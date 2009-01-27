@@ -218,15 +218,12 @@ public class BeanConfig extends WbComponentConfig {
       _comp = _customBean.getComponent();
 
       _comp.addAnnotation(new AnnotationLiteral<Service>() {});
-      System.out.println("INIT-A: " + _comp);
       
       return;
     }
 
     super.init();
     
-      System.out.println("INIT-B: " + _comp);
-
     try {
       if (_comp == null) {
       }

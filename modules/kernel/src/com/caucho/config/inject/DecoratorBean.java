@@ -141,6 +141,26 @@ public class DecoratorBean extends Decorator
   //
   // lifecycle
   //
+  
+  public Object create(CreationalContext creationalContext)
+  {
+    return _bean.create(creationalContext);
+  }
+
+  /*
+  public void destroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
+
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return _bean.getInjectionPoints();
+  }
 
   /**
    * Create a new instance of the bean.
@@ -285,26 +305,6 @@ public class DecoratorBean extends Decorator
   private void addType(Class type)
   {
     _types.add(type);
-  }
-  
-  public Object create(CreationalContext creationalContext)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /*
-  public void destroy(Object instance)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-
-  /**
-   * Returns the set of injection points, for validation.
-   */
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public String toString()

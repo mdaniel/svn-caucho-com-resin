@@ -202,6 +202,19 @@ public class InterceptorBean extends Interceptor
     }
   }
 
+  public Object create(CreationalContext creationalContext)
+  {
+    return _bean.create(creationalContext);
+  }
+  
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return _bean.getInjectionPoints();
+  }
+
   //
   // introspection
   //
@@ -251,27 +264,7 @@ public class InterceptorBean extends Interceptor
       }
     }
   }
-
-  public Object create(CreationalContext creationalContext)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /*
-  public void destroy(Object instance)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
   
-  /**
-   * Returns the set of injection points, for validation.
-   */
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
