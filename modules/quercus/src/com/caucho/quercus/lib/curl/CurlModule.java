@@ -914,7 +914,7 @@ public class CurlModule
         break;
       case CURLOPT_POSTFIELDS:
         curl.setRequestMethod("POST");
-        curl.setPostBody(postfields(env, value));
+        curl.setPostBody(value);
         break;
       case CURLOPT_PROXY:
         curl.setIsProxying(true);
@@ -1029,46 +1029,6 @@ public class CurlModule
     }
 
     return true;
-  }
-
-  private static StringValue postfields(Env env,
-                                        Value value)
-  {
-    if (value.isArray()) {
-      StringValue sb = env.createBinaryBuilder();
-      boolean isFirst = true;
-
-      Iterator<Map.Entry<Value,Value>> iter = value.getIterator(env);
-      while (iter.hasNext()) {
-        Map.Entry<Value,Value> entry = iter.next();
-
-        if (! isFirst)
-          sb.append("&");
-        isFirst = false;
-
-        sb.append(entry.getKey());
-        sb.append("=");
-        sb.append(postfields(env, entry.getValue()));
-      }
-
-      return sb;
-    }
-    else {
-      StringValue str = value.toStringValue(env);
-      
-      if (str.length() > 0 && str.charAt(0) == '@') {
-        str = FileModule.file_get_contents(env,
-                                           str.substring(1),
-                                           false,
-                                           DefaultValue.DEFAULT,
-                                           0,
-                                           Integer.MAX_VALUE);
-      }
-      else
-        str = str.toBinaryValue(env);
-      
-      return str;
-    }
   }
 
   /**

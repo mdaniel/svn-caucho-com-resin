@@ -91,7 +91,7 @@ public class CurlResource
 
   private StringValue _header;
   private StringValue _body;
-  private StringValue _postBody;
+  private Value _postBody;
 
   private String _contentType;
   private int _contentLength;
@@ -441,9 +441,9 @@ public class CurlResource
   }
 
   /**
-   * Sets the body to POST to the server.
+   * Gets the body to POST to the server.
    */
-  public StringValue getPostBody()
+  public Value getPostBody()
   {
     return _postBody;
   }
@@ -451,11 +451,11 @@ public class CurlResource
   /**
    * Sets the body to POST to the server.
    */
-  public void setPostBody(StringValue body)
+  public void setPostBody(Value body)
   {
     _postBody = body;
   }
-
+  
   /**
    * Returns the password to use for proxy authentication.
    */

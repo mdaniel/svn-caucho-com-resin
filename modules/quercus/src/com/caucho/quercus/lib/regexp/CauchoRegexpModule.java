@@ -675,15 +675,18 @@ public class CauchoRegexpModule
 				   countV);
       }
     } else {
-      return pregReplaceString(env,
+      string = pregReplaceString(env,
 			       patternValue.toStringValue(),
 			       replacement.toStringValue(),
 			       string,
 			       limit,
 			       countV);
     }
-
-    return string;
+    
+    if (string != null)
+      return string;
+    else
+      return NullValue.NULL;
   }
 
   /**
@@ -766,7 +769,10 @@ public class CauchoRegexpModule
     throws IllegalRegexpException
   {
     Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = new RegexpState(env, regexp, subject);
+    RegexpState regexpState = new RegexpState(regexp);
+    
+    if (! regexpState.setSubject(env, subject))
+      return null;
 
     // check for e modifier in patternString
     boolean isEval = regexp.isEval();

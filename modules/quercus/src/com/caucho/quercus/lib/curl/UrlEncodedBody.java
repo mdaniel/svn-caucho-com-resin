@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,63 +29,41 @@
 
 package com.caucho.quercus.lib.curl;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.lib.file.BinaryInput;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.ProtocolException;
 
-/**
- * Represents a PUT Http request.
- */
-public class HttpPutRequest
-  extends HttpRequest
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+
+public class UrlEncodedBody extends PostBody
 {
-  public HttpPutRequest(CurlResource curlResource)
+  private StringValue _body;
+  private int _length;
+  
+  protected boolean init(Env env, Value body)
   {
-    super(curlResource);
-  }
-
-  /**
-   * Initializes the connection.
-   */
-  protected boolean init(Env env)
-    throws ProtocolException
-  {
-    if (! super.init(env))
-      return false;
-    
-    getHttpConnection().setDoOutput(true);
+    _body = body.toStringValue(env);
+    _length = _body.length();
     
     return true;
   }
-
-  /**
-   * Transfer data to the server.
-   */
-  protected void transfer(Env env)
+  
+  public String getContentType()
+  {
+    return "application/x-www-form-urlencoded";
+  }
+  
+  public long getContentLength()
+  {
+    return (long) _length;
+  }
+  
+  public void writeTo(Env env, OutputStream os)
     throws IOException
   {
-    super.transfer(env);
-
-    HttpConnection conn = getHttpConnection();
-    OutputStream out = conn.getOutputStream();
-
-    CurlResource curl = getCurlResource();
-
-    BinaryInput in = curl.getUploadFile();
-    int length = curl.getUploadFileSize();
-
-    for (int i = 0; i < length; i++) {
-      int ch = in.read();
-
-      if (ch < 0)
-        break;
-
-      out.write(ch);
+    for (int i = 0; i < _length; i++) {
+      os.write(_body.charAt(i));
     }
-
-    out.close();
-  }
+  }  
 }

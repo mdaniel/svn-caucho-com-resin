@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.curl;
 
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
 
 import java.io.IOException;
@@ -42,6 +41,8 @@ import java.net.ProtocolException;
 public class HttpPostRequest
   extends HttpRequest
 {
+  private PostBody _body;
+  
   public HttpPostRequest(CurlResource curlResource)
   {
     super(curlResource);
@@ -50,11 +51,29 @@ public class HttpPostRequest
   /**
    * Initializes the connection.
    */
-  protected void init(Env env)
+  protected boolean init(Env env)
     throws ProtocolException
   {
-    super.init(env);
-    getHttpConnection().setDoOutput(true);
+    if (! super.init(env))
+      return false;
+    
+    CurlResource curl = getCurlResource();
+    _body = PostBody.create(env, curl.getPostBody());
+    
+    if (_body == null)
+      return false;
+    
+    HttpConnection conn = getHttpConnection();
+    
+    conn.setRequestProperty("Content-Type",
+                            _body.getContentType());
+    
+    conn.setRequestProperty("Content-Length",
+                            String.valueOf(_body.getContentLength()));
+    
+    conn.setDoOutput(true);
+    
+    return true;
   }
 
   /**
@@ -65,20 +84,63 @@ public class HttpPostRequest
   {
     super.transfer(env);
 
-    StringValue body = getCurlResource().getPostBody();
-
-    if (body == null)
-      return;
-
     HttpConnection conn = getHttpConnection();
     OutputStream out = conn.getOutputStream();
-
-    int length = body.length();
-
-    for (int i = 0; i < length; i++) {
-      out.write((byte)body.charAt(i));
-    }
-
-    out.close();
+    
+    //out = new TestOutputStream(out);
+    
+    _body.writeTo(env, out);
   }
+  
+  /*
+  static class TestOutputStream extends OutputStream
+  {
+    OutputStream _out;
+    FileOutputStream _ps;
+    
+    TestOutputStream(OutputStream out)
+      throws IOException
+    {
+      _out = out;
+      
+      _ps = new FileOutputStream("c:/out.txt");
+    }
+    
+    public void close()
+      throws IOException
+    {
+      _out.close();
+      _ps.close();
+    }
+    
+    public void flush()
+      throws IOException
+    {
+      _out.flush();
+      _ps.close();
+    }
+    
+    public void write(int b)
+      throws IOException
+    {
+      _out.write(b);
+      _ps.write(b);
+    }
+    
+    public void write(byte b[])
+      throws IOException
+    {
+      _out.write(b);
+      _ps.write(b);
+    }
+    
+    public void write(byte b[], int offset, int len)
+      throws IOException
+    {
+      _out.write(b, offset, len);
+      _ps.write(b, offset, len);
+    } 
+  }
+  */
+  
 }

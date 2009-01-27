@@ -121,11 +121,11 @@ public class HttpRequest
   /**
    * Initializes the connection.
    */
-  protected void init(Env env)
+  protected boolean init(Env env)
     throws ProtocolException
   {
     if (_conn == null || _curl == null)
-      return;
+      return false;
     
     _conn.setRequestMethod(_curl.getRequestMethod());
 
@@ -144,6 +144,8 @@ public class HttpRequest
     timeout = _curl.getReadTimeout();
     if (timeout >= 0)
       _conn.setReadTimeout(timeout);
+    
+    return true;
   }
 
   /**
@@ -208,7 +210,8 @@ public class HttpRequest
     try {
       create(env);
 
-      init(env);
+      if (! init(env))
+        return false;
 
       connect(env);
 
