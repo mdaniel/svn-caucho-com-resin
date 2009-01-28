@@ -61,7 +61,7 @@ public class FileTopic extends AbstractTopic
 
   public FileTopic()
   {
-    _store = new FileQueueStore(_messageFactory);
+    _store = FileQueueStore.create();
   }
 
   //
@@ -73,7 +73,6 @@ public class FileTopic extends AbstractTopic
    */
   public void setPath(Path path)
   {
-    _store.setPath(path);
   }
 
   //
@@ -85,7 +84,7 @@ public class FileTopic extends AbstractTopic
    */
   public String getUrl()
   {
-    return "file:name=" + getName() + ";path=" + _store.getPath().getURL();
+    return "file:name=" + getName();
   }
 
   public void init()

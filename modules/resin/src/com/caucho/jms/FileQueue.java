@@ -27,15 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.file;
+package com.caucho.jms;
 
-import com.caucho.vfs.*;
+import com.caucho.config.Service;
+import com.caucho.jms.file.FileQueueImpl;
 
 /**
- * @deprecated
+ * A JMS queue backed by a file-based database.
  *
- * @see com.caucho.jms.FileQueue
+ * It is configured as:
+ * <pre>
+ * &lt;web-app xmlns="http://caucho.com/ns/resin"
+ *             xmlns:jms="urn:java:com.caucho.jms">
+ *
+ *   &lt;jms:FileQueue>
+ *     &lt;resin:JndiName>jms/my-name&lt;/resin:JndiName>
+ *
+ *     &lt;jms:name>my-name&lt;/jms:name>
+ *   &lt;/jms:FileQueue>
+ *
+ * &lt;/web-app>
+ * </pre>
  */
+@Service
 public class FileQueue extends FileQueueImpl
 {
   public FileQueue()
@@ -44,23 +58,11 @@ public class FileQueue extends FileQueueImpl
 
   public FileQueue(String name)
   {
-    super(name);
-  }
+    this();
+    
+    setName(name);
 
-  /**
-   * Test interface
-   */
-  public FileQueue(Path path, String name)
-  {
-    super(path, name, "anon");
-  }
-
-  /**
-   * Test interface
-   */
-  public FileQueue(Path path, String name, String serverId)
-  {
-    super(path, name, serverId);
+    init();
   }
 }
 

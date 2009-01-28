@@ -30,6 +30,7 @@
 package com.caucho.jms.file;
 
 import java.io.*;
+import java.lang.IllegalStateException;
 import java.util.logging.*;
 import javax.sql.*;
 import java.sql.Connection;
@@ -43,12 +44,15 @@ import javax.annotation.*;
 
 import com.caucho.jms.queue.*;
 import com.caucho.jms.message.*;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.config.ConfigException;
 import com.caucho.db.*;
 import com.caucho.db.jdbc.*;
 import com.caucho.util.L10N;
 import com.caucho.java.*;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.resin.*;
+import com.caucho.util.FreeList;
 import com.caucho.vfs.*;
 
 /**
@@ -60,7 +64,13 @@ public class FileQueueStore
   private static final Logger log
     = Logger.getLogger(FileQueueStore.class.getName());
 
+  private static final EnvironmentLocal<FileQueueStore> _localStore
+    = new EnvironmentLocal<FileQueueStore>();
+
   private static final MessageType []MESSAGE_TYPE = MessageType.values();
+
+  private FreeList<StoreConnection> _freeList
+    = new FreeList<StoreConnection>(32);
 
   private Path _path;
   private DataSource _db;
@@ -74,101 +84,74 @@ public class FileQueueStore
 
   private long _queueId;
 
-  private Connection _conn;
-
-  private PreparedStatement _sendStmt;
-  private PreparedStatement _receiveStartStmt;
-  private PreparedStatement _readStmt;
-  private PreparedStatement _receiveStmt;
-  private PreparedStatement _removeStmt;
-  private PreparedStatement _deleteStmt;
-
-  public FileQueueStore(MessageFactory messageFactory)
+  public FileQueueStore(Path path, String serverId)
   {
-    _messageFactory = messageFactory;
+    _messageFactory = new MessageFactory();
+
+    init(path, serverId);
   }
 
-  public void setName(String name)
+  public static FileQueueStore create()
   {
-    _name = name;
-  }
+    Server server = Server.getCurrent();
 
-  public String getName()
-  {
-    return _name;
-  }
+    if (server == null)
+      throw new IllegalStateException(L.l("FileQueueStore requires an active Resin instance"));
 
-  /**
-   * Sets the path to the database
-   */
-  public void setPath(Path path)
-  {
-    if (! path.exists()) {
-      try {
-	path.mkdirs();
-      } catch (IOException e) {
-	throw ConfigException.create(e);
+    ClassLoader loader = server.getClassLoader();
+
+    synchronized (_localStore) {
+      FileQueueStore store = _localStore.get(loader);
+
+      if (store == null) {
+	Path path = server.getResinDataDirectory();
+	String serverId = server.getServerId();
+
+	store = new FileQueueStore(path, serverId);
+
+	_localStore.set(store, loader);
       }
+
+      return store;
     }
+  }
+
+  private void init(Path path, String serverId)
+  {
+    if (path == null)
+      throw new NullPointerException();
     
+    if (serverId == null)
+      throw new NullPointerException();
+
+    try {
+      path.mkdirs();
+    } catch (IOException e) {
+      log.log(Level.ALL, e.toString(), e);
+    }
+
     if (! path.isDirectory())
-      throw new ConfigException(L.l("path '{0}' must be a directory",
-				    path));
-
-    _path = path;
-  }
-
-  /**
-   * Returns the path to the backing database
-   */
-  public Path getPath()
-  {
-    return _path;
-  }
-
-  public void setTablePrefix(String prefix)
-  {
-    _tablePrefix = prefix;
-  }
-
-  public void init()
-  {
-    if (_path == null)
-      _path = WorkDir.getLocalWorkDir();
-
-    if (! _path.isDirectory())
-      throw new ConfigException(L.l("FileQueue requires a valid persistent directory."));
-
-    Resin resin = Resin.getLocal();
+      throw new ConfigException(L.l("FileQueue requires a valid persistent directory {0}.",
+				    path.getURL()));
     
-    String serverId = null;
-
-    if (resin != null)
-      serverId = resin.getServerId();
-
-    if (serverId == null) {
-      serverId = "anon";
-    }
-    else if ("".equals(serverId))
+    if ("".equals(serverId))
       serverId = "default";
 
     _queueTable = escapeName("jms_queue_" + serverId);
     _messageTable = escapeName("jms_message_" + serverId);
 
     try {
-      DataSourceImpl db = new DataSourceImpl(_path);
+      DataSourceImpl db = new DataSourceImpl(path);
       db.setRemoveOnError(true);
       db.init();
 
       _db = db;
 
-      _conn = _db.getConnection();
+      Connection conn = _db.getConnection();
 
-      initDatabase();
+      initDatabase(conn);
       
-      initQueue();
-
-      initStatements();
+      conn.close();
     } catch (SQLException e) {
       throw ConfigException.create(e);
     }
@@ -177,67 +160,84 @@ public class FileQueueStore
   /**
    * Adds a new message to the persistent store.
    */
-  public long send(MessageImpl msg, int priority, long expireTime)
+  public long send(byte []queueHash,
+		   MessageImpl msg,
+		   int priority,
+		   long expireTime)
   {
-    synchronized (this) {
-      try {
-	_sendStmt.setLong(1, _queueId);
-	_sendStmt.setInt(2, priority);
-	_sendStmt.setLong(3, expireTime);
-	_sendStmt.setString(4, msg.getJMSMessageID());
-	_sendStmt.setBinaryStream(5, msg.propertiesToInputStream(), 0);
-	_sendStmt.setInt(6, msg.getType().ordinal());
-	_sendStmt.setBinaryStream(7, msg.bodyToInputStream(), 0);
+    StoreConnection conn = null;
+    
+    try {
+      conn = getConnection();
 
-	_sendStmt.executeUpdate();
+      PreparedStatement sendStmt = conn.prepareSend();
 
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " send " + msg);
+      sendStmt.setBytes(1, queueHash);
+      sendStmt.setInt(2, priority);
+      sendStmt.setLong(3, expireTime);
+      sendStmt.setString(4, msg.getJMSMessageID());
+      sendStmt.setBinaryStream(5, msg.propertiesToInputStream(), 0);
+      sendStmt.setInt(6, msg.getType().ordinal());
+      sendStmt.setBinaryStream(7, msg.bodyToInputStream(), 0);
 
-	ResultSet rs = _sendStmt.getGeneratedKeys();
+      sendStmt.executeUpdate();
 
-	if (! rs.next())
-	  throw new java.lang.IllegalStateException();
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " send " + msg);
 
-	long id = rs.getLong(1);
+      ResultSet rs = sendStmt.getGeneratedKeys();
 
-	rs.close();
+      if (! rs.next())
+	throw new java.lang.IllegalStateException();
 
-	return id;
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
+      long id = rs.getLong(1);
+
+      rs.close();
+
+      return id;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      freeConnection(conn);
     }
   }
 
   /**
    * Retrieves a message from the persistent store.
    */
-  void receiveStart(FileQueue fileQueue)
+  void receiveStart(byte []queueHash, FileQueueImpl fileQueue)
   {
-    synchronized (this) {
-      try {
-	_receiveStartStmt.setLong(1, _queueId);
+    StoreConnection conn = null;
+    
+    try {
+      conn = getConnection();
 
-	ResultSet rs = _receiveStartStmt.executeQuery();
+      PreparedStatement receiveStartStmt = conn.prepareReceiveStart();
 
-	while (rs.next()) {
-	  long id = rs.getLong(1);
-	  String msgId = rs.getString(2);
-	  int priority = rs.getInt(3);
-	  long expire = rs.getLong(4);
-	  MessageType type = MESSAGE_TYPE[rs.getInt(5)];
+      receiveStartStmt.setBytes(1, queueHash);
+
+      ResultSet rs = receiveStartStmt.executeQuery();
+
+      while (rs.next()) {
+	long id = rs.getLong(1);
+	String msgId = rs.getString(2);
+	int priority = rs.getInt(3);
+	long expire = rs.getLong(4);
+	MessageType type = MESSAGE_TYPE[rs.getInt(5)];
 	  
-	  FileQueueEntry entry
-	    = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
-	}
-
-	rs.close();
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new RuntimeException(e);
+	FileQueueEntry entry
+	  = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
       }
+
+      rs.close();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      freeConnection(conn);
     }
   }
 
@@ -246,67 +246,74 @@ public class FileQueueStore
    */
   public MessageImpl readMessage(long id, MessageType type)
   {
-    synchronized (this) {
-      try {
-	_readStmt.setLong(1, id);
+    StoreConnection conn = null;
+    
+    try {
+      conn = getConnection();
 
-	ResultSet rs = _readStmt.executeQuery();
+      PreparedStatement readStmt = conn.prepareRead();
 
-	if (rs.next()) {
-	  MessageImpl msg;
+      readStmt.setLong(1, id);
 
-          type = MESSAGE_TYPE[rs.getInt(1)];
+      ResultSet rs = readStmt.executeQuery();
 
-	  switch (type) {
-	  case NULL:
-	    msg = new MessageImpl();
-	    break;
-	  case BYTES:
-	    msg = new BytesMessageImpl();
-	    break;
-	  case MAP:
-	    msg = new MapMessageImpl();
-	    break;
-	  case OBJECT:
-	    msg = new ObjectMessageImpl();
-	    break;
-	  case STREAM:
-	    msg = new StreamMessageImpl();
-	    break;
-	  case TEXT:
-	    msg = new TextMessageImpl();
-	    break;
-	  default:
-	    msg = new MessageImpl();
-	    break;
-	  }
+      if (rs.next()) {
+	MessageImpl msg;
+
+	type = MESSAGE_TYPE[rs.getInt(1)];
+
+	switch (type) {
+	case NULL:
+	  msg = new MessageImpl();
+	  break;
+	case BYTES:
+	  msg = new BytesMessageImpl();
+	  break;
+	case MAP:
+	  msg = new MapMessageImpl();
+	  break;
+	case OBJECT:
+	  msg = new ObjectMessageImpl();
+	  break;
+	case STREAM:
+	  msg = new StreamMessageImpl();
+	  break;
+	case TEXT:
+	  msg = new TextMessageImpl();
+	  break;
+	default:
+	  msg = new MessageImpl();
+	  break;
+	}
 	  
-	  String msgId = rs.getString(2);
+	String msgId = rs.getString(2);
 
-	  msg.setJMSMessageID(msgId);
+	msg.setJMSMessageID(msgId);
 
-	  InputStream is = rs.getBinaryStream(3);
-	  if (is != null) {
-	    msg.readProperties(is);
+	InputStream is = rs.getBinaryStream(3);
+	if (is != null) {
+	  msg.readProperties(is);
 
-	    is.close();
-	  }
-
-
-	  is = rs.getBinaryStream(4);
-	  if (is != null) {
-	    msg.readBody(is);
-
-	    is.close();
-	  }
-
-	  return (MessageImpl) msg;
+	  is.close();
 	}
 
-	rs.close();
-      } catch (Exception e) {
-	throw new RuntimeException(e);
+	is = rs.getBinaryStream(4);
+	if (is != null) {
+	  msg.readBody(is);
+
+	  is.close();
+	}
+
+	return (MessageImpl) msg;
       }
+
+      rs.close();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      freeConnection(conn);
     }
 
     return null;
@@ -315,32 +322,36 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  public MessageImpl receive()
+  public MessageImpl receive(byte []queueHash)
   {
-    synchronized (this) {
-      try {
-	_receiveStmt.setLong(1, _queueId);
+    StoreConnection conn = null;
+    
+    try {
+      conn = getConnection();
 
-	ResultSet rs = _receiveStmt.executeQuery();
+      PreparedStatement receiveStmt = conn.prepareReceive();
 
-	if (rs.next()) {
-	  long id = rs.getLong(1);
+      receiveStmt.setBytes(1, queueHash);
 
-	  rs.close();
+      ResultSet rs = receiveStmt.executeQuery();
 
-	  Message msg = _messageFactory.createTextMessage("sample");
-
-	  _deleteStmt.setLong(1, id);
-
-	  _deleteStmt.executeUpdate();
-
-	  return (MessageImpl) msg;
-	}
+      if (rs.next()) {
+	long id = rs.getLong(1);
 
 	rs.close();
-      } catch (Exception e) {
-	throw new RuntimeException(e);
+
+	PreparedStatement deleteStmt = conn.prepareDelete();
+
+	deleteStmt.setLong(1, id);
+
+	deleteStmt.executeUpdate();
+
+	return null;
       }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      freeConnection(conn);
     }
 
     return null;
@@ -351,14 +362,22 @@ public class FileQueueStore
    */
   public void remove(String id)
   {
-    synchronized (this) {
-      try {
-	_removeStmt.setString(1, id);
+    StoreConnection conn = null;
+    
+    try {
+      conn = getConnection();
 
-	_removeStmt.executeUpdate();
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
+      PreparedStatement removeStmt = conn.prepareRemove();
+      
+      removeStmt.setString(1, id);
+
+      removeStmt.executeUpdate();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      freeConnection(conn);
     }
   }
 
@@ -367,22 +386,32 @@ public class FileQueueStore
    */
   void delete(long id)
   {
-    synchronized (this) {
-      try {
-	_deleteStmt.setLong(1, id);
+    StoreConnection conn = null;
+    
+    try {
+      conn = getConnection();
 
-	_deleteStmt.executeUpdate();
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
+      PreparedStatement deleteStmt = conn.prepareDelete();
+      
+      deleteStmt.setLong(1, id);
+
+      deleteStmt.executeUpdate();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      freeConnection(conn);
     }
   }
 
-  private void initDatabase()
+  private void initDatabase(Connection conn)
     throws SQLException
   {
-    String sql = "select id, priority from " + _messageTable + " where 1=0";
-    Statement stmt = _conn.createStatement();
+    String sql = ("select id, priority, is_valid"
+		  + " from " + _messageTable + " where 1=0");
+    
+    Statement stmt = conn.createStatement();
 
     try {
       ResultSet rs = stmt.executeQuery(sql);
@@ -415,12 +444,9 @@ public class FileQueueStore
 
     sql = ("create table " + _messageTable + " ("
 	   + "  id bigint auto_increment,"
-	   + "  queue bigint,"
-	   + "  state integer,"
+	   + "  queue_id binary(32),"
 	   + "  priority integer,"
 	   + "  expire datetime,"
-	   + "  owner_1 bigint,"
-	   + "  owner_2 bigint,"
 	   + "  msg_id varchar(64),"
 	   + "  header blob,"
 	   + "  type integer,"
@@ -431,79 +457,24 @@ public class FileQueueStore
     stmt.executeUpdate(sql);
   }
 
-  private void initQueue()
+  private StoreConnection getConnection()
     throws SQLException
   {
-    String sql = "select id from " + _queueTable + " where name=?";
-    
-    PreparedStatement stmt = _conn.prepareStatement(sql);
-    stmt.setString(1, getName());
+    StoreConnection storeConn = _freeList.allocate();
 
-    ResultSet rs = stmt.executeQuery();
-    if (rs.next()) {
-      _queueId = rs.getLong(1);
-      rs.close();
-      stmt.close();
+    if (storeConn != null) {
+      return storeConn;
+    } else {
+      Connection conn = _db.getConnection();
 
-      return;
+      return new StoreConnection(conn);
     }
-
-    stmt.close();
-
-    sql = "insert into " + _queueTable + " (name) values(?)";
-    stmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-    stmt.setString(1, getName());
-
-    stmt.executeUpdate();
-
-    rs = stmt.getGeneratedKeys();
-
-    if (! rs.next())
-      throw new java.lang.IllegalStateException();
-
-    _queueId = rs.getLong(1);
-
-    rs.close();
-    stmt.close();
   }
 
-  private void initStatements()
-    throws SQLException
+  private void freeConnection(StoreConnection conn)
   {
-    String sql = ("insert into " + _messageTable
-		  + " (queue,priority,expire,msg_id,header,type,body,is_valid)"
-		  + " VALUES(?,?,?,?,?,?,?,1)");
-    
-    _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-    
-    sql = ("select id,msg_id,header,body from " + _messageTable
-	   + " WHERE queue=? LIMIT 1");
-    
-    _receiveStmt = _conn.prepareStatement(sql);
-    
-    sql = ("select type,msg_id,header,body from " + _messageTable
-	   + " WHERE id=?");
-    
-    _readStmt = _conn.prepareStatement(sql);
-
-    sql = ("select id,msg_id,priority,expire,type from " + _messageTable
-	   + " WHERE queue=? AND is_valid=1 ORDER BY id");
-    
-    _receiveStartStmt = _conn.prepareStatement(sql);
-    
-    _removeStmt = _conn.prepareStatement(sql);
-    
-    sql = ("update " + _messageTable
-	   + " set body=null, is_valid=0, expire=now() + 120000"
-	   + " WHERE id=?");
-    
-    _removeStmt = _conn.prepareStatement(sql);
-    
-    sql = ("delete from " + _messageTable
-	   + " WHERE id=?");
-    
-    _deleteStmt = _conn.prepareStatement(sql);
+    if (conn != null)
+      _freeList.free(conn);
   }
 
   private static String escapeName(String name)
@@ -529,5 +500,102 @@ public class FileQueueStore
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _messageTable + "]";
+  }
+
+  class StoreConnection {
+    private Connection _conn;
+
+    private PreparedStatement _sendStmt;
+    private PreparedStatement _receiveStartStmt;
+    private PreparedStatement _readStmt;
+    private PreparedStatement _receiveStmt;
+    private PreparedStatement _removeStmt;
+    private PreparedStatement _deleteStmt;
+
+    StoreConnection(Connection conn)
+    {
+      _conn = conn;
+    }
+
+    PreparedStatement prepareSend()
+      throws SQLException
+    {
+      if (_sendStmt == null) {
+	String sql = ("insert into " + _messageTable
+		      + " (queue_id,priority,expire,msg_id,header,type,body,is_valid)"
+		      + " VALUES(?,?,?,?,?,?,?,1)");
+    
+	_sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      }
+
+      return _sendStmt;
+    }
+
+    PreparedStatement prepareReceive()
+      throws SQLException
+    {
+      if (_receiveStmt == null) {
+	String sql = ("select id,msg_id,header,body from " + _messageTable
+		      + " WHERE queue_id=? LIMIT 1");
+    
+	_receiveStmt = _conn.prepareStatement(sql);
+      }
+
+      return _receiveStmt;
+    }
+
+    PreparedStatement prepareRead()
+      throws SQLException
+    {
+      if (_readStmt == null) {
+	String sql = ("select type,msg_id,header,body from " + _messageTable
+		      + " WHERE id=?");
+    
+	_readStmt = _conn.prepareStatement(sql);
+      }
+
+      return _readStmt;
+    }
+
+    PreparedStatement prepareReceiveStart()
+      throws SQLException
+    {
+      if (_receiveStartStmt == null) {
+	String sql = ("select id,msg_id,priority,expire,type"
+		      + " from " + _messageTable
+		      + " WHERE queue_id=? AND is_valid=1 ORDER BY id");
+    
+	_receiveStartStmt = _conn.prepareStatement(sql);
+      }
+
+      return _receiveStartStmt;
+    }
+    
+    PreparedStatement prepareRemove()
+      throws SQLException
+    {
+      if (_removeStmt == null) {
+	String sql = ("update " + _messageTable
+		      + " set body=null, is_valid=0, expire=now() + 120000"
+		      + " WHERE id=?");
+    
+	_removeStmt = _conn.prepareStatement(sql);
+      }
+
+      return _removeStmt;
+    }
+
+    PreparedStatement prepareDelete()
+      throws SQLException
+    {
+      if (_deleteStmt == null) {
+	String sql = ("delete from " + _messageTable
+		      + " WHERE id=?");
+    
+	_deleteStmt = _conn.prepareStatement(sql);
+      }
+
+      return _deleteStmt;
+    }
   }
 }

@@ -52,14 +52,14 @@ public class SingletonClassComponent extends SimpleBean
   {
     super(type);
     
-    super.setScope(ApplicationScope.create());
+    super.setScope(InjectManager.create().getApplicationScope());
   }
   
   public SingletonClassComponent(InjectManager webBeans)
   {
     super(webBeans);
     
-    super.setScope(ApplicationScope.create());
+    super.setScope(webBeans.getApplicationScope());
   }
 
   /**
@@ -94,7 +94,7 @@ public class SingletonClassComponent extends SimpleBean
       _value = createNew(null);
 
       init(_value, new ConfigContext(this, _value,
-				     ApplicationScope.create()));
+				     InjectManager.create().getApplicationScope()));
 
       if (_value instanceof HandleAware)
 	((HandleAware) _value).setSerializationHandle(getHandle());
