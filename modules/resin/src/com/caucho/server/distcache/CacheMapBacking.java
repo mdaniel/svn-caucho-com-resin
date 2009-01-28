@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -366,8 +366,6 @@ public class CacheMapBacking implements AlarmListener {
    * Reads the object from the data store.
    *
    * @param id the hash identifier for the data
-   * @param os the WriteStream to hold the data
-   *
    * @return true on successful load
    */
   public CacheMapEntry load(HashKey id)
@@ -394,7 +392,7 @@ public class CacheMapBacking implements AlarmListener {
 	long updateTime = rs.getLong(9);
 	long accessTime = Alarm.getExactTime();
 
-	HashKey valueHash = hash != null ? new HashKey(hash) : null;
+  HashKey valueHash = hash != null ? new HashKey(hash) : null;
 
 	return new CacheMapEntry(valueHash, null, flags, itemVersion,
 				 expireTimeout, idleTimeout,
@@ -418,7 +416,7 @@ public class CacheMapBacking implements AlarmListener {
    *
    * @param id the key hash
    * @param value the value hash
-   * @param timeout the item's timeout
+   * @param idleTimeout the item's timeout
    */
   public boolean insert(HashKey id,
 			HashKey value,
@@ -470,7 +468,7 @@ public class CacheMapBacking implements AlarmListener {
    *
    * @param id the key hash
    * @param value the value hash
-   * @param timeout the item's timeout
+   * @param idleTimeout the item's timeout
    */
   public boolean updateSave(HashKey id,
 			    HashKey value,

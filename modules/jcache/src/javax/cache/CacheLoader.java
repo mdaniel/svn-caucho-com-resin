@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -34,9 +34,21 @@ import java.util.Map;
 
 public interface CacheLoader<K,V>
 {
+  /**
+   * Obtains the value associated with the key, which will be loaded into the Cache
+   * @param key associated with the value.
+   * @return the value returned from the CacheLoader
+   * @throws CacheException
+   */
   public V load(K key)
     throws CacheException;
 
+  /**
+   * Creates a set of entries that will be loaded into the cache.
+   * @param keys the collection of keys
+   * @return a map of key-value pairs that will be loaded into the cache.
+   * @throws CacheException
+   */
   public Map<K,V> loadAll(Collection<K> keys)
     throws CacheException;
 }

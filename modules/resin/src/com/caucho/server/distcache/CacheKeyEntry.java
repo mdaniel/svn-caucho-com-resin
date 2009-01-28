@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,15 +31,16 @@ package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
-import com.caucho.util.Alarm;
 import com.caucho.util.Hex;
 
+import javax.cache.CacheLoader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An entry in the cache map
@@ -111,7 +112,8 @@ public class CacheKeyEntry {
    */
   public Object get(CacheConfig config)
   {
-    return null;
+    CacheLoader cacheLoader = config.getCacheLoader();
+    return (cacheLoader == null) ? null : cacheLoader.load(getKey());
   }
 
   /**
@@ -143,7 +145,7 @@ public class CacheKeyEntry {
    * Sets the value by an input stream
    */
   public ExtCacheEntry put(InputStream is,
-			   CacheConfig config,
+			   CacheConfig config,          
 			   long idleTimeout)
     throws IOException
   {

@@ -33,22 +33,23 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.distcache.CacheConfig;
-import com.caucho.server.distcache.CacheKeyEntry;
-import com.caucho.server.distcache.DistributedCacheManager;
+import com.caucho.server.distcache.*;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
+import javax.cache.Cache;
 import javax.cache.CacheListener;
+import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Implements the distributed cache
@@ -56,11 +57,21 @@ import java.util.Set;
 abstract public class AbstractCache extends AbstractMap
         implements ObjectCache, ByteStreamCache
 {
+  public static final String CACHE_NAME = "javax.cache.cache.name";
+
+  public static final String CACHE_CONFIGURATION = "javax.cache.cache.configuration";
+
   private static final L10N L = new L10N(AbstractCache.class);
 
-  private String _name = "";
+  private static final Logger log
+    = Logger.getLogger(AbstractCache.class.getName());
+
+  private String _name = null;
 
   private String _guid;
+
+  private Collection<CacheListener> _listeners =
+          new ConcurrentLinkedQueue<CacheListener>();
 
   private CacheConfig _config = new CacheConfig();
 
@@ -71,13 +82,21 @@ abstract public class AbstractCache extends AbstractMap
 
   private DistributedCacheManager _distributedCacheManager;
 
+  private CacheStatisticsManager.ManagedCacheStatistics _cacheStatistics;
+
+  private HashManager _hashManager = new HashManager();
+
   /**
    * Assign the name.  The name is mandatory and must be unique.
-   * //TODO(fred): do we need a configuration check?
    */
   public void setName(String name)
   {
     _name = name;
+  }
+
+  public String getName()
+  {
+    return _name;
   }
 
   /**
@@ -104,10 +123,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public void setBackup(boolean isBackup)
   {
-    if (isBackup)
-      _config.setFlags(_config.getFlags() | CacheConfig.FLAG_BACKUP);
-    else
-      _config.setFlags(_config.getFlags() & ~CacheConfig.FLAG_BACKUP);
+    _config.setSinglePersistence(isBackup);
   }
 
   /**
@@ -118,10 +134,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public void setTriplicate(boolean isTriplicate)
   {
-    if (isTriplicate)
-      _config.setFlags(_config.getFlags() | CacheConfig.FLAG_TRIPLICATE);
-    else
-      _config.setFlags(_config.getFlags() & ~CacheConfig.FLAG_TRIPLICATE);
+    _config.setTriplePersistence(isTriplicate);
   }
 
   /**
@@ -175,7 +188,6 @@ abstract public class AbstractCache extends AbstractMap
     setIdleTimeoutMillis(period.getPeriod());
   }
 
-
   /**
    * The maximum idle time for an item, which is typically used for
    * temporary data like sessions.  For example, session
@@ -205,7 +217,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public long getIdleCheckWindow()
   {
-    return _config.getIdleCheckWindow();
+    return _config.getIdleTimeoutWindow();
   }
 
   /**
@@ -280,6 +292,7 @@ abstract public class AbstractCache extends AbstractMap
     return _config.getLocalReadTimeout();
   }
 
+  
   /**
    * Initialize the cache
    */
@@ -291,14 +304,21 @@ abstract public class AbstractCache extends AbstractMap
         return;
       _isInit = true;
 
-      if (_name == null)
-        throw new ConfigException(L.l("'name' is a require attribute for any Cache"));
+      //TODO(fred): remove once injecfion sets the name.
+      _name = ((_name == null) || (_name.length() == 0)) ? "default" : _name;
+
+      if ((_name == null) || (_name.length() == 0))
+        throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
+
+      String _host = (Environment.getEnvironmentName());
 
       String contextId = Environment.getEnvironmentName();
 
       _guid = contextId + ":" + _name;
 
       _config.setGuid(_guid);
+
+      ServerCacheRegistry.add(this);
 
       _config.init();
 
@@ -309,6 +329,9 @@ abstract public class AbstractCache extends AbstractMap
                 getClass().getSimpleName()));
 
       _distributedCacheManager = server.getDistributedCacheManager();
+
+      _cacheStatistics =
+              CacheStatisticsManager.getInstance(this, _config.getCacheStatisticsAccuraccy());
     }
   }
 
@@ -318,8 +341,8 @@ abstract public class AbstractCache extends AbstractMap
   public Object peek(Object key)
   {
     CacheKeyEntry entry = _entryCache.get(key);
-
-    return entry.peek();
+    if (entry == null) return null;
+    else return entry.peek();
   }
 
   /**
@@ -328,7 +351,9 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object get(Object key)
   {
-    return getKeyEntry(key).get(_config);
+    Object result =  getKeyEntry(key).get(_config);
+    if (result == null) _entryCache.remove(key);
+    return result;
   }
 
   /**
@@ -364,7 +389,22 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object put(Object key, Object value)
   {
-    return getKeyEntry(key).put(value, _config);
+    Object object = getKeyEntry(key).put(value, _config);
+    notifyPut(key);
+    logFlow("put : ", key, value, object);
+    return object;
+  }
+
+  protected static void logFlow(String msg, Object... objects) {
+    StringBuilder sb = new StringBuilder().append(msg);
+     for (Object object : objects) {
+       if (object == null)
+       sb.append("null,");
+       else
+       sb.append(object.toString()).append(",");
+     }
+     sb.setLength(sb.length() - 1);
+     log.log(Level.FINE, sb.toString());
   }
 
   /**
@@ -427,7 +467,15 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object remove(Object key)
   {
-    return getKeyEntry(key).remove(_config);
+    Object value = get(key);
+    if (value != null) {
+       CacheKeyEntry keyEntry = getKeyEntry(key);
+       keyEntry.remove(_config);
+       keyEntry.put(null, _config);
+       notifyRemove(key);
+       _entryCache.remove(key);
+    }
+    return value;
   }
 
   /**
@@ -449,71 +497,277 @@ abstract public class AbstractCache extends AbstractMap
 
     if (entry == null) {
       entry = _distributedCacheManager.getKey(key, _config);
-
+      _cacheStatistics.incrementMisses(1);
       _entryCache.put(key, entry);
+    } else {
+      _cacheStatistics.incrementHits(1);
     }
 
     return entry;
   }
 
-  //
-  // jcache stubs
-  //
 
-  public Set<Map.Entry> entrySet()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+  public Set<Map.Entry> entrySet()    {
+    return new LruCacheEntrySet<Entry>(_entryCache);
+
   }
 
+
+
+  protected static class LruCacheEntrySetIterator<K, V> implements Iterator {
+    private Iterator<LruCache.Entry<K, V>> _iterator;
+
+    protected LruCacheEntrySetIterator(LruCache<K, V> lruCache)
+    {
+      _iterator = lruCache.iterator();
+    }
+
+    public Object next()
+    {
+      if (!hasNext())
+        throw new NoSuchElementException();
+      LruCache.Entry<K, V> entry = _iterator.next();
+      CacheKeyEntry cacheKeyEntry = (CacheKeyEntry) entry.getValue();
+
+      return new AbstractMap.SimpleEntry<Object, Object>(
+              entry.getKey(),
+              cacheKeyEntry.getEntry().getValue());
+    }
+
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  protected static class LruCacheValuesIterator extends LruCacheEntrySetIterator {
+
+    public LruCacheValuesIterator(LruCache lruCache)
+    {
+      super(lruCache);
+    }
+
+    @Override
+    public Object next()
+    {
+      return ((Entry) super.next()).getValue();
+    }
+
+  }
+
+  protected static class LruCacheKeysIterator<K, V> implements Iterator {
+    private Iterator<LruCache.Entry<K, V>> _iterator;
+
+    protected LruCacheKeysIterator(LruCache<K, V> lruCache)
+    {
+      _iterator = lruCache.iterator();
+    }
+
+    public Object next()
+    {
+      if (!hasNext())
+        throw new NoSuchElementException();
+      LruCache.Entry<K, V> entry = _iterator.next();
+      return entry.getKey();
+    }
+
+    public boolean hasNext()
+    {
+      return _iterator.hasNext();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  //TODO(fred): block other collection methods.
+  protected static class LruCacheValues extends AbstractCollection {
+
+    private LruCache _lruCache;
+
+    public LruCacheValues(LruCache lruCache)
+    {
+      _lruCache = lruCache;
+    }
+
+    public int size()
+    {
+      return (_lruCache != null) ? _lruCache.size() : 0;
+    }
+
+    public Iterator iterator() {
+      return new LruCacheValuesIterator(_lruCache);
+    }
+  }
+
+  //TODO(fred): block other set methods.
+  protected static class LruCacheKeys extends AbstractSet{
+
+      private LruCache _lruCache;
+
+      public LruCacheKeys(LruCache lruCache)
+      {
+        _lruCache = lruCache;
+      }
+
+      public int size()
+      {
+        return (_lruCache != null) ? _lruCache.size() : 0;
+      }
+
+      public Iterator iterator() {
+        return new LruCacheKeysIterator(_lruCache);
+      }
+    }
+
+  //TODO(fred): block other set methods.
+  protected static class LruCacheEntrySet<E> extends AbstractSet<E> {
+    private LruCache _lruCache;
+
+    protected LruCacheEntrySet(LruCache cache)
+    {
+
+      _lruCache = cache;
+    }
+
+    public Iterator iterator()
+    {
+      return new LruCacheEntrySetIterator(_lruCache);
+    }
+
+    public void clear()
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public boolean remove(Object entry)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public int size()
+    {
+      return (_lruCache != null) ? _lruCache.size() : 0;
+    }
+
+    public boolean contains(Object entry)
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  /**
+   * Returns a map of the items if found in the central cache.
+   *
+   * @note If a cacheLoader is configured if an item is not found in the cache.
+   */
   public Map getAll(Collection keys)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Map result = new HashMap();
+    for (Object key : keys) {
+      Object value = get(key);
+      if (value != null) {
+        result.put(key, value);
+      }
+    }
+    return result;
   }
 
-  public void load(Object object)
+  /**
+   * Loads an item into the cache if found by the CacheLoader.
+   * @param key
+   */
+  public void load(Object key)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Object value = cacheLoader(key);
+    if (value != null) notifyLoad(key);
   }
 
-  public void loadAll(Collection items)
+  /**
+   * Implements the loadAll method for a collection of keys.
+   *
+   * The items are first obtained from the loader and added to the cache.
+   * Items not found from the loader may be in the backing store, and are fetched from there.
+   */
+  public void loadAll(Collection keys)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (keys == null || keys.size() == 0) return;
+    CacheLoader loader = _config.getCacheLoader();
+    Map entries = null;
+    if (loader != null) {
+      entries = loader.loadAll(keys);
+      if (entries.size() > 0) {
+        putAll(entries);
+      }
+    }
+    for (Object key : keys) {
+      if (!containsKey(key)) get(key);
+    }
+
+    if (_listeners.size() > 0) {
+      for (Object key : keySet()) {
+        notifyLoad(key);
+      }
+    }
   }
 
+  /**
+   * Add a listener to the cache
+   */
   public void addListener(CacheListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+      _listeners.add(listener);
   }
 
+  /**
+   * Remove a listener from the cache.
+   */
   public void removeListener(CacheListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+      _listeners.remove(listener);
   }
 
   public CacheStatistics getCacheStatistics()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _cacheStatistics;
   }
 
+  /**
+   * Ignored, since evictions are handled by the container.
+   */
   public void evict()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    notifyEvict(null);
   }
 
-  public Collection values()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+  public Collection values() {
+    return new LruCacheValues(_entryCache);
   }
 
-
-  public Set keySet()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+  public Set keySet() {
+    return new LruCacheKeys(_entryCache);
   }
 
   public boolean containsValue(Object value)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    /**
+     *  TODO(fred): compute the hash of the value to speed this linear search
+     *  Other optimizations are possible.
+     */
+    Iterator<CacheKeyEntry> iterator = _entryCache.values();
+    while (iterator.hasNext()) {
+      if (iterator.next().getEntry().getValue().equals(value)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
@@ -526,6 +780,7 @@ abstract public class AbstractCache extends AbstractMap
   public void clear()
   {
     _entryCache.clear();
+    notifyClear(null);
   }
 
   @Override
@@ -551,9 +806,360 @@ abstract public class AbstractCache extends AbstractMap
     return _entryCache.get(key) != null;
   }
 
+  /**
+   * Returns true is the local cache is empty
+   * @return
+   */
   @Override
   public boolean isEmpty()
   {
     return _entryCache.size() == 0;
+  }
+
+  /**
+   * Places an item in the cache if found in the loader, replacing
+   * an existing entry if it had been present.
+   */
+  protected Object cacheLoader(Object key) {
+    CacheLoader loader = _config.getCacheLoader();
+    Object value = (loader != null) ? loader.load(key) : null;
+    if (value != null) {
+      put(key, value);
+    } else {
+      value = get(key);
+    }
+
+    return value;
+  }
+
+  protected void notifyLoad(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyLoad(_listeners, key);
+    }
+  }
+
+  protected void notifyEvict(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyEvict(_listeners, key);
+    }
+  }
+
+  protected void notifyClear(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyClear(_listeners, key);
+    }
+  }
+
+  protected void notifyPut(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyPut(_listeners, key);
+    }
+  }
+
+  protected void notifyRemove(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyRemove(_listeners, key);
+    }
+  }
+
+  /**
+   * Used in the implementation of the
+   * {@link javax.cache.CacheFactory} createCache method.
+   * @param request
+   * @return
+   */
+  public static final Cache getInstance(Map request)
+  {
+    String cacheName = (String) request.get(CACHE_NAME);
+    //TODO: return the appropriate cache type for the environment.
+    //TODO: accept a CacheConfiguration
+    ClusterCache cache = new ClusterCache(cacheName);
+    cache.init();
+    return cache;
+  }
+
+  /**
+   * Process the CacheListeners defined for this cache.
+   */
+  //TODO(fred): Dispatch to a thread, threadpool, or thread per event type.
+  public static class CacheListeners {
+
+    public static <K> void notifyLoad(Collection<CacheListener> listeners, K key)
+    {
+      for (CacheListener<K> listener : listeners) {
+        listener.onLoad(key);
+      }
+    }
+
+    public static <K> void notifyEvict(Collection<CacheListener> listeners, K key)
+    {
+      for (CacheListener<K> listener : listeners) {
+        listener.onEvict(key);
+      }
+    }
+
+    public static <K> void notifyClear(Collection<CacheListener> listeners, K key)
+    {
+      for (CacheListener<K> listener : listeners) {
+        listener.onClear(key);
+      }
+    }
+
+    public static <K> void notifyPut(Collection<CacheListener> listeners, K key)
+    {
+      for (CacheListener<K> listener : listeners) {
+        listener.onPut(key);
+      }
+    }
+
+    public static <K> void notifyRemove(Collection<CacheListener> listeners, K key)
+    {
+      for (CacheListener<K> listener : listeners) {
+        listener.onRemove(key);
+      }
+    }
+  }
+
+  public static class ServerCacheRegistry {
+
+    private static final Map<String, AbstractCache> _caches = new HashMap<String, AbstractCache>();
+
+    private static final L10N L = new L10N(ServerCacheRegistry.class);
+
+    /**
+     * Adds a cache to the set of caches
+     *
+     * @throws ConfigException if the name for this cache is not unique.
+     */
+    public static void add(AbstractCache cache) throws ConfigException
+    {
+      String name = cache.getName();
+
+      /**
+       * Disabled for testing.
+       */
+//      if (_caches.containsKey(name)) {
+//        throw new ConfigException(L.l("The cache name of'{0}' is defined for another cache.", name));
+//      }
+      _caches.put(name, cache);
+    }
+
+    /**
+     * Returns the set of caches.
+     */
+    public static Collection<AbstractCache> getAll()
+    {
+      return _caches.values();
+    }
+
+    /**
+     * Returns the cache with the name.
+     */
+    public static AbstractCache get(String name)
+    {
+      return _caches.get(name);
+    }
+  }
+
+  /**
+   * Provides instances of the appropriate CacheStatistics implementation.
+   */
+  public static class CacheStatisticsManager {
+
+    /**
+     * Extends the CacheStatistics to enable counting
+     */
+    public interface ManagedCacheStatistics extends CacheStatistics {
+
+      public void incrementHits(int hits);
+
+      public void incrementMisses(int hits);
+    }
+
+    private static final ManagedCacheStatistics NO_STATISTICS
+            = new NoStatistics(null);
+
+    /**
+     * Provide the appropriate implementation based on the requested accuracy
+     */
+    public static ManagedCacheStatistics getInstance(AbstractCache cache, int accuracy)
+    {
+      switch (accuracy) {
+        default:
+        case CacheStatistics.STATISTICS_ACCURACY_NONE:
+          return NO_STATISTICS;
+        case CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT:
+          return new GoodStatistics(cache);
+        case CacheStatistics.STATISTICS_ACCURACY_GUARANTEED:
+          return new GuaranteedStatistics(cache);
+      }
+    }
+
+    /**
+     * Block instantiation.
+     */
+    private CacheStatisticsManager()
+    {
+
+    }
+
+    /**
+     * Default implementation of CacheStatistics - nothing is collected.
+     */
+    private static class NoStatistics implements CacheStatistics, ManagedCacheStatistics {
+      private AbstractCache _cache;
+
+      private NoStatistics(AbstractCache cache)
+      {
+        super();
+        _cache = cache;
+      }
+
+      public int getCacheHits()
+      {
+        return 0;
+      }
+
+      public int getCacheMisses()
+      {
+        return 0;
+      }
+
+      public int getObjectCount()
+      {
+        return 0;
+      }
+
+      public void clearStatistics()
+      {
+        return;
+      }
+
+      public int getStatisticsAccuracy()
+      {
+        return STATISTICS_ACCURACY_NONE;
+      }
+
+      public void incrementHits(int hits)
+      {
+        return;
+      }
+
+      public void incrementMisses(int misses)
+      {
+        return;
+      }
+    }
+
+    /**
+     * Implements CacheStatistics without worrying about synchronizing
+     * counter updates.
+     */
+    private static class GoodStatistics implements CacheStatistics, ManagedCacheStatistics {
+      private AbstractCache _cache;
+      private int _cacheHits;
+      private int _cacheMisses;
+
+      protected GoodStatistics(AbstractCache cache)
+      {
+        super();
+        _cache = cache;
+      }
+
+      public int getCacheHits()
+      {
+        return _cacheHits;
+      }
+
+      public int getCacheMisses()
+      {
+        return _cacheMisses;
+      }
+
+      public int getObjectCount()
+      {
+        return _cache != null ? _cache.size() : 0;
+      }
+
+      public void clearStatistics()
+      {
+        _cacheHits = 0;
+        _cacheMisses = 0;
+      }
+
+      public int getStatisticsAccuracy()
+      {
+        return STATISTICS_ACCURACY_BEST_EFFORT;
+      }
+
+      @Override
+      public void incrementHits(int hits)
+      {
+        _cacheHits += hits;
+      }
+
+      @Override
+      public void incrementMisses(int misses)
+      {
+        _cacheMisses += misses;
+      }
+    }
+
+    private static class GuaranteedStatistics implements CacheStatistics, ManagedCacheStatistics {
+      private AbstractCache _cache;
+      private AtomicInteger _cacheHits;
+      private AtomicInteger _cacheMisses;
+
+      protected GuaranteedStatistics(AbstractCache cache)
+      {
+        super();
+        _cache = cache;
+        _cacheHits = new AtomicInteger(0);
+        _cacheMisses = new AtomicInteger(0);
+      }
+
+      public int getCacheHits()
+      {
+        return _cacheHits.get();
+      }
+
+      public int getCacheMisses()
+      {
+        return _cacheMisses.get();
+      }
+
+      public int getObjectCount()
+      {
+        return _cache != null ? _cache.size() : 0;
+      }
+
+      public void clearStatistics()
+      {
+        _cacheHits.set(0);
+        _cacheMisses.set(0);
+      }
+
+      public int getStatisticsAccuracy()
+      {
+        return STATISTICS_ACCURACY_GUARANTEED;
+      }
+
+      @Override
+      public void incrementHits(int hits)
+      {
+        _cacheHits.getAndAdd(hits);
+      }
+
+      @Override
+      public void incrementMisses(int misses)
+      {
+        _cacheMisses.getAndAdd(misses);
+      }
+    }
   }
 }

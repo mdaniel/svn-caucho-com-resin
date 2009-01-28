@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -60,7 +60,7 @@ public final class CacheMapEntry implements ExtCacheEntry {
   private long _leaseExpireTime;
   
   private long _lastRemoteAccessTime;
-  
+
   private SoftReference _valueRef;
 
   public CacheMapEntry(HashKey valueHash,
@@ -331,11 +331,19 @@ public final class CacheMapEntry implements ExtCacheEntry {
   // jcache stubs
   //
 
+  /**
+   * Implements a method required by the interface that should never be
+   * called>
+   */
   public Object getKey()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+   /**
+   * Implements a method required by the interface that should never be
+   * called>
+   */
   public Object setValue(Object value)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -346,6 +354,10 @@ public final class CacheMapEntry implements ExtCacheEntry {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+   /**
+   * Implements a method required by the interface that should never be
+   * called in this section of the cache.
+   */
   public boolean isValid()
   {
     throw new UnsupportedOperationException(getClass().getName());

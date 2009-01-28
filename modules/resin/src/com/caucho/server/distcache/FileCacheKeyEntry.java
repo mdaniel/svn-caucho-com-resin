@@ -33,6 +33,7 @@ import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.util.Alarm;
 
+import javax.cache.CacheLoader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -66,10 +67,13 @@ public class FileCacheKeyEntry extends CacheKeyEntry {
   /**
    * Fills the value with a stream
    */
-  @Override
+  //@Override
   public Object get(CacheConfig config)
-  {
-    return _manager.get(this, config);
+  {                
+    Object value =  _manager.get(this, config);
+    if (value != null) return value;
+    CacheLoader cacheLoader = config.getCacheLoader();
+    return (cacheLoader == null) ? null : cacheLoader.load(getKey());
   }
 
   /**

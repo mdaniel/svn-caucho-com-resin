@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,14 +29,9 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.ExtCacheEntry;
-import com.caucho.cluster.CacheLoader;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.cluster.HessianSerializer;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
-import com.caucho.util.LruCache;
 
 /**
  * Manages the distributed cache
@@ -45,40 +40,46 @@ public class CacheConfig
 {
   public static final long TIME_INFINITY  = Long.MAX_VALUE / 2;
   public static final int FLAG_EPHEMERAL  = 0x01;
-  public static final int FLAG_BACKUP     = 0x02;
+  public static final int FLAG_BACKUP = 0x02;
   public static final int FLAG_TRIPLICATE = 0x04;
 
   private String _guid;
-  
+
   private int _flags = (FLAG_BACKUP
 			| FLAG_TRIPLICATE);
 
   private long _expireTimeout = TIME_INFINITY;
-  
+
+  private long _expireTimeoutWindow = 0;
+
   private long _idleTimeout = TIME_INFINITY;
-  
+
+  private long _idleTimeoutWindow = 0;
+
   private long _localReadTimeout
     = Alarm.isTest() ? -1 : 250L; // 250ms default timeout, except for QA
 
   private long _leaseTimeout = 5 * 60 * 1000; // 5 min lease timeout
 
-  private CacheLoader _cacheLoader;
+  private javax.cache.CacheLoader _cacheLoader;
 
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
 
+  private int _accuracy;
+
   /**
    * The Cache will use a CacheLoader to populate cache misses.
    */
-  public CacheLoader getCacheLoader()
+  public javax.cache.CacheLoader getCacheLoader()
   {
     return _cacheLoader;
   }
 
   /**
-   * The Cache will use a CacheLoader to populate cache misses.
+   * Sets the CacheLoader that the Cache can then use to populate cache misses for a reference stored (database)
    */
-  public void setCacheLoader(CacheLoader cacheLoader)
+  public void setCacheLoader(javax.cache.CacheLoader cacheLoader)
   {
     _cacheLoader = cacheLoader;
   }
@@ -127,6 +128,11 @@ public class CacheConfig
     return _expireTimeout;
   }
 
+  public long getExpireTimeoutWindow() 
+  {
+    return _expireTimeoutWindow;
+  }
+
   /**
    * The maximum valid time for an item.  Items stored in the cache
    * for longer than the expire time are no longer valid and will
@@ -149,13 +155,24 @@ public class CacheConfig
    */
   public long getExpireCheckWindow()
   {
-    return _expireTimeout / 4;
+    return _expireTimeoutWindow > 0 ? _expireTimeoutWindow : _expireTimeoutWindow / 4;
   }
 
   /**
    * The maximum idle time for an item.  For example, session
    * data might be removed if idle over 30 minutes.
    *
+   * @param expireTimeoutWindow
+   */
+  public void setExpireTimeoutWindow(long expireTimeoutWindow)
+  {
+    _expireTimeoutWindow = expireTimeoutWindow;
+  }
+
+  /**
+   * The maximum time that an item can remain in cache without being referenced.
+   * For example, session data could be configured to be removed if idle for more than 30 minutes.
+   * <p/>
    * Cached data would typically have infinite idle time because
    * it doesn't depend on how often it's accessed.
    *
@@ -166,11 +183,16 @@ public class CacheConfig
     return _idleTimeout;
   }
 
+  public long getIdleTimeoutWindow()
+  {
+    return _idleTimeoutWindow;
+  }
+
   /**
-   * The maximum idle time for an item.  For example, session
-   * data might be removed if idle over 30 minutes.
+   * The maximum time that an item can remain in cache without being referenced.
+   * For example, session data could be configured to be removed if idle for more than 30 minutes.
    *
-   * Cached data would typically have infinite idle time because
+   * Cached data would typically use an infinite idle time because
    * it doesn't depend on how often it's accessed.
    */
   public void setIdleTimeout(long idleTimeout)
@@ -187,11 +209,16 @@ public class CacheConfig
    */
   public long getIdleCheckWindow()
   {
-    return _idleTimeout / 4;
+    return _idleTimeoutWindow > 0 ? _idleTimeoutWindow : _idleTimeoutWindow / 4;
+  }
+
+  public void setIdleTimeoutWindow(long idleTimeoutWindow)
+  {
+    _idleTimeoutWindow = idleTimeoutWindow;
   }
 
   /**
-   * The lease timeout is the time a server can use the local version
+   * Returns the lease timeout, which is the time a server can use the local version
    * if it owns it, before a timeout.
    */
   public long getLeaseTimeout()
@@ -250,11 +277,62 @@ public class CacheConfig
     _valueSerializer = serializer;
   }
 
+  public boolean isSinglePersistence()
+  {
+    return (getFlags() & CacheConfig.FLAG_BACKUP) == CacheConfig.FLAG_BACKUP;
+  }
+
+  /**
+   * Sets the backup mode.  If backups are enabled, copies of the
+   * cache item will be sent to the owning triad server.
+   * <p/>
+   * Defaults to true.
+   */
+  public void setSinglePersistence(boolean isBackup)
+  {
+    if (isBackup)
+      setFlags(getFlags() | CacheConfig.FLAG_BACKUP);
+    else if (!isTriplePersistence())
+      setFlags(getFlags() & ~CacheConfig.FLAG_BACKUP);
+  }
+
+  public boolean isTriplePersistence()
+  {
+    return (getFlags() & CacheConfig.FLAG_TRIPLICATE) == CacheConfig.FLAG_TRIPLICATE;
+  }
+
+  /**
+   * Sets the triplicate backup mode.  If triplicate backups is set,
+   * all triad servers have a copy of the cache item.
+   * <p/>
+   * Defaults to true.
+   */
+  public void setTriplePersistence(boolean isTriplicate)
+  {
+    if (isTriplicate)
+      setFlags(getFlags() | CacheConfig.FLAG_TRIPLICATE);
+    else
+      setFlags(getFlags() & ~CacheConfig.FLAG_TRIPLICATE);
+  }
+
+  public int getCacheStatisticsAccuraccy()
+  {
+    return _accuracy;
+  }
+
+  public void setCacheStatisticsAccuracy(int accuracy)
+  {
+    _accuracy = accuracy;
+  }
+
+  /**
+   * Initializes the CacheConfig.
+   */
   public void init()
   {
     if (_keySerializer == null)
       _keySerializer = new HessianSerializer();
-    
+
     if (_valueSerializer == null)
       _valueSerializer = new HessianSerializer();
   }
