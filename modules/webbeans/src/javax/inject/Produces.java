@@ -34,7 +34,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Produces annotation for web beans
+ * Bean factory methods are declared with the {@literal @Produces} annotation.
  */
 @Target({FIELD, METHOD})
 @Retention(RUNTIME)

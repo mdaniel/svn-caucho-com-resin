@@ -34,7 +34,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Disposes annotation for web beans
+ * Testing and mock beans completely override their parents when enabled
+ * if they are marked with a {@literal @Specializes} annotation.
  */
 @Target({PARAMETER})
 @Retention(RUNTIME)

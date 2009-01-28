@@ -34,8 +34,10 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+
 /**
- * The @Production DeploymentType for web beans
+ * Custom beans default to a {@literal @Production}
+ * {@link javax.inject.DeploymentType @DeploymentType}.
  */
 @DeploymentType
 @Documented  

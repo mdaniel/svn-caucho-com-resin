@@ -34,7 +34,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Disposes annotation for web beans
+ * Factory destruction methods are declared with the {@literal @Disposes}
+ * annotation.
  */
 @Target({PARAMETER})
 @Retention(RUNTIME)

@@ -33,7 +33,17 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 
 /**
- * Usable API for Annotations types.
+ * Convenience API to create runtime Annotations.
+ *
+ * <code><pre>
+ * Annotation current = new AnnotationLiteral&lt;Current>() {}
+ * </pre></code>
+ *
+ * <code><pre>
+ * Annotation named = new AnnotationLiteral&lt;Named>() {
+ *   public String name() { return "my-name"; }
+ * }
+ * </pre></code>
  */
 public abstract class AnnotationLiteral<T extends Annotation>
   implements Annotation

@@ -375,7 +375,12 @@ public class TypeFactory implements AddLoaderListener
       
       InputStream is = null;
       try {
-	is = _loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
+	ClassLoader loader = _loader;
+
+	if (loader == null)
+	  loader = ClassLoader.getSystemClassLoader();
+
+	is = loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
 
 	if (is != null) {
 	  ReadStream in = Vfs.openRead(is);

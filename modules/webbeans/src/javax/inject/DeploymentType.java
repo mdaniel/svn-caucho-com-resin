@@ -36,7 +36,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @DeploymentType meta-annotation for web beans
+ * Production and testing-mode beans are enabled using
+ * {@literal @DeploymentType} annotations.
  */
 @Documented
 @Retention(RUNTIME)

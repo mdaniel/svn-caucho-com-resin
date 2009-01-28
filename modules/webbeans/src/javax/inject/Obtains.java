@@ -38,9 +38,28 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * The @Standard DeploymentType for web beans
+ * {@link javax.inject.Instance} injection uses the
+ * special {@literal @Obtains} {@link javax.inject.BindingType @BindingType}
+ * to create a convenient interface for creating objects.
+ *
+ * <h3>Example: injecting and using Instance</h3>
+ *
+ * <code><pre>
+ * package example;
+ *
+ * import javax.inject.*;
+ * import javax.servlet.*;
+ *
+ * public class MyServlet extends GenericServlet {
+ *  {@literal @Obtains} {@link javax.inject.Instance}&lt;MyBean> _beanFactory;
+ *
+ *  public void service(ServletRequest req, ServletResponse res)
+ *  {
+ *    MyBean bean = _beanFactory.get();
+ *  }
+ * }
+ * </pre></code>
  */
-
 @BindingType
 @Documented
 @Retention(RUNTIME)

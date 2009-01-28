@@ -32,7 +32,25 @@ package javax.inject;
 import java.lang.annotation.Annotation;
 
 /**
- * The Instance interface obtains instances of a specific type.
+ * Factory to create instances of a bean.
+ *
+ * <h3>Example: injecting and using Instance</h3>
+ *
+ * <code><pre>
+ * package example;
+ *
+ * import javax.inject.*;
+ * import javax.servlet.*;
+ *
+ * public class MyServlet extends GenericServlet {
+ *  {@link javax.inject.Obtains @Obtains} {@literal @Instance}&lt;MyBean> _beanFactory;
+ *
+ *  public void service(ServletRequest req, ServletResponse res)
+ *  {
+ *    MyBean bean = _beanFactory.get();
+ *  }
+ * }
+ * </pre></code>
  *
  * @see javax.event.Event
  */

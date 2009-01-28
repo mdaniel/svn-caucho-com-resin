@@ -30,9 +30,10 @@
 package javax.inject;
 
 /**
- * Exception during runtime for webbeans
+ * When two {@link javax.inject.BindingType @BindingType} annotations
+ * with the same annotationType are passed to
+ * a {@link javax.inject.manager.Manager} method, this exception is thrown.
  */
-
 public class DuplicateBindingTypeException extends ExecutionException
 {
   public DuplicateBindingTypeException()

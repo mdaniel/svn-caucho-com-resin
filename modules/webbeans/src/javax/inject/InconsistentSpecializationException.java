@@ -29,9 +29,10 @@
 package javax.inject;
 
 /**
- * Exception thrown when a webbean getInstance is not unique
+ * Bean errors detected with {@link javax.inject.Specializes @Specializes}
+ * annotation cause the injection {@link javax.inject.manager.Manager} to
+ * throw this exception.
  */
-
 public class InconsistentSpecializationException extends DeploymentException
 {
   public InconsistentSpecializationException()

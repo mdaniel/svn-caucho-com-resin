@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package javax.inject;
+package javax.event;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;

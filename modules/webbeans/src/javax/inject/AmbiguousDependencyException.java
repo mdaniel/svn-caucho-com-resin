@@ -29,9 +29,10 @@
 package javax.inject;
 
 /**
- * Exception thrown when a webbean getInstance is not unique
+ * When an injection {@link javax.inject.manager.Manager#getInstance
+ * Manager.getInstance} call cannot return a unique bean, it throws
+ * this exception.
  */
-
 public class AmbiguousDependencyException extends DeploymentException
 {
   public AmbiguousDependencyException()

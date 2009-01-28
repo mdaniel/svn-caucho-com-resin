@@ -35,24 +35,33 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @New annotation injects a new instance of a bean to the injection
- * point.  The configuration for the @New instance is separate from any
+ * New bean creation and injection uses the {@literal @New} annotation as the
+ * {@link javax.inject.BindingType @BindingType} for the injection point.
+ * 
+ * The {@literal @New} annotation injects a new instance of a bean to
+ * the injection
+ * point.  The configuration for the {@literal @New} instance is separate
+ * from any
  * simple bean configuration.
  *
  * <ul>
  * <li>Initializer methods and injected fields are defined by annotations.
  * <li>Interceptor bindings are defined by annotations.
- * <li>Scope is @Dependent
- * <li>Deployment type is @Standard
- * <li>The binding is @New
- * <li>No bean name
- * <li>No @Stereotypes
- * <li>No observer methods, producer methods, or disposal methods
+ * <li>Scope is {@link javax.context.Dependent @Dependent}
+ * <li>Deployment type is  {@link javax.context.Standard @Standard}
+ * <li>The binding is {@literal @New}
+ * <li>No bean {@link javax.annotation.Named @Named}
+ * <li>No {@link javax.annotation.Stereotype @Stereotypes}
+ * <li>No {@link javax.event.Observer @Observer} methods,
+ * {@link javax.inject.Produces @Produces} methods, or
+ * {@link javax.inject.Disposes @Disposes} methods
  * </ul>
+ *
+ * <h3>example: {@literal @New} injection</h3>
  *
  * <code><pre>
  * class MyBean {
- *   @New
+ *   {@literal @New}
  *   private SubBean _bean;
  * }
  * </pre></code>

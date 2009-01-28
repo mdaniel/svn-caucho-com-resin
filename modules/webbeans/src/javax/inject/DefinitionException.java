@@ -29,9 +29,9 @@
 package javax.inject;
 
 /**
- * Exception thrown when a webbean definition is inconsistent or invalid
+ * When a bean's annotations or XML configuration is inconsistent or
+ * invalid the {@link javax.inject.manager.Manager} throws this exception.
  */
-
 public class DefinitionException extends RuntimeException
 {
   public DefinitionException()

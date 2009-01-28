@@ -35,8 +35,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
+ * Default bean injection uses @Current as the injection point's
+ * {@link javax.inject.BindingType @BindingType}.
+ *
  * The @Current annotation for Java injection is the default, single
  * bean with the given type.
+ *
+ * @see BindingType
  */
 @BindingType
 @Documented

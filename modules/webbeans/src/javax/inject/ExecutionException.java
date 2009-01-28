@@ -29,9 +29,8 @@
 package javax.inject;
 
 /**
- * Exception during runtime for webbeans
+ * Exceptions occuring during runtime throw this exception.
  */
-
 public class ExecutionException extends RuntimeException
 {
   public ExecutionException()

@@ -32,7 +32,11 @@ package javax.inject;
 import java.lang.reflect.*;
 
 /**
- * Usable API for Parameterized types.
+ * Convenience API to create runtime parameterized types.
+ *
+ * <code><pre>
+ * new TypeLiteral&lt;ArrayList&lt;String>>() {}
+ * </pre></code>
  */
 public abstract class TypeLiteral<T>
 {

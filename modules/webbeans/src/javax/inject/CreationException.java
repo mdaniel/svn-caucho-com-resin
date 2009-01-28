@@ -30,9 +30,9 @@
 package javax.inject;
 
 /**
- * Exception during runtime for webbeans
+ * When bean creation fails, the injection
+ * {@link javax.inject.manager.Manager} will throw this exception.
  */
-
 public class CreationException extends ExecutionException
 {
   public CreationException()

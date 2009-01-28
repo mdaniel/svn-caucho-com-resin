@@ -28,10 +28,11 @@
 
 package javax.inject;
 
-/**
- * Exception during runtime for webbeans
- */
 
+/**
+ * Exceptions occuring during deployment will extend from this
+ * exception.
+ */
 public class DeploymentException extends RuntimeException
 {
   public DeploymentException()

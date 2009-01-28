@@ -34,7 +34,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Disposes annotation for web beans
+ * Beans which inherit injection annotations from a superclass are marked
+ * by the {@literal @Realizes} annotation.  The default behavior
+ * (non-{@literal @Realizes}), ignores all injection annotations for super
+ * classes.
  */
 @Target({PARAMETER})
 @Retention(RUNTIME)

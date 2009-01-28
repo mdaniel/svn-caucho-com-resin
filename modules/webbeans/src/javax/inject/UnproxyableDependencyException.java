@@ -29,9 +29,10 @@
 package javax.inject;
 
 /**
- * Exception thrown when a webbean getInstance is not unique
+ * When a bean cannot generate a proxy as required by the specification,
+ * the injection {@link javax.inject.manager.Manager} will
+ * throw this exception.
  */
-
 public class UnproxyableDependencyException extends DeploymentException
 {
   public UnproxyableDependencyException()

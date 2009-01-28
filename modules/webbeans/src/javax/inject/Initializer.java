@@ -35,7 +35,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Initializer stereotype
+ * Initialization lifecycle methods and constructors are declared with
+ * the {@literal @Initializer} annotation.
+ *
+ * After the bean is created and after field injection, the injection
+ * {@link javax.inject.manager.Manager} calls any method marked by the
+ * {@literal @Initializer} annotation.
  */
 @Documented
 @Retention(RUNTIME)

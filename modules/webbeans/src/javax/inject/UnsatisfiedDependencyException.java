@@ -29,9 +29,10 @@
 package javax.inject;
 
 /**
- * Exception thrown when a webbean getInstance is not unique
+ * When no matching bean can be found for an injection point or a
+ * {@link javax.inject.manager.Manager#getInstance Manager.getInstance},
+ * the Manager {@link javax.inject.manager.Manager} will throw this exception.
  */
-
 public class UnsatisfiedDependencyException extends DeploymentException
 {
   public UnsatisfiedDependencyException()

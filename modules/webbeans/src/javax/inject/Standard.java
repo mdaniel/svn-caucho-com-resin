@@ -38,9 +38,10 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * The @Standard DeploymentType for web beans
+ * Beans defined by the Java Injection standard use a
+ * low-priority {@literal @Standard}
+ * {@link javax.inject.DeploymentType @DeploymentType}.
  */
-
 @DeploymentType
 @Documented
 @Retention(RUNTIME)
