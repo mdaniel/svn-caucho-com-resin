@@ -572,7 +572,20 @@ if test -n "${b64_jni}"; then
    LIBEXEC=libexec64
 fi
 
-CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+#
+# --enable-lfs
+#
+AC_ARG_ENABLE(lfs,
+[  --enable-lfs            Enable large file source support],
+[case "${enableval}" in
+ yes) lfs=true ;;
+ no)  lfs="";;
+ *) AC_MSG_ERROR(bad value ${enableval} for --enable-lfs) ;;
+ esac],[])
+
+if test -n "${lfs}"; then
+  CFLAGS_JNI="$CFLAGS_JNI -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+fi
 
 #
 # fill in based on known configurations
@@ -627,7 +640,15 @@ if test -z "${LD_SHLIB}"; then
     darwin*)
         CFLAGS_SHLIB="-DSHARED_MODULE"
 	LD_SHLIB=${CC}
- 	LDFLAGS_SHLIB="-bundle -undefined suppress -flat_namespace"
+ 	LDFLAGS_SHLIB="-dynamiclib -undefined suppress -flat_namespace"
+        if test -n "$b64"; then
+  	  CFLAGS="$CFLAGS -arch x86_64"
+  	  LDFLAGS_SHLIB="$LDFLAGS_SHLIB -arch x86_64"
+        fi
+	if test -n "$b64_jni"; then
+  	  CFLAGS_JNI="$CFLAGS_JNI -arch x86_64"
+  	  LDFLAGS_SHLIB="$LDFLAGS_SHLIB -arch x86_64"
+   	fi
         ;;
 
     *aix*)

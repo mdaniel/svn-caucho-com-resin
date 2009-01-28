@@ -26,6 +26,8 @@ libresin_os.jnilib	: $(OBJ)
 	$(LD) $(LDFLAGS_SHLIB) -framework JavaVM -o $@ $(OBJ) $(PROXY_LIBS)
 
 jni_os.o	: Makefile
+jni_jvmti.o	: Makefile
+jni_jvmdi.o	: Makefile
 
 clean	:
 	rm -f *.o *.$(SO)

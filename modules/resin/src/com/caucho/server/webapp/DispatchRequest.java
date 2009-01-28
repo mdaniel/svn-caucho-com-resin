@@ -594,6 +594,7 @@ class DispatchRequest extends RequestAdapter {
     _webApp = null;
     _oldWebApp = null;
     _readStream = null;
+    _invocation = null;
 
     if (_is != null)
       _is.free();

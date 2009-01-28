@@ -80,6 +80,7 @@ public class FileQueueStore
   private PreparedStatement _receiveStartStmt;
   private PreparedStatement _readStmt;
   private PreparedStatement _receiveStmt;
+  private PreparedStatement _removeStmt;
   private PreparedStatement _deleteStmt;
 
   public FileQueueStore(MessageFactory messageFactory)
@@ -130,7 +131,6 @@ public class FileQueueStore
     _tablePrefix = prefix;
   }
 
-  @PostConstruct
   public void init()
   {
     if (_path == null)
@@ -146,8 +146,9 @@ public class FileQueueStore
     if (resin != null)
       serverId = resin.getServerId();
 
-    if (serverId == null)
+    if (serverId == null) {
       serverId = "anon";
+    }
     else if ("".equals(serverId))
       serverId = "default";
 
@@ -176,18 +177,22 @@ public class FileQueueStore
   /**
    * Adds a new message to the persistent store.
    */
-  public long send(MessageImpl msg, long expireTime)
+  public long send(MessageImpl msg, int priority, long expireTime)
   {
     synchronized (this) {
       try {
 	_sendStmt.setLong(1, _queueId);
-	_sendStmt.setLong(2, expireTime);
-	_sendStmt.setString(3, msg.getJMSMessageID());
-	_sendStmt.setBinaryStream(4, msg.propertiesToInputStream(), 0);
-	_sendStmt.setInt(5, msg.getType().ordinal());
-	_sendStmt.setBinaryStream(6, msg.bodyToInputStream(), 0);
+	_sendStmt.setInt(2, priority);
+	_sendStmt.setLong(3, expireTime);
+	_sendStmt.setString(4, msg.getJMSMessageID());
+	_sendStmt.setBinaryStream(5, msg.propertiesToInputStream(), 0);
+	_sendStmt.setInt(6, msg.getType().ordinal());
+	_sendStmt.setBinaryStream(7, msg.bodyToInputStream(), 0);
 
 	_sendStmt.executeUpdate();
+
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " send " + msg);
 
 	ResultSet rs = _sendStmt.getGeneratedKeys();
 
@@ -218,13 +223,18 @@ public class FileQueueStore
 
 	while (rs.next()) {
 	  long id = rs.getLong(1);
-	  long expire = rs.getLong(2);
-	  MessageType type = MESSAGE_TYPE[rs.getInt(3)];
+	  String msgId = rs.getString(2);
+	  int priority = rs.getInt(3);
+	  long expire = rs.getLong(4);
+	  MessageType type = MESSAGE_TYPE[rs.getInt(5)];
 	  
-	  FileQueueEntry entry = fileQueue.addEntry(id, expire, type);
+	  FileQueueEntry entry
+	    = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
 	}
 
 	rs.close();
+      } catch (RuntimeException e) {
+	throw e;
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
@@ -339,6 +349,22 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
+  public void remove(String id)
+  {
+    synchronized (this) {
+      try {
+	_removeStmt.setString(1, id);
+
+	_removeStmt.executeUpdate();
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Retrieves a message from the persistent store.
+   */
   void delete(long id)
   {
     synchronized (this) {
@@ -355,7 +381,7 @@ public class FileQueueStore
   private void initDatabase()
     throws SQLException
   {
-    String sql = "select id from " + _queueTable + " where 1=0";
+    String sql = "select id, priority from " + _messageTable + " where 1=0";
     Statement stmt = _conn.createStatement();
 
     try {
@@ -364,6 +390,18 @@ public class FileQueueStore
       rs.close();
       
       return;
+    } catch (SQLException e) {
+      log.finer(e.toString());
+    }
+
+    try {
+      stmt.executeUpdate("drop table " + _queueTable);
+    } catch (SQLException e) {
+      log.finer(e.toString());
+    }
+
+    try {
+      stmt.executeUpdate("drop table " + _messageTable);
     } catch (SQLException e) {
       log.finer(e.toString());
     }
@@ -379,13 +417,15 @@ public class FileQueueStore
 	   + "  id bigint auto_increment,"
 	   + "  queue bigint,"
 	   + "  state integer,"
+	   + "  priority integer,"
 	   + "  expire datetime,"
 	   + "  owner_1 bigint,"
 	   + "  owner_2 bigint,"
 	   + "  msg_id varchar(64),"
 	   + "  header blob,"
 	   + "  type integer,"
-	   + "  body blob"
+	   + "  body blob,"
+	   + "  is_valid bit"
 	   + ")");
 
     stmt.executeUpdate(sql);
@@ -432,7 +472,8 @@ public class FileQueueStore
     throws SQLException
   {
     String sql = ("insert into " + _messageTable
-		  + " (queue,expire,msg_id,header,type,body) VALUES(?,?,?,?,?,?)");
+		  + " (queue,priority,expire,msg_id,header,type,body,is_valid)"
+		  + " VALUES(?,?,?,?,?,?,?,1)");
     
     _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
     
@@ -445,11 +486,19 @@ public class FileQueueStore
 	   + " WHERE id=?");
     
     _readStmt = _conn.prepareStatement(sql);
-    
-    sql = ("select id,expire,type from " + _messageTable
-	   + " WHERE queue=? ORDER BY id");
+
+    sql = ("select id,msg_id,priority,expire,type from " + _messageTable
+	   + " WHERE queue=? AND is_valid=1 ORDER BY id");
     
     _receiveStartStmt = _conn.prepareStatement(sql);
+    
+    _removeStmt = _conn.prepareStatement(sql);
+    
+    sql = ("update " + _messageTable
+	   + " set body=null, is_valid=0, expire=now() + 120000"
+	   + " WHERE id=?");
+    
+    _removeStmt = _conn.prepareStatement(sql);
     
     sql = ("delete from " + _messageTable
 	   + " WHERE id=?");
@@ -475,5 +524,10 @@ public class FileQueueStore
     }
 
     return sb.toString();
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _messageTable + "]";
   }
 }

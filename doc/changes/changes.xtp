@@ -10,6 +10,14 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
+<s2 title="3.1.9 snapshot">
+<ul>
+<li>jsp: backport of JspCompileResource parallel compile (#2987, rep by stbu)</li>
+<li>memory: DispatchRequest._invocation needs to be cleared (rep by Mattias Jiderhamn)</li>
+</ul>
+</s2>
+
+
 <s2 title="3.1.8">
 <ul>
 <li>(2008-11-17) thread: thread pool load smoothing (rep by Martin Thompson)</li>
