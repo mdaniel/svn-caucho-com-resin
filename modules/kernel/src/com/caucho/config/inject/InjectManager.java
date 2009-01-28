@@ -196,6 +196,8 @@ public class InjectManager
   private ArrayList<CauchoBean> _pendingRegistrationList
     = new ArrayList<CauchoBean>();
 
+  private ApplicationScope _applicationScope = new ApplicationScope();
+
   private RuntimeException _configException;
 
   private InjectManager(String id,
@@ -238,7 +240,7 @@ public class InjectManager
       addContext("com.caucho.server.webbeans.RequestScope");
       addContext("com.caucho.server.webbeans.SessionScope");
       addContext("com.caucho.server.webbeans.ConversationScope");
-      addContext(new ApplicationScope());
+      addContext(_applicationScope);
 
       _deploymentMap.put(Standard.class, 0);
       _deploymentMap.put(CauchoDeployment.class, 1);
@@ -350,6 +352,11 @@ public class InjectManager
   public InjectManager getParent()
   {
     return _parent;
+  }
+
+  public ApplicationScope getApplicationScope()
+  {
+    return _applicationScope;
   }
 
   public void setParent(InjectManager parent)

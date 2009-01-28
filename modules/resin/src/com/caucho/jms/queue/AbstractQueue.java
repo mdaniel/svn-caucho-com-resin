@@ -106,7 +106,7 @@ abstract public class AbstractQueue extends AbstractDestination
     return _listenerFailLastTime;
   }
 
-  public void init()
+  protected void init()
   {
   }
 

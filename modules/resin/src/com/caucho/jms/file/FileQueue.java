@@ -151,11 +151,8 @@ public class FileQueue extends AbstractQueue implements Topic
   /**
    * Initialize the queue
    */
-  @PostConstruct
   public void init()
   {
-    System.out.println("INIT: " + getName());
-    
     _store.setName(getName());
 
     _store.init();
@@ -176,8 +173,6 @@ public class FileQueue extends AbstractQueue implements Topic
 		   int priority,
 		   long expires)
   {
-    System.out.println("SEND: " + msg);
-    
     synchronized (_queueLock) {
       long id = _store.send(msg, priority, expires);
 
@@ -221,8 +216,6 @@ public class FileQueue extends AbstractQueue implements Topic
   @Override
   public MessageImpl receive(boolean isAutoAck)
   {
-	  System.out.println("RECEIVE: " + isAutoAck);
-	  
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
 	for (FileQueueEntry entry = _head[i];
@@ -325,8 +318,6 @@ public class FileQueue extends AbstractQueue implements Topic
     else if (_head.length <= priority)
       priority = _head.length;
 
-    System.out.println("ADD: " + id + " " + msgId);
-      
     FileQueueEntry entry
       = new FileQueueEntry(id, msgId, leaseTimeout, priority, expire, type);
 

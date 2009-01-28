@@ -43,17 +43,13 @@ import javax.inject.manager.Bean;
  * The application scope value
  */
 public class ApplicationScope extends ScopeContext {
-  private static final ApplicationScope SCOPE = new ApplicationScope();
-  
-  private final static EnvironmentLocal<ScopeMap> _localScopeMap
-    = new EnvironmentLocal<ScopeMap>();
+  private ScopeMap _scopeMap = new ScopeMap();
 
   /**
    * Returns the current applicatin scope
    */
-  public static ApplicationScope create()
+  public ApplicationScope()
   {
-    return SCOPE;
   }
   
   /**
@@ -75,22 +71,13 @@ public class ApplicationScope extends ScopeContext {
   @Override
   protected ScopeMap getScopeMap()
   {
-    return _localScopeMap.getLevel();
+    return _scopeMap;
   }
 
   @Override
   protected ScopeMap createScopeMap()
   {
-    synchronized (_localScopeMap) {
-      ScopeMap scopeMap = _localScopeMap.getLevel();
-
-      if (scopeMap == null) {
-	scopeMap = new ScopeMap();
-	_localScopeMap.set(scopeMap);
-      }
-
-      return scopeMap;
-    }
+    return _scopeMap;
   }
 
   @Override

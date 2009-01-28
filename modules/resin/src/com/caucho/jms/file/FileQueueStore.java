@@ -91,7 +91,6 @@ public class FileQueueStore
   public void setName(String name)
   {
     _name = name;
-    Thread.dumpStack();
   }
 
   public String getName()
@@ -132,7 +131,6 @@ public class FileQueueStore
     _tablePrefix = prefix;
   }
 
-  @PostConstruct
   public void init()
   {
     if (_path == null)
@@ -153,8 +151,6 @@ public class FileQueueStore
     }
     else if ("".equals(serverId))
       serverId = "default";
-    System.out.println("SID: " + serverId);
-    Thread.dumpStack();
 
     _queueTable = escapeName("jms_queue_" + serverId);
     _messageTable = escapeName("jms_message_" + serverId);
@@ -224,7 +220,6 @@ public class FileQueueStore
 	_receiveStartStmt.setLong(1, _queueId);
 
 	ResultSet rs = _receiveStartStmt.executeQuery();
-	System.out.println("STARTMMM:");
 
 	while (rs.next()) {
 	  long id = rs.getLong(1);
@@ -232,8 +227,6 @@ public class FileQueueStore
 	  int priority = rs.getInt(3);
 	  long expire = rs.getLong(4);
 	  MessageType type = MESSAGE_TYPE[rs.getInt(5)];
-
-	  System.out.println("START: " + id + " " + msgId);
 	  
 	  FileQueueEntry entry
 	    = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
@@ -253,8 +246,6 @@ public class FileQueueStore
    */
   public MessageImpl readMessage(long id, MessageType type)
   {
-    System.out.println("READ: " + id + " " + type);
-    
     synchronized (this) {
       try {
 	_readStmt.setLong(1, id);
@@ -433,7 +424,8 @@ public class FileQueueStore
 	   + "  msg_id varchar(64),"
 	   + "  header blob,"
 	   + "  type integer,"
-	   + "  body blob"
+	   + "  body blob,"
+	   + "  is_valid bit"
 	   + ")");
 
     stmt.executeUpdate(sql);
@@ -480,8 +472,8 @@ public class FileQueueStore
     throws SQLException
   {
     String sql = ("insert into " + _messageTable
-		  + " (queue,priority,expire,msg_id,header,type,body)"
-		  + " VALUES(?,?,?,?,?,?,?)");
+		  + " (queue,priority,expire,msg_id,header,type,body,is_valid)"
+		  + " VALUES(?,?,?,?,?,?,?,1)");
     
     _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
     
@@ -494,16 +486,16 @@ public class FileQueueStore
 	   + " WHERE id=?");
     
     _readStmt = _conn.prepareStatement(sql);
-    
+
     sql = ("select id,msg_id,priority,expire,type from " + _messageTable
-	   + " WHERE queue=? AND body is not null ORDER BY id");
+	   + " WHERE queue=? AND is_valid=1 ORDER BY id");
     
     _receiveStartStmt = _conn.prepareStatement(sql);
     
     _removeStmt = _conn.prepareStatement(sql);
     
     sql = ("update " + _messageTable
-	   + " set body=null, expire=now() + 120000"
+	   + " set body=null, is_valid=0, expire=now() + 120000"
 	   + " WHERE id=?");
     
     _removeStmt = _conn.prepareStatement(sql);
@@ -532,5 +524,10 @@ public class FileQueueStore
     }
 
     return sb.toString();
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _messageTable + "]";
   }
 }
