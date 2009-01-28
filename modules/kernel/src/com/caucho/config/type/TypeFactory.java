@@ -448,8 +448,10 @@ public class TypeFactory implements AddLoaderListener
       // jms/2300
       return new ListType(type);
     }
-    else if (Map.class.isAssignableFrom(type))
+    else if (Map.class.isAssignableFrom(type)
+	     && type.getName().startsWith("java.util")) {
       return new MapType(type);
+    }
     else if (EnvironmentBean.class.isAssignableFrom(type))
       return new EnvironmentBeanType(type);
     else if (FlowBean.class.isAssignableFrom(type))

@@ -91,7 +91,8 @@ public abstract class Attribute {
     if (value.trim().equals(""))
       return;
 
-    throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
+    throw new ConfigException(L.l("{0}: '{1}' does not allow text for attribute {2}.",
+				  this,
 				  getConfigType().getTypeName(),
 				  name));
   }
@@ -117,5 +118,11 @@ public abstract class Attribute {
   public Object replaceObject(Object bean)
   {
     return getConfigType().replaceObject(bean);
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getConfigType() + "]";
   }
 }
