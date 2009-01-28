@@ -3,10 +3,11 @@
 <title>Resin IoC</title>
 <description>
 
-<p>Resin is designed around an internal inversion-of-control framework
-used for all configuration and resources including servlets, EJBs, messaging,
-remoting, and databases.  Applications can take advantage of Resin's
-IoC capabilities using WebBeans-standard annotations and interfaces.</p>
+<p>Resin is designed around the Java Dependency Injection specification
+(JSR-299), an inversion-of-control framework used for all configuration
+and resources including servlets, EJBs, messaging,
+remoting, and databases.  Applications can take advantage of Java
+Injection using standard annotations and interfaces.</p>
 
 <p>Since Resin-IoC is used for servlets, WebBeans and EJBs, any application
 bean can use EJB annotations like @TransactionAttribute or WebBeans
@@ -48,21 +49,23 @@ all JavaEE specified files uses Resin-IoC as the configuration engine.
 
 <s1 title="Overview">
 
-<p>Resin's IoC support is integrated with <a href="resin-ejb.xtp">EJB 3.0
+<p>Resin's Java Injection support is integrated
+with <a href="resin-ejb.xtp">EJB 3.0
 </a> and the core components like Servlets, Filters and remote objects.
 This integration means plain Java beans can use EJB annotations
-and interception, EJBs can use Resin IoC annotations, and both kinds of
+and interception, EJBs can use Java Injection annotations, and both kinds of
 beans can be configured directly from the <code>resin-web.xml</code>
 or discovered by classpath scanning.</p>
 
-<p>So it's best to think of Resin-IoC as a set of orthogonal capabilities that
+<p>So it's best to think of Java Injection as a set of orthogonal
+capabilities that
 are available to any registered bean.  The basic capability types are:</p>
 
 <ul>
 <li><b>Lifecycle model:</b> Java, <code>@Stateless</code>, <code>@Stateful</code>,
 or <code>@MessageDriven</code>.
 Resin-managed objects like Servlets and Filters are Java model beans.</li>
-<li><b>Dependency injection:</b> injection annotations <code>@In</code>, <code>@Named</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
+<li><b>Dependency injection:</b> injection annotations from <code>javax.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
 available to all beans.</li>
 <li><b>Registration:</b> all beans are registered in a unified typed-namespace
 registry (i.e. the registration half of dependency injection.)</li>
@@ -70,8 +73,8 @@ registry (i.e. the registration half of dependency injection.)</li>
 <li><b>Predefined aspects:</b> the <code>@TransactionAttribute</code>, <code>@RunAs</code>, <code>@RolesAllowed</code>, etc. annotations are
 available to all beans.</li>
 <li><b>Custom interceptors:</b> EJB-style <code>@AroundInvoke</code>, and <code>@Interceptors</code>, as well
-as WebBeans-style <code>@Interceptor</code> and <code>@InterceptorBindingType</code> are available to all beans.</li>
-<li><b>Event handling:</b> the WebBeans <code>@Observes</code> capability is available to all beans.</li>
+as Java Injection <code>@Interceptor</code>, <code>@InterceptorBindingType</code>, and <code>@Decorator</code> are available to all beans.</li>
+<li><b>Event handling:</b> the Java Injection <code>javax.event</code>, <code>@Observes</code> capability is available to all beans.</li>
 </ul>
 </s1>
 
@@ -97,11 +100,11 @@ before calling the servlet's <code>init()</code> method.</p>
 <example title="Example: DataSource and UserTransaction">
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
-import javax.webbeans.In;
+import javax.inject.Current;
 
 public class MyServlet extends GenericServlet {
-  @In private DataSource _ds;
-  @In private UserTransaction _ut;
+  @Current private DataSource _ds;
+  @Current private UserTransaction _ut;
 
   ...
 }
@@ -113,16 +116,17 @@ public class MyServlet extends GenericServlet {
 your injection may need to specify a name or other binding to uniquely
 identify the resource you want.  In the case of a unique resource like
 <code>UserTransaction</code> or <code>MBeanServer</code> or an application
-with a single <code>DataSource</code>, the <code>@In</code> is enough
+with a single <code>DataSource</code>, the <code>@Current</code> is enough
 information.  When you have multiple databases, you'll want to
-use <code>@Named</code> to specify the database name.</p>
+use <code>@Name</code> to specify the database name.</p>
 
-<example title="Example: @Named with DataSource">
+<example title="Example: @Name with DataSource">
 import javax.sql.DataSource;
-import javax.webbeans.Named;
+import com.caucho.config.Name;
 
 public class MyServlet extends GenericServlet {
-  @Named("foo") private DataSource _ds;
+  @Name("foo")
+  private DataSource _ds;
 
   ...
 }
@@ -147,16 +151,16 @@ public class MyServlet extends GenericServlet {
 &lt;/web-app>
 </example>
 
-<p>Injection using a <code>@Named</code> binding annotation is still
-typed.  You can have a database with <code>@Named("foo")</code> and
-a JMS queue with <code>@Named("foo")</code>, i.e. each type has its own
+<p>Injection using a <code>@Name</code> binding annotation is still
+typed.  You can have a database with <code>@Name("foo")</code> and
+a JMS queue with <code>@Name("foo")</code>, i.e. each type has its own
 namespace.  The typed injection is a big improvement from the JNDI
 <code>java:comp/env/jdbc/foo</code> vs <code>java:comp/env/jms/foo</code>
 conventions.</p>
 
 <p>Although many applications will just use <code>@In</code>
-and <code>@Named</code>, you can also create your
-own <code>BindingType</code> annotations to match resources
+and <code>@Name</code>, you can also create your
+own <code>@BindingType</code> annotations to match resources
 and components.</p>
 
 </s2>
@@ -166,49 +170,49 @@ and components.</p>
 <p>Since Resin implements all three flavors of dependency injection: field,
 method and constructor, the choice of style is up to you.</p>
 
-<p>You can mark any field with <code>@In</code>, <code>@New</code>,
-<code>@Named</code> or any other <code>@BindingType</code> to tell Resin
+<p>You can mark any field with <code>@Current</code>, <code>@New</code>,
+<code>@Name</code> or any other <code>@BindingType</code> to tell Resin
 to inject the field.  When a <code>@BindingType</code> is used, Resin will
 only match components configured with that binding type.</p>
 
-<example title="Example: field injection with @Named">
-import javax.webbeans.Named;
+<example title="Example: field injection with @Name">
+import com.caucho.config.Name;
 
 public class MyBean {
-  @Named DataSource _ds;
+  @Name DataSource _ds;
   ...
 }
 </example>
 
 <p>Method injection can use any binding annotation on any of the parameters.
 When Resin introspects the component class and it finds
-any <code>@BindingType</code> or <code>@In</code> parameter on a method, it
+any <code>@BindingType</code> or <code>@Current</code> parameter on a method, it
 will schedule that method to be injected.  Method parameters can
 also use <code>@New</code>.  The method does not need to follow bean-style
 setting conventions; any method will work.</p>
 
 <example title="Example: method injection with @Named">
-import javax.webbeans.Named;
+import com.caucho.config.Name;
 
 public class MyBean {
-  void foo(@Named("jdbc/foo") DataSource myDataSource) { ... }
+  void foo(@Name("jdbc/foo") DataSource myDataSource) { ... }
   ...
 }
 </example>
 
 <p>Construction injection is available for components and singleton beans.
 Like method injection, the <code>@BindingType</code> values
-like <code>@Named</code> assigned to the parameters determine the
+like <code>@Name</code> assigned to the parameters determine the
 values to be injected.</p>
 
 <p>If the bean has multiple constructors, exactly one must be marked
-<code>@In</code> or have a <code>@BindingType</code> value.</p>
+<code>@Current</code> or have a <code>@BindingType</code> value.</p>
 
 <example title="Example: constructor injection">
-import javax.webbeans.In;
+import javax.inject.Current;
 
 public class MyBean {
-  @In
+  @Current
   public MyBean(DataSource myDataSource) { ... }
   ...
 }
@@ -216,31 +220,27 @@ public class MyBean {
 
 </s2>
 
-<s2 title="WebBeans-enabled components (injectable objects)">
+<s2 title="Java Injection simple beans (injectable objects)">
 
-<p>Any Resin-managed object can use the entire WebBeans
-dependency-injection system and all of the managed objects, while objects
+<p>Any Resin-managed object can use the entire Java
+Dependency-Injection system and all of the managed objects, while objects
 you create using <code>new</code> are still plain Java objects.
 Once you've got a root object managed by the system, any futher
-WebBeans components or singletons you bring in will also be managed.
+Java injection components or singletons you bring in will also be managed.
 The starting set of managed objects is pretty broad and includes:</p>
 
 <ul>
-<li>&lt;bean> (singletons) defined in the resin.xml or resin-web.xml</li>
-<li>&lt;component> (WebBeans components) defined in the resin.xml,
-resin-web.xml or web-beans.xml</li>
+<li>&lt;my:MyBean> (simple beans) defined in the META-INF/beans.xml, resin.xml or resin-web.xml</li>
 <li>EJB message-driven beans</li>
 <li>EJB session beans</li>
 <li>Filters (servlet)</li>
 <li>JSF resources (currently only model beans)</li>
 <li>JSP pages</li>
 <li>JSP tag libraries</li>
-<li>&lt;resource> components (Resin will be migrating to use &lt;bean> for resources in the future.)</li>
 <li>Servlets</li>
 <li>Servlet Listeners defined in the web.xml</li>
-<li>WebBeans annotated components (<code>@Component</code>)
-discovered through the classpath scan (see below)</li>
-<li>WebBeans components injected with <code>@New</code> (see below)</li>
+<li>Simple beans discovered through the classpath scan (see below)</li>
+<li>Java Injection simple beans injected with <code>@New</code> (see below)</li>
 <li>Remote services defined by &lt;servlet> (e.g. Hessian or SOAP).</li>
 </ul>
 
@@ -250,15 +250,15 @@ discovered through the classpath scan (see below)</li>
 
 <p>Resin automatically provides several global resources to any
 injectable code. Since these resources are unique, your application
-will use <code>@In</code> as the annotation.</p>
+will use <code>@Current</code> as the annotation.</p>
 
-<p><b><code>javax.webbeans.Container</code></b> provides a reference to
-the WebBeans container itself.  Applications can use the
-<code>Container</code> to raise <code>WebBeans</code> events, and
+<p><b><code>javax.inject.manager.Manager</code></b> provides a reference to
+the Java Injection manager itself.  Applications can use the
+<code>Manager</code> to raise <code>javax.event</code> events, and
 lookup components programmatically.</p>
 
-<p><b><code>javax.webbeans.Conversation</code></b> injects the WebBeans
-conversation scope for a JSF application.  The conversatio scope lets
+<p><b><code>javax.context.Conversation</code></b> injects the Java
+Injection conversation scope for a JSF application.  The conversatio scope lets
 JSF views store data local to the page itself, separate from the
 HTTP session scope.</p>
 
@@ -270,7 +270,7 @@ can use JMX to view the current state of Resin.  See the
 <p><b><code>javax.transaction.TransactionManager</code></b> injects the
 XA transaction manager.  Advanced applications which want to add their
 own <code>XAResource</code> or <code>Synchronization</code> objects
-to an active transaction can use <code>@In TransactionManager</code>.</p>
+to an active transaction can use <code>@Current TransactionManager</code>.</p>
 
 <p><b><code>javax.transaction.UserTransaction</code></b> injects the
 XA user transaction manager.  Applications controlling XA transactions
@@ -292,38 +292,29 @@ tasks when restarting a web-app.</p>
 <p>All Resin configured resources are available through WebBeans, since
 Resin uses WebBeans as its internal registry.</p>
 
-<p><b><code>&lt;bean></code></b> singletons are application-specific
-custom services.  They are exactly like the &lt;component> beans but
-default to singleton scope.  Like &lt;component> they can
-either use WebBeans annotations or just be POJO objects.
-The &lt;bean> tag makes the beans available to any other WebBeans
-component.  The bean default to <code>@Singleton</code> scope, which
-means that a unique instance is created at Resin start time.
-The injected type will depend on the <code>class</code> attribute of
-the bean.</p>
-
-<p><b><code>&lt;component></code></b> objects are application-specific custom
-beans.  They can either use WebBeans annotations or just be POJO objects.
-The &lt;component> tag makes the beans available to any other WebBeans
-component.  The components default to <code>@Dependent</code> scope, which
+<p><b><code>&lt;my:MyBean></code></b> is an application-specific
+custom bean.  They can
+either use Java Inject annotations or just be POJO objects.
+The simple beans default to <code>@Dependent</code> scope, which
 means a new instance is created each time they're referenced or injected.
 The injected type will depend on the <code>class</code> attribute of
 the bean.</p>
 
 <p><b><code>&lt;database></code></b> is a JDBC pooled database.
-The <code>name</code> attribute is assigned to the <code>@Named</code>
+The <code>name</code> attribute is assigned to
+the <code>@com.caucho.config.Name</code>
 binding. Databases are injected as <code>javax.sql.DataSource</code> types.</p>
 
-<p><b>EJB stateless beans</b> are automatically registered the
-WebBeans.  The default <code>@Named</code> value is the ejb-name.
-Stateless beans can use the &lt;ejb-stateless-bean> tag for custom
+<p><b>EJB stateless beans</b> are automatically registered with Java
+Injection.  The Resin <code>@Name</code> value is the ejb-name.
+Stateless beans can use the &lt;Stateless> annotation for custom
 configuration, or rely on the standard EJB discovery mechanism.
 Each EJB 3.0 <code>@Local</code> interface is registered separately
-in the WebBeans registry.</p>
+in the Java Injection registry.</p>
 
 <p><b>EJB stateful beans</b> are automatically registered with
-WebBeans.  The default <code>@Named</code> value is the ejb-name.
-Stateful beans can use the &lt;ejb-stateful-bean> tag for custom
+Java Injection.  The Resin <code>@Name</code> binding is the ejb-name.
+Stateful beans can use the &lt;Stateful> tag for custom
 configuration, or rely on the standard EJB discovery mechanism.
 Each injection or bean lookup will return a new stateful bean
 reference, modified by the bean's scope (see below.)
@@ -332,10 +323,10 @@ in the WebBeans registry.</p>
 
 <p><b>EntityManager</b> and <b>EntityManagerFactory</b> objects
 from JPA are automatically registered with WebBeans.  The default
-<code>@Named</code> value is the <code>persistence-unit</code> name.</p>
+Resin <code>@Name</code> value is the <code>persistence-unit</code> name.</p>
 
 <p><b>&lt;env-entry></b> tags register their values with
-WebBeans.  The default <code>@Named</code> value is
+Java Inject.  The default <code>@Name</code> value is
 the <code>env-entry-name</code>.  The registered type is the
 <code>env-entry-type</code>.</p>
 
@@ -373,7 +364,7 @@ of the remote service.</p>
 </example>
 <example title="Example: Injecting for remote-client">
 public class MyServlet extends GenericServlet {
-  @In example.HelloService _hello;
+  @Current example.HelloService _hello;
   ...
 }
 </example>
@@ -397,31 +388,29 @@ and XML which gets in the way of good design.</p>
 <s2 title="Annotation-based Component Discovery">
 
 <p>At startup, Resin will scan jars and class directories for a
-<code>META-INF/web-beans.xml</code> file.  The presence of that file
+<code>META-INF/beans.xml</code> file.  The presence of that file
 tells Resin to start scanning all the classes in the jar or directory
-for <code>@Component</code> annotations.  Resin will register each
-class with a <code>@Component</code> market with the WebBeans directory.
-The <code>META-INF/web-beans.xml</code> can be trivial, since its primary
+Resin will register each class with the Java Injection registry.
+The <code>META-INF/beans.xml</code> can be trivial, since its primary
 purpose is speeding up startup time by letting Resin scan only the jars
 which contain components.  So, applications will generally want to minimize
-the number of classes in <code>@Component</code> jars to make
+the number of classes in beans.xml jars to make
 startup fast.</p>
 
-<example title="Example: META-INF/web-beans.xml">
-&lt;web-beans xmlns="http://caucho.com/ns/resin">
-&lt;/web-beans>
+<example title="Example: META-INF/beans.xml">
+&lt;Beans xmlns="urn:java:ee">
+&lt;/Beans>
 </example>
 
 <p>The component itself can be any Java class.  Since Resin manages the
-component, it can use <code>@In</code> and <code>@Named</code> to inject
+component, it can use <code>@Current</code>, <code>@BindingType</code>
+annotations and Resin's <code>@Name</code> to inject
 any other component or resource.  Resin will take care of any circular
 dependencies automatically.</p>
 
 <example title="Example: Movie.java">
 import javax.annotation.PostConstruct;
-import javax.webbeans.Component;
 
-@Component
 public class Movie {
   private String _title;
   private String _director;
@@ -445,32 +434,31 @@ public class Movie {
 complete.</p>
 
 <p>Any other component or Resin-managed class like servlets can now
-use <code>@In Movie</code> to inject the movie resource.</p>
+use <code>@Current Movie</code> to inject the movie resource.</p>
 
 <example title="Example: MyServlet.java">
-import javax.webbeans.In;
+import javax.inject.In;
 
 public class MyServlet extends GenericServlet {
-  @In Movie _movie;
+  @Current Movie _movie;
 
   ...
 }
 </example>
 
-<p>Most application components will use the <code>@Component</code>
-discovery mechanism.  Except for the <code>META-INF/web-beans.xml</code>
+<p>Most application components will use the Java Injection
+class scanning mechanism.  Except for the <code>META-INF/beans.xml</code>
 marker file, no additional housekeeping code or XML is
 required.  As described below, applications can reduce the configuration
 by one more step with the <code>@New</code> annotation
-replacing <code>@In</code>.  The target class of the <code>@New</code>
-annotation is automatically registered with WebBeans even if the class
-has no <code>@Component</code> annotation or if the
-<code>META-INF/web-beans.xml</code> is missing.  In other words, any plain
-Java class can become a part of the WebBeans system without overhead.</p>
+replacing <code>@Current</code>.  The target class of the <code>@New</code>
+annotation is automatically registered with Java Injection even if the 
+<code>META-INF/beans.xml</code> is missing.  In other words, any plain
+Java class can become a part of the Java Injection system without overhead.</p>
 
 </s2>
 
-<s2 title="Scopes: @Singleton, @Dependent, @RequestScoped">
+<s2 title="Scopes: @ApplicationScoped, @Dependent, @RequestScoped">
 
 <p>The scope of the component determines when Resin will create a new
 component and when it will reuse an old one.  Singletons will always
@@ -483,11 +471,10 @@ components will be used as pieces of other components,
 <code>@Dependent</code> is the least-surprising value as a default.</p>
 
 <p>You can specify a component's scope with an annotation or in
-the <code>&lt;bean></code> or <code>&lt;component></code> tag.  The
+the <code>&lt;my:MyBean></code> tag.  The
 predefined scope values are: <code>@Dependent</code>,
 <code>@RequestScoped</code>, <code>@ConversationScoped</code>,
-<code>@SessionScoped</code>, <code>@ApplicationScoped</code> and
-<code>@Singleton</code>.</p>
+<code>@SessionScoped</code>, and <code>@ApplicationScoped</code>.</p>
 
 <ul>
 <li><code>@Dependent</code> creates a new instance each time.</li>
@@ -497,12 +484,10 @@ servlet request, reusing the instance for the same request.</li>
 JSF conversation, i.e. for each JSF view page.</li>
 <li><code>@SessionScoped</code> creates a new instance for each
 HTTP session, reusing the instance for the same session.</li>
-<li><code>@ApplicationScoped</code> uses a single instance in each
-web-app.  For web applications, this will have the same lifecycle as
-<code>@Singleton</code>.</li>
-<li><code>@Singleton</code> uses a single instance in the
-container.  For web applications, this will have the same lifecycle as
-<code>@ApplicationScoped</code>.</li>
+<li><code>@ApplicationScoped</code> uses a single instance for the
+application.  For web applications, this will be the same lifecycle as
+&lt;web-app>  For virtual hosts, this will be the same lifecycle as
+&lt;host>.</li>
 </ul>
 
 <p>An example scoped resource might be a <code>Calculator</code> object which
@@ -512,11 +497,11 @@ processing a form and then calculate the result.  The
 each time it's called.</p>
 
 <example title="Example: @RequestScoped Calculator">
-import javax.webbeans.RequestScoped;
-import javax.webbeans.Component;
+package example;
+
+import javax.context.RequestScoped;
 
 @RequestScoped
-@Component
 public class Calculator {
   private int _a;
   private int _b;
@@ -530,26 +515,29 @@ public class Calculator {
 
 <p>You could also register the same calculator using XML:</p>
 
-<example title="Example: resin-web.xml Calculator">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+<example title="Example: META-INF/beans.xml Calculator">
+&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
 
-  &lt;component class="example.Calculator" scope="request"/>
+  &lt;example:Calculator>
+    &lt;RequestScoped/>
+  &lt;/example:Calculator>
 
-&lt;/web-app>
+&lt;/Beans>
 </example>
 
 </s2>
 
-<s2 title="@New Component Discovery">
+<s2 title="@New bean discovery">
 
 <p>The <code>@New</code> annotation automatically registers the target
-class with the WebBeans registry and tells Resin to create a new instance
-of the bean, even if the bean has a singleton scope definition.
-Since <code>@New</code> replaces <code>@In</code>, it can be used anywhere
-<code>@In</code> can be used.</p>
+class with the Java Injection registry and tells Resin to create
+a new instance of the bean, even if the bean has an application
+scope definition. Since <code>@New</code> replaces
+<code>@Current</code>, it can be used anywhere <code>@Current</code>
+can be used.</p>
 
 <example title="Example: MyServlet.java">
-import javax.webbeans.New;
+import javax.inject.New;
 
 public class MyServlet extends GenericServlet {
   @New Movie _movie;
@@ -559,8 +547,7 @@ public class MyServlet extends GenericServlet {
 </example>
 
 <p>The <code>Movie</code> is identical to the movie class defined
-above, but doesn't need the <code>@Component</code> annotation and
-doesn't need the <code>META-INF/web-beans.xml</code> marker file.
+above, but doesn't need the <code>META-INF/web-beans.xml</code> marker file.
 In many cases, the <code>@New</code> annotation can replace the Java
 <code>new</code> operator.  If your application starts
 using <code>@New</code> consistently, it can add injection capabilities to
@@ -568,6 +555,8 @@ a growing share of your code, letting you simplify and refactor incrementally.
 </p>
 
 <example title="Example: Movie.java">
+package example;
+
 public class Movie {
   private String _title;
 
@@ -601,15 +590,13 @@ and the <code>@PreDestroy</code> method will stop the timer.</p>
 
 <example title="Example: Timer Service">
 import javax.annotation.PostConstruct;
-import javax.webbeans.In;
-import javax.webbeans.Component;
+import javax.inject.Current;
 import java.util.concurrent.ScheduledExecutorService;
-import com.caucho.webbeans.Singleton;
+import com.caucho.config.Service;
 
-@Component
-@Singleton
+@Service
 public class TimerService {
-  @In ScheduledExecutorService _timer;
+  @Current ScheduledExecutorService _timer;
 
   @PostConstruct
   public void init()
@@ -634,7 +621,8 @@ public class TimerService {
 <s1 title="XML configuration">
 
 <p>You can register your components and services with Resin using the
-resin.xml or resin-web.xml files.  Since the WebBeans registry is integrated
+resin.xml or resin-web.xml files as well as the META-INF/beans.xml.
+Since the Java Injection registry is integrated
 with Resin, your services be treated as first-class components along with
 the Resin resources.  Although most components will not need XML, there
 are a few advantages for the small number of services which do use XML.</p>
@@ -652,53 +640,48 @@ while lightweight components do not need this extra housekeeping overhead.</p>
 
 <s2 title="bean and component registration">
 
-<p>The <code>&lt;bean></code> and <code>&lt;component></code> tags register
-application classes with Resin.  The two tags are identical except for the
-expected lifecycle: <code>&lt;bean></code> configures singleton services while
-<code>&lt;component></code> configures component template classes.
-In other words, the default scope of a <code>&lt;bean></code>
-is <code>@Singleton</code> while the default scope
-of a <code>&lt;component></code> is <code>@Dependent</code>.
-A <code>&lt;component></code> will create a new instance each time it's
-injected or referenced, while a <code>&lt;bean></code> always returns
-the same singleton instance.</p>
+<p>The <code>&lt;my:MyBean></code> tags register
+application classes with Resin.
+The default scope of a <code>&lt;my:MyBean></code> is <code>@Dependent</code>.
+A <code>&lt;my:MyBean></code> will create a new instance each time it's
+injected or referenced.</p>
 
-<example title="Example: bean and component resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+<example title="Example: bean and component META-INF/beans.xml">
+&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
 
-  &lt;bean class="example.MyService"/>
+  &lt;example:MyService>
+    &lt;ApplicationScoped/>
+  &lt;/example:MyService>
 
-  &lt;component class="example.MyService"/>
+  &lt;example:MyComponent>
+  &lt;/example:MyComponent>
 
-&lt;/web-app>
+&lt;/Beans>
 </example>
 
-<p>The <code>&lt;bean></code> and <code>&lt;component></code> tags have a
-number of optional attributes:</p>
+<p>The <code>&lt;my:MyBean></code> tags can configure fields and
+annotations:</p>
 
-<deftable title="bean and component attributes">
+<deftable title="XML annotations">
 <tr>
   <th>Attribute</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>binding</td>
-  <td>the <code>@BindingType</code> annotations for custom bean matching</td>
+  <td>&lt;Named></td>
+  <td>the <code>@javax.annotation.Name</code> annotations for EL naming</td>
 </tr>
 <tr>
-  <td>class</td>
-  <td>the Java class of the bean or component (required)</td>
+  <td>&lt;BindingType></td>
+  <td>any <code>@javax.annotation.BindingType</code> annotations for
+  injection</td>
 </tr>
 <tr>
-  <td>init</td>
-  <td>optional configuration/initialization block, using bean-style assignment</td>
+  <td>my:myField</td>
+  <td>optional configuration, using bean-style assignment</td>
 </tr>
 <tr>
-  <td>name</td>
-  <td>the instance name, used for <code>@Named</code> and script integration</td>
-</tr>
-<tr>
-  <td>scope</td>
+  <td>&lt;SessionScoped></td>
   <td>specifies scope of the instances: request, conversation, session, application, or singleton</td>
 </tr>
 </deftable>
@@ -707,17 +690,19 @@ number of optional attributes:</p>
 
 <s2 title="Bean property configuration">
 
-<p>Resin's XML configuration uses the standard JavaBeans patterns to
-configure properties.  Resin uses the same mechanism for all of its own
-configuration parsing, including every JavaEE configuration file, the
+<p>Resin's Java Injection configuration uses the standard JavaBeans
+patterns to configure properties.  Resin uses the same mechanism for all of
+its own configuration parsing, including every JavaEE configuration file, the
 resin-web.xml and the resin.xml itself.  So your application will have
 all the configuration flexibility it needs.</p>
 
-<p>Since the component beans can use WebBeans
-injections, injected components are typically not configured in
+<p>Since the component beans can use Java
+Injections, injected components are typically not configured in
 the resin-web.conf, avoiding the need for tags like <code>&lt;ref></code>.</p>
 
 <example title="Example: Hello.java">
+package example;
+
 public class Hello {
   private String _greeting = "default";
 
@@ -727,28 +712,25 @@ public class Hello {
 </example>
 
 <p>The basic example sets a <code>greeting</code> property of a hello, world
-bean.  In this example, we're configuring a singleton, but the
-<code>&lt;init></code> works for dependent components as well.  Resin will
+bean.  Resin will
 apply the configuration to the instance as part of the creation process.</p>
 
-<example title="Example: resin-web.xml configuring a singleton">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+<example title="Example: META-INF/beans.xml configuring a singleton">
+&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
 
-  &lt;bean class="example.Hello">
-    &lt;init>
-      &lt;greeting>Hello, World&lt;/greeting>
-    &lt;/init>
-  &lt;/bean>
+  &lt;example:Hello>
+    &lt;example:greeting>Hello, World&lt;/example:greeting>
+  &lt;/example:Hello>
 
-&lt;/web-app>
+&lt;/Beans>
 </example>
 
 <p>Resin's configuration uses 5 basic bean patterns, extending the JavaBeans
 conventions.  It can configure literal values like string and integers as
 well as configuring other beans.  Any component bean configured by Resin
-has full access to <code>@In</code> injection as well as
+has full access to <code>@BindingType</code> injection as well as
 the standard <code>@PostConstruct</code> annotations.  Sub-beans are
-not automatically registered with WebBeans, i.e. they act like the
+not automatically registered with Java Inection, i.e. they act like the
 servlet configuration.</p>
 
 <p>(Currently the patterns are name-based like JavaBeans, since Resin
@@ -790,15 +772,13 @@ the parent.</p>
 <example title="Example: sub-bean configuration example">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;bean class="example.Theater">
-    &lt;init>
-      &lt;name>Balboa&lt;/name>
+  &lt;example:Theater xmlns:example="urn:java:example">
+    &lt;example:name>Balboa&lt;/example:name>
 
-      &lt;movie title="The Princess Bride"/>
+    &lt;example:movie title="The Princess Bride"/>
 
-      &lt;movie title="The Maltese Falcon"/>
-    &lt;/init>
-  &lt;/bean>
+    &lt;example:movie title="The Maltese Falcon"/>
+  &lt;/example:Theater>
 
 &lt;/web-app>
 </example>
@@ -843,7 +823,7 @@ public class Theater {
 
 <s2 title="Base configuration: string conversions">
 
-<p>Resin-IoC provides a number of built-in string conversion types as well
+<p>Java Injection provides a number of built-in string conversion types as well
 as supporting JavaBeans <code>PropertyEditor</code> and custom converters.</p>
 
 <deftable title="Built-in String Converters">
@@ -1106,19 +1086,23 @@ use beans as factories in the EL expressions.</p>
 
 <p>If your application is using a scripting language like PHP for the
 presentation layer, the WebBeans registry provides a simple interface to
-use your components and services.  Although WebBeans injection is typed,
-each WebBean is also registered under its name for scripting applications.
+use your components and services.  Although Java Injection injection is typed,
+each simple bean can bean registered under its name for scripting applications.
 The name must be globally unique, of course, unlike the typed injection
 binding.</p>
 
-<p>The default scripting name is the name of the component's class, with
-the first character lowercased.  You can change the name by adding
-a <code>@Named</code> or setting a <code>name</code> attribute in the
-<code>&lt;component></code> or <code>&lt;bean></code>.</p>
+<p>By default, beans do not have a name, so you'll need to specify it
+by an annotation or the configuration file.  You can change the name by adding
+a <code>@Named</code> annotation or &lt;Named> XML configuration.</p>
 
 <example title="Example: Movie.java">
-@Component
+pakcage example;
+
+import javax.annotation;
+import javax.context;
+
 @RequestScoped
+@Named
 public class Movie {
   ...
 }
@@ -1145,7 +1129,7 @@ echo "title: " . $movie->title . "\n";
 
 <s2 title="JSP/JSF EL">
 
-<p>Resin automatically provides the WebBeans variables to EL expressions
+<p>Resin automatically provides the Java Injection variables to EL expressions
 for both JSP and JSF.</p>
 
 <example title="Example: accessing the movie from JSP">
@@ -1167,9 +1151,11 @@ since JSF needs to build a component tree first.</p>
 
 <s1 title="@BindingType: custom injection binding">
 
-<p>Although many applications will just use <code>@In</code> and
-<code>@Named</code> injection binding, applications can create their
-own binding annotations.  Some bindings might be more
+<p>Applications will typically create custom <code>@BindingType</code>
+annotations to clearly specify their expected beans.
+In many cases, <code>@Current</code> will be appropriate for unique beans,
+and Resin <code>@com.caucho.config.Named</code> is used for Resin's resources
+like &lt;database>.  Some bindings might be more
 logical, for example an <code>@XA</code> annotation might mark the
 transactional <code>DataSource</code>, while <code>@ReadOnly</code> might
 mark a read-only <code>DataSource</code>.  Drivers might
@@ -1203,6 +1189,8 @@ producers, or event observers.</p>
 <example title="Example: ReadOnly.java">
 package com.foo.webbeans;
 
+import javax.inject.BindingType;
+
 @BindingType
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
@@ -1220,12 +1208,10 @@ can mark a factory component's method with the <code>@Produces</code>
 annotation.  Resin will register the results of the method with WebBeans.</p>
 
 <example title="Example: @Produces">
-import javax.webbeans.Component;
-import javax.webbeans.Produces;
-import com.caucho.webbeans.Singleton;
+import javax.inject.Produces;
+import javax.context.ApplicationScoped;
 
-@Component
-@Singleton
+@ApplicationScoped
 public class MyFactory {
   @Produces public List&lt;Movie> currentMovies()
   {
@@ -1234,7 +1220,7 @@ public class MyFactory {
 </example>
 
 <p>The produces method can be marked with <code>@ScopeType</code>,
-<code>@ComponentType</code> or <code>@BindingType</code> annotations just
+<code>@DeploymentType</code> or <code>@BindingType</code> annotations just
 like a class-based component can.</p>
 
 </s1>
@@ -1252,7 +1238,6 @@ letting Resin know where it should apply the interceptor:</p>
 <example title="Example: secure method">
 import com.foo.webbeans.Secure;
 
-@Component
 public class MyBean {
   @Secure
   public void doSomethingSafely() { ... }
@@ -1265,7 +1250,6 @@ interceptor.</p>
 
 <example title="Example: security implementation">
 import javax.interceptor.*;
-import javax.webbeans.Interceptor;
 
 @Secure @Interceptor
 public class MySecureInterceptor {
@@ -1281,15 +1265,19 @@ public class MySecureInterceptor {
 </example>
 
 <p>The interceptors must be enabled in the
-<code>META-INF/web-beans.xml</code> file.  This protects your code
+<code>META-INF/beans.xml</code> file.  This protects your code
 from any surprising interceptors.</p>
 
-<example title="Example: META-INF/web-beans.xml">
-&lt;web-beans xmlns="http://caucho.com/ns/resin">
-  &lt;interceptors>
-    &lt;interceptor>com.foo.MySecureInterceptor&lt;/interceptor>
-  &lt;/interceptors>
-&lt;/web-beans>
+<example title="Example: META-INF/beans.xml">
+&lt;Beans xmlns="urn:java:ee" xmlns:foo="urn:java:com.foo">
+
+  &lt;Interceptors>
+  
+    &lt;foo:MySecureInterceptor/>
+    
+  &lt;/Interceptors>
+  
+&lt;/Beans>
 </example>
 
 </s1>
@@ -1301,10 +1289,10 @@ Any method with an <code>@Observes</code> parameter will receive events
 with the proper type.  The event can be any Java class.</p>
 
 <example title="Example: event handler">
-import javax.webbeans.Component;
-import javax.webbeans.Observes;
+import javax.context.ApplicationScoped;
+import javax.event.Observes;
 
-@Component
+@ApplicationScoped
 public class MyHandler {
   public void myHandlerMethod(@Observes Movie movie)
   {
@@ -1314,17 +1302,17 @@ public class MyHandler {
 </example>
 
 <p>Your application can throw events through the WebBeans
-<code>Container</code> API, which is available through injection:</p>
+<code>Manager</code> API, which is available through injection:</p>
 
 <example title="Example: raising events">
-import javax.webbeans.Container;
+import javax.inject.manager.Manager;
 
 public void MyServlet extends GenericServlet {
-  @In Container _webbeans;
+  @Current Manager _webbeans;
 
   public void service(ServletRequest req, ServletResponse res)
   {
-    _webbeans.raiseEvent(new Movie("A Bridge Too Far"));
+    _webbeans.fireEvent(new Movie("A Bridge Too Far"));
   }
 }
 </example>
@@ -1397,7 +1385,7 @@ WebBeans-style interception.  The class will normally also have
 an <code>@AroundInvoke</code> method as well as any
 <code>InterceptorBindingType</code> annotations.</p>
 
-<def title="javax.webbeans.Interceptor">
+<def title="javax.interceptor.Interceptor">
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface Interceptor {
@@ -1408,14 +1396,13 @@ public @interface Interceptor {
 
 <s2 title="@InterceptorBindingType">
 
-<p><code>@InterceptorBindingType</code> is a WebBeans meta-annotation for
+<p><code>@InterceptorBindingType</code> is a Java Injection meta-annotation for
 creating interceptor binding types.  Applications will use
 <code>@InterceptorBindingType</code> to create application-specific
-interceptors.  The WebBeans-style of interception decouples the
-interception declaration from the interceptor classes, in contrast
-with the EJB-style which specifies the interceptor class directly.</p>
+interceptors.  The Java Injection binding of interception decouples the
+interception declaration from the interceptor classes.</p>
 
-<def title="javax.webbeans.InterceptorBindingType">
+<def title="javax.interceptor.InterceptorBindingType">
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface InterceptorBindingType {
@@ -1666,7 +1653,7 @@ annotations like <code>@Named</code> to provide application-specific
 binding.  For example, a database might have a <code>@XA</code>
 and a <code>@NonXA</code> connector implemented.</p>
 
-<def title="javax.webbeans.BindingType">
+<def title="javax.inject.BindingType">
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface BindingType {
@@ -1752,25 +1739,24 @@ void setFoo(example.Test test)
 
 </s2>
 
-<s2 title="@In" type="defun">
+<s2 title="@Current" type="defun">
 
 <p>Marks a field, method, or parameter for injection.
 When used with a constructor, it marks the given constructor as
 the constructor to use when creating new instances.</p>
 
-<def title="javax.webbeans.In">
+<def title="javax.inject.Current">
 @Target({CONSTRUCTOR, METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
-public @interface In {
+public @interface Current {
 }
 </def>
 </s2>
 
 <s2 title="@Named" type="defun">
 
-<p><code>@Named</code> is a predefined <code>@BindingType</code>
-annotation for named objects.  Many application objects can just use
-<code>@Named</code> to disambiguate multiple objects with the same
+<p><code>@Named</code> is used to define an EL name for the bean
+used for JSP, JSF and PHP named objects.
 type.
 </p>
 
@@ -1787,7 +1773,7 @@ type.
 </tr>
 </deftable>
 
-<def title="javax.webbeans.Named">
+<def title="javax.annotation.Named">
 @BindingType
 @Target({METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
@@ -1804,7 +1790,7 @@ instance of the object.  If the type of the <code>@New</code>
 has not yet been registered with the WebBeans directory, it will
 be registered automatically..</p>
 
-<def title="javax.webbeans.New">
+<def title="javax.inject.New">
 @Target({METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
 public @interface New {
@@ -1823,7 +1809,7 @@ annotations with the properties in the injection property.  The
 property.
 </p>
 
-<def title="javax.webbeans.NonBinding">
+<def title="javax.annotation.NonBinding">
 @Target({FIELD, METHOD})
 @Retention(RUNTIME)
 public @interface NonBinding {
@@ -1832,6 +1818,8 @@ public @interface NonBinding {
 
 <example title="Example: @Demo with @NonBinding">
 package demo;
+
+import javax.inject.BindingType;
 
 @BindingType
 @Target({TYPE, METHOD, FIELD, PARAMETER})
@@ -1850,8 +1838,8 @@ public @interface Demo {
 declare a dependency in cases where the session bean loads the
 JNDI value by itself.</p>
 
-<p>In general, it's better to use the WebBeans
-annotations: <code>@In</code>, <code>@Named</code>
+<p>In general, it's better to use the Java Injection
+annotations: <code>@Current</code>, Resin's <code>@Name</code>
 or custom <code>@BindingType</code> annotations, since they use the
 type-safe WebBeans registry instead of JNDI.  <code>@Resource</code>
 is supported for backwards compatibility.</p>
@@ -1931,14 +1919,14 @@ injection.</p>
 <example title="Example: Struts2 integration">
 package com.caucho.xwork2;
 
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 import com.opensymphony.xwork2.ObjectFactory;
 import java.util.*;
-import javax.webbeans.*;
+import javax.inject.*;
 
 public class ResinObjectFactory extends ObjectFactory
 {
-  private final WebBeansContainer _webBeans = WebBeansContainer.create();
+  private final InjectManager _webBeans = InjectManager.create();
   
   @Override
   public Object buildBean(Class clazz, Map extraContext)
@@ -1961,14 +1949,14 @@ it does not get any aspects or interception.</p>
 <example title="Example: Wicket injection">
 package com.caucho.wicket;
 
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.application.*;
 
 public class ResinComponentInjector implements IComponentInstantiationListener
 {
-  private WebBeansContainer _webBeans = WebBeansContainer.create();
+  private InjectManager _webBeans = InjectManager.create();
   
   public void onInstantiation(Component component)
   {
