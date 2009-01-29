@@ -631,8 +631,7 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  //TODO(fred): block other collection methods.
-  protected static class CacheValues extends AbstractCollection {
+  protected static class CacheValues extends AbstractReadOnlyCollection {
 
     private LruCache _lruCache;
 
@@ -651,33 +650,32 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  //TODO(fred): block other set methods.
-  protected static class CacheKeys extends AbstractSet{
+  protected static class CacheKeys extends AbstractReadOnlySet {
 
-      private LruCache _lruCache;
+    private LruCache _lruCache;
 
-      public CacheKeys(LruCache lruCache)
-      {
-        _lruCache = lruCache;
-      }
-
-      public int size()
-      {
-        return (_lruCache != null) ? _lruCache.size() : 0;
-      }
-
-      public Iterator iterator() {
-        return new CacheKeysIterator(_lruCache);
-      }
+    public CacheKeys(LruCache lruCache)
+    {
+      _lruCache = lruCache;
     }
 
-  //TODO(fred): block other set methods.
-  protected static class CacheEntrySet<E> extends AbstractSet<E> {
+    public int size()
+    {
+      return _lruCache.size();
+    }
+
+    public Iterator iterator()
+    {
+      return new CacheKeysIterator(_lruCache);
+    }
+  }
+
+  protected static class CacheEntrySet<E> extends AbstractReadOnlySet<E> {
     private LruCache _lruCache;
 
     protected CacheEntrySet(LruCache cache)
     {
-
+      super();
       _lruCache = cache;
     }
 
@@ -686,24 +684,9 @@ abstract public class AbstractCache extends AbstractMap
       return new CacheEntrySetIterator(_lruCache);
     }
 
-    public void clear()
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    public boolean remove(Object entry)
-    {
-      throw new UnsupportedOperationException();
-    }
-
     public int size()
     {
-      return (_lruCache != null) ? _lruCache.size() : 0;
-    }
-
-    public boolean contains(Object entry)
-    {
-      throw new UnsupportedOperationException();
+      return _lruCache.size();
     }
   }
 
@@ -875,7 +858,8 @@ abstract public class AbstractCache extends AbstractMap
    * Places an item in the cache if found in the loader, replacing
    * an existing entry if it had been present.
    */
-  protected Object cacheLoader(Object key) {
+  protected Object cacheLoader(Object key)
+  {
     CacheLoader loader = _config.getCacheLoader();
     Object value = (loader != null) ? loader.load(key) : null;
 
@@ -926,6 +910,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Used in the implementation of the
    * {@link javax.cache.CacheFactory} createCache method.
+   *
    * @param request
    * @return
    */
@@ -980,8 +965,6 @@ abstract public class AbstractCache extends AbstractMap
       }
     }
   }
-
-
 
   /**
    * Provides instances of the appropriate CacheStatistics implementation.
@@ -1077,8 +1060,7 @@ abstract public class AbstractCache extends AbstractMap
      * Implements CacheStatistics without worrying about synchronizing
      * counter updates.
      */
-    private static class GoodStatistics implements CacheStatistics, ManagedCacheStatistics
-    {
+    private static class GoodStatistics implements CacheStatistics, ManagedCacheStatistics {
       private AbstractCache _cache;
       private int _cacheHits;
       private int _cacheMisses;
@@ -1180,45 +1162,172 @@ abstract public class AbstractCache extends AbstractMap
       }
     }
   }
-    private static class ReadOnlyStatistics implements CacheStatistics {
 
-      private final int _cacheHits;
-      private final int _cacheMisses;
-      private final int _size;
-      private final int _accuracy;
+  private static class ReadOnlyStatistics implements CacheStatistics {
+
+    private final int _cacheHits;
+    private final int _cacheMisses;
+    private final int _size;
+    private final int _accuracy;
 
 
-      public ReadOnlyStatistics(CacheStatistics old)
-      {
-        _cacheHits = old.getCacheHits();
-        _cacheMisses = old.getCacheMisses();
-        _size = old.getObjectCount();
-        _accuracy = old.getStatisticsAccuracy();
-      }
+    public ReadOnlyStatistics(CacheStatistics old)
+    {
+      _cacheHits = old.getCacheHits();
+      _cacheMisses = old.getCacheMisses();
+      _size = old.getObjectCount();
+      _accuracy = old.getStatisticsAccuracy();
+    }
 
-      public void clearStatistics()
-      {
+    public void clearStatistics()
+    {
 
-      }
+    }
 
-      public int getCacheHits()
-      {
-        return _cacheHits;
-      }
+    public int getCacheHits()
+    {
+      return _cacheHits;
+    }
 
-      public int getCacheMisses()
-      {
-        return _cacheMisses;
-      }
+    public int getCacheMisses()
+    {
+      return _cacheMisses;
+    }
 
-      public int getObjectCount()
-      {
-        return _size;
-      }
+    public int getObjectCount()
+    {
+      return _size;
+    }
 
-      public int getStatisticsAccuracy()
-      {
-        return _accuracy;
-      }
+    public int getStatisticsAccuracy()
+    {
+      return _accuracy;
     }
   }
+
+  /**
+   * This decoration of {@link AbstractSet} prevents modification of the
+   * set.  The set itself is defined by the Iterator<E> that is required for
+   * any extension of this class.  Note that this does not confer immutability
+   * of the elements themselves.
+   * <p/>
+   * If the default constructor is used, the extending class should override
+   * both size() and isEmpty().
+   */
+  //TODO(fred): Refactor as com.caucho.collection.AbstractReadOnlySet
+  public abstract static class AbstractReadOnlySet<E> extends AbstractSet<E> {
+
+    private final Collection<? extends E> _collection;
+
+    protected AbstractReadOnlySet()
+    {
+      _collection = null;
+    }
+
+    protected AbstractReadOnlySet(Collection<? extends E> collection)
+    {
+      _collection = collection;
+    }
+
+    public abstract Iterator<E> iterator();
+
+    public int size()
+    {
+      return _collection.size();
+    }
+
+    public boolean isEmpty()
+    {
+      return _collection.size() == 0;
+    }
+
+    public boolean add(E e)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public boolean remove(Object object)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public boolean addAdd(Collection<? extends E> c)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public boolean retainAll(Collection<?> c)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void clear()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  /**
+   * This decoration of {@link AbstractCollection} prevents modification of the
+   * set.  The set itself is defined by the Iterator<E> that is required for
+   * any extension of this class.  Note that this does not confer immutability
+   * of the elements themselves.
+   * <p/>
+   * If the default constructor is used, the extending class should override size().
+   */
+//TODO(fred): Refactor as com.caucho.collection.AbstractReadOnlyCollection?
+
+  public abstract static class AbstractReadOnlyCollection<E> extends AbstractCollection<E> {
+
+    private final Collection<? extends E> _collection;
+
+    protected AbstractReadOnlyCollection()
+    {
+      _collection = null;
+    }
+
+    protected AbstractReadOnlyCollection(Collection<? extends E> collection)
+    {
+      _collection = collection;
+    }
+
+    public abstract Iterator<E> iterator();
+
+    public int size()
+    {
+      return _collection.size();
+    }
+
+    public boolean add(E e)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public boolean remove(Object object)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public boolean retainAll(Collection<?> c)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public void clear()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+}
