@@ -917,6 +917,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	_headerValues[_headerSize].clear();
 	_rawRead.readAll(_headerValues[_headerSize], len);
 
+	setContentLength(_headerValues[_headerSize]);
+
 	if (isLoggable)
 	  log.fine(dbgId() + (char) code + " content-length=" +
                    _headerValues[_headerSize]);

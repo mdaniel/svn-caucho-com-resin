@@ -779,17 +779,9 @@ public abstract class AbstractHttpRequest
       }
       else if (keyLen == CONTENT_LENGTH.length
 	       && match(keyBuf, keyOff, keyLen, CONTENT_LENGTH)) {
-	long contentLength = 0;
-	int i = 0;
-	int ch;
-
-	int length = value.length();
-	for (; i < length && (ch = value.charAt(i)) >= '0' && ch <= '9'; i++)
-	  contentLength = 10 * contentLength + ch - '0';
-
-	if (i > 0)
-	  _contentLength = contentLength;
+	setContentLength(value);
       }
+      
       return true;
       
     case 'e':
@@ -814,6 +806,23 @@ public abstract class AbstractHttpRequest
     default:
       return true;
     }
+  }
+
+  protected void setContentLength(CharSegment value)
+  {
+    int contentLength = 0;
+    int ch;
+    int i = 0;
+    
+    int length = value.length();
+    for (;
+	 i < length && (ch = value.charAt(i)) >= '0' && ch <= '9';
+	 i++) {
+      contentLength = 10 * contentLength + ch - '0';
+    }
+
+    if (i > 0)
+      _contentLength = contentLength;
   }
 
   /**
