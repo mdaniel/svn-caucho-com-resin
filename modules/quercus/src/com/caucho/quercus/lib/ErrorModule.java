@@ -83,7 +83,7 @@ public class ErrorModule extends AbstractQuercusModule {
   /**
    * Exits
    */
-  public Value die(Env env, @Optional String msg)
+  public static Value die(Env env, @Optional String msg)
   {
     if (msg != null)
       return env.die(msg);

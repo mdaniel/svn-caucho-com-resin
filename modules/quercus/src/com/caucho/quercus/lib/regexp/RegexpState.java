@@ -116,10 +116,12 @@ public class RegexpState {
 
       int length = _subject.length();
 
+      /* php/4e85 XXX: optim doesn't work for greedy loops
       if (_regexp._isAnchorBegin) {
 	if (_first + minLength <= length)
 	  length = _first + minLength;
       }
+      */
 
       for (; _first + minLength <= length; _first++) {
 	if (firstSet != null && _first < length) {

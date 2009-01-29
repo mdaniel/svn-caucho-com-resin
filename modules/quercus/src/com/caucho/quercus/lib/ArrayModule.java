@@ -2588,10 +2588,11 @@ public class ArrayModule
         else
           value = entry.getValue();
 
+        // php/1745
         if (key.isNumberConvertible())
-          result.put(value);
+          result.put(value.copy());
         else
-          result.append(key, value);
+          result.append(key, value.copy());
       }
     }
 
@@ -2604,7 +2605,7 @@ public class ArrayModule
    * @param args the vector of array arguments
    * @return an array with all of the mapped values
    */
-  public Value array_merge_recursive(Value []args)
+  public Value array_merge_recursive(Env env, Value []args)
   {
     // quercus/173a
 
@@ -2614,28 +2615,36 @@ public class ArrayModule
       if (! (arg.toValue() instanceof ArrayValue))
         continue;
 
-      arrayMergeRecursiveImpl(result, (ArrayValue) arg.toValue());
+      arrayMergeRecursiveImpl(env, result, (ArrayValue) arg.toValue());
     }
 
     return result;
   }
 
-  private static void arrayMergeRecursiveImpl(ArrayValue result,
+  private static void arrayMergeRecursiveImpl(Env env,
+                                              ArrayValue result,
                                               ArrayValue array)
   {
-    for (Map.Entry<Value, Value> entry : array.entrySet()) {
+    Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
+    
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      
       Value key = entry.getKey();
       Value value = entry.getValue().toValue();
 
       if (key.isNumberConvertible()) {
-        result.put(value);
+        // php/1744
+        result.put(value.copy());
       }
       else {
         Value oldValue = result.get(key).toValue();
 
         if (oldValue != null && oldValue.isset()) {
           if (oldValue.isArray() && value.isArray()) {
-            arrayMergeRecursiveImpl((ArrayValue) oldValue, (ArrayValue) value);
+            arrayMergeRecursiveImpl(env,
+                                    (ArrayValue) oldValue,
+                                    (ArrayValue) value);
           }
           else if (oldValue.isArray()) {
             oldValue.put(value);
@@ -2654,7 +2663,8 @@ public class ArrayModule
           }
         }
         else {
-          result.put(key, value);
+          // php/1744
+          result.put(key, value.copy());
         }
       }
     }

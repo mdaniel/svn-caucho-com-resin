@@ -76,7 +76,7 @@ public class MultipartBody extends PostBody
         
         Path path = env.lookup(fileName);
         
-        if (path == null) {
+        if (path == null || ! path.canRead()) {
           env.warning(L.l("cannot read file '{0}'", fileName));
           return false;
         }
