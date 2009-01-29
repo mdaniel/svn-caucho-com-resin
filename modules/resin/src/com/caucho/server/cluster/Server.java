@@ -64,8 +64,6 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.FileCacheManager;
-import com.caucho.server.distcache.StoreManager;
-import com.caucho.server.distcache.FileStoreManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -199,10 +197,6 @@ public class Server extends ProtocolDispatchServer
   //
   // internal databases
   //
-
-  // session store
-  private StoreManager _store;
-  private StoreManager _clusterStore;
 
   // reliable system store
   private ClusterCache _systemStore;
@@ -652,75 +646,21 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the cluster store.
-   */
-  public StoreManager getStore()
-  {
-    return _clusterStore;
-  }
-
-  /**
-   * Sets the cluster store.
-   */
-  protected void setStore(StoreManager store)
-  {
-    _clusterStore = store;
-  }
-
-  /**
    * Creates a persistent store instance.
    */
-  public StoreManager createPersistentStore(String type)
+  public Object createPersistentStore(String type)
   {
-    if (type.equals("file")) {
-      if (! Alarm.isTest())
-	throw new ConfigException(L.l("'file' store is no longer allowed.  Use 'cluster' store instead with a single server"));
-      
-      setStore(new FileStoreManager());
-    }
-    else if (type.equals("cluster")) {
-      setStore(new FileStoreManager());
-    }
-
-    if (getStore() == null)
-      throw new ConfigException(L.l("{0} is an unknown persistent-store type.  Only 'cluster' with a single server is allowed for Resin OpenSource.",
-				    type));
-
-    return getStore();
+    return null;
   }
   
   public void startPersistentStore()
   {
-    try {
-      if (_clusterStore != null)
-        _clusterStore.start();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 
-  public StoreManager createJdbcStore()
+  public Object createJdbcStore()
     throws ConfigException
   {
-    if (getStore() != null)
-      throw new ConfigException(L.l("multiple jdbc stores are not allowed in a cluster."));
-
-    StoreManager store = null;
-
-    try {
-      Class cl = Class.forName("com.caucho.server.cluster.JdbcStoreManager");
-
-      store = (StoreManager) cl.newInstance();
-
-      setStore(store);
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    if (store == null)
-      throw new ConfigException(L.l("'jdbc' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
-
-    return store;
+    return null;
   }
 
   /**
@@ -1803,12 +1743,14 @@ public class Server extends ProtocolDispatchServer
 
   public void startClusterUpdate()
   {
+    /*
     try {
       if (_clusterStore != null)
         _clusterStore.startUpdate();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+    */
   }
 
   /**

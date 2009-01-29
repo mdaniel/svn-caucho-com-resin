@@ -50,8 +50,6 @@ public class PersistentStoreConfig
 
   private String _name = "caucho/persistent-store";
 
-  private StoreManager _store;
-
   /**
    * Sets the persistent store name.
    */
@@ -67,27 +65,17 @@ public class PersistentStoreConfig
     throws ConfigException
   {
     Server server = Server.getCurrent();
-
-    _store = server.createPersistentStore(type);
-  }
-
-  public StoreManager createInit()
-  {
-    return _store;
   }
 
   @PostConstruct
   public void init()
     throws Exception
   {
-    if (_store == null)
-      throw new ConfigException(L.l("type is a required attribute of persistent-store"));
-
-    _store.init();
-
+    /*
     if (_name.startsWith("java:comp"))
       Jndi.bindDeep(_name, _store);
     else
       Jndi.bindDeep("java:comp/env/" + _name, _store);
+    */
   }
 }

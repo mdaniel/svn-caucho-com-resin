@@ -109,6 +109,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -318,7 +319,7 @@ public class WebApp extends ServletContextImpl
   private final Object _countLock = new Object();
   private final Lifecycle _lifecycle;
 
-  private int _requestCount;
+  private final AtomicInteger _requestCount = new AtomicInteger();
   private long _lastRequestTime = Alarm.getCurrentTime();
 
   //
@@ -2780,10 +2781,8 @@ public class WebApp extends ServletContextImpl
    */
   final boolean enterWebApp()
   {
-    synchronized (_countLock) {
-      _requestCount++;
-      _lastRequestTime = Alarm.getCurrentTime();
-    }
+    _requestCount.incrementAndGet();
+    _lastRequestTime = Alarm.getCurrentTime();
 
     return _lifecycle.isActive();
   }
@@ -2793,9 +2792,7 @@ public class WebApp extends ServletContextImpl
    */
   final void exitWebApp()
   {
-    synchronized (_countLock) {
-      _requestCount--;
-    }
+    _requestCount.decrementAndGet();
   }
 
   /**
@@ -2803,7 +2800,7 @@ public class WebApp extends ServletContextImpl
    */
   public int getRequestCount()
   {
-    return _requestCount;
+    return _requestCount.get();
   }
 
   /**
@@ -2897,9 +2894,9 @@ public class WebApp extends ServletContextImpl
 
       long beginStop = Alarm.getCurrentTime();
 
-      while (_requestCount > 0 &&
-             Alarm.getCurrentTime() < beginStop + _shutdownWaitTime &&
-             ! Alarm.isTest()) {
+      while (_requestCount.get() > 0
+	     && Alarm.getCurrentTime() < beginStop + _shutdownWaitTime
+	     && ! Alarm.isTest()) {
         try {
           Thread.interrupted();
           Thread.sleep(100);
@@ -2907,7 +2904,7 @@ public class WebApp extends ServletContextImpl
         }
       }
 
-      if (_requestCount > 0) {
+      if (_requestCount.get() > 0) {
         log.warning(L.l("{0} closing with {1} active requests.",
                         toString(), _requestCount));
       }

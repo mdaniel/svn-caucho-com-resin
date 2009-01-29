@@ -30,8 +30,6 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.distcache.FileStoreManager;
-import com.caucho.server.distcache.StoreManager;
 import com.caucho.server.resin.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;

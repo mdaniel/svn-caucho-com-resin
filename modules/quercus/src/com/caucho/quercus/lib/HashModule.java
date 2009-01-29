@@ -228,8 +228,6 @@ public class HashModule extends AbstractQuercusModule {
       if (options == HASH_HMAC) {
         algorithm = "Hmac" + algorithm;
 
-        KeyGenerator gen = KeyGenerator.getInstance(algorithm);
-
         Mac mac = Mac.getInstance(algorithm);
 
         int keySize = 64;
@@ -478,10 +476,27 @@ public class HashModule extends AbstractQuercusModule {
       int len = value.length();
 
       Mac digest = _digest;
-    
-      for (int i = 0; i < len; i++) {
-	digest.update((byte) value.charAt(i));
+
+      TempBuffer tBuf = TempBuffer.allocate();
+      byte []buffer = tBuf.getBuffer();
+      
+      int offset = 0;
+      
+      while (offset < len) {
+	int sublen = len - offset;
+	if (buffer.length < sublen)
+	  sublen = buffer.length;
+	
+	for (int i = 0; i < sublen; i++) {
+	  buffer[i] = (byte) value.charAt(offset + i);
+	}
+
+	digest.update(buffer, 0, sublen);
+
+	offset += sublen;
       }
+
+      TempBuffer.free(tBuf);
     }
     
     void update(byte []buffer, int offset, int length)

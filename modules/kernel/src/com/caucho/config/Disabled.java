@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -26,29 +26,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.config;
 
-import com.caucho.vfs.Path;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
+
+import javax.inject.DeploymentType;
 
 /**
- * Manages the object backing for a context.
+ * Disables deployment for a bean by default, forcing configuration in an
+ * XML file.
+ *
+ * The {@literal @Disabled} annotation is useful when multiple scanned
+ * beans might conflict, or if a {@link javax.inject.Produces @Produces}
+ * method should take precedence over a scanned simple bean.
  */
-public class FileBackingManager {
-  private Path _path;
-
-  /**
-   * Sets the top-level path for the backing manager.
-   */
-  public void setPath(Path path)
-  {
-    _path = path;
-  }
-
-  /**
-   * Gets the top-level path for the backing manager.
-   */
-  public Path getPath()
-  {
-    return _path;
-  }
+@DeploymentType
+@Documented  
+@Retention(RUNTIME)
+@Target({METHOD, TYPE})
+public @interface Disabled {
 }

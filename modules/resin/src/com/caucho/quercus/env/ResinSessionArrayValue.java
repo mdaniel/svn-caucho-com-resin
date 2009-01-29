@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.server.distcache.ClusterObject;
-
 import java.util.IdentityHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,8 +41,6 @@ public class ResinSessionArrayValue extends SessionArrayValue
   static protected final Logger log
     = Logger.getLogger(ResinSessionArrayValue.class.getName());
 
-  private ClusterObject _clusterObject;
-
   public ResinSessionArrayValue(String id, long now, 
 				long maxInactiveInterval)
   {
@@ -55,11 +51,6 @@ public class ResinSessionArrayValue extends SessionArrayValue
 				long maxInactiveInterval, ArrayValue array)
   {
     super(id, now, maxInactiveInterval, array);
-  }
-
-  public void setClusterObject(ClusterObject obj)
-  {
-    _clusterObject = obj;
   }
 
   /**
@@ -74,7 +65,7 @@ public class ResinSessionArrayValue extends SessionArrayValue
       new ResinSessionArrayValue(getId(), accessTime, getMaxInactiveInterval(),
 				 (ArrayValue) getArray().copy(env, map));
 
-    copy.setClusterObject(_clusterObject);
+    // copy.setClusterObject(_clusterObject);
 
     return copy;
   }
@@ -82,27 +73,13 @@ public class ResinSessionArrayValue extends SessionArrayValue
   @Override
   public boolean load()
   {
-    if (_clusterObject != null)
-      return _clusterObject.objectLoad(this);
-    else
-      return true;
+    // XXX: stubbed from refactor
+    return false;
   }
 
   protected void store()
   {
-    try {
-      ClusterObject clusterObject = _clusterObject;
-
-      if (clusterObject != null) {
-        // make sure the object always saves - PHP references can make changes
-        // without directly calling on the session object
-        clusterObject.objectModified(); 
-
-        clusterObject.objectStore(this);
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, "Can't serialize session", e);
-    }
+    // XXX: stubbed from refactor
   }
 
   /**
@@ -111,10 +88,6 @@ public class ResinSessionArrayValue extends SessionArrayValue
   @Override
   protected void remove()
   {
-    ClusterObject clusterObject = _clusterObject;
-    _clusterObject = null;
-
-    if (clusterObject != null)
-      clusterObject.objectRemove();
+    // XXX: stubbed from refactor
   }
 }

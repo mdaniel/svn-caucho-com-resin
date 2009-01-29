@@ -44,9 +44,6 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.distcache.ClusterObject;
-import com.caucho.server.distcache.Store;
-import com.caucho.server.distcache.StoreManager;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
@@ -153,9 +150,6 @@ public final class SessionManager implements AlarmListener
   private boolean _isTriplicate = true;
   private boolean _isBackup = true;
 
-  //private SessionStore sessionStore;
-  private StoreManager _storeManager;
-
   // If true, serialization errors should not be logged
   // XXX: changed for JSF
   private boolean _ignoreSerializationErrors = true;
@@ -207,6 +201,7 @@ public final class SessionManager implements AlarmListener
     boolean isSaveTriplicate = true;
     
     // copy defaults from store for backward compat
+    /* XXX: need to change config
     StoreManager store = _server.getStore();
     if (store != null) {
       setAlwaysSaveSession(store.isAlwaysSave());
@@ -214,6 +209,7 @@ public final class SessionManager implements AlarmListener
       isSaveBackup = store.isSaveBackup();
       isSaveTriplicate = store.isSaveTriplicate();
     }
+    */
 
     AbstractCache sessionCache = new ClusterByteStreamCache();
 
@@ -339,18 +335,6 @@ public final class SessionManager implements AlarmListener
       return _sessionStore;
     else
       return null;
-  }
-
-  /**
-   * Sets the persistent store.
-   */
-  public void setPersistentStore(StoreManager store)
-    throws ConfigException
-  {
-    _storeManager = store;
-
-    if (_storeManager == null)
-      throw new ConfigException(L.l("unknown persistent store."));
   }
 
   /**

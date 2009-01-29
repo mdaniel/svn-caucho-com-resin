@@ -34,7 +34,6 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.management.server.WebAppMXBean;
-import com.caucho.server.distcache.Store;
 
 import java.util.logging.Logger;
 

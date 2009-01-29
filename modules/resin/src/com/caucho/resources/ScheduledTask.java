@@ -30,6 +30,7 @@
 package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.loader.*;
@@ -50,6 +51,8 @@ import java.util.logging.*;
  * The cron resources starts application Work tasks at cron-specified
  * intervals.
  */
+
+@Service
 public class ScheduledTask extends BeanConfig
   implements AlarmListener, EnvironmentListener
 {
@@ -184,7 +187,7 @@ public class ScheduledTask extends BeanConfig
 
   private void start()
   {
-    long now = Alarm.getExactTime();
+    long now = Alarm.getCurrentTime();
     
     long nextTime = _trigger.nextTime(now + 500);
 

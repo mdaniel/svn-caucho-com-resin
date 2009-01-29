@@ -66,6 +66,7 @@ public class SimpleBean extends ComponentImpl
   
   private boolean _isBound;
 
+  private ClassLoader _loader;
   private Class _instanceClass;
 
   private ArrayList<SimpleBeanMethod> _methodList
@@ -83,6 +84,8 @@ public class SimpleBean extends ComponentImpl
   public SimpleBean(InjectManager webBeans)
   {
     super(webBeans);
+
+    _loader = Thread.currentThread().getContextClassLoader();
   }
 
   public SimpleBean()
@@ -292,7 +295,7 @@ public class SimpleBean extends ComponentImpl
 	}
 	else if (hasBindingAnnotation(ctor)) {
 	  if (best != null && hasBindingAnnotation(best))
-	    throw new ConfigException(L.l("Simple bean {0} has two constructors with binding annotations.",
+	    throw new ConfigException(L.l("Simple bean {0} can't have two constructors with @BindingType or @Initializer, because the Manager can't tell which one to use.",
 					  ctor.getDeclaringClass().getName()));
 	  best = ctor;
 	  second = null;
@@ -386,7 +389,12 @@ public class SimpleBean extends ComponentImpl
   @Override
   public Object create(CreationalContext cxt)
   {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
     try {
+      thread.setContextClassLoader(_loader);
+      
       Object value;
       boolean isNew = false;
 
@@ -419,6 +427,8 @@ public class SimpleBean extends ComponentImpl
       throw e;
     } catch (Exception e) {
       throw new CreationException(e);
+    } finally {
+      thread.setContextClassLoader(loader);
     }
   }
 

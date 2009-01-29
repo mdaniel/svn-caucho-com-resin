@@ -13,6 +13,9 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: hmac performance (#3297, rep by koreth)</li>
+<li>server: cron syntax not properly handling day of week (#3248, rep by mate)</li>
+<li>mod_caucho: content-length not properly propagated (#2995, rep by uwe schaefer)</li>
 <li>(2009-01-27) inject: update packaging to latest Java Injection draft</li>
 <li>make: makefiles updated to use $(CC) instead of $(LD) (#3267, rep by dicr)</li>
 <li>admin: add &lt;resin-data-directory> to replace admin path</li>

@@ -65,6 +65,6 @@ public abstract class AnnotationLiteral<T extends Annotation>
   @Override
   public String toString()
   {
-    return annotationType().getName() + "[]";
+    return "@" + annotationType().getName() + "()";
   }
 }

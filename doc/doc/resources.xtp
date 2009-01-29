@@ -3,7 +3,7 @@
     <title>Scheduled Task</title>
     <type>contents</type>
     <description>
-    <p>Resin's &lt;scheduled-task> capability lets you schedule
+    <p>Resin's &lt;resin:ScheduledTask> capability lets you schedule
       events using a flexible cron-style trigger.  The task can be
       any <code>Runnable</code> bean, a method specified by EL, or
       a URL.</p>
@@ -14,18 +14,19 @@
 
 <localtoc/>
 
-<s1 title="&lt;scheduled-task>"> version="Resin 3.1.6">
+<s1 title="&lt;resin:ScheduledTask>"> version="Resin 4.0.0">
 
-<p>&lt;scheduled-task> schedules a job to be executed at specific times
+<p>&lt;resin:ScheduledTask> schedules a job to be executed at specific times
 or after specific delays.  The times can be specified by a cron syntax or
 by a simple delay parameter.  The job can be either a <code>Runnable</code>
 bean, a method specified by an EL expression, or a URL.</p>
 
-<p>When specified as an IoC bean, the bean task has full IoC capabilities,
+<p>When specified as an Java Injection bean, the bean task
+has full IoC capabilities,
 including injection, @TransactionAttribute aspects, interception and
 @Observes.</p>
 
-<deftable title="&lt;scheduled-task> Attributes">
+<deftable title="&lt;resin:ScheduledTask> Attributes">
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -68,8 +69,8 @@ including injection, @TransactionAttribute aspects, interception and
 </tr>
 </deftable>
 
-<def title="&lt;scheduled-task> schema">
-element scheduled-task {
+<def title="&lt;ScheduledTask> schema">
+element resin:ScheduledTask {
   class?
   &amp; cron?
   &amp; delay?
@@ -86,16 +87,20 @@ element scheduled-task {
 
 <p>The most common and flexible job configuration uses standard IoC
 bean-style configuration.  The bean must implement <code>Runnable</code>.
-Like the &lt;bean> tag, the <var>class</var> attribute specifies the
-<code>Runnable</code> class, and any <var>init</var> section configures
-the bean using <a href="resin-ioc.xtp">Resin IoC</a> configuration.</p>
+The <var>&lt;task></var> element specifies the bean, using standard
+Java injection syntax as described
+in <a href="resin-ioc.xtp">Resin IoC</a> configuration.</p>
 
 <example title="Example: 5min cron bean task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+      xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;scheduled-task class="qa.MyTask">
+  &lt;resin:ScheduledTask>
     &lt;cron>*/5&lt;/cron>
-  &lt;/scheduled-task>
+    &lt;task>
+      &lt;qa:MyTask xmlns:qa="urn:java:com.caucho.resin"/>
+    &lt;/task>
+  &lt;/ScheduledTask>
 
 &lt;/web-app>
 </example>
@@ -111,11 +116,12 @@ scanning.  Like the bean-style job configuration, the reference bean must
 implement <code>Runnable</code>.</p>
 
 <example title="Example: midnight cron bean task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;scheduled-task task="#{taskBean}">
+  &lt;resin:ScheduledTask task="#{taskBean}">
     &lt;cron>0 0 *&lt;/cron>
-  &lt;/scheduled-task>
+  &lt;/resin:ScheduledTask>
 
 &lt;/web-app>
 </example>
@@ -133,14 +139,18 @@ expression.</p>
 on the <var>myBean</var> singleton every 1 hour.</p>
 
 <example title="Example: 1h period method task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:resin="urn:java:com.caucho.resin"
+  xmlns:qa="urn:java:qa">
 
-  &lt;bean name="myBean" class="qa.MyBean"/>
+  &lt;qa:MyBean>
+    &lt;Named>myBean&lt;/Named>
+  &lt;/qa:MyBean>
 
-  &lt;scheduled-task method="#{myBean.myMethod}">
-    &lt;delay>10m&lt;/delay>
-    &lt;period>1h&lt;/period>
-  &lt;/scheduled-task>
+  &lt;resin:ScheduledTask method="#{myBean.myMethod}">
+    &lt;resin:delay>10m&lt;/resin:delay>
+    &lt;resin:period>1h&lt;/resin:period>
+  &lt;/resin:ScheduledTask>
 
 &lt;/web-app>
 </example>
@@ -155,11 +165,12 @@ and forwards to the specified URL.  The URL is relative to the &lt;web-app>
 which contains the &lt;scheduled-task.</p>
 
 <example title="Example: sunday cron url task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:resin="urn:java:com.caucho.config">
 
-  &lt;scheduled-task url="/cron.php">
-    &lt;cron>0 15 * * 0&lt;/cron>
-  &lt;/scheduled-task>
+  &lt;resin:ScheduledTask url="/cron.php">
+    &lt;resin:cron>0 15 * * 0&lt;/resin:cron>
+  &lt;/resin:ScheduledTask>
 
 &lt;/web-app>
 </example>
@@ -265,196 +276,6 @@ months fields are optional.</p>
 
 </s2>
 
-<s2 title="com.caucho.resources.CronResource">
-<p>Often, applications need to run a task at specific times.  The
-<code>CronResource</code> provides a standard way of doing that.
-Applications need only create a standard
-<code>java.lang.Runnable</code> task and configure the CronResource.
-Resin configure's the work task with 
-<a href="ioc-bean-patterns.xtp">bean-style configuration</a>.
-</p>
-
-<example title="Task running every 15 minutes">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;resource type="com.caucho.resources.CronResource"&gt;
-    &lt;init&gt;
-      &lt;cron&gt;*/15&lt;/cron&gt;
-      &lt;work resin:type="example.PeriodicWork"&gt;
-        &lt;foo&gt;Custom Config&lt;/foo&gt;
-      &lt;/work&gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
-&lt;/web-app&gt;
-</example>
-
-<deftable-parameters>
-<tr><td>cron</td><td>Specifies the times the task should be run</td><td>required
-</td></tr><tr><td>work</td><td>Specifies application's work bean</td><td>required
-</td></tr></deftable-parameters>
-
-<p>The cron specification follows the Unix crontab format.  The cron
-is composed of 5 fields: minutes, hours, day of month, month, and day
-of week.</p>
-
-<p>Each field specifies a range of times to be executed.  The patterns
-allowed are:</p>
-
-<deftable title="example ranges">
-<tr><th>range</th><th>explanation (using minutes as example)
-</th></tr><tr><td>*</td><td>run every minute
-</td></tr><tr><td>*/5</td><td>run every 5 minutes
-</td></tr><tr><td>0,5,50</td><td>run at :00, :05, :50 every hour
-</td></tr><tr><td>0-4</td><td>run at :00, :01, :02, :03, :04
-</td></tr><tr><td>0-30/2</td><td>run every 2 minutes for the first half hour
-</td></tr></deftable>
-
-<p>The minutes field is always required, and the hours, days, and
-months fields are optional.</p>
-
-<deftable title="example times">
-<tr><th>range</th><th>explanation
-</th></tr><tr><td>0 */3</td><td>run every 3 hours
-</td></tr><tr><td>15 2 *</td><td>run every day at 0215 local time
-</td></tr><tr><td>0 0 */3</td><td>run every third day at midnight
-</td></tr><tr><td>15 0 * * 6</td><td>run every Saturday at 0015
-</td></tr></deftable>
-</s2>
-
-<s2 title="Hello, World example">
-
-<example title="Example: WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-
-  &lt;scheduled-task class="example.PeriodicWork"&gt;
-    &lt;!-- every 5 minutes --&gt;
-    &lt;cron&gt;*/5&lt;/cron&gt;
-  &lt;/resource&gt;
-
-&lt;/web-app&gt;
-</example>
-
-<example title="Example: WEB-INF/classes/example/PeriodicWork.java">
-
-package example;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-public class PeriodicWork implements Runnable {
-  static protected final Logger log = 
-    Logger.getLogger(PeriodicWork.class.getName());
-
-  public PeriodicWork()
-  {
-    log.info("PeriodicWork: constructor");
-  }
-
-  /**
-   * Required implementation of java.lang.Runnable.run()
-   */
-  public void run()
-  {
-    log.info("PeriodicWork: run() Hello, World");
-  }
-}
-</example>
-
-<results>
-[13:04:27.429] PeriodicWork: constructor
-[13:05:00.095] PeriodicWork: run() Hello, World
-[13:10:00.182] PeriodicWork: run() Hello, World
-</results>
-</s2>
-
-<s2 title="Example: bean-style configuration example">
-
-<example title="WEB-INF/web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-
-  &lt;scheduled-task class="example.PeriodicWork"&gt;
-    &lt;!-- every minute --&gt;
-    &lt;cron&gt;*&lt;/cron&gt;
-
-    &lt;init&gt;
-      &lt;message&gt;Goodybye, World&lt;/message&gt;
-    &lt;/init&gt;
-  &lt;/scheduled-task&gt;
-
-&lt;/web-app&gt;
-</example>
-
-<example title="Example: WEB-INF/classes/example/PeriodicWork.java">
-package example;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.resource.spi.work.Work;
-
-public class PeriodicWork implements Work {
-  static protected final Logger log = 
-    Logger.getLogger(PeriodicWork.class.getName());
-
-  String _message;
-
-  public PeriodicWork()
-  {
-    log.info("PeriodicWork: constructor");
-  }
-
-  /**
-   * Optional, called in response to presence of &lt;message&gt;
-   * configuration tag. 
-   */
-  public void setMessage(String message)
-  {
-    log.info("PeriodicWork: setMessage");
-    _message = message;
-  }
-
-  /**
-   * Optional, called after bean is created and any setters
-   * from configuration are called.
-   */
-  @PostConstruct
-  public void init()
-    throws Exception
-  {
-    log.info("PeriodicWork: init()");
-
-    if (_message == null)
-      throw new Exception("`message' is required");
-  }
-
-  /**
-   * Required implementation of java.lang.Runnable.run()
-   */
-  public void run()
-  {
-    log.info("PeriodicWork: run() " + _message);
-  }
-
-  /**
-   * Implementation of javax.resource.spi.work.Work.release()
-   */
-  public void release()
-  {
-    log.info("PeriodicWork: release()");
-  }
-}
-</example>
-
-<results>
-[13:04:27.429] PeriodicWork: constructor
-[13:04:27.429] PeriodicWork: setMessage
-[13:04:27.429] PeriodicWork: init()
-[13:05:00.095] PeriodicWork: run() Goodbye, World
-[13:06:00.182] PeriodicWork: run() Goodbye, World
-(close Resin)
-[13:06:00.345] PeriodicWork: release()
-</results>
-</s2>
-</s1> <!-- scheduled-task -->
-
 <s1 name="concepts" title="RMI Resource">
 
 <p>
@@ -556,17 +377,15 @@ RMI Registry if needed.
 </p>
 
 <example title="Example use of RMI Registry">
-&lt;web-app&gt;
-  &lt;resource type="com.caucho.resources.rmi.RmiRegistry"&gt;
-    &lt;init&gt;
+&lt;web-app xmlns:rmi="urn:java:com.caucho.resources.rmi"&gt;
+  &lt;rmi:RmiRegistry&gt;
       &lt;server&gt;localhost&lt;/server&gt;  <!-- optional, default is `localhost' -->
       &lt;port&gt;1099&lt;/port&gt;           <!-- optional, default is `1099' -->
 
       &lt;rmi-service service-name="HelloWorld" 
                       service-class="example.HelloWorldImpl"/&gt;
       &lt;rmi-service .... &gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/rmi:RmiRegistry&gt;
 &lt;/web-app&gt;
 </example>
 
@@ -694,15 +513,13 @@ is complete, it is a simple process to deploy the service in Resin.
 </p>
 
 <example title="Deploying the service with Resin">
-&lt;web-app&gt;
-  &lt;resource type="com.caucho.resources.rmi.RmiRegistry"&gt;
-    &lt;init&gt;
+&lt;web-app xmlns:rmi="urn:java:com.caucho.resources.rmi"&gt;
+  &lt;rmi:RmiRegistry&gt;
       &lt;server&gt;localhost&lt;/server&gt;  <!-- optional, default is `localhost' -->
       &lt;port&gt;1099&lt;/port&gt;           <!-- optional, default is `1099' -->
 
       &lt;rmi-service service-name="HelloWorld" service-class="example.HelloWorldImpl"/&gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/rmi:RmiRegistry&gt;
 &lt;/web-app&gt;
 </example>
 
@@ -712,16 +529,14 @@ with the use of multiple <code>rmi-service</code> tags:
 </p>
 
 <example title="Deploying more than once service with Resin">
-&lt;web-app&gt;
-  &lt;resource type="com.caucho.resources.rmi.RmiRegistry"&gt;
-    &lt;init&gt;
+&lt;web-app xmlns:rmi="urn:java:com.caucho.resources.rmi"&gt;
+  &lt;rmi:RmiRegistry&gt;
       &lt;server&gt;localhost&lt;/server&gt;  <!-- optional, default is `localhost' -->
       &lt;port&gt;1099&lt;/port&gt;           <!-- optional, default is `1099' -->
 
       &lt;rmi-service service-name="HelloWorld" service-class="example.HelloWorldImpl"/&gt;
       &lt;rmi-service service-name="HelloAgainWorld" service-class="example.HelloAgainWorldImpl"/&gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/rmi:RmiRegistry&gt;
 &lt;/web-app&gt;
 </example>
 
@@ -849,16 +664,14 @@ Resin will start the rmi registry if has not been started already.</p>
 the (somewhat tricky) process of starting the rmi registry yourself.</p>
 
 <example title="Scenario: a Resin server that provides the Registry and the service">
-&lt;web-app&gt;
-  &lt;resource type="com.caucho.resources.rmi.RmiRegistry"&gt;
-    &lt;init&gt;
+&lt;web-app xmlns:rmi="urn:java:com.caucho.resources.rmi"&gt;
+  &lt;rmi:RmiRegistry&gt;
       &lt;server&gt;localhost&lt;/server&gt;
       &lt;port&gt;1099&lt;/port&gt;
 
       &lt;rmi-service service-name="HelloWorld" service-class="example.HelloWorldImpl"/&gt;
       &lt;rmi-service .... &gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/rmi:RmiRegistry&gt;
 &lt;/web-app&gt;
 </example>
 
@@ -880,16 +693,14 @@ server, to be registered with the remote Registry.</p>
 existing RMI registry running on <code>services.hogwarts.com</code>.  </p>
 
 <example title="A Registry on a different server">
-&lt;web-app&gt;
-  &lt;resource type="com.caucho.resources.rmi.RmiRegistry"&gt;
-    &lt;init&gt;
+&lt;web-app xmlns:rmi="urn:java:com.caucho.resources.rmi"&gt;
+  &lt;rmi:RmiRegistry&gt;
       &lt;server&gt;services.hogwarts.com&lt;/server&gt;
       &lt;port&gt;1099&lt;/port&gt;
 
       &lt;rmi-service service-name="HelloWorld" service-class="example.HelloWorldImpl"/&gt;
       &lt;rmi-service .... &gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/rmi:RmiRegistry&gt;
 &lt;/web-app&gt;
 </example>
 
@@ -917,16 +728,14 @@ server.  Because the server name is not `localhost', the RMI registry will not
 be created.</p>
 
 <example title="A Registry in a different JVM">
-&lt;web-app&gt;
-  &lt;resource type="com.caucho.resources.rmi.RmiRegistry"&gt;
-    &lt;init&gt;
+&lt;web-app xmlns:rmi="urn:java:com.caucho.resources.rmi"&gt;
+  &lt;rmi:RmiRegistry&gt;
       &lt;server&gt;127.0.0.1&lt;/server&gt;
       &lt;port&gt;1099&lt;/port&gt;
 
       &lt;rmi-service service-name="HelloWorld" service-class="example.HelloWorldImpl"/&gt;
       &lt;rmi-service .... &gt;
-    &lt;/init&gt;
-  &lt;/resource&gt;
+  &lt;/rmi:RmiRegistry&gt;
 &lt;/web-app&gt;
 </example>
 

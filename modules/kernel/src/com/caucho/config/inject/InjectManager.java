@@ -550,7 +550,7 @@ public class InjectManager
 
     Context context = _contextMap.get(scope);
 
-    if (context != null)
+    if (context instanceof ScopeContext)
       return (ScopeContext) context;
     else
       return null;
@@ -605,9 +605,30 @@ public class InjectManager
 				   set));
     }
     
-    if (! isOptional)
-      throw injectError(field, L.l("Can't find a component for '{0}' because no beans match",
+    if (! isOptional) {
+      WebComponent component = getWebComponent(field.getGenericType());
+
+      if (component == null) {
+	throw injectError(field, L.l("Can't find a component for '{0}' because no beans has been registered and enabled.",
 				   field.getType().getName()));
+      }
+      else {
+	ArrayList<Bean<?>> enabledList = component.getEnabledBeanList();
+
+	if (enabledList.size() == 0) {
+	  throw injectError(field, L.l("Can't find a component for '{0}' because any matching beans are disabled, i.e. non-enabled Deploy.\nDisabled beans: {2}",
+				     field.getType().getName(),
+				     toList(bindings),
+				     component.getBeanList()));
+	}
+	else {
+	  throw injectError(field, L.l("Can't find a component for '{0}' because no enabled beans match the bindings {1}.\nEnabled beans: {2}",
+				     field.getType().getName(),
+				     toList(bindings),
+				       enabledList));
+	}
+      }
+    }
   }
 
   private Annotation []getBindings(Annotation []annotations)
@@ -1173,7 +1194,7 @@ public class InjectManager
       }
       else
 	createContext = new ConfigContext();
-      
+
       return (T) context.get(bean, createContext);
     }
   }
@@ -1250,8 +1271,10 @@ public class InjectManager
   {
     ArrayList<Annotation> list = new ArrayList<Annotation>();
 
-    for (Annotation ann : annList) {
-      list.add(ann);
+    if (annList != null) {
+      for (Annotation ann : annList) {
+	list.add(ann);
+      }
     }
 
     return list;

@@ -45,8 +45,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.server.distcache.DistributedCacheManager;
-import com.caucho.server.distcache.FileStoreManager;
-import com.caucho.server.distcache.StoreManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;

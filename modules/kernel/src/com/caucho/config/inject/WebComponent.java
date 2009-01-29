@@ -141,6 +141,38 @@ public class WebComponent<T> {
     return beans;
   }
 
+  public ArrayList<Bean<T>> getBeanList()
+  {
+    ArrayList<Bean<T>> list = new ArrayList<Bean<T>>();
+    
+    for (BeanEntry<T> beanEntry : _beanList) {
+      Bean<T> bean = beanEntry.getBean();
+
+      list.add(bean);
+    }
+
+    return list;
+  }
+
+  public ArrayList<Bean<T>> getEnabledBeanList()
+  {
+    ArrayList<Bean<T>> list = new ArrayList<Bean<T>>();
+    
+    int priority = 0;
+    
+    for (BeanEntry<T> beanEntry : _beanList) {
+      Bean<T> bean = beanEntry.getBean();
+
+      int beanPriority
+	= _webBeans.getDeploymentPriority(bean.getDeploymentType());
+
+      if (priority <= beanPriority)
+	list.add(bean);
+    }
+
+    return list;
+  }
+
   private int getPriority(Class deploymentType)
   {
     return _webBeans.getDeploymentPriority(deploymentType);
