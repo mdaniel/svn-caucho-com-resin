@@ -641,7 +641,7 @@ public class InterceptorCallChain extends AbstractCallChain {
   public void generatePostConstruct(JavaWriter out, HashMap map)
     throws IOException
   {
-    if (map.get("interceptor_object_init") == null) {
+    if (isEnhanced() && map.get("interceptor_object_init") == null) {
       map.put("interceptor_object_init", true);
 
       out.println("int size = __caucho_interceptor_beans.size();");

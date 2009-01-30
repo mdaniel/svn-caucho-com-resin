@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>server: sync performance with Encoding (#3226, rep by lookis)</li>
 <li>quercus: hmac performance (#3297, rep by koreth)</li>
 <li>server: cron syntax not properly handling day of week (#3248, rep by mate)</li>
 <li>mod_caucho: content-length not properly propagated (#2995, rep by uwe schaefer)</li>

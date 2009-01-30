@@ -557,9 +557,9 @@ public class SimpleBean extends ComponentImpl
 
       Class instanceClass = bean.generateClass();
 
-      if (instanceClass == _instanceClass && isSingleton())
-	instanceClass = SerializationAdapter.gen(_instanceClass);
-
+      if (instanceClass == getTargetClass() && isSingleton())
+	instanceClass = SerializationAdapter.gen(instanceClass);
+      
       if (instanceClass != null && instanceClass != _instanceClass) {
 	try {
 	  if (_ctor != null)

@@ -63,24 +63,10 @@ public class ConfigContext implements CreationalContext {
   private final static Logger log
     = Logger.getLogger(ConfigContext.class.getName());
 
-  private final static QName RESIN_TYPE = new QName("resin:type", null);
-  private final static QName RESIN_TYPE_NS
-    = new QName("resin:type", "http://caucho.com/ns/resin/core");
-
-  private final static QName RESIN_CLASS = new QName("resin:class", null);
-  private final static QName RESIN_CLASS_NS
-    = new QName("resin:class", "http://caucho.com/ns/resin/core");
-
-  private final static QName RESIN_PARAM = new QName("resin:param", null);
-  private final static QName RESIN_PARAM_NS
-    = new QName("resin:param", "http://caucho.com/ns/resin/core");
-  
   private final static QName TEXT = new QName("#text");
   private final static QName VALUE = new QName("value");
 
   private final static Object NULL = new Object();
-
-  private final static HashSet<QName> _resinClassSet = new HashSet<QName>();
 
   private static ThreadLocal<ConfigContext> _currentBuilder
     = new ThreadLocal<ConfigContext>();
@@ -364,9 +350,7 @@ public class ConfigContext implements CreationalContext {
   {
     String attrName = attribute.getNodeName();
 
-    if (attrName.equals("resin:type"))
-      return;
-    else if (attrName.startsWith("xmlns"))
+    if (attrName.startsWith("xmlns"))
       return;
 
     String oldFile = _baseUri;
@@ -488,8 +472,7 @@ public class ConfigContext implements CreationalContext {
 				  boolean allowParam)
     throws Exception
   {
-    if (qName.getName().startsWith("xmlns")
-	|| ! allowParam && _resinClassSet.contains(qName)) {
+    if (qName.getName().startsWith("xmlns")) {
       return;
     }
 
@@ -548,23 +531,6 @@ public class ConfigContext implements CreationalContext {
 
       ConfigType childType = null;
       Object childBean;
-
-      if (childNode instanceof Element) {
-	childBean = createResinType(attrStrategy.getConfigType(),
-				    (Element) childNode);
-
-	if (childBean != null) {
-	  ConfigType childBeanType = TypeFactory.getType(childBean);
-
-	  // server/02e3
-	  // childBeanType.init(childBean);
-
-	  childBean = childBeanType.replaceObject(childBean);
-	  
-	  attrStrategy.setValue(bean, qName, childBean);
-	  return;
-	}
-      }
 
       String text;
 
@@ -650,18 +616,6 @@ public class ConfigContext implements CreationalContext {
   public Object create(Node childNode, ConfigType type)
     throws ConfigException
   {
-    if (childNode instanceof Element) {
-      Object childBean = createResinType(type, (Element) childNode);
-
-      if (childBean != null) {
-	ConfigType childBeanType = TypeFactory.getType(childBean);
-	
-	childBeanType.init(childBean);
-
-	return childBeanType.replaceObject(childBean);
-      }
-    }
-
     try {
       Object childBean;
       String text;
@@ -683,7 +637,7 @@ public class ConfigContext implements CreationalContext {
 	    return null;
 	}
 	else {
-	  return text;
+	  return type.valueOf(text);
 	}
       }
       else
@@ -780,8 +734,7 @@ public class ConfigContext implements CreationalContext {
 				       ConfigType type)
     throws Exception
   {
-    if (qName.getName().startsWith("xmlns")
-	|| _resinClassSet.contains(qName)) {
+    if (qName.getName().startsWith("xmlns")) {
       return;
     }
 
@@ -883,80 +836,6 @@ public class ConfigContext implements CreationalContext {
     }
 
     return dependList;
-  }
-
-  /**
-   * Create a custom resin:type value.
-   */
-  Object createResinType(ConfigType childType, Element node)
-  {
-    String typeName = null;
-
-    if (node instanceof QAttributedNode) {
-      Node child = ((QAttributedNode) node).getFirstAttribute();
-
-      for (; child != null; child = child.getNextSibling()) {
-        Attr attr = (Attr) child;
-        QName qName = ((QNode) attr).getQName();
-
-	if (_resinClassSet.contains(qName)) {
-	  typeName = attr.getValue();
-	  break;
-	}
-      }
-    }
-    else {
-      NamedNodeMap attrList = node.getAttributes();
-      if (attrList != null) {
-        int length = attrList.getLength();
-        for (int i = 0; i < length; i++) {
-          Attr attr = (Attr) attrList.item(i);
-          QName qName = ((QNode) attr).getQName();
-
-	  if (_resinClassSet.contains(qName)) {
-	    typeName = attr.getValue();
-	    break;
-	  }
-        }
-      }
-    }
-
-    if (typeName != null) {
-      try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	Class cl = Class.forName(typeName, false, loader);
-
-	ConfigType beanConfigType = TypeFactory.getType(BeanConfig.class);
-	InterfaceConfig cfg = new InterfaceConfig(cl);
-	cfg.setClass(cl);
-
-	for (Node childNode = node.getFirstChild();
-	     childNode != null;
-	     childNode = childNode.getNextSibling()) {
-	  QName qName = ((QAbstractNode) childNode).getQName();
-        
-	  if (qName.equals(RESIN_PARAM)
-	      || qName.equals(RESIN_PARAM_NS)) {
-	    configureChildNode(childNode, qName, cfg, beanConfigType, true);
-	  }
-	}
-
-	cfg.init();
-
-	Object bean = cfg.replaceObjectNoInit();
-
-	configureBean(bean, node);
-
-	Config.init(bean);
-	
-	return bean;
-      } catch (Exception e) {
-	throw ConfigException.create(e);
-      }
-    }
-    
-    return null;
   }
 
   /**
@@ -1453,18 +1332,5 @@ public class ConfigContext implements CreationalContext {
 
   public void push(Object obj)
   {
-  }
-
-  static {
-    _resinClassSet.add(RESIN_CLASS_NS);
-    _resinClassSet.add(RESIN_CLASS);
-    _resinClassSet.add(RESIN_TYPE_NS);
-    _resinClassSet.add(RESIN_TYPE);
-    _resinClassSet.add(RESIN_PARAM_NS);
-    _resinClassSet.add(RESIN_PARAM);
-    /*
-    _resinClassSet.add(new QName("resin:type", "http://caucho.com/ns/resin"));
-    _resinClassSet.add(new QName("resin:class", "http://caucho.com/ns/resin"));
-    */
   }
 }

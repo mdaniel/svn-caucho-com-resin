@@ -42,22 +42,23 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Converts between the mime encoding names and Java encoding names.
  */
 public class Encoding {
-  static HashMap<String,String> _javaName;
-  static Hashtable<String,String> _mimeName;
-  static HashMap<String,String> _localeName;
+  private static ConcurrentHashMap<String,String> _javaName;
+  private static ConcurrentHashMap<String,String> _mimeName;
+  private static ConcurrentHashMap<String,String> _localeName;
 
   // map from an encoding name to its EncodingReader factory.
-  static final HashMap<String,EncodingReader> _readEncodingFactories
-    = new HashMap<String,EncodingReader>();
+  static final ConcurrentHashMap<String,EncodingReader> _readEncodingFactories
+    = new ConcurrentHashMap<String,EncodingReader>();
   
   // map from an encoding name to its EncodingWriter factory.
-  static final HashMap<String,EncodingWriter> _writeEncodingFactories =
-    new HashMap<String,EncodingWriter>();
+  static final ConcurrentHashMap<String,EncodingWriter> _writeEncodingFactories
+    = new ConcurrentHashMap<String,EncodingWriter>();
 
   static final EncodingWriter _latin1Writer = new ISO8859_1Writer();
 
@@ -144,37 +145,35 @@ public class Encoding {
   {
     EncodingReader factory = null;
     
-    synchronized (_readEncodingFactories) {
-      factory = _readEncodingFactories.get(encoding);
+    factory = _readEncodingFactories.get(encoding);
+
+    if (factory == null) {
+      try {
+	String javaEncoding = Encoding.getJavaName(encoding);
+
+	if (javaEncoding == null)
+	  javaEncoding = "ISO8859_1";
+
+	String className = "com.caucho.vfs.i18n." + javaEncoding + "Reader";
+        
+	Class cl = Class.forName(className);
+
+	factory = (EncodingReader) cl.newInstance();
+	factory.setJavaEncoding(javaEncoding);
+      } catch (Throwable e) {
+      }
 
       if (factory == null) {
-        try {
-          String javaEncoding = Encoding.getJavaName(encoding);
+	String javaEncoding = Encoding.getJavaName(encoding);
 
-          if (javaEncoding == null)
-            javaEncoding = "ISO8859_1";
-
-          String className = "com.caucho.vfs.i18n." + javaEncoding + "Reader";
-        
-          Class cl = Class.forName(className);
-
-          factory = (EncodingReader) cl.newInstance();
-          factory.setJavaEncoding(javaEncoding);
-        } catch (Throwable e) {
-        }
-
-        if (factory == null) {
-          String javaEncoding = Encoding.getJavaName(encoding);
-
-          if (javaEncoding == null)
-            javaEncoding = "ISO8859_1";
+	if (javaEncoding == null)
+	  javaEncoding = "ISO8859_1";
           
-          factory = new JDKReader();
-          factory.setJavaEncoding(javaEncoding);
-        }
-
-        _readEncodingFactories.put(encoding, factory);
+	factory = new JDKReader();
+	factory.setJavaEncoding(javaEncoding);
       }
+
+      _readEncodingFactories.put(encoding, factory);
     }
 
     return factory;
@@ -194,36 +193,34 @@ public class Encoding {
     if (factory != null)
       return factory.create();
 
-    synchronized (_writeEncodingFactories) {
-      factory = _writeEncodingFactories.get(encoding);
+    factory = _writeEncodingFactories.get(encoding);
+
+    if (factory == null) {
+      try {
+	String javaEncoding = Encoding.getJavaName(encoding);
+
+	if (javaEncoding == null)
+	  javaEncoding = "ISO8859_1";
+
+	String className = "com.caucho.vfs.i18n." + javaEncoding + "Writer";
+        
+	Class cl = Class.forName(className);
+
+	factory = (EncodingWriter) cl.newInstance();
+	factory.setJavaEncoding(javaEncoding);
+      } catch (Throwable e) {
+      }
 
       if (factory == null) {
-        try {
-          String javaEncoding = Encoding.getJavaName(encoding);
+	factory = new JDKWriter();
+	String javaEncoding = Encoding.getJavaName(encoding);
 
-          if (javaEncoding == null)
-            javaEncoding = "ISO8859_1";
-
-          String className = "com.caucho.vfs.i18n." + javaEncoding + "Writer";
-        
-          Class cl = Class.forName(className);
-
-          factory = (EncodingWriter) cl.newInstance();
-	  factory.setJavaEncoding(javaEncoding);
-        } catch (Throwable e) {
-        }
-
-        if (factory == null) {
-          factory = new JDKWriter();
-          String javaEncoding = Encoding.getJavaName(encoding);
-
-          if (javaEncoding == null)
-            javaEncoding = "ISO8859_1";
-          factory.setJavaEncoding(javaEncoding);
-        }
-
-        _writeEncodingFactories.put(encoding, factory);
+	if (javaEncoding == null)
+	  javaEncoding = "ISO8859_1";
+	factory.setJavaEncoding(javaEncoding);
       }
+
+      _writeEncodingFactories.put(encoding, factory);
     }
 
     // return factory.create(factory.getJavaEncoding());
@@ -306,9 +303,9 @@ public class Encoding {
       
 
   static {
-    _javaName = new HashMap<String,String>();
-    _mimeName = new Hashtable<String,String>();
-    _localeName = new HashMap<String,String>();
+    _javaName = new ConcurrentHashMap<String,String>();
+    _mimeName = new ConcurrentHashMap<String,String>();
+    _localeName = new ConcurrentHashMap<String,String>();
 
     _mimeName.put("ANSI-X3.4-1968", "US-ASCII");
     _mimeName.put("ISO-IR-6", "US-ASCII");
@@ -532,7 +529,7 @@ public class Encoding {
     }
     
     // from http://www.w3c.org/International/O-charset-lang.html
-    _localeName = new HashMap<String,String>();
+    _localeName = new ConcurrentHashMap<String,String>();
     _localeName.put("af", "ISO-8859-1");
     _localeName.put("sq", "ISO-8859-1");
     _localeName.put("ar", "ISO-8859-6");

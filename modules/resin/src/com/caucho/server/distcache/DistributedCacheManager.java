@@ -87,36 +87,11 @@ abstract public class DistributedCacheManager
   abstract public CacheKeyEntry getKey(Object key, CacheConfig config);
 
   /**
-   * Gets a cache entry
-   */
-  // abstract public CacheEntry getEntry(HashKey hashKey, CacheConfig config);
-
-  /**
-   * Gets a cache entry
-   */
-  //abstract public Object get(HashKey hashKey, CacheConfig config);
-
-  /**
-   * Gets a cache entry
-   */
-  /*
-  abstract public boolean get(HashKey hashKey,
-			      OutputStream os,
-			      CacheConfig config)
-    throws IOException;
-  */
-
-  /**
-   * Gets a cache entry
-   */
-  //  abstract public Object peek(HashKey hashKey, CacheConfig config);
-
-  /**
    * Sets a cache entry
    */
   public void put(HashKey hashKey,
-			   Object value,
-			   CacheConfig config)
+		  Object value,
+		  CacheConfig config)
   {
     throw new UnsupportedOperationException();
   }

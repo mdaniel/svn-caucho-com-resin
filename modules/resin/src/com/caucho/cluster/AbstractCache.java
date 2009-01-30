@@ -71,13 +71,13 @@ abstract public class AbstractCache extends AbstractMap
 
   private String _guid;
 
-  private Collection<CacheListener> _listeners =
-          new ConcurrentLinkedQueue<CacheListener>();
+  private Collection<CacheListener> _listeners
+    = new ConcurrentLinkedQueue<CacheListener>();
 
   private CacheConfig _config = new CacheConfig();
 
   private LruCache<Object, CacheKeyEntry> _entryCache
-          = new LruCache<Object, CacheKeyEntry>(512);
+    = new LruCache<Object, CacheKeyEntry>(512);
 
   private boolean _isInit;
 
@@ -103,20 +103,20 @@ abstract public class AbstractCache extends AbstractMap
     return _name;
   }
 
-
   /**
    * Added for testing support.
    * @param config
    */
-  protected void setConfig(CacheConfig config) {
+  protected void setConfig(CacheConfig config)
+  {
     if (config != null) {
       synchronized(this) {
         if (!_isInit) {
           _config = config;
-      } else {
+	} else {
           throw new ConfigException("This cache has already been configured!");
         }
-    }
+      }
     }
   }
 
@@ -333,7 +333,6 @@ abstract public class AbstractCache extends AbstractMap
   public void init()
   {
     synchronized (this) {
-
       if (_isInit)
         return;
       _isInit = true;
@@ -364,7 +363,6 @@ abstract public class AbstractCache extends AbstractMap
 
       _distributedCacheManager = server.getDistributedCacheManager();
 
-
       _cacheStats
               = new AtomicReference<CacheStatisticsManager.ManagedCacheStatistics>(
            CacheStatisticsManager.getInstance(this, _config.getCacheStatisticsAccuraccy()));
@@ -391,10 +389,8 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object get(Object key)
   {
-    Object result =  getKeyEntry(key).get(_config);
-
-    if (result == null)
-      _entryCache.remove(key);
+    Object result = getKeyEntry(key).get(_config);
+    
     return result;
   }
 
@@ -432,7 +428,9 @@ abstract public class AbstractCache extends AbstractMap
   public Object put(Object key, Object value)
   {
     Object object = getKeyEntry(key).put(value, _config);
+    
     notifyPut(key);
+    
     logFlow("put : ", key, value, object);
     return object;
   }
@@ -459,9 +457,9 @@ abstract public class AbstractCache extends AbstractMap
    * @param idleTimeout the idle timeout for the item
    */
   public ExtCacheEntry put(Object key,
-          InputStream is,
-          long idleTimeout)
-          throws IOException
+			   InputStream is,
+			   long idleTimeout)
+    throws IOException
   {
     return getKeyEntry(key).put(is, _config, idleTimeout);
   }
@@ -476,10 +474,11 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-          long version,
-          Object value)
+			       long version,
+			       Object value)
   {
     put(key, value);
+    
     return true;
   }
 
@@ -493,9 +492,9 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-          long version,
-          InputStream inputStream)
-          throws IOException
+			       long version,
+			       InputStream inputStream)
+    throws IOException
   {
     put(key, inputStream);
 
@@ -509,16 +508,9 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object remove(Object key)
   {
-    Object value = get(key);
-
-    if (value != null) {
-       CacheKeyEntry keyEntry = getKeyEntry(key);
-       keyEntry.remove(_config);
-       keyEntry.put(null, _config);
-       notifyRemove(key);
-       _entryCache.remove(key);
-    }
-    return value;
+    CacheKeyEntry keyEntry = getKeyEntry(key);
+    
+    return keyEntry.remove(_config);
   }
 
   /**
@@ -531,9 +523,6 @@ abstract public class AbstractCache extends AbstractMap
     return false;
   }
 
-
-
-
   /**
    * Returns the CacheKeyEntry for the given key.
    */
@@ -543,19 +532,253 @@ abstract public class AbstractCache extends AbstractMap
 
     if (entry == null) {
       entry = _distributedCacheManager.getKey(key, _config);
-      _cacheStats.get().incrementMisses(1);
       _entryCache.put(key, entry);
-    } else {
-      _cacheStats.get().incrementHits(1);
     }
 
     return entry;
   }
 
-
-  public Set<Map.Entry> entrySet()    {
+  public Set<Map.Entry> entrySet()
+  {
     return new CacheEntrySet<Entry>(_entryCache);
+  }
 
+  /**
+   * Returns a map of the items if found in the central cache.
+   *
+   * @note If a cacheLoader is configured if an item is not found in the cache.
+   */
+  public Map getAll(Collection keys)
+  {
+    Map result = new HashMap();
+    for (Object key : keys) {
+      Object value = get(key);
+
+      if (value != null) {
+        result.put(key, value);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Loads an item into the cache if found by the CacheLoader.
+   * @param key
+   */
+  public void load(Object key)
+  {
+    Object value = cacheLoader(key);
+
+    if (value != null)
+      notifyLoad(key);
+  }
+
+  /**
+   * Implements the loadAll method for a collection of keys.
+   *
+   * The items are first obtained from the loader and added to the cache.
+   * Items not found from the loader may be in the backing store, and are
+   * fetched from there.
+   */
+  public void loadAll(Collection keys)
+  {
+    if (keys == null || keys.size() == 0)
+      return;
+    
+    CacheLoader loader = _config.getCacheLoader();
+    Map entries = null;
+
+    if (loader != null) {
+      entries = loader.loadAll(keys);
+
+      if (entries.size() > 0) {
+        putAll(entries);
+      }
+    }
+
+    for (Object key : keys) {
+      if (! containsKey(key))
+        get(key);
+    }
+
+    if (_listeners.size() > 0) {
+      for (Object key : keySet()) {
+        notifyLoad(key);
+      }
+    }
+  }
+
+  /**
+   * Add a listener to the cache
+   */
+  public void addListener(CacheListener listener)
+  {
+    _listeners.add(listener);
+  }
+
+  /**
+   * Remove a listener from the cache.
+   */
+  public void removeListener(CacheListener listener)
+  {
+    _listeners.remove(listener);
+  }
+
+  public CacheStatistics getCacheStatistics()
+  {
+    return _cacheStats.get();
+  }
+
+  /**
+   * Ignored, since evictions are handled by the container.
+   */
+  public void evict()
+  {
+    notifyEvict(null);
+  }
+
+  public Collection values()
+  {
+    return new CacheValues(_entryCache);
+  }
+
+  public Set keySet()
+  {
+    return new CacheKeys(_entryCache);
+  }
+
+  public boolean containsValue(Object value)
+  {
+    /**
+     *  TODO(fred): compute the hash of the value to speed this linear search
+     *  Other optimizations are possible.
+     */
+    Iterator<CacheKeyEntry> iterator = _entryCache.values();
+
+    while (iterator.hasNext()) {
+      if (iterator.next().getEntry().getValue().equals(value)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public void clear()
+  {
+    _entryCache.clear();
+    notifyClear(null);
+  }
+
+  @Override
+  public int size()
+  {
+    return _entryCache.size();
+  }
+
+  @Override
+  public void putAll(Map map)
+  {
+    if (map == null || map.size() == 0)
+      return;
+    Set entries = map.entrySet();
+
+    for (Object item : entries) {
+      Map.Entry entry = (Map.Entry) item;
+      put(entry.getKey(), entry.getValue());
+    }
+  }
+
+  @Override
+  public boolean containsKey(Object key)
+  {
+    return _entryCache.get(key) != null;
+  }
+
+  /**
+   * Returns true is the local cache is empty
+   * @return
+   */
+  @Override
+  public boolean isEmpty()
+  {
+    return _entryCache.size() == 0;
+  }
+
+  /**
+   * Places an item in the cache if found in the loader, replacing
+   * an existing entry if it had been present.
+   */
+  protected Object cacheLoader(Object key)
+  {
+    CacheLoader loader = _config.getCacheLoader();
+    Object value = (loader != null) ? loader.load(key) : null;
+
+    if (value != null) {
+      put(key, value);
+    } else {
+      value = get(key);
+    }
+
+    return value;
+  }
+
+  protected void notifyLoad(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyLoad(_listeners, key);
+    }
+  }
+
+  protected void notifyEvict(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyEvict(_listeners, key);
+    }
+  }
+
+  protected void notifyClear(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyClear(_listeners, key);
+    }
+  }
+
+  protected void notifyPut(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyPut(_listeners, key);
+    }
+  }
+
+  protected void notifyRemove(Object key)
+  {
+    if (_listeners.size() > 0) {
+      CacheListeners.notifyRemove(_listeners, key);
+    }
+  }
+
+  /**
+   * Used in the implementation of the
+   * {@link javax.cache.CacheFactory} createCache method.
+   *
+   * @param request
+   * @return
+   */
+  public static final Cache getInstance(Map request)
+  {
+    String cacheName = (String) request.get(CACHE_NAME);
+    //TODO: return the appropriate cache type for the environment.
+    //TODO: accept a CacheConfiguration
+    ClusterCache cache = new ClusterCache(cacheName);
+    cache.init();
+    return cache;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _guid + "]";
   }
 
   protected static class CacheEntrySetIterator<K, V> implements Iterator {
@@ -691,240 +914,6 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
-   * Returns a map of the items if found in the central cache.
-   *
-   * @note If a cacheLoader is configured if an item is not found in the cache.
-   */
-  public Map getAll(Collection keys)
-  {
-    Map result = new HashMap();
-    for (Object key : keys) {
-      Object value = get(key);
-
-      if (value != null) {
-        result.put(key, value);
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Loads an item into the cache if found by the CacheLoader.
-   * @param key
-   */
-  public void load(Object key)
-  {
-    Object value = cacheLoader(key);
-
-    if (value != null)
-      notifyLoad(key);
-  }
-
-  /**
-   * Implements the loadAll method for a collection of keys.
-   *
-   * The items are first obtained from the loader and added to the cache.
-   * Items not found from the loader may be in the backing store, and are fetched from there.
-   */
-  public void loadAll(Collection keys)
-  {
-    if (keys == null || keys.size() == 0) return;
-    CacheLoader loader = _config.getCacheLoader();
-    Map entries = null;
-
-    if (loader != null) {
-      entries = loader.loadAll(keys);
-
-      if (entries.size() > 0) {
-        putAll(entries);
-      }
-    }
-
-    for (Object key : keys) {
-
-      if (!containsKey(key))
-        get(key);
-    }
-
-    if (_listeners.size() > 0) {
-      for (Object key : keySet()) {
-        notifyLoad(key);
-      }
-    }
-  }
-
-  /**
-   * Add a listener to the cache
-   */
-  public void addListener(CacheListener listener)
-  {
-      _listeners.add(listener);
-  }
-
-  /**
-   * Remove a listener from the cache.
-   */
-  public void removeListener(CacheListener listener)
-  {
-      _listeners.remove(listener);
-  }
-
-  public CacheStatistics getCacheStatistics()
-  {
-    return _cacheStats.get();
-  }
-
-  /**
-   * Ignored, since evictions are handled by the container.
-   */
-  public void evict()
-  {
-    notifyEvict(null);
-  }
-
-  public Collection values() {
-    return new CacheValues(_entryCache);
-  }
-
-  public Set keySet() {
-    return new CacheKeys(_entryCache);
-  }
-
-  public boolean containsValue(Object value)
-  {
-    /**
-     *  TODO(fred): compute the hash of the value to speed this linear search
-     *  Other optimizations are possible.
-     */
-    Iterator<CacheKeyEntry> iterator = _entryCache.values();
-
-    while (iterator.hasNext()) {
-      if (iterator.next().getEntry().getValue().equals(value)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _guid + "]";
-  }
-
-  @Override
-  public void clear()
-  {
-    _entryCache.clear();
-    notifyClear(null);
-  }
-
-  @Override
-  public int size()
-  {
-    return _entryCache.size();
-  }
-
-  @Override
-  public void putAll(Map map)
-  {
-    if (map == null || map.size() == 0)
-      return;
-    Set entries = map.entrySet();
-
-    for (Object item : entries) {
-      Map.Entry entry = (Map.Entry) item;
-      put(entry.getKey(), entry.getValue());
-    }
-  }
-
-  @Override
-  public boolean containsKey(Object key)
-  {
-    return _entryCache.get(key) != null;
-  }
-
-  /**
-   * Returns true is the local cache is empty
-   * @return
-   */
-  @Override
-  public boolean isEmpty()
-  {
-    return _entryCache.size() == 0;
-  }
-
-  /**
-   * Places an item in the cache if found in the loader, replacing
-   * an existing entry if it had been present.
-   */
-  protected Object cacheLoader(Object key)
-  {
-    CacheLoader loader = _config.getCacheLoader();
-    Object value = (loader != null) ? loader.load(key) : null;
-
-    if (value != null) {
-      put(key, value);
-    } else {
-      value = get(key);
-    }
-
-    return value;
-  }
-
-  protected void notifyLoad(Object key)
-  {
-    if (_listeners.size() > 0) {
-      CacheListeners.notifyLoad(_listeners, key);
-    }
-  }
-
-  protected void notifyEvict(Object key)
-  {
-    if (_listeners.size() > 0) {
-      CacheListeners.notifyEvict(_listeners, key);
-    }
-  }
-
-  protected void notifyClear(Object key)
-  {
-    if (_listeners.size() > 0) {
-      CacheListeners.notifyClear(_listeners, key);
-    }
-  }
-
-  protected void notifyPut(Object key)
-  {
-    if (_listeners.size() > 0) {
-      CacheListeners.notifyPut(_listeners, key);
-    }
-  }
-
-  protected void notifyRemove(Object key)
-  {
-    if (_listeners.size() > 0) {
-      CacheListeners.notifyRemove(_listeners, key);
-    }
-  }
-
-  /**
-   * Used in the implementation of the
-   * {@link javax.cache.CacheFactory} createCache method.
-   *
-   * @param request
-   * @return
-   */
-  public static final Cache getInstance(Map request)
-  {
-    String cacheName = (String) request.get(CACHE_NAME);
-    //TODO: return the appropriate cache type for the environment.
-    //TODO: accept a CacheConfiguration
-    ClusterCache cache = new ClusterCache(cacheName);
-    cache.init();
-    return cache;
-  }
-
-  /**
    * Process the CacheListeners defined for this cache.
    */
   //TODO(fred): Dispatch to a thread, threadpool, or thread per event type.
@@ -987,7 +976,8 @@ abstract public class AbstractCache extends AbstractMap
     /**
      * Provide the appropriate implementation based on the requested accuracy
      */
-    public static ManagedCacheStatistics getInstance(AbstractCache cache, int accuracy)
+    public static ManagedCacheStatistics getInstance(AbstractCache cache,
+						     int accuracy)
     {
       switch (accuracy) {
         default:

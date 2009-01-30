@@ -81,7 +81,7 @@ public interface Cache extends Map {
      * Loads and returns a map of all values specified by the key collection.
      */
     public Map getAll(Collection keys)
-            throws CacheException;
+      throws CacheException;
 
     /**
      * Asynchronous call to preload the cache item.
