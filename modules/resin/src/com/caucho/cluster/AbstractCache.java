@@ -99,7 +99,6 @@ abstract public class AbstractCache extends AbstractMap
     return _name;
   }
 
-
   /**
    * Assign the CacheLoader to populate the cache on a miss.
    */
@@ -834,7 +833,6 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-
   /**
    * Provides the values contined in the local cache.
    */
@@ -848,7 +846,6 @@ abstract public class AbstractCache extends AbstractMap
     {
       super(lruCache);
       _lruCache = lruCache;
-
     }
 
     /**
@@ -870,7 +867,6 @@ abstract public class AbstractCache extends AbstractMap
       };
     }
   }
-
 
   protected static class CacheKeys
     extends CacheEntrySet
@@ -903,6 +899,4 @@ abstract public class AbstractCache extends AbstractMap
       };
     }
   }
-
-
 }
