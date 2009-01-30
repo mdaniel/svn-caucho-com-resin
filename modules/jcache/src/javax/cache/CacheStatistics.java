@@ -29,20 +29,52 @@
 
 package javax.cache;
 
+/**
+ * Provides the means to observe the behavior of the Cache.
+ */
 public interface CacheStatistics
 {
+  /**
+   * No statistics will be colleced.
+   */
   public static int STATISTICS_ACCURACY_BEST_EFFORT = 1;
+
+  /**
+   * The  counters are thread safe.
+   */
   public static int STATISTICS_ACCURACY_GUARANTEED = 2;
+
+  /**
+   *
+   */
   public static int STATISTICS_ACCURACY_NONE = 0;
 
+  /**
+   * resets the counters for the hits and misses.
+   */
   public void clearStatistics();
-  
+
+  /**
+   * Returns the number of hits, i.e., the number of times
+   * requested values were found in the cache.
+   */
   public int getCacheHits();
-  
+
+  /**
+   * Returns the number of times requested values were not found
+   * in the local cache.  Note that this statistic does not
+   *
+   */
   public int getCacheMisses();
-  
+
+  /**
+   * Returns the current number of items in the local cache.
+   */
   public int getObjectCount();
-  
-  public int getStatisticsAccuracy();
-  
+
+  /**
+   * Returns the setting for cache statistics..
+   * @return
+   */
+  public int getStatisticsAccuracy();  
 }
