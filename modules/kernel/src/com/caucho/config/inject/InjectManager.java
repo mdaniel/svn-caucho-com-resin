@@ -962,6 +962,12 @@ public class InjectManager
       }
     }
 
+    if (bean instanceof AbstractBean) {
+      AbstractBean abstractBean = (AbstractBean) bean;
+
+      addComponentByType(abstractBean.getTargetType(), bean);
+    }    
+
     if (bean.getName() != null)
       addComponentByName(bean.getName(), bean);
 

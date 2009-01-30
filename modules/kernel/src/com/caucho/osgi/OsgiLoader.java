@@ -173,4 +173,10 @@ public class OsgiLoader extends Loader implements EnvironmentListener
   public void environmentStop(EnvironmentClassLoader loader)
   {
   }
+
+  @Override
+  public String toString()
+  {
+    return "OsgiLoader[" + _manager + "]";
+  }
 }

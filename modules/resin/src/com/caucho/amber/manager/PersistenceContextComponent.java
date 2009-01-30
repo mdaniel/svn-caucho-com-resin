@@ -30,7 +30,8 @@
 package com.caucho.amber.manager;
 
 import javax.persistence.*;
-import java.util.*;
+import javax.context.CreationalContext;
+import javax.context.ApplicationScoped;
 
 import com.caucho.config.inject.*;
 
@@ -44,12 +45,19 @@ public class PersistenceContextComponent extends FactoryComponent {
 				     EntityManagerTransactionProxy proxy)
   {
     super(EntityManager.class, name);
-    
+    setScopeType(ApplicationScoped.class);
+
     _proxy = proxy;
   }
 
   @Override
   public Object create()
+  {
+    return _proxy;
+  }
+
+  @Override
+  protected Object createNew(CreationalContext context)
   {
     return _proxy;
   }

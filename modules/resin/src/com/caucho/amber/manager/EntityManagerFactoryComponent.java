@@ -31,6 +31,8 @@ package com.caucho.amber.manager;
 
 import javax.persistence.*;
 import javax.persistence.spi.*;
+import javax.context.ApplicationScoped;
+import javax.context.CreationalContext;
 
 import com.caucho.amber.cfg.*;
 import com.caucho.config.inject.*;
@@ -50,6 +52,7 @@ public class EntityManagerFactoryComponent extends FactoryComponent {
 				       PersistenceUnitConfig unit)
   {
     super(EntityManagerFactory.class, unit.getName());
+    setScopeType(ApplicationScoped.class);
 
     _amber = amber;
     _provider = provider;
@@ -64,6 +67,15 @@ public class EntityManagerFactoryComponent extends FactoryComponent {
     if (_factory == null)
       _factory = _amber.getEntityManagerFactory(_unit.getName());
     
+    return _factory;
+  }
+
+  @Override
+  protected Object createNew(CreationalContext context)
+  {
+    if (_factory == null)
+      _factory = _amber.getEntityManagerFactory(_unit.getName());
+
     return _factory;
   }
 }
