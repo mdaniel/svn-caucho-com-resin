@@ -644,6 +644,11 @@ public final class LruCache<K,V> {
     return _missCount;
   }
 
+  public void clearStatistics() {
+    _missCount = 0;
+    _hitCount = 0;
+  }
+
   /**
    * A cache item
    */
