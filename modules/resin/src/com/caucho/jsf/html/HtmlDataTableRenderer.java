@@ -475,11 +475,8 @@ class HtmlDataTableRenderer extends BaseRenderer
 
           out.startElement("td", child);
 
-          if (columnClassArray != null) {
-            String v = columnClassArray [i % columnClassArray.length];
-
-            out.writeAttribute("class", v, "columnClasses");
-          }
+          if (columnClassArray != null && i < columnClassArray.length)
+            out.writeAttribute("class", columnClassArray[i], "columnClasses");
 
           if (child instanceof UIColumn) {
             int subCount = child.getChildCount();
