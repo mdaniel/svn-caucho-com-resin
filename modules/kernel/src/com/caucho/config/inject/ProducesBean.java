@@ -48,8 +48,8 @@ import javax.inject.manager.Bean;
 /**
  * Configuration for a @Produces method
  */
-public class ProducesComponent extends ComponentImpl {
-  private static final L10N L = new L10N(ProducesComponent.class);
+public class ProducesBean extends ComponentImpl {
+  private static final L10N L = new L10N(ProducesBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];
   
@@ -62,12 +62,12 @@ public class ProducesComponent extends ComponentImpl {
 
   private boolean _isBound;
 
-  public ProducesComponent(InjectManager webBeans,
-			   Bean producer,
-			   Method method,
-			   Annotation []annList)
+  public ProducesBean(InjectManager inject,
+		      Bean producer,
+		      Method method,
+		      Annotation []annList)
   {
-    super(webBeans);
+    super(inject);
 
     _producer = producer;
     _method = method;
@@ -180,12 +180,6 @@ public class ProducesComponent extends ComponentImpl {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
-    
-    if (getName() != null) {
-      sb.append("name=");
-      sb.append(getName());
-      sb.append(", ");
-    }
 
     sb.append(getTargetSimpleName());
     sb.append(", ");
@@ -193,6 +187,27 @@ public class ProducesComponent extends ComponentImpl {
     sb.append(".");
     sb.append(_method.getName());
     sb.append("()");
+    
+    sb.append(", {");
+
+    boolean isFirst = true;
+    for (Object obj : getBindings()) {
+      Annotation ann = (Annotation) obj;
+      
+      if (! isFirst)
+	sb.append(", ");
+
+      sb.append(ann);
+
+      isFirst = false;
+    }
+
+    sb.append("}");
+    
+    if (getName() != null) {
+      sb.append(", name=");
+      sb.append(getName());
+    }
 
     if (getDeploymentType() != null) {
       sb.append(", @");

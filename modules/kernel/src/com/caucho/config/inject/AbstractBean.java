@@ -117,7 +117,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
 
-  private ArrayList<ProducesComponent> _producesList;
+  private ArrayList<ProducesBean> _producesList;
 
   private boolean _isNullable;
 
@@ -387,7 +387,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     initDefault();
 
     if (_producesList != null) {
-      for (ProducesComponent producesBean : _producesList) {
+      for (ProducesBean producesBean : _producesList) {
 	_webBeans.addBean(producesBean);
       }
     }
@@ -731,14 +731,14 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   protected void addProduces(Method method, Annotation []annList)
   {
-    ProducesComponent comp
-      = new ProducesComponent(_webBeans, this, method, annList);
+    ProducesBean bean = new ProducesBean(_webBeans, this, method, annList);
 
-    comp.init();
+    bean.init();
 
     if (_producesList == null)
-      _producesList = new ArrayList<ProducesComponent>();
-    _producesList.add(comp);
+      _producesList = new ArrayList<ProducesBean>();
+    
+    _producesList.add(bean);
   }
 
   protected void addMethod(Method method, Annotation []annList)
@@ -1045,7 +1045,18 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     sb.append("[");
 
     sb.append(getTargetSimpleName());
-    sb.append(", ");
+    sb.append(", {");
+
+    for (int i = 0; i < _bindings.size(); i++) {
+      Annotation ann = _bindings.get(i);
+
+      if (i != 0)
+	sb.append(", ");
+
+      sb.append(ann);
+    }
+
+    sb.append("}, ");
 
     if (_deploymentType != null) {
       sb.append("@");

@@ -609,26 +609,37 @@ public class InjectManager
       WebComponent component = getWebComponent(field.getGenericType());
 
       if (component == null) {
-	throw injectError(field, L.l("Can't find a component for '{0}' because no beans has been registered and enabled.",
+	throw injectError(field, L.l("Can't find a component for '{0}' because no beans implementing that class have been registered with the injection Manager.",
 				   field.getType().getName()));
       }
       else {
 	ArrayList<Bean<?>> enabledList = component.getEnabledBeanList();
 
 	if (enabledList.size() == 0) {
-	  throw injectError(field, L.l("Can't find a component for '{0}' because any matching beans are disabled, i.e. non-enabled Deploy.\nDisabled beans: {2}",
-				     field.getType().getName(),
-				     toList(bindings),
-				     component.getBeanList()));
+	  throw injectError(field, L.l("Can't find a component for '{0}' because any matching beans are disabled, i.e. non-enabled Deploy.\nDisabled beans:{2}",
+				       field.getType().getName(),
+				       toList(bindings),
+				       listToLines(component.getBeanList())));
 	}
 	else {
-	  throw injectError(field, L.l("Can't find a component for '{0}' because no enabled beans match the bindings {1}.\nEnabled beans: {2}",
-				     field.getType().getName(),
-				     toList(bindings),
-				       enabledList));
+	  throw injectError(field, L.l("Can't find a component for '{0}' because no enabled beans match the bindings {1}.\nEnabled beans:{2}",
+				       field.getType().getName(),
+				       toList(bindings),
+				       listToLines(enabledList)));
 	}
       }
     }
+  }
+
+  private String listToLines(List list)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < list.size(); i++) {
+      sb.append("\n    ").append(list.get(i));
+    }
+
+    return sb.toString();
   }
 
   private Annotation []getBindings(Annotation []annotations)

@@ -99,7 +99,7 @@ public class InvocationContextImpl implements InvocationContext {
   {
     try {
       // ioc/0c57
-      if (_index < _chainIndex.length) {
+      if (_chainObjects != null && _index < _chainIndex.length) {
 	int i = _index++;
 
 	return _chainMethods[i].invoke(_chainObjects[_chainIndex[i]], this);
