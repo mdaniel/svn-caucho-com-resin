@@ -30,8 +30,11 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.CacheSerializer;
+import com.caucho.config.Configurable;
 import com.caucho.cluster.HessianSerializer;
 import com.caucho.util.Alarm;
+
+import javax.cache.CacheStatistics;
 
 /**
  * Manages the distributed cache
@@ -71,21 +74,23 @@ public class CacheConfig
   /**
    * The Cache will use a CacheLoader to populate cache misses.
    */
+
   public javax.cache.CacheLoader getCacheLoader()
   {
     return _cacheLoader;
   }
 
   /**
-   * Sets the CacheLoader that the Cache can then use to populate cache misses for a reference stored (database)
+   * Sets the CacheLoader that the Cache can then use to populate cache misses for a reference store (database)
    */
+  @Configurable
   public void setCacheLoader(javax.cache.CacheLoader cacheLoader)
   {
     _cacheLoader = cacheLoader;
   }
 
   /**
-   * Sets the globally-unique id for the cache
+   * Returns the globally-unique id for the cache.
    */
   public String getGuid()
   {
@@ -101,7 +106,7 @@ public class CacheConfig
   }
 
   /**
-   * Returns the flags
+   * Returns internal flags
    */
   public int getFlags()
   {
@@ -109,7 +114,7 @@ public class CacheConfig
   }
 
   /**
-   * Sets the flags
+   * Sets inteneral flags
    */
   public void setFlags(int flags)
   {
@@ -128,7 +133,12 @@ public class CacheConfig
     return _expireTimeout;
   }
 
-  public long getExpireTimeoutWindow() 
+  /**
+   * Returns the expire check window, i.e. the precision of the expire
+   * check.  Since an expired item can cause a massive cascade of
+   * attempted loads from the backup, the actual expiration is randomized.
+   */
+  public long getExpireTimeoutWindow()
   {
     return _expireTimeoutWindow;
   }
@@ -140,6 +150,7 @@ public class CacheConfig
    *
    * Default is infinite.
    */
+  @Configurable
   public void setExpireTimeout(long expireTimeout)
   {
     if (expireTimeout < 0 || TIME_INFINITY <= expireTimeout)
@@ -158,13 +169,15 @@ public class CacheConfig
     return _expireTimeoutWindow > 0 ? _expireTimeoutWindow : _expireTimeoutWindow / 4;
   }
 
-  /**
-   * The maximum idle time for an item.  For example, session
-   * data might be removed if idle over 30 minutes.
-   *
-   * @param expireTimeoutWindow
+ /**
+   * Provides the opportunity to control the expire check window,
+   * i.e. the precision of the expirecheck.
+   * <p/>
+   * Since an expired item can cause a massive cascade of
+   * attempted loads from the backup, the actual expiration is randomized.
    */
-  public void setExpireTimeoutWindow(long expireTimeoutWindow)
+ @Configurable
+ public void setExpireTimeoutWindow(long expireTimeoutWindow)
   {
     _expireTimeoutWindow = expireTimeoutWindow;
   }
@@ -195,7 +208,8 @@ public class CacheConfig
    * Cached data would typically use an infinite idle time because
    * it doesn't depend on how often it's accessed.
    */
-  public void setIdleTimeout(long idleTimeout)
+  @Configurable
+    public void setIdleTimeout(long idleTimeout)
   {
     if (idleTimeout < 0 || TIME_INFINITY <= idleTimeout)
       idleTimeout = TIME_INFINITY;
@@ -212,7 +226,15 @@ public class CacheConfig
     return _idleTimeoutWindow > 0 ? _idleTimeoutWindow : _idleTimeoutWindow / 4;
   }
 
-  public void setIdleTimeoutWindow(long idleTimeoutWindow)
+   /**
+   * Provides the option to set the idle check window,  the amount of time
+   * in which the idle time limit can be spread out to smooth performance.
+   * <p/>
+   * If this optional value is not set, the system  uses a fraction of the
+   * idle time.
+   */
+   @Configurable
+    public void setIdleTimeoutWindow(long idleTimeoutWindow)
   {
     _idleTimeoutWindow = idleTimeoutWindow;
   }
@@ -230,6 +252,7 @@ public class CacheConfig
    * The lease timeout is the time a server can use the local version
    * if it owns it, before a timeout.
    */
+  @Configurable
   public void setLeaseTimeout(long timeout)
   {
     _leaseTimeout = timeout;
@@ -248,7 +271,8 @@ public class CacheConfig
    * The local read timeout is the time a local copy of the
    * cache is considered valid.
    */
-  public void setLocalReadTimeout(long timeout)
+  @Configurable
+    public void setLocalReadTimeout(long timeout)
   {
     _localReadTimeout = timeout;
   }
@@ -296,6 +320,13 @@ public class CacheConfig
       setFlags(getFlags() & ~CacheConfig.FLAG_BACKUP);
   }
 
+
+  /**
+   * Returns true is the triplicate backup mode enabled so that
+   * all triad servers have a copy of the cache item.
+   * <p/>
+   * Defaults is true.
+   */
   public boolean isTriplePersistence()
   {
     return (getFlags() & CacheConfig.FLAG_TRIPLICATE) == CacheConfig.FLAG_TRIPLICATE;
@@ -303,10 +334,11 @@ public class CacheConfig
 
   /**
    * Sets the triplicate backup mode.  If triplicate backups is set,
-   * all triad servers have a copy of the cache item.
+   * all triad servers have a copy of each cached item.
    * <p/>
    * Defaults to true.
    */
+  @Configurable
   public void setTriplePersistence(boolean isTriplicate)
   {
     if (isTriplicate)
@@ -320,10 +352,6 @@ public class CacheConfig
     return _accuracy;
   }
 
-  public void setCacheStatisticsAccuracy(int accuracy)
-  {
-    _accuracy = accuracy;
-  }
 
   /**
    * Initializes the CacheConfig.
@@ -335,6 +363,10 @@ public class CacheConfig
 
     if (_valueSerializer == null)
       _valueSerializer = new HessianSerializer();
+
+    _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
+
+
   }
 
   @Override

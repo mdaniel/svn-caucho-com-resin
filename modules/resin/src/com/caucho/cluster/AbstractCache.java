@@ -30,6 +30,7 @@
 package com.caucho.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
@@ -38,7 +39,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
-import javax.cache.Cache;
 import javax.cache.CacheListener;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
@@ -47,9 +47,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -100,8 +97,9 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
-   * Assign the CacheLoader to populate the cache on a miss.
+   * Assigns the CacheLoader to populate the cache on a miss.
    */
+  @Configurable
   public void setCacheLoader(CacheLoader loader)
   {
     _config.setCacheLoader(loader);
@@ -302,9 +300,6 @@ abstract public class AbstractCache extends AbstractMap
       if (_isInit)
         return;
       _isInit = true;
-
-      //TODO(fred): remove hack after updating all tests, now that injection is works
-      _name = ((_name == null) || (_name.length() == 0)) ? "default" : _name;
 
       if ((_name == null) || (_name.length() == 0))
         throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
@@ -775,6 +770,10 @@ abstract public class AbstractCache extends AbstractMap
     return getClass().getSimpleName() + "[" + _guid + "]";
   }
 
+  /**
+   * provides the implementation of the set of entries over the
+   * cache,
+   */
   protected static class CacheEntrySet<E>
     extends AbstractSet
   {
@@ -868,6 +867,9 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
+  /**
+   * Provides access to the keys of the map as a set.
+   */
   protected static class CacheKeys
     extends CacheEntrySet
   {
