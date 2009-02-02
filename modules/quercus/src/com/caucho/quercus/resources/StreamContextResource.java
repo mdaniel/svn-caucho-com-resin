@@ -79,13 +79,10 @@ public class StreamContextResource extends ResourceValue {
   /**
    * Sets an option
    */
-  public void setOption(String wrapper, String option, Value value)
+  public void setOption(Env env, StringValue wrapper,
+                        StringValue option, Value value)
   {
-    // XXX: i18n
-    StringValue wrapperV = new StringBuilderValue(wrapper);
-    StringValue optionV = new StringBuilderValue(option);
-
-    _options.getArray(wrapperV).put(optionV, value);
+    _options.getArray(wrapper).put(option, value);
   }
 
   /**

@@ -33,14 +33,20 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.file.FileInput.HttpInput;
+import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.FilePath;
+import com.caucho.vfs.HttpPath;
+import com.caucho.vfs.HttpStreamWrapper;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.LockableStream;
 
 import java.io.*;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,20 +72,20 @@ public class FileInputOutput extends AbstractBinaryOutput
 
   private boolean _temporary;
 
-  public FileInputOutput(Env env, Path path)
+  private FileInputOutput(Env env, Path path)
     throws IOException
   {
     this(env, path, false, false, false);
   }
 
-  public FileInputOutput(Env env, Path path, boolean append, boolean truncate)
+  private FileInputOutput(Env env, Path path, boolean append, boolean truncate)
     throws IOException
   {
     this(env, path, append, truncate, false);
   }
 
-  public FileInputOutput(Env env, Path path, 
-                         boolean append, boolean truncate, boolean temporary)
+  private FileInputOutput(Env env, Path path, 
+                          boolean append, boolean truncate, boolean temporary)
     throws IOException
   {
     _env = env;
@@ -100,7 +106,18 @@ public class FileInputOutput extends AbstractBinaryOutput
 
     _temporary = temporary;
   }
-
+  
+  public static FileInputOutput create(Env env,
+                                       Path path,
+                                       StreamContextResource context,
+                                       boolean append,
+                                       boolean truncate,
+                                       boolean temporary)
+    throws IOException
+  {
+    return new FileInputOutput(env, path, append, truncate, temporary);
+  }
+  
   /**
    * Returns the write stream.
    */

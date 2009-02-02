@@ -39,6 +39,7 @@ import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -1318,10 +1319,10 @@ public class FileModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static BinaryStream fopen(Env env,
-				   StringValue filename,
-				   String mode,
-				   @Optional boolean useIncludePath,
-				   @Optional Value context)
+                                   StringValue filename,
+                                   String mode,
+                                   @Optional boolean useIncludePath,
+                                   @Optional Value contextV)
   {
     if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
@@ -1332,6 +1333,11 @@ public class FileModule extends AbstractQuercusModule {
       env.warning(L.l("fopen mode must not be null"));
       return null;
     }
+    
+    StreamContextResource context = null;
+    
+    if (contextV instanceof StreamContextResource)
+      context = (StreamContextResource) contextV;
 
     // XXX: context
     try {
@@ -1378,9 +1384,10 @@ public class FileModule extends AbstractQuercusModule {
           BinaryInput input;
 
           if (mode.startsWith("r+"))
-            input = new FileInputOutput(env, path);
+            input = FileInputOutput.create(env, path, context,
+                                           false, false, false);
           else
-            input = new FileInput(env, path);
+            input = FileInput.create(env, path, context);
 
           return input;
         } catch (IOException e) {
@@ -1394,7 +1401,8 @@ public class FileModule extends AbstractQuercusModule {
       else if (mode.startsWith("w")) {
         try {
           if (mode.startsWith("w+")) 
-            return new FileInputOutput(env, path, false, true);
+            return FileInputOutput.create(env, path, context,
+                                          false, true, false);
           else
             return new FileOutput(env, path);
         } catch (IOException e) {
@@ -1408,7 +1416,8 @@ public class FileModule extends AbstractQuercusModule {
       else if (mode.startsWith("a")) {
         try {
           if (mode.startsWith("a+"))
-            return new FileInputOutput(env, path, true, false);
+            return FileInputOutput.create(env, path, context,
+                                          true, false, false);
           else
             return new FileOutput(env, path, true);
         } catch (IOException e) {
@@ -1427,7 +1436,8 @@ public class FileModule extends AbstractQuercusModule {
         }
         
         if (mode.startsWith("x+"))
-          return new FileInputOutput(env, path);
+          return FileInputOutput.create(env, path, context,
+                                        false, false, false);
         else 
           return new FileOutput(env, path);
       }
@@ -2915,7 +2925,7 @@ public class FileModule extends AbstractQuercusModule {
 
       env.addCleanup(new RemoveFile(file));
       
-      return new FileInputOutput(env, file, false, false, true);
+      return FileInputOutput.create(env, file, null, false, false, true);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 

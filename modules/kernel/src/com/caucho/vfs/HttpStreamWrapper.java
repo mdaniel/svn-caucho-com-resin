@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Facade to HttpStream to properly handle the close.
  */
-class HttpStreamWrapper extends StreamImpl
+public class HttpStreamWrapper extends StreamImpl
 {
   private static final Logger log
     = Logger.getLogger(HttpStream.class.getName());
@@ -98,6 +98,22 @@ class HttpStreamWrapper extends StreamImpl
   public int getPort()
   {
     return _stream.getPort();
+  }
+  
+  /**
+   * Sets the http version.
+   */
+  public void setHttp10()
+  {
+    _stream.setHttp10();
+  }
+  
+  /**
+   * Sets the http version.
+   */
+  public void setHttp11()
+  {
+    _stream.setHttp11();
   }
   
   /**

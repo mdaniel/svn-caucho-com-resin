@@ -84,6 +84,8 @@ class HttpStream extends StreamImpl {
   private boolean _isHead;
   // true for a POST stream
   private boolean _isPost;
+  
+  private boolean _isHttp11 = true;
 
   // buffer containing the POST data
   private MemoryStream _tempStream;
@@ -310,6 +312,22 @@ class HttpStream extends StreamImpl {
   public int getPort()
   {
     return _port;
+  }
+  
+  /**
+   * Sets the http version.
+   */
+  public void setHttp10()
+  {
+    _isHttp11 = false;
+  }
+  
+  /**
+   * Sets the http version.
+   */
+  public void setHttp11()
+  {
+    _isHttp11 = true;
   }
   
   /**
@@ -569,21 +587,27 @@ class HttpStream extends StreamImpl {
       _ws.print("?");
       _ws.print(_path.getQuery());
     }
-    _ws.print(" HTTP/1.1\r\n");
-    Object host = getAttribute("host");
-    _ws.print("Host: ");
-    if (host != null) {
-      _ws.print(host);
-    }
-    else if (_virtualHost != null)
-      _ws.print(_virtualHost);
-    else {
-      _ws.print(_path.getHost());
-      if (_path.getPort() != 80) {
-	_ws.print(":");
-	_ws.print(String.valueOf(_path.getPort()));
+    
+    if (_isHttp11) {
+      _ws.print(" HTTP/1.1\r\n");
+      Object host = getAttribute("host");
+      _ws.print("Host: ");
+      if (host != null) {
+        _ws.print(host);
+      }
+      else if (_virtualHost != null)
+        _ws.print(_virtualHost);
+      else {
+        _ws.print(_path.getHost());
+        if (_path.getPort() != 80) {
+      _ws.print(":");
+      _ws.print(String.valueOf(_path.getPort()));
+        }
       }
     }
+    else
+      _ws.print(" HTTP/1.0\r\n");
+    
     _ws.print("\r\n");
     
     Object userAgent = getAttribute("User-Agent");

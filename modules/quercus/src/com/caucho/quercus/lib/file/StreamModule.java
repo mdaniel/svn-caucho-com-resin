@@ -160,14 +160,14 @@ public class StreamModule extends AbstractQuercusModule {
    */
   public static boolean stream_context_set_option(Env env,
                                                   Value resource,
-                                                  String wrapper,
-                                                  String option,
+                                                  StringValue wrapper,
+                                                  StringValue option,
                                                   Value value)
   {
     if (resource instanceof StreamContextResource) {
       StreamContextResource context = (StreamContextResource) resource;
 
-      context.setOption(wrapper, option, value);
+      context.setOption(env, wrapper, option, value);
 
       return true;
     }
