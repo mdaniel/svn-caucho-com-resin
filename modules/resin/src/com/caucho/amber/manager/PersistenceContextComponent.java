@@ -46,7 +46,8 @@ public class PersistenceContextComponent extends FactoryComponent {
   {
     super(EntityManager.class, name);
     setScopeType(ApplicationScoped.class);
-
+    addBinding(CurrentLiteral.CURRENT);
+    
     _proxy = proxy;
   }
 

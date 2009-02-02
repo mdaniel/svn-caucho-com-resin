@@ -53,6 +53,7 @@ public class EntityManagerFactoryComponent extends FactoryComponent {
   {
     super(EntityManagerFactory.class, unit.getName());
     setScopeType(ApplicationScoped.class);
+    addBinding(CurrentLiteral.CURRENT);
 
     _amber = amber;
     _provider = provider;
