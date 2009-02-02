@@ -140,12 +140,12 @@ public class Encoding {
    *
    * @return a reader for the translation
    */
-  public static EncodingReader getReadFactory(String encoding)
+  public static EncodingReader getReadFactory(final String encoding)
     throws UnsupportedEncodingException
   {
     EncodingReader factory = null;
-    
-    factory = _readEncodingFactories.get(encoding);
+
+    factory = _readEncodingFactories.get(encoding == null ? "null" : encoding);
 
     if (factory == null) {
       try {
@@ -173,7 +173,7 @@ public class Encoding {
 	factory.setJavaEncoding(javaEncoding);
       }
 
-      _readEncodingFactories.put(encoding, factory);
+      _readEncodingFactories.put(encoding == null ? "null" : encoding, factory);
     }
 
     return factory;
