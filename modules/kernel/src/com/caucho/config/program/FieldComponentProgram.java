@@ -31,20 +31,23 @@ package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.AbstractInjectionPoint;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.util.*;
 
 import java.util.Set;
+import java.util.HashSet;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import javax.inject.BindingType;
 import javax.inject.manager.Bean;
 import javax.inject.manager.InjectionPoint;
 
 public class FieldComponentProgram extends ConfigProgram
-  implements InjectionPoint
+
 {
   private static final L10N L = new L10N(FieldComponentProgram.class);
   private static final Logger log
@@ -53,6 +56,7 @@ public class FieldComponentProgram extends ConfigProgram
   private InjectManager _manager;
   private Bean _bean;
   private Field _field;
+  private AbstractInjectionPoint _ij;
 
   public FieldComponentProgram(InjectManager manager,
 			       Bean bean,
@@ -63,13 +67,28 @@ public class FieldComponentProgram extends ConfigProgram
     _field = field;
 
     field.setAccessible(true);
+
+    HashSet<Annotation> bindingSet = new HashSet<Annotation>();
+
+    for (Annotation ann : _field.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindingSet.add(ann);
+    }
+
+    _ij = new AbstractInjectionPoint(manager,
+				     bean,
+				     _field,
+				     _field.getGenericType(),
+				     bindingSet,
+				     _field.getAnnotations());
   }
 
   public void inject(Object bean, ConfigContext env)
   {
     Object value = null;
+    
     try {
-      value = _manager.getInstanceToInject(this, env);
+      value = _manager.getInstanceToInject(_ij, env);
 
       _field.set(bean, value);
     } catch (IllegalArgumentException e) {

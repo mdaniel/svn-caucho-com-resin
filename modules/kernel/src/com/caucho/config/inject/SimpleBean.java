@@ -464,8 +464,9 @@ public class SimpleBean extends ComponentImpl
       
       Object value = _ctor.newInstance(args);
 
-      if (isSingleton())
+      if (isSingleton()) {
 	SerializationAdapter.setHandle(value, getHandle());
+      }
 
       return value;
     } catch (RuntimeException e) {
@@ -557,8 +558,9 @@ public class SimpleBean extends ComponentImpl
 
       Class instanceClass = bean.generateClass();
 
-      if (instanceClass == getTargetClass() && isSingleton())
+      if (instanceClass == getTargetClass() && isSingleton()) {
 	instanceClass = SerializationAdapter.gen(instanceClass);
+      }
       
       if (instanceClass != null && instanceClass != _instanceClass) {
 	try {

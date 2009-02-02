@@ -69,17 +69,22 @@ public class SerializationAdapter {
 
   public static void setHandle(Object obj, Object handle)
   {
-    try {
-      Class cl = obj.getClass();
+    if (obj instanceof HandleAware) {
+      ((HandleAware) obj).setSerializationHandle(handle);
+    }
+    else {
+      try {
+	Class cl = obj.getClass();
 
-      for (Field field : cl.getDeclaredFields()) {
-	if (field.getName().equals("__caucho_handle")) {
-	  field.setAccessible(true);
-	  field.set(obj, handle);
+	for (Field field : cl.getDeclaredFields()) {
+	  if (field.getName().equals("__caucho_handle")) {
+	    field.setAccessible(true);
+	    field.set(obj, handle);
+	  }
 	}
+      } catch (Exception e) {
+	throw ConfigException.create(e);
       }
-    } catch (Exception e) {
-      throw ConfigException.create(e);
     }
   }
 

@@ -32,14 +32,18 @@ package com.caucho.config.j2ee;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.AbstractInjectionPoint;
+import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.logging.Logger;
 import javax.inject.BindingType;
+import javax.inject.manager.Bean;
 
 
 public class PostConstructProgram extends ConfigProgram
@@ -62,7 +66,7 @@ public class PostConstructProgram extends ConfigProgram
   protected void introspect()
   {
     // XXX: type
-    Class []paramTypes = _init.getParameterTypes();
+    Type []paramTypes = _init.getGenericParameterTypes();
 
     if (paramTypes.length == 0)
       return;
@@ -76,7 +80,8 @@ public class PostConstructProgram extends ConfigProgram
     for (int i = 0; i < paramTypes.length; i++) {
       Annotation []bindings = createBindings(paramAnns[i]);
       
-      _program[i] = new ParamProgram(webBeans, paramTypes[i], bindings);
+      _program[i] = new ParamProgram(webBeans, paramTypes[i],
+				     bindings, paramAnns[i]);
     }
   }
 
@@ -158,22 +163,39 @@ public class PostConstructProgram extends ConfigProgram
   }
 
   static class ParamProgram {
-    private final InjectManager _webBeans;
+    private final InjectManager _inject;
     private final Type _type;
     private final Annotation []_bindings;
+    private final AbstractInjectionPoint _injectionPoint;
 
-    ParamProgram(InjectManager webBeans,
+    ParamProgram(InjectManager inject,
 		 Type type,
-		 Annotation []bindings)
+		 Annotation []bindings,
+		 Annotation []annList)
     {
-      _webBeans = webBeans;
+      _inject = inject;
       _type = type;
       _bindings = bindings;
+
+      Bean bean = null;
+      Member member = null;
+      HashSet<Annotation> bindingSet = new HashSet<Annotation>();
+
+      if (bindings != null) {
+	for (Annotation ann :  bindings)
+	  bindingSet.add(ann);
+      }
+      else
+	bindingSet.add(CurrentLiteral.CURRENT);
+
+      _injectionPoint = new AbstractInjectionPoint(inject,
+						   bean, member, type,
+						   bindingSet, annList);
     }
 
     public Object eval(ConfigContext env)
     {
-      return _webBeans.getInstanceByType((Class) _type, _bindings);
+      return _inject.getInstanceToInject(_injectionPoint, env);
     }
   }
 }

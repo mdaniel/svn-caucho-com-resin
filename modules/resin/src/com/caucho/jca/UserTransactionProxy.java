@@ -253,7 +253,7 @@ public class UserTransactionProxy
    */
   private Object writeReplace()
   {
-    return new WebBeansHandle(UserTransaction.class);
+    return new SingletonHandle(UserTransaction.class);
   }
 
   public String toString()

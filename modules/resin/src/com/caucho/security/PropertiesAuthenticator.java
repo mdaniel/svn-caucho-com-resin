@@ -66,6 +66,7 @@ import java.io.*;
  * &lt;/sec:PropertiesAuthenticator>
  * </pre></code>
  */
+@com.caucho.config.Service
 public class PropertiesAuthenticator extends AbstractAuthenticator {
   private static final Logger log =
     Logger.getLogger(PropertiesAuthenticator.class.getName());

@@ -28,7 +28,7 @@
 
 package com.caucho.transaction;
 
-import com.caucho.config.inject.WebBeansHandle;
+import com.caucho.config.inject.SingletonHandle;
 import com.caucho.config.types.Period;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -432,7 +432,7 @@ public class TransactionManagerImpl
    */
   private Object writeReplace()
   {
-    return new WebBeansHandle(TransactionManager.class);
+    return new SingletonHandle(TransactionManager.class);
   }
 
   public String toString()

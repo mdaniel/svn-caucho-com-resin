@@ -1108,7 +1108,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
    */
   public String toString()
   {
-    return "DBPoolImpl[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }
 

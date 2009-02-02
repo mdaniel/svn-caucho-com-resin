@@ -35,7 +35,7 @@ import java.util.concurrent.*;
 
 import com.caucho.loader.*;
 import com.caucho.util.*;
-import com.caucho.config.inject.WebBeansHandle;
+import com.caucho.config.inject.SingletonHandle;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override
@@ -445,7 +445,7 @@ public class ScheduledThreadPool
    */
   public Object writeReplace()
   {
-    return new WebBeansHandle(ScheduledExecutorService.class);
+    return new SingletonHandle(ScheduledExecutorService.class);
   }
 
   @Override

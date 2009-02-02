@@ -1316,16 +1316,9 @@ public class InjectManager
   public <T> T getInstanceToInject(InjectionPoint ij,
 				   CreationalContext<?> ctx)
   {
-    Bean bean = ij.getBean();
+    Bean bean = resolveByInjectionPoint(ij);
 
-    ConfigContext env = (ConfigContext) ctx;
-    Class scopeType = bean.getScopeType();
-
-    if (! env.canInject(scopeType)) {
-      return (T) ((SimpleBean) bean).getScopeAdapter();
-    }
-
-    return (T) getInstance(bean);
+    return (T) getInstance(bean); // XXX: ctx
   }
 
   /**
@@ -1333,9 +1326,48 @@ public class InjectManager
    */
   public <T> T getInstanceToInject(InjectionPoint ij)
   {
-    Bean bean = ij.getBean();
+    Bean bean = resolveByInjectionPoint(ij);
     
     return (T) getInstance(bean);
+  }
+
+  public Bean resolveByInjectionPoint(InjectionPoint ij)
+  {
+    Type type = ij.getType();
+    Set<Annotation> bindingSet = ij.getBindings();
+
+    Annotation []bindings;
+
+    if (bindingSet != null) {
+      bindings = new Annotation[bindingSet.size()];
+      bindingSet.toArray(bindings);
+    }
+    else
+      bindings = new Annotation[] { CurrentLiteral.CURRENT };
+
+    Set set = resolveByType(type, bindings);
+
+    if (set == null || set.size() == 0) {
+      throw new UnsatisfiedDependencyException(L.l("'{0}' does not match any configured beans with binding {1}",
+						   type,
+						   toList(bindings)));
+    }
+    else if (set.size() == 1) {
+      Iterator iter = set.iterator();
+
+      if (iter.hasNext()) {
+	Bean bean = (Bean) iter.next();
+      
+	return bean;
+      }
+    }
+    else {
+      throw new AmbiguousDependencyException(L.l("'{0}' matches too many configured beans {1}",
+						 BaseType.create(type, null),
+						 set));
+    }
+
+    return null;
   }
 
   //
@@ -2079,7 +2111,7 @@ public class InjectManager
    */
   public Object writeReplace()
   {
-    return new WebBeansHandle(Manager.class);
+    return new SingletonHandle(Manager.class);
   }
 
   private void checkActive()

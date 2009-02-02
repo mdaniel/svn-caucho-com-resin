@@ -30,7 +30,7 @@
 package com.caucho.jmx;
 
 import com.caucho.util.L10N;
-import com.caucho.config.inject.WebBeansHandle;
+import com.caucho.config.inject.SingletonHandle;
 
 import java.util.logging.Logger;
 import javax.management.*;
@@ -119,7 +119,7 @@ public class GlobalMBeanServer extends AbstractMBeanServer
    */
   private Object writeReplace()
   {
-    return new WebBeansHandle(MBeanServer.class);
+    return new SingletonHandle(MBeanServer.class);
   }
 
   /**

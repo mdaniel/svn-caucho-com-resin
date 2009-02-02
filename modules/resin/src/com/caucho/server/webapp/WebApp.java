@@ -3013,7 +3013,7 @@ public class WebApp extends ServletContextImpl
    */
   private Object writeReplace()
   {
-    return new WebBeansHandle(WebApp.class);
+    return new SingletonHandle(WebApp.class);
   }
 
   public String toString()

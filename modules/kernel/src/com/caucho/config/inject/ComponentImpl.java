@@ -66,12 +66,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
 
   private boolean _isFromClass;
   
-  private boolean _hasBinding;
-  
-  private ArrayList<WbBinding> _bindingList
-    = new ArrayList<WbBinding>();
-
-  private WebBeansHandle _handle;
+  private SingletonHandle _handle;
 
   private String _scopeId;
   
@@ -141,7 +136,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
   /**
    * Returns the serialization handle
    */
-  public WebBeansHandle getHandle()
+  public SingletonHandle getHandle()
   {
     return _handle;
   }
@@ -155,7 +150,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
 
     generateScopeId();
 
-    _handle = new WebBeansHandle(getTargetType(), _bindingList);
+    _handle = new SingletonHandle(getTargetType(), getBindings());
   }
 
   private void generateScopeId()
@@ -449,6 +444,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
       return false;
     }
 
+    /*
     int size = _bindingList.size();
 
     if (size != comp._bindingList.size()) {
@@ -460,6 +456,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
 	return false;
       }
     }
+    */
 
     return true;
   }

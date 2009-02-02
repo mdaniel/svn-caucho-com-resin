@@ -13,6 +13,9 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>hessian: Annotation support</li>
+<li>hessian: AbstractSerializer changes to improve usability</li>
+<li>hessian: META-INF/hessian/serializers and deserializers</li>
 <li>server: sync performance with Encoding (#3226, rep by lookis)</li>
 <li>quercus: hmac performance (#3297, rep by koreth)</li>
 <li>server: cron syntax not properly handling day of week (#3248, rep by mate)</li>
