@@ -32,7 +32,7 @@ package javax.cache;
 import java.util.Collection;
 import java.util.Map;
 
-public interface CacheLoader<K,V>
+public interface CacheLoader
 {
   /**
    * Obtains the value associated with the key, which will be loaded into the Cache
@@ -40,7 +40,7 @@ public interface CacheLoader<K,V>
    * @return the value returned from the CacheLoader
    * @throws CacheException
    */
-  public V load(K key)
+  public Object load(Object key)
     throws CacheException;
 
   /**
@@ -49,6 +49,6 @@ public interface CacheLoader<K,V>
    * @return a map of key-value pairs that will be loaded into the cache.
    * @throws CacheException
    */
-  public Map<K,V> loadAll(Collection<K> keys)
+  public Map loadAll(Collection<Object> keys)
     throws CacheException;
 }

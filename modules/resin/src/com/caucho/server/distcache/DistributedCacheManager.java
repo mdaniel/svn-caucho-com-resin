@@ -30,20 +30,15 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
-import com.caucho.cluster.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.L10N;
-import com.caucho.config.ConfigException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
+import javax.cache.CacheLoader;
 
 /**
  * Manages the distributed cache
@@ -51,6 +46,8 @@ import java.util.Collection;
 abstract public class DistributedCacheManager
 {
   private final Server _server;
+
+  private CacheLoader _cacheLoader;
 
   protected DistributedCacheManager(Server server)
   {
@@ -141,6 +138,16 @@ abstract public class DistributedCacheManager
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public CacheLoader getCacheLoader()
+  {
+    return _cacheLoader;
+  }
+
+  public void setCacheLoader(CacheLoader cacheLoader)
+  {
+    _cacheLoader = cacheLoader;
   }
 
   @Override

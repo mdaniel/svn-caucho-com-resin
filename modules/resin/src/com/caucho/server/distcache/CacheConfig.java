@@ -34,6 +34,7 @@ import com.caucho.config.Configurable;
 import com.caucho.cluster.HessianSerializer;
 import com.caucho.util.Alarm;
 
+import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
 
 /**
@@ -64,7 +65,7 @@ public class CacheConfig
 
   private long _leaseTimeout = 5 * 60 * 1000; // 5 min lease timeout
 
-  private javax.cache.CacheLoader _cacheLoader;
+  private CacheLoader _cacheLoader;
 
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
@@ -75,7 +76,7 @@ public class CacheConfig
    * The Cache will use a CacheLoader to populate cache misses.
    */
 
-  public javax.cache.CacheLoader getCacheLoader()
+  public CacheLoader getCacheLoader()
   {
     return _cacheLoader;
   }
@@ -84,7 +85,7 @@ public class CacheConfig
    * Sets the CacheLoader that the Cache can then use to populate cache misses for a reference store (database)
    */
   @Configurable
-  public void setCacheLoader(javax.cache.CacheLoader cacheLoader)
+  public void setCacheLoader(CacheLoader cacheLoader)
   {
     _cacheLoader = cacheLoader;
   }

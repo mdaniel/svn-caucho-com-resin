@@ -335,6 +335,7 @@ abstract public class AbstractCache extends AbstractMap
           getClass().getSimpleName()));
 
       _distributedCacheManager = server.getDistributedCacheManager();
+      _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
 
     }
   }
@@ -736,11 +737,12 @@ abstract public class AbstractCache extends AbstractMap
     if (value != null)
       return value;
 
-    CacheLoader loader = _config.getCacheLoader();
+    CacheLoader loader = _distributedCacheManager.getCacheLoader();
     value = (loader != null) ? loader.load(key) : null;
 
     if (value != null)
       put(key, value);
+      notifyLoad(key);
 
     return value;
   }
