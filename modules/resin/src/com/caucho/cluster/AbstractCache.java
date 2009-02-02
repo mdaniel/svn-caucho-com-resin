@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.*;
 import com.caucho.util.L10N;
@@ -60,6 +61,9 @@ abstract public class AbstractCache extends AbstractMap
 
   private static final Logger log
     = Logger.getLogger(AbstractCache.class.getName());
+
+  private static final EnvironmentLocal<Map<String,AbstractCache>> _caches
+    = new EnvironmentLocal<Map<String,AbstractCache>>();
 
   private String _name = null;
 
@@ -303,6 +307,18 @@ abstract public class AbstractCache extends AbstractMap
 
       if ((_name == null) || (_name.length() == 0))
         throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
+
+      Map<String, AbstractCache> cacheMap = _caches.get();
+
+      if (cacheMap == null) {
+         cacheMap = new HashMap<String, AbstractCache>();
+         _caches.set(cacheMap);
+      }
+
+      if (!cacheMap.containsKey(_name))
+        cacheMap.put(_name, this);
+      else
+        throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
 
       String contextId = Environment.getEnvironmentName();
 
