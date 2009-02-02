@@ -143,9 +143,9 @@ public class Encoding {
   public static EncodingReader getReadFactory(final String encoding)
     throws UnsupportedEncodingException
   {
-    EncodingReader factory = null;
+    String encKey = encoding == null ? "null" : encoding;
 
-    factory = _readEncodingFactories.get(encoding == null ? "null" : encoding);
+    EncodingReader factory = _readEncodingFactories.get(encKey);
 
     if (factory == null) {
       try {
@@ -173,7 +173,7 @@ public class Encoding {
 	factory.setJavaEncoding(javaEncoding);
       }
 
-      _readEncodingFactories.put(encoding == null ? "null" : encoding, factory);
+      _readEncodingFactories.put(encKey, factory);
     }
 
     return factory;
