@@ -31,8 +31,14 @@ package javax.cache;
 
 import java.util.Map;
 
+/**
+ * This interface is not implemented in this implementation of JSR 107.
+ */
 public interface EvictionStrategy
 {
+  /**
+   * Use the clear() method in {@link Cache}.
+   */
   public void clear();
 
   public CacheEntry createEntry(Object key, Object value, long expireTimeout);

@@ -182,9 +182,7 @@ public class EnvironmentLocal<E> {
   }
 
   /**
-   * Sets the variable for the context classloader.
-   *
-   * @param value the new value
+   * Removes this variable
    *
    * @return the old value
    */
@@ -205,9 +203,7 @@ public class EnvironmentLocal<E> {
   }
 
   /**
-   * Sets the variable for the context classloader.
-   *
-   * @param value the new value
+   * Removes the variable for the context classloader.
    *
    * @return the old value
    */
