@@ -73,6 +73,7 @@ public class RemoteAdminService
     hostConfig.setHostName(new RawString(_hostName));
     hostConfig.setRootDirectory(new RawString("error:" + _hostName));
     hostConfig.setSkipDefaultConfig(true);
+    hostConfig.setRedeployMode("manual");
 
     _server.addHost(hostConfig);
 
@@ -82,6 +83,7 @@ public class RemoteAdminService
     webAppConfig.setId("/");
     webAppConfig.setRootDirectory(new RawString("error:/ROOT"));
     webAppConfig.setSkipDefaultConfig(true);
+    webAppConfig.setRedeployMode("manual");
 
     host.addWebApp(webAppConfig);
 

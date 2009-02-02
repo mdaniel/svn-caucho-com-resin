@@ -44,6 +44,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
@@ -201,15 +202,13 @@ public final class SessionManager implements AlarmListener
     boolean isSaveTriplicate = true;
     
     // copy defaults from store for backward compat
-    /* XXX: need to change config
-    StoreManager store = _server.getStore();
-    if (store != null) {
-      setAlwaysSaveSession(store.isAlwaysSave());
+    PersistentStoreConfig cfg = _server.getPersistentStoreConfig();
+    if (cfg != null) {
+      setAlwaysSaveSession(cfg.isAlwaysSave());
 
-      isSaveBackup = store.isSaveBackup();
-      isSaveTriplicate = store.isSaveTriplicate();
+      isSaveBackup = cfg.isSaveBackup();
+      isSaveTriplicate = cfg.isSaveTriplicate();
     }
-    */
 
     AbstractCache sessionCache = new ClusterByteStreamCache();
 

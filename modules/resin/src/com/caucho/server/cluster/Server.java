@@ -64,6 +64,7 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.FileCacheManager;
+import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -142,6 +143,7 @@ public class Server extends ProtocolDispatchServer
   private GitRepository _git;
   private Repository _repository;
   private FileRepository _localRepository;
+  private PersistentStoreConfig _persistentStoreConfig;
 
   private DistributedCacheManager _distributedCacheManager;
 
@@ -648,9 +650,20 @@ public class Server extends ProtocolDispatchServer
   /**
    * Creates a persistent store instance.
    */
-  public Object createPersistentStore(String type)
+  public PersistentStoreConfig createPersistentStore()
   {
-    return null;
+    if (_persistentStoreConfig == null)
+      _persistentStoreConfig = new PersistentStoreConfig();
+    
+    return _persistentStoreConfig;
+  }
+
+  /**
+   * Creates a persistent store instance.
+   */
+  public PersistentStoreConfig getPersistentStoreConfig()
+  {
+    return _persistentStoreConfig;
   }
   
   public void startPersistentStore()
@@ -1885,7 +1898,7 @@ public class Server extends ProtocolDispatchServer
     boolean isModified = _classLoader.isModified();
 
     if (isModified)
-      log.fine("server is modified");
+      log.fine(this + " is modified");
 
     return isModified;
   }

@@ -36,6 +36,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.RawString;
+import com.caucho.config.types.Period;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
@@ -85,7 +86,7 @@ class WatchdogManager extends ProtocolDispatchServer {
   private String _adminCookie;
   private BootManagementConfig _management;
 
-  private Server _dispatchServer;
+  private Server _server;
   
   private HashMap<String,Watchdog> _watchdogMap
     = new HashMap<String,Watchdog>();
@@ -174,12 +175,12 @@ class WatchdogManager extends ProtocolDispatchServer {
 
     resin.addCluster(cluster);
 
-    _dispatchServer = resin.createServer();
+    _server = resin.createServer();
 
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_dispatchServer.getClassLoader());
+      thread.setContextClassLoader(_server.getClassLoader());
 
       AdminAuthenticator auth = null;
 
@@ -191,6 +192,10 @@ class WatchdogManager extends ProtocolDispatchServer {
 					   AdminAuthenticator.class,
 					   Authenticator.class));
       }
+
+      DependencyCheckInterval depend = new DependencyCheckInterval();
+      depend.setValue(new Period(-1));
+      depend.init();
       
       RemoteAdminService adminService = new RemoteAdminService();
       adminService.init();
@@ -394,7 +399,12 @@ class WatchdogManager extends ProtocolDispatchServer {
     }
   }
 
-  private void readConfig(WatchdogArgs args)
+  boolean isValid()
+  {
+    return _server != null && _server.isActive();
+  }
+
+  private Watchdog readConfig(WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();
@@ -438,17 +448,33 @@ class WatchdogManager extends ProtocolDispatchServer {
     }
 
     WatchdogClient client = resin.findClient(args.getServerId());
+    WatchdogConfig server;
       
     if (client == null) {
-      WatchdogConfig server = resin.findServer(args.getServerId());
-      
-      _watchdogMap.put(server.getId(), new Watchdog(server));
+      server = resin.findServer(args.getServerId());
     }
-    else {
-      WatchdogConfig server = client.getConfig();
-      
-      _watchdogMap.put(server.getId(), new Watchdog(server));
+    else
+      server = client.getConfig();
+
+    Watchdog watchdog = _watchdogMap.get(server.getId());
+
+    if (watchdog != null) {
+      if (watchdog.isActive()) {
+	throw new ConfigException(L().l("server '{0}' cannot be started because a running instance already exists.  stop or restart the old server first.",
+					server.getId()));
+      }
+
+      watchdog = _watchdogMap.remove(server.getId());
+
+      if (watchdog != null)
+	watchdog.close();
     }
+
+    watchdog = new Watchdog(server);
+
+    _watchdogMap.put(server.getId(), watchdog);
+
+    return watchdog;
   }
 
   /**
@@ -458,12 +484,25 @@ class WatchdogManager extends ProtocolDispatchServer {
   public static void main(String []argv)
     throws Exception
   {
-    DynamicClassLoader.setJarCacheEnabled(false);
+    boolean isValid = false;
     
-    JniCauchoSystem.create().initJniBackground();
+    try {
+      DynamicClassLoader.setJarCacheEnabled(false);
+    
+      JniCauchoSystem.create().initJniBackground();
       
-    WatchdogManager manager = new WatchdogManager(argv);
-    manager.startServer(argv);
+      WatchdogManager manager = new WatchdogManager(argv);
+      manager.startServer(argv);
+
+      isValid = manager.isValid();
+
+      log().log(Level.WARNING, manager + " valid: " + isValid);
+    } catch (Exception e) {
+      log().log(Level.WARNING, e.toString(), e);
+    } finally {
+      if (! isValid)
+	System.exit(1);
+    }
   }
 
   private static L10N L()

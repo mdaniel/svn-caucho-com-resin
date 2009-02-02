@@ -34,6 +34,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import java.util.logging.Level;
@@ -49,6 +50,11 @@ public class PersistentStoreConfig
   private static final L10N L = new L10N(PersistentStoreConfig.class);
 
   private String _name = "caucho/persistent-store";
+  private String _type;
+  
+  private boolean _isBackup = true;
+  private boolean _isTriplicate = true;
+  private boolean _isAlwaysSave = false;
 
   /**
    * Sets the persistent store name.
@@ -65,6 +71,48 @@ public class PersistentStoreConfig
     throws ConfigException
   {
     Server server = Server.getCurrent();
+    
+    _type = type;
+  }
+
+  @Deprecated
+  public void setPath(Path path)
+  {
+  }
+
+  public void setAlwaysSave(boolean isAlwaysSave)
+  {
+    _isAlwaysSave = isAlwaysSave;
+  }
+
+  public boolean isAlwaysSave()
+  {
+    return _isAlwaysSave;
+  }
+
+  public void setBackup(boolean isBackup)
+  {
+    _isBackup = isBackup;
+  }
+
+  public void setTriplicate(boolean isTriplicate)
+  {
+    _isTriplicate = isTriplicate;
+  }
+
+  public boolean isSaveTriplicate()
+  {
+    return _isTriplicate;
+  }
+
+  public boolean isSaveBackup()
+  {
+    return _isBackup;
+  }
+
+  public PersistentStoreConfig createInit()
+  {
+    return this;
   }
 
   @PostConstruct

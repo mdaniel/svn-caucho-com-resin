@@ -39,6 +39,7 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -308,6 +309,11 @@ class Watchdog
     task.start();
   }
 
+  public boolean isActive()
+  {
+    return _task != null;
+  }
+
   /**
    * Stops the watchdog instance
    */
@@ -329,6 +335,17 @@ class Watchdog
     
     if (task != null)
       task.kill();
+  }
+
+  public void close()
+  {
+    kill();
+
+    WatchdogAdmin admin = _admin;
+    _admin = null;
+
+    if (admin != null)
+      admin.unregister();
   }
 
   void notifyTaskStarted()
@@ -359,6 +376,11 @@ class Watchdog
     WatchdogAdmin()
     {
       registerSelf();
+    }
+
+    void unregister()
+    {
+      unregisterSelf();
     }
 
     public String getId()

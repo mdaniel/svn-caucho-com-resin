@@ -102,7 +102,7 @@ public class InjectManager
   private static final Annotation []NULL_ANN = new Annotation[0];
 
   private static final Annotation []CURRENT_ANN
-    = new Annotation[] { new CurrentLiteral() };
+    = CurrentLiteral.CURRENT_ANN_LIST;
 
   private static final String []FORBIDDEN_ANNOTATIONS = {
     "javax.persistence.Entity",

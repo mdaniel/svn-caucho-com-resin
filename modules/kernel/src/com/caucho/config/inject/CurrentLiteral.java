@@ -29,6 +29,8 @@
 
 package com.caucho.config.inject;
 
+import java.lang.annotation.Annotation;
+
 import javax.inject.Current;
 import javax.inject.AnnotationLiteral;
 
@@ -37,4 +39,6 @@ import javax.inject.AnnotationLiteral;
  */
 public class CurrentLiteral extends AnnotationLiteral<Current> {
   public static final CurrentLiteral CURRENT = new CurrentLiteral();
+  public static final Annotation []CURRENT_ANN_LIST
+    = new Annotation[] { CURRENT };
 }
