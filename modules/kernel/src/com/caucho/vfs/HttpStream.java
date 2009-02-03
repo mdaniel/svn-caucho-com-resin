@@ -803,7 +803,10 @@ class HttpStream extends StreamImpl {
     if (! _didGet)
       getConnInput();
 
-    if (_contentLength > 0)
+    // php/164q
+    if (_isRequestDone)
+      return 0;
+    else if (_contentLength > 0)
       return _contentLength;
     else
       return _rs.getAvailable();

@@ -4550,7 +4550,7 @@ public class Env {
         return new CallbackFunction(cl.getFunction(methodName));
       }
     }
-    else if (value instanceof ArrayValue) {
+    else if (value.isArray()) {
       Value obj = value.get(LongValue.ZERO);
       Value nameV = value.get(LongValue.ONE);
       
@@ -4564,6 +4564,7 @@ public class Env {
         
         int p = name.indexOf("::");
         
+        // php/09lf
         if (p > 0) {
           String clsName = name.substring(0, p);
           name = name.substring(p + 2);

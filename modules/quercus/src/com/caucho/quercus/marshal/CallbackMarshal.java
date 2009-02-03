@@ -54,14 +54,16 @@ public class CallbackMarshal extends Marshal
   {
     Callback cb = env.createCallback(value);
 
-    // return env.createCallback(value);
+    return cb;
 
+    /*
     if (cb != null)
       return cb;
-    else if (value instanceof DefaultValue)
+    else if (value.isDefault())
       return null;
     else
       return new CallbackFunction(env, value.toString()); //null;
+    */
   }
 
   public Value unmarshal(Env env, Object value)

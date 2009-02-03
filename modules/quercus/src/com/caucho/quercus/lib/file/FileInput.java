@@ -178,7 +178,7 @@ public class FileInput extends ReadStreamInput
   
   static class HttpInput extends FileInput
   {
-    private byte []_content;
+    private byte []_bodyStart;
     
     HttpInput(Env env, Path path, StreamContextResource context)
       throws IOException
@@ -197,8 +197,8 @@ public class FileInput extends ReadStreamInput
         
         setOptions(env, httpStream, options);
         
-        if (_content != null && _content.length > 0)
-          httpStream.write(_content, 0, _content.length, false);
+        if (_bodyStart != null && _bodyStart.length > 0)
+          httpStream.write(_bodyStart, 0, _bodyStart.length, false);
       }
     }
     
@@ -236,7 +236,7 @@ public class FileInput extends ReadStreamInput
         else if (optionName.equals("user_agent"))
           stream.setAttribute("User-Agent", entry.getValue().toString());
         else if (optionName.equals("content"))
-          _content = entry.getValue().toBinaryValue(env).toBytes();
+          _bodyStart = entry.getValue().toBinaryValue(env).toBytes();
         else if (optionName.equals("proxy")) {
           env.stub("StreamContextResource::proxy option");
         }
@@ -270,21 +270,7 @@ public class FileInput extends ReadStreamInput
     {
       return "HttpInput[" + getPath() + "]";
     }
-    
-    @Override
-    public boolean isEOF()
-    {
-      if (_is == null)
-        return true;
-      
-      try {
-        return getPosition() > _is.available();
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
 
-        return true;
-      }
-    }
   }
 }
 
