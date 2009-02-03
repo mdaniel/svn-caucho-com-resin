@@ -30,6 +30,8 @@
 package com.caucho.security;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
+import com.caucho.config.Unbound;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.security.AbstractConstraint;
 import com.caucho.server.security.SecurityConstraint;
@@ -55,7 +57,8 @@ import javax.servlet.http.*;
  * </pre></code>
  * </pre></code>
  */
-@com.caucho.config.Service
+@Service
+@Unbound
 public class Deny extends SecurityConstraint
 {
   private static final L10N L = new L10N(Deny.class);

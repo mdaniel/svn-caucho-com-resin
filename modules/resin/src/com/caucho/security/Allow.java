@@ -30,6 +30,8 @@
 package com.caucho.security;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
+import com.caucho.config.Unbound;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.security.AbstractConstraint;
 import com.caucho.server.security.AuthorizationResult;
@@ -72,7 +74,8 @@ import javax.servlet.http.*;
  * </pre></code>
  * </pre></code>
  */
-@com.caucho.config.Service
+@Service
+@Unbound
 public class Allow extends com.caucho.server.security.SecurityConstraint
 {
   private static final L10N L = new L10N(Allow.class);
@@ -82,7 +85,7 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
 
   private ArrayList<ServletRequestPredicate> _predicateList
     = new ArrayList<ServletRequestPredicate>();
-  
+
   /**
    * Sets the url-pattern
    */

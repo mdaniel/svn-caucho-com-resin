@@ -325,8 +325,8 @@ public class EjbMessageBean extends EjbBean {
       else {
 	InjectManager webBeans = InjectManager.create();
 
-	Destination dest
-	  = webBeans.getObject(Destination.class, String.valueOf(value));
+	Destination dest = null;
+	//= webBeans.getObject(Destination.class, String.valueOf(value));
 
 	setDestination(dest);
       }

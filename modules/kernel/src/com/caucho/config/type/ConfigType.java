@@ -76,6 +76,14 @@ abstract public class ConfigType
   }
   
   /**
+   * Creates a top-level instance of the type.
+   */
+  public ConfigType createType(QName name)
+  {
+    return null;
+  }
+  
+  /**
    * Inject and initialize the type
    */
   public void inject(Object bean)
@@ -159,6 +167,39 @@ abstract public class ConfigType
   public boolean isProgram()
   {
     return ConfigProgram.class.equals(getType());
+  }
+
+  public Attribute getDefaultAttribute(QName qName)
+  {
+    Attribute attrStrategy = getProgramAttribute();
+
+    if (attrStrategy != null)
+      return attrStrategy;
+
+    // ioc/2252 - flow attributes are not captured by ContentProgram
+	
+    attrStrategy = getContentProgramAttribute();
+
+    TypeFactory factory = TypeFactory.getFactory();
+
+    Attribute envStrategy = factory.getEnvironmentAttribute(qName);
+
+    if (envStrategy instanceof FlowAttribute
+	|| envStrategy != null && attrStrategy == null)
+      return envStrategy;
+    else if (attrStrategy != null)
+      return attrStrategy;
+
+    if (qName.getNamespaceURI() != null
+	&& qName.getNamespaceURI().startsWith("urn:java:"))
+      return getAddBeanAttribute(qName);
+    else
+      return null;
+  }
+
+  public Attribute getAddBeanAttribute(QName qName)
+  {
+    return null;
   }
 
   /**

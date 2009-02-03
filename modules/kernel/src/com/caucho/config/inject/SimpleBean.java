@@ -128,7 +128,7 @@ public class SimpleBean extends ComponentImpl
 
   public static boolean isValidConstructor(Class type)
   {
-    for (Constructor ctor : type.getConstructors()) {
+    for (Constructor ctor : type.getDeclaredConstructors()) {
       if (ctor.getParameterTypes().length == 0)
 	return true;
 
@@ -389,6 +389,9 @@ public class SimpleBean extends ComponentImpl
   @Override
   public Object create(CreationalContext cxt)
   {
+    if (cxt == null)
+      throw new NullPointerException();
+    
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
     
@@ -558,7 +561,9 @@ public class SimpleBean extends ComponentImpl
 
       Class instanceClass = bean.generateClass();
 
-      if (instanceClass == getTargetClass() && isSingleton()) {
+      if (instanceClass == getTargetClass()
+	  && isSingleton()
+	  && ! isUnbound()) {
 	instanceClass = SerializationAdapter.gen(instanceClass);
       }
       
@@ -582,6 +587,18 @@ public class SimpleBean extends ComponentImpl
 	}
       }
     }
+  }
+
+  private boolean isUnbound()
+  {
+    for (Object annObj : getBindings()) {
+      Annotation ann = (Annotation) annObj;
+      
+      if (Unbound.class.equals(ann.annotationType()))
+	return true;
+    }
+
+    return false;
   }
 
   protected ComponentImpl createArg(ConfigType type, ConfigProgram program)

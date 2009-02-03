@@ -482,22 +482,7 @@ public class ConfigContext implements CreationalContext {
       attrStrategy = type.getAttribute(qName);
 
       if (attrStrategy == null)
-	attrStrategy = type.getProgramAttribute();
-
-      if (attrStrategy == null) {
-	// ioc/2252 - flow attributes are not captured by ContentProgram
-	
-	attrStrategy = type.getContentProgramAttribute();
-
-	Attribute envStrategy
-	  = TypeFactory.getFactory().getEnvironmentAttribute(qName);
-
-	if (envStrategy instanceof FlowAttribute)
-	  attrStrategy = null;
-      }
-
-      if (attrStrategy == null)
-	attrStrategy = TypeFactory.getFactory().getEnvironmentAttribute(qName);
+	attrStrategy = type.getDefaultAttribute(qName);
 
       if (attrStrategy == null) {
 	if (childNode instanceof Element || childNode instanceof Attr) {
@@ -640,11 +625,13 @@ public class ConfigContext implements CreationalContext {
 	  return type.valueOf(text);
 	}
       }
-      else
-	childBean = type.create(null, TEXT);
 
-      if (childBean != null) {
-	ConfigType childBeanType = TypeFactory.getType(childBean);
+      QName qName = ((QNode) childNode).getQName();
+	
+      ConfigType childBeanType = type.createType(qName);
+
+      if (childBeanType != null) {
+	childBean = childBeanType.create(null, qName);
 	
 	if (childNode instanceof Element)
 	  configureNode(childNode, childBean, childBeanType);

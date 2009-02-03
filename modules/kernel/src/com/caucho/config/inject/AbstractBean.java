@@ -60,6 +60,7 @@ import javax.inject.BindingType;
 import javax.inject.Current;
 import javax.inject.DeploymentType;
 import javax.inject.Initializer;
+import javax.inject.Disposes;
 import javax.inject.Produces;
 import javax.inject.Production;
 import javax.inject.manager.Bean;
@@ -647,7 +648,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	    _name = "";
 
 	    if (! "".equals(named.value()))
-	      throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition; it must have an empty value=\"\"."));
+	      throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition, because @Stereotypes are used with multiple beans."));
 	  }
 	}
       }
@@ -780,6 +781,18 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	  if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	    bindingList.add(ann);
 	}
+      }
+
+      if (method.isAnnotationPresent(Initializer.class)) {
+	throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Initializer annotation."));
+      }
+
+      if (method.isAnnotationPresent(Produces.class)) {
+	throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Produces annotation."));
+      }
+
+      if (method.isAnnotationPresent(Disposes.class)) {
+	throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Disposes annotation."));
       }
 
       Annotation []bindings = new Annotation[bindingList.size()];

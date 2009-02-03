@@ -427,6 +427,10 @@ public class InjectManager
     if (log.isLoggable(Level.FINEST))
       log.finest(bean + "(" + type + ") added to " + this);
 
+    if (isUnbound(bean)) {
+      return;
+    }
+
     WebComponent webComponent;
 
     synchronized (_componentMap) {
@@ -441,6 +445,18 @@ public class InjectManager
     }
 
     webComponent.addComponent(bean);
+  }
+
+  private boolean isUnbound(Bean bean)
+  {
+    for (Object annObj : bean.getBindings()) {
+      Annotation ann = (Annotation) annObj;
+      
+      if (Unbound.class.equals(ann.annotationType()))
+	return true;
+    }
+
+    return false;
   }
 
   public ArrayList<Bean> getBeansOfType(Type type)
@@ -843,29 +859,12 @@ public class InjectManager
    */
   public <T> T getObject(Class<T> type, Annotation ... ann)
   {
-    return (T) createFactory(type, ann).get();
-  }
+    Set<Bean<T>> beans = resolveByType(type, ann);
 
-  /**
-   * Returns a new instance for a class, but does not register the
-   * component with webbeans.
-   */
-  public <T> T getObject(Class<T> type, String name)
-  {
-    Annotation []ann = new Annotation[] { Names.create(name) };
-    
-    return (T) createFactory(type, ann).get();
-  }
-
-  /**
-   * Returns a new instance for a class, but does not register the
-   * component with webbeans.
-   */
-  public <T> T createFactory(Class<T> type, String name)
-  {
-    Annotation []ann = new Annotation[] { Names.create(name) };
-    
-    return (T) createFactory(type, ann);
+    if (beans == null || beans.size() == 0)
+      return (T) createTransientObject(type);
+    else
+      return getInstanceByType(type, ann);
   }
 
   /**
@@ -1076,6 +1075,13 @@ public class InjectManager
       
       bindings = CURRENT_ANN;
     }
+
+    if (New.class.equals(bindings[0].annotationType())) {
+      // ioc/0721
+      HashSet set = new HashSet();
+      set.add(new NewBean(this, (Class) type));
+      return set;
+    }
     
     WebComponent component = getWebComponent(type);
 
@@ -1186,9 +1192,17 @@ public class InjectManager
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getInstance(Bean<T> bean)
+  public <T> T getInstance(Bean<T> bean,
+			   CreationalContext<T> createContext)
   {
-    if (false && bean instanceof ComponentImpl)
+    if (bean.getManager() != this) {
+      if (getParent() == null)
+	throw new IllegalStateException(L.l("{0}: {1} is an unknown Bean object for this Manager",
+					    this, bean));
+
+      return getParent().getInstance(bean, createContext);
+    }
+    else if (false && bean instanceof ComponentImpl)
       return (T) ((ComponentImpl) bean).get();
     else {
       Class scopeType = bean.getScopeType();
@@ -1200,11 +1214,11 @@ public class InjectManager
 
       if (context == null)
 	return null;
-      
-      CreationalContext createContext;
 
-      if ((bean instanceof ComponentImpl)
-	  && (context instanceof ScopeContext)) {
+      if (createContext != null) {
+      }
+      else if ((bean instanceof ComponentImpl)
+	       && (context instanceof ScopeContext)) {
 	createContext = new ConfigContext((ComponentImpl) bean,
 					  null,
 					  (ScopeContext) context);
@@ -1224,9 +1238,9 @@ public class InjectManager
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getInstance(Bean<T> bean, ConfigContext env)
+  public <T> T getInstance(Bean<T> bean)
   {
-    return (T) ((ComponentImpl) bean).get(env);
+    return getInstance(bean, null);
   }
 
   /**
@@ -1314,11 +1328,11 @@ public class InjectManager
    * Internal callback during creation to get a new injection instance.
    */
   public <T> T getInstanceToInject(InjectionPoint ij,
-				   CreationalContext<?> ctx)
+				   CreationalContext<?> cxt)
   {
     Bean bean = resolveByInjectionPoint(ij);
 
-    return (T) getInstance(bean); // XXX: ctx
+    return (T) getInstance(bean, cxt); // XXX: ctx
   }
 
   /**
@@ -1618,8 +1632,8 @@ public class InjectManager
 
     for (DecoratorEntry entry : _decoratorList) {
       Decorator decorator = entry.getDecorator();
-      
-      if (types.contains(decorator.getDelegateType())
+
+      if (isTypeContained(types, decorator.getDelegateType())
 	  && entry.isMatch(bindings)) {
 	decorators.add(decorator);
       }
@@ -1642,7 +1656,6 @@ public class InjectManager
 
     Annotation []bindings = new Annotation[bindingList.size()];
     bindingList.toArray(bindings);
-
     
     ArrayList<Decorator> decorators = new ArrayList<Decorator>();
 
@@ -1656,6 +1669,16 @@ public class InjectManager
     }
 
     return decorators;
+  }
+
+  private boolean isTypeContained(Set<Class<?>> types, Class delegateType)
+  {
+    for (Class type : types) {
+      if (delegateType.isAssignableFrom(type))
+	return true;
+    }
+
+    return false;
   }
 
   //
@@ -2067,7 +2090,7 @@ public class InjectManager
     try {
       String className = annotationName.toString();
 
-      if (className.startsWith("javax.webbeans"))
+      if (className.startsWith("javax.inject"))
 	return true;
       
       Class cl = Class.forName(className, false, _tempClassLoader);
@@ -2078,7 +2101,7 @@ public class InjectManager
 	for (Annotation ann : annList) {
 	  Class annType = ann.annotationType();
 	  
-	  if (annType.getName().startsWith("javax.webbeans"))
+	  if (annType.getName().startsWith("javax.inject"))
 	    return true;
 	}
       }

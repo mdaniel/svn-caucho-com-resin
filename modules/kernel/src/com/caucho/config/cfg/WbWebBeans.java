@@ -93,7 +93,7 @@ public class WbWebBeans {
     _webBeansContainer = webBeansContainer;
     
     _root = root;
-    _webBeansFile = root.lookup("web-beans.xml");
+    _webBeansFile = root.lookup("META-INF/beans.xml");
     _webBeansFile.setUserPath(_webBeansFile.getURL());
   }
 
@@ -331,6 +331,13 @@ public class WbWebBeans {
   }
 
   public class Decorators {
+    private String _location;
+
+    public void setConfigLocation(String location)
+    {
+      _location = location;
+    }
+    
     public void addCustomBean(CustomBeanConfig config)
     {
       Class cl = config.getClassType();
@@ -348,16 +355,25 @@ public class WbWebBeans {
   }
 
   public class DeployConfig {
+    private String _location;
+    
     private ArrayList<Class> _deployList
       = new ArrayList<Class>();
+
+    public void setConfigLocation(String location)
+    {
+      _location = location;
+    }
 
     public void addAnnotation(Annotation ann)
     {
       Class cl = ann.annotationType();
 
+      /*
       if (! cl.isAnnotationPresent(DeploymentType.class))
 	throw new ConfigException(L.l("'{0}' must have a @DeploymentType annotation because because <Deploy> can only contain @DeploymentType annotations",
 				      cl.getName()));
+      */
 
       _deployList.add(cl);
     }

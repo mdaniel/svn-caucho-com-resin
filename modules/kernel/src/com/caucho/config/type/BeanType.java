@@ -237,12 +237,18 @@ public class BeanType extends ConfigType
       return _addCustomBean;
     }
     else if (_addBean != null
-	&& name.getNamespaceURI() != null
-	&& name.getNamespaceURI().startsWith("urn:java:")) {
+	     && name.getNamespaceURI() != null
+	     && name.getNamespaceURI().startsWith("urn:java:")) {
       return _addBean;
     }
     
     return null;
+  }
+
+  @Override
+  public Attribute getAddBeanAttribute(QName qName)
+  {
+    return _addBean;
   }
 
   /**

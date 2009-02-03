@@ -144,8 +144,9 @@ public class AnnotationInterfaceType extends ConfigType
   public String toString(HashMap<String,Object> valueMap)
   {
     StringBuilder sb = new StringBuilder();
+    sb.append("@");
     sb.append(_annClass.getName());
-    sb.append("[");
+    sb.append("(");
 
     boolean isFirst = true;
     for (Map.Entry<String,Object> entry : valueMap.entrySet()) {
@@ -158,7 +159,7 @@ public class AnnotationInterfaceType extends ConfigType
       sb.append(entry.getValue());
     }
 
-    sb.append("]");
+    sb.append(")");
 
     return sb.toString();
   }

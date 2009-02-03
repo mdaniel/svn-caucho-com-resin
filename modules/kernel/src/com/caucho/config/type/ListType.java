@@ -106,6 +106,9 @@ public class ListType extends ConfigType
    */
   public Object valueOf(String text)
   {
+    if ("".equals(text.trim()))
+      return null;
+    
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
 				  _listClass.getName(), text));
   }

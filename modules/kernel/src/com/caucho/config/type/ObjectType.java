@@ -29,6 +29,8 @@
 
 package com.caucho.config.type;
 
+import com.caucho.xml.QName;
+
 /**
  * Represents a Object type.
  */
@@ -50,6 +52,16 @@ public final class ObjectType extends InterfaceType
   public Class getType()
   {
     return Object.class;
+  }
+  
+  /**
+   * Creates a top-level instance of the type.
+   */
+  public ConfigType createType(QName name)
+  {
+    TypeFactory factory = TypeFactory.create();
+    
+    return factory.getEnvironmentType(name);
   }
   
   /**

@@ -46,6 +46,7 @@ import java.net.URL;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.*;
 import java.util.regex.Pattern;
 import java.util.logging.*;
@@ -88,8 +89,8 @@ public class TypeFactory implements AddLoaderListener
   private final HashMap<String,CustomBeanType> _customBeanMap
     = new HashMap<String,CustomBeanType>();
 
-  private final HashMap<QName,ConfigType> _attrMap
-    = new HashMap<QName,ConfigType>();
+  private final ConcurrentHashMap<QName,ConfigType> _attrMap
+    = new ConcurrentHashMap<QName,ConfigType>();
 
   private final HashMap<QName,Attribute> _listAttrMap
     = new HashMap<QName,Attribute>();
@@ -97,8 +98,8 @@ public class TypeFactory implements AddLoaderListener
   private final HashMap<QName,Attribute> _setAttrMap
     = new HashMap<QName,Attribute>();
 
-  private final HashMap<QName,Attribute> _envAttrMap
-    = new HashMap<QName,Attribute>();
+  private final ConcurrentHashMap<QName,Attribute> _envAttrMap
+    = new ConcurrentHashMap<QName,Attribute>();
 
   private final HashMap<String,NamespaceConfig> _nsMap
     = new HashMap<String,NamespaceConfig>();
@@ -196,74 +197,80 @@ public class TypeFactory implements AddLoaderListener
    */
   public ConfigType getEnvironmentType(QName name)
   {
-    synchronized (_attrMap) {
-      ConfigType type = _attrMap.get(name);
+    ConfigType type = _attrMap.get(name);
 
-      if (type != null)
-	return type;
+    if (type != null)
+      return type == NotFoundConfigType.NULL ? null : type;
 
-      type = getEnvironmentTypeRec(name);
+    type = getEnvironmentTypeRec(name);
+
+    if (type != null) {
+      return type;
+    }
+
+    if (! "".equals(name.getNamespaceURI())) {
+      type = getEnvironmentType(new QName(name.getLocalName()));
 
       if (type != null) {
 	_attrMap.put(name, type);
 	
 	return type;
       }
-
-      if (! "".equals(name.getNamespaceURI())) {
-	type = getEnvironmentType(new QName(name.getLocalName()));
-
-	if (type != null) {
-	  _attrMap.put(name, type);
-	
-	  return type;
-	}
-      }
-
-      return null;
     }
+
+    _attrMap.put(name, NotFoundConfigType.NULL);
+
+    return null;
   }
 
   /**
    * Returns an environment type.
    */
-  public ConfigType getEnvironmentTypeRec(QName name)
+  protected ConfigType getEnvironmentTypeRec(QName name)
   {
-    synchronized (_attrMap) {
-      ConfigType type = _attrMap.get(name);
+    ConfigType type = _attrMap.get(name);
 
-      if (type != null)
-	return type;
+    if (type != null)
+      return type == NotFoundConfigType.NULL ? null : type;
 
-      if (_parent != null)
-	type = _parent.getEnvironmentTypeRec(name);
+    if (_parent != null)
+      type = _parent.getEnvironmentTypeRec(name);
 
+    if (type != null) {
+      _attrMap.put(name, type);
+	
+      return type;
+    }
+
+    String uri = name.getNamespaceURI();
+    if (uri != null && uri.startsWith("urn:java:")) {
+      String pkg = uri.substring("urn:java:".length());
+      String className = name.getLocalName();
+
+      Class cl = loadClassImpl(pkg, className);
+
+      if (cl != null) {
+	return getType(cl);
+      }
+    }
+
+    NamespaceConfig ns = _nsMap.get(uri);
+
+    if (ns != null) {
+      ns.loadBeans();
+
+      type = ns.getBean(name.getLocalName());
+	
       if (type != null) {
 	_attrMap.put(name, type);
 	
 	return type;
       }
-
-      NamespaceConfig ns = _nsMap.get(name.getNamespaceURI());
-
-      if (ns == null) {
-	// XXX: xbeans and spring would go here
-      }
-
-      if (ns != null) {
-	ns.loadBeans();
-
-	type = ns.getBean(name.getLocalName());
-	
-	if (type != null) {
-	  _attrMap.put(name, type);
-	
-	  return type;
-	}
-      }
-
-      return null;
     }
+    
+    _attrMap.put(name, NotFoundConfigType.NULL);
+
+    return null;
   }
 
   /**
@@ -319,26 +326,24 @@ public class TypeFactory implements AddLoaderListener
    */
   public Attribute getEnvironmentAttribute(QName name)
   {
-    synchronized (_envAttrMap) {
-      Attribute attr = _envAttrMap.get(name);
+    Attribute attr = _envAttrMap.get(name);
 
-      if (attr != null)
-	return attr;
-
-      ConfigType type = getEnvironmentType(name);
-
-      if (type == null)
-	return null;
-
-      if (type instanceof FlowBeanType)
-	attr = new FlowAttribute(type);
-      else
-	attr = new EnvironmentAttribute(type);
-
-      _envAttrMap.put(name, attr);
-
+    if (attr != null)
       return attr;
-    }
+
+    ConfigType type = getEnvironmentType(name);
+
+    if (type == null)
+      return null;
+
+    if (type instanceof FlowBeanType)
+      attr = new FlowAttribute(type);
+    else
+      attr = new EnvironmentAttribute(type);
+
+    _envAttrMap.put(name, attr);
+
+    return attr;
   }
 
   private Class loadClassImpl(String pkg, String name)
