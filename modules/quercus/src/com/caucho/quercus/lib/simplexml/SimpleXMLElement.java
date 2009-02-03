@@ -920,7 +920,12 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     if (indexV.isString()) {
       String name = indexV.toString();
       
-      return wrapJava(env, _cls, getAttribute(name));
+      SimpleXMLElement attr = getAttribute(name);
+      
+      if (attr == null)
+        return NullValue.NULL;
+      else
+        return wrapJava(env, _cls, attr);
     }
     else if (indexV.isLongConvertible()) {
       int i = indexV.toInt();

@@ -42,15 +42,21 @@ import java.util.IdentityHashMap;
 public class CallbackObjectMethod extends Callback {
   private static final L10N L = new L10N(CallbackObjectMethod.class);
   
-  private final Value _obj;
+  private final ObjectValue _obj;
+  private final AbstractFunction _fun;
   
   private final String _methodName;
   private final int _hash;
   private final char []_name;
-
-  public CallbackObjectMethod(Env env, Value obj, String methodName)
+  
+  public CallbackObjectMethod(Env env,
+                              ObjectValue obj,
+                              AbstractFunction fun,
+                              String methodName)
   {
     _obj = obj;
+    _fun = fun;
+    
     _methodName = methodName;
     _hash = MethodMap.hash(methodName);
     _name = _methodName.toCharArray();
@@ -64,7 +70,10 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length);
   }
 
   /**
@@ -75,8 +84,12 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env, Value a1)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length,
-                           a1);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj,
+                             a1);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length,
+                             a1);
   }
 
   /**
@@ -87,8 +100,12 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env, Value a1, Value a2)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length,
-                           a1, a2);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj,
+                             a1, a2);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length,
+                             a1, a2);
   }
 
   /**
@@ -99,8 +116,12 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length,
-                           a1, a2, a3);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj,
+                             a1, a2, a3);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length,
+                             a1, a2, a3);
   }
 
   /**
@@ -112,8 +133,12 @@ public class CallbackObjectMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length,
-                           a1, a2, a3, a4);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj,
+                             a1, a2, a3, a4);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length,
+                             a1, a2, a3, a4);
   }
 
   /**
@@ -125,14 +150,21 @@ public class CallbackObjectMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length,
-                           a1, a2, a3, a4, a5);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj,
+                             a1, a2, a3, a4, a5);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length,
+                             a1, a2, a3, a4, a5);
   }
 
   @Override
   public Value call(Env env, Value []args)
   {
-    return _obj.callMethod(env, _hash, _name, _name.length, args);
+    if (_fun != null)
+      return _fun.callMethod(env, _obj, args);
+    else
+      return _obj.callMethod(env, _hash, _name, _name.length, args);
   }
 
   @Override
@@ -163,7 +195,7 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public boolean isInternal()
   {
-    return _obj.findFunction(_methodName) instanceof JavaInvoker;
+    return _fun instanceof JavaInvoker;
   }
   
   private Value error(Env env)

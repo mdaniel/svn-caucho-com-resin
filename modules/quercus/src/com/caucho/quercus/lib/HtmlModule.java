@@ -376,8 +376,12 @@ public class HtmlModule extends AbstractQuercusModule {
 
     Iterator<Map.Entry<Value,Value>> iter;
 
-    if (env.isUnicodeSemantics())
+    if (env.isUnicodeSemantics()) {
+      if (HTML_ENTITIES_ARRAY_UNICODE == null)
+        HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(env, HTML_ENTITIES_ARRAY);
+      
       iter = HTML_ENTITIES_ARRAY_UNICODE.getIterator(env);
+    }
     else
       iter = HTML_ENTITIES_ARRAY.getIterator(env);
 

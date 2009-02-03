@@ -493,11 +493,21 @@ public class JdbcResultResource {
 
           if (rs.wasNull())
             return NullValue.NULL;
+          else if (metaData.isCurrency(column)) {
+            StringValue sb = _env.createUnicodeBuilder();
+             
+            sb.append("$");
+            
+            return sb.append(value);
+          }
+          else if (value == 0.0) {
+            StringValue sb = _env.createUnicodeBuilder();
+            
+            return sb.append("0");
+          }
           else {
             StringValue sb = _env.createUnicodeBuilder();
-            if (metaData.isCurrency(column)) {
-              sb.append("$");
-            }
+            
             return sb.append(value);
           }
         }

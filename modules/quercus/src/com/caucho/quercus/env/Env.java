@@ -4552,22 +4552,43 @@ public class Env {
     }
     else if (value instanceof ArrayValue) {
       Value obj = value.get(LongValue.ZERO);
-      Value name = value.get(LongValue.ONE);
+      Value nameV = value.get(LongValue.ONE);
+      
+      if (! nameV.isString())
+        throw new IllegalStateException(L.l("unknown callback name {0}", nameV));
 
-      if (! (name instanceof StringValue))
-        throw new IllegalStateException(L.l("unknown callback name {0}", name));
+      String name = nameV.toString();
+      
+      if (obj.isObject()) {
+        AbstractFunction fun;
+        
+        int p = name.indexOf("::");
+        
+        if (p > 0) {
+          String clsName = name.substring(0, p);
+          name = name.substring(p + 2);
 
-      if (obj instanceof StringValue) {
+          QuercusClass cls = findClass(clsName);
+
+          if (cls == null)
+            throw new IllegalStateException(L.l("can't find class {0}",
+                                                obj.toString()));
+
+          fun = cls.getFunction(name);
+        }
+        else
+          fun = obj.findFunction(name);
+        
+        return new CallbackObjectMethod(this, (ObjectValue) obj, fun, name);
+      }
+      else {
         QuercusClass cl = findClass(obj.toString());
 
         if (cl == null)
           throw new IllegalStateException(L.l("can't find class {0}",
                                               obj.toString()));
 
-        return new CallbackFunction(cl.getFunction(name.toString()));
-      }
-      else {
-        return new CallbackObjectMethod(this, obj, name.toString());
+        return new CallbackFunction(cl.getFunction(name));
       }
     }
     else
