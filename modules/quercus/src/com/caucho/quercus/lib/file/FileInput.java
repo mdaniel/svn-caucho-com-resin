@@ -211,32 +211,43 @@ public class FileInput extends ReadStreamInput
         Map.Entry<Value,Value> entry = iter.next();
         
         String optionName = entry.getKey().toString();
+        Value optionValue = entry.getValue();
 
         if (optionName.equals("method"))
-          stream.setMethod(entry.getValue().toString());
+          stream.setMethod(optionValue.toString());
         else if (optionName.equals("header")) {
-          String optionValue = entry.getValue().toString();
+          String option = optionValue.toString();
           
-          int i = optionValue.indexOf(":");
+          int start = 0;
+          int len = option.length();
           
-          String name;
-          String value;
-          
-          if (i < 0) {
-            name = optionValue;
-            value = "";
+          while (start < len) {
+            int end = option.indexOf("\r\n", start);
+
+            if (end < 0)
+              end = len;
+            
+            int i = option.indexOf(':', start);
+            
+            if (i < 0 || i > end) {
+              stream.setAttribute(option.substring(start, end), "");
+              
+              break;
+            }
+            else {
+              String name = option.substring(start, i);
+              String value = option.substring(i + 1, end);
+              
+              stream.setAttribute(name, value);
+            }
+            
+            start = end += 2;
           }
-          else {
-            name = optionValue.substring(0, i - 1);
-            value = optionValue.substring(i + 1);
-          }
-          
-          stream.setAttribute(name, value);
         }
         else if (optionName.equals("user_agent"))
-          stream.setAttribute("User-Agent", entry.getValue().toString());
+          stream.setAttribute("User-Agent", optionValue.toString());
         else if (optionName.equals("content"))
-          _bodyStart = entry.getValue().toBinaryValue(env).toBytes();
+          _bodyStart = optionValue.toBinaryValue(env).toBytes();
         else if (optionName.equals("proxy")) {
           env.stub("StreamContextResource::proxy option");
         }
@@ -244,7 +255,7 @@ public class FileInput extends ReadStreamInput
           env.stub("StreamContextResource::request_fulluri option");
         }
         else if (optionName.equals("protocol_version")) {
-          double version = entry.getValue().toDouble();
+          double version = optionValue.toDouble();
           
           if (version == 1.1) {
           }
@@ -254,7 +265,7 @@ public class FileInput extends ReadStreamInput
             env.stub("StreamContextResource::protocol_version " + version);
         }
         else if (optionName.equals("timeout")) {
-          long ms = (long) entry.getValue().toDouble() * 1000;
+          long ms = (long) optionValue.toDouble() * 1000;
           stream.setSocketTimeout(ms);
         }
         else if (optionName.equals("ignore_errors")) {
