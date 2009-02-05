@@ -69,9 +69,7 @@ public class SimpleXMLModule
                                      @Optional Value namespaceV,
                                      @Optional boolean isPrefix)
   {
-    if (data.isNull())
-      return BooleanValue.FALSE;
-    else if (data.isBoolean() && data.toBoolean() == false)
+    if (data.isNull() || data == BooleanValue.FALSE)
       return BooleanValue.FALSE;
     
     if (className == null || className.length() == 0)

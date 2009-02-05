@@ -57,6 +57,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.*;
 import java.util.logging.*;
@@ -607,15 +608,10 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
         is.close();
       }
     }
-    else if (data.isUnicode()) {
+    else {
       StringReader reader = new java.io.StringReader(data.toString());
 
       document = builder.parse(new InputSource(reader));
-    }
-    else {
-      InputStream in = data.toInputStream();
-
-      document = builder.parse(in);
     }
 
     NodeList childList = document.getChildNodes();
