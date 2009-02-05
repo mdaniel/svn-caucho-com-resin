@@ -34,6 +34,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.*;
 import com.caucho.util.L10N;
@@ -48,6 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -56,18 +58,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 abstract public class AbstractCache extends AbstractMap
   implements ObjectCache, ByteStreamCache, CacheStatistics
 {
-
   private static final L10N L = new L10N(AbstractCache.class);
 
   private static final Logger log
     = Logger.getLogger(AbstractCache.class.getName());
 
-  private static final EnvironmentLocal<Map<String,AbstractCache>> _caches
-    = new EnvironmentLocal<Map<String,AbstractCache>>();
+  private static final EnvironmentLocal<CacheMap> _cacheMap
+    = new EnvironmentLocal<CacheMap>("com.caucho.cluster.cache");
 
   private String _name = null;
 
   private String _guid;
+
+  private static int initCalls = 0;
 
   private Collection<CacheListener> _listeners
     = new ConcurrentLinkedQueue<CacheListener>();
@@ -83,25 +86,30 @@ abstract public class AbstractCache extends AbstractMap
 
   private HashManager _hashManager = new HashManager();
 
-  // used in the implementation  CacheStatistics
   private long _priorMisses = 0;
   private long _priorHits = 0;
 
-  /**
-   * Assign the name.  The name is mandatory and must be unique.
+  /**                                                
+   * Returns the name of the cache.
    */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
   public String getName()
   {
     return _name;
   }
 
   /**
-   * Assigns the CacheLoader to populate the cache on a miss.
+   * Assigns the name of the cache.
+   * A name is mandatory and must be unique among open caches.
+   */
+  @Configurable
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Sets the CacheLoader that the Cache can then use to populate
+   * cache misses from a reference store (database).
    */
   @Configurable
   public void setCacheLoader(CacheLoader loader)
@@ -110,8 +118,12 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
-   * Assign the serializer
+   * Assign the serializer used on values.
+   *
+   * @Note: This setting should not be changed after
+   * a cache is created.
    */
+  @Configurable
   public void setSerializer(CacheSerializer serializer)
   {
     _config.setValueSerializer(serializer);
@@ -123,6 +135,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * Defaults to true.
    */
+  @Configurable
   public void setBackup(boolean isBackup)
   {
     _config.setSinglePersistence(isBackup);
@@ -134,6 +147,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * Defaults to true.
    */
+  @Configurable
   public void setTriplicate(boolean isTriplicate)
   {
     _config.setTriplePersistence(isTriplicate);
@@ -141,8 +155,8 @@ abstract public class AbstractCache extends AbstractMap
 
   /**
    * The maximum valid time for an item.  Items stored in the cache
-   * for longer than the expire time are no longer valid and will
-   * return null from a get.
+   * for longer than the expire time are no longer valid and z null value
+   * will be returned for a get.
    * <p/>
    * Default is infinite.
    */
@@ -158,6 +172,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * Default is infinite.
    */
+  @Configurable
   public void setExpireTimeout(Period expireTimeout)
   {
     setExpireTimeoutMillis(expireTimeout.getPeriod());
@@ -170,6 +185,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * Default is infinite.
    */
+  @Configurable
   public void setExpireTimeoutMillis(long expireTimeout)
   {
     _config.setExpireTimeout(expireTimeout);
@@ -185,6 +201,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * Default is infinite.
    */
+  @Configurable
   public void setIdleTimeout(Period period)
   {
     setIdleTimeoutMillis(period.getPeriod());
@@ -208,6 +225,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Sets the idle timeout in milliseconds
    */
+  @Configurable
   public void setIdleTimeoutMillis(long timeout)
   {
     _config.setIdleTimeout(timeout);
@@ -217,7 +235,7 @@ abstract public class AbstractCache extends AbstractMap
    * Returns the idle check window, used to minimize traffic when
    * updating access times.
    */
-  public long getIdleCheckWindow()
+  public long getIdleTimeoutWindow()
   {
     return _config.getIdleTimeoutWindow();
   }
@@ -235,6 +253,7 @@ abstract public class AbstractCache extends AbstractMap
    * The lease timeout is the time a server can use the local version
    * if it owns it, before a timeout.
    */
+  @Configurable
   public void setLeaseTimeout(Period period)
   {
     setLeaseTimeoutMillis(period.getPeriod());
@@ -244,9 +263,25 @@ abstract public class AbstractCache extends AbstractMap
    * The lease timeout is the time a server can use the local version
    * if it owns it, before a timeout.
    */
+  @Configurable
   public void setLeaseTimeoutMillis(long timeout)
   {
     _config.setLeaseTimeout(timeout);
+  }
+
+   /**
+   * The local read timeout is how long a local copy of
+   * a cache item can be reused before checking with the master copy.
+   * <p/>
+   * A read-only item could be infinite (-1).  A slow changing item
+   * like a list of bulletin-board comments could be 10s.  Even a relatively
+   * quicky changing item can be 10ms or 100ms.
+   * <p/>
+   * The default is 10ms
+   */
+  public long getLocalReadTimeout()
+  {
+    return _config.getLocalReadTimeout();
   }
 
   /**
@@ -259,6 +294,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * The default is 10ms
    */
+  @Configurable
   public void setLocalReadTimeout(Period period)
   {
     setLocalReadTimeoutMillis(period.getPeriod());
@@ -274,24 +310,10 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * The default is 10ms
    */
+  @Configurable
   public void setLocalReadTimeoutMillis(long period)
   {
     _config.setLocalReadTimeout(period);
-  }
-
-  /**
-   * The local read timeout is how long a local copy of
-   * a cache item can be reused before checking with the master copy.
-   * <p/>
-   * A read-only item could be infinite (-1).  A slow changing item
-   * like a list of bulletin-board comments could be 10s.  Even a relatively
-   * quicky changing item can be 10ms or 100ms.
-   * <p/>
-   * The default is 10ms
-   */
-  public long getLocalReadTimeout()
-  {
-    return _config.getLocalReadTimeout();
   }
 
   /**
@@ -308,23 +330,17 @@ abstract public class AbstractCache extends AbstractMap
       if ((_name == null) || (_name.length() == 0))
         throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
 
-      Map<String, AbstractCache> cacheMap = _caches.get();
-
-      if (cacheMap == null) {
-         cacheMap = new HashMap<String, AbstractCache>();
-         _caches.set(cacheMap);
-      }
-
-      if (!cacheMap.containsKey(_name))
-        cacheMap.put(_name, this);
-      else
-        throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
+      CacheMap cacheMap = getLocalCacheMap();
 
       String contextId = Environment.getEnvironmentName();
 
       _guid = contextId + ":" + _name;
-
       _config.setGuid(_guid);
+
+       if (!cacheMap.containsKey(_guid))
+        cacheMap.put(_guid, this);
+      else
+        throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
 
       _config.init();
 
@@ -742,7 +758,7 @@ abstract public class AbstractCache extends AbstractMap
 
     if (value != null)
       put(key, value);
-      notifyLoad(key);
+    notifyLoad(key);
 
     return value;
   }
@@ -782,10 +798,30 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
+  protected CacheMap getLocalCacheMap()
+  {
+    ClassLoader localLoader = Environment.getEnvironmentClassLoader();
+    CacheMap result = _cacheMap.getLevel(localLoader);
+    if (result == null)
+    {
+      result = new CacheMap();
+      _cacheMap.set(result, localLoader);
+    }
+    return result;
+  }
+
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _guid + "]";
+  }
+
+  protected static class CacheMap extends HashMap<String, AbstractCache>
+  {
+      public CacheMap()
+      {
+        super();
+      }
   }
 
   /**
@@ -873,8 +909,7 @@ abstract public class AbstractCache extends AbstractMap
     @Override
     public Iterator iterator()
     {
-      return new CacheEntrySetIterator<Object, Object>(_lruCache)
-      {
+      return new CacheEntrySetIterator<Object, Object>(_lruCache) {
 
         @Override
         public Object next()
@@ -909,8 +944,7 @@ abstract public class AbstractCache extends AbstractMap
     @Override
     public Iterator iterator()
     {
-      return new CacheEntrySetIterator<Object, Object>(_lruCache)
-      {
+      return new CacheEntrySetIterator<Object, Object>(_lruCache) {
         @Override
         public Object next()
         {
