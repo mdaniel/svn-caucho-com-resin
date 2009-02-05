@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.packet;
 
-import com.caucho.bam.BamStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 

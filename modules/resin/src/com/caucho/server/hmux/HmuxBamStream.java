@@ -29,9 +29,10 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.bam.AbstractBamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamException;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.AbstractActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
 import com.caucho.hessian.io.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -42,7 +43,7 @@ import java.util.logging.*;
 /**
  * Sends bam messages to a hmux stream
  */
-public class HmuxBamStream extends AbstractBamStream {
+public class HmuxBamStream extends AbstractActorStream {
   private static final L10N L = new L10N(HmuxBamStream.class);
   
   private static final Logger log
@@ -55,6 +56,18 @@ public class HmuxBamStream extends AbstractBamStream {
     _request = request;
   }
 
+  @Override
+  public String getJid()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  @Override
+  public ActorStream getBrokerStream()
+  {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * Sends a message to the stream.
    */
@@ -65,7 +78,7 @@ public class HmuxBamStream extends AbstractBamStream {
     try {
       _request.writeHmtpMessage(to, from, value);
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
@@ -75,40 +88,36 @@ public class HmuxBamStream extends AbstractBamStream {
   public void messageError(String to,
 			   String from,
 			   Serializable value,
-			   BamError error)
+			   ActorError error)
   {
     try {
       _request.writeHmtpMessageError(to, from, value, error);
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 			  String to,
 			  String from,
 			  Serializable value)
   {
     try {
       _request.writeHmtpQueryGet(id, to, from, value);
-
-      return true;
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
-  public boolean querySet(long id,
+  public void querySet(long id,
 			  String to,
 			  String from,
 			  Serializable value)
   {
     try {
       _request.writeHmtpQuerySet(id, to, from, value);
-      
-      return true;
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
@@ -120,7 +129,7 @@ public class HmuxBamStream extends AbstractBamStream {
     try {
       _request.writeHmtpQueryResult(id, to, from, value);
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
@@ -128,12 +137,12 @@ public class HmuxBamStream extends AbstractBamStream {
 			 String to,
 			 String from,
 			 Serializable value,
-			 BamError error)
+			 ActorError error)
   {
     try {
       _request.writeHmtpQueryError(id, to, from, value, error);
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 

@@ -29,11 +29,11 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.FromLinkStream;
-import com.caucho.bam.BamError;
 import com.caucho.hemp.broker.HempBroker;
 import java.io.*;
 import java.util.logging.*;
@@ -41,8 +41,7 @@ import javax.servlet.*;
 
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.BamException;
+import com.caucho.bam.ActorException;
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -58,15 +57,15 @@ public class ServerFromLinkStream extends FromLinkStream
     = Logger.getLogger(ServerFromLinkStream.class.getName());
   
   private HempBroker _broker;
-  private BamConnection _conn;
-  private BamStream _toBroker;
+  private ActorStream _toBroker;
+  private ActorClient _conn;
 
   private Hessian2StreamingInput _in;
   private Hessian2Output _out;
 
-  private BamStream _linkStream;
+  private ActorStream _linkStream;
   private ServerLinkService _linkService;
-  private BamStream _linkServiceStream;
+  private ActorStream _linkServiceStream;
   private AuthBrokerStream _authHandler;
 
   private String _jid;
@@ -91,7 +90,7 @@ public class ServerFromLinkStream extends FromLinkStream
     // _authHandler = new AuthBrokerStream(getJid(), _agentStream);
     _linkService = new ServerLinkService(this, _linkStream, linkManager);
     
-    _linkServiceStream = new ServerLinkFilter(_linkService.getAgentStream(),
+    _linkServiceStream = new ServerLinkFilter(_linkService.getActorStream(),
 					      ipAddress);
   }
 
@@ -101,9 +100,9 @@ public class ServerFromLinkStream extends FromLinkStream
   }
 
   @Override
-  protected BamStream getStream(String to)
+  protected ActorStream getStream(String to)
   {
-    BamStream stream;
+    ActorStream stream;
     
     if (to == null)
       return _linkServiceStream;
@@ -147,13 +146,14 @@ public class ServerFromLinkStream extends FromLinkStream
 	       String ipAddress)
   {
     if (credentials != null && ! (credentials instanceof String)) {
-      throw new BamException(L.l("'{0}' is an unknown credential",
+      throw new ActorException(L.l("'{0}' is an unknown credential",
 				 credentials));
     }
     
     String password = (String) credentials;
     
-    _conn = _broker.getConnection(_linkStream, uid, password, null, ipAddress);
+    // _conn = _broker.getConnection(_linkStream, uid, password, null, ipAddress);
+    _conn = _broker.getConnection(_linkStream, uid, null);
 
     _jid = _conn.getJid();
     
@@ -178,7 +178,7 @@ public class ServerFromLinkStream extends FromLinkStream
   public void messageError(String to,
 			       String from,
 			       Serializable value,
-			       BamError error)
+			       ActorError error)
   {
     _toBroker.messageError(to, _jid, value, error);
   }
@@ -189,14 +189,12 @@ public class ServerFromLinkStream extends FromLinkStream
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+  public void queryGet(long id,
+		       String to,
+		       String from,
+		       Serializable payload)
   {
-    _toBroker.queryGet(id, to, _jid, value);
-    
-    return true;
+    _toBroker.queryGet(id, to, _jid, payload);
   }
   
   /**
@@ -205,14 +203,12 @@ public class ServerFromLinkStream extends FromLinkStream
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean querySet(long id,
-			  String to,
-			  String from,
-			  Serializable value)
+  public void querySet(long id,
+		       String to,
+		       String from,
+		       Serializable payload)
   {
-    _toBroker.querySet(id, to, _jid, value);
-    
-    return true;
+    _toBroker.querySet(id, to, _jid, payload);
   }
   
   /**
@@ -237,7 +233,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			     String to,
 			     String from,
 			     Serializable value,
-			     BamError error)
+			     ActorError error)
   {
     _toBroker.queryError(id, to, _jid, value, error);
   }
@@ -325,7 +321,7 @@ public class ServerFromLinkStream extends FromLinkStream
   public void presenceError(String to,
 			      String from,
 			      Serializable data,
-			      BamError error)
+			      ActorError error)
   {
     _toBroker.presenceError(to, _jid, data, error);
   }

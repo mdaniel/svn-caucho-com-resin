@@ -52,26 +52,26 @@ public class HempDomainManager extends DomainManager
   private static final L10N L = new L10N(HempDomainManager.class);
   
   // domains
-  private final HashMap<String,WeakReference<BamStream>> _domainMap
-    = new HashMap<String,WeakReference<BamStream>>();
+  private final HashMap<String,WeakReference<ActorStream>> _domainMap
+    = new HashMap<String,WeakReference<ActorStream>>();
 
   public HempDomainManager()
   {
   }
 
-  public void addDomain(String name, BamStream domain)
+  public void addDomain(String name, ActorStream domain)
   {
     synchronized (_domainMap) {
-      _domainMap.put(name, new WeakReference<BamStream>(domain));
+      _domainMap.put(name, new WeakReference<ActorStream>(domain));
     }
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " add " + domain + " as '" + name + "'");
   }
 
-  public BamStream removeDomain(String name)
+  public ActorStream removeDomain(String name)
   {
-    WeakReference<BamStream> domainRef = null;
+    WeakReference<ActorStream> domainRef = null;
     
     synchronized (_domainMap) {
       domainRef = _domainMap.remove(name);
@@ -87,9 +87,9 @@ public class HempDomainManager extends DomainManager
       return null;
   }
 
-  public BamStream findDomain(String name)
+  public ActorStream findDomain(String name)
   {
-    WeakReference<BamStream> domainRef = null;
+    WeakReference<ActorStream> domainRef = null;
     
     synchronized (_domainMap) {
       domainRef = _domainMap.get(name);
@@ -109,10 +109,10 @@ public class HempDomainManager extends DomainManager
     if (host == null)
       return null;
 
-    BamStream domain = host.getBamDomain();
+    ActorStream domain = host.getBamDomain();
 
     synchronized (_domainMap) {
-      _domainMap.put(name, new WeakReference<BamStream>(domain));
+      _domainMap.put(name, new WeakReference<ActorStream>(domain));
     }
     */
 

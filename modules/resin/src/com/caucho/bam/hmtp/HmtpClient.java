@@ -29,14 +29,14 @@
 
 package com.caucho.bam.hmtp;
 
-import com.caucho.bam.AbstractBamConnection;
-import com.caucho.bam.BamQueryCallback;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamException;
-import com.caucho.bam.BamRemoteConnectionFailedException;
-import com.caucho.bam.SimpleBamClientStream;
+import com.caucho.bam.QueryCallback;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.SimpleActorStream;
+import com.caucho.bam.ActorException;
+import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -49,7 +49,7 @@ import java.security.PublicKey;
 /**
  * HMTP client protocol
  */
-public class HmtpClient extends AbstractBamConnection {
+public class HmtpClient extends SimpleActorClient {
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
 
@@ -68,29 +68,29 @@ public class HmtpClient extends AbstractBamConnection {
   protected InputStream _is;
   protected OutputStream _os;
 
-  private BamException _connException;
+  private ActorException _connException;
 
   private ClientLinkManager _linkManager = new ClientLinkManager();
   
   private ClientToLinkStream _brokerStream;
   private String _jid;
 
-  private BamStream _streamHandler;
+  private ActorStream _streamHandler;
 
   public HmtpClient(String url)
   {
     this(url, null);
   }
 
-  public HmtpClient(String url, BamStream agentStream)
+  public HmtpClient(String url, ActorStream actorStream)
   {
     _url = url;
     parseURL(url);
 
-    if (agentStream == null)
-      agentStream = new SimpleBamClientStream();
+    if (actorStream == null)
+      actorStream = new SimpleActorStream();
     
-    setAgentStream(agentStream);
+    setActorStream(actorStream);
   }
 
   public void setVirtualHost(String host)
@@ -142,6 +142,15 @@ public class HmtpClient extends AbstractBamConnection {
     return _port;
   }
 
+  @Override
+  public void setActorStream(ActorStream actorStream)
+  {
+    if (actorStream == null)
+      throw new NullPointerException();
+
+    super.setActorStream(actorStream);
+  }
+
   public void setEncryptPassword(boolean isEncrypt)
   {
     _isEncryptPassword = isEncrypt;
@@ -191,6 +200,7 @@ public class HmtpClient extends AbstractBamConnection {
 	  log.fine(this + " " + status);
 
 	_brokerStream = new ClientToLinkStream(null, _os);
+	setBrokerStream(_brokerStream);
 
 	executeThread(new ClientFromLinkStream(this, _is));
       }
@@ -210,14 +220,14 @@ public class HmtpClient extends AbstractBamConnection {
 	if (log.isLoggable(Level.FINE))
 	  log.fine(this + " " + status + "\n" + text);
       
-	throw new BamRemoteConnectionFailedException("Failed to upgrade to HMTP\n" + status + "\n\n" + text);
+	throw new RemoteConnectionFailedException("Failed to upgrade to HMTP\n" + status + "\n\n" + text);
       }
-    } catch (BamException e) {
+    } catch (ActorException e) {
       _connException = e;
 
       throw _connException;
     } catch (IOException e) {
-      _connException = new BamException(e);
+      _connException = new ActorException(e);
 
       throw _connException;
     }
@@ -294,16 +304,16 @@ public class HmtpClient extends AbstractBamConnection {
    * Returns the current stream to the broker, throwing an exception if
    * it's unavailable
    */
-  public BamStream getBrokerStream()
+  public ActorStream getBrokerStream()
   {
-    BamStream stream = _brokerStream;
+    ActorStream stream = _brokerStream;
 
     if (stream != null)
       return stream;
     else if (_connException != null)
       throw _connException;
     else
-      throw new BamRemoteConnectionFailedException(_url + " connection has been closed");
+      throw new RemoteConnectionFailedException(_url + " connection has been closed");
   }
 
   public void flush()

@@ -28,9 +28,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.bam.AbstractBamConnection;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.SimpleActorClient;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import com.caucho.config.ConfigException;
 import com.caucho.hessian.io.ExtSerializerFactory;
 import com.caucho.hessian.io.Hessian2Input;
@@ -49,7 +49,7 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class HmuxBamClient extends AbstractBamConnection
+public class HmuxBamClient extends SimpleActorClient
 {
   private static final L10N L = new L10N(HmuxBamClient.class);
 
@@ -73,13 +73,13 @@ public class HmuxBamClient extends AbstractBamConnection
   /**
    * Returns the broker stream
    */
-  public BamStream getBrokerStream()
+  public ActorStream getBrokerStream()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   //
-  // BamStream API
+  // ActorStream API
   //
 
   /**

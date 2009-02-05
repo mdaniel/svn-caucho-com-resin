@@ -30,25 +30,40 @@
 package com.caucho.bam;
 
 /**
- * HMPP wrapper
+ * Bam exception when a service address does not exist
  */
-public class BamTimeoutException extends RuntimeException {
-  public BamTimeoutException()
+public class ServiceUnavailableException
+  extends ErrorPacketException
+{
+  public ServiceUnavailableException()
   {
   }
 
-  public BamTimeoutException(String msg)
+  public ServiceUnavailableException(String msg)
   {
     super(msg);
   }
 
-  public BamTimeoutException(Throwable e)
+  public ServiceUnavailableException(String msg, ActorError error)
   {
-    super(e);
+    super(msg, error);
   }
 
-  public BamTimeoutException(String msg, Throwable e)
+  public ServiceUnavailableException(ActorError error)
   {
-    super(msg, e);
+    super(error);
+  }
+
+  @Override
+  public ActorError createActorError()
+  {
+    ActorError error = getActorError();
+
+    if (error != null)
+      return error;
+
+    return new ActorError(ActorError.TYPE_CANCEL,
+			  ActorError.SERVICE_UNAVAILABLE,
+			  getMessage());
   }
 }

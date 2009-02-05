@@ -29,7 +29,7 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.Broker;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.Connection;
@@ -54,7 +54,7 @@ public class XmppProtocol extends Protocol
     = Logger.getLogger(XmppProtocol.class.getName());
 
   private HempBrokerManager _brokerManager;
-  private BamBroker _broker;
+  private Broker _broker;
   
   private ClassLoader _loader;
 

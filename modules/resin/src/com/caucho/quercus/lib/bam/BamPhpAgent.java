@@ -36,9 +36,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
@@ -64,7 +63,7 @@ import javax.sql.DataSource;
 /**
  * BAM agent that calls into a PHP script to handle messages/queries.
  **/
-public class BamPhpAgent extends SimpleBamService {
+public class BamPhpAgent extends SimpleActor {
   private static final L10N L = new L10N(BamPhpAgent.class);
   private static final Logger log
     = Logger.getLogger(BamPhpAgent.class.getName());
@@ -128,7 +127,7 @@ public class BamPhpAgent extends SimpleBamService {
   }
 
   @Override
-  public boolean startAgent(String jid)
+  public boolean startChild(String jid)
   {
     if (log.isLoggable(Level.FINE)) 
       log.fine(L.l("{0}.startAgent({1})", toString(), jid));
@@ -155,11 +154,11 @@ public class BamPhpAgent extends SimpleBamService {
     env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
   }
 
-  private void setError(Env env, BamError error)
+  private void setError(Env env, ActorError error)
   {
     Value errorValue = NullValue.NULL;
     if (error != null) {
-      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
+      JavaClassDef errorClassDef = env.getJavaClassDefinition(ActorError.class);
       errorValue = errorClassDef.wrap(env, error);
     }
 
@@ -181,7 +180,7 @@ public class BamPhpAgent extends SimpleBamService {
 
   @Override
   public void messageError(String to, String from, Serializable value,
-                           BamError error)
+                           ActorError error)
   {
     Env env = createEnv(_page, BamEventType.MESSAGE_ERROR, to, from, value);
 
@@ -196,7 +195,7 @@ public class BamPhpAgent extends SimpleBamService {
   }
 
   @Override
-  public boolean queryGet(long id, String to, String from, Serializable value)
+  public void queryGet(long id, String to, String from, Serializable value)
   {
     BamEventType eventType = BamEventType.QUERY_GET;
 
@@ -234,8 +233,6 @@ public class BamPhpAgent extends SimpleBamService {
     finally {
       env.close();
     }
-
-    return understood;
   }
 
   /*
@@ -247,7 +244,7 @@ public class BamPhpAgent extends SimpleBamService {
   */
 
   @Override
-  public boolean querySet(long id, String to, String from, Serializable value)
+  public void querySet(long id, String to, String from, Serializable value)
   {
     Env env = createEnv(_page, BamEventType.QUERY_SET, to, from, value);
     boolean understood = false;
@@ -263,8 +260,6 @@ public class BamPhpAgent extends SimpleBamService {
     finally {
       env.close();
     }
-
-    return understood;
   }
 
   @Override
@@ -284,7 +279,7 @@ public class BamPhpAgent extends SimpleBamService {
 
   @Override
   public void queryError(long id, String to, String from, 
-                         Serializable value, BamError error)
+                         Serializable value, ActorError error)
   {
     Env env = createEnv(_page, BamEventType.QUERY_ERROR, to, from, value);
 
@@ -397,7 +392,7 @@ public class BamPhpAgent extends SimpleBamService {
 
   @Override
   public void presenceError(String to, String from, 
-                            Serializable value, BamError error)
+                            Serializable value, ActorError error)
   {
     Env env = createEnv(_page, BamEventType.PRESENCE_ERROR, to, from, value);
 

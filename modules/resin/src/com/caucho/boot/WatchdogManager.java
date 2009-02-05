@@ -73,7 +73,7 @@ import java.util.logging.Logger;
 /**
  * Process responsible for watching a backend watchdog.
  */
-class WatchdogManager extends ProtocolDispatchServer {
+class WatchdogManager {
   private static L10N _L;
   private static Logger _log;
 
@@ -87,6 +87,7 @@ class WatchdogManager extends ProtocolDispatchServer {
   private BootManagementConfig _management;
 
   private Server _server;
+  private Port _httpPort;
   
   private HashMap<String,Watchdog> _watchdogMap
     = new HashMap<String,Watchdog>();
@@ -116,7 +117,7 @@ class WatchdogManager extends ProtocolDispatchServer {
     log.setLevel("all");
     log.init();
 
-    // Logger.getLogger("").setLevel(Level.FINER);
+    Logger.getLogger("").setLevel(Level.INFO);
 
     ThreadPool.getThreadPool().setThreadIdleMin(1);
     ThreadPool.getThreadPool().setThreadIdleMax(5);
@@ -156,18 +157,18 @@ class WatchdogManager extends ProtocolDispatchServer {
     clusterServer.setId("");
     clusterServer.setPort(0);
 
-    Port http = clusterServer.createHttp();
+    _httpPort = clusterServer.createHttp();
     if (_watchdogPort > 0)
-      http.setPort(_watchdogPort);
+      _httpPort.setPort(_watchdogPort);
     else
-      http.setPort(server.getWatchdogPort());
+      _httpPort.setPort(server.getWatchdogPort());
 
-    http.setAddress(server.getWatchdogAddress());
+    _httpPort.setAddress(server.getWatchdogAddress());
 
-    http.setMinSpareListen(1);
-    http.setMaxSpareListen(2);
+    _httpPort.setMinSpareListen(1);
+    _httpPort.setMaxSpareListen(2);
 
-    http.init();
+    _httpPort.init();
 
     // clusterServer.addHttp(http);
 
@@ -176,6 +177,7 @@ class WatchdogManager extends ProtocolDispatchServer {
     resin.addCluster(cluster);
 
     _server = resin.createServer();
+    _server.bindPorts();
 
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -205,12 +207,16 @@ class WatchdogManager extends ProtocolDispatchServer {
 
       HempBroker broker = HempBroker.getCurrent();
 
+      /*
       broker.setAdmin(true);
       broker.setAllowNullAdminAuthenticator(true);
+      */
 
       service.setBrokerStream(broker.getBrokerStream());
 
-      broker.addService(service);
+      broker.addActor(service);
+
+      _server.start();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -235,6 +241,11 @@ class WatchdogManager extends ProtocolDispatchServer {
       return _management.getAdminCookie();
     else
       return null;    
+  }
+  
+  boolean isActive()
+  {
+    return _server.isActive() && _httpPort.isActive();
   }
 
   Path getRootDirectory()
@@ -494,9 +505,7 @@ class WatchdogManager extends ProtocolDispatchServer {
       WatchdogManager manager = new WatchdogManager(argv);
       manager.startServer(argv);
 
-      isValid = manager.isValid();
-
-      log().log(Level.WARNING, manager + " valid: " + isValid);
+      isValid = manager.isActive() && manager.isValid();
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     } finally {

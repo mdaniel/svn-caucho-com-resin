@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.BamConnection;
+import com.caucho.bam.ActorClient;
 import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
@@ -69,7 +69,7 @@ class WatchdogClient
   private WatchdogConfig _config;
   private Watchdog _watchdog;
 
-  private BamConnection _conn;
+  private ActorClient _conn;
   
   private Boot _jniBoot;
 
@@ -182,7 +182,7 @@ class WatchdogClient
     throws IOException
   {
     
-    BamConnection conn = getConnection();
+    ActorClient conn = getConnection();
 
     try {
       ResultStatus status = (ResultStatus)
@@ -216,7 +216,7 @@ class WatchdogClient
       throw new ConfigException(L.l("<group-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
     }
 
-    BamConnection conn = null;
+    ActorClient conn = null;
 
     try {
       conn = getConnection();
@@ -242,7 +242,7 @@ class WatchdogClient
 
   public void stopWatchdog()
   {
-    BamConnection conn = getConnection();
+    ActorClient conn = getConnection();
 
     try {
       ResultStatus status = (ResultStatus)
@@ -261,7 +261,7 @@ class WatchdogClient
   public void killWatchdog()
     throws IOException
   {
-    BamConnection conn = getConnection();
+    ActorClient conn = getConnection();
 
     try {
       ResultStatus status = (ResultStatus)
@@ -298,7 +298,7 @@ class WatchdogClient
   public boolean shutdown()
     throws IOException
   {
-    BamConnection conn = getConnection();
+    ActorClient conn = getConnection();
 
     try {
       ResultStatus status = (ResultStatus)
@@ -316,7 +316,7 @@ class WatchdogClient
     return true;
   }
   
-  private BamConnection getConnection()
+  private ActorClient getConnection()
   {
     if (_conn == null) {
       HmtpClient client = new HmtpClient("http://" + getWatchdogAddress()

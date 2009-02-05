@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.packet;
 
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import java.io.Serializable;
 
 /**
@@ -38,7 +38,7 @@ import java.io.Serializable;
  */
 public class MessageError extends Packet {
   private final Serializable _value;
-  private final BamError _error;
+  private final ActorError _error;
 
   /**
    * An empty message to a destination
@@ -48,7 +48,7 @@ public class MessageError extends Packet {
   public MessageError(String to,
 		      String from,
 		      Serializable value,
-		      BamError error)
+		      ActorError error)
   {
     super(to, from);
 
@@ -67,7 +67,7 @@ public class MessageError extends Packet {
   /**
    * Returns the message error
    */
-  public BamError getError()
+  public ActorError getError()
   {
     return _error;
   }
@@ -76,7 +76,7 @@ public class MessageError extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(BamStream handler, BamStream toSource)
+  public void dispatch(ActorStream handler, ActorStream toSource)
   {
     handler.messageError(getTo(), getFrom(), getValue(), _error);
   }

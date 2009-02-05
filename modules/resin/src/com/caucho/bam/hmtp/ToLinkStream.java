@@ -29,9 +29,9 @@
 
 package com.caucho.bam.hmtp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamProtocolException;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ProtocolException;
+import com.caucho.bam.ActorError;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -43,7 +43,7 @@ import java.util.logging.*;
 /**
  * ToLinkStream sends HMTP packets to the stream
  */
-public class ToLinkStream implements BamStream
+public class ToLinkStream implements ActorStream
 {
   private static final Logger log
     = Logger.getLogger(ToLinkStream.class.getName());
@@ -109,7 +109,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -119,7 +119,7 @@ public class ToLinkStream implements BamStream
   public void messageError(String to,
 			   String from,
 			   Serializable value,
-			   BamError error)
+			   ActorError error)
   {
     try {
       Hessian2Output out = _out;
@@ -142,7 +142,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -153,7 +153,7 @@ public class ToLinkStream implements BamStream
   /**
    * Low-level query get
    */
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -166,7 +166,7 @@ public class ToLinkStream implements BamStream
 	  log.finer(this + " queryGet " + value
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
-	
+
 	out.startPacket();
 	out.writeInt(HmtpPacketType.QUERY_GET.ordinal());
 	out.writeString(to);
@@ -176,19 +176,17 @@ public class ToLinkStream implements BamStream
 	out.endPacket();
 	out.flush();
       }
-      
-      return true;
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
   /**
    * Low-level query set
    */
-  public boolean querySet(long id,
+  public void querySet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -211,12 +209,10 @@ public class ToLinkStream implements BamStream
 	out.endPacket();
 	out.flush();
       }
-
-      return true;
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -249,7 +245,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -260,7 +256,7 @@ public class ToLinkStream implements BamStream
 			 String to,
 			 String from, 
 			 Serializable value,
-			 BamError error)
+			 ActorError error)
   {
     try {
       Hessian2Output out = _out;
@@ -314,7 +310,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -340,7 +336,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -366,7 +362,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -392,7 +388,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -418,7 +414,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -444,7 +440,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -470,7 +466,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 
@@ -480,7 +476,7 @@ public class ToLinkStream implements BamStream
   public void presenceError(String to,
 			    String from,
 			    Serializable value,
-			    BamError error)
+			    ActorError error)
   {
     try {
       Hessian2Output out = _out;
@@ -498,7 +494,7 @@ public class ToLinkStream implements BamStream
     } catch (IOException e) {
       close();
       
-      throw new BamProtocolException(e);
+      throw new ProtocolException(e);
     }
   }
 

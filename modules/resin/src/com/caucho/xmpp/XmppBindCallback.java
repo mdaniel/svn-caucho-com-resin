@@ -46,7 +46,7 @@ import javax.xml.stream.*;
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
-public class XmppBindCallback extends AbstractBamStream
+public class XmppBindCallback extends AbstractActorStream
 {
   private XmppBrokerStream _xmppBroker;
 
@@ -55,8 +55,18 @@ public class XmppBindCallback extends AbstractBamStream
     _xmppBroker = broker;
   }
 
+  public String getJid()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public ActorStream getBrokerStream()
+  {
+    return _xmppBroker;
+  }
+
   @Override
-  public boolean querySet(long id,
+  public void querySet(long id,
 			  String to, String from,
 			  Serializable value)
   {
@@ -67,13 +77,9 @@ public class XmppBindCallback extends AbstractBamStream
 
       ImBindQuery result = new ImBindQuery(null, jid);
 
-      _xmppBroker.getAgentStream().queryResult(id, from, to, result);
-
-      return true;
+      _xmppBroker.getActorStream().queryResult(id, from, to, result);
     }
 
-    System.out.println("V: " + value);
-    
-    return false;
+    // XXX:
   }
 }

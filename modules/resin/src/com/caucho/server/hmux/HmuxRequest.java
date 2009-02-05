@@ -269,9 +269,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private int _srunIndex;
 
-  private BamConnection _bamConn;
-  private BamConnection _bamAdminConn;
-  private BamConnection _bamBamConn;
+  private ActorClient _bamConn;
+  private ActorClient _bamAdminConn;
+  private ActorClient _bamBamConn;
 
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
@@ -645,7 +645,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _clientCert.clear();
 
     _pendingData = 0;
-    BamConnection bamConn = _bamConn;
+    ActorClient bamConn = _bamConn;
     _bamConn = null;
 
     if (bamConn != null)
@@ -1053,12 +1053,12 @@ public class HmuxRequest extends AbstractHttpRequest
     // return false;
   }
 
-  private BamStream getLinkStream()
+  private ActorStream getLinkStream()
   {
     if (_linkService == null)
       _linkService = new HmuxLinkService(_server, this);
       
-    return getLinkService().getAgentStream();
+    return getLinkService().getActorStream();
   }
 
   private HmuxLinkService getLinkService()
@@ -1069,7 +1069,7 @@ public class HmuxRequest extends AbstractHttpRequest
     return _linkService;
   }
 
-  private BamStream getBrokerStream(boolean isAdmin)
+  private ActorStream getBrokerStream(boolean isAdmin)
   {
     return getLinkService().getBrokerStream(isAdmin);
   }
@@ -1103,10 +1103,10 @@ public class HmuxRequest extends AbstractHttpRequest
   public void finishRequest()
     throws IOException
   {
-    BamConnection adminConn = _bamAdminConn;
+    ActorClient adminConn = _bamAdminConn;
     _bamAdminConn = null;
     
-    BamConnection bamConn = _bamBamConn;
+    ActorClient bamConn = _bamBamConn;
     _bamBamConn = null;
 
     try {
@@ -1124,7 +1124,7 @@ public class HmuxRequest extends AbstractHttpRequest
   // HMTP
   //
 
-  void setHmtpAdminConnection(BamConnection conn)
+  void setHmtpAdminConnection(ActorClient conn)
   {
     _bamAdminConn = conn;
   }
@@ -1248,7 +1248,7 @@ public class HmuxRequest extends AbstractHttpRequest
     long id = hIn.readLong();
 
     Serializable value = (Serializable) hIn.readObject();
-    BamError error = (BamError) hIn.readObject();
+    ActorError error = (ActorError) hIn.readObject();
 
     endHmtpPacket();
 
@@ -1296,7 +1296,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
   void writeHmtpMessageError(String to, String from,
 			     Serializable value,
-			     BamError error)
+			     ActorError error)
     throws IOException
   {
     WriteStream out = _rawWrite;
@@ -1427,7 +1427,7 @@ public class HmuxRequest extends AbstractHttpRequest
   }
 
   void writeHmtpQueryError(long id, String to, String from,
-			   Serializable value, BamError error)
+			   Serializable value, ActorError error)
     throws IOException
   {
     WriteStream out = _rawWrite;
@@ -1469,13 +1469,13 @@ public class HmuxRequest extends AbstractHttpRequest
     }
   }
 
-  private void hmtpConnect(int code, BamBroker broker)
+  private void hmtpConnect(int code, Broker broker)
     throws IOException
   {
     try {
       _bamConn = broker.getConnection("client", null);
 
-      _bamConn.setAgentStream(new HmuxBamCallback(this));
+      _bamConn.setActorStream(new HmuxBamCallback(this));
 
       WriteStream os = _rawWrite;
 
@@ -1981,7 +1981,7 @@ public class HmuxRequest extends AbstractHttpRequest
   
   public void protocolCloseEvent()
   {
-    BamConnection bamConn = _bamConn;
+    ActorClient bamConn = _bamConn;
     _bamConn = null;
 
     if (bamConn != null)

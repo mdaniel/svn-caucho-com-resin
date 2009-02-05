@@ -32,38 +32,23 @@ package com.caucho.bam;
 /**
  * HMPP wrapper
  */
-public class BamNotAuthorizedException
-  extends BamErrorPacketException
-{
-  public BamNotAuthorizedException()
+public class ProtocolException extends ActorException {
+  public ProtocolException()
   {
   }
 
-  public BamNotAuthorizedException(String msg)
+  public ProtocolException(String msg)
   {
     super(msg);
   }
 
-  public BamNotAuthorizedException(String msg, BamError error)
+  public ProtocolException(Throwable e)
   {
-    super(msg, error);
+    super(e);
   }
 
-  public BamNotAuthorizedException(BamError error)
+  public ProtocolException(String msg, Throwable e)
   {
-    super(error);
-  }
-
-  @Override
-  public BamError createBamError()
-  {
-    BamError error = getBamError();
-
-    if (error != null)
-      return error;
-
-    return new BamError(BamError.TYPE_AUTH,
-			BamError.NOT_AUTHORIZED,
-			getMessage());
+    super(msg, e);
   }
 }

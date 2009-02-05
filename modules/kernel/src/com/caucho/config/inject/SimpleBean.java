@@ -389,9 +389,6 @@ public class SimpleBean extends ComponentImpl
   @Override
   public Object create(CreationalContext cxt)
   {
-    if (cxt == null)
-      throw new NullPointerException();
-    
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
     

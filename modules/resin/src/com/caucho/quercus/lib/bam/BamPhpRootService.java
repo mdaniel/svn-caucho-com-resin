@@ -33,8 +33,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
@@ -46,7 +45,7 @@ import javax.annotation.PostConstruct;
 /**
  * BAM agent spawns a new BamPhpAgent when requested.
  **/
-public class BamPhpRootService extends SimpleBamService {
+public class BamPhpRootService extends SimpleActor {
   private static final L10N L = new L10N(BamPhpAgent.class);
   private static final Logger log
     = Logger.getLogger(BamPhpRootService.class.getName());
@@ -88,7 +87,7 @@ public class BamPhpRootService extends SimpleBamService {
   }
 
   @Override
-  public boolean startAgent(String jid)
+  public boolean startChild(String jid)
   {
     if (log.isLoggable(Level.FINE)) 
       log.fine(L.l("{0}.startAgent({1})", toString(), jid));

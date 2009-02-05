@@ -29,15 +29,47 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamError;
-import java.io.Serializable;
-
 /**
- * callback for a query
+ * HMPP wrapper
  */
-public interface BamQueryCallback {
-  public void onQueryResult(String to, String from, Serializable value);
+public class ErrorPacketException extends ActorException {
+  private ActorError _error;
   
-  public void onQueryError(String to, String from,
-			   Serializable value, BamError error);
+  public ErrorPacketException()
+  {
+  }
+
+  public ErrorPacketException(String msg)
+  {
+    super(msg);
+  }
+
+  public ErrorPacketException(String msg, ActorError error)
+  {
+    super(msg);
+
+    _error = error;
+  }
+
+  public ErrorPacketException(ActorError error)
+  {
+    super(String.valueOf(error));
+
+    _error = error;
+  }
+
+  @Override
+  public ActorError getActorError()
+  {
+    if (_error != null)
+      return _error;
+    else
+      return super.getActorError();
+  }
+
+  @Override
+  public ActorError createActorError()
+  {
+    return _error;
+  }
 }

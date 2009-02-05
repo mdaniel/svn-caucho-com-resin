@@ -28,9 +28,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.bam.AbstractBamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.AbstractActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import com.caucho.config.ConfigException;
 import com.caucho.hessian.io.ExtSerializerFactory;
 import com.caucho.hessian.io.Hessian2Input;
@@ -50,7 +50,7 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-class HmuxBamConnection extends AbstractBamStream
+class HmuxBamConnection extends AbstractActorStream
 {
   private static final L10N L = new L10N(HmuxBamConnection.class);
 
@@ -81,6 +81,11 @@ class HmuxBamConnection extends AbstractBamStream
     _jid = _callback.getJid();
   }
 
+  public ActorStream getBrokerStream()
+  {
+    throw new UnsupportedOperationException();
+  }
+
   //
   // predicates
   //
@@ -94,7 +99,7 @@ class HmuxBamConnection extends AbstractBamStream
   }
 
   //
-  // BamStream API
+  // ActorStream API
   //
 
   /**
@@ -132,7 +137,7 @@ class HmuxBamConnection extends AbstractBamStream
   public void messageError(String to,
 			   String from,
 			   Serializable value,
-			   BamError error)
+			   ActorError error)
   {
     throw new UnsupportedOperationException(String.valueOf(this));
   }
@@ -156,7 +161,7 @@ class HmuxBamConnection extends AbstractBamStream
    *
    * @return true if this handler understand the query, false otherwise
    */
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 			  String to,
 			  String from,
 			  Serializable query)
@@ -167,8 +172,6 @@ class HmuxBamConnection extends AbstractBamStream
       synchronized (stream) {
 	stream.queryGet(id, to, getJid(), query);
 	stream.writeYield();
-
-	return true;
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -192,7 +195,7 @@ class HmuxBamConnection extends AbstractBamStream
    *
    * @return true if this handler understand the query, false otherwise
    */
-  public boolean querySet(long id,
+  public void querySet(long id,
 			  String to,
 			  String from,
 			  Serializable query)
@@ -203,8 +206,6 @@ class HmuxBamConnection extends AbstractBamStream
       synchronized (stream) {
 	stream.querySet(id, to, getJid(), query);
 	stream.writeYield();
-
-	return true;
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -242,7 +243,7 @@ class HmuxBamConnection extends AbstractBamStream
 			 String to,
 			 String from,
 			 Serializable query,
-			 BamError error)
+			 ActorError error)
   {
     throw new UnsupportedOperationException(String.valueOf(this));
   }
@@ -328,7 +329,7 @@ class HmuxBamConnection extends AbstractBamStream
   public void presenceError(String to,
 			    String from,
 			    Serializable data,
-			    BamError error)
+			    ActorError error)
   {
     throw new UnsupportedOperationException(String.valueOf(this));
   }

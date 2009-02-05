@@ -29,9 +29,9 @@
 
 package com.caucho.quercus.lib.bam;
 
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.config.inject.InjectManager;
@@ -91,10 +91,10 @@ public class BamModule extends AbstractQuercusModule
     return null;
   }
 
-  private static BamConnection getBamConnection(Env env)
+  private static ActorClient getActorClient(Env env)
   {
-    BamConnection connection
-      = (BamConnection) env.getSpecialValue("_quercus_bam_connection");
+    ActorClient connection
+      = (ActorClient) env.getSpecialValue("_quercus_bam_connection");
 
     // create a connection lazily
     if (connection == null) {
@@ -107,7 +107,7 @@ public class BamModule extends AbstractQuercusModule
       if (resource.indexOf('/') == 0)
         resource = resource.substring(1);
 
-      connection = broker.getConnection(jid, "pass", resource);
+      connection = broker.getConnection(jid, resource);
       env.addCleanup(new BamConnectionResource(connection));
       env.setSpecialValue("_quercus_bam_connection", connection);
     }
@@ -125,14 +125,14 @@ public class BamModule extends AbstractQuercusModule
     return null;
   }
 
-  private static BamStream getBrokerStream(Env env)
+  private static ActorStream getBrokerStream(Env env)
   {
     BamPhpAgent agent = getAgent(env);
 
     if (agent != null)
       return agent.getBrokerStream();
 
-    BamConnection connection = getBamConnection(env);
+    ActorClient connection = getActorClient(env);
 
     return connection.getBrokerStream();
   }
@@ -144,7 +144,7 @@ public class BamModule extends AbstractQuercusModule
     if (agent != null)
       return agent.getJid();
 
-    BamConnection connection = getBamConnection(env);
+    ActorClient connection = getActorClient(env);
 
     return connection.getJid();
   }
@@ -232,7 +232,7 @@ public class BamModule extends AbstractQuercusModule
     if (service == null)
       return BooleanValue.FALSE;
 
-    manager.getBroker().removeService(service);
+    manager.getBroker().removeActor(service);
 
     return BooleanValue.TRUE;
   }
@@ -316,7 +316,7 @@ public class BamModule extends AbstractQuercusModule
   public static void bam_send_message_error(Env env, 
                                             String to, 
                                             Serializable value, 
-                                            BamError error)
+                                            ActorError error)
   {
     getBrokerStream(env).messageError(to, getJid(env), value, error);
   }
@@ -327,9 +327,9 @@ public class BamModule extends AbstractQuercusModule
                                          Serializable value)
   {
     String from = getJid(env);
-    boolean understood = getBrokerStream(env).queryGet(id, to, from, value);
+    getBrokerStream(env).queryGet(id, to, from, value);
 
-    return BooleanValue.create(understood);
+    return BooleanValue.TRUE;
   }
 
   public static Value bam_send_query_set(Env env, 
@@ -338,9 +338,9 @@ public class BamModule extends AbstractQuercusModule
                                          Serializable value)
   {
     String from = getJid(env);
-    boolean understood = getBrokerStream(env).querySet(id, to, from, value);
+    getBrokerStream(env).querySet(id, to, from, value);
 
-    return BooleanValue.create(understood);
+    return BooleanValue.TRUE;
   }
 
   public static void bam_send_query_result(Env env, 
@@ -353,7 +353,7 @@ public class BamModule extends AbstractQuercusModule
 
   public static void bam_send_query_error(Env env, 
                                           long id, String to,
-                                          Serializable value, BamError error)
+                                          Serializable value, ActorError error)
   {
     getBrokerStream(env).queryError(id, to, getJid(env), value, error);
   }
@@ -408,7 +408,7 @@ public class BamModule extends AbstractQuercusModule
   public static void bam_send_presence_error(Env env, 
                                              String to, 
                                              Serializable value,
-                                             BamError error)
+                                             ActorError error)
   {
     getBrokerStream(env).presenceError(to, getJid(env), value, error);
   }

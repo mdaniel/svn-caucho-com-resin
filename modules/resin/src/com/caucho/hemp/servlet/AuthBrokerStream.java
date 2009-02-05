@@ -29,9 +29,9 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.AbstractBamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.AbstractActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.bam.hmtp.AuthResult;
 import com.caucho.bam.hmtp.AuthQuery;
 import java.io.*;
@@ -45,18 +45,28 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class AuthBrokerStream extends AbstractBamStream
+public class AuthBrokerStream extends AbstractActorStream
 {
   private static final Logger log
     = Logger.getLogger(AuthBrokerStream.class.getName());
 
   private ServerFromLinkStream _manager;
-  private BamStream _broker;
+  private ActorStream _broker;
 
-  AuthBrokerStream(ServerFromLinkStream manager, BamStream server)
+  AuthBrokerStream(ServerFromLinkStream manager, ActorStream server)
   {
     _manager = manager;
     _broker = server;
+  }
+
+  public String getJid()
+  {
+    return null;
+  }
+
+  public ActorStream getBrokerStream()
+  {
+    return _broker;
   }
   
   /**
@@ -66,16 +76,14 @@ public class AuthBrokerStream extends AbstractBamStream
    * a QueryResult or a QueryError 
    */
   @Override
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
   {
     _broker.queryError(id, from, to, value, 
-		           new BamError(BamError.TYPE_CANCEL,
-				         BamError.FORBIDDEN));
-      
-    return true;
+		           new ActorError(ActorError.TYPE_CANCEL,
+				         ActorError.FORBIDDEN));
   }
   
   /**
@@ -85,7 +93,7 @@ public class AuthBrokerStream extends AbstractBamStream
    * a QueryResult or a QueryError 
    */
   @Override
-  public boolean querySet(long id,
+  public void querySet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -103,18 +111,17 @@ public class AuthBrokerStream extends AbstractBamStream
 	_broker.queryResult(id, from, to, new AuthResult(jid));
       else
 	_broker.queryError(id, from, to, value,
-			       new BamError(BamError.TYPE_AUTH,
-					     BamError.FORBIDDEN));
+			       new ActorError(ActorError.TYPE_AUTH,
+					     ActorError.FORBIDDEN));
     }
     else {
       // XXX: auth
       _broker.queryError(id, from, to, value,
-			     new BamError(BamError.TYPE_CANCEL,
-				           BamError.FORBIDDEN));
+			     new ActorError(ActorError.TYPE_CANCEL,
+				           ActorError.FORBIDDEN));
     }
-    
-    return true;
   }
+  
   /**
    * General presence, for clients announcing availability
    */
@@ -191,7 +198,7 @@ public class AuthBrokerStream extends AbstractBamStream
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        BamError error)
+			        ActorError error)
   {
     log.fine(this + " sendPresenceError requires login first");
   }

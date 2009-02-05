@@ -29,10 +29,9 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.Broker;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -58,8 +57,8 @@ public class XmppReader
   private static final Logger log
     = Logger.getLogger(XmppReader.class.getName());
 
-  private BamStream _toReply;
-  private BamStream _handler;
+  private ActorStream _toReply;
+  private ActorStream _handler;
 
   private ReadStream _is;
   private XmppStreamReader _in;
@@ -75,8 +74,8 @@ public class XmppReader
   XmppReader(XmppContext context,
 	     ReadStream is,
 	     XmppStreamReader in,
-	     BamStream toReply,
-	     BamStream handler)
+	     ActorStream toReply,
+	     ActorStream handler)
   {
     _xmppContext = context;
     _marshalFactory = context.getMarshalFactory();
@@ -91,7 +90,7 @@ public class XmppReader
     _isFinest = log.isLoggable(Level.FINEST);
   }
 
-  void setHandler(BamStream handler)
+  void setHandler(ActorStream handler)
   {
     _handler = handler;
   }
@@ -323,7 +322,7 @@ public class XmppReader
     else
       query = readAsXmlString(_in);
 
-    BamError error = null;
+    ActorError error = null;
       
     skipToEnd("iq");
 
@@ -394,7 +393,7 @@ public class XmppReader
     Text status = null;
     int priority = 0;
     ArrayList<Serializable> extraList = new ArrayList<Serializable>();
-    BamError error = null;
+    ActorError error = null;
 
     while ((tag = _in.nextTag()) > 0
 	   && ! ("presence".equals(_in.getLocalName())

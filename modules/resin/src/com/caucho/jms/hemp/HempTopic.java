@@ -29,10 +29,10 @@
 
 package com.caucho.jms.hemp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.Broker;
+import com.caucho.bam.SimpleActor;
 import java.util.ArrayList;
 import java.util.logging.*;
 
@@ -61,8 +61,8 @@ public class HempTopic extends AbstractTopic
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private BamBroker _broker;
-  private BamStream _brokerStream;
+  private Broker _broker;
+  private ActorStream _brokerStream;
 
   private TopicResource _resource = new TopicResource();
 
@@ -72,7 +72,7 @@ public class HempTopic extends AbstractTopic
   /**
    * Sets the broker
    */
-  public void setBroker(BamBroker broker)
+  public void setBroker(Broker broker)
   {
     _broker = broker;
   }
@@ -99,10 +99,10 @@ public class HempTopic extends AbstractTopic
     if (_broker == null) {
       InjectManager webBeans = InjectManager.create();
     
-      _broker = webBeans.getInstanceByType(BamBroker.class);
+      _broker = webBeans.getInstanceByType(Broker.class);
 
       if (_broker == null)
-	throw new ConfigException(L.l("hmpp protocol needs a BamBroker"));
+	throw new ConfigException(L.l("hmpp protocol needs a Broker"));
 
       _brokerStream = _broker.getBrokerStream();
     }
@@ -117,7 +117,7 @@ public class HempTopic extends AbstractTopic
     if (! _isInit) {
       _isInit = true;
       _resource.setJid(jid);
-      _broker.addService(_resource);
+      _broker.addActor(_resource);
     }
   }
 
@@ -183,7 +183,7 @@ public class HempTopic extends AbstractTopic
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       BamError error)
+			       ActorError error)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " sendMessageError to=" + to + " from=" + from +
@@ -200,7 +200,7 @@ public class HempTopic extends AbstractTopic
     // _xmppNode.send(session, msg, timeout);
   }
 
-  class TopicResource extends SimpleBamService {
+  class TopicResource extends SimpleActor {
     public void setJid(String jid)
     {
       super.setJid(jid);

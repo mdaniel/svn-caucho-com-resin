@@ -29,21 +29,18 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.AbstractBamFilter;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.AbstractFilter;
 import com.caucho.bam.hmtp.AuthQuery;
 import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.FromLinkStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorStream;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.BamException;
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -51,11 +48,11 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HMTP
  */
-public class ServerLinkFilter extends AbstractBamFilter
+public class ServerLinkFilter extends AbstractFilter
 {
   private String _ipAddress;
   
-  public ServerLinkFilter(BamStream next, String ipAddress)
+  public ServerLinkFilter(ActorStream next, String ipAddress)
   {
     super(next);
 
@@ -63,12 +60,12 @@ public class ServerLinkFilter extends AbstractBamFilter
   }
 
   @Override
-  public boolean querySet(long id, String to, String from,
+  public void querySet(long id, String to, String from,
 			  Serializable query)
   {
     if (query instanceof AuthQuery)
       query = new LoginQuery((AuthQuery) query, _ipAddress);
 
-    return super.querySet(id, to, from, query);
+    super.querySet(id, to, from, query);
   }
 }

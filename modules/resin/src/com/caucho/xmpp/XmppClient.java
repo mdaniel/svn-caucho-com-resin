@@ -90,7 +90,7 @@ public class XmppClient {
 
   private String _jid;
   
-  private BamStream _callback;
+  private ActorStream _callback;
 
   public XmppClient(InetAddress address, int port)
   {
@@ -235,7 +235,7 @@ public class XmppClient {
     }
   }
 
-  public void setCallback(BamStream callback)
+  public void setCallback(ActorStream callback)
   {
     _callback = callback;
 
@@ -534,7 +534,7 @@ public class XmppClient {
     return false;
   }
 
-  public BamStream getBrokerStream()
+  public ActorStream getBrokerStream()
   {
     return _toBroker;
   }
@@ -553,7 +553,18 @@ public class XmppClient {
     close();
   }
 
-  class BindCallback extends AbstractBamStream {
+  class BindCallback extends AbstractActorStream {
+    public String getJid()
+    {
+      throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public ActorStream getBrokerStream()
+    {
+      throw new UnsupportedOperationException();
+    }
+    
     @Override
     public void queryResult(long id, String to, String from,
 			    Serializable value)

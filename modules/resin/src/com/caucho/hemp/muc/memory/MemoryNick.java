@@ -30,7 +30,7 @@
 package com.caucho.hemp.muc.memory;
 
 import com.caucho.xmpp.muc.MucUserPresence;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 import com.caucho.xmpp.im.ImMessage;
 import java.io.Serializable;
 import java.util.*;
@@ -39,7 +39,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room nick (xep-0045)
  */
-public class MemoryNick extends SimpleBamService
+public class MemoryNick extends SimpleActor
 {
   private static final Logger log
     = Logger.getLogger(MemoryNick.class.getName());

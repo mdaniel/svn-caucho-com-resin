@@ -30,42 +30,45 @@
 package com.caucho.bam;
 
 /**
- * HMPP wrapper
+ * Actor exception when a feature does not exist because the
+ * service {@link com.caucho.bam.Actor}
+ * does not understand or implement the message or RPC query.
  */
-public class BamErrorPacketException extends BamException {
-  private BamError _bamError;
-  
-  public BamErrorPacketException()
+public class FeatureNotImplementedException
+  extends ErrorPacketException
+{
+  public FeatureNotImplementedException()
   {
   }
 
-  public BamErrorPacketException(String msg)
-  {
-    super(msg);
-  }
-
-  public BamErrorPacketException(String msg, BamError error)
+  public FeatureNotImplementedException(String msg)
   {
     super(msg);
-
-    _bamError = error;
   }
 
-  public BamErrorPacketException(BamError error)
+  public FeatureNotImplementedException(String msg, ActorError error)
   {
-    super(String.valueOf(error));
-
-    _bamError = error;
+    super(msg, error);
   }
 
-  public BamError getBamError()
+  public FeatureNotImplementedException(ActorError error)
   {
-    return _bamError;
+    super(error);
   }
 
+  /**
+   * Creates the ActorError corresponding to this exception
+   */
   @Override
-  public BamError createBamError()
+  public ActorError createActorError()
   {
-    return _bamError;
+    ActorError error = getActorError();
+
+    if (error != null)
+      return error;
+
+    return new ActorError(ActorError.TYPE_CANCEL,
+			  ActorError.FEATURE_NOT_IMPLEMENTED,
+			  getMessage());
   }
 }

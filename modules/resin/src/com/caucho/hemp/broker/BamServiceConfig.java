@@ -55,10 +55,10 @@ public class BamServiceConfig extends BeanConfig
   private static final Logger log
     = Logger.getLogger(BamServiceConfig.class.getName());
 
-  private BamBroker _broker;
+  private Broker _broker;
 
   private int _threadMax = 1;
-  private BamService _service;
+  private Actor _service;
   
   public BamServiceConfig()
   {
@@ -70,7 +70,7 @@ public class BamServiceConfig extends BeanConfig
   @Override
   public Class getBeanConfigClass()
   {
-    return BamService.class;
+    return Actor.class;
   }
 
   public void setThreadMax(int threadMax)
@@ -92,7 +92,8 @@ public class BamServiceConfig extends BeanConfig
   @PreDestroy
   public void destroy()
   {
-    _broker.removeService(_service);
+    if (_service != null)
+      _broker.removeActor(_service);
   }
 
   @Start
@@ -101,11 +102,11 @@ public class BamServiceConfig extends BeanConfig
     if (_service != null)
       return;
 
-    BamService service = (BamService) getObject();
+    Actor service = (Actor) getObject();
 
     // XXX: jms/3a14 - needs to be cleaned up
-    if (service instanceof SimpleBamService) {
-      SimpleBamService simpleService = (SimpleBamService) service;
+    if (service instanceof SimpleActor) {
+      SimpleActor simpleService = (SimpleActor) service;
 
       simpleService.setBrokerStream(_broker.getBrokerStream());
     }
@@ -129,7 +130,7 @@ public class BamServiceConfig extends BeanConfig
 
     _service = service;
 
-    _broker.addService(service);
+    _broker.addActor(service);
   }
 }
 

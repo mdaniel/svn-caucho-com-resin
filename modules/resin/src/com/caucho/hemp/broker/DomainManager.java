@@ -64,7 +64,7 @@ abstract public class DomainManager
     return _localDomain.get();
   }
 
-  abstract public BamStream findDomain(String name);
+  abstract public ActorStream findDomain(String name);
   
   @Override
   public String toString()

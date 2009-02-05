@@ -29,10 +29,10 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.Broker;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -47,7 +47,7 @@ import javax.xml.stream.*;
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
 public class XmppBrokerStream
-  implements TcpDuplexHandler, BamStream
+  implements TcpDuplexHandler, ActorStream
 {
   private static final Logger log
     = Logger.getLogger(XmppBrokerStream.class.getName());
@@ -56,12 +56,12 @@ public class XmppBrokerStream
   private XmppProtocol _protocol;
   private XmppContext _xmppContext;
   
-  private BamBroker _broker;
-  private BamConnection _conn;
-  private BamStream _toBroker;
+  private Broker _broker;
+  private ActorClient _conn;
+  private ActorStream _toBroker;
 
-  private BamStream _toClient;
-  private BamStream _authHandler;
+  private ActorStream _toClient;
+  private ActorStream _authHandler;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -80,7 +80,7 @@ public class XmppBrokerStream
   // XXX: needs timeout(?)
   private HashMap<Long,String> _idMap = new HashMap<Long,String>();
 
-  XmppBrokerStream(XmppRequest request, BamBroker broker,
+  XmppBrokerStream(XmppRequest request, Broker broker,
 		   ReadStream is, XmppStreamReader in, WriteStream os)
   {
     _request = request;
@@ -115,7 +115,7 @@ public class XmppBrokerStream
     return _jid;
   }
 
-  BamStream getAgentStream()
+  ActorStream getActorStream()
   {
     return _toClient;
   }
@@ -151,7 +151,7 @@ public class XmppBrokerStream
     _uid = uid + _broker.getJid();
     
     _conn = _broker.getConnection(_uid, password);
-    _conn.setAgentStream(_toClient);
+    _conn.setActorStream(_toClient);
 
     _jid = _conn.getJid();
     
@@ -164,8 +164,8 @@ public class XmppBrokerStream
   {
     String password = null;
     
-    _conn = _broker.getConnection(_uid, password, resource);
-    _conn.setAgentStream(_toClient);
+    _conn = _broker.getConnection(_uid, resource);
+    _conn.setActorStream(_toClient);
 
     _jid = _conn.getJid();
     
@@ -214,7 +214,7 @@ public class XmppBrokerStream
   public void messageError(String to,
 			   String from,
 			   Serializable value,
-			   BamError error)
+			   ActorError error)
   {
     _toBroker.messageError(to, _jid, value, error);
   }
@@ -225,14 +225,12 @@ public class XmppBrokerStream
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
     _toBroker.queryGet(id, to, _jid, value);
-    
-    return true;
   }
   
   /**
@@ -241,14 +239,12 @@ public class XmppBrokerStream
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean querySet(long id,
+  public void querySet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
     _toBroker.querySet(id, to, _jid, value);
-    
-    return true;
   }
   
   /**
@@ -273,7 +269,7 @@ public class XmppBrokerStream
 			     String to,
 			     String from,
 			     Serializable value,
-			     BamError error)
+			     ActorError error)
   {
     _toBroker.queryError(id, to, _jid, value, error);
   }
@@ -361,7 +357,7 @@ public class XmppBrokerStream
   public void presenceError(String to,
 			      String from,
 			      Serializable data,
-			      BamError error)
+			      ActorError error)
   {
     _toBroker.presenceError(to, _jid, data, error);
   }

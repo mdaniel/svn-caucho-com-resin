@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.bam;
 
-import com.caucho.bam.BamConnection;
+import com.caucho.bam.ActorClient;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.util.L10N;
 
@@ -47,14 +47,14 @@ public class BamConnectionResource
 
   private static final L10N L = new L10N(BamConnectionResource.class);
 
-  private BamConnection _connection;
+  private ActorClient _connection;
 
-  public BamConnectionResource(BamConnection connection)
+  public BamConnectionResource(ActorClient connection)
   {
     _connection = connection;
   }
 
-  public BamConnection getConnection()
+  public ActorClient getConnection()
   {
     return _connection;
   }
@@ -63,7 +63,7 @@ public class BamConnectionResource
   {
     if (_connection != null) {
       if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("BamConnectionResource.cleanup(): closing {0}", 
+        log.finest(L.l("ActorClientResource.cleanup(): closing {0}", 
                        _connection));
 
       _connection.close();

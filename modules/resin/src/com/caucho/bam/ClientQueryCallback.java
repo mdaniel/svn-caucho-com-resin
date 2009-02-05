@@ -29,28 +29,14 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamException;
+import java.io.Serializable;
 
 /**
- * HMPP wrapper
+ * callback for a query
  */
-public class BamProtocolException extends BamException {
-  public BamProtocolException()
-  {
-  }
-
-  public BamProtocolException(String msg)
-  {
-    super(msg);
-  }
-
-  public BamProtocolException(Throwable e)
-  {
-    super(e);
-  }
-
-  public BamProtocolException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
+public interface ClientQueryCallback {
+  public void onQueryResult(String to, String from, Serializable value);
+  
+  public void onQueryError(String to, String from,
+			   Serializable value, ActorError error);
 }

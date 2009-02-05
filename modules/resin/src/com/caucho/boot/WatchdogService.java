@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 import com.caucho.util.L10N;
 
 import java.util.logging.*;
@@ -39,7 +39,7 @@ import java.util.logging.*;
 /**
  * BAM service managing the watchdog
  */
-class WatchdogService extends SimpleBamService
+class WatchdogService extends SimpleActor
 {
   private static final L10N L = new L10N(WatchdogService.class);
   private static final Logger log

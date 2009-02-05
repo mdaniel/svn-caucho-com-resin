@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.BamService;
+import com.caucho.bam.Actor;
 import com.caucho.config.inject.BeanRegistrationListener;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.hemp.broker.HempBroker;
@@ -51,7 +51,7 @@ public class BamRegisterListener implements BeanRegistrationListener
   {
     HempBroker broker = HempBroker.getCurrent();
     
-    BamService service = (BamService) manager.getInstance(bean);
+    Actor service = (Actor) manager.getInstance(bean);
 
     com.caucho.remote.BamService serviceAnn
       = getAnnotation(bean, com.caucho.remote.BamService.class);
@@ -72,7 +72,7 @@ public class BamRegisterListener implements BeanRegistrationListener
 					   broker,
 					   threadMax);
 
-    broker.addService(service);
+    broker.addActor(service);
 
     // XXX: shutdown
   }

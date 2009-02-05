@@ -24,8 +24,8 @@ public class DeployClient
 {
   private static final L10N L = new L10N(DeployClient.class);
 
-  private BamBroker _broker;
-  private BamConnection _conn;
+  private Broker _broker;
+  private ActorClient _conn;
   private String _deployJid;
   
   private HmuxBamClient _client;

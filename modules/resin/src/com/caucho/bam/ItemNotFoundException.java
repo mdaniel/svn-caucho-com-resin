@@ -32,23 +32,36 @@ package com.caucho.bam;
 /**
  * HMPP wrapper
  */
-public class BamConnectionTimeoutException extends BamErrorPacketException {
-  public BamConnectionTimeoutException()
+public class ItemNotFoundException extends ErrorPacketException {
+  public ItemNotFoundException()
   {
   }
 
-  public BamConnectionTimeoutException(String msg)
+  public ItemNotFoundException(String msg)
   {
     super(msg);
   }
 
-  public BamConnectionTimeoutException(String msg, BamError error)
+  public ItemNotFoundException(String msg, ActorError error)
   {
     super(msg, error);
   }
 
-  public BamConnectionTimeoutException(BamError error)
+  public ItemNotFoundException(ActorError error)
   {
     super(error);
+  }
+
+  @Override
+  public ActorError createActorError()
+  {
+    ActorError error = getActorError();
+
+    if (error != null)
+      return error;
+
+    return new ActorError(ActorError.TYPE_CANCEL,
+			  ActorError.ITEM_NOT_FOUND,
+			  getMessage());
   }
 }

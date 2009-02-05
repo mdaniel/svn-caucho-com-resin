@@ -30,53 +30,25 @@
 package com.caucho.bam;
 
 /**
- * BamService is a registered service.
+ * HMPP wrapper
  */
-public interface BamService
-{
-  /**
-   * Returns the service's jid.
-   */
-  public String getJid();
+public class ConnectionTimeoutException extends ErrorPacketException {
+  public ConnectionTimeoutException()
+  {
+  }
 
-  /**
-   * Sets the service's jid.
-   */
-  public void setJid(String jid);
+  public ConnectionTimeoutException(String msg)
+  {
+    super(msg);
+  }
 
-  /**
-   * Returns the service's agent stream
-   */
-  public BamStream getAgentStream();
-  
-  /**
-   * Requests that an agent with the given jid be started. 
-   */
-  public boolean startAgent(String jid);
+  public ConnectionTimeoutException(String msg, ActorError error)
+  {
+    super(msg, error);
+  }
 
-  /**
-   * Requests that an agent with the given jid be stopped. 
-   */
-  public boolean stopAgent(String jid);
-
-  /**
-   * Called when an agent logs in
-   */
-  public void onAgentStart(String jid);
-
-  /**
-   * Called when an agent logs out
-   */
-  public void onAgentStop(String jid);
-  
-  /**
-   * Returns a filter for outbound calls, i.e. filtering messages to the agent.
-   */
-  public BamStream getAgentFilter(BamStream stream);
-
-  /**
-   * Returns a filter for inbound calls, i.e. filtering messages to the broker
-   * from the agent.
-   */
-  public BamStream getBrokerFilter(BamStream stream);
+  public ConnectionTimeoutException(ActorError error)
+  {
+    super(error);
+  }
 }

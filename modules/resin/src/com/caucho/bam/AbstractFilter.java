@@ -33,25 +33,25 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Abstrat implementation of a HtmpStream filter.  The default operation
+ * Abstract implementation of a BAM filter.  The default operation
  * of most methods is to forward the request to the next stream.
  */
-public class AbstractBamFilter implements BamStream
+public class AbstractFilter implements ActorStream
 {
-  private final BamStream _next;
+  private final ActorStream _next;
 
-  protected AbstractBamFilter(BamStream next)
+  protected AbstractFilter(ActorStream next)
   {
     _next = next;
   }
 
-  protected BamStream getNext()
+  protected ActorStream getNext()
   {
     return _next;
   }
   
   /**
-   * Returns the jid of the final agent
+   * Returns the jid of the final actor
    */
   public String getJid()
   {
@@ -63,11 +63,11 @@ public class AbstractBamFilter implements BamStream
    * 
    * @param to the target JID
    * @param from the source JID
-   * @param value the message payload
+   * @param payload the message payload
    */
-  public void message(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable payload)
   {
-    _next.message(to, from, value);
+    _next.message(to, from, payload);
   }
   
   /**
@@ -75,106 +75,107 @@ public class AbstractBamFilter implements BamStream
    * 
    * @param to the target JID
    * @param from the source JID
-   * @param value the message payload
+   * @param payload the message payload
    */
   public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       BamError error)
+			   String from,
+			   Serializable payload,
+			   ActorError error)
   {
-    _next.messageError(to, from, value, error);
+    _next.messageError(to, from, payload, error);
   }
   
-  public boolean queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable query)
+  public void queryGet(long id,
+		       String to,
+		       String from,
+		       Serializable payload)
   {
-    return _next.queryGet(id, to, from, query);
+    _next.queryGet(id, to, from, payload);
   }
   
-  public boolean querySet(long id,
-			      String to,
-			      String from,
-			      Serializable query)
+  public void querySet(long id,
+		       String to,
+		       String from,
+		       Serializable payload)
   {
-    return _next.querySet(id, to, from, query);
+    _next.querySet(id, to, from, payload);
   }
   
   public void queryResult(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+			  String to,
+			  String from,
+			  Serializable payload)
   {
-    _next.queryResult(id, to, from, value);
+    _next.queryResult(id, to, from, payload);
   }
   
   public void queryError(long id,
-			     String to,
-			     String from,
-			     Serializable query,
-			     BamError error)
+			 String to,
+			 String from,
+			 Serializable payload,
+			 ActorError error)
   {
-    _next.queryError(id, to, from, query, error);
+    _next.queryError(id, to, from, payload, error);
   }
   
   /**
    * General presence, for clients announcing availability
    */
   public void presence(String to,
-			   String from,
-			   Serializable data)
+		       String from,
+		       Serializable payload)
   {
-    _next.presence(to, from, data);
+    _next.presence(to, from, payload);
   }
 
   /**
    * General presence, for clients announcing unavailability
    */
   public void presenceUnavailable(String to,
-				      String from,
-				      Serializable data)
+				  String from,
+				  Serializable payload)
   {
-    _next.presenceUnavailable(to, from, data);
+    _next.presenceUnavailable(to, from, payload);
   }
 
   /**
    * Presence probe from the server to a client
    */
   public void presenceProbe(String to,
-			      String from,
-			      Serializable data)
+			    String from,
+			    Serializable payload)
   {
+    _next.presenceProbe(to, from, payload);
   }
 
   /**
    * A subscription request from a client
    */
   public void presenceSubscribe(String to,
-				  String from,
-				  Serializable data)
+				String from,
+				Serializable payload)
   {
-    _next.presenceSubscribe(to, from, data);
+    _next.presenceSubscribe(to, from, payload);
   }
 
   /**
    * A subscription response to a client
    */
   public void presenceSubscribed(String to,
-				   String from,
-				   Serializable data)
+				 String from,
+				 Serializable payload)
   {
-    _next.presenceSubscribed(to, from, data);
+    _next.presenceSubscribed(to, from, payload);
   }
 
   /**
    * An unsubscription request from a client
    */
   public void presenceUnsubscribe(String to,
-				    String from,
-				    Serializable data)
+				  String from,
+				  Serializable payload)
   {
-    _next.presenceUnsubscribe(to, from, data);
+    _next.presenceUnsubscribe(to, from, payload);
   }
 
   /**
@@ -182,20 +183,20 @@ public class AbstractBamFilter implements BamStream
    */
   public void presenceUnsubscribed(String to,
 				     String from,
-				     Serializable data)
+				     Serializable payload)
   {
-    _next.presenceUnsubscribed(to, from, data);
+    _next.presenceUnsubscribed(to, from, payload);
   }
 
   /**
    * An error response to a client
    */
   public void presenceError(String to,
-			      String from,
-			      Serializable data,
-			      BamError error)
+			    String from,
+			    Serializable payload,
+			    ActorError error)
   {
-    _next.presenceError(to, from, data, error);
+    _next.presenceError(to, from, payload, error);
   }
 
   /**

@@ -29,8 +29,8 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.vfs.*;
 import java.io.*;
 import java.util.logging.*;
@@ -40,7 +40,7 @@ import com.caucho.hessian.io.*;
 /**
  * Handles callbacks for a xmpp service
  */
-public class XmppAgentStream implements BamStream
+public class XmppAgentStream implements ActorStream
 {
   private static final Logger log
     = Logger.getLogger(XmppAgentStream.class.getName());
@@ -96,7 +96,7 @@ public class XmppAgentStream implements BamStream
   public void messageError(String to,
 			       String from,
 			       Serializable value,
-			       BamError error)
+			       ActorError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -112,7 +112,7 @@ public class XmppAgentStream implements BamStream
     }
   }
   
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 		              String to,
 		              String from,
 		              Serializable query)
@@ -129,11 +129,9 @@ public class XmppAgentStream implements BamStream
       
       log.log(Level.FINE, e.toString(), e);
     }
-    
-    return true;
   }
   
-  public boolean querySet(long id,
+  public void querySet(long id,
 		              String to,
 		              String from,
 		              Serializable query)
@@ -164,8 +162,6 @@ public class XmppAgentStream implements BamStream
       
       log.log(Level.FINE, e.toString(), e);
     }
-    
-    return true;
   }
   
   public void queryResult(long bamId,
@@ -182,7 +178,7 @@ public class XmppAgentStream implements BamStream
 			     String to,
 			     String from,
 			     Serializable query,
-			     BamError error)
+			     ActorError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -379,7 +375,7 @@ public class XmppAgentStream implements BamStream
   public void presenceError(String to,
 			        String from,
 			        Serializable data,
-			        BamError error)
+			        ActorError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {

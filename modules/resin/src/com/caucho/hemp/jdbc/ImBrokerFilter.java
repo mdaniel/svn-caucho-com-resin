@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.jdbc;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.AbstractBamFilter;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.AbstractFilter;
 import java.util.*;
 import java.util.logging.*;
 import java.io.Serializable;
@@ -39,11 +39,11 @@ import java.io.Serializable;
 /**
  * Filter on inbound requests
  */
-public class ImBrokerFilter extends AbstractBamFilter
+public class ImBrokerFilter extends AbstractFilter
 {
   private ImUser _resource;
   
-  public ImBrokerFilter(BamStream next, ImUser resource)
+  public ImBrokerFilter(ActorStream next, ImUser resource)
   {
     super(next);
 

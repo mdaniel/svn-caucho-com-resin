@@ -28,9 +28,8 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.bam.AbstractBamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.AbstractActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.config.ConfigException;
 import com.caucho.hessian.io.ExtSerializerFactory;
 import com.caucho.hessian.io.Hessian2StreamingInput;
@@ -183,7 +182,7 @@ class HmuxBamClientCallback implements Runnable
     String from = readString(is);
 
     Serializable query = (Serializable) readObject();
-    BamError error = (BamError) readObject();
+    ActorError error = (ActorError) readObject();
 
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " r: HMTP queryError("

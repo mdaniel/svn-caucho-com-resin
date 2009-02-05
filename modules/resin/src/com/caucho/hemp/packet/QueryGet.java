@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.packet;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
 import java.io.Serializable;
 
 /**
@@ -79,17 +79,9 @@ public class QueryGet extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(BamStream handler, BamStream toSource)
+  public void dispatch(ActorStream handler, ActorStream toSource)
   {
-    if (! handler.queryGet(getId(), getTo(), getFrom(), getValue())) {
-      String to = getFrom();
-      if (to == null)
-	to = toSource.getJid();
-      
-      toSource.queryError(getId(), to, getTo(), getValue(),
-			  new BamError(BamError.TYPE_CANCEL,
-				       BamError.ITEM_NOT_FOUND));
-    }
+    handler.queryGet(getId(), getTo(), getFrom(), getValue());
   }
 
   @Override

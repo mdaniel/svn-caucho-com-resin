@@ -29,8 +29,7 @@
 
 package com.caucho.bam.hmtp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorStream;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -52,8 +51,8 @@ public class ClientFromLinkStream extends FromLinkStream implements Runnable
   private HmtpClient _client;
   private ClassLoader _loader;
 
-  private BamStream _toLinkStream;
-  private BamStream _toClientStream;
+  private ActorStream _toLinkStream;
+  private ActorStream _toClientStream;
 
   ClientFromLinkStream(HmtpClient client,
 		       InputStream is)
@@ -61,7 +60,13 @@ public class ClientFromLinkStream extends FromLinkStream implements Runnable
     super(is);
 
     _toLinkStream = client.getBrokerStream();
-    _toClientStream = client.getAgentStream();
+    _toClientStream = client.getActorStream();
+
+    if (_toLinkStream == null)
+      throw new NullPointerException();
+
+    if (_toClientStream == null)
+      throw new NullPointerException();
 
     _client = client;
     _loader = Thread.currentThread().getContextClassLoader();
@@ -72,12 +77,12 @@ public class ClientFromLinkStream extends FromLinkStream implements Runnable
     return _client.getJid();
   }
 
-  protected BamStream getStream(String to)
+  protected ActorStream getStream(String to)
   {
     return _toClientStream;
   }
 
-  protected BamStream getLinkStream()
+  protected ActorStream getLinkStream()
   {
     return _toLinkStream;
   }

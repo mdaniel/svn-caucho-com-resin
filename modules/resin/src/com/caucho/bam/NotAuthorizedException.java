@@ -32,23 +32,38 @@ package com.caucho.bam;
 /**
  * HMPP wrapper
  */
-public class BamItemNotFoundException extends BamErrorPacketException {
-  public BamItemNotFoundException()
+public class NotAuthorizedException
+  extends ErrorPacketException
+{
+  public NotAuthorizedException()
   {
   }
 
-  public BamItemNotFoundException(String msg)
+  public NotAuthorizedException(String msg)
   {
     super(msg);
   }
 
-  public BamItemNotFoundException(String msg, BamError error)
+  public NotAuthorizedException(String msg, ActorError error)
   {
     super(msg, error);
   }
 
-  public BamItemNotFoundException(BamError error)
+  public NotAuthorizedException(ActorError error)
   {
     super(error);
+  }
+
+  @Override
+  public ActorError createActorError()
+  {
+    ActorError error = getActorError();
+
+    if (error != null)
+      return error;
+
+    return new ActorError(ActorError.TYPE_AUTH,
+			ActorError.NOT_AUTHORIZED,
+			getMessage());
   }
 }

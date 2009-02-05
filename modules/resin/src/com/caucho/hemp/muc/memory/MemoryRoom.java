@@ -39,7 +39,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room (xep-0045)
  */
-public class MemoryRoom extends SimpleBamService
+public class MemoryRoom extends SimpleActor
 {
   private static final Logger log
     = Logger.getLogger(MemoryRoom.class.getName());
@@ -129,7 +129,7 @@ public class MemoryRoom extends SimpleBamService
     return null;
   }
 
-  public BamStream getBrokerStream()
+  public ActorStream getBrokerStream()
   {
     return super.getBrokerStream();
   }

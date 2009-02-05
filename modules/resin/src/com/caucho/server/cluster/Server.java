@@ -29,8 +29,8 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.Broker;
 import com.caucho.cluster.ClusterCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -483,7 +483,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the bam broker.
    */
-  public BamBroker getBamBroker()
+  public Broker getBamBroker()
   {
     return _broker;
   }
@@ -491,7 +491,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the stream to the public broker.
    */
-  public BamStream getBamStream()
+  public ActorStream getBamStream()
   {
     return getBamBroker().getBrokerStream();
   }
@@ -499,7 +499,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the bam broker.
    */
-  public BamBroker getAdminBroker()
+  public Broker getAdminBroker()
   {
     return getBamBroker();
   }
@@ -507,7 +507,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the stream to the admin broker.
    */
-  public BamStream getAdminStream()
+  public ActorStream getAdminStream()
   {
     return getAdminBroker().getBrokerStream();
   }
@@ -523,9 +523,9 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the admin broker.
    */
-  public BamBroker getBroker()
+  public Broker getBroker()
   {
-    return _resin.getManagement().getAdminBroker();
+    return _broker;
   }
 
   public String getAdminCookie()
@@ -2043,7 +2043,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns any HMTP stream
    */
-  public BamStream getHmtpStream()
+  public ActorStream getHmtpStream()
   {
     return null;
   }

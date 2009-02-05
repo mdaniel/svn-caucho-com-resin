@@ -43,7 +43,7 @@ import javax.xml.stream.*;
 /**
  * xmpp client to broker
  */
-class XmppClientBrokerStream extends AbstractBamStream
+class XmppClientBrokerStream extends AbstractActorStream
 {
   private static final Logger log
     = Logger.getLogger(XmppClientBrokerStream.class.getName());
@@ -54,6 +54,17 @@ class XmppClientBrokerStream extends AbstractBamStream
   XmppClientBrokerStream(XmppClient client, XmppWriter out)
   {
     _out = out;
+  }
+
+  public String getJid()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ActorStream getBrokerStream()
+  {
+    return this;
   }
 
   /**
@@ -69,24 +80,20 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a query get message to the stream
    */
   @Override
-  public boolean queryGet(long id, String to, String from,
+  public void queryGet(long id, String to, String from,
 			  Serializable value)
   {
     _out.sendQuery(String.valueOf(id), to, from, value, "get");
-
-    return true;
   }
 
   /**
    * Sends a query set message to the stream
    */
   @Override
-  public boolean querySet(long id, String to, String from,
+  public void querySet(long id, String to, String from,
 			  Serializable value)
   {
     _out.sendQuery(String.valueOf(id), to, from, value, "set");
-    
-    return true;
   }
 
   /**

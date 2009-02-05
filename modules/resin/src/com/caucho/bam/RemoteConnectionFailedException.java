@@ -29,20 +29,28 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamService;
-
 /**
- * Manages a dynamic collection of services
+ * HMPP wrapper
  */
-public interface BamServiceManager
+public class RemoteConnectionFailedException
+  extends ErrorPacketException
 {
-  /**
-   * Requests that a service with the given jid be started. 
-   */
-  public boolean startService(String jid);
+  public RemoteConnectionFailedException()
+  {
+  }
 
-  /**
-   * Requests that a service with the given jid be stopped. 
-   */
-  public boolean stopService(String jid);
+  public RemoteConnectionFailedException(String msg)
+  {
+    super(msg);
+  }
+
+  public RemoteConnectionFailedException(String msg, ActorError error)
+  {
+    super(msg, error);
+  }
+
+  public RemoteConnectionFailedException(ActorError error)
+  {
+    super(error);
+  }
 }

@@ -29,10 +29,10 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamService;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.Actor;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.Broker;
 import com.caucho.config.ConfigException;
 import com.caucho.hemp.packet.*;
 import com.caucho.server.resin.*;
@@ -47,17 +47,17 @@ import java.io.Serializable;
 /**
  * Queue of hmtp packets
  */
-public class MemoryQueueServiceFilter implements BamService
+public class MemoryQueueServiceFilter implements Actor
 {
   private static final Logger log
     = Logger.getLogger(MemoryQueueServiceFilter.class.getName());
   private static final L10N L = new L10N(MemoryQueueServiceFilter.class);
   
-  private final BamService _service;
-  private final BamStream _serviceStream;
+  private final Actor _service;
+  private final ActorStream _serviceStream;
 
-  public MemoryQueueServiceFilter(BamService service,
-				  BamBroker broker,
+  public MemoryQueueServiceFilter(Actor service,
+				  Broker broker,
 				  int threadMax)
   {
     if (service == null)
@@ -69,7 +69,7 @@ public class MemoryQueueServiceFilter implements BamService
     _service = service;
 
     _serviceStream
-      = new HempMemoryQueue(null, broker, service.getAgentStream());
+      = new HempMemoryQueue(null, broker, service.getActorStream());
   }
   
   /**
@@ -87,56 +87,56 @@ public class MemoryQueueServiceFilter implements BamService
   {
   }
 
-  public BamStream getAgentStream()
+  public ActorStream getActorStream()
   {
     return _serviceStream;
   }
   
   /**
-   * Requests that an agent with the given jid be started. 
+   * Requests that an child with the given jid be started. 
    */
-  public boolean startAgent(String jid)
+  public boolean startChild(String jid)
   {
-    return _service.startAgent(jid);
+    return _service.startChild(jid);
   }
 
   /**
-   * Requests that an agent with the given jid be stopped. 
+   * Requests that an child with the given jid be stopped. 
    */
-  public boolean stopAgent(String jid)
+  public boolean stopChild(String jid)
   {
-    return _service.stopAgent(jid);
+    return _service.stopChild(jid);
   }
 
   /**
-   * Called when an agent logs in
+   * Called when an child logs in
    */
-  public void onAgentStart(String jid)
+  public void onChildStart(String jid)
   {
-    _service.onAgentStart(jid);
+    _service.onChildStart(jid);
   }
 
   /**
-   * Called when an agent logs out
+   * Called when an child logs out
    */
-  public void onAgentStop(String jid)
+  public void onChildStop(String jid)
   {
-    _service.onAgentStop(jid);
+    _service.onChildStop(jid);
   }
   
   /**
-   * Returns a filter for outbound calls, i.e. filtering messages to the agent.
+   * Returns a filter for outbound calls, i.e. filtering messages to the actor.
    */
-  public BamStream getAgentFilter(BamStream stream)
+  public ActorStream getActorFilter(ActorStream stream)
   {
-    return _service.getAgentFilter(stream);
+    return _service.getActorFilter(stream);
   }
 
   /**
    * Returns a filter for inbound calls, i.e. filtering messages to the broker
-   * from the agent.
+   * from the actor.
    */
-  public BamStream getBrokerFilter(BamStream stream)
+  public ActorStream getBrokerFilter(ActorStream stream)
   {
     return _service.getBrokerFilter(stream);
   }

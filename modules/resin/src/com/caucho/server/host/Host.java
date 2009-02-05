@@ -219,7 +219,7 @@ public class Host extends WebAppContainer
   /**
    * Returns the bam broker.
    */
-  public BamBroker getBamBroker()
+  public Broker getBamBroker()
   {
     return _bamBroker;
   }
@@ -536,7 +536,7 @@ public class Host extends WebAppContainer
     InjectManager webBeans = InjectManager.getCurrent();
 
     SingletonBean bean
-      = new SingletonBean(_bamBroker, "bamBroker", BamBroker.class);
+      = new SingletonBean(_bamBroker, "bamBroker", Broker.class);
 
     webBeans.addBean(bean);
 

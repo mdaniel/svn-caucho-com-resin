@@ -29,26 +29,28 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamConnection;
-
 /**
- * The BamConnectionFactory creates new instances of a BamConnection
- * for clients.  The getConnection will automatically register an
- * agent associated with the connection.  When the connection closes,
- * it will unregister the connection's agent.
+ * HMPP wrapper
  */
-public interface BamConnectionFactory
+public class ForbiddenException
+  extends ErrorPacketException
 {
-  /**
-   * Creates a session
-   */
-  public BamConnection getConnection(String uid,
-				     String password);
-  
-  /**
-   * Creates a session
-   */
-  public BamConnection getConnection(String uid,
-				     String password,
-				     String resource);
+  public ForbiddenException()
+  {
+  }
+
+  public ForbiddenException(String msg)
+  {
+    super(msg);
+  }
+
+  public ForbiddenException(String msg, ActorError error)
+  {
+    super(msg, error);
+  }
+
+  public ForbiddenException(ActorError error)
+  {
+    super(error);
+  }
 }

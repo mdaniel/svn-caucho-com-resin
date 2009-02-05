@@ -33,11 +33,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 /**
- * BamError encapsulates error responses
+ * ActorError encapsulates error responses
  *
  * The errors are defined in RFC-3920, XMPP
  */
-public class BamError implements Serializable {
+public class ActorError implements Serializable {
   /**
    * Retry after providing credentials
    */
@@ -236,7 +236,7 @@ public class BamError implements Serializable {
   /**
    * zero-arg constructor for Hessian
    */
-  private BamError()
+  private ActorError()
   {
     _type = null;
     _group = null;
@@ -248,7 +248,7 @@ public class BamError implements Serializable {
    *
    * @param text an error text
    */
-  public BamError(String text)
+  public ActorError(String text)
   {
     _type = TYPE_CANCEL;
     _group = INTERNAL_SERVER_ERROR;
@@ -261,8 +261,8 @@ public class BamError implements Serializable {
    * @param type the error type
    * @param group the error group
    */
-  public BamError(String type,
-		  String group)
+  public ActorError(String type,
+		    String group)
   {
     _type = type;
     _group = group;
@@ -276,13 +276,27 @@ public class BamError implements Serializable {
    * @param group the error group
    * @param text the error text
    */
-  public BamError(String type,
-		   String group,
-		   String text)
+  public ActorError(String type,
+		    String group,
+		    String text)
   {
     _type = type;
     _group = group;
     _text = text;
+  }
+
+  /**
+   * Creates an ActorError based on an exception
+   */
+  public static ActorError create(Throwable e)
+  {
+    if (e instanceof ActorException)
+      return ((ActorException) e).createActorError();
+    else {
+      return new ActorError(ActorError.TYPE_CANCEL,
+			    ActorError.INTERNAL_SERVER_ERROR,
+			    e.toString());
+    }
   }
 
   /**
@@ -341,28 +355,28 @@ public class BamError implements Serializable {
     _extra = extra;
   }
 
-  public BamErrorPacketException createException()
+  public ErrorPacketException createException()
   {
     ErrorGroup group = _errorMap.get(getGroup());
 
     if (group == null)
-      return new BamErrorPacketException(this);
+      return new ErrorPacketException(this);
 
     switch (group) {
     case FEATURE_NOT_IMPLEMENTED:
-      return new BamFeatureNotImplementedException(this);
+      return new FeatureNotImplementedException(this);
       
     case NOT_AUTHORIZED:
-      return new BamNotAuthorizedException(this);
+      return new NotAuthorizedException(this);
       
     case REMOTE_CONNECTION_FAILED:
-      return new BamRemoteConnectionFailedException(this);
+      return new RemoteConnectionFailedException(this);
       
     case SERVICE_UNAVAILABLE:
-      return new BamServiceUnavailableException(this);
+      return new ServiceUnavailableException(this);
 
     default:
-      return new BamErrorPacketException(this);
+      return new ErrorPacketException(this);
     }
   }
 

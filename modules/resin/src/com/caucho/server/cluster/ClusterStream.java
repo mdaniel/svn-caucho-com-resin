@@ -29,9 +29,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamException;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
+import com.caucho.bam.ActorStream;
 import com.caucho.hessian.io.*;
 import com.caucho.server.hmux.*;
 import com.caucho.util.*;
@@ -43,7 +43,7 @@ import java.util.logging.*;
 /**
  * Defines a connection to the client.
  */
-public class ClusterStream implements BamStream {
+public class ClusterStream implements ActorStream {
   private static final L10N L = new L10N(ClusterStream.class);
   
   private static final Logger log
@@ -175,7 +175,7 @@ public class ClusterStream implements BamStream {
   }
 
   //
-  // BamStream output for HMTP
+  // ActorStream output for HMTP
   //
 
   public String getJid()
@@ -204,14 +204,14 @@ public class ClusterStream implements BamStream {
       hOut.endPacket();
       hOut.flushBuffer();
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
   public void messageError(String to,
 			   String from,
 			   Serializable query,
-			   BamError error)
+			   ActorError error)
   {
     try {
       WriteStream out = getWriteStream();
@@ -234,11 +234,11 @@ public class ClusterStream implements BamStream {
       hOut.endPacket();
       hOut.flushBuffer();
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
-  public boolean queryGet(long id, String to, String from,
+  public void queryGet(long id, String to, String from,
 			  Serializable query)
   {
     try {
@@ -260,17 +260,15 @@ public class ClusterStream implements BamStream {
       hOut.writeObject(query);
       hOut.endPacket();
       hOut.flushBuffer();
-
-      return true;
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
-  public boolean querySet(long id,
-			  String to,
-			  String from,
-			  Serializable query)
+  public void querySet(long id,
+		       String to,
+		       String from,
+		       Serializable query)
   {
     try {
       WriteStream out = getWriteStream();
@@ -291,10 +289,8 @@ public class ClusterStream implements BamStream {
       hOut.writeObject(query);
       hOut.endPacket();
       hOut.flushBuffer();
-
-      return true;
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
@@ -321,7 +317,7 @@ public class ClusterStream implements BamStream {
       hOut.writeObject(query);
       hOut.endPacket();
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
@@ -329,7 +325,7 @@ public class ClusterStream implements BamStream {
 			 String to,
 			 String from,
 			 Serializable query,
-			 BamError error)
+			 ActorError error)
   {
     try {
       WriteStream out = getWriteStream();
@@ -349,7 +345,7 @@ public class ClusterStream implements BamStream {
       hOut.writeObject(query);
       hOut.writeObject(error);
     } catch (IOException e) {
-      throw new BamException(e);
+      throw new ActorException(e);
     }
   }
 
@@ -391,7 +387,7 @@ public class ClusterStream implements BamStream {
   public void presenceError(String to,
 			    String from,
 			    Serializable value,
-			    BamError error)
+			    ActorError error)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -456,7 +452,7 @@ public class ClusterStream implements BamStream {
     long resultId = hIn.readLong();
 
     Serializable result = (Serializable) hIn.readObject();
-    BamError error = (BamError) hIn.readObject();
+    ActorError error = (ActorError) hIn.readObject();
 
     hInStream.endPacket();
 

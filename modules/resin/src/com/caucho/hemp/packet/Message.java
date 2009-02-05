@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.packet;
 
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorStream;
 import java.io.Serializable;
 
 /**
@@ -64,7 +64,7 @@ public class Message extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(BamStream handler, BamStream toSource)
+  public void dispatch(ActorStream handler, ActorStream toSource)
   {
     handler.message(getTo(), getFrom(), _value);
   }

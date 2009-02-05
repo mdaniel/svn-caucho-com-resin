@@ -29,8 +29,6 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
 import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.ToLinkStream;
 import java.io.*;

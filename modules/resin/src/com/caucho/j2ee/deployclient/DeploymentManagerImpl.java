@@ -37,7 +37,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.xml.*;
 import com.caucho.xpath.XPath;
-import com.caucho.bam.BamRemoteConnectionFailedException;
+import com.caucho.bam.RemoteConnectionFailedException;
 
 import org.w3c.dom.*;
 
@@ -146,7 +146,7 @@ public class DeploymentManagerImpl
 
       return targets;
     } // XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       return getTargets();
@@ -202,7 +202,7 @@ public class DeploymentManagerImpl
 
       return result;
     } // XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       return getAvailableModules(moduleType, targetList);
@@ -306,7 +306,7 @@ public class DeploymentManagerImpl
 
       return result;
     } // XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       return distributeImpl(targetList,
@@ -364,7 +364,7 @@ public class DeploymentManagerImpl
         }
       }
     } // XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       deployExtraFiles(tag, doc);
@@ -403,7 +403,7 @@ public class DeploymentManagerImpl
 
       return result;
     } // XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       return start(moduleIDList);
@@ -438,7 +438,7 @@ public class DeploymentManagerImpl
 
       return result;
     } // XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       return stop(moduleIDList);
@@ -473,7 +473,7 @@ public class DeploymentManagerImpl
 
       return result;
     }// XXX: hack
-    catch (BamRemoteConnectionFailedException e) {
+    catch (RemoteConnectionFailedException e) {
       reset();
 
       return undeploy(moduleIDList);

@@ -29,7 +29,7 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
@@ -57,7 +57,7 @@ public class XmppRequest implements TcpServerRequest {
   private XmppProtocol _protocol;
 
   private HempBrokerManager _brokerManager;
-  private BamBroker _broker;
+  private Broker _broker;
   
   private TcpConnection _conn;
 

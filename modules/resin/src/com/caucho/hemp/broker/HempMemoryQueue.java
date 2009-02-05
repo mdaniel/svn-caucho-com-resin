@@ -30,9 +30,9 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.hemp.packet.*;
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.Broker;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.server.resin.*;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
@@ -46,7 +46,7 @@ import java.io.Serializable;
 /**
  * Queue of hmtp packets
  */
-public class HempMemoryQueue implements BamStream, Runnable
+public class HempMemoryQueue implements ActorStream, Runnable
 {
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
@@ -61,9 +61,9 @@ public class HempMemoryQueue implements BamStream, Runnable
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
   
-  private final BamBroker _broker;
-  private final BamStream _brokerStream;
-  private final BamStream _agentStream;
+  private final Broker _broker;
+  private final ActorStream _brokerStream;
+  private final ActorStream _actorStream;
 
   private int _threadMax;
   private AtomicInteger _threadCount = new AtomicInteger();
@@ -77,29 +77,29 @@ public class HempMemoryQueue implements BamStream, Runnable
 
   private volatile boolean _isClosed;
 
-  public HempMemoryQueue(BamBroker broker,
-			 BamStream agentStream)
+  public HempMemoryQueue(Broker broker,
+			 ActorStream actorStream)
   {
-    this(null, broker, agentStream);
+    this(null, broker, actorStream);
   }
 
   public HempMemoryQueue(String name,
-			 BamBroker broker,
-			 BamStream agentStream)
+			 Broker broker,
+			 ActorStream actorStream)
   {
     if (broker == null)
       throw new NullPointerException();
     
-    if (agentStream == null)
+    if (actorStream == null)
       throw new NullPointerException();
     
     _broker = broker;
     _brokerStream = broker.getBrokerStream();
-    _agentStream = agentStream;
+    _actorStream = actorStream;
     _threadMax = 5;
 
     if (name == null)
-      name = _agentStream.getJid();
+      name = _actorStream.getJid();
 
     _name = name;
 
@@ -111,11 +111,11 @@ public class HempMemoryQueue implements BamStream, Runnable
   }
   
   /**
-   * Returns the agent's jid
+   * Returns the actor's jid
    */
   public String getJid()
   {
-    return _agentStream.getJid();
+    return _actorStream.getJid();
   }
 
   /**
@@ -140,7 +140,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   public void messageError(String to,
 			       String from,
 			       Serializable value,
-			       BamError error)
+			       ActorError error)
   {
     enqueue(new MessageError(to, from, value, error));
   }
@@ -148,31 +148,27 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Query an entity
    */
-  public boolean queryGet(long id,
-			  String to,
-			  String from,
-			  Serializable query)
+  public void queryGet(long id,
+		       String to,
+		       String from,
+		       Serializable query)
   {
     if (from == null) {
       throw new NullPointerException();
     }
     
     enqueue(new QueryGet(id, to, from, query));
-    
-    return true;
   }
 
   /**
    * Query an entity
    */
-  public boolean querySet(long id,
-			      String to,
-			      String from,
-			      Serializable query)
+  public void querySet(long id,
+		       String to,
+		       String from,
+		       Serializable query)
   {
     enqueue(new QuerySet(id, to, from, query));
-    
-    return true;
   }
 
   /**
@@ -193,7 +189,7 @@ public class HempMemoryQueue implements BamStream, Runnable
 			     String to,
 			     String from,
 			     Serializable query,
-			     BamError error)
+			     ActorError error)
   {
     enqueue(new QueryError(id, to, from, query, error));
   }
@@ -272,14 +268,14 @@ public class HempMemoryQueue implements BamStream, Runnable
   public void presenceError(String to,
 			        String from,
 			        Serializable data,
-			        BamError error)
+			        ActorError error)
   {
     enqueue(new PresenceError(to, from, data, error));
   }
 
-  protected BamStream getAgentStream()
+  protected ActorStream getActorStream()
   {
-    return _agentStream;
+    return _actorStream;
   }
 
   protected final void enqueue(Packet packet)
@@ -343,7 +339,7 @@ public class HempMemoryQueue implements BamStream, Runnable
    */
   protected void dispatch(Packet packet)
   {
-    packet.dispatch(getAgentStream(), _brokerStream);
+    packet.dispatch(getActorStream(), _brokerStream);
   }
 
   protected Packet dequeue()

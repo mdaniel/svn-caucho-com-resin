@@ -37,7 +37,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.*;
 import com.caucho.hemp.broker.*;
 import com.caucho.hemp.servlet.*;
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.Broker;
 import com.caucho.security.Authenticator;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.connection.*;
@@ -56,9 +56,20 @@ public class HmtpServlet extends GenericServlet {
   private static final L10N L = new L10N(HmtpServlet.class);
 
   private boolean _isAdmin;
+  private boolean _isAuthenticationRequired = true;
   
   private Authenticator _auth;
   private ServerLinkManager _linkManager;
+
+  public void setAuthenticationRequired(boolean isAuthRequired)
+  {
+    _isAuthenticationRequired = isAuthRequired;
+  }
+
+  public boolean isAuthenticationRequired()
+  {
+    return _isAuthenticationRequired;
+  }
 
   public void init()
   {
@@ -70,11 +81,14 @@ public class HmtpServlet extends GenericServlet {
       else
 	_auth = webBeans.getInstanceByType(Authenticator.class);
     } catch (Exception e) {
-      log.info(L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.  In the resin.xml, add an <sec:AdminAuthenticator>",
+      if (log.isLoggable(Level.FINER)) {
+	log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",
+				 this), e);
+      }
+      else {
+	log.info(L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.  In the resin.xml, add an <sec:AdminAuthenticator>",
 		   this));
-      
-      log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",
-		    this), e);
+      }
     }
 
     _linkManager = new ServerLinkManager(_auth);

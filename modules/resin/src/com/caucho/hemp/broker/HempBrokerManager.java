@@ -55,8 +55,8 @@ public class HempBrokerManager
     = new EnvironmentLocal<HempBrokerManager>();
   
   // brokers
-  private final HashMap<String,WeakReference<BamBroker>> _brokerMap
-    = new HashMap<String,WeakReference<BamBroker>>();
+  private final HashMap<String,WeakReference<Broker>> _brokerMap
+    = new HashMap<String,WeakReference<Broker>>();
 
   public HempBrokerManager()
   {
@@ -68,19 +68,19 @@ public class HempBrokerManager
     return _localBroker.get();
   }
 
-  public void addBroker(String name, BamBroker broker)
+  public void addBroker(String name, Broker broker)
   {
     synchronized (_brokerMap) {
-      _brokerMap.put(name, new WeakReference<BamBroker>(broker));
+      _brokerMap.put(name, new WeakReference<Broker>(broker));
     }
 
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " add " + broker + " as '" + name + "'");
   }
 
-  public BamBroker removeBroker(String name)
+  public Broker removeBroker(String name)
   {
-    WeakReference<BamBroker> brokerRef = null;
+    WeakReference<Broker> brokerRef = null;
     
     synchronized (_brokerMap) {
       brokerRef = _brokerMap.remove(name);
@@ -96,7 +96,7 @@ public class HempBrokerManager
       return null;
   }
 
-  public BamBroker findBroker(String name)
+  public Broker findBroker(String name)
   {
     if (name == null)
       return null;
@@ -111,7 +111,7 @@ public class HempBrokerManager
     else if (q >= 0)
       name = name.substring(0, q);
     
-    WeakReference<BamBroker> brokerRef = null;
+    WeakReference<Broker> brokerRef = null;
     
     synchronized (_brokerMap) {
       brokerRef = _brokerMap.get(name);
@@ -134,10 +134,10 @@ public class HempBrokerManager
     if ("default".equals(host.getHostName()))
       return null;
 
-    BamBroker broker = host.getBamBroker();
+    Broker broker = host.getBamBroker();
 
     synchronized (_brokerMap) {
-      _brokerMap.put(name, new WeakReference<BamBroker>(broker));
+      _brokerMap.put(name, new WeakReference<Broker>(broker));
     }
 
     return broker;

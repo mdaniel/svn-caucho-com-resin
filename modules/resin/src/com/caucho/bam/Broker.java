@@ -30,27 +30,37 @@
 package com.caucho.bam;
 
 /**
- * HMPP wrapper
+ * BamBroker is the hub which routes messages to actors.
  */
-public class BamForbiddenException
-  extends BamErrorPacketException
+public interface Broker extends ClientActorFactory
 {
-  public BamForbiddenException()
-  {
-  }
-
-  public BamForbiddenException(String msg)
-  {
-    super(msg);
-  }
-
-  public BamForbiddenException(String msg, BamError error)
-  {
-    super(msg, error);
-  }
-
-  public BamForbiddenException(BamError error)
-  {
-    super(error);
-  }
+  /**
+   * Returns true if the broker has been closed
+   */
+  public boolean isClosed();
+  
+  /**
+   * Returns the broker's jid, i.e. the virtual host domain name.
+   */
+  public String getJid();
+  
+  /**
+   * Returns the stream to the broker
+   */
+  public ActorStream getBrokerStream();
+  
+  /**
+   * Registers an actor.
+   */
+  public void addActor(Actor actor);
+  
+  /**
+   * Removes an actor.
+   */
+  public void removeActor(Actor actor);
+  
+  /**
+   * Registers an actor manager
+   */
+  public void addActorManager(ActorManager manager);   
 }

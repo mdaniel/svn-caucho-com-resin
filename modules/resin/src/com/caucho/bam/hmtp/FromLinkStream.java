@@ -29,8 +29,8 @@
 
 package com.caucho.bam.hmtp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -57,7 +57,7 @@ abstract public class FromLinkStream {
 
   abstract public String getJid();
 
-  abstract protected BamStream getStream(String to);
+  abstract protected ActorStream getStream(String to);
 
   abstract protected String getFrom(String from);
 
@@ -105,7 +105,7 @@ abstract public class FromLinkStream {
     case MESSAGE_ERROR:
       {
 	Serializable value = (Serializable) hIn.readObject();
-	BamError error = (BamError) hIn.readObject();
+	ActorError error = (ActorError) hIn.readObject();
 	in.endPacket();
 
 	if (log.isLoggable(Level.FINER)) {
@@ -174,7 +174,7 @@ abstract public class FromLinkStream {
       {
 	long id = hIn.readLong();
 	Serializable value = (Serializable) hIn.readObject();
-	BamError error = (BamError) hIn.readObject();
+	ActorError error = (ActorError) hIn.readObject();
 	in.endPacket();
 
 	if (log.isLoggable(Level.FINER)) {
@@ -295,7 +295,7 @@ abstract public class FromLinkStream {
     case PRESENCE_ERROR:
       {
 	Serializable value = (Serializable) hIn.readObject();
-	BamError error = (BamError) hIn.readObject();
+	ActorError error = (ActorError) hIn.readObject();
 	in.endPacket();
 
 	if (log.isLoggable(Level.FINER)) {

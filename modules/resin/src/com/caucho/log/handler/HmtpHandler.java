@@ -29,8 +29,6 @@
 
 package com.caucho.log.handler;
 
-import com.caucho.bam.BamConnectionFactory;
-import com.caucho.bam.BamConnection;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.*;
 import com.caucho.log.*;
@@ -54,10 +52,8 @@ public class HmtpHandler extends Handler {
     = Logger.getLogger(HmtpHandler.class.getName());
   private static final L10N L = new L10N(HmtpHandler.class);
 
-  private BamConnectionFactory _factory;
-  private BamConnection _conn;
-  
   private String _to;
+  // private ActorClient _conn;
 
   public HmtpHandler()
   {
@@ -81,7 +77,7 @@ public class HmtpHandler extends Handler {
     if (_to == null)
       throw new ConfigException(L.l("HmppHandler needs a 'to' attribute"));
     
-    _conn = _factory.getConnection("log@localhost", null);
+    // _conn = _factory.getConnection("log@localhost", null);
   }
 
   /**
@@ -105,7 +101,7 @@ public class HmtpHandler extends Handler {
       else
 	value = record.getMessage();
 
-      _conn.message(_to, value);
+      // _conn.message(_to, value);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

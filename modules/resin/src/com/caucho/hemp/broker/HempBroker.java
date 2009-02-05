@@ -29,14 +29,14 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.BamServiceManager;
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamService;
-import com.caucho.bam.AbstractBamService;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamNotAuthorizedException;
+import com.caucho.bam.ActorManager;
+import com.caucho.bam.Broker;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.Actor;
+import com.caucho.bam.AbstractActor;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.NotAuthorizedException;
 import com.caucho.config.inject.BeanStartupEvent;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.inject.InjectManager;
@@ -44,6 +44,7 @@ import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.security.*;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import com.caucho.hemp.BamServiceBinding;
@@ -62,7 +63,7 @@ import javax.inject.manager.Manager;
 /**
  * Broker
  */
-public class HempBroker implements BamBroker, BamStream
+public class HempBroker implements Broker, ActorStream
 {
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
@@ -74,34 +75,40 @@ public class HempBroker implements BamBroker, BamStream
   private HempBrokerManager _manager;
   private DomainManager _domainManager;
   
-  // agents
-  private final ConcurrentHashMap<String,WeakReference<BamStream>> _agentMap
-    = new ConcurrentHashMap<String,WeakReference<BamStream>>();
+  // actors
+  private final
+    ConcurrentHashMap<String,WeakReference<ActorStream>> _actorStreamMap
+    = new ConcurrentHashMap<String,WeakReference<ActorStream>>();
   
-  private final HashMap<String,BamService> _serviceMap
-    = new HashMap<String,BamService>();
+  private final HashMap<String,Actor> _actorMap
+    = new HashMap<String,Actor>();
   
-  private final Map<String,WeakReference<BamService>> _serviceCache
-    = Collections.synchronizedMap(new HashMap<String,WeakReference<BamService>>());
+  private final Map<String,WeakReference<Actor>> _actorCache
+    = Collections.synchronizedMap(new HashMap<String,WeakReference<Actor>>());
   
-  private String _serverId = Resin.getCurrent().getServerId();
+  private String _serverId;
 
   private String _domain = "localhost";
   private String _managerJid = "localhost";
   private HempDomainService _domainService;
 
-  private boolean _isAdmin;
-  private boolean _isAllowNullAdminAuthenticator;
-  private Authenticator _auth;
-
   private ArrayList<String> _aliasList = new ArrayList<String>();
 
-  private BamServiceManager []_serviceManagerList = new BamServiceManager[0];
+  private ActorManager []_actorManagerList = new ActorManager[0];
 
   private volatile boolean _isClosed;
 
   public HempBroker()
   {
+    Server server = Server.getCurrent();
+
+    if (server == null) {
+      throw new IllegalStateException(L.l("{0} must be created from an active server context",
+					  this));
+    }
+
+    _serverId = server.getServerId();
+    
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
     
@@ -115,6 +122,15 @@ public class HempBroker implements BamBroker, BamStream
 
   public HempBroker(String domain)
   {
+    Server server = Server.getCurrent();
+
+    if (server == null) {
+      throw new IllegalStateException(L.l("{0} must be created from an active server context",
+					  this));
+    }
+
+    _serverId = server.getServerId();
+    
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
     
@@ -151,7 +167,7 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Returns the stream to the broker
    */
-  public BamStream getBrokerStream()
+  public ActorStream getBrokerStream()
   {
     return this;
   }
@@ -159,19 +175,9 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Returns the domain service
    */
-  public BamService getDomainService()
+  public Actor getDomainService()
   {
     return _domainService;
-  }
-
-  public void setAdmin(boolean isAdmin)
-  {
-    _isAdmin = isAdmin;
-  }
-
-  public void setAllowNullAdminAuthenticator(boolean isAllowNullAdmin)
-  {
-    _isAllowNullAdminAuthenticator = isAllowNullAdmin;
   }
 
   //
@@ -181,15 +187,15 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
-  public void addServiceManager(BamServiceManager serviceManager)
+  public void addActorManager(ActorManager actorManager)
   {
-    BamServiceManager []serviceManagerList
-      = new BamServiceManager[_serviceManagerList.length + 1];
+    ActorManager []actorManagerList
+      = new ActorManager[_actorManagerList.length + 1];
     
-    System.arraycopy(_serviceManagerList, 0, serviceManagerList, 0,
-		     _serviceManagerList.length);
-    serviceManagerList[serviceManagerList.length - 1] = serviceManager;
-    _serviceManagerList = serviceManagerList;
+    System.arraycopy(_actorManagerList, 0, actorManagerList, 0,
+		     _actorManagerList.length);
+    actorManagerList[actorManagerList.length - 1] = actorManager;
+    _actorManagerList = actorManagerList;
   }
 
   //
@@ -199,50 +205,26 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Creates a session
    */
-  public BamConnection getConnection(String uid, String password)
+  public ActorClient getConnection(String uid,
+				   String resourceId)
   {
-    return getConnection(null, uid, password, null, "127.0.0.1");
+    return getConnection(null, uid, resourceId);
   }
 
   /**
    * Creates a session
    */
-  public BamConnection getConnection(String uid,
-				     String password,
-				     String resourceId)
+  public ActorClient getConnection(ActorStream actorStream,
+				   String uid,
+				   String resourceId)
   {
-    return getConnection(null, uid, password, resourceId, "127.0.0.1");
-  }
+    String jid = generateJid(uid, resourceId);
 
-  /**
-   * Creates a session
-   */
-  public BamConnection getConnection(String uid,
-				     String password,
-				     String resourceId,
-				     String ipAddress)
-  {
-    return getConnection(null, uid, password, resourceId, ipAddress);
-  }
+    HempConnectionImpl conn = new HempConnectionImpl(this, jid, actorStream);
 
-  /**
-   * Creates a session
-   */
-  public BamConnection getConnection(BamStream agentStream,
-				     String uid,
-				     String password,
-				     String resourceId,
-				     String ipAddress)
-  {
-    String jid = login(uid, password, resourceId, ipAddress);
-
-    HempConnectionImpl conn = new HempConnectionImpl(this, jid, agentStream);
-
-    agentStream = conn.getAgentStream();
+    actorStream = conn.getActorStream();
     
-    synchronized (_agentMap) {
-      _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
-    }
+    _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
 
     if (log.isLoggable(Level.FINE))
       log.fine(conn + " created");
@@ -251,80 +233,13 @@ public class HempBroker implements BamBroker, BamStream
     if (p > 0) {
       String owner = jid.substring(0, p);
       
-      BamService resource = findService(owner);
+      Actor resource = findParentActor(owner);
 
       if (resource != null)
-	resource.onAgentStart(jid);
+	resource.onChildStart(jid);
     }
 
     return conn;
-  }
-
-  protected String login(String uid,
-			 String password,
-			 String resource,
-			 String ipAddress)
-  {
-    if (true)
-      return generateJid(uid, resource);
-    
-    Authenticator auth = getAuthenticator();
-
-    if (auth == null
-	// && _isAllowNullAdminAuthenticator
-	// && "127.0.0.1".equals(ipAddress)
-	) {
-      // server/2e2a
-      // needed for watchdog (XXX: need watchdog testcase)
-      
-      return generateJid(uid, resource);
-    }
-    else if (auth == null)
-      throw new BamNotAuthorizedException(L.l("remote access requires a configured authenticator, like <sec:AdminAuthenticator> for IP='{0}'",
-				     ipAddress));
-    else {
-      authenticate(uid, password, ipAddress);
-    }
-    
-    return generateJid(uid, resource);
-  }
-
-  protected void authenticate(String uid, String password, String ipAddress)
-  {
-    Authenticator auth = getAuthenticator();
-
-    if (auth == null)
-      throw new RuntimeException(L.l("can't login '{0}' for IP={1}",
-				     uid, ipAddress));
-
-    Principal user = auth.authenticate(new BasicPrincipal(uid),
-				       new PasswordCredentials(password),
-				       null);
-
-    if (user == null) {
-      throw new BamNotAuthorizedException(L.l("authentication failed '{0}' for IP={1}",
-					      uid, ipAddress));
-    }
-  }
-
-  protected Authenticator getAuthenticator()
-  {
-    if (_auth == null) {
-      try {
-	InjectManager webBeans = InjectManager.getCurrent();
-      
-	if (_isAdmin)
-	  _auth = webBeans.getInstanceByType(AdminAuthenticator.class);
-	else
-	  _auth = webBeans.getInstanceByType(Authenticator.class);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-
-	return null;
-      }
-    }
-	
-    return _auth;
   }
 
   protected String generateJid(String uid, String resource)
@@ -350,57 +265,57 @@ public class HempBroker implements BamBroker, BamStream
   }
   
   /**
-   * Registers a service
+   * Registers a actor
    */
-  public void addService(BamService service)
+  public void addActor(Actor actor)
   {
-    String jid = service.getJid();
+    String jid = actor.getJid();
 
-    synchronized (_serviceMap) {
-      BamService oldService = _serviceMap.get(jid);
+    synchronized (_actorMap) {
+      Actor oldActor = _actorMap.get(jid);
 
-      if (oldService != null)
+      if (oldActor != null)
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
       
-      _serviceMap.put(jid, service);
-      _serviceCache.put(jid, new WeakReference<BamService>(service));
+      _actorMap.put(jid, actor);
+      _actorCache.put(jid, new WeakReference<Actor>(actor));
     }
     
-    synchronized (_agentMap) {
-      WeakReference<BamStream> oldRef = _agentMap.get(jid);
+    synchronized (_actorStreamMap) {
+      WeakReference<ActorStream> oldRef = _actorStreamMap.get(jid);
 
       if (oldRef != null && oldRef.get() != null)
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
 
-      BamStream agentStream = service.getAgentStream();
-      _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
+      ActorStream actorStream = actor.getActorStream();
+      _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " addService jid=" + jid + " " + service);
+      log.fine(this + " addActor jid=" + jid + " " + actor);
  }
   
   /**
-   * Removes a service
+   * Removes a actor
    */
-  public void removeService(BamService service)
+  public void removeActor(Actor actor)
   {
-    String jid = service.getJid();
+    String jid = actor.getJid();
     
-    synchronized (_serviceMap) {
-      _serviceMap.remove(jid);
+    synchronized (_actorMap) {
+      _actorMap.remove(jid);
     }
     
-    _serviceCache.remove(jid);
+    _actorCache.remove(jid);
     
-    synchronized (_agentMap) {
-      _agentMap.remove(jid);
+    synchronized (_actorStreamMap) {
+      _actorStreamMap.remove(jid);
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " removeService jid=" + jid + " " + service);
+      log.fine(this + " removeActor jid=" + jid + " " + actor);
   }
 
   /**
@@ -430,26 +345,16 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence
    */
-  public void presence(String to, String from, Serializable value)
+  public void presence(String to, String from, Serializable payload)
   {
-    /*
-    if (to == null) {
-      BamServiceManager []resourceManagers = _serviceManagerList;
-
-      for (BamServiceManager manager : resourceManagers) {
-        manager.presence(to, from, data);
-      }
-    }
-    else {
-    */
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
-      stream.presence(to, from, value);
+      stream.presence(to, from, payload);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresence (no resource) to=" + to
-		  + " from=" + from + " value=" + value);
+	log.finer(this + " presence (no actor) " + payload
+		  + " {to:" + to + ", from:" + from + "}");
       }
     }
   }
@@ -461,7 +366,7 @@ public class HempBroker implements BamBroker, BamStream
 				      String from,
 				      Serializable data)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceUnavailable(to, from, data);
@@ -480,7 +385,7 @@ public class HempBroker implements BamBroker, BamStream
 			        String from,
 			        Serializable data)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceProbe(to, from, data);
@@ -499,7 +404,7 @@ public class HempBroker implements BamBroker, BamStream
 				    String from,
 				    Serializable data)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceSubscribe(to, from, data);
@@ -518,7 +423,7 @@ public class HempBroker implements BamBroker, BamStream
 				     String from,
 				     Serializable data)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceSubscribed(to, from, data);
@@ -537,7 +442,7 @@ public class HempBroker implements BamBroker, BamStream
 				      String from,
 				      Serializable data)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceUnsubscribe(to, from, data);
@@ -556,7 +461,7 @@ public class HempBroker implements BamBroker, BamStream
 				       String from,
 				       Serializable data)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceUnsubscribed(to, from, data);
@@ -574,9 +479,9 @@ public class HempBroker implements BamBroker, BamStream
   public void presenceError(String to,
 			        String from,
 			        Serializable data,
-			        BamError error)
+			        ActorError error)
   {
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.presenceError(to, from, data, error);
@@ -595,7 +500,7 @@ public class HempBroker implements BamBroker, BamStream
   {
     Alarm.yieldIfTest();
     
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.message(to, from, value);
@@ -611,11 +516,11 @@ public class HempBroker implements BamBroker, BamStream
   public void messageError(String to,
 			       String from,
 			       Serializable value,
-			       BamError error)
+			       ActorError error)
   {
     Alarm.yieldIfTest();
     
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.messageError(to, from, value, error);
@@ -628,43 +533,25 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Query an entity
    */
-  public boolean queryGet(long id, String to, String from,
-			      Serializable query)
+  public void queryGet(long id, String to, String from,
+			      Serializable payload)
   {
     Alarm.yieldIfTest();
     
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null) {
       try {
-	if (! stream.queryGet(id, to, from, query)) {
-	  if (log.isLoggable(Level.FINE)) {
-	    log.fine(this + " queryGet to unknown feature to='" + to
-		     + "' from=" + from + " query='" + query + "'"
-		     + " stream=" + stream);
-	  }
-
-	  String msg = L.l("{0}: unknown queryGet feature {1} for jid={2} stream={3}",
-			   this, query, stream.getJid(), stream);
-    
-	  BamError error = new BamError(BamError.TYPE_CANCEL,
-					BamError.FEATURE_NOT_IMPLEMENTED,
-					msg);
-	
-	  queryError(id, from, to, query, error);
-	}
-
-	return true;
+	stream.queryGet(id, to, from, payload);
       } catch (Exception e) {
-	String msg = L.l("'{0}' threw an unexpected exception for '{1}'\n{2}",
-			 to, query, e.toString());
+	log.log(Level.FINER, e.toString(), e);
 	
-	BamError error = new BamError(msg);
+	ActorError error = ActorError.create(e);
 	
-	queryError(id, from, to, query, error);
-
-	return true;
+	queryError(id, from, to, payload, error);
       }
+
+      return;
     }
 
     if (log.isLoggable(Level.FINE)) {
@@ -672,25 +559,26 @@ public class HempBroker implements BamBroker, BamStream
 	       + "' from=" + from);
     }
 
-    String msg = L.l("'{0}' is an unknown service for queryGet", to);
+    String msg = L.l("'{0}' is an unknown actor for queryGet", to);
     
-    BamError error = new BamError(BamError.TYPE_CANCEL,
-				    BamError.SERVICE_UNAVAILABLE,
+    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
+				    ActorError.SERVICE_UNAVAILABLE,
 				    msg);
 				    
-    queryError(id, from, to, query, error);
-    
-    return true;
+    queryError(id, from, to, payload, error);
   }
 
   /**
    * Query an entity
    */
-  public boolean querySet(long id, String to, String from, Serializable query)
+  public void querySet(long id,
+		       String to,
+		       String from,
+		       Serializable payload)
   {
     Alarm.yieldIfTest();
     
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream == null) {
       if (log.isLoggable(Level.FINE)) {
@@ -698,36 +586,18 @@ public class HempBroker implements BamBroker, BamStream
 		 + "' from=" + from);
       }
 
-      String msg = L.l("'{0}' is an unknown service for querySet", to);
+      String msg = L.l("'{0}' is an unknown actor for querySet", to);
     
-      BamError error = new BamError(BamError.TYPE_CANCEL,
-				      BamError.SERVICE_UNAVAILABLE,
+      ActorError error = new ActorError(ActorError.TYPE_CANCEL,
+				      ActorError.SERVICE_UNAVAILABLE,
 				      msg);
 				    
-      queryError(id, from, to, query, error);
+      queryError(id, from, to, payload, error);
 
-      return true;
+      return;
     }
 
-    if (stream.querySet(id, to, from, query))
-      return true;
-
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " querySet with unknown feature to=" + to
-	       + " from=" + from + " resource=" + stream
-	       + " query=" + query);
-    }
-
-    String msg = L.l("{0}: unknown querySet feature {1} for jid={2} stream={3}",
-		     this, query, stream.getJid(), stream);
-    
-    BamError error = new BamError(BamError.TYPE_CANCEL,
-				  BamError.FEATURE_NOT_IMPLEMENTED,
-				  msg);
-				    
-    queryError(id, from, to, query, error);
-
-    return true;
+    stream.querySet(id, to, from, payload);
   }
 
   /**
@@ -737,7 +607,7 @@ public class HempBroker implements BamBroker, BamStream
   {
     Alarm.yieldIfTest();
     
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
       stream.queryResult(id, to, from, value);
@@ -751,25 +621,25 @@ public class HempBroker implements BamBroker, BamStream
   public void queryError(long id,
 			 String to,
 			 String from,
-			 Serializable query,
-			 BamError error)
+			 Serializable payload,
+			 ActorError error)
   {
     Alarm.yieldIfTest();
     
-    BamStream stream = findAgent(to);
+    ActorStream stream = findActor(to);
 
     if (stream != null)
-      stream.queryError(id, to, from, query, error);
+      stream.queryError(id, to, from, payload, error);
     else
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
   }
 
-  protected BamStream findAgent(String jid)
+  protected ActorStream findActor(String jid)
   {
-    WeakReference<BamStream> ref = _agentMap.get(jid);
+    WeakReference<ActorStream> ref = _actorStreamMap.get(jid);
 
     if (ref != null) {
-      BamStream stream = ref.get();
+      ActorStream stream = ref.get();
 
       if (stream != null)
 	return stream;
@@ -780,24 +650,24 @@ public class HempBroker implements BamBroker, BamStream
       jid = jid + getDomain();
     }
 
-    BamStream agentStream;
-    BamService service = findService(jid);
+    ActorStream actorStream;
+    Actor actor = findParentActor(jid);
 
-    if (service == null) {
-      return putAgentStream(jid, findDomain(jid));
+    if (actor == null) {
+      return putActorStream(jid, findDomain(jid));
     }
-    else if (jid.equals(service.getJid())) {
-      agentStream = service.getAgentStream();
+    else if (jid.equals(actor.getJid())) {
+      actorStream = actor.getActorStream();
 
-      if (agentStream != null) {
-	return putAgentStream(jid, agentStream);
+      if (actorStream != null) {
+	return putActorStream(jid, actorStream);
       }
     }
     else {
-      if (! service.startAgent(jid))
+      if (! actor.startChild(jid))
         return null;
 
-      ref = _agentMap.get(jid);
+      ref = _actorStreamMap.get(jid);
 
       if (ref != null)
 	return ref.get();
@@ -806,59 +676,59 @@ public class HempBroker implements BamBroker, BamStream
     return null;
   }
 
-  private BamStream putAgentStream(String jid, BamStream agentStream)
+  private ActorStream putActorStream(String jid, ActorStream actorStream)
   {
-    if (agentStream == null)
+    if (actorStream == null)
       return null;
     
-    synchronized (_agentMap) {
-      WeakReference<BamStream> ref = _agentMap.get(jid);
+    synchronized (_actorStreamMap) {
+      WeakReference<ActorStream> ref = _actorStreamMap.get(jid);
 
       if (ref != null)
 	return ref.get();
 
-      _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
+      _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
 
-      return agentStream;
+      return actorStream;
     }
   }
 
-  protected BamService findService(String jid)
+  protected Actor findParentActor(String jid)
   {
     if (jid == null)
       return null;
 
-    WeakReference<BamService> ref = _serviceCache.get(jid);
+    WeakReference<Actor> ref = _actorCache.get(jid);
 
     if (ref != null)
       return ref.get();
 
-    if (startServiceFromManager(jid)) {
-      ref = _serviceCache.get(jid);
+    if (startActorFromManager(jid)) {
+      ref = _actorCache.get(jid);
 
       if (ref != null)
 	return ref.get();
     }
 
     if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0) {
-      BamBroker broker = _manager.findBroker(jid);
-      BamService service = null;
+      Broker broker = _manager.findBroker(jid);
+      Actor actor = null;
 
       if (broker instanceof HempBroker) {
 	HempBroker hempBroker = (HempBroker) broker;
 
-	service = hempBroker.getDomainService();
+	actor = hempBroker.getDomainService();
       }
 
-      if (service != null) {
-	ref = _serviceCache.get(jid);
+      if (actor != null) {
+	ref = _actorCache.get(jid);
 
 	if (ref != null)
 	  return ref.get();
 
-	_serviceCache.put(jid, new WeakReference<BamService>(service));
+	_actorCache.put(jid, new WeakReference<Actor>(actor));
 
-	return service;
+	return actor;
       }
     }
     
@@ -867,18 +737,18 @@ public class HempBroker implements BamBroker, BamStream
     if ((p = jid.indexOf('/')) > 0) {
       String uid = jid.substring(0, p);
 
-      return findService(uid);
+      return findParentActor(uid);
     }
     else if ((p = jid.indexOf('@')) > 0) {
       String domainName = jid.substring(p + 1);
       
-      return findService(domainName);
+      return findParentActor(domainName);
     }
     else
       return null;
   }
 
-  protected BamStream findDomain(String domain)
+  protected ActorStream findDomain(String domain)
   {
     if (domain == null)
       return null;
@@ -886,20 +756,20 @@ public class HempBroker implements BamBroker, BamStream
     if ("local".equals(domain))
       return getBrokerStream();
 
-    BamBroker broker = _manager.findBroker(domain);
+    Broker broker = _manager.findBroker(domain);
 
     if (broker instanceof HempBroker) {
       HempBroker hempBroker = (HempBroker) broker;
 
-      BamService service = hempBroker.getDomainService();
+      Actor actor = hempBroker.getDomainService();
 
-      return service.getAgentStream();
+      return actor.getActorStream();
     }
     
     if (broker == this)
       return null;
 
-    BamStream stream = null;
+    ActorStream stream = null;
     
     if (_domainManager != null)
       stream = _domainManager.findDomain(domain);
@@ -907,10 +777,10 @@ public class HempBroker implements BamBroker, BamStream
     return stream;
   }
 
-  protected boolean startServiceFromManager(String jid)
+  protected boolean startActorFromManager(String jid)
   {
-    for (BamServiceManager manager : _serviceManagerList) {
-      if (manager.startService(jid))
+    for (ActorManager manager : _actorManagerList) {
+      if (manager.startActor(jid))
         return true;
     }
 
@@ -920,27 +790,27 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Closes a connection
    */
-  void closeAgent(String jid)
+  void closeActor(String jid)
   {
     int p = jid.indexOf('/');
     if (p > 0) {
       String owner = jid.substring(0, p);
       
-      BamService service = findService(owner);
+      Actor actor = findParentActor(owner);
 
-      if (service != null) {
+      if (actor != null) {
 	try {
-	  service.onAgentStop(jid);
+	  actor.onChildStop(jid);
 	} catch (Exception e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
       }
     }
     
-    _serviceCache.remove(jid);
+    _actorCache.remove(jid);
     
-    synchronized (_agentMap) {
-      _agentMap.remove(jid);
+    synchronized (_actorStreamMap) {
+      _actorStreamMap.remove(jid);
     }
   }
 
@@ -949,9 +819,9 @@ public class HempBroker implements BamBroker, BamStream
   //
 
   /**
-   * Called when a @BamService is annotated on the service
+   * Called when a @Actor is annotated on the actor
    */
-  public void registerBamService(@Observes @BamServiceBinding
+  public void registerActor(@Observes @BamServiceBinding
 				 BeanStartupEvent event)
   {
     Manager manager = event.getManager();
@@ -960,31 +830,31 @@ public class HempBroker implements BamBroker, BamStream
     if (bean instanceof CauchoBean) {
       CauchoBean cauchoBean = (CauchoBean) bean;
 
-      AbstractBamService service
-	= (AbstractBamService) manager.getInstance(bean);
+      AbstractActor actor
+	= (AbstractActor) manager.getInstance(bean);
 
       Annotation []ann = cauchoBean.getAnnotations();
 
-      service.setBrokerStream(this);
+      actor.setBrokerStream(this);
 
-      String jid = getJid(service, ann);
+      String jid = getJid(actor, ann);
 
-      service.setJid(jid);
+      actor.setJid(jid);
 
       int threadMax = getThreadMax(ann);
 
-      BamService bamService = service;
+      Actor bamActor = actor;
 
       // queue
       if (threadMax > 0) {
-	bamService = new MemoryQueueServiceFilter(bamService,
+	bamActor = new MemoryQueueServiceFilter(bamActor,
 						  this,
 						  threadMax);
       }
 
-      addService(bamService);
+      addActor(bamActor);
 
-      Environment.addCloseListener(new ServiceClose(bamService));
+      Environment.addCloseListener(new ActorClose(bamActor));
     }
     else {
       log.warning(this + " can't register " + bean + " because it's not a CauchoBean");
@@ -1000,14 +870,14 @@ public class HempBroker implements BamBroker, BamStream
     for (String alias : _aliasList)
       _manager.removeBroker(alias);
 
-    _serviceMap.clear();
-    _serviceCache.clear();
-    _agentMap.clear();
+    _actorMap.clear();
+    _actorCache.clear();
+    _actorStreamMap.clear();
   }
 
-  private String getJid(BamService service, Annotation []annList)
+  private String getJid(Actor actor, Annotation []annList)
   {
-    com.caucho.config.BamService bamAnn = findBamService(annList);
+    com.caucho.config.BamService bamAnn = findActor(annList);
 
     String name = "";
 
@@ -1015,10 +885,10 @@ public class HempBroker implements BamBroker, BamStream
       name = bamAnn.name();
     
     if (name == null || "".equals(name))
-      name = service.getJid();
+      name = actor.getJid();
 
     if (name == null || "".equals(name))
-      name = service.getClass().getSimpleName();
+      name = actor.getClass().getSimpleName();
 
     String jid = name;
     if (jid.indexOf('@') < 0 && jid.indexOf('/') < 0)
@@ -1029,7 +899,7 @@ public class HempBroker implements BamBroker, BamStream
 
   private int getThreadMax(Annotation []annList)
   {
-    com.caucho.config.BamService bamAnn = findBamService(annList);
+    com.caucho.config.BamService bamAnn = findActor(annList);
 
     if (bamAnn != null)
       return bamAnn.threadMax();
@@ -1037,7 +907,7 @@ public class HempBroker implements BamBroker, BamStream
       return 1;
   }
 
-  private com.caucho.config.BamService findBamService(Annotation []annList)
+  private com.caucho.config.BamService findActor(Annotation []annList)
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(com.caucho.config.BamService.class))
@@ -1055,17 +925,17 @@ public class HempBroker implements BamBroker, BamStream
     return getClass().getSimpleName() + "[" + _domain + "]";
   }
 
-  class ServiceClose {
-    private BamService _service;
+  class ActorClose {
+    private Actor _actor;
 
-    ServiceClose(BamService service)
+    ActorClose(Actor actor)
     {
-      _service = service;
+      _actor = actor;
     }
     
     public void close()
     {
-      removeService(_service);
+      removeActor(_actor);
     }
   }
 }

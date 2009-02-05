@@ -30,40 +30,16 @@
 package com.caucho.bam;
 
 /**
- * Bam exception when a service address does not exist
+ * The BamConnectionFactory creates new instances of a BamConnection
+ * for clients.  The getConnection will automatically register an
+ * agent associated with the connection.  When the connection closes,
+ * it will unregister the connection's agent.
  */
-public class BamServiceUnavailableException
-  extends BamErrorPacketException
+public interface ClientActorFactory
 {
-  public BamServiceUnavailableException()
-  {
-  }
-
-  public BamServiceUnavailableException(String msg)
-  {
-    super(msg);
-  }
-
-  public BamServiceUnavailableException(String msg, BamError error)
-  {
-    super(msg, error);
-  }
-
-  public BamServiceUnavailableException(BamError error)
-  {
-    super(error);
-  }
-
-  @Override
-  public BamError createBamError()
-  {
-    BamError error = getBamError();
-
-    if (error != null)
-      return error;
-
-    return new BamError(BamError.TYPE_CANCEL,
-			BamError.SERVICE_UNAVAILABLE,
-			getMessage());
-  }
+  /**
+   * Creates a client
+   */
+  public ActorClient getConnection(String uid,
+				   String resource);
 }

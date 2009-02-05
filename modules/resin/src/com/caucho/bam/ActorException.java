@@ -29,45 +29,38 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamServiceManager;
-import com.caucho.bam.BamService;
-import com.caucho.bam.BamBroker;
-
 /**
- * Abstract service manager */
-public class AbstractBamServiceManager implements BamServiceManager
-{
-  private BamBroker _broker;
-  
-  /**
-   * Sets the server to send messages
-   */
-  public void setBroker(BamBroker broker)
+ * General BAM exception
+ */
+public class ActorException extends RuntimeException {
+  public ActorException()
   {
-    _broker = broker;
-  }
-  
-  /**
-   * Sets the server to send messages
-   */
-  public BamBroker getBroker()
-  {
-    return _broker;
-  }
-  
-  /**
-   * Requests that a service with the given jid be started. 
-   */
-  public boolean startService(String jid)
-  {
-    return false;
   }
 
-  /**
-   * Requests that a service with the given jid be stopped. 
-   */
-  public boolean stopService(String jid)
+  public ActorException(String msg)
   {
-    return false;
+    super(msg);
+  }
+
+  public ActorException(Throwable e)
+  {
+    super(e);
+  }
+
+  public ActorException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+
+  public ActorError getActorError()
+  {
+    return null;
+  }
+
+  public ActorError createActorError()
+  {
+    return new ActorError(ActorError.TYPE_CANCEL,
+			  ActorError.INTERNAL_SERVER_ERROR,
+			  toString());
   }
 }

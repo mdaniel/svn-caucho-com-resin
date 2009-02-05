@@ -29,11 +29,11 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 
 import com.caucho.bam.hmtp.AuthQuery;
 import com.caucho.bam.hmtp.AuthResult;
@@ -46,7 +46,7 @@ import java.security.Key;
  * The LinkService is low-level link
  */
 
-public class ServerLinkService extends SimpleBamService {
+public class ServerLinkService extends SimpleActor {
   private ServerLinkManager _linkManager;
   
   private ServerFromLinkStream _manager;
@@ -57,7 +57,7 @@ public class ServerLinkService extends SimpleBamService {
    * Creates the LinkService for low-level link messages
    */
   public ServerLinkService(ServerFromLinkStream manager,
-			   BamStream agentStream,
+			   ActorStream agentStream,
 			   ServerLinkManager linkManager)
   {
     _manager = manager;
@@ -73,26 +73,26 @@ public class ServerLinkService extends SimpleBamService {
   //
 
   @QueryGet
-  public boolean getPublicKey(long id, String to, String from,
-			      GetPublicKeyQuery query)
+  public void getPublicKey(long id, String to, String from,
+			   GetPublicKeyQuery query)
   {
     GetPublicKeyQuery result = _linkManager.getPublicKey();
 
     getBrokerStream().queryResult(id, from, to, result);
-
-    return true;
   }
 
   @QuerySet
-  public boolean authLogin(long id, String to, String from, LoginQuery query)
+  public void authLogin(long id, String to, String from, LoginQuery query)
   {
-    return login(id, to, from, query.getAuth(), query.getAddress());
+    login(id, to, from, query.getAuth(), query.getAddress());
   }
 
   @QuerySet
-  public boolean authLogin(long id, String to, String from, AuthQuery query)
+  public void authLogin(long id, String to, String from, AuthQuery query)
   {
-    return login(id, to, from, query, null);
+    System.out.println("AUTH: " + id + " " + query);
+    
+    login(id, to, from, query, null);
   }
 
   private boolean login(long id, String to, String from,
@@ -110,8 +110,8 @@ public class ServerLinkService extends SimpleBamService {
     }
     else if (_isRequireEncryptedPassword) {
       getBrokerStream().queryError(id, from, to, query,
-				   new BamError(BamError.TYPE_AUTH,
-						BamError.FORBIDDEN,
+				   new ActorError(ActorError.TYPE_AUTH,
+						ActorError.FORBIDDEN,
 						"passwords must be encrypted"));
       return true;
     }
@@ -125,8 +125,8 @@ public class ServerLinkService extends SimpleBamService {
       getBrokerStream().queryResult(id, from, to, new AuthResult(jid));
     else
       getBrokerStream().queryError(id, from, to, query,
-				   new BamError(BamError.TYPE_AUTH,
-						BamError.FORBIDDEN));
+				   new ActorError(ActorError.TYPE_AUTH,
+						ActorError.FORBIDDEN));
 
     return true;
   }

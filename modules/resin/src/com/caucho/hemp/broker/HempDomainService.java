@@ -34,11 +34,8 @@ import com.caucho.xmpp.disco.DiscoInfoQuery;
 import com.caucho.xmpp.disco.DiscoIdentity;
 import com.caucho.xmpp.disco.DiscoFeature;
 import com.caucho.xmpp.im.ImSessionQuery;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamConnection;
 import com.caucho.config.*;
-import com.caucho.bam.AbstractBamStream;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -49,7 +46,7 @@ import javax.annotation.*;
 /**
  * GenericService implementation to simplify configuring a service.
  */
-public class HempDomainService extends SimpleBamService
+public class HempDomainService extends SimpleActor
 {
   private static final L10N L = new L10N(HempDomainService.class);
   private static final Logger log
@@ -66,7 +63,7 @@ public class HempDomainService extends SimpleBamService
   }
   
   @Override
-  public boolean startAgent(String jid)
+  public boolean startChild(String jid)
   {
     if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0)
       return true;

@@ -29,9 +29,6 @@
 
 package com.caucho.bam.hmtp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamProtocolException;
-import com.caucho.bam.BamError;
 import com.caucho.hessian.io.*;
 
 import java.io.*;

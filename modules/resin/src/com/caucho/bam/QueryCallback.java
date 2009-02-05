@@ -29,38 +29,17 @@
 
 package com.caucho.bam;
 
+import com.caucho.bam.ActorError;
+import java.io.Serializable;
+
 /**
- * BamBroker is the hub which routes messages to agents.
+ * callback for a query
  */
-public interface BamBroker extends BamConnectionFactory
-{
-  /**
-   * Returns true if the broker has been closed
-   */
-  public boolean isClosed();
+public interface QueryCallback {
+  public void onQueryResult(String to, String from, Serializable payload);
   
-  /**
-   * Returns the broker's jid, i.e. the virtual host domain name.
-   */
-  public String getJid();
-  
-  /**
-   * Returns the stream to the broker
-   */
-  public BamStream getBrokerStream();
-  
-  /**
-   * Registers a service
-   */
-  public void addService(BamService service);
-  
-  /**
-   * Removes a service
-   */
-  public void removeService(BamService service);
-  
-  /**
-   * Registers a service manager
-   */
-  public void addServiceManager(BamServiceManager manager);   
+  public void onQueryError(String to,
+			   String from,
+			   Serializable payload,
+			   ActorError error);
 }

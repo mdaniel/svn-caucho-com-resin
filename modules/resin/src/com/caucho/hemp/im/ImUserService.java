@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.SimpleActor;
 import com.caucho.xmpp.im.RosterQuery;
 import com.caucho.xmpp.im.RosterItem;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
@@ -44,7 +44,7 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImUserService extends SimpleBamService
+public class ImUserService extends SimpleActor
 {
   private static final Logger log
     = Logger.getLogger(ImUserService.class.getName());
@@ -72,13 +72,13 @@ public class ImUserService extends SimpleBamService
    * Creates an inbound filter
    */
   @Override
-  public BamStream getBrokerFilter(BamStream stream)
+  public ActorStream getBrokerFilter(ActorStream stream)
   {
     return new ImBrokerFilter(stream, this);
   }
 
   @Override
-  public void onAgentStart(String jid)
+  public void onChildStart(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " login(" + jid + ")");
@@ -93,7 +93,7 @@ public class ImUserService extends SimpleBamService
   }
 
   @Override
-  public void onAgentStop(String jid)
+  public void onChildStop(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " logout(" + jid + ")");
@@ -118,7 +118,7 @@ public class ImUserService extends SimpleBamService
   }
   
   @Override
-  public boolean queryGet(long id,
+  public void queryGet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -128,31 +128,23 @@ public class ImUserService extends SimpleBamService
 					       getDiscoFeatures());
       
       getBrokerStream().queryResult(id, from, to, info);
-      
-      return true;
     }
     else if (query instanceof RosterQuery) {
       getBrokerStream().queryResult(id, from, to, new RosterQuery(getRoster()));
-
-      return true;
     }
-    
-    return false;
   }
   
   @Override
-  public boolean querySet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
+    public void querySet(long id,
+			 String to,
+			 String from,
+			 Serializable query)
   {
     if (query instanceof RosterQuery) {
       RosterQuery roster = (RosterQuery) query;
 
-      return querySetRoster(id, to, from, roster);
+      querySetRoster(id, to, from, roster);
     }
-    
-    return false;
   }
 
   /**

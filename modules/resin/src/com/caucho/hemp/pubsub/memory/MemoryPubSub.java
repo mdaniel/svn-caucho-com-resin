@@ -30,9 +30,9 @@
 package com.caucho.hemp.pubsub.memory;
 
 import com.caucho.xmpp.pubsub.PubSubPublish;
-import com.caucho.bam.BamError;
+import com.caucho.bam.ActorError;
 import com.caucho.bam.QuerySet;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -41,7 +41,7 @@ import java.util.logging.*;
  * pub/sub (xep-0060)
  * http://www.xmpp.org/extensions/xep-0060.html
  */
-public class MemoryPubSub extends SimpleBamService
+public class MemoryPubSub extends SimpleActor
 {
   private static final Logger log
     = Logger.getLogger(MemoryPubSub.class.getName());
@@ -115,7 +115,7 @@ public class MemoryPubSub extends SimpleBamService
 
     if (node == null) {
       getBrokerStream().queryError(id, from, to, publish,
-				   new BamError(BamError.TYPE_CANCEL,
+				   new ActorError(ActorError.TYPE_CANCEL,
 						"no-node"));
       return true;
     }

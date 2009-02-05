@@ -36,10 +36,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamServiceManager;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.Broker;
+import com.caucho.bam.ActorManager;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.Quercus;
@@ -66,7 +64,7 @@ import javax.sql.DataSource;
 /**
  * BAM agent that calls into a PHP script to handle messages/queries.
  **/
-public class BamPhpServiceManager implements BamServiceManager {
+public class BamPhpServiceManager implements ActorManager {
   private static final L10N L = new L10N(BamPhpServiceManager.class);
   private static final Logger log
     = Logger.getLogger(BamPhpServiceManager.class.getName());
@@ -82,7 +80,7 @@ public class BamPhpServiceManager implements BamServiceManager {
   private Path _script;
   private String _encoding = "ISO-8859-1";
 
-  BamBroker _broker = HempBroker.getCurrent();
+  Broker _broker = HempBroker.getCurrent();
 
   public BamPhpServiceManager()
   {
@@ -114,7 +112,7 @@ public class BamPhpServiceManager implements BamServiceManager {
     _encoding = encoding;
   }
 
-  BamBroker getBroker()
+  Broker getBroker()
   {
     return _broker;
   }
@@ -128,10 +126,10 @@ public class BamPhpServiceManager implements BamServiceManager {
 
     _quercus.init();
 
-    _broker.addServiceManager(this);
+    _broker.addActorManager(this);
   }
 
-  public boolean startService(String jid)
+  public boolean startActor(String jid)
   {
     Env env = null;
     boolean started = false;
@@ -151,7 +149,7 @@ public class BamPhpServiceManager implements BamServiceManager {
     }
   }
 
-  public boolean stopService(String jid)
+  public boolean stopActor(String jid)
   {
     Env env = null;
     boolean stoped = false;

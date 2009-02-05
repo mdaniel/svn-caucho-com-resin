@@ -385,7 +385,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Returns the admin broker
    */
-  public BamBroker getAdminBroker()
+  public Broker getAdminBroker()
   {
     return _management.getAdminBroker();
   }

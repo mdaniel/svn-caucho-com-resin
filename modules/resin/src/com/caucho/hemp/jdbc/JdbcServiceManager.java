@@ -48,13 +48,13 @@ import java.net.*;
 /**
  * service manager
  */
-public class JdbcServiceManager extends AbstractBamServiceManager
+public class JdbcServiceManager extends AbstractActorManager
 {
   private static final L10N L = new L10N(JdbcServiceManager.class);
   private static final Logger log
     = Logger.getLogger(JdbcServiceManager.class.getName());
   
-  private BamBroker _broker;
+  private Broker _broker;
   private DataSource _db;
 
   private String _tablePrefix = "hemp_";
@@ -92,7 +92,7 @@ public class JdbcServiceManager extends AbstractBamServiceManager
 
     setBroker(_broker);
     
-    _broker.addServiceManager(this);
+    _broker.addActorManager(this);
 
     String host = "localhost";
     
@@ -116,7 +116,7 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     ImUser user = findUser(jid);
 
     // XXX: timeout
-    _broker.addService(user);
+    _broker.addActor(user);
 
     return true;
   }

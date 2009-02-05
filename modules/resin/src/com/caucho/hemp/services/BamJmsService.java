@@ -29,8 +29,7 @@
 
 package com.caucho.hemp.services;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -54,7 +53,7 @@ import javax.annotation.PreDestroy;
  * jms service
  */
 public class BamJmsService
-  extends SimpleBamService
+  extends SimpleActor
 {
   private static final L10N L = new L10N(BamJmsService.class);
   private static final Logger log

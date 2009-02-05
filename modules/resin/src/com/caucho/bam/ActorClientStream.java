@@ -29,28 +29,25 @@
 
 package com.caucho.bam;
 
+import java.io.Serializable;
+
 /**
- * HMPP wrapper
+ * Extends {@link com.caucho.bam.ActorStream} to
+ * set {@link com.caucho.bam.ActorClient} callbacks.
  */
-public class BamRemoteConnectionFailedException
-  extends BamErrorPacketException
+public interface ActorClientStream extends ActorStream
 {
-  public BamRemoteConnectionFailedException()
-  {
-  }
-
-  public BamRemoteConnectionFailedException(String msg)
-  {
-    super(msg);
-  }
-
-  public BamRemoteConnectionFailedException(String msg, BamError error)
-  {
-    super(msg, error);
-  }
-
-  public BamRemoteConnectionFailedException(BamError error)
-  {
-    super(error);
-  }
+  /**
+   * The {@link com.caucho.bam.ActorClient} to receive
+   * {@link com.caucho.bamActorClient#onQueryResult onQueryResult} and
+   * {@link com.caucho.bamActorClient#onQueryError onQueryError} events.
+   */
+  public void setActorClient(ActorClient actorClient);
+  
+  /**
+   * The {@link com.caucho.bam.ActorClient} to receive
+   * {@link com.caucho.bamActorClient#onQueryResult onQueryResult} and
+   * {@link com.caucho.bamActorClient#onQueryError onQueryError} events.
+   */
+  public ActorClient getActorClient();
 }

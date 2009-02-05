@@ -57,7 +57,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HmuxBamCallback extends AbstractBamStream
+public class HmuxBamCallback extends AbstractActorStream
 {
   private static final L10N L = new L10N(HmuxBamCallback.class);
   private static final Logger log
@@ -71,11 +71,23 @@ public class HmuxBamCallback extends AbstractBamStream
   }
 
   @Override
+  public String getJid()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  @Override
+  public ActorStream getBrokerStream()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void queryError(long id,
 			 String to,
 			 String from,
 			 Serializable query,
-			 BamError error)
+			 ActorError error)
   {
     try {
       _request.writeHmtpQueryError(id, to, from, query, error);

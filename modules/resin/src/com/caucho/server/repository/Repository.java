@@ -29,8 +29,6 @@
 
 package com.caucho.server.repository;
 
-import com.caucho.bam.BamBroker;
-import com.caucho.bam.SimpleBamService;
 import com.caucho.git.GitCommit;
 import com.caucho.git.GitObjectStream;
 import com.caucho.git.GitRepository;

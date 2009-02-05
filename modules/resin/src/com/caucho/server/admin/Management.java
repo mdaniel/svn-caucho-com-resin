@@ -29,7 +29,7 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.bam.BamBroker;
+import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
@@ -131,10 +131,10 @@ public class Management
   /**
    * Returns the admin broker
    */
-  public BamBroker getAdminBroker()
+  public Broker getAdminBroker()
   {
     if (_server != null)
-      return _server.getBamBroker();
+      return _server.getBroker();
     else
       return null;
   }

@@ -29,10 +29,6 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;

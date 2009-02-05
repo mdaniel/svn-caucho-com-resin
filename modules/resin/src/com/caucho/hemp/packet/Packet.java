@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.packet;
 
-import com.caucho.bam.BamStream;
+import com.caucho.bam.ActorStream;
 import com.caucho.util.Alarm;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -119,7 +119,7 @@ public class Packet
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  public void dispatch(BamStream handler, BamStream toSource)
+  public void dispatch(ActorStream handler, ActorStream toSource)
   {
   }
 

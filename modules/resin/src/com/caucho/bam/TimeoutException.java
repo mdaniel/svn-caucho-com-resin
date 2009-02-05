@@ -30,30 +30,25 @@
 package com.caucho.bam;
 
 /**
- * General BAM exception
+ * HMPP wrapper
  */
-public class BamException extends RuntimeException {
-  public BamException()
+public class TimeoutException extends ActorException {
+  public TimeoutException()
   {
   }
 
-  public BamException(String msg)
+  public TimeoutException(String msg)
   {
     super(msg);
   }
 
-  public BamException(Throwable e)
+  public TimeoutException(Throwable e)
   {
     super(e);
   }
 
-  public BamException(String msg, Throwable e)
+  public TimeoutException(String msg, Throwable e)
   {
     super(msg, e);
-  }
-
-  public BamError createBamError()
-  {
-    return null;
   }
 }

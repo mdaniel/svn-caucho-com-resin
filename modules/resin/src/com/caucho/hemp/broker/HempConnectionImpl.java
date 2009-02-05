@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Manager
  */
-public class HempConnectionImpl extends AbstractBamConnection
+public class HempConnectionImpl extends SimpleActorClient
 {
   private static final Logger log
     = Logger.getLogger(HempConnectionImpl.class.getName());
@@ -54,44 +54,44 @@ public class HempConnectionImpl extends AbstractBamConnection
   
   private final String _jid;
   
-  private BamStream _brokerFilter;
+  private ActorStream _brokerFilter;
   // private HmtpAgentStream _agentFilter;
   
-  private BamStream _brokerStream;
+  private ActorStream _brokerStream;
   // private HmtpAgentStream _agentStream;
   
-  private BamService _resource;
+  private Actor _resource;
 
   HempConnectionImpl(HempBroker broker,
 		     String jid,
-		     BamStream agentStream)
+		     ActorStream actorStream)
   {
     _broker = broker;
     _jid = jid;
 
-    //_handler = new HempConnectionAgentStream(this);
-    //setAgentStream(_handler);
+    //_handler = new HempConnectionActorStream(this);
+    //setActorStream(_handler);
 
     _brokerStream = broker.getBrokerStream();
-    // _agentStream = _handler;
+    // _actorStream = _handler;
     
-    if (agentStream == null)
-      agentStream = new SimpleBamClientStream();
+    if (actorStream == null)
+      actorStream = new SimpleActorStream();
     
-    setAgentStream(agentStream);
+    setActorStream(actorStream);
     
     String uid = jid;
     int p = uid.indexOf('/');
     if (p > 0)
       uid = uid.substring(0, p);
 
-    _resource = broker.findService(uid);
+    _resource = broker.findParentActor(uid);
 
     if (_resource != null) {
       _brokerFilter = _resource.getBrokerFilter(_broker);
       _brokerStream = _brokerFilter;
       
-      // _agentFilter = _resource.getAgentFilter(_handler);
+      // _actorFilter = _resource.getActorFilter(_handler);
     }
   }
 
@@ -103,12 +103,12 @@ public class HempConnectionImpl extends AbstractBamConnection
     return _jid;
   }
 
-  HempConnectionAgentStream getAgentStreamHandler()
+  HempConnectionAgentStream getActorStreamHandler()
   {
     return _handler;
   }
   
-  public BamStream getBrokerStream()
+  public ActorStream getBrokerStream()
   {
     return _brokerStream;
   }
