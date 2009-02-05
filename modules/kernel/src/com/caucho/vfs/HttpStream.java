@@ -29,7 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -52,9 +51,10 @@ import java.util.logging.Logger;
  * Underlying stream handling HTTP requests.
  */
 class HttpStream extends StreamImpl {
-  private static final L10N L = new L10N(FileModule.class);
+  private static final L10N L = new L10N(HttpStream.class);
   
-  private static final Logger log = Log.open(HttpStream.class);
+  private static final Logger log
+    = Logger.getLogger(HttpStream.class.getName());
   // reserved headers that should not be passed to the HTTP server
   private static HashMap<String,String> _reserved;
 
