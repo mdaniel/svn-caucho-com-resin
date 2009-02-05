@@ -29,8 +29,10 @@
 
 package com.caucho.vfs;
 
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.net.ssl.SSLContext;
@@ -50,6 +52,8 @@ import java.util.logging.Logger;
  * Underlying stream handling HTTP requests.
  */
 class HttpStream extends StreamImpl {
+  private static final L10N L = new L10N(FileModule.class);
+  
   private static final Logger log = Log.open(HttpStream.class);
   // reserved headers that should not be passed to the HTTP server
   private static HashMap<String,String> _reserved;
@@ -85,6 +89,7 @@ class HttpStream extends StreamImpl {
   // true for a POST stream
   private boolean _isPost;
   
+  // true for an HTTP 1.1 client
   private boolean _isHttp11 = true;
 
   // buffer containing the POST data
@@ -634,11 +639,37 @@ class HttpStream extends StreamImpl {
       _ws.print("Connection: close\r\n");
     
     if (_isPost) {
-      int length = 0;
+      int writeLength = 0;
       if (_tempStream != null)
-	length = _tempStream.getLength();
-      _ws.print("Content-Length: ");
-      _ws.print(length);
+        writeLength = _tempStream.getLength();
+      
+      Object contentLength = getAttribute("Content-Length");
+
+      if (contentLength != null) {
+        long len = 0;
+        
+        if (contentLength instanceof Number)
+          len = ((Number) contentLength).longValue();
+        else {
+          String lenStr = contentLength.toString().trim();
+          
+          for (int i = 0; i < lenStr.length(); i++) {
+            char ch = lenStr.charAt(i);
+            
+            if ('0' <= ch && ch <= '9') 
+              len = len * 10 + ch - '0';
+            else
+              break;
+          }
+        }
+        
+        if (len != writeLength)
+          log.fine(L.l("Content-Length=" + len + " but wrote " + writeLength));
+        
+        _ws.print("Content-Length: " + contentLength);
+      }
+      else
+        _ws.print("Content-Length: " + writeLength);
       _ws.print("\r\n");
     }
     _ws.print("\r\n");
@@ -894,8 +925,8 @@ class HttpStream extends StreamImpl {
     _reserved = new HashMap<String,String>();
     _reserved.put("user-agent", "");
     _reserved.put("content-length", "");
-    _reserved.put("content-encoding", "");
+    //_reserved.put("content-encoding", "");
     _reserved.put("connection", "");
-    _reserved.put("host", "");
+    //_reserved.put("host", "");
   }
 }

@@ -1339,6 +1339,7 @@ public class FileModule extends AbstractQuercusModule {
     if (contextV instanceof StreamContextResource)
       context = (StreamContextResource) contextV;
 
+
     // XXX: context
     try {
       ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
@@ -1381,15 +1382,15 @@ public class FileModule extends AbstractQuercusModule {
 	  */
 
         try {
-          BinaryInput input;
-
-          if (mode.startsWith("r+"))
-            input = FileInputOutput.create(env, path, context,
-                                           false, false, false);
+          String scheme = path.getScheme();
+          
+          if (scheme.equals("http") || scheme.equals("https"))
+            return new HttpInputOutput(env, path, context);
+          else if (mode.startsWith("r+"))
+            return new FileInputOutput(env, path,
+                                       false, false, false);
           else
-            input = FileInput.create(env, path, context);
-
-          return input;
+            return new FileInput(env, path);
         } catch (IOException e) {
           log.log(Level.FINE, e.toString(), e);
 	  
@@ -1400,9 +1401,13 @@ public class FileModule extends AbstractQuercusModule {
       }
       else if (mode.startsWith("w")) {
         try {
-          if (mode.startsWith("w+")) 
-            return FileInputOutput.create(env, path, context,
-                                          false, true, false);
+          String scheme = path.getScheme();
+
+          if (scheme.equals("http") || scheme.equals("https"))
+            return new HttpInputOutput(env, path, context);
+          else if (mode.startsWith("w+")) 
+            return new FileInputOutput(env, path,
+                                       false, true, false);
           else
             return new FileOutput(env, path);
         } catch (IOException e) {
@@ -1416,8 +1421,8 @@ public class FileModule extends AbstractQuercusModule {
       else if (mode.startsWith("a")) {
         try {
           if (mode.startsWith("a+"))
-            return FileInputOutput.create(env, path, context,
-                                          true, false, false);
+            return new FileInputOutput(env, path,
+                                       true, false, false);
           else
             return new FileOutput(env, path, true);
         } catch (IOException e) {
@@ -1436,8 +1441,8 @@ public class FileModule extends AbstractQuercusModule {
         }
         
         if (mode.startsWith("x+"))
-          return FileInputOutput.create(env, path, context,
-                                        false, false, false);
+          return new FileInputOutput(env, path,
+                                     false, false, false);
         else 
           return new FileOutput(env, path);
       }
@@ -2925,7 +2930,7 @@ public class FileModule extends AbstractQuercusModule {
 
       env.addCleanup(new RemoveFile(file));
       
-      return FileInputOutput.create(env, file, null, false, false, true);
+      return new FileInputOutput(env, file, false, false, true);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 

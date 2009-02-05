@@ -33,20 +33,13 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.file.FileInput.HttpInput;
-import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.vfs.Encoding;
-import com.caucho.vfs.FilePath;
-import com.caucho.vfs.HttpPath;
-import com.caucho.vfs.HttpStreamWrapper;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.LockableStream;
 
 import java.io.*;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,19 +65,19 @@ public class FileInputOutput extends AbstractBinaryOutput
 
   private boolean _temporary;
 
-  private FileInputOutput(Env env, Path path)
+  public FileInputOutput(Env env, Path path)
     throws IOException
   {
     this(env, path, false, false, false);
   }
 
-  private FileInputOutput(Env env, Path path, boolean append, boolean truncate)
+  public FileInputOutput(Env env, Path path, boolean append, boolean truncate)
     throws IOException
   {
     this(env, path, append, truncate, false);
   }
 
-  private FileInputOutput(Env env, Path path, 
+  public FileInputOutput(Env env, Path path, 
                           boolean append, boolean truncate, boolean temporary)
     throws IOException
   {
@@ -105,17 +98,6 @@ public class FileInputOutput extends AbstractBinaryOutput
       _stream.seek(_stream.getLength());
 
     _temporary = temporary;
-  }
-  
-  public static FileInputOutput create(Env env,
-                                       Path path,
-                                       StreamContextResource context,
-                                       boolean append,
-                                       boolean truncate,
-                                       boolean temporary)
-    throws IOException
-  {
-    return new FileInputOutput(env, path, append, truncate, temporary);
   }
   
   /**
@@ -251,25 +233,28 @@ public class FileInputOutput extends AbstractBinaryOutput
   {
     StringValue bb = _env.createBinaryBuilder();
     TempBuffer temp = TempBuffer.allocate();
-    byte []buffer = temp.getBuffer();
+    
+    try {
+      byte []buffer = temp.getBuffer();
 
-    while (length > 0) {
-      int sublen = buffer.length;
+      while (length > 0) {
+        int sublen = buffer.length;
 
-      if (length < sublen)
-        sublen = length;
+        if (length < sublen)
+          sublen = length;
 
-      sublen = read(buffer, 0, sublen);
+        sublen = read(buffer, 0, sublen);
 
-      if (sublen > 0) {
-	bb.append(buffer, 0, sublen);
-        length -= sublen;
+        if (sublen > 0) {
+          bb.append(buffer, 0, sublen);
+          length -= sublen;
+        }
+        else
+          break;
       }
-      else
-        break;
+    } finally {
+      TempBuffer.free(temp);
     }
-
-    TempBuffer.free(temp);
 
     return bb;
   }

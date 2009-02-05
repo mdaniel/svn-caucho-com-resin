@@ -57,7 +57,7 @@ public class FileInput extends ReadStreamInput
   protected Path _path;
   protected ReadStream _is;
   
-  private FileInput(Env env, Path path)
+  public FileInput(Env env, Path path)
     throws IOException
   {
     super(env);
@@ -71,17 +71,6 @@ public class FileInput extends ReadStreamInput
     _is = path.openRead();
 
     init(_is);
-  }
-  
-  public static FileInput create(Env env,
-                                 Path path,
-                                 StreamContextResource context)
-    throws IOException
-  {
-    if (path instanceof HttpPath)
-      return new HttpInput(env, path, context);
-    else
-      return new FileInput(env, path);
   }
 
   /**
@@ -174,114 +163,6 @@ public class FileInput extends ReadStreamInput
   public String toString()
   {
     return "FileInput[" + getPath() + "]";
-  }
-  
-  static class HttpInput extends FileInput
-  {
-    private byte []_bodyStart;
-    
-    HttpInput(Env env, Path path, StreamContextResource context)
-      throws IOException
-    {
-      super(env, path);
-
-      if (context != null) {
-        Value options = context.getOptions();
-        
-        if (path.getScheme().equals("http"))
-          options = options.get(env.createString("http"));
-        else
-          options = options.get(env.createString("https"));
-        
-        HttpStreamWrapper httpStream = (HttpStreamWrapper) _is.getSource();
-        
-        setOptions(env, httpStream, options);
-        
-        if (_bodyStart != null && _bodyStart.length > 0)
-          httpStream.write(_bodyStart, 0, _bodyStart.length, false);
-      }
-    }
-    
-    private void setOptions(Env env, HttpStreamWrapper stream, Value options)
-      throws IOException
-    {
-      Iterator<Map.Entry<Value,Value>> iter = options.getIterator(env);
-      
-      while (iter.hasNext()) {
-        Map.Entry<Value,Value> entry = iter.next();
-        
-        String optionName = entry.getKey().toString();
-        Value optionValue = entry.getValue();
-
-        if (optionName.equals("method"))
-          stream.setMethod(optionValue.toString());
-        else if (optionName.equals("header")) {
-          String option = optionValue.toString();
-          
-          int start = 0;
-          int len = option.length();
-          
-          while (start < len) {
-            int end = option.indexOf("\r\n", start);
-
-            if (end < 0)
-              end = len;
-            
-            int i = option.indexOf(':', start);
-            
-            if (i < 0 || i > end) {
-              stream.setAttribute(option.substring(start, end), "");
-              
-              break;
-            }
-            else {
-              String name = option.substring(start, i);
-              String value = option.substring(i + 1, end);
-              
-              stream.setAttribute(name, value);
-            }
-            
-            start = end += 2;
-          }
-        }
-        else if (optionName.equals("user_agent"))
-          stream.setAttribute("User-Agent", optionValue.toString());
-        else if (optionName.equals("content"))
-          _bodyStart = optionValue.toBinaryValue(env).toBytes();
-        else if (optionName.equals("proxy")) {
-          env.stub("StreamContextResource::proxy option");
-        }
-        else if (optionName.equals("request_fulluri")) {
-          env.stub("StreamContextResource::request_fulluri option");
-        }
-        else if (optionName.equals("protocol_version")) {
-          double version = optionValue.toDouble();
-          
-          if (version == 1.1) {
-          }
-          else if (version == 1.0)
-            stream.setHttp10();
-          else
-            env.stub("StreamContextResource::protocol_version " + version);
-        }
-        else if (optionName.equals("timeout")) {
-          long ms = (long) optionValue.toDouble() * 1000;
-          stream.setSocketTimeout(ms);
-        }
-        else if (optionName.equals("ignore_errors")) {
-          env.stub("ignore_errors::ignore_errors option");
-        }
-        else {
-          env.stub("ignore_errors::" + optionName + " option");
-        }
-      }
-    }
-    
-    public String toString()
-    {
-      return "HttpInput[" + getPath() + "]";
-    }
-
   }
 }
 
