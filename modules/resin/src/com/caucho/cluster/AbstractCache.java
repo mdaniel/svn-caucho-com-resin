@@ -44,6 +44,7 @@ import javax.annotation.PostConstruct;
 import javax.cache.CacheListener;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
+import javax.cache.Cache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -77,8 +78,7 @@ abstract public class AbstractCache extends AbstractMap
 
   private CacheConfig _config = new CacheConfig();
 
-  private LruCache<Object, CacheKeyEntry> _entryCache
-    = new LruCache<Object, CacheKeyEntry>(512);
+  private LruCache<Object, CacheKeyEntry> _entryCache;
 
   private boolean _isInit;
 
@@ -88,6 +88,17 @@ abstract public class AbstractCache extends AbstractMap
 
   private long _priorMisses = 0;
   private long _priorHits = 0;
+  private boolean _isTemplate;
+
+//  protected AbstractCache(boolean isTemplate)
+//  {
+//    _isTemplate = isTemplate;
+//  }
+//
+//  protected AbstractCache()
+//  {
+//    _isTemplate = false;
+//  }
 
   /**
    * Returns the name of the cache.
@@ -316,6 +327,16 @@ abstract public class AbstractCache extends AbstractMap
     _config.setLocalReadTimeout(period);
   }
 
+  public boolean isTemplate()
+  {
+    return _isTemplate;
+  }
+
+  public void setTemplate(boolean template)
+  {
+    _isTemplate = template;
+  }
+
   /**
    * Initialize the cache.
    */
@@ -330,29 +351,30 @@ abstract public class AbstractCache extends AbstractMap
       if ((_name == null) || (_name.length() == 0))
         throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
 
-      Map<String, AbstractCache> cacheMap = getLocalCacheMap();
-
       String contextId = Environment.getEnvironmentName();
 
       _guid = contextId + ":" + _name;
       _config.setGuid(_guid);
-
-      if (!cacheMap.containsKey(_guid))
-        cacheMap.put(_guid, this);
-      else
-        throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
-
+      Server server = Server.getCurrent();
       _config.init();
 
-      Server server = Server.getCurrent();
+      Map<String, AbstractCache> cacheMap = getLocalCacheMap();
+
+      if (!isTemplate() && cacheMap.containsKey(_guid))
+        throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
 
       if (server == null)
         throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
           getClass().getSimpleName()));
 
-      _distributedCacheManager = server.getDistributedCacheManager();
-      _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
+      if (_entryCache == null) {
+        _entryCache = new LruCache<Object, CacheKeyEntry>(512);
 
+        _distributedCacheManager = server.getDistributedCacheManager();
+        _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
+
+        cacheMap.put(_guid, this);
+      }
     }
   }
 
@@ -743,6 +765,21 @@ abstract public class AbstractCache extends AbstractMap
     return CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 
+  public static Cache getInstance(String name)
+  {
+    AbstractCache result = getLocalCacheMap().get(name);
+    if (result == null) {
+      result = new ClusterCache(name);
+      result.init();
+      getLocalCacheMap().put(name, result);
+      return result;
+    }
+    else
+      return result;
+
+
+  }
+
   /**
    * Places an item in the cache from the loader unless the item is in cache already.
    */
@@ -798,7 +835,7 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  protected Map<String, AbstractCache> getLocalCacheMap()
+  private static Map<String, AbstractCache> getLocalCacheMap()
   {
     Map<String, AbstractCache> result = _cacheMap.getLevel();
     if (result == null) {
