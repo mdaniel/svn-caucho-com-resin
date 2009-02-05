@@ -168,7 +168,7 @@ abstract public class AbstractFunction {
   /*
    * Returns true for a protected function.
    */
-  public final boolean isPublic()
+  public boolean isPublic()
   {
     return _visibility == Visibility.PUBLIC;
   }
@@ -176,7 +176,7 @@ abstract public class AbstractFunction {
   /*
    * Returns true for a protected function.
    */
-  public final boolean isProtected()
+  public boolean isProtected()
   {
     return _visibility == Visibility.PROTECTED;
   }
@@ -184,7 +184,7 @@ abstract public class AbstractFunction {
   /*
    * Returns true for a private function.
    */
-  public final boolean isPrivate()
+  public boolean isPrivate()
   {
     return _visibility == Visibility.PRIVATE;
   }

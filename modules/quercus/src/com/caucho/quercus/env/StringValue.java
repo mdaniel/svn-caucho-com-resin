@@ -348,8 +348,9 @@ abstract public class StringValue
       if ('0' <= ch && ch <= '9') {
         long newValue = 10 * value + ch - '0';
         if (newValue < value) {
-          // long value overflowed, set result to 0
-          result = 0;
+          // php/0143
+          // long value overflowed
+          result = Integer.MAX_VALUE;
           isResultSet = true;
           break;
         }

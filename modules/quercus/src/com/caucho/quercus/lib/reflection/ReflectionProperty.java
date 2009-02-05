@@ -291,9 +291,6 @@ public class ReflectionProperty
     @Override
     protected QuercusClass getDeclaringClassImpl(Env env, QuercusClass cls)
     {
-      return cls;
-      
-      /*
       if (cls == null)
         return null;
       
@@ -305,7 +302,6 @@ public class ReflectionProperty
         return cls;
 
       return null;
-      */
     }
     
     public String getComment(Env env)
