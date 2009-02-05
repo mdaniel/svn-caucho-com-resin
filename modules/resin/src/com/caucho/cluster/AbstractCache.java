@@ -63,8 +63,8 @@ abstract public class AbstractCache extends AbstractMap
   private static final Logger log
     = Logger.getLogger(AbstractCache.class.getName());
 
-  private static final EnvironmentLocal<CacheMap> _cacheMap
-    = new EnvironmentLocal<CacheMap>("com.caucho.cluster.cache");
+  private static final EnvironmentLocal<Map<String, AbstractCache>> _cacheMap
+    = new EnvironmentLocal<Map<String, AbstractCache>>("com.caucho.cluster.cache");
 
   private String _name = null;
 
@@ -89,7 +89,7 @@ abstract public class AbstractCache extends AbstractMap
   private long _priorMisses = 0;
   private long _priorHits = 0;
 
-  /**                                                
+  /**
    * Returns the name of the cache.
    */
   public String getName()
@@ -269,7 +269,7 @@ abstract public class AbstractCache extends AbstractMap
     _config.setLeaseTimeout(timeout);
   }
 
-   /**
+  /**
    * The local read timeout is how long a local copy of
    * a cache item can be reused before checking with the master copy.
    * <p/>
@@ -330,14 +330,14 @@ abstract public class AbstractCache extends AbstractMap
       if ((_name == null) || (_name.length() == 0))
         throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
 
-      CacheMap cacheMap = getLocalCacheMap();
+      Map<String, AbstractCache> cacheMap = getLocalCacheMap();
 
       String contextId = Environment.getEnvironmentName();
 
       _guid = contextId + ":" + _name;
       _config.setGuid(_guid);
 
-       if (!cacheMap.containsKey(_guid))
+      if (!cacheMap.containsKey(_guid))
         cacheMap.put(_guid, this);
       else
         throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
@@ -798,14 +798,12 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  protected CacheMap getLocalCacheMap()
+  protected Map<String, AbstractCache> getLocalCacheMap()
   {
-    ClassLoader localLoader = Environment.getEnvironmentClassLoader();
-    CacheMap result = _cacheMap.getLevel(localLoader);
-    if (result == null)
-    {
-      result = new CacheMap();
-      _cacheMap.set(result, localLoader);
+    Map<String, AbstractCache> result = _cacheMap.getLevel();
+    if (result == null) {
+      result = new HashMap<String, AbstractCache>();
+      _cacheMap.set(result);
     }
     return result;
   }
@@ -814,14 +812,6 @@ abstract public class AbstractCache extends AbstractMap
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _guid + "]";
-  }
-
-  protected static class CacheMap extends HashMap<String, AbstractCache>
-  {
-      public CacheMap()
-      {
-        super();
-      }
   }
 
   /**
