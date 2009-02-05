@@ -261,6 +261,30 @@ abstract public class ClassDef {
   {
     return null;
   }
+  
+  /**
+   * Returns the documentation for this class.
+   */
+  public String getComment()
+  {
+    return null;
+  }
+  
+  /**
+   * Returns the comment for the specified field.
+   */
+  public String getFieldComment(StringValue name)
+  {
+    return null;
+  }
+  
+  /**
+   * Returns the comment for the specified static field.
+   */
+  public String getStaticFieldComment(String name)
+  {
+    return null;
+  }
 
   public String toString()
   {
@@ -275,6 +299,11 @@ abstract public class ClassDef {
     return null;
   }
   
+  public Set<Map.Entry<String, StaticFieldEntry>> staticFieldSet()
+  {
+    return null;
+  }
+  
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
   {
     return null;
@@ -284,11 +313,20 @@ abstract public class ClassDef {
   public static class FieldEntry {
     private final Expr _value;
     private final FieldVisibility _visibility;
+    private final String _comment;
 
     public FieldEntry(Expr value, FieldVisibility visibility)
     {
       _value = value;
       _visibility = visibility;
+      _comment = null;
+    }
+    
+    public FieldEntry(Expr value, FieldVisibility visibility, String comment)
+    {
+      _value = value;
+      _visibility = visibility;
+      _comment = comment;
     }
 
     public Expr getValue()
@@ -299,6 +337,38 @@ abstract public class ClassDef {
     public FieldVisibility getVisibility()
     {
       return _visibility;
+    }
+    
+    public String getComment()
+    {
+      return _comment;
+    }
+  }
+  
+  public static class StaticFieldEntry {
+    private final Expr _value;
+    private final String _comment;
+
+    public StaticFieldEntry(Expr value)
+    {
+      _value = value;
+      _comment = null;
+    }
+    
+    public StaticFieldEntry(Expr value, String comment)
+    {
+      _value = value;
+      _comment = comment;
+    }
+
+    public Expr getValue()
+    {
+      return _value;
+    }
+    
+    public String getComment()
+    {
+      return _comment;
     }
   }
 }

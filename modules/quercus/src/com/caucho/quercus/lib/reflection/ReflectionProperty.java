@@ -30,11 +30,13 @@
 package com.caucho.quercus.lib.reflection;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.util.L10N;
 
 public class ReflectionProperty
@@ -49,9 +51,29 @@ public class ReflectionProperty
 
   private Property _prop;
   
+  protected ReflectionProperty(Property prop)
+  {
+    _prop = prop;
+  }
+  
   protected ReflectionProperty(Env env, QuercusClass cls, StringValue nameV)
   {
     _prop = Property.create(env, cls, nameV);
+  }
+  
+  protected static ReflectionProperty create(Env env,
+                                             QuercusClass cls,
+                                             StringValue propName,
+                                             boolean isStatic)
+  {
+    Property prop;
+    
+    if (isStatic)
+      prop = new StaticProperty(cls, propName);
+    else
+      prop = new Property(cls, propName);
+    
+    return new ReflectionProperty(prop);
   }
   
   final private void __clone()
@@ -132,9 +154,10 @@ public class ReflectionProperty
     return _prop.getDeclaringClass(env);
   }
   
-  public String getDocComment()
+  @ReturnNullAsFalse
+  public String getDocComment(Env env)
   {
-    return null;
+    return _prop.getComment(env);
   }
   
   public String toString()
@@ -146,6 +169,8 @@ public class ReflectionProperty
   {
     final QuercusClass _cls;
     final StringValue _nameV;
+    
+    QuercusClass _declaringClass;
     
     public static Property create(Env env, QuercusClass cls, StringValue nameV)
     { 
@@ -184,24 +209,46 @@ public class ReflectionProperty
       obj.putField(env, _nameV, value);
     }
     
-    public ReflectionClass getDeclaringClass(Env env)
+    public final ReflectionClass getDeclaringClass(Env env)
     {
-      return getDeclaringClass(env, _cls);
+      QuercusClass cls = getDeclaringClass(env, _cls);
+      
+      if (cls != null)
+        return new ReflectionClass(cls);
+      else
+        return null;
     }
     
-    protected ReflectionClass getDeclaringClass(Env env, QuercusClass cls)
+    protected final QuercusClass getDeclaringClass(Env env, QuercusClass cls)
+    {
+      if (_declaringClass == null)
+        _declaringClass = getDeclaringClassImpl(env, cls);
+      
+      return _declaringClass;
+    }
+    
+    protected QuercusClass getDeclaringClassImpl(Env env, QuercusClass cls)
     {
       if (cls == null)
         return null;
       
-      ReflectionClass refClass = getDeclaringClass(env, cls.getParent());
+      QuercusClass refClass = getDeclaringClassImpl(env, cls.getParent());
 
       if (refClass != null)
         return refClass;
       else if (cls.findFieldIndex(_nameV) >= 0)
-        return new ReflectionClass(cls);
+        return cls;
 
       return null;
+    }
+    
+    public String getComment(Env env)
+    {
+      QuercusClass cls = getDeclaringClass(env, _cls);
+      
+      ClassDef def = cls.getClassDef();
+
+      return def.getFieldComment(_nameV);
     }
     
     public String toString()
@@ -220,7 +267,6 @@ public class ReflectionProperty
     public StaticProperty(QuercusClass cls, StringValue nameV)
     {
       super(cls, nameV);
-      
       _name = nameV.toString();
     }
     
@@ -243,25 +289,32 @@ public class ReflectionProperty
     }
     
     @Override
-    public ReflectionClass getDeclaringClass(Env env)
+    protected QuercusClass getDeclaringClassImpl(Env env, QuercusClass cls)
     {
-      return getDeclaringClass(env, _cls);
-    }
-    
-    @Override
-    protected ReflectionClass getDeclaringClass(Env env, QuercusClass cls)
-    {
+      return cls;
+      
+      /*
       if (cls == null)
         return null;
       
-      ReflectionClass refClass = getDeclaringClass(env, cls.getParent());
+      QuercusClass refClass = getDeclaringClassImpl(env, cls.getParent());
 
       if (refClass != null)
         return refClass;
       else if (cls.getStaticField(env, _name) != null)
-        return new ReflectionClass(cls);
+        return cls;
 
       return null;
+      */
+    }
+    
+    public String getComment(Env env)
+    {
+      QuercusClass cls = getDeclaringClass(env, _cls);
+      
+      ClassDef def = cls.getClassDef();
+
+      return def.getStaticFieldComment(_name);
     }
     
     public String toString()

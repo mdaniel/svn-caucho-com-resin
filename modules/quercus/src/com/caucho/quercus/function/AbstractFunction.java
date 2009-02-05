@@ -52,7 +52,8 @@ abstract public class AbstractFunction {
   private final Location _location;
 
   private boolean _isGlobal = true;
-  private boolean _isFinal = false;
+  protected boolean _isStatic = false;
+  protected boolean _isFinal = false;
   
   protected Visibility _visibility = Visibility.PUBLIC;
   protected String _declaringClassName;
@@ -135,18 +136,26 @@ abstract public class AbstractFunction {
     return false;
   }
   
-  /*
+  /**
+   * Sets true if function is static.
+   */
+  public void setStatic(boolean isStatic)
+  {
+    _isStatic = isStatic;
+  }
+  
+  /**
    * Returns true for a static function.
    */
   public boolean isStatic()
   {
-    return false;
+    return _isStatic;
   }
   
   /*
    * Returns true for a final function.
    */
-  public final boolean isFinal()
+  public boolean isFinal()
   {
     return _isFinal;
   }
@@ -281,6 +290,14 @@ abstract public class AbstractFunction {
   public AbstractFunction getActualFunction(int actualArgs)
   {
     return this;
+  }
+  
+  /**
+   * Returns the documentation for this function.
+   */
+  public String getComment()
+  {
+    return null;
   }
 
   /**

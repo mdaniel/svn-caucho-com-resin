@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
@@ -86,10 +87,10 @@ public abstract class ReflectionFunctionAbstract
     return _fun.getLocation().getLineNumber();
   }
   
+  @ReturnNullAsFalse
   public String getDocComment()
   {
-    // TODO
-    return null;
+    return _fun.getComment();
   }
   
   public ArrayValue getStaticVariables()

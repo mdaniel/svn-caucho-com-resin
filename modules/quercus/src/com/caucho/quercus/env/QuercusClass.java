@@ -620,8 +620,16 @@ public class QuercusClass {
   {
     ArrayList<String> names = new ArrayList<String>();
 
-    if (_staticFieldExprMap != null)
-      names.addAll(_staticFieldExprMap.keySet());
+    if (_staticFieldExprMap != null) {
+      for (Map.Entry<String,ArrayList<StaticField>> entry
+           : _staticFieldExprMap.entrySet()) {
+        ArrayList<StaticField> fieldList = entry.getValue();
+        
+        for (StaticField field : fieldList) {
+          names.add(field.getName());
+        }
+      }
+    }
 
     return names;
   }
@@ -1757,6 +1765,11 @@ public class QuercusClass {
     {
       _name = name;
       _expr = expr;
+    }
+    
+    String getName()
+    {
+      return _name;
     }
   }
 }

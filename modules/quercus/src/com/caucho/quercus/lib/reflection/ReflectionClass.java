@@ -150,10 +150,12 @@ public class ReflectionClass
     return _cls.getClassDef().getLocation().getLineNumber();
   }
   
+  @ReturnNullAsFalse
   public String getDocComment()
   {
-    // TODO
-    return null;
+    ClassDef def = _cls.getClassDef();
+    
+    return def.getComment();
   }
   
   public ReflectionMethod getConstructor()
@@ -198,7 +200,7 @@ public class ReflectionClass
     MethodMap<AbstractFunction> map = _cls.getMethodMap();
     
     for (AbstractFunction method : map.values()) {
-      array.put(env.wrapJava(new ReflectionMethod(method)));
+      array.put(env.wrapJava(new ReflectionMethod(_cls.getName(), method)));
     }
     
     return array;
@@ -218,12 +220,22 @@ public class ReflectionClass
   {
     ArrayValue array = new ArrayValueImpl();
     
-    ArrayList<StringValue> list = _cls.getFieldNames();
+    ArrayList<StringValue> fieldList = _cls.getFieldNames();
     
-    int size = list.size();
+    for (StringValue field : fieldList) {
+      ReflectionProperty prop
+        = ReflectionProperty.create(env, _cls, field, false);
+      
+      array.put(env.wrapJava(prop));
+    }
     
-    for (int i = 0; i < size; i++) {
-      array.put(env.wrapJava(new ReflectionProperty(env, _cls, list.get(i))));
+    ArrayList<String> staticFieldList = _cls.getStaticFieldNames();
+    
+    for (String field : staticFieldList) {
+      ReflectionProperty prop
+        = ReflectionProperty.create(env, _cls, env.createString(field), true);
+      
+      array.put(env.wrapJava(prop));
     }
     
     return array;
@@ -388,7 +400,6 @@ public class ReflectionClass
     
     for (String name : cls.getStaticFieldNames()) {
       Var field = cls.getStaticField(env, name);
-
       array.put(StringValue.create(name), field.toValue());
     }
     
@@ -404,9 +415,10 @@ public class ReflectionClass
     if (field == null) {
       if (! defaultV.isDefault())
         return defaultV;
-      else {
-        throw new ReflectionException(L.l("Class '{0}' does not have property named '{1}'", _name, name));
-      }
+      else
+        throw new QuercusLanguageException(
+            env.createException("ReflectionException",
+                                L.l("Class '{0}' does not have a property named '{1}'", _name, name)));
     }
 
     return field.toValue();
@@ -424,7 +436,6 @@ public class ReflectionClass
     getStaticFields(env, array, _cls);
     
     HashMap<StringValue, Expr> fieldMap = _cls.getClassVars();
-    
     for (Map.Entry<StringValue, Expr> entry : fieldMap.entrySet()) {
       array.put(entry.getKey(), entry.getValue().eval(env));
     }

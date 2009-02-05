@@ -100,12 +100,33 @@ public class ClassScope extends Scope
   }
   
   /**
+   * Adds a value
+   */
+  public void addVar(String name,
+                     Expr value,
+                     FieldVisibility visibility,
+                     String comment)
+  {
+    // XXX: i18n
+    _cl.addValue(new StringBuilderValue(name), value, visibility, comment);
+  }
+  
+  /**
    * Adds a static value
    */
   public void addStaticVar(String name, Expr value)
   {
     // XXX: i18n
-    _cl.addStaticValue(new StringBuilderValue(name), value);
+    _cl.addStaticValue(new StringBuilderValue(name), value, null);
+  }
+  
+  /**
+   * Adds a static value
+   */
+  public void addStaticVar(String name, Expr value, String comment)
+  {
+    // XXX: i18n
+    _cl.addStaticValue(new StringBuilderValue(name), value, comment);
   }
   
   /**

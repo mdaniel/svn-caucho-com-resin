@@ -64,9 +64,9 @@ public class Function extends AbstractFunction {
   protected final Arg []_args;
   protected final Statement _statement;
 
-  protected boolean _isStatic = true;
-
   protected boolean _hasReturn;
+  
+  protected String _comment;
 
   Function(Location location,
            String name,
@@ -84,6 +84,8 @@ public class Function extends AbstractFunction {
     _statement = new BlockStatement(location, statements);
 
     setGlobal(info.isPageStatic());
+    
+    _isStatic = true;
   }
 
   public Function(ExprFactory exprFactory,
@@ -107,6 +109,8 @@ public class Function extends AbstractFunction {
     _statement = exprFactory.createBlock(location, statements);
 
     setGlobal(info.isPageStatic());
+    
+    _isStatic = true;
   }
 
   /**
@@ -148,17 +152,6 @@ public class Function extends AbstractFunction {
     return _args;
   }
 
-  public void setStatic(boolean isStatic)
-  {
-    _isStatic = isStatic;
-  }
-
-  @Override
-  public boolean isStatic()
-  {
-    return _isStatic;
-  }
-
   public boolean isObjectMethod()
   {
     return false;
@@ -170,6 +163,23 @@ public class Function extends AbstractFunction {
   public boolean isReturnsReference()
   {
     return _isReturnsReference;
+  }
+  
+  /**
+   * Sets the documentation for this function.
+   */
+  public void setComment(String comment)
+  {
+    _comment = comment;
+  }
+  
+  /**
+   * Returns the documentation for this function.
+   */
+  @Override
+  public String getComment()
+  {
+    return _comment;
   }
 
   public Value execute(Env env)

@@ -217,6 +217,8 @@ public class QuercusParser {
   
   private ArrayList<String> _loopLabelList = new ArrayList<String>();
   private int _labelsCreated;
+  
+  private String _comment;
 
   QuercusParser(Quercus quercus)
   {
@@ -1578,6 +1580,9 @@ public class QuercusParser {
       _returnsReference = false;
 
       int token = parseToken();
+      
+      String comment = _comment;
+      _comment = null;
 
       if (token == '&')
 	_returnsReference = true;
@@ -1657,6 +1662,7 @@ public class QuercusParser {
       function.setFinal((modifiers & M_FINAL) != 0);
       
       function.setParseIndex(_functionsParsed++);
+      function.setComment(comment);
       
       if ((modifiers & M_PROTECTED) != 0)
         function.setVisibility(Visibility.PROTECTED);
@@ -1870,6 +1876,8 @@ public class QuercusParser {
     throws IOException
   {
     String name = parseIdentifier();
+    
+    String comment = _comment;
 
     String parentName = null;
 
@@ -1908,7 +1916,9 @@ public class QuercusParser {
       _classDef = oldScope.addClass(getLocation(),
                                     name, parentName, ifaceList,
                                     _classesParsed++,
-				    _isTop);
+                                    _isTop);
+      
+      _classDef.setComment(comment);
 
       if ((modifiers & M_ABSTRACT) != 0)
         _classDef.setAbstract(true);
@@ -1939,6 +1949,8 @@ public class QuercusParser {
     throws IOException
   {
     while (true) {
+      _comment = null;
+      
       int token = parseToken();
 
       switch (token) {
@@ -2018,6 +2030,9 @@ public class QuercusParser {
     
     do {
       expect('$');
+      
+      String comment = _comment;
+      
       String name = parseIdentifier();
 
       token = parseToken();
@@ -2032,14 +2047,27 @@ public class QuercusParser {
 	expr = _factory.createNull();
       }
 
-      if ((modifiers & M_STATIC) != 0)
-        ((ClassScope) _scope).addStaticVar(name, expr);
-      else if ((modifiers & M_PRIVATE) != 0)
-        ((ClassScope) _scope).addVar(name, expr, FieldVisibility.PRIVATE);
-      else if ((modifiers & M_PROTECTED) != 0)
-        ((ClassScope) _scope).addVar(name, expr, FieldVisibility.PROTECTED);
-      else
-        ((ClassScope) _scope).addVar(name, expr, FieldVisibility.PUBLIC);
+      if ((modifiers & M_STATIC) != 0) {
+        ((ClassScope) _scope).addStaticVar(name, expr, _comment);
+      }
+      else if ((modifiers & M_PRIVATE) != 0) {
+        ((ClassScope) _scope).addVar(name,
+                                     expr,
+                                     FieldVisibility.PRIVATE,
+                                     comment);
+      }
+      else if ((modifiers & M_PROTECTED) != 0) {
+        ((ClassScope) _scope).addVar(name,
+                                     expr,
+                                     FieldVisibility.PROTECTED,
+                                     comment);
+      }
+      else {
+        ((ClassScope) _scope).addVar(name,
+                                     expr,
+                                     FieldVisibility.PUBLIC,
+                                     comment);
+      }
 
       token = parseToken();
     } while (token == ',');
@@ -3569,6 +3597,9 @@ public class QuercusParser {
       
       var = parseIdentifier();
     }
+    
+    _comment = null;
+    
 
     _peekToken = parseToken();
     if (_peekToken == '(' && ! _isNewExpr) {
@@ -4073,7 +4104,7 @@ public class QuercusParser {
 	  break;
 	}
 	else if (ch == '*') {
-	  skipMultilineComment();
+	  parseMultilineComment();
 	  break;
 	}
 	else
@@ -4320,22 +4351,47 @@ public class QuercusParser {
   }
 
   /**
-   * Skips a multiline comment.
+   * Parses a multiline comment.
    */
-  private void skipMultilineComment()
+  private void parseMultilineComment()
     throws IOException
   {
-    int ch;
-
-    while ((ch = readByte()) >= 0) {
-      if (ch != '*') {
-      }
-      else if ((ch = readByte()) == '/') {
-        return;
-      }
-      else {
-        _peek = ch;
-      }
+    int ch = readByte();
+    
+    if (ch == '*') {
+      _sb.setLength(0);
+      _sb.append('/');
+      _sb.append('*');
+      
+      do {
+        if (ch != '*') {
+          _sb.append((char) ch);
+        }
+        else if ((ch = readByte()) == '/') {
+          _sb.append('*');
+          _sb.append('/');
+          
+          _comment = _sb.toString();
+          
+          return;
+        }
+        else {
+          _sb.append('*');
+          _peek = ch;
+        }
+      } while ((ch = readByte()) >= 0);
+      
+      _comment = _sb.toString();
+    }
+    else if (ch >= 0) {
+      do {
+        if (ch != '*') {
+        }
+        else if ((ch = readByte()) == '/')
+          return;
+        else
+          _peek = ch;
+      } while ((ch = readByte()) >= 0);
     }
   }
 

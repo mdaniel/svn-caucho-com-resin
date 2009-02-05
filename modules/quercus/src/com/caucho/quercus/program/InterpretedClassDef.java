@@ -32,6 +32,7 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.ClassDef.FieldEntry;
 import com.caucho.quercus.Location;
 
 import java.util.HashMap;
@@ -60,8 +61,8 @@ public class InterpretedClassDef extends ClassDef
   protected final HashMap<StringValue,FieldEntry> _fieldMap
     = new LinkedHashMap<StringValue,FieldEntry>();
 
-  protected final HashMap<String,Expr> _staticFieldMap
-    = new LinkedHashMap<String,Expr>();
+  protected final HashMap<String,StaticFieldEntry> _staticFieldMap
+    = new LinkedHashMap<String,StaticFieldEntry>();
 
   protected final HashMap<String,Expr> _constMap
     = new HashMap<String,Expr>();
@@ -72,8 +73,9 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _setField;
   protected AbstractFunction _call;
   
-  // the order that this class was parsed
-  protected int _index;
+  protected int _parseIndex;
+  
+  protected String _comment;
   
   public InterpretedClassDef(Location location,
                              String name,
@@ -83,7 +85,7 @@ public class InterpretedClassDef extends ClassDef
   {
     super(location, name, parentName, ifaceList);
     
-    _index = index;
+    _parseIndex = index;
   }
 
   public InterpretedClassDef(String name,
@@ -170,7 +172,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public String getCompilationName()
   {
-    return getName() + "_" + _index;
+    return getName() + "_" + _parseIndex;
   }
 
   /**
@@ -207,13 +209,17 @@ public class InterpretedClassDef extends ClassDef
     for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
       FieldEntry fieldEntry = entry.getValue();
       
-      cl.addField(entry.getKey(), 0, fieldEntry.getValue(),
-		  fieldEntry.getVisibility());
+      cl.addField(entry.getKey(),
+                  0,
+                  fieldEntry.getValue(),
+                  fieldEntry.getVisibility());
     }
 
     String className = getName();
-    for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
-      cl.addStaticFieldExpr(className, entry.getKey(), entry.getValue());
+    for (Map.Entry<String,StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
+      StaticFieldEntry field = entry.getValue();
+      
+      cl.addStaticFieldExpr(className, entry.getKey(), field.getValue());
     }
 
     for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
@@ -259,9 +265,17 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addStaticValue(Value name, Expr value)
   {
-    _staticFieldMap.put(name.toString(), value);
+    _staticFieldMap.put(name.toString(), new StaticFieldEntry(value));
   }
 
+  /**
+   * Adds a static value.
+   */
+  public void addStaticValue(Value name, Expr value, String comment)
+  {
+    _staticFieldMap.put(name.toString(), new StaticFieldEntry(value, comment));
+  }
+  
   /**
    * Adds a const value.
    */
@@ -284,6 +298,18 @@ public class InterpretedClassDef extends ClassDef
   public void addValue(Value name, Expr value, FieldVisibility visibility)
   {
     _fieldMap.put(name.toStringValue(), new FieldEntry(value, visibility));
+  }
+  
+  /**
+   * Adds a value.
+   */
+  public void addValue(Value name,
+                       Expr value, 
+                       FieldVisibility visibility,
+                       String comment)
+  {
+    _fieldMap.put(name.toStringValue(),
+                  new FieldEntry(value, visibility, comment));
   }
 
   /**
@@ -312,10 +338,12 @@ public class InterpretedClassDef extends ClassDef
    */
   public void init(Env env)
   {
-    for (Map.Entry<String,Expr> var : _staticFieldMap.entrySet()) {
-      String name = getName() + "::" + var.getKey();
+    for (Map.Entry<String,StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
+      String name = getName() + "::" + entry.getKey();
 
-      env.setGlobalValue(name.intern(), var.getValue().eval(env).copy());
+      StaticFieldEntry field = entry.getValue();
+      
+      env.setGlobalValue(name.intern(), field.getValue().eval(env).copy());
     }
   }
 
@@ -345,10 +373,60 @@ public class InterpretedClassDef extends ClassDef
   {
     return _constructor;
   }
+  
+  /**
+   * Sets the documentation for this class.
+   */
+  public void setComment(String comment)
+  {
+    _comment = comment;
+  }
+  
+  /**
+   * Returns the documentation for this class.
+   */
+  @Override
+  public String getComment()
+  {
+    return _comment;
+  }
+  
+  /**
+   * Returns the comment for the specified field.
+   */
+  @Override
+  public String getFieldComment(StringValue name)
+  {
+    FieldEntry field = _fieldMap.get(name);
+    
+    if (field != null)
+      return field.getComment();
+    else
+      return null;
+  }
+  
+  /**
+   * Returns the comment for the specified field.
+   */
+  @Override
+  public String getStaticFieldComment(String name)
+  {
+    StaticFieldEntry field = _staticFieldMap.get(name);
+    
+    if (field != null)
+      return field.getComment();
+    else
+      return null;
+  }
 
   public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
   {
     return _fieldMap.entrySet();
+  }
+  
+  public Set<Map.Entry<String, StaticFieldEntry>> staticFieldSet()
+  {
+    return _staticFieldMap.entrySet();
   }
   
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
