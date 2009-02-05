@@ -57,9 +57,11 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.resource.spi.*;
 import javax.naming.NamingException;
+import javax.inject.manager.Bean;
 import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.List;
 
 /**
  * Configuration for an ejb entity bean.
@@ -323,10 +325,18 @@ public class EjbMessageBean extends EjbBean {
       if (value instanceof Destination)
 	setDestination((Destination) value);
       else {
+        String destinationName = String.valueOf(value);
+
 	InjectManager webBeans = InjectManager.create();
 
-	Destination dest = null;
-	//= webBeans.getObject(Destination.class, String.valueOf(value));
+        Destination dest = null;
+
+        List<Bean> beans = webBeans.getBeansOfType(Destination.class);
+        
+        for (Bean bean : beans) {
+          if (destinationName.equals(bean.getName()))
+            dest = (Destination) bean.create(null);
+        }
 
 	setDestination(dest);
       }
