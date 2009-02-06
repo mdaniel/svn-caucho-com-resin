@@ -61,7 +61,7 @@ public class HttpInputOutput extends AbstractBinaryOutput
 
   private Env _env;
   private Path _path;
-  private ArrayValue _options;
+  private StreamContextResource _context;
   
   private LineReader _lineReader;
 
@@ -78,11 +78,10 @@ public class HttpInputOutput extends AbstractBinaryOutput
   public HttpInputOutput(Env env, Path path, StreamContextResource context)
     throws IOException
   {
-    this(env,
-         path,context.getOptions().get(env.createString(path.getScheme())));
+    init(env, path, context);
   }
   
-  public HttpInputOutput(Env env, Path path, Value options)
+  private void init(Env env, Path path, StreamContextResource context)
     throws IOException
   {
     _env = env;
@@ -93,6 +92,10 @@ public class HttpInputOutput extends AbstractBinaryOutput
     _path = path;
     
     _lineReader = new LineReader(env);
+    
+    if (context != null) {
+      Value options
+      = context.getOptions().get(env.createString(path.getScheme()));
 
     String method = options.get(env.createString("method")).toString();
     
@@ -106,16 +109,16 @@ public class HttpInputOutput extends AbstractBinaryOutput
     
     _httpStream = (HttpStreamWrapper) _is.getSource();
     
-    init(env, options);
-  }
-  
-  private void init(Env env, Value options)
-    throws IOException
-  {
     setOptions(env, options);
     
     if (_os != null && _bodyStart != null && _bodyStart.length > 0)
       _os.write(_bodyStart, 0, _bodyStart.length);
+    }
+    else {
+      _is = path.openRead();
+      
+      _httpStream = (HttpStreamWrapper) _is.getSource();
+    }
   }
 
   private void setOptions(Env env, Value options)
@@ -223,7 +226,7 @@ public class HttpInputOutput extends AbstractBinaryOutput
   public BinaryInput openCopy()
     throws IOException
   {
-    return new HttpInputOutput(_env, _path, _options);
+    return new HttpInputOutput(_env, _path, _context);
   }
 
   /**
