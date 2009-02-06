@@ -31,6 +31,7 @@ package com.caucho.jms.cfg;
 
 import javax.jms.*;
 
+import com.caucho.config.cfg.*;
 import com.caucho.config.types.*;
 
 /**

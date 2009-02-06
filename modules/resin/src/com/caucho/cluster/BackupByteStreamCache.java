@@ -29,9 +29,14 @@
 
 package com.caucho.cluster;
 
+import com.caucho.config.Configurable;
+import javax.context.ApplicationScoped;
+
 /**
  * Cache which stores a single copy on the triad.
  */
+@ApplicationScoped
+@Configurable  
 public class BackupByteStreamCache extends AbstractCache
 {
   public BackupByteStreamCache()

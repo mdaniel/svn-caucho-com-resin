@@ -83,7 +83,8 @@ public class FileQueueEntry
 			long leaseTimeout,
 			int priority,
 			long expiresTime,
-			MessageType type)
+			MessageType type,
+			MessageImpl msg)
   {
     if (msgId == null)
       throw new NullPointerException();
@@ -94,6 +95,9 @@ public class FileQueueEntry
     _priority = priority;
     _expiresTime = expiresTime;
     _type = type;
+
+    if (msg != null)
+      _msg = new SoftReference<MessageImpl>(msg);
   }
 
   public FileQueueEntry(long id,

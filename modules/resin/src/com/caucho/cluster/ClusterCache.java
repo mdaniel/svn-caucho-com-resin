@@ -29,6 +29,9 @@
 
 package com.caucho.cluster;
 
+import com.caucho.config.Configurable;
+import javax.context.ApplicationScoped;
+
 /**
  * Cache which stores consistent copies on the cluster segment.
  *
@@ -39,6 +42,9 @@ package com.caucho.cluster;
  * The cache configuration affects the lifetime, local caching timeouts
  * and consistency.
  */
+
+@ApplicationScoped
+@Configurable  
 public class ClusterCache extends AbstractCache
 {
   public ClusterCache()

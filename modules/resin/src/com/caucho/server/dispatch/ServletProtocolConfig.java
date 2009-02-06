@@ -33,7 +33,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.BeanConfig;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.remote.server.ProtocolServletFactory;
 import com.caucho.util.*;
 

@@ -29,188 +29,19 @@
 
 package com.caucho.jms.memory;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.logging.*;
-
-import javax.jms.*;
-
-import com.caucho.jms.connection.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
+import com.caucho.vfs.*;
 
 /**
- * Implements a memory queue.
+ * For Backward compat only.  Use com.caucho.jms.MemoryQueue
+ * 
+ * @deprecated
+ *
+ * @see com.caucho.jms.MemoryQueue
  */
-public class MemoryQueue extends AbstractQueue
+public class MemoryQueue extends MemoryQueueImpl
 {
-  private static final Logger log
-    = Logger.getLogger(MemoryQueue.class.getName());
-
-  private PriorityQueue<MessageImpl> _queueList
-    = new PriorityQueue<MessageImpl>(64, new JmsPriorityComparator());
-  
-  // messages waiting for an ack
-  private ArrayList<MessageImpl> _readList = new ArrayList<MessageImpl>();
-
-  private long _sequence;
-
-  //
-  // JMX configuration
-  //
-
-  /**
-   * Returns the configuration URL.
-   */
-  @Override
-  public String getUrl()
+  public MemoryQueue()
   {
-    return "memory:name=" + getName();
-  }
-
-  //
-  // JMX statistics
-  //
-
-  /**
-   * Returns the queue size
-   */
-  @Override
-  public int getQueueSize()
-  {
-    synchronized (_queueList) {
-      return _queueList.size();
-    }
-  }
-
-  /**
-   * Adds the message to the persistent store.  Called if there are no
-   * active listeners.
-   */
-  @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
-		   int priority,
-		   long expires)
-  {
-    synchronized (_queueList) {
-      msg.setSequence(_sequence++);
-      
-      _queueList.add(msg);
-    }
-
-    notifyMessageAvailable();
-  }
-
-  /**
-   * Returns true if a message is available.
-   */
-  @Override
-  public boolean hasMessage()
-  {
-    return _queueList.size() > 0;
-  }
-  
-  /**
-   * Polls the next message from the store.
-   */
-  @Override
-  public MessageImpl receive(boolean isAutoAck)
-  {
-    synchronized (_queueList) {
-      MessageImpl msg = _queueList.poll();
-
-      if (msg == null)
-	return null;
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " receive " + msg + (isAutoAck ? " (auto-ack)" : ""));
-      
-      if (isAutoAck) {
-	return msg;
-      }
-      else {
-	_readList.add(msg);
-	return msg;
-      }
-    }
-  }
-
-  @Override
-  public ArrayList<MessageImpl> getBrowserList()
-  {
-    synchronized (_queueList) {
-      return new ArrayList<MessageImpl>(_queueList);
-    }
-  }
-
-  /**
-   * Acknowledges the receipt of a message
-   */
-  @Override
-  public void acknowledge(String msgId)
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " acknowledge " + msgId);
-    
-    synchronized (_queueList) {
-      for (int i = _readList.size() - 1; i >= 0; i--) {
-        MessageImpl msg = _readList.get(i);
-
-        if (msg.getJMSMessageID().equals(msgId))
-          _readList.remove(i);
-      }
-    }
-  }
-
-  /**
-   * Rolls back the receipt of a message
-   */
-  @Override
-  public void rollback(String msgId)
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " rollback " + msgId);
-    
-    synchronized (_queueList) {
-      for (int i = _readList.size() - 1; i >= 0; i--) {
-        MessageImpl msg = _readList.get(i);
-
-        if (msg.getJMSMessageID().equals(msgId)) {
-          _readList.remove(i);
-          msg.setJMSRedelivered(true);
-          _queueList.add(msg);
-	  notifyMessageAvailable();
-        }
-      }
-    }
-  }
-
-  static class JmsPriorityComparator implements Comparator<MessageImpl> {
-    /**
-     * Compares the priority.
-     */
-    public int compare(MessageImpl msg1, MessageImpl msg2)
-    {
-      try {
-	int cmp = msg2.getJMSPriority() - msg1.getJMSPriority();
-
-	if (cmp != 0)
-	  return cmp;
-
-	long seqCmp = (msg1.getSequence() - msg2.getSequence());
-
-	if (seqCmp < 0)
-	  return -1;
-	else if (seqCmp > 0)
-	  return 1;
-	else
-	  return 0;
-      } catch (Exception e) {
-	throw new RuntimeException(e);
-      }
-    }
   }
 }
 

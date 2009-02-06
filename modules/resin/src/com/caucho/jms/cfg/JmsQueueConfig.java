@@ -30,8 +30,10 @@
 package com.caucho.jms.cfg;
 
 import javax.jms.*;
+import javax.annotation.*;
 
-import com.caucho.config.types.*;
+import com.caucho.config.cfg.*;
+import com.caucho.config.type.*;
 
 /**
  * jms-queue configuration

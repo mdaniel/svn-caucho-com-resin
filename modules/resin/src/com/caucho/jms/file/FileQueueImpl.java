@@ -81,6 +81,8 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 
   private byte []_hash;
 
+  private volatile boolean _isStartComplete;
+
   private final Object _queueLock = new Object();
 
   private FileQueueEntry []_head = new FileQueueEntry[10];
@@ -192,7 +194,8 @@ public class FileQueueImpl extends AbstractQueue implements Topic
       throw new RuntimeException(e);
     }
       
-    _store.receiveStart(_hash, this);
+    _isStartComplete = _store.receiveStart(_hash, this);
+    System.out.println("DINE: " + _isStartComplete);
   }
 
   /**
@@ -208,14 +211,9 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 		   int priority,
 		   long expires)
   {
-    synchronized (_queueLock) {
-      long id = _store.send(_hash, msg, priority, expires);
+    long id = _store.send(_hash, msg, priority, expires);
 
-      FileQueueEntry entry = addEntry(id, msg.getJMSMessageID(),
-				      -1, priority, expires, null);
-
-      entry.setMessage(msg);
-    }
+    addEntry(id, msg.getJMSMessageID(), -1, priority, expires, null, msg);
 
     notifyMessageAvailable();
   }
@@ -233,15 +231,10 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 			 int priority,
 			 long expires)
   {
-    synchronized (_queueLock) {
-      long id = _store.send(_hash, msg, priority, expires);
+    long id = _store.send(_hash, msg, priority, expires);
 
-      FileQueueEntry entry
-	= addEntry(id, msg.getJMSMessageID(), leaseTimeout,
-		   priority, expires, null);
-
-      entry.setMessage(msg);
-    }
+    addEntry(id, msg.getJMSMessageID(), leaseTimeout,
+	     priority, expires, null, msg);
   }
 
   /**
@@ -251,39 +244,83 @@ public class FileQueueImpl extends AbstractQueue implements Topic
   @Override
   public MessageImpl receive(boolean isAutoAck)
   {
+    FileQueueEntry entry = receiveImpl(isAutoAck);
+
+    if (entry != null) {
+      try {
+	MessageImpl msg = entry.getMessage();
+
+	if (msg == null) {
+	  msg = _store.readMessage(entry.getId(), entry.getType());
+	  entry.setMessage(msg);
+	}
+
+	if (log.isLoggable(Level.FINER))
+	  log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
+
+	if (isAutoAck || msg == null) {
+	  synchronized (_queueLock) {
+	    removeEntry(entry);
+	  }
+	
+	  _store.delete(entry.getId());
+	}
+
+	if (msg != null)
+	  return msg;
+      } catch (Exception e) {
+	e.printStackTrace();
+      }
+    }
+
+    // System.out.println("ENTRY: " + isEntryAvailable + " " + _isStartComplete);
+    if (! _isStartComplete) {
+      synchronized (this) {
+	if (! _isStartComplete)
+	  _isStartComplete = _store.receiveStart(_hash, this);
+      }
+
+      return receive(isAutoAck);
+    }
+
+    return null;
+  }
+
+  /**
+   * Polls the next message from the store.  If no message is available,
+   * wait for the timeout.
+   */
+  private FileQueueEntry receiveImpl(boolean isAutoAck)
+  {
+    boolean isEntryAvailable = false;
+    
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
 	for (FileQueueEntry entry = _head[i];
 	     entry != null;
 	     entry = entry._next) {
-	  if (! entry.isLease())
+	  isEntryAvailable = true;
+
+	  if (! entry.isLease()) {
 	    continue;
-	  
-	  if (! entry.isRead()) {
-	    entry.setRead(true);
-
-	    MessageImpl msg = entry.getMessage();
-
-	    if (msg == null) {
-	      msg = _store.readMessage(entry.getId(), entry.getType());
-	      entry.setMessage(msg);
-	    }
-
-	    if (log.isLoggable(Level.FINER))
-	      log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
-
-	    if (isAutoAck) {
-	      removeEntry(entry);
-	      _store.delete(entry.getId());
-	    }
-
-	    return msg;
 	  }
+
+	  if (entry.isRead()) {
+	    continue;
+	  }
+	  
+	  entry.setRead(true);
+	  
+	  if (isAutoAck) {
+	    removeEntry(entry);
+	  }
+
+	  return entry;
 	}
       }
-
-      return null;
     }
+
+    return null;
   }
 
   /**
@@ -320,6 +357,17 @@ public class FileQueueImpl extends AbstractQueue implements Topic
   @Override
   public void acknowledge(String msgId)
   {
+    FileQueueEntry entry = acknowledgeImpl(msgId);
+
+    if (entry != null)
+      _store.delete(entry.getId());
+  }
+
+  /**
+   * Rollsback the message from the store.
+   */
+  private FileQueueEntry acknowledgeImpl(String msgId)
+  {
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
 	for (FileQueueEntry entry = _head[i];
@@ -328,14 +376,16 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 	  if (msgId.equals(entry.getMsgId())) {
 	    if (entry.isRead()) {
 	      removeEntry(entry);
-	      _store.delete(entry.getId());
+	      return entry;
 	    }
 	      
-	    return;
+	    return null;
 	  }
 	}
       }
     }
+
+    return null;
   }
   
   /**
@@ -346,7 +396,8 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 			  long leaseTimeout,
 			  int priority,
 			  long expire,
-			  MessageType type)
+			  MessageType type,
+			  MessageImpl msg)
   {
     if (priority < 0)
       priority = 0;
@@ -354,7 +405,9 @@ public class FileQueueImpl extends AbstractQueue implements Topic
       priority = _head.length;
 
     FileQueueEntry entry
-      = new FileQueueEntry(id, msgId, leaseTimeout, priority, expire, type);
+      = new FileQueueEntry(id, msgId, leaseTimeout,
+			   priority, expire, type,
+			   msg);
 
     synchronized (_queueLock) {
       entry._prev = _tail[priority];
@@ -414,12 +467,12 @@ public class FileQueueImpl extends AbstractQueue implements Topic
     
     if (prev != null)
       prev._next = next;
-    else
+    else if (_head[priority] == entry)
       _head[priority] = next;
 
     if (next != null)
       next._prev = prev;
-    else
+    else if (_tail[priority] == entry)
       _tail[priority] = prev;
   }
 }

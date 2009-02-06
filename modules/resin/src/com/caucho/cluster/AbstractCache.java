@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Implements the distributed cache
  */
+
 abstract public class AbstractCache extends AbstractMap
   implements ObjectCache, ByteStreamCache, CacheStatistics
 {
@@ -64,8 +65,8 @@ abstract public class AbstractCache extends AbstractMap
   private static final Logger log
     = Logger.getLogger(AbstractCache.class.getName());
 
-  private static final EnvironmentLocal<Map<String, AbstractCache>> _cacheMap
-    = new EnvironmentLocal<Map<String, AbstractCache>>("com.caucho.cluster.cache");
+  private static final EnvironmentLocal<HashSet<String>> _localCacheNameSet
+    = new EnvironmentLocal<HashSet<String>>();
 
   private String _name = null;
 
@@ -348,20 +349,25 @@ abstract public class AbstractCache extends AbstractMap
         return;
       _isInit = true;
 
-      if ((_name == null) || (_name.length() == 0))
+      if (_name == null || _name.length() == 0)
         throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
+
+      HashSet<String> cacheNameSet = getLocalCacheNameSet();
 
       String contextId = Environment.getEnvironmentName();
 
       _guid = contextId + ":" + _name;
       _config.setGuid(_guid);
+      
       Server server = Server.getCurrent();
       _config.init();
 
-      Map<String, AbstractCache> cacheMap = getLocalCacheMap();
-
-      if (!isTemplate() && cacheMap.containsKey(_guid))
-        throw new ConfigException(L.l("The name: '{0}' is already in use by another Cache.", _name));
+      if (cacheNameSet.contains(_guid)) {
+        throw new ConfigException(L.l("'{0}' is an invalid Cache name because it's already used by another cache.",
+				      _name));
+      }
+      
+      cacheNameSet.add(_guid);
 
       if (server == null)
         throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
@@ -369,11 +375,9 @@ abstract public class AbstractCache extends AbstractMap
 
       if (_entryCache == null) {
         _entryCache = new LruCache<Object, CacheKeyEntry>(512);
-
+	
         _distributedCacheManager = server.getDistributedCacheManager();
         _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
-
-        cacheMap.put(_guid, this);
       }
     }
   }
@@ -392,7 +396,8 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
-   * Returns the object with the given key, checking the backing store if necessary.
+   * Returns the object with the given key, checking the backing
+   * store if necessary.
    */
   public Object get(Object key)
   {
@@ -447,8 +452,8 @@ abstract public class AbstractCache extends AbstractMap
    * @param idleTimeout the idle timeout for the item
    */
   public ExtCacheEntry put(Object key,
-    InputStream is,
-    long idleTimeout)
+			   InputStream is,
+			   long idleTimeout)
     throws IOException
   {
     return getKeyEntry(key).put(is, _config, idleTimeout);
@@ -464,8 +469,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-    long version,
-    Object value)
+			       long version,
+			       Object value)
   {
     put(key, value);
 
@@ -482,8 +487,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-    long version,
-    InputStream inputStream)
+			       long version,
+			       InputStream inputStream)
     throws IOException
   {
     put(key, inputStream);
@@ -562,7 +567,6 @@ abstract public class AbstractCache extends AbstractMap
    */
   public void load(Object key)
   {
-
     if (containsKey(key) || get(key) != null)
       return;
 
@@ -570,6 +574,7 @@ abstract public class AbstractCache extends AbstractMap
 
     if (loaderValue != null)
       put(key, loaderValue);
+    
     notifyLoad(key);
   }
 
@@ -619,7 +624,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public CacheStatistics getCacheStatistics()
   {
-    return (CacheStatistics) this;
+    return this;
   }
 
   /**
@@ -765,21 +770,6 @@ abstract public class AbstractCache extends AbstractMap
     return CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 
-  public static Cache getInstance(String name)
-  {
-    AbstractCache result = getLocalCacheMap().get(name);
-    if (result == null) {
-      result = new ClusterCache(name);
-      result.init();
-      getLocalCacheMap().put(name, result);
-      return result;
-    }
-    else
-      return result;
-
-
-  }
-
   /**
    * Places an item in the cache from the loader unless the item is in cache already.
    */
@@ -835,14 +825,17 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  private static Map<String, AbstractCache> getLocalCacheMap()
+  protected HashSet<String> getLocalCacheNameSet()
   {
-    Map<String, AbstractCache> result = _cacheMap.getLevel();
-    if (result == null) {
-      result = new HashMap<String, AbstractCache>();
-      _cacheMap.set(result);
+    HashSet<String> cacheNameSet = _localCacheNameSet.getLevel();
+    
+    if (cacheNameSet == null) {
+      cacheNameSet = new HashSet<String>();
+      
+      _localCacheNameSet.set(cacheNameSet);
     }
-    return result;
+    
+    return cacheNameSet;
   }
 
   @Override
@@ -894,6 +887,7 @@ abstract public class AbstractCache extends AbstractMap
     {
       if (!hasNext())
         throw new NoSuchElementException();
+      
       LruCache.Entry<K, V> entry = _iterator.next();
       CacheKeyEntry cacheKeyEntry = (CacheKeyEntry) entry.getValue();
 
@@ -919,7 +913,6 @@ abstract public class AbstractCache extends AbstractMap
   protected static class CacheValues
     extends CacheEntrySet
   {
-
     private LruCache _lruCache;
 
     public CacheValues(LruCache lruCache)
@@ -937,7 +930,6 @@ abstract public class AbstractCache extends AbstractMap
     public Iterator iterator()
     {
       return new CacheEntrySetIterator<Object, Object>(_lruCache) {
-
         @Override
         public Object next()
         {
@@ -953,13 +945,13 @@ abstract public class AbstractCache extends AbstractMap
   protected static class CacheKeys
     extends CacheEntrySet
   {
-
     private LruCache _lruCache;
     private Set _entries;
 
     public CacheKeys(LruCache cache)
     {
       super(cache);
+      
       _lruCache = cache;
     }
 

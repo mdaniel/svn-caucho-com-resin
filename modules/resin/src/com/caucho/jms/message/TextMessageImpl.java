@@ -124,16 +124,11 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
     if (_text == null)
       return null;
     
-    TempStream body = new TempStream();
-    body.openWrite();
-      
-    WriteStream ws = new WriteStream(body);
+    TempOutputStream os = new TempOutputStream();
 
-    writeBody(ws);
-    
-    ws.close();
+    writeBody(os);
 
-    return body.openRead();
+    return os.openRead();
   }
 
   /**

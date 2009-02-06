@@ -128,13 +128,15 @@ class IndexExpr extends RowIterateExpr {
 
     int length = _expr.evalToBuffer(context, buffer, 0, _column.getTypeCode());
 
-    if (length <= 0)
+    if (length <= 0) {
+      //System.out.println("EVAL: " + length);
       return 0;
+    }
 
     try {
       long index = _index.lookup(buffer, 0, length, context.getTransaction());
 
-      //System.out.println("UPDATE: " + index + " " + _expr.evalString(context));
+      // System.out.println("LOOKUP: " + index + " " + _expr.evalString(context));
 
       return index;
     } catch (IOException e) {

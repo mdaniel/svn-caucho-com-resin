@@ -360,7 +360,7 @@ public final class BTree {
 				       _store,
 				       _keyCompare.toString(keyBuffer, keyOffset, keyLength)));
 	}
-	
+
         setPointer(buffer, offset, value);
         //writeBlock(blockIndex, block);
         
@@ -481,8 +481,6 @@ public final class BTree {
       throw new IllegalStateException(L.l("illegal length '{0}' for block {1}",
 					  length, debugId(blockId)));
       
-    //System.out.println("INDEX SPLIT: " + debugId(blockId) + " " + length + " " + block + " " + buffer);
-
     Block leftBlock = null;
 
     try {
@@ -503,7 +501,8 @@ public final class BTree {
 
       int pivotSize = pivot * _tupleSize;
       int pivotEnd = HEADER_SIZE + pivotSize;
-
+      int blockEnd = HEADER_SIZE + length * _tupleSize;
+      
       System.arraycopy(buffer, HEADER_SIZE,
 		       leftBuffer, HEADER_SIZE,
 		       pivotSize);
@@ -516,7 +515,7 @@ public final class BTree {
 
       System.arraycopy(buffer, pivotEnd,
 		       buffer, HEADER_SIZE,
-		       length * _tupleSize - pivotEnd);
+		       blockEnd - pivotEnd);
 
       setLength(buffer, length - pivot);
 
@@ -563,7 +562,6 @@ public final class BTree {
   {
     long parentId = parentBlock.getBlockId();
     
-    //System.out.println("INDEX SPLIT ROOT: " + (parentId / BLOCK_SIZE));
     log.finer("btree splitting root " + (parentId / BLOCK_SIZE));
 
     Block leftBlock = null;
@@ -592,6 +590,9 @@ public final class BTree {
       int length = getLength(parentBuffer);
 
       int pivot = (length - 1) / 2;
+      
+      //System.out.println("INDEX SPLIT ROOT: " + (parentId / BLOCK_SIZE)
+      //                    + " PIVOT=" + pivot);
 
       if (length <= 2 || _n < length || pivot < 1 || length <= pivot)
 	throw new IllegalStateException(length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
@@ -684,7 +685,7 @@ public final class BTree {
     long blockId = block.getBlockId();
 
     boolean isLeaf = isLeaf(buffer);
-      
+
     if (isLeaf) {
       Lock blockLock = block.getLock();
       
@@ -757,8 +758,6 @@ public final class BTree {
     long blockId = block.getBlockId();
     byte []buffer = block.getBuffer();
     
-    //System.out.println("INDEX JOIN: " + debugId(blockId));
-
     Lock parentLock = parent.getLock();
     xa.lockWrite(parentLock);
     try {
@@ -790,7 +789,7 @@ public final class BTree {
 		leftBlock.setFlushDirtyOnCommit(false);
 		leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
-		//System.out.println("MOVE_FROM_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
+		// System.out.println("MOVE_FROM_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
 		moveFromLeft(parentBuffer, leftBuffer, buffer, blockId);
 
 		return false;
@@ -830,7 +829,7 @@ public final class BTree {
 		rightBlock.setFlushDirtyOnCommit(false);
 		rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
-		//System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
+		// System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
 		moveFromRight(parentBuffer, buffer, rightBuffer, blockId);
 
@@ -876,7 +875,7 @@ public final class BTree {
 		leftBlock.setFlushDirtyOnCommit(false);
 		leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
-		//System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
+		// System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
 	    
 		mergeLeft(parentBuffer, leftBuffer, buffer, blockId);
 
@@ -918,7 +917,7 @@ public final class BTree {
 		parent.setFlushDirtyOnCommit(false);
 		parent.setDirty(0, Store.BLOCK_SIZE);
 	  
-		//System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
+		// System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
 		mergeRight(parentBuffer, buffer, rightBuffer, blockId);
 
@@ -1538,8 +1537,9 @@ public final class BTree {
   {
     long blockId = _store.addressToBlockId(blockIndex * BLOCK_SIZE);
 
-    if (_store.isIndexBlock(blockId))
+    if (! _store.isIndexBlock(blockId)) {
       return null;
+    }
     
     Block block = _store.readBlock(blockId);
 
@@ -1607,6 +1607,7 @@ public final class BTree {
 
   public String toString()
   {
-    return "BTree[" + _store + "," + (_rootBlockId / BLOCK_SIZE) + "]";
+    return (getClass().getSimpleName()
+	    + "[" + _store + "," + (_rootBlockId / BLOCK_SIZE) + "]");
   }
 }

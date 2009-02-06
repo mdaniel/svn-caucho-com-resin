@@ -29,23 +29,23 @@
 
 package com.caucho.jms;
 
-import com.caucho.config.Configurable;
 import com.caucho.config.Service;
-import com.caucho.jms.file.FileQueueImpl;
+import com.caucho.config.Configurable;
+import com.caucho.jms.memory.MemoryTopicImpl;
 
 /**
- * A JMS queue backed by a file-based database.
+ * A JMS topic stored in memory.
  *
  * It is configured as:
  * <pre>
  * &lt;web-app xmlns="http://caucho.com/ns/resin"
- *             xmlns:jms="urn:java:com.caucho.jms">
+ *             xmlns:resin="urn:java:com.caucho.resin">
  *
- *   &lt;jms:FileQueue>
+ *   &lt;resin:MemoryTopic>
  *     &lt;resin:JndiName>jms/my-name&lt;/resin:JndiName>
  *
- *     &lt;jms:name>my-name&lt;/jms:name>
- *   &lt;/jms:FileQueue>
+ *     &lt;resin:Name>my-name&lt;/resin:Name>
+ *   &lt;/resin:MemoryTopic>
  *
  * &lt;/web-app>
  * </pre>
@@ -53,13 +53,19 @@ import com.caucho.jms.file.FileQueueImpl;
 
 @Service
 @Configurable  
-public class FileQueue extends FileQueueImpl
+public class MemoryTopic extends MemoryTopicImpl
 {
-  public FileQueue()
+  /**
+   * Standard Injection constructor
+   */
+  public MemoryTopic()
   {
   }
 
-  public FileQueue(String name)
+  /**
+   * Programmatic constructor, automatically initializes the topic.
+   */
+  public MemoryTopic(String name)
   {
     this();
     

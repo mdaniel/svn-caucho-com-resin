@@ -75,8 +75,8 @@ public class WbComponentConfig {
 
   private String _name;
   
-  private ArrayList<WbBinding> _bindingList
-    = new ArrayList<WbBinding>();
+  private ArrayList<Annotation> _bindingList
+    = new ArrayList<Annotation>();
 
   private Class _scope;
 
@@ -105,11 +105,7 @@ public class WbComponentConfig {
   {
     _name = name;
 
-    WbBinding binding = new WbBinding();
-    binding.setClass(Named.class);
-    binding.addValue("value", name);
-
-    _bindingList.add(binding);
+    _bindingList.add(Names.create(name));
   }
 
   /**
@@ -172,12 +168,12 @@ public class WbComponentConfig {
   /**
    * Adds a component binding.
    */
-  public void addBinding(WbBinding binding)
+  public void addBinding(Annotation binding)
   {
     _bindingList.add(binding);
   }
 
-  public ArrayList<WbBinding> getBindingList()
+  public ArrayList<Annotation> getBindingList()
   {
     return _bindingList;
   }
@@ -361,9 +357,8 @@ public class WbComponentConfig {
     if (getMBeanName() != null)
       comp.setMBeanName(getMBeanName());
 
-    for (WbBinding binding : _bindingList) {
-      if (binding.getAnnotation() != null)
-	comp.addBinding(binding.getAnnotation());
+    for (Annotation binding : _bindingList) {
+      comp.addBinding(binding);
     }
 
     if (_deploymentType != null)

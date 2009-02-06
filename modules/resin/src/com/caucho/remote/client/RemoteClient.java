@@ -37,6 +37,7 @@ import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.logging.Logger;
@@ -90,8 +91,8 @@ public class RemoteClient extends BeanConfig
       addOptionalStringProperty("name", getName());
     }
 
-    for (WbBinding binding : getBindingList())
-      comp.addBinding(binding.getAnnotation());
+    for (Annotation binding : getBindingList())
+      comp.addBinding(binding);
 
     if (getDeploymentType() != null)
       comp.setDeploymentType(getDeploymentType());

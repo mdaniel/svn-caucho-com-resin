@@ -27,10 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.config.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
+import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
@@ -216,6 +217,9 @@ public class BeanConfig extends WbComponentConfig {
     if (_customBean != null) {
       _customBean.initComponent();
       _comp = _customBean.getComponent();
+
+      if (getName() != null)
+	_comp.addBinding(Names.create(getName()));
 
       _comp.addAnnotation(new AnnotationLiteral<Service>() {});
       

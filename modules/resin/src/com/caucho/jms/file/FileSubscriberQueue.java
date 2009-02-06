@@ -41,13 +41,13 @@ import com.caucho.jms.connection.*;
 /**
  * Implements a file queue.
  */
-public class FileSubscriberQueue extends MemoryQueue
+public class FileSubscriberQueue extends MemoryQueueImpl
 {
-  private FileTopic _topic;
+  private FileTopicImpl _topic;
   private JmsSession _session;
   private boolean _isNoLocal;
   
-  FileSubscriberQueue(FileTopic topic, JmsSession session, boolean noLocal)
+  FileSubscriberQueue(FileTopicImpl topic, JmsSession session, boolean noLocal)
   {
     _topic = topic;
     _session = session;

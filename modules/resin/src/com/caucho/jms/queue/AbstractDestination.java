@@ -38,12 +38,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.jms.JmsRuntimeException;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
 import com.caucho.util.*;
+import com.caucho.config.Configurable;
 import com.caucho.config.inject.HandleAware;
 
 /**
@@ -59,7 +61,7 @@ abstract public class AbstractDestination
     = Logger.getLogger(AbstractDestination.class.getName());
 
   private static long _idRandom;
-  private static long _idCount;
+  private static final AtomicLong _idCount = new AtomicLong();
   
   private String _name = "default";
 
@@ -81,14 +83,16 @@ abstract public class AbstractDestination
 
   protected AbstractDestination()
   {
-    synchronized (AbstractDestination.class) {
-      if (_idRandom == 0 || Alarm.isTest()) {
-        _idRandom = RandomUtil.getRandomLong();
-        _idCount = Alarm.getCurrentTime() << 16;
-      }
+    if (_idRandom == 0 || Alarm.isTest()) {
+      _idCount.set(Alarm.getCurrentTime() << 16);
+      _idRandom = RandomUtil.getRandomLong();
     }
   }
 
+  /**
+   * Sets the name of the destination
+   */
+  @Configurable
   public void setName(String name)
   {
     _name = name;
@@ -218,11 +222,7 @@ abstract public class AbstractDestination
 
   protected void generateMessageID(StringBuilder cb)
   {
-    long id;
-    
-    synchronized (AbstractDestination.class) {
-      id = _idCount++;
-    }
+    long id = _idCount.incrementAndGet();
 
     Base64.encode(cb, _idRandom);
     Base64.encode(cb, id);

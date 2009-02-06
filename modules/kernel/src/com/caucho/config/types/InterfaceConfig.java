@@ -31,7 +31,7 @@ package com.caucho.config.types;
 
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.BeanConfig;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.naming.*;
 import com.caucho.config.cfg.*;

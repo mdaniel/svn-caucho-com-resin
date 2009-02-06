@@ -7,7 +7,7 @@
           class="com.caucho.hemp.broker.BamServiceConfig"/>
 
     <bean name="bean"
-          class="com.caucho.config.types.BeanConfig"/>
+          class="com.caucho.config.cfg.BeanConfig"/>
 
     <bean name="case-insensitive"
           class="com.caucho.vfs.CaseInsensitive"/>

@@ -1,4 +1,5 @@
 com.caucho.admin
 com.caucho.config
+com.caucho.jms
 com.caucho.resources
 com.caucho.security

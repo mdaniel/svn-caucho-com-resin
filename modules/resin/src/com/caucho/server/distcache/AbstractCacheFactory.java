@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.AbstractCache;
+import com.caucho.cluster.ClusterCache;
 
 import javax.cache.CacheFactory;
 import javax.cache.Cache;
@@ -52,13 +53,12 @@ public class AbstractCacheFactory
   {
     String cacheName = ((request != null) && request.containsKey(CACHE_NAME))
       ? (String) request.get(CACHE_NAME) : getName();
-    Cache result = getInstance(cacheName);
-    if (result == null) {
-      setName(cacheName);
-      this.init();
-      return this;
-    } else
-      return result;
+    
+    ClusterCache result = new ClusterCache();
+    result.setName(cacheName);
+    result.init();
+
+    return result;
   }
 
   public void init()

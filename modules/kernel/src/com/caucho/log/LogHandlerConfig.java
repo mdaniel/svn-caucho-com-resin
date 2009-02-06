@@ -30,6 +30,7 @@
 package com.caucho.log;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.*;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.CloseListener;

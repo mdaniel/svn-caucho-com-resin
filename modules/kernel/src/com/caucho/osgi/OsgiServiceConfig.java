@@ -35,7 +35,7 @@ import java.util.logging.*;
 import javax.annotation.*;
 import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.*;
+import com.caucho.config.cfg.BeanConfig;
 
 import com.caucho.util.*;
 import org.osgi.framework.*;

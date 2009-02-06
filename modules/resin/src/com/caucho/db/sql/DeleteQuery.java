@@ -68,8 +68,9 @@ class DeleteQuery extends Query {
     context.init(xa, rows, isReadOnly());
 
     try {
-      if (! start(rows, rows.length, context, xa))
+      if (! start(rows, rows.length, context, xa)) {
 	return;
+      }
 
       do {
 	rows[0].delete();

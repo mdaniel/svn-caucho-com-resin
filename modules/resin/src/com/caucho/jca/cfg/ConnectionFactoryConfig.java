@@ -36,6 +36,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.*;
 import com.caucho.jca.*;
 import com.caucho.jca.cfg.JavaMailConfig;

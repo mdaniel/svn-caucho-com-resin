@@ -29,6 +29,8 @@
 package com.caucho.db.table;
 
 import com.caucho.db.index.BTree;
+import com.caucho.db.index.LongKeyCompare;
+import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
@@ -81,6 +83,14 @@ class LongColumn extends Column {
   public int getLength()
   {
     return 8;
+  }
+
+  /**
+   * Returns the key compare for the column.
+   */
+  public KeyCompare getIndexKeyCompare()
+  {
+    return new LongKeyCompare();
   }
   
   /**

@@ -217,8 +217,8 @@ public class BeanType extends ConfigType
       Attribute attr = _nsAttributeMap.get(name);
 
       if (attr == null) {
-	// serer/2r10
-	attr = _attributeMap.get(name.getLocalName().toLowerCase());
+	// server/2r10 vs jms/2193
+	// attr = _attributeMap.get(name.getLocalName().toLowerCase());
 
         if (attr == null)
           attr = _attributeMap.get(name.getLocalName());
@@ -646,8 +646,8 @@ public class BeanType extends ConfigType
 	  attr = new SetterAttribute(method, type);
 
 	_attributeMap.put(propName, attr);
-	// server/2e28
-	_attributeMap.put(className, attr);
+	// server/2e28 vs jms/2193
+	// _attributeMap.put(className, attr);
 
 	if (propName.equals("value")) {
 	  _attributeMap.put("#text", attr);
@@ -657,7 +657,8 @@ public class BeanType extends ConfigType
 	    _addText = attr;
 	}
 
-	propName = toCamelName(name.substring(3));
+	propName = toCamelName(className);
+	
 	_attributeMap.put(propName, attr);
       }
       else if ((name.startsWith("create")

@@ -686,8 +686,9 @@ abstract public class Query {
 	return false;
       }
 
-      if (rowLength == 0)
+      if (rowLength == 0) {
 	return true;
+      }
 
       for (int i = rowLength - 1; i >= 0; i--) {
 	TableIterator row = rows[i];
@@ -701,6 +702,8 @@ abstract public class Query {
 	//if (! xa.isAutoCommit())
 	//  xa.lockRead(row.getTable().getLock());
       }
+
+      //System.out.println("IBR:");
 
       return (initBlockRow(rowLength - 1, rows, queryContext)
 	      || nextBlock(rowLength - 1, rows, rowLength, queryContext));

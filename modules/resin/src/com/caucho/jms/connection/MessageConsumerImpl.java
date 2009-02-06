@@ -307,6 +307,11 @@ public class MessageConsumerImpl
     try {
       msg = _queue.receive(false);
 
+      /*
+      if (msg == null)
+	System.out.println(_queue + " NOMESSAGE:");
+      */
+
       if (msg != null) {
         if (log.isLoggable(Level.FINE)) {
           log.fine(_queue + " deliver " + msg + " to listener " + listener);

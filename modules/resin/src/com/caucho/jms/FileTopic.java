@@ -31,21 +31,21 @@ package com.caucho.jms;
 
 import com.caucho.config.Configurable;
 import com.caucho.config.Service;
-import com.caucho.jms.file.FileQueueImpl;
+import com.caucho.jms.file.FileTopicImpl;
 
 /**
- * A JMS queue backed by a file-based database.
+ * A JMS topic backed by a file-based database.
  *
  * It is configured as:
  * <pre>
  * &lt;web-app xmlns="http://caucho.com/ns/resin"
  *             xmlns:jms="urn:java:com.caucho.jms">
  *
- *   &lt;jms:FileQueue>
+ *   &lt;jms:FileTopic>
  *     &lt;resin:JndiName>jms/my-name&lt;/resin:JndiName>
  *
  *     &lt;jms:name>my-name&lt;/jms:name>
- *   &lt;/jms:FileQueue>
+ *   &lt;/jms:FileTopic>
  *
  * &lt;/web-app>
  * </pre>
@@ -53,13 +53,13 @@ import com.caucho.jms.file.FileQueueImpl;
 
 @Service
 @Configurable  
-public class FileQueue extends FileQueueImpl
+public class FileTopic extends FileTopicImpl
 {
-  public FileQueue()
+  public FileTopic()
   {
   }
 
-  public FileQueue(String name)
+  public FileTopic(String name)
   {
     this();
     

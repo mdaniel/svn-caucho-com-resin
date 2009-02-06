@@ -29,96 +29,19 @@
 
 package com.caucho.jms.memory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.*;
-
-import javax.jms.*;
-
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.connection.*;
+import com.caucho.vfs.*;
 
 /**
- * Implements a memory topic.
+ * For Backward compat only.  Use com.caucho.jms.MemoryTopic
+ * 
+ * @deprecated
+ *
+ * @see com.caucho.jms.MemoryTopic
  */
-public class MemoryTopic extends AbstractTopic
+public class MemoryTopic extends MemoryTopicImpl
 {
-  private static final Logger log
-    = Logger.getLogger(MemoryTopic.class.getName());
-
-  private HashMap<String,MemoryQueue> _durableSubscriptionMap
-    = new HashMap<String,MemoryQueue>();
-    
-  private ArrayList<AbstractQueue> _subscriptionList
-    = new ArrayList<AbstractQueue>();
-
-  private int _id;
-
-  //
-  // JMX configuration
-  //
-
-  /**
-   * Returns the configuration URL.
-   */
-  @Override
-  public String getUrl()
+  public MemoryTopic()
   {
-    return "memory:name=" + getName();
-  }
-
-  @Override
-  public AbstractQueue createSubscriber(JmsSession session,
-                                        String name,
-                                        boolean noLocal)
-  {
-    MemoryQueue queue;
-
-    if (name != null) {
-      queue = _durableSubscriptionMap.get(name);
-
-      if (queue == null) {
-	queue = new MemorySubscriberQueue(session, noLocal);
-	queue.setName(getName() + ":sub-" + name);
-
-	_subscriptionList.add(queue);
-	_durableSubscriptionMap.put(name, queue);
-      }
-    }
-    else {
-      queue = new MemorySubscriberQueue(session, noLocal);
-      queue.setName(getName() + ":sub-" + _id++);
-
-      _subscriptionList.add(queue);
-    }
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " create-subscriber(" + queue + ")");
-
-    return queue;
-  }
-
-  @Override
-  public void closeSubscriber(AbstractQueue queue)
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " close-subscriber(" + queue + ")");
-    
-    if (! _durableSubscriptionMap.values().contains(queue))
-      _subscriptionList.remove(queue);
-  }
-
-  @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
-		   int priority,
-		   long timeout)
-    throws JMSException
-  {
-    for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, priority, timeout);
-    }
   }
 }
 

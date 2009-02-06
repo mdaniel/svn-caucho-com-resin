@@ -1124,6 +1124,18 @@ public class SelectResult {
     int length = _length;
     int rOffset = length % SIZE;
     int blockId = length / SIZE;
+
+    while (_buffers.length <= blockId) {
+      byte [][]newBuffers = new byte[2 * _buffers.length][];
+      
+      System.arraycopy(_buffers, 0, newBuffers, 0, _buffers.length);
+      _buffers = newBuffers;
+      
+      TempBuffer []newTempBuffers = new TempBuffer[newBuffers.length];
+      System.arraycopy(_tempBuffers, 0, newTempBuffers, 0,
+		       _tempBuffers.length);
+      _tempBuffers = newTempBuffers;
+    }
     
     byte []buffer = _buffers[blockId];
     

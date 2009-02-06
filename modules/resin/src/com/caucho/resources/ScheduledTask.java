@@ -32,6 +32,7 @@ package com.caucho.resources;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.*;
 import com.caucho.loader.*;
 import com.caucho.util.*;

@@ -69,6 +69,8 @@ public class FileQueueStore
 
   private static final MessageType []MESSAGE_TYPE = MessageType.values();
 
+  private static final int START_LIMIT = 8192;
+
   private FreeList<StoreConnection> _freeList
     = new FreeList<StoreConnection>(32);
 
@@ -207,7 +209,7 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  void receiveStart(byte []queueHash, FileQueueImpl fileQueue)
+  boolean receiveStart(byte []queueHash, FileQueueImpl fileQueue)
   {
     StoreConnection conn = null;
     
@@ -219,19 +221,24 @@ public class FileQueueStore
       receiveStartStmt.setBytes(1, queueHash);
 
       ResultSet rs = receiveStartStmt.executeQuery();
+      int count = 0;
 
       while (rs.next()) {
+	count++;
 	long id = rs.getLong(1);
 	String msgId = rs.getString(2);
 	int priority = rs.getInt(3);
 	long expire = rs.getLong(4);
 	MessageType type = MESSAGE_TYPE[rs.getInt(5)];
 	  
-	FileQueueEntry entry
-	  = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
+	fileQueue.addEntry(id, msgId, -1, priority, expire, type, null);
       }
 
       rs.close();
+
+      System.out.println("COUNT: " + count + " " + receiveStartStmt);
+
+      return count < START_LIMIT;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -247,7 +254,7 @@ public class FileQueueStore
   public MessageImpl readMessage(long id, MessageType type)
   {
     StoreConnection conn = null;
-    
+
     try {
       conn = getConnection();
 
@@ -436,14 +443,14 @@ public class FileQueueStore
     }
 
     sql = ("create table " + _queueTable + " ("
-	   + "  id bigint auto_increment,"
+	   + "  id bigint primary key auto_increment,"
 	   + "  name varchar(128)"
 	   + ")");
 
     stmt.executeUpdate(sql);
 
     sql = ("create table " + _messageTable + " ("
-	   + "  id bigint auto_increment,"
+	   + "  id bigint primary key auto_increment,"
 	   + "  queue_id binary(32),"
 	   + "  priority integer,"
 	   + "  expire datetime,"
@@ -563,7 +570,8 @@ public class FileQueueStore
       if (_receiveStartStmt == null) {
 	String sql = ("select id,msg_id,priority,expire,type"
 		      + " from " + _messageTable
-		      + " WHERE queue_id=? AND is_valid=1 ORDER BY id");
+		      + " WHERE queue_id=? AND is_valid=1 ORDER BY id"
+		      + " LIMIT " + START_LIMIT);
     
 	_receiveStartStmt = _conn.prepareStatement(sql);
       }

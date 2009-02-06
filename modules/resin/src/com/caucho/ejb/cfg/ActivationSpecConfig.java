@@ -31,7 +31,7 @@ package com.caucho.ejb.cfg;
 
 import javax.resource.spi.*;
 
-import com.caucho.config.types.BeanConfig;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.util.L10N;
 

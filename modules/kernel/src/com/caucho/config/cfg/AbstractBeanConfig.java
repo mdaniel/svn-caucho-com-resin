@@ -56,7 +56,7 @@ import javax.inject.DeploymentType;
 import javax.naming.*;
 
 /**
- * Convenience classes for the bean config
+ * Backwards compatibility class for 3.1-style &lt;jms-queue>, etc.
  */
 abstract public class AbstractBeanConfig {
   private static final L10N L = new L10N(AbstractBeanConfig.class);
@@ -71,8 +71,8 @@ abstract public class AbstractBeanConfig {
 
   private Class<? extends Annotation> _deploymentType;
   
-  private ArrayList<WbBinding> _bindingList
-    = new ArrayList<WbBinding>();
+  private ArrayList<Annotation> _bindingList
+    = new ArrayList<Annotation>();
 
   private Class _scope;
   
@@ -108,11 +108,7 @@ abstract public class AbstractBeanConfig {
   {
     _name = name;
 
-    WbBinding binding = new WbBinding();
-    binding.setClass(Named.class);
-    binding.addValue("value", name);
-
-    _bindingList.add(binding);
+    _bindingList.add(Names.create(name));
   }
 
   /**
@@ -178,7 +174,7 @@ abstract public class AbstractBeanConfig {
   /**
    * Adds a component binding.
    */
-  public void addBinding(WbBinding binding)
+  public void addBinding(Annotation binding)
   {
     _bindingList.add(binding);
   }
@@ -252,7 +248,6 @@ abstract public class AbstractBeanConfig {
   protected void register(Object value, Class api)
   {
     InjectManager webBeans = InjectManager.create();
-    WbWebBeans wbWebBeans = webBeans.getWbWebBeans();
     
     ComponentImpl comp;
 
@@ -273,8 +268,8 @@ abstract public class AbstractBeanConfig {
     if (_name != null)
       comp.setName(_name);
 
-    for (WbBinding binding : _bindingList)
-      comp.addBinding(binding.getAnnotation());
+    for (Annotation binding : _bindingList)
+      comp.addBinding(binding);
 
     if (_deploymentType != null)
       comp.setDeploymentType(_deploymentType);

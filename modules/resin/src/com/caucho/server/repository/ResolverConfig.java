@@ -31,7 +31,7 @@ package com.caucho.server.repository;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.BeanConfig;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;

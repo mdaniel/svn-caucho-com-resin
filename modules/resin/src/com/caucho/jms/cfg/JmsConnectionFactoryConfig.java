@@ -51,6 +51,11 @@ public class JmsConnectionFactoryConfig extends AbstractBeanConfig
   private static final L10N L = new L10N(JmsConnectionFactoryConfig.class);
   private static final Logger log
     = Logger.getLogger(JmsConnectionFactoryConfig.class.getName());
+  
+  public JmsConnectionFactoryConfig()
+  {
+    setScope("singleton");
+  }
 
   public void setClass(Class cl)
   {

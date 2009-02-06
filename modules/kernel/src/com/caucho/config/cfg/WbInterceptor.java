@@ -45,8 +45,8 @@ public class WbInterceptor {
   
   private Class _cl;
   
-  private ArrayList<WbBinding> _bindingList
-    = new ArrayList<WbBinding>();
+  private ArrayList<Annotation> _bindingList
+    = new ArrayList<Annotation>();
   
   private Method _invokeMethod;
 
@@ -60,7 +60,7 @@ public class WbInterceptor {
 
     for (Annotation ann : cl.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
-	_bindingList.add(new WbBinding(ann));
+	_bindingList.add(ann);
       }
     }
 
@@ -121,13 +121,16 @@ public class WbInterceptor {
    * Returns true if at least one of this component's bindings match
    * the injection binding.
    */
-  public boolean isMatch(WbBinding binding, ArrayList<Annotation> bindList)
+  public boolean isMatch(Annotation binding, ArrayList<Annotation> bindList)
   {
+    return false;
+    /*
     for (int i = 0; i < bindList.size(); i++) {
       if (binding.isMatch(bindList.get(i)))
 	return true;
     }
     
     return false;
+    */
   }
 }

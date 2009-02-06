@@ -203,7 +203,7 @@ public class SelectQuery extends Query {
 	for (int i = 0; i < _results.length; i++) {
 	  _results[i].evalToResult(context, result);
 	}
-      } while (nextTuple(rows, rowLength, context, xa) && --_limit > 0);
+      } while (nextTuple(rows, rowLength, context, xa) && --limit > 0);
     }
   }
 

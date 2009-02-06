@@ -29,120 +29,17 @@
 
 package com.caucho.jms.file;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.*;
-
-import javax.jms.*;
-
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.memory.MemoryQueue;
-import com.caucho.jms.connection.*;
 import com.caucho.vfs.*;
 
 /**
- * Implements a file topic.
+ * @deprecated
+ *
+ * @see com.caucho.jms.FileTopic
  */
-public class FileTopic extends AbstractTopic
+public class FileTopic extends FileTopicImpl
 {
-  private static final Logger log
-    = Logger.getLogger(FileTopic.class.getName());
-
-  private final FileQueueStore _store;
-
-  private HashMap<String,AbstractQueue> _durableSubscriptionMap
-    = new HashMap<String,AbstractQueue>();
-    
-  private ArrayList<AbstractQueue> _subscriptionList
-    = new ArrayList<AbstractQueue>();
-
-  private int _id;
-
   public FileTopic()
   {
-    _store = FileQueueStore.create();
-  }
-
-  //
-  // Configuration
-  //
-
-  /**
-   * Sets the path to the backing database
-   */
-  public void setPath(Path path)
-  {
-  }
-
-  //
-  // JMX configuration attributes
-  //
-
-  /**
-   * Returns the JMS configuration url.
-   */
-  public String getUrl()
-  {
-    return "file:name=" + getName();
-  }
-
-  public void init()
-  {
-  }
-
-  @Override
-  public AbstractQueue createSubscriber(JmsSession session,
-                                        String name,
-                                        boolean noLocal)
-  {
-    AbstractQueue queue;
-
-    if (name != null) {
-      queue = _durableSubscriptionMap.get(name);
-
-      if (queue == null) {
-	queue = new FileSubscriberQueue(this, session, noLocal);
-	queue.setName(getName() + ":sub-" + name);
-
-	_subscriptionList.add(queue);
-	_durableSubscriptionMap.put(name, queue);
-      }
-
-      return queue;
-    }
-    else {
-      queue = new FileSubscriberQueue(this, session, noLocal);
-      queue.setName(getName() + ":sub-" + _id++);
-
-      _subscriptionList.add(queue);
-    }
-
-    return queue;
-  }
-
-  @Override
-  public void closeSubscriber(AbstractQueue queue)
-  {
-    if (! _durableSubscriptionMap.values().contains(queue))
-      _subscriptionList.remove(queue);
-  }
-
-  @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
-		   int priority,
-		   long timeout)
-    throws JMSException
-  {
-    for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, priority, timeout);
-    }
-  }
-
-  public String toString()
-  {
-    return "FileTopic[" + getTopicName() + "]";
   }
 }
 
