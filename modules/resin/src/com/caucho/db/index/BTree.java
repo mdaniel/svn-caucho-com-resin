@@ -503,6 +503,7 @@ public final class BTree {
 
       int pivotSize = pivot * _tupleSize;
       int pivotEnd = HEADER_SIZE + pivotSize;
+      int blockEnd = HEADER_SIZE + length * _tupleSize;
 
       System.arraycopy(buffer, HEADER_SIZE,
 		       leftBuffer, HEADER_SIZE,
@@ -516,7 +517,7 @@ public final class BTree {
 
       System.arraycopy(buffer, pivotEnd,
 		       buffer, HEADER_SIZE,
-		       length * _tupleSize - pivotEnd);
+		       blockEnd - pivotEnd);
 
       setLength(buffer, length - pivot);
 

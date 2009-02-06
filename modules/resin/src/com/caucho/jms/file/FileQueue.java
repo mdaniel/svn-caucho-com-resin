@@ -78,6 +78,8 @@ public class FileQueue extends AbstractQueue implements Topic
 
   private final Object _queueLock = new Object();
 
+  private boolean _isStartComplete;
+
   private FileQueueEntry []_head = new FileQueueEntry[10];
   private FileQueueEntry []_tail = new FileQueueEntry[10];
 
@@ -157,7 +159,7 @@ public class FileQueue extends AbstractQueue implements Topic
 
     _store.init();
 
-    _store.receiveStart(this);
+    _isStartComplete = _store.receiveStart(this);
   }
 
   /**
@@ -174,9 +176,9 @@ public class FileQueue extends AbstractQueue implements Topic
   {
     int priority = 1;
     
-    synchronized (_queueLock) {
       long id = _store.send(msg, priority, expires);
 
+    synchronized (_queueLock) {
       FileQueueEntry entry = addEntry(id, msg.getJMSMessageID(),
 				      -1, priority, expires, null);
 
@@ -238,18 +240,26 @@ public class FileQueue extends AbstractQueue implements Topic
 	    if (log.isLoggable(Level.FINER))
 	      log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
 
-	    if (isAutoAck) {
+	    if (isAutoAck || msg == null) {
 	      removeEntry(entry);
 	      _store.delete(entry.getId());
 	    }
 
-	    return msg;
+	    if (msg != null)
+	      return msg;
 	  }
 	}
       }
-
-      return null;
     }
+
+    if (! _isStartComplete) {
+      synchronized (this) {
+	if (! _isStartComplete)
+	  _isStartComplete = _store.receiveStart(this);
+      }
+    }
+
+    return null;
   }
 
   /**

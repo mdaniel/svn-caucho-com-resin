@@ -211,7 +211,7 @@ public class CronType implements Trigger {
       }
 
       if (_daysOfWeek != null) {
-	int oldDayOfWeek = cal.getDayOfWeek();
+	int oldDayOfWeek = cal.getDayOfWeek() - 1;
 	int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
 
 	if (dayOfWeek > 0) {

@@ -12,6 +12,9 @@
 
 <s2 title="3.1.9 snapshot">
 <ul>
+<li>jms: btree split off-by-one issue (#3287, rep by tyson weihs)</li>
+<li>jms: file missing primary declaration (#3287, rep by tyson weihs)</li>
+<li>server: cron syntax not properly handling day of week (#3248, rep by mate)</li>
 <li>jsp: backport of JspCompileResource parallel compile (#2987, rep by stbu)</li>
 <li>memory: DispatchRequest._invocation needs to be cleared (rep by Mattias Jiderhamn)</li>
 </ul>

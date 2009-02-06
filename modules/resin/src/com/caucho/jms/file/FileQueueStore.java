@@ -62,6 +62,8 @@ public class FileQueueStore
 
   private static final MessageType []MESSAGE_TYPE = MessageType.values();
 
+  private static int START_LIMIT = 8192;
+
   private Path _path;
   private DataSource _db;
   private String _name = "default";
@@ -213,13 +215,15 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  void receiveStart(FileQueue fileQueue)
+  boolean receiveStart(FileQueue fileQueue)
   {
     synchronized (this) {
       try {
 	_receiveStartStmt.setLong(1, _queueId);
 
 	ResultSet rs = _receiveStartStmt.executeQuery();
+
+	int count = 0;
 
 	while (rs.next()) {
 	  long id = rs.getLong(1);
@@ -230,9 +234,13 @@ public class FileQueueStore
 	  
 	  FileQueueEntry entry
 	    = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
+
+	  count++;
 	}
 
 	rs.close();
+
+	return count < START_LIMIT;
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {
@@ -407,14 +415,14 @@ public class FileQueueStore
     }
 
     sql = ("create table " + _queueTable + " ("
-	   + "  id bigint auto_increment,"
+	   + "  id bigint primary key auto_increment,"
 	   + "  name varchar(128)"
 	   + ")");
 
     stmt.executeUpdate(sql);
 
     sql = ("create table " + _messageTable + " ("
-	   + "  id bigint auto_increment,"
+	   + "  id bigint primary key auto_increment,"
 	   + "  queue bigint,"
 	   + "  state integer,"
 	   + "  priority integer,"
@@ -488,7 +496,7 @@ public class FileQueueStore
     _readStmt = _conn.prepareStatement(sql);
 
     sql = ("select id,msg_id,priority,expire,type from " + _messageTable
-	   + " WHERE queue=? AND is_valid=1 ORDER BY id");
+	   + " WHERE queue=? AND is_valid=1 ORDER BY id LIMIT " + START_LIMIT);
     
     _receiveStartStmt = _conn.prepareStatement(sql);
     
