@@ -32,8 +32,8 @@ package com.caucho.ejb;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.WebApp;
@@ -152,8 +152,8 @@ public class EJBServlet extends GenericServlet {
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
-    AbstractHttpRequest req = (AbstractHttpRequest) request;
-    AbstractHttpResponse res = (AbstractHttpResponse) response;
+    CauchoRequest req = (CauchoRequest) request;
+    CauchoResponse res = (CauchoResponse) response;
 
     if (_urlPrefix == null) {
       synchronized (this) {
@@ -265,7 +265,7 @@ public class EJBServlet extends GenericServlet {
   /**
    * Initialize the server.
    */
-  private void serverInit(AbstractHttpRequest req)
+  private void serverInit(CauchoRequest req)
     throws ServletException
   {
     if (_urlPrefix != null)
