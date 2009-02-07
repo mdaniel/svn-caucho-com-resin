@@ -34,7 +34,6 @@ import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.*;
 import com.caucho.util.L10N;
@@ -44,13 +43,11 @@ import javax.annotation.PostConstruct;
 import javax.cache.CacheListener;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
-import javax.cache.Cache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -68,11 +65,12 @@ abstract public class AbstractCache extends AbstractMap
   private static final EnvironmentLocal<HashSet<String>> _localCacheNameSet
     = new EnvironmentLocal<HashSet<String>>();
 
+  protected static final String DUPLICATE_CACHE_NAME_MESSAGE
+    = "'{0}' is an invalid Cache name because it's already used by another cache.";
+
   private String _name = null;
 
   private String _guid;
-
-  private static int initCalls = 0;
 
   private Collection<CacheListener> _listeners
     = new ConcurrentLinkedQueue<CacheListener>();
@@ -84,8 +82,6 @@ abstract public class AbstractCache extends AbstractMap
   private boolean _isInit;
 
   private DistributedCacheManager _distributedCacheManager;
-
-  private HashManager _hashManager = new HashManager();
 
   private long _priorMisses = 0;
   private long _priorHits = 0;
@@ -350,7 +346,7 @@ abstract public class AbstractCache extends AbstractMap
       _isInit = true;
 
       if (_name == null || _name.length() == 0)
-        throw new ConfigException(L.l("'name' is a required attribute for any Cache"));
+        throw new ConfigException(L.l(DUPLICATE_CACHE_NAME_MESSAGE));
 
       HashSet<String> cacheNameSet = getLocalCacheNameSet();
 
@@ -372,13 +368,9 @@ abstract public class AbstractCache extends AbstractMap
       if (server == null)
         throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
           getClass().getSimpleName()));
-
-      if (_entryCache == null) {
         _entryCache = new LruCache<Object, CacheKeyEntry>(512);
-	
         _distributedCacheManager = server.getDistributedCacheManager();
         _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
-      }
     }
   }
 
@@ -842,6 +834,11 @@ abstract public class AbstractCache extends AbstractMap
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _guid + "]";
+  }
+
+  protected void duplicateCacheNameException(String cacheName)
+  {
+    throw new ConfigException(L.l(DUPLICATE_CACHE_NAME_MESSAGE, cacheName));
   }
 
   /**

@@ -36,24 +36,43 @@ import javax.cache.CacheFactory;
 import javax.cache.Cache;
 import java.util.Map;
 
-public class AbstractCacheFactory
+/**
+ * This implementation of the {@link CacheFactory} interface
+ * provides the means to obtain new instances of caches.
+ */
+public class AbstractCacheTemplate
   extends AbstractCache
   implements CacheFactory
 {
-  public final String CACHE_NAME = "com.caucho.cluser.name";
+
+  // The key to be used when using a map to provide the chache name as its value.
+  //public static final String CACHE_NAME = "com.caucho.cluser.name";
 
   /**
    * Returns the requested cache.
    *
-   * @param request is optional parameter that contains the name of the
-   *        cache
+   * @param settings is optional parameter that contains the name of the
+   *        cache as the value of the key CACHE_NAME
    * @return
    */
-  public Cache createCache(Map request)
+  public Cache createCache(Map settings)
   {
-    String cacheName = ((request != null) && request.containsKey(CACHE_NAME))
-      ? (String) request.get(CACHE_NAME) : getName();
-    
+    String cacheName = ((settings != null) && settings.containsKey(CACHE_NAME))
+      ? (String) settings.get(CACHE_NAME) : getName();
+
+    return new ClusterCache(cacheName);
+  }
+
+  /**
+   * Create a new cache directly by name.
+   * @param cacheName
+   * @return
+   */
+  public Cache createCache(String cacheName)
+  {
+    if (isOpen(cacheName))
+      duplicateCacheNameException(cacheName);
+
     ClusterCache result = new ClusterCache();
     result.setName(cacheName);
     result.init();
@@ -61,8 +80,13 @@ public class AbstractCacheFactory
     return result;
   }
 
-  public void init()
+  /**
+   * Tests to see if the cacheName is currently open
+   * in this environment.
+   */
+  protected boolean isOpen(String cacheName)
   {
-    setTemplate(true);
+    return getLocalCacheNameSet().contains(cacheName);
   }
+
 }

@@ -31,8 +31,26 @@ package javax.cache;
 
 import java.util.Map;
 
-public interface CacheFactory
-{
+/**
+ * Provides the capability of dynamically creating a cache.
+ *
+ * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
+ * for additional methods.
+ */
+public interface CacheFactory {
+
+  /**
+   *  Key supported in the map parameter for the createCache method.
+   */
+    public static final String CACHE_NAME = "com.caucho.cluser.name";
+
+  /**
+   * Provides a means for dynamically obtaining a cache.
+   *
+   * @param env If null, the configured and required cache name is used.
+   * @return  the requested cache.
+   * @throws CacheException if a cache with the name has already beeen created.
+   */
   public Cache createCache(Map env)
     throws CacheException;
 }

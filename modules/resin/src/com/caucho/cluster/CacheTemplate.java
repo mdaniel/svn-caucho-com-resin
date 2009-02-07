@@ -29,15 +29,49 @@
 
 package com.caucho.cluster;
 
-import com.caucho.server.distcache.AbstractCacheFactory;
+import com.caucho.server.distcache.AbstractCacheTemplate;
+import com.caucho.config.ConfigException;
 
-public class CacheFactory  extends AbstractCacheFactory
+import javax.cache.Cache;
+import javax.cache.CacheFactory;
+import java.util.Map;
+
+/**
+ * This implementation of the {@link CacheFactory} interface provide
+ * additional capabilities to manage caches.
+ *
+ * @note To use as a template, the properties should be set in
+ * a configuration file. 
+ */
+public class CacheTemplate
+  extends AbstractCacheTemplate
+  implements CacheFactory
 {
 
+  /**
+   * Returns a cache with the requested name.
+   *
+   * @param cacheName
+   * @return
+   * @throws ConfigException if a cache with that name is open.
+   */
   @Override
-  public void init()
+  public Cache createCache(String cacheName) throws ConfigException
   {
-
+    return super.createCache(cacheName);
   }
 
+  /**
+   * Returns a new cache.
+   *
+   * @param settings of the cache configuration. In the current
+   *                 implementation, only the name may be changed. Use
+   *                 {@link #CACHE_NAME} as the key.
+   * @return
+   */
+  @Override
+  public Cache createCache(Map settings)
+  {
+    return super.createCache(settings);
+  }
 }
