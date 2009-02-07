@@ -165,11 +165,6 @@ public class CallbackFunction extends Callback {
     return getFunction().call(env, args);
   }
 
-  public String getFunctionName()
-  {
-    return _funName;
-  }
-
   public String getCallbackName()
   {
     return _funName;

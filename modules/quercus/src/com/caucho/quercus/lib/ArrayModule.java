@@ -631,31 +631,40 @@ public class ArrayModule
    */
   public Value array_filter(Env env,
                             ArrayValue array,
-                            @Optional Callback callback)
+                            @Optional Value callbackName)
   {
     if (array == null)
       return NullValue.NULL;
 
     ArrayValue filteredArray = new ArrayValueImpl();
 
-    if (callback != null) {
-
-      if (! callback.isValid()) {
-        env.warning("The second argument, '" + ((CallbackFunction) callback).getFunctionName() + "', should be a valid callback");
+    if (! callbackName.isDefault()) {
+      Callback callback = env.createCallback(callbackName);
+      
+      if (callback == null || ! callback.isValid()) {
+        env.warning(L.l("The second argument, '{0}', is not a valid callback",
+                        callbackName));
         return NullValue.NULL;
       }
 
       try {
-        Iterator<Value> iter = array.getKeyIterator(env);
+        Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
 
         while (iter.hasNext()) {
-          Value key = iter.next();
-          Value val = array.getRaw(key);
+          Map.Entry<Value,Value> entry = iter.next();
+          
+          Value key = entry.getKey();
+          Value value;
+          
+          if (entry instanceof ArrayValue.Entry)
+            value = ((ArrayValue.Entry) entry).getRawValue();
+          else
+            value = entry.getValue();
 
-          boolean isMatch = callback.call(env, array, key, val).toBoolean();
+          boolean isMatch = callback.call(env, array, key, value).toBoolean();
 
           if (isMatch) {
-            filteredArray.put(key, val);
+            filteredArray.put(key, value);
           }
         }
       }
@@ -667,7 +676,6 @@ public class ArrayModule
       }
     }
     else {
-
       for (Map.Entry<Value, Value> entry : array.entrySet()) {
         if (entry.getValue().toBoolean())
           filteredArray.put(entry.getKey(), entry.getValue());
@@ -1225,13 +1233,20 @@ public class ArrayModule
       return false;
 
     try {
-      Value []keyArray = array.getKeyArray(env);
+      Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
 
-      for (int i = 0; i < keyArray.length; i++) {
-        Value key = keyArray[i];
-        Value val = array.getRaw(key);
+      while (iter.hasNext()) {
+        Map.Entry<Value,Value> entry = iter.next();
         
-        callback.call(env, array, key, val, key, userData);
+        Value key = entry.getKey();
+        Value value;
+        
+        if (entry instanceof ArrayValue.Entry)
+          value = ((ArrayValue.Entry) entry).getRawValue();
+        else
+          value = entry.getValue();
+        
+        callback.call(env, array, key, value, key, userData);
       }
       
       return true;
@@ -1268,24 +1283,30 @@ public class ArrayModule
       return false;
 
     try {
-      Value []keyArray = array.getKeyArray(env);
+      Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
 
-      for (int i = 0; i < keyArray.length; i++) {
-        Value key = keyArray[i];
-        Value val = array.getRaw(key);
+      while (iter.hasNext()) {
+        Map.Entry<Value,Value> entry = iter.next();
+        
+        Value key = entry.getKey();
+        Value value;
+        
+        if (entry instanceof ArrayValue.Entry)
+          value = ((ArrayValue.Entry) entry).getRawValue();
+        else
+          value = entry.getValue();
 
-        if (val.isArray()) {
+        if (value.isArray()) {
           boolean result = array_walk_recursive(env,
-                                                (ArrayValue)val.toValue(),
+                                                (ArrayValue) value.toValue(),
                                                 callback,
                                                 extra);
 
           if (! result)
             return false;
         }
-        else {
-          callback.call(env, array, key, val, key, extra);
-        }
+        else
+          callback.call(env, array, key, value, key, extra);
       }
 
       return true;
@@ -2582,17 +2603,20 @@ public class ArrayModule
         Value value;
         
         if (entry instanceof ArrayValue.Entry) {
-          // php/173z
+          // php/173z, php/1747
           value = ((ArrayValue.Entry) entry).getRawValue();
         }
         else
           value = entry.getValue();
+        
+        if (! (value instanceof Var))
+          value = value.copy();
 
         // php/1745
         if (key.isNumberConvertible())
-          result.put(value.copy());
+          result.put(value);
         else
-          result.append(key, value.copy());
+          result.append(key, value);
       }
     }
 
@@ -2631,12 +2655,20 @@ public class ArrayModule
       Map.Entry<Value,Value> entry = iter.next();
       
       Value key = entry.getKey();
-      Value value = entry.getValue().toValue();
-
-      if (key.isNumberConvertible()) {
-        // php/1744
-        result.put(value.copy());
+      Value value;
+      
+      if (entry instanceof ArrayValue.Entry) {
+        // php/1744, php/1746
+        value = ((ArrayValue.Entry) entry).getRawValue();
       }
+      else
+        value = entry.getValue();
+      
+      if (! (value instanceof Var))
+        value = value.copy();
+
+      if (key.isNumberConvertible())
+        result.put(value);
       else {
         Value oldValue = result.get(key).toValue();
 
@@ -2662,10 +2694,8 @@ public class ArrayModule
             result.put(key, newArray);
           }
         }
-        else {
-          // php/1744
-          result.put(key, value.copy());
-        }
+        else
+          result.put(key, value);
       }
     }
   }

@@ -204,5 +204,10 @@ abstract public class Callback extends Value {
    *
    */
   abstract public boolean isInternal();
+  
+  public String toString()
+  {
+    return "Callback" + getCallbackName() + "]";
+  }
 }
 

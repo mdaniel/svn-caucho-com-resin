@@ -361,13 +361,9 @@ public class HttpConnection
   }
 
   public int getResponseCode()
+    throws IOException
   {
-    try {
-      return _conn.getResponseCode();
-    }
-    catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
+    return _conn.getResponseCode();
   }
 
   public void disconnect()
