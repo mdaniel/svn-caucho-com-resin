@@ -28,19 +28,23 @@
 
 package com.caucho.ejb.hessian;
 
-import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.*;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.ReadWritePair;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.util.logging.*;
 
 /**
  * Utility class to call methods easily.
  */
 public class MetaStub {
+  private static final L10N L = new L10N(MetaStub.class);
+  private static final Logger log = Logger.getLogger(MetaStub.class.getName());
   /**
    * Calls an arbitrary method at the given url.
    *
@@ -64,12 +68,17 @@ public class MetaStub {
   public static Object call(Path urlPath, String method, Object []args)
     throws Throwable
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer("MetaStub[] " + " calling " + method + " on "
+		+ urlPath);
+    }
+    
     ReadWritePair pair = urlPath.openReadWrite();
 
     ReadStream is = pair.getReadStream();
     WriteStream os = pair.getWriteStream();
     
-    HessianInput in = new HessianInput(is);
+    Hessian2Input in = new Hessian2Input(is);
     HessianWriter out = new HessianWriter(os);
 
     try {
@@ -85,6 +94,15 @@ public class MetaStub {
           msg.append((char) ch);
 
         throw new IOException("bad status: " + status + "\n" + msg);
+      }
+
+      int code = in.read();
+      int major = in.read();
+      int minor = in.read();
+
+      if (code != 'H' || major != 2 || minor != 0) {
+	throw new IOException(L.l("expected hessian 2.0 header at {0} {1}.{0}",
+				  (char) code, major, minor));
       }
 
       return in.readReply(null);

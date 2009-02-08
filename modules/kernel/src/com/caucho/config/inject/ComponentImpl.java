@@ -150,7 +150,8 @@ public class ComponentImpl<T> extends AbstractBean<T>
 
     generateScopeId();
 
-    _handle = new SingletonHandle(getTargetType(), getBindings());
+    if (isSingleton())
+      _handle = new SingletonHandle(getTargetType(), getBindings());
   }
 
   private void generateScopeId()

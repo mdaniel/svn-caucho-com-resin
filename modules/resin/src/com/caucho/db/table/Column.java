@@ -31,6 +31,7 @@ package com.caucho.db.table;
 
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
+import com.caucho.db.index.IndexCache;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
@@ -506,6 +507,21 @@ abstract public class Column {
 		long rowAddr, QueryContext context)
     throws SQLException
   {
+    BTree index = getIndex();
+
+    if (index == null)
+      return;
+
+    /*
+    IndexCache manager = IndexCache.create();
+
+    manager.insert(index,
+		   block, rowOffset + getColumnOffset(), getLength(),
+		   rowAddr,
+		   xa);
+    */
+    index.insert(block, rowOffset + getColumnOffset(), getLength(),
+		 rowAddr, xa, false);
   }
   
   /**
@@ -518,6 +534,21 @@ abstract public class Column {
   void deleteIndex(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
+    BTree index = getIndex();
+
+    if (index == null)
+      return;
+
+    /*
+    IndexCache manager = IndexCache.create();
+
+    manager.delete(index,
+		   block, rowOffset + getColumnOffset(), getLength(),
+		   xa);
+    */
+
+    index.remove(block, rowOffset + getColumnOffset(), getLength(),
+		 xa);
   }
   
   /**

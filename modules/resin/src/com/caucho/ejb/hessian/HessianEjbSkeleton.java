@@ -28,14 +28,14 @@
 
 package com.caucho.ejb.hessian;
 
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.*;
 import com.caucho.hessian.server.HessianSkeleton;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
-import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.util.*;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
@@ -47,6 +47,7 @@ import java.util.logging.Logger;
  * to execute the request.
  */
 public class HessianEjbSkeleton extends Skeleton {
+  private static final L10N L = new L10N(HessianEjbSkeleton.class);
   protected static Logger log
     = Logger.getLogger(HessianEjbSkeleton.class.getName());
 
@@ -69,12 +70,34 @@ public class HessianEjbSkeleton extends Skeleton {
   public void _service(InputStream is, OutputStream os)
     throws Exception
   {
-    HessianInput in = new HessianReader(is);
-    HessianOutput out = new HessianWriter(os);
+    Hessian2Output out = new HessianWriter(os);
 
-    in.setRemoteResolver(_resolver);
-    
     String oldProtocol = EjbProtocolManager.setThreadProtocol("hessian");
+    
+    int code = is.read();
+
+    int major = is.read();
+    int minor = is.read();
+
+    AbstractHessianInput in;
+    
+    if (code == 'c' && major == 2 && minor == 0) {
+      in = new HessianInput(is);
+    }
+    else if (code == 'H' && major == 2 && minor == 0) {
+      in = new Hessian2Input(is);
+      
+      code = in.readCall();
+    }
+    else {
+      throw new IOException(L.l("Unexpected Hessian call {0} {1}.{2}",
+				(code > 0x20 && code < 0x7f
+				 ? String.valueOf((char) code)
+				 : Integer.toHexString(code)),
+				major, minor));
+    }
+    
+    in.setRemoteResolver(_resolver);
 
     try {
       _skel.invoke(_object, in, out);

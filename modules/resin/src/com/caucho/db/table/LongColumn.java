@@ -279,6 +279,7 @@ class LongColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
+  /*
   void setIndex(Transaction xa,
 		byte []block, int rowOffset,
 		long rowAddr, QueryContext context)
@@ -291,6 +292,7 @@ class LongColumn extends Column {
 
     index.insert(block, rowOffset + _columnOffset, 8, rowAddr, xa, false);
   }
+  */
 
   /**
    * Sets based on an iterator.
@@ -310,6 +312,7 @@ class LongColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  /*
   @Override
   void deleteIndex(Transaction xa, byte []block, int rowOffset)
     throws SQLException
@@ -319,4 +322,5 @@ class LongColumn extends Column {
     if (index != null)
       index.remove(block, rowOffset + _columnOffset, 8, xa);
   }
+  */
 }

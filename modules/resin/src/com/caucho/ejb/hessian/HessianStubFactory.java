@@ -30,7 +30,7 @@ package com.caucho.ejb.hessian;
 
 import com.caucho.java.WorkDir;
 import com.caucho.hessian.io.AbstractHessianInput;
-import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.hessian.io.HessianSerializerInput;
 import com.caucho.server.util.CauchoSystem;
@@ -123,7 +123,7 @@ public class HessianStubFactory implements HessianRemoteResolver {
     return in;
   }
 
-  public HessianOutput getHessianOutput(OutputStream os)
+  public Hessian2Output getHessianOutput(OutputStream os)
   {
     return new HessianWriter(os);
   }

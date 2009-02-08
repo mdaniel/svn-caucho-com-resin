@@ -163,6 +163,9 @@ public class EJBServlet extends GenericServlet {
     }
 
     if (! req.getMethod().equals("POST")) {
+      if (log.isLoggable(Level.FINE))
+	log.log(Level.FINE, this + " unexpected method " + req.getMethod());
+      
       String protocol = _protocolContainer.getName();
       res.setStatus(500, protocol + " Protocol Error");
       PrintWriter out = res.getWriter();
@@ -225,8 +228,10 @@ public class EJBServlet extends GenericServlet {
 
       skeleton._service(req.getInputStream(), res.getOutputStream());
     } catch (ServletException e) {
+      e.printStackTrace();
       throw e;
     } catch (Throwable e) {
+      e.printStackTrace();
       log.log(Level.WARNING, e.toString(), e);
       
       throw new ServletException(e);

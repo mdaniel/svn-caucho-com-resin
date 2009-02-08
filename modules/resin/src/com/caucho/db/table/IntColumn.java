@@ -262,26 +262,6 @@ class IntColumn extends Column {
 	    block1[startOffset1 + 2] == block2[startOffset2 + 2] &&
 	    block1[startOffset1 + 3] == block2[startOffset2 + 3]);
   }
-  
-  /**
-   * Sets any index for the column.
-   *
-   * @param block the block's buffer
-   * @param rowOffset the offset of the row in the block
-   * @param rowAddr the address of the row
-   */
-  void setIndex(Transaction xa,
-		byte []block, int rowOffset,
-		long rowAddr, QueryContext context)
-    throws SQLException
-  {
-    BTree index = getIndex();
-
-    if (index == null)
-      return;
-
-    index.insert(block, rowOffset + _columnOffset, 4, rowAddr, xa, false);
-  }
 
   /**
    * Sets based on an iterator.

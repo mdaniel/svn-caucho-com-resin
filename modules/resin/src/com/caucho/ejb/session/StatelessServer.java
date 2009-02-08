@@ -233,7 +233,7 @@ public class StatelessServer extends SessionServer {
     ComponentImpl comp = getComponent(api);
 
     // XXX: remote handle differently
-    if (comp != null)
+    if (comp != null && comp.getHandle() != null)
       return comp.getHandle();
     else
       return new ObjectSkeletonWrapper(obj.getHandle());

@@ -131,4 +131,9 @@ public class ProtocolContainer {
   {
     throw new UnsupportedOperationException();
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _urlPrefix + "," + _manager + "]";
+  }
 }

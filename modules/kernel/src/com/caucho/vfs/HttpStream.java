@@ -573,6 +573,9 @@ class HttpStream extends StreamImpl {
       return;
 
     _didGet = true;
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " connect " + _method + " post=" + _isPost);
 
     if (_method != null) {
       _ws.print(_method);
@@ -919,6 +922,12 @@ class HttpStream extends StreamImpl {
 	_s.close();
       _s = null;
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _s + "]";
   }
 
   static {

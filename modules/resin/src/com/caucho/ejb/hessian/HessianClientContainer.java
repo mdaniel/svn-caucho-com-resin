@@ -45,6 +45,7 @@ import com.caucho.vfs.Vfs;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import java.net.URL;
+import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -115,8 +116,16 @@ public class HessianClientContainer implements HessianRemoteResolver {
 
 	try {
 	  URL url = new URL(serverId);
+	  
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(client + " clearing keepalive connection " + url);
+	  
+	  HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	  conn.disconnect();
+	  /*
 	  InputStream is = url.openStream();
 	  is.close();
+	  */
 	} catch (IOException e) {
 	  log.log(Level.FINEST, e.toString(), e);
 	}

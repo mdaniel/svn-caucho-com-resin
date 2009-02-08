@@ -31,9 +31,10 @@ package com.caucho.ejb.hessian;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.HessianRemote;
 import com.caucho.services.name.NameServerRemote;
 
 import javax.ejb.EJBHome;
@@ -70,8 +71,8 @@ public class NameContextSkeleton extends Skeleton {
   public void _service(InputStream is, OutputStream os)
     throws Exception
   {
-    HessianInput in = new HessianReader(is);
-    HessianOutput out = new HessianWriter(os);
+    Hessian2Input in = new HessianReader(is);
+    Hessian2Output out = new HessianWriter(os);
 
     in.startCall();
 
@@ -97,7 +98,8 @@ public class NameContextSkeleton extends Skeleton {
     }
   }
 
-  private void executeLookup(HessianInput in, HessianOutput out)
+  private void executeLookup(Hessian2Input in,
+			     Hessian2Output out)
     throws Throwable
   {
     String name = in.readString();
@@ -147,7 +149,7 @@ public class NameContextSkeleton extends Skeleton {
       else
 	url = prefix + '/' + serverId;
 
-      out.writeRemote(NameServerRemote.class.getName(), url);
+      out.writeObject(new HessianRemote(NameServerRemote.class.getName(), url));
       
       out.completeReply();
     }
@@ -159,7 +161,7 @@ public class NameContextSkeleton extends Skeleton {
     }
   }
 
-  private void executeList(HessianInput in, HessianOutput out)
+  private void executeList(Hessian2Input in, Hessian2Output out)
     throws Throwable
   {
     in.completeCall();
@@ -202,7 +204,8 @@ public class NameContextSkeleton extends Skeleton {
    * @param out the hessian output stream
    */
   protected void executeUnknown(String method,
-                                HessianInput in, HessianOutput out)
+                                Hessian2Input in,
+				Hessian2Output out)
     throws Exception
   {
     if (method.equals("_hessian_getAttribute")) {

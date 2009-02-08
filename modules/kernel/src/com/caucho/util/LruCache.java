@@ -471,8 +471,11 @@ public final class LruCache<K,V> {
       else
 	return false;
     }
+
+    if (tail._value instanceof LruListener)
+      ((LruListener) tail._value).lruEvent();
     
-    remove(tail._key);
+    V value = remove(tail._key);
     
     return true;
   }
@@ -498,7 +501,10 @@ public final class LruCache<K,V> {
     if (tail == null)
       return false;
 
-    remove(tail._key);
+    if (tail._value instanceof LruListener)
+      ((LruListener) tail._value).lruEvent();
+
+    V value = remove(tail._key);
     
     return true;
   }

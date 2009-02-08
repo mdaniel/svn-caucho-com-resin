@@ -29,6 +29,7 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.index.BTree;
+import com.caucho.db.index.IndexCache;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
 import com.caucho.sql.SQLExceptionWrapper;
@@ -38,6 +39,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class IndexExpr extends RowIterateExpr {
+  private IndexCache _cache = IndexCache.create();
   private IdExpr _columnExpr;
   private Column _column;
   private BTree _index;
@@ -133,15 +135,20 @@ class IndexExpr extends RowIterateExpr {
       return 0;
     }
 
+    /*
+    long index = _cache.lookup(_index, buffer, 0, length,
+			       context.getTransaction());
+    */
+    long index;
     try {
-      long index = _index.lookup(buffer, 0, length, context.getTransaction());
-
-      // System.out.println("LOOKUP: " + index + " " + _expr.evalString(context));
-
-      return index;
+      index = _index.lookup(buffer, 0, length,
+			    context.getTransaction());
     } catch (IOException e) {
-      throw new SQLExceptionWrapper(e);
+      throw new SQLException(e);
     }
+
+    // System.out.println("LOOKUP: " + index + " " + _expr.evalString(context));
+    return index;
   }
 
   /**

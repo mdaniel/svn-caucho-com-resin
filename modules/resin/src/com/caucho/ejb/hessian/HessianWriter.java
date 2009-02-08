@@ -29,9 +29,10 @@
 
 package com.caucho.ejb.hessian;
 
-import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.HessianProtocolException;
 import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.hessian.io.HessianRemote;
 import com.caucho.hessian.io.HessianSerializerOutput;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -45,8 +46,12 @@ import javax.ejb.HomeHandle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.*;
 
 public class HessianWriter extends HessianSerializerOutput {
+  private static final Logger log
+    = Logger.getLogger(HessianWriter.class.getName());
+  
   private InputStream _is;
   private HessianRemoteResolver _resolver;
   
@@ -96,7 +101,7 @@ public class HessianWriter extends HessianSerializerOutput {
     _resolver = resolver;
   }
 
-  public HessianInput doCall()
+  public Hessian2Input doCall()
     throws Throwable
   {
     completeCall();
@@ -118,7 +123,7 @@ public class HessianWriter extends HessianSerializerOutput {
       throw new HessianProtocolException("exception: " + cb);
     }
 
-    HessianInput in = new HessianReader();
+    Hessian2Input in = new HessianReader();
     in.setSerializerFactory(_serializerFactory);
     in.setRemoteResolver(_resolver);
     in.init(_is);
@@ -147,9 +152,12 @@ public class HessianWriter extends HessianSerializerOutput {
   public void close()
   {
     try {
-      os.close();
-      _is.close();
+      super.close();
+
+      if (_is != null)
+	_is.close();
     } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
   
@@ -172,7 +180,10 @@ public class HessianWriter extends HessianSerializerOutput {
 
         Class api = ejbHome.getEJBMetaData().getRemoteInterfaceClass();
 
-        writeRemote(api.getName(), hessianHandle.getURL());
+	HessianRemote remote
+	  = new HessianRemote(api.getName(), hessianHandle.getURL());
+
+        writeObjectImpl(remote);
         return;
       }
     }
@@ -186,7 +197,11 @@ public class HessianWriter extends HessianSerializerOutput {
 
         Class api = ejbHome.getEJBMetaData().getHomeInterfaceClass();
 
-        writeRemote(api.getName(), hessianHandle.getURL("hessian"));
+	HessianRemote remote
+	  = new HessianRemote(api.getName(), hessianHandle.getURL("hessian"));
+
+        writeObjectImpl(remote);
+	
         return;
       }
     }

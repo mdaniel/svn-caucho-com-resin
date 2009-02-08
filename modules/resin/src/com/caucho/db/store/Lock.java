@@ -52,10 +52,12 @@ public final class Lock {
   private int _tryWriteCount;
   
   // count of threads with a read currently running
+  private int _tryReadCount;
+  // count of threads with a read currently running
   private int _readCount;
   // true if a thread has a write lock
   private boolean _isWrite;
-
+  
   private Thread _owner;
   
   public Lock(String id)
@@ -140,6 +142,7 @@ public final class Lock {
 		   + " write:" + _isWrite
 		   + " try-write:" + _tryWriteCount + ")");
       }
+
 
       notifyAll();
     }

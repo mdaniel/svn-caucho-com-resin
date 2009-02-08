@@ -824,8 +824,11 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     }
 
     ThreadPool.getThreadPool().schedule(this);
-    // the yield is only needed for the regressions
-    Thread.yield();
+
+    if (Alarm.isTest()) {
+      // the yield is only needed for the regressions
+      Thread.yield();
+    }
 
     return true;
   }

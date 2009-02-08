@@ -28,8 +28,8 @@
 
 package com.caucho.ejb.hessian;
 
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.ejb.protocol.Skeleton;
 
 import javax.jms.JMSException;
@@ -77,8 +77,8 @@ public class ExceptionSkeleton extends Skeleton {
 		       Throwable e)
     throws Exception
   {
-    HessianInput in = new HessianInput(rawIs);
-    HessianOutput out = new HessianWriter(rawOs);
+    Hessian2Input in = new Hessian2Input(rawIs);
+    Hessian2Output out = new HessianWriter(rawOs);
 
     try {
       in.startCall();
