@@ -55,6 +55,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.sql.Connection;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,8 +102,8 @@ public class Quercus
   private QuercusClass _stdClass;
   */
 
-  private HashMap<String, JavaClassDef> _javaClassWrappers
-    = new HashMap<String, JavaClassDef>();
+  private ConcurrentHashMap<String, JavaClassDef> _javaClassWrappers
+    = new ConcurrentHashMap<String, JavaClassDef>();
   
   private LruCache<String, String> _classNotFoundCache
     = new LruCache<String, String>(64);
@@ -150,8 +151,8 @@ public class Quercus
   //private LruCache<String, SessionArrayValue> _sessionMap
   //  = new LruCache<String, SessionArrayValue>(4096);
 
-  private HashMap<String, Object> _specialMap
-    = new HashMap<String, Object>();
+  private ConcurrentHashMap<String, Object> _specialMap
+    = new ConcurrentHashMap<String, Object>();
 
   private String _scriptEncoding;
 
@@ -165,8 +166,8 @@ public class Quercus
 
   private DataSource _database;
 
-  private HashMap<String,DataSource> _databaseMap
-    = new HashMap<String,DataSource>();
+  private ConcurrentHashMap<String,DataSource> _databaseMap
+    = new ConcurrentHashMap<String,DataSource>();
 
   private long _staticId;
 
@@ -286,10 +287,12 @@ public class Quercus
 
   public ModuleContext getLocalContext(ClassLoader loader)
   {
-    synchronized (this) {
-      if (_moduleContext == null) {
-	_moduleContext = createModuleContext(null, loader);
-	_moduleContext.init();
+    if (_moduleContext == null) {
+      synchronized (this) {
+	if (_moduleContext == null) {
+	  _moduleContext = createModuleContext(null, loader);
+	  _moduleContext.init();
+	}
       }
     }
 
@@ -489,29 +492,27 @@ public class Quercus
       return _database;
     else {
       try {
-	synchronized (_databaseMap) {
-	  String key = driver + ";" + url;
+	String key = driver + ";" + url;
 	
-	  DataSource database = _databaseMap.get(key);
+	DataSource database = _databaseMap.get(key);
 
-	  if (database != null)
-	    return database;
-	
-	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-	  Class cls = loader.loadClass(driver);
-        
-	  Object ds = cls.newInstance();
-        
-	  if (ds instanceof DataSource)
-	    database = (DataSource) ds;
-	  else
-	    database = new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
-
-	  _databaseMap.put(key, database);
-
+	if (database != null)
 	  return database;
-	}
+	
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+	Class cls = loader.loadClass(driver);
+        
+	Object ds = cls.newInstance();
+        
+	if (ds instanceof DataSource)
+	  database = (DataSource) ds;
+	else
+	  database = new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
+
+	_databaseMap.put(key, database);
+
+	return database;
       } catch (ClassNotFoundException e) {
         throw new QuercusModuleException(e);
       } catch (InstantiationException e) {
@@ -683,9 +684,7 @@ public class Quercus
     if (_classNotFoundCache.get(className) != null)
       return null;
     
-    synchronized (_javaClassWrappers) {
-      def = _javaClassWrappers.get(className);
-    }
+    def = _javaClassWrappers.get(className);
 
     if (def == null) {
       try {
@@ -694,9 +693,7 @@ public class Quercus
 	int id = getClassId(className);
 	_classDefMap[id] = def;
 
-	synchronized (_javaClassWrappers) {
-	  _javaClassWrappers.put(className, def);
-	}
+	_javaClassWrappers.put(className, def);
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {
@@ -719,21 +716,19 @@ public class Quercus
     if (_classNotFoundCache.get(className) != null)
       return null;
     
-    synchronized (_javaClassWrappers) {
-      def = _javaClassWrappers.get(className);
+    def = _javaClassWrappers.get(className);
 
-      if (def == null) {
-        try {
-          def = getModuleContext().getJavaClassDefinition(className);
+    if (def == null) {
+      try {
+	def = getModuleContext().getJavaClassDefinition(className);
 
-          _javaClassWrappers.put(className, def);
-        } catch (RuntimeException e) {
-          _classNotFoundCache.put(className, className);
+	_javaClassWrappers.put(className, def);
+      } catch (RuntimeException e) {
+	_classNotFoundCache.put(className, className);
           
-          throw e;
-        } catch (Exception e) {
-          throw new QuercusRuntimeException(e);
-        }
+	throw e;
+      } catch (Exception e) {
+	throw new QuercusRuntimeException(e);
       }
     }
 
@@ -747,14 +742,12 @@ public class Quercus
    */
   public ClassDef findJavaClassWrapper(String name)
   {
-    synchronized (_javaClassWrappers) {
-      ClassDef def = _javaClassWrappers.get(name);
+    ClassDef def = _javaClassWrappers.get(name);
 
-      if (def != null)
-	return def;
+    if (def != null)
+      return def;
 
-      return _lowerJavaClassWrappers.get(name.toLowerCase());
-    }
+    return _lowerJavaClassWrappers.get(name.toLowerCase());
   }
 
   /**
@@ -1123,19 +1116,25 @@ public class Quercus
     if (! isStrict())
       name = name.toLowerCase();
 
-    synchronized (_functionNameMap) {
-      int id = _functionNameMap.get(name);
+    int id = _functionNameMap.get(name);
 
-      if (id < 0) {
-        id = _functionNameMap.size();
-
-        _functionNameMap.put(name, id);
-
-	extendFunctionMap(name, id);
-      }
-
+    if (id >= 0)
       return id;
+
+    synchronized (_functionNameMap) {
+      id = _functionNameMap.get(name);
+	  
+      if (id >= 0)
+	return id;
+	
+      id = _functionNameMap.size();
+
+      extendFunctionMap(name, id);
+
+      _functionNameMap.put(name, id);
     }
+
+    return id;
   }
 
   protected void extendFunctionMap(String name, int id)
@@ -1182,9 +1181,7 @@ public class Quercus
   {
     int id = getFunctionId(name);
     
-    synchronized (_functionNameMap) {
-      _functionMap[id] = fun;
-    }
+    _functionMap[id] = fun;
 
     return id;
   }
@@ -1196,41 +1193,47 @@ public class Quercus
   {
     String name = className.toLowerCase();
 
+    int id = _classNameMap.get(name);
+
+    if (id >= 0)
+      return id;
+
     synchronized (_classNameMap) {
-      int id = _classNameMap.get(name);
+      id = _classNameMap.get(name);
 
-      if (id < 0) {
-	id = _classNameMap.size();
+      if (id >= 0)
+	return id;
+      
+      id = _classNameMap.size();
 
-	_classNameMap.put(name, id);
-
-	if (_classDefMap.length <= id) {
-	  String []classNames = new String[id + 256];
-	  System.arraycopy(_classNames, 0,
-			   classNames, 0,
-			   _classNames.length);
-	  _classNames = classNames;
+      if (_classDefMap.length <= id) {
+	String []classNames = new String[id + 256];
+	System.arraycopy(_classNames, 0,
+			 classNames, 0,
+			 _classNames.length);
+	_classNames = classNames;
 	  
-	  ClassDef []classDefMap = new ClassDef[_classNames.length];
-	  System.arraycopy(_classDefMap, 0,
-			   classDefMap, 0,
-			   _classDefMap.length);
-	  _classDefMap = classDefMap;
+	ClassDef []classDefMap = new ClassDef[_classNames.length];
+	System.arraycopy(_classDefMap, 0,
+			 classDefMap, 0,
+			 _classDefMap.length);
+	_classDefMap = classDefMap;
 	  
-	  QuercusClass []classCacheMap = new QuercusClass[_classNames.length];
-	  System.arraycopy(_classCacheMap, 0,
-			   classCacheMap, 0,
-			   _classCacheMap.length);
-	  _classCacheMap = classCacheMap;
-	}
-
-	_classNames[id] = className;
-
-	// _classMap[id] = new UndefinedClass(name);
+	QuercusClass []classCacheMap = new QuercusClass[_classNames.length];
+	System.arraycopy(_classCacheMap, 0,
+			 classCacheMap, 0,
+			 _classCacheMap.length);
+	_classCacheMap = classCacheMap;
       }
 
-      return id;
+      _classNames[id] = className;
+
+      // _classMap[id] = new UndefinedClass(name);
+
+      _classNameMap.put(name, id);
     }
+
+    return id;
   }
 
   public String getClassName(int id)
@@ -1243,9 +1246,7 @@ public class Quercus
    */
   public int findClassId(String name)
   {
-    synchronized (_classNameMap) {
-      return _classNameMap.get(name);
-    }
+    return _classNameMap.get(name);
   }
 
   /**
@@ -1301,45 +1302,56 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
-    synchronized (_constantNameMap) {
-      int id = _constantNameMap.get(name);
-      
-      if (id < 0) {
-	id = _constantNameMap.size();
+    int id = _constantNameMap.get(name);
 
-	_constantNameMap.put(name, id);
-
-	if (_classDefMap.length <= id) {
-	  Value []constantMap = new Value[id + 256];
-	  System.arraycopy(_constantMap, 0,
-			   constantMap, 0,
-			   _constantMap.length);
-	  _constantMap = constantMap;
-	  
-	  Value []constantNameList = new Value[id + 256];
-	  System.arraycopy(_constantNameList, 0,
-			   constantNameList, 0,
-			   _constantNameList.length);
-	  _constantNameList = constantNameList;
-	  
-	  int []constantLowerMap = new int[_constantMap.length];
-	  System.arraycopy(_constantLowerMap, 0,
-			   constantLowerMap, 0,
-			   _constantLowerMap.length);
-	  _constantLowerMap = constantLowerMap;
-	}
-
-	// XXX: i18n
-    _constantNameList[id] = new StringBuilderValue(name);
-    
-    // php/0501
-    int lowerId = getConstantId(name.toLowerCase());
-    
-    _constantLowerMap[id] = lowerId;
-      }
-      
+    if (id >= 0)
       return id;
+
+    synchronized (_constantNameMap) {
+      id = _constantNameMap.get(name);
+
+      if (id >= 0)
+	return id;
+      
+      id = _constantNameMap.size();
+
+      if (_classDefMap.length <= id) {
+	Value []constantMap = new Value[id + 256];
+	System.arraycopy(_constantMap, 0,
+			 constantMap, 0,
+			 _constantMap.length);
+	_constantMap = constantMap;
+	  
+	Value []constantNameList = new Value[id + 256];
+	System.arraycopy(_constantNameList, 0,
+			 constantNameList, 0,
+			 _constantNameList.length);
+	_constantNameList = constantNameList;
+	  
+	int []constantLowerMap = new int[_constantMap.length];
+	System.arraycopy(_constantLowerMap, 0,
+			 constantLowerMap, 0,
+			 _constantLowerMap.length);
+	_constantLowerMap = constantLowerMap;
+      }
+
+      // XXX: i18n
+      _constantNameList[id] = new StringBuilderValue(name);
+    
+      // php/0501
+      int lowerId;
+
+      if (! name.equals(name.toLowerCase()))
+	lowerId = getConstantId(name.toLowerCase());
+      else
+	lowerId = id;
+    
+      _constantLowerMap[id] = lowerId;
+
+      _constantNameMap.put(name, id);
     }
+      
+    return id;
   }
 
   /**
@@ -1583,10 +1595,19 @@ public class Quercus
   /**
    * Interns a string.
    */
+/*
   public StringValue intern(String name)
   {
+    StringValue value = _internMap.get(name);
+
+    if (value != null)
+      return value;
+    
     synchronized (_internMap) {
-      StringValue value = _internMap.get(name);
+      value = _internMap.get(name);
+
+      if (value != null)
+	return value;
 
       if (value == null) {
         name = name.intern();
@@ -1598,6 +1619,7 @@ public class Quercus
       return value;
     }
   }
+*/
 
   /**
    * Returns a named constant.
@@ -1649,9 +1671,7 @@ public class Quercus
    */
   public Object getSpecial(String key)
   {
-    synchronized (_specialMap) {
-      return _specialMap.get(key);
-    }
+    return _specialMap.get(key);
   }
 
   /**
@@ -1659,9 +1679,7 @@ public class Quercus
    */
   public void setSpecial(String key, Object value)
   {
-    synchronized (_specialMap) {
-      _specialMap.put(key, value);
-    }
+    _specialMap.put(key, value);
   }
 
   public static Value objectToValue(Object obj)

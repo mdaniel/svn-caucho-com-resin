@@ -1434,10 +1434,12 @@ abstract public class StringValue
   /**
    * Interns the string.
    */
+  /*
   public StringValue intern(Quercus quercus)
   {
     return quercus.intern(toString());
   }
+  */
 
   //
   // CharSequence

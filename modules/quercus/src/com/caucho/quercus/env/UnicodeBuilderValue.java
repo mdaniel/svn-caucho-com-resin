@@ -212,10 +212,12 @@ public class UnicodeBuilderValue extends StringBuilderValue
   /**
    * Interns the string.
    */
+  /*
   public StringValue intern(Quercus quercus)
   {
     return quercus.intern(toString());
   }
+  */
 
   /**
    * Converts to a string builder

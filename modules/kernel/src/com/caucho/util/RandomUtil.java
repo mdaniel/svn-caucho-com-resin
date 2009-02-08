@@ -37,32 +37,57 @@ import java.util.Random;
  */
 public class RandomUtil {
   private static long _seed = System.currentTimeMillis();
-  private static SecureRandom _secureRandom;
-  private static Random _random;
+
+  private static FreeList<Random> _freeRandomList
+    = new FreeList<Random>(64);
+  
+  private static Random _testRandom;
+  
   private static boolean _isTest;
 
   /**
    * Returns the next random long.
    */
-  public synchronized static long getRandomLong()
+  public static long getRandomLong()
   {
-    return getRandom().nextLong();
+    Random random = getRandom();
+
+    long value = random.nextLong();
+
+    if (! _isTest)
+      _freeRandomList.free(random);
+
+    return value;
   }
 
   /**
    * Returns the next random int.
    */
-  public synchronized static int nextInt(int n)
+  public static int nextInt(int n)
   {
-    return getRandom().nextInt(n);
+    Random random = getRandom();
+
+    int value = random.nextInt(n);
+
+    if (! _isTest)
+      _freeRandomList.free(random);
+
+    return value;
   }
 
   /**
    * Returns the next random double between 0 and 1
    */
-  public synchronized static double nextDouble()
+  public static double nextDouble()
   {
-    return getRandom().nextDouble();
+    Random random = getRandom();
+
+    double value = random.nextDouble();
+
+    if (! _isTest)
+      _freeRandomList.free(random);
+
+    return value;
   }
 
   /**
@@ -82,9 +107,12 @@ public class RandomUtil {
    */
   public static void addRandom(long seed)
   {
+    /*
     Random random = getRandom();
+    
     if (random instanceof SecureRandom)
       ((SecureRandom) random).setSeed(seed);
+    */
   }
 
   /**
@@ -92,12 +120,19 @@ public class RandomUtil {
    */
   private static Random getRandom()
   {
-    if (_random == null) {
-      _random = new SecureRandom();
-      _random.setSeed(_seed);
+    if (_isTest) {
+      if (_testRandom == null)
+	_testRandom = new Random(_seed);
+
+      return _testRandom;
     }
 
-    return _random;
+    Random random = _freeRandomList.allocate();
+
+    if (random == null)
+      random = new SecureRandom();
+
+    return random;
   }
 
   /**
@@ -107,20 +142,23 @@ public class RandomUtil {
   {
     _seed = seed;
     _isTest = true;
-    _random = new Random(seed);
+    _testRandom = new Random(seed);
   }
 
   /**
    * Sets the specific seed.  Only for testing.
    */
+  /*
   public static void setSecureRandom(SecureRandom random)
   {
     _secureRandom = random;
   }
+  */
 
   /**
    * Sets the specific seed.  Only for testing.
    */
+  /*
   public static SecureRandom getSecureRandom()
   {
     if (_secureRandom == null)
@@ -131,6 +169,7 @@ public class RandomUtil {
 
   public static Random getTestRandom()
   {
-    return _random;
+    return _testRandom;
   }
+  */
 }
