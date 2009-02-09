@@ -1010,7 +1010,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value imageftbbox(Env env,
 				  double size,
 				  double angle,
-				  String fontFile,
+				  StringValue fontFile,
 				  String text,
 				  @Optional ArrayValue extra)
   {
@@ -1070,7 +1070,7 @@ public class ImageModule extends AbstractQuercusModule {
 				  int x,
 				  int y,
 				  int color,
-				  String fontFile,
+				  StringValue fontFile,
 				  String text,
 				  @Optional ArrayValue extra)
   {
@@ -1580,7 +1580,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value imagettfbbox(Env env,
 				   double size,
 				   double angle,
-				   String fontFile,
+				   StringValue fontFile,
 				   String text)
   {
     return imageftbbox(env, size, angle, fontFile, text, null);
@@ -1596,7 +1596,7 @@ public class ImageModule extends AbstractQuercusModule {
 				   int x,
 				   int y,
 				   int color,
-				   String fontFile,
+				   StringValue fontFile,
 				   String text)
   {
     return imagefttext(env, image, size, angle, x, y,
@@ -1877,7 +1877,8 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   public static class QuercusImage extends ResourceValue {
-    private HashMap<String,Font> _fontMap = new HashMap<String,Font>();
+    private HashMap<StringValue,Font> _fontMap
+      = new HashMap<StringValue,Font>();
     private Font []_fontArray = new Font[6];
     
     private int _width;
@@ -1989,55 +1990,74 @@ public class ImageModule extends AbstractQuercusModule {
       return font;
     }
 
-    public Font getTrueTypeFont(Env env, String fontPath)
+    public Font getTrueTypeFont(Env env, StringValue fontPath)
       throws FontFormatException,
 	     IOException
     {
       Font font = _fontMap.get(fontPath);
 
       if (font != null)
-	return font;
+        return font;
 
-      Path pwd = env.getPwd();
-      Path path = pwd.lookup(fontPath);
+      Path path = env.lookupPwd(fontPath);
 
       if (path.canRead()) {
-	ReadStream is = path.openRead();
+        ReadStream is = path.openRead();
 
-	try {
-	  font = Font.createFont(Font.TRUETYPE_FONT, is);
-	} finally {
-	  is.close();
-	}
+        try {
+          font = Font.createFont(Font.TRUETYPE_FONT, is);
+        } finally {
+          is.close();
+        }
 
-	_fontMap.put(fontPath, font);
+        _fontMap.put(fontPath, font);
 
-	return font;
+        return font;
       }
 
-      if (fontPath.startsWith("/"))
-	return null;
+      if (fontPath.length() > 0 && fontPath.charAt(0) == '/')
+        return null;
 
       StringValue gdFontPathKey = env.createString("GDFONTPATH");
       
-      String gdFontPath = OptionsModule.getenv(env, gdFontPathKey).toString();
+      StringValue gdFontPath
+        = OptionsModule.getenv(env, gdFontPathKey).toStringValue();
 
-      for (String item : gdFontPath.split("[:;]")) {
-	path = pwd.lookup(item).lookup(fontPath);
+      int start = 0;
+      int len = gdFontPath.length();
+      
+      while (start < len) {
+        int i = gdFontPath.indexOf(':', start);
+        
+        if (i >= 0 && i + 1 < len && gdFontPath.charAt(i + 1) == ';') {
+          StringValue item = gdFontPath.substring(start, i);
+          
+          path = env.lookupPwd(item);
+          
+          start = i + 2;
+        }
+        else {
+          StringValue item = gdFontPath.substring(start);
+          
+          path = env.lookupPwd(item);
+          
+          start = len;
+        }
 
-	if (path.canRead()) {
-	  ReadStream is = path.openRead();
+        if (path.canRead()) {
+          ReadStream is = path.openRead();
 
-	  try {
-	    font = Font.createFont(Font.TRUETYPE_FONT, is);
-	  } finally {
-	    is.close();
-	  }
+          try {
+            font = Font.createFont(Font.TRUETYPE_FONT, is);
+          } finally {
+            is.close();
+          }
 
-	  _fontMap.put(fontPath, font);
+          _fontMap.put(fontPath, font);
 
-	  return font;
-	}
+          return font;
+        }
+        
       }
 
       return null;

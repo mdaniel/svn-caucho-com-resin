@@ -312,6 +312,8 @@ public class Env {
   private long _firstMicroTime;
   private long _firstNanoTime;
   
+  private CharBuffer _cb = new CharBuffer();
+  
   public Env(Quercus quercus,
              QuercusPage page,
              WriteStream out,
@@ -4740,7 +4742,7 @@ public class Env {
     Path path = _lookupCache.get(relPath);
 
     if (path == null) {
-      path = getPwd().lookup(relPath.toString());
+      path = getPwd().lookup(normalizePath(relPath));
       _lookupCache.put(relPath, path);
     }
 
@@ -4752,7 +4754,7 @@ public class Env {
    */
   public Path lookup(StringValue relPath)
   {
-    return lookupInclude(getSelfDirectory(), relPath.toString());
+    return lookupInclude(getSelfDirectory(), normalizePath(relPath));
   }
 
   /**
@@ -4810,7 +4812,7 @@ public class Env {
 				 Path pwd,
 				 Path scriptPwd)
   {
-    String include = includeValue.toString();
+    String include = normalizePath(includeValue);
     
     // php/0b0g
 
@@ -4879,14 +4881,14 @@ public class Env {
       while ((tail = includePath.indexOf(pathSeparator, head)) >= 0) {
         String subpath = includePath.substring(head, tail);
         
-        _includePathList.add(subpath);
+        _includePathList.add(normalizePath(subpath));
 
         head = tail + length;
       }
 
       String subpath = includePath.substring(head);
 
-      _includePathList.add(subpath);
+      _includePathList.add(normalizePath(subpath));
 
       _includePath = includePath;
       _includePathIniCount = _iniCount;
@@ -4923,6 +4925,111 @@ public class Env {
     _includePathIniCount = -1;
 
     return prevIncludePath;
+  }
+  
+  public String normalizePath(CharSequence path)
+  {
+    if (Path.isWindows()) {
+      _cb.setLength(0);
+      
+      int len = path.length();
+      
+      if (len >= 3) {
+        char ch;
+        char ch3;
+        
+        if (path.charAt(1) == ':'
+            && ('a' <= (ch = path.charAt(0)) && ch <= 'z'
+                || 'A' <= ch && ch <= 'Z')
+            && (ch3 = path.charAt(2)) != '/' && ch3 != '\\') {
+          _cb.append(ch);
+          _cb.append(':');
+          _cb.append('\\');
+          _cb.append(ch3);
+          
+          for (int i = 3; i < len; i++) {
+            _cb.append(path.charAt(i));
+          }
+          
+          return _cb.toString();
+        }
+      }
+    }
+    
+    return path.toString();
+      
+      
+      /*
+      
+      
+      
+      
+      if (len >= 3) {
+        char ch = path.charAt(0);
+        char ch2 = path.charAt(1);
+        char ch3 = path.charAt(2);
+        
+        _cb.append(ch);
+        _cb.append(ch2);
+        offset += 2;
+        
+        if (ch == '/') {
+          if (('a' <= ch2 && ch2 <= 'z' || 'A' <= ch2 && ch2 <= 'Z')
+              && ch3 == ':') {
+            _cb.append(ch3);
+            offset += 1;
+            
+            char ch4;
+            
+            if (len >= 4 && (ch4 = path.charAt(3)) != '/' && ch4 != '\\') {
+              _cb.append('/');
+              _cb.append(ch4);
+              offset += 1;
+            }
+          }
+          else if (ch2 == ':' && ch3 != '/' && ch3 != '\\') {
+            _cb.append('/');
+            _cb.append(ch3);
+            offset += 1;
+          }
+        }
+        
+        if (ch == '/'
+            && ('a' <= ch2 && ch2 <= 'z' || 'A' <= ch2 && ch2 <= 'Z')
+            && ch3 == ':') {
+          
+          _cb.append(ch3);
+          offset += 1;
+          
+          char ch4;
+          
+          if (len >= 4
+              && (ch4 = path.charAt(3)) != '/' && ch4 != '\\') {
+            _cb.append('/');
+            _cb.append(ch4);
+            offset += 1;
+          }
+        }
+        else if (('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z')
+                 && ch2 == ':'
+                 && ch3 != '/' && ch3 != '\\') {
+          _cb.append('/');
+          _cb.append(ch3);
+          offset += 1;
+        }
+      }
+      
+      for (; offset < len; offset++) {
+        _cb.append(path.charAt(offset));
+      }
+      
+      return _cb.toString();
+      
+    }
+    else
+      return path.toString();
+    
+    */
   }
 
   /**

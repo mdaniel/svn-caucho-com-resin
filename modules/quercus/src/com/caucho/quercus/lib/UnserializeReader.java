@@ -114,6 +114,11 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
+        if (! isValidString(len)) {
+          env.notice(L.l("expected string length of {0}", len));
+          return BooleanValue.FALSE;
+        }
+        
         Value value = readStringValue(env, len);
 
         expect('"');
@@ -132,6 +137,11 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
+        if (! isValidString(len)) {
+          env.notice(L.l("expected string length of {0}", len));
+          return BooleanValue.FALSE;
+        }
+        
         Value value = readUnicodeValue(env, len);
 
         expect('"');
@@ -210,6 +220,9 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
+        if (! isValidString(len))
+          return BooleanValue.FALSE;
+        
         String className = readString(len);
 
         expect('"');
@@ -709,6 +722,14 @@ public final class UnserializeReader {
     unread();
 
     return sign * value;
+  }
+  
+  public final boolean isValidString(int len)
+  {
+    if (_index + len >= _buffer.length)
+      return false;
+    
+    return true;
   }
 
   public final String readString(int len)

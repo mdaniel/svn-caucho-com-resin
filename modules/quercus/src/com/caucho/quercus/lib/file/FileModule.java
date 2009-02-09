@@ -42,6 +42,7 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.vfs.NotFoundPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -312,10 +313,15 @@ public class FileModule extends AbstractQuercusModule {
   public static boolean copy(Env env, Path src, Path dst)
   {
     // quercus/1603
-
     try {
       if (! src.canRead() || ! src.isFile()) {
-        env.warning(L.l("{0} cannot be read", src.getFullPath()));
+        env.warning(L.l("'{0}' cannot be read", src.getFullPath()));
+
+        return false;
+      }
+      // php/1603
+      else if (dst.getScheme().equals("error")) {
+        env.warning(L.l("'{0}' cannot be written to", dst.getFullPath()));
 
         return false;
       }
@@ -1355,10 +1361,10 @@ public class FileModule extends AbstractQuercusModule {
                                   LongValue.create(options));
       }
 
-      Path path = env.getPwd().lookup(filename.toString());
+      Path path = env.lookupPwd(filename);
 
       if (! env.isAllowUrlFopen() && isUrl(path)) {
-        String msg = (L.l("not allowed to fopen url {0}", path.getURL()));
+        String msg = (L.l("not allowed to fopen url {0}", filename));
         env.error(msg);
 
         return null;
@@ -2161,7 +2167,7 @@ public class FileModule extends AbstractQuercusModule {
       return wrapper.url_stat(env, filename, 
           LongValue.create(StreamModule.STREAM_URL_STAT_LINK));
 
-    Path path = env.getPwd().lookup(filename.toString());
+    Path path = env.lookupPwd(filename);
 
     // XXX: Hack to trigger lstat() in JNI code
     path.isLink();
@@ -2187,7 +2193,7 @@ public class FileModule extends AbstractQuercusModule {
       return wrapper.mkdir(env, dirname, 
                            LongValue.create(mode), LongValue.ZERO);
 
-    Path path = env.getPwd().lookup(dirname.toString());
+    Path path = env.lookupPwd(dirname);
     
     try {
       if (recursive)
@@ -2250,7 +2256,7 @@ public class FileModule extends AbstractQuercusModule {
       return wrapper.opendir(env, pathName, LongValue.ZERO);
  
     try {
-      Path path = env.getPwd().lookup(pathName.toString());
+      Path path = env.lookupPwd(pathName);
 
       if (path.isDirectory())
         return new DirectoryValue(env, path);
@@ -2662,10 +2668,10 @@ public class FileModule extends AbstractQuercusModule {
     if (wrapper != null)
       return wrapper.rename(env, from, to);
 
-    Path fromPath = env.getPwd().lookup(from.toString());
-    Path toPath = env.getPwd().lookup(to.toString());
+    Path fromPath = env.lookupPwd(from);
+    Path toPath = env.lookupPwd(to);
 
-    if (!fromPath.canRead()) {
+    if (! fromPath.canRead()) {
       env.warning(L.l("{0} cannot be read", fromPath.getFullPath()));
       return false;
     }
@@ -2725,7 +2731,7 @@ public class FileModule extends AbstractQuercusModule {
 
     // XXX: safe_mode
     try {
-      Path path = env.getPwd().lookup(filename.toString());
+      Path path = env.lookupPwd(filename);
 
       if (!path.isDirectory()) {
         env.warning(L.l("{0} is not a directory", path.getFullPath()));
@@ -2758,7 +2764,7 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param fileName the directory
    */
-  public static Value scandir(Env env, String fileName,
+  public static Value scandir(Env env, StringValue fileName,
                               @Optional("1") int order,
                               @Optional Value context)
   {
@@ -2768,7 +2774,7 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     try {
-      Path path = env.getPwd().lookup(fileName);
+      Path path = env.lookupPwd(fileName);
 
       if (!path.isDirectory()) {
         env.warning(L.l("{0} is not a directory", path.getFullPath()));
@@ -2991,7 +2997,7 @@ public class FileModule extends AbstractQuercusModule {
       if (wrapper != null)
         return wrapper.unlink(env, filename);
 
-      Path path = env.getPwd().lookup(filename.toString());
+      Path path = env.lookupPwd(filename);
 
       return path.remove();
     } catch (IOException e) {

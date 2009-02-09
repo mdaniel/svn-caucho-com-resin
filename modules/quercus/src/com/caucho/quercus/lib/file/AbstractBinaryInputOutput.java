@@ -68,13 +68,6 @@ public class AbstractBinaryInputOutput
     _lineReader = new LineReader(env);
   }
 
-  protected AbstractBinaryInputOutput(Env env, ReadStream is, WriteStream os)
-  {
-    this(env);
-    
-    init(is, os);
-  }
-
   public void init(ReadStream is, WriteStream os)
   {
     _is = is;
