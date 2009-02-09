@@ -99,6 +99,9 @@ abstract public class JavaInvoker
 
   public void init()
   {
+    if (_isInit)
+      return;
+    
     synchronized (this) {
       if (_isInit)
 	return;
@@ -166,7 +169,7 @@ abstract public class JavaInvoker
 
 	for (int i = 0; i < argLength - envOffset; i++) {
 	  boolean isReference = false;
-      boolean isPassThru = false;
+	  boolean isPassThru = false;
       
 	  boolean isNotNull = false;
 
@@ -184,8 +187,8 @@ abstract public class JavaInvoker
 	        _defaultExprs[i] = exprFactory.createDefault();
 	    } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
 	      isReference = true;
-        } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
-          isPassThru = true;
+	    } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
+	      isPassThru = true;
 	    } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
 	      isNotNull = true;
 	    }
@@ -202,14 +205,14 @@ abstract public class JavaInvoker
 					     _name));
 	    }
 	  }
-      else if (isPassThru) {
-        _marshalArgs[i] = marshalFactory.createValuePassThru();
+	  else if (isPassThru) {
+	    _marshalArgs[i] = marshalFactory.createValuePassThru();
         
-        if (! Value.class.equals(argType)) {
+	    if (! Value.class.equals(argType)) {
               throw new QuercusException(L.l("pass thru must be Value for {0}",
                                              _name));
             }
-      }
+	  }
 	  else
 	    _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
 	}
@@ -231,6 +234,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
+    
     return _minArgumentLength;
   }
   
@@ -242,6 +246,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
+    
     return _maxArgumentLength;
   }
 

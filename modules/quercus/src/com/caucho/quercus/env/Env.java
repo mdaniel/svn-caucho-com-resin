@@ -241,6 +241,7 @@ public class Env {
 
   private long _startTime;
   private long _timeLimit = 600000L;
+  private long _endTime;
 
   private Expr [] _callStack = new Expr[256];
   private Value [] _callThisStack = new Value[256];
@@ -738,6 +739,11 @@ public class Env {
     
     _startTime = Alarm.getCurrentTime();
     _timeLimit = getIniLong("max_execution_time") * 1000;
+
+    if (_timeLimit > 0)
+      _endTime = _startTime + _timeLimit;
+    else
+      _endTime = Long.MAX_VALUE / 2;
     
     _threadEnv.set(this);
     
@@ -923,7 +929,7 @@ public class Env {
   {
     long now = Alarm.getCurrentTime();
 
-    if (_timeLimit > 0 && _startTime + _timeLimit < now)
+    if (_endTime < now)
       throw new QuercusRuntimeException(L.l("script timed out"));
   }
 

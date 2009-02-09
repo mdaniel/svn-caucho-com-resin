@@ -42,6 +42,7 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A virtual filesystem path, essentially represented by a URL.
@@ -77,7 +78,8 @@ public abstract class Path {
   protected static char _pathSeparatorChar = File.pathSeparatorChar;
   private static String _newline;
 
-  private static final PathKey _key = new PathKey();
+  private static final AtomicReference<PathKey> _key
+    = new AtomicReference<PathKey>();
 
   private static final SchemeMap DEFAULT_SCHEME_MAP = new SchemeMap();
 
@@ -130,14 +132,19 @@ public abstract class Path {
       return this;
 
     if (isPathCacheable()) {
-      synchronized (_key) {
-	_key.init(this, userPath);
+      PathKey key = _key.getAndSet(null);
 
-	Path path = _pathLookupCache.get(_key);
+      if (key == null)
+	key = new PathKey();
 
-	if (path != null) {
-	  return path.cacheCopy();
-	}
+      key.init(this, userPath);
+
+      Path path = _pathLookupCache.get(key);
+
+      _key.set(key);
+
+      if (path != null) {
+	return path.cacheCopy();
       }
     }
 

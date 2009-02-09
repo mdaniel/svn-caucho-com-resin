@@ -40,6 +40,7 @@ import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ByteToChar;
@@ -95,6 +96,9 @@ public class StringModule extends AbstractQuercusModule {
   public static final int STR_PAD_BOTH = 2;
 
   private static final DecimalFormatSymbols DEFAULT_DECIMAL_FORMAT_SYMBOLS ;
+
+  private static final FreeList<MessageDigest> _md5FreeList
+    = new FreeList<MessageDigest>(16);
 
   /**
    * Escapes a string using C syntax.
@@ -804,7 +808,12 @@ public class StringModule extends AbstractQuercusModule {
 				          @Optional boolean rawOutput)
   {
     try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
+      MessageDigest md = _md5FreeList.allocate();
+
+      if (md == null)
+	md = MessageDigest.getInstance("MD5");
+
+      md.reset();
       
       // XXX: iso-8859-1
 
@@ -814,9 +823,10 @@ public class StringModule extends AbstractQuercusModule {
       }
       
       byte []digest = md.digest();
+
+      _md5FreeList.free(md);
       
       return hashToValue(env, digest, rawOutput);
-
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }

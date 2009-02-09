@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -52,7 +53,7 @@ public class SessionArrayValue extends ArrayValueWrapper
 
   private String _id;
 
-  private int _useCount;
+  private AtomicInteger _useCount = new AtomicInteger();
 
   protected long _accessTime;
   private long _maxInactiveInterval;
@@ -173,14 +174,12 @@ public class SessionArrayValue extends ArrayValueWrapper
 
   public boolean inUse()
   {
-    return _useCount > 0;
+    return _useCount.get() > 0;
   }
 
   public void addUse()
   {
-    synchronized (this) {
-      _useCount++;
-    }
+    _useCount.incrementAndGet();
   }
 
   public boolean load()
@@ -243,9 +242,7 @@ public class SessionArrayValue extends ArrayValueWrapper
   {
     int count;
 
-    synchronized (this) {
-      count = --_useCount;
-    }
+    count = _useCount.decrementAndGet();
 
     if (count > 0)
       return;

@@ -34,6 +34,7 @@
 package com.caucho.quercus.lib.regexp;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.*;
 
 import com.caucho.quercus.env.StringValue;
@@ -66,8 +67,8 @@ class Regcomp {
   static final HashMap<String,Integer> _characterClassMap
     = new HashMap<String,Integer>();
 
-  static final Map<String,RegexpSet> _unicodeBlockMap
-    = Collections.synchronizedMap(new HashMap<String,RegexpSet>());
+  static final ConcurrentHashMap<String,RegexpSet> _unicodeBlockMap
+    = new ConcurrentHashMap<String,RegexpSet>();
   
   int _nGroup;
   int _nLoop;

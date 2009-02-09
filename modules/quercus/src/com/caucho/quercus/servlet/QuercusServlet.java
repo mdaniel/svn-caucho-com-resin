@@ -421,10 +421,8 @@ public class QuercusServlet
    */
   private Quercus getQuercus()
   {
-    synchronized (this) {
-      if (_quercus == null)
-	_quercus = _impl.getQuercus();
-    }
+    if (_quercus == null)
+      _quercus = _impl.getQuercus();
 
     return _quercus;
   }

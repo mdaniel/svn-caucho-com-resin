@@ -39,29 +39,31 @@ import java.util.logging.Logger;
  * <p>A separate thread periodically tests the queue for alarms ready.
  */
 public class Alarm implements ThreadTask {
-  static private final Logger log
+  private static final Logger log
     = Logger.getLogger(Alarm.class.getName());
   
-  static private final ClassLoader _systemLoader
+  private static final ClassLoader _systemLoader
     = ClassLoader.getSystemClassLoader();
 
-  static private volatile long _currentTime = System.currentTimeMillis();
-  static private volatile boolean _isCurrentTimeUsed;
+  // using volatile is a bottleneck on MP systems
+  private static long _initialTime;
+  private static int _currentTime;
+  private static boolean _isCurrentTimeUsed;
 
-  static private int _concurrentAlarmThrottle = 5;
+  private static int _concurrentAlarmThrottle = 5;
   
-  static private Object _queueLock = new Object();
+  private static Object _queueLock = new Object();
   
-  static private AlarmThread _alarmThread;
-  static private CoordinatorThread _coordinatorThread;
+  private static AlarmThread _alarmThread;
+  private static CoordinatorThread _coordinatorThread;
 
-  static private Alarm []_heap = new Alarm[256];
-  static private int _heapTop;
+  private static Alarm []_heap = new Alarm[256];
+  private static int _heapTop;
   
-  static private volatile int _runningAlarmCount;
+  private static volatile int _runningAlarmCount;
   
-  static private long _testTime;
-  static private long _testNanoDelta;
+  private static long _testTime;
+  private static long _testNanoDelta;
 
   private long _wakeTime;
   private AlarmListener _listener;
@@ -73,7 +75,6 @@ public class Alarm implements ThreadTask {
   private int _heapIndex = 0;
 
   private volatile boolean _isRunning;
-  
     
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
@@ -82,8 +83,6 @@ public class Alarm implements ThreadTask {
   protected Alarm()
   {
     _name = "alarm";
-
-    init();
   }
     
   /**
@@ -114,8 +113,6 @@ public class Alarm implements ThreadTask {
     
     setListener(listener);
     setContextLoader(loader);
-    
-    init();
   }
     
   /**
@@ -133,8 +130,6 @@ public class Alarm implements ThreadTask {
     setContextLoader(loader);
 
     queue(delta);
-    
-    init();
   }
 
   /**
@@ -150,9 +145,8 @@ public class Alarm implements ThreadTask {
 
     _name = name;
     queue(delta);
-    
-    init();
   }
+  
   /**
    * Creates a new alarm and schedules its wakeup.
    *
@@ -164,24 +158,6 @@ public class Alarm implements ThreadTask {
     this(listener);
 
     queue(delta);
-    
-    init();
-  }
-
-  private void init()
-  {
-    synchronized (Alarm.class) {
-      if (_alarmThread == null) {
-	_currentTime = System.currentTimeMillis();
-	_alarmThread = new AlarmThread();
-	_alarmThread.start();
-      }
-      
-      if (_coordinatorThread == null && ! isTest()) {
-	_coordinatorThread = new CoordinatorThread();
-	_coordinatorThread.start();
-      }
-    }
   }
 
   /**
@@ -206,15 +182,12 @@ public class Alarm implements ThreadTask {
    */
   public static long getCurrentTime()
   {
-    if (_testTime > 0)
-      return _testTime;
-    else if (_alarmThread != null) {
+    // test avoids extra writes on multicore machines
+    if (! _isCurrentTimeUsed) {
       _isCurrentTimeUsed = true;
-      
-      return _currentTime;
     }
-    else
-      return System.currentTimeMillis();
+      
+    return _currentTime + _initialTime;
   }
 
   /**
@@ -623,14 +596,16 @@ public class Alarm implements ThreadTask {
     _testTime = time;
     
     if (_testTime > 0) {
-      if (time < _currentTime) {
+      if (time < _initialTime + _currentTime) {
 	testClear();
       }
 
-      _currentTime = time;
+      _initialTime = time;
     }
-    else
-      _currentTime = System.currentTimeMillis();
+    else {
+      _initialTime = System.currentTimeMillis();
+      _currentTime = 0;
+    }
 
     Alarm alarm;
 
@@ -692,10 +667,23 @@ public class Alarm implements ThreadTask {
 	      sleepTime = MAX;
 	  }
 	  
-	  if (_testTime > 0)
-	    _currentTime = _testTime;
-	  else
-	    _currentTime = System.currentTimeMillis();
+	  if (_testTime > 0) {
+	    _initialTime = _testTime;
+	    _currentTime = 0;
+	  }
+	  else {
+	    long now = System.currentTimeMillis();
+
+	    long delta = now - _initialTime;
+
+	    if (delta < Integer.MAX_VALUE / 2) {
+	      _currentTime = (int) delta;
+	    }
+	    else {
+	      _initialTime = now;
+	      _currentTime = 0;
+	    }
+	  }
 	
 	  Thread.sleep(sleepTime);
 	} catch (Throwable e) {
@@ -756,6 +744,12 @@ public class Alarm implements ThreadTask {
   }
 
   static {
-    _currentTime = System.currentTimeMillis();
+    _initialTime = System.currentTimeMillis();
+    
+    _alarmThread = new AlarmThread();
+    _alarmThread.start();
+      
+    _coordinatorThread = new CoordinatorThread();
+    _coordinatorThread.start();
   }
 }
