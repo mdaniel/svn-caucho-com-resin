@@ -29,7 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.config.ConfigException;
 import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -37,14 +36,9 @@ import com.caucho.util.FreeList;
 import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.server.admin.Management;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -368,7 +362,7 @@ public class CacheMapBacking implements AlarmListener {
    * @param id the hash identifier for the data
    * @return true on successful load
    */
-  public CacheMapEntry load(HashKey id)
+  public CacheEntryValue load(HashKey id)
   {
     CacheMapConnection conn = null;
     
@@ -394,7 +388,7 @@ public class CacheMapBacking implements AlarmListener {
 
   HashKey valueHash = hash != null ? new HashKey(hash) : null;
 
-	return new CacheMapEntry(valueHash, null, flags, itemVersion,
+	return new CacheEntryValue(valueHash, null, flags, itemVersion,
 				 expireTimeout, idleTimeout,
 				 leaseTimeout, localReadTimeout,
 				 accessTime, updateTime,

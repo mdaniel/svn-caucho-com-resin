@@ -30,22 +30,21 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
+import com.caucho.cluster.AbstractCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
-import com.caucho.util.Alarm;
 
 import javax.cache.CacheLoader;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.lang.ref.SoftReference;
 
 /**
  * An entry in the cache map
  */
-public class FileCacheKeyEntry extends CacheKeyEntry {
+public class FileCacheEntry extends AbstractCacheEntry {
   private final FileCacheManager _manager;
 
-  public FileCacheKeyEntry(Object key,
+  public FileCacheEntry(Object key,
 			   HashKey keyHash,
 			   ClusterTriad.Owner owner,
 			   FileCacheManager manager)
@@ -54,6 +53,17 @@ public class FileCacheKeyEntry extends CacheKeyEntry {
 
     _manager = manager;
   }
+
+//  public FileCacheEntry(Object key,
+//			   HashKey keyHash,
+//			   ClusterTriad.Owner owner,
+//			   FileCacheManager manager,
+//                           CacheConfig config)
+//  {
+//    super(key, keyHash, owner, config);
+//
+//    _manager = manager;
+//  }
 
   /**
    * Peeks the current value
@@ -91,7 +101,7 @@ public class FileCacheKeyEntry extends CacheKeyEntry {
    */
   /*
   @Override
-  public CacheEntry<Object> getValueEntry()
+  public IntCacheEntry<Object> getEntryValue()
   {
     return null;
   }

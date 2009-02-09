@@ -37,9 +37,9 @@ import java.lang.ref.SoftReference;
 /**
  * An entry in the cache map
  */
-public final class CacheMapEntry implements ExtCacheEntry {
-  public static final CacheMapEntry NULL
-    = new CacheMapEntry(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false);
+public final class CacheEntryValue implements ExtCacheEntry {
+  public static final CacheEntryValue NULL
+    = new CacheEntryValue(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false);
   
   private final HashKey _valueHash;
   private final int _flags;
@@ -61,9 +61,11 @@ public final class CacheMapEntry implements ExtCacheEntry {
   
   private long _lastRemoteAccessTime;
 
+  private int _hits = 0;
+
   private SoftReference _valueRef;
 
-  public CacheMapEntry(HashKey valueHash,
+  public CacheEntryValue(HashKey valueHash,
 		       Object value,
 		       int flags,
 		       long version,
@@ -95,30 +97,30 @@ public final class CacheMapEntry implements ExtCacheEntry {
       _valueRef = new SoftReference(value);
   }
 
-  public CacheMapEntry(CacheMapEntry oldEntry,
+  public CacheEntryValue(CacheEntryValue oldEntryValue,
 		       long idleTimeout,
 		       long lastUpdateTime)
   {
-    _valueHash = oldEntry.getValueHashKey();
-    _flags = oldEntry.getFlags();
-    _version = oldEntry.getVersion();
+    _valueHash = oldEntryValue.getValueHashKey();
+    _flags = oldEntryValue.getFlags();
+    _version = oldEntryValue.getVersion();
     
-    _expireTimeout = oldEntry.getExpireTimeout();
+    _expireTimeout = oldEntryValue.getExpireTimeout();
     _idleTimeout = idleTimeout;
-    _leaseTimeout = oldEntry.getLeaseTimeout();
-    _localReadTimeout = oldEntry.getLocalReadTimeout();
+    _leaseTimeout = oldEntryValue.getLeaseTimeout();
+    _localReadTimeout = oldEntryValue.getLocalReadTimeout();
     
     _lastRemoteAccessTime = lastUpdateTime;
     _lastUpdateTime = lastUpdateTime;
     
     _lastAccessTime = Alarm.getExactTime();
 
-    _leaseExpireTime = oldEntry._leaseExpireTime;
-    _leaseOwner = oldEntry._leaseOwner;
+    _leaseExpireTime = oldEntryValue._leaseExpireTime;
+    _leaseOwner = oldEntryValue._leaseOwner;
 
-    _isServerVersionValid = oldEntry.isServerVersionValid();
+    _isServerVersionValid = oldEntryValue.isServerVersionValid();
 
-    Object value = oldEntry.getValue();
+    Object value = oldEntryValue.getValue();
     
     if (value != null)
       _valueRef = new SoftReference(value);
@@ -281,7 +283,7 @@ public final class CacheMapEntry implements ExtCacheEntry {
   public final void setObjectValue(Object value)
   {
     if (value != null && (_valueRef == null || _valueRef.get() == null))
-      _valueRef = new SoftReference(value);
+      _valueRef = new SoftReference<Object>(value);
   }
 
   /**
@@ -300,7 +302,10 @@ public final class CacheMapEntry implements ExtCacheEntry {
     SoftReference valueRef = _valueRef;
 
     if (valueRef != null)
+    {
+      _hits++;
       return valueRef.get();
+    }
     else
       return null;
   }
@@ -370,7 +375,7 @@ public final class CacheMapEntry implements ExtCacheEntry {
   
   public int getHits()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _hits;
   }
 
   public String toString()

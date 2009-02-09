@@ -32,7 +32,7 @@ package com.caucho.cluster;
 import javax.cache.CacheEntry;
 
 /**
- * Represents an item in the cache.
+ * Provides additional informationabout an entry in a {@link javax.cache.Cache}.
  */
 public interface ExtCacheEntry extends CacheEntry
 {
@@ -60,4 +60,6 @@ public interface ExtCacheEntry extends CacheEntry
    * Returns the lease owner
    */
   public int getLeaseOwner();
+
+  public boolean isValid();
 }

@@ -27,10 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.cluster;
 
 import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.server.distcache.CacheEntryKey;
+import com.caucho.server.distcache.HashKey;
+import com.caucho.server.distcache.CacheEntryValue;
+import com.caucho.server.distcache.CacheConfig;
 import com.caucho.util.Hex;
 
 import javax.cache.CacheLoader;
@@ -39,26 +43,29 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An entry in the cache map
  */
-public class CacheKeyEntry {
+abstract public class AbstractCacheEntry
+  implements CacheEntryKey, ExtCacheEntry {
   private final HashKey _keyHash;
 
   private final ClusterTriad.Owner _owner;
+
+  //private CacheConfig _cacheConfig;
 
   private Object _key;
 
   private final AtomicBoolean _isReadUpdate
     = new AtomicBoolean();
   
-  private final AtomicReference<CacheMapEntry> _entryRef
-    = new AtomicReference<CacheMapEntry>();
+  private final AtomicReference<CacheEntryValue> _entryRef
+    = new AtomicReference<CacheEntryValue>();
 
-  public CacheKeyEntry(Object key,
+  private int _hits;
+
+  public AbstractCacheEntry(Object key,
 		       HashKey keyHash,
 		       ClusterTriad.Owner owner)
   {
@@ -67,12 +74,39 @@ public class CacheKeyEntry {
     _owner = owner;
   }
 
-  /**
-   * Returns the key
+//   public AbstractCacheEntry(Object key,
+//		       HashKey keyHash,
+//		       ClusterTriad.Owner owner,
+//                       CacheConfig config)
+//  {
+//    _key = key;
+//    _keyHash = keyHash;
+//    _owner = owner;
+//    _cacheConfig = config;
+//  }
+
+   /**
+   * Returns the key for this entry in the Cache.
    */
   public final Object getKey()
   {
     return _key;
+  }
+
+  /**
+   * Returns the value of the cache entry.
+   */
+  public Object getValue()
+  {
+    return getEntryValue().getValue();
+  }
+
+  /**
+   * Returns true if the value is null.
+   */
+  public boolean isValueNull()
+  {
+    return getEntryValue().isValueNull();
   }
 
   /**
@@ -92,9 +126,9 @@ public class CacheKeyEntry {
   }
 
   /**
-   * Returns the current value.
+   * Returns the value section of the entry.
    */
-  public final CacheMapEntry getEntry()
+  public final CacheEntryValue getEntryValue()
   {
     return _entryRef.get();
   }
@@ -104,7 +138,7 @@ public class CacheKeyEntry {
    */
   public Object peek()
   {
-    return null;
+    return getEntryValue().getValue();
   }
 
   /**
@@ -119,46 +153,35 @@ public class CacheKeyEntry {
   /**
    * Fills the value with a stream
    */
-  public boolean getStream(OutputStream os, CacheConfig config)
-    throws IOException
-  {
-    return false;
-  }
+  abstract public boolean getStream(OutputStream os, CacheConfig config)
+    throws IOException;
+
 
   /**
    * Returns the current value.
    */
-  public CacheMapEntry getEntry(CacheConfig config)
+  public CacheEntryValue getEntryValue(CacheConfig config)
   {
-    return null;
+    return getEntryValue();
   }
 
   /**
    * Sets the value by an input stream
    */
-  public Object put(Object value, CacheConfig config)
-  {
-    return null;
-  }
+  abstract public Object put(Object value, CacheConfig config);
 
   /**
    * Sets the value by an input stream
    */
-  public ExtCacheEntry put(InputStream is,
+  abstract public ExtCacheEntry put(InputStream is,
 			   CacheConfig config,          
 			   long idleTimeout)
-    throws IOException
-  {
-    return null;
-  }
+    throws IOException;
 
   /**
    * Remove the value
    */
-  public boolean remove(CacheConfig config)
-  {
-    return false;
-  }
+  abstract public boolean remove(CacheConfig config);
 
   /**
    * Conditionally starts an update of a cache item, allowing only a
@@ -182,12 +205,84 @@ public class CacheKeyEntry {
   /**
    * Sets the current value.
    */
-  public final boolean compareAndSet(CacheMapEntry oldEntry,
-				     CacheMapEntry entry)
+  public final boolean compareAndSet(CacheEntryValue oldEntryValue,
+				     CacheEntryValue entryValue)
   {
-    return _entryRef.compareAndSet(oldEntry, entry);
+    return _entryRef.compareAndSet(oldEntryValue, entryValue);
   }
-  
+
+   public HashKey getValueHash()
+  {
+    return getEntryValue().getValueHashKey();
+  }
+
+   public byte []getValueHashArray()
+  {
+    return getEntryValue().getValueHash();
+  }
+
+  public long getIdleTimeout()
+  {
+    return getEntryValue().getIdleTimeout();
+  }
+
+   public long getLeaseTimeout()
+  {
+    return getEntryValue().getLeaseTimeout();
+  }
+
+   public int getLeaseOwner()
+  {
+    return getEntryValue().getLeaseOwner();
+  }
+
+    public long getCost()
+  {
+    return 0;
+  }
+
+  //TODO(fred): implement as time of first put for key.
+  public long getCreationTime()
+  {
+    return getEntryValue().getCreationTime();
+  }
+
+  public long getExpirationTime()
+  {
+    return getEntryValue().getExpirationTime();
+  }
+
+  public int getHits()
+  {
+    return getEntryValue().getHits();
+  }
+
+   public long getLastAccessTime()
+   {
+     return getEntryValue().getLastAccessTime();
+   }
+
+   public long getLastUpdateTime()
+   {
+     return getEntryValue().getLastUpdateTime();
+   }
+
+   public long getVersion()
+   {
+     return getEntryValue().getVersion();
+   }
+
+   public boolean isValid()
+   {
+     return getEntryValue().isValid();
+   }
+
+
+   public Object setValue(Object value)
+   {
+     return getEntryValue().setValue(value);
+   }
+
   public String toString()
   {
     return (getClass().getSimpleName()

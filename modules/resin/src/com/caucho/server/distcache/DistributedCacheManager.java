@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
+import com.caucho.cluster.AbstractCacheEntry;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.server.cluster.Server;
@@ -81,7 +82,7 @@ abstract public class DistributedCacheManager
   /**
    * Gets a cache key entry
    */
-  abstract public CacheKeyEntry getKey(Object key, CacheConfig config);
+  abstract public AbstractCacheEntry getCacheEntry(Object key, CacheConfig config);
 
   /**
    * Sets a cache entry
