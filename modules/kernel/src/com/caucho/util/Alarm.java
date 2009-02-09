@@ -45,10 +45,8 @@ public class Alarm implements ThreadTask {
   private static final ClassLoader _systemLoader
     = ClassLoader.getSystemClassLoader();
 
-  // using volatile is a bottleneck on MP systems
-  private static long _initialTime;
-  private static int _currentTime;
-  private static boolean _isCurrentTimeUsed;
+  private static volatile long _currentTime;
+  private static volatile boolean _isCurrentTimeUsed;
 
   private static int _concurrentAlarmThrottle = 5;
   
@@ -187,7 +185,7 @@ public class Alarm implements ThreadTask {
       _isCurrentTimeUsed = true;
     }
       
-    return _currentTime + _initialTime;
+    return _currentTime;
   }
 
   /**
@@ -596,15 +594,14 @@ public class Alarm implements ThreadTask {
     _testTime = time;
     
     if (_testTime > 0) {
-      if (time < _initialTime + _currentTime) {
+      if (time < _currentTime) {
 	testClear();
       }
 
-      _initialTime = time;
+      _currentTime = time;
     }
     else {
-      _initialTime = System.currentTimeMillis();
-      _currentTime = 0;
+      _currentTime = System.currentTimeMillis();
     }
 
     Alarm alarm;
@@ -668,21 +665,12 @@ public class Alarm implements ThreadTask {
 	  }
 	  
 	  if (_testTime > 0) {
-	    _initialTime = _testTime;
-	    _currentTime = 0;
+	    _currentTime = _testTime;
 	  }
 	  else {
 	    long now = System.currentTimeMillis();
 
-	    long delta = now - _initialTime;
-
-	    if (delta < Integer.MAX_VALUE / 2) {
-	      _currentTime = (int) delta;
-	    }
-	    else {
-	      _initialTime = now;
-	      _currentTime = 0;
-	    }
+	    _currentTime = now;
 	  }
 	
 	  Thread.sleep(sleepTime);
@@ -744,7 +732,7 @@ public class Alarm implements ThreadTask {
   }
 
   static {
-    _initialTime = System.currentTimeMillis();
+    _currentTime = System.currentTimeMillis();
     
     _alarmThread = new AlarmThread();
     _alarmThread.start();
