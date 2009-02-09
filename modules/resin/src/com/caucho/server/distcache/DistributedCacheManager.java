@@ -91,7 +91,7 @@ abstract public class DistributedCacheManager
 		  Object value,
 		  CacheConfig config)
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -103,7 +103,7 @@ abstract public class DistributedCacheManager
 			   long idleTimeout)
     throws IOException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
