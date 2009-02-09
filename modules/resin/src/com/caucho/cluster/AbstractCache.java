@@ -830,7 +830,7 @@ abstract public class AbstractCache extends AbstractMap
   protected static class CacheEntrySet<E>
     extends AbstractSet
   {
-    private LruCache _lruCache;
+    private LruCache<Object, AbstractCacheEntry> _lruCache;
 
     protected CacheEntrySet(LruCache cache)
     {
@@ -840,7 +840,7 @@ abstract public class AbstractCache extends AbstractMap
 
     public Iterator iterator()
     {
-      return new CacheEntrySetIterator(_lruCache);
+      return new CacheEntrySetIterator<Object, AbstractCacheEntry>(_lruCache);
     }
 
     public int size()
@@ -880,21 +880,25 @@ abstract public class AbstractCache extends AbstractMap
       return _iterator.hasNext();
     }
 
+
+    /**
+     *
+     */
     public void remove()
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Use cache.remove(key)");
     }
   }
 
   /**
    * Provides the values contined in the local cache.
    */
-  protected static class CacheValues
+  protected  static  class CacheValues<K,V>
     extends CacheEntrySet
   {
-    private LruCache _lruCache;
+    private LruCache<K, V> _lruCache;
 
-    public CacheValues(LruCache lruCache)
+    public CacheValues(LruCache<K,  V> lruCache)
     {
       super(lruCache);
       _lruCache = lruCache;
@@ -908,7 +912,7 @@ abstract public class AbstractCache extends AbstractMap
     @Override
     public Iterator iterator()
     {
-      return new CacheEntrySetIterator<Object, Object>(_lruCache) {
+      return new CacheEntrySetIterator<K,V>(_lruCache) {
         @Override
         public Object next()
         {
