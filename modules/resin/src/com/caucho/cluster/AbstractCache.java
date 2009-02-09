@@ -65,7 +65,7 @@ abstract public class AbstractCache extends AbstractMap
   private static final EnvironmentLocal<HashSet<String>> _localCacheNameSet
     = new EnvironmentLocal<HashSet<String>>();
 
-  protected static final String DUPLICATE_CACHE_NAME_MESSAGE
+  private static final String DUPLICATE_CACHE_NAME_MESSAGE
     = "'{0}' is an invalid Cache name because it's already used by another cache.";
 
   private String _name = null;
@@ -85,6 +85,9 @@ abstract public class AbstractCache extends AbstractMap
 
   private long _priorMisses = 0;
   private long _priorHits = 0;
+
+  private String _scopeName = Scope.CLUSTER.toString();
+  private String _persistenceOption = Persistence.TRIPLE.toString();
 
   /**
    * Returns the name of the cache.
@@ -313,6 +316,34 @@ abstract public class AbstractCache extends AbstractMap
     _config.setLocalReadTimeout(period);
   }
 
+  public void setScopeMode(Scope scope)
+  {
+    _config.setScopeMode(scope);
+  }
+
+  /**
+   * Sets the {@link Scope} of the cache.
+   */
+  @Configurable
+  public void setScope(String scopeName)
+  {
+      _scopeName = scopeName;
+  }
+
+  /**
+   * Returns the name of the Scope of the cache.
+   * @return
+   */
+  public String getScope()
+  {
+    return _config.getScopeMode().toString().toLowerCase();
+  }
+
+  public void setPersistence(String persistenceOption)
+  {
+    _persistenceOption = persistenceOption;
+  }
+
   /**
    * Initialize the cache.
    */
@@ -322,34 +353,20 @@ abstract public class AbstractCache extends AbstractMap
     synchronized (this) {
       if (_isInit)
         return;
+
       _isInit = true;
 
-      if (_name == null || _name.length() == 0)
-        throw new ConfigException(L.l(DUPLICATE_CACHE_NAME_MESSAGE));
+      initName(_name);
 
-      HashSet<String> cacheNameSet = getLocalCacheNameSet();
+      initScope(_scopeName);
 
-      String contextId = Environment.getEnvironmentName();
+      initPersistence(_persistenceOption);
 
-      _guid = contextId + ":" + _name;
-      _config.setGuid(_guid);
-      
-      Server server = Server.getCurrent();
+      initServer();
+
       _config.init();
 
-      if (cacheNameSet.contains(_guid)) {
-        throw new ConfigException(L.l("'{0}' is an invalid Cache name because it's already used by another cache.",
-				      _name));
-      }
-      
-      cacheNameSet.add(_guid);
-
-      if (server == null)
-        throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
-          getClass().getSimpleName()));
-        _entryCache = new LruCache<Object, AbstractCacheEntry>(512);
-        _distributedCacheManager = server.getDistributedCacheManager();
-        _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
+      _entryCache = new LruCache<Object, AbstractCacheEntry>(512);
     }
   }
 
@@ -360,7 +377,7 @@ abstract public class AbstractCache extends AbstractMap
   {
     AbstractCacheEntry cacheEntry = _entryCache.get(key);
 
-    return (cacheEntry  != null) ? cacheEntry.peek() : null;
+    return (cacheEntry != null) ? cacheEntry.peek() : null;
   }
 
   /**
@@ -420,8 +437,8 @@ abstract public class AbstractCache extends AbstractMap
    * @param idleTimeout the idle timeout for the item
    */
   public ExtCacheEntry put(Object key,
-			   InputStream is,
-			   long idleTimeout)
+    InputStream is,
+    long idleTimeout)
     throws IOException
   {
     return getAbstractCacheEntry(key).put(is, _config, idleTimeout);
@@ -437,8 +454,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long version,
-			       Object value)
+    long version,
+    Object value)
   {
     put(key, value);
 
@@ -455,8 +472,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long version,
-			       InputStream inputStream)
+    long version,
+    InputStream inputStream)
     throws IOException
   {
     put(key, inputStream);
@@ -547,7 +564,7 @@ abstract public class AbstractCache extends AbstractMap
 
     if (loaderValue != null)
       put(key, loaderValue);
-    
+
     notifyLoad(key);
   }
 
@@ -744,6 +761,16 @@ abstract public class AbstractCache extends AbstractMap
     return CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 
+  public boolean isSingleBackup()
+  {
+    return _config.isSinglePersistence();
+  }
+
+  public boolean isTripleBackup()
+  {
+    return _config.isTriplePersistence();
+  }
+
   /**
    * Places an item in the cache from the loader unless the item is in cache already.
    */
@@ -762,6 +789,25 @@ abstract public class AbstractCache extends AbstractMap
     notifyLoad(key);
 
     return value;
+  }
+
+  protected  void setPersistenceMode(Persistence persistence)
+  {
+      switch (persistence) {
+      case NONE:
+        setTriplicate(false);
+        setBackup(false);
+        break;
+
+      case SINGLE:
+        setTriplicate(false);
+        setBackup(true);
+        break;
+
+      case TRIPLE:
+      default:
+        setTriplicate(true);
+    }
   }
 
   protected void notifyLoad(Object key)
@@ -799,16 +845,21 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
+  protected void duplicateCacheNameException(String cacheName)
+  {
+    throw new ConfigException(L.l(DUPLICATE_CACHE_NAME_MESSAGE, cacheName));
+  }
+
   protected HashSet<String> getLocalCacheNameSet()
   {
     HashSet<String> cacheNameSet = _localCacheNameSet.getLevel();
-    
+
     if (cacheNameSet == null) {
       cacheNameSet = new HashSet<String>();
-      
+
       _localCacheNameSet.set(cacheNameSet);
     }
-    
+
     return cacheNameSet;
   }
 
@@ -818,9 +869,103 @@ abstract public class AbstractCache extends AbstractMap
     return getClass().getSimpleName() + "[" + _guid + "]";
   }
 
-  protected void duplicateCacheNameException(String cacheName)
+  private void initName(String name) throws ConfigException
+   {
+     if (_name == null || _name.length() == 0)
+       throw new ConfigException(L.l("Each Cache must have a name."));
+
+     HashSet<String> cacheNameSet = getLocalCacheNameSet();
+     String contextId = Environment.getEnvironmentName();
+
+     _guid = contextId + ":" + _name;
+     _config.setGuid(_guid);
+
+     if (!cacheNameSet.contains(_guid))
+       cacheNameSet.add(_guid);
+     else
+       throw new ConfigException(L.l(
+         "'{0}' is an invalid Cache name because it's already used by another cache.",
+         _name));
+   }
+
+   private void initPersistence(String persistence) throws ConfigException
+    {
+      Persistence result  = Persistence.TRIPLE;
+      if (persistence != null)
+        try {
+          result = Persistence.valueOf(persistence.toUpperCase());
+        }
+        catch (Exception e) {
+          throw new ConfigException(L.l("'{0}' is not a valid Persistence option", persistence));
+        }
+      setPersistenceMode(result);
+    }
+
+   private void initScope(String scopeName) throws ConfigException
+   {
+     Scope scope = null;
+       if (_scopeName != null)
+       try {
+         scope = Scope.valueOf(_scopeName.toUpperCase());
+       }
+       catch (Exception e) {
+         throw new ConfigException(L.l("'{0}' is not a valid Scope option", scopeName));
+       }
+       setScopeMode(scope);
+   }
+
+  private void initServer() throws ConfigException
   {
-    throw new ConfigException(L.l(DUPLICATE_CACHE_NAME_MESSAGE, cacheName));
+    Server server = Server.getCurrent();
+    if (server == null)
+      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
+        getClass().getSimpleName()));
+
+    _distributedCacheManager = server.getDistributedCacheManager();
+    _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
+  }
+
+  /**
+   * Defines the scope options for a cache.
+   */
+  //TODO(fred): finalize supported modes.
+  public enum Scope {
+
+    /** Not distributed, no persistence.*/
+    LOCAL,
+
+    /** Not distributed, single or no persistence */
+    SERVER,
+
+    /** Distributed across a pod, persistence required.*/
+    POD,
+
+    /** Accessible across a multi-pod cluster*/
+    CLUSTER,
+
+    /** Support CRUD operation with basic access control*/
+    GLOBAL
+  }
+
+  /**
+   * Defines the persistence options for a cache.
+   */
+  public enum Persistence {
+
+    /**
+     * No persistence.
+     */
+    NONE,
+
+    /**
+     * A single copy of the cache is persisted on one server in the cluster.
+     */
+    SINGLE,
+
+    /**
+     * Three copies of the cache and its entrys are saved on three servers.
+     */
+    TRIPLE
   }
 
   /**
@@ -880,25 +1025,24 @@ abstract public class AbstractCache extends AbstractMap
       return _iterator.hasNext();
     }
 
-
     /**
      *
      */
     public void remove()
     {
-      throw new UnsupportedOperationException("Use cache.remove(key)");
+      throw new UnsupportedOperationException(getClass().getName());
     }
   }
 
   /**
    * Provides the values contined in the local cache.
    */
-  protected  static  class CacheValues<K,V>
+  protected static class CacheValues<K,V>
     extends CacheEntrySet
   {
     private LruCache<K, V> _lruCache;
 
-    public CacheValues(LruCache<K,  V> lruCache)
+    public CacheValues(LruCache<K,V> lruCache)
     {
       super(lruCache);
       _lruCache = lruCache;
@@ -933,7 +1077,7 @@ abstract public class AbstractCache extends AbstractMap
     public CacheKeys(LruCache cache)
     {
       super(cache);
-      
+
       _lruCache = cache;
     }
 

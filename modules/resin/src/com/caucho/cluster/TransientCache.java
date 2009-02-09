@@ -33,18 +33,21 @@ import com.caucho.config.Configurable;
 import javax.context.ApplicationScoped;
 
 /**
- * Cache which stores a single copy on the triad.
+ * Cache with no persistence.
+ * //TODO(fred): finalize definition of allowable and supported cache modes (Scope and Persistence)
+ * //TODO(fred): finalize definition of the set of classes that extend AbstractCache
  */
 @ApplicationScoped
-@Configurable  
-public class BackupByteStreamCache extends AbstractCache
+@Configurable
+public class TransientCache extends AbstractCache
 {
-  public BackupByteStreamCache()
+  public TransientCache()
   {
-    setPersistenceMode(Persistence.SINGLE);
+    setPersistenceMode(Persistence.NONE);
+    setScopeMode(Scope.SERVER);
   }
 
-  public BackupByteStreamCache(String name)
+  public TransientCache(String name)
   {
     this();
     setName(name);

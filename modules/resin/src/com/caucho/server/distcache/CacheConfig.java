@@ -32,6 +32,7 @@ package com.caucho.server.distcache;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.config.Configurable;
 import com.caucho.cluster.HessianSerializer;
+import com.caucho.cluster.AbstractCache;
 import com.caucho.util.Alarm;
 
 import javax.cache.CacheLoader;
@@ -50,7 +51,7 @@ public class CacheConfig
   private String _guid;
 
   private int _flags = (FLAG_BACKUP
-			| FLAG_TRIPLICATE);
+    | FLAG_TRIPLICATE);
 
   private long _expireTimeout = TIME_INFINITY;
 
@@ -71,6 +72,8 @@ public class CacheConfig
   private CacheSerializer _valueSerializer;
 
   private int _accuracy;
+
+  private AbstractCache.Scope _scope;
 
   /**
    * The Cache will use a CacheLoader to populate cache misses.
@@ -170,15 +173,15 @@ public class CacheConfig
     return _expireTimeoutWindow > 0 ? _expireTimeoutWindow : _expireTimeoutWindow / 4;
   }
 
- /**
+  /**
    * Provides the opportunity to control the expire check window,
    * i.e. the precision of the expirecheck.
    * <p/>
    * Since an expired item can cause a massive cascade of
    * attempted loads from the backup, the actual expiration is randomized.
    */
- @Configurable
- public void setExpireTimeoutWindow(long expireTimeoutWindow)
+  @Configurable
+  public void setExpireTimeoutWindow(long expireTimeoutWindow)
   {
     _expireTimeoutWindow = expireTimeoutWindow;
   }
@@ -210,7 +213,7 @@ public class CacheConfig
    * it doesn't depend on how often it's accessed.
    */
   @Configurable
-    public void setIdleTimeout(long idleTimeout)
+  public void setIdleTimeout(long idleTimeout)
   {
     if (idleTimeout < 0 || TIME_INFINITY <= idleTimeout)
       idleTimeout = TIME_INFINITY;
@@ -227,15 +230,15 @@ public class CacheConfig
     return _idleTimeoutWindow > 0 ? _idleTimeoutWindow : _idleTimeoutWindow / 4;
   }
 
-   /**
+  /**
    * Provides the option to set the idle check window,  the amount of time
    * in which the idle time limit can be spread out to smooth performance.
    * <p/>
    * If this optional value is not set, the system  uses a fraction of the
    * idle time.
    */
-   @Configurable
-    public void setIdleTimeoutWindow(long idleTimeoutWindow)
+  @Configurable
+  public void setIdleTimeoutWindow(long idleTimeoutWindow)
   {
     _idleTimeoutWindow = idleTimeoutWindow;
   }
@@ -273,7 +276,7 @@ public class CacheConfig
    * cache is considered valid.
    */
   @Configurable
-    public void setLocalReadTimeout(long timeout)
+  public void setLocalReadTimeout(long timeout)
   {
     _localReadTimeout = timeout;
   }
@@ -321,7 +324,6 @@ public class CacheConfig
       setFlags(getFlags() & ~CacheConfig.FLAG_BACKUP);
   }
 
-
   /**
    * Returns true is the triplicate backup mode enabled so that
    * all triad servers have a copy of the cache item.
@@ -348,11 +350,31 @@ public class CacheConfig
       setFlags(getFlags() & ~CacheConfig.FLAG_TRIPLICATE);
   }
 
+  /**
+   * Returns the level of accuracy supported by the implementation of JCache
+   */
   public int getCacheStatisticsAccuraccy()
   {
     return _accuracy;
   }
 
+  /**
+   * Sets the {@link AbstractCache.Scope} of this cache.
+   * //TODO(fred): Implement/integrate the initial set of Scopes.
+   */
+  public void setScopeMode(AbstractCache.Scope scope)
+  {
+    _scope = scope;
+  }
+
+  /**
+   * Returns the {@link AbstractCache.Scope} defined for this cache.
+   * @return
+   */
+  public AbstractCache.Scope getScopeMode()
+  {
+    return _scope;
+  }
 
   /**
    * Initializes the CacheConfig.
@@ -366,8 +388,6 @@ public class CacheConfig
       _valueSerializer = new HessianSerializer();
 
     _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
-
-
   }
 
   @Override
