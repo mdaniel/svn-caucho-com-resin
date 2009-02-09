@@ -636,6 +636,9 @@ public class HempBroker implements Broker, ActorStream
 
   protected ActorStream findActor(String jid)
   {
+    if (jid == null)
+      return null;
+    
     WeakReference<ActorStream> ref = _actorStreamMap.get(jid);
 
     if (ref != null) {

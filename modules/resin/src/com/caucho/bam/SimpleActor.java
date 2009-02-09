@@ -47,7 +47,7 @@ public class SimpleActor extends SimpleActorStream
 
   public SimpleActor()
   {
-    // setActorClient(new ProxyActorClient(this));
+    setActorClient(new ProxyActorClient(this));
   }
   
   //

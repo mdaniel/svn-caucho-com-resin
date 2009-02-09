@@ -544,7 +544,10 @@ public class Server extends ProtocolDispatchServer
       try {
 	_adminAuth = (AdminAuthenticator) _webBeans.getInstanceByType(AdminAuthenticator.class);
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+	if (log.isLoggable(Level.FINEST))
+	  log.log(Level.FINEST, e.toString(), e);
+	else
+	  log.finer(e.toString());
 
 	_adminAuth = new AdminAuthenticator();
       }

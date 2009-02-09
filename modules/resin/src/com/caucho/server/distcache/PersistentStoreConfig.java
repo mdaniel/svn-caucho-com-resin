@@ -110,6 +110,10 @@ public class PersistentStoreConfig
     return _isBackup;
   }
 
+  public void setWaitForAcknowledge(boolean isWait)
+  {
+  }
+
   public PersistentStoreConfig createInit()
   {
     return this;
