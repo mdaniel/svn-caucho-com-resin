@@ -85,8 +85,8 @@ public class CustomBeanConfig {
 
     _class = cl;
 
-    System.out.println("CFG: " + this + " " + name + " " + cl);
-    Thread.dumpStack();
+//    System.out.println("CFG: " + this + " " + name + " " + cl);
+//    Thread.dumpStack();
 
     if (! Annotation.class.isAssignableFrom(cl)) {
       _component = new SimpleBean(cl);
