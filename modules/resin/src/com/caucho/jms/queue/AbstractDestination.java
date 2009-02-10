@@ -222,7 +222,7 @@ abstract public class AbstractDestination
 
   protected void generateMessageID(StringBuilder cb)
   {
-    long id = _idCount.incrementAndGet();
+    long id = _idCount.getAndIncrement();
 
     Base64.encode(cb, _idRandom);
     Base64.encode(cb, id);
