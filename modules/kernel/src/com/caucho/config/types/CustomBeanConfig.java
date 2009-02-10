@@ -378,7 +378,7 @@ public class CustomBeanConfig {
 
   public Object toObject()
   {
-    return _component.create();
+    return _component.createNew();
   }
 
   public String toString()

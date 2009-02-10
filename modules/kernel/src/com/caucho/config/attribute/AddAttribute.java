@@ -152,8 +152,6 @@ public class AddAttribute extends Attribute {
 
       value = config.toObject();
 
-      System.out.println("SETV: " + config + " " + value + " " + _setMethod);
-      
       if (_setMethod != null && value != null) {
 	if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))
 	  throw new ConfigException(L.l("'{0}.{1}' is not assignable from {2}",

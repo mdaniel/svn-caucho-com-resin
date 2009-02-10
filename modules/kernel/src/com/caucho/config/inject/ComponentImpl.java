@@ -245,6 +245,11 @@ public class ComponentImpl<T> extends AbstractBean<T>
     return object;
   }
 
+  public T createNew()
+  {
+    return create(new ConfigContext());
+  }
+
   /**
    * Creates a new instance of the component.
    */
