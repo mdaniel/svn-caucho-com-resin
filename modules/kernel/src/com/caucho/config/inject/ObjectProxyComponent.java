@@ -84,7 +84,7 @@ public class ObjectProxyComponent extends ComponentImpl {
     return get();
   }
 
-  protected Object createNew()
+  public Object createNew()
   {
     throw new IllegalStateException();
   }
