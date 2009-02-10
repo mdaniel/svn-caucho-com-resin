@@ -31,15 +31,20 @@ package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
+import com.caucho.config.Unbound;
+import com.caucho.config.Configurable;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.*;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.server.connection.*;
+import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.server.webapp.*;
 
 import javax.annotation.PostConstruct;
+import javax.context.Dependent;
+import javax.inject.AnnotationLiteral;
 import javax.el.*;
 import javax.resource.spi.work.Work;
 import javax.servlet.*;
@@ -54,14 +59,15 @@ import java.util.logging.*;
  */
 
 @Service
-public class ScheduledTask extends BeanConfig
+@Unbound
+@Configurable  
+public class ScheduledTask
   implements AlarmListener, EnvironmentListener
 {
   private static final L10N L = new L10N(ScheduledTask.class);
   private static final Logger log
     = Logger.getLogger(ScheduledTask.class.getName());
 
-  @Current
   private Executor _threadPool;
 
   private ClassLoader _loader;
@@ -87,12 +93,13 @@ public class ScheduledTask extends BeanConfig
   {
     _loader = Thread.currentThread().getContextClassLoader();
 
-    setBeanConfigClass(Runnable.class);
+    _threadPool = ScheduledThreadPool.getLocal();
   }
 
   /**
    * Sets the delay
    */
+  @Configurable  
   public void setDelay(Period delay)
   {
     _trigger = _timerTrigger;
@@ -103,6 +110,7 @@ public class ScheduledTask extends BeanConfig
   /**
    * Sets the period
    */
+  @Configurable  
   public void setPeriod(Period period)
   {
     _trigger = _timerTrigger;
@@ -113,6 +121,7 @@ public class ScheduledTask extends BeanConfig
   /**
    * Sets the cron interval.
    */
+  @Configurable  
   public void setCron(String cron)
   {
     _trigger = new CronType(cron);
@@ -121,6 +130,7 @@ public class ScheduledTask extends BeanConfig
   /**
    * Sets the method expression as a task
    */
+  @Configurable  
   public void setMethod(MethodExpression method)
   {
     _method = method;
@@ -129,6 +139,7 @@ public class ScheduledTask extends BeanConfig
   /**
    * Sets the url expression as a task
    */
+  @Configurable  
   public void setUrl(String url)
   {
     if (! url.startsWith("/"))
@@ -145,22 +156,12 @@ public class ScheduledTask extends BeanConfig
   }
 
   /**
-   * Sets the work task.
-   */
-  @Deprecated
-  public void setWork(Runnable work)
-  {
-    setTask(work);
-  }
-
-  /**
    * Sets the task.
    */
+  @Configurable  
   public void setTask(Runnable task)
   {
     _task = task;
-
-    setClass(task.getClass());
   }
 
   /**
@@ -170,13 +171,18 @@ public class ScheduledTask extends BeanConfig
   public void init()
     throws ConfigException
   {
-    if (_method != null) {
+    if (_task != null) {
+    }
+    else if (_method != null) {
       _task = new MethodTask(_method);
     }
     else if (_url != null) {
+      _task = new ServletTask(_url, _webApp);
     }
-    else
-      super.init();
+
+    if (_task == null)
+      throw new ConfigException(L.l("{0} requires a <task>, <method>, or <url> because the ScheduledTask needs a task to run.",
+				    this));
 
     if (_trigger == null) {
       _timerTrigger.setFirstTime(Long.MAX_VALUE / 2);
@@ -193,12 +199,6 @@ public class ScheduledTask extends BeanConfig
     long nextTime = _trigger.nextTime(now + 500);
 
     _isActive = true;
-
-    if (_url != null)
-      _task = new ServletTask(_url, _webApp);
-
-    if (_task == null)
-      _task = (Runnable) getObject();
 
     assert(_task != null);
 

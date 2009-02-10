@@ -215,11 +215,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public EnvironmentMXBean getAdmin()
   {
-    if (_admin == null) {
-      _admin = new EnvironmentAdmin(this);
-      _admin.register();
-    }
-
     return _admin;
   }
 
@@ -707,7 +702,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentStart(this);
     }
-
+    
+    _admin = new EnvironmentAdmin(this);
+    _admin.register();
+    
     _lifecycle.toActive();
   }
 

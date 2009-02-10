@@ -52,6 +52,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.CacheItem;
+import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
 import com.caucho.security.AdminAuthenticator;
@@ -1415,6 +1416,14 @@ public class Server extends ProtocolDispatchServer
   public ServerMXBean getAdmin()
   {
     return _admin;
+  }
+
+  /**
+   * Returns the admin for the current environment.
+   */
+  public EnvironmentMXBean getEnvironmentAdmin()
+  {
+    return _classLoader.getAdmin();
   }
 
   /**

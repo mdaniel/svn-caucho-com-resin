@@ -181,7 +181,7 @@
         class="com.caucho.security.RoleMap"/>
 
   <bean name="scheduled-task"
-        class="com.caucho.resources.ScheduledTask"/>
+        class="com.caucho.resources.ScheduledTaskConfig"/>
 
   <bean name="security-role-ref"
         class="com.caucho.config.types.SecurityRoleRef"/>

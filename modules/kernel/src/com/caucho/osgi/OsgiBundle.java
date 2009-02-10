@@ -121,7 +121,9 @@ public class OsgiBundle implements Bundle
   {
     _id = id;
     _manager = manager;
+
     _path = path;
+
     _lastModified = Alarm.getCurrentTime();
     _program = program;
     _isExport = isExport;
@@ -131,8 +133,9 @@ public class OsgiBundle implements Bundle
 
     _bundleContext = new OsgiBundleContext(manager, this);
 
-    if (_path != null && _path.getTail().endsWith(".jar"))
+    if (_path != null && _path.getTail().endsWith(".jar")) {
       _jar = JarPath.create(_path);
+    }
 
     try {
       if (_jar != null)
@@ -143,10 +146,10 @@ public class OsgiBundle implements Bundle
       throw ConfigException.create(e);
     }
 
-    if (_path != null) {
+    if (path != null) {
       _loader = new BundleClassLoader(_manager.getParentLoader(),
 				      _symbolicName + "-" + id,
-				      _path);
+				      path);
     }
   }
 

@@ -30,6 +30,8 @@
 package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
+import com.caucho.config.Unbound;
 import com.caucho.config.types.Trigger;
 import com.caucho.config.types.CronType;
 import com.caucho.loader.*;
@@ -44,7 +46,12 @@ import java.util.logging.*;
 /**
  * The cron resources starts application Work tasks at cron-specified
  * intervals.
+ *
+ * @deprecated
+ * @see com.caucho.resources.ScheduledTask
  */
-public class CronResource extends ScheduledTask
+@Service
+@Unbound
+public class CronResource extends ScheduledTaskConfig
 {
 }

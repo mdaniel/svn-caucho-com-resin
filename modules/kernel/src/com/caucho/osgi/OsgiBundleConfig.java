@@ -29,6 +29,9 @@
 
 package com.caucho.osgi;
 
+import com.caucho.config.Service;
+import com.caucho.config.Unbound;
+import com.caucho.config.Configurable;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -42,6 +45,8 @@ import javax.annotation.PostConstruct;
 /**
  * Adds a new bundle to the current environment
  */
+@Service
+@Unbound
 public class OsgiBundleConfig
 {
   private static final L10N L = new L10N(OsgiBundleConfig.class);
