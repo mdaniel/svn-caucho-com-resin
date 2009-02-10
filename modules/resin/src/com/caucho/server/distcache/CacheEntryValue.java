@@ -186,14 +186,34 @@ public final class CacheEntryValue implements ExtCacheEntry {
       return false;
   }
 
-  public final boolean isExpired(long now)
-  {
-    return (_lastUpdateTime + _expireTimeout < now);
-  }
-
   public final boolean isLeaseExpired(long now)
   {
     return (_leaseExpireTime <= now);
+  }
+
+  /**
+   * Returns true is the entry has expired for being idle or having
+   * expired.
+   */
+  public final boolean isEntryExpired(long now)
+  {
+    return (isIdleExpired(now) || isValueExpired(now));
+  }
+
+   /**
+   * Returns true if the value of the entry has expired.
+   */
+  public final boolean isValueExpired(long now)
+  {
+    return ((_lastUpdateTime + _expireTimeout) < now);
+  }
+
+  /**
+   * Returns true is the entry has remained idle  too long.
+   */
+  public final boolean isIdleExpired(long now)
+  {
+    return ((_lastAccessTime + _idleTimeout) < now);
   }
 
   /**
@@ -359,13 +379,10 @@ public final class CacheEntryValue implements ExtCacheEntry {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-   /**
-   * Implements a method required by the interface that should never be
-   * called in this section of the cache.
-   */
+
   public boolean isValid()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (! isEntryExpired(Alarm.getCurrentTime()));
   }
 
   public long getCost()
