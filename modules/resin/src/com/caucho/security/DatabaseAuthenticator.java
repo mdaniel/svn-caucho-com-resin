@@ -282,16 +282,15 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
     if (_cookieUpdate != null) {
       i = _cookieUpdate.indexOf('?');
       if (i < 0)
-        throw new ConfigException(L.l("'cookie-auth-update' expects two parameters"));
+        throw new ConfigException(L.l("'cookie-auth-update' expects two parameters for the cookie id and the user id."));
       int j = _cookieUpdate.indexOf('?', i + 1);
       if (j < 0)
         throw new ConfigException(L.l("'cookie-auth-update' expects two parameters"));
     }
 
-    if ((_cookieUpdate != null) && (_cookieQuery == null))
-      throw new ServletConfigException(L.l("<{0}> expects `{1}'",
-                                     "cookie-auth-update", "cookie-query"));
-    
+    if (_cookieUpdate != null && _cookieQuery == null)
+      throw new ServletConfigException(L.l("<cookie-auth-update> expects 'cookie-query' because both update and select queries are needed."));
+
     if (_roleQuery != null) {
       i = _roleQuery.indexOf('?');
       if (i < 0)
@@ -336,8 +335,9 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
       cookieAuth = (String) request.getParameter("j_use_cookie_auth");
 
     if ("true".equals(cookieAuth) || "on".equals(cookieAuth)
-	|| _useCookie && cookieAuth == null)
+	|| _useCookie && cookieAuth == null) {
       addAuthCookie(user, request);
+    }
 
     return user;
   }
@@ -349,6 +349,8 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
   public boolean isCookieSupported(String jUseCookieAuth)
   {
     if (_cookieQuery == null)
+      return false;
+    else if ("false".equals(jUseCookieAuth) || "off".equals(jUseCookieAuth))
       return false;
     else if (_useCookie)
       return true;

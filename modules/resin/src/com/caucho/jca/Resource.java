@@ -29,10 +29,14 @@
 
 package com.caucho.jca;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
+import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.CurrentLiteral;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.jca.cfg.JavaMailConfig;
 import com.caucho.jmx.IntrospectionMBean;
@@ -46,6 +50,12 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
@@ -57,11 +67,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ResourceAdapter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Configuration for the init-param pattern.
@@ -438,10 +443,23 @@ public class Resource {
     
     InjectManager webBeans = InjectManager.create();
 
-    if (name != null)
-      webBeans.addSingleton(_object, name);
-    else
-      webBeans.addSingleton(_object);
+    SingletonBean singleton;
+
+    if (name != null) {
+      singleton = new SingletonBean(_object, CauchoDeployment.class, name,
+				    new Annotation[] {
+				      CurrentLiteral.CURRENT,
+				      Names.create(name)
+				    });
+    }
+    else {
+      singleton = new SingletonBean(_object, CauchoDeployment.class, null,
+				    new Annotation[] {
+				      CurrentLiteral.CURRENT,
+				    });
+    }
+    
+    webBeans.addBean(singleton);
 
     if (log.isLoggable(Level.CONFIG))
       logConfig();

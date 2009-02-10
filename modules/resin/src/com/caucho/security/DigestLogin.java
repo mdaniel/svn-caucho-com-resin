@@ -29,6 +29,8 @@
 
 package com.caucho.security;
 
+import com.caucho.config.Unbound;
+import com.caucho.config.Service;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharCursor;
@@ -58,6 +60,8 @@ import java.util.logging.Level;
  * digest = MD5(A1 + ':' + nonce + A2)
  * </pre></code>
  */
+@Unbound
+@Service
 public class DigestLogin extends AbstractLogin {
   protected String _realm;
   

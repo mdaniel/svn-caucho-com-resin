@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
 import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
@@ -95,6 +96,11 @@ public class PersistentStoreConfig
     _isBackup = isBackup;
   }
 
+  public void setSaveBackup(boolean isBackup)
+  {
+    setBackup(isBackup);
+  }
+
   public void setTriplicate(boolean isTriplicate)
   {
     _isTriplicate = isTriplicate;
@@ -111,6 +117,10 @@ public class PersistentStoreConfig
   }
 
   public void setWaitForAcknowledge(boolean isWait)
+  {
+  }
+
+  public void setMaxIdleTime(Period period)
   {
   }
 

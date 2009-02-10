@@ -130,4 +130,36 @@ public class AbstractAuthenticator
   {
     return null;
   }
+
+  //
+  // user in role
+
+  /**
+   * Returns true if the user plays the named role.
+   *
+   * @param request the servlet request
+   * @param user the user to test
+   * @param role the role to test
+   */
+  public boolean isUserInRole(Principal user, String role)
+  {
+    try {
+      HttpServletRequest request = null;
+      HttpServletResponse response = null;
+      ServletContext webApp = null;
+      
+      return isUserInRole(request, response, webApp, user, role);
+    } catch (ServletException e) {
+      throw new RuntimeException(e);
+    }
+  }
+      
+  public boolean isUserInRole(HttpServletRequest request,
+                              HttpServletResponse response,
+                              ServletContext application,
+                              Principal user, String role)
+    throws ServletException
+  {
+    return "user".equals(role);
+  }
 }

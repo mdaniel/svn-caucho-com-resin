@@ -163,7 +163,7 @@ public class CustomBeanType extends ConfigType
 
     Field field = null;
     if (uri.equals(_namespaceURI)
-	     && (field = findField(qName.getLocalName())) != null) {
+	&& (field = findField(qName.getLocalName())) != null) {
       return new CustomBeanFieldAttribute(_beanClass, field);
     }
 

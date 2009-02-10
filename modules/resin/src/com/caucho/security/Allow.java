@@ -108,6 +108,8 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
    */
   public void add(ServletRequestPredicate predicate)
   {
+    System.out.println("ADD: " + predicate);
+    
     _predicateList.add(predicate);
   }
 
@@ -116,6 +118,7 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
    */
   public boolean isMatch(String url)
   {
+    System.out.println("MATCH: " + url + " " + _predicateList);
     for (int i = 0; i < _patternList.size(); i++) {
       Pattern pattern = _patternList.get(i);
 
@@ -153,6 +156,8 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
       throw new ConfigException(L.l("Allow must be in a <web-app> context because it requires ServletRequest capabilities."));
 
     webApp.addSecurityConstraint(this);
+
+    System.out.println("INIT: " + this + " " + webApp);
   }
 
   /**

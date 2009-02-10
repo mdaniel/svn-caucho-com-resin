@@ -795,7 +795,8 @@ public class InjectManager
   {
     Bean<T> factory = createTransient(type);
 
-    return factory.create(null);
+    // server/10gn
+    return factory.create(new ConfigContext());
   }
 
   /**

@@ -151,6 +151,8 @@ public class AddAttribute extends Attribute {
       CustomBeanConfig config = (CustomBeanConfig) value;
 
       value = config.toObject();
+
+      System.out.println("SETV: " + config + " " + value + " " + _setMethod);
       
       if (_setMethod != null && value != null) {
 	if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))

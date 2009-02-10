@@ -30,6 +30,8 @@
 package com.caucho.security;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Unbound;
+import com.caucho.config.Service;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.session.SessionManager;
@@ -54,7 +56,9 @@ import java.util.logging.Level;
  *
  * @since Resin 2.0.2
  */
-@com.caucho.config.Service
+
+@Service
+@Unbound  
 public class FormLogin extends AbstractLogin
 {
   private static final L10N L = new L10N(FormLogin.class);
@@ -203,7 +207,7 @@ public class FormLogin extends AbstractLogin
     Principal user;
     
     Authenticator auth = getAuthenticator();
-    
+
     if (auth instanceof CookieAuthenticator) {
       CookieAuthenticator cookieAuth = (CookieAuthenticator) auth;
       
@@ -243,7 +247,8 @@ public class FormLogin extends AbstractLogin
   {
     String userName = request.getParameter("j_username");
 
-    return userName == null || userName.equals(savedUser.getName());
+    // server/135j
+    return userName == null;// || userName.equals(savedUser.getName());
   }
 
   /**

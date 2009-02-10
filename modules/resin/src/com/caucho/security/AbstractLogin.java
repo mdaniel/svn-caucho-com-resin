@@ -282,8 +282,9 @@ public abstract class AbstractLogin implements Login {
     user = findSavedUser(request);
 
     // server/12c9 - new login overrides old
-    if (user != null && isSavedUserValid(request, user))
+    if (user != null && isSavedUserValid(request, user)) {
       return user;
+    }
     
     user = getLoginPrincipalImpl(request);
 
