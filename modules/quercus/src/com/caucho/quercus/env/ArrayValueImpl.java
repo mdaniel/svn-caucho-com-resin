@@ -97,10 +97,14 @@ public class ArrayValueImpl extends ArrayValue
       // php/0662 for copy
       Entry entry = createEntry(ptr._key);
 
+      /* php/04b1
       if (ptr._var != null)
         entry._var = ptr._var;
       else
         entry._value = ptr._value.copyArrayItem();
+      */
+      
+      entry._value = value.copyArrayItem();
     }
   }
 
@@ -198,10 +202,10 @@ public class ArrayValueImpl extends ArrayValue
       ptrCopy._index = ptr._index;
 
       if (prev == null)
-	_head = _current = ptrCopy;
+        _head = _current = ptrCopy;
       else {
-	prev._next = ptrCopy;
-	ptrCopy._prev = prev;
+        prev._next = ptrCopy;
+        ptrCopy._prev = prev;
       }
 
       prev = ptrCopy;
