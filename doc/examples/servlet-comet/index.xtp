@@ -44,19 +44,19 @@ application sending Hessian packets to update the monitoring display.</p>
   <td>resin-web.xml configuration</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/META-INF/beans.xml"/></td>
+  <td><viewfile-link file="WEB-INF/classez/META-INF/beans.xml"/></td>
   <td>Java Injection beans.xml marker for class scanning</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/example/TestCometServlet.java"/></td>
+  <td><viewfile-link file="WEB-INF/classez/example/TestCometServlet.java"/></td>
   <td>The Comet servlet.</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/example/TimerService.java"/></td>
+  <td><viewfile-link file="WEB-INF/classez/example/TimerService.java"/></td>
   <td>Application service for timer/comet events.</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/example/CometState.java"/></td>
+  <td><viewfile-link file="WEB-INF/classez/example/CometState.java"/></td>
   <td>The application's Comet controller state.</td>
 </tr>
 <tr>
