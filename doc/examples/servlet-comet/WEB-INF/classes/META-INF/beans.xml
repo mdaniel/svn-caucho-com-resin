@@ -1,0 +1,8 @@
+<Beans xmlns="urn:java:ee">
+  <!--
+     - META-INF/beans.xml is used as a marker to tell Resin to scan all
+     - classes in the directory tree for Java Injection beans.  The matching
+     - beans will be available for injection using @javax.inject.Current
+    -->
+</Beans>
+

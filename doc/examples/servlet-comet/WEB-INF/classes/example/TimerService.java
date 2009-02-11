@@ -3,12 +3,30 @@ package example;
 import java.util.*;
 import java.util.concurrent.*;
 
-import javax.webbeans.Component;
-import javax.webbeans.In;
+import javax.context.ApplicationScoped;
+import javax.inject.Current;
+import javax.inject.Initializer;
 
 import com.caucho.servlet.comet.*;
 
-@Component
+/**
+ * The TimerService is an injectible service used to provide example events
+ * for the comet application.  The ScheduledExecutorService schedules
+ * a timer every 2 seconds, causing the TimerService to wake up the
+ * comet threads so they can process the next data.
+ *
+ * @ApplicationScoped is a Java Injection marker telling Resin to create
+ * a singleton instance of TimerService in the webApp to be used by all
+ * clients.
+ *
+ * @Initializer selects the constructor for Java Injection and tells
+ * it to inject Resin's own ScheduledExecutorService, which Resin
+ * automatically registers with Java Injection under the @Current binding.
+ *
+ * Using Resin's ScheduledExecutorService is a good idea because it
+ * uses Resin's own thread management and configuration for the applications.
+ */
+@ApplicationScoped
 public class TimerService implements Runnable {
   private ScheduledExecutorService _timer;
   
@@ -17,7 +35,13 @@ public class TimerService implements Runnable {
   private ArrayList<CometState> _stateList
     = new ArrayList<CometState>();
 
-  public TimerService(@In ScheduledExecutorService timer)
+  /**
+   * Creates the TimerService for Java Injection, when the comet servlet
+   * asks for it.  Java Injection passes the correct ScheduledExecutorService
+   * automatically.
+   */
+  @Initializer
+  public TimerService(@Current ScheduledExecutorService timer)
   {
     _timer = timer;
     

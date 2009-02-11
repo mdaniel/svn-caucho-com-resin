@@ -44,8 +44,8 @@ application sending Hessian packets to update the monitoring display.</p>
   <td>resin-web.xml configuration</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/META-INF/web-beans.xml"/></td>
-  <td>web-beans.xml marker for class scanning</td>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/beans.xml"/></td>
+  <td>Java Injection beans.xml marker for class scanning</td>
 </tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/TestCometServlet.java"/></td>
@@ -246,13 +246,13 @@ import java.io.*;
 
 import javax.servlet.http.*;
 import javax.servlet.*;
-import javax.webbeans.*;
+import javax.inject.Current;
 
 import com.caucho.servlet.comet.GenericCometServlet;
 import com.caucho.servlet.comet.CometController;
 
 public class TestComet extends GenericCometServlet {
-  @In private TimerService _timerService;
+  @Current private TimerService _timerService;
 
   @Override
   public boolean service(ServletRequest request,

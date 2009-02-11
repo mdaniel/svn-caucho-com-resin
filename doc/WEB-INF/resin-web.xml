@@ -65,11 +65,12 @@
     <redirect regexp="/doc/quercus-java-interface.xtp" target="${app.contextPath}/doc/quercus-java-integration.xtp"/>
     <redirect regexp="/doc/quercus-getting-started.xtp" target="${app.contextPath}/doc/quercus-overview.xtp"/>
   </rewrite-dispatch>
-    
+<!--    
   <web-app-deploy url-prefix="/examples"
                   path="examples"
                   startup-mode="lazy">
   </web-app-deploy>
+  -->
 
   <servlet servlet-name="javadoc" 
            servlet-class="com.caucho.doc.JavadocRedirectServlet"/>

@@ -7,13 +7,13 @@ import java.util.concurrent.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import javax.webbeans.In;
+import javax.inject.Current;
 
 import com.caucho.servlet.comet.*;
 
 public class TestCometServlet extends GenericCometServlet
 {
-  @In private TimerService _timerService;
+  @Current private TimerService _timerService;
   
   private ArrayList<CometState> _itemList
     = new ArrayList<CometState>();
