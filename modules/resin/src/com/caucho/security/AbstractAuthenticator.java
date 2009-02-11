@@ -318,6 +318,9 @@ public class AbstractAuthenticator
 				   DigestCredentials cred,
 				   Object details)
   {
+    if (principal == null)
+      Thread.dumpStack();
+    
     String cnonce = cred.getCnonce();
     String method = cred.getMethod();
     String nc = cred.getNc();
@@ -326,7 +329,7 @@ public class AbstractAuthenticator
     String realm = cred.getRealm();
     byte []clientDigest = cred.getResponse();
     String uri = cred.getUri();
-    
+
     try {
       if (clientDigest == null)
 	return null;
@@ -422,6 +425,11 @@ public class AbstractAuthenticator
    */
   protected PasswordUser getPasswordUser(String userName)
   {
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " getPasswordUser() is not implemented for "
+	       + userName);
+    }
+    
     return null;
   }
 

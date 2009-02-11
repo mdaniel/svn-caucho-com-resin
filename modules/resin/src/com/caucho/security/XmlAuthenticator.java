@@ -251,6 +251,11 @@ public class XmlAuthenticator extends AbstractAuthenticator
     {
       _isDisabled = isDisabled;
     }
+
+    public void addGroup(String role)
+    {
+      addRole(role);
+    }
     
     public void addRole(String role)
     {

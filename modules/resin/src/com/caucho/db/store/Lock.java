@@ -101,13 +101,17 @@ public final class Lock {
 
 	long delta = expire - Alarm.getCurrentTime();
 
-	if (delta < 0 || Alarm.isTest())
+	if (delta < 0)
 	  break;
 
 	try {
 	  wait(delta);
 	} catch (InterruptedException e) {
 	  throw new LockTimeoutException(e);
+	}
+
+	if (Alarm.isTest()) {
+	  expire = 0;
 	}
       }
 

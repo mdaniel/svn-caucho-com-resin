@@ -35,6 +35,7 @@ import com.caucho.server.security.*;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
+import javax.inject.UnsatisfiedDependencyException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.*;
@@ -119,13 +120,14 @@ public abstract class AbstractLogin implements Login {
     if (_auth == null) {
       try {
 	_auth = _webBeans.getInstanceByType(Authenticator.class);
-      } catch (Exception e) {
+      } catch (UnsatisfiedDependencyException e) {
         log.finer(e.toString());
 	log.log(Level.FINEST, e.toString(), e);
       }
 
-      if (_auth == null)
-        _auth = new NullAuthenticator();
+      if (_auth == null) {
+	_auth = new NullAuthenticator();
+      }
 
       if (log.isLoggable(Level.FINE))
 	log.fine(toString() + " using " + _auth);

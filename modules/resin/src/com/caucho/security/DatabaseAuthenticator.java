@@ -460,7 +460,8 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
    * Returns the password for authenticators too lazy to calculate the
    * digest.
    */
-  protected PasswordUser getUser(String username)
+  @Override
+  protected PasswordUser getPasswordUser(String username)
   {
     Connection conn = null;
     PreparedStatement stmt = null;

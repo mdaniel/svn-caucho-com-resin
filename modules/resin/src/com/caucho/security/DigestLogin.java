@@ -38,6 +38,7 @@ import com.caucho.util.RandomUtil;
 import com.caucho.util.StringCharCursor;
 import com.caucho.xml.XmlChar;
 
+import javax.context.ApplicationScoped;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -60,10 +61,14 @@ import java.util.logging.Level;
  * digest = MD5(A1 + ':' + nonce + A2)
  * </pre></code>
  */
-@Unbound
-@Service
+
+@ApplicationScoped
 public class DigestLogin extends AbstractLogin {
   protected String _realm;
+
+  public DigestLogin()
+  {
+  }
   
   /**
    * Sets the login realm.
