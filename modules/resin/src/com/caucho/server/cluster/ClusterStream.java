@@ -336,14 +336,16 @@ public class ClusterStream implements ActorStream {
       boolean isAdmin = true;
       out.write(isAdmin ? 1 : 0);
 
-      writeLong(id);
-      writeString(to);
-      writeString(from);
-
       Hessian2Output hOut = getHessianOutputStream();
+
+      hOut.startPacket();
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
     
       hOut.writeObject(query);
       hOut.writeObject(error);
+      hOut.endPacket();
     } catch (IOException e) {
       throw new ActorException(e);
     }

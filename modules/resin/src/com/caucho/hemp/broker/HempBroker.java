@@ -347,7 +347,7 @@ public class HempBroker implements Broker, ActorStream
    */
   public void presence(String to, String from, Serializable payload)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presence(to, from, payload);
@@ -366,7 +366,7 @@ public class HempBroker implements Broker, ActorStream
 				      String from,
 				      Serializable data)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceUnavailable(to, from, data);
@@ -385,7 +385,7 @@ public class HempBroker implements Broker, ActorStream
 			        String from,
 			        Serializable data)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceProbe(to, from, data);
@@ -404,7 +404,7 @@ public class HempBroker implements Broker, ActorStream
 				    String from,
 				    Serializable data)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceSubscribe(to, from, data);
@@ -423,7 +423,7 @@ public class HempBroker implements Broker, ActorStream
 				     String from,
 				     Serializable data)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceSubscribed(to, from, data);
@@ -442,7 +442,7 @@ public class HempBroker implements Broker, ActorStream
 				      String from,
 				      Serializable data)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceUnsubscribe(to, from, data);
@@ -461,7 +461,7 @@ public class HempBroker implements Broker, ActorStream
 				       String from,
 				       Serializable data)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceUnsubscribed(to, from, data);
@@ -481,7 +481,7 @@ public class HempBroker implements Broker, ActorStream
 			        Serializable data,
 			        ActorError error)
   {
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.presenceError(to, from, data, error);
@@ -500,13 +500,13 @@ public class HempBroker implements Broker, ActorStream
   {
     Alarm.yieldIfTest();
     
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.message(to, from, value);
     else {
       log.fine(this + " sendMessage to=" + to + " from=" + from
-	       + " is an unknown stream");
+	       + " is an unknown actor stream.");
     }
   }
 
@@ -520,13 +520,13 @@ public class HempBroker implements Broker, ActorStream
   {
     Alarm.yieldIfTest();
     
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.messageError(to, from, value, error);
     else {
       log.fine(this + " sendMessageError to=" + to + " from=" + from
-	       + " error=" + error + " is an unknown stream");
+	       + " error=" + error + " is an unknown actor stream.");
     }
   }
 
@@ -538,7 +538,7 @@ public class HempBroker implements Broker, ActorStream
   {
     Alarm.yieldIfTest();
     
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null) {
       try {
@@ -578,7 +578,7 @@ public class HempBroker implements Broker, ActorStream
   {
     Alarm.yieldIfTest();
     
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream == null) {
       if (log.isLoggable(Level.FINE)) {
@@ -607,12 +607,13 @@ public class HempBroker implements Broker, ActorStream
   {
     Alarm.yieldIfTest();
     
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.queryResult(id, to, from, value);
     else
-      throw new RuntimeException(L.l("{0} is an unknown entity", to));
+      throw new RuntimeException(L.l("{0}: {1} is an unknown actor stream.",
+				     this, to));
   }
 
   /**
@@ -626,15 +627,15 @@ public class HempBroker implements Broker, ActorStream
   {
     Alarm.yieldIfTest();
     
-    ActorStream stream = findActor(to);
+    ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.queryError(id, to, from, payload, error);
     else
-      throw new RuntimeException(L.l("{0} is an unknown entity", to));
+      throw new RuntimeException(L.l("{0} is an unknown actor stream.", to));
   }
 
-  protected ActorStream findActor(String jid)
+  protected ActorStream findActorStream(String jid)
   {
     if (jid == null)
       return null;
@@ -647,7 +648,7 @@ public class HempBroker implements Broker, ActorStream
       if (stream != null)
 	return stream;
     }
-
+    
     if (jid.endsWith("@")) {
       // jms/3d00
       jid = jid + getDomain();

@@ -175,9 +175,17 @@ public class CustomBeanType extends ConfigType
 
     Class cl = createClass(qName);
 
-    if (cl == null)
-      throw new ConfigException(L.l("'{0}' cannot be instantiated because it does not map to a known class",
-				    qName));
+    if (cl == null) {
+      if (Character.isLowerCase(qName.getLocalName().charAt(0))) {
+	throw new ConfigException(L.l("'{0}' is an unknown field of {1}",
+				      qName.getLocalName(),
+				      _beanClass.getName()));
+      }
+      else {
+	throw new ConfigException(L.l("'{0}' cannot be instantiated because it does not map to a known class",
+				      qName));
+      }
+    }
 
     if (Annotation.class.isAssignableFrom(cl))
       return new CustomBeanAnnotationAttribute(cl);

@@ -1252,14 +1252,20 @@ public class HmuxRequest extends AbstractHttpRequest
 
     endHmtpPacket();
 
-    if (log.isLoggable(Level.FINER))
-      log.fine(dbgId() + (char) code + "-r: HMTP queryResult " + value
+    if (log.isLoggable(Level.FINER)) {
+      log.fine(dbgId() + (char) code + "-r: HMTP queryError " +
+	       error + " " + value
 	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+    }
 
-    if (to == null)
-      getLinkStream().queryResult(id, to, from, value);
-    else
-      getBrokerStream(isAdmin).queryResult(id, to, from, value);
+    try {
+      if (to == null)
+	getLinkStream().queryError(id, to, from, value, error);
+      else
+	getBrokerStream(isAdmin).queryError(id, to, from, value, error);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   void writeHmtpMessage(String to,

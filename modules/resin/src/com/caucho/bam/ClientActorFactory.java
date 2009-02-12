@@ -42,4 +42,10 @@ public interface ClientActorFactory
    */
   public ActorClient getConnection(String uid,
 				   String resource);
+  /**
+   * Creates a client
+   */
+  public ActorClient getConnection(ActorStream actorStream,
+				   String uid,
+				   String resource);
 }

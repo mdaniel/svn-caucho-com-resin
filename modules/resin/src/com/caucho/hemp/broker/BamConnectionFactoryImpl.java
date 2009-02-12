@@ -81,6 +81,19 @@ public class BamConnectionFactoryImpl implements ClientActorFactory
     
     return _broker.getConnection(uid, resource);
   }
+  
+  /**
+   * Creates a session
+   */
+  public ActorClient getConnection(ActorStream stream,
+				   String uid,
+				   String resource)
+  {
+    if (uid == null)
+      uid = createUid();
+    
+    return _broker.getConnection(stream, uid, resource);
+  }
 
   private String createUid()
   {

@@ -632,6 +632,11 @@ public class BeanType extends ConfigType
 
 	String className = name.substring(3);
 	String propName = toXmlName(name.substring(3));
+
+	TagName tagName = method.getAnnotation(TagName.class);
+
+	if (tagName != null)
+	  propName = tagName.value();
 	
 	Attribute attr;
 	

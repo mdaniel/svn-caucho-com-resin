@@ -229,13 +229,11 @@ public class Server extends ProtocolDispatchServer
     String triadId
       = (cluster.getId() + ":" + _selfServer.getClusterTriad().getId());
 
-    ClassLoader parentClassLoader
-      = Thread.currentThread().getContextClassLoader();
-    _classLoader = EnvironmentClassLoader.create(parentClassLoader,
-						 "server:" + triadId);
+    _classLoader = (EnvironmentClassLoader) cluster.getClassLoader();
+
+    _classLoader.setId("server:" + triadId);
 
     _serverLocal.set(this, _classLoader);
-    log.warning("SET: " + _classLoader);
     
     if (! Alarm.isTest())
       _serverHeader = "Resin/" + com.caucho.Version.VERSION;

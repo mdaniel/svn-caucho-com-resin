@@ -195,7 +195,6 @@ public class FileQueueImpl extends AbstractQueue implements Topic
     }
       
     _isStartComplete = _store.receiveStart(_hash, this);
-    System.out.println("DINE: " + _isStartComplete);
   }
 
   /**

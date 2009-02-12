@@ -63,7 +63,7 @@ import javax.annotation.PostConstruct;
  * Defines a set of clustered servers.
  */
 abstract public class Cluster
-  implements EnvironmentListener, SchemaBean
+  implements EnvironmentBean, EnvironmentListener, SchemaBean
 {
   private static final L10N L = new L10N(Cluster.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
@@ -74,6 +74,7 @@ abstract public class Cluster
   
   private Resin _resin;
 
+  private EnvironmentClassLoader _classLoader;
   private Path _rootDirectory;
 
   private ClusterAdmin _admin;
@@ -93,15 +94,11 @@ abstract public class Cluster
     
     _resin = resin;
     
-    //_classLoader = EnvironmentClassLoader.create("cluster:??");
-
-    //_clusterLocal.set(this, _classLoader);
-  
-    //_serverId = _serverIdLocal.get();
+    _classLoader = EnvironmentClassLoader.create("cluster:??");
 
     Environment.addEnvironmentListener(this, resin.getClassLoader());
 
-    // Config.setProperty("cluster", new Var(), _classLoader);
+    Config.setProperty("cluster", new Var(), _classLoader);
 
     _rootDirectory = Vfs.getPwd();
   }
@@ -116,7 +113,7 @@ abstract public class Cluster
     
     _id = id;
 
-    // _classLoader.setId("cluster:" + _id);
+    _classLoader.setId("cluster:" + _id);
   }
 
   /**
@@ -146,12 +143,10 @@ abstract public class Cluster
   /**
    * Returns the environment class loader.
    */
-  /*
   public ClassLoader getClassLoader()
   {
     return _classLoader;
   }
-  */
 
   /**
    * Returns the relax schema.
@@ -612,11 +607,20 @@ abstract public class Cluster
   Server startServer(ClusterServer clusterServer)
     throws StartLifecycleException
   {
-    Server server = createResinServer(clusterServer);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    _serverProgram.configure(server);
+    try {
+      thread.setContextClassLoader(getClassLoader());
+      
+      Server server = createResinServer(clusterServer);
 
-    return server;
+      _serverProgram.configure(server);
+
+      return server;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   protected Server createResinServer(ClusterServer clusterServer)

@@ -185,6 +185,7 @@ public class WbWebBeans {
   /**
    * Adds the interceptors
    */
+  @TagName("Interceptors")
   public Interceptors createInterceptors()
   {
     return new Interceptors();
@@ -193,6 +194,7 @@ public class WbWebBeans {
   /**
    * Adds the decorators
    */
+  @TagName("Decorators")
   public Decorators createDecorators()
   {
     return new Decorators();

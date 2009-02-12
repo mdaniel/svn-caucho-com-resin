@@ -236,8 +236,6 @@ public class FileQueueStore
 
       rs.close();
 
-      System.out.println("COUNT: " + count + " " + receiveStartStmt);
-
       return count < START_LIMIT;
     } catch (RuntimeException e) {
       throw e;
