@@ -30,26 +30,24 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.TcpInputOutput;
+import com.caucho.quercus.lib.UdpInputOutput;
+import com.caucho.quercus.lib.file.SocketInputOutput.Domain;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Handling the PHP Stream API
@@ -427,7 +425,8 @@ public class StreamModule extends AbstractQuercusModule {
   /*
    * Opens an Internet connection.
    */
-  public static Value stream_socket_client(Env env,
+  @ReturnNullAsFalse
+  public static SocketInputOutput stream_socket_client(Env env,
                                   @NotNull String remoteSocket,
                                   @Optional @Reference Value errorInt,
                                   @Optional @Reference Value errorStr,
@@ -438,13 +437,14 @@ public class StreamModule extends AbstractQuercusModule {
     try {
       if (remoteSocket == null) {
         env.warning("socket to connect to must not be null");
-        return BooleanValue.FALSE;
+        return null;
       }
       
       if (flags != STREAM_CLIENT_CONNECT) {
         env.stub("unsupported stream_socket_client flag");
       }
       
+      boolean isTcp = true;
       boolean isSecure = false;
       remoteSocket = remoteSocket.trim();
 
@@ -459,10 +459,13 @@ public class StreamModule extends AbstractQuercusModule {
         else if (type.equals("ssl")) {
           isSecure = true;
         }
+        else if (type.equals("udp")) {
+          isTcp = false;
+        }
         else {
           env.warning(L.l("unrecognized socket transport: {0}", type));
           
-          return BooleanValue.FALSE;
+          return null;
         }
       }
 
@@ -486,31 +489,27 @@ public class StreamModule extends AbstractQuercusModule {
         }
       }
 
-      Socket socket;
+      SocketInputOutput stream;
       
-      if (isSecure)
-        socket = SSLSocketFactory.getDefault().createSocket(host, port);
+      if (isTcp)
+        stream = new TcpInputOutput(env, host, port, isSecure, Domain.AF_INET);
       else
-        socket = SocketFactory.getDefault().createSocket(host, port);
-
-      socket.setSoTimeout((int) (timeout * 1000));
-
-      SocketInputOutput stream
-        = new SocketInputOutput(env, socket, SocketInputOutput.Domain.AF_INET);
-
+        stream = new UdpInputOutput(env, host, port, Domain.AF_INET);
+      
+      stream.setTimeout((int) (timeout * 1000));
       stream.init();
 
-      return env.wrapJava(stream);
+      return stream;
     }
     catch (UnknownHostException e) {
       errorStr.set(env.createString(e.getMessage()));
       
-      return BooleanValue.FALSE;
+      return null;
     }
     catch (IOException e) {
       errorStr.set(env.createString(e.getMessage()));
       
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 

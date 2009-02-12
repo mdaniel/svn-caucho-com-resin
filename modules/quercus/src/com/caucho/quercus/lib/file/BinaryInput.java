@@ -69,12 +69,6 @@ public interface BinaryInput extends BinaryStream {
     throws IOException;
 
   /**
-   * Reads into a buffer, returning -1 on eof.
-   */
-  public int read(char []buffer, int offset, int length)
-    throws IOException;
-
-  /**
    * Reads a Binary string.
    */
   public StringValue read(int length)
@@ -117,14 +111,5 @@ public interface BinaryInput extends BinaryStream {
    * Closes the stream for reading
    */
   public void closeRead();
-
-  /**
-   * Sets the current read encoding.  The encoding can either be a
-   * Java encoding name or a mime encoding.
-   *
-   * @param encoding name of the read encoding
-   */
-  public void setEncoding(String encoding)
-    throws UnsupportedEncodingException;
 }
 

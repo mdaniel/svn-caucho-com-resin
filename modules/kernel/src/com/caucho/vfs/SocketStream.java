@@ -54,7 +54,6 @@ public class SocketStream extends StreamImpl {
   private byte []_newline = UNIX_NEWLINE;
 
   private boolean _throwReadInterrupts = false;
-  private int _socketTimeout;
 
   private long _totalReadBytes;
   private long _totalWriteBytes;
@@ -229,9 +228,6 @@ public class SocketStream extends StreamImpl {
       s.setSoTimeout((int) timeout);
 
       int readLength = read(buf, offset, length);
-
-      if (readLength > 0)
-	System.out.println("READ: " + new String(buf, offset, readLength));
 
       return readLength;
     } finally {

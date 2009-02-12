@@ -37,6 +37,8 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.TcpInputOutput;
+import com.caucho.quercus.lib.UdpInputOutput;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
@@ -44,11 +46,13 @@ import com.caucho.vfs.TempCharBuffer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -207,13 +211,11 @@ public class SocketModule extends AbstractQuercusModule {
  
   @ReturnNullAsFalse
   public static SocketInputOutput socket_create(Env env,
-                                              int domain, 
-                                              int type, 
-                                              int protocol)
+                                                int domain, 
+                                                int type, 
+                                                int protocol)
   {
     try {
-      InetAddress local = null;
-
       SocketInputOutput.Domain socketDomain = SocketInputOutput.Domain.AF_INET;
 
       switch (domain) {
@@ -233,20 +235,22 @@ public class SocketModule extends AbstractQuercusModule {
 
       switch (type) {
         case SOCK_STREAM:
-          return new SocketInputOutput(env, new Socket(), socketDomain);
+          return new TcpInputOutput(env, new Socket(), socketDomain);
         case SOCK_DGRAM:
-          env.warning(L.l("Datagrams not supported"));
-          return null;
+          return new UdpInputOutput(env, new DatagramSocket(), socketDomain);
         default:
+          env.warning(L.l("socket stream not socked"));
           return null;
       }
 
     } catch (Exception e) {
+      env.warning(e);
       return null;
     }
   }
 
-  public static boolean socket_bind(Env env, @NotNull SocketInputOutput socket,
+  public static boolean socket_bind(Env env,
+                                    @NotNull SocketInputOutput socket,
                                     StringValue address, 
                                     @Optional("0") int port)
   {
@@ -274,7 +278,8 @@ public class SocketModule extends AbstractQuercusModule {
     socket.close();
   }
 
-  public static boolean socket_connect(Env env, @NotNull SocketInputOutput socket,
+  public static boolean socket_connect(Env env,
+                                       @NotNull SocketInputOutput socket,
                                        StringValue address, @Optional int port)
   {
     try {
@@ -301,7 +306,8 @@ public class SocketModule extends AbstractQuercusModule {
     return StreamModule.stream_get_meta_data(env, stream);
   }
 
-  public static Value socket_read(Env env, @NotNull SocketInputOutput socket,
+  public static Value socket_read(Env env,
+                                  @NotNull SocketInputOutput socket,
                                   int length, @Optional int type)
   {
     TempBuffer tempBuffer = null;
@@ -359,12 +365,18 @@ public class SocketModule extends AbstractQuercusModule {
     if (length < 0)
       length = Integer.MAX_VALUE;
 
-    int result = socket.write(is, length);
+    try {
+      int result = socket.write(is, length);
 
-    if (result < 0)
+      if (result < 0)
+        return BooleanValue.FALSE;
+      else
+        return LongValue.create(result);
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
       return BooleanValue.FALSE;
-    else
-      return LongValue.create(result);
+    }
   }
 
   /**
@@ -373,8 +385,8 @@ public class SocketModule extends AbstractQuercusModule {
    * @param how 0 = read, 1 = write, 2 = both
    */
   public boolean socket_shutdown(Env env,
-				 @NotNull SocketInputOutput file,
-				 int how)
+                                 @NotNull SocketInputOutput file,
+                                 int how)
   {
     if (file == null)
       return false;

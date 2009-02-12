@@ -29,38 +29,34 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.*;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Represents a Quercus file open for reading
  */
-public class AbstractBinaryInputOutput
+abstract public class AbstractBinaryInputOutput
   implements BinaryInput, BinaryOutput
 {
   private static final Logger log
     = Logger.getLogger(AbstractBinaryInputOutput.class.getName());
 
-  private Env _env;
-  private final LineReader _lineReader;
+  protected final Env _env;
+  protected final LineReader _lineReader;
 
-  private ReadStream _is;
-  private WriteStream _os;
+  private InputStream _is;
+  private OutputStream _os;
 
   // Set to true when EOF is read from the input stream.
 
-  private boolean _isTimeout;
-  private boolean _isEOF;
+  protected boolean _isTimeout;
+  protected boolean _isEOF;
 
   protected AbstractBinaryInputOutput(Env env)
   {
@@ -68,7 +64,7 @@ public class AbstractBinaryInputOutput
     _lineReader = new LineReader(env);
   }
 
-  public void init(ReadStream is, WriteStream os)
+  public void init(InputStream is, OutputStream os)
   {
     _is = is;
     _os = os;
@@ -95,24 +91,11 @@ public class AbstractBinaryInputOutput
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void setEncoding(String encoding)
-    throws UnsupportedEncodingException
-  {
-    if (_is != null)
-      _is.setEncoding(encoding);
-  }
-
   /**
    * Unread the last byte.
    */
-  public void unread()
-    throws IOException
-  {
-    if (_is != null) {
-      _is.unread();
-      _isEOF = false;
-    }
-  }
+  abstract public void unread()
+    throws IOException;
 
   /**
    * Reads a character from a file, returning -1 on EOF.
@@ -169,35 +152,6 @@ public class AbstractBinaryInputOutput
   }
 
   /**
-   * Reads a buffer from a file, returning -1 on EOF.
-   */
-  public int read(char []buffer, int offset, int length)
-    throws IOException
-  {
-    try {
-      if (_is != null) {
-	int c = _is.read(buffer, offset, length);
-
-	if (c == -1)
-	  _isEOF = true;
-	else
-	  _isEOF = false;
-
-	return c;
-      }
-      else
-	return -1;
-    } catch (IOException e) {
-      _isTimeout = true;
-      _isEOF = true;
-
-      log.log(Level.FINER, e.toString(), e);
-
-      return -1;
-    }
-  }
-
-  /**
    * Reads into a binary builder.
    */
   public StringValue read(int length)
@@ -212,41 +166,6 @@ public class AbstractBinaryInputOutput
       return bb;
     else
       return null;
-  }
-
-  /**
-   * Reads the optional linefeed character from a \r\n
-   */
-  public boolean readOptionalLinefeed()
-    throws IOException
-  {
-    if (_is == null)
-      return false;
-
-    int ch = read();
-
-    if (ch == '\n') {
-      return true;
-    }
-    else {
-      _is.unread();
-      return false;
-    }
-  }
-
-  public void writeToStream(OutputStream os, int length)
-    throws IOException
-  {
-    try {
-      if (_is != null) {
-	_is.writeToStream(os, length);
-      }
-    } catch (IOException e) {
-      _isTimeout = true;
-      _isEOF = true;
-
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 
   /**
@@ -266,6 +185,26 @@ public class AbstractBinaryInputOutput
       log.log(Level.FINER, e.toString(), e);
 
       return _env.getEmptyString();
+    }
+  }
+  
+  /**
+   * Reads the optional linefeed character from a \r\n
+   */
+  public boolean readOptionalLinefeed()
+    throws IOException
+  {
+    if (_is == null)
+      return false;
+
+    int ch = read();
+
+    if (ch == '\n') {
+      return true;
+    }
+    else {
+      unread();
+      return false;
     }
   }
 
@@ -300,30 +239,12 @@ public class AbstractBinaryInputOutput
   /**
    * Returns the current location in the file.
    */
-  public long getPosition()
-  {
-    if (_is != null)
-      return _is.getPosition();
-    else
-      return -1;
-  }
+  abstract public long getPosition();
 
   /**
    * Sets the current location in the file.
    */
-  public boolean setPosition(long offset)
-  {
-    if (_is == null)
-      return false;
-
-    _isEOF = false;
-
-    try {
-      return _is.setPosition(offset);
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
+  abstract public boolean setPosition(long offset);
 
   public long seek(long offset, int whence)
   {
@@ -361,11 +282,15 @@ public class AbstractBinaryInputOutput
    */
   public void closeRead()
   {
-    ReadStream is = _is;
-    _is = null;
+    try {
+      InputStream is = _is;
+      _is = null;
 
-    if (is != null)
-      is.close();
+      if (is != null)
+        is.close();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   //
@@ -397,6 +322,7 @@ public class AbstractBinaryInputOutput
    * argument and write them to this output stream.
    */
   public int write(InputStream is, int length)
+    throws IOException
   {
     int writeLength = 0;
 
@@ -424,8 +350,6 @@ public class AbstractBinaryInputOutput
       }
 
       return writeLength;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
     } finally {
       TempBuffer.free(tb);
     }
@@ -439,14 +363,17 @@ public class AbstractBinaryInputOutput
   {
     write((byte) v);
   }
-
+  
   /**
    * Prints a string to a file.
    */
-  public void print(String v)
+  public void print(String s)
     throws IOException
   {
-    _os.print(v);
+    int len = s.length();
+    for (int i = 0; i < len; i++) {
+      print(s.charAt(i));
+    }
   }
 
   /**
@@ -465,7 +392,7 @@ public class AbstractBinaryInputOutput
   public void closeWrite()
   {
     try {
-      WriteStream os = _os;
+      OutputStream os = _os;
       _os = null;
 
       if (os != null)
@@ -509,7 +436,7 @@ public class AbstractBinaryInputOutput
   public String toString()
   {
     if (_is != null)
-      return "AbstractBinaryInputOutput[" + _is.getPath() + "]";
+      return "AbstractBinaryInputOutput[]";
     else
       return "AbstractBinaryInputOutput[closed]";
   }

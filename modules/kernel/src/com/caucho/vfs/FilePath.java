@@ -291,23 +291,22 @@ public class FilePath extends FilesystemPath {
     CharBuffer cb = new CharBuffer();
     char ch;
     int offset = 0;
+    
     // For windows, convert /c: to c:
-    if (isWindows()) {
-      if (length >= 3
-	  && path.charAt(0) == '/'
-	  && path.charAt(2) == ':'
-	  && ('a' <= (ch = path.charAt(1)) && ch <= 'z'
-	      || 'A' <= ch && ch <= 'Z')) {
-        offset = 1;
-      }
-      else if (length >= 3
-	       && path.charAt(0) == '/'
-	       && path.charAt(1) == ':'
-	       && path.charAt(2) == '/') {
-        cb.append('\\');
-        cb.append('\\');
-        offset = 3;
-      }
+    if (length >= 3
+        && path.charAt(0) == '/'
+        && path.charAt(2) == ':'
+        && ('a' <= (ch = path.charAt(1)) && ch <= 'z'
+            || 'A' <= ch && ch <= 'Z')) {
+      offset = 1;
+    }
+    else if (length >= 3
+             && path.charAt(0) == '/'
+             && path.charAt(1) == ':'
+             && path.charAt(2) == '/') {
+      cb.append('\\');
+      cb.append('\\');
+      offset = 3;
     }
 
     for (; offset < length; offset++) {
