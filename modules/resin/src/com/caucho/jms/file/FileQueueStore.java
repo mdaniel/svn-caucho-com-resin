@@ -39,11 +39,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import javax.jms.*;
+//import javax.jms.*;
 import javax.annotation.*;
 
-import com.caucho.jms.queue.*;
-import com.caucho.jms.message.*;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.Hessian2Input;
+//import com.caucho.jms.queue.*;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.config.ConfigException;
 import com.caucho.db.*;
@@ -67,7 +68,7 @@ public class FileQueueStore
   private static final EnvironmentLocal<FileQueueStore> _localStore
     = new EnvironmentLocal<FileQueueStore>();
 
-  private static final MessageType []MESSAGE_TYPE = MessageType.values();
+  // private static final MessageType []MESSAGE_TYPE = MessageType.values();
 
   private static final int START_LIMIT = 8192;
 
@@ -79,7 +80,7 @@ public class FileQueueStore
   private String _name = "default";
   private String _tablePrefix = "jms";
 
-  private MessageFactory _messageFactory;
+  // private MessageFactory _messageFactory;
 
   private String _queueTable;
   private String _messageTable;
@@ -88,7 +89,7 @@ public class FileQueueStore
 
   public FileQueueStore(Path path, String serverId)
   {
-    _messageFactory = new MessageFactory();
+    //    _messageFactory = new MessageFactory();
 
     init(path, serverId);
   }
@@ -163,29 +164,34 @@ public class FileQueueStore
    * Adds a new message to the persistent store.
    */
   public long send(byte []queueHash,
-		   MessageImpl msg,
+		   String msgId,
+		   Serializable payload,
 		   int priority,
 		   long expireTime)
   {
     StoreConnection conn = null;
-    
+
     try {
+      TempOutputStream os = new TempOutputStream();
+      
+      Hessian2Output out = new Hessian2Output(os);
+      out.writeObject(payload);
+      out.close();
+    
       conn = getConnection();
 
       PreparedStatement sendStmt = conn.prepareSend();
 
       sendStmt.setBytes(1, queueHash);
-      sendStmt.setInt(2, priority);
-      sendStmt.setLong(3, expireTime);
-      sendStmt.setString(4, msg.getJMSMessageID());
-      sendStmt.setBinaryStream(5, msg.propertiesToInputStream(), 0);
-      sendStmt.setInt(6, msg.getType().ordinal());
-      sendStmt.setBinaryStream(7, msg.bodyToInputStream(), 0);
+      sendStmt.setString(2, msgId);
+      sendStmt.setBinaryStream(3, os.openInputStream(), 0);
+      sendStmt.setInt(4, priority);
+      sendStmt.setLong(5, expireTime);
 
       sendStmt.executeUpdate();
 
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " send " + msg);
+	log.fine(this + " send " + payload);
 
       ResultSet rs = sendStmt.getGeneratedKeys();
 
@@ -229,9 +235,10 @@ public class FileQueueStore
 	String msgId = rs.getString(2);
 	int priority = rs.getInt(3);
 	long expire = rs.getLong(4);
-	MessageType type = MESSAGE_TYPE[rs.getInt(5)];
+
+	int type = 0;
 	  
-	fileQueue.addEntry(id, msgId, -1, priority, expire, type, null);
+	fileQueue.addEntry(id, msgId, -1, priority, expire, null);
       }
 
       rs.close();
@@ -249,7 +256,7 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  public MessageImpl readMessage(long id, MessageType type)
+  public Serializable readMessage(long id)
   {
     StoreConnection conn = null;
 
@@ -263,53 +270,19 @@ public class FileQueueStore
       ResultSet rs = readStmt.executeQuery();
 
       if (rs.next()) {
-	MessageImpl msg;
-
-	type = MESSAGE_TYPE[rs.getInt(1)];
-
-	switch (type) {
-	case NULL:
-	  msg = new MessageImpl();
-	  break;
-	case BYTES:
-	  msg = new BytesMessageImpl();
-	  break;
-	case MAP:
-	  msg = new MapMessageImpl();
-	  break;
-	case OBJECT:
-	  msg = new ObjectMessageImpl();
-	  break;
-	case STREAM:
-	  msg = new StreamMessageImpl();
-	  break;
-	case TEXT:
-	  msg = new TextMessageImpl();
-	  break;
-	default:
-	  msg = new MessageImpl();
-	  break;
-	}
+	Serializable payload = null;
 	  
-	String msgId = rs.getString(2);
-
-	msg.setJMSMessageID(msgId);
-
-	InputStream is = rs.getBinaryStream(3);
+	InputStream is = rs.getBinaryStream(1);
 	if (is != null) {
-	  msg.readProperties(is);
+	  Hessian2Input in = new Hessian2Input(is);
 
+	  payload = (Serializable) in.readObject();
+
+	  in.close();
 	  is.close();
 	}
 
-	is = rs.getBinaryStream(4);
-	if (is != null) {
-	  msg.readBody(is);
-
-	  is.close();
-	}
-
-	return (MessageImpl) msg;
+	return payload;
       }
 
       rs.close();
@@ -327,7 +300,7 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  public MessageImpl receive(byte []queueHash)
+  public Serializable receive(byte []queueHash)
   {
     StoreConnection conn = null;
     
@@ -453,9 +426,7 @@ public class FileQueueStore
 	   + "  priority integer,"
 	   + "  expire datetime,"
 	   + "  msg_id varchar(64),"
-	   + "  header blob,"
-	   + "  type integer,"
-	   + "  body blob,"
+	   + "  payload blob,"
 	   + "  is_valid bit"
 	   + ")");
 
@@ -527,8 +498,8 @@ public class FileQueueStore
     {
       if (_sendStmt == null) {
 	String sql = ("insert into " + _messageTable
-		      + " (queue_id,priority,expire,msg_id,header,type,body,is_valid)"
-		      + " VALUES(?,?,?,?,?,?,?,1)");
+		      + " (queue_id,msg_id,payload,priority,expire,is_valid)"
+		      + " VALUES(?,?,?,?,?,1)");
     
 	_sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       }
@@ -540,7 +511,7 @@ public class FileQueueStore
       throws SQLException
     {
       if (_receiveStmt == null) {
-	String sql = ("select id,msg_id,header,body from " + _messageTable
+	String sql = ("select id,msg_id,payload from " + _messageTable
 		      + " WHERE queue_id=? LIMIT 1");
     
 	_receiveStmt = _conn.prepareStatement(sql);
@@ -553,7 +524,7 @@ public class FileQueueStore
       throws SQLException
     {
       if (_readStmt == null) {
-	String sql = ("select type,msg_id,header,body from " + _messageTable
+	String sql = ("select payload from " + _messageTable
 		      + " WHERE id=?");
     
 	_readStmt = _conn.prepareStatement(sql);
@@ -566,7 +537,7 @@ public class FileQueueStore
       throws SQLException
     {
       if (_receiveStartStmt == null) {
-	String sql = ("select id,msg_id,priority,expire,type"
+	String sql = ("select id,msg_id,priority,expire"
 		      + " from " + _messageTable
 		      + " WHERE queue_id=? AND is_valid=1 ORDER BY id"
 		      + " LIMIT " + START_LIMIT);
@@ -582,7 +553,7 @@ public class FileQueueStore
     {
       if (_removeStmt == null) {
 	String sql = ("update " + _messageTable
-		      + " set body=null, is_valid=0, expire=now() + 120000"
+		      + " set payload=null, is_valid=0, expire=now() + 120000"
 		      + " WHERE id=?");
     
 	_removeStmt = _conn.prepareStatement(sql);

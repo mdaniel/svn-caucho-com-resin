@@ -31,9 +31,8 @@ package com.caucho.jms.file;
 
 import java.lang.ref.*;
 
-import javax.jms.*;
+import java.io.Serializable;
 
-import com.caucho.jms.message.*;
 import com.caucho.util.Alarm;
 
 /**
@@ -55,9 +54,7 @@ public class FileQueueEntry
 
   private long _expiresTime;
 
-  private MessageType _type;
-
-  private SoftReference<MessageImpl> _msg;
+  private SoftReference<Serializable> _payload;
 
   // True if the message has been read, but not yet committed
   private boolean _isRead;
@@ -83,8 +80,7 @@ public class FileQueueEntry
 			long leaseTimeout,
 			int priority,
 			long expiresTime,
-			MessageType type,
-			MessageImpl msg)
+			Serializable payload)
   {
     if (msgId == null)
       throw new NullPointerException();
@@ -94,28 +90,9 @@ public class FileQueueEntry
     _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
     _priority = priority;
     _expiresTime = expiresTime;
-    _type = type;
 
-    if (msg != null)
-      _msg = new SoftReference<MessageImpl>(msg);
-  }
-
-  public FileQueueEntry(long id,
-			String msgId,
-			long leaseTimeout,
-			int priority,
-			long expiresTime,
-			MessageImpl msg)
-  {
-    if (msgId == null)
-      throw new NullPointerException();
-    
-    _id = id;
-    _msgId = msgId;
-    _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
-    _priority = priority;
-    _expiresTime = expiresTime;
-    _msg = new SoftReference<MessageImpl>(msg);
+    if (payload != null)
+      _payload = new SoftReference<Serializable>(payload);
   }
   
   public long getId()
@@ -128,19 +105,9 @@ public class FileQueueEntry
     return _msgId;
   }
 
-  public MessageType getType()
+  public Serializable getPayload()
   {
-    return _type;
-  }
-
-  public void setType(MessageType type)
-  {
-    _type = type;
-  }
-
-  public MessageImpl getMessage()
-  {
-    SoftReference<MessageImpl> ref = _msg;
+    SoftReference<Serializable> ref = _payload;
 
     if (ref != null)
       return ref.get();
@@ -148,9 +115,9 @@ public class FileQueueEntry
       return null;
   }
 
-  public void setMessage(MessageImpl msg)
+  public void setPayload(Serializable payload)
   {
-    _msg = new SoftReference<MessageImpl>(msg);
+    _payload = new SoftReference<Serializable>(payload);
   }
 
   /**

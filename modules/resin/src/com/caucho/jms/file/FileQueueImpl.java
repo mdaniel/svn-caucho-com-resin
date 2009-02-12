@@ -210,9 +210,10 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 		   int priority,
 		   long expires)
   {
-    long id = _store.send(_hash, msg, priority, expires);
+    long id = _store.send(_hash, msg.getJMSMessageID(),
+			  msg, priority, expires);
 
-    addEntry(id, msg.getJMSMessageID(), -1, priority, expires, null, msg);
+    addEntry(id, msg.getJMSMessageID(), -1, priority, expires, msg);
 
     notifyMessageAvailable();
   }
@@ -230,10 +231,11 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 			 int priority,
 			 long expires)
   {
-    long id = _store.send(_hash, msg, priority, expires);
+    long id = _store.send(_hash, msg.getJMSMessageID(), msg,
+			  priority, expires);
 
     addEntry(id, msg.getJMSMessageID(), leaseTimeout,
-	     priority, expires, null, msg);
+	     priority, expires, msg);
   }
 
   /**
@@ -247,11 +249,11 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 
     if (entry != null) {
       try {
-	MessageImpl msg = entry.getMessage();
+	MessageImpl msg = (MessageImpl) entry.getPayload();
 
 	if (msg == null) {
-	  msg = _store.readMessage(entry.getId(), entry.getType());
-	  entry.setMessage(msg);
+	  msg = (MessageImpl) _store.readMessage(entry.getId());
+	  entry.setPayload(msg);
 	}
 
 	if (log.isLoggable(Level.FINER))
@@ -337,7 +339,7 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 	    if (entry.isRead()) {
 	      entry.setRead(false);
 
-	      MessageImpl msg = entry.getMessage();
+	      MessageImpl msg = (MessageImpl) entry.getPayload();
         
 	      if (msg != null)
 		msg.setJMSRedelivered(true);
@@ -395,8 +397,7 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 			  long leaseTimeout,
 			  int priority,
 			  long expire,
-			  MessageType type,
-			  MessageImpl msg)
+			  Serializable payload)
   {
     if (priority < 0)
       priority = 0;
@@ -405,8 +406,7 @@ public class FileQueueImpl extends AbstractQueue implements Topic
 
     FileQueueEntry entry
       = new FileQueueEntry(id, msgId, leaseTimeout,
-			   priority, expire, type,
-			   msg);
+			   priority, expire, payload);
 
     synchronized (_queueLock) {
       entry._prev = _tail[priority];
@@ -461,6 +461,7 @@ public class FileQueueImpl extends AbstractQueue implements Topic
   private void removeEntry(FileQueueEntry entry)
   {
     int priority = entry.getPriority();
+    
     FileQueueEntry prev = entry._prev;
     FileQueueEntry next = entry._next;
     
