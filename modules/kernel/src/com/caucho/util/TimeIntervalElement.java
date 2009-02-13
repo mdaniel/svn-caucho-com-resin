@@ -39,6 +39,7 @@ public class TimeIntervalElement
   private final long _stops;
   private final long _duration;
   private final int _hashCode;
+  private String _toString;
 
   public TimeIntervalElement(long starts, long stops)
   {
@@ -136,4 +137,19 @@ public class TimeIntervalElement
   {
     return this;
   }
+
+   @Override
+   public String toString()
+   {
+     if (_toString == null)
+     {
+       StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+       sb.append("[starts=").append(_starts);
+       sb.append(", stops=").append(_stops);
+       sb.append(", duration=").append(_duration).append("]");
+       _toString = sb.toString();
+     }
+
+     return _toString;
+   }
 }
