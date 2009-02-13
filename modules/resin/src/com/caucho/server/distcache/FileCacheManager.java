@@ -110,7 +110,7 @@ public class FileCacheManager extends DistributedCacheManager {
   /**
    * Returns the key entry.
    */
-  public FileCacheEntry getKey(HashKey hashKey)
+  public FileCacheEntry getCacheEntry(HashKey hashKey)
   {
     FileCacheEntry cacheEntry = _entryCache.get(hashKey);
 
@@ -129,21 +129,22 @@ public class FileCacheManager extends DistributedCacheManager {
   /**
    * Gets a cache entry
    */
-  public ExtCacheEntry getEntry(HashKey key, CacheConfig config)
-  {
-    FileCacheEntry entryKey = getLocalEntry(key);
-    CacheEntryValue entryValue = entryKey.getEntryValue();
-
-    if (entryValue == null) {
-      entryValue = _cacheMapBacking.load(key);
-
-      entryKey.compareAndSet(null, entryValue);
-
-      entryValue = entryKey.getEntryValue();
-    }
-
-    return entryValue;
-  }
+  //TODO(fred): Verify that this code is  not needed.
+//  public ExtCacheEntry getEntry(HashKey key, CacheConfig config)
+//  {
+//    FileCacheEntry cacheEntry = getLocalEntry(key);
+//    CacheEntryValue entryValue = cacheEntry.getEntryValue();
+//
+//    if (entryValue == null) {
+//      entryValue = _cacheMapBacking.load(key);
+//
+//      cacheEntry.compareAndSet(null, entryValue);
+//
+//      entryValue = cacheEntry.getEntryValue();
+//    }
+//
+//    return entryValue;
+//  }
 
   /**
    * Gets a cache entry
@@ -169,11 +170,10 @@ public class FileCacheManager extends DistributedCacheManager {
    */
   public Object get(FileCacheEntry cacheEntry, CacheConfig config)
   {
-    HashKey key = cacheEntry.getKeyHash();
 
     CacheEntryValue entryValue = loadLocalEntry(cacheEntry);
 
-    if (entryValue == null)
+    if ((entryValue == null) || entryValue.isEntryExpired(Alarm.getCurrentTime()))
       return null;
 
     Object value = entryValue.getValue();
@@ -305,7 +305,7 @@ public class FileCacheManager extends DistributedCacheManager {
    */
   public boolean remove(HashKey key)
   {
-    //FileCacheEntry cacheEntry = getKey(key);
+    //FileCacheEntry cacheEntry = getCacheEntry(key);
 
     return false;
   }
@@ -374,7 +374,7 @@ public class FileCacheManager extends DistributedCacheManager {
 
   FileCacheEntry getLocalEntry(HashKey key)
   {
-    FileCacheEntry entryKey = getKey(key);
+    FileCacheEntry entryKey = getCacheEntry(key);
 
     CacheEntryValue valueEntryValue = entryKey.getEntryValue();
 
@@ -386,7 +386,7 @@ public class FileCacheManager extends DistributedCacheManager {
 
       if (idleTimeout < CacheConfig.TIME_INFINITY
         && updateTime + valueEntryValue.getIdleWindow() < now) {
-        /* XXX:
+        /* TODO(fred): discuss with Scott.
          CacheEntryValue newEntry
            = new CacheEntryValue(valueEntryValue, idleTimeout, now);
 
