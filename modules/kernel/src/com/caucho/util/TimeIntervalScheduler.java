@@ -54,4 +54,15 @@ public interface TimeIntervalScheduler<E extends TimeIntervalEntry> {
    */
   public void schedule(E entry, TimeInterval interval);
 
+  public TimeInterval getSchedulerInterval(long time);
+
+  public  TimeInterval getSchedulerInterval(long time, long intervalDuration);
+
+  public enum ScheduleType
+  {
+    // FIRM,
+    SOFT,
+    WEAK;
+  }
+
 }
