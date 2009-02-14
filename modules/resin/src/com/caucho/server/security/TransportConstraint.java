@@ -29,7 +29,7 @@
 package com.caucho.server.security;
 
 import com.caucho.server.host.Host;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -76,7 +76,7 @@ public class TransportConstraint extends AbstractConstraint {
     if (request.isSecure())
       return AuthorizationResult.DEFAULT_ALLOW;
 
-    Application app = (Application) application;
+    WebApp app = (WebApp) application;
     Host host = (Host) app.getParent();
     String secureHost = host.getSecureHostName();
 

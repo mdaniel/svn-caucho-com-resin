@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -33,13 +34,13 @@ import javax.jms.JMSException;
 /**
  * Wraps the actual exception with an JMS exception
  */
-public class JMSExceptionWrapper extends JMSException {
+public class JmsExceptionWrapper extends JMSException {
   private Throwable _rootCause;
 
   /**
    * Null constructor for beans
    */
-  public JMSExceptionWrapper()
+  public JmsExceptionWrapper()
   {
     super("");
   }
@@ -48,7 +49,7 @@ public class JMSExceptionWrapper extends JMSException {
    *
    * @param msg the exception message.
    */
-  public JMSExceptionWrapper(String msg)
+  public JmsExceptionWrapper(String msg)
   {
     super(msg);
   }
@@ -58,7 +59,7 @@ public class JMSExceptionWrapper extends JMSException {
    *
    * @param rootCause the underlying wrapped exception.
    */
-  public JMSExceptionWrapper(Throwable rootCause)
+  public JmsExceptionWrapper(Throwable rootCause)
   {
     super(rootCause.getMessage());
 
@@ -73,7 +74,7 @@ public class JMSExceptionWrapper extends JMSException {
     if (rootCause instanceof JMSException)
       return ((JMSException) rootCause);
     else
-      return new JMSExceptionWrapper(rootCause);
+      return new JmsExceptionWrapper(rootCause);
   }
 
   /**

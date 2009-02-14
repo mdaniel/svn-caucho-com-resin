@@ -28,7 +28,7 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HTTPUtil;
 import com.caucho.util.QDate;
@@ -219,12 +219,12 @@ public class WebDavServlet extends GenericServlet {
     if (_path != null) {
     }
     else if (_root != null) {
-      Path pwd = ((Application) getServletContext()).getAppDir();
+      Path pwd = ((WebApp) getServletContext()).getAppDir();
 
       _path = new FilePath(pwd.lookup(_root));
     }
     else if (root != null) {
-      Path pwd = ((Application) getServletContext()).getAppDir();
+      Path pwd = ((WebApp) getServletContext()).getAppDir();
 
       _path = new FilePath(pwd.lookup(root));
     }
@@ -358,7 +358,7 @@ public class WebDavServlet extends GenericServlet {
       return;
     }
 
-    Application app = (Application) getServletContext();
+    WebApp app = (WebApp) getServletContext();
     Path appDir = app.getAppDir();
 
     String pathInfo = req.getPathInfo();
@@ -411,7 +411,7 @@ public class WebDavServlet extends GenericServlet {
       return;
     }
     
-    Application app = (Application) getServletContext();
+    WebApp app = (WebApp) getServletContext();
     Path appDir = app.getAppDir();
 
     String pathInfo = req.getPathInfo();
@@ -555,7 +555,7 @@ public class WebDavServlet extends GenericServlet {
   private void addAllProperties(ArrayList<AttributeName> properties,
 				String pathInfo,
                                 HttpServletRequest req,
-				Application app)
+				WebApp app)
     throws IOException, ServletException
   {
     properties.add(new AttributeName("DAV:", "resourcetype", "D:resourcetype"));

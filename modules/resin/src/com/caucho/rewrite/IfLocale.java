@@ -19,25 +19,54 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.jms;
+package com.caucho.rewrite;
 
-import javax.jms.TopicConnectionFactory;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
+import java.util.Locale;
+import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * A sample queue connection factory.
- *
- * @deprecated Use ConnectionFactoryImpl
- */
-public class JVMTopicConnectionFactory extends ConnectionFactoryImpl
-  implements TopicConnectionFactory  {
-  public JVMTopicConnectionFactory()
+* A rewrite condition that passes if the value of the Locale matches
+ * a regexp.
+*/
+public class IfLocale implements RequestPredicate
+{
+  private static final L10N L = new L10N(IfLocale.class);
+
+  private Pattern _regexp;
+
+  public void setValue(Pattern regexp)
   {
+    _regexp = regexp;
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    if (_regexp == null)
+      throw new ConfigException(L.l("'value' is a required attribute for {0}",
+				    getClass().getSimpleName()));
+  }
+
+  public boolean isMatch(HttpServletRequest request)
+  {
+    Locale locale = request.getLocale();
+
+    if (locale == null)
+      return false;
+    else
+      return _regexp.matcher(locale.toString()).find();
   }
 }

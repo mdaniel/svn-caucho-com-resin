@@ -75,6 +75,11 @@ public class CustomBeanProgramAttribute extends Attribute {
       throw ConfigException.create(e);
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName();
+  }
   
   /**
    * Sets the value of the attribute

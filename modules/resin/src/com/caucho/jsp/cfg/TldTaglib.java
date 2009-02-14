@@ -30,7 +30,7 @@
 package com.caucho.jsp.cfg;
 
 import com.caucho.config.DependencyBean;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
@@ -389,7 +389,7 @@ public class TldTaglib implements DependencyBean
   /**
    * Applies the listeners.
    */
-  public void initListeners(Application app)
+  public void initListeners(WebApp app)
     throws InstantiationException, IllegalAccessException
   {
     if (app == null)

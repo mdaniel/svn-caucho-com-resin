@@ -32,6 +32,7 @@ package com.caucho.server.connection;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.ReadStream;
 
+import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -72,6 +73,7 @@ public interface CauchoRequest extends HttpServletRequest {
   public boolean login();
 
   // public HashMap<String,String> setRoleMap(HashMap<String,String> roleMap);
-  
+
+  public ServletResponse getServletResponse();
   public AbstractHttpRequest getAbstractHttpRequest();
 }

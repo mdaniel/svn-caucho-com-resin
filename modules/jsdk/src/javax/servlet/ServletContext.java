@@ -313,14 +313,15 @@ public interface ServletContext {
 			 String description,
 			 String className,
 			 Map<String,String> initParam,
-			 int loadOnStartup);
+			 int loadOnStartup,
+			 boolean isAsyncSupported);
 
   /**
    * Adds a runtime servlet mapping
    *
    * @Since Servlet 3.0
    */
-  public void addServletMaping(String servletName,
+  public void addServletMapping(String servletName,
 			       String []urlPatterns);
 
   /**
@@ -331,18 +332,28 @@ public interface ServletContext {
   public void addFilter(String filterName,
 			String description,
 			String className,
-			Map<String,String> initParam);
+			Map<String,String> initParam,
+			boolean isAsyncSupported);
 
   /**
    * Adds a filter mapping.
    *
    * @Since Servlet 3.0
    */
-  public void addFilterMapping(String filterName,
-			       String []urlPatterns,
-			       String []servletNames,
-			       EnumSet<DispatcherType> dispatcherTypes,
-			       boolean isMatchAfter);
+  public void addFilterMappingForServletNames(String filterName,
+					      EnumSet<DispatcherType> dispatcherTypes,
+					      boolean isMatchAfter,
+					      String ... servletNames);
+
+  /**
+   * Adds a filter mapping.
+   *
+   * @Since Servlet 3.0
+   */
+  public void addFilterMappingForUrlPatterns(String filterName,
+					      EnumSet<DispatcherType> dispatcherTypes,
+					      boolean isMatchAfter,
+					      String ... urlPatterns);
 
   /**
    * The session cookie configuration
@@ -370,5 +381,12 @@ public interface ServletContext {
    *
    * @Since Servlet 3.0
    */
-  public EnumSet<SessionTrackingMode> getSessionTrackingModes();
+  public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes();
+
+  /**
+   * The session tracking mode
+   *
+   * @Since Servlet 3.0
+   */
+  public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes();
 }

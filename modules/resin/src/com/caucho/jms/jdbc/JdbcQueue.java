@@ -30,7 +30,7 @@
 package com.caucho.jms.jdbc;
 
 import com.caucho.config.ConfigException;
-import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.JmsExceptionWrapper;
 import com.caucho.jms.connection.MessageConsumerImpl;
 import com.caucho.jms.connection.JmsSession;
 import com.caucho.jms.message.MessageImpl;
@@ -201,7 +201,7 @@ public class JdbcQueue extends PollingQueue {
       JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
       jdbcMessage.send(message, _id, priority, expireTime);
     } catch (Exception e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -296,9 +296,9 @@ public class JdbcQueue extends PollingQueue {
 	conn.close();
       }
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     } catch (SQLException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 

@@ -505,7 +505,7 @@ public class WebAppController
    */
   protected WebApp instantiateDeployInstance()
   {
-    return new Application(this);
+    return new WebApp(this);
   }
 
   /**

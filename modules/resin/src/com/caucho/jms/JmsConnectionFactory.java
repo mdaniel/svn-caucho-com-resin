@@ -34,8 +34,4 @@ package com.caucho.jms;
 public class JmsConnectionFactory
   extends com.caucho.jms.connection.ConnectionFactoryImpl
 {
-  public String toString()
-  {
-    return "JmsConnectionFactory[]";
-  }
 }

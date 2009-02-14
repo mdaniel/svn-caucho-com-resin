@@ -259,9 +259,9 @@ public class Cookie implements Cloneable {
   public Object clone()
   {
     try {
-      return super.clone ();
+      return super.clone();
     } catch (CloneNotSupportedException e) {
-      throw new RuntimeException (e.getMessage ());
+      throw new RuntimeException(e.getMessage ());
     }
   }
 

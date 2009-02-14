@@ -31,7 +31,7 @@ package com.caucho.jsp.cfg;
 
 import com.caucho.config.DependencyBean;
 import com.caucho.config.ConfigException;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;

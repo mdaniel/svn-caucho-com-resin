@@ -30,7 +30,7 @@
 package com.caucho.servlets;
 
 import com.caucho.config.types.Period;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
@@ -110,7 +110,7 @@ public class FastCGIServlet extends GenericServlet {
   private InetAddress _hostAddr;
   private int _hostPort;
   protected QDate _calendar = new QDate();
-  private Application _app;
+  private WebApp _app;
   private long _readTimeout = 120000;
 
   private int _maxKeepaliveCount = 250;
@@ -183,7 +183,7 @@ public class FastCGIServlet extends GenericServlet {
 
     _servletId = id;
 
-    _app = (Application) getServletContext();
+    _app = (WebApp) getServletContext();
 
     String serverAddress = getInitParameter("server-address");
     if (serverAddress != null)

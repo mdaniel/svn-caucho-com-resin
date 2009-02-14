@@ -624,6 +624,94 @@ public class RequestWrapper implements ServletRequest {
     return null;
   }
 
+
+  //
+  // servlet 3.0
+  //
+
+  /**
+   * Adds an async listener for this request
+   *
+   * @since Servlet 3.0
+   */
+  public void addAsyncListener(AsyncListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Adds an async listener for this request
+   *
+   * @since Servlet 3.0
+   */
+  public void addAsyncListener(AsyncListener listener,
+			       ServletRequest request,
+			       ServletResponse response)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the async context for the request
+   *
+   * @since Servlet 3.0
+   */
+  public AsyncContext getAsyncContext()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns true if the request is in async.
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isAsyncStarted()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns true if the request supports async
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isAsyncSupported()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Sets the async timeout
+   *
+   * @since Servlet 3.0
+   */
+  public void setAsyncTimeout(long timeout)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Starts an async mode
+   *
+   * @since Servlet 3.0
+   */
+  public AsyncContext startAsync()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Starts an async mode
+   *
+   * @since Servlet 3.0
+   */
+  public AsyncContext startAsync(ServletRequest servletRequest,
+				 ServletResponse servletResponse)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   /**
    * Suspend the request
    *

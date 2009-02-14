@@ -2295,11 +2295,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	conn = request.getConnection();
       }
 
+      /* XXX:
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
 	handleNotModified(_isTopCache);
       }
+      */
+      if (_statusCode == SC_NOT_MODIFIED) {
+	handleNotModified(_isTopCache);
+      }
 
-      isSuspend = conn != null && conn.isSuspend();
+      isSuspend = false; // conn != null && conn.isSuspend();
 
       if (isClose)
 	_responseStream.close();

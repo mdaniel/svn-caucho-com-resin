@@ -29,7 +29,7 @@
 package com.caucho.jms.jdbc;
 
 import com.caucho.config.ConfigException;
-import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.JmsExceptionWrapper;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;

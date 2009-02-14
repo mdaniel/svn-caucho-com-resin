@@ -36,6 +36,7 @@ import com.caucho.vfs.ReadWritePair;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 import com.caucho.config.types.*;
+import com.caucho.servlets.HttpProxyServlet;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;

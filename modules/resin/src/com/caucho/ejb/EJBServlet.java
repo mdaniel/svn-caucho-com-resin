@@ -35,7 +35,6 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -133,7 +132,7 @@ public class EJBServlet extends GenericServlet {
       throw new ServletException(e);
     }
 
-    Application app = (Application) getServletContext();
+    WebApp app = (WebApp) getServletContext();
 
     // need to initialize in the case of message driven beans.
     //if (containerId == null)
@@ -326,7 +325,7 @@ public class EJBServlet extends GenericServlet {
     if (_urlPrefix == null)
       return;
 
-    Application application = (Application) getServletContext();
+    WebApp application = (WebApp) getServletContext();
     String hostName = "localhost"; // application.getHost();
     String contextPath = application.getContextPath();
 

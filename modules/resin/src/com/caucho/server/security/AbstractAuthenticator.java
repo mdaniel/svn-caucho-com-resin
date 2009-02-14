@@ -31,9 +31,10 @@ package com.caucho.server.security;
 
 import com.caucho.security.BasicPrincipal;
 import com.caucho.security.PasswordCredentials;
+import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -82,7 +83,7 @@ public class AbstractAuthenticator
 
     ServletContext webApp = request.getServletContext();
     HttpServletResponse response
-      = (HttpServletResponse) request.getServletResponse();
+      = (HttpServletResponse) ((CauchoRequest) request).getServletResponse();
 
     try {
       return loginImpl(request, response, webApp, userName, password);

@@ -29,7 +29,7 @@
 
 package com.caucho.jms.message;
 
-import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.JmsExceptionWrapper;
 import com.caucho.vfs.*;
 import com.caucho.hessian.io.*;
 
@@ -95,7 +95,7 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
       out.close();
       ws.close();
     } catch (Exception e) {
-      throw JMSExceptionWrapper.create(e);
+      throw JmsExceptionWrapper.create(e);
     }
   }
 
@@ -117,7 +117,7 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
 
       return object;
     } catch (Exception e) {
-      throw JMSExceptionWrapper.create(e);
+      throw JmsExceptionWrapper.create(e);
     }
   }
   

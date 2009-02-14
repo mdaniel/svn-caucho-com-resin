@@ -29,7 +29,7 @@
 
 package com.caucho.jms.message;
 
-import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.JmsExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
 
@@ -135,7 +135,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 	_rs = _tempStream.openReadAndSaveBuffer();
       }
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -155,7 +155,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -175,7 +175,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -198,7 +198,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -219,7 +219,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -240,7 +240,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -263,7 +263,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -298,7 +298,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -337,7 +337,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       else
         throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -387,7 +387,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
 
     return cb.toString();
@@ -404,7 +404,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       return is.read(value);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -419,7 +419,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       return is.read(value, 0, length);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -458,7 +458,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       getWriteStream().write(b ? 1 : 0);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -471,7 +471,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       getWriteStream().write(b);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -487,7 +487,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       ws.write(s >> 8);
       ws.write(s);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -505,7 +505,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       ws.write(i >> 8);
       ws.write(i);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -527,7 +527,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       ws.write((int) (l >> 8));
       ws.write((int) l);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -600,7 +600,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
         }
       }
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -616,7 +616,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       ws.write(ch >> 8);
       ws.write(ch);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 
@@ -640,7 +640,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 
       ws.write(buf, offset, length);
     } catch (IOException e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
   }
 

@@ -35,7 +35,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.security.PasswordDigest;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;

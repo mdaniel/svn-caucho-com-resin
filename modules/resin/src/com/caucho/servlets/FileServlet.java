@@ -32,7 +32,7 @@ package com.caucho.servlets;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
@@ -60,7 +60,7 @@ public class FileServlet extends GenericServlet {
   private static final Logger log
     = Logger.getLogger(FileServlet.class.getName());
   private Path _context;
-  private Application _app;
+  private WebApp _app;
   private RequestDispatcher _dir;
   private LruCache<String,Cache> _pathCache;
   private QDate _calendar = new QDate();
@@ -111,7 +111,7 @@ public class FileServlet extends GenericServlet {
   {
     super.init(conf);
 
-    _app = (Application) getServletContext();
+    _app = (WebApp) getServletContext();
     _context = _app.getAppDir();
 
     try {

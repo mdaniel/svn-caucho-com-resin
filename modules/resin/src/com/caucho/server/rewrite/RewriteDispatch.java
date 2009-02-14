@@ -32,6 +32,7 @@ package com.caucho.server.rewrite;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
+import com.caucho.rewrite.DispatchRule;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
@@ -63,6 +64,9 @@ public class RewriteDispatch
   private MatchRule _matchRule;
 
   private ContainerProgram _program = new ContainerProgram();
+
+  private ArrayList<DispatchRule> _ruleList
+    = new ArrayList<DispatchRule>();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -147,6 +151,11 @@ public class RewriteDispatch
     _program.addProgram(program);
   }
 
+  public void addRule(DispatchRule rule)
+  {
+    _ruleList.add(rule);
+  }
+
   @PostConstruct
   public void init()
   {
@@ -158,7 +167,9 @@ public class RewriteDispatch
     _matchRule.init();
   }
 
-  public FilterChain map(String uri, String queryString, FilterChain next)
+  public FilterChain map(String uri,
+			 String queryString,
+			 FilterChain chain)
     throws ServletException
   {
     if (_isFinest)
@@ -176,7 +187,13 @@ public class RewriteDispatch
       _matchRule.init();
     }
 
-    return _matchRule.map(uri, queryString, next);
+    chain = _matchRule.map(uri, queryString, chain);
+
+    for (int i = _ruleList.size() - 1; i >= 0; i--) {
+      chain = _ruleList.get(i).map(uri, queryString, chain);
+    }
+
+    return chain;
   }
 
   public void clearCache()

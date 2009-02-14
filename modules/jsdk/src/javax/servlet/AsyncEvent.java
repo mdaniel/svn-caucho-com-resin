@@ -27,27 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.webapp;
+package javax.servlet;
 
-import com.caucho.vfs.Path;
+import java.io.IOException;
 
 /**
- * Resin's application implementation.
+ * Asynchronous/comet servlet support.
+ *
+ * @since Servlet 3.0
  */
-public class Application extends WebApp {
-  /**
-   * Creates the application with its environment loader.
-   */
-  public Application(Path rootDirectory)
+public class AsyncEvent {
+  private final ServletRequest _request;
+  private final ServletResponse _response;
+  
+  public AsyncEvent(ServletRequest request, ServletResponse response)
   {
-    super(rootDirectory);
+    _request = request;
+    _response = response;
   }
 
-  /**
-   * Creates the application with its environment loader.
-   */
-  Application(WebAppController controller)
+  public ServletRequest getRequest()
   {
-    super(controller);
+    return _request;
+  }
+
+  public ServletResponse getResponse()
+  {
+    return _response;
   }
 }

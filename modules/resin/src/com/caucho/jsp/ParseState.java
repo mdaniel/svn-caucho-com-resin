@@ -31,7 +31,7 @@ package com.caucho.jsp;
 
 import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharScanner;
 import com.caucho.util.L10N;
@@ -54,7 +54,7 @@ public class ParseState {
   private static final Logger log
     = Logger.getLogger(ParseState.class.getName());
 
-  private Application _application;
+  private WebApp _application;
 
   private JspPropertyGroup _jspPropertyGroup = new JspPropertyGroup();
 

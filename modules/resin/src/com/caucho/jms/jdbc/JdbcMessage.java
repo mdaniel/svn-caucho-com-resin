@@ -32,7 +32,7 @@ package com.caucho.jms.jdbc;
 import com.caucho.config.ConfigException;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.jdbc.OracleMetaData;
-import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.JmsExceptionWrapper;
 import com.caucho.jms.message.BytesMessageImpl;
 import com.caucho.jms.message.MapMessageImpl;
 import com.caucho.jms.message.MessageImpl;
@@ -748,7 +748,7 @@ public class JdbcMessage
       }
     } catch (EOFException e) {
     } catch (Exception e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
 
     in.close();
@@ -780,7 +780,7 @@ public class JdbcMessage
       }
     } catch (EOFException e) {
     } catch (Exception e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
 
     in.close();
@@ -807,7 +807,7 @@ public class JdbcMessage
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw new JMSExceptionWrapper(e);
+      throw new JmsExceptionWrapper(e);
     }
 
     in.close();

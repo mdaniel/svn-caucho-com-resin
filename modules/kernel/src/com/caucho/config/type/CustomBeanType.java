@@ -138,11 +138,19 @@ public class CustomBeanType extends ConfigType
   {
     Attribute attr = _nsAttributeMap.get(qName);
 
-    if (attr != null) {
-      return attr;
+    if (attr == null) {
+      attr = getAttributeImpl(qName);
+      
+      if (attr != null)
+	_nsAttributeMap.put(qName, attr);
     }
+    
+    return attr;
+  }
 
-    attr = _beanType.getAttribute(qName);
+  protected Attribute getAttributeImpl(QName qName)
+  {
+    Attribute attr = _beanType.getAttribute(qName);
 
     if (attr != null) {
       return CustomBeanProgramAttribute.ATTRIBUTE;
@@ -192,9 +200,8 @@ public class CustomBeanType extends ConfigType
 
     AddAttribute addAttribute = (AddAttribute) _beanType.getAddAttribute(cl);
     
-    if (addAttribute != null) {
+    if (addAttribute != null)
       return new CustomBeanAddAttribute(cl);
-    }
     else
       return new CustomBeanArgAttribute(cl);
   }

@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -26,14 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms;
+package javax.servlet.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.servlet.DispatcherType;
 
 /**
- * A sample queue connection factory.
+ * Servlet
  *
- * @deprecated Use ConnectionFactoryImpl
+ * @since Servlet 3.0
  */
-public class JVMQueueConnectionFactory
-  extends com.caucho.jms.connection.JVMQueueConnectionFactory
-{
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented  
+public @interface WebServletContextListener {
+  public String description() default "";
 }

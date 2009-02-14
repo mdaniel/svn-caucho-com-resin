@@ -33,6 +33,7 @@ import java.beans.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 
 import com.caucho.config.program.ConfigProgram;
@@ -59,6 +60,9 @@ public class BeanType extends ConfigType
   private static final L10N L = new L10N(BeanType.class);
   private static final Logger log
     = Logger.getLogger(BeanType.class.getName());
+  
+  private static final String RESIN_NS
+    = "http://caucho.com/ns/resin";
 
   private static final QName TEXT = new QName("#text");
 
@@ -66,8 +70,8 @@ public class BeanType extends ConfigType
 
   private final Class _beanClass;
   
-  private HashMap<QName,Attribute> _nsAttributeMap
-    = new HashMap<QName,Attribute>();
+  private ConcurrentHashMap<QName,Attribute> _nsAttributeMap
+    = new ConcurrentHashMap<QName,Attribute>();
   
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
@@ -90,6 +94,9 @@ public class BeanType extends ConfigType
   private Attribute _addContentProgram;
   private Attribute _addBean; // add(Object)
   private Attribute _setProperty;
+
+  private HashMap<Class,Attribute> _addMethodMap
+    = new HashMap<Class,Attribute>();
 
   private Attribute _addCustomBean;
   private Attribute _addAnnotation;
@@ -213,35 +220,49 @@ public class BeanType extends ConfigType
   @Override
   public Attribute getAttribute(QName name)
   {
-    synchronized (_nsAttributeMap) {
-      Attribute attr = _nsAttributeMap.get(name);
+    Attribute attr = _nsAttributeMap.get(name);
 
-      if (attr == null) {
-	// server/2r10 vs jms/2193
-	// attr = _attributeMap.get(name.getLocalName().toLowerCase());
+    if (attr == null) {
+      attr = getAttributeImpl(name);
 
-        if (attr == null)
-          attr = _attributeMap.get(name.getLocalName());
+      if (attr != null)
+	_nsAttributeMap.put(name, attr);
+    }
 
-	if (attr != null)
-	  _nsAttributeMap.put(name, attr);
-      }
+    return attr;
+  }
+
+  protected Attribute getAttributeImpl(QName name)
+  {
+    // server/2r10 vs jms/2193
+    // attr = _attributeMap.get(name.getLocalName().toLowerCase());
+
+    Attribute attr = _attributeMap.get(name.getLocalName());
+
+    if (attr != null)
+      return attr;
+
+    String uri = name.getNamespaceURI();
+
+    if (uri == null || ! uri.startsWith("urn:java"))
+      return null;
+
+    Class cl = createClass(name);
+
+    if (cl != null) {
+      attr = getAddAttribute(cl);
 
       if (attr != null)
 	return attr;
     }
-
-    if (_addCustomBean != null
-	&& name.getNamespaceURI() != null
-	&& name.getNamespaceURI().startsWith("urn:java:")) {
+    
+    if (_addCustomBean != null) {
       return _addCustomBean;
     }
-    else if (_addBean != null
-	     && name.getNamespaceURI() != null
-	     && name.getNamespaceURI().startsWith("urn:java:")) {
+    else if (_addBean != null) {
       return _addBean;
     }
-    
+
     return null;
   }
 
@@ -249,6 +270,54 @@ public class BeanType extends ConfigType
   public Attribute getAddBeanAttribute(QName qName)
   {
     return _addBean;
+  }
+
+  /**
+   * Returns any add attributes to add arbitrary content
+   */
+  public Attribute getAddAttribute(Class cl)
+  {
+    if (cl == null)
+      return null;
+
+    Attribute attr = _addMethodMap.get(cl);
+
+    if (attr != null)
+      return attr;
+    
+    for (Class iface : cl.getInterfaces()) {
+      attr = getAddAttribute(iface);
+
+      if (attr != null)
+	return attr;
+    }
+
+    return getAddAttribute(cl.getSuperclass());
+  }
+
+  private Class createClass(QName name)
+  {
+    String uri = name.getNamespaceURI();
+
+    if (uri.equals(RESIN_NS)) {
+      return createResinClass(name.getLocalName());
+    }
+
+    if (! uri.startsWith("urn:java:"))
+      return null;
+
+    String pkg = uri.substring("urn:java:".length());
+
+    return TypeFactory.loadClass(pkg, name.getLocalName());
+  }
+
+  private Class createResinClass(String name)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    Class cl = TypeFactory.loadClass("ee", name);
+
+    return cl;
   }
 
   /**
@@ -270,14 +339,6 @@ public class BeanType extends ConfigType
   public Attribute getContentProgramAttribute()
   {
     return _addContentProgram;
-  }
-
-  /**
-   * Returns any add attributes to add arbitrary content
-   */
-  public Attribute getAddAttribute(Class cl)
-  {
-    return _addBean; // XXX: check type
   }
 
   /**
@@ -521,6 +582,8 @@ public class BeanType extends ConfigType
 	  if (_attributeMap.get(entry.getKey()) == null)
 	    _attributeMap.put(entry.getKey(), entry.getValue());
 	}
+
+	_addMethodMap.putAll(parentBean._addMethodMap);
       }
     }
   }
@@ -622,8 +685,12 @@ public class BeanType extends ConfigType
       else if (name.equals("add")
 	       && paramTypes.length == 1) {
 	ConfigType type = TypeFactory.getType(paramTypes[0]);
-	
-	_addBean = new AddAttribute(method, type);
+
+	Attribute addAttr = new AddAttribute(method, type);
+
+	_addMethodMap.put(paramTypes[0], addAttr);
+
+	_addBean = addAttr;
       }
       else if ((name.startsWith("set") || name.startsWith("add"))
 	       && paramTypes.length == 1

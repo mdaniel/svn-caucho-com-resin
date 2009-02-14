@@ -62,7 +62,7 @@ public class ErrorPageFilter implements Filter {
   public static String SHUTDOWN = "com.caucho.shutdown";
   
   private FilterConfig _config;
-  private Application _app;
+  private WebApp _app;
   private ErrorPageManager _errorPageManager;
 
   /**
@@ -86,7 +86,7 @@ public class ErrorPageFilter implements Filter {
   public void init(FilterConfig config)
   {
     _config = config;
-    _app = (Application) config.getServletContext();
+    _app = (WebApp) config.getServletContext();
   }
   
   /**

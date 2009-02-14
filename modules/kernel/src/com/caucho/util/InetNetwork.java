@@ -83,6 +83,11 @@ public class InetNetwork {
     _mask = -1L << (64 - maskIndex);
   }
 
+  public static InetNetwork valueOf(String network)
+  {
+    return create(network);
+  }
+  
   public static InetNetwork create(String network)
   {
     if (network == null)

@@ -31,7 +31,7 @@ package com.caucho.server.security;
 
 import com.caucho.config.ConfigException;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
