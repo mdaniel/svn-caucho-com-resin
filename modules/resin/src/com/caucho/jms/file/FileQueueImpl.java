@@ -29,24 +29,20 @@
 
 package com.caucho.jms.file;
 
-import java.io.*;
-import java.util.logging.*;
-import java.security.*;
-import java.sql.*;
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.jms.*;
-import javax.annotation.*;
+import javax.jms.Topic;
 
-import com.caucho.jms.queue.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
-import com.caucho.config.ConfigException;
-import com.caucho.db.*;
+import com.caucho.jms.connection.JmsSession;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.queue.AbstractMemoryQueue;
+import com.caucho.jms.queue.QueueEntry;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.L10N;
-import com.caucho.java.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
 
 /**
  * A JMS queue backed by a file-based database.
@@ -71,9 +67,8 @@ import com.caucho.vfs.*;
  * &lt;/web-app>
  * </pre>
  */
-public class FileQueueImpl extends AbstractQueue implements Topic
+public class FileQueueImpl extends AbstractMemoryQueue implements Topic
 {
-  private static final L10N L = new L10N(FileQueueImpl.class);
   private static final Logger log
     = Logger.getLogger(FileQueueImpl.class.getName());
 
@@ -82,11 +77,6 @@ public class FileQueueImpl extends AbstractQueue implements Topic
   private byte []_hash;
 
   private volatile boolean _isStartComplete;
-
-  private final Object _queueLock = new Object();
-
-  private FileQueueEntry []_head = new FileQueueEntry[10];
-  private FileQueueEntry []_tail = new FileQueueEntry[10];
 
   public FileQueueImpl()
   {
@@ -140,35 +130,12 @@ public class FileQueueImpl extends AbstractQueue implements Topic
     
   }
 
-  //
-  // JMX configuration items
-  //
-
   /**
    * Returns the JMS configuration url.
    */
   public String getUrl()
   {
     return "file:name=" + getName();
-  }
-
-  //
-  // JMX stats
-  //
-
-  public int getQueueSize()
-  {
-    int count = 0;
-
-    for (int i = 0; i < _head.length; i++) {
-      for (FileQueueEntry entry = _head[i];
-	   entry != null;
-	   entry = entry._next) {
-	count++;
-      }
-    }
-
-    return count;
   }
 
   /**
@@ -197,6 +164,27 @@ public class FileQueueImpl extends AbstractQueue implements Topic
     _isStartComplete = _store.receiveStart(_hash, this);
   }
 
+  /**
+   * 
+   * @param entry
+   * @return        Payload associated with the entry.
+   */
+  protected MessageImpl getPayload(QueueEntry entry) 
+  { 
+    if (entry == null) {
+      return null;
+    }
+
+    MessageImpl msg = (MessageImpl) entry.getPayload();
+
+    // Read it from the backed-up medium.
+    if (msg == null) {
+      msg = (MessageImpl) _store.readMessage(((FileQueueEntry)entry).getId());
+      entry.setPayload(msg);
+    }
+    return msg;
+  } 
+  
   /**
    * Adds the message to the persistent store.  Called if there are no
    * active listeners.
@@ -245,7 +233,7 @@ public class FileQueueImpl extends AbstractQueue implements Topic
   @Override
   public MessageImpl receive(boolean isAutoAck)
   {
-    FileQueueEntry entry = receiveImpl(isAutoAck);
+    FileQueueEntry entry = (FileQueueEntry)receiveImpl(isAutoAck);
 
     if (entry != null) {
       try {
@@ -288,105 +276,16 @@ public class FileQueueImpl extends AbstractQueue implements Topic
   }
 
   /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
-   */
-  private FileQueueEntry receiveImpl(boolean isAutoAck)
-  {
-    boolean isEntryAvailable = false;
-    
-    synchronized (_queueLock) {
-      for (int i = _head.length - 1; i >= 0; i--) {
-	for (FileQueueEntry entry = _head[i];
-	     entry != null;
-	     entry = entry._next) {
-	  isEntryAvailable = true;
-
-	  if (! entry.isLease()) {
-	    continue;
-	  }
-
-	  if (entry.isRead()) {
-	    continue;
-	  }
-	  
-	  entry.setRead(true);
-	  
-	  if (isAutoAck) {
-	    removeEntry(entry);
-	  }
-
-	  return entry;
-	}
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Rollsback the message from the store.
-   */
-  @Override
-  public void rollback(String msgId)
-  {
-    synchronized (_queueLock) {
-      for (int i = _head.length - 1; i >= 0; i--) {
-	for (FileQueueEntry entry = _head[i];
-	     entry != null;
-	     entry = entry._next) {
-	  if (msgId.equals(entry.getMsgId())) {
-	    if (entry.isRead()) {
-	      entry.setRead(false);
-
-	      MessageImpl msg = (MessageImpl) entry.getPayload();
-        
-	      if (msg != null)
-		msg.setJMSRedelivered(true);
-	    }
-	    
-	    return;
-	  }
-	}
-      }
-    }
-  }
-
-  /**
-   * Rollsback the message from the store.
+   * Acknowledges the receipt of a message.
+   * Removes the message from the store.
    */
   @Override
   public void acknowledge(String msgId)
   {
-    FileQueueEntry entry = acknowledgeImpl(msgId);
+    FileQueueEntry entry = (FileQueueEntry)acknowledgeImpl(msgId);
 
     if (entry != null)
       _store.delete(entry.getId());
-  }
-
-  /**
-   * Rollsback the message from the store.
-   */
-  private FileQueueEntry acknowledgeImpl(String msgId)
-  {
-    synchronized (_queueLock) {
-      for (int i = _head.length - 1; i >= 0; i--) {
-	for (FileQueueEntry entry = _head[i];
-	     entry != null;
-	     entry = entry._next) {
-	  if (msgId.equals(entry.getMsgId())) {
-	    if (entry.isRead()) {
-	      removeEntry(entry);
-	      return entry;
-	    }
-	      
-	    return null;
-	  }
-	}
-      }
-    }
-
-    return null;
   }
   
   /**
@@ -408,72 +307,7 @@ public class FileQueueImpl extends AbstractQueue implements Topic
       = new FileQueueEntry(id, msgId, leaseTimeout,
 			   priority, expire, payload);
 
-    synchronized (_queueLock) {
-      entry._prev = _tail[priority];
-
-      if (_tail[priority] != null)
-	_tail[priority]._next = entry;
-      else
-	_head[priority] = entry;
-
-      _tail[priority] = entry;
-
-      return entry;
-    }
-  }
-
-  /**
-   * Rollsback the message from the store.
-   */
-  public void removeMessage(String msgId)
-  {
-    if (removeMessageEntry(msgId)) {
-      _store.remove(msgId);
-    }
-  }
-
-  /**
-   * Rollsback the message from the store.
-   */
-  private boolean removeMessageEntry(String msgId)
-  {
-    synchronized (_queueLock) {
-      loop:
-      for (int i = _head.length - 1; i >= 0; i--) {
-	for (FileQueueEntry entry = _head[i];
-	     entry != null;
-	     entry = entry._next) {
-	  if (msgId.equals(entry.getMsgId())) {
-	    if (log.isLoggable(Level.FINER))
-	      log.finer(this + " remove " + msgId);
-	    
-	    removeEntry(entry);
-
-	    return true;
-	  }
-	}
-      }
-    }
-
-    return false;
-  }
-
-  private void removeEntry(FileQueueEntry entry)
-  {
-    int priority = entry.getPriority();
-    
-    FileQueueEntry prev = entry._prev;
-    FileQueueEntry next = entry._next;
-    
-    if (prev != null)
-      prev._next = next;
-    else if (_head[priority] == entry)
-      _head[priority] = next;
-
-    if (next != null)
-      next._prev = prev;
-    else if (_tail[priority] == entry)
-      _tail[priority] = prev;
+    return (FileQueueEntry)addEntry(entry);
   }
 }
 

@@ -29,37 +29,22 @@
 
 package com.caucho.jms.memory;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.jms.*;
-
-import com.caucho.jms.connection.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
+import com.caucho.jms.connection.JmsSession;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.queue.AbstractMemoryQueue;
+import com.caucho.jms.queue.QueueEntry;
 
 /**
  * Implements a memory queue.
  */
-public class MemoryQueueImpl extends AbstractQueue
+public class MemoryQueueImpl extends AbstractMemoryQueue
 {
   private static final Logger log
     = Logger.getLogger(MemoryQueueImpl.class.getName());
-
-  private PriorityQueue<MessageImpl> _queueList
-    = new PriorityQueue<MessageImpl>(64, new JmsPriorityComparator());
   
-  // messages waiting for an ack
-  private ArrayList<MessageImpl> _readList = new ArrayList<MessageImpl>();
-
-  private long _sequence;
-
-  //
-  // JMX configuration
-  //
-
   /**
    * Returns the configuration URL.
    */
@@ -67,21 +52,6 @@ public class MemoryQueueImpl extends AbstractQueue
   public String getUrl()
   {
     return "memory:name=" + getName();
-  }
-
-  //
-  // JMX statistics
-  //
-
-  /**
-   * Returns the queue size
-   */
-  @Override
-  public int getQueueSize()
-  {
-    synchronized (_queueList) {
-      return _queueList.size();
-    }
   }
 
   /**
@@ -94,123 +64,60 @@ public class MemoryQueueImpl extends AbstractQueue
 		   int priority,
 		   long expires)
   {
-    synchronized (_queueList) {
-      msg.setSequence(_sequence++);
-      
-      _queueList.add(msg);
-    }
+    addEntry(msg.getJMSMessageID(), -1, priority, expires, msg);
 
     notifyMessageAvailable();
   }
-
-  /**
-   * Returns true if a message is available.
-   */
-  @Override
-  public boolean hasMessage()
-  {
-    return _queueList.size() > 0;
-  }
   
   /**
-   * Polls the next message from the store.
+   * Polls the next message.
    */
   @Override
   public MessageImpl receive(boolean isAutoAck)
   {
-    synchronized (_queueList) {
-      MessageImpl msg = _queueList.poll();
+    QueueEntry entry = receiveImpl(isAutoAck);
 
-      if (msg == null)
-	return null;
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " receive " + msg + (isAutoAck ? " (auto-ack)" : ""));
-      
-      if (isAutoAck) {
-	return msg;
-      }
-      else {
-	_readList.add(msg);
-	return msg;
-      }
-    }
-  }
-
-  @Override
-  public ArrayList<MessageImpl> getBrowserList()
-  {
-    synchronized (_queueList) {
-      return new ArrayList<MessageImpl>(_queueList);
-    }
-  }
-
-  /**
-   * Acknowledges the receipt of a message
-   */
-  @Override
-  public void acknowledge(String msgId)
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " acknowledge " + msgId);
-    
-    synchronized (_queueList) {
-      for (int i = _readList.size() - 1; i >= 0; i--) {
-        MessageImpl msg = _readList.get(i);
-
-        if (msg.getJMSMessageID().equals(msgId))
-          _readList.remove(i);
-      }
-    }
-  }
-
-  /**
-   * Rolls back the receipt of a message
-   */
-  @Override
-  public void rollback(String msgId)
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " rollback " + msgId);
-    
-    synchronized (_queueList) {
-      for (int i = _readList.size() - 1; i >= 0; i--) {
-        MessageImpl msg = _readList.get(i);
-
-        if (msg.getJMSMessageID().equals(msgId)) {
-          _readList.remove(i);
-          msg.setJMSRedelivered(true);
-          _queueList.add(msg);
-	  notifyMessageAvailable();
-        }
-      }
-    }
-  }
-
-  static class JmsPriorityComparator implements Comparator<MessageImpl> {
-    /**
-     * Compares the priority.
-     */
-    public int compare(MessageImpl msg1, MessageImpl msg2)
-    {
+    if (entry != null) {
       try {
-	int cmp = msg2.getJMSPriority() - msg1.getJMSPriority();
+        MessageImpl msg = (MessageImpl) entry.getPayload();
 
-	if (cmp != 0)
-	  return cmp;
+        if (log.isLoggable(Level.FINER))
+          log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
 
-	long seqCmp = (msg1.getSequence() - msg2.getSequence());
+        if (isAutoAck || msg == null) {
+          synchronized (_queueLock) {
+            removeEntry(entry);
+          }
+        }
 
-	if (seqCmp < 0)
-	  return -1;
-	else if (seqCmp > 0)
-	  return 1;
-	else
-	  return 0;
+        return msg;
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        e.printStackTrace();
       }
     }
-  }
+
+    return null;
+  }  
+
+  /**
+   * Adds a message entry from startup.
+   */
+  QueueEntry addEntry(String msgId,
+                          long leaseTimeout,
+                          int priority,
+                          long expire,
+                          MessageImpl payload)
+  {
+    if (priority < 0)
+      priority = 0;
+    else if (_head.length <= priority)
+      priority = _head.length;
+
+    MemoryQueueEntry entry
+      = new MemoryQueueEntry(msgId, leaseTimeout, priority, expire, payload);
+    
+    return addEntry(entry);
+  }  
+
 }
 
