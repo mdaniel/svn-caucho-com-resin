@@ -208,7 +208,7 @@ public class ArrayModule
       if (preserveKeys)
         currentArray.put(key, value);
       else
-        currentArray.put(new LongValue(i % size), value);
+        currentArray.put(LongValue.create(i % size), value);
 
       i++;
     }
@@ -266,7 +266,7 @@ public class ArrayModule
         Value count = result.get(value);
 
         if (count == null)
-          count = new LongValue(1);
+          count = LongValue.create(1);
         else
           count = count.add(1);
 

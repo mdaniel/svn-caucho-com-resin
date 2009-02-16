@@ -56,7 +56,7 @@ abstract public class LongValuedExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return new LongValue(evalLong(env));
+    return LongValue.create(evalLong(env));
   }
 
   /**

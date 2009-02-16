@@ -27,11 +27,9 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.lib.file.AbstractBinaryInputOutput;
-import com.caucho.quercus.lib.file.SocketInputOutput;
 import com.caucho.vfs.DatagramStream;
 
 import java.io.IOException;

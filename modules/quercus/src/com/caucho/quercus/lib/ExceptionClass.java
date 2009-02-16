@@ -66,7 +66,7 @@ public class ExceptionClass
       else
         value.putField(env, "file", env.createString("unknown"));
 
-      value.putField(env, "line", new LongValue(location.getLineNumber()));
+      value.putField(env, "line", LongValue.create(location.getLineNumber()));
     }
 
     value.putField(env, "trace", ErrorModule.debug_backtrace(env));

@@ -642,7 +642,7 @@ abstract public class ArrayValue extends Value {
   public void put(String key, long value)
   {
     // XXX: this needs an Env arg because of i18n
-    put(StringValue.create(key), new LongValue(value));
+    put(StringValue.create(key), LongValue.create(value));
   }
 
   /**
@@ -650,7 +650,7 @@ abstract public class ArrayValue extends Value {
    */
   public void put(Env env, String key, long value)
   {
-    put(env.createString(key), new LongValue(value));
+    put(env.createString(key), LongValue.create(value));
   }
   
   /**
@@ -694,7 +694,7 @@ abstract public class ArrayValue extends Value {
    */
   public void put(long value)
   {
-    put(new LongValue(value));
+    put(LongValue.create(value));
   }
 
   /**

@@ -876,7 +876,7 @@ abstract public class Value implements java.io.Serializable
    */
   public LongValue toLongValue()
   {
-    return new LongValue(toLong());
+    return LongValue.create(toLong());
   }
 
   /**
@@ -1570,7 +1570,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value neg()
   {
-    return new LongValue(- toLong());
+    return LongValue.create(- toLong());
   }
 
   /**
@@ -1578,7 +1578,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value pos()
   {
-    return new LongValue(toLong());
+    return LongValue.create(toLong());
   }
 
   /**
@@ -1623,7 +1623,7 @@ abstract public class Value implements java.io.Serializable
   {
     long lValue = toLong();
 
-    return new LongValue(lValue + incr);
+    return LongValue.create(lValue + incr);
   }
 
   /**
@@ -1729,7 +1729,7 @@ abstract public class Value implements java.io.Serializable
     long lLong = toLong();
     long rLong = rValue.toLong();
 
-    return new LongValue(lLong << rLong);
+    return LongValue.create(lLong << rLong);
   }
 
   /**
@@ -1740,7 +1740,7 @@ abstract public class Value implements java.io.Serializable
     long lLong = toLong();
     long rLong = rValue.toLong();
 
-    return new LongValue(lLong >> rLong);
+    return LongValue.create(lLong >> rLong);
   }
   
   /*

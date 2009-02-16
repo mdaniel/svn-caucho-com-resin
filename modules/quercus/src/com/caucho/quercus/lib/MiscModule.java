@@ -270,7 +270,7 @@ public class MiscModule extends AbstractQuercusModule {
 
       int status = process.waitFor();
 
-      result.set(new LongValue(status));
+      result.set(LongValue.create(status));
 
       return line;
     } catch (Exception e) {
@@ -796,11 +796,11 @@ public class MiscModule extends AbstractQuercusModule {
           }
         }
         // place to put error output from the command
-        else if (key.equals(new LongValue(2))) {
+        else if (key.equals(LongValue.create(2))) {
           if (type.equals("pipe")) {
             es = new ProcOpenInput(env, process.getErrorStream());
             
-            array.put(new LongValue(2), env.wrapJava(es));
+            array.put(LongValue.create(2), env.wrapJava(es));
           }
           else if (type.equals("file")) {
             BinaryStream stream = FileModule.fopen(env, name, mode, false, null);

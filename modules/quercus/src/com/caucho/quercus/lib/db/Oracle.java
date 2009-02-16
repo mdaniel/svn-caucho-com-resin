@@ -115,15 +115,15 @@ public class Oracle extends JdbcConnectionResource {
 
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("oracle.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("oracle.connectError", new UnicodeValueImpl(e.getMessage()));
+      env.setSpecialValue("oracle.connectErrno", LongValue.create(e.getErrorCode()));
+      env.setSpecialValue("oracle.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return null;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("oracle.connectError", new UnicodeValueImpl(e.getMessage()));
+      env.setSpecialValue("oracle.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return null;

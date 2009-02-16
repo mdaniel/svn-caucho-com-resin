@@ -69,7 +69,7 @@ public class LongValue extends NumberValue
     if (value == null)
       return LongValue.ZERO;
     else
-      return new LongValue(value.longValue());
+      return LongValue.create(value.longValue());
   }
 
   /**
@@ -201,7 +201,7 @@ public class LongValue extends NumberValue
    */
   public Value neg()
   {
-    return new LongValue(- _value);
+    return LongValue.create(- _value);
   }
 
   /**

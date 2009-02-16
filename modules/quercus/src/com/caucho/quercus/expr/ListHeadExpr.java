@@ -52,7 +52,7 @@ public class ListHeadExpr extends Expr {
     _keyList = new Value[varList.size()];
 
     for (int i = 0; i < varList.size(); i++)
-      _keyList[i] = new LongValue(i);
+      _keyList[i] = LongValue.create(i);
   }
 
   public Expr []getVarList()

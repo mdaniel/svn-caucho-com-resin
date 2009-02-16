@@ -57,7 +57,7 @@ public class ToLongExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    return new LongValue(_expr.evalLong(env));
+    return LongValue.create(_expr.evalLong(env));
   }
 
   public String toString()

@@ -357,7 +357,7 @@ public class ZlibModule extends AbstractQuercusModule {
   {
     if (binaryStream == null)
       return BooleanValue.FALSE;
-    return new LongValue(binaryStream.getPosition());
+    return LongValue.create(binaryStream.getPosition());
   }
 
   /**
@@ -378,7 +378,7 @@ public class ZlibModule extends AbstractQuercusModule {
         sublen = is.read(buffer, 0, buffer.length);
       }
 
-      return new LongValue(length);
+      return LongValue.create(length);
 
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);

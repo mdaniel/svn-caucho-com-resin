@@ -353,17 +353,17 @@ public class MysqliResult extends JdbcResultResource {
       // "max_length" is the maximum width of this field in this
       // result set.
 
-      result.putField(env, "max_length", new LongValue(0));
+      result.putField(env, "max_length", LongValue.ZERO);
 
       // "length" is the width of the field defined in the table
       // declaration.
 
-      result.putField(env, "length", new LongValue(fieldLength));
+      result.putField(env, "length", LongValue.create(fieldLength));
 
       //generate flags
       long flags = 0;
 
-      result.putField(env, "flags", new LongValue(flags));
+      result.putField(env, "flags", LongValue.create(flags));
 
       //generate PHP type
       int quercusType = 0;
@@ -439,8 +439,8 @@ public class MysqliResult extends JdbcResultResource {
 	break;
       }
       
-      result.putField(env, "type", new LongValue(quercusType));
-      result.putField(env, "decimals", new LongValue(scale));
+      result.putField(env, "type", LongValue.create(quercusType));
+      result.putField(env, "decimals", LongValue.create(scale));
 
       // The "charsetnr" field is an integer identifier
       // for the character set used to encode the field.
@@ -451,7 +451,7 @@ public class MysqliResult extends JdbcResultResource {
       // to lookup the mysql index given a Java or Mysql encoding
       // name.
 
-      result.putField(env, "charsetnr", new LongValue(0));
+      result.putField(env, "charsetnr", LongValue.ZERO);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -510,12 +510,12 @@ public class MysqliResult extends JdbcResultResource {
       // "max_length" is the maximum width of this field in this
       // result set.
 
-      result.putField(env, "max_length", new LongValue(0));
+      result.putField(env, "max_length", LongValue.ZERO);
 
       // "length" is the width of the field defined in the table
       // declaration.
 
-      result.putField(env, "length", new LongValue(fieldLength));
+      result.putField(env, "length", LongValue.create(fieldLength));
 
       //generate flags
       long flags = 0;
@@ -570,7 +570,7 @@ public class MysqliResult extends JdbcResultResource {
 	  || (jdbcType == Types.SMALLINT))
 	flags += MysqliModule.NUM_FLAG;
 
-      result.putField(env, "flags", new LongValue(flags));
+      result.putField(env, "flags", LongValue.create(flags));
 
       //generate PHP type
       int quercusType = 0;
@@ -645,8 +645,8 @@ public class MysqliResult extends JdbcResultResource {
 	quercusType = MysqliModule.MYSQLI_TYPE_NULL;
 	break;
       }
-      result.putField(env, "type", new LongValue(quercusType));
-      result.putField(env, "decimals", new LongValue(scale));
+      result.putField(env, "type", LongValue.create(quercusType));
+      result.putField(env, "decimals", LongValue.create(scale));
 
       // The "charsetnr" field is an integer identifier
       // for the character set used to encode the field.
@@ -657,7 +657,7 @@ public class MysqliResult extends JdbcResultResource {
       // to lookup the mysql index given a Java or Mysql encoding
       // name.
 
-      result.putField(env, "charsetnr", new LongValue(0));
+      result.putField(env, "charsetnr", LongValue.ZERO);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;

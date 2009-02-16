@@ -260,10 +260,10 @@ public class Post {
     addFormValue(env, entry, "tmp_name" + index, env.createString(tmpName),
 		 null, addSlashesToValues);
 
-    addFormValue(env, entry, "error" + index, new LongValue(error),
+    addFormValue(env, entry, "error" + index, LongValue.create(error),
 		 null, addSlashesToValues);
 
-    addFormValue(env, entry, "size" + index, new LongValue(size),
+    addFormValue(env, entry, "size" + index, LongValue.create(size),
 		 null, addSlashesToValues);
 
     addFormValue(env, files, name, entry, null, addSlashesToValues);
@@ -379,7 +379,7 @@ public class Post {
           array.put(formValue);
       }
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
-        put(array, new LongValue(StringValue.toLong(index)), formValue, addSlashesToValues);
+        put(array, LongValue.create(StringValue.toLong(index)), formValue, addSlashesToValues);
       else
         put(array, env.createString(index), formValue, addSlashesToValues);
     }

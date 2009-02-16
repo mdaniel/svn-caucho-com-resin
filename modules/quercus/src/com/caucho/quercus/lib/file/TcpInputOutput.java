@@ -27,11 +27,9 @@
  * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.lib.file.BufferedBinaryInputOutput;
-import com.caucho.quercus.lib.file.SocketInputOutput;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;
 import com.caucho.vfs.WriteStream;

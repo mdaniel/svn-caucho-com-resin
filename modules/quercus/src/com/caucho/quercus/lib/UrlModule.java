@@ -566,13 +566,13 @@ public class UrlModule
         }
         else if (state == ParseUrlState.PASS) {
           value.put(env.createString("host"), user);
-          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          value.put(env.createString("port"), LongValue.create(sb.toLong()));
           sb = env.createUnicodeBuilder();
           state = ParseUrlState.PATH;
           sb.append(ch);
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          value.put(env.createString("port"), LongValue.create(sb.toLong()));
           sb = env.createUnicodeBuilder();
           state = ParseUrlState.PATH;
           sb.append(ch);
@@ -589,12 +589,12 @@ public class UrlModule
         }
         else if (state == ParseUrlState.PASS) {
           value.put(env.createString("host"), user);
-          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          value.put(env.createString("port"), LongValue.create(sb.toLong()));
           sb = env.createUnicodeBuilder();
           state = ParseUrlState.QUERY;
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          value.put(env.createString("port"), LongValue.create(sb.toLong()));
           sb = env.createUnicodeBuilder();
           state = ParseUrlState.QUERY;
         }
@@ -616,12 +616,12 @@ public class UrlModule
         }
         else if (state == ParseUrlState.PASS) {
           value.put(env.createString("host"), user);
-          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          value.put(env.createString("port"), LongValue.create(sb.toLong()));
           sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(env.createString("port"), new LongValue(sb.toLong()));
+          value.put(env.createString("port"), LongValue.create(sb.toLong()));
           sb = env.createUnicodeBuilder();
           state = ParseUrlState.FRAGMENT;
         }
@@ -654,10 +654,10 @@ public class UrlModule
       value.put(env.createString("host"), sb);
     else if (state == ParseUrlState.PASS) {
       value.put(env.createString("host"), user);
-      value.put(env.createString("port"), new LongValue(sb.toLong()));
+      value.put(env.createString("port"), LongValue.create(sb.toLong()));
     }
     else if (state == ParseUrlState.PORT) {
-      value.put(env.createString("port"), new LongValue(sb.toLong()));
+      value.put(env.createString("port"), LongValue.create(sb.toLong()));
     }
     else if (state == ParseUrlState.QUERY)
       value.put(env.createString("query"), sb);

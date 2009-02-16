@@ -335,21 +335,21 @@ public class Env {
 
     AbstractFunction []defFuns = getDefaultFunctionMap();
     _fun = _freeFunList.allocate();
-    if (_fun == null || _fun.length != defFuns.length)
+    if (_fun == null || _fun.length < defFuns.length)
       _fun = new AbstractFunction[defFuns.length];
     System.arraycopy(defFuns, 0, _fun, 0, defFuns.length);
 
     ClassDef []defClasses = quercus.getClassDefMap();
 
     _classDef = _freeClassDefList.allocate();
-    if (_classDef == null || _classDef.length != defClasses.length)
+    if (_classDef == null || _classDef.length < defClasses.length)
       _classDef = new ClassDef[defClasses.length];
     else {
       // list should have been zeroed on call to free
     }
 
     _qClass = _freeClassList.allocate();
-    if (_qClass == null || _qClass.length != defClasses.length)
+    if (_qClass == null || _qClass.length < defClasses.length)
       _qClass = new QuercusClass[defClasses.length];
     else {
       // list should have been zeroed on call to free
@@ -358,7 +358,7 @@ public class Env {
     Value []defConst = quercus.getConstantMap();
     
     _const = _freeConstList.allocate();
-    if (_const == null || _const.length != defConst.length)
+    if (_const == null || _const.length < defConst.length)
       _const = new Value[defConst.length];
     else {
       // list should have been zeroed on call to free
@@ -2531,15 +2531,17 @@ public class Env {
       
       Value []newThisStack = new Value[2 * _callThisStack.length];
       System.arraycopy(_callThisStack,
-		       0, newThisStack,
-		       0, _callThisStack.length);
-      
-      Value []newArgStack = new Value[2 * _callArgStack.length];
-      System.arraycopy(_callArgStack,
-		       0, newArgStack,
-		       0, _callArgStack.length);
+                       0, newThisStack,
+                       0, _callThisStack.length);
       
       _callThisStack = newThisStack;
+      
+      Value [][]newArgStack = new Value[2 * _callArgStack.length][];
+      System.arraycopy(_callArgStack,
+                       0, newArgStack,
+                       0, _callArgStack.length);
+      
+      _callArgStack = newArgStack;
     }
 
     _callStack[_callStackTop] = call;
@@ -5627,11 +5629,11 @@ public class Env {
         Value lineV = NullValue.NULL;
         int line = location.getLineNumber();
         if (line > 0)
-          lineV = new LongValue(line);
+          lineV = LongValue.create(line);
 
         Value context = NullValue.NULL;
 
-        handler.call(this, new LongValue(mask), createString(msg),
+        handler.call(this, LongValue.create(mask), createString(msg),
                      fileNameV, lineV, context);
 
         return NullValue.NULL;
@@ -5870,7 +5872,7 @@ public class Env {
    */
   public static Value toValue(long value)
   {
-    return new LongValue(value);
+    return LongValue.create(value);
   }
 
   /**

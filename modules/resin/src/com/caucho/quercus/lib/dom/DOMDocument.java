@@ -544,7 +544,7 @@ public class DOMDocument
       }
     }
 
-    return new LongValue(path.getLength());
+    return LongValue.create(path.getLength());
   }
 
   private void saveToStream(WriteStream os, boolean isHTML)

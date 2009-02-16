@@ -58,7 +58,7 @@ public class LongObjectMarshal extends Marshal
     if (value == null)
       return LongValue.ZERO;
     else
-      return new LongValue(((Number) value).longValue());
+      return LongValue.create(((Number) value).longValue());
   }
   
   @Override

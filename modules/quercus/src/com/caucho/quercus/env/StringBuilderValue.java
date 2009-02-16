@@ -495,7 +495,7 @@ public class StringBuilderValue
         return this;
     }
 
-    return new LongValue(sign * value);
+    return LongValue.create(sign * value);
   }
 
   /**

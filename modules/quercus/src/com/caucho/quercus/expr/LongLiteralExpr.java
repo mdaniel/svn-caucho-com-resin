@@ -45,7 +45,7 @@ public class LongLiteralExpr extends Expr {
   {
     super(location);
     _value = value;
-    _objValue = new LongValue(_value);
+    _objValue = LongValue.create(_value);
   }
 
   public LongLiteralExpr(long value)

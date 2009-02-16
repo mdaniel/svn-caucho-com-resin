@@ -369,7 +369,7 @@ public class McryptModule extends AbstractQuercusModule {
     if (mcrypt == null)
       return BooleanValue.FALSE;
     else
-      return new LongValue(mcrypt.init(key, iv));
+      return LongValue.create(mcrypt.init(key, iv));
   }
 
   /**

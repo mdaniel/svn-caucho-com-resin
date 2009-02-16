@@ -785,11 +785,11 @@ public class OptionsModule extends AbstractQuercusModule {
       return cmp >= 0 ? BooleanValue.TRUE : BooleanValue.FALSE;
     else {
       if (cmp == 0)
-        return new LongValue(0);
+        return LongValue.ZERO;
       else if (cmp < 0)
-        return new LongValue(-1);
+        return LongValue.MINUS_ONE;
       else
-        return new LongValue(1);
+        return LongValue.ONE;
     }
   }
 
@@ -818,7 +818,7 @@ public class OptionsModule extends AbstractQuercusModule {
           value = 10 * value + ch - '0';
         }
 
-        expand.add(new LongValue(value));
+        expand.add(LongValue.create(value));
       }
       else if (Character.isLetter((char) ch)) {
         StringBuilder sb = new StringBuilder();

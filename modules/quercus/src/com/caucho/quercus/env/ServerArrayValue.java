@@ -227,13 +227,13 @@ public class ServerArrayValue extends ArrayValueImpl
                 _env.createString(request.getServerName()));
 
       super.put(SERVER_PORT_V,
-                new LongValue(request.getServerPort()));
+                LongValue.create(request.getServerPort()));
       super.put(REMOTE_HOST_V,
                 _env.createString(request.getRemoteHost()));
       super.put(REMOTE_ADDR_V,
                 _env.createString(request.getRemoteAddr()));
       super.put(REMOTE_PORT_V,
-                new LongValue(request.getRemotePort()));
+                LongValue.create(request.getRemotePort()));
 
       // Drupal's optional activemenu plugin only works on Apache servers!
       // bug at http://drupal.org/node/221867

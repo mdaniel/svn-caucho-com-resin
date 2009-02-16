@@ -126,7 +126,7 @@ public class ZipModule extends AbstractQuercusModule {
     if (entry == null)
       return BooleanValue.FALSE;
 
-    return new LongValue(entry.zip_entry_filesize());
+    return LongValue.create(entry.zip_entry_filesize());
   }
 
   /**

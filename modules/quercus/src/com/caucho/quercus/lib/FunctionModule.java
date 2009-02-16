@@ -156,7 +156,7 @@ public class FunctionModule extends AbstractQuercusModule {
     Value []args = env.getFunctionArgs();
 
     if (args != null && args.length > 0)
-      return new LongValue(args.length);
+      return LongValue.create(args.length);
     else
       return LongValue.ZERO;
   }

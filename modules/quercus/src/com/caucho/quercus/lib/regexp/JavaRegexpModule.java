@@ -168,7 +168,7 @@ public class JavaRegexpModule
         else
           value = env.createString(group);
 
-        regs.put(new LongValue(i), value);
+        regs.put(LongValue.create(i), value);
       }
 
       int len = matcher.end() - matcher.start();
@@ -176,7 +176,7 @@ public class JavaRegexpModule
       if (len == 0)
         return LongValue.ONE;
       else
-        return new LongValue(len);
+        return LongValue.create(len);
     }
     else {
       return LongValue.ONE;
@@ -237,7 +237,7 @@ public class JavaRegexpModule
       if (isOffsetCapture) {
         ArrayValueImpl part = new ArrayValueImpl();
         part.append(env.createString(matcher.group()));
-        part.append(new LongValue(matcher.start()));
+        part.append(LongValue.create(matcher.start()));
 
         regs.put(LongValue.ZERO, part);
       }
@@ -261,24 +261,24 @@ public class JavaRegexpModule
             part.append(env.getEmptyString());
             part.append(LongValue.MINUS_ONE);
 
-            regs.put(new LongValue(j), part);
+            regs.put(LongValue.create(j), part);
           }
 
           ArrayValueImpl part = new ArrayValueImpl();
           part.append(env.createString(group));
-          part.append(new LongValue(matcher.start(i)));
+          part.append(LongValue.create(matcher.start(i)));
 
           Value name = pcrePattern.get(i);
           if (name != null)
             regs.put(name, part);
 
-          regs.put(new LongValue(i), part);
+          regs.put(LongValue.create(i), part);
         }
         else {
           // php/151u
           // add unmatched groups first
           for (int j = regs.getSize(); j < i; j++) {
-            regs.put(new LongValue(j), env.getEmptyString());
+            regs.put(LongValue.create(j), env.getEmptyString());
           }
 
           StringValue match = env.createString(group);
@@ -287,7 +287,7 @@ public class JavaRegexpModule
           if (name != null)
             regs.put(name, match);
 
-          regs.put(new LongValue(i), match);
+          regs.put(LongValue.create(i), match);
         }
       }
 

@@ -178,7 +178,7 @@ public class MhashModule extends AbstractQuercusModule {
     if (algorithm == null || algorithm.createMessageDigest() == null)
       return BooleanValue.FALSE;
 
-    return new LongValue(512); // XXX: stubbed
+    return LongValue.create(512); // XXX: stubbed
   }
 
   public Value mhash_get_hash_name(Env env, int hash)

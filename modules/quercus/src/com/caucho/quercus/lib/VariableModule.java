@@ -631,7 +631,7 @@ public class VariableModule extends AbstractQuercusModule {
       return true;
     }
     else if ("int".equals(type) || "integer".equals(type)) {
-      var.set(new LongValue(value.toLong()));
+      var.set(LongValue.create(value.toLong()));
       return true;
     }
     else if ("float".equals(type) || "double".equals(type)) {

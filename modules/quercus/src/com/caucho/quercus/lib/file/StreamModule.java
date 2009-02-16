@@ -35,8 +35,6 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.TcpInputOutput;
-import com.caucho.quercus.lib.UdpInputOutput;
 import com.caucho.quercus.lib.file.SocketInputOutput.Domain;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.resources.StreamContextResource;
@@ -582,32 +580,32 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   static {
-    _constMap.put("STREAM_URL_STAT_LINK", new LongValue(STREAM_URL_STAT_LINK));
+    _constMap.put("STREAM_URL_STAT_LINK", LongValue.create(STREAM_URL_STAT_LINK));
     _constMap.put("STREAM_URL_STAT_QUIET", 
-                  new LongValue(STREAM_URL_STAT_QUIET));
+                  LongValue.create(STREAM_URL_STAT_QUIET));
 
-    _constMap.put("STREAM_FILTER_READ", new LongValue(STREAM_FILTER_READ));
-    _constMap.put("STREAM_FILTER_WRITE", new LongValue(STREAM_FILTER_WRITE));
-    _constMap.put("STREAM_FILTER_ALL", new LongValue(STREAM_FILTER_ALL));
+    _constMap.put("STREAM_FILTER_READ", LongValue.create(STREAM_FILTER_READ));
+    _constMap.put("STREAM_FILTER_WRITE", LongValue.create(STREAM_FILTER_WRITE));
+    _constMap.put("STREAM_FILTER_ALL", LongValue.create(STREAM_FILTER_ALL));
 
-    _constMap.put("PSFS_PASS_ON", new LongValue(PSFS_PASS_ON));
-    _constMap.put("PSFS_FEED_ME", new LongValue(PSFS_FEED_ME));
-    _constMap.put("PSFS_ERR_FATAL", new LongValue(PSFS_ERR_FATAL));
+    _constMap.put("PSFS_PASS_ON", LongValue.create(PSFS_PASS_ON));
+    _constMap.put("PSFS_FEED_ME", LongValue.create(PSFS_FEED_ME));
+    _constMap.put("PSFS_ERR_FATAL", LongValue.create(PSFS_ERR_FATAL));
 
-    _constMap.put("STREAM_USE_PATH", new LongValue(STREAM_USE_PATH));
-    _constMap.put("STREAM_REPORT_ERRORS", new LongValue(STREAM_REPORT_ERRORS));
+    _constMap.put("STREAM_USE_PATH", LongValue.create(STREAM_USE_PATH));
+    _constMap.put("STREAM_REPORT_ERRORS", LongValue.create(STREAM_REPORT_ERRORS));
 
     _constMap.put("STREAM_CLIENT_ASYNC_CONNECT",
-                  new LongValue(STREAM_CLIENT_ASYNC_CONNECT));
+                  LongValue.create(STREAM_CLIENT_ASYNC_CONNECT));
     _constMap.put("STREAM_CLIENT_CONNECT",
-                  new LongValue(STREAM_CLIENT_CONNECT));
+                  LongValue.create(STREAM_CLIENT_CONNECT));
     _constMap.put("STREAM_CLIENT_PERSISTENT",
-                  new LongValue(STREAM_CLIENT_PERSISTENT));
+                  LongValue.create(STREAM_CLIENT_PERSISTENT));
 
     _constMap.put("STREAM_SERVER_BIND",
-                  new LongValue(STREAM_SERVER_BIND));
+                  LongValue.create(STREAM_SERVER_BIND));
     _constMap.put("STREAM_SERVER_LISTEN",
-                  new LongValue(STREAM_SERVER_LISTEN));
+                  LongValue.create(STREAM_SERVER_LISTEN));
   }
 }
 

@@ -123,7 +123,7 @@ public class Postgres extends JdbcConnectionResource {
       return jConn;
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectErrno",new LongValue(e.getErrorCode()));
+      env.setSpecialValue("postgres.connectErrno", LongValue.create(e.getErrorCode()));
       env.setSpecialValue("postgres.connectError", env.createString(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);

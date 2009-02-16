@@ -270,7 +270,8 @@ public class ErrorModule extends AbstractQuercusModule {
       if (callExpr.getFileName() != null) {
         call.put(env.createString("file"),
                  env.createString(callExpr.getFileName()));
-        call.put(env.createString("line"), new LongValue(callExpr.getLine()));
+        call.put(env.createString("line"),
+                 LongValue.create(callExpr.getLine()));
       }
 
       call.put(env.createString("function"),
@@ -296,7 +297,7 @@ public class ErrorModule extends AbstractQuercusModule {
         call.put(env.createString("file"),
                  env.createString(callExpr.getFileName()));
         call.put(env.createString("line"),
-                 new LongValue(callExpr.getLine()));
+                 LongValue.create(callExpr.getLine()));
       }
 
       call.put(env.createString("function"),
@@ -317,7 +318,7 @@ public class ErrorModule extends AbstractQuercusModule {
         call.put(env.createString("file"),
                  env.createString(expr.getFileName()));
         call.put(env.createString("line"),
-                 new LongValue(expr.getLine()));
+                 LongValue.create(expr.getLine()));
       }
 
       call.put(env.createString("function"), env.createString("include"));

@@ -495,7 +495,7 @@ public class StringModule extends AbstractQuercusModule {
 
         for (int i = 0; i < count.length; i++) {
           if (count[i] > 0)
-            result.put(LongValue.create(i), new LongValue(count[i]));
+            result.put(LongValue.create(i), LongValue.create(count[i]));
         }
 
         return result;
@@ -507,7 +507,7 @@ public class StringModule extends AbstractQuercusModule {
 
         for (int i = 0; i < count.length; i++) {
           if (count[i] == 0)
-            result.put(new LongValue(i), new LongValue(count[i]));
+            result.put(LongValue.create(i), LongValue.create(count[i]));
         }
 
         return result;
@@ -2870,7 +2870,7 @@ public class StringModule extends AbstractQuercusModule {
         value = string.substring(i);
       }
 
-      array.put(new LongValue(i), value);
+      array.put(LongValue.create(i), value);
     }
 
     return array;
@@ -2932,7 +2932,7 @@ public class StringModule extends AbstractQuercusModule {
             if (format == 1)
               resultArray.append(word);
             else if (format == 2)
-              resultArray.put(new LongValue(lastWordStart), word);
+              resultArray.put(LongValue.create(lastWordStart), word);
           }
         }
       }
@@ -3684,7 +3684,7 @@ public class StringModule extends AbstractQuercusModule {
     if (pos < 0)
       return BooleanValue.FALSE;
     else
-      return new LongValue(pos);
+      return LongValue.create(pos);
   }
 
   /**
@@ -3716,7 +3716,7 @@ public class StringModule extends AbstractQuercusModule {
     if (pos < 0)
       return BooleanValue.FALSE;
     else
-      return new LongValue(pos);
+      return LongValue.create(pos);
   }
 
   /**
@@ -4189,7 +4189,7 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    return new LongValue(count);
+    return LongValue.create(count);
   }
 
   /**

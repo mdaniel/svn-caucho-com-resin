@@ -316,7 +316,7 @@ public class IniDefinition {
     else if (value instanceof BooleanValue)
       return value.toBoolean() ? LongValue.ONE : LongValue.ZERO;
     else
-      return new LongValue(value.toLong());
+      return LongValue.create(value.toLong());
   }
 
   public long getAsLong(Env env)

@@ -246,7 +246,7 @@ public class DateModule extends AbstractQuercusModule {
     array.put("yday", date.getDayOfYear());
     array.put("weekday", _fullDayOfWeek[date.getDayOfWeek() - 1]);
     array.put("month", _fullMonth[date.getMonth()]);
-    array.put(new LongValue(0), new LongValue(time));
+    array.put(LongValue.ZERO, LongValue.create(time));
 
     return array;
   }

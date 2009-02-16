@@ -59,7 +59,7 @@ public class ByteObjectMarshal extends Marshal
     if (value == null)
       return LongValue.ZERO;
     else
-      return new LongValue(((Number) value).longValue());
+      return LongValue.create(((Number) value).longValue());
   }
   
   @Override

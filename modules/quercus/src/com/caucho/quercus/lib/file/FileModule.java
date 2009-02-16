@@ -789,7 +789,7 @@ public class FileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    return new LongValue(path.getGroup());
+    return LongValue.create(path.getGroup());
   }
 
   /**
@@ -840,7 +840,7 @@ public class FileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    return new LongValue(path.getOwner());
+    return LongValue.create(path.getOwner());
   }
 
   /**
@@ -850,7 +850,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fileperms(Env env, Path path)
   {
-    return new LongValue(path.getMode());
+    return LongValue.create(path.getMode());
   }
 
   /**
@@ -876,7 +876,7 @@ public class FileModule extends AbstractQuercusModule {
     if (length < 0)
       return BooleanValue.FALSE;
     else
-      return new LongValue(length);
+      return LongValue.create(length);
   }
 
   /**
@@ -1014,7 +1014,7 @@ public class FileModule extends AbstractQuercusModule {
           is.close();
         }
 
-        return new LongValue(dataWritten);
+        return LongValue.create(dataWritten);
       } finally {
         os.close();
       }
@@ -2768,7 +2768,7 @@ public class FileModule extends AbstractQuercusModule {
                               @Optional("1") int order,
                               @Optional Value context)
   {
-    if (fileName == null) {
+    if (fileName.length() == 0) {
       env.warning(L.l("file name must not be NULL"));
       return BooleanValue.FALSE;
     }
@@ -2776,8 +2776,8 @@ public class FileModule extends AbstractQuercusModule {
     try {
       Path path = env.lookupPwd(fileName);
 
-      if (!path.isDirectory()) {
-        env.warning(L.l("{0} is not a directory", path.getFullPath()));
+      if (path == null || ! path.isDirectory()) {
+        env.warning(L.l("'{0}' is not a directory", fileName));
         return BooleanValue.FALSE;
       }
 
@@ -2789,11 +2789,11 @@ public class FileModule extends AbstractQuercusModule {
 
       if (order == 1) {
         for (int i = 0; i < values.length; i++)
-          result.append(new LongValue(i), env.createString(values[i]));
+          result.append(LongValue.create(i), env.createString(values[i]));
       }
       else {
         for (int i = values.length - 1; i >= 0; i--) {
-          result.append(new LongValue(values.length - i - 1),
+          result.append(LongValue.create(values.length - i - 1),
           env.createString(values[i]));
         }
       }

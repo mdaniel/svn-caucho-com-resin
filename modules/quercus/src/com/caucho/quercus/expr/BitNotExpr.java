@@ -67,7 +67,7 @@ public class BitNotExpr extends UnaryExpr {
   {
     long lValue = _expr.evalLong(env);
 
-    return new LongValue(~ lValue);
+    return LongValue.create(~ lValue);
   }
 
   public String toString()

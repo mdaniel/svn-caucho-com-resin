@@ -172,14 +172,14 @@ public class ImageModule extends AbstractQuercusModule {
     if (imageArray == null)
       imageArray = new ArrayValueImpl();
 
-    imageArray.put(new LongValue(info._width));
-    imageArray.put(new LongValue(info._height));
-    imageArray.put(new LongValue(info._type));
+    imageArray.put(LongValue.create(info._width));
+    imageArray.put(LongValue.create(info._height));
+    imageArray.put(LongValue.create(info._type));
     imageArray.put(env.createString("width=\"" + info._width +
 				   "\" height=\"" + info._height + "\""));
 
     if (info._bits >= 0)
-      imageArray.put(env.createString("bits"), new LongValue(info._bits));
+      imageArray.put(env.createString("bits"), LongValue.create(info._bits));
 
     if (info._type == IMAGETYPE_JPEG)
       imageArray.put("channels", 3);
@@ -1040,17 +1040,17 @@ public class ImageModule extends AbstractQuercusModule {
       double y2 = rect.getY() + descent - 1;
       
       ArrayValue bbox = new ArrayValueImpl();
-      bbox.put(new LongValue(Math.round(x1)));
-      bbox.put(new LongValue(Math.round(y1)));
+      bbox.put(LongValue.create(Math.round(x1)));
+      bbox.put(LongValue.create(Math.round(y1)));
       
-      bbox.put(new LongValue(Math.round(x2)));
-      bbox.put(new LongValue(Math.round(y1)));
+      bbox.put(LongValue.create(Math.round(x2)));
+      bbox.put(LongValue.create(Math.round(y1)));
       
-      bbox.put(new LongValue(Math.round(x2)));
-      bbox.put(new LongValue(Math.round(y2)));
+      bbox.put(LongValue.create(Math.round(x2)));
+      bbox.put(LongValue.create(Math.round(y2)));
 
-      bbox.put(new LongValue(Math.round(x1)));
-      bbox.put(new LongValue(Math.round(y2)));
+      bbox.put(LongValue.create(Math.round(x1)));
+      bbox.put(LongValue.create(Math.round(y2)));
       
       return bbox;
     } catch (Exception e) {

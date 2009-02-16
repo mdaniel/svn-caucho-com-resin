@@ -239,8 +239,6 @@ public class JdbcResultResource {
       return null;
     
     ObjectValue result = env.createObject();
-    LongValue one = new LongValue(1);
-    LongValue zero = new LongValue(0);
 
     try {
       if (! _isValid) {
@@ -250,44 +248,44 @@ public class JdbcResultResource {
       
       result.putField(env, "name", env.createString(_rs.getString(1)));
       result.putField(env, "table", env.createString(tableName));
-      result.putField(env, "max_length", new LongValue(maxLength));
+      result.putField(env, "max_length", LongValue.create(maxLength));
 
       if (! isInResultString(4, "YES"))
-        result.putField(env, "not_null", one);
+        result.putField(env, "not_null", LongValue.ONE);
       else
-        result.putField(env, "not_null", zero);
+        result.putField(env, "not_null", LongValue.ZERO);
 
       if (isInResultString(5, "PRI"))
-        result.putField(env, "primary_key", one);
+        result.putField(env, "primary_key", LongValue.ONE);
       else
-        result.putField(env, "primary_key", zero);
+        result.putField(env, "primary_key", LongValue.ZERO);
 
       if (isInResultString(5, "MUL"))
-        result.putField(env, "multiple_key", one);
+        result.putField(env, "multiple_key", LongValue.ONE);
       else
-        result.putField(env, "multiple_key", zero);
+        result.putField(env, "multiple_key", LongValue.ZERO);
 
       if (isInResultString(2, "int") || isInResultString(2, "real"))
-        result.putField(env, "numeric", one);
+        result.putField(env, "numeric", LongValue.ONE);
       else
-        result.putField(env, "numeric", zero);
+        result.putField(env, "numeric", LongValue.ZERO);
 
       if (isInResultString(2, "blob"))
-        result.putField(env, "blob", one);
+        result.putField(env, "blob", LongValue.ONE);
       else
-        result.putField(env, "blob", zero);
+        result.putField(env, "blob", LongValue.ZERO);
 
       result.putField(env, "type", env.createString(type));
 
       if (isInResultString(2, "unsigned"))
-        result.putField(env, "unsigned", one);
+        result.putField(env, "unsigned", LongValue.ONE);
       else
-        result.putField(env, "unsigned", zero);
+        result.putField(env, "unsigned", LongValue.ZERO);
 
       if (isInResultString(2, "zerofill"))
-        result.putField(env, "zerofill", one);
+        result.putField(env, "zerofill", LongValue.ONE);
       else
-        result.putField(env, "zerofill", zero);
+        result.putField(env, "zerofill", LongValue.ZERO);
 
       return result;
     } catch (SQLException e) {
@@ -795,7 +793,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
       else
-        return new LongValue((long) md.getPrecision(fieldOffset + 1));
+        return LongValue.create((long) md.getPrecision(fieldOffset + 1));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -904,7 +902,7 @@ public class JdbcResultResource {
       if (md.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return new LongValue((long) md.getScale(fieldOffset + 1));
+        return LongValue.create((long) md.getScale(fieldOffset + 1));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1063,7 +1061,7 @@ public class JdbcResultResource {
     try {
       ResultSetMetaData md = getMetaData();
 
-      return new LongValue(md.getColumnType(fieldOffset + 1));
+      return LongValue.create(md.getColumnType(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -1089,7 +1087,7 @@ public class JdbcResultResource {
       int numColumns = md.getColumnCount();
 
       for (int i = 1; i <= numColumns; i++) {
-        array.put(new LongValue(_rs.getObject(i).toString().length()));
+        array.put(LongValue.create(_rs.getObject(i).toString().length()));
       }
       result = array;
 
@@ -1142,7 +1140,7 @@ public class JdbcResultResource {
       int count = md.getColumnCount();
 
       if (count != 0) {
-        result = new LongValue((long) count);
+        result = LongValue.create((long) count);
       }
 
       return result;

@@ -636,7 +636,7 @@ public class PDOStatement
         Value value = getColumnValue(i);
 
         array.put(_env.createString(name), value);
-        array.put(new LongValue(i - 1), value);
+        array.put(LongValue.create(i - 1), value);
       }
 
       return array;
