@@ -60,7 +60,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   private AbstractHttpRequest _request;
 
-  private AbstractHttpResponse _response;
+  private HttpServletResponseImpl _response;
 
   private ConnectionCometController _comet;
 
@@ -75,6 +75,11 @@ public class HttpServletRequestImpl implements CauchoRequest
   public HttpServletRequestImpl(AbstractHttpRequest request)
   {
     _request = request;
+  }
+
+  public void setResponse(HttpServletResponseImpl response)
+  {
+    _response = response;
   }
 
   //
@@ -458,7 +463,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   public void suspend()
   {
     if (_comet == null)
-      _comet = _request.getConnection().toComet();
+      _comet = _request.getConnection().toComet(true, this, _response);
 
     _comet.suspend();
   }
@@ -898,7 +903,8 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   public ConnectionCometController toComet()
   {
-    _comet = _request.getConnection().toComet();
+    if (_comet == null)
+      _comet = _request.getConnection().toComet(true, this, _response);
     
     return _comet;
   }
@@ -1000,7 +1006,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public AsyncContext getAsyncContext()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _comet;
   }
 
   /**
@@ -1010,7 +1016,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isAsyncStarted()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _comet != null;
   }
 
   /**
@@ -1020,7 +1026,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isAsyncSupported()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return true;
   }
 
   /**
@@ -1040,7 +1046,12 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public AsyncContext startAsync()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (_comet == null)
+      _comet = _request.getConnection().toComet(true, this, _response);
+
+    _comet.suspend();
+
+    return _comet;
   }
 
   /**
@@ -1048,10 +1059,15 @@ public class HttpServletRequestImpl implements CauchoRequest
    *
    * @since Servlet 3.0
    */
-  public AsyncContext startAsync(ServletRequest servletRequest,
-				 ServletResponse servletResponse)
+  public AsyncContext startAsync(ServletRequest request,
+				 ServletResponse response)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (_comet == null)
+      _comet = _request.getConnection().toComet(false, request, response);
+
+    _comet.suspend();
+    
+    return _comet;
   }
 
   @Override

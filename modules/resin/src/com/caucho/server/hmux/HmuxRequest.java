@@ -491,6 +491,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
 	_requestFacade = new HttpServletRequestImpl(this);
 	_responseFacade = new HttpServletResponseImpl(_response);
+	_requestFacade.setResponse(_responseFacade);
 
 	startInvocation();
 

@@ -44,10 +44,19 @@ public class ConnectionController
   protected ConnectionController()
   {
   }
+
+  public void suspend()
+  {
+  }
   
   public boolean isSuspended()
   {
     return false;
+  }
+
+  public String getForwardPath()
+  {
+    return null;
   }
 
   /**

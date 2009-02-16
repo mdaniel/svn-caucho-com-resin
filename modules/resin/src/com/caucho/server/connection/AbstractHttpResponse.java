@@ -2304,8 +2304,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	handleNotModified(_isTopCache);
       }
 
-      isSuspend = false; // conn != null && conn.isSuspend();
-
       if (isClose)
 	_responseStream.close();
       else if (_responseStream != _originalResponseStream)

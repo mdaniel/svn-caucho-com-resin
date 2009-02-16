@@ -201,6 +201,7 @@ public class HttpRequest extends AbstractHttpRequest
       // XXX: use same one for keepalive?
       _requestFacade = new HttpServletRequestImpl(this);
       _responseFacade = new HttpServletResponseImpl(_response);
+      _requestFacade.setResponse(_responseFacade);
 
       try {
 	if (! readRequest(_rawRead)) {
@@ -252,49 +253,10 @@ public class HttpRequest extends AbstractHttpRequest
 			  host, _conn.getLocalPort(),
 			  _uri, _uriLength);
 
-      Invocation invocation;
+      Invocation invocation = getInvocation(host);
 
-      invocation = _server.getInvocation(_invocationKey);
-
-      if (invocation == null) {
-	invocation = _server.createInvocation();
-	invocation.setSecure(_isSecure);
-
-	if (host != null) {
-	  String hostName = host.toString().toLowerCase();
-
-	  invocation.setHost(hostName);
-	  invocation.setPort(_conn.getLocalPort());
-
-	  // Default host name if the host doesn't have a canonical
-	  // name
-	  int p = hostName.indexOf(':');
-	  if (p > 0)
-	    invocation.setHostName(hostName.substring(0, p));
-	  else
-	    invocation.setHostName(hostName);
-	}
-
-	InvocationDecoder decoder = _server.getInvocationDecoder();
-
-	decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
-
-	if (_server.isModified()) {
-	  _server.logModified(log);
-
-	  _invocation = invocation;
-	  if (_server instanceof Server)
-	    _invocation.setWebApp(((Server) _server).getDefaultWebApp());
-
-	  restartServer();
-	  return false;
-	}
-
-	invocation = _server.buildInvocation(_invocationKey.clone(),
-					     invocation);
-      }
-
-      invocation = invocation.getRequestInvocation(this);
+      if (invocation == null)
+	return false;
 
       setInvocation(invocation);
 
@@ -341,6 +303,55 @@ public class HttpRequest extends AbstractHttpRequest
 
     return isKeepalive();
   }
+
+  private Invocation getInvocation(CharSequence host)
+    throws Throwable
+  {
+    Invocation invocation = _server.getInvocation(_invocationKey);
+
+    if (invocation == null) {
+      invocation = _server.createInvocation();
+      invocation.setSecure(_isSecure);
+
+      if (host != null) {
+	String hostName = host.toString().toLowerCase();
+
+	invocation.setHost(hostName);
+	invocation.setPort(_conn.getLocalPort());
+
+	// Default host name if the host doesn't have a canonical
+	// name
+	int p = hostName.indexOf(':');
+	if (p > 0)
+	  invocation.setHostName(hostName.substring(0, p));
+	else
+	  invocation.setHostName(hostName);
+      }
+
+      InvocationDecoder decoder = _server.getInvocationDecoder();
+
+      decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
+
+      if (_server.isModified()) {
+	_server.logModified(log);
+
+	_invocation = invocation;
+	if (_server instanceof Server)
+	  _invocation.setWebApp(((Server) _server).getDefaultWebApp());
+
+	restartServer();
+	
+	return null;
+      }
+
+      invocation = _server.buildInvocation(_invocationKey.clone(),
+					   invocation);
+    }
+
+    invocation = invocation.getRequestInvocation(this);
+
+    return invocation;
+  }
   
   /**
    * Handles a comet-style resume.
@@ -356,6 +367,24 @@ public class HttpRequest extends AbstractHttpRequest
 
       if (! isComet())
 	return false;
+
+      String url = _tcpConn.getCometPath();
+
+      // servlet 3.0 spec defaults to suspend
+      _tcpConn.suspend();
+	  
+      if (url != null) {
+	WebApp webApp = getWebApp();
+
+	RequestDispatcherImpl disp
+	  = (RequestDispatcherImpl) webApp.getRequestDispatcher(url);
+
+	if (disp != null) {
+	  disp.forwardResume(_requestFacade, _responseFacade);
+	  
+	  return isSuspend();
+	}
+      }
 	
       _invocation.doResume(_requestFacade, _responseFacade);
     } catch (ClientDisconnectException e) {

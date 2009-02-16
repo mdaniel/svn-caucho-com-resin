@@ -215,4 +215,10 @@ public class ResponseWriter extends AbstractPrintWriter {
     }
     */
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _out + "]";
+  }
 }

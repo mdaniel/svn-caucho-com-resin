@@ -27,26 +27,66 @@
  * @author Scott Ferguson
  */
 
-package javax.servlet;
+package com.caucho.server.connection;
 
-import java.io.IOException;
+import javax.servlet.*;
 
 /**
- * Asynchronous/comet servlet support.
- *
- * @since Servlet 3.0
+ * Implementation of the Servlet 3.0 AsyncContext
  */
-public interface AsyncContext {
-  public ServletRequest getRequest();
-  public ServletResponse getResponse();
+public class AsyncContextImpl implements AsyncContext
+{
+  private HttpServletRequestImpl _topRequest;
+  
+  private ServletRequest _request;
+  private ServletResponse _response;
 
-  public boolean hasOriginalRequestAndResponse();
+  public AsyncContextImpl(HttpServletRequestImpl topRequest,
+			  ServletRequest request,
+			  ServletResponse response)
+  {
+    _topRequest = topRequest;
+    _request = request;
+    _response = response;
+  }
+  
+  public ServletRequest getRequest()
+  {
+    return _request;
+  }
+  
+  public ServletResponse getResponse()
+  {
+    return _response;
+  }
 
-  public void forward();
-  public void forward(String path);
-  public void forward(ServletContext context, String path);
+  public boolean hasOriginalRequestAndResponse()
+  {
+    return true;
+  }
 
-  public void complete();
+  public void forward()
+  {
+  }
+  
+  public void forward(String path)
+  {
+  }
+  
+  public void forward(ServletContext context, String path)
+  {
+  }
 
-  public void start(Runnable task);
+  public void complete()
+  {
+  }
+
+  public void start(Runnable task)
+  {
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _topRequest + "]";
+  }
 }

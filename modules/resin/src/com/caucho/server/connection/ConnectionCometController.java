@@ -42,23 +42,36 @@ import com.caucho.util.*;
  * Public API to control a comet connection.
  */
 public class ConnectionCometController extends ConnectionController
-  implements CometController
+  implements CometController, AsyncContext
 {
   private Connection _conn;
   
   private HashMap<String,Object> _map;
+
+  private ServletRequest _request;
+  private ServletResponse _response;
   
   private boolean _isTimeout;
 
+  private boolean _isTop;
   private boolean _isInitial = true;
   private boolean _isSuspended;
   private boolean _isComplete;
+
+  private String _forwardPath;
   
   private long _maxIdleTime;
 
-  public ConnectionCometController(Connection conn)
+  public ConnectionCometController(Connection conn,
+				   boolean isTop,
+				   ServletRequest request,
+				   ServletResponse response)
   {
     _conn = conn;
+
+    _isTop = isTop;
+    _request = request;
+    _response = response;
   }
   
   /**
@@ -102,6 +115,7 @@ public class ConnectionCometController extends ConnectionController
   /**
    * Suspend the connection on the next request
    */
+  @Override
   public final void suspend()
   {
     if (! _isComplete)
@@ -242,6 +256,53 @@ public class ConnectionCometController extends ConnectionController
   {
     return _conn == null || _isComplete;
   }
+  
+  public ServletRequest getRequest()
+  {
+    return _request;
+  }
+  
+  public ServletResponse getResponse()
+  {
+    return _response;
+  }
+
+  public boolean hasOriginalRequestAndResponse()
+  {
+    return true;
+  }
+
+  public String getForwardPath()
+  {
+    return _forwardPath;
+  }
+
+  public void forward()
+  {
+    Connection conn = _conn;
+
+    if (conn != null) {
+      conn.wake();
+    }
+  }
+  
+  public void forward(String path)
+  {
+    _forwardPath = path;
+
+    forward();
+  }
+  
+  public void forward(ServletContext context, String path)
+  {
+    _forwardPath = path;
+
+    forward();
+  }
+
+  public void start(Runnable task)
+  {
+  }
 
   /**
    * Closes the connection.
@@ -258,6 +319,10 @@ public class ConnectionCometController extends ConnectionController
     
     Connection conn = _conn;
     _conn = null;
+
+    _request = null;
+    _response = null;
+    
     _isComplete = true;
 
     if (conn != null)

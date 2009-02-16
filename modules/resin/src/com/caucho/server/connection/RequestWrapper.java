@@ -658,7 +658,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public AsyncContext getAsyncContext()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getRequest().getAsyncContext();
   }
 
   /**
@@ -668,7 +668,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public boolean isAsyncStarted()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getRequest().isAsyncStarted();
   }
 
   /**
@@ -678,7 +678,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public boolean isAsyncSupported()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getRequest().isAsyncSupported();
   }
 
   /**

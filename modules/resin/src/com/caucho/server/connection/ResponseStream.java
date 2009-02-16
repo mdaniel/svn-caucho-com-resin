@@ -839,4 +839,9 @@ class ResponseStream extends ToByteResponseStream {
   {
     finish();
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _response + "]";
+  }
 }

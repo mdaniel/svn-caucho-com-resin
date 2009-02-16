@@ -34,6 +34,8 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
 import java.net.InetAddress;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  * Represents a protocol-independent connection.  Prococol servers and
@@ -174,9 +176,12 @@ public abstract class Connection
   /**
    * Starts a comet request
    */
-  public ConnectionCometController toComet()
+  public ConnectionCometController toComet(boolean isTop,
+					   ServletRequest request,
+					   ServletResponse response)
   {
-    ConnectionCometController controller = new ConnectionCometController(this);
+    ConnectionCometController controller
+      = new ConnectionCometController(this, request, response);
 
     return controller;
   }

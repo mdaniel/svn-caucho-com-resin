@@ -2753,8 +2753,8 @@ public abstract class AbstractHttpRequest
    *
    * @since Servlet 3.0
    */
-  public AsyncContext startAsync(ServletRequest servletRequest,
-				 ServletResponse servletResponse)
+  public AsyncContext startAsync(ServletRequest request,
+				 ServletResponse response)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

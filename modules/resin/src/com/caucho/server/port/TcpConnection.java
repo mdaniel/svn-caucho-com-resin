@@ -49,6 +49,8 @@ import java.net.SocketTimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  * A protocol-independent TcpConnection.  TcpConnection controls the
@@ -515,6 +517,20 @@ public class TcpConnection extends Connection
     return _controller != null && _controller.isSuspended();
   }
 
+  public void suspend()
+  {
+    if (_controller != null)
+      _controller.suspend();
+  }
+
+  public String getCometPath()
+  {
+    if (_controller != null)
+      return _controller.getForwardPath();
+    else
+      return null;
+  }
+
   @Override
   public boolean isDuplex()
   {
@@ -789,13 +805,16 @@ public class TcpConnection extends Connection
    * Starts a comet request
    */
   @Override
-  public ConnectionCometController toComet()
+  public ConnectionCometController toComet(boolean isTop,
+					   ServletRequest request,
+					   ServletResponse response)
   {
     if (_controller != null)
       throw new IllegalStateException(L.l("comet mode can't start in state '{0}'",
 					  _state));
 
-    ConnectionCometController controller = new ConnectionCometController(this);
+    ConnectionCometController controller
+      = new ConnectionCometController(this, isTop, request, response);
     _controller = controller;
 
     if (log.isLoggable(Level.FINER))
