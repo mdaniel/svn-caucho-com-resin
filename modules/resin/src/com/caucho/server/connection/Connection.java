@@ -181,7 +181,7 @@ public abstract class Connection
 					   ServletResponse response)
   {
     ConnectionCometController controller
-      = new ConnectionCometController(this, request, response);
+      = new ConnectionCometController(this, isTop, request, response);
 
     return controller;
   }
