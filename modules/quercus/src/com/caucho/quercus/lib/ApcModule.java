@@ -37,14 +37,18 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * APC object oriented API facade
  */
-public class ApcModule extends AbstractQuercusModule {
+public class ApcModule extends AbstractQuercusModule
+{
   private static final Logger log = Logger.getLogger(ApcModule.class.getName());
   private static final L10N L = new L10N(ApcModule.class);
 
@@ -144,6 +148,26 @@ public class ApcModule extends AbstractQuercusModule {
       _cache.clear();
 
     return true;
+  }
+  
+  /**
+   * Preloads the specified file.
+   */
+  public boolean apc_compile_file(Env env, StringValue name)
+  {
+    try {
+      Path path = env.lookup(name);
+      
+      if (path != null && path.canRead()) {
+        env.getQuercus().parse(path);
+      
+        return true;
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+    }
+    
+    return false;
   }
 
   /**
