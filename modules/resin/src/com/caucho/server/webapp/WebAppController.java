@@ -520,6 +520,7 @@ public class WebAppController
     webBeans.addSingleton(app, CauchoDeployment.class, (String) null,
 			  WebApp.class, ServletContext.class);
     Config.setProperty("webApp", getVar());
+    Config.setProperty("app", getVar());
     
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());

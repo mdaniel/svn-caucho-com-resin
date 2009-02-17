@@ -189,8 +189,9 @@ class Skeleton<S extends SimpleActorStream>
 
     if (payload != null)
       handler = _queryGetHandlers.get(payload.getClass());
-    else
+    else {
       handler = null;
+    }
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {

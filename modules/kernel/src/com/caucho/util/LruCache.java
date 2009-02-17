@@ -359,6 +359,8 @@ public final class LruCache<K,V> {
 	_entries[hash] = item;
 
 	synchronized (_lruLock) {
+	  // server/1401
+	  _lruCounter++;
 	  _size1++;
 	  
 	  item._nextLru = _head1;

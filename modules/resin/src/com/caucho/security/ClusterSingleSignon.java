@@ -49,7 +49,6 @@ import javax.annotation.PostConstruct;
 public class ClusterSingleSignon implements SingleSignon {
   private final static Logger log
     = Logger.getLogger(MemorySingleSignon.class.getName());
-
   private AbstractCache _cache;
 
   public ClusterSingleSignon()

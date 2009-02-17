@@ -82,18 +82,16 @@ public class HmuxLinkService extends SimpleActor {
   //
 
   @QueryGet
-  public boolean getPublicKey(long id, String to, String from,
+  public void getPublicKey(long id, String to, String from,
 			      GetPublicKeyQuery query)
   {
     GetPublicKeyQuery result = _linkManager.getPublicKey();
 
     getBrokerStream().queryResult(id, from, to, result);
-
-    return true;
   }
 
   @QuerySet
-  public boolean authLogin(long id, String to, String from, AuthQuery query)
+  public void authLogin(long id, String to, String from, AuthQuery query)
   {
     Object credentials = query.getCredentials();
 
@@ -110,7 +108,7 @@ public class HmuxLinkService extends SimpleActor {
 				   new ActorError(ActorError.TYPE_AUTH,
 						ActorError.FORBIDDEN,
 						"passwords must be encrypted"));
-      return true;
+      return;
     }
 
     String cookie = (String) credentials;
@@ -131,8 +129,6 @@ public class HmuxLinkService extends SimpleActor {
 
     getBrokerStream().queryResult(id, from, to,
 				  new AuthResult(_adminConn.getJid()));
-
-    return true;
   }
 
   public ActorStream getBrokerStream(boolean isAdmin)

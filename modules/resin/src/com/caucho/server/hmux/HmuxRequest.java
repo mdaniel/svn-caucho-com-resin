@@ -295,6 +295,7 @@ public class HmuxRequest extends AbstractHttpRequest
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
     _server = Server.getCurrent();
+    /*
     if (_server != null) {
       try {
 	Class cl = Class.forName("com.caucho.server.hmux.HmuxClusterRequest");
@@ -308,6 +309,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	log.log(Level.FINER, e.toString(), e);
       }
     }
+    */
     
     _dispatchRequest = new HmuxDispatchRequest(this);
     
@@ -371,12 +373,8 @@ public class HmuxRequest extends AbstractHttpRequest
 
       return result;
     } catch (RuntimeException e) {
-      e.printStackTrace();
-
       throw e;
     } catch (IOException e) {
-      e.printStackTrace();
-
       throw e;
     }
   }
@@ -1311,7 +1309,8 @@ public class HmuxRequest extends AbstractHttpRequest
     synchronized (out) {
       out.write(HmuxRequest.HMTP_MESSAGE_ERROR);
       out.write(0);
-      out.write(0);
+      out.write(1);
+      out.write(1); // XXX: isadmin
 
       Hessian2Output hOut = getHessianOutput();
       
@@ -1344,7 +1343,8 @@ public class HmuxRequest extends AbstractHttpRequest
     synchronized (out) {
       out.write(HmuxRequest.HMTP_QUERY_GET);
       out.write(0);
-      out.write(0);
+      out.write(1);
+      out.write(1); // XXX: isadmin
 
       Hessian2Output hOut = getHessianOutput();
       
@@ -1378,6 +1378,7 @@ public class HmuxRequest extends AbstractHttpRequest
       out.write(HmuxRequest.HMTP_QUERY_SET);
       out.write(0);
       out.write(0);
+      out.write(1); // isadmin
 
       Hessian2Output hOut = getHessianOutput();
       
@@ -1410,7 +1411,8 @@ public class HmuxRequest extends AbstractHttpRequest
     synchronized (out) {
       out.write(HmuxRequest.HMTP_QUERY_RESULT);
       out.write(0);
-      out.write(0);
+      out.write(1);
+      out.write(1); // XXX: Is admin
 
       Hessian2Output hOut = getHessianOutput();
       
@@ -1442,7 +1444,8 @@ public class HmuxRequest extends AbstractHttpRequest
     synchronized (out) {
       out.write(HmuxRequest.HMTP_QUERY_ERROR);
       out.write(0);
-      out.write(0);
+      out.write(1);
+      out.write(1); // XXX: isAdmin
 
       Hessian2Output hOut = getHessianOutput();
       

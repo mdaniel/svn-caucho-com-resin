@@ -30,6 +30,7 @@
 package com.caucho.security;
 
 import com.caucho.config.inject.HandleAware;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.security.PasswordDigest;
@@ -70,6 +71,9 @@ public class AbstractAuthenticator
   private static final Logger log
     = Logger.getLogger(AbstractAuthenticator.class.getName());
   static final L10N L = new L10N(AbstractAuthenticator.class);
+
+  private static final EnvironmentLocal<SingleSignon> _localSingleSignon
+    = new EnvironmentLocal<SingleSignon>();
   
   protected String _passwordDigestAlgorithm = "MD5-base64";
   protected String _passwordDigestRealm = "resin";
@@ -185,8 +189,14 @@ public class AbstractAuthenticator
       }
     }
 
-    if (Server.getCurrent() != null)
-      _singleSignon = new ClusterSingleSignon("authenticator");
+    if (Server.getCurrent() != null) {
+      _singleSignon = _localSingleSignon.getLevel();
+      
+      if (_singleSignon == null) {
+	_singleSignon = new ClusterSingleSignon("authenticator");
+	_localSingleSignon.set(_singleSignon);
+      }
+    }
   }
 
   //

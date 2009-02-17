@@ -148,8 +148,8 @@ public final class SessionManager implements AlarmListener
   private int _sessionSaveMode = SAVE_AFTER_REQUEST;
 
   private boolean _isPersistenceEnabled = false;
-  private boolean _isTriplicate = true;
-  private boolean _isBackup = true;
+  private boolean _isSaveTriplicate = true;
+  private boolean _isSaveBackup = true;
 
   // If true, serialization errors should not be logged
   // XXX: changed for JSF
@@ -198,26 +198,14 @@ public final class SessionManager implements AlarmListener
     _selfServer = _server.getSelfServer();
     _selfIndex = _selfServer.getIndex();
 
-    boolean isSaveBackup = true;
-    boolean isSaveTriplicate = true;
-    
     // copy defaults from store for backward compat
     PersistentStoreConfig cfg = _server.getPersistentStoreConfig();
     if (cfg != null) {
       setAlwaysSaveSession(cfg.isAlwaysSave());
 
-      isSaveBackup = cfg.isSaveBackup();
-      isSaveTriplicate = cfg.isSaveTriplicate();
+      _isSaveBackup = cfg.isSaveBackup();
+      _isSaveTriplicate = cfg.isSaveTriplicate();
     }
-
-    AbstractCache sessionCache = new ClusterByteStreamCache();
-
-    sessionCache.setName("resin:session");
-    sessionCache.setBackup(isSaveBackup);
-    sessionCache.setTriplicate(isSaveTriplicate);
-    sessionCache.init();
-
-    _sessionStore = sessionCache;
 
     DispatchServer server = webApp.getDispatchServer();
     if (server != null) {
@@ -940,6 +928,17 @@ public final class SessionManager implements AlarmListener
 
     if (_sessionStore != null)
       _sessionStore.setIdleTimeoutMillis(_sessionTimeout);
+
+    if (_isPersistenceEnabled) {
+      AbstractCache sessionCache = new ClusterByteStreamCache();
+
+      sessionCache.setName("resin:session");
+      sessionCache.setBackup(_isSaveBackup);
+      sessionCache.setTriplicate(_isSaveTriplicate);
+      sessionCache.init();
+
+      _sessionStore = sessionCache;
+    }
     
     /*
     if (_storeManager != null) {

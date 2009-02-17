@@ -973,6 +973,11 @@ public class HttpServletRequestImpl implements CauchoRequest
     return _request.hasRequest();
   }
 
+  public void finishInvocation()
+  {
+    _request.finishInvocation();
+  }
+
   //
   // servlet 3.0
   //

@@ -35,6 +35,7 @@ import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.AbstractFilterChain;
 import com.caucho.server.log.AbstractAccessLog;
@@ -212,9 +213,9 @@ public class WebAppFilterChain extends AbstractFilterChain {
       // logging
 
       // needed for things like closing the session
-      if (request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).finishInvocation();
-        
+      if (request instanceof HttpServletRequestImpl)
+        ((HttpServletRequestImpl) request).finishInvocation();
+
       try {
 	if (_accessLog != null) {
 	  _accessLog.log((HttpServletRequest) request,
