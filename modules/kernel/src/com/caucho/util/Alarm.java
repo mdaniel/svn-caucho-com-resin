@@ -717,12 +717,12 @@ public class Alarm implements ThreadTask {
 
 	  synchronized (this) {
 	    long next = nextAlarmTime();
-	    long now = System.currentTimeMillis();
+	    long now = getExactTime();
 
 	    if (now < next) {
 	      wait(next - now);
 	    }
-	    now = System.currentTimeMillis();
+	    now = getExactTime();
 	  }
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);

@@ -723,12 +723,6 @@ cse_write_response(stream_t *s, int len, request_rec *r)
        * RSN-420.  If the client fails, should still read data from the
        * server and complete that side of the socket.
        */
-      /*
-      if (sentlen < 0) {
-	cse_close(s, "write");
-	return -1;
-      }
-      */
 
       if (sentlen > 0)
 	writelen -= sentlen;
