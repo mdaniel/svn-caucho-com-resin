@@ -322,7 +322,7 @@ public class Function extends AbstractFunction {
 
   private Value callImpl(Env env, Value []args, boolean isRef)
   {
-    HashMap<String,EnvVar> map = new HashMap<String,EnvVar>();
+    HashMap<String,EnvVar> map = new HashMap<String,EnvVar>(8);
 
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;

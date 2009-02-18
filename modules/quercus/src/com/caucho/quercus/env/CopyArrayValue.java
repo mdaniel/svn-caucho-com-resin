@@ -173,9 +173,7 @@ public class CopyArrayValue extends ArrayValue {
    */
   public ArrayValue append(Value key, Value value)
   {
-    put(key, value.toArgValue());
-
-    return this;
+    return getCopyArray().append(key, value);
   }
 
   /**

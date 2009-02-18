@@ -60,43 +60,5 @@ public class ConstArrayValue extends ArrayValueImpl {
   {
     throw new IllegalStateException();
   }
-
-  //
-  // Java generator code
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PrintWriter out)
-    throws IOException
-  {
-    out.print("new ConstArrayValue(");
-    
-    out.print("new Value[] {");
-      
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      if (entry != getHead())
-	out.print(", ");
-	    
-      if (entry.getKey() != null)
-	entry.getKey().generate(out);
-      else
-	out.print("null");
-    }
-      
-    out.print("}, new Value[] {");
-
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      if (entry != getHead())
-	out.print(", ");
-	    
-      entry.getValue().generate(out);
-    }
-
-    out.print("})");
-  }
 }
 

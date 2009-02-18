@@ -50,7 +50,7 @@ public class JdbcTableMetaData {
   
   private final long _lastModified;
 
-  private long _maxIdleTime = 5000L;
+  private long _maxIdleTime = 10000L;
 
   private final HashMap<String,JdbcColumnMetaData> _columnMap
     = new HashMap<String,JdbcColumnMetaData>();

@@ -43,6 +43,9 @@ public class RegexpState {
     = Logger.getLogger(RegexpState.class.getName());
   
   private static final L10N L = new L10N(Regexp.class);
+
+  private static final FreeList<RegexpState> _freeList
+    = new FreeList<RegexpState>(64);
   
   public static final int FAIL = -1;
   public static final int SUCCESS = 0;
@@ -72,7 +75,8 @@ public class RegexpState {
   
   int []_loopCount;
   int []_loopOffset;
-  
+
+  /*
   public RegexpState(Env env, Regexp regexp, StringValue subject)
   {
     this(regexp);
@@ -96,6 +100,78 @@ public class RegexpState {
     int nLoop = _regexp._nLoop;
     _loopCount = new int[nLoop];
     _loopOffset = new int[nLoop];
+  }
+  */
+
+  private RegexpState()
+  {
+    int size = 32;
+
+    _groupBegin = new int[size];
+    _groupEnd = new int[size];
+
+    _loopCount = new int[size];
+    _loopOffset = new int[size];
+  }
+
+  private void init(Regexp regexp)
+  {
+    _regexp = regexp;
+
+    int nGroup = regexp._nGroup;
+
+    if (_groupBegin.length < nGroup) {
+      _groupBegin = new int[nGroup];
+      _groupEnd = new int[nGroup];
+    }
+
+    int nLoop = regexp._nLoop;
+
+    if (_loopCount.length < nLoop) {
+      _loopCount = new int[nLoop];
+      _loopOffset = new int[nLoop];
+    }
+
+    _subject = null;
+    _isGlobal = false;
+
+    _first = 0;
+    _start = 0;
+
+    _prefix = null; // initial string
+    _minLength = 0; // minimum length possible for this regexp
+
+    _isUnicode = false;
+    _isPHP5String = false;
+  
+    _isUTF8 = false;
+    _isEval = false;
+  }
+
+  public static RegexpState create(Regexp regexp)
+  {
+    RegexpState state = _freeList.allocate();
+
+    if (state == null)
+      state = new RegexpState();
+
+    state.init(regexp);
+
+    return state;
+  }
+
+  public static RegexpState create(Env env, Regexp regexp, StringValue subject)
+  {
+    RegexpState state = create(regexp);
+
+    state.setSubject(env, subject);
+    
+    return state;
+  }
+
+  public static void free(RegexpState state)
+  {
+    _freeList.free(state);
   }
   
   public boolean setSubject(Env env, StringValue subject)

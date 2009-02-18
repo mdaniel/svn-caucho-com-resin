@@ -1176,8 +1176,6 @@ abstract public class ArrayValue extends Value {
 
     Entry _nextHash;
 
-    int _index;
-
     public Entry(Value key)
     {
       _key = key;

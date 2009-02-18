@@ -1531,6 +1531,8 @@ public class StringBuilderValue
   @Override
   public boolean eq(Value rValue)
   {
+    rValue = rValue.toValue();
+    
     ValueType typeB = rValue.getValueType();
 
     if (typeB.isNumber()) {
@@ -1570,7 +1572,19 @@ public class StringBuilderValue
       return true;
     }
     else {
-      return toString().equals(rValue.toString());
+      String rString = rValue.toString();
+      
+      int len = rString.length();
+
+      if (_length != len)
+	return false;
+
+      for (int i = len - 1; i >= 0; i--) {
+	if (_buffer[i] != rString.charAt(i))
+	  return false;
+      }
+      
+      return true;
     }
   }
 

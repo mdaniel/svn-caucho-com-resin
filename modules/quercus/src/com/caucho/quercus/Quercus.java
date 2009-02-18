@@ -82,6 +82,12 @@ public class Quercus
   private HashMap<String, StringValue> _internMap
     = new HashMap<String, StringValue>();
 
+  private LruCache<String, UnicodeBuilderValue> _unicodeMap
+    = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
+
+  private LruCache<String, StringBuilderValue> _stringMap
+    = new LruCache<String, StringBuilderValue>(8 * 1024);
+
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
 
@@ -1302,6 +1308,14 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
+    return getConstantId(new StringBuilderValue(name));
+  }
+
+  /**
+   * Returns the id for a constant
+   */
+  public int getConstantId(StringValue name)
+  {
     int id = _constantNameMap.get(name);
 
     if (id >= 0)
@@ -1592,6 +1606,40 @@ public class Quercus
     }
   }
 
+  /**
+   * Creates a string.  Because these strings are typically Java
+   * constants, they fit into a lru cache.
+   */
+  public UnicodeBuilderValue createUnicodeString(String name)
+  {
+    UnicodeBuilderValue value = _unicodeMap.get(name);
+
+    if (value == null) {
+      value = new UnicodeBuilderValue(name);
+
+      _unicodeMap.put(name, value);
+    }
+
+    return value;
+  }
+
+  /**
+   * Creates a string.  Because these strings are typically Java
+   * constants, they fit into a lru cache.
+   */
+  public StringBuilderValue createStringBuilder(String name)
+  {
+    StringBuilderValue value = _stringMap.get(name);
+
+    if (value == null) {
+      value = new StringBuilderValue(name);
+
+      _stringMap.put(name, value);
+    }
+
+    return value;
+  }
+  
   /**
    * Interns a string.
    */

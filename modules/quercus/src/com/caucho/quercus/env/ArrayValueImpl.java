@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.util.RandomUtil;
 
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -59,6 +60,8 @@ public class ArrayValueImpl extends ArrayValue
   private static final int SORT_NUMERIC = 1;
   private static final int SORT_STRING = 2;
   private static final int SORT_LOCALE_STRING = 5;
+
+  private static final int MIN_HASH = 4;
   
   private Entry []_entries;
   private int _hashMask;
@@ -72,12 +75,13 @@ public class ArrayValueImpl extends ArrayValue
 
   public ArrayValueImpl()
   {
-    _entries = new Entry[DEFAULT_SIZE];
-    _hashMask = _entries.length - 1;
+    //_entries = new Entry[DEFAULT_SIZE];
+    //_hashMask = _entries.length - 1;
   }
 
   public ArrayValueImpl(int size)
   {
+    /*
     int capacity = DEFAULT_SIZE;
 
     while (capacity < 4 * size)
@@ -85,11 +89,12 @@ public class ArrayValueImpl extends ArrayValue
     
     _entries = new Entry[capacity];
     _hashMask = _entries.length - 1;
+    */
   }
 
   public ArrayValueImpl(ArrayValue copy)
   {
-    this(copy.getSize());
+    // this(copy.getSize());
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
       Value value = ptr._var != null ? ptr._var : ptr._value;
@@ -184,28 +189,35 @@ public class ArrayValueImpl extends ArrayValue
 
     _isDirty = false;
     
-    Entry []entries = new Entry[_entries.length];
+    Entry []entries = _entries;
+
+    if (entries != null)
+      entries = new Entry[entries.length];
+    else
+      entries = null;
     
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr._next) {
       // Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
       Entry ptrCopy = new Entry(ptr);
 
-      Entry head = entries[ptr._index];
+      if (entries != null) {
+	int hash = ptr._key.hashCode() & _hashMask;
+	
+	Entry head = entries[hash];
 
-      if (head != null) {
-        ptrCopy._nextHash = head;
+	if (head != null) {
+	  ptrCopy._nextHash = head;
+	}
+
+	entries[hash] = ptrCopy;
       }
 
-      entries[ptr._index] = ptrCopy;
-      
-      ptrCopy._index = ptr._index;
-
       if (prev == null)
-        _head = _current = ptrCopy;
+	_head = _current = ptrCopy;
       else {
-        prev._next = ptrCopy;
-        ptrCopy._prev = prev;
+	prev._next = ptrCopy;
+	ptrCopy._prev = prev;
       }
 
       prev = ptrCopy;
@@ -338,17 +350,15 @@ public class ArrayValueImpl extends ArrayValue
   public void clear()
   {
     if (_isDirty) {
-      _entries = new Entry[_entries.length];
       _isDirty = false;
     }
     
+    _entries = null;
+      
     _size = 0;
     _head = _tail = _current = null;
 
     _nextAvailableIndex = 0;
-    for (int j = _entries.length - 1; j >= 0; j--) {
-      _entries[j] = null;
-    }
   }
 
   /**
@@ -402,9 +412,12 @@ public class ArrayValueImpl extends ArrayValue
       copyOnWrite();
     
     _size++;
-    
-    if (_entries.length <= 2 * _size)
+
+    Entry []entries = _entries;
+    if ((entries == null && _size >= MIN_HASH)
+	|| (entries != null && entries.length <= 2 * _size)) {
       expand();
+    }
 
     Value key = createTailKey();
 
@@ -471,9 +484,12 @@ public class ArrayValueImpl extends ArrayValue
 	     replaceEntry != null;
 	     replaceEntry = replaceEntry._next) {
 	  _size++;
-	  
-	  if (_entries.length <= 2 * _size)
+
+	  Entry []entries = _entries;
+	  if ((entries == null && _size >= MIN_HASH)
+	      || (entries != null && entries.length <= 2 * _size)) {
 	    expand();
+	  }
 
 	  Entry entry = new Entry(createTailKey(), replaceEntry.getValue());
 
@@ -567,7 +583,7 @@ public class ArrayValueImpl extends ArrayValue
     if (value != array) {
       value = array;
 
-      entry.set(array);
+      entry.set(value);
     }
 
     return value;
@@ -631,17 +647,34 @@ public class ArrayValueImpl extends ArrayValue
   {
     key = key.toKey();
 
-    int hash = key.hashCode() & _hashMask;
+    Entry []entries = _entries;
+    
+    if (entries != null) {
+      int hash = key.hashCode() & _hashMask;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._nextHash) {
-      if (key.equals(entry._key)) {
-	Var var = entry._var;
+      for (Entry entry = entries[hash];
+	   entry != null;
+	   entry = entry._nextHash) {
+	if (key.equals(entry._key)) {
+	  Var var = entry._var;
 	
-        return var != null ? var.toValue() : entry._value;
+	  return var != null ? var.toValue() : entry._value;
 	
-        // return entry._value.toValue(); // php/39a1
+	  // return entry._value.toValue(); // php/39a1
+	}
+      }
+    }
+    else {
+      for (Entry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (key.equals(entry._key)) {
+	  Var var = entry._var;
+	
+	  return var != null ? var.toValue() : entry._value;
+	
+	  // return entry._value.toValue(); // php/39a1
+	}
       }
     }
 
@@ -657,16 +690,30 @@ public class ArrayValueImpl extends ArrayValue
   {
     key = key.toKey();
 
-    int hashMask = _hashMask;
-    int hash = key.hashCode() & hashMask;
+    Entry []entries = _entries;
+    if (entries != null) {
+      int hashMask = _hashMask;
+      int hash = key.hashCode() & hashMask;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._nextHash) {
-      if (key.equals(entry._key)) {
-	Var var = entry._var;
+      for (Entry entry = entries[hash];
+	   entry != null;
+	   entry = entry._nextHash) {
+	if (key.equals(entry._key)) {
+	  Var var = entry._var;
 	
-        return var != null ? var : entry._value;
+	  return var != null ? var : entry._value;
+	}
+      }
+    }
+    else {
+      for (Entry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (key.equals(entry._key)) {
+	  Var var = entry._var;
+	
+	  return var != null ? var : entry._value;
+	}
       }
     }
 
@@ -734,13 +781,24 @@ public class ArrayValueImpl extends ArrayValue
   {
     key = key.toKey();
 
-    int hash = key.hashCode() & _hashMask;
+    Entry []entries = _entries;
+    if (entries != null) {
+      int hash = key.hashCode() & _hashMask;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._nextHash) {
-      if (key.equals(entry._key))
-	return entry;
+      for (Entry entry = entries[hash];
+	   entry != null;
+	   entry = entry._nextHash) {
+	if (key.equals(entry._key))
+	  return entry;
+      }
+    }
+    else {
+      for (Entry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (key.equals(entry._key))
+	  return entry;
+      }
     }
 
     return null;
@@ -754,13 +812,24 @@ public class ArrayValueImpl extends ArrayValue
   {
     key = key.toKey();
 
-    int hash = key.hashCode() & _hashMask;
+    Entry []entries = _entries;
+    if (entries != null) {
+      int hash = key.hashCode() & _hashMask;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._nextHash) {
-      if (key.equals(entry._key))
-	return true;
+      for (Entry entry = entries[hash];
+	   entry != null;
+	   entry = entry._nextHash) {
+	if (key.equals(entry._key))
+	  return true;
+      }
+    }
+    else {
+      for (Entry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (key.equals(entry._key))
+	  return true;
+      }
     }
 
     return false;
@@ -774,58 +843,73 @@ public class ArrayValueImpl extends ArrayValue
   {
     if (_isDirty)
       copyOnWrite();
-    
-    int capacity = _entries.length;
 
     key = key.toKey();
-    int hash = key.hashCode() & _hashMask;
-    Entry prevHash = null;
-    Entry nextHash = null;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = nextHash) {
-      nextHash = entry._nextHash;
+    Entry []entries = _entries;
+    if (entries != null) {
+      int capacity = entries.length;
 
-      if (key.equals(entry._key)) {
-        if (prevHash != null)
-          prevHash._nextHash = nextHash;
-        else
-          _entries[hash] = nextHash;
-        
-        Entry next = entry._next;
-        Entry prev = entry._prev;
-        
-	if (prev != null)
-	  prev._next = next;
-	else
-	  _head = next;
-	
-	if (next != null)
-	  next._prev = prev;
-	else
-	  _tail = prev;
+      int hash = key.hashCode() & _hashMask;
+      Entry prevHash = null;
 
-	entry._prev = null;
-	entry._next = null;
+      for (Entry entry = entries[hash];
+	   entry != null;
+	   entry = entry._nextHash) {
+	if (key.equals(entry._key)) {
+	  if (prevHash != null)
+	    prevHash._nextHash = entry._nextHash;
+	  else
+	    entries[hash] = entry._nextHash;
 
-	_current = _head;
-
-	_size--;
-
-	Value value = entry.getValue();
-
-	if (key.nextIndex(-1) == _nextAvailableIndex) {
-	  _nextAvailableIndex = -1;
+	  return removeEntry(key, entry);
 	}
 
-	return value;
+	prevHash = entry;
       }
-
-      prevHash = entry;
+    }
+    else {
+      for (Entry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (key.equals(entry._key)) {
+	  return removeEntry(key, entry);
+	}
+      }
     }
     
     return UnsetValue.UNSET;
+  }
+
+  private Value removeEntry(Value key, Entry entry)
+  {
+    Entry next = entry._next;
+    Entry prev = entry._prev;
+        
+    if (prev != null)
+      prev._next = next;
+    else
+      _head = next;
+	
+    if (next != null)
+      next._prev = prev;
+    else
+      _tail = prev;
+
+    entry._prev = null;
+    entry._next = null;
+
+    _current = _head;
+
+    _size--;
+
+    Value value = entry.getValue();
+
+    if (key.nextIndex(-1) == _nextAvailableIndex) {
+      _nextAvailableIndex = -1;
+    }
+
+    return value;
   }
 
   /**
@@ -867,14 +951,24 @@ public class ArrayValueImpl extends ArrayValue
     key = key.toKey();
     
     int hashMask = _hashMask;
-
     int hash = key.hashCode() & hashMask;
 
-    for (Entry entry = _entries[hash];
-         entry != null;
-         entry = entry._nextHash) {
-      if (key.equals(entry._key))
-	return entry;
+    Entry []entries = _entries;
+    if (entries != null) {
+      for (Entry entry = entries[hash];
+	   entry != null;
+	   entry = entry._nextHash) {
+	if (key.equals(entry._key))
+	  return entry;
+      }
+    }
+    else {
+      for (Entry entry = _head;
+	   entry != null;
+	   entry = entry._next) {
+	if (key.equals(entry._key))
+	  return entry;
+      }
     }
     
     _size++;
@@ -883,11 +977,19 @@ public class ArrayValueImpl extends ArrayValue
     if (_nextAvailableIndex >= 0)
       _nextAvailableIndex = key.nextIndex(_nextAvailableIndex);
 
-    Entry head = _entries[hash];
+    if (_entries == null && _size < MIN_HASH) {
+    }
+    else {
+      if (_entries == null || _entries.length <= 2 * _size) {
+	expand();
+	hash = key.hashCode() & _hashMask;
+      }
+    
+      Entry head = _entries[hash];
 
-    newEntry._nextHash = head;
-    _entries[hash] = newEntry;
-    newEntry._index = hash;
+      newEntry._nextHash = head;
+      _entries[hash] = newEntry;
+    }
 
     if (_head == null) {
       newEntry._prev = null;
@@ -905,17 +1007,18 @@ public class ArrayValueImpl extends ArrayValue
       _tail = newEntry;
     }
 
-    if (_entries.length <= 2 * _size)
-      expand();
-
     return newEntry;
   }
 
   private void expand()
   {
     Entry []entries = _entries;
+
+    if (entries == null)
+      _entries = new Entry[8];
+    else
+      _entries = new Entry[2 * entries.length];
     
-    _entries = new Entry[2 * entries.length];
     _hashMask = _entries.length - 1;
 
     for (Entry entry = _head; entry != null; entry = entry._next) {
@@ -925,18 +1028,21 @@ public class ArrayValueImpl extends ArrayValue
 
   private void addEntry(Entry entry)
   {
-    int capacity = _entries.length;
+    Entry []entries = _entries;
+    if (entries != null) {
+      int capacity = entries.length;
 
-    int hash = entry._key.hashCode() & _hashMask;
+      int hash = entry._key.hashCode() & _hashMask;
 
-    Entry head = _entries[hash];
+      Entry head = entries[hash];
 
-    entry._nextHash = head;
+      entry._nextHash = head;
 
-    _entries[hash] = entry;
+      entries[hash] = entry;
+    }
+    
     if (_nextAvailableIndex >= 0)
       _nextAvailableIndex = entry._key.nextIndex(_nextAvailableIndex);
-    entry._index = hash;
   }
 
   /**
@@ -965,12 +1071,12 @@ public class ArrayValueImpl extends ArrayValue
       return BooleanValue.FALSE;
   }
 
-  protected Entry getHead()
+  protected final Entry getHead()
   {
     return _head;
   }
 
-  protected Entry getTail()
+  protected final Entry getTail()
   {
     return _tail;
   }
@@ -1050,5 +1156,43 @@ public class ArrayValueImpl extends ArrayValue
     for (int i = 0; i < size; i++) {
       put((Value) in.readObject(), (Value) in.readObject());
     }
+  }
+
+  //
+  // Java generator code
+  //
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  public void generate(PrintWriter out)
+    throws IOException
+  {
+    out.print("new ConstArrayValue(");
+    
+    out.print("new Value[] {");
+      
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      if (entry != getHead())
+	out.print(", ");
+	    
+      if (entry.getKey() != null)
+	entry.getKey().generate(out);
+      else
+	out.print("null");
+    }
+      
+    out.print("}, new Value[] {");
+
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      if (entry != getHead())
+	out.print(", ");
+      
+      entry.getValue().generate(out);
+    }
+
+    out.print("})");
   }
 }

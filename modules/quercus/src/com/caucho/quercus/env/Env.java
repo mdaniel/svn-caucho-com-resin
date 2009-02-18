@@ -2876,6 +2876,18 @@ public class Env {
   /**
    * Sets a constant.
    */
+  public Value addConstant(StringValue name,
+                           Value value,
+                           boolean isCaseInsensitive)
+  {
+    int id = _quercus.getConstantId(name);
+
+    return addConstant(id, value, isCaseInsensitive);
+  }
+
+  /**
+   * Sets a constant.
+   */
   public Value addConstant(int id,
                            Value value,
                            boolean isCaseInsensitive)
@@ -3765,9 +3777,9 @@ public class Env {
 	      : StringBuilderValue.EMPTY);
     }
     else if (_isUnicodeSemantics)
-      return new UnicodeBuilderValue(s);
+      return _quercus.createUnicodeString(s);
     else
-      return new StringBuilderValue(s);
+      return _quercus.createStringBuilder(s);
   }
 
   /**

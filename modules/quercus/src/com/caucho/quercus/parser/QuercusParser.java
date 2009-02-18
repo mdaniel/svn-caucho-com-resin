@@ -481,16 +481,22 @@ public class QuercusParser {
     init(argPath);
 
     Arg []args = parseFunctionArgDefinition();
+
+    close();
       
     init(codePath);
       
     Statement []statements = parseStatements();
     
-    return _factory.createFunction(Location.UNKNOWN,
-                                   name,
-                                   _function,
-                                   args,
-                                   statements);
+    Function fun = _factory.createFunction(Location.UNKNOWN,
+					   name,
+					   _function,
+					   args,
+					   statements);
+
+    close();
+
+    return fun;
   }
 
   /**
