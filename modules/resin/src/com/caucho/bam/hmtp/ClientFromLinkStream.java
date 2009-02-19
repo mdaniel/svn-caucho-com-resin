@@ -88,6 +88,12 @@ public class ClientFromLinkStream extends FromLinkStream implements Runnable
   }
 
   @Override
+  protected ActorStream getToLinkStream()
+  {
+    return _toLinkStream;
+  }
+
+  @Override
   protected String getFrom(String from)
   {
     return from;
