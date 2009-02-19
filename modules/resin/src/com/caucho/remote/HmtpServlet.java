@@ -118,7 +118,8 @@ public class HmtpServlet extends GenericServlet {
     String address = req.getRemoteAddr();
 
     ServerFromLinkStream fromLinkStream
-      = new ServerFromLinkStream(broker, _linkManager, is, os, address);
+      = new ServerFromLinkStream(broker, _linkManager, is, os, address,
+				 _auth, _isAuthenticationRequired);
 
     TcpDuplexController controller = res.upgradeProtocol(fromLinkStream);
     

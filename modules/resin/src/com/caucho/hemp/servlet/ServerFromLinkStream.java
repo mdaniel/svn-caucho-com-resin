@@ -32,19 +32,24 @@ package com.caucho.hemp.servlet;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorException;
+import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.FromLinkStream;
 import com.caucho.hemp.broker.HempBroker;
-import java.io.*;
-import java.util.logging.*;
-import javax.servlet.*;
-
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
-import com.caucho.bam.ActorException;
+import com.caucho.security.Authenticator;
+import com.caucho.security.PasswordCredentials;
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.security.BasicPrincipal;
+import java.io.*;
+import java.security.*;
+import java.util.logging.*;
+import javax.servlet.*;
+
 
 /**
  * Main protocol handler for the HTTP version of HMTP
@@ -60,6 +65,9 @@ public class ServerFromLinkStream extends FromLinkStream
   private ActorStream _toBroker;
   private ActorClient _conn;
 
+  private Authenticator _auth;
+  private boolean _isAuthenticationRequired;
+
   private Hessian2StreamingInput _in;
   private Hessian2Output _out;
 
@@ -74,10 +82,14 @@ public class ServerFromLinkStream extends FromLinkStream
 			      ServerLinkManager linkManager,
 			      InputStream is,
 			      OutputStream os,
-			      String ipAddress)
+			      String ipAddress,
+			      Authenticator auth,
+			      boolean isAuthRequired)
   {
     super(is);
-	  
+
+    _auth = auth;
+    _isAuthenticationRequired = isAuthRequired;
     _broker = broker;
 
     if (log.isLoggable(Level.FINEST)) {
@@ -110,6 +122,12 @@ public class ServerFromLinkStream extends FromLinkStream
       return _toBroker;
     else
       return _authHandler;
+  }
+
+  @Override
+  protected ActorStream getToLinkStream()
+  {
+    return _linkStream;
   }
 
   @Override
@@ -146,13 +164,27 @@ public class ServerFromLinkStream extends FromLinkStream
 	       String ipAddress)
   {
     if (credentials != null && ! (credentials instanceof String)) {
-      throw new ActorException(L.l("'{0}' is an unknown credential",
-				 credentials));
+      throw new NotAuthorizedException(L.l("'{0}' is an unknown credential",
+					   credentials));
     }
     
     String password = (String) credentials;
+
+    if (_auth == null && ! _isAuthenticationRequired) {
+      // _conn = _broker.getConnection(_linkStream, uid, password, null, ipAddress);
+      if (_auth == null) {
+	throw new NotAuthorizedException(L.l("{0} does not have a configured authenticator",
+					     this));
+      }
+
+      Principal user = new BasicPrincipal(uid);
     
-    // _conn = _broker.getConnection(_linkStream, uid, password, null, ipAddress);
+      if (_auth.authenticate(user, new PasswordCredentials(password), null) == null) {
+	throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+					     uid));
+      }
+    }
+    
     _conn = _broker.getConnection(_linkStream, uid, null);
 
     _jid = _conn.getJid();

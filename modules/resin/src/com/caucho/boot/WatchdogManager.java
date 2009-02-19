@@ -73,7 +73,7 @@ import java.util.logging.Logger;
 /**
  * Process responsible for watching a backend watchdog.
  */
-class WatchdogManager {
+class WatchdogManager implements AlarmListener {
   private static L10N _L;
   private static Logger _log;
 
@@ -217,6 +217,9 @@ class WatchdogManager {
       broker.addActor(service);
 
       _server.start();
+
+      // valid checker
+      new Alarm(this).queue(60000);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -486,6 +489,20 @@ class WatchdogManager {
     _watchdogMap.put(server.getId(), watchdog);
 
     return watchdog;
+  }
+
+  public void handleAlarm(Alarm alarm)
+  {
+    try {
+      if (! _args.getResinConf().canRead()) {
+	log().severe(L().l("{0} exiting because '{1}' is no longer valid",
+			   this, _args.getResinConf()));
+
+	System.exit(1);
+      }
+    } finally {
+      alarm.queue(60000);
+    }
   }
 
   /**

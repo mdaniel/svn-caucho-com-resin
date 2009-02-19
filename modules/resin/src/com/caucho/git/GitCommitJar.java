@@ -169,6 +169,20 @@ public class GitCommitJar {
     }
   }
 
+  public long getLength(String sha1)
+    throws IOException
+  {
+    InputStream is = openFile(sha1);
+    long length = 0;
+
+    int ch;
+    while ((ch = is.read()) >= 0) {
+      length++;
+    }
+
+    return length;
+  }
+
   public InputStream openFile(String sha1)
     throws IOException
   {

@@ -36,7 +36,7 @@ import javax.annotation.*;
 import javax.jms.*;
 
 import com.caucho.config.*;
-import com.caucho.config.cfg.AbstractBeanConfig;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
@@ -46,7 +46,7 @@ import com.caucho.util.*;
 /**
  * jms-connection-factory configuration
  */
-public class JmsConnectionFactoryConfig extends AbstractBeanConfig
+public class JmsConnectionFactoryConfig extends BeanConfig
 {
   private static final L10N L = new L10N(JmsConnectionFactoryConfig.class);
   private static final Logger log
@@ -55,6 +55,7 @@ public class JmsConnectionFactoryConfig extends AbstractBeanConfig
   public JmsConnectionFactoryConfig()
   {
     setScope("singleton");
+    setBeanConfigClass(ConnectionFactory.class);
   }
 
   public void setClass(Class cl)
@@ -64,7 +65,7 @@ public class JmsConnectionFactoryConfig extends AbstractBeanConfig
 
     super.setClass(cl);
   }
-
+  /*
   @PostConstruct
   public void init()
   {
@@ -76,5 +77,6 @@ public class JmsConnectionFactoryConfig extends AbstractBeanConfig
     else
       register();
   }
+    */
 }
 

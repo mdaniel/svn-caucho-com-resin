@@ -31,6 +31,7 @@ package com.caucho.bam.hmtp;
 
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -58,6 +59,8 @@ abstract public class FromLinkStream {
   abstract public String getJid();
 
   abstract protected ActorStream getStream(String to);
+
+  abstract protected ActorStream getToLinkStream();
 
   abstract protected String getFrom(String from);
 
@@ -147,8 +150,15 @@ abstract public class FromLinkStream {
 
 	try {
 	  getStream(to).querySet(id, to, getFrom(from), value);
+	} catch (ActorException e) {
+	  if (log.isLoggable(Level.FINER))
+	    log.log(Level.FINER, e.toString(), e);
+	  else
+	    log.fine(e.toString());
+	  
+	  getToLinkStream().queryError(id, from, to, value, e.createActorError());
 	} catch (Exception e) {
-	  e.printStackTrace();
+	  log.log(Level.WARNING, e.toString(), e);
 	}
 
 	break;

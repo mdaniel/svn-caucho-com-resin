@@ -84,6 +84,17 @@ public class QuerySet extends Packet {
     handler.querySet(getId(), getTo(), getFrom(), getValue());
   }
 
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
+  @Override
+  public void dispatchError(ActorStream handler,
+			    ActorStream toSource,
+			    ActorError error)
+  {
+    toSource.queryError(getId(), getFrom(), getTo(), getValue(), error);
+  }
+
   @Override
   public String toString()
   {

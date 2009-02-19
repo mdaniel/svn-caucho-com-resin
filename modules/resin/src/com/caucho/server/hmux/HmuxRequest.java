@@ -1108,6 +1108,15 @@ public class HmuxRequest extends AbstractHttpRequest
     ActorClient bamConn = _bamBamConn;
     _bamBamConn = null;
 
+    Hessian2StreamingInput in = _in;
+    _in = null;
+    
+    Hessian2StreamingOutput out = _out;
+    _out = null;
+    
+    Hessian2Output hOut = _hOut;
+    _hOut = null;
+
     try {
       super.finishRequest();
     } finally {
@@ -1177,10 +1186,19 @@ public class HmuxRequest extends AbstractHttpRequest
       log.fine(dbgId() + (char) code + "-r: HMTP queryGet " + query
 	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
 
-    if (to == null)
-      getLinkStream().queryGet(id, to, from, query);
-    else
-      getBrokerStream(isAdmin).queryGet(id, to, from, query);
+    try {
+      if (to == null)
+	getLinkStream().queryGet(id, to, from, query);
+      else
+	getBrokerStream(isAdmin).queryGet(id, to, from, query);
+    } catch (ActorException e) {
+      log.finer(e.toString());
+      if (log.isLoggable(Level.FINEST))
+	log.log(Level.FINEST, e.toString(), e);
+      
+      if (to == null)
+	writeHmtpQueryError(id, from, to, query, ActorError.create(e));
+    }
   }
 
   private void readHmtpQuerySet(int code,
@@ -1189,6 +1207,7 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     Hessian2Input hIn = startHmtpPacket();
+    
     String to = hIn.readString();
     String from = hIn.readString();
 
@@ -1202,10 +1221,19 @@ public class HmuxRequest extends AbstractHttpRequest
       log.fine(dbgId() + (char) code + "-r: HMTP querySet " + query
 	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
 
-    if (to == null)
-      getLinkStream().querySet(id, to, from, query);
-    else
-      getBrokerStream(isAdmin).querySet(id, to, from, query);
+    try {
+      if (to == null)
+	getLinkStream().querySet(id, to, from, query);
+      else
+	getBrokerStream(isAdmin).querySet(id, to, from, query);
+    } catch (ActorException e) {
+      log.finer(e.toString());
+      if (log.isLoggable(Level.FINEST))
+	log.log(Level.FINEST, e.toString(), e);
+      
+      if (to == null)
+	writeHmtpQueryError(id, from, to, query, ActorError.create(e));
+    }
   }
 
   private void readHmtpQueryResult(int code,

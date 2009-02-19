@@ -30,8 +30,10 @@
 package com.caucho.hemp.packet;
 
 import com.caucho.bam.ActorStream;
+import com.caucho.bam.ActorError;
 import com.caucho.util.Alarm;
 
+import java.util.logging.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
@@ -39,6 +41,9 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  */
 public class Packet
 {
+  private static final Logger log
+    = Logger.getLogger(Packet.class.getName());
+  
   private static final AtomicReferenceFieldUpdater<Packet,Packet> _casNext
     = AtomicReferenceFieldUpdater.newUpdater(Packet.class,
 					     Packet.class,
@@ -121,6 +126,16 @@ public class Packet
    */
   public void dispatch(ActorStream handler, ActorStream toSource)
   {
+  }
+
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
+  public void dispatchError(ActorStream handler,
+			    ActorStream toSource,
+			    ActorError error)
+  {
+    log.fine(this + " dispatchError " + error);
   }
 
   public String toString()

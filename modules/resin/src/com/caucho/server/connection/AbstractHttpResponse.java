@@ -2261,7 +2261,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void finishInvocation() throws IOException
   {
-    finishInvocation(false);
+    // server/1960
+    // finishInvocation(false);
+    finishInvocation(true);
   }
   
   /**

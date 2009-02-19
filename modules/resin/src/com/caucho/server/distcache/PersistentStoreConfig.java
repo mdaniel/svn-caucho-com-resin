@@ -37,9 +37,10 @@ import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
-import javax.annotation.PostConstruct;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 /**
  * Configuration distributed stores.
@@ -52,6 +53,8 @@ public class PersistentStoreConfig
 
   private String _name = "caucho/persistent-store";
   private String _type;
+
+  private DataSource _dataSource;
   
   private boolean _isBackup = true;
   private boolean _isTriplicate = true;
@@ -76,6 +79,10 @@ public class PersistentStoreConfig
     _type = type;
   }
 
+  public void setDataSource(DataSource dataSource)
+  {
+  }
+
   @Deprecated
   public void setPath(Path path)
   {
@@ -89,6 +96,10 @@ public class PersistentStoreConfig
   public boolean isAlwaysSave()
   {
     return _isAlwaysSave;
+  }
+
+  public void setAlwaysLoad(boolean isAlwaysLoad)
+  {
   }
 
   public void setBackup(boolean isBackup)
