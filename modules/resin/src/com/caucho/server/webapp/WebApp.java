@@ -1912,15 +1912,15 @@ public class WebApp extends ServletContextImpl
 
       _webBeans = InjectManager.getCurrent();
 
-      /*
       try {
+	// server/1a36
+	
 	Authenticator auth = _webBeans.getInstanceByType(Authenticator.class);
 
 	setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
 	log.finest(e.toString());
       }
-      */
 
       try {
 	_login = _webBeans.getInstanceByType(Login.class);

@@ -175,16 +175,18 @@ parameters in the custom class.</p>
 
 <example title="Example: custom access log">
 &lt;resin xmlns="http://caucho.com/ns/resin">
+
 &lt;cluster id="app-tier">
 
   &lt;host id='foo.com'&gt;
-    &lt;access-log resin:type='test.MyLog'&gt;
-               path='${resin.root}/foo/error.log'
-               rollover-period='1W'&gt;
-      &lt;init&gt;
-        &lt;foo&gt;bar&lt;/foo&gt;
-      &lt;/init&gt;
-    &lt;/access-log&gt;
+
+    &lt;access-log>
+      &lt;test:MyLog xmlns:test="urn:java:test">
+                 path='${resin.root}/foo/error.log'
+                 rollover-period='1W'&gt;
+          &lt;test:foo&gt;bar&lt;/test:foo&gt;
+      &lt;/test:MyLog>
+    &lt;/access-log>
     ...
   &lt;/host&gt;
 

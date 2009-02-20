@@ -86,11 +86,27 @@ public class AbstractAuthenticator
       = (HttpServletResponse) ((CauchoRequest) request).getServletResponse();
 
     try {
-      return loginImpl(request, response, webApp, userName, password);
+      Principal user = getUserPrincipal(request, response, webApp);
+
+      if (user != null)
+	return user;
+      
+      return login(request, response, webApp, userName, password);
     } catch (Exception e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Backward compatiblity call
+   */
+  protected Principal login(HttpServletRequest request,
+				HttpServletResponse response,
+				ServletContext app,
+				String userName, String password)
+    throws ServletException
+  {
+    return loginImpl(request, response, app, userName, password);
   }
 
   /**

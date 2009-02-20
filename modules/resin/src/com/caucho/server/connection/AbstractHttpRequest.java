@@ -51,6 +51,7 @@ import com.caucho.vfs.ReadStream;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
@@ -349,6 +350,11 @@ public abstract class AbstractHttpRequest
   {
     if (_tcpConn != null)
       _tcpConn.close();
+  }
+
+  public HttpServletRequest getRequestFacade()
+  {
+    return this;
   }
 
   /**
@@ -1699,7 +1705,7 @@ public abstract class AbstractHttpRequest
       Login login = app.getLogin();
 
       if (login != null) {
-	Principal user = login.login(this, getResponse());
+	Principal user = login.login(getRequestFacade(), getResponse());
 
 	return user != null;
 	/*
@@ -1761,7 +1767,7 @@ public abstract class AbstractHttpRequest
     Login login = app.getLogin();
 
     if (login != null) {
-      user = login.getUserPrincipal(this);
+      user = login.getUserPrincipal(getRequestFacade());
 
       if (user != null) {
 	_response.setPrivateCache(true);
@@ -2410,7 +2416,7 @@ public abstract class AbstractHttpRequest
    */
   public ServletResponse getServletResponse()
   {
-    return null;
+    return getResponse();
   }
 
   /**

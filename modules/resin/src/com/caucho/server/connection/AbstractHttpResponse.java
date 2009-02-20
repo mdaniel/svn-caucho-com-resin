@@ -2261,9 +2261,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void finishInvocation() throws IOException
   {
-    // server/1960
+    // server/1960, server/1l11
     // finishInvocation(false);
-    finishInvocation(true);
+    boolean isClose = ! _request.isSuspend();
+    
+    finishInvocation(isClose);
   }
   
   /**

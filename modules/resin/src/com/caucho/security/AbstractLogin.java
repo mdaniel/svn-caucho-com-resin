@@ -244,19 +244,19 @@ public abstract class AbstractLogin implements Login {
     if (user != null)
       return user;
 
-    user = findSavedUser(request);
+    Principal savedUser = findSavedUser(request);
 
     // server/12c9 - new login overrides old
-    if (user != null && isSavedUserValid(request, user)) {
-      request.setAttribute(LOGIN_NAME, user);
+    if (savedUser != null && isSavedUserValid(request, savedUser)) {
+      request.setAttribute(LOGIN_NAME, savedUser);
       
-      return user;
+      return savedUser;
     }
 
     // server/12d2
     user = getUserPrincipalImpl(request);
 
-    if (user != null) {
+    if (user != null || savedUser != null) {
       saveUser(request, user);
     }
 
@@ -279,22 +279,24 @@ public abstract class AbstractLogin implements Login {
   {
     // Most login classes will extract the user and password (or some other
     // credentials) from the request and call auth.login.
-    Principal user;
 
-    user = findSavedUser(request);
+    Principal savedUser = findSavedUser(request);
 
     // server/12c9 - new login overrides old
-    if (user != null && isSavedUserValid(request, user)) {
-      return user;
+    if (savedUser != null && isSavedUserValid(request, savedUser)) {
+      return savedUser;
     }
     
-    user = getLoginPrincipalImpl(request);
+    Principal user = getLoginPrincipalImpl(request);
 
     try {
+      if (user != null || savedUser != null) {
+	// server/12h7
+	saveUser(request, user);
+      }
+	
       if (user != null) {
 	loginSuccessResponse(user, request, response);
-
-	saveUser(request, user);
       
 	return user;
       }

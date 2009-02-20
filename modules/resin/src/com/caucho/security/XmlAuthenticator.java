@@ -97,6 +97,26 @@ public class XmlAuthenticator extends AbstractAuthenticator
   {
     return _path;
   }
+  
+  /**
+   * Returns the default group for a user
+   */
+  protected String getDefaultGroup()
+  {
+    return "user";
+  }
+
+  /**
+   * Adds a user from the configuration.
+   *
+   * <pre>
+   * &lt;init user='Harry Potter:quidditch:user,webdav'/>
+   * </pre>
+   */
+  public User createUser()
+  {
+    return new User();
+  }
 
   /**
    * Adds a user from the configuration.
@@ -187,7 +207,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
     }
   }
 
-  public static class User {
+  public class User {
     private String _name;
     private String _password;
     
@@ -288,7 +308,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
 
       if (p2 < 0) {
 	password = userParam.substring(p1 + 1);
-	roles = "user";
+	roles = getDefaultGroup();
       }
       else {
 	password = userParam.substring(p1 + 1, p2);
@@ -300,10 +320,17 @@ public class XmlAuthenticator extends AbstractAuthenticator
       addRoles(roles);
     }
 
+    @PostConstruct
+    public void init()
+    {
+      if ((_roles == null || _roles.length == 0) && getDefaultGroup() != null)
+	_roles = new String[] { getDefaultGroup() };
+    }
+
     public PasswordUser getPasswordUser()
     {
       boolean isAnonymous = false;
-      
+
       return new PasswordUser(_principal, _password.toCharArray(),
 			      _isDisabled, isAnonymous,
 			      _roles);

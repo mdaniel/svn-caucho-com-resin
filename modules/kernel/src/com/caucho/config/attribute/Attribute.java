@@ -106,6 +106,15 @@ public abstract class Attribute {
   /**
    * Creates the child bean.
    */
+  public Object create(Object parent, QName name, ConfigType type)
+    throws ConfigException
+  {
+    return create(parent, name);
+  }
+
+  /**
+   * Creates the child bean.
+   */
   public Object create(Object parent, QName name)
     throws ConfigException
   {

@@ -106,14 +106,19 @@ public class Management
     _resin.setAdminPath(path);
   }
 
+  public XmlAuthenticator.User createUser()
+  {
+    if (_auth == null)
+      _auth = new AdminAuthenticator();
+
+    return _auth.createUser();
+  }
+  
   /**
    * Adds a user
    */
   public void addUser(XmlAuthenticator.User user)
   {
-    if (_auth == null)
-      _auth = new AdminAuthenticator();
-    
     _auth.addUser(user);
   }
 

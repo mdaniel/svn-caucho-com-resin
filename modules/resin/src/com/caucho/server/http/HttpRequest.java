@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Handles a new request from an HTTP connection.
@@ -1463,6 +1464,12 @@ public class HttpRequest extends AbstractHttpRequest
   public ReadStream getRawInput()
   {
     return _rawRead;
+  }
+
+  @Override
+  public HttpServletRequest getRequestFacade()
+  {
+    return _requestFacade;
   }
 
   /**

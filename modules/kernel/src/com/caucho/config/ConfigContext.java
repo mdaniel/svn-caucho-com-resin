@@ -542,8 +542,11 @@ public class ConfigContext implements CreationalContext {
 
 	return;
       }
-      else
-	childBean = attrStrategy.create(bean, qName);
+      else {
+	ConfigType childEltType = getChildType(childNode);
+
+	childBean = attrStrategy.create(bean, qName, childEltType);
+      }
 
       if (childBean != null) {
 	ConfigType childBeanType = TypeFactory.getType(childBean);
@@ -694,6 +697,32 @@ public class ConfigContext implements CreationalContext {
     }
     else
       attrStrategy.setText(bean, qName, text);
+  }
+
+  private ConfigType getChildType(Node node)
+  {
+    if (! (node instanceof Element))
+      return null;
+    
+    Element elt = (Element) node;
+
+    Node child = elt.getFirstChild();
+
+    if (child == null || child.getNextSibling() != null)
+      return null;
+
+    if (! (child instanceof Element))
+      return null;
+
+    QName qName = ((QNode) child).getQName();
+    String uri = qName.getNamespaceURI();
+
+    if (uri == null || ! uri.startsWith("urn:java:"))
+      return null;
+
+    ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+    return type;
   }
 
   private boolean isTrim(Node node)

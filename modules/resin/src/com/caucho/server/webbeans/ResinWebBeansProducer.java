@@ -73,6 +73,10 @@ public class ResinWebBeansProducer
   private static final Logger log
     = Logger.getLogger(ResinWebBeansProducer.class.getName());
   private static final L10N L = new L10N(ResinWebBeansProducer.class);
+
+  public ResinWebBeansProducer()
+  {
+  }
   
   /**
    * Returns the web beans container.

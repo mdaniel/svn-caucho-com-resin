@@ -60,7 +60,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   private DependencyContainer _dependencyList = new DependencyContainer();
 
   // Entry map
-  private HashMap<String,JarList> _pathMap;
+  private JarMap _pathMap;
 
   /**
    * Creates a new jar list loader.
@@ -150,13 +150,13 @@ abstract public class JarListLoader extends Loader implements Dependency {
     _dependencyList.add(new Depend(jarPath));
 
     if (_pathMap == null && DynamicClassLoader.isJarCacheEnabled())
-      _pathMap = new HashMap<String,JarList>(8);
+      _pathMap = new JarMap();
 
     if (_pathMap != null) {
       ZipScanner scan = null;
       
       try {
-	HashMap<String,JarList> pathMap = _pathMap;
+	JarMap pathMap = _pathMap;
 
 	boolean isScan = true;
 	boolean isValidScan = false;
@@ -168,15 +168,10 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	
 	  if (scan != null && scan.open()) {
 	    while (scan.next()) {
-	      String name = scan.getName();
-
-	      name = name.replace('\\', '/');
-
-	      JarList entryList = pathMap.get(name);
-
-	      entryList = new JarList(jarEntry, entryList);
-
-	      pathMap.put(name, entryList);
+	      char []buffer = scan.getNameBuffer();
+	      int length = scan.getNameLength();
+	      
+	      pathMap.add(buffer, length, jarEntry);
 
 	      // server/249b
 	      /*
@@ -201,19 +196,13 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	    ZipEntry entry = e.nextElement();
 	    String name = entry.getName();
 
-	    name = name.replace('\\', '/');
-	    
-	    JarList entryList = pathMap.get(name);
-
-	    entryList = new JarList(jarEntry, entryList);
+	    pathMap.add(name, jarEntry);
 
 	    // server/249b
 	    /*
 	      if (name.endsWith("/"))
 		name = name.substring(0, name.length() - 1);
 	    */
-	      
-	    pathMap.put(name, entryList);
 	  }
 
 	  file.close();
@@ -257,7 +246,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
     throws ClassNotFoundException
   {
     if (_pathMap != null) {
-      JarList jarEntryList = _pathMap.get(pathName);
+      JarMap.JarList jarEntryList = _pathMap.get(pathName);
 
       if (jarEntryList != null) {
 	JarEntry jarEntry = jarEntryList.getEntry();
@@ -311,7 +300,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public void getResources(Vector<URL> vector, String name)
   {
     if (_pathMap != null) {
-      JarList jarEntryList = _pathMap.get(name);
+      JarMap.JarList jarEntryList = _pathMap.get(name);
 
       for (; jarEntryList != null; jarEntryList = jarEntryList.getNext()) {
 	JarEntry jarEntry = jarEntryList.getEntry();
@@ -360,7 +349,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public Path getPath(String pathName)
   {
     if (_pathMap != null) {
-      JarList jarEntryList = _pathMap.get(pathName);
+      JarMap.JarList jarEntryList = _pathMap.get(pathName);
 
       if (jarEntryList != null) {
 	return jarEntryList.getEntry().getJarPath().lookup(pathName);
@@ -409,6 +398,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
     return getClass().getSimpleName() + "[" + _jarList + "]";
   }
 
+  /*
   static class JarList {
     JarEntry _entry;
     JarList _next;
@@ -429,4 +419,5 @@ abstract public class JarListLoader extends Loader implements Dependency {
       return _next;
     }
   }
+  */
 }

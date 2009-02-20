@@ -260,21 +260,23 @@ public class Resin implements EnvironmentBean, SchemaBean
       _brokerManager = new HempBrokerManager();
 
       _management = createManagement();
+      
+      if (webBeans.resolveByType(ResinWebBeansProducer.class).size() == 0) {
+	webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 
-      webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
+	ResinConfigLibrary.configure(webBeans);
 
-      ResinConfigLibrary.configure(webBeans);
+	try {
+	  Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
+	  webBeans.addSingleton(method, "jndi", Standard.class);
+	  webBeans.addSingleton(method, "jndi:lookup", Standard.class);
+	} catch (Exception e) {
+	  throw ConfigException.create(e);
+	}
 
-      try {
-        Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
-        webBeans.addSingleton(method, "jndi", Standard.class);
-        webBeans.addSingleton(method, "jndi:lookup", Standard.class);
-      } catch (Exception e) {
-	throw ConfigException.create(e);
+	webBeans.addSingleton(new ResinWebBeansProducer());
+	webBeans.update();
       }
-
-      webBeans.addSingleton(new ResinWebBeansProducer());
-      webBeans.update();
       
       _threadPoolAdmin = ThreadPoolAdmin.create();
       _resinAdmin = new ResinAdmin(this);

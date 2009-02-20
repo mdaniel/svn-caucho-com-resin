@@ -58,7 +58,6 @@ import java.util.logging.Level;
  */
 
 @Service
-@Unbound  
 public class FormLogin extends AbstractLogin
 {
   private static final L10N L = new L10N(FormLogin.class);

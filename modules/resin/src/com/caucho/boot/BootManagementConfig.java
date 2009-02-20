@@ -58,11 +58,19 @@ public class BootManagementConfig
   /**
    * Adds a user
    */
-  public void addUser(XmlAuthenticator.User user)
+  public XmlAuthenticator.User createUser()
   {
     if (_auth == null)
       _auth = new AdminAuthenticator();
 
+    return _auth.createUser();
+  }
+  
+  /**
+   * Adds a user
+   */
+  public void addUser(XmlAuthenticator.User user)
+  {
     _auth.addUser(user);
   }
 

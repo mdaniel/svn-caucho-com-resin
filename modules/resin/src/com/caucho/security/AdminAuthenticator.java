@@ -126,4 +126,10 @@ public class AdminAuthenticator extends XmlAuthenticator
 
     return _remoteCookie;
   }
+
+  @Override
+  public String getDefaultGroup()
+  {
+    return "resin-admin";
+  }
 }

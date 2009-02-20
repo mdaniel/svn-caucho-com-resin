@@ -40,6 +40,7 @@ public class ZipScanner
   private static Logger _log;
   
   private char []_cbuf = new char[256];
+  private int _nameLen;
 
   private Path _path;
   private ReadStream _is;
@@ -138,6 +139,7 @@ public class ZipScanner
 
     is.skip(2 + 2 + 4 + 4);
 
+    _nameLen = nameLen;
     if (_cbuf.length < nameLen)
       _cbuf = new char[nameLen];
 
@@ -145,7 +147,15 @@ public class ZipScanner
 
     int k = is.readUTF8ByByteLength(cbuf, 0, nameLen);
 
-    _name = new String(cbuf, 0, k);
+    for (int i = k - 1; i >= 0; i--) {
+      char ch = cbuf[i];
+
+      // win32 canonicalize 
+      if (ch == '\\')
+	cbuf[i] = '/';
+    }
+
+    _name = null; // new String(cbuf, 0, k);
 
     if (extraLen + commentLen > 0)
       is.skip(extraLen + commentLen);
@@ -155,7 +165,20 @@ public class ZipScanner
 
   public String getName()
   {
+    if (_name == null)
+      _name = new String(_cbuf, 0, _nameLen);
+    
     return _name;
+  }
+
+  public char []getNameBuffer()
+  {
+    return _cbuf;
+  }
+
+  public int getNameLength()
+  {
+    return _nameLen;
   }
 
   public void close()
