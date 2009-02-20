@@ -264,7 +264,24 @@ public class InterceptorBean extends Interceptor
       }
     }
   }
-  
+
+  @Override
+  public boolean equals(Object o)
+  {
+    if (! (o instanceof InterceptorBean))
+      return false;
+
+    InterceptorBean bean = (InterceptorBean) o;
+
+    return _type.equals(bean._type);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return _type.hashCode();
+  }
+
   public String toString()
   {
     StringBuilder sb = new StringBuilder();

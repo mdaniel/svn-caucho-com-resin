@@ -700,12 +700,12 @@ public class BeanType extends ConfigType
 	String className = name.substring(3);
 	String propName = toXmlName(name.substring(3));
 
-	TagName tagName = method.getAnnotation(TagName.class);
+        TagName tagName = method.getAnnotation(TagName.class);
 
-	if (tagName != null)
-	  propName = tagName.value();
-	
-	Attribute attr;
+        if (tagName != null)
+          propName = tagName.value();
+
+        Attribute attr;
 	
 	if (propName.equals("text")
 	    && (paramTypes[0].equals(String.class)
@@ -744,7 +744,12 @@ public class BeanType extends ConfigType
 
 	String propName = toXmlName(name.substring(6));
 
-	_attributeMap.put(propName, attr);
+        TagName tagName = method.getAnnotation(TagName.class);
+
+        if (tagName != null)
+          propName = tagName.value();
+
+        _attributeMap.put(propName, attr);
       }
     }
   }
