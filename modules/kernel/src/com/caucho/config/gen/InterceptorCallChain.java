@@ -55,11 +55,12 @@ import java.util.Map;
 /**
  * Represents the interception
  */
-public class InterceptorCallChain extends AbstractCallChain
+public class InterceptorCallChain
+  extends AbstractCallChain
 {
   private static final L10N L = new L10N(InterceptorCallChain.class);
 
-  private static final Annotation[] NULL_ANN_LIST = new Annotation[0];
+  private static final Annotation []NULL_ANN_LIST = new Annotation[0];
 
   private View _view;
   private BusinessMethodGenerator _next;
@@ -166,8 +167,8 @@ public class InterceptorCallChain extends AbstractCallChain
       return;
     }
 
-    Annotation[] apiAnnList = getMethodAnnotations(apiMethod);
-    Annotation[] implAnnList = getMethodAnnotations(implMethod);
+    Annotation []apiAnnList = getMethodAnnotations(apiMethod);
+    Annotation []implAnnList = getMethodAnnotations(implMethod);
 
     if (isAnnotationPresent(apiAnnList, ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
@@ -292,7 +293,7 @@ public class InterceptorCallChain extends AbstractCallChain
     if (method == null)
       return NULL_ANN_LIST;
 
-    Annotation[] annList = _view.getBean().getMethodAnnotations(method);
+    Annotation []annList = _view.getBean().getMethodAnnotations(method);
 
     if (annList != null)
       return annList;
@@ -300,7 +301,7 @@ public class InterceptorCallChain extends AbstractCallChain
       return method.getAnnotations();
   }
 
-  protected boolean isAnnotationPresent(Annotation[] annList, Class type)
+  protected boolean isAnnotationPresent(Annotation []annList, Class type)
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(type))
@@ -310,7 +311,7 @@ public class InterceptorCallChain extends AbstractCallChain
     return false;
   }
 
-  protected <T> T getAnnotation(Annotation[] annList, Class<T> type)
+  protected <T> T getAnnotation(Annotation []annList, Class<T> type)
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(type))
@@ -340,8 +341,8 @@ public class InterceptorCallChain extends AbstractCallChain
     if (!methodA.getName().equals(methodB.getName()))
       return false;
 
-    Class[] paramA = methodA.getParameterTypes();
-    Class[] paramB = methodB.getParameterTypes();
+    Class []paramA = methodA.getParameterTypes();
+    Class []paramB = methodB.getParameterTypes();
 
     if (paramA.length != paramB.length)
       return false;
@@ -356,7 +357,7 @@ public class InterceptorCallChain extends AbstractCallChain
 
   private Annotation findInterceptorBinding(Class interceptorClass)
   {
-    Annotation[] annotations = interceptorClass.getAnnotations();
+    Annotation []annotations = interceptorClass.getAnnotations();
 
     for (Annotation annotation : annotations) {
       if (annotation.annotationType()
@@ -839,7 +840,7 @@ public class InterceptorCallChain extends AbstractCallChain
     return false;
   }
 
-  private boolean containsMethod(Method[] methodList, Method method)
+  private boolean containsMethod(Method []methodList, Method method)
   {
     for (Method oldMethod : methodList) {
       if (isMatch(oldMethod, method))
@@ -874,7 +875,7 @@ public class InterceptorCallChain extends AbstractCallChain
 
     out.print("(");
 
-    Class[] paramTypes = method.getParameterTypes();
+    Class []paramTypes = method.getParameterTypes();
     for (int i = 0; i < paramTypes.length; i++) {
       if (i != 0)
         out.print(", ");
@@ -883,7 +884,7 @@ public class InterceptorCallChain extends AbstractCallChain
       out.print(" a" + i);
     }
     out.println(")");
-    Class[] exnTypes = method.getExceptionTypes();
+    Class []exnTypes = method.getExceptionTypes();
 
     if (exnTypes.length > 0) {
       out.print("  throws ");
@@ -1101,7 +1102,7 @@ public class InterceptorCallChain extends AbstractCallChain
       generateThis(out);
       out.print("." + _chainName + "_objectIndexChain, ");
 
-      Class[] paramTypes = _implMethod.getParameterTypes();
+      Class []paramTypes = _implMethod.getParameterTypes();
 
       if (paramTypes.length == 0) {
         out.print("com.caucho.ejb.util.EjbUtil.NULL_OBJECT_ARRAY");
@@ -1127,7 +1128,7 @@ public class InterceptorCallChain extends AbstractCallChain
       out.println("  throw e;");
 
       boolean isException = false;
-      Class[] exnList = _implMethod.getExceptionTypes();
+      Class []exnList = _implMethod.getExceptionTypes();
       for (Class cl : exnList) {
         if (RuntimeException.class.isAssignableFrom(cl))
           continue;
@@ -1164,7 +1165,7 @@ public class InterceptorCallChain extends AbstractCallChain
     out.print(_implMethod.getName());
     out.print("_decorator(");
 
-    Class[] types = _implMethod.getParameterTypes();
+    Class []types = _implMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       Class type = types[i];
 
@@ -1216,7 +1217,7 @@ public class InterceptorCallChain extends AbstractCallChain
     _next.generateThis(out);
   }
 
-  private boolean isMostGeneralException(Class[] exnList, Class cl)
+  private boolean isMostGeneralException(Class []exnList, Class cl)
   {
     for (Class exn : exnList) {
       if (exn != cl && exn.isAssignableFrom(cl))
@@ -1272,7 +1273,7 @@ public class InterceptorCallChain extends AbstractCallChain
   protected void generateGetMethod(JavaWriter out,
                                    String className,
                                    String methodName,
-                                   Class[] paramTypes)
+                                   Class []paramTypes)
     throws IOException
   {
     out.print("com.caucho.ejb.util.EjbUtil.getMethod(");
