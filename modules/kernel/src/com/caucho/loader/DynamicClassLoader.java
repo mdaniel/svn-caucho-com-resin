@@ -486,6 +486,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return false;
     else {
       addURL(url);
+
       return true;
     }
   }
@@ -512,6 +513,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       if (path.getScheme().equals("jar")) {
       }
       else if (path.getFullPath().endsWith(".jar")) {
+	path = JarPath.create(path);
       }
       else if (! path.getURL().endsWith("/"))
         path = path.lookup("./");

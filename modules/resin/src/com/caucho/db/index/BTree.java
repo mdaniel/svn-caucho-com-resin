@@ -338,20 +338,24 @@ public final class BTree {
 			       boolean isOverride)
     throws IOException, SQLException
   {
-    int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
     int length = getLength(buffer);
 
-    for (int i = 0; i < length; i++) {
+    int sublen = length;
+    int min = 0;
+    int max = length;
+    int offset = HEADER_SIZE;
+    
+    while (min < max) {
+      int i = (min + max) / 2;
+      
+      offset = HEADER_SIZE + i * tupleSize;
+    
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
 				    buffer, offset + PTR_SIZE,
 				    keyLength);
 
-      if (0 < cmp) {
-        offset += tupleSize;
-        continue;
-      }
-      else if (cmp == 0) {
+      if (cmp == 0) {
 	if (! isOverride) {
 	  long oldValue = getPointer(buffer, offset);
 
@@ -366,21 +370,23 @@ public final class BTree {
         
         return 0;
       }
-      else if (length < _n) {
-        return addKey(blockId, buffer, offset, i, length,
-                      keyBuffer, keyOffset, keyLength, value);
+      else if (0 < cmp) {
+	min = i + 1;
       }
-      else {
-	throw new IllegalStateException("ran out of key space");
+      else if (cmp < 0) {
+	max = i;
       }
     }
 
     if (length < _n) {
-      return addKey(blockId, buffer, offset, length, length,
-                    keyBuffer, keyOffset, keyLength, value);
+      offset = HEADER_SIZE + min * tupleSize;
+      
+      return addKey(blockId, buffer, offset, min, length,
+		    keyBuffer, keyOffset, keyLength, value);
     }
-
-    throw new IllegalStateException();
+    else {
+      throw new IllegalStateException("ran out of key space");
+    }
 
     // return split(blockIndex, block);
   }
