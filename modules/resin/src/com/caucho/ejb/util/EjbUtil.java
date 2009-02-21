@@ -55,6 +55,7 @@ public class EjbUtil {
 
   public static int []createInterceptors(InjectManager manager,
 					 ArrayList<Interceptor> beans,
+                                         int []indexList,
 					 InterceptionType type,
 					 Annotation ...bindings)
   {
@@ -66,16 +67,27 @@ public class EjbUtil {
     else
       interceptors = new ArrayList<Interceptor>();
 
-    int []indexList = new int[interceptors.size()];
+    int offset = 0;
+
+    if (indexList == null) {
+      indexList = new int[interceptors.size()];
+    }
+    else {
+      offset = indexList.length;
+
+      int[] newIndexList = new int[indexList.length + interceptors.size()];
+      System.arraycopy(indexList, 0, newIndexList, 0, indexList.length);
+      indexList = newIndexList;
+    }
 
     for (int i = 0; i < interceptors.size(); i++) {
       Interceptor interceptor = interceptors.get(i);
 
       int index = beans.indexOf(interceptor);
       if (index >= 0)
-	indexList[i] = index;
+	indexList[offset + i] = index;
       else {
-	indexList[i] = beans.size();
+	indexList[offset + i] = beans.size();
 	beans.add(interceptor);
       }
     }

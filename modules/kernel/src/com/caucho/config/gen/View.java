@@ -231,6 +231,24 @@ abstract public class View {
     }
   }
 
+  protected void generatePostConstruct(JavaWriter out)
+     throws IOException
+   {
+     out.println();
+     out.println("private void __caucho_postConstruct()");
+     out.println("{");
+     out.pushDepth();
+
+     HashMap map = new HashMap();
+     for (BusinessMethodGenerator method : getMethods()) {
+       method.generatePostConstruct(out, map);
+     }
+
+     out.popDepth();
+     out.println("}");
+   }
+
+
   /**
    * Generates view's business methods
    */

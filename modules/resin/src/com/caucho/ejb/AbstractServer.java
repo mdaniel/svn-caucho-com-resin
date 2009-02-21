@@ -61,6 +61,8 @@ import javax.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.lang.reflect.Method;
 
 /**
  * Base server for a single home/object bean pair.
@@ -831,7 +833,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     if (scope != null)
       scope.put(_component, scope);
     */
-    
+
     if (_initInject != null) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
@@ -847,6 +849,20 @@ abstract public class AbstractServer implements EnvironmentBean {
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
+    }
+
+    // XXX: needs to be preinitialized for performance
+    Method postConstruct = null;
+    try {
+      postConstruct = instance.getClass()
+        .getDeclaredMethod("__caucho_postConstruct");
+      postConstruct.setAccessible(true);
+      postConstruct.invoke(instance, null);
+    }
+    catch (Throwable e) {
+      log.log(Level.FINER,
+              L.l("Error invoking method {0}", postConstruct),
+              e);
     }
   }
 
@@ -901,7 +917,7 @@ abstract public class AbstractServer implements EnvironmentBean {
         _serverProgram.configure(this);
       
       bindInjection();
-      
+
       log.config(this + " active");
     } finally {
       thread.setContextClassLoader(oldLoader);

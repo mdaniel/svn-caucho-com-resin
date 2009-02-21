@@ -65,7 +65,9 @@ abstract public class StatefulObjectView extends StatefulView {
 
     HashMap map = new HashMap();
     
-    generateBusinessPrologue(out, map);    
+    generateBusinessPrologue(out, map);
+
+    generatePostConstruct(out);
     //_postConstructInterceptor.generatePrologue(out, map);
     //_preDestroyInterceptor.generatePrologue(out, map);
 
