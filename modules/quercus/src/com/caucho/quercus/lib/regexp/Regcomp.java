@@ -443,28 +443,28 @@ class Regcomp {
 
     case ' ': case '\n': case '\t': case '\r':
       if (isIgnoreWs()) {
-	while (Character.isSpace((char) pattern.peek()))
-	  pattern.read();
+        while (Character.isSpace((char) pattern.peek()))
+          pattern.read();
 
-	return parseRec(pattern, tail);
+        return parseRec(pattern, tail);
       }
       else {
-	next = parseString(ch, pattern);
-      
-	return concat(tail, parseRec(pattern, next));
+        next = parseString(ch, pattern);
+        
+        return concat(tail, parseRec(pattern, next));
       }
 
     case '#':
       if (isIgnoreWs()) {
-	while ((ch = pattern.read()) > 0 && ch!= '\n') {
-	}
+        while ((ch = pattern.read()) > 0 && ch != '\n') {
+        }
 
-	return parseRec(pattern, tail);
+        return parseRec(pattern, tail);
       }
       else {
-	next = parseString(ch, pattern);
-      
-	return concat(tail, parseRec(pattern, next));
+        next = parseString(ch, pattern);
+        
+        return concat(tail, parseRec(pattern, next));
       }
       
     default:

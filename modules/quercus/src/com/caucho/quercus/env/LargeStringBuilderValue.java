@@ -96,7 +96,7 @@ public class LargeStringBuilderValue
   @Override
   public ValueType getValueType()
   {
-    return BinaryBuilderValue.getValueType(_bufferList[0], 0, _length);
+    return StringBuilderValue.getValueType(_bufferList[0], 0, _length);
   }
 
   /**
@@ -163,7 +163,7 @@ public class LargeStringBuilderValue
   @Override
   public double toDouble()
   {
-    return BinaryBuilderValue.toDouble(_bufferList[0], 0, _length);
+    return StringBuilderValue.toDouble(_bufferList[0], 0, _length);
   }
 
   /**

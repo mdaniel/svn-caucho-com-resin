@@ -54,7 +54,9 @@ abstract public class StringValue
 {
   public static final StringValue EMPTY = new StringBuilderValue("");
 
-  private final static StringValue []CHAR_STRINGS;
+  private static final StringValue []CHAR_STRINGS;
+  
+  protected static final int MIN_LENGTH = 32;
 
   protected static final int IS_STRING = 0;
   protected static final int IS_LONG = 1;
@@ -1452,7 +1454,7 @@ abstract public class StringValue
   {
     return toString().length();
   }
-
+  
   /**
    * Returns the character at a particular location
    */
@@ -2000,7 +2002,7 @@ abstract public class StringValue
    * @param out the writer to the Java source code.
    */
   @Override
-  final public void generate(PrintWriter out)
+  public final void generate(PrintWriter out)
     throws IOException
   {
     // max JVM constant string length
@@ -2090,7 +2092,7 @@ abstract public class StringValue
     CHAR_STRINGS = new StringValue[256];
 
     for (int i = 0; i < CHAR_STRINGS.length; i++)
-      CHAR_STRINGS[i] = new StringBuilderValue(String.valueOf((char) i));
+      CHAR_STRINGS[i] = new StringBuilderValue((char) i);
   }
 }
 

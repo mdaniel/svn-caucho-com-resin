@@ -174,6 +174,11 @@ public class RegexpState {
     _freeList.free(state);
   }
   
+  public int getSubjectLength()
+  {
+    return _subject.length();
+  }
+  
   public boolean setSubject(Env env, StringValue subject)
   {
     _subject = _regexp.convertSubject(env, subject);

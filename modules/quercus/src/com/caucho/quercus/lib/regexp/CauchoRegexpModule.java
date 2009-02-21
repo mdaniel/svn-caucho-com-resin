@@ -771,7 +771,7 @@ public class CauchoRegexpModule
       numberOfMatches++;
     }
 
-    if (tail < subject.length())
+    if (tail < regexpState.getSubjectLength())
       result = result.append(regexpState.substring(env, tail));
 
     RegexpState.free(regexpState);
@@ -945,8 +945,6 @@ public class CauchoRegexpModule
     if (limit < 0)
       limit = LONG_MAX;
 
-    int length = subject.length();
-
     StringValue result = subject.createStringBuilder();
 
     int tail = 0;
@@ -1000,7 +998,7 @@ public class CauchoRegexpModule
     if (! isMatched)
       return subject;
     
-    if (tail < length)
+    if (tail < regexpState.getSubjectLength())
       result = result.append(regexpState.substring(env, tail));
 
     return result;

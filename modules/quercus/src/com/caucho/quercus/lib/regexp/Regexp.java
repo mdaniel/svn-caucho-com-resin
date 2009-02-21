@@ -36,6 +36,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.util.*;
 
 public class Regexp {
@@ -250,7 +251,7 @@ public class Regexp {
 
   static StringValue fromUtf8(Env env, StringValue source)
   {
-    StringValue target = env.createUnicodeBuilder();
+    StringValue target = new UnicodeBuilderValue();
     int len = source.length();
 
     for (int i = 0; i < len; i++) {
@@ -295,16 +296,16 @@ public class Regexp {
       char ch = source.charAt(i);
 
       if (ch < 0x80) {
-	target.append(ch);
+        target.append(ch);
       }
       else if (ch < 0x800) {
-	target.append((char) (0xc0 | (ch >> 6)));
-	target.append((char) (0x80 | (ch & 0x3f)));
+        target.append((char) (0xc0 | (ch >> 6)));
+        target.append((char) (0x80 | (ch & 0x3f)));
       }
       else {
-	target.append((char) (0xe0 | (ch >> 12)));
-	target.append((char) (0x80 | ((ch >> 6) & 0x3f)));
-	target.append((char) (0x80 | (ch & 0x3f)));
+        target.append((char) (0xe0 | (ch >> 12)));
+        target.append((char) (0x80 | ((ch >> 6) & 0x3f)));
+        target.append((char) (0x80 | (ch & 0x3f)));
       }
     }
 

@@ -243,9 +243,9 @@ public class Env {
   private long _timeLimit = 600000L;
   private long _endTime;
 
-  private Expr [] _callStack = new Expr[256];
-  private Value [] _callThisStack = new Value[256];
-  private Value [][] _callArgStack = new Value[256][];
+  private Expr [] _callStack;
+  private Value [] _callThisStack;
+  private Value [][] _callArgStack;
   private int _callStackTop;
   
   private QuercusClass _callingClass;
@@ -2524,6 +2524,12 @@ public class Env {
    */
   public void pushCall(Expr call, Value obj, Value []args)
   {
+    if (_callStack == null) {
+      _callStack = new Expr[256];
+      _callThisStack = new Value[256];
+      _callArgStack = new Value[256][];
+    }
+    
     if (_callStack.length <= _callStackTop) {
       Expr []newStack = new Expr[2 * _callStack.length];
       System.arraycopy(_callStack, 0, newStack, 0, _callStack.length);
@@ -2556,6 +2562,9 @@ public class Env {
    */
   public Expr popCall()
   {
+    if (_callStack == null)
+      throw new IllegalStateException();
+    
     return _callStack[--_callStackTop];
   }
 
