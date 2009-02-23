@@ -29,53 +29,33 @@
 
 package com.caucho.loader;
 
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.EnvironmentMXBean;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.io.File;
-import java.lang.ref.*;
+import java.io.IOException;
+import java.net.URLClassLoader;
 
-public class EnvironmentAdmin extends AbstractManagedObject
-  implements EnvironmentMXBean
+/**
+ * Non scanning classloader.
+ */
+public class NonScanDynamicClassLoader extends DynamicClassLoader
 {
-  private final WeakReference<EnvironmentClassLoader> _loaderRef;
-
-  public EnvironmentAdmin(EnvironmentClassLoader loader)
+  /**
+   * Creates a new SystemClassLoader.
+   */
+  public NonScanDynamicClassLoader(ClassLoader parent)
   {
-    _loaderRef = new WeakReference(loader);
-  }
-
-  public String getName()
-  {
-    return null;
-  }
-
-  public String []getClassPath()
-  {
-    EnvironmentClassLoader loader = _loaderRef.get();
-
-    if (loader != null) {
-      String classPath = loader.getClassPath();
-
-      return classPath.split("[" + File.pathSeparatorChar + "]");
-    }
-    else
-      return null;
-  }
-
-  void register()
-  {
-    //registerSelf();
-  }
-
-  void unregister()
-  {
-    //unregisterSelf();
+    super(parent);
   }
 
   @Override
-  public String toString()
+  public boolean isJarCacheEnabled()
   {
-    return getClass().getSimpleName() + "[" + getObjectName() + "]";
+    return false;
   }
 }
+
+

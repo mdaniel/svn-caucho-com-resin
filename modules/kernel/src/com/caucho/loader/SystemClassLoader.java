@@ -80,6 +80,13 @@ public class SystemClassLoader
       DynamicClassLoader.setJarCacheEnabled(false);
   }
 
+  @Override
+  public boolean isJarCacheEnabled()
+  {
+    // XXX: disabled for regression perf
+    return false; //  DynamicClassLoader.isJarCacheEnabled();
+  }
+
   public ClassLoader getClassLoader()
   {
     return this;

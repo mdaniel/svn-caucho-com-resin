@@ -118,6 +118,16 @@ abstract public class JarListLoader extends Loader implements Dependency {
     }
   }
 
+  protected boolean isJarCacheEnabled()
+  {
+    DynamicClassLoader loader = getLoader();
+
+    if (loader != null)
+      return loader.isJarCacheEnabled();
+    else
+      return false;
+  }
+  
   protected void addJar(Path jar)
   {
     if (! jar.exists()) {
@@ -149,7 +159,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
 
     _dependencyList.add(new Depend(jarPath));
 
-    if (_pathMap == null && DynamicClassLoader.isJarCacheEnabled())
+    if (_pathMap == null && isJarCacheEnabled())
       _pathMap = new JarMap();
 
     if (_pathMap != null) {

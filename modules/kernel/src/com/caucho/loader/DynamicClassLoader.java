@@ -225,9 +225,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns true if jar entries should be cached.
    */
-  public static boolean isJarCacheEnabled()
+  public static boolean isJarCacheEnabledDefault()
   {
     return _isJarCacheEnabled;
+  }
+
+  /**
+   * Returns true if jar entries should be cached.
+   */
+  public boolean isJarCacheEnabled()
+  {
+    return isJarCacheEnabledDefault();
   }
 
   /**

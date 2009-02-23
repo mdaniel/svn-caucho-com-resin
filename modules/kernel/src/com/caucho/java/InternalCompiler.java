@@ -30,6 +30,7 @@
 package com.caucho.java;
 
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.NonScanDynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
@@ -49,8 +50,9 @@ import java.util.logging.Logger;
 public class InternalCompiler extends AbstractJavaCompiler {
   private static final Logger log
     = Logger.getLogger(InternalCompiler.class.getName());
-  
+
   private static boolean _hasCompiler; // already tested for compiler
+  private static DynamicClassLoader _internalLoader;
   
   Process _process;
   String _userPrefix;
@@ -77,7 +79,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
 
       try {
 	DynamicClassLoader env;
-	env = new DynamicClassLoader(ClassLoader.getSystemClassLoader());
+	env = new NonScanDynamicClassLoader(ClassLoader.getSystemClassLoader());
 
 	Path javaHome = Vfs.lookup(System.getProperty("java.home"));
 	Path jar = javaHome.lookup("./lib/tools.jar");
@@ -156,13 +158,17 @@ public class InternalCompiler extends AbstractJavaCompiler {
       ClassLoader oldLoader = thread.getContextClassLoader();
       
       DynamicClassLoader env;
-      env = new DynamicClassLoader(ClassLoader.getSystemClassLoader());
 
+      env = new NonScanDynamicClassLoader(ClassLoader.getSystemClassLoader());
+      
       Path javaHome = Vfs.lookup(System.getProperty("java.home"));
       Path jar = javaHome.lookup("./lib/tools.jar");
       env.addJar(jar);
       jar = javaHome.lookup("../lib/tools.jar");
       env.addJar(jar);
+
+      // env = _internalLoader;
+
 	  
       try {
         thread.setContextClassLoader(env);
@@ -190,7 +196,6 @@ public class InternalCompiler extends AbstractJavaCompiler {
           if (value instanceof Integer)
             status = ((Integer) value).intValue();
         } catch (ClassNotFoundException e) {
-	  e.printStackTrace();
           throw new JavaCompileException(L.l("Can't find internal Java compiler.  Either configure an external compiler with <javac> or use a JDK which contains a Java compiler."), e);
         } catch (NoSuchMethodException e) {
           throw new JavaCompileException(e);

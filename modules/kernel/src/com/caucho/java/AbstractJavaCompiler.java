@@ -32,6 +32,7 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Compiles Java source, returning the loaded class.
@@ -49,7 +50,8 @@ abstract public class AbstractJavaCompiler implements Runnable {
   // path of source files
   private String []_path;
   private LineMap _lineMap;
-  
+
+  private Thread _thread;
   private Throwable _exception;
   
   public AbstractJavaCompiler(JavaCompiler compiler)
@@ -96,6 +98,8 @@ abstract public class AbstractJavaCompiler implements Runnable {
    */
   public void run()
   {
+    _thread = Thread.currentThread();
+    
     try {
       Thread.currentThread().setContextClassLoader(_loader);
 
@@ -105,11 +109,37 @@ abstract public class AbstractJavaCompiler implements Runnable {
     } finally {
       Thread.currentThread().setContextClassLoader(null);
 
-      _isDone = true;
+      notifyComplete();
 
-      synchronized (this) {
-	notifyAll();
+      _thread = null;
+    }
+  }
+
+  protected void waitForComplete(long timeout)
+  {
+    synchronized (this) {
+      long endTime = System.currentTimeMillis() + timeout;
+      Thread thread;
+
+      while (! isDone()
+	     && System.currentTimeMillis() <= endTime
+	     && ((thread = _thread) == null || thread.isAlive())) {
+	try {
+	  wait(endTime - System.currentTimeMillis());
+	} catch (InterruptedException e) {
+	  Thread.currentThread().interrupted();
+	  log.log(Level.WARNING, e.toString(), e);
+	}
       }
+    }
+  }
+
+  protected void notifyComplete()
+  {
+    synchronized (this) {
+      _isDone = true;
+      
+      notifyAll();
     }
   }
 

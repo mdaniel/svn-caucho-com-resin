@@ -596,21 +596,10 @@ public class JavaCompiler {
 
     // the compiler may not be well-behaved enough to use the ThreadPool
     Thread thread = new Thread(compiler);
-
+    thread.setDaemon(true);
     thread.start();
 
-    synchronized (compiler) {
-      long endTime = System.currentTimeMillis() + _maxCompileTime;
-
-      while (! compiler.isDone() && System.currentTimeMillis() <= endTime) {
-	try {
-	  compiler.wait(endTime - System.currentTimeMillis());
-	} catch (InterruptedException e) {
-	  Thread.currentThread().interrupted();
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-    }
+    compiler.waitForComplete(_maxCompileTime);
 
     if (! compiler.isDone()) {
       log.warning("compilation timed out");
