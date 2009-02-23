@@ -255,6 +255,14 @@ abstract public class QuercusPage
   {
     _classMap.put(name, cl);
   }
+
+  /**
+   * Sets a runtime function array after an env.
+   */
+  public boolean setRuntimeFunction(AbstractFunction []funList)
+  {
+    return false;
+  }
   
   public String toString()
   {

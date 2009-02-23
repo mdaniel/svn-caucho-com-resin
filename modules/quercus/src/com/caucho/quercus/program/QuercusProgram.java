@@ -82,6 +82,9 @@ public class QuercusProgram {
   private ArrayList<PersistentDependency> _dependList
     = new ArrayList<PersistentDependency>();
 
+  // runtime function list for compilation
+  private AbstractFunction []_runtimeFunList;
+
   private BasicDependencyContainer _depend
     = new BasicDependencyContainer();
 
@@ -183,9 +186,9 @@ public class QuercusProgram {
 	return false;
       
       _isCompiling = true;
-
-      return true;
     }
+
+    return true;
   }
   
   /*
@@ -410,6 +413,42 @@ public class QuercusProgram {
   }
 
   /**
+   * Sets a runtime function array after an env.
+   */
+  public boolean setRuntimeFunction(AbstractFunction []funList)
+  {
+    synchronized (this) {
+      if (_runtimeFunList == null) {
+	_runtimeFunList = funList;
+
+	notifyAll();
+      
+	return true;
+      }
+    
+      return false;
+    }
+  }
+
+  public AbstractFunction []getRuntimeFunctionList()
+  {
+    return _runtimeFunList;
+  }
+
+  public void waitForRuntimeFunctionList(long timeout)
+  {
+    synchronized (this) {
+      if (_runtimeFunList == null) {
+	try {
+	  wait(timeout);
+	} catch (Exception e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+      }
+    }
+  }
+
+  /**
    * Imports the page definitions.
    */
   public void importDefinitions(Env env)
@@ -428,7 +467,7 @@ public class QuercusProgram {
 
   public String toString()
   {
-    return "QuercusProgram[" + _sourceFile + "]";
+    return getClass().getSimpleName() + "[" + _sourceFile + "]";
   }
 
   class PageDependency implements Dependency {

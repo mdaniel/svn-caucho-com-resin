@@ -152,6 +152,18 @@ public class InterpretedPage extends QuercusPage
     return null;
   }
 
+  // runtime function list for compilation
+  private AbstractFunction []_runtimeFunList;
+
+  /**
+   * Sets a runtime function array after an env.
+   */
+  @Override
+  public boolean setRuntimeFunction(AbstractFunction []funList)
+  {
+    return _program.setRuntimeFunction(funList);
+  }
+
   public boolean equals(Object o)
   {
     if (! (o instanceof InterpretedPage))
@@ -164,7 +176,7 @@ public class InterpretedPage extends QuercusPage
   
   public String toString()
   {
-    return "InterpretedPage[" +  _program.getSourcePath() + "]";
+    return getClass().getSimpleName() + "[" +  _program.getSourcePath() + "]";
   }
 }
 

@@ -6197,11 +6197,25 @@ public class Env {
     AbstractFunction []fun = _fun;
     _fun = null;
     if (fun != null) {
-      for (int i = 0; i < fun.length; i++) {
-        fun[i] = null;
+      boolean isUsed = false;
+
+      if (_page.setRuntimeFunction(fun)) {
+	isUsed = true;
       }
+
+      for (QuercusPage page : _includeMap.values()) {
+	if (page.setRuntimeFunction(fun)) {
+	  isUsed = true;
+	}
+      }
+
+      if (! isUsed) {
+	for (int i = fun.length - 1; i >= 0; i--) {
+	  fun[i] = null;
+	}
       
-      _freeFunList.free(fun);
+	_freeFunList.free(fun);
+      }
     }
 
     ClassDef []classDef = _classDef;
