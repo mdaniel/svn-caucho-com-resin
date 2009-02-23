@@ -326,8 +326,22 @@ public class Resin implements EnvironmentBean, SchemaBean
       licenseErrorMessage = msg;
     }
 
-    if (resin == null)
+    if (resin == null) {
+      try {
+        Class cl = Class.forName("com.caucho.license.LicenseCheckImpl");
+        LicenseCheck license = (LicenseCheck) cl.newInstance();
+
+        license.requirePersonal(1);
+
+        licenseErrorMessage = license.doLogging();
+      } catch (ConfigException e) {
+        licenseErrorMessage = e.getMessage();
+      } catch (Throwable e) {
+        // message should already be set above
+      }
+
       resin = new Resin(loader, licenseErrorMessage);
+    }
 
     _resinLocal.set(resin, loader);
 
