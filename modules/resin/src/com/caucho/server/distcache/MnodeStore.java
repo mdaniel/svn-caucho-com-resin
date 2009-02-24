@@ -33,6 +33,7 @@ import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
+import com.caucho.util.HashKey;
 import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -52,10 +53,10 @@ import java.util.logging.Logger;
 /**
  * Manages backing for the cache map.
  */
-public class CacheMapBacking implements AlarmListener {
-  private static final L10N L = new L10N(CacheMapBacking.class);
+public class MnodeStore implements AlarmListener {
+  private static final L10N L = new L10N(MnodeStore.class);
   private static final Logger log
-    = Logger.getLogger(CacheMapBacking.class.getName());
+    = Logger.getLogger(MnodeStore.class.getName());
   
   private FreeList<CacheMapConnection> _freeConn
     = new FreeList<CacheMapConnection>(32);
@@ -84,7 +85,7 @@ public class CacheMapBacking implements AlarmListener {
   private Alarm _alarm;
   private long _expireReaperTimeout = 5 * 60 * 1000L;
   
-  public CacheMapBacking(Path path, String serverName)
+  public MnodeStore(Path path, String serverName)
     throws Exception
   {
     _path = path;
@@ -362,7 +363,7 @@ public class CacheMapBacking implements AlarmListener {
    * @param id the hash identifier for the data
    * @return true on successful load
    */
-  public CacheEntryValue load(HashKey id)
+  public MnodeValue load(HashKey id)
   {
     CacheMapConnection conn = null;
     
@@ -386,14 +387,23 @@ public class CacheMapBacking implements AlarmListener {
 	long updateTime = rs.getLong(9);
 	long accessTime = Alarm.getExactTime();
 
-  HashKey valueHash = hash != null ? new HashKey(hash) : null;
+	HashKey valueHash = hash != null ? new HashKey(hash) : null;
+	
+	if (log.isLoggable(Level.FINER))
+	  log.finer(this + " load " + id + " value=" + valueHash);
 
-	return new CacheEntryValue(valueHash, null, flags, itemVersion,
-				 expireTimeout, idleTimeout,
-				 leaseTimeout, localReadTimeout,
-				 accessTime, updateTime,
-				 serverVersion == _serverVersion);
+	return new MnodeValue(valueHash, null, flags, itemVersion,
+			      expireTimeout, idleTimeout,
+			      leaseTimeout, localReadTimeout,
+			      accessTime, updateTime,
+			      serverVersion == _serverVersion,
+			      false);
       }
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " load: no mnode for " + id);
+
+      return null;
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -642,10 +652,10 @@ public class CacheMapBacking implements AlarmListener {
   private String serverNameToTableName(String serverName)
   {
     if (serverName == null || "".equals(serverName))
-      return "resin_distcache_default";
+      return "resin_mnode_default";
     
     StringBuilder cb = new StringBuilder();
-    cb.append("resin_distcache_");
+    cb.append("resin_mnode_");
     
     for (int i = 0; i < serverName.length(); i++) {
       char ch = serverName.charAt(i);

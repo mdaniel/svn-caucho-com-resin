@@ -27,14 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
-import com.caucho.server.distcache.CacheEntryKey;
-import com.caucho.server.distcache.HashKey;
-import com.caucho.server.distcache.CacheEntryValue;
+import com.caucho.server.distcache.MnodeValue;
 import com.caucho.server.distcache.CacheConfig;
+import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 
 import javax.cache.CacheLoader;
@@ -47,45 +46,43 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * An entry in the cache map
  */
-abstract public class AbstractCacheEntry
-  implements CacheEntryKey, ExtCacheEntry {
+abstract public class DistCacheEntry implements ExtCacheEntry {
   private final HashKey _keyHash;
 
   private final ClusterTriad.Owner _owner;
 
-  //private CacheConfig _cacheConfig;
+  private CacheConfig _cacheConfig;
 
   private Object _key;
 
-  private final AtomicBoolean _isReadUpdate
-    = new AtomicBoolean();
+  private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
   
-  private final AtomicReference<CacheEntryValue> _entryRef
-    = new AtomicReference<CacheEntryValue>();
+  private final AtomicReference<MnodeValue> _mnodeValue
+    = new AtomicReference<MnodeValue>();
 
   private int _hits;
 
-  public AbstractCacheEntry(Object key,
-		       HashKey keyHash,
-		       ClusterTriad.Owner owner)
+  public DistCacheEntry(Object key,
+		    HashKey keyHash,
+		    ClusterTriad.Owner owner)
   {
     _key = key;
     _keyHash = keyHash;
     _owner = owner;
   }
 
-//   public AbstractCacheEntry(Object key,
-//		       HashKey keyHash,
-//		       ClusterTriad.Owner owner,
-//                       CacheConfig config)
-//  {
-//    _key = key;
-//    _keyHash = keyHash;
-//    _owner = owner;
-//    _cacheConfig = config;
-//  }
+  public DistCacheEntry(Object key,
+		    HashKey keyHash,
+		    ClusterTriad.Owner owner,
+		    CacheConfig config)
+  {
+    _key = key;
+    _keyHash = keyHash;
+    _owner = owner;
+    _cacheConfig = config;
+  }
 
-   /**
+  /**
    * Returns the key for this entry in the Cache.
    */
   public final Object getKey()
@@ -98,7 +95,7 @@ abstract public class AbstractCacheEntry
    */
   public Object getValue()
   {
-    return getEntryValue().getValue();
+    return getMnodeValue().getValue();
   }
 
   /**
@@ -106,7 +103,7 @@ abstract public class AbstractCacheEntry
    */
   public boolean isValueNull()
   {
-    return getEntryValue().isValueNull();
+    return getMnodeValue().isValueNull();
   }
 
   /**
@@ -128,9 +125,9 @@ abstract public class AbstractCacheEntry
   /**
    * Returns the value section of the entry.
    */
-  public final CacheEntryValue getEntryValue()
+  public final MnodeValue getMnodeValue()
   {
-    return _entryRef.get();
+    return _mnodeValue.get();
   }
 
   /**
@@ -138,7 +135,7 @@ abstract public class AbstractCacheEntry
    */
   public Object peek()
   {
-    return getEntryValue().getValue();
+    return getMnodeValue().getValue();
   }
 
   /**
@@ -147,6 +144,7 @@ abstract public class AbstractCacheEntry
   public Object get(CacheConfig config)
   {
     CacheLoader cacheLoader = config.getCacheLoader();
+    
     return (cacheLoader == null) ? null : cacheLoader.load(getKey());
   }
 
@@ -160,9 +158,9 @@ abstract public class AbstractCacheEntry
   /**
    * Returns the current value.
    */
-  public CacheEntryValue getEntryValue(CacheConfig config)
+  public MnodeValue getMnodeValue(CacheConfig config)
   {
-    return getEntryValue();
+    return getMnodeValue();
   }
 
   /**
@@ -174,8 +172,8 @@ abstract public class AbstractCacheEntry
    * Sets the value by an input stream
    */
   abstract public ExtCacheEntry put(InputStream is,
-			   CacheConfig config,          
-			   long idleTimeout)
+				    CacheConfig config,          
+				    long idleTimeout)
     throws IOException;
 
   /**
@@ -205,35 +203,35 @@ abstract public class AbstractCacheEntry
   /**
    * Sets the current value.
    */
-  public final boolean compareAndSet(CacheEntryValue oldEntryValue,
-				     CacheEntryValue entryValue)
+  public final boolean compareAndSet(MnodeValue oldMnodeValue,
+				     MnodeValue mnodeValue)
   {
-    return _entryRef.compareAndSet(oldEntryValue, entryValue);
+    return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
   }
 
    public HashKey getValueHash()
   {
-    return getEntryValue().getValueHashKey();
+    return getMnodeValue().getValueHashKey();
   }
 
    public byte []getValueHashArray()
   {
-    return getEntryValue().getValueHash();
+    return getMnodeValue().getValueHash();
   }
 
   public long getIdleTimeout()
   {
-    return getEntryValue().getIdleTimeout();
+    return getMnodeValue().getIdleTimeout();
   }
 
    public long getLeaseTimeout()
   {
-    return getEntryValue().getLeaseTimeout();
+    return getMnodeValue().getLeaseTimeout();
   }
 
    public int getLeaseOwner()
   {
-    return getEntryValue().getLeaseOwner();
+    return getMnodeValue().getLeaseOwner();
   }
 
     public long getCost()
@@ -244,44 +242,44 @@ abstract public class AbstractCacheEntry
   //TODO(fred): implement as time of first put for key.
   public long getCreationTime()
   {
-    return getEntryValue().getCreationTime();
+    return getMnodeValue().getCreationTime();
   }
 
   public long getExpirationTime()
   {
-    return getEntryValue().getExpirationTime();
+    return getMnodeValue().getExpirationTime();
   }
 
   public int getHits()
   {
-    return getEntryValue().getHits();
+    return getMnodeValue().getHits();
   }
 
-   public long getLastAccessTime()
-   {
-     return getEntryValue().getLastAccessTime();
-   }
+  public long getLastAccessTime()
+  {
+    return getMnodeValue().getLastAccessTime();
+  }
 
-   public long getLastUpdateTime()
-   {
-     return getEntryValue().getLastUpdateTime();
-   }
+  public long getLastUpdateTime()
+  {
+    return getMnodeValue().getLastUpdateTime();
+  }
 
-   public long getVersion()
-   {
-     return getEntryValue().getVersion();
-   }
+  public long getVersion()
+  {
+    return getMnodeValue().getVersion();
+  }
 
-   public boolean isValid()
-   {
-     return getEntryValue().isValid();
-   }
+  public boolean isValid()
+  {
+    return getMnodeValue().isValid();
+  }
 
 
-   public Object setValue(Object value)
-   {
-     return getEntryValue().setValue(value);
-   }
+  public Object setValue(Object value)
+  {
+    return getMnodeValue().setValue(value);
+  }
 
   public String toString()
   {

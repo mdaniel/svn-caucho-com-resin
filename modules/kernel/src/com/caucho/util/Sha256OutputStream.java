@@ -27,17 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.util;
 
 import java.io.*;
 import java.security.*;
 
-import com.caucho.util.*;
-
 /**
  * Creates hashes for the identifiers.
  */
-public class MessageDigestOutputStream extends OutputStream {
+public class Sha256OutputStream extends OutputStream {
   private static FreeList<MessageDigest> _freeDigestList
     = new FreeList<MessageDigest>(16);
 
@@ -48,7 +46,7 @@ public class MessageDigestOutputStream extends OutputStream {
   /**
    * Creates the output
    */
-  public MessageDigestOutputStream(OutputStream os)
+  public Sha256OutputStream(OutputStream os)
   {
     _os = os;
     
@@ -56,7 +54,7 @@ public class MessageDigestOutputStream extends OutputStream {
       _digest = _freeDigestList.allocate();
 
       if (_digest == null)
-	_digest = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+	_digest = MessageDigest.getInstance("SHA-256");
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

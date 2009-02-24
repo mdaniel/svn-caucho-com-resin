@@ -40,6 +40,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
+import javax.cache.CacheEntry;
 import javax.cache.CacheListener;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
@@ -77,7 +78,7 @@ abstract public class AbstractCache extends AbstractMap
 
   private CacheConfig _config = new CacheConfig();
 
-  private LruCache<Object, AbstractCacheEntry> _entryCache;
+  private LruCache<Object,DistCacheEntry> _entryCache;
 
   private boolean _isInit;
 
@@ -366,7 +367,7 @@ abstract public class AbstractCache extends AbstractMap
 
       _config.init();
 
-      _entryCache = new LruCache<Object, AbstractCacheEntry>(512);
+      _entryCache = new LruCache<Object,DistCacheEntry>(512);
     }
   }
 
@@ -375,7 +376,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object peek(Object key)
   {
-    AbstractCacheEntry cacheEntry = _entryCache.get(key);
+    DistCacheEntry cacheEntry = _entryCache.get(key);
 
     return (cacheEntry != null) ? cacheEntry.peek() : null;
   }
@@ -386,7 +387,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object get(Object key)
   {
-    return getAbstractCacheEntry(key).get(_config);
+    return getDistCacheEntry(key).get(_config);
   }
 
   /**
@@ -395,7 +396,7 @@ abstract public class AbstractCache extends AbstractMap
   public boolean get(Object key, OutputStream os)
     throws IOException
   {
-    return getAbstractCacheEntry(key).getStream(os, _config);
+    return getDistCacheEntry(key).getStream(os, _config);
   }
 
   /**
@@ -403,13 +404,13 @@ abstract public class AbstractCache extends AbstractMap
    */
   public ExtCacheEntry getExtCacheEntry(Object key)
   {
-    return getAbstractCacheEntry(key).getEntryValue(_config);
+    return getDistCacheEntry(key).getMnodeValue(_config);
   }
 
   /**
    * Returns the cache entry for the object with the given key.
    */
-  public ExtCacheEntry getCacheEntry(Object key)
+  public CacheEntry getCacheEntry(Object key)
   {
     return getExtCacheEntry(key);
   }
@@ -422,7 +423,7 @@ abstract public class AbstractCache extends AbstractMap
    */
   public Object put(Object key, Object value)
   {
-    Object object = getAbstractCacheEntry(key).put(value, _config);
+    Object object = getDistCacheEntry(key).put(value, _config);
     notifyPut(key);
 
     return object;
@@ -437,11 +438,11 @@ abstract public class AbstractCache extends AbstractMap
    * @param idleTimeout the idle timeout for the item
    */
   public ExtCacheEntry put(Object key,
-    InputStream is,
-    long idleTimeout)
+			   InputStream is,
+			   long idleTimeout)
     throws IOException
   {
-    return getAbstractCacheEntry(key).put(is, _config, idleTimeout);
+    return getDistCacheEntry(key).put(is, _config, idleTimeout);
   }
 
   /**
@@ -454,8 +455,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-    long version,
-    Object value)
+			       long version,
+			       Object value)
   {
     put(key, value);
 
@@ -472,8 +473,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-    long version,
-    InputStream inputStream)
+			       long version,
+			       InputStream inputStream)
     throws IOException
   {
     put(key, inputStream);
@@ -489,7 +490,7 @@ abstract public class AbstractCache extends AbstractMap
   public Object remove(Object key)
   {
     notifyRemove(key);
-    return getAbstractCacheEntry(key).remove(_config);
+    return getDistCacheEntry(key).remove(_config);
   }
 
   /**
@@ -497,11 +498,11 @@ abstract public class AbstractCache extends AbstractMap
    */
   public boolean compareAndRemove(Object key, long version)
   {
-    AbstractCacheEntry cacheEntry = getAbstractCacheEntry(key);
+    DistCacheEntry cacheEntry = getDistCacheEntry(key);
 
-    if (cacheEntry.getVersion() == version)
-    {
+    if (cacheEntry.getVersion() == version) {
       remove(key);
+      
       return true;
     }
 
@@ -511,12 +512,13 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the CacheKeyEntry for the given key.
    */
-  protected AbstractCacheEntry getAbstractCacheEntry(Object key)
+  protected DistCacheEntry getDistCacheEntry(Object key)
   {
-    AbstractCacheEntry cacheEntry = _entryCache.get(key);
+    DistCacheEntry cacheEntry = _entryCache.get(key);
 
     if (cacheEntry == null) {
       cacheEntry = _distributedCacheManager.getCacheEntry(key, _config);
+      
       _entryCache.put(key, cacheEntry);
     }
     return cacheEntry;
@@ -975,7 +977,7 @@ abstract public class AbstractCache extends AbstractMap
   protected static class CacheEntrySet<E>
     extends AbstractSet
   {
-    private LruCache<Object, AbstractCacheEntry> _lruCache;
+    private LruCache<Object, CacheEntry> _lruCache;
 
     protected CacheEntrySet(LruCache cache)
     {
@@ -985,7 +987,7 @@ abstract public class AbstractCache extends AbstractMap
 
     public Iterator iterator()
     {
-      return new CacheEntrySetIterator<Object, AbstractCacheEntry>(_lruCache);
+      return new CacheEntrySetIterator<Object,CacheEntry>(_lruCache);
     }
 
     public int size()
@@ -1013,7 +1015,7 @@ abstract public class AbstractCache extends AbstractMap
         throw new NoSuchElementException();
 
       LruCache.Entry<K, V> entry = _iterator.next();
-      AbstractCacheEntry cacheEntry = (AbstractCacheEntry) entry.getValue();
+      CacheEntry cacheEntry = (CacheEntry) entry.getValue();
 
       return new AbstractMap.SimpleEntry<Object, Object>(
         cacheEntry.getKey(),

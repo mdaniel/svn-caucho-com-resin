@@ -29,8 +29,8 @@
 
 package com.caucho.server.distcache;
 
+import com.caucho.util.HashKey;
 import java.security.*;
-
 
 /**
  * Creates hashes for the identifiers.
@@ -38,6 +38,8 @@ import java.security.*;
 public class HashManager {
   public static final int SIZE = 32;
   public static final String HASH_ALGORITHM = "SHA-256";
+  
+  public static final HashKey NULL = new HashKey(new byte[SIZE]);
   
   private MessageDigest _digest;
 

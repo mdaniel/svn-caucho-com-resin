@@ -27,15 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
-
+package com.caucho.util;
 
 /**
  * Creates hashes for the identifiers.
  */
 public class HashKey {
-  public static final HashKey NULL = new HashKey(new byte[HashManager.SIZE]);
-  
   private final byte []_hash;
   
   /**

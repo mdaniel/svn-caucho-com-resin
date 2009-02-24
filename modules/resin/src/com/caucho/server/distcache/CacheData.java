@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.HashKey;
 
 import java.lang.ref.SoftReference;
 

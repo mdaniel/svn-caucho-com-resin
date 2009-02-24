@@ -31,15 +31,16 @@ package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.util.Alarm;
+import com.caucho.util.HashKey;
 
 import java.lang.ref.SoftReference;
 
 /**
  * An entry in the cache map
  */
-public final class CacheEntryValue implements ExtCacheEntry {
-  public static final CacheEntryValue NULL
-    = new CacheEntryValue(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false);
+public final class MnodeValue implements ExtCacheEntry {
+  public static final MnodeValue NULL
+    = new MnodeValue(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
   
   private final HashKey _valueHash;
   private final int _flags;
@@ -53,6 +54,8 @@ public final class CacheEntryValue implements ExtCacheEntry {
   private final long _lastUpdateTime;
 
   private final boolean _isServerVersionValid;
+
+  private final boolean _isImplicitNull;
   
   private volatile long _lastAccessTime;
   
@@ -65,17 +68,18 @@ public final class CacheEntryValue implements ExtCacheEntry {
 
   private SoftReference _valueRef;
 
-  public CacheEntryValue(HashKey valueHash,
-		       Object value,
-		       int flags,
-		       long version,
-		       long expireTimeout,
-		       long idleTimeout,
-		       long leaseTimeout,
-		       long localReadTimeout,
-		       long lastAccessTime,
-		       long lastUpdateTime,
-		       boolean isServerVersionValid)
+  public MnodeValue(HashKey valueHash,
+		    Object value,
+		    int flags,
+		    long version,
+		    long expireTimeout,
+		    long idleTimeout,
+		    long leaseTimeout,
+		    long localReadTimeout,
+		    long lastAccessTime,
+		    long lastUpdateTime,
+		    boolean isServerVersionValid,
+		    boolean isImplicitNull)
   {
     _valueHash = valueHash;
     _flags = flags;
@@ -91,36 +95,38 @@ public final class CacheEntryValue implements ExtCacheEntry {
     
     _lastAccessTime = Alarm.getExactTime();
 
+    _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
 
     if (value != null)
       _valueRef = new SoftReference(value);
   }
 
-  public CacheEntryValue(CacheEntryValue oldEntryValue,
-		       long idleTimeout,
-		       long lastUpdateTime)
+  public MnodeValue(MnodeValue oldMnodeValue,
+		    long idleTimeout,
+		    long lastUpdateTime)
   {
-    _valueHash = oldEntryValue.getValueHashKey();
-    _flags = oldEntryValue.getFlags();
-    _version = oldEntryValue.getVersion();
+    _valueHash = oldMnodeValue.getValueHashKey();
+    _flags = oldMnodeValue.getFlags();
+    _version = oldMnodeValue.getVersion();
     
-    _expireTimeout = oldEntryValue.getExpireTimeout();
+    _expireTimeout = oldMnodeValue.getExpireTimeout();
     _idleTimeout = idleTimeout;
-    _leaseTimeout = oldEntryValue.getLeaseTimeout();
-    _localReadTimeout = oldEntryValue.getLocalReadTimeout();
+    _leaseTimeout = oldMnodeValue.getLeaseTimeout();
+    _localReadTimeout = oldMnodeValue.getLocalReadTimeout();
     
     _lastRemoteAccessTime = lastUpdateTime;
     _lastUpdateTime = lastUpdateTime;
     
     _lastAccessTime = Alarm.getExactTime();
 
-    _leaseExpireTime = oldEntryValue._leaseExpireTime;
-    _leaseOwner = oldEntryValue._leaseOwner;
+    _leaseExpireTime = oldMnodeValue._leaseExpireTime;
+    _leaseOwner = oldMnodeValue._leaseOwner;
 
-    _isServerVersionValid = oldEntryValue.isServerVersionValid();
+    _isImplicitNull = oldMnodeValue.isImplicitNull();
+    _isServerVersionValid = oldMnodeValue.isServerVersionValid();
 
-    Object value = oldEntryValue.getValue();
+    Object value = oldMnodeValue.getValue();
     
     if (value != null)
       _valueRef = new SoftReference(value);
@@ -350,6 +356,14 @@ public final class CacheEntryValue implements ExtCacheEntry {
   public boolean isServerVersionValid()
   {
     return _isServerVersionValid;
+  }
+
+  /**
+   * If the null value is due to a missing item in the database.
+   */
+  public boolean isImplicitNull()
+  {
+    return _isImplicitNull;
   }
 
   //

@@ -36,6 +36,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
 import com.caucho.util.IoUtil;
+import com.caucho.util.HashKey;
 import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -60,16 +61,16 @@ import java.util.logging.Logger;
 /**
  * Manages the backing for the file database objects
  */
-public class DataBacking implements AlarmListener {
-  private static final L10N L = new L10N(DataBacking.class);
+public class DataStore implements AlarmListener {
+  private static final L10N L = new L10N(DataStore.class);
   private static final Logger log
-    = Logger.getLogger(DataBacking.class.getName());
+    = Logger.getLogger(DataStore.class.getName());
   
   private FreeList<DataConnection> _freeConn
     = new FreeList<DataConnection>(32);
 
   private final String _tableName;
-  private final String _mapTableName;
+  private final String _mnodeTableName;
 
   // remove unused data after 1 hour
   private long _expireTimeout = 3600L * 1000L;
@@ -87,12 +88,12 @@ public class DataBacking implements AlarmListener {
   private Alarm _alarm;
   private long _expireReaperTimeout = 15 * 60 * 1000L;
   
-  public DataBacking(String serverName,
-		     CacheMapBacking mapBacking)
+  public DataStore(String serverName,
+		   MnodeStore mnodeStore)
     throws Exception
   {
-    _dataSource = mapBacking.getDataSource();
-    _mapTableName = mapBacking.getTableName();
+    _dataSource = mnodeStore.getDataSource();
+    _mnodeTableName = mnodeStore.getTableName();
     
     _tableName = serverNameToTableName(serverName);
     
@@ -127,8 +128,8 @@ public class DataBacking implements AlarmListener {
     _updateExpiresQuery = ("UPDATE " + _tableName
 			   + " SET expire_time=?"
 			   + " WHERE expire_time<? AND EXISTS "
-			   + "      (SELECT * FROM " + _mapTableName
-			   +   "       WHERE " + _tableName + ".id = " + _mapTableName + ".value)");
+			   + "      (SELECT * FROM " + _mnodeTableName
+			   +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
 		     + " WHERE expire_time < ?");
@@ -215,8 +216,14 @@ public class DataBacking implements AlarmListener {
 	  is.close();
 	}
 
+	if (log.isLoggable(Level.FINER))
+	  log.finer(this + " load " + id + " length:" + os.getPosition());
+
 	return true;
       }
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " no data loaded for " + id);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } catch (IOException e) {

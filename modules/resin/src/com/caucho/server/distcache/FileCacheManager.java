@@ -31,7 +31,6 @@ package com.caucho.server.distcache;
 
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.cluster.ExtCacheEntry;
-//import com.caucho.cluster.AbstractCacheEntry;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.ClusterTriad;
@@ -39,6 +38,8 @@ import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.util.HashKey;
+import com.caucho.util.Sha256OutputStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.TempOutputStream;
@@ -63,8 +64,8 @@ public class FileCacheManager extends DistributedCacheManager {
 
   private TempFileManager _tempFileManager;
 
-  private CacheMapBacking _cacheMapBacking;
-  private DataBacking _dataBacking;
+  private MnodeStore _mnodeStore;
+  private DataStore _dataStore;
 
   private final LruCache<HashKey, FileCacheEntry> _entryCache
     = new LruCache<HashKey, FileCacheEntry>(64 * 1024);
@@ -79,8 +80,8 @@ public class FileCacheManager extends DistributedCacheManager {
       Path adminPath = server.getResinDataDirectory();
       String serverId = server.getServerId();
 
-      _cacheMapBacking = new CacheMapBacking(adminPath, serverId);
-      _dataBacking = new DataBacking(serverId, _cacheMapBacking);
+      _mnodeStore = new MnodeStore(adminPath, serverId);
+      _dataStore = new DataStore(serverId, _mnodeStore);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -133,36 +134,36 @@ public class FileCacheManager extends DistributedCacheManager {
 //  public ExtCacheEntry getEntry(HashKey key, CacheConfig config)
 //  {
 //    FileCacheEntry cacheEntry = getLocalEntry(key);
-//    CacheEntryValue entryValue = cacheEntry.getEntryValue();
+//    MnodeValue mnodeValue = cacheEntry.getMnodeValue();
 //
-//    if (entryValue == null) {
-//      entryValue = _cacheMapBacking.load(key);
+//    if (mnodeValue == null) {
+//      mnodeValue = _mnodeStore.load(key);
 //
-//      cacheEntry.compareAndSet(null, entryValue);
+//      cacheEntry.compareAndSet(null, mnodeValue);
 //
-//      entryValue = cacheEntry.getEntryValue();
+//      mnodeValue = cacheEntry.getMnodeValue();
 //    }
 //
-//    return entryValue;
+//    return mnodeValue;
 //  }
 
   /**
    * Gets a cache entry
    */
-  public CacheEntryValue loadLocalEntry(FileCacheEntry cacheEntry)
+  public MnodeValue loadLocalEntry(FileCacheEntry cacheEntry)
   {
     HashKey key = cacheEntry.getKeyHash();
-    CacheEntryValue entryValue = cacheEntry.getEntryValue();
+    MnodeValue mnodeValue = cacheEntry.getMnodeValue();
 
-    if (entryValue == null) {
-      entryValue = _cacheMapBacking.load(key);
+    if (mnodeValue == null) {
+      mnodeValue = _mnodeStore.load(key);
 
-      cacheEntry.compareAndSet(null, entryValue);
+      cacheEntry.compareAndSet(null, mnodeValue);
 
-      entryValue = cacheEntry.getEntryValue();
+      mnodeValue = cacheEntry.getMnodeValue();
     }
 
-    return entryValue;
+    return mnodeValue;
   }
 
   /**
@@ -171,17 +172,17 @@ public class FileCacheManager extends DistributedCacheManager {
   public Object get(FileCacheEntry cacheEntry, CacheConfig config)
   {
 
-    CacheEntryValue entryValue = loadLocalEntry(cacheEntry);
+    MnodeValue mnodeValue = loadLocalEntry(cacheEntry);
 
-    if ((entryValue == null) || entryValue.isEntryExpired(Alarm.getCurrentTime()))
+    if ((mnodeValue == null) || mnodeValue.isEntryExpired(Alarm.getCurrentTime()))
       return null;
 
-    Object value = entryValue.getValue();
+    Object value = mnodeValue.getValue();
 
     if (value != null)
       return value;
 
-    HashKey valueHash = entryValue.getValueHashKey();
+    HashKey valueHash = mnodeValue.getValueHashKey();
 
     if (valueHash == null)
       return null;
@@ -189,8 +190,8 @@ public class FileCacheManager extends DistributedCacheManager {
     value = readData(valueHash, config.getValueSerializer());
 
     // use the old value if it's been overwritten
-    if (entryValue.getValue() == null)
-      entryValue.setObjectValue(value);
+    if (mnodeValue.getValue() == null)
+      mnodeValue.setObjectValue(value);
 
     return value;
   }
@@ -218,12 +219,12 @@ public class FileCacheManager extends DistributedCacheManager {
   /**
    * Sets a cache entry
    */
-  public CacheEntryValue put(FileCacheEntry entry,
+  public MnodeValue put(FileCacheEntry entry,
     Object value,
     CacheConfig config)
   {
     HashKey key = entry.getKeyHash();
-    CacheEntryValue oldEntryValue = loadLocalEntry(entry);
+    MnodeValue oldEntryValue = loadLocalEntry(entry);
 
     HashKey oldValueHash
       = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
@@ -247,7 +248,7 @@ public class FileCacheManager extends DistributedCacheManager {
     long accessTime = Alarm.getExactTime();
     long updateTime = Alarm.getExactTime();
 
-    CacheEntryValue entryValue = new CacheEntryValue(valueHash, value,
+    MnodeValue mnodeValue = new MnodeValue(valueHash, value,
       flags, version,
       expireTimeout,
       idleTimeout,
@@ -259,15 +260,15 @@ public class FileCacheManager extends DistributedCacheManager {
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
 
-    if (!entry.compareAndSet(oldEntryValue, entryValue)) {
-      log.fine(this + " entryValue update failed due to timing conflict"
+    if (!entry.compareAndSet(oldEntryValue, mnodeValue)) {
+      log.fine(this + " mnodeValue update failed due to timing conflict"
         + " (key=" + key + ")");
 
-      return entry.getEntryValue();
+      return entry.getMnodeValue();
     }
 
     if (oldEntryValue == null) {
-      if (_cacheMapBacking.insert(key, valueHash,
+      if (_mnodeStore.insert(key, valueHash,
         flags, version,
         expireTimeout,
         idleTimeout,
@@ -278,14 +279,14 @@ public class FileCacheManager extends DistributedCacheManager {
           + "(key=" + key + ")");
       }
     } else {
-      if (_cacheMapBacking.updateSave(key, valueHash, version, idleTimeout)) {
+      if (_mnodeStore.updateSave(key, valueHash, version, idleTimeout)) {
       } else {
         log.fine(this + " db update failed due to timing conflict"
           + "(key=" + key + ")");
       }
     }
 
-    return entry.getEntryValue();
+    return entry.getMnodeValue();
   }
 
   /**
@@ -316,7 +317,7 @@ public class FileCacheManager extends DistributedCacheManager {
   public boolean remove(FileCacheEntry entry, CacheConfig config)
   {
     HashKey key = entry.getKeyHash();
-    CacheEntryValue oldEntryValue = loadLocalEntry(entry);
+    MnodeValue oldEntryValue = loadLocalEntry(entry);
 
     HashKey oldValueHash
       = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
@@ -324,20 +325,24 @@ public class FileCacheManager extends DistributedCacheManager {
     long version = oldEntryValue != null ? oldEntryValue.getVersion() + 1 : 1;
     int flags = oldEntryValue != null ? oldEntryValue.getFlags() : 0;
 
-    long expireTimeout = oldEntryValue != null ? oldEntryValue.getExpireTimeout() : 0;
-    long idleTimeout = oldEntryValue != null ? oldEntryValue.getIdleTimeout() : 0;
+    long expireTimeout = (oldEntryValue != null
+			  ? oldEntryValue.getExpireTimeout()
+			  : 0);
+    long idleTimeout = (oldEntryValue != null
+			? oldEntryValue.getIdleTimeout()
+			: 0);
     long leaseTimeout = (oldEntryValue != null
-      ? oldEntryValue.getLeaseTimeout()
-      : 0);
+			 ? oldEntryValue.getLeaseTimeout()
+			 : 0);
     long localReadTimeout = (oldEntryValue != null
-      ? oldEntryValue.getLocalReadTimeout()
-      : 0);
+			     ? oldEntryValue.getLocalReadTimeout()
+			     : 0);
 
     long accessTime = Alarm.getCurrentTime();
     long updateTime = accessTime;
 
     long localExpireTime = accessTime + 100L;
-    CacheEntryValue entryValue = new CacheEntryValue(null, null,
+    MnodeValue mnodeValue = new MnodeValue(null, null,
       flags, version,
       expireTimeout,
       idleTimeout,
@@ -350,8 +355,8 @@ public class FileCacheManager extends DistributedCacheManager {
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
 
-    if (!entry.compareAndSet(oldEntryValue, entryValue)) {
-      log.fine(this + " entryValue remove failed due to timing conflict"
+    if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
+      log.fine(this + " mnodeValue remove failed due to timing conflict"
         + " (key=" + key + ")");
 
       return oldValueHash != null;
@@ -362,7 +367,7 @@ public class FileCacheManager extends DistributedCacheManager {
         + "(key=" + key + ")");
     } else {
       long timeout = 60000;
-      if (_cacheMapBacking.updateSave(key, null, timeout, version)) {
+      if (_mnodeStore.updateSave(key, null, timeout, version)) {
       } else {
         log.fine(this + " db remove failed due to timing conflict"
           + "(key=" + key + ")");
@@ -376,7 +381,7 @@ public class FileCacheManager extends DistributedCacheManager {
   {
     FileCacheEntry entryKey = getCacheEntry(key);
 
-    CacheEntryValue valueEntryValue = entryKey.getEntryValue();
+    MnodeValue valueEntryValue = entryKey.getMnodeValue();
 
     if (valueEntryValue != null) {
       long idleTimeout = valueEntryValue.getIdleTimeout();
@@ -387,8 +392,8 @@ public class FileCacheManager extends DistributedCacheManager {
       if (idleTimeout < CacheConfig.TIME_INFINITY
         && updateTime + valueEntryValue.getIdleWindow() < now) {
         /* TODO(fred): discuss with Scott.
-         CacheEntryValue newEntry
-           = new CacheEntryValue(valueEntryValue, idleTimeout, now);
+         MnodeValue newEntry
+           = new MnodeValue(valueEntryValue, idleTimeout, now);
 
          saveUpdateTime(entryKey, newEntry);
          */
@@ -407,7 +412,7 @@ public class FileCacheManager extends DistributedCacheManager {
     try {
       os = new TempOutputStream();
 
-      MessageDigestOutputStream mOut = new MessageDigestOutputStream(os);
+      Sha256OutputStream mOut = new Sha256OutputStream(os);
       DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
 
       serializer.serialize(value, gzOut);
@@ -425,7 +430,7 @@ public class FileCacheManager extends DistributedCacheManager {
       int length = os.getLength();
 
       StreamSource source = new StreamSource(os);
-      if (!_dataBacking.save(valueHash, source, length))
+      if (! _dataStore.save(valueHash, source, length))
         throw new RuntimeException(L.l("Can't save the data '{0}'",
           valueHash));
 
@@ -447,7 +452,7 @@ public class FileCacheManager extends DistributedCacheManager {
 
       WriteStream out = Vfs.openWrite(os);
 
-      if (!_dataBacking.load(valueKey, out)) {
+      if (! _dataStore.load(valueKey, out)) {
         out.close();
         // XXX: error?  since we have the value key, it should exist
         return null;

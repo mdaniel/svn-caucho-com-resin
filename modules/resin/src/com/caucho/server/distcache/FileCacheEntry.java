@@ -30,8 +30,8 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
-import com.caucho.cluster.AbstractCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.util.HashKey;
 
 import javax.cache.CacheLoader;
 import java.io.InputStream;
@@ -41,29 +41,29 @@ import java.io.IOException;
 /**
  * An entry in the cache map
  */
-public class FileCacheEntry extends AbstractCacheEntry {
+public class FileCacheEntry extends DistCacheEntry {
   private final FileCacheManager _manager;
 
   public FileCacheEntry(Object key,
-			   HashKey keyHash,
-			   ClusterTriad.Owner owner,
-			   FileCacheManager manager)
+			HashKey keyHash,
+			ClusterTriad.Owner owner,
+			FileCacheManager manager)
   {
     super(key, keyHash, owner);
 
     _manager = manager;
   }
 
-//  public FileCacheEntry(Object key,
-//			   HashKey keyHash,
-//			   ClusterTriad.Owner owner,
-//			   FileCacheManager manager,
-//                           CacheConfig config)
-//  {
-//    super(key, keyHash, owner, config);
-//
-//    _manager = manager;
-//  }
+  public FileCacheEntry(Object key,
+			   HashKey keyHash,
+			   ClusterTriad.Owner owner,
+			   FileCacheManager manager,
+                           CacheConfig config)
+  {
+    super(key, keyHash, owner, config);
+
+    _manager = manager;
+  }
 
   /**
    * Peeks the current value
@@ -80,10 +80,7 @@ public class FileCacheEntry extends AbstractCacheEntry {
   //@Override
   public Object get(CacheConfig config)
   {                
-    Object value =  _manager.get(this, config);
-    if (value != null) return value;
-    CacheLoader cacheLoader = config.getCacheLoader();
-    return (cacheLoader == null) ? null : cacheLoader.load(getKey());
+    return _manager.get(this, config);
   }
 
   /**
@@ -101,7 +98,7 @@ public class FileCacheEntry extends AbstractCacheEntry {
    */
   /*
   @Override
-  public IntCacheEntry<Object> getEntryValue()
+  public IntCacheEntry<Object> getMnodeValue()
   {
     return null;
   }

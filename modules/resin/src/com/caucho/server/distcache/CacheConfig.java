@@ -50,8 +50,7 @@ public class CacheConfig
 
   private String _guid;
 
-  private int _flags = (FLAG_BACKUP
-    | FLAG_TRIPLICATE);
+  private int _flags = (FLAG_BACKUP | FLAG_TRIPLICATE);
 
   private long _expireTimeout = TIME_INFINITY;
 
