@@ -249,13 +249,14 @@ public class FileCacheManager extends DistributedCacheManager {
     long updateTime = Alarm.getExactTime();
 
     MnodeValue mnodeValue = new MnodeValue(valueHash, value,
-      flags, version,
-      expireTimeout,
-      idleTimeout,
-      leaseTimeout,
-      localReadTimeout,
-      accessTime, updateTime,
-      true);
+					   flags, version,
+					   expireTimeout,
+					   idleTimeout,
+					   leaseTimeout,
+					   localReadTimeout,
+					   accessTime, updateTime,
+					   true,
+					   false);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
@@ -343,14 +344,15 @@ public class FileCacheManager extends DistributedCacheManager {
 
     long localExpireTime = accessTime + 100L;
     MnodeValue mnodeValue = new MnodeValue(null, null,
-      flags, version,
-      expireTimeout,
-      idleTimeout,
-      leaseTimeout,
-      localReadTimeout,
-      accessTime,
-      updateTime,
-      true);
+					   flags, version,
+					   expireTimeout,
+					   idleTimeout,
+					   leaseTimeout,
+					   localReadTimeout,
+					   accessTime,
+					   updateTime,
+					   true,
+					   false);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
