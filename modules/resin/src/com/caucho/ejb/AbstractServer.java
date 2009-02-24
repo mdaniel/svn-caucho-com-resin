@@ -144,6 +144,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   private boolean _isContainerTransaction = true;
 
   private final Lifecycle _lifecycle = new Lifecycle();;
+  private Class _beanImplClass;
+  private Method _cauchoPostConstruct;
 
   /**
    * Creates a new server container
@@ -309,6 +311,18 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void setContextImplClass(Class cl)
   {
     _contextImplClass = cl;
+  }
+
+  public void setBeanImplClass(Class cl)
+  {
+    _beanImplClass = cl;
+
+    try {
+      _cauchoPostConstruct = cl.getDeclaredMethod("__caucho_postConstruct");
+      _cauchoPostConstruct.setAccessible(true);
+    }
+    catch (NoSuchMethodException e) {
+    }
   }
 
   /**
@@ -851,17 +865,13 @@ abstract public class AbstractServer implements EnvironmentBean {
       }
     }
 
-    // XXX: needs to be preinitialized for performance
-    Method postConstruct = null;
     try {
-      postConstruct = instance.getClass()
-        .getDeclaredMethod("__caucho_postConstruct");
-      postConstruct.setAccessible(true);
-      postConstruct.invoke(instance, null);
+      if (_cauchoPostConstruct != null)
+      _cauchoPostConstruct.invoke(instance, null);
     }
     catch (Throwable e) {
       log.log(Level.FINER,
-              L.l("Error invoking method {0}", postConstruct),
+              L.l("Error invoking method {0}", _cauchoPostConstruct),
               e);
     }
   }

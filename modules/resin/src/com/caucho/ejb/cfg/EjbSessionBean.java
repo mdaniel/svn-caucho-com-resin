@@ -406,6 +406,16 @@ public class EjbSessionBean extends EjbBean {
 
     Class beanClass = javaGen.loadClass(getEJBClass().getName());
 
+    Class[] classes = contextImplClass.getDeclaredClasses();
+    
+    for (Class aClass : classes) {
+      if (getEJBClass().isAssignableFrom(aClass)) {
+        server.setBeanImplClass(aClass);
+
+        break;
+      }
+    }
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
