@@ -339,9 +339,9 @@ public class ClusterServerAdmin extends AbstractManagedObject
     
     ClusterPort port = clusterServer.getClusterPort();
     
-    clusterServer.getClusterTriad().removeDynamicServer(clusterServer.getId(),
-							port.getAddress(),
-							port.getPort());
+    clusterServer.getClusterPod().removeDynamicServer(clusterServer.getId(),
+						      port.getAddress(),
+						      port.getPort());
   }
 
   protected void register()

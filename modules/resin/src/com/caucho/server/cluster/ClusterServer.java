@@ -61,7 +61,7 @@ public final class ClusterServer {
   private static final int DECODE[];
 
   private final Cluster _cluster;
-  private final ClusterTriad _triad;
+  private final ClusterPod _pod;
   private final int _index;
   
   private String _id = "";
@@ -105,10 +105,10 @@ public final class ClusterServer {
   
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
-  public ClusterServer(ClusterTriad triad, int index)
+  public ClusterServer(ClusterPod pod, int index)
   {
-    _triad = triad;
-    _cluster = triad.getCluster();
+    _pod = pod;
+    _cluster = pod.getCluster();
     _index = index;
 
     _clusterPort = new ClusterPort(this);
@@ -117,8 +117,8 @@ public final class ClusterServer {
     StringBuilder sb = new StringBuilder();
 
     sb.append(convert(getIndex()));
-    sb.append(convert(getClusterTriad().getIndex()));
-    sb.append(convert(getClusterTriad().getIndex() / 64));
+    sb.append(convert(getClusterPod().getIndex()));
+    sb.append(convert(getClusterPod().getIndex() / 64));
 
     _serverClusterId = sb.toString();
       
@@ -196,11 +196,11 @@ public final class ClusterServer {
   }
 
   /**
-   * Returns the owning triad
+   * Returns the owning pod
    */
-  public ClusterTriad getClusterTriad()
+  public ClusterPod getClusterPod()
   {
-    return _triad;
+    return _pod;
   }
 
   /**
@@ -208,17 +208,17 @@ public final class ClusterServer {
    */
   public boolean isTriad()
   {
-    ClusterTriad triad = getClusterTriad();
+    ClusterPod pod = getClusterPod();
 
-    return triad.isTriad(this);
+    return pod.isTriad(this);
   }
 
   /**
-   * Returns the triad owner
+   * Returns the pod owner
    */
-  public ClusterTriad.Owner getTriadOwner()
+  public ClusterPod.Owner getTriadOwner()
   {
-    return getClusterTriad().getOwner(getIndex());
+    return getClusterPod().getOwner(getIndex());
   }
 
   /**
@@ -232,7 +232,7 @@ public final class ClusterServer {
   */
 
   /**
-   * Returns the server index within the triad.
+   * Returns the server index within the pod.
    */
   public int getIndex()
   {

@@ -37,36 +37,36 @@ import java.util.Collections;
 import java.util.logging.Logger;
 
 /**
- * The ClusterTriad is a reliable triplicate for clustered data.
+ * The ClusterPod is a reliable triplicate for clustered data.
  * 
- * For small clusters, the triad may only have 1 or 2 servers, so
+ * For small clusters, the pod may only have 1 or 2 servers, so
  * server B and server C may return null.
  */
-public class SingleClusterTriad extends ClusterTriad
+public class SingleClusterPod extends ClusterPod
 {
-  private static final L10N L = new L10N(SingleClusterTriad.class);
+  private static final L10N L = new L10N(SingleClusterPod.class);
   private static final Logger log
-    = Logger.getLogger(SingleClusterTriad.class.getName());
+    = Logger.getLogger(SingleClusterPod.class.getName());
 
   private ClusterServer _serverA;
 
   private ClusterServer []_serverList = new ClusterServer[0];
 
   /**
-   * Creates a new triad for the cluster.
+   * Creates a new pod for the cluster.
    * 
    * @param cluster the owning cluster
-   * @param serverA the triad's first server
-   * @param serverB the triad's second server
-   * @param serverC the triad's third server
+   * @param serverA the pod's first server
+   * @param serverB the pod's second server
+   * @param serverC the pod's third server
    */
-  SingleClusterTriad(Cluster cluster)
+  SingleClusterPod(Cluster cluster)
   {
     super(cluster, 0);
   }
 
   /**
-   * Return the servers in the triad
+   * Return the servers in the pod
    */
   public ClusterServer []getServerList()
   {
@@ -74,7 +74,7 @@ public class SingleClusterTriad extends ClusterTriad
   }
   
   /**
-   * Returns the triad's first server
+   * Returns the pod's first server
    * 
    * @return the first server.
    */
@@ -84,7 +84,7 @@ public class SingleClusterTriad extends ClusterTriad
   }
   
   /**
-   * Returns the triad's second server
+   * Returns the pod's second server
    * 
    * @return the second server.
    */
@@ -94,7 +94,7 @@ public class SingleClusterTriad extends ClusterTriad
   }
   
   /**
-   * Returns the triad's third server
+   * Returns the pod's third server
    * 
    * @return the third server.
    */
@@ -104,7 +104,7 @@ public class SingleClusterTriad extends ClusterTriad
   }
 
   /**
-   * Returns the OwnerServerTriad for the given owner.
+   * Returns the OwnerServerPod for the given owner.
    */
   @Override
   public OwnerServerTriad getOwnerServerTriad(Owner owner)

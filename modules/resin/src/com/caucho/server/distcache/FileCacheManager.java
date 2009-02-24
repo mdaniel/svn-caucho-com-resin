@@ -33,7 +33,7 @@ import com.caucho.cluster.CacheSerializer;
 import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
-import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -98,7 +98,7 @@ public class FileCacheManager extends DistributedCacheManager {
     FileCacheEntry cacheEntry = _entryCache.get(hashKey);
 
     while (cacheEntry == null) {
-      ClusterTriad.Owner owner = ClusterTriad.Owner.A_B;
+      ClusterPod.Owner owner = ClusterPod.Owner.A_B;
 
       cacheEntry = new FileCacheEntry(key, hashKey, owner, this);
 
@@ -116,7 +116,7 @@ public class FileCacheManager extends DistributedCacheManager {
     FileCacheEntry cacheEntry = _entryCache.get(hashKey);
 
     while (cacheEntry == null) {
-      ClusterTriad.Owner owner = ClusterTriad.Owner.A_B;
+      ClusterPod.Owner owner = ClusterPod.Owner.A_B;
 
       cacheEntry = new FileCacheEntry(null, hashKey, owner, this);
 

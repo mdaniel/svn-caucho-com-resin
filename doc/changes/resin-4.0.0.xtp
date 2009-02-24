@@ -1,0 +1,27 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.2.0 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 4.0.x">
+
+<p>Resin 4.0.x is now the development branch.  Due to the addition of
+new features, it may be more unstable than the production branch.</p>
+
+<p>The 3.1.x branch is the stable branch.</p>
+
+</s1>
+
+<s1 title="win32 openssl">
+
+<p>The win32 openssl version is 0.9.8g</p>
+
+</s1>
+
+</body>
+</document>

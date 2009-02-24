@@ -224,14 +224,14 @@ public class Server extends ProtocolDispatchServer
 
     _id = cluster.getId() + ":" + clusterServer.getId();
 
-    // triad id can't include the server since it's used as part of
+    // pod id can't include the server since it's used as part of
     // cache ids
-    String triadId
-      = (cluster.getId() + ":" + _selfServer.getClusterTriad().getId());
+    String podId
+      = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
     _classLoader = (EnvironmentClassLoader) cluster.getClassLoader();
 
-    _classLoader.setId("server:" + triadId);
+    _classLoader.setId("server:" + podId);
 
     _serverLocal.set(this, _classLoader);
     
@@ -448,11 +448,11 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Returns the self server's triad
+   * Returns the self server's pod
    */
-  public ClusterTriad getTriad()
+  public ClusterPod getPod()
   {
-    return _selfServer.getClusterTriad();
+    return _selfServer.getClusterPod();
   }
 
   /**

@@ -1044,9 +1044,9 @@ public final class SessionManager implements AlarmListener
     else if (owner instanceof Number) {
       index = ((Number) owner).intValue();
 
-      int triadIndex = _selfServer.getClusterTriad().getIndex();
+      int podIndex = _selfServer.getClusterPod().getIndex();
       
-      server = _selfServer.getCluster().findServer(triadIndex, index);
+      server = _selfServer.getCluster().findServer(podIndex, index);
 
       if (server == null)
 	server = _selfServer;

@@ -41,15 +41,15 @@ public class Machine {
     = Logger.getLogger(Machine.class.getName());
   private static final L10N L = new L10N(Machine.class);
 
-  private ClusterTriad _triad;
+  private ClusterPod _pod;
   private String _id = "";
 
   private ArrayList<ClusterServer> _serverList
     = new ArrayList<ClusterServer>();
 
-  public Machine(ClusterTriad triad)
+  public Machine(ClusterPod pod)
   {
-    _triad = triad;
+    _pod = pod;
   }
 
   /**
@@ -71,9 +71,9 @@ public class Machine {
   /**
    * Returns the cluster.
    */
-  public ClusterTriad getClusterTriad()
+  public ClusterPod getClusterPod()
   {
-    return _triad;
+    return _pod;
   }
 
   /**
@@ -81,7 +81,7 @@ public class Machine {
    */
   public ClusterServer createServer()
   {
-    ClusterServer server = _triad.createServer();
+    ClusterServer server = _pod.createServer();
 
     server.setMachine(this);
 
@@ -109,7 +109,7 @@ public class Machine {
    */
   public void addServer(ClusterServer server)
   {
-    _triad.addServer(server);
+    _pod.addServer(server);
   }
 
   /**

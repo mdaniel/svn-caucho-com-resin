@@ -47,15 +47,15 @@ public class SingleCluster extends Cluster
   private static final Logger log
     = Logger.getLogger(SingleCluster.class.getName());
 
-  private SingleClusterTriad _triad;
-  private ClusterTriad [] _triadList;
+  private SingleClusterPod _pod;
+  private ClusterPod [] _podList;
 
   public SingleCluster(Resin resin)
   {
     super(resin);
 
-    _triad = new SingleClusterTriad(this);
-    _triadList = new ClusterTriad[] { _triad };
+    _pod = new SingleClusterPod(this);
+    _podList = new ClusterPod[] { _pod };
   }
 
   public SingleCluster()
@@ -64,12 +64,12 @@ public class SingleCluster extends Cluster
   }
 
   /**
-   * Returns the triad as a list
+   * Returns the pod as a list
    */
   @Override
-  public ClusterTriad []getTriadList()
+  public ClusterPod []getPodList()
   {
-    return _triadList;
+    return _podList;
   }
 
   //
@@ -84,7 +84,7 @@ public class SingleCluster extends Cluster
     if (isActive())
       throw new IllegalStateException(L.l("{0}: can't create static server after initialization", this));
 
-    return _triad.createServer();
+    return _pod.createServer();
   }
 
   @Override

@@ -32,7 +32,7 @@ package com.caucho.server.hmux;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPort;
 import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.WebApp;
@@ -370,10 +370,10 @@ public class HmuxDispatchRequest {
 
     crc64 = Crc64.generate(crc64, cluster.getId());
 
-    ClusterTriad []triads = cluster.getTriadList();
+    ClusterPod []pods = cluster.getPodList();
     
-    ClusterServer []servers = (triads.length > 0
-			       ? triads[0].getServerList()
+    ClusterServer []servers = (pods.length > 0
+			       ? pods[0].getServerList()
 			       : null);
     
     if (servers != null && servers.length > 0) {

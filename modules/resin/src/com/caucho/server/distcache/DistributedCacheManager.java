@@ -31,7 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.HashKey;
 
@@ -72,11 +72,11 @@ abstract public class DistributedCacheManager
   }
 
   /**
-   * Returns the owning triad.
+   * Returns the owning pod.
    */
-  protected ClusterTriad getTriad()
+  protected ClusterPod getPod()
   {
-    return _server.getTriad();
+    return _server.getPod();
   }
 
   /**

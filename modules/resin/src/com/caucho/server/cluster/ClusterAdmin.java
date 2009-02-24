@@ -89,8 +89,8 @@ public class ClusterAdmin extends AbstractManagedObject
     ArrayList<ClusterServerMXBean> serverMBeansList
       = new ArrayList<ClusterServerMXBean>();
 
-    for (ClusterTriad triad : _cluster.getTriadList()) {
-      for (ClusterServer server : triad.getServerList()) {
+    for (ClusterPod pod : _cluster.getPodList()) {
+      for (ClusterServer server : pod.getServerList()) {
 	if (server != null)
 	  serverMBeansList.add(server.getAdmin());
       }

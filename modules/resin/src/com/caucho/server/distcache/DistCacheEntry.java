@@ -30,7 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
-import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.distcache.MnodeValue;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.util.HashKey;
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 abstract public class DistCacheEntry implements ExtCacheEntry {
   private final HashKey _keyHash;
 
-  private final ClusterTriad.Owner _owner;
+  private final ClusterPod.Owner _owner;
 
   private CacheConfig _cacheConfig;
 
@@ -64,7 +64,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
 
   public DistCacheEntry(Object key,
 		    HashKey keyHash,
-		    ClusterTriad.Owner owner)
+		    ClusterPod.Owner owner)
   {
     _key = key;
     _keyHash = keyHash;
@@ -73,7 +73,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
 
   public DistCacheEntry(Object key,
 		    HashKey keyHash,
-		    ClusterTriad.Owner owner,
+		    ClusterPod.Owner owner,
 		    CacheConfig config)
   {
     _key = key;
@@ -117,7 +117,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the owner
    */
-  public final ClusterTriad.Owner getOwner()
+  public final ClusterPod.Owner getOwner()
   {
     return _owner;
   }

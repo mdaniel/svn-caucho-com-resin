@@ -208,17 +208,17 @@ abstract public class Cluster
   }
 
   /**
-   * Returns the list of triads for the cluster
+   * Returns the list of pods for the cluster
    */
-  abstract public ClusterTriad []getTriadList();
+  abstract public ClusterPod []getPodList();
 
   /**
    * Finds the first server with the given server-id.
    */
   public ClusterServer findServer(String id)
   {
-    for (ClusterTriad triad : getTriadList()) {
-      ClusterServer server = triad.findServer(id);
+    for (ClusterPod pod : getPodList()) {
+      ClusterServer server = pod.findServer(id);
 
       if (server != null)
         return server;
@@ -230,12 +230,12 @@ abstract public class Cluster
   /**
    * Finds the first server with the given server-id.
    */
-  public ClusterServer findServer(int triadIndex,
+  public ClusterServer findServer(int podIndex,
 				  int index)
   {
-    for (ClusterTriad triad : getTriadList()) {
-      if (triad.getIndex() == triadIndex) {
-	for (ClusterServer server : triad.getServerList()) {
+    for (ClusterPod pod : getPodList()) {
+      if (pod.getIndex() == podIndex) {
+	for (ClusterServer server : pod.getServerList()) {
 	  if (server.getIndex() == index)
 	    return server;
 	}
@@ -250,11 +250,11 @@ abstract public class Cluster
   /**
    * Finds the first server with the given server-id.
    */
-  public ClusterTriad findTriad(int triadIndex)
+  public ClusterPod findPod(int podIndex)
   {
-    for (ClusterTriad triad : getTriadList()) {
-      if (triad.getIndex() == triadIndex) {
-	return triad;
+    for (ClusterPod pod : getPodList()) {
+      if (pod.getIndex() == podIndex) {
+	return pod;
       }
     }
 
@@ -266,8 +266,8 @@ abstract public class Cluster
    */
   public ClusterServer findServerByPrefix(String prefix)
   {
-    for (ClusterTriad triad : getTriadList()) {
-      ClusterServer server = triad.findServerByPrefix(prefix);
+    for (ClusterPod pod : getPodList()) {
+      ClusterServer server = pod.findServerByPrefix(prefix);
 
       if (server != null)
         return server;
@@ -281,8 +281,8 @@ abstract public class Cluster
    */
   public ClusterServer findServer(String address, int port)
   {
-    for (ClusterTriad triad : getTriadList()) {
-      ClusterServer server = triad.findServer(address, port);
+    for (ClusterPod pod : getPodList()) {
+      ClusterServer server = pod.findServer(address, port);
 
       if (server != null)
         return server;
@@ -300,11 +300,11 @@ abstract public class Cluster
   }
 
   /**
-   * Adds a new triad to the cluster
+   * Adds a new pod to the cluster
    */
-  public ClusterTriad createTriad()
+  public ClusterPod createPod()
   {
-    throw new UnsupportedOperationException(L.l("<triad> requires Resin Professional"));
+    throw new UnsupportedOperationException(L.l("<pod> requires Resin Professional"));
   }
 
   /**
@@ -459,14 +459,14 @@ abstract public class Cluster
   */
   
   /**
-   * Returns the owning triad for a cluster server.
+   * Returns the owning pod for a cluster server.
    * 
-   * @return the corresponding triad
+   * @return the corresponding pod
    */
   /*
-  public ClusterTriad getTriad(ClusterServer server)
+  public ClusterPod getPod(ClusterServer server)
   {
-    return _triad;
+    return _pod;
   }
   */
 
@@ -533,8 +533,8 @@ abstract public class Cluster
     _admin = new ClusterAdmin(this);
     _admin.register();
 
-    for (ClusterTriad triad : getTriadList()) {
-      triad.init();
+    for (ClusterPod pod : getPodList()) {
+      pod.init();
     }
   }
 
@@ -546,8 +546,8 @@ abstract public class Cluster
   {
     _lifecycle.toActive();
 
-    for (ClusterTriad triad : getTriadList()) {
-      triad.start();
+    for (ClusterPod pod : getPodList()) {
+      pod.start();
     }
   }
 
@@ -969,10 +969,10 @@ abstract public class Cluster
     if (! _lifecycle.toDestroy())
       return;
 
-    for (ClusterTriad triad : getTriadList()) {
+    for (ClusterPod pod : getPodList()) {
       try {
-        if (triad != null)
-          triad.close();
+        if (pod != null)
+          pod.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }

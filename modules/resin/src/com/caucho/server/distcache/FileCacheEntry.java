@@ -30,7 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
-import com.caucho.server.cluster.ClusterTriad;
+import com.caucho.server.cluster.ClusterPod;
 import com.caucho.util.HashKey;
 
 import javax.cache.CacheLoader;
@@ -46,7 +46,7 @@ public class FileCacheEntry extends DistCacheEntry {
 
   public FileCacheEntry(Object key,
 			HashKey keyHash,
-			ClusterTriad.Owner owner,
+			ClusterPod.Owner owner,
 			FileCacheManager manager)
   {
     super(key, keyHash, owner);
@@ -56,7 +56,7 @@ public class FileCacheEntry extends DistCacheEntry {
 
   public FileCacheEntry(Object key,
 			   HashKey keyHash,
-			   ClusterTriad.Owner owner,
+			   ClusterPod.Owner owner,
 			   FileCacheManager manager,
                            CacheConfig config)
   {

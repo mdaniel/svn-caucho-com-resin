@@ -13,7 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
-<li>jms: btree split off-by-one issue (#3287, rep by tyson weihs)</li>
+<li>quercus: $f($v) with foo(&$v) declaration (#3351, rep by koreth)</li>
+<li>(2009-02-23) jms: btree split off-by-one issue (#3287, rep by tyson weihs)</li>
 <li>jms: file missing primary declaration (#3287, rep by tyson weihs)</li>
 <li>hessian: Annotation support</li>
 <li>hessian: AbstractSerializer changes to improve usability</li>

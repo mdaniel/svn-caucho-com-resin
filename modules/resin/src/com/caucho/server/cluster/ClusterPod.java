@@ -37,16 +37,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The ClusterTriad is a reliable triplicate for clustered data.
+ * The ClusterPod is a reliable triplicate for clustered data.
  * 
  * For small clusters, the triad may only have 1 or 2 servers, so
  * server B and server C may return null.
  */
-abstract public class ClusterTriad
+abstract public class ClusterPod
 {
-  private static final L10N L = new L10N(ClusterTriad.class);
+  private static final L10N L = new L10N(ClusterPod.class);
   private static final Logger log
-    = Logger.getLogger(ClusterTriad.class.getName());
+    = Logger.getLogger(ClusterPod.class.getName());
 
   public final static Owner []OWNER_VALUES = Owner.class.getEnumConstants();
   
@@ -62,8 +62,8 @@ abstract public class ClusterTriad
    * @param cluster the owning cluster
    * @param index the triad index
    */
-  protected ClusterTriad(Cluster cluster,
-			 int index)
+  protected ClusterPod(Cluster cluster,
+		       int index)
   {
     _cluster = cluster;
     _index = index;
