@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -118,14 +118,9 @@ package hessian.io
      */
     public override function startCall(method:String, length:int):void
     {
-      if (SIZE < _buffer.position + 32)
-        flush();
+      flushIfFull();
 
-      var buffer:ByteArray = _buffer;
-
-      buffer.writeByte('C'.charCodeAt());
-      writeString(method);
-      writeInt(length);
+      _buffer.writeByte('C'.charCodeAt());
     }
 
     /**
@@ -182,7 +177,7 @@ package hessian.io
 
         var array:Array = object as Array;
 
-        var hasEnd:Boolean = writeListBegin(array.length, className);
+        var hasEnd:Boolean = writeListBegin(array.length);
 
         for (var i:int = 0; i < array.length; i++)
           writeObject(array[i]);
@@ -201,15 +196,26 @@ package hessian.io
         return;
       }
 
-      /* XXX: Figure out how to get a real associative array in AS that 
-         associates objects by their value rather than their toString value
       if (addRef(object))
-        return;*/
+        return;
 
       // writeReplace not supported at this time
       // to save processing time
 
       var type:XML = describeType(object);
+
+      if (type.@name == "Object") {
+        _buffer.writeByte(Hessian2Constants.BC_MAP_UNTYPED);
+
+        for (var key:String in object) {
+          writeString(key);
+          writeObject(object[key]);
+        }
+
+        _buffer.writeByte(Hessian2Constants.BC_END);
+
+        return;
+      }
 
       if (type.@alias != null && type.@alias.length() != 0)
         className = type.@alias;
@@ -331,6 +337,7 @@ package hessian.io
      * Writes the list header to the stream.  List writers will call
      * <code>writeListBegin</code> followed by the list contents and then
      * call <code>writeListEnd</code>.
+
      *
      * <p>
      *   <code><pre>
@@ -345,9 +352,12 @@ package hessian.io
      * </p>
      * 
      * @param length The length of the list.
-     * @param type The type of the elements in the list.
+     * @param type The type of the list.
      *
      * @return If this list will have an end.
+     *
+     * There's only one kind of list in AS3, so type won't be used.  Left
+     * in case of future use.
      */
     public override function writeListBegin(length:int, 
                                             type:String = null):Boolean

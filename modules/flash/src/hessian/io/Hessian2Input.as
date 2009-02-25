@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -48,7 +48,6 @@
 
 package hessian.io
 {
-	import flash.errors.EOFError;
 	import flash.errors.IllegalOperationError;
 	import flash.errors.IOError;
   import flash.net.getClassByAlias;
@@ -1637,7 +1636,7 @@ package hessian.io
           {
             length = tag - 0x78;
 
-            return readList(length, type);
+            return readLengthList(length, type);
           }
 
         case 'H'.charCodeAt(): 
@@ -2193,12 +2192,12 @@ package hessian.io
     /**
      * Reads a byte from the stream.
      *
-     * @return The byte read as a uint.
+     * @return The byte read as a int.
      */
-    public final function read():uint
+    public final function read():int
     {
       if (_length <= _offset && ! readBuffer())
-        throw new EOFError();
+        return -1;
 
       return _buffer[_offset++] & 0xff;
     }
