@@ -48,7 +48,7 @@ public class StringBuilderValue
   
   protected byte []_buffer;
   protected int _length;
-  private boolean _isCopy;
+  protected boolean _isCopy;
  
   private int _hashCode;
   
