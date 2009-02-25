@@ -2,8 +2,6 @@
 #
 # See contrib/init.resin for /etc/rc.d/init.d startup script
 #
-# resin.sh can be called like apachectl
-#
 # resin.sh         -- execs resin in the foreground
 # resin.sh start   -- starts resin in the background
 # resin.sh stop    -- stops resin
@@ -20,6 +18,10 @@ if test -n "${JAVA_HOME}"; then
   if test -z "${JAVA_EXE}"; then
     JAVA_EXE=$JAVA_HOME/bin/java
   fi
+fi
+
+if test -x "${JAVA_EXE}"; then
+  JAVA_EXE=java
 fi  
 
 #

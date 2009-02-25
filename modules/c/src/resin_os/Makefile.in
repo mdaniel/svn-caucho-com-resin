@@ -38,7 +38,7 @@ clean	:
 
 install	: libresin_os.$(SO)
 #	cp resin $(resin_home)/bin
-	- mkdir $(resin_home)/$(LIBEXEC)
+	- mkdir -p $(resin_home)/$(LIBEXEC)
 	cp libresin_os.$(SO) $(resin_home)/$(LIBEXEC)
 
 

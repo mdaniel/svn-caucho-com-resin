@@ -13,13 +13,7 @@ OBJ=stream.o config.o memory.o
 OBJ_PICS=stream.lo config.lo memory.lo
 INCLUDES=@INCLUDES@
 
-all	: common.o $(OBJ_PICS)
-
-common.o	: $(OBJ)
-	$(CC) $(LDFLAGS) -r -o $@ $(OBJ)
-
-common.lo	: $(OBJ_PICS)
-	$(CC) $(LDFLAGS) -r -o $@ $(OBJ_PICS)
+all	: $(OBJ) $(OBJ_PICS)
 
 .c.lo	:
 	$(LIBTOOL) --mode=compile $(CC) -o $@ -c $(INCLUDES) $(CFLAGS) $<

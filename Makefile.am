@@ -1,4 +1,7 @@
-PREFIX=@prefix@
+resin_home=@resin_home@
+resin_conf=@resin_conf@
+resin_root=@resin_root@
+resin_init_d=@resin_root@
 LIBEXEC=@LIBEXEC@
 
 all	: 
@@ -9,22 +12,25 @@ clean	:
 	- rm -r $(LIBEXEC)
 
 install	:
+	if test $(resin_home) != `pwd`; then \
+	  mkdir -p $(resin_home)/lib; \
+	  mkdir -p $(resin_home)/$(LIBEXEC); \
+	  cp lib/*.jar $(resin_home)/lib; \
+	  mkdir -p $(resin_home)/bin; \
+	  cp -u bin/* $(resin_home)/bin; \
+	fi; \
+	if test $(resin_root) != `pwd`; then \
+	  mkdir -p $(resin_root)/webapps; \
+	  cp -ru webapps/* $(resin_root)/webapps; \
+	  mkdir -p $(resin_root)/doc; \
+	  cp -ru doc/* $(resin_root)/doc; \
+	fi; \
+	if test $(resin_conf) != `pwd`/conf; then \
+	  mkdir -p $(resin_conf); \
+	  cp -u conf/app-default.xml $(resin_conf)/app-default.xml; \
+	  cp -u conf/resin.xml $(resin_conf)/resin.xml; \
+	fi; \
+	if test -n "$resin_init_d"; then \
+	  cp -u init.d/resin $(resin_init_d); \
+	fi; \
 	(cd modules/c/src; $(MAKE) install)
-	if test $(PREFIX) != `pwd`; then \
-	  mkdir -p $(PREFIX)/lib; \
-	  mkdir -p $(PREFIX)/$(LIBEXEC); \
-	  cp -r $(LIBEXEC)/* $(PREFIX)/$(LIBEXEC); \
-	  cp lib/*.jar $(PREFIX)/lib; \
-	  mkdir -p $(PREFIX)/bin; \
-	  cp bin/* $(PREFIX)/bin; \
-	  mkdir -p $(PREFIX)/webapps; \
-	  cp -r webapps/* $(PREFIX)/webapps; \
-	  mkdir -p $(PREFIX)/doc; \
-	  cp -r doc/* $(PREFIX)/doc; \
-	  mkdir -p $(PREFIX)/conf; \
-	  cp conf/app-default.xml $(PREFIX)/conf/app-default.xml.orig; \
-	  if test ! -r $(PREFIX)/conf/resin.xml; then \
-	    cp conf/resin.xml $(PREFIX)/conf/resin.xml; \
-	    cp conf/app-default.xml $(PREFIX)/conf/app-default.xml; \
-	  fi; \
-	fi

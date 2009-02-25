@@ -1,14 +1,14 @@
 AC_INIT(modules/c/src/resin_os/boot.c)
-AC_PREFIX_DEFAULT(`pwd`)
+AC_PREFIX_DEFAULT(/usr/local/resin)
 AC_CONFIG_AUX_DIR(automake)	
+
+FULL_VERSION="Resin $VERSION -- `date`"
+AC_SUBST(FULL_VERSION)
 
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
 AM_INIT_AUTOMAKE(resin, 3.2.0)
-
-FULL_VERSION="Resin $VERSION -- `date`"
-AC_SUBST(FULL_VERSION)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -16,14 +16,119 @@ AC_PROG_LD
 AC_PROG_EGREP
 
 dnl Checks for poll.h
-AC_CHECK_HEADER(sys/poll.h, [ CFLAGS="$CFLAGS -DPOLL" ])
+AC_CHECK_HEADER(sys/poll.h, [ CFLAGS="$CFLAGS -DPOLL"; poll=1 ])
 dnl Checks for epoll.h
-AC_CHECK_HEADER(sys/epoll.h, [ CFLAGS="$CFLAGS -DEPOLL" ])
+AC_CHECK_HEADER(sys/epoll.h, [ CFLAGS="$CFLAGS -DEPOLL"; epoll=1 ])
 
-AC_PROG_LIBTOOL			    
+#
+# Resin home
+#
+
+if test "$prefix" == "NONE"; then
+  resin_home="$ac_default_prefix"
+else
+  resin_home="$prefix"
+fi  
+AC_SUBST(resin_home)
+
+#
+# --with-resin-root
+#
+
+echo "ROOT: ${resin_root}"
+echo "ROOT2: ${resin_home}"
+
+AC_ARG_WITH(resin-root,
+[  --with-resin-root=DIR  resin data directory
+], [
+resin_root=${withval}
+])
+
+if test -z "$resin_root"; then
+  resin_root="${resin_home}"
+fi
+
+echo "ROOT3: ${resin_root}"
+
+AC_SUBST(resin_root)
+
+#
+# --with-resin-conf
+#
+resin_conf="${resin_conf}"
+AC_SUBST(resin_conf)
+
+AC_ARG_WITH(resin-conf,
+[  --with-resin-conf=DIR  resin configuration directory
+], [
+resin_conf=${withval}
+])
+
+if test -z "$resin_conf"; then
+  resin_conf="${resin_root}/conf"
+fi
+
+if test -d "/etc/init.d/rc.d"; then
+  resin_init_d="/etc/init.d/rc.d/resin"
+elif test -d "/etc/init.d"; then
+  resin_init_d="/etc/init.d/resin"
+fi
+
+AC_SUBST(resin_init_d)
+
+#
+# --with-java-home
+#
+AC_ARG_WITH(java-home,
+[  --with-java-home=DIR  java home
+], [
+JAVA_HOME=${withval}
+])
+
+if test -z "$JAVA_HOME"; then
+  java=`which java 2>/dev/null`
+  if test $? = "0"; then
+    while test -h "$java"
+    do
+      head=`dirname $java`
+      tail=`/bin/ls -l $java | awk '{ print $NF; }'`
+      if test -f "$tail"; then
+        java=$tail
+      else
+        java=$head/$tail
+      fi
+    done
+
+    javabin=`dirname $java`
+    JAVA_HOME=`cd $javabin/..; pwd`
+
+    # we're in $JAVA_HOME/jre
+    if test -f "$JAVA_HOME/lib/rt.jar"; then
+      JAVA_HOME=`cd $JAVA_HOME/..; pwd`
+    elif test -d "/usr/java"; then
+      JAVA_HOME=/usr/java
+    elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
+      JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
+    fi
+  elif test -d "/usr/java"; then
+    JAVA_HOME=/usr/java
+  elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
+    JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
+  fi
+fi
+
+echo $ac_n "checking for JAVA_HOME... $JAVA_HOME"
+
+if test ! -d "$JAVA_HOME"; then
+  AC_MSG_ERROR([Can't find valid JAVA_HOME ${JAVA_HOME}])
+fi
+
+AC_SUBST(JAVA_HOME)
+
 #
 # libtool stuff
 #  
+AC_PROG_LIBTOOL			    
 if test -z "${LTFLAGS}"; then
   LTFLAGS="--silent"
 fi
@@ -428,6 +533,7 @@ AC_SUBST(apache_libexec)
 AC_SUBST(apache_conf)
 AC_SUBST(apache_dir)
 AC_SUBST(apache_cflags)
+
 #
 # fill in compilation stuff
 #
@@ -449,60 +555,6 @@ if test -z "${LD_SHLIB}"; then
     echo "Using shared library flags from ${apxs}"
   fi
 fi
-#
-# --with-java-home
-#
-AC_ARG_WITH(java-home,
-[  --with-java-home=DIR  java home
-], [
-JAVA_HOME=${withval}
-])
-
-if test -z "$JAVA_HOME"; then
-  java=`which java 2>/dev/null`
-  if test $? = "0"; then
-    while test -h "$java"
-    do
-      head=`dirname $java`
-      tail=`/bin/ls -l $java | awk '{ print $NF; }'`
-      if test -f "$tail"; then
-        java=$tail
-      else
-        java=$head/$tail
-      fi
-    done
-
-    javabin=`dirname $java`
-    JAVA_HOME=`cd $javabin/..; pwd`
-
-    # we're in $JAVA_HOME/jre
-    if test -f "$JAVA_HOME/lib/rt.jar"; then
-      JAVA_HOME=`cd $JAVA_HOME/..; pwd`
-    elif test -d "/usr/java"; then
-      JAVA_HOME=/usr/java
-    elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
-      JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
-    fi
-  elif test -d "/usr/java"; then
-    JAVA_HOME=/usr/java
-  elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
-    JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
-  fi
-fi
-
-echo $ac_n "checking for JAVA_HOME... $JAVA_HOME"
-
-if test ! -d "$JAVA_HOME"; then
-  AC_MSG_ERROR([Can't find valid JAVA_HOME ${JAVA_HOME}])
-fi
-
-AC_SUBST(JAVA_HOME)
-#
-# Resin home
-#
-resin_home=`pwd`
-AC_SUBST(resin_home)
-
 
 #
 # 64bit heuristics
@@ -1069,7 +1121,10 @@ elif test ! -r "${OPENSSL_INCLUDE}/openssl/ssl23.h"; then
 else
   echo "Using openssl include in ... ${OPENSSL_INCLUDE}"
   echo "Using openssl lib in ... ${OPENSSL_LIB}"
-  echo "Using openssl libraries in ... ${SSL_LIBS}"
+  echo "Using openssl libraries ... ${SSL_LIBS}"
+
+  cat <<END
+END
 
   if test -x "${apache_dir}/bin/httpd"; then
     apache_ssl=`${apache_dir}/bin/httpd -l 2>&1 | grep ssl`
@@ -1103,7 +1158,8 @@ fi
 
 #
 # test the open ssl
-#  		
+#
+
 if test -n "${OPENSSL_LIB}"; then	
 cat >conftest.$ac_ext <<_ACEOF
 #include <openssl/ssl.h>
@@ -1120,6 +1176,8 @@ int main(int argc, char **argv)
       ERR_print_errors_cb(0, 0);
 #endif
 
+  printf("%s\n", OPENSSL_VERSION_TEXT);
+
   return 0;
 }
 _ACEOF
@@ -1133,7 +1191,7 @@ if test "$?" != 0; then
   
   resin_ssl_plugin=""
 else
-  ./conftest
+  openssl_version=`./conftest`
 
   if test "$?" != 0; then
     AC_MSG_WARN(Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version.)
@@ -1182,6 +1240,7 @@ modules/c/src/Makefile
 modules/c/src/common/Makefile
 modules/c/src/apache2/Makefile
 modules/c/src/resin_os/Makefile
+init.d/resin
 ], [])
 
 if test -n "${resin_pro_plugin}"; then
@@ -1190,3 +1249,56 @@ if test -n "${resin_pro_plugin}"; then
     modules/c/src/resinssl/Makefile
   ])
 fi
+
+echo ""
+echo ""
+echo "Resin Configuration summary:"
+echo ""
+echo "  RESIN_HOME: ${resin_home}"
+echo "      root: ${resin_root}"
+echo "      conf: ${resin_conf}"
+
+if test -n "resin_init_d"; then
+  echo "      init: ${resin_init_d}"
+fi
+
+echo ""
+
+if test -n "$epoll"; then
+  echo "  + epoll() for keepalives"
+elif test -n "$poll"; then
+  echo "  + poll() for keepalives"
+else
+  echo "  + select() for keepalives"
+fi
+
+if test -n "$OPENSSL_INCLUDE"; then
+  echo "  + ${openssl_version}"
+  echo "      OpenSSL include: ${OPENSSL_INCLUDE}"
+  echo "      OpenSSL lib: ${OPENSSL_LIB}"
+  echo "      OpenSSL libraries: ${SSL_LIBS}"
+else
+  echo "  + not using OpenSSL"
+fi
+
+echo ""
+echo "  JAVA_HOME: ${JAVA_HOME}"
+
+if test -n "$b64_jni"; then
+  echo "    + 64-bit JNI in ${JNI_INCLUDE}"
+else  
+  echo "    + 32-bit JNI in ${JNI_INCLUDE}"
+fi
+
+echo "      JNI CFLAGS: ${CFLAGS}"
+
+if test -n "${apache}"; then
+  echo ""
+  echo "  Apache: ${apache_dir}"
+  echo "      conf: ${apache_conf}"
+  echo "      libexec: ${apache_libexec}"
+  echo "      include: ${apache_include}"
+  echo "      CFLAGS: ${apache_cflags}"
+fi
+
+echo ""
