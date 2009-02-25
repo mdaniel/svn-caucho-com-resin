@@ -55,7 +55,6 @@ AC_SUBST(resin_root)
 #
 # --with-resin-conf
 #
-resin_conf="${resin_conf}"
 AC_SUBST(resin_conf)
 
 AC_ARG_WITH(resin-conf,
@@ -66,6 +65,21 @@ resin_conf=${withval}
 
 if test -z "$resin_conf"; then
   resin_conf="${resin_root}/conf"
+fi
+
+#
+# --with-resin-log
+#
+AC_SUBST(resin_log)
+
+AC_ARG_WITH(resin-log,
+[  --with-resin-log=DIR  resin log directory
+], [
+resin_log=${withval}
+])
+
+if test -z "$resin_log"; then
+  resin_log="${resin_root}/log"
 fi
 
 if test -d "/etc/init.d/rc.d"; then
@@ -1257,6 +1271,7 @@ echo ""
 echo "  RESIN_HOME: ${resin_home}"
 echo "      root: ${resin_root}"
 echo "      conf: ${resin_conf}"
+echo "      log : ${resin_log}"
 
 if test -n "resin_init_d"; then
   echo "      init: ${resin_init_d}"

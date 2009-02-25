@@ -20,7 +20,7 @@ if test -n "${JAVA_HOME}"; then
   fi
 fi
 
-if test -x "${JAVA_EXE}"; then
+if test -z "${JAVA_EXE}"; then
   JAVA_EXE=java
 fi  
 

@@ -21,17 +21,17 @@ JAVA="$JAVA_HOME/bin/java"
 #
 # -resin-root /var/resin        -- the main data directory
 #
-RESIN_ROOT="@resin_root@"
+RESIN_ROOT="--root-directory @resin_root@"
 #
-# -conf /etc/resin/resin.conf   -- the main configuration file
+# -conf /etc/resin/resin.xml   -- the main configuration file
 #
-RESIN_CONF="@resin_conf@"
+RESIN_CONF="-conf @resin_conf@/resin.xml"
 #
 # -log-directory /var/log/resin -- the main log directory
 #
-RESIN_LOG="@resin_log@"
+RESIN_LOG="--log-directory @resin_log@"
 
-ARGS="-resin-home $RESIN_HOME $RESIN_CONF $RESIN_LOG $RESIN_ROOT $SERVER"
+ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $SERVER"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions

@@ -1,7 +1,7 @@
 resin_home=@resin_home@
 resin_conf=@resin_conf@
 resin_root=@resin_root@
-resin_init_d=@resin_root@
+resin_init_d=@resin_init_d@
 LIBEXEC=@LIBEXEC@
 
 all	: 
@@ -30,7 +30,8 @@ install	:
 	  cp -u conf/app-default.xml $(resin_conf)/app-default.xml; \
 	  cp -u conf/resin.xml $(resin_conf)/resin.xml; \
 	fi; \
-	if test -n "$resin_init_d"; then \
+	if test -n "${resin_init_d}"; then \
 	  cp -u init.d/resin $(resin_init_d); \
+	  chmod +x $(resin_init_d); \
 	fi; \
 	(cd modules/c/src; $(MAKE) install)
