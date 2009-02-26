@@ -50,6 +50,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StaticStringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -76,10 +77,10 @@ public class BamModule extends AbstractQuercusModule
   private static final L10N L = new L10N(BamModule.class);
 
   private static final StringValue PHP_SELF 
-    = new StringBuilderValue("PHP_SELF");
+    = new StaticStringValue("PHP_SELF");
 
   private static final StringValue SERVER_NAME 
-    = new StringBuilderValue("SERVER_NAME");
+    = new StaticStringValue("SERVER_NAME");
 
   private static BamPhpAgent getAgent(Env env)
   {
