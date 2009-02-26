@@ -185,10 +185,10 @@ public class MathModule extends AbstractQuercusModule {
       return new BigInteger(str.toString(), base);
   }
   
-  private static Value intToBase(Env env, long num, int base)
+  private static StringValue intToBase(Env env, long num, int base)
   {
     if (num == 0)
-      return env.createString("0");
+      return env.createString((char) '0');
     
     // ignore sign
     if (num < 0)
@@ -216,7 +216,7 @@ public class MathModule extends AbstractQuercusModule {
     return env.createString(buffer, bufLen - i);
   }
   
-  private static Value intToBase(Env env, BigInteger num, int base)
+  private static StringValue intToBase(Env env, BigInteger num, int base)
   {
     BigInteger toBaseBig = BigInteger.valueOf(base);
     BigInteger zero = BigInteger.valueOf(0);
@@ -284,7 +284,7 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue decbin(Env env, long value)
   {
-    return env.createString(intToBase(env, value, 2).toString());
+    return intToBase(env, value, 2);
     
     /*
     value = value & 037777777777L;
@@ -317,7 +317,7 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue dechex(Env env, long value)
   {
-    return env.createString(intToBase(env, value, 16).toString());
+    return intToBase(env, value, 16);
     
     /*
     value = value & 037777777777L;
@@ -353,7 +353,7 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue decoct(Env env, long value)
   {
-    return env.createString(intToBase(env, value, 8).toString());
+    return intToBase(env, value, 8);
     
     /*
     value = value & 037777777777L;

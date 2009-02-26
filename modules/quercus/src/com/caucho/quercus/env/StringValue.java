@@ -82,7 +82,7 @@ abstract public class StringValue
     if (value == null)
       return NullValue.NULL;
     else
-      return new StringBuilderValue(value);
+      return new StaticStringValue(value);
   }
 
   /**
@@ -92,10 +92,14 @@ abstract public class StringValue
   {
     // XXX: needs updating for i18n, currently php5 only
     
+    return StaticStringValue.create(value);
+    
+    /*
     if (value < CHAR_STRINGS.length)
       return CHAR_STRINGS[value];
     else
       return new StringBuilderValue(String.valueOf(value));
+    */
   }
 
   /**
@@ -2002,7 +2006,7 @@ abstract public class StringValue
    * @param out the writer to the Java source code.
    */
   @Override
-  public final void generate(PrintWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     // max JVM constant string length
@@ -2012,7 +2016,12 @@ abstract public class StringValue
     
     String className = getClass().getSimpleName();
     
-    if (len < maxSublen) {
+    if (len == 1) {
+      out.print(className + ".create('");
+      printJavaChar(out, charAt(0));
+      out.print("')");
+    }
+    else if (len < maxSublen) {
       out.print("new " + className + "(\"");
       printJavaString(out, this);
       out.print("\")");

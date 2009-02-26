@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.env.StaticStringValue;
 import com.caucho.quercus.env.TraversableDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
@@ -50,7 +51,7 @@ public class IteratorAggregateDelegate
   private static final L10N L = new L10N(IteratorAggregateDelegate.class);
   
   private static final StringBuilderValue GET_ITERATOR
-    = new StringBuilderValue("getIterator");
+    = new StaticStringValue("getIterator");
   
   private static final IteratorDelegate _iteratorDelegate
     = new IteratorDelegate();

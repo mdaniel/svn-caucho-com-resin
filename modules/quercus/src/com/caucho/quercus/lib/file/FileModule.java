@@ -3024,11 +3024,11 @@ public class FileModule extends AbstractQuercusModule {
 
   static {
     ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
-    StreamModule.stream_wrapper_register(new StringBuilderValue("compress.zlib"),
+    StreamModule.stream_wrapper_register(new StaticStringValue("compress.zlib"),
                                          zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new StringBuilderValue("zlib"),
+    StreamModule.stream_wrapper_register(new StaticStringValue("zlib"),
                                          zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new StringBuilderValue("php"),
+    StreamModule.stream_wrapper_register(new StaticStringValue("php"),
                                          new PhpProtocolWrapper());
 
     _constMap.put("SEEK_SET", LongValue.create(SEEK_SET));

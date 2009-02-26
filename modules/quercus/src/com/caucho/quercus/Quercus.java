@@ -50,13 +50,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -85,8 +81,8 @@ public class Quercus
   private LruCache<String, UnicodeBuilderValue> _unicodeMap
     = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
 
-  private LruCache<String, StringBuilderValue> _stringMap
-    = new LruCache<String, StringBuilderValue>(8 * 1024);
+  private LruCache<String, StaticStringValue> _stringMap
+    = new LruCache<String, StaticStringValue>(8 * 1024);
 
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
@@ -372,14 +368,6 @@ public class Quercus
   public boolean isAllowUrlFopen()
   {
     return getIniBoolean("allow_url_fopen");
-  }
-
-  public StringValue createString(String v)
-  {
-    if (isUnicodeSemantics())
-      return new UnicodeBuilderValue(v);
-    else
-      return new StringBuilderValue(v);
   }
   
   /**
@@ -828,6 +816,22 @@ public class Quercus
   public long getIniLong(String name)
   {
     return _iniDefinitions.get(name).getAsLongValue(this).toLong();
+  }
+  
+  /**
+   * Returns an ini value as a Value.
+   */
+  public Value getIniValue(String name)
+  {
+    return _iniDefinitions.get(name).getValue(this);
+  }
+  
+  /**
+   * Returns an ini value as a Value.
+   */
+  public Value getIniStringValue(String name)
+  {
+    return _iniDefinitions.get(name).getValue(this);
   }
   
   /**
@@ -1308,7 +1312,7 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
-    return getConstantId(new StringBuilderValue(name));
+    return getConstantId(new StaticStringValue(name));
   }
 
   /**
@@ -1350,7 +1354,7 @@ public class Quercus
       }
 
       // XXX: i18n
-      _constantNameList[id] = new StringBuilderValue(name);
+      _constantNameList[id] = new StaticStringValue(name);
     
       // php/0501
       int lowerId;
@@ -1627,13 +1631,12 @@ public class Quercus
    * Creates a string.  Because these strings are typically Java
    * constants, they fit into a lru cache.
    */
-  public StringBuilderValue createStringBuilder(String name)
+  public StringBuilderValue createString(String name)
   {
-    StringBuilderValue value = _stringMap.get(name);
+    StaticStringValue value = _stringMap.get(name);
 
     if (value == null) {
-      value = new StringBuilderValue(name);
-
+      value = new StaticStringValue(name);
       _stringMap.put(name, value);
     }
 

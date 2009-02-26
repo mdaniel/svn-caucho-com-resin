@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
+import com.caucho.quercus.env.StaticStringValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.util.*;
@@ -500,7 +501,7 @@ class Regcomp {
 
       String name = sb.toString();
       
-      Integer v = _groupNameReverseMap.get(new StringBuilderValue(name));
+      Integer v = _groupNameReverseMap.get(new StaticStringValue(name));
 
       if (v != null) {
 	RegexpNode next = new RegexpNode.GroupRef(v);

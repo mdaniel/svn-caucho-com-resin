@@ -30,6 +30,7 @@
 package com.caucho.quercus.parser;
 
 import com.caucho.quercus.env.FieldVisibility;
+import com.caucho.quercus.env.StaticStringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
@@ -96,7 +97,7 @@ public class ClassScope extends Scope
   public void addVar(String name, Expr value, FieldVisibility visibility)
   {
     // XXX: i18n
-    _cl.addValue(new StringBuilderValue(name), value, visibility);
+    _cl.addValue(new StaticStringValue(name), value, visibility);
   }
   
   /**
@@ -108,7 +109,7 @@ public class ClassScope extends Scope
                      String comment)
   {
     // XXX: i18n
-    _cl.addValue(new StringBuilderValue(name), value, visibility, comment);
+    _cl.addValue(new StaticStringValue(name), value, visibility, comment);
   }
   
   /**
@@ -117,7 +118,7 @@ public class ClassScope extends Scope
   public void addStaticVar(String name, Expr value)
   {
     // XXX: i18n
-    _cl.addStaticValue(new StringBuilderValue(name), value, null);
+    _cl.addStaticValue(new StaticStringValue(name), value, null);
   }
   
   /**
@@ -126,7 +127,7 @@ public class ClassScope extends Scope
   public void addStaticVar(String name, Expr value, String comment)
   {
     // XXX: i18n
-    _cl.addStaticValue(new StringBuilderValue(name), value, comment);
+    _cl.addStaticValue(new StaticStringValue(name), value, comment);
   }
   
   /**

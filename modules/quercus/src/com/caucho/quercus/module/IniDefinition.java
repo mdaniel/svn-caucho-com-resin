@@ -162,7 +162,7 @@ public class IniDefinition {
    */
   public void set(Quercus quercus, String value)
   {
-    set(quercus, new StringBuilderValue(value));
+    set(quercus, new StaticStringValue(value));
   }
 
   /**

@@ -2394,6 +2394,30 @@ abstract public class Value implements java.io.Serializable
       }
     }
   }
+  
+  protected static void printJavaChar(PrintWriter out, char ch)
+  {
+    switch (ch) {
+      case '\r':
+        out.print("\\r");
+        break;
+      case '\n':
+        out.print("\\n");
+        break;
+      //case '\"':
+      //  out.print("\\\"");
+      //  break;
+      case '\'':
+        out.print("\\\'");
+        break;
+      case '\\':
+        out.print("\\\\");
+        break;
+      default:
+        out.print(ch);
+        break;
+      }
+  }
 
   public String toInternString()
   {
@@ -2405,16 +2429,16 @@ abstract public class Value implements java.io.Serializable
     return toString();
   }
 
-  final public void varDump(Env env,
+  public final void varDump(Env env,
                             WriteStream out,
                             int depth,
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
     if (valueSet.get(this) != null) {
-       out.print("#recursion#");
-       return;
-     }
+      out.print("#recursion#");
+      return;
+    }
 
     valueSet.put(this, "printing");
 
@@ -2435,7 +2459,7 @@ abstract public class Value implements java.io.Serializable
     out.print("resource(" + toString() + ")");
   }
 
-  final public void printR(Env env,
+  public final void printR(Env env,
                            WriteStream out,
                            int depth,
                            IdentityHashMap<Value, String> valueSet)

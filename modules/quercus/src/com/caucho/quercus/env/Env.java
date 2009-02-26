@@ -1548,6 +1548,14 @@ public class Env {
   {
     return getIniDefinition(name).getAsLong(this);
   }
+  
+  /**
+   * Returns an ini value as a Value.
+   */
+  public Value getIniValue(String name)
+  {
+    return getIniDefinition(name).getValue(this);
+  }
 
   /**
    * Returns an ini value as a string, null for missing or empty string
@@ -3781,14 +3789,17 @@ public class Env {
   public StringValue createString(String s)
   {
     if (s == null || s.length() == 0) {
-      return (_isUnicodeSemantics
-	      ? UnicodeBuilderValue.EMPTY
-	      : StringBuilderValue.EMPTY);
+      return _isUnicodeSemantics
+             ? UnicodeBuilderValue.EMPTY : StringBuilderValue.EMPTY;
     }
-    else if (_isUnicodeSemantics)
-      return _quercus.createUnicodeString(s);
-    else
-      return _quercus.createStringBuilder(s);
+    else if (s.length() == 1) {
+      // for php benchmark
+      return createString(s.charAt(0));
+    }
+    else {
+      return _isUnicodeSemantics
+             ? _quercus.createUnicodeString(s) : _quercus.createString(s);
+    }
   }
 
   /**

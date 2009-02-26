@@ -30,7 +30,6 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.*;
-import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.QuercusModuleException;
 
 import java.io.*;
@@ -50,7 +49,7 @@ public class StringBuilderValue
   protected int _length;
   protected boolean _isCopy;
  
-  private int _hashCode;
+  protected int _hashCode;
   
   public StringBuilderValue()
   {
@@ -196,7 +195,11 @@ public class StringBuilderValue
     else {
       _buffer = v._buffer;
       _length = v._length;
-      _isCopy = true;
+      
+      if (v instanceof StaticStringValue)
+        _isCopy = true;
+      else
+        v._isCopy = true;
     }
   }
 
@@ -268,7 +271,7 @@ public class StringBuilderValue
    * Returns the ValueType.
    */
   @Override
-  public final ValueType getValueType()
+  public ValueType getValueType()
   {
     return getValueType(_buffer, 0, _length);
   }
@@ -359,7 +362,7 @@ public class StringBuilderValue
    * Converts to a boolean.
    */
   @Override
-  public final boolean toBoolean()
+  public boolean toBoolean()
   {
     if (_length == 0)
       return false;
@@ -373,7 +376,7 @@ public class StringBuilderValue
    * Converts to a long.
    */
   @Override
-  public final long toLong()
+  public long toLong()
   {
     return parseLong(_buffer, 0, _length);
   }
@@ -382,7 +385,7 @@ public class StringBuilderValue
    * Converts to a double.
    */
   @Override
-  public final double toDouble()
+  public double toDouble()
   {
     return toDouble(_buffer, 0, _length);
   }
@@ -450,7 +453,7 @@ public class StringBuilderValue
    * Converts to a string.
    */
   @Override
-  public final String toString()
+  public String toString()
   {
     if (_length == 1)
       return String.valueOf((char) (_buffer[0] & 0xFF));
@@ -509,10 +512,7 @@ public class StringBuilderValue
   @Override
   public final Object toJavaObject()
   {
-    if (_length == 1)
-      return String.valueOf((char) (_buffer[0] & 0xFF));
-    else
-      return new String(_buffer, 0, _length);
+    return toString();
   }
 
   /**
@@ -587,7 +587,7 @@ public class StringBuilderValue
    * Converts to a key.
    */
   @Override
-  public final Value toKey()
+  public Value toKey()
   {
     byte []buffer = _buffer;
     int len = _length;
@@ -740,28 +740,40 @@ public class StringBuilderValue
       
       int index = (int) indexL;
 
-      StringBuilderValue sb = (StringBuilderValue) copyStringBuilder();
-
-      if (sb._buffer.length < index + 1)
-        sb.ensureCapacity(index + 1);
-      
-      int padLen = index - len;
-
-      if (padLen > 0) {
-        for (int i = 0; i <= padLen; i++) {
-          sb.append(' ');
-        }
+      if (index < _length) {
+        StringBuilderValue sb = new StringBuilderValue(_buffer, 0, _length);
+        
+        if (value.length() == 0)
+          sb._buffer[index] = 0;
+        else
+          sb._buffer[index] = (byte) value.charAt(0);
+        
+        return sb;
       }
-      
-      if(sb._isCopy)
-        sb.copyOnWrite();
-      
-      if (value.length() == 0)
-        sb._buffer[index] = 0;
-      else
-        sb._buffer[index] = (byte) value.charAt(0);
+      else {
+        StringBuilderValue sb = (StringBuilderValue) copyStringBuilder();
 
-      return sb;
+        if (sb._buffer.length < index + 1)
+          sb.ensureCapacity(index + 1);
+        
+        int padLen = index - len;
+
+        if (padLen > 0) {
+          for (int i = 0; i <= padLen; i++) {
+            sb.append(' ');
+          }
+        }
+        
+        if(sb._isCopy)
+          sb.copyOnWrite();
+        
+        if (value.length() == 0)
+          sb._buffer[index] = 0;
+        else
+          sb._buffer[index] = (byte) value.charAt(0);
+
+        return sb;
+      }
     }
   }
     
@@ -1943,10 +1955,10 @@ public class StringBuilderValue
   }
 
   static {
-    CHAR_STRINGS = new StringBuilderValue[256];
+    CHAR_STRINGS = new StaticStringValue[256];
 
     for (int i = 0; i < CHAR_STRINGS.length; i++) {
-      CHAR_STRINGS[i] = new StringBuilderValue((char) i);
+      CHAR_STRINGS[i] = new StaticStringValue((char) i);
     }
   }
 }

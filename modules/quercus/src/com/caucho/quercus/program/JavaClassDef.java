@@ -1139,8 +1139,8 @@ public class JavaClassDef extends ClassDef {
       MarshalFactory factory = moduleContext.getMarshalFactory();
       Marshal marshal = factory.create(field.getType(), false);
       
-      _fieldMap.put(new StringBuilderValue(field.getName()),
-		    new FieldMarshalPair(field, marshal));
+      _fieldMap.put(new StaticStringValue(field.getName()),
+                    new FieldMarshalPair(field, marshal));
     }
 
 

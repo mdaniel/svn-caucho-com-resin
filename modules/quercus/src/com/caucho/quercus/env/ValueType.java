@@ -79,7 +79,7 @@ abstract public class ValueType {
     {
       public String toString()
       {
-	return "ValueType[NULL]";
+        return "ValueType.NULL";
       }
     };
   
@@ -87,12 +87,12 @@ abstract public class ValueType {
     {
       public boolean isBoolean()
       {
-	return true;
+        return true;
       }
   
       public String toString()
       {
-	return "ValueType[NULL]";
+        return "ValueType.BOOLEAN";
       }
     };
   
@@ -100,37 +100,37 @@ abstract public class ValueType {
     {
       public boolean isLong()
       {
-	return true;
+        return true;
       }
   
       public boolean isLongCmp()
       {
-	return true;
+        return true;
       }
   
       public boolean isLongAdd()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumber()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumberCmp()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumberAdd()
       {
-	return true;
+        return true;
       }
       
       public String toString()
       {
-	return "ValueType[NULL]";
+        return "ValueType.LONG";
       }
     };
   
@@ -138,27 +138,27 @@ abstract public class ValueType {
     {
       public boolean isLongCmp()
       {
-	return true;
+        return true;
       }
 
       public boolean isLongAdd()
       {
-	return true;
+        return true;
       }
 
       public boolean isNumberCmp()
       {
-	return true;
+        return true;
       }
 
       public boolean isNumberAdd()
       {
-	return true;
+        return true;
       }
       
       public String toString()
       {
-	return "ValueType[LONG_EQ]";
+        return "ValueType.LONG_EQ";
       }
     };
   
@@ -166,17 +166,17 @@ abstract public class ValueType {
     {
       public boolean isLongAdd()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumberAdd()
       {
-	return true;
+        return true;
       }
       
       public String toString()
       {
-	return "ValueType[LONG_ADD]";
+        return "ValueType.LONG_ADD";
       }
     };
   
@@ -184,27 +184,27 @@ abstract public class ValueType {
     {
       public boolean isDouble()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumber()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumberCmp()
       {
-	return true;
+        return true;
       }
   
       public boolean isNumberAdd()
       {
-	return true;
+        return true;
       }
       
       public String toString()
       {
-	return "ValueType[DOUBLE]";
+        return "ValueType.DOUBLE";
       }
     };
   
@@ -212,17 +212,17 @@ abstract public class ValueType {
     {
       public boolean isNumberCmp()
       {
-	return true;
+        return true;
       }
       
       public boolean isNumberAdd()
       {
-	return true;
+        return true;
       }
       
       public String toString()
       {
-	return "ValueType[DOUBLE_CMP]";
+        return "ValueType.DOUBLE_CMP";
       }
     };
   
@@ -231,7 +231,7 @@ abstract public class ValueType {
       
       public String toString()
       {
-	return "ValueType[STRING]";
+        return "ValueType.STRING";
       }
     };
   
@@ -240,7 +240,7 @@ abstract public class ValueType {
       
       public String toString()
       {
-	return "ValueType[ARRAY]";
+        return "ValueType.ARRAY";
       }
     };
   
@@ -249,7 +249,7 @@ abstract public class ValueType {
       
       public String toString()
       {
-	return "ValueType[OBJECT]";
+        return "ValueType.OBJECT";
       }
     };
   
@@ -258,7 +258,7 @@ abstract public class ValueType {
       
       public String toString()
       {
-	return "ValueType[VALUE]";
+        return "ValueType.VALUE";
       }
     };
 }

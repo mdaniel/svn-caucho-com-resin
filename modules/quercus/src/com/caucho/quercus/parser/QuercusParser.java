@@ -4805,7 +4805,7 @@ public class QuercusParser {
     if (_quercus != null && _quercus.isUnicodeSemantics())
       return new UnicodeBuilderValue(lexeme);
     else
-      return new StringBuilderValue(lexeme);
+      return new StaticStringValue(lexeme);
   }
 
   private Expr createBinary(byte []bytes)

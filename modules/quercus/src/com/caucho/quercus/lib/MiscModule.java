@@ -1447,9 +1447,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name.length() == 0)
 	  key = LongValue.create(j + 1);
 	else if (_length == 1)
-	  key = new StringBuilderValue(_name);
+	  key = env.createString(_name);
 	else {
-	  StringValue sb = new StringBuilderValue();
+	  StringValue sb = env.createStringBuilder();
 	  sb.append(_name);
 	  sb.append(j);
 
