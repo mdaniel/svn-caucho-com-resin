@@ -52,9 +52,7 @@ abstract public class StringValue
   extends Value
   implements CharSequence
 {
-  public static final StringValue EMPTY = new StringBuilderValue("");
-
-  private static final StringValue []CHAR_STRINGS;
+  public static final StringValue EMPTY = new StaticStringValue("");
   
   protected static final int MIN_LENGTH = 32;
 
@@ -2066,9 +2064,9 @@ abstract public class StringValue
     public int read()
     {
       if (_index < _length)
-	return charAt(_index++);
+        return charAt(_index++);
       else
-	return -1;
+        return -1;
     }
 
     /**
@@ -2079,29 +2077,20 @@ abstract public class StringValue
       int sublen = _length - _index;
 
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       if (sublen <= 0)
-	return -1;
+        return -1;
 
       int index = _index;
 
       for (int i = 0; i < sublen; i++)
-	buffer[offset + i] = (byte) charAt(index + i);
+        buffer[offset + i] = (byte) charAt(index + i);
 
       _index += sublen;
 
       return sublen;
     }
-  }
-
-  static {
-    // XXX: need to update for unicode
-    
-    CHAR_STRINGS = new StringValue[256];
-
-    for (int i = 0; i < CHAR_STRINGS.length; i++)
-      CHAR_STRINGS[i] = new StringBuilderValue((char) i);
   }
 }
 

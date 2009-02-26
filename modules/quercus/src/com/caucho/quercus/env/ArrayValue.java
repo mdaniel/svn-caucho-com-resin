@@ -48,8 +48,8 @@ abstract public class ArrayValue extends Value {
   private static final Logger log
     = Logger.getLogger(ArrayValue.class.getName());
 
-  protected static final StringValue KEY = new StringBuilderValue("key");
-  protected static final StringValue VALUE = new StringBuilderValue("value");
+  protected static final StringValue KEY = new StaticStringValue("key");
+  protected static final StringValue VALUE = new StaticStringValue("value");
 
   public static final GetKey GET_KEY = new GetKey();
   public static final GetValue GET_VALUE = new GetValue();
@@ -542,6 +542,11 @@ abstract public class ArrayValue extends Value {
 
   @Override
   public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
+  {
+    return new EntryIterator(getHead());
+  }
+  
+  public Iterator<Map.Entry<Value, Value>> getIterator()
   {
     return new EntryIterator(getHead());
   }
@@ -1390,6 +1395,21 @@ abstract public class ArrayValue extends Value {
       values[i] = iter.next();
     }
     
+    return values;
+  }
+  
+  /**
+   * Takes the values of this array and puts them in a java array
+   */
+  public Value[] keysToArray()
+  {
+    Value[] values = new Value[getSize()];
+
+    int i = 0;
+    for (Entry ptr = getHead(); ptr != null; ptr = ptr.getNext()) {
+      values[i++] = ptr.getKey();
+    }
+
     return values;
   }
   

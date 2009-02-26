@@ -52,7 +52,7 @@ abstract public class Value implements java.io.Serializable
 {
   protected static final L10N L = new L10N(Value.class);
 
-  public static final StringValue SCALAR_V = new StringBuilderValue("scalar");
+  public static final StringValue SCALAR_V = new StaticStringValue("scalar");
 
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
@@ -2359,6 +2359,30 @@ abstract public class Value implements java.io.Serializable
   public void generate(PrintWriter out)
     throws IOException
   {
+  }
+  
+  protected static void printJavaChar(PrintWriter out, char ch)
+  {
+    switch (ch) {
+      case '\r':
+        out.print("\\r");
+        break;
+      case '\n':
+        out.print("\\n");
+        break;
+      //case '\"':
+      //  out.print("\\\"");
+      //  break;
+      case '\'':
+        out.print("\\\'");
+        break;
+      case '\\':
+        out.print("\\\\");
+        break;
+      default:
+        out.print(ch);
+        break;
+      }
   }
 
   protected static void printJavaString(PrintWriter out, StringValue s)

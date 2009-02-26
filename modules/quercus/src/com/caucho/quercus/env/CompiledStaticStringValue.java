@@ -38,7 +38,7 @@ public class CompiledStaticStringValue
 {
   public CompiledStaticStringValue(StringValue s)
   {
-    super(s.toString());
+    super(s);
     
     _longValue = s.toLongValue();
     _doubleValue = s.toDoubleValue();
@@ -46,7 +46,26 @@ public class CompiledStaticStringValue
     
     _valueType = s.getValueType();
     _hashCode = s.hashCode();
+    _key = s.toKey();
     
+  }
+  
+  public CompiledStaticStringValue(char ch,
+                                   LongValue longValue,
+                                   DoubleValue doubleValue,
+                                   ValueType valueType,
+                                   Value key,
+                                   int hashCode)
+  {
+    super(ch);
+
+    _string = String.valueOf(ch);
+    _longValue = longValue;
+    _doubleValue = doubleValue;
+    
+    _valueType = valueType;
+    _key = key;
+    _hashCode = hashCode;
   }
   
   public CompiledStaticStringValue(char ch,
@@ -60,8 +79,9 @@ public class CompiledStaticStringValue
     _string = String.valueOf(ch);
     _longValue = longValue;
     _doubleValue = doubleValue;
-    
+
     _valueType = valueType;
+    _key = this;
     _hashCode = hashCode;
   }
 
@@ -69,6 +89,7 @@ public class CompiledStaticStringValue
                                    LongValue longValue,
                                    DoubleValue doubleValue,
                                    ValueType valueType,
+                                   Value key,
                                    int hashCode)
   {
     super(s);
@@ -76,8 +97,26 @@ public class CompiledStaticStringValue
     _string = s;
     _longValue = longValue;
     _doubleValue = doubleValue;
-    
     _valueType = valueType;
+    
+    _key = key;
+    _hashCode = hashCode;
+  }
+  
+  public CompiledStaticStringValue(String s,
+                                   LongValue longValue,
+                                   DoubleValue doubleValue,
+                                   ValueType valueType,
+                                   int hashCode)
+  {
+    super(s);
+
+    _string = s;
+    _longValue = longValue;
+    _doubleValue = doubleValue;
+    _valueType = valueType;
+
+    _key = this;
     _hashCode = hashCode;
   }
   
@@ -129,6 +168,15 @@ public class CompiledStaticStringValue
   public ValueType getValueType()
   {
     return _valueType;
+  }
+  
+  /**
+   * Converts to a key.
+   */
+  @Override
+  public Value toKey()
+  {
+    return _key;
   }
   
   @Override

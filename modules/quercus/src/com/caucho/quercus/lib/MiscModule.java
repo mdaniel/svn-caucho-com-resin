@@ -1287,7 +1287,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      StringValue sb = new StringBuilderValue();
+      StringValue sb = env.createStringBuilder();
       for (int i = _length / 2 - 1; i >= 0; i--) {
 	int ch = is.read();
 
@@ -1372,7 +1372,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      StringValue sb = new StringBuilderValue();
+      StringValue sb = env.createStringBuilder();
       for (int i = _length / 2 - 1; i >= 0; i--) {
 	int ch = is.read();
 
@@ -1541,9 +1541,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name.length() == 0)
 	  key = LongValue.create(j + 1);
 	else if (_length == 1)
-	  key = new StringBuilderValue(_name);
+	  key = env.createString(_name);
 	else {
-	  StringBuilderValue sb = new StringBuilderValue();
+	  StringValue sb = env.createStringBuilder();
 	  sb.append(_name);
 	  sb.append(j);
 

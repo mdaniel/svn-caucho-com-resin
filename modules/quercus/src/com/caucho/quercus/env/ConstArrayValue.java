@@ -35,9 +35,18 @@ import java.io.PrintWriter;
 /**
  * Represents a PHP array value.
  */
-public class ConstArrayValue extends ArrayValueImpl {
+public class ConstArrayValue
+  extends ArrayValueImpl
+{
   public ConstArrayValue()
   {
+  }
+  
+  public ConstArrayValue(ConstArrayValueComponent[] components)
+  {
+    for (int i = 0; i < components.length; i++) {
+      components[i].init(this);
+    }
   }
 
   public ConstArrayValue(Value []keys, Value []values)

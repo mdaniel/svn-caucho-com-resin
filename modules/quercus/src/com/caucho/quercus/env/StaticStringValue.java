@@ -54,6 +54,11 @@ public class StaticStringValue
     super();
   }
   
+  public StaticStringValue(StringBuilderValue sb)
+  {
+    super(sb._buffer, 0, sb._length);
+  }
+  
   public StaticStringValue(byte []buffer, int offset, int length)
   {
     super(buffer, offset, length);
@@ -235,10 +240,17 @@ public class StaticStringValue
     int len = length();
 
     if (len == 1) {
-      out.print("(StringBuilderValue.create('");
+      out.print("(StaticStringValue.create('");
       printJavaChar(out, charAt(0));
       out.print("'))");
     }
+    /*
+    else if (len < maxSublen) {
+      out.print("(new StaticStringValue(\"");
+      printJavaString(out, this);
+      out.print("\"))");
+    }
+    */
     else if (len < maxSublen) {
       out.print("(new CompiledStaticStringValue (\"");
       printJavaString(out, this);
@@ -249,11 +261,19 @@ public class StaticStringValue
       out.print(", ");
       out.print(getValueType());
       out.print(", ");
+      
+      Value key = toKey();
+      
+      if (key instanceof LongValue) {
+        key.generate(out);
+        out.print(", ");
+      }
+      
       out.print(hashCode());
       out.print("))");
     }
     else {
-      out.print("(new StringBuilderValue (\"");
+      out.print("(new StaticStringValue(new StringBuilderValue (\"");
       
       // php/313u
       for (int i = 0; i < len; i += maxSublen) {
@@ -263,7 +283,7 @@ public class StaticStringValue
         printJavaString(out, substring(i, Math.min(i + maxSublen, len)));
       }
       
-      out.print("\"))");
+      out.print("\")))");
     }
   }
   

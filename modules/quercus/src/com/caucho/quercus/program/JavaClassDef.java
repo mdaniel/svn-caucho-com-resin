@@ -1140,7 +1140,7 @@ public class JavaClassDef extends ClassDef {
       Marshal marshal = factory.create(field.getType(), false);
       
       _fieldMap.put(new StaticStringValue(field.getName()),
-                    new FieldMarshalPair(field, marshal));
+		    new FieldMarshalPair(field, marshal));
     }
 
 
@@ -1156,11 +1156,11 @@ public class JavaClassDef extends ClassDef {
   private StringValue javaToQuercusConvert(String s)
   {
     if (s.length() == 1) {
-      return new StringBuilderValue(new char[] {Character.toLowerCase(s.charAt(0))});
+      return new StaticStringValue(new char[] {Character.toLowerCase(s.charAt(0))});
     }
 
     if (Character.isUpperCase(s.charAt(1)))
-      return new StringBuilderValue(s);
+      return new StaticStringValue(s);
     else {
       StringBuilderValue sb = new StringBuilderValue();
       sb.append(Character.toLowerCase(s.charAt(0)));

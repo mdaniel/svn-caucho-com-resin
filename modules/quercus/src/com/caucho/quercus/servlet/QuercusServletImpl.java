@@ -38,6 +38,7 @@ import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
@@ -159,9 +160,9 @@ public class QuercusServletImpl
         env.setScriptGlobal("response", response);
         env.setScriptGlobal("servletContext", _servletContext);
 
-        String prepend = env.getIniString("auto_prepend_file");
-        if (prepend != null) {
-          Path prependPath = env.lookup(env.createString(prepend));
+        Value prepend = quercus.getIniValue("auto_prepend_file");
+        if (! prepend.isNull()) {
+          Path prependPath = env.lookup(prepend.toStringValue(env));
           
           if (prependPath == null)
             env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
@@ -173,9 +174,9 @@ public class QuercusServletImpl
 
         env.executeTop();
 
-        String append = env.getIniString("auto_append_file");
-        if (append != null) {
-          Path appendPath = env.lookup(env.createString(append));
+        Value append = quercus.getIniValue("auto_append_file");
+        if (! append.isNull()) {
+          Path appendPath = env.lookup(append.toStringValue(env));
           
           if (appendPath == null)
             env.error(L.l("auto_append_file '{0}' not found.", append));

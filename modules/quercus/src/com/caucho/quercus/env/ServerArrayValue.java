@@ -43,56 +43,56 @@ import java.util.Set;
 public class ServerArrayValue extends ArrayValueImpl
 {
   private static final StringValue SERVER_ADDR_V
-    = new StringBuilderValue("SERVER_ADDR");
+    = new StaticStringValue("SERVER_ADDR");
   private static final StringValue SERVER_NAME_V
-    = new StringBuilderValue("SERVER_NAME");
+    = new StaticStringValue("SERVER_NAME");
   private static final StringValue SERVER_PORT_V
-    = new StringBuilderValue("SERVER_PORT");
+    = new StaticStringValue("SERVER_PORT");
   private static final StringValue REMOTE_HOST_V
-    = new StringBuilderValue("REMOTE_HOST");
+    = new StaticStringValue("REMOTE_HOST");
   private static final StringValue REMOTE_ADDR_V
-    = new StringBuilderValue("REMOTE_ADDR");
+    = new StaticStringValue("REMOTE_ADDR");
   private static final StringValue REMOTE_PORT_V
-    = new StringBuilderValue("REMOTE_PORT");
+    = new StaticStringValue("REMOTE_PORT");
   
   private static final StringValue DOCUMENT_ROOT_V
-    = new StringBuilderValue("DOCUMENT_ROOT");
+    = new StaticStringValue("DOCUMENT_ROOT");
   
   private static final StringValue SERVER_SOFTWARE_V
-    = new StringBuilderValue("SERVER_SOFTWARE");
+    = new StaticStringValue("SERVER_SOFTWARE");
   
   private static final StringValue SERVER_PROTOCOL_V
-    = new StringBuilderValue("SERVER_PROTOCOL");
+    = new StaticStringValue("SERVER_PROTOCOL");
   private static final StringValue REQUEST_METHOD_V
-    = new StringBuilderValue("REQUEST_METHOD");
+    = new StaticStringValue("REQUEST_METHOD");
   private static final StringValue QUERY_STRING_V
-    = new StringBuilderValue("QUERY_STRING");
+    = new StaticStringValue("QUERY_STRING");
   
   private static final StringValue REQUEST_URI_V
-    = new StringBuilderValue("REQUEST_URI");
+    = new StaticStringValue("REQUEST_URI");
   private static final StringValue SCRIPT_NAME_V
-    = new StringBuilderValue("SCRIPT_NAME");
+    = new StaticStringValue("SCRIPT_NAME");
   private static final StringValue SCRIPT_FILENAME_V
-    = new StringBuilderValue("SCRIPT_FILENAME");
+    = new StaticStringValue("SCRIPT_FILENAME");
   private static final StringValue PATH_INFO_V
-    = new StringBuilderValue("PATH_INFO");
+    = new StaticStringValue("PATH_INFO");
   private static final StringValue PATH_TRANSLATED_V
-    = new StringBuilderValue("PATH_TRANSLATED");
+    = new StaticStringValue("PATH_TRANSLATED");
   
   private static final StringValue PHP_SELF_V
-    = new StringBuilderValue("PHP_SELF");
+    = new StaticStringValue("PHP_SELF");
   
   private static final StringValue PHP_AUTH_USER_V
-    = new StringBuilderValue("PHP_AUTH_USER");
+    = new StaticStringValue("PHP_AUTH_USER");
   
   private static final StringValue AUTH_TYPE_V
-    = new StringBuilderValue("AUTH_TYPE");
+    = new StaticStringValue("AUTH_TYPE");
   
   private static final StringValue HTTPS_V
-    = new StringBuilderValue("HTTPS");
+    = new StaticStringValue("HTTPS");
   
   private static final StringValue HTTP_HOST_V
-    = new StringBuilderValue("HTTP_HOST");
+    = new StaticStringValue("HTTP_HOST");
   
   private final Env _env;
   

@@ -51,8 +51,8 @@ public class ArrayValueImpl extends ArrayValue
   private static final Logger log
     = Logger.getLogger(ArrayValueImpl.class.getName());
 
-  private static final StringValue KEY = new StringBuilderValue("key");
-  private static final StringValue VALUE = new StringBuilderValue("value");
+  private static final StringValue KEY = new StaticStringValue("key");
+  private static final StringValue VALUE = new StaticStringValue("value");
   
   private static final int DEFAULT_SIZE = 16;
   
@@ -1172,27 +1172,34 @@ public class ArrayValueImpl extends ArrayValue
   {
     out.print("new ConstArrayValue(");
     
-    out.print("new Value[] {");
+    if (getSize() < ConstArrayValueComponent.MAX_SIZE) {
+      out.print("new Value[] {");
       
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      if (entry != getHead())
-	out.print(", ");
-	    
-      if (entry.getKey() != null)
-	entry.getKey().generate(out);
-      else
-	out.print("null");
-    }
-      
-    out.print("}, new Value[] {");
+      for (Entry entry = getHead(); entry != null; entry = entry._next) {
+        if (entry != getHead())
+          out.print(", ");
+              
+            if (entry.getKey() != null)
+          entry.getKey().generate(out);
+            else
+          out.print("null");
+      }
+        
+      out.print("}, new Value[] {");
 
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      if (entry != getHead())
-	out.print(", ");
+      for (Entry entry = getHead(); entry != null; entry = entry._next) {
+        if (entry != getHead())
+      out.print(", ");
+        
+        entry.getValue().generate(out);
+      }
       
-      entry.getValue().generate(out);
+      out.print("}");
+    }
+    else {
+      ConstArrayValueComponent.generate(out, this);
     }
 
-    out.print("})");
+    out.print(")");
   }
 }

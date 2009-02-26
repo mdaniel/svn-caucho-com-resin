@@ -819,17 +819,9 @@ public class Quercus
   }
   
   /**
-   * Returns an ini value as a Value.
+   * Returns an ini value.
    */
   public Value getIniValue(String name)
-  {
-    return _iniDefinitions.get(name).getValue(this);
-  }
-  
-  /**
-   * Returns an ini value as a Value.
-   */
-  public Value getIniStringValue(String name)
   {
     return _iniDefinitions.get(name).getValue(this);
   }
@@ -1312,7 +1304,7 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
-    return getConstantId(new StaticStringValue(name));
+    return getConstantId(createString(name));
   }
 
   /**
@@ -1354,7 +1346,7 @@ public class Quercus
       }
 
       // XXX: i18n
-      _constantNameList[id] = new StaticStringValue(name);
+      _constantNameList[id] = name;
     
       // php/0501
       int lowerId;
@@ -1626,17 +1618,18 @@ public class Quercus
 
     return value;
   }
-
+  
   /**
    * Creates a string.  Because these strings are typically Java
    * constants, they fit into a lru cache.
    */
-  public StringBuilderValue createString(String name)
+  public StringValue createString(String name)
   {
     StaticStringValue value = _stringMap.get(name);
 
     if (value == null) {
       value = new StaticStringValue(name);
+
       _stringMap.put(name, value);
     }
 
@@ -1747,7 +1740,7 @@ public class Quercus
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
       // XXX: i18n
-      return new StringBuilderValue((String) obj);
+      return new StaticStringValue((String) obj);
     } else {
       // XXX: unknown types, e.g. Character?
 

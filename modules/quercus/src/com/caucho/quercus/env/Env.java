@@ -144,10 +144,10 @@ public class Env {
   private static final IntMap SPECIAL_VARS = new IntMap();
 
   private static final StringValue PHP_SELF_STRING
-    = new StringBuilderValue("PHP_SELF");
+    = new StaticStringValue("PHP_SELF");
 
   private static final StringValue UTF8_STRING
-    = new StringBuilderValue("utf-8");
+    = new StaticStringValue("utf-8");
 
   public static final Value []EMPTY_VALUE = new Value[0];
 
@@ -1547,14 +1547,6 @@ public class Env {
   public long getIniLong(String name)
   {
     return getIniDefinition(name).getAsLong(this);
-  }
-  
-  /**
-   * Returns an ini value as a Value.
-   */
-  public Value getIniValue(String name)
-  {
-    return getIniDefinition(name).getValue(this);
   }
 
   /**
@@ -3736,7 +3728,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return UnicodeBuilderValue.EMPTY;
     else
-      return StringBuilderValue.EMPTY;
+      return StaticStringValue.EMPTY;
   }
 
   /*
@@ -3758,7 +3750,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeValueImpl(new String(buffer, offset, length));
     else
-      return new StringBuilderValue(buffer, offset, length);
+      return new StaticStringValue(buffer, offset, length);
   }
   
   /**
@@ -3769,7 +3761,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(buffer, length);
     else
-      return new StringBuilderValue(buffer, length);
+      return new StaticStringValue(buffer, length);
   }
   
   /**
@@ -3780,7 +3772,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(buffer, offset, length);
     else
-      return new StringBuilderValue(buffer, offset, length);
+      return new StaticStringValue(buffer, offset, length);
   }
 
   /**
@@ -3789,17 +3781,20 @@ public class Env {
   public StringValue createString(String s)
   {
     if (s == null || s.length() == 0) {
-      return _isUnicodeSemantics
-             ? UnicodeBuilderValue.EMPTY : StringBuilderValue.EMPTY;
+      return (_isUnicodeSemantics
+	      ? UnicodeBuilderValue.EMPTY
+	      : StaticStringValue.EMPTY);
     }
     else if (s.length() == 1) {
-      // for php benchmark
-      return createString(s.charAt(0));
+      if (_isUnicodeSemantics)
+        return UnicodeBuilderValue.create(s.charAt(0));
+      else
+        return StaticStringValue.create(s.charAt(0));
     }
-    else {
-      return _isUnicodeSemantics
-             ? _quercus.createUnicodeString(s) : _quercus.createString(s);
-    }
+    else if (_isUnicodeSemantics)
+      return _quercus.createUnicodeString(s);
+    else
+      return _quercus.createString(s);
   }
 
   /**
@@ -3810,7 +3805,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return UnicodeValueImpl.create(ch);
     else
-      return StringBuilderValue.create(ch);
+      return StaticStringValue.create(ch);
   }
 
   /**

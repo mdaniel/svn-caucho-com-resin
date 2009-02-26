@@ -62,31 +62,31 @@ public class MysqlModule extends AbstractQuercusModule {
   public static final int MYSQL_STORE_RESULT = 0x1;
 
   private static final StringValue SV_NAME
-    = new StringBuilderValue("name");
+    = new StaticStringValue("name");
   private static final StringValue SV_TABLE
-    = new StringBuilderValue("table");
+    = new StaticStringValue("table");
   private static final StringValue SV_DEF
-    = new StringBuilderValue("def");
+    = new StaticStringValue("def");
   private static final StringValue SV_MAX_LENGTH
-    = new StringBuilderValue("max_length");
+    = new StaticStringValue("max_length");
   private static final StringValue SV_NOT_NULL
-    = new StringBuilderValue("not_null");
+    = new StaticStringValue("not_null");
   private static final StringValue SV_PRIMARY_KEY
-    = new StringBuilderValue("primary_key");
+    = new StaticStringValue("primary_key");
   private static final StringValue SV_MULTIPLE_KEY
-    = new StringBuilderValue("multiple_key");
+    = new StaticStringValue("multiple_key");
   private static final StringValue SV_UNIQUE_KEY
-    = new StringBuilderValue("unique_key");
+    = new StaticStringValue("unique_key");
   private static final StringValue SV_NUMERIC
-    = new StringBuilderValue("numeric");
+    = new StaticStringValue("numeric");
   private static final StringValue SV_BLOB
-    = new StringBuilderValue("blob");
+    = new StaticStringValue("blob");
   private static final StringValue SV_TYPE
-    = new StringBuilderValue("type");
+    = new StaticStringValue("type");
   private static final StringValue SV_UNSIGNED
-    = new StringBuilderValue("unsigned");
+    = new StaticStringValue("unsigned");
   private static final StringValue SV_ZEROFILL
-    = new StringBuilderValue("zerofill");
+    = new StaticStringValue("zerofill");
 
   public MysqlModule()
   {

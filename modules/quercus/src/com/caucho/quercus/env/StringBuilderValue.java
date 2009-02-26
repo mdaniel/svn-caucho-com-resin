@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.*;
+import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.QuercusModuleException;
 
 import java.io.*;
@@ -41,7 +42,7 @@ import java.util.IdentityHashMap;
 public class StringBuilderValue
   extends StringValue
 {
-  public static final StringBuilderValue EMPTY = new StringBuilderValue("");
+  public static final StringBuilderValue EMPTY = new StaticStringValue("");
 
   private static final StringBuilderValue []CHAR_STRINGS;
   
@@ -192,14 +193,15 @@ public class StringBuilderValue
       System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
       _length = v._length;
     }
+    else if (v instanceof StaticStringValue) {
+      _buffer = v._buffer;
+      _length = v._length;
+      _isCopy = true;
+    }
     else {
       _buffer = v._buffer;
       _length = v._length;
-      
-      if (v instanceof StaticStringValue)
-        _isCopy = true;
-      else
-        v._isCopy = true;
+      v._isCopy = true;
     }
   }
 
@@ -362,7 +364,7 @@ public class StringBuilderValue
    * Converts to a boolean.
    */
   @Override
-  public boolean toBoolean()
+  public final boolean toBoolean()
   {
     if (_length == 0)
       return false;
@@ -512,7 +514,10 @@ public class StringBuilderValue
   @Override
   public final Object toJavaObject()
   {
-    return toString();
+    if (_length == 1)
+      return String.valueOf((char) (_buffer[0] & 0xFF));
+    else
+      return new String(_buffer, 0, _length);
   }
 
   /**
@@ -735,45 +740,38 @@ public class StringBuilderValue
 
     if (indexL < 0)
       return this;
+    else if (indexL < len) {
+      StringBuilderValue sb = new StringBuilderValue(_buffer, 0, len);
+      
+      sb._buffer[(int) indexL] = (byte) value.charAt(0);
+      
+      return sb;
+    }
     else {
       // php/03mg, #2940
       
       int index = (int) indexL;
 
-      if (index < _length) {
-        StringBuilderValue sb = new StringBuilderValue(_buffer, 0, _length);
-        
-        if (value.length() == 0)
-          sb._buffer[index] = 0;
-        else
-          sb._buffer[index] = (byte) value.charAt(0);
-        
-        return sb;
+      StringBuilderValue sb = (StringBuilderValue) copyStringBuilder();
+
+      if (sb._buffer.length < index + 1)
+        sb.ensureCapacity(index + 1);
+      
+      int padLen = index - len;
+
+      for (int i = 0; i <= padLen; i++) {
+         sb.append(' ');
       }
-      else {
-        StringBuilderValue sb = (StringBuilderValue) copyStringBuilder();
+      
+      if(sb._isCopy)
+        sb.copyOnWrite();
+      
+      if (value.length() == 0)
+        sb._buffer[index] = 0;
+      else
+        sb._buffer[index] = (byte) value.charAt(0);
 
-        if (sb._buffer.length < index + 1)
-          sb.ensureCapacity(index + 1);
-        
-        int padLen = index - len;
-
-        if (padLen > 0) {
-          for (int i = 0; i <= padLen; i++) {
-            sb.append(' ');
-          }
-        }
-        
-        if(sb._isCopy)
-          sb.copyOnWrite();
-        
-        if (value.length() == 0)
-          sb._buffer[index] = 0;
-        else
-          sb._buffer[index] = (byte) value.charAt(0);
-
-        return sb;
-      }
+      return sb;
     }
   }
     
