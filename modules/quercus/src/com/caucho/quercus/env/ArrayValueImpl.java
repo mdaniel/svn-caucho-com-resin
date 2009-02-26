@@ -78,6 +78,22 @@ public class ArrayValueImpl extends ArrayValue
     //_entries = new Entry[DEFAULT_SIZE];
     //_hashMask = _entries.length - 1;
   }
+  
+  public ArrayValueImpl(Env env, ArrayValueComponent[] components)
+  {
+    for (int i = 0; i < components.length; i++) {
+      components[i].init(env);
+      components[i].init(this);
+    }
+  }
+  
+  public ArrayValueImpl(ArrayValueComponent[] components)
+  {
+    for (int i = 0; i < components.length; i++) {
+      components[i].init();
+      components[i].init(this);
+    }
+  }
 
   public ArrayValueImpl(int size)
   {
@@ -1172,7 +1188,7 @@ public class ArrayValueImpl extends ArrayValue
   {
     out.print("new ConstArrayValue(");
     
-    if (getSize() < ConstArrayValueComponent.MAX_SIZE) {
+    if (getSize() < ArrayValueComponent.MAX_SIZE) {
       out.print("new Value[] {");
       
       for (Entry entry = getHead(); entry != null; entry = entry._next) {
@@ -1197,7 +1213,7 @@ public class ArrayValueImpl extends ArrayValue
       out.print("}");
     }
     else {
-      ConstArrayValueComponent.generate(out, this);
+      ArrayValueComponent.generate(out, this);
     }
 
     out.print(")");

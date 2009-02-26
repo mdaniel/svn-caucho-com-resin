@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,26 +33,27 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * Represents a compileable piece of a constant array.
+ * Represents a compileable piece of an array.
  */
-public class ConstArrayValueComponent
+public class ArrayValueComponent
 {
+  public static final int MAX_SIZE = 512;
+  
   protected Value []_keys;
   protected Value []_values;
   
-  public static final int MAX_SIZE = 512;
-  
-  public ConstArrayValueComponent()
+  public ArrayValueComponent()
   {
+    init();
   }
   
-  public ConstArrayValueComponent(Value []keys, Value []values)
+  public ArrayValueComponent(Value []keys, Value []values)
   {
     _keys = keys;
     _values = values;
   }
   
-  public static ConstArrayValueComponent[] create(ArrayValue array)
+  public static ArrayValueComponent[] create(ArrayValue array)
   {
     int size = array.getSize();
     int bins = size / MAX_SIZE;
@@ -60,7 +61,7 @@ public class ConstArrayValueComponent
     if (size % MAX_SIZE > 0)
       bins++;
     
-    ConstArrayValueComponent []components = new ConstArrayValueComponent[bins];
+    ArrayValueComponent []components = new ArrayValueComponent[bins];
     
     int bin = 0;
     
@@ -79,7 +80,7 @@ public class ConstArrayValueComponent
       System.arraycopy(keys, bin * MAX_SIZE, k, 0, binSize);
       System.arraycopy(values, bin * MAX_SIZE, v, 0, binSize);
       
-      components[bin] = new ConstArrayValueComponent(k, v);
+      components[bin] = new ArrayValueComponent(k, v);
       
       bin++;
     }
@@ -101,7 +102,7 @@ public class ConstArrayValueComponent
     Value []keys = array.keysToArray();
     Value []values = array.valuesToArray();
     
-    out.print("new ConstArrayValueComponent[] {");
+    out.print("new ArrayValueComponent[] {");
     
     while (bin < bins) {
       int binSize = MAX_SIZE;
@@ -112,7 +113,7 @@ public class ConstArrayValueComponent
       if (bin + 1 == bins)
         binSize = size - bin * MAX_SIZE;
       
-      out.println("new ConstArrayValueComponent() {");
+      out.println("new ArrayValueComponent() {");
       out.println("    public void init() {");
       
       out.print("      _keys = new Value[] {");
@@ -143,13 +144,20 @@ public class ConstArrayValueComponent
   }
   
   public void init()
-  {  
+  {
+  }
+  
+  public void init(Env env)
+  {
   }
   
   public final void init(ArrayValue array)
   {
     for (int i = 0; i < _keys.length; i++) {
-      array.append(_keys[i], _values[i]);
+      if (_keys[i] != null)
+        array.append(_keys[i], _values[i]);
+      else
+        array.put(_values[i]);
     }
   }
   

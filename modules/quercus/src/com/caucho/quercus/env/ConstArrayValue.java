@@ -42,11 +42,9 @@ public class ConstArrayValue
   {
   }
   
-  public ConstArrayValue(ConstArrayValueComponent[] components)
+  public ConstArrayValue(ArrayValueComponent[] components)
   {
-    for (int i = 0; i < components.length; i++) {
-      components[i].init(this);
-    }
+    super(components);
   }
 
   public ConstArrayValue(Value []keys, Value []values)
