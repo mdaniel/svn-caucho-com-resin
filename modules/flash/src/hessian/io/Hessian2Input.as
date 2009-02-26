@@ -1610,7 +1610,7 @@ package hessian.io
             type = readType();
             length = readInt();
 
-            return readList(length, type);
+            return readLengthList(length, type);
           }
 
         case Hessian2Constants.BC_LIST_FIXED_UNTYPED:
@@ -1627,7 +1627,7 @@ package hessian.io
             type = readType();
             length = tag - 0x70;
 
-            return readList(length, type);
+            return readLengthList(length, type);
           }
 
         // compact fixed untyped list
@@ -1636,7 +1636,7 @@ package hessian.io
           {
             length = tag - 0x78;
 
-            return readLengthList(length, type);
+            return readLengthList(length, null);
           }
 
         case 'H'.charCodeAt(): 

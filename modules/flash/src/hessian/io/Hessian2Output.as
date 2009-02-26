@@ -65,7 +65,7 @@ package hessian.io
     private const SIZE:int = 4096;
 
     private var _out:IDataOutput;
-    private var _refs:Dictionary;
+    private var _refs:Dictionary = new Dictionary();
 
     private var _classRefs:Object;
     private var _numClassRefs:int = 0;
@@ -118,9 +118,67 @@ package hessian.io
      */
     public override function startCall(method:String, length:int):void
     {
-      flushIfFull();
+      if (SIZE < _buffer.position + 32) {
+        flushBuffer();
+      }
 
       _buffer.writeByte('C'.charCodeAt());
+    }
+
+    /**
+     * Writes a fault.  
+     *
+     * <p>
+     *   The fault will be written
+     *   as a descriptive string followed by an object:
+     *   <code><pre>
+     *   f
+     *   &lt;string>code
+     *   &lt;string>the fault code
+     *
+     *   &lt;string>message
+     *   &lt;string>the fault mesage
+     *
+     *   &lt;string>detail
+     *   mt\x00\xnnjavax.ejb.FinderException
+     *       ...
+     *   z
+     *   z
+     *   </pre></code>
+     * </p>
+     *
+     * @param code The fault code, a three digit number.
+     * @param message The fault message.
+     * @param detail The fault detail.
+     */
+    public override function writeFault(code:String, 
+                                        message:String, 
+                                        detail:Object):void
+    {
+      flushIfFull();
+
+      writeVersion();
+
+      _out.writeByte('F'.charCodeAt());
+      _out.writeByte('H'.charCodeAt());
+
+      // force a reference
+      addRef(new Object());
+
+      writeString("code");
+      writeString(code);
+
+      writeString("message");
+      writeString(message);
+
+      if (detail != null) {
+        writeString("detail");
+        writeObject(detail);
+      }
+
+      flushIfFull();
+
+      _out.writeByte('Z'.charCodeAt());
     }
 
     /**
@@ -255,7 +313,7 @@ package hessian.io
         if (SIZE < _buffer.position + 32)
           flush();
 
-        _buffer.writeByte('C'.charCodeAt());
+        _buffer.writeByte(Hessian2Constants.BC_CLASS_DEF);
 
         writeString(className);
 
@@ -323,14 +381,6 @@ package hessian.io
     {
       for each (var fieldName:String in def.fieldNames)
         writeObject(instance[fieldName]);
-
-      /* 
-         XXX per-instance variables
-      for (key in obj) {
-        if (key != "hessianTypeName")
-          writeObject(instance[key]);
-      }
-      */
     }
     
     /**
@@ -497,9 +547,9 @@ package hessian.io
         flush();
 
       if (value)
-        _buffer.writeByte('T'.charCodeAt());
+        _buffer.writeByte(Hessian2Constants.BC_TRUE);
       else
-        _buffer.writeByte('F'.charCodeAt());
+        _buffer.writeByte(Hessian2Constants.BC_FALSE);
     }
 
     /**
@@ -535,7 +585,7 @@ package hessian.io
         _buffer.writeByte(value);
       }
       else {
-        _buffer.writeByte('I'.charCodeAt());
+        _buffer.writeByte(Hessian2Constants.BC_INT);
         _buffer.writeByte(value >> 24);
         _buffer.writeByte(value >> 16);
         _buffer.writeByte(value >> 8);
@@ -583,7 +633,7 @@ package hessian.io
         _buffer.writeByte(value);
       }
       else {
-        _buffer.writeByte('L'.charCodeAt());
+        _buffer.writeByte(Hessian2Constants.BC_LONG);
 
         write8ByteLong(value);
       }
@@ -644,7 +694,7 @@ package hessian.io
 
       var bits:ByteArray = Double.doubleToLongBits(value);
 
-      _buffer.writeByte('D'.charCodeAt());
+      _buffer.writeByte(Hessian2Constants.BC_DOUBLE);
       _buffer.writeBytes(bits);
     }
 
@@ -753,7 +803,7 @@ package hessian.io
       if (SIZE < _buffer.position + 16)
         flush();
 
-      _out.writeByte('N'.charCodeAt());
+      _out.writeByte(Hessian2Constants.BC_NULL);
     }
 
     /**
@@ -786,7 +836,7 @@ package hessian.io
         flush();
 
       if (value == null)
-        _out.writeByte('N'.charCodeAt());
+        _out.writeByte(Hessian2Constants.BC_NULL);
 
       else {
         length = value.length;
@@ -825,7 +875,7 @@ package hessian.io
           _buffer.writeByte(length);
         }
         else {
-          _buffer.writeByte('S'.charCodeAt());
+          _buffer.writeByte(Hessian2Constants.BC_STRING);
           _buffer.writeByte(length >> 8);
           _buffer.writeByte(length);
         }
@@ -864,7 +914,7 @@ package hessian.io
         if (SIZE < _buffer.position + 16)
           flush();
 
-        _buffer.writeByte('N'.charCodeAt());
+        _buffer.writeByte(Hessian2Constants.BC_NULL);
       }
       else {
         flush();
@@ -906,7 +956,7 @@ package hessian.io
           _buffer.writeByte(length);
         }
         else {
-          _buffer.writeByte('B'.charCodeAt());
+          _buffer.writeByte(Hessian2Constants.BC_BINARY);
           _buffer.writeByte(length >> 8);
           _buffer.writeByte(length);
         }
@@ -952,9 +1002,6 @@ package hessian.io
      */
     public override function addRef(object:Object):Boolean
     {
-      if (_refs == null)
-        _refs = new Dictionary();
-
       var ref:Object = _refs[object];
 
       if (ref != null) {
@@ -975,9 +1022,8 @@ package hessian.io
      */
     public override function resetReferences():void
     {
-      if (_refs != null) {
-        _refs = new Dictionary();
-      }
+      _refs = new Dictionary();
+      _numRefs = 0;
     }
 
     /**
@@ -989,6 +1035,7 @@ package hessian.io
      */
     public override function removeRef(obj:Object):Boolean
     {
+      // XXX this logic makes no sense, but is copied from Hessian2Output.java
       if (_refs != null) {
         delete _refs[obj];
 
@@ -1012,7 +1059,9 @@ package hessian.io
 
       if (value != null) {
         delete _refs[oldRef];
+
         _refs[newRef] = value;
+
         return true;
       }
       else
@@ -1082,10 +1131,8 @@ package hessian.io
 
     private function flushIfFull():void
     {
-      if (SIZE < _buffer.position + 32) {
-        _buffer.position = 0;
-        _out.writeBytes(_buffer);
-      }
+      if (SIZE < _buffer.position + 32)
+        flushBuffer();
     }
 
     public function flush():void
@@ -1096,6 +1143,7 @@ package hessian.io
     public function flushBuffer():void
     {
       _out.writeBytes(_buffer);
+      _buffer.length = 0;
     }
 
     public function close():void
