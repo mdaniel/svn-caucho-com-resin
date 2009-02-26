@@ -87,11 +87,6 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int INFO_ALL = -1;
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
-
-  public static int nam()
-  {
-    return StringBuilderValue._allocated;
-  }
   
   /**
    * Returns the default php.ini values.
