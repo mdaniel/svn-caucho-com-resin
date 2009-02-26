@@ -89,7 +89,7 @@ public class JniServerSocketImpl extends QServerSocket {
   public static QServerSocket create(String host, int port)
     throws IOException
   {
-    checkJni();
+    checkJni(host, port);
 
     return new JniServerSocketImpl(host, port);
   }
@@ -97,12 +97,13 @@ public class JniServerSocketImpl extends QServerSocket {
   public static QServerSocket open(int fd, int port)
     throws IOException
   {
-    checkJni();
+    checkJni("fd=" + fd, port);
 
     return new JniServerSocketImpl(fd, port, true);
   }
 
-  private static void checkJni()
+  private static void checkJni(String host, int port)
+    throws IOException
   {
     if (! _hasInitJni) {
       throw new IOException(L.l("Can't use JNI to listen to port '{0}:{1}"

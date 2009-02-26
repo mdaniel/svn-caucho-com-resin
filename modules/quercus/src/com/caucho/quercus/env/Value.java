@@ -2418,30 +2418,6 @@ abstract public class Value implements java.io.Serializable
       }
     }
   }
-  
-  protected static void printJavaChar(PrintWriter out, char ch)
-  {
-    switch (ch) {
-      case '\r':
-        out.print("\\r");
-        break;
-      case '\n':
-        out.print("\\n");
-        break;
-      //case '\"':
-      //  out.print("\\\"");
-      //  break;
-      case '\'':
-        out.print("\\\'");
-        break;
-      case '\\':
-        out.print("\\\\");
-        break;
-      default:
-        out.print(ch);
-        break;
-      }
-  }
 
   public String toInternString()
   {
