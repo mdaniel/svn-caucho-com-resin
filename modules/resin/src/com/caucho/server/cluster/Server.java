@@ -700,6 +700,13 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * The Resin system classloader
+   */
+  public void setSystemClassLoader(String loader)
+  {
+  }
+
+  /**
    * Arguments on boot
    */
   public void addWatchdogArg(String args)

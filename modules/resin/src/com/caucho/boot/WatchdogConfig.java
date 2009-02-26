@@ -67,9 +67,11 @@ class WatchdogConfig
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
   private ArrayList<String> _jvmClasspath = new ArrayList<String>();
   private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
+  
   private Path _resinHome;
   private Path _resinRoot;
   private Path _resinConf;
+  private String _systemClassLoader = "com.caucho.loader.SystemClassLoader";
 
   private boolean _is64bit;
   private boolean _hasXss;
@@ -278,6 +280,16 @@ class WatchdogConfig
   public long getShutdownWaitTime()
   {
     return _shutdownWaitTime;
+  }
+
+  public void setSystemClassLoader(String loader)
+  {
+    _systemClassLoader = loader;
+  }
+
+  public String getSystemClassLoader()
+  {
+    return _systemClassLoader;
   }
   
   public int getWatchdogPort()

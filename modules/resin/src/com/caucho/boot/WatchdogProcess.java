@@ -438,7 +438,10 @@ class WatchdogProcess
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     
     // This is needed for JMX to work correctly.
-    list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
+    String systemClassLoader = _watchdog.getSystemClassLoader();
+    if (systemClassLoader != null && ! "".equals(systemClassLoader)) {
+      list.add("-Djava.system.class.loader=" + systemClassLoader);
+    }
     // #2567
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
@@ -486,7 +489,10 @@ class WatchdogProcess
       list.add("-d64");
     }
 
-    if (! list.contains("-server") && ! list.contains("-client")) {
+    if (! list.contains("-server")
+	&& ! list.contains("-client")
+	&& ! CauchoSystem.isWindows()) {
+      // #3331, windows can't add -server automatically
       list.add("-server");
     }
     

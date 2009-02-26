@@ -24,6 +24,8 @@ public class JniServerSocketImpl extends QServerSocket {
     = Logger.getLogger(JniServerSocketImpl.class.getName());
   
   private static boolean _hasInitJni;
+  private static Throwable _jniInitException;
+  
   private long _fd;
 
   /**
@@ -87,12 +89,7 @@ public class JniServerSocketImpl extends QServerSocket {
   public static QServerSocket create(String host, int port)
     throws IOException
   {
-    if (! _hasInitJni) {
-      throw new IOException(L.l("Can't use JNI to listen to port '{0}:{1}" +
-				"' because JNI support has not been compiled.\n" +
-				"  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.",
-				host, port));
-    }
+    checkJni();
 
     return new JniServerSocketImpl(host, port);
   }
@@ -100,14 +97,19 @@ public class JniServerSocketImpl extends QServerSocket {
   public static QServerSocket open(int fd, int port)
     throws IOException
   {
-    if (! _hasInitJni) {
-      throw new IOException(L.l("Can't open JNI port '{0}' fd '{1}'" +
-				" because JNI support has not been compiled.\n" +
-				"  On Unix, run ./configure; make; make install.",
-				port, fd));
-    }
+    checkJni();
 
     return new JniServerSocketImpl(fd, port, true);
+  }
+
+  private static void checkJni()
+  {
+    if (! _hasInitJni) {
+      throw new IOException(L.l("Can't use JNI to listen to port '{0}:{1}"
+				+ "' because JNI support has not been compiled.\n"
+				+ "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n{2}",
+				host, port, _jniInitException));
+    }
   }
 
   /**
@@ -267,6 +269,8 @@ public class JniServerSocketImpl extends QServerSocket {
       System.loadLibrary("resin_os");
       _hasInitJni = true;
     } catch (Throwable e) {
+      _jniInitException = e;
+      
       log.info("Socket JNI library is not available.\nResin will still run but performance will be slower.\nTo compile the Socket JNI library on Unix, use ./configure; make; make install.");
       log.log(Level.FINER, e.toString(), e);
     }

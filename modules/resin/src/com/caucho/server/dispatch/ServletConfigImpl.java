@@ -640,7 +640,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
-      _alarm.queue(nextTime - Alarm.getCurrentTime());
+
+      Alarm nextAlarm = _alarm;
+      if (nextAlarm != null)
+	alarm.queue(nextTime - Alarm.getCurrentTime());
     }
   }
 

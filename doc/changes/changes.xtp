@@ -13,6 +13,12 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>boot: windows machines can't add -server option automatically (#3331)</li>
+<li>inject: findByName needs to work during shutdown (#3334, rep by stbu)</li>
+<li>make: "make clean" not properly propagated in modules/c/src/Makefile (#3340, rep by copart)</li>
+<li>boot: add system-class-loader configuration (#3339, rep by toomasr)</li>
+<li>servlet: run-at race condition on web-app restart (rep by stbu, #3342)</li>
+<li>boot: update messages for Quercus Personal (#3352)</li>
 <li>quercus: $f($v) with foo(&$v) declaration (#3351, rep by koreth)</li>
 <li>(2009-02-23) jms: btree split off-by-one issue (#3287, rep by tyson weihs)</li>
 <li>jms: file missing primary declaration (#3287, rep by tyson weihs)</li>

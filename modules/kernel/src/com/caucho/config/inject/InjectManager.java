@@ -713,6 +713,12 @@ public class InjectManager
    */
   public Bean findByName(String name)
   {
+    // #3334 - shutdown timing issues
+    HashMap<String,Bean> namedComponentMap = _namedComponentMap;
+
+    if (namedComponentMap == null)
+      return null;
+    
     Bean comp = _namedComponentMap.get(name);
     
     if (comp != null)

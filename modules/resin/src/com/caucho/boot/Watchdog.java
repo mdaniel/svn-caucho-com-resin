@@ -153,6 +153,14 @@ class Watchdog
   }
 
   /**
+   * Returns the system classloader to use for Resin.
+   */
+  public String getSystemClassLoader()
+  {
+    return _config.getSystemClassLoader();
+  }
+
+  /**
    * Returns the setuid user name.
    */
   public String getUserName()
