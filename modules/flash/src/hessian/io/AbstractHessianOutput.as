@@ -442,6 +442,13 @@ package hessian.io
       throw new IllegalOperationError();
     }
 
+    public function writeReply(o:Object):void
+    {
+      startReply();
+      writeObject(o);
+      completeReply();
+    }
+
     public function startReply():void
     {
     }

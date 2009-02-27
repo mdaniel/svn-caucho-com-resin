@@ -312,7 +312,7 @@ package hessian.io
      * 
      * @return The reply value.
      */
-    public override function readReply(expectedClass:Class):Object 
+    public override function readReply(expectedClass:Class = null):Object 
     {
       var tag:int = read();
 

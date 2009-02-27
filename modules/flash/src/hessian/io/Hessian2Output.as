@@ -104,6 +104,27 @@ package hessian.io
     }
 
     /**
+     * Writes a complete method call.
+     */
+    public override function call(method:String, args:Array):void 
+    {
+      writeVersion();
+
+      var length:int = args != null ? args.length : 0;
+
+      startCall(method, length);
+
+      if (args != null) {
+        for (var i:int = 0; i < args.length; i++)
+          writeObject(args[i]);
+      }
+
+      completeCall();
+
+      flush();
+    }
+
+    /**
      * Starts the method call.
      *
      * <p>
@@ -118,11 +139,34 @@ package hessian.io
      */
     public override function startCall(method:String, length:int):void
     {
-      if (SIZE < _buffer.position + 32) {
-        flushBuffer();
-      }
+      flushIfFull();
 
       _buffer.writeByte('C'.charCodeAt());
+
+      writeString(method);
+      writeInt(length);
+    }
+
+    public override function completeCall():void
+    {
+    }
+
+    public override function startReply():void
+    {
+      writeVersion();
+
+      flushIfFull();
+
+      _buffer.writeByte('R'.charCodeAt());
+    }
+
+    public function writeVersion():void
+    {
+      flushIfFull();
+
+      _buffer.writeByte('H'.charCodeAt());
+      _buffer.writeByte(2);
+      _buffer.writeByte(0);
     }
 
     /**
@@ -155,12 +199,10 @@ package hessian.io
                                         message:String, 
                                         detail:Object):void
     {
-      flushIfFull();
-
       writeVersion();
 
-      _out.writeByte('F'.charCodeAt());
-      _out.writeByte('H'.charCodeAt());
+      _buffer.writeByte('F'.charCodeAt());
+      _buffer.writeByte('H'.charCodeAt());
 
       // force a reference
       addRef(new Object());
@@ -178,7 +220,7 @@ package hessian.io
 
       flushIfFull();
 
-      _out.writeByte('Z'.charCodeAt());
+      _buffer.writeByte('Z'.charCodeAt());
     }
 
     /**
@@ -310,8 +352,7 @@ package hessian.io
         def = new ObjectDefinition(className, fieldNames, ref);
         _classRefs[className] = def;
 
-        if (SIZE < _buffer.position + 32)
-          flush();
+        flushIfFull();
 
         _buffer.writeByte(Hessian2Constants.BC_CLASS_DEF);
 
@@ -320,8 +361,7 @@ package hessian.io
         def.write(this);
       }
 
-      if (SIZE < _buffer.position + 32)
-        flush();
+      flushIfFull();
 
       ref = def.ref;
 
@@ -329,7 +369,7 @@ package hessian.io
         _buffer.writeByte(Hessian2Constants.BC_OBJECT_DIRECT + ref);
       }
       else {
-        _buffer.writeByte(0);
+        _buffer.writeByte(Hessian2Constants.BC_OBJECT);
         writeInt(ref);
       }
 
@@ -473,8 +513,7 @@ package hessian.io
      */
     public override function writeMapBegin(type:String):void
     {
-      if (SIZE < _buffer.position + 32)
-        flush();
+      flushIfFull();
 
       if (type != null && type != "Object") {
         _buffer.writeByte(Hessian2Constants.BC_MAP);
@@ -803,7 +842,7 @@ package hessian.io
       if (SIZE < _buffer.position + 16)
         flush();
 
-      _out.writeByte(Hessian2Constants.BC_NULL);
+      _buffer.writeByte(Hessian2Constants.BC_NULL);
     }
 
     /**
@@ -836,7 +875,7 @@ package hessian.io
         flush();
 
       if (value == null)
-        _out.writeByte(Hessian2Constants.BC_NULL);
+        _buffer.writeByte(Hessian2Constants.BC_NULL);
 
       else {
         length = value.length;

@@ -58,7 +58,7 @@ package hessian.client
   import flash.utils.describeType;
 
   import hessian.io.Hessian2Input;
-  import hessian.io.HessianOutput;
+  import hessian.io.Hessian2Output;
   import hessian.io.HessianServiceError;
 
   import mx.core.mx_internal;
@@ -84,7 +84,7 @@ package hessian.client
     protected var _returnType:Class;
     protected var _tokens:Dictionary = new Dictionary();
     protected var _input:Hessian2Input = new Hessian2Input();
-    protected var _output:HessianOutput = new HessianOutput();
+    protected var _output:Hessian2Output = new Hessian2Output();
 
     /** @private */
     public function HessianOperation(service:HessianService, 

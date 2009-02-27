@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -163,7 +163,7 @@ package hessian.io
      * Reads a reply as an object.
      * If the reply has a fault, throws the exception.
      */
-    public function readReply(expectedClass:Class):Object 
+    public function readReply(expectedClass:Class = null):Object 
     {
       throw new IllegalOperationError();
     }
