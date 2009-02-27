@@ -181,12 +181,21 @@ public class StringBuilderValue
 
   public StringBuilderValue(Value v1)
   {
-    _buffer = new byte[MIN_LENGTH];
+    if (v1 instanceof StringBuilderValue)
+      init((StringBuilderValue) v1);
+    else {
+      _buffer = new byte[MIN_LENGTH];
 
-    v1.appendTo(this);
+      v1.appendTo(this);
+    }
   }
   
   public StringBuilderValue(StringBuilderValue v)
+  {
+    init(v);
+  }
+  
+  private void init(StringBuilderValue v)
   {
     if (v._isCopy) {
       _buffer = new byte[v._buffer.length];
@@ -757,15 +766,15 @@ public class StringBuilderValue
       if (sb._buffer.length < index + 1)
         sb.ensureCapacity(index + 1);
       
-      int padLen = index - len;
-
-      for (int i = 0; i <= padLen; i++) {
-         sb.append(' ');
-      }
-      
       if(sb._isCopy)
         sb.copyOnWrite();
       
+      int padLen = index - len;
+
+      for (int i = 0; i <= padLen; i++) {
+         sb._buffer[_length++] = ' ';
+      }
+
       if (value.length() == 0)
         sb._buffer[index] = 0;
       else
@@ -774,7 +783,7 @@ public class StringBuilderValue
       return sb;
     }
   }
-    
+  
   /**
    * Returns the last index of the match string, starting from the head.
    */
