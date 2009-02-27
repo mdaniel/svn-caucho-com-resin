@@ -78,22 +78,6 @@ public class ArrayValueImpl extends ArrayValue
     //_entries = new Entry[DEFAULT_SIZE];
     //_hashMask = _entries.length - 1;
   }
-  
-  public ArrayValueImpl(Env env, ArrayValueComponent[] components)
-  {
-    for (int i = 0; i < components.length; i++) {
-      components[i].init(env);
-      components[i].init(this);
-    }
-  }
-  
-  public ArrayValueImpl(ArrayValueComponent[] components)
-  {
-    for (int i = 0; i < components.length; i++) {
-      components[i].init();
-      components[i].init(this);
-    }
-  }
 
   public ArrayValueImpl(int size)
   {
@@ -195,6 +179,22 @@ public class ArrayValueImpl extends ArrayValue
 
     for (int i = 0; i < values.length; i++) {
       put(values[i]);
+    }
+  }
+  
+  public ArrayValueImpl(Env env, ArrayValueComponent[] components)
+  {
+    for (int i = 0; i < components.length; i++) {
+      components[i].init(env);
+      components[i].init(this);
+    }
+  }
+  
+  public ArrayValueImpl(ArrayValueComponent[] components)
+  {
+    for (int i = 0; i < components.length; i++) {
+      components[i].init();
+      components[i].init(this);
     }
   }
 

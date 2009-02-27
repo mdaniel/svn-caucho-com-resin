@@ -831,7 +831,7 @@ public class Quercus
    */
   public void setServerEnv(String name, String value)
   {
-    setServerEnv(createString(name), createString(value));
+    setServerEnv(createString(name, true), new StaticStringValue(value));
   }
 
   /**
@@ -1304,7 +1304,7 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
-    return getConstantId(createString(name));
+    return getConstantId(new StaticStringValue(name));
   }
 
   /**
@@ -1634,6 +1634,24 @@ public class Quercus
     }
 
     return value;
+  }
+  
+  public StringValue createString(String name, boolean isCache)
+  {
+    if (isCache) {
+      StaticStringValue value = _stringMap.get(name);
+
+      if (value == null) {
+        value = new StaticStringValue(name);
+
+        _stringMap.put(name, value);
+      }
+
+      return value;
+    }
+    else
+      return new StaticStringValue(name);
+      
   }
   
   /**

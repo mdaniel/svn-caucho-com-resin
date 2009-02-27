@@ -240,7 +240,7 @@ public class StaticStringValue
     int len = length();
 
     if (len == 1) {
-      out.print("(StaticStringValue.create('");
+      out.print("(StaticStringValue.create((char) '");
       printJavaChar(out, charAt(0));
       out.print("'))");
     }
