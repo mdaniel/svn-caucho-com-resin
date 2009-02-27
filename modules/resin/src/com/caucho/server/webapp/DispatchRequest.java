@@ -537,12 +537,12 @@ class DispatchRequest extends RequestAdapter {
       return ((CauchoRequest) getRequest()).isLoginRequested();
   }
 
-  public boolean login()
+  public boolean login(boolean isFail)
   {
     if (! (getRequest() instanceof CauchoRequest))
       return false;
     else
-      return ((CauchoRequest) getRequest()).login();
+      return ((CauchoRequest) getRequest()).login(isFail);
   }
   
   /**

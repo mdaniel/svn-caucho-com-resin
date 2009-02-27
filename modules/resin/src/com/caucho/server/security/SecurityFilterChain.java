@@ -111,8 +111,8 @@ public class SecurityFilterChain extends AbstractFilterChain {
     if (isPrivateCache)
       res.setPrivateCache(true);
 
-    // server/1af3
-    if (result.isFail() && req.isLoginRequested() && req.login()) {
+    // server/1af3, server/12d2
+    if (req.isLoginRequested() && req.login(result.isFail())) {
       if (result.isResponseSent())
 	return;
     }

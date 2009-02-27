@@ -28,6 +28,8 @@
 package com.caucho.config;
 
 import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.Destructor;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
@@ -203,8 +205,12 @@ public class ConfigContext implements CreationalContext {
   {
     if (_dependentScope != null)
       _dependentScope.addDestructor(comp, value);
-    else if (comp instanceof Closeable)
-      Environment.addCloseListener((Closeable) comp);
+    else {
+      InjectManager manager = InjectManager.create();
+
+      //manager.addDestructor(new Destructor(comp, value));
+      // manager.addDestructor(comp, value);
+    }
   }
 
   public boolean canInject(ScopeContext scope)
@@ -515,7 +521,7 @@ public class ConfigContext implements CreationalContext {
       }
 
       ConfigType childType = null;
-      Object childBean;
+      Object childBean = null;
 
       String text;
 
@@ -543,9 +549,11 @@ public class ConfigContext implements CreationalContext {
 	return;
       }
       else {
-	ConfigType childEltType = getChildType(childNode);
-
-	childBean = attrStrategy.create(bean, qName, childEltType);
+	if (configureInlineBean(bean, childNode, attrStrategy)) {
+	  return;
+	}
+	else
+	  childBean = attrStrategy.create(bean, qName);
       }
 
       if (childBean != null) {
@@ -699,7 +707,61 @@ public class ConfigContext implements CreationalContext {
       attrStrategy.setText(bean, qName, text);
   }
 
-  private ConfigType getChildType(Node node)
+  private boolean configureInlineBean(Object parent, Node node,
+				      Attribute attrStrategy)
+    throws Exception
+  {
+    if (! attrStrategy.isAllowInline())
+      return false;
+    
+    Node childNode = getChildElement(node);
+
+    if (childNode == null)
+      return false;
+
+    QName qName = ((QNode) childNode).getQName();
+    
+    ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+    Object childBean = attrStrategy.create(parent, qName, type);
+
+    if (childBean == null)
+      return false;
+
+    // server/1af3
+    ConfigType childType = TypeFactory.getType(childBean);
+
+    childBean = configureChildBean(childBean, childType,
+				   childNode, attrStrategy);
+    
+    attrStrategy.setValue(parent, qName, childBean);
+
+    return true;
+  }
+
+  private Object configureChildBean(Object childBean,
+				    ConfigType childBeanType,
+				    Node childNode,
+				    Attribute attrStrategy)
+    throws Exception
+  {
+    if (childNode instanceof Element) {
+      configureNode(childNode, childBean, childBeanType);
+    }
+    else
+      configureChildNode(childNode, TEXT, childBean, childBeanType, false);
+
+    childBeanType.init(childBean);
+
+    Object newBean = attrStrategy.replaceObject(childBean);
+    
+    if (newBean == childBean)
+      return childBeanType.replaceObject(childBean);
+    else
+      return newBean;
+  }
+
+  private Node getChildElement(Node node)
   {
     if (! (node instanceof Element))
       return null;
@@ -719,10 +781,8 @@ public class ConfigContext implements CreationalContext {
 
     if (uri == null || ! uri.startsWith("urn:java:"))
       return null;
-
-    ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
-
-    return type;
+    else
+      return child;
   }
 
   private boolean isTrim(Node node)

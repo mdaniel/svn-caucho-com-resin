@@ -359,8 +359,9 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public void destroy(Object value, ConfigContext env)
   {
-    for (ConfigProgram inject : _destroyProgram)
+    for (ConfigProgram inject : _destroyProgram) {
       inject.inject(value, env);
+    }
   }
 
   /**

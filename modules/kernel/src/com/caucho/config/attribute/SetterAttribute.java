@@ -60,6 +60,15 @@ public class SetterAttribute extends Attribute {
     
     return _configType;
   }
+
+  /**
+   * True if it allows inline beans
+   */
+  @Override
+  public boolean isAllowInline()
+  {
+    return true;
+  }
   
   /**
    * Sets the value of the attribute

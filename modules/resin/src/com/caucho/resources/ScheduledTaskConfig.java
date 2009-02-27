@@ -161,7 +161,8 @@ public class ScheduledTaskConfig extends BeanConfig
     if (! _isTask) {
       super.init();
 
-      _scheduledTask.setTask((Runnable) getObject());
+      if (_scheduledTask.getTask() == null)
+	_scheduledTask.setTask((Runnable) getObject());
     }
 
     _scheduledTask.init();

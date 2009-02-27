@@ -29,6 +29,7 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.config.inject.BeanInstance;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
@@ -56,6 +57,8 @@ public class Listener extends DescriptionGroupConfig {
 
   // The listener object
   private Object _object;
+
+  private BeanInstance _instance;
   
   private ContainerProgram _init;
 
@@ -124,21 +127,30 @@ public class Listener extends DescriptionGroupConfig {
     InjectManager webBeans = InjectManager.create();
     
     if (_init != null) {
-      _object = webBeans.createTransientObjectNoInit(_listenerClass);
+      _instance = webBeans.createTransientInstanceNoInit(_listenerClass);
+
+      _object = _instance.getValue();
 
       _init.configure(_object);
 
       _init.init(_object);
     }
     else {
-      _object = webBeans.createTransientObject(_listenerClass);
+      _instance = webBeans.createTransientInstance(_listenerClass);
+
+      _object = _instance.getValue();
     }
 
     return _object;
   }
+  
+  public void destroy()
+  {
+    _instance.destroy();
+  }
 
   public String toString()
   {
-    return "Listener[" + _listenerClass + "]";
+    return getClass().getSimpleName() + "[" + _listenerClass + "]";
   }
 }

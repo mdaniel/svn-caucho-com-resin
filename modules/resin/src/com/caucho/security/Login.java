@@ -85,11 +85,13 @@ public interface Login {
    *
    * @param request servlet request
    * @param response servlet response for a failed authentication.
+   * @param isFail true if the authorization has failed
    *
    * @return the logged in principal on success, null on failure.
    */
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response);
+			 HttpServletResponse response,
+			 boolean isFail);
   
   /**
    * Returns true if the current user plays the named role.

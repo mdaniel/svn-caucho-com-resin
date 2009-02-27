@@ -79,7 +79,8 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
    */
   @Override
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response)
+			 HttpServletResponse response,
+			 boolean isFail)
   {
     try {
       ServletContext app = request.getServletContext();

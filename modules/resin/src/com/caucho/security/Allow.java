@@ -72,7 +72,6 @@ import javax.servlet.http.*;
  *
  * &lt;/web-app>
  * </pre></code>
- * </pre></code>
  */
 @Service
 @Unbound

@@ -19,29 +19,29 @@ l_web-app = element l:web-app { r_any-Group }
 ## r_kbytes = string
 
 r_access-log = element access-log {
-  r_resin-type?
+  r_bean-Custom
 
-  & r_log-Content
+  | (r_log-Content
 
-  & (attribute auto-flush { r_boolean-Type }
-     | element auto-flush { r_boolean-Type })?
+     & (attribute auto-flush { r_boolean-Type }
+        | element auto-flush { r_boolean-Type })?
 
-  & (attribute auto-flush-time { r_period-Type }
-     | element auto-flush-time { r_period-Type })?
+     & (attribute auto-flush-time { r_period-Type }
+        | element auto-flush-time { r_period-Type })?
 
-  & (attribute exclude { string }
-     | element exclude { string })*
+     & (attribute exclude { string }
+        | element exclude { string })*
 
-  & (attribute format { string }
-     | element format { string })?
+     & (attribute format { string }
+        | element format { string })?
 
-  & (attribute hostname-dns-lookup { r_boolean-Type }
-     | element hostname-dns-lookup { r_boolean-Type })?
+     & (attribute hostname-dns-lookup { r_boolean-Type }
+        | element hostname-dns-lookup { r_boolean-Type })?
 
-  & (attribute shared-buffer { r_boolean-Type }
-     | element shared-buffer { r_boolean-Type })?
-
-  & r_init?
+     & (attribute shared-buffer { r_boolean-Type }
+        | element shared-buffer { r_boolean-Type })?
+  
+    & r_init?)
 }
 
 r_allow-servlet-el =

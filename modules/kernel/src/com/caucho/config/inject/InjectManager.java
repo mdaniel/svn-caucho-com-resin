@@ -56,6 +56,7 @@ import java.lang.reflect.*;
 
 import javax.annotation.Stereotype;
 import javax.context.Context;
+import javax.context.Contextual;
 import javax.context.ContextNotActiveException;
 import javax.context.Conversation;
 import javax.context.ConversationScoped;
@@ -809,11 +810,39 @@ public class InjectManager
    * Creates an object, but does not register the
    * component with webbeans.
    */
+  public <T> BeanInstance<T> createTransientInstance(Class<T> type)
+  {
+    Contextual<T> factory = createTransient(type);
+
+    // server/10gn
+    T value = factory.create(new ConfigContext());
+
+    return new BeanInstance(factory, value);
+  }
+
+  /**
+   * Creates an object, but does not register the
+   * component with webbeans.
+   */
   public <T> T createTransientObjectNoInit(Class<T> type)
   {
     ComponentImpl comp = (ComponentImpl) createTransient(type);
 
     return (T) comp.createNoInit();
+  }
+
+  /**
+   * Creates an object, but does not register the
+   * component with webbeans.
+   */
+  public <T> BeanInstance<T> createTransientInstanceNoInit(Class<T> type)
+  {
+    ComponentImpl<T> bean = (ComponentImpl) createTransient(type);
+
+    // server/10gn
+    T value = (T) bean.createNoInit();
+
+    return new BeanInstance<T>(bean, value);
   }
 
   /**

@@ -13,7 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
-<li>boot: windows machines can't add -server option automatically (#3331)</li>
+<li>(2009-02-26) boot: windows machines can't add -server option automatically (#3331)</li>
 <li>inject: findByName needs to work during shutdown (#3334, rep by stbu)</li>
 <li>make: "make clean" not properly propagated in modules/c/src/Makefile (#3340, rep by copart)</li>
 <li>boot: add system-class-loader configuration (#3339, rep by toomasr)</li>

@@ -512,7 +512,7 @@ public class SimpleBean extends ComponentImpl
       InjectIntrospector.introspectDestroy(destroyList, cl);
       _destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(_destroyProgram);
-      
+
       if (_ctor == null)
 	introspectConstructor();
 

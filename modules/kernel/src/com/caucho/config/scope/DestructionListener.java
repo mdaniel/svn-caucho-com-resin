@@ -32,6 +32,7 @@ package com.caucho.config.scope;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import javax.context.Contextual;
 import javax.servlet.http.*;
 
 import com.caucho.config.inject.ComponentImpl;
@@ -45,15 +46,15 @@ public class DestructionListener
 	     HttpSessionBindingListener,
 	     ClassLoaderListener,
 	     Serializable {
-  private transient ArrayList<ComponentImpl> _componentList
-    = new ArrayList<ComponentImpl>();
+  private transient ArrayList<Contextual> _beanList
+    = new ArrayList<Contextual>();
   
   private transient ArrayList<WeakReference<Object>> _valueList
     = new ArrayList<WeakReference<Object>>();
 
-  public void addValue(ComponentImpl comp, Object value)
+  public void addValue(Contextual bean, Object value)
   {
-    _componentList.add(comp);
+    _beanList.add(bean);
     _valueList.add(new WeakReference<Object>(value));
   }
 
@@ -82,17 +83,17 @@ public class DestructionListener
 
   private void close()
   {
-    ArrayList<ComponentImpl> componentList = _componentList;
-    _componentList = null;
+    ArrayList<Contextual> beanList = _beanList;
+    _beanList = null;
     
     ArrayList<WeakReference<Object>> valueList = _valueList;
     _valueList = null;
 
-    if (valueList == null || componentList == null)
+    if (valueList == null || beanList == null)
       return;
 
-    for (int i = componentList.size() - 1; i >= 0; i--) {
-      ComponentImpl comp = componentList.get(i);
+    for (int i = beanList.size() - 1; i >= 0; i--) {
+      Contextual bean = beanList.get(i);
       WeakReference<Object> ref = valueList.get(i);
       Object value = null;
 
@@ -100,7 +101,7 @@ public class DestructionListener
 	value = ref.get();
 
 	if (value != null)
-	  comp.destroy(value, null);
+	  bean.destroy(value);
       }
     }
   }

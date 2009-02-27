@@ -2950,6 +2950,17 @@ public class WebApp extends ServletContextImpl
 	}
       }
 
+      // server/10g8 -- webApp listeners after session
+      for (int i = _listeners.size() - 1; i >= 0; i--) {
+	Listener listener = _listeners.get(i);
+
+	try {
+	  listener.destroy();
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+
       try {
         _classLoader.stop();
       } catch (Throwable e) {

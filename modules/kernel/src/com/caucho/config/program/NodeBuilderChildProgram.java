@@ -80,6 +80,6 @@ public class NodeBuilderChildProgram extends FlowProgram {
 
   public String toString()
   {
-    return "NodeBuilderChildProgram[" + _node + "]";
+    return getClass().getSimpleName() + "[" + _node + "]";
   }
 }

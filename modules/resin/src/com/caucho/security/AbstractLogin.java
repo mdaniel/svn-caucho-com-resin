@@ -275,7 +275,8 @@ public abstract class AbstractLogin implements Login {
    * @return the logged in principal on success, null on failure.
    */
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response)
+			 HttpServletResponse response,
+			 boolean isFail)
   {
     // Most login classes will extract the user and password (or some other
     // credentials) from the request and call auth.login.
@@ -301,7 +302,8 @@ public abstract class AbstractLogin implements Login {
 	return user;
       }
 
-      loginChallenge(request, response);
+      if (isFail)
+	loginChallenge(request, response);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

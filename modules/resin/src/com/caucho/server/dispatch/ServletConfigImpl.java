@@ -850,8 +850,9 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       InjectManager inject = InjectManager.create();
       
       _comp = (ComponentImpl) inject.createTransient(servletClass);
-      
-      servlet = inject.getInstance(_comp);
+
+      // server/1b40
+      servlet = _comp.createNoInit();
     }
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",

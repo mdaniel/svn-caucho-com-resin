@@ -902,9 +902,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 					  cluster.getId()));
 	}
 
+	/*
 	cluster.addDynamicServer(_serverId,
 				 _dynamicServer.getAddress(),
 				 _dynamicServer.getPort());
+	*/
       }
 
       /*

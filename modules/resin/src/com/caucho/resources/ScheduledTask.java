@@ -164,6 +164,11 @@ public class ScheduledTask
     _task = task;
   }
 
+  public Runnable getTask()
+  {
+    return _task;
+  }
+
   /**
    * Initialization.
    */

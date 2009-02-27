@@ -565,7 +565,7 @@ public class RequestAdapter extends RequestWrapper
     return false;
   }
   
-  public boolean login()
+  public boolean login(boolean isFail)
   {
     return true;
   }

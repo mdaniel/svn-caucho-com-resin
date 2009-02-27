@@ -90,6 +90,7 @@ abstract public class ScopeContext implements Context {
     instance = bean.create(creationalContext);
 
     scopeMap.put(bean, instance);
+    addDestructor(bean, instance);
     
     return instance;
   }
@@ -125,7 +126,7 @@ abstract public class ScopeContext implements Context {
 	    || scopeType == Dependent.class);
   }
 
-  public void addDestructor(ComponentImpl comp, Object value)
+  public void addDestructor(Contextual bean, Object value)
   {
   }
 }

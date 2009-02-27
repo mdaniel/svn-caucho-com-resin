@@ -37,6 +37,7 @@ import java.util.Hashtable;
 
 import javax.context.ApplicationScoped;
 import javax.context.Context;
+import javax.context.Contextual;
 import javax.inject.manager.Bean;
 
 /**
@@ -86,7 +87,7 @@ public class ApplicationScope extends ScopeContext {
     return (scope instanceof ApplicationScope);
   }
 
-  public void addDestructor(ComponentImpl comp, Object value)
+  public void addDestructor(Contextual comp, Object value)
   {
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 

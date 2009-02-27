@@ -944,9 +944,9 @@ public class HttpServletRequestImpl implements CauchoRequest
     return _request.isLoginRequested();
   }
   
-  public boolean login()
+  public boolean login(boolean isFail)
   {
-    return _request.login();
+    return _request.login(isFail);
   }
 
   public Connection getConnection()

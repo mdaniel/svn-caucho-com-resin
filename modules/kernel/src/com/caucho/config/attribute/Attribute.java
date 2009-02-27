@@ -75,6 +75,14 @@ public abstract class Attribute {
   }
 
   /**
+   * True if it allows inline beans
+   */
+  public boolean isAllowInline()
+  {
+    return false;
+  }
+
+  /**
    * True if it allows text.
    */
   public boolean isAllowText()

@@ -1680,7 +1680,7 @@ public abstract class AbstractHttpRequest
   /**
    * Authenticate the user.
    */
-  public boolean login()
+  public boolean login(boolean isFail)
   {
     try {
       /*
@@ -1705,7 +1705,9 @@ public abstract class AbstractHttpRequest
       Login login = app.getLogin();
 
       if (login != null) {
-	Principal user = login.login(getRequestFacade(), getResponse());
+	Principal user = login.login(getRequestFacade(),
+				     getResponse(),
+				     isFail);
 
 	return user != null;
 	/*
@@ -1717,12 +1719,17 @@ public abstract class AbstractHttpRequest
 	return true;
 	*/
       }
-      else {
+      else if (isFail) {
 	if (log.isLoggable(Level.FINE))
 	  log.finer("authentication failed, no login module found for "
 		    + app);
       
 	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	
+	return false;
+      }
+      else {
+	// if a non-failure, then missing login is fine
 	
 	return false;
       }
