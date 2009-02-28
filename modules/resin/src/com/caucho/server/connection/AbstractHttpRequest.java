@@ -2860,21 +2860,25 @@ public abstract class AbstractHttpRequest
 
   public void cleanup()
   {
-    if (! isComet()) {
-      _session = null;
+    _session = null;
       
-      if (_attributes.size() > 0) {
-	for (Map.Entry<String,Object> entry : _attributes.entrySet()) {
-	  Object value = entry.getValue();
+    if (_attributes.size() > 0) {
+      for (Map.Entry<String,Object> entry : _attributes.entrySet()) {
+	Object value = entry.getValue();
 
-	  if (value instanceof ScopeRemoveListener) {
-	    ((ScopeRemoveListener) value).removeEvent(this, entry.getKey());
-	  }
+	if (value instanceof ScopeRemoveListener) {
+	  ((ScopeRemoveListener) value).removeEvent(this, entry.getKey());
 	}
-	
-	_attributes.clear();
       }
+	
+      _attributes.clear();
     }
+
+    if (_form != null)
+      _form.clear();
+    _filledForm = null;
+    _cookiesIn = null;
+    _cookies.clear();
   }
 
   /**

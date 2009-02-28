@@ -75,8 +75,6 @@ public class ConfigContext implements CreationalContext {
 
   private Config _config;
 
-  private ConfigELContext _elContext = new ConfigELContext();
-  
   private DependentScope _dependentScope;
 
   private ArrayList<Dependency> _dependList;
@@ -146,53 +144,6 @@ public class ConfigContext implements CreationalContext {
   public String getBaseUri()
   {
     return Vfs.decode(_baseUri);
-  }
-
-  public static String decode(String uri)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    int len = uri.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = uri.charAt(i);
-
-      if (ch != '%' || len <= i + 2) {
-	sb.append(ch);
-	continue;
-      }
-
-      int d1 = uri.charAt(i + 1);
-      int d2 = uri.charAt(i + 2);
-      int v = 0;
-
-      if ('0' <= d1 && d1 <= '9')
-	v = 16 * v + d1 - '0';
-      else if ('a' <= d1 && d1 <= 'f')
-	v = 16 * v + d1 - 'a' + 10;
-      else if ('A' <= d1 && d1 <= 'F')
-	v = 16 * v + d1 - 'A' + 10;
-      else {
-	sb.append('%');
-	continue;
-      }
-
-      if ('0' <= d2 && d2 <= '9')
-	v = 16 * v + d2 - '0';
-      else if ('a' <= d2 && d2 <= 'f')
-	v = 16 * v + d2 - 'a' + 10;
-      else if ('A' <= d2 && d2 <= 'F')
-	v = 16 * v + d2 - 'A' + 10;
-      else {
-	sb.append('%');
-	continue;
-      }
-
-      sb.append((char) v);
-      i += 2;
-    }
-
-    return sb.toString();
   }
 
   /**
@@ -445,7 +396,6 @@ public class ConfigContext implements CreationalContext {
   private void configureNodeAttributes(Node node,
                                        Object bean,
                                        ConfigType type)
-    throws Exception
   {
     if (node instanceof QAttributedNode) {
       Node child = ((QAttributedNode) node).getFirstAttribute();
@@ -476,7 +426,6 @@ public class ConfigContext implements CreationalContext {
                                   Object bean,
                                   ConfigType type,
 				  boolean allowParam)
-    throws Exception
   {
     if (qName.getName().startsWith("xmlns")) {
       return;
@@ -485,122 +434,25 @@ public class ConfigContext implements CreationalContext {
     Attribute attrStrategy;
 
     try {
-      attrStrategy = type.getAttribute(qName);
-
-      if (attrStrategy == null)
-	attrStrategy = type.getDefaultAttribute(qName);
+      attrStrategy = getAttribute(type, qName, childNode);
 
       if (attrStrategy == null) {
-	if (childNode instanceof Element || childNode instanceof Attr) {
-	  String localName = qName.getLocalName();
-	  
-	  if (localName.indexOf(':') >= 0) {
-	    // XXX: need ioc QA
-	    throw error(L.l("'{0}' does not have a defined namespace for 'xmlns:{1}'.  Tags with prefixes need defined namespaces.",
-			    qName.getName(),
-			    localName.substring(0, localName.indexOf(':'))),
-			childNode);
-	  }
-	  
-	  throw error(L.l("'{0}' is an unknown property of '{1}'.",
-			  qName.getName(), type.getTypeName()),
-		      childNode);
-	}
-
-	return;
       }
-
-      if (attrStrategy.isProgram()) {
+      else if (attrStrategy.isProgram()) {
 	attrStrategy.setValue(bean, qName,
 			      buildProgram(attrStrategy, childNode));
-	return;
       }
       else if (attrStrategy.isNode()) {
 	attrStrategy.setValue(bean, qName, childNode);
-	return;
       }
-
-      ConfigType childType = null;
-      Object childBean = null;
-
-      String text;
-
-      if (attrStrategy.isAllowText()
-	  && (text = getTextValue(childNode)) != null) {
-	boolean isTrim = isTrim(childNode);
-	  
-	if (isEL() && attrStrategy.isEL()
-	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
-	  if (isTrim)
-	    text = text.trim();
-	  
-	  Object elValue = eval(attrStrategy.getConfigType(), text);
-
-	  // ioc/2410
-	  if (elValue != NULL)
-	    attrStrategy.setValue(bean, qName, elValue);
-	  else
-	    attrStrategy.setValue(bean, qName, null);
-	}
-	else {
-	  setText(bean, qName, text, attrStrategy, isTrim);
-	}
-
-	return;
+      else if (configureInlineText(bean, childNode, qName, attrStrategy)) {
+      }
+      else if (configureInlineBean(bean, childNode, attrStrategy)) {
       }
       else {
-	if (configureInlineBean(bean, childNode, attrStrategy)) {
-	  return;
-	}
-	else
-	  childBean = attrStrategy.create(bean, qName);
-      }
-
-      if (childBean != null) {
-	ConfigType childBeanType = TypeFactory.getType(childBean);
-	
-	if (childNode instanceof Element)
-	  configureNode(childNode, childBean, childBeanType);
-	else
-	  configureChildNode(childNode, TEXT, childBean, childBeanType, false);
-
-	childBeanType.init(childBean);
-
-	Object newBean = attrStrategy.replaceObject(childBean);
-	if (newBean != childBean)
-	  childBean = newBean;
-	else
-	  childBean = childBeanType.replaceObject(childBean);
-
-	attrStrategy.setValue(bean, qName, childBean);
-      }
-      else if ((childBean = getElementValue(attrStrategy, childNode)) != null) {
-	if (childBean != NULL)
-	  attrStrategy.setValue(bean, qName, childBean);
-	else
-	  attrStrategy.setValue(bean, qName, null);
-      }
-      else {
-	ConfigType attrType = attrStrategy.getConfigType();
-	
-	String textValue;
-
-	if (attrType.isNoTrim())
-	  textValue = textValueNoTrim(childNode);
-	else
-	  textValue = textValue(childNode);
-
-	if (isEL() && attrType.isEL() && textValue.indexOf("${") >= 0) {
-	  childType = attrStrategy.getConfigType();
-	  
-	  Object value = childType.valueOf(evalObject(textValue));
-	  
-	  attrStrategy.setValue(bean, qName, value);
-	}
-	else {
-	  // needed for boolean
-	  attrStrategy.setText(bean, qName, textValue);
-	}
+	configureBeanProperties(childNode, qName, bean,
+				type, attrStrategy,
+				allowParam);
       }
     } catch (LineConfigException e) {
       throw e;
@@ -608,80 +460,38 @@ public class ConfigContext implements CreationalContext {
       throw error(e, childNode);
     }
   }
-  
-  public Object create(Node childNode, ConfigType type)
-    throws ConfigException
+
+  private Attribute getAttribute(ConfigType type,
+				 QName qName,
+				 Node childNode)
   {
-    try {
-      Object childBean;
-      String text;
+    Attribute attrStrategy;
+    
+    attrStrategy = type.getAttribute(qName);
+      
+    if (attrStrategy == null)
+      attrStrategy = type.getDefaultAttribute(qName);
 
-      if ((text = getTextValue(childNode)) != null) {
-	boolean isTrim = isTrim(childNode);
-
-	if (isEL() && type.isEL()
-	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
-	  if (isTrim)
-	    text = text.trim();
+    if (attrStrategy != null)
+      return attrStrategy;
+    
+    if (childNode instanceof Element || childNode instanceof Attr) {
+      String localName = qName.getLocalName();
 	  
-	  Object elValue = eval(type, text);
-
-	  // ioc/2410
-	  if (elValue != NULL)
-	    return elValue;
-	  else
-	    return null;
-	}
-	else {
-	  return type.valueOf(text);
-	}
+      if (localName.indexOf(':') >= 0) {
+	// XXX: need ioc QA
+	throw error(L.l("'{0}' does not have a defined namespace for 'xmlns:{1}'.  Tags with prefixes need defined namespaces.",
+			qName.getName(),
+			localName.substring(0, localName.indexOf(':'))),
+		    childNode);
       }
-
-      QName qName = ((QNode) childNode).getQName();
-	
-      ConfigType childBeanType = type.createType(qName);
-
-      if (childBeanType != null) {
-	childBean = childBeanType.create(null, qName);
-	
-	if (childNode instanceof Element)
-	  configureNode(childNode, childBean, childBeanType);
-	else
-	  configureChildNode(childNode, TEXT, childBean, childBeanType, false);
-
-	childBeanType.init(childBean);
-
-	return childBeanType.replaceObject(childBean);
-      }
-      /*
-      else if ((childBean = getElementValue(attrStrategy, childNode)) != null) {
-	if (childBean != NULL)
-	  attrStrategy.setValue(bean, qName, childBean);
-	else
-	  attrStrategy.setValue(bean, qName, null);
-      }
-      */
-      else {
-	String textValue;
-
-	if (type.isNoTrim())
-	  textValue = textValueNoTrim(childNode);
-	else
-	  textValue = textValue(childNode);
-
-	if (isEL() && type.isEL() && textValue.indexOf("${") >= 0) {
-	  Object value = type.valueOf(evalObject(textValue));
 	  
-	  return value;
-	}
-	else
-	  return type.valueOf(textValue);
-      }
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, childNode);
+      throw error(L.l("'{0}' is an unknown property of '{1}'.",
+		      qName.getName(), type.getTypeName()),
+		  childNode);
     }
+
+    return null;
   }
   
   private void setText(Object bean,
@@ -689,7 +499,6 @@ public class ConfigContext implements CreationalContext {
 		       String text,
 		       Attribute attrStrategy,
 		       boolean isTrim)
-    throws Exception
   {
     ConfigType attrType = attrStrategy.getConfigType();
 	
@@ -706,10 +515,45 @@ public class ConfigContext implements CreationalContext {
     else
       attrStrategy.setText(bean, qName, text);
   }
+  
+  private boolean configureInlineText(Object bean,
+				      Node childNode,
+				      QName qName,
+				      Attribute attrStrategy)
+  {
+    if (! attrStrategy.isAllowText())
+      return false;
+
+    String text = getTextValue(childNode);
+
+    if (text != null) {
+      boolean isTrim = isTrim(childNode);
+	  
+      if (isEL() && attrStrategy.isEL()
+	  && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+	if (isTrim)
+	  text = text.trim();
+	  
+	Object elValue = eval(attrStrategy.getConfigType(), text);
+
+	// ioc/2410
+	if (elValue != NULL)
+	  attrStrategy.setValue(bean, qName, elValue);
+	else
+	  attrStrategy.setValue(bean, qName, null);
+      }
+      else {
+	setText(bean, qName, text, attrStrategy, isTrim);
+      }
+
+      return true;
+    }
+    else
+      return false;
+  }
 
   private boolean configureInlineBean(Object parent, Node node,
 				      Attribute attrStrategy)
-    throws Exception
   {
     if (! attrStrategy.isAllowInline())
       return false;
@@ -722,6 +566,9 @@ public class ConfigContext implements CreationalContext {
     QName qName = ((QNode) childNode).getQName();
     
     ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+    if (! attrStrategy.isInlineType(type))
+      return false;
 
     Object childBean = attrStrategy.create(parent, qName, type);
 
@@ -738,12 +585,33 @@ public class ConfigContext implements CreationalContext {
 
     return true;
   }
+  
+  private void configureBeanProperties(Node childNode,
+				       QName qName,
+				       Object bean,
+				       ConfigType type,
+				       Attribute attrStrategy,
+				       boolean allowParam)
+  {
+    Object childBean = attrStrategy.create(bean, qName);
+
+    if (childBean == null)
+      throw error(L.l("unknown attribute {0} for {1} and {2}",
+		      attrStrategy, bean, qName),
+		  childNode);
+    
+    ConfigType childBeanType = TypeFactory.getType(childBean);
+
+    childBean = configureChildBean(childBean, childBeanType,
+				   childNode, attrStrategy);
+
+    attrStrategy.setValue(bean, qName, childBean);
+  }
 
   private Object configureChildBean(Object childBean,
 				    ConfigType childBeanType,
 				    Node childNode,
 				    Attribute attrStrategy)
-    throws Exception
   {
     if (childNode instanceof Element) {
       configureNode(childNode, childBean, childBeanType);
@@ -808,7 +676,6 @@ public class ConfigContext implements CreationalContext {
 				       QName qName,
 				       Object bean,
 				       ConfigType type)
-    throws Exception
   {
     if (qName.getName().startsWith("xmlns")) {
       return;
@@ -838,6 +705,76 @@ public class ConfigContext implements CreationalContext {
       String textValue = childNode.getValue();
 
       attrStrategy.setText(bean, qName, textValue);
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, childNode);
+    }
+  }
+
+  //
+  // XXX: required by args ...
+  //
+  public Object create(Node childNode, ConfigType type)
+    throws ConfigException
+  {
+    try {
+      Object childBean;
+      String text;
+
+      if ((text = getTextValue(childNode)) != null) {
+	boolean isTrim = isTrim(childNode);
+
+	if (isEL() && type.isEL()
+	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+	  if (isTrim)
+	    text = text.trim();
+	  
+	  Object elValue = eval(type, text);
+
+	  // ioc/2410
+	  if (elValue != NULL)
+	    return elValue;
+	  else
+	    return null;
+	}
+	else {
+	  return type.valueOf(text);
+	}
+      }
+
+      QName qName = ((QNode) childNode).getQName();
+	
+      ConfigType childBeanType = type.createType(qName);
+
+      if (childBeanType != null) {
+	childBean = childBeanType.create(null, qName);
+	
+	if (childNode instanceof Element)
+	  configureNode(childNode, childBean, childBeanType);
+	else
+	  configureChildNode(childNode, TEXT, childBean, childBeanType, false);
+
+	childBeanType.init(childBean);
+
+	return childBeanType.replaceObject(childBean);
+      }
+      else {
+	String textValue;
+
+	if (type.isNoTrim())
+	  textValue = textValueNoTrim(childNode);
+	else
+	  textValue = textValue(childNode);
+
+	if (isEL() && type.isEL() && textValue.indexOf("${") >= 0) {
+	  Object value = type.valueOf(evalObject(textValue));
+	  
+	  return value;
+	}
+	else
+	  return type.valueOf(textValue);
+      }
     } catch (LineConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -923,11 +860,16 @@ public class ConfigContext implements CreationalContext {
    * @throws Exception
    */
   Object configureCreate(Class type, Node node)
-    throws Exception
   {
-    Object value = type.newInstance();
+    try {
+      Object value = type.newInstance();
 
-    return configure(value, node);
+      return configure(value, node);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, node);
+    }
   }
 
   /**
@@ -935,37 +877,7 @@ public class ConfigContext implements CreationalContext {
    */
   public ConfigELContext getELContext()
   {
-    return _elContext;
-  }
-
-  static boolean hasChildren(Node node)
-  {
-    Node ptr;
-
-    if (node instanceof QAttributedNode) {
-      Node attr = ((QAttributedNode) node).getFirstAttribute();
-
-      for (; attr != null; attr = attr.getNextSibling()) {
-        if (! attr.getNodeName().startsWith("xml"))
-          return true;
-      }
-    }
-    else if (node instanceof Element) {
-      NamedNodeMap attrList = node.getAttributes();
-      if (attrList != null) {
-        for (int i = 0; i < attrList.getLength(); i++) {
-          if (! attrList.item(i).getNodeName().startsWith("xml"))
-            return true;
-        }
-      }
-    }
-
-    for (ptr = node.getFirstChild(); ptr != null; ptr = ptr.getNextSibling()) {
-      if (ptr instanceof Element)
-	return true;
-    }
-
-    return false;
+    return ConfigELContext.EL_CONTEXT;
   }
 
   static String getValue(QName name, Node node, String defaultValue)
@@ -1073,15 +985,25 @@ public class ConfigContext implements CreationalContext {
 
       return data;
     }
+    else if (node instanceof CharacterData) {
+      CharacterData cData = (CharacterData) node;
+
+      return cData.getData();
+    }
+      
 
     if (! (node instanceof Element))
       return null;
 
-    Element elt = (Element) node;
+    QElement elt = (QElement) node;
 
     // ioc/2235
-    if (elt.getAttributes().getLength() > 0)
-      return null;
+    for (Node attr = elt.getFirstAttribute();
+	 attr != null;
+	 attr = attr.getNextSibling()) {
+      if (! "xml".equals(attr.getPrefix()))
+	return null;
+    }
 
     for (Node child = elt.getFirstChild();
 	 child != null;
@@ -1101,7 +1023,7 @@ public class ConfigContext implements CreationalContext {
       }
     }
 
-    return null;
+    return "";
   }
 
   private Object eval(ConfigType type, String data)
@@ -1379,32 +1301,86 @@ public class ConfigContext implements CreationalContext {
     return getClass().getSimpleName() + "[" + _dependentScope + "]";
   }
 
-  static class ValidatorEntry {
-    private Validator _validator;
-    private ClassLoader _loader;
+  /*
+  public static String decode(String uri)
+  {
+    StringBuilder sb = new StringBuilder();
 
-    ValidatorEntry(Validator validator)
-    {
-      _validator = validator;
+    int len = uri.length();
 
-      _loader = Thread.currentThread().getContextClassLoader();
+    for (int i = 0; i < len; i++) {
+      char ch = uri.charAt(i);
+
+      if (ch != '%' || len <= i + 2) {
+	sb.append(ch);
+	continue;
+      }
+
+      int d1 = uri.charAt(i + 1);
+      int d2 = uri.charAt(i + 2);
+      int v = 0;
+
+      if ('0' <= d1 && d1 <= '9')
+	v = 16 * v + d1 - '0';
+      else if ('a' <= d1 && d1 <= 'f')
+	v = 16 * v + d1 - 'a' + 10;
+      else if ('A' <= d1 && d1 <= 'F')
+	v = 16 * v + d1 - 'A' + 10;
+      else {
+	sb.append('%');
+	continue;
+      }
+
+      if ('0' <= d2 && d2 <= '9')
+	v = 16 * v + d2 - '0';
+      else if ('a' <= d2 && d2 <= 'f')
+	v = 16 * v + d2 - 'a' + 10;
+      else if ('A' <= d2 && d2 <= 'F')
+	v = 16 * v + d2 - 'A' + 10;
+      else {
+	sb.append('%');
+	continue;
+      }
+
+      sb.append((char) v);
+      i += 2;
     }
 
-    void validate()
-      throws ConfigException
-    {
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
+    return sb.toString();
+  }
+  */
 
-      try {
-	thread.setContextClassLoader(_loader);
+  /*
+  static boolean hasChildren(Node node)
+  {
+    Node ptr;
 
-	_validator.validate();
-      } finally {
-	thread.setContextClassLoader(oldLoader);
+    if (node instanceof QAttributedNode) {
+      Node attr = ((QAttributedNode) node).getFirstAttribute();
+
+      for (; attr != null; attr = attr.getNextSibling()) {
+        if (! attr.getNodeName().startsWith("xml"))
+          return true;
       }
     }
+    else if (node instanceof Element) {
+      NamedNodeMap attrList = node.getAttributes();
+      if (attrList != null) {
+        for (int i = 0; i < attrList.getLength(); i++) {
+          if (! attrList.item(i).getNodeName().startsWith("xml"))
+            return true;
+        }
+      }
+    }
+
+    for (ptr = node.getFirstChild(); ptr != null; ptr = ptr.getNextSibling()) {
+      if (ptr instanceof Element)
+	return true;
+    }
+
+    return false;
   }
+  */
 
   public void push(Object obj)
   {

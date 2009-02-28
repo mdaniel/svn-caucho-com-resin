@@ -255,7 +255,7 @@ public class BeanType extends ConfigType
       if (attr != null)
 	return attr;
     }
-    
+
     if (_addCustomBean != null) {
       return _addCustomBean;
     }
@@ -282,8 +282,9 @@ public class BeanType extends ConfigType
 
     Attribute attr = _addMethodMap.get(cl);
 
-    if (attr != null)
+    if (attr != null) {
       return attr;
+    }
     
     for (Class iface : cl.getInterfaces()) {
       attr = getAddAttribute(iface);
@@ -690,7 +691,7 @@ public class BeanType extends ConfigType
 
 	_addMethodMap.put(paramTypes[0], addAttr);
 
-	_addBean = addAttr;
+	// _addBean = addAttr;
       }
       else if ((name.startsWith("set") || name.startsWith("add"))
 	       && paramTypes.length == 1

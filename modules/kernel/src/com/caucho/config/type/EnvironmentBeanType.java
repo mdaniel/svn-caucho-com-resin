@@ -56,7 +56,7 @@ public class EnvironmentBeanType extends BeanType
   {
     super(beanClass);
 
-    setAddCustomBean(new CustomBeanAttribute());
+    setAddCustomBean(CustomBeanAttribute.ATTRIBUTE);
   }
 
   /**

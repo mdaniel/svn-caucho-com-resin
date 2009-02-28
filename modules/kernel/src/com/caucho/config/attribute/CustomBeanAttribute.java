@@ -43,11 +43,14 @@ import com.caucho.xml.QName;
 
 public class CustomBeanAttribute extends Attribute {
   private static final L10N L = new L10N(CustomBeanAttribute.class);
+
+  public static final CustomBeanAttribute ATTRIBUTE
+    = new CustomBeanAttribute();
   
   private final ConfigType _configType;
   private final Method _setMethod;
 
-  public CustomBeanAttribute()
+  private CustomBeanAttribute()
   {
     this(null, TypeFactory.getType(CustomBeanConfig.class));
   }

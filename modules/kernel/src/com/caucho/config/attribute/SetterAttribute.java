@@ -69,6 +69,15 @@ public class SetterAttribute extends Attribute {
   {
     return true;
   }
+
+  /**
+   * True if it allows inline beans
+   */
+  @Override
+  public boolean isInlineType(ConfigType type)
+  {
+    return _type.isAssignableFrom(type.getType());
+  }
   
   /**
    * Sets the value of the attribute

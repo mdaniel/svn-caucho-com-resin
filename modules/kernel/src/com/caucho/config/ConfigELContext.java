@@ -39,6 +39,8 @@ import javax.el.*;
  * Creates a variable resolver based on the classloader.
  */
 public class ConfigELContext extends ELContext {
+  public static final ConfigELContext EL_CONTEXT;
+  
   private static final StackELResolver _stackResolver;
 
   private ELResolver _resolver = _stackResolver;
@@ -91,5 +93,7 @@ public class ConfigELContext extends ELContext {
     _stackResolver.push(new SystemPropertiesResolver());
     _stackResolver.push(new ConfigPropertiesResolver());
     _stackResolver.push(new WebBeansContextResolver());
+    
+    EL_CONTEXT = new ConfigELContext();
   }
 }

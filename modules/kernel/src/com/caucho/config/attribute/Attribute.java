@@ -83,6 +83,14 @@ public abstract class Attribute {
   }
 
   /**
+   * True if the inline type matches
+   */
+  public boolean isInlineType(ConfigType type)
+  {
+    return false;
+  }
+
+  /**
    * True if it allows text.
    */
   public boolean isAllowText()
