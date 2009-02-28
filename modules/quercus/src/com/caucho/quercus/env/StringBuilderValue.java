@@ -197,15 +197,10 @@ public class StringBuilderValue
   
   private void init(StringBuilderValue v)
   {
-    if (v._isCopy) {
+    if (v._isCopy || v instanceof StaticStringValue) {
       _buffer = new byte[v._buffer.length];
       System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
       _length = v._length;
-    }
-    else if (v instanceof StaticStringValue) {
-      _buffer = v._buffer;
-      _length = v._length;
-      _isCopy = true;
     }
     else {
       _buffer = v._buffer;
@@ -766,9 +761,6 @@ public class StringBuilderValue
       if (sb._buffer.length < index + 1)
         sb.ensureCapacity(index + 1);
       
-      if(sb._isCopy)
-        sb.copyOnWrite();
-      
       int padLen = index - len;
 
       for (int i = 0; i <= padLen; i++) {
@@ -1033,9 +1025,6 @@ public class StringBuilderValue
 
     if (_buffer.length < _length + sublen)
       ensureCapacity(_length + sublen);
-
-    if (_isCopy)
-      copyOnWrite();
     
     byte []buffer = _buffer;
     int length = _length;
@@ -1060,9 +1049,6 @@ public class StringBuilderValue
     if (_buffer.length < _length + sublen)
       ensureCapacity(_length + sublen);
 
-    if (_isCopy)
-      copyOnWrite();
-    
     byte []buffer = _buffer;
     int length = _length;
 
@@ -1082,9 +1068,6 @@ public class StringBuilderValue
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
-
-    if (_isCopy)
-      copyOnWrite();
     
     _buffer[_length++] = (byte) ch;
     
@@ -1102,9 +1085,6 @@ public class StringBuilderValue
     if (_buffer.length < end)
       ensureCapacity(end);
 
-    if (_isCopy)
-      copyOnWrite();
-    
     byte []buffer = _buffer;
     int bufferLength = _length;
     
@@ -1127,9 +1107,6 @@ public class StringBuilderValue
     
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
-
-    if (_isCopy)
-      copyOnWrite();
     
     byte []buffer = _buffer;
     int bufferLength = _length;
@@ -1153,9 +1130,6 @@ public class StringBuilderValue
     
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
-
-    if (_isCopy)
-      copyOnWrite();
     
     byte []buffer = _buffer;
     int bufferLength = _length;
@@ -1177,9 +1151,6 @@ public class StringBuilderValue
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
-
-    if (_isCopy)
-      copyOnWrite();
     
     byte []buffer = _buffer;
     int bufferLength = _length;
@@ -1203,9 +1174,6 @@ public class StringBuilderValue
     
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
-
-    if (_isCopy)
-      copyOnWrite();
     
     if (buf instanceof StringBuilderValue) {
       StringBuilderValue sb = (StringBuilderValue) buf;
@@ -1241,9 +1209,6 @@ public class StringBuilderValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    if (_isCopy)
-      copyOnWrite();
-    
     System.arraycopy(sb._buffer, head, _buffer, _length, length);
 
     _length += length;
@@ -1339,9 +1304,6 @@ public class StringBuilderValue
     if (_buffer.length < end)
       ensureCapacity(end);
     
-    if (_isCopy)
-      copyOnWrite();
-
     System.arraycopy(buf, offset, _buffer, _length, length);
     
     _length = end;
@@ -1366,9 +1328,6 @@ public class StringBuilderValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    if (_isCopy)
-      copyOnWrite();
-    
     byte []charBuffer = _buffer;
     int charLength = _length;
 
@@ -1412,9 +1371,6 @@ public class StringBuilderValue
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
 
-    if (_isCopy)
-      copyOnWrite();
-    
     _buffer[_length++] = (byte) v;
 
     return this;
@@ -1458,9 +1414,6 @@ public class StringBuilderValue
     if (_buffer.length < _length + sublen)
       ensureCapacity(_length + sublen);
 
-    if (_isCopy)
-      copyOnWrite();
-    
     for (int i = 0; i < sublen; i++) {
       _buffer[_length++] = (byte) s.charAt(i);
     }
@@ -1478,9 +1431,6 @@ public class StringBuilderValue
     
     if (_buffer.length < _length + len)
       ensureCapacity(_length + len);
-    
-    if (_isCopy)
-      copyOnWrite();
 
     System.arraycopy(bytes, offset, _buffer, _length, len);
     
@@ -1505,9 +1455,6 @@ public class StringBuilderValue
       while (length > 0) {
         if (_buffer.length < _length + sublen)
           ensureCapacity(_length + sublen);
-        
-        if (_isCopy)
-          copyOnWrite();
 
         int count = reader.read(buffer, 0, sublen);
 
@@ -1658,18 +1605,6 @@ public class StringBuilderValue
   public void ensureAppendCapacity(int newCapacity)
   {
     ensureCapacity(_length + newCapacity);
-  }
-  
-  protected void copyOnWrite()
-  {
-    if (_isCopy) {
-      _isCopy = false;
-      
-      byte []buffer = new byte[_buffer.length];
-      
-      System.arraycopy(_buffer, 0, buffer, 0, _length);
-      _buffer = buffer;
-    }
   }
 
   protected void ensureCapacity(int newCapacity)
