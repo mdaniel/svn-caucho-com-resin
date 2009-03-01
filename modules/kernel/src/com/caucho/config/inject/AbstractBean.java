@@ -360,6 +360,16 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return annotations;
   }
 
+  public Annotation getAnnotation(Class type)
+  {
+    return _annotationMap.get(type);
+  }
+
+  public boolean isAnnotationPresent(Class type)
+  {
+    return _annotationMap.get(type) != null;
+  }
+
   /**
    * Returns the types that the bean implements
    */
@@ -1004,7 +1014,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 					  webBeansLoader));
     }
     else {
-      log.fine(L.l("'{0}' is an invalid class because its classloader '{1}' does not belong to the webbeans classloader '{2}'",
+      log.fine(L.l("'{0}' may be incorrect classloader '{1}' does not belong to the injection classloader '{2}'",
 		   cl, beanLoader,
 		   webBeansLoader));
     }

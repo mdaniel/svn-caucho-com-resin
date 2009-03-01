@@ -557,7 +557,7 @@ public class ConfigContext implements CreationalContext {
   {
     if (! attrStrategy.isAllowInline())
       return false;
-    
+
     Node childNode = getChildElement(node);
 
     if (childNode == null)

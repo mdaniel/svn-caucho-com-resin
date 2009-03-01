@@ -1231,12 +1231,22 @@ public class InjectManager
   public <T> T getInstance(Bean<T> bean,
 			   CreationalContext<T> createContext)
   {
+    return getInstanceRec(bean, createContext, this);
+  }
+  
+  private <T> T getInstanceRec(Bean<T> bean,
+			       CreationalContext<T> createContext,
+			       InjectManager topManager)
+  {
     if (bean.getManager() != this) {
-      if (getParent() == null)
-	throw new IllegalStateException(L.l("{0}: {1} is an unknown Bean object for this Manager",
-					    this, bean));
+      if (getParent() == null) {
+	throw new IllegalStateException(L.l("{0}: unknown bean {1} with owning manager {2}",
+					    topManager,
+					    bean,
+					    bean.getManager()));
+      }
 
-      return getParent().getInstance(bean, createContext);
+      return getParent().getInstanceRec(bean, createContext, topManager);
     }
     else if (false && bean instanceof ComponentImpl)
       return (T) ((ComponentImpl) bean).get();

@@ -95,12 +95,18 @@ public class CustomBeanAnnotationAttribute extends Attribute {
 
     Attribute attr = _configType.getAttribute(VALUE);
 
-    if (attr == null)
+    if (attr != null) {
+      attr.setText(bean, VALUE, text);
+
+      setValue(parent, name, bean);
+    }
+    else if (text == null || "".equals(text)) {
+      // server/2pad
+      setValue(parent, name, bean);
+    }
+    else {
       throw new ConfigException(L.l("'{0}' does not have a 'value' attribute, so it cannot have a text value.",
 				    name));
-
-    attr.setText(bean, VALUE, text);
-
-    setValue(parent, name, bean);
+    }
   }
 }

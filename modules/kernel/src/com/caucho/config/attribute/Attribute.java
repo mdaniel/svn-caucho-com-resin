@@ -104,8 +104,22 @@ public abstract class Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
-    if (value.trim().equals(""))
-      return;
+    if (value.trim().equals("")) {
+      Object childBean = create(bean, name);
+
+      if (childBean != null) {
+	ConfigType type = TypeFactory.getType(childBean.getClass());
+
+	type.init(childBean);
+
+	Object newBean = replaceObject(childBean);
+
+	setValue(bean, name, newBean);
+
+	return;
+      }
+      
+    }
 
     throw new ConfigException(L.l("{0}: '{1}' does not allow text for attribute {2}.",
 				  this,

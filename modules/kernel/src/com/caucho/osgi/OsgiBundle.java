@@ -30,9 +30,11 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.OsgiService;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.inject.ProxyBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.CustomBeanConfig;
@@ -951,14 +953,12 @@ public class OsgiBundle implements Bundle
     {
       ComponentImpl comp = bean.getComponent();
 
-      /*
-      if (comp.isService()) {
-	WebBeansContainer webBeans
-	  = WebBeansContainer.create(_manager.getParentLoader());
-
-	webBeans.addComponent(comp);
+      if (comp.isAnnotationPresent(OsgiService.class)) {
+	InjectManager inject
+	  = InjectManager.create(_manager.getParentLoader());
+	
+	inject.addBean(new ProxyBean(inject, comp));
       }
-      */
     }
   }
 
@@ -972,10 +972,10 @@ public class OsgiBundle implements Bundle
       super.init();
 
       if (_comp != null) {
-	InjectManager webBeans
+	InjectManager inject
 	  = InjectManager.create(_manager.getParentLoader());
 
-	webBeans.addBean(_comp);
+	inject.addBean(new ProxyBean(inject, _comp));
       }
     }
   }

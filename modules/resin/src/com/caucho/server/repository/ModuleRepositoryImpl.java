@@ -32,6 +32,7 @@ package com.caucho.server.repository;
 import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.repository.ModuleRepository;
+import com.caucho.repository.Resolver;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -81,6 +82,11 @@ public class ModuleRepositoryImpl extends ModuleRepository
   public void addResolver(ResolverConfig resolverConfig)
   {
     addResolverImpl(resolverConfig.getResolver());
+  }
+
+  public void add(Resolver resolver)
+  {
+    addResolverImpl(resolver);
   }
 
   public JarsDirectory createJars()

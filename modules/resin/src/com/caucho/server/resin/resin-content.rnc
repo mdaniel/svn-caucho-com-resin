@@ -512,7 +512,9 @@ r_protocol =
   }
 
 r_module-repository = element module-repository {
-  element jars {
+  r_bean-Custom*
+  
+  & element jars {
     (attribute path { string }
      | element path { string })
   }*
