@@ -79,7 +79,7 @@
         class="com.caucho.config.core.ResinInclude"/>
 
   <bean name="interceptor"
-        class="com.caucho.webbeans.cfg.InterceptorConfig"/>
+        class="com.caucho.config.cfg.InterceptorConfig"/>
 
   <bean name="java"
         class="com.caucho.java.JavacConfig"/>
