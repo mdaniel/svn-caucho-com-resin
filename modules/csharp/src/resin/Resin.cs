@@ -102,7 +102,7 @@ namespace Caucho
           
           argsIdx++;
         } else if (args[argsIdx].StartsWith("-J")){
-          //skip
+          argsIdx++;
         } else if (args[argsIdx].StartsWith("-D")) {
           jvmArgs.Append(' ').Append(args[argsIdx]);
           
