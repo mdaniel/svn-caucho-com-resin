@@ -290,7 +290,14 @@ public class DeployClient
   {
     InputStream blobIs = GitCommitTree.writeBlob(is, length);
 
-    InputStreamSource iss = new InputStreamSource(blobIs);
+    sendRawFile(sha1, blobIs);
+  }
+
+  public void sendRawFile(String sha1,
+			  InputStream is)
+    throws IOException
+  {
+    InputStreamSource iss = new InputStreamSource(is);
     
     StreamSource source = new StreamSource(iss);
 
@@ -322,13 +329,17 @@ public class DeployClient
     return (String) querySet(query);
   }
 
+  /**
+   * Public for QA, but not normally exposed.
+   */
   private String commit(String tag,
-			String sha1,
-			String user,
-			String message,
-			String version,
-			HashMap<String,String> attr)
+		       String sha1,
+		       String user,
+		       String message,
+		       String version,
+		       HashMap<String,String> attr)
   {
+    // server/2o66
     DeployCommitQuery query
       = new DeployCommitQuery(tag, sha1, user, message, version, attr);
 

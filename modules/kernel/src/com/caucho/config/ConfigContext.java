@@ -595,10 +595,11 @@ public class ConfigContext implements CreationalContext {
   {
     Object childBean = attrStrategy.create(bean, qName);
 
-    if (childBean == null)
-      throw error(L.l("unknown attribute {0} for {1} and {2}",
+    if (childBean == null) {
+      throw error(L.l("unable to create attribute {0} for {1} and {2}",
 		      attrStrategy, bean, qName),
 		  childNode);
+    }
     
     ConfigType childBeanType = TypeFactory.getType(childBean);
 

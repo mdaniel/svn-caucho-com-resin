@@ -64,7 +64,8 @@ public class BeanType extends ConfigType
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
 
-  private static final QName TEXT = new QName("#text");
+  public static final QName TEXT = new QName("#text");
+  public static final QName VALUE = new QName("value");
 
   private static final Object _introspectLock = new Object();
 

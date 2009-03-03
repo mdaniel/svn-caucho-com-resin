@@ -111,6 +111,11 @@ public class RoleMapManager
 
     if (_parent != null)
       return _parent.isUserInRole(role, user);
+    else if (size > 0) {
+      // server/1ae0
+      
+      return Boolean.FALSE;
+    }
     else
       return null;
   }

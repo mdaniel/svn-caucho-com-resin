@@ -87,7 +87,7 @@ public class LoggerConfig {
     else if (level.equals("all"))
       _level = Level.ALL;
     else
-      throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
+      throw new ConfigException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
   }
 
   /**
@@ -96,6 +96,9 @@ public class LoggerConfig {
   @PostConstruct
   public void init()
   {
+    if (_logger == null)
+      throw new ConfigException(L.l("<logger> requires a 'name' attribute."));
+    
     if (_level != null)
       _logger.setLevel(_level);
 

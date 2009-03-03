@@ -124,7 +124,7 @@ public class XmlRoleMap extends AbstractRoleMap
 
     if (role.containsUser(name))
       return Boolean.TRUE;
-    
+
     return null;
   }
 

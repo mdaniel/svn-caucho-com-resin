@@ -40,6 +40,7 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.resin.Resin;
@@ -302,7 +303,7 @@ public class ErrorPageManager {
       _parent.sendServletError(e, req, res);
       return;
     }
-    
+
     if (badRequest) {
       title = rootExn.getMessage();
       doStackTrace = false;
@@ -434,7 +435,7 @@ public class ErrorPageManager {
 	else
       */
     
-      if (log.isLoggable(Level.FINE) || ! Alarm.isTest())
+      if (log.isLoggable(Level.FINE) && ! Alarm.isTest())
 	doStackTrace = true;
 
       if (doStackTrace) {
@@ -468,12 +469,13 @@ public class ErrorPageManager {
 
       out.println("</pre></code>");
 
+      Server server = Server.getCurrent();
       String version = null;
-      if (_app == null) {
+
+      if (server == null) {
       }
-      else if (_app.getServer() != null
-	       && _app.getServer().getServerHeader() != null) {
-	version = _app.getServer().getServerHeader();
+      else if (server.getServerHeader() != null) {
+	version = server.getServerHeader();
       }
       else if (CauchoSystem.isTesting()) {
       }
@@ -486,8 +488,8 @@ public class ErrorPageManager {
 	
 	out.println(version);
 	
-	if (Resin.getCurrent() != null)
-	  out.println("Server: '" + Resin.getCurrent().getServerId() + "'");
+	if (server != null)
+	  out.println("Server: '" + server.getServerId() + "'");
 	  
 	out.println("</small>");
       }

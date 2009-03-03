@@ -71,8 +71,8 @@ public class RequestAdapter extends RequestWrapper
   
   public static String SHUTDOWN = "com.caucho.shutdown";
 
-  private static final FreeList<RequestAdapter> _freeList =
-    new FreeList<RequestAdapter>(16);
+  private static final FreeList<RequestAdapter> _freeList
+    = new FreeList<RequestAdapter>(16);
   
   // for real adapters
   private WebApp _webApp;

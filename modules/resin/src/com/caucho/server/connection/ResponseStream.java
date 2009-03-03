@@ -828,7 +828,7 @@ class ResponseStream extends ToByteResponseStream {
       return req.dbgId();
     }
     else
-      return "inc";
+      return "inc ";
   }
 
   /**

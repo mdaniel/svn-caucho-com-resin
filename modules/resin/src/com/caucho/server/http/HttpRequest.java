@@ -192,8 +192,13 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     _hasRequest = false;
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
     
     try {
+      thread.setContextClassLoader(_server.getClassLoader());
+      
       startRequest();
       startInvocation();
       
@@ -295,6 +300,8 @@ public class HttpRequest extends AbstractHttpRequest
       if (! isSuspend()) {
 	finishRequest();
       }
+      
+      thread.setContextClassLoader(oldLoader);
     }
 
     if (log.isLoggable(Level.FINE)) {

@@ -219,7 +219,7 @@ abstract public class Repository
 
       if (! validateFile(root))
 	throw new RepositoryException(L.l("'{0}' is an invalid .git file",
-						root));
+					  root));
 
       RepositoryTagEntry oldEntry = tagMap.get(tag);
       String parent = null;

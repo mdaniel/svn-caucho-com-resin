@@ -79,7 +79,7 @@ public class HmuxResponse extends AbstractHttpResponse {
 				    boolean isHead)
     throws IOException
   {
-    if (! _request.hasRequest())
+    if (! _originalRequest.hasRequest())
       return false;
     
     CharBuffer cb = _cb;

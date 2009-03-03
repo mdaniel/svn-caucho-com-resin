@@ -339,9 +339,12 @@ public class ComponentImpl<T> extends AbstractBean<T>
       }
     }
 
+    // server/13a3 - XXX: handled in scope
+    /*
     if (_destroyProgram.length > 0) {
       env.addDestructor(this, value);
     }
+    */
 
     return value;
   }

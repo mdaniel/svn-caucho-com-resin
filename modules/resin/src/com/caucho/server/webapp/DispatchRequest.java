@@ -608,6 +608,6 @@ class DispatchRequest extends RequestAdapter {
 
   public String toString()
   {
-    return "DispatchRequest[" + getRequest() + "]";
+    return getClass().getSimpleName() + "[" + getRequest() + "]";
   }
 }

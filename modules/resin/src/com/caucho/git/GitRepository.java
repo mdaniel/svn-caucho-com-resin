@@ -573,13 +573,15 @@ public class GitRepository {
       String newHex = validate(tmp);
 
       if (! sha1.equals(newHex))
-	throw new RuntimeException(L.l("'{0}' does not match expected '{1}'",
+	throw new RuntimeException(L.l("{0}: file validation failed because sha-1 hash '{0}' does not match expected '{1}'",
 				       newHex, sha1));
 
       tmp.renameTo(objectPath);
       
       if (log.isLoggable(Level.FINER))
 	log.finer(this + " addRawGitFile " + sha1 + " " + objectPath);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {

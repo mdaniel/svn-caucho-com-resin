@@ -28,6 +28,7 @@
 
 package com.caucho.security;
 
+import com.caucho.config.Service;
 import com.caucho.config.types.InitParam;
 import com.caucho.security.BasicPrincipal;
 
@@ -54,6 +55,7 @@ import java.util.logging.*;
  * &lt;/authenticator>
  * </code></pre>
  */
+@Service
 public class LdapAuthenticator extends AbstractAuthenticator {
   private static final Logger log
     = Logger.getLogger(LdapAuthenticator.class.getName());
@@ -62,6 +64,7 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   
   private String _userAttribute = "uid";
   private String _passwordAttribute = "userPassword";
+  private String _roleAttribute;
   private String _baseDn;
   private String _dnPrefix;
   private String _dnSuffix;
@@ -120,6 +123,11 @@ public class LdapAuthenticator extends AbstractAuthenticator {
     _passwordAttribute = password;
   }
 
+  public void setRoleAttribute(String role)
+  {
+    _roleAttribute = role;
+  }
+
   /**
    * Sets the Context.SECURITY_AUTHENTICATION
    */
@@ -157,7 +165,8 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   /**
    * Authenticate (login) the user.
    */
-  protected PasswordUser getUser(String userName)
+  @Override
+  protected PasswordUser getPasswordUser(String userName)
   {
     try {
       Hashtable env = new Hashtable();
@@ -187,11 +196,27 @@ public class LdapAuthenticator extends AbstractAuthenticator {
 
       Attribute passwordAttr = attributes.get(_passwordAttribute);
 
-      if (passwordAttr == null)
-	return null;
-      
       String ldapPassword = (String) passwordAttr.get();
 
+      if (passwordAttr == null)
+	return null;
+
+      String []roles = null;
+      
+      if (_roleAttribute != null) {
+	Attribute roleAttr = attributes.get(_roleAttribute);
+
+	if (roleAttr != null) {
+	  String roleSet = (String) roleAttr.get();
+
+	  if (roleSet != null)
+	    roles = roleSet.split("[, ]+");
+	}
+      }
+
+      if (roles == null)
+	roles = new String[] { "user" };
+      
       Principal principal = new BasicPrincipal(userName);
 
       boolean isDisabled = false;
@@ -199,7 +224,7 @@ public class LdapAuthenticator extends AbstractAuthenticator {
       
       return new PasswordUser(principal, ldapPassword.toCharArray(),
 			      isDisabled, isAnonymous,
-			      new String[] { "user" });
+			      roles);
     } catch (NamingException e) {
       log.log(Level.FINE, e.toString(), e);
 
