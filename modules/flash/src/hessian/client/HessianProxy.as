@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -57,7 +57,7 @@ package hessian.client
 	import flash.utils.flash_proxy;
 
   import hessian.io.Hessian2Input;
-  import hessian.io.HessianOutput;
+  import hessian.io.Hessian2Output;
 
   /**
    * Pure flash proxy client for Hessian.
@@ -68,7 +68,7 @@ package hessian.client
     private var _destination:String;
     private var _returnTypes:Object = new Object();
     private var _input:Hessian2Input = new Hessian2Input();
-    private var _output:HessianOutput = new HessianOutput();
+    private var _output:Hessian2Output = new Hessian2Output();
 
     /**
      * Constructor.

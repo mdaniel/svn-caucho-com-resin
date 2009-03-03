@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -173,6 +173,16 @@ package hessian.client
       var fault:Fault = null;
 
       try {
+        var ch:int = stream.readByte();
+
+        if (ch != 'H'.charCodeAt()) 
+          throw new Error("expected hessian reply at " + codeName(ch));
+
+        var major:int = stream.readByte();
+        var minor:int = stream.readByte();
+
+        // XXX do something with version
+
         _input.init(stream);
         ret = _input.readReply(_returnType);
 
@@ -231,6 +241,16 @@ package hessian.client
     public function set returnType(returnType:Class):void
     {
       _returnType = returnType;
+    }
+
+    /** @private */
+    protected function codeName(ch:int):String
+    {
+      if (ch < 0) 
+        return "end of file";
+      else
+        return "0x" + (ch & 0xff).toString(16) + 
+               " (" + String.fromCharCode(ch) + ")";
     }
 
     public override function toString():String

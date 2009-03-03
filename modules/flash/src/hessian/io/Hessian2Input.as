@@ -1471,10 +1471,10 @@ package hessian.io
           return new Number(1);
 
         case Hessian2Constants.BC_DOUBLE_BYTE:
-          return new Number(read());
-
+          return ByteUtils.castToByte(_offset < _length ? _buffer[_offset++]
+                                                        : read());
         case Hessian2Constants.BC_DOUBLE_SHORT:
-          return new Number(256 * read() + read());
+          return ByteUtils.castToShort((256 * read() + read()) & 0xFFFF);
 
         case Hessian2Constants.BC_DOUBLE_MILL:
           {
