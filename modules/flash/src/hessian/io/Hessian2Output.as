@@ -304,11 +304,12 @@ package hessian.io
 
       var type:XML = describeType(object);
 
-      if (type.@name == "Object") {
+      if (type.@name == "Object" && 
+          ! object.hasOwnProperty("hessianTypeName")) {
         _buffer.writeByte(Hessian2Constants.BC_MAP_UNTYPED);
 
-        for (var key:String in object) {
-          writeString(key);
+        for (var key:Object in object) {
+          writeObject(key);
           writeObject(object[key]);
         }
 
