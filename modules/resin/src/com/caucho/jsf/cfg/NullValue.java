@@ -41,6 +41,7 @@ import javax.faces.convert.*;
 import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
+import javax.inject.Produces;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
@@ -52,5 +53,9 @@ public class NullValue extends AbstractValueConfig
   AbstractValue getValue(Class type)
   {
     return NullPropertyValue.NULL;
+  }
+
+  public static NullValue valueOf(String value) {
+    return NULL;
   }
 }
