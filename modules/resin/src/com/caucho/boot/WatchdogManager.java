@@ -123,6 +123,8 @@ class WatchdogManager implements AlarmListener {
     ThreadPool.getThreadPool().setThreadIdleMax(5);
 
     ResinELContext elContext = _args.getELContext();
+
+    // XXX: needs to be config
     
     InjectManager webBeans = InjectManager.create();
     webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
@@ -135,6 +137,7 @@ class WatchdogManager implements AlarmListener {
     ResinConfigLibrary.configure(webBeans);
 
     _watchdogPort = _args.getWatchdogPort();
+    
     readConfig(_args);
 
     Watchdog server = _watchdogMap.get(_args.getServerId());
@@ -200,6 +203,7 @@ class WatchdogManager implements AlarmListener {
       depend.init();
       
       RemoteAdminService adminService = new RemoteAdminService();
+      adminService.setAuthenticationRequired(false);
       adminService.init();
 
       WatchdogService service
@@ -384,7 +388,7 @@ class WatchdogManager implements AlarmListener {
    */
   void killServer(String serverId)
   {
-    // no synchronization since kill must avoid blocking
+    // no synchronization because kill must avoid blocking
     
     Watchdog watchdog = _watchdogMap.get(serverId);
     

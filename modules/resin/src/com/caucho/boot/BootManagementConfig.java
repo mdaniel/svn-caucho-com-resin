@@ -30,6 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.*;
 import com.caucho.config.program.*;
 import com.caucho.lifecycle.*;
 import com.caucho.server.admin.*;
@@ -115,11 +116,16 @@ public class BootManagementConfig
   public void init()
   {
     try {
-      if (_auth != null)
+      if (_auth != null) {
 	_auth.init();
-    } catch (Exception e) {
-      e.printStackTrace();
       
+	InjectManager webBeans = InjectManager.create();
+
+	webBeans.addBean(new SingletonBean(_auth, null,
+					   Authenticator.class,
+					   AdminAuthenticator.class));
+      }
+    } catch (Exception e) {
       throw ConfigException.create(e);
     }
   }

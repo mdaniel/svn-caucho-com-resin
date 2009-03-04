@@ -540,7 +540,12 @@ public class Server extends ProtocolDispatchServer
   public AdminAuthenticator getAdminAuthenticator()
   {
     if (_adminAuth == null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
       try {
+	thread.setContextClassLoader(getClassLoader());
+	
 	_adminAuth = (AdminAuthenticator) _webBeans.getInstanceByType(AdminAuthenticator.class);
       } catch (Exception e) {
 	if (log.isLoggable(Level.FINEST))
@@ -549,6 +554,8 @@ public class Server extends ProtocolDispatchServer
 	  log.finer(e.toString());
 
 	_adminAuth = new AdminAuthenticator();
+      } finally {
+	thread.setContextClassLoader(oldLoader);
       }
     }
     
@@ -1694,7 +1701,8 @@ public class Server extends ProtocolDispatchServer
 
       _lifecycle.toStarting();
 
-      getAdminAuthenticator();
+      // server/2l32
+      // getAdminAuthenticator();
 
       if (_resin != null && _resin.getManagement() != null)
 	_resin.getManagement().start(this);

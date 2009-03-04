@@ -729,6 +729,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   public Management createManagement()
   {
+    System.out.println("MANA:");
     if (_management == null) {
       _management = new Management();
 

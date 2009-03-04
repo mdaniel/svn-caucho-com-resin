@@ -41,10 +41,12 @@ import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
 import com.caucho.security.Authenticator;
 import com.caucho.security.PasswordCredentials;
+import com.caucho.security.BasicPrincipal;
+import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.connection.*;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.security.BasicPrincipal;
 import java.io.*;
 import java.security.*;
 import java.util.logging.*;
@@ -115,7 +117,7 @@ public class ServerFromLinkStream extends FromLinkStream
   protected ActorStream getStream(String to)
   {
     ActorStream stream;
-    
+
     if (to == null)
       return _linkServiceStream;
     else if (_conn != null)
@@ -163,26 +165,44 @@ public class ServerFromLinkStream extends FromLinkStream
   String login(String uid, Object credentials, String resource,
 	       String ipAddress)
   {
-    if (credentials != null && ! (credentials instanceof String)) {
-      throw new NotAuthorizedException(L.l("'{0}' is an unknown credential",
-					   credentials));
-    }
-    
-    String password = (String) credentials;
+    Server server = Server.getCurrent();
 
     if (_auth == null && ! _isAuthenticationRequired) {
-      // _conn = _broker.getConnection(_linkStream, uid, password, null, ipAddress);
-      if (_auth == null) {
-	throw new NotAuthorizedException(L.l("{0} does not have a configured authenticator",
+    }
+    else if (_auth == null) {
+      throw new NotAuthorizedException(L.l("{0} does not have a configured authenticator",
 					     this));
-      }
-
-      Principal user = new BasicPrincipal(uid);
+    }
+    else if (credentials instanceof String) {
+      String password = (String) credentials;
     
-      if (_auth.authenticate(user, new PasswordCredentials(password), null) == null) {
+      Principal user = new BasicPrincipal(uid);
+      PasswordCredentials pwdCred = new PasswordCredentials(password);
+    
+      if (_auth.authenticate(user, pwdCred, null) == null) {
 	throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
 					     uid));
       }
+    }
+    else if (credentials instanceof SelfEncryptedCookie) {
+      SelfEncryptedCookie cookie = (SelfEncryptedCookie) credentials;
+
+      // XXX: cred timeout
+      
+      if (! cookie.getCookie().equals(server.getAdminCookie())) {
+	throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+					     uid));
+      }
+    }
+    else if (server.getAdminCookie() == null && credentials == null) {
+      if (! "127.0.0.1".equals(ipAddress)) {
+	throw new NotAuthorizedException(L.l("'{0}' is an invalid local address for '{1}', because no password credentials are available",
+					     ipAddress, uid));
+      }
+    }
+    else {
+      throw new NotAuthorizedException(L.l("'{0}' is an unknown credential",
+					   credentials));
     }
     
     _conn = _broker.getConnection(_linkStream, uid, null);

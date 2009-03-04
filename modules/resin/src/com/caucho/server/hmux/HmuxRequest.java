@@ -1191,7 +1191,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	getLinkStream().queryGet(id, to, from, query);
       else
 	getBrokerStream(isAdmin).queryGet(id, to, from, query);
-    } catch (ActorException e) {
+    } catch (Exception e) {
       log.finer(e.toString());
       if (log.isLoggable(Level.FINEST))
 	log.log(Level.FINEST, e.toString(), e);
@@ -1226,10 +1226,17 @@ public class HmuxRequest extends AbstractHttpRequest
 	getLinkStream().querySet(id, to, from, query);
       else
 	getBrokerStream(isAdmin).querySet(id, to, from, query);
-    } catch (ActorException e) {
-      log.finer(e.toString());
-      if (log.isLoggable(Level.FINEST))
-	log.log(Level.FINEST, e.toString(), e);
+    } catch (Exception e) {
+      if (e instanceof ActorException) {
+	log.finer(e.toString());
+      
+	if (log.isLoggable(Level.FINEST))
+	  log.log(Level.FINEST, e.toString(), e);
+      }
+      else {
+	if (log.isLoggable(Level.FINER))
+	  log.log(Level.FINER, e.toString(), e);
+      }
       
       if (to == null)
 	writeHmtpQueryError(id, from, to, query, ActorError.create(e));

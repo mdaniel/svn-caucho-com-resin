@@ -199,6 +199,20 @@ public class TempOutputStream extends OutputStream
     return length;
   }
 
+  public byte []toByteArray()
+  {
+    int len = getLength();
+    byte []data = new byte[len];
+
+    int offset = 0;
+    for (TempBuffer ptr = _head; ptr != null; ptr = ptr._next) {
+      System.arraycopy(ptr.getBuffer(), 0, data, offset, ptr.getLength());
+      offset += ptr.getLength();
+    }
+
+    return data;
+  }
+
   /**
    * Clean up the temp stream.
    */

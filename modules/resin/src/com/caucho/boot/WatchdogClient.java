@@ -31,8 +31,10 @@ package com.caucho.boot;
 
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.hmtp.HmtpClient;
+import com.caucho.bam.hmtp.SelfEncryptedCredentials;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
+import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
 import com.caucho.Version;
@@ -325,7 +327,20 @@ class WatchdogClient
 
       client.setVirtualHost("admin.resin");
 
-      client.connect("admin.resin", getAdminCookie());
+      String cookie = getAdminCookie();
+
+      if (cookie != null) {
+	long now = Alarm.getCurrentTime();
+
+	byte []encData = SelfEncryptedCookie.encrypt(cookie, now);
+
+	SelfEncryptedCredentials cred = new SelfEncryptedCredentials(encData);
+
+	client.connect("admin.resin", cred);
+      }
+      else {
+	client.connect("admin.resin", null);
+      }
 
       _conn = client;
     }

@@ -91,6 +91,11 @@ public class HmtpServlet extends GenericServlet {
       }
     }
 
+    String authRequired = getInitParameter("authentication-required");
+
+    if ("false".equals(authRequired))
+      _isAuthenticationRequired = false;
+
     _linkManager = new ServerLinkManager(_auth);
   }
   

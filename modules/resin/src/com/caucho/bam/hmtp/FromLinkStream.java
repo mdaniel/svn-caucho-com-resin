@@ -132,7 +132,17 @@ abstract public class FromLinkStream {
 		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
 	}
 
-	getStream(to).queryGet(id, to, getFrom(from), value);
+	try {
+	  getStream(to).queryGet(id, to, getFrom(from), value);
+	} catch (Exception e) {
+	  if (log.isLoggable(Level.FINER))
+	    log.log(Level.FINER, e.toString(), e);
+	  else
+	    log.fine(e.toString());
+	  
+	  getToLinkStream().queryError(id, from, to, value,
+				       ActorError.create(e));
+	}
 
 	break;
       }
@@ -150,15 +160,14 @@ abstract public class FromLinkStream {
 
 	try {
 	  getStream(to).querySet(id, to, getFrom(from), value);
-	} catch (ActorException e) {
+	} catch (Exception e) {
 	  if (log.isLoggable(Level.FINER))
 	    log.log(Level.FINER, e.toString(), e);
 	  else
 	    log.fine(e.toString());
-	  
-	  getToLinkStream().queryError(id, from, to, value, e.createActorError());
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
+
+	  getToLinkStream().queryError(id, from, to, value,
+				       ActorError.create(e));
 	}
 
 	break;

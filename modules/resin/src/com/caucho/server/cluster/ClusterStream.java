@@ -406,14 +406,16 @@ public class ClusterStream implements ActorStream {
     int code = in.read();
 
     if (code < 0)
-      throw new EOFException(L.l("unexpected end of file"));
+      throw new EOFException(L.l("{0} unexpected end of file",
+				 this));
     else if (code == HmuxRequest.HMTP_QUERY_RESULT)
       return parseQueryResult(id, in);
     else if (code == HmuxRequest.HMTP_QUERY_ERROR)
       return parseQueryError(id, in);
     else
-      throw new IOException(L.l("expected query result at '" +
-				(char) code + "' " + code));
+      throw new IOException(L.l("{0} expected query result at '"
+				+ (char) code + "' " + code,
+				this));
   }
 
   public Serializable parseQueryResult(long id, ReadStream is)

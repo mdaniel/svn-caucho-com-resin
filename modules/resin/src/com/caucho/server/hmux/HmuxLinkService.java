@@ -42,11 +42,16 @@ import com.caucho.bam.hmtp.AuthQuery;
 import com.caucho.bam.hmtp.AuthResult;
 import com.caucho.bam.hmtp.GetPublicKeyQuery;
 import com.caucho.bam.hmtp.EncryptedObject;
+import com.caucho.bam.hmtp.SelfEncryptedCredentials;
 
+import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.cluster.Server;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.servlet.ServerLinkManager;
 import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
+
+import java.util.logging.*;
 
 import java.security.Key;
 
@@ -55,6 +60,8 @@ import java.security.Key;
  */
 
 public class HmuxLinkService extends SimpleActor {
+  private static final Logger log
+    = Logger.getLogger(HmuxLinkService.class.getName());
   private static final L10N L = new L10N(HmuxLinkService.class);
   
   private ServerLinkManager _linkManager;
@@ -94,14 +101,40 @@ public class HmuxLinkService extends SimpleActor {
   public void authLogin(long id, String to, String from, AuthQuery query)
   {
     Object credentials = query.getCredentials();
+    String adminCookie = _server.getAdminCookie();
 
-    if (credentials instanceof EncryptedObject) {
+    if (adminCookie == null) {
+    }
+    else if (credentials instanceof EncryptedObject) {
       EncryptedObject encPassword = (EncryptedObject) credentials;
 
       Key key = _linkManager.decryptKey(encPassword.getKeyAlgorithm(),
 					encPassword.getEncKey());
 
       credentials = _linkManager.decrypt(key, encPassword.getEncData());
+    }
+    else if (credentials instanceof SelfEncryptedCredentials) {
+      SelfEncryptedCredentials encCredentials
+	= (SelfEncryptedCredentials) credentials;
+
+      byte []encData = encCredentials.getEncData();
+
+      SelfEncryptedCookie selfCookie
+	= SelfEncryptedCookie.decrypt(adminCookie, encData);
+
+      credentials = selfCookie.getCookie();
+      long creationDate = selfCookie.getCreateTime();
+      long now = Alarm.getCurrentTime();
+
+      if (Math.abs(creationDate - now) > 3 * 3600) {
+	log.warning(this + " expired credentials date");
+
+	getBrokerStream().queryError(id, from, to, query,
+				     new ActorError(ActorError.TYPE_AUTH,
+						    ActorError.FORBIDDEN,
+						    "expired credentials"));
+	return;
+      }
     }
     else {
       getBrokerStream().queryError(id, from, to, query,
@@ -113,11 +146,11 @@ public class HmuxLinkService extends SimpleActor {
 
     String cookie = (String) credentials;
 
-    if (cookie == null && _server.getAdminCookie() == null) {
+    if (cookie == null && adminCookie == null) {
     }
     else if (cookie == null
 	     || ! "admin.resin".equals(query.getUid())
-	     || ! cookie.equals(_server.getAdminCookie())) {
+	     || ! cookie.equals(adminCookie)) {
       throw new NotAuthorizedException(L.l("admin.resin login forbidden because the authentication cookies do not match"));
     }
     

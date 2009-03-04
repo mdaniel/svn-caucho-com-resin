@@ -249,7 +249,7 @@ public class Management
     try {
       if (! _lifecycle.toInit())
 	return;
-      
+
       if (_auth != null) {
 	_auth.init();
       

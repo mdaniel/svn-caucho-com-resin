@@ -56,8 +56,14 @@ public class RemoteAdminService
 
   private String _hostName = "admin.resin";
   private Server _server;
+  private boolean _isAuthenticationRequired = true;
 
   private WebApp _webApp;
+
+  public void setAuthenticationRequired(boolean isAuthenticationRequired)
+  {
+    _isAuthenticationRequired = isAuthenticationRequired;
+  }
 
   @PostConstruct
   public void init()
@@ -92,6 +98,8 @@ public class RemoteAdminService
     ServletMapping mapping = new ServletMapping();
     mapping.addURLPattern("/hmtp");
     mapping.setServletClass("com.caucho.remote.HmtpServlet");
+    mapping.setInitParam("authentication-required",
+			 String.valueOf(_isAuthenticationRequired));
     mapping.init();
 
     _webApp.addServletMapping(mapping);

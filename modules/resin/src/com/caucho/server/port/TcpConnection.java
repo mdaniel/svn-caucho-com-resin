@@ -830,9 +830,16 @@ public class TcpConnection extends Connection
    */
   public TcpDuplexController toDuplex(TcpDuplexHandler handler)
   {
-    if (_controller != null)
+    if (_controller != null) {
+      ConnectionState state = _state;
+      
+      log.warning(this + " toDuplex call failed for state " + state);
+      
+      destroy();
+      
       throw new IllegalStateException(L.l("duplex mode can't start in state '{0}'",
-					  _state));
+					  state));
+    }
     
     TcpDuplexController duplex = new TcpDuplexController(this, handler);
 

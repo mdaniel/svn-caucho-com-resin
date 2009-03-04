@@ -163,6 +163,13 @@ public class HmtpClient extends SimpleActorClient {
     loginImpl(user, password);
   }
 
+  public void connect(String user, Serializable credentials)
+  {
+    connectImpl();
+
+    loginImpl(user, credentials);
+  }
+
   protected void connectImpl()
   {
     if (_s != null)
@@ -236,12 +243,12 @@ public class HmtpClient extends SimpleActorClient {
   /**
    * Login to the server
    */
-  protected void loginImpl(String uid, String password)
+  protected void loginImpl(String uid, Serializable credentials)
   {
     try {
-      Serializable credentials = password;
-
-      if (_isEncryptPassword) {
+      if (credentials instanceof SelfEncryptedCredentials) {
+      }
+      else if (_isEncryptPassword) {
 	GetPublicKeyQuery pkValue
 	  = (GetPublicKeyQuery) queryGet(null, new GetPublicKeyQuery());
 
@@ -250,7 +257,7 @@ public class HmtpClient extends SimpleActorClient {
 	ClientLinkManager.Secret secret = _linkManager.generateSecret();
 
 	EncryptedObject encPassword
-	  = _linkManager.encrypt(secret, publicKey, password);
+	  = _linkManager.encrypt(secret, publicKey, credentials);
 
 	credentials = encPassword;
       }
