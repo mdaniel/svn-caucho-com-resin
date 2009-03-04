@@ -569,6 +569,7 @@
         <include name="automake/**"/>
         <include name="conf/**"/>
         <include name="contrib/**"/>
+        <include name="init.d/**"/>
 	<!--
         <include name="doc/**"/>
         <include name="php/**"/>
