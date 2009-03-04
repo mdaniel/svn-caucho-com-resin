@@ -284,4 +284,9 @@ abstract public class ConfigType
   {
     return getClass().getSimpleName() + "[" + getTypeName() + "]";
   }
+
+  public boolean isConstructableFromString()
+  {
+    return true;
+  }
 }

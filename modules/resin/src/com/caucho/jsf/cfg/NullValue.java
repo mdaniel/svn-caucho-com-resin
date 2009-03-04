@@ -54,8 +54,4 @@ public class NullValue extends AbstractValueConfig
   {
     return NullPropertyValue.NULL;
   }
-
-  public static NullValue valueOf(String value) {
-    return NULL;
-  }
 }

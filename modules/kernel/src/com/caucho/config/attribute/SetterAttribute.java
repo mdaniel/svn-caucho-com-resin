@@ -70,6 +70,12 @@ public class SetterAttribute extends Attribute {
     return true;
   }
 
+  @Override
+  public boolean isAllowText()
+  {
+    return getConfigType().isConstructableFromString();
+  }
+
   /**
    * True if it allows inline beans
    */

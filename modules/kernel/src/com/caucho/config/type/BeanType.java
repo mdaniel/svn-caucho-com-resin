@@ -436,7 +436,16 @@ public class BeanType extends ConfigType
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
 				  _beanClass.getName(), text));
   }
-  
+
+  public boolean isConstructableFromString()
+  {
+    return _valueOf != null ||
+           _stringConstructor != null ||
+           _addText != null ||
+           _addProgram != null ||
+           _addContentProgram != null;
+  }
+
   /**
    * Converts the string to the given value.
    */
