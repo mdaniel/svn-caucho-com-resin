@@ -504,8 +504,9 @@ public final class LruCache<K,V> {
     if (tail == null)
       return false;
 
-    if (tail._value instanceof LruListener)
-      ((LruListener) tail._value).lruEvent();
+    V oldValue = tail._value;
+    if (oldValue instanceof LruListener)
+      ((LruListener) oldValue).lruEvent();
 
     V value = remove(tail._key);
     
