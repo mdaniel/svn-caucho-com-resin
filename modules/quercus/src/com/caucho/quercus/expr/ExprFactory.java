@@ -428,7 +428,7 @@ public class ExprFactory {
    */
   public Expr createRequired()
   {
-    return new RequiredExpr();
+    return RequiredExpr.REQUIRED;
   }
 
   /**

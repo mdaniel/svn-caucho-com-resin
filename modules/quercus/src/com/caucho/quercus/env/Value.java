@@ -2288,7 +2288,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Sets the character at the named index.
    */
-  public Value setCharValueAt(long index, String value)
+  public Value setCharValueAt(long index, Value value)
   {
     return NullValue.NULL;
   }

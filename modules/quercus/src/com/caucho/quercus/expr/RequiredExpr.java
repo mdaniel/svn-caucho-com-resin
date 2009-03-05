@@ -41,12 +41,12 @@ public class RequiredExpr extends Expr {
   public static final RequiredExpr REQUIRED
     = new RequiredExpr(Location.UNKNOWN);
 
-  public RequiredExpr(Location location)
+  protected RequiredExpr(Location location)
   {
     super(location);
   }
 
-  public RequiredExpr()
+  protected RequiredExpr()
   {
     super();
   }

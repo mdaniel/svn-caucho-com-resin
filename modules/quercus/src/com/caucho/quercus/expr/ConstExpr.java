@@ -77,12 +77,7 @@ public class ConstExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    Value value = env.getConstant(_var);
-
-    if (value == null)
-      value = env.createString(_var);
-
-    return value;
+    return env.getConstant(_var);
   }
 
   public String toString()
