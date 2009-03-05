@@ -567,8 +567,10 @@ public class ConfigContext implements CreationalContext {
     
     ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
 
-    if (! attrStrategy.isInlineType(type))
+    if (type == null || ! attrStrategy.isInlineType(type)) {
+      // server/6500
       return false;
+    }
 
     Object childBean = attrStrategy.create(parent, qName, type);
 

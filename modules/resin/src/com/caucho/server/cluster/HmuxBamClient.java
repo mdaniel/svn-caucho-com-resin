@@ -30,7 +30,9 @@ package com.caucho.server.cluster;
 
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorStream;
+import com.caucho.bam.Broker;
 import com.caucho.config.ConfigException;
 import com.caucho.hessian.io.ExtSerializerFactory;
 import com.caucho.hessian.io.Hessian2Input;
@@ -53,17 +55,27 @@ public class HmuxBamClient extends SimpleActorClient
 {
   private static final L10N L = new L10N(HmuxBamClient.class);
 
-  private final ClusterServer _server;
+  private final Server _server;
+  private final Broker _broker;
+  
+  private ActorClient _conn;
 
-  private HmuxBamConnection _conn;
-
-  public HmuxBamClient(String serverId)
+  public HmuxBamClient()
   {
-    _server = findServer(serverId);
+    this(null);
+  }
+  
+  public HmuxBamClient(String uid)
+  {
+    _server = Server.getCurrent();
 
     if (_server == null)
-      throw new ConfigException(L.l("'{0}' is an unknown server.",
-                                    serverId));
+      throw new ConfigException(L.l("'{0}' is only allowed in a valid Resin server.",
+                                    getClass().getName()));
+
+    _broker = _server.getAdminBroker();
+
+    _conn = _broker.getConnection(uid, null);
   }
 
   //
@@ -75,7 +87,7 @@ public class HmuxBamClient extends SimpleActorClient
    */
   public ActorStream getBrokerStream()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _conn.getBrokerStream();
   }
 
   //
@@ -87,7 +99,10 @@ public class HmuxBamClient extends SimpleActorClient
    */
   public String getJid()
   {
-    return _conn.getJid();
+    if (_conn != null)
+      return _conn.getJid();
+    else
+      return null;
   }
 
 
@@ -147,7 +162,7 @@ public class HmuxBamClient extends SimpleActorClient
    */
   public void close()
   {
-    HmuxBamConnection conn = _conn;
+    ActorClient conn = _conn;
     _conn = null;
     
     if (conn != null)
@@ -157,7 +172,7 @@ public class HmuxBamClient extends SimpleActorClient
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _server + "]";
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }
 

@@ -194,7 +194,7 @@ public final class MnodeValue implements ExtCacheEntry {
 
   public final boolean isLeaseExpired(long now)
   {
-    return (_leaseExpireTime <= now);
+    return _leaseExpireTime <= now;
   }
 
   /**
@@ -203,7 +203,7 @@ public final class MnodeValue implements ExtCacheEntry {
    */
   public final boolean isEntryExpired(long now)
   {
-    return (isIdleExpired(now) || isValueExpired(now));
+    return isIdleExpired(now) || isValueExpired(now);
   }
 
    /**
@@ -211,7 +211,7 @@ public final class MnodeValue implements ExtCacheEntry {
    */
   public final boolean isValueExpired(long now)
   {
-    return ((_lastUpdateTime + _expireTimeout) < now);
+    return _lastUpdateTime + _expireTimeout < now;
   }
 
   /**
@@ -219,7 +219,7 @@ public final class MnodeValue implements ExtCacheEntry {
    */
   public final boolean isIdleExpired(long now)
   {
-    return ((_lastAccessTime + _idleTimeout) < now);
+    return _lastAccessTime + _idleTimeout < now;
   }
 
   /**
@@ -245,6 +245,16 @@ public final class MnodeValue implements ExtCacheEntry {
 	
       _leaseExpireTime = 0;
     }
+  }
+
+  /**
+   * Sets the owner
+   */
+  public final void clearLease()
+  {
+    _leaseOwner = -1;
+	
+    _leaseExpireTime = 0;
   }
 
   public int getFlags()

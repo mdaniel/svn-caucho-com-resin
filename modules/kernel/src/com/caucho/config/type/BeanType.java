@@ -418,7 +418,7 @@ public class BeanType extends ConfigType
       inject(bean);
       
       try {
-	ConfigProgram program = new PropertyStringProgram("value", text);
+	ConfigProgram program = new PropertyStringProgram(TEXT, text);
 
 	if (_addProgram != null)
 	  _addProgram.setValue(bean, TEXT, program);

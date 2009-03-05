@@ -521,6 +521,7 @@ abstract public class AbstractCache extends AbstractMap
       
       _entryCache.put(key, cacheEntry);
     }
+    
     return cacheEntry;
   }
 

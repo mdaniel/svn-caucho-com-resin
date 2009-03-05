@@ -606,6 +606,10 @@ public class TcpConnection extends Connection
      do {
        thread.setContextClassLoader(systemLoader);
 
+       if (_controller != null)
+	 throw new IllegalStateException(L.l("can't shift to active from duplex {0} controller {1}",
+					     _state, _controller));
+
        _state = _state.toActive();
 
        if (_port.isClosed()) {
@@ -903,9 +907,8 @@ public class TcpConnection extends Connection
    */
   private void closeImpl()
   {
-    QSocket socket = _socket;
     ConnectionState state;
-
+    
     synchronized (this) {
       state = _state;
       
@@ -914,6 +917,8 @@ public class TcpConnection extends Connection
       
       _state = _state.toClosed();
     }
+    
+    QSocket socket = _socket;
 
     // detach any comet
     getPort().detach(this);
@@ -921,6 +926,7 @@ public class TcpConnection extends Connection
     getRequest().protocolCloseEvent();
      
     ConnectionController controller = _controller;
+    _controller = null;
     
     if (controller != null)
       controller.closeImpl();
@@ -1021,6 +1027,11 @@ public class TcpConnection extends Connection
 
     if (_state != ConnectionState.IDLE
 	&& _state != ConnectionState.DESTROYED) {
+      if (_controller != null) {
+	throw new IllegalStateException(L.l("{0} can't switch to idle from {1} with an active controller {2}",
+					    this, _state, _controller));
+      }
+      
       _state = _state.toIdle();
       _readTask = _acceptTask;
 
@@ -1240,9 +1251,14 @@ public class TcpConnection extends Connection
       
       try {
         _thread = thread;
-	_state = _state.toAccept();
+      
+	// _state = _state.toAccept();
 
         while (! _port.isClosed() && _state != ConnectionState.DESTROYED) {
+	  if (_controller != null) {
+	    throw new IllegalStateException(L.l("{0} cannot change from {1} to accept with an active controller {2}", this, _state, _controller));
+	  }
+	
           _state = _state.toAccept();
 
           if (! _port.accept(TcpConnection.this, isThreadStart)) {

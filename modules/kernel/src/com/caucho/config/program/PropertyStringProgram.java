@@ -58,6 +58,14 @@ public class PropertyStringProgram extends ConfigProgram {
     _value = value;
     _isOptional = isOptional;
   }
+
+  public PropertyStringProgram(QName qName, String value)
+  {
+    _name = qName.getLocalName();
+    _qName = qName;
+    _value = value;
+    _isOptional = false;
+  }
   
   /**
    * Returns the injection name.
@@ -84,6 +92,9 @@ public class PropertyStringProgram extends ConfigProgram {
 
       if (attr != null)
 	attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
+      else if (_qName.equals(BeanType.TEXT) && "".equals(_value.trim())) {
+	// server/3000
+      }
       else if (! _isOptional)
 	throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'",
 				      _qName, bean.getClass().getName()));

@@ -209,12 +209,12 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
   }
 
-   public HashKey getValueHash()
+  public HashKey getValueHash()
   {
     return getMnodeValue().getValueHashKey();
   }
 
-   public byte []getValueHashArray()
+  public byte []getValueHashArray()
   {
     return getMnodeValue().getValueHash();
   }
@@ -224,17 +224,22 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return getMnodeValue().getIdleTimeout();
   }
 
-   public long getLeaseTimeout()
+  public long getLeaseTimeout()
   {
     return getMnodeValue().getLeaseTimeout();
   }
 
-   public int getLeaseOwner()
+  public int getLeaseOwner()
   {
     return getMnodeValue().getLeaseOwner();
   }
 
-    public long getCost()
+  public void clearLease()
+  {
+    getMnodeValue().clearLease();
+  }
+
+  public long getCost()
   {
     return 0;
   }

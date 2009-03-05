@@ -639,7 +639,7 @@ public class WebApp extends ServletContextImpl
    */
   public void setDocumentDirectory(Path appDir)
   {
-    setAppDir(appDir);
+    throw new ConfigException(L.l("Use <root-directory> instead of <document-directory>, because <document-directory> has been removed for Resin 4.0"));
   }
 
   /**

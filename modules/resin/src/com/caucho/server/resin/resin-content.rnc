@@ -106,7 +106,7 @@ r_cluster-Content =
 
   & r_ssl-session-cookie?
 
-  & r_triad*
+  & r_pod*
   
   & r_url-character-encoding?
 
@@ -528,6 +528,12 @@ r_module-repository = element module-repository {
     }*
 }
 
+r_pod = element pod {
+  attribute id { string }?
+
+  & r_server+
+}
+
 r_resin = element resin {
   r_resin-Content
 }
@@ -779,12 +785,6 @@ r_transaction-log = element transaction-log {
 
 r_transaction-manager = element transaction-manager {
   r_transaction-log?
-}
-
-r_triad = element triad {
-  attribute id { string }?
-
-  & r_server+
 }
 
 r_url-character-encoding =

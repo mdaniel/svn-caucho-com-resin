@@ -119,7 +119,10 @@ public class ClientFromLinkStream extends FromLinkStream implements Runnable
 	readPacket();
       }
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      if (! _client.isClosed())
+	log.log(Level.WARNING, e.toString(), e);
+      else
+	log.log(Level.FINER, e.toString(), e);
     } finally {
       close();
 

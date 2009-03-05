@@ -82,7 +82,10 @@ public class SetterAttribute extends Attribute {
   @Override
   public boolean isInlineType(ConfigType type)
   {
-    return _type.isAssignableFrom(type.getType());
+    if (type == null)
+      return false;
+    else
+      return _type.isAssignableFrom(type.getType());
   }
   
   /**
