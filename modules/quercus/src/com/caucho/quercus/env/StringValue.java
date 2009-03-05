@@ -701,7 +701,7 @@ abstract public class StringValue
    * sets the character at an index
    */
   @Override
-  public Value setCharValueAt(long index, String value)
+  public Value setCharValueAt(long index, Value value)
   {
     //XXX: need to double-check this for non-string values
     

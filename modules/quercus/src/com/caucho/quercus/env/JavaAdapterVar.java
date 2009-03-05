@@ -1139,7 +1139,7 @@ public class JavaAdapterVar extends Value
    * Sets the character at an index
    */
   @Override
-  public Value setCharValueAt(long index, String value)
+  public Value setCharValueAt(long index, Value value)
   {
     return getValue().setCharValueAt(index, value);
   }
