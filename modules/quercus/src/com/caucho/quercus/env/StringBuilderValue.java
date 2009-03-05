@@ -730,7 +730,7 @@ public class StringBuilderValue
     else {
       byte ch = _buffer[(int) index];
 
-      return CHAR_STRINGS[ch];
+      return CHAR_STRINGS[ch & 0xFF];
     }
   }
   
