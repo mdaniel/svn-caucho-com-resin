@@ -17,6 +17,12 @@ be applied to new versions of the 3.1.x branch.</p>
 
 </s1>
 
+<s1 title="Win32 OpenSSL">
+
+<p>Win32 openssl version is 0.9.8g</p>
+
+</s1>
+
 <s1 title="Bugs">
 
 <ul>

@@ -790,6 +790,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
     getPort().detach(this);
 
     ConnectionController controller = getController();
+    _controller = null;
+    
     if (controller != null)
       controller.close();
 

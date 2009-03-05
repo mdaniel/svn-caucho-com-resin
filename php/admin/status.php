@@ -350,7 +350,7 @@ if ($db_pools) {
 <?php
 
 if ($mbean_server) {
-  $mbean = $mbean_server->lookup("resin:type=LoggingManager");
+  $mbean = $mbean_server->lookup("resin:type=LogService");
 }
 
 //

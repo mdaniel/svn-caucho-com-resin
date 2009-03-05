@@ -405,7 +405,7 @@ public class ErrorPageManager {
     else
     */
     
-    if (log.isLoggable(Level.FINE) || ! Alarm.isTest())
+    if (log.isLoggable(Level.FINE) && ! Alarm.isTest())
       doStackTrace = true;
 
     if (doStackTrace) {
