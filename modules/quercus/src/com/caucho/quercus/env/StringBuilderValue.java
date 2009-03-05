@@ -658,7 +658,7 @@ public class StringBuilderValue
   @Override
   public Value put(Value index, Value value)
   {
-    setCharValueAt(index.toLong(), value.toString());
+    setCharValueAt(index.toLong(), value);
 
     return value;
   }
@@ -670,7 +670,7 @@ public class StringBuilderValue
   public Value append(Value index, Value value)
   {
     if (_length > 0)
-      return setCharValueAt(index.toLong(), value.toString());
+      return setCharValueAt(index.toLong(), value);
     else
       return new ArrayValueImpl().append(index, value);
   }
@@ -738,7 +738,7 @@ public class StringBuilderValue
    * sets the character at an index
    */
   @Override
-  public Value setCharValueAt(long indexL, String value)
+  public Value setCharValueAt(long indexL, Value value)
   {
     int len = _length;
 
@@ -747,8 +747,15 @@ public class StringBuilderValue
     else if (indexL < len) {
       StringBuilderValue sb = new StringBuilderValue(_buffer, 0, len);
       
-      sb._buffer[(int) indexL] = (byte) value.charAt(0);
+      StringValue str = value.toStringValue();
       
+      int index = (int) indexL;
+      
+      if (value.length() == 0)
+        sb._buffer[index] = 0;
+      else
+        sb._buffer[index] = (byte) str.charAt(0);
+
       return sb;
     }
     else {
@@ -766,11 +773,13 @@ public class StringBuilderValue
       for (int i = 0; i <= padLen; i++) {
          sb._buffer[_length++] = ' ';
       }
+      
+      StringValue str = value.toStringValue();
 
       if (value.length() == 0)
         sb._buffer[index] = 0;
       else
-        sb._buffer[index] = (byte) value.charAt(0);
+        sb._buffer[index] = (byte) str.charAt(0);
 
       return sb;
     }
