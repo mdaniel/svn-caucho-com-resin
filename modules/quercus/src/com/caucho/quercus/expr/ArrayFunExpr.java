@@ -80,12 +80,12 @@ public class ArrayFunExpr extends Expr {
   public boolean isConstant()
   {
     for (int i = 0; i < _keys.length; i++) {
-      if (_keys[i] != null && ! _keys[i].isLiteral())
+      if (_keys[i] != null && ! _keys[i].isConstant())
         return false;
     }
 
     for (int i = 0; i < _values.length; i++) {
-      if (_values[i] != null && ! _values[i].isLiteral())
+      if (_values[i] != null && ! _values[i].isConstant())
         return false;
     }
 
