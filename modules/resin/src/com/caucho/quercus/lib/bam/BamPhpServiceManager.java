@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -62,7 +62,7 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 /**
- * BAM agent that calls into a PHP script to handle messages/queries.
+ * BAM actor that calls into a PHP script to handle messages/queries.
  **/
 public class BamPhpServiceManager implements ActorManager {
   private static final L10N L = new L10N(BamPhpServiceManager.class);
@@ -71,8 +71,8 @@ public class BamPhpServiceManager implements ActorManager {
 
   private final Quercus _quercus = new Quercus();
 
-  private final HashMap<String,BamPhpAgent> _children = 
-    new HashMap<String,BamPhpAgent>();
+  private final HashMap<String,BamPhpActor> _children = 
+    new HashMap<String,BamPhpActor>();
 
   private ArrayList<String> _featureNames = new ArrayList<String>();
 
@@ -174,12 +174,12 @@ public class BamPhpServiceManager implements ActorManager {
     return _children.containsKey(jid);
   }
 
-  BamPhpAgent removeChild(String jid)
+  BamPhpActor removeChild(String jid)
   {
     return _children.remove(jid);
   }
 
-  void addChild(String jid, BamPhpAgent child)
+  void addChild(String jid, BamPhpActor child)
   {
     _children.put(jid, child);
   }
@@ -191,11 +191,11 @@ public class BamPhpServiceManager implements ActorManager {
     Env env = new Env(_quercus, page, out, null, null);
     env.start();
 
-    JavaClassDef agentClassDef = 
+    JavaClassDef actorClassDef = 
       env.getJavaClassDefinition(BamPhpServiceManager.class);
 
     env.setGlobalValue("_quercus_bam_service_manager", 
-                       agentClassDef.wrap(env, this));
+                       actorClassDef.wrap(env, this));
     env.setGlobalValue(type, BooleanValue.TRUE);
     env.setGlobalValue("_quercus_bam_service_jid", StringValue.create(jid));
 

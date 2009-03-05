@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.Quercus;
@@ -51,6 +52,7 @@ import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.remote.BamService;
 import com.caucho.util.L10N;
 import com.caucho.vfs.NullWriteStream;
 import com.caucho.vfs.Path;
@@ -58,20 +60,21 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Current;
 import javax.sql.DataSource;
 
 /**
- * BAM agent that calls into a PHP script to handle messages/queries.
+ * BAM actor that calls into a PHP script to handle messages/queries.
  **/
-public class BamPhpAgent extends SimpleActor {
-  private static final L10N L = new L10N(BamPhpAgent.class);
+public class BamPhpActor extends SimpleActor {
+  private static final L10N L = new L10N(BamPhpActor.class);
   private static final Logger log
-    = Logger.getLogger(BamPhpAgent.class.getName());
+    = Logger.getLogger(BamPhpActor.class.getName());
 
   private final Quercus _quercus = new Quercus();
 
-  private final HashMap<String,BamPhpAgent> _children
-    = new HashMap<String,BamPhpAgent>();
+  private final HashMap<String,BamPhpActor> _children
+    = new HashMap<String,BamPhpActor>();
 
   private ArrayList<String> _featureNames = new ArrayList<String>();
 
@@ -80,11 +83,14 @@ public class BamPhpAgent extends SimpleActor {
   
   private String _encoding = "ISO-8859-1";
 
-  public BamPhpAgent()
+  @Current
+  private Broker _broker;
+
+  public BamPhpActor()
   {
   }
 
-  public BamPhpAgent(Path script, String encoding)
+  public BamPhpActor(Path script, String encoding)
   {
     _script = script;
     _encoding = encoding;
@@ -130,7 +136,7 @@ public class BamPhpAgent extends SimpleActor {
   public boolean startChild(String jid)
   {
     if (log.isLoggable(Level.FINE)) 
-      log.fine(L.l("{0}.startAgent({1})", toString(), jid));
+      log.fine(L.l("{0}.startActor({1})", toString(), jid));
 
     return hasChild(jid);
   }
@@ -142,11 +148,13 @@ public class BamPhpAgent extends SimpleActor {
     }
   }
 
-  void addChild(String jid, BamPhpAgent child)
+  void addChild(String jid, BamPhpActor child)
   {
     synchronized(_children) {
       _children.put(jid, child);
     }
+
+    _broker.addActor(child);
   }
 
   private void setId(Env env, long id)
@@ -413,8 +421,8 @@ public class BamPhpAgent extends SimpleActor {
 
     Env env = new Env(_quercus, page, out, null, null);
 
-    JavaClassDef agentClassDef = env.getJavaClassDefinition(BamPhpAgent.class);
-    env.setGlobalValue("_quercus_bam_agent", agentClassDef.wrap(env, this));
+    JavaClassDef actorClassDef = env.getJavaClassDefinition(BamPhpActor.class);
+    env.setGlobalValue("_quercus_bam_actor", actorClassDef.wrap(env, this));
 
     env.start();
 

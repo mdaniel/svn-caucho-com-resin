@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -82,12 +82,12 @@ public class BamModule extends AbstractQuercusModule
   private static final StringValue SERVER_NAME 
     = new StaticStringValue("SERVER_NAME");
 
-  private static BamPhpAgent getAgent(Env env)
+  private static BamPhpActor getActor(Env env)
   {
-    Value agentValue = env.getGlobalValue("_quercus_bam_agent");
+    Value actorValue = env.getGlobalValue("_quercus_bam_actor");
 
-    if (agentValue != null && ! agentValue.isNull())
-      return (BamPhpAgent) agentValue.toJavaObject();
+    if (actorValue != null && ! actorValue.isNull())
+      return (BamPhpActor) actorValue.toJavaObject();
 
     return null;
   }
@@ -128,10 +128,10 @@ public class BamModule extends AbstractQuercusModule
 
   private static ActorStream getBrokerStream(Env env)
   {
-    BamPhpAgent agent = getAgent(env);
+    BamPhpActor actor = getActor(env);
 
-    if (agent != null)
-      return agent.getBrokerStream();
+    if (actor != null)
+      return actor.getBrokerStream();
 
     ActorClient connection = getActorClient(env);
 
@@ -140,10 +140,10 @@ public class BamModule extends AbstractQuercusModule
 
   private static String getJid(Env env)
   {
-    BamPhpAgent agent = getAgent(env);
+    BamPhpActor actor = getActor(env);
 
-    if (agent != null)
-      return agent.getJid();
+    if (actor != null)
+      return actor.getJid();
 
     ActorClient connection = getActorClient(env);
 
@@ -155,10 +155,10 @@ public class BamModule extends AbstractQuercusModule
                                 String username, 
                                 String password)
   {
-    BamPhpAgent agent = getAgent(env);
+    BamPhpActor actor = getActor(env);
 
-    if (agent != null)
-      return env.error("bam_login not available from agent script");
+    if (actor != null)
+      return env.error("bam_login not available from actor script");
 
     HmtpClient client = new HmtpClient(url);
 
@@ -169,6 +169,7 @@ public class BamModule extends AbstractQuercusModule
       client.connect(username, password);
     }
     catch (Exception e) {
+      e.printStackTrace();
       return env.error("Unable to connect to BAM server", e);
     }
 
@@ -204,7 +205,7 @@ public class BamModule extends AbstractQuercusModule
     if (! path.exists())
       return env.error("script not found: " + script);
 
-    BamPhpAgent child = new BamPhpAgent();
+    BamPhpActor child = new BamPhpActor();
     child.setJid(jid);
     child.setScript(path);
     // child.setBroker(manager.getBroker());
@@ -228,7 +229,7 @@ public class BamModule extends AbstractQuercusModule
       return env.error("bam_unregister_service must be called from " + 
                        "service manager script");
 
-    BamPhpAgent service = manager.removeChild(jid);
+    BamPhpActor service = manager.removeChild(jid);
 
     if (service == null)
       return BooleanValue.FALSE;
@@ -238,27 +239,27 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
-  public static Value bam_agent_exists(Env env, String jid)
+  public static Value bam_actor_exists(Env env, String jid)
   {
-    BamPhpAgent agent = getAgent(env);
+    BamPhpActor actor = getActor(env);
 
-    if (agent == null)
-      return env.error("bam_agent_exists must be called from agent script");
+    if (actor == null)
+      return env.error("bam_actor_exists must be called from actor script");
 
-    return BooleanValue.create(agent.hasChild(jid));
+    return BooleanValue.create(actor.hasChild(jid));
   }
 
   /**
-   * Registers a "child" agent that is represented by the given script.
+   * Registers a "child" actor that is represented by the given script.
    **/
-  public static Value bam_register_agent(Env env, String jid, String script)
+  public static Value bam_register_actor(Env env, String jid, String script)
   {
-    BamPhpAgent agent = getAgent(env);
+    BamPhpActor actor = getActor(env);
 
-    if (agent == null)
-      return env.error("bam_register_agent must be called from agent script");
+    if (actor == null)
+      return env.error("bam_register_actor must be called from actor script");
 
-    BamPhpAgent child = new BamPhpAgent();
+    BamPhpActor child = new BamPhpActor();
     child.setJid(jid);
 
     Path path = env.getSelfDirectory().lookup(script);
@@ -271,7 +272,7 @@ public class BamModule extends AbstractQuercusModule
     InjectManager container = InjectManager.getCurrent();
     container.injectObject(child);
 
-    agent.addChild(jid, child);
+    actor.addChild(jid, child);
 
     return BooleanValue.TRUE;
   }
@@ -678,7 +679,7 @@ public class BamModule extends AbstractQuercusModule
       return BooleanValue.TRUE;
     }
 
-    // agent script dispatch
+    // actor script dispatch
 
     Value eventTypeValue = env.getGlobalValue("_quercus_bam_event_type");
 

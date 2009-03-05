@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -43,15 +43,15 @@ import com.caucho.xmpp.disco.DiscoInfoQuery;
 import javax.annotation.PostConstruct;
 
 /**
- * BAM agent spawns a new BamPhpAgent when requested.
+ * BAM actor spawns a new BamPhpActor when requested.
  **/
 public class BamPhpRootService extends SimpleActor {
-  private static final L10N L = new L10N(BamPhpAgent.class);
+  private static final L10N L = new L10N(BamPhpActor.class);
   private static final Logger log
     = Logger.getLogger(BamPhpRootService.class.getName());
 
-  private final HashMap<String,BamPhpAgent> _agents = 
-    new HashMap<String,BamPhpAgent>();
+  private final HashMap<String,BamPhpActor> _actors = 
+    new HashMap<String,BamPhpActor>();
 
   private Path _script;
   private String _encoding = "ISO-8859-1";
@@ -90,18 +90,18 @@ public class BamPhpRootService extends SimpleActor {
   public boolean startChild(String jid)
   {
     if (log.isLoggable(Level.FINE)) 
-      log.fine(L.l("{0}.startAgent({1})", toString(), jid));
+      log.fine(L.l("{0}.startActor({1})", toString(), jid));
 
-    BamPhpAgent agent = _agents.get(jid);
+    BamPhpActor actor = _actors.get(jid);
 
-    if (agent == null) {
-      agent = new BamPhpAgent(_script, _encoding);
-      agent.setJid(jid);
+    if (actor == null) {
+      actor = new BamPhpActor(_script, _encoding);
+      actor.setJid(jid);
 
       InjectManager container = InjectManager.getCurrent();
-      container.injectObject(agent);
+      container.injectObject(actor);
 
-      _agents.put(jid, agent);
+      _actors.put(jid, actor);
     }
 
     return true;
