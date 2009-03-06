@@ -70,6 +70,8 @@ public class ArrayValueImpl extends ArrayValue
   private long _nextAvailableIndex;
   private boolean _isDirty;
 
+  private boolean _isCopy;
+  
   private Entry _head;
   private Entry _tail;
 
@@ -92,40 +94,37 @@ public class ArrayValueImpl extends ArrayValue
     */
   }
 
-  public ArrayValueImpl(ArrayValue copy)
+  public ArrayValueImpl(ArrayValue source)
   {
     // this(copy.getSize());
 
-    for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      Value value = ptr._var != null ? ptr._var : ptr._value;
-      
+    for (Entry ptr = source.getHead(); ptr != null; ptr = ptr._next) {
       // php/0662 for copy
       Entry entry = createEntry(ptr._key);
 
-      /* php/04b1
-      if (ptr._var != null)
-        entry._var = ptr._var;
+      if (entry._value instanceof Var) {
+        entry._var = (Var) entry._value;
+        entry._value = entry._value;
+      }
       else
-        entry._value = ptr._value.copyArrayItem();
-      */
-      
-      entry._value = value.copyArrayItem();
+        entry._value = entry._value.copyArrayItem();
     }
   }
 
-  public ArrayValueImpl(ArrayValueImpl copy)
+  public ArrayValueImpl(ArrayValueImpl source)
   {
-    copy._isDirty = true;
+    source._isDirty = true;
     _isDirty = true;
+    _isCopy = true;
     
-    _size = copy._size;
-    _entries = copy._entries;
-    _hashMask = copy._hashMask;
+    _size = source._size;
+    _entries = source._entries;
+    _hashMask = source._hashMask;
 
-    _head = copy._head;
-    _current = copy._current;
-    _tail = copy._tail;
-    _nextAvailableIndex = copy._nextAvailableIndex;
+    _head = source._head;
+    _current = source._current;
+    _tail = source._tail;
+    _nextAvailableIndex = source._nextAvailableIndex;
   }
 
   public ArrayValueImpl(Env env,
@@ -204,6 +203,8 @@ public class ArrayValueImpl extends ArrayValue
       return;
 
     _isDirty = false;
+    boolean isCopy = _isCopy;
+    _isCopy = false;
     
     Entry []entries = _entries;
 
@@ -215,7 +216,7 @@ public class ArrayValueImpl extends ArrayValue
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr._next) {
       // Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
-      Entry ptrCopy = new Entry(ptr);
+      Entry ptrCopy = new Entry(ptr, isCopy);
 
       if (entries != null) {
 	int hash = ptr._key.hashCode() & _hashMask;
@@ -408,6 +409,7 @@ public class ArrayValueImpl extends ArrayValue
       var.setReference();
 
       entry._var = var;
+      entry._value = var;
     }
     else if (oldVar != null) {
       oldVar.set(value);

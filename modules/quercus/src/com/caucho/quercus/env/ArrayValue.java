@@ -1193,20 +1193,27 @@ abstract public class ArrayValue extends Value {
       _value = value;
     }
 
-    public Entry(Entry entry)
+    public Entry(Entry entry, boolean isCopy)
     {
       _key = entry._key;
 
-      Value value = entry._var != null ? entry._var : entry._value;
-      
-      /* php/04b1
-      if (entry._var != null)
-        _var = entry._var;
-      else
-        _value = entry._value.copyArrayItem();
-      */
-      
-      _value = value.copyArrayItem();
+      // php/04b1
+      if (isCopy) {
+        if (entry._value instanceof Var) {
+          _var = (Var) entry._value;
+          _value = entry._value;
+        }
+        else
+          _value = entry._value.copyArrayItem();
+      }
+      else {
+        if (entry._var != null) {
+          _var = entry._var;
+          _value = entry._value;
+        }
+        else
+          _value = entry._value.copyArrayItem();
+      }
     }
 
     public Entry getNext()
