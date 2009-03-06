@@ -257,14 +257,6 @@ public class CopyArrayValue extends ArrayValue {
   }
 
   /**
-   * Convenience for lib.
-   */
-  public void put(String key, String value)
-  {
-    put(new StaticStringValue(key), new StaticStringValue(value));
-  }
-
-  /**
    * Pops the top value.
    */
   public Value pop()

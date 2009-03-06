@@ -1252,6 +1252,11 @@ abstract public class ArrayValue extends Value {
 
       if (_var != null)
         return _var;
+      else if (_value instanceof Var) {
+        _var = (Var) _value;
+        
+        return _var;
+      }
       else {
         _var = new Var(_value);
 

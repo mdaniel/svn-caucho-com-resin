@@ -102,12 +102,12 @@ public class ArrayValueImpl extends ArrayValue
       // php/0662 for copy
       Entry entry = createEntry(ptr._key);
 
-      if (entry._value instanceof Var) {
-        entry._var = (Var) entry._value;
-        entry._value = entry._value;
+      if (ptr._value instanceof Var) {
+        entry._var = (Var) ptr._value;
+        entry._value = ptr._value;
       }
       else
-        entry._value = entry._value.copyArrayItem();
+        entry._value = ptr._value.copyArrayItem();
     }
   }
 
