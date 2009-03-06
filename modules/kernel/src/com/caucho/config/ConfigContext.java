@@ -555,8 +555,11 @@ public class ConfigContext implements CreationalContext {
   private boolean configureInlineBean(Object parent, Node node,
 				      Attribute attrStrategy)
   {
-    if (! attrStrategy.isAllowInline())
+    /* server/0219
+    if (! attrStrategy.isAllowInline()) {
       return false;
+    }
+    */
 
     Node childNode = getChildElement(node);
 
@@ -569,12 +572,12 @@ public class ConfigContext implements CreationalContext {
 
     if (type == null || ! attrStrategy.isInlineType(type)) {
       // server/6500
-      System.out.println("NOT-INLINE: " + type + " " + attrStrategy);
       return false;
     }
 
-    Object childBean = attrStrategy.create(parent, qName, type);
-    System.out.println("INLINE: " + childBean + " " + type);
+    // server/0219
+    // Object childBean = attrStrategy.create(parent, qName, type);
+    Object childBean = type.create(parent, qName);
 
     if (childBean == null)
       return false;

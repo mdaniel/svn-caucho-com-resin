@@ -85,6 +85,31 @@ public class CreateAttribute extends Attribute {
   {
     return false;
   }
+
+  /**
+   * True if it allows inline beans
+   */
+  @Override
+  public boolean isAllowInline()
+  {
+    return _setter != null;
+  }
+
+  /**
+   * True if it allows inline beans
+   */
+  @Override
+  public boolean isInlineType(ConfigType type)
+  {
+    // server/0219
+    
+    if (_setter == null)
+      return false;
+    else if (type == null)
+      return false;
+    else
+      return _type.isAssignableFrom(type.getType());
+  }
   
   /**
    * Sets the value of the attribute
