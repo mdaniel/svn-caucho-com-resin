@@ -52,7 +52,13 @@ public class EnvironmentAttribute extends Attribute {
   {
     return _type;
   }
-  
+
+  @Override
+  public boolean isAllowText()
+  {
+    return _type.isConstructableFromString();
+  }
+
   /**
    * Sets the value of the attribute
    */
