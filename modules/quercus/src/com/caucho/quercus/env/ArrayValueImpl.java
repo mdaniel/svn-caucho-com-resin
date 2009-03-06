@@ -943,8 +943,10 @@ public class ArrayValueImpl extends ArrayValue
     if (var != null)
       return var;
     
-    if (entry._value instanceof Var)
-      var = new Var(entry._value.toValue());
+    if (entry._value instanceof Var) {
+      var = (Var) entry._value;
+      entry._value = entry._value.toValue();
+    }
     else
       var = new Var(entry._value);
 
