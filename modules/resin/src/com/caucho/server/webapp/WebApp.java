@@ -1148,6 +1148,16 @@ public class WebApp extends ServletContextImpl
   @Configurable
   public void setAccessLog(AbstractAccessLog log)
   {
+    add(log);
+  }
+
+  /**
+   * Allow custom access log
+   */
+  @Configurable
+  public void add(AbstractAccessLog log)
+  {
+    System.out.println("ADD: " + log);
     _accessLog = log;
 
     _accessLogLocal.set(log);

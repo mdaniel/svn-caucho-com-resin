@@ -45,17 +45,6 @@ typedef time_t unsigned int;
 typedef struct mem_pool_t mem_pool_t;
 
 #define CONN_POOL_SIZE 128
-
-typedef struct registry_t {
-  struct registry_t *parent;
-  struct registry_t *next;
-  struct registry_t *prev;
-  struct registry_t *first;
-  struct registry_t *last;
-
-  char *key;
-  char *value;
-} registry_t;
   
 typedef struct stream_t stream_t;
 
@@ -67,15 +56,15 @@ typedef struct srun_t {
   int port;
 
   int connect_timeout;       /* time the connect() call should wait  */
-  int live_time;             /* time an idle socket should live      */
-  int dead_time;             /* time a dead srun stays dead          */
+  int idle_timeout;          /* time an idle socket should live      */
+  int fail_recover_timeout;  /* time a dead srun stays dead          */
   int read_timeout;          /* how long to wait for a read (iis)    */
   int send_buffer_size;      /* how big the send buffer is           */
   
   void *lock;                /* lock specific to the srun            */
   
-  int is_dead;               /* true if the connect() failed         */
-  time_t fail_time;    /* when the last connect() failed       */
+  int is_fail;               /* true if the connect() failed         */
+  time_t fail_time;          /* when the last connect() failed       */
 
   void *ssl;                 /* ssl context                          */
   int (*open) (stream_t *);
@@ -167,7 +156,7 @@ typedef struct resin_host_t {
   int port;
 
   int has_data;
-  time_t last_update;
+  time_t last_update_time;
   char etag[32];  /* etag for the last configuration update. */
 
   cluster_t cluster;
@@ -224,8 +213,8 @@ typedef struct config_t {
   resin_host_t *manual_host;
 
   /* how often to check for updates */
-  int update_interval;
-  time_t last_update;
+  int update_timeout;
+  time_t last_update_time;
   time_t last_file_update;
   time_t start_time;
   int update_count;
@@ -341,13 +330,6 @@ char *cse_strdup(mem_pool_t *p, const char *string);
 
 void cse_error(config_t *config, char *format, ...);
 
-registry_t *cse_parse(FILE *is, config_t *config, char *path);
-
-registry_t *cse_next_link(registry_t *reg, char *key);
-char *cse_find_value(registry_t *reg, char *key);
-char *cse_find_inherited_value(registry_t *reg, char *key, char *deflt);
-void cse_print_registry(registry_t *registry);
-
 void cse_init_config(config_t *config);
 /*
 void cse_update_config(config_t *config, time_t now);
@@ -381,7 +363,7 @@ int cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
 void cse_close(stream_t *s, char *msg);
 void cse_close_stream(stream_t *s);
 void cse_close_sockets(config_t *config);
-void cse_recycle(stream_t *s, time_t now);
+void cse_free_idle(stream_t *s, time_t now);
 int cse_flush(stream_t *s);
 int cse_fill_buffer(stream_t *s);
 int cse_read_byte(stream_t *s);

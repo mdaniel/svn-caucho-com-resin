@@ -124,15 +124,19 @@ public class CustomBeanAttribute extends Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
-    CustomBeanConfig config = (CustomBeanConfig) create(bean, name);
+    Object beanChild = create(bean, name);
 
-    if (! value.trim().equals("")) {
-      config.addArg(new TextArgProgram(value));
+    if (beanChild instanceof CustomBeanConfig) {
+      CustomBeanConfig config = (CustomBeanConfig) beanChild; 
+
+      if (! value.trim().equals("")) {
+	config.addArg(new TextArgProgram(value));
+      }
+
+      config.init();
     }
 
-    config.init();
-
-    setValue(bean, name, config);
+    setValue(bean, name, beanChild);
   }
   
   

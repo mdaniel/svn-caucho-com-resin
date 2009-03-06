@@ -177,6 +177,7 @@ public class WbWebBeans {
   /**
    * Adds a deploy
    */
+  @TagName("Deploy")
   public DeployConfig createDeploy()
   {
     return new DeployConfig();

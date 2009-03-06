@@ -439,9 +439,9 @@ static int
 handle_config_header(config_t *config, char *header, char *value)
 {
   if (! strcmp(header, "check-interval")) {
-    config->update_interval = resin_atoi(value);
-    if (config->update_interval < 5)
-      config->update_interval = 5;
+    config->update_timeout = resin_atoi(value);
+    if (config->update_timeout < 5)
+      config->update_timeout = 5;
   }
   else if (! strcmp(header, "cookie")) {
     int len = sizeof(config->session_cookie);
@@ -605,9 +605,9 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	buf[0] = 0;
 
 #ifndef WIN32
- 	ctime_r(&host->last_update, buf);
+ 	ctime_r(&host->last_update_time, buf);
 #else
-	strcpy(buf, ctime(&host->last_update));
+	strcpy(buf, ctime(&host->last_update_time));
 #endif
 
 	sprintf(host->config_source, "Unavailable (%s)", buf);
@@ -625,9 +625,9 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	buf[0] = 0;
 
 #ifndef WIN32
-	ctime_r(&host->last_update, buf);
+	ctime_r(&host->last_update_time, buf);
 #else
-	strcpy(buf, ctime(&host->last_update));
+	strcpy(buf, ctime(&host->last_update_time));
 #endif
 
 	sprintf(host->config_source, "Resin-ETag (%s)", buf);
@@ -660,11 +660,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	else if (! strcmp(buffer, "read-timeout"))
 	  read_timeout = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
-	  int last_update = resin_atoi(value);
+	  int last_update_time = resin_atoi(value);
 
 	  /* If server started after the file, don't update time. */
-	  if (host && host->config->start_time < last_update) {
-	    host->last_update = last_update;
+	  if (host && host->config->start_time < last_update_time) {
+	    host->last_update_time = last_update_time;
 	  }
 	}
 	else
@@ -714,9 +714,9 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  }
 	  else {
 	    if (max_idle_time > 0)
-	      srun->srun->live_time = max_idle_time;
+	      srun->srun->idle_timeout = max_idle_time;
 	    if (fail_recover_time > 0)
-	      srun->srun->dead_time = fail_recover_time;
+	      srun->srun->fail_recover_timeout = fail_recover_time;
 	    if (read_timeout > 0)
 	      srun->srun->read_timeout = read_timeout;
 	  }
@@ -733,7 +733,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	is_change = 0;
 	*p_is_change = is_change;
 	host->canonical = old_canonical;
-	host->last_update = 0;
+	host->last_update_time = 0;
 
 	if (pool)
 	  cse_free_pool(pool);
@@ -778,7 +778,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	   __FILE__, __LINE__, code));
       
       host->canonical = old_canonical;
-      host->last_update = 0;
+      host->last_update_time = 0;
       
       sprintf(host->error_message,
 	      "%s:%d:read_config(): hmux unknown %d\n",
@@ -847,7 +847,7 @@ write_config(config_t *config)
   memset(&s, 0, sizeof(s));
   s.socket = fd;
 
-  sprintf(buffer, "%d", config->update_interval);
+  sprintf(buffer, "%d", config->update_timeout);
   hmux_write_string(&s, HMUX_HEADER, "check-interval");
   hmux_write_string(&s, HMUX_STRING, buffer);
 
@@ -892,12 +892,12 @@ write_config(config_t *config)
     else
       hmux_write_string(&s, HMUX_DISPATCH_HOST, host->name);
     
-    sprintf(buffer, "%d", (int) host->last_update);
+    sprintf(buffer, "%d", (int) host->last_update_time);
     hmux_write_string(&s, HMUX_HEADER, "last-update");
     hmux_write_string(&s, HMUX_STRING, buffer);
     
     ERR(("%s:%d:write_config(): update %s:%d -> %d\n",
-       __FILE__, __LINE__, host->name, host->port, host->last_update));
+       __FILE__, __LINE__, host->name, host->port, host->last_update_time));
 
     if (host->canonical && host->canonical != host) {
       if (host->canonical->port) {
@@ -941,11 +941,11 @@ write_config(config_t *config)
       if (! srun || ! srun->srun || ! srun->srun->hostname)
 	continue;
 
-      sprintf(buffer, "%d", srun->srun->live_time);
+      sprintf(buffer, "%d", srun->srun->idle_timeout);
       hmux_write_string(&s, HMUX_HEADER, "live-time");
       hmux_write_string(&s, HMUX_STRING, buffer);
 
-      sprintf(buffer, "%d", srun->srun->dead_time);
+      sprintf(buffer, "%d", srun->srun->fail_recover_timeout);
       hmux_write_string(&s, HMUX_HEADER, "dead-time");
       hmux_write_string(&s, HMUX_STRING, buffer);
 
@@ -1036,7 +1036,7 @@ read_all_config_impl(config_t *config)
 	
 	if (read_config(&s, config, host, 0, &is_change) > 0) {
 	  char buf[128];
-	  time_t time = host->last_update;
+	  time_t time = host->last_update_time;
 	  buf[0] = 0;
 
 #ifndef WIN32
@@ -1110,8 +1110,8 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     int is_change;
     time_t prev_update;
 
-    prev_update = host->last_update;
-    host->last_update = now;
+    prev_update = host->last_update_time;
+    host->last_update_time = now;
     
     hmux_start_channel(&s, 1);
     hmux_write_int(&s, HMUX_PROTOCOL, HMUX_DISPATCH_PROTOCOL);
@@ -1123,7 +1123,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
 
     code = cse_read_byte(&s);
     if (code != HMUX_CHANNEL) {
-      host->last_update = prev_update;
+      host->last_update_time = prev_update;
       
       cse_close(&s, "protocol");
       return 0;
@@ -1132,14 +1132,14 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     len = hmux_read_len(&s);
 
     if (read_config(&s, host->config, host, now, &is_change) == HMUX_QUIT) {
-      cse_recycle(&s, now);
+      cse_free_idle(&s, now);
     }
     else
       cse_close(&s, "close");
 
     if (is_change > 0) {
       char buf[128];
-      time_t now = host->last_update;
+      time_t now = host->last_update_time;
       buf[0] = 0;
 
 #ifndef WIN32
@@ -1153,7 +1153,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
 
     if (is_change > 0
 	|| prev_update < host->config->start_time
-	|| host->config->update_interval >= AUTO_WRITE_TIME) {
+	|| host->config->update_timeout >= AUTO_WRITE_TIME) {
       write_config(host->config);
     }
 
@@ -1203,7 +1203,7 @@ cse_init_config(config_t *config)
   config->enable_caucho_status = 0;
   */
   config->disable_session_failover = 0;
-  config->update_interval = 15;
+  config->update_timeout = 15;
   strcpy(config->session_url_prefix, ";jsessionid=");
   strcpy(config->session_cookie, "JSESSIONID");
 
@@ -1263,7 +1263,7 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
 {
  struct stat st;
 
-  if (now < host->last_update + config->update_interval) {
+  if (now < host->last_update_time + config->update_timeout) {
     /* If current value is still valid, return */
     return;
   }
@@ -1274,8 +1274,8 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
       read_all_config_impl(config);
     }
 
-    if (now < host->last_update + config->update_interval
-        && config->start_time <= host->last_update) {
+    if (now < host->last_update_time + config->update_timeout
+        && config->start_time <= host->last_update_time) {
       /*
        * If the cached value is still valid and Resin has been checked
        * at least once since startup, use the cached value.
@@ -1285,12 +1285,12 @@ cse_update_host(config_t *config, resin_host_t *host, time_t now)
   }
 
   LOG(("%s:%d:cse_update_host(): %s:%d(%p) old:%d now:%d()\n",
-       __FILE__, __LINE__, host->name, host->port, host, host->last_update, now));
+       __FILE__, __LINE__, host->name, host->port, host, host->last_update_time, now));
 
   cse_update_host_from_resin(host, now);
   
   LOG(("%s:%d:cse_update_host(): complete %s:%d(%p) old:%d now:%d()\n",
-       __FILE__, __LINE__, host->name, host->port, host, host->last_update, now));
+       __FILE__, __LINE__, host->name, host->port, host, host->last_update_time, now));
 }
 
 /**
@@ -1550,7 +1550,7 @@ cse_is_match(config_t *config,
     return 0;
 
   if (! app->has_data) {
-    host->last_update = 0;
+    host->last_update_time = 0;
     return host;
   }
 
@@ -1654,11 +1654,11 @@ cse_match_request(config_t *config, const char *host, int port,
   else if (test_port && test_port != port) {
   }
   else if (! test_match_host
-	   && config->last_update + config->update_interval < now) {
+	   && config->last_update_time + config->update_timeout < now) {
     /* if non-match, the timeout is the config update time */
   }
   else if (test_match_host
-	   && test_match_host->last_update + config->update_interval < now) {
+	   && test_match_host->last_update_time + config->update_timeout < now) {
   }
   else {
     cse_unlock(config->lock);
@@ -1688,7 +1688,7 @@ cse_match_request(config_t *config, const char *host, int port,
   entry->uri = strdup(uri);
   entry->port = port;
   entry->count++;
-  config->last_update = now;
+  config->last_update_time = now;
   cse_unlock(config->lock);
 
   return match_host;

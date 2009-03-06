@@ -569,10 +569,12 @@ public class ConfigContext implements CreationalContext {
 
     if (type == null || ! attrStrategy.isInlineType(type)) {
       // server/6500
+      System.out.println("NOT-INLINE: " + type + " " + attrStrategy);
       return false;
     }
 
     Object childBean = attrStrategy.create(parent, qName, type);
+    System.out.println("INLINE: " + childBean + " " + type);
 
     if (childBean == null)
       return false;
@@ -641,8 +643,15 @@ public class ConfigContext implements CreationalContext {
 
     Node child = elt.getFirstChild();
 
-    if (child == null || child.getNextSibling() != null)
+    if (child == null)
       return null;
+
+    if (isEmptyText(child)) {
+      child = child.getNextSibling();
+
+      if (child == null)
+	return null;
+    }
 
     if (! (child instanceof Element))
       return null;
@@ -652,8 +661,25 @@ public class ConfigContext implements CreationalContext {
 
     if (uri == null || ! uri.startsWith("urn:java:"))
       return null;
-    else
-      return child;
+
+    Node next = child.getNextSibling();
+    
+    if (next != null) {
+      if (next.getNextSibling() != null || ! isEmptyText(next))
+	return null;
+    }
+
+    return child;
+  }
+
+  private boolean isEmptyText(Node node)
+  {
+    if (! (node instanceof CharacterData))
+      return false;
+    
+    CharacterData data = (CharacterData) node;
+
+    return data.getData().trim().length() == 0;
   }
 
   private boolean isTrim(Node node)

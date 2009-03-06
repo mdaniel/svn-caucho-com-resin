@@ -942,7 +942,7 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
   
   /* on failure, do not failover but simply fail */
   if (code == HMUX_QUIT)
-    cse_recycle(&s, now);
+    cse_free_idle(&s, now);
   else
     cse_close(&s, "no reuse");
 
@@ -1021,7 +1021,9 @@ jvm_status(cluster_t *cluster, request_rec *r)
       ap_rprintf(r, "<td align=right>%d</td><td align=right>%d</td>",
 		 srun->active_sockets, pool_count);
       ap_rprintf(r, "<td align=right>%d</td><td align=right>%d</td><td align=right>%d</td>",
-		 srun->connect_timeout, srun->live_time, srun->dead_time);
+		 srun->connect_timeout,
+		 srun->idle_timeout,
+		 srun->fail_recover_timeout);
       ap_rputs("</tr>\n", r);
     }
   }
@@ -1083,7 +1085,7 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
   }
   
   ap_rprintf(r, "<b>Last-Update:</b> %s</p><br />\n",
-	     ctime(&host->last_update));
+	     ctime(&host->last_update_time));
   ap_rprintf(r, "</p>\n");
 
   if (host->canonical == host) {
@@ -1163,7 +1165,7 @@ caucho_status(request_rec *r)
   ap_rprintf(r, "<tr><td><b>Session URL</b></td><td>'%s'</td></tr>\n",
 	     config->session_url_prefix);
   ap_rprintf(r, "<tr><td><b>Config Check Interval</b></b></td><td>%ds</td></tr>\n",
-	     config->update_interval);
+	     config->update_timeout);
   if (config->config_path && config->config_path[0]) {
     ap_rprintf(r, "<tr><td><b>Config Cache File</b></td><td>%s</td></tr>\n",
 	       config->config_path);

@@ -58,8 +58,8 @@
 
 #define WINDOWS_READ_TIMEOUT 3600
 #define DEFAULT_PORT 6800
-#define DEAD_TIME 20
-#define LIVE_TIME 10
+#define FAIL_RECOVER_TIMEOUT 20
+#define IDLE_TIMEOUT 10
 #define CONNECT_TIMEOUT 2
 
 #ifndef ECONNRESET
@@ -78,9 +78,6 @@ std_open(stream_t *stream)
 static int
 poll_read(int fd, int s)
 {
-  if (s <= 0)
-    return 1;
-
   while (s > 0) {
     fd_set read_set;
     struct timeval timeout;
@@ -230,6 +227,9 @@ cse_close(stream_t *s, char *msg)
 {
   int socket = s->socket;
   s->socket = -1;
+  
+  s->read_offset = 0;
+  s->read_length = 0;
   
   if (socket >= 0) {
     LOG(("%s:%d:cse_close(): close %d %s\n", __FILE__, __LINE__, socket, msg));
@@ -538,6 +538,7 @@ cse_fill_buffer(stream_t *s)
 {
   int len = 0;
   int retry;
+  int read_length = 0;
   
   if (s->socket < 0)
     return -1;
@@ -560,31 +561,31 @@ cse_fill_buffer(stream_t *s)
     }
   }
 
-  s->read_offset = 0;
-
   retry = 3;
 
   do {
     /* config read/save has no cluster_srun */
     if (s->cluster_srun)
-      s->read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
+      read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
     else
-      s->read_length = read(s->socket, s->read_buf, BUF_LENGTH);
+      read_length = read(s->socket, s->read_buf, BUF_LENGTH);
     // repeat for EINTR, EAGAIN
-  } while (s->read_length < 0
+  } while (read_length < 0
 	   && errno != EPIPE && errno != ECONNRESET
 	   && retry-- > 0);
   
-  if (s->read_length <= 0) {
+  if (read_length <= 0) {
     cse_close(s, "fill_buffer");
     
     return -1;
   }
 
+  s->read_offset = 0;
+  s->read_length = read_length;
   s->sent_data = 1;
   s->write_length = 0;
   
-  return s->read_length;
+  return read_length;
 }
 
 int
@@ -657,14 +658,15 @@ int
 cse_read_all(stream_t *s, char *buf, int len)
 {
   while (len > 0) {
-    int sublen;
+    int sublen = s->read_length - s->read_offset;
 
-    if (s->read_offset >= s->read_length) {
+    if (sublen <= 0) {
       if (cse_fill_buffer(s) < 0)
         return -1;
+      
+      sublen = s->read_length - s->read_offset;
     }
 
-    sublen = s->read_length - s->read_offset;
     if (len < sublen)
       sublen = len;
 
@@ -684,12 +686,15 @@ cse_skip(stream_t *s, int len)
   while (len > 0) {
     int sublen;
 
-    if (s->read_offset >= s->read_length) {
+    sublen = s->read_length - s->read_offset;
+    
+    if (sublen <= 0) {
       if (cse_fill_buffer(s) < 0)
 	return -1;
+      
+      sublen = s->read_length - s->read_offset;
     }
 
-    sublen = s->read_length - s->read_offset;
     if (len < sublen)
       sublen = len;
 
@@ -722,9 +727,12 @@ int
 hmux_read_len(stream_t *s)
 {
   int l1 = cse_read_byte(s) & 0xff;
-  int l2 = cse_read_byte(s) & 0xff;
+  int l2 = cse_read_byte(s);
 
-  return (l1 << 8) + l2;
+  if (l2 < 0)
+    return -1;
+
+  return (l1 << 8) + (l2 & 0xff);
 }
 
 /**
@@ -829,7 +837,7 @@ hmux_read_string(stream_t *s, char *buf, int length)
     return -1;
   }
 
-  if (length > read_length)
+  if (read_length < length)
     length = read_length;
 
   if (cse_read_all(s, buf, length) < 0) {
@@ -840,8 +848,7 @@ hmux_read_string(stream_t *s, char *buf, int length)
   buf[length] = 0;
 
   /* scan extra */
-  for (read_length -= length; read_length > 0; read_length--)
-    cse_read_byte(s);
+  cse_skip(s, read_length - length);
 
   return length;
 }
@@ -945,86 +952,95 @@ cse_add_config_srun(config_t *config, srun_t *srun)
 }
 
 static srun_t *
-cse_add_srun(cluster_t *cluster, const char *hostname, int port, int ssl)
+cse_create_srun(config_t *config, const char *hostname, int port, int is_ssl)
 {
-  struct hostent *hostent = 0;
-  srun_t *srun = 0;
-  config_t *config = cluster->config;
-  int i;
-
-  LOG(("%s:%d:cse_add_srun(): adding host %s:%d cluster=%p\n",
-       __FILE__, __LINE__, hostname, port, cluster));
-
-  srun = cse_find_config_srun(config, hostname, port, ssl);
-  if (srun)
-    return srun;
+  struct hostent *hostent;
+  srun_t *srun;
+  
+  hostent = gethostbyname(hostname);
+  if (! hostent || ! hostent->h_addr)
+    return 0;
   
   srun = malloc(sizeof(srun_t));
   memset(srun, 0, sizeof(srun_t));
 
-  hostent = gethostbyname(hostname);
-  if (hostent && hostent->h_addr) {
-    srun->hostname = strdup(hostname);
-    srun->host = (struct in_addr *) malloc(sizeof (struct in_addr));
-    memcpy(srun->host, hostent->h_addr, sizeof(struct in_addr));
-    srun->port = port;
-    srun->conn_head = 0;
-    srun->conn_tail = 0;
-    srun->max_sockets = 32;
+  srun->hostname = strdup(hostname);
+  srun->host = (struct in_addr *) malloc(sizeof (struct in_addr));
+  memcpy(srun->host, hostent->h_addr, sizeof(struct in_addr));
+  srun->port = port;
+  srun->conn_head = 0;
+  srun->conn_tail = 0;
+  srun->max_sockets = 32;
 
-    srun->connect_timeout = CONNECT_TIMEOUT;
-    srun->live_time = LIVE_TIME;
-    srun->dead_time = DEAD_TIME;
-    srun->read_timeout = WINDOWS_READ_TIMEOUT;
+  srun->connect_timeout = CONNECT_TIMEOUT;
+  srun->idle_timeout = IDLE_TIMEOUT;
+  srun->fail_recover_timeout = FAIL_RECOVER_TIMEOUT;
+  srun->read_timeout = WINDOWS_READ_TIMEOUT;
 
-    srun->open = std_open;
-    srun->read = std_read;
-    srun->write = std_write;
-    srun->close = std_close;
+  srun->open = std_open;
+  srun->read = std_read;
+  srun->write = std_write;
+  srun->close = std_close;
 
 #ifdef OPENSSL
-    if (ssl) {
-      SSL_CTX* ctx;
-      SSL_METHOD *meth;
+  if (is_ssl) {
+    SSL_CTX* ctx;
+    SSL_METHOD *meth;
 
-      SSLeay_add_ssl_algorithms();
-      meth = SSLv3_client_method();
-      SSL_load_error_strings();
-      ctx = SSL_CTX_new(meth);
+    SSLeay_add_ssl_algorithms();
+    meth = SSLv3_client_method();
+    SSL_load_error_strings();
+    ctx = SSL_CTX_new(meth);
 
-      if (ctx) {
-        srun->ssl = ctx;
-        srun->open = ssl_open;
-        srun->read = ssl_read;
-        srun->write = ssl_write;
-        srun->close = ssl_close;
-      }
-      else {
-        ERR(("%s:%d:cse_add_srun(): can't initialize ssl",
-	     __FILE__, __LINE__));
-      }
+    if (ctx) {
+      srun->ssl = ctx;
+      srun->open = ssl_open;
+      srun->read = ssl_read;
+      srun->write = ssl_write;
+      srun->close = ssl_close;
     }
+    else {
+      ERR(("%s:%d:cse_create_srun(): can't initialize ssl",
+	   __FILE__, __LINE__));
+    }
+  }
 #endif
 
-    srun->lock = cse_create_lock(config);
-    LOG(("%s:%d:cse_add_srun(): srun lock %x\n",
-	 __FILE__, __LINE__, srun->lock));
+  srun->lock = cse_create_lock(config);
+  LOG(("%s:%d:cse_create_srun(): srun lock %x\n",
+       __FILE__, __LINE__, srun->lock));
+
+  return srun;
+}
+
+static srun_t *
+cse_add_srun(config_t *config, const char *hostname, int port, int is_ssl)
+{
+  struct hostent *hostent = 0;
+  srun_t *srun = 0;
+  int i;
+
+  LOG(("%s:%d:cse_add_srun(): adding host %s:%d config=%p\n",
+       __FILE__, __LINE__, hostname, port, config));
+
+  srun = cse_find_config_srun(config, hostname, port, is_ssl);
+  
+  if (! srun) {
+    srun = cse_create_srun(config, hostname, port, is_ssl);
 
     cse_add_config_srun(config, srun);
-    
-    return srun;
   }
 
-  return 0;
+  return srun;
 }
 
 /**
  * Adds a new host to the configuration
  */
-cluster_srun_t *
-cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
-		       const char *hostname, int port, const char *id,
-		       int index, int is_backup, int is_ssl)
+static cluster_srun_t *
+cse_add_cluster_server_impl(mem_pool_t *pool, cluster_t *cluster,
+			    const char *hostname, int port, const char *id,
+			    int index, int is_backup, int is_ssl)
 {
   config_t *config = cluster->config;
   srun_t *srun;
@@ -1056,7 +1072,7 @@ cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
     cluster->srun_list = srun_list;
   }
 
-  srun = cse_add_srun(cluster, hostname, port, is_ssl);
+  srun = cse_add_srun(cluster->config, hostname, port, is_ssl);
 
   if (srun) {
     cluster_srun = &cluster->srun_list[index];
@@ -1081,15 +1097,35 @@ cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
 }
 
 /**
- * reuse the socket
+ * Adds a new host to the configuration
+ */
+cluster_srun_t *
+cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
+		       const char *hostname, int port, const char *id,
+		       int index, int is_backup, int is_ssl)
+{
+  cluster_srun_t *srun;
+  
+  cse_lock(cluster->config->lock);
+  
+  srun = cse_add_cluster_server_impl(pool, cluster, hostname, port, id,
+				     index, is_backup, is_ssl);
+  
+  cse_unlock(cluster->config->lock);
+
+  return srun;
+}
+
+/**
+ * initialize the stream from an idle socket
  */
 static void
-cse_reuse(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
-          int socket, void *ssl,
-	  time_t request_time, void *web_pool)
+cse_init_from_idle(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
+		   int socket, void *ssl,
+		   time_t request_time, void *web_pool)
 {
   config_t *config = cluster->config;
-  
+
   s->socket = socket;
   s->ssl = ssl;
                      
@@ -1104,9 +1140,86 @@ cse_reuse(stream_t *s, cluster_t *cluster, cluster_srun_t *srun,
   s->cluster_srun = srun;
   s->sent_data = 0;
   
-  srun->srun->is_dead = 0;
+  srun->srun->is_fail = 0;
   
-  LOG(("%s:%d:cse_reuse(): reopen %d\n", __FILE__, __LINE__, s->socket));
+  LOG(("%s:%d:cse_init_from_idle(): reopen %d\n",
+       __FILE__, __LINE__, s->socket));
+}
+
+/**
+ * Try to allocate an socket.  Must be called from inside a lock of
+ * srun->lock
+ */
+static int
+cse_alloc_idle_socket_impl(stream_t *s, cluster_t *cluster,
+			   cluster_srun_t *cluster_srun,
+			   time_t now, void *web_pool)
+{
+  int head;
+  int next_head;
+  srun_t *srun = cluster_srun->srun;
+
+  LOG(("%s:%d:cse_reuse_socket(): reuse head:%d tail:%d\n",
+       __FILE__, __LINE__, srun->conn_head, srun->conn_tail));
+
+  if (! srun || srun->conn_head == srun->conn_tail)
+    return 0;
+  
+  for (head = srun->conn_head;
+       head != srun->conn_tail;
+       head = next_head) {
+    struct conn_t *conn;
+    
+    next_head = (head + CONN_POOL_SIZE - 1) % CONN_POOL_SIZE;
+
+    conn = &srun->conn_pool[next_head];
+    
+    if (conn->last_time + srun->idle_timeout < now) {
+      LOG(("%s:%d:cse_reuse_socket(): closing idle socket:%d\n",
+	   __FILE__, __LINE__, conn->socket));
+      srun->close(conn->socket, conn->ssl);
+    }
+    else {
+      int socket;
+      void *ssl;
+
+      socket = conn->socket;
+      ssl = conn->ssl;
+      srun->conn_head = next_head;
+
+      cse_init_from_idle(s, cluster, cluster_srun, socket, ssl, now, web_pool);
+      
+      return 1;
+    }
+  }
+
+  srun->conn_head = head;
+
+  return 0;
+}
+
+/**
+ * Try to reuse a socket
+ */
+static int
+cse_alloc_idle_socket(stream_t *s, cluster_t *cluster,
+		      cluster_srun_t *cluster_srun,
+		      time_t now, void *web_pool)
+{
+  srun_t *srun = cluster_srun->srun;
+  int is_alloc = 0;
+  
+  if (! srun)
+    return 0;
+  
+  cse_lock(srun->lock);
+  
+  is_alloc = cse_alloc_idle_socket_impl(s, cluster, cluster_srun,
+					now, web_pool);
+  
+  cse_unlock(srun->lock);
+
+  return is_alloc;
 }
 
 /**
@@ -1133,7 +1246,7 @@ cse_close_idle(srun_t *srun, time_t now)
     conn = &srun->conn_pool[tail];
 
     /* from here on, it's live connections. */
-    if (now < conn->last_time + srun->live_time)
+    if (now < conn->last_time + srun->idle_timeout)
       return;
     
     srun->conn_tail = next_tail;
@@ -1144,14 +1257,45 @@ cse_close_idle(srun_t *srun, time_t now)
 }
 
 /**
+ * Stores the idle srun data in the ring.
+ *
+ * Must be called from within the srun->lock.
+ */
+static int
+cse_free_idle_srun(stream_t *s, srun_t *srun, time_t now)
+{
+  int head = srun->conn_head;
+  int next_head = (head + 1) % CONN_POOL_SIZE;
+  int socket = s->socket;
+    
+  if (socket < 0 || s->config->update_count != s->update_count)
+    return 0;
+
+  /* If there's room in the ring, add it. */
+  if (next_head != srun->conn_tail) {
+    s->socket = -1;
+    cse_kill_socket_cleanup(socket, s->web_pool);
+    srun->conn_pool[head].socket = socket;
+    srun->conn_pool[head].ssl = s->ssl;
+    srun->conn_pool[head].last_time = now;
+    srun->conn_head = next_head;
+
+    return 1;
+  }
+
+  return 0;
+}
+
+/**
  * Try to recycle the socket so the next request can reuse it.
  */
 void
-cse_recycle(stream_t *s, time_t now)
+cse_free_idle(stream_t *s, time_t now)
 {
   int socket = s->socket;
   cluster_srun_t *cluster_srun = s->cluster_srun;
   srun_t *srun = cluster_srun ? cluster_srun->srun : 0;
+  int is_free;
 
   if (! srun) {
     cse_close(s, "recycle");
@@ -1162,28 +1306,16 @@ cse_recycle(stream_t *s, time_t now)
 
   cse_close_idle(srun, now);
   
-  if (socket >= 0 && s->config->update_count == s->update_count) {
-    int head = srun->conn_head;
-    int next_head = (head + 1) % CONN_POOL_SIZE;
-
-    /* If there's room in the ring, add it. */
-    if (next_head != srun->conn_tail) {
-      s->socket = -1;
-      cse_kill_socket_cleanup(socket, s->web_pool);
-      srun->conn_pool[head].socket = socket;
-      srun->conn_pool[head].ssl = s->ssl;
-      srun->conn_pool[head].last_time = now;
-      srun->conn_head = next_head;
-      cse_unlock(srun->lock);
-      LOG(("%s:%d:cse_recycle(): recycle %d\n", __FILE__, __LINE__, socket));
-      return;
-    }
-  }
+  is_free = cse_free_idle_srun(s, srun, now);
   
   cse_unlock(srun->lock);
-  
-  if (socket >= 0) {
-    LOG(("%s:%d:cse_recycle(): close2 %d update1:%d update2:%d max-sock:%d\n",
+
+  if (is_free) {
+    LOG(("%s:%d:cse_free_idle(): recycle %d\n",
+	 __FILE__, __LINE__, socket));
+  }
+  else if (socket >= 0) {
+    LOG(("%s:%d:cse_free_idle(): close2 %d update1:%d update2:%d max-sock:%d\n",
 	 __FILE__, __LINE__,
          socket, s->config->update_count, s->update_count,
          srun ? srun->max_sockets : -1));
@@ -1210,59 +1342,6 @@ close_srun(srun_t *srun, time_t now)
   srun->conn_head = srun->conn_tail = 0;
   
   cse_unlock(srun->lock);
-}
-
-/**
- * Try to reuse a socket
- */
-static int
-cse_reuse_socket(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
-		 time_t now, void *web_pool)
-{
-  int head;
-  int next_head;
-  srun_t *srun = cluster_srun->srun;
-
-  LOG(("%s:%d:cse_reuse_socket(): reuse head:%d tail:%d\n",
-       __FILE__, __LINE__, srun->conn_head, srun->conn_tail));
-
-  if (! srun || srun->conn_head == srun->conn_tail)
-    return 0;
-  
-  cse_lock(srun->lock);
-  for (head = srun->conn_head;
-       head != srun->conn_tail;
-       head = next_head) {
-    struct conn_t *conn;
-    
-    next_head = (head + CONN_POOL_SIZE - 1) % CONN_POOL_SIZE;
-
-    conn = &srun->conn_pool[next_head];
-    
-    if (conn->last_time + srun->live_time < now) {
-      LOG(("%s:%d:cse_reuse_socket(): closing idle socket:%d\n",
-	   __FILE__, __LINE__, conn->socket));
-      srun->close(conn->socket, conn->ssl);
-    }
-    else {
-      int socket;
-      void *ssl;
-
-      socket = conn->socket;
-      ssl = conn->ssl;
-      srun->conn_head = next_head;
-
-      cse_reuse(s, cluster, cluster_srun, socket, ssl, now, web_pool);
-      cse_unlock(srun->lock);
-      
-      return 1;
-    }
-  }
-
-  srun->conn_head = head;
-  cse_unlock(srun->lock);
-
-  return 0;
 }
 
 void
@@ -1326,7 +1405,7 @@ select_host(cluster_t *cluster, time_t now)
     if (cluster_srun->is_backup)
       cost += 10000;
     
-    if (srun->is_dead && now < srun->fail_time + srun->dead_time)
+    if (srun->is_fail && now < srun->fail_time + srun->fail_recover_timeout)
       continue;
     else if (cost < best_cost) {
       best_srun = index;
@@ -1351,16 +1430,6 @@ open_connection_group(stream_t *s, cluster_t *cluster,
 
   if (offset < 0)
     cluster_srun = owner_item;
-  /*
-  else if (owner_item->group_size < 2)
-    return 0;
-  else {
-    int delta = offset % (owner_item->group_size - 1) + 1;
-    int index = (owner_item->group_index + delta) % owner_item->group_size;
-
-    cluster_srun = owner_item->group[index];
-  }
-  */
   else
     cluster_srun = owner_item;
   
@@ -1369,18 +1438,18 @@ open_connection_group(stream_t *s, cluster_t *cluster,
   if (! srun)
     return 0;
 
-  if (cse_reuse_socket(s, cluster, cluster_srun, now, web_pool)) {
+  if (cse_alloc_idle_socket(s, cluster, cluster_srun, now, web_pool)) {
     return 1;
   }
   else if (ignore_dead &&
-           srun->is_dead && now < srun->fail_time + srun->dead_time) {
+           srun->is_fail && now < srun->fail_time + srun->fail_recover_timeout) {
   }
   else if (cse_open(s, cluster, cluster_srun, web_pool, 0)) {
-    srun->is_dead = 0;
+    srun->is_fail = 0;
     return 1;
   }
   else {
-    srun->is_dead = 1;
+    srun->is_fail = 1;
     srun->fail_time = now;
   }
 
@@ -1404,21 +1473,21 @@ open_connection_any_host(stream_t *s, cluster_t *cluster, int host,
 
     if (! srun) {
     }
-    else if (cse_reuse_socket(s, cluster, cluster_srun, now, web_pool)) {
-      srun->is_dead = 0;
+    else if (cse_alloc_idle_socket(s, cluster, cluster_srun, now, web_pool)) {
+      srun->is_fail = 0;
       return 1;
     }
     else if (ignore_dead && cluster_srun->is_backup) {
     }
-    else if (ignore_dead &&
-             srun->is_dead && now < srun->fail_time + srun->dead_time) {
+    else if (ignore_dead && srun->is_fail
+	     && now < srun->fail_time + srun->fail_recover_timeout) {
     }
     else if (cse_open(s, cluster, cluster_srun, web_pool, 0)) {
-      srun->is_dead = 0;
+      srun->is_fail = 0;
       return 1;
     }
     else {
-      srun->is_dead = 1;
+      srun->is_fail = 1;
       srun->fail_time = now;
     }
   }
