@@ -57,8 +57,10 @@ import javax.servlet.http.*;
  * </pre></code>
  * </pre></code>
  */
+/*
 @Service
 @Unbound
+*/
 public class Deny extends SecurityConstraint
 {
   private static final L10N L = new L10N(Deny.class);
@@ -72,13 +74,14 @@ public class Deny extends SecurityConstraint
   /**
    * Sets the url-pattern
    */
+  @Override
   public void addURLPattern(String pattern)
   {
     String regexpPattern = UrlMap.urlPatternToRegexpPattern(pattern);
 
-    int flags = (CauchoSystem.isCaseInsensitive() ?
-                 Pattern.CASE_INSENSITIVE :
-                 0);
+    int flags = (CauchoSystem.isCaseInsensitive()
+		 ? Pattern.CASE_INSENSITIVE
+		 : 0);
     try {
       _patternList.add(Pattern.compile(regexpPattern, flags));
     } catch (PatternSyntaxException e) {
@@ -127,6 +130,7 @@ public class Deny extends SecurityConstraint
     return null;
   }
 
+  /*
   @PostConstruct
   public void init()
   {
@@ -137,6 +141,7 @@ public class Deny extends SecurityConstraint
 
     webApp.addSecurityConstraint(this);
   }
+  */
 
   /**
    * return the constraint

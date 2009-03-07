@@ -432,6 +432,14 @@ public class BeanType extends ConfigType
 
       return bean;
     }
+    else if ("".equals(text.trim())) {
+      Object bean = create(null, TEXT);
+
+      inject(bean);
+      init(bean);
+      
+      return bean;
+    }
 
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
 				  _beanClass.getName(), text));

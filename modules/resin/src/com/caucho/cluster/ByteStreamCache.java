@@ -50,6 +50,12 @@ public interface ByteStreamCache
   public ExtCacheEntry getExtCacheEntry(Object key);
   
   /**
+   * Returns the cache entry for the object with the given key, without
+   * triggering a load.
+   */
+  public ExtCacheEntry peekExtCacheEntry(Object key);
+  
+  /**
    * Puts a new item in the cache.
    *
    * @param key the key of the item to put

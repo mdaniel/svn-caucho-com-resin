@@ -150,8 +150,7 @@ public class SelfEncryptedCookie implements Serializable {
     } catch (SecurityException e) {
       throw e;
     } catch (Exception e) {
-      throw new SecurityException(L.l("SelfEncryptedCookie[] does not correctly decrypt: {0}",
-				      e), e);
+      throw new SecurityException(L.l("SelfEncryptedCookie[] does not correctly decrypt."), e);
     }
   }
 

@@ -1307,6 +1307,11 @@ public class WebApp extends ServletContextImpl
     _constraintManager.addConstraint(constraint);
   }
 
+  public void add(SecurityConstraint constraint)
+  {
+    addSecurityConstraint(constraint);
+  }
+
   /**
    * Adds a security role
    */
@@ -1326,7 +1331,7 @@ public class WebApp extends ServletContextImpl
       TransportConstraint transConstraint = new TransportConstraint("secure");
 
       SecurityConstraint constraint = new SecurityConstraint();
-      constraint.setURLPattern("/*");
+      constraint.addURLPattern("/*");
       constraint.addConstraint(transConstraint);
 
       _constraintManager.addConstraint(constraint);

@@ -109,7 +109,6 @@ public class ProxyBean<T> extends AbstractBean<T>
    */
   public T create(CreationalContext<T> context)
   {
-    System.out.println("CREATE:" + this);
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 

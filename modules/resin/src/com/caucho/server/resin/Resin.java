@@ -1773,6 +1773,46 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     /**
+     * Returns the port (backward compat)
+     */
+    public int getPort()
+    {
+      return 0;
+    }
+
+    /**
+     * Returns the port (backward compat)
+     */
+    public String getHttpAddress()
+    {
+      return getAddress();
+    }
+
+    /**
+     * Returns the port (backward compat)
+     */
+    public String getHttpsAddress()
+    {
+      return getAddress();
+    }
+
+    /**
+     * Returns the port (backward compat)
+     */
+    public int getHttpPort()
+    {
+      return 0;
+    }
+
+    /**
+     * Returns the port (backward compat)
+     */
+    public int getHttpsPort()
+    {
+      return 0;
+    }
+
+    /**
      * Returns the resin config.
      */
     public Path getConf()

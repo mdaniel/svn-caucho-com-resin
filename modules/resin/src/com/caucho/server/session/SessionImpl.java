@@ -1052,14 +1052,15 @@ public class SessionImpl implements HttpSession, CacheListener {
     try {
       if (_isInvalidating && _manager.getSessionStore() != null) {
 	boolean isRemove = false;
+	
 	if (logout == Logout.TIMEOUT) {
+	  // server/016r
 	  ExtCacheEntry entry
-	    = _manager.getSessionStore().getExtCacheEntry(_id);
+	    = _manager.getSessionStore().peekExtCacheEntry(_id);
 
 	  long now = Alarm.getCurrentTime();
 
-	  if (entry == null
-	      || entry.getLastUpdateTime() + _idleTimeout < now) {
+	  if (entry == null || ! entry.isValid()) {
 	    isRemove = true;
 	  }
 	}

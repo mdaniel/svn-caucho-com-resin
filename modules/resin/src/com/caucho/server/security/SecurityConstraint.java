@@ -82,7 +82,7 @@ public class SecurityConstraint {
   /**
    * Sets the url-pattern
    */
-  public void setURLPattern(String pattern)
+  public void addURLPattern(String pattern)
   {
     String regexpPattern = UrlMap.urlPatternToRegexpPattern(pattern);
 

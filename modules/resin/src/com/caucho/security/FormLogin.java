@@ -342,8 +342,14 @@ public class FormLogin extends AbstractLogin
 
     if (path.endsWith("/j_security_check")) {
       // server/12d8, server/12bs
-      response.setHeader("Cache-Control", "no-cache");
-      response.setDateHeader("Expires", 0);
+
+      if (response instanceof CauchoResponse) {
+	((CauchoResponse) response).setNoCache(true);
+      }
+      else {
+	response.setHeader("Cache-Control", "no-cache");
+	response.setDateHeader("Expires", 0);
+      }
       
       RequestDispatcher disp = app.getRequestDispatcher(_errorPage);
       disp.forward(request, response);

@@ -144,6 +144,15 @@ public class HmuxLinkService extends SimpleActor {
       return;
     }
 
+    if (! (credentials instanceof String)) {
+      getBrokerStream().queryError(id, from, to, query,
+				   new ActorError(ActorError.TYPE_AUTH,
+						  ActorError.FORBIDDEN,
+						  "unknown credentials: " + credentials));
+
+      return;
+    }
+
     String cookie = (String) credentials;
 
     if (cookie == null && adminCookie == null) {

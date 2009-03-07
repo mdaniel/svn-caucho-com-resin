@@ -410,6 +410,14 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the cache entry for the object with the given key.
    */
+  public ExtCacheEntry peekExtCacheEntry(Object key)
+  {
+    return getDistCacheEntry(key).getMnodeValue();
+  }
+
+  /**
+   * Returns the cache entry for the object with the given key.
+   */
   public CacheEntry getCacheEntry(Object key)
   {
     return getExtCacheEntry(key);

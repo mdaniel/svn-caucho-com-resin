@@ -403,7 +403,6 @@ public final class MnodeValue implements ExtCacheEntry {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-
   public boolean isValid()
   {
     return (! isEntryExpired(Alarm.getCurrentTime()));

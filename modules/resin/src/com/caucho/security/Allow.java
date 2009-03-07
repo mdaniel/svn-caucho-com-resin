@@ -73,8 +73,6 @@ import javax.servlet.http.*;
  * &lt;/web-app>
  * </pre></code>
  */
-@Service
-@Unbound
 public class Allow extends com.caucho.server.security.SecurityConstraint
 {
   private static final L10N L = new L10N(Allow.class);
@@ -88,6 +86,7 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
   /**
    * Sets the url-pattern
    */
+  @Override
   public void addURLPattern(String pattern)
   {
     String regexpPattern = UrlMap.urlPatternToRegexpPattern(pattern);
@@ -143,6 +142,7 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
     return null;
   }
 
+  /*
   @PostConstruct
   public void init()
   {
@@ -153,6 +153,7 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
 
     webApp.addSecurityConstraint(this);
   }
+  */
 
   /**
    * return the constraint

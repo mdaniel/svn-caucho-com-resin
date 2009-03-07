@@ -1192,10 +1192,17 @@ public class HmuxRequest extends AbstractHttpRequest
       else
 	getBrokerStream(isAdmin).queryGet(id, to, from, query);
     } catch (Exception e) {
-      log.finer(e.toString());
-      if (log.isLoggable(Level.FINEST))
-	log.log(Level.FINEST, e.toString(), e);
+      if (e instanceof ActorException) {
+	log.finer(e.toString());
       
+	if (log.isLoggable(Level.FINEST))
+	  log.log(Level.FINEST, e.toString(), e);
+      }
+      else {
+	if (log.isLoggable(Level.FINER))
+	  log.log(Level.FINER, e.toString(), e);
+      }
+
       if (to == null)
 	writeHmtpQueryError(id, from, to, query, ActorError.create(e));
     }
@@ -1495,6 +1502,8 @@ public class HmuxRequest extends AbstractHttpRequest
 
       hOut.endPacket();
       hOut.flushBuffer();
+
+      out.flush();
 
       if (log.isLoggable(Level.FINER)) {
 	log.finer(dbgId() + (char) HMTP_QUERY_ERROR + "-w:"
