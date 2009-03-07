@@ -104,7 +104,7 @@ abstract public class ManagementService
     webAppConfig.addBuilderProgram(new PropertyValueProgram("servlet-mapping", servlet));
 
     SecurityConstraint constraint = new SecurityConstraint();
-    constraint.setURLPattern("/*");
+    constraint.addURLPattern("/*");
     constraint.addConstraint(new HmuxConstraint(this));
     constraint.init();
     webAppConfig.addBuilderProgram(new PropertyValueProgram("security-constraint", constraint));
