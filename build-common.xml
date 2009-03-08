@@ -699,10 +699,11 @@
 
       <include name="${dist.name}/lib/**"/>
       <include name="${dist.name}/webapps/**"/>
-      <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/conf/**"/>
+      <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/doc/**"/>
       <include name="${dist.name}/ext-webapp-lib/**"/>
+      <include name="${dist.name}/init.d/**"/>
       <include name="${dist.name}/automake/**"/>
 
       <include name="${dist.name}/LICENSE"/>
@@ -1157,7 +1158,7 @@
     </copy>
     
     <copy tofile="dist-debian/etc/init.d/resin"
-          file="${resin.install}/contrib/init.resin.in"
+          file="${resin.install}/init.d/resin.in"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
