@@ -1193,27 +1193,14 @@ abstract public class ArrayValue extends Value {
       _value = value;
     }
 
-    public Entry(Entry entry, boolean isCopy)
+    public Entry(Entry entry)
     {
       _key = entry._key;
 
-      // php/04b1
-      if (isCopy) {
-        if (entry._value instanceof Var) {
-          _var = (Var) entry._value;
-          _value = entry._value;
-        }
-        else
-          _value = entry._value.copyArrayItem();
-      }
-      else {
-        if (entry._var != null) {
-          _var = entry._var;
-          _value = entry._value;
-        }
-        else
-          _value = entry._value.copyArrayItem();
-      }
+      if (entry._var != null)
+        _var = entry._var;
+      else
+        _value = entry._value.copyArrayItem();
     }
 
     public Entry getNext()
@@ -1252,11 +1239,6 @@ abstract public class ArrayValue extends Value {
 
       if (_var != null)
         return _var;
-      else if (_value instanceof Var) {
-        _var = (Var) _value;
-        
-        return _var;
-      }
       else {
         _var = new Var(_value);
 

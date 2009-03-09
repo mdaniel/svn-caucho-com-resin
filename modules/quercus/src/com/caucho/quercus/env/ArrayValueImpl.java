@@ -69,8 +69,6 @@ public class ArrayValueImpl extends ArrayValue
   private int _size;
   private long _nextAvailableIndex;
   private boolean _isDirty;
-
-  private boolean _isCopy;
   
   private Entry _head;
   private Entry _tail;
@@ -101,11 +99,9 @@ public class ArrayValueImpl extends ArrayValue
     for (Entry ptr = source.getHead(); ptr != null; ptr = ptr._next) {
       // php/0662 for copy
       Entry entry = createEntry(ptr._key);
-
-      if (ptr._value instanceof Var) {
-        entry._var = (Var) ptr._value;
-        entry._value = ptr._value;
-      }
+      
+      if (ptr._var != null)
+        entry._var = ptr._var;
       else
         entry._value = ptr._value.copyArrayItem();
     }
@@ -115,7 +111,6 @@ public class ArrayValueImpl extends ArrayValue
   {
     source._isDirty = true;
     _isDirty = true;
-    _isCopy = true;
     
     _size = source._size;
     _entries = source._entries;
@@ -203,9 +198,7 @@ public class ArrayValueImpl extends ArrayValue
       return;
 
     _isDirty = false;
-    boolean isCopy = _isCopy;
-    _isCopy = false;
-    
+
     Entry []entries = _entries;
 
     if (entries != null)
@@ -216,7 +209,7 @@ public class ArrayValueImpl extends ArrayValue
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr._next) {
       // Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
-      Entry ptrCopy = new Entry(ptr, isCopy);
+      Entry ptrCopy = new Entry(ptr);
 
       if (entries != null) {
 	int hash = ptr._key.hashCode() & _hashMask;
@@ -409,7 +402,6 @@ public class ArrayValueImpl extends ArrayValue
       var.setReference();
 
       entry._var = var;
-      entry._value = var;
     }
     else if (oldVar != null) {
       oldVar.set(value);
@@ -945,10 +937,7 @@ public class ArrayValueImpl extends ArrayValue
     if (var != null)
       return var;
     
-    if (entry._value instanceof Var)
-      var = (Var) entry._value;
-    else
-      var = new Var(entry._value);
+    var = new Var(entry._value);
 
     entry._var = var;
 
