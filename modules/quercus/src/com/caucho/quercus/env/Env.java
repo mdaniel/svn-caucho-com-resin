@@ -4608,8 +4608,15 @@ public class Env {
 
           QuercusClass cls = findClass(clsName);
 
+	  if (cls == null) {
+	    warning(L.l("Callback: '{0}' is not a valid callback class for {1}",
+			clsName, name));
+	  
+	    return null;
+	  }
+
           if (cls == null)
-            throw new IllegalStateException(L.l("can't find class {0}",
+            throw new IllegalStateException(L.l("can't find class '{0}'",
                                                 obj.toString()));
 
           fun = cls.getFunction(name);
@@ -4622,9 +4629,12 @@ public class Env {
       else {
         QuercusClass cl = findClass(obj.toString());
 
-        if (cl == null)
-          throw new IllegalStateException(L.l("can't find class {0}",
-                                              obj.toString()));
+        if (cl == null) {
+	  warning(L.l("Callback: '{0}' is not a valid callback string for {1}",
+		      obj.toString(), obj));
+	  
+          return null;
+	}
 
         return new CallbackFunction(cl.getFunction(name));
       }
