@@ -3279,8 +3279,6 @@ public class Env {
     try {
       return executePageTop(_page);
     } catch (QuercusLanguageException e) {
-      // XXX: debugging
-      e.printStackTrace();
       log.log(Level.FINER, e.toString(), e);
 
       if (getExceptionHandler() != null) {
