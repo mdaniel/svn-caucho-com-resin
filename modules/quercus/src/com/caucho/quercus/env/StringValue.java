@@ -337,11 +337,11 @@ abstract public class StringValue
       offset++;
     }
 
-    if (buffer[offset] == '-') {
+    if (offset < end && buffer[offset] == '-') {
       sign = -1;
       offset++;
     }
-    else if (buffer[offset] == '+') {
+    else if (offset < end && buffer[offset] == '+') {
       sign = +1;
       offset++;
     }
@@ -389,11 +389,11 @@ abstract public class StringValue
       offset++;
     }
     
-    if (buffer[offset] == '-') {
+    if (offset < end && buffer[offset] == '-') {
       sign = -1;
       offset++;
     }
-    else if (buffer[offset] == '+') {
+    else if (offset < end && buffer[offset] == '+') {
       sign = +1;
       offset++;
     }
