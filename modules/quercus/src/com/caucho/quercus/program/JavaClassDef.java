@@ -280,6 +280,9 @@ public class JavaClassDef extends ClassDef {
 
   protected void addInterfaces(HashSet<String> interfaceSet, Class type)
   {
+    if (type == null || Object.class.equals(type))
+      return;
+    
     interfaceSet.add(type.getSimpleName().toLowerCase());
 
     if (type.getInterfaces() != null) {
@@ -287,6 +290,9 @@ public class JavaClassDef extends ClassDef {
 	addInterfaces(interfaceSet, iface);
       }
     }
+
+    // php/1z21
+    addInterfaces(interfaceSet, type.getSuperclass());
   }
 
   private boolean hasInterface(String name, Class type)

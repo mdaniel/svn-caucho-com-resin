@@ -34,6 +34,9 @@ import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.QuercusException;
+
+import java.util.Iterator;
 
 /**
  * Exception object facade.
@@ -43,6 +46,7 @@ import com.caucho.quercus.env.*;
 public class ExceptionClass
 {
   private static final StringValue MESSAGE = new ConstStringValue("message");
+  private static final StringValue FUNCTION = new ConstStringValue("function");
   private static final StringValue FILE = new ConstStringValue("file");
   private static final StringValue LINE = new ConstStringValue("line");
   private static final StringValue CODE = new ConstStringValue("code");
@@ -70,6 +74,10 @@ public class ExceptionClass
     }
 
     value.putField(env, "trace", ErrorModule.debug_backtrace(env));
+    QuercusException e = new QuercusException();
+    e.fillInStackTrace();
+    
+    value.putField(env, "_quercusException", env.wrapJava(e));
 
     return value;
   }
@@ -125,7 +133,7 @@ public class ExceptionClass
   /**
    * Returns the trace.
    */
-  public static Value getTrace(Env env, @This ObjectValue obj)
+  public static Value getTrace(Env env, @This Value obj)
   {
     return obj.getField(env, TRACE);
   }
@@ -133,8 +141,24 @@ public class ExceptionClass
   /**
    * Returns the trace.
    */
-  public static Value getTraceAsString(Env env, @This ObjectValue obj)
+  public static Value getTraceAsString(Env env, @This Value obj)
   {
-    return env.createString("<trace>");
+    Value trace = getTrace(env, obj);
+    
+    StringValue sb = env.createString("<trace>");
+
+    Iterator<Value> iter = trace.getValueIterator(env);
+
+    while (iter.hasNext()) {
+      Value value = iter.next();
+
+      sb = sb.append(value.getField(env, FILE));
+      sb = sb.append(":");
+      sb = sb.append(value.getField(env, LINE));
+      sb = sb.append(": ");
+      sb = sb.append(value.getField(env, FUNCTION)).append("\n");
+    }
+
+    return sb;
   }
 }

@@ -1864,7 +1864,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_sessionId != null && ! _hasSessionCookie) {
       _hasSessionCookie = true;
 
-      createServletCookie(webApp);
+      addServletCookie(webApp);
     }
 
     _isChunked = writeHeadersInt(os, length, isHead);
@@ -1872,7 +1872,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return _isChunked;
   }
 
-  private void createServletCookie(WebApp webApp)
+  protected void addServletCookie(WebApp webApp)
+  {
+    addCookie(createServletCookie(webApp));
+  }
+
+  protected Cookie createServletCookie(WebApp webApp)
   {
     SessionManager manager = webApp.getSessionManager();
 
@@ -1902,7 +1907,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       */
     }
 
-    addCookie(cookie);
+    return cookie;
   }
 
   /**

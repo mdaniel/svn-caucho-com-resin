@@ -55,11 +55,19 @@ public class DOMDocument
   extends DOMNode<Document>
 {
   private final static L10N L = new L10N(DOMDocument.class);
-  private final static Logger log = Logger.getLogger(DOMDocument.class.getName());
+  private final static Logger log
+    = Logger.getLogger(DOMDocument.class.getName());
 
   private String _encoding;
 
-  public static DOMDocument __construct(Env env, @Optional("'1.0'") String version, @Optional String encoding)
+  DOMDocument(DOMImplementation impl, Document document)
+  {
+    super(impl, document);
+  }
+
+  public static DOMDocument __construct(Env env,
+					@Optional("'1.0'") String version,
+					@Optional String encoding)
   {
     DOMDocument document = getImpl(env).createDocument();
 
@@ -75,11 +83,6 @@ public class DOMDocument
   public void setVersion(String version)
   {
     _delegate.setXmlVersion(version);
-  }
-
-  DOMDocument(DOMImplementation impl, Document document)
-  {
-    super(impl, document);
   }
 
   public String getEncoding()
