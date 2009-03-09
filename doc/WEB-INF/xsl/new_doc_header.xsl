@@ -40,7 +40,7 @@
     while (p >= 0) {
       String prefix = url.substring(0, p + 1);
 
-      Application subapp = (Application) app.getContext(prefix);
+      WebApp subapp = (WebApp) app.getContext(prefix);
       if (subapp != null) {
         String rel = prefix.substring(subapp.getContextPath().length());
 
