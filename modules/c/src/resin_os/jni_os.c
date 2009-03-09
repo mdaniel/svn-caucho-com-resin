@@ -41,7 +41,7 @@
 
 #define STACK_BUFFER_SIZE (16 * 1024)
 
-jboolean jvmdi_can_reload_native(JNIEnv *env, jobject obj);
+/* jboolean jvmdi_can_reload_native(JNIEnv *env, jobject obj); */
 jboolean jvmti_can_reload_native(JNIEnv *env, jobject obj);
 
 jint
@@ -52,6 +52,7 @@ jvmti_reload_native(JNIEnv *env,
 		    jint offset,
 		    jint length);
 
+/*
 jint
 jvmdi_reload_native(JNIEnv *env,
 		    jobject obj,
@@ -59,6 +60,7 @@ jvmdi_reload_native(JNIEnv *env,
 		    jbyteArray buf,
 		    jint offset,
 		    jint length);
+*/		    
 
 static int
 resin_set_byte_array_region(JNIEnv *env,
@@ -115,8 +117,8 @@ JNIEXPORT jboolean JNICALL
 Java_com_caucho_loader_ClassEntry_canReloadNative(JNIEnv *env,
 					          jobject obj)
 {
-  return (jvmti_can_reload_native(env, obj) ||
-	  jvmdi_can_reload_native(env, obj));
+  return (jvmti_can_reload_native(env, obj));
+  /* || jvmdi_can_reload_native(env, obj)); */
 }
 
 JNIEXPORT jint JNICALL
@@ -129,10 +131,14 @@ Java_com_caucho_loader_ClassEntry_reloadNative(JNIEnv *env,
 {
   int res = jvmti_reload_native(env, obj, cl, buf, offset, length);
 
+  return res;
+  
+  /*
   if (res > 0)
     return res;
 
   return jvmdi_reload_native(env, obj, cl, buf, offset, length);
+  */
 }
 
 static char *
