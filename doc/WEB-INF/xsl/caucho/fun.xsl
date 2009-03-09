@@ -168,7 +168,7 @@
       while (p >= 0) {
         String prefix = url.substring(0, p + 1);
 
-        Application subapp = (Application) app.getContext(prefix);
+        WebApp subapp = (WebApp) app.getContext(prefix);
         String rel = prefix.substring(subapp.getContextPath().length());
 
         String rp = subapp.getRealPath(rel);
@@ -238,7 +238,7 @@
       while (p >= 0) {
         String prefix = url.substring(0, p + 1);
 
-        Application subapp = (Application) app.getContext(prefix);
+        WebApp subapp = (WebApp) app.getContext(prefix);
         String rel = prefix.substring(subapp.getContextPath().length());
 
         String rp = subapp.getRealPath(rel);
@@ -788,10 +788,10 @@
         app = app.getContext(url);
         if (app == null)
           return null;
-        if (!(app instanceof com.caucho.server.webapp.Application))
+        if (!(app instanceof com.caucho.server.webapp.WebApp))
           return null;
 
-        url = url.substring(((com.caucho.server.webapp.Application)app).getContextPath().length());
+        url = url.substring(((com.caucho.server.webapp.WebApp)app).getContextPath().length());
 
         String rp = app.getRealPath(url);
 
