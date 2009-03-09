@@ -149,7 +149,11 @@ public abstract class AbstractLogin implements Login {
       }
 
       if (_singleSignon == null) {
-	_singleSignon = new ClusterSingleSignon("login");
+	try {
+	  _singleSignon = new ClusterSingleSignon("login");
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
     }
 
@@ -330,7 +334,7 @@ public abstract class AbstractLogin implements Login {
     else
       sessionId = request.getRequestedSessionId();
 
-    if (sessionId != null)
+    if (sessionId != null && singleSignon != null)
       return singleSignon.get(sessionId);
     else
       return null;
@@ -360,7 +364,7 @@ public abstract class AbstractLogin implements Login {
     else
       sessionId = request.getRequestedSessionId();
 
-    if (sessionId != null)
+    if (sessionId != null && singleSignon != null)
       singleSignon.put(sessionId, user);
   }
   
@@ -442,7 +446,8 @@ public abstract class AbstractLogin implements Login {
     
     SingleSignon singleSignon = getSingleSignon();
 
-    singleSignon.remove(sessionId);
+    if (singleSignon != null)
+      singleSignon.remove(sessionId);
   }
   
   /**
@@ -457,7 +462,8 @@ public abstract class AbstractLogin implements Login {
       SingleSignon singleSignon = getSingleSignon();
       
       // server/12cg
-      if (! isTimeout || isLogoutOnSessionTimeout()) {
+      if (singleSignon != null
+	  && (! isTimeout || isLogoutOnSessionTimeout())) {
 	singleSignon.remove(session.getId());
       }
     }
