@@ -32,7 +32,7 @@ package com.caucho.quercus.lib.spl;
 import com.caucho.quercus.env.CountDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.StaticStringValue;
+import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
@@ -45,7 +45,7 @@ import com.caucho.quercus.env.StringValue;
 public class CountableDelegate implements CountDelegate
 {
   private static final StringValue COUNT_METHOD
-    = new StaticStringValue("count");
+    = new ConstStringValue("count");
   
   public int count(ObjectValue qThis)
   {

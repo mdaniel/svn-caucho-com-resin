@@ -33,10 +33,10 @@ package com.caucho.quercus.env;
  * Represents a StringValue that is never modified.
  * For compiled code.
  */
-public class CompiledStaticStringValue
-  extends StaticStringValue
+public class CompiledConstStringValue
+  extends ConstStringValue
 {
-  public CompiledStaticStringValue(StringValue s)
+  public CompiledConstStringValue(StringValue s)
   {
     super(s);
     
@@ -50,7 +50,7 @@ public class CompiledStaticStringValue
     
   }
   
-  public CompiledStaticStringValue(char ch,
+  public CompiledConstStringValue(char ch,
                                    LongValue longValue,
                                    DoubleValue doubleValue,
                                    ValueType valueType,
@@ -68,7 +68,7 @@ public class CompiledStaticStringValue
     _hashCode = hashCode;
   }
   
-  public CompiledStaticStringValue(char ch,
+  public CompiledConstStringValue(char ch,
                                    LongValue longValue,
                                    DoubleValue doubleValue,
                                    ValueType valueType,
@@ -85,7 +85,7 @@ public class CompiledStaticStringValue
     _hashCode = hashCode;
   }
 
-  public CompiledStaticStringValue(String s,
+  public CompiledConstStringValue(String s,
                                    LongValue longValue,
                                    DoubleValue doubleValue,
                                    ValueType valueType,
@@ -103,7 +103,7 @@ public class CompiledStaticStringValue
     _hashCode = hashCode;
   }
   
-  public CompiledStaticStringValue(String s,
+  public CompiledConstStringValue(String s,
                                    LongValue longValue,
                                    DoubleValue doubleValue,
                                    ValueType valueType,

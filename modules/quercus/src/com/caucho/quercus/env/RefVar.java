@@ -196,7 +196,7 @@ public class RefVar extends Value
   public Value toArgValue()
   {
     // php/343k
-    return _var;
+    return _var.toValue();
   }
 
   /**

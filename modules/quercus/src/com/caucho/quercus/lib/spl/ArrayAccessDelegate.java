@@ -39,13 +39,13 @@ import com.caucho.quercus.env.*;
 public class ArrayAccessDelegate implements ArrayDelegate
 {
   private static final StringValue OFFSET_GET
-    = new StaticStringValue("offsetGet");
+    = new ConstStringValue("offsetGet");
   private static final StringValue OFFSET_SET
-    = new StaticStringValue("offsetSet");
+    = new ConstStringValue("offsetSet");
   private static final StringValue OFFSET_UNSET
-    = new StaticStringValue("offsetUnset");
+    = new ConstStringValue("offsetUnset");
   private static final StringValue OFFSET_EXISTS
-    = new StaticStringValue("offsetExists");
+    = new ConstStringValue("offsetExists");
   
   public Value get(ObjectValue qThis, Value index)
   {

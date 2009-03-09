@@ -42,11 +42,11 @@ import com.caucho.quercus.env.*;
 @ClassImplementation
 public class ExceptionClass
 {
-  private static final StringValue MESSAGE = new StaticStringValue("message");
-  private static final StringValue FILE = new StaticStringValue("file");
-  private static final StringValue LINE = new StaticStringValue("line");
-  private static final StringValue CODE = new StaticStringValue("code");
-  private static final StringValue TRACE = new StaticStringValue("trace");
+  private static final StringValue MESSAGE = new ConstStringValue("message");
+  private static final StringValue FILE = new ConstStringValue("file");
+  private static final StringValue LINE = new ConstStringValue("line");
+  private static final StringValue CODE = new ConstStringValue("code");
+  private static final StringValue TRACE = new ConstStringValue("trace");
   
   /**
    * Create a new exception API object.

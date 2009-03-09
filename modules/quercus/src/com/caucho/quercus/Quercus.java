@@ -81,8 +81,8 @@ public class Quercus
   private LruCache<String, UnicodeBuilderValue> _unicodeMap
     = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
 
-  private LruCache<String, StaticStringValue> _stringMap
-    = new LruCache<String, StaticStringValue>(8 * 1024);
+  private LruCache<String, ConstStringValue> _stringMap
+    = new LruCache<String, ConstStringValue>(8 * 1024);
 
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
@@ -831,7 +831,7 @@ public class Quercus
    */
   public void setServerEnv(String name, String value)
   {
-    setServerEnv(createString(name, true), new StaticStringValue(value));
+    setServerEnv(createString(name, true), new ConstStringValue(value));
   }
 
   /**
@@ -1304,7 +1304,7 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
-    return getConstantId(new StaticStringValue(name));
+    return getConstantId(new ConstStringValue(name));
   }
 
   /**
@@ -1625,10 +1625,10 @@ public class Quercus
    */
   public StringValue createString(String name)
   {
-    StaticStringValue value = _stringMap.get(name);
+    ConstStringValue value = _stringMap.get(name);
 
     if (value == null) {
-      value = new StaticStringValue(name);
+      value = new ConstStringValue(name);
 
       _stringMap.put(name, value);
     }
@@ -1639,10 +1639,10 @@ public class Quercus
   public StringValue createString(String name, boolean isCache)
   {
     if (isCache) {
-      StaticStringValue value = _stringMap.get(name);
+      ConstStringValue value = _stringMap.get(name);
 
       if (value == null) {
-        value = new StaticStringValue(name);
+        value = new ConstStringValue(name);
 
         _stringMap.put(name, value);
       }
@@ -1650,7 +1650,7 @@ public class Quercus
       return value;
     }
     else
-      return new StaticStringValue(name);
+      return new ConstStringValue(name);
       
   }
   
@@ -1758,7 +1758,7 @@ public class Quercus
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
       // XXX: i18n
-      return new StaticStringValue((String) obj);
+      return new ConstStringValue((String) obj);
     } else {
       // XXX: unknown types, e.g. Character?
 

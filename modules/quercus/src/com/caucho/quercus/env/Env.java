@@ -144,10 +144,10 @@ public class Env {
   private static final IntMap SPECIAL_VARS = new IntMap();
 
   private static final StringValue PHP_SELF_STRING
-    = new StaticStringValue("PHP_SELF");
+    = new ConstStringValue("PHP_SELF");
 
   private static final StringValue UTF8_STRING
-    = new StaticStringValue("utf-8");
+    = new ConstStringValue("utf-8");
 
   public static final Value []EMPTY_VALUE = new Value[0];
 
@@ -938,6 +938,7 @@ public class Env {
   public void resetTimeout()
   {
     _startTime = Alarm.getCurrentTime();
+    _endTime = _startTime + _timeLimit;
   }
   
   /**
@@ -3728,7 +3729,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return UnicodeBuilderValue.EMPTY;
     else
-      return StaticStringValue.EMPTY;
+      return ConstStringValue.EMPTY;
   }
 
   /*
@@ -3750,7 +3751,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeValueImpl(new String(buffer, offset, length));
     else
-      return new StaticStringValue(buffer, offset, length);
+      return new ConstStringValue(buffer, offset, length);
   }
   
   /**
@@ -3761,7 +3762,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(buffer, length);
     else
-      return new StaticStringValue(buffer, length);
+      return new ConstStringValue(buffer, length);
   }
   
   /**
@@ -3772,7 +3773,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(buffer, offset, length);
     else
-      return new StaticStringValue(buffer, offset, length);
+      return new ConstStringValue(buffer, offset, length);
   }
 
   /**
@@ -3783,13 +3784,13 @@ public class Env {
     if (s == null || s.length() == 0) {
       return (_isUnicodeSemantics
 	      ? UnicodeBuilderValue.EMPTY
-	      : StaticStringValue.EMPTY);
+	      : ConstStringValue.EMPTY);
     }
     else if (s.length() == 1) {
       if (_isUnicodeSemantics)
         return UnicodeBuilderValue.create(s.charAt(0));
       else
-        return StaticStringValue.create(s.charAt(0));
+        return ConstStringValue.create(s.charAt(0));
     }
     else if (_isUnicodeSemantics)
       return _quercus.createUnicodeString(s);
@@ -3805,7 +3806,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return UnicodeValueImpl.create(ch);
     else
-      return StaticStringValue.create(ch);
+      return ConstStringValue.create(ch);
   }
 
   /**

@@ -50,7 +50,8 @@ abstract public class BytesValue
   /**
    * Convert to a binary value.
    */
-  public BinaryValue toBinaryValue(Env env)
+  @Override
+  public StringValue toBinaryValue(Env env)
   {
     return this;
   }

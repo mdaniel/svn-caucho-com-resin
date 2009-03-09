@@ -43,56 +43,56 @@ import java.util.Set;
 public class ServerArrayValue extends ArrayValueImpl
 {
   private static final StringValue SERVER_ADDR_V
-    = new StaticStringValue("SERVER_ADDR");
+    = new ConstStringValue("SERVER_ADDR");
   private static final StringValue SERVER_NAME_V
-    = new StaticStringValue("SERVER_NAME");
+    = new ConstStringValue("SERVER_NAME");
   private static final StringValue SERVER_PORT_V
-    = new StaticStringValue("SERVER_PORT");
+    = new ConstStringValue("SERVER_PORT");
   private static final StringValue REMOTE_HOST_V
-    = new StaticStringValue("REMOTE_HOST");
+    = new ConstStringValue("REMOTE_HOST");
   private static final StringValue REMOTE_ADDR_V
-    = new StaticStringValue("REMOTE_ADDR");
+    = new ConstStringValue("REMOTE_ADDR");
   private static final StringValue REMOTE_PORT_V
-    = new StaticStringValue("REMOTE_PORT");
+    = new ConstStringValue("REMOTE_PORT");
   
   private static final StringValue DOCUMENT_ROOT_V
-    = new StaticStringValue("DOCUMENT_ROOT");
+    = new ConstStringValue("DOCUMENT_ROOT");
   
   private static final StringValue SERVER_SOFTWARE_V
-    = new StaticStringValue("SERVER_SOFTWARE");
+    = new ConstStringValue("SERVER_SOFTWARE");
   
   private static final StringValue SERVER_PROTOCOL_V
-    = new StaticStringValue("SERVER_PROTOCOL");
+    = new ConstStringValue("SERVER_PROTOCOL");
   private static final StringValue REQUEST_METHOD_V
-    = new StaticStringValue("REQUEST_METHOD");
+    = new ConstStringValue("REQUEST_METHOD");
   private static final StringValue QUERY_STRING_V
-    = new StaticStringValue("QUERY_STRING");
+    = new ConstStringValue("QUERY_STRING");
   
   private static final StringValue REQUEST_URI_V
-    = new StaticStringValue("REQUEST_URI");
+    = new ConstStringValue("REQUEST_URI");
   private static final StringValue SCRIPT_NAME_V
-    = new StaticStringValue("SCRIPT_NAME");
+    = new ConstStringValue("SCRIPT_NAME");
   private static final StringValue SCRIPT_FILENAME_V
-    = new StaticStringValue("SCRIPT_FILENAME");
+    = new ConstStringValue("SCRIPT_FILENAME");
   private static final StringValue PATH_INFO_V
-    = new StaticStringValue("PATH_INFO");
+    = new ConstStringValue("PATH_INFO");
   private static final StringValue PATH_TRANSLATED_V
-    = new StaticStringValue("PATH_TRANSLATED");
+    = new ConstStringValue("PATH_TRANSLATED");
   
   private static final StringValue PHP_SELF_V
-    = new StaticStringValue("PHP_SELF");
+    = new ConstStringValue("PHP_SELF");
   
   private static final StringValue PHP_AUTH_USER_V
-    = new StaticStringValue("PHP_AUTH_USER");
+    = new ConstStringValue("PHP_AUTH_USER");
   
   private static final StringValue AUTH_TYPE_V
-    = new StaticStringValue("AUTH_TYPE");
+    = new ConstStringValue("AUTH_TYPE");
   
   private static final StringValue HTTPS_V
-    = new StaticStringValue("HTTPS");
+    = new ConstStringValue("HTTPS");
   
   private static final StringValue HTTP_HOST_V
-    = new StaticStringValue("HTTP_HOST");
+    = new ConstStringValue("HTTP_HOST");
   
   private final Env _env;
   

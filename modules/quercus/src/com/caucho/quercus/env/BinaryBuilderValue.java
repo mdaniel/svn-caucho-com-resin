@@ -175,7 +175,7 @@ public class BinaryBuilderValue
     // XXX: can this just return this, or does it need to return a copy?
     return new BinaryBuilderValue(this);
   }
-
+  
   /**
    * Returns the character at an index
    */
@@ -285,6 +285,49 @@ public class BinaryBuilderValue
   public StringValue toStringBuilder(Env env)
   {
     return new BinaryBuilderValue(_buffer, 0, _length);
+  }
+  
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env, Value value)
+  {
+    if (value.isUnicode()) {
+      UnicodeBuilderValue sb = new UnicodeBuilderValue(this);
+      
+      value.appendTo(sb);
+      
+      return sb;
+    }
+    else {
+      BinaryBuilderValue v = new BinaryBuilderValue(this);
+
+      value.appendTo(v);
+      
+      return v;
+    }
+  }
+  
+  /**
+   * Converts to a string builder
+   */
+  public StringValue toStringBuilder(Env env, StringValue value)
+  {
+    if (value.isUnicode()) {
+      UnicodeBuilderValue sb = new UnicodeBuilderValue(this);
+      
+      value.appendTo(sb);
+      
+      return sb;
+    }
+    else {
+      BinaryBuilderValue v = new BinaryBuilderValue(this);
+
+      value.appendTo(v);
+      
+      return v;
+    }
   }
 
   /**

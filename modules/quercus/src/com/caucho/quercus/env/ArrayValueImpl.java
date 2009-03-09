@@ -51,8 +51,8 @@ public class ArrayValueImpl extends ArrayValue
   private static final Logger log
     = Logger.getLogger(ArrayValueImpl.class.getName());
 
-  private static final StringValue KEY = new StaticStringValue("key");
-  private static final StringValue VALUE = new StaticStringValue("value");
+  private static final StringValue KEY = new ConstStringValue("key");
+  private static final StringValue VALUE = new ConstStringValue("value");
   
   private static final int DEFAULT_SIZE = 16;
   
@@ -539,8 +539,14 @@ public class ArrayValueImpl extends ArrayValue
   @Override
   public Value getArg(Value index, boolean isTop)
   {
+    /* not needed because of ArgGetValue
     if (_isDirty) // XXX: needed?
       copyOnWrite();
+    */
+    
+    // php/3d42
+    if (isTop)
+      return new ArgGetValue(this, index);
     
     Entry entry = getEntry(index);
 
@@ -548,10 +554,11 @@ public class ArrayValueImpl extends ArrayValue
       // php/3d48, php/39aj
       Value value = entry.getValue();
 
-      if (! isTop && value.isset())
-	return value;
-      else 
-	return entry.toArg();
+      // php/3d42
+      //if (! isTop && value.isset())
+        return value;
+      //else 
+        //return entry.toArg();
     }
     else {
       // php/3d49

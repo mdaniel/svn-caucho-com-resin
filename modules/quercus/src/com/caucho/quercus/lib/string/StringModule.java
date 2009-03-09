@@ -260,19 +260,19 @@ public class StringModule extends AbstractQuercusModule {
 
       int ch;
       while ((ch = is.read()) >= 0) {
-	int d = (ch >> 4) & 0xf;
+        int d = (ch >> 4) & 0xf;
 
-	if (d < 10)
-	  sb.append((char) (d + '0'));
-	else
-	  sb.append((char) (d + 'a' - 10));
+        if (d < 10)
+          sb.append((char) (d + '0'));
+        else
+          sb.append((char) (d + 'a' - 10));
 
-	d = (ch) & 0xf;
+        d = (ch) & 0xf;
 
-	if (d < 10)
-	  sb.append((char) (d + '0'));
-	else
-	  sb.append((char) (d + 'a' - 10));
+        if (d < 10)
+          sb.append((char) (d + '0'));
+        else
+          sb.append((char) (d + 'a' - 10));
       }
 
       return sb;

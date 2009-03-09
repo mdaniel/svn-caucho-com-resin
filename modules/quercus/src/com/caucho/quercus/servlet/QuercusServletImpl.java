@@ -38,6 +38,7 @@ import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.L10N;
@@ -160,8 +161,9 @@ public class QuercusServletImpl
         env.setScriptGlobal("response", response);
         env.setScriptGlobal("servletContext", _servletContext);
 
-        Value prepend = quercus.getIniValue("auto_prepend_file");
-        if (! prepend.isNull()) {
+        StringValue prepend
+          = quercus.getIniValue("auto_prepend_file").toStringValue(env);
+        if (prepend.length() > 0) {
           Path prependPath = env.lookup(prepend.toStringValue(env));
           
           if (prependPath == null)
@@ -174,8 +176,9 @@ public class QuercusServletImpl
 
         env.executeTop();
 
-        Value append = quercus.getIniValue("auto_append_file");
-        if (! append.isNull()) {
+        StringValue append
+          = quercus.getIniValue("auto_append_file").toStringValue(env);
+        if (append.length() > 0) {
           Path appendPath = env.lookup(append.toStringValue(env));
           
           if (appendPath == null)

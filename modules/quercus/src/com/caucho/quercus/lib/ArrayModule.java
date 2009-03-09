@@ -912,7 +912,7 @@ public class ArrayModule
    * @return the left most value in the array
    */
   public static Value array_shift(Env env,
-				  ArrayValue array)
+                                  ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;

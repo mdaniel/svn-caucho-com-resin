@@ -52,7 +52,7 @@ public class ObjectExtValue extends ObjectValue
   implements Serializable
 {
   private static final StringValue TO_STRING
-    = new StaticStringValue("__toString");
+    = new ConstStringValue("__toString");
 
   private static final int DEFAULT_SIZE = 16;
 

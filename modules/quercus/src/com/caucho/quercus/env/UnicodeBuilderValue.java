@@ -336,6 +336,16 @@ public class UnicodeBuilderValue
   //
   // append code
   //
+  
+  /**
+   * Append a Java value to the value.
+   */
+  public StringValue append(Value v)
+  {
+    v.appendTo(this);
+    
+    return this;
+  }
 
   /**
    * Append a Java string to the value.
@@ -495,7 +505,112 @@ public class UnicodeBuilderValue
 
     return this;
   }
+  
+  /**
+   * Append a Java byte to the value without conversions.
+   */
+  public StringValue appendByte(int v)
+  {
+    if (_buffer.length < _length + 1)
+      ensureCapacity(_length + 1);
+    
+    _buffer[_length++] = (char) v;
+    
+    return this;
+  }
+  
+  /**
+   * Returns true if the value is empty.
+   */
+  @Override
+  public final boolean isEmpty()
+  {
+    return _length == 0 || _length == 1 && _buffer[0] == '0';
+  }
 
+  /**
+   * Converts to a key.
+   */
+  @Override
+  public Value toKey()
+  {
+    char []buffer = _buffer;
+    int len = _length;
+
+    if (len == 0)
+      return this;
+
+    int sign = 1;
+    long value = 0;
+
+    int i = 0;
+    int ch = buffer[i];
+    if (ch == '-') {
+      sign = -1;
+      i++;
+    }
+
+    for (; i < len; i++) {
+      ch = buffer[i];
+
+      if ('0' <= ch && ch <= '9')
+        value = 10 * value + ch - '0';
+      else
+        return this;
+    }
+
+    return LongValue.create(sign * value);
+  }
+
+  /**
+   * Converts to a byte array, with no consideration of character encoding.
+   * Each character becomes one byte, characters with values above 255 are
+   * not correctly preserved.
+   */
+  public final byte[] toBytes()
+  {
+    byte[] bytes = new byte[_length];
+
+    System.arraycopy(_buffer, 0, bytes, 0, _length);
+
+    return bytes;
+  }
+
+  //
+  // Operations
+  //
+
+  /**
+   * Returns the character at an index
+   */
+  public final Value get(Value key)
+  {
+    return charValueAt(key.toLong());
+  }
+  
+  /**
+   * Sets the array ref.
+   */
+  @Override
+  public Value put(Value index, Value value)
+  {
+    setCharValueAt(index.toLong(), value);
+
+    return value;
+  }
+  
+  /**
+   * Sets the array ref.
+   */
+  @Override
+  public Value append(Value index, Value value)
+  {
+    if (_length > 0)
+      return setCharValueAt(index.toLong(), value);
+    else
+      return new ArrayValueImpl().append(index, value);
+  }
+  
   /**
    * Returns the buffer.
    */
@@ -589,6 +704,55 @@ public class UnicodeBuilderValue
         return CHAR_STRINGS[ch];
       else
         return new UnicodeBuilderValue((char) ch);
+    }
+  }
+  
+  /**
+   * sets the character at an index
+   */
+  @Override
+  public Value setCharValueAt(long indexL, Value value)
+  {
+    int len = _length;
+
+    if (indexL < 0)
+      return this;
+    else if (indexL < len) {
+      UnicodeBuilderValue sb = new UnicodeBuilderValue(_buffer, 0, len);
+      
+      StringValue str = value.toStringValue();
+      
+      int index = (int) indexL;
+      
+      if (value.length() == 0)
+        sb._buffer[index] = 0;
+      else
+        sb._buffer[index] = str.charAt(0);
+
+      return sb;
+    }
+    else {
+      int index = (int) indexL;
+
+      UnicodeBuilderValue sb = (UnicodeBuilderValue) copyStringBuilder();
+
+      if (sb._buffer.length < index + 1)
+        sb.ensureCapacity(index + 1);
+      
+      int padLen = index - len;
+
+      for (int i = 0; i <= padLen; i++) {
+         sb._buffer[sb._length++] = ' ';
+      }
+      
+      StringValue str = value.toStringValue();
+
+      if (value.length() == 0)
+        sb._buffer[index] = 0;
+      else
+        sb._buffer[index] = str.charAt(0);
+
+      return sb;
     }
   }
   
@@ -870,7 +1034,30 @@ public class UnicodeBuilderValue
     else
       return ValueType.STRING;
   }
+  
+  /**
+   * Converts to a boolean.
+   */
+  @Override
+  public final boolean toBoolean()
+  {
+    if (_length == 0)
+      return false;
+    else if (_length == 1 && _buffer[0] == '0')
+      return false;
+    else
+      return true;
+  }
 
+  /**
+   * Converts to a long.
+   */
+  @Override
+  public long toLong()
+  {
+    return parseLong(_buffer, 0, _length);
+  }
+  
   /**
    * Converts to a long.
    */
@@ -879,6 +1066,15 @@ public class UnicodeBuilderValue
     return parseLong(buffer, offset, len);
   }
 
+  /**
+   * Converts to a double.
+   */
+  @Override
+  public double toDouble()
+  {
+    return toDouble(_buffer, 0, _length);
+  }
+  
   public static double toDouble(char []buffer, int offset, int len)
   {
     int start = offset;
@@ -998,6 +1194,8 @@ public class UnicodeBuilderValue
   @Override
   public boolean eq(Value rValue)
   {
+    rValue = rValue.toValue();
+    
     ValueType typeB = rValue.getValueType();
 
     if (typeB.isNumber()) {
@@ -1037,7 +1235,19 @@ public class UnicodeBuilderValue
       return true;
     }
     else {
-      return toString().equals(rValue.toString());
+      String rString = rValue.toString();
+      
+      int len = rString.length();
+
+      if (_length != len)
+    return false;
+
+      for (int i = len - 1; i >= 0; i--) {
+    if (_buffer[i] != rString.charAt(i))
+      return false;
+      }
+      
+      return true;
     }
   }
 

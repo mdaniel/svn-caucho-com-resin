@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.expr;
 
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -84,12 +85,10 @@ public class AppendExpr extends Expr
   {
     Value value = _value.eval(env);
 
-    StringValue sb;
-    
     if (_next != null)
-      sb = value.toStringBuilder(env, _next.eval(env));
+      return value.toStringBuilder(env, _next.eval(env));
     else
-      sb = value.toStringBuilder(env);
+      return value.toStringBuilder(env);
 
     /*
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
@@ -98,8 +97,6 @@ public class AppendExpr extends Expr
       sb = sb.appendUnicode(ptrValue);
     }
     */
-
-    return sb;
   }
 
   @Override

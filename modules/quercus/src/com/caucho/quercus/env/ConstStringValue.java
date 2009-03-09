@@ -36,10 +36,10 @@ import java.io.PrintWriter;
  * Represents a StringValue that is never modified.
  * For compiled code.
  */
-public class StaticStringValue
+public class ConstStringValue
   extends StringBuilderValue
 {
-  public static final StaticStringValue EMPTY = new StaticStringValue();
+  public static final ConstStringValue EMPTY = new ConstStringValue();
   
   protected LongValue _longValue;
   protected DoubleValue _doubleValue;
@@ -49,22 +49,22 @@ public class StaticStringValue
   protected ValueType _valueType;
   protected char []_serializeValue;
   
-  public StaticStringValue()
+  public ConstStringValue()
   {
     super();
   }
   
-  public StaticStringValue(StringBuilderValue sb)
+  public ConstStringValue(StringBuilderValue sb)
   {
     super(sb._buffer, 0, sb._length);
   }
   
-  public StaticStringValue(byte []buffer, int offset, int length)
+  public ConstStringValue(byte []buffer, int offset, int length)
   {
     super(buffer, offset, length);
   }
   
-  public StaticStringValue(char []buffer, int offset, int length)
+  public ConstStringValue(char []buffer, int offset, int length)
   {
     super(buffer, offset, length);
   }
@@ -72,64 +72,64 @@ public class StaticStringValue
   /**
    * Creates a new StringBuilderValue with the buffer without copying.
    */
-  public StaticStringValue(char []buffer, int length)
+  public ConstStringValue(char []buffer, int length)
   {
     super(buffer, length);
   }
 
-  public StaticStringValue(byte []buffer)
+  public ConstStringValue(byte []buffer)
   {
     super(buffer);
   }
   
-  public StaticStringValue(Byte []buffer)
+  public ConstStringValue(Byte []buffer)
   {
     super(buffer);
   }
   
-  public StaticStringValue(Character []buffer)
+  public ConstStringValue(Character []buffer)
   {
     super(buffer);
   }
 
-  public StaticStringValue(char ch)
+  public ConstStringValue(char ch)
   {
     super(ch);
   }
 
-  public StaticStringValue(String s)
+  public ConstStringValue(String s)
   {
     super(s);
     
     _string = s;
   }
 
-  public StaticStringValue(char []s)
+  public ConstStringValue(char []s)
   {
     super(s);
   }
 
-  public StaticStringValue(char []s, Value v1)
+  public ConstStringValue(char []s, Value v1)
   {
     super(s, v1);
   }
   
-  public StaticStringValue(byte []s, Value v1)
+  public ConstStringValue(byte []s, Value v1)
   {
     super(s, v1);
   }
 
-  public StaticStringValue(Value v1)
+  public ConstStringValue(Value v1)
   {
     super(v1);
   }
 
-  public StaticStringValue(Value v1, Value v2)
+  public ConstStringValue(Value v1, Value v2)
   {
     super(v1, v2);
   }
 
-  public StaticStringValue(Value v1, Value v2, Value v3)
+  public ConstStringValue(Value v1, Value v2, Value v3)
   {
     super(v1, v2, v3);
   }
@@ -240,19 +240,19 @@ public class StaticStringValue
     int len = length();
 
     if (len == 1) {
-      out.print("(StaticStringValue.create((char) '");
+      out.print("(ConstStringValue.create((char) '");
       printJavaChar(out, charAt(0));
       out.print("'))");
     }
     /*
     else if (len < maxSublen) {
-      out.print("(new StaticStringValue(\"");
+      out.print("(new ConstStringValue(\"");
       printJavaString(out, this);
       out.print("\"))");
     }
     */
     else if (len < maxSublen) {
-      out.print("(new CompiledStaticStringValue (\"");
+      out.print("(new CompiledConstStringValue (\"");
       printJavaString(out, this);
       out.print("\", ");
       toLongValue().generate(out);
@@ -273,7 +273,7 @@ public class StaticStringValue
       out.print("))");
     }
     else {
-      out.print("(new StaticStringValue(new StringBuilderValue (\"");
+      out.print("(new ConstStringValue(new StringBuilderValue (\"");
       
       // php/313u
       for (int i = 0; i < len; i += maxSublen) {

@@ -38,10 +38,10 @@ import com.caucho.quercus.lib.VariableModule;
  */
 public class QuercusLanguageException extends QuercusException
 {
-  private static final StringValue FILE = new StaticStringValue("file");
-  private static final StringValue LINE = new StaticStringValue("line");
+  private static final StringValue FILE = new ConstStringValue("file");
+  private static final StringValue LINE = new ConstStringValue("line");
   private static final StringValue MESSAGE
-    = new StaticStringValue("message");
+    = new ConstStringValue("message");
   
   private Value _value;
   

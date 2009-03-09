@@ -42,7 +42,7 @@ import java.util.IdentityHashMap;
 public class StringBuilderValue
   extends StringValue
 {
-  public static final StringBuilderValue EMPTY = new StaticStringValue("");
+  public static final StringBuilderValue EMPTY = new ConstStringValue("");
 
   private static final StringBuilderValue []CHAR_STRINGS;
   
@@ -197,7 +197,7 @@ public class StringBuilderValue
   
   private void init(StringBuilderValue v)
   {
-    if (v._isCopy || v instanceof StaticStringValue) {
+    if (v._isCopy || v instanceof ConstStringValue) {
       _buffer = new byte[v._buffer.length];
       System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
       _length = v._length;
@@ -771,7 +771,7 @@ public class StringBuilderValue
       int padLen = index - len;
 
       for (int i = 0; i <= padLen; i++) {
-         sb._buffer[_length++] = ' ';
+         sb._buffer[sb._length++] = ' ';
       }
       
       StringValue str = value.toStringValue();
@@ -1827,7 +1827,7 @@ public class StringBuilderValue
     public int read()
     {
       if (_offset < _length)
-        return _buffer[_offset++];
+        return _buffer[_offset++] & 0xFF;
       else
         return -1;
     }
@@ -1861,7 +1861,7 @@ public class StringBuilderValue
     public int read()
     {
       if (_index < _length)
-        return _buffer[_index++];
+        return _buffer[_index++] & 0xFF;
       else
         return -1;
     }
@@ -1906,10 +1906,10 @@ public class StringBuilderValue
   }
 
   static {
-    CHAR_STRINGS = new StaticStringValue[256];
+    CHAR_STRINGS = new ConstStringValue[256];
 
     for (int i = 0; i < CHAR_STRINGS.length; i++) {
-      CHAR_STRINGS[i] = new StaticStringValue((char) i);
+      CHAR_STRINGS[i] = new ConstStringValue((char) i);
     }
   }
 }

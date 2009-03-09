@@ -31,7 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StaticStringValue;
+import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Value;
@@ -46,7 +46,7 @@ public class StringLiteralExpr extends Expr {
   {
     super(location);
     
-    _value = new StaticStringValue(value);
+    _value = new ConstStringValue(value);
   }
 
   public StringLiteralExpr(Location location, StringValue value)

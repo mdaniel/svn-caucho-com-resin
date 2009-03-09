@@ -52,7 +52,7 @@ abstract public class StringValue
   extends Value
   implements CharSequence
 {
-  public static final StringValue EMPTY = new StaticStringValue("");
+  public static final StringValue EMPTY = new ConstStringValue("");
   
   protected static final int MIN_LENGTH = 32;
 
@@ -80,7 +80,7 @@ abstract public class StringValue
     if (value == null)
       return NullValue.NULL;
     else
-      return new StaticStringValue(value);
+      return new ConstStringValue(value);
   }
 
   /**
@@ -90,7 +90,7 @@ abstract public class StringValue
   {
     // XXX: needs updating for i18n, currently php5 only
     
-    return StaticStringValue.create(value);
+    return ConstStringValue.create(value);
     
     /*
     if (value < CHAR_STRINGS.length)
@@ -385,6 +385,10 @@ abstract public class StringValue
 
     int end = offset + len;
 
+    while (offset < end && Character.isWhitespace(buffer[offset])) {
+      offset++;
+    }
+    
     if (buffer[offset] == '-') {
       sign = -1;
       offset++;
@@ -400,8 +404,8 @@ abstract public class StringValue
       if ('0' <= ch && ch <= '9') {
         long newValue = 10 * value + ch - '0';
         if (newValue < value) {
-          // long value overflowed, set result to 0
-          result = 0;
+          // long value overflowed, set result to integer max
+          result = Integer.MAX_VALUE;
           isResultSet = true;
           break;
         }
@@ -414,7 +418,7 @@ abstract public class StringValue
       }
     }
 
-    if (!isResultSet)
+    if (! isResultSet)
       result = sign * value;
 
     return result;
@@ -433,9 +437,12 @@ abstract public class StringValue
     long result = 0;
 
     int offset = 0;
-    int i = 0;
     int end = offset + len;
 
+    while (offset < end && Character.isWhitespace(string.charAt(offset))) {
+      offset++;
+    }
+    
     if (string.charAt(offset) == '-') {
       sign = -1;
       offset++;
@@ -451,8 +458,8 @@ abstract public class StringValue
       if ('0' <= ch && ch <= '9') {
         long newValue = 10 * value + ch - '0';
         if (newValue < value) {
-          // long value overflowed, set result to 0
-          result = 0;
+          // long value overflowed, set result to integer max
+          result = Integer.MAX_VALUE;
           isResultSet = true;
           break;
         }
@@ -465,7 +472,7 @@ abstract public class StringValue
       }
     }
 
-    if (!isResultSet)
+    if (! isResultSet)
       result = sign * value;
 
     return result;
@@ -1939,7 +1946,7 @@ abstract public class StringValue
       int len = length();
 
       for (int i = 0; i < len; i++)
-	os.write(charAt(i));
+        os.write(charAt(i));
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

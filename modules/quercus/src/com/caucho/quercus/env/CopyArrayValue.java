@@ -150,6 +150,15 @@ public class CopyArrayValue extends ArrayValue {
   {
     return getCopyArray().getArg(index, isTop);
   }
+  
+  /**
+   * Convert to an argument value.
+   */
+  @Override
+  public Value toArgValue()
+  {
+    return getCopyArray().toArgValue();
+  }
 
   /**
    * Returns the field value, creating an object if it's unset.
