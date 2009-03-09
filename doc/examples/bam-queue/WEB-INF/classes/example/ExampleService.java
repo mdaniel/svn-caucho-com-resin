@@ -1,12 +1,12 @@
 package example;
 
-import com.caucho.bam.SimpleBamService;
-import com.caucho.bam.annotation.Message;
+import com.caucho.bam.SimpleActor;
+import com.caucho.bam.Message;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ExampleService extends SimpleBamService
+public class ExampleService extends SimpleActor
 {
   private ArrayList<String> _messages = new ArrayList<String>();
   

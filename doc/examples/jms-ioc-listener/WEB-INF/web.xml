@@ -1,13 +1,16 @@
-<web-app xmlns="http://caucho.com/ns/resin">
+<web-app xmlns="http://caucho.com/ns/resin"
+	 xmlns:jms="urn:java:com.caucho.jms">
   <!--
      - Configures the JDBC-backed Queue.
     -->
-  <jms-queue name="my_queue" uri="file:path=WEB-INF/db"/>
+  <jms:FileQueue>
+    <Named>my_queue</Named>
+  </jms:FileQueue>
 
   <!--
      - Configures the JMS connection factory
     -->
-  <jms-connection-factory uri="resin:"/>
+  <jms:JmsConnectionFactory/>
 
   <ejb-message-bean class="example.MyListener">
     <destination>${my_queue}</destination>

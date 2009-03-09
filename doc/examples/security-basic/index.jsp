@@ -13,7 +13,7 @@
   <body>
     <%@ include file="/inc/buttonbar.jspf" %>
 
-    <h1>Welcome to Hogwart's!</h1>
+    <h1>Welcome to Hogwarts!</h1>
 
     This is a Defense Against the Dark Arts example of using
     JSP/Servlet security. 

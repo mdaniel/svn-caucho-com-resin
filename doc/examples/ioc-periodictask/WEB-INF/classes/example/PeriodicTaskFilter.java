@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import javax.webbeans.In;
+import javax.inject.Current;
 
 /**
  * Filter to show a maintenance page if the MaintenanceRunner is active.
@@ -30,7 +30,7 @@ public class PeriodicTaskFilter implements Filter {
   private String _url = null;
   private int _minEstimatedTime = 5;;
 
-  @In private PeriodicTask _periodicTask;
+  @Current private PeriodicTask _periodicTask;
 
   public PeriodicTaskFilter()
   {

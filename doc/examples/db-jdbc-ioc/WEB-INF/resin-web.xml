@@ -6,7 +6,7 @@
      - type      specifies the driver class
      - path      is a driver-specific configuration parameter
     -->
-  <database jndi-name="jdbc/basic">
+  <database name="jdbc/basic">
     <driver type="com.caucho.db.jca.ConnectionFactory">
       <url>resin:WEB-INF/db</url>
 

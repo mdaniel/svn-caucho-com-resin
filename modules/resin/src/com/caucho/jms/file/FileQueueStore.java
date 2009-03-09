@@ -386,7 +386,7 @@ public class FileQueueStore
   private void initDatabase(Connection conn)
     throws SQLException
   {
-    String sql = ("select id, priority, is_valid"
+    String sql = ("select id, priority, payload, is_valid"
 		  + " from " + _messageTable + " where 1=0");
     
     Statement stmt = conn.createStatement();

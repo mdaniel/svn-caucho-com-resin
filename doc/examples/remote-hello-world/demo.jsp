@@ -1,9 +1,9 @@
-<%@ page import="javax.webbeans.Named" %>
+<%@ page import="com.caucho.config.Name, javax.inject.Current" %>
 <%@ page import="example.HelloService" %>
 <%!
-@Named("hessian") HelloService _hessianHello;
-@Named("burlap") HelloService _burlapHello; 
-@Named("vm") HelloService _vmHello; 
+@Name("hessian") HelloService _hessianHello;
+@Name("burlap") HelloService _burlapHello; 
+@Current HelloService _vmHello; 
 %>
 <pre>
 From Hessian: <%= _hessianHello.hello() %>

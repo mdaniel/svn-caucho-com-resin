@@ -3,18 +3,16 @@
   <!--
      - Configures the movie finder singleton with some movies.
     -->
-  <bean class="example.MovieFinderImpl">
-    <init>
-      <movie director="Jackson" title="LOTR: Fellowship of the Ring"/>
-      <movie director="Jackson" title="LOTR: The Two Towers"/>
-      <movie director="Jackson" title="LOTR: Return of the King"/>
+  <example:MovieFinderImpl xmlns:example="urn:java:example">
+    <movie director="Jackson" title="LOTR: Fellowship of the Ring"/>
+    <movie director="Jackson" title="LOTR: The Two Towers"/>
+    <movie director="Jackson" title="LOTR: Return of the King"/>
 
-      <movie director="Lucas" title="Star Wars"/>
+    <movie director="Lucas" title="Star Wars"/>
 
-      <movie director="Gilliam" title="Monty Python's Holy Grail"/>
-      <movie director="Gilliam" title="Brazil"/>
-    </init>
-  </bean>
+    <movie director="Gilliam" title="Monty Python's Holy Grail"/>
+    <movie director="Gilliam" title="Brazil"/>
+  </example:MovieFinderImpl>
 
   <!--
      - Configures the movie servlet with the lister.

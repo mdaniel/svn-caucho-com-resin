@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.webbeans.In;
+import javax.inject.Current;
 
 /**
  * A simple servlet that uses the resource.
@@ -23,7 +23,7 @@ public class TestServlet extends HttpServlet {
   /**
    * The saved resource from JNDI.
    */
-  @In private TestResource _resource;
+  @Current private TestResource _resource;
   
   /**
    * The doGet method just prints out the resource.

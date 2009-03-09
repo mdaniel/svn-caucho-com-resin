@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.webbeans.Named;
+import com.caucho.config.Name;
 
 /**
  * The BasicServlet executes a simple JDBC query.
@@ -28,7 +28,7 @@ public class BasicServlet extends HttpServlet {
   /**
    * The saved DataSource for the database
    */
-  @Named("jdbc/basic")
+  @Name("jdbc/basic")
   private DataSource _ds;
 
   /**

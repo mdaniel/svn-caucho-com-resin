@@ -11,13 +11,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 
-import javax.webbeans.In;
+import javax.inject.Current;
 
 public class MessageServlet extends GenericServlet {
   private static final Logger log =
     Logger.getLogger(MessageServlet.class.getName());
 
-  @In private BlockingQueue _sender;
+  @Current
+  private BlockingQueue _sender;
   private int _count;
   
   /**

@@ -95,11 +95,11 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
-import javax.webbeans.Named;
+import com.caucho.config.Name;
 
 @Stateless
 public class HelloBean implements Hello {
-  @Named("greeting")
+  @Name("greeting")
   private String _greeting;
 
   @TransactionAttribute(SUPPORTS)
@@ -114,8 +114,8 @@ public class HelloBean implements Hello {
 
 <p>The @Stateless annotation marks the bean as a stateless session
 bean.  Resin will create a stub implementing <code>Hello</code> and
-store it in the WebBeans directory with type <code>Hello</code> and
-name <code>@Named("HelloBean")</code>.</p>
+store it in the Java Injection directory with type <code>Hello</code> and
+name <code>@Name("HelloBean")</code>.</p>
 
 <p>The @Stateless annotation can have an optional <code>name</code>
 value which overrides the default name of "HelloBean".</p>

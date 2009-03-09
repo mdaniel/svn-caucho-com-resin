@@ -1,6 +1,5 @@
 package example;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,8 +7,8 @@ import java.util.logging.Logger;
 public class PeriodicTask
  implements PeriodicTaskMBean, javax.resource.spi.work.Work
 {
-  static protected final Logger log = 
-    Logger.getLogger(PeriodicTask.class.getName());
+  static protected final Logger log
+    = Logger.getLogger(PeriodicTask.class.getName());
 
   private long _estimatedAverageTime = 5000;
 

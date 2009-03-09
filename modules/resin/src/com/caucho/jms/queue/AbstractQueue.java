@@ -113,7 +113,12 @@ abstract public class AbstractQueue extends AbstractDestination
   @PostConstruct
   public void postConstruct()
   {
-    init();
+    try {
+      init();
+    } catch (Exception e) {
+      // XXX: issue with examples: iterating with closed table
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
     _admin = new QueueAdmin(this);
     _admin.register();

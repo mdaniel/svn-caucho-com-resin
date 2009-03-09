@@ -3,10 +3,10 @@ package example;
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.*;
+import javax.inject.Current;
 
 public class ViewLogServlet extends HttpServlet {
-  @In private MessageStoreService _messageStore;
+  @Current private MessageStoreService _messageStore;
 
   public void service(HttpServletRequest request,
                       HttpServletResponse response)

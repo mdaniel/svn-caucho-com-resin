@@ -1,7 +1,7 @@
-<%@ page import="javax.webbeans.In" %>
+<%@ page import="com.caucho.config.Name" %>
 <%@ page import="example.MathService" %>
 <%!
-@In MathService math;
+@Name("math") MathService math;
 %>
 <pre>
 3 + 2 = <%= math.add(3, 2) %>

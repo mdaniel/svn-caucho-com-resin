@@ -25,39 +25,6 @@
       -->
     <item link="config-cmdline.xtp" title="Command-Line" />
 
-    <!--
-       - Configuration
-      -->    
-    <item link="config.xtp" title="Configuration">
-    <!--
-      <item link="config-overview.xtp" title="overview"/>
-      -->
-      <item link="cluster-tags.xtp" title="&lt;cluster>"
-            description="clustering, caching, load-balancing, and distributed sessions"/>
-      <item link="database-tags.xtp" title="&lt;database>"
-	    description="connection pool and database driver configuration"/>
-      <item link="host-tags.xtp" title="&lt;host>"
-	    description="virtual hosts" />
-      <item link="port-tags.xtp" title="Ports"
-             description="HTTP, SSL, addresses and ports"/>
-      <item link="resin-tags.xtp" title="&lt;resin>"
-            description="top-level configuration container"/>
-      <item link="env-tags.xtp" title="Resource tags"
-            description="database, classloader, jms, bean, and IoC"/>
-      <item link="rewrite-tags.xtp" title="Rewrite"
-	    description="URL rewriting, dispatching, and load-balancing"/>
-      <item link="server-tags.xtp" title="&lt;server>"
-            description="threading, keepalive, timeout, and jvm arguments"/>
-      <item link="session-tags.xtp" title="session"
-	    description="servlet sessions"/>
-      <item link="el-var.xtp" title="variables"
-	    description="configuration variables"/>
-      <item link="webapp-tags.xtp" title="&lt;web-app>"
-	    description="servlet and filter configuration"/>
-      <item link="index-tags.xtp" title="Index"
-	    description="alphabetical list of tags" />
-    </item>
-
     <!-- line/rule goes here? -->
 
     <!--
@@ -66,11 +33,6 @@
     <item link="guide-admin.xtp" title="Guide: Admin"/>
     
     <!-- line/rule goes here? -->
-    
-    <!--
-       - Admin/JMX
-      -->
-    <item link="resin-admin.xtp" title="Admin"/>
       
     <item link="resin-clustering.xtp" title="Clustering"/>
       
@@ -109,10 +71,52 @@
           description="executing tasks, methods and URLs based on cron triggers"/>
     
     <!--
+       - Admin/JMX
+      -->
+    <item link="resin-admin.xtp" title="resin-admin"/>
+    
+    <!--
        - Security
       -->
 	    
     <item link="resin-security.xtp" title="Security"/>
+
+    <!--
+       - XXX: rule here?
+      -->
+
+    <!--
+       - Configuration
+      -->    
+    <item link="config.xtp" title="Tag Reference">
+    <!--
+      <item link="config-overview.xtp" title="overview"/>
+      -->
+      <item link="cluster-tags.xtp" title="&lt;cluster>"
+            description="clustering, caching, load-balancing, and distributed sessions"/>
+      <item link="database-tags.xtp" title="&lt;database>"
+	    description="connection pool and database driver configuration"/>
+      <item link="host-tags.xtp" title="&lt;host>"
+	    description="virtual hosts" />
+      <item link="port-tags.xtp" title="Ports"
+             description="HTTP, SSL, addresses and ports"/>
+      <item link="resin-tags.xtp" title="&lt;resin>"
+            description="top-level configuration container"/>
+      <item link="env-tags.xtp" title="Resource tags"
+            description="database, classloader, jms, bean, and IoC"/>
+      <item link="rewrite-tags.xtp" title="Rewrite"
+	    description="URL rewriting, dispatching, and load-balancing"/>
+      <item link="server-tags.xtp" title="&lt;server>"
+            description="threading, keepalive, timeout, and jvm arguments"/>
+      <item link="session-tags.xtp" title="session"
+	    description="servlet sessions"/>
+      <item link="el-var.xtp" title="variables"
+	    description="configuration variables"/>
+      <item link="webapp-tags.xtp" title="&lt;web-app>"
+	    description="servlet and filter configuration"/>
+      <item link="index-tags.xtp" title="Index"
+	    description="alphabetical list of tags" />
+    </item>
 
     <!--
        - Third party

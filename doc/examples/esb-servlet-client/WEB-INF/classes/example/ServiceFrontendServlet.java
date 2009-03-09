@@ -3,10 +3,10 @@ package example;
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.*;
+import com.caucho.config.Name;
 
 public class ServiceFrontendServlet extends HttpServlet {
-  @Named("hessian")
+  @Name("hessian")
   private HelloService _helloService;
 
   public void doGet(HttpServletRequest req, HttpServletResponse res)

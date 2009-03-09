@@ -1,10 +1,10 @@
 package example;
 
 import javax.jms.*;
-import javax.webbeans.*;
+import javax.inject.*;
 
 public class MyListener implements MessageListener {
-  @In private MessageStoreService _messageStore;
+  @Current private MessageStoreService _messageStore;
 
   public void onMessage(Message message)
   {

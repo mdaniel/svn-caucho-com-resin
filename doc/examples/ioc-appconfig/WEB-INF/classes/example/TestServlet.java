@@ -5,10 +5,10 @@ import javax.servlet.http.*;
 
 import java.io.*;
 import java.util.*;
-import javax.webbeans.*;
+import javax.inject.*;
 
 public class TestServlet extends HttpServlet {
-  @In AppConfig _appConfig;
+  @Current AppConfig _appConfig;
 
   public void doGet(HttpServletRequest req,
                     HttpServletResponse res)

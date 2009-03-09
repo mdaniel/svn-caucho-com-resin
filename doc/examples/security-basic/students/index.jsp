@@ -4,12 +4,12 @@
 
 <html>
   <head>
-    <title>Hogwart's::Student's</title>
+    <title>Hogwarts::Students</title>
   </head>
 
   <body>
     <%@ include file="/inc/buttonbar.jspf" %>
-    <h1>Student's Home</h1>
+    <h1>Students Home</h1>
 
     Welcome <c:out value="${pageContext.request.remoteUser}"/>.
 

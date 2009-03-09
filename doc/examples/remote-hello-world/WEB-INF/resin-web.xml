@@ -1,11 +1,14 @@
 <!--
    - web.xml configuration file for the Hessian addition example.
   -->
-<web-app xmlns="http://caucho.com/ns/resin">
+<web-app xmlns="http://caucho.com/ns/resin"
+	 xmlns:example="urn:java:example">
   <!--
      - WebBeans singleton bean for the service.
     -->
-  <bean class="example.HelloServiceImpl" name="vm"/>
+  <example:HelloServiceImpl>
+    <Named>vm</Named>
+  </example:HelloServiceImpl>
 
   <!--
      - Hessian protocol service

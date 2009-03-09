@@ -1,4 +1,5 @@
-<web-app xmlns="http://caucho.com/ns/resin">
+<web-app xmlns="http://caucho.com/ns/resin"
+	 xmlns:jms="urn:java:com.caucho.jms">
   <!--
      - Configures the Message Listener connector with a MessageSender
      - to send messages to and a ListenerEndpoint to receive messages
@@ -13,12 +14,15 @@
       -->
     <resource-adapter>
       <init>
-        <connection-factory resin:type="com.caucho.jms.ConnectionFactoryImpl"/>
+        <connection-factory>
+	    <jms:JmsConnectionFactory/>
+        </connection-factory>
 
-        <destination resin:type="com.caucho.jms.jdbc.JdbcQueue">
-          <data-source>jdbc/resin</data-source>
-          <queue-name>test</queue-name>
-        </destination>
+        <destination>
+          <jms:FileQueue>
+            <queue-name>test</queue-name>
+          </jms:FileQueue>
+	</destination>
       </init>
     </resource-adapter>
 
@@ -34,7 +38,9 @@
     <message-listener type="com.caucho.jms.jca.MessageListenerSpec">
       <endpoint-factory type="com.caucho.jms.jca.ListenerEndpointFactory">
         <init>
-          <listener resin:type="example.MyListener"/>
+          <listener>
+	      <example:MyListener xmlns:example="urn:java:example"/>
+          </listener>
         </init>
       </endpoint-factory>
     </message-listener>

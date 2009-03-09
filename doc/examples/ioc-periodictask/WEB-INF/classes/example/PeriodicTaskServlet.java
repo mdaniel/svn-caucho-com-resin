@@ -16,7 +16,8 @@ import java.util.concurrent.Executor;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.In;
+
+import javax.inject.Current;
 
 /**
  * A Servlet that provides a user interface for managing a PeriodicTask.
@@ -27,10 +28,10 @@ public class PeriodicTaskServlet extends HttpServlet {
 
   int _refreshRate = 5;
 
-  @In
+  @Current
   private Executor _executor;
 
-  @In
+  @Current
   private PeriodicTask _periodicTask;
 
   private NumberFormat _numberFormat ;

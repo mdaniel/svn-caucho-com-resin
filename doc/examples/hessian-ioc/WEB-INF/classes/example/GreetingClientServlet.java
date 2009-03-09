@@ -8,13 +8,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 
-import javax.webbeans.In;
+import javax.inject.Current;
 
 /**
  * The greeting client calls the GreetingAPI client.
  */
 public class GreetingClientServlet extends GenericServlet {
-  @In private GreetingAPI _greeting;
+  @Current private GreetingAPI _greeting;
 
   /**
    * Runs the servlet

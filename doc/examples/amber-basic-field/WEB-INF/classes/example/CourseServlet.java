@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.annotation.*;
 
+import javax.inject.Current;
+
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServlet;
@@ -15,16 +17,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.transaction.*;
 import javax.persistence.*;
-import javax.webbeans.In;
 
 /**
  * The CourseServlet queries the active courses and displays them.
  */
 public class CourseServlet extends HttpServlet {
-  @In
+  @Current
   private UserTransaction _uTrans;
   
-  @In
+  @Current
   private EntityManager _manager;
 
   /**

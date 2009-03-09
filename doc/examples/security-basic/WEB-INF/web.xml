@@ -1,4 +1,6 @@
-<web-app>
+<web-app xmlns="http://caucho.com/ns/resin"
+	 xmlns:sec="urn:java:com.caucho.security">
+  
   <display-name>login-xml</display-name>
 
   <welcome-file-list>
@@ -64,18 +66,18 @@
   </login-config>
 
   <!-- Resin-specific XmlAuthenticator configuration -->
-  <authenticator>
-    <type>com.caucho.server.security.XmlAuthenticator</type>
+  <sec:XmlAuthenticator>
+    <!-- Optionally put user information here.  -->
+    <user>pince:Txpd1jQc/xwhISIqodEjfw==:staff,website</user>
+    <user>filch:KmZIq2RKXAHV4BaoNHfupQ==:staff</user>
 
-    <init>
-      <!-- Optionally put user information here.  -->
-      <user>pince:Txpd1jQc/xwhISIqodEjfw==:staff,website</user>
-      <user>filch:KmZIq2RKXAHV4BaoNHfupQ==:staff</user>
+    <!-- You can also use an external file --> 
+    <path>WEB-INF/password.xml</path>
+  </sec:XmlAuthenticator>
 
-      <!-- You can also use an external file --> 
-      <path>WEB-INF/password.xml</path>
-    </init>
-  </authenticator>
+  <!--
+     - Documentation of the security roles used by the program
+    -->
   
   <security-role>
     <role-name>professor</role-name>

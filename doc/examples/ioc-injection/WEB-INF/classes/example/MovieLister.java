@@ -2,12 +2,10 @@ package example;
 
 import java.util.ArrayList;
 
-import javax.webbeans.Component;
-import javax.webbeans.In;
+import javax.inject.Current;
 
-@Component
 public class MovieLister {
-  @In private MovieFinder _finder;
+  @Current private MovieFinder _finder;
   
   /**
    * Returns movies by a particular director.
