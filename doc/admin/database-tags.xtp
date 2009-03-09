@@ -1,0 +1,329 @@
+<document>
+<header>
+  <title>database: Database tag configuration</title>
+  <version>Resin 3.1</version>
+  <description>
+    <p>The <var>database</var> tag configures a database as a javax.sql.DataSource with numerous options.
+      Resin offers robust database connection pooling.
+    </p>
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="See Also">
+
+<ul>
+<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="config-database.xtp">Database Configuration</a> for a detailed overview of databases and Resin.</li>
+</ul>
+
+</s1>
+
+<defun title="&lt;connection-wait-time>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;connection-wait-time> configures the time a <code>getConnection</code>
+call should wait when then pool is full before trying to create an
+overflow connection.</p>
+
+<default>10m</default>
+
+</defun>
+
+<defun title="&lt;close-dangling-connections>" version="Resin 3.1.1">
+<parents>database</parents>
+
+<p>&lt;close-dangling-connections> closes open connections at the
+end of a request and logs a warning and stack trace.</p>
+
+<default>true</default>
+
+</defun>
+
+<defun title="&lt;driver>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;driver> configures a database driver for a connection pool.
+The individual driver information is available from the driver vendor
+or in the <a href="db-thirdparty.xtp">database driver</a> page.</p>
+
+<p>The content of the driver tag configures bean properties of
+the driver class, e.g. url, user, password.</p>
+
+<def title="driver schema">
+element driver {
+  type,
+  *
+}
+</def>
+
+</defun>
+
+<defun title="&lt;database>" version="Resin 3.1">
+<parents>resin, cluster, host, web-app</parents>
+
+<p>&lt;database> configures a database as a <code>javax.sql.DataSource</code>
+and stores it in jndi with the given <var>jndi-name</var>.</p>
+
+<deftable-childtags>
+<tr>
+  <td>connection-wait-time</td>
+  <td>When the pool it full, how long to wait before opening a new connection anyway.</td>
+  <td>10m</td>
+</tr>
+</deftable-childtags>
+
+<example title="Example: mysql database">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;database jndi-name="jdbc/test">
+    &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+      &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+      &lt;user>&lt;/user>
+      &lt;password>&lt;/password>
+    &lt;/driver>
+  &lt;/database>
+&lt;/web-app&gt;
+</example>
+
+<def title="database schema">
+element database {
+  jndi-name
+  &amp; connection-Database?
+  &amp; driver+
+  &amp; connection-wait-time
+  &amp; max-active-time
+  &amp; max-close-statements
+  &amp; max-connections
+  &amp; max-create-connections
+  &amp; max-idle-time
+  &amp; max-overflow-connections
+  &amp; max-pool-time
+  &amp; password
+  &amp; ping
+  &amp; ping-table
+  &amp; ping-query
+  &amp; ping-interval
+  &amp; prepared-statement-cache-size
+  &amp; save-allocation-stack-trace
+  &amp; spy
+  &amp; transaction-timeout
+  &amp; user
+  &amp; xa
+  &amp; xa-forbid-same-rm
+  &amp; wrap-statements
+}
+</def>
+
+</defun>
+
+<defun title="&lt;max-active-time>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-active-time> configures the maximum time a connection
+can be active before Resin will automatically close it.  Normally,
+the max-active-time should not be configured, since Resin will
+also automatically close a connection at the end of a request.</p>
+
+<p>Sites should generally leave max-active-time at the default.</p>
+
+<default>6h</default>
+</defun>
+
+<defun title="&lt;max-close-statements>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-close-statements> configures how many open statements Resin
+should save to for the connection close.  Since the JDBC
+<code>Connection.close()</code> call automatically closes any open
+statements, Resin's database pool needs to keep track of any open
+statements to close them in case the application has forgotten.  The
+&lt;max-close-statements> is primarily needed for older database drivers
+implementing the <code>java.sql.Driver</code> interface.</p>
+
+<default>256</default>
+
+</defun>
+
+<defun title="&lt;max-connections>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-connections> configures the maximum number of
+open connections allowed for Resin's database pool.  Sites
+can use &lt;max-connections> to throttle the number of database
+connections for an overloaded server.  When <code>max-connections</code>
+is reached and an application calls <code>getConnection</code>, Resin will
+wait <a href="#connection-wait-time">connection-wait-time</a> or until
+a connection is freed before allocating a new connection.</p>
+
+<default>128</default>
+</defun>
+
+<defun title="&lt;max-create-connections>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-create-connections> configures the maximum number of
+simultaneous connection creations.  Since connection creation is slow
+and database access can be spiky, Resin's pool limits the number
+of new connections to the database at any time.  Once a connection
+has succeeded, a new connection can proceed.</p>
+
+<default>5</default>
+
+</defun>
+
+<defun title="&lt;max-idle-time>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-idle-time> configures the maximum time a connection
+can remain idle before Resin automatically closes it.  Since idle databases
+tie up resources, Resin will slowly close idle connections that are no
+longer needed.</p>
+
+<p>Higher values of &lt;max-idle-time> will connections to remain in the
+idle pool for a longer time.  Lower values will close idle connections
+more quickly.</p>
+
+<default>30s</default>
+
+</defun>
+
+<defun title="&lt;max-overflow-connections>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-overflow-connections> extends &lt;connection-max> temporarily
+in case of overflow.  After the &lt;connection-wait-time> expires, Resin can
+create an overflow connection to handle unforseen load spikes.</p>
+
+<default>0</default>
+
+</defun>
+
+<defun title="&lt;max-pool-time>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;max-pool-time> configures the maximum time the connection
+can remain open.  A connection could theoretically remain open, switching
+between active and idle, for an indefinite time.  The &lt;max-pool-time>
+allows a site to limit to total time of that connection.</p>
+
+<p>Most sites will leave &lt;max-pool-time> at the default.</p>
+
+<default>24h</default>
+
+</defun>
+
+<defun title="&lt;password>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;password> configures the database connection password.
+Sites requiring additional security for their passwords can use
+the <a href="env-tags.xtp#resin:type">resin:type</a> attribute
+to configure a password decoder.</p>
+
+</defun>
+
+<defun title="&lt;ping>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;ping> enables connection validation.  When &lt;ping> is enabled,
+Resin will test the connection with <a href="#ping-query">&lt;ping-query></a>
+or <a href="#ping-table">&lt;ping-table></a> before returning a connection
+to the user.  If the connection fails the test, Resin will close it and
+return a new connection.</p>
+
+<p>For efficiency, Resin will only validate the connection if it
+has been idle for longer than <a href="#ping-interval">&lt;ping-interval></a>.
+</p>
+
+<default>false</default>
+
+</defun>
+
+<defun title="&lt;ping-table>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;ping-table> configures the database table Resin should
+use to verify if a connection is still valid when returned from the pool.
+</p>
+
+</defun>
+
+<defun title="&lt;ping-query>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;ping-query> specifies the query to use for validating if a
+database connection is still valid when returned from the idle pool.</p>
+
+</defun>
+
+<defun title="&lt;ping-interval>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;ping-interval> configures when Resin should validate an
+idle connection.  Connections which have been idle for less than
+&lt;ping-interval> are assumed to be still valid without validation.
+Connections idle for longer than &lt;ping-interval> are validated.
+</p>
+
+<p>Sites can force a validation by setting &lt;ping-interval> to 0.</p>
+
+<default>1s</default>
+
+</defun>
+
+<defun title="&lt;prepared-statement-cache-size>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;prepared-statement-cache-size> configures how many prepared
+statements Resin should cache for each connection.  Caching prepared
+statement can improve performance for some database drivers by avoiding
+repeated parsing of the query SQL.</p>
+
+<default>0</default>
+
+</defun>
+
+<defun title="&lt;save-allocation-stack-trace>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;save-allocation-stack-trace> helps debugging application with
+a missing <code>Connection.close()</code> by saving the stack trace
+where the <code>Connection.getConnection()</code> was called.  When
+Resin detects that the connection has failed to close, it can then
+print the allocation stack trace, which is more informative for
+tracking down errors.</p>
+
+</defun>
+
+<defun title="&lt;spy>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>The &lt;spy> tag is a very useful logging tag for debugging database
+problems.  If &lt;spy> is enabled, all database queries will be logged
+at the "fine" level.  Applications can use &lt;spy> to debug unexpected
+database queries, or to improve query performance.</p>
+
+<default>false</default>
+
+<example title="Example: spy output">
+0.6:setString(1,1)
+0.6:executeQuery(select o.DATA from my_bean o where o.ID=?)
+
+</example>
+
+</defun>
+
+<defun title="&lt;transaction-timeout>" version="Resin 3.1">
+<parents>database</parents>
+
+<p>&lt;transaction-timeout> configures the maximum time a transaction
+can be alive before a mandatory rollback.</p>
+
+<default>-1</default>
+
+</defun>
+
+</body>
+</document>

@@ -1,0 +1,895 @@
+<document>
+<header>
+<title>Resin Clustering</title>
+<description>
+
+<p>As traffic increases beyond a single server, Resin's clustering
+lets you add new machines to handle the load and simultaneously improves
+uptime and reliability by failing over requests from a downed or maintenance
+server to a backup transparently.
+</p>
+
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 name="resin" title="Load Balancing">
+
+<p>When your traffic requires multiple servers, your site will
+naturally split into two clusters: an app-tier of identical servers to handle
+the content and a web-tier of HTTP servers talking to the browsers, caching
+the content, and distributing the load to the app-tier servers.</p>
+
+<p>Since each app-tier servers produces the same content, Resin configures
+them identically: the app-tier servers have the same virtual hosts,
+web-applications and servlets, and use the same resin.xml.  Adding a new
+machine just requires adding a new &lt;server> tag to the cluster.</p>
+
+<figure src="cluster-load-balance.png"/>
+
+<p>The new server has a unique name like "app-b" and a TCP cluster-port
+consisting of an &lt;IP,port>, so the other servers can communicate with
+it.  Although you can start multiple Resin servers on the same machine,
+TCP requires the &lt;IP,port> must be unique, so you might need to assign
+unique ports like 6801, 6802 for servers on the same machine.  On different
+machines, you'll use unique IP addresses.  Because the cluster-port is for
+Resin servers to communicate with each other, they'll typically be private
+IP addresses like 192.168.1.10 and not public IP addresses.  In particular,
+the load balancer on the web-tier uses the cluster-port of the app-tier
+to forward HTTP requests.</p>
+
+<p>The load balancer on the web-tier forwards requests to the app-tier,
+distributing the load evenly and skipping any app-tier server that's
+down for maintenance or restarting due to a crash.  This failover capability
+increases reliability and improves the customer's experiency by making
+your site look like every server is always up.  The load balancer also
+steers traffic from a user session to the same app-tier server, improving
+caching and session performance, i.e. it supports sticky sessions.</p>
+
+<s2 title="Two Server Configuration">
+
+<p>For example, a site running Drupal on Resin might now need two
+app-tier servers to handle additional load as it grows traffic.  In the
+following configuration, the two app-tier servers "app-a" and "app-b" both
+serve the Drupal content, while the web-tier server "web-a" handles the
+HTTP, caches content, and balances the load to the app-tier cluster.</p>
+
+<p>The web-tier is configured with a &lt;cache> tag for the caching, and
+uses <a href="rewrite-tags.xtp#load-balance">&lt;rewrite-dispatch></a> with
+a &lt;load-balance> tag for the dispatching.  In this case, we send
+all content to the app-tier.  &lt;rewrite-dispatch> is
+Resin's equivalent of the Apache mod_rewrite module, providing a powerful
+and detailed URL matching and decoding, so more complicated sites might
+load-balance based on the virtual host or URL.</p>
+
+<example title="Example: resin.xml for load balancing">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+
+&lt;cluster id="app-tier"&gt;
+  &lt;server id="app-a" address="192.168.0.10" port="6800"/&gt;
+  &lt;server id="app-b" address="192.168.0.11" port="6800"/&gt;
+
+  &lt;host id=""&gt;
+    &lt;web-app id="" root-directory="/var/www/htdocs"/>
+  &lt;/host&gt;
+&lt;/cluster&gt;
+
+&lt;cluster id="web-tier"&gt;
+  &lt;server-default>
+    &lt;http port="80"/&gt;
+  &lt;/server-default&gt;
+
+  &lt;server id="web-a" address="192.168.0.1" port="6800"/&gt;
+
+  &lt;cache disk-size="1024M" memory-size="256M"/&gt;
+
+  &lt;host id=""&gt;
+    &lt;web-app id="/"&gt;
+      &lt;rewrite-dispatch>
+        &lt;load-balance regexp="" cluster="app-tier"/>
+      &lt;/rewrite-dispatch>
+    &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/cluster&gt;
+
+&lt;/resin&gt;
+</example>
+
+<p>All three servers will use the same resin.xml, which makes managing
+multiple servers easier.  The servers are name by the
+server <var>id</var> attribute, which must be unique.  When you start
+Resin, you'll use the server-id as part of the command line</p>
+
+<example title="Example: starting servers">
+192.168.0.10> java -jar lib/resin.jar -server app-a start
+
+192.168.0.11> java -jar lib/resin.jar -server app-b start
+
+192.168.0.1> java -jar lib/resin.jar -server web-a start
+</example>
+
+<p>Since Resin lets you start multiple servers on the same machine, a
+small site might start the web-tier server and one of the app-tier servers
+on one machine, and start the second server on a second machine.  You can
+even start all three servers on the same machine, increasing reliability
+and easing maintenance, without addressing the additional load.  If you
+do put multiple servers on the same machine, remember to change the
+<var>port</var> to something like 6801, so the TCP bind doesn't
+conflict.</p>
+
+<p>In the <a href="resin-admin.xtp">/resin-admin</a> management page, you
+can manage all three servers at once, gathering statistics and load and
+watching for any errors.  When setting up /resin-admin on a web-tier
+server, you'll want to remember to add a separate &lt;web-app> for resin-admin
+to make sure the &lt;rewrite-dispatch> doesn't inadvertantly send the
+management request to the app-tier.</p>
+
+</s2>
+
+<s2 title="Socket Pooling, Timeouts, and Failover">
+
+<p>For efficiency, Resin's load balancer manages a pool of sockets
+connecting to the app-tier servers.  If Resin forwards a new request to
+an app-tier server and it has an idle socket available, it will reuse that
+socket, improving performance an minimizing network load.  Resin uses a
+set of timeout values to manage those idle sockets and to handle any
+failures or freezes of the backend servers.  The following diagram
+illustrates the main timeout values:</p>
+
+<figure src="load-balance-idle-time.png"/>
+
+<ul>
+<li><b>load-balance-connect-timeout</b>: the load balancer timeout
+for the <code>connect()</code> system call to complete to
+the app-tier (5s).</li>
+<li><b>load-balance-idle-time</b>: load balancer timeout
+for an idle socket before closing it automatically (5s).</li>
+<li><b>load-balance-recover-time</b>: the load balancer connection failure wait
+time before trying a new connection (15s).</li>
+<li><b>load-balance-socket-timeout</b>: the load balancer
+timeout for a valid request to complete (665s).</li>
+<li><b>keepalive-timeout</b>: the app-tier timeout for a keepalive
+connection (15s)</li>
+<li><b>socket-timeout</b>: the app-tier timeout for a read or
+write (65s)</li>
+</ul>
+
+<p>When an app-tier server is down due to maintenance or a crash, Resin
+will use the <b>load-balance-recover-time</b> as a delay before retrying
+the downed server.  With the failover and recover timeout, the load balancer
+reduces the cost of a failed server to almost no time at all.  Every
+recover-time, Resin will try a new connection and wait for
+<b>load-balance-connect-timeout</b> for the server to respond.  At most, one
+request every 15 seconds might wait an extra 5 seconds to connect to the
+backend server.  All other requests will automatically go
+to the other servers.</p>
+
+<p>The socket-timeout values tell Resin when a socket connection is
+dead and should be dropped.  The web-tier timeout
+<b>load-balance-socket-timeout</b> is much larger than the app-tier
+timeout <b>socket-timeout</b> because the web-tier needs to wait for
+the application to generate the response.  If your application has some
+very slow pages, like a complicated nightly report, you may need to
+increase the <b>load-balance-socket-timeout</b> to avoid the web-tier
+disconnecting it.</p>
+
+<p>Likewise, the <b>load-balance-idle-time</b> and <b>keepalive-timeout</b>
+are a matching pair for the socket idle pool.  The idle-time tells the
+web-tier how long it can keep an idle socket before closing it.  The
+keepalive-timeout tells the app-tier how long it should listen for
+new requests on the socket.  The <b>keepalive-timeout</b> must be
+significantly larger than the <b>load-balance-idle-time</b> so the app-tier
+doesn't close its sockets too soon.  The keepalive timeout can be large
+since the app-tier can use the
+<a href="server-tags.xtp#keepalive-select-enable">keepalive-select</a>
+manager to efficiently wait for many connections at once.</p>
+
+</s2>
+
+<s2 title="Dispatching">
+
+<p>In most cases, the web-tier will dispatch
+everything to the app-tier servers.  Because of Resin's
+<a href="proxy-cache.xtp">proxy cache</a>, the web-tier servers
+will serve static pages as fast as if they were local pages.</p>
+
+<p>In some cases, though, it may be important to send different
+requests to different backend clusters.  The
+&lt;<a href="rewrite-tags.xtp#load-balance">load-balance</a>&gt; tag can
+choose clusters based on URL patterns.</p>
+
+<p>The following &lt;<a href="rewrite-tags.xtp">rewrite-dispatch</a>&gt;
+keeps all *.png, *.gif, and *.jpg files on the web-tier, sends
+everything in /foo/* to the foo-tier cluster, everything in /bar/* to
+the bar-tier cluster, and keeps anything else on the web-tier.</p>
+
+<example title="split dispatching">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="web-tier">
+    &lt;server id="web-a">
+      &lt;http port="80"/>
+    &lt;/server>
+
+    &lt;cache memory-size="64m"/>
+
+    &lt;host id="">
+      &lt;web-app id="/">
+
+        &lt;rewrite-dispatch>
+          &lt;dispatch regexp="(\.png|\.gif|\.jpg)"/>
+
+          &lt;load-balance regexp="^/foo" cluster="foo-tier"/>
+
+          &lt;load-balance regexp="^/bar" cluster="bar-tier"/>
+        &lt;/rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster>
+
+  &lt;cluster id="foo-tier">
+    ...
+  &lt;/cluster>
+
+  &lt;cluster id="bar-tier">
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2> <!-- dispatching -->
+</s1> <!-- load balancing -->
+
+<s1 title="Persistent Sessions">
+
+<p>A session needs to stay on the same JVM that started it.
+Otherwise, each JVM would only see every second or third request and
+get confused.</p>
+
+<p>To make sure that sessions stay on the same JVM, Resin encodes the
+cookie with the host number.  In the previous example, the hosts would
+generate cookies like:</p>
+
+<deftable>
+<tr>
+  <th>index</th>
+  <th>cookie prefix</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><var>a</var>xxx</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><var>b</var>xxx</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><var>c</var>xxx</td>
+</tr>
+</deftable>
+
+<p>On the web-tier, Resin will decode the cookie and send it
+to the appropriate host.  So <var>bacX8ZwooOz</var> would go to app-b.</p>
+
+<p>In the infrequent case that app-b fails, Resin will send the
+request to app-a.  The user might lose the session but that's a minor
+problem compared to showing a connection failure error.  To save sessions,
+you'll need to use <a href="config-sessions.xtp">distributed sessions</a>.
+Also take a look at <a href="tcp-sessions.xtp">tcp sessions</a>.</p>
+
+<p>The following example is a typical configuration for a distributed
+server using an external hardware load-balancer, i.e. where each Resin is
+acting as the HTTP server.  Each server will be started
+as <var>-server a</var> or <var>-server b</var> to grab its specific configuration.</p>
+
+<p>In this example, sessions will only be stored when the server shuts down,
+either for maintenance or with a new version of the server.  This is the most
+lightweight configuration, and doesn't affect performance significantly.
+If the hardware or the JVM crashes, however, the sessions will be lost.
+(If you want to save sessions for hardware or JVM crashes,
+remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
+
+<example title="resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="app-tier"&gt;
+  &lt;server-default>
+    &lt;http port='80'/&gt;
+  &lt;/server-default>
+
+  &lt;server id='app-a' address='192.168.0.1'/&gt;
+  &lt;server id='app-b' address='192.168.0.2'/&gt;
+  &lt;server id='app-c' address='192.168.0.3'/&gt;
+
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
+
+  &lt;web-app-default&gt;
+    &lt;!-- enable tcp-store for all hosts/web-apps --&gt;
+    &lt;session-config&gt;
+      &lt;use-persistent-store/&gt;
+      &lt;save-only-on-shutdown/&gt;
+    &lt;/session-config&gt;
+  &lt;/web-app-default&gt;
+
+  ...
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<s2 title="Choosing a backend server">
+<p>
+Requests can be made to specific servers in the app-tier.  The web-tier uses
+the value of the jsessionid to maintain sticky sessions.  You can include an
+explicit jsessionid to force the web-tier to use a particular server in the app-tier.
+</p>
+
+<p>
+Resin uses the first character of the jsessionid to identify the backend server
+to use, starting with `a' as the first backend server.  If wwww.example.com
+resolves to your web-tier, then you can use:
+</p>
+
+<ol>
+<li>http://www.example.com/proxooladmin;jsessionid=abc</li>
+<li>http://www.example.com/proxooladmin;jsessionid=bcd</li>
+<li>http://www.example.com/proxooladmin;jsessionid=cde</li>
+<li>http://www.example.com/proxooladmin;jsessionid=def</li>
+<li>http://www.example.com/proxooladmin;jsessionid=efg</li>
+<li>etc.</li>
+</ol>
+</s2>
+
+<s2 title="&lt;persistent-store&gt;">
+<p>Configuration for persistent store uses
+the <a href="resin-tags.xtp#persistent-store">persistent-store</a> tag.</p>
+</s2>
+
+<s2 title="File Based">
+
+<p>For single-server configurations, the "cluster" store saves session
+data on disk, allowing for recovery after system restart or during
+development.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="">
+    &lt;persistent-store type="cluster"/&gt;
+
+    &lt;host id="">
+      &lt;/web-app id=""/>
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin&gt;
+</example>
+
+<p>Sessions are stored as files in the <var>path</var>
+directory.  When the session changes, the updates will be written to
+the file.  After Resin loads an Application, it will load the stored
+sessions.</p>
+
+</s2>
+
+<s2 title="Distributed Sessions">
+
+<p>Distributed sessions are intrinsically more complicated than single-server
+sessions.  Single-server session can be implemented as a simple memory-based
+Hashtable.  Distributed sessions must communicate between machines to ensure
+the session state remains consistent.</p>
+
+<p>Load balancing with multiple machines either uses <var>sticky sessions</var> or
+<var>symmetrical sessions</var>.  Sticky sessions put more intelligence on the
+load balancer, and symmetrical sessions puts more intelligence on the JVMs.
+The choice of which to use depends on what kind of hardware you have,
+how many machines you're using and how you use sessions.</p>
+
+<p>Distributed sessions can use a database as a backing store, or they can
+distribute the backup among all the servers using TCP.</p>
+
+<s3 title="Symmetrical Sessions">
+
+<p>Symmetrical sessions happen with dumb load balancers like DNS
+round-robin.  A single session may bounce from machine A
+to machine B and back to machine B.  For JDBC sessions, the symmetrical
+session case needs the <var>always-load-session</var> attribute described below.
+Each request must load the most up-to-date version of the session.</p>
+
+<p>Distributed sessions in a symmetrical environment are required to make
+sessions work at all.  Otherwise the state will end up spread across the JVMs.
+However, because each request must update its session information, it is
+less efficient than sticky sessions.</p>
+
+</s3>
+
+<s3 title="Sticky Sessions">
+
+<p>Sticky sessions require more intelligence on the load-balancer, but
+are easier for the JVM.  Once a session starts, the load-balancer will
+always send it to the same JVM.  Resin's load balancing, for example, encodes
+the session id as 'aaaXXX' and 'baaXXX'.  The 'aaa' session will always go
+to JVM-a and 'baa' will always go to JVM-b.</p>
+
+<p>Distributed sessions with a sticky session environment add reliability.
+If JVM-a goes down, JVM-b can pick up the session without the user
+noticing any change.  In addition, distributed sticky sessions are more
+efficient.  The distributor only needs to update sessions when they change.
+So if you update the session once when the user logs in, the distributed
+sessions can be very efficient.</p>
+
+</s3>
+
+<s3 title="always-load-session">
+
+<p>Symmetrical sessions must use the 'always-load-session' flag to
+update each session data on each request.  always-load-session is only
+needed for jdbc-store sessions.  tcp-store sessions use a more-sophisticated
+protocol that eliminates the need for always-load-session, so tcp-store
+ignores the always-load-session flag.</p>
+
+<p>The <var>always-load-session</var> attribute forces sessions to check the store for
+each request.  By default, sessions are only loaded from persistent
+store when they are created.  In a configuration with multiple symmetric
+web servers, sessions can be loaded on each request to ensure consistency.</p>
+
+</s3>
+
+<s3 title="always-save-session">
+
+<p>By default, Resin only saves session data when you add new values
+to the session object, i.e. if the request calls <var>setAttribute</var>.
+This may be insufficient when storing large objects.  For example, if you
+change an internal field of a large object, Resin will not automatically
+detect that change and will not save the session object.</p>
+
+<p>With <var>always-save-session</var> Resin will always write the session
+to the store at the end of each request.  Although this is less efficient,
+it guarantees that updates will get stored in the backup after each
+request.</p>
+
+</s3>
+
+</s2>
+
+<s2 title="Database Based">
+
+<p>Database backed sessions are the easiest to understand.  Session data
+gets serialized and stored in a database.  The data is loaded on the
+next request.</p>
+
+<p>For efficiency, the owning JVM keeps a cache of the session value, so
+it only needs to query the database when the session changes.  If another JVM
+stores a new session value, it will notify the owner of the change so
+the owner can update its cache.  Because of this notification, the database
+store is cluster-aware.</p>
+
+<p>In some cases, the database can become a bottleneck.
+By adding load to an already-loaded
+system, you may harm performance.  One way around that bottleneck is to use
+a small, quick database like MySQL for your session store and save the "Big
+Iron" database like Oracle for your core database needs.</p>
+
+<p>The database must be specified using a <var>&lt;database&gt;</var>.
+The database store will automatically create a <var>session</var> table.</p>
+
+<p>The JDBC store needs to know about the other servers in the cluster
+in order to efficiently update them when changes occur to the server.</p>
+
+<example title="JDBC store">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="app-tier"&gt;
+  &lt;server-default>
+    &lt;http port="80"/>
+  &lt;/server-default>
+
+  &lt;server id="app-a" address="192.168.2.10" port="6800"/>
+  &lt;server id="app-b" address="192.168.2.11" port="6800"/>
+
+  &lt;database jndi-name="jdbc/session"&gt;
+    ...
+  &lt;/database&gt;
+
+  &lt;persistent-store type="jdbc"&gt;
+    &lt;init&gt;
+      &lt;data-source&gt;jdbc/session&lt;data-source&gt;
+    &lt;/init&gt;
+  &lt;/persistent-store&gt;
+  ...
+
+  &lt;web-app-default&gt;
+    &lt;session-config&gt;
+      &lt;use-persistent-store/&gt;
+    &lt;/session-config&gt;
+  &lt;/web-app-default&gt;
+  ...
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>The persistent store is configured in the &lt;server&gt; with
+<a href="resin-tags.xtp#persistent-store">persistent-store</a>.
+Each web-app which needs distributed sessions must enable
+the persistent store with a
+<a href="webapp-tags.xtp#session-config">use-persistent-store</a>
+tag in the session-config.</p>
+
+<deftable>
+<tr>
+  <td>data-source</td>
+  <td>data source name for the table</td>
+</tr>
+<tr>
+  <td>table-name</td>
+  <td>database table for the session data</td>
+</tr>
+<tr>
+  <td>blob-type</td>
+  <td>database type for a blob</td>
+</tr>
+<tr>
+  <td>max-idle-time</td>
+  <td>cleanup time</td>
+</tr>
+</deftable>
+
+<example>
+CREATE TABLE persistent_session (
+  id VARCHAR(64) NOT NULL,
+  data BLOB,
+  access_time int(11),
+  expire_interval int(11),
+  PRIMARY KEY(id)
+)
+</example>
+
+<p>The store is enabled with &lt;use-persistent-store&gt; in the session config.
+</p>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;session-config&gt;
+    &lt;use-persistent-store/&gt;
+    &lt;always-save-session/&gt;
+  &lt;/session-config&gt;
+&lt;/web-app&gt;
+</example>
+
+</s2> <!-- jdbc sessions -->
+
+<s2 title="Cluster Sessions">
+
+<p>The distributed cluster stores the sessions across the
+cluster servers.  In some configurations, the cluster store
+may be more efficient than the database store, in others the database
+store will be more efficient.</p>
+
+<p>With cluster sessions, each session has an owning JVM and a backup JVM.
+The session is always stored in both the owning JVM and the backup JVM.</p>
+
+<p>The cluster store is configured in the in the &lt;cluster&gt;.
+It uses the &lt;server&gt; hosts in the &lt;cluster&gt; to distribute
+the sessions.  The session store is enabled in the &lt;session-config&gt;
+with the &lt;use-persistent-store&gt;.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  ...
+
+  &lt;cluster id="app-tier"&gt;
+    &lt;server id="app-a" host="192.168.0.1" port="6802"/>
+    &lt;server id="app-b" host="192.168.0.2" port="6802"/>
+
+    &lt;persistent-store type="cluster"&gt;
+      &lt;init path="cluster"/&gt;
+    &lt;/persistent-store&gt;
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>The configuration is enabled in the <var>web-app</var>.</p>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;session-config&gt;
+    &lt;use-persistent-store="true"/&gt;
+  &lt;/session-config&gt;
+&lt;/web-app&gt;
+</example>
+
+<p>The &lt;srun&gt; and &lt;srun-backup&gt; hosts are treated as a cluster
+of hosts.  Each host uses the other hosts as a backup.  When the session
+changes, the updates will be sent to the backup host.  When the host starts, it
+looks up old sessions in the other hosts to update its own version of the
+persistent store.
+</p>
+
+<example title="Symmetric load-balanced servers">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="app-tier"&gt;
+
+  &lt;server-default&gt;
+    &lt;http port='80'/&gt;
+  &lt;/server-default&gt;
+
+  &lt;server id="app-a" address="192.168.2.10" port="6802"/>
+  &lt;server id="app-b" address="192.168.2.11" port="6803"/>
+
+  &lt;persistent-store type="cluster"&gt;
+    &lt;init path="cluster"/&gt;
+  &lt;/persistent-store&gt;
+
+  &lt;host id=''&gt;
+  &lt;web-app id=''&gt;
+
+  &lt;session-config&gt;
+    &lt;use-persistent-store="true"/&gt;
+  &lt;/session-config&gt;
+
+  &lt;/web-app&gt;
+  &lt;/host&gt;
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+</s2>
+
+<s2 title="Clustered Distributed Sessions">
+<p>Resin's cluster protocol for distributed sessions can
+is an alternative to JDBC-based distributed sessions.  In some
+configurations, the cluster-stored sessions will be more efficient
+than JDBC-based sessions.
+Because sessions are always duplicated on separate servers, cluster
+sessions do not have a single point of failure.
+As the number of
+servers increases, JDBC-based sessions can start overloading the
+backing database.  With clustered sessions, each additional server
+shares the backup load, so the main scalability issue reduces to network
+bandwidth.  Like the JDBC-based sessions, the cluster store sessions
+uses sticky-session caching to avoid unnecessary network traffic.</p>
+</s2>
+
+<s2 title="Configuration">
+
+<p>The cluster configuration must tell each host the servers in the
+cluster
+and it must enable the persistent in the session configuration
+with <a href="session-tags.xtp#session-config">use-persistent-store</a>.
+Because session configuration is specific to a virtual host and a
+web-application, each web-app needs <var>use-persistent-store</var> enabled
+individually.  The <a href="webapp-tags.xtp#web-app-default">web-app-default</a>
+tag can be used to enable distributed sessions across an entire site.
+</p>
+
+<p>Most sites using Resin's load balancing will already have the cluster
+<var>&lt;srun&gt;</var> configured.  Each <var>&lt;srun&gt;</var> block corresponds to a
+host, including the current host.  Since cluster sessions uses
+Resin's srun protocol, each host must listen for srun requests.</p>
+
+<example title="resin.xml fragment">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier"&gt;
+
+    &lt;server id="app-a" host="192.168.0.1"/>
+    &lt;server id="app-b" host="192.168.0.2"/>
+    &lt;server id="app-c" host="192.168.0.3"/>
+    &lt;server id="app-d" host="192.168.0.4"/>
+
+    &lt;persistent-store type="cluster"&gt;
+      &lt;init path="cluster"/&gt;
+    &lt;/persistent-store&gt;
+
+    ...
+    &lt;host id=""&gt;
+    &lt;web-app id='myapp'&gt;
+      ...
+      &lt;session-config&gt;
+        &lt;use-persistent-store/&gt;
+      &lt;/session-config&gt;
+    &lt;/web-app&gt;
+    &lt;/host&gt;
+  &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<p>Usually, hosts will share the same resin.xml.  Each host will be
+started with a different <var>-server xx</var> to select the correct
+block.  On Unix, startup will look like:</p>
+
+<example title="Starting Host&#160;C on Unix">
+resin-3.2.x&gt; bin/resin.sh -conf conf/resin.xml -server c start
+</example>
+
+<p>On Windows, Resin will generally be configured as a service:</p>
+
+<example title="Starting Host&#160;C on Windows">
+resin-3.2.x&gt; bin/resin -conf conf/resin.xml -server c -install-as ResinC
+</example>
+
+<s3 title="always-save-session">
+
+<p>Resin's distributed sessions needs to know when a session has
+changed in order to save the new session value.  Although Resin can
+detect when an application calls <var>HttpSession.setAttribute</var>, it
+can't tell if an internal session value has changed.  The following
+Counter class shows the issue:</p>
+
+<example title="Counter.java">
+package test;
+
+public class Counter implements java.io.Serializable {
+  private int _count;
+
+  public int nextCount() { return _count++; }
+}
+</example>
+
+<p>Assuming a copy of the Counter is saved as a session attribute,
+Resin doesn't know if the application has called <var>nextCount</var>.  If it
+can't detect a change, Resin will not backup the new session, unless
+<var>always-save-session</var> is set.  When <var>always-save-session</var> is
+true, Resin will back up the session on every request.</p>
+
+<example>
+...
+&lt;web-app id="/foo"&gt;
+...
+&lt;session-config&gt;
+  &lt;use-persistent-store/&gt;
+  &lt;always-save-session/&gt;
+&lt;/session-config&gt;
+...
+&lt;/web-app&gt;
+</example>
+
+<p>Like the JDBC-based sessions, Resin will ignore the
+<var>always-load-session</var> flag for cluster sessions.  Because the
+cluster protocol notifies servers of changes, <var>always-load-session</var> is
+not needed.</p>
+
+</s3>
+
+<s3 title="Serialization">
+
+<p>Resin's distributed sessions relies on Java serialization to save and
+restore sessions.  Application object must <var>implement
+java.io.Serializable</var> for distributed sessions to work.</p>
+
+</s3>
+
+</s2> <!-- clustered sessions -->
+
+<s2 title="Protocol Examples">
+
+<s3 title="Session Request">
+
+<p>To see how cluster sessions work, consider a case where
+the load balancer sends the request to a random host.  Host&#160;C owns the
+session but the load balancer gives the request to Host&#160;A.  In the
+following figure, the request modifies the session so it must be saved
+as well as loaded.</p>
+
+<figure src="srunc.gif"/>
+
+<p>The session id encodes the owning host.  The example session
+id, <var>ca8MbyA</var>, decodes to an srun-index of 3, mapping
+to Host&#160;C.  Resin determines the backup host from the cookie
+as well.
+Host&#160;A must know the owning host
+for every cookie so it can communicate with the owning srun.
+The example configuration defines all the sruns Host&#160;A needs to
+know about.  If Host&#160;C is unavailable, Host&#160;A can use its
+configuration knowledge to use Host&#160;D as a backup
+for <var>ca8MbyA</var> instead..</p>
+
+<p>When the request first accesses the session, Host&#160;A asks
+Host&#160;C for the serialized session data (<var>2:load</var>).
+Since Host&#160;A doesn't cache the session data, it must
+ask Host&#160;C for an update on each request.  For requests that
+only read the session, this TCP load is the only extra overhead,
+i.e. they can skip <var>3-5</var>.  The <var>always-save-session</var>
+flag, in contrast, will always force a write.</p>
+
+<p>At the end of the request, Host&#160;A writes any session
+updates to Host&#160;C (<var>3:store</var>). If always-save-session
+is false and the session doesn't change, this step can be skipped.
+Host&#160;A sends
+the new serialized session contents to Host&#160;C.  Host&#160;C saves
+the session on its local disk (<var>4:save</var>) and saves a backup
+to Host&#160;D (<var>5:backup</var>).</p>
+
+</s3>
+
+<s3 title="Sticky Session Request">
+
+<p>Smart load balancers that implement sticky sessions can improve
+cluster performance.  In the previous request, Resin's cluster
+sessions maintain consistency for dumb load balancers or twisted
+clients like the AOL browsers.  The cost is the additional network
+traffic for <var>2:load</var> and <var>3:store</var>.  Smart load-balancers
+can avoid the network traffic of <var>2</var> and <var>3</var>.</p>
+
+<figure src="same_srun.gif"/>
+
+<p>Host&#160;C decodes the session id, <var>caaMbyA</var>.  Since it owns
+the session, Host&#160;C gives the session to the servlet with no work
+and no network traffic.  For a read-only request, there's zero
+overhead for cluster sessions.  So even a semi-intelligent load
+balancer will gain a performance advantage.  Normal browsers will have
+zero overhead, and bogus AOL browsers will have the non-sticky
+session overhead.</p>
+
+<p>A session write saves the new serialized session to disk
+(<var>2:save</var>) and to Host&#160;D (<var>3:backup</var>).
+<var>always-save-session</var> will determine if Resin can take advantage
+of read-only sessions or must save the session on each request.</p>
+
+</s3>
+
+<s3 title="Disk copy">
+<p>Resin stores a disk copy of the session information, in the location
+specified by the <var>path</var>.  The disk copy serves two purposes.  The first is
+that it allows Resin to keep session information for a large number of
+sessions. An efficient memory cache keeps the most active sessions in memory
+and the disk holds all of the sessions without requiring large amounts of
+memory.  The second purpose of the disk copy is that the sessions are recovered
+from disk when the server is restarted.</p>
+</s3>
+
+<s3 title="Failover">
+
+<p>Since the session always has a current copy on two servers, the load
+balancer can direct requests to the next server in the ring.  The
+backup server is always ready to take control.  The failover will
+succeed even for dumb load balancers, as in the non-sticky-session
+case, because the srun hosts will use the backup as the new owning
+server.</p>
+
+<p>In the example, either Host&#160;C or Host&#160;D can stop and
+the sessions will use the backup.  Of course, the failover will work
+for scheduled downtime as well as server crashes.  A site could
+upgrade one server at a time with no observable downtime.</p>
+
+</s3>
+
+<s3 title="Recovery">
+
+<p>When Host&#160;C restarts, possibly with an upgraded version of Resin,
+it needs to use the most up-to-date version of the session; its
+file-saved session will probably be obsolete.  When a "new" session
+arrives, Host&#160;C loads the saved session from both the file and
+from Host&#160;D.  It will use the newest session as the current
+value.  Once it's loaded the "new" session, it will remain consistent
+as if the server had never stopped.</p>
+
+</s3>
+
+<s3 title="No Distributed Locking">
+
+<p>Resin's cluster sessions does not lock sessions.  For browser-based
+sessions, only one request will execute at a time.  Since browser
+sessions have no concurrently, there's no need for distributed
+locking.  However, it's a good idea to be aware of the lack of
+distributed locking.</p>
+
+</s3>
+
+</s2>
+
+</s1> <!-- persistent sessions -->
+
+<s1 title="See Also">
+
+<ul>
+<li><a href="config-sessions.xtp">Distributed Sessions</a>
+</li><li><a href="tcp-sessions.xtp">Distributed Sessions with Cluster Store</a>
+</li><li><a href="cluster-tags.xtp#persistent-store">&lt;persistent-store&gt;</a>
+</li></ul>
+
+</s1>
+
+  </body>
+</document>
