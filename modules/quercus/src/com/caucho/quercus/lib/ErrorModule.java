@@ -70,12 +70,12 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final int E_STRICT = Env.E_STRICT;
   public static final int E_RECOVERABLE_ERROR = Env.E_RECOVERABLE_ERROR;
 
-  public static final StringValue ARGS = new StaticStringValue("args");
-  public static final StringValue CLASS = new StaticStringValue("class");
-  public static final StringValue FILE = new StaticStringValue("file");
-  public static final StringValue FUNCTION = new StaticStringValue("function");
-  public static final StringValue LINE = new StaticStringValue("line");
-  public static final StringValue TYPE = new StaticStringValue("type");
+  public static final StringValue ARGS = new ConstStringValue("args");
+  public static final StringValue CLASS = new ConstStringValue("class");
+  public static final StringValue FILE = new ConstStringValue("file");
+  public static final StringValue FUNCTION = new ConstStringValue("function");
+  public static final StringValue LINE = new ConstStringValue("line");
+  public static final StringValue TYPE = new ConstStringValue("type");
 
   private long _errorReporting = Env.E_DEFAULT;
 
