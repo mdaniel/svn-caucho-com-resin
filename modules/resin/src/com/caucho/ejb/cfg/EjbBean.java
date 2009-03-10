@@ -1002,6 +1002,8 @@ public class EjbBean extends DescriptionGroupConfig
 
       introspect();
 
+      initIntrospect();
+
       _bean.createViews();
 
       InterceptorBinding interceptor
@@ -1024,6 +1026,12 @@ public class EjbBean extends DescriptionGroupConfig
 	}
       }
 
+      if (_interceptors != null) {
+        for (Interceptor i : _interceptors) {
+          _bean.addInterceptor(i.getInterceptorJClass().getJavaClass());
+        }
+      }
+
       for (View view : _bean.getViews()) {
 	for (BusinessMethodGenerator bizMethod : view.getMethods()) {
 	  if (! isContainerTransaction())
@@ -1038,8 +1046,6 @@ public class EjbBean extends DescriptionGroupConfig
       for (RemoveMethod method : _removeMethods) {
 	method.configure(_bean);
       }
-      
-      // initIntrospect();
 
       // assembleBeanMethods();
 
@@ -1094,9 +1100,13 @@ public class EjbBean extends DescriptionGroupConfig
     InterceptorBinding binding =
       _ejbConfig.getInterceptorBinding(getEJBName(), isExcludeDefault);
 
-    /*
+
     if (binding != null) {
-      ArrayList<Class> interceptorClasses = binding.getInterceptors();
+      ArrayList<String> interceptorClasses = new ArrayList<String>();
+
+      for (Class iClass : binding.getInterceptors()) {
+        interceptorClasses.add(iClass.getName());
+      }
 
       // ejb/0fb7
       if (interceptorClasses.isEmpty()) {
@@ -1125,7 +1135,7 @@ public class EjbBean extends DescriptionGroupConfig
         }
       }
     }
-    */
+
   }
 
   private Interceptor configureInterceptor(Class type)

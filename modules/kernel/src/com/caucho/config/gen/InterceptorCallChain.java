@@ -73,8 +73,8 @@ public class InterceptorCallChain
   private ArrayList<Interceptor> _defaultInterceptors
     = new ArrayList<Interceptor>();
 
-  private ArrayList<Interceptor> _classInterceptors
-    = new ArrayList<Interceptor>();
+  private ArrayList<Class> _classInterceptors
+    = new ArrayList<Class>();
 
   private boolean _isExcludeDefaultInterceptors;
   private boolean _isExcludeClassInterceptors;
@@ -85,6 +85,9 @@ public class InterceptorCallChain
     = new ArrayList<Annotation>();
 
   private ArrayList<Class> _interceptors
+    = new ArrayList<Class>();
+
+  private ArrayList<Class> _methodInterceptors
     = new ArrayList<Class>();
 
   private InterceptionBinding _bindingEntry;
@@ -131,6 +134,7 @@ public class InterceptorCallChain
               || _classInterceptors.size() > 0
               || _interceptorBinding.size() > 0
               || _interceptors.size() > 0
+              || _methodInterceptors.size() > 0
               || _decoratorType != null
               || getAroundInvokeMethod() != null);
     }
@@ -151,6 +155,7 @@ public class InterceptorCallChain
    */
   public void introspect(Method apiMethod, Method implMethod)
   {
+
     if (implMethod == null)
       return;
 
@@ -188,8 +193,8 @@ public class InterceptorCallChain
 
       if (iAnn != null) {
         for (Class iClass : iAnn.value()) {
-          if (! _interceptors.contains(iClass))
-            _interceptors.add(iClass);
+          if (! _classInterceptors.contains(iClass))
+            _classInterceptors.add(iClass);
         }
       }
 
@@ -198,8 +203,8 @@ public class InterceptorCallChain
 
         if (apiMethod != implMethod && iAnn != null) {
           for (Class iClass : iAnn.value()) {
-            if (! _interceptors.contains(iClass))
-              _interceptors.add(iClass);
+            if (! _classInterceptors.contains(iClass))
+              _classInterceptors.add(iClass);
           }
         }
       }
@@ -209,8 +214,8 @@ public class InterceptorCallChain
 
     if (iAnn != null) {
       for (Class iClass : iAnn.value()) {
-        if (! _interceptors.contains(iClass))
-          _interceptors.add(iClass);
+        if (! _methodInterceptors.contains(iClass))
+          _methodInterceptors.add(iClass);
       }
     }
 
@@ -218,8 +223,8 @@ public class InterceptorCallChain
 
     if (apiMethod != implMethod && iAnn != null) {
       for (Class iClass : iAnn.value()) {
-        if (! _interceptors.contains(iClass))
-          _interceptors.add(iClass);
+        if (! _methodInterceptors.contains(iClass))
+          _methodInterceptors.add(iClass);
       }
     }
 
@@ -380,16 +385,23 @@ public class InterceptorCallChain
 
     _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
 
-    /*
+
     if (! _isExcludeDefaultInterceptors)
       _interceptors.addAll(_view.getBean().getDefaultInterceptors());
 
     // ejb/0fb6
-    if (! _isExcludeClassInterceptors && _interceptors.size() == 0)
-      _interceptors.addAll(_classInterceptors);
+    if (! _isExcludeClassInterceptors && _interceptors.size() == 0) {
+      for (Class iClass : _classInterceptors) {
+        if (_interceptors.indexOf(iClass) < 0)
+          _interceptors.add(iClass);
+      }
+    }
 
-    _interceptors.addAll(_methodInterceptors);
-    */
+    for (Class iClass : _methodInterceptors) {
+      if (_interceptors.indexOf(iClass) < 0)
+        _interceptors.add(iClass);
+    }
+
 
     if (hasInterceptor())
       generateInterceptorPrologue(out, map);

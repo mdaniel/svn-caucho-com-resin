@@ -284,7 +284,8 @@ abstract public class BeanGenerator extends GenClass
    */
   public void addInterceptor(Class cl)
   {
-    _defaultInterceptors.add(cl);
+    if (_defaultInterceptors.indexOf(cl) < 0)
+      _defaultInterceptors.add(cl);
   }
 
   /**
