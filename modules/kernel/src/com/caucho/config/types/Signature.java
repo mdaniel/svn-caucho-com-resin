@@ -148,7 +148,7 @@ public class Signature {
       throw new ConfigException(L.l("A Signature requires the method signature."));
     */
 
-    if (_signature != null)
+    if (_signature != null && ! "".equals(_signature)) // <-jsp/18v2 (ConfigContext.getTextValue(node) no longer returns null)
       parseSignature();
   }
 
