@@ -427,6 +427,7 @@ std_close_ss(server_socket_t *ss)
   }
   
   result = closesocket(fd);
+  /* fprintf(stderr, "closesocket: %d %p\n", fd, ss->context); */
 }
 
 static int

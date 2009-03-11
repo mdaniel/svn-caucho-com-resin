@@ -266,7 +266,9 @@ public class JniSocketImpl extends QSocket {
    */
   public boolean readNonBlock(int ms)
   {
-    return nativeReadNonBlock(_fd, ms);
+    synchronized (this) {
+      return nativeReadNonBlock(_fd, ms);
+    }
   }
 
   /**
@@ -275,7 +277,9 @@ public class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
-    return readNative(_fd, buffer, offset, length, timeout);
+    synchronized (this) {
+      return readNative(_fd, buffer, offset, length, timeout);
+    }
   }
 
   /**
@@ -284,7 +288,9 @@ public class JniSocketImpl extends QSocket {
   public int write(byte []buffer, int offset, int length)
     throws IOException
   {
-    return writeNative(_fd, buffer, offset, length);
+    synchronized (this) {
+      return writeNative(_fd, buffer, offset, length);
+    }
   }
 
   /**
@@ -293,7 +299,9 @@ public class JniSocketImpl extends QSocket {
   public int flush()
     throws IOException
   {
-    return flushNative(_fd);
+    synchronized (this) {
+      return flushNative(_fd);
+    }
   }
   
   /**
@@ -344,7 +352,9 @@ public class JniSocketImpl extends QSocket {
     if (_stream != null)
       _stream.close();
 
-    nativeClose(_fd);
+    synchronized (this) {
+      nativeClose(_fd);
+    }
   }
 
   protected void finalize()
