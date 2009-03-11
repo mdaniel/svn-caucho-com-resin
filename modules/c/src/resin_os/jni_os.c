@@ -340,6 +340,7 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
   char buffer[8192];
   int fd;
   int flags;
+  int mode;
 
   if (! name || length <= 0 || sizeof(buffer) <= length)
     return -1;
@@ -358,10 +359,12 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
   flags |= O_LARGEFILE;
 #endif
 
+  mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IRGRP|S_IROTH;
+
   if (is_append)
-    fd = open(buffer, O_WRONLY|O_CREAT|O_APPEND|flags, 0666);
+    fd = open(buffer, O_WRONLY|O_CREAT|O_APPEND|flags, mode);
   else
-    fd = open(buffer, O_WRONLY|O_CREAT|O_TRUNC|flags, 0666);
+    fd = open(buffer, O_WRONLY|O_CREAT|O_TRUNC|flags, mode);
 
   if (fd < 0) {
     switch (errno) {
