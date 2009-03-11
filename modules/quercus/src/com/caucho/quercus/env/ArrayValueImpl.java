@@ -539,14 +539,12 @@ public class ArrayValueImpl extends ArrayValue
   @Override
   public Value getArg(Value index, boolean isTop)
   {
-    /* not needed because of ArgGetValue
     if (_isDirty) // XXX: needed?
       copyOnWrite();
-    */
     
     // php/3d42
-    if (isTop)
-      return new ArgGetValue(this, index);
+    //if (isTop)
+      //return new ArgGetValue(this, index);
     
     Entry entry = getEntry(index);
 
@@ -555,10 +553,10 @@ public class ArrayValueImpl extends ArrayValue
       Value value = entry.getValue();
 
       // php/3d42
-      //if (! isTop && value.isset())
+      if (! isTop && value.isset())
         return value;
-      //else 
-        //return entry.toArg();
+      else 
+        return entry.toArg();
     }
     else {
       // php/3d49

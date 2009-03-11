@@ -443,11 +443,11 @@ abstract public class StringValue
       offset++;
     }
     
-    if (string.charAt(offset) == '-') {
+    if (offset < end && string.charAt(offset) == '-') {
       sign = -1;
       offset++;
     }
-    else if (string.charAt(offset) == '+') {
+    else if (offset < end && string.charAt(offset) == '+') {
       sign = +1;
       offset++;
     }
