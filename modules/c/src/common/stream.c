@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -77,9 +78,6 @@ std_open(stream_t *stream)
 static int
 poll_read(int fd, int s)
 {
-  if (s <= 0)
-    return 1;
-
   while (s > 0) {
     fd_set read_set;
     struct timeval timeout;
@@ -229,6 +227,9 @@ cse_close(stream_t *s, char *msg)
 {
   int socket = s->socket;
   s->socket = -1;
+
+  s->read_offset = 0;
+  s->read_length = 0;
   
   if (socket >= 0) {
     LOG(("%s:%d:cse_close(): close %d %s\n", __FILE__, __LINE__, socket, msg));
@@ -537,6 +538,7 @@ cse_fill_buffer(stream_t *s)
 {
   int len = 0;
   int retry;
+  int read_length;
   
   if (s->socket < 0)
     return -1;
@@ -559,27 +561,27 @@ cse_fill_buffer(stream_t *s)
     }
   }
 
-  s->read_offset = 0;
-  
   retry = 3;
 
   do {
     /* config read/save has no cluster_srun */
     if (s->cluster_srun)
-      s->read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
+      read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
     else
-      s->read_length = read(s->socket, s->read_buf, BUF_LENGTH);
+      read_length = read(s->socket, s->read_buf, BUF_LENGTH);
     /* repeat for EINTR, EAGAIN */
-  } while (s->read_length < 0
+  } while (read_length < 0
 	   && errno != EPIPE && errno != ECONNRESET
 	   && retry-- > 0);
   
-  if (s->read_length <= 0) {
+  if (read_length <= 0) {
     cse_close(s, "fill_buffer");
     
     return -1;
   }
 
+  s->read_offset = 0;
+  s->read_length = read_length;
   s->sent_data = 1;
   s->write_length = 0;
   
@@ -658,12 +660,15 @@ cse_read_all(stream_t *s, char *buf, int len)
   while (len > 0) {
     int sublen;
 
-    if (s->read_offset >= s->read_length) {
+    sublen = s->read_length - s->read_offset;
+    
+    if (sublen <= 0) {
       if (cse_fill_buffer(s) < 0)
         return -1;
+      
+      sublen = s->read_length - s->read_offset;
     }
 
-    sublen = s->read_length - s->read_offset;
     if (len < sublen)
       sublen = len;
 
@@ -683,12 +688,15 @@ cse_skip(stream_t *s, int len)
   while (len > 0) {
     int sublen;
 
-    if (s->read_offset >= s->read_length) {
+    sublen = s->read_length - s->read_offset;
+    
+    if (sublen <= 0) {
       if (cse_fill_buffer(s) < 0)
 	return -1;
+      
+      sublen = s->read_length - s->read_offset;
     }
 
-    sublen = s->read_length - s->read_offset;
     if (len < sublen)
       sublen = len;
 

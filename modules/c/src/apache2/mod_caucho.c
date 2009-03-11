@@ -976,8 +976,8 @@ jvm_status(cluster_t *cluster, request_rec *r)
   ap_rputs("    <th>Active</th>\n", r);
   ap_rputs("    <th>Pooled</th>\n", r);
   ap_rputs("    <th>Connect<br>Timeout</th>\n", r);
-  ap_rputs("    <th>Idle<br>Time</th>\n", r);
-  ap_rputs("    <th>Recover<br>Time</th>\n", r);
+  ap_rputs("    <th>Idle<br>Timeout</th>\n", r);
+  ap_rputs("    <th>Recover<br>Timeout</th>\n", r);
   ap_rputs("</tr>\n", r);
 
   for (; cluster; cluster = cluster->next) {

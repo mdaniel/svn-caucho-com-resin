@@ -12,6 +12,7 @@
 
 <s2 title="3.1.9 snapshot">
 <ul>
+<li>mod_caucho: recompilation of 3.1.8 win32 mod_caucho.dll (rep by Takahiro Fukuda)</li>
 <li>server: stack trace incorrectly displaed for bad request response (rep by Vinod Mehra, #3359)</li>
 <li>admin: change to resin:type=LogService (rep by stbu, #3328)</li>
 <li>servlet: run-at race condition on web-app restart (rep by stbu, #3342)</li>
