@@ -38,6 +38,7 @@ import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.file.PhpStderr;
 import com.caucho.quercus.lib.file.PhpStdin;
 import com.caucho.quercus.lib.file.PhpStdout;
+import com.caucho.quercus.lib.regexp.RegexpState;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.module.ModuleContext;
@@ -311,6 +312,8 @@ public class Env {
 
   private long _firstMicroTime;
   private long _firstNanoTime;
+
+  private RegexpState _freeRegexpState;
   
   private CharBuffer _cb = new CharBuffer();
   
@@ -2608,6 +2611,29 @@ public class Env {
       return _callArgStack[_callStackTop - depth - 1];
     else
       return null;
+  }
+
+  //
+  // allocations
+  //
+
+  /**
+   * Allocate the free regexp
+   */
+  public RegexpState allocateRegexpState()
+  {
+    RegexpState state = _freeRegexpState;
+    _freeRegexpState = null;
+
+    return state;
+  }
+
+  /**
+   * Free the free regexp
+   */
+  public void freeRegexpState(RegexpState state)
+  {
+    _freeRegexpState = state;
   }
 
   //

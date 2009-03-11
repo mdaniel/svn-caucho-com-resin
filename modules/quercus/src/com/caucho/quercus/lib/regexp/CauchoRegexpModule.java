@@ -156,7 +156,7 @@ public class CauchoRegexpModule
       RegexpState regexpState = RegexpState.create(env, regexp, string);
 
       if (regexpState.exec(env, string, 0) < 0) {
-	RegexpState.free(regexpState);
+	RegexpState.free(env, regexpState);
 	
         return BooleanValue.FALSE;
       }
@@ -182,7 +182,7 @@ public class CauchoRegexpModule
 
         int len = regexpState.end() - regexpState.start();
 
-	RegexpState.free(regexpState);
+	RegexpState.free(env, regexpState);
 
         if (len == 0)
           return LongValue.ONE;
@@ -190,7 +190,7 @@ public class CauchoRegexpModule
           return LongValue.create(len);
       }
       else {
-	RegexpState.free(regexpState);
+	RegexpState.free(env, regexpState);
 	
         return LongValue.ONE;
       }
@@ -244,7 +244,7 @@ public class CauchoRegexpModule
       if (regexpState == null || regexpState.exec(env, subject, offset) < 0) {
         matchRef.set(regs);
 
-	RegexpState.free(regexpState);
+	env.freeRegexpState(regexpState);
 	
         return LongValue.ZERO;
       }
@@ -309,7 +309,7 @@ public class CauchoRegexpModule
         matchRef.set(regs);
       }
       
-      RegexpState.free(regexpState);
+      env.freeRegexpState(regexpState);
 
       return LongValue.ONE;
     }
@@ -388,7 +388,7 @@ public class CauchoRegexpModule
       else
         throw new UnsupportedOperationException();
 
-      RegexpState.free(regexpState);
+      env.freeRegexpState(regexpState);
 
       return result;
     }
@@ -733,7 +733,7 @@ public class CauchoRegexpModule
       limit = LONG_MAX;
 
     Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = RegexpState.create(regexp);
+    RegexpState regexpState = RegexpState.create(env, regexp);
 
     regexpState.setSubject(env, subject);
 
@@ -774,7 +774,7 @@ public class CauchoRegexpModule
     if (tail < regexpState.getSubjectLength())
       result = result.append(regexpState.substring(env, tail));
 
-    RegexpState.free(regexpState);
+    env.freeRegexpState(regexpState);
 
     return result;
   }
@@ -791,7 +791,7 @@ public class CauchoRegexpModule
     throws IllegalRegexpException
   {
     Regexp regexp = getRegexp(env, patternString);
-    RegexpState regexpState = RegexpState.create(regexp);
+    RegexpState regexpState = RegexpState.create(env, regexp);
     
     if (! regexpState.setSubject(env, subject))
       return null;
@@ -816,7 +816,7 @@ public class CauchoRegexpModule
 					       countV,
 					       isEval);
 
-    RegexpState.free(regexpState);
+    env.freeRegexpState(regexpState);
 
     return result;
   }
@@ -896,7 +896,7 @@ public class CauchoRegexpModule
         patternStr = addDelimiters(env, patternStr, "/", "/");
       
       Regexp regexp = getRegexp(env, patternStr);
-      RegexpState regexpState = RegexpState.create(regexp);
+      RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, subject);
 
@@ -917,7 +917,7 @@ public class CauchoRegexpModule
 						 NullValue.NULL,
 						 false);
 
-      RegexpState.free(regexpState);
+      env.freeRegexpState(regexpState);
 
       return result;
     }
@@ -1117,7 +1117,7 @@ public class CauchoRegexpModule
       StringValue empty = patternString.EMPTY;
     
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = RegexpState.create(regexp);
+      RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, string);
 
@@ -1237,7 +1237,7 @@ public class CauchoRegexpModule
 	}
       }
 
-      RegexpState.free(regexpState);
+      env.freeRegexpState(regexpState);
       
       return result;
     }
@@ -1337,7 +1337,7 @@ public class CauchoRegexpModule
         patternString = addDelimiters(env, patternString, "/", "/");
 
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = RegexpState.create(regexp);
+      RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, string);
 
@@ -1365,7 +1365,7 @@ public class CauchoRegexpModule
         result.put(regexpState.substring(env, head));
       }
       
-      RegexpState.free(regexpState);
+      env.freeRegexpState(regexpState);
 
       return result;
 
@@ -1397,7 +1397,7 @@ public class CauchoRegexpModule
         return NullValue.NULL;
 
       Regexp regexp = getRegexp(env, patternString);
-      RegexpState regexpState = RegexpState.create(regexp);
+      RegexpState regexpState = RegexpState.create(env, regexp);
 
       ArrayValue matchArray = new ArrayValueImpl();
 
@@ -1413,7 +1413,7 @@ public class CauchoRegexpModule
           matchArray.append(entryKey, entryValue);
       }
 
-      RegexpState.free(regexpState);
+      env.freeRegexpState(regexpState);
       
       return matchArray;
     } catch (IllegalRegexpException e) {

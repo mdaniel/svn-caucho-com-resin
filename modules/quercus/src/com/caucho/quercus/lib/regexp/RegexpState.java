@@ -44,9 +44,6 @@ public class RegexpState {
   
   private static final L10N L = new L10N(Regexp.class);
 
-  private static final FreeList<RegexpState> _freeList
-    = new FreeList<RegexpState>(64);
-  
   public static final int FAIL = -1;
   public static final int SUCCESS = 0;
 
@@ -148,9 +145,9 @@ public class RegexpState {
     _isEval = false;
   }
 
-  public static RegexpState create(Regexp regexp)
+  public static RegexpState create(Env env, Regexp regexp)
   {
-    RegexpState state = _freeList.allocate();
+    RegexpState state = env.allocateRegexpState();
 
     if (state == null)
       state = new RegexpState();
@@ -162,16 +159,16 @@ public class RegexpState {
 
   public static RegexpState create(Env env, Regexp regexp, StringValue subject)
   {
-    RegexpState state = create(regexp);
+    RegexpState state = create(env, regexp);
 
     state.setSubject(env, subject);
     
     return state;
   }
 
-  public static void free(RegexpState state)
+  public static void free(Env env, RegexpState state)
   {
-    _freeList.free(state);
+    env.freeRegexpState(state);
   }
   
   public int getSubjectLength()
