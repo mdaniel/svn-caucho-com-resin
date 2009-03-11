@@ -47,7 +47,6 @@ public class CompiledConstStringValue
     _valueType = s.getValueType();
     _hashCode = s.hashCode();
     _key = s.toKey();
-    
   }
   
   public CompiledConstStringValue(char ch,

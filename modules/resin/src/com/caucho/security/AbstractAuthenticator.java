@@ -328,9 +328,6 @@ public class AbstractAuthenticator
 				   DigestCredentials cred,
 				   Object details)
   {
-    if (principal == null)
-      Thread.dumpStack();
-    
     String cnonce = cred.getCnonce();
     String method = cred.getMethod();
     String nc = cred.getNc();
@@ -398,10 +395,8 @@ public class AbstractAuthenticator
     if (user == null || user.isDisabled())
       return null;
 
-    /*
     if (_passwordDigest != null)
-      return _passwordDigest.stringToDigest(password);
-    */
+      return _passwordDigest.stringToDigest(user.getPassword());
 
     String username = principal.getName();
 

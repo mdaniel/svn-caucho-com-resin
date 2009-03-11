@@ -556,8 +556,10 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       ExtCacheEntry entry = cache.getExtCacheEntry(_id);
 
-      if (entry != null && entry == _cacheEntry)
+      if (entry != null && _cacheEntry != null
+	  && _cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {
 	return true;
+      }
       
       TempOutputStream os = new TempOutputStream();
 
@@ -984,8 +986,9 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " timeout");
+
+    _isInvalidating = _manager.isOwner(_id);
     
-    _isInvalidating = true; // XXX: check for owner
     invalidate(Logout.TIMEOUT);
   }
   

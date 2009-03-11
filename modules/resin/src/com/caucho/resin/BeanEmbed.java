@@ -31,12 +31,15 @@ package com.caucho.resin;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.SimpleBean;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
+
+import javax.context.ApplicationScoped;
 
 import java.util.*;
 
@@ -166,22 +169,23 @@ public class BeanEmbed
       else if (_className == null)
 	throw new ConfigException(L.l("BeanEmbed must either have a value or a class"));
       else {
-	WbComponentConfig comp = new WbComponentConfig();
-
-	comp.setScope("singleton");
-
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
 	
 	Class cl = Class.forName(_className, false, loader);
-	comp.setClass(cl);
+
+	SimpleBean bean = new SimpleBean(cl);
+
+	bean.setScopeType(ApplicationScoped.class);
 
 	if (_name != null)
-	  comp.setName(_name);
+	  bean.setName(_name);
 
 	if (_init != null)
-	  comp.setInit(_init);
+	  bean.setInit(_init);
 
-	comp.init();
+	bean.init();
+
+	webBeans.addBean(bean);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

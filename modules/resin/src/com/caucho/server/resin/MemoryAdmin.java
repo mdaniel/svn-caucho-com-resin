@@ -64,13 +64,41 @@ public class MemoryAdmin extends AbstractManagedObject
     _mbeanServer = Jmx.getGlobalMBeanServer();
 
     try {
-      _codeCacheName = new ObjectName("java.lang:type=MemoryPool,name=Code Cache");
-      _edenName = new ObjectName("java.lang:type=MemoryPool,name=Eden Space");
-      _permGenName = new ObjectName("java.lang:type=MemoryPool,name=Perm Gen");
-    
-      _survivorName = new ObjectName("java.lang:type=MemoryPool,name=Survivor Space");
-    
-      _tenuredName = new ObjectName("java.lang:type=MemoryPool,name=Tenured Gen");
+      ObjectName query = new ObjectName("java.lang:type=MemoryPool,*");
+
+      ObjectName codeCacheName
+	= new ObjectName("java.lang:type=MemoryPool,name=Code Cache");
+      ObjectName edenName
+	= new ObjectName("java.lang:type=MemoryPool,name=Eden Space");
+      ObjectName permGenName
+	= new ObjectName("java.lang:type=MemoryPool,name=Perm Gen");
+      ObjectName survivorName
+	= new ObjectName("java.lang:type=MemoryPool,name=Survivor Space");
+      ObjectName tenuredName
+	= new ObjectName("java.lang:type=MemoryPool,name=Tenured Gen");
+      
+      for (ObjectName objName : _mbeanServer.queryNames(query, null)) {
+	String name = objName.getKeyProperty("name");
+
+	if (name.toLowerCase().contains("code"))
+	  codeCacheName = objName;
+	else if (name.toLowerCase().contains("eden"))
+	  edenName = objName;
+	else if (name.toLowerCase().contains("perm"))
+	  permGenName = objName;
+	else if (name.toLowerCase().contains("surv"))
+	  survivorName = objName;
+	else if (name.toLowerCase().contains("tenured"))
+	  tenuredName = objName;
+	else if (name.toLowerCase().contains("old"))
+	  tenuredName = objName;
+      }
+      
+      _codeCacheName = codeCacheName;
+      _edenName = edenName;
+      _permGenName = permGenName;
+      _survivorName = survivorName;
+      _tenuredName = tenuredName;
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

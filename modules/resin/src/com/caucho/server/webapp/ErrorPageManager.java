@@ -391,7 +391,7 @@ public class ErrorPageManager {
 	  disp = _app.getRequestDispatcher(location);
 	else if (_appContainer != null)
 	  disp = _appContainer.getRequestDispatcher(location);
-	  
+
         if (disp != null) {
           ((RequestDispatcherImpl) disp).error(request, response);
           return;

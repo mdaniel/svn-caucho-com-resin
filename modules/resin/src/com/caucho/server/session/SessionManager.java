@@ -195,6 +195,11 @@ public final class SessionManager implements AlarmListener
     _webApp = webApp;
     
     _server = Server.getCurrent();
+
+    if (_server == null) {
+      throw new IllegalStateException(L.l("Server is not active in this context {0}",
+					  Thread.currentThread().getContextClassLoader()));
+    }
     _selfServer = _server.getSelfServer();
     _selfIndex = _selfServer.getIndex();
 
@@ -422,13 +427,13 @@ public final class SessionManager implements AlarmListener
     */
     
     if ("before-headers".equals(mode)) {
-      _sessionSaveMode = (SAVE_BEFORE_HEADERS|
-			  SAVE_AFTER_REQUEST|
-			  SAVE_ON_SHUTDOWN);
+      _sessionSaveMode = (SAVE_BEFORE_HEADERS
+			  | SAVE_AFTER_REQUEST
+			  | SAVE_ON_SHUTDOWN);
     }
     else if ("after-request".equals(mode)) {
-      _sessionSaveMode = (SAVE_AFTER_REQUEST|
-			  SAVE_ON_SHUTDOWN);
+      _sessionSaveMode = (SAVE_AFTER_REQUEST
+			  | SAVE_ON_SHUTDOWN);
     }
     else if ("on-shutdown".equals(mode)) {
       _sessionSaveMode = (SAVE_ON_SHUTDOWN);
@@ -1028,6 +1033,11 @@ public final class SessionManager implements AlarmListener
     Object owner = request.getAttribute("caucho.session-server-id");
 
     return createCookieValue(owner);
+  }
+
+  public boolean isOwner(String id)
+  {
+    return id.startsWith(_selfServer.getServerClusterId());
   }
 
   protected String createCookieValue(Object owner)

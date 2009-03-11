@@ -369,6 +369,14 @@ public class PasswordDigest {
   {
     return Base64.decodeToByteArray(s);
   }
+
+  /**
+   * Convert the string to a digest byte array.
+   */
+  public byte[]stringToDigest(char []s)
+  {
+    return Base64.decodeToByteArray(new String(s));
+  }
   
   /**
    * Convert the digest byte array to a string.

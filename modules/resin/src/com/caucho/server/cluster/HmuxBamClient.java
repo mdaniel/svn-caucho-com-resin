@@ -75,7 +75,7 @@ public class HmuxBamClient extends SimpleActorClient
 
     _broker = _server.getAdminBroker();
 
-    _conn = _broker.getConnection(uid, null);
+    _conn = _broker.getConnection(getActorStream(), uid, null);
   }
 
   //

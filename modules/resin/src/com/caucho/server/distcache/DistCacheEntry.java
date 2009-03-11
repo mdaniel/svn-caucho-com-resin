@@ -209,7 +209,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
   }
 
-  public HashKey getValueHash()
+  public HashKey getValueHashKey()
   {
     return getMnodeValue().getValueHashKey();
   }

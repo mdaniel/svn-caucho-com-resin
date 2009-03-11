@@ -19,54 +19,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
-
-import javax.cache.CacheEntry;
-
-import com.caucho.util.HashKey;
+package com.caucho.jms;
 
 /**
- * Provides additional informationabout an entry in a {@link javax.cache.Cache}.
+ * @deprecated
+ *
+ * @see JmsConnectionFactory
  */
-public interface ExtCacheEntry extends CacheEntry
+public class ConnectionFactoryImpl extends JmsConnectionFactory
 {
-  /**
-   * Returns true for a null entry
-   */
-  public boolean isValueNull();
-  
-  /**
-   * Returns the item's value
-   */
-  public Object getValue();
-
-  /**
-   * Returns the value key
-   */
-  public HashKey getValueHashKey();
-
-  /**
-   * Returns the idle timeout
-   */
-  public long getIdleTimeout();
-
-  /**
-   * Returns the lease timeout
-   */
-  public long getLeaseTimeout();
-
-  /**
-   * Returns the lease owner
-   */
-  public int getLeaseOwner();
-
-  public boolean isValid();
 }

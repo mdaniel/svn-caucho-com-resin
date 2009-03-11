@@ -1064,7 +1064,9 @@ public class WebApp extends ServletContextImpl
     if (_isInheritSession)
       return new SessionManager(this);
 
-    return getSessionManager();
+    SessionManager manager = getSessionManager();
+
+    return manager;
   }
 
   /**
@@ -2392,15 +2394,6 @@ public class WebApp extends ServletContextImpl
     try {
       FilterChain chain;
 
-      /*
-        if (! _isActive) {
-        int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
-        chain = new ErrorFilterChain(code);
-        invocation.setFilterChain(chain);
-        invocation.setDependency(AlwaysModified.create());
-        return;
-        }
-      */
       if (_configException != null) {
         chain = new ExceptionFilterChain(_configException);
         invocation.setDependency(AlwaysModified.create());
@@ -2438,6 +2431,11 @@ public class WebApp extends ServletContextImpl
         }
       }
 
+      invocation.setFilterChain(chain);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      FilterChain chain = new ExceptionFilterChain(e);
       invocation.setFilterChain(chain);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -2786,7 +2784,7 @@ public class WebApp extends ServletContextImpl
 
           _sessionManager = new SessionManager(this);
         } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
+          throw ConfigException.create(e);
         } finally {
           thread.setContextClassLoader(oldLoader);
         }
