@@ -97,28 +97,28 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   /**
    * Starts the instance.
    */
-  @Description("Start")
+  @Description("Starts instance of a controller")
   public void start()
     throws Exception;
 
   /**
    * Stops the instance.
    */
-  @Description("Stop")
+  @Description("Stops instance of a controller")
   public void stop()
     throws Exception;
 
   /**
    * Restarts the instance.
    */
-  @Description("Restart (Stop then Start)")
+  @Description("Restarts instance of a controller (Stop then Start)")
   public void restart()
     throws Exception;
 
   /**
    * Restarts the instance if any changes are detected.
    */
-  @Description("Update")
+  @Description("Restarts the instance if changes are detected")
   public void update()
     throws Exception;
 }
