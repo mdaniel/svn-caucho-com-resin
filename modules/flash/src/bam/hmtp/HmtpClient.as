@@ -141,45 +141,7 @@ package bam.hmtp
     {
       _url = 
         new URL(URLUtil.getFullURL(Application.application.url, _destination));
-
-      trace("url = " + _url);
     }
-
-    /*
-    protected function parseURL(url:String):Boolean
-    {
-      var p:int = url.indexOf("://");
-
-      if (p < 0)
-        throw new ArgumentError("URL '" + url + "' is not well-formed");
-
-      _scheme = url.substring(0, p);
-
-      url = url.substring(p + 3);
-
-      p = url.indexOf("/");
-      if (p >= 0) {
-        _path = url.substring(p);
-        url = url.substring(0, p);
-      }
-      else {
-        _path = "/";
-      }
-
-      p = url.indexOf(':');
-      if (p > 0) {
-        _host = url.substring(0, p);
-        _port = parseInt(url.substring(p + 1));
-      }
-      else {
-        _host = url;
-
-        if ("https" == _scheme)
-          _port = 443;
-        else
-          _port = 80;
-      }
-    }*/
 
     public function get host():String
     {
@@ -208,19 +170,12 @@ package bam.hmtp
       if (_policyPort != -1) {
         var policy:String = "xmlsocket://" + _url.host + ":" + _policyPort;
 
-        trace("1 loading policy from " + policy);
-
         Security.loadPolicyFile(policy);
       }
       else if (_policyUrl != null) {
-        trace("2 loading policy from " + _policyUrl);
         Security.loadPolicyFile(_policyUrl);
       }
       else {
-        trace("3 loading policy from " + _url.protocol + "://" + 
-                                _url.host + ":" + _url.port + 
-                                "/crossdomain.xml");
-
         if (_url.port == 80) {
           Security.loadPolicyFile(_url.protocol + "://" + _url.host + 
                                   "/crossdomain.xml");

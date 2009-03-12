@@ -138,8 +138,8 @@ package bam
     public function presenceUnavailable(to:String, from:String, 
                                         value:Object):void
     {
-      if (! _client.handlePresence(to, from, value))
-        trace("unhandled presence: " + value + 
+      if (! _client.handlePresenceUnavailable(to, from, value))
+        trace("unhandled presenceUnavailable: " + value + 
               "{to: " + to + ", from: " + from + "}");
     }
 

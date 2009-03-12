@@ -218,121 +218,212 @@ package bam
 
     // input methods
 
-    public function handleMessage(to:String, from:String, value:Object):void
+    public function handleMessage(to:String, from:String, value:Object):Boolean
     {
-      for each (var entry:MessageListenerMapEntry in _messageListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:MessageListenerMapEntry in _messageListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handleMessageError(to:String, from:String, 
-                                       value:Object, error:ActorErrorMessage):void
+                                       value:Object, 
+                                       error:ActorErrorMessage):Boolean
     {
+      var handled:Boolean = false;
+
       for each (var entry:MessageErrorListenerMapEntry in 
-                _messageErrorListeners)
-        entry.invoke(to, from, value, error);
+                _messageErrorListeners) {
+        if (entry.invoke(to, from, value, error))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handleQueryGet(id:Number, to:String, from:String, 
-                                   value:Object):void
+                                   value:Object):Boolean
     {
-      for each (var entry:QueryListenerMapEntry in _queryGetListeners)
-        entry.invoke(id, to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:QueryListenerMapEntry in _queryGetListeners) {
+        if (entry.invoke(id, to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handleQuerySet(id:Number, to:String, from:String, 
-                                   value:Object):void
+                                   value:Object):Boolean
     {
-      for each (var entry:QueryListenerMapEntry in _querySetListeners)
-        entry.invoke(id, to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:QueryListenerMapEntry in _querySetListeners) {
+        if (entry.invoke(id, to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handleQueryResult(id:Number, to:String, from:String, 
-                                      value:Object):void
+                                      value:Object):Boolean
     {
+      var handled:Boolean = false;
       var bundle:QueryCallbackBundle = _outstandingQueries[id];
-
-      trace("bundle = " + bundle);
 
       if (bundle != null) {
         bundle.onResult(id, to, from, value);
+        handled = true;
 
         delete(_outstandingQueries[id]);
       }
-      else {
-        for each (var entry:QueryListenerMapEntry in _queryResultListeners)
-          entry.invoke(id, to, from, value);
+
+      for each (var entry:QueryListenerMapEntry in _queryResultListeners) {
+        if (entry.invoke(id, to, from, value))
+          handled = true;
       }
+
+      return handled;
     }
 
     public function handleQueryError(id:Number, to:String, from:String, 
-                                     value:Object, error:ActorErrorMessage):void
+                                     value:Object, 
+                                     error:ActorErrorMessage):Boolean
     {
+      var handled:Boolean = false;
       var bundle:QueryCallbackBundle = _outstandingQueries[id];
 
       if (bundle != null) {
         bundle.onError(id, to, from, value, error);
+        handled = true;
 
         delete(_outstandingQueries[id]);
       }
-      else {
-        for each (var entry:QueryErrorListenerMapEntry in _queryErrorListeners)
-          entry.invoke(id, to, from, value, error);
+
+      for each (var entry:QueryErrorListenerMapEntry in 
+                _queryErrorListeners) {
+        if (entry.invoke(id, to, from, value, error))
+          handled = true;
       }
+
+      return handled;
     }
 
-    public function handlePresence(to:String, from:String, value:Object):void
+    public function handlePresence(to:String, from:String, value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in _presenceListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceUnavailable(to:String, from:String, 
-                                              value:Object):void
+                                              value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in 
+                _presenceUnavailableListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceProbe(to:String, from:String, 
-                                        value:Object):void
+                                        value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in 
+                _presenceProbeListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceSubscribe(to:String, from:String, 
-                                            value:Object):void
+                                            value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in 
+                _presenceSubscribeListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceSubscribed(to:String, from:String,  
-                                             value:Object):void
+                                             value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in 
+                _presenceSubscribedListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceUnsubscribe(to:String, from:String, 
-                                              value:Object):void
+                                              value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in 
+                _presenceUnsubscribeListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceUnsubscribed(to:String, from:String, 
-                                               value:Object):void
+                                               value:Object):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceListenerMapEntry in 
+                _presenceUnsubscribedListeners) {
+        if (entry.invoke(to, from, value))
+          handled = true;
+      }
+
+      return handled;
     }
 
     public function handlePresenceError(to:String, from:String, 
-                                        value:Object, error:ActorErrorMessage):void
+                                        value:Object, 
+                                        error:ActorErrorMessage):Boolean
     {
-      for each (var entry:PresenceListenerMapEntry in _presenceListeners)
-        entry.invoke(to, from, value);
+      var handled:Boolean = false;
+
+      for each (var entry:PresenceErrorListenerMapEntry in 
+                _presenceErrorListeners) {
+        if (entry.invoke(to, from, value, error))
+          handled = true;
+      }
+
+      return handled;
     }
 
     // listener registration
@@ -496,6 +587,329 @@ package bam
       _presenceErrorListeners.push(entry);
     }
 
+    // unregistration functions
+
+    public function removeMessageListener(cl:Class, listener:Function):Boolean
+    {
+      if (_messageListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _messageListeners = _messageListeners.filter(
+        function(entry:MessageListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removeMessageErrorListener(cl:Class, 
+                                               listener:Function):Boolean
+    {
+      if (_messageErrorListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _messageErrorListeners = _messageErrorListeners.filter(
+        function(entry:MessageErrorListenerMapEntry, 
+                 index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removeQueryGetListener(cl:Class, listener:Function):Boolean
+    {
+      if (_queryGetListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _queryGetListeners = _queryGetListeners.filter(
+        function(entry:QueryListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removeQuerySetListener(cl:Class, listener:Function):Boolean
+    {
+      if (_querySetListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _querySetListeners = _querySetListeners.filter(
+        function(entry:QueryListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removeQueryResultListener(cl:Class, 
+                                              listener:Function):Boolean
+    {
+      if (_queryResultListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _queryResultListeners = _queryResultListeners.filter(
+        function(entry:QueryListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removeQueryErrorListener(cl:Class, 
+                                             listener:Function):Boolean
+    {
+      if (_queryErrorListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _queryErrorListeners = _queryErrorListeners.filter(
+        function(entry:QueryErrorListenerMapEntry, 
+                 index:int, array:Array):Boolean 
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceListener(cl:Class, listener:Function):Boolean
+    {
+      if (_presenceListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceListeners = _presenceListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceUnavailableListener(cl:Class, 
+                                                      listener:Function):Boolean
+    {
+      if (_presenceUnavailableListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceUnavailableListeners = _presenceUnavailableListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceProbeListener(cl:Class, 
+                                                listener:Function):Boolean
+    {
+      if (_presenceProbeListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceProbeListeners = _presenceProbeListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceSubscribeListener(cl:Class, 
+                                                    listener:Function):Boolean
+    {
+      if (_presenceSubscribeListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceSubscribeListeners = _presenceSubscribeListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceSubscribedListener(cl:Class, 
+                                                     listener:Function):Boolean
+    {
+      if (_presenceSubscribedListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceSubscribedListeners = _presenceSubscribedListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceUnsubscribeListener(cl:Class, 
+                                                      listener:Function):Boolean
+    {
+      if (_presenceUnsubscribeListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceUnsubscribeListeners = _presenceUnsubscribeListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceUnsubscribedListener(cl:Class, 
+                                                    listener:Function):Boolean
+    {
+      if (_presenceUnsubscribedListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceUnsubscribedListeners = _presenceUnsubscribedListeners.filter(
+        function(entry:PresenceListenerMapEntry, index:int, array:Array):Boolean
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
+    public function removePresenceErrorListener(cl:Class, 
+                                                listener:Function):Boolean
+    {
+      if (_presenceErrorListeners == null)
+        return false;
+
+      var found:Boolean = false;
+
+      _presenceErrorListeners = _presenceErrorListeners.filter(
+        function(entry:PresenceErrorListenerMapEntry, 
+                 index:int, array:Array):Boolean 
+        {
+          if (entry.cl == cl && entry.listener == listener) {
+            found = true;
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+      return found;
+    }
+
     public function isClosed():Boolean
     {
       return _toLinkStream == null;
@@ -544,10 +958,24 @@ class MessageListenerMapEntry {
     _listener = listener;
   }
 
-  public function invoke(to:String, from:String, value:Object):void
+  public function invoke(to:String, from:String, value:Object):Boolean
   {
-    if (value is _class)
+    if (value is _class) {
       _listener(to, from, value);
+      return true;
+    }
+
+    return false;
+  }
+
+  public function get cl():Class
+  {
+    return _class;
+  }
+
+  public function get listener():Function
+  {
+    return _listener;
   }
 }
 
@@ -562,10 +990,24 @@ class QueryListenerMapEntry {
   }
 
   public function invoke(id:Number, to:String, from:String, 
-                         value:Object):void
+                         value:Object):Boolean
   {
-    if (value is _class)
+    if (value is _class) {
       _listener(id, to, from, value);
+      return true;
+    }
+
+    return false;
+  }
+
+  public function get cl():Class
+  {
+    return _class;
+  }
+
+  public function get listener():Function
+  {
+    return _listener;
   }
 }
 
@@ -581,10 +1023,24 @@ class MessageErrorListenerMapEntry {
   }
 
   public function invoke(to:String, from:String, 
-                         value:Object, error:bam.ActorErrorMessage):void
+                         value:Object, error:bam.ActorErrorMessage):Boolean
   {
-    if (value is _class)
+    if (value is _class) {
       _listener(to, from, value, error);
+      return true;
+    }
+
+    return false;
+  }
+
+  public function get cl():Class
+  {
+    return _class;
+  }
+
+  public function get listener():Function
+  {
+    return _listener;
   }
 }
 
@@ -600,10 +1056,24 @@ class QueryErrorListenerMapEntry {
   }
 
   public function invoke(id:Number, to:String, from:String, 
-                         value:Object, error:bam.ActorErrorMessage):void
+                         value:Object, error:bam.ActorErrorMessage):Boolean
   {
-    if (value is _class)
+    if (value is _class) {
       _listener(id, to, from, value, error);
+      return true;
+    }
+
+    return false;
+  }
+
+  public function get cl():Class
+  {
+    return _class;
+  }
+
+  public function get listener():Function
+  {
+    return _listener;
   }
 }
 
@@ -617,10 +1087,24 @@ class PresenceListenerMapEntry {
     _listener = listener;
   }
 
-  public function invoke(to:String, from:String, value:Object):void
+  public function invoke(to:String, from:String, value:Object):Boolean
   {
-    if (value is _class)
+    if (value is _class) {
       _listener(to, from, value);
+      return true;
+    }
+
+    return false;
+  }
+
+  public function get cl():Class
+  {
+    return _class;
+  }
+
+  public function get listener():Function
+  {
+    return _listener;
   }
 }
 
@@ -636,10 +1120,24 @@ class PresenceErrorListenerMapEntry {
   }
 
   public function invoke(to:String, from:String, 
-                         value:Object, error:bam.ActorErrorMessage):void
+                         value:Object, error:bam.ActorErrorMessage):Boolean
   {
-    if (value is _class)
+    if (value is _class) {
       _listener(to, from, value, error);
+      return true;
+    }
+
+    return false;
+  }
+
+  public function get cl():Class
+  {
+    return _class;
+  }
+
+  public function get listener():Function
+  {
+    return _listener;
   }
 }
 

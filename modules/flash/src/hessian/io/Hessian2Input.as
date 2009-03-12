@@ -2229,8 +2229,6 @@ package hessian.io
       
       _di.readBytes(buffer, offset, readAmount);
 
-      trace("buffer = " + ByteUtils.printByteArray(buffer));
-
       // calculate how many bytes were actually read in
       len = buffer.length - len;
 

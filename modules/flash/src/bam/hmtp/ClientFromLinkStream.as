@@ -380,8 +380,6 @@ package bam.hmtp
         _type = _input.readInt();
         _readType = true;
 
-        trace("type: " + _type);
-
         return true;
       }
       else {
@@ -397,8 +395,6 @@ package bam.hmtp
       if (_input.hasMoreObjects()) {
         _to = _input.readString();
         _readTo = true;
-
-        trace("to: " + _to);
 
         return true;
       }
@@ -416,8 +412,6 @@ package bam.hmtp
         _from = _input.readString();
         _readFrom = true;
 
-        trace("from: " + _from);
-
         return true;
       }
       else {
@@ -433,8 +427,6 @@ package bam.hmtp
       if (_input.hasMoreObjects()) {
         _id = _input.readLong();
         _readId = true;
-
-        trace("id: " + _id);
 
         return true;
       }
@@ -452,8 +444,6 @@ package bam.hmtp
         _value = _input.readObject();
         _readValue = true;
 
-        trace("value: " + _value);
-
         return true;
       }
       else {
@@ -469,8 +459,6 @@ package bam.hmtp
       if (_input.hasMoreObjects()) {
         _error = _input.readObject() as ActorErrorMessage;
         _readError = true;
-
-        trace("error: " + _error);
 
         return true;
       }
