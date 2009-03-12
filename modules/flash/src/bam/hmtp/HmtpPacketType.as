@@ -44,57 +44,28 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * @author Emil Ong
+ * 
  */
 
-package hessian.util
+package bam.hmtp
 {
-  import flash.utils.ByteArray;
+  public class HmtpPacketType
+  {
+    public static const MESSAGE:int = 0;
+    public static const MESSAGE_ERROR:int = 1;
 
-  public class ByteUtils {
-    public static function castToByte(i:int):int
-    {
-      var bits:uint = i & 0xFF;
+    public static const QUERY_GET:int = 2;
+    public static const QUERY_SET:int = 3;
+    public static const QUERY_RESULT:int = 4;
+    public static const QUERY_ERROR:int = 5;
 
-      if (bits >= 0x80)
-        bits = -(0x100 - bits);
-
-      return bits;
-    }
-
-    public static function castToShort(i:int):int
-    {
-      var bits:uint = i & 0xFFFF;
-
-      if (bits >= 0x8000)
-        bits = -(0x10000 - bits);
-
-      return bits;
-    }
-
-    public static function printByteArray(buf:ByteArray):String
-    {
-      var s:String = "";
-      var position:int = buf.position;
-
-      buf.position = 0;
-
-      while (buf.bytesAvailable > 0) {
-        var ch:uint = uint(buf.readByte()) & 0xff;
-        
-        if (isprint(ch))
-          s += String.fromCharCode(ch);
-        else
-          s += "\\x" + ch.toString(16);
-      }
-
-      buf.position = position;
-
-      return s;
-    }
-
-    public static function isprint(ch:int):Boolean
-    {
-      return (ch >= 0x20) && (ch < 0x7F);
-    }
+    public static const PRESENCE:int = 6;
+    public static const PRESENCE_UNAVAILABLE:int = 7;
+    public static const PRESENCE_PROBE:int = 8;
+    public static const PRESENCE_SUBSCRIBE:int = 9;
+    public static const PRESENCE_SUBSCRIBED:int = 10;
+    public static const PRESENCE_UNSUBSCRIBE:int = 11;
+    public static const PRESENCE_UNSUBSCRIBED:int = 12;
+    public static const PRESENCE_ERROR:int = 13;
   }
 }

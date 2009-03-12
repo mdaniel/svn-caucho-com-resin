@@ -75,7 +75,7 @@ package hessian.io
 
     private var _buffer:ByteArray = new ByteArray();
 
-    private var _isStreaming:Boolean;
+    private var _isPacket:Boolean = false;
 
     /**
      * Creates a new HessianOutput.
@@ -1108,6 +1108,36 @@ package hessian.io
         return false;
     }
 
+    public function startPacket():void
+    {
+      resetReferences();
+
+      flushBuffer();
+
+      _isPacket = true;
+      _buffer.position = 2;
+    }
+
+    public function endPacket():void
+    {
+      var len:int = _buffer.position - 2;
+
+      _buffer[0] = (0x80 + ((len >> 7) & 0x7f));
+      _buffer[1] = (len & 0x7f);
+
+      _buffer.writeByte(0);
+
+      _isPacket = false;
+
+      if (len < 0x80)
+        // skip the 0 byte in the 16's column
+        _out.writeBytes(_buffer, 1);
+      else
+        _out.writeBytes(_buffer, 0);
+
+      _buffer.length = 0;
+    }
+
     /**
      * Prints a string to the stream, encoded as UTF-8 with preceeding length.
      *
@@ -1182,8 +1212,19 @@ package hessian.io
 
     public function flushBuffer():void
     {
-      _out.writeBytes(_buffer);
-      _buffer.length = 0;
+      if (! _isPacket) {
+        _out.writeBytes(_buffer);
+        _buffer.length = 0;
+      }
+      else if (_isPacket && _buffer.position > 2) {
+        var len:int = _buffer.position - 2;
+
+        _buffer[0] = (0x80 + ((len >> 7) & 0x7f));
+        _buffer[1] = (len & 0x7f);
+
+        _out.writeBytes(_buffer);
+        _buffer.length = 2;
+      }
     }
 
     public function close():void

@@ -44,57 +44,24 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * @author Emil Ong
+ * 
  */
 
-package hessian.util
+package bam.hmtp
 {
-  import flash.utils.ByteArray;
+  [RemoteClass(alias="com.caucho.bam.hmtp.AuthResult")]
+  public class AuthResult {
+    public var _jid:String;
 
-  public class ByteUtils {
-    public static function castToByte(i:int):int
+    public function AuthResult(jid:String = ""):void
     {
-      var bits:uint = i & 0xFF;
-
-      if (bits >= 0x80)
-        bits = -(0x100 - bits);
-
-      return bits;
+      _jid = jid;
     }
 
-    public static function castToShort(i:int):int
+    public function get jid():String
     {
-      var bits:uint = i & 0xFFFF;
-
-      if (bits >= 0x8000)
-        bits = -(0x10000 - bits);
-
-      return bits;
-    }
-
-    public static function printByteArray(buf:ByteArray):String
-    {
-      var s:String = "";
-      var position:int = buf.position;
-
-      buf.position = 0;
-
-      while (buf.bytesAvailable > 0) {
-        var ch:uint = uint(buf.readByte()) & 0xff;
-        
-        if (isprint(ch))
-          s += String.fromCharCode(ch);
-        else
-          s += "\\x" + ch.toString(16);
-      }
-
-      buf.position = position;
-
-      return s;
-    }
-
-    public static function isprint(ch:int):Boolean
-    {
-      return (ch >= 0x20) && (ch < 0x7F);
+      return _jid;
     }
   }
 }
+

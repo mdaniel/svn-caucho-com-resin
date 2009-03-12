@@ -46,55 +46,42 @@
  * @author Emil Ong
  */
 
-package hessian.util
+package bam
 {
-  import flash.utils.ByteArray;
+  public interface ActorStream {
+    function get jid():String;
 
-  public class ByteUtils {
-    public static function castToByte(i:int):int
-    {
-      var bits:uint = i & 0xFF;
+    function message(to:String, from:String, value:Object):void;
 
-      if (bits >= 0x80)
-        bits = -(0x100 - bits);
+    function messageError(to:String, from:String, 
+                          value:Object, error:ActorErrorMessage):void;
 
-      return bits;
-    }
+    function queryGet(id:Number, to:String, from:String, value:Object):void;
 
-    public static function castToShort(i:int):int
-    {
-      var bits:uint = i & 0xFFFF;
+    function querySet(id:Number, to:String, from:String, value:Object):void;
 
-      if (bits >= 0x8000)
-        bits = -(0x10000 - bits);
+    function queryResult(id:Number, to:String, from:String, value:Object):void;
 
-      return bits;
-    }
+    function queryError(id:Number, to:String, from:String, 
+                        value:Object, error:ActorErrorMessage):void;
 
-    public static function printByteArray(buf:ByteArray):String
-    {
-      var s:String = "";
-      var position:int = buf.position;
+    function presence(to:String, from:String, value:Object):void;
 
-      buf.position = 0;
+    function presenceUnavailable(to:String, from:String, value:Object):void;
 
-      while (buf.bytesAvailable > 0) {
-        var ch:uint = uint(buf.readByte()) & 0xff;
-        
-        if (isprint(ch))
-          s += String.fromCharCode(ch);
-        else
-          s += "\\x" + ch.toString(16);
-      }
+    function presenceProbe(to:String, from:String, value:Object):void;
 
-      buf.position = position;
+    function presenceSubscribe(to:String, from:String, value:Object):void;
 
-      return s;
-    }
+    function presenceSubscribed(to:String, from:String, value:Object):void;
 
-    public static function isprint(ch:int):Boolean
-    {
-      return (ch >= 0x20) && (ch < 0x7F);
-    }
+    function presenceUnsubscribe(to:String, from:String, value:Object):void;
+
+    function presenceUnsubscribed(to:String, from:String, value:Object):void;
+
+    function presenceError(to:String, from:String, 
+                           value:Object, error:ActorErrorMessage):void;
+
+    function close():void;
   }
 }

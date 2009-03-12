@@ -48,6 +48,7 @@
 
 package hessian.io
 {
+	import flash.errors.EOFError;
 	import flash.errors.IllegalOperationError;
 	import flash.errors.IOError;
   import flash.net.getClassByAlias;
@@ -2197,7 +2198,7 @@ package hessian.io
     public final function read():int
     {
       if (_length <= _offset && ! readBuffer())
-        return -1;
+        throw new EOFError();
 
       return _buffer[_offset++] & 0xff;
     }
@@ -2227,6 +2228,8 @@ package hessian.io
       var readAmount:int = Math.min(_di.bytesAvailable, SIZE - offset);
       
       _di.readBytes(buffer, offset, readAmount);
+
+      trace("buffer = " + ByteUtils.printByteArray(buffer));
 
       // calculate how many bytes were actually read in
       len = buffer.length - len;

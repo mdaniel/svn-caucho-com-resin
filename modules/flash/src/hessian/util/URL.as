@@ -115,5 +115,11 @@ package hessian.util
     {
       return _path;
     }
+
+    public function toString():String
+    {
+      return "[URL protocol='" + protocol + "', host='" + host + 
+               "', port='" + port + "', path='" + path + "']";
+    }
   }
 }

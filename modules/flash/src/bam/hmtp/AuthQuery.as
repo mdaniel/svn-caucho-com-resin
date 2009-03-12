@@ -44,57 +44,40 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * @author Emil Ong
+ * 
  */
 
-package hessian.util
+package bam.hmtp
 {
-  import flash.utils.ByteArray;
+  [RemoteClass(alias="com.caucho.bam.hmtp.AuthQuery")]
+  public class AuthQuery {
+    public var _uid:String;
+    public var _credentials:Object;
+    public var _resource:String;
 
-  public class ByteUtils {
-    public static function castToByte(i:int):int
+    public function AuthQuery(uid:String, 
+                              credentials:Object, 
+                              resource:String = null):void
     {
-      var bits:uint = i & 0xFF;
-
-      if (bits >= 0x80)
-        bits = -(0x100 - bits);
-
-      return bits;
+      _uid = uid;
+      _credentials = credentials;
+      _resource = resource;
     }
 
-    public static function castToShort(i:int):int
+    public function get uid():String
     {
-      var bits:uint = i & 0xFFFF;
-
-      if (bits >= 0x8000)
-        bits = -(0x10000 - bits);
-
-      return bits;
+      return _uid;
     }
 
-    public static function printByteArray(buf:ByteArray):String
+    public function get credentials():Object
     {
-      var s:String = "";
-      var position:int = buf.position;
-
-      buf.position = 0;
-
-      while (buf.bytesAvailable > 0) {
-        var ch:uint = uint(buf.readByte()) & 0xff;
-        
-        if (isprint(ch))
-          s += String.fromCharCode(ch);
-        else
-          s += "\\x" + ch.toString(16);
-      }
-
-      buf.position = position;
-
-      return s;
+      return _credentials;
     }
 
-    public static function isprint(ch:int):Boolean
+    public function get resource():String
     {
-      return (ch >= 0x20) && (ch < 0x7F);
+      return _resource;
     }
   }
 }
+

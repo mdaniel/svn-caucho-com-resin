@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -49,28 +49,43 @@
 
 package hessian.io
 {
+  import flash.errors.EOFError;
   import flash.utils.ByteArray;
 	import flash.utils.IDataInput;
+	import flash.utils.getQualifiedClassName;
 
   /**
    * An input for streaming Hessian data.  Data that is sent in Hessian
    * streaming packets is buffered until a whole object is received.  The
    * object is then decoded and stored within this object.  Such received
-   * objects can be retrieved by calling #nextObject().
+   * objects can be retrieved by calling #readObject().
    *
    * @see hessian.io.Hessian2Input
    */
   public class Hessian2StreamingInput
   {
-    private var _tag:int = -1;
     private var _length:int = 0;
+    private var _chunkLength:int = 0;
     private var _offset:int = 0;
-    private var _buffer:ByteArray = new ByteArray();
+    private var _buffer:ByteArray;
     private var _input:Hessian2Input = new Hessian2Input();
-    private var _queue:Array = new Array();
+    private var _queue:Array;
+    private var _di:IDataInput;
 
-    public function Hessian2StreamingInput()
+    public function Hessian2StreamingInput(di:IDataInput = null)
     {
+      if (di != null)
+        init(di);
+    }
+
+    public function init(di:IDataInput):void
+    {
+      _di = di;
+      _queue = [];
+      _buffer = new ByteArray();
+      _length = 0;
+      _chunkLength = 0;
+      _offset = 0;
     }
 
     /**
@@ -78,69 +93,126 @@ package hessian.io
       */
     public function hasMoreObjects():Boolean
     {
+      read();
+
       return _queue.length > 0;
+    }
+
+    public function readLong():Number
+    {
+      var obj:Object = readObject();
+
+      if (! (obj is Number)) {
+        throw new TypeError("expected long, but received " + obj + 
+                            "(" + getQualifiedClassName(obj) + ")");
+      }
+
+      return obj as Number;
+    }
+
+    public function readInt():int
+    {
+      var obj:Object = readObject();
+
+      if (! (obj is int)) {
+        throw new TypeError("expected int, but received " + obj + 
+                            "(" + getQualifiedClassName(obj) + ")");
+      }
+
+      return obj as int;
+    }
+
+    public function readString():String
+    {
+      var obj:Object = readObject();
+
+      if (! (obj is String) && (obj != null)) {
+        throw new TypeError("expected String, but received " + obj + 
+                            "(" + getQualifiedClassName(obj) + ")");
+      }
+
+      return obj as String;
     }
 
     /**
       * @return The next object available from this input.
       */
-    public function nextObject():Object
+    public function readObject():Object
     {
       return _queue.shift();
     }
 
     /**
-      * Submits data to be read as stream data.  If the data contains any
-      * headers, they must be complete.  
-      * 
-      * @param di The source from which to add the streaming data.
-      *
+      * Submits data to be read as stream data.
       */
-    public function read(di:IDataInput):void
+    private function read():void
     {
-      while (di.bytesAvailable > 0) {
-        while (_length == 0) {
-          // We expect at least three bytes at the beginning of a packet.
-          // If we don't get them, we don't read anything. This is important
-          // to note if you're throwing away the bytes everytime you call
-          // this method.
-          if (di.bytesAvailable < 3)
-            return;
+      while (_di.bytesAvailable > 0) {
+        if (! readChunkLength())
+          return;
 
-          _tag = di.readByte();
-          if (_tag != 'p'.charCodeAt() && _tag != 'P'.charCodeAt()) {
-            throw new HessianProtocolError("expected streaming packet at 0x"
-                                           + (_tag & 0xff).toString(16)
-                                           + "(" + String.fromCharCode(_tag) 
-                                           + ")");
-          }
+        if (_chunkLength == 0) {
+          // this packet stream has ended
+          // assume no 0 length chunks in the middle of an object
 
-          var d1:int = di.readUnsignedByte();
-          var d2:int = di.readUnsignedByte();
-
-          _length = (d1 << 8) + d2;
-        }
-
-        var length:int = _length;
-        if (di.bytesAvailable < _length)
-          length = di.bytesAvailable;
-
-        di.readBytes(_buffer, _offset, length);
-
-        _offset = _buffer.length;
-
-        _length -= length;
-
-        if (_length == 0 && _tag == 'P'.charCodeAt()) {
           _buffer.position = 0;
           _input.init(_buffer);
           _input.resetReferences();
-          _queue.push(_input.readObject());
+
+          if (_buffer.bytesAvailable > 0) {
+            while (true) {
+              try {
+                _queue.push(_input.readObject());
+              }
+              catch (e:EOFError) {
+                break;
+              }
+            }
+          }
 
           _offset = 0;
           _buffer.length = 0;
+          _length = 0;
+        }
+        else {
+          var length:int = _length;
+          if (_di.bytesAvailable < _length)
+            length = _di.bytesAvailable;
+
+          _di.readBytes(_buffer, _offset, length);
+
+          _offset = _buffer.length;
+
+          _length -= length;
         }
       }
+    }
+
+    /**
+      * Reads the next chunk length, if necessary. If the chunk length
+      * could not be read yet, returns false.  If a chunk length was read
+      * successfully or
+      */
+    private function readChunkLength():Boolean
+    {
+      if (_length > 0) 
+        return true;
+
+      _chunkLength = 0;
+
+      while (_di.bytesAvailable > 0) {
+        var code:int = _di.readUnsignedByte();
+
+        _chunkLength = 0x80 * _chunkLength + (code & 0x7f);
+
+        if ((code & 0x80) == 0) {
+          _length = _chunkLength;
+
+          return true;
+        }
+      }
+
+      return false;
     }
   }
 }

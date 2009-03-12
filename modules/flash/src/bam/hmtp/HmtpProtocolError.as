@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2009 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -47,55 +47,20 @@
  * 
  */
 
-package hessian.mxml
+package bam.hmtp
 {
-  import flash.events.EventDispatcher;
-  import flash.utils.getDefinitionByName;
-
-  import hessian.client.HessianStreamingService;
-  
-  import mx.core.IMXMLObject;
-  import mx.rpc.mxml.IMXMLSupport;
-
-  [Bindable]
-  /**
-   * The HessianStreamingService class provides access to Hessian-based web 
-   * services on remote servers.  This class implements the MXML tag.
-   *
-   * @see hessian.client.HessianStreamingService
-   */
-  public dynamic class HessianStreamingService 
-    extends hessian.client.HessianStreamingService
-    implements IMXMLObject,IMXMLSupport
+  public class HmtpProtocolError extends Error
   {
-    private var _concurrency:String;
-    private var _showBusyCursor:Boolean;
+    private var _cause:Error;
 
-    /** @private */
-    public function initialized(document:Object, id:String):void 
+    public function HmtpProtocolError(cause:Error):void
     {
+      _cause = cause;
     }
 
-    /** @private */
-    public function get concurrency():String
+    public function get cause():Error
     {
-      return _concurrency;
-    }
-
-    public function set concurrency(value:String):void
-    {
-      _concurrency = value;
-    }
-
-    /** @private */
-    public function get showBusyCursor():Boolean
-    {
-      return _showBusyCursor;
-    }
-
-    public function set showBusyCursor(value:Boolean):void
-    {
-      _showBusyCursor = value;
+      return _cause;
     }
   }
 }
