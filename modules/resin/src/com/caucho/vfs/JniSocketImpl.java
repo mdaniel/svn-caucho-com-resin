@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +44,10 @@ public class JniSocketImpl extends QSocket {
   
   private boolean _isSecure;
 
-  private boolean _isClosed;
+  private Object _readLock = new Object();
+  private Object _writeLock = new Object();
+  
+  private final AtomicBoolean _isClosed = new AtomicBoolean();
 
   JniSocketImpl()
   {
@@ -65,8 +69,8 @@ public class JniSocketImpl extends QSocket {
     _isSecure = false;
 
     nativeInit(_fd); // initialize fields from the _fd
-
-    _isClosed = false;
+    
+    _isClosed.set(false);
   }
 
   final long getFd()
@@ -266,7 +270,7 @@ public class JniSocketImpl extends QSocket {
    */
   public boolean readNonBlock(int ms)
   {
-    synchronized (this) {
+    synchronized (_readLock) {
       return nativeReadNonBlock(_fd, ms);
     }
   }
@@ -277,7 +281,7 @@ public class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
-    synchronized (this) {
+    synchronized (_readLock) {
       return readNative(_fd, buffer, offset, length, timeout);
     }
   }
@@ -288,7 +292,7 @@ public class JniSocketImpl extends QSocket {
   public int write(byte []buffer, int offset, int length)
     throws IOException
   {
-    synchronized (this) {
+    synchronized (_writeLock) {
       return writeNative(_fd, buffer, offset, length);
     }
   }
@@ -299,7 +303,7 @@ public class JniSocketImpl extends QSocket {
   public int flush()
     throws IOException
   {
-    synchronized (this) {
+    synchronized (_writeLock) {
       return flushNative(_fd);
     }
   }
@@ -334,7 +338,18 @@ public class JniSocketImpl extends QSocket {
    */
   public boolean isClosed()
   {
-    return _isClosed;
+    return _isClosed.get();
+  }
+
+  /**
+   * Closes the socket.
+   *
+   * XXX: potential sync issues
+   */
+  @Override
+  public void forceShutdown()
+  {
+    nativeCloseFd(_fd);
   }
 
   /**
@@ -345,13 +360,12 @@ public class JniSocketImpl extends QSocket {
   public void close()
     throws IOException
   {
-    if (_isClosed)
+    if (_isClosed.getAndSet(true))
       return;
-    _isClosed = true;
     
     if (_stream != null)
       _stream.close();
-
+    
     synchronized (this) {
       nativeClose(_fd);
     }
@@ -412,6 +426,7 @@ public class JniSocketImpl extends QSocket {
 
   native int flushNative(long fd) throws IOException;
 
+  native void nativeCloseFd(long fd);
   native void nativeClose(long fd);
 
   native long nativeAllocate();

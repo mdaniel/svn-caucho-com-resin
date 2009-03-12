@@ -312,6 +312,22 @@ Java_com_caucho_vfs_JniSocketImpl_flushNative(JNIEnv *env,
   /* return cse_flush_request(res); */
 }
 
+/**
+ * Force an interrupt so listening threads will close
+ */
+JNIEXPORT void JNICALL
+Java_com_caucho_vfs_JniSocketImpl_nativeCloseFd(JNIEnv *env,
+						jobject obj,
+						jlong conn_fd)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  int fd = conn ? conn->fd : -1;
+
+  if (fd >= 0) {
+    closesocket(fd);
+  }
+}
+
 JNIEXPORT void JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeClose(JNIEnv *env,
 					      jobject obj,

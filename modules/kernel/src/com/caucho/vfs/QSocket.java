@@ -179,9 +179,12 @@ abstract public class QSocket {
    * returns true if it's closed.
    */
   abstract public boolean isClosed();
+
+  public void forceShutdown()
+  {
+  }
   
   abstract public void close()
     throws IOException;
-
 }
 

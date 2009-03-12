@@ -1008,6 +1008,8 @@ public class TcpConnection extends Connection
    */
   public final void destroy()
   {
+    _socket.forceShutdown();
+    
     closeImpl();
     
     ConnectionState state = _state;

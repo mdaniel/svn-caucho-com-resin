@@ -205,7 +205,10 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
 #endif
   
     result = recv(fd, buf, len, 0);
-  } while (result < 0 && (errno == EINTR || errno == EAGAIN) && retry-- >= 0);
+  } while (result < 0
+	   && (errno == EINTR || errno == EAGAIN)
+	   && conn->fd == fd
+	   && retry-- >= 0);
     
   if (result > 0)
     return result;

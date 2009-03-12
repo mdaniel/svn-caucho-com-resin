@@ -528,7 +528,7 @@ Java_com_caucho_vfs_JniFileStream_nativeFlushToDisk(JNIEnv *env,
 #ifndef WIN32
     return fsync(fd);
 #else
-	  return -1;
+    return -1;
 #endif
   }
   else
