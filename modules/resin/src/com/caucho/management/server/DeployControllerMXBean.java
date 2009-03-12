@@ -118,7 +118,11 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   /**
    * Restarts the instance if any changes are detected.
    */
-  @Description("Restarts the instance if changes are detected")
+  @Description("Restarts instance if changes are detected")
   public void update()
+    throws Exception;
+
+  @Description("Destroys instance")
+  public boolean destroy()
     throws Exception;
 }

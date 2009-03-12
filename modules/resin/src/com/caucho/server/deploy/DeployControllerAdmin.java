@@ -151,6 +151,12 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     getController().update();
   }
 
+  public boolean destroy()
+    throws Exception
+  {
+    return getController().destroy();
+  }
+
   /**
    * Returns the root directory
    */
