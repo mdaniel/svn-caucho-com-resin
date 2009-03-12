@@ -60,7 +60,9 @@ public abstract class JdbcConnectionResource
   protected ConnectionEntry _conn;
 
   // cached statement
-  private Statement _stmt;
+  private Statement _savedStmt;
+  
+  private Statement _freeStmt;
 
   private DatabaseMetaData _dmd;
 
@@ -318,7 +320,7 @@ public abstract class JdbcConnectionResource
       ResultSet rs = _dmd.getCatalogs();
 
       if (rs != null)
-        return createResult(_env, _stmt, rs);
+        return createResult(_env, _savedStmt, rs);
       else
         return null;
     } catch (SQLException e) {
@@ -525,8 +527,8 @@ public abstract class JdbcConnectionResource
     if (stmt == null)
       return;
 
-    if (_stmt == null && false)
-      _stmt = stmt;
+    if (_freeStmt == null && false)
+      _freeStmt = stmt;
     else
       JdbcUtil.close(stmt);
   }
@@ -563,11 +565,17 @@ public abstract class JdbcConnectionResource
     }
 
     try {
-      Statement stmt = _stmt;
-      _stmt = null;
+      Statement savedStmt = _savedStmt;
+      _savedStmt = null;
+      
+      Statement freeStmt = _freeStmt;
+      _freeStmt = null;
 
-      if (stmt != null)
-        stmt.close();
+      if (savedStmt != null)
+        savedStmt.close();
+
+      if (freeStmt != null)
+        freeStmt.close();
     } catch (Throwable e) {
       // must catch throwable to force the conn close to work
       
@@ -601,8 +609,8 @@ public abstract class JdbcConnectionResource
 
     _rs = null;
 
-    Statement stmt = _stmt;
-    _stmt = null;
+    Statement stmt = _freeStmt;
+    _freeStmt = null;
 
     try {
       Connection conn = getConnection(env);
@@ -614,7 +622,7 @@ public abstract class JdbcConnectionResource
         return BooleanValue.TRUE;
 
       // statement reuse does not gain performance significantly (< 1%)
-      if (true || stmt == null) {
+      if (stmt == null) {
 	// XXX: test for performance
 	boolean canSeek = true;
 	if (canSeek)
@@ -660,12 +668,12 @@ public abstract class JdbcConnectionResource
 
         // for php/430a
 	if (keepStatementOpen()) {
-	  _stmt = stmt;
+	  _savedStmt = stmt;
 	}
         else {
           // _warnings = stmt.getWarnings();
-	  _stmt = null;
-          stmt.close();
+	  _freeStmt = stmt;
+          // stmt.close();
         }
       }
     } catch (DataTruncation truncationError) {

@@ -4333,15 +4333,19 @@ public class StringModule extends AbstractQuercusModule {
    *
    * @param string the input string
    */
-  public static String ucfirst(String string)
+  public static StringValue ucfirst(Env env, StringValue string)
   {
     if (string == null)
-      string = "";
-    
-    if (string.length() == 0)
+      return env.getEmptyString();
+    else if (string.length() == 0)
       return string;
 
-    return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+    StringValue sb = string.createStringBuilder();
+
+    sb = sb.append(Character.toUpperCase(string.charAt(0)));
+    sb = sb.append(string, 1, string.length());
+
+    return sb;
   }
 
   /**

@@ -1193,18 +1193,21 @@ public class Quercus
    */
   public int getClassId(String className)
   {
-    String name = className.toLowerCase();
-
-    int id = _classNameMap.get(name);
+    int id = _classNameMap.get(className);
 
     if (id >= 0)
       return id;
 
     synchronized (_classNameMap) {
+      String name = className.toLowerCase();
+
       id = _classNameMap.get(name);
 
-      if (id >= 0)
+      if (id >= 0) {
+	_classNameMap.put(className, id);
+	
 	return id;
+      }
       
       id = _classNameMap.size();
 
@@ -1232,6 +1235,7 @@ public class Quercus
 
       // _classMap[id] = new UndefinedClass(name);
 
+      _classNameMap.put(className, id);
       _classNameMap.put(name, id);
     }
 

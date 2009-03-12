@@ -33,9 +33,11 @@ package com.caucho.quercus.env;
  * Represents a StringValue that is never modified.
  * For compiled code.
  */
-public class CompiledConstStringValue
+public final class CompiledConstStringValue
   extends ConstStringValue
 {
+  private final int _hashCode;
+  
   public CompiledConstStringValue(StringValue s)
   {
     super(s);
@@ -173,13 +175,13 @@ public class CompiledConstStringValue
    * Converts to a key.
    */
   @Override
-  public Value toKey()
+  public final Value toKey()
   {
     return _key;
   }
   
   @Override
-  public int hashCode()
+  public final int hashCode()
   {
     return _hashCode;
   }

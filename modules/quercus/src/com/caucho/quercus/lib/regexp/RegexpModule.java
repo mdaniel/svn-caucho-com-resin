@@ -105,6 +105,7 @@ public class RegexpModule
    *
    * @param env the calling environment
    */
+  /*
   public static Value preg_match(Env env,
 				 StringValue regexp,
 				 StringValue subject,
@@ -118,6 +119,18 @@ public class RegexpModule
     else
       return CauchoRegexpModule.preg_match(env, regexp, subject, matchRef, flags, offset);
   }
+  */
+  
+  public static Value preg_match(Env env,
+				 Regexp regexp,
+				 StringValue subject,
+				 @Optional @Reference Value matchRef,
+				 @Optional int flags,
+				 @Optional int offset)
+  {
+    return CauchoRegexpModule.cauchoPregMatch(env, regexp, subject,
+					      matchRef, flags, offset);
+  }
 
   /**
    * Returns the index of the first match.
@@ -125,11 +138,11 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value preg_match_all(Env env,
-                                   StringValue regexp,
-                                   StringValue subject,
-                                   @Reference Value matchRef,
-                                   @Optional("PREG_PATTERN_ORDER") int flags,
-                                   @Optional int offset)
+				     StringValue regexp,
+				     StringValue subject,
+				     @Reference Value matchRef,
+				     @Optional("PREG_PATTERN_ORDER") int flags,
+				     @Optional int offset)
   {
     if (useJavaRegexp(env))
       return JavaRegexpModule.preg_match_all(env, regexp, subject, matchRef, flags, offset);
@@ -175,6 +188,27 @@ public class RegexpModule
       return CauchoRegexpModule.preg_replace(env, pattern, replacement, subject, limit, count);
 
   }
+
+  /**
+   * Simple preg_replace
+   */
+  /* XXX: resolution isn't handling this properly
+  @UsesSymbolTable
+  public static Value preg_replace(Env env,
+                                   Regexp pattern,
+                                   StringValue replacement,
+                                   StringValue subject,
+                                   @Optional("-1") long limit,
+                                   @Optional @Reference Value count)
+  {
+    return CauchoRegexpModule.pregReplaceString(env,
+						pattern,
+						replacement,
+						subject,
+						limit,
+						count);
+  }
+  */
 
   /**
    * Replaces values using regexps

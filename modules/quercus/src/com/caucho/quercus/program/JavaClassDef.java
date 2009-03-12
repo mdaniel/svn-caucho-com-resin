@@ -71,6 +71,8 @@ public class JavaClassDef extends ClassDef {
   private final String _name;
   private final Class _type;
 
+  private QuercusClass _quercusClass;
+
   private HashSet<String> _instanceOfSet;
   private HashSet<String> _instanceOfSetLowerCase;
   
@@ -843,6 +845,20 @@ public class JavaClassDef extends ClassDef {
    */
   public void initInstance(Env env, Value value)
   {
+  }
+
+  /**
+   * Returns the quercus class
+   */
+  public QuercusClass getQuercusClass()
+  {
+    if (_quercusClass == null) {
+      init();
+
+      _quercusClass = new QuercusClass(_moduleContext, this, null);
+    }
+
+    return _quercusClass;
   }
 
   /**

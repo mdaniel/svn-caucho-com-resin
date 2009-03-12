@@ -61,8 +61,7 @@ public class JavaValue extends ObjectValue
   {
     super();
     
-    int id = env.getQuercus().getClassId(def.getName());
-    setQuercusClass(env.createQuercusClass(id, def, null));
+    setQuercusClass(env.createJavaQuercusClass(def));
     
     _env = env;
     _classDef = def;

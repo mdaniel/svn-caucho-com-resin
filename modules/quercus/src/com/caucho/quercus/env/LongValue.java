@@ -246,8 +246,8 @@ public class LongValue extends NumberValue
   {
     if (rValue.isLongConvertible())
       return LongValue.create(_value - rValue.toLong());
-    
-    return DoubleValue.create(_value - rValue.toDouble());
+    else
+      return DoubleValue.create(_value - rValue.toDouble());
   }
 
   /**

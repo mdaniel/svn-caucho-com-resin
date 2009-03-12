@@ -32,6 +32,7 @@ package com.caucho.quercus.marshal;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.regexp.Regexp;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -181,6 +182,9 @@ public class MarshalFactory {
     }
     else if (Date.class.equals(argType)) {
       marshal = DateMarshal.MARSHAL;
+    }
+    else if (Regexp.class.equals(argType)) {
+      marshal = RegexpMarshal.MARSHAL;
     }
     else if (URL.class.equals(argType)) {
       marshal = URLMarshal.MARSHAL;

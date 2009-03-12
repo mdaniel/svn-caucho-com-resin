@@ -229,89 +229,9 @@ public class CauchoRegexpModule
         return LongValue.ZERO;
       }
 
-      StringValue empty = subject.EMPTY;
-      
       Regexp regexp = getRegexp(env, regexpValue);
-      RegexpState regexpState = RegexpState.create(env, regexp, subject);
 
-      ArrayValue regs;
-
-      if (matchRef.isDefault())
-        regs = null;
-      else
-        regs = new ArrayValueImpl();
-
-      if (regexpState == null || regexpState.exec(env, subject, offset) < 0) {
-        matchRef.set(regs);
-
-	env.freeRegexpState(regexpState);
-	
-        return LongValue.ZERO;
-      }
-
-      boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
-
-      if (regs != null) {
-        if (isOffsetCapture) {
-          ArrayValueImpl part = new ArrayValueImpl();
-          part.append(regexpState.group(env));
-          part.append(LongValue.create(regexpState.start()));
-
-          regs.put(LongValue.ZERO, part);
-        }
-        else
-          regs.put(LongValue.ZERO, regexpState.group(env));
-
-        int count = regexpState.groupCount();
-        for (int i = 1; i < count; i++) {
-          if (! regexpState.isMatchedGroup(i))
-            continue;
-          
-          StringValue group = regexpState.group(env, i);
-
-          if (isOffsetCapture) {
-            // php/151u
-            // add unmatched groups first
-            for (int j = regs.getSize(); j < i; j++) {
-              ArrayValue part = new ArrayValueImpl();
-
-              part.append(empty);
-              part.append(LongValue.MINUS_ONE);
-
-              regs.put(LongValue.create(j), part);
-            }
-
-            ArrayValueImpl part = new ArrayValueImpl();
-            part.append(group);
-            part.append(LongValue.create(regexpState.start(i)));
-
-            StringValue name = regexpState.getGroupName(i);
-            if (name != null)
-              regs.put(name, part);
-
-            regs.put(LongValue.create(i), part);
-          }
-          else {
-            // php/151u
-            // add unmatched groups first
-            for (int j = regs.getSize(); j < i; j++) {
-              regs.put(LongValue.create(j), empty);
-            }
-
-            StringValue name = regexp.getGroupName(i);
-            if (name != null)
-              regs.put(name, group);
-
-            regs.put(LongValue.create(i), group);
-          }
-        }
-
-        matchRef.set(regs);
-      }
-      
-      env.freeRegexpState(regexpState);
-
-      return LongValue.ONE;
+      return cauchoPregMatch(env, regexp, subject, matchRef, flags, offset);
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -319,6 +239,132 @@ public class CauchoRegexpModule
       
       return BooleanValue.FALSE;
     }
+  }
+  
+  public static Regexp createRegexp(Env env, StringValue regexpValue)
+  {
+    try {
+      if (regexpValue.length() < 2) {
+        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
+        return null;
+      }
+
+      return getRegexp(env, regexpValue);
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return null;
+    }
+  }
+  
+  public static Regexp createRegexp(String pattern)
+  {
+    try {
+      if (pattern.length() < 2) {
+        throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
+      }
+
+      return getRegexp(null, new StringBuilderValue(pattern));
+    }
+    catch (IllegalRegexpException e) {
+      throw new QuercusException(e);
+    }
+  }
+  
+  public static Value cauchoPregMatch(Env env,
+				      Regexp regexp,
+				      StringValue subject,
+				      @Optional @Reference Value matchRef,
+				      @Optional int flags,
+				      @Optional int offset)
+  {
+    if (regexp == null)
+      return BooleanValue.FALSE;
+    
+    StringValue empty = subject.EMPTY;
+      
+    RegexpState regexpState = RegexpState.create(env, regexp, subject);
+
+    ArrayValue regs;
+
+    if (matchRef.isDefault())
+      regs = null;
+    else
+      regs = new ArrayValueImpl();
+
+    if (regexpState == null || regexpState.exec(env, subject, offset) < 0) {
+      matchRef.set(regs);
+
+      env.freeRegexpState(regexpState);
+	
+      return LongValue.ZERO;
+    }
+
+    boolean isOffsetCapture = (flags & PREG_OFFSET_CAPTURE) != 0;
+
+    if (regs != null) {
+      if (isOffsetCapture) {
+	ArrayValueImpl part = new ArrayValueImpl();
+	part.append(regexpState.group(env));
+	part.append(LongValue.create(regexpState.start()));
+
+	regs.put(LongValue.ZERO, part);
+      }
+      else
+	regs.put(LongValue.ZERO, regexpState.group(env));
+
+      int count = regexpState.groupCount();
+      for (int i = 1; i < count; i++) {
+	if (! regexpState.isMatchedGroup(i))
+	  continue;
+          
+	StringValue group = regexpState.group(env, i);
+
+	if (isOffsetCapture) {
+	  // php/151u
+	  // add unmatched groups first
+	  for (int j = regs.getSize(); j < i; j++) {
+	    ArrayValue part = new ArrayValueImpl();
+
+	    part.append(empty);
+	    part.append(LongValue.MINUS_ONE);
+
+	    regs.put(LongValue.create(j), part);
+	  }
+
+	  ArrayValueImpl part = new ArrayValueImpl();
+	  part.append(group);
+	  part.append(LongValue.create(regexpState.start(i)));
+
+	  StringValue name = regexpState.getGroupName(i);
+	  if (name != null)
+	    regs.put(name, part);
+
+	  regs.put(LongValue.create(i), part);
+	}
+	else {
+	  // php/151u
+	  // add unmatched groups first
+	  for (int j = regs.getSize(); j < i; j++) {
+	    regs.put(LongValue.create(j), empty);
+	  }
+
+	  StringValue name = regexp.getGroupName(i);
+	  if (name != null)
+	    regs.put(name, group);
+
+	  regs.put(LongValue.create(i), group);
+	}
+      }
+
+      matchRef.set(regs);
+    }
+      
+    env.freeRegexpState(regexpState);
+
+    return LongValue.ONE;
   }
 
   /**
@@ -791,6 +837,17 @@ public class CauchoRegexpModule
     throws IllegalRegexpException
   {
     Regexp regexp = getRegexp(env, patternString);
+
+    return pregReplaceString(env, regexp, replacement, subject, limit, countV);
+  }
+  
+  static StringValue pregReplaceString(Env env,
+				       Regexp regexp,
+				       StringValue replacement,
+				       StringValue subject,
+				       long limit,
+				       Value countV)
+  {
     RegexpState regexpState = RegexpState.create(env, regexp);
     
     if (! regexpState.setSubject(env, subject))

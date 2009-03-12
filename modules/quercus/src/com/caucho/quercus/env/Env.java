@@ -1876,8 +1876,6 @@ public class Env {
    */
   public final Var getStaticVar(String name)
   {
-    String staticName = "\0resin:static:" + name;
-
     return getGlobalVar(name);
   }
 
@@ -2491,9 +2489,26 @@ public class Env {
    * @param className of the owning class 
    * @param name of the variable
    */
-  public Value getStaticClassFieldValue(String className, String name)
+  public Value getStaticClassFieldValue(String className,
+					String name)
   {
-    Var var = getStaticClassFieldVar(className, name);
+    return getStaticClassFieldValue(className + "::" + name,
+				    className,
+				    name);
+  }
+
+  /**
+   * Gets a static class field.
+   *
+   * @param fieldName qualified field name, e.g. "Foo::bar"
+   * @param className of the owning class 
+   * @param name of the variable
+   */
+  public Value getStaticClassFieldValue(String fieldName,
+					String className,
+					String name)
+  {
+    Var var = getStaticClassFieldVar(fieldName, className, name);
     
     if (var != null) {
       Value val = var.toValue();
@@ -2505,19 +2520,40 @@ public class Env {
   }
 
   /**
+   * Gets a static class field.
+   *
+   * @param className of the owning class 
+   * @param name of the variable
+   */
+  public Value getStaticClassFieldVar(String className,
+					String name)
+  {
+    return getStaticClassFieldVar(className + "::" + name,
+				  className,
+				    name);
+  }
+
+  /**
    * Gets a static field from a class.
    *
    * @param className of the owning class 
    * @param name of the variable
    */
-  public final Var getStaticClassFieldVar(String className, String name)
+  public final Var getStaticClassFieldVar(String fieldName,
+					  String className,
+					  String name)
   {
+    EnvVar envVar = getGlobalRaw(fieldName);
+
+    if (envVar != null)
+      return envVar.getRef();
+    
     QuercusClass cl = getClass(className);
 
     Var var = cl.getStaticField(this, name);
     
     if (var == null) {
-      error(L.l("{0}::${1} is an undeclared static property", className, name));
+      error(L.l("{0}::{1} is an undeclared static property", className, name));
     }
 
     return var;
@@ -4512,6 +4548,24 @@ public class Env {
   public void clearClassCache()
   {
     // _classCache.clear();
+  }
+
+  QuercusClass createJavaQuercusClass(JavaClassDef def)
+  {
+    int id = getQuercus().getClassId(def.getName());
+    
+    if (_qClass.length <= id) {
+      QuercusClass []oldClassList = _qClass;
+      
+      _qClass = new QuercusClass[id + 256];
+      
+      System.arraycopy(oldClassList, 0, _qClass, 0, oldClassList.length);
+    }
+
+    if (_qClass[id] == null)
+      _qClass[id] = def.getQuercusClass();
+
+    return _qClass[id];
   }
 
   QuercusClass createQuercusClass(int id,

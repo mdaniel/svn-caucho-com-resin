@@ -1048,10 +1048,7 @@ public class QuercusClass {
    */
   public final AbstractFunction getFunction(String name)
   {
-    char []key = name.toCharArray();
-    int hash = MethodMap.hash(key, key.length);
-
-    return getFunction(hash, key, key.length);
+    return _methodMap.get(name);
   }
 
   /**
