@@ -462,7 +462,7 @@ public class DeploymentManagerImpl
 
         System.out.println("UNDEPLOY: " + tag);
 
-        _deployClient.undeploy(tag);
+        _deployClient.undeploy(tag, _user, "", null);
 
         sb.append(tag).append(' ');
       }

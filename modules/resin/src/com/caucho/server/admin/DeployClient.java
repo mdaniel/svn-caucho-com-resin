@@ -126,15 +126,14 @@ public class DeployClient
    * @param user user name for the commit message
    * @param message the commit message
    */
-  public String undeploy(String tag,
+  public Boolean undeploy(String tag,
 			 String user,
 			 String message,
 			 HashMap<String,String> extraAttr)
-    throws IOException
   {
     RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
 
-    return (String) querySet(query);
+    return (Boolean) querySet(query);
   }
 
   /**

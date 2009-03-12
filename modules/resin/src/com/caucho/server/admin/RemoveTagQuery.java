@@ -60,6 +60,11 @@ public class RemoveTagQuery implements java.io.Serializable
     return _message;
   }
 
+  public String getUser()
+  {
+    return _user;
+  }
+
   @Override
   public String toString()
   {
