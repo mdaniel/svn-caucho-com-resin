@@ -192,7 +192,7 @@ public class RegexpModule
   /**
    * Simple preg_replace
    */
-  /* XXX: resolution isn't handling this properly
+  /*
   @UsesSymbolTable
   public static Value preg_replace(Env env,
                                    Regexp pattern,

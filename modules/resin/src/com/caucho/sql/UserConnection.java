@@ -688,7 +688,6 @@ public class UserConnection implements java.sql.Connection {
     try {
       // Clean up the connection and put it back in the pool
       resetConnection(mConn);
-
     } catch (Throwable e) {
       mConn.fatalEvent();
 

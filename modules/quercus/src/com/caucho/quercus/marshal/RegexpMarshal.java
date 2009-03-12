@@ -58,6 +58,16 @@ public class RegexpMarshal extends StringMarshal {
   }
   
   @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isString()) {
+      return Marshal.SAME;
+    }
+    else
+      return Marshal.INCOMPATIBLE;
+  }
+  
+  @Override
   public Class getExpectedClass()
   {
     return Regexp.class;

@@ -166,6 +166,12 @@ public class Env {
   private static final FreeList<Value[]> _freeConstList
     = new FreeList<Value[]>(256);
 
+  private static final FreeList<QDate> _freeGmtDateList
+    = new FreeList<QDate>(256);
+
+  private static final FreeList<QDate> _freeLocalDateList
+    = new FreeList<QDate>(256);
+
   protected final Quercus _quercus;
   
   private QuercusPage _page;
@@ -305,6 +311,8 @@ public class Env {
   private ImportMap _importMap;
 
   private TimeZone _defaultTimeZone;
+  private QDate _localDate;
+  private QDate _gmtDate;
 
   private Object _gzStream;
 
@@ -661,6 +669,30 @@ public class Env {
   public TimeZone getDefaultTimeZone()
   {
     return _defaultTimeZone;
+  }
+
+  public QDate getGmtDate()
+  {
+    if (_gmtDate == null) {
+      _gmtDate = _freeGmtDateList.allocate();
+
+      if (_gmtDate == null)
+	_gmtDate = new QDate();
+    }
+
+    return _gmtDate;
+  }
+
+  public QDate getLocalDate()
+  {
+    if (_localDate == null) {
+      _localDate = _freeLocalDateList.allocate();
+
+      if (_localDate == null)
+	_localDate = QDate.createLocal();
+    }
+
+    return _localDate;
   }
   
   public void setDefaultTimeZone(String id)
@@ -6347,7 +6379,12 @@ public class Env {
       
       _freeConstList.free(consts);
     }
-    
+
+    if (_gmtDate != null)
+      _freeGmtDateList.free(_gmtDate);
+
+    if (_localDate != null)
+      _freeLocalDateList.free(_localDate);
   }
 
   public void sessionWriteClose()

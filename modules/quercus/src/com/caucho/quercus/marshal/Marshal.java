@@ -46,7 +46,7 @@ abstract public class Marshal {
   public static final int SIMILAR = 200;
   public static final int MARSHALABLE = 300;
   public static final int DUBIOUS = 400;
-  public static final int INCOMPATIBLE = Integer.MAX_VALUE;
+  public static final int INCOMPATIBLE = Integer.MAX_VALUE / 16;
 
   public static final int PHP5_STRING_VALUE_COST = SAME;
   public static final int PHP5_BYTE_ARRAY_COST = EQUIVALENT             + 1;
