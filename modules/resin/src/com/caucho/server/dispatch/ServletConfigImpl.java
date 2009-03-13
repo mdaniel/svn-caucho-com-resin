@@ -85,6 +85,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   private String _displayName;
   private int _loadOnStartup = Integer.MIN_VALUE;
 
+  private Servlet _singletonServlet;
+
   private boolean _allowEL = true;
   private HashMap<String,String> _initParams = new HashMap<String,String>();
 
@@ -216,7 +218,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   
   public void setServlet(Servlet servlet)
   {
-    _servlet = servlet;
+    _singletonServlet = servlet;
   }
 
   /**
@@ -678,7 +680,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 
       return servletChain;
     }
-    else if (_servlet instanceof Servlet) {
+    else if (_singletonServlet != null) {
       servletChain = new ServletFilterChain(this);
 
       return servletChain;
@@ -767,6 +769,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     // server/102e
     if (_servlet != null && ! isNew)
       return _servlet;
+    else if (_singletonServlet != null)
+      return _singletonServlet;
 
     Object servlet = null;
 
