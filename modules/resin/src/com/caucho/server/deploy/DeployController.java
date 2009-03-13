@@ -649,7 +649,7 @@ abstract public class DeployController<I extends DeployInstance>
       return null;
     }
 
-    I deployInstance = getDeployInstance();
+    I deployInstance = null;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -657,6 +657,10 @@ abstract public class DeployController<I extends DeployInstance>
     boolean isStarting = false;
 
     try {
+      thread.setContextClassLoader(_parentLoader);
+      
+      deployInstance = getDeployInstance();
+      
       loader = deployInstance.getClassLoader();
       thread.setContextClassLoader(loader);
 

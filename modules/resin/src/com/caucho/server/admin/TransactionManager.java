@@ -81,7 +81,7 @@ public class TransactionManager
     else if (_path != null)
       return _path;
     else
-      return Vfs.lookup("admin");
+      return Vfs.lookup("resin-data");
   }
 
   /**

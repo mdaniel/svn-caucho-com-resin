@@ -174,8 +174,9 @@ typedef struct config_t {
 
   int has_config; /* true if there's config information, i.e. not defalt */
   
-  void *lock;
+  void *cache_lock;
   void *config_lock;
+  void *server_lock;
   char *error;
   
   int enable_caucho_status;
@@ -218,6 +219,7 @@ typedef struct config_t {
   time_t last_file_update;
   time_t start_time;
   int update_count;
+  int is_updating;
 } config_t;
 
 #define BUF_LENGTH (16 * 1024)

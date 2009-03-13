@@ -136,8 +136,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private HashMap<String,Object> _variableMap = new HashMap<String,Object>();
 
-  private ArrayList<ContainerProgram> _clusterDefaults
-    = new ArrayList<ContainerProgram>();
+  private ArrayList<ConfigProgram> _clusterDefaults
+    = new ArrayList<ConfigProgram>();
 
   private ArrayList<Cluster> _clusters
     = new ArrayList<Cluster>();
@@ -259,7 +259,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       _brokerManager = new HempBrokerManager();
 
-      _management = createManagement();
+      _management = createResinManagement();
       
       if (webBeans.resolveByType(ResinWebBeansProducer.class).size() == 0) {
 	webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
@@ -727,9 +727,13 @@ public class Resin implements EnvironmentBean, SchemaBean
     return new TransactionManager(this);
   }
 
-  public Management createManagement()
+  public void addManagement(ConfigProgram program)
   {
-    System.out.println("MANA:");
+    _clusterDefaults.add(program);
+  }
+
+  public Management createResinManagement()
+  {
     if (_management == null) {
       _management = new Management();
 

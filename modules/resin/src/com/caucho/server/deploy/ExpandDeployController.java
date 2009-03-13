@@ -572,9 +572,10 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   protected void removeExpandFile(Path path, String prefix)
     throws IOException
   {
-    if (_expandCleanupFileSet == null ||
-        _expandCleanupFileSet.isMatch(path, prefix))
+    if (_expandCleanupFileSet == null
+	|| _expandCleanupFileSet.isMatch(path, prefix)) {
       path.remove();
+    }
   }
 
   /**

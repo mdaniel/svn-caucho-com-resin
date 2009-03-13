@@ -66,7 +66,7 @@ public class HttpProxy extends AbstractTargetDispatchRule
     _servlet = new ServletConfigImpl();
 
     _servlet.setServletName("resin-dispatch-lb");
-    _servlet.setServletClass("com.caucho.servlets.HttpProxyServlet");
+    _servlet.setServlet(_proxyServlet);
   }
 
   public void addAddress(String address)

@@ -158,9 +158,12 @@ public class InterfaceConfig extends BeanConfig {
   /**
    * Sets the value for old-style jndi lookup
    */
-  public void setValue(String value)
+  public void setValue(Object value)
   {
-    _valueName = value;
+    if (value instanceof String)
+      _valueName = (String) value;
+    else
+      _value = value;
   }
 
   /**

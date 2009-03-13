@@ -1225,11 +1225,12 @@ cse_init_config(config_t *config)
   cse_update_from_resin(config);
   */
 
-  if (! config->lock) {
-    config->lock = cse_create_lock(config);
+  if (! config->cache_lock) {
     LOG(("%s:%d:cse_init_config(): config lock %p\n",
 	 __FILE__, __LINE__, config->lock));
+    config->cache_lock = cse_create_lock(config);
     config->config_lock = cse_create_lock(config);
+    config->server_lock = cse_create_lock(config);
   }
 
   /*
@@ -1642,7 +1643,7 @@ cse_match_request(config_t *config, const char *host, int port,
   test_port = entry->port;
   test_match_host = entry->match_host;
 
-  cse_lock(config->lock);
+  cse_lock(config->cache_lock);
   if (g_update_count != entry->update_count) {
   }
   else if (test_count != entry->count) {
@@ -1658,18 +1659,21 @@ cse_match_request(config_t *config, const char *host, int port,
     /* if non-match, the timeout is the config update time */
   }
   else if (test_match_host
-	   && test_match_host->last_update_time + config->update_timeout < now) {
+	   && test_match_host->last_update_time + config->update_timeout < now
+	   && ! config->is_updating) {
   }
   else {
-    cse_unlock(config->lock);
+    cse_unlock(config->cache_lock);
     
     return test_match_host;
   }
-  cse_unlock(config->lock);
+  
+  config->is_updating = 1;
+  cse_unlock(config->cache_lock);
 
   match_host = cse_is_match(config, host, port, uri, unescape, now);
 
-  cse_lock(config->lock);
+  cse_lock(config->cache_lock);
   entry->update_count = g_update_count;
   entry->count++;
   entry->match_host = match_host;
@@ -1689,7 +1693,8 @@ cse_match_request(config_t *config, const char *host, int port,
   entry->port = port;
   entry->count++;
   config->last_update_time = now;
-  cse_unlock(config->lock);
+  config->is_updating = 0;
+  cse_unlock(config->cache_lock);
 
   return match_host;
 }

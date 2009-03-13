@@ -58,6 +58,8 @@ public class ExportBundleClassLoader extends DynamicClassLoader
   {
     super(parent);
 
+    System.out.println("EXP: " + symbolicName + " " + version);
+
     if (symbolicName == null)
       throw new IllegalArgumentException(L.l("ExportBundleClassLoader requires a symbolicName."));
 

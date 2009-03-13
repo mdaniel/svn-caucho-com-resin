@@ -1106,12 +1106,12 @@ cse_add_cluster_server(mem_pool_t *pool, cluster_t *cluster,
 {
   cluster_srun_t *srun;
   
-  cse_lock(cluster->config->lock);
+  cse_lock(cluster->config->server_lock);
   
   srun = cse_add_cluster_server_impl(pool, cluster, hostname, port, id,
 				     index, is_backup, is_ssl);
   
-  cse_unlock(cluster->config->lock);
+  cse_unlock(cluster->config->server_lock);
 
   return srun;
 }

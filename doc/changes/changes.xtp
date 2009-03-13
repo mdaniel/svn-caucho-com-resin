@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>mod_caucho: only allow one thread to update config for worker model</li>
 <li>win32: truncate applied incorrect file mode for new file (#3382, rep by Kair Virkki)</li>
 <li>(2009-02-26) boot: windows machines can't add -server option automatically (#3331)</li>
 <li>inject: findByName needs to work during shutdown (#3334, rep by stbu)</li>

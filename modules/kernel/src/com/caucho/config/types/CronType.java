@@ -87,8 +87,11 @@ public class CronType implements Trigger {
     if (split.length > 3)
       _months = parseRange(split[3], 1, 12);
     
-    if (split.length > 4)
+    if (split.length > 4) {
       _daysOfWeek = parseRange(split[4], 0, 7);
+      if (_daysOfWeek[7])
+	_daysOfWeek[0] = _daysOfWeek[7];
+    }
   }
 
   /**

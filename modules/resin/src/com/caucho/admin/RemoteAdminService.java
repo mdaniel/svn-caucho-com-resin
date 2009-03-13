@@ -75,37 +75,43 @@ public class RemoteAdminService
       throw new ConfigException(L.l("<admin:{0}> may only be instantiated in an active server",
 				    getClass().getSimpleName()));
 
-    HostConfig hostConfig = new HostConfig();
-    hostConfig.setHostName(new RawString(_hostName));
-    hostConfig.setRootDirectory(new RawString("error:" + _hostName));
-    hostConfig.setSkipDefaultConfig(true);
-    hostConfig.setRedeployMode("manual");
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    _server.addHost(hostConfig);
+    try {
+      HostConfig hostConfig = new HostConfig();
+      hostConfig.setHostName(new RawString(_hostName));
+      hostConfig.setRootDirectory(new RawString("error:" + _hostName));
+      hostConfig.setSkipDefaultConfig(true);
+      hostConfig.setRedeployMode("manual");
 
-    Host host = _server.getHost(_hostName, 0);
+      WebAppConfig webAppConfig = new WebAppConfig();
+      webAppConfig.setId("/");
+      webAppConfig.setRootDirectory(new RawString("error:/ROOT"));
+      webAppConfig.setSkipDefaultConfig(true);
+      webAppConfig.setRedeployMode("manual");
 
-    WebAppConfig webAppConfig = new WebAppConfig();
-    webAppConfig.setId("/");
-    webAppConfig.setRootDirectory(new RawString("error:/ROOT"));
-    webAppConfig.setSkipDefaultConfig(true);
-    webAppConfig.setRedeployMode("manual");
+      hostConfig.addPropertyProgram("web-app", webAppConfig);
 
-    host.addWebApp(webAppConfig);
+      // host.addWebApp(webAppConfig);
+      
+      ServletMapping mapping = new ServletMapping();
+      mapping.addURLPattern("/hmtp");
+      mapping.setServletClass("com.caucho.remote.HmtpServlet");
+      mapping.setInitParam("authentication-required",
+			   String.valueOf(_isAuthenticationRequired));
+      mapping.setInitParam("admin", "true");
+      mapping.init();
 
-    _webApp = host.findWebAppByURI("/");
+      webAppConfig.addPropertyProgram("servlet-mapping", mapping);
+      
+      _server.addHost(hostConfig);
 
-    ServletMapping mapping = new ServletMapping();
-    mapping.addURLPattern("/hmtp");
-    mapping.setServletClass("com.caucho.remote.HmtpServlet");
-    mapping.setInitParam("authentication-required",
-			 String.valueOf(_isAuthenticationRequired));
-    mapping.init();
-
-    _webApp.addServletMapping(mapping);
-
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " enabled at http://" + _hostName + "/hmtp");
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " enabled at http://" + _hostName + "/hmtp");
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   public WebApp getWebApp()

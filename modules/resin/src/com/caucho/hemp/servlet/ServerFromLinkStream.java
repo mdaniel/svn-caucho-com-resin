@@ -33,6 +33,7 @@ import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorException;
+import com.caucho.bam.Broker;
 import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.FromLinkStream;
@@ -80,7 +81,7 @@ public class ServerFromLinkStream extends FromLinkStream
 
   private String _jid;
 
-  public ServerFromLinkStream(HempBroker broker,
+  public ServerFromLinkStream(Broker broker,
 			      ServerLinkManager linkManager,
 			      InputStream is,
 			      OutputStream os,
@@ -92,7 +93,8 @@ public class ServerFromLinkStream extends FromLinkStream
 
     _auth = auth;
     _isAuthenticationRequired = isAuthRequired;
-    _broker = broker;
+    // XXX: cleanup type
+    _broker = (HempBroker) broker;
 
     if (log.isLoggable(Level.FINEST)) {
       is = new HessianDebugInputStream(is, log, Level.FINEST);

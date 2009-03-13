@@ -213,6 +213,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       
     return _servletClass;
   }
+  
+  public void setServlet(Servlet servlet)
+  {
+    _servlet = servlet;
+  }
 
   /**
    * Sets the JSP file
@@ -670,6 +675,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       QServlet jsp = (QServlet) _servletManager.createServlet("resin-jsp");
 
       servletChain = new PageFilterChain(_servletContext, jsp, jspFile, this);
+
+      return servletChain;
+    }
+    else if (_servlet instanceof Servlet) {
+      servletChain = new ServletFilterChain(this);
 
       return servletChain;
     }

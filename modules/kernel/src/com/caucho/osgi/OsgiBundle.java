@@ -187,6 +187,8 @@ public class OsgiBundle implements Bundle
 
     addExports(exportList);
 
+    System.out.println("EXPORTS: " + exportList);
+
     _importAttr = attr.getValue("Import-Package");
 
     if (exportList != null)
@@ -312,6 +314,8 @@ public class OsgiBundle implements Bundle
 	throw new NullPointerException();
 
       _loader.addImport(packageName, loader);
+
+      System.out.println("RESOLVE: " + loader + " " + packageName + " " + this);
     }
   }
 

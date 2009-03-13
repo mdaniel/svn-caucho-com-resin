@@ -880,7 +880,7 @@ public class Server extends ProtocolDispatchServer
   public Management createManagement()
   {
     if (_management == null && _resin != null) {
-      _management = _resin.createManagement();
+      _management = _resin.createResinManagement();
 
       _management.setCluster(getCluster());
     }

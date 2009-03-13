@@ -29,8 +29,10 @@
 
 package com.caucho.log.handler;
 
+import com.caucho.bam.ActorClient;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.*;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.log.*;
 import com.caucho.util.L10N;
 
@@ -53,7 +55,7 @@ public class HmtpHandler extends Handler {
   private static final L10N L = new L10N(HmtpHandler.class);
 
   private String _to;
-  // private ActorClient _conn;
+  private ActorClient _conn;
 
   public HmtpHandler()
   {
@@ -76,8 +78,10 @@ public class HmtpHandler extends Handler {
   {
     if (_to == null)
       throw new ConfigException(L.l("HmppHandler needs a 'to' attribute"));
+
+    HempBroker broker = HempBroker.getCurrent();
     
-    // _conn = _factory.getConnection("log@localhost", null);
+    _conn = broker.getConnection("log@localhost", null);
   }
 
   /**
@@ -101,7 +105,7 @@ public class HmtpHandler extends Handler {
       else
 	value = record.getMessage();
 
-      // _conn.message(_to, value);
+      _conn.message(_to, value);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

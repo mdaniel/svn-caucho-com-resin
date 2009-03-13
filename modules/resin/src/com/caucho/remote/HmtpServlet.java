@@ -41,6 +41,7 @@ import com.caucho.bam.Broker;
 import com.caucho.security.Authenticator;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.connection.*;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -61,6 +62,11 @@ public class HmtpServlet extends GenericServlet {
   private Authenticator _auth;
   private ServerLinkManager _linkManager;
 
+  public void setAdmin(boolean isAdmin)
+  {
+    _isAdmin = isAdmin;
+  }
+
   public void setAuthenticationRequired(boolean isAuthRequired)
   {
     _isAuthenticationRequired = isAuthRequired;
@@ -73,6 +79,16 @@ public class HmtpServlet extends GenericServlet {
 
   public void init()
   {
+    String authRequired = getInitParameter("authentication-required");
+
+    if ("false".equals(authRequired))
+      _isAuthenticationRequired = false;
+    
+    String admin = getInitParameter("admin");
+
+    if ("true".equals(admin))
+      _isAdmin = true;
+
     try {
       InjectManager webBeans = InjectManager.getCurrent();
 
@@ -90,11 +106,6 @@ public class HmtpServlet extends GenericServlet {
 		   this));
       }
     }
-
-    String authRequired = getInitParameter("authentication-required");
-
-    if ("false".equals(authRequired))
-      _isAuthenticationRequired = false;
 
     _linkManager = new ServerLinkManager(_auth);
   }
@@ -119,7 +130,13 @@ public class HmtpServlet extends GenericServlet {
     ReadStream is = req.getConnection().getReadStream();
     WriteStream os = req.getConnection().getWriteStream();
 
-    HempBroker broker = HempBroker.getCurrent();
+    Broker broker;
+
+    if (_isAdmin)
+      broker = Server.getCurrent().getAdminBroker();
+    else
+      broker = HempBroker.getCurrent();
+    
     String address = req.getRemoteAddr();
 
     ServerFromLinkStream fromLinkStream

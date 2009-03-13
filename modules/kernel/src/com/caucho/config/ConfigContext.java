@@ -521,30 +521,30 @@ public class ConfigContext implements CreationalContext {
 				      QName qName,
 				      Attribute attrStrategy)
   {
-    if (! attrStrategy.isAllowText())
-      return false;
-
     String text = getTextValue(childNode);
 
-    if (text != null) {
-      boolean isTrim = isTrim(childNode);
+    if (text == null)
+      return false;
+    
+    boolean isTrim = isTrim(childNode);
 	  
-      if (isEL() && attrStrategy.isEL()
-	  && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
-	if (isTrim)
-	  text = text.trim();
+    if (isEL() && attrStrategy.isEL()
+	&& (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+      if (isTrim)
+	text = text.trim();
 	  
-	Object elValue = eval(attrStrategy.getConfigType(), text);
+      Object elValue = eval(attrStrategy.getConfigType(), text);
 
-	// ioc/2410
-	if (elValue != NULL)
-	  attrStrategy.setValue(bean, qName, elValue);
-	else
-	  attrStrategy.setValue(bean, qName, null);
-      }
-      else {
-	setText(bean, qName, text, attrStrategy, isTrim);
-      }
+      // ioc/2410
+      if (elValue != NULL)
+	attrStrategy.setValue(bean, qName, elValue);
+      else
+	attrStrategy.setValue(bean, qName, null);
+
+      return true;
+    }
+    else if (attrStrategy.isAllowText()) {
+      setText(bean, qName, text, attrStrategy, isTrim);
 
       return true;
     }

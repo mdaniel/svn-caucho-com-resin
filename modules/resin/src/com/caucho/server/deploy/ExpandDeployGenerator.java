@@ -67,6 +67,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private static final long MIN_CRON_INTERVAL = 5000L;
 
   private Path _path; // default path
+  private ClassLoader _loader;
 
   private Path _containerRootDirectory;
   private Path _archiveDirectory;
@@ -118,6 +119,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     _cronInterval = Environment.getDependencyCheckInterval();
     if (_cronInterval < MIN_CRON_INTERVAL)
       _cronInterval = MIN_CRON_INTERVAL;
+
+    _loader = Thread.currentThread().getContextClassLoader();
   }
 
   Path getContainerRootDirectory()
@@ -552,7 +555,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     if (! _isDeploying)
       log.finer(this + " deploy/start " + _isDeploying);
 
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
     try {
+      thread.setContextClassLoader(_loader);
+      
       ArrayList<String> updatedNames = null;
 
       synchronized (this) {
@@ -590,6 +598,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 	getDeployContainer().update(name);
       }
     } finally {
+      thread.setContextClassLoader(oldLoader);
+      
       if (isDeploying) {
 	_isModified = false;
 	_isDeploying = false;

@@ -119,7 +119,7 @@ abstract public class
     if (_config != null && ! _configDefaults.contains(_config))
       addConfigDefault(_config);
 
-    addConfigMode(config);
+    addConfigController(config);
 
     _config = config;
 
@@ -199,14 +199,11 @@ abstract public class
     if (! _configDefaults.contains(config)) {
       _configDefaults.add(config);
 
-      addConfigMode(config);
-
-      if (config.getExpandCleanupFileset() != null)
-	setExpandCleanupFileSet(config.getExpandCleanupFileset());
+      addConfigController(config);
     }
   }
 
-  private void addConfigMode(C config)
+  private void addConfigController(C config)
   {
     if (config.getStartupMode() != null)
       setStartupMode(config.getStartupMode());
@@ -216,6 +213,9 @@ abstract public class
 
     if (config.getRedeployMode() != null)
       setRedeployMode(config.getRedeployMode());
+
+    if (config.getExpandCleanupFileset() != null)
+      setExpandCleanupFileSet(config.getExpandCleanupFileset());
   }
 
   /**
