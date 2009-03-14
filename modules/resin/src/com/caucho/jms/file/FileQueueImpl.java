@@ -243,6 +243,8 @@ public class FileQueueImpl extends AbstractMemoryQueue implements Topic
 	  msg = (MessageImpl) _store.readMessage(entry.getId());
 	  entry.setPayload(msg);
 	}
+	
+	msg.setReceive();
 
 	if (log.isLoggable(Level.FINER))
 	  log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
