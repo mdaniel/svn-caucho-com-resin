@@ -92,7 +92,7 @@ public class SimpleBean extends ComponentImpl
 
   public SimpleBean(Class type)
   {
-    this(InjectManager.create(type.getClassLoader()), type);
+    this(InjectManager.create(), type);
   }
 
   public SimpleBean(InjectManager inject, Class type)
