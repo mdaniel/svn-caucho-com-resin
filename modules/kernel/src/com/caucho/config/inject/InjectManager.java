@@ -53,6 +53,7 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+import java.lang.ref.*;
 
 import javax.annotation.Stereotype;
 import javax.context.Context;
@@ -173,8 +174,8 @@ public class InjectManager
   private ArrayList<DecoratorEntry> _decoratorList
     = new ArrayList<DecoratorEntry>();
 
-  private HashMap<Class,SimpleBean> _transientMap
-    = new HashMap<Class,SimpleBean>();
+  private HashMap<String,SoftReference<SimpleBean>> _transientMap
+    = new HashMap<String,SoftReference<SimpleBean>>();
 
   private HashMap<FactoryBinding,Bean> _objectFactoryMap
     = new HashMap<FactoryBinding,Bean>();
@@ -851,8 +852,26 @@ public class InjectManager
    */
   public <T> Bean<T> createTransient(Class<T> type)
   {
+    ClassLoader loader = type.getClassLoader();
+
+    InjectManager manager = _localContainer.get(loader);
+
+    if (manager != null)
+      return manager.createTransientImpl(type);
+    else
+      return createTransientImpl(type);
+  }
+  
+  /**
+   * Returns a Bean for a class, but does not register the
+   * component with webbeans.
+   */
+  private <T> Bean<T> createTransientImpl(Class<T> type)
+  {
     synchronized (_transientMap) {
-      SimpleBean comp = _transientMap.get(type);
+      SoftReference<SimpleBean> compRef = _transientMap.get(type.getName());
+
+      SimpleBean comp = compRef != null ? compRef.get() : null;
 
       if (comp == null) {
 	if (type.isInterface())
@@ -862,6 +881,7 @@ public class InjectManager
 	
 	comp = new SimpleBean(this);
 	comp.setTargetType(type);
+	
 
 	try {
 	  Constructor nullCtor = type.getConstructor(new Class[0]);
@@ -874,7 +894,7 @@ public class InjectManager
 
 	comp.init();
 
-	_transientMap.put(type, comp);
+	_transientMap.put(type.getName(), new SoftReference<SimpleBean>(comp));
 
 	// XXX: QA
 	comp.bind();

@@ -46,8 +46,8 @@ import java.io.IOException;
  */
 class DispatchResponse extends AbstractHttpResponse
 {
-  private static final FreeList<DispatchResponse> _freeList =
-    new FreeList<DispatchResponse>(32);
+  private static final FreeList<DispatchResponse> _freeList
+    = new FreeList<DispatchResponse>(32);
 
   private IncludeResponseStream _stream;
   
@@ -218,6 +218,9 @@ class DispatchResponse extends AbstractHttpResponse
   public void free()
   {
     super.free();
+
+    if (_stream != null)
+      _stream.init(null);
     
     _next = null;
   }

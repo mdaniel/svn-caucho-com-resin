@@ -66,7 +66,6 @@ public class SimpleBean extends ComponentImpl
   
   private boolean _isBound;
 
-  private ClassLoader _loader;
   private Class _instanceClass;
 
   private ArrayList<SimpleBeanMethod> _methodList
@@ -84,8 +83,6 @@ public class SimpleBean extends ComponentImpl
   public SimpleBean(InjectManager webBeans)
   {
     super(webBeans);
-
-    _loader = Thread.currentThread().getContextClassLoader();
   }
 
   public SimpleBean()
@@ -95,7 +92,7 @@ public class SimpleBean extends ComponentImpl
 
   public SimpleBean(Class type)
   {
-    this(InjectManager.create(), type);
+    this(InjectManager.create(type.getClassLoader()), type);
   }
 
   public SimpleBean(InjectManager inject, Class type)
@@ -393,7 +390,7 @@ public class SimpleBean extends ComponentImpl
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      thread.setContextClassLoader(_loader);
+      thread.setContextClassLoader(getWebBeans().getClassLoader());
       
       Object value;
       boolean isNew = false;

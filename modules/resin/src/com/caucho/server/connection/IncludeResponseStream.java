@@ -78,8 +78,10 @@ public class IncludeResponseStream extends ToByteResponseStream {
       if (_isCauchoResponseStream)
 	_nextResponseStream = response.getResponseStream();
     }
-    else
+    else {
+      _nextResponseStream = null;
       _isCauchoResponseStream = false;
+    }
   }
 
   public void start()
