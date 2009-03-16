@@ -33,39 +33,51 @@ typedef struct chunk_t {
   struct chunk_t *next;
 } chunk_t;
 
+#define MEMORY_MAX 65536
+#define MEMORY_ALLOC 65536
+
 static int is_init;
 static pthread_mutex_t mem_lock;
 static int alloc = 0;
-static chunk_t *buckets[1024];
+static chunk_t *buckets[256];
 
 static int
 get_bucket(int size)
 {
   size += sizeof(chunk_t);
 
-  if (size < 4096)
+  if (size <= MEMORY_MAX)
     return (size + 255) / 256;
   else
-    return ((size + 4095) / 4096) + 16;
+    return -1;
 }
 
 static int
 get_chunk_size(int size)
 {
-  if (size + sizeof(chunk_t) < 4096)
+  if (size + sizeof(chunk_t) < MEMORY_MAX)
     return 256 * ((size + sizeof(chunk_t) + 255) / 256);
   else
-    return 4096 * ((size + sizeof(chunk_t) + 4095) / 4096);
+    return 0;
 }
 
 static void
 cse_init_bucket(int size, int alloc_size)
 {
-  char *data = malloc(alloc_size);
+  char *data;
   int bucket = get_bucket(size);
   int chunk_size = get_chunk_size(size);
   int i;
 
+  if (bucket < 0) {
+    fprintf(stderr, "illegal call to cse_init_bucket size=%d\n", size);
+    return;
+  }
+  
+  data = malloc(alloc_size);
+  bucket = get_bucket(size);
+  chunk_size = get_chunk_size(size);
+  
   if (bucket >= 1024)
     fprintf(stderr, "bad bucket size:%d bucket:%d\n", size, bucket);
 
@@ -82,8 +94,18 @@ cse_malloc(int size)
 {
   int bucket;
   chunk_t *chunk = 0;
+  void *data;
 
   bucket = get_bucket(size);
+
+  if (bucket < 0) {
+    chunk = (chunk_t *) malloc(size + sizeof(chunk_t));
+    chunk->bucket = -1;
+    
+    data = ((char *) chunk) + sizeof(chunk_t);
+    
+    return data;
+  }
   
   pthread_mutex_lock(&mem_lock);
   chunk = buckets[bucket];
@@ -95,7 +117,7 @@ cse_malloc(int size)
   }
   else if (size + sizeof(chunk_t) <= 4096) {
     pthread_mutex_lock(&mem_lock);
-    cse_init_bucket(size, 64 * 1024);
+    cse_init_bucket(size, MEMORY_ALLOC);
     
     chunk = buckets[bucket];
     buckets[bucket] = chunk->next;
@@ -111,8 +133,10 @@ cse_malloc(int size)
   }
   
   chunk->next = 0;
-  
-  return ((char *) chunk) + sizeof(chunk_t);
+
+  data = ((char *) chunk) + sizeof(chunk_t);
+
+  return data;
 }
 
 void
@@ -121,7 +145,10 @@ cse_free(void *v_data)
   chunk_t *chunk = (chunk_t *) (((char *) v_data) - sizeof(chunk_t));
   int bucket = chunk->bucket;
 
-  if (bucket >= 0 && bucket < 1024) {
+  if (bucket == -1) {
+    free(chunk);
+  }
+  else if (bucket < 256) {
     pthread_mutex_lock(&mem_lock);
     chunk->next = buckets[bucket];
     buckets[bucket] = chunk;
