@@ -852,14 +852,7 @@ public class InjectManager
    */
   public <T> Bean<T> createTransient(Class<T> type)
   {
-    ClassLoader loader = type.getClassLoader();
-
-    InjectManager manager = _localContainer.get(loader);
-
-    if (manager != null)
-      return manager.createTransientImpl(type);
-    else
-      return createTransientImpl(type);
+    return createTransientImpl(type);
   }
   
   /**

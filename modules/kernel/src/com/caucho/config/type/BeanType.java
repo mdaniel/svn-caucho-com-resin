@@ -366,6 +366,14 @@ public class BeanType extends ConfigType
     for (int i = 0; i < _initList.size(); i++)
       _initList.get(i).inject(bean, null);
   }
+
+  /**
+   * Return true if the object is replaced
+   */
+  public boolean isReplace()
+  {
+    return _replaceObject != null;
+  }
   
   /**
    * Replace the type with the generated object

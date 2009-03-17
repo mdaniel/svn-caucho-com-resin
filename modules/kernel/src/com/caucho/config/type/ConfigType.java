@@ -162,6 +162,14 @@ abstract public class ConfigType
   }
 
   /**
+   * Return true if the object is replaced
+   */
+  public boolean isReplace()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for a program type.
    */
   public boolean isProgram()

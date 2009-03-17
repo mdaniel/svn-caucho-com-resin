@@ -587,7 +587,7 @@ public class ConfigContext implements CreationalContext {
 
     childBean = configureChildBean(childBean, childType,
 				   childNode, attrStrategy);
-    
+
     attrStrategy.setValue(parent, qName, childBean);
 
     return true;

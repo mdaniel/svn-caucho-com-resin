@@ -84,6 +84,8 @@ public class SetterAttribute extends Attribute {
   {
     if (type == null)
       return false;
+    else if (type.isReplace())
+      return true;
     else
       return _type.isAssignableFrom(type.getType());
   }
