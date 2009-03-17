@@ -206,13 +206,6 @@ public class TagSupport implements IterationTag, Serializable {
   }
 
   /**
-   * Resets any custom attributes to the default value.
-   */
-  public void resetCustomAttributes()
-  {
-  }
-
-  /**
    * Cleans the tag after it completes.
    */
   public void release()

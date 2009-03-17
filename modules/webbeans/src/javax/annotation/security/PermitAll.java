@@ -32,11 +32,13 @@ import static java.lang.annotation.ElementType.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.annotation.Documented;
 
 /**
  * Sets the user name to run as.
  */
-@Target({TYPE,METHOD})
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target({TYPE,METHOD})
 public @interface PermitAll {
 }
