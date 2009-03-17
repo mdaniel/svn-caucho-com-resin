@@ -115,8 +115,10 @@ public class StatefulServer extends SessionServer
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
-    if (provider != null)
-      return provider.__caucho_createNew(new ConfigContext());
+    if (provider != null) {
+      // XXX: should be bean
+      return provider.__caucho_createNew(null, new ConfigContext());
+    }
     else
       return null;
   }
@@ -215,7 +217,8 @@ public class StatefulServer extends SessionServer
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
     if (provider != null) {
-      Object value = provider.__caucho_createNew(null);
+      // XXX: bean?
+      Object value = provider.__caucho_createNew(null, null);
       
       return value;
     }
