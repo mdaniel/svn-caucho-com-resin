@@ -77,6 +77,8 @@ public class Figure implements ContentItem {
 
     out.writeEmptyElement("img");
 
+    out.writeAttribute("border", "0");
+
     if (_height >= 0)
       out.writeAttribute("height", Integer.toString(_height));
 

@@ -1,0 +1,67 @@
+<navigation threaded="true">
+  <item link="index.xtp" title="Resin 4.0">
+    <!--
+       - Guides
+      -->
+    <item link="guide-admin.xtp" title="Guide: Admin"/>
+    
+    <!-- line/rule goes here? -->
+      
+    <item link="clustering.xtp" title="Clustering"/>
+      
+    <!--
+       - Database
+      -->
+    <item link="database.xtp" title="Database"/>
+      
+    <!--
+       - Deployment
+      -->
+    <item link="deployment.xtp" title="Deployment"/>
+
+    <!--
+       - IoC
+      -->
+	  
+    <item link="ioc.xtp" title="IoC"/>
+
+    <!--
+       - Performance
+      -->
+    <item link="performance.xtp" title="Performance">
+      <item link="performance-benchmarks.xtp" title="Benchmarks"/>
+      <item link="jvm-tuning.xtp" title="JVM Tuning"/>
+      <item link="performance-faq.xtp" title="Performance FAQ"/>
+      <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
+      <item link="tuning.xtp" title="Tuning"/>
+    </item>
+
+    <!--
+       - resources
+      -->
+    <item link="resources.xtp" title="Scheduled Tasks"
+          description="executing tasks, methods and URLs based on cron triggers"/>
+    
+    <!--
+       - Admin/JMX
+      -->
+    <item link="resin-admin.xtp" title="resin-admin"/>
+    
+    <!--
+       - Security
+      -->
+	    
+    <item link="security.xtp" title="Security"/>
+
+    <!--
+       - Third party
+      -->      
+    <item link="troubleshoot.xtp" title="Troubleshooting"/>
+      
+    <item link="virtual-host.xtp" title="Virtual Hosting"/>
+      
+    <item link="watchdog.xtp" title="Watchdog"/>
+      
+    <item link="webapp-overview.xtp" title="WebApp"/>
+  </item>
+</navigation>

@@ -1,0 +1,28 @@
+<navigation threaded="true">
+  <item link="index.xtp" title="Resin 4.0 Quick Start">
+    <!--
+       - Overview
+      -->    
+    <item link="overview.xtp" title="Overview"/>
+    
+    <!--
+       - Quick Start
+      -->    
+    <item link="starting.xtp" title="Quick Start"/>
+    
+    <!--
+       - Installation
+      -->    
+    <item link="install.xtp" title="Installation">
+      <item link="resin-web-server.xtp" title="Resin Web Server"/>
+      <item link="install-apache.xtp" title="Apache"/>
+      <item link="install-iis.xtp" title="IIS"/>
+      <item link="plugin-dispatch.xtp" title="Plugin Dispatch"/>
+    </item>
+
+    <!--
+       - Command-line
+      -->
+    <item link="config-cmdline.xtp" title="Command-Line" />
+  </item>
+</navigation>

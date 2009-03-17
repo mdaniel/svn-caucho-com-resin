@@ -148,4 +148,18 @@ public class FormattedText extends ContainerNode {
     addItem(webOnly);
     return webOnly;
   }
+
+  public Figure createFigure()
+  {
+    Figure figure = new Figure(getDocument());
+    addItem(figure);
+    return figure;
+  }
+
+  public Table createTable()
+  {
+    Table table = new Table(getDocument());
+    addItem(table);
+    return table;
+  }
 }

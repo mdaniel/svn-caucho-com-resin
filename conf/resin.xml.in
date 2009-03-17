@@ -272,7 +272,7 @@
       <web-app id="/resin-config" root-directory="${resin.root}/doc/config"/>
       -->
       
-      <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
+      <web-app id="/resin-doc" root-directory="${resin.root}/doc"/>
     </host>
   </cluster>
 

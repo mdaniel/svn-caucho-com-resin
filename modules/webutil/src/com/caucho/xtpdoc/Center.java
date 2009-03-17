@@ -43,7 +43,7 @@ public class Center extends FormattedTextWithAnchors {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("div");
+    out.writeStartElement("span");
     out.writeAttribute("style", "text-align: center;");
 
     super.writeHtml(out);
