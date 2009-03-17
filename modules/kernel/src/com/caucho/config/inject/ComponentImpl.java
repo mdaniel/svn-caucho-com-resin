@@ -106,6 +106,11 @@ public class ComponentImpl<T> extends AbstractBean<T>
     _init = init;
   }
 
+  public ContainerProgram getInit()
+  {
+    return _init;
+  }
+
   /**
    * Add to the init program.
    */

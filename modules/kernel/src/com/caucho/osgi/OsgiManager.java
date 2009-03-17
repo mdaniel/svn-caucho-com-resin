@@ -301,8 +301,10 @@ public class OsgiManager
   public void publishExportLoader(String name,
 				  ExportBundleClassLoader loader)
   {
-    _publishedExportMap.put(name, loader);
-    _publishedExportMap.put(name.replace('.', '/'), loader);
+    if (_publishedExportMap.get(name) == null) {
+      _publishedExportMap.put(name, loader);
+      _publishedExportMap.put(name.replace('.', '/'), loader);
+    }
   }
 
   /**

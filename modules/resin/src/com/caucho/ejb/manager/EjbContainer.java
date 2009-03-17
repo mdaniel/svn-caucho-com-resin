@@ -33,10 +33,13 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.*;
 import javax.jms.*;
+import javax.inject.manager.Bean;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.config.*;
+import com.caucho.config.inject.CauchoBean;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.EjbConfigManager;
 import com.caucho.ejb.cfg.EjbRootConfig;
@@ -342,6 +345,12 @@ public class EjbContainer implements ScanListener, EnvironmentListener
       }
     }
 
+    return null;
+  }
+  
+  public Bean createBean(CauchoBean cauchoBean)
+  {
+    
     return null;
   }
 

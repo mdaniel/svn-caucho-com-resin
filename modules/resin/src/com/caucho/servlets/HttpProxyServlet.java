@@ -114,8 +114,6 @@ public class HttpProxyServlet extends GenericServlet {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    PrintWriter out = res.getWriter();
-    
     String uri;
     if (req.isRequestedSessionIdFromUrl()) {
       uri =  (req.getRequestURI() + ";jsessionid=" +

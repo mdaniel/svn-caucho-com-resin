@@ -38,6 +38,8 @@ import javax.jms.*;
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.config.cfg.WbComponentConfig;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
 
@@ -56,22 +58,24 @@ public class StatefulBeanConfig extends AbstractBeanConfig
   {
   }
 
-  public StatefulBeanConfig(WbComponentConfig beanConfig)
+  public StatefulBeanConfig(CauchoBean beanConfig)
   {
-    setClass(beanConfig.getClassType());
+    ComponentImpl comp = (ComponentImpl) beanConfig;
+    
+    setClass((Class) comp.getTargetType());
 
     // XXX:
     //if (beanConfig.getComponentType() != null)
     //  setComponentType(beanConfig.getComponentType());
     
-    if (beanConfig.getName() != null)
-      setName(beanConfig.getName());
+    if (comp.getName() != null)
+      setName(comp.getName());
     
     // XXX:
     // setScope(beanConfig.getScope());
 
-    if (beanConfig.getInit() != null)
-      setInit(beanConfig.getInit());
+    if (comp.getInit() != null)
+      setInit(comp.getInit());
   }
 
   @PostConstruct

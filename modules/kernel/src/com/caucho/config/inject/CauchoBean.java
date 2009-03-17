@@ -52,4 +52,14 @@ abstract public class CauchoBean<T> extends Bean<T>
    * Returns all of the custom annotations
    */
   abstract public Annotation []getAnnotations();
+
+  public boolean isAnnotationPresent(Class annType)
+  {
+    for (Annotation ann : getAnnotations()) {
+      if (ann.annotationType().equals(annType))
+	return true;
+    }
+
+    return false;
+  }
 }

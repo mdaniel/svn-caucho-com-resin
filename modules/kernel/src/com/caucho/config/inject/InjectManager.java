@@ -124,8 +124,13 @@ public class InjectManager
     "javax.faces.component.UIComponent"
   };
 
+  private static final String []FACTORY_CLASSES = {
+    "com.caucho.ejb.cfg.StatelessBeanConfigFactory",
+  };
+
   private static final Class []_forbiddenAnnotations;
   private static final Class []_forbiddenClasses;
+  private static final Class []_factoryClasses;
 
   private String _id;
 
@@ -198,6 +203,9 @@ public class InjectManager
   private ArrayList<CauchoBean> _pendingRegistrationList
     = new ArrayList<CauchoBean>();
 
+  private ArrayList<BeanConfigFactory> _customFactoryList
+    = new ArrayList<BeanConfigFactory>();
+
   private ApplicationScope _applicationScope = new ApplicationScope();
 
   private RuntimeException _configException;
@@ -250,6 +258,15 @@ public class InjectManager
 
       if (_classLoader != null && isSetLocal) {
 	_classLoader.addScanListener(this);
+      }
+
+      for (Class cl : _factoryClasses) {
+	try {
+	  BeanConfigFactory factory = (BeanConfigFactory) cl.newInstance();
+	  _customFactoryList.add(factory);
+	} catch (Exception e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
     
       Environment.addEnvironmentListener(this, _classLoader);
@@ -1035,6 +1052,21 @@ public class InjectManager
     return this;
   }
 
+  public void addBeanConfigFactory(BeanConfigFactory factory)
+  {
+    _customFactoryList.add(factory);
+  }
+  
+  public Manager addConfigBean(CauchoBean configBean)
+  {
+    for (BeanConfigFactory factory : _customFactoryList) {
+      if (factory.createBean(configBean))
+	return this;
+    }
+    
+    return addBean(configBean);
+  }
+
   private void registerJmx(Bean bean)
   {
     int id = _beanId++;
@@ -1244,6 +1276,15 @@ public class InjectManager
   public <T> T getInstance(Bean<T> bean,
 			   CreationalContext<T> createContext)
   {
+    ConfigContext cxt = (ConfigContext) createContext;
+
+    if (cxt != null) {
+      T object = (T) cxt.get(bean);
+
+      if (object != null)
+	return object;
+    }
+    
     return getInstanceRec(bean, createContext, this);
   }
   
@@ -1266,8 +1307,10 @@ public class InjectManager
     else {
       Class scopeType = bean.getScopeType();
 
-      if (Dependent.class.equals(scopeType))
-	return (T) bean.create(new ConfigContext());
+      if (Dependent.class.equals(scopeType)) {
+	// server/4764
+	return (T) bean.create(createContext);
+      }
       
       Context context = getContext(scopeType);
 
@@ -2268,6 +2311,7 @@ public class InjectManager
   static {
     ArrayList<Class> forbiddenAnnotations = new ArrayList<Class>();
     ArrayList<Class> forbiddenClasses = new ArrayList<Class>();
+    ArrayList<Class> factoryClasses = new ArrayList<Class>();
 
     for (String className : FORBIDDEN_ANNOTATIONS) {
       try {
@@ -2291,10 +2335,24 @@ public class InjectManager
       }
     }
 
+    for (String className : FACTORY_CLASSES) {
+      try {
+	Class cl = Class.forName(className);
+
+	if (cl != null)
+	  factoryClasses.add(cl);
+      } catch (Throwable e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
     _forbiddenAnnotations = new Class[forbiddenAnnotations.size()];
     forbiddenAnnotations.toArray(_forbiddenAnnotations);
 
     _forbiddenClasses = new Class[forbiddenClasses.size()];
     forbiddenClasses.toArray(_forbiddenClasses);
+
+    _factoryClasses = new Class[factoryClasses.size()];
+    factoryClasses.toArray(_factoryClasses);
   }
 }

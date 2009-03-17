@@ -41,6 +41,8 @@ public class ExportBundleClassLoader extends DynamicClassLoader
 {
   private static final L10N L = new L10N(ExportBundleClassLoader.class);
 
+  private OsgiManager _manager;
+  
   private String _symbolicName;
   private OsgiVersion _version;
 
@@ -53,16 +55,16 @@ public class ExportBundleClassLoader extends DynamicClassLoader
    * Creates a new export class loader.
    */
   protected ExportBundleClassLoader(ClassLoader parent,
+				    OsgiManager manager,
 				    String symbolicName,
 				    OsgiVersion version)
   {
     super(parent);
 
-    System.out.println("EXP: " + symbolicName + " " + version);
-
     if (symbolicName == null)
       throw new IllegalArgumentException(L.l("ExportBundleClassLoader requires a symbolicName."));
 
+    _manager = manager;
     _symbolicName = symbolicName;
     _version = version;
   }
@@ -71,10 +73,12 @@ public class ExportBundleClassLoader extends DynamicClassLoader
    * Creates a new environment class loader.
    */
   public static ExportBundleClassLoader create(ClassLoader parent,
+					       OsgiManager manager,
 					       String symbolicName,
 					       OsgiVersion version)
   {
     return new ExportBundleClassLoader(parent,
+				       manager,
 				       symbolicName,
 				       version);
   }
@@ -104,7 +108,7 @@ public class ExportBundleClassLoader extends DynamicClassLoader
       }
     }
 
-    return null;
+    return _manager.findImportClass(name);
   }
 
   public OsgiVersion getVersion()

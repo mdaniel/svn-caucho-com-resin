@@ -81,12 +81,15 @@ abstract public class SessionServer extends AbstractServer
 
       super.init();
       
-      InjectManager webBeans = InjectManager.create();
-
       SingletonBean comp
-        = new SingletonBean(getSessionContext(), null, SessionContext.class);
+	= new SingletonBean(getSessionContext(), null,
+			    SessionContext.class);
 
-      webBeans.addBean(comp);
+      _component = comp;
+
+      InjectManager inject = InjectManager.create();
+
+      inject.addBean(comp);
 
       if (_localHomeClass != null)
 	_localHome = (EJBLocalHome) getLocalObject(_localHomeClass);

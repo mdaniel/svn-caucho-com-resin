@@ -29,17 +29,14 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -579,6 +576,17 @@ public class JavaValue extends ObjectValue
   {
     if (_object instanceof InputStream)
       return (InputStream) _object;
+    else if (_object instanceof File) {
+      try {
+	InputStream is = new FileInputStream((File) _object);
+
+	Env.getCurrent().addCleanup(new EnvCloseable(is));
+
+	return is;
+      } catch (IOException e) {
+	throw new QuercusException(e);
+      }
+    }
     else
       return super.toInputStream();
   }

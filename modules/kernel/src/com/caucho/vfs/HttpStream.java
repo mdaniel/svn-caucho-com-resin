@@ -666,13 +666,14 @@ class HttpStream extends StreamImpl {
           }
         }
         
-        if (len != writeLength)
-          log.fine(L.l("Content-Length=" + len + " but wrote " + writeLength));
-        
-        _ws.print("Content-Length: " + contentLength);
+	// server/1963
+        if (len != writeLength) {
+	  throw new IOException(L.l("Content-Length={0} but only received {1}",
+				    len, "" + writeLength));
+	}
       }
-      else
-        _ws.print("Content-Length: " + writeLength);
+
+      _ws.print("Content-Length: " + writeLength);
       _ws.print("\r\n");
     }
     _ws.print("\r\n");

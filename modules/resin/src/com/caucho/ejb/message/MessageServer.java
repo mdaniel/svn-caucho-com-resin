@@ -226,7 +226,7 @@ public class MessageServer extends AbstractServer
     
       Object listener = ctor.newInstance(this);
 
-      initInstance(listener, new ConfigContext());
+      initInstance(listener);
 
       if (_ejbCreate != null)
 	_ejbCreate.invoke(listener);

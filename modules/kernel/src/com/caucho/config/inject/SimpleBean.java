@@ -396,7 +396,7 @@ public class SimpleBean extends ComponentImpl
       boolean isNew = false;
 
       ConfigContext env = (ConfigContext) cxt;
-      
+
       /*
       if (! env.canInject(_scope)) {
 	value = _scopeAdapter;
@@ -415,9 +415,12 @@ public class SimpleBean extends ComponentImpl
 
       // jsf/4221
       if (env != null)
-        env.push(value);
+        env.put(this, value);
 
       init(value, env);
+
+      if (env != null)
+	env.remove(this);
 
       return value;
     } catch (RuntimeException e) {

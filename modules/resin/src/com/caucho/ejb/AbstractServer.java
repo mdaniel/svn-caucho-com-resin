@@ -53,6 +53,7 @@ import com.caucho.util.Log;
 
 import javax.ejb.*;
 import javax.context.CreationalContext;
+import javax.inject.manager.Bean;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -834,19 +835,21 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void initInstance(Object instance)
   {
-    initInstance(instance, new ConfigContext());
+    initInstance(instance, null, null, new ConfigContext());
   }
 
   /**
    * Initialize an instance
    */
-  public void initInstance(Object instance, CreationalContext cxt)
+  public void initInstance(Object instance,
+			   Bean comp,
+			   Object proxy,
+			   CreationalContext cxt)
   {
     ConfigContext env = (ConfigContext) cxt;
-    /*
-    if (scope != null)
-      scope.put(_component, scope);
-    */
+
+    if (env != null && comp != null)
+      env.put((ComponentImpl) comp, proxy);
 
     if (_initInject != null) {
       Thread thread = Thread.currentThread();
@@ -874,6 +877,9 @@ abstract public class AbstractServer implements EnvironmentBean {
               L.l("Error invoking method {0}", _cauchoPostConstruct),
               e);
     }
+
+    if (env != null && comp != null)
+      env.remove((ComponentImpl) comp);
   }
 
   /**

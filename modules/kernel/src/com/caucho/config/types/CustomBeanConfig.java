@@ -364,7 +364,7 @@ public class CustomBeanConfig {
     
       InjectManager webBeans = InjectManager.create();
 
-      webBeans.addBean(_component);
+      webBeans.addConfigBean(_component);
     }
   }
 

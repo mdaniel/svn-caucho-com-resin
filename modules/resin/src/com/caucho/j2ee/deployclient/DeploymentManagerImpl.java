@@ -316,12 +316,15 @@ public class DeploymentManagerImpl
                             deploymentPlanStream);
     }
     catch (Exception e) {
+      throw new IllegalStateException(e);
+      /*
       IllegalStateException ex;
 
       ex = new IllegalStateException(e.getMessage());
       ex.initCause(e);
 
       throw ex;
+      */
     }
   }
 

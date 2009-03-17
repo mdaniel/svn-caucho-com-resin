@@ -48,7 +48,7 @@ public class InputStreamMarshal extends Marshal
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return expr.eval(env).toInputStream();
+    return marshal(env, expr.eval(env), expectedClass);
   }
 
   public Object marshal(Env env, Value value, Class expectedClass)

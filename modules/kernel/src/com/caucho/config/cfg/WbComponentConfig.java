@@ -407,7 +407,7 @@ public class WbComponentConfig {
   protected void deploy()
   {
     if (_comp != null) {
-      _webbeans.addBean(_comp);
+      _webbeans.addConfigBean(_comp);
     }
   }
 

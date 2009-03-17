@@ -56,6 +56,7 @@ import java.util.logging.Logger;
 import javax.context.CreationalContext;
 import javax.context.ApplicationScoped;
 import javax.context.Dependent;
+import javax.inject.manager.Bean;
 
 /**
  * The ConfigContext contains the state of the current configuration.
@@ -76,7 +77,7 @@ public class ConfigContext implements CreationalContext {
   private Config _config;
 
   private DependentScope _dependentScope;
-
+  
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
 
@@ -104,6 +105,8 @@ public class ConfigContext implements CreationalContext {
   
   ConfigContext(Config config)
   {
+    this();
+    
     _config = config;
   }
   
@@ -185,10 +188,13 @@ public class ConfigContext implements CreationalContext {
    * @param aThis
    * @return
    */
-  public Object get(ComponentImpl comp)
+  public Object get(Bean comp)
   {
-    if (_dependentScope != null)
-      return _dependentScope.get(comp);
+    if (_dependentScope != null && comp instanceof ComponentImpl) {
+      Object value = _dependentScope.get((ComponentImpl) comp);
+
+      return value;
+    }
     else
       return null;
   }
@@ -210,6 +216,12 @@ public class ConfigContext implements CreationalContext {
       _dependentScope = new DependentScope();
 
     _dependentScope.put(comp, obj);
+  }
+  
+  public void remove(ComponentImpl comp)
+  {
+    if (_dependentScope != null)
+      _dependentScope.remove(comp);
   }
 
   /**

@@ -27,14 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.session;
+package com.caucho.quercus.env;
 
-import javax.inject.manager.Bean;
-import javax.context.CreationalContext;
+import java.io.Closeable;
 
-/**
- * Creates a new instance of a stateful bean
- */
-public interface StatefulProvider {
-  public Object __caucho_createNew(Bean bean, CreationalContext env);
+public class EnvCloseable implements EnvCleanup {
+  private Closeable _obj;
+
+  public EnvCloseable(Closeable obj)
+  {
+    _obj = obj;
+  }
+  /*
+   * This method is invoked after a Quercus request has been
+   * processed and the environment is being cleaned up.
+   * An object that implements the EnvCleanup interface
+   * will register itself with via Env.addCleanup() to
+   * ensure that resources are released when the script
+   * has finished executing. If an object's resources
+   * are explicitly cleaned up, the Env.removeCleanup()
+   * method should be invoked.
+   */
+  public void cleanup()
+    throws Exception
+  {
+    _obj.close();
+  }
 }
+

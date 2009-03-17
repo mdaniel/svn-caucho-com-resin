@@ -121,6 +121,15 @@ public class DependentScope {
     _map.put(comp, value);
   }
 
+  /**
+   * Sets the object with the given name.
+   */
+  public void remove(ComponentImpl comp)
+  {
+    if (_map != null)
+      _map.remove(comp);
+  }
+
   public boolean canInject(ScopeContext scope)
   {
     if (scope == null)

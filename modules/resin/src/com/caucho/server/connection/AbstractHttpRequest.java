@@ -760,7 +760,7 @@ public abstract class AbstractHttpRequest
   {
     if (keyLen < 4)
       return true;
-
+    
     int key1 = keyBuf[keyOff];
     switch (key1) {
     case 'c':

@@ -33,11 +33,13 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
+import javax.inject.manager.Bean;
 import javax.jms.*;
 
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.cfg.WbComponentConfig;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
 
@@ -52,13 +54,20 @@ public class StatelessBeanConfig extends AbstractBeanConfig
   private static final Logger log
     = Logger.getLogger(StatelessBeanConfig.class.getName());
 
+  private CauchoBean _bean;
+  private EjbStatelessBean _ejbBean;
+
   public StatelessBeanConfig()
   {
   }
 
-  public StatelessBeanConfig(WbComponentConfig beanConfig)
+  public StatelessBeanConfig(CauchoBean beanConfig)
   {
-    setClass(beanConfig.getClassType());
+    _bean = beanConfig;
+    
+    ComponentImpl comp = (ComponentImpl) beanConfig;
+
+    setClass((Class) comp.getTargetType());
 
     // XXX:
     //if (beanConfig.getComponentType() != null)
@@ -70,8 +79,8 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     // XXX:
     // setScope(beanConfig.getScope());
 
-    if (beanConfig.getInit() != null)
-      setInit(beanConfig.getInit());
+    if (comp.getInit() != null)
+      setInit(comp.getInit());
   }
 
   @PostConstruct
@@ -99,10 +108,17 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     if (getInit() != null)
       bean.setInit(getInit());
 
+    _ejbBean = bean;
+
     configManager.setBeanConfig(name, bean);
 
     // XXX: timing?
     // configManager.start();
+  }
+
+  public Bean getInjectBean()
+  {
+    return _bean;
   }
 }
 

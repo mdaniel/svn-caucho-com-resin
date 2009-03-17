@@ -55,6 +55,6 @@ public class StatefulComponent extends ComponentImpl {
   @Override
   public Object createNew(CreationalContext env)
   {
-    return _provider.__caucho_createNew(env);
+    return _provider.__caucho_createNew(this, env);
   }
 }
