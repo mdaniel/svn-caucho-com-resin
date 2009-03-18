@@ -402,6 +402,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	_webBeans.addBean(producesBean);
       }
     }
+
+    Collections.sort(_bindings, new AnnotationComparator());
   }
 
   protected void initDefault()
@@ -1108,6 +1110,16 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     public int compare(Method a, Method b)
     {
       return a.getName().compareTo(b.getName());
+    }
+  }
+
+  static class AnnotationComparator implements Comparator<Annotation> {
+    public int compare(Annotation a, Annotation b)
+    {
+      Class annTypeA = a.annotationType();
+      Class annTypeB = b.annotationType();
+      
+      return annTypeA.getName().compareTo(annTypeB.getName());
     }
   }
 

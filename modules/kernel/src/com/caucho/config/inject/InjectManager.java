@@ -1342,7 +1342,7 @@ public class InjectManager
    */
   public <T> T getInstance(Bean<T> bean)
   {
-    return getInstance(bean, null);
+    return (T) getInstance(bean, new ConfigContext());
   }
 
   /**
@@ -1434,6 +1434,15 @@ public class InjectManager
   {
     Bean bean = resolveByInjectionPoint(ij);
 
+    if (bean instanceof SimpleBean) {
+      SimpleBean simpleBean = (SimpleBean) bean;
+
+      Object adapter = simpleBean.getScopeAdapter(cxt);
+
+      if (adapter != null)
+	return (T) adapter;
+    }
+	
     return (T) getInstance(bean, cxt); // XXX: ctx
   }
 
@@ -1442,9 +1451,7 @@ public class InjectManager
    */
   public <T> T getInstanceToInject(InjectionPoint ij)
   {
-    Bean bean = resolveByInjectionPoint(ij);
-    
-    return (T) getInstance(bean);
+    return (T) getInstanceToInject(ij, new ConfigContext());
   }
 
   public Bean resolveByInjectionPoint(InjectionPoint ij)

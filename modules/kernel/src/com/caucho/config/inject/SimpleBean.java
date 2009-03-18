@@ -398,6 +398,7 @@ public class SimpleBean extends ComponentImpl
       ConfigContext env = (ConfigContext) cxt;
 
       /*
+      // ioc/0520
       if (! env.canInject(_scope)) {
 	value = _scopeAdapter;
 	
@@ -430,6 +431,29 @@ public class SimpleBean extends ComponentImpl
     } finally {
       thread.setContextClassLoader(loader);
     }
+  }
+  
+  public Object getScopeAdapter(CreationalContext cxt)
+  {
+    if (! (cxt instanceof ConfigContext))
+      return null;
+
+    ConfigContext env = (ConfigContext) cxt;
+
+    // ioc/0520
+    if (! env.canInject(_scope)) {
+      Object value = _scopeAdapter;
+	
+      if (value == null) {
+	ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
+	_scopeAdapter = scopeAdapter.wrap(this);
+	value = _scopeAdapter;
+      }
+
+      return value;
+    }
+
+    return null;
   }
 
   public Object getScopeAdapter()

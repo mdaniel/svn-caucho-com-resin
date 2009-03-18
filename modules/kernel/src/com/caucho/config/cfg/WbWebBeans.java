@@ -348,10 +348,13 @@ public class WbWebBeans {
       if (cl.isInterface())
 	throw new ConfigException(L.l("'{0}' is not valid because <Decorators> can only contain decorator implementations",
 				      cl.getName()));
-
-      if (! cl.isAnnotationPresent(Decorator.class))
+      
+      /*
+      if (! comp.isAnnotationPresent(Decorator.class)) {
 	throw new ConfigException(L.l("'{0}' must have an @Decorator annotation because it is a decorator implementation",
 				      cl.getName()));
+      }
+      */
 
       _decoratorList.add(cl);
     }

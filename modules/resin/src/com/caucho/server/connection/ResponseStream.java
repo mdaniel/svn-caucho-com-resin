@@ -180,6 +180,11 @@ class ResponseStream extends ToByteResponseStream {
     return _isCommitted || _isClosed;
   }
 
+  public boolean hasData()
+  {
+    return _isCommitted || _contentLength > 0;
+  }
+  
   public boolean isFlushed()
   {
     try {

@@ -152,6 +152,11 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     return false;
   }
 
+  public boolean hasData()
+  {
+    return false;
+  }
+
   /**
    * Set true for HEAD requests.
    */

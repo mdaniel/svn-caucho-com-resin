@@ -143,6 +143,9 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public SingletonHandle getHandle()
   {
+    if (_handle == null)
+      _handle = new SingletonHandle(getTargetType(), getBindings());
+    
     return _handle;
   }
 
@@ -155,8 +158,13 @@ public class ComponentImpl<T> extends AbstractBean<T>
 
     generateScopeId();
 
-    if (isSingleton())
+    if (isSingleton()) {
       _handle = new SingletonHandle(getTargetType(), getBindings());
+    }
+    
+    if (getScopeType() != null) {
+      _scope = _webBeans.getScopeContext(getScopeType());
+    }
   }
 
   private void generateScopeId()
@@ -385,9 +393,6 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public void bind()
   {
-    if (getScopeType() != null) {
-      _scope = _webBeans.getScopeContext(getScopeType());
-    }
   }
 
   public void createProgram(ArrayList<ConfigProgram> initList, Field field)
