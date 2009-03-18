@@ -53,4 +53,10 @@ public interface Record extends Cloneable, Serializable {
    * Gets a short description for the record.
    */
   public String getRecordShortDescription();
+
+  public Object clone() throws CloneNotSupportedException;
+
+  public boolean equals(Object o);
+
+  public int hashCode();
 }

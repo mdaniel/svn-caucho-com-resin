@@ -39,7 +39,11 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
 public @interface SecondaryTable {
-  String name() default "";
+  /**
+   * (Required) the name of the table
+   */
+  String name();
+  
   String catalog() default "";
   String schema() default "";
   PrimaryKeyJoinColumn []pkJoinColumns() default {};

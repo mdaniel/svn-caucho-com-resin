@@ -29,11 +29,16 @@
 package javax.resource.spi;
 
 import javax.resource.ResourceException;
+import java.beans.PropertyDescriptor;
 
 /**
  * An exception with internal causes.
  */
-public class InvalidPropertyException extends ResourceException {
+public class InvalidPropertyException
+  extends ResourceException
+{
+  private PropertyDescriptor[] _invalidProperties;
+
   public InvalidPropertyException()
   {
   }
@@ -57,4 +62,15 @@ public class InvalidPropertyException extends ResourceException {
   {
     super(e);
   }
+
+  public void setInvalidPropertyDescriptors(PropertyDescriptor[] invalidProperties)
+  {
+    _invalidProperties = invalidProperties;
+  }
+
+  public PropertyDescriptor[] getInvalidPropertyDescriptors()
+  {
+    return _invalidProperties;
+  }
 }
+

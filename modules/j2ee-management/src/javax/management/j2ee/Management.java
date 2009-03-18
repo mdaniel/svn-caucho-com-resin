@@ -31,7 +31,7 @@ package javax.management.j2ee;
 
 import javax.ejb.EJBObject;
 import javax.management.*;
-import javax.management.j2ee.statistics.ListenerRegistration;
+import javax.management.j2ee.ListenerRegistration;
 import java.rmi.RemoteException;
 import java.util.Set;
 

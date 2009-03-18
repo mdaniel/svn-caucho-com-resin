@@ -37,7 +37,7 @@ import java.util.Iterator;
  * Resolves properties based on arrays.
  */
 public class CompositeELResolver extends ELResolver {
-  public final ArrayList<ELResolver> _resolvers
+  private final ArrayList<ELResolver> _resolvers
     = new ArrayList<ELResolver>();
   
   public CompositeELResolver()

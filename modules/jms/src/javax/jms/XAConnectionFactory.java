@@ -31,7 +31,7 @@ package javax.jms;
 /**
  * The main destination.
  */
-public interface XAConnectionFactory extends ConnectionFactory {
+public interface XAConnectionFactory {
   public XAConnection createXAConnection()
     throws JMSException;
   

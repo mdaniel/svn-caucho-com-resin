@@ -28,10 +28,14 @@
 
 package javax.resource.cci;
 
+import java.io.Serializable;
+
 /**
  * Specification for an interaction.
  */
-public interface InteractionSpec {
+public interface InteractionSpec
+  extends Serializable
+{
   public final static int SYNC_RECEIVE = 2;
   public final static int SYNC_SEND = 0;
   public final static int SYNC_SEND_RECEIVE = 1;

@@ -39,6 +39,6 @@ public interface DissociatableManagedConnection {
   /**
    * Disassociates a managed connection from all the handles.
    */
-  public void disassociateConnections()
+  public void dissociateConnections()
     throws ResourceException;
 }

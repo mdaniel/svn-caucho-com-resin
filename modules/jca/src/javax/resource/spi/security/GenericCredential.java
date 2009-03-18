@@ -50,4 +50,8 @@ public interface GenericCredential {
    */
   public byte []getCredentialData()
     throws SecurityException;
+
+  public boolean equals(Object o);
+
+  public int hashCode();
 }

@@ -47,14 +47,9 @@ public class SystemException extends Exception {
   {
     this.errorCode = errorCode;
   }
-  
-  public SystemException(Throwable rootCause)
+
+  public SystemException(Throwable throwable)
   {
-    super(rootCause);
-  }
-  
-  public SystemException(String msg, Throwable rootCause)
-  {
-    super(msg, rootCause);
+    super(throwable);
   }
 }

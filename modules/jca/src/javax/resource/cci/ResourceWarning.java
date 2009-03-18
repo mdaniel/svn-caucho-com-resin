@@ -41,7 +41,7 @@ public class ResourceWarning extends ResourceException {
   {
     super();
   }
-  
+
   /**
    * Creates the resource warning.
    */
@@ -49,7 +49,17 @@ public class ResourceWarning extends ResourceException {
   {
     super(reason);
   }
-  
+
+  public ResourceWarning(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public ResourceWarning(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
+
   /**
    * Creates the resource warning.
    */

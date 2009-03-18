@@ -33,4 +33,8 @@ package javax.resource.spi;
  * Resource-specific information.
  */
 public interface ConnectionRequestInfo {
+
+  public boolean equals(Object o);
+
+  public int hashCode();
 }

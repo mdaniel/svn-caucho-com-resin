@@ -41,14 +41,4 @@ public class HeuristicMixedException extends Exception {
   {
     super(msg);
   }
-  
-  public HeuristicMixedException(Throwable e)
-  {
-    super(e);
-  }
-  
-  public HeuristicMixedException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
 }

@@ -80,4 +80,8 @@ public interface ManagedConnectionFactory extends java.io.Serializable {
    */
   public PrintWriter getLogWriter()
     throws ResourceException;
+
+  public boolean equals(Object o);
+
+  public int hashCode();
 }

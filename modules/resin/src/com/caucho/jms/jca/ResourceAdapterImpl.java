@@ -119,7 +119,6 @@ public class ResourceAdapterImpl implements ResourceAdapter {
    * Called when the resource adapter is stopped.
    */
   public void stop()
-    throws ResourceAdapterInternalException
   {
     _ctx = null;
   }
@@ -137,7 +136,7 @@ public class ResourceAdapterImpl implements ResourceAdapter {
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
 				 ActivationSpec spec)
-    throws NotSupportedException
+    throws NotSupportedException, ResourceException
   {
     MessageListenerSpec listener = (MessageListenerSpec) spec;
     listener.setEndpointFactory(endpointFactory);

@@ -40,15 +40,5 @@ public class HeuristicCommitException extends Exception {
   public HeuristicCommitException(String msg)
   {
     super(msg);
-  }
-  
-  public HeuristicCommitException(Throwable e)
-  {
-    super(e);
-  }
-  
-  public HeuristicCommitException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
+  }   
 }

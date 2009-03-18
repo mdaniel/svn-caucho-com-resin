@@ -181,7 +181,6 @@ public class RmiRegistry extends AbstractResourceAdapter
    * stop (unbind and unexport) all services
    */
   public void stop()
-    throws ResourceAdapterInternalException
   {
     // unbind and unexport all services
     for (Iterator<RmiService> i = _services.iterator(); i.hasNext(); ) {

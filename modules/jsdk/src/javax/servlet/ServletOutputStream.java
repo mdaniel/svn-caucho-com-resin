@@ -47,6 +47,11 @@ import java.io.OutputStream;
  * <p>Buffering of the output stream is controlled by the Response object.
  */
 public abstract class ServletOutputStream extends OutputStream {
+  
+  protected ServletOutputStream()
+  {
+  }
+
   /**
    * Prints a string to the stream.  Note, this method does not properly
    * handle character encoding.

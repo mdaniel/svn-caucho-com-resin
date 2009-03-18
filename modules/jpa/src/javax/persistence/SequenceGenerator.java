@@ -51,6 +51,6 @@ public @interface SequenceGenerator {
    * @since JPA 2.0
    */
   String schema() default "";
-  int initialValue() default 0;
+  int initialValue() default 1;
   int allocationSize() default 50;
 }

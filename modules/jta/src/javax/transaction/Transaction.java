@@ -35,10 +35,7 @@ import javax.transaction.xa.XAResource;
  * associated with a single thread.
  */
 public interface Transaction {
-  public final static int TMSUCCESS = 0x04000000;
-  public final static int TMSUSPEND = 0x02000000;
-  public final static int TMFAIL    = 0x20000000;
-  
+ 
   /**
    * Returns the transaction's status.
    */

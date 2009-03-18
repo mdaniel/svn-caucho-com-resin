@@ -37,8 +37,7 @@ public interface XASession extends Session {
   public Session getSession()
     throws JMSException;
   
-  public XAResource getXAResource()
-    throws JMSException;
+  public XAResource getXAResource();
 
   public boolean getTransacted()
     throws JMSException;

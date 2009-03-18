@@ -34,7 +34,14 @@ import javax.resource.ResourceException;
 /**
  * An exception with internal causes.
  */
-public class ApplicationServerInternalException extends ResourceException {
+public class ApplicationServerInternalException
+  extends ResourceException
+{
+
+  public ApplicationServerInternalException()
+  {
+  }
+
   public ApplicationServerInternalException(String reason)
   {
     super(reason);

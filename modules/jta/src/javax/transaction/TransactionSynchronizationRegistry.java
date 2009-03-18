@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,32 +18,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package javax.ejb;
+package javax.transaction;
 
 /**
- * The main ejb context.
+ * @Since JTA 1.1
  */
-public class NoSuchEntityException
-  extends EJBException
-{
-  public NoSuchEntityException()
-  {
-  }
+public interface TransactionSynchronizationRegistry {
+  Object getTransactionKey();
 
-  public NoSuchEntityException(Exception e)
-  {
-    super(e);
-  }
+  void putResource(Object key, Object value);
 
-  public NoSuchEntityException(String msg)
-  {
-    super(msg);
-  }
+  Object getResource(Object key);
+
+  void registerInterposedSynchronization(Synchronization sync);
+
+  int getTransactionStatus();
+
+  void setRollbackOnly();
+
+  boolean getRollbackOnly();
 }

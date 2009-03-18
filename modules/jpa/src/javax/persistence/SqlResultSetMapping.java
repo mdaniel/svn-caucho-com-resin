@@ -29,16 +29,16 @@
 
 package javax.persistence;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.TYPE;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
  * The @SqlResultSetMapping annotation.
  */
-@Target({ElementType.TYPE,ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RUNTIME)
+@Target({TYPE})
 public @interface SqlResultSetMapping {
   String name();
   EntityResult []entities() default {};

@@ -29,37 +29,39 @@
 package javax.resource.spi.security;
 
 import javax.resource.spi.ManagedConnectionFactory;
+import java.util.Arrays;
 
 /**
  * @deprecated
  */
-public class PasswordCredential implements java.io.Serializable {
+public final class PasswordCredential
+  implements java.io.Serializable
+{
   private String userName;
-  private char []password;
+  private char[] password;
   private ManagedConnectionFactory mcf;
-  
+
   /**
    * Creates the credential
    */
-  public PasswordCredential(String userName, char []password)
+  public PasswordCredential(String userName, char[] password)
   {
     this.userName = userName;
     this.password = password;
   }
 
   /**
-  /**
-   * Returns the user name of the principal.
+   * /** Returns the user name of the principal.
    */
   public String getUserName()
   {
     return this.userName;
   }
-  
+
   /**
    * Returns the user password.
    */
-  public char []getPassword()
+  public char[] getPassword()
   {
     return this.password;
   }
@@ -78,5 +80,32 @@ public class PasswordCredential implements java.io.Serializable {
   public void setManagedConnectionFactory(ManagedConnectionFactory factory)
   {
     this.mcf = factory;
+  }
+
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    PasswordCredential that = (PasswordCredential) o;
+
+    if (!Arrays.equals(password, that.password))
+      return false;
+
+    if (!userName.equals(that.userName))
+      return false;
+
+    return true;
+  }
+
+  public int hashCode()
+  {
+    int result = userName.hashCode();
+    result = 31 * result + (password != null ? Arrays.hashCode(password) : 0);
+
+    return result;
   }
 }

@@ -35,9 +35,12 @@ package javax.persistence;
 public enum LockModeType {
   READ,
   WRITE,
+  /**
+   * @Since JPA 2.0
+   */
   OPTIMISTIC,
   OPTIMISTIC_FORCE_INCREMENT,
   PESSIMISTIC,
   PESSIMISTIC_FORCE_INCREMENT,
-   NONE
+  NONE
 }

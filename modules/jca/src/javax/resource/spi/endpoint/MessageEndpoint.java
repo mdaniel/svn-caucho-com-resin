@@ -30,6 +30,7 @@
 package javax.resource.spi.endpoint;
 
 import javax.resource.ResourceException;
+import javax.resource.NotSupportedException;
 import java.lang.reflect.Method;
 
 /**
@@ -40,7 +41,7 @@ public interface MessageEndpoint {
    * Called by a resource adapter before a message is delivered.
    */
   public void beforeDelivery(Method method)
-    throws ResourceException;
+    throws NoSuchMethodException, ResourceException;
 
   /**
    * Called by a resource adapter after a message is delivered.

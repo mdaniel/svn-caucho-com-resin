@@ -105,7 +105,6 @@ public class JmsResourceAdapter implements ResourceAdapter {
    * Called when the resource adapter is stopped.
    */
   public void stop()
-    throws ResourceAdapterInternalException
   {
   }
 
@@ -114,7 +113,7 @@ public class JmsResourceAdapter implements ResourceAdapter {
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
 				 ActivationSpec spec)
-    throws NotSupportedException
+    throws NotSupportedException, ResourceException
   {
     synchronized (this) {
       if (_consumers != null)

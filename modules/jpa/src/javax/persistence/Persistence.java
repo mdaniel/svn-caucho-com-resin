@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +54,13 @@ public class Persistence {
   
   private static final String AMBER_PROVIDER
     = "com.caucho.amber.manager.AmberPersistenceProvider";
-  
+
+  protected static final java.util.Set<PersistenceProvider> providers
+    = new HashSet<PersistenceProvider>();
+
+  public static final String PERSISTENCE_PROVIDER
+    = "javax.persistence.spi.PeristenceProvider";
+
   /**
    * Create an return an EntityManagerFactory for the named unit.
    *

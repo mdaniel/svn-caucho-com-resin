@@ -404,7 +404,7 @@ public class BeanELResolver extends ELResolver {
       initDescriptor();
     }
     
-    public BeanProperty(Class baseClass,
+    private BeanProperty(Class baseClass,
 			String name,
 			Method getter)
     {
@@ -432,7 +432,7 @@ public class BeanELResolver extends ELResolver {
 			   Boolean.TRUE);
     }
 
-    public PropertyDescriptor getDescriptor()
+    private PropertyDescriptor getDescriptor()
     {
       return _descriptor;
     }

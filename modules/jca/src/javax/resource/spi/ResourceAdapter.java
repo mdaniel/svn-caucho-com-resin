@@ -47,15 +47,14 @@ public interface ResourceAdapter {
   /**
    * Called when the resource adapter is stopped.
    */
-  public void stop()
-    throws ResourceAdapterInternalException;
+  public void stop();
 
   /**
    * Called during activation of a message endpoint.
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
 				 ActivationSpec spec)
-    throws NotSupportedException;
+    throws NotSupportedException, ResourceException;
   
   /**
    * Called during deactivation of a message endpoint.

@@ -38,8 +38,8 @@ import java.lang.annotation.Target;
 /**
  * The @GeneratedValue annotation.
  */
-@Target({FIELD,METHOD})
 @Retention(RUNTIME)
+@Target({METHOD, FIELD})
 public @interface GeneratedValue {
   GenerationType strategy() default GenerationType.AUTO;
 

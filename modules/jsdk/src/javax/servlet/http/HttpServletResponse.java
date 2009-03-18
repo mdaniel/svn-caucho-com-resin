@@ -84,7 +84,8 @@ public interface HttpServletResponse extends ServletResponse {
   public final static int SC_SWITCHING_PROTOCOLS = 101;
   public final static int SC_UNAUTHORIZED = 401;
   public final static int SC_UNSUPPORTED_MEDIA_TYPE = 415;
-  public final static int SC_USE_PROXY_TYPE = 305;
+  public final static int SC_USE_PROXY = 305;
+  public final static int SC_TEMPORARY_REDIRECT = 307;
 
   /**
    * Sets the HTTP status

@@ -38,6 +38,11 @@ import java.io.InputStream;
  * API.
  */
 public abstract class ServletInputStream extends InputStream {
+
+  protected ServletInputStream()
+  {
+  }
+
   /**
    * Reads a line from the POST data.
    *

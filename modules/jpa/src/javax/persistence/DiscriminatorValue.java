@@ -40,5 +40,9 @@ import java.lang.annotation.Target;
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface DiscriminatorValue {
-  String value() default "";
+  /**
+   * (Optional) The value that indicates that the row is an entity of the
+   * annotated entity type.
+   */
+  String value();
 }

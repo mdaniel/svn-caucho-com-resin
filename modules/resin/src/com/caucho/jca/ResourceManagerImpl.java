@@ -187,7 +187,7 @@ public class ResourceManagerImpl implements BootstrapContext {
   /**
    * Creates a new Timer instance.
    */
-  public Timer createTimer()
+  public Timer createTimer() throws javax.resource.spi.UnavailableException 
   {
     TimerImpl timer = new TimerImpl(this);
 

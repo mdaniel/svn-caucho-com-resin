@@ -41,14 +41,4 @@ public class HeuristicRollbackException extends Exception {
   {
     super(msg);
   }
-  
-  public HeuristicRollbackException(Throwable e)
-  {
-    super(e);
-  }
-  
-  public HeuristicRollbackException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
 }

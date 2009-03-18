@@ -36,8 +36,9 @@ import java.lang.annotation.Target;
 /**
  * The transaction attribute annotation.
  */
-@Target({ElementType.TYPE,ElementType.METHOD})
+
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD,ElementType.TYPE})
 public @interface TransactionAttribute {
   TransactionAttributeType value() default TransactionAttributeType.REQUIRED;
 }
