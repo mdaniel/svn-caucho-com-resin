@@ -46,7 +46,12 @@ public class ExecutionContext {
   {
     _xid = xid;
   }
-    
+
+  public Xid getXid()
+  {
+    return _xid;
+  }
+
   /**
    * Returns the timeout
    */

@@ -29,25 +29,37 @@
 
 package javax.annotation;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.PACKAGE;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+import static java.lang.annotation.ElementType.PARAMETER;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.annotation.Documented;
 
 /**
  * The inject annotation.
  */
-@Target({ElementType.ANNOTATION_TYPE,
-         ElementType.CONSTRUCTOR,
-         ElementType.FIELD,
-         ElementType.LOCAL_VARIABLE,
-         ElementType.METHOD,
-         ElementType.PACKAGE,
-         ElementType.PARAMETER,
-         ElementType.TYPE})
+@Documented
 @Retention(RetentionPolicy.SOURCE)
+@Target({PACKAGE,
+         TYPE,
+         ANNOTATION_TYPE,
+         METHOD,
+         CONSTRUCTOR,
+         FIELD,
+         LOCAL_VARIABLE,
+         PARAMETER
+})
 public @interface Generated {
   String[] value();
-  String date() default "";
+
   String comments() default "";
+
+  String date() default "";
 }

@@ -32,12 +32,14 @@ import static java.lang.annotation.ElementType.TYPE;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.annotation.Documented;
 
 /**
  * The resource annotation.
  */
-@Target({TYPE})
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target({TYPE})
 public @interface Resources {
   Resource[] value();
 }

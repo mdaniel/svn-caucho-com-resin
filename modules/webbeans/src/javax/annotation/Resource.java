@@ -38,8 +38,9 @@ import java.lang.annotation.Target;
 /**
  * The resource annotation.
  */
-@Target({TYPE, METHOD, FIELD})
+
 @Retention(RetentionPolicy.RUNTIME)
+@Target({TYPE, FIELD, METHOD})
 public @interface Resource {
   public enum AuthenticationType {
     CONTAINER,
@@ -54,7 +55,7 @@ public @interface Resource {
   /**
    * Java type of the resource.
    */
-  Class<?> type() default Object.class;
+  Class type() default Object.class;
   
   AuthenticationType authenticationType()
     default AuthenticationType.CONTAINER;

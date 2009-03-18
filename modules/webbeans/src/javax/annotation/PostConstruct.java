@@ -32,11 +32,13 @@ import static java.lang.annotation.ElementType.METHOD;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.annotation.Documented;
 
 /**
  * Marks a method to be called after construction.
  */
-@Target({METHOD})
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target({METHOD})
 public @interface PostConstruct {
 }
