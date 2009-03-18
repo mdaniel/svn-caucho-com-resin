@@ -298,6 +298,9 @@ public class StringBuilderValue
       i++;
     }
     
+    if (i + 1 < len && buffer[i] == '0' && buffer[i + 1] == 'x')
+      return ValueType.LONG_EQ;
+    
     if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
       i++;
     }
@@ -405,6 +408,29 @@ public class StringBuilderValue
     while (i < len && Character.isWhitespace(buffer[i])) {
       start++;
       i++;
+    }
+    
+    int end = offset + len;
+
+    if (offset + 1 < end && buffer[offset] == '0'
+        && ((ch = buffer[offset + 1]) == 'x' || ch == 'X')) {
+      
+      double value = 0;
+      
+      for (offset += 2; offset < end; offset++) {
+        ch = buffer[offset] & 0xFF;
+
+        if ('0' <= ch && ch <= '9')
+          value = value * 16 + ch - '0';
+        else if ('a' <= ch && ch <= 'z')
+          value = value * 16 + ch - 'a' + 10;
+        else if ('A' <= ch && ch <= 'Z')
+          value = value * 16 + ch - 'A' + 10;
+        else
+          return value;
+      }
+      
+      return value;
     }
 
     if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {

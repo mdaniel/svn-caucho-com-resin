@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
@@ -100,13 +99,13 @@ public class MailModule extends AbstractQuercusModule {
       StringValue user = null;
 
       if (headers.get("from") != null)
-	user = env.createString(headers.get("from"));
+        user = env.createString(headers.get("from"));
 
       if (user == null)
-	user = env.getIni("sendmail_from");
+        user = env.getIni("sendmail_from");
       
       if (user != null && ! user.toString().equals("")) {
-	String userString = user.toString();
+        String userString = user.toString();
 
 	/*
 	int p = userString.indexOf('<');
@@ -115,7 +114,6 @@ public class MailModule extends AbstractQuercusModule {
 	if (p >= 0 && q >= 0) {
 	  userString = userString.substring(p + 1, q);
 	}
-	System.out.println("USER: " + userString);
 	*/
 	
         props.put("mail.from", userString);
@@ -133,10 +131,8 @@ public class MailModule extends AbstractQuercusModule {
           int index = email.indexOf('@');
           
           // for certain windows smtp servers
-          if ((index < 0)
-              || (email.indexOf('.', index) < 0)) {
+          if (email.indexOf('.', index) < 0)
             email += ".com";
-          }
 
           props.put("mail.from", email);
         } catch (Exception e) {
@@ -164,10 +160,10 @@ public class MailModule extends AbstractQuercusModule {
       ArrayList<Address> addrList = new ArrayList<Address>();
       
       if (to != null && to.length() > 0)
-        addrList.addAll(addRecipients(msg, Message.RecipientType.TO, to));
+        addRecipients(msg, Message.RecipientType.TO, to, addrList);
 
       if (headers != null)
-        addrList.addAll(addHeaders(msg, headers));
+        addHeaders(msg, headers, addrList);
 
       Address []from = msg.getFrom();
       if (from == null || from.length == 0) {
@@ -243,14 +239,13 @@ public class MailModule extends AbstractQuercusModule {
     }
   }
 
-  private static ArrayList<Address> addRecipients(MimeMessage msg,
-                                                  Message.RecipientType type,
-                                                  String to)
+  private static void addRecipients(MimeMessage msg,
+                                    Message.RecipientType type,
+                                    String to,
+                                    ArrayList<Address> addrList)
     throws MessagingException
   {
     String []split = to.split(",");
-
-    ArrayList<Address> addresses = new ArrayList<Address>();
 
     for (int i = 0; i < split.length; i++) {
       String addrStr = split[i];
@@ -281,48 +276,38 @@ public class MailModule extends AbstractQuercusModule {
         
         Address addr = new InternetAddress(addrStr);
 
-        addresses.add(addr);
+        addrList.add(addr);
         msg.addRecipient(type, addr);
       }
     }
-
-    return addresses;
   }
 
-  private static ArrayList<Address>
-      addHeaders(MimeMessage msg,
-                 HashMap<String,String> headerMap)
+  private static void addHeaders(MimeMessage msg,
+                                 HashMap<String,String> headerMap,
+                                 ArrayList<Address> addrList)
     throws MessagingException
   {
-    ArrayList<Address> addrList = new ArrayList<Address>();
-    
     for (Map.Entry<String,String> entry : headerMap.entrySet()) {
       String name = entry.getKey();
       String value = entry.getValue();
 
-      /*
-      System.out.println("MAIL-HEADER: " + name + " " + value);
-      */
-      
       if ("".equals(value)) {
       }
       else if (name.equalsIgnoreCase("From")) {
         msg.setFrom(new InternetAddress(value));
       }
       else if (name.equalsIgnoreCase("To")) {
-        addrList.addAll(addRecipients(msg, Message.RecipientType.TO, value));
+        addRecipients(msg, Message.RecipientType.TO, value, addrList);
       }
       else if (name.equalsIgnoreCase("Bcc")) {
-        addrList.addAll(addRecipients(msg, Message.RecipientType.BCC, value));
+        addRecipients(msg, Message.RecipientType.BCC, value, addrList);
       }
       else if (name.equalsIgnoreCase("Cc")) {
-        addrList.addAll(addRecipients(msg, Message.RecipientType.CC, value));
+        addRecipients(msg, Message.RecipientType.CC, value, addrList);
       }
       else
         msg.addHeader(name, value);
     }
-    
-    return addrList;
   }
 
   private static HashMap<String,String> splitHeaders(String headers)

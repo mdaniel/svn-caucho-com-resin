@@ -336,6 +336,32 @@ abstract public class StringValue
     while (offset < end && Character.isWhitespace(buffer[offset])) {
       offset++;
     }
+    
+    int ch;
+    
+    if (offset + 1 < end && buffer[offset] == '0'
+      && ((ch = buffer[offset + 1]) == 'x' || ch == 'X')) {
+    
+    for (offset += 2; offset < end; offset++) {
+      ch = buffer[offset] & 0xFF;
+
+      long oldValue = value;
+      
+      if ('0' <= ch && ch <= '9')
+        value = value * 16 + ch - '0';
+      else if ('a' <= ch && ch <= 'z')
+        value = value * 16 + ch - 'a' + 10;
+      else if ('A' <= ch && ch <= 'Z')
+        value = value * 16 + ch - 'A' + 10;
+      else
+        return value;
+      
+      if (value < oldValue)
+        return Integer.MAX_VALUE;
+    }
+    
+    return value;
+  }
 
     if (offset < end && buffer[offset] == '-') {
       sign = -1;
@@ -347,7 +373,7 @@ abstract public class StringValue
     }
 
     while (offset < end) {
-      int ch = buffer[offset++];
+      ch = buffer[offset++];
 
       if ('0' <= ch && ch <= '9') {
         long newValue = 10 * value + ch - '0';
@@ -389,6 +415,32 @@ abstract public class StringValue
       offset++;
     }
     
+    int ch;
+    
+    if (offset + 1 < end && buffer[offset] == '0'
+        && ((ch = buffer[offset + 1]) == 'x' || ch == 'X')) {
+      
+      for (offset += 2; offset < end; offset++) {
+        ch = buffer[offset] & 0xFF;
+        
+        long oldValue = value;
+        
+        if ('0' <= ch && ch <= '9')
+          value = value * 16 + ch - '0';
+        else if ('a' <= ch && ch <= 'z')
+          value = value * 16 + ch - 'a' + 10;
+        else if ('A' <= ch && ch <= 'Z')
+          value = value * 16 + ch - 'A' + 10;
+        else
+          return value;
+        
+        if (value < oldValue)
+          return Integer.MAX_VALUE;
+      }
+      
+      return value;
+    }
+    
     if (offset < end && buffer[offset] == '-') {
       sign = -1;
       offset++;
@@ -399,7 +451,7 @@ abstract public class StringValue
     }
 
     while (offset < end) {
-      int ch = buffer[offset++];
+      ch = buffer[offset++];
 
       if ('0' <= ch && ch <= '9') {
         long newValue = 10 * value + ch - '0';
@@ -501,6 +553,27 @@ abstract public class StringValue
     while (i < len && Character.isWhitespace(s.charAt(i))) {
       start++;
       i++;
+    }
+    
+    if (i + 1 < len && s.charAt(i) == '0'
+        && ((ch = s.charAt(i)) == 'x' || ch == 'X')) {
+      
+      double value = 0;
+      
+      for (i += 2; i < len; i++) {
+        ch = s.charAt(i);
+
+        if ('0' <= ch && ch <= '9')
+          value = value * 16 + ch - '0';
+        else if ('a' <= ch && ch <= 'z')
+          value = value * 16 + ch - 'a' + 10;
+        else if ('A' <= ch && ch <= 'Z')
+          value = value * 16 + ch - 'A' + 10;
+        else
+          return value;
+      }
+      
+      return value;
     }
     
     if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {

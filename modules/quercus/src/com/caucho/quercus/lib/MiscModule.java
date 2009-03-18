@@ -1188,9 +1188,14 @@ public class MiscModule extends AbstractQuercusModule {
       StringValue bb = env.createBinaryBuilder();
       
       int i = 0;
+      int ch;
       
       while (i < _length) {
-        int ch = is.read();
+        ch = is.read();
+        
+        if (ch < 0)
+          return;
+        
         bb.appendByte(ch);
         
         i++;
@@ -1199,9 +1204,7 @@ public class MiscModule extends AbstractQuercusModule {
           break;
       }
       
-      for (; i < _length; i++) {
-        int ch = is.read();
-
+      for (; i < _length && (ch = is.read()) >= 0; i++) {
         if (ch == _pad) {
         }
         else if (ch >= 0)
@@ -1289,10 +1292,13 @@ public class MiscModule extends AbstractQuercusModule {
     {
       StringValue sb = env.createStringBuilder();
       for (int i = _length / 2 - 1; i >= 0; i--) {
-	int ch = is.read();
-
-	sb.append(digitToHex(ch >> 4));
-	sb.append(digitToHex(ch));
+        int ch = is.read();
+        
+        if (ch < 0)
+          break;
+        
+        sb.append(digitToHex(ch >> 4));
+        sb.append(digitToHex(ch));
       }
 
       result.put(_name, sb);
@@ -1374,10 +1380,13 @@ public class MiscModule extends AbstractQuercusModule {
     {
       StringValue sb = env.createStringBuilder();
       for (int i = _length / 2 - 1; i >= 0; i--) {
-	int ch = is.read();
-
-	sb.append(digitToHex(ch));
-	sb.append(digitToHex(ch >> 4));
+        int ch = is.read();
+        
+        if (ch < 0)
+          break;
+        
+        sb.append(digitToHex(ch));
+        sb.append(digitToHex(ch >> 4));
       }
 
       result.put(_name, sb);
@@ -1440,45 +1449,50 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	Value key;
+        Value key;
 
-	// XXX: check key type with unicode semantics
+        // XXX: check key type with unicode semantics
 
-	if (_name.length() == 0)
-	  key = LongValue.create(j + 1);
-	else if (_length == 1)
-	  key = env.createString(_name);
-	else {
-	  StringValue sb = env.createStringBuilder();
-	  sb.append(_name);
-	  sb.append(j);
+        if (_name.length() == 0)
+          key = LongValue.create(j + 1);
+        else if (_length == 1)
+          key = env.createString(_name);
+        else {
+          StringValue sb = env.createStringBuilder();
+          sb.append(_name);
+          sb.append(j + 1);
 
-	  key = sb;
-	}
-	
-	long v = 0;
+          key = sb;
+        }
+        
+        long v = 0;
 
-	for (int k = 0; k < _bytes; k++) {
-	  long d = is.read() & 0xff;
-	  
-	  v = (v << 8) + d;
-	}
+        for (int k = 0; k < _bytes; k++) {
+          int ch = is.read();
+          
+          if (ch < 0)
+            break;
+          
+          long d = ch & 0xff;
+          
+          v = (v << 8) + d;
+        }
 
-	if (_isSigned) {
-	  switch (_bytes) {
-	  case 1:
-	    v = (byte) v;
-	    break;
-	  case 2:
-	    v = (short) v;
-	    break;
-	  case 4:
-	    v = (int) v;
-	    break;
-	  }
-	}
+        if (_isSigned) {
+          switch (_bytes) {
+          case 1:
+            v = (byte) v;
+            break;
+          case 2:
+            v = (short) v;
+            break;
+          case 4:
+            v = (int) v;
+            break;
+          }
+        }
 
-	result.put(key, LongValue.create(v));
+        result.put(key, LongValue.create(v));
       }
     }
   }
@@ -1536,29 +1550,33 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	Value key;
+        Value key;
 
-	if (_name.length() == 0)
-	  key = LongValue.create(j + 1);
-	else if (_length == 1)
-	  key = env.createString(_name);
-	else {
-	  StringValue sb = env.createStringBuilder();
-	  sb.append(_name);
-	  sb.append(j);
+        if (_name.length() == 0)
+          key = LongValue.create(j + 1);
+        else if (_length == 1)
+          key = env.createString(_name);
+        else {
+          StringValue sb = env.createStringBuilder();
+          sb.append(_name);
+          sb.append(j + 1);
 
-	  key = sb;
-	}
-	
-	long v = 0;
+          key = sb;
+        }
+        
+        long v = 0;
 
-	for (int k = 0; k < _bytes; k++) {
-	  long d = is.read() & 0xff;
+        for (int k = 0; k < _bytes; k++) {
+          int ch = is.read();
+          if (ch < 0)
+            break;
+          
+          long d = ch & 0xff;
 
-	  v |= d << 8 * k;
-	}
+          v |= d << 8 * k;
+        }
 
-	result.put(key, LongValue.create(v));
+        result.put(key, LongValue.create(v));
       }
     }
   }
@@ -1613,29 +1631,34 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	Value key;
+        Value key;
 
-	if (_name.length() == 0)
-	  key = LongValue.create(j + 1);
-	else if (_length == 1)
-	  key = env.createString(_name);
-	else {
-	  StringValue sb = env.createBinaryBuilder();
-	  sb.append(_name);
-	  sb.append(j);
+        if (_name.length() == 0)
+          key = LongValue.create(j + 1);
+        else if (_length == 1)
+          key = env.createString(_name);
+        else {
+          StringValue sb = env.createBinaryBuilder();
+          sb.append(_name);
+          sb.append(j + 1);
 
-	  key = sb;
-	}
-	
-	long v = 0;
+          key = sb;
+        }
+        
+        long v = 0;
 
-	for (int k = 0; k < 8; k++) {
-	  long d = is.read() & 0xff;
+        for (int k = 0; k < 8; k++) {
+          int ch = is.read();
+          
+          if (ch < 0)
+            break;
+          
+          long d = ch & 0xff;
 
-	  v = 256 * v + d;
-	}
+          v = 256 * v + d;
+        }
 
-	result.put(key, new DoubleValue(Double.longBitsToDouble(v)));
+        result.put(key, new DoubleValue(Double.longBitsToDouble(v)));
       }
     }
   }
@@ -1690,29 +1713,34 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	Value key;
+        Value key;
 
-	if (_name.length() == 0)
-	  key = LongValue.create(j + 1);
-	else if (_length == 1)
-	  key = env.createString(_name);
-	else {
-	  StringValue sb = env.createBinaryBuilder();
-	  sb.append(_name);
-	  sb.append(j);
+        if (_name.length() == 0)
+          key = LongValue.create(j + 1);
+        else if (_length == 1)
+          key = env.createString(_name);
+        else {
+          StringValue sb = env.createBinaryBuilder();
+          sb.append(_name);
+          sb.append(j + 1);
 
-	  key = sb;
-	}
-	
-	int v = 0;
+          key = sb;
+        }
+        
+        int v = 0;
 
-	for (int k = 0; k < 4; k++) {
-	  int d = is.read() & 0xff;
+        for (int k = 0; k < 4; k++) {
+          int ch = is.read();
+          
+          if (ch < 0)
+            break;
+          
+          int d = ch & 0xff;
 
-	  v = 256 * v + d;
-	}
+          v = 256 * v + d;
+        }
 
-	result.put(key, new DoubleValue(Float.intBitsToFloat(v)));
+        result.put(key, new DoubleValue(Float.intBitsToFloat(v)));
       }
     }
   }
@@ -1751,8 +1779,8 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      for (int i = 0; i < _length; i++)
-	is.read();
+      for (int i = 0; i < _length && is.read() >= 0; i++) {
+      }
     }
   }
 
