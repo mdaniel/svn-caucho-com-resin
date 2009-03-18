@@ -882,8 +882,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (setSpecial(key, value))
       return;
 
-    // server/05e8
-    if (_responseStream != null && _responseStream.hasData()) {
+    // server/05e8 (tck)
+    if (_hasWriter) {
       return;
     }
 
@@ -942,12 +942,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (setSpecial(key, value))
       return;
 
-    // server/05e8
-    if (_hasWriter || _hasOutputStream) {
-      return;
-    }
-
-    if (_responseStream != null && _responseStream.hasData()) {
+    // server/05e8 (tck)
+    if (_hasWriter) {
       return;
     }
 

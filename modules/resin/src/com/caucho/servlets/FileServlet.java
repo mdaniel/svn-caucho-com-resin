@@ -368,10 +368,10 @@ public class FileServlet extends GenericServlet {
     boolean hasMore = range.indexOf(',') > 0;
 
     int head = 0;
-    ServletOutputStream os = res.getOutputStream();
     boolean isFirstChunk = true;
     String boundary = null;
     int off = range.indexOf("bytes=", head);
+    ServletOutputStream os = null;
 
     if (off < 0)
       return false;
@@ -459,6 +459,7 @@ public class FileServlet extends GenericServlet {
 	  boundary = cb1.toString();
 
 	  res.setContentType("multipart/byteranges; boundary=" + boundary);
+	  os = res.getOutputStream();
 	}
 	else {
 	  os.write('\r');
