@@ -278,14 +278,12 @@ public class Document {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartDocument("1.0", _encoding);
-    /*
-    out.writeDTD("html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
-                 "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"");*/
+    out.writeStartDocument(_encoding, "1.0");
+    out.writeDTD("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
+                 "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
 
     out.writeStartElement("html");
-    // XXX: workaround until writeNamespace gets fixed
-    out.writeAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+    out.writeDefaultNamespace("http://www.w3.org/1999/xhtml");
 
     if (_header != null)
       _header.writeHtml(out);

@@ -193,9 +193,12 @@ public class Navigation {
     out.writeStartElement("dl");
     out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
     */
+    out.writeStartElement("ol");
 
     for (NavigationItem item : _items)
       item.writeHtml(out, path, depth, styleDepth, maxDepth);
+
+    out.writeEndElement(); // ol
 
     //out.writeEndElement(); // dl
   }

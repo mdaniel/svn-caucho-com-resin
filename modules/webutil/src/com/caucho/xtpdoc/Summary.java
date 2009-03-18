@@ -101,10 +101,14 @@ public class Summary implements ContentItem {
     if (_document.getNavigation() == null) {
     }
     else if (_isSkipDescription) {
+      out.writeStartElement("ol");
       _document.getNavigation().writeHtml(out, "", 1, 2, 5);
+      out.writeEndElement(); // ol
     }
     else {
+      out.writeStartElement("ol");
       _document.getNavigation().writeHtml(out, "", 1, 0, 5);
+      out.writeEndElement(); // ol
     }
   }
 

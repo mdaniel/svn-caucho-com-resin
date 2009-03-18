@@ -156,8 +156,6 @@ public class NavigationItem {
     if (_uri != null) {
       Path linkPath = _document.getRealPath(_uri);
 
-      // System.out.println("LINK: " + linkPath);
-      
       if (linkPath.exists() && linkPath.getPath().endsWith(".xtp")) {
         Config config = new Config();
 
@@ -276,7 +274,7 @@ public class NavigationItem {
     for (NavigationItem item : _items)
       item.writeHtmlImpl(out, path, 0, 0, 3);
     
-    out.writeEndElement();
+    out.writeEndElement(); // dl
   }
 
   public void writeHtml(XMLStreamWriter out, String path,
@@ -393,33 +391,106 @@ public class NavigationItem {
   public void writeLeftNav(XMLStreamWriter out)
     throws XMLStreamException
   {
-    if (_parent != null) {
-      _parent.writeLeftNav(out);
-    }
-    else {
-      // writeLeftNavItem(out);
-    }
+    if (_parent != null)
+      _parent.writeLeftNavPre(out, this, 1);
+
+    writeLeftNavItem(out, this);
       
     if (_items.size() > 0) {
-      if (_parent != null)
-	out.writeEmptyElement("hr");
+      out.writeStartElement("ul");
+      out.writeAttribute("class", "leftnav");
+
+      for (NavigationItem item : _items)
+        item.writeLeftNavNoParent(out, this);
+
+      out.writeEndElement(); // ul
+    }
+
+    if (_parent != null)
+      _parent.writeLeftNavPost(out, this);
+  }
+
+  public int writeLeftNavPre(XMLStreamWriter out, 
+                             NavigationItem caller, 
+                             int padding)
+    throws XMLStreamException
+  {
+    if (_parent != null)
+      padding = _parent.writeLeftNavPre(out, this, padding);
+
+    writeLeftNavItem(out, caller);
+
+    if (_items.size() > 0) {
+      out.writeStartElement("ul");
+      out.writeAttribute("class", "leftnav");
 
       for (NavigationItem item : _items) {
-	item.writeLeftNavItem(out);
+        if (item.getUri().equals(caller.getUri()))
+          return padding + 1;
+
+        item.writeLeftNavItem(out, caller);
       }
+
+      return padding + 1;
+    }
+    else {
+      return padding;
     }
   }
 
-  public void writeLeftNavItem(XMLStreamWriter out)
+  public void writeLeftNavPost(XMLStreamWriter out, NavigationItem caller)
     throws XMLStreamException
   {
+    if (_items.size() > 0) {
+      boolean found = false;
+
+      for (NavigationItem item : _items) {
+        if (found) 
+          item.writeLeftNavItem(out, caller);
+
+        if (item.getUri().equals(caller.getUri()))
+          found = true;
+      }
+
+      out.writeEndElement(); // ul
+    }
+
+    if (_parent != null) {
+      _parent.writeLeftNavPost(out, this);
+    }
+  }
+
+  public void writeLeftNavNoParent(XMLStreamWriter out, NavigationItem caller)
+    throws XMLStreamException
+  {
+    writeLeftNavItem(out, caller);
+
+    if (_items.size() > 0) {
+      out.writeStartElement("ul");
+      out.writeAttribute("class", "leftnav");
+
+      for (NavigationItem item : _items)
+        item.writeLeftNavNoParent(out, this);
+
+      out.writeEndElement(); // ul
+    }
+  }
+
+  private void writeLeftNavItem(XMLStreamWriter out, NavigationItem caller)
+    throws XMLStreamException
+  {
+    out.writeStartElement("li");
+
+    if (caller != null && _uri.equals(caller.getUri())) {
+      out.writeAttribute("class", "selected");
+    }
+
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
     out.writeAttribute("class", "leftnav");
     out.writeCharacters(_title.toLowerCase());
     out.writeEndElement(); // a
-
-    out.writeEmptyElement("br");
+    out.writeEndElement(); // li
   }
 
   public void writeLink(XMLStreamWriter out)

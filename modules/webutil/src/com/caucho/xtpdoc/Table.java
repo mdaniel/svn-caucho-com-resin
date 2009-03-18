@@ -41,12 +41,18 @@ public class Table extends Node implements ContentItem {
   private int _myCount = _count++;
   private Document _document;
   protected String _title;
+  protected String _width;
   protected int _columns = 0;
   protected ArrayList<TableRow> _rows = new ArrayList<TableRow>();
 
   public Table(Document document)
   {
     _document = document;
+  }
+
+  public void setWidth(String width)
+  {
+    _width = width;
   }
 
   public void setTitle(String title)
@@ -65,6 +71,10 @@ public class Table extends Node implements ContentItem {
     throws XMLStreamException
   {
     out.writeStartElement("table");
+
+    if (_width != null) {
+      out.writeAttribute("style", "width: " + _width);
+    }
 
     int index = 0;
     for (TableRow row : _rows)

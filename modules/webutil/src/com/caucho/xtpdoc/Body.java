@@ -167,7 +167,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("td");
     // out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
-    out.writeAttribute("width", "130");
+    out.writeAttribute("width", "160");
     
     parseNavigation();
 
