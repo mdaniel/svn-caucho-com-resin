@@ -2099,6 +2099,10 @@ public class StringModule extends AbstractQuercusModule {
     boolean isAssign = args.length != 0;
     int argIndex = 0;
     
+    if (strlen == 0) {
+      return isAssign ? LongValue.MINUS_ONE : NullValue.NULL;
+    }
+    
     ArrayValue array = new ArrayValueImpl();
 
     while (fIndex < fmtLen) {
