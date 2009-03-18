@@ -2472,9 +2472,9 @@ class RegexpNode {
       char ch = string.charAt(offset);
 
       if (ch < 128)
-	return _asciiSet[ch] ? offset + 1 : -1;
+        return _asciiSet[ch] ? offset + 1 : -1;
       else
-	return _range.contains(ch) ? offset + 1 : -1;
+        return _range.contains(ch) ? offset + 1 : -1;
     }
   }
 

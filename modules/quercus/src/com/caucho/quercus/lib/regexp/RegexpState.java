@@ -291,10 +291,10 @@ public class RegexpState {
   {
     try {
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " exec(" + subject + ")");
+        log.finest(this + " exec(" + subject + ")");
     
       subject = _regexp.convertSubject(env, subject);
-      
+
       if (subject == null)
         throw new QuercusException(L.l("error converting subject to utf8"));
 
@@ -310,7 +310,7 @@ public class RegexpState {
       boolean []firstSet = _regexp._firstSet;
       int end = subject.length() - minLength;
       RegexpNode prog = _regexp._prog;
-
+      
       if (_regexp._isAnchorBegin)
 	end = start;
 

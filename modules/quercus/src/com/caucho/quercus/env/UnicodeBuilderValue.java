@@ -789,7 +789,7 @@ public class UnicodeBuilderValue
     
     UnicodeBuilderValue sb = new UnicodeBuilderValue(len);
 
-    sb.append(_buffer, 0, len);
+    sb.append(_buffer, start, len);
 
     return sb;
   }
