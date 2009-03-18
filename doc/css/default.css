@@ -112,6 +112,15 @@ h2 {
   color : #003366;
 }
 
+h2.section {
+  font-family : Helvetica, Arial, sans-serif;
+  font-weight : normal;
+
+  color : #003366;
+  padding : 2px;
+  background-color : #ccccdd;
+}
+
 h3 {
   font-family : Helvetical, Arial, sans-serif;
   color : #6699cc;
@@ -363,6 +372,17 @@ code {
 .meta {
   font-style : italic;
   color : #003399;
+}
+
+ul.leftnav {
+  list-style : none;
+  padding-left : 1em;
+  margin : 0;
+  list-style-position : outside;
+}
+
+ul.leftnav li.selected {
+  list-style : disc;
 }
 
 ul.none {

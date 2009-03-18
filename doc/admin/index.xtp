@@ -8,7 +8,7 @@
   <body>
   <s1>
   <center>
-  <table>
+  <table width="100%">
     <tr>
       <td><a href="quick/index.xtp"><figure src="quick-start.png"/></a></td>
       <td><a href="full/index.xtp"><figure src="full-documentation.png"/></a></td>
