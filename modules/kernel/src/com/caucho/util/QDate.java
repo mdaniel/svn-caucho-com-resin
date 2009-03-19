@@ -716,6 +716,43 @@ public class QDate {
     os.print(_zoneName);
     os.write(')');
   }
+  
+  /*
+   * Mon, 17 Jan 1994 11:14:55 -0500
+   */
+  public void printRFC2822(CharBuffer cb)
+  {
+    cb.append(DAY_NAMES[(int) (_dayOfEpoch % 7 + 11) % 7]);
+    cb.append(", ");
+    cb.append((_dayOfMonth + 1) / 10);
+    cb.append((_dayOfMonth + 1) % 10);
+    cb.append(" ");
+    cb.append(MONTH_NAMES[(int) _month]);
+    cb.append(" ");
+    cb.append(_year);
+    cb.append(" ");
+    cb.append((_timeOfDay / 36000000L) % 10);
+    cb.append((_timeOfDay / 3600000L) % 10);
+    cb.append(":");
+    cb.append((_timeOfDay / 600000L) % 6);
+    cb.append((_timeOfDay / 60000L) % 10);
+    cb.append(":");
+    cb.append((_timeOfDay / 10000L) % 6);
+    cb.append((_timeOfDay / 1000L) % 10);
+
+    long offset = _zoneOffset;
+
+    if (offset < 0) {
+      cb.append(" -");
+      offset = - offset;
+    } else
+      cb.append(" +");
+
+    cb.append((offset / 36000000) % 10);
+    cb.append((offset / 3600000) % 10);
+    cb.append((offset / 600000) % 6);
+    cb.append((offset / 60000) % 10);
+  }
 
   /**
    * Prints the time in ISO 8601

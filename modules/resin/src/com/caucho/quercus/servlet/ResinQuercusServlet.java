@@ -142,7 +142,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
         StringValue prepend
           = quercus.getIniValue("auto_prepend_file").toStringValue(env);
         if (prepend.length() > 0) {
-          Path prependPath = env.lookup(prepend.toStringValue(env));
+          Path prependPath = env.lookup(prepend);
           
           if (prependPath == null)
             env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
@@ -157,7 +157,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
         StringValue append
           = quercus.getIniValue("auto_append_file").toStringValue(env);
         if (append.length() > 0) {
-          Path appendPath = env.lookup(append.toStringValue(env));
+          Path appendPath = env.lookup(append);
           
           if (appendPath == null)
             env.error(L.l("auto_append_file '{0}' not found.", append));

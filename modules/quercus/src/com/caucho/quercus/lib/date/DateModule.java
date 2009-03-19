@@ -754,7 +754,7 @@ public class DateModule extends AbstractQuercusModule {
 
       case 'r':
 	{
-	  sb.append(calendar.printDate());
+	  calendar.printRFC2822(sb);
 	  break;
 	}
 
