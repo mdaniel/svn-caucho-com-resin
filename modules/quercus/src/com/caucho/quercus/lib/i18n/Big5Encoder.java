@@ -48,32 +48,30 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
-public class GenericEncoder
-  extends Encoder
+public class Big5Encoder
+  extends GenericEncoder
 {
   private static final Logger log
     = Logger.getLogger(GenericEncoder.class.getName());
 
-  private static final L10N L = new L10N(GenericEncoder.class);
+  private static final L10N L = new L10N(Big5Encoder.class);
   
-  private Charset _charset;
-  protected CharsetEncoder _encoder;
-  
-  public GenericEncoder(String charsetName)
+  public Big5Encoder(String charsetName)
   {
     super(charsetName);
-    
-    _charset = Charset.forName(charsetName);
-    
-    _encoder = _charset.newEncoder();
   }
   
+  @Override
   public boolean isEncodable(Env env, StringValue str)
   {
     int len = str.length();
     
     for (int i = 0; i < len; i++) {
-      if (! _encoder.canEncode(str.charAt(i))) {
+      char ch = str.charAt(i);
+      
+      if (ch == '\u20AC') // euro
+        continue;
+      else if (! _encoder.canEncode(str.charAt(i))) {
         return false;
       }
     }
@@ -82,41 +80,6 @@ public class GenericEncoder
   }
   
   @Override
-  public StringValue encode(Env env, CharSequence str)
-  {
-    CharBuffer in = CharBuffer.wrap(str);
-    
-    TempBuffer tempBuf = TempBuffer.allocate();
-    
-    try {
-      ByteBuffer out = ByteBuffer.wrap(tempBuf.getBuffer());
-      
-      StringValue sb = env.createBinaryBuilder();
-
-      while (in.hasRemaining()) {
-        CoderResult coder = _encoder.encode(in, out, false);
-
-        if (! fill(sb, in, out, coder))
-          return sb;
-        
-        out.clear();
-      }
-      
-      CoderResult coder = _encoder.encode(in, out, true);
-      if (! fill(sb, in, out, coder))
-        return sb;
-      
-      out.clear();
-      
-      coder = _encoder.flush(out);
-      fill(sb, in, out, coder);
-      
-      return sb;
-    } finally {
-      TempBuffer.free(tempBuf);
-    }
-  }
-  
   protected boolean fill(StringValue sb, CharBuffer in,
                          ByteBuffer out, CoderResult coder)
   {
@@ -130,10 +93,15 @@ public class GenericEncoder
     
     if (coder.isMalformed() || coder.isUnmappable()) {
       int errorIndex = in.position();
-      
+
       in.position(errorIndex + 1);
       
-      if (_isIgnore) {
+      if (in.get(errorIndex) == '\u20AC') {
+        // euro
+        sb.append('\u00a3');
+        sb.append('\u00e1');
+      }
+      else if (_isIgnore) {
       }
       else if (_replacement != null)
         sb.append(_replacement);
@@ -145,10 +113,4 @@ public class GenericEncoder
     
     return true;
   }
-  
-  public void reset()
-  {
-    _encoder.reset();
-  }
-
 }
