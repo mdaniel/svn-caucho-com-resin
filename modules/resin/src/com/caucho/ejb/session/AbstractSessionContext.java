@@ -33,6 +33,7 @@ import com.caucho.ejb.AbstractContext;
 import com.caucho.util.*;
 
 import javax.ejb.*;
+import javax.xml.rpc.handler.MessageContext;
 
 /**
  * Abstract base class for an session context
@@ -63,10 +64,8 @@ abstract public class AbstractSessionContext extends AbstractContext
     throw new UnsupportedOperationException(getClass().getName());
   }
 
- /**
   public MessageContext getMessageContext()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
- */
 }
