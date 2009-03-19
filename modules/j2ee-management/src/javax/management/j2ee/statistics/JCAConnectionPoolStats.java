@@ -56,5 +56,6 @@ public interface JCAConnectionPoolStats extends JCAConnectionStats {
   /**
    * Returns the number of threads waiting for a connection.
    */
-  public BoundedRangeStatistic getWaitingThreadCount();
+
+  public javax.management.j2ee.statistics.RangeStatistic getWaitingThreadCount();
 }

@@ -38,9 +38,4 @@ public interface SessionBeanStats extends EJBStats
    * Returns the number of beans that are ready.
    */
   public RangeStatistic getMethodReadyCount();
-
-  /**
-   * Returns the number of beans that are pooled.
-   */
-  public RangeStatistic getPooledCount();
 }

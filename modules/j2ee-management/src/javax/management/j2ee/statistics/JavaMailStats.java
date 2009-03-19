@@ -32,7 +32,7 @@ package javax.management.j2ee.statistics;
 /**
  * Statistics interface for a JavaMail.
  */
-public interface JavaMailStats extends Stats {
+public interface JavaMailStats {
   /**
    * Returns the number of mail messages that have been sent.
    */

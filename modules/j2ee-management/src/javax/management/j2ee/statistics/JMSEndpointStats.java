@@ -48,8 +48,6 @@ public interface JMSEndpointStats extends Stats {
    */
   public TimeStatistic getMessageWaitTime();
 
-  /**
-   * Returns the number of messages that are pending.
-   */
-  public TimeStatistic getPendingMessageCount();
+
+  public javax.management.j2ee.statistics.CountStatistic getPendingMessageCount();
 }

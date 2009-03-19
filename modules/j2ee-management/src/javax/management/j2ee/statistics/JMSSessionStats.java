@@ -69,5 +69,5 @@ public interface JMSSessionStats extends Stats {
   /**
    * Returns the number of messages that are pending.
    */
-  public TimeStatistic getPendingMessagesCount();
+  public javax.management.j2ee.statistics.CountStatistic getPendingMessageCount();
 }
