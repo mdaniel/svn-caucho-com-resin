@@ -9,7 +9,7 @@
   <property name="shell" value="bash"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext">
+          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management">
   </target>
 
   <!--
@@ -184,7 +184,9 @@
   <target name="j2ee-management" depends="init,ejb">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="j2ee-management"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="j2ee-management-10.jar"/>
+      <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
 
