@@ -77,7 +77,11 @@ public class TimestampFilter extends StreamImpl {
 
   private QDate _calendar = new QDate(true);
 
+  private boolean _isNullDelimited;
+  
   private boolean _isLineBegin = true;
+  private boolean _isRecordBegin = true;
+  private int _timestampLength = 0;
 
   /**
    * Create listener.
@@ -97,6 +101,14 @@ public class TimestampFilter extends StreamImpl {
   {
     _stream = out;
     setTimestamp(timestamp);
+  }
+
+  /**
+   * If null-delimited, the timestamp only applies after the cr/lf and a null
+   */
+  public void setNullDelimited(boolean isNullDelimited)
+  {
+    _isNullDelimited = isNullDelimited;
   }
 
   public void setTimestamp(String timestamp)
@@ -210,7 +222,16 @@ public class TimestampFilter extends StreamImpl {
     int timestampLength = 0;
     
     for (int i = 0; i < length; i++) {
-      if (_isLineBegin) {
+      int ch = buffer[offset + i];
+
+      if (ch == 0)
+	continue;
+
+      if (! _isLineBegin) {
+      }
+      else if (_isRecordBegin) {
+	long start = _stream.getPosition();
+	
         // _stream.print(_calendar.formatLocal(now, _timestamp));
 	synchronized (_calendar) {
 	  _calendar.setGMTTime(now);
@@ -220,15 +241,43 @@ public class TimestampFilter extends StreamImpl {
 	    _timestamp[j].print(_stream, _calendar);
 	}
 
+	_timestampLength = (int) (_stream.getPosition() - start);
         _isLineBegin = false;
+        _isRecordBegin = false;
+      }
+      else {
+        _isLineBegin = false;
+        _isRecordBegin = false;
+
+	for (int j = _timestampLength - 1; j >= 0; j--) {
+	  _stream.write(' ');
+	}
       }
 
-      int ch = buffer[offset + i];
       _stream.write(ch);
       
-      if (ch == '\n'
-	  || ch == '\r' && i + 1 < length && buffer[offset + i + 1] != '\n') {
+      if (ch == '\n') {
         _isLineBegin = true;
+
+	if (i + 1 < length && buffer[offset + i + 1] == 0) {
+	  _isRecordBegin = true;
+	}
+
+	if (! _isNullDelimited) {
+	  _isRecordBegin = true;
+	}
+      }
+      else if (ch == '\r'
+	       && i + 1 < length && buffer[offset + i + 1] != '\n') {
+        _isLineBegin = true;
+
+	if (i + 2 < length && buffer[offset + i + 2] == 0) {
+	  _isRecordBegin = true;
+	}
+
+	if (! _isNullDelimited) {
+	  _isRecordBegin = true;
+	}
       }
     }
   }

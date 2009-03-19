@@ -574,38 +574,48 @@ public class AbstractRolloverLog {
 
     try {
       if (path.exists()) {
-        WriteStream os = savedPath.openWrite();
-        OutputStream out;
+        WriteStream os = null;
+        OutputStream out = null;
 
-        if (savedName.endsWith(".gz"))
+	// *.gz and *.zip are copied.  Others are just renamed
+        if (savedName.endsWith(".gz")) {
+	  os = savedPath.openWrite();
           out = new GZIPOutputStream(os);
-        else if (savedName.endsWith(".zip")) 
+	}
+        else if (savedName.endsWith(".zip")) {
+	  os = savedPath.openWrite();
           out = new ZipOutputStream(os);
-        else
-          out = os;
+	}
+        else {
+	  path.renameTo(savedPath);
+	}
 
-        try {
-          path.writeToStream(out);
-        } finally {
-          try {
-            out.close();
-          } catch (Throwable e) {
-            // can't log in log rotation routines
-          }
+	if (out != null) {
+	  try {
+	    path.writeToStream(out);
+	  } finally {
+	    try {
+	      out.close();
+	    } catch (Throwable e) {
+	      // can't log in log rotation routines
+	    }
 
-          try {
-            if (out != os)
-              os.close();
-          } catch (Throwable e) {
-            // can't log in log rotation routines
-          }
-        }
+	    try {
+	      if (out != os)
+		os.close();
+	    } catch (Throwable e) {
+	      // can't log in log rotation routines
+	    }
+	  }
+	}
       }
     } catch (Throwable e) {
       logWarning(L.l("Error rotating logs"), e);
     }
 
     try {
+      path.remove();
+      /*
       try {
         if (! path.truncate())
           path.remove();
@@ -614,6 +624,7 @@ public class AbstractRolloverLog {
 
         throw e;
       }
+      */
     } catch (Exception e) {
       logWarning(L.l("Error truncating logs"), e);
     }

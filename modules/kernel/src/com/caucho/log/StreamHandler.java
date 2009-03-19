@@ -46,6 +46,7 @@ public class StreamHandler extends Handler {
   private Formatter _formatter;
 
   private String _timestamp;
+  private boolean _isNullDelimited;
 
   public StreamHandler()
   {
@@ -72,6 +73,11 @@ public class StreamHandler extends Handler {
     _formatter = formatter;
   }
 
+  public void setNullDelimited(boolean isNullDelimited)
+  {
+    _isNullDelimited = isNullDelimited;
+  }
+
   /**
    * Publishes the record.
    */
@@ -84,6 +90,10 @@ public class StreamHandler extends Handler {
       if (record == null) {
 	synchronized (_os) {
 	  _os.println("no record");
+	  
+	  if (_isNullDelimited)
+	    _os.write(0);
+	    
 	  _os.flush();
 	}
 	return;
@@ -94,6 +104,9 @@ public class StreamHandler extends Handler {
 
 	synchronized (_os) {
 	  _os.println(value);
+	  if (_isNullDelimited)
+	    _os.write(0);
+	  
 	  _os.flush();
 	}
 	
@@ -119,6 +132,10 @@ public class StreamHandler extends Handler {
 	else {
 	  _os.println(record.getMessage());
 	}
+	
+	if (_isNullDelimited)
+	  _os.write(0);
+	
 	_os.flush();
       }
     } catch (Throwable e) {

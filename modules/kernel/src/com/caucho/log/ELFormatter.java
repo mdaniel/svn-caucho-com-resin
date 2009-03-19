@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -30,16 +31,19 @@ package com.caucho.log;
 
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
+import com.caucho.config.scope.ThreadRequestFactory;
 import com.caucho.config.types.RawString;
 import com.caucho.el.AbstractVariableResolver;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
+import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.el.ELContext;
 import javax.el.ELException;
-import java.util.ResourceBundle;
+import javax.servlet.http.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -47,7 +51,13 @@ import java.util.logging.LogRecord;
  * A Formatter that accepts an EL format string, and.
  */
 public class ELFormatter extends MessageFormatter {
-  static final L10N L = new L10N(ELFormatter.class);
+  private static final L10N L = new L10N(ELFormatter.class);
+
+  private static final ThreadLocal<LogRecord> _threadLogRecord
+    = new ThreadLocal<LogRecord>();
+
+  private final FreeList<ELContext> _freeContextList
+    = new FreeList<ELContext>(8);
 
   private String _format;
   private Expr _expr;
@@ -86,28 +96,36 @@ public class ELFormatter extends MessageFormatter {
       ret = super.format(logRecord);
     }
     else {
+      LogRecord oldLogRecord = _threadLogRecord.get();
+      
       try {
-        ELFormatterVariableResolver vr = new ELFormatterVariableResolver();
-        vr.setLogRecord(logRecord);
+	_threadLogRecord.set(logRecord);
 
-        ret =  _expr.evalString(new ConfigELContext(vr));
+	ELContext context = _freeContextList.allocate();
+	
+	if (context == null) {
+	  ELFormatterVariableResolver vr = new ELFormatterVariableResolver();
+	  context = new ConfigELContext(vr);
+	}
+
+        ret = _expr.evalString(context);
+
+	_freeContextList.free(context);
       } 
       catch (Exception ex) {
         throw new RuntimeException(ex);
+      }
+      finally {
+	_threadLogRecord.set(oldLogRecord);
       }
     }
 
     return ret;
   }
 
-  class ELFormatterVariableResolver extends AbstractVariableResolver
-  {
-    ELFormatterLogRecord _logRecord;
-
-    public void setLogRecord(LogRecord logRecord)
-    {
-      _logRecord = new ELFormatterLogRecord(logRecord);
-    }
+  class ELFormatterVariableResolver extends AbstractVariableResolver {
+    private ELFormatterLogRecord _logRecord
+      = new ELFormatterLogRecord();
 
     @Override
     public Object getValue(ELContext env, Object base, Object property)
@@ -121,6 +139,40 @@ public class ELFormatter extends MessageFormatter {
 	
         return _logRecord;
       }
+      else if ("request".equals(property)) {
+	env.setPropertyResolved(true);
+	
+        return ThreadRequestFactory.getCurrentRequest();
+      }
+      else if ("cookie".equals(property)) {
+	env.setPropertyResolved(true);
+
+	Object request = ThreadRequestFactory.getCurrentRequest();
+
+	if (request instanceof HttpServletRequest) {
+	  Cookie []cookies = ((HttpServletRequest) request).getCookies();
+
+	  if (cookies != null)
+	    return new CookieMap(cookies);
+	}
+
+	return null;
+      }
+      else if ("session".equals(property)) {
+	env.setPropertyResolved(true);
+
+	Object request = ThreadRequestFactory.getCurrentRequest();
+
+	if (request instanceof HttpServletRequest) {
+	  HttpServletRequest req = (HttpServletRequest) request;
+	  
+	  HttpSession session = req.getSession(false);
+
+	  return session;
+	}
+
+	return null;
+      }
 
       return null;
     }
@@ -132,13 +184,6 @@ public class ELFormatter extends MessageFormatter {
    */
   public class ELFormatterLogRecord
   {
-    LogRecord _logRecord;
-
-    ELFormatterLogRecord(LogRecord logRecord)
-    {
-      _logRecord = logRecord;
-    }
-
     /**
      * The "formatted" log message, after localization, substitution of
      * parameters, and the inclusion of an exception stack trace if applicable.
@@ -159,8 +204,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getMessage()
     { 
-      /** use the formatMessage() method of the outer class */
-      return formatMessage(_logRecord); 
+      return formatMessage(getLogRecord()); 
     }
 
     /** 
@@ -170,7 +214,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getName()
     {
-      return _logRecord.getLoggerName();
+      return getLogRecord().getLoggerName();
     }
    
     /** 
@@ -180,7 +224,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getLoggerName()
     {
-      return _logRecord.getLoggerName();
+      return getLogRecord().getLoggerName();
     }
    
     /** 
@@ -193,7 +237,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getShortName()
     { 
-      String name = _logRecord.getLoggerName();
+      String name = getLogRecord().getLoggerName();
 
       if (name != null) {
         int index = name.lastIndexOf('.') + 1;
@@ -212,7 +256,7 @@ public class ELFormatter extends MessageFormatter {
      */
     public Level getLevel()
     {
-      return _logRecord.getLevel();
+      return getLogRecord().getLevel();
     }
 
     /** 
@@ -220,7 +264,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public long getMillis()
     {
-      return _logRecord.getMillis();
+      return getLogRecord().getMillis();
     }
 
     /** 
@@ -228,7 +272,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public int getThreadID()
     {
-      return _logRecord.getThreadID();
+      return getLogRecord().getThreadID();
     }
 
     /** 
@@ -236,7 +280,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public Throwable getThrown()
     {
-      return _logRecord.getThrown();
+      return getLogRecord().getThrown();
     }
 
     /** 
@@ -244,7 +288,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public long getSequenceNumber()
     {
-      return _logRecord.getSequenceNumber();
+      return getLogRecord().getSequenceNumber();
     }
 
     /** 
@@ -254,7 +298,7 @@ public class ELFormatter extends MessageFormatter {
      */
     public String getSourceClassName()
     {
-      return _logRecord.getSourceClassName();
+      return getLogRecord().getSourceClassName();
     }
 
     /** 
@@ -267,7 +311,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getShortSourceClassName()
     { 
-      String name = _logRecord.getSourceClassName();
+      String name = getLogRecord().getSourceClassName();
 
       if (name != null) {
         int index = name.lastIndexOf('.') + 1;
@@ -286,7 +330,7 @@ public class ELFormatter extends MessageFormatter {
      */
     public String getSourceMethodName()
     {
-      return _logRecord.getSourceMethodName();
+      return getLogRecord().getSourceMethodName();
     }
 
     /**
@@ -301,7 +345,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getRawMessage()
     {
-      return _logRecord.getMessage();
+      return getLogRecord().getMessage();
     }
 
     /** 
@@ -309,7 +353,7 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public ResourceBundle getResourceBundle()
     {
-      return _logRecord.getResourceBundle();
+      return getLogRecord().getResourceBundle();
     }
    
     /** 
@@ -317,12 +361,45 @@ public class ELFormatter extends MessageFormatter {
      */ 
     public String getResourceBundleName()
     {
-      return _logRecord.getResourceBundleName();
+      return getLogRecord().getResourceBundleName();
     }
    
     public Object[] getParameters()
     {
-      return _logRecord.getParameters();
+      return getLogRecord().getParameters();
+    }
+
+    private LogRecord getLogRecord()
+    {
+      return _threadLogRecord.get();
+    }
+  }
+
+  public static class CookieMap extends AbstractMap {
+    private Cookie []_cookies;
+
+    CookieMap(Cookie []cookies)
+    {
+      _cookies = cookies;
+    }
+    
+    public Object get(Object key)
+    {
+      for (Cookie cookie : _cookies) {
+	if (cookie.getName().equals(key))
+	  return cookie;
+      }
+      return null;
+    }
+
+    public int size()
+    {
+      return _cookies.length;
+    }
+
+    public Set entrySet()
+    {
+      return null;
     }
   }
 }

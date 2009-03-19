@@ -260,6 +260,7 @@ public class LogConfig extends RotateLog {
 	TimestampFilter filter = new TimestampFilter();
 	filter.setTimestamp(_timestamp);
 	filter.setStream(os);
+	filter.setNullDelimited(true);
 	os = new WriteStream(filter);
       }
 
@@ -288,6 +289,7 @@ public class LogConfig extends RotateLog {
       if (_handlers == null) {
 	StreamHandler handler = new StreamHandler(os);
 	handler.setFormatter(_formatter);
+	handler.setNullDelimited(true);
 
 	_handlers = new ArrayList<Handler>();
 	_handlers.add(handler);
