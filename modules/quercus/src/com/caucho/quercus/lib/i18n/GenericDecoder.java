@@ -50,7 +50,7 @@ public class GenericDecoder
   private static final L10N L = new L10N(GenericDecoder.class);
   
   private Charset _charset;
-  private CharsetDecoder _decoder;
+  protected CharsetDecoder _decoder;
   
   public GenericDecoder(String charsetName)
   {

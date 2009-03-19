@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,15 +31,12 @@ package com.caucho.quercus.lib.i18n;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
 import java.util.logging.Logger;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
-import com.caucho.vfs.TempCharBuffer;
 
 public class Big5Decoder
   extends GenericDecoder
@@ -48,9 +45,6 @@ public class Big5Decoder
     = Logger.getLogger(Big5Decoder.class.getName());
 
   private static final L10N L = new L10N(Big5Decoder.class);
-  
-  private Charset _charset;
-  private CharsetDecoder _decoder;
   
   public Big5Decoder(String charsetName)
   {
