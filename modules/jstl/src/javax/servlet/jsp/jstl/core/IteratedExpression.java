@@ -43,12 +43,6 @@ public final class IteratedExpression {
     this.delims = delims;
   }
 
-  public IteratedExpression(ValueExpression orig)
-  {
-    this.orig = orig;
-    this.delims = null;
-  }
-
   public ValueExpression getValueExpression()
   {
     return this.orig;

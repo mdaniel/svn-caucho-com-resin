@@ -40,14 +40,4 @@ public class RollbackException extends Exception {
   {
     super(msg);
   }
-  
-  public RollbackException(Throwable rootCause)
-  {
-    super(rootCause);
-  }
-  
-  public RollbackException(String msg, Throwable rootCause)
-  {
-    super(msg, rootCause);
-  }
 }

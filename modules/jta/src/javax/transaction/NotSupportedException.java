@@ -40,9 +40,4 @@ public class NotSupportedException extends Exception {
   {
     super(msg);
   }
-  
-  public NotSupportedException(Throwable rootCause)
-  {
-    super(rootCause);
-  }
 }

@@ -324,7 +324,10 @@ public class UserTransactionImpl
 	try {
 	  xa.enlistResource(poolItem);
 	} catch (Exception e) {
-	  throw new SystemException(e);
+          String message = L.l("Failed to begin UserTransaction due to: {0}", e);
+          log.log(Level.SEVERE, message, e);
+
+	  throw new SystemException(message);
 	}
       }
 

@@ -274,7 +274,7 @@ abstract public class LoopTagSupport extends TagSupport
   }
 
 
-  public class Status implements LoopTagStatus {
+  private class Status implements LoopTagStatus {
     /**
    * Returns the current object.
    */

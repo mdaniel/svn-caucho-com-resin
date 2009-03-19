@@ -313,7 +313,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
       resource.start(xid, flags);
     } catch (XAException e) {
       setRollbackOnly(e);
-      throw new SystemException(e);
+
+      String message = L.l("Failed to enlist resource due to: {0}", e);
+      log.log(Level.SEVERE, message, e);
+
+      throw new SystemException(message);
     }
 
     if (hasNewResource) {
@@ -397,7 +401,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
       resource.end(_resourceXid[index], flag);
     } catch (XAException e) {
       setRollbackOnly(e);
-      throw new SystemException(e);
+
+      String message = L.l("Failed to delist resource due to: {0}", e);
+      log.log(Level.SEVERE, message, e);
+
+      throw new SystemException(message);
     }
 
     return true;
@@ -588,8 +596,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	setRollbackOnly(e);
 
 	rollbackInt();
-      
-	throw new RollbackException(e);
+
+        String message = L.l("Commit failed due to: {0}", e);
+        log.log(Level.SEVERE, message, e);
+
+	throw new RollbackException(message);
       }
 
       if (_status == Status.STATUS_MARKED_ROLLBACK) {
@@ -844,7 +855,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
       } catch (RuntimeException e) {
 	setRollbackOnly(e);
 	
-        throw new RollbackException(e);
+        String message = L.l("Operation failed due to: {0}", e);
+        log.log(Level.SEVERE, message, e);
+
+	throw new RollbackException(message);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }

@@ -47,9 +47,4 @@ public class SystemException extends Exception {
   {
     this.errorCode = errorCode;
   }
-
-  public SystemException(Throwable throwable)
-  {
-    super(throwable);
-  }
 }

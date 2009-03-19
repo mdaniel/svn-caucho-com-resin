@@ -163,11 +163,11 @@ public class CoreForEachTag extends LoopTagSupport {
     else if (items.getClass().isArray())
       return new IndexedValueExpression(expr, i);
     else if (items instanceof Map)
-      return new IteratedValueExpression(new IteratedExpression(expr), i);
+      return new IteratedValueExpression(new IteratedExpression(expr, null), i);
     else if (items instanceof Iterator)
-      return new IteratedValueExpression(new IteratedExpression(expr), i);
+      return new IteratedValueExpression(new IteratedExpression(expr, null), i);
     else if (items instanceof Enumeration)
-      return new IteratedValueExpression(new IteratedExpression(expr), i);
+      return new IteratedValueExpression(new IteratedExpression(expr, null), i);
     else if (items instanceof String && delims == null)
       return new StringTokenValueExpression(expr, i);
     else if (items instanceof String && delims != null)

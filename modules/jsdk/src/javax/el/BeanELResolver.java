@@ -382,7 +382,7 @@ public class BeanELResolver extends ELResolver {
       return _propMap.get(property);
     }
 
-    public Collection<BeanProperty> getProperties()
+    private Collection<BeanProperty> getProperties()
     {
       return _propMap.values();
     }
