@@ -32,7 +32,7 @@ package com.caucho.quercus.marshal;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.regexp.CauchoRegexpModule;
+import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.regexp.Regexp;
 import com.caucho.quercus.expr.Expr;
 
@@ -44,12 +44,12 @@ public class RegexpMarshal extends StringMarshal {
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return CauchoRegexpModule.createRegexp(env, expr.evalStringValue(env));
+    return RegexpModule.createRegexp(env, expr.evalStringValue(env));
   }
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return CauchoRegexpModule.createRegexp(env, value.toStringValue(env));
+    return RegexpModule.createRegexp(env, value.toStringValue(env));
   }
 
   public Value unmarshal(Env env, Object value)

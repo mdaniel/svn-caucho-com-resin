@@ -740,7 +740,7 @@ public class StringBuilderValue
   @Override
   public final char charAt(int index)
   {
-    if (index < 0 || len <= index)
+    if (index < 0 || _length <= index)
       return 0;
     else
       return (char) (_buffer[index] & 0xff);
