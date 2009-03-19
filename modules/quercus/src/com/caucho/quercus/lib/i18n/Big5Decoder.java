@@ -41,32 +41,20 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempCharBuffer;
 
-public class GenericDecoder
-  extends Decoder
+public class Big5Decoder
+  extends GenericDecoder
 {
   private static final Logger log
-    = Logger.getLogger(GenericDecoder.class.getName());
+    = Logger.getLogger(Big5Decoder.class.getName());
 
-  private static final L10N L = new L10N(GenericDecoder.class);
+  private static final L10N L = new L10N(Big5Decoder.class);
   
   private Charset _charset;
   private CharsetDecoder _decoder;
   
-  public GenericDecoder(String charsetName)
+  public Big5Decoder(String charsetName)
   {
     super(charsetName);
-    
-    _charset = Charset.forName(charsetName);
-    
-    _decoder = _charset.newDecoder();
-  }
-  
-  @Override
-  public void reset()
-  {
-    _decoder.reset();
-    
-    super.reset();
   }
   
   @Override
@@ -80,60 +68,46 @@ public class GenericDecoder
     
     while (in.hasRemaining()) {
       CoderResult coder = _decoder.decode(in, out, false);
-      if (coder.isMalformed())
+      if (isMalformed(coder, in)) {
         return false;
+      }
       
       out.clear();
     }
     
     CoderResult coder = _decoder.decode(in, out, true);
-    if (coder.isMalformed())
+    if (isMalformed(coder, in)) {
       return false;
+    }
     
     out.clear();
     
     coder = _decoder.flush(out);
-    if (coder.isMalformed())
+    if (isMalformed(coder, in)) {
       return false;
+    }
     
     return true;
   }
   
-  @Override
-  protected StringBuilder decodeImpl(Env env, StringValue str)
+  private boolean isMalformed(CoderResult coder, ByteBuffer in)
   {
-    ByteBuffer in = ByteBuffer.wrap(str.toBytes());
-    
-    TempCharBuffer tempBuf = TempCharBuffer.allocate();
-    
-    try  {
-      CharBuffer out = CharBuffer.wrap(tempBuf.getBuffer());
+    if (coder.isMalformed() || coder.isUnmappable()) {
+      int errorPosition = in.position();
       
-      StringBuilder sb = new StringBuilder();
-      
-      while (in.hasRemaining()) {
-        CoderResult coder = _decoder.decode(in, out, false);
-        if (! fill(sb, in, out, coder))
-          return sb;
-        
-        out.clear();
+      if (errorPosition + 1 < in.limit()
+          && in.get(errorPosition) == '\u00a3'
+          && in.get(errorPosition + 1) == '\u00e1') {
+        return false;
       }
-      
-      CoderResult coder = _decoder.decode(in, out, true);
-      if (! fill(sb, in, out, coder))
-        return sb;
-      
-      out.clear();
-      
-      coder = _decoder.flush(out);
-      fill(sb, in, out, coder);
-      
-      return sb;
-    } finally {
-      TempCharBuffer.free(tempBuf);
+      else
+        return true;
     }
+    else
+      return false;
   }
   
+  @Override
   protected boolean fill(StringBuilder sb, ByteBuffer in,
                          CharBuffer out, CoderResult coder)
   {
@@ -145,10 +119,19 @@ public class GenericDecoder
     }
     
     if (coder.isMalformed() || coder.isUnmappable()) {
-      _hasError = true;
-      
       int errorPosition = in.position();
+
+      if (errorPosition + 1 < in.limit()
+          && (in.get(errorPosition) & 0xFF) == '\u00a3'
+          && (in.get(errorPosition + 1) & 0xFF) == '\u00e1') {
+        
+        sb.append('\u20AC');
+        in.position(errorPosition + 2);
+        
+        return true;
+      }
       
+      _hasError = true;
       in.position(errorPosition + 1);
       
       if (_isIgnoreErrors) {

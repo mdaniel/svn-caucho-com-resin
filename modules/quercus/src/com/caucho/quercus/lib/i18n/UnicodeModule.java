@@ -316,7 +316,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       if (isStartUtf8)
         decoder = new Utf8Decoder(inCharset);
       else
-        decoder = new GenericDecoder(inCharset);
+        decoder = Decoder.create(inCharset);
       
       decoder.setIgnoreErrors(isIgnoreErrors);
 

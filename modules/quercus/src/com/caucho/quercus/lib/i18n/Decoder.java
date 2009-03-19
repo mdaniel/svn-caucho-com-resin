@@ -54,6 +54,9 @@ abstract public class Decoder
     if (charset.equalsIgnoreCase("utf8")
         || charset.equalsIgnoreCase("utf-8"))
       return new Utf8Decoder(charset);
+    else if (charset.equalsIgnoreCase("big5")
+             || charset.equalsIgnoreCase("big-5"))
+      return new Big5Decoder(charset);
     else
       return new GenericDecoder(charset);
   }
