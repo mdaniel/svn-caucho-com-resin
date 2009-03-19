@@ -66,7 +66,7 @@ public class ScopedAttributeELResolver extends ELResolver {
 
     ArrayList<FeatureDescriptor> keys = new ArrayList<FeatureDescriptor>();
 
-    Enumeration e = pageContext.getAttributeNames();
+    Enumeration e = pageContext.getAttributeNamesInScope(PageContext.PAGE_SCOPE);
     while (e.hasMoreElements()) {
       Object key = e.nextElement();
       String name = (String) key;

@@ -393,7 +393,7 @@ public class PageContextImpl extends PageContext
       _webApp.removeAttribute(name);
   }
 
-  public Enumeration<String> getAttributeNames()
+  private Enumeration<String> getAttributeNames()
   {
     if (! _isFilled)
       fillAttribute();

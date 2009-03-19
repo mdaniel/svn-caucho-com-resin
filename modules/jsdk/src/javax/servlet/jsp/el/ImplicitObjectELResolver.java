@@ -117,7 +117,7 @@ public class ImplicitObjectELResolver extends ELResolver {
       {
 	HashMap<String,Object> map = new HashMap<String,Object>();
 
-	Enumeration e = jspContext.getAttributeNames();
+	Enumeration e = jspContext.getAttributeNamesInScope(PageContext.PAGE_SCOPE);
 	while (e.hasMoreElements()) {
 	  String name = (String) e.nextElement();
 	  

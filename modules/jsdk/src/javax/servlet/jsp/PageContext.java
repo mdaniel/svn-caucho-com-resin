@@ -72,10 +72,6 @@ public abstract class PageContext extends JspContext {
    * Removes the named page attribute.
    */
   public abstract void removeAttribute(String name);
-  /**
-   * Return an enumeration of all the attribute names.
-   */
-  public abstract Enumeration getAttributeNames();
 
   /**
    * Returns the current output for the page.
