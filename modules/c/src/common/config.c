@@ -750,7 +750,7 @@ write_config(config_t *config)
   tail = tempnam(temp_directory(config, temp, sizeof(temp)), "resin-");
   if (tail) {
 	strcpy(temp, tail);
-	fd = open(temp, O_WRONLY|O_CREAT|O_TRUNC, 0664);
+	fd = open(temp, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0664);
   }
   else
 	  fd = -1;
@@ -920,7 +920,7 @@ read_all_config_impl(config_t *config)
   if (! *config->config_path)
     return 0;
   
-  fd = open(config->config_path, O_RDONLY);
+  fd = open(config->config_path, O_RDONLY|O_BINARY);
 
   if (fd < 0) {
 	  ERR(("%s:%d can't open config path '%s' (errno=%d)", __FILE__, __LINE__,
@@ -1100,7 +1100,7 @@ cse_init_config(config_t *config)
   config->enable_caucho_status = 0;
   */
   config->disable_session_failover = 0;
-  config->update_interval = 15;
+  config->update_interval = 2;
   strcpy(config->session_url_prefix, ";jsessionid=");
   strcpy(config->session_cookie, "JSESSIONID");
 
