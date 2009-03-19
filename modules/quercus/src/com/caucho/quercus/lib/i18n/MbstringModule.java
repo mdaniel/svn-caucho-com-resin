@@ -36,7 +36,6 @@ import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.MailModule;
-import com.caucho.quercus.lib.regexp.CauchoRegexpModule;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -407,8 +406,8 @@ public class MbstringModule
 
     // XXX: option
 
-    Value val = CauchoRegexpModule.eregImpl(env, pattern, string,
-                                            null, false);
+    Value val = RegexpModule.eregImpl(env, pattern, string,
+                                      null, false);
 
     if (val == BooleanValue.FALSE)
       return BooleanValue.FALSE;
@@ -498,18 +497,18 @@ public class MbstringModule
 
     if (regs == null) {
       if (isCaseSensitive)
-        return CauchoRegexpModule.eregImpl(env, pattern, string, null, false);
+        return RegexpModule.eregImpl(env, pattern, string, null, false);
       else
-        return CauchoRegexpModule.eregImpl(env, pattern, string, null, true);
+        return RegexpModule.eregImpl(env, pattern, string, null, true);
     }
 
     Value val;
     Var regVar = new Var();
 
     if (isCaseSensitive)
-      val = CauchoRegexpModule.eregImpl(env, pattern, string, regVar, false);
+      val = RegexpModule.eregImpl(env, pattern, string, regVar, false);
     else
-      val = CauchoRegexpModule.eregImpl(env, pattern, string, regVar, true);
+      val = RegexpModule.eregImpl(env, pattern, string, regVar, true);
 
     if (regVar.isset()) {
       regs.clear();
