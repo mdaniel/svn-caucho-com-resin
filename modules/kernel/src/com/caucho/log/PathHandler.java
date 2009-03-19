@@ -125,6 +125,6 @@ public class PathHandler extends Handler {
 
   public String toString()
   {
-    return "PathHandler[" + _path + "]";
+    return getClass().getSimpleName() + "[" + _path + "]";
   }
 }

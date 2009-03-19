@@ -664,7 +664,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (messages != null) {
       try {
 	for (int i = 0; i < messages.size(); i++) {
-	  messages.get(i).commit();
+	  TransactedMessage msg = messages.get(i);
+
+	  if (msg != null)
+	    msg.commit();
 	}
       } finally {
 	messages.clear();
@@ -1188,6 +1191,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     ReceiveMessage(AbstractDestination queue, MessageImpl message)
     {
       _queue = queue;
+
+      if (queue == null)
+	throw new NullPointerException();
+      
       _msgId = message.getJMSMessageID();
 
       if (_msgId == null)

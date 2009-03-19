@@ -77,7 +77,7 @@ public class SetFilterChain
     AbstractHttpResponse cauchoResponse = null;
     if (_requestSecure != null) {
       CauchoRequest cauchoRequest
-	= new SecureServletRequestWrapper((HttpServletRequest) request);
+	= new SetRequestSecureFilterChain.SecureServletRequestWrapper((HttpServletRequest) request);
 
       if (response instanceof AbstractHttpResponse
 	  && cauchoRequest.getWebApp() != null) {
@@ -103,31 +103,6 @@ public class SetFilterChain
     } finally {
       if (cauchoResponse != null && request != oldRequest)
 	cauchoResponse.setRequest(oldRequest);
-    }
-  }
-
-  private class SecureServletRequestWrapper
-    extends RequestAdapter
-  {
-    public SecureServletRequestWrapper(HttpServletRequest request)
-    {
-      setRequest(request);
-
-      if (request instanceof CauchoRequest)
-	setWebApp(((CauchoRequest) request).getWebApp());
-    }
-
-    public boolean isSecure()
-    {
-      return _requestSecure;
-    }
-
-    /**
-     * Returns the request's scheme.
-     */
-    public String getScheme()
-    {
-      return isSecure() ? "https" : "http";
     }
   }
 }

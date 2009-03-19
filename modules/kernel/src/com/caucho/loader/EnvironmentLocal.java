@@ -28,13 +28,15 @@
 
 package com.caucho.loader;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * Creates a ClassLoader dependent variable.
  * The value of the ClassLoaderLocal
  * variable depends on the context ClassLoader.
  */
 public class EnvironmentLocal<E> {
-  private static int _varCount;
+  private static AtomicLong _varCount = new AtomicLong();
   
   private String _varName;
   private E _globalValue;
@@ -45,7 +47,7 @@ public class EnvironmentLocal<E> {
    */
   public EnvironmentLocal()
   {
-    _varName = "resin:var-" + _varCount++;
+    _varName = "resin:var-" + _varCount.incrementAndGet();
   }
 
   public EnvironmentLocal(String varName)

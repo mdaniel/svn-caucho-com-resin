@@ -80,10 +80,11 @@ abstract public class AbstractDispatchRule implements DispatchRule
   {
     Matcher matcher = null;
     
-    if (_regexp != null && (matcher = _regexp.matcher(uri)).find()) {
+    if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
       String target = null;
 
-      uri = rewrite(matcher, uri);
+      if (matcher != null)
+	uri = rewrite(matcher, uri);
     
       if (queryString == null)
 	target = uri;

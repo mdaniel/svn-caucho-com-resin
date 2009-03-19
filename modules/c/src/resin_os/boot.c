@@ -336,10 +336,10 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
 #endif
 
   if (gid >= 0)
-    setgid(gid);
+    setregid(gid, gid);
   
   if (uid >= 0) {
-    setuid(uid);
+    setreuid(uid, uid);
 
     if (getuid() != uid) {
       fprintf(stderr, "Can't setuid to %d, received %d\n", uid, getuid());

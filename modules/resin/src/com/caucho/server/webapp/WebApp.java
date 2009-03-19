@@ -58,6 +58,9 @@ import com.caucho.osgi.OsgiManager;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
+import com.caucho.security.Deny;
+import com.caucho.security.IfSecure;
+import com.caucho.security.Not;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
@@ -1330,13 +1333,11 @@ public class WebApp extends ServletContextImpl
     _isSecure = isSecure;
 
     if (isSecure) {
-      TransportConstraint transConstraint = new TransportConstraint("secure");
+      Deny deny = new Deny();
+      deny.addURLPattern("/*");
+      deny.add(new Not(new IfSecure()));
 
-      SecurityConstraint constraint = new SecurityConstraint();
-      constraint.addURLPattern("/*");
-      constraint.addConstraint(transConstraint);
-
-      _constraintManager.addConstraint(constraint);
+      _constraintManager.addConstraint(deny);
     }
   }
 

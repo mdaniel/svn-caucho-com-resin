@@ -13,7 +13,19 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
-<li>mod_caucho: only allow one thread to update config for worker model</li>
+<li>rewrite: &lt;dispatch> should not modify uri unless it has a target (#3295, rep by Ethan Larson)</li>
+<li>distcache: distributed cache update times must be deltas because of clock skew (#3161, rep by Dushyanth Harinath)</li>
+<li>jms: commit() NPE check (#3287, rep by tyson weihs)</li>
+<li>rewrite: new rewrite rules allow custom dispatching (#3096, rep by Leonid Geller)</li>
+<li>rewrite: &lt;rewrite:SetHeader>,&lt;rewrite: Location> (#3381, rep by Andrea Sodomaco)</li>
+<li>rewrite: request-secure disabled access log (#3354, rep by Tamas Pinter)</li>
+<li>security: &lt;secure> interaction with auth-constraint (#3333, rep by stbu)</li>
+<li>servlet: add &lt;cron> syntax for servlet (#3188, rep by mate)</li>
+<li>boot: update setuid/setgid code (#3330, rep by tlandmann)</li>
+<li>quercus: charAt needs to check range (#3363, rep by gyvc)</li>
+<li>boot: improve bind error messages for failed binding (#3193, #3204, rep by sibyj)</li>
+<li>dist: init.d/resin.in distribution changes (#3374, rep by jkriesten)</li>
+<li>(2009-03-18) mod_caucho: only allow one thread to update config for worker model</li>
 <li>win32: truncate applied incorrect file mode for new file (#3382, rep by Kair Virkki)</li>
 <li>(2009-02-26) boot: windows machines can't add -server option automatically (#3331)</li>
 <li>inject: findByName needs to work during shutdown (#3334, rep by stbu)</li>

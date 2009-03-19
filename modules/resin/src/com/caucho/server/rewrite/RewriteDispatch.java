@@ -33,6 +33,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.rewrite.DispatchRule;
+import com.caucho.rewrite.RewriteAction;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
@@ -67,6 +68,9 @@ public class RewriteDispatch
 
   private ArrayList<DispatchRule> _ruleList
     = new ArrayList<DispatchRule>();
+
+  private ArrayList<RewriteAction> _actionList
+    = new ArrayList<RewriteAction>();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -156,6 +160,11 @@ public class RewriteDispatch
     _ruleList.add(rule);
   }
 
+  public void addAction(RewriteAction action)
+  {
+    _actionList.add(action);
+  }
+
   @PostConstruct
   public void init()
   {
@@ -187,10 +196,16 @@ public class RewriteDispatch
       _matchRule.init();
     }
 
-    chain = _matchRule.map(uri, queryString, chain);
+    if (_matchRule != null) {
+      chain = _matchRule.map(uri, queryString, chain);
+    }
 
     for (int i = _ruleList.size() - 1; i >= 0; i--) {
       chain = _ruleList.get(i).map(uri, queryString, chain);
+    }
+
+    for (int i = _actionList.size() - 1; i >= 0; i--) {
+      chain = _actionList.get(i).map(uri, queryString, chain);
     }
 
     return chain;

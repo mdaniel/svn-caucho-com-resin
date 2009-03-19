@@ -56,6 +56,8 @@ public class SecurityConstraint {
   private Pattern _regexp;
   private IPConstraint _oldStyleIpConstraint;
 
+  private boolean _isFallthrough;
+
   private ArrayList<WebResourceCollection> _webResourceCollectionList;
 
   /**
@@ -76,6 +78,10 @@ public class SecurityConstraint {
    * Sets the display-name.
    */
   public void setDisplayName(String displayName)
+  {
+  }
+
+  public void setFallthrough(boolean isFallthrough)
   {
   }
 
@@ -213,8 +219,8 @@ public class SecurityConstraint {
     }
     
     for (int i = 0;
-         _webResourceCollectionList != null &&
-           i < _webResourceCollectionList.size();
+         _webResourceCollectionList != null
+	   && i < _webResourceCollectionList.size();
          i++) {
       WebResourceCollection resource = _webResourceCollectionList.get(i);
 
@@ -230,7 +236,7 @@ public class SecurityConstraint {
    */
   public boolean isFallthrough()
   {
-    return false;
+    return _isFallthrough;
   }
 
   /**

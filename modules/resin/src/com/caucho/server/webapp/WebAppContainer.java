@@ -37,6 +37,8 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.make.AlwaysModified;
+import com.caucho.rewrite.RewriteAction;
+import com.caucho.rewrite.DispatchRule;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
@@ -320,7 +322,31 @@ public class WebAppContainer
   }
 
   /**
-   * Adds rewrite-dispatch.
+   * Adds a rewrite dispatch rule
+   */
+  public void add(DispatchRule dispatchRule)
+  {
+    if (dispatchRule.isRequest()) {
+      RewriteDispatch rewrite = createRewriteDispatch();
+
+      rewrite.addRule(dispatchRule);
+    }
+  }
+
+  /**
+   * Adds a rewrite dispatch rule
+   */
+  public void add(RewriteAction dispatchAction)
+  {
+    if (dispatchAction.isRequest()) {
+      RewriteDispatch rewrite = createRewriteDispatch();
+
+      rewrite.addAction(dispatchAction);
+    }
+  }
+
+  /**
+   * Adds rewrite-dispatch (backward compat).
    */
   public RewriteDispatch createRewriteDispatch()
   {

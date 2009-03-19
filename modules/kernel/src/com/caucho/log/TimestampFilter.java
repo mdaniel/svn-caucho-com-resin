@@ -196,6 +196,9 @@ public class TimestampFilter extends StreamImpl {
       _stream.write(buffer, offset, length);
       return;
     }
+
+    if (length == 0)
+      return;
     
     long now;
 
@@ -203,6 +206,8 @@ public class TimestampFilter extends StreamImpl {
       now = Alarm.getCurrentTime();
     else
       now = System.currentTimeMillis();
+
+    int timestampLength = 0;
     
     for (int i = 0; i < length; i++) {
       if (_isLineBegin) {
@@ -221,9 +226,10 @@ public class TimestampFilter extends StreamImpl {
       int ch = buffer[offset + i];
       _stream.write(ch);
       
-      if (ch == '\n' ||
-          ch == '\r' && i + 1 < length && buffer[offset + i + 1] != '\n')
+      if (ch == '\n'
+	  || ch == '\r' && i + 1 < length && buffer[offset + i + 1] != '\n') {
         _isLineBegin = true;
+      }
     }
   }
 

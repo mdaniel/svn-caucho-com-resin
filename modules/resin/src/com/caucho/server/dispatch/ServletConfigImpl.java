@@ -36,6 +36,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitParam;
+import com.caucho.config.types.CronType;
 import com.caucho.jmx.Jmx;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
@@ -95,6 +96,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   private ContainerProgram _init;
 
   private RunAt _runAt;
+  private CronType _cron;
 
   private ServletProtocolConfig _protocolConfig;
   private ProtocolServletFactory _protocolFactory;
@@ -371,7 +373,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   {
     if (_loadOnStartup > Integer.MIN_VALUE)
       return _loadOnStartup;
-    else if (_runAt != null)
+    else if (_runAt != null || _cron != null)
       return 0;
     else
       return Integer.MIN_VALUE;
@@ -386,6 +388,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       _runAt = new RunAt();
 
     return _runAt;
+  }
+
+  public void setCron(CronType cron)
+  {
+    _cron = cron;
   }
 
   public void setJndiName(String jndiName)
@@ -404,6 +411,14 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   public RunAt getRunAt()
   {
     return _runAt;
+  }
+
+  /**
+   * Returns the cron configuration.
+   */
+  public CronType getCron()
+  {
+    return _cron;
   }
 
   /**
@@ -498,7 +513,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   public void init()
     throws ServletException
   {
-    if (_runAt != null) {
+    if (_runAt != null || _cron != null) {
       _alarm = new Alarm(this);
     }
 
@@ -542,7 +557,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   protected void validateClass(boolean requireClass)
     throws ServletException
   {
-    if (_runAt != null || _loadOnStartup >= 0)
+    if (_runAt != null || _cron != null || _loadOnStartup >= 0)
       requireClass = true;
 
     Thread thread = Thread.currentThread();
@@ -646,12 +661,21 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
+      long now = Alarm.getCurrentTime();
+      long nextTime = nextTimeout(now);
 
       Alarm nextAlarm = _alarm;
       if (nextAlarm != null)
-	alarm.queue(nextTime - Alarm.getCurrentTime());
+	alarm.queue(nextTime - now);
     }
+  }
+
+  private long nextTimeout(long now)
+  {
+    if (_cron != null)
+      return _cron.nextTime(now);
+    else
+      return _runAt.getNextTimeout(now);
   }
 
   public FilterChain createServletChain()
@@ -806,8 +830,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 	  log.finest(e.toString());
 	}
 
-	if (_runAt != null && _alarm != null) {
-	  long nextTime = _runAt.getNextTimeout(Alarm.getCurrentTime());
+	if ((_runAt != null || _cron != null) && _alarm != null) {
+	  long nextTime = nextTimeout(Alarm.getCurrentTime());
 	  _alarm.queue(nextTime - Alarm.getCurrentTime());
 	}
       }

@@ -37,8 +37,9 @@ public class JniServerSocketImpl extends QServerSocket {
     _fd = bindPort(host, port);
 
     if (_fd == 0)
-      throw new IOException(L.l("bind failed to {0}:{1}",
-				host, port));
+      throw new IOException(L.l("Socket bind failed for {0}:{1} while running as {2}.  Check for other processes listening to the port and check for permissions (root on unix).",
+				host, port,
+				System.getProperty("user.name")));
   }
 
   /**
@@ -50,7 +51,7 @@ public class JniServerSocketImpl extends QServerSocket {
     _fd = nativeOpenPort(fd, port);
 
     if (_fd == 0)
-      throw new java.net.BindException(L.l("bind failed to port {0} fd {1}", port, fd));
+      throw new java.net.BindException(L.l("Socket bind failed for port {0} fd={1} opened by watchdog.  Check that the watchdog and Resin permissions are properly configured.", port, fd));
   }
 
   /**

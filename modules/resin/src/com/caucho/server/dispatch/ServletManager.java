@@ -148,8 +148,9 @@ public class ServletManager {
       if (i == loadOnStartup.size())
         loadOnStartup.add(config);
 
-      if (config.getRunAt() != null)
+      if (config.getRunAt() != null || config.getCron() != null) {
         _cronList.add(config);
+      }
     }
 
     for (int i = 0; i < loadOnStartup.size(); i++) {

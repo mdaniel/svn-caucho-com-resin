@@ -154,8 +154,8 @@ public class RequestAdapter extends RequestWrapper
   {
     HttpServletRequest request = getRequest();
 
-    if (request instanceof AbstractHttpRequest)
-      return (AbstractHttpRequest) request;
+    if (request instanceof CauchoRequest)
+      return ((CauchoRequest) request).getAbstractHttpRequest();
     else
       return null;
   }

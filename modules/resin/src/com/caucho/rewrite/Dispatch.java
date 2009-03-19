@@ -51,6 +51,9 @@ public class Dispatch extends AbstractTargetDispatchRule
 				    String target,
 				    FilterChain next)
   {
-    return new RewriteDispatchFilterChain(target);
+    if (getTarget() != null)
+      return new RewriteDispatchFilterChain(target);
+    else
+      return next;
   }
 }

@@ -60,6 +60,15 @@ public class Not implements ServletRequestPredicate {
   
   private ServletRequestPredicate _predicate;
 
+  public Not()
+  {
+  }
+
+  public Not(ServletRequestPredicate predicate)
+  {
+    add(predicate);
+  }
+
   /**
    * Add a sub-predicate
    */

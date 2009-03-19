@@ -72,6 +72,11 @@ public class DispatchRule
     _targetHost = target;
   }
 
+  public String getTarget()
+  {
+    return _target;
+  }
+
   @Override
   public String rewrite(String uri, Matcher matcher)
   {
@@ -101,7 +106,10 @@ public class DispatchRule
       return new DispatchAbsoluteFilterChain(uriArg, WebApp.getCurrent());
     else
     */
-    return new RewriteDispatchFilterChain(uriArg);
+    if (getTarget() != null)
+      return new RewriteDispatchFilterChain(uriArg);
+    else
+      return accept;
   }
 
   @Override

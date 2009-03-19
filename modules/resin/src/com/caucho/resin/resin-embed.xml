@@ -1,5 +1,6 @@
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core">
+  
   <class-loader>
     <tree-loader path="${resin.root}/ext-lib"/>
   </class-loader>

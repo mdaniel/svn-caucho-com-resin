@@ -70,6 +70,11 @@ abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
     _targetHost = target;
   }
 
+  public String getTarget()
+  {
+    return _target;
+  }
+
   @Override
   protected String rewrite(Matcher matcher, String uri)
   {

@@ -740,7 +740,10 @@ public class StringBuilderValue
   @Override
   public final char charAt(int index)
   {
-    return (char) (_buffer[index] & 0xFF);
+    if (index < 0 || len <= index)
+      return 0;
+    else
+      return (char) (_buffer[index] & 0xff);
   }
 
   /**
@@ -756,7 +759,7 @@ public class StringBuilderValue
     else {
       byte ch = _buffer[(int) index];
 
-      return CHAR_STRINGS[ch & 0xFF];
+      return CHAR_STRINGS[ch & 0xff];
     }
   }
   

@@ -88,6 +88,10 @@ r_context-path =
   attribute context-path { string }
   | element context-path { string }
 
+r_cron =
+   attribute run-at { string }
+   | element cron { string }
+
 ## marks the web-app as distributable
 r_distributable =
   attribute distributable { string }
@@ -854,7 +858,7 @@ r_servlet-Content =
 
    & r_security-role-ref*
 
-   & r_run-at?
+   & (r_cron | r_run-at)?
 
 r_servlet-run-as = element run-as {
   r_role-name
