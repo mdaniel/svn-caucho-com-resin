@@ -40,6 +40,12 @@ typedef time_t unsigned int;
 #include <time.h>
 #endif
 */
+
+#ifndef WIN32
+#define O_BINARY 0
+#define O_TEXT 0
+#endif
+
 #include <time.h>
 
 typedef struct mem_pool_t mem_pool_t;

@@ -825,7 +825,7 @@ write_config(config_t *config)
   tail = tempnam("c:/temp", "resin-");
   if (tail) {
     strcpy(temp, tail);
-    fd = open(tail, O_WRONLY|O_CREAT|O_TRUNC, 0664);
+    fd = open(tail, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0664);
   }
   else
     fd = -1;
@@ -991,14 +991,14 @@ read_all_config_impl(config_t *config)
   char buffer[1024];
   char value[1024];
   int code;
-  int  ch;
+  int ch;
   struct stat st;
   int mtime = time(0);
 
   if (! *config->config_path)
     return 0;
   
-  fd = open(config->config_path, O_RDONLY);
+  fd = open(config->config_path, O_RDONLY|O_BINARY);
 
   if (fd < 0)
     return 0;
@@ -1203,7 +1203,7 @@ cse_init_config(config_t *config)
   config->enable_caucho_status = 0;
   */
   config->disable_session_failover = 0;
-  config->update_timeout = 15;
+  config->update_timeout = 2;
   strcpy(config->session_url_prefix, ";jsessionid=");
   strcpy(config->session_cookie, "JSESSIONID");
 
