@@ -115,6 +115,23 @@ public final class IteratedExpression {
       }
 
       return value;
+    } else if (items instanceof String) {
+      StringTokenizer tokenizer;
+      String value = null;
+
+      if (delims == null)
+        tokenizer = new StringTokenizer((String) items);
+      else
+        tokenizer = new StringTokenizer((String) items, delims);
+
+      while (i-- >= 0) {
+        if (! tokenizer.hasMoreTokens())
+          return null;
+
+        value = tokenizer.nextToken();
+      }
+
+      return value;
     }
     else
       throw new IllegalStateException("unknown items value " + items);

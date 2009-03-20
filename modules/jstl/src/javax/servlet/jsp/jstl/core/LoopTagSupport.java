@@ -36,6 +36,10 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.TryCatchFinally;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Enumeration;
 
 abstract public class LoopTagSupport extends TagSupport
   implements IterationTag, TryCatchFinally, LoopTag {
@@ -142,10 +146,31 @@ abstract public class LoopTagSupport extends TagSupport
     return _status;
   }
 
-  protected ValueExpression createIndexedExpression(int index)
+  private ValueExpression createIndexedExpression(int index)
     throws JspTagException
   {
-    return null;
+    Object items = deferredExpression.getValue(this.pageContext.getELContext());
+
+    if (items == null)
+      return deferredExpression;
+    else if (items instanceof Collection)
+      return new IndexedValueExpression(deferredExpression, index);
+    else if (items.getClass().isArray())
+      return new IndexedValueExpression(deferredExpression, index);
+    else if (items instanceof Map)
+      return new IteratedValueExpression(
+        new IteratedExpression(deferredExpression, null), index);
+    else if (items instanceof Iterator)
+      return new IteratedValueExpression(
+        new IteratedExpression(deferredExpression, null), index);
+    else if (items instanceof Enumeration)
+      return new IteratedValueExpression(
+        new IteratedExpression(deferredExpression, null), index);
+    else if (items instanceof String)
+      return new IteratedValueExpression(
+        new IteratedExpression(deferredExpression, getDelims()), index);
+    else
+      throw new JspTagException("unknown items value '" + items + "'");
   }
 
   /**
@@ -270,7 +295,7 @@ abstract public class LoopTagSupport extends TagSupport
 
   protected String getDelims()
   {
-    return ",";// XXX: needs test
+    return ",";
   }
 
 
