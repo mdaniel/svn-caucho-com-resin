@@ -185,9 +185,9 @@ public class MbstringModule
    */
   @VariableArguments
   public static StringValue mb_convert_variables(Env env,
-                              String toEncoding,
-                              String fromEncodings,
-                              @Reference Value vars)
+                                                  String toEncoding,
+                                                  String fromEncodings,
+                                                  @Reference Value vars)
   {
     // XXX: fallback encoding
     int tail = fromEncodings.indexOf(',', 1);
@@ -1409,9 +1409,9 @@ public class MbstringModule
       ObjectValue obj = (ObjectValue) val.toObject(env);
 
       for (Map.Entry<Value,Value> entry : obj.entrySet()) {
-        obj.putField(env,
-                     entry.getKey().toStringValue(),
-                     decodeAll(env, entry.getValue(), decoder));
+        obj.putThisField(env,
+                         entry.getKey().toStringValue(),
+                         decodeAll(env, entry.getValue(), decoder));
       }
 
       return obj;
@@ -1457,9 +1457,9 @@ public class MbstringModule
       ObjectValue obj = (ObjectValue)val;
 
       for (Map.Entry<Value,Value> entry : obj.entrySet()) {
-        obj.putField(env,
-                     entry.getKey().toStringValue(),
-                     encodeAll(env, entry.getValue(), encoder));
+        obj.putThisField(env,
+                         entry.getKey().toStringValue(),
+                         encodeAll(env, entry.getValue(), encoder));
       }
 
       return obj;

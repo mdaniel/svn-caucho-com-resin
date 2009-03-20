@@ -84,7 +84,7 @@ public class InterpretedClassDef extends ClassDef
                              int index)
   {
     super(location, name, parentName, ifaceList);
-    
+
     _parseIndex = index;
   }
 

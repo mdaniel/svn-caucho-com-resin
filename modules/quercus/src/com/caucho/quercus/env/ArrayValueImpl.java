@@ -63,15 +63,15 @@ public class ArrayValueImpl extends ArrayValue
 
   private static final int MIN_HASH = 4;
   
-  private Entry []_entries;
-  private int _hashMask;
+  protected Entry []_entries;
+  protected int _hashMask;
 
-  private int _size;
-  private long _nextAvailableIndex;
-  private boolean _isDirty;
+  protected int _size;
+  protected long _nextAvailableIndex;
+  protected boolean _isDirty;
   
-  private Entry _head;
-  private Entry _tail;
+  protected Entry _head;
+  protected Entry _tail;
 
   public ArrayValueImpl()
   {
@@ -109,7 +109,23 @@ public class ArrayValueImpl extends ArrayValue
 
   public ArrayValueImpl(ArrayValueImpl source)
   {
-    source._isDirty = true;
+    if (! source._isDirty)
+      source._isDirty = true;
+    
+    _isDirty = true;
+    
+    _size = source._size;
+    _entries = source._entries;
+    _hashMask = source._hashMask;
+
+    _head = source._head;
+    _current = source._current;
+    _tail = source._tail;
+    _nextAvailableIndex = source._nextAvailableIndex;
+  }
+  
+  public ArrayValueImpl(ConstArrayValue source)
+  {
     _isDirty = true;
     
     _size = source._size;

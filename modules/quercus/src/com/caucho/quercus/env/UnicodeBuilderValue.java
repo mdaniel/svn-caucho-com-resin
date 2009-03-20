@@ -570,8 +570,10 @@ public class UnicodeBuilderValue
   public final byte[] toBytes()
   {
     byte[] bytes = new byte[_length];
-
-    System.arraycopy(_buffer, 0, bytes, 0, _length);
+    
+    for (int i = 0; i < _length; i++) {
+      bytes[i] = (byte) (_buffer[i] & 0xFF);
+    }
 
     return bytes;
   }

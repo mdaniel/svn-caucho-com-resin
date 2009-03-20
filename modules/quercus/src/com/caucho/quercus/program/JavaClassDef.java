@@ -157,22 +157,28 @@ public class JavaClassDef extends ClassDef {
     moduleContext.addExtensionClass(extension, name);
   }
 
-  private void fillInstanceOfSet(Class type)
+  private void fillInstanceOfSet(Class type, boolean isTop)
   {
     if (type == null)
       return;
     
-    String name = type.getSimpleName();
-    
-    _instanceOfSet.add(name);
-    _instanceOfSetLowerCase.add(name.toLowerCase());
+    if (isTop && _isDelegate) {
+      _instanceOfSet.add(_name);
+      _instanceOfSetLowerCase.add(_name.toLowerCase());
+    }
+    else {
+      String name = type.getSimpleName();
+      
+      _instanceOfSet.add(name);
+      _instanceOfSetLowerCase.add(name.toLowerCase());
+    }
 
-    fillInstanceOfSet(type.getSuperclass());
+    fillInstanceOfSet(type.getSuperclass(), false);
 
     Class []ifaceList = type.getInterfaces();
     if (ifaceList != null) {
       for (Class iface : ifaceList)
-        fillInstanceOfSet(iface);
+        fillInstanceOfSet(iface, false);
     }
   }
 
@@ -264,7 +270,7 @@ public class JavaClassDef extends ClassDef {
       _instanceOfSet = new HashSet<String>();
       _instanceOfSetLowerCase = new HashSet<String>();
       
-      fillInstanceOfSet(_type);
+      fillInstanceOfSet(_type, true);
     }
     
     return (_instanceOfSet.contains(name)
@@ -277,24 +283,29 @@ public class JavaClassDef extends ClassDef {
   @Override
   public void addInterfaces(HashSet<String> interfaceSet)
   {
-    addInterfaces(interfaceSet, _type);
+    addInterfaces(interfaceSet, _type, true);
   }
 
-  protected void addInterfaces(HashSet<String> interfaceSet, Class type)
+  protected void addInterfaces(HashSet<String> interfaceSet,
+                               Class type,
+                               boolean isTop)
   {
     if (type == null || Object.class.equals(type))
       return;
     
-    interfaceSet.add(type.getSimpleName().toLowerCase());
+    if (isTop)
+      interfaceSet.add(_name.toLowerCase());
+    else
+      interfaceSet.add(type.getSimpleName().toLowerCase());
 
     if (type.getInterfaces() != null) {
       for (Class iface : type.getInterfaces()) {
-	addInterfaces(interfaceSet, iface);
+        addInterfaces(interfaceSet, iface, false);
       }
     }
 
     // php/1z21
-    addInterfaces(interfaceSet, type.getSuperclass());
+    addInterfaces(interfaceSet, type.getSuperclass(), false);
   }
 
   private boolean hasInterface(String name, Class type)
@@ -1135,9 +1146,9 @@ public class JavaClassDef extends ClassDef {
 	  
           _funArrayDelegate.setArrayGet(new JavaMethod(moduleContext, method));
         } else if ("__set".equals(methodName)) {
-	  if (_funArrayDelegate == null)
-	    _funArrayDelegate = new FunctionArrayDelegate();
-	  
+          if (_funArrayDelegate == null)
+            _funArrayDelegate = new FunctionArrayDelegate();
+          
           _funArrayDelegate.setArrayPut(new JavaMethod(moduleContext, method));
         } else if ("__getField".equals(methodName)) {
           __fieldGet = new JavaMethod(moduleContext, method);

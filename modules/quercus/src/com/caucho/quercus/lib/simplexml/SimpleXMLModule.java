@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -48,7 +48,6 @@ import java.util.logging.Logger;
 
 /**
  * PHP SimpleXML
- *   - differences: PHP returns results in UTF-8 byte-encoding
  */
 public class SimpleXMLModule
   extends AbstractQuercusModule

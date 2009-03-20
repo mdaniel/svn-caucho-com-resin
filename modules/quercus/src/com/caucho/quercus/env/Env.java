@@ -2585,7 +2585,7 @@ public class Env {
     Var var = cl.getStaticField(this, name);
     
     if (var == null) {
-      error(L.l("{0}::{1} is an undeclared static property", className, name));
+      error(L.l("{0}::${1} is an undeclared static property", className, name));
     }
 
     return var;

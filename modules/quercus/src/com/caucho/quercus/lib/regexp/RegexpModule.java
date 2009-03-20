@@ -216,6 +216,7 @@ public class RegexpModule
    *
    * @param env the calling environment
    */
+  /*
   public static Value preg_match(Env env,
                                  StringValue regexpValue,
                                  StringValue subject,
@@ -240,6 +241,7 @@ public class RegexpModule
       return BooleanValue.FALSE;
     }
   }
+  */
   
   public static Regexp createRegexp(Env env, StringValue regexpValue)
   {
@@ -273,12 +275,12 @@ public class RegexpModule
     }
   }
   
-  public static Value cauchoPregMatch(Env env,
-                      Regexp regexp,
-                      StringValue subject,
-                      @Optional @Reference Value matchRef,
-                      @Optional int flags,
-                      @Optional int offset)
+  public static Value preg_match(Env env,
+                                 Regexp regexp,
+                                 StringValue subject,
+                                 @Optional @Reference Value matchRef,
+                                 @Optional int flags,
+                                 @Optional int offset)
   {
     if (regexp == null)
       return BooleanValue.FALSE;
