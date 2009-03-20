@@ -60,17 +60,20 @@ public class SqlIndexAlreadyExistsException extends java.sql.SQLException
    */
   public SqlIndexAlreadyExistsException(String message, Throwable e)
   {
-    super(message, e);
+    super(message);
+
+    initCause(e);
   }
   
   /**
    * Creates the wrapper with a root cause.
    *
-   * @param message the message.
    * @param e the rootCause exception
    */
   public SqlIndexAlreadyExistsException(Throwable e)
   {
-    super(e);
+    super();
+
+    initCause(e);
   }
 }
