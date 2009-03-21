@@ -47,27 +47,35 @@ public class RegexpWrapper
   
   public Regexp get(Env env, StringValue str)
   {
-    if (_regexp == null) {
-      _regexp = RegexpModule.createRegexpNoCache(env, str);
+    Regexp regexp = _regexp;
+    StringValue regexpStr = _regexpStr;
+    
+    Regexp regexp2 = _regexp2;
+    StringValue regexpStr2 = _regexpStr2;
+    
+    if (regexp == null) {
+      regexp = RegexpModule.createRegexpNoCache(env, str);
+      _regexp = regexp;
       _regexpStr = str;
       
-      return _regexp;
+      return regexp;
     }
-    else if (str == _regexpStr
-             || (str.hashCode() == _regexpStr.hashCode()
-                 && _regexpStr.equals(str))) {
-      return _regexp;
+    else if (str == regexpStr
+             || (str.hashCode() == regexpStr.hashCode()
+                 && str.equals(regexpStr))) {
+      return regexp;
     }
-    else if (_regexp2 == null) {
-      _regexp2 = RegexpModule.createRegexpNoCache(env, str);
+    else if (regexp2 == null) {
+      regexp2 = RegexpModule.createRegexpNoCache(env, str);
+      _regexp2 = regexp2;
       _regexpStr2 = str;
       
-      return _regexp2;
+      return regexp2;
     }
-    else if (str == _regexpStr2
-        || (str.hashCode() == _regexpStr2.hashCode()
-            && _regexpStr2.equals(str))) {
-      return _regexp2;
+    else if (str == regexpStr2
+        || (str.hashCode() == regexpStr2.hashCode()
+            && str.equals(regexpStr2))) {
+      return regexp2;
     }
     else {
       return RegexpModule.createRegexp(env, str);

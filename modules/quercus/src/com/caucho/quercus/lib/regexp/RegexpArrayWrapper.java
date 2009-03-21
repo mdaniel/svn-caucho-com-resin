@@ -59,83 +59,107 @@ public class RegexpArrayWrapper
   
   public Regexp []get(Env env, Value pattern)
   {
-    if (_regexp == null) {
-      _regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
+    Regexp []regexp = _regexp;
+    Value regexpValue = _regexpValue;
+    
+    Regexp []regexp2 = _regexp2;
+    Value regexpValue2 = _regexpValue2;
+    
+    Regexp []regexp3 = _regexp3;
+    Value regexpValue3 = _regexpValue3;
+    
+    Regexp []regexp4 = _regexp4;
+    Value regexpValue4 = _regexpValue4;
+    
+    Regexp []regexp5 = _regexp5;
+    Value regexpValue5 = _regexpValue5;
+    
+    Regexp []regexp6 = _regexp6;
+    Value regexpValue6 = _regexpValue6;
+    
+    if (regexp == null) {
+      regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      _regexp = regexp;
       _regexpValue = pattern;
 
-      return _regexp;
+      return regexp;
     }
-    else if (pattern == _regexpValue
+    else if (pattern == regexpValue
              || (pattern.isString()
-                 && pattern.hashCode() == _regexpValue.hashCode()
-                 && pattern.equals(_regexpValue))
-             || (pattern.cmp(_regexpValue) == 0)) {
-      return _regexp;
+                 && pattern.hashCode() == regexpValue.hashCode()
+                 && pattern.equals(regexpValue))
+             || (pattern.cmp(regexpValue) == 0)) {
+      return regexp;
     }
-    else if (_regexp2 == null) {
-      _regexp2 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+    else if (regexp2 == null) {
+      regexp2 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      _regexp2 = regexp2;
       _regexpValue2 = pattern;
       
-      return _regexp2;
+      return regexp2;
     }
-    else if (pattern == _regexpValue2
+    else if (pattern == regexpValue2
         || (pattern.isString()
-            && pattern.hashCode() == _regexpValue2.hashCode()
-            && pattern.equals(_regexpValue2))
-        || (pattern.cmp(_regexpValue2) == 0)) {
-      return _regexp2;
+            && pattern.hashCode() == regexpValue2.hashCode()
+            && pattern.equals(regexpValue2))
+        || (pattern.cmp(regexpValue2) == 0)) {
+      return regexp2;
     }
-    else if (_regexp3 == null) {
-      _regexp3 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+    else if (regexp3 == null) {
+      regexp3 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      _regexp3 = regexp;
       _regexpValue3 = pattern;
       
-      return _regexp3;
+      return regexp3;
     }
-    else if (pattern == _regexpValue3
+    else if (pattern == regexpValue3
         || (pattern.isString()
-            && pattern.hashCode() == _regexpValue3.hashCode()
-            && pattern.equals(_regexpValue3))
-        || (pattern.cmp(_regexpValue3) == 0)) {
-      return _regexp3;
+            && pattern.hashCode() == regexpValue3.hashCode()
+            && pattern.equals(regexpValue3))
+        || (pattern.cmp(regexpValue3) == 0)) {
+      return regexp3;
     }
-    else if (_regexp4 == null) {
-      _regexp4 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+    else if (regexp4 == null) {
+      regexp4 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      _regexp4 = regexp4;
       _regexpValue4 = pattern;
       
-      return _regexp4;
+      return regexp4;
     }
-    else if (pattern == _regexpValue4
+    else if (pattern == regexpValue4
         || (pattern.isString()
-            && pattern.hashCode() == _regexpValue4.hashCode()
-            && pattern.equals(_regexpValue4))
-        || (pattern.cmp(_regexpValue4) == 0)) {
-      return _regexp4;
+            && pattern.hashCode() == regexpValue4.hashCode()
+            && pattern.equals(regexpValue4))
+        || (pattern.cmp(regexpValue4) == 0)) {
+      return regexp4;
     }
-    else if (_regexp5 == null) {
-      _regexp5 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+    else if (regexp5 == null) {
+      regexp5 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      _regexp5 = regexp5;
       _regexpValue5 = pattern;
       
-      return _regexp5;
+      return regexp5;
     }
-    else if (pattern == _regexpValue5
+    else if (pattern == regexpValue5
         || (pattern.isString()
-            && pattern.hashCode() == _regexpValue5.hashCode()
-            && pattern.equals(_regexpValue5))
-        || (pattern.cmp(_regexpValue5) == 0)) {
-      return _regexp5;
+            && pattern.hashCode() == regexpValue5.hashCode()
+            && pattern.equals(regexpValue5))
+        || (pattern.cmp(regexpValue5) == 0)) {
+      return regexp5;
     }
-    else if (_regexp6 == null) {
-      _regexp6 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+    else if (regexp6 == null) {
+      regexp6 = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      _regexp6 = regexp6;
       _regexpValue6 = pattern;
       
-      return _regexp6;
+      return regexp6;
     }
-    else if (pattern == _regexpValue6
+    else if (pattern == regexpValue6
         || (pattern.isString()
-            && pattern.hashCode() == _regexpValue6.hashCode()
-            && pattern.equals(_regexpValue6))
-        || (pattern.cmp(_regexpValue6) == 0)) {
-      return _regexp6;
+            && pattern.hashCode() == regexpValue6.hashCode()
+            && pattern.equals(regexpValue6))
+        || (pattern.cmp(regexpValue6) == 0)) {
+      return regexp6;
     }
     else {
       return RegexpModule.createRegexpArray(env, pattern);
