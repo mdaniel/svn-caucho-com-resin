@@ -2118,7 +2118,7 @@ public class StringModule extends AbstractQuercusModule {
         ch = string.charAt(sIndex);
         if (! isWhitespace(ch)) {
           // XXX: return false?
-          return sscanfReturn(env, array, args, argIndex, isAssign);
+          return sscanfReturn(env, array, args, argIndex, isAssign, true);
         }
 
         for (sIndex++;
@@ -2154,7 +2154,7 @@ public class StringModule extends AbstractQuercusModule {
           switch (ch) {
           case '%':
             if (string.charAt(sIndex) != '%')
-              return sscanfReturn(env, array, args, argIndex, isAssign);
+              return sscanfReturn(env, array, args, argIndex, isAssign, true);
             else
               break loop;
 
@@ -2209,20 +2209,21 @@ public class StringModule extends AbstractQuercusModule {
         sIndex++;
       }
       else
-        return sscanfReturn(env, array, args, argIndex, isAssign);
+        return sscanfReturn(env, array, args, argIndex, false, true);
     }
 
-    return sscanfReturn(env, array, args, argIndex, isAssign);
+    return sscanfReturn(env, array, args, argIndex, isAssign, false);
   }
 
   private static Value sscanfReturn(Env env,
                                     ArrayValue array,
                                     Value []args,
                                     int argIndex,
-                                    boolean isAssign)
+                                    boolean isAssign,
+                                    boolean isWarn)
   {
     if (isAssign) {
-      if (argIndex != args.length)
+      if (isWarn && argIndex != args.length)
         env.warning(L.l("{0} vars passed in but saw only {1} '%' args", args.length, argIndex));
       
       return LongValue.create(argIndex);
