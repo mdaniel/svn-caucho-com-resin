@@ -292,8 +292,6 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value copy()
   {
-    _isDirty = true;
-    
     return new ArrayValueImpl(this);
   }
   
@@ -302,8 +300,6 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value copyReturn()
   {
-    _isDirty = true;
-    
     return new ArrayValueImpl(this);
   }
   
@@ -497,7 +493,7 @@ public class ArrayValueImpl extends ArrayValue
 	else
 	  _tail = ptr._prev;
 
-	if (ptr.getKey() instanceof StringValue)
+	if (ptr.getKey().isString())
 	  result.put(ptr.getKey(), ptr.getValue());
 	else
 	  result.put(ptr.getValue());
@@ -547,6 +543,31 @@ public class ArrayValueImpl extends ArrayValue
     }
 
     return result;
+  }
+  
+  /**
+   * Slices.
+   */
+  @Override
+  public ArrayValue slice(Env env, int start, int end, boolean isPreserveKeys)
+  {
+    ArrayValueImpl array = new ArrayValueImpl();
+    
+    int i = 0;
+    for (Entry ptr = _head; i < end && ptr != null; ptr = ptr._next) {
+      if (start > i++)
+        continue;
+
+        Value key = ptr.getKey();
+        Value value = ptr.getValue();
+        
+        if (isPreserveKeys || key.isString())
+          array.put(key, value);
+        else
+          array.put(value);
+    }
+    
+    return array;
   }
 
   /**
@@ -1233,5 +1254,14 @@ public class ArrayValueImpl extends ArrayValue
     }
 
     out.print(")");
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    if (_size == 0)
+      return 0;
+    else
+      return _head.getValue().hashCode();
   }
 }

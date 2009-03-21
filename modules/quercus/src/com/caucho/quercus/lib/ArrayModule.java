@@ -928,25 +928,25 @@ public class ArrayModule
    * @return the array chunk
    */
   public Value array_slice(Env env,
-                           ArrayValue array,
-                           long offset,
-                           @Optional("NULL") Value elements,
-                           @Optional("false") boolean presKeys)
+                           @ReadOnly ArrayValue array,
+                           int offset,
+                           @Optional Value length,
+                           @Optional boolean isPreserveKeys)
   {
     if (array == null)
       return NullValue.NULL;
 
-    long size = array.getSize();
+    int size = array.getSize();
 
-    long startIndex = offset;
+    int startIndex = offset;
 
     if (offset < 0)
       startIndex = size + offset;
 
-    long endIndex = size;
+    int endIndex = size;
 
-    if (! elements.isNull()) {
-      endIndex = elements.toLong();
+    if (! length.isDefault()) {
+      endIndex = length.toInt();
 
       if (endIndex < 0)
         endIndex += size;
@@ -954,26 +954,7 @@ public class ArrayModule
         endIndex += startIndex;
     }
 
-    ArrayValue slicedArray = new ArrayValueImpl();
-
-    Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
-    
-    for (int i = 0; i < endIndex && iter.hasNext(); i++) {
-      Map.Entry<Value,Value> entry = iter.next();
-      
-      if (startIndex <= i) {
-        Value key = entry.getKey();
-
-        Value value = entry.getValue();
-
-        if ((key.isString()) || presKeys)
-          slicedArray.put(key, value);
-        else
-          slicedArray.put(value);
-      }
-    }
-
-    return slicedArray;
+    return array.slice(env, startIndex, endIndex, isPreserveKeys);
   }
 
   /**

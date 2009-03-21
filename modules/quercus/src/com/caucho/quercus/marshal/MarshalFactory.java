@@ -186,6 +186,9 @@ public class MarshalFactory {
     else if (Regexp.class.equals(argType)) {
       marshal = RegexpMarshal.MARSHAL;
     }
+    else if (Regexp[].class.equals(argType)) {
+      marshal = RegexpArrayMarshal.MARSHAL;
+    }
     else if (URL.class.equals(argType)) {
       marshal = URLMarshal.MARSHAL;
     }

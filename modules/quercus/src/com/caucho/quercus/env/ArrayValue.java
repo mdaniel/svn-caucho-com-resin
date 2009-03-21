@@ -455,6 +455,33 @@ abstract public class ArrayValue extends Value {
   abstract public ArrayValue splice(int begin, int end, ArrayValue replace);
 
   /**
+   * Slices.
+   */
+  public ArrayValue slice(Env env, int start, int end, boolean isPreserveKeys)
+  {
+    ArrayValueImpl array = new ArrayValueImpl();
+    
+    Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
+    
+    for (int i = 0; i < end && iter.hasNext(); i++) {
+      Map.Entry<Value,Value> entry = iter.next();
+      
+      if (start <= i) {
+        Value key = entry.getKey();
+
+        Value value = entry.getValue();
+
+        if ((key.isString()) || isPreserveKeys)
+          array.put(key, value);
+        else
+          array.put(value);
+      }
+    }
+
+    return array;
+  }
+  
+  /**
    * Returns the value as an array.
    */
   @Override
@@ -1445,6 +1472,23 @@ abstract public class ArrayValue extends Value {
     }
 
     return array;
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return getSize();
+  }
+  
+  @Override
+  public boolean equals(Object o)
+  {
+    if (! (o instanceof ArrayValue))
+      return false;
+    
+    ArrayValue array = (ArrayValue) o;
+    
+    return cmp(array) == 0;
   }
 
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {

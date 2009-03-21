@@ -127,11 +127,19 @@ public class CopyArrayValue extends ArrayValue {
   }
 
   /**
-   * Add
+   * Splices.
    */
   public ArrayValue splice(int start, int end, ArrayValue replace)
   {
     return getCopyArray().splice(start, end, replace);
+  }
+  
+  /**
+   * Slices.
+   */
+  public ArrayValue slice(Env env, int start, int end, boolean isPreserveKeys)
+  {
+    return getCopyArray().slice(env, start, end, isPreserveKeys);
   }
 
   /**
