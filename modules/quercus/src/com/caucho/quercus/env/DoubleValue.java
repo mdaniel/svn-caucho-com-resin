@@ -235,6 +235,17 @@ public class DoubleValue extends NumberValue
   {
     return new DoubleValue(lValue * _value);
   }
+  
+  /**
+   * Absolute value.
+   */
+  public Value abs()
+  {
+    if (_value >= 0)
+      return this;
+    else
+      return DoubleValue.create(- _value);
+  }
 
   /**
    * Returns true for equality

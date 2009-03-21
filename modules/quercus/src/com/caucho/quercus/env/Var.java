@@ -862,6 +862,14 @@ public final class Var extends Value
   {
     return _value.rshift(rValue);
   }
+  
+  /**
+   * Absolute value.
+   */
+  public Value abs()
+  {
+    return _value.abs();
+  }
 
   /**
    * Returns true for equality

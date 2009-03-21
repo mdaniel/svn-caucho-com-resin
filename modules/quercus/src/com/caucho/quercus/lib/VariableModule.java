@@ -272,9 +272,9 @@ public class VariableModule extends AbstractQuercusModule {
    * @param v the variable to convert
    * @return the double value
    */
-  public static long intval(@ReadOnly Value v)
+  public static Value intval(@ReadOnly Value v)
   {
-    return v.toLong();
+    return v.toLongValue();
   }
 
   /**

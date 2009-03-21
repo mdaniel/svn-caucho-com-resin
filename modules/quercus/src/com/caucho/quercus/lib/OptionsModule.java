@@ -689,7 +689,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static StringValue phpversion(Env env, @Optional StringValue module)
   {
-    return env.createString(env.getQuercus().getPhpVersion());
+    return env.getQuercus().getPhpVersionValue();
   }
 
   /**

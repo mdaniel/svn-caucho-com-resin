@@ -32,6 +32,7 @@ package com.caucho.quercus;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
 import com.caucho.quercus.lib.file.FileModule;
@@ -160,12 +161,15 @@ public class Quercus
 
   private String _phpVersion = "5.2.0";
   private String _mySqlVersion;
+  private StringValue _phpVersionValue;
 
   private boolean _isStrict;
   private boolean _isRequireSource;
   
   private boolean _isConnectionPool = true;
 
+  private Boolean _isUnicodeSemantics;
+  
   private DataSource _database;
 
   private ConcurrentHashMap<String,DataSource> _databaseMap
@@ -177,6 +181,9 @@ public class Quercus
   private Path _workDir;
   
   private ServletContext _servletContext;
+  
+  private ArrayList<QuercusParser> _parserList
+    = new ArrayList<QuercusParser>();
   
   /**
    * Constructor.
@@ -256,12 +263,12 @@ public class Quercus
 
   public String getVersion()
   {
-    return "Open Source 3.2.0";
+    return "Open Source 4.0.0";
   }
 
   public String getVersionDate()
   {
-    return "20070628T2777";
+    return "20090301T2777";
   }
 
   public boolean isProfile()
@@ -349,9 +356,12 @@ public class Quercus
    */
   public boolean isUnicodeSemantics()
   {
-    boolean value = getIniBoolean("unicode.semantics");
-
-    return value;
+    if (_isUnicodeSemantics == null) {
+      _isUnicodeSemantics
+        = Boolean.valueOf(getIniBoolean("unicode.semantics"));
+    }
+    
+    return _isUnicodeSemantics.booleanValue();
   }
   
   /*
@@ -443,6 +453,19 @@ public class Quercus
   public void setPhpVersion(String version)
   {
     _phpVersion = version;
+    _phpVersionValue = null;
+  }
+  
+  public StringValue getPhpVersionValue()
+  {
+    if (_phpVersionValue == null) {
+      if (isUnicodeSemantics())
+        _phpVersionValue = createUnicodeString(_phpVersion);
+      else
+        _phpVersionValue = createString(_phpVersion);
+    }
+    
+    return _phpVersionValue;
   }
   
   /*
@@ -1803,6 +1826,11 @@ public class Quercus
                        HttpServletResponse response)
   {
     return new Env(this, page, out, request, response);
+  }
+  
+  public ExprFactory createExprFactory()
+  {
+    return new ExprFactory();
   }
 
   public void close()

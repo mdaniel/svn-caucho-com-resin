@@ -258,6 +258,17 @@ public class LongValue extends NumberValue
   {
     return LongValue.create(_value - rLong);
   }
+  
+  /**
+   * Absolute value.
+   */
+  public Value abs()
+  {
+    if (_value >= 0)
+      return this;
+    else
+      return LongValue.create(- _value);
+  }
 
   /**
    * Returns true for equality

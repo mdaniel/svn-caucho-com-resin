@@ -378,6 +378,14 @@ public class RefVar extends Value
   {
     return _var.rshift(rValue);
   }
+  
+  /**
+   * Absolute value.
+   */
+  public Value abs()
+  {
+    return _var.abs();
+  }
 
   /**
    * Returns true for equality

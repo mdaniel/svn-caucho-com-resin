@@ -752,6 +752,14 @@ public class JavaAdapterVar extends Value
   {
     return getValue().rshift(rValue);
   }
+  
+  /**
+   * Absolute value.
+   */
+  public Value abs()
+  {
+    return getValue().abs();
+  }
 
   /**
    * Returns true for equality

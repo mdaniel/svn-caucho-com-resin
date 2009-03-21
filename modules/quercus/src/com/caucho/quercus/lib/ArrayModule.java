@@ -306,13 +306,7 @@ public class ArrayModule
    */
   public static Value current(@ReadOnly Value value)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
-      return array.current();
-    }
-    else
-      return BooleanValue.FALSE;
+    return value.current();
   }
 
   /**
@@ -320,13 +314,7 @@ public class ArrayModule
    */
   public static Value key(@ReadOnly Value value)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
-      return array.key();
-    }
-    else
-      return BooleanValue.FALSE;
+    return value.key();
   }
 
   /**
@@ -342,13 +330,7 @@ public class ArrayModule
    */
   public static Value next(Value value)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
-      return array.next();
-    }
-    else
-      return BooleanValue.FALSE;
+    return value.next();
   }
 
   /**

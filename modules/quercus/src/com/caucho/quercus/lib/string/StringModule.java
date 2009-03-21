@@ -1298,7 +1298,7 @@ public class StringModule extends AbstractQuercusModule {
 
     char point = '.';
 
-    if (!pointValue.isNull()) {
+    if (! pointValue.isNull()) {
       String pointString = pointValue.toString();
 
       point =  (pointString.length() == 0) ? 0 : pointString.charAt(0);
@@ -1306,7 +1306,7 @@ public class StringModule extends AbstractQuercusModule {
 
     char group = ',';
 
-    if (!groupValue.isNull()) {
+    if (! groupValue.isNull()) {
       String groupString = groupValue.toString();
 
       group = (groupString.length() == 0) ? 0 : groupString.charAt(0);

@@ -1002,7 +1002,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value key()
   {
-    return NullValue.NULL;
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -1010,7 +1010,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value current()
   {
-    return NullValue.NULL;
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -1765,6 +1765,17 @@ abstract public class Value implements java.io.Serializable
   public Value bitXor(Value rValue)
   {
     return LongValue.create(toLong() ^ rValue.toLong());
+  }
+  
+  /**
+   * Absolute value.
+   */
+  public Value abs()
+  {
+    if (getValueType().isDoubleCmp())
+      return new DoubleValue(Math.abs(toDouble()));
+    else
+      return LongValue.create(Math.abs(toLong()));
   }
 
   /**

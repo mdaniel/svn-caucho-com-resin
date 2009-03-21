@@ -220,10 +220,15 @@ public class QuercusParser {
   
   private String _comment;
 
-  QuercusParser(Quercus quercus)
+  public QuercusParser(Quercus quercus)
   {
     _quercus = quercus;
-    _factory = ExprFactory.create();
+    
+    if (quercus == null)
+      _factory = ExprFactory.create();
+    else
+      _factory = quercus.createExprFactory();
+    
     _globalScope = new GlobalScope(_factory);
     _scope = _globalScope;
   }
@@ -471,7 +476,7 @@ public class QuercusParser {
                               _factory.createBlock(location, stmtList));
   }
 
-  Function parseFunction(String name, Path argPath, Path codePath)
+  public Function parseFunction(String name, Path argPath, Path codePath)
     throws IOException
   {
     _function = getFactory().createFunctionInfo(_quercus, name);
@@ -5166,12 +5171,16 @@ public class QuercusParser {
 
     while (true) {
       if ('0' <= ch && ch <= '7') {
-	value = 8 * value + ch - '0';
-	dValue = 8 * dValue + ch - '0';
+        value = 8 * value + ch - '0';
+        dValue = 8 * dValue + ch - '0';
       }
       else {
-	_peek = ch;
-	break;
+        while ('0' <= ch && ch <= '9') {
+          ch = read();
+        }
+        
+        _peek = ch;
+        break;
       }
 
       ch = read();
