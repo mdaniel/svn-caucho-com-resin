@@ -182,9 +182,6 @@ public class Quercus
   
   private ServletContext _servletContext;
   
-  private ArrayList<QuercusParser> _parserList
-    = new ArrayList<QuercusParser>();
-  
   /**
    * Constructor.
    */
