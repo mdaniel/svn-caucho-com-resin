@@ -77,7 +77,7 @@ public class RegexpArrayWrapper
     Regexp []regexp6 = _regexp6;
     Value regexpValue6 = _regexpValue6;
     
-    if (regexp == null) {
+    if (regexp == null || regexpValue == null) {
       regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
       _regexp = regexp;
       _regexpValue = pattern;
@@ -91,7 +91,7 @@ public class RegexpArrayWrapper
              || (pattern.cmp(regexpValue) == 0)) {
       return regexp;
     }
-    else if (regexp2 == null) {
+    else if (regexp2 == null || regexpValue2 == null) {
       regexp2 = RegexpModule.createRegexpArrayNoCache(env, pattern);
       _regexp2 = regexp2;
       _regexpValue2 = pattern;
@@ -105,7 +105,7 @@ public class RegexpArrayWrapper
         || (pattern.cmp(regexpValue2) == 0)) {
       return regexp2;
     }
-    else if (regexp3 == null) {
+    else if (regexp3 == null || regexpValue3 == null) {
       regexp3 = RegexpModule.createRegexpArrayNoCache(env, pattern);
       _regexp3 = regexp;
       _regexpValue3 = pattern;
@@ -119,7 +119,7 @@ public class RegexpArrayWrapper
         || (pattern.cmp(regexpValue3) == 0)) {
       return regexp3;
     }
-    else if (regexp4 == null) {
+    else if (regexp4 == null || regexpValue4 == null) {
       regexp4 = RegexpModule.createRegexpArrayNoCache(env, pattern);
       _regexp4 = regexp4;
       _regexpValue4 = pattern;
@@ -133,7 +133,7 @@ public class RegexpArrayWrapper
         || (pattern.cmp(regexpValue4) == 0)) {
       return regexp4;
     }
-    else if (regexp5 == null) {
+    else if (regexp5 == null || regexpValue5 == null) {
       regexp5 = RegexpModule.createRegexpArrayNoCache(env, pattern);
       _regexp5 = regexp5;
       _regexpValue5 = pattern;
@@ -147,7 +147,7 @@ public class RegexpArrayWrapper
         || (pattern.cmp(regexpValue5) == 0)) {
       return regexp5;
     }
-    else if (regexp6 == null) {
+    else if (regexp6 == null || regexpValue6 == null) {
       regexp6 = RegexpModule.createRegexpArrayNoCache(env, pattern);
       _regexp6 = regexp6;
       _regexpValue6 = pattern;

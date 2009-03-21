@@ -53,7 +53,7 @@ public class RegexpWrapper
     Regexp regexp2 = _regexp2;
     StringValue regexpStr2 = _regexpStr2;
     
-    if (regexp == null) {
+    if (regexp == null || regexpStr == null) {
       regexp = RegexpModule.createRegexpNoCache(env, str);
       _regexp = regexp;
       _regexpStr = str;
@@ -65,7 +65,7 @@ public class RegexpWrapper
                  && str.equals(regexpStr))) {
       return regexp;
     }
-    else if (regexp2 == null) {
+    else if (regexp2 == null || regexpStr2 == null) {
       regexp2 = RegexpModule.createRegexpNoCache(env, str);
       _regexp2 = regexp2;
       _regexpStr2 = str;
