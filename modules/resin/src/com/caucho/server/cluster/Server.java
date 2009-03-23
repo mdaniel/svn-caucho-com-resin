@@ -76,6 +76,7 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
+import com.caucho.server.port.TcpConnection;
 import com.caucho.server.repository.Repository;
 import com.caucho.server.repository.FileRepository;
 import com.caucho.server.resin.Resin;
@@ -2063,6 +2064,21 @@ public class Server extends ProtocolDispatchServer
       return _cache.getMissCount();
     else
       return 0;
+  }
+
+  /**
+   * Finds the TcpConnection given the threadId
+   */
+  public TcpConnection findConnectionByThreadId(long threadId)
+  {
+    for (Port port : getPorts()) {
+      TcpConnection conn = port.findConnectionByThreadId(threadId);
+
+      if (conn != null)
+	return conn;
+    }
+
+    return null;
   }
 
   /**

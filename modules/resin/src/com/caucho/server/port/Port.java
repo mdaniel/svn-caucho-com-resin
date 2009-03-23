@@ -1500,6 +1500,21 @@ public class Port
   }
 
   /**
+   * Find the TcpConnection based on the thread id (for admin)
+   */
+  public TcpConnection findConnectionByThreadId(long threadId)
+  {
+    ArrayList<TcpConnection> connList = new ArrayList<TcpConnection>(_activeConnectionSet);
+
+    for (TcpConnection conn : connList) {
+      if (conn.getThreadId() == threadId)
+	return conn;
+    }
+    
+    return null;
+  }
+
+  /**
    * The port thread is responsible for creating new connections.
    */
   public void run()

@@ -141,6 +141,14 @@ public class ClusterServerAdmin extends AbstractManagedObject
   }
 
   /**
+   * Returns the green load-balancing connection minimum
+   */
+  public int getConnectionMin()
+  {
+    return _server.getLoadBalanceConnectionMin();
+  }
+
+  /**
    * Returns the connect timeout for a client.
    */
   public long getConnectTimeout()

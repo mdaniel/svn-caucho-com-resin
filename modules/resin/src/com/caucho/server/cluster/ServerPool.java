@@ -83,6 +83,7 @@ public class ServerPool
   private int _maxConnections = Integer.MAX_VALUE / 2;
 
   private long _loadBalanceConnectTimeout = 5000;
+  private long _loadBalanceConnectionMin = 0;
   private long _loadBalanceSocketTimeout = 30000;
   private long _loadBalanceIdleTime = 10000;
   private long _loadBalanceRecoverTime = 15000;
@@ -158,6 +159,7 @@ public class ServerPool
 	 server.getClusterPort().isSSL());
 
     _loadBalanceConnectTimeout = server.getLoadBalanceConnectTimeout();
+    _loadBalanceConnectionMin = server.getLoadBalanceConnectionMin();
     _loadBalanceSocketTimeout = server.getLoadBalanceSocketTimeout();
     _loadBalanceIdleTime = server.getLoadBalanceIdleTime();
     _loadBalanceRecoverTime = server.getLoadBalanceRecoverTime();
@@ -211,6 +213,22 @@ public class ServerPool
   public void setLoadBalanceConnectTimeout(long timeout)
   {
     _loadBalanceConnectTimeout = timeout;
+  }
+
+  /**
+   * The minimum connections for green load balancing.
+   */
+  public long getLoadBalanceConnectionMin()
+  {
+    return _loadBalanceConnectionMin;
+  }
+
+  /**
+   * The minimum connections for green load balancing.
+   */
+  public void setLoadBalanceConnectionMin(int connectionMin)
+  {
+    _loadBalanceConnectionMin = connectionMin;
   }
 
   /**

@@ -358,6 +358,14 @@ public class TcpConnection extends Connection
   {
     return _suspendTime;
   }
+
+  /**
+   * Returns the admin
+   */
+  public TcpConnectionMXBean getAdmin()
+  {
+    return _admin;
+  }
  
   /**
    * Initialize the socket for a new connection
@@ -1466,6 +1474,32 @@ public class TcpConnection extends Connection
     public long getRequestActiveTime()
     {
       return TcpConnection.this.getRequestActiveTime();
+    }
+
+    public String getUrl()
+    {
+      ServerRequest request = TcpConnection.this.getRequest();
+
+      if (request instanceof AbstractHttpRequest) {
+	AbstractHttpRequest req = (AbstractHttpRequest) request;
+
+	if (! "".equals(req.getRequestURI())) {
+	  String url = String.valueOf(req.getRequestURL());
+
+	  return url;
+	}
+	else {
+	  Port port = TcpConnection.this.getPort();
+
+	  if (port.getAddress() == null)
+	    return "accept://*:" + port.getPort();
+	  else
+	    return "accept://" + port.getAddress() + ":" + port.getPort();
+	}
+      }
+
+
+      return null;
     }
 
     public String getState()

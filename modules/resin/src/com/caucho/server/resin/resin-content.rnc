@@ -642,6 +642,9 @@ r_server-Content =
   & (attribute load-balance-connect-timeout { r_period-Type }
      | element load-balance-connect-timeout { r_period-Type })?
 
+  & (attribute load-balance-connection-min { r_period-Type }
+     | element load-balance-connection-min { r_period-Type })?
+
   & (attribute load-balance-idle-time { r_period-Type }
      | element load-balance-idle-time { r_period-Type })?
 

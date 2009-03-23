@@ -29,9 +29,10 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.config.Configurable;
+import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.management.server.ClusterServerMXBean;
@@ -85,6 +86,7 @@ public final class ClusterServer {
   private long _socketTimeout = 65000L;
   private long _keepaliveTimeout = 15000L;
   
+  private int _loadBalanceConnectionMin = 0;
   private long _loadBalanceIdleTime = DEFAULT;
   private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceSocketTimeout = DEFAULT;
@@ -240,22 +242,6 @@ public final class ClusterServer {
   }
 
   /**
-   * Sets the keepalive timeout.
-   */
-  public void setKeepaliveTimeout(Period timeout)
-  {
-    _keepaliveTimeout = timeout.getPeriod();
-  }
-
-  /**
-   * Gets the keepalive timeout.
-   */
-  public long getKeepaliveTimeout()
-  {
-    return _keepaliveTimeout;
-  }
-
-  /**
    * Sets the address
    */
   public void setAddress(String address)
@@ -290,6 +276,22 @@ public final class ClusterServer {
   }
 
   /**
+   * Sets the keepalive timeout.
+   */
+  public void setKeepaliveTimeout(Period timeout)
+  {
+    _keepaliveTimeout = timeout.getPeriod();
+  }
+
+  /**
+   * Gets the keepalive timeout.
+   */
+  public long getKeepaliveTimeout()
+  {
+    return _keepaliveTimeout;
+  }
+
+  /**
    * Sets the loadBalance connection time.
    */
   public void setLoadBalanceConnectTimeout(Period period)
@@ -303,6 +305,23 @@ public final class ClusterServer {
   public long getLoadBalanceConnectTimeout()
   {
     return _loadBalanceConnectTimeout;
+  }
+
+  /**
+   * The minimum number of load balance connections for green load balancing.
+   */
+  @Configurable
+  public void setLoadBalanceConnectionMin(int min)
+  {
+    _loadBalanceConnectionMin = min;
+  }
+
+  /**
+   * The minimum number of load balance connections for green load balancing.
+   */
+  public int getLoadBalanceConnectionMin()
+  {
+    return _loadBalanceConnectionMin;
   }
 
   /**

@@ -6,6 +6,7 @@
 require_once "WEB-INF/php/inc.php";
 
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
+$server = $g_mbean_server->lookup("resin:type=Server");
 
 ?>
 
@@ -73,7 +74,16 @@ $threads = array();
 $thread_ids = $jvm_thread->AllThreadIds;
 
 foreach ($thread_ids as $id) {
-  $threads[] = $jvm_thread->getThreadInfo($id, 50);
+  $conn = $server->findConnectionByThreadId($id);
+  
+  $thread = array("id" => $id,
+                  "info" => $jvm_thread->getThreadInfo($id, 50));
+
+  if ($conn) {
+    $thread["url"] = $conn->getUrl();
+  }
+    
+  $threads[] = $thread;
 }
 
 $thread_group = partition_threads($threads);
@@ -93,12 +103,16 @@ foreach ($groups as $name) {
   echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($threads) . ")";
 
   $show = "hide('s_$name');show('h_$name');";
-  foreach ($threads as $info) {
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+    
     $show .= "show('t_{$info->threadId}');";
   }
 
   $hide = "show('s_$name');hide('h_$name');";
-  foreach ($threads as $info) {
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+    
     $hide .= "hide('t_{$info->threadId}');";
   }
 
@@ -113,9 +127,12 @@ foreach ($groups as $name) {
   echo "<th>name</th>";
   echo "<th>method</th>";
   echo "<th>state</th>";
+  echo "<th>url</th>";
   echo "</tr>\n";
 
-  foreach ($threads as $info) {
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+    
     echo "<tr>";
 
     $id = $info->threadId;
@@ -142,11 +159,13 @@ foreach ($groups as $name) {
       echo sprintf(" (%dms)", $info->getWaitedTime())
     echo "</td>";
 
-    echo "</tr>\n";
+    echo "<td>" . $thread["url"] . "</td>\n";
 
+    echo "</tr>\n";
+    
     echo "<tr id='t_$id' style='display:none' class='stack_trace'>";
     echo "<td style='border-width:0'></td>";
-    echo "<td colspan='4'>";
+    echo "<td colspan='5'>";
     echo "<pre>\n";
     
     // echo $info;
@@ -210,25 +229,27 @@ function partition_threads($threads)
 {
   $partition = array();
 
-  foreach ($threads as $info) {
+  foreach ($threads as $thread) {
+    $info = $thread["info"];
+    
     $stackTrace = $info->stackTrace;
     if ($stackTrace[0]->className == "java.lang.Object"
         && $stackTrace[0]->methodName == "wait"
         && $stackTrace[1]->className == "com.caucho.util.ThreadPool\$Item"
         && $stackTrace[1]->methodName == "runTasks") {
-      $partition["idle"][] = $info;
+      $partition["idle"][] = $thread;
     }
     else if (is_accept_thread($info)) {
-      $partition["accept"][] = $info;
+      $partition["accept"][] = $thread;
     }
     else if (is_keepalive_thread($info)) {
-      $partition["keepalive"][] = $info;
+      $partition["keepalive"][] = $thread;
     }
     else if (preg_match("/^(http|hmux)/", $info->threadName)) {
-      $partition["active"][] = $info;
+      $partition["active"][] = $thread;
     }
     else {
-      $partition["misc"][] = $info;
+      $partition["misc"][] = $thread;
     }
   }
 

@@ -13,6 +13,9 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>load balance: add green load balancing (
+<li>admin: added URL to thread dump when available (#3194, rep by Keith Paulson)</li>
+<li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>
 <li>log: non-gz/zip archiving now uses rename instead of copy</li>
 <li>log: added ${request}, ${session}, ${cookie} to log format (#3255, rep by Philippe Collard)</li>
 <li>log: multiline logs like thread dumps should not have extra timestamps (#3229, rep by Jamison Novak)</li>

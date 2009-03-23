@@ -59,13 +59,6 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   public int getClusterIndex();
 
   /**
-   * The timeout in milliseconds for connecting to the server.
-   */
-  @Description("The configured timeout for a client connect to the server")
-  @Units("milliseconds")
-  public long getConnectTimeout();
-
-  /**
    * Returns the ip address or host name of the server.
    */
   @Description("The configured IP address or host name of the server")
@@ -94,6 +87,19 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
    */
   @Description("Returns true for the server's own ClusterServer")
   public boolean isSelfServer();
+
+  /**
+   * The timeout in milliseconds for connecting to the server.
+   */
+  @Description("The configured timeout for a client connect to the server")
+  @Units("milliseconds")
+  public long getConnectTimeout();
+
+  /**
+   * The minimum number of connections for green load balancing.
+   */
+  @Description("The minimum connections for green load balancing")
+  public int getConnectionMin();
 
   /**
    * Returns the timeout for assuming a target server remains unavailable once

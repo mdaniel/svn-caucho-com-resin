@@ -262,4 +262,9 @@ public interface ServerMXBean extends ManagedObjectMXBean {
                + " start a new JVM")
   public void restart();
 
+  /**
+   * Finds the ConnectionMXBean for a given thread id
+   */
+  @Description("Finds the ConnectionMXBean for a given thread id")
+  public TcpConnectionMXBean findConnectionByThreadId(long threadId);
 }

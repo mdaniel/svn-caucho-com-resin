@@ -59,6 +59,12 @@ public interface TcpConnectionMXBean extends ManagedObjectMXBean {
   @Description("The current lifecycle state")
   public String getState();
 
+  /**
+   * Returns the current url being processed
+   */
+  @Description("The current url")
+  public String getUrl();
+
   //
   // Statistics
   //

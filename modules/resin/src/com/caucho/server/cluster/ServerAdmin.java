@@ -34,7 +34,9 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ServerMXBean;
+import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
+import com.caucho.server.port.TcpConnection;
 import com.caucho.server.port.Port;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
@@ -355,5 +357,18 @@ public class ServerAdmin extends AbstractEmitterObject
   public void restart()
   {
     _server.destroy();
+  }
+
+  /**
+   * Finds the ConnectionMXBean for a given thread id
+   */
+  public TcpConnectionMXBean findConnectionByThreadId(long threadId)
+  {
+    TcpConnection conn = _server.findConnectionByThreadId(threadId);
+
+    if (conn != null)
+      return conn.getAdmin();
+    else
+      return null;
   }
 }
