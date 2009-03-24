@@ -506,7 +506,7 @@ public class StringBuilderValue
    * Converts to a BinaryValue in desired charset.
    */
   @Override
-  public final StringValue toBinaryValue(Env env, String charset)
+  public final StringValue toBinaryValue(String charset)
   {
     return this;
   }

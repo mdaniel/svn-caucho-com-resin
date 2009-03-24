@@ -789,6 +789,14 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a BinaryValue.
    */
+  public StringValue toBinaryValue(String charset)
+  {
+    return toBinaryValue();
+  }
+  
+  /**
+   * Converts to a BinaryValue.
+   */
   public StringValue toBinaryValue(Env env)
   {
     StringValue bb = env.createBinaryBuilder();

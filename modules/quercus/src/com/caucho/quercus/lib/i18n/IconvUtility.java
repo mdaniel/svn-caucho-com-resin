@@ -145,7 +145,7 @@ public class IconvUtility {
     StringValue str = env.createString(
             MimeUtility.unfold(MimeUtility.decodeText(word.toString())));
 
-    return str.toBinaryValue(env, charset);
+    return str.toBinaryValue(charset);
   }
 
   public static Value encodeMime(Env env,

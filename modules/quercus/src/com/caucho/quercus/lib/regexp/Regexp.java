@@ -50,6 +50,7 @@ public class Regexp {
 
   final StringValue _rawRegexp;
   StringValue _pattern;
+  int _flags;
   
   RegexpNode _prog;
   boolean _ignoreCase;
@@ -74,25 +75,37 @@ public class Regexp {
   boolean _isUtf8;
   boolean _isEval;
   
-  public Regexp(Env env, StringValue rawRegexp)
+  public Regexp(StringValue rawRegexp)
     throws IllegalRegexpException
   {
+    _rawRegexp = rawRegexp;
+
+    init();
+    
+    Regcomp comp = new Regcomp(_flags);
+    _prog = comp.parse(new PeekString(_pattern));
+
+    compile(_prog, comp);
+  }
+  
+  protected void init()
+  {
+    StringValue rawRegexp = _rawRegexp;
+    
     if (rawRegexp.length() < 2) {
       throw new IllegalStateException(L.l(
           "Can't find delimiters in regexp '{0}'.",
           rawRegexp));
     }
-    
-    _rawRegexp = rawRegexp;
 
     int head = 0;
     
     char delim = '/';
 
     for (;
-	 head < rawRegexp.length()
-	   && Character.isWhitespace((delim = rawRegexp.charAt(head)));
-	 head++) {
+     head < rawRegexp.length()
+       && Character.isWhitespace((delim = rawRegexp.charAt(head)));
+     head++) {
     }
 
     if (delim == '{')
@@ -144,18 +157,11 @@ public class Regexp {
     // XXX: what if unicode.semantics='true'?
     
     if ((flags & Regcomp.UTF8) != 0) {
-      pattern = fromUtf8(env, pattern);
+      _pattern = fromUtf8(pattern);
       
       if (pattern == null)
         throw new QuercusException(L.l("Regexp: error converting subject to utf8"));
     }
-
-    _pattern = pattern;
-
-    Regcomp comp = new Regcomp(flags);
-    _prog = comp.parse(new PeekString(_pattern));
-
-    compile(env, _prog, comp);
   }
   
   public StringValue getRawRegexp()
@@ -181,7 +187,7 @@ public class Regexp {
   public StringValue convertSubject(Env env, StringValue subject)
   {
     if (isUTF8())
-      return fromUtf8(env, subject);
+      return fromUtf8(subject);
     else
       return subject;
   }
@@ -194,7 +200,7 @@ public class Regexp {
       return result;
   }
 
-  private void compile(Env env, RegexpNode prog, Regcomp comp)
+  private void compile(RegexpNode prog, Regcomp comp)
   {
     _ignoreCase = (comp._flags & Regcomp.IGNORE_CASE) != 0;
     _isGlobal = (comp._flags & Regcomp.GLOBAL) != 0;
@@ -230,9 +236,7 @@ public class Regexp {
       if (_isUnicode) {
       }
       else if (isUTF8())
-        groupName.toBinaryValue(env, "UTF-8");
-      else
-        groupName.toBinaryValue(env);
+        groupName.toBinaryValue("UTF-8");
 
       _groupNames[entry.getKey().intValue()] = groupName;
     }
@@ -246,7 +250,7 @@ public class Regexp {
   public boolean isGlobal() { return _isGlobal; }
   public boolean ignoreCase() { return _ignoreCase; }
 
-  static StringValue fromUtf8(Env env, StringValue source)
+  static StringValue fromUtf8(StringValue source)
   {
     StringValue target = new UnicodeBuilderValue();
     int len = source.length();

@@ -893,9 +893,9 @@ public class MbstringModule
     
     String encoding = getEncoding(env);
 
-    subject = subject.toBinaryValue(env, encoding);
-    message = message.toBinaryValue(env, encoding);
-    additionalHeaders = additionalHeaders.toBinaryValue(env, encoding);
+    subject = subject.toBinaryValue(encoding);
+    message = message.toBinaryValue(encoding);
+    additionalHeaders = additionalHeaders.toBinaryValue(encoding);
 
     boolean result = MailModule.mail(env,
                                      to.toString(),

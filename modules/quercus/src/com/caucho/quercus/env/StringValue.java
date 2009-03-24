@@ -1920,47 +1920,6 @@ abstract public class StringValue
     return new InputStreamReader(new ByteArrayInputStream(bytes), charset);
   }
 
-  /**
-   * Converts to a BinaryValue in desired charset.
-   *
-   * @param env
-   * @param charset
-   */
-  public StringValue toBinaryValue(Env env, String charset)
-  {
-    TempBuffer tb = TempBuffer.allocate();
-    byte[] buffer = tb.getBuffer();
-
-    try {
-      InputStream in = toInputStream(charset);
-      TempStream out = new TempStream();
-
-      int sublen = in.read(buffer, 0, buffer.length);
-
-      while (sublen >= 0) {
-        out.write(buffer, 0, sublen, false);
-        sublen = in.read(buffer, 0, buffer.length);
-      }
-
-      out.flush();
-
-      StringValue result = env.createBinaryBuilder();
-      for (TempBuffer ptr = out.getHead();
-           ptr != null;
-           ptr = ptr.getNext()) {
-        result.append(ptr.getBuffer(), 0, ptr.getLength());
-      }
-
-      TempBuffer.free(out.getHead());
-
-      return result;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-    } finally {
-      TempBuffer.free(tb);
-    }
-  }
-
   public byte []toBytes()
   {
     throw new UnsupportedOperationException();

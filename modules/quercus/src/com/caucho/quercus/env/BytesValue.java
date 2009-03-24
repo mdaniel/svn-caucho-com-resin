@@ -166,7 +166,7 @@ abstract public class BytesValue
    * @param charset ignored since BinaryValue has no set encoding
    */
   @Override
-  public BytesValue toBinaryValue(Env env, String charset)
+  public BytesValue toBinaryValue(String charset)
   {
     return this;
   }

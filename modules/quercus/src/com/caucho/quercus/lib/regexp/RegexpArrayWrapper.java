@@ -49,7 +49,7 @@ public class RegexpArrayWrapper
     RegexpCouple couple3 = _couple3;
     
     if (couple == null) {
-      Regexp []regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
       
       _couple = new RegexpCouple(regexp, pattern);
 
@@ -59,7 +59,7 @@ public class RegexpArrayWrapper
       return couple._regexp;
     }
     else if (couple2 == null) {
-      Regexp []regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
       
       _couple2 = new RegexpCouple(regexp, pattern);
 
@@ -69,7 +69,7 @@ public class RegexpArrayWrapper
       return couple2._regexp;
     }
     else if (couple3 == null) {
-      Regexp []regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
       
       _couple3 = new RegexpCouple(regexp, pattern);
 
@@ -79,7 +79,7 @@ public class RegexpArrayWrapper
       return couple3._regexp;
     }
     else {
-      Regexp []regexp = RegexpModule.createRegexpArrayNoCache(env, pattern);
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
       return regexp;
     }
   }

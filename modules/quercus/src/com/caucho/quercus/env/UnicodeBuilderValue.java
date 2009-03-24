@@ -660,7 +660,7 @@ public class UnicodeBuilderValue
   @Override
   public StringValue toBinaryValue(Env env)
   {
-    return toBinaryValue(env, env.getRuntimeEncoding());
+    return toBinaryValue(env.getRuntimeEncoding());
   }
 
   /**
@@ -669,7 +669,8 @@ public class UnicodeBuilderValue
    * @param env
    * @param charset
    */
-  public StringValue toBinaryValue(Env env, String charset)
+  @Override
+  public StringValue toBinaryValue(String charset)
   {
     try {
       BinaryBuilderValue result = new BinaryBuilderValue();

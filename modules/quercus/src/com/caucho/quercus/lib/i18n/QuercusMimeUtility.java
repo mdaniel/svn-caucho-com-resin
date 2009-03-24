@@ -114,7 +114,7 @@ public class QuercusMimeUtility
     StringValue str
       = env.createString(MimeUtility.unfold(decodedStr));
 
-    return str.toBinaryValue(env, charset);
+    return str.toBinaryValue(charset);
   }
 
   public static Value encodeMime(Env env,

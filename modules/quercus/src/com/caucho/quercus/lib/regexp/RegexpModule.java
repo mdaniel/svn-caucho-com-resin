@@ -149,7 +149,7 @@ public class RegexpModule
       cleanPattern = addDelimiters(env, cleanPattern, "/", "/s");
 
     try {
-      Regexp regexp = new Regexp(env, cleanPattern);
+      Regexp regexp = new Regexp(cleanPattern);
       RegexpState regexpState = RegexpState.create(env, regexp, string);
 
       if (regexpState.exec(env, string, 0) < 0) {
@@ -248,7 +248,7 @@ public class RegexpModule
         return null;
       }
 
-      return new Regexp(env, regexpValue);
+      return new Regexp(regexpValue);
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -265,7 +265,7 @@ public class RegexpModule
         throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
       }
 
-      return new Regexp(null, new StringBuilderValue(pattern));
+      return new Regexp(new StringBuilderValue(pattern));
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
@@ -300,7 +300,7 @@ public class RegexpModule
     return new Regexp [] { regexp };
   }
   
-  public static Regexp []createRegexpArrayNoCache(Env env, Value pattern)
+  public static Regexp []createRegexpArray(Env env, Value pattern)
   {
     if (pattern.isArray()) {
       ArrayValue array = pattern.toArrayValue(env);
@@ -319,6 +319,38 @@ public class RegexpModule
       Regexp regexp = createRegexp(env, pattern.toStringValue(env));
 
       return new Regexp [] { regexp };
+    }
+  }
+  
+  public static Regexp createEreg(Env env, StringValue regexpValue)
+  {
+    try {
+      if (regexpValue.length() < 2) {
+        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
+        return null;
+      }
+
+      return new Ereg(regexpValue);
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return null;
+    }
+  }
+  
+  public static Regexp createEreg(String pattern)
+  {
+    try {
+      if (pattern.length() < 2) {
+        throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
+      }
+
+      return new Ereg(new StringBuilderValue(pattern));
+    }
+    catch (IllegalRegexpException e) {
+      throw new QuercusException(e);
     }
   }
   
@@ -865,7 +897,7 @@ public class RegexpModule
                            Value countV)
     throws IllegalRegexpException
   {
-    Regexp regexp = new Regexp(env, patternString);
+    Regexp regexp = new Regexp(patternString);
 
     return pregReplaceString(env, regexp, replacement, subject,
                              limit, countV);
@@ -982,7 +1014,7 @@ public class RegexpModule
       else
         patternStr = addDelimiters(env, patternStr, "/", "/");
       
-      Regexp regexp = new Regexp(env, patternStr);
+      Regexp regexp = new Regexp(patternStr);
       RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, subject);
@@ -1406,7 +1438,7 @@ public class RegexpModule
       else
         patternString = addDelimiters(env, patternString, "/", "/");
 
-      Regexp regexp = new Regexp(env, patternString);
+      Regexp regexp = new Regexp(patternString);
       RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, string);

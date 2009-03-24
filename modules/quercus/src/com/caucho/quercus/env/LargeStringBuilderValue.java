@@ -224,7 +224,7 @@ public class LargeStringBuilderValue
    * Converts to a BinaryValue in desired charset.
    */
   @Override
-  public StringValue toBinaryValue(Env env, String charset)
+  public StringValue toBinaryValue(String charset)
   {
     return this;
   }
