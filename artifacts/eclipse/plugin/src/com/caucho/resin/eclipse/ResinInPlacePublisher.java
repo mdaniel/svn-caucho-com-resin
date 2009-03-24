@@ -1,28 +1,17 @@
 package com.caucho.resin.eclipse;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.GenericPublisher;
-import org.eclipse.jst.server.generic.internal.core.util.FileUtil;
-import org.eclipse.jst.server.generic.servertype.definition.Publisher;
-import org.eclipse.jst.server.generic.servertype.definition.PublisherData;
 import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 import org.eclipse.wst.server.core.IModuleArtifact;
-import org.osgi.framework.Bundle;
 
 /**
  * This "publisher" doesn't actually publish anything, but instead makes sure
@@ -33,6 +22,7 @@ import org.osgi.framework.Bundle;
  * @author Emil Ong
  *
  */
+@SuppressWarnings("restriction")
 public class ResinInPlacePublisher extends GenericPublisher {
   public static final String PUBLISHER_ID = 
     "org.eclipse.jst.server.generic.resin.resininplacepublisher";
