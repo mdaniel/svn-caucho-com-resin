@@ -596,7 +596,10 @@ public class OptionsModule extends AbstractQuercusModule {
     env.println("Configure Command => n/a");
     env.println("Server API => CGI");
     env.println("Virtual Directory Support => disabled");
-    env.println("Configuration File (php.ini) Path => WEB-INF/php.ini");
+
+    env.println("Configuration File (php.ini) Path => "
+                + env.getQuercus().getIniFile());
+    
     env.println("PHP API => 20031224");
     env.println("PHP Extension => 20041030");
     env.println("Debug Build => no");

@@ -38,23 +38,43 @@ import java.io.PrintWriter;
 public class ConstArrayValue
   extends ArrayValueImpl
 {
-  public ConstArrayValue()
+  private final int _hashCode;
+
+  public ConstArrayValue(ArrayValueImpl source)
   {
+    if (! source._isDirty)
+      source._isDirty = true;
+    
+    _size = source._size;
+    _entries = source._entries;
+    _hashMask = source._hashMask;
+
+    _head = source._head;
+    _current = source._current;
+    _tail = source._tail;
+    _nextAvailableIndex = source._nextAvailableIndex;
+    
+    _hashCode = source.hashCode();;
   }
   
   public ConstArrayValue(ArrayValueComponent[] components)
   {
     super(components);
+    
+    _hashCode = super.hashCode();
   }
 
   public ConstArrayValue(Value []keys, Value []values)
   {
     super(keys, values);
+    
+    _hashCode = super.hashCode();
   }
   
   /**
    * Copy for assignment.
    */
+  @Override
   public Value copy()
   {
     return new CopyArrayValue(this);
@@ -63,9 +83,16 @@ public class ConstArrayValue
   /**
    * Shuffles the array
    */
+  @Override
   public void shuffle()
   {
     throw new IllegalStateException();
+  }
+  
+  @Override
+  public final int hashCode()
+  {
+    return _hashCode;
   }
 }
 

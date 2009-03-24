@@ -76,9 +76,6 @@ public class Quercus
   
   private ModuleContext _moduleContext;
 
-  private HashMap<String, StringValue> _internMap
-    = new HashMap<String, StringValue>();
-
   private LruCache<String, UnicodeBuilderValue> _unicodeMap
     = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
 
@@ -119,6 +116,7 @@ public class Quercus
 
   private final IniDefinitions _iniDefinitions = new IniDefinitions();
   
+  private Path _iniFile;
   private HashMap<String, Value> _iniMap;
 
   private HashMap<Value, Value> _serverEnvMap
@@ -787,7 +785,17 @@ public class Quercus
           setIni(entry.getKey().toString(), entry.getValue().toString());
         }
       }
+      
+      _iniFile = path;
     }
+  }
+  
+  /**
+   * Returns the ini file.
+   */
+  public Path getIniFile()
+  {
+    return _iniFile;
   }
 
   /**
