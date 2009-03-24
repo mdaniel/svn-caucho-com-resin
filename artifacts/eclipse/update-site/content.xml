@@ -1,0 +1,364 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?metadataRepository class='org.eclipse.equinox.internal.p2.metadata.repository.LocalMetadataRepository' version='1.0.0'?>
+<repository name='Caucho Technology Eclipse Update Site' type='org.eclipse.equinox.internal.p2.metadata.repository.LocalMetadataRepository' version='4.0.0'>
+  <properties size='2'>
+    <property name='p2.compressed' value='false'/>
+    <property name='p2.timestamp' value='1237931865223'/>
+  </properties>
+  <references size='2'>
+    <repository url='http://caucho.com/eclipse' type='0' options='0'/>
+    <repository url='http://caucho.com/eclipse' type='1' options='0'/>
+  </references>
+  <units size='8'>
+    <unit id='com.caucho.resin.eclipse' version='4.0.0'>
+      <update id='com.caucho.resin.eclipse' range='[0.0.0,4.0.0)' severity='0'/>
+      <properties size='3'>
+        <property name='df_LT.pluginName' value='Resin Application Server Definitions'/>
+        <property name='org.eclipse.equinox.p2.name' value='%pluginName'/>
+        <property name='org.eclipse.equinox.p2.provider' value='Caucho Technology'/>
+      </properties>
+      <provides size='5'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='com.caucho.resin.eclipse' version='4.0.0'/>
+        <provided namespace='osgi.bundle' name='com.caucho.resin.eclipse' version='4.0.0'/>
+        <provided namespace='java.package' name='com.caucho.resin.eclipse' version='0.0.0'/>
+        <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
+        <provided namespace='org.eclipse.equinox.p2.localization' name='df_LT' version='1.0.0'/>
+      </provides>
+      <requires size='11'>
+        <required namespace='osgi.bundle' name='org.eclipse.jst.server.core' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.jst.server.generic.core' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.jst.server.generic.ui' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.jst.server.ui' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.jst.common.project.facet.core' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.wst.common.project.facet.core' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.wst.common.project.facet.ui' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.wst.server.core' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.debug.core' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.wst.server.ui' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.core.variables' range='0.0.0'/>
+      </requires>
+      <artifacts size='1'>
+        <artifact classifier='osgi.bundle' id='com.caucho.resin.eclipse' version='4.0.0'/>
+      </artifacts>
+      <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='2'>
+          <instruction key='manifest'>
+            Bundle-ManifestVersion: 2&#xA;Export-Package: com.caucho.resin.eclipse;uses:=&quot;org.eclipse.core.runtime,org.eclipse.wst.server.core.model&quot;&#xA;Bundle-RequiredExecutionEnvironment: J2SE-1.5&#xA;Bundle-Localization: plugin&#xA;Require-Bundle: org.eclipse.jst.server.core,org.eclipse.jst.server.generic.core,org.eclipse.jst.server.generic.ui,org.eclipse.jst.server.ui,org.eclipse.jst.common.project.facet.core,org.eclipse.wst.common.project.facet.core,org.eclipse.wst.common.project.facet.ui,org.eclipse.wst.server.core,org.eclipse.debug.core,org.eclipse.wst.server.ui,org.eclipse.core.variables&#xA;Bundle-Name: %pluginName&#xA;Bundle-Version: 4.0.0&#xA;Bundle-Vendor: Caucho Technology&#xA;Bundle-SymbolicName: com.caucho.resin.eclipse; singleton:=true&#xA;Bundle-ActivationPolicy: lazy&#xA;Bundle-ClassPath: resin-eclipse.jar, lib/resin.jar, lib/resin-kernel.jar, lib/hessian.jar&#xA;Manifest-Version: 1.0
+          </instruction>
+          <instruction key='zipped'>
+            true
+          </instruction>
+        </instructions>
+      </touchpointData>
+    </unit>
+    <unit id='tooling.source.default' version='1.0.0' singleton='false'>
+      <hostRequirements size='1'>
+        <required namespace='org.eclipse.equinox.p2.eclipse.type' name='source' range='0.0.0' optional='true' multiple='true' greedy='false'/>
+      </hostRequirements>
+      <properties size='1'>
+        <property name='org.eclipse.equinox.p2.type.fragment' value='true'/>
+      </properties>
+      <provides size='2'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='tooling.source.default' version='1.0.0'/>
+        <provided namespace='org.eclipse.equinox.p2.flavor' name='tooling' version='1.0.0'/>
+      </provides>
+      <requires size='1'>
+        <required namespace='org.eclipse.equinox.p2.eclipse.type' name='source' range='0.0.0' optional='true' multiple='true' greedy='false'/>
+      </requires>
+      <touchpoint id='null' version='0.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='2'>
+          <instruction key='install'>
+            addSourceBundle(bundle:${artifact})
+          </instruction>
+          <instruction key='uninstall'>
+            removeSourceBundle(bundle:${artifact})
+          </instruction>
+        </instructions>
+      </touchpointData>
+    </unit>
+    <unit id='tooling.osgi.bundle.default' version='1.0.0' singleton='false'>
+      <hostRequirements size='1'>
+        <required namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' range='0.0.0' multiple='true' greedy='false'/>
+      </hostRequirements>
+      <properties size='1'>
+        <property name='org.eclipse.equinox.p2.type.fragment' value='true'/>
+      </properties>
+      <provides size='2'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='tooling.osgi.bundle.default' version='1.0.0'/>
+        <provided namespace='org.eclipse.equinox.p2.flavor' name='tooling' version='1.0.0'/>
+      </provides>
+      <requires size='1'>
+        <required namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' range='0.0.0' multiple='true' greedy='false'/>
+      </requires>
+      <touchpoint id='null' version='0.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='4'>
+          <instruction key='install'>
+            installBundle(bundle:${artifact})
+          </instruction>
+          <instruction key='uninstall'>
+            uninstallBundle(bundle:${artifact})
+          </instruction>
+          <instruction key='unconfigure'>
+
+          </instruction>
+          <instruction key='configure'>
+            setStartLevel(startLevel:4);
+          </instruction>
+        </instructions>
+      </touchpointData>
+    </unit>
+    <unit id='com.caucho.resin.eclipse.feature.jar' version='4.0.0'>
+      <update id='com.caucho.resin.eclipse.feature.jar' range='[0.0.0,4.0.0)' severity='0'/>
+      <properties size='4'>
+        <property name='org.eclipse.equinox.p2.name' value='Resin Eclipse Feature'/>
+        <property name='org.eclipse.equinox.p2.description' value='Resin Eclipse Plugin based on WebTools Generic Server.'/>
+        <property name='org.eclipse.equinox.p2.description.url' value='http://www.caucho.com/'/>
+        <property name='org.eclipse.equinox.p2.provider' value='Caucho Technology'/>
+      </properties>
+      <provides size='3'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='com.caucho.resin.eclipse.feature.jar' version='4.0.0'/>
+        <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='feature' version='1.0.0'/>
+        <provided namespace='org.eclipse.update.feature' name='com.caucho.resin.eclipse' version='4.0.0'/>
+      </provides>
+      <filter>
+        (org.eclipse.update.install.features=true)
+      </filter>
+      <artifacts size='1'>
+        <artifact classifier='org.eclipse.update.feature' id='com.caucho.resin.eclipse' version='4.0.0'/>
+      </artifacts>
+      <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='1'>
+          <instruction key='zipped'>
+            true
+          </instruction>
+        </instructions>
+      </touchpointData>
+      <licenses size='1'>
+        <license>
+          Copyright (c) 1998-2009 Caucho Technology -- all rights reserved&#xA;&#xA;This file is part of Resin(R) Open Source&#xA;&#xA;Each copy or derived work must preserve the copyright notice and this&#xA;notice unmodified.&#xA;&#xA;Resin Open Source is free software; you can redistribute it and/or modify&#xA;it under the terms of the GNU General Public License as published by&#xA;the Free Software Foundation; either version 2 of the License, or&#xA;(at your option) any later version.&#xA;&#xA;Resin Open Source is distributed in the hope that it will be useful,&#xA;but WITHOUT ANY WARRANTY; without even the implied warranty of&#xA;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty&#xA;of NON-INFRINGEMENT.  See the GNU General Public License for more&#xA;details.&#xA;&#xA;You should have received a copy of the GNU General Public License&#xA;along with Resin Open Source; if not, write to the&#xA;&#xA;  Free Software Foundation, Inc.&#xA;  59 Temple Place, Suite 330&#xA;  Boston, MA 02111-1307  USA
+        </license>
+      </licenses>
+      <copyright>
+        Copyright (c) 1998-2009 Caucho Technology -- all rights reserved&#xA;&#xA;This file is part of Resin(R) Open Source&#xA;&#xA;Each copy or derived work must preserve the copyright notice and this&#xA;notice unmodified.&#xA;&#xA;Resin Open Source is free software; you can redistribute it and/or modify&#xA;it under the terms of the GNU General Public License as published by&#xA;the Free Software Foundation; either version 2 of the License, or&#xA;(at your option) any later version.&#xA;&#xA;Resin Open Source is distributed in the hope that it will be useful,&#xA;but WITHOUT ANY WARRANTY; without even the implied warranty of&#xA;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty&#xA;of NON-INFRINGEMENT.  See the GNU General Public License for more&#xA;details.&#xA;&#xA;You should have received a copy of the GNU General Public License&#xA;along with Resin Open Source; if not, write to the&#xA;&#xA;  Free Software Foundation, Inc.&#xA;  59 Temple Place, Suite 330&#xA;  Boston, MA 02111-1307  USA
+      </copyright>
+    </unit>
+    <unit id='tooling.org.eclipse.update.feature.default' version='1.0.0' singleton='false'>
+      <hostRequirements size='1'>
+        <required namespace='org.eclipse.equinox.p2.eclipse.type' name='feature' range='0.0.0' optional='true' multiple='true' greedy='false'/>
+      </hostRequirements>
+      <properties size='1'>
+        <property name='org.eclipse.equinox.p2.type.fragment' value='true'/>
+      </properties>
+      <provides size='2'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='tooling.org.eclipse.update.feature.default' version='1.0.0'/>
+        <provided namespace='org.eclipse.equinox.p2.flavor' name='tooling' version='1.0.0'/>
+      </provides>
+      <requires size='1'>
+        <required namespace='org.eclipse.equinox.p2.eclipse.type' name='feature' range='0.0.0' optional='true' multiple='true' greedy='false'/>
+      </requires>
+      <filter>
+        (org.eclipse.update.install.features=true)
+      </filter>
+      <touchpoint id='null' version='0.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='2'>
+          <instruction key='install'>
+            installFeature(feature:${artifact},featureId:default,featureVersion:default)
+          </instruction>
+          <instruction key='uninstall'>
+            uninstallFeature(feature:${artifact},featureId:default,featureVersion:default)
+          </instruction>
+        </instructions>
+      </touchpointData>
+    </unit>
+    <unit id='config.a.jre' version='1.6.0' singleton='false'>
+      <hostRequirements size='1'>
+        <required namespace='org.eclipse.equinox.p2.iu' name='a.jre' range='1.6.0'/>
+      </hostRequirements>
+      <properties size='1'>
+        <property name='org.eclipse.equinox.p2.type.fragment' value='true'/>
+      </properties>
+      <provides size='1'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='config.a.jre' version='1.6.0'/>
+      </provides>
+      <requires size='1'>
+        <required namespace='org.eclipse.equinox.p2.iu' name='a.jre' range='1.6.0'/>
+      </requires>
+      <touchpoint id='org.eclipse.equinox.p2.native' version='1.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='1'>
+          <instruction key='install'>
+
+          </instruction>
+        </instructions>
+      </touchpointData>
+    </unit>
+    <unit id='com.caucho.resin.eclipse.feature.group' version='4.0.0' singleton='false'>
+      <update id='com.caucho.resin.eclipse.feature.group' range='[0.0.0,4.0.0)' severity='0'/>
+      <properties size='5'>
+        <property name='org.eclipse.equinox.p2.name' value='Resin Eclipse Feature'/>
+        <property name='org.eclipse.equinox.p2.description' value='Resin Eclipse Plugin based on WebTools Generic Server.'/>
+        <property name='org.eclipse.equinox.p2.description.url' value='http://www.caucho.com/'/>
+        <property name='org.eclipse.equinox.p2.provider' value='Caucho Technology'/>
+        <property name='org.eclipse.equinox.p2.type.group' value='true'/>
+      </properties>
+      <provides size='1'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='com.caucho.resin.eclipse.feature.group' version='4.0.0'/>
+      </provides>
+      <requires size='13'>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.jst.server.core' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.jst.server.generic.core' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.jst.server.generic.ui' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.jst.server.ui' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.jst.common.project.facet.core' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.wst.common.project.facet.core' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.wst.common.project.facet.ui' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.wst.server.core' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.debug.core' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.wst.server.ui' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.core.variables' range='0.0.0'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='com.caucho.resin.eclipse' range='[4.0.0,4.0.0]'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='com.caucho.resin.eclipse.feature.jar' range='[4.0.0,4.0.0]'>
+          <filter>
+            (org.eclipse.update.install.features=true)
+          </filter>
+        </required>
+      </requires>
+      <touchpoint id='null' version='0.0.0'/>
+      <licenses size='1'>
+        <license>
+          Copyright (c) 1998-2009 Caucho Technology -- all rights reserved&#xA;&#xA;This file is part of Resin(R) Open Source&#xA;&#xA;Each copy or derived work must preserve the copyright notice and this&#xA;notice unmodified.&#xA;&#xA;Resin Open Source is free software; you can redistribute it and/or modify&#xA;it under the terms of the GNU General Public License as published by&#xA;the Free Software Foundation; either version 2 of the License, or&#xA;(at your option) any later version.&#xA;&#xA;Resin Open Source is distributed in the hope that it will be useful,&#xA;but WITHOUT ANY WARRANTY; without even the implied warranty of&#xA;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty&#xA;of NON-INFRINGEMENT.  See the GNU General Public License for more&#xA;details.&#xA;&#xA;You should have received a copy of the GNU General Public License&#xA;along with Resin Open Source; if not, write to the&#xA;&#xA;  Free Software Foundation, Inc.&#xA;  59 Temple Place, Suite 330&#xA;  Boston, MA 02111-1307  USA
+        </license>
+      </licenses>
+      <copyright>
+        Copyright (c) 1998-2009 Caucho Technology -- all rights reserved&#xA;&#xA;This file is part of Resin(R) Open Source&#xA;&#xA;Each copy or derived work must preserve the copyright notice and this&#xA;notice unmodified.&#xA;&#xA;Resin Open Source is free software; you can redistribute it and/or modify&#xA;it under the terms of the GNU General Public License as published by&#xA;the Free Software Foundation; either version 2 of the License, or&#xA;(at your option) any later version.&#xA;&#xA;Resin Open Source is distributed in the hope that it will be useful,&#xA;but WITHOUT ANY WARRANTY; without even the implied warranty of&#xA;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty&#xA;of NON-INFRINGEMENT.  See the GNU General Public License for more&#xA;details.&#xA;&#xA;You should have received a copy of the GNU General Public License&#xA;along with Resin Open Source; if not, write to the&#xA;&#xA;  Free Software Foundation, Inc.&#xA;  59 Temple Place, Suite 330&#xA;  Boston, MA 02111-1307  USA
+      </copyright>
+    </unit>
+    <unit id='a.jre' version='1.6.0' singleton='false'>
+      <provides size='117'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='a.jre' version='1.6.0'/>
+        <provided namespace='java.package' name='javax.accessibility' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.activity' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.crypto' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.crypto.interfaces' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.crypto.spec' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio.event' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio.metadata' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio.plugins.bmp' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio.plugins.jpeg' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio.spi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.imageio.stream' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.loading' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.modelmbean' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.monitor' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.openmbean' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.relation' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.remote' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.remote.rmi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.management.timer' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.naming' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.naming.directory' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.naming.event' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.naming.ldap' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.naming.spi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.net' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.net.ssl' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.print' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.print.attribute' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.print.attribute.standard' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.print.event' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.rmi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.rmi.CORBA' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.rmi.ssl' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.auth' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.auth.callback' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.auth.kerberos' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.auth.login' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.auth.spi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.auth.x500' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.cert' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.security.sasl' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sound.midi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sound.midi.spi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sound.sampled' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sound.sampled.spi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sql' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sql.rowset' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sql.rowset.serial' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.sql.rowset.spi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.border' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.colorchooser' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.event' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.filechooser' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.plaf' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.plaf.basic' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.plaf.metal' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.plaf.multi' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.plaf.synth' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.table' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.text' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.text.html' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.text.html.parser' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.text.rtf' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.tree' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.swing.undo' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.transaction' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.transaction.xa' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.datatype' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.namespace' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.parsers' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.transform' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.transform.dom' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.transform.sax' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.transform.stream' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.validation' version='0.0.0'/>
+        <provided namespace='java.package' name='javax.xml.xpath' version='0.0.0'/>
+        <provided namespace='java.package' name='org.ietf.jgss' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA_2_3' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA_2_3.portable' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA.DynAnyPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA.ORBPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA.portable' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CORBA.TypeCodePackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CosNaming' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CosNaming.NamingContextExtPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.CosNaming.NamingContextPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.Dynamic' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.DynamicAny' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.DynamicAny.DynAnyFactoryPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.DynamicAny.DynAnyPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.IOP' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.IOP.CodecFactoryPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.IOP.CodecPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.Messaging' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableInterceptor' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableInterceptor.ORBInitInfoPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableServer' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableServer.CurrentPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableServer.POAManagerPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableServer.POAPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableServer.portable' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.PortableServer.ServantLocatorPackage' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.SendingContext' version='0.0.0'/>
+        <provided namespace='java.package' name='org.omg.stub.java.rmi' version='0.0.0'/>
+        <provided namespace='java.package' name='org.w3c.dom' version='0.0.0'/>
+        <provided namespace='java.package' name='org.w3c.dom.bootstrap' version='0.0.0'/>
+        <provided namespace='java.package' name='org.w3c.dom.events' version='0.0.0'/>
+        <provided namespace='java.package' name='org.w3c.dom.ls' version='0.0.0'/>
+        <provided namespace='java.package' name='org.xml.sax' version='0.0.0'/>
+        <provided namespace='java.package' name='org.xml.sax.ext' version='0.0.0'/>
+        <provided namespace='java.package' name='org.xml.sax.helpers' version='0.0.0'/>
+      </provides>
+      <touchpoint id='org.eclipse.equinox.p2.native' version='1.0.0'/>
+    </unit>
+  </units>
+</repository>
