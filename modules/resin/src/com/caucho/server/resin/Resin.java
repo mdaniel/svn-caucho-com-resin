@@ -63,8 +63,9 @@ import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.SingleCluster;
+import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.repository.ModuleRepositoryImpl;
 import com.caucho.server.util.*;
@@ -121,6 +122,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private String _serverId = "";
   private DynamicServer _dynamicServer;
+  private ClusterServer _activeDynamicServer;
 
   private Path _resinHome;
   private Path _rootDirectory;
@@ -469,13 +471,14 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Sets the server id.
    */
-  public void addDynamicServer(String clusterId, String address, int port)
+  public void setDynamicServer(String clusterId, String address, int port)
   {
     _dynamicServer = new DynamicServer(clusterId, address, port);
       
     String id = address + ":" + port;
 
-    setServerId(id);
+    if (_serverId == null)
+      setServerId(id);
   }
 
   /**
@@ -850,7 +853,10 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Server createServer()
   {
     if (_server == null) {
-      ClusterServer clusterServer = findClusterServer(_serverId);
+      ClusterServer clusterServer = _activeDynamicServer;
+
+      if (clusterServer == null)
+	clusterServer = findClusterServer(_serverId);
 
       if (clusterServer == null)
 	throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
@@ -907,11 +913,12 @@ public class Resin implements EnvironmentBean, SchemaBean
 					  cluster.getId()));
 	}
 
-	/*
-	cluster.addDynamicServer(_serverId,
-				 _dynamicServer.getAddress(),
-				 _dynamicServer.getPort());
-	*/
+	ClusterPod pod = cluster.getPodList()[0];
+
+	_activeDynamicServer
+	  = pod.setActiveDynamicServer(_serverId,
+				       _dynamicServer.getAddress(),
+				       _dynamicServer.getPort());
       }
 
       /*
@@ -1135,7 +1142,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	  String address = values[1];
 	  int port = Integer.parseInt(values[2]);
 
-	  addDynamicServer(clusterId, address, port);
+	  setDynamicServer(clusterId, address, port);
 	} else {
 	  System.out.println("-dynamic-server requires 'cluster:address:port' at '" + argv[i + 1] + "'");
 

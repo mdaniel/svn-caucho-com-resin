@@ -48,7 +48,7 @@ public class MaxExpr extends FunExpr implements GroupExpr {
     _expr = expr;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _dataField = query.getDataFields();

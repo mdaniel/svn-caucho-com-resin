@@ -47,7 +47,7 @@ class BinaryEqExpr extends Expr {
     }
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     throw new UnsupportedOperationException();

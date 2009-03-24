@@ -42,7 +42,7 @@ class StringEqExpr extends Expr {
     _right = right;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     throw new UnsupportedOperationException();

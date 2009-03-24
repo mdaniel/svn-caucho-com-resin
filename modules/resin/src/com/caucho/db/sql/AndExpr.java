@@ -56,7 +56,7 @@ class AndExpr extends Expr {
       return this;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     for (int i = 0; i < _exprs.size(); i++) {

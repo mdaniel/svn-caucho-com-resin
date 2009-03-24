@@ -42,7 +42,7 @@ class ConcatExpr extends Expr {
     _right = right;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _left = _left.bind(query);

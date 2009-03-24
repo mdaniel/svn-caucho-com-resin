@@ -131,7 +131,7 @@ class UnboundIdentifierExpr extends Expr {
     }
   }
 			    
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     return query.bind(_table, _column);

@@ -57,7 +57,7 @@ abstract public class Expr {
   
   private static QDate _gmtDate = new QDate();
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     return this;

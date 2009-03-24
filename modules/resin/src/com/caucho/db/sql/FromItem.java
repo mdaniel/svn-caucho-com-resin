@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Represents a table binding for a from.
  */
-class FromItem {
+public class FromItem {
   private Table _table;
   private String _name;
 

@@ -122,7 +122,7 @@ class IdExpr extends Expr {
     return 10 * 100 * 100 * 100;
   }
 			    
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     FromItem []fromItems = query.getFromItems();

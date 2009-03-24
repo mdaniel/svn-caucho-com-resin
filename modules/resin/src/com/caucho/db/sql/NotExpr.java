@@ -43,7 +43,7 @@ class NotExpr extends Expr {
   /**
    * Binds the expression to the actual tables.
    */
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _sub = _sub.bind(query);

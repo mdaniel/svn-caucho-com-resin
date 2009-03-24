@@ -53,7 +53,7 @@ class EqExpr extends Expr {
     }
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     Expr newLeft = _left.bind(query);

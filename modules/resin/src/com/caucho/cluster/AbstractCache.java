@@ -139,7 +139,19 @@ abstract public class AbstractCache extends AbstractMap
   @Configurable
   public void setBackup(boolean isBackup)
   {
-    _config.setSinglePersistence(isBackup);
+    _config.setBackup(isBackup);
+  }
+
+  /**
+   * Sets the global mode.  If global is enabled, copies of the
+   * cache item will be sent to all clusters
+   * <p/>
+   * Defaults to false.
+   */
+  @Configurable
+  public void setGlobal(boolean isGlobal)
+  {
+    _config.setGlobal(isGlobal);
   }
 
   /**
@@ -151,7 +163,7 @@ abstract public class AbstractCache extends AbstractMap
   @Configurable
   public void setTriplicate(boolean isTriplicate)
   {
-    _config.setTriplePersistence(isTriplicate);
+    _config.setTriplicate(isTriplicate);
   }
 
   /**
@@ -772,14 +784,14 @@ abstract public class AbstractCache extends AbstractMap
     return CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 
-  public boolean isSingleBackup()
+  public boolean isBackup()
   {
-    return _config.isSinglePersistence();
+    return _config.isBackup();
   }
 
-  public boolean isTripleBackup()
+  public boolean isTriplicate()
   {
-    return _config.isTriplePersistence();
+    return _config.isTriplicate();
   }
 
   /**

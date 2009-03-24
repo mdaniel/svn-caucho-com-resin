@@ -26,75 +26,74 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.sql;
+package com.caucho.db.fun;
 
+import com.caucho.db.sql.Expr;
+import com.caucho.db.sql.FromItem;
+import com.caucho.db.sql.Query;
+import com.caucho.db.sql.FunExpr;
+import com.caucho.db.sql.QueryContext;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
 import java.sql.SQLException;
-import java.util.logging.Logger;
+import java.util.Date;
+import java.util.ArrayList;
 
-public class SumExpr extends FunExpr implements GroupExpr {
-  protected static final L10N L = new L10N(SumExpr.class);
+public class BitandExpr extends FunExpr {
+  protected static final L10N L = new L10N(BitandExpr.class);
+
+  private Expr _left;
+  private Expr _right;
+
+  public BitandExpr()
+  {
+  }
+
+  public BitandExpr(Expr left, Expr right)
+  {
+    _left = left;
+    _right = right;
+  }
   
-  private Expr _expr;
-  private int _groupField;
-
   protected void addArg(Expr expr)
     throws SQLException
   {
-    if (_expr != null)
-      throw new SQLException(L.l("sum requires a single argument"));
-
-    _expr = expr;
+    if (_left == null)
+      _left = expr;
+    else if (_right == null)
+      _right = expr;
+    else
+      throw new SQLException(L.l("bitand() has too many arguments"));
   }
 
+  /**
+   * Returns the expected result type of the expression.
+   */
+  public Class getType()
+  {
+    return long.class;
+  }
+
+  /**
+   * Binds the expression to the actual tables.
+   */
   public Expr bind(Query query)
     throws SQLException
   {
-    _groupField = query.getDataFields();
+    Expr newLeft = _left.bind(query);
+    Expr newRight = _right.bind(query);
 
-    query.setDataFields(_groupField + 1);
-    query.setGroup(true);
-
-    _expr = _expr.bind(query);
-    
-    return this;
-  }
-
-  public Class getType()
-  {
-    if (_expr.isLong())
-      return long.class;
-    else
-      return double.class;
+    return new BitandExpr(newLeft, newRight);
   }
 
   /**
-   * Initializes aggregate functions during the group phase.
-   *
-   * @param context the current database tuple
+   * Returns the cost based on the given FromList.
    */
-  public void initGroup(QueryContext context)
-    throws SQLException
+  public long subCost(ArrayList<FromItem> fromList)
   {
-    context.setGroupDouble(_groupField, 0);
-  }
-
-  /**
-   * Evaluates aggregate functions during the group phase.
-   *
-   * @param context the current database tuple
-   */
-  public void evalGroup(QueryContext context)
-    throws SQLException
-  {
-    if (_expr.isNull(context))
-      return;
-
-    double value = _expr.evalDouble(context);
-    double oldValue = context.getGroupDouble(_groupField);
-    
-    context.setGroupDouble(_groupField, value + oldValue);
+    return _left.subCost(fromList) + _right.subCost(fromList);
   }
 
   /**
@@ -107,7 +106,7 @@ public class SumExpr extends FunExpr implements GroupExpr {
   public boolean isNull(QueryContext context)
     throws SQLException
   {
-    return context.isGroupNull(_groupField);
+    return false;
   }
 
   /**
@@ -120,7 +119,7 @@ public class SumExpr extends FunExpr implements GroupExpr {
   public double evalDouble(QueryContext context)
     throws SQLException
   {
-    return context.getGroupDouble(_groupField);
+    return evalLong(context);
   }
 
   /**
@@ -133,7 +132,7 @@ public class SumExpr extends FunExpr implements GroupExpr {
   public long evalLong(QueryContext context)
     throws SQLException
   {
-    return (long) evalDouble(context);
+    return _left.evalLong(context) & _right.evalLong(context);
   }
 
   /**
@@ -147,5 +146,10 @@ public class SumExpr extends FunExpr implements GroupExpr {
     throws SQLException
   {
     return String.valueOf(evalLong(context));
+  }
+
+  public String toString()
+  {
+    return "bitand(" + _left + ", " + _right + ")";
   }
 }

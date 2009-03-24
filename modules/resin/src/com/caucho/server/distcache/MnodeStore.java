@@ -78,6 +78,7 @@ public class MnodeStore implements AlarmListener {
   
   private String _countQuery;
   private String _updatesSinceQuery;
+  private String _globalUpdatesSinceQuery;
 
   private long _serverVersion;
   private long _startupLastUpdateTime;
@@ -179,8 +180,16 @@ public class MnodeStore implements AlarmListener {
     
     _updatesSinceQuery = ("SELECT id,value,item_version,update_time"
 			  + " FROM " + _tableName
-			  + " WHERE update_time<?"
-			  + " OFFSET ? LIMIT 1024");
+			  + " WHERE ? <= update_time"
+			  + " LIMIT 1024");
+
+    int global = CacheConfig.FLAG_GLOBAL;
+    
+    _globalUpdatesSinceQuery = ("SELECT id,value,item_version,update_time"
+				+ " FROM " + _tableName
+				+ " WHERE ? <= update_time"
+				+ "   AND bitand(flags, " + global + ") <> 0"
+				+ " LIMIT 1024");
 
     initDatabase();
 
@@ -308,16 +317,41 @@ public class MnodeStore implements AlarmListener {
    */
   public ArrayList<CacheData> getUpdates(long updateTime, int offset)
   {
+    return getUpdates(updateTime, offset, false);
+  }
+
+  /**
+   * Returns the maximum update time on startup
+   */
+  public ArrayList<CacheData> getGlobalUpdates(long updateTime, int offset)
+  {
+    return getUpdates(updateTime, offset, true);
+  }
+  
+  /**
+   * Returns the maximum update time on startup
+   */
+  private ArrayList<CacheData> getUpdates(long updateTime,
+					  int offset,
+					  boolean isGlobal)
+  {
     Connection conn = null;
 
     try {
       conn = _dataSource.getConnection();
 
       String sql;
+
+      if (isGlobal)
+	sql = _globalUpdatesSinceQuery;
+      else
+	sql = _updatesSinceQuery;
+      /*
       sql = ("SELECT id,value,flags,item_version,update_time"
 	     + " FROM " + _tableName
 	     + " WHERE ?<=update_time"
 	     + " LIMIT 1024");
+      */
       
       PreparedStatement pstmt = conn.prepareStatement(sql);
 

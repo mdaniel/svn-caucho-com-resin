@@ -49,7 +49,7 @@ public class MinExpr extends FunExpr implements GroupExpr {
     _expr = expr;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _groupField = query.getDataFields();

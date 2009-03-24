@@ -44,7 +44,7 @@ class DoubleCmpExpr extends Expr {
     _op = op;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     Expr newLeft = _left.bind(query);

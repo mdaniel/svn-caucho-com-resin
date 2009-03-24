@@ -41,7 +41,7 @@ class DefaultExpr extends Expr {
     _default = defaultExpr;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     Expr newExpr = _expr.bind(query);

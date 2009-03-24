@@ -13,7 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
-<li>load balance: add green load balancing (
+<li>load balance: add green load balancing (#2831)</li>
 <li>admin: added URL to thread dump when available (#3194, rep by Keith Paulson)</li>
 <li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>
 <li>log: non-gz/zip archiving now uses rename instead of copy</li>

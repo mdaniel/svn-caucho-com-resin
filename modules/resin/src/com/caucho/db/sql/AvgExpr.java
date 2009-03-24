@@ -56,7 +56,7 @@ public class AvgExpr extends FunExpr implements GroupExpr {
     return double.class;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _groupField = query.getDataFields();

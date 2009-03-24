@@ -57,13 +57,13 @@ class UnboundStarExpr extends Expr {
     _table =  tableName;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     return bind(query.getFromItems());
   }
 
-  protected Expr bind(FromItem []fromItems)
+  public Expr bind(FromItem []fromItems)
     throws SQLException
   {
     return this;

@@ -52,7 +52,7 @@ public class ExistsExpr extends SubSelectExpr {
   /**
    * Binds the expression to the query.
    */
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     if (_parentQuery != null)

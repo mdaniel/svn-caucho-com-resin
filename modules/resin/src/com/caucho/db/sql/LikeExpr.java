@@ -78,7 +78,7 @@ class LikeExpr extends Expr {
     }
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _expr = _expr.bind(query);

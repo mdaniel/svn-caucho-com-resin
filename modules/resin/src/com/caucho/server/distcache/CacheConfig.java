@@ -47,6 +47,9 @@ public class CacheConfig
   public static final int FLAG_EPHEMERAL  = 0x01;
   public static final int FLAG_BACKUP = 0x02;
   public static final int FLAG_TRIPLICATE = 0x04;
+  
+  public static final int FLAG_CLUSTER = 0x08;
+  public static final int FLAG_GLOBAL = 0x10;
 
   private String _guid;
 
@@ -304,9 +307,9 @@ public class CacheConfig
     _valueSerializer = serializer;
   }
 
-  public boolean isSinglePersistence()
+  public boolean isBackup()
   {
-    return (getFlags() & CacheConfig.FLAG_BACKUP) == CacheConfig.FLAG_BACKUP;
+    return (getFlags() & CacheConfig.FLAG_BACKUP) != 0;
   }
 
   /**
@@ -315,12 +318,37 @@ public class CacheConfig
    * <p/>
    * Defaults to true.
    */
-  public void setSinglePersistence(boolean isBackup)
+  public void setBackup(boolean isBackup)
   {
     if (isBackup)
       setFlags(getFlags() | CacheConfig.FLAG_BACKUP);
-    else if (!isTriplePersistence())
+    else
       setFlags(getFlags() & ~CacheConfig.FLAG_BACKUP);
+  }
+
+  /**
+   * Sets the global mode.  If global is enabled, copies of the
+   * cache item will be sent to all clusters.
+   * <p/>
+   * Defaults to false.
+   */
+  public boolean isGlobal()
+  {
+    return (getFlags() & CacheConfig.FLAG_GLOBAL) != 0;
+  }
+
+  /**
+   * Sets the global mode.  If global is enabled, copies of the
+   * cache item will be sent to all clusters.
+   * <p/>
+   * Defaults to false.
+   */
+  public void setGlobal(boolean isGlobal)
+  {
+    if (isGlobal)
+      setFlags(getFlags() | CacheConfig.FLAG_GLOBAL);
+    else
+      setFlags(getFlags() & ~CacheConfig.FLAG_GLOBAL);
   }
 
   /**
@@ -329,9 +357,9 @@ public class CacheConfig
    * <p/>
    * Defaults is true.
    */
-  public boolean isTriplePersistence()
+  public boolean isTriplicate()
   {
-    return (getFlags() & CacheConfig.FLAG_TRIPLICATE) == CacheConfig.FLAG_TRIPLICATE;
+    return (getFlags() & CacheConfig.FLAG_TRIPLICATE) != 0;
   }
 
   /**
@@ -341,7 +369,7 @@ public class CacheConfig
    * Defaults to true.
    */
   @Configurable
-  public void setTriplePersistence(boolean isTriplicate)
+  public void setTriplicate(boolean isTriplicate)
   {
     if (isTriplicate)
       setFlags(getFlags() | CacheConfig.FLAG_TRIPLICATE);
@@ -359,7 +387,6 @@ public class CacheConfig
 
   /**
    * Sets the {@link AbstractCache.Scope} of this cache.
-   * //TODO(fred): Implement/integrate the initial set of Scopes.
    */
   public void setScopeMode(AbstractCache.Scope scope)
   {

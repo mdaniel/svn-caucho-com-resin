@@ -189,6 +189,17 @@ abstract public class ClusterPod
     throw new ConfigException(L.l("removeDynamicServer requires Resin Professional"));
   }
 
+  /**
+   * Sets the active dynamic server
+   */
+  public ClusterServer setActiveDynamicServer(String serverId,
+					      String address,
+					      int port)
+    throws ConfigException
+  {
+    throw new ConfigException(L.l("setDynamicServer requires Resin Professional"));
+  }
+
   //
   // lifecycle
   //

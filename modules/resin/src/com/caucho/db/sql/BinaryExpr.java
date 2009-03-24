@@ -48,7 +48,7 @@ class BinaryExpr extends Expr {
   /**
    * Binds the expression to the actual tables.
    */
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     Expr newLeft = _left.bind(query);

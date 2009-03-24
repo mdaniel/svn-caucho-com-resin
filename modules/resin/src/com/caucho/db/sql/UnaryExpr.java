@@ -45,7 +45,7 @@ class UnaryExpr extends Expr {
   /**
    * Binds the expression to the actual tables.
    */
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     Expr newSub = _sub.bind(query);

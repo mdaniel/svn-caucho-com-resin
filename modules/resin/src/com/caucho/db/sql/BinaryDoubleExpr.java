@@ -45,7 +45,7 @@ class BinaryDoubleExpr extends Expr {
     _op = op;
   }
 
-  protected Expr bind(FromItem []fromItems)
+  public Expr bind(FromItem []fromItems)
     throws SQLException
   {
     throw new UnsupportedOperationException();

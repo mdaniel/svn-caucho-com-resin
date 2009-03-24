@@ -44,7 +44,7 @@ class CmpExpr extends Expr {
     _op = op;
   }
 
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     _left = _left.bind(query);

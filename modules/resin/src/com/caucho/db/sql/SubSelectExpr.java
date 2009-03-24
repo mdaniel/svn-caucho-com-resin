@@ -58,7 +58,7 @@ public class SubSelectExpr extends Expr {
   /**
    * Binds the expression to the query.
    */
-  protected Expr bind(Query query)
+  public Expr bind(Query query)
     throws SQLException
   {
     if (_parentQuery != null)
