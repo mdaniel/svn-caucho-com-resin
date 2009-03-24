@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -48,6 +48,7 @@ public class Regexp {
   public static final int FAIL = -1;
   public static final int SUCCESS = 0;
 
+  final StringValue _rawRegexp;
   StringValue _pattern;
   
   RegexpNode _prog;
@@ -81,6 +82,8 @@ public class Regexp {
           "Can't find delimiters in regexp '{0}'.",
           rawRegexp));
     }
+    
+    _rawRegexp = rawRegexp;
 
     int head = 0;
     
@@ -154,18 +157,12 @@ public class Regexp {
 
     compile(env, _prog, comp);
   }
-
-  protected Regexp(Env env, RegexpNode prog, Regcomp comp)
+  
+  public StringValue getRawRegexp()
   {
-    _prog = prog;
-    
-    compile(env, _prog, comp);
+    return _rawRegexp;
   }
   
-  private Regexp()
-  {
-  }
-
   public StringValue getPattern()
   {
     return _pattern;

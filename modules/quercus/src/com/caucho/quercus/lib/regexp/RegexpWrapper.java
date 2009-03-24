@@ -35,11 +35,9 @@ import com.caucho.quercus.env.StringValue;
 public class RegexpWrapper
 {
   private Regexp _regexp;
-  private StringValue _regexpStr;
   
   // two so wordpress doesn't need to create a new regexp
   private Regexp _regexp2;
-  private StringValue _regexpStr2;
   
   public RegexpWrapper()  
   {
@@ -48,33 +46,28 @@ public class RegexpWrapper
   public Regexp get(Env env, StringValue str)
   {
     Regexp regexp = _regexp;
-    StringValue regexpStr = _regexpStr;
-    
     Regexp regexp2 = _regexp2;
-    StringValue regexpStr2 = _regexpStr2;
     
-    if (regexp == null || regexpStr == null) {
-      regexp = RegexpModule.createRegexpNoCache(env, str);
+    if (regexp == null) {
+      regexp = RegexpModule.createRegexp(env, str);
       _regexp = regexp;
-      _regexpStr = str;
       
       return regexp;
     }
-    else if (str == regexpStr
-             || (str.hashCode() == regexpStr.hashCode()
-                 && str.equals(regexpStr))) {
+    else if (str == _regexp._rawRegexp
+             || (str.hashCode() == _regexp._rawRegexp.hashCode()
+                 && str.equals(_regexp._rawRegexp))) {
       return regexp;
     }
-    else if (regexp2 == null || regexpStr2 == null) {
-      regexp2 = RegexpModule.createRegexpNoCache(env, str);
+    else if (regexp2 == null) {
+      regexp2 = RegexpModule.createRegexp(env, str);
       _regexp2 = regexp2;
-      _regexpStr2 = str;
       
       return regexp2;
     }
-    else if (str == regexpStr2
-        || (str.hashCode() == regexpStr2.hashCode()
-            && str.equals(regexpStr2))) {
+    else if (str == _regexp2._rawRegexp
+        || (str.hashCode() == _regexp2._rawRegexp.hashCode()
+            && str.equals(_regexp2._rawRegexp))) {
       return regexp2;
     }
     else {

@@ -73,12 +73,6 @@ public class RegexpModule
 
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
-  private static LruCache<StringValue, Regexp> []_regexpCacheList
-    = new LruCache[4];
-  
-  private static LruCache<Value, Regexp[]> []_regexpArrayCacheList
-    = new LruCache[4];
-
   private static final LruCache<StringValue, ArrayList<Replacement>> _replacementCache
     = new LruCache<StringValue, ArrayList<Replacement>>(1024);
 
@@ -155,7 +149,7 @@ public class RegexpModule
       cleanPattern = addDelimiters(env, cleanPattern, "/", "/s");
 
     try {
-      Regexp regexp = getRegexp(env, cleanPattern);
+      Regexp regexp = new Regexp(env, cleanPattern);
       RegexpState regexpState = RegexpState.create(env, regexp, string);
 
       if (regexpState.exec(env, string, 0) < 0) {
@@ -246,7 +240,7 @@ public class RegexpModule
   }
   */
   
-  public static Regexp createRegexpNoCache(Env env, StringValue regexpValue)
+  public static Regexp createRegexp(Env env, StringValue regexpValue)
   {
     try {
       if (regexpValue.length() < 2) {
@@ -264,24 +258,6 @@ public class RegexpModule
     }
   }
   
-  public static Regexp createRegexp(Env env, StringValue regexpValue)
-  {
-    try {
-      if (regexpValue.length() < 2) {
-        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
-        return null;
-      }
-
-      return getRegexp(env, regexpValue);
-    }
-    catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
-      return null;
-    }
-  }
-  
   public static Regexp createRegexp(String pattern)
   {
     try {
@@ -289,13 +265,14 @@ public class RegexpModule
         throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
       }
 
-      return getRegexp(null, new StringBuilderValue(pattern));
+      return new Regexp(null, new StringBuilderValue(pattern));
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
     }
   }
   
+  /*
   private static Regexp getRegexp(Env env,
                                   StringValue rawRegexp)
     throws IllegalRegexpException
@@ -304,8 +281,9 @@ public class RegexpModule
     
     Regexp regexp = _regexpCacheList[bin].get(rawRegexp);
 
-    if (regexp != null)
+    if (regexp != null) {
       return regexp;
+    }
 
     regexp = new Regexp(env, rawRegexp);
 
@@ -313,39 +291,7 @@ public class RegexpModule
 
     return regexp;
   }
-  
-  public static Regexp []createRegexpArray(Env env, Value pattern)
-  {
-    int bin = (pattern.hashCode() & 0xFFFF) % _regexpArrayCacheList.length;
-    
-    Regexp []regexpArray;
-    
-    regexpArray = _regexpArrayCacheList[bin].get(pattern);
-    
-    if (regexpArray != null)
-      return regexpArray;
-    
-    if (pattern.isArray()) {
-      ArrayValue array = pattern.toArrayValue(env);
-      
-      regexpArray = new Regexp[array.getSize()];
-      
-      int i = 0;
-      for (Value value : array.values()) {
-        Regexp regexp = createRegexpNoCache(env, value.toStringValue(env));
-        regexpArray[i++] = regexp;
-      }
-    }
-    else {
-      Regexp regexp = createRegexp(env, pattern.toStringValue(env));
-
-      regexpArray = new Regexp [] { regexp };
-    }
-    
-    _regexpArrayCacheList[bin].put(pattern, regexpArray);
-    
-    return regexpArray;
-  }
+  */
   
   public static Regexp []createRegexpArray(String pattern)
   {
@@ -363,14 +309,14 @@ public class RegexpModule
       
       int i = 0;
       for (Value value : array.values()) {
-        Regexp regexp = createRegexpNoCache(env, value.toStringValue(env));
+        Regexp regexp = createRegexp(env, value.toStringValue(env));
         regexpArray[i++] = regexp;
       }
       
       return regexpArray;
     }
     else {
-      Regexp regexp = createRegexpNoCache(env, pattern.toStringValue(env));
+      Regexp regexp = createRegexp(env, pattern.toStringValue(env));
 
       return new Regexp [] { regexp };
     }
@@ -919,7 +865,7 @@ public class RegexpModule
                            Value countV)
     throws IllegalRegexpException
   {
-    Regexp regexp = getRegexp(env, patternString);
+    Regexp regexp = new Regexp(env, patternString);
 
     return pregReplaceString(env, regexp, replacement, subject,
                              limit, countV);
@@ -1036,7 +982,7 @@ public class RegexpModule
       else
         patternStr = addDelimiters(env, patternStr, "/", "/");
       
-      Regexp regexp = getRegexp(env, patternStr);
+      Regexp regexp = new Regexp(env, patternStr);
       RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, subject);
@@ -1460,7 +1406,7 @@ public class RegexpModule
       else
         patternString = addDelimiters(env, patternString, "/", "/");
 
-      Regexp regexp = getRegexp(env, patternString);
+      Regexp regexp = new Regexp(env, patternString);
       RegexpState regexpState = RegexpState.create(env, regexp);
       
       regexpState.setSubject(env, string);
@@ -2068,16 +2014,6 @@ public class RegexpModule
   }
   
   static {
-    for (int i = 0; i < _regexpCacheList.length; i++) {
-      _regexpCacheList[i]
-        = new LruCache<StringValue, Regexp>(1024 / _regexpCacheList.length);
-    }
-    
-    for (int i = 0; i < _regexpArrayCacheList.length; i++) {
-      _regexpArrayCacheList[i]
-        = new LruCache<Value, Regexp[]>(1024 / _regexpCacheList.length);
-    }
-    
     PREG_QUOTE['\\'] = true;
     PREG_QUOTE['+'] = true;
     PREG_QUOTE['*'] = true;

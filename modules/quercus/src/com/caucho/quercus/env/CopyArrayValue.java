@@ -320,5 +320,23 @@ public class CopyArrayValue extends ArrayValue {
 
     return _copyArray;
   }
+  
+  @Override
+  public int hashCode()
+  {
+    if (_copyArray != null)
+      return _copyArray.hashCode();
+    else
+      return _constArray.hashCode();
+  }
+  
+  @Override
+  public boolean equals(Object o)
+  {
+    if (_copyArray != null)
+      return _copyArray.equals(o);
+    else
+      return _constArray.equals(o);
+  }
 }
 

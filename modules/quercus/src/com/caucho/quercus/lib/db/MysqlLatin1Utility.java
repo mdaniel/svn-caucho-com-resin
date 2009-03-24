@@ -101,9 +101,6 @@ public class MysqlLatin1Utility
         bytes[i] = UNICODE_MAP[ch];
       else
         bytes[i] = (byte) ch;
-        
-        //System.err.println("MysqlLatinUtility->encode(): " + Integer.toHexString((byte) ch) + " . " + Integer.toHexString(ch) + " . " + ch);
-        
     }
     
     return bytes;
