@@ -32,7 +32,6 @@ package com.caucho.quercus.module;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.program.*;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Field;

@@ -93,6 +93,9 @@ public class Quercus
 
   private HashSet<String> _extensionSet
     = new HashSet<String>();
+  
+  private HashSet<String> _extensionSetLowerCase
+  = new HashSet<String>();
 
   private HashMap<String, AbstractFunction> _funMap
     = new HashMap<String, AbstractFunction>();
@@ -1487,11 +1490,12 @@ public class Quercus
    */
   public boolean isExtensionLoaded(String name)
   {
-    return _extensionSet.contains(name);
+    return _extensionSet.contains(name)
+           || _extensionSetLowerCase.contains(name.toLowerCase());
   }
 
   /**
-   * Returns true if an extension is loaded.
+   * Returns the loaded extensions.
    */
   public HashSet<String> getLoadedExtensions()
   {
@@ -1573,8 +1577,10 @@ public class Quercus
     if (info.getModule() instanceof ModuleStartupListener)
       _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
 
-    for (String ext : info.getLoadedExtensions())
+    for (String ext : info.getLoadedExtensions()) {
       _extensionSet.add(ext);
+      _extensionSetLowerCase.add(ext.toLowerCase());
+    }
 
     Map<String, Value> map = info.getConstMap();
 
