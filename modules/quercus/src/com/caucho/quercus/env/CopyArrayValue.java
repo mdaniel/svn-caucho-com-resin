@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.caucho.quercus.Location;
@@ -321,6 +322,15 @@ public class CopyArrayValue extends ArrayValue {
     return _copyArray;
   }
   
+  @Override
+  public int cmp(Value rValue)
+  {
+    if (_copyArray != null)
+      return _copyArray.cmp(rValue);
+    else
+      return _constArray.cmp(rValue);
+  }
+
   @Override
   public int hashCode()
   {

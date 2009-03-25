@@ -37,6 +37,10 @@ public class RegexpArrayWrapper
   private RegexpCouple _couple;
   private RegexpCouple _couple2;
   private RegexpCouple _couple3;
+  private RegexpCouple _couple4;
+  private RegexpCouple _couple5;
+  // six so mediawiki does not have to create a new regexp[]
+  private RegexpCouple _couple6;
   
   public RegexpArrayWrapper()  
   {
@@ -47,7 +51,12 @@ public class RegexpArrayWrapper
     RegexpCouple couple = _couple;
     RegexpCouple couple2 = _couple2;
     RegexpCouple couple3 = _couple3;
+    RegexpCouple couple4 = _couple4;
+    RegexpCouple couple5 = _couple5;
+    RegexpCouple couple6 = _couple6;
     
+    pattern = pattern.toValue();
+
     if (couple == null) {
       Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
       
@@ -77,6 +86,36 @@ public class RegexpArrayWrapper
     }
     else if (couple3.is(pattern)) {
       return couple3._regexp;
+    }
+    else if (couple4 == null) {
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
+      
+      _couple4 = new RegexpCouple(regexp, pattern);
+
+      return regexp;
+    }
+    else if (couple4.is(pattern)) {
+      return couple4._regexp;
+    }
+    else if (couple5 == null) {
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
+      
+      _couple5 = new RegexpCouple(regexp, pattern);
+
+      return regexp;
+    }
+    else if (couple5.is(pattern)) {
+      return couple5._regexp;
+    }
+    else if (couple6 == null) {
+      Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);
+      
+      _couple6 = new RegexpCouple(regexp, pattern);
+
+      return regexp;
+    }
+    else if (couple6.is(pattern)) {
+      return couple6._regexp;
     }
     else {
       Regexp []regexp = RegexpModule.createRegexpArray(env, pattern);

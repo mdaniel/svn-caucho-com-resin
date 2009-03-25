@@ -1664,17 +1664,5 @@ public final class Var extends Value
   {
     return _value;
   }
-  
-  @Override
-  public int hashCode()
-  {
-    return _value.hashCode();
-  }
-  
-  @Override
-  public boolean equals(Object o)
-  {
-    return _value.equals(o);
-  }
 }
 
