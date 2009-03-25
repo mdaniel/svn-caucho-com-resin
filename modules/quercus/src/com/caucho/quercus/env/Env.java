@@ -4798,7 +4798,7 @@ public class Env {
   {
     return include(scriptPwd, include, isRequire, true);
   }
-
+  
   /**
    * Evaluates an included file.
    */
@@ -4838,7 +4838,7 @@ public class Env {
       else if (page == null || page.isModified()) {
         page = _quercus.parse(path);
 
-	pageInit(page);
+        pageInit(page);
         
         _includeMap.put(path, page);
       }
@@ -4848,6 +4848,8 @@ public class Env {
       throw new QuercusModuleException(e);
     }
   }
+  
+  
 
   void executePage(Path path)
   {

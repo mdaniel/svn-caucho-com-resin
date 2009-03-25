@@ -39,6 +39,8 @@ import com.caucho.quercus.lib.MailModule;
 import com.caucho.quercus.lib.regexp.Ereg;
 import com.caucho.quercus.lib.regexp.Eregi;
 import com.caucho.quercus.lib.regexp.RegexpModule;
+import com.caucho.quercus.lib.regexp.UnicodeEreg;
+import com.caucho.quercus.lib.regexp.UnicodeEregi;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
@@ -397,18 +399,15 @@ public class MbstringModule
    * Returns true if pattern matches a part of string.
    */
   public static BooleanValue mb_ereg_match(Env env,
-                              StringValue pattern,
-                              StringValue string,
-                              @Optional String option)
+                                           UnicodeEreg ereg,
+                                           StringValue string,
+                                           @Optional String option)
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.convertToUnicode(env, encoding);
     string = string.convertToUnicode(env, encoding);
 
     // XXX: option
-    
-    Ereg ereg = RegexpModule.createEreg(env, pattern);
 
     Value val = RegexpModule.eregImpl(env, ereg, string, null);
 
@@ -422,23 +421,20 @@ public class MbstringModule
    * Multibyte version of ereg_replace.
    */
   public static Value mb_ereg_replace(Env env,
-                              StringValue pattern,
-                              StringValue replacement,
-                              StringValue subject,
-                              @Optional String option)
+                                      UnicodeEreg ereg,
+                                      StringValue replacement,
+                                      StringValue subject,
+                                      @Optional String option)
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.convertToUnicode(env, encoding);
     replacement = replacement.convertToUnicode(env, encoding);
     subject = subject.convertToUnicode(env, encoding);
 
     //XXX: option
-
-    Ereg regexp = RegexpModule.createEreg(env, pattern);
     
     Value val = RegexpModule.ereg_replace(env,
-                                          regexp,
+                                          ereg,
                                           replacement,
                                           subject);
 
@@ -449,11 +445,11 @@ public class MbstringModule
    * Multibyte version of ereg.
    */
   public static Value mb_ereg(Env env,
-                              StringValue pattern,
+                              UnicodeEreg ereg,
                               StringValue string,
                               @Optional ArrayValue regs)
   {
-    return eregImpl(env, pattern, string, regs, true);
+    return eregImpl(env, ereg, string, regs);
   }
 
   /**
@@ -484,31 +480,22 @@ public class MbstringModule
    * Multibyte version of eregi.
    */
   public static Value mb_eregi(Env env,
-                              StringValue pattern,
-                              StringValue string,
-                              @Optional ArrayValue regs)
+                               UnicodeEregi eregi,
+                               StringValue string,
+                               @Optional ArrayValue regs)
   {
-    return eregImpl(env, pattern, string, regs, false);
+    return eregImpl(env, eregi, string, regs);
   }
 
   private static Value eregImpl(Env env,
-                                StringValue pattern,
+                                UnicodeEreg ereg,
                                 StringValue string,
-                                ArrayValue regs,
-                                boolean isCaseInsensitive)
+                                ArrayValue regs)
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.convertToUnicode(env, encoding);
     string = string.convertToUnicode(env, encoding);
 
-    Ereg ereg;
-    
-    if (isCaseInsensitive)
-      ereg = RegexpModule.createEreg(env, pattern);
-    else
-      ereg = RegexpModule.createEregi(env, pattern);
-    
     if (regs == null) {
       return RegexpModule.eregImpl(env, ereg, string, null);
     }
@@ -565,11 +552,18 @@ public class MbstringModule
    * Initializes a ereg state object.
    */
   public static BooleanValue mb_ereg_search_init(Env env,
-                              StringValue string,
-                              @Optional Value pattern,
-                              @Optional Value option)
+                                                 StringValue string,
+                                                 @Optional Value rawRegexp,
+                                                 @Optional Value option)
   {
-    EregSearch ereg = new EregSearch(env, string, pattern, option);
+    UnicodeEregi regexp = null;
+    
+    if (! rawRegexp.isDefault()) {
+      regexp
+        = RegexpModule.createUnicodeEregi(env, rawRegexp.toStringValue(env));
+    }
+    
+    EregSearch ereg = new EregSearch(env, string, regexp, option);
     env.setSpecialValue("mb.search", ereg);
 
     return BooleanValue.TRUE;
@@ -579,10 +573,17 @@ public class MbstringModule
    * Returns index and position after matching.
    */
   public static Value mb_ereg_search_pos(Env env,
-                              @Optional Value pattern,
-                              @Optional Value option)
+                                         @Optional Value rawRegexp,
+                                         @Optional Value option)
   {
-    EregSearch ereg = getEreg(env, pattern, option);
+    UnicodeEregi regexp = null;
+    
+    if (! rawRegexp.isDefault()) {
+      regexp
+        = RegexpModule.createUnicodeEregi(env, rawRegexp.toStringValue(env));
+    }
+    
+    EregSearch ereg = getEreg(env, regexp, option);
 
     if (ereg == null) {
       env.warning(L.l("Regular expression not set"));
@@ -596,10 +597,17 @@ public class MbstringModule
    * Returns match array after matching.
    */
   public static Value mb_ereg_search_regs(Env env,
-                              @Optional Value pattern,
-                              @Optional Value option)
+                                          @Optional Value rawRegexp,
+                                          @Optional Value option)
   {
-    EregSearch ereg = getEreg(env, pattern, option);
+    UnicodeEregi regexp = null;
+    
+    if (! rawRegexp.isDefault()) {
+      regexp
+        = RegexpModule.createUnicodeEregi(env, rawRegexp.toStringValue(env));
+    }
+    
+    EregSearch ereg = getEreg(env, regexp, option);
 
     if (ereg == null) {
       env.warning(L.l("Regular expression not set"));
@@ -631,10 +639,17 @@ public class MbstringModule
    * Returns whether or not pattern matches string.
    */
   public static BooleanValue mb_ereg_search(Env env,
-                              @Optional Value pattern,
-                              @Optional Value option)
+                                            @Optional Value rawRegexp,
+                                            @Optional Value option)
   {
-    EregSearch ereg = getEreg(env, pattern, option);
+    UnicodeEregi regexp = null;
+    
+    if (! rawRegexp.isDefault()) {
+      regexp
+        = RegexpModule.createUnicodeEregi(env, rawRegexp.toStringValue(env));
+    }
+    
+    EregSearch ereg = getEreg(env, regexp, option);
 
     if (ereg == null) {
       env.warning(L.l("Regular expression not set"));
@@ -664,7 +679,7 @@ public class MbstringModule
    * is a valid one.
    */
   private static EregSearch getEreg(Env env,
-                                    Value pattern,
+                                    UnicodeEregi regexp,
                                     Value option)
   {
     Object obj = env.getSpecialValue("mb.search");
@@ -672,7 +687,8 @@ public class MbstringModule
     if (obj != null) {
       EregSearch ereg = (EregSearch) obj;
 
-      ereg.init(env, pattern, option);
+      if (regexp != null)
+        ereg.init(regexp, option);
 
       if (ereg._isValidRegexp)
         return ereg;
@@ -919,18 +935,15 @@ public class MbstringModule
    * Multibyte version of split.
    */
   public static Value mb_split(Env env,
-                              StringValue pattern,
+                               UnicodeEreg ereg,
                               StringValue string,
                               @Optional("-1") long limit)
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.convertToUnicode(env, encoding);
     string = string.convertToUnicode(env, encoding);
-
-    Ereg regexp = RegexpModule.createEreg(env, pattern);
     
-    Value val = RegexpModule.split(env, regexp, string, limit);
+    Value val = RegexpModule.split(env, ereg, string, limit);
 
     return encodeAll(env, val, encoding);
   }
@@ -1156,10 +1169,10 @@ public class MbstringModule
    * Multibyte version of substr.
    */
   public static StringValue mb_substr(Env env,
-                              StringValue str,
-                              int start,
-                              @Optional Value lengthV,
-                              @Optional String encoding)
+                                      StringValue str,
+                                      int start,
+                                      @Optional Value lengthV,
+                                      @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -1302,7 +1315,7 @@ public class MbstringModule
     return encoder;
   }
 
-  private static String getEncoding(Env env)
+  public static String getEncoding(Env env)
   {
     Value encoding = env.getIni("mbstring.internal_encoding");
     
@@ -1484,7 +1497,7 @@ public class MbstringModule
    */
   static class EregSearch {
     private StringValue _string;
-    private StringValue _pattern;
+    private UnicodeEregi _ereg;
     private Value _option;
     private int _length;
 
@@ -1493,31 +1506,26 @@ public class MbstringModule
     boolean _isValidRegexp;
 
     EregSearch(Env env,
-                 StringValue string,
-                 Value pattern,
-                 Value option)
+               StringValue string,
+               UnicodeEregi ereg,
+               Value option)
     {
       _string = string.convertToUnicode(env, getEncoding(env));
       _position = 0;
       _length = _string.length();
-
-      init(env, pattern, option);
-    }
-
-    void init(Env env, Value pattern, Value option)
-    {
+      
+      _ereg = ereg;
+      _isValidRegexp = ereg != null;
+      
       _option = option;
-      initPattern(env, pattern);
     }
-
-    void initPattern(Env env, Value pattern)
+    
+    void init(UnicodeEregi ereg, Value option)
     {
-      if (pattern instanceof StringValue) {
-        _pattern = pattern.toStringValue();
-        _isValidRegexp = true;
-      }
-      else
-        _isValidRegexp = (_pattern != null);
+      _ereg = ereg;
+      _isValidRegexp = ereg != null;
+      
+      _option = option;
     }
 
     StringValue getString(Env env)
@@ -1532,19 +1540,24 @@ public class MbstringModule
 
     Value search(Env env, boolean isArrayReturn)
     {
+      if (_position < 0)
+        return BooleanValue.FALSE;
+      
       StringValue string = getString(env);
 
       ArrayValue regs = new ArrayValueImpl();
-      Value val = eregImpl(env, _pattern, string, regs, true);
+      Value val = eregImpl(env, _ereg, string, regs);
 
       if (val == BooleanValue.FALSE)
         return BooleanValue.FALSE;
 
       StringValue match = regs.get(LongValue.ZERO).toStringValue();
+
       int matchIndex = _string.indexOf(match, _position);
       int matchLength = match.length();
 
       _position = matchIndex + matchLength;
+
       _lastMatch = regs;
 
       if (isArrayReturn) {

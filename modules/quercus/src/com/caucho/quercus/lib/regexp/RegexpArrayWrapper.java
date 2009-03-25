@@ -137,8 +137,7 @@ public class RegexpArrayWrapper
     boolean is(Value pattern)
     {
       return pattern == _rawRegexp
-             || (pattern.hashCode() == _rawRegexp.hashCode()
-                 && pattern.equals(_rawRegexp));
+             || pattern.equals(_rawRegexp);
     }
   }
 }

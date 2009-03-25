@@ -35,6 +35,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.i18n.MbstringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -92,6 +93,12 @@ public class RegexpModule
                            StringValue string,
                            @Optional @Reference Value regsV)
   {
+    
+    if (regexp.getRawRegexp().length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     return eregImpl(env, regexp, string, regsV);
   }
 
@@ -105,6 +112,12 @@ public class RegexpModule
                             StringValue string,
                             @Optional @Reference Value regsV)
   {
+    
+    if (regexp.getRawRegexp().length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     //  php/1511 : error when pattern argument is null or an empty string
     return eregImpl(env, regexp, string, regsV);
   }
@@ -121,11 +134,6 @@ public class RegexpModule
   {
     if (regexp == null)
       return BooleanValue.FALSE;
-    
-    if (regexp.getRawRegexp().length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
     
     // php/1512 : non-string pattern argument is converted to
     // an integer value and formatted as a string.
@@ -179,47 +187,20 @@ public class RegexpModule
       return LongValue.ONE;
     }
   }
-
-  /**
-   * Returns the index of the first match.
-   *
-   * php/151u
-   * The array that preg_match (PHP 5) returns does not have trailing unmatched
-   * groups. Therefore, an unmatched group should not be added to the array
-   * unless a matched group appears after it.  A couple applications like
-   * Gallery2 expect this behavior in order to function correctly.
-   * 
-   * Only preg_match and preg_match_all(PREG_SET_ORDER) exhibits this odd
-   * behavior.
-   *
-   * @param env the calling environment
-   */
-  /*
-  public static Value preg_match(Env env,
-                                 StringValue regexpValue,
-                                 StringValue subject,
-                                 @Optional @Reference Value matchRef,
-                                 @Optional int flags,
-                                 @Optional int offset)
+  
+  public static Regexp createRegexp(StringValue pattern)
   {
     try {
-      if (regexpValue.length() < 2) {
-        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
-        return LongValue.ZERO;
+      if (pattern.length() < 2) {
+        throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
       }
 
-      Regexp regexp = getRegexp(env, regexpValue);
-
-      return cauchoPregMatch(env, regexp, subject, matchRef, flags, offset);
+      return new Regexp(pattern);
     }
     catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
-      return BooleanValue.FALSE;
+      throw new QuercusException(e);
     }
   }
-  */
   
   public static Regexp createRegexp(Env env, StringValue regexpValue)
   {
@@ -238,41 +219,6 @@ public class RegexpModule
       return null;
     }
   }
-  
-  public static Regexp createRegexp(StringValue pattern)
-  {
-    try {
-      if (pattern.length() < 2) {
-        throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
-      }
-
-      return new Regexp(pattern);
-    }
-    catch (IllegalRegexpException e) {
-      throw new QuercusException(e);
-    }
-  }
-  
-  /*
-  private static Regexp getRegexp(Env env,
-                                  StringValue rawRegexp)
-    throws IllegalRegexpException
-  {
-    int bin = (rawRegexp.hashCode() & 0xFFFF) % _regexpCacheList.length;
-    
-    Regexp regexp = _regexpCacheList[bin].get(rawRegexp);
-
-    if (regexp != null) {
-      return regexp;
-    }
-
-    regexp = new Regexp(env, rawRegexp);
-
-    _regexpCacheList[bin].put(rawRegexp, regexp);
-
-    return regexp;
-  }
-  */
   
   public static Regexp []createRegexpArray(StringValue pattern)
   {
@@ -390,6 +336,54 @@ public class RegexpModule
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
+    }
+  }
+  
+  public static UnicodeEreg createUnicodeEreg(Env env, StringValue pattern)
+  {
+    return createUnicodeEreg(env, pattern, MbstringModule.getEncoding(env));
+  }
+  
+  public static UnicodeEreg createUnicodeEreg(Env env,
+                                              StringValue pattern,
+                                              String encoding)
+  {
+    try {
+      pattern = pattern.convertToUnicode(env, encoding);
+
+      StringValue cleanPattern = cleanEregRegexp(pattern, false);
+      
+      return new UnicodeEreg(cleanPattern);
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return null;
+    }
+  }
+  
+  public static UnicodeEregi createUnicodeEregi(Env env, StringValue pattern)
+  {
+    return createUnicodeEregi(env, pattern, MbstringModule.getEncoding(env));
+  }
+  
+  public static UnicodeEregi createUnicodeEregi(Env env,
+                                               StringValue pattern,
+                                               String encoding)
+  {
+    try {
+      pattern = pattern.convertToUnicode(env, encoding);
+
+      StringValue cleanPattern = cleanEregRegexp(pattern, false);
+
+      return new UnicodeEregi(cleanPattern);
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+
+      return null;
     }
   }
   

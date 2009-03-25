@@ -72,6 +72,14 @@ public class StringLiteralExpr extends Expr {
   {
     return true;
   }
+  
+  /**
+   * Returns true if the expression evaluates to a string.
+   */
+  public boolean isString()
+  {
+    return true;
+  }
 
   /**
    * Evaluates the expression as a constant.

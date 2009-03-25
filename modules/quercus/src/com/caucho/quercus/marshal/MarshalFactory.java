@@ -35,6 +35,8 @@ import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.regexp.Ereg;
 import com.caucho.quercus.lib.regexp.Eregi;
 import com.caucho.quercus.lib.regexp.Regexp;
+import com.caucho.quercus.lib.regexp.UnicodeEreg;
+import com.caucho.quercus.lib.regexp.UnicodeEregi;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -196,6 +198,12 @@ public class MarshalFactory {
     }
     else if (Eregi.class.equals(argType)) {
       marshal = EregiMarshal.MARSHAL;
+    }
+    else if (UnicodeEreg.class.equals(argType)) {
+      marshal = UnicodeEregMarshal.MARSHAL;
+    }
+    else if (UnicodeEregi.class.equals(argType)) {
+      marshal = UnicodeEregiMarshal.MARSHAL;
     }
     else if (URL.class.equals(argType)) {
       marshal = URLMarshal.MARSHAL;

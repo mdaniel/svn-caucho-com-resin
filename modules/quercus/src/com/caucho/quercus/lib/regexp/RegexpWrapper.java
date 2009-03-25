@@ -35,7 +35,6 @@ import com.caucho.quercus.env.StringValue;
 public class RegexpWrapper
 {
   private Regexp _regexp;
-  
   // two so wordpress doesn't need to create a new regexp
   private Regexp _regexp2;
   
@@ -55,8 +54,7 @@ public class RegexpWrapper
       return regexp;
     }
     else if (str == _regexp._rawRegexp
-             || (str.hashCode() == _regexp._rawRegexp.hashCode()
-                 && str.equals(_regexp._rawRegexp))) {
+             || str.equals(_regexp._rawRegexp)) {
       return regexp;
     }
     else if (regexp2 == null) {
@@ -66,8 +64,7 @@ public class RegexpWrapper
       return regexp2;
     }
     else if (str == _regexp2._rawRegexp
-        || (str.hashCode() == _regexp2._rawRegexp.hashCode()
-            && str.equals(_regexp2._rawRegexp))) {
+             || str.equals(_regexp2._rawRegexp)) {
       return regexp2;
     }
     else {
