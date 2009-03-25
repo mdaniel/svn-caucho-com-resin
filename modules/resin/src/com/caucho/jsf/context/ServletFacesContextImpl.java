@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.context;
 
+import com.caucho.util.L10N;
+
 import java.util.*;
 import java.util.logging.*;
 
@@ -47,6 +49,9 @@ public class ServletFacesContextImpl extends FacesContext
 {
   private static final Logger log
     = Logger.getLogger(ServletFacesContextImpl.class.getName());
+
+  private static final L10N L = new L10N(ServletFacesContextImpl.class);
+
 
   private static final Iterator<FacesMessage> NO_MESSAGES
     = new NoMessagesIterator();
@@ -154,17 +159,6 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
-    if (_responseWriter == null) {
-      try {
-	_responseWriter = new ResponseWriterImpl(_response,
-						 _response.getWriter());
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new FacesException(e);
-      }
-    }
 
     return _responseWriter;
   }
@@ -173,7 +167,10 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
+
+    if (writer == null)
+      throw new NullPointerException(L.l("ResponseWriter object can not be null"));
+
     _responseWriter = writer;
   }
 

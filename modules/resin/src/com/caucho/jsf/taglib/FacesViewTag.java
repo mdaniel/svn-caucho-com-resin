@@ -31,7 +31,6 @@ package com.caucho.jsf.taglib;
 
 import java.io.*;
 import java.util.logging.*;
-import java.util.Locale;
 
 import javax.el.*;
 
@@ -44,7 +43,6 @@ import javax.faces.event.PhaseId;
 
 import javax.servlet.*;
 import javax.servlet.jsp.*;
-import javax.servlet.jsp.jstl.core.Config;
 
 import com.caucho.jsf.context.*;
 import com.caucho.util.L10N;
@@ -110,8 +108,11 @@ public class FacesViewTag extends UIComponentELTag
     throws JspException
   {
     PageContext pageContext = this.pageContext;
-
+    FacesContext facesContext = FacesContext.getCurrentInstance();
     ServletResponse response = pageContext.getResponse();
+    int doStartValue = super.doStartTag();
+
+    response.setLocale(facesContext.getViewRoot().getLocale());
 
     try {
       if (response instanceof JspResponseWrapper)
@@ -120,12 +121,6 @@ public class FacesViewTag extends UIComponentELTag
     catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
-    int doStartValue = super.doStartTag();
-
-    FacesContext context = FacesContext.getCurrentInstance();
-
-    pageContext.getResponse().setLocale(context.getViewRoot().getLocale());
 
     return doStartValue;
   }
@@ -139,7 +134,6 @@ public class FacesViewTag extends UIComponentELTag
   protected void setProperties(UIComponent component)
   {
     boolean isFiner = log.isLoggable(Level.FINER);
-
 
     UIViewRoot viewRoot = (UIViewRoot) component;
 

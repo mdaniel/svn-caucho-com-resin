@@ -374,10 +374,6 @@ public class JspViewHandler extends ViewHandler
 
     ResponseWriter out;
 
-    out = renderKit.createResponseWriter(response.getWriter(),
-					 null,
-					 encoding);
-
     JspResponseWrapper resWrapper = new JspResponseWrapper();
     resWrapper.init(response);
     extContext.setResponse(resWrapper);
@@ -387,6 +383,10 @@ public class JspViewHandler extends ViewHandler
     String tail = resWrapper.completeJsf();
 
     extContext.setResponse(response);
+    
+    out = renderKit.createResponseWriter(response.getWriter(),
+					 null,
+					 encoding);
 
     context.setResponseWriter(out);
     
@@ -403,7 +403,8 @@ public class JspViewHandler extends ViewHandler
     
     out.endDocument();
 
-    context.setResponseWriter(oldOut);
+    if (oldOut != null)
+      context.setResponseWriter(oldOut);
   }
 
   @Override

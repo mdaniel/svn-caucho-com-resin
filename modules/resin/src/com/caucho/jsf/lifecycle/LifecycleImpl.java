@@ -480,7 +480,7 @@ public class LifecycleImpl extends Lifecycle
 
       context.setViewRoot(viewRoot);
 
-      view.writeState(context);
+      //view.writeState(context); // XXX: no need to output state, but review.
 
       return true;
     } catch (IOException e1) {
