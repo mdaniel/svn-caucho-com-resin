@@ -189,6 +189,22 @@ public class JavaAdapterVar extends Value
   }
 
   /**
+   * Returns true for a long-value.
+   */
+  public boolean isLong()
+  {
+    return getValue().isLong();
+  }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isDouble()
+  {
+    return getValue().isDouble();
+  }
+  
+  /**
    * Returns true for is_numeric
    */
   @Override

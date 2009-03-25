@@ -32,6 +32,7 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.regexp.Ereg;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -386,10 +387,12 @@ public class HtmlModule extends AbstractQuercusModule {
     while (iter.hasNext()) {
       Map.Entry<Value,Value> entry = iter.next();
       StringValue key = entry.getKey().toStringValue();
-      StringValue value = entry.getValue().toStringValue();
+      Value value = entry.getValue();
+      
+      Ereg regexp = RegexpModule.createEreg(env, value);
 
       string = RegexpModule.ereg_replace(env,
-                                         value,
+                                         regexp,
                                          key,
                                          string).toStringValue();
     }

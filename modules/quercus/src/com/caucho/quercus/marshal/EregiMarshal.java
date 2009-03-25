@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,32 +24,31 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.marshal;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.regexp.Ereg;
+import com.caucho.quercus.lib.regexp.Eregi;
 import com.caucho.quercus.lib.regexp.RegexpModule;
-import com.caucho.quercus.lib.regexp.Regexp;
 import com.caucho.quercus.expr.Expr;
 
 /**
  * Code for marshaling (PHP to Java) and unmarshaling (Java to PHP) arguments.
  */
-public class EregMarshal extends StringMarshal {
-  public static final EregMarshal MARSHAL = new EregMarshal();
+public class EregiMarshal extends StringMarshal {
+  public static final EregiMarshal MARSHAL = new EregiMarshal();
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return RegexpModule.createEreg(env, expr.eval(env));
+    return RegexpModule.createEregi(env, expr.eval(env));
   }
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return RegexpModule.createEreg(env, value);
+    return RegexpModule.createEregi(env, value);
   }
 
   public Value unmarshal(Env env, Object value)
@@ -70,6 +69,6 @@ public class EregMarshal extends StringMarshal {
   @Override
   public Class getExpectedClass()
   {
-    return Ereg.class;
+    return Eregi.class;
   }
 }

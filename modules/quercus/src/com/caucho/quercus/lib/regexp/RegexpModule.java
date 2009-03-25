@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -88,16 +88,11 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-                           Value pattern,
+                           Ereg regexp,
                            StringValue string,
                            @Optional @Reference Value regsV)
   {
-    if (pattern.length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
-    
-    return eregImpl(env, pattern, string, regsV, false);
+    return eregImpl(env, regexp, string, regsV);
   }
 
   /**
@@ -106,18 +101,12 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-                            Value pattern,
+                            Eregi regexp,
                             StringValue string,
                             @Optional @Reference Value regsV)
   {
     //  php/1511 : error when pattern argument is null or an empty string
-    
-    if (pattern.length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
-    
-    return eregImpl(env, pattern, string, regsV, true);
+    return eregImpl(env, regexp, string, regsV);
   }
 
   /**
@@ -126,76 +115,68 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value eregImpl(Env env,
-                               Value rawPattern,
+                               Ereg regexp,
                                StringValue string,
-                               Value regsV,
-                               boolean isCaseInsensitive)
+                               Value regsV)
   {
+    if (regexp == null)
+      return BooleanValue.FALSE;
+    
+    if (regexp.getRawRegexp().length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     // php/1512 : non-string pattern argument is converted to
     // an integer value and formatted as a string.
-
-    StringValue rawPatternStr;
-
+    
+    /*
     if (! rawPattern.isString())
       rawPatternStr = rawPattern.toLongValue().toStringValue();
     else
       rawPatternStr = rawPattern.toStringValue();
+    */
 
-    StringValue cleanPattern = cleanEregRegexp(env, rawPatternStr, false);
-    
-    if (isCaseInsensitive)
-      cleanPattern = addDelimiters(env, cleanPattern, "/", "/si");
-    else
-      cleanPattern = addDelimiters(env, cleanPattern, "/", "/s");
+    RegexpState regexpState = RegexpState.create(env, regexp, string);
 
-    try {
-      Regexp regexp = new Regexp(cleanPattern);
-      RegexpState regexpState = RegexpState.create(env, regexp, string);
-
-      if (regexpState.exec(env, string, 0) < 0) {
-        RegexpState.free(env, regexpState);
-    
-        return BooleanValue.FALSE;
-      }
-
-      if (regsV != null && ! (regsV instanceof NullValue)) {
-        ArrayValue regs = new ArrayValueImpl();
-        regsV.set(regs);
-
-        regs.put(LongValue.ZERO, regexpState.group(env));
-        int count = regexpState.groupCount();
-
-        for (int i = 1; i < count; i++) {
-          StringValue group = regexpState.group(env, i);
-
-          Value value;
-          if (group == null || group.length() == 0)
-            value = BooleanValue.FALSE;
-          else
-            value = group;
-
-          regs.put(LongValue.create(i), value);
-        }
-
-        int len = regexpState.end() - regexpState.start();
-
-    RegexpState.free(env, regexpState);
-
-        if (len == 0)
-          return LongValue.ONE;
-        else
-          return LongValue.create(len);
-      }
-      else {
-    RegexpState.free(env, regexpState);
-    
-        return LongValue.ONE;
-      }
-    } catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
+    if (regexpState.exec(env, string, 0) < 0) {
+      RegexpState.free(env, regexpState);
+  
       return BooleanValue.FALSE;
+    }
+
+    if (regsV != null && ! (regsV instanceof NullValue)) {
+      ArrayValue regs = new ArrayValueImpl();
+      regsV.set(regs);
+
+      regs.put(LongValue.ZERO, regexpState.group(env));
+      int count = regexpState.groupCount();
+
+      for (int i = 1; i < count; i++) {
+        StringValue group = regexpState.group(env, i);
+
+        Value value;
+        if (group == null || group.length() == 0)
+          value = BooleanValue.FALSE;
+        else
+          value = group;
+
+        regs.put(LongValue.create(i), value);
+      }
+
+      int len = regexpState.end() - regexpState.start();
+
+      RegexpState.free(env, regexpState);
+
+      if (len == 0)
+        return LongValue.ONE;
+      else
+        return LongValue.create(len);
+    }
+    else {
+      RegexpState.free(env, regexpState);
+  
+      return LongValue.ONE;
     }
   }
 
@@ -258,14 +239,14 @@ public class RegexpModule
     }
   }
   
-  public static Regexp createRegexp(String pattern)
+  public static Regexp createRegexp(StringValue pattern)
   {
     try {
       if (pattern.length() < 2) {
         throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
       }
 
-      return new Regexp(new StringBuilderValue(pattern));
+      return new Regexp(pattern);
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
@@ -293,7 +274,7 @@ public class RegexpModule
   }
   */
   
-  public static Regexp []createRegexpArray(String pattern)
+  public static Regexp []createRegexpArray(StringValue pattern)
   {
     Regexp regexp = createRegexp(pattern);
 
@@ -322,15 +303,21 @@ public class RegexpModule
     }
   }
   
-  public static Regexp createEreg(Env env, StringValue regexpValue)
+  public static Ereg createEreg(Env env, Value value)
   {
     try {
-      if (regexpValue.length() < 2) {
-        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
-        return null;
-      }
+      StringValue regexpStr;
+      
+      if (value.isNull() || value.isBoolean())
+        regexpStr = env.getEmptyString();
+      else if (! value.isString())
+        regexpStr = value.toLongValue().toStringValue();
+      else
+        regexpStr = value.toStringValue();
 
-      return new Ereg(regexpValue);
+      StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
+      
+      return new Ereg(cleanPattern);
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -340,14 +327,66 @@ public class RegexpModule
     }
   }
   
-  public static Regexp createEreg(String pattern)
+  public static Ereg createEreg(Value value)
   {
     try {
-      if (pattern.length() < 2) {
-        throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
-      }
+      StringValue regexpStr;
+      
+      if (value.isNull() || value.isBoolean())
+        regexpStr = StringValue.EMPTY;
+      else if (! value.isString())
+        regexpStr = value.toLongValue().toStringValue();
+      else
+        regexpStr = value.toStringValue();
+      
+      StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
+      
+      return new Ereg(cleanPattern);
+    }
+    catch (IllegalRegexpException e) {
+      throw new QuercusException(e);
+    }
+  }
+  
+  public static Eregi createEregi(Env env, Value value)
+  {
+    try {
+      StringValue regexpStr;
+      
+      if (value.isNull() || value.isBoolean())
+        regexpStr = env.getEmptyString();
+      else if (! value.isString())
+        regexpStr = value.toLongValue().toStringValue();
+      else
+        regexpStr = value.toStringValue();
+      
+      StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
+      
+      return new Eregi(cleanPattern);
+    }
+    catch (IllegalRegexpException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return null;
+    }
+  }
+  
+  public static Eregi createEregi(Value value)
+  {
+    try {
+      StringValue regexpStr;
+      
+      if (value.isNull() || value.isBoolean())
+        regexpStr = StringValue.EMPTY;
+      else if (! value.isString())
+        regexpStr = value.toLongValue().toStringValue();
+      else
+        regexpStr = value.toStringValue();
 
-      return new Ereg(new StringBuilderValue(pattern));
+      StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
+      
+      return new Eregi(cleanPattern);
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
@@ -885,23 +924,6 @@ public class RegexpModule
 
     return result;
   }
-
-  /**
-   * Replaces values using regexps
-   */
-  private static StringValue pregReplaceString(Env env,
-                           StringValue patternString,
-                           StringValue replacement,
-                           StringValue subject,
-                           long limit,
-                           Value countV)
-    throws IllegalRegexpException
-  {
-    Regexp regexp = new Regexp(patternString);
-
-    return pregReplaceString(env, regexp, replacement, subject,
-                             limit, countV);
-  }
   
   static StringValue pregReplaceString(Env env,
                                        Regexp regexp,
@@ -944,32 +966,22 @@ public class RegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-          Value pattern,
-          Value replacement,
-          StringValue subject)
+                                   Ereg regexp,
+                                   Value replacement,
+                                   StringValue subject)
   {
-    if (pattern.length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
-    
-    return eregReplaceImpl(env, pattern, replacement, subject, false);
+    return eregReplaceImpl(env, regexp, replacement, subject, false);
   }
 
   /**
    * Replaces values using regexps
    */
   public static Value eregi_replace(Env env,
-          Value pattern,
-          Value replacement,
-          StringValue subject)
+                                    Eregi regexp,
+                                    Value replacement,
+                                    StringValue subject)
   {
-    if (pattern.length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
-    
-    return eregReplaceImpl(env, pattern, replacement, subject, true);
+    return eregReplaceImpl(env, regexp, replacement, subject, true);
   }
 
   /**
@@ -977,25 +989,17 @@ public class RegexpModule
    */
 
   public static Value eregReplaceImpl(Env env,
-                                      Value pattern,
+                                      Ereg regexp,
                                       Value replacement,
                                       StringValue subject,
                                       boolean isCaseInsensitive)
   {
-    StringValue patternStr;
     StringValue replacementStr;
 
     // php/150u : If a non-string type argument is passed
     // for the pattern or replacement argument, it is
     // converted to a string of length 1 that contains
     // a single character.
-
-    if (pattern instanceof StringValue) {
-      patternStr = pattern.toStringValue();
-    } else {
-      patternStr = env.createString(
-        String.valueOf((char) pattern.toLong()));
-    }
 
     if (replacement instanceof NullValue) {
       replacementStr = env.getEmptyString();
@@ -1006,46 +1010,30 @@ public class RegexpModule
         String.valueOf((char) replacement.toLong()));
     }
 
-    try {
-      patternStr = cleanEregRegexp(env, patternStr, false);
-      
-      if (isCaseInsensitive)
-        patternStr = addDelimiters(env, patternStr, "/", "/i");
-      else
-        patternStr = addDelimiters(env, patternStr, "/", "/");
-      
-      Regexp regexp = new Regexp(patternStr);
-      RegexpState regexpState = RegexpState.create(env, regexp);
-      
-      regexpState.setSubject(env, subject);
+    RegexpState regexpState = RegexpState.create(env, regexp);
+    
+    regexpState.setSubject(env, subject);
 
-      ArrayList<Replacement> replacementProgram
-        = _replacementCache.get(replacementStr);
+    ArrayList<Replacement> replacementProgram
+      = _replacementCache.get(replacementStr);
 
-      if (replacementProgram == null) {
-        replacementProgram = compileReplacement(env, replacementStr, false);
-        _replacementCache.put(replacementStr, replacementProgram);
-      }
-
-      StringValue result = pregReplaceStringImpl(env,
-                         regexp,
-                         regexpState,
-                         replacementProgram,
-                         subject,
-                         -1,
-                         NullValue.NULL,
-                         false);
-
-      env.freeRegexpState(regexpState);
-
-      return result;
+    if (replacementProgram == null) {
+      replacementProgram = compileReplacement(env, replacementStr, false);
+      _replacementCache.put(replacementStr, replacementProgram);
     }
-    catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
-      return BooleanValue.FALSE;
-    }
+
+    StringValue result = pregReplaceStringImpl(env,
+                                               regexp,
+                                               regexpState,
+                                               replacementProgram,
+                                               subject,
+                                               -1,
+                                               NullValue.NULL,
+                                               false);
+
+    env.freeRegexpState(regexpState);
+
+    return result;
   }
 
   /**
@@ -1391,11 +1379,11 @@ public class RegexpModule
    * @return an array of strings split around the pattern string
    */
   public static Value split(Env env,
-                StringValue patternString,
-                StringValue string,
-                @Optional("-1") long limit)
+                            Ereg regexp,
+                            StringValue string,
+                            @Optional("-1") long limit)
   {
-    return splitImpl(env, patternString, string, limit, false);
+    return splitImpl(env, regexp, string, limit);
   }
 
   /**
@@ -1408,11 +1396,11 @@ public class RegexpModule
    * @return an array of strings split around the pattern string
    */
   public static Value spliti(Env env,
-                StringValue patternString,
-                StringValue string,
-                @Optional("-1") long limit)
+                             Eregi regexp,
+                             StringValue string,
+                             @Optional("-1") long limit)
   {
-    return splitImpl(env, patternString, string, limit, true);
+    return splitImpl(env, regexp, string, limit);
   }
 
   /**
@@ -1422,61 +1410,46 @@ public class RegexpModule
    */
 
   private static Value splitImpl(Env env,
-                                 StringValue patternString,
+                                 Ereg regexp,
                                  StringValue string,
-                                 long limit,
-                                 boolean isCaseInsensitive)
+                                 long limit)
   {
-    try {
-      if (limit < 0)
-        limit = LONG_MAX;
+    if (limit < 0)
+      limit = LONG_MAX;
 
-      // php/151c
+    // php/151c
 
-      if (isCaseInsensitive)
-        patternString = addDelimiters(env, patternString, "/", "/i");
-      else
-        patternString = addDelimiters(env, patternString, "/", "/");
+    RegexpState regexpState = RegexpState.create(env, regexp);
+    
+    regexpState.setSubject(env, string);
 
-      Regexp regexp = new Regexp(patternString);
-      RegexpState regexpState = RegexpState.create(env, regexp);
-      
-      regexpState.setSubject(env, string);
+    ArrayValue result = new ArrayValueImpl();
 
-      ArrayValue result = new ArrayValueImpl();
+    long count = 0;
+    int head = 0;
 
-      long count = 0;
-      int head = 0;
-
-      while (regexpState.find() && count < limit) {
-        StringValue value;
-        if (count == limit - 1) {
-          value = regexpState.substring(env, head);
-          head = string.length();
-        } else {
-          value = regexpState.substring(env, head, regexpState.start());
-          head = regexpState.end();
-        }
-
-        result.put(value);
-
-        count++;
+    while (regexpState.find() && count < limit) {
+      StringValue value;
+      if (count == limit - 1) {
+        value = regexpState.substring(env, head);
+        head = string.length();
+      } else {
+        value = regexpState.substring(env, head, regexpState.start());
+        head = regexpState.end();
       }
 
-      if (head <= string.length() && count != limit) {
-        result.put(regexpState.substring(env, head));
-      }
-      
-      env.freeRegexpState(regexpState);
+      result.put(value);
 
-      return result;
-
-    } catch (IllegalRegexpException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e);
-      
-      return BooleanValue.FALSE;
+      count++;
     }
+
+    if (head <= string.length() && count != limit) {
+      result.put(regexpState.substring(env, head));
+    }
+    
+    env.freeRegexpState(regexpState);
+
+    return result;
   }
 
   /**
@@ -1621,8 +1594,7 @@ public class RegexpModule
    * Cleans the regexp from valid values that the Java regexps can't handle.
    * Ereg has a different syntax so need to handle it differently from preg.
    */
-  private static StringValue cleanEregRegexp(Env env,
-                                             StringValue regexp,
+  private static StringValue cleanEregRegexp(StringValue regexp,
                                              boolean isComments)
   {
     int len = regexp.length();

@@ -105,6 +105,24 @@ public class LongValue extends NumberValue
   {
     return true;
   }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  @Override
+  public boolean isLong()
+  {
+    return true;
+  }
+  
+  /**
+   * Returns true for a double-value.
+   */
+  @Override
+  public boolean isDouble()
+  {
+    return false;
+  }
 
   /**
    * Returns true for a scalar

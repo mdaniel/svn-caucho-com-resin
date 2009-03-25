@@ -87,6 +87,22 @@ public class RefVar extends Value
   {
     return _var.isNumberConvertible();
   }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isLong()
+  {
+    return _var.isLong();
+  }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isDouble()
+  {
+    return _var.isDouble();
+  }
 
   /**
    * Converts to a boolean.

@@ -177,9 +177,9 @@ public class ArrayValueImpl extends ArrayValue
 
     for (int i = 0; i < keys.length; i++) {
       if (keys[i] != null)
-	append(keys[i], values[i]);
+        append(keys[i], values[i]);
       else
-	put(values[i]);
+        put(values[i]);
     }
   }
 

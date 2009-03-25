@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
@@ -79,6 +78,7 @@ public class Regexp {
     throws IllegalRegexpException
   {
     _rawRegexp = rawRegexp;
+    _pattern = rawRegexp;
 
     init();
     
@@ -134,6 +134,8 @@ public class Regexp {
     StringValue sflags = rawRegexp.substring(tail);
     StringValue pattern = rawRegexp.substring(head + 1, tail); 
     
+    _pattern = pattern;
+    
     int flags = 0;
     
     for (int i = 0; sflags != null && i < sflags.length(); i++) {
@@ -153,6 +155,8 @@ public class Regexp {
         case 'e': _isEval = true; break;
       }
     }
+    
+    _flags = flags;
 
     // XXX: what if unicode.semantics='true'?
     

@@ -100,6 +100,24 @@ public class DoubleValue extends NumberValue
   {
     return _value == (double)((long) _value);
   }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  @Override
+  public boolean isLong()
+  {
+    return false;
+  }
+  
+  /**
+   * Returns true for a double-value.
+   */
+  @Override
+  public boolean isDouble()
+  {
+    return true;
+  }
 
   /**
    * Returns true for is_numeric

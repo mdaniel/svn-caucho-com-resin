@@ -189,6 +189,22 @@ public final class Var extends Value
   {
     return _value.isNumberConvertible();
   }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isLong()
+  {
+    return _value.isLong();
+  }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isDouble()
+  {
+    return _value.isDouble();
+  }
 
   /**
    * Returns true for is_numeric

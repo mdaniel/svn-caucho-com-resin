@@ -29,24 +29,47 @@
 
 package com.caucho.quercus.lib.regexp;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 
-public class Ereg extends Regexp
+public class EregWrapper
 {
-  public Ereg(StringValue rawRegexp)
-    throws IllegalRegexpException
+  private Ereg _regexp;
+  private Ereg _regexp2;
+  
+  public EregWrapper()  
   {
-    super(rawRegexp);
   }
   
-  @Override
-  protected void init()
+  public Ereg get(Env env, StringValue str)
   {
-    _flags |= Regcomp.SINGLE_LINE;
-  }
-  
-  public String toString()
-  {
-    return "Ereg[" + _pattern + "]";
+    Ereg regexp = _regexp;
+    Ereg regexp2 = _regexp2;
+    
+    if (regexp == null) {
+      regexp = RegexpModule.createEreg(env, str);
+      _regexp = regexp;
+      
+      return regexp;
+    }
+    else if (str == _regexp._rawRegexp
+             || (str.hashCode() == _regexp._rawRegexp.hashCode()
+                 && str.equals(_regexp._rawRegexp))) {
+      return regexp;
+    }
+    else if (regexp2 == null) {
+      regexp2 = RegexpModule.createEreg(env, str);
+      _regexp2 = regexp2;
+      
+      return regexp2;
+    }
+    else if (str == _regexp2._rawRegexp
+        || (str.hashCode() == _regexp2._rawRegexp.hashCode()
+            && str.equals(_regexp2._rawRegexp))) {
+      return regexp2;
+    }
+    else {
+      return RegexpModule.createEreg(env, str);
+    }
   }
 }

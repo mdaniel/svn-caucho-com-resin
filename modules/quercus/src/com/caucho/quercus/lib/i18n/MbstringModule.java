@@ -36,6 +36,8 @@ import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.MailModule;
+import com.caucho.quercus.lib.regexp.Ereg;
+import com.caucho.quercus.lib.regexp.Eregi;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -405,9 +407,10 @@ public class MbstringModule
     string = string.convertToUnicode(env, encoding);
 
     // XXX: option
+    
+    Ereg ereg = RegexpModule.createEreg(env, pattern);
 
-    Value val = RegexpModule.eregImpl(env, pattern, string,
-                                      null, false);
+    Value val = RegexpModule.eregImpl(env, ereg, string, null);
 
     if (val == BooleanValue.FALSE)
       return BooleanValue.FALSE;
@@ -432,10 +435,12 @@ public class MbstringModule
 
     //XXX: option
 
-    Value val = RegexpModule.eregi_replace(env,
-                                           pattern,
-                                           replacement,
-                                           subject);
+    Ereg regexp = RegexpModule.createEreg(env, pattern);
+    
+    Value val = RegexpModule.ereg_replace(env,
+                                          regexp,
+                                          replacement,
+                                          subject);
 
     return encodeAll(env, val, encoding);
   }
@@ -468,7 +473,9 @@ public class MbstringModule
 
     //XXX: option
 
-    Value val = RegexpModule.eregi_replace(env, pattern, replacement, subject);
+    Eregi regexp = RegexpModule.createEregi(env, pattern);
+    
+    Value val = RegexpModule.eregi_replace(env, regexp, replacement, subject);
 
     return encodeAll(env, val, encoding);
   }
@@ -485,31 +492,32 @@ public class MbstringModule
   }
 
   private static Value eregImpl(Env env,
-                              StringValue pattern,
-                              StringValue string,
-                              ArrayValue regs,
-                              boolean isCaseSensitive)
+                                StringValue pattern,
+                                StringValue string,
+                                ArrayValue regs,
+                                boolean isCaseInsensitive)
   {
     String encoding = getEncoding(env);
 
     pattern = pattern.convertToUnicode(env, encoding);
     string = string.convertToUnicode(env, encoding);
 
+    Ereg ereg;
+    
+    if (isCaseInsensitive)
+      ereg = RegexpModule.createEreg(env, pattern);
+    else
+      ereg = RegexpModule.createEregi(env, pattern);
+    
     if (regs == null) {
-      if (isCaseSensitive)
-        return RegexpModule.eregImpl(env, pattern, string, null, false);
-      else
-        return RegexpModule.eregImpl(env, pattern, string, null, true);
+      return RegexpModule.eregImpl(env, ereg, string, null);
     }
 
     Value val;
     Var regVar = new Var();
 
-    if (isCaseSensitive)
-      val = RegexpModule.eregImpl(env, pattern, string, regVar, false);
-    else
-      val = RegexpModule.eregImpl(env, pattern, string, regVar, true);
-
+    val = RegexpModule.eregImpl(env, ereg, string, regVar);
+    
     if (regVar.isset()) {
       regs.clear();
       ArrayValue results = regVar.toArrayValue(env);
@@ -920,7 +928,9 @@ public class MbstringModule
     pattern = pattern.convertToUnicode(env, encoding);
     string = string.convertToUnicode(env, encoding);
 
-    Value val = RegexpModule.split(env, pattern, string, limit);
+    Ereg regexp = RegexpModule.createEreg(env, pattern);
+    
+    Value val = RegexpModule.split(env, regexp, string, limit);
 
     return encodeAll(env, val, encoding);
   }

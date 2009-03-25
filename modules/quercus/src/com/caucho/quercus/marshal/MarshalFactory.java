@@ -32,6 +32,8 @@ package com.caucho.quercus.marshal;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.regexp.Ereg;
+import com.caucho.quercus.lib.regexp.Eregi;
 import com.caucho.quercus.lib.regexp.Regexp;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
@@ -188,6 +190,12 @@ public class MarshalFactory {
     }
     else if (Regexp[].class.equals(argType)) {
       marshal = RegexpArrayMarshal.MARSHAL;
+    }
+    else if (Ereg.class.equals(argType)) {
+      marshal = EregMarshal.MARSHAL;
+    }
+    else if (Eregi.class.equals(argType)) {
+      marshal = EregiMarshal.MARSHAL;
     }
     else if (URL.class.equals(argType)) {
       marshal = URLMarshal.MARSHAL;

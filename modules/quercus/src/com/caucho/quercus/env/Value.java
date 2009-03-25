@@ -137,6 +137,22 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isLong()
+  {
+    return false;
+  }
+  
+  /**
+   * Returns true for a long-value.
+   */
+  public boolean isDouble()
+  {
+    return false;
+  }
 
   /**
    * Returns true for a null.

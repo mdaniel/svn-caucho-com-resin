@@ -31,9 +31,9 @@ package com.caucho.quercus.lib.regexp;
 
 import com.caucho.quercus.env.StringValue;
 
-public class Ereg extends Regexp
+public class Eregi extends Ereg
 {
-  public Ereg(StringValue rawRegexp)
+  public Eregi(StringValue rawRegexp)
     throws IllegalRegexpException
   {
     super(rawRegexp);
@@ -42,11 +42,13 @@ public class Ereg extends Regexp
   @Override
   protected void init()
   {
-    _flags |= Regcomp.SINGLE_LINE;
+    super.init();
+    
+    _flags |= Regcomp.IGNORE_CASE;
   }
   
   public String toString()
   {
-    return "Ereg[" + _pattern + "]";
+    return "Eregi[" + _pattern + "]";
   }
 }
