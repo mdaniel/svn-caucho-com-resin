@@ -108,6 +108,11 @@ abstract public class AbstractCache extends AbstractMap
     _name = name;
   }
 
+  public void setGuid(String guid)
+  {
+    _guid = guid;
+  }
+
   /**
    * Sets the CacheLoader that the Cache can then use to populate
    * cache misses from a reference store (database).
@@ -900,7 +905,9 @@ abstract public class AbstractCache extends AbstractMap
      HashSet<String> cacheNameSet = getLocalCacheNameSet();
      String contextId = Environment.getEnvironmentName();
 
-     _guid = contextId + ":" + _name;
+     if (_guid == null)
+       _guid = contextId + ":" + _name;
+     
      _config.setGuid(_guid);
 
      if (!cacheNameSet.contains(_guid))

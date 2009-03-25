@@ -194,7 +194,8 @@ abstract public class ClusterPod
    */
   public ClusterServer setActiveDynamicServer(String serverId,
 					      String address,
-					      int port)
+					      int port,
+					      int index)
     throws ConfigException
   {
     throw new ConfigException(L.l("setDynamicServer requires Resin Professional"));

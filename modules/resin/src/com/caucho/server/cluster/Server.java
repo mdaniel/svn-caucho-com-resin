@@ -32,6 +32,7 @@ package com.caucho.server.cluster;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.cluster.ClusterCache;
+import com.caucho.cluster.GlobalCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
@@ -204,6 +205,7 @@ public class Server extends ProtocolDispatchServer
 
   // reliable system store
   private ClusterCache _systemStore;
+  private GlobalCache _globalStore;
 
   // stats
 
@@ -335,6 +337,14 @@ public class Server extends ProtocolDispatchServer
   public Cluster getCluster()
   {
     return _selfServer.getCluster();
+  }
+
+  /**
+   * Returns all the clusters
+   */
+  public ArrayList<Cluster> getClusterList()
+  {
+    return getResin().getClusterList();
   }
 
   /**
@@ -1548,6 +1558,7 @@ public class Server extends ProtocolDispatchServer
     synchronized (this) {
       if (_systemStore == null) {
 	_systemStore = new ClusterCache("resin:system");
+	_systemStore.setGuid("resin:system");
 	// XXX: need to set reliability values
       }
     }
@@ -1555,6 +1566,26 @@ public class Server extends ProtocolDispatchServer
     _systemStore.init();
     
     return _systemStore;
+  }
+
+  /**
+   * Returns the reliable system store
+   */
+  public GlobalCache getGlobalStore()
+  {
+    synchronized (this) {
+      if (_globalStore == null) {
+	_globalStore = new GlobalCache();
+	_globalStore.setName("resin:global");
+	_globalStore.setGuid("resin:global");
+	_globalStore.setLocalReadTimeoutMillis(5000);
+	// XXX: need to set reliability values
+      }
+    }
+    
+    _globalStore.init();
+
+    return _globalStore;
   }
 
   /**

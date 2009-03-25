@@ -853,7 +853,11 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Server createServer()
   {
     if (_server == null) {
-      ClusterServer clusterServer = _activeDynamicServer;
+      ClusterServer clusterServer = null;
+      
+      if (_activeDynamicServer != null) {
+	clusterServer = loadDynamicServer(_activeDynamicServer);
+      }
 
       if (clusterServer == null)
 	clusterServer = findClusterServer(_serverId);
@@ -869,6 +873,11 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     return _server;
+  }
+
+  protected ClusterServer loadDynamicServer(ClusterServer dynServer)
+  {
+    throw new ConfigException(L().l("dynamic-server requires Resin Professional"));
   }
 
   /**
@@ -918,7 +927,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 	_activeDynamicServer
 	  = pod.setActiveDynamicServer(_serverId,
 				       _dynamicServer.getAddress(),
-				       _dynamicServer.getPort());
+				       _dynamicServer.getPort(),
+				       63);
       }
 
       /*

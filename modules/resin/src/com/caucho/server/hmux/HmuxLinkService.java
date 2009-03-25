@@ -45,7 +45,10 @@ import com.caucho.bam.hmtp.EncryptedObject;
 import com.caucho.bam.hmtp.SelfEncryptedCredentials;
 
 import com.caucho.security.SelfEncryptedCookie;
+import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.DynamicServerQuery;
+import com.caucho.server.cluster.DynamicServerResult;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.servlet.ServerLinkManager;
 import com.caucho.util.L10N;
@@ -171,6 +174,26 @@ public class HmuxLinkService extends SimpleActor {
 
     getBrokerStream().queryResult(id, from, to,
 				  new AuthResult(_adminConn.getJid()));
+  }
+
+  @QueryGet
+  public void getDynamicService(long id, String to, String from,
+				DynamicServerQuery query)
+  {
+    ClusterServer clusterServer
+      = _server.getResin().findClusterServer(query.getId());
+
+    if (clusterServer != null) {
+      DynamicServerResult result
+	= new DynamicServerResult(clusterServer.getId(),
+				  clusterServer.getIndex(),
+				  clusterServer.getAddress(),
+				  clusterServer.getPort());
+
+      getBrokerStream().queryResult(id, from, to, result);
+    }
+    else 
+      getBrokerStream().queryResult(id, from, to, null);
   }
 
   public ActorStream getBrokerStream(boolean isAdmin)

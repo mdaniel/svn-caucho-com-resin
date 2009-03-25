@@ -251,6 +251,14 @@ public final class ClusterServer {
   }
 
   /**
+   * Gets the address
+   */
+  public String getAddress()
+  {
+    return _clusterPort.getAddress();
+  }
+
+  /**
    * Sets true for backups
    */
   public void setBackup(boolean isBackup)
@@ -491,7 +499,6 @@ public final class ClusterServer {
   {
     _clusterPort.setPort(port);
   }
-
 
   /**
    * Gets the port.
