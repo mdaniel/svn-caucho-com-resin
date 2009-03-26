@@ -30,7 +30,7 @@
 package com.caucho.quercus.lib.regexp;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 
 public class EregWrapper
 {
@@ -41,7 +41,7 @@ public class EregWrapper
   {
   }
   
-  public Ereg get(Env env, StringValue str)
+  public Ereg get(Env env, Value str)
   {
     Ereg regexp = _regexp;
     Ereg regexp2 = _regexp2;
