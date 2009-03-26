@@ -1769,6 +1769,9 @@ public class StringBuilderValue
   @Override
   public boolean equals(Object o)
   {
+    if (o == this)
+      return true;
+    
     if (o instanceof StringBuilderValue) {
       StringBuilderValue value = (StringBuilderValue) o;
 
@@ -1802,6 +1805,9 @@ public class StringBuilderValue
   public boolean eql(Value o)
   {
     o = o.toValue();
+    
+    if (o == this)
+      return true;
     
     if (o instanceof StringBuilderValue) {
       StringBuilderValue value = (StringBuilderValue) o;

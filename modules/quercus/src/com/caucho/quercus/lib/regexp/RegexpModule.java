@@ -409,7 +409,8 @@ public class RegexpModule
       regs = new ArrayValueImpl();
 
     if (regexpState == null || regexpState.exec(env, subject, offset) < 0) {
-      matchRef.set(regs);
+      if (regs != null)
+        matchRef.set(regs);
 
       env.freeRegexpState(regexpState);
     

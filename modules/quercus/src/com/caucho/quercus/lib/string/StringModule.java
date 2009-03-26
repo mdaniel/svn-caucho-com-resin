@@ -290,8 +290,8 @@ public class StringModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static StringValue chop(Env env,
-				 StringValue str,
-				 @Optional String charset)
+				                 StringValue str,
+				                 @Optional String charset)
   {
     return rtrim(env, str, charset);
   }
@@ -359,9 +359,9 @@ public class StringModule extends AbstractQuercusModule {
    * 16 bit unicode.
    */
   public static String convert_cyr_string(Env env,
-					  String str,
-					  String from,
-					  String to)
+					                      String str,
+					                      String from,
+					                      String to)
   {
     env.stub("convert_cyr_string");
     
@@ -768,8 +768,8 @@ public class StringModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static StringValue ltrim(Env env,
-				  StringValue string,
-				  @Optional String characters)
+                                  StringValue string,
+                                  @Optional String characters)
   {
     if (characters == null)
       characters = "";

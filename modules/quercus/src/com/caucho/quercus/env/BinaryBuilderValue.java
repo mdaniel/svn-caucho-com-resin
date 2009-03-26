@@ -548,6 +548,9 @@ public class BinaryBuilderValue
   @Override
   public boolean equals(Object o)
   {
+    if (o == this)
+      return true;
+    
     if (o instanceof BinaryBuilderValue) {
       BinaryBuilderValue value = (BinaryBuilderValue) o;
 
@@ -581,6 +584,9 @@ public class BinaryBuilderValue
   public boolean eql(Value o)
   {
     o = o.toValue();
+    
+    if (o == this)
+      return true;
     
     if (o instanceof BinaryBuilderValue) {
       BinaryBuilderValue value = (BinaryBuilderValue) o;

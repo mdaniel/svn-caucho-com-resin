@@ -1280,6 +1280,9 @@ public class UnicodeBuilderValue
   @Override
   public boolean equals(Object o)
   {
+    if (o == this)
+      return true;
+    
     if (o instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) o;
 
@@ -1313,6 +1316,9 @@ public class UnicodeBuilderValue
   public boolean eql(Value o)
   {
     o = o.toValue();
+    
+    if (o == this)
+      return true;
     
     if (o instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) o;
