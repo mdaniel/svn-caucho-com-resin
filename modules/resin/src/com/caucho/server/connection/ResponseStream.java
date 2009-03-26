@@ -161,9 +161,20 @@ class ResponseStream extends ToByteResponseStream {
     return _isHead;
   }
 
+  @Override
   public int getContentLength()
   {
-    return _contentLength;
+    // server/05e8
+    try {
+      flushCharBuffer();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (_isCommitted)
+      return _contentLength;
+    else
+      return super.getContentLength();
   }
 
   public void setBufferSize(int size)
@@ -242,6 +253,7 @@ class ResponseStream extends ToByteResponseStream {
   private void writeHeaders(int length)
     throws IOException
   {
+    _isCommitted = true;
     _chunkedEncoding = _response.writeHeaders(_next, length);
   }
 
@@ -251,9 +263,11 @@ class ResponseStream extends ToByteResponseStream {
   public byte []getBuffer()
     throws IOException
   {
-    flushBuffer();
-
-    return _next.getBuffer();
+    if (_isCommitted) {
+      return _next.getBuffer();
+    }
+    else
+      return super.getBuffer();
   }
 
   /**
@@ -262,10 +276,11 @@ class ResponseStream extends ToByteResponseStream {
   public int getBufferOffset()
     throws IOException
   {
+    if (! _isCommitted)
+      return super.getBufferOffset();
+
     byte []buffer;
     int offset;
-
-    flushBuffer();
 
     offset = _next.getBufferOffset();
 
@@ -299,6 +314,9 @@ class ResponseStream extends ToByteResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
+    if (! _isCommitted)
+      return super.nextBuffer(offset);
+    
     if (_isClosed)
       return _next.getBuffer();
     
@@ -376,6 +394,11 @@ class ResponseStream extends ToByteResponseStream {
   {
     if (_isClosed)
       return;
+
+    if (! _isCommitted) {
+      super.setBufferOffset(offset);
+      return;
+    }
     
     int startOffset = _bufferStartOffset;
     if (offset == startOffset)
@@ -424,6 +447,8 @@ class ResponseStream extends ToByteResponseStream {
       if (_disableAutoFlush && ! isFinished)
 	throw new IOException(L.l("auto-flushing has been disabled"));
       
+      _isCommitted = true;
+
       boolean isFirst = _isFirst;
       _isFirst = false;
 
@@ -466,6 +491,7 @@ class ResponseStream extends ToByteResponseStream {
 	  }
 	  else {
 	    _isCommitted = true;
+
 	    _next.write(buf, offset, length);
 
 	    if (log.isLoggable(Level.FINE))
@@ -598,7 +624,6 @@ class ResponseStream extends ToByteResponseStream {
   {
     try {
       _disableAutoFlush = false;
-      _isCommitted = true;
 
       if (_allowFlush && ! _isClosed) {
         flushBuffer();

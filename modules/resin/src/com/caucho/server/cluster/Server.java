@@ -2156,6 +2156,20 @@ public class Server extends ProtocolDispatchServer
       if (alarm != null)
         alarm.dequeue();
 
+      try {
+	if (_systemStore != null)
+	  _systemStore.close();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      try {
+	if (_globalStore != null)
+	  _globalStore.close();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
       if (getSelectManager() != null)
         getSelectManager().stop();
 

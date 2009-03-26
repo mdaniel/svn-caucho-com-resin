@@ -13,6 +13,14 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>jsp: UTF-8 BOM should not force text/html (#3062, rep by CnXiaowei)</li>
+<li>proxy-cache: Authorization header should not disable proxy caching (#3065, rep by Daniel Wigenfors)</li>
+<li>servlet: sendRedirect URL encoding to use iso-8859-1 when character encoding set (#3032, rep by bjopet)</li>
+<li>hessian: timeout on http connection clear needs to be short (#3039, rep by Jeff Porter)</li>
+<li>http: improve error message on chunked encoding (#3021, rep by e_rajasekar)</li>
+<li>error: allow custom error page for 400 bad request errors (#3008, rep by Vinod Mehra)</li>
+<li>jsp: error parsing should ignore encoding errors (#2967, rep by Takahiro Fukuda)</li>
+<li>load balance: dynamic servers (#2867, rep by Dana P'Simer)</li>
 <li>load balance: add green load balancing (#2831)</li>
 <li>admin: added URL to thread dump when available (#3194, rep by Keith Paulson)</li>
 <li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>

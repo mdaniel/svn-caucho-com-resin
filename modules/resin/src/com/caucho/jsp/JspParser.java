@@ -355,7 +355,8 @@ public class JspParser {
 	throw error(L.l("Expected 0xbf in UTF-8 header.  UTF-8 pages with the initial byte 0xbb expect 0xbf immediately following.  The 0xbb 0xbf sequence is used by some application to suggest UTF-8 encoding without a directive."));
       }
       else {
-	_parseState.setContentType("text/html; charset=UTF-8");
+	// jsp/002a, #3062
+	// _parseState.setContentType("text/html; charset=UTF-8");
 	_parseState.setPageEncoding("UTF-8");
 	stream.setEncoding("UTF-8");
       }

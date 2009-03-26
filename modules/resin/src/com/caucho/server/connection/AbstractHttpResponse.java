@@ -660,6 +660,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     setStatus(SC_MOVED_TEMPORARILY);
     String path = getAbsolutePath(url);
 
+    // Bug #3051
+    String encoding = getCharacterEncoding();
+
+    boolean isLatin1 = "iso-8859-1".equals(encoding);
+
     CharBuffer cb = new CharBuffer();
 
     for (int i = 0; i < path.length(); i++) {
@@ -669,7 +674,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	cb.append("%3c");
       else if (ch < 0x80)
 	cb.append(ch);
-      else if (_charEncoding == null) {
+      else if (isLatin1) {
 	addHex(cb, ch);
       }
       else if (ch < 0x800) {
@@ -693,7 +698,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     path = cb.toString();
     
     setHeader("Location", path);
-    setHeader("Content-Type", "text/html; charset=utf-8");
+
+    if (isLatin1)
+      setHeader("Content-Type", "text/html; charset=iso-8859-1");
+    else
+      setHeader("Content-Type", "text/html; charset=utf-8");
 
     // The data is required for some WAP devices that can't handle an
     // empty response.
@@ -883,7 +892,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     // server/05e8 (tck)
-    if (_hasWriter) {
+    if (isCommitted()) {
       return;
     }
 
@@ -943,7 +952,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     // server/05e8 (tck)
-    if (_hasWriter) {
+    if (isCommitted()) {
       return;
     }
 
@@ -1629,7 +1638,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public boolean isCommitted()
   {
-    return _originalResponseStream.isCommitted();
+    if (_originalResponseStream.isCommitted())
+      return true;
+
+    if (_contentLength >= 0
+	&& _contentLength <= _responseStream.getContentLength()) {
+      return true;
+    }
+
+    return false;
   }
 
   public void reset()

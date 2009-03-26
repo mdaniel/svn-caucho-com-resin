@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Handles the dual char/byte buffering for the response stream.
@@ -221,6 +222,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (_charLength > 0)
       flushCharBuffer();
     
+    _bufferSize += (offset - _byteLength);
     _byteLength = offset;
   }
 
@@ -486,11 +488,25 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (charLength > 0 && ! _isOutputStreamOnly) {
       _toByte.write(this, _charBuffer, 0, charLength);
 
-      if (_bufferCapacity <= _byteLength + _bufferSize)
+      if (_bufferCapacity <= _byteLength + _bufferSize) {
 	flushByteBuffer();
-      // jsp/0182 jsp/0502 jsp/0503
-      _isCommitted = true;
+      }
+      
+      // server/05e8, jsp/0182, jsp/0502, jsp/0503
+      // _isCommitted = true;
     }
+  }
+
+  public int getContentLength()
+  {
+    try {
+      // server/05e8
+      flushCharBuffer();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return _bufferSize;
   }
 
   /**
@@ -524,6 +540,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   protected void flushByteBuffer()
     throws IOException
   {
+    // jsp/0182 jsp/0502 jsp/0503
+    // _isCommitted = true;
+    
     _tail.setLength(_byteLength);
     _bufferSize += _byteLength;
     _byteLength = 0;
@@ -545,8 +564,6 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       ptr = next;
     } while (ptr != null);
 
-    // jsp/0182 jsp/0502 jsp/0503
-    _isCommitted = true;
     _tail = _head;
     _byteBuffer = _tail.getBuffer();
     _bufferSize = 0;

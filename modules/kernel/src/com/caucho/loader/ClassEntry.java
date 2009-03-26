@@ -397,7 +397,7 @@ public class ClassEntry implements Dependency {
 	long lastModified = classPath.getLastModified();
       
 	if (length < 0)
-	  throw new IOException("missing class: " + classPath);
+	  throw new IOException("class loading failed because class file '" + classPath + "' does not have a positive length.  Possibly the file has been overwritten");
       
 	ReadStream is = classPath.openRead();
       
@@ -411,12 +411,12 @@ public class ClassEntry implements Dependency {
 	      && lastModified == classPath.getLastModified()) {
 	    return;
 	  }
+	
+	  log.warning(L.l("{0}: class file length mismatch expected={1} received={2}.  The class file may have been modified concurrently.",
+			  this, length, results));
 	} finally {
 	  is.close();
 	}
-	
-	log.warning(L.l("{0}: class file length mismatch expected={1}",
-			this, length));
       }
     }
   }
@@ -442,9 +442,9 @@ public class ClassEntry implements Dependency {
   public String toString()
   {
     if (_sourcePath == null)
-      return "ClassEntry[" + _classPath + "]";
+      return getClass().getSimpleName() + "[" + _classPath + "]";
     else
-      return "ClassEntry[" + _classPath + ", src=" + _sourcePath + "]";
+      return getClass().getSimpleName() +  "[" + _classPath + ", src=" + _sourcePath + "]";
   }
 
   public static native boolean canReloadNative();

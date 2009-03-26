@@ -36,11 +36,16 @@ import com.caucho.vfs.ByteToChar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Reads javac error messages and parses them into a usable format.
  */
 class JavacErrorParser extends ErrorParser {
+  private static final Logger log
+    = Logger.getLogger(JavacErrorParser.class.getName());
+  
   private CharBuffer _token = new CharBuffer();
   private CharBuffer _buf = new CharBuffer();
   private ByteToChar _lineBuf = ByteToChar.create();
@@ -67,22 +72,29 @@ class JavacErrorParser extends ErrorParser {
 
     int ch = is.read();
     for (; ch >= 0; ch = is.read()) {
-      _lineBuf.clear();
+      try {
+	_lineBuf.clear();
 
-      for (; ch > 0 && ch != '\n'; ch = is.read())
-	_lineBuf.addByte((byte) ch);
-      _lineBuf.addChar('\n');
+	for (; ch >= 0 && ch != '\n'; ch = is.read()) {
+	  _lineBuf.addByte((byte) ch);
+	}
+      
+	_lineBuf.addByte('\n');
 
-      String lineString = _lineBuf.getConvertedString();
+	String lineString = _lineBuf.getConvertedString();
 
-      StringCharCursor cursor = new StringCharCursor(lineString);
+	StringCharCursor cursor = new StringCharCursor(lineString);
 
-      String line = parseLine(cursor, lineMap);
-      if (line == null)
-	result.append(lineString);
-      else
-	result.append(line);
-
+	String line = parseLine(cursor, lineMap);
+	if (line == null)
+	  result.append(lineString);
+	else
+	  result.append(line);
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+	
+	result.append(e).append("\n");
+      }
     }
 
     return result.toString();

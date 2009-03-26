@@ -115,8 +115,6 @@ public class HttpRequest extends AbstractHttpRequest
   private ChunkedInputStream _chunkedInputStream = new ChunkedInputStream();
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
 
-  private ErrorPageManager _errorManager = new ErrorPageManager(null);
-
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
 
@@ -280,7 +278,7 @@ public class HttpRequest extends AbstractHttpRequest
       killKeepalive();
 
       try {
-        _errorManager.sendServletError(e, this, _response);
+        getErrorManager().sendServletError(e, this, _response);
       } catch (ClientDisconnectException e1) {
         throw e1;
       } catch (Throwable e1) {

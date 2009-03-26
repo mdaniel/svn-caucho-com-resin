@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -36,7 +37,7 @@ import java.io.IOException;
 /**
  * StreamImpl so servlets can read POST data as a normal stream.
  */
-class ChunkedInputStream extends StreamImpl  {
+class ChunkedInputStream extends StreamImpl {
   private ReadStream _next;
   private int _available;
 
@@ -106,35 +107,46 @@ class ChunkedInputStream extends StreamImpl  {
     int length = 0;
     int ch;
 
+    ReadStream is = _next;
+
     // skip whitespace
-    for (ch = _next.read();
-	 ch == '\r' || ch == ' ' || ch == '\n';
-	 ch = _next.read()) {
+    for (ch = is.read();
+	 ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+	 ch = is.read()) {
     }
 
     // XXX: This doesn't properly handle the case when when the browser
     // sends headers at the end of the data.  See the HTTP/1.1 spec.
-    for (; ch > 0 && ch != '\r' && ch != '\n'; ch = _next.read()) {
-      if (ch >= '0' && ch <= '9')
+    for (; ch > 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
+      if ('0' <= ch && ch <= '9')
 	length = 16 * length + ch - '0';
-      else if (ch >= 'a' && ch <= 'f')
+      else if ('a' <= ch && ch <= 'f')
 	length = 16 * length + ch - 'a' + 10;
-      else if (ch >= 'A' && ch <= 'F')
+      else if ('A' <= ch && ch <= 'F')
 	length = 16 * length + ch - 'A' + 10;
       else if (ch == ' ' || ch == '\t') {
 	//if (dbg.canWrite())
 	//  dbg.println("unexpected chunk whitespace.");
       }
       else {
-	throw new IOException("HTTP/1.1 protocol error: bad chunk at "
-			      + "'" + (char) ch
-			      + "' 0x" + Integer.toHexString(ch)
+	StringBuilder sb = new StringBuilder();
+
+	sb.append((char) ch);
+	for (int ch1 = is.read();
+	     ch1 >= 0 && ch1 != '\r' && ch1 != '\n';
+	     ch1 = is.read()) {
+	  sb.append((char) ch1);
+	}
+	
+	throw new IOException("HTTP/1.1 protocol error: bad chunk at"
+			      + " '" + sb + "'"
+			      + " 0x" + Integer.toHexString(ch)
 			      + " length=" + length);
       }
     }
 
     if (ch == '\r')
-      ch = _next.read();
+      ch = is.read();
 
     return length;
   }

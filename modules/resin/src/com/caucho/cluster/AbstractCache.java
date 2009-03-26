@@ -81,6 +81,7 @@ abstract public class AbstractCache extends AbstractMap
   private LruCache<Object,DistCacheEntry> _entryCache;
 
   private boolean _isInit;
+  private boolean _isClosed;
 
   private DistributedCacheManager _distributedCacheManager;
 
@@ -890,6 +891,16 @@ abstract public class AbstractCache extends AbstractMap
 
     return cacheNameSet;
   }
+  
+  public boolean isClosed()
+  {
+    return _isClosed;
+  }
+
+  public void close()
+  {
+    _isClosed = true;
+  }
 
   @Override
   public String toString()
@@ -954,11 +965,11 @@ abstract public class AbstractCache extends AbstractMap
     _distributedCacheManager = server.getDistributedCacheManager();
     _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
   }
+  
 
   /**
    * Defines the scope options for a cache.
    */
-  //TODO(fred): finalize supported modes.
   public enum Scope {
 
     /** Not distributed, no persistence.*/

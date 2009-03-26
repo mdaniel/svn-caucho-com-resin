@@ -58,4 +58,9 @@ public interface ObjectCache extends Cache
    * matches.
    */
   public boolean compareAndRemove(Object key, long version);
+
+  /**
+   * Returns true if the cache is closed
+   */
+  public boolean isClosed();
 }

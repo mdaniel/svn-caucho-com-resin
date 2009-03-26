@@ -36,6 +36,7 @@ import com.caucho.security.Login;
 import com.caucho.security.RoleMapManager;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextProvider;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.port.TcpConnection;
@@ -43,6 +44,7 @@ import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.util.*;
 import com.caucho.vfs.BufferedReaderAdapter;
 import com.caucho.vfs.Encoding;
@@ -175,6 +177,8 @@ public abstract class AbstractHttpRequest
 
   private boolean _hasReader;
   private boolean _hasInputStream;
+  
+  private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   // HttpServletRequest stuff
   private final Form _formParser = new Form();
@@ -564,7 +568,10 @@ public abstract class AbstractHttpRequest
    */
   public String getContextPath() 
   {
-    return _invocation.getContextPath();
+    if (_invocation != null)
+      return _invocation.getContextPath();
+    else
+      return "";
   }
 
   /**
@@ -582,7 +589,10 @@ public abstract class AbstractHttpRequest
    */
   public String getServletPath()
   {
-    return _invocation.getServletPath();
+    if (_invocation != null)
+      return _invocation.getServletPath();
+    else
+      return "";
   }
 
   /**
@@ -591,7 +601,10 @@ public abstract class AbstractHttpRequest
    */
   public String getPageServletPath()
   {
-    return _invocation.getServletPath();
+    if (_invocation != null)
+      return _invocation.getServletPath();
+    else
+      return "";
   }
 
   /**
@@ -600,7 +613,10 @@ public abstract class AbstractHttpRequest
    */
   public String getPathInfo()
   {
-    return _invocation.getPathInfo();
+    if (_invocation != null)
+      return _invocation.getPathInfo();
+    else
+      return null;
   }
 
   /**
@@ -609,7 +625,10 @@ public abstract class AbstractHttpRequest
    */
   public String getPagePathInfo()
   {
-    return _invocation.getPathInfo();
+    if (_invocation != null)
+      return _invocation.getPathInfo();
+    else
+      return null;
   }
 
   /**
@@ -2558,7 +2577,10 @@ public abstract class AbstractHttpRequest
    */
   public String getServletName()
   {
-    return _invocation.getServletName();
+    if (_invocation != null)
+      return _invocation.getServletName();
+    else
+      return null;
   }
 
   /**
@@ -2587,6 +2609,21 @@ public abstract class AbstractHttpRequest
   public boolean isTop()
   {
     return false;
+  }
+
+  /**
+   * Returns the default error manager
+   */
+  protected ErrorPageManager getErrorManager()
+  {
+    Server server = (Server) _server;
+
+    WebApp webApp = server.getWebApp("error.resin", 80, "/");
+
+    if (webApp != null)
+      return webApp.getErrorPageManager();
+    else
+      return _errorManager;
   }
 
   /**
