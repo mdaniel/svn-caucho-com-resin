@@ -744,7 +744,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   protected void addProduces(Method method, Annotation []annList)
   {
-    ProducesBean bean = new ProducesBean(_webBeans, this, method, annList);
+    ProducesBean bean = ProducesBean.create(_webBeans, this, method, annList);
 
     bean.init();
 

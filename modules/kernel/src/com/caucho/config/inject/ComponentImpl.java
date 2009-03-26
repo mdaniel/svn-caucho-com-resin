@@ -52,6 +52,7 @@ import javax.context.Context;
 import javax.context.CreationalContext;
 import javax.context.Dependent;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * Configuration for the xml web bean component.
@@ -249,9 +250,18 @@ public class ComponentImpl<T> extends AbstractBean<T>
   /**
    * Creates a new instance of the component.
    */
-  public T create(CreationalContext<T> context)
+  public final T create(CreationalContext<T> context)
   {
-    T object = createNew(context);
+    return create(context, null);
+  }
+  
+  /**
+   * Creates a new instance of the component.
+   */
+  public T create(CreationalContext<T> context,
+		  InjectionPoint ij)
+  {
+    T object = createNew(context, ij);
 
     init(object, context);
     
@@ -297,7 +307,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
   public T createNoInit()
   {
     try {
-      T value = createNew(null);
+      T value = createNew(null, null);
 
       if (_injectProgram.length > 0) {
         ConfigContext env = new ConfigContext(this, value, null);
@@ -321,7 +331,8 @@ public class ComponentImpl<T> extends AbstractBean<T>
    * @param env the configuration environment
    * @return the new object
    */
-  protected T createNew(CreationalContext context)
+  protected T createNew(CreationalContext context,
+			InjectionPoint ij)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -393,6 +404,11 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public void bind()
   {
+  }
+
+  public Bean bindInjectionPoint(InjectionPoint ij)
+  {
+    return this;
   }
 
   public void createProgram(ArrayList<ConfigProgram> initList, Field field)

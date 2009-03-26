@@ -840,6 +840,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
         log.finer("Servlet[" + _servletName + "] active");
 
       return servlet;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (ServletException e) {
       throw e;
     } catch (Throwable e) {

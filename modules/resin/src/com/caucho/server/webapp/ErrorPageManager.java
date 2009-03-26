@@ -352,7 +352,9 @@ public class ErrorPageManager {
 
     Level level = location == null ? Level.WARNING : Level.FINE;
 
-    if (isCompileException)
+    if (log.isLoggable(Level.FINER))
+      log.log(level, e.toString(), e);
+    else if (isCompileException)
       log.log(level, compileException.getMessage());
     else if (! doStackTrace)
       log.log(level, rootExn.toString());

@@ -32,6 +32,7 @@ package com.caucho.amber.manager;
 import javax.persistence.*;
 import javax.context.CreationalContext;
 import javax.context.ApplicationScoped;
+import javax.inject.manager.InjectionPoint;
 
 import com.caucho.config.inject.*;
 
@@ -58,7 +59,8 @@ public class PersistenceContextComponent extends FactoryComponent {
   }
 
   @Override
-  protected Object createNew(CreationalContext context)
+  protected Object createNew(CreationalContext context,
+			     InjectionPoint ij)
   {
     return _proxy;
   }

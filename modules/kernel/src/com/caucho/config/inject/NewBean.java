@@ -51,6 +51,7 @@ import javax.context.Dependent;
 import javax.interceptor.InterceptorBindingType;
 import javax.inject.Produces;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionPoint;
 import javax.inject.Initializer;
 
 /**
@@ -114,10 +115,10 @@ public class NewBean extends SimpleBean
   /**
    * Creates a new instance of the component.
    */
-  @Override
-  public Object create(CreationalContext env)
+    public Object create(CreationalContext env,
+			 InjectionPoint ij)
   {
-    Object value = createNew(env);
+    Object value = createNew(env, ij);
 
     init(value, env);
     

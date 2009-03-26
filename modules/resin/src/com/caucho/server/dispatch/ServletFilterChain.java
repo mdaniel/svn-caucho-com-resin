@@ -93,6 +93,8 @@ public class ServletFilterChain extends AbstractFilterChain {
     if (_servlet == null) {
       try {
         _servlet = (Servlet) _config.createServlet(false);
+      } catch (RuntimeException e) {
+        throw e;
       } catch (ServletException e) {
         throw e;
       } catch (Exception e) {

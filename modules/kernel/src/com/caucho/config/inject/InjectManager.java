@@ -1156,13 +1156,6 @@ public class InjectManager
       
       bindings = CURRENT_ANN;
     }
-
-    if (New.class.equals(bindings[0].annotationType())) {
-      // ioc/0721
-      HashSet set = new HashSet();
-      set.add(new NewBean(this, (Class) type));
-      return set;
-    }
     
     WebComponent component = getWebComponent(type);
 
@@ -1175,6 +1168,12 @@ public class InjectManager
 
       if (beans != null && beans.size() > 0)
 	return beans;
+    }
+    else if (New.class.equals(bindings[0].annotationType())) {
+      // ioc/0721
+      HashSet set = new HashSet();
+      set.add(new NewBean(this, (Class) type));
+      return set;
     }
     
     if (_parent != null) {
@@ -1311,6 +1310,11 @@ public class InjectManager
 	// server/4764
 	return (T) bean.create(createContext);
       }
+
+      if (scopeType == null) {
+	System.out.println("BEAN: " + bean);
+	Thread.dumpStack();
+      }
       
       Context context = getContext(scopeType);
 
@@ -1443,7 +1447,7 @@ public class InjectManager
 	return (T) adapter;
     }
 	
-    return (T) getInstance(bean, cxt); // XXX: ctx
+    return (T) getInstance(bean, cxt);
   }
 
   /**
@@ -1480,7 +1484,10 @@ public class InjectManager
 
       if (iter.hasNext()) {
 	Bean bean = (Bean) iter.next();
-      
+
+	if (bean instanceof ComponentImpl)
+ 	  bean = ((ComponentImpl) bean).bindInjectionPoint(ij);
+
 	return bean;
       }
     }

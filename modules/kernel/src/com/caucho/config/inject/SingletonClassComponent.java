@@ -36,6 +36,7 @@ import com.caucho.jmx.*;
 import java.util.logging.*;
 import java.io.Closeable;
 import javax.context.CreationalContext;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * Configuration for a singleton component.
@@ -91,7 +92,7 @@ public class SingletonClassComponent extends SimpleBean
   public Object get(ConfigContext env)
   {
     if (_value == null) {
-      _value = createNew(null);
+      _value = createNew(null, null);
 
       init(_value, new ConfigContext(this, _value,
 				     InjectManager.create().getApplicationScope()));
@@ -107,7 +108,8 @@ public class SingletonClassComponent extends SimpleBean
    * The singleton instance is created in its original class loader context
    */
   @Override
-  protected Object createNew(CreationalContext env)
+  protected Object createNew(CreationalContext env,
+			     InjectionPoint ij)
   {
     ClassLoader loader = getWebBeans().getClassLoader();
 
@@ -117,7 +119,7 @@ public class SingletonClassComponent extends SimpleBean
     try {
       thread.setContextClassLoader(loader);
 
-      return super.createNew(env);
+      return super.createNew(env, ij);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

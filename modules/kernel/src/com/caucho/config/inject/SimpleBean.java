@@ -52,6 +52,7 @@ import javax.inject.CreationException;
 import javax.inject.Produces;
 import javax.inject.Initializer;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
@@ -384,7 +385,8 @@ public class SimpleBean extends ComponentImpl
    * Creates a new instance of the component.
    */
   @Override
-  public Object create(CreationalContext cxt)
+  public Object create(CreationalContext cxt,
+		       InjectionPoint ij)
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
@@ -412,7 +414,7 @@ public class SimpleBean extends ComponentImpl
       }
       */
 
-      value = createNew(env);
+      value = createNew(env, ij);
 
       // jsf/4221
       if (env != null)
@@ -469,7 +471,9 @@ public class SimpleBean extends ComponentImpl
     return value;
   }
 
-  protected Object createNew(CreationalContext env)
+  @Override
+  protected Object createNew(CreationalContext env,
+			     InjectionPoint ij)
   {
     try {
       if (! _isBound)

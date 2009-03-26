@@ -117,4 +117,10 @@ public class AbstractInjectionPoint implements InjectionPoint
 
     return _inject.getInstance(_injectionBean); // XXX: cxt
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _type + "," + _bindings + "]";
+  }
 }

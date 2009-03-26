@@ -36,6 +36,7 @@ import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
 import javax.context.CreationalContext;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * Component for session beans
@@ -63,7 +64,8 @@ public class StatelessComponent extends ComponentImpl
   }
 
   @Override
-  public Object create(CreationalContext env)
+  public Object create(CreationalContext env,
+		       InjectionPoint ij)
   {
     return _provider.__caucho_get();
   }

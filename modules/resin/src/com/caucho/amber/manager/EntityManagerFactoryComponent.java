@@ -33,6 +33,7 @@ import javax.persistence.*;
 import javax.persistence.spi.*;
 import javax.context.ApplicationScoped;
 import javax.context.CreationalContext;
+import javax.inject.manager.InjectionPoint;
 
 import com.caucho.amber.cfg.*;
 import com.caucho.config.inject.*;
@@ -72,7 +73,8 @@ public class EntityManagerFactoryComponent extends FactoryComponent {
   }
 
   @Override
-  protected Object createNew(CreationalContext context)
+  protected Object createNew(CreationalContext context,
+			     InjectionPoint ij)
   {
     if (_factory == null)
       _factory = _amber.getEntityManagerFactory(_unit.getName());

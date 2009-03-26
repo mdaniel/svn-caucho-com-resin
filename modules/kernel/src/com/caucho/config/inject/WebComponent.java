@@ -61,6 +61,8 @@ public class WebComponent<T> {
   
   private BaseType _type;
 
+  private BeanEntry _injectionPointEntry;
+
   private ArrayList<BeanEntry<T>> _beanList
     = new ArrayList<BeanEntry<T>>();
 
@@ -75,6 +77,11 @@ public class WebComponent<T> {
     for (BeanEntry<T> beanEntry : _beanList) {
       if (beanEntry.isMatch(bean))
 	return;
+    }
+
+    if (bean instanceof ProducesBean
+	&& ((ProducesBean) bean).isInjectionPoint()) {
+      _injectionPointEntry = new BeanEntry<T>(bean);
     }
 
     _beanList.add(new BeanEntry<T>(bean));
@@ -113,6 +120,12 @@ public class WebComponent<T> {
   public Set<Bean<T>> resolve(Annotation []bindings)
   {
     LinkedHashSet<Bean<T>> beans = null;
+
+    if (_injectionPointEntry != null) {
+      beans = new LinkedHashSet<Bean<T>>();
+      beans.add(_injectionPointEntry.getBean());
+      return beans;
+    }
 
     int priority = 0;
 

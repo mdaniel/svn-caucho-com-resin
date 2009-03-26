@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import javax.annotation.*;
 import javax.context.CreationalContext;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionPoint;
+import javax.inject.manager.Manager;
 
 /**
  * Configuration for a @Produces method
@@ -62,10 +64,10 @@ public class ProducesBean extends ComponentImpl {
 
   private boolean _isBound;
 
-  public ProducesBean(InjectManager inject,
-		      Bean producer,
-		      Method method,
-		      Annotation []annList)
+  protected ProducesBean(InjectManager inject,
+			 Bean producer,
+			 Method method,
+			 Annotation []annList)
   {
     super(inject);
 
@@ -74,6 +76,29 @@ public class ProducesBean extends ComponentImpl {
     _annotationList = annList;
 
     setTargetType(method.getGenericReturnType());
+  }
+
+  public static ProducesBean create(InjectManager inject,
+				    Bean producer,
+				    Method method,
+				    Annotation []annList)
+  {
+    return new ProducesBean(inject, producer, method, annList);
+  }
+
+  protected Bean getProducer()
+  {
+    return _producer;
+  }
+
+  protected Method getMethod()
+  {
+    return _method;
+  }
+
+  protected Annotation []getAnnotationList()
+  {
+    return _annotationList;
   }
 
   @Override
@@ -109,8 +134,19 @@ public class ProducesBean extends ComponentImpl {
       return methodName;
   }
 
+  public boolean isInjectionPoint()
+  {
+    for (Class paramType : _method.getParameterTypes()) {
+      if (InjectionPoint.class.equals(paramType))
+	return true;
+    }
+
+    return false;
+  }
+
   @Override
-  protected Object createNew(CreationalContext context)
+  protected Object createNew(CreationalContext context,
+			     InjectionPoint ij)
   {
     try {
       ConfigContext env = (ConfigContext) context;
@@ -129,8 +165,16 @@ public class ProducesBean extends ComponentImpl {
       if (_args.length > 0) {
 	args = new Object[_args.length];
 
-	for (int i = 0; i < args.length; i++)
-	  args[i] = _webBeans.getInstance(_args[i]);
+	for (int i = 0; i < args.length; i++) {
+	  if (_args[i] instanceof InjectionPointBean) {
+	    if (ij != null)
+	      args[i] = ij;
+	    else
+	      throw new NullPointerException();
+	  }
+	  else
+	    args[i] = _webBeans.getInstance(_args[i]);
+	}
       }
       else
 	args = NULL_ARGS;
@@ -167,11 +211,27 @@ public class ProducesBean extends ComponentImpl {
       for (int i = 0; i < param.length; i++) {
 	_args[i] = bindParameter(loc, param[i], paramAnn[i]);
 
-	if (_args[i] == null)
+	if (_args[i] != null) {
+	}
+	else if (InjectionPoint.class.equals(param[i])) {
+	  _args[i] = createInjectionPointBean(getManager());
+	}
+	else {
 	  throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
 				   getSimpleName(param[i]), i));
+	}
       }
     }
+  }
+
+  public Bean bindInjectionPoint(InjectionPoint ij)
+  {
+    return new ProducesInjectionPointBean(this, ij);
+  }
+
+  protected InjectionPointBean createInjectionPointBean(Manager manager)
+  {
+    return new InjectionPointBean(manager);
   }
 
   public String toString()

@@ -38,6 +38,7 @@ import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import javax.context.CreationalContext;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -194,13 +195,15 @@ public class SingletonBean extends SimpleBean
   }
 
   @Override
-  public Object create(CreationalContext env)
+  public Object create(CreationalContext env,
+		       InjectionPoint ij)
   {
     return _value;
   }
 
   @Override
-  protected Object createNew(CreationalContext env)
+    protected Object createNew(CreationalContext env,
+			       InjectionPoint ij)
   {
     throw new IllegalStateException();
   }
