@@ -1,12 +1,320 @@
 <document>
   <header>
     <product>resin</product>
-    <version>Resin 3.0</version>
+    <version>Resin 4.0</version>
     <title>Resin Installation</title>
+
+    <description>
+      <p><b><em>Ready to install and deploy on Resin?</em></b>  
+      If you've decided that you're ready to deploy Resin for 
+      production, this page will guide you through the steps
+      to install this powerful application server system-wide.
+      You'll see where we recommend installing the various components
+      of Resin as well as some basic production tuning tips.
+      </p>
+    </description>
   </header>
 
   <body>
-    <summary/>
+
+    <localtoc/>
+<s1 title="Resin Server Installation">
+<p><b>This page is for you if you: </b></p>
+<ul>
+  <li>Have evaluated Resin and are ready to install system-wide</li>
+</ul>
+<p>
+This page leads you through a full installation of Resin.  If you just
+want to evaluate or develop locally using Resin, check out our 
+<a href="starting.xtp">quick start guide</a>.  
+</p>
+
+<p><b>You'll learn:</b></p>
+<ul>
+  <li>How to install Resin system-wide</li>
+  <li>The recommended installation locations for Resin</li>
+  <li>Basic deployment tuning tips</li>
+</ul>
+
+<s2 title="Installing Resin on Unix or Mac OS X">
+<p>
+If you're installing Resin on Windows, you can skip to the next section.
+If you're installing Resin on Ubuntu or Debian and want to use the .deb
+packaged version of Resin, skip to the end of this section.
+</p>
+<s3 title="Preparing for installation">
+<ol>
+<li>Install JDK 1.5 or later.  You'll need to set the JAVA_HOME
+variable in your shell or link /usr/java to the Java home
+directory.</li>
+<li>Download the latest version of Resin 4 from the <a
+href="http://www.caucho.com/download">Resin download page</a>.
+Grab the Professional version if:
+<ul>
+  <li>You have purchased a Resin Professional license.</li>
+  <li>You have obtained an evaluation Resin Professional license.</li>
+  <li>
+    You are considering purchasing Resin Professional (without
+    a license, Resin Professional simply downgrades to the open 
+    source functionality).  This will make it easier to upgrade in the 
+    future.
+  </li>
+</ul>
+</li>
+<li>Unzip or untar the Resin download.  If you downloaded Resin
+Professional, it will unzip into resin-pro-4.x.x/, otherwise it
+will download into resin-4.x.x/.</li>
+</ol>
+</s3>
+
+<s3 title="Configuring the build process for Resin">
+<p>
+Next we'll change into the Resin directory we just unpacked to
+configure and build the server.  The Java portions of Resin are
+already compiled, but this step will build additional C-based
+components of Resin that provide additional functionality such as:
+</p>
+<ul>
+  <li>A faster IO library, including massive keepalive support *</li>
+  <li>Support for OpenSSL *</li>
+  <li>The ability to run as a non-priviledged user for security</li>
+  <li>Connector modules for Apache</li>
+</ul>
+<p>
+(* only available in Resin Professional)
+</p>
+<p>
+If you want to use the default configuration of Resin, just run:
+</p>
+<example>
+./configure
+</example>
+
+<p>
+This will configure Resin to install in <var>/usr/local/resin</var>, with
+support for OpenSSL if it was detected, but without support
+for Apache.  If you need to configure other options with Resin,
+now is the time to do it.  The following options are some of the most
+popular to customize the configuration:
+</p>
+
+<ul>
+<li>
+<optional title="Installing Resin in a different directory">
+We recommend installing Resin in /usr/local/resin, but you may want to 
+install some place else such as /opt/resin or a version-specific directory
+like /usr/local/resin-pro-4.0.0 and make a soft link from /usr/local/resin.
+Where ever you install Resin, you can configure the directory by using
+the --prefix argument:
+<example>
+./configure --prefix=/path/to/resin
+</example>
+</optional>
+</li>
+<li>
+<optional title="Configuring support for OpenSSL">
+If you need OpenSSL support and the configure script was able to find your
+OpenSSL libraries, you should see something like the following in the output:
+<example>
+...
+
+  + OpenSSL 0.9.8g 19 Oct 2007
+      OpenSSL include: /usr/include
+      OpenSSL lib: /usr/lib
+      OpenSSL libraries:  -lssl -lcrypto
+
+...
+</example>
+
+If the configure script was unable to find your OpenSSL library, add the
+--with-openssl= option to the configure invocation:
+<example>
+./configure --with-openssl=/path/to/openssl
+</example>
+</optional>
+</li>
+
+<li>
+<optional title="Configuring support for Apache">
+There are lots of good reasons <em>not</em> to use Apache with Resin, but
+if you must use Apache, you can compile Resin's Apache module called
+<var>mod_caucho</var> by using the --with-apxs option with the configure
+script.  First, locate the path of the apxs command included with Apache.
+Once you have this path, you can configure support for Apache with the
+following:
+<example>
+./configure --with-apxs=/path/to/apxs
+</example>
+</optional>
+</li>
+</ul>
+
+<p>
+All of the options mentioned above can be combined.  If you'd like to
+find out some of the other less frequently used options, you can run:
+</p>
+<example>
+./configure --help
+</example>
+<p>
+Once you've run the configuration successfully, the configure script
+will display a summary like the following:
+</p>
+<example>
+Resin Configuration summary:
+
+  RESIN_HOME: /usr/local/resin
+      root: /usr/local/resin
+      conf: /usr/local/resin/conf
+      log : /usr/local/resin/log
+      init: /etc/init.d/resin
+
+  + epoll() for keepalives
+  + OpenSSL 0.9.8g 19 Oct 2007
+      OpenSSL include: /usr/include
+      OpenSSL lib: /usr/lib
+      OpenSSL libraries:  -lssl -lcrypto
+
+  JAVA_HOME: /usr/lib/jvm/java-6-sun
+    + 32-bit JNI in -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux
+      JNI CFLAGS: -g -O2 -DPOLL -DEPOLL -D_POSIX_PTHREAD_SEMANTICS -DHAS_SOCK_TIMEOUT -DHAS_JVMTI
+</example>
+</s3>
+
+<s3 title="Building and Installing Resin">
+<p>Now that you've configured the Resin build process, all you need to
+do is build and install! To build, just run</p>
+<example>
+make
+</example>
+<p>If this step went well, you'll now need to install the Resin files as
+the root user:</p>
+<example>
+sudo make install
+</example>
+</s3>
+
+<s3 title="Installing the Resin configuration files">
+<p>
+Now that Resin is in place, it's time to start preparing it for
+deployment.  To do this, we'll copy the Resin configuration
+files and make some basic changes to it.  We'll assume that you
+installed Resin in /usr/local/resin from now on so if you installed
+it elsewhere, just replace the following directories with your
+installation directory.
+</p>
+
+<ol>
+<li>Create the directory <var>/etc/resin</var></li>
+<li>Copy the following files to <var>/etc/resin</var>
+<ul>
+ <li><var>/usr/local/resin/conf/resin.xml</var></li>
+ <li><var>/usr/local/resin/conf/admin-users.xml</var></li>
+ <li><var>/usr/local/resin/conf/app-default.xml</var></li>
+</ul>
+</li>
+
+<li>Browse <code>http://localhost:8080</code>.  You should see the
+default Resin page that shows the server is up and running!</li>
+</ol>
+</s3>
+
+<s3 title="Installing Resin using the .deb package on Ubuntu and Debian">
+<p>
+We provide a Debian packaged version of Resin that Debian and Ubuntu
+users can take advantage of.  Simply download from the 
+<a href="http://caucho.com/download">Resin download page</a> and install
+using dpkg.
+</p>
+<p>
+Alternatively, you can add Caucho's Debian repository to your system's
+repositories to use automated update tools like Synaptic and apt-get.
+To do this, add the following line to your <var>/etc/apt/sources.list</var>
+</p>
+<example>
+deb http://caucho.com/download/ debian/
+</example>
+<p>
+After adding this line, update your local repository cache by running:
+</p>
+<example>
+apt-get update
+</example>
+<p>
+Finally, install Resin Professional using the following:
+</p>
+<example>
+apt-get resin-pro
+</example>
+<p>
+Or install Resin Open Source with this command:
+</p>
+<example>
+apt-get resin
+</example>
+</s3>
+</s2>
+
+<s2 title="Installing Resin on Windows">
+</s2>
+</s1>
+
+<s1 title="Creating a password for the Resin Administration Console">
+<p>
+One of the most useful tools provided with Resin is the built-in,
+web-based administration console.  This tool provides detailed
+information about the operation of the server, a feature that is 
+very useful to administrators, but one which must be kept secure from
+unauthorized users.  To allow access to the administration application,
+you must set up a password and install it.
+</p>
+</s1>
+
+<s1 title="Resin Content Installation">
+<p>Once your have the Resin server installed, you can start installing your
+content.</p>
+
+<s2 title="Virtual Hosts">
+
+<p>Resin makes it easy to create virtual hosts using a
+<a href="virtual-host.xtp">host deploy directory</a>.  All you have to
+do to create a new virtual host is to create a new sub-directory in the 
+deployment directory with the name of the virtual host.  For example,
+you can create the virtual host <var>example.com</var> by creating the
+directory <var>/var/www/hosts/example.com/webapps</var>.  The webapps 
+for example.com can then be deployed there.
+</p>
+
+</s2>
+
+<s2 title="Permanent content locations">
+
+<p>Eventually, you'll want to move your content and configuration
+into a more permanent location:</p>
+
+<ol>
+
+<li>Create a permanent resin.root:
+
+<ul>
+<li>Virtual hosts go in <var>/var/www/hosts/www.foo.com/webapps/ROOT</var></li>
+<li>Run <var>java -jar resin-3.2.0/lib/resin.jar --root-directory /var/www</var></li>
+<li>You can also set &lt;root-directory> in the &lt;<a href="cluster-tags.xtp#root-directory">cluster</a>> to configure the resin root.</li>
+</ul>
+</li>
+
+<li>If needed, modify the Resin configuration in <var>resin-3.2.0/conf/resin.xml</var>
+
+<ul>
+<li>You can copy resin.xml to somewhere like <var>/etc/resin/resin.xml</var></li>
+<li>Run <var>java -jar resin-3.2.0/lib/resin.jar --conf /etc/resin/resin.xml</var></li>
+</ul>
+</li>
+
+</ol>
+
+</s2>
+</s1>
 
 </body>
 </document>
