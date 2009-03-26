@@ -597,10 +597,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
 	rollbackInt();
 
-        String message = L.l("Commit failed due to: {0}", e);
-        log.log(Level.SEVERE, message, e);
+        RollbackException newException = new RollbackException(e.toString());
+        newException.initCause(e);
 
-	throw new RollbackException(message);
+        throw newException;
       }
 
       if (_status == Status.STATUS_MARKED_ROLLBACK) {
@@ -854,11 +854,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
         sync.beforeCompletion();
       } catch (RuntimeException e) {
 	setRollbackOnly(e);
-	
-        String message = L.l("Operation failed due to: {0}", e);
-        log.log(Level.SEVERE, message, e);
 
-	throw new RollbackException(message);
+        RollbackException newException = new RollbackException(e.toString());
+        newException.initCause(e);
+
+        throw newException;
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
