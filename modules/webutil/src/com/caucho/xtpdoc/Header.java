@@ -160,6 +160,14 @@ public class Header {
     out.writeAttribute("rel", "shortcut icon");
     out.writeAttribute("href", _document.getContextPath() + "/images/favicon.ico");
 
+    out.writeStartElement("script");
+    out.writeCharacters("function hide(id) ");
+    out.writeCharacters("{ document.getElementById(id).style.display = 'none'; }");
+    out.writeCharacters("function show(id) ");
+    out.writeCharacters("{ document.getElementById(id).style.display = ''; }");
+    out.writeEndElement();
+
+
     out.writeStartElement("title");
 
     NavigationItem nav = _document.getNavigation();

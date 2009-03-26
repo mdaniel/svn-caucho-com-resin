@@ -162,4 +162,11 @@ public class FormattedText extends ContainerNode {
     addItem(table);
     return table;
   }
+
+  public Optional createOptional()
+  {
+    Optional optional = new Optional(getDocument());
+    addItem(optional);
+    return optional;
+  }
 }
