@@ -330,6 +330,24 @@ public class CopyArrayValue extends ArrayValue {
     else
       return _constArray.cmp(rValue);
   }
+  
+  @Override
+  public boolean eq(Value rValue)
+  {
+    if (_copyArray != null)
+      return _copyArray.eq(rValue);
+    else
+      return _constArray.eq(rValue);
+  }
+  
+  @Override
+  public boolean eql(Value rValue)
+  {
+    if (_copyArray != null)
+      return _copyArray.eql(rValue);
+    else
+      return _constArray.eql(rValue);
+  }
 
   @Override
   public int hashCode()
@@ -343,10 +361,14 @@ public class CopyArrayValue extends ArrayValue {
   @Override
   public Value toValue()
   {
+    /*
     if (_copyArray != null)
       return _copyArray;
     else
       return _constArray;
+    */
+    
+    return this;
   }
   
   @Override

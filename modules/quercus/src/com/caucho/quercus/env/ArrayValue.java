@@ -1078,7 +1078,7 @@ abstract public class ArrayValue extends Value {
       Value rEntryValue = rValue.get(entryKey);
 
       if ((rEntryValue instanceof ArrayValue) &&
-          !entryValue.eq((ArrayValue) rEntryValue))
+          ! entryValue.eq((ArrayValue) rEntryValue))
         return false;
 
       if (! entryValue.eq(rEntryValue))
