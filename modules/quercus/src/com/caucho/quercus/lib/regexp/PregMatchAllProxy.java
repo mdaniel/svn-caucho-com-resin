@@ -38,21 +38,21 @@ import com.caucho.quercus.env.Value;
  */
 public class PregMatchAllProxy
 {
-  private PregMatchAllResult []_results = new PregMatchAllResult[5];
+  private final PregMatchAllResult []_results = new PregMatchAllResult[5];
   
   private int _hits;
   private int _total;
   private boolean _isPassthru;
   
-  private final int MIN_HITS = 5;
-  private final int MAX_TOTAL = 20;
+  private static final int MIN_HITS = 5;
+  private static final int MAX_TOTAL = 20;
   
   public PregMatchAllProxy()  
   {
   }
   
   public Value preg_match_all(Env env, Regexp regexp, StringValue subject,
-                          Value matchRef, int flags, int offset)
+                              Value matchRef, int flags, int offset)
   {
     if (_isPassthru) {
       return RegexpModule.preg_match_all(env, regexp, subject, matchRef,
@@ -76,9 +76,8 @@ public class PregMatchAllProxy
         Value val = RegexpModule.preg_match_all(env, regexp, subject, matchRef,
                                                 flags, offset);
         
-        _results[i]
-          = new PregMatchAllResult(regexp, subject, matchRef,
-                                   flags, offset, val);
+        _results[i] = new PregMatchAllResult(regexp, subject, matchRef,
+                                             flags, offset, val);
         
         return val;
       }

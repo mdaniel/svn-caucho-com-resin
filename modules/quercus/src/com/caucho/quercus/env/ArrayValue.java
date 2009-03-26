@@ -1486,7 +1486,8 @@ abstract public class ArrayValue extends Value {
     if (! (o instanceof ArrayValue))
       return false;
     
-    ArrayValue array = (ArrayValue) o;
+    // toValue() for CopyArrayValue
+    ArrayValue array = (ArrayValue) ((Value) o).toValue();
     
     return cmp(array) == 0;
   }

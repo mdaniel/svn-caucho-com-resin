@@ -341,6 +341,15 @@ public class CopyArrayValue extends ArrayValue {
   }
   
   @Override
+  public Value toValue()
+  {
+    if (_copyArray != null)
+      return _copyArray;
+    else
+      return _constArray;
+  }
+  
+  @Override
   public boolean equals(Object o)
   {
     if (_copyArray != null)

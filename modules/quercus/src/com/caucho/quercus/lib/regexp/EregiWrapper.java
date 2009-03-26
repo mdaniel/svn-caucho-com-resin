@@ -52,8 +52,8 @@ public class EregiWrapper
       
       return regexp;
     }
-    else if (str == _regexp._rawRegexp
-             || str.equals(_regexp._rawRegexp)) {
+    else if (str == regexp._rawRegexp
+             || str.equals(regexp._rawRegexp)) {
       return regexp;
     }
     else if (regexp2 == null) {
@@ -62,8 +62,8 @@ public class EregiWrapper
       
       return regexp2;
     }
-    else if (str == _regexp2._rawRegexp
-             || str.equals(_regexp2._rawRegexp)) {
+    else if (str == regexp2._rawRegexp
+             || str.equals(regexp2._rawRegexp)) {
       return regexp2;
     }
     else {

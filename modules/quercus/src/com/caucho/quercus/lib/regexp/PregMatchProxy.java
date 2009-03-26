@@ -44,8 +44,8 @@ public class PregMatchProxy
   private int _total;
   private boolean _isPassthru;
   
-  private final int MIN_HITS = 5;
-  private final int MAX_TOTAL = 20;
+  private static final int MIN_HITS = 5;
+  private static final int MAX_TOTAL = 20;
   
   public PregMatchProxy()  
   {
