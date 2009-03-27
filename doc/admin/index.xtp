@@ -7,15 +7,15 @@
 
   <body>
   <s1>
-  <center>
-  <table width="100%">
+
+  <deftable>
     <tr>
       <td><a href="quick/index.xtp"><figure src="quick-start.png"/></a></td>
       <td><a href="full/index.xtp"><figure src="full-documentation.png"/></a></td>
       <td><a href="reference/index.xtp"><figure src="reference.png"/></a></td>
     </tr>
-  </table>
-  </center>
+  </deftable>
+
   </s1>
   </body>
 </document>

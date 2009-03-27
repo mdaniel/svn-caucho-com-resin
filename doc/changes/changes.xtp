@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>jsp: trimDirectiveWhitespaces was ignored for tag files (#3386, rep by kvirkki)</li>
 <li>admin: PingMailer updated to Java Injection (#3257, rep by kenjrwalker)</li>
 <li>session: timeout/listener updates (#3116, rep by Richard Grantham)</li>
 <li>rewrite: &lt;dispatch> needs to change Invocation (#3067, rep by Leonid Geller)</li>

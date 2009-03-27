@@ -198,8 +198,17 @@ public class JspDirectiveTag extends JspNode {
     else if (DEFERRED_AS_LITERAL.equals(name)) {
       _parseState.setDeferredSyntaxAllowedAsLiteral(value.equals("true"));
     }
+    else if (TRIM_WHITESPACES.equals(name)) {
+      if (value.equals("true"))
+        _parseState.setTrimWhitespace(true);
+      else if (value.equals("false"))
+        _parseState.setTrimWhitespace(false);
+      else
+        throw error(L.l("trimDirectiveWhitespaces expects 'true' or 'false' at '{0}'",
+                        value));
+    }
     else {
-      throw error(L.l("'{0}' is an unknown JSP tag directive attribute.  The valid attributes are: body-content, deferredSyntaxAllowedAsLiteral, display-name, dynamic-attributes, example, isELIgnored, language, large-icon, pageEncoding, small-icon, trimDirectiveWhitespace.",
+      throw error(L.l("'{0}' is an unknown JSP tag directive attribute.  The valid attributes are: body-content, deferredSyntaxAllowedAsLiteral, display-name, dynamic-attributes, example, isELIgnored, language, large-icon, pageEncoding, small-icon, trimDirectiveWhitespaces.",
                       name.getName()));
     }
   }
