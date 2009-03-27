@@ -673,4 +673,14 @@ function info($name,$wiki="")
   echo "<sup><small><a href='http://wiki.caucho.com/Admin:$wiki' class='info'>?</a></small></sup>";
 }
 
+function sort_host($a, $b)
+{
+  return strcmp($a->URL, $b->URL);
+}
+
+function sort_webapp($a, $b)
+{
+  return strcmp($a->ContextPath, $b->ContextPath);
+}
+
 ?>

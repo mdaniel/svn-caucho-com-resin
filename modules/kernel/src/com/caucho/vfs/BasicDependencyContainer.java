@@ -160,7 +160,7 @@ public class BasicDependencyContainer implements Dependency
 	Dependency dependency = _dependencyList.get(i);
 	
 	if (dependency.isModified()) {
-	  log().fine(dependency + " is modified");
+	  dependency.logModified(log());
 
 	  _isModified = true;
         

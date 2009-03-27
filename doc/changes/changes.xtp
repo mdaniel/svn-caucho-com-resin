@@ -13,6 +13,10 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>admin: PingMailer updated to Java Injection (#3257, rep by kenjrwalker)</li>
+<li>session: timeout/listener updates (#3116, rep by Richard Grantham)</li>
+<li>rewrite: &lt;dispatch> needs to change Invocation (#3067, rep by Leonid Geller)</li>
+<li>admin: sort_webapp duplicate error in /resin-admin (#3405, rep by c. whalley)</li>
 <li>ioc: add @Produces foo(InjectionPoint ij)</li>
 <li>jsp: UTF-8 BOM should not force text/html (#3062, rep by CnXiaowei)</li>
 <li>proxy-cache: Authorization header should not disable proxy caching (#3065, rep by Daniel Wigenfors)</li>

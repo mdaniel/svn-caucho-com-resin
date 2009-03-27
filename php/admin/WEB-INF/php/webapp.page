@@ -7,11 +7,6 @@
 
 require_once "WEB-INF/php/inc.php";
 
-function sort_host($a, $b)
-{
-  return strcmp($a->URL, $b->URL);
-}
-
 $webapp = $g_mbean_server->lookup($_GET['id']);
 
 $request = quercus_get_request();
@@ -164,10 +159,6 @@ foreach ($hosts as $host) {
 
   <tr title='<?= $hostObjectName ?>'><td class='group' colspan='7'><?= $host->URL ?></td></tr>
 <?php
-function sort_webapp($a, $b)
-{
-  return strcmp($a->ContextPath, $b->ContextPath);
-}
 
 $webapps = $host->WebApps;
 

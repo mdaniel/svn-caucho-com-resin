@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -37,6 +38,10 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.dispatch.Invocation;
+
 /**
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
@@ -52,6 +57,7 @@ public class DispatchFilterChain implements FilterChain {
   private WebApp _app;
   // class loader
   private ClassLoader _classLoader;
+  private Invocation _invocation;
 
   private ServletRequestListener []_requestListeners;
   
@@ -61,10 +67,13 @@ public class DispatchFilterChain implements FilterChain {
    * @param next the next filterChain
    * @param app the webApp
    */
-  public DispatchFilterChain(FilterChain next, WebApp app)
+  public DispatchFilterChain(FilterChain next,
+			     WebApp app,
+			     Invocation invocation)
   {
     _next = next;
     _app = app;
+    _invocation = invocation;
     _classLoader = app.getClassLoader();
     _requestListeners = app.getRequestListeners();
   }
@@ -83,9 +92,14 @@ public class DispatchFilterChain implements FilterChain {
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    CauchoRequest cauchoReq = (CauchoRequest) request;
+    AbstractHttpRequest abstractReq = cauchoReq.getAbstractHttpRequest();
+    Invocation oldInvocation = abstractReq.getInvocation();
     
     try {
       thread.setContextClassLoader(_classLoader);
+
+      abstractReq.setInvocation(_invocation);
 
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);
@@ -100,7 +114,8 @@ public class DispatchFilterChain implements FilterChain {
 	
 	_requestListeners[i].requestDestroyed(event);
       }
-      
+
+      abstractReq.setInvocation(oldInvocation);
       thread.setContextClassLoader(oldLoader);
     }
   }

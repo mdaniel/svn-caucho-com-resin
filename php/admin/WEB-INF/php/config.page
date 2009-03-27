@@ -209,12 +209,7 @@ $servers = $cluster->Servers;
 
 <?php
 
-function sort_host($a, $b)
-{
-  return strcmp($a->URL, $b->URL);
-}
-
-  $hosts = $g_mbean_server->query("resin:*,type=Host");
+$hosts = $g_mbean_server->query("resin:*,type=Host");
 
 usort($hosts, "sort_host");
 
@@ -234,10 +229,6 @@ foreach ($hosts as $host) {
   </table>
 
 <?php
-function sort_webapp($a, $b)
-{
-  return strcmp($a->ContextPath, $b->ContextPath);
-}
 
 echo "<h3>WebApps</h3>\n";
 
