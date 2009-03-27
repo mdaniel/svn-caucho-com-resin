@@ -36,13 +36,7 @@ want to evaluate or develop locally using Resin, check out our
   <li>Basic deployment tuning tips</li>
 </ul>
 
-<s2 title="Installing Resin on Unix or Mac OS X">
-<p>
-If you're installing Resin on Windows, you can skip to the next section.
-If you're installing Resin on Ubuntu or Debian and want to use the .deb
-packaged version of Resin, skip to the end of this section.
-</p>
-<s3 title="Preparing for installation">
+<s2 title="Preparing for installation">
 <ol>
 <li>Install JDK 1.5 or later.  You'll need to set the JAVA_HOME
 variable in your shell or link /usr/java to the Java home
@@ -65,7 +59,14 @@ Grab the Professional version if:
 Professional, it will unzip into resin-pro-4.x.x/, otherwise it
 will download into resin-4.x.x/.</li>
 </ol>
-</s3>
+</s2>
+
+<s2 title="Installing Resin on Unix or Mac OS X">
+<p>
+If you're installing Resin on Windows, you can skip to the next section.
+If you're installing Resin on Ubuntu or Debian and want to use the .deb
+packaged version of Resin, skip to the end of this section.
+</p>
 
 <s3 title="Configuring the build process for Resin">
 <p>
@@ -192,6 +193,8 @@ the root user:</p>
 <example>
 sudo make install
 </example>
+<p>Where ever you install Resin to, we'll refer to that directory as
+<b>resin.home</b>.</p>
 </s3>
 
 <s3 title="Installing the Resin configuration files">
@@ -214,16 +217,16 @@ installation directory.
 </ul>
 </li>
 
-<li>Browse <code>http://localhost:8080</code>.  You should see the
-default Resin page that shows the server is up and running!</li>
 </ol>
 </s3>
 
 <s3 title="Installing Resin using the .deb package on Ubuntu and Debian">
 <p>
 We provide a Debian packaged version of Resin that Debian and Ubuntu
-users can take advantage of.  Simply download from the 
-<a href="http://caucho.com/download">Resin download page</a> and install
+users can take advantage of.  It performs all of the installation
+steps above for you and creates all the recommended server and
+content directories.  Simply download from the <a
+href="http://caucho.com/download">Resin download page</a> and install
 using dpkg.
 </p>
 <p>
@@ -256,6 +259,94 @@ apt-get resin
 </s2>
 
 <s2 title="Installing Resin on Windows">
+<p>
+Installing Resin on Windows is as easy as unpacking the
+Resin package.  The native libraries that are included with Resin
+are precompiled for Windows in both 32-bit and 64-bit mode.  These
+libraries provide:
+</p>
+<ul>
+  <li>A faster IO library, including massive keepalive support *</li>
+  <li>Support for OpenSSL *</li>
+  <li>Connector modules for Apache/IIS</li>
+</ul>
+<p>
+(* only available in Resin Professional)
+</p>
+
+<p>We recommend that Windows users install Resin at <var>C:\Resin</var></p>
+</s2>
+</s1>
+
+<s1 title="Resin Content Installation">
+<p>Once your have the Resin server installed, you can start installing your
+content.</p>
+
+<s2 title="Content from the top down">
+<p>Say that you're in charge of a couple of virtual hosts,
+<code>www.example.com</code> and <code>news.example.com</code>.  To
+create these virtual hosts in Resin, all you need to do is create
+directories with the names of the hosts in a <b>host deploy directory</b>.
+For example under Unix, you can create the virtual host
+<var>example.com</var> by creating the directory
+<var>/var/www/hosts/example.com</var>.  Under Windows, you could
+create the same <b>virtual host directory</b> at
+<var>C:\www\hosts\example.com</var>.  Once you have a virtual
+host directory, you can deploy applications that will run on that
+virtual host.</p>
+
+<p>Resin and JavaEE organize content into "web applications" or
+webapps.  As an administrator, your developers have probably provided
+you with a webapp in the form of a .war file or a webapp directory.
+Within a virtual host directory, you can create a special subdirectory
+named <code>webapps</code> which is a <b>webapp deploy directory</b>.
+Deploying applications to a virtual host in Resin is as easy as
+copying them one of these webapp deploy directories.  Resin detects
+the applications and deploys them automatically.</p>
+
+<figure src="content-directories.png"/>
+
+<p>
+In the directory structure above, notice the special webapp directories
+named "ROOT".  These will map to the "/" (root) of the virtual host.
+Other webapps will map to their name within the virtual host.  For example,
+"rss" in the "news.example.com" host will map to "http://news.example.com/rss".
+</p>
+</s2>
+
+<s2 title="Permanent content locations">
+
+<p>Resin is configured to use the content directory structure show above
+by default.  In the examples, the Resin <b>root directory</b> is 
+<var>/var/www</var>.  This directory is also the recommended content root
+for Unix.  For Windows, the recommended content root is <var>C:\www</var>.
+To specify the root directory to Resin, you pass it on the
+command line when starting the server.  For example:
+</p>
+
+<example>
+java -jar ${resin.home}/lib/resin.jar --root-directory /var/www
+</example>
+
+</s2>
+</s1>
+
+<s1 title="Starting Resin">
+<s2 title="Creating Unix startup scripts for Resin">
+<p>When you installed using the .deb package or when you ran "make install"
+earlier, the installer created a file named <var>/etc/init.d/resin</var>
+which contains a standard Unix init.d startup file.  This file will start
+Resin when invoked as:
+</p>
+<example>
+/etc/init.d/resin start
+</example>
+<p>Use the tools that came with your system to execute the script
+on startup.  You may need to edit this file to change your resin.root
+or resin.home based on where you located them in earlier steps.
+</p>
+</s2>
+<s2 title="Installing Resin as a Windows Service">
 </s2>
 </s1>
 
@@ -268,52 +359,55 @@ very useful to administrators, but one which must be kept secure from
 unauthorized users.  To allow access to the administration application,
 you must set up a password and install it.
 </p>
+<ol>
+<li>Browse to <var>http://localhost:8080/resin-admin/</var><br/><br/>
+<optional title="Not running Resin on your local host?">
+If you are deploying Resin to a production machine, it's likely
+that you won't be running your browser on the same system as the
+server.  In this case, you'll need to configure Resin to allow
+you to access the server remotely.
+<ol>
+  <li>Edit <var>/etc/resin/resin.xml</var></li>
+  <li>Change the line:
+    <example>
+      &lt;resin:set var="resin_admin_external" value="false"/>
+    </example>
+    <p>to</p> 
+    <example>
+      &lt;resin:set var="resin_admin_external" value="true"/>
+    </example>
+  </li>
+  <li>Save <var>/etc/resin/resin.xml</var> and restart the server.</li>
+  <li>Replace "localhost" with the name of your host in the URLs in
+      this section.</li>
+</ol>
+</optional>
+</li>
+<li>Enter a username and password in the lower half of the page, then 
+click "Create Digest".  The recommended username is "admin".
+<optional title="Screenshot" id="screenshot1">
+<figure src="admin-create-password.png"/>
+</optional>
+</li>
+<li>From the next page, copy the XML &lt;user&gt; tag.
+<optional title="Screenshot" id="screenshot2">
+<figure src="admin-digest.png"/>
+</optional>
+</li>
+<li>Edit <var>/etc/resin/admin-users.xml</var> and replace the default
+&lt;user&gt; tag with the one you copied from above.</li>
+<li>Browse back to <var>http://localhost:8080/resin-admin/</var>.  The
+change you made should force Resin to restart and return a 503 error. 
+Just hit refresh in a few moments to bring up the page again.</li>
+<li>You should now be able to login using the username and password
+that you gave above.</li> 
+</ol>
 </s1>
 
-<s1 title="Resin Content Installation">
-<p>Once your have the Resin server installed, you can start installing your
-content.</p>
+<s1 title="Troubleshooting">
+</s1>
 
-<s2 title="Virtual Hosts">
-
-<p>Resin makes it easy to create virtual hosts using a
-<a href="virtual-host.xtp">host deploy directory</a>.  All you have to
-do to create a new virtual host is to create a new sub-directory in the 
-deployment directory with the name of the virtual host.  For example,
-you can create the virtual host <var>example.com</var> by creating the
-directory <var>/var/www/hosts/example.com/webapps</var>.  The webapps 
-for example.com can then be deployed there.
-</p>
-
-</s2>
-
-<s2 title="Permanent content locations">
-
-<p>Eventually, you'll want to move your content and configuration
-into a more permanent location:</p>
-
-<ol>
-
-<li>Create a permanent resin.root:
-
-<ul>
-<li>Virtual hosts go in <var>/var/www/hosts/www.foo.com/webapps/ROOT</var></li>
-<li>Run <var>java -jar resin-3.2.0/lib/resin.jar --root-directory /var/www</var></li>
-<li>You can also set &lt;root-directory> in the &lt;<a href="cluster-tags.xtp#root-directory">cluster</a>> to configure the resin root.</li>
-</ul>
-</li>
-
-<li>If needed, modify the Resin configuration in <var>resin-3.2.0/conf/resin.xml</var>
-
-<ul>
-<li>You can copy resin.xml to somewhere like <var>/etc/resin/resin.xml</var></li>
-<li>Run <var>java -jar resin-3.2.0/lib/resin.jar --conf /etc/resin/resin.xml</var></li>
-</ul>
-</li>
-
-</ol>
-
-</s2>
+<s1 title="Where to look next">
 </s1>
 
 </body>

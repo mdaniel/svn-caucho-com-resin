@@ -53,6 +53,27 @@ public class Optional extends FormattedText {
     _id = id;
   }
 
+  public Paragraph createP()
+  {
+    Paragraph paragraph = new Paragraph(getDocument());
+    addItem(paragraph);
+    return paragraph;
+  }
+
+  public OrderedList createOl()
+  {
+    OrderedList orderedList = new OrderedList(getDocument());
+    addItem(orderedList);
+    return orderedList;
+  }
+
+  public UnorderedList createUl()
+  {
+    UnorderedList unorderedList = new UnorderedList(getDocument());
+    addItem(unorderedList);
+    return unorderedList;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
