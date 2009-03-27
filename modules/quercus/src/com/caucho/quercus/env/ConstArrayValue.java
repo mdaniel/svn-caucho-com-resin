@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,17 +29,12 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
 /**
  * Represents a PHP array value.
  */
 public class ConstArrayValue
   extends ArrayValueImpl
 {
-  private final int _hashCode;
-
   public ConstArrayValue(ArrayValueImpl source)
   {
     if (! source._isDirty)
@@ -53,22 +48,16 @@ public class ConstArrayValue
     _current = source._current;
     _tail = source._tail;
     _nextAvailableIndex = source._nextAvailableIndex;
-    
-    _hashCode = source.hashCode();;
   }
   
   public ConstArrayValue(ArrayValueComponent[] components)
   {
     super(components);
-    
-    _hashCode = super.hashCode();
   }
 
   public ConstArrayValue(Value []keys, Value []values)
   {
     super(keys, values);
-    
-    _hashCode = super.hashCode();
   }
   
   /**
@@ -77,7 +66,9 @@ public class ConstArrayValue
   @Override
   public Value copy()
   {
-    return new CopyArrayValue(this);
+    //return new CopyArrayValue(this);
+    
+    return new ArrayValueImpl(this);
   }
   
   /**
@@ -87,12 +78,6 @@ public class ConstArrayValue
   public void shuffle()
   {
     throw new IllegalStateException();
-  }
-  
-  @Override
-  public final int hashCode()
-  {
-    return _hashCode;
   }
 }
 
