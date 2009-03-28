@@ -1523,7 +1523,7 @@ public class Port
       try {
         // need delay to avoid spawing too many threads over a short time,
         // when the load doesn't justify it
-        Thread.yield();
+        // Thread.yield();
 
 	// Clear the pending startThread requests because we're about to
 	// start handling them

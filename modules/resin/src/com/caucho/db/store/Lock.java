@@ -361,7 +361,7 @@ public final class Lock {
    */
   void waitForCommit()
   {
-    Thread.yield();
+    // Thread.yield();
     
     synchronized (this) {
       while (true) {

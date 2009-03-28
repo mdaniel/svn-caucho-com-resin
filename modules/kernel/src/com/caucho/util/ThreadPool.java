@@ -32,6 +32,7 @@ package com.caucho.util;
 import com.caucho.config.ConfigException;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -508,17 +509,16 @@ public class ThreadPool {
 	    startNew = true;
 
 	  if (startNew) {
-	    synchronized (_launcher) {
-	      _launcher.notifyAll();
-	    }
+	    _launcher.wake();
 	    
 	    if (poolItem == null) {
 	      if (queueIfFull) {
 		synchronized (_taskQueue) {
 		  _taskQueue.add(task);
 		  _loaderQueue.add(loader);
-		  _taskQueue.notifyAll();
 		}
+		
+		_scheduler.wake();
 		
 		return false;
 	      }
@@ -594,7 +594,7 @@ public class ThreadPool {
     return getClass().getSimpleName() + "[]";
   }
 
-  class Item implements Runnable {
+  class Item extends Thread {
     final int _id;
     final String _name;
 
@@ -610,26 +610,31 @@ public class ThreadPool {
     Runnable _task;
     ClassLoader _classLoader;
 
-    private Item()
+    Item()
     {
       synchronized (Item.class) {
 	_id = _g_id++;
 	_name = "resin-" + _id;
       }
+
+      setName(_name);
+      setDaemon(true);
     }
 
     /**
      * Returns the id.
      */
+    /*
     int getId()
     {
       return _id;
     }
+    */
 
     /**
      * Returns the name.
      */
-    public String getName()
+    public String getDebugName()
     {
       return _name;
     }
@@ -639,7 +644,7 @@ public class ThreadPool {
      */
     public long getThreadId()
     {
-      return _thread.getId();
+      return getId();
     }
 
     /**
@@ -651,16 +656,16 @@ public class ThreadPool {
     }
 
     /**
-     * Starts the thread.
+     * Starts this;
      */
     boolean start(Runnable task, ClassLoader loader)
     {
       synchronized (this) {
 	_task = task;
 	_classLoader = loader;
-
-	notifyAll();
       }
+
+      LockSupport.unpark(this);
 
       return true;
     }
@@ -670,8 +675,6 @@ public class ThreadPool {
      */
     public void run()
     {
-      _thread = Thread.currentThread();
-
       synchronized (_idleLock) {
 	_threadCount++;
 	_startCount--;
@@ -692,9 +695,7 @@ public class ThreadPool {
 	}
 
 	if (_threadCount < _threadIdleMin) {
-	  synchronized (_launcher) {
-	    _launcher.notifyAll();
-	  }
+	  _launcher.wake();
 	}
       }
     }
@@ -703,7 +704,7 @@ public class ThreadPool {
     {
       _threadResetCount = _resetCount;
     
-      Thread thread = Thread.currentThread();
+      Thread thread = this;
       ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
       boolean isIdle = false;
 
@@ -736,7 +737,7 @@ public class ThreadPool {
 	      _idleCount++;
 
 	      if (_scheduleWaitCount > 0)
-		_idleLock.notifyAll();
+		_scheduler.wake();
 	    }
 	  }
 
@@ -747,12 +748,9 @@ public class ThreadPool {
 	  Thread.interrupted();
 	  
 	  // wait for the next available task
-	  synchronized (this) {
-	    if (_task == null) {
-	      thread.setContextClassLoader(systemClassLoader);
-	      wait(60000L);
-	    }
+	  thread.setContextClassLoader(systemClassLoader);
 
+	  synchronized (this) {
 	    task = _task;
 	    _task = null;
 
@@ -810,13 +808,14 @@ public class ThreadPool {
 	    }
 
 	    if (isReset) {
-	      synchronized (_launcher) {
-		_launcher.notifyAll();
-	      }
+	      _launcher.wake();
 	    }
 	  
 	    if (isDead)
 	      return;
+
+	    // wait for next request
+	    LockSupport.park();
 	  }
 	} catch (Throwable e) {
 	}
@@ -854,19 +853,26 @@ public class ThreadPool {
   }
 
   class ThreadLauncher implements Runnable {
+    private final Thread _thread;
+    
     private ThreadLauncher()
     {
-      Thread thread = new Thread(this);
-      thread.setName("resin-thread-launcher");
-      thread.setDaemon(true);
+      _thread = new Thread(this);
+      _thread.setName("resin-thread-launcher");
+      _thread.setDaemon(true);
 
-      thread.start();
+      _thread.start();
+    }
+
+    void wake()
+    {
+      LockSupport.unpark(_thread);
     }
 
     /**
      * Starts a new connection
      */
-    private boolean startConnection(long waitTime)
+    private boolean startConnection(boolean isWait)
       throws InterruptedException
     {
       boolean doStart = true;
@@ -889,11 +895,7 @@ public class ThreadPool {
 	  _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
 	  
 	  Item poolItem = new Item();
-    
-	  Thread thread = new Thread(poolItem, poolItem.getName());
-	  thread.setDaemon(true);
-
-	  thread.start();
+	  poolItem.start();
 	} catch (Throwable e) {
 	  _startCount--;
 
@@ -908,10 +910,11 @@ public class ThreadPool {
       }
       else {
 	Thread.interrupted();
-	synchronized (this) {
-	  wait(waitTime);
-	  return false;
-	}
+
+	if (isWait)
+	  LockSupport.park();
+	
+	return false;
       }
 
       return true;
@@ -925,17 +928,14 @@ public class ThreadPool {
 
       try {
 	for (int i = 0; i < _threadIdleMin; i++)
-	  startConnection(0);
+	  startConnection(false);
       } catch (Throwable e) {
 	e.printStackTrace();
       }
       
       while (true) {
 	try {
-	  startConnection(10000);
-
-	  //Thread.currentThread().sleep(5);
-	  Thread.currentThread().yield();
+	  startConnection(true);
 	} catch (OutOfMemoryError e) {
 	  System.exit(10);
 	} catch (Throwable e) {
@@ -946,13 +946,20 @@ public class ThreadPool {
   }
 
   class ScheduleThread implements Runnable {
+    private final Thread _thread;
+    
     private ScheduleThread()
     {
-      Thread thread = new Thread(this);
-      thread.setName("resin-thread-scheduler");
-      thread.setDaemon(true);
+      _thread = new Thread(this);
+      _thread.setName("resin-thread-scheduler");
+      _thread.setDaemon(true);
 
-      thread.start();
+      _thread.start();
+    }
+
+    void wake()
+    {
+      LockSupport.unpark(_thread);
     }
     
     public void run()
@@ -967,25 +974,19 @@ public class ThreadPool {
 	  Runnable task = null;
 	  ClassLoader loader = null;
 
-	  Thread.interrupted();
-	  
 	  synchronized (_taskQueue) {
 	    if (_taskQueue.size() > 0) {
 	      task = _taskQueue.remove(0);
 	      loader = _loaderQueue.remove(0);
 	    }
-	    else {
-	      try {
-		_taskQueue.wait(60000);
-	      } catch (Throwable e) {
-		thread.interrupted();
-		log.finer(e.toString());
-	      }
-	    }
 	  }
 
-	  if (task != null) {
+	  if (task != null)
 	    schedule(task, loader, _threadIdleMin, MAX_EXPIRE, false);
+	  else {
+	    Thread.interrupted();
+	  
+	    LockSupport.park();
 	  }
 	} catch (OutOfMemoryError e) {
 	  System.exit(10);

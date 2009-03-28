@@ -285,10 +285,19 @@ public class RotateStream extends StreamImpl implements AlarmListener {
       _rolloverLog.flush();
       _rolloverLog.rollover();
     } catch (Throwable e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (! _isClosed) {
-	_alarm.queueAt(_rolloverLog.getNextRolloverCheckTime());
+	long nextTime = _rolloverLog.getNextRolloverCheckTime();
+	long now = Alarm.getCurrentTime();
+
+	long delta = nextTime - now;
+
+	if (delta < 60000)
+	  delta = 60000;
+	
+	_alarm.queue(delta);
       }
     }
   }

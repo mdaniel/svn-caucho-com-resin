@@ -29,6 +29,8 @@
 
 package com.caucho.util;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,7 +60,8 @@ public class Alarm implements ThreadTask {
   private static Alarm []_heap = new Alarm[256];
   private static int _heapTop;
   
-  private static volatile int _runningAlarmCount;
+  private static AtomicInteger _runningAlarmCount
+    = new AtomicInteger();
   
   private static long _testTime;
   private static long _testNanoDelta;
@@ -229,7 +232,7 @@ public class Alarm implements ThreadTask {
   public static void yieldIfTest()
   {
     if (_testTime > 0) {
-      Thread.yield();
+      // Thread.yield();
     }
   }
   
@@ -318,12 +321,7 @@ public class Alarm implements ThreadTask {
       if (_heapIndex > 0)
 	dequeueImpl(this);
 
-      long wakeTime;
-
-      if (delta >= 2000)
-	wakeTime = delta + getCurrentTime();
-      else
-	wakeTime = delta + getExactTime();
+      long wakeTime = delta + getExactTime();
       
       _wakeTime = wakeTime;
 
@@ -331,9 +329,7 @@ public class Alarm implements ThreadTask {
     }
 
     if (isNotify) {
-      synchronized (_coordinatorThread) {
-	_coordinatorThread.notifyAll();
-      }
+      _coordinatorThread.wake();
     }
   }
 
@@ -345,7 +341,7 @@ public class Alarm implements ThreadTask {
   public void queueAt(long wakeTime)
   {
     boolean isNotify = false;
-    
+
     synchronized (_queueLock) {
       if (_heapIndex > 0)
 	dequeueImpl(this);
@@ -356,9 +352,7 @@ public class Alarm implements ThreadTask {
     }
     
     if (isNotify) {
-      synchronized (_coordinatorThread) {
-	_coordinatorThread.notifyAll();
-      }
+      _coordinatorThread.wake();
     }
   }
 
@@ -383,10 +377,8 @@ public class Alarm implements ThreadTask {
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      synchronized (_queueLock) {
-	_isRunning = false;
-	_runningAlarmCount--;
-      }
+      _isRunning = false;
+      _runningAlarmCount.decrementAndGet();
     }
   }
 
@@ -458,12 +450,10 @@ public class Alarm implements ThreadTask {
 
       Alarm alarm = heap[1];
 
-      if (alarm == null) {
-	return getCurrentTime() + 12000;
-      }
-      else {
+      if (alarm != null)
 	return alarm._wakeTime;
-      }
+      else
+	return getExactTime() + 120000;
     }
   }
 
@@ -640,7 +630,9 @@ public class Alarm implements ThreadTask {
     AlarmThread()
     {
       super("resin-timer");
+      
       setDaemon(true);
+      setPriority(Thread.MAX_PRIORITY);
     }
     
     public void run()
@@ -666,14 +658,16 @@ public class Alarm implements ThreadTask {
 	  
 	  if (_testTime > 0) {
 	    _currentTime = _testTime;
+	    
+	    LockSupport.park();
 	  }
 	  else {
 	    long now = System.currentTimeMillis();
 
 	    _currentTime = now;
+	    
+	    LockSupport.park(now + sleepTime);
 	  }
-	
-	  Thread.sleep(sleepTime);
 	} catch (Throwable e) {
 	}
       }
@@ -685,6 +679,12 @@ public class Alarm implements ThreadTask {
     {
       super("resin-alarm");
       setDaemon(true);
+      setPriority(Thread.MAX_PRIORITY);
+    }
+
+    void wake()
+    {
+      LockSupport.unpark(this);
     }
     
     /**
@@ -702,12 +702,14 @@ public class Alarm implements ThreadTask {
 	  if ((alarm = Alarm.extractAlarm()) != null) {
 	    // throttle alarm invocations by 5ms so quick alarms don't need
 	    // extra threads
-	    if (_concurrentAlarmThrottle < _runningAlarmCount) {
+	    if (_concurrentAlarmThrottle < _runningAlarmCount.get()) {
 	      try {
 		Thread.sleep(5);
 	      } catch (Throwable e) {
 	      }
 	    }
+
+	    _runningAlarmCount.incrementAndGet();
 
 	    if (alarm.isPriority())
 	      ThreadPool.getThreadPool().startPriority(alarm);
@@ -715,14 +717,12 @@ public class Alarm implements ThreadTask {
 	      ThreadPool.getThreadPool().start(alarm);
 	  }
 
-	  synchronized (this) {
-	    long next = nextAlarmTime();
-	    long now = getExactTime();
+	  long next = nextAlarmTime();
+	  long now = getExactTime();
 
-	    if (now < next) {
-	      wait(next - now);
-	    }
-	    now = getExactTime();
+	  if (now < next) {
+	    Thread.interrupted();
+	    LockSupport.parkNanos((next - now) * 1000000L);
 	  }
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);

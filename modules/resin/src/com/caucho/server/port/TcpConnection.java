@@ -901,7 +901,7 @@ public class TcpConnection extends Connection
         log.log(Level.FINE, e.toString(), e);
       }
 
-      Thread.yield();
+      // Thread.yield();
     }
   }
   

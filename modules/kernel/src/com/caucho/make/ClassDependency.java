@@ -89,7 +89,7 @@ public class ClassDependency implements PersistentDependency {
 
     if (newDigest != digest) {
       if (log.isLoggable(Level.FINE))
-        log.fine(className + " digest is modified (old=" + digest + ",new=" + newDigest + ")");
+        log.fine(className + " class digest is modified (old=" + digest + ",new=" + newDigest + ")");
 
       _isDigestModified = true;
     }

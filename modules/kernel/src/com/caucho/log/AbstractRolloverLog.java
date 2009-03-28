@@ -425,20 +425,24 @@ public class AbstractRolloverLog {
    */
   protected void rolloverLog()
   {
-    long now = Alarm.getExactTime();
+    long now = Alarm.getCurrentTime();
     
     boolean isRollingOver = false;
     
     try {
       Path savedPath = null;
 
-      synchronized (this) {
-	if (_isRollingOver || now < _nextRolloverCheckTime)
-	  return;
-
-	_isRollingOver = isRollingOver = true;
+      if (now < _nextRolloverCheckTime) {
+	return;
+      }
       
+      synchronized (this) {
+	if (_isRollingOver || now < _nextRolloverCheckTime) {
+	  return;
+	}
+
 	_nextRolloverCheckTime = now + _rolloverCheckPeriod;
+	_isRollingOver = isRollingOver = true;
 
 	long lastPeriodEnd = _nextPeriodEnd;
 
@@ -481,8 +485,8 @@ public class AbstractRolloverLog {
 	_savedPath = savedPath;
 	isRollingOver = false;
 	ThreadPool.getThreadPool().startPriority(_archiveTask);
-	Thread.yield();
       }
+
     } finally {
       synchronized (this) {
 	if (isRollingOver) {

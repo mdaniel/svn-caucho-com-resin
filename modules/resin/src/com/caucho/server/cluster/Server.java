@@ -2198,7 +2198,7 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-        Thread.yield();
+        Thread.sleep(10);
       } catch (Throwable e) {
       }
 
