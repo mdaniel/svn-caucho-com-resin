@@ -160,7 +160,7 @@ public class OsgiManager
   {
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 
-    return loader.getOsgiManager();
+    return null;// loader.getOsgiManager();
   }
 
   public ClassLoader getParentLoader()
