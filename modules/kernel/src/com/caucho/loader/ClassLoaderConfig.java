@@ -33,8 +33,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.ivy.IvyLoader;
 import com.caucho.loader.ivy.IvyModule;
-import com.caucho.osgi.OsgiLoader;
-import com.caucho.osgi.OsgiBundleConfig;
+//import com.caucho.osgi.OsgiLoader;
+//import com.caucho.osgi.OsgiBundleConfig;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -163,12 +163,14 @@ public class ClassLoaderConfig {
   /**
    * Install an osgi bundle
    */
+  /*
   public OsgiBundleConfig createBundle()
   {
     OsgiBundleConfig module = new OsgiBundleConfig();
 
     return module;
   }
+  */
 
   /**
    * Adds a compiling class loader.
@@ -181,6 +183,7 @@ public class ClassLoaderConfig {
   /**
    * Creates an osgi class loader.
    */
+  /*
   public OsgiLoader createOsgiLoader()
   {
     OsgiLoader loader = new OsgiLoader();
@@ -189,14 +192,17 @@ public class ClassLoaderConfig {
 
     return loader;
   }
+  */
 
   /**
    * Adds an osig class loader.
    */
+  /*
   public void addOsgiLoader(OsgiLoader loader)
   {
     _classLoader.addLoader(loader, _index++);
   }
+  */
 
   /**
    * Adds a tree loader.

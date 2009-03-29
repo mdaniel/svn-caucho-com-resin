@@ -60,7 +60,7 @@ import javax.inject.*;
 import javax.inject.manager.Bean;
 import javax.inject.manager.Manager;
 
-import org.osgi.framework.BundleContext;
+//import org.osgi.framework.BundleContext;
 
 /**
  * Resin WebBeans producer for the main singletons.
@@ -170,6 +170,7 @@ public class ResinWebBeansProducer
   /**
    * Registers a bean with OSGi based on a ServiceStartup event
    */
+  /*
   public void osgiServiceStartup(@Observes @OsgiServiceBinding
 				 BeanStartupEvent beanEvent)
   {
@@ -202,4 +203,5 @@ public class ResinWebBeansProducer
 
     bundle.registerService(types, service, properties);
   }
+  */
 }

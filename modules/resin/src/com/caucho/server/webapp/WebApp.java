@@ -53,8 +53,8 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
-import com.caucho.osgi.OsgiBundle;
-import com.caucho.osgi.OsgiManager;
+//import com.caucho.osgi.OsgiBundle;
+//import com.caucho.osgi.OsgiManager;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
@@ -117,7 +117,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.osgi.framework.BundleContext;
+//import org.osgi.framework.BundleContext;
 
 /**
  * Resin's webApp implementation.
@@ -298,7 +298,7 @@ public class WebApp extends ServletContextImpl
 
   private boolean _cookieHttpOnly;
 
-  private OsgiBundle _osgiBundle;
+  //  private OsgiBundle _osgiBundle;
 
   // special
   private int _jspState;
