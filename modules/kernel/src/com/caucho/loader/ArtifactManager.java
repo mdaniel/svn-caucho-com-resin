@@ -198,10 +198,12 @@ public class ArtifactManager
 
     ArrayList<Artifact> subArtifactList
       = new ArrayList<Artifact>();
+
+    ArrayList<ArtifactDependency> dependencies
+      = getArtifactDependencies(artifact);
       
-    for (ArtifactDependency depend : artifact.getDependencies()) {
-      ArrayList<Artifact> artifacts
-	= repository.resolve(depend, artifact.getDependencies());
+    for (ArtifactDependency depend : dependencies) {
+      ArrayList<Artifact> artifacts = repository.resolve(depend, dependencies);
 
       if (artifacts.size() == 0) {
 	throw new ConfigException(L.l("Dependency org={0}, name={1} does not have any matching artifacts",
@@ -234,6 +236,35 @@ public class ArtifactManager
     }
 
     return loader;
+  }
+
+  private ArrayList<ArtifactDependency>
+    getArtifactDependencies(Artifact artifact)
+  {
+    ArrayList<ArtifactDependency> dependencies
+      = new ArrayList<ArtifactDependency>();
+
+    ArtifactDependency parentDep = artifact.getParent();
+
+    if (parentDep != null) {
+      ArtifactRepository repository = ArtifactRepository.getCurrent();
+      
+      ArrayList<Artifact> parentList = repository.resolve(parentDep);
+
+      if (parentList == null || parentList.size() == 0)
+	throw new ConfigException(L.l("maven parent {0} cannot be resolved",
+				      parentDep));
+
+      Artifact parent = parentList.get(0);
+
+      dependencies.addAll(getArtifactDependencies(parent));
+    }
+
+    for (ArtifactDependency dep : artifact.getDependencies()) {
+      dependencies.add(dep);
+    }
+
+    return dependencies;
   }
 
   private Artifact findArtifact(Artifact newArtifact,

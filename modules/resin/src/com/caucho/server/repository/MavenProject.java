@@ -52,6 +52,8 @@ public class MavenProject
   private String _artifactId;
   private ArtifactVersion _version;
 
+  private Parent _parent;
+
   private ArrayList<ArtifactDependency> _dependencyList
     = new ArrayList<ArtifactDependency>();
 
@@ -79,6 +81,11 @@ public class MavenProject
     _version = ArtifactVersion.create(version);
   }
 
+  public void addParent(Parent parent)
+  {
+    _parent = parent;
+  }
+
   /**
    * Creates the dependencies section.
    */
@@ -99,13 +106,49 @@ public class MavenProject
     _dependencyList.add(dependency);
   }
 
+  @PostConstruct
+  public void init()
+  {
+    if (_groupId == null && _parent != null) {
+      _groupId = _parent.getGroupId();
+    }
+
+    if (_groupId == null)
+      throw new ConfigException(L.l("<groupId> is a required attribute of Maven <project>"));
+
+    if (_artifactId == null)
+      throw new ConfigException(L.l("<artifactId> is a required attribute of Maven <project>"));
+
+    if (_version == null && _parent != null) {
+      _version = _parent.getVersion();
+    }
+
+    if (_version == null)
+      throw new ConfigException(L.l("<version> is a required attribute of Maven <project>"));
+  }
+
   /**
    * Returns the Artifact corresponding to the project.
    */
   public Artifact toArtifact(Path path)
   {
+    ArtifactDependency parent = null;
+
+    if (_parent != null) {
+      ArtifactVersion parentVersion = _parent.getVersion();
+      
+      ArtifactVersionRange parentRange
+	= new ArtifactVersionRange(parentVersion, true,
+				   parentVersion, true);
+
+      parent = new ArtifactDependency(_parent.getGroupId(),
+				      null,
+				      _parent.getArtifactId(),
+				      parentRange);
+    }
+    
     return new Artifact(path, _groupId, null, _artifactId, _version,
-			_dependencyList);
+			parent, _dependencyList);
   }
   
   @Override
@@ -116,6 +159,68 @@ public class MavenProject
 	    + ",artifact=" + _artifactId
 	    + ",version=" + _version
 	    + "]");
+  }
+
+  public static class Parent {
+    private String _groupId;
+    private String _artifactId;
+    private ArtifactVersion _version;
+
+    /**
+     * Sets the groupId for the project
+     */
+    public void setGroupId(String groupId)
+    {
+      _groupId = groupId;
+    }
+
+    public String getGroupId()
+    {
+      return _groupId;
+    }
+
+    /**
+     * Sets the artifactId for the project
+     */
+    public void setArtifactId(String artifactId)
+    {
+      _artifactId = artifactId;
+    }
+
+    public String getArtifactId()
+    {
+      return _artifactId;
+    }
+
+    /**
+     * Sets the version for the project
+     */
+    public void setVersion(String version)
+    {
+      _version = ArtifactVersion.create(version);
+    }
+
+    public ArtifactVersion getVersion()
+    {
+      return _version;
+    }
+    
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
+
+    @PostConstruct
+    public void init()
+    {
+      if (_groupId == null)
+	throw new ConfigException(L.l("<groupId> is a required attribute of <parent>"));
+      
+      if (_artifactId == null)
+	throw new ConfigException(L.l("<artifactId> is a required attribute of <parent>"));
+      
+      if (_version == null)
+	throw new ConfigException(L.l("<version> is a required attribute of <parent>"));
+    }
   }
 
   public class Dependencies {

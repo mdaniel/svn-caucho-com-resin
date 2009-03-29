@@ -48,6 +48,7 @@ public class Artifact implements Comparable
   private final String _name;
   private final ArtifactVersion _version;
 
+  private final ArtifactDependency _parent;
   private final ArtifactDependency []_dependencies;
 
   public Artifact(Path path,
@@ -55,6 +56,7 @@ public class Artifact implements Comparable
 		  String module,
 		  String name,
 		  ArtifactVersion version,
+		  ArtifactDependency parent,
 		  ArrayList<ArtifactDependency> dependencyList)
   {
     _path = path;
@@ -70,6 +72,8 @@ public class Artifact implements Comparable
       throw new NullPointerException(L.l("artifact name cannot be null"));
     
     _version = version;
+
+    _parent = parent;
 
     _dependencies = new ArtifactDependency[dependencyList.size()];
     dependencyList.toArray(_dependencies);
@@ -105,6 +109,14 @@ public class Artifact implements Comparable
   public ArtifactVersion getVersion()
   {
     return _version;
+  }
+
+  /**
+   * Returns the artifact's parent
+   */
+  public ArtifactDependency getParent()
+  {
+    return _parent;
   }
 
   /**

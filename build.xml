@@ -342,7 +342,7 @@
     </antcall>
   </target>
   
-  <target name="resin-kernel" depends="init, inject, osgi, jsdk">
+  <target name="resin-kernel" depends="init, inject, jsdk">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>
@@ -511,7 +511,7 @@
     </antcall>
   </target>
   
-  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-kernel, osgi, version, resin-compile"/>
+  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-kernel, version, resin-compile"/>
 
   <!--
   <target name="jaf" depends="init">
@@ -694,7 +694,9 @@
       <packageset dir="${modules}/jstl/src"/>
       <packageset dir="${modules}/jta/src"/>
       <packageset dir="${modules}/quercus/src"/>
+      <!--
       <packageset dir="${modules}/osgi/src"/>
+      -->
       <packageset dir="${modules}/resin/src"/>
       <!--
       <packageset dir="${modules}/script/src"/>

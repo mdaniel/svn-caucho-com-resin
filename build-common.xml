@@ -584,7 +584,9 @@
         <include name="lib/javamail-141.jar"/>
         <include name="lib/jcache.jar"/>
         <include name="lib/jaxstream-15.jar"/>
+	<!--
         <include name="lib/osgi-14.jar"/>
+	-->
         <include name="lib/jsf-12.jar"/>
         <include name="lib/webutil.jar"/>
 
@@ -1188,7 +1190,9 @@
         <include name="lib/activation.jar"/>
         <include name="lib/javaee-16.jar"/>
         <include name="lib/javamail-141.jar"/>
+	<!--
         <include name="lib/osgi-14.jar"/>
+	-->
         <include name="lib/jaxrpc-15.jar"/>
         <include name="lib/jsf-12.jar"/>
         <include name="lib/pro.jar"/>
@@ -1199,7 +1203,9 @@
       <fileset dir="${resin.install}">
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-141.jar"/>
+	<!--
         <include name="lib/osgi-14.jar"/>
+	-->
         <include name="lib/jcache.jar"/>
         <include name="lib/jaxrpc-15.jar"/>
         <include name="lib/jsf-12.jar"/>
