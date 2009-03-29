@@ -45,6 +45,9 @@ public class ArtifactManager
 
   private EnvironmentClassLoader _loader;
 
+  private ArrayList<ArtifactDependency> _dependencyList
+    = new ArrayList<ArtifactDependency>();
+
   private ArrayList<ArtifactDependency> _pendingList
     = new ArrayList<ArtifactDependency>();
 
@@ -75,11 +78,23 @@ public class ArtifactManager
     ArrayList<Artifact> artifactList = repository.resolve(dependency);
 
     if (artifactList == null || artifactList.size() == 0) {
-      throw new ConfigException(L.l("Dependency org='{0}', name='{1}' does not match any jars in the repository",
+      ArtifactDependency plainDependency
+	= new ArtifactDependency(dependency.getOrg(),
+				 null,
+				 dependency.getName(),
+				 null);
+
+      artifactList = repository.resolve(plainDependency);
+      
+      throw new ConfigException(L.l("Dependency org='{0}', name='{1}', version={2} does not match any jars in the repository\n{3}",
 				    dependency.getOrg(),
-				    dependency.getName()));
+				    dependency.getName(),
+				    dependency.getVersion(),
+				    artifactList));
     }
 
+    _dependencyList.add(dependency);
+    
     _pendingList.add(dependency);
   }
 
@@ -134,21 +149,24 @@ public class ArtifactManager
 
       ArtifactRepository repository = ArtifactRepository.getCurrent();
 
-      ArrayList<Artifact> artifactList = new ArrayList<Artifact>();
+      ArrayList<Artifact> newArtifactList = new ArrayList<Artifact>();
       
       for (ArtifactDependency depend : pendingList) {
-	ArrayList<Artifact> artifacts = repository.resolve(depend);
+	ArrayList<Artifact> artifacts
+	  = repository.resolve(depend, _dependencyList);
 
 	Artifact artifact = artifacts.get(0);
 
-	artifactList.add(artifact);
+	_artifactList.add(artifact);
+	newArtifactList.add(artifact);
       }
 
-      for (Artifact artifact : artifactList) {
+      for (Artifact artifact : newArtifactList) {
 	ArrayList<Artifact> createList = new ArrayList<Artifact>();
 	
 	ArtifactClassLoader loader
-	  = createLoader(_loader.getParent(), artifact, createList);
+	  = createLoader(_loader.getParent(), artifact,
+			 _artifactList, createList);
 	
 	_entryList.add(new Entry(artifact, loader));
       }
@@ -162,6 +180,7 @@ public class ArtifactManager
 
   private ArtifactClassLoader createLoader(ClassLoader parent,
 					   Artifact artifact,
+					   ArrayList<Artifact> artifactList,
 					   ArrayList<Artifact> createList)
   {
     if (createList.contains(artifact)) {
@@ -177,8 +196,12 @@ public class ArtifactManager
     ArrayList<ArtifactClassLoader> importList
       = new ArrayList<ArtifactClassLoader>();
 
+    ArrayList<Artifact> subArtifactList
+      = new ArrayList<Artifact>();
+      
     for (ArtifactDependency depend : artifact.getDependencies()) {
-      ArrayList<Artifact> artifacts = repository.resolve(depend);
+      ArrayList<Artifact> artifacts
+	= repository.resolve(depend, artifact.getDependencies());
 
       if (artifacts.size() == 0) {
 	throw new ConfigException(L.l("Dependency org={0}, name={1} does not have any matching artifacts",
@@ -186,9 +209,15 @@ public class ArtifactManager
 				      depend.getName()));
       }
       
-      Artifact subArtifact = artifacts.get(0);
+      Artifact subArtifact = findArtifact(artifacts.get(0),
+					  artifactList);
 
-      importList.add(createLoader(parent, subArtifact, createList));
+      subArtifactList.add(subArtifact);
+    }
+
+    for (Artifact subArtifact : subArtifactList) {
+      importList.add(createLoader(parent, subArtifact,
+				  subArtifactList, createList));
     }
     
     createList.remove(artifact);
@@ -207,6 +236,17 @@ public class ArtifactManager
     return loader;
   }
 
+  private Artifact findArtifact(Artifact newArtifact,
+				ArrayList<Artifact> artifactList)
+  {
+    for (Artifact artifact : artifactList) {
+      if (newArtifact.isSameArtifact(artifact))
+	return artifact;
+    }
+
+    return newArtifact;
+  }
+  
   private ArtifactClassLoader findLoader(Artifact artifact)
   {
     for (ArtifactClassLoader loader : _loaderList) {

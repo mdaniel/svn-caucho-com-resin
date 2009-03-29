@@ -33,6 +33,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * A jar artifact in the repository
@@ -98,11 +99,57 @@ public class ArtifactRepository
 
   public ArrayList<Artifact> resolve(ArtifactDependency dependency)
   {
-    ArrayList<Artifact> artifactList = new ArrayList<Artifact>();
+    ArrayList<ArtifactDependency> peers = new ArrayList<ArtifactDependency>();
 
+    return resolve(dependency, peers);
+  }
+
+  public ArrayList<Artifact> resolve(ArtifactDependency dependency,
+				     ArtifactDependency []peerDependencyList)
+  {
+    ArrayList<ArtifactDependency> peers = new ArrayList<ArtifactDependency>();
+
+    for (ArtifactDependency peer : peerDependencyList)
+      peers.add(peer);
+
+    return resolve(dependency, peers);
+  }
+
+  public ArrayList<Artifact> resolve(ArtifactDependency dependency,
+				     ArrayList<ArtifactDependency> peerDependencyList)
+  {
+    ArrayList<Artifact> artifactList = new ArrayList<Artifact>();
     resolve(artifactList, dependency);
 
+    ArrayList<ArtifactDependency> peerDeps
+      = resolvePeer(dependency, peerDependencyList);
+    
+    ArrayList<Artifact> filteredArtifactList = new ArrayList<Artifact>();
+
+    for (Artifact artifact : artifactList) {
+      if (isValid(artifact, peerDeps)) {
+	filteredArtifactList.add(artifact);
+      }
+    }
+
+    if (filteredArtifactList.size() > 0)
+      artifactList = filteredArtifactList;
+
+    Collections.sort(artifactList);
+    Collections.reverse(artifactList);
+
     return artifactList;
+  }
+
+  private boolean isValid(Artifact artifact,
+			  ArrayList<ArtifactDependency> dependencyList)
+  {
+    for (ArtifactDependency dep : dependencyList) {
+      if (! artifact.isMatch(dep))
+	return false;
+    }
+
+    return true;
   }
 
   protected void resolve(ArrayList<Artifact> artifactList,
@@ -113,6 +160,32 @@ public class ArtifactRepository
 
     for (ArtifactResolver resolver : _resolverList)
       resolver.resolve(artifactList, dependency);
+  }
+
+  protected ArrayList<ArtifactDependency>
+    resolvePeer(ArtifactDependency dependency,
+		ArrayList<ArtifactDependency> peerList)
+  {
+    ArrayList<ArtifactDependency> commonDeps
+      = new ArrayList<ArtifactDependency>();
+    
+    for (ArtifactDependency peer : peerList) {
+      if (peer == dependency)
+	continue;
+
+      ArrayList<Artifact> peerArtifacts = resolve(peer);
+
+      for (Artifact peerArtifact : peerArtifacts) {
+	for (ArtifactDependency peerDependency
+	       : peerArtifact.getDependencies()) {
+	  if (peerDependency.isSameArtifact(dependency)) {
+	    commonDeps.add(peerDependency);
+	  }
+	}
+      }
+    }
+
+    return commonDeps;
   }
   
   @Override

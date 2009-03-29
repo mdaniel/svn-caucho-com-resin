@@ -73,7 +73,7 @@ public class ArtifactClassLoader extends EnvironmentClassLoader
     sb.append(",name=").append(artifact.getName());
 
     if (artifact.getVersion() != null)
-      sb.append(",version=").append(artifact.getVersion());
+      sb.append(",version=").append(artifact.getVersion().toDebugString());
 
     return sb.toString();
   }

@@ -50,7 +50,7 @@ public class ModuleConfig
 
   private String _org;
   private String _name;
-  private String _rev;
+  private ArtifactVersionRange _version;
 
   private String _module;
 
@@ -95,7 +95,15 @@ public class ModuleConfig
    */
   public void setRev(String rev)
   {
-    _rev = rev;
+    setVersion(rev);
+  }
+
+  /**
+   * Sets the artifact version
+   */
+  public void setVersion(String version)
+  {
+    _version = ArtifactVersionRange.create(version);
   }
 
   /**
@@ -123,7 +131,7 @@ public class ModuleConfig
 	throw new IllegalStateException(L.l("Cannot find dependency because not repositories are configured."));
 
       ArtifactDependency dependency
-	= new ArtifactDependency(_org, null, _name, _rev);
+	= new ArtifactDependency(_org, null, _name, _version);
 
       EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 

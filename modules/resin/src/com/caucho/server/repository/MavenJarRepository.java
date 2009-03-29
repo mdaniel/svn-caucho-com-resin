@@ -57,12 +57,12 @@ import javax.annotation.PostConstruct;
  */
 @Service
 @Unbound
-public class JarRepository implements ArtifactResolver
+public class MavenJarRepository implements ArtifactResolver
 {
-  private static final L10N L = new L10N(JarRepository.class);
+  private static final L10N L = new L10N(MavenJarRepository.class);
   
   private static final Logger log
-    = Logger.getLogger(JarRepository.class.getName());
+    = Logger.getLogger(MavenJarRepository.class.getName());
   
   private Path _path;
 

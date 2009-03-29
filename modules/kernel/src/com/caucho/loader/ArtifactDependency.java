@@ -41,12 +41,12 @@ public class ArtifactDependency
   private final String _org;
   private final String _module;
   private final String _name;
-  private final String _version; // XXX: -> Version
+  private final ArtifactVersionRange _version;
 
   public ArtifactDependency(String org,
 			    String module,
 			    String name,
-			    String version)
+			    ArtifactVersionRange version)
   {
     _org = org;
     if (org == null)
@@ -80,9 +80,20 @@ public class ArtifactDependency
   /**
    * Returns the artifact's version
    */
-  public String getVersion()
+  public ArtifactVersionRange getVersion()
   {
     return _version;
+  }
+
+  public boolean isSameArtifact(ArtifactDependency dependency)
+  {
+    if (! getOrg().equals(dependency.getOrg()))
+      return false;
+    
+    if (! getName().equals(dependency.getName()))
+      return false;
+
+    return true;
   }
   
   @Override

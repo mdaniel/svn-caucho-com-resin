@@ -37,7 +37,7 @@ import java.util.ArrayList;
 /**
  * A jar artifact in the repository
  */
-public class Artifact
+public class Artifact implements Comparable
 {
   private static final L10N L = new L10N(Artifact.class);
 
@@ -46,7 +46,7 @@ public class Artifact
   private final String _org;
   private final String _module;
   private final String _name;
-  private final String _version; // XXX: -> Version
+  private final ArtifactVersion _version;
 
   private final ArtifactDependency []_dependencies;
 
@@ -54,7 +54,7 @@ public class Artifact
 		  String org,
 		  String module,
 		  String name,
-		  String version,
+		  ArtifactVersion version,
 		  ArrayList<ArtifactDependency> dependencyList)
   {
     _path = path;
@@ -102,7 +102,7 @@ public class Artifact
   /**
    * Returns the artifact's version
    */
-  public String getVersion()
+  public ArtifactVersion getVersion()
   {
     return _version;
   }
@@ -113,6 +113,28 @@ public class Artifact
   public ArtifactDependency []getDependencies()
   {
     return _dependencies;
+  }
+
+  public boolean isSameArtifact(Artifact artifact)
+  {
+    return _org.equals(artifact.getOrg()) && _name.equals(artifact.getName());
+  }
+
+  public int compareTo(Object o)
+  {
+    if (! (o instanceof Artifact))
+      return -1;
+
+    Artifact artifact = (Artifact) o;
+
+    if (_version == null && artifact._version != null)
+      return -1;
+    else if (artifact._version == null && _version != null)
+      return 1;
+    else if (_version == null && artifact._version == null)
+      return 0;
+    else
+      return _version.compareTo(artifact._version);
   }
 
   /**
@@ -127,7 +149,7 @@ public class Artifact
       return false;
 
     if (dependency.getVersion() != null
-	&& ! dependency.getVersion().equals(_version)) {
+	&& ! dependency.getVersion().isMatch(_version)) {
       return false;
     }
 

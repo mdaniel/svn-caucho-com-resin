@@ -33,6 +33,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.Artifact;
 import com.caucho.loader.ArtifactDependency;
+import com.caucho.loader.ArtifactVersion;
+import com.caucho.loader.ArtifactVersionRange;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -48,7 +50,7 @@ public class MavenProject
   
   private String _groupId;
   private String _artifactId;
-  private String _version;
+  private ArtifactVersion _version;
 
   private ArrayList<ArtifactDependency> _dependencyList
     = new ArrayList<ArtifactDependency>();
@@ -74,7 +76,7 @@ public class MavenProject
    */
   public void setVersion(String version)
   {
-    _version = version;
+    _version = ArtifactVersion.create(version);
   }
 
   /**
@@ -130,7 +132,7 @@ public class MavenProject
   public class Dependency {
     private String _groupId;
     private String _artifactId;
-    private String _version;
+    private ArtifactVersionRange _version;
     
     public void setGroupId(String groupId)
     {
@@ -144,7 +146,7 @@ public class MavenProject
     
     public void setVersion(String version)
     {
-      _version = version;
+      _version = ArtifactVersionRange.create(version);
     }
     
     public void addBuilderProgram(ConfigProgram program)
