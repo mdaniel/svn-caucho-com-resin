@@ -34,7 +34,6 @@ import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
-import com.caucho.osgi.OsgiManager;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.naming.Jndi;
@@ -84,7 +83,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private ArrayList<ScanListener> _scanListeners;
   private ArrayList<URL> _pendingScanUrls = new ArrayList<URL>();
 
-  private OsgiManager _osgiManager;
+  private ArtifactManager _artifactManager;
 
   // Array of listeners
   // XXX: this used to be a weak reference list, but that caused problems
@@ -548,52 +547,52 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   }
 
   /**
-   * Returns the osgi manager
+   * Returns the artifact manager
    */
-  public OsgiManager createOsgiManager()
+  public ArtifactManager createArtifactManager()
   {
     synchronized (this) {
-      if (_osgiManager == null)
-	_osgiManager = new OsgiManager(this, getParent());
+      if (_artifactManager == null)
+	_artifactManager = new ArtifactManager(this);
       
-      return _osgiManager;
+      return _artifactManager;
     }
   }
 
   /**
-   * Returns the osgi manager
+   * Returns the artifact manager
    */
-  public OsgiManager getOsgiManager()
+  public ArtifactManager getArtifactManager()
   {
-    return _osgiManager;
+    return _artifactManager;
   }
 
   /**
-   * Returns any import class, e.g. from an osgi bundle
+   * Returns any import class, e.g. from an artifact
    */
   protected Class findImportClass(String name)
   {
-    if (_osgiManager != null)
-      return _osgiManager.findImportClass(name);
+    if (_artifactManager != null)
+      return _artifactManager.findImportClass(name);
     else
       return null;
   }
 
   /**
-   * Get resource from OSGi
+   * Get resource from an artifact
    */
   protected URL getImportResource(String name)
   {
-    if (_osgiManager != null)
-      return _osgiManager.getImportResource(name);
+    if (_artifactManager != null)
+      return _artifactManager.getImportResource(name);
     else
       return null;
   }
 
   protected void buildImportClassPath(StringBuilder sb)
   {
-    if (_osgiManager != null)
-      _osgiManager.buildImportClassPath(sb);
+    if (_artifactManager != null)
+      _artifactManager.buildImportClassPath(sb);
   }
 
   /**
@@ -691,8 +690,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     
     bind();
 
-    if (_osgiManager != null)
-      _osgiManager.start();
+    if (_artifactManager != null)
+      _artifactManager.start();
       
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
@@ -799,7 +798,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _attributes = null;
       _listeners = null;
       _scanListeners = null;
-      _osgiManager = null;
+      _artifactManager = null;
       _stopListener = null;
 
       EnvironmentAdmin admin = _admin;

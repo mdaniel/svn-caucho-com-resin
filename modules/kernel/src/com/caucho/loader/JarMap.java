@@ -51,6 +51,9 @@ import java.util.zip.*;
  * picks up new jars.
  */
 public class JarMap {
+  private static final Logger log
+    = Logger.getLogger(JarMap.class.getName());
+  
   private static final AtomicReference<JarList> _key
     = new AtomicReference<JarList>();
   
@@ -134,8 +137,85 @@ public class JarMap {
     return null;
   }
 
+  public Iterator<String> keys()
+  {
+    return new JarKeyIterator();
+  }
+
   private void resize()
   {
+  }
+
+  public void scan(Path jar)
+  {
+    JarEntry jarEntry = new JarEntry(JarPath.create(jar));
+
+    scan(jar, jarEntry);
+  }
+
+  public void scan(Path jar, JarEntry jarEntry)
+  {
+    ZipScanner scan = null;
+      
+    try {
+      boolean isScan = true;
+      boolean isValidScan = false;
+
+      try {
+	if (isScan && jar.canRead()) {
+	  scan = new ZipScanner(jar);
+	}
+	
+	if (scan != null && scan.open()) {
+	  while (scan.next()) {
+	    char []buffer = scan.getNameBuffer();
+	    int length = scan.getNameLength();
+	      
+	    add(buffer, length, jarEntry);
+
+	    // server/249b
+	    /*
+	      if (name.endsWith("/"))
+	      name = name.substring(0, name.length() - 1);
+	    */
+	  }
+
+	  isValidScan = true;
+	}
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+
+	isScan = false;
+      }
+	
+      if (! isValidScan && jar.canRead()) {
+	ZipFile file = new ZipFile(jar.getNativePath());
+
+	Enumeration<? extends ZipEntry> e = file.entries();
+	while (e.hasMoreElements()) {
+	  ZipEntry entry = e.nextElement();
+	  String name = entry.getName();
+
+	  add(name, jarEntry);
+
+	  // server/249b
+	  /*
+	    if (name.endsWith("/"))
+	    name = name.substring(0, name.length() - 1);
+	  */
+	}
+
+	file.close();
+      }
+    } catch (IOException e) {
+      if (jar.canRead())
+	log.log(Level.WARNING, e.toString(), e);
+      else
+	log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (scan != null)
+	scan.close();
+    }
   }
 
   public void clear()
@@ -195,6 +275,11 @@ public class JarMap {
       _name = newName;
     }
 
+    String getNameString()
+    {
+      return new String(_name, 0, _length);
+    }
+
     JarEntry getEntry()
     {
       return _entry;
@@ -248,6 +333,53 @@ public class JarMap {
     {
       return (getClass().getSimpleName()
 	      + "[" + new String(_name, 0, _length) + "]");
+    }
+  }
+
+  class JarKeyIterator implements Iterator<String> {
+    private int _index;
+    private JarList _entry;
+
+    JarKeyIterator()
+    {
+      for (; _index < _entries.length; _index++) {
+	_entry = _entries[_index];
+
+	if (_entry != null)
+	  break;
+      }
+    }
+
+    public boolean hasNext()
+    {
+      return _entry != null;
+    }
+
+    public String next()
+    {
+      JarList next = _entry;
+      
+      if (_entry != null)
+	_entry = _entry._nextHash;
+      
+      if (_entry == null) {
+	for (_index++; _index < _entries.length; _index++) {
+	  _entry = _entries[_index];
+
+	  if (_entry != null)
+	    break;
+	}
+      }
+
+      if (next != null)
+	return next.getNameString();
+      else
+	return null;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException(getClass().getName());
     }
   }
 }

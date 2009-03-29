@@ -437,6 +437,7 @@ public class WebApp extends ServletContextImpl
    */
   public void preConfigInit()
   {
+    /*
     OsgiManager manager = _classLoader.createOsgiManager();
 
     _osgiBundle = new OsgiWebAppBundle(manager, this);
@@ -446,6 +447,7 @@ public class WebApp extends ServletContextImpl
     webBeans.addSingleton(_osgiBundle.getBundleContext(),
 			  CauchoDeployment.class, (String) null,
 			  BundleContext.class);
+    */
   }
 
   /**

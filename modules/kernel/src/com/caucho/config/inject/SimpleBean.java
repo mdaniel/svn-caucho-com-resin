@@ -499,6 +499,11 @@ public class SimpleBean extends ComponentImpl
       return value;
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else
+	throw new CreationException(e.getCause());
     } catch (Exception e) {
       throw new CreationException(e);
     }

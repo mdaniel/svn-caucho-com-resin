@@ -1,0 +1,242 @@
+/*
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.loader;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import java.net.URL;
+import java.util.ArrayList;
+
+/**
+ * A jar artifact in the repository
+ */
+public class ArtifactManager
+{
+  private static final L10N L = new L10N(ArtifactManager.class);
+
+  private EnvironmentClassLoader _loader;
+
+  private ArrayList<ArtifactDependency> _pendingList
+    = new ArrayList<ArtifactDependency>();
+
+  private ArrayList<Artifact> _artifactList
+    = new ArrayList<Artifact>();
+
+  private ArrayList<Entry> _entryList
+    = new ArrayList<Entry>();
+
+  private ArrayList<ArtifactClassLoader> _loaderList
+    = new ArrayList<ArtifactClassLoader>();
+
+  ArtifactManager(EnvironmentClassLoader loader)
+  {
+    _loader = loader;
+  }
+
+  public void addDependency(ArtifactDependency dependency)
+  {
+    ArtifactRepository repository = ArtifactRepository.getCurrent();
+
+    if (repository == null) {
+      throw new ConfigException(L.l("Artifact dependency org='{0}', name='{1}' is not valid because no artifact repositories have been defined",
+				    dependency.getOrg(),
+				    dependency.getName()));
+    }
+
+    ArrayList<Artifact> artifactList = repository.resolve(dependency);
+
+    if (artifactList == null || artifactList.size() == 0) {
+      throw new ConfigException(L.l("Dependency org='{0}', name='{1}' does not match any jars in the repository",
+				    dependency.getOrg(),
+				    dependency.getName()));
+    }
+
+    _pendingList.add(dependency);
+  }
+
+  public void start()
+  {
+    resolve();
+  }
+
+  public Class findImportClass(String name)
+  {
+    resolve();
+
+    for (int i = 0; i < _entryList.size(); i++) {
+      Entry entry = _entryList.get(i);
+
+      try {
+	Class cl = entry.getLoader().findClassImpl(name);
+
+	if (cl != null)
+	  return cl;
+      } catch (ClassNotFoundException e) {
+      }
+    }
+    
+    return null;
+  }
+
+  public URL getImportResource(String name)
+  {
+    resolve();
+    
+    return null;
+  }
+
+  public void buildImportClassPath(StringBuilder sb)
+  {
+    resolve();
+
+    for (Entry entry : _entryList) {
+      entry.getLoader().buildClassPathImpl(sb);
+    }
+  }
+
+  private void resolve()
+  {
+    synchronized (this) {
+      if (_pendingList.size() == 0)
+	return;
+      
+      ArrayList<ArtifactDependency> pendingList
+	= new ArrayList<ArtifactDependency>(_pendingList);
+
+      ArtifactRepository repository = ArtifactRepository.getCurrent();
+
+      ArrayList<Artifact> artifactList = new ArrayList<Artifact>();
+      
+      for (ArtifactDependency depend : pendingList) {
+	ArrayList<Artifact> artifacts = repository.resolve(depend);
+
+	Artifact artifact = artifacts.get(0);
+
+	artifactList.add(artifact);
+      }
+
+      for (Artifact artifact : artifactList) {
+	ArrayList<Artifact> createList = new ArrayList<Artifact>();
+	
+	ArtifactClassLoader loader
+	  = createLoader(_loader.getParent(), artifact, createList);
+	
+	_entryList.add(new Entry(artifact, loader));
+      }
+    }
+
+    // XXX: timing
+    for (Entry entry : _entryList) {
+      entry.getLoader().start();
+    }
+  }
+
+  private ArtifactClassLoader createLoader(ClassLoader parent,
+					   Artifact artifact,
+					   ArrayList<Artifact> createList)
+  {
+    if (createList.contains(artifact)) {
+      throw new ConfigException(L.l("Dependency loop detected at {0} while creating artifact {1}",
+				    artifact,
+				    createList.get(0)));
+    }
+
+    createList.add(artifact);
+    
+    ArtifactRepository repository = ArtifactRepository.getCurrent();
+    
+    ArrayList<ArtifactClassLoader> importList
+      = new ArrayList<ArtifactClassLoader>();
+
+    for (ArtifactDependency depend : artifact.getDependencies()) {
+      ArrayList<Artifact> artifacts = repository.resolve(depend);
+
+      if (artifacts.size() == 0) {
+	throw new ConfigException(L.l("Dependency org={0}, name={1} does not have any matching artifacts",
+				      depend.getOrg(),
+				      depend.getName()));
+      }
+      
+      Artifact subArtifact = artifacts.get(0);
+
+      importList.add(createLoader(parent, subArtifact, createList));
+    }
+    
+    createList.remove(artifact);
+
+    
+    ArtifactClassLoader loader = findLoader(artifact);
+
+    if (loader == null) {
+      loader = new ArtifactClassLoader(_loader.getParent(),
+				       artifact,
+				       importList);
+
+      _loaderList.add(loader);
+    }
+
+    return loader;
+  }
+
+  private ArtifactClassLoader findLoader(Artifact artifact)
+  {
+    for (ArtifactClassLoader loader : _loaderList) {
+      if (loader.getArtifact().equals(artifact))
+	return loader;
+    }
+
+    return null;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName() + "[" + _loader + "]");
+  }
+
+  static class Entry {
+    private Artifact _artifact;
+    private ArtifactClassLoader _loader;
+
+    Entry(Artifact artifact,
+	  ArtifactClassLoader loader)
+    {
+      _artifact = artifact;
+      _loader = loader;
+    }
+
+    ArtifactClassLoader getLoader()
+    {
+      return _loader;
+    }
+  }
+}

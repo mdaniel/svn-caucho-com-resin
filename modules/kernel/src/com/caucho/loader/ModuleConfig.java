@@ -117,6 +117,22 @@ public class ModuleConfig
       path = _path;
     }
     else {
+      ArtifactRepository repository = ArtifactRepository.getCurrent();
+
+      if (repository == null)
+	throw new IllegalStateException(L.l("Cannot find dependency because not repositories are configured."));
+
+      ArtifactDependency dependency
+	= new ArtifactDependency(_org, null, _name, _rev);
+
+      EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
+
+      loader.createArtifactManager().addDependency(dependency);
+
+      return;
+    }
+    /*
+    else {
       ModuleRepository repository = ModuleRepository.getCurrent();
 
       if (repository == null)
@@ -124,6 +140,7 @@ public class ModuleConfig
 
       path = repository.findArtifact(_org, _module, _name, _rev, "jar");
     }
+    */
 
     if (path == null)
       throw new ConfigException(L.l("Can't find artifact '{0}'",

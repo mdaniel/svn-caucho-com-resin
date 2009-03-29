@@ -1448,8 +1448,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     */
 
     // server/2439
-    name = name.replace('/', '.');
-    name = name.replace('\\', '.');
+    if (name.indexOf('/') >= 0)
+      name = name.replace('/', '.');
+    
+    if (name.indexOf('\\') >= 0)
+      name = name.replace('\\', '.');
 
     ClassEntry entry = null;
 

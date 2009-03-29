@@ -163,69 +163,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
       _pathMap = new JarMap();
 
     if (_pathMap != null) {
-      ZipScanner scan = null;
-      
-      try {
-	JarMap pathMap = _pathMap;
-
-	boolean isScan = true;
-	boolean isValidScan = false;
-
-	try {
-	  if (isScan && jar.canRead()) {
-	    scan = new ZipScanner(jar);
-	  }
-	
-	  if (scan != null && scan.open()) {
-	    while (scan.next()) {
-	      char []buffer = scan.getNameBuffer();
-	      int length = scan.getNameLength();
-	      
-	      pathMap.add(buffer, length, jarEntry);
-
-	      // server/249b
-	      /*
-		if (name.endsWith("/"))
-		name = name.substring(0, name.length() - 1);
-	      */
-	    }
-
-	    isValidScan = true;
-	  }
-	} catch (Exception e) {
-	  log.log(Level.FINER, e.toString(), e);
-
-	  isScan = false;
-	}
-	
-	if (! isValidScan && jar.canRead()) {
-	  ZipFile file = new ZipFile(jar.getNativePath());
-
-	  Enumeration<? extends ZipEntry> e = file.entries();
-	  while (e.hasMoreElements()) {
-	    ZipEntry entry = e.nextElement();
-	    String name = entry.getName();
-
-	    pathMap.add(name, jarEntry);
-
-	    // server/249b
-	    /*
-	      if (name.endsWith("/"))
-		name = name.substring(0, name.length() - 1);
-	    */
-	  }
-
-	  file.close();
-	}
-      } catch (IOException e) {
-	if (jar.canRead())
-	  log.log(Level.WARNING, e.toString(), e);
-	else
-	  log.log(Level.FINER, e.toString(), e);
-      } finally {
-	if (scan != null)
-	  scan.close();
-      }
+      _pathMap.scan(jar, jarEntry);
     }
   }
 
