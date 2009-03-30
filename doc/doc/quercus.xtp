@@ -717,8 +717,8 @@ var_dump($calendar);
   # System.in
   $in = $class->in;
   
-  # System.currentTimeInMillis();
-  $time = $class->currentTimeInMillis();
+  # System.currentTimeMillis();
+  $time = $class->currentTimeMillis();
 
 ?>
 </example>
