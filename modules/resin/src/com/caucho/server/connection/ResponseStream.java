@@ -542,8 +542,9 @@ class ResponseStream extends ToByteResponseStream {
 	}
       }
 
-      if (! _response.isClientDisconnect())
+      if (! _response.isClientDisconnect()) {
         _contentLength += length;
+      }
     } catch (ClientDisconnectException e) {
       // server/183c
       _response.killCache();

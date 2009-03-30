@@ -222,7 +222,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (_charLength > 0)
       flushCharBuffer();
     
-    _bufferSize += (offset - _byteLength);
+    // _bufferSize += (offset - _byteLength);
     _byteLength = offset;
   }
 
