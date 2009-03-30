@@ -506,7 +506,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    return _bufferSize;
+    return _bufferSize + _byteLength;
   }
 
   /**
