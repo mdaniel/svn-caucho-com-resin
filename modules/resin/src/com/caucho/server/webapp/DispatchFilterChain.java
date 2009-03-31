@@ -92,14 +92,21 @@ public class DispatchFilterChain implements FilterChain {
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    CauchoRequest cauchoReq = (CauchoRequest) request;
-    AbstractHttpRequest abstractReq = cauchoReq.getAbstractHttpRequest();
-    Invocation oldInvocation = abstractReq.getInvocation();
+    CauchoRequest cauchoReq = null;
+    AbstractHttpRequest abstractReq = null;
+    Invocation oldInvocation = null;
+
+    if (request instanceof CauchoRequest) {
+      cauchoReq = (CauchoRequest) request;
+      abstractReq = cauchoReq.getAbstractHttpRequest();
+      oldInvocation = abstractReq.getInvocation();
+    }
     
     try {
       thread.setContextClassLoader(_classLoader);
 
-      abstractReq.setInvocation(_invocation);
+      if (abstractReq != null)
+	abstractReq.setInvocation(_invocation);
 
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);
@@ -115,7 +122,9 @@ public class DispatchFilterChain implements FilterChain {
 	_requestListeners[i].requestDestroyed(event);
       }
 
-      abstractReq.setInvocation(oldInvocation);
+      if (abstractReq != null)
+	abstractReq.setInvocation(oldInvocation);
+      
       thread.setContextClassLoader(oldLoader);
     }
   }
