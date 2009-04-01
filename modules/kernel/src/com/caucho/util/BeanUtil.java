@@ -322,36 +322,31 @@ public class BeanUtil {
    */
   public static Method getSetMethod(BeanInfo info, String propertyName)
   {
-    // jsp, 184c, jsp/184z, bug #2634
+    // jsp/184c, jsp/184z, jsp/18o1 bug #2634, #3066
 
-    Method method;
-    
-    method = getSetMethod(info.getBeanDescriptor().getBeanClass(),
-			  propertyName);
-
-    if (method != null)
-      return method;
+    Method method = getSetMethod(info.getBeanDescriptor().getBeanClass(),
+				 propertyName);
     
     PropertyDescriptor []pds = info.getPropertyDescriptors();
 
-    Method bestMethod = null;
+    Method bestMethod = method;
 
     for (int i = 0; i < pds.length; i++) {
       if (pds[i].getName().equals(propertyName)
 	  && pds[i].getWriteMethod() != null) {
-        method = pds[i].getWriteMethod();
+        Method writeMethod = pds[i].getWriteMethod();
 
-        if (method.getParameterTypes()[0].equals(String.class))
-          return method;
+	if (method != null && writeMethod.getName().equals(method.getName()))
+	  continue;
+
+        if (writeMethod.getParameterTypes()[0].equals(String.class))
+          return writeMethod;
 	else
-	  bestMethod = method;
+	  bestMethod = writeMethod;
       }
     }
 
-    if (method != null)
-      return method;
-
-    return null;
+    return bestMethod;
   }
   
   /**
