@@ -61,24 +61,13 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
     return _session;
   }
 
-  @Override
-  public void addMessageAvailableListener(MessageAvailableListener consumer)
-  {
-    if (! _consumerList.contains(consumer))
-      _consumerList.add(consumer);
-  }
-
-  @Override
-  public void removeMessageAvailableListener(MessageAvailableListener consumer)
-  {
-    _consumerList.remove(consumer);
-  }
-
   public void delete()
     throws JMSException
   {
+    /*
     if (_consumerList.size() > 0)
       throw new javax.jms.IllegalStateException(L.l("temporary topic is still active"));
+    */
   }
 }
 

@@ -29,6 +29,8 @@
 
 package com.caucho.jms.event;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
@@ -101,14 +103,14 @@ public class EventTopic extends AbstractTopic
   }
 
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
 		   long timeout)
-    throws JMSException
+    throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, priority, timeout);
+      _subscriptionList.get(i).send(msgId, payload, priority, timeout);
     }
   }
 }

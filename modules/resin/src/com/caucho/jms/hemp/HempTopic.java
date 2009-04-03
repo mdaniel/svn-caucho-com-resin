@@ -191,11 +191,10 @@ public class HempTopic extends AbstractTopic
   }
 
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
 		   long timeout)
-    throws JMSException
   {
     // _xmppNode.send(session, msg, timeout);
   }

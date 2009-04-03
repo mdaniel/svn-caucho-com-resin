@@ -892,7 +892,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     // server/05e8 (tck)
-    if (isCommitted()) {
+    // XXX: server/13w0 for _isHeaderWritten because the Expires in caching
+    // occurs after the output fills (committed), which contradicts the tck
+    // requirements
+    if (isCommitted() && ! _isHeaderWritten) {
       return;
     }
 

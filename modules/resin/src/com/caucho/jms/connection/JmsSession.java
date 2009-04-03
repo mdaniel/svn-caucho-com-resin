@@ -595,6 +595,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   {
     if (log.isLoggable(Level.FINE))
       log.fine(toString() + " active");
+
+    synchronized (_consumers) {
+      for (MessageConsumerImpl consumer : _consumers) {
+	consumer.start();
+      }
+    }
     
     notifyMessageAvailable();
   }
@@ -830,7 +836,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     if (Alarm.isTest()) {
       // the yield is only needed for the regressions
-      Thread.yield();
+      try {
+	Thread.sleep(10);
+      } catch (Exception e) {
+      }
     }
 
     return true;
@@ -893,7 +902,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
       
-      queue.send(this, message, priority, expireTime);
+      queue.send(message.getJMSMessageID(), message, priority, expireTime);
     }
   }
 
@@ -1166,7 +1175,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     void commit()
       throws JMSException
     {
-      _queue.send(JmsSession.this,
+      _queue.send(_message.getJMSMessageID(),
 		  _message,
 		  _message.getJMSPriority(),
 		  _expires);

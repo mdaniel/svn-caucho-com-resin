@@ -27,35 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.memory;
-
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.queue.QueueEntry;
-import com.caucho.util.Alarm;
+package com.caucho.jms.queue;
 
 import java.io.Serializable;
 
 /**
- * Entry in a memory queue.
+ * Common interface for message queues and topics
  */
-public class MemoryQueueEntry extends QueueEntry
-{  
-  private Serializable _payload;
-
-  public MemoryQueueEntry(String msgId,
-			  long leaseTimeout,
-			  int priority,
-			  long expiresTime,
-			  Serializable payload)
-  {
-    super(msgId, leaseTimeout, priority, expiresTime);
-
-    if (payload != null)
-      _payload = payload;
-  }
-  
-  public Serializable getPayload()
-  {
-    return _payload;
-  }
+public interface MessageDestination
+{
+  /**
+   * Sends a message to the destination
+   */
+  public void send(String msgId,
+		   Serializable msg,
+		   int priority,
+		   long expires)
+    throws MessageException;
 }
+

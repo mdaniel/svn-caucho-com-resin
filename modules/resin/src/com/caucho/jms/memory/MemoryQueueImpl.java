@@ -29,6 +29,8 @@
 
 package com.caucho.jms.memory;
 
+import java.io.Serializable;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +42,7 @@ import com.caucho.jms.queue.QueueEntry;
 /**
  * Implements a memory queue.
  */
-public class MemoryQueueImpl extends AbstractMemoryQueue
+public class MemoryQueueImpl extends AbstractMemoryQueue<MemoryQueueEntry>
 {
   private static final Logger log
     = Logger.getLogger(MemoryQueueImpl.class.getName());
@@ -59,65 +61,30 @@ public class MemoryQueueImpl extends AbstractMemoryQueue
    * active listeners.
    */
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
-		   long expires)
+		   long expireTime)
   {
-    addEntry(msg.getJMSMessageID(), -1, priority, expires, msg);
-
-    notifyMessageAvailable();
-  }
-  
-  /**
-   * Polls the next message.
-   */
-  @Override
-  public MessageImpl receive(boolean isAutoAck)
-  {
-    QueueEntry entry = receiveImpl(isAutoAck);
-
-    if (entry != null) {
-      try {
-        MessageImpl msg = (MessageImpl) entry.getPayload();
-
-        if (log.isLoggable(Level.FINER))
-          log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
-
-        if (isAutoAck || msg == null) {
-          synchronized (_queueLock) {
-            removeEntry(entry);
-          }
-        }
-
-        return msg;
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-
-    return null;
-  }  
-
-  /**
-   * Adds a message entry from startup.
-   */
-  QueueEntry addEntry(String msgId,
-                          long leaseTimeout,
-                          int priority,
-                          long expire,
-                          MessageImpl payload)
-  {
-    if (priority < 0)
-      priority = 0;
-    else if (_head.length <= priority)
-      priority = _head.length;
-
-    MemoryQueueEntry entry
-      = new MemoryQueueEntry(msgId, leaseTimeout, priority, expire, payload);
+    int leaseTimeout = -1;
     
-    return addEntry(entry);
-  }  
+    MemoryQueueEntry entry
+      = new MemoryQueueEntry(msgId,
+			     leaseTimeout, priority, expireTime,
+			     payload);
 
+    addQueueEntry(entry);
+  }
+
+  @Override
+  protected Serializable readPayload(MemoryQueueEntry entry)
+  {
+    return entry.getPayload();
+  }
+
+  @Override
+  protected void acknowledge(MemoryQueueEntry entry)
+  {
+  }
 }
 

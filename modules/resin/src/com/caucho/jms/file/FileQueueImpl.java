@@ -39,6 +39,7 @@ import javax.jms.Topic;
 import com.caucho.jms.connection.JmsSession;
 import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.AbstractMemoryQueue;
+import com.caucho.jms.queue.MessageException;
 import com.caucho.jms.queue.QueueEntry;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
@@ -67,16 +68,19 @@ import com.caucho.vfs.Path;
  * &lt;/web-app>
  * </pre>
  */
-public class FileQueueImpl extends AbstractMemoryQueue implements Topic
+public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
+  implements Topic
 {
   private static final Logger log
     = Logger.getLogger(FileQueueImpl.class.getName());
 
   private final FileQueueStore _store;
 
-  private byte []_hash;
+  private byte []_queueIdHash;
 
   private volatile boolean _isStartComplete;
+
+  private Object _dispatchLock = new Object();
 
   public FileQueueImpl()
   {
@@ -114,8 +118,9 @@ public class FileQueueImpl extends AbstractMemoryQueue implements Topic
   //
 
   /**
-   * Sets the path to the backing database
+   * Backward compatibility
    */
+  @Deprecated
   public void setPath(Path path)
   {
   }
@@ -125,6 +130,10 @@ public class FileQueueImpl extends AbstractMemoryQueue implements Topic
     return null;
   }
 
+  /**
+   * Backward compatibility
+   */
+  @Deprecated
   public void setTablePrefix(String prefix)
   {
     
@@ -151,165 +160,71 @@ public class FileQueueImpl extends AbstractMemoryQueue implements Topic
       String env = Environment.getEnvironmentName();
 
       digest.update(env.getBytes());
+      
       if (Server.getCurrent() != null)
 	digest.update(Server.getCurrent().getServerId().getBytes());
+      
       digest.update(getClass().getSimpleName().getBytes());
       digest.update(getName().getBytes());
 
-      _hash = digest.digest();
+      _queueIdHash = digest.digest();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
       
-    _isStartComplete = _store.receiveStart(_hash, this);
+    _isStartComplete = _store.receiveStart(_queueIdHash, this);
   }
-
-  /**
-   * 
-   * @param entry
-   * @return        Payload associated with the entry.
-   */
-  protected MessageImpl getPayload(QueueEntry entry) 
-  { 
-    if (entry == null) {
-      return null;
-    }
-
-    MessageImpl msg = (MessageImpl) entry.getPayload();
-
-    // Read it from the backed-up medium.
-    if (msg == null) {
-      msg = (MessageImpl) _store.readMessage(((FileQueueEntry)entry).getId());
-      entry.setPayload(msg);
-    }
-    return msg;
-  } 
   
   /**
    * Adds the message to the persistent store.  Called if there are no
    * active listeners.
    *
-   * @param msg the message to store
-   * @param expires the expires time
+   * @param msgId the queue's unique identifier for the message
+   * @param payload the message payload to store
+   * @param priority the message priority
+   * @param expireTime the expires time
    */
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
-		   long expires)
+		   long expireTime)
   {
-    long id = _store.send(_hash, msg.getJMSMessageID(),
-			  msg, priority, expires);
+    long id = _store.send(_queueIdHash, msgId, payload, priority, expireTime);
 
-    addEntry(id, msg.getJMSMessageID(), -1, priority, expires, msg);
+    long leaseTimeout = -1;
 
-    notifyMessageAvailable();
+    FileQueueEntry entry = new FileQueueEntry(id, msgId, leaseTimeout,
+					      priority, expireTime, payload);
+
+    addQueueEntry(entry);
   }
 
-  /**
-   * Adds the message to the persistent store.  Called if there are no
-   * active listeners.
-   *
-   * @param msg the message to store
-   * @param expires the expires time
-   */
-  public void sendBackup(JmsSession session,
-			 MessageImpl msg,
-			 long leaseTimeout,
-			 int priority,
-			 long expires)
-  {
-    long id = _store.send(_hash, msg.getJMSMessageID(), msg,
-			  priority, expires);
-
-    addEntry(id, msg.getJMSMessageID(), leaseTimeout,
-	     priority, expires, msg);
-  }
-
-  /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
-   */
   @Override
-  public MessageImpl receive(boolean isAutoAck)
+  protected Serializable readPayload(FileQueueEntry entry)
   {
-    FileQueueEntry entry = (FileQueueEntry)receiveImpl(isAutoAck);
+    Serializable payload = _store.readMessage(entry.getId());
 
-    if (entry != null) {
-      try {
-	MessageImpl msg = (MessageImpl) entry.getPayload();
-
-	if (msg == null) {
-	  msg = (MessageImpl) _store.readMessage(entry.getId());
-	  entry.setPayload(msg);
-	}
-	
-	msg.setReceive();
-
-	if (log.isLoggable(Level.FINER))
-	  log.finer(this + " receive " + msg + " auto-ack=" + isAutoAck);
-
-	if (isAutoAck || msg == null) {
-	  synchronized (_queueLock) {
-	    removeEntry(entry);
-	  }
-	
-	  _store.delete(entry.getId());
-	}
-
-	if (msg != null)
-	  return msg;
-      } catch (Exception e) {
-	e.printStackTrace();
-      }
-    }
-
-    // System.out.println("ENTRY: " + isEntryAvailable + " " + _isStartComplete);
-    if (! _isStartComplete) {
-      synchronized (this) {
-	if (! _isStartComplete)
-	  _isStartComplete = _store.receiveStart(_hash, this);
-      }
-
-      return receive(isAutoAck);
-    }
-
-    return null;
+    return payload;
   }
 
-  /**
-   * Acknowledges the receipt of a message.
-   * Removes the message from the store.
-   */
   @Override
-  public void acknowledge(String msgId)
+  protected void acknowledge(FileQueueEntry entry)
   {
-    FileQueueEntry entry = (FileQueueEntry)acknowledgeImpl(msgId);
-
-    if (entry != null)
-      _store.delete(entry.getId());
+    _store.delete(entry.getId());
   }
-  
+
   /**
-   * Adds a message entry from startup.
+   * Callback from startup
    */
-  FileQueueEntry addEntry(long id,
-			  String msgId,
-			  long leaseTimeout,
-			  int priority,
-			  long expire,
+  protected void addEntry(long id, String msgId, long leaseTimeout,
+			  int priority, long expireTime,
 			  Serializable payload)
   {
-    if (priority < 0)
-      priority = 0;
-    else if (_head.length <= priority)
-      priority = _head.length;
+    FileQueueEntry entry = new FileQueueEntry(id, msgId, leaseTimeout,
+					      priority, expireTime, payload);
 
-    FileQueueEntry entry
-      = new FileQueueEntry(id, msgId, leaseTimeout,
-			   priority, expire, payload);
-
-    return (FileQueueEntry)addEntry(entry);
+    addQueueEntry(entry);
   }
 }
 

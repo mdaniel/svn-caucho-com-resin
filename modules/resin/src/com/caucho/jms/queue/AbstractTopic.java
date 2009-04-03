@@ -29,13 +29,18 @@
 
 package com.caucho.jms.queue;
 
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.*;
+
+import java.io.Serializable;
 
 import javax.annotation.*;
 import javax.jms.*;
 
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
+import com.caucho.util.Alarm;
 
 import com.caucho.util.L10N;
 
@@ -81,5 +86,99 @@ abstract public class AbstractTopic extends AbstractDestination
                                                  boolean noLocal);
 
   public abstract void closeSubscriber(AbstractQueue subscriber);
+
+  //
+  // BlockingQueue api
+  //
+
+  public int size()
+  {
+    return 0;
+  }
+
+  public Iterator iterator()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Adds the item to the queue, waiting if necessary
+   */
+  public boolean offer(Object value, long timeout, TimeUnit unit)
+  {
+    int priority = 0;
+      
+    timeout = unit.toMillis(timeout);
+
+    long expires = Alarm.getCurrentTime() + timeout;
+      
+    send(generateMessageID(), (Serializable) value, priority, expires);
+
+    return true;
+  }
+
+  public boolean offer(Object value)
+  {
+    return offer(value, 0, TimeUnit.SECONDS);
+  }
+
+  public void put(Object value)
+  {
+    offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
+  }
+
+  public Object poll(long timeout, TimeUnit unit)
+  {
+    long msTimeout = unit.toMillis(timeout);
+    
+    Serializable payload = receive(msTimeout);
+
+    try {
+      if (payload == null)
+	return null;
+      else if (payload instanceof ObjectMessage)
+	return ((ObjectMessage) payload).getObject();
+      else if (payload instanceof TextMessage)
+	return ((TextMessage) payload).getText();
+      else if (payload instanceof Serializable)
+	return payload;
+      else
+	throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
+				       payload));
+    } catch (JMSException e) {
+      throw new MessageException(e);
+    }
+  }
+
+  public int remainingCapacity()
+  {
+    return Integer.MAX_VALUE;
+  }
+
+  public Object peek()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public Object poll()
+  {
+    return poll(0, TimeUnit.MILLISECONDS);
+  }
+
+  public Object take()
+  {
+    return poll(Integer.MAX_VALUE, TimeUnit.SECONDS);
+  }
+
+  public int drainTo(Collection c)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public int drainTo(Collection c, int max)
+  {
+    throw new UnsupportedOperationException();
+  }
+
 }
 

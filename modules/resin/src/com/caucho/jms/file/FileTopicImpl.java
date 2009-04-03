@@ -29,6 +29,8 @@
 
 package com.caucho.jms.file;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
@@ -129,20 +131,20 @@ public class FileTopicImpl extends AbstractTopic
   }
 
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
 		   long timeout)
-    throws JMSException
+    throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, priority, timeout);
+      _subscriptionList.get(i).send(msgId, payload, priority, timeout);
     }
   }
 
   public String toString()
   {
-    return "FileTopic[" + getTopicName() + "]";
+    return getClass().getSimpleName() + "[" + getTopicName() + "]";
   }
 }
 

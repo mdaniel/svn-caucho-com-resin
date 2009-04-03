@@ -65,19 +65,6 @@ abstract public class AbstractDestination
   
   private String _name = "default";
 
-  protected MessageFactory _messageFactory = new MessageFactory();
-  
-  // queue api
-  private ConnectionFactoryImpl _connectionFactory;
-  private Connection _conn;
-
-  private Object _readLock = new Object();
-  private Object _writeLock = new Object();
-
-  private JmsSession _writeSession;
-  private JmsSession _readSession;
-  private MessageConsumerImpl _consumer;
-
   // serialization
   private Object _serializationHandle;
 
@@ -136,49 +123,43 @@ abstract public class AbstractDestination
   //
   // runtime methods
   //
-  
+
   /**
-   * Adds a new listener to receive message available events.  The listener
-   * will wake or spawn a thread to handle the new message.  It MUST NOT
-   * handle the message on the event thread.
-   * 
-   * Each listener should be associated with a single thread, i.e. multiple
-   * notifyMessageAvailable() calls MUST NOT spawn multiple threads.  This
-   * single-thread restriction is necessary to properly manage round-robin
-   * behavior.
-   * 
-   * @param consumer
+   * Creates a new random message identifier.
    */
-  public void addMessageAvailableListener(MessageAvailableListener consumer)
+  public final String generateMessageID()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    StringBuilder cb = new StringBuilder();
+
+    cb.append("ID:");
+    generateMessageID(cb);
+
+    return cb.toString();
   }
-  
+
   /**
-   * Removes the consumer receiving messages.
+   * Customization of the message id for different queue/topics
    */
-  public void removeMessageAvailableListener(MessageAvailableListener consumer)
+  protected void generateMessageID(StringBuilder cb)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    long id = _idCount.getAndIncrement();
+
+    Base64.encode(cb, _idRandom);
+    Base64.encode(cb, id);
   }
 
   /**
    * Sends a message to the queue
    */
-  abstract public void send(JmsSession session,
-			    MessageImpl msg,
+  abstract public void send(String msgId,
+			    Serializable msg,
 			    int priority,
 			    long expires)
-    throws JMSException;
+    throws MessageException;
+
   
-  /**
-   * Polls the next message from the store.  Returns null if no message
-   * is available.
-   *
-   * @param isAutoAcknowledge if true, automatically acknowledge the message
-   */
-  public MessageImpl receive(boolean isAutoAcknowledge)
-    throws JMSException
+  public Serializable receive(long timeout)
+    throws MessageException
   {
     return null;
   }
@@ -207,178 +188,9 @@ abstract public class AbstractDestination
   {
   }
 
-  /**
-   * Creates a new random message identifier.
-   */
-  public final String generateMessageID()
-  {
-    StringBuilder cb = new StringBuilder();
-
-    cb.append("ID:");
-    generateMessageID(cb);
-
-    return cb.toString();
-  }
-
-  protected void generateMessageID(StringBuilder cb)
-  {
-    long id = _idCount.getAndIncrement();
-
-    Base64.encode(cb, _idRandom);
-    Base64.encode(cb, id);
-  }
-
   public Destination getJMSDestination()
   {
     return new DestinationHandle(toString());
-  }
-
-  //
-  // BlockingQueue api
-  //
-
-  public int size()
-  {
-    return 0;
-  }
-
-  public Iterator iterator()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Adds the item to the queue, waiting if necessary
-   */
-  public boolean offer(Object value, long timeout, TimeUnit unit)
-  {
-    try {
-      synchronized (_writeLock) {
-	JmsSession session = getWriteSession();
-
-	Message msg;
-
-	if (value instanceof Message)
-	  msg = (Message) value;
-	else
-	  msg = session.createObjectMessage((Serializable) value);
-	
-	session.send(this, msg, 0, 0, Integer.MAX_VALUE);
-
-	return true;
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new JmsRuntimeException(e);
-    }
-  }
-
-  public Object poll(long timeout, TimeUnit unit)
-  {
-    try {
-      synchronized (_readLock) {
-	MessageConsumerImpl consumer = getReadConsumer();
-
-	long msTimeout = unit.toMillis(timeout);
-
-	Message msg = consumer.receive(msTimeout);
-
-	if (msg instanceof ObjectMessage) {
-	  return ((ObjectMessage) msg).getObject();
-	}
-	else if (msg instanceof TextMessage) {
-	  return ((TextMessage) msg).getText();
-	}
-	else if (msg == null)
-	  return null;
-	else
-	  throw new JmsRuntimeException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
-					    msg));
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new JmsRuntimeException(e);
-    }
-  }
-
-  public boolean offer(Object value)
-  {
-    return offer(value, 0, TimeUnit.SECONDS);
-  }
-
-  public void put(Object value)
-  {
-    offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
-  }
-
-  public int remainingCapacity()
-  {
-    return Integer.MAX_VALUE;
-  }
-
-  public Object peek()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public Object poll()
-  {
-    return poll(0, TimeUnit.MILLISECONDS);
-  }
-
-  public Object take()
-  {
-    return poll(Integer.MAX_VALUE, TimeUnit.SECONDS);
-  }
-
-  public int drainTo(Collection c)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public int drainTo(Collection c, int max)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  protected JmsSession getWriteSession()
-    throws JMSException
-  {
-    if (_conn == null) {
-      _connectionFactory = new ConnectionFactoryImpl();
-      _conn = _connectionFactory.createConnection();
-      _conn.start();
-    }
-    
-    if (_writeSession == null) {
-      _writeSession =
-	(JmsSession) _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    }
-
-    return _writeSession;
-  }
-
-  protected MessageConsumerImpl getReadConsumer()
-    throws JMSException
-  {
-    if (_conn == null) {
-      _connectionFactory = new ConnectionFactoryImpl();
-      _conn = _connectionFactory.createConnection();
-      _conn.start();
-    }
-    
-    if (_readSession == null) {
-      _readSession =
-	(JmsSession) _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    }
-    
-    if (_consumer == null) {
-      _consumer = (MessageConsumerImpl) _readSession.createConsumer(this);
-    }
-
-    return _consumer;
   }
 
   /**

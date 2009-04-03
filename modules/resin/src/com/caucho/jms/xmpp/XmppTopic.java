@@ -29,7 +29,7 @@
 
 package com.caucho.jms.xmpp;
 
-import com.caucho.xmpp.XmppProtocol;
+import java.io.Serializable;
 import java.util.logging.*;
 
 import javax.annotation.*;
@@ -41,6 +41,7 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.connection.*;
 import com.caucho.util.*;
+import com.caucho.xmpp.XmppProtocol;
 
 /**
  * Implements an xmpp topic.
@@ -94,11 +95,11 @@ public class XmppTopic extends AbstractTopic
   }
 
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+    public void send(String msgId,
+		   Serializable payload,
 		   int priority,
 		   long timeout)
-    throws JMSException
+    throws MessageException
   {
   }
 }

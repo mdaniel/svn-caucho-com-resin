@@ -41,7 +41,7 @@ public class FileQueueEntry extends QueueEntry
 {
   private final long _id;
 
-  private SoftReference<Serializable> _payload;
+  private SoftReference<Serializable> _payloadRef;
 
   public FileQueueEntry(long id,
                         String msgId,
@@ -50,11 +50,12 @@ public class FileQueueEntry extends QueueEntry
                         long expiresTime,
                         Serializable payload)
   {
+    super(msgId, leaseTimeout, priority, expiresTime);
     
-    super(msgId, leaseTimeout, priority, expiresTime);    
     _id = id;
+    
     if (payload != null)
-      _payload = new SoftReference<Serializable>(payload);
+      _payloadRef = new SoftReference<Serializable>(payload);
   }
   
   public long getId()
@@ -64,7 +65,7 @@ public class FileQueueEntry extends QueueEntry
 
   public Serializable getPayload()
   {
-    SoftReference<Serializable> ref = _payload;
+    SoftReference<Serializable> ref = _payloadRef;
 
     if (ref != null)
       return ref.get();
@@ -72,8 +73,9 @@ public class FileQueueEntry extends QueueEntry
       return null;
   }
 
-  public void setPayload(Object payload)
+  @Override
+  public void setPayload(Serializable payload)
   {
-    _payload = new SoftReference<Serializable>((Serializable)payload);
+    _payloadRef = new SoftReference<Serializable>(payload);
   }
 }

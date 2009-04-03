@@ -27,35 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.memory;
-
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.queue.QueueEntry;
-import com.caucho.util.Alarm;
-
-import java.io.Serializable;
+package com.caucho.jms.queue;
 
 /**
- * Entry in a memory queue.
+ * A message exception.
  */
-public class MemoryQueueEntry extends QueueEntry
-{  
-  private Serializable _payload;
-
-  public MemoryQueueEntry(String msgId,
-			  long leaseTimeout,
-			  int priority,
-			  long expiresTime,
-			  Serializable payload)
+public class MessageException extends RuntimeException {
+  /**
+   * Null message exception
+   */
+  public MessageException()
   {
-    super(msgId, leaseTimeout, priority, expiresTime);
-
-    if (payload != null)
-      _payload = payload;
   }
   
-  public Serializable getPayload()
+  /**
+   * Create a basic message exception
+   *
+   * @param msg the exception message.
+   */
+  public MessageException(String msg)
   {
-    return _payload;
+    super(msg);
+  }
+
+  /**
+   * Create a MessageException wrapping a root exception.
+   *
+   * @param rootCause the underlying wrapped exception.
+   */
+  public MessageException(Throwable rootCause)
+  {
+    super(rootCause);
+  }
+
+  /**
+   * Create a MessageException wrapping a root exception.
+   *
+   * @param rootCause the underlying wrapped exception.
+   */
+  public MessageException(String msg, Throwable rootCause)
+  {
+    super(msg, rootCause);
   }
 }
+

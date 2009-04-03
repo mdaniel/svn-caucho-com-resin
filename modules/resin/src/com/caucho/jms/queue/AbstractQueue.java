@@ -29,7 +29,10 @@
 
 package com.caucho.jms.queue;
 
+import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
 import javax.annotation.*;
@@ -44,18 +47,13 @@ import com.caucho.util.*;
  * Implements an abstract queue.
  */
 abstract public class AbstractQueue extends AbstractDestination
-  implements javax.jms.Queue
+  implements javax.jms.Queue, MessageQueue, BlockingQueue
 {
   private static final L10N L = new L10N(AbstractQueue.class);
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
 
   private QueueAdmin _admin;
-
-  private ArrayList<MessageAvailableListener> _consumerList
-    = new ArrayList<MessageAvailableListener>();
-
-  private int _roundRobin;
 
   // stats
   private long _listenerFailCount;
@@ -70,6 +68,184 @@ abstract public class AbstractQueue extends AbstractDestination
     setName(name);
   }
 
+  protected void init()
+  {
+  }
+
+  @PostConstruct
+  public void postConstruct()
+  {
+    try {
+      init();
+    } catch (Exception e) {
+      // XXX: issue with examples: iterating with closed table
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    _admin = new QueueAdmin(this);
+    _admin.register();
+  }
+
+  /**
+   * Primary message receiving, registers a callback for any new
+   * message.
+   */
+  public boolean listen(MessageCallback callback)
+    throws MessageException
+  {
+    return false;
+  }
+
+  /**
+   * Removes the callback from the listening list.
+   */
+  public void removeMessageCallback(MessageCallback callback)
+  {
+  }
+  
+  /**
+   * Acknowledge receipt of the message.
+   * 
+   * @param msgId message to acknowledge
+   */
+  public void acknowledge(String msgId)
+  {
+  }
+  
+  /**
+   * Rollback the message read.
+   */
+  public void rollback(String msgId)
+  {
+  }
+
+  //
+  // convenience methods
+  //
+
+  /**
+   * Receives a message, blocking until expireTime if no message is
+   * available.
+   */
+  public Serializable receive(long expireTime)
+    throws MessageException
+  {
+    BlockingReceiveCallback cb = new BlockingReceiveCallback();
+
+    return cb.receive(this, true, expireTime);
+  }
+
+  /**
+   * Receives a message, blocking until expireTime if no message is
+   * available.
+   */
+  public Serializable receive(long expireTime,
+			      boolean isAutoAcknowledge)
+    throws MessageException
+  {
+    BlockingReceiveCallback cb = new BlockingReceiveCallback();
+
+    return cb.receive(this, isAutoAcknowledge, expireTime);
+  }
+
+  public ArrayList<MessageImpl> getBrowserList()
+  {
+    return new ArrayList<MessageImpl>();
+  }
+
+  //
+  // BlockingQueue api
+  //
+
+  public int size()
+  {
+    return 0;
+  }
+
+  public Iterator iterator()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Adds the item to the queue, waiting if necessary
+   */
+  public boolean offer(Object value, long timeout, TimeUnit unit)
+  {
+    int priority = 0;
+      
+    timeout = unit.toMillis(timeout);
+
+    long expires = Alarm.getCurrentTime() + timeout;
+      
+    send(generateMessageID(), (Serializable) value, priority, expires);
+
+    return true;
+  }
+
+  public boolean offer(Object value)
+  {
+    return offer(value, 0, TimeUnit.SECONDS);
+  }
+
+  public void put(Object value)
+  {
+    offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
+  }
+
+  public Object poll(long timeout, TimeUnit unit)
+  {
+    long msTimeout = unit.toMillis(timeout);
+    
+    Serializable payload = receive(msTimeout);
+
+    try {
+      if (payload == null)
+	return null;
+      else if (payload instanceof ObjectMessage)
+	return ((ObjectMessage) payload).getObject();
+      else if (payload instanceof TextMessage)
+	return ((TextMessage) payload).getText();
+      else if (payload instanceof Serializable)
+	return payload;
+      else
+	throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
+				       payload));
+    } catch (JMSException e) {
+      throw new MessageException(e);
+    }
+  }
+
+  public int remainingCapacity()
+  {
+    return Integer.MAX_VALUE;
+  }
+
+  public Object peek()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public Object poll()
+  {
+    return poll(0, TimeUnit.MILLISECONDS);
+  }
+
+  public Object take()
+  {
+    return poll(Integer.MAX_VALUE, TimeUnit.SECONDS);
+  }
+
+  public int drainTo(Collection c)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public int drainTo(Collection c, int max)
+  {
+    throw new UnsupportedOperationException();
+  }
+
   //
   // JMX statistics
   //
@@ -79,7 +255,7 @@ abstract public class AbstractQueue extends AbstractDestination
    */
   public int getConsumerCount()
   {
-    return _consumerList.size();
+    return 0;
   }
 
   /**
@@ -106,89 +282,6 @@ abstract public class AbstractQueue extends AbstractDestination
     return _listenerFailLastTime;
   }
 
-  protected void init()
-  {
-  }
-
-  @PostConstruct
-  public void postConstruct()
-  {
-    try {
-      init();
-    } catch (Exception e) {
-      // XXX: issue with examples: iterating with closed table
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    _admin = new QueueAdmin(this);
-    _admin.register();
-  }
-  
-  /**
-   * Adds a MessageAvailableListener to receive notifications for new
-   * messages.  The listener will spawn or wake a thread to process
-   * the message.  The listener MUST NOT use the event thread to
-   * process the message.
-   * 
-   * @param listener notification listener
-   */
-  @Override
-  public void addMessageAvailableListener(MessageAvailableListener listener)
-  {
-    synchronized (_consumerList) {
-      if (! _consumerList.contains(listener))
-	_consumerList.add(listener);
-
-      startPoll();
-    }
-  }
-  
-  @Override
-  public void removeMessageAvailableListener(MessageAvailableListener consumer)
-  {
-    synchronized (_consumerList) {
-      _consumerList.remove(consumer);
-
-      // force a poll to avoid missing messages
-      for (int i = 0; i < _consumerList.size(); i++) {
-	_consumerList.get(i).notifyMessageAvailable();
-      }
-
-      if (_consumerList.size() == 0)
-        stopPoll();
-    }
-  }
-
-  protected void notifyMessageAvailable()
-  {
-    synchronized (_consumerList) {
-      if (_consumerList.size() > 0) {
-	MessageAvailableListener consumer;
-	int count = _consumerList.size();
-
-	// notify until one of the consumers signals readiness to read
-	do {
-	  int roundRobin = _roundRobin++ % _consumerList.size();
-	  
-	  consumer = _consumerList.get(roundRobin);
-	} while (! consumer.notifyMessageAvailable() && count-- > 0);
-      }
-    }
-  }
-
-  public ArrayList<MessageImpl> getBrowserList()
-  {
-    return new ArrayList<MessageImpl>();
-  }
-
-  protected void startPoll()
-  {
-  }
-
-  protected void stopPoll()
-  {
-  }
-
   /**
    * Called when a listener throws an excepton
    */
@@ -198,6 +291,14 @@ abstract public class AbstractQueue extends AbstractDestination
       _listenerFailCount++;
       _listenerFailLastTime = Alarm.getCurrentTime();
     }
+  }
+
+  protected void startPoll()
+  {
+  }
+
+  protected void stopPoll()
+  {
   }
 
   @PreDestroy

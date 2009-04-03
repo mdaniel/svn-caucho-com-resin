@@ -1,6 +1,7 @@
 package com.caucho.jms.queue;
 
 import com.caucho.util.Alarm;
+import java.io.Serializable;
 
 /**
  * Basic implementation of an entry in the Queue.
@@ -59,10 +60,21 @@ public abstract class QueueEntry
   {
     _isRead = isRead;
   }
+
+  public void rollback()
+  {
+    
+  }
   
   public int getPriority()
   {
     return _priority;
+  }
+  
+  public abstract Serializable getPayload();
+  
+  public void setPayload(Serializable payload)
+  {
   }
 
   @Override
@@ -71,9 +83,4 @@ public abstract class QueueEntry
     return (getClass().getSimpleName()
             + "[" + _msgId + ",pri=" + _priority + "]");
   }
-  
-  public abstract Object getPayload();
-  
-  public abstract void setPayload(Object object);
-  
 }

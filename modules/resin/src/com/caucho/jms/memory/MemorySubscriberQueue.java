@@ -28,6 +28,7 @@
 
 package com.caucho.jms.memory;
 
+import java.io.Serializable;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -54,19 +55,20 @@ public class MemorySubscriberQueue extends MemoryQueue
   }
 
   @Override
-  public void send(JmsSession sendingSession,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable msg,
 		   int priority,
 		   long timeout)
   {
+    /*
     if (_isNoLocal && _session == sendingSession)
       return;
     else {
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " send message " + msg);
+    */
       
-      super.send(sendingSession, msg, priority, timeout);
-    }
+    super.send(msgId, msg, priority, timeout);
   }
 }
 

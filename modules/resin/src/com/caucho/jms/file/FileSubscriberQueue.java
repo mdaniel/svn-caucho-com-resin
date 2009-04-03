@@ -28,6 +28,8 @@
 
 package com.caucho.jms.file;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.logging.*;
 
@@ -56,15 +58,17 @@ public class FileSubscriberQueue extends MemoryQueueImpl
 
 
   @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
 		   long timeout)
   {
+    /*
     if (_isNoLocal && _session == session)
       return;
     else
-      super.send(session, msg, priority, timeout);
+    */
+    super.send(msgId, payload, priority, timeout);
   }
 
   public String toString()

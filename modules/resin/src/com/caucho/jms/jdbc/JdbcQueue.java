@@ -35,6 +35,7 @@ import com.caucho.jms.connection.MessageConsumerImpl;
 import com.caucho.jms.connection.JmsSession;
 import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.AbstractQueue;
+import com.caucho.jms.queue.MessageException;
 import com.caucho.jms.queue.PollingQueue;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -191,23 +192,20 @@ public class JdbcQueue extends PollingQueue {
    * Sends the message to the queue.
    */
   @Override
-  public void send(JmsSession session,
-		   MessageImpl message,
+  public void send(String msgId,
+		   Serializable payload,
 		   int priority,
 		   long expireTime)
-    throws JMSException
+    throws MessageException
   {
-    try {
-      JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
-      jdbcMessage.send(message, _id, priority, expireTime);
-    } catch (Exception e) {
-      throw new JmsExceptionWrapper(e);
-    }
+    // JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
+    //jdbcMessage.send(payload, _id, priority, expireTime);
   }
 
   /**
    * Receives a message from the queue.
    */
+  /*
   @Override
   public MessageImpl receive(boolean isAutoAck)
     throws JMSException
@@ -264,12 +262,6 @@ public class JdbcQueue extends PollingQueue {
 
 	    msg = jdbcMessage.readMessage(rs);
 
-	    /*
-	    if (_selector == null || _selector.isMatch(msg))
-	      break;
-	    else
-	      msg = null;
-	    */
 	    if (true)
 	      break;
 	  }
@@ -301,6 +293,7 @@ public class JdbcQueue extends PollingQueue {
       throw new JmsExceptionWrapper(e);
     }
   }
+  */
 
   /**
    * Removes the first message matching the selector.
@@ -447,8 +440,10 @@ public class JdbcQueue extends PollingQueue {
       log.log(Level.FINE, e.toString(), e);
     }
 
+    /*
     if (hasValue)
       notifyMessageAvailable();
+    */
   }
 
   /**

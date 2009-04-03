@@ -29,11 +29,11 @@
 
 package com.caucho.jms.memory;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
-
-import javax.jms.*;
 
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
@@ -66,6 +66,18 @@ public class MemoryTopicImpl extends AbstractTopic
   public String getUrl()
   {
     return "memory:name=" + getName();
+  }
+
+  @Override
+  public void send(String msgId,
+		   Serializable payload,
+		   int priority,
+		   long timeout)
+    throws MessageException
+  {
+    for (int i = 0; i < _subscriptionList.size(); i++) {
+      _subscriptionList.get(i).send(msgId, payload, priority, timeout);
+    }
   }
 
   @Override
@@ -107,18 +119,6 @@ public class MemoryTopicImpl extends AbstractTopic
     
     if (! _durableSubscriptionMap.values().contains(queue))
       _subscriptionList.remove(queue);
-  }
-
-  @Override
-  public void send(JmsSession session,
-		   MessageImpl msg,
-		   int priority,
-		   long timeout)
-    throws JMSException
-  {
-    for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, priority, timeout);
-    }
   }
 }
 

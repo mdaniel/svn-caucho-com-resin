@@ -1,25 +1,172 @@
 package com.caucho.jms.queue;
 
+import com.caucho.jms.message.MessageImpl;
+
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.jms.message.MessageImpl;
 
 /**
  * Provides abstract implementation for a memory queue.
  * 
  */
-public abstract class AbstractMemoryQueue extends AbstractQueue
+public abstract class AbstractMemoryQueue<E extends QueueEntry>
+  extends AbstractQueue
 {
-  
   protected final Object _queueLock = new Object();
+
+  private ArrayList<MessageCallback> _callbackList
+    = new ArrayList<MessageCallback>();
 
   protected QueueEntry []_head = new QueueEntry[10];
   protected QueueEntry []_tail = new QueueEntry[10];
+
+  //
+  // Abstract/stub methods to be implemented by the Queue
+  //
+  /**
+   * Sends a message to the queue
+   */
+  @Override
+  abstract public void send(String msgId,
+			    Serializable payload,
+			    int priority,
+			    long expires)
+    throws MessageException;
+
+  protected Serializable readPayload(E entry)
+  {
+    return null;
+  }
+
+  protected void acknowledge(E entry)
+  {
+  }
+
+  //
+  // send implementation
+  //
+
+  protected void addQueueEntry(E entry)
+  {
+    addEntry(entry);
+
+    dispatchMessage();
+  }
+
+  //
+  // receive implementation
+  //
+
+  @Override
+  public boolean listen(MessageCallback callback)
+    throws MessageException
+  {
+    addMessageCallback(callback);
+
+    dispatchMessage();
+
+    return true;
+  }
+
+  protected void dispatchMessage()
+  {
+    ArrayList<MessageCallback> callbackList = _callbackList;
+
+    if (callbackList.size() == 0)
+      return;
+
+    // find entry and mark it read
+    E entry = readEntry();
+
+    if (entry == null)
+      return;
+
+    Serializable payload = entry.getPayload();
+
+    if (payload == null) {
+      payload = readPayload(entry);
+
+      entry.setPayload(payload);
+    }
+
+    boolean isAck = false;
+    
+    synchronized (callbackList) {
+      if (callbackList.size() == 0) {
+	// if all callbacks have been removed during the readEntry,
+	// mark the entry as unread
+	entry.rollback();
+	return;
+      }
+
+      MessageCallback callback = callbackList.remove(0);
+
+      isAck = callback.messageReceived(entry.getMsgId(), entry.getPayload());
+    }
+
+    if (isAck)
+      acknowledge(entry.getMsgId());
+  }
+  
+  /**
+   * Adds a MessageAvailableListener to receive notifications for new
+   * messages.  The listener will spawn or wake a thread to process
+   * the message.  The listener MUST NOT use the event thread to
+   * process the message.
+   * 
+   * @param listener notification listener
+   */
+  protected void addMessageCallback(MessageCallback callback)
+  {
+    synchronized (_callbackList) {
+      if (! _callbackList.contains(callback))
+	_callbackList.add(callback);
+    }
+  }
+  
+  public void removeMessageCallback(MessageCallback callback)
+  {
+    synchronized (_callbackList) {
+      _callbackList.remove(callback);
+    }
+  }
+
+  protected boolean messageReceived(String msgId, Serializable message)
+  {
+    synchronized (_callbackList) {
+      int size = _callbackList.size();
+      
+      for (int i = 0; i < size; i++) {
+	MessageCallback callback = _callbackList.get(i);
+
+	if (callback.messageReceived(msgId, message)) {
+	  _callbackList.remove(i);
+	  
+	  return true;
+	}
+      }
+
+      return false;
+    }
+  }
+    
+  /**
+   * Acknowledges the receipt of a message
+   */
+  @Override
+  public void acknowledge(String msgId)
+  {
+    E entry = removeEntry(msgId);
+
+    if (entry != null)
+      acknowledge(entry);
+  }
   
   //
-  // JMX statistics
+  // Queue size statistics
   //
 
   /**
@@ -40,22 +187,6 @@ public abstract class AbstractMemoryQueue extends AbstractQueue
     return count;
   }
   
-  @Override
-  public ArrayList<MessageImpl> getBrowserList()
-  {
-
-    ArrayList<MessageImpl> browserList = new ArrayList<MessageImpl>();
-    for (int i = 0; i < _head.length; i++) {
-      for (QueueEntry entry = _head[i];
-           entry != null;
-           entry = entry._next) {
-        browserList.add((MessageImpl)getPayload(entry));
-      }
-    }
-
-    return browserList;    
-  }
-  
   /**
    * Returns true if a message is available.
    */
@@ -63,57 +194,59 @@ public abstract class AbstractMemoryQueue extends AbstractQueue
   public boolean hasMessage()
   {
     return getQueueSize() > 0;
-  }  
+  }
   
+
+  //
+  // queue management
+  //
+
   /**
-   * 
-   * @param entry
-   * @return        Payload associated with the entry.
+   * Add an entry to the queue
    */
-  protected MessageImpl getPayload(QueueEntry entry) 
-  {    
-    return (MessageImpl)entry.getPayload();
-  }  
+  protected E addEntry(E entry)
+  {
+    int priority = entry.getPriority();
     
-  /**
-   * Acknowledges the receipt of a message
-   */
-  @Override
-  public void acknowledge(String msgId)
-  {
-    acknowledgeImpl(msgId);
-  }
-
-  /**
-   * Removes message.
-   */
-  protected QueueEntry acknowledgeImpl(String msgId)
-  {
     synchronized (_queueLock) {
-      for (int i = _head.length - 1; i >= 0; i--) {
-        for (QueueEntry entry = _head[i];
-             entry != null;
-             entry = entry._next) {
-          if (msgId.equals(entry.getMsgId())) {
-            if (entry.isRead()) {
-              removeEntry(entry);
-              return entry;
-            }
-              
-            return null;
-          }
-        }
-      }
-    }
+      entry._prev = _tail[priority];
 
-    return null;
+      if (_tail[priority] != null)
+        _tail[priority]._next = entry;
+      else
+        _head[priority] = entry;
+
+      _tail[priority] = entry;
+
+      return entry;
+    }
   }
+
+  /**
+   * Remove an entry from the queue
+   */
+  protected void removeEntry(E entry)
+  {
+    int priority = entry.getPriority();
+    
+    QueueEntry prev = entry._prev;
+    QueueEntry next = entry._next;
+    
+    if (prev != null)
+      prev._next = next;
+    else if (_head[priority] == entry)
+      _head[priority] = next;
+
+    if (next != null)
+      next._prev = prev;
+    else if (_tail[priority] == entry)
+      _tail[priority] = prev;
+  }  
   
   /**
-   * Polls the next message from the store.  If no message is available,
-   * wait for the timeout.
+   * Returns the next entry from the queue
    */
-  protected QueueEntry receiveImpl(boolean isAutoAck)
+  protected E readEntry()
   {
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
@@ -130,12 +263,37 @@ public abstract class AbstractMemoryQueue extends AbstractQueue
           }
           
           entry.setRead(true);
-          
-          if (isAutoAck) {
-            removeEntry(entry);
+
+          return (E) entry;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Removes message.
+   */
+  protected E removeEntry(String msgId)
+  {
+    synchronized (_queueLock) {
+      for (int i = _head.length - 1; i >= 0; i--) {
+	QueueEntry prev = null;
+	
+        for (QueueEntry entry = _head[i];
+             entry != null;
+             entry = entry._next) {
+          if (msgId.equals(entry.getMsgId())) {
+	    if (prev != null)
+	      prev._next = entry._next;
+	    else
+	      _head[i] = entry._next;
+	    
+	    return (E) entry;
           }
 
-          return entry;
+	  prev = entry;
         }
       }
     }
@@ -159,10 +317,12 @@ public abstract class AbstractMemoryQueue extends AbstractQueue
             if (entry.isRead()) {
               entry.setRead(false);
 
+	      /*
               MessageImpl msg = (MessageImpl) getPayload(entry);
         
               if (msg != null)
                 msg.setJMSRedelivered(true);
+	      */
             }
             
             return;
@@ -171,40 +331,21 @@ public abstract class AbstractMemoryQueue extends AbstractQueue
       }
     }
   }
-
-  protected QueueEntry addEntry(QueueEntry entry) {
-    
-    int priority = entry.getPriority();
-    
-    synchronized (_queueLock) {
-      entry._prev = _tail[priority];
-
-      if (_tail[priority] != null)
-        _tail[priority]._next = entry;
-      else
-        _head[priority] = entry;
-
-      _tail[priority] = entry;
-
-      return entry;
-    }
-  }
   
-  protected void removeEntry(QueueEntry entry)
+  public ArrayList<String> getMessageIds()
   {
-    int priority = entry.getPriority();
-    
-    QueueEntry prev = entry._prev;
-    QueueEntry next = entry._next;
-    
-    if (prev != null)
-      prev._next = next;
-    else if (_head[priority] == entry)
-      _head[priority] = next;
+    ArrayList<String> browserList = new ArrayList<String>();
 
-    if (next != null)
-      next._prev = prev;
-    else if (_tail[priority] == entry)
-      _tail[priority] = prev;
-  }  
+    synchronized (_queueLock) {
+      for (int i = 0; i < _head.length; i++) {
+	for (QueueEntry entry = _head[i];
+	     entry != null;
+	     entry = entry._next) {
+	  browserList.add(entry.getMsgId());
+	}
+      }
+    }
+
+    return browserList;    
+  }
 }

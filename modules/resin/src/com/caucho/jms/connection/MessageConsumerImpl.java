@@ -35,20 +35,21 @@ import com.caucho.jms.selector.Selector;
 import com.caucho.jms.selector.SelectorParser;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
 
+import java.io.Serializable;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * A basic message consumer.
  */
-public class MessageConsumerImpl
-  implements MessageConsumer, MessageAvailableListener
+public class MessageConsumerImpl implements MessageConsumer
 {
   static final Logger log
     = Logger.getLogger(MessageConsumerImpl.class.getName());
@@ -62,6 +63,8 @@ public class MessageConsumerImpl
 
   private MessageListener _messageListener;
   private ClassLoader _listenerClassLoader;
+
+  private MessageConsumerCallback _messageCallback;
 
   private String _messageSelector;
   protected Selector _selector;
@@ -86,7 +89,7 @@ public class MessageConsumerImpl
     }
     _noLocal = noLocal;
 
-    _queue.addMessageAvailableListener(this);
+    // _queue.addMessageAvailableListener(this);
 
     switch (_session.getAcknowledgeMode()) {
     case Session.AUTO_ACKNOWLEDGE:
@@ -155,8 +158,13 @@ public class MessageConsumerImpl
       throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
 
     _messageListener = listener;
+    _messageCallback = new MessageConsumerCallback(listener);
+    
     _listenerClassLoader = Thread.currentThread().getContextClassLoader();
-    _session.setAsynchronous();
+
+    // XXX: if start?
+    
+    // _session.setAsynchronous();
   }
 
   /**
@@ -247,20 +255,12 @@ public class MessageConsumerImpl
     long expireTime = timeout > 0 ? now + timeout : 0;
 
     while (_session.isActive()) {
-      MessageImpl msg = _queue.receive(_isAutoAcknowledge);
+      MessageImpl msg
+	= (MessageImpl) _queue.receive(expireTime, _isAutoAcknowledge);
 
-      if (msg == null) {
-        synchronized (_consumerLock) {
-          if (expireTime <= Alarm.getCurrentTime() || Alarm.isTest())
-            return null;
-
-          try {
-            _consumerLock.wait(expireTime - Alarm.getCurrentTime());
-          } catch (Exception e) {
-          }
-        }
-      }
-
+      if (msg == null)
+	return null;
+      
       else if (_selector != null && ! _selector.isMatch(msg)) {
         msg.acknowledge();
         continue;
@@ -305,7 +305,11 @@ public class MessageConsumerImpl
 
     MessageImpl msg = null;
     try {
-      msg = _queue.receive(false);
+      MessageCallback callback = _messageCallback;
+      
+      // XXX: not correct with new model
+
+      _queue.listen(callback);
 
       /*
       if (msg == null)
@@ -353,14 +357,33 @@ public class MessageConsumerImpl
   }
 
   /**
+   * Starts the consumer
+   */
+  public void start()
+  {
+    MessageConsumerCallback callback = _messageCallback;
+
+    if (callback != null)
+      _queue.listen(callback);
+  }
+
+  /**
    * Stops the consumer.
    */
   public void stop()
     throws JMSException
   {
+    MessageConsumerCallback callback = _messageCallback;
+    _messageCallback = null;
+
+    if (callback != null)
+      _queue.removeMessageCallback(callback);
+
+    /*
     synchronized (_consumerLock) {
       _consumerLock.notifyAll();
     }
+    */
   }
 
   /**
@@ -376,7 +399,7 @@ public class MessageConsumerImpl
       _isClosed = true;
     }
 
-    _queue.removeMessageAvailableListener(this);
+    // _queue.removeMessageAvailableListener(this);
     _session.removeConsumer(this);
   }
 
@@ -384,5 +407,67 @@ public class MessageConsumerImpl
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _queue + "]";
+  }
+
+  class MessageConsumerCallback implements MessageCallback, Runnable {
+    private final MessageListener _listener;
+    private final ClassLoader _classLoader;
+    
+    private MessageImpl _message;
+
+    MessageConsumerCallback(MessageListener listener)
+    {
+      _listener = listener;
+      _classLoader = Thread.currentThread().getContextClassLoader();
+    }
+    
+    public boolean messageReceived(String msgId, Serializable payload)
+    {
+      _message = null;
+
+      MessageImpl message = null;
+
+      try {
+	if (payload instanceof MessageImpl)
+	  message = (MessageImpl) payload;
+	else
+	  message = new ObjectMessageImpl(payload);
+
+	if (_selector == null || _selector.isMatch(message)) {
+	  _session.addTransactedReceive(_queue, message);
+
+	  _message = message;
+
+	  ThreadPool.getThreadPool().schedule(this);
+	
+	  return true;
+	}
+	else {
+	  _queue.listen(_messageCallback);
+
+	  return true;
+	}
+      } catch (JMSException e) {
+	throw new MessageException(e);
+      }
+    }
+
+    public void run()
+    {
+      MessageImpl message = _message;
+      _message = null;
+      
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      try {
+	thread.setContextClassLoader(_classLoader);
+
+	_listener.onMessage(message);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+
+      _queue.listen(this);
+    }
   }
 }

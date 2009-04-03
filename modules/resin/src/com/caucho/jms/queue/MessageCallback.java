@@ -27,35 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.memory;
-
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.queue.QueueEntry;
-import com.caucho.util.Alarm;
+package com.caucho.jms.queue;
 
 import java.io.Serializable;
 
 /**
- * Entry in a memory queue.
+ * Listener for queue message available
  */
-public class MemoryQueueEntry extends QueueEntry
-{  
-  private Serializable _payload;
-
-  public MemoryQueueEntry(String msgId,
-			  long leaseTimeout,
-			  int priority,
-			  long expiresTime,
-			  Serializable payload)
-  {
-    super(msgId, leaseTimeout, priority, expiresTime);
-
-    if (payload != null)
-      _payload = payload;
-  }
-  
-  public Serializable getPayload()
-  {
-    return _payload;
-  }
+public interface MessageCallback
+{
+  /**
+   * Notifies a listener that a message is available from the queue.
+   *
+   * The message handler MUST use a different thread to retrieve the
+   * message from the queue, i.e. the <code>notifyMessageAvailable</code>
+   * implementation must spawn or wake a thread to handle the actual
+   * message.
+   * 
+   * @return true if the consumer can handle the message
+   */
+  public boolean messageReceived(String msgId, Serializable payload);
 }
+
