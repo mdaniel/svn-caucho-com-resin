@@ -20,6 +20,8 @@ public abstract class QueueEntry
   QueueEntry _nextPriority;
 
   private long _expiresTime;
+
+  private Serializable _payload;
   
   // True if the message has been read, but not yet committed
   private boolean _isRead;
@@ -70,11 +72,20 @@ public abstract class QueueEntry
   {
     return _priority;
   }
-  
-  public abstract Serializable getPayload();
-  
-  public void setPayload(Serializable payload)
+
+  public Serializable readPayload()
   {
+    return getPayload();
+  }
+  
+  public final Serializable getPayload()
+  {
+    return _payload;
+  }
+  
+  public final void setPayload(Serializable payload)
+  {
+    _payload = payload;
   }
 
   @Override

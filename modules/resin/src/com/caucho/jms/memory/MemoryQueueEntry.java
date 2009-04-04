@@ -40,8 +40,6 @@ import java.io.Serializable;
  */
 public class MemoryQueueEntry extends QueueEntry
 {  
-  private Serializable _payload;
-
   public MemoryQueueEntry(String msgId,
 			  long leaseTimeout,
 			  int priority,
@@ -50,12 +48,8 @@ public class MemoryQueueEntry extends QueueEntry
   {
     super(msgId, leaseTimeout, priority, expiresTime);
 
-    if (payload != null)
-      _payload = payload;
-  }
-  
-  public Serializable getPayload()
-  {
-    return _payload;
+    if (payload != null) {
+      setPayload(payload);
+    }
   }
 }

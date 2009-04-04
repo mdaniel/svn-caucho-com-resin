@@ -236,12 +236,6 @@ public class MessageProducerImpl implements MessageProducer {
   public void send(Destination destination, Message message)
     throws JMSException
   {
-    if (message == null)
-      throw new NullPointerException(L.l("jms message cannot be null for send()"));
-    if (destination == null)
-      throw new NullPointerException(L.l("jms destination cannot be null for send()"));
-
-
     send(destination, message, _deliveryMode, _priority, _timeToLive);
   }
   
@@ -264,11 +258,11 @@ public class MessageProducerImpl implements MessageProducer {
     if (destination == null)
       destination = _queue;
     else if (_queue != null && destination != _queue)
-      throw new UnsupportedOperationException(L.l("MessageProducer: '{0}' does not match the queue '{1}'",
+      throw new IllegalArgumentException(L.l("MessageProducer: '{0}' does not match the queue '{1}'",
                                                   destination, _queue));
 
     if (destination == null)
-      throw new UnsupportedOperationException(L.l("MessageProducer: null destination is not supported."));
+      throw new NullPointerException(L.l("MessageProducer: null destination is not supported."));
 
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));

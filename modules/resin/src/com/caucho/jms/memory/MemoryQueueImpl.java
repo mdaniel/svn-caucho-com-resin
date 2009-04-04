@@ -77,12 +77,6 @@ public class MemoryQueueImpl extends AbstractMemoryQueue<MemoryQueueEntry>
   }
 
   @Override
-  protected Serializable readPayload(MemoryQueueEntry entry)
-  {
-    return entry.getPayload();
-  }
-
-  @Override
   protected void acknowledge(MemoryQueueEntry entry)
   {
   }

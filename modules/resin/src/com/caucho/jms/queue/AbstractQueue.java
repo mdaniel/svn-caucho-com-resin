@@ -111,15 +111,18 @@ abstract public class AbstractQueue extends AbstractDestination
   /**
    * Adds the callback to the listening list.
    */
-  public void addMessageCallback(MessageCallback callback)
+  public EntryCallback addMessageCallback(MessageCallback callback,
+					  boolean isAutoAck)
   {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * Removes the callback from the listening list.
    */
-  public void removeMessageCallback(MessageCallback callback)
+  public void removeMessageCallback(EntryCallback entryCallback)
   {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**

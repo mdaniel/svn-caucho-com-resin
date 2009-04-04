@@ -63,7 +63,7 @@ public class FileQueueEntry extends QueueEntry
     return _id;
   }
 
-  public Serializable getPayload()
+  public Serializable getPayloadRef()
   {
     SoftReference<Serializable> ref = _payloadRef;
 
@@ -73,8 +73,7 @@ public class FileQueueEntry extends QueueEntry
       return null;
   }
 
-  @Override
-  public void setPayload(Serializable payload)
+  public void setPayloadRef(Serializable payload)
   {
     _payloadRef = new SoftReference<Serializable>(payload);
   }

@@ -46,6 +46,6 @@ public interface MessageCallback
    * 
    * @return true if the consumer can handle the message
    */
-  public boolean messageReceived(String msgId, Serializable payload);
+  public void messageReceived(String msgId, Serializable payload);
 }
 

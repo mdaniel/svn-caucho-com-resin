@@ -200,12 +200,18 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
     addQueueEntry(entry);
   }
 
-  @Override
-  protected Serializable readPayload(FileQueueEntry entry)
+  protected void readPayload(FileQueueEntry entry)
   {
-    Serializable payload = _store.readMessage(entry.getId());
+    Serializable payload = entry.getPayload();
 
-    return payload;
+    if (payload == null) {
+      payload = entry.getPayloadRef();
+
+      if (payload == null)
+	payload = _store.readMessage(entry.getId());
+      
+      entry.setPayload(payload);
+    }
   }
 
   @Override

@@ -65,6 +65,7 @@ public class MessageConsumerImpl implements MessageConsumer
   private ClassLoader _listenerClassLoader;
 
   private MessageConsumerCallback _messageCallback;
+  private EntryCallback _entryCallback;
 
   private String _messageSelector;
   protected Selector _selector;
@@ -262,7 +263,7 @@ public class MessageConsumerImpl implements MessageConsumer
 	return null;
       
       else if (_selector != null && ! _selector.isMatch(msg)) {
-        msg.acknowledge();
+        _queue.acknowledge(msg.getJMSMessageID());
         continue;
       }
 
@@ -363,10 +364,10 @@ public class MessageConsumerImpl implements MessageConsumer
   {
     MessageConsumerCallback callback = _messageCallback;
 
-    /*
-    if (callback != null)
-      _queue.listen(callback);
-    */
+    if (callback != null) {
+      EntryCallback _entryCallback
+	= _queue.addMessageCallback(callback, _isAutoAcknowledge);
+    }
   }
 
   /**
@@ -375,8 +376,8 @@ public class MessageConsumerImpl implements MessageConsumer
   public void stop()
     throws JMSException
   {
-    MessageConsumerCallback callback = _messageCallback;
-    _messageCallback = null;
+    EntryCallback callback = _entryCallback;
+    _entryCallback = null;
 
     if (callback != null)
       _queue.removeMessageCallback(callback);
@@ -411,7 +412,7 @@ public class MessageConsumerImpl implements MessageConsumer
     return getClass().getSimpleName() + "[" + _queue + "]";
   }
 
-  class MessageConsumerCallback implements MessageCallback, Runnable {
+  class MessageConsumerCallback implements MessageCallback {
     private final MessageListener _listener;
     private final ClassLoader _classLoader;
     
@@ -423,10 +424,8 @@ public class MessageConsumerImpl implements MessageConsumer
       _classLoader = Thread.currentThread().getContextClassLoader();
     }
     
-    public boolean messageReceived(String msgId, Serializable payload)
+    public void messageReceived(String msgId, Serializable payload)
     {
-      _message = null;
-
       MessageImpl message = null;
 
       try {
@@ -436,40 +435,24 @@ public class MessageConsumerImpl implements MessageConsumer
 	  message = new ObjectMessageImpl(payload);
 
 	if (_selector == null || _selector.isMatch(message)) {
+	  // XXX: only if XA
 	  _session.addTransactedReceive(_queue, message);
 
-	  _message = message;
+	  Thread thread = Thread.currentThread();
+	  ClassLoader oldLoader = thread.getContextClassLoader();
+	  try {
+	    thread.setContextClassLoader(_classLoader);
 
-	  ThreadPool.getThreadPool().schedule(this);
-	
-	  return true;
-	}
-	else {
-	  //  _queue.listen(_messageCallback);
+	    _listener.onMessage(message);
+	  } finally {
+	    thread.setContextClassLoader(oldLoader);
 
-	  return true;
+	    // XXX: commit/rollback?
+	  }
 	}
       } catch (JMSException e) {
 	throw new MessageException(e);
       }
-    }
-
-    public void run()
-    {
-      MessageImpl message = _message;
-      _message = null;
-      
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-      try {
-	thread.setContextClassLoader(_classLoader);
-
-	_listener.onMessage(message);
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
-
-      // _queue.listen(this);
     }
   }
 }

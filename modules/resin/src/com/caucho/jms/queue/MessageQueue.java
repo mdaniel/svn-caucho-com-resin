@@ -27,8 +27,21 @@ public interface MessageQueue
    * Listen for a message from the queue, until a message is received
    * or the timeout occurs.
    */
-  public QueueEntry receiveEntry(long timeout, boolean isAutoAck)
+  public QueueEntry receiveEntry(long expireTime, boolean isAutoAck)
     throws MessageException;
+  
+  /**
+   * Registers a message callback with the queue.  Each message callback
+   * will receive messages one at a time until the messages complete.
+   */
+  public EntryCallback addMessageCallback(MessageCallback messageCallback,
+					  boolean isAutoAck)
+    throws MessageException;
+
+  /**
+   * Removes the callback when messages are done listening
+   */
+  public void removeMessageCallback(EntryCallback entryCallback);
     
   /**
    * Rollback a message read
@@ -39,18 +52,6 @@ public interface MessageQueue
    * Acknowledges the receipt of a message
    */
   public void acknowledge(String msgId);
-  
-  /**
-   * Registers a message callback with the queue.  Each message callback
-   * will receive messages one at a time until the messages complete.
-   */
-  public void addMessageCallback(MessageCallback callback)
-    throws MessageException;
-
-  /**
-   * Removes the callback when messages are done listening
-   */
-  public void removeMessageCallback(MessageCallback callback);
 
   /**
    * Browsing
