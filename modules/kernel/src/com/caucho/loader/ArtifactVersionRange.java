@@ -155,6 +155,37 @@ public class ArtifactVersionRange
     return true;
   }
 
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    if (! _isStrict) {
+    }
+    else if (_isMinInclusive)
+      sb.append("[");
+    else
+      sb.append("(");
+
+    if (_min != null)
+      sb.append(_min.toDebugString());
+
+    if (_min != _max) {
+      sb.append(",");
+
+      if (_max != null)
+	sb.append(_max.toDebugString());
+    }
+
+    if (! _isStrict) {
+    }
+    else if (_isMaxInclusive)
+      sb.append("]");
+    else
+      sb.append(")");
+
+    return sb.toString();
+  }
+
   @Override
   public String toString()
   {

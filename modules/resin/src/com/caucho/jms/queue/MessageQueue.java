@@ -11,21 +11,24 @@ import java.util.logging.Logger;
 /**
  * Provides abstract implementation for a memory queue.
  */
-public interface MessageQueue extends MessageDestination
+public interface MessageQueue
 {
   /**
-   * Listen for a message from the queue, registering the callback
-   * until a message is received or removeMessageCallBack removes it.
-   *
-   * When the message is received, listen automatically removes the callback.
+   * Sends a message to the destination
    */
-  public boolean listen(MessageCallback callback)
+  public void send(String msgId,
+		   Serializable msg,
+		   int priority,
+		   long expires)
     throws MessageException;
-
+  
   /**
-   * Removes the callback, e.g. for a timeout
+   * Synchronous/blocking message receiving.
+   * Listen for a message from the queue, until a message is received
+   * or the timeout occurs.
    */
-  public void removeMessageCallback(MessageCallback callback);
+  public QueueEntry receiveEntry(long timeout, boolean isAutoAck)
+    throws MessageException;
     
   /**
    * Rollback a message read
@@ -36,6 +39,18 @@ public interface MessageQueue extends MessageDestination
    * Acknowledges the receipt of a message
    */
   public void acknowledge(String msgId);
+  
+  /**
+   * Registers a message callback with the queue.  Each message callback
+   * will receive messages one at a time until the messages complete.
+   */
+  public void addMessageCallback(MessageCallback callback)
+    throws MessageException;
+
+  /**
+   * Removes the callback when messages are done listening
+   */
+  public void removeMessageCallback(MessageCallback callback);
 
   /**
    * Browsing

@@ -86,16 +86,31 @@ public class ArtifactManager
 
       artifactList = repository.resolve(plainDependency);
       
-      throw new ConfigException(L.l("Dependency org='{0}', name='{1}', version={2} does not match any jars in the repository\n{3}",
-				    dependency.getOrg(),
+      throw new ConfigException(L.l("Artifact dependency '{0}', org='{1}', version={2} does not match any jars in the repository.  Available artifacts:{3}",
 				    dependency.getName(),
-				    dependency.getVersion(),
-				    artifactList));
+				    dependency.getOrg(),
+				    dependency.getVersion().toDebugString(),
+				    toArtifactList(artifactList)));
     }
 
     _dependencyList.add(dependency);
     
     _pendingList.add(dependency);
+  }
+
+  private String toArtifactList(ArrayList<Artifact> artifactList)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (Artifact artifact : artifactList) {
+      sb.append("\n  ").append(artifact.getName());
+      sb.append(", org=").append(artifact.getOrg());
+
+      if (artifact.getVersion() != null)
+	sb.append(", version=").append(artifact.getVersion().toDebugString());
+    }
+
+    return sb.toString();
   }
 
   public void start()

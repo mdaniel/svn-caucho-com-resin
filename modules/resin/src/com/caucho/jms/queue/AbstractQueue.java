@@ -87,13 +87,32 @@ abstract public class AbstractQueue extends AbstractDestination
   }
 
   /**
+   * Sends a message to the queue
+   */
+  public void send(String msgId,
+		   Serializable msg,
+		   int priority,
+		   long expires)
+    throws MessageException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Primary message receiving, registers a callback for any new
    * message.
    */
-  public boolean listen(MessageCallback callback)
+  public QueueEntry receiveEntry(long timeout, boolean isAutoAck)
     throws MessageException
   {
-    return false;
+    return null;
+  }
+
+  /**
+   * Adds the callback to the listening list.
+   */
+  public void addMessageCallback(MessageCallback callback)
+  {
   }
 
   /**
@@ -130,9 +149,7 @@ abstract public class AbstractQueue extends AbstractDestination
   public Serializable receive(long expireTime)
     throws MessageException
   {
-    BlockingReceiveCallback cb = new BlockingReceiveCallback();
-
-    return cb.receive(this, true, expireTime);
+    return receive(expireTime, true);
   }
 
   /**
@@ -143,9 +160,12 @@ abstract public class AbstractQueue extends AbstractDestination
 			      boolean isAutoAcknowledge)
     throws MessageException
   {
-    BlockingReceiveCallback cb = new BlockingReceiveCallback();
+    QueueEntry entry = receiveEntry(expireTime, isAutoAcknowledge);
 
-    return cb.receive(this, isAutoAcknowledge, expireTime);
+    if (entry != null)
+      return entry.getPayload();
+    else
+      return null;
   }
 
   public ArrayList<MessageImpl> getBrowserList()

@@ -60,11 +60,10 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   // receive implementation
   //
 
-  @Override
   public boolean listen(MessageCallback callback)
     throws MessageException
   {
-    addMessageCallback(callback);
+    registerMessageCallback(callback);
 
     dispatchMessage();
 
@@ -111,6 +110,13 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       acknowledge(entry.getMsgId());
   }
   
+  public void addMessageCallback(MessageCallback callback)
+  {
+    registerMessageCallback(callback);
+
+    dispatchMessage();
+  }
+  
   /**
    * Adds a MessageAvailableListener to receive notifications for new
    * messages.  The listener will spawn or wake a thread to process
@@ -119,7 +125,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    * 
    * @param listener notification listener
    */
-  protected void addMessageCallback(MessageCallback callback)
+  protected void registerMessageCallback(MessageCallback callback)
   {
     synchronized (_callbackList) {
       if (! _callbackList.contains(callback))

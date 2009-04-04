@@ -309,7 +309,7 @@ public class MessageConsumerImpl implements MessageConsumer
       
       // XXX: not correct with new model
 
-      _queue.listen(callback);
+      // _queue.listen(callback);
 
       /*
       if (msg == null)
@@ -363,8 +363,10 @@ public class MessageConsumerImpl implements MessageConsumer
   {
     MessageConsumerCallback callback = _messageCallback;
 
+    /*
     if (callback != null)
       _queue.listen(callback);
+    */
   }
 
   /**
@@ -443,7 +445,7 @@ public class MessageConsumerImpl implements MessageConsumer
 	  return true;
 	}
 	else {
-	  _queue.listen(_messageCallback);
+	  //  _queue.listen(_messageCallback);
 
 	  return true;
 	}
@@ -467,7 +469,7 @@ public class MessageConsumerImpl implements MessageConsumer
 	thread.setContextClassLoader(oldLoader);
       }
 
-      _queue.listen(this);
+      // _queue.listen(this);
     }
   }
 }

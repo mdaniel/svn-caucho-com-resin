@@ -72,7 +72,7 @@ public class BlockingReceiveCallback implements MessageCallback
     return true;
   }
 
-  public Serializable receive(AbstractQueue queue,
+  public Serializable receive(AbstractMemoryQueue queue,
 			      boolean isAutoAck, long timeout)
   {
     if (! queue.listen(this)) {

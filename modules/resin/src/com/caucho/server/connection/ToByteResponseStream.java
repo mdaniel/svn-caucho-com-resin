@@ -496,7 +496,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       // _isCommitted = true;
     }
   }
-
+  
   public int getContentLength()
   {
     try {

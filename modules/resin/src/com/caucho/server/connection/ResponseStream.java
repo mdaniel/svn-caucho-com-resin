@@ -171,7 +171,7 @@ class ResponseStream extends ToByteResponseStream {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    if (_isCommitted)
+    if (true || _isCommitted)
       return _contentLength;
     else
       return super.getContentLength();
@@ -278,7 +278,7 @@ class ResponseStream extends ToByteResponseStream {
   {
     if (! _isCommitted)
       return super.getBufferOffset();
-
+    
     byte []buffer;
     int offset;
 
@@ -428,7 +428,7 @@ class ResponseStream extends ToByteResponseStream {
       _next.setBufferOffset(offset);
     }
   }
-
+  
   /**
    * Writes the next chunk of data to the response stream.
    *

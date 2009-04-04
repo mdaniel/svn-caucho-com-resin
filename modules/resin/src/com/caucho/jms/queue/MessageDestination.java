@@ -36,13 +36,5 @@ import java.io.Serializable;
  */
 public interface MessageDestination
 {
-  /**
-   * Sends a message to the destination
-   */
-  public void send(String msgId,
-		   Serializable msg,
-		   int priority,
-		   long expires)
-    throws MessageException;
 }
 
