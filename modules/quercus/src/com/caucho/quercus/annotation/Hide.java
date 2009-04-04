@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,49 +24,17 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.quercus.marshal;
+package com.caucho.quercus.annotation;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class ReferenceMarshal extends Marshal
-{
-  public static final Marshal MARSHAL = new ReferenceMarshal();
-  
-  public boolean isReadOnly()
-  {
-    return false;
-  }
-
-  public boolean isReference()
-  {
-    return true;
-  }
-
-  public Object marshal(Env env, Expr expr, Class expectedClass)
-  {
-    // quercus/0d1k
-    return expr.evalRef(env);
-  }
-
-  public Value unmarshal(Env env, Object value)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  protected int getMarshalingCostImpl(Value argValue)
-  {
-    return Marshal.ZERO;
-  }
-  
-  @Override
-  public Class getExpectedClass()
-  {
-    return Value.class;
-  }
+/**
+ * Used to hide Java functions from the php namespace.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Hide {
 }

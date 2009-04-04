@@ -80,9 +80,17 @@ public class StringMarshal extends Marshal {
         return Marshal.PHP5_STRING_COST;
     }
     else if (! (argValue.isArray() || argValue.isObject()))
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
+  }
+  
+  public int getMarshalingCost(Expr expr)
+  {
+    if (expr.isString())
+      return Marshal.ZERO;
+    else
+      return Marshal.FOUR;
   }
   
   @Override

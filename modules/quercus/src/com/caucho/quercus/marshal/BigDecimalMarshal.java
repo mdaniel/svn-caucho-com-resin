@@ -66,17 +66,17 @@ public class BigDecimalMarshal extends Marshal {
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof BigDecimalValue)
-      return Marshal.SAME;
+      return Marshal.ZERO;
     else if (argValue instanceof DoubleValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue instanceof LongValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue.isDoubleConvertible())
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue.isLongConvertible())
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

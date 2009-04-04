@@ -96,9 +96,9 @@ public class BinaryInputMarshal extends Marshal
   {
     if (argValue instanceof JavaValue
 	&& InputStream.class.isAssignableFrom(argValue.toJavaObject().getClass()))
-      return Marshal.SAME;
+      return Marshal.ZERO;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

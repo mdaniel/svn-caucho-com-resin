@@ -72,9 +72,9 @@ public class BooleanObjectMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof BooleanValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else
-      return Marshal.MARSHALABLE + 1;
+      return Marshal.THREE + 1;
   }
   
   @Override

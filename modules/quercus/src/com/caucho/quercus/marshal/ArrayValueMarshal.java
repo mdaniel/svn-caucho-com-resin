@@ -84,12 +84,12 @@ public class ArrayValueMarshal extends Marshal
   {
     if (argValue.isArray()) {
       if (argValue instanceof JavaAdapter)
-        return Marshal.EQUIVALENT;
+        return Marshal.ONE;
       else
-        return Marshal.SAME;
+        return Marshal.ZERO;
     }
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

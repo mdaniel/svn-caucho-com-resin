@@ -316,6 +316,14 @@ abstract public class Expr {
   {
     return false;
   }
+  
+  /**
+   * Returns true if the expression evaluates to an array.
+   */
+  public boolean isArray()
+  {
+    return false;
+  }
 
   /**
    * Evaluates the expression as a constant.

@@ -472,6 +472,9 @@ public class ArrayModule
     if (array == null)
       return NullValue.NULL;
 
+    if (searchValue.isDefault())
+      return array.getKeys();
+    
     ArrayValue newArray = new ArrayValueImpl(array.getSize());
 
     int i = 0;
@@ -483,9 +486,7 @@ public class ArrayModule
       Value entryKey = entry.getKey();
       Value entryValue = entry.getValue();
 
-      if (searchValue == null || searchValue instanceof DefaultValue)
-        newArray.append(LongValue.create(i++), entryKey);
-      else if (entryValue.eq(searchValue))
+      if (entryValue.eq(searchValue))
         newArray.append(LongValue.create(i++), entryKey);
     }
 
@@ -810,7 +811,7 @@ public class ArrayModule
    * Returns the inputted array reversed, preserving the keys if keyed is true
    *
    * @param inputArray the array to reverse
-   * @param keyed true if the keys are to be preservered
+   * @param keyed true if the keys are to be preserved
    * @return the array in reverse
    */
   public Value array_reverse(Env env,
@@ -1163,14 +1164,7 @@ public class ArrayModule
     if (array == null)
       return NullValue.NULL;
 
-    ArrayValue arrayValues = new ArrayValueImpl(array.getSize());
-    
-    Iterator<Value> iter = array.getValueIterator(env);
-    while (iter.hasNext()) {
-      arrayValues.put(iter.next());
-    }
-
-    return arrayValues;
+    return array.getValues();
   }
 
   /**

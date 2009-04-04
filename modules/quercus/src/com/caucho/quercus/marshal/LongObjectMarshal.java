@@ -65,13 +65,13 @@ public class LongObjectMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof LongValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue.isLongConvertible())
       return LONG_CONVERTIBLE_LONG_OBJECT_COST;
     else if (argValue.isDoubleConvertible())
       return DOUBLE_CONVERTIBLE_LONG_OBJECT_COST;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

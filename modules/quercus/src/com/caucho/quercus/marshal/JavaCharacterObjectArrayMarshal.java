@@ -65,9 +65,9 @@ public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
         return Marshal.PHP5_CHARACTER_OBJECT_ARRAY_COST;
     }
     else if (argValue.isArray())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

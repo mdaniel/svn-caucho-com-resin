@@ -36,6 +36,7 @@ import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.session.QuercusSessionManager;
 import com.caucho.quercus.module.*;
 import com.caucho.quercus.page.InterpretedPage;
@@ -580,17 +581,33 @@ public class Quercus
   /*
    * Gets the max size of the page cache.
    */
-  public int getPageCacheEntries()
+  public int getPageCacheSize()
   {
-    return _pageManager.getPageCacheEntries();
+    return _pageManager.getPageCacheSize();
   }
   
   /*
    * Sets the capacity of the page cache.
    */
-  public void setPageCacheEntries(int entries)
+  public void setPageCacheSize(int size)
   {
-    _pageManager.setPageCacheEntries(entries);
+    _pageManager.setPageCacheSize(size);
+  }
+  
+  /*
+   * Gets the max size of the regexp cache.
+   */
+  public int getRegexpCacheSize()
+  {
+    return RegexpModule.getRegexpCacheSize();
+  }
+  
+  /*
+   * Sets the capacity of the regexp cache.
+   */
+  public void setRegexpCacheSize(int size)
+  {
+    RegexpModule.setRegexpCacheSize(size);
   }
   
   /*
@@ -862,7 +879,7 @@ public class Quercus
    */
   public void setServerEnv(String name, String value)
   {
-    setServerEnv(createString(name, true), new ConstStringValue(value));
+    setServerEnv(createString(name), new ConstStringValue(value));
   }
 
   /**
@@ -1673,25 +1690,7 @@ public class Quercus
 
     return value;
   }
-  
-  public StringValue createString(String name, boolean isCache)
-  {
-    if (isCache) {
-      ConstStringValue value = _stringMap.get(name);
 
-      if (value == null) {
-        value = new ConstStringValue(name);
-
-        _stringMap.put(name, value);
-      }
-
-      return value;
-    }
-    else
-      return new ConstStringValue(name);
-      
-  }
-  
   /**
    * Interns a string.
    */

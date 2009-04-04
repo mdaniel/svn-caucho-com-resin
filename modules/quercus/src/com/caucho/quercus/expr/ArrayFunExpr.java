@@ -73,6 +73,14 @@ public class ArrayFunExpr extends Expr {
   {
     this(Location.UNKNOWN, keys, values);
   }
+  
+  /**
+   * Returns true if the expression evaluates to an array.
+   */
+  public boolean isArray()
+  {
+    return true;
+  }
 
   /**
    * Returns true for a constant array.

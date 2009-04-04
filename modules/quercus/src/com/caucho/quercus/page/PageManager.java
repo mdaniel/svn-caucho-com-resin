@@ -153,7 +153,7 @@ public class PageManager
   /**
    * Gets the max size of the page cache.
    */
-  public int getPageCacheEntries()
+  public int getPageCacheSize()
   {
     return _programCache.getCapacity();
   }
@@ -161,10 +161,10 @@ public class PageManager
   /**
    * Sets the max size of the page cache.
    */
-  public void setPageCacheEntries(int entries)
+  public void setPageCacheSize(int size)
   {
-    if (_programCache.getCapacity() != entries)
-      _programCache = new LruCache<Path,QuercusProgram>(entries);
+    if (_programCache.getCapacity() != size)
+      _programCache = new LruCache<Path,QuercusProgram>(size);
   }
 
   /**

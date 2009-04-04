@@ -69,13 +69,13 @@ public class DoubleMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof DoubleValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue.isLongConvertible())
       return LONG_CONVERTIBLE_DOUBLE_COST;
     else if (argValue.isDoubleConvertible())
       return DOUBLE_CONVERTIBLE_DOUBLE_COST;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   public Class getExpectedClass()

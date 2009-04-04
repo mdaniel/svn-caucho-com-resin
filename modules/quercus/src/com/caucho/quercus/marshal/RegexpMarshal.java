@@ -59,12 +59,20 @@ public class RegexpMarshal extends StringMarshal {
   
   @Override
   protected int getMarshalingCostImpl(Value argValue)
-  {
-    if (argValue.isString()) {
-      return Marshal.SAME;
-    }
+  {    
+    if (argValue.isString())
+      return Marshal.ZERO;
     else
-      return Marshal.INCOMPATIBLE;
+      return Marshal.MAX;
+  }
+  
+  @Override
+  public int getMarshalingCost(Expr expr)
+  {
+    if (expr.isString())
+      return Marshal.ZERO;
+    else
+      return Marshal.MAX;
   }
   
   @Override

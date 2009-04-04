@@ -61,9 +61,9 @@ public class JavaCharacterArrayMarshal extends JavaArrayMarshal
         return Marshal.PHP5_CHARACTER_ARRAY_COST;
     }
     else if (argValue.isArray())
-      return Marshal.SIMILAR; // php/0cib
+      return Marshal.TWO; // php/0cib
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

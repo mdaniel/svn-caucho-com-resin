@@ -65,9 +65,9 @@ public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
         return Marshal.PHP5_BYTE_OBJECT_ARRAY_COST;
     }
     else if (argValue.isArray())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

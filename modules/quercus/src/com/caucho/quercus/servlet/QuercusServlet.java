@@ -217,7 +217,23 @@ public class QuercusServlet
    */
   public void setPageCacheEntries(int entries)
   {
-    getQuercus().setPageCacheEntries(entries);
+    getQuercus().setPageCacheSize(entries);
+  }
+  
+  /*
+   * Sets the max size of the page cache.
+   */
+  public void setPageCacheSize(int size)
+  {
+    getQuercus().setPageCacheSize(size);
+  }
+  
+  /*
+   * Sets the max size of the regexp cache.
+   */
+  public void setRegexpCacheSize(int size)
+  {
+    getQuercus().setRegexpCacheSize(size);
   }
   
   /*
@@ -384,8 +400,12 @@ public class QuercusServlet
     else if ("strict".equals(paramName)) {
       setStrict("true".equals(paramValue));
     }
-    else if ("page-cache-entries".equals(paramName)) {
-      setPageCacheEntries(Integer.parseInt(paramValue));
+    else if ("page-cache-entries".equals(paramName)
+             || "page-cache-size".equals(paramName)) {
+      setPageCacheSize(Integer.parseInt(paramValue));
+    }
+    else if ("regexp-cache-size".equals(paramName)) {
+      setRegexpCacheSize(Integer.parseInt(paramValue));
     }
     else if ("connection-pool".equals(paramName)) {
       setConnectionPool("true".equals(paramValue));

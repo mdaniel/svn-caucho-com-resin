@@ -67,6 +67,8 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   abstract public boolean getHasRestArgs();
   
   abstract public int getMarshalingCost(Value []args);
+  
+  abstract public int getMarshalingCost(Expr []args);
 
   public Class getJavaDeclaringClass()
   {

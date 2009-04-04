@@ -72,6 +72,8 @@ public class ArrayValueImpl extends ArrayValue
   
   protected Entry _head;
   protected Entry _tail;
+  
+  private ConstArrayValue _constSource;
 
   public ArrayValueImpl()
   {
@@ -126,6 +128,8 @@ public class ArrayValueImpl extends ArrayValue
   
   public ArrayValueImpl(ConstArrayValue source)
   {
+    _constSource = source;
+    
     _isDirty = true;
     
     _size = source._size;
@@ -212,6 +216,8 @@ public class ArrayValueImpl extends ArrayValue
   {
     if (! _isDirty)
       return;
+    
+    _constSource = null;
 
     _isDirty = false;
 
@@ -1175,6 +1181,30 @@ public class ArrayValueImpl extends ArrayValue
     }
 
     _current = _head;
+  }
+  
+  /**
+   * Returns the array keys.
+   */
+  @Override
+  public Value getKeys()
+  {
+    if (_constSource != null)
+      return _constSource.getKeys();
+    else
+      return super.getKeys();
+  }
+  
+  /**
+   * Returns the array keys.
+   */
+  @Override
+  public Value getValues()
+  {
+    if (_constSource != null)
+      return _constSource.getValues();
+    else
+      return super.getValues();
   }
 
   //

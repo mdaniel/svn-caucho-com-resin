@@ -60,11 +60,21 @@ public class RegexpArrayMarshal extends StringMarshal {
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isString()) {
-      return Marshal.SAME;
-    }
+    if (argValue.isArray())
+      return Marshal.ZERO;
+    else if (argValue.isString())
+      return Marshal.ONE;
     else
-      return Marshal.INCOMPATIBLE;
+      return Marshal.MAX;
+  }
+  
+  @Override
+  public int getMarshalingCost(Expr expr)
+  {
+    if (expr.isArray())
+      return Marshal.ZERO;
+    else
+      return Marshal.ONE;
   }
   
   @Override

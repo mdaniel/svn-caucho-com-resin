@@ -61,10 +61,10 @@ public class EregMarshal extends StringMarshal {
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue.isString()) {
-      return Marshal.SAME;
+      return Marshal.ZERO;
     }
     else
-      return Marshal.INCOMPATIBLE;
+      return Marshal.MAX;
   }
   
   @Override

@@ -486,6 +486,52 @@ abstract public class JavaInvoker
 
     return cost;
   }
+  
+  public int getMarshalingCost(Expr []args)
+  {
+    if (! _isInit)
+      init();
+
+    if (_hasRestArgs) {
+    }
+    else if (args.length < getMinArgLength()) {
+      // not enough args
+      return Integer.MAX_VALUE;
+    }
+    else if (args.length > getMaxArgLength()) {
+      // too many args
+      return Integer.MAX_VALUE;
+    }
+
+    int cost = 0;
+    int i = 0;
+    
+    for (; i < _marshalArgs.length; i++) {
+      Marshal marshal = _marshalArgs[i];
+      
+      if (i < args.length && args[i] != null) {
+        Expr arg = args[i];
+
+        int argCost = marshal.getMarshalingCost(arg);
+
+        cost = Math.max(argCost + cost, cost);
+      }
+    }
+
+    // consume all the REST args
+    if (_hasRestArgs) {
+      int restLen = args.length - _marshalArgs.length;
+      
+      if (restLen > 0)
+        i += restLen;
+    }
+
+    // too many args passed in
+    if (i > getMaxArgLength())
+      return Integer.MAX_VALUE;
+
+    return cost;
+  }
 
   public Value callMethod(Env env, Value qThis, Expr []exprs)
   {

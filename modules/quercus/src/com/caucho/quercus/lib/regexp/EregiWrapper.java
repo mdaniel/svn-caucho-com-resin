@@ -35,7 +35,6 @@ import com.caucho.quercus.env.Value;
 public class EregiWrapper
 {
   private Eregi _regexp;
-  private Eregi _regexp2;
   
   public EregiWrapper()  
   {
@@ -44,7 +43,6 @@ public class EregiWrapper
   public Eregi get(Env env, Value str)
   {
     Eregi regexp = _regexp;
-    Eregi regexp2 = _regexp2;
     
     if (regexp == null) {
       regexp = RegexpModule.createEregi(env, str);
@@ -55,16 +53,6 @@ public class EregiWrapper
     else if (str == regexp._rawRegexp
              || str.equals(regexp._rawRegexp)) {
       return regexp;
-    }
-    else if (regexp2 == null) {
-      regexp2 = RegexpModule.createEregi(env, str);
-      _regexp2 = regexp2;
-      
-      return regexp2;
-    }
-    else if (str == regexp2._rawRegexp
-             || str.equals(regexp2._rawRegexp)) {
-      return regexp2;
     }
     else {
       return RegexpModule.createEregi(env, str);

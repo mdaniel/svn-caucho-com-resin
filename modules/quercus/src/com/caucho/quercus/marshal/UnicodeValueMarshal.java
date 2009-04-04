@@ -77,13 +77,13 @@ public class UnicodeValueMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue.isUnicode())
-      return Marshal.SAME;
+      return Marshal.ZERO;
     else if (argValue.isString())
-      return Marshal.SIMILAR;
+      return Marshal.TWO;
     else if (! (argValue.isArray() || argValue.isObject()))
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

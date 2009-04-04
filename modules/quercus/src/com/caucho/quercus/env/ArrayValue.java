@@ -1448,7 +1448,23 @@ abstract public class ArrayValue extends Value {
 
     return values;
   }
+  
+  /**
+   * Returns the keys.
+   */
+  public Value getKeys()
+  {
+    return new ArrayValueImpl(keysToArray());
+  }
 
+  /**
+   * Returns the keys.
+   */
+  public Value getValues()
+  {
+    return new ArrayValueImpl(valuesToArray());
+  }
+  
   /**
    * Takes the values of this array, unmarshals them to objects of type
    * <i>elementType</i>, and puts them in a java array.

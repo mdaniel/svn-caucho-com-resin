@@ -35,6 +35,12 @@ package com.caucho.quercus.env;
 public class ConstArrayValue
   extends ArrayValueImpl
 {
+  private ConstArrayValue _keys;
+  private ConstArrayValue _values;
+  
+  private Value []_keysArray;
+  private Value []_valuesArray;
+  
   public ConstArrayValue(ArrayValueImpl source)
   {
     if (! source._isDirty)
@@ -78,6 +84,54 @@ public class ConstArrayValue
   public void shuffle()
   {
     throw new IllegalStateException();
+  }
+  
+  /**
+   * Takes the values of this array and puts them in a java array
+   */
+  public Value[] keysToArray()
+  {
+    if (_keysArray == null)
+      _keysArray = super.keysToArray();
+    
+    // XXX: copy?
+    return _keysArray;
+  }
+  
+  /**
+   * Takes the values of this array and puts them in a java array
+   */
+  public Value[] valuesToArray()
+  {
+    if (_valuesArray == null)
+      _valuesArray = super.valuesToArray();
+    
+    // XXX: copy?
+    return _valuesArray;
+  }
+  
+  /**
+   * Returns the array keys.
+   */
+  @Override
+  public Value getKeys()
+  {
+    if (_keys == null)
+      _keys = new ConstArrayValue((ArrayValueImpl) super.getKeys());
+    
+    return _keys.copy();
+  }
+  
+  /**
+   * Returns the array keys.
+   */
+  @Override
+  public Value getValues()
+  {
+    if (_values == null)
+      _values = new ConstArrayValue((ArrayValueImpl) super.getValues());
+   
+    return _values.copy();
   }
 }
 

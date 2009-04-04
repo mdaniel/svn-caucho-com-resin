@@ -3891,7 +3891,7 @@ public class Env {
     else if (_isUnicodeSemantics)
       return _quercus.createUnicodeString(s);
     else
-      return _quercus.createString(s, true);
+      return _quercus.createString(s);
   }
 
   /**

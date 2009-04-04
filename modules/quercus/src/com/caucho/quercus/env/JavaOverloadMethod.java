@@ -44,7 +44,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
   private AbstractJavaMethod [][]_restMethodTable
     = new AbstractJavaMethod[0][];
-
+  
   public JavaOverloadMethod(AbstractJavaMethod fun)
   {
     overload(fun);
@@ -100,8 +100,6 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
         _restMethodTable[len] = newMethods;
       }
-      
-      return this;
     }
     else {
       int maxLen = fun.getMaxArgLength();
@@ -131,27 +129,39 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
           _methodTable[len] = newMethods;
         }
       }
-
-      return this;
     }
+    
+    return this;
   }
-
+  
   /**
    * Returns the actual function
    */
   @Override
-  public AbstractFunction getActualFunction(int argLength)
+  public AbstractFunction getActualFunction(Expr []args)
   {
-    for (int i = argLength; i < _methodTable.length; i++) {
-      if (_methodTable[i] == null)
-	continue;
+    if (args.length <= _methodTable.length) {
+      AbstractJavaMethod []methods = _methodTable[args.length];
 
-      if (_methodTable[i] != null && _methodTable[i].length == 1) {
-	return _methodTable[i][0];
+      if (methods != null) {
+        if (methods.length == 1)
+          return methods[0];
+        else
+          return getBestFitJavaMethod(methods, _restMethodTable, args);
+      }
+      else {
+        if (_restMethodTable.length == 0)
+          return this;
+
+        return getBestFitJavaMethod(methods, _restMethodTable, args);
       }
     }
-
-    return this;
+    else {
+      if (_restMethodTable.length == 0)
+        return this;
+      else
+        return getBestFitJavaMethod(null, _restMethodTable, args);
+    }
   }
 
   /**
@@ -160,38 +170,38 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   @Override
   public Value callMethod(Env env, Value qThis, Value []args)
   {
-    if (_methodTable.length <= args.length) {
-      if (_restMethodTable.length == 0)
-        return env.error(L.l("'{0}' overloaded method call with {1} arguments has too many arguments", getName(), args.length));
+    if (args.length <= _methodTable.length) {
+      AbstractJavaMethod []methods = _methodTable[args.length];
+
+      if (methods != null) {
+        if (methods.length == 1)
+          return methods[0].callMethod(env, qThis, args);
+        else {
+          AbstractJavaMethod method
+            = getBestFitJavaMethod(methods, _restMethodTable, args);
+
+          return method.callMethod(env, qThis, args);
+        }
+      }
       else {
+        if (_restMethodTable.length == 0) {
+          return env.error(L.l("'{0}' overloaded method call with {1} arguments does not match any overloaded method", getName(), args.length));
+        }
+
         AbstractJavaMethod method
-	  = getBestFitJavaMethod(null, _restMethodTable, args);
+          = getBestFitJavaMethod(methods, _restMethodTable, args);
 
         return method.callMethod(env, qThis, args);
       }
     }
     else {
-      AbstractJavaMethod []methods = _methodTable[args.length];
-
-      if (methods != null) {
-	if (methods.length == 1)
-	  return methods[0].callMethod(env, qThis, args);
-	else {
-	  AbstractJavaMethod method
-	    = getBestFitJavaMethod(methods, _restMethodTable, args);
-
-	  return method.callMethod(env, qThis, args);
-	}
-      }
+      if (_restMethodTable.length == 0)
+        return env.error(L.l("'{0}' overloaded method call with {1} arguments has too many arguments", getName(), args.length));
       else {
-	if (_restMethodTable.length == 0) {
-	  return env.error(L.l("'{0}' overloaded method call with {1} arguments does not match any overloaded method", getName(), args.length));
-	}
+        AbstractJavaMethod method
+          = getBestFitJavaMethod(null, _restMethodTable, args);
 
-	AbstractJavaMethod method
-	  = getBestFitJavaMethod(methods, _restMethodTable, args);
-
-	return method.callMethod(env, qThis, args);
+        return method.callMethod(env, qThis, args);
       }
     }
   }
@@ -201,8 +211,8 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   private AbstractJavaMethod
     getBestFitJavaMethod(AbstractJavaMethod []methods,
-			 AbstractJavaMethod [][]restMethodTable,
-			 Value []args)
+                         AbstractJavaMethod [][]restMethodTable,
+                         Value []args)
   {
 
     AbstractJavaMethod minCostJavaMethod = null;
@@ -249,9 +259,77 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   }
   
   /**
+   * Returns the Java function that matches the args passed in.
+   */
+  private AbstractJavaMethod
+    getBestFitJavaMethod(AbstractJavaMethod []methods,
+                         AbstractJavaMethod [][]restMethodTable,
+                         Expr []args)
+  {
+    AbstractJavaMethod minCostJavaMethod = null;
+    int minCost = Integer.MAX_VALUE;
+
+    if (methods != null) {
+      for (int i = 0; i < methods.length; i++) {
+        AbstractJavaMethod javaMethod = methods[i];
+
+        int cost = javaMethod.getMarshalingCost(args);
+
+        if (cost == 0)
+          return javaMethod;
+
+        if (cost <= minCost) {
+          minCost = cost;
+          minCostJavaMethod = javaMethod;
+        }
+      }
+    }
+
+    for (int i = Math.min(args.length, restMethodTable.length) - 1;
+     i >= 0;
+     i--) {
+      if (restMethodTable[i] == null)
+        continue;
+      
+      for (int j = 0; j < restMethodTable[i].length; j++) {
+        AbstractJavaMethod javaMethod = restMethodTable[i][j];
+        
+        int cost = javaMethod.getMarshalingCost(args);
+
+        if (cost == 0)
+          return javaMethod;
+
+        if (cost <= minCost) {
+          minCost = cost;
+          minCostJavaMethod = javaMethod;
+        }
+      }
+    }
+
+    return minCostJavaMethod;
+  }
+  
+  /**
    * Returns the cost of marshaling for this method given the args.
    */
   public int getMarshalingCost(Value []args)
+  {
+    AbstractJavaMethod []methods = null;
+    
+    if (args.length < _methodTable.length) {
+      methods = _methodTable[args.length];
+    }
+    
+    AbstractJavaMethod bestFitMethod
+      = getBestFitJavaMethod(methods, _restMethodTable, args);
+    
+    return bestFitMethod.getMarshalingCost(args);
+  }
+  
+  /**
+   * Returns the cost of marshaling for this method given the args.
+   */
+  public int getMarshalingCost(Expr []args)
   {
     throw new UnsupportedOperationException();
     /*

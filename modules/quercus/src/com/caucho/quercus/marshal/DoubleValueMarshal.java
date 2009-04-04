@@ -77,13 +77,13 @@ public class DoubleValueMarshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof DoubleValue)
-      return Marshal.SAME;
+      return Marshal.ZERO;
     else if (argValue.isLongConvertible())
       return LONG_CONVERTIBLE_DOUBLE_VALUE_COST;
     else if (argValue.isDoubleConvertible())
       return DOUBLE_CONVERTIBLE_DOUBLE_VALUE_COST;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
 
   @Override

@@ -287,7 +287,7 @@ abstract public class AbstractFunction {
   /**
    * Returns the actual function
    */
-  public AbstractFunction getActualFunction(int actualArgs)
+  public AbstractFunction getActualFunction(Expr []args)
   {
     return this;
   }

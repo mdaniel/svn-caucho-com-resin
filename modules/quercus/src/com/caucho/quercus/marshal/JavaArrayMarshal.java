@@ -87,12 +87,12 @@ public class JavaArrayMarshal extends Marshal
     if (argValue.isArray()) {
       if (Value[].class.equals(_expectedClass) ||
           Object[].class.equals(_expectedClass))
-        return Marshal.EQUIVALENT;
+        return Marshal.ONE;
       else
-        return Marshal.MARSHALABLE;
+        return Marshal.THREE;
     }
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

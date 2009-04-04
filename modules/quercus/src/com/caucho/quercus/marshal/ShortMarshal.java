@@ -70,13 +70,13 @@ public class ShortMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof LongValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue.isLongConvertible())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else if (argValue.isNumeric())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

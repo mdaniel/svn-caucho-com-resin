@@ -70,7 +70,7 @@ public class ByteObjectMarshal extends Marshal
     else if (argValue.isDoubleConvertible())
       return DOUBLE_CONVERTIBLE_BYTE_OBJECT_COST;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

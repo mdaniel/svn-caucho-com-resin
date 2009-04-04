@@ -93,9 +93,9 @@ public class BinaryValueMarshal extends Marshal
         return Marshal.PHP5_BINARY_VALUE_COST;
     }
     else if (! (argValue.isArray() || argValue.isObject()))
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

@@ -75,9 +75,9 @@ public class BooleanMarshal extends Marshal {
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof BooleanValue)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
   }
   
   @Override

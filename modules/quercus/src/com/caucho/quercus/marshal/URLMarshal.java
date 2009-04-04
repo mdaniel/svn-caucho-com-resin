@@ -64,11 +64,19 @@ public class URLMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof JavaURLValue)
-      return Marshal.SAME;
+      return Marshal.ZERO;
     else if (argValue.isString())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
+  }
+  
+  public int getMarshalingCost(Expr expr)
+  {
+    if (expr.isString())
+      return Marshal.THREE;
+    else
+      return Marshal.MAX;
   }
   
   @Override

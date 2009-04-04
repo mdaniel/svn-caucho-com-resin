@@ -30,6 +30,7 @@
 package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
@@ -186,6 +187,9 @@ public class ModuleInfo {
       
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
+      
+      if (method.getAnnotation(Hide.class) != null)
+        continue;
 
       // XXX: removed for php/0c2o.qa
       /**
@@ -213,7 +217,7 @@ public class ModuleInfo {
           throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method));
 
         StaticFunction function
-	  = _context.createStaticFunction(_module, method);
+          = _context.createStaticFunction(_module, method);
 
         String functionName = function.getName();
 

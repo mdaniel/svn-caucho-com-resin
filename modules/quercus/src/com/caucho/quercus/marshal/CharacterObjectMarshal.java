@@ -65,13 +65,13 @@ public class CharacterObjectMarshal extends Marshal
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue.isUnicode() && argValue.length() == 1)
-      return Marshal.EQUIVALENT;
+      return Marshal.ONE;
     else if (argValue.isString() && !argValue.isBinary() && argValue.length() == 1)
-      return Marshal.EQUIVALENT; // php/0ch1
+      return Marshal.ONE; // php/0ch1
     else if (argValue.isLongConvertible())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
   
   @Override

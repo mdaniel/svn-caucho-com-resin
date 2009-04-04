@@ -88,11 +88,11 @@ public class JavaMapMarshal extends JavaMarshal {
   {
     if (argValue instanceof JavaMapAdapter &&
         getExpectedClass().isAssignableFrom(argValue.toJavaObject().getClass()))
-      return Marshal.SAME;
+      return Marshal.ZERO;
     else if (argValue.isArray())
-      return Marshal.MARSHALABLE;
+      return Marshal.THREE;
     else
-      return Marshal.DUBIOUS;
+      return Marshal.FOUR;
   }
 }
 
