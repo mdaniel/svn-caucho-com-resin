@@ -14,7 +14,6 @@ public abstract class QueueEntry
 
   private final String _msgId;
 
-  QueueEntry _prev;
   QueueEntry _next;
   
   QueueEntry _nextPriority;

@@ -61,10 +61,10 @@ public class MemoryQueueImpl extends AbstractMemoryQueue<MemoryQueueEntry>
    * active listeners.
    */
   @Override
-  public void send(String msgId,
-		   Serializable payload,
-		   int priority,
-		   long expireTime)
+    public MemoryQueueEntry writeEntry(String msgId,
+				       Serializable payload,
+				       int priority,
+				       long expireTime)
   {
     int leaseTimeout = -1;
     
@@ -73,7 +73,7 @@ public class MemoryQueueImpl extends AbstractMemoryQueue<MemoryQueueEntry>
 			     leaseTimeout, priority, expireTime,
 			     payload);
 
-    addQueueEntry(entry);
+    return entry;
   }
 
   @Override

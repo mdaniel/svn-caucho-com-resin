@@ -866,6 +866,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     long expireTime = now + timeout;
 
     message.setJMSMessageID(queue.generateMessageID());
+    
     if (message.getJMSDestination() == null)
       message.setJMSDestination(queue);
     message.setJMSDeliveryMode(deliveryMode);
@@ -901,7 +902,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     else {
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
-      
+
+      System.out.println("SEND: " + message.getJMSMessageID());
       queue.send(message.getJMSMessageID(), message, priority, expireTime);
     }
   }

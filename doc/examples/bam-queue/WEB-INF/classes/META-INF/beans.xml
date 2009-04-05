@@ -1,0 +1,8 @@
+<Beans xmlns="urn:java:ee">
+  <!-- marker file to active Java Injection -->
+  <example:ExampleMessages xmlns:example="example">
+    <Named>exampleMessages</Named>
+  </example:ExampleMessages>
+</Beans>
+
+  

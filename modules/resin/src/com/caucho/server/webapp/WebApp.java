@@ -378,6 +378,10 @@ public class WebApp extends ServletContextImpl
       Vfs.setPwd(_appDir, _classLoader);
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
 
+      InjectManager inject = InjectManager.create(_classLoader);
+
+      inject.addPath(_appDir.lookup("WEB-INF/beans.xml"));
+
       // map.put("app", _appVar);
 
       _servletManager = new ServletManager();

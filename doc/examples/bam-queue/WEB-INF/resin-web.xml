@@ -1,8 +1,13 @@
-<web-app xmlns="http://caucho.com/ns/resin">
-  
+<web-app xmlns="http://caucho.com/ns/resin"
+	 xmlns:resin="urn:java:com.caucho.resin">
+
   <bam-service name="bam-java-queue"
-	       class="example.ExampleService"/>
-<!--  
+	       class="example.ExampleService">
+  </bam-service>
+
+
+  
+  <!--  
   <bam-service name="bam-php-queue" uri="caucho.php:">
     <init>
       <script>WEB-INF/php/bam_queue.php</script>

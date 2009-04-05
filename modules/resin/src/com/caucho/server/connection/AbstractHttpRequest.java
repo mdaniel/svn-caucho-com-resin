@@ -786,7 +786,7 @@ public abstract class AbstractHttpRequest
     case 'C':
       if (keyLen == CONNECTION.length
 	  && match(keyBuf, keyOff, keyLen, CONNECTION)) {
-	if (match(value.getBuffer(), value.getOffset(), value.length(),
+	if (match(value.getBuffer(), value.getOffset(), value.getLength(),
 		  CLOSE)) {
 	  connectionClose();
 	}
@@ -805,7 +805,7 @@ public abstract class AbstractHttpRequest
     case 'e':
     case 'E':
       if (match(keyBuf, keyOff, keyLen, EXPECT)) {
-	if (match(value.getBuffer(), value.getOffset(), value.length(),
+	if (match(value.getBuffer(), value.getOffset(), value.getLength(),
 		  CONTINUE_100)) {
 	  _expect100Continue = true;
           return false;

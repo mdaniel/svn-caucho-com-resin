@@ -256,13 +256,35 @@ public class MessageConsumerImpl implements MessageConsumer
     long expireTime = timeout > 0 ? now + timeout : 0;
 
     while (_session.isActive()) {
-      MessageImpl msg
-	= (MessageImpl) _queue.receive(expireTime, _isAutoAcknowledge);
+      QueueEntry entry = _queue.receiveEntry(expireTime, _isAutoAcknowledge);
 
-      if (msg == null)
+      if (entry == null)
+	return null;
+
+      Serializable payload = entry.getPayload();
+
+      if (payload == null)
 	return null;
       
-      else if (_selector != null && ! _selector.isMatch(msg)) {
+      MessageImpl msg = null;
+
+      System.out.println("YAP: " + payload);
+
+      if (payload instanceof MessageImpl) {
+	msg = (MessageImpl) payload;
+      }
+      else if (payload instanceof String) {
+	msg = new TextMessageImpl((String) payload);
+	msg.setJMSMessageID(entry.getMsgId());
+      }
+      else {
+	msg = new ObjectMessageImpl(payload);
+	msg.setJMSMessageID(entry.getMsgId());
+      }
+
+      // msg.received();
+      
+      if (_selector != null && ! _selector.isMatch(msg)) {
         _queue.acknowledge(msg.getJMSMessageID());
         continue;
       }
@@ -431,8 +453,14 @@ public class MessageConsumerImpl implements MessageConsumer
       try {
 	if (payload instanceof MessageImpl)
 	  message = (MessageImpl) payload;
-	else
+	else if (payload instanceof String) {
+	  message = new TextMessageImpl((String) payload);
+	  message.setJMSMessageID(msgId);
+	}
+	else {
 	  message = new ObjectMessageImpl(payload);
+	  message.setJMSMessageID(msgId);
+	}
 
 	if (_selector == null || _selector.isMatch(message)) {
 	  // XXX: only if XA

@@ -1,16 +1,17 @@
 package example;
 
-import java.io.*;
-import java.util.*;
-import javax.jms.*;
-import javax.ejb.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+import javax.annotation.Named;
+import javax.context.ApplicationScoped;
 
 /**
- * Custom singleton service to store messages
+ * Custom singleton bean to store messages
  */
-public class MessageStoreService {
+@ApplicationScoped
+@Named  
+public class MessageStore {
   private LinkedList<String> _messageLog = new LinkedList<String>();
 
   public void addMessage(String message)

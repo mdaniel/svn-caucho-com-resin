@@ -1,9 +1,9 @@
-<%@ page import="com.caucho.bam.BamClient, java.util.*, example.*"
+<%@ page import="com.caucho.bam.LocalActorClient, java.util.*, example.*"
 %><%!
-@javax.webbeans.Named("bam-java-queue")
+@com.caucho.config.Name("bam-java-queue")
 ExampleService _service;
 
-BamClient _client = new BamClient();
+LocalActorClient _client = new LocalActorClient();
 %>
 <%
 

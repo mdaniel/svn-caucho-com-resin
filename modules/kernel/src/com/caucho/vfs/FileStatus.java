@@ -61,13 +61,17 @@ public class FileStatus {
   private boolean _isLink;
   private boolean _isSocket;
 
-  public FileStatus(long st_dev, long st_ino, int st_mode, int st_nlink,
-                    int st_uid, int st_gid, long st_rdev, long st_size, 
-                    long st_blksize, long st_blocks, 
-                    long st_atime, long st_mtime, long st_ctime,
-                    boolean isRegularFile, boolean isDirectory,
-                    boolean isCharacterDevice, boolean isBlockDevice,
-                    boolean isFIFO, boolean isLink, boolean isSocket)
+  public FileStatus()
+  {
+  }
+  
+  public void init(long st_dev, long st_ino, int st_mode, int st_nlink,
+		   int st_uid, int st_gid, long st_rdev, long st_size, 
+		   long st_blksize, long st_blocks, 
+		   long st_atime, long st_mtime, long st_ctime,
+		   boolean isRegularFile, boolean isDirectory,
+		   boolean isCharacterDevice, boolean isBlockDevice,
+		   boolean isFIFO, boolean isLink, boolean isSocket)
   {
     _st_dev = st_dev;
     _st_ino = st_ino;
@@ -190,5 +194,13 @@ public class FileStatus {
   public boolean isSocket() 
   {
     return _isSocket;
+  }
+
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + String.format("%o", _st_mode)
+	    + ",len=" + _st_size
+	    + "]");
   }
 }

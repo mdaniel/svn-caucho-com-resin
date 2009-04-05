@@ -20,6 +20,10 @@
   <td>resin-web.xml configuration</td>
 </tr>
 <tr>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/beans.xml"/></td>
+  <td>Java Injection marker file to start bean scanning</td>
+</tr>
+<tr>
   <td><viewfile-link file="send-message.php"/></td>
   <td>PHP script sending the message.</td>
 </tr>
@@ -28,12 +32,8 @@
   <td>Java message bean listener receiving the message.</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/example/MessageStoreService.java"/></td>
+  <td><viewfile-link file="WEB-INF/classes/example/MessageStore.java"/></td>
   <td>Singleton service bean storing the received messages.</td>
-</tr>
-<tr>
-  <td><viewfile-link file="WEB-INF/classes/example/ViewLogServlet.java"/></td>
-  <td>Servlet displaying the contents of the message store.</td>
 </tr>
 </deftable>
 
@@ -64,7 +64,7 @@ is displayed by a servlet.
 <example title="Example: PHP sending script">
 &lt;?php
 
-if (array_key_exists("message", $_POST)) {
+if (isset($_POST["message"])) {
   $queue = java_bean("Queue");
 
   if (! $queue) {
@@ -96,28 +96,38 @@ receive messages with <code>poll()</code>.
 <s1 title="Configuring JMS for PHP and Java">
 
 <p>
-JMS requires that two resources be set up: A
-<code>ConnectionFactory</code> and a <code>Queue</code>.  Both are
+JMS requires two resources: A <code>Queue</code> and a
+<code>ConnectionFactory</code>.  Both are
 configured in <viewfile-link file="WEB-INF/resin-web.xml"/>.
 The <code>ConnectionFactory</code> is used to connect to all the
 <code>Queue</code>s and only one of them needs to be set up.</p>
 
-<example title="Example: ConnectionFactory configuration in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;jms-connection-factory uri="resin:"/>
-
-&lt;/web-app>
-</example>
+<s2 title="MemoryQueue configuration">
 
 <p>
 The example uses the queue named <code>Queue</code>.
 </p>
 
 <example title="Example: Queue configuration in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+           xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;jms-queue name="Queue" uri="memory:"/>
+  &lt;jms:MemoryQueue>
+    &lt;Named>Queue&lt;/Named>
+  &lt;/jms:MemoryQueue>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="ConnectionFactory configuration">
+
+<example title="Example: ConnectionFactory configuration in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+           xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:JmsConnectionFactory/>
 
 &lt;/web-app>
 </example>
@@ -126,6 +136,23 @@ The example uses the queue named <code>Queue</code>.
 The complete configuration is in 
 <viewfile-link file="WEB-INF/resin-web.xml"/>.
 </p>
+
+</s2>
+
+<s2 title="Message Bean configuration">
+
+<example title="Example: MyListener configuration in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+           xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;ejb-message-bean class="example.MyListener">
+    &lt;destination>#{Queue}&lt;/destination>
+  &lt;/ejb-message-bean>
+
+&lt;/web-app>
+</example>
+
+</s2>
 
 </s1>
 

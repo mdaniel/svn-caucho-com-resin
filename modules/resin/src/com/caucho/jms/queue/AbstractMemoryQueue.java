@@ -68,15 +68,25 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    * Sends a message to the queue
    */
   @Override
-  abstract public void send(String msgId,
-			    Serializable payload,
-			    int priority,
-			    long expires)
-    throws MessageException;
+  public final void send(String msgId,
+			 Serializable payload,
+			 int priority,
+			 long expires)
+    throws MessageException
+  {
+    E entry = writeEntry(msgId, payload, priority, expires);
+      
+    addQueueEntry(entry);
+  }
 
   //
   // send implementation
   //
+
+  abstract protected E writeEntry(String msg,
+				  Serializable payload,
+				  int priority,
+				  long expires);
 
   protected void addQueueEntry(E entry)
   {
@@ -182,7 +192,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
     throws MessageException
   {
     E entry = null;
-      
+
     synchronized (_queueLock) {
       if (_callbackList.size() > 0 || (entry = readEntry()) == null) {
 	_callbackList.add(callback);
@@ -201,21 +211,23 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 
   protected void dispatchMessage()
   {
-    E entry = null;
-    EntryCallback callback = null;
+    while (true) {
+      E entry = null;
+      EntryCallback callback = null;
       
-    synchronized (_queueLock) {
-      if (_callbackList.size() == 0 || (entry = readEntry()) == null) {
-	return;
+      synchronized (_queueLock) {
+	if (_callbackList.size() == 0 || (entry = readEntry()) == null) {
+	  return;
+	}
+
+	callback = _callbackList.remove(0);
       }
 
-      callback = _callbackList.remove(0);
-    }
+      readPayload(entry);
 
-    readPayload(entry);
-
-    if (callback.entryReceived(entry)) {
-      acknowledge(entry.getMsgId());
+      if (callback.entryReceived(entry)) {
+	acknowledge(entry.getMsgId());
+      }
     }
   }
   
@@ -258,13 +270,11 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   /**
    * Add an entry to the queue
    */
-  protected E addEntry(E entry)
+  private E addEntry(E entry)
   {
     int priority = entry.getPriority();
     
     synchronized (_queueLock) {
-      entry._prev = _tail[priority];
-
       if (_tail[priority] != null)
         _tail[priority]._next = entry;
       else
@@ -275,27 +285,6 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       return entry;
     }
   }
-
-  /**
-   * Remove an entry from the queue
-   */
-  protected void removeEntry(E entry)
-  {
-    int priority = entry.getPriority();
-    
-    QueueEntry prev = entry._prev;
-    QueueEntry next = entry._next;
-    
-    if (prev != null)
-      prev._next = next;
-    else if (_head[priority] == entry)
-      _head[priority] = next;
-
-    if (next != null)
-      next._prev = prev;
-    else if (_tail[priority] == entry)
-      _tail[priority] = prev;
-  }  
   
   /**
    * Returns the next entry from the queue
@@ -332,20 +321,25 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
 	QueueEntry prev = null;
-	
-        for (QueueEntry entry = _head[i];
-             entry != null;
-             entry = entry._next) {
+        QueueEntry entry = _head[i];
+
+	while (entry != null) {
+	  QueueEntry next = entry._next;
+	  
           if (msgId.equals(entry.getMsgId())) {
 	    if (prev != null)
 	      prev._next = entry._next;
 	    else
 	      _head[i] = entry._next;
+
+	    if (_tail[i] == entry)
+	      _tail[i] = prev;
 	    
 	    return (E) entry;
           }
 
 	  prev = entry;
+	  entry = next;
         }
       }
     }

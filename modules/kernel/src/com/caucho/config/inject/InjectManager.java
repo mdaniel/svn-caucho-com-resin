@@ -142,7 +142,7 @@ public class InjectManager
   private WbWebBeans _wbWebBeans;
 
   private int _beanId;
-  
+
   private HashMap<Path,WbWebBeans> _webBeansMap
     = new HashMap<Path,WbWebBeans>();
 
@@ -184,6 +184,9 @@ public class InjectManager
 
   private HashMap<FactoryBinding,Bean> _objectFactoryMap
     = new HashMap<FactoryBinding,Bean>();
+
+  private ArrayList<Path> _pendingPathList
+    = new ArrayList<Path>();
 
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
@@ -403,6 +406,11 @@ public class InjectManager
   public WbComponentType createComponentType(Class cl)
   {
     return _wbWebBeans.createComponentType(cl);
+  }
+
+  public void addPath(Path path)
+  {
+    _pendingPathList.add(path);
   }
 
   public void setDeploymentTypes(ArrayList<Class> deploymentList)
@@ -1861,6 +1869,25 @@ public class InjectManager
 
     try {
       thread.setContextClassLoader(_classLoader);
+
+      ArrayList<Path> pathList
+	= new ArrayList<Path>(_pendingPathList);
+      
+      _pendingPathList.clear();
+
+      for (Path path : pathList) {
+	if (_webBeansMap.get(path) != null)
+	  continue;
+	
+	if (path.canRead()) {
+	  WbWebBeans webBeans = new WbWebBeans(this, path);
+	  _webBeansMap.put(path, webBeans);
+	  
+	  path.setUserPath(path.getURL());
+	    
+	  new Config().configure(webBeans, path, SCHEMA);
+	}
+      }
 
       ArrayList<WebBeansRootContext> rootContextList
 	= new ArrayList<WebBeansRootContext>(_pendingRootContextList);

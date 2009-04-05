@@ -102,22 +102,6 @@ public final class CharBuffer extends CharSegment {
   }
 
   /**
-   * Returns the character count of the buffer's contents.
-   */
-  public int length()
-  {
-    return _length;
-  }
-
-  /**
-   * Returns the buffer length
-   */
-  public int getLength()
-  {
-    return _length;
-  }
-
-  /**
    * Returns the capacity of the buffer, i.e. how many chars it
    * can hold.
    */

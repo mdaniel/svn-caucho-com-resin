@@ -71,8 +71,7 @@
       <item link="bam-queue/index.xtp" title="BAM Queue"/>
       <item link="jms-php-queue-send/index.xtp" title="JMS/PHP Send"/>
       <item link="jms-php-queue-receive/index.xtp" title="JMS/PHP Receive"/>
-      <item link="jms-listener/index.xtp" title="JMS JCA Listener"/>
-      <item link="jms-ioc-listener/index.xtp" title="JMS IOC Listener"/>
+      <item link="jms-ioc-listener/index.xtp" title="MDB Listener"/>
      </item>
 
     <!--

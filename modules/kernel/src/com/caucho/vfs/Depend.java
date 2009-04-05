@@ -273,7 +273,9 @@ public class Depend implements PersistentDependency {
    */
   public String toString()
   {
-    return ("Depend[" + _source + " " + _lastModified + " " +
-            (_source.getLastModified() - _lastModified) + "]");
+    return ("Depend[" + _source + ",time=" + _lastModified
+	    + ",time-ch=" + (_source.getLastModified() - _lastModified)
+	    + ",len-ch=" + (_source.getLength() - _length)
+	    + "]");
   }
 }

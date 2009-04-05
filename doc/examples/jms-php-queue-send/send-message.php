@@ -1,6 +1,6 @@
 <?php
 
-if (array_key_exists("message", $_POST)) {
+if (isset($_POST["message"])) {
   $queue = java_bean("Queue");
 
   if (! $queue) {
@@ -14,6 +14,17 @@ if (array_key_exists("message", $_POST)) {
   }
 }
 
+// get the stored messages from the message store
+$messages = java_bean("messageStore");
+
+echo "<p>Received Messages:\n";
+
+echo "<ol>";
+foreach ($messages->getMessages() as $message) {
+  echo "<li>" . htmlspecialchars($message) . "</li>\n";
+}
+echo "</ol>";
+
 ?>
 <form method=POST action="">
   <input type="text" name="message" />
@@ -22,5 +33,7 @@ if (array_key_exists("message", $_POST)) {
 </form>
 
 <p>
-<a href="view-log">See all messages sent so far.</a>
+<ul>
+<li><a href="">See all messages sent so far.</a>
+<li><a href="index.xtp">Back to tutorial</a>
 </p>

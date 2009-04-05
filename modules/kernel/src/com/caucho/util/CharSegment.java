@@ -63,7 +63,7 @@ public class CharSegment implements CharSequence {
   /**
    * Returns the character count of the buffer's contents.
    */
-  public int length()
+  public final int length()
   {
     return _length;
   }
@@ -71,12 +71,12 @@ public class CharSegment implements CharSequence {
   /**
    * Returns the buffer length
    */
-  public int getLength()
+  public final int getLength()
   {
     return _length;
   }
 
-  public int getOffset()
+  public final int getOffset()
   {
     return _offset;
   }

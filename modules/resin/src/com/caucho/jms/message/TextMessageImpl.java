@@ -40,11 +40,16 @@ import com.caucho.hessian.io.*;
 /**
  * A text message.
  */
-public class TextMessageImpl extends MessageImpl implements TextMessage  {
+public class TextMessageImpl extends MessageImpl implements TextMessage {
   private String _text;
 
   public TextMessageImpl()
   {
+  }
+
+  public TextMessageImpl(String text)
+  {
+    _text = text;
   }
 
   public TextMessageImpl(TextMessage msg)

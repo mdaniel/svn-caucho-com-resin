@@ -256,17 +256,22 @@ public class WriteStream extends OutputStreamWithBuffer
    */
   public void write(int ch) throws IOException
   {
-    if (_source == null)
-      return;
-
     int len = _writeLength;
-    if (_writeBuffer.length <= len) {
+    byte []writeBuffer = _writeBuffer;
+    
+    if (writeBuffer.length <= len) {
+      if (_source == null)
+	return;
+
       _writeLength = 0;
-      _source.write(_writeBuffer, 0, len, false);
+      _source.write(writeBuffer, 0, len, false);
       _position += len;
+      len = 0;
     }
 
-    _writeBuffer[_writeLength++] = (byte) ch;
+    writeBuffer[len] = (byte) ch;
+
+    _writeLength = len + 1;
 
     if (_implicitFlush)
       flush();
@@ -279,17 +284,18 @@ public class WriteStream extends OutputStreamWithBuffer
   {
     byte []buffer = _writeBuffer;
     
-    if (_source == null)
-      return;
-
     int bufferLength = buffer.length;
     int writeLength = _writeLength;
 
-    if (bufferLength <= length
-	&& _source.write(buffer, 0, writeLength,
-			 buf, offset, length, false)) {
-      _position += (writeLength + length);
-      return;
+    if (bufferLength <= length) {
+      if (_source == null)
+	return;
+
+      if (_source.write(buffer, 0, writeLength,
+			buf, offset, length, false)) {
+	_position += (writeLength + length);
+	return;
+      }
     }
     
     while (length > 0) {

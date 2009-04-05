@@ -46,13 +46,13 @@ import java.util.logging.Logger;
  */
 public class MessageImpl implements Message, java.io.Serializable
 {
-  protected static final Logger log
+  private static final Logger log
     = Logger.getLogger(MessageImpl.class.getName());
-  protected static final L10N L = new L10N(MessageImpl.class);
+  private static final L10N L = new L10N(MessageImpl.class);
 
   private static final HashSet<String> _reserved;
 
-  private volatile WeakReference<JmsSession> _sessionRef;
+  private transient volatile WeakReference<JmsSession> _sessionRef;
   
   private String _messageId;
   private String _correlationId;

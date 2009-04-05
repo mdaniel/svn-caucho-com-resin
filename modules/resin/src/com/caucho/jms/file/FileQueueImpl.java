@@ -185,10 +185,10 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
    * @param expireTime the expires time
    */
   @Override
-  public void send(String msgId,
-		   Serializable payload,
-		   int priority,
-		   long expireTime)
+  public FileQueueEntry writeEntry(String msgId,
+				   Serializable payload,
+				   int priority,
+				   long expireTime)
   {
     long id = _store.send(_queueIdHash, msgId, payload, priority, expireTime);
 
@@ -197,7 +197,7 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
     FileQueueEntry entry = new FileQueueEntry(id, msgId, leaseTimeout,
 					      priority, expireTime, payload);
 
-    addQueueEntry(entry);
+    return entry;
   }
 
   protected void readPayload(FileQueueEntry entry)

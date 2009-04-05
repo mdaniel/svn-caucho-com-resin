@@ -116,7 +116,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
       if (cLength < sublen)
 	sublen = cLength;
 
-      for (int i = 0; i < sublen; i++) {
+      for (int i = sublen - 1; i >= 0; i--) {
 	bBuf[bOffset + i] = (byte) cBuf[cOffset + i];
       }
 

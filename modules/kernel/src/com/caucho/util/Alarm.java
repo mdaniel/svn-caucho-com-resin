@@ -666,7 +666,7 @@ public class Alarm implements ThreadTask {
 
 	    _currentTime = now;
 	    
-	    LockSupport.park(now + sleepTime);
+	    LockSupport.parkNanos(sleepTime * 1000000L);
 	  }
 	} catch (Throwable e) {
 	}
@@ -677,9 +677,10 @@ public class Alarm implements ThreadTask {
   static class CoordinatorThread extends Thread {
     CoordinatorThread()
     {
-      super("resin-alarm");
+      super("alarm-coordinator");
       setDaemon(true);
       setPriority(Thread.MAX_PRIORITY);
+      setName("alarm-coordinator");
     }
 
     void wake()
@@ -692,8 +693,7 @@ public class Alarm implements ThreadTask {
      */
     public void run()
     {
-      Thread thread = Thread.currentThread();
-      thread.setName("alarm-coordinator");
+      Thread thread = this;
 
       while (true) {
 	try {
