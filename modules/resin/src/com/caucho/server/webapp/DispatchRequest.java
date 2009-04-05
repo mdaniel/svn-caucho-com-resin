@@ -317,6 +317,7 @@ class DispatchRequest extends RequestAdapter {
 	  _formParser = new Form();
 	_formParser.parseQueryString(table, _addedQuery, javaEncoding, false);
       } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
       }
     }
 
@@ -335,6 +336,7 @@ class DispatchRequest extends RequestAdapter {
 	System.arraycopy(newValues, 0, next, 0, newValues.length);
 	System.arraycopy(oldValues, 0, next, newValues.length,
 			 oldValues.length);
+
 	table.put(key, next);
       }
     }

@@ -105,7 +105,8 @@ public class DispatchFilterChain implements FilterChain {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      if (abstractReq != null)
+      // server/1061
+      if (abstractReq != null && oldInvocation == null)
 	abstractReq.setInvocation(_invocation);
 
       for (int i = 0; i < _requestListeners.length; i++) {
