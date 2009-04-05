@@ -54,21 +54,21 @@ public class MemorySubscriberQueue extends MemoryQueue
     _isNoLocal = noLocal;
   }
 
+  /*
   @Override
   public void send(String msgId,
 		   Serializable msg,
 		   int priority,
 		   long timeout)
   {
-    /*
     if (_isNoLocal && _session == sendingSession)
       return;
     else {
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " send message " + msg);
-    */
       
     super.send(msgId, msg, priority, timeout);
   }
+  */
 }
 

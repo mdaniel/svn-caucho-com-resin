@@ -46,9 +46,9 @@ import java.util.logging.Logger;
  */
 public class MessageImpl implements Message, java.io.Serializable
 {
-  private static final Logger log
+  protected static final Logger log
     = Logger.getLogger(MessageImpl.class.getName());
-  private static final L10N L = new L10N(MessageImpl.class);
+  protected static final L10N L = new L10N(MessageImpl.class);
 
   private static final HashSet<String> _reserved;
 

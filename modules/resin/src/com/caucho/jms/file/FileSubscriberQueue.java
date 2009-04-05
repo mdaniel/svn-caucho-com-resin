@@ -56,6 +56,7 @@ public class FileSubscriberQueue extends MemoryQueueImpl
     _isNoLocal = noLocal;
   }
 
+    /*
 
   @Override
   public void send(String msgId,
@@ -63,13 +64,12 @@ public class FileSubscriberQueue extends MemoryQueueImpl
 		   int priority,
 		   long timeout)
   {
-    /*
     if (_isNoLocal && _session == session)
       return;
     else
-    */
     super.send(msgId, payload, priority, timeout);
   }
+    */
 
   public String toString()
   {
