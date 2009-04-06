@@ -243,7 +243,7 @@ public class IncludeResponseStream extends ToByteResponseStream {
 
       if (_os == null)
 	_os = _next.getOutputStream();
-    
+
       _os.write(buf, offset, length);
     } catch (IOException e) {
       if (_next instanceof CauchoResponse)

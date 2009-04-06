@@ -75,4 +75,9 @@ public class ServletOutputStreamImpl extends ServletOutputStream {
   public final void close() throws IOException
   {
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _out + "]";
+  }
 }

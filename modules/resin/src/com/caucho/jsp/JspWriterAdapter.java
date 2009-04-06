@@ -204,7 +204,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     if (_isClosed) {
       // jsp/0504
-      closeError("flushBuffer()");
+      closeError("clear()");
     }
 
     /*

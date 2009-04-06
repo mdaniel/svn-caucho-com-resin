@@ -264,6 +264,8 @@ class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     if (_isCommitted) {
+      flushBuffer();
+      
       return _next.getBuffer();
     }
     else
@@ -279,6 +281,8 @@ class ResponseStream extends ToByteResponseStream {
     if (! _isCommitted)
       return super.getBufferOffset();
     
+    flushBuffer();
+      
     byte []buffer;
     int offset;
 
@@ -320,6 +324,8 @@ class ResponseStream extends ToByteResponseStream {
     if (_isClosed)
       return _next.getBuffer();
     
+    flushBuffer();
+      
     int startOffset = _bufferStartOffset;
     _bufferStartOffset = 0;
 
@@ -609,12 +615,6 @@ class ResponseStream extends ToByteResponseStream {
         
     length = (int) (contentLengthHeader - _contentLength);
     return (length <= 0);
-  }
-
-  public void flushBuffer()
-    throws IOException
-  {
-    super.flushBuffer();
   }
 
   /**
