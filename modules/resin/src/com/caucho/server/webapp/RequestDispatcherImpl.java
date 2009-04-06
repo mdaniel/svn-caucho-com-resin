@@ -92,6 +92,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     _forwardInvocation = forwardInvocation;
     _errorInvocation = errorInvocation;
     _dispatchInvocation = dispatchInvocation;
+
     _webApp = webApp;
   }
 
@@ -173,8 +174,9 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       response = (AbstractHttpResponse) res;
 
     ServletResponse resPtr = res;
+    boolean isError = "error".equals(method);
 	  
-    if (method == null || "error".equals(method))
+    if (method == null || isError)
       method = req.getMethod();
 
     subRequest = DispatchRequest.createDispatch();
@@ -231,7 +233,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 		    invocation.getServletPath(),
 		    invocation.getPathInfo(),
 		    queryString, newQueryString);
-
     
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
@@ -264,7 +265,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       req.removeAttribute("caucho.jsp.jsp-file");
     }
 
-    if (req.getAttribute(FWD_REQUEST_URI) == null) {
+    // server/1ksc
+    if (! isError && req.getAttribute(FWD_REQUEST_URI) == null) {
       subRequest.setAttribute(FWD_REQUEST_URI, req.getRequestURI());
       subRequest.setAttribute(FWD_CONTEXT_PATH, req.getContextPath());
       subRequest.setAttribute(FWD_SERVLET_PATH, req.getServletPath());

@@ -27,44 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.security;
+package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
-import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.server.security.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
- * Combines matches.
+ * Negates the result of another request predicate, returning false
+ * if the child predicate is true.
+ *
+ * <p>Complex test can be built using &lt;resin:Not>,
+ * &lt;resin:And> and &lt;resin:Or> on top of simpler primary
+ * predicates.
  *
  * <pre>
- * &lt;sec:Allow url-pattern="/admin/*"&gt;
- *   &lt;sec:Not>
- *     &lt;sec:Address value="192.168.1.10"/&gt;
- *   &lt;/sec:Not>
- * &lt;/sec:Allow>
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:Forbidden regexp="^/local/">
+ *     &lt;resin:Not>
+ *       &lt;resin:IfAddress value="192.168.1.10"/&gt;
+ *     &lt;/resin:Not>
+ *   &lt;/resin:Forbidden regexp="^/local/">
+ *
+ * &lt;/web-app>
  * </pre>
  */
-public class Not implements ServletRequestPredicate {
-  public static final L10N L = new L10N(Not.class);
+public class Not implements RequestPredicate {
+  private static final L10N L = new L10N(Not.class);
   
-  private ServletRequestPredicate _predicate;
+  private RequestPredicate _predicate;
 
   public Not()
   {
   }
 
-  public Not(ServletRequestPredicate predicate)
+  public Not(RequestPredicate predicate)
   {
     add(predicate);
   }
@@ -72,10 +72,10 @@ public class Not implements ServletRequestPredicate {
   /**
    * Add a sub-predicate
    */
-  public void add(ServletRequestPredicate predicate)
+  public void add(RequestPredicate predicate)
   {
     if (_predicate != null)
-      throw new ConfigException(L.l("security:Not requires a single value"));
+      throw new ConfigException(L.l("&lt;resin:Not> requires a single value"));
       
     _predicate = predicate;
   }
@@ -84,7 +84,7 @@ public class Not implements ServletRequestPredicate {
   public void init()
   {
     if (_predicate == null)
-      throw new ConfigException(L.l("security:Not requires a value"));
+      throw new ConfigException(L.l("&lt;resin:Not> requires a value"));
   }
 
   /**

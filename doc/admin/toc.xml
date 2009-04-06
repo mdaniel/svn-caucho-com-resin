@@ -23,29 +23,28 @@
        - IoC
       -->
 	  
-    <item link="ioc.xtp" title="IoC"/>
+    <item link="candi.xtp" title="Java Injection"/>
 
     <!--
        - Performance
       -->
-    <item link="performance.xtp" title="Performance">
-      <item link="performance-benchmarks.xtp" title="Benchmarks"/>
-      <item link="jvm-tuning.xtp" title="JVM Tuning"/>
-      <item link="performance-faq.xtp" title="Performance FAQ"/>
-      <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
-      <item link="tuning.xtp" title="Tuning"/>
-    </item>
-
-    <!--
-       - resources
-      -->
-    <item link="resources.xtp" title="Scheduled Tasks"
-          description="executing tasks, methods and URLs based on cron triggers"/>
+    <item link="performance.xtp" title="Performance"/>
     
     <!--
        - Admin/JMX
       -->
-    <item link="resin-admin.xtp" title="resin-admin"/>
+    <item link="resin-admin.xtp" title="/resin-admin"/>
+    
+    <!--
+       - Rewrite
+      -->
+    <item link="rewrite.xtp" title="Rewrite"/>
+
+    <!--
+       - resources
+      -->
+    <item link="resources.xtp" title="Scheduling"
+          description="executing tasks, methods and URLs based on cron triggers"/>
     
     <!--
        - Security

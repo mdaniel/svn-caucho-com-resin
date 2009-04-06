@@ -2579,8 +2579,9 @@ public abstract class AbstractHttpRequest
    */
   public String getServletName()
   {
-    if (_invocation != null)
+    if (_invocation != null) {
       return _invocation.getServletName();
+    }
     else
       return null;
   }

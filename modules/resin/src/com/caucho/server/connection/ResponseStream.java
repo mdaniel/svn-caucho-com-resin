@@ -171,7 +171,7 @@ class ResponseStream extends ToByteResponseStream {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    if (true || _isCommitted)
+    if (_isCommitted)
       return _contentLength;
     else
       return super.getContentLength();

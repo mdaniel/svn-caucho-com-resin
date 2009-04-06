@@ -67,6 +67,11 @@ abstract public class AbstractDispatchRule implements DispatchRule
     return false;
   }
 
+  public boolean isFilter()
+  {
+    return false;
+  }
+
   public void add(RequestPredicate predicate)
   {
     _predicateList.add(predicate);
@@ -85,14 +90,14 @@ abstract public class AbstractDispatchRule implements DispatchRule
 
       if (matcher != null)
 	uri = rewrite(matcher, uri);
-    
+
       if (queryString == null)
 	target = uri;
       else if (uri.indexOf('?') >= 0)
 	target = uri + "&" + queryString;
       else
 	target = uri + "?" + queryString;
-    
+
       FilterChain chain = createDispatch(uri, queryString, target, next);
 
       if (_predicates.length > 0)
@@ -101,7 +106,7 @@ abstract public class AbstractDispatchRule implements DispatchRule
       return chain;
     }
     else
-      return next;
+      return null;
   }
 
   protected FilterChain createDispatch(String uri,

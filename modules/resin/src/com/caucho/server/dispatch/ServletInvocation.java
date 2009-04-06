@@ -304,6 +304,17 @@ public class ServletInvocation {
 
   public String toString()
   {
-    return "ServletInvocation[" + _contextUri + "]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(_contextUri);
+
+    if (_queryString != null)
+      sb.append("?").append(_queryString);
+
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

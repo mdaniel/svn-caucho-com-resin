@@ -360,7 +360,7 @@ public class ErrorPageManager {
       log.log(level, rootExn.toString());
     else
       log.log(level, e.toString(), e);
-    
+
     if (location != null) {
       if (errorPageExn == null)
 	errorPageExn = rootExn;
@@ -580,8 +580,9 @@ public class ErrorPageManager {
     
     try {
       if (handleErrorStatus(request, response, code, message)
-	  || code == HttpServletResponse.SC_NOT_MODIFIED)
+	  || code == HttpServletResponse.SC_NOT_MODIFIED) {
         return;
+      }
 
       response.setContentType("text/html; charset=utf-8");
       PrintWriter out = response.getWriter();
@@ -657,8 +658,9 @@ public class ErrorPageManager {
     if (request.getRequestDepth(0) > 16)
       return false;
 
-    else if (request.getAttribute(AbstractHttpRequest.ERROR_URI) != null)
+    else if (request.getAttribute(AbstractHttpRequest.ERROR_URI) != null) {
       return false;
+    }
 
     response.killCache();
     
@@ -680,9 +682,11 @@ public class ErrorPageManager {
                            message);
       request.setAttribute(AbstractHttpRequest.ERROR_URI,
                            request.getRequestURI());
-      if (request instanceof AbstractHttpRequest)
-        request.setAttribute(AbstractHttpRequest.SERVLET_NAME,
-                             ((AbstractHttpRequest) request).getServletName());
+
+      String servletName = getServletName(request);
+
+      if (servletName != null)
+        request.setAttribute(AbstractHttpRequest.SERVLET_NAME, servletName);
 
       try {
         RequestDispatcher disp = null;

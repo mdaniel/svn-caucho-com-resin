@@ -32,7 +32,11 @@ package com.caucho.rewrite;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * A condition of the request which must pass for the rule to fire.
+ * <p>A predicate on a HttpServletRequest, returning true if the
+ * request matches the predicate's requirements.
+ *
+ * <p>Applications can create custom predicates as needed for
+ * both rewrite and security rules.
  */
 public interface RequestPredicate
 {

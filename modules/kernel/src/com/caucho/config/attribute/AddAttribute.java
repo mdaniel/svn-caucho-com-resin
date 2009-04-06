@@ -101,16 +101,12 @@ public class AddAttribute extends Attribute {
     if (! uri.startsWith("urn:java:"))
       throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
 
-    String className = uri.substring("uri:java:".length()) + '.' + localName;
-    Class cl = null;
+    String packageName = uri.substring("uri:java:".length());
+    Class cl = TypeFactory.loadClass(packageName, localName);
 
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    try {
-      cl = Class.forName(className, false, loader);
-    } catch (ClassNotFoundException e) {
-      throw new ConfigException(L.l("'{0}' is an unknown class for element '{1}'",
-				    className, qName), e);
+    if (cl == null) {
+      throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
+				    packageName, localName, qName));
     }
 
     if (Annotation.class.isAssignableFrom(cl)) {

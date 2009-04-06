@@ -2248,6 +2248,7 @@ public class WebApp extends ServletContextImpl
 
         if (entry != null && ! entry.isModified()) {
           chain = entry.getFilterChain();
+	  invocation.setServletName(entry.getServletName());
         } else {
           chain = _servletMapper.mapServlet(invocation);
 
@@ -3096,6 +3097,7 @@ public class WebApp extends ServletContextImpl
     FilterChain _filterChain;
     String _pathInfo;
     String _servletPath;
+    String _servletName;
     HashMap<String,String> _securityRoleMap;
     final Dependency _dependency;
 
@@ -3104,6 +3106,7 @@ public class WebApp extends ServletContextImpl
       _filterChain = filterChain;
       _pathInfo = invocation.getPathInfo();
       _servletPath = invocation.getServletPath();
+      _servletName = invocation.getServletName();
       _dependency = invocation.getDependency();
     }
 
@@ -3135,6 +3138,11 @@ public class WebApp extends ServletContextImpl
     String getServletPath()
     {
       return _servletPath;
+    }
+
+    String getServletName()
+    {
+      return _servletName;
     }
   }
 

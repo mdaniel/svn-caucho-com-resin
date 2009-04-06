@@ -1,6 +1,8 @@
 <navigation threaded="true">
   <item link="index.xtp" title="Resin 4.0">
+    <item link="install/index.xtp" title="Installation"/>
     <item link="admin/index.xtp" title="Admin Docs"/>
+    <item link="reference/index.xtp" title="Reference"/>
     <item link="doc/index.xtp" title="Dev Docs"/>
     <item link="examples/index.xtp" title="Examples"/>
     <item link="changes/index.xtp" title="Changes"/>

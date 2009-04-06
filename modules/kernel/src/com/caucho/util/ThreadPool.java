@@ -132,11 +132,13 @@ public class ThreadPool {
    */
   public void setThreadMax(int max)
   {
-    if (max < _threadIdleMax && _threadIdleMax >= 0)
-      throw new ConfigException(L.l("lt;thread-max> ({0}) must be less than &lt;thread-idle-max> ({1})", max, _threadIdleMax));
+    synchronized (this) {
+      int threadIdleMax = _threadIdleMax;
+      if (max < threadIdleMax && threadIdleMax >= 0)
+	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})", threadIdleMax, max));
 	
-    _threadMax = max;
-
+      _threadMax = max;
+    }
   }
 
   /**
@@ -152,12 +154,15 @@ public class ThreadPool {
    */
   public void setThreadIdleMin(int min)
   {
-    if (_threadIdleMax < min && _threadIdleMax >= 0)
-      throw new ConfigException(L.l("lt;thread-idle-min> ({0}) must be less than &lt;thread-idle-max> ({1})", min, _threadIdleMax));
+    synchronized (this) {
+      int threadIdleMax = _threadIdleMax;
+      if (threadIdleMax < min && threadIdleMax >= 0)
+	throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})", min, threadIdleMax));
     
-    _threadIdleMin = min;
+      _threadIdleMin = min;
 
-    calculateThreadPriority();
+      calculateThreadPriority();
+    }
   }
 
   /**
@@ -173,15 +178,19 @@ public class ThreadPool {
    */
   public void setThreadIdleMax(int max)
   {
-    if (max < _threadIdleMin && _threadIdleMin >= 0)
-      throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be greater than &lt;thread-idle-min> ({1})",
-				    max, _threadIdleMin));
+    synchronized (this) {
+      int threadIdleMin = _threadIdleMin;
+      if (max < threadIdleMin && threadIdleMin >= 0)
+	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be greater than <thread-idle-min> ({1})",
+				      max, threadIdleMin));
+
+      int threadMax = _threadMax;
+      if (threadMax < max && threadMax >= 0)
+	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
+				      max, threadMax));
     
-    if (_threadMax < max && _threadMax >= 0)
-      throw new ConfigException(L.l("lt;thread-idle-max> ({0}) must be less than &lt;thread-max> ({1})",
-				    max, _threadMax));
-    
-    _threadIdleMax = max;
+      _threadIdleMax = max;
+    }
   }
 
   /**
@@ -197,14 +206,16 @@ public class ThreadPool {
    */
   public void setExecutorTaskMax(int max)
   {
-    if (_threadMax < max && _threadMax >= 0)
-      throw new ConfigException(L.l("lt;thread-executor-max> ({0}) must be less than &lt;thread-max> ({1})",
-				    max, _threadMax));
+    synchronized (this) {
+      if (_threadMax < max && _threadMax >= 0)
+	throw new ConfigException(L.l("<thread-executor-max> ({0}) must be less than <thread-max> ({1})",
+				      max, _threadMax));
     
-    if (max == 0)
-      throw new ConfigException(L.l("lt;thread-executor-max> must not be zero."));
+      if (max == 0)
+	throw new ConfigException(L.l("<thread-executor-max> must not be zero."));
     
-    _executorTaskMax = max;
+      _executorTaskMax = max;
+    }
   }
 
   /**

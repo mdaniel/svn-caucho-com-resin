@@ -39,6 +39,8 @@ public interface DispatchRule
   public boolean isInclude();
   
   public boolean isForward();
+
+  public boolean isFilter();
   
   public FilterChain map(String uri, String queryString, FilterChain accept)
     throws ServletException;

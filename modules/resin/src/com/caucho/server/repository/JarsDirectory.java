@@ -64,7 +64,6 @@ public class JarsDirectory
 
   public void update()
   {
-    System.out.println("UPDATE: " + _path);
   }
 
   public String toString()

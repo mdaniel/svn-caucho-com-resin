@@ -31,13 +31,12 @@ package com.caucho.security;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.caucho.rewrite.RequestPredicate;
+
 /**
  * Interface for predicates on the ServletRequest
  */
 public interface ServletRequestPredicate
 {
-  /**
-   * Returns true if the predicate matches
-   */
   public boolean isMatch(HttpServletRequest request);
 }
