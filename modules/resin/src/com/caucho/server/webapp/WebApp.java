@@ -60,7 +60,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
 import com.caucho.security.Deny;
 import com.caucho.security.IfSecure;
-import com.caucho.security.Not;
+import com.caucho.rewrite.Not;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;

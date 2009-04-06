@@ -30,6 +30,7 @@
 package com.caucho.security;
 
 import com.caucho.util.CharBuffer;
+import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.connection.CauchoRequest;
 
 import java.security.Principal;
@@ -39,7 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class IfRole implements ServletRequestPredicate {
+public class IfRole implements RequestPredicate {
   private String []_roles = new String[0];
 
   public void addName(String role)

@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.security.*;
 
 import javax.annotation.PostConstruct;
@@ -64,7 +65,7 @@ import java.util.logging.Logger;
  * &lt;/sec:Deny&gt;
  * </pre>
  */
-public class IfNetwork implements ServletRequestPredicate {
+public class IfNetwork implements RequestPredicate {
   private static final Logger log
     = Logger.getLogger(IfNetwork.class.getName());
   static L10N L = new L10N(IfNetwork.class);

@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.security.*;
 
 import javax.annotation.PostConstruct;
@@ -56,16 +57,16 @@ import java.util.logging.Logger;
  * &lt;/sec:Allow>
  * </pre>
  */
-public class And implements ServletRequestPredicate {
-  private ArrayList<ServletRequestPredicate> _predicateList
-    = new ArrayList<ServletRequestPredicate>();
+public class And implements RequestPredicate {
+  private ArrayList<RequestPredicate> _predicateList
+    = new ArrayList<RequestPredicate>();
 
-  private ServletRequestPredicate []_predicates;
+  private RequestPredicate []_predicates;
 
   /**
    * Add a sub-predicate
    */
-  public void add(ServletRequestPredicate predicate)
+  public void add(RequestPredicate predicate)
   {
     _predicateList.add(predicate);
   }
@@ -73,7 +74,7 @@ public class And implements ServletRequestPredicate {
   @PostConstruct
   public void init()
   {
-    _predicates = new ServletRequestPredicate[_predicateList.size()];
+    _predicates = new RequestPredicate[_predicateList.size()];
     _predicateList.toArray(_predicates);
   }
 
@@ -82,7 +83,7 @@ public class And implements ServletRequestPredicate {
    */
   public boolean isMatch(HttpServletRequest request)
   {
-    for (ServletRequestPredicate predicate : _predicates) {
+    for (RequestPredicate predicate : _predicates) {
       if (! predicate.isMatch(request))
 	return false;
     }

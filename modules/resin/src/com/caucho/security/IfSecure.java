@@ -30,6 +30,7 @@
 package com.caucho.security;
 
 import com.caucho.util.CharBuffer;
+import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.connection.CauchoRequest;
 
 import java.security.Principal;
@@ -39,7 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class IfSecure implements ServletRequestPredicate {
+public class IfSecure implements RequestPredicate {
   /**
    * Returns true if the user is authorized for the resource.
    */

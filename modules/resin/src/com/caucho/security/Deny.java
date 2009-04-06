@@ -32,6 +32,7 @@ package com.caucho.security;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.config.Unbound;
+import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.security.AbstractConstraint;
 import com.caucho.server.security.SecurityConstraint;
@@ -68,8 +69,8 @@ public class Deny extends SecurityConstraint
   private ArrayList<Pattern> _patternList
     = new ArrayList<Pattern>();
 
-  private ArrayList<ServletRequestPredicate> _predicateList
-    = new ArrayList<ServletRequestPredicate>();
+  private ArrayList<RequestPredicate> _predicateList
+    = new ArrayList<RequestPredicate>();
   
   /**
    * Sets the url-pattern
@@ -92,7 +93,7 @@ public class Deny extends SecurityConstraint
   /**
    * Adds a match
    */
-  public void add(ServletRequestPredicate predicate)
+  public void add(RequestPredicate predicate)
   {
     _predicateList.add(predicate);
   }
@@ -154,11 +155,11 @@ public class Deny extends SecurityConstraint
 
   class DenyConstraint extends AbstractConstraint
   {
-    private ServletRequestPredicate []_predicateList;
+    private RequestPredicate []_predicateList;
 
-    DenyConstraint(ArrayList<ServletRequestPredicate> predicateList)
+    DenyConstraint(ArrayList<RequestPredicate> predicateList)
     {
-      _predicateList = new ServletRequestPredicate[predicateList.size()];
+      _predicateList = new RequestPredicate[predicateList.size()];
       predicateList.toArray(_predicateList);
     }
 
@@ -166,7 +167,7 @@ public class Deny extends SecurityConstraint
 					    HttpServletResponse response,
 					    ServletContext webApp)
     {
-      for (ServletRequestPredicate predicate : _predicateList) {
+      for (RequestPredicate predicate : _predicateList) {
 	if (! predicate.isMatch(request))
 	  return AuthorizationResult.DEFAULT_ALLOW;
       }
