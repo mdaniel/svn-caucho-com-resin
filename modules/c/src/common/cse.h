@@ -42,6 +42,11 @@ typedef time_t unsigned int;
 */
 #include <time.h>
 
+#ifndef WIN32
+#define O_BINARY 0
+#define O_TEXT 0
+#endif
+
 typedef struct mem_pool_t mem_pool_t;
 
 #define CONN_POOL_SIZE 128
@@ -187,6 +192,7 @@ typedef struct config_t {
   
   void *lock;
   void *config_lock;
+  void *server_lock;
   char *error;
   
   int enable_caucho_status;
@@ -229,6 +235,7 @@ typedef struct config_t {
   time_t last_file_update;
   time_t start_time;
   int update_count;
+  int is_updating;
 } config_t;
 
 #define BUF_LENGTH (16 * 1024)
