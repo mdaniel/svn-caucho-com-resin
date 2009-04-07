@@ -200,7 +200,7 @@ public class ArrayValueImpl extends ArrayValue
   {
     for (int i = 0; i < components.length; i++) {
       components[i].init(env);
-      components[i].init(this);
+      components[i].addTo(this);
     }
   }
   
@@ -208,7 +208,7 @@ public class ArrayValueImpl extends ArrayValue
   {
     for (int i = 0; i < components.length; i++) {
       components[i].init();
-      components[i].init(this);
+      components[i].addTo(this);
     }
   }
 

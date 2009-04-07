@@ -152,7 +152,7 @@ public class ArrayValueComponent
   {
   }
   
-  public final void init(ArrayValue array)
+  public final void addTo(ArrayValue array)
   {
     for (int i = 0; i < _keys.length; i++) {
       if (_keys[i] != null)

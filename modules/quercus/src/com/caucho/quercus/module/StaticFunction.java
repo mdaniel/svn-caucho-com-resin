@@ -132,11 +132,6 @@ public class StaticFunction extends JavaInvoker {
   public Object invoke(Object obj, Object []javaArgs)
   {
     try {
-      if (_method.getName().equals("preg_replace")) {
-	System.out.println("M: " + _method);
-	Thread.dumpStack();
-      }
-      
       return _method.invoke(_quercusModule, javaArgs);
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException(toString(_method, javaArgs), e);
