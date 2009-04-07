@@ -1,10 +1,13 @@
 <!--
-   - Resin 3.2 configuration file.
+   - Resin 4.0 configuration file.
   -->
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="urn:java:com.caucho.resin">
 
-  <!-- adds all .jar files under the resin/lib directory -->
+  <!--
+     - driver .jar files can be placed in
+     - ${resin.home}/ext-lib or ${resin.root}/ext-lib
+     -->
   <class-loader>
     <tree-loader path="${resin.home}/ext-lib"/>
     <tree-loader path="${resin.root}/ext-lib"/>
@@ -32,10 +35,10 @@
      - Logging configuration for the JDK logging API.
     -->
   <log-handler name="" level="all" path="stdout:"
-               timestamp="[%H:%M:%S.%s] {%{thread}} "/>
+               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
 
   <!--
-     - 'info' for production
+     - level='info' for production
      - 'fine' or 'finer' for development and troubleshooting
     -->
   <logger name="com.caucho" level="info"/>
@@ -127,16 +130,6 @@
 
     <!-- define the servers in the cluster -->
     <server id="" address="127.0.0.1" port="6800"/>
-
-    <!--
-       - Configures the persistent store for single-server or clustered
-       - in Resin professional.
-      -->
-    <resin:if test="${resin.professional}">
-      <persistent-store type="cluster">
-        <init path="session"/>
-      </persistent-store>
-    </resin:if>
 
     <!--
        - For security, use a different cookie for SSL sessions.
@@ -272,7 +265,7 @@
       <web-app id="/resin-config" root-directory="${resin.root}/doc/config"/>
       -->
       
-      <web-app id="/resin-doc" root-directory="${resin.root}/doc"/>
+      <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
     </host>
   </cluster>
 
