@@ -102,6 +102,11 @@ public class CustomBeanAttribute extends Attribute {
     Class cl = TypeFactory.loadClass(pkg, localName);
 
     if (cl == null) {
+      ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+      if (type != null)
+	return type.create(parent, qName);
+
       throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
 				    pkg, localName, qName));
     }

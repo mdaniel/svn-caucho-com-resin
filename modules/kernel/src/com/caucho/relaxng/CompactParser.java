@@ -612,8 +612,11 @@ public class CompactParser {
     while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
       cbuf[i++] = (char) ch;
 
-      if (_offset < _length)
+      if (_offset < _length) {
 	ch = _buffer[_offset++] & 0xff;
+	if (ch == '\n')
+	  _line++;
+      }
       else
 	ch = read();
     }
@@ -720,8 +723,11 @@ public class CompactParser {
     _cb.clear();
       
     while (true)  {
-      if (_offset < _length)
+      if (_offset < _length) {
 	ch = _buffer[_offset++];
+	if (ch == '\n')
+	  _line++;
+      }
       else
 	ch = read();
 
@@ -787,8 +793,11 @@ public class CompactParser {
 	  while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
 	    cbuf[i++] = (char) ch;
 
-	    if (_offset < _length)
+	    if (_offset < _length) {
 	      ch = _buffer[_offset++] & 0xff;
+	      if (ch == '\n')
+		_line++;
+	    }
 	    else
 	      ch = read();
 	  }
@@ -956,8 +965,9 @@ public class CompactParser {
     if (_offset > 0) {
       _offset--;
       int ch = _buffer[_offset];
-      if (ch == '\n')
+      if (ch == '\n') {
 	_line--;
+      }
     }
   }
 

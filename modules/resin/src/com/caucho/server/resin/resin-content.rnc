@@ -1,5 +1,8 @@
-default namespace r = "http://caucho.com/ns/resin"
+default namespace resin = "http://caucho.com/ns/resin"
+
 namespace rcore = "http://caucho.com/ns/resin/core"
+namespace r = "urn:java:com.caucho.resin"
+
 namespace local = ""
 namespace l = ""
 
@@ -114,13 +117,13 @@ r_cluster-Content =
 
   & r_web-app-default*
 
-  & element rcore:if { rcore_if-Args, r_cluster-Content }*
+  & element rcore:if|r:if { rcore_if-Args, r_cluster-Content }*
 
   & rcore_import*
 
-  & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_cluster-Content }+,
-      element rcore:otherwise { r_cluster-Content }?
+  & element rcore:choose|r:choose {
+      element rcore:when|r:when { rcore_when-Args, r_cluster-Content }+,
+      element rcore:otherwise|r:otherwise { r_cluster-Content }?
     }*
 
 r_cluster-port = element cluster-port {
@@ -199,15 +202,13 @@ r_host-Content =
 r_host-Flow =
   r_host-Content
 
-  & element rcore:env { rcore_env-Args, r_host-Flow }*
-
-  & element rcore:if { rcore_if-Args, r_host-Flow }*
+  & element rcore:if|r:if { rcore_if-Args, r_host-Flow }*
 
   & rcore_import*
 
-  & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_host-Flow }+,
-      element rcore:otherwise { r_host-Flow }?
+  & element rcore:choose|r:choose {
+      element rcore:when|r:when { rcore_when-Args, r_host-Flow }+,
+      element rcore:otherwise|r:otherwise { r_host-Flow }?
     }*
 
 ## The complete host contents
@@ -343,13 +344,13 @@ r_management-Content =
 
   & r_xa-log-service?
 
-  & element rcore:if { rcore_if-Args, r_management-Content }*
-
   & rcore_import*
 
-  & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_management-Content }+,
-      element rcore:otherwise { r_management-Content }?
+  & element rcore:if|r:if { rcore_if-Args, r_management-Content }*
+
+  & element rcore:choose|r:choose {
+      element rcore:when|r:when { rcore_when-Args, r_management-Content }+,
+      element rcore:otherwise|r:otherwise { r_management-Content }?
     }*
 
 r_memory-free-min =
@@ -564,13 +565,13 @@ r_resin-Content =
 
   & r_watchdog-manager?
 
-  & element rcore:if { rcore_if-Args, r_resin-Content }*
+  & element rcore:if|r:if { rcore_if-Args, r_resin-Content }*
 
   & rcore_import*
 
-  & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_resin-Content }+,
-      element rcore:otherwise { r_resin-Content }?
+  & element rcore:choose|r:choose {
+      element rcore:when|r:when { rcore_when-Args, r_resin-Content }+,
+      element rcore:otherwise|r:otherwise { r_resin-Content }?
     }*
 
 r_resin-data-directory =
@@ -704,13 +705,13 @@ r_server-Content =
   & (attribute watchdog-port { r_int-Type }
      | element watchdog-port { r_int-Type })?
 
-  & element rcore:if { rcore_if-Args, r_server-Content }*
+  & element rcore:if|r:if { rcore_if-Args, r_server-Content }*
 
   & rcore_import*
 
-  & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_server-Content }+,
-      element rcore:otherwise { r_server-Content }?
+  & element rcore:choose|r:choose {
+      element rcore:when|r:when { rcore_when-Args, r_server-Content }+,
+      element rcore:otherwise|r:otherwise { r_server-Content }?
     }*
 
 r_session-cookie = 

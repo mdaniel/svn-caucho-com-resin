@@ -9,5 +9,8 @@
   <namespace name="http://caucho.com/ns/resin/core"
              path="META-INF/caucho/com.caucho.config/core.xml"/>
 
+  <namespace name="urn:java:com.caucho.resin"
+             path="META-INF/caucho/com.caucho.config/urnresin.xml"/>
+
 </namespaces>
 

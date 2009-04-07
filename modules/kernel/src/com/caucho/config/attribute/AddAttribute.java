@@ -105,6 +105,11 @@ public class AddAttribute extends Attribute {
     Class cl = TypeFactory.loadClass(packageName, localName);
 
     if (cl == null) {
+      ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+      if (type != null)
+	return type.create(parent, qName);
+
       throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
 				    packageName, localName, qName));
     }
