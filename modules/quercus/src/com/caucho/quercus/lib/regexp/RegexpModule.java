@@ -1343,12 +1343,63 @@ public class RegexpModule
    * @return
    */
   public static Value preg_replace_callback(Env env,
-                                            Regexp []regexpList,
+                                            Regexp regexp,
                                             Callback fun,
                                             Value subject,
                                             @Optional("-1") long limit,
                                             @Optional @Reference Value count)
   {
+    try {
+      if (subject instanceof ArrayValue) {
+        ArrayValue result = new ArrayValueImpl();
+
+        for (Value value : ((ArrayValue) subject).values()) {
+          result.put(pregReplaceCallback(env,
+                                         regexp,
+                                         fun,
+                                         value.toStringValue(),
+                                         limit,
+                                         count));
+        }
+
+        return result;
+
+      } else if (subject.isset()) {
+        return pregReplaceCallback(env,
+                                   regexp,
+                                   fun,
+                                   subject.toStringValue(),
+                                   limit,
+                                   count);
+      } else {
+        return env.getEmptyString();
+      }
+    }
+    catch (IllegalRegexpException e) { 
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
+    }
+  }
+  
+  /**
+   * Loops through subject if subject is array of strings
+   */
+  public static Value preg_replace_callback(Env env,
+                                            Value regexpValue,
+                                            Callback fun,
+                                            Value subject,
+                                            @Optional("-1") long limit,
+                                            @Optional @Reference Value count)
+  {
+    if (! regexpValue.isArray())
+      return preg_replace_callback(env,
+                                   regexpValue.toStringValue(),
+                                   fun, subject, limit, count);
+    
+    Regexp []regexpList = createRegexpArray(env, regexpValue);
+    
     try {
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1383,6 +1434,33 @@ public class RegexpModule
     }
   }
 
+  /**
+   * Replaces values using regexps
+   */
+  private static Value pregReplaceCallback(Env env,
+                                           Regexp regexp,
+                                           Callback fun,
+                                           StringValue subject,
+                                           @Optional("-1") long limit,
+                                           @Optional @Reference Value countV)
+    throws IllegalRegexpException
+  {
+    if (limit < 0)
+      limit = LONG_MAX;
+
+    if (! subject.isset()) {
+      return env.getEmptyString();
+    }
+    else {
+      return pregReplaceCallbackImpl(env,
+                                     regexp,
+                                     fun,
+                                     subject,
+                                     limit,
+                                     countV);
+    }
+  }
+  
   /**
    * Replaces values using regexps
    */

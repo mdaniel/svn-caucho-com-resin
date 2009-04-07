@@ -448,11 +448,11 @@ abstract public class JavaInvoker
 
     if (_hasRestArgs) {
     }
-    else if (args.length < _marshalArgs.length) {
+    else if (args.length < getMinArgLength()) {
       // not enough args
       return Integer.MAX_VALUE;
     }
-    else if (args.length > _marshalArgs.length) {
+    else if (args.length > getMaxArgLength()) {
       // too many args
       return Integer.MAX_VALUE;
     }
@@ -481,8 +481,9 @@ abstract public class JavaInvoker
     }
 
     // too many args passed in
-    if (i != args.length)
+    if (i > getMaxArgLength()) {
       return Integer.MAX_VALUE;
+    }
 
     return cost;
   }
