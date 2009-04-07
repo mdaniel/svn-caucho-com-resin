@@ -30,6 +30,7 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
 import java.util.Locale;
@@ -38,15 +39,28 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 /**
-* A rewrite condition that passes if the value of the Locale matches
- * a regexp.
-*/
+ * Match if the request's locale matches an expression.
+ *
+ * <pre>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:IfLocale value="fr"/>
+ * &lt;/resin:Allow>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
+ */
+@Configurable
 public class IfLocale implements RequestPredicate
 {
   private static final L10N L = new L10N(IfLocale.class);
 
   private Pattern _regexp;
 
+  /**
+   * The locale value to test against
+   */
+  @Configurable
   public void setValue(Pattern regexp)
   {
     _regexp = regexp;
@@ -60,6 +74,11 @@ public class IfLocale implements RequestPredicate
 				    getClass().getSimpleName()));
   }
 
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
     Locale locale = request.getLocale();

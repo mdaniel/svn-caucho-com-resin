@@ -55,11 +55,12 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
 //import com.caucho.osgi.OsgiBundle;
 //import com.caucho.osgi.OsgiManager;
+import com.caucho.rewrite.RewriteAction;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
 import com.caucho.security.Deny;
-import com.caucho.security.IfSecure;
+import com.caucho.rewrite.IfSecure;
 import com.caucho.rewrite.Not;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
@@ -1248,13 +1249,26 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a rewrite dispatch rule
    */
-  public void add(DispatchRule dispatchRule)
+  public void add(RewriteAction action)
   {
-    if (dispatchRule.isRequest()) {
+    if (action.isRequest()) {
       if (_requestRewriteDispatch == null)
 	_requestRewriteDispatch = new RewriteDispatch(this);
 
-      _requestRewriteDispatch.addRule(dispatchRule);
+      _requestRewriteDispatch.addAction(action);
+    }
+  }
+
+  /**
+   * Adds a rewrite dispatch rule
+   */
+  public void add(DispatchRule rule)
+  {
+    if (rule.isRequest()) {
+      if (_requestRewriteDispatch == null)
+	_requestRewriteDispatch = new RewriteDispatch(this);
+
+      _requestRewriteDispatch.addRule(rule);
     }
   }
 

@@ -230,7 +230,8 @@ public class HttpResponse extends AbstractHttpResponse
       // php/1b0k
 
       contentType = null;
-    } else if (_isNoCache) {
+    } else if (_isNoCache
+	       || isNoCacheUnlessVary() && ! containsHeader("Vary")) {
       // server/1b15
       removeHeader("ETag");
       removeHeader("Last-Modified");
@@ -238,7 +239,13 @@ public class HttpResponse extends AbstractHttpResponse
       // even in case of 302, this may be needed for filters which
       // automatically set cache headers
       setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
-      os.print("\r\nCache-Control: no-cache");
+
+      if (_isNoCache)
+	os.print("\r\nCache-Control: no-cache");
+      else {
+	// server/1k68
+	os.print("\r\nCache-Control: private");
+      }
 
       if (debug) {
         log.fine(_request.dbgId() + "" +

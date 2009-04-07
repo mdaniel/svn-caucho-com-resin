@@ -40,8 +40,22 @@ public interface DispatchRule
   
   public boolean isForward();
 
-  public boolean isFilter();
-  
-  public FilterChain map(String uri, String queryString, FilterChain accept)
+  /**
+   * Creates a FilterChain for the action based on the uri and query string.
+   *
+   * Matching requests will use <code>tail</code>, and mismatching
+   * requests will use <code>next</code>.  <code>tail</code> is the
+   * plain servlet/filter chain without any rewriting.  <code>next</code>
+   * is the next rewrite dispatch
+   *
+   * @param uri the request URI to match against
+   * @param queryString the request query string to match against
+   * @param next the next rewrite FilterChain dispatch
+   * @param tail the plain servlet/filter chain for a match
+   */
+  public FilterChain map(String uri,
+			 String queryString,
+			 FilterChain next,
+			 FilterChain tail)
     throws ServletException;
 }

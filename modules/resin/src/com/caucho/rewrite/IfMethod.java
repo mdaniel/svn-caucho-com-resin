@@ -40,7 +40,16 @@ import javax.annotation.PostConstruct;
 import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if the method port matches.
+ * Match if the HTTP method matches the value.
+ *
+ * <pre>
+ * &lt;resin:Forbidden
+ *             xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:Method method="POST"/>
+ * &lt;/resin:Forbidden>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
  */
 @Configurable
 public class IfMethod implements RequestPredicate
@@ -49,9 +58,22 @@ public class IfMethod implements RequestPredicate
   
   private String _method;
 
+  /**
+   * Sets the HTTP method value to test: GET, POST, etc..
+   */
+  @Configurable
+  public void setMethod(String value)
+  {
+    setMethod(value);
+  }
+
+  /**
+   * Sets the HTTP method value to test.
+   */
+  @Configurable
   public void setValue(String value)
   {
-    _method = value;
+    setMethod(value);
   }
 
   @PostConstruct
@@ -62,6 +84,11 @@ public class IfMethod implements RequestPredicate
 				    getClass().getSimpleName()));
   }
 
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
     return _method.equals(request.getMethod());

@@ -152,6 +152,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   private boolean _allowCache;
   private boolean _isPrivateCache;
   private boolean _hasCacheControl;
+  private boolean _isNoCacheUnlessVary;
 
   protected boolean _isTopCache;
 
@@ -358,6 +359,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _cacheStream = null;
     _cacheWriter = null;
     _isPrivateCache = false;
+    _isNoCacheUnlessVary = false;
     _hasCacheControl = false;
     _allowCache = true;
     _isNoCache = false;
@@ -2096,6 +2098,22 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     // XXX: let the webApp override this?
 
     _isPrivateCache = isPrivate;
+  }
+
+  /**
+   * Set no cache w/o vary
+   */
+  public void setNoCacheUnlessVary(boolean isNoCacheUnlessVary)
+  {
+    _isNoCacheUnlessVary = isNoCacheUnlessVary;
+  }
+
+  /**
+   * Return true if no-cache without var.
+   */
+  public boolean isNoCacheUnlessVary()
+  {
+    return _isNoCacheUnlessVary;
   }
   
   /**

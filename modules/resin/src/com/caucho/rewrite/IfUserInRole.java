@@ -30,43 +30,80 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
-import javax.servlet.http.Cookie;
+import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.annotation.PostConstruct;
-import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if the isUserInRole matches.
+ * Match if the user is in any of the given roles,
+ * i.e. if request.isUserInRole() matches.
+ *
+ * <pre>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:IfUserInRole role="admin"/>
+ * &lt;/resin:Allow>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
  */
+@Configurable
 public class IfUserInRole implements RequestPredicate
 {
-  private static final L10N L = new L10N(IfUserInRole.class);
-  
-  private String _role;
+  private String []_roles = new String[0];
 
-  public void setRole(String role)
+  /**
+   * Adds a role to check.  The user must match one of the roles.
+   */
+  @Configurable
+  public void addRole(String role)
   {
-    _role = role;
+    String []newRoles = new String[_roles.length + 1];
+    System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
+    newRoles[_roles.length] = role;
+    _roles = newRoles;
   }
 
-  public void setValue(String role)
-  {
-    setRole(role);
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    if (_role == null)
-      throw new ConfigException(L.l("'role' is a required attribute for {0}",
-				    getClass().getSimpleName()));
-  }
-
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
-    return request.isUserInRole(_role);
+    Principal user = request.getUserPrincipal();
+
+    if (user == null)
+      return false;
+    
+    for (String role : _roles) {
+      if (role.equals("*"))
+        return true;
+
+      if (request.isUserInRole(role))
+        return true;
+    }
+
+    return false;
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    for (int i = 0; i < _roles.length; i++) {
+      if (i != 0)
+        sb.append(',');
+      sb.append(_roles[i]);
+    }
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

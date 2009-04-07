@@ -30,23 +30,35 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.annotation.PostConstruct;
-import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if the request.getLocalPort() matches.
+ * Matches if request.getLocalPort() matches the 'value' attribute.
+ *
+ * <pre>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:IfLocalPort value="8080"/>
+ * &lt;/resin:Allow>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
  */
+@Configurable
 public class IfLocalPort implements RequestPredicate
 {
   private static final L10N L = new L10N(IfLocalPort.class);
   
   private int _localPort;
 
+  /**
+   * Sets the local port to compare
+   */
+  @Configurable
   public void setValue(int value)
   {
     _localPort = value;
@@ -60,6 +72,11 @@ public class IfLocalPort implements RequestPredicate
 				    getClass().getSimpleName()));
   }
 
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
     return _localPort == request.getLocalPort();

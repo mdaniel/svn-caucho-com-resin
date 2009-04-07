@@ -27,44 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.security;
+package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
-import com.caucho.util.InetNetwork;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.rewrite.RequestPredicate;
-import com.caucho.server.security.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
- * Combines matches.
+ * Matches if any of the child predicates match.
  *
  * <pre>
- * &lt;sec:Allow url-pattern="/admin/*"&gt;
- *   &lt;sec:NotAnd>
- *     &lt;sec:Address value="192.168.1.10"/&gt;
- *     &lt;sec:IfRole/>
- *   &lt;/sec:NotAnd>
- * &lt;/sec:Allow>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:Or>
+ *     &lt;resin:IfNetwork value="192.168.1.10"/&gt;
+ *     &lt;resin:IfNetwork value="192.168.1.11"/&gt;
+ *   &lt;/resin:Or>
+ * &lt;/resin:Allow>
  * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
  */
-public class NotAnd implements RequestPredicate {
+@Configurable
+public class Or implements RequestPredicate {
   private ArrayList<RequestPredicate> _predicateList
     = new ArrayList<RequestPredicate>();
 
   private RequestPredicate []_predicates;
 
   /**
-   * Add a sub-predicate
+   * Add a child predicate.  Any child must pass for Or to pass.
+   *
+   * @param predicate the child predicate
    */
   public void add(RequestPredicate predicate)
   {
@@ -79,12 +78,14 @@ public class NotAnd implements RequestPredicate {
   }
 
   /**
-   * Returns true if the user is authorized for the resource.
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
    */
   public boolean isMatch(HttpServletRequest request)
   {
     for (RequestPredicate predicate : _predicates) {
-      if (! predicate.isMatch(request))
+      if (predicate.isMatch(request))
 	return true;
     }
 

@@ -27,45 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.security;
+package com.caucho.rewrite;
 
+import com.caucho.config.Configurable;
 import com.caucho.config.ConfigException;
-import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.rewrite.RequestPredicate;
-import com.caucho.server.security.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+
 /**
- * Combines matches.
+ * Matches if all of the child predicates fail. The predicate may be used
+ * for security and rewrite actions.
  *
  * <pre>
- * &lt;sec:Allow url-pattern="/admin/*"&gt;
- *   &lt;sec:NotOr>
- *     &lt;sec:Address value="192.168.1.10"/&gt;
- *     &lt;sec:Address value="192.168.1.11"/&gt;
- *   &lt;/sec:NotOr>
- * &lt;/sec:Allow>
+ * &lt;resin:Forbidden url-pattern="/admin/*"
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:NotAnd>
+ *     &lt;resin:IfRole name="admin"/&gt;
+ *     &lt;resin:IfNetwork value="192.168/16"/&gt;
+ *   &lt;/resin:NotAnd>
+ * &lt;/resin:Allow>
  * </pre>
  */
-public class NotOr implements RequestPredicate {
+public class NotAnd implements RequestPredicate {
   private ArrayList<RequestPredicate> _predicateList
     = new ArrayList<RequestPredicate>();
 
   private RequestPredicate []_predicates;
 
   /**
-   * Add a sub-predicate
+   * Add a child predicate.  One child must fail for NotAnd to pass.
+   *
+   * @param predicate the child predicate
    */
+  @Configurable
   public void add(RequestPredicate predicate)
   {
     _predicateList.add(predicate);
@@ -79,16 +79,18 @@ public class NotOr implements RequestPredicate {
   }
 
   /**
-   * Returns true if the user is authorized for the resource.
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
    */
   public boolean isMatch(HttpServletRequest request)
   {
     for (RequestPredicate predicate : _predicates) {
-      if (predicate.isMatch(request))
-	return false;
+      if (! predicate.isMatch(request))
+	return true;
     }
 
-    return true;
+    return false;
   }
 
   @Override

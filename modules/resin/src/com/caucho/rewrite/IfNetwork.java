@@ -27,44 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.security;
+package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.InetNetwork;
-import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.rewrite.RequestPredicate;
-import com.caucho.server.security.*;
+import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
- * Allow or deny requests based on the ip address of the client.
+ * Match if the remote IP address matches one of the pattern networks.
+ * Standard IP network syntax is allowed, so 192.168/16 matches the entire
+ * subnetwork.
  *
  * <pre>
- * &lt;sec:Allow url-pattern="/admin/*"&gt;
- *   &lt;sec:IfNetwork name="192.168.17.0/24"/&gt;
- * &lt;/sec:Allow>
+ * &lt;resin:Allow url-pattern="/admin/*"
+ *                xmlns:resin="urn:java:com.caucho.resin">
+ *   &lt;resin:IfNetwork value="192.168.17.0/24"/&gt;
+ * &lt;/resin:Allow>
  * </pre>
  * 
  * <pre> 
- * &lt;sec:Deny>
- *   &lt;sec:IfNetwork>
+ * &lt;resin:Forbidden
+ *         xmlns:resin="urn:java:com.caucho.resin">
+ *   &lt;resin:IfNetwork>
  *     &lt;value>205.11.12.3&lt;/value>
  *     &lt;value>123.4.45.6&lt;/value>
  *     &lt;value>233.15.25.35&lt;/value>
  *     &lt;value>233.14.87.12&lt;/value>
- *   &lt;/sec:IfNetwork&gt;
- * &lt;/sec:Deny&gt;
+ *   &lt;/resin:IfNetwork&gt;
+ * &lt;/resin:Forbidden>
  * </pre>
+ *
+ * <p>RequestPredicates may be used for both security and rewrite conditions.
  */
+@Configurable
 public class IfNetwork implements RequestPredicate {
   private static final Logger log
     = Logger.getLogger(IfNetwork.class.getName());
@@ -85,6 +88,7 @@ public class IfNetwork implements RequestPredicate {
    * is especially important if there are a large number of allow and/or deny
    * rules, and to protect against denial of service attacks.  
    */ 
+  @Configurable
   public void setCacheSize(int cacheSize)
   {
     _cacheSize = cacheSize;
@@ -103,6 +107,7 @@ public class IfNetwork implements RequestPredicate {
    * Add an ip network to allow.  If allow is never used, (only deny is used),
    * then all are allowed except those in deny.
    */
+  @Configurable
   public void addValue(String network)
   {
     if (_networkList == null)
@@ -119,7 +124,9 @@ public class IfNetwork implements RequestPredicate {
   }
 
   /**
-   * Returns true if the user is authorized for the resource.
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
    */
   public boolean isMatch(HttpServletRequest request)
   {
@@ -131,7 +138,7 @@ public class IfNetwork implements RequestPredicate {
     
     if (_cache != null) {
       Boolean cacheValue = _cache.get(remoteAddr);
-      
+
       if (cacheValue != null)
 	return cacheValue;
     }

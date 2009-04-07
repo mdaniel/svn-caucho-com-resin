@@ -81,11 +81,12 @@ abstract public class AbstractDispatchRule implements DispatchRule
   
   public FilterChain map(String uri,
 			 String queryString,
-			 FilterChain next)
+			 FilterChain next,
+			 FilterChain tail)
   {
     Matcher matcher = null;
     
-    if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
+    if (_regexp == null || (matcher = _regexp.matcher(uri)).lookingAt()) {
       String target = null;
 
       if (matcher != null)
@@ -98,7 +99,7 @@ abstract public class AbstractDispatchRule implements DispatchRule
       else
 	target = uri + "?" + queryString;
 
-      FilterChain chain = createDispatch(uri, queryString, target, next);
+      FilterChain chain = createDispatch(uri, queryString, target, tail);
 
       if (_predicates.length > 0)
 	chain = new MatchFilterChain(_predicates, chain, next);
@@ -106,7 +107,7 @@ abstract public class AbstractDispatchRule implements DispatchRule
       return chain;
     }
     else
-      return null;
+      return next;
   }
 
   protected FilterChain createDispatch(String uri,

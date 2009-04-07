@@ -30,21 +30,35 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
-* A rewrite condition that passes if the auth-type is exactly
-* equal to the specified value.
+ * Matches if the auth-type is equal to the specified value.
  * Valid auth types are  BASIC, CLIENT-CERT, DIGEST, FORM.
-*/
+ *
+ * <pre>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:IfAuthType value="DIGEST"/>
+ * &lt;/resin:Allow>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
+ */
+@Configurable
 public class IfAuthType implements RequestPredicate
 {
   private static final L10N L = new L10N(IfAuthType.class);
 
   private String _authType;
 
+  /**
+   * Sets the auth-type value to match against.
+   */
+  @Configurable
   public void setValue(String authType)
   {
     if ("NONE".equalsIgnoreCase(authType))
@@ -61,6 +75,11 @@ public class IfAuthType implements RequestPredicate
       throw new ConfigException(L.l("auth-type expects a 'value' of BASIC, CLIENT-CERT, DIGEST, FORM, or NONE"));
   }
 
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
     String authType = request.getAuthType();

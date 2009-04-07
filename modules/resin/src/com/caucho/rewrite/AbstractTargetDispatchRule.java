@@ -79,7 +79,7 @@ abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
   protected String rewrite(Matcher matcher, String uri)
   {
     if (_target != null)
-      return matcher.replaceAll(_target);
+      return matcher.replaceFirst(_target);
     else
       return uri;
   }

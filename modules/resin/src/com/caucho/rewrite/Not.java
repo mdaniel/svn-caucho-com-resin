@@ -30,16 +30,16 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Negates the result of another request predicate, returning false
- * if the child predicate is true.
+ * True if the child predicate is false.
  *
- * <p>Complex test can be built using &lt;resin:Not>,
+ * <p>Complex tests can be built using &lt;resin:Not>,
  * &lt;resin:And> and &lt;resin:Or> on top of simpler primary
  * predicates.
  *
@@ -50,11 +50,14 @@ import javax.servlet.http.HttpServletRequest;
  *     &lt;resin:Not>
  *       &lt;resin:IfAddress value="192.168.1.10"/&gt;
  *     &lt;/resin:Not>
- *   &lt;/resin:Forbidden regexp="^/local/">
+ *   &lt;/resin:Forbidden>
  *
  * &lt;/web-app>
  * </pre>
+ *
+ * <p>Predicates may be used for security and rewrite actions.
  */
+@Configurable
 public class Not implements RequestPredicate {
   private static final L10N L = new L10N(Not.class);
   
@@ -70,8 +73,11 @@ public class Not implements RequestPredicate {
   }
 
   /**
-   * Add a sub-predicate
+   * Add a child predicate.  The child must fail for Not to pass.
+   *
+   * @param predicate the child predicate
    */
+  @Configurable
   public void add(RequestPredicate predicate)
   {
     if (_predicate != null)
@@ -88,7 +94,9 @@ public class Not implements RequestPredicate {
   }
 
   /**
-   * Returns true if the user is authorized for the resource.
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
    */
   public boolean isMatch(HttpServletRequest request)
   {

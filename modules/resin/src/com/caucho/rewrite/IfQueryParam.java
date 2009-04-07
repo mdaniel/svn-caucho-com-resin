@@ -30,6 +30,7 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.Cookie;
@@ -39,9 +40,22 @@ import javax.annotation.PostConstruct;
 import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if a named parameter exists and has a value
+ * Passes if the named parameter exists and has a value
  * that matches a regular expression.
+ *
+ * <pre>
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:Forbidden regexp="^/local/">
+ *     &lt;resin:IfQueryParam name="foo" regexp="bar"/>
+ *   &lt;/resin:Forbidden>
+ *
+ * &lt;/web-app>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for both security and rewrite conditions.
  */
+@Configurable
 public class IfQueryParam implements RequestPredicate
 {
   private static final L10N L = new L10N(IfQueryParam.class);
@@ -53,14 +67,31 @@ public class IfQueryParam implements RequestPredicate
   {
   }
 
+  /**
+   * Sets the name of the query parameter to test.
+   *
+   * @param name the name of the parameter.
+   */
+  @Configurable
   public void setName(String name)
   {
     _name = name;
   }
 
+  /**
+   * Sets the regular expression to compare against the query parameter.
+   *
+   * @param regexp the regular expression to test
+   */
+  @Configurable
   public void setRegexp(Pattern regexp)
   {
     _regexp = regexp;
+  }
+
+  public void setValue(Pattern regexp)
+  {
+    setRegexp(regexp);
   }
 
   @PostConstruct
@@ -71,6 +102,11 @@ public class IfQueryParam implements RequestPredicate
 				    getClass().getSimpleName()));
   }
 
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
     String value = request.getParameter(_name);

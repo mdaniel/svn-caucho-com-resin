@@ -30,28 +30,46 @@
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.annotation.PostConstruct;
-import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if the request.isSecure() matches.
+ * Match if the request is secure, i.e. if request.isSecure() matches.
+ *
+ * <pre>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:IfSecure/>
+ * &lt;/resin:Allow>
+ * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
  */
+@Configurable
 public class IfSecure implements RequestPredicate
 {
   private static final L10N L = new L10N(IfSecure.class);
   
   private boolean _isSecure = true;
 
+  /**
+   * Sets the secure value to test against.  If true matches if
+   * isSecure() is true
+   */
+  @Configurable
   public void setValue(boolean value)
   {
     _isSecure = value;
   }
 
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
   public boolean isMatch(HttpServletRequest request)
   {
     return _isSecure == request.isSecure();

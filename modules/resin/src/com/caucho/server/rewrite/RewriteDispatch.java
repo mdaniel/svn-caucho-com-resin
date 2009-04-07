@@ -69,7 +69,7 @@ public class RewriteDispatch
   private ArrayList<DispatchRule> _ruleList
     = new ArrayList<DispatchRule>();
 
-  private ArrayList<RewriteAction> _actionList
+  private ArrayList<RewriteAction> _filterList
     = new ArrayList<RewriteAction>();
 
   private final boolean _isFiner;
@@ -162,7 +162,7 @@ public class RewriteDispatch
 
   public void addAction(RewriteAction action)
   {
-    _actionList.add(action);
+    _filterList.add(action);
   }
 
   @PostConstruct
@@ -184,6 +184,7 @@ public class RewriteDispatch
     if (_isFinest)
       log.finest("rewrite-dispatch check uri '" + uri + "'");
 
+    /*
     if (_matchRule == null || _matchRule.isModified()) {
       if (_matchRule != null)
 	_matchRule.destroy();
@@ -195,25 +196,23 @@ public class RewriteDispatch
 
       _matchRule.init();
     }
+    */
 
     if (_matchRule != null) {
       chain = _matchRule.map(uri, queryString, chain);
     }
 
-    for (int i = 0; i < _ruleList.size(); i++) {
-      FilterChain next = _ruleList.get(i).map(uri, queryString, chain);
-
-      if (next != null) {
-	chain = next;
-	break;
-      }
+    for (int i = _filterList.size() - 1; i >= 0; i--) {
+      chain = _filterList.get(i).map(uri, queryString, chain);
     }
 
-    for (int i = _actionList.size() - 1; i >= 0; i--) {
-      chain = _actionList.get(i).map(uri, queryString, chain);
+    FilterChain next = chain;
+    
+    for (int i = _ruleList.size() - 1; i >= 0; i--) {
+      next = _ruleList.get(i).map(uri, queryString, next, chain);
     }
 
-    return chain;
+    return next;
   }
 
   public void clearCache()

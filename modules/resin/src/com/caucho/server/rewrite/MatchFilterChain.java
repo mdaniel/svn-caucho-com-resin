@@ -30,6 +30,8 @@
 package com.caucho.server.rewrite;
 
 import com.caucho.rewrite.RequestPredicate;
+import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.connection.AbstractHttpResponse;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -64,6 +66,14 @@ public class MatchFilterChain
   {
     HttpServletRequest req = (HttpServletRequest) request;
 
+    if (response instanceof CauchoResponse) {
+      AbstractHttpResponse res
+	= ((CauchoResponse) response).getAbstractHttpResponse();
+
+      // server/1k67
+      res.setNoCacheUnlessVary(true);
+    }
+
     for (RequestPredicate predicate : _predicates) {
       if (! predicate.isMatch(req)) {
 	if (log.isLoggable(Level.FINEST))
@@ -73,6 +83,9 @@ public class MatchFilterChain
 	return;
       }
     }
+    
+    if (log.isLoggable(Level.FINER))
+      log.finest(this + " match");
 
     _passChain.doFilter(request, response);
   }

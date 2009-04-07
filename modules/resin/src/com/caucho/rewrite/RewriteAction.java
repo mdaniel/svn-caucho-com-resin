@@ -40,6 +40,15 @@ public interface RewriteAction
   
   public boolean isForward();
 
-  public FilterChain map(String uri, String queryString, FilterChain accept)
+  /**
+   * Creates a FilterChain for the action based on the uri and query string.
+   *
+   * @param uri the request URI to match against
+   * @param queryString the request query string to match against
+   * @param next the next rewrite FilterChain dispatch
+   */
+  public FilterChain map(String uri,
+			 String queryString,
+			 FilterChain next)
     throws ServletException;
 }
