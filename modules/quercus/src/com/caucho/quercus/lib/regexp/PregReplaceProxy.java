@@ -56,6 +56,8 @@ public class PregReplaceProxy
                             Value replacement, Value subject,
                             long limit, Value countRef)
   {
+    return null;
+    /*
     if (_isPassthru) {
       return RegexpModule.preg_replace(env, regexpList, replacement,
                                        subject, limit, countRef);
@@ -116,6 +118,7 @@ public class PregReplaceProxy
       
     return RegexpModule.preg_replace(env, regexpList, replacement,
                                      subject, limit, countRef);
+    */
   }
   
   static class PregReplaceResult
