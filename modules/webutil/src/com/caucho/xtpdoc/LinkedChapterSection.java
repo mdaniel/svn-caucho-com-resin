@@ -54,6 +54,7 @@ public class LinkedChapterSection extends ChapterSection {
       //org.w3c.dom.Node node = LooseToStrictHtml.looseToStrictHtml(xtpFile);
 
       Config config = new Config();
+      config.setEL(false);
 
       config.configure(document, xtpFile);
 

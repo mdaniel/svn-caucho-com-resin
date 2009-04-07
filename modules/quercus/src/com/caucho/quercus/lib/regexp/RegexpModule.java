@@ -275,7 +275,7 @@ public class RegexpModule
       return null;
     }
   }
-  
+
   public static Regexp []createRegexpArray(Value pattern)
   {
     if (pattern.isArray()) {
@@ -980,13 +980,15 @@ public class RegexpModule
    */
   @UsesSymbolTable
   public static Value preg_replace(Env env,
-                                   Regexp []regexpList,
+                                   Value pattern,
                                    Value replacement,
                                    Value subject,
                                    @Optional("-1") long limit,
                                    @Optional @Reference Value count)
   {
     try {
+      Regexp []regexpList = createRegexpArray(pattern);
+      
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
 

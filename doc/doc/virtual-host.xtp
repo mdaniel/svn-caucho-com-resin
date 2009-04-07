@@ -193,9 +193,9 @@ hide configuration details in case an error occurs on a live site.</p>
 &lt;/resin&gt;
 </example>
 
-<p>Any directory created in <code>${resin.root}/hosts</code> will now
+<p>Any directory created in <code>${'${'}resin.root}/hosts</code> will now
 become a virtual
-host. You can also place a .jar file in <code>${resin.root}/hosts</code>, it is expanded to
+host. You can also place a .jar file in <code>${'${'}resin.root}/hosts</code>, it is expanded to
 become a virtual host.</p>
 
 <example>

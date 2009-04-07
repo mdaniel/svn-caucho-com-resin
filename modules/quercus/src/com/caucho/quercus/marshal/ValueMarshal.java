@@ -85,7 +85,7 @@ public class ValueMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    return Marshal.ZERO;
+    return Marshal.FOUR;
   }
   
   @Override

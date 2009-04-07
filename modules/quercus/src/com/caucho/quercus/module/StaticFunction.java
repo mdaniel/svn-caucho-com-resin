@@ -132,24 +132,14 @@ public class StaticFunction extends JavaInvoker {
   public Object invoke(Object obj, Object []javaArgs)
   {
     try {
-      return _method.invoke(_quercusModule, javaArgs);
-    } catch (IllegalArgumentException e) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(_method.getDeclaringClass().getName());
-      sb.append(".");
-      sb.append(_method.getName());
-      sb.append("(");
-
-      for (int i = 0; i < javaArgs.length; i++) {
-        if (i != 0)
-          sb.append(", ");
-
-        sb.append(javaArgs[i]);
+      if (_method.getName().equals("preg_replace")) {
+	System.out.println("M: " + _method);
+	Thread.dumpStack();
       }
       
-      sb.append(")");
-
-      throw new IllegalArgumentException(sb.toString(), e);
+      return _method.invoke(_quercusModule, javaArgs);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(toString(_method, javaArgs), e);
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
@@ -168,6 +158,27 @@ public class StaticFunction extends JavaInvoker {
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     }
+  }
+
+  private String toString(Method method, Object []javaArgs)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(method.getDeclaringClass().getName());
+    sb.append(".");
+    sb.append(method.getName());
+    sb.append("(");
+
+    for (int i = 0; i < javaArgs.length; i++) {
+      if (i != 0)
+	sb.append(", ");
+
+      sb.append(javaArgs[i]);
+    }
+      
+    sb.append(")");
+
+    return sb.toString();
   }
 
   public String toString()

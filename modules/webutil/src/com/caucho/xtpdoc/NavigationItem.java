@@ -158,6 +158,7 @@ public class NavigationItem {
 
       if (linkPath.exists() && linkPath.getPath().endsWith(".xtp")) {
         Config config = new Config();
+	config.setEL(false);
 
         try {
           config.configure(_document, linkPath);

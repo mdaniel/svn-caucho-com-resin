@@ -41,6 +41,7 @@ public class Printer {
   public static void main(String []args)
   {
     Config config = new Config();
+    config.setEL(false);
 
     if (args.length == 0) {
       System.out.println("usage: " + Printer.class.getName() + " <book.xml>");

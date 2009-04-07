@@ -568,7 +568,7 @@ public class ThreadPool {
       return true;
     }
     else
-      return false;
+      return queueIfFull;
   }
 
   private void init()

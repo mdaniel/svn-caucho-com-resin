@@ -903,7 +903,6 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
 
-      System.out.println("SEND: " + message.getJMSMessageID());
       queue.send(message.getJMSMessageID(), message, priority, expireTime);
     }
   }

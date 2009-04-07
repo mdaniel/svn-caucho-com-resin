@@ -122,6 +122,7 @@ public class Document {
 
       if (toc.canRead()) {
 	Config config = new Config();
+	config.setEL(false);
 
 	Navigation navigation = new Navigation(this, uri, path, 0);
       
@@ -193,6 +194,7 @@ public class Document {
 
 	if (toc.canRead()) {
 	  Config config = new Config();
+	  config.setEL(false);
 
 	  int p = uri.lastIndexOf('/');
 	  if (p > 0)

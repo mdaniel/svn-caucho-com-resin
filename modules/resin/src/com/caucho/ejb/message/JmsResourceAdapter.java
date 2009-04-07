@@ -202,9 +202,15 @@ public class JmsResourceAdapter implements ResourceAdapter {
       throws Exception
     {
       if (conn instanceof XAConnection) {
+	/*
 	XASession xaSession = ((XAConnection) conn).createXASession();
 	_session = xaSession;
 	_xaResource = xaSession.getXAResource();
+	*/
+	// ejb/09a0 - needs to be auto-ack because if processing throws
+	// an exception because of a bug, can't just replay
+	boolean transacted = false;
+	_session = conn.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
       }
       else {
 	boolean transacted = false;

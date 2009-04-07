@@ -160,7 +160,7 @@ public class MessageConsumerImpl implements MessageConsumer
 
     _messageListener = listener;
     _messageCallback = new MessageConsumerCallback(listener);
-    
+
     _listenerClassLoader = Thread.currentThread().getContextClassLoader();
 
     // XXX: if start?
@@ -267,8 +267,6 @@ public class MessageConsumerImpl implements MessageConsumer
 	return null;
       
       MessageImpl msg = null;
-
-      System.out.println("YAP: " + payload);
 
       if (payload instanceof MessageImpl) {
 	msg = (MessageImpl) payload;
@@ -387,8 +385,10 @@ public class MessageConsumerImpl implements MessageConsumer
     MessageConsumerCallback callback = _messageCallback;
 
     if (callback != null) {
+      boolean isAutoAcknowledge = _isAutoAcknowledge;
+      
       EntryCallback _entryCallback
-	= _queue.addMessageCallback(callback, _isAutoAcknowledge);
+	= _queue.addMessageCallback(callback, isAutoAcknowledge);
     }
   }
 

@@ -851,7 +851,7 @@ objects are created.</p>
 <tr>
   <td>generator</td>
   <td>The sequence or table generator name</td>
-  <td>${table}_cseq</td>
+  <td>${'${'}table}_cseq</td>
 </tr>
 <tr>
   <td>strategy</td>
