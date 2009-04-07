@@ -34,6 +34,9 @@ import com.caucho.util.L10N;
 import com.caucho.config.ConfigException;
 import static com.caucho.jsf.application.SessionStateManager.StateSerializationMethod;
 
+import javax.faces.application.Application;
+import java.lang.reflect.Method;
+
 /**
  * Configuration for the jsf-property-group.
  */
@@ -148,10 +151,10 @@ public class JsfPropertyGroup {
 
   static {
     try {
-      Class cl = Class.forName("javax.faces.webapp.CauchoUtil");
+      Method m = Application.class.getDeclaredMethod("__caucho__");
 
-      if (cl != null)
-	_isDefaultFastJsf = true;
+      if (m != null)
+        _isDefaultFastJsf = true;
     } catch (Exception e) {
     }
   }

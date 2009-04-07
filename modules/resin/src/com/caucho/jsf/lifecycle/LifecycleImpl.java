@@ -105,16 +105,12 @@ public class LifecycleImpl extends Lifecycle
 
     beforePhase(context, PhaseId.RESTORE_VIEW);
 
-    context.setCurrentPhaseId(PhaseId.RESTORE_VIEW);
-
     try {
       if (isFiner)
 	log.finer("JSF[] before restore view");
       
       restoreView(context);
     } finally {
-      context.setCurrentPhaseId(null);
-
       afterPhase(context, PhaseId.RESTORE_VIEW);
     }
 
@@ -125,16 +121,16 @@ public class LifecycleImpl extends Lifecycle
 
     beforePhase(context, PhaseId.APPLY_REQUEST_VALUES);
 
-    context.setCurrentPhaseId(PhaseId.APPLY_REQUEST_VALUES);
-    
     try {
       if (isFiner)
 	log.finer(context.getViewRoot() + " before process decodes");
       
       viewRoot.processDecodes(context);
-    } finally {
-      context.setCurrentPhaseId(null);
-
+    }
+    catch (RuntimeException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    finally {
       afterPhase(context, PhaseId.APPLY_REQUEST_VALUES);
     }
 
@@ -147,18 +143,13 @@ public class LifecycleImpl extends Lifecycle
     
     beforePhase(context, PhaseId.PROCESS_VALIDATIONS);
 
-    context.setCurrentPhaseId(PhaseId.PROCESS_VALIDATIONS);
-
     try {
       if (isFiner)
 	log.finer(context.getViewRoot() + " before process validators");
       
       viewRoot.processValidators(context);
     } finally {
-      context.setCurrentPhaseId(null);
-      
       afterPhase(context, PhaseId.PROCESS_VALIDATIONS);
-
     }
 
     //
@@ -170,8 +161,6 @@ public class LifecycleImpl extends Lifecycle
     
     beforePhase(context, PhaseId.UPDATE_MODEL_VALUES);
 
-    context.setCurrentPhaseId(PhaseId.UPDATE_MODEL_VALUES);
-
     try {
       if (isFiner)
 	log.finer(context.getViewRoot() + " before process updates");
@@ -181,8 +170,6 @@ public class LifecycleImpl extends Lifecycle
       if (sendError(context, "processUpdates", e))
 	return;
     } finally {
-      context.setCurrentPhaseId(null);
-
       afterPhase(context, PhaseId.UPDATE_MODEL_VALUES);
     }
 
@@ -195,16 +182,12 @@ public class LifecycleImpl extends Lifecycle
     
     beforePhase(context, PhaseId.INVOKE_APPLICATION);
 
-    context.setCurrentPhaseId(PhaseId.INVOKE_APPLICATION);
-
     try {
       if (isFiner)
 	log.finer(context.getViewRoot() + " before process application");
       
       viewRoot.processApplication(context);
     } finally {
-      context.setCurrentPhaseId(null);
-      
       afterPhase(context, PhaseId.INVOKE_APPLICATION);
     }
   }
@@ -318,8 +301,6 @@ public class LifecycleImpl extends Lifecycle
 
     beforePhase(context, PhaseId.RENDER_RESPONSE);
 
-    context.setCurrentPhaseId(PhaseId.RENDER_RESPONSE);
-
     try {
       if (log.isLoggable(Level.FINER))
 	log.finer(context.getViewRoot() + " before render view");
@@ -336,8 +317,6 @@ public class LifecycleImpl extends Lifecycle
 
       throw e;
     } finally {
-      context.setCurrentPhaseId(null);
-
       afterPhase(context, PhaseId.RENDER_RESPONSE);
 
       logMessages(context);

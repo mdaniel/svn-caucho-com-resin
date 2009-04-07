@@ -71,61 +71,6 @@ public class UIViewRoot extends UIComponentBase
   {
   }
 
-  public void addComponentResource(FacesContext context,
-                                 UIComponent componentResource) {
-    addComponentResource(context, componentResource, null);
-  }
-
-  public void addComponentResource(FacesContext context,
-                                   UIComponent componentResource,
-                                   String target)
-  {
-    if (target == null)
-      target = (String)componentResource.getAttributes().get("target");
-
-    if (target == null)
-      target = "head";
-
-    List<UIComponent> resources = getComponentResources(context, target);
-
-    resources.add(componentResource);
-  }
-
-  public void removeComponentResource(FacesContext context,
-                                      UIComponent componentResource) {
-    removeComponentResource(context, componentResource, null);
-  }
-
-  public void removeComponentResource(FacesContext context,
-                                    UIComponent componentResource,
-                                    String target) {
-    if (target == null)
-      target = (String) componentResource.getAttributes().get("target");
-
-    if (target == null)
-      target = "head";
-
-    List<UIComponent> resources = getComponentResources(context, target);
-
-    resources.remove(componentResource);
-  }
-
-  public List<UIComponent> getComponentResources(FacesContext context,
-                                                 String target)
-  {
-    UIComponent facet = getFacet(target);
-
-    if (facet == null) {
-      facet = context.getApplication().createComponent("javax.faces.Panel");
-
-      facet.setId(target);
-
-      getFacets().put(target, facet);
-    }
-
-    return facet.getChildren();
-  }
-
   public String getFamily()
   {
     return COMPONENT_FAMILY;

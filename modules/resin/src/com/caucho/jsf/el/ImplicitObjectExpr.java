@@ -106,8 +106,6 @@ public class ImplicitObjectExpr extends Expr {
       return context.getExternalContext().getRequest();
     case REQUEST_SCOPE:
       return context.getExternalContext().getRequestMap();
-    case RESOURCE:
-      return context.getApplication().getResourceHandler();
     case SESSION:
       return context.getExternalContext().getSession(true);
     case SESSION_SCOPE:

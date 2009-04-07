@@ -522,13 +522,6 @@ public class UIInput extends UIOutput
       FacesMessage msg = new FacesMessage(summary, detail);
 
       context.addMessage(getClientId(context), msg);
-
-      // jsf/5011
-      // if the spec lets us throw this, it's useful for development
-      Application app = context.getApplication();
-      if (app.getProjectStage().equals(ProjectStage.Development))
-         throw new FacesException("id=" + getClientId(context)
-			       + " " + e.toString(), e);
     }
   }
 

@@ -49,8 +49,6 @@ import javax.el.PropertyNotFoundException;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
-import javax.faces.application.ProjectStage;
-import javax.faces.application.ResourceHandler;
 import javax.faces.application.StateManager;
 import javax.faces.application.ViewHandler;
 import javax.faces.component.*;
@@ -60,9 +58,6 @@ import javax.faces.convert.*;
 import javax.faces.el.*;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionListener;
-import javax.faces.event.SystemEvent;
-import javax.faces.event.SystemEventListener;
-import javax.faces.event.SystemEventListenerHolder;
 import javax.faces.validator.DoubleRangeValidator;
 import javax.faces.validator.LengthValidator;
 import javax.faces.validator.LongRangeValidator;
@@ -90,7 +85,6 @@ public class ApplicationImpl
   private ActionListener _actionListener;
   private StateManager _stateManager;
   private ViewHandler _viewHandler;
-  private ResourceHandler _resourceHandler;
   private NavigationHandler _navigationHandler;
   final private NavigationHandlerImpl _defaultNavigationHandler;
 
@@ -133,12 +127,6 @@ public class ApplicationImpl
   private HashMap<Class, Class> _converterClassMap
     = new HashMap<Class, Class>();
 
-  private HashMap<Class<? extends SystemEvent>, HashMap<Class, SystemEventListener []>> _systemEventListenerMap
-    = new HashMap<Class<? extends SystemEvent>, HashMap<Class, SystemEventListener []>>();
-
-  private LruCache<Class<? extends SystemEvent>, LruCache<Class<? extends SystemEventListenerHolder>, Constructor>> _systemEventConstructorMap
-    = new LruCache<Class<? extends SystemEvent>, LruCache<Class<? extends SystemEventListenerHolder>, Constructor>>(32);
-
   private String _defaultRenderKitId = "HTML_BASIC";
 
   private String _messageBundle;
@@ -147,8 +135,6 @@ public class ApplicationImpl
 
   private PropertyResolver _legacyPropertyResolver;
   private VariableResolver _legacyVariableResolver;
-
-  private ProjectStage _projectStage;
 
   private BundleManager _bundleManager;
 
@@ -172,7 +158,6 @@ public class ApplicationImpl
 					     _bundleResolver);
 
     setViewHandler(new JspViewHandler());
-    setResourceHandler(new ResourceHandlerImpl());
 
     SessionStateManager stateManager = new SessionStateManager();
     
@@ -608,18 +593,6 @@ public class ApplicationImpl
     _viewHandler = handler;
   }
 
-  @Override
-  public ResourceHandler getResourceHandler()
-  {
-    return _resourceHandler;
-  }
-
-  @Override
-  public void setResourceHandler(ResourceHandler resourceHandler)
-  {
-    _resourceHandler = resourceHandler;
-  }
-
   public StateManager getStateManager()
   {
     return _stateManager;
@@ -1026,282 +999,6 @@ public class ApplicationImpl
       = factory.createValueExpression(elContext, expression, expectedType);
 
     return expr.getValue(elContext);
-  }
-
-  @Override
-  public ProjectStage getProjectStage()
-  {
-    if (_projectStage == null) {
-      String stage = null;
-
-      try {
-       stage
-         = (String) new InitialContext().lookup(ProjectStage.PROJECT_STAGE_JNDI_NAME);
-      }
-      catch (NamingException e) {
-      }
-
-      if (stage == null) {
-        stage = FacesContext.getCurrentInstance()
-          .getExternalContext()
-          .getInitParameter(ProjectStage.PROJECT_STAGE_PARAM_NAME);
-      }
-
-      if (stage != null) {
-        try {
-          _projectStage = ProjectStage.valueOf(ProjectStage.class, stage);
-        }
-        catch (IllegalArgumentException e) {
-          log.fine(L.l("Can't convert '{0}' to ProjectStage", stage));
-        }
-      }
-
-      if (_projectStage == null)
-        _projectStage = ProjectStage.Production;
-    }
-
-    return _projectStage;
-  }
-
-  @Override
-  public void subscribeToEvent(Class<? extends SystemEvent> systemEventClass,
-                               SystemEventListener listener)
-  {
-    subscribeToEvent(systemEventClass, null, listener);
-  }
-
-  @Override
-  public void subscribeToEvent(final Class<? extends SystemEvent> systemEventClass,
-                               final Class sourceClass,
-                               final SystemEventListener listener)
-  {
-
-    if (systemEventClass == null)
-      throw new NullPointerException();
-
-    if (listener == null)
-      throw new NullPointerException();
-
-    HashMap<Class, SystemEventListener[]> listenerMap;
-
-    synchronized (_systemEventListenerMap) {
-      listenerMap = _systemEventListenerMap.get(systemEventClass);
-
-      if (listenerMap == null) {
-        listenerMap = new HashMap<Class, SystemEventListener[]>();
-
-        _systemEventListenerMap.put(systemEventClass, listenerMap);
-      }
-    }
-
-    synchronized (listenerMap) {
-      SystemEventListener[] listeners = listenerMap.get(sourceClass);
-
-      if (listeners == null) {
-        listeners = new SystemEventListener[]{listener};
-      }
-      else {
-        SystemEventListener[] temp = listeners;
-
-        listeners = new SystemEventListener[temp.length + 1];
-
-        System.arraycopy(temp, 0, listeners, 0, temp.length);
-
-        listeners[listeners.length - 1] = listener;
-      }
-
-      listenerMap.put(sourceClass, listeners);
-    }
-  }
-
-  @Override
-  public void unsubscribeFromEvent(Class<? extends SystemEvent> systemEventClass,
-                                   SystemEventListener listener)
-  {
-    unsubscribeFromEvent(systemEventClass, null, listener);
-  }
-
-  @Override
-  public void unsubscribeFromEvent(Class<? extends SystemEvent> systemEventClass,
-                                   Class sourceClass,
-                                   SystemEventListener listener)
-  {
-    if (systemEventClass == null)
-      throw new NullPointerException();
-
-    if (listener == null)
-      throw new NullPointerException();
-
-
-    HashMap<Class, SystemEventListener[]> listenerMap;
-
-    synchronized (_systemEventListenerMap) {
-      listenerMap
-      = _systemEventListenerMap.get(systemEventClass);
-
-    }
-
-    if (listenerMap == null) return;
-
-    synchronized (listenerMap) {
-      SystemEventListener[] temp = listenerMap.get(sourceClass);
-      
-      for (int i = 0; i < temp.length; i++) {
-        if (listener.equals(temp [i])) {
-          SystemEventListener[] listeners = new SystemEventListener[temp.length - 1];
-
-          System.arraycopy(temp, 0, listeners, 0, i);
-          System.arraycopy(temp, i + 1, listeners, i, temp.length - (i + 1));
-
-          listenerMap.put(sourceClass, listeners);
-          
-          break;
-        }
-      }
-    }
-  }
-
-  /**
-   * XXX: exception handling -> review with final 2.0 spec
-   */
-  @Override
-  public void publishEvent(Class<? extends SystemEvent> systemEventClass,
-                           SystemEventListenerHolder source)
-  {
-    if (systemEventClass == null)
-      throw new NullPointerException();
-
-    if (source == null)
-      throw new NullPointerException();
-    
-    List<SystemEventListener> sourceListeners
-      = source.getListenersForEventClass(systemEventClass);
-
-    SystemEventListener []appListenersForSourceClass = null;
-
-    HashMap<Class, SystemEventListener []> map
-      = _systemEventListenerMap.get(systemEventClass);
-
-    if (map != null)
-      appListenersForSourceClass = map.get(source.getClass());
-
-    SystemEventListener []appListeners = null;
-
-    map = _systemEventListenerMap.get(systemEventClass);
-
-    if (map != null)
-      appListeners = map.get(null);
-
-    if ((sourceListeners != null && sourceListeners.size() > 0)
-        ||
-        (appListenersForSourceClass != null && appListenersForSourceClass.length > 0)
-        ||
-        (appListeners != null && appListeners.length > 0)) {
-
-      LruCache<Class<? extends SystemEventListenerHolder>, Constructor> constructorMap
-        = _systemEventConstructorMap.get(systemEventClass);
-
-      if (constructorMap == null) {
-        constructorMap
-          = new LruCache<Class<? extends SystemEventListenerHolder>, Constructor>(64);
-
-        _systemEventConstructorMap.put(systemEventClass, constructorMap);
-      }
-
-      final Class sourceClass = source.getClass();
-
-      Constructor ctor = constructorMap.get(sourceClass);
-
-      if (ctor == null) {
-        Constructor []constructors = systemEventClass.getConstructors();
-
-        for (Constructor constructor : constructors) {
-          Class []params = constructor.getParameterTypes();
-
-          if (params.length == 1) {
-            if (sourceClass.equals(params[0])) {
-              ctor = constructor;
-              break;
-            }
-          }
-        }
-
-        if (ctor == null) {
-          constructors = systemEventClass.getConstructors();
-
-          for (Constructor constructor : constructors) {
-            Class []params = constructor.getParameterTypes();
-
-            if (params.length == 1) {
-              if (params[0].isAssignableFrom(sourceClass)) {
-                ctor = constructor;
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      if (ctor == null) {
-        log.fine(L.l(
-          "Class '{0}' must have constructor accepting single argument of type assignable from '{1}'",
-          systemEventClass.getName(),
-          sourceClass));
-
-        return;
-      }
-
-      SystemEvent event;
-      try {
-        event = (SystemEvent) ctor.newInstance(source);
-      }
-      catch (Exception e) {
-        log.log(Level.FINER,
-                L.l(
-                  "Can not create an instance of class '{0}' using constructor '{1}'",
-                  systemEventClass,
-                  ctor),
-                e);
-
-        return;
-      }
-
-      SystemEventListener listener = null;
-
-      try {
-        if (sourceListeners != null)
-          for (int i = 0; i < sourceListeners.size(); i++) {
-            listener = sourceListeners.get(i);
-
-            if (listener.isListenerForSource(source))
-              if (event.isAppropriateListener(listener))
-                event.processListener(listener);
-          }
-
-        if (appListenersForSourceClass != null)
-          for (int i = 0; i < appListenersForSourceClass.length; i++) {
-            listener = appListenersForSourceClass[i];
-
-            if (listener.isListenerForSource(source))
-              if (event.isAppropriateListener(listener))
-                event.processListener(listener);
-          }
-
-        if (appListeners != null)
-          for (int i = 0; i < appListeners.length; i++) {
-            listener = appListeners[i];
-
-            if (listener.isListenerForSource(source))
-              if (event.isAppropriateListener(listener))
-                event.processListener(listener);
-          }
-      }
-      catch (AbortProcessingException e) {
-        log.log(Level.FINER,
-                L.l("Listener '{0}' aborted event publishing", listener),
-                e);
-      }
-    }
   }
 
   public void initRequest()

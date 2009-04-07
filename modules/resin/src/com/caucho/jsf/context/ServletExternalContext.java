@@ -377,12 +377,6 @@ public class ServletExternalContext extends ExternalContext {
     return _response;
   }
 
-  @Override
-  public String getMimeType(String file)
-  {
-    return _webApp.getMimeType(file);
-  }
-
   /**
    * @Since 1.2
    */

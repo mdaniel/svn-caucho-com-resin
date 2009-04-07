@@ -246,21 +246,6 @@ public class HtmlDataTable extends UIData
     _columnClasses = value;
   }
 
-  public int getColumns()
-  {
-    if (_columns != null)
-      return _columns;
-    else if (_columnsExpr != null)
-      return Util.evalInt(_columnsExpr);
-    else
-      return Integer.MIN_VALUE;
-  }
-
-  public void setColumns(int value)
-  {
-    _columns = value;
-  }
-  
   public String getDir()
   {
     if (_dir != null)

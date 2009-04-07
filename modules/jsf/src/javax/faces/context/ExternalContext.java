@@ -175,11 +175,4 @@ public abstract class ExternalContext {
 
   public abstract void redirect(String url)
     throws IOException;
-
-  /**
-   * @Since 2.0
-   */
-  public String getMimeType(String file) {
-    throw new UnsupportedOperationException();
-  }
 }

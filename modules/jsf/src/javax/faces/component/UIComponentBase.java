@@ -48,9 +48,6 @@ import javax.faces.render.*;
 
 public abstract class UIComponentBase extends UIComponent
 {
-  protected static final Logger log
-    = Logger.getLogger(UIComponentBase.class.getName());
-  
   private static final UIComponent []NULL_FACETS_AND_CHILDREN
     = new UIComponent[0];
   
@@ -560,8 +557,6 @@ public abstract class UIComponentBase extends UIComponent
     try {
       decode(context);
     } catch (RuntimeException e) {
-      log.log(Level.WARNING, e.toString(), e);
-      
       context.renderResponse();
 
       throw e;
@@ -1191,15 +1186,6 @@ public abstract class UIComponentBase extends UIComponent
 
       FacesContext context = FacesContext.getCurrentInstance();
 
-      if (! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId()) &&
-          ! isPostback(context)) {
-
-        context.getApplication()
-          .publishEvent(AfterAddToParentEvent.class, child);
-
-        processResourceDependencies(context, child);
-      }
-
       return result;
     }
 
@@ -1209,17 +1195,6 @@ public abstract class UIComponentBase extends UIComponent
       _list.add(i, child);
 
       setParent(child);
-
-      FacesContext context = FacesContext.getCurrentInstance();
-
-      if (! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId()) &&
-          ! isPostback(context)) {
-
-        context.getApplication()
-          .publishEvent(AfterAddToParentEvent.class, child);
-
-        processResourceDependencies(context, child);
-      }
 
       _parent._facetsAndChildren = null;
     }
@@ -1233,17 +1208,6 @@ public abstract class UIComponentBase extends UIComponent
 	setParent(child);
 
 	_list.add(i++, child);
-
-        FacesContext context = FacesContext.getCurrentInstance();
-
-        if (! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId()) &&
-            ! isPostback(context)) {
-
-          context.getApplication()
-            .publishEvent(AfterAddToParentEvent.class, child);
-
-          processResourceDependencies(context, child);
-        }
 
         isChange = true;
       }
@@ -1265,162 +1229,6 @@ public abstract class UIComponentBase extends UIComponent
         renderKit = factory.getRenderKit(context, RenderKitFactory.HTML_BASIC_RENDER_KIT);
       
       return renderKit.getResponseStateManager().isPostback(context);
-    }
-
-    private void processResourceDependencies(FacesContext context, 
-                                             UIComponent child)
-    {
-      ResourceDependency []dependencies = null;
-
-      Annotation annotation
-        = child.getClass().getAnnotation(ResourceDependency.class);
-
-      if (annotation != null)
-        dependencies
-          = new ResourceDependency []{(ResourceDependency) annotation};
-
-      annotation = child.getClass().getAnnotation(ResourceDependencies.class);
-
-      if (annotation != null) {
-
-        ResourceDependency []dependencyArray
-          = ((ResourceDependencies) annotation).value();
-        
-        if (dependencies == null) {
-          dependencies = dependencyArray;
-        }
-        else {
-          ResourceDependency []newDependecies
-            = new ResourceDependency[dependencies
-            .length +
-                    dependencyArray
-                      .length];
-
-          System.arraycopy(dependencies,
-                           0,
-                           newDependecies,
-                           0,
-                           dependencies.length);
-
-          System.arraycopy(dependencyArray,
-                           0,
-                           newDependecies,
-                           dependencies.length,
-                           dependencyArray.length);
-
-          dependencies = newDependecies;
-        }
-      }
-
-      Renderer renderer = child.getRenderer(context);
-
-      if (renderer != null) {
-        annotation
-          = renderer.getClass().getAnnotation(ResourceDependency.class);
-        
-        if (annotation != null) {
-          ResourceDependency dependency = (ResourceDependency) annotation;
-          
-          if (dependencies == null) {
-            dependencies = new ResourceDependency []{dependency};
-          }
-          else {
-            ResourceDependency []newDependencies
-              = new ResourceDependency[dependencies.length + 1];
-
-            System.arraycopy(dependencies,
-                             0,
-                             newDependencies,
-                             0,
-                             dependencies.length);
-
-            newDependencies[newDependencies.length - 1] = dependency;
-
-            dependencies = newDependencies;
-          }
-        }
-
-        annotation =
-          renderer.getClass().getAnnotation(ResourceDependencies.class);
-
-        if (annotation != null) {
-          ResourceDependency []dependencyArray
-            = ((ResourceDependencies) annotation).value();
-          
-          if (dependencies == null) {
-            dependencies = dependencyArray;
-          }
-          else {
-            ResourceDependency []newDependecies
-              = new ResourceDependency[dependencies
-              .length +
-                      dependencyArray
-                        .length];
-
-            System.arraycopy(dependencies,
-                             0,
-                             newDependecies,
-                             0,
-                             dependencies.length);
-
-            System.arraycopy(dependencyArray,
-                             0,
-                             newDependecies,
-                             dependencies.length,
-                             dependencyArray.length);
-
-            dependencies = newDependecies;
-          }
-        }
-      }
-
-      if (dependencies == null)
-        return;
-
-      Application app = context.getApplication();
-
-      ResourceHandler resourceHandler = app.getResourceHandler();
-
-      for (int i = 0; i < dependencies.length; i++) {
-        ResourceDependency dependency = dependencies[i];
-
-        String name = dependency.name();
-
-        if (name == null || name.length() == 0)
-          throw new IllegalArgumentException(
-            "Element name in ResourceDependency annotation for component '" +
-            child +
-            "' must have a value");
-
-        UIOutput componentDependency =
-          (UIOutput) app.createComponent(UIOutput.COMPONENT_TYPE);
-
-        Map<String, Object> attributes = componentDependency.getAttributes();
-
-        attributes.put("name", name);
-
-        String library = dependency.library();
-
-        if (library != null && library.length() > 0)
-          attributes.put("library", library);
-
-        String rendererType
-          = resourceHandler.getRendererTypeForResourceName(name);
-
-        componentDependency.setRendererType(rendererType);
-
-        String target = dependency.target();
-
-        if (target != null && target.length() > 0) {
-          attributes.put("target", target);
-          context.getViewRoot()
-            .addComponentResource(context, componentDependency, target);
-
-        }
-        else
-          context.getViewRoot()
-            .addComponentResource(context, componentDependency);
-      }
     }
 
     @Override
@@ -1446,8 +1254,6 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent old = _list.remove(i);
 
       if (old != null) {
-	UIComponent parent = old.getParent();
-	
 	old.setParent(null);
       }
 

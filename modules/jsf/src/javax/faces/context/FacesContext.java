@@ -90,25 +90,6 @@ public abstract class FacesContext {
   
   public abstract void responseComplete();
 
-  public PhaseId getCurrentPhaseId()
-  {
-    return _currentPhaseId;
-  }
-
-  public void setCurrentPhaseId(PhaseId currentPhaseId)
-  {
-    _currentPhaseId = currentPhaseId;
-  }
-
-  /**
-   * Since 2.0
-   */
-  public Map<Object, Object> getAttributes()
-    throws UnsupportedOperationException
-  {
-    throw new UnsupportedOperationException();
-  }
-
   public static FacesContext getCurrentInstance()
   {
     FacesContext context = _currentInstance.get();

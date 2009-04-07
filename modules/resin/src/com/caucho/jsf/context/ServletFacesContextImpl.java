@@ -514,22 +514,6 @@ public class ServletFacesContextImpl extends FacesContext
     return _attributes;
   }
 
-  public PhaseId getCurrentPhaseId()
-  {
-    if (_isClosed)
-      throw new IllegalStateException();
-
-    return super.getCurrentPhaseId();
-  }
-
-  public void setCurrentPhaseId(PhaseId currentPhaseId)
-  {
-    if (_isClosed)
-      throw new IllegalStateException();
-
-    super.setCurrentPhaseId(currentPhaseId);
-  }
-
   public String toString()
   {
     return "ServletFacesContextImpl[]";
