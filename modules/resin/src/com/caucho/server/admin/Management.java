@@ -67,6 +67,7 @@ public class Management
   private HostConfig _hostConfig;
 
   private AdminAuthenticator _auth;
+  private DeployService _deployService;
 
   protected TransactionManager _transactionManager;
 
@@ -149,9 +150,9 @@ public class Management
    */
   public Object createDeployService()
   {
-    log.warning(L.l("deploy-service requires Resin Professional"));
+    _deployService = new DeployService();
 
-    return new ContainerProgram();
+    return _deployService;
   }
 
   /**
@@ -274,6 +275,10 @@ public class Management
    */
   public void start(Server server)
   {
+    /*
+    if (_deployService != null)
+      _deployService.start();
+    */
   }
 
   public HostConfig getHostConfig()

@@ -107,9 +107,9 @@ public class JniServerSocketImpl extends QServerSocket {
     throws IOException
   {
     if (! _hasInitJni) {
-      throw new IOException(L.l("Can't use JNI to listen to port '{0}:{1}"
-				+ "' because JNI support has not been compiled.\n"
-				+ "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n{2}",
+      throw new IOException(L.l("Socket JNI is not available"
+				+ " because JNI support has not been compiled.\n"
+				+ "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n  {2}",
 				host, port, _jniInitException));
     }
   }

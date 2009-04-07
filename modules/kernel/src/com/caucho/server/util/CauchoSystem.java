@@ -529,7 +529,7 @@ public class CauchoSystem {
       System.loadLibrary("resin");
       _hasJni = true;
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
     }
   }
 }

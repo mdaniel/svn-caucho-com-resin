@@ -63,7 +63,8 @@ import java.util.logging.*;
  * &lt;/users>
  * </pre></code>
  */
-@com.caucho.config.Service
+@Service
+@CauchoDeployment  
 public class AdminAuthenticator extends XmlAuthenticator
 {
   private static final Logger log
