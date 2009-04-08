@@ -211,8 +211,8 @@ public class RefVar extends Value
   @Override
   public Value toArgValue()
   {
-    // php/343k
-    return _var.toValue();
+    // php/0471
+    return _var;
   }
 
   /**
