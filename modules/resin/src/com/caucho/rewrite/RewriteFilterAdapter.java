@@ -29,28 +29,61 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.server.rewrite.SetRequestSecureFilterChain;
-import com.caucho.util.L10N;
+import com.caucho.server.dispatch.FilterConfigImpl;
+import com.caucho.server.dispatch.FilterFilterChain;
+import com.caucho.server.webapp.WebApp;
 
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-@Configurable
-public class SetRequestSecure extends AbstractRewriteFilter
+/**
+ * Wraps a Java filter in a RewriteFilter
+ */
+public class RewriteFilterAdapter implements RewriteFilter
 {
-  private static final L10N L = new L10N(SetRequestSecure.class);
+  private Filter _filter;
 
-  protected FilterChain createFilterChain(String uri,
-					  String queryString,
-					  FilterChain next)
+  public RewriteFilterAdapter(Filter filter)
+    throws ServletException
   {
-    return new SetRequestSecureFilterChain(next);
+    WebApp webApp = WebApp.getCurrent();
+    FilterConfigImpl filterConfig = new FilterConfigImpl();
+    filterConfig.setServletContext(webApp);
+
+    filter.init(filterConfig);
+
+    _filter = filter;
+  }
+  
+  public boolean isRequest()
+  {
+    return true;
+  }
+  
+  public boolean isInclude()
+  {
+    return false;
+  }
+  
+  public boolean isForward()
+  {
+    return false;
+  }
+
+  public FilterChain map(String uri,
+			 String queryString,
+			 FilterChain next)
+  {
+    return new FilterFilterChain(next, _filter);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _filter + "]";
   }
 }
-

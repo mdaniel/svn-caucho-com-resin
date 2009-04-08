@@ -55,7 +55,7 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
 //import com.caucho.osgi.OsgiBundle;
 //import com.caucho.osgi.OsgiManager;
-import com.caucho.rewrite.RewriteAction;
+import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
@@ -1249,13 +1249,13 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a rewrite dispatch rule
    */
-  public void add(RewriteAction action)
+  public void add(RewriteFilter filter)
   {
-    if (action.isRequest()) {
+    if (filter.isRequest()) {
       if (_requestRewriteDispatch == null)
 	_requestRewriteDispatch = new RewriteDispatch(this);
 
-      _requestRewriteDispatch.addAction(action);
+      _requestRewriteDispatch.addAction(filter);
     }
   }
 

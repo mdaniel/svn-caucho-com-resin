@@ -35,10 +35,11 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-abstract public class AbstractRewriteAction implements RewriteAction
+abstract public class AbstractRewriteFilter implements RewriteFilter
 {
   private Pattern _regexp;
 
@@ -47,10 +48,10 @@ abstract public class AbstractRewriteAction implements RewriteAction
 
   private RequestPredicate []_predicates = new RequestPredicate[0];
 
-  private ArrayList<RewriteAction> _actionList
-    = new ArrayList<RewriteAction>();
+  private ArrayList<RewriteFilter> _filterList
+    = new ArrayList<RewriteFilter>();
 
-  private RewriteAction []_actions = new RewriteAction[0];
+  private RewriteFilter []_filters = new RewriteFilter[0];
 
   public void setRegexp(Pattern regexp)
   {
@@ -79,11 +80,17 @@ abstract public class AbstractRewriteAction implements RewriteAction
     _predicateList.toArray(_predicates);
   }
   
-  public void add(RewriteAction action)
+  public void add(RewriteFilter filter)
   {
-    _actionList.add(action);
-    _actions = new RewriteAction[_actionList.size()];
-    _actionList.toArray(_actions);
+    _filterList.add(filter);
+    _filters = new RewriteFilter[_filterList.size()];
+    _filterList.toArray(_filters);
+  }
+  
+  public void add(Filter filter)
+    throws ServletException
+  {
+    add(new RewriteFilterAdapter(filter));
   }
   
   public FilterChain map(String uri,
@@ -96,8 +103,8 @@ abstract public class AbstractRewriteAction implements RewriteAction
     if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
       FilterChain chain = createFilterChain(uri, queryString, next);
 
-      for (int i = _actions.length - 1; i >= 0; i--) {
-	chain = _actions[i].map(uri, queryString, chain);
+      for (int i = _filters.length - 1; i >= 0; i--) {
+	chain = _filters[i].map(uri, queryString, chain);
       }
 
       if (_predicates.length > 0)

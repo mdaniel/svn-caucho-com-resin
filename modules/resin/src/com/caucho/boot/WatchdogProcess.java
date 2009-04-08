@@ -251,6 +251,7 @@ class WatchdogProcess
       }
 
       RotateStream rotateStream = RotateStream.create(jvmPath);
+      rotateStream.getRolloverLog().setRolloverSizeBytes(64L * 1024 * 1024);
       _watchdog.getConfig().logInit(rotateStream);
       rotateStream.init();
       return rotateStream.getStream();

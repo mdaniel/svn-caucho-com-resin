@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
@@ -42,10 +43,10 @@ abstract public class AbstractDispatchRule implements DispatchRule
 {
   private Pattern _regexp;
 
-  private ArrayList<RewriteAction> _actionList
-    = new ArrayList<RewriteAction>();
+  private ArrayList<RewriteFilter> _filterList
+    = new ArrayList<RewriteFilter>();
 
-  private RewriteAction []_actions = new RewriteAction[0];
+  private RewriteFilter []_filters = new RewriteFilter[0];
 
   private ArrayList<RequestPredicate> _predicateList
     = new ArrayList<RequestPredicate>();
@@ -84,11 +85,17 @@ abstract public class AbstractDispatchRule implements DispatchRule
     _predicateList.toArray(_predicates);
   }
 
-  public void add(RewriteAction action)
+  public void add(RewriteFilter filter)
   {
-    _actionList.add(action);
-    _actions = new RewriteAction[_actionList.size()];
-    _actionList.toArray(_actions);
+    _filterList.add(filter);
+    _filters = new RewriteFilter[_filterList.size()];
+    _filterList.toArray(_filters);
+  }
+  
+  public void add(Filter filter)
+    throws ServletException
+  {
+    add(new RewriteFilterAdapter(filter));
   }
   
   public FilterChain map(String uri,
@@ -114,8 +121,8 @@ abstract public class AbstractDispatchRule implements DispatchRule
 
       FilterChain chain = createDispatch(uri, queryString, target, tail);
 
-      for (int i = _actions.length - 1; i >= 0; i--) {
-	chain = _actions[i].map(uri, queryString, chain);
+      for (int i = _filters.length - 1; i >= 0; i--) {
+	chain = _filters[i].map(uri, queryString, chain);
       }
 
       if (_predicates.length > 0)

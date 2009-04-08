@@ -32,7 +32,7 @@ package com.caucho.rewrite;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-public interface RewriteAction
+public interface RewriteFilter
 {
   public boolean isRequest();
   

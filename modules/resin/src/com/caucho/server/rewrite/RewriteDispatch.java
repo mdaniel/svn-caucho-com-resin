@@ -33,7 +33,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.*;
 import com.caucho.rewrite.DispatchRule;
-import com.caucho.rewrite.RewriteAction;
+import com.caucho.rewrite.RewriteFilter;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
@@ -69,8 +69,8 @@ public class RewriteDispatch
   private ArrayList<DispatchRule> _ruleList
     = new ArrayList<DispatchRule>();
 
-  private ArrayList<RewriteAction> _filterList
-    = new ArrayList<RewriteAction>();
+  private ArrayList<RewriteFilter> _filterList
+    = new ArrayList<RewriteFilter>();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -160,7 +160,7 @@ public class RewriteDispatch
     _ruleList.add(rule);
   }
 
-  public void addAction(RewriteAction action)
+  public void addAction(RewriteFilter action)
   {
     _filterList.add(action);
   }

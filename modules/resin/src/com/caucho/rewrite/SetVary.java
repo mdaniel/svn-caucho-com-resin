@@ -33,7 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
-import com.caucho.server.rewrite.SetHeaderFilterChain;
+import com.caucho.server.rewrite.AddHeaderFilterChain;
 import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
@@ -41,25 +41,49 @@ import javax.servlet.ServletException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
- * Filter container which matches URLs and conditions and contains child
- * actions.
+ * Sets a response Vary header to control caching based on input headers,
+ * e.g. varying depending on the Locale.
  *
  * <pre>
  * &lt;web-app xmlns="http://caucho.com/ns/resin"
- *        xmlns:resin="urn:java:com.caucho.resin">
+ *            xmlns:resin="urn:java:com.caucho.resin">
  *
- * &lt;resin:Location regexp="^/admin">
- *  &lt;resin:IfSecure/>
- *  &lt;resin:SetHeader name="Foo" value="bar"/>
- * &lt;/resin:Location>
+ *   &lt;resin:SetVary regexp="^/foo" value="Bar"/>
  *
  * &lt;/web-app>
  * </pre>
  */
 @Configurable
-public class Location extends AbstractRewriteFilter
+public class SetVary extends AbstractRewriteFilter
 {
+  private static final L10N L = new L10N(SetVary.class);
+
+  private String _value;
+  
+  /**
+   * Sets the Vary header
+   */
+  public void setValue(String value)
+  {
+    _value = value;
+  }
+
+  //  @Override
+  public void init()
+    throws ConfigException
+  {
+    if (_value == null) {
+      throw new ConfigException(L.l("'value' is a required attribute of '{0}'.",
+				    getClass().getSimpleName()));
+    }
+  }
+
+  protected FilterChain createFilterChain(String uri,
+					  String queryString,
+					  FilterChain next)
+  {
+    return new AddHeaderFilterChain(next, "Vary", _value);
+  }
 }
 

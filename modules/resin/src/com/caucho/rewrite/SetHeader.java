@@ -44,14 +44,13 @@ import java.util.regex.Pattern;
 /**
  * Sets a response header in a rewrite rule or as a top-level filter.
  *
- *
  * <pre>
  * &lt;resin:SetHeader url-pattern="/foo/*"
  *                  name="Foo" value="bar"/>
  * </pre>
  */
 @Configurable
-public class SetHeader extends AbstractRewriteAction
+public class SetHeader extends AbstractRewriteFilter
 {
   private static final L10N L = new L10N(SetHeader.class);
 

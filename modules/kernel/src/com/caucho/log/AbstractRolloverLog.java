@@ -237,8 +237,11 @@ public class AbstractRolloverLog {
    */
   public void setRolloverSize(Bytes bytes)
   {
-    long size = bytes.getBytes();
-    
+    setRolloverSizeBytes(bytes.getBytes());
+  }
+
+  public void setRolloverSizeBytes(long size)
+  {
     if (size < 0)
       _rolloverSize = Bytes.INFINITE;
     else
