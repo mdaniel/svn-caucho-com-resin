@@ -29,6 +29,7 @@
 
 package com.caucho.servlets;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
@@ -103,8 +104,8 @@ public class FastCGIServlet extends GenericServlet {
 
   private int _servletId;
 
-  private FreeList<FastCGISocket> _freeSockets =
-    new FreeList<FastCGISocket>(8);
+  private FreeList<FastCGISocket> _freeSockets
+    = new FreeList<FastCGISocket>(8);
 
   private String _hostAddress;
   private InetAddress _hostAddr;
@@ -122,7 +123,6 @@ public class FastCGIServlet extends GenericServlet {
    * Sets the host address.
    */
   public void setServerAddress(String hostAddress)
-    throws ServletException
   {
     _hostAddress = hostAddress;
 
@@ -133,7 +133,7 @@ public class FastCGIServlet extends GenericServlet {
         _hostAddr = InetAddress.getByName(_hostAddress.substring(0, p));
       }
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw ConfigException.create(e);
     }
   }
 

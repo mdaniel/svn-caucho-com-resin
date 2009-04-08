@@ -607,6 +607,8 @@ r_server-Content =
   (attribute backup { r_boolean-Type }
    | element backup { r_boolean-Type })?
 
+  & r_bean-Custom*
+
   & (attribute bind-ports-after-start { r_boolean-Type }
      | element bind-ports-after-start { r_boolean-Type })?
 

@@ -535,24 +535,24 @@ public final class ClusterServer {
     return port;
   }
 
-  /**
-   * Adds a custom-protocol port.
-   */
-  public Port createProtocol()
-    throws ConfigException
-  {
-    ProtocolPort port = new ProtocolPort(this);
-
-    _ports.add(port);
-
-    applyPortDefaults(port);
-    
-    return port;
-  }
-
   void addProtocolPort(Port port)
   {
     _ports.add(port);
+  }
+
+  public void add(ProtocolPort protocolPort)
+  {
+    Port port = new Port(this);
+
+    Protocol protocol = protocolPort.getProtocol();
+    protocol.setParent(port);
+    port.setProtocol(protocol);
+
+    applyPortDefaults(port);
+
+    protocolPort.getConfigProgram().configure(port);
+    
+    addProtocolPort(port);
   }
 
   private void applyPortDefaults(Port port)

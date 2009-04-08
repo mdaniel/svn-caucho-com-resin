@@ -202,8 +202,20 @@ public class CustomBeanType extends ConfigType
     
     if (addAttribute != null)
       return new CustomBeanAddAttribute(cl);
-    else
-      return new CustomBeanArgAttribute(cl);
+
+    return new CustomBeanArgAttribute(cl);
+  }
+
+  @Override
+  public Attribute getProgramAttribute()
+  {
+    Attribute attr = _beanType.getProgramAttribute();
+
+    if (attr == null)
+      return null;
+
+    // server/1kl5
+    return CustomBeanProgramAttribute.ATTRIBUTE;
   }
 
   private Method findMethod(String name)

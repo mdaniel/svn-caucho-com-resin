@@ -497,7 +497,8 @@ public class ConfigContext implements CreationalContext {
 			localName.substring(0, localName.indexOf(':'))),
 		    childNode);
       }
-	  
+
+      System.out.println("TYPE: " + type);
       throw error(L.l("'{0}' is an unknown property of '{1}'.",
 		      qName.getName(), type.getTypeName()),
 		  childNode);
