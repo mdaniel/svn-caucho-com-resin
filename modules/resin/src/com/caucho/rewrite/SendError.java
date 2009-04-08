@@ -29,33 +29,47 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
+import com.caucho.server.dispatch.ErrorFilterChain;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletResponse;
 
 /*
- * Redirect a request using a HTTP redirect.
- * protocol.
+ * Sends a HTTP error response using response.sendError(code)
  *
  * <pre>
  * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
  *
- *   &lt;resin:Redirect regexp="^/foo" target="/bar"/>
+ *   &lt;resin:SendError regexp="^/hidden" code="512"/>
  *
  * &lt;/web-app>
  * </pre>
  */
 @Configurable
-public class Redirect extends AbstractTargetDispatchRule
+public class SendError extends AbstractTargetDispatchRule
 {
-  private static final L10N L = new L10N(Redirect.class);
+  private static final L10N L = new L10N(SendError.class);
+
+  private int _code = 403;
+  private String _message;
+
+  /**
+   * Sets the HTTP error code
+   */
+  public void setCode(int code)
+  {
+    _code = code;
+  }
+
+  /**
+   * Sets the HTTP error message
+   */
+  public void setMessage(String message)
+  {
+    _message = message;
+  }
 
   @Override
   public FilterChain createDispatch(String uri,
@@ -63,6 +77,6 @@ public class Redirect extends AbstractTargetDispatchRule
 				    String target,
 				    FilterChain next)
   {
-    return new RedirectFilterChain(target);
+    return new ErrorFilterChain(_code, _message);
   }
 }

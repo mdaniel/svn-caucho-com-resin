@@ -32,6 +32,32 @@ package com.caucho.rewrite;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
+/**
+ * URL rewriting and request dispatching based on URL and query string,
+ * configured in the resin-web.xml.  Basically, a replacement for
+ * mod_rewrite capabilities in Resin.
+ *
+ * <p>DispatchRules generally have a regular expression and a target
+ * (defined in {@link com.caucho.rewrite.AbstractTargetDispatchRule}).  They have optional
+ * {@link com.caucho.rewrite.RequestPredicate} conditions to check
+ request headers, so
+ * dispatching can be browser-specific.
+ *
+ * <p>Custom DispatchRules can be made by extending
+ * {@link com.caucho.rewrite.AbstractTargetDispatchRule} and implementing
+ * the <code>createDispatch</code> method.
+ *
+ * <pre>
+ * &lt;web-app xmlns="http://caucho.com/ns/resin"
+ *             xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:Dispatch regexp="\.(php|jpg|gif|js|css)"/>
+ *
+ *   &lt;resin:Dispatch regexp="^" target="/index.php"/>
+ *
+ * &lt;/web-app>
+ * </pre>
+ */
 public interface DispatchRule
 {
   public boolean isRequest();

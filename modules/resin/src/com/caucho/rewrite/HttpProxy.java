@@ -45,6 +45,20 @@ import javax.servlet.http.*;
 import java.io.*;
 import java.util.logging.*;
 
+/**
+ * Dispatches a request to a backend server using HTTP as the proxy
+ * protocol.
+ *
+ * <pre>
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:HttpProxy regexp="^/remote">
+ *     &lt;address>127.0.0.1:8080&lt;/address>
+ *   &lt;/resin:HttpProxy>
+ *
+ * &lt;/web-app>
+ * </pre>
+ */
 @Configurable
 public class HttpProxy extends AbstractTargetDispatchRule
 {
@@ -69,11 +83,23 @@ public class HttpProxy extends AbstractTargetDispatchRule
     _servlet.setServlet(_proxyServlet);
   }
 
+  /**
+   * Adds a backend HTTP server address like "127.0.0.1:8081"
+   *
+   * @param address the backend address likst "127.0.0.1:8081"
+   */
+  @Configurable
   public void addAddress(String address)
   {
     _proxyServlet.addAddress(address);
   }
 
+  /**
+   * Sets the timeout to recover from a failed connection to the backend.
+   *
+   * @param period the recover timeout
+   */
+  @Configurable
   public void setFailRecoverTime(Period period)
   {
     _proxyServlet.setFailRecoverTime(period);

@@ -29,33 +29,28 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
+import com.caucho.server.dispatch.ErrorFilterChain;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletResponse;
 
 /*
- * Redirect a request using a HTTP redirect.
- * protocol.
+ * Sends a HTTP Forbidden response using response.sendError(SC_FORBIDDEN).
  *
  * <pre>
  * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
  *
- *   &lt;resin:Redirect regexp="^/foo" target="/bar"/>
+ *   &lt;resin:Forbidden regexp="^/hidden"/>
  *
  * &lt;/web-app>
  * </pre>
  */
 @Configurable
-public class Redirect extends AbstractTargetDispatchRule
+public class Forbidden extends AbstractTargetDispatchRule
 {
-  private static final L10N L = new L10N(Redirect.class);
+  private static final L10N L = new L10N(Forbidden.class);
 
   @Override
   public FilterChain createDispatch(String uri,
@@ -63,6 +58,6 @@ public class Redirect extends AbstractTargetDispatchRule
 				    String target,
 				    FilterChain next)
   {
-    return new RedirectFilterChain(target);
+    return new ErrorFilterChain(HttpServletResponse.SC_FORBIDDEN);
   }
 }

@@ -24,45 +24,51 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.rewrite;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
-/*
- * Redirect a request using a HTTP redirect.
- * protocol.
+/**
+ * Match if the file specified by getRealPath() exists in the filesystem.
  *
  * <pre>
- * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
- *
- *   &lt;resin:Redirect regexp="^/foo" target="/bar"/>
- *
- * &lt;/web-app>
+ * &lt;resin:Allow url-pattern="/admin/*"&gt;
+ *                  xmlns:resin="urn:java:com.caucho.resin"&gt;
+ *   &lt;resin:IfFileExists/>
+ * &lt;/resin:Allow>
  * </pre>
+ *
+ * <p>RequestPredicates may be used for security and rewrite actions.
  */
 @Configurable
-public class Redirect extends AbstractTargetDispatchRule
+public class IfFileExists implements RequestPredicate
 {
-  private static final L10N L = new L10N(Redirect.class);
+  private static final L10N L = new L10N(IfFileExists.class);
 
-  @Override
-  public FilterChain createDispatch(String uri,
-				    String queryString,
-				    String target,
-				    FilterChain next)
+  /**
+   * True if the predicate matches.
+   *
+   * @param request the servlet request to test
+   */
+  public boolean isMatch(HttpServletRequest request)
   {
-    return new RedirectFilterChain(target);
+    String servletPath = request.getServletPath();
+    String realPath;
+
+    if (servletPath != null)
+      realPath = request.getRealPath(servletPath);
+    else
+      realPath = request.getRealPath(request.getPathInfo());
+
+    return Vfs.lookup(realPath).exists();
   }
 }

@@ -40,6 +40,18 @@ import javax.servlet.ServletException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+ * Forwards a requests using the servlet RequestDispatcher.forward call
+ * protocol.
+ *
+ * <pre>
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:Forward regexp="^/foo" target="/bar"/>
+ *
+ * &lt;/web-app>
+ * </pre>
+ */
 @Configurable
 public class Forward extends AbstractDispatchRule
 {
@@ -53,11 +65,13 @@ public class Forward extends AbstractDispatchRule
 
   private boolean _isAbsolute;
 
+  @Configurable
   public void setTarget(String target)
   {
     _target = target;
   }
 
+  @Configurable
   public void setAbsoluteTarget(String target)
   {
     setTarget(target);
@@ -65,6 +79,7 @@ public class Forward extends AbstractDispatchRule
     _isAbsolute = true;
   }
 
+  @Configurable
   public void setTargetHost(String target)
   {
     _targetHost = target;
@@ -77,41 +92,6 @@ public class Forward extends AbstractDispatchRule
       return matcher.replaceAll(_target);
     else
       return uri;
-  }
-
-  /*
-  //@Override
-  public FilterChain dispatch(String uri,
-			      String queryString,
-                              FilterChain accept,
-                              FilterChainMapper next)
-  {
-    String uriArg = null;
-    
-    if (queryString == null)
-      uriArg = uri;
-    else if (uri.indexOf('?') >= 0)
-      uriArg = uri + "&" + queryString;
-    else
-      uriArg = uri + "?" + queryString;
-
-    if (_isAbsolute)
-      return new ForwardAbsoluteFilterChain(uriArg, WebApp.getCurrent());
-    else
-      return new ForwardFilterChain(uriArg);
-  }
-  */
-
-  @Override
-  public FilterChain createDispatch(String uri,
-				    String queryString,
-				    String target,
-				    FilterChain next)
-  {
-    if (_isAbsolute)
-      return new ForwardAbsoluteFilterChain(target, WebApp.getCurrent());
-    else
-      return new ForwardFilterChain(target);
   }
 
   //  @Override
@@ -129,5 +109,17 @@ public class Forward extends AbstractDispatchRule
     if (getRegexp() == null && getFullUrlRegexp() == null)
       setRegexp(ALL_PATTERN);
     */
+  }
+
+  @Override
+  public FilterChain createDispatch(String uri,
+				    String queryString,
+				    String target,
+				    FilterChain next)
+  {
+    if (_isAbsolute)
+      return new ForwardAbsoluteFilterChain(target, WebApp.getCurrent());
+    else
+      return new ForwardFilterChain(target);
   }
 }

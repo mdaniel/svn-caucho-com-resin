@@ -40,6 +40,21 @@ import javax.servlet.ServletException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+ * Dispatch the request using the standard servlet and filter processing.
+ * The Dispatch rule can be used to select normal processing before
+ * additional rewrites.
+ *
+ * <pre>
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:Dispatch regexp="\.(php|jpg|gif|js|css)"/>
+ *
+ *   &lt;resin:Dispatch regexp="^" target="/index.php"/>
+ *
+ * &lt;/web-app>
+ * </pre>
+ */
 @Configurable
 public class Dispatch extends AbstractTargetDispatchRule
 {

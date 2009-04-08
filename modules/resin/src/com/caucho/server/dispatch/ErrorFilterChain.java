@@ -42,15 +42,27 @@ import java.io.IOException;
 public class ErrorFilterChain implements FilterChain {
   // servlet
   private int _errorCode;
+  private String _message;
 
   /**
-   * Create the redirect filter chain servlet.
+   * Create the error filter chain servlet.
    *
-   * @param url the URL to redirect to.
+   * @param errorCode the HTTP error code
    */
   public ErrorFilterChain(int errorCode)
   {
     _errorCode = errorCode;
+  }
+
+  /**
+   * Create the error filter chain servlet.
+   *
+   * @param errorCode the HTTP error code
+   */
+  public ErrorFilterChain(int errorCode, String message)
+  {
+    _errorCode = errorCode;
+    _message = message;
   }
 
   /**
@@ -67,11 +79,14 @@ public class ErrorFilterChain implements FilterChain {
   {
     HttpServletResponse res = (HttpServletResponse) response;
 
-    res.sendError(_errorCode);
+    if (_message != null)
+      res.sendError(_errorCode, _message);
+    else
+      res.sendError(_errorCode);
   }
 
   public String toString()
   {
-    return "ErrorFilterChain[" + _errorCode + "]";
+    return getClass().getSimpleName() + "[" + _errorCode + "]";
   }
 }

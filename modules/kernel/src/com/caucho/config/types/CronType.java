@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
 import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Implements a unix cron-style trigger
@@ -43,7 +44,7 @@ public class CronType implements Trigger {
 
   private static final long DAY = 24L * 3600L * 1000L;
 
-  private final QDate _localCalendar = QDate.createLocal();
+  private AtomicReference<QDate> _localCalendar = new AtomicReference<QDate>();
 
   private String _text;
   
@@ -175,73 +176,73 @@ public class CronType implements Trigger {
 
   public long nextTime(long now)
   {
-    QDate cal = _localCalendar;
-
+    QDate cal = allocateCalendar();
+    
     long time = now + 60000 - now % 60000;
     
-    synchronized (cal) {
-      cal.setGMTTime(time);
+    cal.setGMTTime(time);
 
-      int minute = nextInterval(_minutes, cal.getMinute());
+    int minute = nextInterval(_minutes, cal.getMinute());
 
-      if (minute < 0) {
-	minute = nextInterval(_minutes, 0);
+    if (minute < 0) {
+      minute = nextInterval(_minutes, 0);
 	
-	cal.setHour(cal.getHour() + 1);
-      }
+      cal.setHour(cal.getHour() + 1);
+    }
 
-      int hour = nextInterval(_hours, cal.getHour());
-      if (hour < 0) {
+    int hour = nextInterval(_hours, cal.getHour());
+    if (hour < 0) {
+      hour = nextInterval(_hours, 0);
+      minute = nextInterval(_minutes, 0);
+	
+      cal.setDayOfMonth(cal.getDayOfMonth() + 1);
+    }
+
+    int day = cal.getDayOfMonth();
+
+    if (_days != null) {
+      day = nextInterval(_days, cal.getDayOfMonth());
+
+      if (day < 0) {
+	cal.setMonth(cal.getMonth() + 1);
+	cal.setDayOfMonth(1);
+
+	day = nextInterval(_days, cal.getDayOfMonth());
 	hour = nextInterval(_hours, 0);
 	minute = nextInterval(_minutes, 0);
-	
-	cal.setDayOfMonth(cal.getDayOfMonth() + 1);
       }
-
-      int day = cal.getDayOfMonth();
-
-      if (_days != null) {
-	day = nextInterval(_days, cal.getDayOfMonth());
-
-	if (day < 0) {
-	  cal.setMonth(cal.getMonth() + 1);
-	  cal.setDayOfMonth(1);
-
-	  day = nextInterval(_days, cal.getDayOfMonth());
-	  hour = nextInterval(_hours, 0);
-	  minute = nextInterval(_minutes, 0);
-	}
-      }
-
-      if (_daysOfWeek != null) {
-	int oldDayOfWeek = cal.getDayOfWeek() - 1;
-	int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
-
-	if (dayOfWeek >= 0) {
-	  day += (dayOfWeek - oldDayOfWeek);
-	}
-	else {
-	  dayOfWeek = nextInterval(_daysOfWeek, 0);
-	  
-	  day += (dayOfWeek - oldDayOfWeek + 7);
-	}
-      }
-
-      int month = cal.getMonth();
-      int year = (int) cal.getYear();
-      
-      long nextTime = nextTime(year, month, day, hour, minute);
-
-      if (now < nextTime)
-	return nextTime;
-      else
-	return nextTime(now + 3600000L); // DST
     }
+
+    if (_daysOfWeek != null) {
+      int oldDayOfWeek = cal.getDayOfWeek() - 1;
+      int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
+
+      if (dayOfWeek >= 0) {
+	day += (dayOfWeek - oldDayOfWeek);
+      }
+      else {
+	dayOfWeek = nextInterval(_daysOfWeek, 0);
+	  
+	day += (dayOfWeek - oldDayOfWeek + 7);
+      }
+    }
+
+    int month = cal.getMonth();
+    int year = (int) cal.getYear();
+      
+    freeCalendar(cal);
+
+    long nextTime = nextTime(year, month, day, hour, minute);
+
+    if (now < nextTime)
+      return nextTime;
+    else
+      return nextTime(now + 3600000L); // DST
   }
 
   private long nextTime(int year, int month, int day, int hour, int minute)
   {
-    QDate cal = _localCalendar;
+    QDate cal = allocateCalendar();
     
     cal.setLocalTime(0);
 
@@ -251,7 +252,11 @@ public class CronType implements Trigger {
     cal.setHour(hour);
     cal.setMinute(minute);
 
-    return cal.getGMTTime();
+    long time = cal.getGMTTime();
+
+    freeCalendar(cal);
+
+    return time;
   }
     
   public int nextInterval(boolean []values, int now)
@@ -264,6 +269,111 @@ public class CronType implements Trigger {
     return -1;
   }
 
+  public long prevTime(long now)
+  {
+    QDate cal = allocateCalendar();
+
+    long time = now + 60000 - now % 60000;
+    
+    cal.setGMTTime(time);
+
+    int minute = prevInterval(_minutes, cal.getMinute());
+
+    if (minute < 0) {
+      minute = prevInterval(_minutes, _minutes.length - 1);
+	
+      cal.setHour(cal.getHour() - 1);
+    }
+
+    int hour = prevInterval(_hours, cal.getHour());
+    if (hour < 0) {
+      hour = prevInterval(_hours, _hours.length - 1);
+      minute = prevInterval(_minutes, _minutes.length - 1);
+	
+      cal.setDayOfMonth(cal.getDayOfMonth() - 1);
+    }
+
+    int day = cal.getDayOfMonth();
+
+    if (_days != null) {
+      day = prevInterval(_days, cal.getDayOfMonth());
+
+      if (day < 0) {
+	cal.setDayOfMonth(0);
+
+	day = prevInterval(_days, cal.getDayOfMonth());
+	hour = prevInterval(_hours, _hours.length - 1);
+	minute = prevInterval(_minutes, _minutes.length - 1);
+      }
+    }
+
+    if (_daysOfWeek != null) {
+      int oldDayOfWeek = cal.getDayOfWeek() - 1;
+      int dayOfWeek = prevInterval(_daysOfWeek, oldDayOfWeek);
+
+      if (dayOfWeek >= 0) {
+	day += (dayOfWeek - oldDayOfWeek);
+      }
+      else {
+	dayOfWeek = prevInterval(_daysOfWeek, _daysOfWeek.length - 1);
+	  
+	day += (dayOfWeek - oldDayOfWeek + 7);
+      }
+    }
+
+    int month = cal.getMonth();
+    int year = (int) cal.getYear();
+      
+    long prevTime = prevTime(year, month, day, hour, minute);
+
+    return prevTime;
+  }
+
+  private long prevTime(int year, int month, int day, int hour, int minute)
+  {
+    QDate cal = allocateCalendar();
+    
+    cal.setLocalTime(0);
+
+    cal.setYear(year);
+    cal.setMonth(month);
+    cal.setDayOfMonth(day);
+    cal.setHour(hour);
+    cal.setMinute(minute);
+
+    long time = cal.getGMTTime();
+
+    freeCalendar(cal);
+
+    return time;
+  }
+    
+  public int prevInterval(boolean []values, int now)
+  {
+    for (; now >= 0; now--) {
+      if (values[now])
+	return now;
+    }
+
+    return -1;
+  }
+
+  private QDate allocateCalendar()
+  {
+    QDate cal = _localCalendar.getAndSet(null);
+
+    if (cal == null)
+      cal = QDate.createLocal();
+
+    return cal;
+  }
+
+  private void freeCalendar(QDate cal)
+  {
+    _localCalendar.set(cal);
+  }
+
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _text + "]";
