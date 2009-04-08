@@ -116,6 +116,12 @@ public class ClusterAdmin extends AbstractManagedObject
     */
   }
 
+  public boolean isDynamicServerEnable()
+  {
+    return _cluster.isDynamicServerEnable();
+  }
+
+
   //
   // lifecycle
   //

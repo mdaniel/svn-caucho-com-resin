@@ -84,6 +84,12 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
 	       " information")
   public PersistentStoreMXBean getPersistentStore();
 
+  /**
+   * Returns true if this cluster supports adding dynamic servers.
+   */
+  @Description("Determines if the cluster supports dynamic servers")
+  public boolean isDynamicServerEnable();
+
   //
   // operations
   //
@@ -93,4 +99,5 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
    */
   @Description("Adds a dynamic server")
   public void addDynamicServer(String id, String address, int port);
+
 }

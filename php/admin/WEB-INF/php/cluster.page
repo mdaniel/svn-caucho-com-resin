@@ -28,6 +28,14 @@ foreach ($g_resin->Clusters as $cluster) {
   if (empty($cluster->Servers))
     continue;
 
+  if (($_REQUEST['action'] == 'add_dynamic_server') &&
+      ($_REQUEST['cluster'] == $cluster->Name)) {
+    $server_id = $_REQUEST['dyn_server_id'];
+    $server_ip = $_REQUEST['dyn_server_ip'];
+    $server_port = $_REQUEST['dyn_server_port'];
+    $cluster->addDynamicServer($server_id, $server_ip, $server_port);
+  }
+
   echo "<tr><td class='group' colspan='8'>$cluster->Name</td></tr>\n";
 
   sort($client_names);
@@ -37,6 +45,20 @@ foreach ($g_resin->Clusters as $cluster) {
     $sub_mbean_server = new MBeanServer($name);
 
     $sub_server = $sub_mbean_server->lookup("resin:type=Server");
+    $sub_cluster_server = server_by_name($name, $cluster);
+
+    $is_dynamic = false;
+
+    if ($sub_cluster_server)
+      $is_dynamic = $sub_cluster_server->isDynamicServer();
+
+    if ($is_dynamic && 
+        ($_REQUEST['action'] == 'remove_dynamic_server') &&
+        ($_REQUEST['dyn_server_id'] == $name) &&
+        ($_REQUEST['cluster'] == $cluster->Name)) {
+      $sub_cluster_server->removeDynamicServer();
+      continue;
+    }
 
     if (! $name)
       $name = "default";
@@ -46,8 +68,20 @@ foreach ($g_resin->Clusters as $cluster) {
     else
       echo "<tr class='rb'>";
 
-    if ($sub_server)
-      echo "<td class='item'>$name</td>";
+    if ($sub_server) {
+      if ($is_dynamic) {
+        echo "<td class='item'><form method='POST'>\n";
+        echo "<input type='hidden' name='action' value='remove_dynamic_server'/>\n";
+        echo "<input type='hidden' name='dyn_server_id' value='$name'/>\n";
+        echo "<input type='hidden' name='cluster' value='{$cluster->Name}'/>\n";
+        echo "<div style='float: left'>$name</div>\n";
+        echo "<div style='float: right'>";
+        echo "<input type='submit' value='remove'/>\n";
+        echo "</div></form></td>\n";
+      }
+      else
+        echo "<td class='item'>$name</td>";
+    }
     else
       echo "<td class='itemfail'>$name</td>";
 
@@ -114,6 +148,18 @@ foreach ($g_resin->Clusters as $cluster) {
     }
 
     echo "</tr>\n";
+  }
+
+  if ($cluster->isDynamicServerEnable()) {
+    echo "<form method='POST'>\n";
+    echo "<input type='hidden' name='action' value='add_dynamic_server'/>\n";
+    echo "<input type='hidden' name='cluster' value='{$cluster->Name}'/>\n";
+    echo "<tr><td colspan='5'><table><tr>\n";
+    echo "<td>Server id: <input type='text' name='dyn_server_id'/></td>\n";
+    echo "<td>IP: <input type='text' name='dyn_server_ip'/></td>\n";
+    echo "<td>Port: <input type='text' name='dyn_server_port'/></td>\n";
+    echo "<td><input type='submit' value='Add Dynamic Server'/></td>\n";
+    echo "</tr></table></td></tr>\n";
   }
 }
 
