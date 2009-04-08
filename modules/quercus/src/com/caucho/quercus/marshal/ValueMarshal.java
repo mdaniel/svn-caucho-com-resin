@@ -89,6 +89,12 @@ public class ValueMarshal extends Marshal
   }
   
   @Override
+  public int getMarshalingCost(Expr expr)
+  {
+    return Marshal.FOUR;
+  }
+  
+  @Override
   public Class getExpectedClass()
   {
     return Value.class;
