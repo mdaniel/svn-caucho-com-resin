@@ -41,6 +41,15 @@ import javax.servlet.ServletException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Sets a response header in a rewrite rule or as a top-level filter.
+ *
+ *
+ * <pre>
+ * &lt;resin:SetHeader url-pattern="/foo/*"
+ *                  name="Foo" value="bar"/>
+ * </pre>
+ */
 @Configurable
 public class SetHeader extends AbstractRewriteAction
 {
@@ -50,12 +59,19 @@ public class SetHeader extends AbstractRewriteAction
 
   private String _name;
   private String _value;
-  
+
+  /**
+   * Sets the HTTP header name
+   */
+  @Configurable
   public void setName(String name)
   {
     _name = name;
   }
   
+  /**
+   * Sets the HTTP header value
+   */
   public void setValue(String value)
   {
     _value = value;

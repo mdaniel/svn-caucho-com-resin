@@ -42,6 +42,11 @@ abstract public class AbstractDispatchRule implements DispatchRule
 {
   private Pattern _regexp;
 
+  private ArrayList<RewriteAction> _actionList
+    = new ArrayList<RewriteAction>();
+
+  private RewriteAction []_actions = new RewriteAction[0];
+
   private ArrayList<RequestPredicate> _predicateList
     = new ArrayList<RequestPredicate>();
 
@@ -78,15 +83,23 @@ abstract public class AbstractDispatchRule implements DispatchRule
     _predicates = new RequestPredicate[_predicateList.size()];
     _predicateList.toArray(_predicates);
   }
+
+  public void add(RewriteAction action)
+  {
+    _actionList.add(action);
+    _actions = new RewriteAction[_actionList.size()];
+    _actionList.toArray(_actions);
+  }
   
   public FilterChain map(String uri,
 			 String queryString,
 			 FilterChain next,
 			 FilterChain tail)
+    throws ServletException
   {
     Matcher matcher = null;
-    
-    if (_regexp == null || (matcher = _regexp.matcher(uri)).lookingAt()) {
+
+    if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
       String target = null;
 
       if (matcher != null)
@@ -100,6 +113,10 @@ abstract public class AbstractDispatchRule implements DispatchRule
 	target = uri + "?" + queryString;
 
       FilterChain chain = createDispatch(uri, queryString, target, tail);
+
+      for (int i = _actions.length - 1; i >= 0; i--) {
+	chain = _actions[i].map(uri, queryString, chain);
+      }
 
       if (_predicates.length > 0)
 	chain = new MatchFilterChain(_predicates, chain, next);
