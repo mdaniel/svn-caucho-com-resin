@@ -13,6 +13,7 @@ clean	:
 
 install	:
 	if test $(resin_home) != `pwd`; then \
+	  mkdir -p $(resin_home)/licenses; \
 	  mkdir -p $(resin_home)/lib; \
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
 	  cp lib/*.jar $(resin_home)/lib; \
