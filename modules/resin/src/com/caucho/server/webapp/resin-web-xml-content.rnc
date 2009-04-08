@@ -119,6 +119,9 @@ r_ear-deploy = element ear-deploy {
   & (attribute archive-directory { r_path-Type }
      | element archive-directory { r_path-Type })?
 
+  & (attribute startup-mode {r_startup-mode}
+     | element startup-mode {r_startup-mode})?
+
   & r_ear-default?
 
   & r_expand-cleanup-fileset?
