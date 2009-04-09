@@ -87,7 +87,7 @@ public class IfUserInRole implements RequestPredicate
         return true;
     }
 
-    return false;
+    return _roles.length == 0;
   }
 
   @Override

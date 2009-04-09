@@ -181,9 +181,14 @@ public class CustomBeanType extends ConfigType
       return CustomBeanValueArgAttribute.ATTRIBUTE;
     }
 
-    Class cl = createClass(qName);
+    Attribute envAttr = TypeFactory.getFactory().getEnvironmentAttribute(qName);
 
-    if (cl == null) {
+    if (envAttr != null)
+      return envAttr;
+    
+    ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+    if (type == null) {
       if (Character.isLowerCase(qName.getLocalName().charAt(0))) {
 	throw new ConfigException(L.l("'{0}' is an unknown field of {1}",
 				      qName.getLocalName(),
@@ -194,6 +199,8 @@ public class CustomBeanType extends ConfigType
 				      qName));
       }
     }
+
+    Class cl = type.getType();
 
     if (Annotation.class.isAssignableFrom(cl))
       return new CustomBeanAnnotationAttribute(cl);
@@ -254,8 +261,10 @@ public class CustomBeanType extends ConfigType
     return findField(cl.getSuperclass(), name);
   }
 
-  private Class createClass(QName name)
+  private ConfigType createClass(QName name)
   {
+    return TypeFactory.getFactory().getEnvironmentType(name);
+    /*
     String uri = name.getNamespaceURI();
 
     if (uri.equals(RESIN_NS)) {
@@ -268,6 +277,7 @@ public class CustomBeanType extends ConfigType
     String pkg = uri.substring("urn:java:".length());
 
     return TypeFactory.loadClass(pkg, name.getLocalName());
+    */
   }
 
   private Class createResinClass(String name)

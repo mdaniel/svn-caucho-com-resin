@@ -274,6 +274,10 @@ public class ServletMapper {
       }
     }
 
+    if (servletName == null && contextURI.endsWith("j_security_check")) {
+      servletName = "j_security_check";
+    }
+
     if (servletName == null) {
       servletName = _defaultServlet;
       vars.clear();

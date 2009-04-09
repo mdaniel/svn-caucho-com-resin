@@ -535,6 +535,17 @@ public final class ClusterServer {
     return port;
   }
 
+  public Port createProtocol()
+  {
+    Port port = new Port(this);
+
+    applyPortDefaults(port);
+
+    addProtocolPort(port);
+
+    return port;
+  }
+
   void addProtocolPort(Port port)
   {
     _ports.add(port);

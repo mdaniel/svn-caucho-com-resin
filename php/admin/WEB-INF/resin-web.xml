@@ -1,7 +1,6 @@
 <web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="http://caucho.com/ns/resin/core">
+         xmlns:resin="urn:java:com.caucho.resin">
 
-  
   <servlet-mapping url-pattern="*.php"
                    servlet-class="com.caucho.quercus.servlet.QuercusServlet">
      <init compile="false"/>
@@ -10,24 +9,23 @@
   <!--
      - Security configuration
     -->
-  <login uri="form:">
-     <init authenticator="${resin_admin}"
+  <resin:FormLogin
 	   login-page="/login.php"
 	   error-page="/error.php"/>
-  </login>
 
-  <security-constraint url-pattern="*.php">
+  <resin:Allow url-pattern="*.php">
     <resin:if test="${! resin_admin_external}">
-      <ip-constraint>
-        <allow>127.0.0.1</allow>
-        <allow>192.168/16</allow>
-      </ip-constraint>
+      <resin:IfNetwork>
+        <value>127.0.0.1</value>
+        <value>192.168/16</value>
+      </resin:IfNetwork>
     </resin:if>
-      
+
     <resin:if test="${! resin_admin_insecure}">
-      <user-data-constraint transport-guarantee="CONFIDENTIAL"/>
+      <resin:IfSecure/>
     </resin:if>
-    
-    <auth-constraint role-name="*"/>
-  </security-constraint>
+
+    <resin:IfUserInRole role="resin-admin"/>
+  </resin:Allow>
+  
 </web-app>
