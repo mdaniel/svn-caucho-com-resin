@@ -851,7 +851,7 @@ objects are created.</p>
 <tr>
   <td>generator</td>
   <td>The sequence or table generator name</td>
-  <td>${table}_cseq</td>
+  <td>${'${'}table}_cseq</td>
 </tr>
 <tr>
   <td>strategy</td>
@@ -887,7 +887,7 @@ public @interface GeneratedValue {
 </def>
 
 <p>For SEQUENCE and TABLE, Resin will create the sequence
-name as "${table}_cseq".</p>
+name as "${'${'}table}_cseq".</p>
 
 <example title="Example: autoincrement generation">
 import javax.persistence.*;

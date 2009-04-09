@@ -529,7 +529,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 
   &lt;web-app&gt;
     &lt;log name='' level='all' path='log/debug.log' timestamp="[%H:%M:%S.%s]"
-         format=" [<b>${app.contextPath}</b>] ${log.message}"/&gt;
+         format=" [<b>${'${'}app.contextPath}</b>] ${'${'}log.message}"/&gt;
 
     ...
   &lt;/web-app&gt;
