@@ -1393,10 +1393,13 @@ public class RegexpModule
                                             @Optional("-1") long limit,
                                             @Optional @Reference Value count)
   {
-    if (! regexpValue.isArray())
-      return preg_replace_callback(env,
-                                   regexpValue.toStringValue(),
+    if (! regexpValue.isArray()) {
+      Regexp regexp = createRegexp(env, regexpValue.toStringValue());
+
+      
+      return preg_replace_callback(env, regexp,
                                    fun, subject, limit, count);
+    }
     
     Regexp []regexpList = createRegexpArray(env, regexpValue);
     
