@@ -260,6 +260,23 @@ class ResponseStream extends ToByteResponseStream {
   /**
    * Returns the byte buffer.
    */
+  @Override
+  public void write(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (_isCommitted) {
+      flushBuffer();
+      
+      _next.write(buffer, offset, length);
+    }
+    else
+      super.write(buffer, offset, length);
+  }
+
+  /**
+   * Returns the byte buffer.
+   */
+  @Override
   public byte []getBuffer()
     throws IOException
   {
@@ -318,8 +335,12 @@ class ResponseStream extends ToByteResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
-    if (! _isCommitted)
-      return super.nextBuffer(offset);
+    if (! _isCommitted) {
+      byte []buffer = super.nextBuffer(offset);
+      _bufferStartOffset = _next.getBufferOffset();
+
+      return getBuffer();
+    }
     
     if (_isClosed)
       return _next.getBuffer();
@@ -370,6 +391,7 @@ class ResponseStream extends ToByteResponseStream {
 	  writeCache(_next.getBuffer(), startOffset, length);
 	
 	byte []buffer = _next.nextBuffer(offset);
+	_bufferStartOffset = _next.getBufferOffset();
 	      
 	if (log.isLoggable(Level.FINE))
 	  log.fine(dbgId() + "write-chunk(" + offset + ")");
@@ -405,6 +427,8 @@ class ResponseStream extends ToByteResponseStream {
       super.setBufferOffset(offset);
       return;
     }
+
+    flushBuffer();
     
     int startOffset = _bufferStartOffset;
     if (offset == startOffset)
@@ -452,7 +476,7 @@ class ResponseStream extends ToByteResponseStream {
 
       if (_disableAutoFlush && ! isFinished)
 	throw new IOException(L.l("auto-flushing has been disabled"));
-      
+
       _isCommitted = true;
 
       boolean isFirst = _isFirst;

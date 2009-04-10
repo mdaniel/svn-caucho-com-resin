@@ -13,7 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
-<li>thread: ThreadPool initialization needs to be synchronized because of lazy-init (rep by Dannis Devota)</li>
+<li>thread pool: improve detection of illegal internal thread state (rep by Takahiro Fukuda)</li>
+<li>(2008-04-08) thread: ThreadPool initialization needs to be synchronized because of lazy-init (rep by Dannis Devota)</li>
 <li>jsp: BeanInfo vs introspection for tags (#3066, rep by Mike McNally)</li>
 <li>classloader: maven classloader replaces osgi</li>
 <li>jsp: trimDirectiveWhitespaces was ignored for tag files (#3386, rep by kvirkki)</li>

@@ -299,9 +299,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     if (_isClosed)
       return;
-    else if (_isHead) {
+    else if (_isHead)
       return;
-    }
 
     if (_charLength > 0)
       flushCharBuffer();
@@ -515,7 +514,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
-    if (_byteLength + _bufferSize < _bufferCapacity) {
+    if (offset + _bufferSize < _bufferCapacity) {
       _tail.setLength(offset);
       _bufferSize += offset;
 	
@@ -525,13 +524,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
       _byteBuffer = _tail.getBuffer();
       _byteLength = 0;
+
+      return _byteBuffer;
     }
     else {
       _byteLength = offset;
       flushByteBuffer();
-    }
 
-    return _byteBuffer;
+      return getBuffer();
+    }
   }
 
   /**
@@ -542,6 +543,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     // jsp/0182 jsp/0502 jsp/0503
     // _isCommitted = true;
+
+    if (_byteLength == 0 && _bufferSize == 0)
+      return;
     
     _tail.setLength(_byteLength);
     _bufferSize += _byteLength;
@@ -565,6 +569,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     } while (ptr != null);
 
     _tail = _head;
+    _tail.setLength(0);
     _byteBuffer = _tail.getBuffer();
     _bufferSize = 0;
   }

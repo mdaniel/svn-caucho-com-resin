@@ -509,7 +509,15 @@ public class ThreadPool {
 	  int freeCount = idleCount + _threadMax - _threadCount;
 	  boolean startNew = false;
 
-	  if (idleCount > 0 && freeThreads < freeCount) {
+	  poolItem = _idleHead;
+
+	  if (poolItem != null && freeThreads < freeCount) {
+	    if (_idleCount <= 0) {
+	      String msg = this + " critical internal error in ThreadPool, requiring Resin restart";
+	      System.err.println(msg);
+	      System.exit(10);
+	    }
+	    
 	    _idleCount--;
 	    
 	    poolItem = _idleHead;

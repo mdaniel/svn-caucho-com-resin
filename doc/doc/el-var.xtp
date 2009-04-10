@@ -563,7 +563,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
   <td>The the location of the Resin executables</td>
 </tr>
 <tr>
-  <td>hostname</td>
+  <td>hostName</td>
   <td>The local hostname as returned by InetAddress</td>
 </tr>
 <tr>

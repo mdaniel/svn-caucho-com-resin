@@ -1282,8 +1282,8 @@ public abstract class Path {
 
         if (sublen <= 0) {
           buffer = os.nextBuffer(offset);
-          offset = 0;
-          sublen = length;
+          offset = os.getBufferOffset();
+          sublen = length - offset;
         }
 
         sublen = is.read(buffer, offset, sublen);
