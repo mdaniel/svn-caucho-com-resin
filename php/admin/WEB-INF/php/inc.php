@@ -534,6 +534,7 @@ if (! empty($server)) {
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="?q=<?= $g_page ?>&server-id=<?= $g_server_id ?>">refresh</a></li>
+   <li><a href="?q=index.php&logout=true">logout</a></li>
    </ul>
   </td>
 </tr>

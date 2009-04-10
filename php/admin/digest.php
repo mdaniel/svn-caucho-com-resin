@@ -52,11 +52,13 @@ if (empty($digest_realm))
   if (! empty($digest)) {
 ?>
 
+  <!--
 <p>
 The digest for user <b><i><?= $digest_username ?></i></b>
 in realm <b><i><?= $digest_realm ?></i></b>
 is <b><i><?= $digest ?></i></b>
 </p>
+-->
 
 <?php
     if (basename($_SERVER['PHP_SELF']) !== "calculate-digest.php")
@@ -71,10 +73,13 @@ is <b><i><?= $digest ?></i></b>
     if (empty($validation_error) ) {
 ?>
 
+<h3>Don't have a login yet?</h3>
 <p>
-Enter a Username and a Password and then calculate a digest.
-A digest is the result of passing a password through a one way function,
-it cannot be used to reverse-engineer the original password.
+To access the Resin administration console, you'll need to generate
+a configuration file containing your username and password.  Complete
+the form below to create a configuration file automatically with
+your login information.  The next page will provide you with a link
+and instructions to download and install the configuration.
 </p>
 
 <?php
@@ -113,7 +118,7 @@ it cannot be used to reverse-engineer the original password.
 <td><input name="digest_realm" size="50" value="<?= $digest_realm ?>"></td>
 </tr>
 
-<tr><td colspan='2' class='buttons'><input type="submit" value="Calculate Digest"></td></tr>
+<tr><td colspan='2' class='buttons'><input type="submit" value="Create Configuration File"></td></tr>
 </table>
 
   <input name="digest_attempt" type="hidden" value="true">

@@ -39,63 +39,59 @@ $digest_username = null;
 
 include "digest.php";
 
+// destroy old temporary config file as soon as the user logs in or
+// tries to generate a new password
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+  unlink("admin-users.xml");
+}
+
 if (! empty($digest)) {
-
+  // generate temporary config file
+  $file = fopen("admin-users.xml", "w");
+  resin_var_dump("$file");
+  fwrite($file, <<<EOF
+<management xmlns="http://caucho.com/ns/resin">
+  <user name="$digest_username" password="$digest"/>
+</management>
+EOF
+);
+  fclose($file);
 ?>
 
-<?php
-  /** XXX:
-<p>
-The following can now be added to the file
-<code><b>resin.conf</b></code>
-to enable administration functionality. 
-</p>
+<ol>
+<li>
+Download and save the file below as
+<em>/etc/resin/admin-users.xml</em> (If your resin.xml file is
+not in /etc/resin, save this file as admin-users.xml in the same
+directory as your resin.xml.)
+<br/>
+<br/>
+<ul>
+<li><a href="admin-users.xml">admin-users.xml</a></li>
+</ul>
+<br/>
+</li>
 
-<pre>
-&lt;resin xmlns="http://caucho.com/ns/resin">
-
-  &lt;management>
-     &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
-  &lt;/management>
-
-  ...
-
-&lt;/resin>
-</pre>
-  */
-?>
-
-<p>
-The following can now be set in the ${resin.home}/conf/admin-user.xml file
-to enable administration functionality. 
-</p>
-
-<pre>
-&lt;management xmlns="http://caucho.com">
-
-  &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
-
-&lt;/management>
-</pre>
-
-<p>
+<li>
 By default, access to the administration application is limited
 to the localhost.  The default behaviour can be changed in the 
-resin.conf file.  To enable access to clients other than localhost:
-</p>
+resin.xml file.  To enable access to clients other than localhost:
 
 <pre>
   &lt;resin:set var="resin_admin_external" value="true"/&gt;
 </pre>
+</li>
 
-<p>
-Once the file has been updated, you can
+<li>
+Once the file has been saved, you can
 <a href="<?= $login_uri ?>">continue to the administration area</a>.
-</p>
+This will trigger a server restart, so just refresh your browser
+until you see the login page again.
+</li>
 
-<p>
+<li>
 When prompted, use the username and password you provided.
-</p>
+</li>
 
 <?php
 }
