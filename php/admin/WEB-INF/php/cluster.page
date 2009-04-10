@@ -41,7 +41,11 @@ foreach ($g_resin->Clusters as $cluster) {
   sort($client_names);
 
   $count = 0;
-  foreach (server_names($g_server, $cluster) as $name) {
+  $seen_dynamic = false;
+
+  $server_names = array_merge(static_server_names($g_server, $cluster),
+                              dynamic_server_names($g_server, $cluster));
+  foreach ($server_names as $name) {
     $sub_mbean_server = new MBeanServer($name);
 
     $sub_server = $sub_mbean_server->lookup("resin:type=Server");
@@ -60,30 +64,37 @@ foreach ($g_resin->Clusters as $cluster) {
       continue;
     }
 
+    if ($is_dynamic && ! $seen_dynamic) {
+      echo "<tr><td colspan='5'/></tr>\n";
+      $seen_dynamic = true;
+    }
+
     if (! $name)
       $name = "default";
+
+    $name_field = $name;
+
+    if ($is_dynamic) {
+      $name_field = 
+        "<form method='POST'>\n" .
+        "<input type='hidden' name='action' value='remove_dynamic_server'/>\n" .
+        "<input type='hidden' name='dyn_server_id' value='$name'/>\n" .
+        "<input type='hidden' name='cluster' value='{$cluster->Name}'/>\n" .
+        "<div style='float: left'>$name</div>\n" .
+        "<div style='float: right'>" .
+        "<input type='submit' value='remove'/>\n" .
+        "</div></form>\n";
+    }
 
     if ($count++ % 2 == 0)
       echo "<tr class='ra'>";
     else
       echo "<tr class='rb'>";
 
-    if ($sub_server) {
-      if ($is_dynamic) {
-        echo "<td class='item'><form method='POST'>\n";
-        echo "<input type='hidden' name='action' value='remove_dynamic_server'/>\n";
-        echo "<input type='hidden' name='dyn_server_id' value='$name'/>\n";
-        echo "<input type='hidden' name='cluster' value='{$cluster->Name}'/>\n";
-        echo "<div style='float: left'>$name</div>\n";
-        echo "<div style='float: right'>";
-        echo "<input type='submit' value='remove'/>\n";
-        echo "</div></form></td>\n";
-      }
-      else
-        echo "<td class='item'>$name</td>";
-    }
+    if ($sub_server)
+      echo "<td class='item'>$name_field</td>";
     else
-      echo "<td class='itemfail'>$name</td>";
+      echo "<td class='itemfail'>$name_field</td>";
 
     if ($sub_server) {
       $live_count++;
@@ -313,13 +324,12 @@ foreach ($g_resin->Clusters as $cluster) {
     // startup
     //
     $start_time = $sub_server->StartTime->time / 1000;
-    $logger_manager = $sub_mbean_server->lookup("resin:type=LoggerManager");
+    $logger_manager = $sub_mbean_server->lookup("resin:type=LogService");
 
     if (! $logger_manager)
       continue;
 
     $messages = $logger_manager->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
-resin_var_dump($messages);
     echo "<table class='data' width='100%'>\n";
 
     $messages = array_reverse($messages);

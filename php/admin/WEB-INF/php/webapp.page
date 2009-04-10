@@ -16,23 +16,32 @@ $action = $_POST['action'];
 
 if (! $action) {
 }
-else if ($request->isSecure()
-         && $_POST['name'] == $_GET['id']) {
-    
-  if ($action == 'start') {
-    $webapp->start();
+else if ($request->isSecure()) {
+  if ($action == 'deploy') {
+    $client = @new Java("com.caucho.server.admin.DeployClient");
+    $vfs = java_class("com.caucho.vfs.Vfs");
 
-    echo "<div class='warn'>Starting '${_GET['id']}' by $user</div>";
+    $path = $vfs->lookup($_FILES['warfile']['tmp_name']);
+    $tag = "wars/{$_REQUEST['host']}/{$_REQUEST['url']}";
+    $user = $request->getRemoteUser();
+    $client->deployJarContents($path, $tag, $user, "", "", null);
   }
-  else if ($action == 'stop') {
-    $webapp->stop();
+  else if ($_POST['name'] == $_GET['id']) {
+    if ($action == 'start') {
+      $webapp->start();
 
-    echo "<div class='warn'>Stopping '${_GET['id']}' by $user</div>";
-  }
-  else if ($action == 'restart') {
-    $webapp->restart();
+      echo "<div class='warn'>Starting '${_GET['id']}' by $user</div>";
+    }
+    else if ($action == 'stop') {
+      $webapp->stop();
 
-    echo "<div class='warn'>Restarting '${_GET['id']}' by $user</div>";
+      echo "<div class='warn'>Stopping '${_GET['id']}' by $user</div>";
+    }
+    else if ($action == 'restart') {
+      $webapp->restart();
+
+      echo "<div class='warn'>Restarting '${_GET['id']}' by $user</div>";
+    }
   }
 }
 
@@ -195,6 +204,26 @@ echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "
   } // webapps
 } // hosts
 ?>
+
+</table>
+
+<h2>Deploy new webapp</h2>
+
+<table>
+<form method='POST' enctype="multipart/form-data">
+  <input type='hidden' name='action' value='deploy'/>
+  <tr>
+    <th>Virtual Host</th>
+    <th>URL</th>
+    <th>.war file</th>
+  </tr>
+  <tr>
+    <td><input type='text' name='host' value='default'/></td>
+    <td>/<input type='text' name='url' value=''/></td>
+    <td><input type='file' name='warfile'/></td>
+    <td><input type='submit' value='Deploy'/></td>
+  </tr>
+</form>
 
 </table>
 <?php

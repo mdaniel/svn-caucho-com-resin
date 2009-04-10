@@ -233,9 +233,6 @@ function uri_nocache($path)
 function server_names($server, $cluster)
 {
   $client_names = array();
-  if ($cluster->Name == $server->Cluster->Name) {
-    $client_names[] = $server->Id;
-  }
 
   foreach ($cluster->Servers as $client) {
     $client_names[] = $client->Name;
@@ -244,6 +241,44 @@ function server_names($server, $cluster)
   sort($client_names);
 
   return $client_names;
+}
+
+function static_server_names($server, $cluster)
+{
+  $client_names = array();
+
+  foreach ($cluster->Servers as $client) {
+    if (! $client->isDynamicServer())
+      $client_names[] = $client->Name;
+  }
+
+  sort($client_names);
+
+  return $client_names;
+}
+
+function dynamic_server_names($server, $cluster)
+{
+  $client_names = array();
+
+  foreach ($cluster->Servers as $client) {
+    if ($client->isDynamicServer())
+      $client_names[] = $client->Name;
+  }
+
+  sort($client_names);
+
+  return $client_names;
+}
+
+function server_by_name($name, $cluster)
+{
+  foreach ($cluster->Servers as $client) {
+    if ($client->Name == $name)
+      return $client;
+  }
+
+  return null;
 }
 
 function redirect($relative_url)
@@ -624,9 +659,10 @@ function display_left_navigation($current_server)
     echo "<div class='nav-cluster'>$cluster->Name</div>\n";
 
     $client_names = array();
+    /*
     if ($cluster->Name == $server->Cluster->Name) {
       $client_names[] = $server->Id;
-    }
+    }*/
 
     foreach ($cluster->Servers as $client) {
       $client_names[] = $client->Name;
