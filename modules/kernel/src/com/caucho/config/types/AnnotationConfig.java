@@ -70,7 +70,7 @@ public class AnnotationConfig implements InvocationHandler {
   {
     if ("#text".equals(name))
       name = "value";
-    
+
     _valueMap.put(name, value);
   }
 

@@ -181,9 +181,10 @@ public class CustomBeanType extends ConfigType
       return CustomBeanValueArgAttribute.ATTRIBUTE;
     }
 
-    Attribute envAttr = TypeFactory.getFactory().getEnvironmentAttribute(qName);
+    Attribute envAttr
+      = TypeFactory.getFactory().getEnvironmentAttribute(qName);
 
-    if (envAttr != null)
+    if (envAttr instanceof FlowAttribute)
       return envAttr;
     
     ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);

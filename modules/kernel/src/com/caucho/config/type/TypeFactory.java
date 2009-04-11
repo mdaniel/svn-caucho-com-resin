@@ -66,6 +66,8 @@ public class TypeFactory implements AddLoaderListener
     = Logger.getLogger(TypeFactory.class.getName());
   private static L10N L = new L10N(TypeFactory.class);
 
+  private static final String RESIN_NS = "http://caucho.com/ns/resin";
+  
   private static final HashMap<Class,ConfigType> _primitiveTypes
     = new HashMap<Class,ConfigType>();
   
@@ -243,16 +245,6 @@ public class TypeFactory implements AddLoaderListener
     }
 
     String uri = name.getNamespaceURI();
-    if (uri != null && uri.startsWith("urn:java:")) {
-      String pkg = uri.substring("urn:java:".length());
-      String className = name.getLocalName();
-
-      Class cl = loadClassImpl(pkg, className);
-
-      if (cl != null) {
-	return getType(cl);
-      }
-    }
 
     NamespaceConfig ns = _nsMap.get(uri);
 
@@ -265,6 +257,20 @@ public class TypeFactory implements AddLoaderListener
 	_attrMap.put(name, type);
 	
 	return type;
+      }
+    }
+
+    if (RESIN_NS.equals(uri))
+      uri = "urn:java:ee";
+
+    if (uri != null && uri.startsWith("urn:java:")) {
+      String pkg = uri.substring("urn:java:".length());
+      String className = name.getLocalName();
+
+      Class cl = loadClassImpl(pkg, className);
+
+      if (cl != null) {
+	return getType(cl);
       }
     }
     

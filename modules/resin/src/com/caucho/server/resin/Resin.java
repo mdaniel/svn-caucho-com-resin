@@ -1577,10 +1577,13 @@ public class Resin implements EnvironmentBean, SchemaBean
   public static void main(String []argv)
   {
     try {
+      System.out.println("MAIN");
       EnvironmentClassLoader.initializeEnvironment();
+      System.out.println("INIT-ENV");
       validateEnvironment();
 
       final Resin resin = Resin.create();
+      System.out.println("CREATE");
 
       resin.parseCommandLine(argv);
 

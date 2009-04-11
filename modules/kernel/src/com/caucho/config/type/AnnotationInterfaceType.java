@@ -123,7 +123,23 @@ public class AnnotationInterfaceType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    AnnotationConfig ann = new AnnotationConfig(this, _annClass);
+
+    Attribute attr = getAttribute(TEXT);
+
+    if (attr == null)
+      throw new ConfigException(L.l("'{0}' does not support value",
+				    this));
+
+    attr.setText(ann, TEXT, text);
+
+    Thread.dumpStack();
+    return ann;
+    /*
+    Object value = ann.replace();
+    System.out.println("V: " + value
+    return
+    */
   }
 
   /**

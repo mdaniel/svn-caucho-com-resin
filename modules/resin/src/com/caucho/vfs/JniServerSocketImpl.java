@@ -272,9 +272,6 @@ public class JniServerSocketImpl extends QServerSocket {
       _hasInitJni = true;
     } catch (Throwable e) {
       _jniInitException = e;
-      
-      log.info("Socket JNI library is not available.\nResin will still run but performance will be slower.\nTo compile the Socket JNI library on Unix, use ./configure; make; make install.");
-      log.log(Level.FINER, e.toString(), e);
     }
   }
 }

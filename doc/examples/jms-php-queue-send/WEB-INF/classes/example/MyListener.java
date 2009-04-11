@@ -5,7 +5,7 @@ import javax.inject.*;
 
 public class MyListener implements MessageListener {
   @Current
-  private MessageStoreService _messageStore;
+  private MessageStore _messageStore;
 
   public void onMessage(Message message)
   {
