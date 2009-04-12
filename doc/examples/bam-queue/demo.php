@@ -2,7 +2,7 @@
 
 <?php
 
-$service = java_bean("bam-java-queue");
+$messages = java_bean("exampleMessages");
 
 echo "<ol>\n";
 

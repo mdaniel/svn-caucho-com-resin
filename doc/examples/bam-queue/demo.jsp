@@ -3,13 +3,16 @@
 @com.caucho.config.Name("bam-java-queue")
 ExampleService _service;
 
+@javax.inject.Current
+ExampleMessages _messages;
+
 LocalActorClient _client = new LocalActorClient();
 %>
 <%
 
 out.println("<h3>Recent Messages</h3>");
 
-ArrayList<String> messages = _service.getMessages();
+ArrayList<String> messages = _messages.getMessages();
 
 out.println("<ol>");
 for (String msg : messages) {

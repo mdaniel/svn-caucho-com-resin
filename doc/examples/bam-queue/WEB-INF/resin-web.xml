@@ -5,8 +5,6 @@
 	       class="example.ExampleService">
   </bam-service>
 
-
-  
   <!--  
   <bam-service name="bam-php-queue" uri="caucho.php:">
     <init>

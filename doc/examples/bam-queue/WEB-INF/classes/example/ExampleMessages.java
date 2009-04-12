@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import javax.annotation.Named;
 import javax.context.ApplicationScoped;
 
-@ApplicationScoped
 @Named
+@ApplicationScoped
 public class ExampleMessages
 {
   private ArrayList<String> _messages = new ArrayList<String>();
