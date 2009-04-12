@@ -66,7 +66,6 @@ public class EnvironmentAttribute extends Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
-    System.out.println("SETV: " + bean + " " + name);
     setValue(bean, name, _type.valueOf(value));
   }
   

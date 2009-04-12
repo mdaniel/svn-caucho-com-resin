@@ -195,6 +195,11 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return _baseType.getRawClass();
   }
 
+  protected Class getIntrospectionClass()
+  {
+    return getTargetClass();
+  }
+
   public String getTargetName()
   {
     if (_targetType instanceof Class)
@@ -431,8 +436,13 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   protected void introspect()
   {
-    Class cl = getTargetClass();
-    
+    Class cl = getIntrospectionClass();
+
+    introspect(cl);
+  }
+
+  protected void introspect(Class cl)
+  {
     if (_types.size() == 0)
       introspectTypes(cl);
   }

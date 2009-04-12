@@ -1,5 +1,5 @@
 <Beans xmlns="urn:java:ee">
-  <!-- marker file to active Java Injection -->
+  <!-- marker file to activate Java Injection -->
   <example:ExampleMessages xmlns:example="example">
     <Named>exampleMessages</Named>
   </example:ExampleMessages>

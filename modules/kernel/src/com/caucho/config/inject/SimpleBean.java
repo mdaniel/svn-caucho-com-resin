@@ -240,7 +240,7 @@ public class SimpleBean extends ComponentImpl
    */
   public void introspect()
   {
-    Class cl = getTargetClass();
+    Class cl = getIntrospectionClass();
     Class scopeClass = null;
 
     introspectTypes(cl);

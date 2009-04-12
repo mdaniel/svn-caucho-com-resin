@@ -76,6 +76,7 @@ public class ConfigContext implements CreationalContext {
 
   private Config _config;
 
+  private ConfigContext _parent;
   private DependentScope _dependentScope;
   
   private ArrayList<Dependency> _dependList;
@@ -85,6 +86,13 @@ public class ConfigContext implements CreationalContext {
 
   public ConfigContext()
   {
+  }
+
+  public ConfigContext(ConfigContext parent)
+  {
+    this();
+    
+    _parent = parent;
   }
 
   public ConfigContext(ComponentImpl component,
@@ -216,6 +224,22 @@ public class ConfigContext implements CreationalContext {
       _dependentScope = new DependentScope();
 
     _dependentScope.put(comp, obj);
+  }
+
+  public Object findByName(String name)
+  {
+    if (_dependentScope != null) {
+      Object value = _dependentScope.findByName(name);
+
+      if (value != null)
+	return value;
+      else if (_parent != null)
+	return _parent.findByName(name);
+      else
+	return null;
+    }
+    else
+      return null;
   }
   
   public void remove(ComponentImpl comp)

@@ -1320,8 +1320,7 @@ public class InjectManager
       }
 
       if (scopeType == null) {
-	System.out.println("BEAN: " + bean);
-	Thread.dumpStack();
+	throw new IllegalStateException("Unknown scope for " + bean);
       }
       
       Context context = getContext(scopeType);
@@ -1337,8 +1336,11 @@ public class InjectManager
 					  null,
 					  (ScopeContext) context);
       }
-      else
-	createContext = new ConfigContext();
+      else {
+	ConfigContext parent = ConfigContext.getCurrent();
+	
+	createContext = new ConfigContext(parent);
+      }
 
       return (T) context.get(bean, createContext);
     }
@@ -1354,7 +1356,7 @@ public class InjectManager
    */
   public <T> T getInstance(Bean<T> bean)
   {
-    return (T) getInstance(bean, new ConfigContext());
+    return (T) getInstance(bean, new ConfigContext(ConfigContext.getCurrent()));
   }
 
   /**

@@ -56,6 +56,11 @@ public class SingletonBean extends SimpleBean
 
   private Object _value;
 
+  protected SingletonBean(InjectManager manager)
+  {
+    super(manager);
+  }
+
   /**
    * Creates a WebBeans Bean for the value by introspecting the
    * value's annotations and methods.
@@ -142,11 +147,15 @@ public class SingletonBean extends SimpleBean
   {
     super(webBeans);
     
-    _value = value;
+    setValue(value);
 
     setTargetType(value.getClass());
     
     super.setScope(webBeans.getApplicationScope());
+  }
+
+  protected void setValue(Object value)
+  {
   }
 
   @Override

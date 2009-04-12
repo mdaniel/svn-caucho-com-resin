@@ -82,8 +82,7 @@ abstract public class SessionServer extends AbstractServer
       super.init();
       
       SingletonBean comp
-	= new SingletonBean(getSessionContext(), null,
-			    SessionContext.class);
+	= new SessionSingletonBean(getSessionContext(), getEjbClass());
 
       _component = comp;
 
@@ -121,13 +120,14 @@ abstract public class SessionServer extends AbstractServer
 
       if (localApiList != null) {
 	for (Class api : localApiList) {
-	  ComponentImpl comp = createSessionComponent(api);
+	  ComponentImpl comp = createSessionComponent(api, getEjbClass());
 
 	  comp.setTargetType(api);
 
 	  comp.setName(beanName);
 
 	  comp.init();
+
 	  webBeans.addComponentByName(beanName, comp);
 	  webBeans.addComponentByType(api, comp);
 	  
@@ -137,7 +137,7 @@ abstract public class SessionServer extends AbstractServer
       
       if (remoteApiList != null) {
 	for (Class api : remoteApiList) {
-	  ComponentImpl comp = createSessionComponent(api);
+	  ComponentImpl comp = createSessionComponent(api, beanClass);
 
 	  comp.setTargetType(api);
 
@@ -162,7 +162,8 @@ abstract public class SessionServer extends AbstractServer
     }
   }
   
-  abstract protected ComponentImpl createSessionComponent(Class api);
+  abstract protected ComponentImpl
+    createSessionComponent(Class api, Class beanClass);
 
   protected ComponentImpl getComponent(Class api)
   {

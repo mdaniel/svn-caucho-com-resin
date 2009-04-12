@@ -123,12 +123,13 @@ public class StatefulServer extends SessionServer
       return null;
   }
 
-  protected ComponentImpl createSessionComponent(Class api)
+  protected ComponentImpl createSessionComponent(Class api,
+						 Class beanClass)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
     if (provider != null)
-      return new StatefulComponent(provider);
+      return new StatefulComponent(provider, beanClass);
     else
       return null;
   }

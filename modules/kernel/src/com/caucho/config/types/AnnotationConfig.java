@@ -117,8 +117,10 @@ public class AnnotationConfig implements InvocationHandler {
 
   public Annotation replace()
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+    // ioc/0h20
+    ClassLoader loader = _annotationType.getClassLoader();
+    // Thread.currentThread().getContextClassLoader();
+
     return (Annotation) Proxy.newProxyInstance(loader,
 					       new Class[] { _annotationType },
 					       this);

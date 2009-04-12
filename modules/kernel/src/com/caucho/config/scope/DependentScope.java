@@ -110,6 +110,24 @@ public class DependentScope {
       return null;
   }
 
+  public Object findByName(String name)
+  {
+    if (_owner != null && name.equals(_owner.getName()))
+      return _value;
+    else if (_map != null && _map.size() > 0) {
+      for (Map.Entry<ComponentImpl,Object> entry : _map.entrySet()) {
+	ComponentImpl comp = entry.getKey();
+
+	if (name.equals(comp.getName()))
+	  return entry.getValue();
+      }
+
+      return null;
+    }
+    else
+      return null;
+  }
+
   /**
    * Sets the object with the given name.
    */

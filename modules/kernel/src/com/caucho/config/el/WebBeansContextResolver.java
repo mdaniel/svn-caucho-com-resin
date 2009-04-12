@@ -80,7 +80,11 @@ public class WebBeansContextResolver extends ELResolver {
 
     String name = (String) property;
 
-    InjectManager webBeans = InjectManager.create();
+    InjectManager webBeans = InjectManager.getCurrent();
+
+    if (webBeans == null)
+      return null;
+    
     Object result = webBeans.getInstanceByName(name);
 
     if (result != null) {

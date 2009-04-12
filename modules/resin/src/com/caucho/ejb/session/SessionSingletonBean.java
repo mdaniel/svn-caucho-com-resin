@@ -29,65 +29,45 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.cfg.*;
+import com.caucho.ejb.manager.EjbContainer;
 
-import java.lang.annotation.*;
-import javax.context.CreationalContext;
-import javax.inject.manager.InjectionPoint;
+import javax.ejb.*;
+import javax.annotation.Named;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
- * Component for session beans
+ * Server container for a session bean.
  */
-public class StatefulComponent extends ComponentImpl {
-  private final StatefulProvider _provider;
-  private final Class _beanClass;
-
-  public StatefulComponent(StatefulProvider provider,
-			   Class beanClass)
+public class SessionSingletonBean extends SingletonBean
+{
+  private Class _beanType;
+  
+  public SessionSingletonBean(Object value, Class beanType)
   {
     super(InjectManager.create());
     
-    _provider = provider;
-    _beanClass = beanClass;
+    setValue(value);
+    setTargetType(value.getClass());
+
+    addType(SessionContext.class);
+
+    _beanType = beanType;
+
+    init();
   }
 
   @Override
   protected Class getIntrospectionClass()
   {
-    return _beanClass;
-  }
-
-  /**
-   * Called for implicit introspection.
-   */
-  @Override
-  public void introspect()
-  {
-    Class cl = getIntrospectionClass();
-
-    introspectTypes(cl);
-
-    introspectClass(cl);
-
-    if (getBindings().size() == 0)
-      introspectBindings(cl.getAnnotations());
-
-    /*
-    introspectObservers(cl);
-    
-    introspectMBean();
-    */
-  }
-
-  /**
-   * Creates a new instance of the component
-   */
-  @Override
-  public Object createNew(CreationalContext env,
-			  InjectionPoint ij)
-  {
-    return _provider.__caucho_createNew(this, env);
+    return _beanType;
   }
 }
