@@ -249,6 +249,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       // else
       //  setRootDirectory(Vfs.getPwd());
 
+      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       InjectManager webBeans = InjectManager.create();
 

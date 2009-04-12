@@ -246,6 +246,9 @@ public class LocalActorClient implements ActorClient {
       
       is = loader.getResourceAsStream("META-INF/services/com.caucho.bam.ClientActorFactory");
 
+      if (is == null)
+	return null;
+
       StringBuilder sb = new StringBuilder();
       int ch;
 

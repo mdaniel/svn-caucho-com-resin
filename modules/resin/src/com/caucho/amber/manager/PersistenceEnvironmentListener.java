@@ -45,6 +45,11 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   public PersistenceEnvironmentListener()
   {
   }
+
+  public boolean isEnhancer()
+  {
+    return true;
+  }
   
   /**
    * Handles the case where the environment is starting (after init).
@@ -63,6 +68,19 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
    */
   public void environmentStop(EnvironmentClassLoader loader)
   {
+  }
+
+  public int hashCode()
+  {
+    return getClass().hashCode();
+  }
+
+  public boolean equals(Object o)
+  {
+    if (o == null)
+      return false;
+
+    return getClass().equals(o.getClass());
   }
 }
 

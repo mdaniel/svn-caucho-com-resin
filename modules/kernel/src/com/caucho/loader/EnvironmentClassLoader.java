@@ -446,8 +446,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
         _addLoaderListeners.set(listeners, this);
       }
 
-      if (! listeners.contains(listener))
+      if (! listeners.contains(listener)) {
 	listeners.add(listener);
+      }
     }
 
     listener.addLoader(this);
@@ -490,7 +491,27 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     for (int i = 0;
 	 listeners != null && i < listeners.size();
 	 i++) {
-      listeners.get(i).addLoader(this);
+      AddLoaderListener listener = listeners.get(i);
+
+      if (listener.isEnhancer())
+	listeners.get(i).addLoader(this);
+    }
+  }
+
+  /**
+   * Adds a listener to detect class loader changes.
+   */
+  protected void configurePostEnhancerEvent()
+  {
+    ArrayList<AddLoaderListener> listeners = getLoaderListeners();
+    
+    for (int i = 0;
+	 listeners != null && i < listeners.size();
+	 i++) {
+      AddLoaderListener listener = listeners.get(i);
+
+      if (! listener.isEnhancer())
+	listeners.get(i).addLoader(this);
     }
   }
 
@@ -500,6 +521,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   @Override
   public void addURL(URL url)
   {
+    if (containsURL(url))
+      return;
+    
     super.addURL(url);
 
     _pendingScanUrls.add(url);

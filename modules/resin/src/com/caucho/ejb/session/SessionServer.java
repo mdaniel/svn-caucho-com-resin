@@ -137,7 +137,7 @@ abstract public class SessionServer extends AbstractServer
       
       if (remoteApiList != null) {
 	for (Class api : remoteApiList) {
-	  ComponentImpl comp = createSessionComponent(api, beanClass);
+	  ComponentImpl comp = createSessionComponent(api, getEjbClass());
 
 	  comp.setTargetType(api);
 

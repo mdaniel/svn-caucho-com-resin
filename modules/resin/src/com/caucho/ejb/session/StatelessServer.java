@@ -92,11 +92,11 @@ public class StatelessServer extends SessionServer {
     return getStatelessContext().getProvider(api);
   }
   
-  protected ComponentImpl createSessionComponent(Class api)
+  protected ComponentImpl createSessionComponent(Class api, Class beanClass)
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
 
-    return new StatelessComponent(provider, api);
+    return new StatelessComponent(provider, beanClass);
   }
 
   /**

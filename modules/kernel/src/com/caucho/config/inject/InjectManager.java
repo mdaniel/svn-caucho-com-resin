@@ -1946,8 +1946,9 @@ public class InjectManager
 
 	webBeans.init();
       }
-    
-      _wbWebBeans.init();
+
+      if (_wbWebBeans != null)
+	_wbWebBeans.init();
     } catch (ConfigException e) {
       if (_configException == null)
 	_configException = e;

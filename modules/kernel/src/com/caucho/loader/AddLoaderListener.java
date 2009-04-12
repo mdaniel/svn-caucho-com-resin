@@ -35,6 +35,8 @@ import java.util.EventListener;
  */
 public interface AddLoaderListener extends EventListener
 {
+  public boolean isEnhancer();
+  
   /**
    * Called with the loader config changes.
    */

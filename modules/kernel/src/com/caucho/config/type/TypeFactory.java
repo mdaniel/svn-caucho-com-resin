@@ -811,6 +811,11 @@ public class TypeFactory implements AddLoaderListener
   //
   // AddLoaderListener
   //
+
+  public boolean isEnhancer()
+  {
+    return false;
+  }
   
   /**
    * Called with the loader config changes.

@@ -550,12 +550,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void addURL(int index, URL url)
   {
+    if (containsURL(url))
+      return;
+    
     super.addURL(url);
-
-    for (int i = 0; i < _urls.length; i++) {
-      if (_urls[i].equals(url))
-	return;
-    }
 
     URL []newURLs = new URL[_urls.length + 1];
 
@@ -590,7 +588,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns true if the loader contains the url.
    */
-  private boolean containsURL(URL url)
+  protected boolean containsURL(URL url)
   {
     if (_urls != null) {
       for (URL testURL : _urls) {
@@ -814,6 +812,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       scan();
 
       configureEnhancerEvent();
+      configurePostEnhancerEvent();
     }
   }
 
@@ -821,6 +820,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * Sends an event to notify than an event has changed.
    */
   protected void configureEnhancerEvent()
+  {
+  }
+
+  /**
+   * Sends an event to notify than an event has changed.
+   */
+  protected void configurePostEnhancerEvent()
   {
   }
 

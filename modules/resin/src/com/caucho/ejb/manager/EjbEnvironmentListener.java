@@ -40,6 +40,11 @@ public class EjbEnvironmentListener implements AddLoaderListener
   public EjbEnvironmentListener()
   {
   }
+
+  public boolean isEnhancer()
+  {
+    return false;
+  }
   
   /**
    * Handles the case where the environment is starting (after init).

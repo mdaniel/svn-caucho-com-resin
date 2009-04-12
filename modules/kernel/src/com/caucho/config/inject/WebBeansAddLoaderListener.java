@@ -37,6 +37,11 @@ import com.caucho.loader.AddLoaderListener;
  */
 public class WebBeansAddLoaderListener implements AddLoaderListener
 {
+  public boolean isEnhancer()
+  {
+    return false;
+  }
+  
   /**
    * Handles the case where the environment is starting (after init).
    */
@@ -44,8 +49,8 @@ public class WebBeansAddLoaderListener implements AddLoaderListener
   {
     InjectManager container = InjectManager.create(loader);
 
-    // jpa/0046
-    // container.update();
+    // jpa/0046, jms/3e01
+    container.update();
   }
 
   public boolean equals(Object o)
