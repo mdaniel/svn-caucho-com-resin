@@ -57,12 +57,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   private TempBuffer _head = TempBuffer.allocate();
   private TempBuffer _tail;
   
-  private byte []_byteBuffer;
-  private int _byteLength;
-  
+  private byte []_tailByteBuffer;
+  private int _tailByteLength;
+
+  // total buffer length, from servlet response setter
   private int _bufferCapacity;
+  // extended buffer length
   private int _bufferSize;
 
+  // true if character data should be ignored
   private boolean _isOutputStreamOnly;
   
   private boolean _isHead;
@@ -88,8 +91,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     
     _head.clear();
     _tail = _head;
-    _byteBuffer = _tail.getBuffer();
-    _byteLength = 0;
+    _tailByteBuffer = _tail.getBuffer();
+    _tailByteLength = 0;
     
     _bufferSize = 0;
     
@@ -192,7 +195,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public byte []getBuffer()
     throws IOException
   {
-    return _byteBuffer;
+    return _tailByteBuffer;
   }
 
   /**
@@ -201,7 +204,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public int getBufferOffset()
     throws IOException
   {
-    return _byteLength;
+    return _tailByteLength;
   }
 
   /**
@@ -210,7 +213,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public int getByteBufferOffset()
     throws IOException
   {
-    return _byteLength;
+    return _tailByteLength;
   }
 
   /**
@@ -219,11 +222,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void setBufferOffset(int offset)
     throws IOException
   {
-    if (_charLength > 0)
-      flushCharBuffer();
-    
-    // _bufferSize += (offset - _byteLength);
-    _byteLength = offset;
+    _tailByteLength = offset;
   }
 
   /**
@@ -264,11 +263,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   }
 
   /**
-   * Returns the remaining value left.
+   * Returns the data in the buffer
    */
   protected int getBufferLength()
   {
-    return _bufferSize + _byteLength + _charLength;
+    return _bufferSize + _tailByteLength + _charLength;
   }
 
   /**
@@ -283,8 +282,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     }
     _head.clear();
     _tail = _head;
-    _byteBuffer = _tail.getBuffer();
-    _byteLength = 0;
+    _tailByteBuffer = _tail.getBuffer();
+    _tailByteLength = 0;
     
     _charLength = 0;
 
@@ -292,7 +291,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   }
 
   /**
-   * Writes a character to the output.
+   * Writes a byte to the output.
    */
   public void write(int ch)
     throws IOException
@@ -305,22 +304,22 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (_charLength > 0)
       flushCharBuffer();
 
-    if (_bufferCapacity <= _bufferSize + _byteLength + 1) {
+    if (_bufferCapacity <= _bufferSize + _tailByteLength + 1) {
       flushByteBuffer();
     }
-    else if (_byteLength == SIZE) {
-      _tail.setLength(_byteLength);
-      _bufferSize += _byteLength;
+    else if (_tailByteLength == SIZE) {
+      _tail.setLength(_tailByteLength);
+      _bufferSize += _tailByteLength;
 	
       TempBuffer tempBuf = TempBuffer.allocate();
       _tail.setNext(tempBuf);
       _tail = tempBuf;
 
-      _byteBuffer = _tail.getBuffer();
-      _byteLength = 0;
+      _tailByteBuffer = _tail.getBuffer();
+      _tailByteLength = 0;
     }
 
-    _byteBuffer[_byteLength++] = (byte) ch;
+    _tailByteBuffer[_tailByteLength++] = (byte) ch;
   }
 
   /**
@@ -339,19 +338,19 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (_charLength > 0)
       flushCharBuffer();
 
-    if (_bufferCapacity <= _bufferSize + _byteLength + length) {
-      if (_bufferSize + _byteLength > 0)
+    if (_bufferCapacity <= _bufferSize + _tailByteLength + length) {
+      if (_bufferSize + _tailByteLength > 0)
 	flushByteBuffer();
 
       if (_bufferCapacity <= length) {
-	_bufferSize = length;
+	// _bufferSize = length;
 	writeNext(buffer, offset, length, isFinished);
 	_bufferSize = 0;
 	return;
       }
     }
 
-    int byteLength = _byteLength;
+    int byteLength = _tailByteLength;
     while (length > 0) {
       if (SIZE <= byteLength) {
 	_tail.setLength(byteLength);
@@ -361,7 +360,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 	_tail.setNext(tempBuf);
 	_tail = tempBuf;
 
-	_byteBuffer = _tail.getBuffer();
+	_tailByteBuffer = _tail.getBuffer();
 	byteLength = 0;
       }
 
@@ -369,14 +368,14 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       if (SIZE - byteLength < sublen)
 	sublen = SIZE - byteLength;
 
-      System.arraycopy(buffer, offset, _byteBuffer, byteLength, sublen);
+      System.arraycopy(buffer, offset, _tailByteBuffer, byteLength, sublen);
 
       offset += sublen;
       length -= sublen;
       byteLength += sublen;
     }
 
-    _byteLength = byteLength;
+    _tailByteLength = byteLength;
   }
 
   /**
@@ -487,7 +486,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     if (charLength > 0 && ! _isOutputStreamOnly) {
       _toByte.write(this, _charBuffer, 0, charLength);
 
-      if (_bufferCapacity <= _byteLength + _bufferSize) {
+      if (_bufferCapacity <= _tailByteLength + _bufferSize) {
 	flushByteBuffer();
       }
       
@@ -505,7 +504,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    return _bufferSize + _byteLength;
+    return _bufferSize + _tailByteLength;
   }
 
   /**
@@ -514,7 +513,14 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
-    if (offset + _bufferSize < _bufferCapacity) {
+    if (_bufferCapacity <= SIZE
+	|| _bufferCapacity <= offset + _bufferSize) {
+      _tailByteLength = offset;
+      flushByteBuffer();
+
+      return getBuffer();
+    }
+    else {
       _tail.setLength(offset);
       _bufferSize += offset;
 	
@@ -522,16 +528,10 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       _tail.setNext(tempBuf);
       _tail = tempBuf;
 
-      _byteBuffer = _tail.getBuffer();
-      _byteLength = 0;
+      _tailByteBuffer = _tail.getBuffer();
+      _tailByteLength = 0;
 
-      return _byteBuffer;
-    }
-    else {
-      _byteLength = offset;
-      flushByteBuffer();
-
-      return getBuffer();
+      return _tailByteBuffer;
     }
   }
 
@@ -544,12 +544,17 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     // jsp/0182 jsp/0502 jsp/0503
     // _isCommitted = true;
 
-    if (_byteLength == 0 && _bufferSize == 0)
+    if (_tailByteLength == 0 && _bufferSize == 0) {
+      if (! _isCommitted) {
+	// server/0101
+	writeNext(_head.getBuffer(), 0, 0, _isFinished);
+      }
       return;
+    }
     
-    _tail.setLength(_byteLength);
-    _bufferSize += _byteLength;
-    _byteLength = 0;
+    _tail.setLength(_tailByteLength);
+    _bufferSize += _tailByteLength;
+    _tailByteLength = 0;
 
     TempBuffer ptr = _head;
     do {
@@ -570,7 +575,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
     _tail = _head;
     _tail.setLength(0);
-    _byteBuffer = _tail.getBuffer();
+    _tailByteBuffer = _tail.getBuffer();
     _bufferSize = 0;
   }
 

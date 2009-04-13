@@ -61,7 +61,8 @@ class ResponseStream extends ToByteResponseStream {
   private int _bufferStartOffset;
   
   private boolean _chunkedEncoding;
-  
+
+  private byte []_singleByteBuffer = new byte[1];
   private int _bufferSize;
   private boolean _disableAutoFlush;
   
@@ -257,6 +258,15 @@ class ResponseStream extends ToByteResponseStream {
     _chunkedEncoding = _response.writeHeaders(_next, length);
   }
 
+  @Override
+  public void write(int ch)
+    throws IOException
+  {
+    _singleByteBuffer[0] = (byte) ch;
+
+    write(_singleByteBuffer, 0, 1);
+  }
+
   /**
    * Returns the byte buffer.
    */
@@ -267,7 +277,7 @@ class ResponseStream extends ToByteResponseStream {
     if (_isCommitted) {
       flushBuffer();
       
-      _next.write(buffer, offset, length);
+      writeNext(buffer, offset, length, false);
     }
     else
       super.write(buffer, offset, length);
@@ -300,23 +310,22 @@ class ResponseStream extends ToByteResponseStream {
     
     flushBuffer();
       
-    byte []buffer;
     int offset;
 
     offset = _next.getBufferOffset();
 
     if (! _chunkedEncoding) {
-      _bufferStartOffset = offset;
+      //_bufferStartOffset = offset;
       return offset;
     }
     else if (_bufferStartOffset > 0) {
       return offset;
     }
 
+    byte []buffer;
     // chunked allocates 8 bytes for the chunk header
     buffer = _next.getBuffer();
     if (buffer.length - offset < 8) {
-      _isCommitted = true;
       _next.flushBuffer();
       
       buffer = _next.getBuffer();
@@ -336,10 +345,9 @@ class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     if (! _isCommitted) {
-      byte []buffer = super.nextBuffer(offset);
-      _bufferStartOffset = _next.getBufferOffset();
-
-      return getBuffer();
+      // server/055b
+      return super.nextBuffer(offset);
+      // _bufferStartOffset = _next.getBufferOffset();
     }
     
     if (_isClosed)
@@ -595,7 +603,7 @@ class ResponseStream extends ToByteResponseStream {
       ServletContext app = request.getWebApp();
       
       Exception exn =
-	  new IllegalStateException(L.l("{0}: tried to write {1} bytes with content-length {2}.",
+	  new IllegalStateException(L.l("{0}: tried to write {1} bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
 					request.getRequestURL(),
 					"" + (length + _contentLength),
 					"" + contentLengthHeader));
@@ -622,7 +630,7 @@ class ResponseStream extends ToByteResponseStream {
 	  graph = "'" + (char) ch + "', ";
 	    
 	Exception exn =
-	  new IllegalStateException(L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).",
+	  new IllegalStateException(L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
 					request.getRequestURL(),
 					"" + (length + _contentLength),
 					"" + contentLengthHeader,

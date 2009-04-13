@@ -248,6 +248,7 @@ public class TempBuffer implements java.io.Serializable {
   }
 
   static {
+    // the max size needs to check with JNI code, currently max 16k
     int size = 16 * 1024;
     boolean isSmallmem = false;
 
@@ -255,7 +256,7 @@ public class TempBuffer implements java.io.Serializable {
     
     if (smallmem != null && ! "false".equals(smallmem)) {
       isSmallmem = true;
-      size = 1024;
+      size = 512;
     }
 
     _isSmallmem = isSmallmem;

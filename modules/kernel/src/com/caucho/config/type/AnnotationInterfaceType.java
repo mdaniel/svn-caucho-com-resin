@@ -125,15 +125,17 @@ public class AnnotationInterfaceType extends ConfigType
   {
     AnnotationConfig ann = new AnnotationConfig(this, _annClass);
 
-    Attribute attr = getAttribute(TEXT);
+    if (! "".equals(text)) {
+      // ioc/04e2
+      Attribute attr = getAttribute(TEXT);
 
-    if (attr == null)
-      throw new ConfigException(L.l("'{0}' does not support value",
-				    this));
+      if (attr == null)
+	throw new ConfigException(L.l("'{0}' does not support value",
+				      this));
 
-    attr.setText(ann, TEXT, text);
+      attr.setText(ann, TEXT, text);
+    }
 
-    Thread.dumpStack();
     return ann;
     /*
     Object value = ann.replace();
