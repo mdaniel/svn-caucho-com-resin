@@ -464,6 +464,7 @@ class ResponseStream extends ToByteResponseStream {
 
     if (! _isHead) {
       _next.setBufferOffset(offset);
+      _next.flush();
     }
   }
   
@@ -538,6 +539,9 @@ class ResponseStream extends ToByteResponseStream {
 
 	  if (_cacheStream != null)
 	    writeCache(buf, offset, length);
+
+	  // server/1975
+	  _bufferStartOffset = _next.getBufferOffset();
 	}
 	else {
 	  byte []buffer = _next.getBuffer();
