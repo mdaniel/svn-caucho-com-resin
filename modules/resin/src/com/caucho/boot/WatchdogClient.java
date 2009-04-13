@@ -336,10 +336,14 @@ public class WatchdogClient
 
     String libexecPath;
 
-    if (is64bit())
+    if (is64bit()) {
       libexecPath = resinHome.lookup("libexec64").getNativePath();
-    else
+      appendEnvPath(env, "PATH", resinHome.lookup("win64").getNativePath());
+    }
+    else {
       libexecPath = resinHome.lookup("libexec").getNativePath();
+      appendEnvPath(env, "PATH", resinHome.lookup("win32").getNativePath());
+    }
 
     if (ldLibraryPath == null || "".equals(ldLibraryPath))
       ldLibraryPath += libexecPath;
@@ -411,6 +415,18 @@ public class WatchdogClient
 
     stdIs.close();
     stdOs.close();
+  }
+
+  private void appendEnvPath(Map<String,String> env,
+                             String prop,
+                             String value)
+  {
+    String oldValue = env.get(prop);
+
+    if (oldValue != null && ! "".equals(oldValue))
+      value = value + File.pathSeparator + oldValue;
+
+    env.put(prop, value);
   }
   
   @Override

@@ -216,7 +216,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
       // needed for things like closing the session
       if (request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).finish();
+        ((AbstractHttpRequest) request).finishSession();
         
       try {
 	if (_accessLog != null) {
@@ -227,6 +227,10 @@ public class WebAppFilterChain extends AbstractFilterChain {
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }
+
+      // needed for things like closing the session
+      if (request instanceof AbstractHttpRequest)
+        ((AbstractHttpRequest) request).finish();
       
       thread.setContextClassLoader(oldLoader);
     }

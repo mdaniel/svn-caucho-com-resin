@@ -2521,6 +2521,18 @@ public abstract class AbstractHttpRequest
   /**
    * Cleans up at the end of the request
    */
+  public void finishSession()
+    throws IOException
+  {
+    SessionImpl session = _session;
+      
+    if (session != null)
+      session.finish();
+  }
+  
+  /**
+   * Cleans up at the end of the request
+   */
   public void finish()
     throws IOException
   {
