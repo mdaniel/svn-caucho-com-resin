@@ -280,7 +280,7 @@ public class MessageConsumerImpl implements MessageConsumer
 	msg.setJMSMessageID(entry.getMsgId());
       }
 
-      // msg.received();
+      msg.setReceive();
       
       if (_selector != null && ! _selector.isMatch(msg)) {
         _queue.acknowledge(msg.getJMSMessageID());
