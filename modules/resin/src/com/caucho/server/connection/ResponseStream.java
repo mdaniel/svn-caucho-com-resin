@@ -382,7 +382,7 @@ class ResponseStream extends ToByteResponseStream {
       
 	byte []buffer = _next.getBuffer();
 
-	writeChunk(buffer, startOffset, length);
+	writeChunkHeader(buffer, startOffset, length);
 
 	buffer = _next.nextBuffer(offset);
 	      
@@ -464,6 +464,13 @@ class ResponseStream extends ToByteResponseStream {
 
     if (! _isHead) {
       _next.setBufferOffset(offset);
+      
+      if (_chunkedEncoding && offset != startOffset) {
+	// server/0506
+	writeChunkHeader(_next.getBuffer(), startOffset,
+			 offset - startOffset);
+      }
+
       _next.flush();
     }
   }
@@ -520,30 +527,7 @@ class ResponseStream extends ToByteResponseStream {
 	  log.fine(dbgId() +  "write-chunk(" + length + ")");
 	}
 	
-	if (! _chunkedEncoding) {
-	  byte []nextBuffer = _next.getBuffer();
-	  int nextOffset = _next.getBufferOffset();
-
-	  if (nextOffset + length < nextBuffer.length) {
-	    System.arraycopy(buf, offset, nextBuffer, nextOffset, length);
-	    _next.setBufferOffset(nextOffset + length);
-	  }
-	  else {
-	    _isCommitted = true;
-
-	    _next.write(buf, offset, length);
-
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(dbgId() + "write-data(" + _tailChunkedLength + ")");
-	  }
-
-	  if (_cacheStream != null)
-	    writeCache(buf, offset, length);
-
-	  // server/1975
-	  _bufferStartOffset = _next.getBufferOffset();
-	}
-	else {
+	if (_chunkedEncoding) {
 	  byte []buffer = _next.getBuffer();
 	  int writeLength = length;
 
@@ -566,7 +550,7 @@ class ResponseStream extends ToByteResponseStream {
 
 	    if (writeLength > 0) {
 	      int delta = bufferOffset - bufferStart;
-	      writeChunk(buffer, bufferStart, delta);
+	      writeChunkHeader(buffer, bufferStart, delta);
 			   
 	      _isCommitted = true;
 	      buffer = _next.nextBuffer(bufferOffset);
@@ -581,6 +565,29 @@ class ResponseStream extends ToByteResponseStream {
 
 	  _next.setBufferOffset(bufferOffset);
 	  _bufferStartOffset = bufferStart;
+	}
+	else {
+	  byte []nextBuffer = _next.getBuffer();
+	  int nextOffset = _next.getBufferOffset();
+
+	  if (nextOffset + length < nextBuffer.length) {
+	    System.arraycopy(buf, offset, nextBuffer, nextOffset, length);
+	    _next.setBufferOffset(nextOffset + length);
+	  }
+	  else {
+	    _isCommitted = true;
+
+	    _next.write(buf, offset, length);
+
+	    if (log.isLoggable(Level.FINE))
+	      log.fine(dbgId() + "write-data(" + _tailChunkedLength + ")");
+	  }
+
+	  if (_cacheStream != null)
+	    writeCache(buf, offset, length);
+
+	  // server/1975
+	  _bufferStartOffset = _next.getBufferOffset();
 	}
       }
 
@@ -673,7 +680,7 @@ class ResponseStream extends ToByteResponseStream {
 	    int bufferOffset = _next.getBufferOffset();
 
 	    if (bufferStart != bufferOffset) {
-	      writeChunk(_next.getBuffer(), bufferStart,
+	      writeChunkHeader(_next.getBuffer(), bufferStart,
 			 bufferOffset - bufferStart);
 	    }
 	    else
@@ -767,7 +774,7 @@ class ResponseStream extends ToByteResponseStream {
 	if (bufferStart > 0 && bufferOffset != bufferStart) {
 	  byte []buffer = _next.getBuffer();
 
-	  writeChunk(buffer, bufferStart, bufferOffset - bufferStart);
+	  writeChunkHeader(buffer, bufferStart, bufferOffset - bufferStart);
 	}
 	else {
 	  // server/05b3
@@ -836,7 +843,7 @@ class ResponseStream extends ToByteResponseStream {
   /**
    * Fills the chunk header.
    */
-  private void writeChunk(byte []buffer, int start, int length)
+  private void writeChunkHeader(byte []buffer, int start, int length)
     throws IOException
   {
     buffer[start - 8] = (byte) '\r';
