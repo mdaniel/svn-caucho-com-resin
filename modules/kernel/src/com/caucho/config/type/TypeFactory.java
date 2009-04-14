@@ -356,12 +356,12 @@ public class TypeFactory implements AddLoaderListener
   {
     String className = pkg + "." + name;
 
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
     ArrayList<String> pkgList = loadPackageList(pkg);
 
     for (String pkgName : pkgList) {
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
 	Class cl = Class.forName(pkgName + '.' + name, false, loader);
 
 	return cl;

@@ -950,16 +950,28 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void addHeader(String key, String value)
   {
+    // server/05e8 (tck)
+    if (isCommitted()) {
+      return;
+    }
+
+    addHeaderImpl(key, value);
+  }
+
+  /**
+   * Adds a new header.  If an old header with that name exists,
+   * both headers are output.
+   *
+   * @param key the header key.
+   * @param value the header value.
+   */
+  public void addHeaderImpl(String key, String value)
+  {
     if (_disableHeaders)
       return;
 
     if (setSpecial(key, value))
       return;
-
-    // server/05e8 (tck)
-    if (isCommitted()) {
-      return;
-    }
 
     _headerKeys.add(key);
     _headerValues.add(value);

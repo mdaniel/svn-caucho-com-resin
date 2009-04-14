@@ -51,6 +51,7 @@ import com.caucho.hemp.BamServiceBinding;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.security.Principal;
@@ -71,6 +72,9 @@ public class HempBroker implements Broker, ActorStream
 
   private static final EnvironmentLocal<HempBroker> _localBroker
     = new EnvironmentLocal<HempBroker>();
+
+  private final AtomicLong _jidGenerator
+    = new AtomicLong(Alarm.getCurrentTime());
 
   private HempBrokerManager _manager;
   private DomainManager _domainManager;
@@ -108,7 +112,7 @@ public class HempBroker implements Broker, ActorStream
     }
 
     _serverId = server.getServerId();
-    
+
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
     
@@ -258,7 +262,7 @@ public class HempBroker implements Broker, ActorStream
     if (resource != null)
       sb.append(resource);
     else {
-      Base64.encode(sb, RandomUtil.getRandomLong());
+      Base64.encode(sb, _jidGenerator.incrementAndGet());
     }
     
     return sb.toString();
