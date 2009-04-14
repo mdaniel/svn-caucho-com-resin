@@ -64,7 +64,7 @@ public class IfMethod implements RequestPredicate
   @Configurable
   public void setMethod(String value)
   {
-    setMethod(value);
+    _method = value;
   }
 
   /**

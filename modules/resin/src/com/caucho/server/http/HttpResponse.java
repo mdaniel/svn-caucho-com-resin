@@ -230,8 +230,7 @@ public class HttpResponse extends AbstractHttpResponse
       // php/1b0k
 
       contentType = null;
-    } else if (_isNoCache
-	       || isNoCacheUnlessVary() && ! containsHeader("Vary")) {
+    } else if (_isNoCache) {
       // server/1b15
       removeHeader("ETag");
       removeHeader("Last-Modified");
@@ -250,6 +249,13 @@ public class HttpResponse extends AbstractHttpResponse
       if (debug) {
         log.fine(_request.dbgId() + "" +
                  "Expires: Thu, 01 Dec 1994 16:00:00 GMT");
+      }
+    }
+    else if (isNoCacheUnlessVary() && ! containsHeader("Vary")) {
+      os.print("\r\nCache-Control: private");
+
+      if (debug) {
+        log.fine(_request.dbgId() + "Cache-Control: private");
       }
     }
     else if (! isPrivateCache()) {
