@@ -131,13 +131,13 @@ public class ArrayIterator
   public void natcasesort()
   {
     if (_value instanceof ArrayValue)
-      ArrayModule.natcasesort((ArrayValue) _value);
+      ArrayModule.natcasesort(_env, _value);
   }
 
   public void natsort()
   {
     if (_value instanceof ArrayValue)
-      ArrayModule.natsort((ArrayValue) _value);
+      ArrayModule.natsort(_env, _value);
   }
 
   public void next(Env env)
