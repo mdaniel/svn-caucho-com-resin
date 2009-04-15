@@ -166,7 +166,7 @@
     </antcall>
   </target>
 
-  <target name="hessian" depends="init, jsdk">
+  <target name="hessian" depends="init, servlet16">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="hessian"/>
       <param name="module.jar" value="hessian.jar"/>
@@ -190,7 +190,7 @@
     </antcall>
   </target>
 
-  <target name="jaxrpc" depends="init,saaj,jsdk">
+  <target name="jaxrpc" depends="init,saaj,servlet16">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaxrpc"/>
       <param name="module.jar" value="jaxrpc-15.jar"/>
@@ -237,10 +237,17 @@
     </antcall>
   </target>
 
-  <target name="jsdk" depends="init">
+  <target name="servlet15" depends="init">
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="jsdk"/>
-      <param name="module.jar" value="jsdk-16.jar"/>
+      <param name="module.name" value="servlet25"/>
+      <param name="module.jar" value="servlet-15.jar"/>
+    </antcall>
+  </target>
+
+  <target name="servlet16" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="servlet30"/>
+      <param name="module.jar" value="servlet-16.jar"/>
     </antcall>
   </target>
 
@@ -252,7 +259,7 @@
     </antcall>
   </target>
 
-  <target name="jstl" depends="init, jsdk">
+  <target name="jstl" depends="init, servlet16">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jstl"/>
       <param name="module.jar" value="jstl-11.jar"/>
@@ -342,7 +349,7 @@
     </antcall>
   </target>
   
-  <target name="resin-kernel" depends="init, inject, jsdk">
+  <target name="resin-kernel" depends="init, inject, servlet16">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>
@@ -453,7 +460,7 @@
     </copy>
   </target>
 
-  <target name="javaee" depends="ejb, jca, jms, jpa, jsdk, jstl, jta, jws, inject">
+  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jstl, jta, jws, inject">
     <!--
        - javaee-16.jar
       -->
@@ -474,7 +481,7 @@
         <exclude name="**/.*"/>
       </fileset>
       
-      <fileset dir="${resin.modules}/jsdk/classes">
+      <fileset dir="${resin.modules}/servlet30/classes">
         <exclude name="**/.*"/>
       </fileset>
 
@@ -685,7 +692,7 @@
 
       <packageset dir="${modules}/ejb/src"/>
       <packageset dir="${modules}/hessian/src"/>
-      <packageset dir="${modules}/jsdk/src"/>
+      <packageset dir="${modules}/servlet30/src"/>
       <packageset dir="${modules}/jcache/src"/>
       <packageset dir="${modules}/jpa/src"/>
       <packageset dir="${modules}/jaxstream/src"/>

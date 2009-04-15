@@ -1,0 +1,392 @@
+/*
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package javax.servlet;
+
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * ServletContexts encapsulate applications.  Applications are generalized
+ * virtual hosts; a URL prefix defines a distinct application.
+ * So /myapp and /yourapp could define different applications. As a
+ * degenerate case, each virtual host has its own ServletContext.
+ *
+ * <p>Each application is entirely distinct.  Each has its own:
+ * <ul>
+ * <li>Class loader -- each application gets its own beans and servlets.
+ * <li>ServletContext attributes
+ * <li>Servlets and servlet mappings (e.g. *.jsp could map to different
+ * servlets in different applications.)
+ * <li>File root
+ * <li>Mime mapping
+ * <li>Real-path mapping (aliases)
+ * </ul>
+ *
+ * <p>URIs are relative to the application root (e.g. /myapp) for
+ * most ServletContext methods.  So you can define user workspaces with
+ * identical JSP files and servlets in different applications.
+ *
+ * <h4>Including and forwarding</h4>
+ *
+ * <p>Forwarding and including files, the Servlet equivalent of SSI are
+ * handled by the RequestDispatcher methods.
+ *
+ * <h4>Global initialization</h4>
+ *
+ * <p>There is no direct equivalent of a global.jsa.  To initialize
+ * and cleanup shared classes on start and stop, use a load-on-startup
+ * servlet.  The init() method will be called when the application starts
+ * and the destroy() method will be called when the application finishes.
+ *
+ * <pre><code>
+ *   &lt;servlet servlet-name='global'
+ *            servlet-class='test.InitServlet'
+ *            load-on-startup/>
+ * </code></pre>
+ *
+ * <h4>Basic configuration</h4>
+ *
+ * In the resin.conf, to define the /myapp application with a document
+ * root in /www/myweb, add the following to the resin.conf.
+ * 
+ * <pre><code>
+ *   &lt;web-app id='/myapp' app-dir='/www/myweb'/>
+ * </code></pre>
+ *
+ * <h4>Servlet and Bean locations (class loaders)</h4>
+ *
+ * Each application has its own directories to load application servlets
+ * and beans.  By default these are WEB-APP/classes and WEB-APP/lib.
+ * To add a servlet test.MyServlet, create the java file:
+ * <center>/www/myweb/WEB-APP/classes/test/MyServlet.java</center>
+ *
+ * <h4>Load balancing</h4>
+ *
+ * When using load balancing with a web server, each JVM will have its own
+ * application object.  The attributes are not shared.  In contrast,
+ * sessions are always sent to the same JVM.
+ *
+ * <p>So the application object is best used as a cache rather than
+ * as a way for servlets to communicate.
+ */
+public interface ServletContext {
+  /**
+   * Returns the URL prefix for the ServletContext.
+   */
+  public String getServletContextName();
+  
+  /**
+   * Returns a server-specific string identifying the servlet engine.
+   */
+  public String getServerInfo();
+  
+  /**
+   * Returns the major version of the servlet API.
+   */
+  public int getMajorVersion();
+  
+  /**
+   * Returns the minor version of the servlet API.
+   */
+  public int getMinorVersion();
+  
+  /**
+   * Returns the value of an initialization parameter from the configuration
+   * file.
+   *
+   * The Resin configuration looks something like:
+   * <pre><code>
+   * &lt;web-app id='/myapp' app-dir='/www/myapp'>
+   *   &lt;context-param name1='value1'/>
+   *   &lt;context-param name2='value2'/>
+   * &lt;/web-app>
+   * </code></pre>
+   *
+   * @param name init parameter name
+   * @return init parameter value
+   */
+  public String getInitParameter(String name);
+  
+  /**
+   * Returns an enumeration of all init parameter names.
+   */
+  public Enumeration getInitParameterNames();
+  
+  /**
+   * Returns the ServletContext for the uri.
+   * Note: the uri is <em>not</em> relative to the application.
+   *
+   * @param uri path relative to the root
+   * @return the ServletContext responsible for the given uri.
+   */
+  public ServletContext getContext(String uri);
+
+  /**
+   * Returns the context-path for the web-application.
+   */
+  public String getContextPath();
+  
+  /**
+   * Returns the real file path for the given uri.  The file path will
+   * be in native path format (with native path separators.)
+   *
+   * <p>See ServletRequest to return the real path relative to the
+   * request uri.
+   *
+   * @param uri path relative to the application root to be translated.
+   * @return native file path for the uri.
+   */
+  public String getRealPath(String uri);
+  
+  /**
+   * Returns a request dispatcher for later inclusion or forwarding.  This
+   * is the servlet API equivalent to SSI includes.  The uri is relative
+   * to the application root.
+   *
+   * <p>The following example includes the result of executing inc.jsp
+   * into the output stream.  If the context path is /myapp, the equivalent
+   * uri is /myapp/inc.jsp
+   *
+   * <code><pre>
+   *   RequestDispatcher disp;
+   *   disp = getRequestDispatcher("/inc.jsp?a=b");
+   *   disp.include(request, response);
+   * </pre></code>
+   *
+   * <p>See ServletRequest to return a request dispatcher relative to the
+   * request uri.
+   *
+   * @param uri path relative to the app root (including query string)
+   * for the included file.
+   * @return RequestDispatcher for later inclusion or forwarding.
+   */
+  public RequestDispatcher getRequestDispatcher(String uri);
+  
+  /**
+   * Returns a request dispatcher based on a servlet name.
+   *
+   * @param servletName the servlet name to include or forward to.
+   * @return RequestDispatcher for later inclusion or forwarding.
+   */
+  public RequestDispatcher getNamedDispatcher(String servletName);
+  
+  /**
+   * Returns the mime type for the given uri.
+   *
+   * @param uri path relative to the application root.
+   */
+  public String getMimeType(String uri);
+  
+  /**
+   * Returns an attribute value.
+   *
+   * @param name of the attribute.
+   * @return stored value
+   */
+  public Object getAttribute(String name);
+  
+  /**
+   * Returns an enumeration of all the attribute names.
+   */
+  public Enumeration getAttributeNames();
+  
+  /**
+   * Sets an attribute value.  Because servlets are multithreaded, 
+   * setting ServletContext attributes will generally need synchronization.
+   *
+   * <p>A typical initialization of an application attribute will look like:
+   * <code><pre>
+   * ServletContext app = getServletContext();
+   * Object value;
+   * synchronized (app) {
+   *   value = app.getAttribute("cache");
+   *   if (value == null) {
+   *     value = new Cache();
+   *     app.setAttribute("cache", value);
+   *   }
+   * }
+   * </pre></code>
+   *
+   * @param name of the attribute.
+   * @param value value to store
+   */
+  public void setAttribute(String name, Object value);
+  
+  /**
+   * Removes an attribute.  Because servlets are multithreaded, 
+   * removing ServletContext attributes will generally need synchronization.
+   *
+   * @param name of the attribute.
+   */
+  public void removeAttribute(String name);
+  
+  /**
+   * Logs a message.
+   */
+  public void log(String msg);
+  
+  /**
+   * Logs a message and a stack trace.
+   */
+  public void log(String message, Throwable throwable);
+  
+  /**
+   * Returns the resource for the given uri.  In general, the
+   * RequestDispatcher routines are more useful.
+   *
+   * @param uri path relative to the application root.
+   */
+  public java.net.URL getResource(String uri)
+    throws java.net.MalformedURLException;
+  
+  /**
+   * Returns the set all resources held by the application.
+   */
+  public Set getResourcePaths(String prefix);
+  
+  /**
+   * Returns the resource as a stream.  In general, the
+   * RequestDispatcher routines are more useful.
+   *
+   * @param uri path relative to the application root.
+   * @return InputStream to the resource.
+   */
+  public InputStream getResourceAsStream(String path);
+  
+  /**
+   * @deprecated
+   */
+  public Servlet getServlet(String name)
+    throws ServletException;
+  
+  /**
+   * @deprecated
+   */
+  public Enumeration getServlets();
+  
+  /**
+   * @deprecated
+   */
+  public Enumeration getServletNames();
+  
+  /**
+   * @deprecated
+   */
+  public void log(Exception exception, String msg);
+
+  /**
+   * Adds a runtime servlet.
+   *
+   * @Since Servlet 3.0
+   */
+  public void addServlet(String servletName,
+			 String description,
+			 String className,
+			 Map<String,String> initParam,
+			 int loadOnStartup,
+			 boolean isAsyncSupported);
+
+  /**
+   * Adds a runtime servlet mapping
+   *
+   * @Since Servlet 3.0
+   */
+  public void addServletMapping(String servletName,
+			       String []urlPatterns);
+
+  /**
+   * Adds a filter.
+   *
+   * @Since Servlet 3.0
+   */
+  public void addFilter(String filterName,
+			String description,
+			String className,
+			Map<String,String> initParam,
+			boolean isAsyncSupported);
+
+  /**
+   * Adds a filter mapping.
+   *
+   * @Since Servlet 3.0
+   */
+  public void addFilterMappingForServletNames(String filterName,
+					      EnumSet<DispatcherType> dispatcherTypes,
+					      boolean isMatchAfter,
+					      String ... servletNames);
+
+  /**
+   * Adds a filter mapping.
+   *
+   * @Since Servlet 3.0
+   */
+  public void addFilterMappingForUrlPatterns(String filterName,
+					      EnumSet<DispatcherType> dispatcherTypes,
+					      boolean isMatchAfter,
+					      String ... urlPatterns);
+
+  /**
+   * The session cookie configuration
+   *
+   * @Since Servlet 3.0
+   */
+  public void setSessionCookieConfig(SessionCookieConfig cookieConfig);
+
+  /**
+   * Sets the session cookie configuration
+   *
+   * @Since Servlet 3.0
+   */
+  public SessionCookieConfig getSessionCookieConfig();
+
+  /**
+   * The session tracking mode
+   *
+   * @Since Servlet 3.0
+   */
+  public void setSessionTrackingModes(EnumSet<SessionTrackingMode> modes);
+
+  /**
+   * The session tracking mode
+   *
+   * @Since Servlet 3.0
+   */
+  public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes();
+
+  /**
+   * The session tracking mode
+   *
+   * @Since Servlet 3.0
+   */
+  public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes();
+}
