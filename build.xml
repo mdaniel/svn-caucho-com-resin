@@ -239,14 +239,14 @@
 
   <target name="servlet15" depends="init">
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="servlet25"/>
+      <param name="module.name" value="servlet15"/>
       <param name="module.jar" value="servlet-15.jar"/>
     </antcall>
   </target>
 
   <target name="servlet16" depends="init">
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="servlet30"/>
+      <param name="module.name" value="servlet16"/>
       <param name="module.jar" value="servlet-16.jar"/>
     </antcall>
   </target>
@@ -481,7 +481,7 @@
         <exclude name="**/.*"/>
       </fileset>
       
-      <fileset dir="${resin.modules}/servlet30/classes">
+      <fileset dir="${resin.modules}/servlet16/classes">
         <exclude name="**/.*"/>
       </fileset>
 
@@ -692,7 +692,7 @@
 
       <packageset dir="${modules}/ejb/src"/>
       <packageset dir="${modules}/hessian/src"/>
-      <packageset dir="${modules}/servlet30/src"/>
+      <packageset dir="${modules}/servlet16/src"/>
       <packageset dir="${modules}/jcache/src"/>
       <packageset dir="${modules}/jpa/src"/>
       <packageset dir="${modules}/jaxstream/src"/>

@@ -445,7 +445,7 @@
         <exclude name="**/.*"/>
       </fileset>
       
-      <fileset dir="${resin.modules}/servlet30/classes">
+      <fileset dir="${resin.modules}/servlet16/classes">
         <exclude name="**/.*"/>
       </fileset>
 
