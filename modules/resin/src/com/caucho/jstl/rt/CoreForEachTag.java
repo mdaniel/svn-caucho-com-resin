@@ -169,7 +169,7 @@ public class CoreForEachTag extends LoopTagSupport {
     else if (items instanceof Enumeration)
       return new IteratedValueExpression(new IteratedExpression(expr, null), i);
     else if (items instanceof String && delims == null)
-      return new StringTokenValueExpression(expr, i);
+    return new IteratedValueExpression(new IteratedExpression(expr, null), i);
     else if (items instanceof String && delims != null)
       return new CoreStringTokenValueExpression(expr, i, delims);
     else
