@@ -32,6 +32,7 @@ package com.caucho.server.http;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.BadRequestException;
@@ -93,7 +94,7 @@ public class HttpRequest extends AbstractHttpRequest
   private CharSequence _host;
   private CharBuffer _hostBuffer = new CharBuffer();
 
-  private final byte []_uri;              // "/path/test.jsp/Junk?query=7"
+  private byte []_uri;              // "/path/test.jsp/Junk?query=7"
   private int _uriLength;
 
   private int _urlLengthMax = 8192;
@@ -103,11 +104,10 @@ public class HttpRequest extends AbstractHttpRequest
 
   private final InvocationKey _invocationKey = new InvocationKey();
 
-  private final char []_headerBuffer;
+  private char []_headerBuffer;
 
   private CharSegment []_headerKeys;
   private CharSegment []_headerValues;
-  private int _headerCapacity = 256;
   private int _headerSize;
 
   private boolean _hasRequest;
@@ -132,17 +132,20 @@ public class HttpRequest extends AbstractHttpRequest
     _response = new HttpResponse(this);
     _response.init(conn.getWriteStream());
 
+    /*
     if (server instanceof Server)
       _urlLengthMax = ((Server) server).getUrlLengthMax();
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
     _uri = new byte[_urlLengthMax];
+    */
 
     _method = new CharBuffer();
     _uriHost = new CharBuffer();
     _protocol = new CharBuffer();
 
+    /*
     if (TempBuffer.isSmallmem()) {
       _headerBuffer = new char[4 * 1024];
       _headerCapacity = 64;
@@ -159,6 +162,7 @@ public class HttpRequest extends AbstractHttpRequest
       _headerKeys[i] = new CharSegment();
       _headerValues[i] = new CharSegment();
     }
+    */
   }
 
   /**
@@ -197,10 +201,12 @@ public class HttpRequest extends AbstractHttpRequest
     try {
       thread.setContextClassLoader(_server.getClassLoader());
       
-      startRequest();
-      startInvocation();
+      HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
       
-      _response.start();
+      startRequest(httpBuffer);
+      startInvocation();
+
+      _response.startRequest(httpBuffer);
 
       // XXX: use same one for keepalive?
       _requestFacade = new HttpServletRequestImpl(this);
@@ -242,7 +248,7 @@ public class HttpRequest extends AbstractHttpRequest
       } catch (Throwable e) {
 	log.log(Level.FINER, e.toString(), e);
 
-	throw new BadRequestException(String.valueOf(e));
+	throw new BadRequestException(String.valueOf(e), e);
       }
 
       CharSequence host = getHost();
@@ -449,19 +455,25 @@ public class HttpRequest extends AbstractHttpRequest
    * @param s the read stream for the request
    */
   @Override
-  protected void startRequest()
+  protected void startRequest(HttpBufferStore httpBuffer)
     throws IOException
   {
-    super.startRequest();
+    super.startRequest(httpBuffer);
 
     _method.clear();
     _methodString = null;
     _protocol.clear();
+    
     _uriLength = 0;
+    _uri = httpBuffer.getUriBuffer();
+    
     _uriHost.clear();
     _host = null;
 
     _headerSize = 0;
+    _headerBuffer = httpBuffer.getHeaderBuffer();
+    _headerKeys = httpBuffer.getHeaderKeys();
+    _headerValues = httpBuffer.getHeaderValues();
     _initAttributes = false;
   }
 

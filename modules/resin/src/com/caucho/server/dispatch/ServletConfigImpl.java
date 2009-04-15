@@ -989,26 +989,44 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 
   protected ConfigException error(String msg)
   {
+    ConfigException e;
+    
     if (_location != null)
-      return new LineConfigException(_location + msg);
+      e = new LineConfigException(_location + msg);
     else
-      return new ConfigException(msg);
+      e = new ConfigException(msg);
+
+    log.warning(e.getMessage());
+
+    return e;
   }
 
   protected ConfigException error(String msg, Throwable e)
   {
+    ConfigException e1;
+    
     if (_location != null)
-      return new LineConfigException(_location + msg, e);
+      e1 = new LineConfigException(_location + msg, e);
     else
-      return new ConfigException(msg, e);
+      e1 = new ConfigException(msg, e);
+
+    log.warning(e1.getMessage());
+
+    return e1;
   }
 
   protected RuntimeException error(Throwable e)
   {
+    RuntimeException e1;
+    
     if (_location != null)
-      return new LineConfigException(_location + e.getMessage(), e);
+      e1 = new LineConfigException(_location + e.getMessage(), e);
     else
-      return ConfigException.create(e);
+      e1 = ConfigException.create(e);
+
+    log.warning(e1.toString());
+
+    return e1;
   }
 
   /**
@@ -1016,7 +1034,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
    */
   public String toString()
   {
-    return "ServletConfigImpl[name=" + _servletName + ",class=" + _servletClass + "]";
+    return getClass().getSimpleName() + "[name=" + _servletName + ",class=" + _servletClass + "]";
   }
 
   public static class RunAs {

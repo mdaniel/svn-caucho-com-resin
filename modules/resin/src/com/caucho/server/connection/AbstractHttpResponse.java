@@ -104,10 +104,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   protected final ArrayList<Cookie> _cookiesOut = new ArrayList<Cookie>();
 
-  private final AbstractResponseStream _originalResponseStream;
-  
-  private final ServletOutputStreamImpl _responseOutputStream;
-  private final ResponseWriter _responsePrintWriter;
+  private HttpBufferStore _bufferStore;
+  private AbstractResponseStream _originalResponseStream;
+  private ServletOutputStreamImpl _responseOutputStream;
+  private ResponseWriter _responsePrintWriter;
 
   private AbstractResponseStream _responseStream;
 
@@ -161,10 +161,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   private boolean _isCacheHit;
 
-  private final TempBuffer _tempBuffer = TempBuffer.allocate();
-
   protected AbstractHttpResponse()
   {
+    /*
     _originalResponseStream = createResponseStream();
     
     _responseOutputStream = new ServletOutputStreamImpl();
@@ -172,6 +171,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _responseOutputStream.init(_originalResponseStream);
     _responsePrintWriter.init(_originalResponseStream);
+    */
   }
 
   protected AbstractResponseStream createResponseStream()
@@ -185,9 +185,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     
     _request = request;
     _originalRequest = request;
-    
+
+    /*
     _responseOutputStream.init(_originalResponseStream);
     _responsePrintWriter.init(_originalResponseStream);
+    */
   }
 
   /**
@@ -249,6 +251,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void init(WriteStream stream)
   {
     _rawWrite = stream;
+    
     if (_originalResponseStream instanceof ResponseStream)
       ((ResponseStream) _originalResponseStream).init(_rawWrite);
   }
@@ -317,9 +320,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   /**
    * Initializes the Response at the beginning of the request.
    */
-  public void start()
+  public void startRequest(HttpBufferStore bufferStore)
     throws IOException
   {
+    _bufferStore = bufferStore;
+    
     _statusCode = 200;
     _statusMessage = "OK";
 
@@ -340,8 +345,22 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _contentType = null;
     _contentPrefix = null;
     _locale = null;
+
+    if (bufferStore != null) {
+      ResponseStream responseStream = bufferStore.getResponseStream();
+      _originalResponseStream = responseStream;
+      responseStream.setResponse(this);
+      responseStream.init(_rawWrite);
+      responseStream.start();
+      _responseOutputStream = bufferStore.getOutputStream();
+      _responsePrintWriter = bufferStore.getPrintWriter();
+      _responseStream = _originalResponseStream;
+    }
+    
+    /*
     if (_originalResponseStream instanceof ResponseStream)
       ((ResponseStream) _originalResponseStream).init(_rawWrite);
+    */
     _flushBuffer = null;
 
     _contentLength = -1;
@@ -369,13 +388,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _sessionId = null;
 
     _forbidForward = false;
-
-    _originalResponseStream.start();
-    
-    _responseStream = _originalResponseStream;
-
-    _responseOutputStream.init(_responseStream);
-    _responsePrintWriter.init(_responseStream);
   }
 
   /**
@@ -1403,6 +1415,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _footerKeys.add(key);
     _footerValues.add(value);
+  }
+
+  protected boolean hasFooter()
+  {
+    return _footerKeys.size() > 0;
   }
 
   /**
@@ -2501,7 +2518,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   TempBuffer getBuffer()
   {
-    return _tempBuffer;
+    return _bufferStore.getTempBuffer();
   }
 
   protected final QDate getCalendar()

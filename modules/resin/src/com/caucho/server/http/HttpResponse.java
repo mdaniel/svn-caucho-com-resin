@@ -385,6 +385,11 @@ public class HttpResponse extends AbstractHttpResponse
       }
     }
 
+    if (hasFooter()) {
+      _contentLength = -1;
+      length = -1;
+    }
+
     boolean hasContentLength = false;
     if (_contentLength >= 0) {
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);

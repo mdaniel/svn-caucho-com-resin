@@ -35,6 +35,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.DispatchServer;
@@ -408,10 +409,11 @@ public class HmuxRequest extends AbstractHttpRequest
     _hasRequest = false;
     
     try {
-      startRequest();
+      HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
+      startRequest(httpBuffer);
       startInvocation();
       
-      _response.start();
+      _response.startRequest(httpBuffer);
 
       try {
         if (! scanHeaders()) {
@@ -620,10 +622,10 @@ public class HmuxRequest extends AbstractHttpRequest
    * Clears variables at the start of a new request.
    */
   @Override
-  protected void startRequest()
+  protected void startRequest(HttpBufferStore httpBuffer)
     throws IOException
   {
-    super.startRequest();
+    super.startRequest(httpBuffer);
 
     _method.clear();
     _methodString = null;

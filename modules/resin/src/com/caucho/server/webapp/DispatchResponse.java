@@ -33,6 +33,7 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.IncludeResponseStream;
+import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.util.FreeList;
 import com.caucho.vfs.WriteStream;
 
@@ -55,6 +56,7 @@ class DispatchResponse extends AbstractHttpResponse
   
   protected DispatchResponse()
   {
+    _stream = new IncludeResponseStream(this);
   }
 
   /**
@@ -67,16 +69,6 @@ class DispatchResponse extends AbstractHttpResponse
       res = new DispatchResponse();
 
     return res;
-  }
-
-  /**
-   * Creates the response stream.
-   */
-  protected AbstractResponseStream createResponseStream()
-  {
-    _stream = new IncludeResponseStream(this);
-
-    return _stream;
   }
 
   /**
@@ -100,10 +92,11 @@ class DispatchResponse extends AbstractHttpResponse
   /**
    * Starts the response.
    */
-  public void start()
+  @Override
+  public void startRequest(HttpBufferStore httpBuffer)
     throws IOException
   {
-    super.start();
+    super.startRequest(httpBuffer);
 
     setResponseStream(_stream);
 

@@ -81,7 +81,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     subResponse.init(req);
     subResponse.setNextResponse(res);
     // subResponse.init(req, s);
-    subResponse.start();
+    subResponse.startRequest(null);
     
     try {
       _includeFilterChain.doFilter(req, subResponse);

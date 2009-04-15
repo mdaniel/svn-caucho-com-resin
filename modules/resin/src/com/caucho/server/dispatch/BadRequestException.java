@@ -29,16 +29,22 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.util.CompileException;
-
 import java.io.IOException;
 
-public class BadRequestException extends IOException implements CompileException {
+public class BadRequestException extends IOException
+  implements CompileException
+{
+  public BadRequestException()
+  {
+  }
+  
   public BadRequestException(String msg)
   {
     super(msg);
   }
 
-  public BadRequestException()
+  public BadRequestException(String msg, Throwable cause)
   {
+    super(msg, cause);
   }
 }

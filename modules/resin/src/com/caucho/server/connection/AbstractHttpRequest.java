@@ -200,9 +200,7 @@ public abstract class AbstractHttpRequest
   protected final CharBuffer _cb = new CharBuffer();
   // private final ArrayList<CharSegment> _arrayList = new ArrayList<CharSegment>();
 
-  private final byte []_address = new byte[256];
-
-  private final byte []_logBuffer = new byte[1024];
+  private HttpBufferStore _httpBuffer;
 
   private ServletRequestAttributeListener []_attributeListeners;
   
@@ -268,9 +266,10 @@ public abstract class AbstractHttpRequest
    *
    * @param s the raw connection stream
    */
-  protected void startRequest()
+  protected void startRequest(HttpBufferStore httpBuffer)
     throws IOException
   {
+    _httpBuffer = httpBuffer;
     _invocation = null;
 
     _varyCookies = false;
@@ -316,6 +315,14 @@ public abstract class AbstractHttpRequest
   public boolean hasRequest()
   {
     return false;
+  }
+
+  /**
+   * Returns the http buffer store
+   */
+  final HttpBufferStore getHttpBufferStore()
+  {
+    return _httpBuffer;
   }
 
   /**
@@ -2602,7 +2609,7 @@ public abstract class AbstractHttpRequest
    */
   public final byte []getLogBuffer()
   {
-    return _logBuffer;
+    return _httpBuffer.getLogBuffer();
   }
 
   /**
@@ -2919,6 +2926,12 @@ public abstract class AbstractHttpRequest
     _filledForm = null;
     _cookiesIn = null;
     _cookies.clear();
+
+    HttpBufferStore httpBuffer = _httpBuffer;
+    _httpBuffer = null;
+
+    if (httpBuffer != null)
+      HttpBufferStore.free(httpBuffer);
   }
 
   /**

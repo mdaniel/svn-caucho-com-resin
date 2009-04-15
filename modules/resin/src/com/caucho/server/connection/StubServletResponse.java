@@ -39,7 +39,7 @@ public class StubServletResponse extends AbstractHttpResponse {
   public StubServletResponse()
   {
     try {
-      start();
+      startRequest(null);
     } catch (Throwable e) {
     }
   }

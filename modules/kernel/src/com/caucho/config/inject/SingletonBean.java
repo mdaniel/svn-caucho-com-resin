@@ -117,7 +117,7 @@ public class SingletonBean extends SimpleBean
     
     _value = value;
     setTargetType(value.getClass());
-    
+
     super.setScope(InjectManager.create().getApplicationScope());
     
     setName(name);
@@ -146,8 +146,8 @@ public class SingletonBean extends SimpleBean
   public SingletonBean(InjectManager webBeans, Object value)
   {
     super(webBeans);
-    
-    setValue(value);
+
+    _value = value;
 
     setTargetType(value.getClass());
     

@@ -33,6 +33,7 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.L10N;
 
@@ -627,10 +628,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     AbstractResponseStream s = null;
     boolean oldDisableClose = false;
+    HttpBufferStore httpBuffer = HttpBufferStore.allocate(webApp.getServer());
 
     subResponse.init(subRequest);
     subResponse.setNextResponse(parentResponse);
-    subResponse.start();
+    subResponse.startRequest(httpBuffer);
     subResponse.setCharacterEncoding(res.getCharacterEncoding());
 
     if (_webApp.getDispatchWrapsFilters())
@@ -751,6 +753,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       if (resWrapper != null)
 	resWrapper.setResponse(parentResponse);
+
+      HttpBufferStore.free(httpBuffer);
     }
   }
 }

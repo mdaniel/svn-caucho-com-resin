@@ -96,9 +96,9 @@ public class ServletManager {
       }
 
       try {
-	config.validateClass(! _isLazyValidate);
+	// ioc/0000, server/12e4
+	config.validateClass(false);
       } catch (ConfigException e) {
-	// ioc/0000
 	throw e;
       } catch (Exception e) {
 	if (log.isLoggable(Level.FINE))

@@ -40,12 +40,16 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.*;
 
 /**
  * Used when there isn't any actual request object, e.g. for calling
  * run-at servlets.
  */
 public class StubServletRequest extends AbstractHttpRequest {
+  private static final Logger log
+    = Logger.getLogger(StubServletRequest.class.getName());
+  
   private HashMap _attributes;
 
   public StubServletRequest()
@@ -53,8 +57,9 @@ public class StubServletRequest extends AbstractHttpRequest {
     super(null, null);
 
     try {
-      startRequest();
+      startRequest(null);
     } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
   

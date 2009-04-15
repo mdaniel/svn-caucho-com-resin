@@ -51,7 +51,7 @@ class ResponseStream extends ToByteResponseStream {
   private static final byte []_tailChunked =
     new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
   
-  private final AbstractHttpResponse _response;
+  private AbstractHttpResponse _response;
   
   private WriteStream _next;
   
@@ -77,7 +77,16 @@ class ResponseStream extends ToByteResponseStream {
   
   private final byte []_buffer = new byte[16];
 
+  ResponseStream()
+  {
+  }
+
   ResponseStream(AbstractHttpResponse response)
+  {
+    setResponse(response);
+  }
+
+  public void setResponse(AbstractHttpResponse response)
   {
     _response = response;
   }
@@ -463,8 +472,10 @@ class ResponseStream extends ToByteResponseStream {
       log.fine(dbgId() +  "write-chunk(" + length + ")");
 
     if (! _isHead) {
+      // server/051e
       _next.setBufferOffset(offset);
-      
+
+      /*
       if (_chunkedEncoding && offset != startOffset) {
 	// server/0506
 	writeChunkHeader(_next.getBuffer(), startOffset,
@@ -472,6 +483,7 @@ class ResponseStream extends ToByteResponseStream {
       }
 
       _next.flush();
+      */
     }
   }
   
