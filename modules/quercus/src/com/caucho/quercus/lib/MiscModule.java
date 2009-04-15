@@ -1295,7 +1295,7 @@ public class MiscModule extends AbstractQuercusModule {
         int ch = is.read();
         
         if (ch < 0)
-          break;
+          return;
         
         sb.append(digitToHex(ch >> 4));
         sb.append(digitToHex(ch));
@@ -1383,7 +1383,7 @@ public class MiscModule extends AbstractQuercusModule {
         int ch = is.read();
         
         if (ch < 0)
-          break;
+          return;
         
         sb.append(digitToHex(ch));
         sb.append(digitToHex(ch >> 4));
@@ -1448,6 +1448,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
+      outer:
       for (int j = 0; j < _length; j++) {
         Value key;
 
@@ -1471,7 +1472,7 @@ public class MiscModule extends AbstractQuercusModule {
           int ch = is.read();
           
           if (ch < 0)
-            break;
+            break outer;
           
           long d = ch & 0xff;
           
@@ -1549,6 +1550,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
+      outer:
       for (int j = 0; j < _length; j++) {
         Value key;
 
@@ -1569,7 +1571,7 @@ public class MiscModule extends AbstractQuercusModule {
         for (int k = 0; k < _bytes; k++) {
           int ch = is.read();
           if (ch < 0)
-            break;
+            break outer;
           
           long d = ch & 0xff;
 
@@ -1630,6 +1632,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
+      outer:
       for (int j = 0; j < _length; j++) {
         Value key;
 
@@ -1651,7 +1654,7 @@ public class MiscModule extends AbstractQuercusModule {
           int ch = is.read();
           
           if (ch < 0)
-            break;
+            break outer;
           
           long d = ch & 0xff;
 
@@ -1712,6 +1715,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
+      outer:
       for (int j = 0; j < _length; j++) {
         Value key;
 
@@ -1733,7 +1737,7 @@ public class MiscModule extends AbstractQuercusModule {
           int ch = is.read();
           
           if (ch < 0)
-            break;
+            break outer;
           
           int d = ch & 0xff;
 

@@ -1285,13 +1285,4 @@ public class ArrayValueImpl extends ArrayValue
 
     out.print(")");
   }
-  
-  @Override
-  public int hashCode()
-  {
-    if (_size == 0)
-      return 0;
-    else
-      return _head.getValue().hashCode();
-  }
 }
