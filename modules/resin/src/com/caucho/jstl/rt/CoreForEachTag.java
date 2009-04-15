@@ -149,7 +149,13 @@ public class CoreForEachTag extends LoopTagSupport {
     return CoreForEachTag.getExpr(deferredExpression,
                                   index,
                                   _items,
-                                  null);
+                                  getDelims());
+  }
+
+  @Override
+  protected String getDelims()
+  {
+    return ", \t\n\r\f";
   }
 
   public static ValueExpression getExpr(ValueExpression expr, Integer i,
