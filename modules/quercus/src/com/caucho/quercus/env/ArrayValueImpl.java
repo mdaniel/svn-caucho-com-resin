@@ -1127,7 +1127,7 @@ public class ArrayValueImpl extends ArrayValue
     if (_tail != null)
       return remove(_tail._key);
     else
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
   }
 
   protected final Entry getHead()
@@ -1143,7 +1143,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Shuffles the array
    */
-  public void shuffle()
+  public Value shuffle()
   {
     if (_isDirty)
       copyOnWrite();
@@ -1153,7 +1153,7 @@ public class ArrayValueImpl extends ArrayValue
     int length = values.length;
 
     if (length == 0)
-      return;
+      return BooleanValue.TRUE;
 
     int i = 0;
     for (Entry ptr = _head; ptr != null; ptr = ptr._next)
@@ -1175,12 +1175,14 @@ public class ArrayValueImpl extends ArrayValue
     
     for (i = 0; i < length; i++) {
       if (i > 0)
-	values[i]._prev = values[i - 1];
+        values[i]._prev = values[i - 1];
       if (i < length - 1)
-	values[i]._next = values[i + 1];
+        values[i]._next = values[i + 1];
     }
 
     _current = _head;
+    
+    return BooleanValue.TRUE;
   }
   
   /**

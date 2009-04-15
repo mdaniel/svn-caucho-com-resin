@@ -293,9 +293,9 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Shuffles the array
    */
-  public void shuffle()
+  public Value shuffle()
   {
-    getCopyArray().shuffle();
+    return getCopyArray().shuffle();
   }
 
   protected Entry getHead()

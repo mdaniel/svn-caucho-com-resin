@@ -117,7 +117,7 @@ public class JavaListAdapter
   public Value pop()
   {    
     if (getSize() == 0)
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     
     return wrapJava(_list.remove(0));
   }

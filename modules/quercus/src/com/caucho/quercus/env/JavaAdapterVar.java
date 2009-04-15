@@ -1203,6 +1203,50 @@ public class JavaAdapterVar extends Value
   {
     return getValue().next();
   }
+  
+  /**
+   * Returns the previous value
+   */
+  @Override
+  public Value prev()
+  {
+    return getValue().prev();
+  }
+  
+  /**
+   * Returns the end value.
+   */
+  @Override
+  public Value end()
+  {
+    return getValue().end();
+  }
+  
+  /**
+   * Returns the array pointer.
+   */
+  @Override
+  public Value reset()
+  {
+    return getValue().reset();
+  }
+  
+  /**
+   * Shuffles the array.
+   */
+  @Override
+  public Value shuffle()
+  {
+    return getValue().shuffle();
+  }
+  
+  /**
+   * Pops the top array element.
+   */
+  public Value pop()
+  {
+    return getValue().pop();
+  }
 
   /**
    * Evaluates a method.

@@ -430,7 +430,8 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Shuffles the array
    */
-  public void shuffle()
+  @Override
+  public Value shuffle()
   {
     throw new UnsupportedOperationException();
   }

@@ -1408,6 +1408,50 @@ public final class Var extends Value
   {
     return _value.next();
   }
+  
+  /**
+   * Returns the previous value
+   */
+  @Override
+  public Value prev()
+  {
+    return _value.prev();
+  }
+  
+  /**
+   * Returns the end value.
+   */
+  @Override
+  public Value end()
+  {
+    return _value.end();
+  }
+  
+  /**
+   * Returns the array pointer.
+   */
+  @Override
+  public Value reset()
+  {
+    return _value.reset();
+  }
+  
+  /**
+   * Shuffles the array.
+   */
+  @Override
+  public Value shuffle()
+  {
+    return _value.shuffle();
+  }
+  
+  /**
+   * Pops the top array element.
+   */
+  public Value pop()
+  {
+    return _value.pop();
+  }
 
   /**
    * Evaluates a method.

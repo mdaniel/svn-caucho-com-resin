@@ -201,9 +201,9 @@ public class ArrayValueWrapper extends ArrayValue {
    * Shuffles the array
    */
   @Override
-  public void shuffle()
+  public Value shuffle()
   {
-    _array.shuffle();
+    return _array.shuffle();
   }
 
   /**

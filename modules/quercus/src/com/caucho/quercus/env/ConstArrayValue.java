@@ -81,7 +81,7 @@ public class ConstArrayValue
    * Shuffles the array
    */
   @Override
-  public void shuffle()
+  public Value shuffle()
   {
     throw new IllegalStateException();
   }

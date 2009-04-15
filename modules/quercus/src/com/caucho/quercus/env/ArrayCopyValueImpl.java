@@ -166,10 +166,11 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   /**
    * Shuffles the array
    */
-  public void shuffle()
+  @Override
+  public Value shuffle()
   {
     _root.setModified();
 
-    super.shuffle();
+    return super.shuffle();
   }
 }

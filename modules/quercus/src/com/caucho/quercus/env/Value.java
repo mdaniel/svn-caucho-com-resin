@@ -1038,11 +1038,51 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Returns the current value
+   * Returns the next value
    */
   public Value next()
   {
     return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Returns the previous value
+   */
+  public Value prev()
+  {
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Returns the end value.
+   */
+  public Value end()
+  {
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Returns the array pointer.
+   */
+  public Value reset()
+  {
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Shuffles the array.
+   */
+  public Value shuffle()
+  {
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Pops the top array element.
+   */
+  public Value pop()
+  {
+    return NullValue.NULL;
   }
 
   /**

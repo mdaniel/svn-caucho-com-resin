@@ -135,9 +135,6 @@ public class ArrayModule
   private static final CompareNatural CNA_VALUE_NORMAL_INSENSITIVE
     = new CompareNatural(ArrayValue.GET_VALUE, SORT_NORMAL, CASE_INSENSITIVE);
 
-  /**
-   * Returns true for the mysql extension.
-   */
   public String []getLoadedExtensions()
   {
     return new String[] { "standard" };
@@ -146,9 +143,9 @@ public class ArrayModule
   /**
    * Changes the key case
    */
-  public Value array_change_key_case(Env env,
-				     ArrayValue array,
-                                     @Optional("CASE_LOWER") int toCase)
+  public static Value array_change_key_case(Env env,
+				                            ArrayValue array,
+				                            @Optional("CASE_LOWER") int toCase)
   {
     if (array == null)
       return BooleanValue.FALSE;
@@ -178,10 +175,10 @@ public class ArrayModule
   /**
    * Chunks the array
    */
-  public Value array_chunk(Env env,
-                           ArrayValue array,
-                           int size,
-                           @Optional boolean preserveKeys)
+  public static Value array_chunk(Env env,
+                                  ArrayValue array,
+                                  int size,
+                                  @Optional boolean preserveKeys)
   {
     if (array == null)
       return NullValue.NULL;
@@ -219,8 +216,9 @@ public class ArrayModule
   /**
    * Combines array
    */
-  public Value array_combine(Env env, ArrayValue keys,
-                             ArrayValue values)
+  public static Value array_combine(Env env,
+                                    ArrayValue keys,
+                                    ArrayValue values)
   {
     if (keys == null || values == null)
       return BooleanValue.FALSE;
@@ -252,7 +250,7 @@ public class ArrayModule
   /**
    * Counts the values
    */
-  public Value array_count_values(Env env, ArrayValue array)
+  public static Value array_count_values(Env env, ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -280,11 +278,8 @@ public class ArrayModule
   /**
    * Pops off the top element
    */
-  public Value array_pop(Env env, ArrayValue array)
+  public static Value array_pop(Env env, @Reference Value array)
   {
-    if (array == null || array.getSize() <= 0)
-      return NullValue.NULL;
-      
     return array.pop();
   }
 
@@ -292,8 +287,8 @@ public class ArrayModule
    * Returns the size of the array.
    */
   public static long count(Env env,
-			   @ReadOnly Value value,
-			   @Optional("false") boolean recursive)
+			               @ReadOnly Value value,
+			               @Optional("false") boolean recursive)
   {
     if (! recursive)
       return value.getCount(env);
@@ -328,7 +323,7 @@ public class ArrayModule
   /**
    * Returns the next value of the array.
    */
-  public static Value next(Value value)
+  public static Value next(@Reference Value value)
   {
     return value.next();
   }
@@ -359,48 +354,31 @@ public class ArrayModule
   /**
    * Returns the previous value of the array.
    */
-  public static Value prev(Value value)
+  public static Value prev(@Reference Value array)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
-      return array.prev();
-    }
-    else
-      return BooleanValue.FALSE;
+    return array.prev();
   }
 
   /**
    * Resets the pointer
    */
-  public static Value reset(Value value)
+  public static Value reset(@Reference Value array)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
-      return array.reset();
-    }
-    else
-      return BooleanValue.FALSE;
+    return array.reset();
   }
 
   /**
    * Returns the current value of the array.
    */
-  public static Value shuffle(ArrayValue array)
+  public static Value shuffle(Env env, @Reference Value array)
   {
-    if (array == null)
-      return BooleanValue.FALSE;
-
-    array.shuffle();
-
-    return BooleanValue.TRUE;
+    return array.shuffle();
   }
 
   /**
    * Resets the pointer to the end
    */
-  public static Value end(Value value)
+  public static Value end(@Reference Value value)
   {
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
@@ -464,10 +442,10 @@ public class ArrayModule
    * @param searchValue the corresponding value of the returned key array
    * @return an array containing the keys
    */
-  public Value array_keys(Env env,
-                          @ReadOnly ArrayValue array,
-                          @Optional @ReadOnly Value searchValue,
-                          @Optional boolean isStrict)
+  public static Value array_keys(Env env,
+                                 @ReadOnly ArrayValue array,
+                                 @Optional @ReadOnly Value searchValue,
+                                 @Optional boolean isStrict)
   {
     if (array == null)
       return NullValue.NULL;
@@ -503,7 +481,7 @@ public class ArrayModule
    * @return an array filled with the given value starting from the given start
    *         index
    */
-  public Value array_fill(Env env, long start, long num, Value value)
+  public static Value array_fill(Env env, long start, long num, Value value)
   {
     if (num < 0) {
       env.warning("Number of elements must be positive");
@@ -527,8 +505,8 @@ public class ArrayModule
    * @param array the array to flip
    * @return an array with it's keys and values swapped
    */
-  public Value array_flip(Env env,
-                          ArrayValue array)
+  public static Value array_flip(Env env,
+                                 ArrayValue array)
   {
     if (array == null)
       return BooleanValue.FALSE;
@@ -563,8 +541,10 @@ public class ArrayModule
    * padded space
    * @return a padded array
    */
-  public Value array_pad(Env env, ArrayValue input, long padSize,
-                         Value padValue)
+  public static Value array_pad(Env env,
+                                ArrayValue input,
+                                long padSize,
+                                Value padValue)
   {
     if (input == null)
       return NullValue.NULL;
@@ -612,9 +592,9 @@ public class ArrayModule
    * @param callback the function name for filtering
    * @return a filtered array
    */
-  public Value array_filter(Env env,
-                            ArrayValue array,
-                            @Optional Value callbackName)
+  public static Value array_filter(Env env,
+                                   ArrayValue array,
+                                   @Optional Value callbackName)
   {
     if (array == null)
       return NullValue.NULL;
@@ -674,8 +654,8 @@ public class ArrayModule
    * @param array the array for who's product is to be found
    * @return the produce of the array's elements
    */
-  public Value array_product(Env env,
-                             ArrayValue array)
+  public static Value array_product(Env env,
+                                    ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -696,7 +676,9 @@ public class ArrayModule
    *
    * @return the number of elements in the final array
    */
-  public int array_push(Env env, ArrayValue array, Value []values)
+  public static int array_push(Env env,
+                               @Reference Value array,
+                               Value []values)
   {
     for (Value value : values) {
       array.put(value);
@@ -712,7 +694,7 @@ public class ArrayModule
    * @param num the number of random keys to return
    * @return the produce of the array's elements
    */
-  public Value array_rand(Env env,
+  public static Value array_rand(Env env,
                           ArrayValue array,
                           @Optional("1") long num)
   {
@@ -773,10 +755,10 @@ public class ArrayModule
    * @return the result from reducing the input array with the callback
    *         function
    */
-  public Value array_reduce(Env env,
-                            ArrayValue array,
-                            Callback callback,
-                            @Optional("NULL") Value initialValue)
+  public static Value array_reduce(Env env,
+                                   ArrayValue array,
+                                   Callback callback,
+                                   @Optional("NULL") Value initialValue)
   {
     if (array == null)
       return NullValue.NULL;
@@ -814,9 +796,9 @@ public class ArrayModule
    * @param keyed true if the keys are to be preserved
    * @return the array in reverse
    */
-  public Value array_reverse(Env env,
-                             ArrayValue inputArray,
-                             @Optional("false") boolean keyed)
+  public static Value array_reverse(Env env,
+                                    ArrayValue inputArray,
+                                    @Optional("false") boolean keyed)
   {
     if (inputArray == null)
       return NullValue.NULL;
@@ -856,10 +838,10 @@ public class ArrayModule
    * @param strict checks for type aswell
    * @return the key of the needle
    */
-  public Value array_search(Env env,
-                            @ReadOnly Value needle,
-                            @ReadOnly ArrayValue array,
-                            @Optional("false") boolean strict)
+  public static Value array_search(Env env,
+                                   @ReadOnly Value needle,
+                                   @ReadOnly ArrayValue array,
+                                   @Optional("false") boolean strict)
   {
     // php/171i
     // php/172y
@@ -895,19 +877,19 @@ public class ArrayModule
    * @return the left most value in the array
    */
   public static Value array_shift(Env env,
-                                  ArrayValue array)
+                                  @Reference Value value)
   {
-    if (array == null)
+    if (value.isNull())
       return NullValue.NULL;
+    
+    ArrayValue array = value.toArrayValue(env);
 
     if (array.getSize() < 1)
       return NullValue.NULL;
 
     Iterator<Value> iter = array.getKeyIterator(env);
     
-    Value value = iter.next();
-
-    Value firstValue = array.remove(value);
+    Value firstValue = array.remove(iter.next());
 
     array.keyReset(0, NOT_STRICT);
 
@@ -928,11 +910,11 @@ public class ArrayModule
    * otherwise
    * @return the array chunk
    */
-  public Value array_slice(Env env,
-                           @ReadOnly ArrayValue array,
-                           int offset,
-                           @Optional Value length,
-                           @Optional boolean isPreserveKeys)
+  public static Value array_slice(Env env,
+                                  @ReadOnly ArrayValue array,
+                                  int offset,
+                                  @Optional Value length,
+                                  @Optional boolean isPreserveKeys)
   {
     if (array == null)
       return NullValue.NULL;
@@ -972,11 +954,11 @@ public class ArrayModule
    * @param replace the elements to add to the arrayV
    * @return the part of the arrayV removed from input
    */
-  public Value array_splice(Env env,
-                            @Reference Value arrayVar, //array gets spliced at offset
-                            int offset,
-                            @Optional("NULL") Value length,
-                            @Optional Value replace)
+  public static Value array_splice(Env env,
+                                   @Reference Value arrayVar,
+                                   int offset,
+                                   @Optional("NULL") Value length,
+                                   @Optional Value replace)
   {
     if (! arrayVar.isset())
       return NullValue.NULL;
@@ -1008,12 +990,12 @@ public class ArrayModule
                       (ArrayValue) replace.toArray());
   }
 
-  public Value spliceImpl(Env env,
-                          Value var,
-                          ArrayValue array,
-                          int start,
-                          int end,
-                          ArrayValue replace)
+  public static Value spliceImpl(Env env,
+                                 Value var,
+                                 ArrayValue array,
+                                 int start,
+                                 int end,
+                                 ArrayValue replace)
   {
     int index = 0;
 
@@ -1065,8 +1047,8 @@ public class ArrayModule
    * @param array the array to sum
    * @return the sum of the elements
    */
-  public Value array_sum(Env env,
-                         @ReadOnly ArrayValue array)
+  public static Value array_sum(Env env,
+                                @ReadOnly ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -1093,8 +1075,8 @@ public class ArrayModule
    * @param array the array to get rid of the duplicates from
    * @return an array without duplicates
    */
-  public Value array_unique(Env env,
-                            ArrayValue array)
+  public static Value array_unique(Env env,
+                                   ArrayValue array)
   {
     if (array == null)
       return BooleanValue.FALSE;
@@ -1136,10 +1118,12 @@ public class ArrayModule
    * @param values
    * @return the left most value in the array
    */
-  public Value array_unshift(Env env,
-                             ArrayValue array,
-                             Value []values)
+  public static Value array_unshift(Env env,
+                                    @Reference Value value,
+                                    Value []values)
   {
+    ArrayValue array = value.toArrayValue(env);
+    
     if (array == null)
       return NullValue.NULL;
 
@@ -1158,8 +1142,8 @@ public class ArrayModule
    * @param array the array to get the values from
    * @return an array with the values of the passed array
    */
-  public Value array_values(Env env,
-                            ArrayValue array)
+  public static Value array_values(Env env,
+                                   ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -1176,15 +1160,17 @@ public class ArrayModule
    *
    * @return true if the walk succedded, false otherwise
    */
-  public boolean array_walk(Env env,
-                            @NotNull ArrayValue array,
-                            Callback callback,
-                            @Optional("NULL") Value userData)
+  public static boolean array_walk(Env env,
+                                   @Reference Value arrayVar,
+                                   Callback callback,
+                                   @Optional("NULL") Value userData)
   {
     if (callback == null || ! callback.isValid()) {
       env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
+    
+    ArrayValue array = arrayVar.toArrayValue(env);
 
     if (array == null)
       return false;
@@ -1226,15 +1212,17 @@ public class ArrayModule
    * @param extra extra parameter required by the callback function
    * @return true if the walk succedded, false otherwise
    */
-  public boolean array_walk_recursive(Env env,
-                                      @NotNull ArrayValue array,
-                                      Callback callback,
-                                      @Optional("NULL") Value extra)
+  public static boolean array_walk_recursive(Env env,
+                                             @Reference Value arrayVar,
+                                             Callback callback,
+                                             @Optional("NULL") Value extra)
   {
     if (callback == null || ! callback.isValid()) {
       env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
+    
+    ArrayValue array = arrayVar.toArrayValue(env);
 
     if (array == null)
       return false;
@@ -1284,9 +1272,12 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean arsort(Env env, ArrayValue array,
-                        @Optional long sortFlag)
+  public static boolean arsort(Env env,
+                               @Reference Value arrayVar,
+                               @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1319,9 +1310,12 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  static public boolean asort(Env env, ArrayValue array,
+  public static boolean asort(Env env,
+                              @Reference Value arrayVar,
                               @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1354,9 +1348,12 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  static public boolean ksort(Env env, ArrayValue array,
+  public static boolean ksort(Env env,
+                              @Reference Value arrayVar,
                               @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1389,9 +1386,12 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean krsort(Env env, ArrayValue array,
-                        @Optional long sortFlag)
+  public static boolean krsort(Env env,
+                               @Reference Value arrayVar,
+                               @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1424,8 +1424,10 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  static public Value natsort(ArrayValue array)
+  public static Value natsort(Env env, @Reference Value arrayVar)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return NullValue.NULL;
 
@@ -1444,8 +1446,10 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  static public Value natcasesort(ArrayValue array)
+  public static Value natcasesort(Env env, @Reference Value arrayVar)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return NullValue.NULL;
 
@@ -1462,7 +1466,7 @@ public class ArrayModule
    *
    * @param array the array to trim strings from
    */
-  static private void trimArrayStrings(ArrayValue array)
+  private static void trimArrayStrings(ArrayValue array)
   {
     if (array != null) {
 
@@ -1485,9 +1489,9 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean in_array(@ReadOnly Value needle,
-                          @ReadOnly ArrayValue stack,
-                          @Optional("false") boolean strict)
+  public static boolean in_array(@ReadOnly Value needle,
+                                 @ReadOnly ArrayValue stack,
+                                 @Optional("false") boolean strict)
   {
     if (stack == null)
       return false;
@@ -1510,8 +1514,12 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean sort(Env env, ArrayValue array, @Optional long sortFlag)
+  public static boolean sort(Env env,
+                             @Reference Value arrayVar,
+                             @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1544,8 +1552,12 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean rsort(Env env, ArrayValue array, @Optional long sortFlag)
+  public static boolean rsort(Env env,
+                              @Reference Value arrayVar,
+                              @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1580,11 +1592,13 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  public boolean usort(Env env,
-                       ArrayValue array,
-                       Callback func,
-                       @Optional long sortFlag)
+  public static boolean usort(Env env,
+                              @Reference Value arrayVar,
+                              Callback func,
+                              @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1613,15 +1627,17 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  static public boolean uasort(Env env,
-                               ArrayValue array,
+  public static boolean uasort(Env env,
+                               @Reference Value arrayVar,
                                Callback func,
                                @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
-    if (!func.isValid()) {
+    if (! func.isValid()) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -1643,11 +1659,13 @@ public class ArrayModule
    * @return true if the sort works, false otherwise
    * @throws ClassCastException if the elements are not mutually comparable
    */
-  static public boolean uksort(Env env,
-                               ArrayValue array,
+  public static boolean uksort(Env env,
+                               @Reference Value arrayVar,
                                Callback func,
                                @Optional long sortFlag)
   {
+    ArrayValue array = arrayVar.toArrayValue(env);
+    
     if (array == null)
       return false;
 
@@ -1675,10 +1693,10 @@ public class ArrayModule
    * the next element
    * @return the new array
    */
-  public Value range(Env env,
-                     @ReadOnly Value start,
-                     @ReadOnly Value end,
-                     @Optional("1") long step)
+  public static Value range(Env env,
+                            @ReadOnly Value start,
+                            @ReadOnly Value end,
+                            @Optional("1") long step)
   {
     if (step < 1)
       step = 1;
@@ -1730,9 +1748,9 @@ public class ArrayModule
     return array;
   }
 
-  private Value rangeIncrement(Value value, long step)
+  private static Value rangeIncrement(Value value, long step)
   {
-    if (value instanceof StringValue)
+    if (value.isString())
       return StringValue.create((char) (value.toChar() + step));
 
     return LongValue.create(value.toLong() + step);
@@ -1919,7 +1937,7 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array but
    *         not in the other arrays
    */
-  public Value array_diff(Env env, ArrayValue array, Value []arrays)
+  public static Value array_diff(Env env, ArrayValue array, Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -1967,7 +1985,9 @@ public class ArrayModule
    * 
    * @return newly filled array
    */
-  public ArrayValue array_fill_keys(Env env, ArrayValue keyArray, Value value)
+  public static ArrayValue array_fill_keys(Env env,
+                                           ArrayValue keyArray,
+                                           Value value)
   {
     ArrayValue array = new ArrayValueImpl();
     
@@ -1990,7 +2010,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array but
    *         not in the other arrays
    */
-  public Value array_diff_assoc(Env env, ArrayValue array, Value []arrays)
+  public static Value array_diff_assoc(Env env,
+                                       ArrayValue array,
+                                       Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2038,7 +2060,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array but
    *         not in the other arrays
    */
-  public Value array_diff_key(Env env, ArrayValue array, Value []arrays)
+  public static Value array_diff_key(Env env,
+                                     ArrayValue array,
+                                     Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2083,7 +2107,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array but
    *         not in the other arrays
    */
-  public Value array_diff_uassoc(Env env, ArrayValue array, Value []arrays)
+  public static Value array_diff_uassoc(Env env,
+                                        ArrayValue array,
+                                        Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2143,7 +2169,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array but
    *         not in the other arrays
    */
-  public Value array_diff_ukey(Env env, ArrayValue array, Value []arrays)
+  public static Value array_diff_ukey(Env env,
+                                      ArrayValue array,
+                                      Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2205,7 +2233,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array and
    *         in the other arrays
    */
-  public Value array_intersect(Env env, ArrayValue array, Value []arrays)
+  public static Value array_intersect(Env env,
+                                      ArrayValue array,
+                                      Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2254,7 +2284,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array and
    *         in the other arrays
    */
-  public Value array_intersect_assoc(Env env, ArrayValue array, Value []arrays)
+  public static Value array_intersect_assoc(Env env,
+                                            ArrayValue array,
+                                            Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2309,7 +2341,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array and
    *         in the other arrays
    */
-  public Value array_intersect_key(Env env, ArrayValue array, Value []arrays)
+  public static Value array_intersect_key(Env env,
+                                          ArrayValue array,
+                                          Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2358,7 +2392,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array and
    *         in the other arrays
    */
-  public Value array_intersect_uassoc(Env env, ArrayValue array, Value []arrays)
+  public static Value array_intersect_uassoc(Env env,
+                                             ArrayValue array,
+                                             Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2423,7 +2459,9 @@ public class ArrayModule
    * @return an array with all of the values that are in the primary array and
    *         in the other arrays
    */
-  public Value array_intersect_ukey(Env env, ArrayValue array, Value []arrays)
+  public static Value array_intersect_ukey(Env env,
+                                           ArrayValue array,
+                                           Value []arrays)
   {
     if (array == null)
       return NullValue.NULL;
@@ -2487,8 +2525,8 @@ public class ArrayModule
    * @param args the vector of array arguments
    * @return an array with all of the mapped values
    */
-  public Value array_map(Env env, Callback fun,
-                         ArrayValue arg, Value []args)
+  public static Value array_map(Env env, Callback fun,
+                                ArrayValue arg, Value []args)
   {
     // XXX: drupal
     if (arg == null)
@@ -2586,7 +2624,7 @@ public class ArrayModule
    * @param args the vector of array arguments
    * @return an array with all of the mapped values
    */
-  public Value array_merge_recursive(Env env, Value []args)
+  public static Value array_merge_recursive(Env env, Value []args)
   {
     // quercus/173a
 
@@ -2794,7 +2832,7 @@ public class ArrayModule
    * @return an array with all the values of the first array that are not in the
    *         rest
    */
-  public Value array_udiff(Env env, Value[] arrays)
+  public static Value array_udiff(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
       env.warning("Wrong paremeter count for array_udiff()");
@@ -2884,7 +2922,7 @@ public class ArrayModule
    * @return an array with all the values of the first array that are not in the
    *         rest
    */
-  public Value array_udiff_assoc(Env env, Value[] arrays)
+  public static Value array_udiff_assoc(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
       env.warning("Wrong paremeter count for array_udiff_assoc()");
@@ -2982,7 +3020,7 @@ public class ArrayModule
    * @return an array with all the values of the first array that are not in the
    *         rest
    */
-  public Value array_udiff_uassoc(Env env, Value[] arrays)
+  public static Value array_udiff_uassoc(Env env, Value[] arrays)
   {
     if (arrays.length < 4) {
       env.warning("Wrong paremeter count for array_udiff_uassoc()");
@@ -3102,7 +3140,7 @@ public class ArrayModule
    * @return an array with all the values of the first array that are in the
    *         rest
    */
-  public Value array_uintersect(Env env, Value[] arrays)
+  public static Value array_uintersect(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
       env.warning("Wrong paremeter count for array_uintersect()");
@@ -3191,7 +3229,7 @@ public class ArrayModule
    * @return an array with all the values of the first array that are in the
    *         rest
    */
-  public Value array_uintersect_assoc(Env env, Value[] arrays)
+  public static Value array_uintersect_assoc(Env env, Value[] arrays)
   {
     if (arrays.length < 3) {
       env.warning("Wrong paremeter count for array_uintersect_assoc()");
@@ -3288,7 +3326,7 @@ public class ArrayModule
    * @return an array with all the values of the first array that are in the
    *         rest
    */
-  public Value array_uintersect_uassoc(Env env, Value[] arrays)
+  public static Value array_uintersect_uassoc(Env env, Value[] arrays)
   {
     if (arrays.length < 4) {
       env.warning("Wrong paremeter count for array_uintersect_uassoc()");
@@ -3404,7 +3442,7 @@ public class ArrayModule
    * @return an array with the values of variables that match those passed
    */
   @UsesSymbolTable
-  public ArrayValue compact(Env env, Value[] variables)
+  public static ArrayValue compact(Env env, Value[] variables)
   {
     ArrayValue compactArray = new ArrayValueImpl();
 

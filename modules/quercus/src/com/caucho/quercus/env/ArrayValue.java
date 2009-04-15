@@ -789,7 +789,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Shuffles the array
    */
-  abstract public void shuffle();
+  abstract public Value shuffle();
 
   /**
    * Returns the head.
@@ -849,6 +849,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the previous value.
    */
+  @Override
   public Value prev()
   {
     if (_current != null)
@@ -881,6 +882,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the first value.
    */
+  @Override
   public Value reset()
   {
     _current = getHead();
@@ -891,6 +893,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the last value.
    */
+  @Override
   public Value end()
   {
     _current = getTail();
