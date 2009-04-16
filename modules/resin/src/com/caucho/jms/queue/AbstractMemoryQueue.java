@@ -29,11 +29,9 @@
 
 package com.caucho.jms.queue;
 
-import com.caucho.jms.message.MessageImpl;
-
 import java.io.Serializable;
-
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,6 +58,10 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   protected QueueEntry []_tail = new QueueEntry[10];
 
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
+  
+  // stats
+  private AtomicInteger _receiverCount = new AtomicInteger();
+  private AtomicInteger _listenerCount = new AtomicInteger();
 
   //
   // Abstract/stub methods to be implemented by the Queue
@@ -106,6 +108,8 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   public E receiveEntry(long expireTime, boolean isAutoAck)
     throws MessageException
   {
+    _receiverCount.incrementAndGet();
+    
     E entry = null;
 
     synchronized (_queueLock) {
@@ -120,21 +124,28 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       if (isAutoAck)
 	acknowledge(entry.getMsgId());
 
+      _receiverCount.decrementAndGet();      
       return entry;
     }
 
     if (expireTime <= Alarm.getCurrentTime()) {
+      _receiverCount.decrementAndGet();      
       return null;
     }
 
     ReceiveEntryCallback callback = new ReceiveEntryCallback(isAutoAck);
     
-    return (E) callback.waitForEntry(expireTime);
+    entry = (E) callback.waitForEntry(expireTime);
+
+    _receiverCount.decrementAndGet();    
+    return entry;
   }
   
   public EntryCallback addMessageCallback(MessageCallback callback,
 					  boolean isAutoAck)
   {
+    _listenerCount.incrementAndGet();
+    
     ListenEntryCallback entryCallback
       = new ListenEntryCallback(callback, isAutoAck);
 
@@ -153,6 +164,8 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
     synchronized (_queueLock) {
       _callbackList.remove(listenerCallback);
     }
+    
+    _listenerCount.decrementAndGet();
   }
 
   //
@@ -232,7 +245,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   }
   
   //
-  // Queue size statistics
+  // Queue statistics JMX
   //
 
   /**
@@ -262,7 +275,18 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
     return getQueueSize() > 0;
   }
   
+  @Override  
+  public int getConsumerCount()
+  {
+    return _listenerCount.get();
+  }
 
+  @Override  
+  public int getReceiverCount()
+  {
+    return _receiverCount.get();
+  }
+  
   //
   // queue management
   //
@@ -425,9 +449,10 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       
       while (_entry == null
 	     && (timeout = expireTime - Alarm.getCurrentTime()) > 0) {
+        
 	LockSupport.parkNanos(timeout * 1000000L);
       }
-
+      
       return _entry;
     }
   }
@@ -464,18 +489,23 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
     {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
+      boolean isValid = false;
 
       try {
 	thread.setContextClassLoader(_classLoader);
 
 	_callback.messageReceived(_entry.getMsgId(), _entry.getPayload());
+	isValid = true;
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
+	isValid = true;
+      } catch (Throwable t) {
+        log.log(Level.SEVERE, t.toString(), t);
       } finally {
 	thread.setContextClassLoader(oldLoader);
       }
 
-      if (! _isClosed)
+      if (! _isClosed && isValid)
 	listen(this);
     }
 

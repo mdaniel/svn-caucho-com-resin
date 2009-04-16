@@ -60,6 +60,12 @@ public interface JmsQueueMXBean extends ManagedObjectMXBean {
   public int getConsumerCount();
 
   /**
+   * Returns the number of consumers for the queue.
+   */
+  @Description("The number of queue Receivers")
+  public int getReceiverCount();
+  
+  /**
    * Returns the number of listener failures
    */
   @Description("The number of listener failures")

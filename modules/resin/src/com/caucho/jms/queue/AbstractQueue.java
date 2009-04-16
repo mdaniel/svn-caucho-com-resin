@@ -280,6 +280,16 @@ abstract public class AbstractQueue extends AbstractDestination
   {
     return 0;
   }
+  
+  /**
+   * Returns the number of receivers.
+   * 
+   * @return
+   */
+  public int getReceiverCount() 
+  {
+    return 0;    
+  }
 
   /**
    * Returns the queue size

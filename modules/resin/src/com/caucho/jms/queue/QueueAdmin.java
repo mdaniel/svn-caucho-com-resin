@@ -77,6 +77,16 @@ public class QueueAdmin extends AbstractManagedObject
   {
     return _queue.getConsumerCount();
   }
+  
+  /**
+   * Returns the number of receivers.
+   * 
+   * @return
+   */
+  public int getReceiverCount() 
+  {
+    return _queue.getReceiverCount();    
+  }  
 
   /**
    * Returns the number of active message consumers
