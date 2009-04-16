@@ -104,6 +104,7 @@ END;
   }
   else {
     $disabled = "disabled='true'";
+    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL)</div>";
   }
 
   $name = $webapp->mbean_name;
@@ -207,6 +208,9 @@ echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "
 
 </table>
 
+<?php 
+if (quercus_get_request()->isSecure()) {
+?>
 <h2>Deploy new webapp</h2>
 
 <table>
@@ -224,6 +228,9 @@ echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "
     <td><input type='submit' value='Deploy'/></td>
   </tr>
 </form>
+<?php
+}
+?>
 
 </table>
 <?php
