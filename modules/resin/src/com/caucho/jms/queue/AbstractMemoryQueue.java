@@ -110,35 +110,34 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   {
     _receiverCount.incrementAndGet();
     
-    E entry = null;
+    try {
+      E entry = null;
 
-    synchronized (_queueLock) {
-      if (_callbackList.size() == 0) {
-	entry = readEntry();
+      synchronized (_queueLock) {
+        if (_callbackList.size() == 0) {
+  	entry = readEntry();
+        }
       }
+
+      if (entry != null) {
+        readPayload(entry);
+  
+        if (isAutoAck)
+  	acknowledge(entry.getMsgId());
+          
+        return entry;
+      }
+  
+      if (expireTime <= Alarm.getCurrentTime()) {              
+        return null;
+      }
+  
+      ReceiveEntryCallback callback = new ReceiveEntryCallback(isAutoAck);
+      
+      return (E) callback.waitForEntry(expireTime);
+    } finally {
+      _receiverCount.decrementAndGet();  
     }
-
-    if (entry != null) {
-      readPayload(entry);
-
-      if (isAutoAck)
-	acknowledge(entry.getMsgId());
-
-      _receiverCount.decrementAndGet();      
-      return entry;
-    }
-
-    if (expireTime <= Alarm.getCurrentTime()) {
-      _receiverCount.decrementAndGet();      
-      return null;
-    }
-
-    ReceiveEntryCallback callback = new ReceiveEntryCallback(isAutoAck);
-    
-    entry = (E) callback.waitForEntry(expireTime);
-
-    _receiverCount.decrementAndGet();    
-    return entry;
   }
   
   public EntryCallback addMessageCallback(MessageCallback callback,
