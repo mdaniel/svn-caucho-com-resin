@@ -155,6 +155,35 @@ the user will be using the new version of the application.
 
 </s1>
 
+<s1 title="Remote Deployment">
+<p>
+As of Resin 4.0.0, it is now possible to deploy web applications remotely
+to a shared repository that is distributed across the cluster.  This feature
+allows you to deploy once to any triad server and have the application
+be updated automatically across the entire cluster.  When a new 
+<a href="dynamic-servers.xtp">dynamic server</a> joins the cluster, the
+triad will populate it with these applications as well.
+</p>
+<p>
+To deploy an application remotely:
+</p>
+<ol>
+<li>log into the resin-admin console on
+any triad server.  <em>Make sure you are connecting over SSL, as this feature
+is not available over a non-encrypted channel.</em></li>
+<li>Browse to the "webapp" tab of the resin-admin server and at the bottom
+of the page, enter the virtual host, URL, and local .war file specifying
+the web application, then press "Deploy".
+<figure src="deploy-webapp.png"/>
+</li>
+<li>
+The application should now be deployed on the server.  In a few moments,
+all the servers in the cluster will have the webapp.
+<figure src="deployed-webapp.png"/>
+</li>
+</ol>
+</s1>
+
 <s1 name="precompile-jsp" title="JSP Precompilation">
 
 <p>
