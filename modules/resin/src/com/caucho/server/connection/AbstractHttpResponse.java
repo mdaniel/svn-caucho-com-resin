@@ -106,8 +106,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   private HttpBufferStore _bufferStore;
   private AbstractResponseStream _originalResponseStream;
-  private ServletOutputStreamImpl _responseOutputStream;
-  private ResponseWriter _responsePrintWriter;
+  
+  private final ServletOutputStreamImpl _responseOutputStream
+    = new ServletOutputStreamImpl();
+  private final ResponseWriter _responsePrintWriter
+    = new ResponseWriter();
 
   private AbstractResponseStream _responseStream;
 
@@ -174,9 +177,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     */
   }
 
-  protected AbstractResponseStream createResponseStream()
+  protected AbstractResponseStream
+    createResponseStream(HttpBufferStore bufferStore)
   {
-    return new ResponseStream(this);
+    ResponseStream responseStream = bufferStore.getResponseStream();
+
+    responseStream.setResponse(this);
+    responseStream.init(_rawWrite);
+
+    return responseStream;
   }
 
   protected AbstractHttpResponse(CauchoRequest request)
@@ -185,11 +194,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     
     _request = request;
     _originalRequest = request;
-
-    /*
-    _responseOutputStream.init(_originalResponseStream);
-    _responsePrintWriter.init(_originalResponseStream);
-    */
   }
 
   /**
@@ -346,21 +350,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _contentPrefix = null;
     _locale = null;
 
-    if (bufferStore != null) {
-      ResponseStream responseStream = bufferStore.getResponseStream();
-      _originalResponseStream = responseStream;
-      responseStream.setResponse(this);
-      responseStream.init(_rawWrite);
-      responseStream.start();
-      _responseOutputStream = bufferStore.getOutputStream();
-      _responsePrintWriter = bufferStore.getPrintWriter();
-      _responseStream = _originalResponseStream;
-    }
+    AbstractResponseStream responseStream
+      = createResponseStream(bufferStore);
+    _originalResponseStream = responseStream;
+
+    responseStream.start();
+    _responseStream = _originalResponseStream;
+
+    _responseOutputStream.init(responseStream);
+    _responsePrintWriter.init(responseStream);
     
-    /*
-    if (_originalResponseStream instanceof ResponseStream)
-      ((ResponseStream) _originalResponseStream).init(_rawWrite);
-    */
     _flushBuffer = null;
 
     _contentLength = -1;

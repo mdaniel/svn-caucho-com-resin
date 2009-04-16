@@ -56,9 +56,6 @@ public final class HttpBufferStore
   
   private final ResponseStream _responseStream;
   
-  private final ServletOutputStreamImpl _responseOutputStream;
-  private final ResponseWriter _responsePrintWriter;
-  
   private final TempBuffer _tempBuffer = TempBuffer.allocate();
 
   /**
@@ -91,12 +88,6 @@ public final class HttpBufferStore
     }
     
     _responseStream = new ResponseStream();
-    
-    _responseOutputStream = new ServletOutputStreamImpl();
-    _responsePrintWriter = new ResponseWriter();
-
-    _responseOutputStream.init(_responseStream);
-    _responsePrintWriter.init(_responseStream);
   }
 
   public static HttpBufferStore allocate(Server server)
@@ -142,16 +133,6 @@ public final class HttpBufferStore
   public final ResponseStream getResponseStream()
   {
     return _responseStream;
-  }
-
-  public final ServletOutputStreamImpl getOutputStream()
-  {
-    return _responseOutputStream;
-  }
-
-  public final ResponseWriter getPrintWriter()
-  {
-    return _responsePrintWriter;
   }
 
   public final TempBuffer getTempBuffer()

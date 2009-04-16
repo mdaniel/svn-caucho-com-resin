@@ -178,14 +178,14 @@ public class MnodeStore implements AlarmListener {
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
     
-    _updatesSinceQuery = ("SELECT id,value,item_version,update_time"
+    _updatesSinceQuery = ("SELECT id,value,flags,item_version,update_time"
 			  + " FROM " + _tableName
 			  + " WHERE ? <= update_time"
 			  + " LIMIT 1024");
 
     int global = CacheConfig.FLAG_GLOBAL;
     
-    _globalUpdatesSinceQuery = ("SELECT id,value,item_version,update_time"
+    _globalUpdatesSinceQuery = ("SELECT id,value,flags,item_version,update_time"
 				+ " FROM " + _tableName
 				+ " WHERE ? <= update_time"
 				+ "   AND bitand(flags, " + global + ") <> 0"

@@ -92,6 +92,7 @@ class DispatchResponse extends AbstractHttpResponse
   /**
    * Starts the response.
    */
+  /*
   @Override
   public void startRequest(HttpBufferStore httpBuffer)
     throws IOException
@@ -101,6 +102,14 @@ class DispatchResponse extends AbstractHttpResponse
     setResponseStream(_stream);
 
     _stream.start();
+  }
+  */
+
+  @Override
+  protected AbstractResponseStream
+    createResponseStream(HttpBufferStore bufferStore)
+  {
+    return _stream;
   }
 
   /**

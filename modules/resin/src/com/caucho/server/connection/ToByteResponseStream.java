@@ -195,6 +195,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public byte []getBuffer()
     throws IOException
   {
+    if (! _isOutputStreamOnly)
+      flushCharBuffer();
+    
     return _tailByteBuffer;
   }
 
@@ -204,6 +207,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public int getBufferOffset()
     throws IOException
   {
+    if (! _isOutputStreamOnly)
+      flushCharBuffer();
+    
     return _tailByteLength;
   }
 
