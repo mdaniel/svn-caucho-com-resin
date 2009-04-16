@@ -1,0 +1,135 @@
+<document>
+<header>
+<product>resin</product>
+<title>Dynamic Servers</title>
+<description>
+<p>Resin includes the ability to add servers to clusters dynamically.  These
+dynamic servers are able to use distributed sessions and the distributed
+object cache.  The triad also updates these servers with applications
+that are deployed via the remote deployment server.  The Resin load balancer
+is also able to dispatch requests to them as with any static server.
+</p>
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+<p>
+Adding a dynamic server to a cluster is a simple two-step process:
+</p>
+<ol>
+<li>Register the dynamic server with a triad server via JMX.</li>
+<li>Start the new dynamic server using the registration in the previous step.</li>
+</ol>
+</s1>
+
+<s1 title="Preliminaries">
+<p>
+Before adding a dynamic server, you must:
+</p>
+<ul>
+<li>Set up and start a cluster with a triad, e.g.
+<example>
+&lt;cluster id="app-tier">
+  ...
+  &lt;server id="triad-a" address="234.56.78.90" port="6800"/>
+  &lt;server id="triad-b" address="34.56.78.90" port="6800"/>
+  &lt;server id="triad-c" address="45.67.89.12" port="6800"/>
+</example>
+</li>
+<li>Install at least one admin password, usually in 
+<var>admin-users.xml</var></li>
+<li>Enable the RemoteAdminService for the cluster, e.g.
+<example>
+&lt;cluster id="app-tier">
+  ...
+  &lt;admin:RemoteAdminService xmlns:admin="urn:java:com.caucho.admin"/>
+  ...
+</example>
+</li>
+<li>Enable the dynamic servers for the cluster, e.g.
+<example>
+&lt;cluster id="app-tier">
+  ...
+  &lt;dynamic-server-enable>true&lt;/dynamic-server-enable>
+  ...
+</example></li>
+</ul>
+<p>
+Check the main <a href="clustering.xtp">Clustering</a> section for more
+information on this topic.
+</p>
+</s1>
+
+<s1 title="Registering a dynamic server">
+<p>
+For the first step of registration, you can use a JMX tool like jconsole or
+simply use the Resin administration web console.  We'll show how to do
+the latter method here.  For registration, you'll specify three values:
+</p>
+
+<deftable title="web-app deployment options">
+<tr>
+  <th>Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Server id</td>
+  <td>Symbolic identifier of the new dynamic server.  
+      This is also specified when starting the new server.</td>
+</tr>
+<tr>
+  <td>IP</td>
+  <td>The IP address of the new dynamic server.  May also be host name.</td>
+</tr>
+<tr>
+  <td>Port</td>
+  <td>The server port of the new dynamic server.  Usually 6800.</td>
+</tr>
+</deftable>
+
+<p>
+With these three values, browse to the Resin administration application's
+"cluster" tab.  If you have enabled dynamic servers for your cluster, you 
+should see a form allowing you to register the server in the "Cluster Overview"
+table.
+</p>
+<figure src="dynamic-server-add.png"/>
+<p>
+Once you have entered the values and added the server, it should show up 
+in the table as a dead server because we haven't started it yet.  The
+dynamic server's registration will be propagated to all the servers in the
+cluster.
+</p>
+<figure src="dynamic-server-added.png"/>
+</s1>
+
+<s1 title="Starting a dynamic server">
+<p>
+Now that we've registered the dynamic server, we can start it
+and have it join the cluster.  In order for the new server to be
+recognized and accepted by the triad, it needs to start with the
+same resin.xml that the triad is using, the name of the cluster it is
+joining, and the values entered in the registration step.  These can
+all be specified on the command line when starting the server:
+</p>
+<example>
+dynamic-server> java -jar $RESIN_HOME/lib/resin.jar -conf /etc/resin/resin.xml \
+                     -dynamic-server app-tier:123.45.67.89:6800
+</example>
+<p>
+Specifying the configuration file allows the new server to configure
+itself using the &lt;server-default> options, to find the triad servers
+of the cluster it is joining, and to authenticate using the administration
+logins.  This command starts the server, which immediately contacts the
+triad to join the cluster. Once it has successfully joined, the "Cluster"
+tab of the administration application should look like this:
+</p>
+<figure src="dynamic-server-started.png"/>
+</s1>
+
+</body>
+</document>

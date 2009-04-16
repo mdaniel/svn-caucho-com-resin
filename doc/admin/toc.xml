@@ -19,6 +19,8 @@
       -->
     <item link="deployment.xtp" title="Deployment"/>
 
+    <item link="dynamic-servers.xtp" title="Dynamic Servers"/>
+
     <!--
        - IoC
       -->
