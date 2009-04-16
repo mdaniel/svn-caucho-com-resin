@@ -155,7 +155,7 @@ public class CoreForEachTag extends LoopTagSupport {
   @Override
   protected String getDelims()
   {
-    return ", \t\n\r\f";
+    return ",";
   }
 
   public static ValueExpression getExpr(ValueExpression expr, Integer i,

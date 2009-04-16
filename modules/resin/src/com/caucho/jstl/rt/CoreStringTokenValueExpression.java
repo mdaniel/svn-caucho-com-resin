@@ -100,7 +100,7 @@ public final class CoreStringTokenValueExpression
         if (c == d) {
           if (lastDelimPos + 1 < i) {
             if (index == 0) {
-              return new String(chars, lastDelimPos + 1, i - lastDelimPos - 1);
+              return new String(chars, lastDelimPos + 1, i - lastDelimPos - 1).trim();
             }
 
             index--;
@@ -115,7 +115,7 @@ public final class CoreStringTokenValueExpression
     if (index == 0)
       return new String(chars,
                         lastDelimPos + 1,
-                        chars.length - lastDelimPos - 1);
+                        chars.length - lastDelimPos - 1).trim();
     else
       return null;
   }

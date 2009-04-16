@@ -128,7 +128,7 @@ public final class IteratedExpression {
         if (! tokenizer.hasMoreTokens())
           return null;
 
-        value = tokenizer.nextToken();
+        value = tokenizer.nextToken().trim();
       }
 
       return value;

@@ -609,7 +609,7 @@ public class JstlCoreForEach extends JstlNode {
         out.print("\", ");
         out.print("com.caucho.jstl.rt.CoreForEachTag.getExpr(");
         out.print(deferredValue + ", " + _tagVar + ".getIndex(), " + itemsVar);
-        out.println(", \", \\t\\n\\r\\f\"));");
+        out.println(", \",\"));");
       } else {
         out.print("pageContext.setAttribute(\"" + escapeJavaString(_var) + "\"");
         out.println(", " + iVar + ");");
