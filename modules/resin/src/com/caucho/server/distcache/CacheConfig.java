@@ -60,8 +60,7 @@ public class CacheConfig
   private long _expireTimeoutWindow = 0;
 
   private long _idleTimeout = TIME_INFINITY;
-
-  private long _idleTimeoutWindow = 0;
+  private long _idleTimeoutWindow = -1;
 
   private long _localReadTimeout
     = Alarm.isTest() ? -1 : 250L; // 250ms default timeout, except for QA
@@ -87,9 +86,9 @@ public class CacheConfig
   }
 
   /**
-   * Sets the CacheLoader that the Cache can then use to populate cache misses for a reference store (database)
+   * Sets the CacheLoader that the Cache can then use to
+   * populate cache misses for a reference store (database)
    */
-  @Configurable
   public void setCacheLoader(CacheLoader cacheLoader)
   {
     _cacheLoader = cacheLoader;
@@ -172,7 +171,9 @@ public class CacheConfig
    */
   public long getExpireCheckWindow()
   {
-    return _expireTimeoutWindow > 0 ? _expireTimeoutWindow : _expireTimeoutWindow / 4;
+    return (_expireTimeoutWindow > 0
+	    ? _expireTimeoutWindow
+	    : _expireTimeout / 4);
   }
 
   /**
@@ -214,7 +215,6 @@ public class CacheConfig
    * Cached data would typically use an infinite idle time because
    * it doesn't depend on how often it's accessed.
    */
-  @Configurable
   public void setIdleTimeout(long idleTimeout)
   {
     if (idleTimeout < 0 || TIME_INFINITY <= idleTimeout)
@@ -229,7 +229,9 @@ public class CacheConfig
    */
   public long getIdleCheckWindow()
   {
-    return _idleTimeoutWindow > 0 ? _idleTimeoutWindow : _idleTimeoutWindow / 4;
+    return (_idleTimeoutWindow > 0
+	    ? _idleTimeoutWindow
+	    : _idleTimeout / 4);
   }
 
   /**
@@ -239,7 +241,6 @@ public class CacheConfig
    * If this optional value is not set, the system  uses a fraction of the
    * idle time.
    */
-  @Configurable
   public void setIdleTimeoutWindow(long idleTimeoutWindow)
   {
     _idleTimeoutWindow = idleTimeoutWindow;
@@ -258,7 +259,6 @@ public class CacheConfig
    * The lease timeout is the time a server can use the local version
    * if it owns it, before a timeout.
    */
-  @Configurable
   public void setLeaseTimeout(long timeout)
   {
     _leaseTimeout = timeout;
@@ -277,7 +277,6 @@ public class CacheConfig
    * The local read timeout is the time a local copy of the
    * cache is considered valid.
    */
-  @Configurable
   public void setLocalReadTimeout(long timeout)
   {
     _localReadTimeout = timeout;
@@ -368,7 +367,6 @@ public class CacheConfig
    * <p/>
    * Defaults to true.
    */
-  @Configurable
   public void setTriplicate(boolean isTriplicate)
   {
     if (isTriplicate)

@@ -260,6 +260,14 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
+   * Sets the idle timeout windows
+   */
+  public void setIdleTimeoutWindow(Period period)
+  {
+    _config.setIdleTimeoutWindow(period.getPeriod());
+  }
+
+  /**
    * The lease timeout is the time a server can use the local version
    * if it owns it, before a timeout.
    */
