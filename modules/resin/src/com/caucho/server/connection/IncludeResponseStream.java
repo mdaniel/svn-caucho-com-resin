@@ -133,6 +133,11 @@ public class IncludeResponseStream extends ToByteResponseStream {
   protected void flushCharBuffer()
     throws IOException
   {
+    int charLength = getCharOffset();
+    
+    if (charLength == 0)
+      return;
+    
     if (_isCauchoResponseStream && _nextResponseStream == null) {
       // jsp/18ek
       super.flushCharBuffer();
@@ -148,7 +153,6 @@ public class IncludeResponseStream extends ToByteResponseStream {
     }
 
     if (_writer != null) {
-      int charLength = getCharOffset();
       setCharOffset(0);
       char []buffer = getCharBuffer();
 

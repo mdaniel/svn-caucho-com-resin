@@ -151,6 +151,7 @@ public class WebApp extends ServletContextImpl
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
 
+  private Server _server;
   // The parent
   private WebAppContainer _parent;
 
@@ -347,6 +348,8 @@ public class WebApp extends ServletContextImpl
    */
   WebApp(WebAppController controller)
   {
+    _server = Server.getCurrent();
+    
     String contextPath = controller.getContextPath();
     setContextPathId(contextPath);
 
@@ -1983,8 +1986,10 @@ public class WebApp extends ServletContextImpl
           sessionManager.close();
       }
 
-      if (getSessionManager() != null)
-        getSessionManager().init();
+      if (_server != null) {
+	if (getSessionManager() != null)
+	  getSessionManager().init();
+      }
       
       _roleMapManager = RoleMapManager.create();
 

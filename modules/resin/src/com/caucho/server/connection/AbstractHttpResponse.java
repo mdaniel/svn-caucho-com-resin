@@ -1475,6 +1475,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       // _responseStream.setOutputStreamOnly(true);
     }
     */
+    // jsp/1cie, jsp/1civ
+    // _responseStream.setEncoding(null);
     
     return _responseOutputStream;
   }
