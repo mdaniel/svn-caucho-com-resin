@@ -27,29 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
-
-import com.caucho.config.Configurable;
-import javax.context.ApplicationScoped;
+package com.caucho.distcache;
 
 /**
- * Cache with no persistence.
- * //TODO(fred): finalize definition of allowable and supported cache modes (Scope and Persistence)
- * //TODO(fred): finalize definition of the set of classes that extend AbstractCache
+ * User interface to load items for a cache.
  */
-@ApplicationScoped
-@Configurable
-public class TransientCache extends AbstractCache
+public interface CacheLoader
 {
-  public TransientCache()
-  {
-    setPersistenceMode(Persistence.NONE);
-    setScopeMode(Scope.SERVER);
-  }
-
-  public TransientCache(String name)
-  {
-    this();
-    setName(name);
-  }
+  /**
+   * Creates the object with the given key.
+   */
+  public Object load(Object key);
 }

@@ -29,8 +29,8 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheSerializer;
-import com.caucho.cluster.ExtCacheEntry;
+import com.caucho.distcache.CacheSerializer;
+import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.ClusterPod;

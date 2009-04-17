@@ -2549,9 +2549,13 @@ public abstract class AbstractHttpRequest
   {
     _invocation = invocation;
 
-    WebApp app = invocation.getWebApp();
-    if (app != null)
-      _attributeListeners = app.getRequestAttributeListeners();
+    if (invocation != null) {
+      // server/2m05
+      
+      WebApp app = invocation.getWebApp();
+      if (app != null)
+	_attributeListeners = app.getRequestAttributeListeners();
+    }
   }
 
   public AbstractHttpRequest getAbstractHttpRequest()

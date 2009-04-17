@@ -27,46 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
-import javax.cache.CacheEntry;
-
-import com.caucho.util.HashKey;
+import com.caucho.config.Configurable;
+import javax.context.ApplicationScoped;
 
 /**
- * Provides additional informationabout an entry in a {@link javax.cache.Cache}.
+ * Cache with no persistence.
+ * //TODO(fred): finalize definition of allowable and supported cache modes (Scope and Persistence)
+ * //TODO(fred): finalize definition of the set of classes that extend AbstractCache
  */
-public interface ExtCacheEntry extends CacheEntry
+@ApplicationScoped
+@Configurable
+public class TransientCache extends AbstractCache
 {
-  /**
-   * Returns true for a null entry
-   */
-  public boolean isValueNull();
-  
-  /**
-   * Returns the item's value
-   */
-  public Object getValue();
+  public TransientCache()
+  {
+    setPersistenceMode(Persistence.NONE);
+    setScopeMode(Scope.SERVER);
+  }
 
-  /**
-   * Returns the value key
-   */
-  public HashKey getValueHashKey();
-
-  /**
-   * Returns the idle timeout
-   */
-  public long getIdleTimeout();
-
-  /**
-   * Returns the lease timeout
-   */
-  public long getLeaseTimeout();
-
-  /**
-   * Returns the lease owner
-   */
-  public int getLeaseOwner();
-
-  public boolean isValid();
+  public TransientCache(String name)
+  {
+    this();
+    setName(name);
+  }
 }

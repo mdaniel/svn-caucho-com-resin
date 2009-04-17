@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,40 +27,66 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
-import javax.cache.Cache;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 
 /**
  * Interface for a distributed cache.
  */
-public interface ObjectCache extends Cache
+public interface ByteStreamCache
 {
   /**
-   * Returns the extended entry
+   * Fills a stream for the content with the given key.
    */
-  public ExtCacheEntry getExtCacheEntry(Object entry);
+  public boolean get(Object key, OutputStream os)
+    throws IOException;
+  
+  /**
+   * Returns the cache entry for the object with the given key.
+   */
+  public ExtCacheEntry getExtCacheEntry(Object key);
+  
+  /**
+   * Returns the cache entry for the object with the given key, without
+   * triggering a load.
+   */
+  public ExtCacheEntry peekExtCacheEntry(Object key);
+  
+  /**
+   * Puts a new item in the cache.
+   *
+   * @param key the key of the item to put
+   * @param is stream to contain the value
+   */
+  public ExtCacheEntry put(Object key, InputStream is,
+			   long idleTimeout)
+    throws IOException;
   
   /**
    * Updates the cache if the old value hash matches the current value.
    * A null value for the old value hash only adds the entry if it's new
    *
    * @param key the key to compare
-   * @param version the version of the old value returned by getEntry
-   * @param value the new value
+   * @param oldVersion the version of the old value, returned by getEntry
+   * 
    *
    * @return true if the update succeeds, false if it fails
    */
-  public boolean compareAndPut(Object key, long version, Object value);
+  public boolean compareAndPut(Object key,
+			       long oldVersion,
+			       InputStream is)
+    throws IOException;
 
   /**
-   * Removes the entry from the cache if the current entry's version
-   * matches.
+   * Removes the entry from the cache
    */
-  public boolean compareAndRemove(Object key, long version);
+  public Object remove(Object key);
 
   /**
-   * Returns true if the cache is closed
+   * Removes the entry from the cache if the current entry matches the hash
    */
-  public boolean isClosed();
+  public boolean compareAndRemove(Object key, long oldVersion);
 }

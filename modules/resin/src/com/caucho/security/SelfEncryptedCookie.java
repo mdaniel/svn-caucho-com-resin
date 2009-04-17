@@ -29,9 +29,6 @@
 
 package com.caucho.security;
 
-import com.caucho.cluster.ObjectCache;
-import com.caucho.cluster.AbstractCache;
-import com.caucho.cluster.ClusterCache;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hessian.io.Hessian2Input;

@@ -27,29 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
+
+import javax.cache.CacheEntry;
+
+import com.caucho.util.HashKey;
 
 /**
- * General exception for caches
+ * Provides additional informationabout an entry in a {@link javax.cache.Cache}.
  */
-public class CacheException extends RuntimeException
+public interface ExtCacheEntry extends CacheEntry
 {
-  public CacheException()
-  {
-  }
+  /**
+   * Returns true for a null entry
+   */
+  public boolean isValueNull();
+  
+  /**
+   * Returns the item's value
+   */
+  public Object getValue();
 
-  public CacheException(String msg)
-  {
-    super(msg);
-  }
+  /**
+   * Returns the value key
+   */
+  public HashKey getValueHashKey();
 
-  public CacheException(String msg, Throwable cause)
-  {
-    super(msg, cause);
-  }
+  /**
+   * Returns the idle timeout
+   */
+  public long getIdleTimeout();
 
-  public CacheException(Throwable cause)
-  {
-    super(cause);
-  }
+  /**
+   * Returns the lease timeout
+   */
+  public long getLeaseTimeout();
+
+  /**
+   * Returns the lease owner
+   */
+  public int getLeaseOwner();
+
+  public boolean isValid();
 }

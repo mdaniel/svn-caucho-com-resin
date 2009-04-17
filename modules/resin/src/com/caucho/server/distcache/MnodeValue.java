@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.ExtCacheEntry;
+import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 

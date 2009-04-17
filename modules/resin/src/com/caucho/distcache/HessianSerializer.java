@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;

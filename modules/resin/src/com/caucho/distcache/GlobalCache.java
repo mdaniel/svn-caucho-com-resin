@@ -27,16 +27,35 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
 import com.caucho.config.Configurable;
 import javax.context.ApplicationScoped;
 
 /**
- * Cache which stores consistent copies on the triad.
+ * Cache which stores consistent copies on all clusters.
+ *
+ * Using the cache is like using java.util.Map.  To add a new entry,
+ * call <code>cache.put(key, value)</code>.  To get the entry, call
+ * <code>cache.get(key)</code>.
+ *
+ * The cache configuration affects the lifetime, local caching timeouts
+ * and consistency.
  */
+
 @ApplicationScoped
 @Configurable  
-public class ClusterByteStreamCache extends AbstractCache
+public class GlobalCache extends AbstractCache
 {
+  public GlobalCache()
+  {
+    setGlobal(true);
+  }
+  
+  public GlobalCache(String name)
+  {
+    this();
+    
+    setName(name);
+  }
 }

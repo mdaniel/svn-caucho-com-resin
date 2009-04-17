@@ -27,26 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.caucho.config.Configurable;
+import javax.context.ApplicationScoped;
 
 /**
- * Custom serialization for the cache
+ * Cache which stores consistent copies on the cluster segment.
+ *
+ * Using the cache is like using java.util.Map.  To add a new entry,
+ * call <code>cache.put(key, value)</code>.  To get the entry, call
+ * <code>cache.get(key)</code>.
+ *
+ * The cache configuration affects the lifetime, local caching timeouts
+ * and consistency.
  */
-public interface CacheSerializer<V>
+
+@ApplicationScoped
+@Configurable  
+public class ClusterCache extends AbstractCache
 {
-  /**
-   * Serialize the data
-   */
-  public void serialize(V value, OutputStream os)
-    throws IOException;
+  public ClusterCache()
+  {
+  }
   
-  /**
-   * Deserialize the data
-   */
-  public V deserialize(InputStream is)
-    throws IOException;
+  public ClusterCache(String name)
+  {
+    setName(name);
+  }
 }

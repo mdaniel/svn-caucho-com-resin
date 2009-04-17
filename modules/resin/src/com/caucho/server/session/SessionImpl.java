@@ -29,8 +29,8 @@
 
 package com.caucho.server.session;
 
-import com.caucho.cluster.ByteStreamCache;
-import com.caucho.cluster.ExtCacheEntry;
+import com.caucho.distcache.ByteStreamCache;
+import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.hessian.io.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.security.AbstractAuthenticator;

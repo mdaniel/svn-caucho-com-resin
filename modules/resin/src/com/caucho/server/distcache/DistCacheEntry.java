@@ -29,10 +29,10 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.distcache.MnodeValue;
 import com.caucho.server.distcache.CacheConfig;
+import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 

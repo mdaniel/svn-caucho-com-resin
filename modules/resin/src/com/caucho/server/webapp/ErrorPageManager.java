@@ -305,7 +305,12 @@ public class ErrorPageManager {
     }
 
     if (badRequest) {
-      title = rootExn.getMessage();
+      // server/05a0
+      if (rootExn instanceof CompileException)
+	title = rootExn.getMessage();
+      else
+	title = String.valueOf(rootExn);
+
       doStackTrace = false;
       badRequest = true;
 
@@ -314,7 +319,10 @@ public class ErrorPageManager {
       
       response.resetBuffer();
       
-      response.setStatus(response.SC_BAD_REQUEST, rootExn.getMessage());
+      response.setStatus(response.SC_BAD_REQUEST, title);
+
+      if (location == null)
+	log.warning(e.toString());
     }
     else if (rootExn instanceof UnavailableException) {
       UnavailableException unAvail = (UnavailableException) rootExn;

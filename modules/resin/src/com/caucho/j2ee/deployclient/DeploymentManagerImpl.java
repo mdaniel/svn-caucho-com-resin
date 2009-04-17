@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -297,12 +298,19 @@ public class DeploymentManagerImpl
 
       StatusQuery status = _deployClient.status(tag);
 
+      String archiveName;
+
+      if (archive != null)
+	archiveName = String.valueOf(archive);
+      else
+	archiveName = "stream";
+
       if (status.getMessage() == null)
         result.completed(L.l("application {0} deployed from {1}",
-                             name, archive));
+                             name, archiveName));
       else
         result.failed(L.l("application {0} failed from {1}: {2}",
-                          name, archive, status.getMessage()));
+                          name, archiveName, status.getMessage()));
 
       return result;
     } // XXX: hack

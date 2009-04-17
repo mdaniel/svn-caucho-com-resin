@@ -27,7 +27,7 @@
  * @author Fred Zappert (fred@caucho.com)
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
 /**
  * Provides a null implementation of {@link javax.cache.CacheListener}

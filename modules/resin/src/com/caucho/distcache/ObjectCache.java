@@ -27,15 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
+
+import javax.cache.Cache;
 
 /**
- * User interface to load items for a cache.
+ * Interface for a distributed cache.
  */
-public interface CacheLoader
+public interface ObjectCache extends Cache
 {
   /**
-   * Creates the object with the given key.
+   * Returns the extended entry
    */
-  public Object load(Object key);
+  public ExtCacheEntry getExtCacheEntry(Object entry);
+  
+  /**
+   * Updates the cache if the old value hash matches the current value.
+   * A null value for the old value hash only adds the entry if it's new
+   *
+   * @param key the key to compare
+   * @param version the version of the old value returned by getEntry
+   * @param value the new value
+   *
+   * @return true if the update succeeds, false if it fails
+   */
+  public boolean compareAndPut(Object key, long version, Object value);
+
+  /**
+   * Removes the entry from the cache if the current entry's version
+   * matches.
+   */
+  public boolean compareAndRemove(Object key, long version);
+
+  /**
+   * Returns true if the cache is closed
+   */
+  public boolean isClosed();
 }

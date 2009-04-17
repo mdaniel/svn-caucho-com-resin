@@ -29,9 +29,9 @@
 
 package com.caucho.security;
 
-import com.caucho.cluster.ObjectCache;
-import com.caucho.cluster.AbstractCache;
-import com.caucho.cluster.ClusterCache;
+import com.caucho.distcache.ObjectCache;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.ClusterCache;
 import com.caucho.util.LruCache;
 
 import java.util.logging.Logger;

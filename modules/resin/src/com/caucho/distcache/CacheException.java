@@ -27,26 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
-
-import com.caucho.config.Configurable;
-import javax.context.ApplicationScoped;
+package com.caucho.distcache;
 
 /**
- * Cache which stores a single copy on the triad.
+ * General exception for caches
  */
-@ApplicationScoped
-@Configurable  
-public class BackupByteStreamCache extends AbstractCache
+public class CacheException extends RuntimeException
 {
-  public BackupByteStreamCache()
+  public CacheException()
   {
-    setPersistenceMode(Persistence.SINGLE);
   }
 
-  public BackupByteStreamCache(String name)
+  public CacheException(String msg)
   {
-    this();
-    setName(name);
+    super(msg);
+  }
+
+  public CacheException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
+
+  public CacheException(Throwable cause)
+  {
+    super(cause);
   }
 }

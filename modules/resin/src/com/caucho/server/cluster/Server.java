@@ -31,8 +31,8 @@ package com.caucho.server.cluster;
 
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
-import com.caucho.cluster.ClusterCache;
-import com.caucho.cluster.GlobalCache;
+import com.caucho.distcache.ClusterCache;
+import com.caucho.distcache.GlobalCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;

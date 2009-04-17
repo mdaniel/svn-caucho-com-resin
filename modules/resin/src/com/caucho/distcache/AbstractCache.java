@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cluster;
+package com.caucho.distcache;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;

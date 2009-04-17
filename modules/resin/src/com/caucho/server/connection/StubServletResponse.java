@@ -43,6 +43,13 @@ public class StubServletResponse extends AbstractHttpResponse {
     } catch (Throwable e) {
     }
   }
+
+  @Override
+  protected AbstractResponseStream
+    createResponseStream(HttpBufferStore bufferStore)
+  {
+    return new StubResponseStream();
+  }
   
   public String getCharacterEncoding()
   {

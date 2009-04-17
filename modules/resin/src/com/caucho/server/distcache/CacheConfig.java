@@ -29,10 +29,10 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheSerializer;
 import com.caucho.config.Configurable;
-import com.caucho.cluster.HessianSerializer;
-import com.caucho.cluster.AbstractCache;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.CacheSerializer;
+import com.caucho.distcache.HessianSerializer;
 import com.caucho.util.Alarm;
 
 import javax.cache.CacheLoader;

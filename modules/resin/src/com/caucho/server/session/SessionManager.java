@@ -29,13 +29,13 @@
 
 package com.caucho.server.session;
 
-import com.caucho.cluster.ByteStreamCache;
-import com.caucho.cluster.AbstractCache;
-import com.caucho.cluster.ClusterByteStreamCache;
-import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.distcache.ByteStreamCache;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.ClusterByteStreamCache;
+import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
