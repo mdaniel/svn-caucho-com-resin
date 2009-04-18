@@ -50,18 +50,25 @@ public class ExprFactory {
   private static final Logger log
     = Logger.getLogger(ExprFactory.class.getName());
 
+  private static boolean _isPro = true;
+
   public ExprFactory()
   {
   }
 
   public static ExprFactory create()
   {
+    if (! _isPro)
+      return new ExprFactory();
+    
     try {
       Class cl = Class.forName("com.caucho.quercus.expr.ProExprFactory");
 
       return (ExprFactory) cl.newInstance();
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
+      
+      _isPro = false;
 
       return new ExprFactory();
     }

@@ -420,6 +420,7 @@
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${dist}/${dist.name}/lib"/>
+    <mkdir dir="${dist}/${dist.name}/compat"/>
 
     <!--
        - javaee-16.jar
@@ -446,6 +447,57 @@
       </fileset>
       
       <fileset dir="${resin.modules}/servlet16/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+
+      <!--
+      <fileset dir="${resin.modules}/jsf/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      -->
+      
+      <fileset dir="${resin.modules}/jstl/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jta/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jws/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/webbeans/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+
+    <!--
+       - javaee-15.jar
+      -->
+    <jar destfile="${dist}/${dist.name}/compat/javaee-15.jar">
+      <fileset dir="${resin.modules}/ejb/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jca/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jcache/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jms/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jpa/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/servlet15/classes">
         <exclude name="**/.*"/>
       </fileset>
 

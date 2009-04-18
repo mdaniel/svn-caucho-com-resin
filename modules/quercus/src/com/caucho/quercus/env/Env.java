@@ -962,7 +962,7 @@ public class Env {
   /**
    * Checks for the program timeout.
    */
-  public final void checkTimeout()
+  public void checkTimeout()
   {
     long now = Alarm.getCurrentTime();
 
@@ -3118,10 +3118,12 @@ public class Env {
     int id = _quercus.findFunctionId(name);
 
     if (id >= 0) {
-      if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction))
+      if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction)) {
 	return _fun[id];
-      else
+      }
+      else {
 	return null;
+      }
     }
 
     /*

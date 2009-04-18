@@ -515,7 +515,7 @@ public class ModuleContext
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_loader);
+      setContextClassLoader(_loader);
       
       String quercusModule
         = "META-INF/services/com.caucho.quercus.QuercusModule";
@@ -556,7 +556,7 @@ public class ModuleContext
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      thread.setContextClassLoader(oldLoader);
+      setContextClassLoader(oldLoader);
     }
   }
 
@@ -597,6 +597,21 @@ public class ModuleContext
         }
       }
     }
+  }
+
+  /**
+   * Encapsulate setContextClassLoader for contexts where the
+   * security manager is set.
+   */
+  protected void setContextClassLoader(ClassLoader loader)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader currentLoader = thread.getContextClassLoader();
+
+    // to avoid security manager in GoogleAppEngine, skip the setting
+    // if the loader is the current loader
+    if (loader != currentLoader)
+      thread.setContextClassLoader(loader);
   }
 
   /**

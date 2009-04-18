@@ -36,6 +36,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * variable depends on the context ClassLoader.
  */
 public class EnvironmentLocal<E> {
+  // true on initialization if getting the system classloader is allowed,
+  // i.e. not forbiggen by the security manager
+  private static ClassLoader _systemClassLoader;
+    
   private static AtomicLong _varCount = new AtomicLong();
   
   private String _varName;
@@ -235,7 +239,8 @@ public class EnvironmentLocal<E> {
     
     _globalValue = value;
 
-    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+    ClassLoader systemLoader = _systemClassLoader;
+    
     if (systemLoader instanceof EnvironmentClassLoader)
       ((EnvironmentClassLoader) systemLoader).setAttribute(_varName, value);
 
@@ -247,10 +252,19 @@ public class EnvironmentLocal<E> {
    */
   public E getGlobal()
   {
-    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+    ClassLoader systemLoader = _systemClassLoader;
+
     if (systemLoader instanceof EnvironmentClassLoader)
       return (E) ((EnvironmentClassLoader) systemLoader).getAttribute(_varName);
       
     return _globalValue;
+  }
+
+  static {
+    // test for the system classloader to check for security manager
+    try {
+      _systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Throwable e) {
+    }
   }
 }

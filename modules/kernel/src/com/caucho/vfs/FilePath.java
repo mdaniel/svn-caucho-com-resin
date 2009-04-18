@@ -38,11 +38,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
+import java.util.logging.*;
+import java.security.AccessControlException;
 
 /**
  * FilePath implements the native filesystem.
  */
 public class FilePath extends FilesystemPath {
+  private static Logger log = Logger.getLogger(FilePath.class.getName());
+  
   // The underlying Java File object.
   private static byte []NEWLINE = getNewlineString().getBytes();
 
@@ -322,10 +326,16 @@ public class FilePath extends FilesystemPath {
 
   public boolean exists()
   {
-    if (_isWindows && isAux())
+    try {
+      if (_isWindows && isAux())
+	return false;
+      else
+	return getFile().exists();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
       return false;
-    else
-      return getFile().exists();
+    }
   }
 
   public int getMode()
@@ -348,25 +358,49 @@ public class FilePath extends FilesystemPath {
 
   public boolean isDirectory()
   {
-    return getFile().isDirectory();
+    try {
+      return getFile().isDirectory();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
+      return false;
+    }
   }
 
   public boolean isFile()
   {
-    if (_isWindows && isAux())
+    try {
+      if (_isWindows && isAux())
+	return false;
+      else
+	return getFile().isFile();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
       return false;
-    else
-      return getFile().isFile();
+    }
   }
 
   public long getLength()
   {
-    return getFile().length();
+    try {
+      return getFile().length();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
+      return -1;
+    }
   }
 
   public long getLastModified()
   {
-    return getFile().lastModified();
+    try {
+      return getFile().lastModified();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
+      return -1;
+    }
   }
 
   // This exists in JDK 1.2
@@ -377,22 +411,34 @@ public class FilePath extends FilesystemPath {
 
   public boolean canRead()
   {
-    File file = getFile();
+    try {
+      File file = getFile();
     
-    if (_isWindows && isAux())
+      if (_isWindows && isAux())
+	return false;
+      else
+	return file.canRead();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
       return false;
-    else
-      return file.canRead();
+    }
   }
 
   public boolean canWrite()
   {
-    File file = getFile();
+    try {
+      File file = getFile();
     
-    if (_isWindows && isAux())
+      if (_isWindows && isAux())
+	return false;
+      else
+	return file.canWrite();
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+      
       return false;
-    else
-      return file.canWrite();
+    }
   }
 
   /**
@@ -400,10 +446,14 @@ public class FilePath extends FilesystemPath {
    */
   public String []list() throws IOException
   {
-    String []list = getFile().list();
+    try {
+      String []list = getFile().list();
 
-    if (list != null)
-      return list;
+      if (list != null)
+	return list;
+    } catch (AccessControlException e) {
+      log.finer(e.toString());
+    }
 
     return new String[0];
   }
@@ -412,6 +462,7 @@ public class FilePath extends FilesystemPath {
     throws IOException
   {
     boolean value = getFile().mkdir();
+    
     if (! value && ! getFile().isDirectory())
       throw new IOException("cannot create directory");
 

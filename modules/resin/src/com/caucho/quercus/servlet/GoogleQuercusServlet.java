@@ -45,6 +45,7 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,13 +58,13 @@ import java.util.logging.Logger;
 /**
  * Servlet to call PHP through javax.script.
  */
-public class ResinQuercusServlet extends QuercusServletImpl
+public class GoogleQuercusServlet extends QuercusServletImpl
 {
-  private static final L10N L = new L10N(ResinQuercusServlet.class);
+  private static final L10N L = new L10N(GoogleQuercusServlet.class);
   private static final Logger log
-    = Logger.getLogger(ResinQuercusServlet.class.getName());
+    = Logger.getLogger(GoogleQuercusServlet.class.getName());
 
-  private WebApp _webApp;
+  private ServletContext _webApp;
 
   /**
    * initialize the script manager.
@@ -74,16 +75,20 @@ public class ResinQuercusServlet extends QuercusServletImpl
   {
     super.init(config);
 
-    _webApp = (WebApp) config.getServletContext();
+    _webApp = config.getServletContext();
 
-    ResinQuercus quercus = (ResinQuercus) getQuercus();
+    GoogleQuercus quercus = (GoogleQuercus) getQuercus();
+
+    // _quercus.setWebApp(_webApp);
     
-    quercus.setWebApp(_webApp);
-    getQuercus().setPwd(Vfs.lookup());
+    _quercus.setPwd(Vfs.lookup(_webApp.getRealPath(".")));
 
-    quercus.setIni("caucho.server_id", Resin.getLocal().getServerId());
+    _quercus.start();
+  }
 
-    quercus.start();
+  protected QuercusServletImpl getQuercusServlet()
+  {
+    return this;
   }
 
   protected WriteStream openWrite(HttpServletResponse response)
@@ -126,6 +131,26 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
     return Vfs.lookup().lookup(req.getRealPath(fullPath));
   }
+  /**
+   * Service.
+   */
+  /*
+  public void service(HttpServletRequest request,
+                      HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    try {
+    super.service(request, response);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      OutputStream os = response.getOutputStream();
+      WriteStream out = Vfs.openWrite(os);
+      out.println(e);
+      out.close();
+    }
+  }
+  */
 
   /**
    * Returns the Quercus instance.
@@ -135,7 +160,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
   {
     synchronized (this) {
       if (_quercus == null)
-	_quercus = new ResinQuercus();
+	_quercus = new GoogleQuercus();
     }
 
     return _quercus;

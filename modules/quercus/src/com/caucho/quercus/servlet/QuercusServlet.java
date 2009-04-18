@@ -68,32 +68,41 @@ public class QuercusServlet
   {
     checkJavaVersion();
 
-    if (_impl == null) {
-      try {
-	Class cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
-	_impl = (QuercusServletImpl) cl.newInstance();
-      } catch (ConfigException e) {
-	log.log(Level.FINEST, e.toString(), e);
-	log.info("Quercus compiled mode requires Resin personal or professional licenses");
-	log.info(e.getMessage());
-      } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
-      }
-    }
-    
-    if (_impl == null) {
-      try {
-	Class cl = Class.forName("com.caucho.quercus.servlet.ResinQuercusServlet");
-	_impl = (QuercusServletImpl) cl.newInstance();
-      } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
-      }
-    }
-    
     if (_impl == null)
-      _impl = new QuercusServletImpl();
+      _impl = getQuercusServlet();
   }
 
+  protected QuercusServletImpl getQuercusServlet()
+  {
+    QuercusServletImpl impl = null;
+    
+    try {
+      Class cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
+      
+      impl = (QuercusServletImpl) cl.newInstance();
+    } catch (ConfigException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      log.info("Quercus compiled mode requires Resin personal or professional licenses");
+      log.info(e.getMessage());
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+    
+    if (impl == null) {
+      try {
+	Class cl = Class.forName("com.caucho.quercus.servlet.ResinQuercusServlet");
+	impl = (QuercusServletImpl) cl.newInstance();
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+    
+    if (impl == null)
+      impl = new QuercusServletImpl();
+
+    return impl;
+  }
+  
   /**
    * Make sure Quercus is running on JDK 1.5+.
    */

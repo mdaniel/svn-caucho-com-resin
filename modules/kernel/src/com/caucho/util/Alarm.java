@@ -44,23 +44,22 @@ public class Alarm implements ThreadTask {
   private static final Logger log
     = Logger.getLogger(Alarm.class.getName());
   
-  private static final ClassLoader _systemLoader
-    = ClassLoader.getSystemClassLoader();
+  private static final ClassLoader _systemLoader;
+  
+  private static final Object _queueLock = new Object();
+  
+  private static final AlarmThread _alarmThread;
+  private static final CoordinatorThread _coordinatorThread;
 
   private static volatile long _currentTime;
   private static volatile boolean _isCurrentTimeUsed;
 
   private static int _concurrentAlarmThrottle = 5;
-  
-  private static Object _queueLock = new Object();
-  
-  private static AlarmThread _alarmThread;
-  private static CoordinatorThread _coordinatorThread;
 
   private static Alarm []_heap = new Alarm[256];
   private static int _heapTop;
   
-  private static AtomicInteger _runningAlarmCount
+  private static final AtomicInteger _runningAlarmCount
     = new AtomicInteger();
   
   private static long _testTime;
@@ -185,7 +184,10 @@ public class Alarm implements ThreadTask {
   {
     // test avoids extra writes on multicore machines
     if (! _isCurrentTimeUsed) {
-      _isCurrentTimeUsed = true;
+      if (_alarmThread != null)
+	_isCurrentTimeUsed = true;
+      else
+	return System.currentTimeMillis();
     }
       
     return _currentTime;
@@ -733,11 +735,25 @@ public class Alarm implements ThreadTask {
 
   static {
     _currentTime = System.currentTimeMillis();
+
+    ClassLoader systemLoader = null;
+    AlarmThread alarmThread = null;
+    CoordinatorThread coordinatorThread = null;
+
+    try {
+      systemLoader = ClassLoader.getSystemClassLoader();
     
-    _alarmThread = new AlarmThread();
-    _alarmThread.start();
+      alarmThread = new AlarmThread();
+      alarmThread.start();
       
-    _coordinatorThread = new CoordinatorThread();
-    _coordinatorThread.start();
+      coordinatorThread = new CoordinatorThread();
+      coordinatorThread.start();
+    } catch (Throwable e) {
+      // should display for security manager issues
+    }
+
+    _systemLoader = systemLoader;
+    _alarmThread = alarmThread;
+    _coordinatorThread = coordinatorThread;
   }
 }

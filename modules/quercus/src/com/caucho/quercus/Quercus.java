@@ -190,7 +190,7 @@ public class Quercus
   public Quercus()
   {
     _loader = Thread.currentThread().getContextClassLoader();
-    
+
     _moduleContext = getLocalContext();
     
     _pageManager = createPageManager();
@@ -1559,7 +1559,7 @@ public class Quercus
   }
 
   /**
-   * Initialize the enging
+   * Initialize the engine
    */
   public void init()
   {

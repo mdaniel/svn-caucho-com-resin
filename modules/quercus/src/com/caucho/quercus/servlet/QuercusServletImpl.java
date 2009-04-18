@@ -45,6 +45,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.WriterStreamImpl;
@@ -52,9 +53,12 @@ import com.caucho.vfs.WriterStreamImpl;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.GenericServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServlet;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,7 +66,7 @@ import java.util.logging.Logger;
 /**
  * Servlet to call PHP through javax.script.
  */
-public class QuercusServletImpl
+public class QuercusServletImpl extends HttpServlet
 {
   private static final L10N L = new L10N(QuercusServletImpl.class);
   private static final Logger log
@@ -106,7 +110,7 @@ public class QuercusServletImpl
     if (major < 2 || major == 2 && minor < 4)
       throw new QuercusRuntimeException(L.l("Quercus requires Servlet API 2.4+."));
   }
-  
+
   /**
    * Service.
    */
@@ -134,32 +138,23 @@ public class QuercusServletImpl
         return;
       }
 
-      StreamImpl out;
+
+      ws = openWrite(response);
       
-      try {
-        out = new VfsStream(null, response.getOutputStream());
-      }
-      catch (IllegalStateException e) {
-        WriterStreamImpl writer = new WriterStreamImpl();
-        writer.setWriter(response.getWriter());
-        
-        out = writer;
-      }
-      
-      ws = new WriteStream(out);
-      
+      // php/6006
       ws.setNewlineString("\n");
 
       Quercus quercus = getQuercus();
-      quercus.setServletContext(_servletContext);
       
       env = quercus.createEnv(page, ws, request, response);
+      quercus.setServletContext(_servletContext);
+      
       try {
         env.start();
         
-        env.setScriptGlobal("request", request);
-        env.setScriptGlobal("response", response);
-        env.setScriptGlobal("servletContext", _servletContext);
+        env.setGlobalValue("request", env.wrapJava(request));
+        env.setGlobalValue("response", env.wrapJava(response));
+        env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
 
         StringValue prepend
           = quercus.getIniValue("auto_prepend_file").toStringValue(env);
@@ -199,14 +194,15 @@ public class QuercusServletImpl
       catch (QuercusLineRuntimeException e) {
         log.log(Level.FINE, e.toString(), e);
 
-      //  return;
+	ws.println(e.getMessage());
+	//  return;
       }
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);
 	
         ws.println(e.toString());
 
-      //  return;
+        //  return;
       }
       catch (Throwable e) {
         if (response.isCommitted())
@@ -220,7 +216,7 @@ public class QuercusServletImpl
         if (env != null)
           env.close();
         
-        // don't want a flush for a thrown exception
+        // don't want a flush for an exception
         if (ws != null)
           ws.close();
       }
@@ -243,6 +239,18 @@ public class QuercusServletImpl
     catch (Throwable e) {
       throw new ServletException(e);
     }
+  }
+
+  protected WriteStream openWrite(HttpServletResponse response)
+    throws IOException
+  {
+    WriteStream ws;
+    
+    OutputStream out = response.getOutputStream();
+
+    ws = Vfs.openWrite(out);
+
+    return ws;
   }
 
   Path getPath(HttpServletRequest req)
