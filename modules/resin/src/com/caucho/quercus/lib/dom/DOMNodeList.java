@@ -32,14 +32,6 @@ package com.caucho.quercus.lib.dom;
 import org.w3c.dom.NodeList;
 
 import com.caucho.quercus.annotation.Delegates;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.TraversableDelegate;
-import com.caucho.quercus.env.Value;
-
-import java.util.Iterator;
-import java.util.Map;
 
 @Delegates(DOMNodeListDelegate.class)
 public class DOMNodeList

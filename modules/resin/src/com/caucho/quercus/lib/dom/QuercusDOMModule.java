@@ -29,18 +29,11 @@
 
 package com.caucho.quercus.lib.dom;
 
-import java.io.IOException;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StringPath;
 
 public class QuercusDOMModule
   extends AbstractQuercusModule
