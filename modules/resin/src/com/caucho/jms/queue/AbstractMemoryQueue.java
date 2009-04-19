@@ -32,6 +32,7 @@ package com.caucho.jms.queue;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,9 +60,11 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
   
+  private final AtomicLong _readSequenceGenerator = new AtomicLong();
+  
   // stats
   private AtomicInteger _receiverCount = new AtomicInteger();
-  private AtomicInteger _listenerCount = new AtomicInteger();
+  private AtomicInteger _listenerCount = new AtomicInteger();   
 
   //
   // Abstract/stub methods to be implemented by the Queue
@@ -133,8 +136,8 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       }
   
       ReceiveEntryCallback callback = new ReceiveEntryCallback(isAutoAck);
-      
-      return (E) callback.waitForEntry(expireTime);
+
+      return (E) callback.waitForEntry(expireTime);      
     } finally {
       _receiverCount.decrementAndGet();  
     }
@@ -327,7 +330,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 	  continue;
 	}
           
-	entry.setRead(true);
+	entry.setReadSequence(_readSequenceGenerator.incrementAndGet());
 
 	return (E) entry;
       }
@@ -384,7 +387,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
              entry = entry._next) {
           if (msgId.equals(entry.getMsgId())) {
             if (entry.isRead()) {
-              entry.setRead(false);
+              entry.setReadSequence(0);
 
 	      /*
               MessageImpl msg = (MessageImpl) getPayload(entry);
@@ -421,7 +424,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   /**
    * Synchronous timeout receive
    */
-  static class ReceiveEntryCallback implements EntryCallback {
+  class ReceiveEntryCallback implements EntryCallback {
     private boolean _isAutoAck;
     
     private Thread _thread;
@@ -444,12 +447,18 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 
     public QueueEntry waitForEntry(long expireTime)
     {
+      listen(this);
+      
       long timeout;
       
       while (_entry == null
 	     && (timeout = expireTime - Alarm.getCurrentTime()) > 0) {
         
 	LockSupport.parkNanos(timeout * 1000000L);
+      }
+      
+      synchronized (_queueLock) {
+        _callbackList.remove(this);
       }
       
       return _entry;
@@ -481,7 +490,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 
       _threadPool.schedule(this);
 
-      return _isAutoAck;
+      return false;
     }
 
     public void run()
@@ -489,7 +498,8 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
       boolean isValid = false;
-
+      long readSequence = _entry.getReadSequence();
+      
       try {
 	thread.setContextClassLoader(_classLoader);
 
@@ -502,6 +512,10 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
         log.log(Level.SEVERE, t.toString(), t);
       } finally {
 	thread.setContextClassLoader(oldLoader);
+	
+	if (readSequence == _entry.getReadSequence()){
+	  acknowledge(_entry.getMsgId());
+	}
       }
 
       if (! _isClosed && isValid)

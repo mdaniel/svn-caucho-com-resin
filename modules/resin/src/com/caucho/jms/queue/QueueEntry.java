@@ -23,7 +23,7 @@ public abstract class QueueEntry
   private Serializable _payload;
   
   // True if the message has been read, but not yet committed
-  private boolean _isRead;
+  private long _readSequence;
 
   public QueueEntry(String msgId,
                     long leaseTimeout,
@@ -54,13 +54,18 @@ public abstract class QueueEntry
 
   public boolean isRead()
   {
-    return _isRead;
+    return _readSequence != 0;
+  }
+  
+  public long getReadSequence()
+  {
+    return _readSequence;
   }
 
-  public void setRead(boolean isRead)
+  public void setReadSequence(long readSequence)
   {
-    _isRead = isRead;
-  }
+    _readSequence = readSequence;
+  }  
 
   public void rollback()
   {
