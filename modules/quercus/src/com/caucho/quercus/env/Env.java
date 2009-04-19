@@ -2743,7 +2743,20 @@ public class Env {
    */
   public QuercusClass getCallingClass()
   {
-    return _callingClass;
+    return getCallingClass(_this);
+  }
+  
+  /*
+   * Returns the calling class.
+   */
+  public QuercusClass getCallingClass(Value qThis)
+  {
+    QuercusClass cls = qThis.getQuercusClass();
+    
+    if (cls == null)
+      cls = _callingClass;
+        
+    return cls;
   }
   
   /*

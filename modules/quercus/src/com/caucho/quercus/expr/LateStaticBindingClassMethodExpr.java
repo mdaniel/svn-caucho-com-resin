@@ -94,7 +94,7 @@ public class LateStaticBindingClassMethodExpr extends Expr {
   public Value eval(Env env)
   {
     QuercusClass cls = env.getCallingClass();
-    
+
     if (cls == null) {
       env.error(getLocation(), L.l("no calling class found"));
       

@@ -133,4 +133,16 @@ public class ImportMap
     
     return copy;
   }
+  
+  public void clear()
+  {
+    if (_qualifiedMap != null)
+      _qualifiedMap.clear();
+    
+    if (_wildcardList != null)
+      _wildcardList.clear();
+
+    if (_wildcardPhpList != null)
+      _wildcardPhpList.clear();
+  }
 }

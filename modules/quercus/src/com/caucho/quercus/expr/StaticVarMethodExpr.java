@@ -136,7 +136,7 @@ public class StaticVarMethodExpr extends Expr {
     Value thisValue = env.getThis();
     StringValue methodName = _nameExpr.evalStringValue(env);
 
-    return cl.callMethod(env, thisValue, methodName, _args);
+    return cl.callStaticMethod(env, thisValue, methodName, _args);
   }
   
   /**
@@ -157,8 +157,8 @@ public class StaticVarMethodExpr extends Expr {
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
     StringValue methodName = _nameExpr.evalStringValue(env);
-
-    return cl.callMethodRef(env, thisValue, methodName, _args);
+    
+    return cl.callStaticMethodRef(env, thisValue, methodName, _args);
   }
   
   public String toString()

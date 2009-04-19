@@ -66,6 +66,7 @@ abstract public class ObjectValue extends Value {
     _className = cl.getName();
   }
 
+  @Override
   public QuercusClass getQuercusClass()
   {
     return _quercusClass;

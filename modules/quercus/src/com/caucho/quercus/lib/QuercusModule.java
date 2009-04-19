@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class QuercusModule extends AbstractQuercusModule
 {
-  /*
+  /**
    * Returns the Quercus object.
    */
   @Name("quercus_get_quercus")
@@ -52,7 +52,7 @@ public class QuercusModule extends AbstractQuercusModule
     return env.getQuercus();
   }
   
-  /*
+  /**
    * Returns the Env object.
    */
   @Name("quercus_get_env")
@@ -97,7 +97,7 @@ public class QuercusModule extends AbstractQuercusModule
     return env.getQuercus().isResin();
   }
   
-  /*
+  /**
    * Returns true if a JDBC database has been explicitly set.
    */
   @Name("quercus_has_database")
@@ -106,7 +106,7 @@ public class QuercusModule extends AbstractQuercusModule
     return env.getQuercus().getDatabase() != null;
   }
   
-  /*
+  /**
    * Returns true if there is an HttpRequest associated with this Env.
    */
   @Name("quercus_has_request")
@@ -153,7 +153,7 @@ public class QuercusModule extends AbstractQuercusModule
     return env.getResponse();
   }
   
-  /*
+  /**
    * Returns the ServletContext.
    */
   @Name("quercus_get_servlet_context")
@@ -162,7 +162,7 @@ public class QuercusModule extends AbstractQuercusModule
     return env.getServletContext();
   }
   
-  /*
+  /**
    * Special quercus-only import statements.
    */
   public static void quercus_import(Env env, String name)

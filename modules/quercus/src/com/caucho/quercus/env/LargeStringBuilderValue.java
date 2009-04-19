@@ -65,6 +65,13 @@ public class LargeStringBuilderValue
     _length = length;
   }
   
+  public LargeStringBuilderValue(StringValue s)
+  {
+    this();
+    
+    s.appendTo(this);
+  }
+  
   /*
    * Creates an empty string builder of the same type.
    */

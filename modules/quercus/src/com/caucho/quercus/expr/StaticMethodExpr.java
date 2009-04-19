@@ -143,17 +143,15 @@ public class StaticMethodExpr extends Expr {
       args[i] = _args[i].evalArg(env, true);
     }
     
-    //QuercusClass oldClass = env.setCallingClass(cl);
     env.pushCall(this, thisValue, args);
-    
+
     try {
       env.checkTimeout();
 
-      return cl.callMethod(env, thisValue, _hash, _name, _name.length, args);
+      return cl.callStaticMethod(env, thisValue,_hash, _name, _name.length,
+                                 args);
     } finally {
       env.popCall();
-      
-      //env.setCallingClass(oldClass);
     }
   }
 
@@ -174,18 +172,13 @@ public class StaticMethodExpr extends Expr {
       return NullValue.NULL;
     }
     
-    //QuercusClass oldClass = env.setCallingClass(cl);
-    
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
-    
-    try {
-      env.checkTimeout();
 
-      return cl.callMethodRef(env, thisValue, _hash, _name, _name.length, _args);
-    } finally {
-      //env.setCallingClass(oldClass);
-    }
+    env.checkTimeout();
+
+    return cl.callStaticMethodRef(env, thisValue, _hash, _name, _name.length,
+                                  _args);
   }
   
   public String toString()

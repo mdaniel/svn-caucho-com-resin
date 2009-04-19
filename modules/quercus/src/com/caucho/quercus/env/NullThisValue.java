@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import java.io.Serializable;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.ClassDef;
 
 /**
@@ -44,22 +45,6 @@ public class NullThisValue extends NullValue
 
   private NullThisValue()
   {
-  }
-  
-  /**
-   * Creates a null this context.
-   */
-  public static NullThisValue create()
-  {
-    return NULL;
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  public Value callMethod(Env env, String methodName, Value []args)
-  {
-    throw new QuercusException(L.l("$this value of NULL cannot dispatch to method '{0}'.", methodName));
   }
   
   //

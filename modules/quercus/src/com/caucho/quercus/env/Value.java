@@ -68,6 +68,14 @@ abstract public class Value implements java.io.Serializable
   {
     return getType();
   }
+  
+  /**
+   * Returns the backing QuercusClass.
+   */
+  public QuercusClass getQuercusClass()
+  {
+    return null;
+  }
 
   //
   // Predicates and Relations
@@ -2457,7 +2465,7 @@ abstract public class Value implements java.io.Serializable
       default:
         out.print(ch);
         break;
-      }
+    }
   }
 
   protected static void printJavaString(PrintWriter out, StringValue s)

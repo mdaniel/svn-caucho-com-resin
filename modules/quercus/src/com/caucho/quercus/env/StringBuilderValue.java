@@ -45,6 +45,8 @@ public class StringBuilderValue
   public static final StringBuilderValue EMPTY = new ConstStringValue("");
 
   private static final StringBuilderValue []CHAR_STRINGS;
+  private static final int LARGE_BUILDER_THRESHOLD
+    = LargeStringBuilderValue.SIZE;
   
   protected byte []_buffer;
   protected int _length;
@@ -1021,7 +1023,10 @@ public class StringBuilderValue
   @Override
   public StringValue toStringBuilder(Env env)
   {
-    return new StringBuilderValue(this);
+    if (_length >= LARGE_BUILDER_THRESHOLD)
+      return new LargeStringBuilderValue(this);
+    else
+      return new StringBuilderValue(this);
   }
 
   /**
@@ -1030,11 +1035,20 @@ public class StringBuilderValue
   @Override
   public StringValue toStringBuilder(Env env, Value value)
   {
-    StringBuilderValue v = new StringBuilderValue(this);
-
-    value.appendTo(v);
-    
-    return v;
+    if (_length + value.length() >= LARGE_BUILDER_THRESHOLD) {
+      LargeStringBuilderValue v = new LargeStringBuilderValue(this);
+      
+      value.appendTo(v);
+      
+      return v;
+    }
+    else {
+      StringBuilderValue v = new StringBuilderValue(this);
+      
+      value.appendTo(v);
+      
+      return v;
+    }
   }
   
   /**
@@ -1042,11 +1056,20 @@ public class StringBuilderValue
    */
   public StringValue toStringBuilder(Env env, StringValue value)
   {
-    StringBuilderValue v = new StringBuilderValue(this);
-
-    value.appendTo(v);
-    
-    return v;
+    if (_length + value.length() >= LARGE_BUILDER_THRESHOLD) {
+      LargeStringBuilderValue v = new LargeStringBuilderValue(this);
+      
+      value.appendTo(v);
+      
+      return v;
+    }
+    else {
+      StringBuilderValue v = new StringBuilderValue(this);
+      
+      value.appendTo(v);
+      
+      return v;
+    }
   }
 
   //

@@ -544,7 +544,7 @@ public class ModuleContext
 
           parseServicesModule(rs);
         } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
+          log.log(Level.FINE, e.toString(), e);
         } finally {
           if (rs != null)
             rs.close();
@@ -554,7 +554,7 @@ public class ModuleContext
       }
 
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
     } finally {
       setContextClassLoader(oldLoader);
     }
@@ -712,7 +712,7 @@ public class ModuleContext
 	  
           parseClassServicesModule(rs);
         } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
+          log.log(Level.FINE, e.toString(), e);
         } finally {
           if (rs != null)
             rs.close();
@@ -722,7 +722,7 @@ public class ModuleContext
       }
 
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
