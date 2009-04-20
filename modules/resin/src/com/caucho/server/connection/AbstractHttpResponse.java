@@ -2381,12 +2381,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	handleNotModified(_isTopCache);
       }
 
-      if (isClose)
+      if (isClose) {
 	_responseStream.close();
-      else if (_responseStream != _originalResponseStream)
+	finishResponseStream(isClose);
+      }
+      else if (_responseStream != _originalResponseStream) {
 	_responseStream.finish();
-      else
+      }
+      else {
 	_responseStream.flush();
+	finishResponseStream(isClose);
+      }
 
       if (_rawWrite != null) {
 	_rawWrite.flushBuffer();
@@ -2405,6 +2410,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       
       throw e;
     }
+  }
+
+  protected void finishResponseStream(boolean isClose)
+    throws IOException
+  {
   }
 
   /**

@@ -914,10 +914,8 @@
       </fileset>
     </jar>
 
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"
-          file="${resin.lib}/quercus.jar"/>
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"
-          file="${resin.lib}/resin-kernel.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin.jar"
+          file="${resin.lib}/resin.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
     <!--
@@ -927,8 +925,7 @@
 
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${install}/php/quercus-war">
-        <include name="WEB-INF/lib/quercus.jar"/>
-        <include name="WEB-INF/lib/resin-kernel.jar"/>
+        <include name="WEB-INF/lib/resin.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
 	<!--
         <include name="WEB-INF/lib/script-10.jar"/>

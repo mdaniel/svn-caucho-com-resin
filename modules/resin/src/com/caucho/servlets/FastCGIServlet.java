@@ -164,6 +164,17 @@ public class FastCGIServlet extends GenericServlet {
   /**
    * Initialize the servlet with the server's sruns.
    */
+  public void init(WebApp webApp)
+    throws ServletException
+  {
+    _app = webApp;
+
+    init();
+  }
+
+  /**
+   * Initialize the servlet with the server's sruns.
+   */
   public void init()
     throws ServletException
   {
@@ -183,7 +194,11 @@ public class FastCGIServlet extends GenericServlet {
 
     _servletId = id;
 
-    _app = (WebApp) getServletContext();
+    if (_app == null)
+      _app = (WebApp) getServletContext();
+
+    if (_app == null)
+      throw new NullPointerException();
 
     String serverAddress = getInitParameter("server-address");
     if (serverAddress != null)
@@ -309,8 +324,11 @@ public class FastCGIServlet extends GenericServlet {
     TempBuffer.free(tempBuf);
     tempBuf = null;
 
+    /*
     if (hasStdin)
       writeHeader(fcgiSocket, ws, FCGI_STDIN, 0);
+    */
+    writeHeader(fcgiSocket, ws, FCGI_STDIN, 0);
 
     FastCGIInputStream is = new FastCGIInputStream(fcgiSocket);
 

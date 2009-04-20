@@ -38,7 +38,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class EnvironmentLocal<E> {
   // true on initialization if getting the system classloader is allowed,
   // i.e. not forbiggen by the security manager
-  private static ClassLoader _systemClassLoader;
+  
+  private static Boolean _isSystemClassLoader;
     
   private static AtomicLong _varCount = new AtomicLong();
   
@@ -239,10 +240,12 @@ public class EnvironmentLocal<E> {
     
     _globalValue = value;
 
-    ClassLoader systemLoader = _systemClassLoader;
-    
+    ClassLoader systemLoader = getSystemClassLoader();
+
     if (systemLoader instanceof EnvironmentClassLoader)
       ((EnvironmentClassLoader) systemLoader).setAttribute(_varName, value);
+    else
+      _globalValue = value;
 
     return oldValue;
   }
@@ -252,19 +255,30 @@ public class EnvironmentLocal<E> {
    */
   public E getGlobal()
   {
-    ClassLoader systemLoader = _systemClassLoader;
+    ClassLoader systemLoader = getSystemClassLoader();
 
     if (systemLoader instanceof EnvironmentClassLoader)
       return (E) ((EnvironmentClassLoader) systemLoader).getAttribute(_varName);
-      
-    return _globalValue;
+    else
+      return _globalValue;
   }
 
-  static {
-    // test for the system classloader to check for security manager
-    try {
-      _systemClassLoader = ClassLoader.getSystemClassLoader();
-    } catch (Throwable e) {
+  public static ClassLoader getSystemClassLoader()
+  {
+    if (_isSystemClassLoader == null) {
+      _isSystemClassLoader = false;
+      
+      try {
+	ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+
+	_isSystemClassLoader = true;
+      } catch (Throwable e) {
+      }
     }
+
+    if (_isSystemClassLoader)
+      return ClassLoader.getSystemClassLoader();
+    else
+      return null;
   }
 }

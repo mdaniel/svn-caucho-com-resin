@@ -41,7 +41,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class ResponseStream extends ToByteResponseStream {
+public class ResponseStream extends ToByteResponseStream {
   private static final Logger log
     = Logger.getLogger(ResponseStream.class.getName());
   
@@ -81,7 +81,7 @@ class ResponseStream extends ToByteResponseStream {
   {
   }
 
-  ResponseStream(AbstractHttpResponse response)
+  protected ResponseStream(AbstractHttpResponse response)
   {
     setResponse(response);
   }
@@ -780,43 +780,7 @@ class ResponseStream extends ToByteResponseStream {
     }
     
     try {
-      if (_chunkedEncoding) {
-	int bufferOffset = _next.getBufferOffset();
-
-	if (bufferStart > 0 && bufferOffset != bufferStart) {
-	  byte []buffer = _next.getBuffer();
-
-	  writeChunkHeader(buffer, bufferStart, bufferOffset - bufferStart);
-	}
-	else {
-	  // server/05b3
-	  _next.setBufferOffset(0);
-	}
-
-	_isCommitted = true;
-	
-	ArrayList<String> footerKeys = _response._footerKeys;
-
-	if (footerKeys.size() == 0)
-	  _next.write(_tailChunked, 0, _tailChunkedLength);
-	else {
-	  ArrayList<String> footerValues = _response._footerValues;
-	  
-	  _next.print("\r\n0\r\n");
-
-	  for (int i = 0; i < footerKeys.size(); i++) {
-	    _next.print(footerKeys.get(i));
-	    _next.print(": ");
-	    _next.print(footerValues.get(i));
-	    _next.print("\r\n");
-	  }
-	  
-	  _next.print("\r\n");
-	}
-
-	if (log.isLoggable(Level.FINE))
-          log.fine(dbgId() + "write-chunk(" + _tailChunkedLength + ")");
-      }
+      writeTail(bufferStart);
 
       CauchoRequest req = _response.getRequest();
       if (req.isComet() || req.isDuplex()) {
@@ -849,6 +813,48 @@ class ResponseStream extends ToByteResponseStream {
       if (! _response.isIgnoreClientDisconnect()) {
         throw e;
       }
+    }
+  }
+
+  protected void writeTail(int bufferStart)
+    throws IOException
+  {
+    if (_chunkedEncoding) {
+      int bufferOffset = _next.getBufferOffset();
+
+      if (bufferStart > 0 && bufferOffset != bufferStart) {
+	byte []buffer = _next.getBuffer();
+
+	writeChunkHeader(buffer, bufferStart, bufferOffset - bufferStart);
+      }
+      else {
+	// server/05b3
+	_next.setBufferOffset(0);
+      }
+
+      _isCommitted = true;
+	
+      ArrayList<String> footerKeys = _response._footerKeys;
+
+      if (footerKeys.size() == 0)
+	_next.write(_tailChunked, 0, _tailChunkedLength);
+      else {
+	ArrayList<String> footerValues = _response._footerValues;
+	  
+	_next.print("\r\n0\r\n");
+
+	for (int i = 0; i < footerKeys.size(); i++) {
+	  _next.print(footerKeys.get(i));
+	  _next.print(": ");
+	  _next.print(footerValues.get(i));
+	  _next.print("\r\n");
+	}
+	  
+	_next.print("\r\n");
+      }
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(dbgId() + "write-chunk(" + _tailChunkedLength + ")");
     }
   }
 

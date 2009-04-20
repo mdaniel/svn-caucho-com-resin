@@ -118,6 +118,8 @@ public class TypeFactory implements AddLoaderListener
   {
     _loader = Environment.getEnvironmentClassLoader(loader);
 
+    _localFactory.set(this, loader);
+    
     if (_loader != null) {
       _parent = getFactory(_loader.getParent());
 

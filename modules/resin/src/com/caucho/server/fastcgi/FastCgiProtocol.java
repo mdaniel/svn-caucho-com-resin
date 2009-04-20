@@ -20,28 +20,64 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.protocols;
+package com.caucho.server.fastcgi;
 
-import com.caucho.config.program.ConfigProgram;
+import java.lang.ref.*;
+import java.util.*;
 
-import com.caucho.server.fastcgi.FastCgiProtocol;
-import com.caucho.server.port.ProtocolPort;
+import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
+import com.caucho.server.port.ServerRequest;
+import com.caucho.loader.*;
 
 /**
- * Represents a protocol connection.
+ * Dispatches the FastCgi protocol.
+ *
+ * @see com.caucho.server.port.Protocol
  */
-public class FastCgiPort extends ProtocolPort
-{
-  public Protocol getProtocol()
+public class FastCgiProtocol extends Protocol {
+  private String _protocolName = "fcgi";
+
+  private ClassLoader _classLoader;
+
+  public FastCgiProtocol()
   {
-    return new FastCgiProtocol();
+    _classLoader = Thread.currentThread().getContextClassLoader();
+  }
+
+  /**
+   * Returns the protocol name.
+   */
+  public String getProtocolName()
+  {
+    return _protocolName;
+  }
+  
+  /**
+   * Sets the protocol name.
+   */
+  public void setProtocolName(String name)
+  {
+    _protocolName = name;
+  }
+
+  /**
+   * Create a HmuxRequest object for the new thread.
+   */
+  public ServerRequest createRequest(Connection conn)
+  {
+    return new FastCgiRequest(getServer(), conn);
+  }
+
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
   }
 }

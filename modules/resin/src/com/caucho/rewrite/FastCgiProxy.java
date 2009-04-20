@@ -112,10 +112,10 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
     throws ConfigException
   {
     try {
-      _proxyServlet.init();
-      
       WebApp webApp = WebApp.getCurrent();
 
+      _proxyServlet.init(webApp);
+      
       webApp.addServlet(_servlet);
     }
     catch (ServletException ex) {
