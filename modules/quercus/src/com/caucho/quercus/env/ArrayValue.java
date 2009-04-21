@@ -784,7 +784,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Pops the top value.
    */
-  abstract public Value pop();
+  abstract public Value pop(Env env);
 
   /**
    * Shuffles the array
@@ -1101,14 +1101,18 @@ abstract public class ArrayValue extends Value {
   @Override
   public boolean eql(Value rValue)
   {
-    if (rValue == null)
+    if (rValue == this)
+      return true;
+    else if (rValue == null)
       return false;
     else if (getSize() != rValue.getSize())
       return false;
 
     rValue = rValue.toValue();
 
-    if (! (rValue instanceof ArrayValue))
+    if (rValue == this)
+      return true;
+    else if (! (rValue instanceof ArrayValue))
       return false;
 
     ArrayValue rArray = (ArrayValue) rValue;

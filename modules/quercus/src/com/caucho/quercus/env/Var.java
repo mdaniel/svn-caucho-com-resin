@@ -44,7 +44,7 @@ import java.util.*;
 /**
  * Represents a PHP variable value.
  */
-public final class Var extends Value
+public class Var extends Value
   implements Serializable
 {
   Value _value;
@@ -1448,9 +1448,10 @@ public final class Var extends Value
   /**
    * Pops the top array element.
    */
-  public Value pop()
+  @Override
+  public Value pop(Env env)
   {
-    return _value.pop();
+    return _value.pop(env);
   }
 
   /**

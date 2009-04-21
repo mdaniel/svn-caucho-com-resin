@@ -1119,7 +1119,8 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Pops the top value.
    */
-  public Value pop()
+  @Override
+  public Value pop(Env env)
   {
     if (_isDirty)
       copyOnWrite();

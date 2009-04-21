@@ -170,7 +170,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   @Override
   public Value callMethod(Env env, Value qThis, Value []args)
   {
-    if (args.length <= _methodTable.length) {
+    if (args.length < _methodTable.length) {
       AbstractJavaMethod []methods = _methodTable[args.length];
 
       if (methods != null) {

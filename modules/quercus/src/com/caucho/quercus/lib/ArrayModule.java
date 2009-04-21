@@ -280,7 +280,7 @@ public class ArrayModule
    */
   public static Value array_pop(Env env, @Reference Value array)
   {
-    return array.pop();
+    return array.pop(env);
   }
 
   /**
@@ -380,13 +380,7 @@ public class ArrayModule
    */
   public static Value end(@Reference Value value)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
-
-      return array.end();
-    }
-    else
-      return BooleanValue.FALSE;
+    return value.end();
   }
 
   /**
@@ -879,8 +873,10 @@ public class ArrayModule
   public static Value array_shift(Env env,
                                   @Reference Value value)
   {
-    if (value.isNull())
+    if (! value.isArray()) {
+      env.warning(L.l("cannot shift a non-array"));
       return NullValue.NULL;
+    }
     
     ArrayValue array = value.toArrayValue(env);
 

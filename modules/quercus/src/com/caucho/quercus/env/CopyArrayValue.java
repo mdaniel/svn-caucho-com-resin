@@ -277,9 +277,10 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Pops the top value.
    */
-  public Value pop()
+  @Override
+  public Value pop(Env env)
   {
-    return getCopyArray().pop();
+    return getCopyArray().pop(env);
   }
 
   /**

@@ -151,6 +151,15 @@ public class GlobalArrayValue extends ArrayValueImpl {
   }
 
   /**
+   * Returns the array keys.
+   */
+  @Override
+  public Value getKeys()
+  {
+    return createAndFillArray().getKeys();
+  }
+  
+  /**
    * Returns an iterator of the entries.
    */
   public Set<Map.Entry<Value,Value>> entrySet()

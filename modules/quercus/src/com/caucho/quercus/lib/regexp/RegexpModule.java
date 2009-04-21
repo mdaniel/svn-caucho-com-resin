@@ -324,7 +324,7 @@ public class RegexpModule
   {
     try {
       StringValue regexpStr;
-      
+
       if (value.isNull() || value.isBoolean())
         regexpStr = env.getEmptyString();
       else if (! value.isString())
@@ -1186,10 +1186,24 @@ public class RegexpModule
    * Replaces values using regexps
    */
   public static Value ereg_replace(Env env,
-                                   Ereg regexp,
+                                   Value regexpValue,
                                    Value replacement,
                                    StringValue subject)
   {
+    StringValue regexpStr;
+    
+    if (regexpValue.isLong())
+      regexpStr = env.createString((char) regexpValue.toInt());
+    else
+      regexpStr = regexpValue.toStringValue(env);
+
+    if (regexpStr.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
+    Ereg regexp = createEreg(env, regexpStr);
+    
     return eregReplaceImpl(env, regexp, replacement, subject, false);
   }
 
@@ -1197,10 +1211,24 @@ public class RegexpModule
    * Replaces values using regexps
    */
   public static Value eregi_replace(Env env,
-                                    Eregi regexp,
+                                    Value regexpValue,
                                     Value replacement,
                                     StringValue subject)
   {
+    StringValue regexpStr;
+    
+    if (regexpValue.isLong())
+      regexpStr = env.createString((char) regexpValue.toInt());
+    else
+      regexpStr = regexpValue.toStringValue(env);
+
+    if (regexpStr.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
+    Ereg regexp = createEregi(env, regexpStr);
+    
     return eregReplaceImpl(env, regexp, replacement, subject, true);
   }
 
@@ -1215,7 +1243,7 @@ public class RegexpModule
                                       boolean isCaseInsensitive)
   {
     StringValue replacementStr;
-
+    
     // php/150u : If a non-string type argument is passed
     // for the pattern or replacement argument, it is
     // converted to a string of length 1 that contains

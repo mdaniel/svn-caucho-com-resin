@@ -1406,8 +1406,8 @@ public class Env {
       Value var = getGlobalVar("_SESSION");
       
       if (! (var instanceof SessionVar)) {
-	var = new SessionVar();
-	setGlobalValue("_SESSION", var);
+        var = new SessionVar();
+        setGlobalValue("_SESSION", var);
       }
 
       var.set(session);

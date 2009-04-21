@@ -192,9 +192,9 @@ public class ArrayValueWrapper extends ArrayValue {
    * Pops the top value.
    */
   @Override
-  public Value pop()
+  public Value pop(Env env)
   {
-    return _array.pop();
+    return _array.pop(env);
   }
 
   /**

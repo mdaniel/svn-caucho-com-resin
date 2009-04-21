@@ -388,11 +388,9 @@ public class HtmlModule extends AbstractQuercusModule {
       Map.Entry<Value,Value> entry = iter.next();
       StringValue key = entry.getKey().toStringValue();
       Value value = entry.getValue();
-      
-      Ereg regexp = RegexpModule.createEreg(env, value);
 
       string = RegexpModule.ereg_replace(env,
-                                         regexp,
+                                         value,
                                          key,
                                          string).toStringValue();
     }

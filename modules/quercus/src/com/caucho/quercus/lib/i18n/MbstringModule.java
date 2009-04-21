@@ -421,20 +421,27 @@ public class MbstringModule
    * Multibyte version of ereg_replace.
    */
   public static Value mb_ereg_replace(Env env,
-                                      UnicodeEreg ereg,
+                                      Value eregValue,
                                       StringValue replacement,
                                       StringValue subject,
                                       @Optional String option)
   {
     String encoding = getEncoding(env);
 
+    StringValue eregStr;
+    
+    if (eregValue.isLong())
+      eregStr = UnicodeBuilderValue.create((char) eregValue.toInt());
+    else
+      eregStr = eregValue.toStringValue(env).convertToUnicode(env, encoding);
+    
     replacement = replacement.convertToUnicode(env, encoding);
     subject = subject.convertToUnicode(env, encoding);
 
     //XXX: option
     
     Value val = RegexpModule.ereg_replace(env,
-                                          ereg,
+                                          eregStr,
                                           replacement,
                                           subject);
 
@@ -456,22 +463,26 @@ public class MbstringModule
    * Multibyte version of eregi_replace.
    */
   public static Value mb_eregi_replace(Env env,
-                              StringValue pattern,
-                              StringValue replacement,
-                              StringValue subject,
-                              @Optional String option)
+                                       Value pattern,
+                                       StringValue replacement,
+                                       StringValue subject,
+                                       @Optional String option)
   {
     String encoding = getEncoding(env);
 
-    pattern = pattern.convertToUnicode(env, encoding);
+    StringValue eregStr;
+    
+    if (pattern.isLong())
+      eregStr = UnicodeBuilderValue.create((char) pattern.toInt());
+    else
+      eregStr = pattern.toStringValue(env).convertToUnicode(env, encoding);
+    
     replacement = replacement.convertToUnicode(env, encoding);
     subject = subject.convertToUnicode(env, encoding);
 
     //XXX: option
 
-    Eregi regexp = RegexpModule.createEregi(env, pattern);
-    
-    Value val = RegexpModule.eregi_replace(env, regexp, replacement, subject);
+    Value val = RegexpModule.eregi_replace(env, eregStr, replacement, subject);
 
     return encodeAll(env, val, encoding);
   }

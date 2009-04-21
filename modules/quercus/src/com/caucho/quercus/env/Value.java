@@ -1088,8 +1088,10 @@ abstract public class Value implements java.io.Serializable
   /**
    * Pops the top array element.
    */
-  public Value pop()
+  public Value pop(Env env)
   {
+    env.warning("cannot pop a non-array");
+    
     return NullValue.NULL;
   }
 

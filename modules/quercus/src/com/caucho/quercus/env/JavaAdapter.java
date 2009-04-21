@@ -422,7 +422,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Pops the top value.
    */
-  public Value pop()
+  public Value pop(Env env)
   {
     throw new UnsupportedOperationException();
   }

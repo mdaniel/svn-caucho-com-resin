@@ -1243,9 +1243,10 @@ public class JavaAdapterVar extends Value
   /**
    * Pops the top array element.
    */
-  public Value pop()
+  @Override
+  public Value pop(Env env)
   {
-    return getValue().pop();
+    return getValue().pop(env);
   }
 
   /**

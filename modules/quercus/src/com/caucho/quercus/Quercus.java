@@ -1399,18 +1399,19 @@ public class Quercus
 
       // XXX: i18n
       _constantNameList[id] = name;
-    
+
+      // php/1a0g, php/1d06
+      _constantNameMap.put(name, id);
+      
       // php/0501
       int lowerId;
 
       if (! name.equals(name.toLowerCase()))
-	lowerId = getConstantId(name.toLowerCase());
+        lowerId = getConstantId(name.toLowerCase());
       else
-	lowerId = id;
+        lowerId = id;
     
       _constantLowerMap[id] = lowerId;
-
-      _constantNameMap.put(name, id);
     }
       
     return id;

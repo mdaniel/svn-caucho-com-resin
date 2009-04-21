@@ -34,9 +34,7 @@ import com.caucho.quercus.QuercusModuleException;
 /**
  * Represents a PHP variable value.
  */
-public class SessionVar extends Value {
-  private Value _value;
-  
+public class SessionVar extends Var {
   /**
    * Sets the value.
    */
