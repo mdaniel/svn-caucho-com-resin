@@ -1496,24 +1496,6 @@ abstract public class ArrayValue extends Value {
 
     return array;
   }
-  
-  @Override
-  public int hashCode()
-  {
-    return getSize();
-  }
-  
-  @Override
-  public boolean equals(Object o)
-  {
-    if (! (o instanceof ArrayValue))
-      return false;
-    
-    // toValue() for CopyArrayValue
-    ArrayValue array = (ArrayValue) ((Value) o).toValue();
-    
-    return cmp(array) == 0;
-  }
 
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {
     EntrySet()

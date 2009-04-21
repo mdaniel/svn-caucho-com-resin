@@ -100,7 +100,7 @@ public class ArrayValueImpl extends ArrayValue
 
     for (Entry ptr = source.getHead(); ptr != null; ptr = ptr._next) {
       // php/0662 for copy
-      Entry entry = createEntry(ptr._key);
+      Entry entry = createNewEntry(ptr._key);
       
       if (ptr._var != null)
         entry._var = ptr._var;
@@ -629,22 +629,37 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value getArray(Value index)
   {
-    if (_isDirty) {
-      copyOnWrite();
-    }
+    // php/3482, php/3483
     
-    Entry entry = createEntry(index);
-    Value value = entry.toValue();
+    Entry entry = getEntry(index);
 
-    Value array = value.toAutoArray();
-    
-    if (value != array) {
-      value = array;
+    if (entry == null) {
+      if (_isDirty)
+        copyOnWrite();
+      
+      entry = createNewEntry(index);
+      
+      ArrayValue array = new ArrayValueImpl();
 
-      entry.set(value);
+      entry.set(array);
+
+      return array;
     }
+    else {
+      Value value = entry.toValue();
+      Value array = value.toAutoArray();
+      
+      if (value != array) {
+        if (_isDirty)
+          copyOnWrite();
+        
+        value = array;
 
-    return value;
+        getEntry(index).set(value);
+      }
+
+      return value;
+    }
   }
 
   /**
@@ -1004,9 +1019,6 @@ public class ArrayValueImpl extends ArrayValue
     //
     //            http://us3.php.net/types.array
 
-    if (_isDirty)
-      copyOnWrite();
-    
     key = key.toKey();
     
     int hashMask = _hashMask;
@@ -1042,6 +1054,52 @@ public class ArrayValueImpl extends ArrayValue
       if (_entries == null || _entries.length <= 2 * _size) {
 	expand();
 	hash = key.hashCode() & _hashMask;
+      }
+    
+      Entry head = _entries[hash];
+
+      newEntry._nextHash = head;
+      _entries[hash] = newEntry;
+    }
+
+    if (_head == null) {
+      newEntry._prev = null;
+      newEntry._next = null;
+      
+      _head = newEntry;
+      _tail = newEntry;
+      _current = newEntry;
+    }
+    else {
+      newEntry._prev = _tail;
+      newEntry._next = null;
+      
+      _tail._next = newEntry;
+      _tail = newEntry;
+    }
+
+    return newEntry;
+  }
+  
+  private Entry createNewEntry(Value key)
+  {
+    key = key.toKey();
+    
+    int hashMask = _hashMask;
+    int hash = key.hashCode() & hashMask;
+    
+    _size++;
+
+    Entry newEntry = new Entry(key);
+    if (_nextAvailableIndex >= 0)
+      _nextAvailableIndex = key.nextIndex(_nextAvailableIndex);
+
+    if (_entries == null && _size < MIN_HASH) {
+    }
+    else {
+      if (_entries == null || _entries.length <= 2 * _size) {
+        expand();
+        hash = key.hashCode() & _hashMask;
       }
     
       Entry head = _entries[hash];
