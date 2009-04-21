@@ -40,12 +40,12 @@ public interface Iterator
   /**
    * Returns the current value.
    */
-  public Value current();
+  public Value current(Env env);
 
   /**
    * Returns the current key.
    */
-  public Value key();
+  public Value key(Env env);
 
   /**
    * Advances to the next row.

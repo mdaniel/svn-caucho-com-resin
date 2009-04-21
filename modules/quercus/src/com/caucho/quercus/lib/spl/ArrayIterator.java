@@ -74,7 +74,7 @@ public class ArrayIterator
   {
     _env = env;
     _qThis = qThis;
-    
+
     if (value == null)
       value = NullValue.NULL;
     
@@ -102,8 +102,11 @@ public class ArrayIterator
     return _value.getCount(_env);
   }
 
-  public Value current()
+  public Value current(Env env)
   {
+    if (_iterator == null)
+      rewindJava(env);
+
     return _current == null ? UnsetValue.UNSET : _current.getValue();
   }
 
@@ -117,8 +120,11 @@ public class ArrayIterator
     return _flags;
   }
 
-  public Value key()
+  public Value key(Env env)
   {
+    if (_iterator == null)
+      rewindJava(env);
+
     return _current == null ? UnsetValue.UNSET : _current.getKey();
   }
 

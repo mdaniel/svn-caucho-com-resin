@@ -1,6 +1,9 @@
 <?php
 
 class FilterIterator extends IteratorIterator {
+  var $_key = NULL;
+  var $_current = NULL;
+
   function __construct($iter)
   {
     parent::__construct($iter);
@@ -11,10 +14,25 @@ class FilterIterator extends IteratorIterator {
     return true;
   }
 
+  function current()
+  {
+    return $this->_current;
+  }
+
   function fetch()
   {
+    $this->_key = $this->it->key();
+    $this->_current = $this->it->current();
+
     for (; $this->it->valid() && ! $this->accept(); $this->it->next()) {
+      $this->_key = $this->it->key();
+      $this->_current = $this->it->current();
     }
+  }
+
+  function key()
+  {
+    return $this->_key;
   }
 
   function next()
