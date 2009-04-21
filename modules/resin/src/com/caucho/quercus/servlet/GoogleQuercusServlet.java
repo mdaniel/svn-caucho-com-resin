@@ -151,6 +151,137 @@ public class GoogleQuercusServlet extends QuercusServletImpl
     }
   }
   */
+  
+  /**
+   * Service.
+   */
+  public void service(HttpServletRequest request,
+                      HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    Env env = null;
+    WriteStream ws = null;
+    
+    try {
+      Path path = getPath(request);
+
+      QuercusPage page;
+
+      try {
+        page = getQuercus().parse(path);
+      }
+      catch (FileNotFoundException ex) {
+        // php/2001
+        log.log(Level.FINER, ex.toString(), ex);
+
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+        return;
+      }
+
+
+      ws = openWrite(response);
+      
+      // php/6006
+      ws.setNewlineString("\n");
+
+      Quercus quercus = getQuercus();
+      
+      env = quercus.createEnv(page, ws, request, response);
+      quercus.setServletContext(_servletContext);
+      
+      try {
+        env.start();
+        
+        // GoogleAppEngine SDK is missing non-essential Jetty classes
+        //env.setGlobalValue("request", env.wrapJava(request));
+        //env.setGlobalValue("response", env.wrapJava(response));
+        //env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
+
+        StringValue prepend
+          = quercus.getIniValue("auto_prepend_file").toStringValue(env);
+        if (prepend.length() > 0) {
+          Path prependPath = env.lookup(prepend);
+          
+          if (prependPath == null)
+            env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
+          else {
+            QuercusPage prependPage = getQuercus().parse(prependPath);
+            prependPage.executeTop(env);
+          }
+        }
+
+        env.executeTop();
+
+        StringValue append
+          = quercus.getIniValue("auto_append_file").toStringValue(env);
+        if (append.length() > 0) {
+          Path appendPath = env.lookup(append);
+          
+          if (appendPath == null)
+            env.error(L.l("auto_append_file '{0}' not found.", append));
+          else {
+            QuercusPage appendPage = getQuercus().parse(appendPath);
+            appendPage.executeTop(env);
+          }
+        }
+        //   return;
+      }
+      catch (QuercusExitException e) {
+        throw e;
+      }
+      catch (QuercusErrorException e) {
+        throw e;
+      }
+      catch (QuercusLineRuntimeException e) {
+        log.log(Level.FINE, e.toString(), e);
+
+    ws.println(e.getMessage());
+    //  return;
+      }
+      catch (QuercusValueException e) {
+        log.log(Level.FINE, e.toString(), e);
+    
+        ws.println(e.toString());
+
+        //  return;
+      }
+      catch (Throwable e) {
+        if (response.isCommitted())
+          e.printStackTrace(ws.getPrintWriter());
+
+        ws = null;
+
+        throw e;
+      }
+      finally {
+        if (env != null)
+          env.close();
+        
+        // don't want a flush for an exception
+        if (ws != null)
+          ws.close();
+      }
+    }
+    catch (QuercusDieException e) {
+      // normal exit
+      log.log(Level.FINE, e.toString(), e);
+    }
+    catch (QuercusExitException e) {
+      // normal exit
+      log.log(Level.FINER, e.toString(), e);
+    }
+    catch (QuercusErrorException e) {
+      // error exit
+      log.log(Level.FINE, e.toString(), e);
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (Throwable e) {
+      throw new ServletException(e);
+    }
+  }
 
   /**
    * Returns the Quercus instance.
