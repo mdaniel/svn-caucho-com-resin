@@ -921,6 +921,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
 					     jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
+  char temp_buf[1024];
   server_socket_t *ss;
   
   if (! conn || ! env || ! obj)
@@ -939,7 +940,6 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
 
   if (ss->_localAddrBuffer && ss->_localAddrLength) {
     jbyteArray addrBuffer;
-    char temp_buf[1024];
     int len;
 
     addrBuffer = (*env)->GetObjectField(env, obj, ss->_localAddrBuffer);
@@ -963,7 +963,6 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
 
   if (ss->_remoteAddrBuffer && ss->_remoteAddrLength) {
     jbyteArray addrBuffer;
-    char temp_buf[1024];
     int len;
 
     addrBuffer = (*env)->GetObjectField(env, obj, ss->_remoteAddrBuffer);

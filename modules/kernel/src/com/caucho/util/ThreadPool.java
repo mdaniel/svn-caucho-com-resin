@@ -53,7 +53,7 @@ public class ThreadPool {
 
   private static final long OVERFLOW_TIMEOUT = 5000L;
 
-  private static final long PRIORITY_TIMEOUT = 1000L;
+  private static final long PRIORITY_TIMEOUT = 10L;
 
   private static ThreadPool _globalThreadPool;
 
@@ -447,6 +447,16 @@ public class ThreadPool {
   /**
    * Adds a new task.
    */
+  public void schedulePriority(Runnable task)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    schedule(task, loader, 0, 0, true);
+  }
+
+  /**
+   * Adds a new task.
+   */
   public boolean startPriority(Runnable task, long timeout)
   {
     long expire;
@@ -529,6 +539,8 @@ public class ThreadPool {
 	      _launcher.wake();
 	  }
 	  else {
+	    poolItem = null;
+	    
 	    _launcher.wake();
 	    
 	    if (queueIfFull) {
@@ -603,14 +615,9 @@ public class ThreadPool {
 
   private void calculateThreadPriority()
   {
-    if (_threadPrioritySet) {
+    if (! _threadPrioritySet) {
+      _threadPriority = _threadMax / 10;
     }
-    else if (_threadIdleMin <= 0)
-      _threadPriority = 0;
-    else if (_threadIdleMin <= 2)
-      _threadPriority = _threadIdleMin;
-    else
-      _threadPriority = (_threadIdleMin + 1) / 2;
   }
 
   public String toString()

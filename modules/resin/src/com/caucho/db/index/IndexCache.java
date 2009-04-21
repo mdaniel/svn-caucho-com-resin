@@ -241,10 +241,12 @@ public final class IndexCache
       while (true) {
 	try {
 	  IndexKey key = null;
+
+	  Thread.interrupted();
 	  
 	  synchronized (_writeQueue) {
 	    if (_writeQueue.size() == 0)
-	      _writeQueue.wait(1000);
+	      _writeQueue.wait();
 	    else
 	      key = _writeQueue.get(0);
 	  }

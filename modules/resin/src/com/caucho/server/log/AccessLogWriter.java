@@ -125,12 +125,14 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     _length = length;
   }
 
+  void writeThrough(byte []buffer, int offset, int length)
+  {
+    writeBuffer(buffer, offset, length);
+    flush();
+  }
+
   void writeBuffer(byte []buffer, int offset, int length)
   {
-    if (isRollover()) {
-      flush();
-    }
-    
     synchronized (_bufferLock) {
       byte []logBuffer = _buffer;
       int logLength = _length;
@@ -150,64 +152,13 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     }
   }
 
-  void writeThrough(byte []buffer, int offset, int length)
-  {
-    writeBuffer(buffer, offset, length);
-    flush();
-  }
-
-  private AccessLogBuffer write(AccessLogBuffer logBuffer)
-  {
-    while (true) {
-      synchronized (_writeQueue) {
-	if (_writeQueue.size() < _maxQueueLength) {
-	  _writeQueue.add(logBuffer);
-
-	  if (! _hasThread) {
-	    _hasThread = true;
-	    ThreadPool.getThreadPool().startPriority(this);
-	  }
-
-	  break;
-	}
-	else if (! _isFlushing) {
-	  try {
-	    _isFlushing = true;
-	    // If the queue is full, call the flush code directly
-	    // since the thread pool may be out of threads for
-	    // a schedule
-	    log.fine("AccessLogWriter flushing log directly.");
-	      
-	    run();
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  } finally {
-	    _isFlushing = false;
-	  }
-	}
-      }
-    }
-    
-    AccessLogBuffer buffer = _freeBuffers.allocate();
-
-    if (buffer == null)
-      buffer = new AccessLogBuffer();
-
-    return buffer;
-  }
-
   // must be synchronized by _bufferLock.
   protected void flush()
   {
     boolean isFlush = false;
+    
     synchronized (_bufferLock) {
-      if (_length > 0) {
-	_logBuffer.setLength(_length);
-	_logBuffer = write(_logBuffer);
-	_buffer = _logBuffer.getBuffer();
-	_length = 0;
-	isFlush = true;
-      }
+      isFlush = flushBuffer();
     }
 
     try {
@@ -216,6 +167,74 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+  }
+
+  /**
+   * Must be called from inside _bufferLock
+   */
+  private boolean flushBuffer()
+  {
+    if (_length > 0) {
+      _logBuffer.setLength(_length);
+      _logBuffer = write(_logBuffer);
+      _buffer = _logBuffer.getBuffer();
+      _length = 0;
+
+      return true;
+    }
+    else
+      return false;
+  }
+
+  private AccessLogBuffer write(AccessLogBuffer logBuffer)
+  {
+    boolean isScheduleThread = false;
+    
+    while (true) {
+      boolean isFlush = false;
+      
+      synchronized (_writeQueue) {
+	if (_writeQueue.size() < _maxQueueLength) {
+	  _writeQueue.add(logBuffer);
+
+	  if (! _hasThread) {
+	    _hasThread = true;
+	    isScheduleThread = true;
+	  }
+
+	  break;
+	}
+	else if (! _isFlushing) {
+	  _isFlushing = true;
+	  isFlush = true;
+	}
+      }
+
+      if (isFlush) {
+	try {
+	  // If the queue is full, call the flush code directly
+	  // since the thread pool may be out of threads for
+	  // a schedule
+	  log.fine("AccessLogWriter flushing log directly.");
+	      
+	  run();
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	} finally {
+	  _isFlushing = false;
+	}
+      }
+    }
+
+    if (isScheduleThread)
+      ThreadPool.getThreadPool().schedulePriority(this);
+    
+    AccessLogBuffer buffer = _freeBuffers.allocate();
+
+    if (buffer == null)
+      buffer = new AccessLogBuffer();
+
+    return buffer;
   }
 
   protected void waitForFlush(long timeout)
@@ -256,6 +275,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     throws IOException
   {
     write(buffer.getBuffer(), 0, buffer.getLength());
+    
     super.flush();
     
     _freeBuffers.free(buffer);

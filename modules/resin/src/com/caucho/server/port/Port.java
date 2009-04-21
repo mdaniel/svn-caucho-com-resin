@@ -58,6 +58,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
@@ -161,7 +162,7 @@ public class Port
   private volatile long _idleCloseExpire;
 
   // semaphore to request a new start thread
-  private final Semaphore _startThreadSemaphore = new Semaphore(0);
+  private Thread _portThread;
 
   // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
@@ -1176,9 +1177,9 @@ public class Port
       enable();
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
-      Thread thread = new Thread(this, name);
-      thread.setDaemon(true);
-      thread.start();
+      _portThread = new Thread(this, name);
+      _portThread.setDaemon(true);
+      _portThread.start();
 
       _suspendAlarm = new Alarm(new SuspendReaper());
       _suspendAlarm.queue(_suspendReaperTimeout);
@@ -1285,8 +1286,7 @@ public class Port
       while (_lifecycle.isActive()) {
 	long now = Alarm.getCurrentTime();
       
-	if (_idleThreadMax < _idleThreadCount.get()
-	    && _idleCloseExpire < now) {
+	if (_idleThreadMax < _idleThreadCount.get()) {
 	  _idleCloseExpire = now + _idleCloseTimeout;
 	
 	  return false;
@@ -1313,7 +1313,10 @@ public class Port
       if (isStartThreadRequired()) {
 	// if there are not enough idle threads, wake the manager to
 	// create a new one
-	_startThreadSemaphore.release();
+	Thread portThread = _portThread;
+
+	if (portThread != null)
+	  LockSupport.unpark(portThread);
       }
     }
 
@@ -1525,10 +1528,6 @@ public class Port
         // when the load doesn't justify it
         // Thread.yield();
 
-	// Clear the pending startThread requests because we're about to
-	// start handling them
-	_startThreadSemaphore.drainPermits();
-	
         // XXX: Thread.sleep(10);
 
 	TcpConnection startConn = null;
@@ -1548,10 +1547,9 @@ public class Port
 	  _startThreadCount.incrementAndGet();
 	  _activeConnectionSet.add(startConn);
 	}
-	else if (_lifecycle.isActive())
-	  _startThreadSemaphore.tryAcquire(1, 60000, TimeUnit.MILLISECONDS);
-	else
-	  _startThreadSemaphore.tryAcquire(1, 200, TimeUnit.MILLISECONDS);
+	else {
+	  LockSupport.park();
+	}
 
         if (startConn != null) {
           ThreadPool.getThreadPool().schedule(startConn.getReadTask());
@@ -1629,7 +1627,10 @@ public class Port
   {
     _activeConnectionSet.remove(conn);
 
-    _startThreadSemaphore.release();
+    // wake the start thread
+    Thread portThread = _portThread;
+    if (portThread != null)
+      LockSupport.unpark(portThread);
   }
 
   /**
@@ -1703,7 +1704,9 @@ public class Port
     }
 
     // wake the start thread
-    _startThreadSemaphore.release();
+    Thread portThread = _portThread;
+    if (portThread != null)
+      LockSupport.unpark(portThread);
 
     // Close the socket server socket and send some request to make
     // sure the Port accept thread is woken and dies.

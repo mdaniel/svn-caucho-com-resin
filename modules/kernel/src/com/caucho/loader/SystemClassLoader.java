@@ -36,6 +36,8 @@ import com.caucho.vfs.Vfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.*;
 import java.net.URLClassLoader;
 
 /**
@@ -57,7 +59,7 @@ public class SystemClassLoader
   extends EnvironmentClassLoader
   implements EnvironmentBean
 {
-  private boolean _isInit;
+  private AtomicBoolean _isInit = new AtomicBoolean();
   private boolean _hasBootClassPath;
 
   private URLClassLoader _loader;
@@ -83,8 +85,7 @@ public class SystemClassLoader
   @Override
   public boolean isJarCacheEnabled()
   {
-    // XXX: disabled for regression perf
-    return false; //  DynamicClassLoader.isJarCacheEnabled();
+    return DynamicClassLoader.isJarCacheEnabledDefault();
   }
 
   public ClassLoader getClassLoader()
@@ -94,10 +95,8 @@ public class SystemClassLoader
 
   public void init()
   {
-    if (_isInit)
+    if (_isInit.getAndSet(true))
       return;
-
-    _isInit = true;
 
     initClasspath();
 

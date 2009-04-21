@@ -1328,7 +1328,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 		       + " on " + QDate.formatLocal(_startTime));
     System.out.println();
 
-    EnvironmentClassLoader.initializeEnvironment();
+    Environment.init();
 
     // buildResinClassLoader();
 
@@ -1578,13 +1578,11 @@ public class Resin implements EnvironmentBean, SchemaBean
   public static void main(String []argv)
   {
     try {
-      System.out.println("MAIN");
-      EnvironmentClassLoader.initializeEnvironment();
-      System.out.println("INIT-ENV");
+      Environment.init();
+
       validateEnvironment();
 
       final Resin resin = Resin.create();
-      System.out.println("CREATE");
 
       resin.parseCommandLine(argv);
 

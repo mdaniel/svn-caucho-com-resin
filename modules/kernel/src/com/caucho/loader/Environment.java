@@ -29,24 +29,35 @@
 
 package com.caucho.loader;
 
+import com.caucho.config.ConfigException;
+import com.caucho.jmx.Jmx;
+import java.lang.management.ManagementFactory;
 import com.caucho.lifecycle.StartLifecycleException;
+import com.caucho.log.EnvironmentStream;
+import com.caucho.naming.Jndi;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import java.security.Permission;
 import java.util.ArrayList;
+import java.util.Properties;
+import java.util.logging.*;
+import javax.management.*;
+import javax.naming.NamingException;
 
 /**
  * Static utility classes.
  */
 public class Environment {
-  private static ArrayList<EnvironmentListener> _globalEnvironmentListeners =
-    new ArrayList<EnvironmentListener>();
+  private static boolean _isStaticInit;
+
+  private static Logger _log;
   
-  private static ArrayList<ClassLoaderListener> _globalLoaderListeners =
-    new ArrayList<ClassLoaderListener>();
+  private static ArrayList<EnvironmentListener> _globalEnvironmentListeners
+    = new ArrayList<EnvironmentListener>();
+  
+  private static ArrayList<ClassLoaderListener> _globalLoaderListeners
+    = new ArrayList<ClassLoaderListener>();
   
   /**
    * Returns the local environment.
@@ -246,6 +257,8 @@ public class Environment {
    */
   public static void init()
   {
+    initializeEnvironment();
+    
     init(Thread.currentThread().getContextClassLoader());
   }
 
@@ -706,5 +719,132 @@ public class Environment {
 
       listener.classLoaderDestroy(null);
     }
+  }
+
+  /**
+   * Initializes the environment
+   */
+  public static synchronized void initializeEnvironment()
+  {
+    if (_isStaticInit)
+      return;
+
+    _isStaticInit = true;
+
+    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(systemLoader);
+
+      // #2281
+      // PolicyImpl.init();
+
+      EnvironmentStream.setStdout(System.out);
+      EnvironmentStream.setStderr(System.err);
+
+      try {
+        Vfs.initJNI();
+      } catch (Throwable e) {
+      }
+
+      /*
+      if (System.getProperty("org.xml.sax.driver") == null)
+        System.setProperty("org.xml.sax.driver", "com.caucho.xml.Xml");
+      */
+
+      Properties props = System.getProperties();
+
+      /*
+      if (props.get("java.util.logging.manager") == null) {
+        props.put("java.util.logging.manager",
+                  "com.caucho.log.LogManagerImpl");
+      }
+      */
+      
+      ClassLoader envClassLoader
+	= EnvironmentClassLoader.class.getClassLoader();
+
+      boolean isGlobalLoadable = false;
+      try {
+	Class cl = Class.forName("com.caucho.naming.InitialContextFactoryImpl",
+				 false,
+				 systemLoader);
+
+	isGlobalLoadable = (cl != null);
+      } catch (Exception e) {
+	log().log(Level.FINER, e.toString(), e);
+      }
+	
+      if (isGlobalLoadable) {
+	// These properties require Resin to be at the system loader
+	
+	if (props.get("java.naming.factory.initial") == null) {
+	  props.put("java.naming.factory.initial",
+		    "com.caucho.naming.InitialContextFactoryImpl");
+	}
+
+	props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
+
+	EnvironmentProperties.enableEnvironmentSystemProperties(true);
+
+	String oldBuilder = props.getProperty("javax.management.builder.initial");
+	if (oldBuilder == null) {
+	  oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
+	  props.put("javax.management.builder.initial", oldBuilder);
+	}
+
+	/*
+	  props.put("javax.management.builder.initial",
+	  "com.caucho.jmx.EnvironmentMBeanServerBuilder");
+	*/
+
+	if (MBeanServerFactory.findMBeanServer(null).size() == 0)
+	  MBeanServerFactory.createMBeanServer("Resin");
+	
+	ManagementFactory.getPlatformMBeanServer();
+      }
+
+      Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
+                    Jmx.getGlobalMBeanServer());
+      Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
+                    Jmx.getGlobalMBeanServer());
+      
+      try {
+	Class cl = Class.forName("com.caucho.server.resin.EnvInit",
+				 false,
+				 systemLoader);
+	
+	cl.newInstance();
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+ 
+      /*
+      try {
+        Jndi.rebindDeep("java:comp/ORB",
+                        new com.caucho.iiop.orb.ORBImpl());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      */
+
+      // J2EEManagedObject.register(new JTAResource(tm));
+    } catch (NamingException e) {
+      log().log(Level.FINE, e.toString(), e);
+    } catch (Throwable e) {
+      e.printStackTrace();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  private static final Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(Environment.class.getName());
+
+    return _log;
   }
 }

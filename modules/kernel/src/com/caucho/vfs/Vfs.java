@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Facade to create useful Path and Stream objects.
@@ -67,7 +68,7 @@ public final class Vfs {
   
   static FilesystemPath PWD;
 
-  private static boolean _isInitJNI;
+  private static AtomicBoolean _isInitJNI = new AtomicBoolean();
 
   private Vfs() {}
   
@@ -366,10 +367,9 @@ public final class Vfs {
    */
   public static void initJNI()
   {
-    if (_isInitJNI)
+    if (_isInitJNI.getAndSet(true))
       return;
-    _isInitJNI = true;
-    
+
     // order matters because of static init and license checking
     FilesystemPath jniFilePath = JniFilePath.create();
 

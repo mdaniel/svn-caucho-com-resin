@@ -30,6 +30,7 @@
 package com.caucho.ejb;
 
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.Environment;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.util.L10N;
@@ -136,7 +137,7 @@ public class EJBCompiler {
       System.exit(1);
     }
 
-    EnvironmentClassLoader.initializeEnvironment();
+    Environment.init();
 
     try {
       new EJBCompiler(args).compile();

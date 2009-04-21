@@ -473,8 +473,8 @@ public class AppClient implements EnvironmentBean
     String workDir = null;
     String []mainArgs = null;
 
-    EnvironmentClassLoader.initializeEnvironment();
-
+    Environment.init();
+    
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
 
