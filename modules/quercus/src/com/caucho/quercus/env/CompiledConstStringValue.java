@@ -52,11 +52,11 @@ public final class CompiledConstStringValue
   }
   
   public CompiledConstStringValue(char ch,
-                                   LongValue longValue,
-                                   DoubleValue doubleValue,
-                                   ValueType valueType,
-                                   Value key,
-                                   int hashCode)
+                                  LongValue longValue,
+                                  DoubleValue doubleValue,
+                                  ValueType valueType,
+                                  Value key,
+                                  int hashCode)
   {
     super(ch);
 
@@ -70,10 +70,10 @@ public final class CompiledConstStringValue
   }
   
   public CompiledConstStringValue(char ch,
-                                   LongValue longValue,
-                                   DoubleValue doubleValue,
-                                   ValueType valueType,
-                                   int hashCode)
+                                  LongValue longValue,
+                                  DoubleValue doubleValue,
+                                  ValueType valueType,
+                                  int hashCode)
   {
     super(ch);
 
@@ -87,11 +87,11 @@ public final class CompiledConstStringValue
   }
 
   public CompiledConstStringValue(String s,
-                                   LongValue longValue,
-                                   DoubleValue doubleValue,
-                                   ValueType valueType,
-                                   Value key,
-                                   int hashCode)
+                                  LongValue longValue,
+                                  DoubleValue doubleValue,
+                                  ValueType valueType,
+                                  Value key,
+                                  int hashCode)
   {
     super(s);
     
@@ -105,10 +105,10 @@ public final class CompiledConstStringValue
   }
   
   public CompiledConstStringValue(String s,
-                                   LongValue longValue,
-                                   DoubleValue doubleValue,
-                                   ValueType valueType,
-                                   int hashCode)
+                                  LongValue longValue,
+                                  DoubleValue doubleValue,
+                                  ValueType valueType,
+                                  int hashCode)
   {
     super(s);
 

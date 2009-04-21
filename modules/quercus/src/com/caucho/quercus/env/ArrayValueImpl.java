@@ -630,36 +630,22 @@ public class ArrayValueImpl extends ArrayValue
   public Value getArray(Value index)
   {
     // php/3482, php/3483
+
+    if (_isDirty)
+      copyOnWrite();
     
-    Entry entry = getEntry(index);
+    Entry entry = createEntry(index);
 
-    if (entry == null) {
-      if (_isDirty)
-        copyOnWrite();
-      
-      entry = createNewEntry(index);
-      
-      ArrayValue array = new ArrayValueImpl();
+    Value value = entry.toValue();
+    Value array = value.toAutoArray();
 
+    if (value != array) {
+      value = array;
+      
       entry.set(array);
-
-      return array;
     }
-    else {
-      Value value = entry.toValue();
-      Value array = value.toAutoArray();
-      
-      if (value != array) {
-        if (_isDirty)
-          copyOnWrite();
-        
-        value = array;
 
-        getEntry(index).set(value);
-      }
-
-      return value;
-    }
+    return array;
   }
 
   /**
@@ -859,19 +845,19 @@ public class ArrayValueImpl extends ArrayValue
       int hash = key.hashCode() & _hashMask;
 
       for (Entry entry = entries[hash];
-	   entry != null;
-	   entry = entry._nextHash) {
-	if (key.equals(entry._key))
-	  return entry;
+           entry != null;
+           entry = entry._nextHash) {
+        if (key.equals(entry._key))
+          return entry;
       }
     }
     else {
       for (Entry entry = _head;
-	   entry != null;
-	   entry = entry._next) {
-	if (key.equals(entry._key))
-	  return entry;
-      }
+           entry != null;
+           entry = entry._next) {
+        if (key.equals(entry._key))
+          return entry;
+     }
     }
 
     return null;

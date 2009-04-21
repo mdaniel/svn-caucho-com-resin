@@ -1813,6 +1813,24 @@ public class StringBuilderValue
 
       return true;
     }
+    else if (o instanceof LargeStringBuilderValue) {
+      StringValue value = (StringValue) o;
+      
+      int length = _length;
+      int lengthB = value.length();
+      
+      if (length != lengthB)
+        return false;
+
+      byte []bufferA = _buffer;
+
+      for (int i = length - 1; i >= 0; i--) {
+        if (bufferA[i] != value.charAt(i))
+          return false;
+      }
+      
+      return true;
+    }
     /*
     else if (o instanceof UnicodeValue) {
       UnicodeValue value = (UnicodeValue)o;
