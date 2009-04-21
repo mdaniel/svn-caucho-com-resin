@@ -447,16 +447,6 @@ public class ThreadPool {
   /**
    * Adds a new task.
    */
-  public void schedulePriority(Runnable task)
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    schedule(task, loader, 0, 0, true);
-  }
-
-  /**
-   * Adds a new task.
-   */
   public boolean startPriority(Runnable task, long timeout)
   {
     long expire;
