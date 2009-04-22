@@ -212,4 +212,10 @@ class TcpStream extends StreamImpl {
 	s.close();
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _s + "]";
+  }
 }

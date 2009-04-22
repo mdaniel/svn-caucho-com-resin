@@ -27,6 +27,7 @@ public class JniServerSocketImpl extends QServerSocket {
   private static Throwable _jniInitException;
   
   private long _fd;
+  private String _id;
 
   /**
    * Creates the new server socket.
@@ -35,6 +36,8 @@ public class JniServerSocketImpl extends QServerSocket {
     throws IOException
   {
     _fd = bindPort(host, port);
+
+    _id = host + ":" + port;
 
     if (_fd == 0)
       throw new IOException(L.l("Socket bind failed for {0}:{1} while running as {2}.  Check for other processes listening to the port and check for permissions (root on unix).",
@@ -50,6 +53,8 @@ public class JniServerSocketImpl extends QServerSocket {
   {
     _fd = nativeOpenPort(fd, port);
 
+    _id = "fd=" + fd + ",port=" + port;
+    
     if (_fd == 0)
       throw new java.net.BindException(L.l("Socket bind failed for port {0} fd={1} opened by watchdog.  Check that the watchdog and Resin permissions are properly configured.", port, fd));
   }
@@ -210,6 +215,11 @@ public class JniServerSocketImpl extends QServerSocket {
       closeNative(fd);
   }
 
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _id + "]";
+  }
+
   public void finalize()
   {
     try {
@@ -264,7 +274,6 @@ public class JniServerSocketImpl extends QServerSocket {
    */
   native int closeNative(long fd)
     throws IOException;
-
 
   static {
     try {

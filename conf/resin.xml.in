@@ -17,19 +17,30 @@
   </class-loader>
 
   <!--
-     - Management configuration
-     -
+     - jars with maven dependencies can be placed in maven-jars to be used
+     - by web-apps
+    -->
+  <resin:MavenJarRepository path="${resin.root}/maven-jars"/>
+
+  <!--
+     - Resin-managed data, including sessions, administration, and clustering
+    -->
+  <resin-data-directory>${resin.root}/resin-data</resin-data-directory>
+  
+  <!--
      - Remote management requires at least one enabled admin user.
     -->
-  <management path="${resin.root}/admin">
+  <resin:AdminAuthenticator>
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
-    
+  </resin:AdminAuthenticator>
+  
+  <!--    
     <deploy-service/>
     <jmx-service/>
     <log-service/>
     <stat-service/>
     <xa-log-service/>
-  </management>
+    -->
 
   <!--
      - Logging configuration for the JDK logging API.
@@ -72,6 +83,9 @@
   <cluster id="app-tier">
     <!-- sets the content root for the cluster, relative to resin.root -->
     <root-directory>.</root-directory>
+    
+    <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
+    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <!-- enables development error pages -->
     <development-mode-error-page/>
@@ -123,8 +137,8 @@
          - and group name for the web server user.
         -->
       <resin:if test="${resin.userName == 'root'}">
-        <user-name>resin</user-name>
-        <group-name>resin</group-name>
+        <user-name>www-data</user-name>
+        <group-name>www-data</group-name>
       </resin:if>
     </server-default>
 
@@ -140,10 +154,10 @@
        - Enables the cache (available in Resin Professional) 
       -->
     <resin:if test="${resin.professional}">
-      <cache path="cache" memory-size="64M">
-        <!-- Vary header rewriting for IE -->
-        <rewrite-vary-as-private/>
-      </cache>
+    <cache path="cache" memory-size="64M">
+      <!-- Vary header rewriting for IE -->
+      <rewrite-vary-as-private/>
+    </cache>
     </resin:if>
 
     <!--
@@ -153,9 +167,9 @@
        - All servers can add <url>s to be checked.
       -->
     <resin:if test="${resin.professional}">
-      <ping>
+      <resin:PingThread>
         <!-- <url>http://localhost:8080/test-ping.jsp</url> -->
-      </ping>
+      </resin:PingThread>
     </resin:if>
 
     <!--
@@ -199,9 +213,6 @@
       </jsp>
       <jsf fast-jsf='false'/>
     </web-app-default>
-
-    <!-- includes the app-default for default web-app behavior -->
-    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <!--
        - Sample database pool configuration
@@ -251,10 +262,10 @@
         -->
       <web-app id="/" root-directory="webapps/ROOT"/>
 
+      <!--
+         - Administration application /resin-admin
+        -->
       <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
-        <!--
-           - Administration application /resin-admin
-          -->
         <prologue>
           <resin:set var="resin_admin_external" value="false"/>
           <resin:set var="resin_admin_insecure" value="true"/>
@@ -262,10 +273,21 @@
       </web-app>
 
       <!--
+	 - Resin documentation - remove for a live site
+	-->
+      <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
+
+      <!--
+	 - Sample LoadBalance, HttpProxy and FastCgi dispatch
+	 -
+	 - <resin:LoadBalance regexp="^/load" cluster="backend-tier"/>
+	 - <resin:HttpProxy regexp="^/http" address="localhost:9000"/>
+	 - <resin:FastCgiProxy regexp="^/fcgi" address="localhost:9001"/>
+	-->
+
+      <!--
       <web-app id="/resin-config" root-directory="${resin.root}/doc/config"/>
       -->
-      
-      <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
     </host>
   </cluster>
 

@@ -114,7 +114,8 @@ public class HttpProxy extends AbstractTargetDispatchRule
       
       WebApp webApp = WebApp.getCurrent();
 
-      webApp.addServlet(_servlet);
+      if (webApp != null)
+	webApp.addServlet(_servlet);
     }
     catch (ServletException ex) {
       throw ConfigException.create(ex);

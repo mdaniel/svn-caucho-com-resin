@@ -31,6 +31,7 @@ package com.caucho.servlets;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -42,8 +43,10 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.Vfs;
 
 import javax.servlet.GenericServlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -107,11 +110,11 @@ public class FastCGIServlet extends GenericServlet {
   private FreeList<FastCGISocket> _freeSockets
     = new FreeList<FastCGISocket>(8);
 
+  private Path _pwd;
   private String _hostAddress;
   private InetAddress _hostAddr;
   private int _hostPort;
   protected QDate _calendar = new QDate();
-  private WebApp _app;
   private long _readTimeout = 120000;
 
   private int _maxKeepaliveCount = 250;
@@ -167,8 +170,6 @@ public class FastCGIServlet extends GenericServlet {
   public void init(WebApp webApp)
     throws ServletException
   {
-    _app = webApp;
-
     init();
   }
 
@@ -179,6 +180,8 @@ public class FastCGIServlet extends GenericServlet {
     throws ServletException
   {
     int id = -1;
+
+    _pwd = Vfs.lookup();
     
     for (int i = 0; i < 0x10000; i += 1024) {
       if (! _fcgiServlets.contains(new Integer(i))) {
@@ -187,18 +190,18 @@ public class FastCGIServlet extends GenericServlet {
       }
     }
 
+    Server server = Server.getCurrent();
+
+    if (server == null)
+      throw new ConfigException(L.l("Server context is required for '{0}'",
+				    this));
+
     if (id < 0)
       throw new ServletException("Can't open FastCGI servlet");
 
     _fcgiServlets.add(new Integer(id));
 
     _servletId = id;
-
-    if (_app == null)
-      _app = (WebApp) getServletContext();
-
-    if (_app == null)
-      throw new NullPointerException();
 
     String serverAddress = getInitParameter("server-address");
     if (serverAddress != null)
@@ -376,9 +379,11 @@ public class FastCGIServlet extends GenericServlet {
 
     String scriptPath = req.getServletPath();
     String pathInfo = req.getPathInfo();
+
+    WebApp webApp = (WebApp) req.getServletContext();
     
-    Path appDir = _app.getAppDir();
-    String realPath = _app.getRealPath(scriptPath);
+    Path appDir = webApp.getAppDir();
+    String realPath = webApp.getRealPath(scriptPath);
     
     if (! appDir.lookup(realPath).isFile() && pathInfo != null)
       scriptPath = scriptPath + pathInfo;
@@ -387,10 +392,10 @@ public class FastCGIServlet extends GenericServlet {
      * FastCGI (specifically quercus) uses the PATH_INFO and PATH_TRANSLATED
      * for the script path.
      */
-    log.finer("FCGI file: " + _app.getRealPath(scriptPath));
+    log.finer("FCGI file: " + webApp.getRealPath(scriptPath));
 
     addHeader(fcgi, ws, "PATH_INFO", req.getContextPath() + scriptPath);
-    addHeader(fcgi, ws, "PATH_TRANSLATED", _app.getRealPath(scriptPath));
+    addHeader(fcgi, ws, "PATH_TRANSLATED", webApp.getRealPath(scriptPath));
     
     /* These are the values which would be sent to CGI.
     addHeader(fcgi, ws, "SCRIPT_NAME", req.getContextPath() + scriptPath);
@@ -412,7 +417,10 @@ public class FastCGIServlet extends GenericServlet {
     else
       addHeader(fcgi, ws, "CONTENT_LENGTH", String.valueOf(contentLength));
 
-    addHeader(fcgi, ws, "DOCUMENT_ROOT", _app.getContext("/").getRealPath("/"));
+    ServletContext rootContext = webApp.getContext("/");
+
+    if (rootContext != null)
+      addHeader(fcgi, ws, "DOCUMENT_ROOT", rootContext.getRealPath("/"));
 
     CharBuffer cb = new CharBuffer();
     
@@ -535,6 +543,9 @@ public class FastCGIServlet extends GenericServlet {
 			 String key, String value)
     throws IOException
   {
+    if (value == null)
+      return;
+    
     int keyLen = key.length();
     int valLen = value.length();
 

@@ -1,8 +1,8 @@
 <!--
-   - Resin 3.2 configuration file for a clustered/load-balance environment
+   - Resin 4.0 configuration file for a clustered/load-balance environment
   -->
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="urn:java:com.caucho.resin">
 
   <!-- adds all .jar files under the resin/lib directory -->
   <class-loader>
@@ -70,6 +70,9 @@
     <!-- sets the content root for the cluster, relative to resin.root -->
     <root-directory>.</root-directory>
 
+    <!-- includes the app-default for default web-app behavior -->
+    <resin:import path="${__DIR__}/app-default.xml"/>
+
     <!-- enables development error pages -->
     <development-mode-error-page/>
 
@@ -129,16 +132,6 @@
     <server id="" address="127.0.0.1" port="6800"/>
 
     <!--
-       - Configures the persistent store for single-server or clustered
-       - in Resin professional.
-      -->
-    <resin:if test="${resin.professional}">
-      <persistent-store type="cluster">
-        <init path="session"/>
-      </persistent-store>
-    </resin:if>
-
-    <!--
        - For security, use a different cookie for SSL sessions.
        - <ssl-session-cookie>SSL_JSESSIONID</ssl-session-cookie>
       -->
@@ -146,12 +139,10 @@
     <!--
        - Enables the cache (available in Resin Professional) 
       -->
-    <resin:if test="${resin.professional}">
-      <cache path="cache" memory-size="64M">
-        <!-- Vary header rewriting for IE -->
-        <rewrite-vary-as-private/>
-      </cache>
-    </resin:if>
+    <cache path="cache" memory-size="64M">
+      <!-- Vary header rewriting for IE -->
+      <rewrite-vary-as-private/>
+    </cache>
 
     <!--
        - Enables periodic checking of the server status and
@@ -160,9 +151,9 @@
        - All servers can add <url>s to be checked.
       -->
     <resin:if test="${resin.professional}">
-      <ping>
+      <resin:PingThread>
         <!-- <url>http://localhost:8080/test-ping.jsp</url> -->
-      </ping>
+      </resin:PingThread>
     </resin:if>
 
     <!--
@@ -206,9 +197,6 @@
       </jsp>
       <jsf fast-jsf='false'/>
     </web-app-default>
-
-    <!-- includes the app-default for default web-app behavior -->
-    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <!--
        - Sample database pool configuration
@@ -295,11 +283,11 @@
       <host id="">
         <web-app id="/">
 
-           <rewrite-dispatch>
-             <load-balance regexp="" cluster="app-tier"/>
-           </rewrite-dispatch>
-
+           <resin:LoadBalance regexp="" cluster="app-tier"/>
+	   
         </web-app>
+	
+        <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin"/>
       </host>
     </cluster>
   </resin:if>

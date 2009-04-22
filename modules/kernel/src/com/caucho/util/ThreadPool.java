@@ -762,7 +762,11 @@ public class ThreadPool {
 		}
 	      }
 
-	      if (_task == null) {
+	      if (item != null) {
+		_task = item.getRunnable();
+		_classLoader = item.getLoader();
+	      }
+	      else {
 		long now = Alarm.getCurrentTime();
 		if (_threadIdleMax < _idleCount
 		    && _threadIdleOverflowExpire < now) {
