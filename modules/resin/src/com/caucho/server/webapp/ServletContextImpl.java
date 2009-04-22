@@ -43,7 +43,9 @@ import java.util.logging.Logger;
 /**
  * Bare-bones servlet context implementation.
  */
-public class ServletContextImpl implements ServletContext {
+public class ServletContextImpl extends ServletContextCompat
+  implements ServletContext
+{
   static final Logger log
     = Logger.getLogger(ServletContextImpl.class.getName());
   static final L10N L = new L10N(ServletContextImpl.class);
@@ -408,114 +410,5 @@ public class ServletContextImpl implements ServletContext {
   public Enumeration getServlets()
   {
     throw new UnsupportedOperationException("getServlets is deprecated");
-  }
-
-  /**
-   * Adds a runtime servlet.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addServlet(String servletName,
-			 String description,
-			 String className,
-			 Map<String,String> initParam,
-			 int loadOnStartup,
-			 boolean isAsyncSupported)
-  {
-  }
-
-  /**
-   * Adds a runtime servlet mapping
-   *
-   * @Since Servlet 3.0
-   */
-  public void addServletMapping(String servletName,
-			       String []urlPatterns)
-  {
-  }
-
-  /**
-   * Adds a filter.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addFilter(String filterName,
-			String description,
-			String className,
-			Map<String,String> initParam,
-			boolean isAsyncSupported)
-  {
-  }
-
-  /**
-   * Adds a filter mapping.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addFilterMappingForServletNames(String filterName,
-					      EnumSet<DispatcherType> dispatcherTypes,
-					      boolean isMatchAfter,
-					      String ... servletNames)
-  {
-  }
-
-  /**
-   * Adds a filter mapping.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addFilterMappingForUrlPatterns(String filterName,
-					      EnumSet<DispatcherType> dispatcherTypes,
-					      boolean isMatchAfter,
-					      String ... urlPatterns)
-  {
-  }
-
-  /**
-   * The session cookie configuration
-   *
-   * @Since Servlet 3.0
-   */
-  public void setSessionCookieConfig(SessionCookieConfig cookieConfig)
-  {
-  }
-
-  /**
-   * Sets the session cookie configuration
-   *
-   * @Since Servlet 3.0
-   */
-  public SessionCookieConfig getSessionCookieConfig()
-  {
-    return null;
-  }
-
-  /**
-   * The session tracking mode
-   *
-   * @Since Servlet 3.0
-   */
-  public void setSessionTrackingModes(EnumSet<SessionTrackingMode> modes)
-  {
-  }
-
-  /**
-   * The session tracking mode
-   *
-   * @Since Servlet 3.0
-   */
-  public EnumSet<SessionTrackingMode> getDefaultSessionTrackingModes()
-  {
-    return null;
-  }
-
-  /**
-   * The session tracking mode
-   *
-   * @Since Servlet 3.0
-   */
-  public EnumSet<SessionTrackingMode> getEffectiveSessionTrackingModes()
-  {
-    return null;
   }
 }

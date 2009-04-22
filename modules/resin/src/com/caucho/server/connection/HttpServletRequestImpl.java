@@ -1011,7 +1011,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public AsyncContext getAsyncContext()
   {
-    return _comet;
+    return (AsyncContext) _comet;
   }
 
   /**
@@ -1056,7 +1056,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
     _comet.suspend();
 
-    return _comet;
+    return (AsyncContext) _comet;
   }
 
   /**
@@ -1072,7 +1072,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
     _comet.suspend();
     
-    return _comet;
+    return (AsyncContext) _comet;
   }
 
   @Override

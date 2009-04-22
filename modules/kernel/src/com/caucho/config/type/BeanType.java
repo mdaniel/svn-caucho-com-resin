@@ -504,9 +504,13 @@ public class BeanType extends ConfigType
 	if (! _isIntrospected) {
 	  _isIntrospected = true;
 
-	  Method []methods = _beanClass.getDeclaredMethods();
+	  try {
+	    Method []methods = _beanClass.getDeclaredMethods();
     
-	  introspectMethods(methods);
+	    introspectMethods(methods);
+	  } catch (NoClassDefFoundError e) {
+	    log.fine(_beanClass + " " + e);
+	  }
 
 	  /*
 	  InjectIntrospector.introspectInject(_injectList, _beanClass);

@@ -180,9 +180,11 @@ public abstract class Connection
 					   ServletRequest request,
 					   ServletResponse response)
   {
-    ConnectionCometController controller
-      = new ConnectionCometController(this, isTop, request, response);
-
+    ConnectionCometController controller = null;
+    /*
+      = new AsyncConnectionCometController(this, isTop, request, response);
+    */
+    
     return controller;
   }
 

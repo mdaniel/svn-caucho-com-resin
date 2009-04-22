@@ -42,7 +42,7 @@ import com.caucho.util.*;
  * Public API to control a comet connection.
  */
 public class ConnectionCometController extends ConnectionController
-  implements CometController, AsyncContext
+  implements CometController
 {
   private Connection _conn;
   

@@ -1,4 +1,4 @@
-Class-Path: javaee-16.jar pro.jar license.jar hessian.jar quercus.jar resin-kernel.jar osgi-14.jar jcache-16.jar
+Class-Path: javaee-16.jar javaee-15.jar pro.jar license.jar hessian.jar quercus.jar resin-kernel.jar jcache-16.jar
 Implementation-Vendor: Caucho Technology, Inc.
 Implementation-Version: @VERSION@
 J2EE-DeploymentFactory-Implementation-Class: com.caucho.j2ee.deployclient.DeploymentFactoryImpl
