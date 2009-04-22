@@ -401,8 +401,6 @@ public class HmuxRequest extends AbstractHttpRequest
     _writeStream.init(_filter);
     // _writeStream.setWritePrefix(3);
 
-    _response.init(_writeStream);
-
     _serverType = 0;
     _uri.setLength(0);
 
@@ -414,6 +412,7 @@ public class HmuxRequest extends AbstractHttpRequest
       startInvocation();
       
       _response.startRequest(httpBuffer);
+      _response.init(_writeStream);
 
       try {
         if (! scanHeaders()) {

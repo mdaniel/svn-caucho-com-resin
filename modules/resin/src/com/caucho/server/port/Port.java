@@ -1270,6 +1270,8 @@ public class Port
    */
   public boolean accept(TcpConnection conn, boolean isStart)
   {
+    boolean isDecrement = true;
+    
     try {
       int idleThreadCount = _idleThreadCount.incrementAndGet();
       
@@ -1285,8 +1287,13 @@ public class Port
 
       while (_lifecycle.isActive()) {
 	long now = Alarm.getCurrentTime();
-      
-	if (_idleThreadMax < _idleThreadCount.get()) {
+
+	idleThreadCount = _idleThreadCount.get();
+	
+	if (_idleThreadMax < idleThreadCount
+	    && _idleThreadCount.compareAndSet(idleThreadCount,
+					      idleThreadCount - 1)) {
+	  isDecrement = false;
 	  _idleCloseExpire = now + _idleCloseTimeout;
 	
 	  return false;
@@ -1308,7 +1315,8 @@ public class Port
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
     } finally {
-      _idleThreadCount.decrementAndGet();
+      if (isDecrement)
+	_idleThreadCount.decrementAndGet();
       
       if (isStartThreadRequired()) {
 	// if there are not enough idle threads, wake the manager to
