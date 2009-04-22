@@ -138,26 +138,6 @@ public class Cookie implements Cloneable {
   }
 
   /**
-   * True for HttpOnly request
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isHttpOnly()
-  {
-    return _isHttpOnly;
-  }
-
-  /**
-   * True for HttpOnly request
-   *
-   * @since Servlet 3.0
-   */
-  public void setHttpOnly(boolean isHttpOnly)
-  {
-    _isHttpOnly = isHttpOnly;
-  }
-
-  /**
    * Sets the max age of a cookie.  Setting <code>maxAge</code> to zero
    * deletes the cookie.  Setting it to something large makes the cookie
    * persistent.  If <code>maxAge</code> is not set, the cookie will only
