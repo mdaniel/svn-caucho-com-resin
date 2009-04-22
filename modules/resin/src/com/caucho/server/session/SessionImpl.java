@@ -555,9 +555,11 @@ public class SessionImpl implements HttpSession, CacheListener {
 	return true;
 
       ExtCacheEntry entry = cache.getExtCacheEntry(_id);
+      ExtCacheEntry cacheEntry = _cacheEntry;
 
-      if (entry != null && _cacheEntry != null
-	  && _cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {
+      if (entry != null && cacheEntry != null
+	  && cacheEntry.getValueHashKey() != null
+	  && cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {
 	return true;
       }
       

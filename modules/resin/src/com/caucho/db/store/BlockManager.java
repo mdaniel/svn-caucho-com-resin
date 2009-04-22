@@ -189,13 +189,23 @@ public final class BlockManager
     }
 
     synchronized (_writeQueue) {
-      while (_writeQueue.size() > 0) {
+      while (hasPendingStore(store)) {
 	try {
 	  _writeQueue.wait();
 	} catch (InterruptedException e) {
 	}
       }
     }
+  }
+
+  private boolean hasPendingStore(Store store)
+  {
+    for (int i = _writeQueue.size() - 1; i >= 0; i--) {
+      if (_writeQueue.get(i).getStore() == store)
+	return true;
+    }
+
+    return false;
   }
 
   /**
@@ -355,7 +365,7 @@ public final class BlockManager
 	      if (_writeQueue.size() == 0)
 		_writeQueue.wait();
 	      else
-		_writeQueue.wait(10000);
+		_writeQueue.wait(100);
 	    }
 	  }
 

@@ -93,6 +93,13 @@ abstract public class Repository
   }
 
   /**
+   * Start the repository
+   */
+  public void start()
+  {
+  }
+
+  /**
    * Returns the .git repository tag
    */
   protected String getRepositoryTag()

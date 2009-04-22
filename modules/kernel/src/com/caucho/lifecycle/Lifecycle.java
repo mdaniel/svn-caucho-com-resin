@@ -329,6 +329,14 @@ public final class Lifecycle implements LifecycleState {
   }
 
   /**
+   * Returns true if the service is starting.
+   */
+  public boolean isAfterStarting()
+  {
+    return _state >= IS_STARTING;
+  }
+
+  /**
    * Returns true for the warmup state.
    */
   public boolean isWarmup()

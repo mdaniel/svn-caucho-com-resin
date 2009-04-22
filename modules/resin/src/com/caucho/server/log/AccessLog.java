@@ -72,7 +72,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   // How often to check size
   private static final long ROLLOVER_CHECK_TIME = 600L * 1000L;
 
-  public static final int BUFFER_SIZE = 65536;
+  public static final int BUFFER_SIZE = 64 * 1024;
   private static final int BUFFER_GAP = 8 * 1024;
   
   private QDate _calendar = QDate.createLocal();

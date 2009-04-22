@@ -629,6 +629,7 @@ public class Store {
       buffer[i] = 0;
 
     block.setDirty(0, BLOCK_SIZE);
+    block.validate();
 
     // if extending file, write the contents now
     if (isFileExtended) {
@@ -1705,34 +1706,32 @@ public class Store {
   public void readBlock(long blockId, byte []buffer, int offset, int length)
     throws IOException
   {
-    synchronized (_fileLock) {
-      RandomAccessWrapper wrapper = openRowFile();
-      RandomAccessStream is = wrapper.getFile();
+    RandomAccessWrapper wrapper = openRowFile();
+    RandomAccessStream is = wrapper.getFile();
 
-      long blockAddress = blockId & BLOCK_MASK;
+    long blockAddress = blockId & BLOCK_MASK;
 
-      try {
-	if (blockAddress < 0 || _fileSize < blockAddress + length) {
-	  throw new IllegalStateException(L.l("block at {0} is invalid for file {1} (length {2})",
-					      Long.toHexString(blockAddress),
-					      _path,
-					      Long.toHexString(_fileSize)));
-	}
-
-	//System.out.println("READ: " + (blockAddress >> 16) + ":" + (blockAddress & 0xffff));
-	int readLen = is.read(blockAddress, buffer, offset, length);
-
-	if (readLen < 0) {
-	  for (int i = 0; i < BLOCK_SIZE; i++)
-	    buffer[i] = 0;
-	}
-      
-	freeRowFile(wrapper);
-	wrapper = null;
-      } finally {
-	if (wrapper != null)
-	  wrapper.close();
+    try {
+      if (blockAddress < 0 || _fileSize < blockAddress + length) {
+	throw new IllegalStateException(L.l("block at {0} is invalid for file {1} (length {2})",
+					    Long.toHexString(blockAddress),
+					    _path,
+					    Long.toHexString(_fileSize)));
       }
+
+      //System.out.println("READ: " + (blockAddress >> 16) + ":" + (blockAddress & 0xffff));
+      int readLen = is.read(blockAddress, buffer, offset, length);
+
+      if (readLen < 0) {
+	for (int i = 0; i < BLOCK_SIZE; i++)
+	  buffer[i] = 0;
+      }
+      
+      freeRowFile(wrapper);
+      wrapper = null;
+    } finally {
+      if (wrapper != null)
+	wrapper.close();
     }
   }
 
@@ -1743,24 +1742,23 @@ public class Store {
 			 byte []buffer, int offset, int length)
     throws IOException
   {
-    synchronized (_fileLock) {
-      RandomAccessWrapper wrapper = openRowFile();
-      RandomAccessStream os = wrapper.getFile();
+    RandomAccessWrapper wrapper = openRowFile();
+    RandomAccessStream os = wrapper.getFile();
     
-      try {
-	os.write(blockAddress, buffer, offset, length);
+    try {
+      os.write(blockAddress, buffer, offset, length);
       
-	freeRowFile(wrapper);
-	wrapper = null;
+      freeRowFile(wrapper);
+      wrapper = null;
       
+      synchronized (_fileLock) {
 	if (_fileSize < blockAddress + length) {
 	  _fileSize = blockAddress + length;
 	}
-      
-      } finally {
-	if (wrapper != null)
-	  wrapper.close();
       }
+    } finally {
+      if (wrapper != null)
+	wrapper.close();
     }
   }
 

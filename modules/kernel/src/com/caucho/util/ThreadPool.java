@@ -74,11 +74,8 @@ public class ThreadPool {
   private final ArrayList<Item> _threads
     = new ArrayList<Item>();
 
-  private final ArrayList<Runnable> _taskQueue
-    = new ArrayList<Runnable>();
-
-  private final ArrayList<ClassLoader> _loaderQueue
-    = new ArrayList<ClassLoader>();
+  private final ArrayList<TaskItem> _taskQueue = new ArrayList<TaskItem>();
+  private final ArrayList<TaskItem> _priorityQueue = new ArrayList<TaskItem>();
 
   private final Object _idleLock;
 
@@ -534,9 +531,17 @@ public class ThreadPool {
 	    _launcher.wake();
 	    
 	    if (queueIfFull) {
-	      synchronized (_taskQueue) {
-		_taskQueue.add(task);
-		_loaderQueue.add(loader);
+	      TaskItem item = new TaskItem(task, loader);
+	      
+	      if (freeThreads == 0) {
+		synchronized (_priorityQueue) {
+		  _priorityQueue.add(item);
+		}
+	      }
+	      else {
+		synchronized (_taskQueue) {
+		  _taskQueue.add(item);
+		}
 	      }
 	    }
 	    else if (Alarm.getCurrentTime() <= expireTime) {
@@ -606,7 +611,7 @@ public class ThreadPool {
   private void calculateThreadPriority()
   {
     if (! _threadPrioritySet) {
-      _threadPriority = _threadMax / 10;
+      _threadPriority = _threadIdleMin / 2;
     }
   }
 
@@ -707,6 +712,8 @@ public class ThreadPool {
 	  _startCount = 0;
 	}
       }
+
+      _launcher.wake();
       
       try {
 	runTasks();
@@ -739,10 +746,19 @@ public class ThreadPool {
 	    if (_isIdle) {
 	    }
 	    else {
-	      synchronized (_taskQueue) {
-		if (_taskQueue.size() > 0) {
-		  _task = _taskQueue.remove(0);
-		  _classLoader = _loaderQueue.remove(0);
+	      TaskItem item = null;
+	      
+	      synchronized (_priorityQueue) {
+		if (_priorityQueue.size() > 0) {
+		  item = _priorityQueue.remove(0);
+		}
+	      }
+
+	      if (item == null && _threadPriority <= _idleCount) {
+		synchronized (_taskQueue) {
+		  if (_taskQueue.size() > 0) {
+		    item = _taskQueue.remove(0);
+		  }
 		}
 	      }
 
@@ -921,6 +937,27 @@ public class ThreadPool {
 	  e.printStackTrace();
 	}
       }
+    }
+  }
+
+  static class TaskItem {
+    private Runnable _runnable;
+    private ClassLoader _loader;
+
+    TaskItem(Runnable runnable, ClassLoader loader)
+    {
+      _runnable = runnable;
+      _loader = loader;
+    }
+
+    public final Runnable getRunnable()
+    {
+      return _runnable;
+    }
+
+    public final ClassLoader getLoader()
+    {
+      return _loader;
     }
   }
 

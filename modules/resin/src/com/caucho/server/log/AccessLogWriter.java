@@ -37,6 +37,7 @@ import com.caucho.util.ThreadPool;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +54,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   private static final int BUFFER_GAP = 8 * 1024;
 
   private static final FreeList<AccessLogBuffer> _freeBuffers
-    = new FreeList<AccessLogBuffer>(4);
+    = new FreeList<AccessLogBuffer>(16);
 
   private final AccessLog _log;
 
@@ -69,6 +70,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   private int _maxQueueLength = 32;
   private final ArrayList<AccessLogBuffer> _writeQueue
     = new ArrayList<AccessLogBuffer>();
+
+  private Thread _flushThread;
   
   AccessLogWriter(AccessLog log)
   {
@@ -133,12 +136,14 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 
   void writeBuffer(byte []buffer, int offset, int length)
   {
+    boolean isFlush = false;
+    
     synchronized (_bufferLock) {
       byte []logBuffer = _buffer;
       int logLength = _length;
       
       if (buffer.length - logLength < length) {
-	flush();
+	isFlush = flushBuffer();
 	
 	logBuffer = _buffer;
 	logLength = _length;
@@ -150,9 +155,13 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       System.arraycopy(buffer, offset, logBuffer, logLength, length);
       _length = logLength + length;
     }
+
+    if (isFlush)
+      flush();
   }
 
   // must be synchronized by _bufferLock.
+  @Override
   protected void flush()
   {
     boolean isFlush = false;
@@ -161,11 +170,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       isFlush = flushBuffer();
     }
 
-    try {
-      if (isFlush)
-	super.flush();
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
+    if (isFlush) {
+      scheduleThread();
     }
   }
 
@@ -197,16 +203,17 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 	if (_writeQueue.size() < _maxQueueLength) {
 	  _writeQueue.add(logBuffer);
 
-	  if (! _hasThread) {
-	    _hasThread = true;
-	    isScheduleThread = true;
-	  }
-
 	  break;
 	}
 	else if (! _isFlushing) {
 	  _isFlushing = true;
 	  isFlush = true;
+	}
+	else {
+	  try {
+	    _writeQueue.wait();
+	  } catch (Exception e) {
+	  }
 	}
       }
 
@@ -217,7 +224,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 	  // a schedule
 	  log.fine("AccessLogWriter flushing log directly.");
 	      
-	  run();
+	  runImpl();
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	} finally {
@@ -225,9 +232,6 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 	}
       }
     }
-
-    if (isScheduleThread)
-      ThreadPool.getThreadPool().schedulePriority(this);
     
     AccessLogBuffer buffer = _freeBuffers.allocate();
 
@@ -235,6 +239,24 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       buffer = new AccessLogBuffer();
 
     return buffer;
+  }
+
+  private void scheduleThread()
+  {
+    boolean isScheduleThread = false;
+    
+    synchronized (_writeQueue) {
+      if (_hasThread)
+	wake();
+      else {
+	_hasThread = true;
+	isScheduleThread = true;
+      }
+    }
+
+    if (isScheduleThread) {
+      ThreadPool.getThreadPool().schedulePriority(this);
+    }
   }
 
   protected void waitForFlush(long timeout)
@@ -301,26 +323,61 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     }
   }
 
+  void wake()
+  {
+    Thread flushThread = _flushThread;
+
+    if (flushThread != null)
+      LockSupport.unpark(flushThread);
+  }
+
   public void run()
   {
+    _flushThread = Thread.currentThread();
+    int idleMax = 5;
+    int idleCount = idleMax;
+
+    while (true) {
+      _isFlushing = true;
+      
+      if (runImpl()) {
+	idleCount = idleMax;
+      }
+      else if (idleCount > 0) {
+	idleCount--;
+	LockSupport.parkNanos(10L * 1000000000L);
+      }
+      else {
+	synchronized (_writeQueue) {
+	  if (_writeQueue.size() == 0) {
+	    _isFlushing = false;
+	    _hasThread = false;
+	    _flushThread = null;
+	    return;
+	  }
+	}
+      }
+    }
+  }
+
+  private boolean runImpl()
+  {
+    boolean hasData = false;
+    
     while (true) {
       try {
 	AccessLogBuffer buffer = null;
 	
 	synchronized (_writeQueue) {
-	  if (_writeQueue.size() > 0) {
-	    buffer = _writeQueue.remove(0);
-	    _writeQueue.notifyAll();
-	  }
-	  else {
-	    _hasThread = false;
-	    return;
-	  }
+	  if (_writeQueue.size() == 0)
+	    return hasData;
+	  
+	  buffer = _writeQueue.remove(0);
+	  _writeQueue.notifyAll();
+	  hasData = true;
 	}
 
-	if (buffer != null) {
-	  writeBuffer(buffer);
-	}
+	writeBuffer(buffer);
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
       }

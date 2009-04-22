@@ -1759,9 +1759,14 @@ public class Server extends ProtocolDispatchServer
       if (_distributedCacheManager == null)
 	_distributedCacheManager = createDistributedCacheManager();
 
-      // initialize the store
+      _distributedCacheManager.start();
+
+      // initialize the system distributed store
       getSystemStore();
 
+      // start the repository
+      getRepository().start();
+      
       getCluster().start();
 
       _classLoader.start();
@@ -1971,6 +1976,14 @@ public class Server extends ProtocolDispatchServer
       log.fine("server is modified");
 
     return isModified;
+  }
+
+  /**
+   * Returns true if the server is starting or active
+   */
+  public boolean isAfterStarting()
+  {
+    return _lifecycle.isAfterStarting();
   }
 
   /**

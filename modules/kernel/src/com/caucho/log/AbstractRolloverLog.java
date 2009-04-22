@@ -412,6 +412,12 @@ public class AbstractRolloverLog {
   protected void flush()
     throws IOException
   {
+    flushStream();
+  }
+
+  protected void flushStream()
+    throws IOException
+  {
     synchronized (this) {
       if (_os != null)
 	_os.flush();

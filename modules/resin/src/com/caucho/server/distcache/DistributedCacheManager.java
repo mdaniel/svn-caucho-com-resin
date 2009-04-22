@@ -80,6 +80,13 @@ abstract public class DistributedCacheManager
   }
 
   /**
+   * Starts the service
+   */
+  public void start()
+  {
+  }
+
+  /**
    * Gets a cache key entry
    */
   abstract public DistCacheEntry getCacheEntry(Object key, CacheConfig config);
