@@ -3,9 +3,9 @@
   <artifactId>@ARTIFACT@</artifactId>
   
   <versioning>
-    <latest>3.1-SNAPSHOT</latest>
+    <latest>@VERSION@</latest>
     <versions>
-      <version>3.1-SNAPSHOT</version>
+      <version>@VERSION@</version>
     </versions>
   </versioning>
 </metadata>

@@ -13,11 +13,11 @@
     </license>
   </licenses>
 
-  <version>3.1.5</version>
+  <version>@VERSION@</version>
   <versioning>
-    <release>3.1.5</release>
+    <release>@VERSION@</release>
     <versions>
-      <version>3.1.5</version>
+      <version>@VERSION</version>
     </versions>
   </versioning>
 </metadata>
