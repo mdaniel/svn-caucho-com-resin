@@ -1646,8 +1646,8 @@ public class Server extends ProtocolDispatchServer
     ThreadPool threadPool = ThreadPool.getThreadPool();
     
     threadPool.setThreadMax(_threadMax);
-    threadPool.setThreadIdleMax(_threadIdleMax);
     threadPool.setThreadIdleMin(_threadIdleMin);
+    threadPool.setThreadIdleMax(_threadIdleMax);
     threadPool.setExecutorTaskMax(_threadExecutorTaskMax);
 
     if (_keepaliveSelectEnable) {
