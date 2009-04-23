@@ -204,7 +204,7 @@ public class ObjectExtValue extends ObjectValue
   {
     Entry entry = getEntry(env, name);
     
-    if (entry != null)
+    if (entry != null && entry._visibility == FieldVisibility.PUBLIC)
       return entry._value.toValue();
 
     return getFieldExt(env, name);

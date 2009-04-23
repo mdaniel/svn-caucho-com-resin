@@ -552,16 +552,13 @@ abstract public class ArrayValue extends Value {
     
     ArrayValue result = new ArrayValueImpl(this);
     
-    Iterator<Map.Entry<Value,Value>> iter 
-      = ((ArrayValue) rValue).getIterator(Env.getInstance());
-
-    while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
-      
+    for (Map.Entry<Value,Value> entry : ((ArrayValue) rValue).entrySet()) {
       Value key = entry.getKey();
       
-      if (result.get(key) == UnsetValue.UNSET)
-        result.put(key, entry.getValue());
+      if (result.get(key) == UnsetValue.UNSET) {
+        // php/330c drupal disabled textarea
+        result.put(key, entry.getValue().copy());
+      }
     }
 
     return result;

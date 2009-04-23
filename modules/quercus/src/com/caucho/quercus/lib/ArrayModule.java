@@ -1121,7 +1121,7 @@ public class ArrayModule
     ArrayValue array = value.toArrayValue(env);
     
     if (array == null)
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
 
     for (int i = values.length - 1; i >= 0; i--) {
       array.unshift(values[i]);
@@ -1129,7 +1129,7 @@ public class ArrayModule
 
     array.keyReset(0, NOT_STRICT);
 
-    return array;
+    return LongValue.create(array.getSize());
   }
 
   /**

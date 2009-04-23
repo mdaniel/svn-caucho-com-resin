@@ -51,7 +51,7 @@ public class StringBuilderOutputStream
   public void write(int ch)
     throws IOException
   {
-    _sb.append(ch);
+    _sb.appendByte(ch);
   }
   
   public void setStringBuilder(StringValue sb)

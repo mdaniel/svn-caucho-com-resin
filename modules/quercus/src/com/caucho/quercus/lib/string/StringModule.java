@@ -2889,7 +2889,10 @@ public class StringModule extends AbstractQuercusModule {
       return NullValue.NULL;
 
     int strlen = string.length();
-    boolean isAdditionalWordCharacters = additionalWordCharacters.length() > 0;
+    boolean isAdditionalWordCharacters = false;
+    
+    if (additionalWordCharacters != null)
+      isAdditionalWordCharacters = additionalWordCharacters.length() > 0;
 
     ArrayValueImpl resultArray = null;
 
@@ -2897,9 +2900,7 @@ public class StringModule extends AbstractQuercusModule {
       resultArray = new ArrayValueImpl();
 
     boolean isBetweenWords = true;
-
     int wordCount = 0;
-
     int lastWordStart = 0;
 
     for (int i = 0; i <= strlen; i++) {

@@ -40,6 +40,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -109,12 +110,26 @@ public class UrlModule
   /**
    * Decodes base64
    */
-  public static String base64_decode(String str)
+  public static Value base64_decode(Env env,
+                                    StringValue str,
+                                    @Optional boolean isStrict)
   {
-    if (str == null)
-      return "";
+    if (str.length() == 0)
+      return str;
+    
+    StringValue sb = env.createStringBuilder();
+    
+    OutputStream os = new StringBuilderOutputStream(sb);
 
-    return Base64.decode(str);
+    try {
+      Base64.decode(str.toSimpleReader(), os);
+    } catch (IOException e) {
+      
+      env.warning(e);
+      return BooleanValue.FALSE;
+    }
+    
+    return sb;
   }
 
   /**

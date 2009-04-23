@@ -1906,6 +1906,12 @@ abstract public class StringValue
     return new ByteArrayInputStream(toString().getBytes(charset));
   }
 
+  public Reader toSimpleReader()
+    throws UnsupportedEncodingException
+  {
+    return new SimpleStringValueReader(this);
+  }
+  
   /**
    * Returns a char stream.
    * XXX: when decoding fails
@@ -2129,6 +2135,47 @@ abstract public class StringValue
       _index += sublen;
 
       return sublen;
+    }
+  }
+  
+  static class SimpleStringValueReader extends Reader
+  {
+    StringValue _str;
+    int _index;
+    int _length;
+    
+    SimpleStringValueReader(StringValue s)
+    {
+      _str = s;
+      _length = s.length();
+    }
+    
+    public int read()
+    {
+      if (_index >= _length)
+        return -1;
+      else
+        return _str.charAt(_index++);
+    }
+    
+    public int read(char []buf, int off, int len)
+    {
+      if (_index >= _length)
+        return -1;
+      
+      int i = 0;
+      len = Math.min(_length - _index, len);
+      
+      for (; i < len; i++) {
+        buf[off + i] = _str.charAt(i + _index++);
+      }
+      
+      return i;
+    }
+    
+    public void close()
+      throws IOException
+    {
     }
   }
 }
