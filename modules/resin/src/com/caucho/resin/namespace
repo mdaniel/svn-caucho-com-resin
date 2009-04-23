@@ -6,4 +6,5 @@ com.caucho.protocols
 com.caucho.resources
 com.caucho.rewrite
 com.caucho.security
+com.caucho.server.admin
 com.caucho.server.repository

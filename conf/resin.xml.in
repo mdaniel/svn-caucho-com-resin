@@ -33,14 +33,6 @@
   <resin:AdminAuthenticator>
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
   </resin:AdminAuthenticator>
-  
-  <!--    
-    <deploy-service/>
-    <jmx-service/>
-    <log-service/>
-    <stat-service/>
-    <xa-log-service/>
-    -->
 
   <!--
      - Logging configuration for the JDK logging API.
@@ -76,9 +68,18 @@
     -->
 
   <!--
-     - You can change the compiler to "javac", "eclipse" or "internal".
+     - Admin services
     -->
-  <javac compiler="internal" args="-source 1.5"/>
+  <cluster-default>
+    <resin:DeployService/>
+    
+    <resin:if test="${resin.professional}">
+      <resin:JmxService/>
+      <resin:LogService/>
+      <resin:StatService/>
+      <resin:XaLogService/>
+    </resin:if>
+  </cluster-default>
 
   <cluster id="app-tier">
     <!-- sets the content root for the cluster, relative to resin.root -->
@@ -151,13 +152,13 @@
       -->
 
     <!--
-       - Enables the cache (available in Resin Professional) 
+       - Enables the proxy cache (available in Resin Professional) 
       -->
     <resin:if test="${resin.professional}">
-    <cache path="cache" memory-size="64M">
-      <!-- Vary header rewriting for IE -->
-      <rewrite-vary-as-private/>
-    </cache>
+      <cache path="cache" memory-size="64M">
+       <!-- Vary header rewriting for IE -->
+        <rewrite-vary-as-private/>
+      </cache>
     </resin:if>
 
     <!--
@@ -278,8 +279,6 @@
       <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
 
       <!--
-	 - Sample LoadBalance, HttpProxy and FastCgi dispatch
-	 -
 	 - <resin:LoadBalance regexp="^/load" cluster="backend-tier"/>
 	 - <resin:HttpProxy regexp="^/http" address="localhost:9000"/>
 	 - <resin:FastCgiProxy regexp="^/fcgi" address="localhost:9001"/>

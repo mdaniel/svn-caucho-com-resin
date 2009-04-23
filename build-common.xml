@@ -734,6 +734,7 @@
     <antcall target="resin.artifacts.dist" inheritRefs="true"/>
 
     <mkdir dir="${dist}/${dist.name}/licenses"/>
+    <mkdir dir="${dist}/${dist.name}/mavej-jars"/>
     <mkdir dir="${dist}/${dist.name}/keys"/>
     <mkdir dir="${dist}/${dist.name}/ext-lib"/>
     <mkdir dir="${dist}/${dist.name}/ext-webapp-lib"/>
