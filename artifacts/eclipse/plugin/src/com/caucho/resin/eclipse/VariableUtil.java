@@ -36,7 +36,7 @@ import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.IValueVariable;
 import org.eclipse.core.variables.VariablesPlugin;
 
-public class VariableUtil {
+class VariableUtil {
   public static void setVariable(String key, String value)
     throws CoreException
   {

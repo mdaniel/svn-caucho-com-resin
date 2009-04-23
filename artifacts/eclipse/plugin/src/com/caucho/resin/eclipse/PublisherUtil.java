@@ -109,7 +109,8 @@ class PublisherUtil {
    *  
    * @return the resolved value of the variable
    */
-  public static String getPublisherData(ServerRuntime typeDef,
+  @SuppressWarnings("unchecked")
+public static String getPublisherData(ServerRuntime typeDef,
                                         String publisherId,
                                         String key) 
   {
