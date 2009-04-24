@@ -333,17 +333,41 @@ public class BeanELResolver extends ELResolver {
     {
       _base = baseClass;
 
-      try {
-	BeanInfo info = Introspector.getBeanInfo(baseClass);
+      introspect(baseClass);
+    }
 
-	for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
-	  _propMap.put(descriptor.getName(),
-		       new BeanProperty(baseClass, descriptor));
+    private void introspect(Class cl)
+    {
+      if (cl == null)
+	return;
+
+      introspect(cl.getSuperclass());
+
+      for (Class iface : cl.getInterfaces()) {
+	introspect(iface);
+      }
+
+      try {
+	BeanInfo info = null;
+
+	try {
+	  info = Introspector.getBeanInfo(cl);
+
+	  for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
+	    _propMap.put(descriptor.getName(),
+			 new BeanProperty(cl, descriptor));
+	  }
+	} catch (NoClassDefFoundError e) {
 	}
 
-	Method []methods = baseClass.getMethods();
+	Method []methods = null;
 
-	for (int i = 0; i < methods.length; i++) {
+	try {
+	  methods = cl.getDeclaredMethods();
+	} catch (NoClassDefFoundError e) {
+	}
+
+	for (int i = 0; methods != null && i < methods.length; i++) {
 	  Method method = methods[i];
 
 	  String name = method.getName();
@@ -368,7 +392,7 @@ public class BeanELResolver extends ELResolver {
 	  if (_propMap.get(propName) != null)
 	    continue;
 
-	  _propMap.put(propName, new BeanProperty(baseClass,
+	  _propMap.put(propName, new BeanProperty(_base,
 						  propName,
 						  method));
 	}
