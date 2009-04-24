@@ -1010,7 +1010,6 @@
   <target name="maven2-module">
     <property name="module.dir" value="${modules}"/>
     <property name="module.src" value="${module.dir}/${module.name}/src"/>
-    <property name="module.ext" value="jar"/>
     <property name="jar.name" value="${module.name}.${module.ext}"/>
     <property name="maven.name" value="resin-${module.name}"/>
     <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
@@ -1018,7 +1017,24 @@
 
     <mkdir dir="${maven.dist}"/>
 
-    <copy file="${module.dir}/${module.name}/maven2/pom.xml"
+    <antcall target="maven2-jar" inheritRefs="true">
+      <param name="pom.xml" value="${module.dir}/${module.name}/maven2/pom.xml"/>
+      <param name="ivy.xml" value="${module.dir}/${module.name}/maven2/ivy.xml"/>
+    </antcall>
+  </target>
+
+  <target name="maven2-jar">
+    <!-- PARAMETERS -->
+    <!--
+         maven.name
+         maven.jar
+         ivy.xml
+         pom.xml
+    -->
+    <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
+    <property name="module.ext" value="jar"/>
+
+    <copy file="${pom.xml}"
           tofile="${maven.dist}/${maven.name}-${maven.version}.pom"
           preservelastmodified="true"
           overwrite="true">
@@ -1044,7 +1060,7 @@
     <checksum file="${maven.dist}/${maven.name}-${maven.version}.${module.ext}"
               algorithm="md5"/>
 
-    <copy file="${module.dir}/${module.name}/maven2/ivy.xml"
+    <copy file="${ivy.xml}"
           tofile="${maven.dist}/ivy-${maven.version}.xml"
           preservelastmodified="true"
           overwrite="true">
@@ -1071,6 +1087,7 @@
               algorithm="sha1"/>
     <checksum file="${maven}/${maven.name}/maven-metadata.xml"
               algorithm="md5"/>
+
   </target>
 
   <target name="artifact.dist" depends="init">

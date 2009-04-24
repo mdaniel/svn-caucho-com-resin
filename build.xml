@@ -828,12 +828,21 @@
      <exec executable="autoconf"/>
   </target>
 
-  <target name="maven-dist" depends="init, compile, ant, eclipse, netbeans, maven-plugin, artifacts">
+  <target name="maven-dist" depends="init, compile, ant, eclipse, netbeans, maven-plugin, artifacts, resin.dist.jar">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="resin"/>
+    <antcall target="maven2-jar" inheritRefs="true">
       <param name="maven.name" value="resin"/>
+      <param name="jar" value="${dist}/${dist.name}/lib/resin.jar"/>
+      <param name="pom.xml" value="${modules}/resin/maven2/pom.xml"/>
+      <param name="ivy.xml" value="${modules}/resin/maven2/ivy.xml"/>
+    </antcall>
+
+    <antcall target="maven2-jar" inheritRefs="true">
+      <param name="maven.name" value="resin-javaee"/>
+      <param name="jar" value="${dist}/${dist.name}/lib/javaee-16.jar"/>
+      <param name="pom.xml" value="${modules}/javaee/maven2/pom.xml"/>
+      <param name="ivy.xml" value="${modules}/javaee/maven2/ivy.xml"/>
     </antcall>
 
     <antcall target="maven2-artifact" inheritRefs="true">
@@ -847,12 +856,6 @@
       <param name="jar.name"
 	     value="com.caucho.resin.eclipse_${version}.jar"/>
       <param name="maven.name" value="resin-eclipse"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="javaee"/>
-      <param name="jar.name" value="javaee-16.jar"/>
-      <param name="maven.name" value="resin-javaee"/>
     </antcall>
 
     <!--
@@ -869,18 +872,6 @@
       <param name="maven.name" value="resin-hessian"/>
     </antcall>
 
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jcache"/>
-      <param name="jar.name" value="jcache-16.jar"/>
-      <param name="maven.name" value="resin-jcache"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jsf"/>
-      <param name="jar.name" value="jsf-12.jar"/>
-      <param name="maven.name" value="resin-jsf"/>
-    </antcall>
-
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="maven"/>
       <param name="jar.name" value="resin-maven-plugin.jar"/>
@@ -894,12 +885,6 @@
       <param name="maven.name" value="resin-netbeans"/>
     </antcall>
     
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="quercus"/>
-      <param name="jar.name" value="quercus.jar"/>
-      <param name="maven.name" value="resin-quercus"/>
-    </antcall>
-
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="spring"/>
       <param name="jar.name" value="resin-spring.jar"/>
@@ -913,12 +898,6 @@
       <param name="maven.name" value="resin-support"/>
     </antcall>
     -->
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="kernel"/>
-      <param name="jar.name" value="resin-kernel.jar"/>
-      <param name="maven.name" value="resin-kernel"/>
-    </antcall>
   </target>
 
   <target name="maven-rsync" depends="init,maven-dist">
@@ -954,7 +933,7 @@
   </target>
 
   <target name="hessian-flash" depends="init">
-    <taskdef resource="flexTasks.tasks" classpath="${ant.home}/lib/flexTasks.jar" />
+    <taskdef resource="flexTasks.tasks" classpath="${user.home}/flash/ant/lib/flexTasks.jar" />
     <property name="FLEX_HOME" value="${user.home}/flash"/>
 
     <property name="dist.name" value="${shortproduct}-${version}"/>
@@ -995,8 +974,8 @@
       <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
-        includes="com/caucho/bam/*.as 
-                  com/caucho/hmtp/*.as 
+        includes="bam/*.as 
+                  bam/hmtp/*.as 
                   com/caucho/xmpp/*.as
                   com/caucho/xmpp/ping/*.as"/>
       <compiler.include-libraries dir="${modules}/flash/build" append="true">
