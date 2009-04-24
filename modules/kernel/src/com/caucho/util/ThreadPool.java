@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ThreadPool {
+public final class ThreadPool {
   private static final L10N L = new L10N(ThreadPool.class);
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
@@ -541,9 +541,6 @@ public class ThreadPool {
   {
     PoolThread poolThread = null;
     boolean isWakeLauncher = false;
-    
-    if (! _isInit)
-      init();
 
     int freeThreadsRequired = isPriority ? 0 : _threadPriority;
 
@@ -557,7 +554,9 @@ public class ThreadPool {
 
 	  poolThread = _idleHead;
 
-	  if (poolThread != null && freeThreadsRequired <= freeCount) {
+	  boolean isFreeThreadAvailable = freeThreadsRequired <= freeCount;
+
+	  if (poolThread != null && isFreeThreadAvailable) {
 	    if (_idleCount <= 0) {
 	      String msg = this + " critical internal error in ThreadPool, requiring Resin restart";
 	      System.err.println(msg);
@@ -580,7 +579,9 @@ public class ThreadPool {
 	  else {
 	    poolThread = null;
 
-	    if (queueIfFull) {
+	    // queue if schedule() or if there's space to run but no
+	    // active thread yet
+	    if (queueIfFull || isFreeThreadAvailable) {
 	      isWakeLauncher = true;
 	    
 	      TaskItem item = new TaskItem(task, loader);

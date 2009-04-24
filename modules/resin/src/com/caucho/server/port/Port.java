@@ -88,6 +88,8 @@ public class Port
   // The owning server
   private ProtocolDispatchServer _server;
 
+  private ThreadPool _threadPool = ThreadPool.getThreadPool();
+
   // The id
   private String _serverId = "";
 
@@ -149,6 +151,8 @@ public class Port
   // active set of all connections
   private Set<TcpConnection> _activeConnectionSet
     = Collections.synchronizedSet(new HashSet<TcpConnection>());
+
+  private final AtomicInteger _activeConnectionCount = new AtomicInteger();
 
   // server push (comet) suspend set
   private Set<TcpConnection> _suspendConnectionSet
@@ -689,7 +693,7 @@ public class Port
    */
   public int getConnectionCount()
   {
-    return _activeConnectionSet.size();
+    return _activeConnectionCount.get();
   }
 
   /**
@@ -828,6 +832,18 @@ public class Port
     return _keepaliveSelectThreadTimeout;
   }
 
+  public long getBlockingTimeoutForSelect()
+  {
+    long timeout = _keepaliveSelectThreadTimeout;
+
+    if (timeout <= 10)
+      return timeout;
+    else if (_threadPool.getFreeThreadCount() < 64)
+      return 10;
+    else
+      return timeout;
+  }
+
   public int getKeepaliveSelectMax()
   {
     if (getSelectManager() != null)
@@ -935,7 +951,7 @@ public class Port
   public int getFreeKeepalive()
   {
     int freeKeepalive = _keepaliveMax - _keepaliveCount.get();
-    int freeConnections = (_connectionMax - _activeConnectionSet.size()
+    int freeConnections = (_connectionMax - _activeConnectionCount.get()
 			   - _minSpareConnection);
     int freeSelect = _server.getFreeSelectKeepalive();
 
@@ -1376,7 +1392,7 @@ public class Port
     else if (_keepaliveMax <= _keepaliveCount.get())
       return false;
     else if (_connectionMax
-	     <= _activeConnectionSet.size() + _minSpareConnection)
+	     <= _activeConnectionCount.get() + _minSpareConnection)
       return false;
     else
       return true;
@@ -1390,9 +1406,9 @@ public class Port
     if (! _lifecycle.isActive())
       return false;
     else if (_connectionMax
-	     <= _activeConnectionSet.size() + _minSpareConnection) {
+	     <= _activeConnectionCount.get() + _minSpareConnection) {
       log.warning(conn + " failed keepalive, active-connections="
-		  + _activeConnectionSet.size());
+		  + _activeConnectionCount.get());
 	
       return false;
     }
@@ -1471,7 +1487,7 @@ public class Port
     }
 
     if (isResume) {
-      ThreadPool.getThreadPool().schedule(conn.getResumeTask());
+      _threadPool.schedule(conn.getResumeTask());
       return true;
     }
     else
@@ -1494,7 +1510,7 @@ public class Port
     if (_suspendConnectionSet.remove(conn)) {
       conn.setResume();
 
-      ThreadPool.getThreadPool().schedule(conn.getResumeTask());
+      _threadPool.schedule(conn.getResumeTask());
 
       return true;
     }
@@ -1515,7 +1531,8 @@ public class Port
    */
   public TcpConnection findConnectionByThreadId(long threadId)
   {
-    ArrayList<TcpConnection> connList = new ArrayList<TcpConnection>(_activeConnectionSet);
+    ArrayList<TcpConnection> connList
+      = new ArrayList<TcpConnection>(_activeConnectionSet);
 
     for (TcpConnection conn : connList) {
       if (conn.getThreadId() == threadId)
@@ -1542,7 +1559,7 @@ public class Port
 	
 	if (isStartThreadRequired()
 	    && _lifecycle.isActive()
-	    && _activeConnectionSet.size() <= _connectionMax) {
+	    && _activeConnectionCount.get() <= _connectionMax) {
 	  startConn = _freeConn.allocate();
 	  
 	  if (startConn == null) {
@@ -1553,6 +1570,7 @@ public class Port
 	    startConn._isFree = false; // XXX: validation for 4.0
 	    
 	  _startThreadCount.incrementAndGet();
+	  _activeConnectionCount.incrementAndGet();
 	  _activeConnectionSet.add(startConn);
 	}
 	else {
@@ -1560,7 +1578,7 @@ public class Port
 	}
 
         if (startConn != null) {
-          ThreadPool.getThreadPool().schedule(startConn.getReadTask());
+          _threadPool.schedule(startConn.getReadTask());
         }
       } catch (Throwable e) {
         log.log(Level.SEVERE, e.toString(), e);
@@ -1634,6 +1652,7 @@ public class Port
   private void closeConnection(TcpConnection conn)
   {
     _activeConnectionSet.remove(conn);
+    _activeConnectionCount.decrementAndGet();
 
     // wake the start thread
     Thread portThread = _portThread;

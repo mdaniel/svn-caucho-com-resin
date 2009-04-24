@@ -69,6 +69,8 @@ public class TcpConnection extends Connection
 
   private static final AtomicInteger _connectionCount = new AtomicInteger();
 
+  private static ClassLoader _systemClassLoader;
+
   private int _connectionId;  // The connection's id
   private final String _id;
   private String _dbgId;
@@ -598,7 +600,7 @@ public class TcpConnection extends Connection
   RequestState handleRequests()
   {
     Thread thread = Thread.currentThread();
-    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+    ClassLoader systemLoader = _systemClassLoader;
  
     boolean isValid = false;
     RequestState result = RequestState.EXIT;
@@ -627,6 +629,10 @@ public class TcpConnection extends Connection
        result = RequestState.EXIT;
 
        _isWake = false;
+       
+       if ((result = keepaliveRead()) != RequestState.REQUEST) {
+	 break;
+       }
 
        if (! getRequest().handleRequest())
 	 _isKeepalive = false;
@@ -795,7 +801,7 @@ public class TcpConnection extends Connection
     boolean isSelectManager = port.getServer().isSelectManagerEnabled();
     
     if (isSelectManager) {
-      timeout = port.getKeepaliveSelectThreadTimeout();
+      timeout = port.getBlockingTimeoutForSelect();
     }
 
     if (timeout > 0 && timeout < port.getSocketTimeout()) {
@@ -1253,7 +1259,7 @@ public class TcpConnection extends Connection
  
       port.threadBegin(TcpConnection.this);
 
-      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+      ClassLoader systemLoader = _systemClassLoader;
       thread.setContextClassLoader(systemLoader);
 
       boolean isValid = false;
@@ -1283,11 +1289,6 @@ public class TcpConnection extends Connection
         
           _connectionStartTime = Alarm.getCurrentTime();
           
-          if (isWaitForRead && ! getReadStream().waitForRead()) {
-            close();
-            continue;
-          }
-
 	  _request.startConnection();
 	  _isKeepalive = true;
 
@@ -1458,7 +1459,7 @@ public class TcpConnection extends Connection
   class Admin extends AbstractManagedObject implements TcpConnectionMXBean {
     Admin()
     {
-      super(ClassLoader.getSystemClassLoader());
+      super(_systemClassLoader);
     }
     
     public String getName()
@@ -1516,5 +1517,9 @@ public class TcpConnection extends Connection
     {
       unregisterSelf();
     }
+  }
+
+  static {
+    _systemClassLoader = ClassLoader.getSystemClassLoader();
   }
 }
