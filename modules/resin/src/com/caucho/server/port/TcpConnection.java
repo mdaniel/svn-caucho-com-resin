@@ -808,7 +808,9 @@ public class TcpConnection extends Connection
       port.keepaliveThreadBegin();
 
       try {
-	return is.fillWithTimeout(timeout);
+	boolean result = is.fillWithTimeout(timeout);
+
+	return result;
       } finally {
 	port.keepaliveThreadEnd();
       }

@@ -59,6 +59,7 @@ public final class ReadStream extends InputStream
     implements LockableStream
 {
   public static int ZERO_COPY_SIZE = 1024;
+  public static int READ_TIMEOUT = -4;
   
   private TempBuffer _tempRead;
   private byte []_readBuffer;
@@ -1053,6 +1054,8 @@ public final class ReadStream extends InputStream
 
   /**
    * Fills the buffer with a non-blocking read.
+   *
+   * @return true on data or end of file, false on timeout
    */
   public boolean fillWithTimeout(long timeout)
     throws IOException
@@ -1063,7 +1066,7 @@ public final class ReadStream extends InputStream
     if (_readBuffer == null) {
       _readOffset = 0;
       _readLength = 0;
-      return false;
+      return true;
     }
 
     if (_sibling != null)
@@ -1072,16 +1075,22 @@ public final class ReadStream extends InputStream
     _readOffset = 0;
     _readLength = _source.readTimeout(_readBuffer, 0, _readBuffer.length,
 				      timeout);
-    
+
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (_readLength > 0) {
       _position += _readLength;
       _readTime = Alarm.getCurrentTime();
       return true;
     }
-    else {
+    else if (_readLength == READ_TIMEOUT) {
+      // timeout
       _readLength = 0;
       return false;
+    }
+    else {
+      // return true on end of file
+      _readLength = 0;
+      return true;
     }
   }
 

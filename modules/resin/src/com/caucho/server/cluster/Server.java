@@ -159,8 +159,8 @@ public class Server extends ProtocolDispatchServer
   // <server> configuration compat
   private int _acceptListenBacklog = 100;
   
-  private int _acceptThreadMin = 5;
-  private int _acceptThreadMax = 10;
+  private int _acceptThreadMin = 4;
+  private int _acceptThreadMax = 8;
 
   private int _connectionMax = 1024 * 1024;
 
@@ -184,8 +184,8 @@ public class Server extends ProtocolDispatchServer
   
   private int _threadMax = 4096;
   private int _threadExecutorTaskMax = -1;
-  private int _threadIdleMin = 5;
-  private int _threadIdleMax = 10;
+  private int _threadIdleMin = -1;
+  private int _threadIdleMax = -1;
 
   // <cluster> configuration
 
@@ -1631,11 +1631,11 @@ public class Server extends ProtocolDispatchServer
       createManagement().init();
     }
 
-    if (_threadMax < _threadIdleMax)
+    if (_threadIdleMax > 0 && _threadMax < _threadIdleMax)
       throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
 				    _threadIdleMax, _threadMax));
 
-    if (_threadIdleMax < _threadIdleMin)
+    if (_threadIdleMin > 0 && _threadIdleMax < _threadIdleMin)
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
 
@@ -1644,10 +1644,16 @@ public class Server extends ProtocolDispatchServer
 				    _threadExecutorTaskMax, _threadMax));
     
     ThreadPool threadPool = ThreadPool.getThreadPool();
+
+    if (_threadMax > 0)
+      threadPool.setThreadMax(_threadMax);
     
-    threadPool.setThreadMax(_threadMax);
-    threadPool.setThreadIdleMin(_threadIdleMin);
-    threadPool.setThreadIdleMax(_threadIdleMax);
+    if (_threadIdleMax > 0)
+      threadPool.setThreadIdleMax(_threadIdleMax);
+    
+    if (_threadIdleMin > 0)
+      threadPool.setThreadIdleMin(_threadIdleMin);
+    
     threadPool.setExecutorTaskMax(_threadExecutorTaskMax);
 
     if (_keepaliveSelectEnable) {

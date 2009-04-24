@@ -91,7 +91,7 @@ public class JniStream extends StreamImpl {
       return result;
     }
     else if (result == TIMEOUT_EXN) {
-      return -1;
+      return ReadStream.READ_TIMEOUT;
     }
     else if (result < -1) {
       throw exception(result);

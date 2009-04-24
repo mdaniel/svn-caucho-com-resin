@@ -317,7 +317,7 @@ if ($ports) {
 
     <th>Total</th>
     <th>Thread</th>
-    <th>Select</th>
+    <th>Non-Block</th>
     <th>Comet</th>
   </tr>
 <?php
