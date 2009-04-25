@@ -36,6 +36,7 @@ import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.L10N;
+import com.caucho.jsf.context.JspResponseWrapper;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -52,7 +53,7 @@ import java.io.PrintWriter;
 
 public class RequestDispatcherImpl implements RequestDispatcher {
   private static final L10N L = new L10N(RequestDispatcherImpl.class);
-  
+
   private static final String REQUEST_URI
     = "javax.servlet.include.request_uri";
   private static final String CONTEXT_PATH
@@ -165,7 +166,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	  cauchoRes.setHasError(true);
         throw exn;
       }
-      
+
       _webApp.log(exn.getMessage(), exn);
 
       return;
@@ -176,7 +177,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     ServletResponse resPtr = res;
     boolean isError = "error".equals(method);
-	  
+
     if (method == null || isError)
       method = req.getMethod();
 
@@ -234,7 +235,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 		    invocation.getServletPath(),
 		    invocation.getPathInfo(),
 		    queryString, newQueryString);
-    
+
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
 
@@ -249,7 +250,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     Object oldQueryString = null;
     Object oldJSPFile = null;
     Object oldForward = null;
-    
+
     oldUri = req.getAttribute(REQUEST_URI);
 
     if (oldUri != null) {
@@ -274,7 +275,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       subRequest.setAttribute(FWD_PATH_INFO, req.getPathInfo());
       subRequest.setAttribute(FWD_QUERY_STRING, req.getQueryString());
     }
-    
+
     oldForward = req.getAttribute("caucho.forward");
     req.setAttribute("caucho.forward", "true");
 
@@ -309,7 +310,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	if (ptr != null)
 	  ptr.resetBuffer();
       }
-      
+
       res.resetBuffer();
       res.setContentLength(-1);
 
@@ -318,12 +319,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       if (cauchoRes != null) {
 	// server/1732 wants this commented out
 	// jsp/15m9 (tck)
-	ServletResponse closePtr = cauchoRes;
-	while (closePtr instanceof CauchoResponse) {
-	  ((CauchoResponse) closePtr).close();
-	
-	  closePtr = ((CauchoResponse) closePtr).getResponse();
-	}
+        ServletResponse closePtr = cauchoRes;
+        while (closePtr instanceof CauchoResponse &&
+               !(closePtr instanceof JspResponseWrapper)) {
+          ((CauchoResponse) closePtr).close();
+
+          closePtr = ((CauchoResponse) closePtr).getResponse();
+        }
       }
       else {
 	// server/10ab
@@ -343,7 +345,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       }
     } finally {
       subRequest.finishRequest();
-      
+
       thread.setContextClassLoader(oldLoader);
 
       if (response != null) {
@@ -353,7 +355,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       }
 
       DispatchRequest.free(subRequest);
-      
+
       if (reqWrapper != null)
 	reqWrapper.setRequest(parentRequest);
 
@@ -372,7 +374,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       if (oldQueryString != null)
 	req.setAttribute(QUERY_STRING, oldQueryString);
-      
+
       if (oldForward == null)
 	req.removeAttribute("caucho.forward");
 
@@ -414,7 +416,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       response = (AbstractHttpResponse) res;
 
     ServletResponse resPtr = res;
-	  
+
     String method = req.getMethod();
 
     subRequest = DispatchRequest.createDispatch();
@@ -472,7 +474,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     Object oldQueryString = null;
     Object oldJSPFile = null;
     Object oldForward = null;
-    
+
     oldUri = req.getAttribute(REQUEST_URI);
 
     if (oldUri != null) {
@@ -496,7 +498,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       subRequest.setAttribute(FWD_PATH_INFO, req.getPathInfo());
       subRequest.setAttribute(FWD_QUERY_STRING, req.getQueryString());
     }
-    
+
     oldForward = req.getAttribute("caucho.forward");
     req.setAttribute("caucho.forward", "true");
 
@@ -525,7 +527,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       invocation.service(topRequest, res);
     } finally {
       subRequest.finishRequest();
-      
+
       thread.setContextClassLoader(oldLoader);
 
       if (response != null) {
@@ -549,7 +551,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       if (oldQueryString != null)
 	req.setAttribute(QUERY_STRING, oldQueryString);
-      
+
       if (oldForward == null)
 	req.removeAttribute("caucho.forward");
     }
@@ -680,7 +682,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       contextPath = webApp.getContextPath();
     else
       contextPath = null;
-    
+
     subRequest.setPageContextPath(contextPath);
     subRequest.setAttribute(CONTEXT_PATH, contextPath);
     subRequest.setPageServletPath(invocation.getServletPath());
