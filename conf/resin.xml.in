@@ -17,10 +17,10 @@
   </class-loader>
 
   <!--
-     - jars with maven dependencies can be placed in maven-jars to be used
+     - jars with maven dependencies can be placed in project-jars to be used
      - by web-apps
     -->
-  <resin:MavenJarRepository path="${resin.root}/maven-jars"/>
+  <resin:ProjectJarRepository path="${resin.root}/project-jars"/>
 
   <!--
      - Resin-managed data, including sessions, administration, and clustering

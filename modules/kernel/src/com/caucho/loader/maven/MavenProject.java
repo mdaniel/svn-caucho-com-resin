@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.loader.maven;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;

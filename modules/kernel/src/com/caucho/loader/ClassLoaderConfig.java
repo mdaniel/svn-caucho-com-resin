@@ -205,6 +205,13 @@ public class ClassLoaderConfig {
   */
 
   /**
+   * Adds a project-loader, to be loaded from the repository
+   */
+  public void addProjectLoader(ProjectLoaderConfig config)
+  {
+  }
+
+  /**
    * Adds a tree loader.
    */
   public TreeLoader createTreeLoader()

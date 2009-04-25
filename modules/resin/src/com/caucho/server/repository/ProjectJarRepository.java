@@ -37,6 +37,7 @@ import com.caucho.loader.ArtifactDependency;
 import com.caucho.loader.ArtifactRepository;
 import com.caucho.loader.ArtifactResolver;
 import com.caucho.loader.JarMap;
+import com.caucho.loader.maven.MavenProject;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -57,12 +58,12 @@ import javax.annotation.PostConstruct;
  */
 @Service
 @Unbound
-public class MavenJarRepository implements ArtifactResolver
+public class ProjectJarRepository implements ArtifactResolver
 {
-  private static final L10N L = new L10N(MavenJarRepository.class);
+  private static final L10N L = new L10N(ProjectJarRepository.class);
   
   private static final Logger log
-    = Logger.getLogger(MavenJarRepository.class.getName());
+    = Logger.getLogger(ProjectJarRepository.class.getName());
   
   private Path _path;
 
