@@ -74,6 +74,8 @@ public class FormLogin extends AbstractLogin
   protected String _errorPage;
   protected boolean _internalForward;
   protected boolean _formURIPriority;
+
+  private WebApp _webApp = WebApp.getCurrent();
   
   /**
    * Sets the login page.
@@ -268,7 +270,7 @@ public class FormLogin extends AbstractLogin
       return;
     request.setAttribute(LOGIN_CHECK, "login");
     
-    WebApp app = (WebApp) request.getServletContext();
+    WebApp app = _webApp;
     
     String jUseCookieAuth = (String) request.getParameter("j_use_cookie_auth");
     
@@ -336,7 +338,7 @@ public class FormLogin extends AbstractLogin
       return;
     }
 
-    WebApp app = (WebApp) request.getServletContext();
+    WebApp app = _webApp;
       
     String uri = request.getRequestURI();
 

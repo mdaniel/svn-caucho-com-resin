@@ -37,6 +37,7 @@ import java.io.PrintWriter;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 
 /**
@@ -75,7 +76,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setContentType(String type)
   {
-    getResponse().setContentType(type);
+    getAbstractHttpResponse().setContentType(type);
   }
   
   /**
@@ -85,7 +86,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public String getContentType()
   {
-    return getResponse().getContentType();
+    return getAbstractHttpResponse().getContentType();
   }
 
   /**
@@ -94,7 +95,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public String getCharacterEncoding()
   {
-    return getResponse().getCharacterEncoding();
+    return getAbstractHttpResponse().getCharacterEncoding();
   }
 
   /**
@@ -105,7 +106,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setCharacterEncoding(String charset)
   {
-    getResponse().setCharacterEncoding(charset);
+    getAbstractHttpResponse().setCharacterEncoding(charset);
   }
   
   /**
@@ -115,7 +116,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setLocale(Locale locale)
   {
-    getResponse().setLocale(locale);
+    getAbstractHttpResponse().setLocale(locale);
   }
   
   /**
@@ -123,7 +124,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public Locale getLocale()
   {
-    return getResponse().getLocale();
+    return getAbstractHttpResponse().getLocale();
   }
   
   /**
@@ -133,7 +134,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   public ServletOutputStream getOutputStream()
     throws IOException
   {
-    return getResponse().getOutputStream();
+    return getAbstractHttpResponse().getOutputStream();
   }
   
   /**
@@ -143,7 +144,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   public PrintWriter getWriter()
     throws IOException
   {
-    return getResponse().getWriter();
+    return getAbstractHttpResponse().getWriter();
   }
   
   /**
@@ -154,7 +155,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setBufferSize(int size)
   {
-    getResponse().setBufferSize(size);
+    getAbstractHttpResponse().setBufferSize(size);
   }
   
   /**
@@ -162,7 +163,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public int getBufferSize()
   {
-    return getResponse().getBufferSize();
+    return getAbstractHttpResponse().getBufferSize();
   }
   
   /**
@@ -171,7 +172,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   public void flushBuffer()
     throws IOException
   {
-    getResponse().flushBuffer();
+    getAbstractHttpResponse().flushBuffer();
   }
   
   /**
@@ -180,7 +181,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean isCommitted()
   {
-    return getResponse().isCommitted();
+    return getAbstractHttpResponse().isCommitted();
   }
   
   /**
@@ -191,7 +192,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void reset()
   {
-    getResponse().reset();
+    getAbstractHttpResponse().reset();
   }
   
   /**
@@ -202,7 +203,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void resetBuffer()
   {
-    getResponse().resetBuffer();
+    getAbstractHttpResponse().resetBuffer();
   }
   
   /**
@@ -211,7 +212,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setContentLength(int len)
   {
-    getResponse().setContentLength(len);
+    getAbstractHttpResponse().setContentLength(len);
   }
 
   /**
@@ -221,7 +222,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void disable()
   {
-    getResponse().disable();
+    getAbstractHttpResponse().disable();
   }
 
   /**
@@ -231,7 +232,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void enable()
   {
-    getResponse().enable();
+    getAbstractHttpResponse().enable();
   }
 
   /**
@@ -241,7 +242,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean isDisabled()
   {
-    return getResponse().isDisabled();
+    return getAbstractHttpResponse().isDisabled();
   }
 
   //
@@ -255,7 +256,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setStatus(int sc)
   {
-    getResponse().setStatus(sc);
+    getAbstractHttpResponse().setStatus(sc);
   }
   
   /**
@@ -266,7 +267,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   public void sendError(int sc, String msg)
     throws IOException
   {
-    getResponse().sendError(sc, msg);
+    getAbstractHttpResponse().sendError(sc, msg);
   }
   
   /**
@@ -277,7 +278,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   public void sendError(int sc)
     throws IOException
   {
-    getResponse().sendError(sc);
+    getAbstractHttpResponse().sendError(sc);
   }
   
   /**
@@ -288,7 +289,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   public void sendRedirect(String location)
     throws IOException
   {
-    getResponse().sendRedirect(location);
+    getAbstractHttpResponse().sendRedirect(location);
   }
   
   /**
@@ -300,7 +301,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setHeader(String name, String value)
   {
-    getResponse().setHeader(name, value);
+    getAbstractHttpResponse().setHeader(name, value);
   }
   
   /**
@@ -312,7 +313,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addHeader(String name, String value)
   {
-    getResponse().addHeader(name, value);
+    getAbstractHttpResponse().addHeader(name, value);
   }
   
   /**
@@ -322,7 +323,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean containsHeader(String name)
   {
-    return getResponse().containsHeader(name);
+    return getAbstractHttpResponse().containsHeader(name);
   }
   
   /**
@@ -339,7 +340,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setDateHeader(String name, long date)
   {
-    getResponse().setDateHeader(name, date);
+    getAbstractHttpResponse().setDateHeader(name, date);
   }
   
   /**
@@ -350,7 +351,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addDateHeader(String name, long date)
   {
-    getResponse().addDateHeader(name, date);
+    getAbstractHttpResponse().addDateHeader(name, date);
   }
     
   /**
@@ -361,7 +362,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setIntHeader(String name, int value)
   {
-    getResponse().setIntHeader(name, value);
+    getAbstractHttpResponse().setIntHeader(name, value);
   }
   
   /**
@@ -372,7 +373,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addIntHeader(String name, int value)
   {
-    getResponse().addIntHeader(name, value);
+    getAbstractHttpResponse().addIntHeader(name, value);
   }
   
   /**
@@ -380,7 +381,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addCookie(Cookie cookie)
   {
-    getResponse().addCookie(cookie);
+    getAbstractHttpResponse().addCookie(cookie);
   }
   
   /**
@@ -392,7 +393,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public String encodeURL(String url)
   {
-    return getResponse().encodeURL(url);
+    return getAbstractHttpResponse().encodeURL(url);
   }
   
   /**
@@ -404,7 +405,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public String encodeRedirectURL(String name)
   {
-    return getResponse().encodeRedirectURL(name);
+    return getAbstractHttpResponse().encodeRedirectURL(name);
   }
   
   /**
@@ -412,7 +413,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setStatus(int sc, String msg)
   {
-    getResponse().setStatus(sc, msg);
+    getAbstractHttpResponse().setStatus(sc, msg);
   }
   
   /**
@@ -420,7 +421,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public String encodeUrl(String url)
   {
-    return getResponse().encodeUrl(url);
+    return getAbstractHttpResponse().encodeUrl(url);
   }
   
   /**
@@ -428,7 +429,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public String encodeRedirectUrl(String url)
   {
-    return getResponse().encodeRedirectUrl(url);
+    return getAbstractHttpResponse().encodeRedirectUrl(url);
   }
 
   //
@@ -437,42 +438,42 @@ public class HttpServletResponseImpl implements CauchoResponse
 
   public AbstractResponseStream getResponseStream()
   {
-    return getResponse().getResponseStream();
+    return getAbstractHttpResponse().getResponseStream();
   }
   
   public void setResponseStream(AbstractResponseStream os)
   {
-    getResponse().setResponseStream(os);
+    getAbstractHttpResponse().setResponseStream(os);
   }
 
   public boolean isCauchoResponseStream()
   {
-    return getResponse().isCauchoResponseStream();
+    return getAbstractHttpResponse().isCauchoResponseStream();
   }
   
   public void setFlushBuffer(FlushBuffer out)
   {
-    getResponse().setFlushBuffer(out);
+    getAbstractHttpResponse().setFlushBuffer(out);
   }
   
   public FlushBuffer getFlushBuffer()
   {
-    return getResponse().getFlushBuffer();
+    return getAbstractHttpResponse().getFlushBuffer();
   }
   
   public String getHeader(String key)
   {
-    return getResponse().getHeader(key);
+    return getAbstractHttpResponse().getHeader(key);
   }
   
   public void setFooter(String key, String value)
   {
-    getResponse().setFooter(key, value);
+    getAbstractHttpResponse().setFooter(key, value);
   }
   
   public void addFooter(String key, String value)
   {
-    getResponse().addFooter(key, value);
+    getAbstractHttpResponse().addFooter(key, value);
   }
 
   // XXX: really close invocation
@@ -480,68 +481,70 @@ public class HttpServletResponseImpl implements CauchoResponse
   public void close()
     throws IOException
   {
+    // tck - jsp include
+    getAbstractHttpResponse().close();
   }
 
   public boolean disableHeaders(boolean disable)
   {
-    return getResponse().disableHeaders(disable);
+    return getAbstractHttpResponse().disableHeaders(disable);
   }
 
   public boolean getForbidForward()
   {
-    return getResponse().getForbidForward();
+    return getAbstractHttpResponse().getForbidForward();
   }
   
   public void setForbidForward(boolean forbid)
   {
-    getResponse().setForbidForward(forbid);
+    getAbstractHttpResponse().setForbidForward(forbid);
   }
 
   public int getStatusCode()
   {
-    return getResponse().getStatusCode();
+    return getAbstractHttpResponse().getStatusCode();
   }
   
   public String getStatusMessage()
   {
-    return getResponse().getStatusMessage();
+    return getAbstractHttpResponse().getStatusMessage();
   }
 
   public boolean hasError()
   {
-    return getResponse().hasError();
+    return getAbstractHttpResponse().hasError();
   }
   
   public void setHasError(boolean error)
   {
-    getResponse().setHasError(error);
+    getAbstractHttpResponse().setHasError(error);
   }
 
   public void setSessionId(String id)
   {
-    getResponse().setSessionId(id);
+    getAbstractHttpResponse().setSessionId(id);
   }
 
   public void killCache()
   {
-    getResponse().killCache();
+    getAbstractHttpResponse().killCache();
   }
   
   public void setNoCache(boolean killCache)
   {
-    getResponse().setNoCache(killCache);
+    getAbstractHttpResponse().setNoCache(killCache);
   }
   
   public void setPrivateCache(boolean isPrivate)
   {
-    getResponse().setPrivateCache(isPrivate);
+    getAbstractHttpResponse().setPrivateCache(isPrivate);
   }
 
   //
   // HttpServletRequestImpl methods
   //
 
-  private AbstractHttpResponse getResponse()
+  public ServletResponse getResponse()
   {
     AbstractHttpResponse response = _response;
 
@@ -560,7 +563,7 @@ public class HttpServletResponseImpl implements CauchoResponse
 
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
-    return getResponse().upgradeProtocol(handler);
+    return getAbstractHttpResponse().upgradeProtocol(handler);
   }
   
   public void closeImpl()

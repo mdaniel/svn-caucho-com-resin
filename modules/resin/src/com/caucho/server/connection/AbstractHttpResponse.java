@@ -258,6 +258,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     
     if (_originalResponseStream instanceof ResponseStream)
       ((ResponseStream) _originalResponseStream).init(_rawWrite);
+
   }
 
   /**
@@ -269,6 +270,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     _request = request;
     _originalRequest = request;
+    _responseStream = _originalResponseStream;
   }
 
   /**
@@ -1692,6 +1694,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void resetBuffer()
   {
     _responseStream.clearBuffer();
+
+    // jsp/15ma
+    killCaching();
     /*
     if (_currentWriter instanceof JspPrintWriter)
       ((JspPrintWriter) _currentWriter).clear();

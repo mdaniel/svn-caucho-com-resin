@@ -316,7 +316,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       invocation.service(topRequest, res);
 
       if (cauchoRes != null) {
-        cauchoRes.close();
+	// server/1732 wants this commented out
+	// jsp/15m9 (tck)
+	ServletResponse closePtr = cauchoRes;
+	while (closePtr instanceof CauchoResponse) {
+	  ((CauchoResponse) closePtr).close();
+	
+	  closePtr = ((CauchoResponse) closePtr).getResponse();
+	}
       }
       else {
 	// server/10ab
@@ -371,15 +378,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       // server/1732 wants this commented out
       // jsp/15m9 (tck)
+      /*
       ServletResponse ptr = res;
-      while (ptr instanceof AbstractHttpResponse) {
-	ptr = ((AbstractHttpResponse) ptr).getResponse();
-
-	if (ptr instanceof CauchoResponse) {
-	  ((CauchoResponse) ptr).close();
-	  break;
-	}
+      while (ptr instanceof CauchoResponse) {
+	ptr.close();
+	
+	ptr = ((CauchoResponse) ptr).getResponse();
       }
+      */
     }
   }
 

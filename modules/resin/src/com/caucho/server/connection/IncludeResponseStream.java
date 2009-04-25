@@ -235,6 +235,9 @@ public class IncludeResponseStream extends ToByteResponseStream {
   protected void writeNext(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
+    if (_next == null)
+      return;
+    
     try {
       if (_response != null)
 	_response.writeHeaders(null, -1);

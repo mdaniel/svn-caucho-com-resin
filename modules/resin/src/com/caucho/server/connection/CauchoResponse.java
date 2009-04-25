@@ -32,6 +32,7 @@ package com.caucho.server.connection;
 import com.caucho.vfs.FlushBuffer;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 public interface CauchoResponse extends HttpServletResponse {
@@ -71,6 +72,7 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setNoCache(boolean killCache);
   public void setPrivateCache(boolean isPrivate);
 
+  public ServletResponse getResponse();
   public AbstractHttpResponse getAbstractHttpResponse();
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler);
 }
