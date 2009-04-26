@@ -49,9 +49,9 @@ import java.io.IOException;
 public class FastCgiResponse extends AbstractHttpResponse {
   private FastCgiRequest _req;
   
-  FastCgiResponse(FastCgiRequest request)
+  FastCgiResponse(FastCgiRequest request, WriteStream rawWrite)
   {
-    super(request);
+    super(request, rawWrite);
     
     _req = request;
   }
@@ -69,11 +69,9 @@ public class FastCgiResponse extends AbstractHttpResponse {
   }
 
   @Override
-  protected AbstractResponseStream
-    createResponseStream(HttpBufferStore bufferStore)
+  protected AbstractResponseStream createResponseStream()
   {
     FastCgiResponseStream responseStream = new FastCgiResponseStream(this);
-    responseStream.init(_rawWrite);
     responseStream.setRequest((FastCgiRequest) _request);
 
     return responseStream;

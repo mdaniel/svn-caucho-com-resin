@@ -129,8 +129,8 @@ public class HttpRequest extends AbstractHttpRequest
   {
     super(server, conn);
 
-    _response = new HttpResponse(this);
-    _response.init(conn.getWriteStream());
+    _response = new HttpResponse(this, conn.getWriteStream());
+    // _response.init(conn.getWriteStream());
 
     /*
     if (server instanceof Server)
@@ -204,9 +204,9 @@ public class HttpRequest extends AbstractHttpRequest
       HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
       
       startRequest(httpBuffer);
-      startInvocation();
-
       _response.startRequest(httpBuffer);
+
+      startInvocation();
 
       // XXX: use same one for keepalive?
       _requestFacade = new HttpServletRequestImpl(this);

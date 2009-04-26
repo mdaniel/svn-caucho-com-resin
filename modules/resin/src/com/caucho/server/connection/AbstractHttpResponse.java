@@ -103,19 +103,20 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected final ArrayList<String> _footerValues = new ArrayList<String>();
 
   protected final ArrayList<Cookie> _cookiesOut = new ArrayList<Cookie>();
+  
+  private final AbstractResponseStream _originalResponseStream;
 
-  private HttpBufferStore _bufferStore;
-  private AbstractResponseStream _originalResponseStream;
+  // the raw output stream.
+  private final WriteStream _rawWrite;
+
+  private AbstractResponseStream _responseStream;
   
   private final ServletOutputStreamImpl _responseOutputStream
     = new ServletOutputStreamImpl();
   private final ResponseWriter _responsePrintWriter
     = new ResponseWriter();
 
-  private AbstractResponseStream _responseStream;
-
-  // the raw output stream.
-  protected WriteStream _rawWrite;
+  private HttpBufferStore _bufferStore;
 
   // any stream that needs flusing before getting the writer.
   private FlushBuffer _flushBuffer;
@@ -166,31 +167,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   protected AbstractHttpResponse()
   {
-    /*
     _originalResponseStream = createResponseStream();
-    
-    _responseOutputStream = new ServletOutputStreamImpl();
-    _responsePrintWriter = new ResponseWriter();
-
-    _responseOutputStream.init(_originalResponseStream);
-    _responsePrintWriter.init(_originalResponseStream);
-    */
+    _rawWrite = null;
   }
 
-  protected AbstractResponseStream
-    createResponseStream(HttpBufferStore bufferStore)
+  protected AbstractHttpResponse(CauchoRequest request, WriteStream rawWrite)
   {
-    ResponseStream responseStream = bufferStore.getResponseStream();
-
-    responseStream.setResponse(this);
-    responseStream.init(_rawWrite);
-
-    return responseStream;
-  }
-
-  protected AbstractHttpResponse(CauchoRequest request)
-  {
-    this();
+    _rawWrite = rawWrite;
+    _originalResponseStream = createResponseStream();
     
     _request = request;
     _originalRequest = request;
@@ -252,6 +236,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    *
    * @param stream the underlying output stream.
    */
+  /*
   public void init(WriteStream stream)
   {
     _rawWrite = stream;
@@ -260,6 +245,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       ((ResponseStream) _originalResponseStream).init(_rawWrite);
 
   }
+  */
 
   /**
    * Initialize the response for a new request.
@@ -352,15 +338,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _contentPrefix = null;
     _locale = null;
 
-    AbstractResponseStream responseStream
-      = createResponseStream(bufferStore);
-    _originalResponseStream = responseStream;
-
-    responseStream.start();
     _responseStream = _originalResponseStream;
+    _responseStream.start();
 
-    _responseOutputStream.init(responseStream);
-    _responsePrintWriter.init(responseStream);
+    _responseOutputStream.init(_responseStream);
+    _responsePrintWriter.init(_responseStream);
     
     _flushBuffer = null;
 
@@ -389,6 +371,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _sessionId = null;
 
     _forbidForward = false;
+  }
+
+  protected AbstractResponseStream createResponseStream()
+  {
+    ResponseStream responseStream = new ResponseStream(this);
+
+    responseStream.init(_rawWrite);
+
+    return responseStream;
   }
 
   /**
@@ -2385,8 +2376,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       if (_statusCode == SC_NOT_MODIFIED) {
 	handleNotModified(_isTopCache);
       }
-
-      if (isClose) {
+      
+      if (_responseStream == null) {
+      }
+      else if (isClose) {
 	_responseStream.close();
 	finishResponseStream(isClose);
       }
@@ -2507,6 +2500,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       
       AbstractCacheEntry cacheEntry = _newCacheEntry;
       _newCacheEntry = null;
+
+      _responseStream = null;
       
       _cacheStream = null;
       _cacheWriter = null;

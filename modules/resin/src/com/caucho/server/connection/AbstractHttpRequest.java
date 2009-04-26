@@ -2906,6 +2906,12 @@ public abstract class AbstractHttpRequest
 
 	_tcpConn.finishRequest();
       }
+
+      HttpBufferStore httpBuffer = _httpBuffer;
+      _httpBuffer = null;
+
+      if (httpBuffer != null)
+	HttpBufferStore.free(httpBuffer);
     }
   }
 
@@ -2930,12 +2936,6 @@ public abstract class AbstractHttpRequest
     _filledForm = null;
     _cookiesIn = null;
     _cookies.clear();
-
-    HttpBufferStore httpBuffer = _httpBuffer;
-    _httpBuffer = null;
-
-    if (httpBuffer != null)
-      HttpBufferStore.free(httpBuffer);
   }
 
   /**

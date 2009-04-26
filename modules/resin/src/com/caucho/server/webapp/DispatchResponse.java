@@ -106,8 +106,7 @@ class DispatchResponse extends AbstractHttpResponse
   */
 
   @Override
-  protected AbstractResponseStream
-    createResponseStream(HttpBufferStore bufferStore)
+  protected AbstractResponseStream createResponseStream()
   {
     return _stream;
   }

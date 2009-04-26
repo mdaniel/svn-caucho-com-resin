@@ -102,7 +102,7 @@ public class ResponseStream extends ToByteResponseStream {
   public void start()
   {
     super.start();
-    
+
     _chunkedEncoding = false;
 
     _contentLength = 0;
@@ -791,7 +791,7 @@ public class ResponseStream extends ToByteResponseStream {
           log.fine(dbgId() + "close stream");
         }
       
-        _next.close();
+        _next.flush();
       }
       else {
 	_isClosed = true;

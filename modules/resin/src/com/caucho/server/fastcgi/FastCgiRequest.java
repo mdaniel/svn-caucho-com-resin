@@ -184,9 +184,6 @@ public class FastCgiRequest extends AbstractHttpRequest
   {
     super(server, conn);
 
-    _response = new FastCgiResponse(this);
-    _response.init(conn.getWriteStream());
-
     _method = new CharBuffer();
     _uriHost = new CharBuffer();
     _protocol = new CharBuffer();
@@ -194,6 +191,8 @@ public class FastCgiRequest extends AbstractHttpRequest
     _rawWrite = conn.getWriteStream();
     _writeStream = new WriteStream();
     _writeStream.setReuseBuffer(true);
+    
+    _response = new FastCgiResponse(this, _writeStream);
   }
 
   /**
@@ -242,8 +241,6 @@ public class FastCgiRequest extends AbstractHttpRequest
       _filter.init(_rawRead, _rawWrite);
       _writeStream.init(_filter);
       // _writeStream.setWritePrefix(3);
-
-      _response.init(_writeStream);
 
       // XXX: use same one for keepalive?
       _requestFacade = new HttpServletRequestImpl(this);

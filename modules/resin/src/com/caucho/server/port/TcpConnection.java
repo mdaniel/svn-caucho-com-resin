@@ -750,6 +750,7 @@ public class TcpConnection extends Connection
 
 	_state = _state.toActive();
         port.keepaliveEnd(this);
+	
 	close();
 	
 	return RequestState.EXIT;

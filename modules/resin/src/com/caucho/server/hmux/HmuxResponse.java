@@ -46,9 +46,9 @@ import java.io.IOException;
 public class HmuxResponse extends AbstractHttpResponse {
   HmuxRequest _req;
   
-  HmuxResponse(HmuxRequest request)
+  HmuxResponse(HmuxRequest request, WriteStream rawWrite)
   {
-    super(request);
+    super(request, rawWrite);
     
     _req = request;
   }

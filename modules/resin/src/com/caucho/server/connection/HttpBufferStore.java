@@ -54,8 +54,6 @@ public final class HttpBufferStore
   private final CharSegment []_headerKeys;
   private final CharSegment []_headerValues;
   
-  private final ResponseStream _responseStream;
-  
   private final TempBuffer _tempBuffer = TempBuffer.allocate();
 
   /**
@@ -86,8 +84,6 @@ public final class HttpBufferStore
       _headerKeys[i] = new CharSegment();
       _headerValues[i] = new CharSegment();
     }
-    
-    _responseStream = new ResponseStream();
   }
 
   public static HttpBufferStore allocate(Server server)
@@ -128,11 +124,6 @@ public final class HttpBufferStore
   public final CharSegment []getHeaderValues()
   {
     return _headerValues;
-  }
-
-  public final ResponseStream getResponseStream()
-  {
-    return _responseStream;
   }
 
   public final TempBuffer getTempBuffer()

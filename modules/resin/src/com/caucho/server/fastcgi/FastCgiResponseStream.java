@@ -55,7 +55,7 @@ public class FastCgiResponseStream extends ResponseStream {
 
   FastCgiResponseStream(AbstractHttpResponse response)
   {
-    super(response);
+    super(response);//, rawStream);
   }
 
   void setRequest(FastCgiRequest request)

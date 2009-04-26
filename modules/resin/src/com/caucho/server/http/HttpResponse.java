@@ -70,9 +70,9 @@ public class HttpResponse extends AbstractHttpResponse
    *
    * @param request the matching request object.
    */
-  HttpResponse(HttpRequest request)
+  HttpResponse(HttpRequest request, WriteStream rawWrite)
   {
-    super(request);
+    super(request, rawWrite);
 
     _request = request;
 
@@ -98,11 +98,13 @@ public class HttpResponse extends AbstractHttpResponse
   /**
    * Switch to raw socket mode.
    */
+  /*
   public WriteStream getRawOutput()
     throws IOException
   {
     return _rawWrite;
   }
+  */
 
   /**
    * Upgrade protocol

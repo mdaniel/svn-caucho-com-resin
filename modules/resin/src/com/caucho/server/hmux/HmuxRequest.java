@@ -287,11 +287,11 @@ public class HmuxRequest extends AbstractHttpRequest
     
     _hmuxProtocol = protocol;
 
-    _response = new HmuxResponse(this);
-
     _rawWrite = conn.getWriteStream();
     _writeStream = new WriteStream();
     _writeStream.setReuseBuffer(true);
+
+    _response = new HmuxResponse(this, _writeStream);
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
@@ -409,11 +409,10 @@ public class HmuxRequest extends AbstractHttpRequest
     try {
       HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
       startRequest(httpBuffer);
+      _response.startRequest(httpBuffer);
+
       startInvocation();
       
-      _response.startRequest(httpBuffer);
-      _response.init(_writeStream);
-
       try {
         if (! scanHeaders()) {
           killKeepalive();
