@@ -126,7 +126,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
       os.print(key);
       os.print(": ");
       os.print(value);
-      os.println("\r\n");
+      os.print("\r\n");
     }
 
     long now = Alarm.getCurrentTime();

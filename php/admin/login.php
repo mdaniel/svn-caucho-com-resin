@@ -42,7 +42,7 @@ include "digest.php";
 if (! empty($digest)) {
   admin_init();
   $conf_dir = dirname($g_resin->getConfigFile());
-  $password_file = realpath("{$conf_dir}/admin-users.generated.xml");
+  $password_file = realpath("{$conf_dir}/admin-users.xml.generated");
   // generate temporary config file
   $file = fopen($password_file, "w");
   resin_var_dump("$file");
@@ -60,7 +60,7 @@ EOF
 <ol>
 <li>
 A login configuration file has been written under the name 
-<code>admin-users.generated.xml</code> in the same directory as your
+<code>admin-users.xml.generated</code> in the same directory as your
 resin.xml file. Simply rename this file to <code>admin-users.xml</code>
 to install your login.
 </li>

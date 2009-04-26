@@ -14,19 +14,22 @@
   </class-loader>
 
   <!--
-     - Management configuration
-     -
+     - jars with maven dependencies can be placed in project-jars to be used
+     - by web-apps
+    -->
+  <resin:ProjectJarRepository path="${resin.root}/project-jars"/>
+
+  <!--
+     - Resin-managed data, including sessions, administration, and clustering
+    -->
+  <resin-data-directory>${resin.root}/resin-data</resin-data-directory>
+  
+  <!--
      - Remote management requires at least one enabled admin user.
     -->
-  <management path="${resin.root}/admin">
+  <resin:AdminAuthenticator>
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
-    
-    <deploy-service/>
-    <jmx-service/>
-    <log-service/>
-    <stat-service/>
-    <xa-log-service/>
-  </management>
+  </resin:AdminAuthenticator>
 
   <!--
      - Logging configuration for the JDK logging API.
@@ -66,12 +69,26 @@
     -->
   <javac compiler="internal" args="-source 1.5"/>
 
+  <cluster-default>
+    <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
+    <resin:import path="${__DIR__}/app-default.xml"/>
+    
+    <!--
+       - Admin services
+      -->
+    <resin:DeployService/>
+    
+    <resin:if test="${resin.professional}">
+      <resin:JmxService/>
+      <resin:LogService/>
+      <resin:StatService/>
+      <resin:XaLogService/>
+    </resin:if>
+  </cluster-default>
+
   <cluster id="app-tier">
     <!-- sets the content root for the cluster, relative to resin.root -->
     <root-directory>.</root-directory>
-
-    <!-- includes the app-default for default web-app behavior -->
-    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <!-- enables development error pages -->
     <development-mode-error-page/>
@@ -96,6 +113,9 @@
       <!--
          - Uncomment to enable admin heap dumps
          - <jvm-arg>-agentlib:resin</jvm-arg>
+	 -
+	 - Uncomment for low-memory overhead
+         - <jvm-arg>-Dcaucho.smallmem</jvm-arg>
         -->
 
       <!--
@@ -139,10 +159,12 @@
     <!--
        - Enables the cache (available in Resin Professional) 
       -->
+    <resin:if test="${resin.professional}">
     <cache path="cache" memory-size="64M">
       <!-- Vary header rewriting for IE -->
       <rewrite-vary-as-private/>
     </cache>
+    </resin:if>
 
     <!--
        - Enables periodic checking of the server status and

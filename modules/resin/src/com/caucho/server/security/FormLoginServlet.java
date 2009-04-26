@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 public class FormLoginServlet extends GenericServlet {
   private final Logger log
     = Logger.getLogger(FormLoginServlet.class.getName());
-  static final L10N L = new L10N(FormLoginServlet.class);
+  private static final L10N L = new L10N(FormLoginServlet.class);
   
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
@@ -62,8 +62,12 @@ public class FormLoginServlet extends GenericServlet {
     FormLogin login;
 
     if (! (app.getLogin() instanceof FormLogin))
-      throw new ServletException(L.l("FormLoginServlet requires a form login auth-type configuration at '{0}'",
-                                     app.getLogin().getAuthType()));
+      throw new ServletException(L.l("FormLoginServlet requires a form login auth-type configuration at '{0}' in '{1}'",
+                                     app.getLogin() != null
+				     ? app.getLogin().getAuthType()
+				     : null,
+				     app));
+
     login = (FormLogin) app.getLogin();
 
     if (login == null)

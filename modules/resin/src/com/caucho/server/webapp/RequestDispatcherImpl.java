@@ -765,4 +765,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       HttpBufferStore.free(httpBuffer);
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + _dispatchInvocation.getRawURI() + "]");
+  }
 }

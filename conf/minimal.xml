@@ -11,12 +11,14 @@
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin">
 
+  <cluster-default>
+    <resin:import path="${__DIR__}/app-default.xml"/>
+  </cluster-default>
+
   <cluster id="">
     <server id="">
       <http port="8080"/>
     </server>
-
-    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <host id="" root-directory=".">
       <web-app id="/" root-directory="htdocs"/>

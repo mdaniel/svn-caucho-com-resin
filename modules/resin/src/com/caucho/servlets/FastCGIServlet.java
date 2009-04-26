@@ -340,8 +340,14 @@ public class FastCGIServlet extends GenericServlet {
     if (ch >= 0)
       out.write(ch);
 
-    while ((ch = is.read()) >= 0)
-      out.write(ch);
+    TempBuffer tb = TempBuffer.allocate();
+    byte []buffer = tb.getBuffer();
+    
+    while ((sublen = is.read(buffer, 0, buffer.length)) > 0) {
+      out.write(buffer, 0, sublen);
+    }
+
+    TempBuffer.free(tb);
 
     return ! is.isDead() && keepalive;
   }
@@ -511,7 +517,7 @@ public class FastCGIServlet extends GenericServlet {
 
       if (log.isLoggable(Level.FINE))
 	log.fine("fastcgi:" + key + ": " + value);
-	
+
       if (key.equalsIgnoreCase("status")) {
 	int status = 0;
 	int len = value.length();

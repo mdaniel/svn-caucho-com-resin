@@ -167,8 +167,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   protected AbstractHttpResponse()
   {
-    _originalResponseStream = createResponseStream();
     _rawWrite = null;
+    _originalResponseStream = createResponseStream();
   }
 
   protected AbstractHttpResponse(CauchoRequest request, WriteStream rawWrite)
@@ -180,6 +180,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _originalRequest = request;
   }
 
+  protected AbstractResponseStream
+    createResponseStream(HttpBufferStore bufferStore)
+  {
+    ResponseStream responseStream = new ResponseStream();
+
+    responseStream.setResponse(this);
+    responseStream.init(_rawWrite);
+
+    return responseStream;
+  }
+  
   /**
    * If set true, client disconnect exceptions are no propagated to the
    * server code.

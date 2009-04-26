@@ -1,5 +1,5 @@
 <cluster xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="http://caucho.com/ns/resin/core">
+         xmlns:resin="urn:java:com.caucho.resin">
 
 <ear-default>
   <resin:import path="META-INF/application.xml" optional="true"/>
@@ -11,6 +11,7 @@
   <class-loader>
     <compiling-loader path="WEB-INF/classes"/>
     <library-loader path="WEB-INF/lib"/>
+    <project-loader path="WEB-INF/pom.xml"/>
   </class-loader>
 
   <servlet servlet-name="resin-file"
@@ -52,11 +53,6 @@
 
   <servlet servlet-name="j_security_check"
            servlet-class="com.caucho.server.security.FormLoginServlet"/>
-
-  <login-config>
-    <auth-method>basic</auth-method>
-    <realm-name>resin</realm-name>
-  </login-config>
 
   <!-- Configures the special index files to check for directory URLs -->
   <welcome-file-list>
