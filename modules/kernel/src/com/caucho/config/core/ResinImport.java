@@ -45,7 +45,8 @@ import java.util.logging.Logger;
 /**
  * Imports values from a separate file.
  */
-public class ResinImport extends ResinControl
+// XXX: FlowBean is from ioc/04c1 and server/1ac2
+public class ResinImport extends ResinControl implements FlowBean
 {
   private static final L10N L = new L10N(ResinImport.class);
   private static final Logger log

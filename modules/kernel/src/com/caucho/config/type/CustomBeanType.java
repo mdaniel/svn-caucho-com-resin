@@ -184,8 +184,9 @@ public class CustomBeanType extends ConfigType
     Attribute envAttr
       = TypeFactory.getFactory().getEnvironmentAttribute(qName);
 
-    if (envAttr instanceof FlowAttribute
-	|| envAttr instanceof EnvironmentAttribute) {
+    if (envAttr instanceof FlowAttribute) {
+      //	|| envAttr instanceof EnvironmentAttribute) {
+      // ioc/04c1
       return envAttr;
     }
     
