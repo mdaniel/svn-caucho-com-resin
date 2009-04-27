@@ -56,7 +56,6 @@ class DispatchResponse extends AbstractHttpResponse
   
   protected DispatchResponse()
   {
-    _stream = new IncludeResponseStream(this);
   }
 
   /**
@@ -108,6 +107,8 @@ class DispatchResponse extends AbstractHttpResponse
   @Override
   protected AbstractResponseStream createResponseStream()
   {
+    _stream = new IncludeResponseStream(this);
+    
     return _stream;
   }
 
