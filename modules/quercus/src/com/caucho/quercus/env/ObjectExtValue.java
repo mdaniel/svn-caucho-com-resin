@@ -204,8 +204,19 @@ public class ObjectExtValue extends ObjectValue
   {
     Entry entry = getEntry(env, name);
     
-    if (entry != null && entry._visibility == FieldVisibility.PUBLIC)
+    // php/09ks vs php/091m
+    if (entry != null) {
+      /*
+      if (entry._visibility == FieldVisibility.PRIVATE
+          && _quercusClass != env.getCallingClass()) {
+      }
+      else
+        return entry._value.toValue();
+      */
+      
       return entry._value.toValue();
+        
+    }
 
     return getFieldExt(env, name);
   }
@@ -409,6 +420,7 @@ public class ObjectExtValue extends ObjectValue
   {
     Entry entry = getEntry(env, name);
 
+    // XXX: php/09ks, need visibility check
     if (entry == null) {
       Value oldValue = putFieldExt(env, name, value);
 
@@ -558,6 +570,8 @@ public class ObjectExtValue extends ObjectValue
 
     for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
       if (name.equals(entry._key)) {
+        
+        /*
         if (entry._visibility == FieldVisibility.PRIVATE) {
           QuercusClass cls = env.getCallingClass();
           
@@ -568,6 +582,7 @@ public class ObjectExtValue extends ObjectValue
                         _quercusClass.getName(), name));
           }
         }
+        */
         
         return entry;
       }

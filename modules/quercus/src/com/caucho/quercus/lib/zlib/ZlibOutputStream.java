@@ -180,9 +180,9 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
       long crcValue = _crc32.getValue();
       
       _os.write((byte) crcValue);
-      _os.write((byte) crcValue >> 8);
-      _os.write((byte) crcValue >> 16);
-      _os.write((byte) crcValue >> 24);
+      _os.write((byte) (crcValue >> 8));
+      _os.write((byte) (crcValue >> 16));
+      _os.write((byte) (crcValue >> 24));
     }
 
     _os.write((byte) _inputSize);

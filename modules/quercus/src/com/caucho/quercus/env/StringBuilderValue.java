@@ -35,6 +35,7 @@ import com.caucho.quercus.QuercusModuleException;
 
 import java.io.*;
 import java.util.IdentityHashMap;
+import java.util.zip.CRC32;
 
 /**
  * Represents a PHP 5 style string builder (unicode.semantics = off)
@@ -1262,8 +1263,8 @@ public class StringBuilderValue
   /**
    * Append a Java buffer to the value.
    */
-  // @Override
-  public final StringValue append(StringBuilderValue sb, int head, int tail)
+  @Override
+  public StringValue append(StringBuilderValue sb, int head, int tail)
   {
     int length = tail - head;
     
@@ -1661,6 +1662,19 @@ public class StringBuilderValue
   public OutputStream getOutputStream()
   {
     return new BuilderOutputStream();
+  }
+  
+  /**
+   * Calculates CRC32 value.
+   */
+  @Override
+  public long getCrc32Value()
+  {
+    CRC32 crc = new CRC32();
+
+    crc.update(_buffer, 0, _length);
+    
+    return crc.getValue() & 0xffffffff;
   }
 
   public void ensureAppendCapacity(int newCapacity)

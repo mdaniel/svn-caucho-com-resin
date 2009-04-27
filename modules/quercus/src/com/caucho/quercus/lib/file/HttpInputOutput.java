@@ -419,5 +419,10 @@ public class HttpInputOutput extends AbstractBinaryOutput
       log.log(Level.FINE, e.toString(), e);
     }
   }
+  
+  public String toString()
+  {
+    return "HttpInputOutput[" + _path + "]";
+  }
 
 }

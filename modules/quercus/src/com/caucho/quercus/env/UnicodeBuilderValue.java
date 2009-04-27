@@ -427,11 +427,14 @@ public class UnicodeBuilderValue
     if (_buffer.length < _length + len)
       ensureAppendCapacity(len);
     
-    for (int i = head; i < tail; i++) {
-      _buffer[i] = buf.charAt(i);
-    }
+    char []buffer = _buffer;
+    int bufferLength = _length;
     
-    _length += len;
+    for (; head < tail; head++) {
+      buffer[bufferLength++] = buf.charAt(head);
+    }
+
+    _length = bufferLength;
     
     return this;
   }

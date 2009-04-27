@@ -204,6 +204,8 @@ public class StreamModule extends AbstractQuercusModule {
                                            @Optional("-1") int length,
                                            @Optional int offset)
   {
+    long bytesWritten = 0;
+    
     try {
       if (in == null)
         return -1;
@@ -219,8 +221,6 @@ public class StreamModule extends AbstractQuercusModule {
 
       if (length < 0)
         length = Integer.MAX_VALUE;
-
-      long bytesWritten = 0;
 
       while (length > 0) {
         int sublen = buffer.length;
@@ -242,7 +242,9 @@ public class StreamModule extends AbstractQuercusModule {
 
       return bytesWritten;
     } catch (IOException e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+
+      return bytesWritten;
     }
   }
 
@@ -276,11 +278,11 @@ public class StreamModule extends AbstractQuercusModule {
         sb.append((char) ch);
       }
 
-      // XXX: handle offset and maxlen
-
       return env.createString(sb.toString());
     } catch (IOException e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+
+      return BooleanValue.FALSE;
     }
   }
 
@@ -317,7 +319,9 @@ public class StreamModule extends AbstractQuercusModule {
       else
         return line;
     } catch (IOException e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+      
+      return BooleanValue.FALSE;
     }
   }
 

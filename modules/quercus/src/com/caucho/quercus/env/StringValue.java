@@ -44,6 +44,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.IdentityHashMap;
+import java.util.zip.CRC32;
 
 /**
  * Represents a Quercus string value.
@@ -1031,7 +1032,7 @@ abstract public class StringValue
   {
     return append(buf, 0, buf.length);
   }
-
+  
   /**
    * Append a Java buffer to the value.
    */
@@ -1039,13 +1040,21 @@ abstract public class StringValue
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  /**
+   * Append a Java buffer to the value.
+   */
+  public StringValue append(StringBuilderValue sb, int head, int tail)
+  {
+    return append((CharSequence) sb, head, tail);
+  }
 
   /**
    * Append a Java buffer to the value.
    */
   public StringValue append(UnicodeBuilderValue sb, int head, int tail)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return append((CharSequence) sb, head, tail);
   }
   
   /*
@@ -1988,6 +1997,22 @@ abstract public class StringValue
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+  
+  /**
+   * Calculates CRC32 value.
+   */
+  public long getCrc32Value()
+  {
+    CRC32 crc = new CRC32();
+
+    int length = length();
+    
+    for (int i = 0; i < length; i++) {
+      crc.update((byte) charAt(i));
+    }
+    
+    return crc.getValue() & 0xffffffff;
   }
 
   //

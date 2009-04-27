@@ -485,6 +485,24 @@ public class LargeStringBuilderValue
   /**
    * Append a Java buffer to the value.
    */
+  public StringValue append(CharSequence buf, int head, int tail)
+  {
+    int len = tail - head;
+    
+    ensureCapacity(_length + len);
+    
+    for (int i = 0; i < len; i++) {
+      _bufferList[_length / SIZE][_length % SIZE] = (byte) buf.charAt(i);
+      
+      _length++;
+    }
+    
+    return this;
+  }
+  
+  /**
+   * Append a Java buffer to the value.
+   */
   @Override
   public final StringValue append(char []buf, int offset, int length)
   {

@@ -95,7 +95,7 @@ public class StringModule extends AbstractQuercusModule {
   public static final int STR_PAD_RIGHT = 0;
   public static final int STR_PAD_BOTH = 2;
 
-  private static final DecimalFormatSymbols DEFAULT_DECIMAL_FORMAT_SYMBOLS ;
+  private static final DecimalFormatSymbols DEFAULT_DECIMAL_FORMAT_SYMBOLS;
 
   private static final FreeList<MessageDigest> _md5FreeList
     = new FreeList<MessageDigest>(16);
@@ -368,15 +368,15 @@ public class StringModule extends AbstractQuercusModule {
     return str;
   }
 
-  public static Value convert_uudecode(Env env, String source)
+  public static Value convert_uudecode(Env env, StringValue source)
   {
     try {
-      if (source == null || source.length() == 0)
-	return BooleanValue.FALSE;
+      int length = source.length();
+      
+      if (length == 0)
+        return BooleanValue.FALSE;
 
       ByteToChar byteToChar = env.getByteToChar();
-
-      int length = source.length();
 
       int i = 0;
       while (i < length) {
@@ -420,7 +420,7 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static Value convert_uuencode(StringValue source)
   {
-    if (source == null || source.length() == 0)
+    if (source.length() == 0)
       return BooleanValue.FALSE;
 
     StringValue result = source.createStringBuilder();
@@ -466,9 +466,6 @@ public class StringModule extends AbstractQuercusModule {
   public static Value count_chars(StringValue data,
                                   @Optional("0") int mode)
   {
-    if (data == null)
-      data = data.EMPTY;
-
     int []count = new int[256];
 
     int length = data.length();
@@ -549,20 +546,9 @@ public class StringModule extends AbstractQuercusModule {
    *
    * @return the crc32 hash
    */
-  public static long crc32(InputStream is)
+  public static long crc32(StringValue str)
   {
-    try {
-      CRC32 crc = new CRC32();
-
-      int ch;
-      while ((ch = is.read()) >= 0) {
-	crc.update((byte) ch);
-      }
-      
-      return crc.getValue() & 0xffffffff;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
+    return str.getCrc32Value();
   }
 
   public static String crypt(String string, @Optional String salt)
