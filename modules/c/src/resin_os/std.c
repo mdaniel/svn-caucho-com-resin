@@ -428,7 +428,7 @@ std_close_ss(server_socket_t *ss)
 	break;
     }
   }
-  
+
   result = closesocket(fd);
   /* fprintf(stderr, "closesocket: %d %p\n", fd, ss->context); */
 }

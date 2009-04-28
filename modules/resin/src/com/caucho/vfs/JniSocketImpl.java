@@ -362,7 +362,7 @@ public class JniSocketImpl extends QSocket {
   {
     if (_isClosed.getAndSet(true))
       return;
-    
+
     if (_stream != null)
       _stream.close();
     

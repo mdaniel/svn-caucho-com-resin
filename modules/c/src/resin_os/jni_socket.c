@@ -321,7 +321,12 @@ Java_com_caucho_vfs_JniSocketImpl_nativeCloseFd(JNIEnv *env,
 						jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
-  int fd = conn ? conn->fd : -1;
+  int fd = -1;
+
+  if (conn) {
+    fd = conn->fd;
+    conn->fd = -1;
+  }
 
   if (fd >= 0) {
     closesocket(fd);

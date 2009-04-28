@@ -51,7 +51,7 @@ public class JniFileStream extends StreamImpl
   public static JniFileStream openRead(byte []name, int length)
   {
     int fd = nativeOpenRead(name, length);
-    
+
     if (fd >= 0)
       return new JniFileStream(fd, true, false);
     else

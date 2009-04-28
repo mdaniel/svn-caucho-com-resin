@@ -83,6 +83,8 @@ public class TempBuffer implements java.io.Serializable {
 
     if (next == null)
       return new TempBuffer(SIZE);
+    else if (! next._isFree) // XXX:
+      throw new IllegalStateException();
 
     next._isFree = false;
     next._next = null;
@@ -224,6 +226,9 @@ public class TempBuffer implements java.io.Serializable {
   public static void free(TempBuffer buf)
   {
     buf._next = null;
+    
+    if (buf._isFree) // XXX:
+      throw new IllegalStateException();
 
     if (buf._buf.length == SIZE) {
       if (buf._isFree) {
