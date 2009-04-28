@@ -841,7 +841,7 @@ public class TcpConnection extends Connection
 					  _state));
 
     ConnectionCometController controller
-      = new ConnectionCometController(this, isTop, request, response);
+      = new AsyncConnectionCometController(this, isTop, request, response);
     _controller = controller;
 
     if (log.isLoggable(Level.FINER))

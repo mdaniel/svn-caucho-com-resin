@@ -177,15 +177,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected AbstractHttpResponse(CauchoRequest request, WriteStream rawWrite)
   {
     _rawWrite = rawWrite;
+    
+    _request = request;
+    _originalRequest = request;
+
     _originalResponseStream = createResponseStream();
 
     if (_originalResponseStream == null)
       throw new NullPointerException();
-    
-    _request = request;
-    _originalRequest = request;
   }
-
+  
   protected AbstractResponseStream
     createResponseStream(HttpBufferStore bufferStore)
   {
@@ -301,6 +302,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public CauchoRequest getOriginalRequest()
   {
     return _originalRequest;
+  }
+
+  protected WriteStream getRawWrite()
+  {
+    return _rawWrite;
   }
 
   /**

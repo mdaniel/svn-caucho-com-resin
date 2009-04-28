@@ -498,8 +498,21 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         
         data = request.getUriBuffer();
         sublen = request.getUriLength();
-	System.arraycopy(data, 0, buffer, offset, sublen);
-        offset += sublen;
+	
+	// server/02e9
+	if (buffer.length - offset - 128 < sublen) {
+	  sublen = buffer.length - offset - 128;
+	  System.arraycopy(data, 0, buffer, offset, sublen);
+	  offset += sublen;
+	  buffer[offset++] = (byte) '.';
+	  buffer[offset++] = (byte) '.';
+	  buffer[offset++] = (byte) '.';
+	}
+	else {
+	  System.arraycopy(data, 0, buffer, offset, sublen);
+	  offset += sublen;
+	}
+	
         buffer[offset++] = (byte) ' ';
         
 	offset = print(buffer, offset, request.getProtocol());

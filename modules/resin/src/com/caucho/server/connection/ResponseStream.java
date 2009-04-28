@@ -755,7 +755,7 @@ public class ResponseStream extends ToByteResponseStream {
   {
     boolean isClosed = _isClosed;
 
-    if (_next == null || isClosed) {
+    if (isClosed) {
       _isClosed = true;
       return;
     }
@@ -768,16 +768,16 @@ public class ResponseStream extends ToByteResponseStream {
     _allowFlush = true;
     
     flushBuffer();
-    
-    int bufferStart = _bufferStartOffset;
-    _bufferStartOffset = 0;
-    _isClosed = true;
 
     // flushBuffer can force 304 and then a cache write which would
     // complete the finish.
     if (isClosed || _next == null) {
       return;
     }
+    
+    int bufferStart = _bufferStartOffset;
+    _bufferStartOffset = 0;
+    _isClosed = true;
     
     try {
       writeTail(bufferStart);

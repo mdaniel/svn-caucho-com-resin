@@ -61,6 +61,9 @@ public class FastCgiResponseStream extends ResponseStream {
   void setRequest(FastCgiRequest request)
   {
     _request = request;
+
+    if (request == null)
+      throw new NullPointerException();
   }
 
   @Override

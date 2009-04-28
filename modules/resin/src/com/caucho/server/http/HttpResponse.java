@@ -393,13 +393,16 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     boolean hasContentLength = false;
+    /*
     if (isHead()) {
-      // server/269t
+      // server/269t, server/0560
       hasContentLength = true;
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(0);
     }
-    else if (_contentLength >= 0) {
+    else
+    */
+    if (_contentLength >= 0) {
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(_contentLength);
       hasContentLength = true;

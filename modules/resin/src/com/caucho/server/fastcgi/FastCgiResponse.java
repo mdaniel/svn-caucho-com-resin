@@ -54,6 +54,9 @@ public class FastCgiResponse extends AbstractHttpResponse {
     super(request, rawWrite);
     
     _req = request;
+
+    if (request == null)
+      throw new NullPointerException();
   }
 
   /**
@@ -73,6 +76,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
   {
     FastCgiResponseStream responseStream = new FastCgiResponseStream(this);
     responseStream.setRequest((FastCgiRequest) _request);
+    responseStream.init(getRawWrite());
 
     return responseStream;
   }
