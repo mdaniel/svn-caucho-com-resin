@@ -170,7 +170,7 @@ foreach ($g_resin->Clusters as $cluster) {
     echo "<td>IP: <input type='text' name='dyn_server_ip'/></td>\n";
     echo "<td>Port: <input type='text' name='dyn_server_port'/></td>\n";
     echo "<td><input type='submit' value='Add Dynamic Server'/></td>\n";
-    echo "</tr></table></td></tr>\n";
+    echo "</tr></table></td></tr></form>\n";
   }
 }
 
