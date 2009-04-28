@@ -871,7 +871,7 @@ public class MbstringModule
                               @Optional @Reference Value result)
   {
     String encoding = getEncoding(env);
-    StringModule.parse_str(env,strValue.toString(), result);
+    StringModule.parse_str(env, strValue, result);
 
     if (result == null) {
       // XXX: encode newly added global variables
