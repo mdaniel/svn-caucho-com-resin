@@ -1361,12 +1361,9 @@ public class StringModule extends AbstractQuercusModule {
    * @param array the optional result array
    */
   @UsesSymbolTable
-  public static Value parse_str(Env env, String str,
+  public static Value parse_str(Env env, StringValue str,
                                 @Optional @Reference Value ref)
   {
-    if (str == null)
-      str = "";
-    
     boolean isRef = ref instanceof Var;
 
     ArrayValue result = null;

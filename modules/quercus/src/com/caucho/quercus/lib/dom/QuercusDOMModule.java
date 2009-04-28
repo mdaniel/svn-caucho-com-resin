@@ -24,28 +24,20 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.quercus.lib.xml;
+package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.NotNull;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.Reference;
-import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.L10N;
 
-/**
- * PHP XML
- */
-public class DomModule extends AbstractQuercusModule {
+public class QuercusDOMModule
+  extends AbstractQuercusModule
+{
   public static final int XML_ELEMENT_NODE = 1;
   public static final int XML_ATTRIBUTE_NODE = 2;
   public static final int XML_TEXT_NODE = 3;
@@ -64,7 +56,7 @@ public class DomModule extends AbstractQuercusModule {
   public static final int XML_ATTRIBUTE_DECL_NODE = 16;
   public static final int XML_ENTITY_DECL_NODE = 17;
   public static final int XML_NAMESPACE_DECL_NODE = 18;
-  
+
   public static final int XML_ATTRIBUTE_CDATA = 1;
   public static final int XML_ATTRIBUTE_ID = 2;
   public static final int XML_ATTRIBUTE_IDREF = 3;
@@ -74,5 +66,34 @@ public class DomModule extends AbstractQuercusModule {
   public static final int XML_ATTRIBUTE_NMTOKENS = 8;
   public static final int XML_ATTRIBUTE_ENUMERATION = 9;
   public static final int XML_ATTRIBUTE_NOTATION = 10;
-}
 
+  public static final int DOM_INDEX_SIZE_ERR = 1;
+  public static final int DOMSTRING_SIZE_ERR = 2;
+  public static final int DOM_HIERARCHY_REQUEST_ERR = 3;
+  public static final int DOM_WRONG_DOCUMENT_ERR = 4;
+  public static final int DOM_INVALID_CHARACTER_ERR = 5;
+  public static final int DOM_NO_DATA_ALLOWED_ERR = 6;
+  public static final int DOM_NO_MODIFICATION_ALLOWED_ERR = 7;
+  public static final int DOM_NOT_FOUND_ERR = 8;
+  public static final int DOM_NOT_SUPPORTED_ERR = 9;
+  public static final int DOM_INUSE_ATTRIBUTE_ERR = 10;
+  public static final int DOM_INVALID_STATE_ERR = 11;
+  public static final int DOM_SYNTAX_ERR = 12;
+  public static final int DOM_INVALID_MODIFICATION_ERR = 13;
+  public static final int DOM_NAMESPACE_ERR = 14;
+  public static final int DOM_INVALID_ACCESS_ERR = 15;
+  public static final int DOM_VALIDATION_ERR = 16;
+
+  public static DOMElement dom_import_simplexml(Env env, SimpleXMLElement node)
+  {
+    if (node == null)
+      return null;
+    
+    DOMDocument document = DOMDocument.__construct(env, "1.0", null);
+    
+    StringValue xml = node.asXML(env);
+    document.loadXML(env, xml, DefaultValue.DEFAULT);
+
+    return document.getDocumentElement();
+  }
+}

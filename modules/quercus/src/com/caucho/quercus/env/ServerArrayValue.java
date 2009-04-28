@@ -145,6 +145,18 @@ public class ServerArrayValue extends ArrayValueImpl
   }
   
   /**
+   * Gets a new value.
+   */
+  @Override
+  public Value getArg(Value key, boolean isTop)
+  {
+    if (! _isFilled)
+      fillMap();
+
+    return super.getArg(key, isTop);
+  }
+  
+  /**
    * Returns the array ref.
    */
   public Var getRef(Value key)
