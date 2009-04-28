@@ -198,6 +198,9 @@ public final class ReadStream extends InputStream
 
   public void setOffset(int offset)
   {
+    if (offset < 0)
+      throw new IllegalStateException("illegal offset=" + offset);
+    
     _readOffset = offset;
   }
 
@@ -570,7 +573,7 @@ public final class ReadStream extends InputStream
     if (length < sublen)
       sublen = length;
 
-    for (int i = 0; i < sublen; i++)
+    for (int i = sublen - 1; i >= 0; i--)
       buf[offset + i] = (char) (readBuffer[readOffset + i] & 0xff);
 
     _readOffset = readOffset + sublen;
@@ -1037,11 +1040,12 @@ public final class ReadStream extends InputStream
       _sibling.flush();
 
     _readOffset = 0;
-    _readLength = _source.readNonBlock(_readBuffer, 0, _readBuffer.length);
+    int readLength = _source.readNonBlock(_readBuffer, 0, _readBuffer.length);
     
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0) {
-      _position += _readLength;
+    if (readLength > 0) {
+      _readLength = readLength;
+      _position += readLength;
       _readTime = Alarm.getCurrentTime();
       
       return true;
@@ -1073,16 +1077,17 @@ public final class ReadStream extends InputStream
       _sibling.flush();
 
     _readOffset = 0;
-    _readLength = _source.readTimeout(_readBuffer, 0, _readBuffer.length,
-				      timeout);
+    int readLength = _source.readTimeout(_readBuffer, 0, _readBuffer.length,
+					 timeout);
 
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0) {
-      _position += _readLength;
+    if (readLength > 0) {
+      _readLength = readLength;
+      _position += readLength;
       _readTime = Alarm.getCurrentTime();
       return true;
     }
-    else if (_readLength == READ_TIMEOUT) {
+    else if (readLength == READ_TIMEOUT) {
       // timeout
       _readLength = 0;
       return false;
@@ -1114,11 +1119,12 @@ public final class ReadStream extends InputStream
     _readOffset = 0;
     _readLength = 0;
     
-    _readLength = _source.read(_readBuffer, 0, _readBuffer.length);
+    int readLength = _source.read(_readBuffer, 0, _readBuffer.length);
     
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0) {
-      _position += _readLength;
+    if (readLength > 0) {
+      _readLength = readLength;
+      _position += readLength;
       _readTime = Alarm.getCurrentTime();
       return true;
     }
@@ -1138,11 +1144,12 @@ public final class ReadStream extends InputStream
       _sibling.flush();
 
     _readOffset = 0;
-    _readLength = _source.read(_readBuffer, off, _readBuffer.length - off);
+    int readLength = _source.read(_readBuffer, off, _readBuffer.length - off);
 
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
-    if (_readLength > 0) {
-      _position += _readLength;
+    if (readLength > 0) {
+      _readLength = readLength;
+      _position += readLength;
       _readTime = Alarm.getCurrentTime();
       return true;
     }

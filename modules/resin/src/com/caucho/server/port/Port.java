@@ -1562,7 +1562,7 @@ public class Port
 	    && _activeConnectionCount.get() <= _connectionMax) {
 	  startConn = _freeConn.allocate();
 	  
-	  if (startConn == null) {
+	  if (startConn == null || startConn.isDestroyed()) {
 	    startConn = new TcpConnection(this, _serverSocket.createSocket());
 	    startConn.setRequest(_protocol.createRequest(startConn));
 	  }

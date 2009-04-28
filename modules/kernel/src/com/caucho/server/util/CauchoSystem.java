@@ -57,6 +57,11 @@ public class CauchoSystem {
 
   static EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
+  
+  public static int EXIT_BIND = 2;
+  public static int EXIT_OOM = 3;
+  public static int EXIT_DEADLOCK = 4;
+  public static int EXIT_OTHER = 5;
 
   static char _separatorChar = File.separatorChar;
   static char _pathSeparatorChar = File.pathSeparatorChar;
@@ -519,6 +524,16 @@ public class CauchoSystem {
       return setUserNative(_user, _group);
     else
       return -1;
+  }
+
+  public static void exitOom(Class cl, Throwable e)
+  {
+    try {
+      System.err.println(cl + " Resin restarting due to OutOfMemoryError " + e);
+      Thread.dumpStack();
+    } finally {
+      Runtime.getRuntime().halt(EXIT_OOM);
+    }
   }
 
   private static native int setUserNative(String user, String group)

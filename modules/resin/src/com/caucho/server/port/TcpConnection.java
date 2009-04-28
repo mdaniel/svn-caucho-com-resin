@@ -35,6 +35,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.server.connection.*;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
@@ -465,6 +466,11 @@ public class TcpConnection extends Connection
   public final String getState()
   {
     return _state.toString();
+  }
+
+  public final boolean isDestroyed()
+  {
+    return _state.isDestroyed();
   }
 
   /**
@@ -1150,6 +1156,11 @@ public class TcpConnection extends Connection
       return this == CLOSED || this == DESTROYED;
     }
     
+    boolean isDestroyed()
+    {
+      return this == DESTROYED;
+    }
+    
     ConnectionState toKeepaliveSelect()
     {
       switch (this) {
@@ -1305,6 +1316,8 @@ public class TcpConnection extends Connection
         }
         
         isValid = true;
+      } catch (OutOfMemoryError e) {
+	CauchoSystem.exitOom(getClass(), e);
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
@@ -1353,6 +1366,11 @@ public class TcpConnection extends Connection
         result = handleRequests();
          
         isValid = true;
+      } catch (OutOfMemoryError e) {
+	CauchoSystem.exitOom(getClass(), e);
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+	return;
       } finally {
         thread.setName(oldThreadName);
         _port.threadEnd(TcpConnection.this);
@@ -1360,7 +1378,7 @@ public class TcpConnection extends Connection
         if (! isValid)
           destroy();
 
-	if (result != RequestState.THREAD_DETACHED)
+	else if (result != RequestState.THREAD_DETACHED)
 	  close();
       }
 
@@ -1414,6 +1432,10 @@ public class TcpConnection extends Connection
         isValid = true;
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
+      } catch (OutOfMemoryError e) {
+	CauchoSystem.exitOom(getClass(), e);
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
         thread.setName(oldThreadName);
         _port.threadEnd(TcpConnection.this);
@@ -1451,6 +1473,10 @@ public class TcpConnection extends Connection
 	}
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
+      } catch (OutOfMemoryError e) {
+	CauchoSystem.exitOom(getClass(), e);
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
         if (! isValid) {
 	  finishThread();
