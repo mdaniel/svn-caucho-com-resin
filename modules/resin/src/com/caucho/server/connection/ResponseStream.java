@@ -791,7 +791,7 @@ public class ResponseStream extends ToByteResponseStream {
           log.fine(dbgId() + "close stream");
         }
       
-        _next.flush();
+        _next.close();
       }
       else {
 	_isClosed = true;

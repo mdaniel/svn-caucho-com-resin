@@ -1520,7 +1520,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (! _hasWriter) {
       _hasWriter = true;
 
-      if (_charEncoding != null)
+      if (_charEncoding != null && _responseStream != null)
 	_responseStream.setEncoding(_charEncoding);
     }
     

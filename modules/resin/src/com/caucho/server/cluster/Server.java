@@ -1631,15 +1631,21 @@ public class Server extends ProtocolDispatchServer
       createManagement().init();
     }
 
-    if (_threadIdleMax > 0 && _threadMax < _threadIdleMax)
+    if (_threadIdleMax > 0
+	&& _threadMax > 0
+	&& _threadMax < _threadIdleMax)
       throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
 				    _threadIdleMax, _threadMax));
 
-    if (_threadIdleMin > 0 && _threadIdleMax < _threadIdleMin)
+    if (_threadIdleMin > 0
+	&& _threadIdleMax > 0
+	&& _threadIdleMax < _threadIdleMin)
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
 
-    if (_threadMax < _threadExecutorTaskMax)
+    if (_threadMax > 0
+	&& _threadExecutorTaskMax > 0
+	&& _threadMax < _threadExecutorTaskMax)
       throw new ConfigException(L.l("<thread-executor-task-max> ({0}) must be less than <thread-max> ({1})",
 				    _threadExecutorTaskMax, _threadMax));
     

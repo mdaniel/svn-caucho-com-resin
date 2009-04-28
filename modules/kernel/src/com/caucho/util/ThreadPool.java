@@ -137,7 +137,8 @@ public final class ThreadPool {
   {
     synchronized (this) {
       int threadIdleMax = _threadIdleMax;
-      if (max < threadIdleMax && threadIdleMax >= 0)
+      
+      if (max < threadIdleMax && _isThreadIdleMaxSet)
 	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})", threadIdleMax, max));
 	
       _threadMax = max;
@@ -161,7 +162,8 @@ public final class ThreadPool {
   {
     synchronized (this) {
       int threadIdleMax = _threadIdleMax;
-      if (threadIdleMax < min && threadIdleMax >= 0)
+      
+      if (threadIdleMax < min && _isThreadIdleMaxSet)
 	throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})", min, threadIdleMax));
     
       _threadIdleMin = min;
@@ -186,12 +188,12 @@ public final class ThreadPool {
   {
     synchronized (this) {
       int threadIdleMin = _threadIdleMin;
-      if (max < threadIdleMin && threadIdleMin >= 0)
+      if (max < threadIdleMin && _isThreadIdleMinSet)
 	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be greater than <thread-idle-min> ({1})",
 				      max, threadIdleMin));
 
       int threadMax = _threadMax;
-      if (threadMax < max && threadMax >= 0)
+      if (threadMax < max)
 	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
 				      max, threadMax));
     
@@ -227,7 +229,7 @@ public final class ThreadPool {
   public void setExecutorTaskMax(int max)
   {
     synchronized (this) {
-      if (_threadMax < max && _threadMax >= 0)
+      if (_threadMax < max)
 	throw new ConfigException(L.l("<thread-executor-max> ({0}) must be less than <thread-max> ({1})",
 				      max, _threadMax));
     
