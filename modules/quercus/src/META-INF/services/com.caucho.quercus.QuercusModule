@@ -6,6 +6,7 @@ com.caucho.quercus.lib.ClassesModule
 com.caucho.quercus.lib.CtypeModule
 com.caucho.quercus.lib.curl.CurlModule
 com.caucho.quercus.lib.date.DateModule
+com.caucho.quercus.lib.dom.QuercusDOMModule
 com.caucho.quercus.lib.ErrorModule
 com.caucho.quercus.lib.ExifModule
 com.caucho.quercus.lib.file.FileModule
@@ -44,7 +45,6 @@ com.caucho.quercus.lib.TokenModule
 com.caucho.quercus.lib.UrlModule
 com.caucho.quercus.lib.i18n.UnicodeModule
 com.caucho.quercus.lib.VariableModule
-com.caucho.quercus.lib.xml.DomModule
 com.caucho.quercus.lib.xml.XmlModule
 com.caucho.quercus.lib.xml.XMLWriterModule
 com.caucho.quercus.lib.zip.ZipModule
