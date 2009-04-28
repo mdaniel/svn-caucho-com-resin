@@ -107,7 +107,7 @@ public class StreamSource
     _indirectSource = null;
 
     if (out != null)
-      out.close();
+      out.destroy();
     
     if (ss != null)
       ss.close();

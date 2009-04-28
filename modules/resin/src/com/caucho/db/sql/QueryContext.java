@@ -73,6 +73,8 @@ public class QueryContext {
   private int _limit = -1;
 
   private Block []_blockLocks;
+  private int _blockLockLength;
+  
   private boolean _isLocked;
 
   private HashMap<GroupItem,GroupItem> _groupMap;
@@ -121,7 +123,16 @@ public class QueryContext {
     _xa = xa;
     _isWrite = ! isReadOnly;
     _tableIterators = tableIterators;
-    _blockLocks = new Block[_tableIterators.length];
+
+    _blockLockLength = tableIterators.length;
+
+    if (_blockLocks == null || _blockLocks.length < _blockLockLength)
+      _blockLocks = new Block[_blockLockLength];
+    else {
+      for (int i = _blockLockLength - 1; i >= 0; i--)
+	_blockLocks[i] = null;
+    }
+    
     _isLocked = false;
 
     _rowUpdateCount = 0;
@@ -459,7 +470,7 @@ public class QueryContext {
       throw new IllegalStateException(L.l("blocks are already locked"));
     _isLocked = true;
     
-    int len = _blockLocks.length;
+    int len = _tableIterators.length;
 
     for (int i = 0; i < len; i++) {
       Block bestBlock = null;

@@ -32,6 +32,7 @@ package com.caucho.config.core;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.type.FlowBean;
 import com.caucho.config.types.FileSetType;
 import com.caucho.loader.Environment;
 import com.caucho.util.L10N;

@@ -36,6 +36,7 @@ import com.caucho.db.store.BlobInputStream;
 import com.caucho.db.store.BlobOutputStream;
 import com.caucho.db.store.Inode;
 import com.caucho.db.store.Transaction;
+import com.caucho.util.IoUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,8 +114,9 @@ class BlobColumn extends Column {
 
     setNonNull(block, rowOffset);
 
+    BlobOutputStream os = null;
+    
     try {
-      BlobOutputStream os;
       os = new BlobOutputStream(xa, getTable(),
 				block, rowOffset + _columnOffset);
 
@@ -134,10 +136,10 @@ class BlobColumn extends Column {
 	  os.write(0x80 + (ch & 0x3f));
 	}
       }
-
-      os.close();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      IoUtil.close(os);
     }
   }
 

@@ -34,7 +34,6 @@ import com.caucho.bam.ActorError;
 import com.caucho.util.Alarm;
 
 import java.util.logging.*;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
@@ -43,13 +42,6 @@ public class Packet
 {
   private static final Logger log
     = Logger.getLogger(Packet.class.getName());
-  
-  private static final AtomicReferenceFieldUpdater<Packet,Packet> _casNext
-    = AtomicReferenceFieldUpdater.newUpdater(Packet.class,
-					     Packet.class,
-					     "_next");
-  
-  private volatile Packet _next;
   
   private final String _to;
   private final String _from;
@@ -95,30 +87,6 @@ public class Packet
   public final String getFrom()
   {
     return _from;
-  }
-
-  /**
-   * Creation time
-   */
-  public final long getCreateTime()
-  {
-    return _createTime;
-  }
-
-  /**
-   * Returns the 'next' field
-   */
-  public final Packet getNext()
-  {
-    return _next;
-  }
-
-  /**
-   * Compare and set next
-   */
-  public final boolean compareAndSetNext(Packet expect, Packet update)
-  {
-    return _casNext.compareAndSet(this, expect, update);
   }
 
   /**

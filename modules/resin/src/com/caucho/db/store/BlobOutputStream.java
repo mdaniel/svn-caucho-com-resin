@@ -102,10 +102,12 @@ public class BlobOutputStream extends OutputStream {
     Inode.clear(_inodeBuffer, _inodeOffset);
 
     _offset = 0;
-    
-    _tempBuffer = TempBuffer.allocate();
-    _buffer = _tempBuffer.getBuffer();
-    _bufferEnd = _buffer.length;
+
+    if (_tempBuffer == null) {
+      _tempBuffer = TempBuffer.allocate();
+      _buffer = _tempBuffer.getBuffer();
+      _bufferEnd = _buffer.length;
+    }
   }
 
   /**
@@ -191,7 +193,6 @@ public class BlobOutputStream extends OutputStream {
 
       if (tempBuffer != null) {
 	TempBuffer.free(tempBuffer);
-        tempBuffer = null;
       }
     }
   }

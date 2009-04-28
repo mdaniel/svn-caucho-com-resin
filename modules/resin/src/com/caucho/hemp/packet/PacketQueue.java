@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.logging.*;
 
 
@@ -52,8 +53,10 @@ public final class PacketQueue
   private final int _blockMaxSize;
   private final long _expireTimeout;
   
-  private final AtomicReference<Packet> _head = new AtomicReference<Packet>();
-  private final AtomicReference<Packet> _tail = new AtomicReference<Packet>();
+  private final AtomicReference<QueueItem> _head
+    = new AtomicReference<QueueItem>();
+  private final AtomicReference<QueueItem> _tail
+    = new AtomicReference<QueueItem>();
 
   private final AtomicInteger _size = new AtomicInteger();
 
@@ -91,7 +94,7 @@ public final class PacketQueue
 
     _expireTimeout = expireTimeout;
     
-    _head.set(new Packet());
+    _head.set(new QueueItem(null));
     _tail.set(_head.get());
   }
 
@@ -140,9 +143,11 @@ public final class PacketQueue
       }
     }
 
+    QueueItem item = new QueueItem(packet);
+
     while (true) {
-      Packet tail = _tail.get();
-      Packet next = tail.getNext();
+      QueueItem tail = _tail.get();
+      QueueItem next = tail.getNext();
 
       // check for consistency
       if (tail != _tail.get()) {
@@ -153,10 +158,10 @@ public final class PacketQueue
 	// if tail has new data, move the tail pointer
 	_tail.compareAndSet(tail, next);
       }
-      else if (tail.compareAndSetNext(next, packet)) {
+      else if (tail.compareAndSetNext(next, item)) {
 	// link the tail to the new packet
 	// and move the _tail pointer to the new tail
-	_tail.compareAndSet(tail, packet);
+	_tail.compareAndSet(tail, item);
 
 	// increment the size
 	_size.incrementAndGet();
@@ -172,9 +177,9 @@ public final class PacketQueue
   public final Packet dequeue()
   {
     while (true) {
-      Packet head = _head.get();
-      Packet tail = _tail.get();
-      Packet next = head.getNext();
+      QueueItem head = _head.get();
+      QueueItem tail = _tail.get();
+      QueueItem next = head.getNext();
 
       if (head != _head.get()) { // check for consistency 
 	continue;
@@ -194,8 +199,17 @@ public final class PacketQueue
 		_blockLock.notify();
 	      }
 	    }
-	    
-	    return next;
+
+	    // head.clearNext();
+
+	    if (next != null) {
+	      Packet packet = next.getPacket();
+	      next.clearPacket();
+
+	      return packet;
+	    }
+	    else
+	      return null;
 	  }
 	}
       }
@@ -214,5 +228,73 @@ public final class PacketQueue
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _name + "]";
+  }
+
+  static class QueueItem
+  {
+    private static final Logger log
+      = Logger.getLogger(QueueItem.class.getName());
+  
+    private static final AtomicReferenceFieldUpdater<QueueItem,QueueItem> _casNext
+      = AtomicReferenceFieldUpdater.newUpdater(QueueItem.class,
+					       QueueItem.class,
+					       "_next");
+  
+    private volatile QueueItem _next;
+  
+    private Packet _packet;
+
+    private final long _createTime;
+
+    /**
+     * Creates a packet with a destination and a source.
+     *
+     * @param to the destination jid
+     * @param from the source jid
+     */
+    public QueueItem(Packet packet)
+    {
+      _createTime = Alarm.getCurrentTime();
+      _packet = packet;
+    }
+
+    /**
+     * Creation time
+     */
+    public final long getCreateTime()
+    {
+      return _createTime;
+    }
+
+    /**
+     * Returns the 'next' field
+     */
+    public final QueueItem getNext()
+    {
+      return _next;
+    }
+
+    public final Packet getPacket()
+    {
+      return _packet;
+    }
+
+    public final void clearPacket()
+    {
+      _packet = null;
+    }
+
+    /**
+     * Compare and set next
+     */
+    public final boolean compareAndSetNext(QueueItem expect, QueueItem update)
+    {
+      return _casNext.compareAndSet(this, expect, update);
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _packet + "]";
+    }
   }
 }

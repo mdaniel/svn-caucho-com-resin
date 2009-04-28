@@ -291,7 +291,7 @@ public class DataStore implements AlarmListener {
       if (rs.next()) {
 	InputStream is = rs.getBinaryStream(1);
 
-	InputStream dataInputStream = new DataInputStream(conn, is);
+	InputStream dataInputStream = new DataInputStream(conn, rs, is);
 	conn = null;
 
 	return dataInputStream;
@@ -316,9 +316,8 @@ public class DataStore implements AlarmListener {
   public boolean save(HashKey id, StreamSource source, int length)
     throws IOException
   {
-    if (insert(id, source.openInputStream(), length))
-      return true;
-    else if (updateExpires(id))
+    // try updating first to avoid the exception for an insert
+    if (updateExpires(id))
       return true;
     else if (insert(id, source.openInputStream(), length))
       return true;
@@ -548,11 +547,13 @@ public class DataStore implements AlarmListener {
 
   class DataInputStream extends InputStream {
     private DataConnection _conn;
+    private ResultSet _rs;
     private InputStream _is;
 
-    DataInputStream(DataConnection conn, InputStream is)
+    DataInputStream(DataConnection conn, ResultSet rs, InputStream is)
     {
       _conn = conn;
+      _rs = rs;
       _is = is;
     }
 
@@ -572,11 +573,16 @@ public class DataStore implements AlarmListener {
     {
       DataConnection conn = _conn;
       _conn = null;
+
+      ResultSet rs = _rs;
+      _rs = null;
       
       InputStream is = _is;
       _is = null;
 
       IoUtil.close(is);
+
+      JdbcUtil.close(rs);
       
       if (conn != null)
 	conn.close();
