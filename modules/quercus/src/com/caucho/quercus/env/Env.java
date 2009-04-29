@@ -3797,7 +3797,11 @@ public class Env {
     
     // php/404l
     // XXX: import and namespaces
-    _importMap = saveState.getImportMap().copy();
+    
+    ImportMap importMap =  saveState.getImportMap();
+    
+    if (importMap != null)
+      _importMap = importMap.copy();
   }
 
   /**
@@ -3904,9 +3908,9 @@ public class Env {
         return ConstStringValue.create(s.charAt(0));
     }
     else if (_isUnicodeSemantics)
-      return _quercus.createUnicodeString(s);
+      return new UnicodeBuilderValue(s);
     else
-      return _quercus.createString(s);
+      return new ConstStringValue(s);
   }
 
   /**
