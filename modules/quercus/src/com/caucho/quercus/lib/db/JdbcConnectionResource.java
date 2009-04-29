@@ -609,12 +609,8 @@ public abstract class JdbcConnectionResource
 
     _rs = null;
 
-    // php/142v - XXX
-    //Statement stmt = _freeStmt;
-    //_freeStmt = null;
-    
-    Statement stmt = _savedStmt;
-    _savedStmt = null;
+    Statement stmt = _freeStmt;
+    _freeStmt = null;
 
     try {
       Connection conn = getConnection(env);
@@ -677,8 +673,7 @@ public abstract class JdbcConnectionResource
         }
         else {
           // _warnings = stmt.getWarnings();
-	      //_freeStmt = stmt;
-          stmt.close();
+	      _freeStmt = stmt;
         }
       }
     } catch (DataTruncation truncationError) {
@@ -921,6 +916,11 @@ public abstract class JdbcConnectionResource
       return;
 
     clearErrors();
+    
+    // php/142v
+    // mysql jdbc: can't reuse old statements after a USE query
+    _savedStmt = null;
+    _freeStmt = null;
 
     if (! _isUsed && _isCatalogOptimEnabled) {
       // The database is only connected, but not used, reopen with

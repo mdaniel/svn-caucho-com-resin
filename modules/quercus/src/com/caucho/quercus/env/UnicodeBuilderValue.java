@@ -181,7 +181,7 @@ public class UnicodeBuilderValue
       return new UnicodeBuilderValue(value);
   }
 
-  /*
+  /**
    * Decodes the Unicode str from charset.
    * 
    * @param str should be a Unicode string
@@ -879,6 +879,10 @@ public class UnicodeBuilderValue
     return dest;
   }
 
+  /**
+   * Return the underlying buffer.
+   */
+  @Override
   public char []getRawCharArray()
   {
     return _buffer;

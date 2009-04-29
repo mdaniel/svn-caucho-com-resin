@@ -124,14 +124,14 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static boolean session_decode(Env env, StringValue value)
   {
-    Value session = env.getGlobalValue("_SESSION");
+    SessionArrayValue session = env.getSession();
 
-    if (! (session instanceof SessionArrayValue)) {
+    if (session == null) {
       env.warning(L.l("session_decode requires valid session"));
       return false;
     }
 
-    return ((SessionArrayValue)session).decode(env, value.toString());
+    return session.decode(env, value);
   }
 
   /**
@@ -139,14 +139,14 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static String session_encode(Env env)
   {
-    Value session = env.getGlobalVar("_SESSION");
+    SessionArrayValue session = env.getSession();
 
-    if (! (session instanceof SessionArrayValue)) {
+    if (session == null) {
       env.warning(L.l("session_encode requires valid session"));
       return null;
     }
 
-    return ((SessionArrayValue)session).encode(env);
+    return session.encode(env);
   }
 
   /**
@@ -202,9 +202,11 @@ public class SessionModule extends AbstractQuercusModule
   /**
    * Returns true if a session variable is registered.
    */
-  public static boolean session_is_registered(Env env, String name)
+  public static boolean session_is_registered(Env env, StringValue name)
   {
-    return env.getGlobalValue("_SESSION").get(env.createString(name)).isset();
+    SessionArrayValue session = env.getSession();
+    
+    return session != null && session.get(name).isset();
   }
 
   /**
@@ -275,11 +277,11 @@ public class SessionModule extends AbstractQuercusModule
    */
   public boolean session_register(Env env, Value []values)
   {
-    Value session = env.getGlobalValue("_SESSION");
+    SessionArrayValue session = env.getSession();
 
-    if (! session.isArray()) {
+    if (session == null) {
       session_start(env);
-      session = env.getGlobalValue("_SESSION");
+      session = env.getSession();
     }
 
     for (int i = 0; i < values.length; i++)
@@ -503,6 +505,9 @@ public class SessionModule extends AbstractQuercusModule
     }
     env.setSpecialValue("caucho.session_id", env.createString(sessionId));
 
+    
+    System.err.println();
+    
     return true;
   }
 
@@ -515,9 +520,12 @@ public class SessionModule extends AbstractQuercusModule
    
     String cookieName = env.getIni("session.name").toString();
     
+    StringValue cookieValue
+      = env.createStringNoCache("cookieName + '=' + sessionId");
+    
     env.addConstant("SID", 
-		    env.createString(cookieName + '=' + sessionId),
-		    false);
+		            cookieValue,
+		            false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);
     // #2649
@@ -557,12 +565,12 @@ public class SessionModule extends AbstractQuercusModule
    */
   public boolean session_unregister(Env env, Value key)
   {
-    Value value = env.getGlobalValue("_SESSION");
-
-    if (! value.isArray())
+    SessionArrayValue session = env.getSession();
+    
+    if (session == null)
       return false;
 
-    value.remove(key);
+    session.remove(key);
 
     return true;
   }
@@ -572,14 +580,12 @@ public class SessionModule extends AbstractQuercusModule
    */
   public Value session_unset(Env env)
   {
-    Value value = env.getGlobalValue("_SESSION");
+    SessionArrayValue session = env.getSession();
 
-    if (! value.isArray())
+    if (session == null)
       return NullValue.NULL;
 
-    ArrayValue array = value.toArrayValue(env);
-    
-    array.clear();
+    session.clear();
 
     return NullValue.NULL;
   }

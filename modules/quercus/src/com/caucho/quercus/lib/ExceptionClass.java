@@ -64,6 +64,7 @@ public class ExceptionClass
     value.putField(env, "code", LongValue.create(code));
 
     Location location = env.getLocation();
+
     if (location != null) {
       if (location.getFileName() != null)
         value.putField(env, "file", env.createString(location.getFileName()));
@@ -145,18 +146,20 @@ public class ExceptionClass
   {
     Value trace = getTrace(env, obj);
     
-    StringValue sb = env.createString("<trace>");
+    StringValue sb = env.createUnicodeBuilder();
+    sb.append("<trace>");
 
     Iterator<Value> iter = trace.getValueIterator(env);
 
     while (iter.hasNext()) {
       Value value = iter.next();
 
-      sb = sb.append(value.getField(env, FILE));
-      sb = sb.append(":");
-      sb = sb.append(value.getField(env, LINE));
+      sb = sb.append('\n');
+      sb = sb.append(value.get(FILE));
+      sb = sb.append(':');
+      sb = sb.append(value.get(LINE));
       sb = sb.append(": ");
-      sb = sb.append(value.getField(env, FUNCTION)).append("\n");
+      sb = sb.append(value.get(FUNCTION));
     }
 
     return sb;

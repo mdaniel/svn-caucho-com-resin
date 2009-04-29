@@ -29,20 +29,14 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.IdentityHashMap;
 import java.util.zip.CRC32;
 
@@ -70,7 +64,7 @@ abstract public class StringValue
    * Creates a string builder of the same type.
    */
   abstract public StringValue createStringBuilder(int length);
-  
+
   /**
    * Creates the string.
    */

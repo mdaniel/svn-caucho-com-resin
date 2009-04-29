@@ -85,7 +85,9 @@ public class SaveState {
     saveGlobals(env, globalMap);
     
     _includeMap = new HashMap<Path,QuercusPage>(includeMap);
-    _importMap = importMap.copy();
+    
+    if (importMap != null)
+      _importMap = importMap.copy();
   }
 
   /**

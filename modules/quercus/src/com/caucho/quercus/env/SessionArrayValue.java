@@ -140,20 +140,18 @@ public class SessionArrayValue extends ArrayValueWrapper
   /**
    * Decodes encoded values, adding them to this object.
    */
-  public boolean decode(Env env, String encoded)
+  public boolean decode(Env env, StringValue encoded)
   {
     ArrayValue array = getArray();
 
     try {
       UnserializeReader is = new UnserializeReader(encoded);
 
-      StringBuilder sb = new StringBuilder();
-
       synchronized (array) {
         while (true) {
           int ch;
 
-          sb.setLength(0);
+          StringValue sb = env.createUnicodeBuilder();
 
           while ((ch = is.read()) > 0 && ch != '|') {
             sb.append((char) ch);
@@ -162,9 +160,7 @@ public class SessionArrayValue extends ArrayValueWrapper
           if (sb.length() == 0)
             return true;
 
-          String key = sb.toString();
-
-          array.put(env.createString(key), is.unserialize(env));
+          array.put(sb, is.unserialize(env));
         }
       }
     } catch (IOException e) {
@@ -218,7 +214,7 @@ public class SessionArrayValue extends ArrayValueWrapper
 	       + ((in.read() & 0xff) << 8)
 	       + ((in.read() & 0xff)));
 
-    StringBuilder sb = new StringBuilder();
+    StringValue sb = env.createUnicodeBuilder();
 
     for (int i = 0; i < len; i++) {
       char ch = (char) (((in.read() & 0xff) << 8) + (in.read() & 0xff));
@@ -226,9 +222,7 @@ public class SessionArrayValue extends ArrayValueWrapper
       sb.append(ch);
     }
 
-    String encoded = sb.toString();
-
-    decode(env, encoded);
+    decode(env, sb);
   }
 
   /**

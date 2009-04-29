@@ -72,7 +72,7 @@ public class LargeStringBuilderValue
     s.appendTo(this);
   }
   
-  /*
+  /**
    * Creates an empty string builder of the same type.
    */
   public StringValue createEmptyStringBuilder()

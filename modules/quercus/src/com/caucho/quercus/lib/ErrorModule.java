@@ -117,19 +117,17 @@ public class ErrorModule extends AbstractQuercusModule {
       String name = elt.getMethodName();
       String className = elt.getClassName();
 
-      // System.out.println("N: " + name + " " + className);
-    
       if (name.equals("executeTop")) {
         return result;
       }
       else if (className.startsWith("_quercus._")
                && name.equals("call")) {
         String path = unmangleFile(className);
-        String fileName = env.getPwd().lookup("./" + path).getNativePath();
+        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
         
         String fun = findFunction(stack, i);
 
-        if (fun.equals("debug_backtrace"))
+        if (fun == null || fun.equals("debug_backtrace"))
           continue;
 
         ArrayValue call = new ArrayValueImpl();
@@ -145,7 +143,7 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
                && name.equals("callMethod")) {
         String path = unmangleFile(className);
-        String fileName = env.getPwd().lookup("./" + path).getNativePath();
+        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
         
         ArrayValue call = new ArrayValueImpl();
         result.put(call);
@@ -164,13 +162,14 @@ public class ErrorModule extends AbstractQuercusModule {
         String methodName = stack[i - 1].getMethodName();
 
         String path = unmangleFile(className);
-        String fileName = env.getPwd().lookup("./" + path).getNativePath();
+
+        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
 
         ArrayValue call = new ArrayValueImpl();
         
         call.put(FILE, env.createString(fileName));
         call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
-        
+
         if (methodName.equals("includeOnce")) {
           call.put(FUNCTION, env.createString("include_once"));
           
@@ -181,10 +180,14 @@ public class ErrorModule extends AbstractQuercusModule {
           
           result.put(call);
         }
+        else if (methodName.equals("callNew")) {
+        }
+        else if (methodName.equals("createException")) {
+        }
         else {
           String fun = findFunction(stack, i);
           
-          if (fun.equals("debug_backtrace")) {
+          if (fun == null || fun.equals("debug_backtrace")) {
           }
           else {
             call.put(FUNCTION, env.createString(fun));
@@ -242,10 +245,11 @@ public class ErrorModule extends AbstractQuercusModule {
 
     return result;
   }
-
+  
   private static String findFunction(StackTraceElement []stack, int i)
   {
     String className = stack[i].getClassName();
+    String methodName = stack[i].getMethodName();
     
     if (i == 0)
       return unmangleFunction(className);
@@ -253,11 +257,14 @@ public class ErrorModule extends AbstractQuercusModule {
     String prevClassName = stack[i - 1].getClassName();
     String prevMethodName = stack[i - 1].getMethodName();
 
-    if (prevClassName.startsWith("_quercus._")
+    if (className.startsWith("_quercus._")
+        && methodName.startsWith("call"))
+      return unmangleFunction(className);
+    else if (prevClassName.startsWith("_quercus._")
         && prevMethodName.startsWith("call"))
       return unmangleFunction(prevClassName);
     else
-      return prevMethodName;
+      return null;
   }
   
   private static void addInterpreted(Env env, ArrayValue result, int i)
