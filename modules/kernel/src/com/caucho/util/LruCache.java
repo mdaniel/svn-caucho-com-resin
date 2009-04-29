@@ -31,6 +31,7 @@ package com.caucho.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -83,12 +84,16 @@ public final class LruCache<K,V> {
   // lru timeout reduces lru updates for the most used items
   private int _lruTimeout = 1;
 
+  private final AtomicBoolean _isLruTailRemove = new AtomicBoolean();
+
   // counts group 2 updates, rolling over at 0x3fffffff
   private volatile int _lruCounter;
 
   //
   // statistics
   //
+
+  private boolean _isEnableStatistics;
 
   // hit count statistics
   private volatile long _hitCount;
@@ -127,6 +132,8 @@ public final class LruCache<K,V> {
     
     if (_lruTimeout < 1)
       _lruTimeout = 1;
+
+    _isEnableStatistics = isStatistics;
 
     /*
     if (isStatistics) {
@@ -228,13 +235,15 @@ public final class LruCache<K,V> {
       if (itemKey == okey || itemKey.equals(okey)) {
 	updateLru(item);
 
-	_hitCount++;
+	if (_isEnableStatistics)
+	  _hitCount++;
 
 	return item._value;
       }
     }
 
-    _missCount++;
+    if (_isEnableStatistics)
+      _missCount++;
     
     return null;
   }
@@ -309,10 +318,7 @@ public final class LruCache<K,V> {
       okey = NULL;
 
     // remove LRU items until we're below capacity
-    while (_capacity <= _size1 + _size2) {
-      if (! removeTail())
-	throw new IllegalStateException("unable to remove tail from cache");
-    }
+    removeLru();
 
     int hash = okey.hashCode() & _mask;
 
@@ -481,6 +487,23 @@ public final class LruCache<K,V> {
     V value = remove(tail._key);
     
     return true;
+  }
+
+  private void removeLru()
+  {
+    if (_capacity <= _size1 + _size2) {
+      if (_isLruTailRemove.compareAndSet(false, true)) {
+	try {
+	  // remove LRU items until we're below capacity
+	  while (_capacity <= _size1 + _size2) {
+	    if (! removeTail())
+	      throw new IllegalStateException("unable to remove tail from cache");
+	  }
+	} finally {
+	  _isLruTailRemove.set(false);
+	}
+      }
+    }
   }
 
   /**

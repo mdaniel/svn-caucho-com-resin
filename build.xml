@@ -623,9 +623,9 @@
     <copy todir="${install}/win64"
           file="${win32}/resin/modules/c/src/resin_os_64/Release/resin_os.dll"/>
     <copy todir="${install}"
-          file="${win32}/resin/modules/c/src/httpd/Release/resin.exe"/>
+          file="${win32}/resin/modules/csharp/src/resin/Release/resin.exe"/>
     <copy todir="${install}"
-          file="${win32}/resin/modules/c/src/setup/Release/setup.exe"/>
+          file="${win32}/resin/modules/csharp/src/setup/Release/setup.exe"/>
 
     <chmod perm="ugo+rx">
       <fileset dir="${install}">
