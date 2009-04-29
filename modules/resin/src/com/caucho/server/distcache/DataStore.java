@@ -80,6 +80,7 @@ public class DataStore implements AlarmListener {
   private String _insertQuery;
   private String _loadQuery;
   private String _dataAvailableQuery;
+  private String _updateAllExpiresQuery;
   private String _updateExpiresQuery;
   private String _timeoutQuery;
   
@@ -127,9 +128,14 @@ public class DataStore implements AlarmListener {
     // XXX: add random component to expire time?
     _updateExpiresQuery = ("UPDATE " + _tableName
 			   + " SET expire_time=?"
-			   + " WHERE expire_time<? AND EXISTS "
-			   + "      (SELECT * FROM " + _mnodeTableName
-			   +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
+			   + " WHERE id=?");
+
+    // XXX: add random component to expire time?
+    _updateAllExpiresQuery = ("UPDATE " + _tableName
+			      + " SET expire_time=?"
+			      + " WHERE expire_time<? AND EXISTS "
+			      + "      (SELECT * FROM " + _mnodeTableName
+			      +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
 		     + " WHERE expire_time < ?");
@@ -317,10 +323,12 @@ public class DataStore implements AlarmListener {
     throws IOException
   {
     // try updating first to avoid the exception for an insert
-    if (updateExpires(id))
+    if (updateExpires(id)) {
       return true;
-    else if (insert(id, source.openInputStream(), length))
+    }
+    else if (insert(id, source.openInputStream(), length)) {
       return true;
+    }
     else {
       log.warning(this + " can't save data '" + id + "'");
       
@@ -388,7 +396,7 @@ public class DataStore implements AlarmListener {
       long expireTime = _expireTimeout + Alarm.getCurrentTime();
       
       pstmt.setLong(1, expireTime);
-      pstmt.setLong(2, expireTime);
+      pstmt.setBytes(2, id.getHash());
 
       int count = pstmt.executeUpdate();
       
@@ -418,7 +426,7 @@ public class DataStore implements AlarmListener {
   
       long now = Alarm.getCurrentTime();
       
-      PreparedStatement pstmt = conn.prepareUpdateExpires();
+      PreparedStatement pstmt = conn.prepareUpdateAllExpires();
 
       pstmt.setLong(1, now + 3L * 3600 * 1000L);
       pstmt.setLong(2, now);
@@ -595,6 +603,7 @@ public class DataStore implements AlarmListener {
     private PreparedStatement _loadStatement;
     private PreparedStatement _dataAvailableStatement;
     private PreparedStatement _insertStatement;
+    private PreparedStatement _updateAllExpiresStatement;
     private PreparedStatement _updateExpiresStatement;
     private PreparedStatement _timeoutStatement;
     
@@ -630,6 +639,15 @@ public class DataStore implements AlarmListener {
 	_insertStatement = _conn.prepareStatement(_insertQuery);
 
       return _insertStatement;
+    }
+
+    PreparedStatement prepareUpdateAllExpires()
+      throws SQLException
+    {
+      if (_updateAllExpiresStatement == null)
+	_updateAllExpiresStatement = _conn.prepareStatement(_updateAllExpiresQuery);
+
+      return _updateAllExpiresStatement;
     }
 
     PreparedStatement prepareUpdateExpires()

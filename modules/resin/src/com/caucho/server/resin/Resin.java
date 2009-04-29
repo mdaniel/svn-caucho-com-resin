@@ -122,7 +122,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private String _serverId = "";
   private DynamicServer _dynamicServer;
-  private ClusterServer _activeDynamicServer;
+  
+  private ClusterPod _dynPod;
+  private String _dynCluster;
+  private String _dynAddress;
+  private int _dynPort;
 
   private Path _resinHome;
   private Path _rootDirectory;
@@ -474,9 +478,11 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void setDynamicServer(String clusterId, String address, int port)
   {
-    _dynamicServer = new DynamicServer(clusterId, address, port);
-      
     String id = address + ":" + port;
+
+    _dynCluster = clusterId;
+    _dynAddress = address;
+    _dynPort = port;
 
     if (_serverId == null)
       setServerId(id);
@@ -856,8 +862,9 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (_server == null) {
       ClusterServer clusterServer = null;
       
-      if (_activeDynamicServer != null) {
-	clusterServer = loadDynamicServer(_activeDynamicServer);
+      if (_dynCluster != null) {
+	clusterServer
+	  = loadDynamicServer(_dynPod, _serverId, _dynAddress, _dynPort);
       }
 
       if (clusterServer == null)
@@ -876,7 +883,10 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _server;
   }
 
-  protected ClusterServer loadDynamicServer(ClusterServer dynServer)
+  protected ClusterServer loadDynamicServer(ClusterPod pod,
+					    String dynId,
+					    String dynAddress,
+					    int dynPort)
   {
     throw new ConfigException(L().l("dynamic-server requires Resin Professional"));
   }
@@ -904,14 +914,14 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       ClusterServer clusterServer = null;
 
-      if (_dynamicServer != null) {
+      if (_dynCluster != null) {
 	clusterServer = findClusterServer(_serverId);
 
 	if (clusterServer != null)
 	  throw new ConfigException(L().l("dynamic-server '{0}' must not have a static configuration configured in the resin.xml.",
 					  _serverId));
 
-	Cluster cluster = findCluster(_dynamicServer.getCluster());
+	Cluster cluster = findCluster(_dynCluster);
 
 	if (cluster == null) {
 	  throw new ConfigException(L().l("dynamic-server cluster '{0}' does not exist.  Dynamic servers must be added to an existing cluster.",
@@ -923,13 +933,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 					  cluster.getId()));
 	}
 
-	ClusterPod pod = cluster.getPodList()[0];
+	_dynPod = cluster.getPodList()[0];
 
-	_activeDynamicServer
-	  = pod.setActiveDynamicServer(_serverId,
-				       _dynamicServer.getAddress(),
-				       _dynamicServer.getPort(),
-				       63);
+	if (_dynPod == null)
+	  throw new NullPointerException();
       }
 
       /*
