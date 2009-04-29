@@ -48,7 +48,7 @@ import javax.annotation.PostConstruct;
 @com.caucho.config.Service
 public class ClusterSingleSignon implements SingleSignon {
   private final static Logger log
-    = Logger.getLogger(MemorySingleSignon.class.getName());
+    = Logger.getLogger(ClusterSingleSignon.class.getName());
   private AbstractCache _cache;
 
   public ClusterSingleSignon()

@@ -369,14 +369,15 @@ if ($live_count < 2) {
 
   echo "<h3>resin.conf</h3>";
   echo "<pre>\n";
-  echo "&lt;resin xmlns='http://caucho.com/ns/resin'>\n";
-  echo "  &lt;management>\n";
-  echo "    &lt;user name='...' password='...'/>\n";
+  echo "&lt;resin xmlns='http://caucho.com/ns/resin'\n";
+  echo "       xmlns:resin='urn:java:com.caucho.resin'>\n";
   echo "\n";
-  echo "    &lt;jmx-server/>\n";
-  echo "  &lt;/management>\n";
+  echo "  &lt;resin:AdminAuthenticator>\n";
+  echo "    &lt;user name='...' password='...'/>\n";
+  echo "  &lt;/resin:AdminAuthenticator>\n";
   echo "  ...\n";
   echo "  &lt;cluster id='...'>\n";
+  echo "    &lt;resin:JmxService/>\n";
   echo "    ...\n";
   echo "  &lt;/cluster>\n";
   echo "&lt;/resin>\n";
