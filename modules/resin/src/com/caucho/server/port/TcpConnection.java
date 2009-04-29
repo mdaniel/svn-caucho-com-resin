@@ -45,6 +45,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -841,7 +842,8 @@ public class TcpConnection extends Connection
 					  _state));
 
     ConnectionCometController controller
-      = new AsyncConnectionCometController(this, isTop, request, response);
+      = super.toComet(isTop, request, response);
+    
     _controller = controller;
 
     if (log.isLoggable(Level.FINER))

@@ -33,6 +33,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -48,6 +49,8 @@ import javax.servlet.ServletResponse;
 public abstract class Connection
 {
   private static final L10N L = new L10N(Connection.class);
+  
+  private static Constructor _cometConstructor;
   
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
@@ -180,8 +183,13 @@ public abstract class Connection
 					   ServletRequest request,
 					   ServletResponse response)
   {
-    ConnectionCometController controller
-      = new AsyncConnectionCometController(this, isTop, request, response);
+    ConnectionCometController controller = null;
+    
+    try {
+      controller = (ConnectionCometController) _cometConstructor.newInstance(this, isTop, request, response);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
     
     return controller;
   }
@@ -199,5 +207,19 @@ public abstract class Connection
   protected boolean wake()
   {
     return false;
+  }
+
+  static {
+    try {
+      Class asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
+      
+      _cometConstructor = asyncComet.getConstructor(new Class[] {
+	  Connection.class,
+	  boolean.class,
+	  ServletRequest.class,
+	  ServletResponse.class
+	});
+    } catch (Throwable e) {
+    }
   }
 }
