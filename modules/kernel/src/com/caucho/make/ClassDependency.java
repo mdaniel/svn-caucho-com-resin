@@ -35,6 +35,7 @@ import com.caucho.vfs.PersistentDependency;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.logging.Level;
@@ -183,6 +184,11 @@ public class ClassDependency implements PersistentDependency {
 	digest = addDigest(digest, fields[i].getName());
 	digest = addDigest(digest, fields[i].getModifiers());
 	digest = addDigest(digest, fields[i].getType().getName());
+        // jpa/0021
+        Annotation[] annotations = fields[i].getAnnotations();
+        for (Annotation annotation : annotations) {
+          digest = addDigest(digest, annotation.annotationType().getName());
+        }
       }
     }
 
