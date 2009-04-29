@@ -275,11 +275,13 @@ public class GoogleQuercusServlet extends QuercusServletImpl
       // error exit
       log.log(Level.FINE, e.toString(), e);
     }
-    catch (RuntimeException e) {
-      throw e;
-    }
     catch (Throwable e) {
-      throw new ServletException(e);
+      log.log(Level.WARNING, e.toString(), e);
+      
+      OutputStream os = response.getOutputStream();
+      WriteStream out = Vfs.openWrite(os);
+      out.println(e);
+      out.close();
     }
   }
 
