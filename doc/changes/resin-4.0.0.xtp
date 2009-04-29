@@ -17,9 +17,27 @@ new features, it may be more unstable than the production branch.</p>
 
 </s1>
 
-<s1 title="win32 openssl">
+<s1 title="Resin 10,000">
 
-<p>The win32 openssl version is 0.9.8g</p>
+<p>Resin's concurrent connections has been tested up to 10,000
+simultaneous keepalive connections.  Since the CPU usage of that test was only
+1.0, the actual upper limit would be even larger than 10k.</p>
+
+</s1>
+
+<s1 title="Java Injection (JSR-299, CanDI)">
+
+<p>Resin's configuration and dependency injection is based on the
+JSR-299 (CanDI) draft specification.  Applications can use Java Injection
+to create and configure custom components, including configuration of
+third party libraries.</p>
+
+</s1>
+
+<s1 title="Win32 OpenSSL">
+
+<p>Win32 openssl version is compiled against <a href="http://www.slproweb.com/products/Win32OpenSSL.html">Shining Light's 0.9.8k</a></p>
+<p>Win64 openssl version is compiled against Shining Lights 0.9.8k</p>
 
 </s1>
 
