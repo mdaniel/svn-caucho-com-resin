@@ -966,9 +966,9 @@ public class MysqlModule extends AbstractQuercusModule {
       return false;
 
     if (conn == null)
-      return getConnection(env, dbName).select_db(dbName);
-    else
-      return conn.select_db(dbName);
+      conn = getConnection(env, dbName);
+    
+    return conn.select_db(dbName);
   }
 
   /**

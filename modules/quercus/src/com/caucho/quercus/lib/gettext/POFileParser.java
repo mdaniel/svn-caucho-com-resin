@@ -220,7 +220,7 @@ class POFileParser extends GettextParser
     if (ch != '"')
       return UNKNOWN;
 
-    return readString(token);    
+    return readOriginalString(token);    
   }
 
   private int readMsgstrToken()
@@ -242,6 +242,15 @@ class POFileParser extends GettextParser
       return UNKNOWN;
 
     return readString(MSGSTR);
+  }
+  
+  /**
+   * Reads a string in quotes.
+   */
+  private int readOriginalString(int token)
+    throws IOException
+  {
+    return readString(_env.createUnicodeBuilder(), token);
   }
 
   /**

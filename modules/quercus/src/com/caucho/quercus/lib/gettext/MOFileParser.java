@@ -135,7 +135,7 @@ class MOFileParser extends GettextParser
       if (originalOffsets[i] <= 0)
         return null;
     }
-
+    
     _in.setPosition(_offsetTranslation);
 
     // Read in lengths and offsets of the translated strings
@@ -176,10 +176,10 @@ class MOFileParser extends GettextParser
   private StringValue readOriginalString()
     throws IOException
   {
-    StringValue sb = new UnicodeBuilderValue();
+    StringValue sb = _env.createUnicodeBuilder();
 
-    for (int ch = _in.readChar(); ch > 0; ch = _in.readChar()) {
-      sb.append((char)ch);
+    for (int ch = _in.read(); ch > 0; ch = _in.read()) {
+      sb.append((char) ch);
     }
 
     return sb;

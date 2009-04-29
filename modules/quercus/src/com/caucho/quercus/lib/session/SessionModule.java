@@ -139,7 +139,7 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static String session_encode(Env env)
   {
-    Value session = env.getGlobalValue("_SESSION");
+    Value session = env.getGlobalVar("_SESSION");
 
     if (! (session instanceof SessionArrayValue)) {
       env.warning(L.l("session_encode requires valid session"));

@@ -609,8 +609,12 @@ public abstract class JdbcConnectionResource
 
     _rs = null;
 
-    Statement stmt = _freeStmt;
-    _freeStmt = null;
+    // php/142v - XXX
+    //Statement stmt = _freeStmt;
+    //_freeStmt = null;
+    
+    Statement stmt = _savedStmt;
+    _savedStmt = null;
 
     try {
       Connection conn = getConnection(env);
@@ -622,7 +626,8 @@ public abstract class JdbcConnectionResource
         return BooleanValue.TRUE;
 
       // statement reuse does not gain performance significantly (< 1%)
-      if (stmt == null) {
+      // php/142v
+      if (true || stmt == null) {
 	// XXX: test for performance
 	boolean canSeek = true;
 	if (canSeek)
@@ -667,13 +672,13 @@ public abstract class JdbcConnectionResource
         // _warnings = stmt.getWarnings();
 
         // for php/430a
-	if (keepStatementOpen()) {
-	  _savedStmt = stmt;
-	}
+        if (keepStatementOpen()) {
+          _savedStmt = stmt;
+        }
         else {
           // _warnings = stmt.getWarnings();
-	  _freeStmt = stmt;
-          // stmt.close();
+	      //_freeStmt = stmt;
+          stmt.close();
         }
       }
     } catch (DataTruncation truncationError) {
