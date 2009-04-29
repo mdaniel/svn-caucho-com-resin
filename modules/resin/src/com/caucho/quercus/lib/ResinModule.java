@@ -79,7 +79,7 @@ public class ResinModule
   public final static int XA_STATUS_COMMITTING = 8;
   public final static int XA_STATUS_ROLLING_BACK = 9;
 
-  private LruCache<String,SaveState> _saveState;
+  private static LruCache<String,SaveState> _saveState;
 
   /**
    * Converts a string into its binary representation, according to the
@@ -254,7 +254,7 @@ public class ResinModule
    * correspond to the keys and values in the object name.
    * The domain is stored in the returned array under the key named ":domain:".
    */
-  public ArrayValue mbean_explode(String name)
+  public static ArrayValue mbean_explode(String name)
   {
     try {
       ArrayValueImpl exploded = new ArrayValueImpl();
@@ -357,7 +357,7 @@ public class ResinModule
   /**
    * Restore the current state
    */
-  public boolean resin_restore_state(Env env)
+  public static boolean resin_restore_state(Env env)
   {
     if (_saveState == null)
       return false;
@@ -376,7 +376,7 @@ public class ResinModule
   /**
    * Save the current state
    */
-  public boolean resin_save_state(Env env)
+  public static boolean resin_save_state(Env env)
   {
     if (_saveState == null)
       _saveState = new LruCache<String,SaveState>(256);
@@ -390,5 +390,34 @@ public class ResinModule
     }
     else
       return false;
+  }
+  
+  /**
+   * Clears the current state
+   */
+  public static boolean resin_clear_state(Env env)
+  {
+    if (_saveState == null)
+      return false;
+    
+    String url = env.getSelfPath().getURL();
+    
+    SaveState saveState = _saveState.get(url);
+    
+    if (saveState != null) {
+      _saveState.remove(url);
+      return true;
+    }
+    else
+      return false;
+  }
+  
+  /**
+   * Clears all states.
+   */
+  public static void resin_clear_states()
+  {
+    if (_saveState != null)
+      _saveState.clear();
   }
 }
