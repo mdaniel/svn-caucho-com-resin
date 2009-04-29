@@ -521,7 +521,7 @@ public class SessionModule extends AbstractQuercusModule
     String cookieName = env.getIni("session.name").toString();
     
     StringValue cookieValue
-      = env.createString("cookieName + '=' + sessionId");
+      = env.createString(cookieName + '=' + sessionId);
     
     env.addConstant("SID", 
 		            cookieValue,
