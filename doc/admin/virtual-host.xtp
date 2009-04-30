@@ -25,17 +25,17 @@ adding virtual hosts can as easy as creating a directory
 like <code>/var/www/hosts/foo.com</code> and setting up the DNS name.
 Explicit virtual host is also possible to match existing layouts, like
 matching a <code>/var/www/htdocs</code> configuration when migrating
-a PHP mediawiki or wordpress site to use <a href="quercus.xtp">Quercus</a>
+a PHP mediawiki or wordpress site to use <a href="../doc/quercus.xtp">Quercus</a>
 for security and performance.</p>
 
 <p>The virtual host will contain one or
-more <a href="webapp-tags.xtp">web-apps</a> to serve the host's contents.
+more <a href="../reference/webapp-tags.xtp">web-apps</a> to serve the host's contents.
 Simple sites will use a fixed root webapp, like the Apache-style
 <code>/var/www/htdocs</code>.  More complicated sites can use a
 <code>webapps</code>-style directory.</p>
 
 <p>Each virtual host belongs to a
-Resin <a href="resin-clustering.xtp">&lt;cluster></a>, even if the
+Resin &lt;cluster>, even if the
 cluster has only a single server.</p>
 
 <p>For example, a Resin server might manage both the
@@ -78,7 +78,7 @@ the <code>hosts</code> directory will cause Resin to create a new
 virtual host.  To customize the configuration, you can
 add a <code>host.xml</code> in the host's root directory for shared
 databases, beans or security, or to add
-<a href="host-tags.xtp#host-alias">&lt;host-alias></a> names.
+<a href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a> names.
 </p>
 
 <p>You can add hosts dynamically to a running server just by creating
@@ -119,8 +119,8 @@ return <code>404 Not Found</code> for any unknown virtual hosts.</p>
 <p>Often, the same virtual host will respond to multiple names, like
 <code>www.slytherin.com</code> and <code>slytherin.com</code>.  One
 name is the primary name and the others are aliases.  In Resin, the
-primary name is configured by the <a href="host-tags.xtp#host-name">&lt;host-name></a> tag and aliases are configured
-by <a href="host-tags.xtp#host-alias">&lt;host-alias></a>.  In a dynamic
+primary name is configured by the <a href="../reference/host-tags.xtp#host-name">&lt;host-name></a> tag and aliases are configured
+by <a href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a>.  In a dynamic
 host configuration, the directory name is used as the <code>host-name</code>
 by default, and aliases are declared in the <code>host.xml</code>.</p>
 
@@ -140,7 +140,7 @@ logins, shared databases, and shared resources.</p>
 
 <s2 title="host-deploy configuration">
 
-<p>The <a href="host-tags.xtp#host-deploy">&lt;host-deploy></a> tag configures
+<p>The <a href="../reference/host-tags.xtp#host-deploy">&lt;host-deploy></a> tag configures
 the dynamic virtual hosting specifying the directory where Resin should
 scan for virtual hosts.  Because Resin does not automatically add default
 configuration, you will need to also add configuration for the
@@ -152,7 +152,7 @@ security.  Because all configuration is explicit, it's ultimately traceable
 to the <code>resin.xml</code> which makes debugging more reliable.</p>
 
 <p>Shared host configuration goes in the
-<a href="host-tags.xtp#host-default">&lt;host-default></a> tag.  In this
+<a href="../reference/host-tags.xtp#host-default">&lt;host-default></a> tag.  In this
 case, we've added an optional <code>host.xml</code> for configuration,
 an access log in <code>log/access.log</code> and a standard
 <code>webapps</code> directory.  The standard servlets and file handling
@@ -161,14 +161,14 @@ app-default.xml or the webapps, you will see <code>404 Not Found</code> for
 any requests.</p>
 
 <p>The example below is a complete, working <code>resin.xml</code> listening
-to HTTP at port 8080.  The <a href="resin-clustering.xtp">cluster</a>
-consists of a single server.  It includes a <a href="cluster-tags.xtp#development-mode-error-page">&lt;development-mode-error-page/></a> to help debugging
+to HTTP at port 8080.  The <a href="clustering.xtp">cluster</a>
+consists of a single server.  It includes a <a href="../reference/cluster-tags.xtp#development-mode-error-page">&lt;development-mode-error-page/></a> to help debugging
 the configuration.  Many sites will omit the error-page to
 hide configuration details in case an error occurs on a live site.</p>
 
 <example title="Example: /etc/resin/resin.xml host-deploy configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+          xmlns:resin="urn:java:com.caucho.resin"&gt;
 &lt;cluster id="app-tier">
   &lt;server id="app-a" address="192.168.1.13" port="6800">
     &lt;http port="8080"/>
@@ -215,8 +215,8 @@ ${resin.root}/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
 </example>
 
 <p>More information is available in the configuration documentation
-for &lt;<a href="host-tags.xtp#host-deploy">host-deploy</a>&gt;
-and &lt;<a href="host-tags.xtp#host-default">host-default</a>&gt;.</p>
+for &lt;<a href="../reference/host-tags.xtp#host-deploy">host-deploy</a>&gt;
+and &lt;<a href="../reference/host-tags.xtp#host-default">host-default</a>&gt;.</p>
 
 </s2>
 
@@ -228,12 +228,12 @@ and &lt;<a href="host-tags.xtp#host-default">host-default</a>&gt;.</p>
 virtual host configuration and configure each virtual host explicitly.
 Existing sites wanting to upgrade to Resin or sites with extra security needs
 may prefer to configure each &lt;host>  in the resin.xml. For
-example, a PHP Drupal site evaluating <a href="quercus.xtp">Quercus</a> to
+example, a PHP Drupal site evaluating <a href="../doc/quercus.xtp">Quercus</a> to
 improve performance and security might use the explicit &lt;host> to
 point to the existing <code>/var/www/htdocs</code> directory.</p>
 
 <p>In the explicit configuration, each virtual host has its
-own <a href="resin.xtp#host">host</a> block.  At the very least, each host
+own <a href="../doc/resin.xtp#host">host</a> block.  At the very least, each host
 will define the <var>id</var> specifying the host name and a root web-app.
 A <a config-tag="root-directory"/> is often used to provide a host specific
 root for logfiles.</p>
@@ -248,10 +248,10 @@ hosts.  If you don't have a default host, Resin will return a
 <p>The following sample configuration defines an explicit virtual hosts
 www.slytherin.com and a default host, each with its own
 root directory, access-log and a single explicit
-<a href="webapp-tags.xtp">&lt;web-app></a> in the <code>htdocs</code>
+<a href="../reference/webapp-tags.xtp">&lt;web-app></a> in the <code>htdocs</code>
 directory.  The default virtual host is configured just like a typical
 Apache configuration, so it can be used to upgrade an Apache/PHP site
-to use <a href="quercus.xtp">Quercus</a> for security and performance.</p>
+to use <a href="../doc/quercus.xtp">Quercus</a> for security and performance.</p>
 
 <example title="Example: /etc/resin/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -304,7 +304,7 @@ each &lt;host> belongs to its own &lt;cluster> and has a dedicated
 so the load-balance server will dispatch requests as appropriate.</p>
 
 <p>For further security restrictions, see
-the <a href="resin-watchdog.xtp">watchdog</a> section.  ISPs can also
+the <a href="watchdog.xtp">watchdog</a> section.  ISPs can also
 use the watchdog to assign different &lt;user-name> values for each
 host and can even create chroot directories for each JVM.</p>
 
@@ -323,7 +323,7 @@ server port.</p>
 <p>In this example, the virtual hosts <code>www.gryffindor.com</code> and
 <code>www.slytherin.com</code> each get their own server.  The backend
 clusters have their own virtual host.  The frontend load-balancer dispatches
-the <a href="rewrite-tags.xtp#load-balance">&lt;load-balance></a> tags
+the <a href="rewrite.xtp#load-balance">&lt;resin:LoadBalance></a> tags
 to the backend.</p>
 
 <p>This example is split into two blocks to emphasize the frontend and
@@ -332,7 +332,7 @@ to ensure consistency.</p>
 
 <example title="Example: /etc/resin/resin.xml for backend">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="http://caucho.com/ns/resin/core">
+          xmlns:resin="urn:java:com.caucho.resin">
 
   &lt;cluster-default>
     &lt;resin:import path="${resin.home}/conf/app-default.xml"/>
@@ -391,12 +391,14 @@ It receives all requests and dispatches to the back-end servers.</p>
 
 <figure src="config-jvmpervirtualhost-resin.png" width="481" height="145"/>
 
-<p>The Resin web server is configured using <a href="rewrite-tags.xtp">&lt;rewrite-dispatch></a> with a <a href="rewrite-tags.xtp#load-balance">&lt;load-balance</a> directive to dispatch to the back-end server.  A cluster is
+<p>The Resin web server is configured using <a href="rewrite.xtp">rewrite</a> with a <a href="rewrite.xtp#load-balance">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
 defined for each back-end host, so that the
 &lt;load-balance> knows how to find them.</p>
 
 <example title="Example: /etc/resin/resin.xml for front-end web server">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin"
+     xmlns:resin="urn:java:com.caucho.resin">
+     
   &lt;cluster id="web-tier"&gt;
     &lt;server-default>
       &lt;http port="80"/&gt;
@@ -407,9 +409,7 @@ defined for each back-end host, so that the
     &lt;host id="gryffindor.com"&gt;
       &lt;web-app id="/"&gt;
 
-        &lt;rewrite-dispatch>
-          &lt;load-balance regexp="" cluster="gryffindor"/>
-        &lt;rewrite-dispatch>
+        &lt;resin:LoadBalance regexp="" cluster="gryffindor"/>
 
       &lt;/web-app>
     &lt;/host>
@@ -417,9 +417,7 @@ defined for each back-end host, so that the
     &lt;host id="slytherin.com"&gt;
       &lt;web-app id="/"&gt;
 
-        &lt;rewrite-dispatch>
-          &lt;load-balance regexp="" cluster="slytherin"/>
-        &lt;rewrite-dispatch>
+        &lt;resin:LoadBalance regexp="" cluster="slytherin"/>
 
       &lt;/web-app>
     &lt;/host>
@@ -481,11 +479,11 @@ started with -Xrs.</p>
 <s2 title="host naming">
 
 <p>The virtual host name can be configured by
-an explicit <a href="host-tags.xtp#host-name">&lt;host-name></a>, 
-a <a href="host-tags.xtp#host-alias">&lt;host-alias></a>,
-a <a href="host-tags.xtp#host-alias-regexp">&lt;host-alias-regexp></a>,
-by the <a href="host-tags.xtp#host">&lt;host></a> tag or 
-implicitly by the <a href="host-tags.xtp#host-deploy">&lt;host-deploy></a>.
+an explicit <a href="../reference/host-tags.xtp#host-name">&lt;host-name></a>, 
+a <a href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a>,
+a <a href="../reference/host-tags.xtp#host-alias-regexp">&lt;host-alias-regexp></a>,
+by the <a href="../reference/host-tags.xtp#host">&lt;host></a> tag or 
+implicitly by the <a href="../reference/host-tags.xtp#host-deploy">&lt;host-deploy></a>.
 For explicit configuration styles, the host name and alias
 configuration will generally be in the resin.xml.  For dynamic configuration,
 the host aliases will typically be in an included <code>host.xml</code> inside
@@ -503,12 +501,12 @@ Resin will return a <code>404 Not Found</code>.</p>
 <p>The <code>host.xml</code> is an optional file where virtual hosts can
 put host-common configuration.  The <code>host.xml</code>
 is a good place for shared resources like authentication, database pools
-or host-wide <a href="resin-ioc.xtp">beans and services</a>.  It's also a
+or host-wide <a href="candi.xtp">beans and services</a>.  It's also a
 location for the &lt;host-alias> in a dynamic hosting configuration.</p>
 
 <p>The <code>host.xml</code> is configured in a &lt;host-deploy>
 or &lt;host-default> by adding a
-<a href="env-tags.xtp#import">&lt;resin:import></a> tag
+<a href="../reference/env-tags.xtp#import">&lt;resin:import></a> tag
 specifying the host.xml name and location.  Because the &lt;host-default>
 applies the &lt;resin:import> to every virtual host, it becomes a common
 system-wide configuration file.</p>
@@ -517,13 +515,13 @@ system-wide configuration file.</p>
 
 <s2 title="web-applications">
 
-<p>Hosts must define <a href="webapp-tags.xtp">web-apps</a> in order to
+<p>Hosts must define <a href="../reference/webapp-tags.xtp">web-apps</a> in order to
 serve files, servlets, or PHP pages.  If the host is missing all
 webapps, Resin will return <code>404 Not Found</code> for all requests
 make to the host.</p>
 
-<p>Both explicit <a href="webapp-tags.xtp#web-app">&lt;web-app></a> and
-dynamic <a href="webapp-tags.xtp#web-app-deploy">web-app-deploy</a> tags
+<p>Both explicit <a href="../reference/webapp-tags.xtp#web-app">&lt;web-app></a> and
+dynamic <a href="../reference/webapp-tags.xtp#web-app-deploy">web-app-deploy</a> tags
 are used to configure webapps.  The explicit style is generally used for
 Apache-style configuration, while the dynamic style is generally used for
 Java app-server .war configuration.</p>
@@ -651,7 +649,7 @@ server <var>address</var> and <var>port</var> that you expect.</p>
 </s2>
 
 <s2 title="IIS">
-<p>Configuration and installation for IIS virtual sites is discussed in the <a href="install-iis.xtp">IIS installation</a> section.</p>
+<p>Configuration and installation for IIS virtual sites is discussed in the <a href="../install/install-3rd-party.xtp">IIS installation</a> section.</p>
 </s2>
 </s1> <!-- with Apache or IIS -->
 

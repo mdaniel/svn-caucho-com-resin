@@ -50,7 +50,7 @@ file automatically gets all its URLs.  Other URLs stay with Apache.
 
 <p>
 There's a more complete discussion of the URL dispatching in the
-<a href="plugin-dispatch.xtp">How the Plugins Dispatch to Resin</a> page.
+<a href="../doc/plugin-dispatch.xtp">How the Plugins Dispatch to Resin</a> page.
 </p>
 
 </s2> <!-- dispatch -->
@@ -269,7 +269,7 @@ appear in /caucho-status.
 
 <s2 name="balance" title="Load Balancing">
 
-<p>The <a href="../admin/clustering.xtp">Reliability and Load Balancing</a>
+<p>The <a href="../admin/load-balancing.xtp">Load Balancing</a>
 section provides an introduction to the concepts of load balancing.</p>
 
 <p>mod_caucho recognizes cluster configurations for load balancing. 

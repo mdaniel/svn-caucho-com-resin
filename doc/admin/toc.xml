@@ -26,6 +26,10 @@
       -->
 	  
     <item link="candi.xtp" title="Java Injection"/>
+    
+    <!-- load balance -->
+      
+    <item link="load-balancing.xtp" title="Load Balancing"/>
 
     <!--
        - Performance

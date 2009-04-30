@@ -29,7 +29,7 @@ configuration, while XML is still available for components.</p>
 <s1 title="Overview">
 
 <p>Resin's Java Injection support is integrated
-with <a href="resin-ejb.xtp">EJB 3.0
+with <a href="../doc/resin-ejb.xtp">EJB 3.0
 </a> and the core components like Servlets, Filters and remote objects.
 This integration means plain Java beans can use EJB annotations
 and interception, EJBs can use Java Injection annotations, and both kinds of
@@ -501,15 +501,18 @@ between the two, but the deferred syntax is preferred, since Resin-IoC
 initializes beans lazily to handle circular references.</p>
 
 <example title="Example: circular references in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+       xmlns:qa="urn:java:qa">
 
-  &lt;bean name="a" class="qa.FooBean">
-    &lt;init bar="#{b}"/>
-  &lt;/bean>
+  &lt;qa:FooBean>
+    &lt;Named>a&lt;/Named>
+    &lt;qa:bar>#{b}&lt;/qa:bar>
+  &lt;/qa:FooBean>
 
-  &lt;bean name="b" class="qa.BarBean">
-    &lt;init foo="#{a}"/>
-  &lt;/bean>
+  &lt;qa:FooBean>
+    &lt;Named>b&lt;/Named>
+    &lt;qa:bar>#{a}&lt;/qa:bar>
+  &lt;/qa:FooBean>
 
 &lt;/web-app>
 </example>

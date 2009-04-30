@@ -39,7 +39,7 @@ purposes of this discussion the one described here is used).
 </p>
 
 <p>
-A web application has "web components", such as Servlets, Filters, JSP's,
+A web application has "web components", such as Servlets, Filters, JSPs,
 supporting Java source files, and supporting java libraries.
 </p>
 
@@ -227,7 +227,7 @@ expressions, or specially marked scripting code (Java code).   The special xml
 tags, EL expressions and Java code are used to generate dynamic ouput.
 </p>
 
-<s3 name="jsp-translation" title="JSP's are translated into Servlets">
+<s3 name="jsp-translation" title="JSPs are translated into Servlets">
 <p>
 It is helpful to understand what it is that Resin does with a
 JSP page.  Basically, it takes the JSP page and turns it into the Java

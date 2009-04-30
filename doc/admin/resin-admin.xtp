@@ -42,11 +42,11 @@ is very cautious about security issues to enable the administration.</p>
 
 <example title="resin.xml /resin-admin configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+       xmlns:resin="urn:java:com.caucho.resin"&gt;
 
-  &lt;management>
+  &lt;resin:AdminAuthenticator>
      &lt;user name="harry" password="MD5HASH=="/>
-  &lt;/management>
+  &lt;/resin:AdminAuthenticator>
 
 &lt;cluster id="">
 &lt;host id="">
@@ -475,31 +475,32 @@ unix&gt; jconsole
 
 <s1 title="stat-service">
 
-<p>Resin 3.1.6 adds a new &lt;stat-service> to the &lt;management tag.
-The &lt;stat-service periodically checks the status of Resin and the JVM
+<p>Resin 3.1.6 adds a new &lt;resin:StatService>.
+The &lt;resin:StatService> periodically checks the status of Resin and the JVM
 and can act if certain thresholds are exceeded.  The default check rate
 is every 60s.</p>
 
-<p>The primary statistic that &lt;stat-service> observes is the CPU load
+<p>The primary statistic that &lt;resin:StatService> observes is the CPU load
 of the server.  You can set thresholds so Resin will log a thread dump
 if the CPU gets high, e.g. to find and debug a runaway thread.  If necessary,
 you can also have Resin restart if the CPU load gets too high.
 The configuration is documented in
-<a href="resin-tags.xtp#management">&lt;management></a> in the resin-tags
-section.</p>
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/StatService.html">&lt;resin:StatService></a> javadoc.
+</p>
 
 <example title="Example: CPU thresholds">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-  &lt;management>
-    &lt;stat-service>
+&lt;resin xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+  &lt;cluster id="">
+    &lt;resin:StatService>
       &lt;cpu-load-exit-threshold>10.0&lt;/cpu-load-exit-threshold>
       &lt;cpu-load-log-info-threshold>1.0&lt;/cpu-load-log-info-threshold>
       &lt;cpu-load-log-warning-threshold>2.0&lt;/cpu-load-log-warning-threshold>
       &lt;cpu-load-thread-dump-threshold>2.0&lt;/cpu-load-thread-dump-threshold>
       &lt;sample-period>15s&lt;/sample-period>
       &lt;thread-dump-interval>10m&lt;/thread-dump-interval>
-    &lt;/stat-service>
-  &lt;/management>
+    &lt;/resin:StatService>
+  ...
 
 &lt;/resin>
 </example>

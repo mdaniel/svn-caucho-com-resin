@@ -69,27 +69,13 @@ including injection, @TransactionAttribute aspects, interception and
 </tr>
 </deftable>
 
-<def title="&lt;ScheduledTask> schema">
-element resin:ScheduledTask {
-  class?
-  &amp; cron?
-  &amp; delay?
-  &amp; init?
-  &amp; mbean-name?
-  &amp; method?
-  &amp; name?
-  &amp; period?
-  &amp; task?
-}
-</def>
-
-<s2 title="bean-style job configuration">
+<s2 title="Java Injection bean job configuration">
 
 <p>The most common and flexible job configuration uses standard IoC
 bean-style configuration.  The bean must implement <code>Runnable</code>.
 The <var>&lt;task></var> element specifies the bean, using standard
 Java injection syntax as described
-in <a href="resin-ioc.xtp">Resin IoC</a> configuration.</p>
+in <a href="candi.xtp">Java Injection</a> configuration.</p>
 
 <example title="Example: 5min cron bean task">
 &lt;web-app xmlns="http://caucho.com/ns/resin"

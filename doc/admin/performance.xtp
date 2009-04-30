@@ -7,6 +7,19 @@
 
   <body>
   <!-- performance-benchmarks.xtp -->
+
+  <s1 title="Resin 10,000">
+
+<p>Resin 4.0 has been load tested with 10,000 simultaneous
+keepalive connections.  In a HTTP server, most of the browsers are
+idle, waiting for the user to finish reading and click on the next page.
+The browser and Resin can keep the TCP socket connected for
+improved efficiency, while taking minimal resources until the next page
+is needed.  Because of Resin's use of non-blocking i/o like the
+Linux epoll() call, it can maintain thousands of keepalive connections
+with little overhead.</p>
+
+  </s1>
   
     <s1 title="Resin v. Apache">
       <p>Resin is an excellent web server for both static pages
@@ -378,15 +391,6 @@ If anticipated load overruns a Resin server, either with CPU
 usage or with encountering OS thread limitations, clustering can
 be used to add another server to share the load.
 </p>
-</s1>
-
-<s1 title="Does Resin use NIO for improved performance?" type="faq">
-
-<p>
-Resin does not use NIO - it uses JNI to handle low-level I/O calls with native
-code.  The performance using this method was found to be much better than nio.
-</p>
-
 </s1>
 
 <s1 title="How does Resin use JNI?" type="faq">

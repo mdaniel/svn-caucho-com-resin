@@ -254,7 +254,7 @@ automatically.</p>
 In the directory structure above, notice the special webapp
 directories named "ROOT".  These will map to the "/" (root)
 application.  Other webapps will map to their name.  For example,
-"wordpress" will map to "http://www.example.com/rss".
+"wordpress" will map to "http://www.example.com/wordpress".
 </p>
 </s2>
 
@@ -356,7 +356,9 @@ authentication information on that machine.
 </li>
 <li>Enter a username and password in the lower half of the page, then 
 click "Create Configuration File".  The recommended username is "admin".
+
 <figure src="admin-password-create.png"/>
+
 </li>
 <li>After going to the next page, a new "admin-users.xml.generated"
 file has been created for you in the same directory as your

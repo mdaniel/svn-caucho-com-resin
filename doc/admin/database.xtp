@@ -19,9 +19,9 @@ obtain connections to databases.
 <s1 title="See also">
 
 <ul>
-<li><a href="db-thirdparty.xtp">Sample configurations</a> for several database drivers
+<li><a href="../doc/db-thirdparty.xtp">Sample configurations</a> for several database drivers
 </li><li><a href="../examples/db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="../examples/db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</li><li>Using <a href="../examples/db-jdbc-ioc/index.xtp">Java Injection for Databases</a>
 </li></ul>
 
 </s1>
@@ -29,14 +29,18 @@ obtain connections to databases.
 <s1 title="Basic Configuration">
 
 <p>A basic &lt;database&gt; configuration specifies the following:
-</p><ul>
-<li>The JNDI name where the configured DataSource will be stored
-</li><li>The database driver's main class
-</li><li>The driver-specific url for the database.
-</li><li>Any user and password information.
-</li></ul>
+</p>
+
+<ul>
+<li>The JNDI name where the configured DataSource will be stored</li>
+<li>The database driver's main class</li>
+<li>The driver-specific url for the database.</li>
+<li>Any user and password information.</li>
+</ul>
 
 <example title="Example: mysql configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
 &lt;database jndi-name='jdbc/test_mysql'&gt;
   &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"&gt;
     &lt;url&gt;jdbc:mysql://localhost:3306/test&lt;/url&gt;
@@ -44,6 +48,8 @@ obtain connections to databases.
     &lt;password&gt;&lt;/password&gt;
   &lt;/driver&gt;
 &lt;/database&gt;
+
+&lt;/web-app>
 </example>
 
 <p>This &lt;database&gt; will configure a javax.sql.DataSource and
@@ -52,7 +58,7 @@ source, follow the database use pattern in the
 <a href="../examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
 
 <p>Sample &lt;database&gt; configurations
-are available in the <a href="db-thirdparty.xtp">thirdparty driver page.</a>
+are available in the <a href="../doc/db-thirdparty.xtp">thirdparty driver page.</a>
 
 </p><p>Although some deployments will specify driver and
 connection pool parameters, the default values will be fine for most
@@ -335,7 +341,7 @@ although it is often best to place your datbase driver's jar file in
 your web applications.
 </p>
 
-<p>Examples of common driver configurations are in <a href="db-thirdparty.xtp">Third-party Database Configuration</a>.</p>
+<p>Examples of common driver configurations are in <a href="../doc/db-thirdparty.xtp">Third-party Database Configuration</a>.</p>
 
 <p>The class that corresponds to &lt;driver&gt; is <a href="javadoc|com.caucho.sql.DriverConfig"/></p>
 

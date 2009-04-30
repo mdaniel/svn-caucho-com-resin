@@ -16,9 +16,9 @@ options.
 <s1 title="See Also">
 
 <ul>
-<li><a href="webapp-tags.xtp">web-app tags</a> defines all of the available
+<li><a href="../reference/webapp-tags.xtp">web-app tags</a> defines all of the available
 tags for web-app configuration.</li>
-<li><a href="host-tags.xtp">host tags</a> defines all of the available
+<li><a href="../reference/host-tags.xtp">host tags</a> defines all of the available
 tags for host configuration.</li>
 </ul>
 
@@ -182,13 +182,6 @@ all the servers in the cluster will have the webapp.
 <figure src="deployed-webapp.png"/>
 </li>
 </ol>
-</s1>
-
-<s1 name="precompile-jsp" title="JSP Precompilation">
-
-<p>
-See <a href="jsp-compile.xtp">JSP/Compilation.</a>
-</p>
 </s1>
 
 </body>

@@ -86,30 +86,35 @@ all of the following properly configured:</p>
 <li><b>Server</b>.  The Resin server must be active to do anything.
 Because servers belong to a cluster, you'll automatically have a
 cluster even if it only has a single server.</li>
+
 <li><b>HTTP port</b>.  The server must be listening to the internet
 for HTTP requests just to get started.  If the HTTP port is missing or
 misconfigured, you will get connection failure messages because the
 browser cannot connect to your server at all.</li>
+
 <li><b>Host</b>.  Resin must first match the
-<a href="host-tags.xtp">&lt;host></a> specified by the
+<a href="../reference/host-tags.xtp">&lt;host></a> specified by the
 HTTP request, e.g. www.slytherin.com.  If no hosts match, Resin will
 use the default host.  If no default host exists, Resin will
 return a <code>404 Not Found</code> to the browser.</li>
+
 <li><b>WebApp</b>.  Inside the host, Resin finds a
 web-application to handle the request by looking for the
-<a href="webapp-tags.xtp#webapp">&lt;web-app></a> with the longest URL
+<a href="../reference/webapp-tags.xtp#webapp">&lt;web-app></a> with the longest URL
 prefix. So, <code>http://www.slytherin.com/drupal/index.php</code>
 might match the <code>/drupal/</code>.  The ROOT web-app matches all
 URLs.  If Resin can't find a web-app, it will return
 <code>404 Not Found</code> to the browser.</li>
+
 <li><b>servlet-mapping</b>.  Inside the web-app, Resin searches for a
-<a href="webapp-tags.xtp#servlet-mapping">&lt;servlet-mapping></a> matching
+<a href="../reference/webapp-tags.xtp#servlet-mapping">&lt;servlet-mapping></a> matching
 the URL.  For example, <code>test.php</code> would match the
 <code>QuercusServlet</code> and <code>test.jsp</code> would match
 the JSP servlet.   If none match, Resin will try the default mapping,
 which is normally the <code>FileServlet</code> to handle static pages.
 If the default servlet isn't configured, Resin will return a <code>404
 Not Found</code> to the browser.</li>
+
 <li><b>Servlet</b>.  Finally, the selected servlet processes the
 request and returns the content.  The servlet itself might not find
 the requested content, e.g. if <code>/foo.php</code> does not exist in
@@ -137,16 +142,17 @@ hosting directory structure.</p>
 
 <example title="Example: minimal /etc/resin/resin.xml for HTTP">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
-	
-  &lt;cluster id="app-tier">
-    &lt;development-mode-error-page/>
+       xmlns:resin="urn:java:com.caucho.resin">
 
+  &lt;cluster-default>
+    &lt;resin:import path="${__DIR__}/app-default.xml"/>
+    &lt;development-mode-error-page/>
+  &lt;/cluster-default>
+  
+  &lt;cluster id="app-tier">
     &lt;server id="" address="127.0.0.1" port="6800">
       &lt;http port="8080"/>
     &lt;/server>
-
-    &lt;resin:import path="/etc/resin/app-default.xml"/>
 
     &lt;host id="">
       &lt;web-app id="">
@@ -159,73 +165,79 @@ hosting directory structure.</p>
 </example>
 
 <ul>
-<li><a href="resin-tags.xtp#resin">&lt;resin></a> starts a Resin
+<li><a href="../reference/resin-tags.xtp#resin">&lt;resin></a> starts a Resin
 configuration file and declares the validation namespaces.
 </li>
-<li><a href="cluster-tags.xtp#cluster">&lt;cluster></a> encloses the
+
+<li><a href="../reference/cluster-tags.xtp#cluster">&lt;cluster></a> encloses the
 single-server cluster containing our content.</li>
+
 <li><a
-href="cluster-tags.xtp#development-mode-error-page">&lt;development-mode-error-page></a>
+href="../reference/cluster-tags.xtp#development-mode-error-page">&lt;development-mode-error-page></a>
 reports configuration and runtime errors to the browser, which is
 very helpful during development.  On a production server, you may
 want to remove this tag so errors don't expose information to the
 internet.</li>
-<li><a href="server-tags.xtp#server">&lt;server></a> configures the
+
+<li><a href="../reference/server-tags.xtp#server">&lt;server></a> configures the
 Resin server, including its ports.  The <var>id</var> matches the
 command-line <var>-server</var> argument at startup.  The
 <var>address</var> and <var>port</var> open Resin's cluster port,
 which is used for deployment, management, clustering, and
 distributed caching.</li>
-<li><a href="server-tags.xtp#http">&lt;http></a> listens for HTTP
+
+<li><a href="../reference/server-tags.xtp#http">&lt;http></a> listens for HTTP
 requests.  Production servers will change the port to 80.</li>
-<li><a href="env-tags.xtp#import">&lt;resin:import></a> defines the
+
+<li><a href="../reference/env-tags.xtp#import">&lt;resin:import></a> defines the
 standard servlet like JSP, PHP and the static file servlet.  If you
 omit this &lt;resin:import>, Resin will return <code>404 Not
 Found</code> because the <a
-href="webapp-tags.xtp#servlet-mapping">&lt;servlet-mapping></a> and
+href="../reference/webapp-tags.xtp#servlet-mapping">&lt;servlet-mapping></a> and
 servlets would not be defined.</li>
-<li><a href="host-tags.xtp#host">&lt;host></a> defines a default
+
+<li><a href="../reference/host-tags.xtp#host">&lt;host></a> defines a default
 virtual host.  The default host will handle any host domain given by
 a HTTP request.</li>
-<li><a href="webapp-tags.xtp#web-app">&lt;web-app></a> defines a ROOT
+
+<li><a href="../reference/webapp-tags.xtp#web-app">&lt;web-app></a> defines a ROOT
 web-app, serving all URLs for the host.  The servlets in the web-app
 are defined by the <code>app-default.xml</code> specified by the &lt;resin:import>.</li>
-<li><a href="webapp-tags.xtp#root-directory">&lt;root-directory></a>
+
+<li><a href="../reference/webapp-tags.xtp#root-directory">&lt;root-directory></a>
 specifies the content directory, here matching a standard Apache
 directory.
 </li>
 </ul>
 
-<s2 title="rewrite-dispatch replaces mod_rewrite">
+<s2 title="Resin rewrite replaces mod_rewrite">
 
 <p>For many applications like Drupal and Mediawiki, it's important to
 rewrite a user-friendly URL to an internal servlet or PHP URL.
-Resin's <a href="rewrite-tags.xtp">&lt;rewrite-dispatch></a> replaces
-the capabilities of mod_rewrite for Apache.</p>
+Resin's <a href="rewrite.xtp">rewrite</a> replaces
+the capabilities of mod_rewrite for Apache.  The <a href="rewrite.xtp">rewrite docs</a>
+describe Resin's rewrite capabilities more fully.</p>
 
 <example title="Example: WEB-INF/resin-web.xml Drupal rewriting ">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;rewrite-dispatch>
-    &lt;dispatch regexp="\.(php|gif|css|jpg|png|ico|js|htm|html)"/>
-    &lt;forward regexp="^/" target="/index.php?q="/>
-  &lt;/rewrite-dispatch>
+  &lt;resin:Dispatch regexp="\.(php|gif|css|jpg|png|ico|js|htm|html)"/>
+  &lt;resin:Forward regexp="^/" target="/index.php?q="/>
 
 &lt;/web-app>
 </example>
 
 <ul>
-<li><a href="webapp-tags.xtp#web-app">&lt;web-app></a> configures the
+<li><a href="../reference/webapp-tags.xtp#web-app">&lt;web-app></a> configures the
 <code>/drupal</code> web-application.</li>
-<li><a
-href="rewrite-tags.xtp#rewrite-dispatch">&lt;rewrite-dispatch></a>
-starts the URL rewriting configuration.</li>
-<li><a
-href="rewrite-tags.xtp#dispatch">&lt;dispatch></a>
+
+<li>The <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Dispatch.html">&lt;resin:Dispatch></a>
 passes the URL untouched for content handling, e.g. static files or php.</li>
-<li><a
-href="rewrite-tags.xtp#forward">&lt;forward></a>
-rewrites the URL and forwards.</li>
+
+<li>The <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forward.html">&lt;resin:Forward></a>
+rewrites the URL to use the index.php and forwards.</li>
+
 </ul>
 
 </s2>
@@ -241,7 +253,7 @@ enough to send a message to the <em>watchdog</em> or the Resin
 process, like a "start", "deploy", or "stop".  If necessary, the
 command-line process will start the watchdog.</li>
 
-<li><b>watchdog</b> - the <a href="resin-watchdog.xtp">watchdog
+<li><b>watchdog</b> - the <a href="watchdog.xtp">watchdog
 process</a> manages and monitors <em>Resin server</em> processes.
 If the Resin server exits, the watchdog will automatically restart
 Resin, providing extra reliability in case of server failure.</li>
@@ -257,7 +269,7 @@ and serves the content.</li>
 process, its own JVM arguments come from the resin.xml,
 not from the command-line of <code>ResinBoot</code>.  The JVM
 configuration arguments are supplied as <a
-href="server-tags#jvm-arg">&lt;jvm-arg></a> in the &lt;server>
+href="../reference/server-tags#jvm-arg">&lt;jvm-arg></a> in the &lt;server>
 configuration.</p>
 
 </s1>
@@ -294,7 +306,7 @@ host.</p>
 <code>hosts/default</code> creates a default virtual host, which will
 serve pages for anything not matching a specific host.  If you
 need to configure the host, or add <a
-href="host-tags.xtp#host-alias">&lt;host-alias></a> tags, you can add
+href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a> tags, you can add
 them to a <code>hosts/bar.com/host.xml</code> file.</p>
 
 <p>Deploying a web-application is also straightforward by adding
@@ -383,8 +395,8 @@ in <code>/var/www/htdocs</code> directory, and there's only a single
 virtual host and single root web-app.</p>
 
 <p>For Apache-style sites with multiple virtual hosts, you can add new
-<a href="host-tags.xtp#host">&lt;host></a> tags for each host, and add
-a <a href="host-tags.xtp#root-directory">&lt;root-directory></a> to
+<a href="../reference/host-tags.xtp#host">&lt;host></a> tags for each host, and add
+a <a href="../reference/host-tags.xtp#root-directory">&lt;root-directory></a> to
 set the host's root.</p>
 
 <example title="Example: Unix Apache upgrade">
@@ -530,7 +542,7 @@ force a restart of the server.</p>
 memory is garbage collected periodically, causing the JVM to stop or
 slow while finding unused memory.  The maximum heap is set by the
 <code>-Xmx512m</code> command-line argument in <a
-href="server-tags.xtp#jvm-arg">&lt;jvm-arg></a>.</li>
+href="../reference/server-tags.xtp#jvm-arg">&lt;jvm-arg></a>.</li>
 
 <li><b>PermGen (permanent generation)</b> is JVM memory for permanent
 data like Java class code, JNI code, shared libraries, mmapped memory
@@ -565,7 +577,7 @@ for warning and severe messages.  When a log entry is added at the WARNING
 or SEVERE level, Resin will send a mail containing the log information.  You
 can then look at the administration console to debug any problems.</p>
 
-<p>The configuration is described in the <a href="config-log.xtp#mail">logging configuration</a> section.</p>
+<p>The configuration is described in the <a href="../doc/config-log.xtp#mail">logging configuration</a> section.</p>
 
 <example title="Example: resin.xml with mail logging">
 &lt;resin xmlns="http://caucho.com/ns/resin">

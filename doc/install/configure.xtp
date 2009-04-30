@@ -35,11 +35,11 @@
     </tr>
     <tr>
       <td>--enable-ssl</td>
-      <td>Enable OpenSSL, see the <a href="resin-security.xtp#openssl">OpenSSL</a> documentation for details.</td>
+      <td>Enable OpenSSL, see the <a href="../admin/security.xtp#openssl">OpenSSL</a> documentation for details.</td>
     </tr>
     <tr>
       <td>--with-apxs=<var>/path/to/apxs</var></td>
-      <td>Enable <a href="install-apache.xtp">Apache integration</a> and produce mod_caucho</td>
+      <td>Enable <a href="install-3rd-party.xtp">Apache integration</a> and produce mod_caucho</td>
     </tr>
     </deftable>
 
@@ -144,7 +144,7 @@
       <s1 title="JDK arguments">
 
       <p>Resin 3.1 has moved all JDK arguments into the resin.xml
-      file, in the &lt;<a href="server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
+      file, in the &lt;<a href="../reference/server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
       tag. Because the Resin 3.1 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration
