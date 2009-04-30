@@ -234,7 +234,7 @@ namespace Caucho
       okButton.Text = "OK";
       okButton.UseVisualStyleBackColor = true;
       okButton.Click += delegate {
-        Apply(resinDir.Text,
+        OK(resinDir.Text,
               apacheDirs.Text,
               apacheCheck.Checked,
               iisDir.Text,
