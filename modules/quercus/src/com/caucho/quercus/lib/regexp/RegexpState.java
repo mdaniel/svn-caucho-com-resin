@@ -292,11 +292,15 @@ public class RegexpState {
     try {
       if (log.isLoggable(Level.FINEST))
         log.finest(this + " exec(" + subject + ")");
-    
+      
       subject = _regexp.convertSubject(env, subject);
 
-      if (subject == null)
-        throw new QuercusException(L.l("error converting subject to utf8"));
+      if (subject == null) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(L.l("error converting subject to utf8"));
+        
+        return -1;
+      }
 
       clearGroup();
     

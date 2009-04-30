@@ -774,20 +774,9 @@ public class Mysqli extends JdbcConnectionResource {
                      StringValue sqlV,
                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    String sql = sqlToString(env, sqlV);
+    String sql = sqlV.toString();
     
     return realQuery(env, sql);
-  }
-  
-  private static String sqlToString(Env env, StringValue sql)
-  {
-    byte []bytes = sql.toBytes();
-    
-    try {
-      return new String(bytes, ENCODING);
-    } catch (UnsupportedEncodingException e) {
-      throw new QuercusException(e);
-    }
   }
 
   /**
