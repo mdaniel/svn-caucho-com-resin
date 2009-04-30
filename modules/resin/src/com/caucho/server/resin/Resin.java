@@ -121,6 +121,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   private boolean _isGlobal;
 
   private String _serverId = "";
+  private String _resinId;
+  private boolean _isWatchdog;
   private DynamicServer _dynamicServer;
   
   private ClusterPod _dynPod;
@@ -188,18 +190,21 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Creates a new resin server.
    */
-  protected Resin(ClassLoader loader)
+  protected Resin(ClassLoader loader, boolean isWatchdog)
   {
-    this(loader, null);
+    this(loader, isWatchdog, null);
   }
 
   /**
    * Creates a new resin server.
    */
-  protected Resin(ClassLoader loader, String licenseErrorMessage)
+  protected Resin(ClassLoader loader,
+		  boolean isWatchdog,
+		  String licenseErrorMessage)
   {
     _startTime = Alarm.getCurrentTime();
 
+    _isWatchdog = isWatchdog;
     _licenseErrorMessage = licenseErrorMessage;
 
     // DynamicClassLoader.setJarCacheEnabled(true);
@@ -301,13 +306,25 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public static Resin create()
   {
-    return create(Thread.currentThread().getContextClassLoader());
+    return create(Thread.currentThread().getContextClassLoader(), false);
   }
 
   /**
    * Creates a new Resin instance
    */
-  public static Resin create(ClassLoader loader)
+  public static Resin createWatchdog()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    Resin resin = create(loader, true);
+
+    return resin;
+  }
+
+  /**
+   * Creates a new Resin instance
+   */
+  public static Resin create(ClassLoader loader, boolean isWatchdog)
   {
     String licenseErrorMessage = null;
 
@@ -347,7 +364,7 @@ public class Resin implements EnvironmentBean, SchemaBean
         // message should already be set above
       }
 
-      resin = new Resin(loader, licenseErrorMessage);
+      resin = new Resin(loader, isWatchdog, licenseErrorMessage);
     }
 
     _resinLocal.set(resin, loader);
@@ -368,7 +385,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public static Resin createOpenSource(ClassLoader loader)
   {
-    return new Resin(loader, null);
+    return new Resin(loader, false, null);
   }
 
   /**
@@ -461,6 +478,20 @@ public class Resin implements EnvironmentBean, SchemaBean
   public String getServerId()
   {
     return _serverId;
+  }
+
+  public String getServerUniqueName()
+  {
+    String name;
+    
+    if (_isWatchdog)
+      name = _serverId + "_watchdog";
+    else
+      name = _serverId;
+
+    name = name.replace('-', '_');
+
+    return name;
   }
   
   public static String getCurrentServerId()
@@ -761,9 +792,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   public TempFileManager getTempFileManager()
   {
     if (_tempFileManager == null) {
-      String fileName = "temp_" + _serverId + ".cache";
-      
-      Path path = getResinDataDirectory().lookup(fileName);
+      Path path = getResinDataDirectory();
       
       _tempFileManager = new TempFileManager(path);
     }

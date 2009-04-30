@@ -71,13 +71,21 @@ public class TempFileManager
       String serverId = "";
 
       if (resin != null)
-	serverId = resin.getServerId();
+	serverId = resin.getServerUniqueName();
+
+      if ("".equals(serverId))
+	serverId = "default";
 
       String name = "temp_file_" + serverId;
 
       Path storePath = path.lookup(name);
 
       storePath.remove();
+
+      if (storePath.exists()) {
+	throw new ConfigException(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
+				      storePath.getNativePath()));
+      }
     
       _store = new Store(database, name, null, storePath);
       _store.setFlushDirtyBlocksOnCommit(false);

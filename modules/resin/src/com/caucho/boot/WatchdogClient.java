@@ -424,7 +424,10 @@ class WatchdogClient
       list.add("-d64");
     }
     
-    if (! list.contains("-server") && ! list.contains("-client")) {
+    if (! list.contains("-server")
+	&& ! list.contains("-client")
+	&& ! CauchoSystem.isWindows()) {
+      // #3331, windows can't add -server automatically
       list.add("-server");
     }
 

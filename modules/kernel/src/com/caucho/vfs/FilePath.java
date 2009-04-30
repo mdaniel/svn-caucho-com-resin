@@ -480,6 +480,8 @@ public class FilePath extends FilesystemPath {
       value = file.mkdirs();
     }
     
+    clearStatusCache();
+    
     if (! value && ! file.isDirectory())
       throw new IOException("Cannot create directory: " + getFile());
 
@@ -488,14 +490,19 @@ public class FilePath extends FilesystemPath {
   
   public boolean remove()
   {
-    if (getFile().delete())
+    if (getFile().delete()) {
+      clearStatusCache();
+      
       return true;
-    
+    }
+
+    /*
     if (getPath().endsWith(".jar")) {
       // XXX:
       // Jar.create(this).clearCache();
       return getFile().delete();
     }
+    */
 
     return false;
   }

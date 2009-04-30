@@ -967,6 +967,8 @@ public abstract class Path {
       if (exists()) {
         StreamImpl stream = openWriteImpl();
         stream.close();
+	
+	clearStatusCache();
 
         return true;
       }
@@ -1163,6 +1165,7 @@ public abstract class Path {
   {
     synchronized (LOCK) {
       if (! exists()) {
+	clearStatusCache();
         WriteStream s = openWrite();
         s.close();
         return true;

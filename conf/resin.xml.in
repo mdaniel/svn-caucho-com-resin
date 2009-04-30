@@ -12,10 +12,6 @@
      -->
   <class-loader>
     <tree-loader path="${resin.root}/ext-lib"/>
-    <tree-loader path="${resin.home}/ext-lib"/>
-
-    <tree-loader path="${resin.root}/lib"/>
-    <tree-loader path="${resin.home}/lib"/>
   </class-loader>
 
   <!--

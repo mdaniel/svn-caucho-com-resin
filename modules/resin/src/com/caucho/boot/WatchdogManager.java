@@ -148,7 +148,7 @@ class WatchdogManager implements AlarmListener {
 
     server.getConfig().logInit(logStream);
 
-    Resin resin = Resin.create();
+    Resin resin = Resin.createWatchdog();
 
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
@@ -468,13 +468,15 @@ class WatchdogManager implements AlarmListener {
     WatchdogClient client = resin.findClient(args.getServerId());
     WatchdogConfig server;
       
-    if (client == null) {
+    if (client == null)
       server = resin.findServer(args.getServerId());
-    }
     else
       server = client.getConfig();
 
-    Watchdog watchdog = _watchdogMap.get(server.getId());
+    Watchdog watchdog = null;
+
+    if (server != null)
+      watchdog = _watchdogMap.get(server.getId());
 
     if (watchdog != null) {
       if (watchdog.isActive()) {
