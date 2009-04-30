@@ -140,7 +140,15 @@ class WatchdogManager implements AlarmListener {
     
     readConfig(_args);
 
-    Watchdog server = _watchdogMap.get(_args.getServerId());
+    Watchdog server = null;
+    
+    if (_args.isDynamicServer()) {
+      String serverId = _args.getDynamicAddress() + "-" 
+                        + _args.getDynamicPort();
+      server = _watchdogMap.get(serverId);
+    }
+    else
+      server = _watchdogMap.get(_args.getServerId());
 
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
@@ -447,6 +455,7 @@ class WatchdogManager implements AlarmListener {
     */
 
     String serverId = args.getServerId();
+    WatchdogConfig server = null;
 
     if (args.isDynamicServer()) {
       String clusterId = args.getDynamicCluster();
@@ -460,21 +469,21 @@ class WatchdogManager implements AlarmListener {
 				      clusterId));
       }
       
-      WatchdogConfig server = cluster.createServer();
+      server = cluster.createServer();
       serverId = address + "-" + port;
       server.setId(serverId);
       server.setAddress(address);
       server.setPort(port);
       cluster.addServer(server);
     }
+    else {
+      WatchdogClient client = resin.findClient(serverId);
 
-    WatchdogClient client = resin.findClient(serverId);
-    WatchdogConfig server;
-
-    if (client != null)
-      server = client.getConfig();
-    else
-      server = resin.findServer(serverId);
+      if (client != null)
+        server = client.getConfig();
+      else
+        server = resin.findServer(serverId);
+    }
 
     Watchdog watchdog = _watchdogMap.get(server.getId());
 
