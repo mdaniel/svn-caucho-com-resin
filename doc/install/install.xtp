@@ -87,10 +87,14 @@ components of Resin that provide additional functionality such as:
 (* only available in Resin Professional)
 </p>
 <p>
-If you want to use the default configuration of Resin, just run:
+The following command installs Resin and its files into the recommended
+locations on the file system:
 </p>
 <example>
-./configure --prefix=/usr/local/resin
+./configure --prefix=/usr/local/resin \
+            --with-resin-root=/var/www \
+            --with-resin-log=/var/log/resin \
+            --with-resin-conf=/etc/resin
 </example>
 
 <p>
@@ -112,9 +116,9 @@ will display a summary like the following:
 Resin Configuration summary:
 
   RESIN_HOME: /usr/local/resin
-      root: /usr/local/resin
-      conf: /usr/local/resin/conf
-      log : /usr/local/resin/log
+      root: /var/www
+      conf: /etc/resin/conf
+      log : /var/log/resin
       init: /etc/init.d/resin
 
   + epoll() for keepalives
@@ -268,6 +272,11 @@ command line when starting the server.  For example:
 java -jar ${resin.home}/lib/resin.jar --root-directory /var/www
 </example>
 
+<p>
+If you use the Unix startup scripts mentioned in the next section, they
+automatically specify the root and log directories.
+</p>
+
 </s2>
 </s1>
 
@@ -340,8 +349,7 @@ Now that you're able to access the administration application,
 you have to set up a password and install it.  In order to prove
 that you have access to the machine on which Resin is running,
 the only way to change the password is to create a file with the
-authentication information on that machine.  Specifically, you'll
-be creating and saving a file named "admin-users.xml".
+authentication information on that machine.  
 </p>
 <ol>
 <li>Browse to <var>http://localhost:8080/resin-admin/</var><br/><br/>
@@ -350,9 +358,11 @@ be creating and saving a file named "admin-users.xml".
 click "Create Configuration File".  The recommended username is "admin".
 <figure src="admin-password-create.png"/>
 </li>
-<li>On the next page, a new "admin-users.xml" file has been generated
-for you.  Download this file and save it to /etc/resin or where ever your
-resin.xml file is located.
+<li>After going to the next page, a new "admin-users.xml.generated"
+file has been created for you in the same directory as your
+resin.xml file is located.  (If you followed the directions above,
+this should be in /etc/resin for Unix and C:\Resin\conf for Windows.)
+Just rename this file to admin-users.xml and Resin will use it to
 <figure src="admin-password-save.png"/>
 </li>
 <li>Browse back to <var>http://localhost:8080/resin-admin/</var>.  The
@@ -367,7 +377,7 @@ that you gave above.</li>
 <p>If something went wrong above, the first place to check for problems is
 the log.</p>
 <ul>
-  <li>If you are using Unix, look in <var>/var/www/log/jvm_default.log</var></li>
+  <li>If you are using Unix, look in <var>/var/log/resin/jvm_default.log</var></li>
   <li>If you are using Windows, look in <var>C:\Resin\log\jvm_default.log</var></li>
 </ul>
 <p>Hopefully, the log message will be clear enough for you to figure out the
