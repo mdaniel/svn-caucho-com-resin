@@ -446,6 +446,8 @@ class WatchdogManager implements AlarmListener {
 		     args.getResinConf());
     */
 
+    String serverId = args.getServerId();
+
     if (args.isDynamicServer()) {
       String clusterId = args.getDynamicCluster();
       String address = args.getDynamicAddress();
@@ -459,20 +461,20 @@ class WatchdogManager implements AlarmListener {
       }
       
       WatchdogConfig server = cluster.createServer();
-      server.setId(address + "-" + port);
+      serverId = address + "-" + port;
+      server.setId(serverId);
       server.setAddress(address);
       server.setPort(port);
       cluster.addServer(server);
     }
 
-    WatchdogClient client = resin.findClient(args.getServerId());
+    WatchdogClient client = resin.findClient(serverId);
     WatchdogConfig server;
-      
-    if (client == null)
-      server = resin.findServer(args.getServerId());
 
-    if (server == null)
+    if (client != null)
       server = client.getConfig();
+    else
+      server = resin.findServer(serverId);
 
     Watchdog watchdog = _watchdogMap.get(server.getId());
 
