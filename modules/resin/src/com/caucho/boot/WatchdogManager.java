@@ -470,13 +470,11 @@ class WatchdogManager implements AlarmListener {
       
     if (client == null)
       server = resin.findServer(args.getServerId());
-    else
+
+    if (server == null)
       server = client.getConfig();
 
-    Watchdog watchdog = null;
-
-    if (server != null)
-      watchdog = _watchdogMap.get(server.getId());
+    Watchdog watchdog = _watchdogMap.get(server.getId());
 
     if (watchdog != null) {
       if (watchdog.isActive()) {
