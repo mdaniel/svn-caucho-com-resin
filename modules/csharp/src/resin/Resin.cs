@@ -127,6 +127,9 @@ namespace Caucho
         } else if ("-user".Equals(args[argsIdx])) {
           _user = args[argsIdx + 1];
           
+          if (! _user.StartsWith(".\\") && _user.IndexOf('\\') < 0)
+             _user = ".\\" + _user;
+          
           argsIdx += 2;
         } else if ("-password".Equals(args[argsIdx])) {
           _password = args[argsIdx + 1];

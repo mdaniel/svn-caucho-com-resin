@@ -233,6 +233,13 @@ namespace Caucho
       okButton.TabIndex = 2;
       okButton.Text = "OK";
       okButton.UseVisualStyleBackColor = true;
+      okButton.Click += delegate {
+        Apply(resinDir.Text,
+              apacheDirs.Text,
+              apacheCheck.Checked,
+              iisDir.Text,
+              iisCheck.Checked);
+      };
       // 
       // 
       cancelButton.Location = new System.Drawing.Point(235, 198);
@@ -317,13 +324,13 @@ namespace Caucho
                 MessageBoxDefaultButton.Button1,
                 MessageBoxOptions.ServiceNotification);
           } else if (result.Status == ConfigureInfo.SETUP_ALREADY) {
-                          MessageBox.Show(
-                "Apache appears to have already been configred. No action was taken.",
-                "Configure Apache",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information,
-                MessageBoxDefaultButton.Button1,
-                MessageBoxOptions.ServiceNotification);
+            MessageBox.Show(
+              "Apache appears to have already been configred. No action was taken.",
+              "Configure Apache",
+              MessageBoxButtons.OK,
+              MessageBoxIcon.Information,
+              MessageBoxDefaultButton.Button1,
+              MessageBoxOptions.ServiceNotification);
           }
         } catch (Exception e) {
           Console.WriteLine(e.StackTrace);
@@ -398,13 +405,13 @@ Would you like the setup to attempt stopping IIS Service and copying the filter?
                 MessageBoxDefaultButton.Button1,
                 MessageBoxOptions.ServiceNotification);
           } else if (result.Status == ConfigureInfo.REMOVED_ALREADY){
-              MessageBox.Show(
-                "Apache did not appear to use Resin. No action was taken.",
-                "Configure Apache",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information,
-                MessageBoxDefaultButton.Button1,
-                MessageBoxOptions.ServiceNotification);
+            MessageBox.Show(
+              "Apache did not appear to use Resin. No action was taken.",
+              "Configure Apache",
+              MessageBoxButtons.OK,
+              MessageBoxIcon.Information,
+              MessageBoxDefaultButton.Button1,
+              MessageBoxOptions.ServiceNotification);
           }
         } catch (Exception e) {
           MessageBox.Show(
