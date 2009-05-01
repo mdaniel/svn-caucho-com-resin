@@ -203,6 +203,7 @@
     -->
   <target name="artifact">
     <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
+    <property name="artifact.maven" value="${artifacts}/${artifact.name}/maven2"/>
     <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
     <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
     <property name="artifact.lib" value="${artifacts}/${artifact.name}/lib"/>
@@ -227,6 +228,17 @@
         <include name="**/jaxb.index"/>
         <include name="META-INF/**"/>
       </fileset>
+    </copy>
+
+    <copy tofile="${artifact.build}/META-INF/maven/caucho.com/pom.xml"
+	  file="${artifact.maven}/pom.xml"
+          preservelastmodified="true"
+          overwrite="true">
+        <filterset>
+          <filter token="VERSION" value="${maven.version}"/>
+          <filter token="DATE" value="${date}"/>
+          <filter token="VERSION_DATE" value="${vdate}"/>
+        </filterset>
     </copy>
 
     <javac srcdir="${artifact.src}" destdir="${artifact.build}"
@@ -412,9 +424,9 @@
 
     <property file="${artifact.src}/module.properties"/>
 
-    <mkdir dir="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars"/>
+    <mkdir dir="${dist}/${dist.name}/project-jars"/>
     
-    <copy tofile="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars/${artifact.name}-${version}.jar"
+    <copy tofile="${dist}/${dist.name}/project-jars/resin-${artifact.name}-${version}.jar"
           file="${artifact.dist}/${artifact.jar}"/>
   </target>
 	  
@@ -622,6 +634,7 @@
         <exclude name="**/*~"/>
 
         <include name="automake/**"/>
+        <include name="compat/lib/javaee-15.jar"/>
         <include name="conf/**"/>
         <include name="contrib/**"/>
         <include name="init.d/**"/>
@@ -734,10 +747,12 @@
     <antcall target="resin.artifacts.dist" inheritRefs="true"/>
 
     <mkdir dir="${dist}/${dist.name}/licenses"/>
-    <mkdir dir="${dist}/${dist.name}/mavej-jars"/>
+    <mkdir dir="${dist}/${dist.name}/project-jars"/>
     <mkdir dir="${dist}/${dist.name}/keys"/>
     <mkdir dir="${dist}/${dist.name}/ext-lib"/>
+    <!--
     <mkdir dir="${dist}/${dist.name}/ext-webapp-lib"/>
+    -->
     <mkdir dir="${dist}/${dist.name}/ivy2"/>
     <!--
     <mkdir dir="${dist}/${dist.name}/plugins"/>
@@ -762,14 +777,15 @@
       <exclude name="**/WEB-INF/db/**"/>
       <exclude name="**/*~"/>
 
-      <include name="${dist.name}/lib/**"/>
-      <include name="${dist.name}/webapps/**"/>
+      <include name="${dist.name}/automake/**"/>
+      <include name="${dist.name}/compat/**"/>
       <include name="${dist.name}/conf/**"/>
       <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/doc/**"/>
-      <include name="${dist.name}/ext-webapp-lib/**"/>
       <include name="${dist.name}/init.d/**"/>
-      <include name="${dist.name}/automake/**"/>
+      <include name="${dist.name}/lib/**"/>
+      <include name="${dist.name}/project-jars/**"/>
+      <include name="${dist.name}/webapps/**"/>
 
       <include name="${dist.name}/LICENSE"/>
       <include name="${dist.name}/README"/>
@@ -1413,6 +1429,8 @@
         <include name="*/classes/**"/>
         <include name="*/dist/**"/>
       </fileset>
+    </delete>
+    <delete>
       <fileset dir="${artifacts}">
         <include name="*/classes/**"/>
         <include name="*/dist/**"/>

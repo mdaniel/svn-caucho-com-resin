@@ -480,6 +480,14 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _serverId;
   }
 
+  /**
+   * Returns true for a Resin server, false for a watchdog.
+   */
+  public boolean isResinServer()
+  {
+    return ! _isWatchdog;
+  }
+
   public String getServerUniqueName()
   {
     String name;

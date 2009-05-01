@@ -299,6 +299,14 @@ public class Server extends ProtocolDispatchServer
     return _serverLocal.get();
   }
 
+  public boolean isResinServer()
+  {
+    if (_resin != null)
+      return _resin.isResinServer();
+    else
+      return false;
+  }
+
   /**
    * Returns the classLoader
    */

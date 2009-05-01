@@ -1019,6 +1019,7 @@
     </copy>
   </target>
 
+  <!--
   <target name="clean" depends="init">
     <delete>
       <fileset dir="${modules}">
@@ -1034,6 +1035,7 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
+  -->
 
   <target name="distclean" depends="init, clean, win32clean">
     <delete dir="${install}/conf"/>
