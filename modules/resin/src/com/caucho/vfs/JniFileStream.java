@@ -70,6 +70,11 @@ public class JniFileStream extends StreamImpl
       return null;
   }
 
+  public static void chown(byte []name, int length, String user, String group)
+  {
+    //    nativeChown(name, length, user, group);
+  }
+
   public boolean canRead()
   {
     return _canRead && _fd >= 0;
@@ -213,6 +218,11 @@ public class JniFileStream extends StreamImpl
    */
   private static native int nativeOpenWrite(byte []name, int length,
 					    boolean isAppend);
+
+  /*
+  private static native void nativeChown(byte []path, int length,
+					 String user, String group);
+  */
 
   /**
    * Native interface to write bytes to the file

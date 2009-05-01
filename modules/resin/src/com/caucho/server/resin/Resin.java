@@ -587,6 +587,8 @@ public class Resin implements EnvironmentBean, SchemaBean
     
     if (_resinDataDirectory != null)
       path = _resinDataDirectory;
+    else if (_isWatchdog)
+      path = getRootDirectory().lookup("watchdog-data");
     else
       path = getRootDirectory().lookup("resin-data");
     

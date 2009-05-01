@@ -84,15 +84,18 @@ public class ResinBoot {
       
       Thread.currentThread().setContextClassLoader(loader);
 
+      Environment.init();
+      
       Vfs.initJNI();
 
       resinHome = Vfs.lookup(resinHome.getFullPath());
       
       _args.setResinHome(resinHome);
     }
-    
-    Environment.init();
-    
+    else {
+      Environment.init();
+    }
+
     // required for license check
     System.setProperty("resin.home", resinHome.getNativePath());
 
@@ -139,6 +142,8 @@ public class ResinBoot {
 			              Version.VERSION, _args.getServerId(), _args.getResinConf()));
     }
 
+    // XXX: needs to be changed for setuid issues
+    /*
     Path logDirectory = _client.getLogDirectory();
     if (! logDirectory.exists()) {
       logDirectory.mkdirs();
@@ -160,6 +165,7 @@ public class ResinBoot {
       if (_client.getGroupName() != null)
 	resinDataDirectory.changeOwner(_client.getGroupName());
     }
+    */
   }
 
   boolean start()

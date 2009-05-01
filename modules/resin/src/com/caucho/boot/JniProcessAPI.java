@@ -27,7 +27,7 @@ public interface JniProcessAPI {
   public boolean clearSaveOnExec();
   
   public boolean isValid();
-  
+
   public Process create(ArrayList<String> args,
 			HashMap<String,String> env,
 			String chroot,
