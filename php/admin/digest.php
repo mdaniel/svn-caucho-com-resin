@@ -78,8 +78,8 @@ is <b><i><?= $digest ?></i></b>
 To access the Resin administration console, you'll need to generate
 a configuration file containing your username and password.  Complete
 the form below to create a configuration file automatically with
-your login information.  The next page will provide you with a link
-and instructions to download and install the configuration.
+your login information.  The next page will provide you instructions 
+to install the configuration file.
 </p>
 
 <?php

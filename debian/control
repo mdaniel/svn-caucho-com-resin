@@ -1,8 +1,9 @@
 Package: resin
-Version: 3.2.0
+Version: 4.0.0
 Section: web
 Priority: optional
 Architecture: i386
 Maintainer: Scott Ferguson <ferg@caucho.com>
 Provides: resin
 Description: Resin application server
+Depends: libssl0.9.8 (>=0.9.8f-1), java6-sdk

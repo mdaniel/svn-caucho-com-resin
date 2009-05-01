@@ -161,7 +161,8 @@ foreach ($g_resin->Clusters as $cluster) {
     echo "</tr>\n";
   }
 
-  if ($cluster->isDynamicServerEnable()) {
+  if ($cluster->Name == $g_server->Cluster->Name &&
+      $cluster->isDynamicServerEnable()) {
     echo "<form method='POST'>\n";
     echo "<input type='hidden' name='action' value='add_dynamic_server'/>\n";
     echo "<input type='hidden' name='cluster' value='{$cluster->Name}'/>\n";

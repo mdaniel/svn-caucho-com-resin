@@ -21,7 +21,7 @@ JAVA="$JAVA_HOME/bin/java"
 #
 # -resin-root /var/resin        -- the main data directory
 #
-RESIN_ROOT="--root-directory @resin_root@"
+RESIN_ROOT="-root-directory @resin_root@"
 #
 # -conf /etc/resin/resin.xml   -- the main configuration file
 #
@@ -29,7 +29,7 @@ RESIN_CONF="-conf @resin_conf@/resin.xml"
 #
 # -log-directory /var/log/resin -- the main log directory
 #
-RESIN_LOG="--log-directory @resin_log@"
+RESIN_LOG="-log-directory @resin_log@"
 
 ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $SERVER"
 

@@ -1156,6 +1156,8 @@
 	<include name="Makefile.am"/>
 	<include name="Makefile.in"/>
 	<include name="aclocal.m4"/>
+
+	<include name="init.d/resin.in"/>
 	
 	<include name="modules/c/src/Makefile.in"/>
 	
@@ -1194,7 +1196,14 @@
       </fileset>
     </chmod>
     
-    <exec dir="${libexec}" executable="configure">
+    <exec dir="${libexec}" executable="/bin/sh">
+      <arg value="configure"/>
+      <arg value="--prefix=${libexec}"/>
+      <!--
+      <arg value="-with-resin-root=dist-debian/var/www"/>
+      <arg value="-with-resin-init-d=dist-debian/etc/init.d/resin"/>
+      <arg value="-with-resin-conf=${libexec}/etc/resin"/>
+      -->
     </exec>
     
     <exec dir="${libexec}" executable="make">
@@ -1206,7 +1215,7 @@
   </target>
   
   <target name="debian" depends="compile,resin.dist.jar,debian-libexec">
-    <exec executable="debian-perm">
+    <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
     </exec>
       
@@ -1214,7 +1223,7 @@
     
     <mkdir dir="dist-debian/var/log/resin"/>
     
-    <mkdir dir="dist-debian/var/www/resin"/>
+    <mkdir dir="dist-debian/var/www/webapps/ROOT"/>
     
     <mkdir dir="dist-debian/etc/resin"/>
     <copy todir="dist-debian/etc/resin"
@@ -1241,11 +1250,11 @@
           preservelastmodified="true"
           overwrite="true">
       <filterset>
-        <filter token="JAVA_HOME" value="/usr/java"/>
+        <filter token="JAVA_HOME" value="/usr/lib/jvm/java-6-sun"/>
         <filter token="resin_home" value="/usr/lib/resin"/>
-        <filter token="resin_root" value="-root-directory /var/www/resin"/>
-        <filter token="resin_log" value="-log-directory /var/log/resin"/>
-        <filter token="resin_conf" value="-conf /etc/resin/resin.xml"/>
+        <filter token="resin_root" value="/var/www"/>
+        <filter token="resin_log" value="/var/log/resin"/>
+        <filter token="resin_conf" value="/etc/resin"/>
       </filterset>
     </copy>
     
@@ -1257,7 +1266,6 @@
 
     <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/lib"/>
     <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/libexec"/>
-    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/licenses"/>
     <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/keys"/>
     
     <copy todir="dist-debian/usr/lib/${shortproduct}-${version}"
@@ -1302,26 +1310,27 @@
         <include name="bin/resin.sh"/>
       </fileset>
     </chmod>
-    
+
     <exec executable="ln">
       <arg value="-s"/>
       <arg value="${shortproduct}-${version}"/>
       <arg value="dist-debian/usr/lib/resin"/>
     </exec>
     
-    <copy todir="dist-debian/var/www/resin"
+    <copy todir="dist-debian/var/www"
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${dist}/${shortproduct}-${version}">
         <include name="doc/**"/>
       </fileset>
     </copy>
-    
-    <copy todir="dist-debian/var/www/resin/hosts/default"
+
+    <copy todir="dist-debian/var/www/webapps/ROOT"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${dist}/${shortproduct}-${version}">
-        <include name="webapps/ROOT/index.jsp"/>
+      <fileset dir="${basedir}/webapps/ROOT">
+        <include name="index.jsp"/>
+        <include name="favicon.ico"/>
       </fileset>
     </copy>
 
@@ -1331,7 +1340,7 @@
     <copy file="${install}/debian/conffiles"
           tofile="dist-debian/DEBIAN/conffiles"/>
     
-    <exec executable="debian-perm"/>
+    <exec executable="${basedir}/debian-perm"/>
         
     <exec executable="dpkg">
       <arg value="-b"/>
@@ -1341,7 +1350,7 @@
   </target>
   
   <target name="debian-src" depends="init">
-    <exec executable="debian-perm">
+    <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
       <arg value="dist-debian-src"/>
     </exec>
@@ -1369,7 +1378,7 @@
     <copy file="${install}/debian/control"
           tofile="dist-debian-src/DEBIAN/control"/>
     
-    <exec executable="debian-perm"/>
+    <exec executable="${basedir}/debian-perm"/>
         
     <exec executable="dpkg">
       <arg value="-b"/>
@@ -1378,7 +1387,17 @@
     </exec>
   </target>
 
-  <target name="debian-perm">
+  <target name="debian-perm" depends="init">
+    <copy file="c/debian-perm.c.in"
+          tofile="c/debian-perm.c"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="RESIN_ROOT" value="${shortproduct}-${version}"/>
+      </filterset>
+    </copy>
+
+
     <exec executable="cc">
       <arg value="-o"/>
       <arg value="debian-perm"/>

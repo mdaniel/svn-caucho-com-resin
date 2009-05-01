@@ -8,7 +8,7 @@ AC_SUBST(FULL_VERSION)
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(resin, 3.2.0)
+AM_INIT_AUTOMAKE(resin, 4.0.0)
 
 dnl Checks for programs.
 AC_PROG_CC

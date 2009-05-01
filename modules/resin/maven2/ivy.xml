@@ -6,22 +6,8 @@
   </info>
 
   <dependencies>
-    <dependency org="com.caucho" name="resin-ejb" rev="@VERSION@"/>
     <dependency org="com.caucho" name="resin-hessian" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-j2ee-management" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jca" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jca" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jms" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jsdk" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jsf" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jstl" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jpa" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jta" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-jws" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-quercus" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-support" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-util" rev="@VERSION@"/>
-    <dependency org="com.caucho" name="resin-webbeans" rev="@VERSION@"/>
+    <dependency org="com.caucho" name="resin-javaee" rev="@VERSION@"/>
     
     <dependency org="javax.activation" name="activation" rev="1.1"/>
     <dependency org="javax.annotation" name="jsr250-api" rev="1.0"/>

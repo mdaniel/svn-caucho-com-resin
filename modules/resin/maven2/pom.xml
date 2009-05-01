@@ -36,30 +36,6 @@
     </dependency>
     
     <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jsf</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-quercus</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-kernel</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jcache</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
       <version>1.0</version>
