@@ -3,7 +3,6 @@
     <!--
        - Configuration
       -->    
-    <item link="config.xtp" title="Tag Reference">
     <!--
       <item link="config-overview.xtp" title="overview"/>
       -->
@@ -19,18 +18,19 @@
             description="top-level configuration container"/>
       <item link="env-tags.xtp" title="Resource tags"
             description="database, classloader, jms, bean, and IoC"/>
-      <item link="rewrite-tags.xtp" title="Rewrite"
-	    description="URL rewriting, dispatching, and load-balancing"/>
+      <item link="resources.xtp" title="CanDI Resources"
+            description="Resin standard resources (jms, security, protocol)"/>
       <item link="server-tags.xtp" title="&lt;server>"
             description="threading, keepalive, timeout, and jvm arguments"/>
       <item link="session-tags.xtp" title="session"
 	    description="servlet sessions"/>
+      <!--
       <item link="el-var.xtp" title="variables"
 	    description="configuration variables"/>
+      -->
       <item link="webapp-tags.xtp" title="&lt;web-app>"
 	    description="servlet and filter configuration"/>
       <item link="index-tags.xtp" title="Index"
 	    description="alphabetical list of tags" />
     </item>
-  </item>
 </navigation>

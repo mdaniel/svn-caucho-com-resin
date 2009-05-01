@@ -19,7 +19,7 @@
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="webapp-tags.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
 <li>See <a href="env-tags.xtp">Resource</a> configuration for resources: classloader, databases, JMS, EJB, and IoC beans.</li>
-<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See <a href="../doc/config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
@@ -61,7 +61,7 @@ in.</p>
 <tr>
   <td>path</td>
   <td>Output path for the log entries,
-see <a href="config-log.xtp#path">"Log Paths"</a>.</td>
+see <a href="../doc/config-log.xtp#path">"Log Paths"</a>.</td>
   <td>required</td>
 </tr>
 <tr>
@@ -157,7 +157,7 @@ element access-log {
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
-<a href="resin-ioc.xtp">Resin-IoC initialization</a> can be used to set bean
+<a href="../admin/candi.xtp">Resin-IoC initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 <example title="Example: &lt;access-log> in host configuration">
@@ -293,7 +293,7 @@ Note, this is not a default error-page, i.e. if
 an error occurs inside of a &lt;web-app&gt;, the error-page for
 that web-app will be used instead.</p>
 
-<p>See <a href="webapp.xtp#error-page">webapp: error-page</a>.</p>
+<p>See <a href="webapp-tags.xtp#error-page">webapp: error-page</a>.</p>
 
 </defun>
 
@@ -608,32 +608,6 @@ the host level are available for all web-apps in the host.</p>
 
 </defun>
 
-<defun title="&lt;rewrite-dispatch>" version="Resin 3.1">
-<parents>cluster, host, web-app</parents>
-
-<p>&lt;rewrite-dispatch&gt; defines a set of rewriting rules for
-dispatching and forwarding URLs.  Applications can use these rules
-to redirect old URLs to their new replacements.</p>
-
-<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
-details.</p>
-
-<example title="rewrite-dispatch">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;cluster id="app-tier"&gt;
-
-    &lt;host host-name="www.foo.com">
-      &lt;rewrite-dispatch&gt;
-        &lt;redirect regexp="^/foo" target="/index.php?foo="/&gt;
-      &lt;/rewrite-dispatch&gt;
-    &lt;/host&gt;
-
-  &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-</defun>
-
 <defun title="&lt;root-directory>" version="Resin 3.1">
 
 <p>&lt;root-directory> configures the virtual host's filesystem root.</p>
@@ -656,7 +630,7 @@ redirection.  For some security configurations, Resin needs to redirect from
 an insecure site to a secure one.  The &lt;secure-host-name> configures
 the host to redirect to.</p>
 
-<p>See <a href="resin-security.xtp">Resin security</a>.</p>
+<p>See <a href="../admin/security.xtp">Resin security</a>.</p>
 
 <def title="&lt;secure-host-name> schema">
 element secure-host-name {
@@ -727,12 +701,12 @@ the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative pa
 </tr>
 <tr>
   <td>startup-mode</td>
-  <td>'automatic', 'lazy', or 'manual', see <a href="resin.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>'automatic', 'lazy', or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
   <td>automatic</td>
 </tr>
 <tr>
   <td>redeploy-mode</td>
-  <td>'automatic' or 'manual', see <a href="resin.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>'automatic' or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
   <td>automatic</td>
 </tr>
 </deftable>

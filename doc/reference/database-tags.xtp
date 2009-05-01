@@ -15,8 +15,8 @@
 <s1 title="See Also">
 
 <ul>
-<li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
-<li>See <a href="config-database.xtp">Database Configuration</a> for a detailed overview of databases and Resin.</li>
+<li>See <a href="env-tags.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="../admin/database.xtp">Database Configuration</a> for a detailed overview of databases and Resin.</li>
 </ul>
 
 </s1>
@@ -47,7 +47,7 @@ end of a request and logs a warning and stack trace.</p>
 
 <p>&lt;driver> configures a database driver for a connection pool.
 The individual driver information is available from the driver vendor
-or in the <a href="db-thirdparty.xtp">database driver</a> page.</p>
+or in the <a href="../doc/db-thirdparty.xtp">database driver</a> page.</p>
 
 <p>The content of the driver tag configures bean properties of
 the driver class, e.g. url, user, password.</p>

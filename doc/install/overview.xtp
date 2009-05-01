@@ -25,6 +25,13 @@ for hobbyists, developers, and low traffic websites that do not
 need the performance and reliability enhancements of Resin Professional.
 </p>
 
+<s2 name="resin10k" title="Resin 10,000">
+
+<p>Resin 4.0 has been tested with over 10,000 simultaneous keepalive
+connections, using JNI for advanced operating-specific non-blocking i/o.</p>
+
+</s2>
+
 <s2 name="reliability" title="Reliability features">
   
 <p>Resin Professional provides a number of reliability features,
@@ -329,6 +336,42 @@ to EJB transaction aspects without any extra overhead.</p>
 services are URL-based, they naturally fit into the the familiar servlet
 processing model.  There's no need to introduce complexities like standard
 EJB deployment or add extra frameworks just to expose a service as a URL.</p>
+
+</s1>
+
+<s1 title="Resin Rewrite and Dispatch">
+
+<ul>
+<li>See <a href="../admin/rewrite.xtp">rewrite/dispatch</a> documentation</li>
+</ul>
+
+<p>Resin includes built-in support for mod_rewrite-style URL rewriting
+and dispatching, allowing customized URL matching, rewriting and
+dispatching.</p>
+
+</s1>
+
+<s1 title="Maven Project Jar Repository">
+
+<ul>
+<li>See <a href="../admin/project-jars.xtp">project jar repository</a> documentation</li>
+</ul>
+
+<p>The resin web-app classloaders have direct support for maven-style
+jar resolution and version dependency management.  Library and project
+jars can be placed in a single project-jars/ directory, and resolved
+using a standard WEB-INF/pom.xml file.</p>
+
+</s1>
+
+<s1 title="Security">
+
+<ul>
+<li>See <a href="../admin/security.xtp">security</a> documentation</li>
+</ul>
+
+<p>Resin 4.0 security has been redesigned around Java Injection principles
+allowing customization of authenticators, login, and authorization.</p>
 
 </s1>
 

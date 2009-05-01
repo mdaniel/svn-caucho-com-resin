@@ -52,7 +52,7 @@ the host will apply to all hosts.</p>
 extending <code>com.caucho.server.security.AbstractAuthenticator</code>.
 The <var>uri</var> is a symbolic name for the authenticator class.
 More details on the predefined authenticators are in the
-<a href="resin-security.xtp">Resin security</a> documentation.</p>
+<a href="../admin/security.xtp">Resin security</a> documentation.</p>
 
 <ul>
 <li><var>properties:</var>  Java properties-style authentication.</li>
@@ -64,7 +64,7 @@ More details on the predefined authenticators are in the
 <p>Configuration of the authenticator uses bean-style configuration in the
 &lt;init&gt; tag.</p>
 
-<p>See also: the <a href="resin-security.xtp">Resin security</a> section.</p>
+<p>See also: the <a href="../admin/security.xtp">Resin security</a> section.</p>
 
 <deftable-childtags title="&lt;authenticator> attributes">
 <tr>
@@ -134,7 +134,7 @@ ron=cannons,user,prefect
 <defun title="&lt;bam-service>" occur="*" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
 
-<p>&lt;bam-service> configures a <a href="hmtp.xtp">BamService</a> to
+<p>&lt;bam-service> configures a <a href="../doc/hmtp.xtp">BamService</a> to
 listen for messages.  The service is always a single instance.</p>
 
 <p>&lt;bam-service> can be used as a simple queueing service, replacing
@@ -211,13 +211,13 @@ element ejb-message-bean {
 
 <p>&lt;bean> configures a custom singleton bean and stores in the
 WebBeans registry.  &lt;bean> is a primary configuration tag
-for <a href="resin-ioc.xtp">Resin's IoC</a> capabilities.
+for <a href="../admin/candi.xtp">Resin's IoC</a> capabilities.
 The bean can also be optional registered in JNDI.</p>
 
 <p>Custom configuration of the bean is in the &lt;init&gt; section.
 Field values may use JSP-EL expressions as well as constant strings
 or even complex sub-beans. More details for configuring singleton
-beans are in <a href="resin-ioc.xtp">Resin IoC</a>.</p>
+beans are in <a href="../admin/candi.xtp">Resin IoC</a>.</p>
 
 <deftable-childtags title="&lt;bean> attributes">
 <tr>
@@ -469,85 +469,6 @@ files before loading them.</p>
 
 </defun>
 
-<defun title="&lt;component>" occur="*" version="Resin 3.0">
-<parents>resin, cluster, host, web-app</parents>
-  <!-- com.caucho.config.types.Resource -->
-
-<p>&lt;component> configures a component bean template and stores in the
-WebBeans registry.  Injection of a &lt;component> will generally create a
-new bean instance in constrast to the singleton &lt;bean>.
-&lt;component> is a primary configuration tag
-for <a href="resin-ioc.xtp">Resin's IoC</a> capabilities.
-The bean can also be optionally registered in JNDI.</p>
-
-<p>Custom configuration of the component is in the &lt;init&gt; section.
-Field values may use JSP-EL expressions as well as constant strings
-or even complex sub-beans. More details for configuring singleton
-beans are in <a href="resin-ioc.xtp">Resin IoC</a>.</p>
-
-<deftable-childtags title="&lt;component> attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>class</td>
-  <td>Application class implementing the resource. Since Resin 3.0</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC configuration for the bean</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>JNDI name for the resource.  Since Resin 3.0</td>
-  <td></td>
-</tr>
-<tr>
-  <td>name</td>
-  <td>The name of the bean, used for @Named injection. Resin 3.1.4.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>scope</td>
-  <td>dependent, request, session, conversational, application, singleton. Resin 3.1.4.</td>
-  <td>dependent</td>
-</tr>
-</deftable-childtags>
-
-<def title="&lt;component> schema">
-r_component = element component {
-  r_class?
-  &amp; r_binding*
-  &amp; r_init?
-  &amp; r_jndi-name?
-  &amp; r_name?
-  &amp; r_scope?
-}
-</def>
-
-<example title="Example: WEB-INF/resin-web.xml component bean">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;component name="test"&gt;
-    &lt;type&gt;test.MyBean&lt;/type&gt;
-    &lt;init&gt;
-      &lt;greeting&gt;Hello&lt;/greeting&gt;
-      &lt;server&gt;${serverId}&lt;/server&gt;
-      &lt;sub-bean&gt;
-        &lt;value&gt;${2 + 2}&lt;/value&gt;
-      &lt;/sub-bean&gt;
-    &lt;/init&gt;
-  &lt;/component&gt;
-
-&lt;/web-app>
-</example>
-
-</defun> 
-
 <defun title="&lt;connection-factory>" occur="*" version="Resin 3.1.5"
        type="defun">
 <parents>resin, cluster, host, web-app</parents>
@@ -658,7 +579,7 @@ r_connection-factory = element connection-factory {
 
 <p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
 
-<p>The <a href="config-database.xtp">database configuration</a> section has
+<p>The <a href="../admin/database.xtp">database configuration</a> section has
 more details on the configuration.  A code pattern for using databases
 is in a <a href="../examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
 
@@ -1013,7 +934,7 @@ dependency injection, transaction attributes, and aspect interception.
 <p>The message bean can plug into custom messaging systems.  The
 application will need to define a <a href="http://caucho.com/resin-javadoc/javax/resource/spi/ResourceAdapter.html">ResourceAdapter</a> and
 an <code>ActivationSpec</code>.  More details are available in the
-<a href="resin-messaging.xtp">Resin Messaging section</a>.</p>
+<a href="../doc/messaging.xtp">Resin Messaging section</a>.</p>
 
 <deftable title="&lt;ejb-message-bean> attributes">
 <tr>
@@ -1100,7 +1021,7 @@ element ejb-message-bean {
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.ejb.EJBServer -->
 
-<p>Configures an EJB server.  See <a href="resin-ejb.xtp">Resin EJB</a>
+<p>Configures an EJB server.  See <a href="../doc/resin-ejb.xtp">Resin EJB</a>
 for more details.</p>
 
 <deftable title="&lt;ejb-server> attributes">
@@ -1183,7 +1104,7 @@ element ejb-server {
 
 <p>&lt;ejb-stateful-bean> configures an EJB @Stateful bean.  The
 @Stateful bean is a single-threaded component bean suitable for
-transaction processing.  See <a href="resin-ejb.xtp">Resin EJB</a>
+transaction processing.  See <a href="../doc/resin-ejb.xtp">Resin EJB</a>
 for more details.</p>
 
 <p>The stateful-bean is registered in the Resin-IoC/WebBeans context and
@@ -1246,7 +1167,7 @@ element ejb-stateful-bean {
 
 <p>&lt;ejb-stateless-bean> configures an EJB @Stateless bean.  The
 @Statelesss bean is a pooled, proxied, singleton component bean suitable.
-See <a href="resin-ejb.xtp">Resin EJB</a> for more details.</p>
+See <a href="../doc/resin-ejb.xtp">Resin EJB</a> for more details.</p>
 
 <p>The stateless-bean is registered in the Resin-IoC/WebBeans context and
 optionally with JNDI.</p>
@@ -1566,7 +1487,7 @@ the javac configuration option:
 and registers it with Resin-IoC/WebBeans.  The <code>ConnectionFactory</code>
 can be specified by it's class or a URI alias.</p>
 
-<p>See <a href="resin-messaging.xtp">Resin messaging</a> for more
+<p>See <a href="../doc/resin-messaging.xtp">Resin messaging</a> for more
 information.</p>
 
 <deftable title="jms-connection-factory URIs">
@@ -1603,7 +1524,7 @@ information.</p>
 </tr>
 <tr>
   <td>name</td>
-  <td><a href="resin-ioc.xtp#@Named">@Named</a> binding in Resin-IoC</td>
+  <td><a href="../admin/candi.xtp#@Named">@Named</a> binding in Resin-IoC</td>
   <td></td>
 </tr>
 <tr>
@@ -1619,172 +1540,6 @@ element jms-connection-factory {
   &amp; init?
   &amp; jndi-name?
   &amp; name?
-}
-</def>
-
-</defun>
-
-<defun title="&lt;jms-queue>" occur="*" version="Resin 3.1.5">
-<parents>resin, cluster, host, web-app</parents>
-
-<p>&lt;jms-queue> configures a JMS <code>Queue</code>
-and registers it with Resin-IoC/WebBeans.  Resin's JMS Queues implement
-the <code>BlockingQueue</code> interface and can be used directly or
-with the JMS <code>ConnectionFactory</code>.</p>
-
-<p>See <a href="resin-messaging.xtp">Resin messaging</a> for more
-information.</p>
-
-<p>The Queue can either be identified by the implementing class name
-or with a URI alias.   Third-party queues using JCA will use
-the <a href="#resource-adapter">&lt;resource-adapter></a> and either
-<a href="#connection-factory">&lt;connection-factory></a> or
-<a href="#activation-spec">&lt;activation-spec></a>.</p>
-
-<p>Code sending messages to a Queue will typically use either
-the <code>BlockingQueue</code> API or JMS.  Code receiving from a queue
-will generally use an <a href="#ejb-message-bean">EJB message bean</a>.</p>
-
-<deftable title="&lt;jms-queue> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>class</td>
-  <td>class name of the Queue implementation</td>
-  <td>required (or <var>uri</var>)</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC initialization for the Queue</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>JNDI name for storing the Queue</td>
-  <td></td>
-</tr>
-<tr>
-  <td>name</td>
-  <td><a href="resin-ioc.xtp#@Named">@Named</a> binding for Resin-IoC</td>
-  <td></td>
-</tr>
-</deftable>
-
-<deftable title="Queue URI aliases">
-<tr>
-  <th>URI</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>file:</td>
-  <td>Persistent, file-backed Queue</td>
-</tr>
-<tr>
-  <td>memory:</td>
-  <td>Simple, memory-based Queue</td>
-</tr>
-<tr>
-  <td>server:</td>
-  <td>Server side of a clustered Queue</td>
-</tr>
-<tr>
-  <td>client:</td>
-  <td>Client side of a clustered Queue</td>
-</tr>
-</deftable>
-
-<def title="&lt;jms-queue> schema">
-element jms-queue {
-  (class | uri)
-  &amp; init
-  &amp; jndi-name
-  &amp; name
-}
-</def>
-
-</defun>
-
-<defun title="&lt;jms-topic>" occur="*" version="Resin 3.1.5">
-<parents>resin, cluster, host, web-app</parents>
-
-<p>&lt;jms-topic> configures a JMS <code>Topic</code>
-and registers it with Resin-IoC/WebBeans.  Resin's JMS Topics implement
-the <code>BlockingTopic</code> interface and can be used directly or
-with the JMS <code>ConnectionFactory</code>.</p>
-
-<p>See <a href="resin-messaging.xtp">Resin messaging</a> for more
-information.</p>
-
-<p>The Topic can either be identified by the implementing class name
-or with a URI alias.   Third-party topics using JCA will use
-the <a href="#resource-adapter">&lt;resource-adapter></a> and either
-<a href="#connection-factory">&lt;connection-factory></a> or
-<a href="#activation-spec">&lt;activation-spec></a>.</p>
-
-<p>Code sending messages to a Topic will typically use either
-the <code>BlockingTopic</code> API or JMS.  Code receiving from a topic
-will generally use an <a href="#ejb-message-bean">EJB message bean</a>.</p>
-
-<deftable title="&lt;jms-topic> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>class</td>
-  <td>class name of the Topic implementation</td>
-  <td>required (or <var>uri</var>)</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC initialization for the Topic</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>JNDI name for storing the Topic</td>
-  <td></td>
-</tr>
-<tr>
-  <td>name</td>
-  <td><a href="resin-ioc.xtp#@Named">@Named</a> binding for Resin-IoC</td>
-  <td></td>
-</tr>
-</deftable>
-
-<deftable title="Topic URI aliases">
-<tr>
-  <th>URI</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>file:</td>
-  <td>Persistent, file-backed Topic</td>
-</tr>
-<tr>
-  <td>memory:</td>
-  <td>Simple, memory-based Topic</td>
-</tr>
-<tr>
-  <td>server:</td>
-  <td>Server side of a clustered Topic</td>
-</tr>
-<tr>
-  <td>client:</td>
-  <td>Client side of a clustered Topic</td>
-</tr>
-</deftable>
-
-<def title="&lt;jms-topic> schema">
-element jms-topic {
-  (class | uri)
-  &amp; init
-  &amp; jndi-name
-  &amp; name
 }
 </def>
 
@@ -1878,7 +1633,7 @@ element jndi-link {
 <parents>resin, cluster, host, web-app</parents>
 
 <p>&lt;jpa-persistence> configures JPA persistence defaults.
-More details on JPA are available on the <a href="amber.xtp">Amber</a> page.</p>
+More details on JPA are available on the <a href="../doc/amber.xtp">Amber</a> page.</p>
 
 <deftable title="&lt;jpa-persistence> Attributes">
 <tr>
@@ -2014,7 +1769,7 @@ element fileset {
 
 <p>&lt;log> configures JDK 1.4 java.util.logger handler.</p>
 
-<p>The <a href="config-log.xtp">log configuration</a> describes
+<p>The <a href="../doc/config-log.xtp">log configuration</a> describes
 log in detail.</p>
 
 <deftable title="&lt;log> Attributes">
@@ -2116,7 +1871,7 @@ element log {
 
 <p>&lt;log> configures JDK 1.4 java.util.logger Logger level.</p>
 
-<p>The <a href="config-log.xtp">log configuration</a> describes
+<p>The <a href="../doc/config-log.xtp">log configuration</a> describes
 log in detail.</p>
 
 <deftable title="&lt;logger> Attributes">
@@ -2394,7 +2149,7 @@ It uses a Java interface and a URI to select the web-service.</p>
 location is typically a HTTP URL.</p>
 
 <ul>
-<li>See <a href="resin-remoting.xtp">Resin remoting</a> for more
+<li>See <a href="../doc/resin-remoting.xtp">Resin remoting</a> for more
 information, including how to write an adapter for Resin remoting.</li>
 <li>See the <a href="../examples/remote-hello-world/">hello world tutorial</a>
 for an example.</li>
@@ -2418,7 +2173,7 @@ for an example.</li>
 </tr>
 <tr>
   <td>name</td>
-  <td><a href="resin-ioc.xtp#@Named">@Named</a> binding for Resin-IoC</td>
+  <td><a href="../admin/candi.xtp#@Named">@Named</a> binding for Resin-IoC</td>
   <td></td>
 </tr>
 <tr>
@@ -2702,7 +2457,7 @@ and &lt;host-alias> to customize the virtual host configuration.</p>
 </example>
 
 <p>Some applications may want to split their configuration into multiple
-files using the fileset.  For example, a <a href="resin-ioc.xtp">Resin-IoC</a>
+files using the fileset.  For example, a <a href="../admin/candi.xtp">Resin-IoC</a>
 application might want to define beans in WEB-INF/beans/*.xml and give
 the web-app flexibility in which bean files to create.</p>
 
@@ -2837,7 +2592,7 @@ directly.</p>
 </tr>
 <tr>
   <td>name</td>
-  <td><a href="resin-ioc.xtp#@Named">@Named</a> binding for Resin-IoC injection.</td>
+  <td><a href="../doc/candi.xtp#@Named">@Named</a> binding for Resin-IoC injection.</td>
   <td></td>
 </tr>
 <tr>
@@ -3017,7 +2772,7 @@ element scheduled-task {
 bean-style configuration.  The bean must implement <code>Runnable</code>.
 Like the &lt;bean> tag, the <var>class</var> attribute specifies the
 <code>Runnable</code> class, and any <var>init</var> section configures
-the bean using <a href="resin-ioc.xtp">Resin IoC</a> configuration.</p>
+the bean using <a href="../admin/candi.xtp">Resin IoC</a> configuration.</p>
 
 <example title="Example: 5min cron bean task">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -3158,7 +2913,7 @@ element simple-loader {
 
 <p>Configures the destination for <code>System.err</code>.</p>
 
-<p>The <a href="config-log.xtp">log configuration</a> describes
+<p>The <a href="../doc/config-log.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
 <deftable title="&lt;stderr-log> Attributes">
@@ -3222,7 +2977,7 @@ element stderr-log {
 
 <p>Configures the destination for <code>System.out</code>.</p>
 
-<p>The <a href="config-log.xtp">log configuration</a> describes
+<p>The <a href="../doc/config-log.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
 <deftable title="&lt;stdout-log> Attributes">

@@ -149,6 +149,17 @@ public class ResinBoot {
       if (_client.getGroupName() != null)
 	logDirectory.changeOwner(_client.getGroupName());
     }
+
+    Path resinDataDirectory = _client.getResinDataDirectory();
+    if (! resinDataDirectory.exists()) {
+      resinDataDirectory.mkdirs();
+
+      if (_client.getUserName() != null)
+	resinDataDirectory.changeOwner(_client.getUserName());
+      
+      if (_client.getGroupName() != null)
+	resinDataDirectory.changeOwner(_client.getGroupName());
+    }
   }
 
   boolean start()

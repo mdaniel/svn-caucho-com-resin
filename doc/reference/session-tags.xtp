@@ -180,7 +180,7 @@ when serializing the session.</p>
 </tr>
 <tr>
   <td>use-persistent-store</td>
-  <td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td>
+  <td>Uses the current <a href="resin-tags.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td>
   <td>none</td>
 </tr>
 </deftable-childtags>

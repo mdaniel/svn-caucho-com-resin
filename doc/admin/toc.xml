@@ -22,6 +22,11 @@
     <item link="dynamic-servers.xtp" title="Dynamic Servers"/>
 
     <!--
+       - Jar Repository
+      -->
+    <item link="jar-repository.xtp" title="Jar Repository"/>
+
+    <!--
        - IoC
       -->
 	  
@@ -49,7 +54,7 @@
     <!--
        - resources
       -->
-    <item link="resources.xtp" title="Scheduling"
+    <item link="scheduling.xtp" title="Scheduling"
           description="executing tasks, methods and URLs based on cron triggers"/>
     
     <!--

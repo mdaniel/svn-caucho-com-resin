@@ -65,6 +65,7 @@ public class BootResinConfig implements EnvironmentBean
   
   private Path _resinHome;
   private Path _rootDirectory;
+  private Path _resinDataDirectory;
   
   private BootManagementConfig _management;
   private String _password;
@@ -110,6 +111,19 @@ public class BootResinConfig implements EnvironmentBean
       return logDirectory;
     else
       return getRootDirectory().lookup("log");
+  }
+  
+  public void setResinDataDirectory(Path path)
+  {
+    _resinDataDirectory = path;
+  }
+  
+  public Path getResinDataDirectory()
+  {
+    if (_resinDataDirectory != null)
+      return _resinDataDirectory;
+    else
+      return getRootDirectory().lookup("resin-data");
   }
 
   public ClassLoader getClassLoader()

@@ -35,9 +35,9 @@
 <ul>
 <li><a href="env-tags.xtp">Resources tags</a> for beans, components,
 databases, @Stateless and @Stateful EJBs, JMS queues, etc.</li>
-<li><a href="resin-security.xtp">Security</a> for a full description
+<li><a href="../admin/security.xtp">Security</a> for a full description
 of Resin's authentication and authorization.</li>
-<li><a href="rewrite-tags.xtp">Rewrite tags</a> for Resin's rewrite-dispatch
+<li><a href="../admin/rewrite.xtp">Rewrite tags</a> for Resin's rewrite-dispatch
 rewriting.</li>
 </ul>
 </s1>
@@ -112,60 +112,12 @@ element archive-path {
 
 </defun>
 
-<defun title="&lt;auth-constraint>" version="Servlet">
-<parents>security-constraint</parents>
-
-<p>Requires that authenticated users fill the specified role.
-In Resin's JdbcAuthenticator, normal users are in the "user" role.
-Think of a role as a group of users.</p>
-
-<p>The roles are defined by the authenticators (see <a href="resin-security.xtp">Resin security</a>).  When using Resin's &lt;management> authentication
-as a default, the role name is <var>resin-admin</var>.  (See
-<a href="resin-admin.xtp">Resin management</a>.)</p>
-
-<deftable-childtags>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>role-name</td>
-  <td>Roles which are allowed to access the resource.</td>
-</tr>
-</deftable-childtags>
-
-<def title="&lt;auth-constraint> schema">
-element auth-constraint {
-  description*,
-
-  role-name*
-}
-</def>
-
-<p>The following example protects the /admin subdirectory of a web-app
-by requiring a user to logon with Resin's &lt;management> users, i.e.
-using the same requirement as /resin-admin.</p>
-
-<example title="Example: WEB-INF/resin-web.xml auth constraints">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;login uri="basic:"/>
-
-  &lt;security-constraint url-pattern="/admin/*">
-    &lt;auth-constraint role-name="resin-admin"/>
-  &lt;/security-constraint>
-
-&lt;/web-app>
-</example>
-
-</defun>
-
 <defun title="&lt;cache-mapping>" version="Resin 1.1">
 <parents>web-app</parents>
       
 <p>&lt;cache-mapping> specifies <var>max-age</var> and <var>Expires</var> times for cacheable pages.</p>
 
-<p>See <a href="proxy-cache.xtp">caching</a> for more information.</p>
+<p>See <a href="../doc/proxy-cache.xtp">caching</a> for more information.</p>
 
 <p>&lt;cache-mapping> is intended to provide Expires times for pages that
 have ETags or Last-Modified specified, but do not wish to hard-code the
@@ -262,38 +214,6 @@ cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-M
 
 &lt;/web-app&gt;
 </example>
-</defun>
-
-<defun title="&lt;constraint>" version="Resin">
-<parents>security-constraint</parents>
-
-<p>
-Defines a custom constraint.  Applications can define their own
-security constraints to handle custom authentication requirements.
-</p>
-
-<deftable-childtags>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>resin:type</td>
-  <td>A class that extends <a href="javadoc|com.caucho.server.security.AbstractConstraint">AbstractConstraint</a></td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>initialization parameters, set in the object using Bean-style setters and getters</td>
-</tr>
-</deftable-childtags>
-
-<def title="&lt;constraint> schema">
-element constraint {
-  class
-  &amp; init?
-}
-</def>
-
 </defun>
 
 <defun title="&lt;context-param>" version="Servlet 2.2">
@@ -571,7 +491,7 @@ was not found.
 <defun title="&lt;filter>" version="Servlet 2.3">
 
 <p>Defines a filter name for later mapping.  Because Filters are fully
-integrated with <a href="resin-ioc.xtp">Resin-IoC</a>, they can
+integrated with <a href="../admin/candi.xtp">Resin-IoC</a>, they can
 use dependency-injection, transactional aspects, custom interception
 with @InterceptorType, and event handling with @Observes.
 </p>
@@ -591,7 +511,7 @@ with @InterceptorType, and event handling with @Observes.
 </tr>
 <tr>
   <td>init</td>
-  <td>Resin-IoC initialization configuration, see <a href="resin-ioc.xtp">Resin-IoC</a></td>
+  <td>Resin-IoC initialization configuration, see <a href="../admin/candi.xtp">Resin-IoC</a></td>
 </tr>
 <tr>
   <td>init-param</td>
@@ -728,104 +648,6 @@ A webapp in <code>webapps/baz</code> and a url
 <code>http://localhost/baz/hello.html</code> will have a url of <code>"/hello.html"</code> for the
 purposes of the regular expression match, because "/baz" is the context path.
 </p>
-
-</defun>
-
-<defun title="&lt;form-login-config>" version="Servlet" type="defun">
-<parents>login-config</parents>
-
-<p>Configures authentication using forms.  The login form has
-specific parameters that the servlet engine's login form processing
-understands.  If the login succeeds, the user will see the original
-page.  If it fails, she will see the error page.</p>
-
-<deftable title="&lt;form-login-config> attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>form-login-page</td>
-  <td>The page to be used to prompt the user login</td>
-  <td></td>
-</tr>
-<tr>
-  <td>form-error-page</td>
-  <td>The error page for unsuccessful login</td>
-  <td></td>
-</tr>
-<tr>
-  <td>internal-forward</td>
-  <td>Use an internal redirect on success instead of a sendRedirect</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>form-uri-priority</td>
-  <td>If true, the form's j_uri will override a stored URI</td>
-  <td>false</td>
-</tr>
-</deftable>
-
-<p>The form itself must have the action <var>j_security_check</var>.  It
-must also have the parameters <var>j_username</var> and <var>j_password</var>.
-Optionally, it can also have <var>j_uri</var> and
-<var>j_use_cookie_auth</var>.  <var>j_uri</var> gives the next page to display
-when login succeeds.  <var>j_use_cookie_auth</var> allows Resin to send a
-persistent cookie to the user to make following login easier.</p>
-
-<p><var>j_use_cookie_auth</var> gives control to the user whether to generate
-a persistent cookie.  It lets you implement the "remember me" button.  By
-default, the authentication only lasts for a single session.</p>
-
-<deftable-childtags>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>j_security_check</td>
-  <td>The form's mandatory action</td>
-</tr>
-<tr>
-  <td>j_username</td>
-  <td>The user name</td>
-</tr>
-<tr>
-  <td>j_password</td>
-  <td>The password</td>
-</tr>
-<tr>
-  <td>j_uri</td>
-  <td>Optional Resin extension for the successful display page.</td>
-</tr>
-<tr>
-  <td>j_use_cookie_auth</td>
-  <td>Optional Resin extension to allow cookie login.</td>
-</tr>
-</deftable-childtags>
-
-<def title="&lt;form-login-config> schema">
-element form-login-config {
-  form-login-page,
-  form-error-page,
-  internal-forward,
-  form-uri-priority
-}
-</def>
-
-<p>The following is an example of a servlet-standard login page:</p>
-
-<example title="Example: login.html">
-&lt;form action='j_security_check' method='POST'&gt;
-&lt;table&gt;
-&lt;tr&gt;&lt;td&gt;User:&lt;td&gt;&lt;input name='j_username'&gt;
-&lt;tr&gt;&lt;td&gt;Password:&lt;td&gt;&lt;input name='j_password'&gt;
-&lt;tr&gt;&lt;td colspan=2&gt;hint: the password is 'quidditch'
-&lt;tr&gt;&lt;td&gt;&lt;input type=submit&gt;
-&lt;/table&gt;
-&lt;/form&gt;
-</example>
 
 </defun>
     
@@ -1140,7 +962,7 @@ element lazy-servlet-validate {
 
 <p>&lt;listener> configures servlet event listeners.  The listeners
 are registered based on interfaces they implement.  The listener
-instances are fully <a href="resin-ioc.xtp">Resin-IoC</a> aware,
+instances are fully <a href="../admin/candi.xtp">Resin-IoC</a> aware,
 including dependency injection, observing events, and supporting aspects.</p>
 
 <deftable title="&lt;listener> Attributes">
@@ -1198,64 +1020,6 @@ element listener {
   listener-class,
   init?
 }
-</def>
-
-</defun>
-
-<defun title="&lt;login-config>" version="Servlet 2.2">
-<parents>web-app</parents>
-<default>no authentication</default>
-
-<p>Configures the login method for authentication, one of BASIC,
-DIGEST or FORM.</p>
-
-<p>See also: <a href="resin-security.xtp">Resin security</a> for an
-overview.</p>
-
-<deftable-childtags title="&lt;login-config> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>auth-method</td>
-  <td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-digest.xtp">Digest Authentication</a>.</td>
-</tr>
-<tr>
-  <td>authenticator</td>
-  <td>Specifies the authenticator to use to lookup users and passwords.</td>
-</tr>
-<tr>
-  <td>class</td>
-  <td>Defines a custom class which extends <a href="http://caucho.com/resin-javadoc/com/caucho/server/security/AbstractLogin.html">com.caucho.server.security.AbstractLogin</a></td>
-</tr>
-<tr>
-  <td>form-login-config</td>
-  <td>Configuration for form login.</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>Initialization for the custom login class</td>
-</tr>
-<tr>
-  <td>realm-name</td>
-  <td>The realm name to use in HTTP authentication</td>
-</tr>
-</deftable-childtags>
-
-<p>HTTP Authentication is defined in the RFC <a href="http://www.faqs.org/rfcs/rfc2617.html">HTTP Authentication: Basic and
-Digest</a>.</p> 
-
-<p>HTTP digest authentication is discussed in <a href="security-digest.xtp">Digest Passwords</a>.</p>
-
-<def title="&lt;login-config> schema">
-element login-config {
-  class?
-  &amp; auth-method?
-  &amp; authenticator?
-  &amp; form-login-config?
-  &amp; init?
-  &amp; realm-name?
 </def>
 
 </defun>
@@ -1398,7 +1162,7 @@ element path-mapping {
 <defun title="&lt;protocol>">
 <parents>servlet, servlet-mapping</parents>
 
-<p>&lt;protocol> configures a <a href="resin-remoting.xtp">remoting</a>
+<p>&lt;protocol> configures a <a href="../doc/resin-remoting.xtp">remoting</a>
 protocol for a Java bean.  The bean is configured with the &lt;servlet>
 and &lt;servlet-mapping> tags, since it will process HTTP URL requests.</p>
 
@@ -1534,7 +1298,7 @@ stateless and message beans, JMS queues, remote clients, etc.</p>
 &lt;/web-app&gt;
 </example>
 
-<p>Or <a href="ioc-bean.xtp">IoC-configured Beans</a>:</p>
+<p>Or <a href="../admin/candi.xtp">IoC-configured Beans</a>:</p>
 
 <example title="Example: IoC bean in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -1548,29 +1312,6 @@ stateless and message beans, JMS queues, remote clients, etc.</p>
     &lt;/init>
   &lt;/bean>
 &lt;/web-app&gt;
-</example>
-
-</defun>
-
-<defun title="&lt;rewrite-dispatch>" version="Resin 3.1">
-<parents>cluster, host, web-app</parents>
-
-<p>&lt;rewrite-dispatch&gt; defines a set of rewriting rules for
-dispatching and forwarding URLs.  Applications can use these rules
-to redirect old URLs to their new replacements.</p>
-
-<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
-details.</p>
-
-<example title="Example: Mediawiki dispatch in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
- &lt;rewrite-dispatch>
-   &lt;dispatch regexp="\.(php|gif|css|jpg|png)"/>
-   &lt;forward regexp="^" target="/index.php"/>
- &lt;/rewrite-dispatch>
-
-&lt;/web-app>
 </example>
 
 </defun>
@@ -1660,88 +1401,14 @@ element secure {
 
 </defun>
 
-<defun title="&lt;security-constraint>" version="Servlet">
-<parents>web-app</parents>
-
-<p>Specifies protected areas of the web site.  Sites using
-authentication as an optional personalization feature will typically
-not use any security constraints.  See <a href="resin-security.xtp">Resin
-security</a> for an overview.</p>
-
-<p>Security constraints can also be custom classes.</p>
-
-<p>See <a href="resin-security.xtp">Resin security</a> for an overview of
-security issues and configuration.</p>
-
-<deftable title="&lt;security-constraint> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>auth-constraint</td>
-  <td>Defines a security condition based on a logged-in user's role</td>
-</tr>
-<tr>
-  <td>constraint</td>
-  <td>Defines a custom security condition</td>
-</tr>
-<tr>
-  <td>ip-constraint</td>
-  <td>Defines a security condition based the remote IP address</td>
-</tr>
-<tr>
-  <td>role-name</td>
-  <td>Defines role-name requirement</td>
-</tr>
-<tr>
-  <td>url-pattern</td>
-  <td>URL pattern to match the security constraint</td>
-</tr>
-<tr>
-  <td>user-data-constraint</td>
-  <td>Defines SSL or non-SSL requirements</td>
-</tr>
-<tr>
-  <td>web-resource-collection</td>
-  <td>URL patterns and HTTP methods defining the constraint</td>
-</tr>
-</deftable>
-
-<def title="&lt;security-constraint> content">
-element security-constraint {
-  auth-constraint*
-  &amp; constraint*
-  &amp; ip-constraint*
-  &amp; role-name*
-  &amp; user-data-constraint*
-  &amp; url-pattern?
-  &amp; web-resource-collection*
-}
-</def>
-
-<example title="Example: 'user' role required in WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-&lt;security-constraint&gt;
-  &lt;web-resource-collection&gt;
-    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-  &lt;auth-constraint role-name='user'&gt;
-&lt;/security-constraint&gt;
-
-&lt;/web-app>
-</example>
-</defun>
-
 <defun title="&lt;servlet>" version="Servlet 2.2">
 
 <p>Defines a servlet to process HTTP URL requests.  The servlet class
 can either implement <a href="http://caucho.com/resin-javadoc/javax/servlet/Servlet.html">javax.servlet.Servlet</a> to handle the HTTP request
-directly or it can use a <a href="resin-remoting.xtp">remoting</a>
+directly or it can use a <a href="../doc/resin-remoting.xtp">remoting</a>
 protocol like SOAP or Hessian to handle remoting requests.</p>
 
-<p>Since servlets are full <a href="resin-ioc.xtp">Resin-IoC</a> beans,
+<p>Since servlets are full <a href="../admin/candi.xtp">Resin-IoC</a> beans,
 they can use dependency injection, EJB aspects like @TransactionAttribute,
 custom @InterceptorType interceptors, and listen for @Observes events.</p>
 
@@ -1752,7 +1419,7 @@ custom @InterceptorType interceptors, and listen for @Observes events.</p>
 </tr>
 <tr>
   <td>init</td>
-  <td><a href="resin-ioc.xtp">Resin-IoC</a> initialization</td>
+  <td><a href="../admin/candi.xtp">Resin-IoC</a> initialization</td>
 </tr>
 <tr>
   <td>init-param</td>
@@ -1764,7 +1431,7 @@ custom @InterceptorType interceptors, and listen for @Observes events.</p>
 </tr>
 <tr>
  <td>protocol</td>
- <td>Protocol configuration for <a href="resin-remoting.xtp">Resin remoting</a>.</td>
+ <td>Protocol configuration for <a href="../doc/resin-remoting.xtp">Resin remoting</a>.</td>
 </tr>
 <tr>
   <td>run-at</td>
@@ -1878,12 +1545,12 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 </tr>
 <tr>
   <td>init</td>
-  <td><a href="resin-ioc.xtp">Resin-IoC</a> configuration of the
+  <td><a href="../admin/candi.xtp">Resin-IoC</a> configuration of the
 servlet.</td>
 </tr>
 <tr>
   <td>protocol</td>
-  <td>Defines the optional <a href="resin-remoting.xtp">remoting</a>
+  <td>Defines the optional <a href="../doc/resin-remoting.xtp">remoting</a>
 protocol.</td>
 </tr>
 <tr>
@@ -2032,7 +1699,7 @@ element servlet-regexp {
 <p>&lt;session-config> configures Resin's session handling, including the
 cookies Resin sends, the maximum sessions, and session persistence and clustering.</p>
 
-<p>See also: <a href="resin-clustering.xtp">Resin clustering</a> for more
+<p>See also: <a href="../admin/clustering.xtp">Resin clustering</a> for more
 information about distributed sessions and persistence.</p>
 
 <deftable title="&lt;session-config> Attributes">
@@ -2119,7 +1786,7 @@ been called</td>
 </tr>
 <tr>
   <td>use-persistent-store</td>
-  <td>Uses the current <a href="resin.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td>
+  <td>Uses the current <a href="resin-tags.xtp#persistent-store">persistent-store</a> to save sessions. (resin 3.0.8)</td>
   <td>none</td>
 </tr>
 </deftable>
@@ -2224,31 +1891,6 @@ element strict-mapping {
   &lt;strict-mapping&gt;true&lt;/strict-mapping&gt;
 &lt;/web-app&gt;
 </example>
-
-</defun>
-
-<defun title="&lt;user-data-constraint>" version="Servlet" type="defun">
-<parents>security-constraint</parents>
-
-<p>Restricts access to secure transports, such as SSL</p>
-
-<deftable title="&lt;user-data-constraints> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>transport-guarantee</td>
-  <td>Required transport properties.  NONE,
-INTEGRAL, and CONFIDENTIAL are allowed values.</td>
-</tr>
-</deftable>
-
-<def title="&lt;user-data-constraint> schema">
-element user-data-constraint {
-  transport-guarantee
-}
-</def>
 
 </defun>
 
@@ -2531,49 +2173,6 @@ sessions go to the new web-app version.  So users will not be aware of
 the application upgrade.</p>
 
 </s2>
-
-</defun>
-
-<defun title="&lt;web-resource-collection>" version="Servlet" type="defun">
-<parents>security-constraint</parents>
-
-<p>Specifies a collection of areas of the web site for security purposes.
-See <a href="resin-security.xtp">Resin security</a> for an overview.</p>
-
-<deftable-childtags title="&lt;web-resource-collection> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>web-resource-name</td>
-  <td>a name for a web resource collection</td>
-</tr>
-<tr>
- <td>description</td>
-  <td></td>
-</tr>
-<tr>
-  <td>url-pattern</td>
-  <td>url patterns describing the resource</td>
-</tr>
-<tr>
-  <td>http-method</td>
-  <td>HTTP methods to be restricted.</td>
-</tr>
-<tr>
-  <td>method</td>
-  <td></td>
-</tr>
-</deftable-childtags>
-
-<def title="&lt;web-resource-collection> schema">
-element web-resource-collection {
-  url-method*
-  &amp; http-method*
-  &amp; web-resource-name?
-}
-</def>
 
 </defun>
 

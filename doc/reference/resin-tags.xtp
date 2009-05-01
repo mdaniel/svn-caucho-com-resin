@@ -23,8 +23,8 @@ class-loaders, logging and shared resources.</p>
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="server-tags.xtp">Server tags</a> for JVM-specific configuration like thread-max, JVM settings, ports, etc.</li>
 <li>See <a href="webapp-tags.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="config-env.xtp">Resource</a> configuration: classloader, databases, connectors, and beans.</li>
-<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See <a href="env-tags.xtp">Resource</a> configuration: classloader, databases, connectors, and beans.</li>
+<li>See <a href="../doc/config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
@@ -127,7 +127,7 @@ It also defines a system-wide administration authenticator, providing a
 centralized place to manage administration identity.</p>
 
 <p>The &lt;user> configuration is particularly important since it is used
-as a security measure for the <a href="resin-watchdog.xtp">watchdog</a>
+as a security measure for the <a href="../admin/watchdog.xtp">watchdog</a>
 as well as for remote JMX capabilities.</p>
 
 <deftable title="&lt;management> Attributes">
@@ -187,7 +187,7 @@ method.</p>
 
 <p>The password field is an MD5 hash of the username and password for security.
 The /resin-admin or <code>PasswordDigest</code> can be used to create the
-hash.  See <a href="resin-security.xtp">Resin security</a> for more
+hash.  See <a href="../admin/security.xtp">Resin security</a> for more
 information.</p>
 
 <deftable title="&lt;user> Attributes">
@@ -337,7 +337,7 @@ element root-directory {
 &lt;security-manager> enables the use of the security manager for the JVM.
 Because the JVM security manager is very slow, we generally do not
 recommend enabling it for server applications.  Instead, see the
-<a href="resin-watchdog.xtp">watchdog</a> configuration for alternative
+<a href="../admin/watchdog.xtp">watchdog</a> configuration for alternative
 methods for securiting the JVM in ISP configurations.
 </p>
 

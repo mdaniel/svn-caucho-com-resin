@@ -162,6 +162,11 @@ class WatchdogClient
     return _config.getLogDirectory();
   }
   
+  public Path getResinDataDirectory()
+  {
+    return _bootManager.getResinDataDirectory();
+  }
+  
   public long getShutdownWaitTime()
   {
     return _config.getShutdownWaitTime();

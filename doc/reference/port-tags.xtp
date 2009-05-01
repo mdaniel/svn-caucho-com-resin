@@ -242,7 +242,7 @@ will use @virtual-host.</p>
 support.</p>
 
 <p>
-The <a href="ssl.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
+The <a href="../admin/security.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
 </p>
 
 <deftable-childtags>
@@ -303,7 +303,7 @@ follows Apache's configuration, so any documentation on installing
 SSL certificates can use documentation for Apache.</p>
 
 <p>
-The <a href="ssl.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
+The <a href="../admin/security.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
 </p>
 
 <deftable-childtags>

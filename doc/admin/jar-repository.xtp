@@ -1,0 +1,52 @@
+<document>
+  <header>
+    <title>Project Jar Repository</title>
+    <type>contents</type>
+    <description>
+    <p>Library, project, and third-party jars can be stored
+    in <var>project-jars</var> and resolved using a Maven WEB-INF/pom.xml.
+    Resin will match the correct versions from <var>project-jars</var>
+    and create classloaders for the web-app's libraries.</p>
+    </description>
+  </header>
+
+  <body>
+
+<localtoc/>
+
+<s1 title="Overview" version="Resin 4.0.0">
+
+<p>Since most projects use libraries such as Hibernate, Wicket,
+and Apache Commons, Resin has organized a repository for the jars, letting
+you deploy them once for all web-apps and select the ones you need in
+a WEB-INF/pom.xml.</p>
+
+<p>Resin will scan all the jars in the <var>${resin.root}/project-jars</var>
+directory for pom.xml files and create an internal database of the artifact
+names and versions.  A WEB-INF/pom.xml will select the jars for use in
+the web-app.</p>
+
+<p>The following example might select a
+jar <var>project-jars/bar-2.7.3.jar</var>, adding is automatically to
+the web-apps classloader.</p>
+
+<example title="Example: WEB-INF/pom.xml">
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0">
+  &lt;groupId>com.myfoo&lt;/groupId>
+  &lt;artifactId>myartifact&lt;/artifactId>
+  &lt;version>1.0.0&lt;/version>
+
+  &lt;dependencies>
+    &lt;dependency>
+      &lt;groupId>com.foo&lt;/groupId>
+      &lt;artifactId>bar&lt;/artifactId>
+      &lt;version>2.7.3&lt;/version>
+    &lt;/dependency>
+  &lt;/dependencies>
+&lt;/project>
+</example>
+
+</s1>
+
+  </body>
+</document>
