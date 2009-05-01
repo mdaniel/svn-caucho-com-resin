@@ -78,7 +78,7 @@ public class FileCacheManager extends DistributedCacheManager {
       _tempFileManager = server.getTempFileManager();
 
       Path adminPath = server.getResinDataDirectory();
-      String serverId = server.getServerId();
+      String serverId = server.getUniqueServerName();
 
       _mnodeStore = new MnodeStore(adminPath, serverId);
       _dataStore = new DataStore(serverId, _mnodeStore);

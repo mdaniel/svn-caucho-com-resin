@@ -71,7 +71,7 @@ public class TempFileManager
       String serverId = "";
 
       if (resin != null)
-	serverId = resin.getServerUniqueName();
+	serverId = resin.getUniqueServerName();
 
       if ("".equals(serverId))
 	serverId = "default";

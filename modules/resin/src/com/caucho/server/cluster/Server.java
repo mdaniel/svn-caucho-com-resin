@@ -307,6 +307,11 @@ public class Server extends ProtocolDispatchServer
       return false;
   }
 
+  public String getUniqueServerName()
+  {
+    return _resin.getUniqueServerName();
+  }
+
   /**
    * Returns the classLoader
    */

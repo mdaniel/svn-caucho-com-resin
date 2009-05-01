@@ -488,7 +488,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     return ! _isWatchdog;
   }
 
-  public String getServerUniqueName()
+  public String getUniqueServerName()
   {
     String name;
     
