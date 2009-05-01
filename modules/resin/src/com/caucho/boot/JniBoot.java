@@ -42,11 +42,13 @@ public class JniBoot implements Boot {
       _jniProcess.clearSaveOnExec();
   }
 
+  /*
   public void chown(Path path, String user, String group)
   {
     if (_jniProcess != null)
       _jniProcess.chown(path.getNativePath(), user, group);
   }
+  */
   
   public Process exec(ArrayList<String> argv,
 		      HashMap<String,String> env,
