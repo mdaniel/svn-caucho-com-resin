@@ -1431,7 +1431,6 @@ public class Resin implements EnvironmentBean, SchemaBean
       resinConf = _rootDirectory.lookup(_configFile);
 
     _resinConf = resinConf;
-    System.out.println("CF: " + _resinConf + " " + this);
 
     // server.setServerRoot(_serverRoot);
 
