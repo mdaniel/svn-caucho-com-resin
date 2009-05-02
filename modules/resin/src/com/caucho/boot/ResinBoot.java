@@ -149,15 +149,19 @@ public class ResinBoot {
     if (! logDirectory.exists()) {
       logDirectory.mkdirs();
 
-      boot.chown(logDirectory, _client.getUserName(), _client.getGroupName());
+      if (boot.isValid()) {
+	boot.chown(logDirectory, _client.getUserName(), _client.getGroupName());
+      }
     }
 
     Path resinDataDirectory = _client.getResinDataDirectory();
     if (! resinDataDirectory.exists()) {
       resinDataDirectory.mkdirs();
 
-      boot.chown(resinDataDirectory,
-		 _client.getUserName(), _client.getGroupName());
+      if (boot.isValid()) {
+	boot.chown(resinDataDirectory,
+		   _client.getUserName(), _client.getGroupName());
+      }
     }
   }
 
