@@ -70,11 +70,6 @@ public class JniFileStream extends StreamImpl
       return null;
   }
 
-  public static void chown(byte []name, int length, String user, String group)
-  {
-    //    nativeChown(name, length, user, group);
-  }
-
   public boolean canRead()
   {
     return _canRead && _fd >= 0;

@@ -399,6 +399,81 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
   return fd;
 }
 
+#ifdef WIN32
+JNIEXPORT void JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeChown(JNIEnv *env,
+					      jobject obj,
+					      jbyteArray name,
+					      jint length,
+					      jstring user,
+					      jstring group)
+{
+  return;
+}
+
+#else /* WIN32 */
+
+JNIEXPORT void JNICALL
+Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
+					      jobject obj,
+					      jbyteArray name,
+					      jint length,
+					      jstring user,
+					      jstring group)
+{
+  char buffer[8192];
+  char userbuf[256];
+  char groupbuf[256];
+  int uid = -1;
+  int gid = -1;
+  const char *temp_string;
+  struct passwd *passwd;
+  int fd;
+  int flags;
+  struct stat st;
+
+  if (! name || length <= 0 || sizeof(buffer) <= length)
+    return;
+
+  resin_get_byte_array_region(env, name, 0, length, buffer);
+
+  buffer[length] = 0;
+
+  /* Check if the file exists first. */
+  if (stat(buffer, &st)) {
+    return;
+  }
+
+  if (user) {
+    temp_string = (*env)->GetStringUTFChars(env, user, 0);
+
+    if (! temp_string)
+      return;
+
+    strncpy(userbuf, temp_string, sizeof(userbuf));
+    userbuf[sizeof(userbuf) - 1] = 0;
+  
+    (*env)->ReleaseStringUTFChars(env, user, temp_string);
+
+    passwd = getpwnam(userbuf);
+    
+    if (passwd == 0) {
+      resin_printf_exception(env, "java/lang/IllegalArgumentException",
+			     "'%s' is an unknown user.", userbuf);
+      
+      return;
+    }
+
+    uid = passwd->pw_uid;
+    gid = passwd->pw_gid;
+  }
+
+  if (uid > 0 || gid > 0)
+    chown(buffer, uid, gid);
+}
+
+#endif
+
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniFileStream_nativeRead(JNIEnv *env,
 					     jobject obj,

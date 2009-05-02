@@ -132,6 +132,14 @@ public class JniProcess extends Process
     return _pid;
   }
 
+  public void chown(String path, String user, String group)
+  {
+    byte []name = path.getBytes();
+    int len = name.length;
+
+    nativeChown(name, len, user, group);
+  }
+
   public int waitFor()
   {
     int pid = _pid;
@@ -192,6 +200,9 @@ public class JniProcess extends Process
 			      String pwd,
 			      String user,
 			      String group);
+  
+  private native void nativeChown(byte []name, int length,
+				  String user, String group);
   
   private native int waitpid(int pid, boolean isBlock);
 

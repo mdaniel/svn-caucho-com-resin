@@ -143,29 +143,22 @@ public class ResinBoot {
     }
 
     // XXX: needs to be changed for setuid issues
-    /*
+    JniBoot boot = new JniBoot();
+    
     Path logDirectory = _client.getLogDirectory();
     if (! logDirectory.exists()) {
       logDirectory.mkdirs();
 
-      if (_client.getUserName() != null)
-	logDirectory.changeOwner(_client.getUserName());
-      
-      if (_client.getGroupName() != null)
-	logDirectory.changeOwner(_client.getGroupName());
+      boot.chown(logDirectory, _client.getUserName(), _client.getGroupName());
     }
 
     Path resinDataDirectory = _client.getResinDataDirectory();
     if (! resinDataDirectory.exists()) {
       resinDataDirectory.mkdirs();
 
-      if (_client.getUserName() != null)
-	resinDataDirectory.changeOwner(_client.getUserName());
-      
-      if (_client.getGroupName() != null)
-	resinDataDirectory.changeOwner(_client.getGroupName());
+      boot.chown(resinDataDirectory,
+		 _client.getUserName(), _client.getGroupName());
     }
-    */
   }
 
   boolean start()

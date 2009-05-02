@@ -34,4 +34,6 @@ public interface JniProcessAPI {
 			String pwd,
 			String user,
 			String group);
+
+  public void chown(String path, String user, String group);
 }

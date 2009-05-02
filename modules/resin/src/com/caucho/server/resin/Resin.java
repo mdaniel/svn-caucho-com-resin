@@ -219,7 +219,10 @@ public class Resin implements EnvironmentBean, SchemaBean
       _classLoader = (EnvironmentClassLoader) loader;
     else
       _classLoader = EnvironmentClassLoader.create();
+  }
 
+  protected void initEnvironment()
+  {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -368,6 +371,8 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     _resinLocal.set(resin, loader);
+    
+    resin.initEnvironment();
 
     return resin;
   }
@@ -1407,7 +1412,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
     }
 
-    if (resinConf == null || !resinConf.exists()) {
+    if (resinConf == null || ! resinConf.exists()) {
       if (log().isLoggable(Level.FINER))
         log().finer(this + " looking for conf in " +  _rootDirectory.lookup(_configFile));
 
@@ -1426,6 +1431,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       resinConf = _rootDirectory.lookup(_configFile);
 
     _resinConf = resinConf;
+    System.out.println("CF: " + _resinConf + " " + this);
 
     // server.setServerRoot(_serverRoot);
 
