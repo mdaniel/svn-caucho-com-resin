@@ -400,8 +400,9 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
 }
 
 #ifdef WIN32
+
 JNIEXPORT void JNICALL
-Java_com_caucho_vfs_JniFileStream_nativeChown(JNIEnv *env,
+Java_com_caucho_vfs_JniProcess_nativeChown(JNIEnv *env,
 					      jobject obj,
 					      jbyteArray name,
 					      jint length,
