@@ -359,7 +359,7 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
   flags |= O_LARGEFILE;
 #endif
 
-  mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IRGRP|S_IROTH;
+  mode = 0664; /* S_IRUSR|S_IWUSR|S_IRGRP|S_IRGRP|S_IROTH; */
 
   if (is_append)
     fd = open(buffer, O_WRONLY|O_CREAT|O_APPEND|flags, mode);
@@ -402,7 +402,7 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
 #ifdef WIN32
 
 JNIEXPORT void JNICALL
-Java_com_caucho_vfs_JniProcess_nativeChown(JNIEnv *env,
+Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
 					      jobject obj,
 					      jbyteArray name,
 					      jint length,

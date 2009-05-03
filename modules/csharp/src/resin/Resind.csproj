@@ -90,7 +90,11 @@
     <Compile Include="..\common\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
-    <Compile Include="Resin.cs" />
-    <Compile Include="ResinWindow.cs" />
+    <Compile Include="Resin.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ResinWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

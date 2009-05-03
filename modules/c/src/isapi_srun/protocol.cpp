@@ -856,7 +856,7 @@ write_request(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config, char *h
 	code = send_data(s, r, config, HMUX_QUIT, &isHttp11, &is_first);
 
 	if (code == HMUX_QUIT)
-		cse_recycle(s, now);
+		cse_free_idle(s, now);
 	else
 		cse_close(s, "write");
 
@@ -921,7 +921,8 @@ jvm_status(cluster_t *cluster, EXTENSION_CONTROL_BLOCK *r)
       cse_printf(r, "<td align=right>%d</td><td align=right>%d</td>",
 		 srun->active_sockets, pool_count);
       cse_printf(r, "<td align=right>%d</td><td align=right>%d</td><td align=right>%d</td>",
-		 srun->connect_timeout, srun->live_time, srun->dead_time);
+		 srun->connect_timeout, srun->idle_timeout, 
+		 srun->fail_recover_timeout);
 	  cse_printf(r, "<td align=right>%d</td>", srun->read_timeout);
       cse_printf(r, "</tr>\n");
     }

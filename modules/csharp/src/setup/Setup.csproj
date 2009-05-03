@@ -62,6 +62,8 @@
       <Link>Version.cs</Link>
     </Compile>
     <Compile Include="Setup.cs" />
-    <Compile Include="SetupWindow.cs" />
+    <Compile Include="SetupWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>
