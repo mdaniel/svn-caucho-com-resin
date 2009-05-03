@@ -309,6 +309,19 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return _rawWrite;
   }
 
+  public void closeCache()
+  {
+    // _newCacheEntry
+      
+    if (_cacheInvocation != null) {
+      try {
+	close();
+      } catch (IOException e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+  
   /**
    * Closes the request, called from web-app for early close.
    */
