@@ -223,6 +223,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   protected void initEnvironment()
   {
+    if (_lifecycle != null)
+      return;
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -940,6 +943,8 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void start()
   {
+    initEnvironment();
+    
     if (! _lifecycle.toActive())
       return;
 
