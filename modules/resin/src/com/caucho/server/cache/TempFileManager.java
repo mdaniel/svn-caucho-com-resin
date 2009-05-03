@@ -83,7 +83,7 @@ public class TempFileManager
       storePath.remove();
 
       if (storePath.exists()) {
-	throw new ConfigException(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
+	log.warning(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
 				      storePath.getNativePath()));
       }
     

@@ -539,7 +539,7 @@ public final class ThreadPool {
 			   ClassLoader loader,
 			   long expireTime,
 			   boolean isPriority,
-			   boolean queueIfFull)
+			   boolean isQueueIfFull)
   {
     PoolThread poolThread = null;
     boolean isWakeLauncher = false;
@@ -583,8 +583,9 @@ public final class ThreadPool {
 
 	    // queue if schedule() or if there's space to run but no
 	    // active thread yet
-	    if (queueIfFull || isFreeThreadAvailable) {
+	    if (isQueueIfFull || isFreeThreadAvailable) {
 	      isWakeLauncher = true;
+	      isQueueIfFull = true;
 	    
 	      TaskItem item = new TaskItem(task, loader);
 	      
@@ -622,7 +623,7 @@ public final class ThreadPool {
 	  _launcher.wake();
       } catch (OutOfMemoryError e) {
 	try {
-	  System.err.println("Exiting due to OutOfMemoryError");
+	  System.err.println("ThreadPool.schedule exiting due to OutOfMemoryError");
 	} finally {
 	  System.exit(11);
 	}
@@ -630,7 +631,7 @@ public final class ThreadPool {
 	e.printStackTrace();
       }
     } while (poolThread == null
-	     && ! queueIfFull
+	     && ! isQueueIfFull
 	     && Alarm.getCurrentTime() <= expireTime);
 
     if (poolThread != null) {
@@ -639,7 +640,7 @@ public final class ThreadPool {
       return true;
     }
     else
-      return queueIfFull;
+      return isQueueIfFull;
   }
 
   private void init()

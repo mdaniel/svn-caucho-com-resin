@@ -381,6 +381,9 @@ public class Server extends ProtocolDispatchServer
    */
   public GitRepository getGit()
   {
+    if (! isResinServer())
+      return null;
+    
     synchronized (this) {
       if (_git == null && _resin != null) {
 	// initialize git repository
@@ -408,6 +411,9 @@ public class Server extends ProtocolDispatchServer
    */
   public Repository getRepository()
   {
+    if (! isResinServer())
+      return null;
+    
     synchronized (this) {
       if (_repository == null)
 	_repository = createRepository();
@@ -423,6 +429,9 @@ public class Server extends ProtocolDispatchServer
    */
   public FileRepository getLocalRepository()
   {
+    if (! isResinServer())
+      return null;
+    
     synchronized (this) {
       if (_localRepository == null)
 	_localRepository = new FileRepository(this);
@@ -484,6 +493,9 @@ public class Server extends ProtocolDispatchServer
    */
   public DistributedCacheManager getDistributedCacheManager()
   {
+    if (! isResinServer())
+      return null;
+    
     if (_distributedCacheManager == null)
       _distributedCacheManager = createDistributedCacheManager();
 
@@ -495,11 +507,17 @@ public class Server extends ProtocolDispatchServer
    */
   protected DistributedCacheManager createDistributedCacheManager()
   {
+    if (! isResinServer())
+      return null;
+    
     return new FileCacheManager(this);
   }
 
   public TempFileManager getTempFileManager()
   {
+    if (! isResinServer())
+      return null;
+    
     return _resin.getTempFileManager();
   }
 
@@ -1780,17 +1798,22 @@ public class Server extends ProtocolDispatchServer
         bindPorts();
 	startPorts();
       }
-    
+
+      
       if (_distributedCacheManager == null)
 	_distributedCacheManager = createDistributedCacheManager();
 
-      _distributedCacheManager.start();
+      if (_distributedCacheManager != null)
+	_distributedCacheManager.start();
 
       // initialize the system distributed store
-      getSystemStore();
+      if (isResinServer())
+	getSystemStore();
 
       // start the repository
-      getRepository().start();
+      Repository repository = getRepository();
+      if (repository != null)
+	repository.start();
       
       getCluster().start();
 
