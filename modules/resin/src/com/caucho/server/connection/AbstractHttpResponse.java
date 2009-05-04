@@ -315,7 +315,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     // TCK
       
-    if (_cacheInvocation != null && _newCacheEntry) {
+    if (_cacheInvocation != null && _newCacheEntry != null) {
       try {
 	close();
       } catch (IOException e) {
