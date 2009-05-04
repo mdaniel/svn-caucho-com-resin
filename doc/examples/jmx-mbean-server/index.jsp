@@ -1,6 +1,6 @@
-<%@ page import='javax.webbeans.In, javax.management.*, example.TestAdmin' %>
+<%@ page import='javax.inject.Current, javax.management.*, example.TestAdmin' %>
 <%!
-@In MBeanServer _server;
+@Current MBeanServer _server;
 %><%
 ObjectName name = new ObjectName("example:name=test");
 
