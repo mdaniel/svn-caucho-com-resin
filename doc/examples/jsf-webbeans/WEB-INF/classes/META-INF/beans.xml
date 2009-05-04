@@ -1,7 +1,7 @@
-<web-beans xmlns="http://caucho.com/ns/resin">
+<Beans xmlns="urn:java:ee">
   <!--
      - The web-beans.xml marks a class root for WebBeans to search for
      - @Component beans.  Since the example doesn't need to override any
      - defaults, there's no additional configuration necessary.
      -->
-</web-beans>
+</Beans>
