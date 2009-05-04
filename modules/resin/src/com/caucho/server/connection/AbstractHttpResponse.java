@@ -308,21 +308,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     return _rawWrite;
   }
-
-  public void closeCache()
-  {
-    // _newCacheEntry
-
-    // TCK
-      
-    if (_cacheInvocation != null && _newCacheEntry != null) {
-      try {
-	close();
-      } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-  }
   
   /**
    * Closes the request, called from web-app for early close.
@@ -2482,6 +2467,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	}
       }
 
+      finishCache();
+      
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
       // Never send flush?
@@ -2491,32 +2478,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       if (_rawWrite != null)
 	_rawWrite.flushBuffer();
-
-      if (_newCacheEntry != null && _cacheInvocation != null) {
-	OutputStream cacheStream = _cacheStream;
-	_cacheStream = null;
-	
-	Writer cacheWriter = _cacheWriter;
-	_cacheWriter = null;
-
-	if (cacheStream != null)
-	  cacheStream.close();
-
-	if (cacheWriter != null)
-	  cacheWriter.close();
-	
-        WebApp webApp = _request.getWebApp();
-	if (_statusCode == 200 && _allowCache
-            && webApp != null && webApp.isActive()) {
-	  AbstractCacheFilterChain cache = _cacheInvocation;
-	  _cacheInvocation = null;
-
-	  AbstractCacheEntry cacheEntry = _newCacheEntry;
-	  _newCacheEntry = null;
-	  
-	  cache.finishCaching(cacheEntry);
-	}
-      }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
       _isClientDisconnect = true;
@@ -2533,13 +2494,47 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     } finally {
       _isClosed = true;
 
+      _responseStream = null;
+    }
+  }
+
+  public void finishCache()
+    throws IOException
+  {
+    try {
+      _responseStream.close();
+      
+      if (_newCacheEntry != null && _cacheInvocation != null) {
+	OutputStream cacheStream = _cacheStream;
+	_cacheStream = null;
+	
+	Writer cacheWriter = _cacheWriter;
+	_cacheWriter = null;
+
+	if (cacheStream != null)
+	  cacheStream.close();
+
+	if (cacheWriter != null)
+	  cacheWriter.close();
+	
+	WebApp webApp = _request.getWebApp();
+	if (_statusCode == 200 && _allowCache
+	    && webApp != null && webApp.isActive()) {
+	  AbstractCacheFilterChain cache = _cacheInvocation;
+	  _cacheInvocation = null;
+
+	  AbstractCacheEntry cacheEntry = _newCacheEntry;
+	  _newCacheEntry = null;
+	  
+	  cache.finishCaching(cacheEntry);
+	}
+      }
+    } finally {
       AbstractCacheFilterChain cache = _cacheInvocation;
       _cacheInvocation = null;
       
       AbstractCacheEntry cacheEntry = _newCacheEntry;
       _newCacheEntry = null;
-
-      _responseStream = null;
       
       _cacheStream = null;
       _cacheWriter = null;
