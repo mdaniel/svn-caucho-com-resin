@@ -767,10 +767,12 @@
       </fileset>
     </copy>
 
-    <generate-pdf name="book-reference"/>
+    <generate-pdf name="resin-admin"/>
 
-     <copy tofile="${build}/pdf/resin-4.0-reference.pdf"
-	   file="${build}/pdf/book-reference/book-reference.pdf"/>
+    <copy tofile="${build}/pdf/resin-4.0-admin.pdf"
+          file="${build}/pdf/resin-admin/resin-admin.pdf"/>
+    
+    <generate-pdf name="test"/>
   </target>
 
   <target name="relaxng">

@@ -25,8 +25,7 @@ Because resources can be any Java class conforming to the bean configuration
 patterns, resources provide a flexible configuration.</p>
 
 <p>There is also more documentation
-for <a href="../../doc/resin-ioc.xtp">Resin's IoC/Dependency
-Injection</a>.</p>
+for <a href="../../admin/candi.xtp">Java Injection</a>.</p>
 
 <p>Some typical resources include:</p>
 <ul>
@@ -76,7 +75,7 @@ as resources.</p>
 <s1 title="resin-web.xml configuration">
 
 <p>The resin-web.xml (or resin.conf) configures the resource with the
-&lt;bean&gt; tag.  The resource is created and stored in the
+&lt;test:TestResource&gt; tag.  The resource is created and stored in the
 environment where it is defined.  So a resource configured in the
 &lt;host&gt; will be available for all web-apps in that host and a
 resource configured in a &lt;web-app&gt; will only be available for that
@@ -85,11 +84,9 @@ resource configured in a &lt;web-app&gt; will only be available for that
 <example title="resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
 
-  &lt;bean class="test.TestResource"&gt;
-    &lt;init&gt;
-      &lt;value&gt;An Example Resource&lt;/value&gt;
-    &lt;/init&gt;
-  &lt;/bean&gt;
+  &lt;test:TestResource xmlns:test="urn:java:test">
+    &lt;test:value&gt;An Example Resource&lt;/test:value&gt;
+  &lt;/test:TestResource&gt;
 
 &lt;/web-app&gt;
 </example>
@@ -100,20 +97,12 @@ resource configured in a &lt;web-app&gt; will only be available for that
   <th>description</th>
 </tr>
 <tr>
-  <td>bean</td>
-  <td>defines the singleton service</td>
+  <td>test:TestResource</td>
+  <td>The classname of the resource bean</td>
 </tr>
 <tr>
-  <td>class</td>
-  <td>the class name of the resource bean</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>Any bean-style configuration goes here</td>
-</tr>
-<tr>
-  <td>name</td>
-  <td>the optional WebBeans name of the resource</td>
+  <td>Named</td>
+  <td>the optional Java Injection name of the resource for PHP</td>
 </tr>
 <tr>
   <td>value</td>
@@ -125,7 +114,7 @@ resource configured in a &lt;web-app&gt; will only be available for that
 
 <s1 title="Using the resource from PHP">
 
-<p>Your PHP scripts can use any WebBeans resource by using the
+<p>Your PHP scripts can use any Java Injection resource by using the
 <code>java_bean()</code> method.  The method will return the named
 resource.</p>
 
@@ -157,9 +146,10 @@ JSP resource: ${testResource}
 <s1 title="Using the resource from a Servlet">
 
 <p>The example uses a servlet to demonstrate the resource, but any
-injectable class could use <code>@In</code> to look up and use the
-resource.  Because resources are stored globally in WebBeans, they can
-avoid the complexity of passing objects around or storing in the
+injectable class could use <code>@javax.inject.Current</code> to look up
+and use the
+resource.  Because resources are stored globally in Java Injection,
+they can avoid the complexity of passing objects around or storing in the
 servlet context.</p>
 
 <p>If you save the resource, it's important that the saved field is reloaded
@@ -181,10 +171,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.webbeans.In;
+import javax.inject.Current;
 
 public class TestServlet extends HttpServlet {
-  @In private TestResource _resource;
+  @Current private TestResource _resource;
   
   public void doGet(HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException

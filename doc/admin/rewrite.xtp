@@ -55,6 +55,19 @@ falls through to the second, where it is rewritten to "/index.php/foo".</p>
 &lt;/web-app>
 </example>
 
+<example title="Example: Wordpress Rewriting">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:Dispatch>
+    &lt;resin:IfFileExists/>
+  &lt;/resin:Dispatch>
+
+  &lt;resin:Forward regexp="^" target='/index.php'/>
+
+&lt;/web-app>
+</example>
+
 </s2>
 
 <s2 title="Redirects">

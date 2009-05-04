@@ -1,17 +1,13 @@
 <web-app xmlns="http://caucho.com/ns/resin">
   <!--
-     - Instantiates the singleton service.  The service will have its
+     - Configures the resource.  The service will have its
      - setValue called for the value parameter.
-     -
-     - The resource will have its start() method called when
-     - the web-app starts and the stop() method called when the
-     - web-app stops.
     -->
-  <bean class="test.TestResource">
-    <init>
-      <value>Tutorial Example</value>
-    </init>
-  </bean>
+  <test:TestResource xmlns:test="urn:java:test">
+    <Named/>
+    
+    <test:value>Tutorial Example</test:value>
+  </test:TestResource>
 
   <!--
      - Configures the sample servlet

@@ -147,13 +147,11 @@ architecture.  This example uses both: the MovieLister uses a dependent
 MovieFinder interface, and the MovieServlet uses the dependent
 MovieListener class.</p>
 
-<example>
-import javax.webbeans.Component;
-import javax.webbeans.In;
+<example title="Example: finder injection">
+import javax.inject.Current;
 
-@Component
 public class MovieListener {
-  @In private MovieFinder _finder;
+  @Current private MovieFinder _finder;
 
   ...
 }
@@ -163,22 +161,24 @@ public class MovieListener {
 
 <s1 title="Configuration">
 
-<example title="Configuring the MovieFinder Service">
-&lt;bean class="example.MovieFinderImpl"&gt;
-  &lt;init&gt;
-    &lt;movie director="Jackson" title="Fellowship of the Ring"/&gt;
-    &lt;movie director="Jackson" title="The Two Towers"/&gt;
+<example title="Example: Configuring the MovieFinder Service">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-    &lt;movie director="Lucas" title="Star Wars"/&gt;
+&lt;example:MovieFinderImpl xmlns:example="urn:java:example"&gt;
+  &lt;movie director="Jackson" title="Fellowship of the Ring"/&gt;
+  &lt;movie director="Jackson" title="The Two Towers"/&gt;
 
-    &lt;movie director="Gilliam" title="Brazil"/&gt;
-  &lt;/init&gt;
-&lt;/bean&gt;
+  &lt;movie director="Lucas" title="Star Wars"/&gt;
+
+  &lt;movie director="Gilliam" title="Brazil"/&gt;
+&lt;/example:MovieFinderImpl&gt;
+
+&lt;/web-app>
 </example>
 
 </s1>
 
-<s1 title="Dependency Injection for Servlets">
+<s1 title="Java Injection for Servlets">
 
 <p>The Dependency Injection pattern is just as useful for servlet
 configuration as it is for resources.  This example makes the
@@ -196,11 +196,11 @@ versions of the MovieListener.</li>
 </ul>
 
 <example title="Configuring the MovieServlet">
-import javax.webbeans.In;
+import javax.inject.Current;
 
 public class MovieServlet extends HttpServlet {
   // Inject the MovieLister service
-  @In private MovieLister _movieLister;
+  @Current private MovieLister _movieLister;
 
   ...
 }

@@ -1,0 +1,80 @@
+<book>
+  <chapter title="Overview">
+    <linked-section link="install/overview.xtp" />
+  </chapter>
+
+  <chapter title="Installation">
+    <linked-section link="install/install.xtp" />
+    <linked-section link="install/configure.xtp" />
+    <linked-section link="install/install-3rd-party.xtp" />
+  </chapter>
+
+  <chapter title="Admin Guide">
+    <linked-section link="admin/guide-admin.xtp" />
+  </chapter>
+
+  <chapter title="Clustering: Sessions">
+    <linked-section link="admin/clustering.xtp" />
+  </chapter>
+
+  <chapter title="Database">
+    <linked-section link="admin/database.xtp" />
+  </chapter>
+
+  <chapter title="Deployment">
+    <linked-section link="admin/deployment.xtp" />
+  </chapter>
+
+  <chapter title="Dynamic Servers">
+    <linked-section link="admin/dynamic-servers.xtp" />
+  </chapter>
+
+  <chapter title="Project Jar Repository">
+    <linked-section link="admin/jar-repository.xtp" />
+  </chapter>
+
+  <chapter title="Java Injection">
+    <linked-section link="admin/candi.xtp" />
+  </chapter>
+
+  <chapter title="Load Balancing">
+    <linked-section link="admin/load-balancing.xtp" />
+  </chapter>
+
+  <chapter title="Performance">
+    <linked-section link="admin/performance.xtp" />
+  </chapter>
+
+  <chapter title="/resin-admin">
+    <linked-section link="admin/resin-admin.xtp" />
+  </chapter>
+
+  <chapter title="Rewrite/Dispatch">
+    <linked-section link="admin/rewrite.xtp" />
+  </chapter>
+
+  <chapter title="Scheduling">
+    <linked-section link="admin/scheduling.xtp" />
+  </chapter>
+
+  <chapter title="Security">
+    <linked-section link="admin/security.xtp" />
+  </chapter>
+
+  <chapter title="Troubleshooting">
+    <linked-section link="admin/troubleshoot.xtp" />
+  </chapter>
+
+  <chapter title="Virtual Hosting">
+    <linked-section link="admin/virtual-host.xtp" />
+  </chapter>
+
+  <chapter title="Watchdog">
+    <linked-section link="admin/watchdog.xtp" />
+  </chapter>
+
+  <chapter title="Web Application">
+    <linked-section link="admin/webapp-overview.xtp" />
+  </chapter>
+
+</book>

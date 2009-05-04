@@ -339,9 +339,9 @@
 
       <java classname="com.caucho.xtpdoc.Printer" fork="true" 
             output="${build}/pdf/@{name}/@{name}.tex" logError="true"
-            dir="${doc}/doc">
+            dir="${doc}">
         <jvmarg value="-Djava.awt.headless=true"/>
-        <arg file="${doc}/doc/@{name}.xml"/>
+        <arg file="${doc}/@{name}.xml"/>
         <classpath>
           <pathelement location="${java.home}/../lib/tools.jar"/>
           <dirset dir="${modules}">

@@ -7,7 +7,7 @@ import java.io.*;
 import com.caucho.vfs.*;
 
 /**
- * AppConfig is a singleton &lt;bean> service containing configuration.
+ * AppConfig is a singleton simple bean service containing configuration.
  */
 public class AppConfig {
   ConfigFilesLocation _cfl = null;
