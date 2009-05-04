@@ -2302,12 +2302,13 @@ public class WebApp extends ServletContextImpl
         WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
 
         webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
+	chain = webAppChain;
 
 	// TCK: cache needs to be outside because the cache flush conflicts
 	// with the request listener destroy callback
         // top-level filter elements
         if (_cache != null)
-          chain = _cache.createFilterChain(webAppChain, this);
+          chain = _cache.createFilterChain(chain, this);
 
         invocation.setFilterChain(chain);
         invocation.setPathInfo(entry.getPathInfo());
