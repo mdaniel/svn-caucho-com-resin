@@ -504,9 +504,6 @@ public class SessionModule extends AbstractQuercusModule
       generateSessionCookie(env, sessionId);
     }
     env.setSpecialValue("caucho.session_id", env.createString(sessionId));
-
-    
-    System.err.println();
     
     return true;
   }
