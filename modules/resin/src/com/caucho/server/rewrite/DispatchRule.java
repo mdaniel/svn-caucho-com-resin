@@ -101,7 +101,11 @@ public class DispatchRule
       return new DispatchAbsoluteFilterChain(uriArg, WebApp.getCurrent());
     else
     */
-    return new RewriteDispatchFilterChain(uriArg);
+    
+    if (_target != null)
+      return new RewriteDispatchFilterChain(uriArg);
+    else
+      return accept;
   }
 
   @Override
