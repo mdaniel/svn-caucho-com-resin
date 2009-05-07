@@ -24,18 +24,36 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
-
-package javax.servlet;
 
 /**
- * Tracking mode for sessions
- *
- * @since servlet 3.0
+ * @since 3.0
  */
-public enum SessionTrackingMode {
-  COOKIE,
-  URL,
-  SSL
-  }
+package javax.servlet.http;
+
+import java.io.InputStream;
+import java.io.IOException;
+
+public interface Part {
+  public InputStream getInputStream()
+    throws IOException;
+
+  public String getContentType();
+
+  public String getName();
+
+  public long getSize();
+
+  public void write(String fileName)
+    throws IOException;
+
+  public void delete()
+    throws IOException;
+
+  public String getHeader(String name);
+
+  public Iterable<String> getHeaders(String name);
+
+  public Iterable<String> getHeaderNames();
+}

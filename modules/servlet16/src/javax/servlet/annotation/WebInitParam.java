@@ -20,22 +20,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.servlet;
+package javax.servlet.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.servlet.DispatcherType;
 
 /**
- * Tracking mode for sessions
+ * Init parameter declaration
  *
- * @since servlet 3.0
+ * @since Servlet 3.0
  */
-public enum SessionTrackingMode {
-  COOKIE,
-  URL,
-  SSL
-  }
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface WebInitParam {
+  public String name();
+
+  public String value();
+
+  public String description() default "";
+}

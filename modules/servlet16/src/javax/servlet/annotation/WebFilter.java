@@ -39,11 +39,13 @@ import javax.servlet.DispatcherType;
 
 /**
  * Filter
+ *
+ * @since Servlet 3.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented  
-public @interface ServletFilter {
+public @interface WebFilter {
   public boolean asyncSupported() default false;
   public long asyncTimeout() default 60000L;
   
@@ -54,7 +56,7 @@ public @interface ServletFilter {
   public String filterName() default "";
   
   public String icon() default "";
-  public InitParam[] initParams() default {};
+  public WebInitParam[] initParams() default {};
   
   public String []servletNames() default {};
   public String []urlPatterns() default {};

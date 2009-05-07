@@ -20,24 +20,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package javax.servlet.http.annotation;
+package javax.servlet.annotation;
 
+import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-import javax.servlet.DispatcherType;
-
-@Target(ElementType.TYPE)
+/**
+ * Declares types an instance of the ServletContainerInitializer can handle.
+ *
+ * @since Servlet 3.0
+ */
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Servlet {
-  public String urlPattern();
+public @interface HandlesTypes {
+  Class[] value();
 }

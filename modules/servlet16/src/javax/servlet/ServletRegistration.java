@@ -20,31 +20,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package javax.servlet.annotation;
+package javax.servlet;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Set;
 
-import javax.servlet.DispatcherType;
+public interface ServletRegistration
+  extends Registration
+{
+  public Set<String> addMapping(String... urlPatterns);
 
-/**
- * Servlet
- *
- * @since Servlet 3.0
- */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented  
-public @interface WebServletContextListener {
-  public String description() default "";
+  interface Dynamic
+    extends ServletRegistration, Registration.Dynamic
+  {
+    public void setLoadOnStartup(int loadOnStartup);
+  }
+
 }

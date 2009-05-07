@@ -20,27 +20,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package javax.servlet.http.annotation;
+package javax.servlet.annotation;
 
+import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-import javax.servlet.DispatcherType;
-
+/**
+ * @since Servlet 3.0
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FilterMapping {
-  public String []urlPattern = null;
+public @interface MultipartConfig {
+  String location() default "";
 
-  public DispatcherType[] dispatcherTypes = { DispatcherType.REQUEST };
-  public String[] servletNames = {};
+  long maxFileSize() default 0L;
+
+  long maxRequestSize() default 0L;
+
+  int fileSizeThreshold() default 0;
 }

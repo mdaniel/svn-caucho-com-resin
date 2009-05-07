@@ -35,8 +35,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.servlet.DispatcherType;
-
 /**
  * Servlet
  *
@@ -52,7 +50,8 @@ public @interface WebServlet {
   public String description() default "";
   public String icon() default "";
   
-  public InitParam[] initParams() default {};
+  public WebInitParam[] initParams() default {};
+  public int loadOnStartup() default -1;
 
   public String name() default "";
   public String []urlPatterns() default {};

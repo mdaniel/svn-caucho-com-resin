@@ -29,75 +29,31 @@
 
 package javax.servlet;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Locale;
-
 /**
  * Configuration for cookie handling
  *
  * @since servlet 3.0
  */
-public class SessionCookieConfig {
-  private String _domain;
-  private String _comment;
-  private String _path;
-  private boolean _isHttpOnly;
-  private boolean _isSecure;
+public interface SessionCookieConfig {
 
-  /**
-   * Create the new configuration.
-   */
-  public SessionCookieConfig(String domain,
-			     String path,
-			     String comment,
-			     boolean isHttpOnly,
-			     boolean isSecure)
-  {
-    _domain = domain;
-    _path = path;
-    _comment = comment;
-    _isHttpOnly = isHttpOnly;
-    _isSecure = isSecure;
-  }
+  public void setName(String name);
+  public String getName();
 
-  /**
-   * Returns the default cookie comment
-   */
-  public String getComment()
-  {
-    return _comment;
-  }
+  public void setDomain(String domain);
+  public String getDomain();
 
-  /**
-   * Returns the default cookie domain
-   */
-  public String getDomain()
-  {
-    return _domain;
-  }
+  public void setPath(String path);
+  public String getPath();
 
-  /**
-   * Returns the default cookie path
-   */
-  public String getPath()
-  {
-    return _path;
-  }
+  public void setComment(String comment);
+  public String getComment();
 
-  /**
-   * Returns the default cookie HttpOnly value
-   */
-  public boolean isHttpOnly()
-  {
-    return _isHttpOnly;
-  }
+  public void setHttpOnly(boolean httpOnly);
+  public boolean isHttpOnly();
 
-  /**
-   * Returns the default cookie Secure value
-   */
-  public boolean isSecure()
-  {
-    return _isSecure;
-  }
+  public void setSecure(boolean secure);
+  public boolean isSecure();
+
+  public void setMaxAge(int maxAge);
+  public int getMaxAge();
 }

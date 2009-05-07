@@ -30,13 +30,19 @@
 package javax.servlet;
 
 import java.util.EventListener;
+import java.io.IOException;
 
 /**
  * Asynchronous/comet servlet support.
  *
  * @since Servlet 3.0
  */
-public interface AsyncListener extends EventListener {
-  public void onComplete(AsyncEvent event);
-  public void onTimeout(AsyncEvent event);
+public interface AsyncListener
+  extends EventListener
+{
+  public void onComplete(AsyncEvent event)
+    throws IOException;
+
+  public void onTimeout(AsyncEvent event)
+    throws IOException;
 }

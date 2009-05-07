@@ -277,7 +277,7 @@ public class ConnectionCometController extends ConnectionController
     return _forwardPath;
   }
 
-  public void forward()
+  public void dispatch()
   {
     Connection conn = _conn;
 
@@ -286,18 +286,18 @@ public class ConnectionCometController extends ConnectionController
     }
   }
   
-  public void forward(String path)
+  public void dispatch(String path)
   {
     _forwardPath = path;
 
-    forward();
+    dispatch();
   }
   
-  public void forward(ServletContext context, String path)
+  public void dispatch(ServletContext context, String path)
   {
     _forwardPath = path;
 
-    forward();
+    dispatch();
   }
 
   public void start(Runnable task)

@@ -30,8 +30,9 @@
 package javax.servlet;
 
 public enum DispatcherType {
-  ERROR,
   FORWARD,
   INCLUDE,
-  REQUEST
+  REQUEST,
+  ASYNC,
+  ERROR
 }

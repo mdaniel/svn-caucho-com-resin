@@ -33,8 +33,13 @@ import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.OutputStreamWriter;
+import java.util.ResourceBundle;
 
 /**
  * HttpServlet is a convenient abstract class for creating servlets.
@@ -342,5 +347,67 @@ public abstract class HttpServlet extends GenericServlet
     } else {
       res.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
     }
+  }
+}
+
+/**
+ * @since 3.0
+ */
+class NoBodyResponse
+  extends HttpServletResponseWrapper
+{
+
+  NoBodyResponse(HttpServletResponse r)
+  {
+    super(r);
+  }
+
+  void setContentLength()
+  {
+  }
+
+  public void setContentLength(int len)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public ServletOutputStream getOutputStream()
+    throws IOException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public PrintWriter getWriter()
+    throws UnsupportedEncodingException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+}
+
+/**
+ * @since 3.0
+ */
+class NoBodyOutputStream
+  extends ServletOutputStream
+{
+
+  NoBodyOutputStream()
+  {
+  }
+
+  int getContentLength()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public void write(int b)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public void write(byte buf[], int offset, int len)
+    throws IOException
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
   }
 }

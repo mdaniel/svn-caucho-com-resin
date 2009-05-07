@@ -101,6 +101,7 @@ import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.*;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import javax.inject.*;
 import javax.inject.manager.Bean;
@@ -3102,7 +3103,7 @@ public class WebApp extends ServletContextImpl
 	  CauchoBean cBean = (CauchoBean) bean;
 	  
 	  for (Annotation ann : cBean.getAnnotations()) {
-	    if (ann.annotationType().equals(javax.servlet.http.annotation.Servlet.class)) {
+	    if (ann.annotationType().equals(WebServlet.class)) {
 	      //ServletConfigImpl config
 	      //  = new ServletConfigImpl(this, ann, manager.getInstance(bean));
 

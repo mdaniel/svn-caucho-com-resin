@@ -24,18 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package javax.servlet;
 
-/**
- * Tracking mode for sessions
- *
- * @since servlet 3.0
- */
-public enum SessionTrackingMode {
-  COOKIE,
-  URL,
-  SSL
-  }
+import java.util.Set;
+
+public interface ServletContainerInitializer {
+  public void onStartup(Set<Class<?>> c, ServletContext ctx);
+}

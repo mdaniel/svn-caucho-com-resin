@@ -24,18 +24,30 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package javax.servlet;
+package javax.servlet.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Retention;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
 /**
- * Tracking mode for sessions
+ * Dclares a listener implementing one or more of the {@link
+ * javax.servlet.ServletContextListener}, {@link javax.servlet.ServletContextAttributeListener},
+ * {@link javax.servlet.ServletRequestListener}, {@link
+ * javax.servlet.ServletRequestAttributeListener}, {@link
+ * javax.servlet.http.HttpSessionListener}, or {@link javax.servlet.http.HttpSessionAttributeListener}
+ * interfaces.
  *
- * @since servlet 3.0
+ * @since Servlet 3.0
  */
-public enum SessionTrackingMode {
-  COOKIE,
-  URL,
-  SSL
-  }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface WebListener {
+  String description() default "";
+}

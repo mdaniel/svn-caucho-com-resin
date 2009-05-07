@@ -24,18 +24,24 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package javax.servlet;
 
-/**
- * Tracking mode for sessions
- *
- * @since servlet 3.0
- */
-public enum SessionTrackingMode {
-  COOKIE,
-  URL,
-  SSL
+import java.util.Set;
+import java.util.Map;
+
+public interface Registration {
+  public boolean setInitParameter(String name, String value);
+
+  public Set<String> setInitParameters(Map<String, String> initParameters);
+
+  interface Dynamic
+    extends Registration
+  {
+    public void setDescription(String description);
+
+    public void setAsyncSupported(boolean isAsyncSupported);
   }
+}

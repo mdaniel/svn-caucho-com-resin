@@ -65,15 +65,15 @@ public class AsyncContextImpl implements AsyncContext
     return true;
   }
 
-  public void forward()
+  public void dispatch()
   {
   }
   
-  public void forward(String path)
+  public void dispatch(String path)
   {
   }
   
-  public void forward(ServletContext context, String path)
+  public void dispatch(ServletContext context, String path)
   {
   }
 
