@@ -282,6 +282,21 @@ public class JspResponseWrapper extends ResponseWrapper
   {
   }
 
+  public int getStatus()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaders(String name)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
   /**
    * complete the response.
    */

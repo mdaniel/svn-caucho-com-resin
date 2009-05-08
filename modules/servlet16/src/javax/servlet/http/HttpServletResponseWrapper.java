@@ -221,6 +221,30 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper
   {
     response.setStatus(sc, msg);
   }
+
+  public int getStatus()
+  {
+    return response.getStatus();
+  }
+
+  public String getHeader(String name)
+  {
+    //XXX: test
+    return response.getHeader(name);
+  }
+
+  public Iterable<String> getHeaders(String name)
+  {
+    //XXX: test
+    return response.getHeaders(name);
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    //XXX: test
+    return response.getHeaderNames();
+  }
+
   /**
    * @deprecated
    */

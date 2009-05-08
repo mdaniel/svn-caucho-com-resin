@@ -565,7 +565,25 @@ public class HttpServletResponseImpl implements CauchoResponse
   {
     return getAbstractHttpResponse().upgradeProtocol(handler);
   }
-  
+
+  public int getStatus()
+  {
+    // XXX: test
+    return getAbstractHttpResponse().getStatus();
+  }
+
+  public Iterable<String> getHeaders(String name)
+  {
+    // XXX: test
+    return getAbstractHttpResponse().getHeaders(name);
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    // XXX: test
+    return getAbstractHttpResponse().getHeaderNames();
+  }
+
   public void closeImpl()
     throws IOException
   {

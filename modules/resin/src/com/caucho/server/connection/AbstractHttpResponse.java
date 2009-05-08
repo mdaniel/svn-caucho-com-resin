@@ -1125,6 +1125,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     addHeader(key, _calendar.printDate());
   }
 
+  public Iterable<String> getHeaders(String name)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
   /**
    * Sets the content length of the result.  In general, Resin will handle
    * the content length, but for things like long downloads adding the
@@ -1857,6 +1867,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     boolean old = _disableCaching;
     _disableCaching = disable;
     return old;
+  }
+
+  public int getStatus()
+  {
+    throw new UnsupportedOperationException("unimplemented");
   }
 
   /**

@@ -70,7 +70,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    * Create a new Request.  Because the actual initialization occurs with
    * the start() method, this just allocates statics.
    *
-   * @param server the parent server
+   * @param request
    */
   public HttpServletRequestImpl(AbstractHttpRequest request)
   {
@@ -1044,6 +1044,11 @@ public class HttpServletRequestImpl implements CauchoRequest
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public long getAsyncTimeout()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   /**
    * Starts an async mode
    *
@@ -1073,6 +1078,11 @@ public class HttpServletRequestImpl implements CauchoRequest
     _comet.suspend();
     
     return (AsyncContext) _comet;
+  }
+
+  public DispatcherType getDispatcherType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override

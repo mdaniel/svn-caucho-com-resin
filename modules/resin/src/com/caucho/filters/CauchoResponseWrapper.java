@@ -350,4 +350,19 @@ public class CauchoResponseWrapper extends ResponseWrapper
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).setNoCache(isPrivate);
   }
+
+  public int getStatus()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaders(String name)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
 }

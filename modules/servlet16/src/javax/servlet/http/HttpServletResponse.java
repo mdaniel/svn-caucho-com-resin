@@ -186,7 +186,7 @@ public interface HttpServletResponse extends ServletResponse {
    * Encodes session information in a URL suitable for
    * <code>sendRedirect()</code> 
    *
-   * @param url the url to encode
+   * @param name the url to encode
    * @return a url with session information encoded
    */
   public String encodeRedirectURL(String name);

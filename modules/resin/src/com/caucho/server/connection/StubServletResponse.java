@@ -228,4 +228,19 @@ public class StubServletResponse extends AbstractHttpResponse {
   public void setSessionId(String id)
   {
   }
+
+  public int getStatus()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaders(String name)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
 }

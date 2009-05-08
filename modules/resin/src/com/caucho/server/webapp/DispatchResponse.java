@@ -33,7 +33,6 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.IncludeResponseStream;
-import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.util.FreeList;
 import com.caucho.vfs.WriteStream;
 
@@ -212,6 +211,21 @@ class DispatchResponse extends AbstractHttpResponse
       else
 	break;
     }
+  }
+
+  public int getStatus()
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaders(String name)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Iterable<String> getHeaderNames()
+  {
+    throw new UnsupportedOperationException("unimplemented");
   }
 
   /**

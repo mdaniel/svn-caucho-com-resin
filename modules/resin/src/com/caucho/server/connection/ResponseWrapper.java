@@ -52,8 +52,6 @@ public class ResponseWrapper implements ServletResponse {
   
   /**
    * Create a new ServletResponseWrapper, wrapping a specified response.
-   *
-   * @param response the response to wrap.
    */
   public ResponseWrapper()
   {
@@ -454,6 +452,7 @@ public class ResponseWrapper implements ServletResponse {
   {
     return false;
   }
+  
 
   //
   // caucho methods

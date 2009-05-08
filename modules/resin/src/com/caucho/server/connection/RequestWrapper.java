@@ -788,6 +788,16 @@ public class RequestWrapper implements ServletRequest {
     return true;
   }
 
+  public long getAsyncTimeout()
+  {
+    return getRequest().getAsyncTimeout();
+  }
+
+  public DispatcherType getDispatcherType()
+  {
+    return getRequest().getDispatcherType();
+  }
+
   /**
    * Clears the wrapper.
    */

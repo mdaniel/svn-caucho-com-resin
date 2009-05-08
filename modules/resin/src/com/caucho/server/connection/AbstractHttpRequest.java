@@ -2802,6 +2802,11 @@ public abstract class AbstractHttpRequest
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public long getAsyncTimeout()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   /**
    * Starts an async mode
    *
@@ -2819,6 +2824,11 @@ public abstract class AbstractHttpRequest
    */
   public AsyncContext startAsync(ServletRequest request,
 				 ServletResponse response)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public DispatcherType getDispatcherType()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
