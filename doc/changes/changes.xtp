@@ -10,6 +10,12 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
+<s2 title="3.1 snapshot">
+<ul>
+<li>rewrite: &lt;dispatch> should not modify uri unless it has a target (#3295, rep by Ethan Larson)</li>
+</ul>
+</s2>
+
 <s2 title="3.1.9 (2009-04-13)">
 <ul>
 <li>jsp: trimDirectiveWhitespaces was ignored for tag files (#3386, rep by kvirkki)</li>
