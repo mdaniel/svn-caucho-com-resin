@@ -134,7 +134,8 @@ public class UTF8Writer extends EncodingWriter {
 	buffer[length++] = (byte) (0xc0 + (ch >> 6));
 	buffer[length++] = (byte) (0x80 + (ch & 0x3f));
       }
-      else if (ch < 0xd800 || 0xdfff < ch) {
+      else if (ch < 0xd800 || 0xdfff < ch || i + 1 == len) {
+	// server/0815
 	buffer[length++] = (byte) (0xe0 + (ch >> 12));
 	buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
 	buffer[length++] = (byte) (0x80 + (ch & 0x3f));
