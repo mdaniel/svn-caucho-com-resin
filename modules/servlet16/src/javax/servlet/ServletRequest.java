@@ -352,11 +352,18 @@ public interface ServletRequest {
   public void setAsyncTimeout(long timeout);
 
   /**
+   * Returns asyncTimeout
+   * @return
+   */
+  public long getAsyncTimeout();
+
+  /**
    * Starts an async mode
    *
    * @since Servlet 3.0
    */
-  public AsyncContext startAsync();
+  public AsyncContext startAsync()
+    throws IllegalStateException;
 
   /**
    * Starts an async mode
@@ -364,68 +371,13 @@ public interface ServletRequest {
    * @since Servlet 3.0
    */
   public AsyncContext startAsync(ServletRequest servletRequest,
-				 ServletResponse servletResponse);
+                                 ServletResponse servletResponse)
+    throws IllegalStateException;
 
   /**
-   * Returns the servlet response for the request
-   *
-   * @since Servlet 3.0
+   * Returns DispatherType
+   * @return
    */
-  // public ServletResponse getServletResponse();
+  public DispatcherType getDispatcherType();
 
-  /**
-   * Suspend the request
-   *
-   * @since Servlet 3.0
-   */
-  // public void suspend(long timeout);
-
-  /**
-   * Suspend the request
-   *
-   * @since Servlet 3.0
-   */
-  // public void suspend();
-
-  /**
-   * Resume the request
-   *
-   * @since Servlet 3.0
-   */
-  //public void resume();
-
-  /**
-   * Complete the request
-   *
-   * @since Servlet 3.0
-   */
-  //public void complete();
-
-  /**
-   * Returns true if the servlet is suspended
-   *
-   * @since Servlet 3.0
-   */
-  //public boolean isSuspended();
-
-  /**
-   * Returns true if the servlet is resumed
-   *
-   * @since Servlet 3.0
-   */
-  //public boolean isResumed();
-
-  /**
-   * Returns true if the servlet timed out
-   *
-   * @since Servlet 3.0
-   */
-  //public boolean isTimeout();
-
-  /**
-   * Returns true for the initial dispatch
-   *
-   * @since Servlet 3.0
-   */
-  //public boolean isInitial();
 }

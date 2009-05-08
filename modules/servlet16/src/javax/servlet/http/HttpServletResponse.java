@@ -202,4 +202,36 @@ public interface HttpServletResponse extends ServletResponse {
    * @deprecated
    */
   public String encodeRedirectUrl(String url);
+
+  /**
+   * Returns the current status code of this response
+   *
+   * @return
+   */
+  public int getStatus();
+
+  /**
+   * Retuns value of header with a given name
+   *
+   * @param name
+   * @return
+   */
+  public String getHeader(String name);
+
+  /**
+   * Returns an Iterable for header values with a given name
+   *
+   * @param name
+   * @return
+   */
+  public Iterable<String> getHeaders(String name);
+
+  /**
+   * Returns an Iterable for header names set via {@link #setHeader}, {@link
+   * #addHeader}, {@link #setDateHeader}, {@link #addDateHeader}, {@link
+   * #setIntHeader}, or {@link #addIntHeader}, respectively.
+   *
+   * @return
+   */
+  public Iterable<String> getHeaderNames();
 }

@@ -259,4 +259,13 @@ public class ServletResponseWrapper implements ServletResponse {
   {
     return _response.isDisabled();
   }
+
+  public boolean isWrapperFor(ServletResponse wrapped) {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public boolean isWrapperFor(Class wrappedType)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
 }

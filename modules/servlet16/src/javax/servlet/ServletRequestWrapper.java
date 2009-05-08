@@ -431,12 +431,18 @@ public class ServletRequestWrapper implements ServletRequest {
     _request.setAsyncTimeout(timeout);
   }
 
+  public long getAsyncTimeout()
+  {
+    return _request.getAsyncTimeout();
+  }
+
   /**
    * Starts an async mode
    *
    * @since Servlet 3.0
    */
   public AsyncContext startAsync()
+    throws IllegalStateException
   {
     return _request.startAsync();
   }
@@ -447,116 +453,35 @@ public class ServletRequestWrapper implements ServletRequest {
    * @since Servlet 3.0
    */
   public AsyncContext startAsync(ServletRequest servletRequest,
-				 ServletResponse servletResponse)
+                                 ServletResponse servletResponse)
+    throws IllegalStateException
   {
     return _request.startAsync(servletRequest, servletResponse);
   }
 
   /**
-   * Returns the servlet response for the request
    *
-   * @since Servlet 3.0
+   * @param wrapped
+   * @return
    */
-  /*
-  public ServletResponse getServletResponse()
-  {
-    return _request.getServletResponse();
+  public boolean isWrapperFor(ServletRequest wrapped) {
+    throw new UnsupportedOperationException("unimplemented");
   }
-  */
 
   /**
-   * Suspend the request
-   *
-   * @since Servlet 3.0
+   * @param wrappedType
+   * @return
    */
-  /*
-  public void suspend(long timeout)
+  public boolean isWrapperFor(Class wrappedType)
   {
-    _request.suspend(timeout);
+    throw new UnsupportedOperationException("unimplemented");
   }
-  */
 
   /**
-   * Suspend the request
-   *
-   * @since Servlet 3.0
+   * 
+   * @return
    */
-  /*
-  public void suspend()
-  {
-    _request.suspend();
+  public DispatcherType getDispatcherType() {
+    return _request.getDispatcherType();
   }
-  */
-
-  /**
-   * Resume the request
-   *
-   * @since Servlet 3.0
-   */
-  /*
-  public void resume()
-  {
-    _request.resume();
-  }
-  */
-
-  /**
-   * Complete the request
-   *
-   * @since Servlet 3.0
-   */
-  /*
-  public void complete()
-  {
-    _request.complete();
-  }
-  */
-
-  /**
-   * Returns true if the servlet is suspended
-   *
-   * @since Servlet 3.0
-   */
-  /*
-  public boolean isSuspended()
-  {
-    return _request.isSuspended();
-  }
-  */
-
-  /**
-   * Returns true if the servlet is resumed
-   *
-   * @since Servlet 3.0
-   */
-  /*
-  public boolean isResumed()
-  {
-    return _request.isResumed();
-  }
-  */
-
-  /**
-   * Returns true if the servlet timed out
-   *
-   * @since Servlet 3.0
-   */
-  /*
-  public boolean isTimeout()
-  {
-    return _request.isTimeout();
-  }
-  */
-
-  /**
-   * Returns true for the initial dispatch
-   *
-   * @since Servlet 3.0
-   */
-  /*
-  public boolean isInitial()
-  {
-    return _request.isInitial();
-  }
-  */
 }
