@@ -70,6 +70,10 @@ public class ServerArrayValue extends ArrayValueImpl
   
   private static final StringValue REQUEST_URI_V
     = new ConstStringValue("REQUEST_URI");
+  
+  private static final StringValue SCRIPT_URL_V
+    = new ConstStringValue("SCRIPT_URL");
+  
   private static final StringValue SCRIPT_NAME_V
     = new ConstStringValue("SCRIPT_NAME");
   private static final StringValue SCRIPT_FILENAME_V
@@ -289,6 +293,8 @@ public class ServerArrayValue extends ArrayValueImpl
         requestURI = requestURI + '?' + queryString;
 
       super.put(REQUEST_URI_V,
+                _env.createString(requestURI));
+      super.put(SCRIPT_URL_V,
                 _env.createString(requestURI));
       super.put(SCRIPT_FILENAME_V,
                 _env.createString(request.getRealPath(servletPath)));
