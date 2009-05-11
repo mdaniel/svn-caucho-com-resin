@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
 import com.caucho.vfs.WriteStream;
@@ -53,6 +54,8 @@ abstract public class ArrayValue extends Value {
 
   public static final GetKey GET_KEY = new GetKey();
   public static final GetValue GET_VALUE = new GetValue();
+  
+  public static final StringValue ARRAY = new ConstStringValue("Array");
 
   protected Entry _current;
 
@@ -1132,6 +1135,14 @@ abstract public class ArrayValue extends Value {
       return false;
     else
       return true;
+  }
+  
+  /**
+   * Converts to a key.
+   */
+  public Value toKey()
+  { 
+    return ARRAY;
   }
 
   @Override
