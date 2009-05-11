@@ -864,7 +864,7 @@ abstract public class ArrayValue extends Value {
   public Value each()
   {
     if (_current == null)
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
 
     ArrayValue result = new ArrayValueImpl();
 
