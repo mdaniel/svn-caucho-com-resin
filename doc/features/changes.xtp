@@ -2,6 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title="3.0.28 snap">
+<ul>
+<li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>
+</ul>
+</s2>
+
 <s2 title="3.0.27 - Jan 19, 2009">
 <ul>
 <li>jni: openssl not timing out properly (#2988, rep by Tom Hintz)</li>

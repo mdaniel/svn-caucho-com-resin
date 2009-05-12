@@ -307,8 +307,15 @@ public class ThreadPool implements Runnable {
 	  int freeCount = idleCount + _maxThreads - _threadCount;
 	  boolean startNew = false;
 
-	  if (idleCount > 0 && freeThreads < freeCount) {
-	    poolItem = _idleHead;
+	  poolItem = _idleHead;
+	  
+	  if (poolItem != null && freeThreads < freeCount) {
+	    if (_idleCount <= 0) {
+	      String msg = " critical internal error in ThreadPool, requiring Resin restart";
+	      System.err.println(msg);
+	      System.exit(10);
+	    }
+	    
 	    _idleHead = poolItem._next;
 
 	    poolItem._next = null;
