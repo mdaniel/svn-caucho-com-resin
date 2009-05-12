@@ -819,7 +819,7 @@ public class MiscModule extends AbstractQuercusModule {
         }
       }
       
-      return new ProcOpenResource(env, process, in, out, es);
+      return new ProcOpenResource(env, process, in, out, es, command);
 
     } catch (Exception e) {
 
@@ -837,7 +837,6 @@ public class MiscModule extends AbstractQuercusModule {
                                @NotNull ProcOpenResource stream)
   {
     if (stream == null) {
-      log.log(Level.FINE, "input to proc_close must not be null");
       env.warning("input to proc_close must not be null");
       
       return -1;
@@ -860,6 +859,24 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
    return stream.terminate();
+  }
+  
+  public static Value proc_get_status(Env env,
+                                      @NotNull ProcOpenResource stream)
+  {
+    if (stream == null) {
+      env.warning("input to proc_get_status() must not be null");
+      
+      return BooleanValue.FALSE;
+    }
+    
+    ArrayValue array = new ArrayValueImpl();
+    
+    array.put("command", stream.getCommand());
+    array.put("running", stream.isRunning());
+    array.put("exitcode", stream.getExitCode());
+    
+    return array;
   }
   
   /**

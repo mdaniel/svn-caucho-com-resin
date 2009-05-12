@@ -55,12 +55,17 @@ public class ProcOpenResource
   private ProcOpenInput _err;
 
   private Process _process;
+  
+  private String _command;
+  private boolean _isRunning = true;
+  private int _exitCode = -1;
 
   public ProcOpenResource(Env env,
                           Process process,
                           ProcOpenOutput in,
                           ProcOpenInput out,
-                          ProcOpenInput err)
+                          ProcOpenInput err,
+                          String command)
   {
     _env = env;
     _process = process;
@@ -68,8 +73,45 @@ public class ProcOpenResource
     _in = in;
     _out = out;
     _err = err;
+    _command = command;
 
     env.addCleanup(this);
+  }
+  
+  public boolean isRunning()
+  {
+    if (! _isRunning)
+      return false;
+    
+    try {
+      _exitCode = _process.exitValue();
+      _isRunning = false;
+      
+      return false;
+      
+    } catch (IllegalThreadStateException e) {
+      return true;
+    }
+  }
+  
+  public int getExitCode()
+  {
+    if (! _isRunning)
+      return _exitCode;
+    
+    try {
+      _exitCode = _process.exitValue();
+      _isRunning = false;
+      
+      return _exitCode;
+    } catch (IllegalThreadStateException e) {
+      return -1;
+    }
+  }
+  
+  public String getCommand()
+  {
+    return _command;
   }
 
   public int pclose()
@@ -112,7 +154,6 @@ public class ProcOpenResource
   /**
    * Implements the EnvCleanup interface.
    */
-
   public void cleanup()
   {
     pclose();
