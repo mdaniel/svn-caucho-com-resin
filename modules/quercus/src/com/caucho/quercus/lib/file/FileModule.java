@@ -536,87 +536,97 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       if (is == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       // XXX: length is never used
       if (length <= 0)
-	length = Integer.MAX_VALUE;
+        length = Integer.MAX_VALUE;
 
       int comma = ',';
 
       if (delimiter != null && delimiter.length() > 0)
-	comma = delimiter.charAt(0);
+        comma = delimiter.charAt(0);
 
       int quote = '"';
 
       if (enclosure != null && enclosure.length() > 0)
-	quote = enclosure.charAt(0);
+        quote = enclosure.charAt(0);
 
       ArrayValue array = new ArrayValueImpl();
 
       int ch;
 
       while (true) {
-	// scan whitespace
-	while (true) {
-	  ch = is.read();
+        // scan whitespace
+        while (true) {
+          ch = is.read();
 
-	  if (ch < 0 || ch == '\n')
-	    return array;
-	  else if (ch == '\r') {
-	    is.readOptionalLinefeed();
-	    return array;
-	  }
-	  else if (ch == ' ' || ch == '\t')
-	    continue;
-	  else
-	    break;
-	}
+          if (ch < 0) {
+            if (array.getSize() == 0)
+              return BooleanValue.FALSE;
+            else
+              return array;
+          }
+          else if (ch == '\n')
+            return array;
+          else if (ch == '\r') {
+            is.readOptionalLinefeed();
+            return array;
+          }
+          else if (ch == ' ' || ch == '\t')
+            continue;
+          else
+            break;
+        }
 
-	StringValue sb = env.createBinaryBuilder();
+        StringValue sb = env.createBinaryBuilder();
 
-	if (ch == quote) {
-	  for (ch = is.read(); ch >= 0; ch = is.read()) {
-	    if (ch == quote) {
-	      ch = is.read();
+        if (ch == quote) {
+          for (ch = is.read(); ch >= 0; ch = is.read()) {
+            if (ch == quote) {
+              ch = is.read();
 
-	      if (ch == quote)
-		sb.append((char) ch);
-	      else
-		break;
-	    }
-	    else
-	      sb.append((char) ch);
-	  }
+              if (ch == quote)
+                sb.append((char) ch);
+              else
+                break;
+            }
+            else
+              sb.append((char) ch);
+          }
 
-	  array.append(sb);
+          array.append(sb);
 
-	  for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = is.read()) {
-	  }
-	}
-	else {
-	  for (;
-	       ch >= 0 && ch != comma && ch != '\r' && ch != '\n';
-	       ch = is.read()) {
-	    sb.append((char) ch);
-	  }
+          for (; ch >= 0 && ch == ' ' || ch == '\t'; ch = is.read()) {
+          }
+        }
+        else {
+          for (;
+               ch >= 0 && ch != comma && ch != '\r' && ch != '\n';
+               ch = is.read()) {
+            sb.append((char) ch);
+          }
 
-	  array.append(sb);
-	}
+          array.append(sb);
+        }
 
-	if (ch < 0)
-	  return array;
-	else if (ch == '\n')
-	  return array;
-	else if (ch == '\r') {
-	  is.readOptionalLinefeed();
-	  return array;
-	}
-	else if (ch == comma) {
-	}
-	else {
-	  env.warning("expected comma");
-	}
+        if (ch < 0) {
+          if (array.getSize() == 0)
+            return BooleanValue.FALSE;
+          else
+            return array;
+        }
+        else if (ch == '\n')
+          return array;
+        else if (ch == '\r') {
+          is.readOptionalLinefeed();
+          return array;
+        }
+        else if (ch == comma) {
+        }
+        else {
+          env.warning("expected comma");
+        }
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
