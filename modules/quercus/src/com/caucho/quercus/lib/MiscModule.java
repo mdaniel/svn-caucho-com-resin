@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -60,7 +60,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * PHP mysql routines.
+ * PHP misc functiomn.
  */
 public class MiscModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(MiscModule.class);
@@ -504,13 +504,13 @@ public class MiscModule extends AbstractQuercusModule {
   public Value pack(Env env, String format, Value []args)
   {
     try {
-      ArrayList<PackSegment> segments = parsePackFormat(env, format);
+      ArrayList<PackSegment> segments = parsePackFormat(env, format, false);
 
       StringValue bb = env.createBinaryBuilder();
 
       int i = 0;
       for (PackSegment segment : segments) {
-	i = segment.pack(env, bb, i, args);
+        i = segment.pack(env, bb, i, args);
       }
 
       return bb;
@@ -522,15 +522,18 @@ public class MiscModule extends AbstractQuercusModule {
   /**
    * packs the format into a binary.
    */
-  public Value unpack(Env env, String format, InputStream is)
+  public Value unpack(Env env, String format, StringValue s)
   {
     try {
-      ArrayList<PackSegment> segments = parseUnpackFormat(env, format);
+      ArrayList<PackSegment> segments = parsePackFormat(env, format, true);
 
       ArrayValue array = new ArrayValueImpl();
 
+      int length = s.length();
+      int offset = 0;
+      
       for (PackSegment segment : segments) {
-        segment.unpack(env, array, is);
+        offset = segment.unpack(env, array, s, offset, length);
       }
 
       return array;
@@ -937,7 +940,7 @@ public class MiscModule extends AbstractQuercusModule {
     return exec(env, command, null, result);
   }
 
-  private static ArrayList<PackSegment> parsePackFormat(Env env, String format)
+  private static ArrayList<PackSegment> parsePackFormat123(Env env, String format)
   {
     ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
 
@@ -946,6 +949,8 @@ public class MiscModule extends AbstractQuercusModule {
       char ch = format.charAt(i);
       
       int count = 0;
+      boolean isEnd = false;
+      
       char ch1 = ' ';
       for (i++;
 	   i < length && '0' <= (ch1 = format.charAt(i)) && ch1 <= '9';
@@ -954,19 +959,23 @@ public class MiscModule extends AbstractQuercusModule {
       }
 
       if (ch1 == '*' && count == 0) {
-	i++;
-	count = Integer.MAX_VALUE;
+        i++;
+        isEnd = true;
       }
       else if (count == 0)
 	count = 1;
+
 
       if (i < length)
 	i--;
 
       switch (ch) {
       case 'a':
-	segments.add(new SpacePackSegment(env, count, (byte) 0));
-	break;
+        if (isEnd)
+          segments.add(new SpaceEndPackSegment(env, (byte) 0));
+        else
+          segments.add(new SpacePackSegment(env, count, (byte) 0));
+        break;
       case 'A':
 	segments.add(new SpacePackSegment(env, count, (byte) 0x20));
 	break;
@@ -1018,25 +1027,30 @@ public class MiscModule extends AbstractQuercusModule {
     return segments;
   }
 
-  private static ArrayList<PackSegment> parseUnpackFormat(Env env,
-							  String format)
+  private static ArrayList<PackSegment> parsePackFormat(Env env,
+							                            String format,
+							                            boolean hasName)
   {
     ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
 
     int length = format.length();
-    for (int i = 0; i < length; i++) {
+    
+    int i = 0;
+    while (i < length) {
       char ch = format.charAt(i++);
       
       int count = 0;
+      boolean isEnd = false;
       
       if (i < length && format.charAt(i) == '*') {
         count = Integer.MAX_VALUE;
+        isEnd = true;
         
         i++;
       }
       else {
         while (i < length) {
-          int ch1 = format.charAt(i);
+          char ch1 = format.charAt(i);
           
           if ('0' <= ch1 && ch1 <= '9') {
             count = count * 10 + ch1 - '0';
@@ -1051,21 +1065,35 @@ public class MiscModule extends AbstractQuercusModule {
           count = 1;
       }
 
-      StringBuilder sb = new StringBuilder();
+      String name = "";
       
-      int ch1;
-      for (; i < length && (ch1 = format.charAt(i)) != '/'; i++) {
-        sb.append((char) ch1);
+      if (hasName && i < length) {
+        StringBuilder sb = new StringBuilder();
+        
+        while (i < length) {
+          char ch1 = format.charAt(i++);
+          
+          if (ch1 == '/')
+            break;
+          else
+            sb.append(ch1);
+        }
+        
+        name = sb.toString();
       }
-      
-      String name = sb.toString();
 
       switch (ch) {
       case 'a':
-	segments.add(new SpacePackSegment(env, name, count, (byte) 0));
+        if (isEnd)
+          segments.add(new SpaceEndPackSegment(env, name, (byte) 0));
+        else
+          segments.add(new SpacePackSegment(env, name, count, (byte) 0));
 	break;
       case 'A':
-	segments.add(new SpacePackSegment(env, name, count, (byte) 0x20));
+        if (isEnd)
+          segments.add(new SpaceEndPackSegment(env, name, (byte) 0x20));
+        else
+          segments.add(new SpacePackSegment(env, name, count, (byte) 0x20));
 	break;
       case 'h':
 	segments.add(new RevHexPackSegment(name, count));
@@ -1126,7 +1154,11 @@ public class MiscModule extends AbstractQuercusModule {
 			      int i, Value []args)
       throws IOException;
     
-    abstract public void unpack(Env env, ArrayValue array, InputStream is)
+    abstract public int unpack(Env env,
+                               ArrayValue array,
+                               StringValue s,
+                               int offset,
+                               int strLen)
       throws IOException;
   }
 
@@ -1182,38 +1214,104 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
+    {
+      if (strLen - offset < _length)
+        return offset;
+      
+      StringValue bb = env.createBinaryBuilder();
+      
+      int j = offset;
+      
+      for (int i = 0; i < _length; i++) {
+        char ch = s.charAt(offset++);
+        
+        if (ch != _pad) {
+          if (j + 1 != offset)
+            bb.append(s, j, offset);
+          else
+            bb.append(ch);
+          
+          j = offset;
+        }
+      }
+
+      if (_name.length() == 0)
+        result.put(env.createString('1'), bb);
+      else
+        result.put(_name, bb);
+
+      return offset;
+    }
+  }
+  
+  static class SpaceEndPackSegment extends PackSegment
+  {
+    private final StringValue _name;
+    private final byte _pad;
+
+    SpaceEndPackSegment(Env env, byte pad)
+    {
+      this(env, "", pad);
+    }
+
+    SpaceEndPackSegment(Env env, String name, byte pad)
+    {
+      _name = env.createString(name);
+      _pad = pad;
+    }
+    
+    @Override
+    public int pack(Env env, StringValue bb, int i, Value []args)
       throws IOException
+    {
+      Value arg;
+
+      if (i < args.length) {
+        arg = args[i];
+        i++;
+      }
+      else {
+        env.warning("a: not enough arguments");
+
+        return i;
+      }
+
+      StringValue s = arg.toStringValue(env);
+      
+      bb.append(s);
+
+      return i;
+    }
+    
+    @Override
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
       StringValue bb = env.createBinaryBuilder();
       
-      int i = 0;
-      int ch;
+      int j = offset;
       
-      while (i < _length) {
-        ch = is.read();
+      while (offset < strLen) {
+        char ch = s.charAt(offset++);
         
-        if (ch < 0)
-          return;
-        
-        bb.appendByte(ch);
-        
-        i++;
-        
-        if (ch != _pad)
-          break;
-      }
-      
-      for (; i < _length && (ch = is.read()) >= 0; i++) {
-        if (ch == _pad) {
+        if (ch != _pad) {
+          if (j + 1 != offset)
+            bb.append(s, j, offset);
+          else
+            bb.append(ch);
+
+          j = offset;
         }
-        else if (ch >= 0)
-          bb.appendByte(ch);
-        else
-          break;
       }
 
-      result.put(_name, bb);
+      if (_name.length() == 0)
+        result.put(env.createString('1'), bb);
+      else
+        result.put(_name, bb);
+      
+      return offset;
     }
   }
 
@@ -1287,21 +1385,23 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
+      if ( offset + (long) (_length / 2 - 1) >= strLen)
+        return offset;
+      
       StringValue sb = env.createStringBuilder();
       for (int i = _length / 2 - 1; i >= 0; i--) {
-        int ch = is.read();
-        
-        if (ch < 0)
-          return;
+        char ch = s.charAt(offset++);
         
         sb.append(digitToHex(ch >> 4));
         sb.append(digitToHex(ch));
       }
 
       result.put(_name, sb);
+      
+      return offset;
     }
   }
 
@@ -1375,21 +1475,23 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
+      if (offset + (long) (_length / 2 -1) >= strLen)
+        return offset;
+      
       StringValue sb = env.createStringBuilder();
       for (int i = _length / 2 - 1; i >= 0; i--) {
-        int ch = is.read();
-        
-        if (ch < 0)
-          return;
+        char ch = s.charAt(offset++);
         
         sb.append(digitToHex(ch));
         sb.append(digitToHex(ch >> 4));
       }
 
       result.put(_name, sb);
+      
+      return offset;
     }
   }
 
@@ -1445,8 +1547,8 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
       outer:
       for (int j = 0; j < _length; j++) {
@@ -1469,10 +1571,10 @@ public class MiscModule extends AbstractQuercusModule {
         long v = 0;
 
         for (int k = 0; k < _bytes; k++) {
-          int ch = is.read();
-          
-          if (ch < 0)
+          if (offset >= strLen)
             break outer;
+          
+          char ch = s.charAt(offset++);
           
           long d = ch & 0xff;
           
@@ -1495,6 +1597,8 @@ public class MiscModule extends AbstractQuercusModule {
 
         result.put(key, LongValue.create(v));
       }
+    
+      return offset;
     }
   }
 
@@ -1547,8 +1651,8 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
       outer:
       for (int j = 0; j < _length; j++) {
@@ -1569,9 +1673,10 @@ public class MiscModule extends AbstractQuercusModule {
         long v = 0;
 
         for (int k = 0; k < _bytes; k++) {
-          int ch = is.read();
-          if (ch < 0)
+          if (offset >= strLen)
             break outer;
+          
+          char ch = s.charAt(offset++);
           
           long d = ch & 0xff;
 
@@ -1580,6 +1685,8 @@ public class MiscModule extends AbstractQuercusModule {
 
         result.put(key, LongValue.create(v));
       }
+    
+      return offset;
     }
   }
 
@@ -1629,8 +1736,8 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
       outer:
       for (int j = 0; j < _length; j++) {
@@ -1651,10 +1758,10 @@ public class MiscModule extends AbstractQuercusModule {
         long v = 0;
 
         for (int k = 0; k < 8; k++) {
-          int ch = is.read();
-          
-          if (ch < 0)
+          if (offset >= strLen)
             break outer;
+          
+          char ch = s.charAt(offset++);
           
           long d = ch & 0xff;
 
@@ -1663,6 +1770,8 @@ public class MiscModule extends AbstractQuercusModule {
 
         result.put(key, new DoubleValue(Double.longBitsToDouble(v)));
       }
+    
+      return offset;
     }
   }
 
@@ -1712,8 +1821,8 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
       outer:
       for (int j = 0; j < _length; j++) {
@@ -1734,10 +1843,10 @@ public class MiscModule extends AbstractQuercusModule {
         int v = 0;
 
         for (int k = 0; k < 4; k++) {
-          int ch = is.read();
-          
-          if (ch < 0)
+          if (offset >= strLen)
             break outer;
+          
+          char ch = s.charAt(offset++);
           
           int d = ch & 0xff;
 
@@ -1746,6 +1855,8 @@ public class MiscModule extends AbstractQuercusModule {
 
         result.put(key, new DoubleValue(Float.intBitsToFloat(v)));
       }
+    
+      return offset;
     }
   }
 
@@ -1773,18 +1884,17 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	bb.appendByte(0);
+        bb.appendByte(0);
       }
 
       return i;
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
-      for (int i = 0; i < _length && is.read() >= 0; i++) {
-      }
+      return (int) Math.min(offset + (long) _length, strLen);
     }
   }
 
@@ -1816,8 +1926,8 @@ public class MiscModule extends AbstractQuercusModule {
     }
     
     @Override
-    public void unpack(Env env, ArrayValue result, InputStream is)
-      throws IOException
+    public int unpack(Env env, ArrayValue result,
+                      StringValue s, int offset, int strLen)
     {
       throw new UnsupportedOperationException("'@' skip to position");
     }
