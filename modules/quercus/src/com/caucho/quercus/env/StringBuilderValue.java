@@ -29,9 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
-import com.caucho.quercus.lib.file.BinaryInput;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 
 import java.io.*;
@@ -494,12 +493,13 @@ public class StringBuilderValue
     if (_length == 1)
       return String.valueOf((char) (_buffer[0] & 0xFF));
     else {
-      try {
-        return new String(_buffer, 0, _length, "ISO-8859-1");
-      } catch (UnsupportedEncodingException e) {
-        // should never reach this statement
-        throw new QuercusException(e);
-      }
+      CharBuffer buf = CharBuffer.allocate();
+      buf.append(_buffer, 0, _length);
+      
+      String str = buf.toString();
+      buf.free();
+
+      return str;
     }
   }
 
@@ -875,11 +875,13 @@ public class StringBuilderValue
     if (end <= start)
       return "";
 
-    try {
-      return new String(_buffer, start, end - start, "ISO-8859-1");
-    } catch (UnsupportedEncodingException e) {
-      throw new QuercusException(e);
-    }
+    CharBuffer buf = CharBuffer.allocate();
+    buf.append(_buffer, start, end - start);
+    
+    String str = buf.toString();
+    buf.free();
+    
+    return str;
   }
 
   /**
