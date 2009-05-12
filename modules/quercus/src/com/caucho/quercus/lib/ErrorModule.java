@@ -107,6 +107,8 @@ public class ErrorModule extends AbstractQuercusModule {
     
     Exception e = new Exception();
     e.fillInStackTrace();
+    
+    e.printStackTrace();
 
     StackTraceElement []stack = e.getStackTrace();
     int depth = 0;
@@ -224,6 +226,10 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.equals("com.caucho.quercus.expr.IncludeOnceExpr")
                && name.equals("eval")) {
         addInterpreted(env, result, depth++);
+      }
+      else if (className.equals("com.caucho.quercus.env.Env")
+               && name.equals("close")) {
+        return result;
       }
       else if (className.startsWith("com.caucho.quercus")) {
       }
