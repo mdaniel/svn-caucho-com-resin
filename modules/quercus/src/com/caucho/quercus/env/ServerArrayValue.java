@@ -285,16 +285,15 @@ public class ServerArrayValue extends ArrayValueImpl
       
       super.put(DOCUMENT_ROOT_V,
                 _env.createString(root));
-
       super.put(SCRIPT_NAME_V,
                 _env.createString(contextPath + servletPath));
-
+      super.put(SCRIPT_URL_V,
+          _env.createString(requestURI));
+      
       if (queryString != null)
         requestURI = requestURI + '?' + queryString;
 
       super.put(REQUEST_URI_V,
-                _env.createString(requestURI));
-      super.put(SCRIPT_URL_V,
                 _env.createString(requestURI));
       super.put(SCRIPT_FILENAME_V,
                 _env.createString(request.getRealPath(servletPath)));
