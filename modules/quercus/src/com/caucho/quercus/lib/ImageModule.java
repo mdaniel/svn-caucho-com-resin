@@ -362,12 +362,9 @@ public class ImageModule extends AbstractQuercusModule {
    * Allocate a color for an image
    */
   public static long imagecolorallocate(QuercusImage image,
-					int r, int g, int b)
+                                        int r, int g, int b)
   {
-    return (( 0x7f      << 24) |
-	    ((r & 0xff) << 16) |
-	    ((g & 0xff) <<  8) |
-	    ((b & 0xff) <<  0));
+    return image.allocateColor(r, g, b);
   }
 
   /**
@@ -652,7 +649,11 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static Value imagecreate(int width, int height)
   {
-    return new QuercusImage(width, height);
+    QuercusImage image = new QuercusImage(width, height);
+    
+    image.setToFill(true);
+    
+    return image;
   }
 
   /**
@@ -1890,39 +1891,41 @@ public class ImageModule extends AbstractQuercusModule {
     private BufferedImage _brush;
     private int[] _style;
     private int _thickness;
+    
+    private boolean _isToFill = false;
 
     public QuercusImage(int width, int height)
     {
       _width = width;
       _height = height;
-      _bufferedImage =
-	new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+      _bufferedImage = new BufferedImage(width, height,
+                                         BufferedImage.TYPE_INT_RGB);
       _graphics = (Graphics2D)_bufferedImage.getGraphics();
     }
 
     public QuercusImage(InputStream inputStream)
     {
       try {
-	_bufferedImage = ImageIO.read(inputStream);
-	_width = _bufferedImage.getWidth(null);
-	_height = _bufferedImage.getHeight(null);
-	_graphics = (Graphics2D)_bufferedImage.getGraphics();
+        _bufferedImage = ImageIO.read(inputStream);
+        _width = _bufferedImage.getWidth(null);
+        _height = _bufferedImage.getHeight(null);
+        _graphics = (Graphics2D)_bufferedImage.getGraphics();
       }
       catch (IOException e) {
-	throw new QuercusException(e);
+        throw new QuercusException(e);
       }
     }
 
     public QuercusImage(Env env, Path filename)
     {
       try {
-	_bufferedImage = ImageIO.read(filename.openRead());
-	_width = _bufferedImage.getWidth(null);
-	_height = _bufferedImage.getHeight(null);
-	_graphics = (Graphics2D)_bufferedImage.getGraphics();
+        _bufferedImage = ImageIO.read(filename.openRead());
+        _width = _bufferedImage.getWidth(null);
+        _height = _bufferedImage.getHeight(null);
+        _graphics = (Graphics2D)_bufferedImage.getGraphics();
       }
       catch (IOException e) {
-	throw new QuercusException(e);
+        throw new QuercusException(e);
       }
     }
 
@@ -1959,32 +1962,32 @@ public class ImageModule extends AbstractQuercusModule {
     public Font getFont(int fontIndex)
     {
       if (fontIndex < 0)
-	fontIndex = 0;
+        fontIndex = 0;
       else if (fontIndex > 5)
-	fontIndex = 5;
+        fontIndex = 5;
 
       Font font = _fontArray[fontIndex];
 
       if (font == null) {
-	switch (fontIndex) {
-	case 0: case 1:
-	  font = new Font("sansserif", 0, 8);
-	  break;
-	case 2:
-	  font = new Font("sansserif", 0, 10);
-	  break;
-	case 3:
-	  font = new Font("sansserif", 0, 11);
-	  break;
-	case 4:
-	  font = new Font("sansserif", 0, 12);
-	  break;
-	default:
-	  font = new Font("sansserif", 0, 14);
-	  break;
-	}
+        switch (fontIndex) {
+          case 0: case 1:
+            font = new Font("sansserif", 0, 8);
+            break;
+          case 2:
+            font = new Font("sansserif", 0, 10);
+            break;
+          case 3:
+            font = new Font("sansserif", 0, 11);
+            break;
+          case 4:
+            font = new Font("sansserif", 0, 12);
+            break;
+          default:
+            font = new Font("sansserif", 0, 14);
+            break;
+        }
 
-	_fontArray[fontIndex] = font;
+        _fontArray[fontIndex] = font;
       }
 
       return font;
@@ -2167,6 +2170,26 @@ public class ImageModule extends AbstractQuercusModule {
     public BufferedImage getBrush()
     {
       return _brush;
+    }
+    
+    public void setToFill(boolean isToFill)
+    {
+      _isToFill = isToFill;
+    }
+    
+    public long allocateColor(int r, int g, int b)
+    {
+      int color = (( 0x7f      << 24) |
+          ((r & 0xff) << 16) |
+          ((g & 0xff) <<  8) |
+          ((b & 0xff) <<  0));
+      
+      if (_isToFill) {
+        _isToFill = false;
+        flood(0, 0, color);
+      }
+      
+      return color;
     }
 
     public void flood(int x, int y, int color)
