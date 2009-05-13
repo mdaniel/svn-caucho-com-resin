@@ -107,8 +107,6 @@ public class ErrorModule extends AbstractQuercusModule {
     
     Exception e = new Exception();
     e.fillInStackTrace();
-    
-    e.printStackTrace();
 
     StackTraceElement []stack = e.getStackTrace();
     int depth = 0;
