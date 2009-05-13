@@ -5062,15 +5062,17 @@ public class QuercusParser {
   private int parseNumberToken(int ch)
     throws IOException
   {
+    int ch0 = ch;
+    
     if (ch == '0') {
       ch = read();
       if (ch == 'x' || ch == 'X')
-	return parseHex();
-      else if ('0' <= ch && ch <= '7')
-	return parseOctal(ch);
+        return parseHex();
+      else if (ch == '0')
+        return parseNumberToken(ch);
       else {
-	_peek = ch;
-	ch = '0';
+        _peek = ch;
+        ch = '0';
       }
     }
     
@@ -5113,8 +5115,24 @@ public class QuercusParser {
     }
 
     _peek = ch;
-
-    _lexeme = _sb.toString();
+    
+    if (ch0 == '0' && token == LONG) {
+      int len = _sb.length();
+      int value = 0;
+      
+      for (int i = 0; i < len; i++) {
+        ch = _sb.charAt(i);
+        if ('0' <= ch && ch <= '7')
+          value = value * 8 + ch - '0';
+        else
+          break;
+      }
+      
+      _lexeme = String.valueOf(value);
+    }
+    else {
+      _lexeme = _sb.toString();
+    }
 
     return token;
   }
