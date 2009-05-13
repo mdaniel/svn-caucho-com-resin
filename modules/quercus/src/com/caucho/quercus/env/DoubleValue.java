@@ -381,6 +381,10 @@ public class DoubleValue extends NumberValue
   {
     if (_value == 0)
       out.print("DoubleValue.ZERO");
+    else if (_value == Double.POSITIVE_INFINITY)
+      out.print("new DoubleValue(Double.POSITIVE_INFINITY)");
+    else if (_value == Double.NEGATIVE_INFINITY)
+      out.print("new DoubleValue(Double.NEGATIVE_INFINITY)");
     else
       out.print("new DoubleValue(" + _value + ")");
   }
