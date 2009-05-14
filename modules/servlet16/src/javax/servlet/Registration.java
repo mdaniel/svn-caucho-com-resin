@@ -33,9 +33,18 @@ import java.util.Set;
 import java.util.Map;
 
 public interface Registration {
+
+  public String getName();
+
+  public String getClassName();
+
   public boolean setInitParameter(String name, String value);
 
+  public String getInitParameter(String name);
+
   public Set<String> setInitParameters(Map<String, String> initParameters);
+
+  public Map<String, String> getInitParameters();
 
   interface Dynamic
     extends Registration

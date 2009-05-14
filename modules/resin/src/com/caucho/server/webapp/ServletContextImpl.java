@@ -447,7 +447,12 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("unimplemented");
   }
 
-  public ServletRegistration findServletRegistration(String servletName)
+  public ServletRegistration getServletRegistration(String servletName)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Map<String, ServletRegistration> getServletRegistrations()
   {
     throw new UnsupportedOperationException("unimplemented");
   }
@@ -475,7 +480,12 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("unimplemented");
   }
 
-  public FilterRegistration findFilterRegistration(String filterName)
+  public FilterRegistration getFilterRegistration(String filterName)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public Map<String, FilterRegistration> getFilterRegistrations()
   {
     throw new UnsupportedOperationException("unimplemented");
   }

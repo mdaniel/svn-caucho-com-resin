@@ -38,9 +38,13 @@ public interface FilterRegistration
     EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
     String... servletNames);
 
+  public Iterable<String> getServletNameMappings();
+
   public void addMappingForUrlPatterns(
     EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
     String... urlPatterns);
+
+  public Iterable<String> getUrlPatternMappings();
 
   interface Dynamic
     extends FilterRegistration, Registration.Dynamic

@@ -42,6 +42,7 @@ public interface ScanListener {
    *
    *  0 is an enhancer like Amber
    *  1 is an extender like WebBeans
+   *  2 is an extender like WebApp 3.0
    */
   public int getPriority();
   

@@ -30,7 +30,6 @@
 package com.caucho.server.webapp;
 
 import com.caucho.amber.manager.AmberContainer;
-import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.inject.*;
@@ -49,12 +48,12 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.enhancer.ScanMatch;
+import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
-//import com.caucho.osgi.OsgiBundle;
-//import com.caucho.osgi.OsgiManager;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.Authenticator;
@@ -80,14 +79,13 @@ import com.caucho.security.RoleMapManager;
 import com.caucho.server.security.ConstraintManager;
 import com.caucho.server.security.LoginConfig;
 import com.caucho.server.security.SecurityConstraint;
-import com.caucho.server.security.TransportConstraint;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
-//import com.caucho.soa.client.WebServiceClient;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.util.CharBuffer;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
@@ -96,30 +94,22 @@ import com.caucho.java.WorkDir;
 import com.caucho.jsf.cfg.JsfPropertyGroup;
 
 import javax.annotation.PostConstruct;
-import javax.event.Observer;
 import javax.management.ObjectName;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.*;
-import javax.inject.*;
-import javax.inject.manager.Bean;
-import javax.inject.manager.Initialized;
-import javax.inject.manager.Manager;
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-//import org.osgi.framework.BundleContext;
 
 /**
  * Resin's webApp implementation.
@@ -127,7 +117,7 @@ import java.util.logging.Logger;
 @Configurable
 public class WebApp extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
-             EnvironmentDeployInstance, java.io.Serializable
+             EnvironmentDeployInstance, ScanListener, java.io.Serializable
 {
   private static final String DEFAULT_VERSION = "2.5";
 
@@ -335,6 +325,10 @@ public class WebApp extends ServletContextImpl
 
   private long _status500CountTotal;
   private long _status500LastTime;
+
+  //servlet 3.0
+  private boolean _metadataComplete = false;
+  private List<String> _pendingClasses = new ArrayList<String>();
 
   /**
    * Creates the webApp with its environment loader.
@@ -848,6 +842,78 @@ public class WebApp extends ServletContextImpl
     config.setServletContext(this);
 
     _servletManager.addServlet(config);
+  }
+
+  public void addFilter(WebFilter webFilter, String filterClassName)
+    throws Exception
+  {
+    FilterMapping config = new FilterMapping();
+    config.setFilterClass(filterClassName);
+    config.setFilterName(filterClassName);
+
+    if (webFilter.value().length > 0 &&
+        webFilter.urlPatterns().length == 0 &&
+        webFilter.servletNames().length == 0) {
+      FilterMapping.URLPattern urlPattern = config.createUrlPattern();
+      for (String url : webFilter.value())
+        urlPattern.addText(url);
+
+      urlPattern.init();
+    }
+    else if (webFilter.urlPatterns().length > 0 &&
+             webFilter.value().length == 0 &&
+             webFilter.servletNames().length == 0) {
+      FilterMapping.URLPattern urlPattern = config.createUrlPattern();
+      for (String url : webFilter.urlPatterns())
+        urlPattern.addText(url);
+
+      urlPattern.init();
+    }
+    else if (webFilter.servletNames().length > 0 &&
+             webFilter.value().length == 0 &&
+             webFilter.urlPatterns().length == 0) {
+      for (String servletName : webFilter.servletNames())
+        config.addServletName(servletName);
+    }
+    else {
+      throw new ConfigException(L.l("Annotation @WebFilter at '{0}' must specify either value, urlPatterns or servletNames", filterClassName));
+    }
+
+    addFilter(config);
+    addFilterMapping(config);
+  }
+
+  public void addServlet(WebServlet webServlet, String servletClassName)
+    throws ServletException
+  {
+    ServletConfigImpl config = createServlet();
+    config.setServletClass(servletClassName);
+
+    String name = webServlet.name();
+
+    if (name == null)
+      name = servletClassName;
+
+    config.setServletName(name);
+
+    ServletMapping mapping = createServletMapping();
+    mapping.setServletName(name);
+
+    if (webServlet.value().length > 0 && webServlet.urlPatterns().length == 0) {
+      for (String url : webServlet.value())
+        mapping.addURLPattern(url); // XXX: support addURLRegexp?
+    }
+    else if (webServlet.urlPatterns().length > 0 &&
+             webServlet.value().length == 0) {
+      for (String url : webServlet.urlPatterns()) {
+        mapping.addURLPattern(url); // XXX: support addURLRegexp?
+      }
+    } else {
+      throw new ConfigException(L.l("Annotation @WebServlet at '{0}' must specify either value or urlPatterns", servletClassName));
+    }
+
+    addServlet(config);
+    addServletMapping(mapping);
   }
 
   /**
@@ -1971,9 +2037,8 @@ public class WebApp extends ServletContextImpl
 	log.log(Level.FINEST, e.toString(), e);
       }
 
-      _webBeans.addObserver(new WebBeansObserver(),
-			    Manager.class,
-			    new AnnotationLiteral<Initialized>() {});
+      if (! _metadataComplete)
+        _classLoader.addScanListener(this);
 
       WebAppController parent = null;
       if (_controller != null)
@@ -2001,8 +2066,41 @@ public class WebApp extends ServletContextImpl
 
         validator.validate();
       }
+
+      //Servlet 3.0
+      initAnnotated();
     } finally {
       _lifecycle.toInit();
+    }
+  }
+
+  public void initAnnotated() throws Exception {
+    List<Class> servlets = new ArrayList<Class>();
+    List<Class> filters = new ArrayList<Class>();
+
+    for (String className : _pendingClasses) {
+      Class cl = _classLoader.loadClass(className);
+
+      if (javax.servlet.Servlet.class.isAssignableFrom(cl))
+        servlets.add(cl);
+      else if (Filter.class.isAssignableFrom(cl))
+        filters.add(cl);
+    }
+
+    for (Class filter : filters) {
+      WebFilter webFilter
+        = (WebFilter) filter.getAnnotation(WebFilter.class);
+
+      if (webFilter != null)
+        addFilter(webFilter, filter.getName());
+    }
+
+    for (Class servlet : servlets) {
+      WebServlet webServlet
+        = (WebServlet) servlet.getAnnotation(WebServlet.class);
+
+      if (webServlet != null)
+        addServlet(webServlet, servlet.getName());
     }
   }
 
@@ -3077,6 +3175,36 @@ public class WebApp extends ServletContextImpl
     return _status500LastTime;
   }
 
+  public int getPriority()
+  {
+    return 2;
+  }
+
+  public boolean isRootScannable(Path root)
+  {
+    return true;
+  }
+
+  public ScanMatch isScanMatchClass(String name, int modifiers)
+  {
+    throw new UnsupportedOperationException(WebApp.class.getName());
+  }
+
+  public boolean isScanMatchAnnotation(CharBuffer string)
+  {
+    if (string.startsWith("javax.servlet.annotation."))
+      return true;
+
+    return false;
+  }
+
+  public void classMatchEvent(EnvironmentClassLoader loader,
+                              Path root,
+                              String className)
+  {
+    _pendingClasses.add(className);
+  }
+
   /**
    * Serialize to a handle
    */
@@ -3088,32 +3216,6 @@ public class WebApp extends ServletContextImpl
   public String toString()
   {
     return "WebApp[" + getId() + "]";
-  }
-
-  /**
-   * WebBeans callbacks
-   */
-  class WebBeansObserver implements Observer<Manager> {
-    public void notify(Manager manager)
-    {
-      // search for servlets
-
-      for (Bean bean : manager.resolveByType(Servlet.class, new CurrentLiteral())) {
-	if (bean instanceof CauchoBean) {
-	  CauchoBean cBean = (CauchoBean) bean;
-	  
-	  for (Annotation ann : cBean.getAnnotations()) {
-	    if (ann.annotationType().equals(WebServlet.class)) {
-	      //ServletConfigImpl config
-	      //  = new ServletConfigImpl(this, ann, manager.getInstance(bean));
-
-	      // _servletManager.addServlet(config);
-	      
-	    }
-	  }
-	}
-      }
-    }
   }
 
   static class FilterChainEntry {

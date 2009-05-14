@@ -36,6 +36,8 @@ public interface ServletRegistration
 {
   public Set<String> addMapping(String... urlPatterns);
 
+  public Iterable<String> getMappings();
+
   interface Dynamic
     extends ServletRegistration, Registration.Dynamic
   {

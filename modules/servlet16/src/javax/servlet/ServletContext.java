@@ -140,7 +140,7 @@ public interface ServletContext {
   /**
    * Returns an enumeration of all init parameter names.
    */
-  public Enumeration getInitParameterNames();
+  public Enumeration<String> getInitParameterNames();
 
   /**
    * Returns the ServletContext for the uri.
@@ -218,7 +218,7 @@ public interface ServletContext {
   /**
    * Returns an enumeration of all the attribute names.
    */
-  public Enumeration getAttributeNames();
+  public Enumeration<String> getAttributeNames();
 
   /**
    * Sets an attribute value.  Because servlets are multithreaded,
@@ -297,63 +297,12 @@ public interface ServletContext {
   /**
    * @deprecated
    */
-  public Enumeration getServletNames();
+  public Enumeration<String> getServletNames();
 
   /**
    * @deprecated
    */
   public void log(Exception exception, String msg);
-
-  /**
-   * Adds a runtime servlet.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addServlet(String servletName,
-			 String description,
-			 String className,
-			 Map<String,String> initParam,
-			 int loadOnStartup,
-			 boolean isAsyncSupported);
-
-  /**
-   * Adds a runtime servlet mapping
-   *
-   * @Since Servlet 3.0
-   */
-  public void addServletMapping(String servletName,
-			       String []urlPatterns);
-
-  /**
-   * Adds a filter.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addFilter(String filterName,
-			String description,
-			String className,
-			Map<String,String> initParam,
-			boolean isAsyncSupported);
-
-  /**
-   * Adds a filter mapping.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addFilterMappingForServletNames(String filterName,
-					      EnumSet<DispatcherType> dispatcherTypes,
-					      boolean isMatchAfter,
-					      String ... servletNames);
-
-  /**
-   * Adds a filter mapping.
-   *
-   * @Since Servlet 3.0
-   */
-  public void addFilterMappingForUrlPatterns(String filterName,
-					      EnumSet<DispatcherType> dispatcherTypes,
-					      boolean isMatchAfter,
-					      String ... urlPatterns);
 
   /**
    * The session cookie configuration
@@ -435,11 +384,17 @@ public interface ServletContext {
   public <T extends Servlet> T createServlet(Class<T> c)
       throws ServletException;
 
-  /** Finds servlet registration using servletName
+  /** Returs servlet registration using servletName
    * @param servletName
    * @return a ServletRegistration object
    */
-  public ServletRegistration findServletRegistration(String servletName);
+  public ServletRegistration getServletRegistration(String servletName);
+
+  /**
+   * Returns servlet registrations
+   * @return
+   */
+  public Map<String, ServletRegistration> getServletRegistrations();
 
   /**
    * Adds a dynamic filter registration using className
@@ -480,9 +435,15 @@ public interface ServletContext {
       throws ServletException;
 
   /**
-   * Finds filter registration sing filterName
+   * Returns filter registration sing filterName
    * @param filterName
    * @return
    */
-  public FilterRegistration findFilterRegistration(String filterName);
+  public FilterRegistration getFilterRegistration(String filterName);
+
+  /**
+   * Returns filter registrations
+   * @return
+   */
+  public Map<String, FilterRegistration> getFilterRegistrations();
 }

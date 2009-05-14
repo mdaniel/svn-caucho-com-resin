@@ -34,7 +34,6 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.NodeBuilderProgram;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.CronType;
 import com.caucho.jmx.Jmx;
@@ -60,13 +59,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Configuration for a servlet.
  */
-public class ServletConfigImpl implements ServletConfig, AlarmListener
+public class ServletConfigImpl
+  implements ServletConfig, ServletRegistration, AlarmListener
 {
   static L10N L = new L10N(ServletConfigImpl.class);
   protected static final Logger log
@@ -151,6 +152,46 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   public String getServletName()
   {
     return _servletName;
+  }
+
+  public String getName()
+  {
+    return _servletName;
+  }
+
+  public String getClassName()
+  {
+    return _servletClassName;
+  }
+
+  public boolean setInitParameter(String name, String value)
+  {
+    if (_initParams.containsKey(name))
+      return false;
+
+    _initParams.put(name, value);
+
+    return true;
+  }
+
+  public Set<String> addMapping(String... urlPatterns)
+  {
+    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+  }
+
+  public Iterable<String> getMappings()
+  {
+    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+  }
+
+  public Set<String> setInitParameters(Map<String, String> initParameters)
+  {
+    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+  }
+
+  public Map<String, String> getInitParameters()
+  {
+    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
   }
 
   /**
@@ -783,7 +824,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   /**
    * Instantiates a servlet given its configuration.
    *
-   * @param servletName the servlet
+   * @param isNew
    *
    * @return the initialized servlet.
    */
