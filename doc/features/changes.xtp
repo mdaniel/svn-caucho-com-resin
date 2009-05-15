@@ -4,6 +4,7 @@
 
 <s2 title="3.0.28 snap">
 <ul>
+<li>ThreadPool: validation of idle items (#3454, rep by Takahiro Fukuda)</li>
 <li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>
 </ul>
 </s2>
