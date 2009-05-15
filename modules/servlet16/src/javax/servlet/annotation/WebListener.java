@@ -36,11 +36,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
 /**
- * Dclares a listener implementing one or more of the {@link
- * javax.servlet.ServletContextListener}, {@link javax.servlet.ServletContextAttributeListener},
- * {@link javax.servlet.ServletRequestListener}, {@link
- * javax.servlet.ServletRequestAttributeListener}, {@link
- * javax.servlet.http.HttpSessionListener}, or {@link javax.servlet.http.HttpSessionAttributeListener}
+ * Dclares a listener implementing one or more of the 
+ * {@link javax.servlet.ServletContextListener},
+ * {@link javax.servlet.ServletContextAttributeListener},
+ * {@link javax.servlet.ServletRequestListener},
+ * {@link javax.servlet.ServletRequestAttributeListener},
+ * {@link javax.servlet.http.HttpSessionListener}, or
+ * {@link javax.servlet.http.HttpSessionAttributeListener}
  * interfaces.
  *
  * @since Servlet 3.0

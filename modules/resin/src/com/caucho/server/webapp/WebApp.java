@@ -99,6 +99,7 @@ import javax.naming.NamingException;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebListener;
 import javax.servlet.http.*;
 import java.io.File;
 import java.io.IOException;
@@ -2075,32 +2076,61 @@ public class WebApp extends ServletContextImpl
   }
 
   public void initAnnotated() throws Exception {
+    List<Class> listeners = new ArrayList<Class>();
+
     List<Class> servlets = new ArrayList<Class>();
     List<Class> filters = new ArrayList<Class>();
 
-    for (String className : _pendingClasses) {
+    List<String> pendingClasses = new ArrayList<String>(_pendingClasses);
+    _pendingClasses.clear();
+
+    for (String className : pendingClasses) {
       Class cl = _classLoader.loadClass(className);
 
-      if (javax.servlet.Servlet.class.isAssignableFrom(cl))
+      if (ServletContextListener.class.isAssignableFrom(cl))
+        listeners.add(cl);
+      else if (ServletContextAttributeListener.class.isAssignableFrom(cl))
+        listeners.add(cl);
+      else if (ServletRequestListener.class.isAssignableFrom(cl))
+        listeners.add(cl);
+      else if (ServletRequestAttributeListener.class.isAssignableFrom(cl))
+        listeners.add(cl);
+      else if (HttpSessionListener.class.isAssignableFrom(cl))
+        listeners.add(cl);
+      else if (HttpSessionAttributeListener.class.isAssignableFrom(cl))
+        listeners.add(cl);
+      else if (Servlet.class.isAssignableFrom(cl))
         servlets.add(cl);
       else if (Filter.class.isAssignableFrom(cl))
         filters.add(cl);
     }
 
-    for (Class filter : filters) {
-      WebFilter webFilter
-        = (WebFilter) filter.getAnnotation(WebFilter.class);
+    for (Class listenerClass : listeners) {
+      WebListener webListener
+        = (WebListener) listenerClass.getAnnotation(WebListener.class);
 
-      if (webFilter != null)
-        addFilter(webFilter, filter.getName());
+      if (webListener != null) {
+        Listener listener = new Listener();
+        listener.setListenerClass(listenerClass);
+
+        addListener(listener);
+      }
     }
 
-    for (Class servlet : servlets) {
+    for (Class filterClass : filters) {
+      WebFilter webFilter
+        = (WebFilter) filterClass.getAnnotation(WebFilter.class);
+
+      if (webFilter != null)
+        addFilter(webFilter, filterClass.getName());
+    }
+
+    for (Class servletClass : servlets) {
       WebServlet webServlet
-        = (WebServlet) servlet.getAnnotation(WebServlet.class);
+        = (WebServlet) servletClass.getAnnotation(WebServlet.class);
 
       if (webServlet != null)
-        addServlet(webServlet, servlet.getName());
+        addServlet(webServlet, servletClass.getName());
     }
   }
 
@@ -3187,7 +3217,7 @@ public class WebApp extends ServletContextImpl
 
   public ScanMatch isScanMatchClass(String name, int modifiers)
   {
-    throw new UnsupportedOperationException(WebApp.class.getName());
+    return ScanMatch.DENY;
   }
 
   public boolean isScanMatchAnnotation(CharBuffer string)
