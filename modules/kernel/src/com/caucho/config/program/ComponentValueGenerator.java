@@ -64,6 +64,6 @@ public class ComponentValueGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    return _webBeans.getInstance(_comp);
+    return _webBeans.getReference(_comp);
   }
 }

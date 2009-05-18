@@ -44,18 +44,21 @@ import com.caucho.util.L10N;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.config.inject.InjectManager;
 
-import javax.annotation.PostConstruct;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.inject.BindingType;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
 /**
  * Manages a pool of database connections.  In addition, DBPool configures
@@ -121,6 +124,9 @@ public class DBPool
   private String _name;
   private String _jndiName;
   private String _tmpName;
+
+  private ArrayList<Annotation> _bindingList
+    = new ArrayList<Annotation>();
 
   private ResourceManagerImpl _resourceManager;
   private ConnectionPool _connectionPool;
@@ -197,6 +203,18 @@ public class DBPool
   }
 
   /**
+   * Adds an annotation
+   */
+  public void addAnnotation(Annotation ann)
+  {
+    if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      _bindingList.add(ann);
+    }
+    else
+      throw new ConfigException(L.l("'{0}' is an unsupported annotation for <database>."));
+  }
+
+  /**
    * Sets a custom driver (or data source)
    */
   public DriverConfig createDriver()
@@ -212,6 +230,36 @@ public class DBPool
     throws ConfigException
   {
     return getPool().createBackupDriver();
+  }
+
+  /**
+   * Adds a preconfigured driver using Java Injection syntax.
+   */
+  public void add(DataSource dataSource)
+  {
+    DriverConfig config = createDriver();
+
+    config.setDriverObject(dataSource);
+  }
+
+  /**
+   * Adds a preconfigured driver using Java Injection syntax.
+   */
+  public void add(ConnectionPoolDataSource dataSource)
+  {
+    DriverConfig config = createDriver();
+
+    config.setDriverObject(dataSource);
+  }
+
+  /**
+   * Adds a preconfigured driver using Java Injection syntax.
+   */
+  public void add(XADataSource dataSource)
+  {
+    DriverConfig config = createDriver();
+
+    config.setDriverObject(dataSource);
   }
 
   /**
@@ -684,10 +732,19 @@ public class DBPool
     if (name == null)
       name = _var;
 
+    Annotation []bindingList = null;
+
+    if (_bindingList.size() > 0) {
+      bindingList = new Annotation[_bindingList.size()];
+      _bindingList.toArray(bindingList);
+    }
+    else if (name != null)
+      bindingList = new Annotation[] { Names.create(name) };
+
     SingletonBean bean;
-    if (name != null) {
-      bean = new SingletonBean(this, CauchoDeployment.class, null,
-			       new Annotation[] { Names.create(name) },
+    if (bindingList != null) {
+      bean = new SingletonBean(this, CauchoDeployment.class, name,
+			       bindingList,
 			       DataSource.class);
     }
     else {

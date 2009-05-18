@@ -35,6 +35,7 @@ import com.caucho.config.inject.InjectManager;
 
 import java.lang.annotation.*;
 import javax.context.CreationalContext;
+import javax.inject.manager.AnnotatedType;
 import javax.inject.manager.InjectionPoint;
 
 /**
@@ -65,14 +66,15 @@ public class StatefulComponent extends ComponentImpl {
   @Override
   public void introspect()
   {
-    Class cl = getIntrospectionClass();
+    AnnotatedType type = getAnnotatedType();
 
-    introspectTypes(cl);
+    introspectTypes(getTargetType());
 
-    introspectClass(cl);
+    // XXX: refactor
+    //introspectClass(type);
 
     if (getBindings().size() == 0)
-      introspectBindings(cl.getAnnotations());
+      introspectBindings(type.getAnnotations());
 
     /*
     introspectObservers(cl);

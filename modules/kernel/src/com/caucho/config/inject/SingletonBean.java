@@ -38,6 +38,7 @@ import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import javax.context.CreationalContext;
+import javax.inject.manager.AnnotatedType;
 import javax.inject.manager.InjectionPoint;
 
 /**
@@ -162,9 +163,9 @@ public class SingletonBean extends SimpleBean
   public void bind()
   {
   }
-  
+
   @Override
-  public void introspectConstructor()
+  public void introspectConstructor(AnnotatedType beanType)
   {
   }
 
@@ -201,6 +202,22 @@ public class SingletonBean extends SimpleBean
   public Object create()
   {
     return _value;
+  }
+
+  @Override
+  public Object instantiate()
+  {
+    return _value;
+  }
+
+  @Override
+  public void inject(Object value)
+  {
+  }
+
+  @Override
+  public void postConstruct(Object value)
+  {
   }
 
   @Override

@@ -35,7 +35,7 @@ import com.caucho.config.inject.CauchoBean;
 import com.caucho.hemp.broker.HempBroker;
 
 import java.lang.annotation.Annotation;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * Broker
@@ -47,11 +47,11 @@ public class BamRegisterListener implements BeanRegistrationListener
     return ann instanceof com.caucho.remote.BamService;
   }
 
-  public void start(Manager manager, CauchoBean bean)
+  public void start(BeanManager manager, CauchoBean bean)
   {
     HempBroker broker = HempBroker.getCurrent();
     
-    Actor service = (Actor) manager.getInstance(bean);
+    Actor service = (Actor) manager.getReference(bean);
 
     com.caucho.remote.BamService serviceAnn
       = getAnnotation(bean, com.caucho.remote.BamService.class);

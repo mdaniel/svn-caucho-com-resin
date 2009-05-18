@@ -99,18 +99,22 @@ public class NewBean extends SimpleBean
   /**
    * @New disables produces introspection.
    */
+  /*
   @Override
-  protected void introspectProduces(Method []methods)
+  protected void introspectProduces(Set<AnnotatedMethod> methods)
   {
   }
+  */
 
   /**
    * @New disables observer introspection.
    */
+  /*
   @Override
-  protected void introspectObservers(Method []methods)
+  protected void introspectObservers(Set<AnnotatedMethod> methods)
   {
   }
+  */
 
   /**
    * Creates a new instance of the component.

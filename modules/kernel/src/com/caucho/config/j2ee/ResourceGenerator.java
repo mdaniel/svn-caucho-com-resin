@@ -146,7 +146,7 @@ public class ResourceGenerator extends ValueGenerator {
     }
 
     if (_bean != null)
-      return _webBeans.getInstance(_bean);
+      return _webBeans.getReference(_bean);
     else
       return getJndiValue(_type);
   }

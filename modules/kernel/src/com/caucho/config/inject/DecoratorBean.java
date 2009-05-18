@@ -48,9 +48,11 @@ import javax.inject.manager.InjectionPoint;
 /**
  * DecoratorBean represents a Java decorator
  */
-public class DecoratorBean extends Decorator
+public class DecoratorBean implements Decorator
 {
   private static final L10N L = new L10N(DecoratorBean.class);
+
+  private InjectManager _beanManager;
   
   private Class _type;
 
@@ -64,10 +66,10 @@ public class DecoratorBean extends Decorator
   private HashSet<Annotation> _bindings
     = new HashSet<Annotation>();
   
-  public DecoratorBean(InjectManager webBeans,
+  public DecoratorBean(InjectManager beanManager,
 		       Class type)
   {
-    super(webBeans);
+    _beanManager = beanManager;
 
     _type = type;
 
@@ -133,7 +135,7 @@ public class DecoratorBean extends Decorator
   /**
    * Returns the types that the bean implements
    */
-  public Set<Class<?>> getTypes()
+  public Set<Type> getTypes()
   {
     return _bean.getTypes();
   }
@@ -173,9 +175,11 @@ public class DecoratorBean extends Decorator
   /**
    * Destroys a bean instance
    */
+  /*
   public void destroy(Object instance)
   {
   }
+  */
 
   //
   // decorator
@@ -300,6 +304,46 @@ public class DecoratorBean extends Decorator
 
     if (_bindings.size() == 0)
       _bindings.add(new AnnotationLiteral<Current>() {});
+  }
+  
+  /**
+   * Instantiate the bean.
+   */
+  public Object instantiate()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Inject the bean.
+   */
+  public void inject(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call post-construct
+   */
+  public void postConstruct(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void preDestroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call destroy
+   */
+  public void destroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   private void addType(Class type)

@@ -185,6 +185,14 @@ public class ConversationScope extends ScopeContext
   /**
    * Begins an extended conversation
    */
+  public void begin(String name)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Begins an extended conversation
+   */
   public void begin()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -234,6 +242,26 @@ public class ConversationScope extends ScopeContext
       return;
 
     scope._extendedConversation = null;
+  }
+
+  public boolean isLongRunning()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public String getId()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public long getTimeout()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public void setTimeout(long timeout)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   static class Scope implements java.io.Serializable {

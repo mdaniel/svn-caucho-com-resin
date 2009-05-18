@@ -1,0 +1,169 @@
+/*
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.config.inject;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.logging.*;
+import javax.inject.manager.Annotated;
+import javax.inject.manager.AnnotatedConstructor;
+import javax.inject.manager.AnnotatedField;
+import javax.inject.manager.AnnotatedType;
+import javax.inject.manager.AnnotatedConstructor;
+import javax.inject.manager.AnnotatedMethod;
+
+/**
+ * Abstract introspected view of a Bean
+ */
+public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
+{
+  private static final Logger log
+    = Logger.getLogger(BeanTypeImpl.class.getName());
+
+  private Class _javaClass;
+
+  private Set<AnnotatedConstructor> _constructorSet
+    = new LinkedHashSet<AnnotatedConstructor>();
+
+  private Set<AnnotatedField> _fieldSet
+    = new LinkedHashSet<AnnotatedField>();
+
+  private Set<AnnotatedMethod> _methodSet
+    = new LinkedHashSet<AnnotatedMethod>();
+  
+  public BeanTypeImpl(Type type, Class javaClass)
+  {
+    super(type, javaClass.getAnnotations());
+
+    _javaClass = javaClass;
+
+    introspect(javaClass);
+  }
+  
+  /**
+   * Returns the concrete Java class
+   */
+  public Class<?> getJavaClass()
+  {
+    return _javaClass;
+  }
+
+  /**
+   * Returns the abstract introspected constructors
+   */
+  public Set<AnnotatedConstructor> getConstructors()
+  {
+    return _constructorSet;
+  }
+
+  /**
+   * Returns the abstract introspected methods
+   */
+  public Set<AnnotatedMethod> getMethods()
+  {
+    return _methodSet;
+  }
+
+  /**
+   * Returns the abstract introspected fields
+   */
+  public Set<AnnotatedField> getFields()
+  {
+    return _fieldSet;
+  }
+
+  private void introspect(Class cl)
+  {
+    for (Field field : cl.getDeclaredFields()) {
+      if (hasBeanAnnotation(field.getAnnotations())) {
+	_fieldSet.add(new BeanFieldImpl(this, field));
+      }
+    }
+
+    for (Method method : cl.getMethods()) {
+      if (hasBeanAnnotation(method)) {
+	_methodSet.add(new BeanMethodImpl(this, method));
+      }
+    }
+
+    for (Constructor ctor : cl.getDeclaredConstructors()) {
+      _constructorSet.add(new BeanConstructorImpl(this, ctor));
+    }
+
+    if (_constructorSet.size() == 0) {
+      try {
+	Constructor ctor = cl.getConstructor(new Class[0]);
+	_constructorSet.add(new BeanConstructorImpl(this, ctor));
+      } catch (NoSuchMethodException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+    }
+  }
+
+  private boolean hasBeanAnnotation(Method method)
+  {
+    if (hasBeanAnnotation(method.getAnnotations()))
+      return true;
+
+    return false;
+  }
+
+  private boolean hasBeanAnnotation(Annotation []annotations)
+  {
+    if (annotations == null)
+      return false;
+    
+    for (Annotation ann : annotations) {
+      if (isBeanAnnotation(ann.annotationType()))
+	return true;
+
+      for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+	if (isBeanAnnotation(metaAnn.annotationType()))
+	  return true;
+      }
+    }
+
+    return false;
+  }
+
+  private boolean isBeanAnnotation(Class annType)
+  {
+    String name = annType.getName();
+    
+    return name.startsWith("javax.");
+  }
+}

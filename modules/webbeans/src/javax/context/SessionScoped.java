@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @SessionScoped represents the servlet session scope
  */
-@ScopeType
+@ScopeType(passivating=true)
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface SessionScoped {

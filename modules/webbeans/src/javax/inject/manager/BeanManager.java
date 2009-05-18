@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,6 +30,7 @@
 package javax.inject.manager;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
@@ -45,23 +46,54 @@ import javax.inject.TypeLiteral;
  * instance of the Manager either though webbeans itself or in JNDI at
  * "java:comp/env/Manager"
  */
-public interface Manager
+public interface BeanManager
 {
   //
-  // bean resolution and instantiation
+  // deployment types
   //
+
+  /**
+   * Returns the enabled deployment types
+   */
+  public List<Class<?>> getEnabledDeploymentTypes();
+  
+  //
+  // bean registration
+  //
+
+  /**
+   * Creates a managed bean.
+   */
+  public <T> ManagedBean<T> createManagedBean(AnnotatedType<T> type);
+
+  /**
+   * Creates a managed bean.
+   */
+  public <T> ManagedBean<T> createManagedBean(Class<T> type);
+
+  /**
+   * Creates an injection target
+   */
+  public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type);
+
+  /**
+   * Creates a managed bean.
+   */
+  public <T> InjectionTarget<T> createInjectionTarget(Class<T> type);
   
   /**
    * Adds a new bean definition to the manager
    */
-  public Manager addBean(Bean<?> bean);
+  public void addBean(Bean<?> bean);
 
   /**
-   * Returns the bean definitions matching a given name
-   *
-   * @param name the name of the bean to match
+   * Internal callback during creation to get a new injection instance.
    */
-  public Set<Bean<?>> resolveByName(String name);
+  public void validation(InjectionPoint injectionPoint);
+
+  //
+  // Bean resolution
+  //
 
   /**
    * Returns the beans matching a class and annotation set
@@ -69,8 +101,8 @@ public interface Manager
    * @param type the bean's class
    * @param bindings required @BindingType annotations
    */
-  public <T> Set<Bean<T>> resolveByType(Class<T> type,
-					Annotation... bindings);
+  public <T> Set<Bean<T>> getBeans(Class<T> type,
+				   Annotation... bindings);
 
   /**
    * Returns the beans matching a generic type and annotation set
@@ -78,8 +110,35 @@ public interface Manager
    * @param type the bean's primary type
    * @param bindings required @BindingType annotations
    */
-  public <T> Set<Bean<T>> resolveByType(TypeLiteral<T> type,
-					Annotation... bindings);
+  public <T> Set<Bean<T>> getBeans(TypeLiteral<T> type,
+				   Annotation... bindings);
+
+  /**
+   * Returns the beans matching a generic type and annotation set
+   *
+   * @param type the bean's primary type
+   * @param bindings required @BindingType annotations
+   */
+  public Set<Bean<?>> getBeans(Type type,
+			       Annotation... bindings);
+
+  /**
+   * Returns the bean definitions matching a given name
+   *
+   * @param name the name of the bean to match
+   */
+  public Set<Bean<?>> getBeans(String name);
+
+  /**
+   * Returns the most specialized bean
+   *
+   * @param name the basic bean
+   */
+  public <X> Bean<X> getMostSpecializedBean(Bean<X> bean);
+
+  //
+  // Bean instantiation
+  //
 
   /**
    * Returns an instance for the given bean.  This method will obey
@@ -89,7 +148,13 @@ public interface Manager
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getInstance(Bean<T> bean);
+  public <T> T getReference(Bean<T> bean);
+
+  /**
+   * Internal callback during creation to get a new injection instance.
+   */
+  public <T> T getInjectableReference(InjectionPoint ij,
+				      CreationalContext<?> ctx);
 
   /**
    * Returns an instance of bean matching a given name
@@ -98,36 +163,88 @@ public interface Manager
    */
   public Object getInstanceByName(String name);
 
+  //
+  // Observer registration
+  //
+
   /**
-   * Creates an instance for the given type.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
+   * Registers an event observer
    *
-   * @param type the bean's class
-   * @param bindings required @BindingType annotations
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
    */
-  public <T> T getInstanceByType(Class<T> type,
+  public <T> void addObserver(Observer<T> observer,
+			      Class<T> eventType,
+			      Annotation... bindings);
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void addObserver(Observer<T> observer,
+			      TypeLiteral<T> eventType,
+			      Annotation... bindings);
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public void addObserver(Observer<?> observer,
+			  Type eventType,
+			  Annotation... bindings);
+
+  /**
+   * Removes an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void removeObserver(Observer<T> observer,
+				 Class<T> eventType,
 				 Annotation... bindings);
 
   /**
-   * Creates an instance for the given type.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
+   * Removes an event observer
    *
-   * @param type the bean's primary type
-   * @param bindings required @BindingType annotations
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
    */
-  public <T> T getInstanceByType(TypeLiteral<T> type,
+  public <T> void removeObserver(Observer<T> observer,
+				 TypeLiteral<T> eventType,
 				 Annotation... bindings);
 
   /**
-   * Internal callback during creation to get a new injection instance.
+   * Removes an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
    */
-  public <T> T getInstanceToInject(InjectionPoint ij,
-				   CreationalContext<?> ctx);
+  public void removeObserver(Observer<?> observer,
+			     Type eventType,
+			     Annotation... bindings);
+
+  //
+  // Observer resolution
+  //
 
   /**
-   * Internal callback during creation to get a new injection instance.
+   * Returns the observers listening for an event
+   *
+   * @param eventType event to resolve
+   * @param bindings the binding set for the event
    */
-  public <T> T getInstanceToInject(InjectionPoint ij);
+  public <T> Set<Observer<T>> resolveObservers(T event,
+					       Annotation... bindings);
 
   //
   // scopes
@@ -156,59 +273,6 @@ public interface Manager
   public void fireEvent(Object event,
 			Annotation... bindings);
 
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      Class<T> eventType,
-			      Annotation... bindings);
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      TypeLiteral<T> eventType,
-			      Annotation... bindings);
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void removeObserver(Observer<T> observer,
-				 Class<T> eventType,
-				 Annotation... bindings);
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void removeObserver(Observer<T> observer,
-				 TypeLiteral<T> eventType,
-				 Annotation... bindings);
-
-  /**
-   * Returns the observers listening for an event
-   *
-   * @param eventType event to resolve
-   * @param bindings the binding set for the event
-   */
-  public <T> Set<Observer<T>> resolveObservers(T event,
-					       Annotation... bindings);
-
   //
   // interceptor support
   //
@@ -216,7 +280,7 @@ public interface Manager
   /**
    * Adds a new interceptor
    */
-  public Manager addInterceptor(Interceptor interceptor);
+  public void addInterceptor(Interceptor interceptor);
 
   /**
    * Resolves the interceptors for a given interceptor type
@@ -237,7 +301,7 @@ public interface Manager
   /**
    * Adds a new decorator
    */
-  public Manager addDecorator(Decorator decorator);
+  public BeanManager addDecorator(Decorator decorator);
 
   /**
    * Resolves the decorators for a given set of types
@@ -249,4 +313,18 @@ public interface Manager
    */
   public List<Decorator> resolveDecorators(Set<Class<?>> types,
 					   Annotation... bindings);
+
+  //
+  // Actitivities
+  //
+
+  /**
+   * Creates a new activity
+   */
+  public BeanManager createActivity();
+
+  /**
+   * Associate the context with a scope
+   */
+  public BeanManager setCurrent(Class<? extends Annotation> scopeType);
 }

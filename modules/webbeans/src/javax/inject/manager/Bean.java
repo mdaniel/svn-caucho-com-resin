@@ -30,6 +30,7 @@
 package javax.inject.manager;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.context.Contextual;
@@ -37,23 +38,8 @@ import javax.context.Contextual;
 /**
  * Internal implementation for a Bean
  */
-public abstract class Bean<T> implements Contextual<T>
+public interface Bean<T> extends Contextual<T>
 {
-  private final Manager manager;
-
-  protected Bean(Manager manager)
-  {
-    this.manager = manager;
-  }
-
-  /**
-   * Returns the bean's webbeans manager.
-   */
-  public Manager getManager()
-  {
-    return this.manager;
-  }
-
   //
   // metadata for the bean
   //
@@ -97,5 +83,5 @@ public abstract class Bean<T> implements Contextual<T>
   /**
    * Returns the types that the bean exports for bindings.
    */
-  public abstract Set<Class<?>> getTypes();
+  public abstract Set<Type> getTypes();
 }

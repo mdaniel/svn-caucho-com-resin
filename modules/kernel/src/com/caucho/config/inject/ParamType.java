@@ -47,18 +47,45 @@ import javax.annotation.*;
 /**
  * param type matching
  */
-public class ParamType extends BaseType
+public class ParamType extends BaseType implements ParameterizedType
 {
   private Class _type;
   private BaseType []_param;
+  private Type []_actualArguments;
 
   public ParamType(Class type, BaseType []param)
   {
     _type = type;
     _param = param;
+
+    _actualArguments = new Type[param.length];
+    for (int i = 0; i < param.length; i++) {
+      _actualArguments[i] = param[i].toType();
+    }
   }
   
   public Class getRawClass()
+  {
+    return _type;
+  }
+
+  @Override
+  public Type toType()
+  {
+    return this;
+  }
+
+  public Type []getActualTypeArguments()
+  {
+    return _actualArguments;
+  }
+
+  public Type getOwnerType()
+  {
+    return null;
+  }
+  
+  public Type getRawType()
   {
     return _type;
   }

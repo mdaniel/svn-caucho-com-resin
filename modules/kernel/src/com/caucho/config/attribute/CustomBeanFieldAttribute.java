@@ -34,6 +34,7 @@ import java.lang.reflect.*;
 
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.CustomBeanConfig;
@@ -88,6 +89,8 @@ public class CustomBeanFieldAttribute extends Attribute {
   public void setText(Object parent, QName name, String text)
     throws ConfigException
   {
-    super.setText(parent, name, text);
+    CustomBeanConfig customBean = (CustomBeanConfig) parent;
+
+    customBean.addBuilderProgram(new PropertyStringProgram(name, text));
   }
 }

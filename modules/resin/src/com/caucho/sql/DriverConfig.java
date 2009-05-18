@@ -46,23 +46,31 @@ import com.caucho.tools.profiler.ProfilerPoint;
 import com.caucho.tools.profiler.ProfilerPointConfig;
 import com.caucho.tools.profiler.XADataSourceWrapper;
 import com.caucho.util.Alarm;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
+
+import java.io.InputStream;
+import java.lang.reflect.*;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XADataSource;
-import java.lang.reflect.*;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 /**
  * Configures the database driver.
@@ -78,6 +86,7 @@ public class DriverConfig
   private static final int TYPE_POOL = 2;
   private static final int TYPE_XA = 3;
   private static final int TYPE_JCA = 4;
+  private static final int TYPE_DATA_SOURCE = 5;
 
   /**
    * The beginning of the URL used to connect to a database with
@@ -167,6 +176,9 @@ public class DriverConfig
     else if ("Driver".equals(type)) {
       _driverType = TYPE_DRIVER;
     }
+    else if ("DataSource".equals(type)) {
+      _driverType = TYPE_DATA_SOURCE;
+    }
     else if (hasDriverTypeMethod(_driverClass)) {
       _init.addProgram(new PropertyStringProgram("driverType", type));
     }
@@ -234,9 +246,11 @@ public class DriverConfig
     if (! Driver.class.isAssignableFrom(driverClass)
 	&& ! XADataSource.class.isAssignableFrom(driverClass)
 	&& ! ConnectionPoolDataSource.class.isAssignableFrom(driverClass)
-	&& ! ManagedConnectionFactory.class.isAssignableFrom(driverClass))
-      throw new ConfigException(L.l("'{0}' is not a valid database type.",
+	&& ! ManagedConnectionFactory.class.isAssignableFrom(driverClass)
+	&& ! DataSource.class.isAssignableFrom(driverClass)) {
+      throw new ConfigException(L.l("'{0}' is not a valid database type, because it does not implement Driver, XADataSource, ConnectionPoolDataSource, ManagedConnectionFactory, or DataSource..",
                                     driverClass.getName()));
+    }
 
     Config.checkCanInstantiate(driverClass);
   }
@@ -369,6 +383,11 @@ public class DriverConfig
     _driverObject = driver;
   }
 
+  public void setDriverObject(Object driverObject)
+  {
+    _driverObject = driverObject;
+  }
+
   /**
    * Returns the driver pool.
    */
@@ -493,6 +512,8 @@ public class DriverConfig
         _jcaDataSource = (ManagedConnectionFactory) _driverObject;
       else if (_driverObject instanceof Driver)
         _driver = (Driver) _driverObject;
+      else if (_driverObject instanceof DataSource)
+        _poolDataSource = new ConnectionPoolAdapter((DataSource) _driverObject);
       else
         throw new SQLExceptionWrapper(L.l("driver '{0}' has not been configured for pool {1}.  <database> needs a <driver type='...'>.",
                                           _driverClass, getDBPool().getName()));
@@ -678,7 +699,7 @@ public class DriverConfig
       if (_driverURL == null)
 	throw new ConfigException(L.l("<driver> requires a 'type' or 'url'"));
 
-      String driver = DatabaseManager.findDriverByUrl(_driverURL);
+      String driver = findDriverByUrl(_driverURL);
 
       if (driver == null)
 	throw new ConfigException(L.l("url='{0}' does not have a known driver.  The driver class must be specified by a 'type' parameter.",
@@ -780,6 +801,73 @@ public class DriverConfig
     }
 
     return false;
+  }
+
+  protected String findDriverByUrl(String url)
+  {
+    String driver = DatabaseManager.findDriverByUrl(_driverURL);
+
+    if (driver != null)
+      return driver;
+
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    try {
+      Enumeration e = loader.getResources("META-INF/services/java.sql.Driver");
+
+      while (e.hasMoreElements()) {
+	URL serviceUrl = (URL) e.nextElement();
+
+	driver = testDriver(url, serviceUrl);
+
+	if (driver != null)
+	  return driver;
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    return null;
+  }
+
+  private String testDriver(String url, URL serviceURL)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    InputStream is = null;
+    
+    try {
+      is = serviceURL.openStream();
+
+      ReadStream in = Vfs.openRead(is);
+      String line;
+      while ((line = in.readLine()) != null) {
+	int p = line.indexOf('#');
+	if (p >= 0)
+	  line = line.substring(p);
+
+	line = line.trim();
+
+	if (line.length() == 0)
+	  continue;
+
+	try {
+	  Class cl = Class.forName(line, false, loader);
+
+	  Driver driver = (Driver) cl.newInstance();
+
+	  System.out.println("NOM: " + driver.acceptsURL(url) + " " + url + " " + driver);
+	  if (driver.acceptsURL(url))
+	    return cl.getName();
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      IoUtil.close(is);
+    }
+
+    return null;
   }
 
   //

@@ -162,7 +162,7 @@ public class ManagedFactoryImpl
     if (exn != null)
       throw new ResourceException(exn);
     else
-      throw new ResourceException(L.l("Can't open database"));
+      throw new ResourceException(L.l("Can't create a database connection because no drivers have been defined."));
   }
 
   /**

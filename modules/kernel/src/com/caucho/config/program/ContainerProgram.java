@@ -41,6 +41,11 @@ public class ContainerProgram extends ConfigProgram {
     = new ArrayList<ConfigProgram>();
 
 
+  public ArrayList<ConfigProgram> getProgramList()
+  {
+    return _programList;
+  }
+  
   /**
    * Adds a new program to the container
    * 

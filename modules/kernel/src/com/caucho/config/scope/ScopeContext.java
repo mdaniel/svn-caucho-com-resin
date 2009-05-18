@@ -33,6 +33,7 @@ import java.lang.annotation.Annotation;
 
 import javax.context.*;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionTarget;
 
 import com.caucho.config.inject.ComponentImpl;
 

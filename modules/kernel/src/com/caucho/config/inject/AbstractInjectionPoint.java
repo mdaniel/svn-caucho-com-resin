@@ -64,6 +64,11 @@ public class AbstractInjectionPoint implements InjectionPoint
     _bindings = bindings;
     _annotations = annotations;
   }
+
+  public Annotated getAnnotated()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   public Set<Annotation> getBindings()
   {
@@ -115,7 +120,12 @@ public class AbstractInjectionPoint implements InjectionPoint
     if (_injectionBean == null)
       _injectionBean = _inject.resolveByInjectionPoint(this);
 
-    return _inject.getInstance(_injectionBean); // XXX: cxt
+    return _inject.getReference(_injectionBean); // XXX: cxt
+  }
+
+  public boolean isDelegate()
+  {
+    return false;
   }
 
   @Override

@@ -49,6 +49,7 @@ import com.caucho.servlet.comet.CometServlet;
 import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
+import javax.inject.manager.InjectionTarget;
 import javax.naming.NamingException;
 import javax.servlet.*;
 import java.lang.reflect.Constructor;
@@ -103,7 +104,7 @@ public class ServletConfigImpl
   private ProtocolServletFactory _protocolFactory;
   
   private Alarm _alarm;
-  private ComponentImpl _comp;
+  private InjectionTarget _comp;
 
   private ServletContext _servletContext;
   private ServletManager _servletManager;
@@ -930,10 +931,12 @@ public class ServletConfigImpl
     else if (servletClass != null) {
       InjectManager inject = InjectManager.create();
       
-      _comp = (ComponentImpl) inject.createTransient(servletClass);
+      _comp = inject.createInjectionTarget(servletClass);
 
+      ConfigContext env = ConfigContext.create();
       // server/1b40
-      servlet = _comp.createNoInit();
+      servlet = _comp.produce(env);
+      _comp.inject(servlet, env);
     }
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",

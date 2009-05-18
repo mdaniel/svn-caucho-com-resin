@@ -31,6 +31,7 @@ package com.caucho.config.types;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
+import com.caucho.config.inject.BeanTypeImpl;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SimpleBean;
@@ -50,6 +51,12 @@ import javax.annotation.*;
 import javax.context.ScopeType;
 import javax.inject.BindingType;
 import javax.inject.DeploymentType;
+import javax.inject.manager.AnnotatedConstructor;
+import javax.inject.manager.AnnotatedParameter;
+import javax.inject.manager.Bean;
+import javax.inject.manager.BeanManager;
+import javax.inject.manager.ManagedBean;
+import javax.inject.manager.ProducerBean;
 import javax.interceptor.InterceptorBindingType;
 
 import org.w3c.dom.Node;
@@ -66,8 +73,11 @@ public class CustomBeanConfig {
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
 
+  private InjectManager _beanManager;
+  
   private Class _class;
-  private SimpleBean _component;
+  private BeanTypeImpl _annotatedType;
+  private Bean _component;
   private ConfigType _configType;
 
   private ArrayList<ConfigProgram> _args;
@@ -78,6 +88,8 @@ public class CustomBeanConfig {
   private int _line;
 
   private ContainerProgram _init;
+  private boolean _hasBindings;
+  private boolean _hasDeployment;
 
   public CustomBeanConfig(QName name, Class cl)
   {
@@ -85,9 +97,13 @@ public class CustomBeanConfig {
 
     _class = cl;
 
+    _beanManager = InjectManager.create();
+
     if (! Annotation.class.isAssignableFrom(cl)) {
-      _component = new SimpleBean(cl);
+      // XXX:
+      // _component = new SimpleBean(cl);
       // _component.setScopeClass(Dependent.class);
+      _annotatedType = new BeanTypeImpl(cl, cl);
     }
 
     _configType = TypeFactory.getCustomBeanType(cl);
@@ -149,10 +165,12 @@ public class CustomBeanConfig {
     if (_init == null) {
       _init = new ContainerProgram();
 
+      /*
       if (_component != null)
 	_component.setInit(_init);
+      */
     }
-
+    
     _init.addProgram(program);
   }
   
@@ -212,11 +230,27 @@ public class CustomBeanConfig {
 
   public void addAnnotation(Annotation ann)
   {
+    // XXX: some annotations also remove other annotations
+    
+    if (ann.annotationType().isAnnotationPresent(BindingType.class)
+	&& ! _hasBindings) {
+      _hasBindings = true;
+      clearBindings(_annotatedType);
+    }
+    
+    if (ann.annotationType().isAnnotationPresent(DeploymentType.class)
+	&& ! _hasDeployment) {
+      _hasDeployment = true;
+      clearAnnotations(_annotatedType, DeploymentType.class);
+    }
+    
+    _annotatedType.addAnnotation(ann);
+
+    /*
     Class type = ann.annotationType();
 
     Class metaType = null;
 
-    _component.addAnnotation(ann);
 
     if (type.isAnnotationPresent(ScopeType.class)) {
       metaType = ScopeType.class;
@@ -269,6 +303,7 @@ public class CustomBeanConfig {
     if (type.isAnnotationPresent(StartupType.class)) {
       metaType = StartupType.class;
     }
+    */
 
     // ioc/0l00, server/6600
     /*
@@ -283,7 +318,7 @@ public class CustomBeanConfig {
     Method method = methodConfig.getMethod();
     Annotation []annList = methodConfig.getAnnotations();
 
-    _component.addMethod(new SimpleBeanMethod(method, annList));
+    //_component.addMethod(new SimpleBeanMethod(method, annList));
   }
 
   public void addField(CustomBeanFieldConfig fieldConfig)
@@ -291,9 +326,10 @@ public class CustomBeanConfig {
     Field field = fieldConfig.getField();
     Annotation []annList = fieldConfig.getAnnotations();
 
-    _component.addField(new SimpleBeanField(field, annList));
+    //_component.addField(new SimpleBeanField(field, annList));
   }
 
+  /*
   private void addStereotype(Class type)
   {
     for (Annotation ann : type.getAnnotations()) {
@@ -314,6 +350,30 @@ public class CustomBeanConfig {
       else if (annType.isAnnotationPresent(BindingType.class)) {
 	_component.addBinding(ann);
       }
+    }
+  }
+  */
+
+  private void clearBindings(BeanTypeImpl beanType)
+  {
+    HashSet<Annotation> annSet
+      = new HashSet<Annotation>(beanType.getAnnotations());
+
+    for (Annotation ann : annSet) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	beanType.removeAnnotation(ann);
+    }
+  }
+
+  private void clearAnnotations(BeanTypeImpl beanType,
+				Class<? extends Annotation> annType)
+  {
+    HashSet<Annotation> annSet
+      = new HashSet<Annotation>(beanType.getAnnotations());
+
+    for (Annotation ann : annSet) {
+      if (ann.annotationType().isAnnotationPresent(annType))
+	beanType.removeAnnotation(ann);
     }
   }
 
@@ -351,38 +411,175 @@ public class CustomBeanConfig {
     return null;
   }
 
+  /*
   public ComponentImpl getComponent()
   {
     return _component;
   }
+  */
 
   @PostConstruct
   public void init()
   {
-    if (_component != null) {
+    if (_annotatedType != null) {
       initComponent();
-    
-      InjectManager webBeans = InjectManager.create();
-
-      webBeans.addConfigBean(_component);
     }
   }
 
   public void initComponent()
   {
+    /* XXX: constructor
+       
     if (_args != null)
       _component.setNewArgs(_args);
+    */
 
-    _component.init();
+    InjectManager beanManager = InjectManager.create();
+    
+    ManagedBean<?> managedBean = beanManager.createManagedBean(_annotatedType);
+
+    Arg []newProgram = null;
+    Constructor javaCtor = null;
+
+    if (_args != null) {
+      AnnotatedConstructor ctor = null;
+      
+      for (AnnotatedConstructor<?> testCtor
+	     : managedBean.getAnnotatedType().getConstructors()) {
+	if (testCtor.getParameters().size() == _args.size())
+	  ctor = testCtor;
+      }
+
+      if (ctor == null) {
+	throw new ConfigException(L.l("No matching constructor found for '{0}' with {1} arguments.",
+				      managedBean, _args.size()));
+      }
+
+      javaCtor = ctor.getJavaMember();
+      ArrayList<ConfigProgram> newList = _args;
+      
+      newProgram = new Arg[newList.size()];
+
+      Type []genericParam = javaCtor.getGenericParameterTypes();
+      List<AnnotatedParameter> parameters = ctor.getParameters();
+      String loc = null;
+      
+      for (int i = 0; i < _args.size(); i++) {
+	ConfigProgram argProgram = _args.get(i);
+	ConfigType type = TypeFactory.getType(genericParam[i]);
+
+	if (argProgram != null)
+	  newProgram[i] = new ProgramArg(type, argProgram);
+	else
+	  newProgram[i] = new BeanArg(loc, genericParam[i], parameters.get(i).getAnnotations());
+      }
+    }
+    else
+      newProgram = new Arg[0];
+
+    ConfigProgram []injectProgram;
+
+    if (_init != null) {
+      ArrayList<ConfigProgram> programList = _init.getProgramList();
+      
+      injectProgram = new ConfigProgram[programList.size()];
+      programList.toArray(injectProgram);
+    }
+    else
+      injectProgram = new ConfigProgram[0];
+    
+    _component = new XmlBean(managedBean, javaCtor, newProgram, injectProgram);
+
+    beanManager.addBean(_component);
+
+    for (ProducerBean producerBean : managedBean.getProducerBeans()) {
+      beanManager.addBean(producerBean);
+    }
+  }
+
+  protected Bean bindParameter(String loc,
+			       Type type,
+			       Set<Annotation> bindings)
+  {
+    Set set = _beanManager.resolve(type, bindings);
+
+    if (set == null || set.size() == 0)
+      return null;
+
+    if (set.size() > 1) {
+      throw new ConfigException(L.l("{0}: can't bind webbeans '{1}' because multiple matching beans were found: {2}",
+				    loc, type, set));
+    }
+
+    Iterator iter = set.iterator();
+    if (iter.hasNext()) {
+      Bean bean = (Bean) iter.next();
+
+      return bean;
+    }
+
+    return null;
   }
 
   public Object toObject()
   {
-    return _component.createNew();
+    return InjectManager.create().getReference(_component);
   }
 
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _class.getSimpleName() + "]";
+  }
+
+  class BeanArg extends Arg {
+    private String _loc;
+    private Constructor _ctor;
+    private Type _type;
+    private Set<Annotation> _bindings;
+    private Bean _bean;
+
+    BeanArg(String loc, Type type, Set<Annotation> bindings)
+    {
+      _loc = loc;
+      _type = type;
+      _bindings = bindings;
+      bind();
+    }
+
+    public void bind()
+    {
+      if (_bean == null) {
+	_bean = bindParameter(_loc, _type, _bindings);
+
+	if (_bean == null)
+	  throw new ConfigException(L.l("{0}: {1} does not have valid arguments",
+					_loc, _ctor));
+      }
+    }
+    
+    public Object eval(ConfigContext env)
+    {
+      if (_bean == null)
+	bind();
+
+      // XXX: getInstance for injection?
+      return _beanManager.getReference(_bean);
+    }
+  }
+
+  static class ProgramArg extends Arg {
+    private ConfigType _type;
+    private ConfigProgram _program;
+
+    ProgramArg(ConfigType type, ConfigProgram program)
+    {
+      _type = type;
+      _program = program;
+    }
+    
+    public Object eval(ConfigContext env)
+    {
+      return _program.configure(_type, env);
+    }
   }
 }

@@ -275,8 +275,12 @@ public class WebAppExpandDeployGenerator
 			    _urlPrefix + segmentName);
     }
 
+    String baseName = name;
+
     WebAppController controller
-      = new WebAppVersioningController(name, contextPath, this, _container);
+      = new WebAppVersioningController(_urlPrefix + contextPath,
+				       _urlPrefix + contextPath,
+				       baseName, this, _container);
 
     return controller;
   }
@@ -294,6 +298,9 @@ public class WebAppExpandDeployGenerator
       if (p > 0) {
 	version = versionName.substring(p + 1);
 	baseName = versionName.substring(0, p);
+
+	if ("ROOT".equals(baseName))
+	  baseName = "";
       }
     }
 
@@ -355,7 +362,7 @@ public class WebAppExpandDeployGenerator
     if (! baseName.equals(contextPath)) {
       WebAppController versionController
 	= _container.getWebAppGenerator().findController(baseName);
-      
+
       if (versionController instanceof WebAppVersioningController) {
 	((WebAppVersioningController) versionController).setModified(true);
       }

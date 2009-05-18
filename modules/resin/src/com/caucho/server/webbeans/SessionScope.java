@@ -40,6 +40,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.context.*;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionTarget;
 
 /**
  * The session scope value
@@ -84,9 +85,13 @@ public class SessionScope extends ScopeContext {
 
     return (T) result;
   }
-  
+  /*  
   public <T> T get(Contextual<T> bean,
 		   CreationalContext<T> creationalContext)
+  {
+  */
+  
+  public <T> T get(InjectionTarget<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
@@ -98,12 +103,23 @@ public class SessionScope extends ScopeContext {
 
     Object result = session.getAttribute(comp.getScopeId());
 
-    if (result != null || creationalContext == null)
+    if (result != null)
       return (T) result;
 
-    result = comp.create(creationalContext);
+    result = comp.instantiate();
 
     session.setAttribute(comp.getScopeId(), result);
+    boolean isValid = false;
+
+    try {
+      comp.inject(result);
+      comp.postConstruct(result);
+      
+      isValid = true;
+    } finally {
+      if (! isValid)
+	session.removeAttribute(comp.getScopeId());
+    }
     
     return (T) result;
   }
@@ -137,8 +153,9 @@ public class SessionScope extends ScopeContext {
 	listener = new DestructionListener();
 	session.setAttribute("caucho.destroy", listener);
       }
-      
-      listener.addValue(comp, value);
+
+      // XXX:
+      //listener.addValue(comp, value);
     }
   }
 }

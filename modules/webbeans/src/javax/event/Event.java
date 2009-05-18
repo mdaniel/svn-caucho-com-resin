@@ -29,9 +29,13 @@
 package javax.event;
 
 import java.lang.annotation.*;
+import javax.inject.TypeLiteral;
 
 public interface Event<T> {
   public void fire(T event, Annotation... bindings);
-
   public void observe(Observer<T> observer, Annotation... bindings);
+
+  public Event<T> select(Annotation... bindings);
+  public <U extends T> Event<U> select(Class<U> subtype, Annotation... bindings);
+  public <U extends T> Event<U> select(TypeLiteral<U> subtype, Annotation... bindings);
 }

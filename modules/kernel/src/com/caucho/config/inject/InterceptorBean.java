@@ -48,9 +48,11 @@ import javax.inject.manager.InjectionPoint;
 /**
  * InterceptorBean represents a Java interceptor
  */
-public class InterceptorBean extends Interceptor
+public class InterceptorBean implements Interceptor
 {
   private static final L10N L = new L10N(InterceptorBean.class);
+
+  private final InjectManager _beanManager;
   
   private Class _type;
 
@@ -65,10 +67,10 @@ public class InterceptorBean extends Interceptor
   private HashSet<Annotation> _bindings
     = new HashSet<Annotation>();
   
-  public InterceptorBean(InjectManager webBeans,
+  public InterceptorBean(InjectManager beanManager,
 			 Class type)
   {
-    super(webBeans);
+    _beanManager = beanManager;
 
     _type = type;
 
@@ -139,7 +141,7 @@ public class InterceptorBean extends Interceptor
   /**
    * Returns the types that the bean implements
    */
-  public Set<Class<?>> getTypes()
+  public Set<Type> getTypes()
   {
     return _bean.getTypes();
   }
@@ -264,6 +266,48 @@ public class InterceptorBean extends Interceptor
       }
     }
   }
+  
+  /**
+   * Instantiate the bean.
+   */
+  public Object instantiate()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Inject the bean.
+   */
+  public void inject(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call post-construct
+   */
+  public void postConstruct(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void preDestroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call destroy
+   */
+  /*
+  public void destroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
 
   @Override
   public boolean equals(Object o)

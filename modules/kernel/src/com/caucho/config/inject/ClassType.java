@@ -69,6 +69,11 @@ public class ClassType extends BaseType
     return _type;
   }
   
+  public Type toType()
+  {
+    return _type;
+  }
+  
   public boolean isMatch(Type type)
   {
     return _type.equals(type);

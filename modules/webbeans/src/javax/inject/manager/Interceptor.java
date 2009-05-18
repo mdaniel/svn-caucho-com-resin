@@ -36,20 +36,15 @@ import java.util.Set;
 /**
  * Metadata for for an interceptor
  */
-public abstract class Interceptor extends Bean<Object>
+public interface Interceptor extends Bean<Object>
 {
-  protected Interceptor(Manager manager)
-  {
-    super(manager);
-  }
-
   /**
    * Returns the bindings for the interceptor
    */
-  public abstract Set<Annotation> getInterceptorBindingTypes();
+  public Set<Annotation> getInterceptorBindingTypes();
 
   /**
    * Returns the intercepted method for a type
    */
-  public abstract Method getMethod(InterceptionType type);
+  public Method getMethod(InterceptionType type);
 }

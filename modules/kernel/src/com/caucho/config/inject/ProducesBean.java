@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.Arg;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.config.*;
@@ -40,50 +41,58 @@ import com.caucho.config.cfg.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.*;
 import javax.context.CreationalContext;
 import javax.inject.manager.Bean;
+import javax.inject.manager.BeanManager;
+import javax.inject.manager.AnnotatedMethod;
+import javax.inject.manager.AnnotatedParameter;
 import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.Manager;
+import javax.inject.manager.InjectionTarget;
+import javax.inject.manager.ProducerBean;
 
 /**
  * Configuration for a @Produces method
  */
-public class ProducesBean extends ComponentImpl {
+public class ProducesBean<X,T> extends ComponentImpl<T>
+  implements ProducerBean<X,T>, InjectionTarget<T> {
   private static final L10N L = new L10N(ProducesBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];
   
   private final Bean _producer;
-  private final Method _method;
-  private final Annotation []_annotationList;
+  private final AnnotatedMethod _beanMethod;
 
   // XXX: needs to be InjectionPoint
-  private Bean []_args;
+  private Arg []_args;
 
   private boolean _isBound;
 
   protected ProducesBean(InjectManager inject,
 			 Bean producer,
-			 Method method,
-			 Annotation []annList)
+			 AnnotatedMethod beanMethod,
+			 Arg []args)
   {
     super(inject);
 
     _producer = producer;
-    _method = method;
-    _annotationList = annList;
+    _beanMethod = beanMethod;
+    _args = args;
 
-    setTargetType(method.getGenericReturnType());
+    if (args == null)
+      throw new NullPointerException();
+
+    setTargetType(beanMethod.getJavaMember().getGenericReturnType());
   }
 
   public static ProducesBean create(InjectManager inject,
 				    Bean producer,
-				    Method method,
-				    Annotation []annList)
+				    AnnotatedMethod beanMethod,
+				    Arg []args)
   {
-    return new ProducesBean(inject, producer, method, annList);
+    return new ProducesBean(inject, producer, beanMethod, args);
   }
 
   protected Bean getProducer()
@@ -91,15 +100,17 @@ public class ProducesBean extends ComponentImpl {
     return _producer;
   }
 
-  protected Method getMethod()
+  protected AnnotatedMethod getMethod()
   {
-    return _method;
+    return _beanMethod;
   }
 
+  /*
   protected Annotation []getAnnotationList()
   {
     return _annotationList;
   }
+  */
 
   @Override
   protected void initDefault()
@@ -114,17 +125,15 @@ public class ProducesBean extends ComponentImpl {
 
   public void introspect()
   {
-    introspectTypes(getTargetType());
+    introspectTypes(_beanMethod.getType());
     
-    Annotation []annotations = _annotationList;
-
-    introspectAnnotations(annotations);
+    introspectAnnotations(_beanMethod.getAnnotations());
   }
 
   @Override
   protected String getDefaultName()
   { 
-    String methodName = _method.getName();
+    String methodName = _beanMethod.getJavaMember().getName();
       
     if (methodName.startsWith("get") && methodName.length() > 3) {
       return (Character.toLowerCase(methodName.charAt(3))
@@ -136,7 +145,7 @@ public class ProducesBean extends ComponentImpl {
 
   public boolean isInjectionPoint()
   {
-    for (Class paramType : _method.getParameterTypes()) {
+    for (Class paramType : _beanMethod.getJavaMember().getParameterTypes()) {
       if (InjectionPoint.class.equals(paramType))
 	return true;
     }
@@ -144,46 +153,68 @@ public class ProducesBean extends ComponentImpl {
     return false;
   }
 
-  @Override
-  protected Object createNew(CreationalContext context,
-			     InjectionPoint ij)
+  /**
+   * Returns the declaring bean
+   */
+  public Bean<X> getDeclaringBean()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public InjectionTarget<T> getInjectionTarget()
+  {
+    return this;
+  }
+
+  public T produce(CreationalContext<T> createEnv)
+  {
+    ConfigContext env = (ConfigContext) createEnv;
+      
+    X factory = (X) _beanManager.getReference(_producer);
+
+    if (factory == null) {
+      throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
+					  this, _producer));
+    }
+
+    return produce(factory);
+  }
+
+  public void inject(T instance, CreationalContext<T> createEnv)
+  {
+  }
+  
+  /**
+   * Produces a new bean instance
+   */
+  public T produce(X bean)
   {
     try {
-      ConfigContext env = (ConfigContext) context;
-      
-      Object factory = _webBeans.getInstance(_producer);
-
-      if (factory == null) {
-	throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
-					    this, _producer));
-      }
-
-      if (_args == null)
-	bind();
-
       Object []args;
+
       if (_args.length > 0) {
 	args = new Object[_args.length];
 
 	for (int i = 0; i < args.length; i++) {
+	  args[i] = _args[i].eval(null);
+	  /*
 	  if (_args[i] instanceof InjectionPointBean) {
 	    if (ij != null)
 	      args[i] = ij;
 	    else
 	      throw new NullPointerException();
 	  }
+	  // XXX: get initial value
 	  else
-	    args[i] = _webBeans.getInstance(_args[i]);
+	    args[i] = _beanManager.getReference(_args[i]);
+	  */
 	}
       }
       else
 	args = NULL_ARGS;
       
-      Object value = _method.invoke(factory, args);
-
-      if (env != null)
-	env.put(this, value);
-
+      T value = (T) _beanMethod.getJavaMember().invoke(bean, args);
+      
       return value;
     } catch (RuntimeException e) {
       throw e;
@@ -191,6 +222,14 @@ public class ProducesBean extends ComponentImpl {
       throw new RuntimeException(e);
     }
   }
+
+  /*
+  @Override
+  public X instantiate()
+  {
+    return createNew(null, null);
+  }
+  */
 
   @Override
   public void bind()
@@ -201,15 +240,19 @@ public class ProducesBean extends ComponentImpl {
 
       _isBound = true;
       
-      String loc = InjectManager.location(_method);
+      Method method = _beanMethod.getJavaMember();
     
-      Type []param = _method.getGenericParameterTypes();
-      Annotation [][]paramAnn = _method.getParameterAnnotations();
+      String loc = InjectManager.location(method);
 
-      _args = new Bean[param.length];
+      Type []param = method.getGenericParameterTypes();
+      // Annotation [][]paramAnn = _method.getParameterAnnotations();
+      List<AnnotatedParameter> beanParams = _beanMethod.getParameters();
+
+      /*
+      _args = new Arg[param.length];
 
       for (int i = 0; i < param.length; i++) {
-	_args[i] = bindParameter(loc, param[i], paramAnn[i]);
+	_args[i] = bindParameter(loc, param[i], beanParams.get(i).getAnnotations());
 
 	if (_args[i] != null) {
 	}
@@ -217,10 +260,12 @@ public class ProducesBean extends ComponentImpl {
 	  _args[i] = createInjectionPointBean(getManager());
 	}
 	else {
-	  throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
-				   getSimpleName(param[i]), i));
+	  throw error(_beanMethod.getJavaMember(),
+		      L.l("Type '{0}' for method parameter #{1} has no matching component.",
+			  getSimpleName(param[i]), i));
 	}
       }
+      */
     }
   }
 
@@ -228,8 +273,38 @@ public class ProducesBean extends ComponentImpl {
   {
     return new ProducesInjectionPointBean(this, ij);
   }
+  
+  /**
+   * Disposes a bean instance
+   */
+  public void dispose(T instance)
+  {
+  }
+  
+  /**
+   * Destroys a bean instance
+   */
+  public void destroys(T instance)
+  {
+  }
+  
+  /**
+   * Returns the owning producer
+   */
+  public AnnotatedMethod<X> getAnnotatedProducer()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Returns the owning disposer
+   */
+  public AnnotatedMethod<X> getAnnotatedDisposer()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
-  protected InjectionPointBean createInjectionPointBean(Manager manager)
+  protected InjectionPointBean createInjectionPointBean(BeanManager manager)
   {
     return new InjectionPointBean(manager);
   }
@@ -241,11 +316,13 @@ public class ProducesBean extends ComponentImpl {
     sb.append(getClass().getSimpleName());
     sb.append("[");
 
+    Method method = _beanMethod.getJavaMember();
+
     sb.append(getTargetSimpleName());
     sb.append(", ");
-    sb.append(_method.getDeclaringClass().getSimpleName());
+    sb.append(method.getDeclaringClass().getSimpleName());
     sb.append(".");
-    sb.append(_method.getName());
+    sb.append(method.getName());
     sb.append("()");
     
     sb.append(", {");

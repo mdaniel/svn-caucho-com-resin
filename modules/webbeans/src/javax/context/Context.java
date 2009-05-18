@@ -30,7 +30,7 @@
 package javax.context;
 
 import java.lang.annotation.Annotation;
-import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionTarget;
 
 /**
  * Represents a bean scope, storing the bean instances available to the

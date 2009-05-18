@@ -30,6 +30,7 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.context.Contextual;
@@ -37,16 +38,15 @@ import javax.context.CreationalContext;
 
 import javax.inject.manager.Bean;
 import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * Configuration for the xml web bean component.
  */
-public class InjectionPointBean<T> extends Bean<T>
+public class InjectionPointBean<T> implements Bean<T>
 {
-  public InjectionPointBean(Manager manager)
+  public InjectionPointBean(BeanManager manager)
   {
-    super(manager);
   }
 
   //
@@ -113,12 +113,43 @@ public class InjectionPointBean<T> extends Bean<T>
   /**
    * Returns the types that the bean exports for bindings.
    */
-  public Set<Class<?>> getTypes()
+  public Set<Type> getTypes()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
   public T create(CreationalContext<T> creationalContext)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  /**
+   * Instantiate the bean.
+   */
+  public T instantiate()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Inject the bean.
+   */
+  public void inject(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call post-construct
+   */
+  public void postConstruct(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void preDestroy(T instance)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

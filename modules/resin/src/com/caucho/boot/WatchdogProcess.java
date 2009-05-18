@@ -137,6 +137,8 @@ class WatchdogProcess
 
   void destroy()
   {
+    stop();
+    
     if (_process != null) {
       try {
 	_process.destroy();
@@ -166,7 +168,7 @@ class WatchdogProcess
     try {
       stdIs = process.getInputStream();
       stdOs = process.getOutputStream();
-      ss.setSoTimeout(1000);
+      ss.setSoTimeout(60000);
 	
       boolean isLive = true;
       int stdoutTimeoutMax = 10;

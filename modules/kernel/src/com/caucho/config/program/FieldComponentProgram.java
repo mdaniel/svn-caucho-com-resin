@@ -88,7 +88,7 @@ public class FieldComponentProgram extends ConfigProgram
     Object value = null;
     
     try {
-      value = _manager.getInstanceToInject(_ij, env);
+      value = _manager.getInjectableReference(_ij, env);
 
       _field.set(bean, value);
     } catch (IllegalArgumentException e) {

@@ -58,7 +58,7 @@ import javax.management.*;
 import javax.transaction.*;
 import javax.inject.*;
 import javax.inject.manager.Bean;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 //import org.osgi.framework.BundleContext;
 
@@ -83,7 +83,7 @@ public class ResinWebBeansProducer
    */
   @Produces
   @Standard
-  public Manager getManager()
+  public BeanManager getManager()
   {
     return InjectManager.create();
   }
@@ -164,7 +164,7 @@ public class ResinWebBeansProducer
     
     InjectManager webBeans = InjectManager.create();
 
-    webBeans.getInstance(bean);
+    webBeans.getReference(bean);
   }
 
   /**

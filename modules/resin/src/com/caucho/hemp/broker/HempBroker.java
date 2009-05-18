@@ -59,7 +59,7 @@ import java.lang.ref.*;
 import java.io.Serializable;
 import javax.event.Observes;
 import javax.inject.manager.Bean;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * Broker
@@ -830,16 +830,16 @@ public class HempBroker implements Broker, ActorStream
    * Called when a @Actor is annotated on the actor
    */
   public void registerActor(@Observes @BamServiceBinding
-				 BeanStartupEvent event)
+			    BeanStartupEvent event)
   {
-    Manager manager = event.getManager();
+    BeanManager manager = event.getManager();
     Bean bean = event.getBean();
 
     if (bean instanceof CauchoBean) {
       CauchoBean cauchoBean = (CauchoBean) bean;
 
       AbstractActor actor
-	= (AbstractActor) manager.getInstance(bean);
+	= (AbstractActor) manager.getReference(bean);
 
       Annotation []ann = cauchoBean.getAnnotations();
 

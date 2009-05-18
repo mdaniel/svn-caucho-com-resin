@@ -44,7 +44,7 @@ import java.util.*;
 
 import javax.annotation.*;
 import javax.inject.manager.Bean;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * type matching the web bean
@@ -87,6 +87,11 @@ abstract public class BaseType
   abstract public Class getRawClass();
 
   abstract public boolean isMatch(Type type);
+
+  public Type toType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   public String toString()
   {

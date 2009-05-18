@@ -124,6 +124,14 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Returns true for a versioning controller
+   */
+  public boolean isVersioning()
+  {
+    return false;
+  }
+
+  /**
    * Sets the startup mode.
    */
   public void setStartupMode(String mode)
@@ -593,6 +601,13 @@ abstract public class DeployController<I extends DeployInstance>
   public final void update()
   {
     _strategy.update(this);
+  }
+
+  /**
+   * Updates version-specific information
+   */
+  public void updateVersion()
+  {
   }
 
   /**

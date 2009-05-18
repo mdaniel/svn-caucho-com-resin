@@ -30,22 +30,22 @@
 package com.caucho.config.inject;
 
 import javax.inject.manager.Bean;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * An event at webbeans startup
  */
 public class BeanStartupEvent {
-  private final Manager _manager;
+  private final BeanManager _manager;
   private final Bean _bean;
 
-  public BeanStartupEvent(Manager manager, Bean bean)
+  public BeanStartupEvent(BeanManager manager, Bean bean)
   {
     _manager = manager;
     _bean = bean;
   }
 
-  public Manager getManager()
+  public BeanManager getManager()
   {
     return _manager;
   }

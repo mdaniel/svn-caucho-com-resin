@@ -38,11 +38,35 @@ import java.util.Set;
  */
 public interface InjectionPoint
 {
-  public Set<Annotation> getBindings();
+  /**
+   * Returns the declared type of the injection point, e.g. an
+   * injected field's type.
+   */
   public Type getType();
+  
+  /**
+   * Returns the declared bindings on the injection point.
+   */
+  public Set<Annotation> getBindings();
+  
+  /**
+   * Returns the owning bean for the injection point.
+   */
   public Bean<?> getBean();
+  
+  /**
+   * Returns the Field for field injection, the Method for method injection,
+   * and Constructor for constructor injection.
+   */
   public Member getMember();
-  public <T extends Annotation> T getAnnotation(Class<T> annotationType);
-  public Annotation []getAnnotations();
-  public boolean isAnnotationPresent(Class<? extends Annotation> annType);
+
+  /**
+   * Returns all annotations on the injection point.
+   */
+  public Annotated getAnnotated();
+
+  /**
+   * A delegate injection point is true for Decorators
+   */
+  public boolean isDelegate();
 }

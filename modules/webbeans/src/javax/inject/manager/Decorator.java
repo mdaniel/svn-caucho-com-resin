@@ -36,26 +36,21 @@ import javax.annotation.Stereotype;
 /**
  * Internal implementation for a Decorator
  */
-public abstract class Decorator extends Bean<Object>
+public interface Decorator extends Bean<Object>
 {
-  protected Decorator(Manager manager)
-  {
-    super(manager);
-  }
-
   /**
    * Returns the type of the delegated object
    */
-  public abstract Class<?> getDelegateType();
+  public Class<?> getDelegateType();
 
   /**
    * Returns the bindings for the delegated object
    */
-  public abstract Set<Annotation> getDelegateBindingTypes();
+  public Set<Annotation> getDelegateBindingTypes();
 
   /**
    * Sets the delegate for an object
    */
-  public abstract void setDelegate(Object instance,
+  public void setDelegate(Object instance,
 				   Object delegate);
 }

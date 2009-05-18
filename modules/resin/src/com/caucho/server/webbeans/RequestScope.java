@@ -39,6 +39,7 @@ import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.context.*;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionTarget;
 
 /**
  * Configuration for the xml web bean component.
@@ -98,6 +99,38 @@ public class RequestScope extends ScopeContext
     
     return (T) result;
   }
+  
+  public <T> T get(InjectionTarget<T> bean)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request == null)
+      return null;
+
+    ComponentImpl comp = (ComponentImpl) bean;
+
+    Object result = request.getAttribute(comp.getScopeId());
+
+    if (result != null)
+      return (T) result;
+    
+    result = comp.instantiate();
+
+    request.setAttribute(comp.getScopeId(), result);
+
+    boolean isValid = false;
+
+    try {
+      comp.inject(result);
+      comp.postConstruct(result);
+      isValid = true;
+    } finally {
+      if (! isValid)
+	request.removeAttribute(comp.getScopeId());
+    }
+    
+    return (T) result;
+  }
 
   @Override
   public boolean canInject(ScopeContext scope)
@@ -130,8 +163,9 @@ public class RequestScope extends ScopeContext
 	listener = new DestructionListener();
 	request.setAttribute("caucho.destroy", listener);
       }
-      
-      listener.addValue(comp, value);
+
+      // XXX:
+      // listener.addValue(comp, value);
     }
   }
 }

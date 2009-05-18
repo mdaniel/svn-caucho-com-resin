@@ -11,7 +11,18 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.0 snapshot">
+<s2 title="4.0 snapshot">
+<ul>
+<li>log: SyslogHandler has improper initialization (rep by Michael Glenney)</li>
+<li>class loader: remove potential classloadering deadlock based on ClassEntry lock (#3423, rep by stbu)</li>
+<li>database: driver support for META-INF/services and url without type</li>
+<li>database: DataSource now allowed as a driver type (#3318, rep by atifmk)</li>
+<li>server: web-app versioning updates with /ROOT (#3466, rep by sibyj)</li>
+<li>server: HTTP PrintWriter with i18n double-byte encoding overrun (#3434, rep by Fiaz Hossain)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.0 - May 5, 2009">
 <ul>
 <li>security: ClusterSingleSignon logging wrong class (rep by Scott Hernandez)</li>
 <li>thread pool: improve detection of illegal internal thread state (rep by Takahiro Fukuda)</li>

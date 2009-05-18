@@ -39,6 +39,7 @@ import com.caucho.config.program.FieldEventProgram;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.CreationContextImpl;
 import com.caucho.config.scope.ScopeContext;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.*;
 import com.caucho.util.*;
@@ -69,6 +70,7 @@ import javax.event.Observer;
 import javax.event.Observable;
 import javax.inject.AnnotationLiteral;
 import javax.inject.BindingType;
+import javax.inject.Instance;
 import javax.inject.New;
 import javax.inject.Production;
 import javax.inject.Produces;
@@ -77,19 +79,23 @@ import javax.inject.TypeLiteral;
 import javax.inject.AmbiguousDependencyException;
 import javax.inject.UnsatisfiedDependencyException;
 import javax.inject.manager.Bean;
+import javax.inject.manager.BeanManager;
+import javax.inject.manager.AnnotatedType;
 import javax.inject.manager.Decorator;
+import javax.inject.manager.Deployed;
 import javax.inject.manager.Initialized;
 import javax.inject.manager.InjectionPoint;
+import javax.inject.manager.InjectionTarget;
 import javax.inject.manager.Interceptor;
 import javax.inject.manager.InterceptionType;
-import javax.inject.manager.Manager;
+import javax.inject.manager.ManagedBean;
 import javax.naming.*;
 
 /**
  * The web beans container for a given environment.
  */
 public class InjectManager
-  implements Manager, ScanListener, EnvironmentListener,
+  implements BeanManager, ScanListener, EnvironmentListener,
 	     java.io.Serializable
 {
   private static final L10N L = new L10N(InjectManager.class);
@@ -139,12 +145,10 @@ public class InjectManager
   private EnvironmentClassLoader _classLoader;
   private ClassLoader _tempClassLoader;
 
-  private WbWebBeans _wbWebBeans;
-
   private int _beanId;
 
-  private HashMap<Path,WbWebBeans> _webBeansMap
-    = new HashMap<Path,WbWebBeans>();
+  private HashMap<Path,BeansConfig> _beansConfigMap
+    = new HashMap<Path,BeansConfig>();
 
   private HashSet<Class<? extends Annotation>> _deploymentSet
     = new HashSet<Class<? extends Annotation>>();
@@ -209,6 +213,8 @@ public class InjectManager
   private ArrayList<BeanConfigFactory> _customFactoryList
     = new ArrayList<BeanConfigFactory>();
 
+  private Lifecycle _lifecycle = new Lifecycle();
+
   private ApplicationScope _applicationScope = new ApplicationScope();
 
   private RuntimeException _configException;
@@ -248,8 +254,6 @@ public class InjectManager
       else
 	_tempClassLoader = new DynamicClassLoader(null);
     
-      _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
-
       addContext("com.caucho.server.webbeans.RequestScope");
       addContext("com.caucho.server.webbeans.SessionScope");
       addContext("com.caucho.server.webbeans.ConversationScope");
@@ -361,11 +365,6 @@ public class InjectManager
     return _parent;
   }
 
-  public WbWebBeans getWbWebBeans()
-  {
-    return _wbWebBeans;
-  }
-
   public ClassLoader getClassLoader()
   {
     return _classLoader;
@@ -401,11 +400,6 @@ public class InjectManager
     }
     
     Environment.addEnvironmentListener(this);
-  }
-
-  public WbComponentType createComponentType(Class cl)
-  {
-    return _wbWebBeans.createComponentType(cl);
   }
 
   public void addPath(Path path)
@@ -484,6 +478,22 @@ public class InjectManager
     }
 
     return false;
+  }
+
+  /**
+   * Creates an injection target
+   */
+  public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type)
+  {
+    return createManagedBean(type).getInjectionTarget();
+  }
+
+  /**
+   * Creates a managed bean.
+   */
+  public <T> InjectionTarget<T> createInjectionTarget(Class<T> type)
+  {
+    return createManagedBean(type).getInjectionTarget();
   }
 
   public ArrayList<Bean> getBeansOfType(Type type)
@@ -764,7 +774,7 @@ public class InjectManager
 
     Bean bean = _namedComponentMap.get(name);
     if (bean != null)
-      return getInstance(bean);
+      return getReference(bean);
     else if (_parent != null)
       return _parent.getObjectByName(name);
     else
@@ -826,10 +836,18 @@ public class InjectManager
    */
   public <T> T createTransientObject(Class<T> type)
   {
-    Bean<T> factory = createTransient(type);
+    ManagedBean<T> factory = createManagedBean(type);
 
     // server/10gn
-    return factory.create(new ConfigContext());
+    //return factory.create(new ConfigContext());
+    InjectionTarget<T> injectionTarget = factory.getInjectionTarget();
+
+    ConfigContext env = ConfigContext.create();
+    
+    T instance = injectionTarget.produce(env);
+    injectionTarget.inject(instance, env);
+
+    return instance;
   }
 
   /**
@@ -838,12 +856,15 @@ public class InjectManager
    */
   public <T> BeanInstance<T> createTransientInstance(Class<T> type)
   {
+    /*
     Contextual<T> factory = createTransient(type);
 
     // server/10gn
     T value = factory.create(new ConfigContext());
 
     return new BeanInstance(factory, value);
+    */
+    return null;
   }
 
   /**
@@ -863,12 +884,15 @@ public class InjectManager
    */
   public <T> BeanInstance<T> createTransientInstanceNoInit(Class<T> type)
   {
+    /*
     ComponentImpl<T> bean = (ComponentImpl) createTransient(type);
 
     // server/10gn
     T value = (T) bean.createNoInit();
 
     return new BeanInstance<T>(bean, value);
+    */
+    return null;
   }
 
   /**
@@ -897,10 +921,9 @@ public class InjectManager
 	else if (Modifier.isAbstract(type.getModifiers()))
 	  throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
 	
-	comp = new SimpleBean(this);
-	comp.setTargetType(type);
-	
+	comp = new SimpleBean(this, type);
 
+	/* XXX:
 	try {
 	  Constructor nullCtor = type.getConstructor(new Class[0]);
 
@@ -909,6 +932,7 @@ public class InjectManager
 	} catch (NoSuchMethodException e) {
 	  // if the type doesn't have a null-arg constructor
 	}
+	*/
 
 	comp.init();
 
@@ -918,7 +942,7 @@ public class InjectManager
 	comp.bind();
       }
 
-      return comp;
+      return (Bean<T>) comp;
     }
   }
 
@@ -933,7 +957,7 @@ public class InjectManager
    */
   public <T> T getObject(Class<T> type, Annotation ... ann)
   {
-    Set<Bean<T>> beans = resolveByType(type, ann);
+    Set<Bean<T>> beans = getBeans(type, ann);
 
     if (beans == null || beans.size() == 0)
       return (T) createTransientObject(type);
@@ -964,64 +988,46 @@ public class InjectManager
   public <T> ComponentImpl<T> createFactory(Class<T> type, Annotation ... ann)
   {
     throw new UnsupportedOperationException();
-    /*
-    FactoryBinding binding = new FactoryBinding(type, ann);
-    
-    synchronized (_objectFactoryMap) {
-      Bean<T> factory = _objectFactoryMap.get(binding);
-
-      if (factory != null)
-	return (ComponentImpl<T>) factory;
-
-      if (ann == null)
-	ann = NULL_ANN;
-      
-      factory = resolveByType(type, ann);
-
-      if (factory != null) {
-	_objectFactoryMap.put(binding, factory);
-
-	return (ComponentImpl<T>) factory;
-      }
-      
-      if (type.isInterface())
-	throw new ConfigException(L.l("'{0}' cannot be an interface.  createTransient requires a concrete type.", type.getName()));
-      else if (Modifier.isAbstract(type.getModifiers()))
-	throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
-	
-      ClassComponent comp = new ClassComponent(_wbWebBeans);
-      comp.setInstanceClass(type);
-
-      try {
-	Constructor nullCtor = type.getConstructor(new Class[0]);
-
-	if (nullCtor != null)
-	  comp.setConstructor(nullCtor);
-      } catch (NoSuchMethodException e) {
-	// if the type doesn't have a null-arg constructor
-      }
-
-      comp.init();
-
-      _objectFactoryMap.put(binding, comp);
-
-      return comp;
-    }
-    */
   }
 
   //
   // javax.webbeans.Manager API
   //
+
+  /**
+   * Returns the enabled deployment types
+   */
+  public List<Class<?>> getEnabledDeploymentTypes()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
   //
   // bean resolution and instantiation
   //
 
   /**
+   * Creates a managed bean.
+   */
+  public ManagedBean createManagedBean(AnnotatedType type)
+  {
+    return new ManagedBeanImpl(this, type);
+  }
+
+  /**
+   * Creates a managed bean.
+   */
+  public ManagedBean createManagedBean(Class cl)
+  {
+    AnnotatedType type = new BeanTypeImpl(cl, cl);
+    
+    return createManagedBean(type);
+  }
+
+  /**
    * Adds a new bean definition to the manager
    */
-  public Manager addBean(Bean<?> bean)
+  public void addBean(Bean<?> bean)
   {
     if (bean instanceof CauchoBean) {
       CauchoBean cauchoBean = (CauchoBean) bean;
@@ -1041,7 +1047,7 @@ public class InjectManager
 	_pendingRegistrationList.add(cauchoBean);
     }
     else {
-      for (Class type : bean.getTypes()) {
+      for (Type type : bean.getTypes()) {
 	addComponentByType(type, bean);
       }
     }
@@ -1056,8 +1062,6 @@ public class InjectManager
       addComponentByName(bean.getName(), bean);
 
     registerJmx(bean);
-    
-    return this;
   }
 
   public void addBeanConfigFactory(BeanConfigFactory factory)
@@ -1065,14 +1069,16 @@ public class InjectManager
     _customFactoryList.add(factory);
   }
   
-  public Manager addConfigBean(CauchoBean configBean)
+  public BeanManager addConfigBean(CauchoBean configBean)
   {
     for (BeanConfigFactory factory : _customFactoryList) {
       if (factory.createBean(configBean))
 	return this;
     }
     
-    return addBean(configBean);
+    addBean(configBean);
+
+    return this;
   }
 
   private void registerJmx(Bean bean)
@@ -1099,7 +1105,7 @@ public class InjectManager
    *
    * @param name the name of the bean to match
    */
-  public Set<Bean<?>> resolveByName(String name)
+  public Set<Bean<?>> getBeans(String name)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -1110,8 +1116,8 @@ public class InjectManager
    * @param type the bean's class
    * @param bindings required @BindingType annotations
    */
-  public <T> Set<Bean<T>> resolveByType(Class<T> type,
-					Annotation... bindings)
+  public <T> Set<Bean<T>> getBeans(Class<T> type,
+				   Annotation... bindings)
   {
     Set<Bean<T>> set = resolve(type, bindings);
 
@@ -1127,22 +1133,10 @@ public class InjectManager
    * @param type the bean's primary type
    * @param bindings required @BindingType annotations
    */
-  public <T> Set<Bean<T>> resolveByType(TypeLiteral<T> type,
-					Annotation... bindings)
+  public <T> Set<Bean<T>> getBeans(TypeLiteral<T> type,
+				   Annotation... bindings)
   {
-    return resolveByType(type.getType(), bindings);
-  }
-
-  /**
-   * Returns the beans matching a class and annotation set
-   *
-   * @param type the bean's class
-   * @param bindings required @BindingType annotations
-   */
-  public <T> Set<Bean<T>> resolveByType(Type type,
-					Annotation... bindings)
-  {
-    Set set = resolve(type, bindings);
+    Set set = resolve(type.getType(), bindings);
 
     if (set != null)
       return (Set<Bean<T>>) set;
@@ -1151,13 +1145,50 @@ public class InjectManager
   }
 
   /**
+   * Returns the beans matching a class and annotation set
+   *
+   * @param type the bean's class
+   * @param bindings required @BindingType annotations
+   */
+  public Set<Bean<?>> getBeans(Type type,
+			       Annotation... bindings)
+  {
+    Set set = resolve(type, bindings);
+
+    if (set != null)
+      return (Set<Bean<?>>) set;
+    else
+      return new HashSet<Bean<?>>();
+  }
+
+  public <X> Bean<X> getMostSpecializedBean(Bean<X> bean)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void validation(InjectionPoint ij)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  public Set resolve(Type type,
+		     Set<Annotation> bindingSet)
+  {
+    Annotation []bindings = new Annotation[bindingSet.size()];
+    bindingSet.toArray(bindings);
+
+    return resolve(type, bindings);
+  }
+
+  /**
    * Returns the web beans component with a given binding list.
    */
   public Set resolve(Type type,
 		     Annotation []bindings)
   {
-    _wbWebBeans.init();
-
     if (bindings == null || bindings.length == 0) {
       if (Object.class.equals(type))
 	return resolveAllBeans();
@@ -1183,6 +1214,18 @@ public class InjectManager
       set.add(new NewBean(this, (Class) type));
       return set;
     }
+
+    Class rawType = getRawType(type);
+
+    if (Instance.class.equals(rawType)) {
+      Type beanType = getInstanceType(type);
+      
+      HashSet set = new HashSet();
+      set.add(new InstanceBeanImpl(this, beanType, bindings));
+      return set;
+    }
+    else {
+    }
     
     if (_parent != null) {
       return _parent.resolve(type, bindings);
@@ -1194,6 +1237,11 @@ public class InjectManager
 					       ann));
       }
     }
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " bind(" + getSimpleName(type)
+		+ "," + toList(bindings) + ") -> none");
+    }
 
     return null;
   }
@@ -1203,8 +1251,6 @@ public class InjectManager
    */
   public Set<Bean> resolveAllByType(Class type)
   {
-    _wbWebBeans.init();
-
     Annotation []bindings = new Annotation[0];
     
     WebComponent component = getWebComponent(type);
@@ -1280,8 +1326,8 @@ public class InjectManager
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getInstance(Bean<T> bean,
-			   CreationalContext<T> createContext)
+  public <T> T getReference(Bean<T> bean,
+			    CreationalContext<T> createContext)
   {
     ConfigContext cxt = (ConfigContext) createContext;
 
@@ -1299,6 +1345,7 @@ public class InjectManager
 			       CreationalContext<T> createContext,
 			       InjectManager topManager)
   {
+    /* XXX: temp API change
     if (bean.getManager() != this) {
       if (getParent() == null) {
 	throw new IllegalStateException(L.l("{0}: unknown bean {1} with owning manager {2}",
@@ -1309,14 +1356,18 @@ public class InjectManager
 
       return getParent().getInstanceRec(bean, createContext, topManager);
     }
-    else if (false && bean instanceof ComponentImpl)
+    else
+    */
+    if (false && bean instanceof ComponentImpl)
       return (T) ((ComponentImpl) bean).get();
     else {
       Class scopeType = bean.getScopeType();
 
       if (Dependent.class.equals(scopeType)) {
 	// server/4764
-	return (T) bean.create(createContext);
+	T instance = (T) bean.create(createContext);
+
+	return instance;
       }
 
       if (scopeType == null) {
@@ -1342,7 +1393,8 @@ public class InjectManager
 	createContext = new ConfigContext(parent);
       }
 
-      return (T) context.get(bean, createContext);
+      // return (T) context.get(bean, createContext);
+      return (T) context.get(bean);
     }
   }
 
@@ -1354,9 +1406,9 @@ public class InjectManager
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getInstance(Bean<T> bean)
+  public <T> T getReference(Bean<T> bean)
   {
-    return (T) getInstance(bean, new ConfigContext(ConfigContext.getCurrent()));
+    return (T) getReference(bean, new ConfigContext(ConfigContext.getCurrent()));
   }
 
   /**
@@ -1369,7 +1421,7 @@ public class InjectManager
     Bean bean = _namedComponentMap.get(name);
 
     if (bean != null)
-      return getInstance(bean);
+      return getReference(bean);
     else if (_parent != null)
       return _parent.getInstanceByName(name);
     else
@@ -1386,12 +1438,9 @@ public class InjectManager
   public <T> T getInstanceByType(Class<T> type,
 				 Annotation... bindings)
   {
-    Set<Bean<T>> set = resolveByType(type, bindings);
+    Set<Bean<T>> set = getBeans(type, bindings);
 
     if (set == null || set.size() == 0) {
-      throw new UnsatisfiedDependencyException(L.l("'{0}' does not match any configured beans with binding {1}",
-						   type.getName(),
-						   toList(bindings)));
     }
     else if (set.size() == 1) {
       Iterator<Bean<T>> iter = set.iterator();
@@ -1399,16 +1448,43 @@ public class InjectManager
       if (iter.hasNext()) {
 	Bean<T> bean = iter.next();
       
-	return (T) getInstance(bean);
+	return (T) getReference(bean);
       }
     }
     else {
-      throw new AmbiguousDependencyException(L.l("'{0}' matches too many configured beans {1}",
-						   type.getName(),
-						   set));
+      throw new AmbiguousDependencyException(L.l("'{0}' matches too many configured beans{1}",
+						 type.getName(),
+						 toLineList(set)));
     }
 
     return null;
+  }
+
+  private RuntimeException unsatisfiedException(Type type,
+						Annotation []bindings)
+  {
+    WebComponent component = getWebComponent(type);
+
+    if (component == null) {
+      throw new UnsatisfiedDependencyException(L.l("Can't find a component for '{0}' because no beans implementing that class have been registered with the injection Manager.",
+						   type));
+    }
+    else {
+      ArrayList<Bean<?>> enabledList = component.getEnabledBeanList();
+
+      if (enabledList.size() == 0) {
+	return new UnsatisfiedDependencyException(L.l("Can't find a component for '{0}' because any matching beans are disabled, i.e. non-enabled Deploy.\nDisabled beans:{2}",
+						     type,
+						     toList(bindings),
+						     listToLines(component.getBeanList())));
+      }
+      else {
+	return new UnsatisfiedDependencyException(L.l("Can't find a component for '{0}' because no enabled beans match the bindings {1}.\nEnabled beans:{2}",
+						      type,
+						      toList(bindings),
+						      listToLines(enabledList)));
+      }
+    }
   }
 
   /**
@@ -1427,6 +1503,17 @@ public class InjectManager
     return list;
   }
 
+  private String toLineList(Iterable list)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (Object item : list) {
+      sb.append("\n  ").append(item);
+    }
+
+    return sb.toString();
+  }
+
   /**
    * Creates an instance for the given type.  This method will obey
    * the scope of the bean, so a singleton will return the single bean.
@@ -1443,8 +1530,8 @@ public class InjectManager
   /**
    * Internal callback during creation to get a new injection instance.
    */
-  public <T> T getInstanceToInject(InjectionPoint ij,
-				   CreationalContext<?> cxt)
+  public <T> T getInjectableReference(InjectionPoint ij,
+				      CreationalContext<?> cxt)
   {
     Bean bean = resolveByInjectionPoint(ij);
 
@@ -1457,7 +1544,7 @@ public class InjectManager
 	return (T) adapter;
     }
 	
-    return (T) getInstance(bean, cxt);
+    return (T) getReference(bean, cxt);
   }
 
   /**
@@ -1465,7 +1552,7 @@ public class InjectManager
    */
   public <T> T getInstanceToInject(InjectionPoint ij)
   {
-    return (T) getInstanceToInject(ij, new ConfigContext());
+    return (T) getInjectableReference(ij, new ConfigContext());
   }
 
   public Bean resolveByInjectionPoint(InjectionPoint ij)
@@ -1482,12 +1569,10 @@ public class InjectManager
     else
       bindings = new Annotation[] { CurrentLiteral.CURRENT };
 
-    Set set = resolveByType(type, bindings);
+    Set set = getBeans(type, bindings);
 
     if (set == null || set.size() == 0) {
-      throw new UnsatisfiedDependencyException(L.l("'{0}' does not match any configured beans with binding {1}",
-						   type,
-						   toList(bindings)));
+      throw unsatisfiedException(type, bindings);
     }
     else if (set.size() == 1) {
       Iterator iter = set.iterator();
@@ -1502,9 +1587,10 @@ public class InjectManager
       }
     }
     else {
-      throw new AmbiguousDependencyException(L.l("'{0}' matches too many configured beans {1}",
+      throw new AmbiguousDependencyException(L.l("'{0}' with binding {1} matches too many configured beans{2}",
 						 BaseType.create(type, null),
-						 set));
+						 bindingSet,
+						 toLineList(set)));
     }
 
     return null;
@@ -1588,6 +1674,36 @@ public class InjectManager
 			      Class<T> eventType,
 			      Annotation... bindings)
   {
+    addObserver(observer, (Type) eventType, bindings);
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void addObserver(Observer<T> observer,
+			      TypeLiteral<T> eventType,
+			      Annotation... bindings)
+  {
+    addObserver(observer, (Class) eventType.getType(), bindings);
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public void addObserver(Observer<?> observer,
+			  Type type,
+			  Annotation... bindings)
+  {
+    Class eventType = (Class) type;
+    
     checkActive();
     
     if (eventType.getTypeParameters() != null
@@ -1610,20 +1726,6 @@ public class InjectManager
     synchronized (_observerListCache) {
       _observerListCache.clear();
     }
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      TypeLiteral<T> eventType,
-			      Annotation... bindings)
-  {
-    addObserver(observer, (Class) eventType.getType(), bindings);
   }
 
   /**
@@ -1652,6 +1754,20 @@ public class InjectManager
 				 Annotation... bindings)
   {
     removeObserver(observer, (Class) eventType.getType(), bindings);
+  }
+
+  /**
+   * Removes an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public void removeObserver(Observer<?> observer,
+			     Type eventType,
+			     Annotation... bindings)
+  {
+    removeObserver(observer, eventType, bindings);
   }
 
   //
@@ -1684,11 +1800,9 @@ public class InjectManager
   /**
    * Adds a new interceptor to the manager
    */
-  public Manager addInterceptor(Interceptor interceptor)
+  public void addInterceptor(Interceptor interceptor)
   {
     _interceptorList.add(new InterceptorEntry(interceptor));
-
-    return this;
   }
 
   public void setInterceptorList(List<Interceptor> interceptorList)
@@ -1733,7 +1847,7 @@ public class InjectManager
   /**
    * Adds a new decorator
    */
-  public Manager addDecorator(Decorator decorator)
+  public BeanManager addDecorator(Decorator decorator)
   {
     _decoratorList.add(new DecoratorEntry(decorator));
 
@@ -1797,6 +1911,29 @@ public class InjectManager
     return decorators;
   }
 
+  private Class getRawType(Type type)
+  {
+    if (type instanceof Class)
+      return ((Class) type);
+    else if (type instanceof ParameterizedType)
+      return getRawType(((ParameterizedType) type).getRawType());
+    else
+      return null;
+  }
+
+  private Type getInstanceType(Type type)
+  {
+    if (type instanceof Class)
+      return Object.class;
+    else if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+
+      return pType.getActualTypeArguments()[0];
+    }
+    else
+      throw new UnsupportedOperationException(String.valueOf(type));
+  }
+
   private boolean isTypeContained(Set<Class<?>> types, Class delegateType)
   {
     for (Class type : types) {
@@ -1805,6 +1942,30 @@ public class InjectManager
     }
 
     return false;
+  }
+
+  //
+  // Activity
+  //
+
+  //
+  // Actitivities
+  //
+
+  /**
+   * Creates a new activity
+   */
+  public BeanManager createActivity()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Associate the context with a scope
+   */
+  public BeanManager setCurrent(Class<? extends Annotation> scopeType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   //
@@ -1878,16 +2039,16 @@ public class InjectManager
       _pendingPathList.clear();
 
       for (Path path : pathList) {
-	if (_webBeansMap.get(path) != null)
+	if (_beansConfigMap.get(path) != null)
 	  continue;
 	
 	if (path.canRead()) {
-	  WbWebBeans webBeans = new WbWebBeans(this, path);
-	  _webBeansMap.put(path, webBeans);
+	  BeansConfig beans = new BeansConfig(this, path);
+	  _beansConfigMap.put(path, beans);
 	  
 	  path.setUserPath(path.getURL());
 	    
-	  new Config().configure(webBeans, path, SCHEMA);
+	  new Config().configure(beans, path, SCHEMA);
 	}
       }
 
@@ -1899,18 +2060,18 @@ public class InjectManager
       for (WebBeansRootContext context : rootContextList) {
 	Path root = context.getRoot();
       
-	WbWebBeans webBeans = _webBeansMap.get(root);
+	BeansConfig beans = _beansConfigMap.get(root);
 
-	if (webBeans == null) {
-	  webBeans = new WbWebBeans(this, root);
-	  _webBeansMap.put(root, webBeans);
+	if (beans == null) {
+	  beans = new BeansConfig(this, root);
+	  _beansConfigMap.put(root, beans);
 
 	  Path path = root.lookup("META-INF/beans.xml");
 	  
 	  if (path.canRead()) {
 	    path.setUserPath(path.getURL());
 	    
-	    new Config().configure(webBeans, path, SCHEMA);
+	    new Config().configure(beans, path, SCHEMA);
 	  }
 	}
 
@@ -1936,19 +2097,16 @@ public class InjectManager
 		continue class_loop;
 	    }
 	    
-	    webBeans.addScannedClass(cl);
+	    beans.addScannedClass(cl);
 	  } catch (ClassNotFoundException e) {
 	    log.log(Level.FINER, e.toString(), e);
 	  }
 	}
 
-	webBeans.update();
+	beans.update();
 
-	webBeans.init();
+	beans.init();
       }
-
-      if (_wbWebBeans != null)
-	_wbWebBeans.init();
     } catch (ConfigException e) {
       if (_configException == null)
 	_configException = e;
@@ -2003,7 +2161,7 @@ public class InjectManager
    */
   public void environmentConfigure(EnvironmentClassLoader loader)
   {
-    update();
+    initialize();
   }
 
   /**
@@ -2011,7 +2169,7 @@ public class InjectManager
    */
   public void environmentBind(EnvironmentClassLoader loader)
   {
-    update();
+    initialize();
     bind();
   }
 
@@ -2020,12 +2178,29 @@ public class InjectManager
    */
   public void environmentStart(EnvironmentClassLoader loader)
   {
+    start();
+  }
+
+  public void initialize()
+  {
     update();
+    
+    if (_lifecycle.toInit()) {
+      fireEvent(this, new AnnotationLiteral<Initialized>() {});
+    }
+  }
+
+  public void start()
+  {
+    initialize();
+    
     bind();
     
-    _wbWebBeans.init();
+    //     _wbWebBeans.init();
 
-    fireEvent(this, new AnnotationLiteral<Initialized>() {});
+    if (_lifecycle.toActive()) {
+      fireEvent(this, new AnnotationLiteral<Deployed>() {});
+    }
 
     startServices();
   }
@@ -2117,9 +2292,7 @@ public class InjectManager
     _classLoader = null;
     _tempClassLoader = null;
 
-    _wbWebBeans = null;
-
-    _webBeansMap = null;
+    _beansConfigMap = null;
     _deploymentSet = null;
     _deploymentMap = null;
     
@@ -2280,12 +2453,12 @@ public class InjectManager
    */
   public Object writeReplace()
   {
-    return new SingletonHandle(Manager.class);
+    return new SingletonHandle(BeanManager.class);
   }
 
   private void checkActive()
   {
-    if (_webBeansMap == null)
+    if (_beansConfigMap == null)
       throw new IllegalStateException(L.l("{0} is closed", this));
   }
 

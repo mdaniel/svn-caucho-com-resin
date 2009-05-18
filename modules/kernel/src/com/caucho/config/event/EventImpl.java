@@ -33,15 +33,16 @@ import java.lang.annotation.Annotation;
 
 import javax.event.Event;
 import javax.event.Observer;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
+import javax.inject.TypeLiteral;
 
-public class EventImpl implements Event<Object>
+public class EventImpl<T> implements Event<T>
 {
-  private final Manager _manager;
+  private final BeanManager _manager;
   private final Class _eventType;
   private final Annotation []_bindings;
 
-  public EventImpl(Manager manager,
+  public EventImpl(BeanManager manager,
 		   Class eventType,
 		   Annotation []bindings)
   {
@@ -50,7 +51,7 @@ public class EventImpl implements Event<Object>
     _bindings = bindings;
   }
   
-  public void fire(Object event, Annotation... bindings)
+  public void fire(T event, Annotation... bindings)
   {
     if (_bindings.length == 0)
       _manager.fireEvent(event, bindings);
@@ -68,7 +69,7 @@ public class EventImpl implements Event<Object>
     }
   }
 
-  public void observe(Observer observer, Annotation... bindings)
+  public void observe(Observer<T> observer, Annotation... bindings)
   {
     if (_bindings.length == 0)
       _manager.addObserver(observer, _eventType, bindings);
@@ -84,5 +85,22 @@ public class EventImpl implements Event<Object>
 
       _manager.addObserver(observer, _eventType, fullBindings);
     }
+  }
+
+  public Event<T> select(Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public <U extends T> Event<U> select(Class<U> subtype,
+				       Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public <U extends T> Event<U> select(TypeLiteral<U> subtype,
+				       Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

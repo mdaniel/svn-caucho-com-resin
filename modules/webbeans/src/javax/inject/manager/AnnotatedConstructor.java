@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,50 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.cfg;
+package javax.inject.manager;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.util.List;
 
 /**
- * Configuration for the xml component type.
+ * Abstract introspected view of a Bean constructor
  */
-public class WbComponentType {
-  private Class _type;
-  private int _priority = -1;
-
-  public WbComponentType(Class type)
-  {
-    _type = type;
-
-    if (type == null)
-      throw new NullPointerException();
-  }
-
-  public void setType(Class type)
-  {
-    _type = type;
-  }
-
-  public Class getType()
-  {
-    return _type;
-  }
-
-  public void setPriority(int priority)
-  {
-    _priority = priority;
-  }
-
-  public int getPriority()
-  {
-    return _priority;
-  }
-
-  public boolean isEnabled()
-  {
-    return _priority >= 0;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[@" + _type.getSimpleName() + "]";
-  }
+public interface AnnotatedConstructor<X> extends AnnotatedCallable<X>
+{
+  /**
+   * Returns the reflected Constructor
+   */
+  public Constructor getJavaMember();
 }

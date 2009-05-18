@@ -959,6 +959,10 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     DriverConfig []backupDrivers = new DriverConfig[_backupDriverList.size()];
     _backupDriverList.toArray(backupDrivers);
 
+    if (_driverList.size() == 0 && _backupDriverList.size() == 0) {
+      throw new ConfigException(L.l("<database> configuration needs at least one <driver>, because it needs to know the database to connect."));
+    }
+
     if (_mcf == null)
       _mcf = new ManagedFactoryImpl(this, drivers, backupDrivers);
 
@@ -967,7 +971,10 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       if (! name.startsWith("java:"))
         name = "java:comp/env/" + name;
 
-      if (drivers[0].getURL() != null)
+      if (drivers.length == 0) {
+        log.config("database " + name + " starting");
+      }
+      else if (drivers[0].getURL() != null)
         log.config("database " + name + " starting (URL:" + drivers[0].getURL() + ")");
       else
         log.config("database " + name + " starting");

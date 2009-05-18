@@ -1504,7 +1504,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     try {
-      return loadClass(entry);
+      return loadClassEntry(entry);
     } catch (RuntimeException e) {
       throw e;
     } catch (ClassNotFoundException e) {
@@ -1541,14 +1541,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * Loads the class from the loader.  The loadClass must be in the
    * top classLoader because the defineClass must be owned by the top.
    */
-  protected Class loadClass(ClassEntry entry)
-      throws IOException, ClassNotFoundException
+  protected Class loadClassEntry(ClassEntry entry)
+    throws IOException, ClassNotFoundException
   {
+    Class cl = null;
+
+    byte []bBuf;
+    int bLen;
+    
     synchronized (entry) {
-      Class cl = entry.getEntryClass();
+      cl = entry.getEntryClass();
 
       if (cl != null)
-        return cl;
+	return cl;
 
       entry.preLoad();
 
@@ -1588,8 +1593,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       entry.load(buffer);
 
-      byte []bBuf = buffer.getBuffer();
-      int bLen = buffer.length();
+      bBuf = buffer.getBuffer();
+      bLen = buffer.length();
 
       if (_classFileTransformerList != null) {
 	Class redefineClass = null;
@@ -1635,34 +1640,37 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	  }
 	}
       }
+    }
 
-      try {
-        cl = defineClass(entry.getName(),
-			 bBuf, 0, bLen,
-			 entry.getCodeSource());
-      } catch (RuntimeException e) {
-        log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
-
-	throw e;
-      } catch (Exception e) {
-        log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
-
-        ClassNotFoundException exn;
-        exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);
-        //exn.initCause(e);
-
-        throw exn;
-      }
+    try {
+      // #3423 - defineClass must be outside ClassEntry synchronized
+      // block because it can force recursive definitions,
+      // possibly causing deadlocks
+      cl = defineClass(entry.getName(),
+		       bBuf, 0, bLen,
+		       entry.getCodeSource());
 
       entry.setEntryClass(cl);
+    } catch (RuntimeException e) {
+      log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
 
-      if (entry.postLoad()) {
-        _dependencies.add(AlwaysModified.create());
-        _dependencies.setModified(true);
-      }
+      throw e;
+    } catch (Exception e) {
+      log().log(Level.FINE, entry.getName() + " [" + e.toString() + "]", e);
 
-      return cl;
+      ClassNotFoundException exn;
+      exn = new ClassNotFoundException(entry.getName() + " [" + e + "]", e);
+      //exn.initCause(e);
+
+      throw exn;
     }
+
+    if (entry.postLoad()) {
+      _dependencies.add(AlwaysModified.create());
+      _dependencies.setModified(true);
+    }
+
+    return cl;
   }
 
   /**

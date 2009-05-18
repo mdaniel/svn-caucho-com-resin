@@ -164,7 +164,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
     }
     
     if (getScopeType() != null) {
-      _scope = _webBeans.getScopeContext(getScopeType());
+      _scope = _beanManager.getScopeContext(getScopeType());
     }
   }
 
@@ -208,7 +208,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public Object get()
   {
-    return _webBeans.getInstance(this);
+    return _beanManager.getReference(this);
   }
 
   public T get(ConfigContext env)
@@ -250,7 +250,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
   /**
    * Creates a new instance of the component.
    */
-  public final T create(CreationalContext<T> context)
+  public T create(CreationalContext<T> context)
   {
     return create(context, null);
   }

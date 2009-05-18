@@ -102,21 +102,21 @@ public class SyslogHandler extends Handler {
     throws ConfigException
   {
     if ("emerg".equals(severity))
-      _facility = Syslog.LOG_EMERG;
+      _severity = Syslog.LOG_EMERG;
     else if ("alert".equals(severity))
-      _facility = Syslog.LOG_ALERT;
+      _severity = Syslog.LOG_ALERT;
     else if ("crit".equals(severity))
-      _facility = Syslog.LOG_CRIT;
+      _severity = Syslog.LOG_CRIT;
     else if ("err".equals(severity))
-      _facility = Syslog.LOG_ERR;
+      _severity = Syslog.LOG_ERR;
     else if ("warning".equals(severity))
-      _facility = Syslog.LOG_WARNING;
+      _severity = Syslog.LOG_WARNING;
     else if ("notice".equals(severity))
-      _facility = Syslog.LOG_NOTICE;
+      _severity = Syslog.LOG_NOTICE;
     else if ("info".equals(severity))
-      _facility = Syslog.LOG_INFO;
+      _severity = Syslog.LOG_INFO;
     else if ("debug".equals(severity))
-      _facility = Syslog.LOG_DEBUG;
+      _severity = Syslog.LOG_DEBUG;
     else
       throw new ConfigException(L.l("'{0}' is an unknown syslog severity.",
 				    severity));

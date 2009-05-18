@@ -52,25 +52,23 @@ import javax.annotation.PostConstruct;
 import javax.decorator.Decorator;
 import javax.inject.DeploymentType;
 import javax.inject.Standard;
+import javax.inject.manager.Bean;
+import javax.inject.manager.ManagedBean;
+import javax.inject.manager.ProducerBean;
 import javax.inject.manager.Interceptor;
 
 /**
  * Configuration for a classloader root containing webbeans
  */
-public class WbWebBeans {
-  private static final L10N L = new L10N(WbWebBeans.class);
+public class BeansConfig {
+  private static final L10N L = new L10N(BeansConfig.class);
   private static final Logger log
-    = Logger.getLogger(WbWebBeans.class.getName());
+    = Logger.getLogger(BeansConfig.class.getName());
   
-  private InjectManager _webBeansContainer;
+  private InjectManager _injectManager;
   private Path _root;
   
-  private Path _webBeansFile;
-
-  private HashMap<String,WbComponentType> _componentTypeMap
-    = new HashMap<String,WbComponentType>();
-  
-  private ArrayList<WbComponentType> _componentTypeList;
+  private Path _beansFile;
   
   private ArrayList<ComponentImpl> _pendingComponentList
     = new ArrayList<ComponentImpl>();
@@ -88,13 +86,13 @@ public class WbWebBeans {
 
   private boolean _isConfigured;
 
-  public WbWebBeans(InjectManager webBeansContainer, Path root)
+  public BeansConfig(InjectManager injectManager, Path root)
   {
-    _webBeansContainer = webBeansContainer;
+    _injectManager = injectManager;
     
     _root = root;
-    _webBeansFile = root.lookup("META-INF/beans.xml");
-    _webBeansFile.setUserPath(_webBeansFile.getURL());
+    _beansFile = root.lookup("META-INF/beans.xml");
+    _beansFile.setUserPath(_beansFile.getURL());
   }
 
   public void setSchemaLocation(String schema)
@@ -106,7 +104,7 @@ public class WbWebBeans {
    */
   public InjectManager getContainer()
   {
-    return _webBeansContainer;
+    return _injectManager;
   }
 
   /**
@@ -154,20 +152,6 @@ public class WbWebBeans {
   //
 
   /**
-   * Adds a component.
-   */
-  public WbComponentConfig createComponent()
-  {
-    return new WbComponentConfig(_webBeansContainer);
-  }
-
-  public void addWbComponent(ComponentImpl component)
-  {
-    _pendingComponentList.remove(component);
-    _pendingComponentList.add(component);
-  }
-
-  /**
    * Adds a namespace bean
    */
   public void addCustomBean(CustomBeanConfig bean)
@@ -207,32 +191,24 @@ public class WbWebBeans {
   @PostConstruct
   public void init()
   {
-    if (_componentTypeList == null) {
-      _componentTypeList = new ArrayList<WbComponentType>();
-
-      WbComponentType type = createComponentType(Standard.class);
-      type.setPriority(0);
-      _componentTypeList.add(type);
-    }
-
     for (Class cl : _decoratorList) {
-      DecoratorBean decorator = new DecoratorBean(_webBeansContainer, cl);
+      DecoratorBean decorator = new DecoratorBean(_injectManager, cl);
 
-      _webBeansContainer.addDecorator(decorator);
+      _injectManager.addDecorator(decorator);
     }
     _decoratorList.clear();
 
     update();
     
     if (_interceptorList != null) {
-      _webBeansContainer.setInterceptorList(_interceptorList);
+      _injectManager.setInterceptorList(_interceptorList);
       _interceptorList = null;
     }
   }
 
   public void update()
   {
-    InjectManager webBeans = _webBeansContainer;
+    InjectManager injectManager = _injectManager;
 
     try {
       if (_pendingClasses.size() > 0) {
@@ -241,59 +217,41 @@ public class WbWebBeans {
 	_pendingClasses.clear();
 
 	for (Class cl : pendingClasses) {
-	  if (webBeans.getWebComponent(cl) != null)
+	  if (injectManager.getWebComponent(cl) != null)
 	    continue;
 
-	  SimpleBean component;
+	  ManagedBean<?> bean;
 
 	  /*
 	  if (cl.isAnnotationPresent(Singleton.class))
 	    component = new SingletonClassComponent(cl);
 	  else
 	  */
+	  /*
 	  component = new SimpleBean(cl);
 
 	  component.setFromClass(true);
 	  component.init();
+	  */
+	  bean = injectManager.createManagedBean(cl);
+	  
+	  injectManager.addBean(bean);
 
-	  webBeans.addBean(component);
+	  for (ProducerBean producerBean : bean.getProducerBeans()) {
+	    injectManager.addBean(producerBean);
+	  }
 
 	  //_pendingComponentList.add(component);
 	}
       }
-
-      /*
-      if (_pendingComponentList.size() > 0) {
-	ArrayList<ComponentImpl> componentList
-	  = new ArrayList<ComponentImpl>(_pendingComponentList);
-	_pendingComponentList.clear();
-
-	for (ComponentImpl comp : componentList) {
-	  if (webBeans.getWebComponent(comp.getTargetType()) == null)
-	    webBeans.addBean(comp);
-	}
-      }
-      */
     } catch (Exception e) {
-      throw LineConfigException.create(_webBeansFile.getURL(), 1, e);
+      throw LineConfigException.create(_beansFile.getURL(), 1, e);
     }
-  }
-
-  public WbComponentType createComponentType(Class cl)
-  {
-    WbComponentType type = _componentTypeMap.get(cl.getName());
-
-    if (type == null) {
-      type = new WbComponentType(cl);
-      _componentTypeMap.put(cl.getName(), type);
-    }
-
-    return type;
   }
 
   public ScopeContext getScopeContext(Class cl)
   {
-    return _webBeansContainer.getScopeContext(cl);
+    return _injectManager.getScopeContext(cl);
   }
 
   public void addInterceptor(Class cl)
@@ -301,7 +259,7 @@ public class WbWebBeans {
     if (_interceptorList == null)
       _interceptorList = new ArrayList<Interceptor>();
 
-    InterceptorBean bean = new InterceptorBean(_webBeansContainer, cl);
+    InterceptorBean bean = new InterceptorBean(_injectManager, cl);
     bean.init();
 
     _interceptorList.add(bean);
@@ -311,9 +269,9 @@ public class WbWebBeans {
   public String toString()
   {
     if (_root != null)
-      return "WbWebBeans[" + _root.getURL() + "]";
+      return getClass().getSimpleName() + "[" + _root.getURL() + "]";
     else
-      return "WbWebBeans[]";
+      return getClass().getSimpleName() + "[]";
   }
 
   public class Interceptors {
@@ -387,7 +345,7 @@ public class WbWebBeans {
     @PostConstruct
     public void init()
     {
-      _webBeansContainer.setDeploymentTypes(_deployList);
+      _injectManager.setDeploymentTypes(_deployList);
     }
   }
 }

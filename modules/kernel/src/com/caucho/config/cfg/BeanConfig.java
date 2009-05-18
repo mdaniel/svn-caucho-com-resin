@@ -216,13 +216,14 @@ public class BeanConfig extends WbComponentConfig {
   {
     if (_customBean != null) {
       _customBean.initComponent();
+      /* XXX:
       _comp = _customBean.getComponent();
 
       if (getName() != null)
 	_comp.addBinding(Names.create(getName()));
 
-      _comp.addAnnotation(new AnnotationLiteral<Service>() {});
-      
+	_comp.addAnnotation(new AnnotationLiteral<Service>() {});
+      */
       return;
     }
 

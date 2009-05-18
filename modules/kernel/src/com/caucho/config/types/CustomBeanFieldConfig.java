@@ -29,6 +29,8 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.program.ConfigProgram;
+
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -42,6 +44,9 @@ public class CustomBeanFieldConfig {
   private ArrayList<Annotation> _annotationList
     = new ArrayList<Annotation>();
 
+  private ArrayList<ConfigProgram> _programList
+    = new ArrayList<ConfigProgram>();
+
   public CustomBeanFieldConfig(Field field)
   {
     _field = field;
@@ -50,6 +55,11 @@ public class CustomBeanFieldConfig {
   public Field getField()
   {
     return _field;
+  }
+
+  public void addProgramBuilder(ConfigProgram program)
+  {
+    _programList.add(program);
   }
 
   public void addAnnotation(Annotation ann)

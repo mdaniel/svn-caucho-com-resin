@@ -335,7 +335,7 @@ public class EjbMessageBean extends EjbBean {
         
         for (Bean bean : beans) {
           if (destinationName.equals(bean.getName()))
-            dest = (Destination) bean.create(null);
+            dest = (Destination) webBeans.getReference(bean);
         }
 
 	setDestination(dest);

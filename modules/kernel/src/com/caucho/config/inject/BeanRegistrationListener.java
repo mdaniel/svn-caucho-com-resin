@@ -31,7 +31,7 @@ package com.caucho.config.inject;
 
 
 import java.lang.annotation.Annotation;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * Registers beans on startup
@@ -40,5 +40,5 @@ public interface BeanRegistrationListener
 {
   public boolean isMatch(Annotation ann);
 
-  public void start(Manager manager, CauchoBean bean);
+  public void start(BeanManager manager, CauchoBean bean);
 }

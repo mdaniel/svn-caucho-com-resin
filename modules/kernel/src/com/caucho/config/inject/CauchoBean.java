@@ -34,18 +34,13 @@ import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.inject.manager.Bean;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * Configuration for the xml web bean component.
  */
-abstract public class CauchoBean<T> extends Bean<T>
+abstract public class CauchoBean<T> implements Bean<T>
 {
-  protected CauchoBean(Manager manager)
-  {
-    super(manager);
-  }
-  
   abstract public Set<BaseType> getGenericTypes();
 
   /**

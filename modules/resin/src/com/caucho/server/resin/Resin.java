@@ -279,7 +279,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       _management = createResinManagement();
       
-      if (webBeans.resolveByType(ResinWebBeansProducer.class).size() == 0) {
+      if (webBeans.getBeans(ResinWebBeansProducer.class).size() == 0) {
 	webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 
 	ResinConfigLibrary.configure(webBeans);

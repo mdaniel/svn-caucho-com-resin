@@ -31,10 +31,11 @@ package com.caucho.config.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
 import com.caucho.config.gen.*;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.config.type.ConfigType;
 import com.caucho.util.*;
 import com.caucho.config.bytecode.*;
 import com.caucho.config.cfg.*;
@@ -52,12 +53,15 @@ import javax.inject.CreationException;
 import javax.inject.Produces;
 import javax.inject.Initializer;
 import javax.inject.manager.Bean;
+import javax.inject.manager.AnnotatedConstructor;
+import javax.inject.manager.AnnotatedParameter;
+import javax.inject.manager.AnnotatedType;
 import javax.inject.manager.InjectionPoint;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
-public class SimpleBean extends ComponentImpl
+public class SimpleBean extends ComponentImpl<Object>
 {
   private static final L10N L = new L10N(SimpleBean.class);
   private static final Logger log
@@ -68,11 +72,14 @@ public class SimpleBean extends ComponentImpl
   private boolean _isBound;
 
   private Class _instanceClass;
+  
+  private AnnotatedType _beanType;
+  private AnnotatedConstructor _beanCtor;
+  private Constructor _javaCtor;
 
   private ArrayList<SimpleBeanMethod> _methodList
     = new ArrayList<SimpleBeanMethod>();
 
-  private Constructor _ctor;
   private ConfigProgram []_newArgs;
   private Arg []_ctorArgs;
 
@@ -103,6 +110,8 @@ public class SimpleBean extends ComponentImpl
     validateType(type);
 
     setTargetType(type);
+
+    _beanType = new BeanTypeImpl(type, type);
   }
 
   /**
@@ -162,7 +171,9 @@ public class SimpleBean extends ComponentImpl
 
   public void setConstructor(Constructor ctor)
   {
-    _ctor = ctor;
+    // XXX: handled differently now
+    throw new IllegalStateException();
+    // _ctor = ctor;
   }
 
   public void setMBeanName(String name)
@@ -185,6 +196,7 @@ public class SimpleBean extends ComponentImpl
    */
   public void setNewArgs(ArrayList<ConfigProgram> args)
   {
+    // XXX: handled differently
     if (args != null) {
       _newArgs = new ConfigProgram[args.size()];
       args.toArray(_newArgs);
@@ -196,6 +208,8 @@ public class SimpleBean extends ComponentImpl
    */
   public void addMethod(SimpleBeanMethod simpleMethod)
   {
+    throw new UnsupportedOperationException();
+    /*
     Method method = simpleMethod.getMethod();
     Annotation []annotations = simpleMethod.getAnnotations();
 
@@ -206,6 +220,7 @@ public class SimpleBean extends ComponentImpl
     }
     else
       System.out.println("M: " + method);
+    */
   }
 
   /**
@@ -240,28 +255,32 @@ public class SimpleBean extends ComponentImpl
    */
   public void introspect()
   {
+    AnnotatedType beanType = _beanType;
     Class cl = getIntrospectionClass();
     Class scopeClass = null;
 
-    introspectTypes(cl);
+    if (beanType == null)
+      beanType = new BeanTypeImpl(cl, cl);
 
-    introspectClass(cl);
+    introspectTypes(beanType.getJavaClass());
+
+    introspectAnnotations(beanType.getAnnotations());
 
     if ("".equals(getName())) {
-      String name = cl.getSimpleName();
+      String name = beanType.getJavaClass().getSimpleName();
 
       name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
 	
       setName(name);
     }
 
-    introspectConstructor();
-    introspectProduces(cl);
+    introspectConstructor(beanType);
+    introspectProduces(beanType);
 
     if (getBindings().size() == 0)
-      introspectBindings();
+      introspectBindings(beanType);
 
-    introspectObservers(cl);
+    introspectObservers(beanType);
     
     introspectMBean();
   }
@@ -269,23 +288,25 @@ public class SimpleBean extends ComponentImpl
   /**
    * Introspects the constructor
    */
-  protected void introspectConstructor()
+  protected void introspectConstructor(AnnotatedType<?> beanType)
   {
-    if (_ctor != null)
+    if (_beanCtor != null)
       return;
     
     try {
+      /*
       Class cl = getInstanceClass();
 
       if (cl == null)
 	cl = getTargetClass();
+      */
       
-      Constructor best = null;
-      Constructor second = null;
+      AnnotatedConstructor best = null;
+      AnnotatedConstructor second = null;
 
-      for (Constructor ctor : cl.getDeclaredConstructors()) {
+      for (AnnotatedConstructor<?> ctor : beanType.getConstructors()) {
 	if (_newArgs != null
-	    && ctor.getParameterTypes().length != _newArgs.length) {
+	    && ctor.getParameters().size() != _newArgs.length) {
 	  continue;
 	}
 	else if (best == null) {
@@ -294,42 +315,45 @@ public class SimpleBean extends ComponentImpl
 	else if (hasBindingAnnotation(ctor)) {
 	  if (best != null && hasBindingAnnotation(best))
 	    throw new ConfigException(L.l("Simple bean {0} can't have two constructors with @BindingType or @Initializer, because the Manager can't tell which one to use.",
-					  ctor.getDeclaringClass().getName()));
+					  beanType.getJavaClass().getName()));
 	  best = ctor;
 	  second = null;
 	}
-	else if (ctor.getParameterTypes().length == 0) {
+	else if (ctor.getParameters().size() == 0) {
 	  best = ctor;
 	}
-	else if (best.getParameterTypes().length == 0) {
+	else if (best.getParameters().size() == 0) {
 	}
-	else if (ctor.getParameterTypes().length == 1
-		 && ctor.getParameterTypes()[0].equals(String.class)) {
+	else if (ctor.getParameters().size() == 1
+		 && ctor.getParameters().get(0).equals(String.class)) {
 	  second = best;
 	  best = ctor;
 	}
       }
 
+      /*
       if (best == null)
 	best = cl.getConstructor(new Class[0]);
+      */
 
       if (best == null)
 	throw new ConfigException(L.l("{0}: no constructor found",
-				      cl.getName()));
+				      beanType.getJavaClass().getName()));
 
       if (second == null) {
       }
-      else if (best.getDeclaringClass().getName().startsWith("java.lang")
-	       && best.getParameterTypes().length == 1
-	       && best.getParameterTypes()[0].equals(String.class)) {
+      else if (beanType.getJavaClass().getName().startsWith("java.lang")
+	       && best.getParameters().size() == 1
+	       && best.getParameters().get(0).equals(String.class)) {
 	log.fine(L.l("{0}: WebBean does not have a unique constructor, choosing String-arg constructor",
-		     cl.getName()));
+		     beanType.getJavaClass().getName()));
       }
       else
-	throw new ConfigException(L.l("{0}: WebBean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
-				      cl.getName()));
+	throw new ConfigException(L.l("{0}: Bean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
+				      beanType.getJavaClass().getName()));
 
-      _ctor = best;
+      _beanCtor = best;
+      _javaCtor = _beanCtor.getJavaMember();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -478,19 +502,23 @@ public class SimpleBean extends ComponentImpl
     try {
       if (! _isBound)
 	bind();
-      
-      Object []args;
-      if (_ctorArgs != null && _ctorArgs.length > 0) {
-	args = new Object[_ctorArgs.length];
 
-	for (int i = 0; i < args.length; i++) {
-	  args[i] = _ctorArgs[i].eval((ConfigContext) env);
+      List<AnnotatedParameter> params = _beanCtor.getParameters();
+      Object []args;
+      int size = params.size();
+      if (size > 0) {
+	args = new Object[size];
+
+	/* XXX:
+	for (int i = 0; i < size; i++) {
+	  args[i] = params.get(i).getInitialValue(env);
 	}
+	*/
       }
       else
-	args = NULL_ARGS;
-      
-      Object value = _ctor.newInstance(args);
+ 	args = NULL_ARGS;
+
+      Object value = _javaCtor.newInstance(args);
 
       if (isSingleton()) {
 	SerializationAdapter.setHandle(value, getHandle());
@@ -546,9 +574,16 @@ public class SimpleBean extends ComponentImpl
       _destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(_destroyProgram);
 
-      if (_ctor == null)
-	introspectConstructor();
+      if (_beanCtor == null) {
+	// XXX:
+	AnnotatedType beanType = _beanType;
+	if (beanType != null)
+	  beanType = new BeanTypeImpl(cl, cl);
+	
+	introspectConstructor(beanType);
+      }
 
+      /*
       if (_ctor != null) {
 	String loc = _ctor.getDeclaringClass().getName() + "(): ";
 	Type []param = _ctor.getGenericParameterTypes();
@@ -573,6 +608,7 @@ public class SimpleBean extends ComponentImpl
 	
 	_ctorArgs = ctorArgs;
       }
+      */
 
       // introspectObservers(getTargetClass());
 
@@ -599,8 +635,8 @@ public class SimpleBean extends ComponentImpl
       
       if (instanceClass != null && instanceClass != _instanceClass) {
 	try {
-	  if (_ctor != null)
-	    _ctor = instanceClass.getConstructor(_ctor.getParameterTypes());
+	  if (_javaCtor != null)
+	    _javaCtor = instanceClass.getConstructor(_javaCtor.getParameterTypes());
 	  
 	  _instanceClass = instanceClass;
 	} catch (Exception e) {
@@ -644,26 +680,18 @@ public class SimpleBean extends ComponentImpl
   /**
    * Introspects the methods for any @Produces
    */
-  protected void introspectBindings()
+  protected void introspectBindings(AnnotatedType beanType)
   {
-    introspectBindings(getTargetClass().getAnnotations());
-  }
-
-  abstract static class Arg {
-    public void bind()
-    {
-    }
-    
-    abstract public Object eval(ConfigContext env);
+    introspectBindings(beanType.getAnnotations());
   }
 
   class BeanArg extends Arg {
     private String _loc;
     private Type _type;
-    private Annotation []_bindings;
+    private Set<Annotation> _bindings;
     private Bean _bean;
 
-    BeanArg(String loc, Type type, Annotation []bindings)
+    BeanArg(String loc, Type type, Set<Annotation> bindings)
     {
       _loc = loc;
       _type = type;
@@ -678,7 +706,7 @@ public class SimpleBean extends ComponentImpl
 
 	if (_bean == null)
 	  throw new ConfigException(L.l("{0}: {1} does not have valid arguments",
-					_loc, _ctor));
+					_loc, _javaCtor));
       }
     }
     
@@ -688,7 +716,7 @@ public class SimpleBean extends ComponentImpl
 	bind();
 
       // XXX: getInstance for injection?
-      return _webBeans.getInstance(_bean);
+      return _beanManager.getReference(_bean);
     }
   }
 

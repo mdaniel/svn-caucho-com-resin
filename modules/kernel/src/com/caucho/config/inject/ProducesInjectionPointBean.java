@@ -46,12 +46,12 @@ import javax.annotation.*;
 import javax.context.CreationalContext;
 import javax.inject.manager.Bean;
 import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.Manager;
+import javax.inject.manager.BeanManager;
 
 /**
  * Configuration for a @Produces method
  */
-public class ProducesInjectionPointBean extends Bean {
+public class ProducesInjectionPointBean<X> implements Bean<X> {
   private static final L10N L = new L10N(ProducesInjectionPointBean.class);
 
   private final ProducesBean _producesBean;
@@ -60,8 +60,6 @@ public class ProducesInjectionPointBean extends Bean {
   ProducesInjectionPointBean(ProducesBean producesBean,
 			     InjectionPoint ij)
   {
-    super(producesBean.getManager());
-
     _producesBean = producesBean;
     _ij = ij;
   }
@@ -130,18 +128,61 @@ public class ProducesInjectionPointBean extends Bean {
   /**
    * Returns the types that the bean exports for bindings.
    */
-  public Set<Class<?>> getTypes()
+  public Set<Type> getTypes()
   {
     return _producesBean.getTypes();
   }
   
   public Object create(CreationalContext creationalContext)
   {
-    return _producesBean.createNew(creationalContext, _ij);
+    Object instance = _producesBean.produce(creationalContext);
+    //_producesBean.inject(instance);
+
+    return instance;
+  }
+  
+  /**
+   * Instantiate the bean.
+   */
+  public X instantiate()
+  {
+    return (X) _producesBean.instantiate();
+  }
+  
+  /**
+   * Inject the bean.
+   */
+  public void inject(X instance)
+  {
+  }
+  
+  /**
+   * Call post-construct
+   */
+  public void postConstruct(X instance)
+  {
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void preDestroy(X instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call destroy
+   */
+  public void destroy(X instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
+  /*
   public void destroy(Object instance)
   {
     _producesBean.destroy(instance);
   }
+  */
 }

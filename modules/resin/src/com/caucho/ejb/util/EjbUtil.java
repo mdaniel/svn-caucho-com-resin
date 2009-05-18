@@ -151,7 +151,7 @@ public class EjbUtil {
     for (int i = beans.size() - 1; i >= 0; i--) {
       Decorator bean = beans.get(i);
 
-      Object instance = webBeans.getInstance(bean);
+      Object instance = webBeans.getReference(bean);
 
       bean.setDelegate(instance, tail);
 
@@ -170,7 +170,7 @@ public class EjbUtil {
     for (int i = 0; i < beans.size(); i++) {
       Decorator bean = beans.get(i);
 
-      Object instance = webBeans.getInstance(bean);
+      Object instance = webBeans.getReference(bean);
 
       bean.setDelegate(instance, proxy);
 

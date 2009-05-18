@@ -35,6 +35,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
+import javax.inject.manager.ManagedBean;
+import javax.inject.manager.InjectionTarget;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
@@ -102,7 +104,7 @@ public class BeanType extends ConfigType
   private Attribute _addCustomBean;
   private Attribute _addAnnotation;
   
-  private ComponentImpl _component;
+  private ManagedBean _component;
 
   private ArrayList<ConfigProgram> _injectList;
   private ArrayList<ConfigProgram> _initList;
@@ -150,10 +152,14 @@ public class BeanType extends ConfigType
 	InjectManager webBeans
 	  = InjectManager.create(_beanClass.getClassLoader());
 
-	_component = (ComponentImpl) webBeans.createTransient(_beanClass);
+	_component = webBeans.createManagedBean(_beanClass);
       }
 
-      Object bean = _component.createNoInit();
+      InjectionTarget injection = _component.getInjectionTarget();
+      ConfigContext env = ConfigContext.create();
+
+      Object bean = injection.produce(env);
+      injection.inject(bean, env);
 
       if (_setParent != null
 	  && parent != null

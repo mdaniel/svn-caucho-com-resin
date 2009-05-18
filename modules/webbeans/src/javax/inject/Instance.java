@@ -54,7 +54,27 @@ import java.lang.annotation.Annotation;
  *
  * @see javax.event.Event
  */
-public interface Instance<T>
+public interface Instance<T> extends Iterable<T>
 {
-  public T get(Annotation... bindings);
+  /**
+   * Returns an instance of the selected bean
+   */
+  public T get();
+
+  /**
+   * Restricts the instance given a set of bindings
+   */
+  public Instance<T> select(Annotation ... bindings);
+
+  /**
+   * Restricts the instance to a subtype and bindings.
+   */
+  public <U extends T> Instance<U> select(Class<U> subtype,
+					  Annotation... bindings);
+
+  /**
+   * Restricts the instance to a subtype and bindings.
+   */
+  public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
+					  Annotation... bindings);
 }

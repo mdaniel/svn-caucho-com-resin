@@ -671,7 +671,7 @@ public class CompilingLoader extends Loader implements Make {
     Class cl = null;
 
     try {
-      cl = getLoader().loadClass(entry);
+      cl = getLoader().loadClassEntry(entry);
     } catch (Exception e) {
       try {
         if (javaFile.canRead())

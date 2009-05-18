@@ -39,6 +39,7 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,16 +54,18 @@ class Watchdog
   
   private final String _id;
 
-  private WatchdogConfig _config;
+  private final WatchdogConfig _config;
+  private final WatchdogAdmin _admin;
+  
+  private AtomicReference<WatchdogTask> _taskRef
+    = new AtomicReference<WatchdogTask>();
   
   private boolean _isSingle;
-  private WatchdogTask _task;
 
   // statistics
   private Date _initialStartTime;
   private Date _lastStartTime;
   private int _startCount;
-  private WatchdogAdmin _admin;
 
   Watchdog(String id, WatchdogArgs args, Path rootDirectory)
   {
@@ -115,11 +118,13 @@ class Watchdog
   /**
    * Sets the config state of the watchdog
    */
+  /*
   public void setConfig(WatchdogConfig config)
   {
     _config = config;
   }
-
+  */
+  
   /**
    * Returns the JAVA_HOME for the Resin instance
    */
@@ -263,7 +268,7 @@ class Watchdog
 
   public String getState()
   {
-    WatchdogTask task = _task;
+    WatchdogTask task = _taskRef.get();
     
     if (task == null)
       return "inactive";
@@ -273,7 +278,7 @@ class Watchdog
 
   int getPid()
   {
-    WatchdogTask task = _task;
+    WatchdogTask task = _taskRef.get();
     
     if (task != null)
       return task.getPid();
@@ -288,13 +293,14 @@ class Watchdog
 
   public int startSingle()
   {
-    if (_task != null)
+    _isSingle = true;
+    
+    WatchdogTask task = new WatchdogTask(this);
+
+    if (! _taskRef.compareAndSet(null, task))
       return -1;
     
-    _isSingle = true;
-    _task = new WatchdogTask(this);
-    
-    _task.start();
+    task.start();
 
     return 1;
   }
@@ -304,14 +310,10 @@ class Watchdog
    */
   public void start()
   {
-    WatchdogTask task = null;
-    
-    synchronized (this) {
-      if (_task != null)
-	throw new IllegalStateException(L.l("Can't start new task because of old task '{0}'", _task));
+    WatchdogTask task = new WatchdogTask(this);
 
-      task = new WatchdogTask(this);
-      _task = task;
+    if (! _taskRef.compareAndSet(null, task)) {
+      throw new IllegalStateException(L.l("Can't start new task because of old task '{0}'", task));
     }
 
     task.start();
@@ -319,7 +321,7 @@ class Watchdog
 
   public boolean isActive()
   {
-    return _task != null;
+    return _taskRef.get() != null;
   }
 
   /**
@@ -327,7 +329,7 @@ class Watchdog
    */
   public void stop()
   {
-    WatchdogTask task = _task;
+    WatchdogTask task = _taskRef.getAndSet(null);
     
     if (task != null)
       task.stop();
@@ -338,8 +340,7 @@ class Watchdog
    */
   public void kill()
   {
-    WatchdogTask task = _task;
-    _task = null;
+    WatchdogTask task = _taskRef.getAndSet(null);
     
     if (task != null)
       task.kill();
@@ -349,11 +350,7 @@ class Watchdog
   {
     kill();
 
-    WatchdogAdmin admin = _admin;
-    _admin = null;
-
-    if (admin != null)
-      admin.unregister();
+    _admin.unregister();
   }
 
   void notifyTaskStarted()
@@ -367,10 +364,7 @@ class Watchdog
 
   void completeTask(WatchdogTask task)
   {
-    synchronized (this) {
-      if (_task == task)
-	_task = null;
-    }
+    _taskRef.compareAndSet(task, null);
   }
   
   @Override
@@ -434,7 +428,7 @@ class Watchdog
 
     public String getState()
     {
-      WatchdogTask task = _task;
+      WatchdogTask task = _taskRef.get();
     
       if (task == null)
 	return "inactive";

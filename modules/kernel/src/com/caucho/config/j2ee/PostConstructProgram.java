@@ -195,7 +195,7 @@ public class PostConstructProgram extends ConfigProgram
 
     public Object eval(ConfigContext env)
     {
-      return _inject.getInstanceToInject(_injectionPoint, env);
+      return _inject.getInjectableReference(_injectionPoint, env);
     }
   }
 }

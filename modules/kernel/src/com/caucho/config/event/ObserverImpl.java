@@ -131,7 +131,7 @@ public class ObserverImpl implements Observer {
 	if (hasObserves(annList[i]))
 	  continue;
 
-	Set beans = _webBeans.resolveByType(param[i], annList[i]);
+	Set beans = _webBeans.getBeans(param[i], annList[i]);
 	
 	if (beans == null || beans.size() == 0) {
 	  throw new ConfigException(loc
@@ -173,7 +173,7 @@ public class ObserverImpl implements Observer {
 	obj = context.get(_bean);
     }
     else
-      obj = _webBeans.getInstance(_bean);
+      obj = _webBeans.getReference(_bean);
 
     try {
       if (obj != null) {
@@ -183,7 +183,7 @@ public class ObserverImpl implements Observer {
 	  Bean bean = _args[i];
 	  
 	  if (bean != null)
-	    args[i] = _webBeans.getInstance(bean);
+	    args[i] = _webBeans.getReference(bean);
 	  else
 	    args[i] = event;
 	}

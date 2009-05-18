@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.annotation.NonBinding;
+import javax.inject.Any;
 import javax.inject.BindingType;
 import javax.inject.manager.Bean;
 
@@ -246,6 +247,9 @@ public class WebComponent<T> {
 
     private boolean isMatch(Annotation arg)
     {
+      if (arg.annotationType() == Any.class)
+	return true;
+      
       for (Binding binding : _bindings) {
 	if (binding.isMatch(arg))
 	  return true;

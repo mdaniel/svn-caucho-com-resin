@@ -33,6 +33,7 @@ import com.caucho.config.annotation.ServiceType;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.scope.ScopeContext;
@@ -43,6 +44,7 @@ import com.caucho.config.*;
 import com.caucho.config.bytecode.*;
 import com.caucho.config.cfg.*;
 import com.caucho.config.event.ObserverImpl;
+import com.caucho.config.inject.BeanTypeImpl;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -64,8 +66,12 @@ import javax.inject.Disposes;
 import javax.inject.Produces;
 import javax.inject.Production;
 import javax.inject.manager.Bean;
+import javax.inject.manager.BeanManager;
+import javax.inject.manager.AnnotatedConstructor;
+import javax.inject.manager.AnnotatedMethod;
+import javax.inject.manager.AnnotatedParameter;
+import javax.inject.manager.AnnotatedType;
 import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.Manager;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -87,7 +93,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   public static final Annotation []CURRENT_ANN
     = new Annotation[] { new CurrentLiteral() };
 
-  protected InjectManager _webBeans;
+  protected InjectManager _beanManager;
   
   private Type _targetType;
   private BaseType _baseType;
@@ -97,8 +103,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   private LinkedHashSet<BaseType> _types
     = new LinkedHashSet<BaseType>();
 
-  private LinkedHashSet<Class<?>> _typeClasses
-    = new LinkedHashSet<Class<?>>();
+  private LinkedHashSet<Type> _typeClasses
+    = new LinkedHashSet<Type>();
 
   private String _name;
   
@@ -132,14 +138,12 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   
   public AbstractBean(InjectManager manager)
   {
-    super(manager);
-
-    _webBeans = manager;
+    _beanManager = manager;
   }
 
   public InjectManager getWebBeans()
   {
-    return _webBeans;
+    return _beanManager;
   }
 
   /**
@@ -166,6 +170,11 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   public Class<? extends Annotation> getDeploymentType()
   {
     return _deploymentType;
+  }
+
+  public BeanManager getManager()
+  {
+    return _beanManager;
   }
 
   public void setTargetType(Type type)
@@ -195,6 +204,11 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return _baseType.getRawClass();
   }
 
+  protected AnnotatedType getAnnotatedType()
+  {
+    return new BeanTypeImpl(getTargetType(), getIntrospectionClass());
+  }
+  
   protected Class getIntrospectionClass()
   {
     return getTargetClass();
@@ -219,7 +233,6 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Gets the bean's EL binding name.
    */
-  @Override
   public String getName()
   {
     return _name;
@@ -240,7 +253,6 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Returns the bean's binding types
    */
-  @Override
   public Set<Annotation> getBindings()
   {
     Set<Annotation> set = new LinkedHashSet<Annotation>();
@@ -378,7 +390,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Returns the types that the bean implements
    */
-  public Set<Class<?>> getTypes()
+  public Set<Type> getTypes()
   {
     return _typeClasses;
   }
@@ -404,7 +416,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
     if (_producesList != null) {
       for (ProducesBean producesBean : _producesList) {
-	_webBeans.addBean(producesBean);
+	_beanManager.addBean(producesBean);
       }
     }
 
@@ -493,18 +505,17 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     
     _types.add(baseType);
 
+    /*
     if (! _typeClasses.contains(baseType.getRawClass()))
       _typeClasses.add(baseType.getRawClass());
+    */
+    if (! _typeClasses.contains(baseType.toType()))
+      _typeClasses.add(baseType.toType());
 
     return baseType.getRawClass();
   }
 
-  protected void introspectClass(Class cl)
-  {
-    introspectAnnotations(cl.getAnnotations());
-  }
-
-  protected void introspectAnnotations(Annotation []annotations)
+  protected void introspectAnnotations(Set<Annotation> annotations)
   {
     introspectDeploymentType(annotations);
     introspectScope(annotations);
@@ -520,15 +531,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Called for implicit introspection.
    */
-  protected void introspectDeploymentType(Class cl)
-  {
-    introspectDeploymentType(cl.getAnnotations());
-  }
-
-  /**
-   * Called for implicit introspection.
-   */
-  protected void introspectDeploymentType(Annotation []annotations)
+  protected void introspectDeploymentType(Set<Annotation> annotations)
   {
     Class deploymentType = null;
 
@@ -536,7 +539,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       for (Annotation ann : annotations) {
 	if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
 	  if (deploymentType != null)
-	    throw new ConfigException(L.l("{0}: @DeploymentType annotation @{1} is invalid because it conflicts with @{2}.  WebBeans components may only have a single @DeploymentType.",
+	    throw new ConfigException(L.l("{0}: @DeploymentType annotation @{1} is invalid because it conflicts with @{2}.  Java Injection components may only have a single @DeploymentType.",
 					  getTargetName(),
 					  deploymentType.getName(),
 					  ann.annotationType().getName()));
@@ -546,20 +549,15 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	}
       }
     }
+
+    if (getDeploymentType() == null)
+      setDeploymentType(Production.class);
   }
 
   /**
    * Called for implicit introspection.
    */
-  protected void introspectScope(Class cl)
-  {
-    introspectScope(cl.getAnnotations());
-  }
-
-  /**
-   * Called for implicit introspection.
-   */
-  protected void introspectScope(Annotation []annotations)
+  protected void introspectScope(Set<Annotation> annotations)
   {
     Class scopeClass = null;
 
@@ -567,7 +565,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       for (Annotation ann : annotations) {
 	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
 	  if (scopeClass != null)
-	    throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
+	    throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  Java Injection components may only have a single @ScopeType.",
 					  getTargetName(),
 					  scopeClass.getName(),
 					  ann.annotationType().getName()));
@@ -577,36 +575,66 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	}
       }
     }
+
+    if (getScopeType() == null)
+      setScopeType(Dependent.class);
   }
 
   /**
    * Introspects the binding annotations
    */
-  protected void introspectBindings(Annotation []annotations)
+  protected void introspectBindings(Set<Annotation> annotations)
   {
     if (_bindings.size() == 0) {
       for (Annotation ann : annotations) {
 	if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	  addBinding(ann);
-
-	if (ann instanceof Named && getName() == null)
-	  setName(((Named) ann).value());
       }
     }
+
+    if (_bindings.size() == 0)
+      addBinding(CurrentLiteral.CURRENT);
   }
 
   /**
-   * Called for implicit introspection.
+   * Introspects the binding annotations
    */
-  protected void introspectStereotypes(Class cl)
+  protected void introspectName(AnnotatedType beanType)
   {
-    introspectStereotypes(cl.getAnnotations());
+    if (getName() == null) {
+      Annotation ann = beanType.getAnnotation(Named.class);
+      
+      if (ann != null) {
+	String value = null;
+	
+	try {
+	  // ioc/0m04
+	  Method m = ann.getClass().getMethod("value", new Class[0]);
+	  value = (String) m.invoke(ann);
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+
+	if (value == null)
+	  value = "";
+	  
+	setName(value);
+      }
+    }
+
+    if ("".equals(getName())) {
+      String name = beanType.getJavaClass().getSimpleName();
+
+      name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+	
+      setName(name);
+    }
   }
 
   /**
    * Adds the stereotypes from the bean's annotations
    */
-  protected void introspectStereotypes(Annotation []annotations)
+  protected void introspectStereotypes(Set<Annotation> annotations)
   {
     if (_stereotypes.size() == 0) {
       for (Annotation ann : annotations) {
@@ -650,8 +678,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	  // XXX: potential issue where getDeploymentPriority isn't set yet
 	  
 	  if (_deploymentType == null
-	      || (_webBeans.getDeploymentPriority(_deploymentType)
-		  < _webBeans.getDeploymentPriority(annType))) {
+	      || (_beanManager.getDeploymentPriority(_deploymentType)
+		  < _beanManager.getDeploymentPriority(annType))) {
 	    _deploymentType = annType;
 	  }
 	}
@@ -728,33 +756,20 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Introspects the methods for any @Produces
    */
-  protected void introspectProduces(Class cl)
+  protected void introspectProduces(AnnotatedType<?> beanType)
   {
-    if (cl == null)
-      return;
-
-    introspectProduces(cl.getDeclaredMethods());
-  }
-
-  /**
-   * Introspects the methods for any @Produces
-   */
-  protected void introspectProduces(Method []methods)
-  {
-    for (Method method : methods) {
-      if (Modifier.isStatic(method.getModifiers()))
-	continue;
-
-      if (! method.isAnnotationPresent(Produces.class))
-	continue;
-
-      addProduces(method, method.getAnnotations());
+    for (AnnotatedMethod beanMethod : beanType.getMethods()) {
+      if (beanMethod.isAnnotationPresent(Produces.class))
+	addProduces(beanMethod);
     }
   }
 
-  protected void addProduces(Method method, Annotation []annList)
+  protected void addProduces(AnnotatedMethod beanMethod)
   {
-    ProducesBean bean = ProducesBean.create(_webBeans, this, method, annList);
+    Arg []args = new Arg[0];
+    
+    ProducesBean bean = ProducesBean.create(_beanManager, this, beanMethod,
+					    args);
 
     bean.init();
 
@@ -772,24 +787,20 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Introspects any observers.
    */
-  protected void introspectObservers(Class cl)
+  protected void introspectObservers(AnnotatedType beanType)
   {
-    introspectObservers(cl.getDeclaredMethods());
-  }
-
-  /**
-   * Introspects any observers.
-   */
-  protected void introspectObservers(Method []methods)
-  {
-    Arrays.sort(methods, new MethodNameComparator());
+    ArrayList<AnnotatedMethod> methods
+      = new ArrayList<AnnotatedMethod>(beanType.getMethods());
+				  
+    Collections.sort(methods, new MethodNameComparator());
     
-    for (Method method : methods) {
-      int param = findObserverAnnotation(method);
+    for (AnnotatedMethod beanMethod : methods) {
+      int param = findObserverAnnotation(beanMethod);
 
       if (param < 0)
 	continue;
 
+      Method method = beanMethod.getJavaMember();
       Type eventType = method.getGenericParameterTypes()[param];
 
       ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
@@ -820,9 +831,10 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       Annotation []bindings = new Annotation[bindingList.size()];
       bindingList.toArray(bindings);
 
-      ObserverImpl observer = new ObserverImpl(_webBeans, this, method, param);
+      ObserverImpl observer
+	= new ObserverImpl(_beanManager, this, method, param);
 
-      _webBeans.addObserver(observer, (Class) eventType, bindings);
+      _beanManager.addObserver(observer, (Class) eventType, bindings);
     }
   }
 
@@ -878,15 +890,13 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return types;
   }
   
-  protected boolean hasBindingAnnotation(Constructor ctor)
+  protected boolean hasBindingAnnotation(AnnotatedConstructor<?> ctor)
   {
     if (ctor.isAnnotationPresent(Initializer.class))
       return true;
 
-    Annotation [][]paramAnn = ctor.getParameterAnnotations();
-
-    for (Annotation []annotations : paramAnn) {
-      for (Annotation ann : annotations) {
+    for (AnnotatedParameter param : ctor.getParameters()) {
+      for (Annotation ann : param.getAnnotations()) {
 	if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	  return true;
       }
@@ -895,16 +905,19 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return false;
   }
 
-  private int findObserverAnnotation(Method method)
+  private <X> int findObserverAnnotation(AnnotatedMethod<X> method)
   {
-    Annotation [][]paramAnn = method.getParameterAnnotations();
+    List<AnnotatedParameter<X>> params = method.getParameters();
+    int size = params.size();
     int observer = -1;
 
-    for (int i = 0; i < paramAnn.length; i++) {
-      for (Annotation ann : paramAnn[i]) {
+    for (int i = 0; i < size; i++) {
+      AnnotatedParameter param = params.get(i);
+      
+      for (Annotation ann : param.getAnnotations()) {
 	if (ann instanceof Observes) {
 	  if (observer >= 0)
-	    throw InjectManager.error(method, L.l("Only one param may have an @Observer"));
+	    throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
 	  
 	  observer = i;
 	}
@@ -978,9 +991,9 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   protected Bean bindParameter(String loc,
 			       Type type,
-			       Annotation []bindings)
+			       Set<Annotation> bindings)
   {
-    Set set = _webBeans.resolve(type, bindings);
+    Set set = _beanManager.resolve(type, bindings);
 
     if (set == null || set.size() == 0)
       return null;
@@ -1002,17 +1015,17 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   protected void validateClass(Class cl)
   {
-    ClassLoader webBeansLoader = _webBeans.getClassLoader();
+    ClassLoader beanManagerLoader = _beanManager.getClassLoader();
     
-    if (webBeansLoader == null)
-      webBeansLoader = ClassLoader.getSystemClassLoader();
+    if (beanManagerLoader == null)
+      beanManagerLoader = ClassLoader.getSystemClassLoader();
 
     ClassLoader beanLoader = cl.getClassLoader();
 
     if (beanLoader == null)
       beanLoader = ClassLoader.getSystemClassLoader();
 
-    for (ClassLoader loader = webBeansLoader;
+    for (ClassLoader loader = beanManagerLoader;
 	 loader != null;
 	 loader = loader.getParent()) {
       if (beanLoader == loader)
@@ -1023,13 +1036,53 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       // server/2pad
       throw new IllegalStateException(L.l("'{0}' is an invalid class because its classloader '{1}' does not belong to the webbeans classloader '{2}'",
 					  cl, beanLoader,
-					  webBeansLoader));
+					  beanManagerLoader));
     }
     else {
       log.fine(L.l("'{0}' may be incorrect classloader '{1}' does not belong to the injection classloader '{2}'",
 		   cl, beanLoader,
-		   webBeansLoader));
+		   beanManagerLoader));
     }
+  }
+  
+  /**
+   * Instantiate the bean.
+   */
+  public T instantiate()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Inject the bean.
+   */
+  public void inject(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call post-construct
+   */
+  public void postConstruct(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void preDestroy(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Call destroy
+   */
+  public void destroy(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -1116,10 +1169,10 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return sb.toString();
   }
 
-  static class MethodNameComparator implements Comparator<Method> {
-    public int compare(Method a, Method b)
+  static class MethodNameComparator implements Comparator<AnnotatedMethod> {
+    public int compare(AnnotatedMethod a, AnnotatedMethod b)
     {
-      return a.getName().compareTo(b.getName());
+      return a.getJavaMember().getName().compareTo(b.getJavaMember().getName());
     }
   }
 

@@ -37,7 +37,12 @@ import java.net.*;
 import java.util.logging.*;
 
 /**
- * Thread responsible for watching a backend server.
+ * Thread responsible for the Resin restart capability, managing and
+ * restarting the WatchdogProcess.
+ *
+ * Each WatchdogProcess corresponds to a single Resin instantiation.  When
+ * Resin exits, the WatchdogProcess completes, and WatchdogTask will
+ * create a new one.
  */
 class WatchdogTask implements Runnable
 {
@@ -56,6 +61,9 @@ class WatchdogTask implements Runnable
     _watchdog = watchdog;
   }
 
+  /**
+   * True if the Resin server is currently active.
+   */
   boolean isActive()
   {
     return _lifecycle.isActive();
@@ -69,6 +77,10 @@ class WatchdogTask implements Runnable
     return _lifecycle.getStateName();
   }
 
+  /**
+   * Returns the pid of the current Resin process, when the pid is
+   * available through JNI.
+   */
   int getPid()
   {
     WatchdogProcess process = _process;
@@ -78,6 +90,9 @@ class WatchdogTask implements Runnable
       return 0;
   }
 
+  /**
+   * Starts management of the watchdog process
+   */
   public void start()
   {
     if (! _lifecycle.toActive())
@@ -89,16 +104,25 @@ class WatchdogTask implements Runnable
     thread.start();
   }
 
+  /**
+   * Stops the watchdog process.  Once stopped, the WatchdogTask will
+   * not be reused.
+   */
   public void stop()
   {
     if (! _lifecycle.toDestroy())
       return;
 
     WatchdogProcess process = _process;
+    _process = null;
+    
     if (process != null)
       process.stop();
   }
 
+  /**
+   * Main thread watching over the health of the Resin instances.
+   */
   public void run()
   {
     try {
@@ -135,6 +159,8 @@ class WatchdogTask implements Runnable
    */
   void kill()
   {
+    _lifecycle.toDestroy();
+    
     WatchdogProcess process = _process;
     _process = null;
     
