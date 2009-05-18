@@ -128,7 +128,9 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public boolean setInitParameter(String name, String value)
   {
-    // XXX: requires a test
+    if (! isInit())
+      throw new IllegalStateException();
+    
     if (_initParams.containsKey(name))
       return false;
 
@@ -142,7 +144,7 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public String getInitParameter(String name)
   {
-    return (String) _initParams.get(name);
+    return _initParams.get(name);
   }
 
   /**
@@ -487,6 +489,10 @@ public class ServletContextImpl extends ServletContextCompat
 
   public Map<String, FilterRegistration> getFilterRegistrations()
   {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+  
+  public boolean isInit() {
     throw new UnsupportedOperationException("unimplemented");
   }
 }

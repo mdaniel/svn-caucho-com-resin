@@ -856,15 +856,13 @@ public class InjectManager
    */
   public <T> BeanInstance<T> createTransientInstance(Class<T> type)
   {
-    /*
+
     Contextual<T> factory = createTransient(type);
 
     // server/10gn
     T value = factory.create(new ConfigContext());
 
     return new BeanInstance(factory, value);
-    */
-    return null;
   }
 
   /**
