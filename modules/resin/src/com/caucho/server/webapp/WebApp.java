@@ -895,6 +895,9 @@ public class WebApp extends ServletContextImpl
     for (WebInitParam initParam : webFilter.initParams())
       config.setInitParam(initParam.name(), initParam.value());
 
+    for (DispatcherType dispatcher : webFilter.dispatcherTypes())
+      config.addDispatcher(dispatcher);
+
     addFilter(config);
     addFilterMapping(config);
   }

@@ -36,6 +36,7 @@ import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
+import javax.servlet.DispatcherType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.regex.Pattern;
@@ -52,7 +53,7 @@ public class FilterMapping extends FilterConfigImpl {
   // The match expressions
   private final ArrayList<Match> _matchList = new ArrayList<Match>();
 
-  private HashSet<String> _dispatcher;
+  private HashSet<DispatcherType> _dispatcher;
   
   /**
    * Creates a new filter mapping object.
@@ -111,19 +112,20 @@ public class FilterMapping extends FilterConfigImpl {
   public void addDispatcher(String dispatcher)
     throws ConfigException
   {
-    if (_dispatcher == null)
-      _dispatcher = new HashSet<String>();
-
-    if (dispatcher == null
-        || (! dispatcher.equals("REQUEST")
-            && ! dispatcher.equals("FORWARD")
-            && ! dispatcher.equals("INCLUDE")
-            && ! dispatcher.equals("ERROR"))) {
+    try {
+      addDispatcher(DispatcherType.valueOf(dispatcher));
+    }
+    catch (IllegalArgumentException e) {
       throw new ConfigException(L.l("'{0}' is an unknown value for <dispatcher>  'REQUEST', 'FORWARD', 'INCLUDE', and 'ERROR' are the valid values.",
                                     dispatcher));
     }
+  }
 
-    _dispatcher.add(dispatcher);
+  public void addDispatcher(DispatcherType dispather) {
+    if (_dispatcher == null)
+      _dispatcher = new HashSet<DispatcherType>();
+
+    _dispatcher.add(dispather);
   }
 
   /**
@@ -131,7 +133,7 @@ public class FilterMapping extends FilterConfigImpl {
    */
   public boolean isRequest()
   {
-    return _dispatcher == null || _dispatcher.contains("REQUEST");
+    return _dispatcher == null || _dispatcher.contains(DispatcherType.REQUEST);
   }
 
   /**
@@ -139,7 +141,7 @@ public class FilterMapping extends FilterConfigImpl {
    */
   public boolean isInclude()
   {
-    return _dispatcher != null && _dispatcher.contains("INCLUDE");
+    return _dispatcher != null && _dispatcher.contains(DispatcherType.INCLUDE);
   }
 
   /**
@@ -147,7 +149,7 @@ public class FilterMapping extends FilterConfigImpl {
    */
   public boolean isForward()
   {
-    return _dispatcher != null && _dispatcher.contains("FORWARD");
+    return _dispatcher != null && _dispatcher.contains(DispatcherType.FORWARD);
   }
 
   /**
@@ -155,13 +157,12 @@ public class FilterMapping extends FilterConfigImpl {
    */
   public boolean isError()
   {
-    return _dispatcher != null && _dispatcher.contains("ERROR");
+    return _dispatcher != null && _dispatcher.contains(DispatcherType.ERROR);
   }
 
   /**
    * Returns true if the filter map matches the invocation URL.
    *
-   * @param invocation the request's invocation
    * @param servletName the servlet name to match
    */
   boolean isMatch(String servletName)
