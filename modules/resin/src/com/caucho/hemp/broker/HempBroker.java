@@ -58,8 +58,8 @@ import java.security.Principal;
 import java.lang.ref.*;
 import java.io.Serializable;
 import javax.event.Observes;
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 
 /**
  * Broker

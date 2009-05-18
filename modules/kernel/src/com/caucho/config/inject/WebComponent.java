@@ -43,10 +43,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.annotation.NonBinding;
-import javax.inject.Any;
-import javax.inject.BindingType;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Configuration for the xml web bean component.

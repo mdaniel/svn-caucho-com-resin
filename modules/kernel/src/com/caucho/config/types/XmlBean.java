@@ -34,15 +34,15 @@ import com.caucho.config.inject.ManagedBeanWrapper;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
-import javax.inject.manager.*;
-import javax.inject.manager.InjectionTarget;
+import javax.enterprise.inject.spi.*;
+import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.context.Contextual;
-import javax.context.CreationalContext;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 /**
  * Internal implementation for a Bean
  */

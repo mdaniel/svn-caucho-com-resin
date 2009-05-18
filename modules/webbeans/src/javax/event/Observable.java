@@ -32,7 +32,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.inject.BindingType;
+import javax.enterprise.inject.BindingType;
 
 /**
  * An event @BindingType

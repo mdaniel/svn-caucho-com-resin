@@ -42,7 +42,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.inject.manager.Interceptor;
+import javax.enterprise.inject.spi.Interceptor;
 
 /**
  * Represents an introspected interceptor

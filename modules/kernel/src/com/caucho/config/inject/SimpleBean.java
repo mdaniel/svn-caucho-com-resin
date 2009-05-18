@@ -47,16 +47,16 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.context.CreationalContext;
 import javax.interceptor.InterceptorBindingType;
-import javax.inject.CreationException;
-import javax.inject.Produces;
-import javax.inject.Initializer;
-import javax.inject.manager.Bean;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedParameter;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.CreationException;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Initializer;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.

@@ -35,7 +35,7 @@ import com.caucho.server.security.*;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
-import javax.inject.UnsatisfiedDependencyException;
+import javax.enterprise.inject.UnsatisfiedDependencyException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.*;

@@ -49,7 +49,7 @@ import javax.mail.internet.AddressException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 /**
  * mail service

@@ -33,7 +33,7 @@ import com.caucho.config.inject.BeanConfigFactory;
 import com.caucho.config.inject.CauchoBean;
 import javax.ejb.Stateless;
 import javax.ejb.Stateful;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Custom bean creation

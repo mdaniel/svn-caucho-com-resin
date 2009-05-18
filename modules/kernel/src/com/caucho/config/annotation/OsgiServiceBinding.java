@@ -33,7 +33,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.inject.BindingType;
+import javax.enterprise.inject.BindingType;
 
 /**
  * The @OsgiServiceBinding fires a startup event to register the

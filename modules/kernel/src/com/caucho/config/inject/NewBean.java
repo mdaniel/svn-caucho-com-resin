@@ -46,13 +46,13 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.context.CreationalContext;
-import javax.context.Dependent;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.interceptor.InterceptorBindingType;
-import javax.inject.Produces;
-import javax.inject.manager.Bean;
-import javax.inject.manager.InjectionPoint;
-import javax.inject.Initializer;
+import javax.enterprise.inject.Initializer;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * NewBean represents the SimpleBean created through the @New interface.

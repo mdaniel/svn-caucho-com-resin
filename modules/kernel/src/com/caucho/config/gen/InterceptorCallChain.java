@@ -35,10 +35,10 @@ import com.caucho.config.inject.InterceptorBean;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import javax.annotation.NonBinding;
-import javax.inject.manager.Decorator;
-import javax.inject.manager.InterceptionType;
-import javax.inject.manager.Interceptor;
+import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.InterceptionType;
+import javax.enterprise.inject.spi.Interceptor;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.InterceptorBindingType;
@@ -644,7 +644,7 @@ public class InterceptorCallChain
                                     Annotation ann)
     throws IOException
   {
-    out.print("new javax.inject.AnnotationLiteral<");
+    out.print("new javax.enterprise.inject.AnnotationLiteral<");
     out.printClass(ann.annotationType());
     out.print(">() {");
 
@@ -757,7 +757,7 @@ public class InterceptorCallChain
       out.println();
 
       out.println(
-        "private static java.util.List<javax.inject.manager.Decorator> " +
+        "private static java.util.List<javax.enterprise.inject.spi.Decorator> " +
         _decoratorBeanVar +
         ";");
 

@@ -32,11 +32,11 @@ package com.caucho.config.event;
 import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
-import javax.context.Context;
 import javax.event.Observer;
 import javax.event.Observes;
 import javax.event.IfExists;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;

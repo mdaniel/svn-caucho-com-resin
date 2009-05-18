@@ -37,13 +37,13 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
-import javax.context.CreationalContext;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InterceptorBindingType;
-import javax.inject.manager.Interceptor;
-import javax.inject.manager.InterceptionType;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.inject.spi.Interceptor;
+import javax.enterprise.inject.spi.InterceptionType;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * InterceptorBean represents a Java interceptor

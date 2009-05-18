@@ -33,8 +33,8 @@ import java.lang.annotation.Annotation;
 
 import javax.event.Event;
 import javax.event.Observer;
-import javax.inject.manager.BeanManager;
-import javax.inject.TypeLiteral;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.TypeLiteral;
 
 public class EventImpl<T> implements Event<T>
 {

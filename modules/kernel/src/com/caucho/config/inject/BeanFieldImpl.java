@@ -36,8 +36,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.inject.manager.AnnotatedField;
-import javax.inject.manager.AnnotatedType;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
  * Abstract introspected view of a Bean

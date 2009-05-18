@@ -30,7 +30,7 @@
 package com.caucho.config.scope;
 
 import java.util.*;
-import javax.context.Contextual;
+import javax.enterprise.context.spi.Contextual;
 
 /**
  * The singleton scope value

@@ -39,12 +39,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.*;
-import javax.inject.manager.Annotated;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedField;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedMethod;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
 /**
  * Abstract introspected view of a Bean

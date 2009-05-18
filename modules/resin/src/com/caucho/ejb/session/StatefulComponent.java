@@ -34,9 +34,9 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 
 import java.lang.annotation.*;
-import javax.context.CreationalContext;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * Component for session beans

@@ -51,14 +51,14 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import javax.ejb.*;
-import javax.context.ApplicationScoped;
-import javax.context.Conversation;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.Conversation;
 import javax.event.Observes;
 import javax.management.*;
 import javax.transaction.*;
-import javax.inject.*;
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
+import javax.enterprise.inject.*;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 
 //import org.osgi.framework.BundleContext;
 

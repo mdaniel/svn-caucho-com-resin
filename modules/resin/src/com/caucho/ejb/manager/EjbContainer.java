@@ -33,7 +33,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.*;
 import javax.jms.*;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;

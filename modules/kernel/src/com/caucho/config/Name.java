@@ -33,7 +33,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.inject.BindingType;
+import javax.enterprise.inject.BindingType;
 
 /**
  * The @Name binding is a general binding type used for Resin-configured

@@ -29,8 +29,8 @@
 
 package com.caucho.config.inject;
 
-import javax.inject.AnnotationLiteral;
-import javax.inject.New;
+import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.New;
 
 /**
  * Represents the @New annotation

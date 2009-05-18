@@ -35,7 +35,7 @@ import com.caucho.config.inject.CauchoBean;
 import com.caucho.hemp.broker.HempBroker;
 
 import java.lang.annotation.Annotation;
-import javax.inject.manager.BeanManager;
+import javax.enterprise.inject.spi.BeanManager;
 
 /**
  * Broker

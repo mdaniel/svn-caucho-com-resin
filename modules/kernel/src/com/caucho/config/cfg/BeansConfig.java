@@ -50,12 +50,12 @@ import java.util.zip.*;
 
 import javax.annotation.PostConstruct;
 import javax.decorator.Decorator;
-import javax.inject.DeploymentType;
-import javax.inject.Standard;
-import javax.inject.manager.Bean;
-import javax.inject.manager.ManagedBean;
-import javax.inject.manager.ProducerBean;
-import javax.inject.manager.Interceptor;
+import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.Standard;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ManagedBean;
+import javax.enterprise.inject.spi.ProducerBean;
+import javax.enterprise.inject.spi.Interceptor;
 
 /**
  * Configuration for a classloader root containing webbeans

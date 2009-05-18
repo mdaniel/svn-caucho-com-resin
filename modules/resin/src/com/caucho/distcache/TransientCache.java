@@ -30,12 +30,10 @@
 package com.caucho.distcache;
 
 import com.caucho.config.Configurable;
-import javax.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Cache with no persistence.
- * //TODO(fred): finalize definition of allowable and supported cache modes (Scope and Persistence)
- * //TODO(fred): finalize definition of the set of classes that extend AbstractCache
  */
 @ApplicationScoped
 @Configurable

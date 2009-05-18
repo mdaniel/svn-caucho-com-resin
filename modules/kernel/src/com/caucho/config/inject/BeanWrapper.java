@@ -29,13 +29,13 @@
 
 package com.caucho.config.inject;
 
-import javax.inject.manager.*;
+import javax.enterprise.inject.spi.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.context.Contextual;
-import javax.context.CreationalContext;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Internal implementation for a Bean
@@ -55,7 +55,7 @@ public class BeanWrapper<T> implements Bean<T>
   }
 
   //
-  // from javax.inject.InjectionTarget
+  // from javax.enterprise.inject.InjectionTarget
   //
   
   public T create(CreationalContext<T> cxt)

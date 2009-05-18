@@ -29,8 +29,8 @@
 
 package com.caucho.config.inject;
 
-import javax.context.CreationalContext;
-import javax.inject.manager.*;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

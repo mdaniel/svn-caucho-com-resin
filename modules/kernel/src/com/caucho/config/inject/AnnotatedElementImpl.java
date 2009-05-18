@@ -34,10 +34,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import javax.inject.manager.Annotated;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedMethod;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
 /**
  * Abstract introspected view of a Bean

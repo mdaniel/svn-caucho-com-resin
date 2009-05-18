@@ -36,7 +36,7 @@ import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import javax.persistence.*;
-import javax.inject.AnnotationLiteral;
+import javax.enterprise.inject.AnnotationLiteral;
 
 import java.util.logging.Logger;
 

@@ -37,9 +37,9 @@ import com.caucho.config.scope.ApplicationScope;
 import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;
-import javax.context.CreationalContext;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.

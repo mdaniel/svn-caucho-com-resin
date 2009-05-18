@@ -38,7 +38,7 @@ import com.caucho.util.RandomUtil;
 import com.caucho.util.StringCharCursor;
 import com.caucho.xml.XmlChar;
 
-import javax.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

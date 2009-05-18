@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Administration for an injection Bean queue

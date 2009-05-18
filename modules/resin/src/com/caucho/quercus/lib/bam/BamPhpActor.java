@@ -60,7 +60,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 import javax.sql.DataSource;
 
 /**

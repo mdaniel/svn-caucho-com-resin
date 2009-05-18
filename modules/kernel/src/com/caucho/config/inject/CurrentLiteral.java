@@ -31,8 +31,8 @@ package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 
-import javax.inject.Current;
-import javax.inject.AnnotationLiteral;
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.AnnotationLiteral;
 
 /**
  * Represents the @Current annotation

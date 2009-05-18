@@ -31,10 +31,10 @@ package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
 
-import javax.context.Context;
-import javax.context.Contextual;
-import javax.context.CreationalContext;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.inject.InjectManager;
 

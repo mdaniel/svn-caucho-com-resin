@@ -37,11 +37,11 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
-import javax.annotation.NonBinding;
-import javax.annotation.Stereotype;
 import javax.decorator.Decorator;
-import javax.inject.BindingType;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.spi.Bean;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBindingType;
 

@@ -33,8 +33,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 
 /**
  * Configuration for the xml web bean component.

@@ -46,13 +46,13 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.*;
-import javax.context.ScopeType;
-import javax.context.ApplicationScoped;
-import javax.context.ConversationScoped;
-import javax.context.Dependent;
-import javax.context.RequestScoped;
-import javax.context.SessionScoped;
-import javax.inject.DeploymentType;
+import javax.enterprise.context.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.DeploymentType;
 import javax.naming.*;
 
 /**

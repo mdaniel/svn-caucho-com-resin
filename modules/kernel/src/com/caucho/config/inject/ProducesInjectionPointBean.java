@@ -43,10 +43,10 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import javax.annotation.*;
-import javax.context.CreationalContext;
-import javax.inject.manager.Bean;
-import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.BeanManager;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.BeanManager;
 
 /**
  * Configuration for a @Produces method

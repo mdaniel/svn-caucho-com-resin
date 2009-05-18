@@ -38,9 +38,10 @@ import com.caucho.server.dispatch.ServletInvocation;
 import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.context.*;
-import javax.inject.manager.Bean;
-import javax.inject.manager.InjectionTarget;
+import javax.enterprise.context.*;
+import javax.enterprise.context.spi.*;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 /**
  * The session scope value

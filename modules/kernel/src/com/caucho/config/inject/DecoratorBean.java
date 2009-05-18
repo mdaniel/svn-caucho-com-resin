@@ -37,13 +37,13 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
-import javax.context.CreationalContext;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.decorator.Decorates;
-import javax.inject.AnnotationLiteral;
-import javax.inject.BindingType;
-import javax.inject.Current;
-import javax.inject.manager.Decorator;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * DecoratorBean represents a Java decorator

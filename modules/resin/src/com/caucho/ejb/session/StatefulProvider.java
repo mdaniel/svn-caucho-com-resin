@@ -29,8 +29,8 @@
 
 package com.caucho.ejb.session;
 
-import javax.inject.manager.Bean;
-import javax.context.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Creates a new instance of a stateful bean

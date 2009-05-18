@@ -42,8 +42,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.inject.manager.Bean;
-import javax.annotation.NonBinding;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Introspected annotation binding

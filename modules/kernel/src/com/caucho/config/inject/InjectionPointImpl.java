@@ -34,8 +34,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.Member;
 import java.util.Set;
 import java.util.HashSet;
-import javax.inject.*;
-import javax.inject.manager.*;
+import javax.enterprise.inject.*;
+import javax.enterprise.inject.spi.*;
 
 /**
  */

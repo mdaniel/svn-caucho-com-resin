@@ -43,7 +43,7 @@ import javax.persistence.*;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 import javax.rmi.*;
 import java.util.*;
 import java.util.logging.Level;

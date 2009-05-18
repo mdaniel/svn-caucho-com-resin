@@ -35,8 +35,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
-import javax.inject.manager.ManagedBean;
-import javax.inject.manager.InjectionTarget;
+import javax.enterprise.inject.spi.ManagedBean;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;

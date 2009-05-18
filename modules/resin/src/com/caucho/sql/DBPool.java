@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.inject.BindingType;
+import javax.enterprise.inject.BindingType;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;

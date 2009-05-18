@@ -35,10 +35,10 @@ import com.caucho.loader.*;
 import java.lang.annotation.Annotation;
 import java.util.Hashtable;
 
-import javax.context.ApplicationScoped;
-import javax.context.Context;
-import javax.context.Contextual;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * The application scope value

@@ -44,14 +44,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.*;
-import javax.context.CreationalContext;
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
-import javax.inject.manager.AnnotatedMethod;
-import javax.inject.manager.AnnotatedParameter;
-import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.InjectionTarget;
-import javax.inject.manager.ProducerBean;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ProducerBean;
 
 /**
  * Configuration for a @Produces method

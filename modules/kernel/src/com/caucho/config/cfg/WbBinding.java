@@ -37,7 +37,8 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
 
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.NonBinding;
 
 /**
  * Configuration for the xml web bean component.

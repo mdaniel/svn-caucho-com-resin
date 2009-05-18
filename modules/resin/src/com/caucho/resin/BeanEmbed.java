@@ -39,7 +39,7 @@ import com.caucho.server.webapp.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
 
-import javax.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 import java.util.*;
 

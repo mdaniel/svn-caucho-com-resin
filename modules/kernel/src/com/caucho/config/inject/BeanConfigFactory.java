@@ -29,7 +29,7 @@
 
 package com.caucho.config.inject;
 
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 import com.caucho.config.inject.CauchoBean;
 
 /**

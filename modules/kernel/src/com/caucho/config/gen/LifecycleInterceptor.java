@@ -39,7 +39,7 @@ import java.util.*;
 import javax.annotation.security.*;
 import javax.ejb.*;
 import javax.interceptor.*;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Represents the interception

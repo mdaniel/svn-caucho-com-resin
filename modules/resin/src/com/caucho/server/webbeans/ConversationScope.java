@@ -44,9 +44,11 @@ import javax.faces.context.*;
 import javax.faces.component.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.context.ConversationScoped;
-import javax.context.Conversation;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.spi.Conversation;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * The conversation scope value

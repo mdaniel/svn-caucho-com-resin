@@ -38,13 +38,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.context.CreationalContext;
-import javax.inject.manager.AnnotatedCallable;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedField;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.AnnotatedMethod;
-import javax.inject.manager.AnnotatedParameter;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedCallable;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 
 /**
  * Abstract introspected view of a Bean

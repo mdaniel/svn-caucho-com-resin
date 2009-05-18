@@ -30,9 +30,9 @@
 package com.caucho.amber.manager;
 
 import javax.persistence.*;
-import javax.context.CreationalContext;
-import javax.context.ApplicationScoped;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.config.inject.*;
 

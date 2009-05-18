@@ -42,9 +42,9 @@ import java.util.HashSet;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import javax.inject.BindingType;
-import javax.inject.manager.Bean;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 public class FieldComponentProgram extends ConfigProgram
 

@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import javax.interceptor.*;
-import javax.inject.manager.Decorator;
+import javax.enterprise.inject.spi.Decorator;
 
 /**
  * Generates the skeleton for a bean.

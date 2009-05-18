@@ -29,7 +29,7 @@
 
 package javax.event;
 
-import javax.inject.ExecutionException;
+import javax.enterprise.inject.ExecutionException;
 
 /**
  * Exception during runtime for webbeans

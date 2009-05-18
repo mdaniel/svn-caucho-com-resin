@@ -41,7 +41,7 @@ import javax.faces.convert.*;
 import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
-import javax.inject.Produces;
+import javax.enterprise.inject.Produces;
 
 import com.caucho.config.*;
 import com.caucho.util.*;

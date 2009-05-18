@@ -49,15 +49,15 @@ import java.util.Map;
 
 import javax.annotation.*;
 import javax.ejb.*;
-import javax.context.ApplicationScoped;
-import javax.context.ConversationScoped;
-import javax.context.Dependent;
-import javax.context.RequestScoped;
-import javax.context.SessionScoped;
-import javax.context.ScopeType;
-import javax.inject.AnnotationLiteral;
-import javax.inject.DeploymentType;
-import javax.inject.Initializer;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.context.ScopeType;
+import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.Initializer;
 
 /**
  * Configuration for the xml web bean component.

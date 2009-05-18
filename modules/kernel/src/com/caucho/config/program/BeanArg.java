@@ -48,14 +48,14 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
-import javax.context.ScopeType;
-import javax.inject.BindingType;
-import javax.inject.DeploymentType;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedParameter;
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
-import javax.inject.manager.ManagedBean;
+import javax.enterprise.context.ScopeType;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.ManagedBean;
 import javax.interceptor.InterceptorBindingType;
 
 import org.w3c.dom.Node;

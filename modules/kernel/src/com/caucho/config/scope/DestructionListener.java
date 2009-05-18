@@ -32,7 +32,7 @@ package com.caucho.config.scope;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.*;
-import javax.context.Contextual;
+import javax.enterprise.context.spi.Contextual;
 import javax.servlet.http.*;
 
 import com.caucho.config.inject.ComponentImpl;

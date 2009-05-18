@@ -33,8 +33,8 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.Environment;
 
 import java.util.*;
-import javax.context.ApplicationScoped;
-import javax.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 
 
 /**

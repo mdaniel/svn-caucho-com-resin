@@ -32,8 +32,8 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.annotation.Stereotype;
-import javax.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Stereotype;
 
 /**
  * @Service is a startup @Stereotype for an @ApplicationScoped bean

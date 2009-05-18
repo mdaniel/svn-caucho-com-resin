@@ -56,39 +56,39 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.lang.ref.*;
 
-import javax.annotation.Stereotype;
-import javax.context.Context;
-import javax.context.Contextual;
-import javax.context.ContextNotActiveException;
-import javax.context.Conversation;
-import javax.context.ConversationScoped;
-import javax.context.CreationalContext;
-import javax.context.Dependent;
 import javax.decorator.Decorates;
 import javax.el.*;
 import javax.event.Observer;
 import javax.event.Observable;
-import javax.inject.AnnotationLiteral;
-import javax.inject.BindingType;
-import javax.inject.Instance;
-import javax.inject.New;
-import javax.inject.Production;
-import javax.inject.Produces;
-import javax.inject.Standard;
-import javax.inject.TypeLiteral;
-import javax.inject.AmbiguousDependencyException;
-import javax.inject.UnsatisfiedDependencyException;
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.Decorator;
-import javax.inject.manager.Deployed;
-import javax.inject.manager.Initialized;
-import javax.inject.manager.InjectionPoint;
-import javax.inject.manager.InjectionTarget;
-import javax.inject.manager.Interceptor;
-import javax.inject.manager.InterceptionType;
-import javax.inject.manager.ManagedBean;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.Conversation;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.New;
+import javax.enterprise.inject.Production;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Standard;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.TypeLiteral;
+import javax.enterprise.inject.AmbiguousDependencyException;
+import javax.enterprise.inject.UnsatisfiedDependencyException;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.Deployed;
+import javax.enterprise.inject.spi.Initialized;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.Interceptor;
+import javax.enterprise.inject.spi.InterceptionType;
+import javax.enterprise.inject.spi.ManagedBean;
 import javax.naming.*;
 
 /**
@@ -2409,7 +2409,7 @@ public class InjectManager
     try {
       String className = annotationName.toString();
 
-      if (className.startsWith("javax.inject"))
+      if (className.startsWith("javax.enterprise.inject"))
 	return true;
       
       Class cl = Class.forName(className, false, _tempClassLoader);
@@ -2420,7 +2420,7 @@ public class InjectManager
 	for (Annotation ann : annList) {
 	  Class annType = ann.annotationType();
 	  
-	  if (annType.getName().startsWith("javax.inject"))
+	  if (annType.getName().startsWith("javax.enterprise.inject"))
 	    return true;
 	}
       }

@@ -53,25 +53,27 @@ import java.util.logging.*;
 import java.io.Serializable;
 
 import javax.annotation.*;
-import javax.context.Dependent;
-import javax.context.ScopeType;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ScopeType;
 import javax.event.IfExists;
 import javax.event.Observes;
-import javax.inject.AnnotationLiteral;
-import javax.inject.BindingType;
-import javax.inject.Current;
-import javax.inject.DeploymentType;
-import javax.inject.Initializer;
-import javax.inject.Disposes;
-import javax.inject.Produces;
-import javax.inject.Production;
-import javax.inject.manager.Bean;
-import javax.inject.manager.BeanManager;
-import javax.inject.manager.AnnotatedConstructor;
-import javax.inject.manager.AnnotatedMethod;
-import javax.inject.manager.AnnotatedParameter;
-import javax.inject.manager.AnnotatedType;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Initializer;
+import javax.enterprise.inject.Named;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Production;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -155,7 +157,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       throw new NullPointerException();
 
     if (! type.isAnnotationPresent(DeploymentType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid deployment type because it does not implement @javax.inject.DeploymentType",
+      throw new ConfigException(L.l("'{0}' is an invalid deployment type because it does not implement @javax.enterprise.inject.DeploymentType",
 				    type));
 
     if (_deploymentType != null && ! _deploymentType.equals(type))

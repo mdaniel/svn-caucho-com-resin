@@ -53,10 +53,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.context.CreationalContext;
-import javax.context.ApplicationScoped;
-import javax.context.Dependent;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * The ConfigContext contains the state of the current configuration.

@@ -29,16 +29,16 @@
 
 package com.caucho.config.inject;
 
-import javax.inject.manager.*;
+import javax.enterprise.inject.spi.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.context.Contextual;
-import javax.context.Dependent;
-import javax.context.CreationalContext;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Internal implementation for a Bean

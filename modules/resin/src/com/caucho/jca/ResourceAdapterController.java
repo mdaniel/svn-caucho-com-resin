@@ -35,8 +35,8 @@ import com.caucho.loader.*;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
+import javax.enterprise.inject.spi.Bean;
 import javax.resource.spi.*;
-import javax.inject.manager.Bean;
 
 /**
  * Controller for a resource-adapter

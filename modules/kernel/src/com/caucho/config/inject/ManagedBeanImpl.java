@@ -48,11 +48,11 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.context.CreationalContext;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.event.*;
 import javax.interceptor.InterceptorBindingType;
-import javax.inject.*;
-import javax.inject.manager.*;
+import javax.enterprise.inject.*;
+import javax.enterprise.inject.spi.*;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.

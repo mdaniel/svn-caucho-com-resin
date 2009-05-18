@@ -36,11 +36,11 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.context.ApplicationScoped;
 import java.security.Principal;
 import java.util.Hashtable;
 import java.util.logging.*;

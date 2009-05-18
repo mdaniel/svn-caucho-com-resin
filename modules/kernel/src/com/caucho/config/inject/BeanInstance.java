@@ -42,9 +42,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.annotation.NonBinding;
-import javax.context.Contextual;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Holds a bean and its value

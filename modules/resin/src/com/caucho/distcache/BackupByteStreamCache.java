@@ -30,7 +30,7 @@
 package com.caucho.distcache;
 
 import com.caucho.config.Configurable;
-import javax.context.ApplicationScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Cache which stores a single copy on the triad.

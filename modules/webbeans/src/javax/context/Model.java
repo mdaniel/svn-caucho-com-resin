@@ -37,8 +37,9 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.annotation.Named;
-import javax.annotation.Stereotype;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Named;
+import javax.enterprise.inject.Stereotype;
 
 /**
  * A standard @Stereotype

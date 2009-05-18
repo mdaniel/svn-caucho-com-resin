@@ -52,8 +52,8 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.ejb.*;
-import javax.context.CreationalContext;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;

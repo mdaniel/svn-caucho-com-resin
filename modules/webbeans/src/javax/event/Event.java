@@ -29,7 +29,7 @@
 package javax.event;
 
 import java.lang.annotation.*;
-import javax.inject.TypeLiteral;
+import javax.enterprise.inject.TypeLiteral;
 
 public interface Event<T> {
   public void fire(T event, Annotation... bindings);

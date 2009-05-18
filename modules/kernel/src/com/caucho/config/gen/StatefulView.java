@@ -230,7 +230,7 @@ abstract public class StatefulView extends View {
     throws IOException
   {
     out.println();
-    out.println("public Object __caucho_createNew(javax.inject.manager.Bean injectBean, javax.context.CreationalContext env)");
+    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.Bean injectBean, javax.context.CreationalContext env)");
     out.println("{");
     out.println("  " + getViewClassName() + " bean"
 		+ " = new " + getViewClassName() + "(_server, env);");

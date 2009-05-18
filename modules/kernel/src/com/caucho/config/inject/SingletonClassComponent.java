@@ -35,8 +35,8 @@ import com.caucho.jmx.*;
 
 import java.util.logging.*;
 import java.io.Closeable;
-import javax.context.CreationalContext;
-import javax.inject.manager.InjectionPoint;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * Configuration for a singleton component.

@@ -86,7 +86,7 @@ abstract public class StatefulHomeView extends StatefulView {
     out.println("}");
 
     out.println();
-    out.println("public Object __caucho_createNew(javax.inject.manager.Bean bean, javax.context.CreationalContext env)");
+    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.Bean bean, javax.context.CreationalContext env)");
     out.println("{");
     out.println("  return this;");
     out.println("}");

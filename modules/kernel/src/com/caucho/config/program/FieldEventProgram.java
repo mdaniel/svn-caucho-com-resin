@@ -43,7 +43,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import javax.event.Event;
 import javax.event.Observable;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 
 public class FieldEventProgram extends ConfigProgram
 {

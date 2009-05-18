@@ -37,9 +37,9 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.manager.Decorator;
-import javax.inject.manager.Interceptor;
-import javax.inject.manager.InterceptionType;
+import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.Interceptor;
+import javax.enterprise.inject.spi.InterceptionType;
 
 /**
  * Utilities

@@ -39,7 +39,7 @@ import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.manager.EjbContainer;
 
 import javax.ejb.*;
-import javax.annotation.Named;
+import javax.enterprise.inject.Named;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;

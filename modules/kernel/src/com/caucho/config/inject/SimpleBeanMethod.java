@@ -42,7 +42,7 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Configuration for a SimpleBean method, e.g. for an XML configuration of

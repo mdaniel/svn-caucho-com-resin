@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.inject.manager.Bean;
+import javax.enterprise.inject.spi.Bean;
 import javax.jms.*;
 
 import com.caucho.config.*;

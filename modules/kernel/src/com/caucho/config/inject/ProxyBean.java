@@ -49,11 +49,11 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
-import javax.context.ApplicationScoped;
-import javax.context.Context;
-import javax.context.CreationalContext;
-import javax.context.Dependent;
-import javax.inject.manager.Bean;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Configuration for the xml web bean component.

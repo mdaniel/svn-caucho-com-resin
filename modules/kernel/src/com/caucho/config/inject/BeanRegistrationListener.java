@@ -31,7 +31,7 @@ package com.caucho.config.inject;
 
 
 import java.lang.annotation.Annotation;
-import javax.inject.manager.BeanManager;
+import javax.enterprise.inject.spi.BeanManager;
 
 /**
  * Registers beans on startup

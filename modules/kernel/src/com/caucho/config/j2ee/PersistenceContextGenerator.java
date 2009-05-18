@@ -35,7 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import javax.persistence.*;
-import javax.inject.AnnotationLiteral;
+import javax.enterprise.inject.AnnotationLiteral;
 
 import java.util.*;
 import java.util.logging.Logger;

@@ -36,7 +36,7 @@ import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
 
-import javax.inject.*;
+import javax.enterprise.inject.*;
 
 /**
  * Configuration for the xml web bean component.

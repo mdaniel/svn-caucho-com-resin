@@ -49,7 +49,7 @@ import com.caucho.servlet.comet.CometServlet;
 import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
-import javax.inject.manager.InjectionTarget;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.naming.NamingException;
 import javax.servlet.*;
 import java.lang.reflect.Constructor;
