@@ -100,6 +100,7 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.*;
 import javax.event.Observer;
 import javax.enterprise.inject.*;
@@ -918,6 +919,11 @@ public class WebApp extends ServletContextImpl
     } else {
       throw new ConfigException(L.l("Annotation @WebServlet at '{0}' must specify either value or urlPatterns", servletClassName));
     }
+
+    for (WebInitParam initParam : webServlet.initParams())
+      config.setInitParam(initParam.name(), initParam.value()); //omit description
+
+    config.setLoadOnStartup(webServlet.loadOnStartup());
 
     addServlet(config);
     addServletMapping(mapping);
