@@ -857,7 +857,12 @@ public class WebApp extends ServletContextImpl
   {
     FilterMapping config = new FilterMapping();
     config.setFilterClass(filterClassName);
-    config.setFilterName(filterClassName);
+
+    String filterName = webFilter.filterName();
+    if ("".equals(filterName))
+     filterName = filterClassName;
+
+    config.setFilterName(filterName);
 
     if (webFilter.value().length > 0 &&
         webFilter.urlPatterns().length == 0 &&
@@ -886,6 +891,9 @@ public class WebApp extends ServletContextImpl
     else {
       throw new ConfigException(L.l("Annotation @WebFilter at '{0}' must specify either value, urlPatterns or servletNames", filterClassName));
     }
+
+    for (WebInitParam initParam : webFilter.initParams())
+      config.setInitParam(initParam.name(), initParam.value());
 
     addFilter(config);
     addFilterMapping(config);
