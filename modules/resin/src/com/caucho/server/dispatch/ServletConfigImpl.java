@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  * Configuration for a servlet.
  */
 public class ServletConfigImpl
-  implements ServletConfig, ServletRegistration, AlarmListener
+  implements ServletConfig, ServletRegistration.Dynamic, AlarmListener
 {
   static L10N L = new L10N(ServletConfigImpl.class);
   protected static final Logger log
@@ -191,6 +191,11 @@ public class ServletConfigImpl
   }
 
   public Map<String, String> getInitParameters()
+  {
+    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+  }
+
+  public void setAsyncSupported(boolean isAsyncSupported)
   {
     throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
   }

@@ -940,6 +940,25 @@ public class WebApp extends ServletContextImpl
     addServletMapping(mapping);
   }
 
+  @Override
+  public ServletRegistration.Dynamic addServlet(String servletName,
+                                                String className)
+  {
+    try {
+      ServletConfigImpl config = createServlet();
+      config.setServletName(servletName);
+      config.setServletClass(className);
+
+      addServlet(config);
+
+      return config;
+    }
+    catch (ServletException e) {
+      //spec declares no throws so far
+      throw new RuntimeException(e.getMessage(), e);
+    }
+  }
+
   /**
    * Returns the character encoding.
    */
