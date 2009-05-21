@@ -177,8 +177,10 @@ public class InjectManager
   private HashMap<Class,Integer> _deploymentMap
     = new HashMap<Class,Integer>();
 
-  private HashMap<Type,WebComponent> _componentMap
-    = new HashMap<Type,WebComponent>();
+  private HashMap<Class,WebComponent> _componentMap
+    = new HashMap<Class,WebComponent>();
+
+  private BaseTypeFactory _baseTypeFactory = new BaseTypeFactory();
 
   private HashMap<BaseType,WebComponent> _componentBaseTypeMap
     = new HashMap<BaseType,WebComponent>();
@@ -464,7 +466,7 @@ public class InjectManager
     if (type == null)
       return;
 
-    addComponentByType(BaseType.create(type, null), comp);
+    addComponentByType(createBaseType(type), comp);
   }
     
   private void addComponentByType(BaseType type, Bean bean)
@@ -479,20 +481,22 @@ public class InjectManager
       return;
     }
 
+    Class rawType = type.getRawClass();
+    
     WebComponent webComponent;
 
     synchronized (_componentMap) {
-      webComponent = _componentBaseTypeMap.get(type);
+      webComponent = _componentMap.get(rawType);
 
       if (webComponent == null) {
-	webComponent = new WebComponent(this, type);
+	webComponent = new WebComponent(this, rawType);
       
-	_componentBaseTypeMap.put(type, webComponent);
-	_componentMap.clear();
+	_componentMap.put(rawType, webComponent);
+	// _componentMap.clear();
       }
     }
 
-    webComponent.addComponent(bean);
+    webComponent.addComponent(type, bean);
   }
 
   private boolean isUnbound(Bean bean)
@@ -516,7 +520,7 @@ public class InjectManager
     if (webComponent == null)
       return beans;
 
-    beans.addAll(webComponent.resolve(new Annotation[0]));
+    beans.addAll(webComponent.resolve(type, new Annotation[0]));
 
     return beans;
   }
@@ -1019,6 +1023,14 @@ public class InjectManager
   //
 
   /**
+   * Creates a BaseType from a Type
+   */
+  public BaseType createBaseType(Type type)
+  {
+    return _baseTypeFactory.create(type);
+  }
+  
+  /**
    * Creates an annotated type.
    */
   public <T> AnnotatedType<T> createAnnotatedType(Class<T> cl)
@@ -1247,14 +1259,25 @@ public class InjectManager
       
       bindings = CURRENT_ANN;
     }
-    
-    WebComponent component = getWebComponent(type);
+
+    BaseType baseType = createBaseType(type);
+
+    return resolve(baseType, bindings);
+  }
+
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  public Set resolve(BaseType baseType,
+		     Annotation []bindings)
+  {
+    WebComponent component = getWebComponent(baseType);
 
     if (component != null) {
-      Set beans = component.resolve(bindings);
+      Set beans = component.resolve(baseType, bindings);
 
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " bind(" + getSimpleName(type)
+	log.finer(this + " bind(" + baseType.getSimpleName()
 		  + "," + toList(bindings) + ") -> " + beans);
 
       if (beans != null && beans.size() > 0)
@@ -1263,14 +1286,20 @@ public class InjectManager
     else if (New.class.equals(bindings[0].annotationType())) {
       // ioc/0721
       HashSet set = new HashSet();
-      set.add(new NewBean(this, (Class) type));
+      set.add(new NewBean(this, baseType.getRawClass()));
       return set;
     }
 
-    Class rawType = getRawType(type);
+    Class rawType = baseType.getRawClass();
 
     if (Instance.class.equals(rawType)) {
-      Type beanType = getInstanceType(type);
+      BaseType []param = baseType.getParameters();
+
+      Type beanType;
+      if (param.length > 0)
+	beanType = param[0].getRawClass();
+      else
+	beanType = Object.class;
       
       HashSet set = new HashSet();
       set.add(new InstanceBeanImpl(this, beanType, bindings));
@@ -1280,7 +1309,7 @@ public class InjectManager
     }
     
     if (_parent != null) {
-      return _parent.resolve(type, bindings);
+      return _parent.resolve(baseType, bindings);
     }
     
     for (Annotation ann : bindings) {
@@ -1291,7 +1320,7 @@ public class InjectManager
     }
     
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " bind(" + getSimpleName(type)
+      log.finer(this + " bind(" + baseType.getSimpleName()
 		+ "," + toList(bindings) + ") -> none");
     }
 
@@ -1308,7 +1337,7 @@ public class InjectManager
     WebComponent component = getWebComponent(type);
 
     if (component != null) {
-      Set beans = component.resolve(bindings);
+      Set beans = component.resolve(type, bindings);
 
       if (log.isLoggable(Level.FINER))
 	log.finer(this + " bind(" + getSimpleName(type)
@@ -1342,8 +1371,8 @@ public class InjectManager
     synchronized (_componentMap) {
       LinkedHashSet beans = new LinkedHashSet();
 
-      for (WebComponent comp : _componentBaseTypeMap.values()) {
-	Set set = comp.resolve(bindings);
+      for (WebComponent comp : _componentMap.values()) {
+	Set set = comp.resolve(Object.class, bindings);
 
 	beans.addAll(set);
       }
@@ -1354,20 +1383,18 @@ public class InjectManager
 
   public WebComponent getWebComponent(Type type)
   {
-    synchronized (_componentMap) {
-      WebComponent comp = _componentMap.get(type);
+    BaseType baseType = createBaseType(type);
 
-      if (comp == null) {
-	BaseType baseType = BaseType.create(type, null);
+    return getWebComponent(baseType);
+  }
 
-	comp = _componentBaseTypeMap.get(baseType);
+  public WebComponent getWebComponent(BaseType baseType)
+  {
+    Class rawClass = baseType.getRawClass();
+    
+    WebComponent comp = _componentMap.get(baseType.getRawClass());
 
-	if (comp != null)
-	  _componentMap.put(type, comp);
-      }
-
-      return comp;
-    }
+    return comp;
   }
   
   /**

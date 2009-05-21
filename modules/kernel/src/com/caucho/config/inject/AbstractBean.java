@@ -478,10 +478,12 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     if (type == null || _reservedTypes.contains(type))
       return;
 
-    Class cl = addType(type, paramMap);
+    BaseType baseType = addType(type, paramMap);
     
-    if (cl == null)
+    if (baseType == null)
       return;
+
+    Class cl = baseType.getRawClass();
     
     introspectTypes(cl.getGenericSuperclass(), paramMap);
 
@@ -490,12 +492,12 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     }
   }
 
-  protected Class addType(Type type)
+  protected BaseType addType(Type type)
   {
     return addType(type, null);
   }
 
-  protected Class addType(Type type, HashMap paramMap)
+  protected BaseType addType(Type type, HashMap paramMap)
   {
     BaseType baseType = BaseType.create(type, paramMap);
 
@@ -514,7 +516,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     if (! _typeClasses.contains(baseType.toType()))
       _typeClasses.add(baseType.toType());
 
-    return baseType.getRawClass();
+    return baseType;
   }
 
   protected void introspectAnnotations(Set<Annotation> annotations)

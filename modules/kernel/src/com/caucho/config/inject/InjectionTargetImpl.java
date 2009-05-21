@@ -150,7 +150,8 @@ public class InjectionTargetImpl<X>
     if (type.isInterface())
       throw new ConfigException(L.l("'{0}' is an invalid SimpleBean because it is an interface",
 				    type));
-    
+
+    /*
     Type []typeParam = type.getTypeParameters();
     if (typeParam != null && typeParam.length > 0) {
       StringBuilder sb = new StringBuilder();
@@ -166,6 +167,7 @@ public class InjectionTargetImpl<X>
       throw new ConfigException(L.l("'{0}' is an invalid SimpleBean class because it defines type variables",
 				    sb));
     }
+    */
   }
 
   public void setConstructor(Constructor ctor)

@@ -51,12 +51,16 @@ import javax.enterprise.inject.spi.BeanManager;
  */
 abstract public class BaseType
 {
+  private static final BaseType []NULL_PARAM = new BaseType[0];
+  
   public static BaseType create(Type type, HashMap paramMap)
   {
     if (type instanceof Class)
       return new ClassType((Class) type);
     else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
+
+      Class rawType = (Class) pType.getRawType();
 
       Type []typeArgs = pType.getActualTypeArguments();
       
@@ -65,11 +69,20 @@ abstract public class BaseType
       for (int i = 0; i < args.length; i++) {
 	args[i] = create(typeArgs[i], paramMap);
 	
-	if (args[i] == null)
-	  return null;
+	if (args[i] == null) {
+	  throw new NullPointerException("unsupported BaseType: " + type);
+	}
+      }
+      
+      HashMap newParamMap = new HashMap();
+      
+      TypeVariable []typeVars = rawType.getTypeParameters();
+
+      for (int i = 0; i < typeVars.length; i++) {
+	newParamMap.put(typeVars[i].getName(), args[i]);
       }
 
-      return new ParamType((Class) pType.getRawType(), args);
+      return new ParamType((Class) pType.getRawType(), args, newParamMap);
     }
     else if (type instanceof GenericArrayType) {
       GenericArrayType aType = (GenericArrayType) type;
@@ -79,18 +92,95 @@ abstract public class BaseType
       
       return new ArrayType(baseType, rawType);
     }
-    else {
-      return null;
+    else if (type instanceof TypeVariable) {
+      TypeVariable aType = (TypeVariable) type;
+
+      BaseType actualType = null;
+
+      if (paramMap != null)
+	actualType = (BaseType) paramMap.get(aType.getName());
+
+      if (actualType != null)
+	return actualType;
+
+      BaseType []baseBounds;
+
+      if (aType.getBounds() != null) {
+	Type []bounds = aType.getBounds();
+	
+	baseBounds = new BaseType[bounds.length];
+
+	for (int i = 0; i < bounds.length; i++)
+	  baseBounds[i] = create(bounds[i], paramMap);
+      }
+      else
+	baseBounds = new BaseType[0];
+      
+      return new VarType(aType.getName(), baseBounds);
     }
+    else if (type instanceof WildcardType) {
+      WildcardType aType = (WildcardType) type;
+
+      BaseType []lowerBounds = toBaseType(aType.getLowerBounds(), paramMap);
+      BaseType []upperBounds = toBaseType(aType.getUpperBounds(), paramMap);
+      
+      return new WildcardTypeImpl(lowerBounds, upperBounds);
+    }
+    
+    else {
+      throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
+    }
+  }
+
+  private static BaseType []toBaseType(Type []types, HashMap paramMap)
+  {
+    if (types == null)
+      return NULL_PARAM;
+    
+    BaseType []baseTypes = new BaseType[types.length];
+
+    for (int i = 0; i < types.length; i++) {
+      baseTypes[i] = create(types[i], paramMap);
+    }
+
+    return baseTypes;
   }
   
   abstract public Class getRawClass();
 
+  public HashMap getParamMap()
+  {
+    return null;
+  }
+
+  public BaseType []getParameters()
+  {
+    return NULL_PARAM;
+  }
+
   abstract public boolean isMatch(Type type);
+
+  public boolean isAssignableFrom(BaseType type)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Assignable as a parameter.
+   */
+  public boolean isParamAssignableFrom(BaseType type)
+  {
+    return isAssignableFrom(type);
+  }
 
   public Type toType()
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public String getSimpleName()
+  {
+    return getRawClass().getSimpleName();
   }
   
   public String toString()

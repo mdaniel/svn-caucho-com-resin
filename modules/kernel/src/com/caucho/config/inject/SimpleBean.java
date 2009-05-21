@@ -121,11 +121,13 @@ public class SimpleBean extends ComponentImpl<Object>
   {
     if (type.isInterface())
       return false;
-    
+
+    /* XXX: ioc/024d
     if (type.getTypeParameters() != null
 	&& type.getTypeParameters().length > 0) {
       return false;
     }
+    */
 
     if (! isValidConstructor(type))
       return false;
@@ -151,7 +153,8 @@ public class SimpleBean extends ComponentImpl<Object>
     if (type.isInterface())
       throw new ConfigException(L.l("'{0}' is an invalid SimpleBean because it is an interface",
 				    type));
-    
+
+    /*
     Type []typeParam = type.getTypeParameters();
     if (typeParam != null && typeParam.length > 0) {
       StringBuilder sb = new StringBuilder();
@@ -167,6 +170,7 @@ public class SimpleBean extends ComponentImpl<Object>
       throw new ConfigException(L.l("'{0}' is an invalid SimpleBean class because it defines type variables",
 				    sb));
     }
+    */
   }
 
   public void setConstructor(Constructor ctor)

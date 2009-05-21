@@ -52,11 +52,15 @@ public class ParamType extends BaseType implements ParameterizedType
   private Class _type;
   private BaseType []_param;
   private Type []_actualArguments;
+  private HashMap _paramMap;
 
-  public ParamType(Class type, BaseType []param)
+  public ParamType(Class type,
+		   BaseType []param,
+		   HashMap paramMap)
   {
     _type = type;
     _param = param;
+    _paramMap = paramMap;
 
     _actualArguments = new Type[param.length];
     for (int i = 0; i < param.length; i++) {
@@ -85,9 +89,40 @@ public class ParamType extends BaseType implements ParameterizedType
     return null;
   }
   
+  public BaseType []getParameters()
+  {
+    return _param;
+  }
+
+  @Override
+  public HashMap getParamMap()
+  {
+    return _paramMap;
+  }
+
   public Type getRawType()
   {
     return _type;
+  }
+
+  @Override
+  public boolean isAssignableFrom(BaseType type)
+  {
+    if (! getRawClass().equals(type.getRawClass()))
+      return false;
+
+    BaseType []paramA = getParameters();
+    BaseType []paramB = type.getParameters();
+
+    if (paramA.length != paramB.length)
+      return false;
+
+    for (int i = 0; i < paramA.length; i++) {
+      if (! paramA[i].isParamAssignableFrom(paramB[i]))
+	return false;
+    }
+
+    return true;
   }
   
   public boolean isMatch(Type type)

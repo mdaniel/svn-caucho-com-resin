@@ -47,96 +47,93 @@ import javax.annotation.*;
 /**
  * class type matching
  */
-public class ClassType extends BaseType
+public class VarType<D extends GenericDeclaration> extends BaseType
+  implements TypeVariable<D>
 {
-  private static final BaseType OBJECT_TYPE;
-  
-  private static final HashMap<Class,Class> _boxTypeMap
-    = new HashMap<Class,Class>();
-    
-  private Class _type;
+  private String _name;
+  private BaseType []_bounds;
 
-  public ClassType(Class type)
+  public VarType(String name, BaseType []bounds)
   {
-    Class boxType = _boxTypeMap.get(type);
+    _name = name;
+    _bounds = bounds;
+  }
 
-    if (boxType != null)
-      type = boxType;
-    
-    _type = type;
+  public String getName()
+  {
+    return _name;
+  }
+
+  public D getGenericDeclaration()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public Type []getBounds()
+  {
+    Type []bounds = new Type[_bounds.length];
+
+    for (int i = 0; i < bounds.length; i++) {
+      bounds[i] = _bounds[i].toType();
+    }
+
+    return bounds;
   }
   
   public Class getRawClass()
   {
-    return _type;
+    return Object.class; // technically bounds
   }
-  
+
+  public Type getGenericComponentType()
+  {
+    return null;
+  }
+
   public Type toType()
   {
-    return _type;
-  }
-  
-  @Override
-  public boolean isMatch(Type type)
-  {
-    return _type.equals(type);
+    return this;
   }
 
-  @Override
-  public boolean isParamAssignableFrom(BaseType type)
-  {
-    return _type.equals(type.getRawClass());
-  }
-    
-  @Override
   public boolean isAssignableFrom(BaseType type)
   {
-    if (! _type.isAssignableFrom(type.getRawClass()))
-      return false;
-    else if (type.getParameters().length > 0) {
-      for (BaseType param : type.getParameters()) {
-	if (! OBJECT_TYPE.isParamAssignableFrom(param))
-	  return false;
-      }
-
+    for (BaseType bound : _bounds) {
+      if (! bound.isAssignableFrom(type))
+	return false;
+    }
+    
+    return true;
+  }
+  
+  public boolean isMatch(Type type)
+  {
+    if (type instanceof TypeVariable) {
       return true;
     }
     else
-      return true;
+      return false;
   }
 
   public int hashCode()
   {
-    return _type.hashCode();
+    return 17 + 37 * _name.hashCode();
   }
 
   public boolean equals(Object o)
   {
     if (o == this)
       return true;
-    else if (! (o instanceof ClassType))
+    else if (o instanceof TypeVariable) {
+      TypeVariable var = (TypeVariable) o;
+
+      return true;
+    }
+    else
       return false;
-
-    ClassType type = (ClassType) o;
-
-    return _type.equals(type._type);
   }
 
   public String toString()
   {
-    return getRawClass().toString();
-  }
-
-  static {
-    _boxTypeMap.put(boolean.class, Boolean.class);
-    _boxTypeMap.put(byte.class, Byte.class);
-    _boxTypeMap.put(short.class, Short.class);
-    _boxTypeMap.put(int.class, Integer.class);
-    _boxTypeMap.put(long.class, Long.class);
-    _boxTypeMap.put(float.class, Float.class);
-    _boxTypeMap.put(double.class, Double.class);
-    _boxTypeMap.put(char.class, Character.class);
-
-    OBJECT_TYPE = BaseType.create(Object.class, new HashMap());
+    return _name;
   }
 }

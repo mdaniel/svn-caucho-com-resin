@@ -66,6 +66,9 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
     = Logger.getLogger(ManagedBeanImpl.class.getName());
 
   private static final Object []NULL_ARGS = new Object[0];
+
+  private static final HashSet<Class> _reservedTypes
+    = new HashSet<Class>();
   
   private boolean _isBound;
 
@@ -75,6 +78,12 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
   private AnnotatedConstructor _beanCtor;
   private Constructor _javaCtor;
   private Arg []_args;
+
+  private LinkedHashSet<BaseType> _types
+    = new LinkedHashSet<BaseType>();
+
+  private LinkedHashSet<Type> _typeClasses
+    = new LinkedHashSet<Type>();
 
   private InjectionTarget<X> _injectionTarget;
 
@@ -116,6 +125,22 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
     introspect(_beanType);
 
     _injectionTarget = injectionTarget;
+  }
+
+  /**
+   * Returns the types that the bean implements
+   */
+  public Set<Type> getTypes()
+  {
+    return _typeClasses;
+  }
+
+  /**
+   * Returns the types that the bean implements
+   */
+  public Set<BaseType> getGenericTypes()
+  {
+    return _types;
   }
 
   public AnnotatedType getAnnotatedType()
@@ -165,7 +190,8 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
     if (type.isInterface())
       throw new ConfigException(L.l("'{0}' is an invalid SimpleBean because it is an interface",
 				    type));
-    
+
+    /*
     Type []typeParam = type.getTypeParameters();
     if (typeParam != null && typeParam.length > 0) {
       StringBuilder sb = new StringBuilder();
@@ -181,6 +207,7 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
       throw new ConfigException(L.l("'{0}' is an invalid SimpleBean class because it defines type variables",
 				    sb));
     }
+    */
   }
 
   public void setConstructor(Constructor ctor)
@@ -619,6 +646,60 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
   }
 
   /**
+   * Introspects all the types implemented by the class
+   */
+  @Override
+  protected void introspectTypes(Type type)
+  {
+    introspectTypes(type, null);
+  }
+
+  /**
+   * Introspects all the types implemented by the class
+   */
+  private void introspectTypes(Type type, HashMap paramMap)
+  {
+    if (type == null || _reservedTypes.contains(type))
+      return;
+
+    BaseType baseType = addType(type, paramMap);
+    
+    if (baseType == null)
+      return;
+
+    HashMap newParamMap = baseType.getParamMap();
+    Class cl = baseType.getRawClass();
+    
+    introspectTypes(cl.getGenericSuperclass(), newParamMap);
+
+    for (Type iface : cl.getGenericInterfaces()) {
+      introspectTypes(iface, newParamMap);
+    }
+  }
+
+  protected BaseType addType(Type type, HashMap paramMap)
+  {
+    BaseType baseType = BaseType.create(type, paramMap);
+
+    if (baseType == null)
+      return null;
+
+    if (_types.contains(baseType))
+      return null;
+    
+    _types.add(baseType);
+
+    /*
+    if (! _typeClasses.contains(baseType.getRawClass()))
+      _typeClasses.add(baseType.getRawClass());
+    */
+    if (! _typeClasses.contains(baseType.toType()))
+      _typeClasses.add(baseType.toType());
+
+    return baseType;
+  }
+
+  /**
    * Introspects the constructor
    */
   protected void introspectConstructor(AnnotatedType<?> beanType)
@@ -1029,5 +1110,13 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
 	throw ConfigException.create(_method, e);
       }
     }
+  }
+
+  static {
+    _reservedTypes.add(java.io.Closeable.class);
+    _reservedTypes.add(java.io.Serializable.class);
+    _reservedTypes.add(Cloneable.class);
+    _reservedTypes.add(Object.class);
+    _reservedTypes.add(Comparable.class);
   }
 }

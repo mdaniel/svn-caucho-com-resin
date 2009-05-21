@@ -47,96 +47,96 @@ import javax.annotation.*;
 /**
  * class type matching
  */
-public class ClassType extends BaseType
+public class WildcardTypeImpl extends BaseType implements WildcardType
 {
-  private static final BaseType OBJECT_TYPE;
-  
-  private static final HashMap<Class,Class> _boxTypeMap
-    = new HashMap<Class,Class>();
-    
-  private Class _type;
+  private BaseType []_lowerBounds;
+  private BaseType []_upperBounds;
 
-  public ClassType(Class type)
+  public WildcardTypeImpl(BaseType []lowerBounds, BaseType []upperBounds)
   {
-    Class boxType = _boxTypeMap.get(type);
+    _lowerBounds = lowerBounds;
+    _upperBounds = upperBounds;
+  }
 
-    if (boxType != null)
-      type = boxType;
-    
-    _type = type;
+  public Type []getLowerBounds()
+  {
+    Type []lowerBounds = new Type[_lowerBounds.length];
+
+    for (int i = 0; i < lowerBounds.length; i++)
+      lowerBounds[i] = _lowerBounds[i].toType();
+      
+    return lowerBounds;
+  }
+
+  public Type []getUpperBounds()
+  {
+    Type []upperBounds = new Type[_upperBounds.length];
+
+    for (int i = 0; i < upperBounds.length; i++)
+      upperBounds[i] = _upperBounds[i].toType();
+      
+    return upperBounds;
   }
   
   public Class getRawClass()
   {
-    return _type;
+    return Object.class; // technically bounds(?)
   }
-  
+
+  public Type getGenericComponentType()
+  {
+    return null;
+  }
+
   public Type toType()
   {
-    return _type;
-  }
-  
-  @Override
-  public boolean isMatch(Type type)
-  {
-    return _type.equals(type);
+    return this;
   }
 
-  @Override
-  public boolean isParamAssignableFrom(BaseType type)
-  {
-    return _type.equals(type.getRawClass());
-  }
-    
-  @Override
   public boolean isAssignableFrom(BaseType type)
   {
-    if (! _type.isAssignableFrom(type.getRawClass()))
-      return false;
-    else if (type.getParameters().length > 0) {
-      for (BaseType param : type.getParameters()) {
-	if (! OBJECT_TYPE.isParamAssignableFrom(param))
-	  return false;
-      }
-
+    for (BaseType bound : _lowerBounds) {
+      if (! type.isAssignableFrom(bound))
+	return false;
+    }
+    
+    for (BaseType bound : _upperBounds) {
+      if (! bound.isAssignableFrom(type))
+	return false;
+    }
+    
+    return true;
+  }
+  
+  public boolean isMatch(Type type)
+  {
+    if (type instanceof WildcardType) {
       return true;
     }
     else
-      return true;
+      return false;
   }
 
   public int hashCode()
   {
-    return _type.hashCode();
+    return 17;
   }
 
   public boolean equals(Object o)
   {
     if (o == this)
       return true;
-    else if (! (o instanceof ClassType))
+    else if (o instanceof WildcardType) {
+      WildcardType var = (WildcardType) o;
+
+      return true;
+    }
+    else
       return false;
-
-    ClassType type = (ClassType) o;
-
-    return _type.equals(type._type);
   }
 
   public String toString()
   {
-    return getRawClass().toString();
-  }
-
-  static {
-    _boxTypeMap.put(boolean.class, Boolean.class);
-    _boxTypeMap.put(byte.class, Byte.class);
-    _boxTypeMap.put(short.class, Short.class);
-    _boxTypeMap.put(int.class, Integer.class);
-    _boxTypeMap.put(long.class, Long.class);
-    _boxTypeMap.put(float.class, Float.class);
-    _boxTypeMap.put(double.class, Double.class);
-    _boxTypeMap.put(char.class, Character.class);
-
-    OBJECT_TYPE = BaseType.create(Object.class, new HashMap());
+    return "?";
   }
 }

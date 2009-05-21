@@ -51,41 +51,40 @@ import javax.enterprise.inject.spi.Bean;
 /**
  * Configuration for the xml web bean component.
  */
-public class WebComponent<T> {
+public class WebComponent {
   private static final Logger log
     = Logger.getLogger(WebComponent.class.getName());
   private static final L10N L = new L10N(WebComponent.class);
 
   private static final Class []NULL_ARG = new Class[0];
 
-  private InjectManager _webBeans;
-  
-  private BaseType _type;
+  private InjectManager _beanManager;
+
+  private Class _rawType;
 
   private BeanEntry _injectionPointEntry;
 
-  private ArrayList<BeanEntry<T>> _beanList
-    = new ArrayList<BeanEntry<T>>();
+  private ArrayList<BeanEntry> _beanList = new ArrayList<BeanEntry>();
 
-  public WebComponent(InjectManager webBeans, BaseType type)
+  public WebComponent(InjectManager beanManager, Class rawType)
   {
-    _webBeans = webBeans;
-    _type = type;
+    _beanManager = beanManager;
+    _rawType = rawType;
   }
 
-  public void addComponent(Bean<T> bean)
+  public void addComponent(BaseType type, Bean<?> bean)
   {
-    for (BeanEntry<T> beanEntry : _beanList) {
-      if (beanEntry.isMatch(bean))
+    for (BeanEntry beanEntry : _beanList) {
+      if (beanEntry.getType().equals(type) && beanEntry.isMatch(bean))
 	return;
     }
 
     if (bean instanceof ProducesBean
 	&& ((ProducesBean) bean).isInjectionPoint()) {
-      _injectionPointEntry = new BeanEntry<T>(bean);
+      _injectionPointEntry = new BeanEntry(type, bean);
     }
 
-    _beanList.add(new BeanEntry<T>(bean));
+    _beanList.add(new BeanEntry(type, bean));
 
     /*
     for (int i = _componentList.size() - 1; i >= 0; i--) {
@@ -118,24 +117,31 @@ public class WebComponent<T> {
     */
   }
   
-  public Set<Bean<T>> resolve(Annotation []bindings)
+  public Set<Bean<?>> resolve(Type type, Annotation []bindings)
   {
-    LinkedHashSet<Bean<T>> beans = null;
+    BaseType baseType = _beanManager.createBaseType(type);
+
+    return resolve(baseType, bindings);
+  }
+  
+  public Set<Bean<?>> resolve(BaseType type, Annotation []bindings)
+  {
+    LinkedHashSet<Bean<?>> beans = null;
 
     if (_injectionPointEntry != null) {
-      beans = new LinkedHashSet<Bean<T>>();
+      beans = new LinkedHashSet<Bean<?>>();
       beans.add(_injectionPointEntry.getBean());
       return beans;
     }
 
     int priority = 0;
 
-    for (BeanEntry<T> beanEntry : _beanList) {
-      if (beanEntry.isMatch(bindings)) {
-	Bean<T> bean = beanEntry.getBean();
+    for (BeanEntry beanEntry : _beanList) {
+      if (beanEntry.isMatch(type, bindings)) {
+	Bean<?> bean = beanEntry.getBean();
 
 	int beanPriority
-	  = _webBeans.getDeploymentPriority(bean.getDeploymentType());
+	  = _beanManager.getDeploymentPriority(bean.getDeploymentType());
 
 	if (beanPriority < priority)
 	  continue;
@@ -146,7 +152,7 @@ public class WebComponent<T> {
 	}
 
 	if (beans == null)
-	  beans = new LinkedHashSet<Bean<T>>();
+	  beans = new LinkedHashSet<Bean<?>>();
 	
 	beans.add(beanEntry.getBean());
       }
@@ -155,30 +161,32 @@ public class WebComponent<T> {
     return beans;
   }
 
-  public ArrayList<Bean<T>> getBeanList()
+  public ArrayList<Bean<?>> getBeanList()
   {
-    ArrayList<Bean<T>> list = new ArrayList<Bean<T>>();
+    ArrayList<Bean<?>> list = new ArrayList<Bean<?>>();
     
-    for (BeanEntry<T> beanEntry : _beanList) {
-      Bean<T> bean = beanEntry.getBean();
+    for (BeanEntry beanEntry : _beanList) {
+      Bean<?> bean = beanEntry.getBean();
 
-      list.add(bean);
+      if (! list.contains(bean)) {
+	list.add(bean);
+      }
     }
 
     return list;
   }
 
-  public ArrayList<Bean<T>> getEnabledBeanList()
+  public ArrayList<Bean<?>> getEnabledBeanList()
   {
-    ArrayList<Bean<T>> list = new ArrayList<Bean<T>>();
+    ArrayList<Bean<?>> list = new ArrayList<Bean<?>>();
     
     int priority = 0;
     
-    for (BeanEntry<T> beanEntry : _beanList) {
-      Bean<T> bean = beanEntry.getBean();
+    for (BeanEntry beanEntry : _beanList) {
+      Bean<?> bean = beanEntry.getBean();
 
       int beanPriority
-	= _webBeans.getDeploymentPriority(bean.getDeploymentType());
+	= _beanManager.getDeploymentPriority(bean.getDeploymentType());
 
       if (priority <= beanPriority)
 	list.add(bean);
@@ -189,7 +197,7 @@ public class WebComponent<T> {
 
   private int getPriority(Class deploymentType)
   {
-    return _webBeans.getDeploymentPriority(deploymentType);
+    return _beanManager.getDeploymentPriority(deploymentType);
   }
 
   static String getName(Type type)
@@ -200,12 +208,15 @@ public class WebComponent<T> {
       return String.valueOf(type);
   }
 
-  static class BeanEntry<T> {
-    private Bean<T> _bean;
+  class BeanEntry {
+    private Bean<?> _bean;
+    private BaseType _type;
     private Binding []_bindings;
 
-    BeanEntry(Bean<T> bean)
+    BeanEntry(BaseType type, Bean<?> bean)
     {
+      _type = type;
+      
       _bean = bean;
 
       Set<Annotation> bindings = bean.getBindings();
@@ -218,15 +229,30 @@ public class WebComponent<T> {
       }
     }
 
-    Bean<T> getBean()
+    Bean<?> getBean()
     {
       return _bean;
     }
 
-    boolean isMatch(Bean<T> bean)
+    BaseType getType()
+    {
+      return _type;
+    }
+
+    boolean isMatch(Bean<?> bean)
     {
       // ioc/0213
       return _bean == bean;
+    }
+
+    boolean isMatch(BaseType type, Annotation []bindings)
+    {
+      return isMatch(type) && isMatch(bindings);
+    }
+
+    boolean isMatch(BaseType type)
+    {
+      return type.isAssignableFrom(_type);
     }
 
     boolean isMatch(Annotation []bindingArgs)
