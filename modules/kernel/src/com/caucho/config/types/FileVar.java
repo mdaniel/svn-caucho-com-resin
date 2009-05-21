@@ -48,7 +48,8 @@ public class FileVar {
 
     if (env != null)
       return env.getBaseUri();
-    else
+    else {
       throw new IllegalStateException(L.l("__FILE__ is only available during configuration"));
+    }
   }
 }

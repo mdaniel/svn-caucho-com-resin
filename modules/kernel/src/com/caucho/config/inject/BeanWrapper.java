@@ -103,9 +103,9 @@ public class BeanWrapper<T> implements Bean<T>
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
-    return getBean().isSerializable();
+    return getBean().isPassivationCapable();
   }
 
   /**

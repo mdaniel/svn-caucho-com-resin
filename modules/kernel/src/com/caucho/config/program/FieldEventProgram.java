@@ -41,8 +41,8 @@ import java.util.ArrayList;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import javax.event.Event;
-import javax.event.Observable;
+import javax.enterprise.event.Event;
+//import javax.enterprise.event.Observable;
 import javax.enterprise.inject.spi.Bean;
 
 public class FieldEventProgram extends ConfigProgram
@@ -66,8 +66,10 @@ public class FieldEventProgram extends ConfigProgram
 
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
     for (Annotation ann : bindings) {
+      /*
       if (ann.annotationType().equals(Observable.class))
 	continue;
+      */
       
       bindingList.add(ann);
     }

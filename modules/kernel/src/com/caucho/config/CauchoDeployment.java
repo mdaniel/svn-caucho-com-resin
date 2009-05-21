@@ -34,7 +34,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.deployment.DeploymentType;
 
 /**
  * The @CauchoDeployment is for Caucho automatic objects

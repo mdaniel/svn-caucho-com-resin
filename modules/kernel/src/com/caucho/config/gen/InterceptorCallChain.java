@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -254,12 +255,14 @@ public class InterceptorCallChain
     }
 
     if (isValidMethod()) {
-      ArrayList<Class> decorators = _view.getBean().getDecoratorTypes();
+      ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
 
-      for (Class decorator : decorators) {
-        for (Method method : decorator.getMethods()) {
+      for (Type decorator : decorators) {
+	Class decoratorClass = (Class) decorator;
+	
+        for (Method method : decoratorClass.getMethods()) {
           if (isMatch(method, apiMethod))
-            _decoratorType = decorator;
+            _decoratorType = decoratorClass;
         }
       }
     }
@@ -801,7 +804,7 @@ public class InterceptorCallChain
   {
     String className = _decoratorClass;
 
-    ArrayList<Class> decorators = _view.getBean().getDecoratorTypes();
+    ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
 
     out.println();
     out.print("class ");
@@ -811,7 +814,7 @@ public class InterceptorCallChain
       if (i != 0)
         out.print(", ");
 
-      out.printClass(decorators.get(i));
+      out.printClass((Class) decorators.get(i));
     }
 
     out.println(" {");
@@ -829,8 +832,10 @@ public class InterceptorCallChain
     HashMap<ArrayList<Class>, String> apiMap =
       new HashMap<ArrayList<Class>, String>();
 
-    for (Class decorator : decorators) {
-      for (Method method : decorator.getMethods()) {
+    for (Type decorator : decorators) {
+      Class decoratorClass = (Class) decorator;
+      
+      for (Method method : decoratorClass.getMethods()) {
         if (! containsMethod(methodList, method)) {
           methodList.add(method);
 
@@ -1000,10 +1005,12 @@ public class InterceptorCallChain
   {
     ArrayList<Class> apis = new ArrayList<Class>();
 
-    for (Class decorator : _view.getBean().getDecoratorTypes()) {
-      if (containsMethod(decorator.getMethods(), method)
-          && ! apis.contains(decorator))
-        apis.add(decorator);
+    for (Type decorator : _view.getBean().getDecoratorTypes()) {
+      Class decoratorClass = (Class) decorator;
+      
+      if (containsMethod(decoratorClass.getMethods(), method)
+          && ! apis.contains(decoratorClass))
+        apis.add(decoratorClass);
     }
 
     return apis;

@@ -168,7 +168,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
     }
   }
 
-  private void generateScopeId()
+  private String generateScopeId()
   {
     long crc64 = 17;
 
@@ -187,6 +187,8 @@ public class ComponentImpl<T> extends AbstractBean<T>
     Base64.encode(sb, crc64);
 
     _scopeId = sb.toString();
+
+    return _scopeId;
   }
 
   /**
@@ -419,6 +421,9 @@ public class ComponentImpl<T> extends AbstractBean<T>
 
   public String getScopeId()
   {
+    if (_scopeId == null)
+      _scopeId = generateScopeId();
+    
     return _scopeId;
   }
 

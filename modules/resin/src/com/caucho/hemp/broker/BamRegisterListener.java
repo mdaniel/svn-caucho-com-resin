@@ -51,7 +51,7 @@ public class BamRegisterListener implements BeanRegistrationListener
   {
     HempBroker broker = HempBroker.getCurrent();
     
-    Actor service = (Actor) manager.getReference(bean);
+    Actor service = manager.getReference(bean, Actor.class);
 
     com.caucho.remote.BamService serviceAnn
       = getAnnotation(bean, com.caucho.remote.BamService.class);

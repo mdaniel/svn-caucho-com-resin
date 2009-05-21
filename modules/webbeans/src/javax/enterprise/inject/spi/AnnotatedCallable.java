@@ -37,13 +37,8 @@ import java.util.List;
 /**
  * Abstract introspected view of a Bean injectible field
  */
-public interface AnnotatedCallable<X> extends Annotated
+public interface AnnotatedCallable<X> extends AnnotatedMember<X>
 {
-  /**
-   * Returns the associated field/method
-   */
-  public Member getJavaMember();
-
   /**
    * Returns the declaring type
    */

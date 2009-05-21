@@ -33,7 +33,7 @@ package javax.enterprise.inject;
  * When bean creation fails, the injection
  * {@link javax.enterprise.inject.spi.BeanManager} will throw this exception.
  */
-public class CreationException extends ExecutionException
+public class CreationException extends InjectionException
 {
   public CreationException()
   {

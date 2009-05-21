@@ -55,18 +55,18 @@ import java.io.Serializable;
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.ScopeType;
-import javax.event.IfExists;
-import javax.event.Observes;
+import javax.enterprise.event.IfExists;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.Current;
-import javax.enterprise.inject.DeploymentType;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Production;
 import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.deployment.DeploymentType;
+import javax.enterprise.inject.deployment.Production;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -589,8 +589,9 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   {
     if (_bindings.size() == 0) {
       for (Annotation ann : annotations) {
-	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
 	  addBinding(ann);
+	}
       }
     }
 
@@ -789,55 +790,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Introspects any observers.
    */
-  protected void introspectObservers(AnnotatedType beanType)
+  protected void introspectObservers(AnnotatedType<?> beanType)
   {
-    ArrayList<AnnotatedMethod> methods
-      = new ArrayList<AnnotatedMethod>(beanType.getMethods());
-				  
-    Collections.sort(methods, new MethodNameComparator());
-    
-    for (AnnotatedMethod beanMethod : methods) {
-      int param = findObserverAnnotation(beanMethod);
-
-      if (param < 0)
-	continue;
-
-      Method method = beanMethod.getJavaMember();
-      Type eventType = method.getGenericParameterTypes()[param];
-
-      ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
-      
-      Annotation [][]annList = method.getParameterAnnotations();
-      if (annList != null && annList[param] != null) {
-	for (Annotation ann : annList[param]) {
-	  if (ann.annotationType().equals(IfExists.class))
-	    continue;
-	  
-	  if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	    bindingList.add(ann);
-	}
-      }
-
-      if (method.isAnnotationPresent(Initializer.class)) {
-	throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Initializer annotation."));
-      }
-
-      if (method.isAnnotationPresent(Produces.class)) {
-	throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Produces annotation."));
-      }
-
-      if (method.isAnnotationPresent(Disposes.class)) {
-	throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Disposes annotation."));
-      }
-
-      Annotation []bindings = new Annotation[bindingList.size()];
-      bindingList.toArray(bindings);
-
-      ObserverImpl observer
-	= new ObserverImpl(_beanManager, this, method, param);
-
-      _beanManager.addObserver(observer, (Class) eventType, bindings);
-    }
   }
 
   /**
@@ -986,7 +940,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
     return Serializable.class.isAssignableFrom(getTargetClass());
   }

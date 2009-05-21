@@ -177,7 +177,7 @@ public class ConfigContext implements CreationalContext {
 
   public boolean canInject(ScopeContext scope)
   {
-    return _dependentScope == null || _dependentScope.canInject(scope);
+    return _dependentScope != null && _dependentScope.canInject(scope);
   }
 
   public boolean canInject(Class scopeType)

@@ -11,7 +11,14 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0 snapshot">
+<s2 title="4.0.0">
+<ul>
+<li>server: UTF8Reader with byte-order-mark needs to read full next character (#3525, rep by Fiaz Hossain)</li>
+<li>jca: max-active-time default needs to changed to Long.MAX_VALUE instead of Integer.MAX_VALUE (rep by KC Baltz)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.0">
 <ul>
 <li>log: SyslogHandler has improper initialization (rep by Michael Glenney)</li>
 <li>class loader: remove potential classloadering deadlock based on ClassEntry lock (#3423, rep by stbu)</li>

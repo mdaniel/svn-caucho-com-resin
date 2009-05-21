@@ -41,6 +41,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InterceptorBindingType;
+import javax.interceptor.InvocationContext;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -48,7 +49,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 /**
  * InterceptorBean represents a Java interceptor
  */
-public class InterceptorBean implements Interceptor
+public class InterceptorBean<X> implements Interceptor<X>
 {
   private static final L10N L = new L10N(InterceptorBean.class);
 
@@ -125,7 +126,7 @@ public class InterceptorBean implements Interceptor
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
     return false;
   }
@@ -173,7 +174,7 @@ public class InterceptorBean implements Interceptor
   /**
    * Returns the bean's binding types
    */
-  public Set<Annotation> getInterceptorBindingTypes()
+  public Set<Annotation> getInterceptorBindings()
   {
     return _bindings;
   }
@@ -202,6 +203,14 @@ public class InterceptorBean implements Interceptor
     default:
       return null;
     }
+  }
+
+  /**
+   * Returns the bean's deployment type
+   */
+  public boolean intercepts(InterceptionType type)
+  {
+    return false;
   }
 
   public Object create(CreationalContext creationalContext)
@@ -265,6 +274,16 @@ public class InterceptorBean implements Interceptor
 	_bindings.add(ann);
       }
     }
+  }
+
+  /**
+   * Invokes the callback
+   */
+  public Object intercept(InterceptionType type,
+			  X instance,
+			  InvocationContext ctx)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**

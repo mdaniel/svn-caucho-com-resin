@@ -34,7 +34,7 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
-import javax.enterprise.inject.Production;
+import javax.enterprise.inject.deployment.Production;
 
 /**
  * Component for a singleton beans

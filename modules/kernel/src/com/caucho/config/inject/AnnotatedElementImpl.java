@@ -32,7 +32,7 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -46,7 +46,8 @@ public class AnnotatedElementImpl implements Annotated
 {
   private Type _type;
   
-  private HashSet<Annotation> _annSet = new HashSet<Annotation>();
+  private LinkedHashSet<Annotation> _annSet
+    = new LinkedHashSet<Annotation>();
   
   protected AnnotatedElementImpl(Type type, Annotation []annList)
   {

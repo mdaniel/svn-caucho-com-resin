@@ -36,7 +36,7 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.event.Observer;
+import javax.enterprise.event.Observer;
 import javax.enterprise.inject.TypeLiteral;
 
 /**
@@ -89,7 +89,7 @@ public interface BeanManager
   /**
    * Internal callback during creation to get a new injection instance.
    */
-  public void validation(InjectionPoint injectionPoint);
+  public void validate(InjectionPoint injectionPoint);
 
   //
   // Bean resolution
@@ -145,10 +145,33 @@ public interface BeanManager
    * the scope of the bean, so a singleton will return the single bean.
    *
    * @param bean the metadata for the bean
+   * @param beanType the expected type
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getReference(Bean<T> bean);
+  public Object getReference(Bean<?> bean, Type beanType);
+
+  /**
+   * Returns an instance for the given bean.  This method will obey
+   * the scope of the bean, so a singleton will return the single bean.
+   *
+   * @param bean the metadata for the bean
+   * @param beanType the expected type
+   *
+   * @return an instance of the bean obeying scope
+   */
+  public <T> T getReference(Bean<? extends T> bean, Class<T> beanType);
+
+  /**
+   * Returns an instance for the given bean.  This method will obey
+   * the scope of the bean, so a singleton will return the single bean.
+   *
+   * @param bean the metadata for the bean
+   * @param beanType the expected type
+   *
+   * @return an instance of the bean obeying scope
+   */
+  public <T> T getReference(Bean<? extends T> bean, TypeLiteral<T> beanType);
 
   /**
    * Internal callback during creation to get a new injection instance.
@@ -290,8 +313,8 @@ public interface BeanManager
    *
    * @return the matching interceptors
    */
-  public List<Interceptor> resolveInterceptors(InterceptionType type,
-					       Annotation... bindings);
+  public List<Interceptor<?>> resolveInterceptors(InterceptionType type,
+						  Annotation... bindings);
   
 
   //
@@ -311,8 +334,8 @@ public interface BeanManager
    *
    * @return the matching interceptors
    */
-  public List<Decorator> resolveDecorators(Set<Class<?>> types,
-					   Annotation... bindings);
+  public List<Decorator<?>> resolveDecorators(Set<Type> types,
+					      Annotation... bindings);
 
   //
   // Actitivities

@@ -41,5 +41,5 @@ public interface AnnotatedConstructor<X> extends AnnotatedCallable<X>
   /**
    * Returns the reflected Constructor
    */
-  public Constructor getJavaMember();
+  public Constructor<X> getJavaMember();
 }

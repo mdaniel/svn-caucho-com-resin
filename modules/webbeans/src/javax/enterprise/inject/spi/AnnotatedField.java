@@ -35,7 +35,7 @@ import java.lang.reflect.Field;
 /**
  * Abstract introspected view of a Bean injectible field
  */
-public interface AnnotatedField<X> extends Annotated
+public interface AnnotatedField<X> extends AnnotatedMember<X>
 {
   /**
    * Returns the reflected Field

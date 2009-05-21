@@ -32,19 +32,27 @@ package javax.enterprise.inject.spi;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
+import javax.interceptor.InvocationContext;
 
 /**
  * Metadata for for an interceptor
  */
-public interface Interceptor extends Bean<Object>
+public interface Interceptor<T> extends Bean<T>
 {
   /**
    * Returns the bindings for the interceptor
    */
-  public Set<Annotation> getInterceptorBindingTypes();
+  public Set<Annotation> getInterceptorBindings();
 
   /**
-   * Returns the intercepted method for a type
+   * Returns true if the interceptor intercepts the given type.
    */
-  public Method getMethod(InterceptionType type);
+  public boolean intercepts(InterceptionType type);
+
+  /**
+   * Invokes the callback
+   */
+  public Object intercept(InterceptionType type,
+			  T instance,
+			  InvocationContext ctx);
 }

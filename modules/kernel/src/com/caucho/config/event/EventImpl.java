@@ -31,8 +31,8 @@ package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
 
-import javax.event.Event;
-import javax.event.Observer;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observer;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.TypeLiteral;
 

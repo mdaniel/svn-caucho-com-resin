@@ -119,7 +119,7 @@ public class DecoratorBean implements Decorator
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
     return false;
   }
@@ -138,6 +138,14 @@ public class DecoratorBean implements Decorator
   public Set<Type> getTypes()
   {
     return _bean.getTypes();
+  }
+
+  /**
+   * Returns the types for the decorated
+   */
+  public Set<Type> getDecoratedTypes()
+  {
+    throw new UnsupportedOperationException();
   }
 
   //
@@ -199,7 +207,7 @@ public class DecoratorBean implements Decorator
   /**
    * Returns the bindings for the delegated object
    */
-  public Set<Annotation> getDelegateBindingTypes()
+  public Set<Annotation> getDelegateBindings()
   {
     return _bindings;
   }

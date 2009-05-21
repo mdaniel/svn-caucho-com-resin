@@ -47,6 +47,8 @@ import javax.enterprise.inject.spi.InjectionTarget;
  */
 public class RequestScope extends ScopeContext
 {
+  private ScopeIdMap _idMap = new ScopeIdMap();
+  
   /**
    * Returns true if the scope is currently active.
    */
@@ -72,9 +74,9 @@ public class RequestScope extends ScopeContext
     if (request == null)
       return null;
 
-    ComponentImpl comp = (ComponentImpl) bean;
+    Bean comp = (Bean) bean;
 
-    Object result = request.getAttribute(comp.getScopeId());
+    Object result = request.getAttribute(_idMap.getId(comp));
 
     return (T) result;
   }
@@ -87,16 +89,18 @@ public class RequestScope extends ScopeContext
     if (request == null)
       return null;
 
-    ComponentImpl comp = (ComponentImpl) bean;
+    Bean comp = (Bean) bean;
 
-    Object result = request.getAttribute(comp.getScopeId());
+    String id = _idMap.getId(comp);
+    
+    Object result = request.getAttribute(id);
 
     if (result != null || creationalContext == null)
       return (T) result;
     
     result = comp.create(creationalContext);
 
-    request.setAttribute(comp.getScopeId(), result);
+    request.setAttribute(id, result);
     
     return (T) result;
   }

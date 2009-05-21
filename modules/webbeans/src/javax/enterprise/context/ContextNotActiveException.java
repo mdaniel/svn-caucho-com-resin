@@ -28,13 +28,13 @@
 
 package javax.enterprise.context;
 
-import javax.enterprise.inject.ExecutionException;
+import javax.enterprise.inject.InjectionException;
 
 /**
  * Exception thrown when a webbean definition is inconsistent or invalid
  */
 
-public class ContextNotActiveException extends ExecutionException
+public class ContextNotActiveException extends InjectionException
 {
   public ContextNotActiveException()
   {

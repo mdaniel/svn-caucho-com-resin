@@ -51,6 +51,11 @@ public interface InjectionTarget<X>
   public void inject(X instance, CreationalContext<X> ctx);
   
   /**
+   * PostConstruct initialization
+   */
+  public void postConstruct(X instance, CreationalContext<X> ctx);
+  
+  /**
    * Call pre-destroy
    */
   public void dispose(X instance);

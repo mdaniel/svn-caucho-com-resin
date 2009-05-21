@@ -48,17 +48,18 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
+import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.event.*;
-import javax.interceptor.InterceptorBindingType;
+import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.interceptor.InterceptorBindingType;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 public class ManagedBeanImpl<X> extends ComponentImpl<X>
-  implements ManagedBean<X>, InjectionTarget<X>
+  implements ManagedBean<X>, ScopeAdapterBean
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
   private static final Logger log
@@ -75,8 +76,10 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
   private Constructor _javaCtor;
   private Arg []_args;
 
+  private InjectionTarget<X> _injectionTarget;
+
   private Set<InjectionPoint> _injectionPointSet
-    = new HashSet<InjectionPoint>();
+    = new LinkedHashSet<InjectionPoint>();
 
   private ArrayList<ConfigProgram> _injectProgramList
     = new ArrayList<ConfigProgram>();
@@ -92,12 +95,14 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
   private Class _mbeanInterface;
 
   private HashSet<ProducerBean<X,?>> _producerBeans
-    = new HashSet<ProducerBean<X,?>>();
+    = new LinkedHashSet<ProducerBean<X,?>>();
 
   private HashSet<ObserverMethod<X,?>> _observerMethods
-    = new HashSet<ObserverMethod<X,?>>();
+    = new LinkedHashSet<ObserverMethod<X,?>>();
 
-  public ManagedBeanImpl(InjectManager webBeans, AnnotatedType beanType)
+  public ManagedBeanImpl(InjectManager webBeans,
+			 AnnotatedType beanType,
+			 InjectionTarget<X> injectionTarget)
   {
     super(webBeans);
 
@@ -109,6 +114,8 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
     setTargetType(beanType.getType());
 
     introspect(_beanType);
+
+    _injectionTarget = injectionTarget;
   }
 
   public AnnotatedType getAnnotatedType()
@@ -118,7 +125,7 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
 
   public InjectionTarget getInjectionTarget()
   {
-    return this;
+    return _injectionTarget;
   }
 
   /**
@@ -266,8 +273,9 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
    */
   public X create(CreationalContext<X> context)
   {
-    X instance = produce(context);
-    inject(instance, context);
+    X instance = _injectionTarget.produce(context);
+    _injectionTarget.inject(instance, context);
+    _injectionTarget.postConstruct(instance, context);
 
     return instance;
   }
@@ -291,7 +299,6 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
   // InjectionTarget
   //
 
-  @Override
   public X produce(CreationalContext contextEnv)
   {
     try {
@@ -356,8 +363,10 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
 
     ConfigContext env = (ConfigContext) cxt;
 
+    ScopeType scopeType = getScopeType().getAnnotation(ScopeType.class);
+    
     // ioc/0520
-    if (! env.canInject(_scope)) {
+    if (scopeType != null && scopeType.normal() && ! env.canInject(_scope)) {
       Object value = _scopeAdapter;
 	
       if (value == null) {
@@ -591,6 +600,7 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
     introspectConstructor(beanType);
     introspectBindings(beanType);
     introspectName(beanType);
+    introspectScope(beanType.getAnnotations());
 
     introspectInject(beanType);
 
@@ -602,6 +612,10 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
 
     _injectProgram = new ConfigProgram[_injectProgramList.size()];
     _injectProgramList.toArray(_injectProgram);
+    
+    if (getScopeType() != null) {
+      _scope = _beanManager.getScopeContext(getScopeType());
+    }
   }
 
   /**
@@ -736,6 +750,85 @@ public class ManagedBeanImpl<X> extends ComponentImpl<X>
     bean.init();
 
     _producerBeans.add(bean);
+  }
+
+  /**
+   * Introspects the methods for any @Produces
+   */
+  protected void introspectObservers(AnnotatedType<?> beanType)
+  {
+    for (AnnotatedMethod<?> beanMethod : beanType.getMethods()) {
+      for (AnnotatedParameter param : beanMethod.getParameters()) {
+	if (param.isAnnotationPresent(Observes.class)) {
+	  addObserver(beanMethod);
+	  break;
+	}
+      }
+    }
+  }
+  
+  protected void addObserver(AnnotatedMethod beanMethod)
+  {
+    int param = findObserverAnnotation(beanMethod);
+
+    if (param < 0)
+      return;
+
+    Method method = beanMethod.getJavaMember();
+    Type eventType = method.getGenericParameterTypes()[param];
+
+    HashSet<Annotation> bindingSet = new HashSet<Annotation>();
+      
+    Annotation [][]annList = method.getParameterAnnotations();
+    if (annList != null && annList[param] != null) {
+      for (Annotation ann : annList[param]) {
+	if (ann.annotationType().equals(IfExists.class))
+	  continue;
+	  
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  bindingSet.add(ann);
+      }
+    }
+
+    if (method.isAnnotationPresent(Initializer.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Initializer annotation."));
+    }
+
+    if (method.isAnnotationPresent(Produces.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Produces annotation."));
+    }
+
+    if (method.isAnnotationPresent(Disposes.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Disposes annotation."));
+    }
+
+    ObserverMethodImpl observerMethod
+      = new ObserverMethodImpl(_beanManager, this, beanMethod,
+			       eventType, bindingSet);
+
+    _observerMethods.add(observerMethod);
+  }
+
+  private <X> int findObserverAnnotation(AnnotatedMethod<X> method)
+  {
+    List<AnnotatedParameter<X>> params = method.getParameters();
+    int size = params.size();
+    int observer = -1;
+
+    for (int i = 0; i < size; i++) {
+      AnnotatedParameter param = params.get(i);
+      
+      for (Annotation ann : param.getAnnotations()) {
+	if (ann instanceof Observes) {
+	  if (observer >= 0)
+	    throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
+	  
+	  observer = i;
+	}
+      }
+    }
+
+    return observer;
   }
 
   /**

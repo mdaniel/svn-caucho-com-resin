@@ -32,8 +32,7 @@ package javax.enterprise.inject;
 /**
  * Exception during runtime for webbeans
  */
-
-public class IllegalProductException extends ExecutionException
+public class IllegalProductException extends InjectionException
 {
   public IllegalProductException()
   {

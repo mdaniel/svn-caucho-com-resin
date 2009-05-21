@@ -166,6 +166,13 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
     return this;
   }
 
+  public T create(CreationalContext<T> createEnv)
+  {
+    T instance = produce(createEnv);
+
+    return instance;
+  }
+  
   public T produce(CreationalContext<T> createEnv)
   {
     ConfigContext env = (ConfigContext) createEnv;
@@ -181,6 +188,10 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
   }
 
   public void inject(T instance, CreationalContext<T> createEnv)
+  {
+  }
+
+  public void postConstruct(T instance, CreationalContext<T> createEnv)
   {
   }
   

@@ -59,13 +59,13 @@ public class EjbUtil {
 					 InterceptionType type,
 					 Annotation ...bindings)
   {
-    List<Interceptor> interceptors;
+    List<Interceptor<?>> interceptors;
 
     if (bindings != null && bindings.length > 0) {
       interceptors = manager.resolveInterceptors(type, bindings);
     }
     else
-      interceptors = new ArrayList<Interceptor>();
+      interceptors = new ArrayList<Interceptor<?>>();
 
     int offset = 0;
 
@@ -103,8 +103,9 @@ public class EjbUtil {
 
     for (int i = 0; i < indexChain.length; i++) {
       int index = indexChain[i];
-      
-      Method method = beans.get(index).getMethod(type);
+
+      // XXX:
+      Method method = null; // beans.get(index).getMethod(type);
 
       if (method == null)
 	throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
@@ -153,7 +154,8 @@ public class EjbUtil {
 
       Object instance = webBeans.getReference(bean);
 
-      bean.setDelegate(instance, tail);
+      // XXX:
+      // bean.setDelegate(instance, tail);
 
       tail = instance;
     }
@@ -172,7 +174,8 @@ public class EjbUtil {
 
       Object instance = webBeans.getReference(bean);
 
-      bean.setDelegate(instance, proxy);
+      // XXX:
+      // bean.setDelegate(instance, proxy);
 
       instances[beans.size() - 1 - i] = instance;
     }

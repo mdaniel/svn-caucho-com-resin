@@ -32,7 +32,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.deployment.DeploymentType;
 
 /**
  * Disables deployment for a bean by default, forcing configuration in an

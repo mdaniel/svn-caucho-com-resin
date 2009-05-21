@@ -30,27 +30,27 @@
 package javax.enterprise.inject.spi;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Set;
 import javax.enterprise.inject.Stereotype;
 
 /**
  * Internal implementation for a Decorator
  */
-public interface Decorator extends Bean<Object>
+public interface Decorator<T> extends Bean<T>
 {
+  /**
+   * Returns the type of the decorated object
+   */
+  public Set<Type> getDecoratedTypes();
+
   /**
    * Returns the type of the delegated object
    */
-  public Class<?> getDelegateType();
+  public Type getDelegateType();
 
   /**
    * Returns the bindings for the delegated object
    */
-  public Set<Annotation> getDelegateBindingTypes();
-
-  /**
-   * Sets the delegate for an object
-   */
-  public void setDelegate(Object instance,
-				   Object delegate);
+  public Set<Annotation> getDelegateBindings();
 }

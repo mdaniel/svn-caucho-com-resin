@@ -34,7 +34,7 @@ package javax.enterprise.inject;
  * with the same annotationType are passed to
  * a {@link javax.enterprise.inject.spi.BeanManager} method, this exception is thrown.
  */
-public class DuplicateBindingTypeException extends ExecutionException
+public class DuplicateBindingTypeException extends InjectionException
 {
   public DuplicateBindingTypeException()
   {

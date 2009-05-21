@@ -52,7 +52,7 @@ import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.deployment.DeploymentType;
 import javax.naming.*;
 
 /**

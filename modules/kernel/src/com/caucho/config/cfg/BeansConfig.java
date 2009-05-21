@@ -50,8 +50,8 @@ import java.util.zip.*;
 
 import javax.annotation.PostConstruct;
 import javax.decorator.Decorator;
-import javax.enterprise.inject.DeploymentType;
-import javax.enterprise.inject.Standard;
+import javax.enterprise.inject.deployment.DeploymentType;
+import javax.enterprise.inject.deployment.Standard;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.ManagedBean;
 import javax.enterprise.inject.spi.ProducerBean;

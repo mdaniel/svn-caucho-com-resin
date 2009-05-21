@@ -53,10 +53,11 @@ import java.util.logging.*;
 import javax.ejb.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.Conversation;
-import javax.event.Observes;
+import javax.enterprise.event.Observes;
 import javax.management.*;
 import javax.transaction.*;
 import javax.enterprise.inject.*;
+import javax.enterprise.inject.deployment.Standard;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 

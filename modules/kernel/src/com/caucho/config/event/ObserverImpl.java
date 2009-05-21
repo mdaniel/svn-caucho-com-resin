@@ -32,9 +32,9 @@ package com.caucho.config.event;
 import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
-import javax.event.Observer;
-import javax.event.Observes;
-import javax.event.IfExists;
+import javax.enterprise.event.Observer;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.IfExists;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.inject.spi.Bean;
 

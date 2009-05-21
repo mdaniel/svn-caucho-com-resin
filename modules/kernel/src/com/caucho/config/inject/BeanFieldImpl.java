@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,11 @@ public class BeanFieldImpl
   public Field getJavaMember()
   {
     return _field;
+  }
+
+  public boolean isStatic()
+  {
+    return Modifier.isStatic(_field.getModifiers());
   }
 
   private void introspect(Field field)

@@ -84,7 +84,7 @@ import com.caucho.vfs.WriteStream;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
-import javax.enterprise.inject.Standard;
+import javax.enterprise.inject.deployment.Standard;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InterruptedIOException;

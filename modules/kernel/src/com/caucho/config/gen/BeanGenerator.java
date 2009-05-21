@@ -66,8 +66,8 @@ abstract public class BeanGenerator extends GenClass
 
   private Annotation []_interceptorBindings;
 
-  private ArrayList<Class> _decorators
-    = new ArrayList<Class>();
+  private ArrayList<Type> _decorators
+    = new ArrayList<Type>();
 
   private HashMap<Method,Annotation[]> _methodAnnotations
     = new HashMap<Method,Annotation[]>();
@@ -200,18 +200,20 @@ abstract public class BeanGenerator extends GenClass
     
     InjectManager webBeans = InjectManager.create();
 
-    HashSet<Class<?>> types = new HashSet<Class<?>>();
+    HashSet<Type> types = new HashSet<Type>();
     for (Class iface : cl.getInterfaces()) {
       fillTypes(types, iface);
     }
 
-    List<Decorator> decorators = webBeans.resolveDecorators(types, _bindings);
+    List<Decorator<?>> decorators
+      = webBeans.resolveDecorators(types, _bindings);
     for (Decorator decorator : decorators) {
-      fillTypes(_decorators, decorator.getDelegateType());
+      // XXX:
+      fillTypes(_decorators, (Class) decorator.getDelegateType());
     }
   }
 
-  protected void fillTypes(HashSet<Class<?>> types, Class type)
+  protected void fillTypes(HashSet<Type> types, Class type)
   {
     if (type == null)
       return;
@@ -225,7 +227,7 @@ abstract public class BeanGenerator extends GenClass
     }
   }
 
-  protected void fillTypes(ArrayList<Class> types, Class type)
+  protected void fillTypes(ArrayList<Type> types, Class type)
   {
     if (type == null || types.contains(type))
       return;
@@ -242,7 +244,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Returns the decorator classes
    */
-  public ArrayList<Class> getDecoratorTypes()
+  public ArrayList<Type> getDecoratorTypes()
   {
     return _decorators;
   }

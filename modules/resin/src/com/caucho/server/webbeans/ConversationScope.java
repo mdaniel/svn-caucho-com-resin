@@ -38,7 +38,6 @@ import com.caucho.server.dispatch.ServletInvocation;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-import javax.context.*;
 import javax.faces.*;
 import javax.faces.context.*;
 import javax.faces.component.*;

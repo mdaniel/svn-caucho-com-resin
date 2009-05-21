@@ -97,7 +97,7 @@ public class InjectionPointBean<T> implements Bean<T>
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

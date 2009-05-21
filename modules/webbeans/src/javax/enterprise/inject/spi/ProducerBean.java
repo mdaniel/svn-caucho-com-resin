@@ -43,7 +43,7 @@ public interface ProducerBean<X,T> extends Bean<T>
   /**
    * Returns the owning producer
    */
-  public AnnotatedMethod<X> getAnnotatedProducer();
+  public AnnotatedMember<X> getAnnotatedProducer();
   
   /**
    * Returns the owning disposer

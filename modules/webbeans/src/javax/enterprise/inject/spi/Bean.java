@@ -73,7 +73,7 @@ public interface Bean<T> extends Contextual<T>
   /**
    * Returns true if the bean is serializable
    */
-  public abstract boolean isSerializable();
+  public abstract boolean isPassivationCapable();
 
   /**
    * Returns the bean's scope type.

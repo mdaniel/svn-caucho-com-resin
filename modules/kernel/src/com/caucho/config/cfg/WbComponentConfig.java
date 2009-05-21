@@ -56,8 +56,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.context.ScopeType;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.DeploymentType;
 import javax.enterprise.inject.Initializer;
+import javax.enterprise.inject.deployment.DeploymentType;
 
 /**
  * Configuration for the xml web bean component.

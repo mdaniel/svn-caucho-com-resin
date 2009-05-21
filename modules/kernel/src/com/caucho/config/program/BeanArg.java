@@ -50,7 +50,6 @@ import java.lang.annotation.*;
 import javax.annotation.*;
 import javax.enterprise.context.ScopeType;
 import javax.enterprise.inject.BindingType;
-import javax.enterprise.inject.DeploymentType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
@@ -109,6 +108,6 @@ public class BeanArg extends Arg {
       bind();
 
     // XXX: getInstance for injection?
-    return _beanManager.getReference(_bean);
+    return _beanManager.getReference(_bean, _type);
   }
 }

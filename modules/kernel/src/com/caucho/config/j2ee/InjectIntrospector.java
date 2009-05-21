@@ -53,7 +53,7 @@ import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.spi.Bean;
 import javax.interceptor.*;
 import javax.persistence.*;
-import javax.event.Observes;
+import javax.enterprise.event.Observes;
 //import javax.xml.ws.WebServiceRef;
 
 import java.beans.Introspector;

@@ -86,13 +86,9 @@ public class SessionScope extends ScopeContext {
 
     return (T) result;
   }
-  /*  
+
   public <T> T get(Contextual<T> bean,
 		   CreationalContext<T> creationalContext)
-  {
-  */
-  
-  public <T> T get(InjectionTarget<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
@@ -104,23 +100,12 @@ public class SessionScope extends ScopeContext {
 
     Object result = session.getAttribute(comp.getScopeId());
 
-    if (result != null)
+    if (result != null || creationalContext == null)
       return (T) result;
-
-    result = comp.instantiate();
+    
+    result = comp.create(creationalContext);
 
     session.setAttribute(comp.getScopeId(), result);
-    boolean isValid = false;
-
-    try {
-      comp.inject(result);
-      comp.postConstruct(result);
-      
-      isValid = true;
-    } finally {
-      if (! isValid)
-	session.removeAttribute(comp.getScopeId());
-    }
     
     return (T) result;
   }

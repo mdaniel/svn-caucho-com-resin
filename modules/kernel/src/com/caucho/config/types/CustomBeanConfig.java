@@ -50,7 +50,7 @@ import java.lang.annotation.*;
 import javax.annotation.*;
 import javax.enterprise.context.ScopeType;
 import javax.enterprise.inject.BindingType;
-import javax.enterprise.inject.DeploymentType;
+import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
@@ -435,6 +435,8 @@ public class CustomBeanConfig {
     */
 
     InjectManager beanManager = InjectManager.create();
+
+    beanManager.addConfiguredClass(_annotatedType.getJavaClass().getName());
     
     ManagedBean<?> managedBean = beanManager.createManagedBean(_annotatedType);
 

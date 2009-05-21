@@ -79,7 +79,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
   private ResourceAdapter _ra;
 
   private int _maxConnections = 1024;
-  private long _maxActiveTime = Integer.MAX_VALUE;
+  private long _maxActiveTime = Long.MAX_VALUE / 2;
 
   public ConnectionFactoryConfig()
   {

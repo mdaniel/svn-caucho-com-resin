@@ -122,8 +122,10 @@ public class UTF8Reader extends EncodingReader {
 
       int ch = ((ch1 & 0x1f) << 12) + ((ch2 & 0x3f) << 6) + (ch3 & 0x3f);
 
-      if (ch == 0xfeff) // handle some writers, e.g. microsoft
-        return is.read();
+      if (ch == 0xfeff) { // If byte-order-mark, read next character
+	// server/1m00
+        return read();
+      }
       else
         return ch;
     }
@@ -147,8 +149,8 @@ public class UTF8Reader extends EncodingReader {
       if (ch4 < 0)
         throw new EOFException("unexpected end of file in utf8 character");
       else if ((ch4 & 0xc0) != 0x80)
-        throw new CharConversionException("illegal utf8 encoding at 0x" +
-					  Integer.toHexString(ch4));
+        throw new CharConversionException("illegal utf8 encoding at 0x"
+					  + Integer.toHexString(ch4));
       
       int ch = (((ch1 & 0xf) << 18) +
 		((ch2 & 0x3f) << 12) +
@@ -160,8 +162,8 @@ public class UTF8Reader extends EncodingReader {
       return 0xd800 + ((ch - 0x10000) / 0x400);
     }
     else
-      throw new CharConversionException("illegal utf8 encoding at (" +
-                                        (int) ch1 + ")");
+      throw new CharConversionException("illegal utf8 encoding at (0x"
+					+ Integer.toHexString(ch1) + ")");
   }
 
   /**

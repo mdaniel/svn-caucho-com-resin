@@ -102,10 +102,10 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.*;
-import javax.event.Observer;
+import javax.enterprise.event.Observer;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.Initialized;
+//import javax.enterprise.inject.spi.Initialized;
 import javax.enterprise.inject.spi.BeanManager;
 import java.io.File;
 import java.io.IOException;
@@ -2080,9 +2080,11 @@ public class WebApp extends ServletContextImpl
 	log.log(Level.FINEST, e.toString(), e);
       }
 
+      /*
       _webBeans.addObserver(new WebBeansObserver(),
 			    BeanManager.class,
 			    new AnnotationLiteral<Initialized>() {});
+      */
 
       if (! _metadataComplete)
         _classLoader.addScanListener(this);

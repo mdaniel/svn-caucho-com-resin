@@ -119,7 +119,7 @@ public class InstanceBeanImpl<T> implements Bean<T>
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
     return true;
   }

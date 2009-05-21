@@ -88,6 +88,11 @@ public class BeanConstructorImpl
     return _parameterList;
   }
 
+  public boolean isStatic()
+  {
+    return false;
+  }
+
   private void introspect(Constructor ctor)
   {
     Type []paramTypes = ctor.getGenericParameterTypes();

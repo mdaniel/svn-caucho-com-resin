@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +85,11 @@ public class BeanMethodImpl
   public List<AnnotatedParameter> getParameters()
   {
     return _parameterList;
+  }
+
+  public boolean isStatic()
+  {
+    return Modifier.isStatic(_method.getModifiers());
   }
 
   private void introspect(Method method)

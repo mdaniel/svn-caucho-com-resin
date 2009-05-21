@@ -114,7 +114,7 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
       }
     }
 
-    for (Method method : cl.getMethods()) {
+    for (Method method : cl.getDeclaredMethods()) {
       if (hasBeanAnnotation(method)) {
 	_methodSet.add(new BeanMethodImpl(this, method));
       }
@@ -138,6 +138,14 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   {
     if (hasBeanAnnotation(method.getAnnotations()))
       return true;
+
+    Annotation [][]paramAnn = method.getParameterAnnotations();
+    if (paramAnn != null) {
+      for (int i = 0; i < paramAnn.length; i++) {
+	if (hasBeanAnnotation(paramAnn[i]))
+	  return true;
+      }
+    }
 
     return false;
   }
@@ -165,5 +173,11 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
     String name = annType.getName();
     
     return name.startsWith("javax.");
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _javaClass + "]";
   }
 }

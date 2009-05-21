@@ -34,7 +34,7 @@ import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.enterprise.context.spi.Contextual;
-import javax.event.Observer;
+import javax.enterprise.event.Observer;
 
 /**
  * Internal implementation for a producer Bean

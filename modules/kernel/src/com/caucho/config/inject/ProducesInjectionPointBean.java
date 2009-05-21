@@ -112,9 +112,9 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   /**
    * Returns true if the bean is serializable
    */
-  public boolean isSerializable()
+  public boolean isPassivationCapable()
   {
-    return _producesBean.isSerializable();
+    return _producesBean.isPassivationCapable();
   }
 
   /**

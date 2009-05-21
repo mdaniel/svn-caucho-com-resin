@@ -37,7 +37,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Set;
-import javax.event.Observer;
+import javax.enterprise.event.Observer;
 
 /**
  * Matches bindings

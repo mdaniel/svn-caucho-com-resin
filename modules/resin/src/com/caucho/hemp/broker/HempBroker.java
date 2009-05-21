@@ -57,7 +57,7 @@ import java.lang.annotation.Annotation;
 import java.security.Principal;
 import java.lang.ref.*;
 import java.io.Serializable;
-import javax.event.Observes;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -839,7 +839,7 @@ public class HempBroker implements Broker, ActorStream
       CauchoBean cauchoBean = (CauchoBean) bean;
 
       AbstractActor actor
-	= (AbstractActor) manager.getReference(bean);
+	= manager.getReference(bean, AbstractActor.class);
 
       Annotation []ann = cauchoBean.getAnnotations();
 
