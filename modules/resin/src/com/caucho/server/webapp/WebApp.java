@@ -830,6 +830,7 @@ public class WebApp extends ServletContextImpl
   {
     ServletConfigImpl config = new ServletConfigImpl();
 
+    config.setWebApp(this);
     config.setServletContext(this);
     config.setServletMapper(_servletMapper);
     config.setAllowEL(_servletAllowEL);
@@ -849,70 +850,19 @@ public class WebApp extends ServletContextImpl
     _servletManager.addServlet(config);
   }
 
-  public void addFilter(WebFilter webFilter, String filterClassName)
-    throws Exception
-  {
-    FilterMapping config = new FilterMapping();
-    config.setFilterClass(filterClassName);
-
-    String filterName = webFilter.filterName();
-    if ("".equals(filterName))
-     filterName = filterClassName;
-
-    config.setFilterName(filterName);
-
-    if (webFilter.value().length > 0 &&
-        webFilter.urlPatterns().length == 0 &&
-        webFilter.servletNames().length == 0) {
-      FilterMapping.URLPattern urlPattern = config.createUrlPattern();
-      for (String url : webFilter.value())
-        urlPattern.addText(url);
-
-      urlPattern.init();
-    }
-    else if (webFilter.urlPatterns().length > 0 &&
-             webFilter.value().length == 0 &&
-             webFilter.servletNames().length == 0) {
-      FilterMapping.URLPattern urlPattern = config.createUrlPattern();
-      for (String url : webFilter.urlPatterns())
-        urlPattern.addText(url);
-
-      urlPattern.init();
-    }
-    else if (webFilter.servletNames().length > 0 &&
-             webFilter.value().length == 0 &&
-             webFilter.urlPatterns().length == 0) {
-      for (String servletName : webFilter.servletNames())
-        config.addServletName(servletName);
-    }
-    else {
-      throw new ConfigException(L.l("Annotation @WebFilter at '{0}' must specify either value, urlPatterns or servletNames", filterClassName));
-    }
-
-    for (WebInitParam initParam : webFilter.initParams())
-      config.setInitParam(initParam.name(), initParam.value());
-
-    for (DispatcherType dispatcher : webFilter.dispatcherTypes())
-      config.addDispatcher(dispatcher);
-
-    addFilter(config);
-    addFilterMapping(config);
-  }
-
   public void addServlet(WebServlet webServlet, String servletClassName)
     throws ServletException
   {
-    ServletConfigImpl config = createServlet();
-    config.setServletClass(servletClassName);
+    ServletMapping mapping = createServletMapping();
+    mapping.setServletClass(servletClassName);
 
     String name = webServlet.name();
 
     if (name == null)
       name = servletClassName;
 
-    config.setServletName(name);
+    mapping.setServletName(name);
 
-    ServletMapping mapping = createServletMapping();
     mapping.setServletName(name);
 
     if (webServlet.value().length > 0 && webServlet.urlPatterns().length == 0) {
@@ -929,11 +879,10 @@ public class WebApp extends ServletContextImpl
     }
 
     for (WebInitParam initParam : webServlet.initParams())
-      config.setInitParam(initParam.name(), initParam.value()); //omit description
+      mapping.setInitParam(initParam.name(), initParam.value()); //omit description
 
-    config.setLoadOnStartup(webServlet.loadOnStartup());
+    mapping.setLoadOnStartup(webServlet.loadOnStartup());
 
-    addServlet(config);
     addServletMapping(mapping);
   }
 
@@ -995,6 +944,84 @@ public class WebApp extends ServletContextImpl
     return Collections.unmodifiableMap(result);
   }
 
+
+  public void addFilter(WebFilter webFilter, String filterClassName)
+    throws Exception
+  {
+    FilterMapping config = new FilterMapping();
+    config.setFilterClass(filterClassName);
+
+    String filterName = webFilter.filterName();
+    if ("".equals(filterName))
+     filterName = filterClassName;
+
+    config.setFilterName(filterName);
+
+    if (webFilter.value().length > 0 &&
+        webFilter.urlPatterns().length == 0 &&
+        webFilter.servletNames().length == 0) {
+      FilterMapping.URLPattern urlPattern = config.createUrlPattern();
+      for (String url : webFilter.value())
+        urlPattern.addText(url);
+
+      urlPattern.init();
+    }
+    else if (webFilter.urlPatterns().length > 0 &&
+             webFilter.value().length == 0 &&
+             webFilter.servletNames().length == 0) {
+      FilterMapping.URLPattern urlPattern = config.createUrlPattern();
+      for (String url : webFilter.urlPatterns())
+        urlPattern.addText(url);
+
+      urlPattern.init();
+    }
+    else if (webFilter.servletNames().length > 0 &&
+             webFilter.value().length == 0 &&
+             webFilter.urlPatterns().length == 0) {
+      for (String servletName : webFilter.servletNames())
+        config.addServletName(servletName);
+    }
+    else {
+      throw new ConfigException(L.l("Annotation @WebFilter at '{0}' must specify either value, urlPatterns or servletNames", filterClassName));
+    }
+
+    for (WebInitParam initParam : webFilter.initParams())
+      config.setInitParam(initParam.name(), initParam.value());
+
+    for (DispatcherType dispatcher : webFilter.dispatcherTypes())
+      config.addDispatcher(dispatcher);
+
+    addFilterMapping(config);
+  }
+
+  @Override
+  public FilterRegistration.Dynamic addFilter(String filterName,
+                                              String className)
+  {
+    return addFilter(filterName, className, null);
+  }
+
+  @Override
+  public FilterRegistration.Dynamic addFilter(String filterName,
+                                              Class<? extends Filter> filterClass)
+  {
+    return addFilter(filterName, filterClass.getName(), filterClass);
+  }
+
+  private FilterRegistration.Dynamic addFilter(String filterName,
+                                               String className,
+                                               Class<? extends Filter> filterClass)
+  {
+    throw new UnsupportedOperationException(this.getClass().getName());
+  }
+
+  @Override
+  public FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
+  {
+    return super.addFilter(filterName, filter);
+  }
+
+
   /**
    * Returns the character encoding.
    */
@@ -1034,6 +1061,7 @@ public class WebApp extends ServletContextImpl
   {
     ServletMapping servletMapping = new ServletMapping();
 
+    servletMapping.setWebApp(this);
     servletMapping.setServletContext(this);
     servletMapping.setServletMapper(_servletMapper);
     servletMapping.setStrictMapping(getStrictMapping());

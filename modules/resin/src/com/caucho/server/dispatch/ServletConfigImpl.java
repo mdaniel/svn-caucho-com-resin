@@ -101,6 +101,7 @@ public class ServletConfigImpl
   private Alarm _alarm;
   private InjectionTarget _comp;
 
+  private WebApp _webApp;
   private ServletContext _servletContext;
   private ServletManager _servletManager;
   private ServletMapper _servletMapper;
@@ -163,9 +164,7 @@ public class ServletConfigImpl
 
   public boolean setInitParameter(String name, String value)
   {
-    WebApp webApp = WebApp.getCurrent();
-
-    if (! webApp.isInitializing())
+    if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     if (_initParams.containsKey(name))
@@ -178,14 +177,12 @@ public class ServletConfigImpl
 
   public Set<String> addMapping(String... urlPatterns)
   {
-    WebApp webApp = WebApp.getCurrent();
-
-    if (! webApp.isInitializing())
+    if (! _webApp.isInitializing())
       throw new IllegalStateException();
     
     try {
 
-      ServletMapping mapping = webApp.createServletMapping();
+      ServletMapping mapping = _webApp.createServletMapping();
 
       mapping.setServletName(getServletName());
 
@@ -193,7 +190,7 @@ public class ServletConfigImpl
         mapping.addURLPattern(urlPattern);
       }
 
-      webApp.addServletMapping(mapping);
+      _webApp.addServletMapping(mapping);
 
       Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
 
@@ -213,9 +210,7 @@ public class ServletConfigImpl
 
   public Set<String> setInitParameters(Map<String, String> initParameters)
   {
-    WebApp webApp = WebApp.getCurrent();
-
-    if (! webApp.isInitializing())
+    if (! _webApp.isInitializing())
       throw new IllegalStateException();
     
     Set<String> conflicting = new HashSet<String>();
@@ -237,9 +232,7 @@ public class ServletConfigImpl
 
   public void setAsyncSupported(boolean isAsyncSupported)
   {
-    WebApp webApp = WebApp.getCurrent();
-
-    if (! webApp.isInitializing())
+    if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
@@ -425,6 +418,11 @@ public class ServletConfigImpl
   public void setServletContext(ServletContext app)
   {
     _servletContext = app;
+  }
+
+  public void setWebApp(WebApp webApp)
+  {
+    _webApp = webApp;
   }
 
   /**
