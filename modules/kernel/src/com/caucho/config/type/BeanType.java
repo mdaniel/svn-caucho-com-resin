@@ -41,11 +41,10 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.*;
+import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.attribute.*;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
@@ -641,6 +640,9 @@ public class BeanType extends ConfigType
     fillSetterMap(setterMap, methods);
 
     for (Method method : methods) {
+      if (method.getAnnotation(DisableConfig.class) != null)
+        continue;
+      
       Class []paramTypes = method.getParameterTypes();
 
       String name = method.getName();

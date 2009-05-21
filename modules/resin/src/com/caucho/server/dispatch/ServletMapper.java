@@ -42,6 +42,9 @@ import javax.servlet.ServletException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.Map;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,6 +69,10 @@ public class ServletMapper {
   private ArrayList<String> _ignorePatterns = new ArrayList<String>();
   
   private String _defaultServlet;
+
+  //Servlet 3.0 maps serletName to urlPattern
+  private Map<String, Set<String>> _urlPatterns
+    = new HashMap<String, Set<String>>();
 
   /**
    * Sets the servlet context.
@@ -147,6 +154,16 @@ public class ServletMapper {
       else
         _servletMap.addMap(urlPattern, servletName);
 
+      Set<String> patterns = _urlPatterns.get(servletName);
+
+      if (patterns == null) {
+        patterns = new HashSet<String>();
+
+        _urlPatterns.put(servletName, patterns);
+      }
+
+      patterns.add(urlPattern);
+
       log.config("servlet-mapping " + urlPattern + " -> " + servletName);
     } catch (ServletException e) {
       throw e;
@@ -155,6 +172,10 @@ public class ServletMapper {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  public Set<String> getUrlPatterns(String servletName) {
+    return _urlPatterns.get(servletName);
   }
   
   /**

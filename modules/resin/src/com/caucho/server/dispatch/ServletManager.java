@@ -115,11 +115,16 @@ public class ServletManager {
   }
 
   /**
-   * Adds a servlet to the servlet manager.
+   * Returns ServletConfigImpl to the servlet manager.
    */
   public ServletConfigImpl getServlet(String servletName)
   {
     return _servlets.get(servletName);
+  }
+
+  public HashMap<String, ServletConfigImpl> getServlets()
+  {
+    return _servlets;
   }
 
   /**

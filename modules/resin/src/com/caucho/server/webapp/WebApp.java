@@ -110,11 +110,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -835,6 +831,7 @@ public class WebApp extends ServletContextImpl
     ServletConfigImpl config = new ServletConfigImpl();
 
     config.setServletContext(this);
+    config.setServletMapper(_servletMapper);
     config.setAllowEL(_servletAllowEL);
 
     return config;
@@ -944,10 +941,29 @@ public class WebApp extends ServletContextImpl
   public ServletRegistration.Dynamic addServlet(String servletName,
                                                 String className)
   {
+    return addServlet(servletName, className, null);
+  }
+
+  @Override
+  public ServletRegistration.Dynamic addServlet(String servletName,
+                                                Class<? extends Servlet> servletClass)
+  {
+    return addServlet(servletName, servletClass.getName(), servletClass);
+  }
+
+  private ServletRegistration.Dynamic addServlet(String servletName,
+                                                 String servletClassName,
+                                                 Class<? extends Servlet> servletClass) {
+    if (! isInitializing())
+      throw new IllegalStateException();
+
     try {
       ServletConfigImpl config = createServlet();
       config.setServletName(servletName);
-      config.setServletClass(className);
+      config.setServletClass(servletClassName);
+
+      if (servletClass != null)
+        config.setServletClass(servletClass);
 
       addServlet(config);
 
@@ -957,6 +973,26 @@ public class WebApp extends ServletContextImpl
       //spec declares no throws so far
       throw new RuntimeException(e.getMessage(), e);
     }
+  }
+
+  @Override
+  public ServletRegistration getServletRegistration(String servletName)
+  {
+    return _servletManager.getServlet(servletName);
+  }
+
+  @Override
+  public Map<String, ServletRegistration> getServletRegistrations()
+  {
+    Map<String, ServletConfigImpl> configMap = _servletManager.getServlets();
+
+    Map<String, ServletRegistration> result
+      = new HashMap<String, ServletRegistration>();
+
+    for (String key: configMap.keySet())
+      result.put(key, configMap.get(key));
+
+    return Collections.unmodifiableMap(result);
   }
 
   /**
@@ -999,6 +1035,7 @@ public class WebApp extends ServletContextImpl
     ServletMapping servletMapping = new ServletMapping();
 
     servletMapping.setServletContext(this);
+    servletMapping.setServletMapper(_servletMapper);
     servletMapping.setStrictMapping(getStrictMapping());
 
     return servletMapping;
@@ -2517,6 +2554,11 @@ public class WebApp extends ServletContextImpl
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  public ServletMapper getServletMapper()
+  {
+    return _servletMapper;
   }
 
   /**

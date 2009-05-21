@@ -30,7 +30,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -55,12 +55,7 @@ import javax.servlet.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,6 +103,7 @@ public class ServletConfigImpl
 
   private ServletContext _servletContext;
   private ServletManager _servletManager;
+  private ServletMapper _servletMapper;
 
   private ServletException _initException;
   private long _nextInitTime;
@@ -167,6 +163,11 @@ public class ServletConfigImpl
 
   public boolean setInitParameter(String name, String value)
   {
+    WebApp webApp = WebApp.getCurrent();
+
+    if (! webApp.isInitializing())
+      throw new IllegalStateException();
+
     if (_initParams.containsKey(name))
       return false;
 
@@ -177,26 +178,70 @@ public class ServletConfigImpl
 
   public Set<String> addMapping(String... urlPatterns)
   {
-    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+    WebApp webApp = WebApp.getCurrent();
+
+    if (! webApp.isInitializing())
+      throw new IllegalStateException();
+    
+    try {
+
+      ServletMapping mapping = webApp.createServletMapping();
+
+      mapping.setServletName(getServletName());
+
+      for (String urlPattern : urlPatterns) {
+        mapping.addURLPattern(urlPattern);
+      }
+
+      webApp.addServletMapping(mapping);
+
+      Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
+
+      return Collections.unmodifiableSet(new HashSet<String>(patterns));
+    }
+    catch (ServletException e) {
+      throw new RuntimeException(e.getMessage(), e);
+    }
   }
 
   public Iterable<String> getMappings()
   {
-    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+    Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
+
+    return Collections.unmodifiableSet(new HashSet<String>(patterns));
   }
 
   public Set<String> setInitParameters(Map<String, String> initParameters)
   {
-    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+    WebApp webApp = WebApp.getCurrent();
+
+    if (! webApp.isInitializing())
+      throw new IllegalStateException();
+    
+    Set<String> conflicting = new HashSet<String>();
+
+    for (Map.Entry<String, String> param : initParameters.entrySet()) {
+      if (_initParams.containsKey(param.getKey()))
+        conflicting.add(param.getKey());
+      else
+        _initParams.put(param.getKey(), param.getValue());
+    }
+
+    return Collections.unmodifiableSet(conflicting);
   }
 
   public Map<String, String> getInitParameters()
   {
-    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+    return _initParams;
   }
 
   public void setAsyncSupported(boolean isAsyncSupported)
   {
+    WebApp webApp = WebApp.getCurrent();
+
+    if (! webApp.isInitializing())
+      throw new IllegalStateException();
+
     throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
   }
 
@@ -227,6 +272,7 @@ public class ServletConfigImpl
   /**
    * Sets the servlet class.
    */
+  @Configurable
   public void setServletClass(String servletClassName)
   {
     _servletClassName = servletClassName;
@@ -241,8 +287,16 @@ public class ServletConfigImpl
     }
   }
 
+  @DisableConfig
+  public void setServletClass(Class<? extends Servlet> servletClass) {
+    if (_servletClass != null)
+      throw new IllegalStateException();
+
+    _servletClass = servletClass;
+  }
+
   /**
-   * Gets the servlet name.
+   * Gets the servlet class.
    */
   public Class getServletClass()
   {
@@ -387,6 +441,11 @@ public class ServletConfigImpl
   public void setServletManager(ServletManager manager)
   {
     _servletManager = manager;
+  }
+
+  public void setServletMapper(ServletMapper servletMapper)
+  {
+    _servletMapper = servletMapper;
   }
 
   /**
