@@ -1012,7 +1012,22 @@ public class WebApp extends ServletContextImpl
                                                String className,
                                                Class<? extends Filter> filterClass)
   {
-    throw new UnsupportedOperationException(this.getClass().getName());
+    try {
+      FilterConfigImpl config = new FilterConfigImpl();
+
+      config.setWebApp(this);
+      config.setServletContext(this);
+
+      config.setFilterName(filterName);
+      config.setFilterClass(className);
+      addFilter(config);
+
+      return config;
+    }
+    catch (ClassNotFoundException e) {
+      //spec declares no throws so far.
+      throw new RuntimeException(e.getMessage(), e);
+    }
   }
 
   @Override

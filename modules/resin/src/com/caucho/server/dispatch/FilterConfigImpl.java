@@ -34,20 +34,28 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.InitParam;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.FilterRegistration;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Configuration for a filter.
  */
-public class FilterConfigImpl implements FilterConfig {
+public class FilterConfigImpl
+  implements FilterConfig, FilterRegistration.Dynamic
+{
   private static final L10N L = new L10N(FilterConfigImpl.class);
   
   private String _filterName;
@@ -58,6 +66,7 @@ public class FilterConfigImpl implements FilterConfig {
 
   private ContainerProgram _init;
 
+  private WebApp _webApp;
   private ServletContext _servletContext;
   
   /**
@@ -156,6 +165,11 @@ public class FilterConfigImpl implements FilterConfig {
     return Collections.enumeration(_initParams.keySet());
   }
 
+  public void setWebApp(WebApp webApp)
+  {
+    _webApp = webApp;
+  }
+
   /**
    * Returns the servlet context.
    */
@@ -202,6 +216,97 @@ public class FilterConfigImpl implements FilterConfig {
   public String getDisplayName()
   {
     return _displayName;
+  }
+
+  public void addMappingForServletNames(EnumSet<DispatcherType> dispatcherTypes,
+                                        boolean isMatchAfter,
+                                        String... servletNames)
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
+  }
+
+  public Iterable<String> getServletNameMappings()
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public void addMappingForUrlPatterns(EnumSet<DispatcherType> dispatcherTypes,
+                                       boolean isMatchAfter,
+                                       String... urlPatterns)
+  {
+    try {
+      FilterMapping mapping = new FilterMapping();
+      mapping.setServletContext(_webApp);
+
+      mapping.setFilterName(_filterName);
+
+      FilterMapping.URLPattern urlPattern = mapping.createUrlPattern();
+
+      for (String pattern : urlPatterns) {
+        urlPattern.addText(pattern);
+      }
+
+      urlPattern.init();
+
+      _webApp.addFilterMapping(mapping);
+    }
+    catch (Exception e) {
+      //XXX: needs better exception handling
+      throw new RuntimeException(e.getMessage(), e);
+    }
+  }
+
+  public Iterable<String> getUrlPatternMappings()
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public String getName()
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public String getClassName()
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public boolean setInitParameter(String name, String value)
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return false;
+  }
+
+  public Set<String> setInitParameters(Map<String, String> initParameters)
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public Map<String, String> getInitParameters()
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  public void setAsyncSupported(boolean isAsyncSupported)
+  {
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+
   }
 
   /**
