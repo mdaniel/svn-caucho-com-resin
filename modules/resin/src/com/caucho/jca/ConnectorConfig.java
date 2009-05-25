@@ -30,6 +30,7 @@ package com.caucho.jca;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.type.TypeFactory;
@@ -251,7 +252,7 @@ public class ConnectorConfig implements EnvironmentListener {
       ObjectConfig objectCfg = _rar.getMessageListener(listenerType);
 
       if (objectCfg == null)
-	throw new ConfigException(L.l("`{0}' is an unknown type of <connection-listener> for `{1}'.  The connector has no matching inbound connection-listener.",
+	throw new ConfigException(L.l("'{0}' is an unknown type of <connection-listener> for '{1}'.  The connector has no matching inbound connection-listener.",
 				      listenerType,
 				      _type));
 
@@ -264,7 +265,7 @@ public class ConnectorConfig implements EnvironmentListener {
       try {
 	listenerClass = Class.forName(listenerType, false, loader);
       } catch (Throwable e) {
-	throw new ConfigException(L.l("`{0}' is not a known listener.  The type must match the activation spec for an inbound connection of one of the installed *.rar files or specify an ActivationSpec implementation.",
+	throw new ConfigException(L.l("'{0}' is not a known listener.  The type must match the activation spec for an inbound connection of one of the installed *.rar files or specify an ActivationSpec implementation.",
 				      listenerType), e);
       }
       
@@ -342,26 +343,30 @@ public class ConnectorConfig implements EnvironmentListener {
 
     ResourceManagerImpl.addResource(_ra);
 
-    InjectManager webBeans = InjectManager.create();
+    InjectManager beanManager = InjectManager.create();
+
+    BeanFactory factory = beanManager.createBeanFactory(_ra.getClass());
     
     if (_resourceAdapter.getName() != null) {
       Jndi.bindDeepShort(_resourceAdapter.getName(), _ra);
 
-      webBeans.addSingleton(_ra, _resourceAdapter.getName());
+      beanManager.addBean(factory.name(_resourceAdapter.getName())
+			  .singleton(_ra));
     }
-    else
-      webBeans.addSingleton(_ra, _name);
+    else {
+      beanManager.addBean(factory.name(_name).singleton(_ra));
+    }
 
     // create a default outbound factory
     if (_outboundList.size() == 0 && _jndiName != null && _rar != null) {
       ObjectConfig factoryConfig = _rar.getConnectionDefinition(null);
 
       if (factoryConfig != null) {
-        ConnectionFactory factory = createConnectionFactory();
-        factory.setJndiName(_jndiName);
-        factory.init();
+        ConnectionFactory connFactory = createConnectionFactory();
+        connFactory.setJndiName(_jndiName);
+        connFactory.init();
 
-        addConnectionFactory(factory);
+        addConnectionFactory(connFactory);
       }
     }
 
@@ -686,15 +691,17 @@ public class ConnectorConfig implements EnvironmentListener {
       Object connectionFactory = cm.init(managedFactory);
       cm.start();
 
-      InjectManager webBeans = InjectManager.create();
+      InjectManager manager = InjectManager.create();
+      BeanFactory factory
+	= manager.createBeanFactory(connectionFactory.getClass());
       
       if (getName() != null) {
 	Jndi.bindDeepShort(getName(), connectionFactory);
 
-	webBeans.addSingleton(connectionFactory, getName());
+	factory.name(getName());
       }
-      else
-	webBeans.addSingleton(connectionFactory);
+      
+      manager.addBean(factory.singleton(connectionFactory));
     }
   }
 
@@ -857,7 +864,7 @@ public class ConnectorConfig implements EnvironmentListener {
 	_objectConfig = _rar.getAdminObject(type);
 
 	if (_objectConfig == null)
-	  throw new ConfigException(L.l("`{0}' may not have a <resource> section.  The connector has no matching <adminobject> defined.",
+	  throw new ConfigException(L.l("'{0}' may not have a <resource> section.  The connector has no matching <adminobject> defined.",
 					_type));
 
 	_object = _objectConfig.instantiate();
@@ -869,7 +876,7 @@ public class ConnectorConfig implements EnvironmentListener {
 	  
 	  _object = resourceClass.newInstance();
 	} catch (Exception e) {
-	  throw new ConfigException(L.l("`{0}' is not a known resource.  The type must match the adminobject of one of the installed *.rar files.",
+	  throw new ConfigException(L.l("'{0}' is not a known resource.  The type must match the adminobject of one of the installed *.rar files.",
 					_type), e);
 	}
       
@@ -911,15 +918,18 @@ public class ConnectorConfig implements EnvironmentListener {
       if (_ra != null && resourceObject instanceof ResourceAdapterAssociation)
 	((ResourceAdapterAssociation) resourceObject).setResourceAdapter(_ra);
 
-      InjectManager webBeans = InjectManager.create();
+      InjectManager manager = InjectManager.create();
 
+      BeanFactory factory
+	= manager.createBeanFactory(resourceObject.getClass());
+      
       if (getName() != null) {
 	Jndi.bindDeepShort(getName(), resourceObject);
 
-	webBeans.addSingleton(resourceObject, getName());
+	manager.addBean(factory.name(getName()).singleton(resourceObject));
       }
       else
-	webBeans.addSingleton(resourceObject);
+	manager.addBean(factory.singleton(resourceObject));
     }
   }
 }

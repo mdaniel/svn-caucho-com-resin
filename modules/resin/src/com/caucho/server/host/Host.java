@@ -535,12 +535,10 @@ public class Host extends WebAppContainer
 
     InjectManager webBeans = InjectManager.getCurrent();
 
-    SingletonBean bean
-      = new SingletonBean(_bamBroker, "bamBroker", Broker.class);
-
-    webBeans.addBean(bean);
-
-    webBeans.addRegistrationListener(new BamRegisterListener());
+    webBeans.addBean(webBeans.createBeanFactory(Broker.class)
+		     .name("bamBroker").singleton(_bamBroker));
+    
+    // XXX: webBeans.addRegistrationListener(new BamRegisterListener());
   }
 
   /**

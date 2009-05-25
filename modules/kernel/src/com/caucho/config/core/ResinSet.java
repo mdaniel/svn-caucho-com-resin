@@ -29,6 +29,7 @@
 
 package com.caucho.config.core;
 
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
@@ -88,7 +89,13 @@ public class ResinSet {
    */
   public void setProperty(String name, Object value)
   {
-    InjectManager.create().addSingletonByName(value, name);
+    InjectManager webBeans = InjectManager.create();
+    
+    BeanFactory factory = webBeans.createBeanFactory(value.getClass());
+    factory.name(name);
+    factory.type();
+	
+    webBeans.addBean(factory.singleton(value));
   }
 
   @PostConstruct
@@ -100,11 +107,21 @@ public class ResinSet {
     
     if (_var != null) {
       InjectManager webBeans = InjectManager.create();
-      
-      if (_value != null)
-	webBeans.addSingletonByName(_value, _var);
-      else if (_default != null && webBeans.findByName(_var) == null)
-	webBeans.addSingletonByName(_default, _var);
+
+      if (_value != null) {
+	BeanFactory factory = webBeans.createBeanFactory(_value.getClass());
+	factory.name(_var);
+	factory.type();
+	
+	webBeans.addBean(factory.singleton(_value));
+      }
+      else if (_default != null && webBeans.findByName(_var) == null) {
+	BeanFactory factory = webBeans.createBeanFactory(_default.getClass());
+	factory.name(_var);
+	factory.type();
+	
+	webBeans.addBean(factory.singleton(_default));
+      }
     }
   }
 }

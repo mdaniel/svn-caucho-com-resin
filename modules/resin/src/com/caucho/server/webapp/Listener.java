@@ -38,6 +38,8 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.util.L10N;
 
+import javax.enterprise.inject.spi.InjectionTarget;
+
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;
@@ -58,7 +60,7 @@ public class Listener extends DescriptionGroupConfig {
   // The listener object
   private Object _object;
 
-  private BeanInstance _instance;
+  private InjectionTarget _target;
   
   private ContainerProgram _init;
 
@@ -125,20 +127,15 @@ public class Listener extends DescriptionGroupConfig {
       return _object;
 
     InjectManager webBeans = InjectManager.create();
+    _target = webBeans.createInjectionTarget(_listenerClass);
     
+    _object = _target.produce(null);
+    _target.inject(_object, null);
+
     if (_init != null) {
-      _instance = webBeans.createTransientInstanceNoInit(_listenerClass);
-
-      _object = _instance.getValue();
-
-      _init.configure(_object);
+      // _init.configure(_object);
 
       _init.init(_object);
-    }
-    else {
-      _instance = webBeans.createTransientInstance(_listenerClass);
-
-      _object = _instance.getValue();
     }
 
     return _object;
@@ -146,7 +143,7 @@ public class Listener extends DescriptionGroupConfig {
   
   public void destroy()
   {
-    _instance.destroy();
+    _target.destroy(_object);
   }
 
   public String toString()

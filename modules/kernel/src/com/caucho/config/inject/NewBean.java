@@ -51,6 +51,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.interceptor.InterceptorBindingType;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -62,16 +63,20 @@ import javax.enterprise.inject.spi.InjectionPoint;
  * <li>interceptor bindings are defined by annotations
  *
  */
-public class NewBean extends SimpleBean
+public class NewBean extends AbstractIntrospectedBean
 {
-  NewBean(InjectManager inject, Class type)
+  private AnnotatedType _beanType;
+  
+  NewBean(InjectManager inject, AnnotatedType beanType)
   {
-    super(inject, type);
+    super(inject, beanType.getType(), beanType);
 
-    addBinding(NewLiteral.NEW);
-    setScopeType(Dependent.class);
+    _beanType = beanType;
 
-    init();
+    //addBinding(NewLiteral.NEW);
+    //setScopeType(Dependent.class);
+
+    //init();
   }
 
   /**
@@ -119,6 +124,7 @@ public class NewBean extends SimpleBean
   /**
    * Creates a new instance of the component.
    */
+  /*
     public Object create(CreationalContext env,
 			 InjectionPoint ij)
   {
@@ -128,4 +134,5 @@ public class NewBean extends SimpleBean
     
     return value;
   }
+  */
 }

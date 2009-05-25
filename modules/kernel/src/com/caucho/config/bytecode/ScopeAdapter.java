@@ -33,9 +33,10 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
+import javax.enterprise.inject.spi.Bean;
+
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.*;
 import com.caucho.config.cfg.*;
 import com.caucho.util.*;
@@ -66,7 +67,7 @@ public class ScopeAdapter {
     return adapter;
   }
     
-  public Object wrap(ComponentImpl comp)
+  public Object wrap(Bean comp)
   {
     try {
       Object v = _proxyCtor.newInstance(comp);
@@ -113,24 +114,35 @@ public class ScopeAdapter {
       jClass.setSuperClass(superClassName);
       jClass.setThisClass(thisClassName);
 
-      JavaField jField
-	= jClass.createField("_cxt", "Lcom/caucho/config/inject/ComponentImpl;");
-      jField.setAccessFlags(Modifier.PRIVATE);
+      JavaField managerField
+	= jClass.createField("_manager",
+			     "Lcom/caucho/config/inject/InjectManager;");
+      managerField.setAccessFlags(Modifier.PRIVATE);
+      
+      JavaField beanField
+	= jClass.createField("_cxt", "Ljavax/enterprise/inject/spi/Bean;");
+      beanField.setAccessFlags(Modifier.PRIVATE);
 
       JavaMethod ctor
 	= jClass.createMethod("<init>",
-			      "(Lcom/caucho/config/inject/ComponentImpl;)V");
+			      "(Lcom/caucho/config/inject/InjectManager;"
+			      + "Ljavax/enterprise/inject/spi/Bean)V");
       ctor.setAccessFlags(Modifier.PUBLIC);
       
       CodeWriterAttribute code = ctor.createCodeWriter();
-      code.setMaxLocals(2);
+      code.setMaxLocals(3);
       code.setMaxStack(4);
 
       code.pushObjectVar(0);
       code.invokespecial(superClassName, "<init>", "()V", 1, 0);
       code.pushObjectVar(0);
       code.pushObjectVar(1);
-      code.putField(thisClassName, jField.getName(), jField.getDescriptor());
+      code.putField(thisClassName, managerField.getName(),
+		    managerField.getDescriptor());
+      code.pushObjectVar(0);
+      code.pushObjectVar(2);
+      code.putField(thisClassName, beanField.getName(),
+		    beanField.getDescriptor());
       code.addReturn();
       code.close();
 
@@ -180,14 +192,20 @@ public class ScopeAdapter {
       
     CodeWriterAttribute code = jMethod.createCodeWriter();
     code.setMaxLocals(1 + 2 * parameterTypes.length);
-    code.setMaxStack(2 + 2 * parameterTypes.length);
+    code.setMaxStack(3 + 2 * parameterTypes.length);
 
     code.pushObjectVar(0);
-    code.getField(jClass.getThisClass(), "_cxt",
-		  "Lcom/caucho/config/inject/ComponentImpl;");
+    code.getField(jClass.getThisClass(), "_manager",
+		  "Lcom/caucho/config/inject/InjectManager;");
+
+    code.pushObjectVar(0);
+    code.getField(jClass.getThisClass(), "_bean",
+		  "Ljavax/enterprise/inject/spi/Bean;");
     
-    code.invoke("com/caucho/config/inject/ComponentImpl",
-		"get", "()Ljava/lang/Object;", 1, 1);
+    code.invoke("com/caucho/config/inject/InjectManager",
+		"create",
+		"(Ljavax/enterprise/inject/spi/Bean)Ljava/lang/Object;",
+		1, 1);
     
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));
 

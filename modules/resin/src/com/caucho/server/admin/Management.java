@@ -32,8 +32,8 @@ package com.caucho.server.admin;
 import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.*;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.*;
@@ -255,10 +255,11 @@ public class Management
 	_auth.init();
       
 	InjectManager webBeans = InjectManager.create();
+	BeanFactory factory = webBeans.createBeanFactory(Authenticator.class);
+	factory.type(Authenticator.class);
+	factory.type(AdminAuthenticator.class);
 
-	webBeans.addBean(new SingletonBean(_auth, null,
-					   Authenticator.class,
-					   AdminAuthenticator.class));
+	webBeans.addBean(factory.singleton(_auth));
       }
 
       if (_transactionManager != null)

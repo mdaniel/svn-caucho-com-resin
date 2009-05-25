@@ -33,7 +33,6 @@ import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.MethodComponentProgram;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.program.FieldEventProgram;
 import com.caucho.config.scope.ApplicationScope;
@@ -72,6 +71,7 @@ import javax.enterprise.context.spi.Conversation;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.New;
 import javax.enterprise.inject.Produces;
@@ -82,6 +82,7 @@ import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.deployment.Standard;
 import javax.enterprise.inject.deployment.Production;
+import javax.enterprise.inject.deployment.Specializes;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -171,9 +172,15 @@ public class InjectManager
   private HashSet<String> _configuredClasses
     = new HashSet<String>();
 
+  private ArrayList<AnnotatedType> _pendingAnnotatedTypes
+    = new ArrayList<AnnotatedType>();
+
+  private HashSet<Class> _specializedClasses
+    = new HashSet<Class>();
+
   private HashSet<Class<? extends Annotation>> _deploymentSet
     = new HashSet<Class<? extends Annotation>>();
-
+    
   private HashMap<Class,Integer> _deploymentMap
     = new HashMap<Class,Integer>();
 
@@ -206,8 +213,8 @@ public class InjectManager
   private ArrayList<DecoratorEntry> _decoratorList
     = new ArrayList<DecoratorEntry>();
 
-  private HashMap<String,SoftReference<SimpleBean>> _transientMap
-    = new HashMap<String,SoftReference<SimpleBean>>();
+  private HashMap<String,SoftReference<ManagedBean>> _transientMap
+    = new HashMap<String,SoftReference<ManagedBean>>();
 
   private HashMap<FactoryBinding,Bean> _objectFactoryMap
     = new HashMap<FactoryBinding,Bean>();
@@ -218,11 +225,11 @@ public class InjectManager
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
-  private ArrayList<ComponentImpl> _pendingBindList
-    = new ArrayList<ComponentImpl>();
+  private ArrayList<AbstractBean> _pendingBindList
+    = new ArrayList<AbstractBean>();
 
-  private ArrayList<CauchoBean> _pendingServiceList
-    = new ArrayList<CauchoBean>();
+  private ArrayList<ManagedBean> _pendingServiceList
+    = new ArrayList<ManagedBean>();
 
   private HashMap<Class,InjectProgram> _injectMap
     = new HashMap<Class,InjectProgram>();
@@ -230,8 +237,8 @@ public class InjectManager
   private ArrayList<BeanRegistrationListener> _registrationListenerList
     = new ArrayList<BeanRegistrationListener>();
 
-  private ArrayList<CauchoBean> _pendingRegistrationList
-    = new ArrayList<CauchoBean>();
+  private ArrayList<Bean> _pendingRegistrationList
+    = new ArrayList<Bean>();
 
   private ArrayList<BeanConfigFactory> _customFactoryList
     = new ArrayList<BeanConfigFactory>();
@@ -526,85 +533,6 @@ public class InjectManager
   }
 
   /**
-   * Registers a singleton as a WebBean.  The value will be introspected
-   * for its annotations like a SimpleBean to determine its attributes
-   *
-   * @param value the singleton value to register with the manager
-   */
-  public void addSingleton(Object value, Type... api)
-  {
-    addBean(new SingletonBean(value, null, api));
-  }
-
-  /**
-   * Registers a singleton as a WebBean.  The value will be introspected
-   * for its annotations like a SimpleBean to determine its attributes.
-   * The name parameter override any introspected values.
-   *
-   * @param value the singleton value to register with the manager
-   * @param name the WebBeans @Named value for the singleton
-   */
-  public void addSingleton(Object object,
-			   String name,
-			   Type ... api)
-  {
-    addBean(new SingletonBean(object,
-			      null,
-			      name,
-			      new Annotation[] { Names.create(name),
-						 CurrentLiteral.CURRENT },
-			      api));
-  }
-
-  /**
-   * Registers a singleton as a WebBean.  The value will be introspected
-   * for its annotations like a SimpleBean to determine its attributes.
-   * The name and api parameters override any introspected values.
-   *
-   * @param value the singleton value to register with the manager
-   * @param name the WebBeans @Named value for the singleton
-   * @param api the exported types for the singleton
-   */
-  /*
-  public void addSingleton(Object object,
-			   String name,
-			   Type ...api)
-  {
-    addBean(new SingletonBean(object, name, api));
-  }
-  */
-
-  /**
-   * Registers a singleton as a WebBean.  The value will be introspected
-   * for its annotations like a SimpleBean to determine its attributes.
-   * The name, deployment type, and api parameters override any
-   * introspected values.
-   *
-   * @param value the singleton value to register with the manager
-   * @param deploymentType the WebBeans @DeploymentType value for the singleton
-   * @param name the WebBeans @Named value for the singleton
-   * @param api the exported types for the singleton
-   */
-  public void addSingleton(Object object,
-			   Class deploymentType,
-			   String name,
-			   Type ...api)
-  {
-    addBean(new SingletonBean(object, deploymentType, name, api));
-  }
-  
-  /**
-   * Adds a singleton only to the name map
-   * 
-   * @param object the singleton value
-   * @param name the singleton's name
-   */
-  public void addSingletonByName(Object object, String name)
-  {
-    addBean(new SingletonBean(object, name, new Type[0]));
-  }
-
-  /**
    * Returns the scope context corresponding to the scope annotation type.
    *
    * @param scope the scope annotation type identifying the scope
@@ -644,7 +572,8 @@ public class InjectManager
       Set set = resolve(field.getGenericType(), bindings);
 
       if (set == null || set.size() == 0) {
-	addBean(new NewBean(this, field.getType()));
+	addBean(new NewBean(this, new BeanTypeImpl(field.getType(),
+						   field.getType())));
       }
     }
     else
@@ -725,41 +654,6 @@ public class InjectManager
     bindingList.toArray(bindings);
 
     return bindings;
-  }
-
-  /**
-   * Creates an injection program for the given method
-   */
-  public void createProgram(ArrayList<ConfigProgram> injectList,
-			    Method method)
-    throws ConfigException
-  {
-    if (method.isAnnotationPresent(Produces.class))
-      throw error(method, "An injection method may not have the @Produces annotation.");
-
-    // XXX: lazy binding
-    try {
-      Type []paramTypes = method.getGenericParameterTypes();
-      Annotation[][]paramAnn = method.getParameterAnnotations();
-      
-      ComponentImpl []args = new ComponentImpl[paramTypes.length];
-
-      for (int i = 0; i < args.length; i++) {
-	args[i] = null;//bind(location(method), paramTypes[i], paramAnn[i]);
-
-	if (args[i] == null) {
-	  throw error(method,
-		      L.l("Injection for type '{0}' of method parameter #{1} has no matching component.",
-			  getSimpleName(paramTypes[i]), i));
-	}
-      }
-
-      injectList.add(new MethodComponentProgram(method, args));
-    } catch (ConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw LineConfigException.create(method, e);
-    }
   }
 
   /**
@@ -872,6 +766,7 @@ public class InjectManager
    * Creates an object, but does not register the
    * component with webbeans.
    */
+  /*
   public <T> BeanInstance<T> createTransientInstance(Class<T> type)
   {
 
@@ -882,6 +777,7 @@ public class InjectManager
 
     return new BeanInstance(factory, value);
   }
+  */
 
   /**
    * Creates an object, but does not register the
@@ -889,9 +785,13 @@ public class InjectManager
    */
   public <T> T createTransientObjectNoInit(Class<T> type)
   {
-    ComponentImpl comp = (ComponentImpl) createTransient(type);
+    /*
+    AbstractBean comp = (AbstractBean) createManagedBean(type);
 
     return (T) comp.createNoInit();
+    */
+
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -909,57 +809,6 @@ public class InjectManager
     return new BeanInstance<T>(bean, value);
     */
     return null;
-  }
-
-  /**
-   * Returns a Bean for a class, but does not register the
-   * component with webbeans.
-   */
-  public <T> Bean<T> createTransient(Class<T> type)
-  {
-    return createTransientImpl(type);
-  }
-  
-  /**
-   * Returns a Bean for a class, but does not register the
-   * component with webbeans.
-   */
-  private <T> Bean<T> createTransientImpl(Class<T> type)
-  {
-    synchronized (_transientMap) {
-      SoftReference<SimpleBean> compRef = _transientMap.get(type.getName());
-
-      SimpleBean comp = compRef != null ? compRef.get() : null;
-
-      if (comp == null) {
-	if (type.isInterface())
-	  throw new ConfigException(L.l("'{0}' cannot be an interface.  createTransient requires a concrete type.", type.getName()));
-	else if (Modifier.isAbstract(type.getModifiers()))
-	  throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
-	
-	comp = new SimpleBean(this, type);
-
-	/* XXX:
-	try {
-	  Constructor nullCtor = type.getConstructor(new Class[0]);
-
-	  if (nullCtor != null)
-	    comp.setConstructor(nullCtor);
-	} catch (NoSuchMethodException e) {
-	  // if the type doesn't have a null-arg constructor
-	}
-	*/
-
-	comp.init();
-
-	_transientMap.put(type.getName(), new SoftReference<SimpleBean>(comp));
-
-	// XXX: QA
-	comp.bind();
-      }
-
-      return (Bean<T>) comp;
-    }
   }
 
   public ELContext getELContext()
@@ -985,25 +834,27 @@ public class InjectManager
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> T getEnvironmentObject(Class<T> type, Annotation ... ann)
+  public <T> BeanFactory<T> createBeanFactory(ManagedBean<T> managedBean)
   {
-    ComponentImpl comp = (ComponentImpl) createFactory(type, ann);
-
-    Object value = comp.get();
-
-    if (comp.isDestroyPresent())
-      Environment.addClassLoaderListener(new ComponentClose(value, comp));
-    
-    return (T) value;
+    return new BeanFactory(managedBean);
   }
 
   /**
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> ComponentImpl<T> createFactory(Class<T> type, Annotation ... ann)
+  public <T> BeanFactory<T> createBeanFactory(Class<T> type)
   {
-    throw new UnsupportedOperationException();
+    return createBeanFactory(createManagedBean(type));
+  }
+
+  /**
+   * Returns a new instance for a class, but does not register the
+   * component with webbeans.
+   */
+  public <T> BeanFactory<T> createBeanFactory(AnnotatedType<T> type)
+  {
+    return createBeanFactory(createManagedBean(type));
   }
 
   //
@@ -1056,7 +907,11 @@ public class InjectManager
    */
   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type)
   {
-    return new InjectionTargetImpl(this, type);
+    InjectionTargetImpl bean = new InjectionTargetImpl(this, type);
+    
+    bean.introspect();
+
+    return bean;
   }
 
   /**
@@ -1087,7 +942,10 @@ public class InjectManager
   {
     InjectionTarget target = createInjectionTarget(type);
     
-    return new ManagedBeanImpl(this, type, target);
+    ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
+    bean.introspect();
+
+    return bean;
   }
 
   /**
@@ -1132,8 +990,9 @@ public class InjectManager
   {
     _customFactoryList.add(factory);
   }
-  
-  public BeanManager addConfigBean(CauchoBean configBean)
+
+  /*
+  public BeanManager addConfigBean(Bean configBean)
   {
     for (BeanConfigFactory factory : _customFactoryList) {
       if (factory.createBean(configBean))
@@ -1144,6 +1003,7 @@ public class InjectManager
 
     return this;
   }
+  */
 
   private void registerJmx(Bean bean)
   {
@@ -1286,7 +1146,7 @@ public class InjectManager
     else if (New.class.equals(bindings[0].annotationType())) {
       // ioc/0721
       HashSet set = new HashSet();
-      set.add(new NewBean(this, baseType.getRawClass()));
+      set.add(new NewBean(this, new BeanTypeImpl(baseType.getRawClass(), baseType.getRawClass())));
       return set;
     }
 
@@ -1439,44 +1299,40 @@ public class InjectManager
     }
     else
     */
-    if (false && bean instanceof ComponentImpl)
-      return (T) ((ComponentImpl) bean).get();
-    else {
-      Class scopeType = bean.getScopeType();
+    Class scopeType = bean.getScopeType();
 
-      if (Dependent.class.equals(scopeType)) {
-	// server/4764
-	T instance = (T) bean.create(createContext);
+    if (Dependent.class.equals(scopeType)) {
+      // server/4764
+      T instance = (T) bean.create(createContext);
 
-	return instance;
-      }
-
-      if (scopeType == null) {
-	throw new IllegalStateException("Unknown scope for " + bean);
-      }
-      
-      Context context = getContext(scopeType);
-
-      if (context == null)
-	return null;
-
-      if (createContext != null) {
-      }
-      else if ((bean instanceof ComponentImpl)
-	       && (context instanceof ScopeContext)) {
-	createContext = new ConfigContext((ComponentImpl) bean,
-					  null,
-					  (ScopeContext) context);
-      }
-      else {
-	ConfigContext parent = ConfigContext.getCurrent();
-	
-	createContext = new ConfigContext(parent);
-      }
-
-      return (T) context.get(bean, createContext);
-      //return (T) context.get(bean);
+      return instance;
     }
+
+    if (scopeType == null) {
+      throw new IllegalStateException("Unknown scope for " + bean);
+    }
+      
+    Context context = getContext(scopeType);
+
+    if (context == null)
+      return null;
+
+    if (createContext != null) {
+    }
+    else if ((bean instanceof AbstractBean)
+	     && (context instanceof ScopeContext)) {
+      createContext = new ConfigContext((AbstractBean) bean,
+					null,
+					(ScopeContext) context);
+    }
+    else {
+      ConfigContext parent = ConfigContext.getCurrent();
+	
+      createContext = new ConfigContext(parent);
+    }
+
+    return (T) context.get(bean, createContext);
+    //return (T) context.get(bean);
   }
 
   /**
@@ -1700,8 +1556,10 @@ public class InjectManager
       if (iter.hasNext()) {
 	Bean bean = (Bean) iter.next();
 
+	/*
 	if (bean instanceof ComponentImpl)
  	  bean = ((ComponentImpl) bean).bindInjectionPoint(ij);
+	*/
 
 	return bean;
       }
@@ -2122,13 +1980,13 @@ public class InjectManager
   /**
    * Checks if the bean matches one if the registration listeners
    */
-  public boolean isRegistrationMatch(CauchoBean bean)
+  public boolean isRegistrationMatch(ManagedBean bean)
   {
     if (_parent != null && _parent.isRegistrationMatch(bean))
       return true;
 
     for (BeanRegistrationListener listener : _registrationListenerList) {
-      for (Annotation ann : bean.getAnnotations()) {
+      for (Annotation ann : bean.getAnnotatedType().getAnnotations()) {
 	if (listener.isMatch(ann))
 	  return true;
       }
@@ -2140,7 +1998,7 @@ public class InjectManager
   /**
    * Starts registrations
    */
-  public void startRegistration(CauchoBean bean)
+  public void startRegistration(ManagedBean bean)
   {
     if (_parent != null)
       _parent.startRegistration(bean);
@@ -2148,7 +2006,7 @@ public class InjectManager
     for (BeanRegistrationListener listener : _registrationListenerList) {
       boolean isMatch = false;
       
-      for (Annotation ann : bean.getAnnotations()) {
+      for (Annotation ann : bean.getAnnotatedType().getAnnotations()) {
 	if (listener.isMatch(ann)) {
 	  isMatch = true;
 	  break;
@@ -2303,6 +2161,14 @@ public class InjectManager
 	  }
 	}
       }
+
+      ArrayList<AnnotatedType> types
+	= new ArrayList<AnnotatedType>(_pendingAnnotatedTypes);
+      _pendingAnnotatedTypes.clear();
+
+      for (AnnotatedType type : types) {
+	discoverBean(type);
+      }
     } catch (ConfigException e) {
       if (_configException == null)
 	_configException = e;
@@ -2318,7 +2184,7 @@ public class InjectManager
     try {
       Class cl = Class.forName(className, false, _classLoader);
 
-      if (! SimpleBean.isValid(cl))
+      if (! isValidSimpleBean(cl))
 	return;
 	    
       if (cl.getDeclaringClass() != null
@@ -2342,21 +2208,68 @@ public class InjectManager
       if (type == null)
 	return;
 
-      InjectionTarget target = createInjectionTarget(type);
+      if (type.isAnnotationPresent(Specializes.class)) {
+	for (Class parent = cl.getSuperclass();
+	     parent != null;
+	     parent = parent.getSuperclass()) {
+	  _specializedClasses.add(parent);
+	}
+      }
 
-      target = processInjectionTarget(target);
-
-      if (target == null)
-	return;
-
-      ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
-
-      addDiscoveredBean(bean);
-	    
-      // beans.addScannedClass(cl);
+      _pendingAnnotatedTypes.add(type);
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+  
+  private boolean isValidSimpleBean(Class type)
+  {
+    if (type.isInterface())
+      return false;
+
+    /* XXX: ioc/024d
+    if (type.getTypeParameters() != null
+	&& type.getTypeParameters().length > 0) {
+      return false;
+    }
+    */
+
+    if (! isValidConstructor(type))
+      return false;
+    
+    return true;
+  }
+
+  private boolean isValidConstructor(Class type)
+  {
+    for (Constructor ctor : type.getDeclaredConstructors()) {
+      if (ctor.getParameterTypes().length == 0)
+	return true;
+
+      if (ctor.isAnnotationPresent(Initializer.class))
+	return true;
+    }
+
+    return false;
+  }
+
+  private void discoverBean(AnnotatedType type)
+  {
+    if (_specializedClasses.contains(type.getJavaClass()))
+      return;
+      
+    InjectionTarget target = createInjectionTarget(type);
+
+    target = processInjectionTarget(target);
+
+    if (target == null)
+      return;
+
+    ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
+
+    addDiscoveredBean(bean);
+	    
+    // beans.addScannedClass(cl);
   }
 
   private <X> void addDiscoveredBean(ManagedBean<X> managedBean)
@@ -2518,8 +2431,8 @@ public class InjectManager
     try {
       thread.setContextClassLoader(_classLoader);
 
-      ArrayList<ComponentImpl> bindList
-	= new ArrayList<ComponentImpl>(_pendingBindList);
+      ArrayList<AbstractBean> bindList
+	= new ArrayList<AbstractBean>(_pendingBindList);
       
       _pendingBindList.clear();
 
@@ -2533,11 +2446,13 @@ public class InjectManager
 
       if (_configException != null)
 	throw _configException;
-      
-      for (ComponentImpl comp : bindList) {
+
+      /*
+      for (AbstractBean comp : bindList) {
 	if (_deploymentMap.get(comp.getDeploymentType()) != null)
 	  comp.bind();
       }
+      */
 
       if (isBind) {
 	fireEvent(new AfterDeploymentValidationImpl());
@@ -2619,24 +2534,26 @@ public class InjectManager
    */
   private void startServices()
   {
-    ArrayList<CauchoBean> services;
-    ArrayList<CauchoBean> registerServices;
+    /*
+    ArrayList<ManagedBean> services;
+    ArrayList<ManagedBean> registerServices;
 
     synchronized (_pendingServiceList) {
-      services = new ArrayList<CauchoBean>(_pendingServiceList);
+      services = new ArrayList<ManagedBean>(_pendingServiceList);
       _pendingServiceList.clear();
       
-      registerServices = new ArrayList<CauchoBean>(_pendingRegistrationList);
+      registerServices = new ArrayList<ManagedBean>(_pendingRegistrationList);
       _pendingRegistrationList.clear();
     }
 
-    for (CauchoBean bean : services) {
-      registerBean(bean, bean.getAnnotations());
+    for (ManagedBean bean : services) {
+      registerBean(bean, bean.getAnnotatedType().getAnnotations());
     }
 
-    for (CauchoBean bean : registerServices) {
+    for (ManagedBean bean : registerServices) {
       startRegistration(bean);
     }
+    */
   }
 
   private boolean isStartupPresent(Annotation []annList)

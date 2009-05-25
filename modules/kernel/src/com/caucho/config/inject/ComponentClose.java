@@ -31,7 +31,7 @@ package com.caucho.config.inject;
 import java.lang.ref.*;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.loader.*;
 
 /**
@@ -39,9 +39,9 @@ import com.caucho.loader.*;
  */
 public class ComponentClose implements ClassLoaderListener {
   private final WeakReference<Object> _ref;
-  private final ComponentImpl _comp;
+  private final AbstractBean _comp;
 
-  public ComponentClose(Object value, ComponentImpl comp)
+  public ComponentClose(Object value, AbstractBean comp)
   {
     _comp = comp;
     _ref = new WeakReference<Object>(value);
@@ -62,7 +62,7 @@ public class ComponentClose implements ClassLoaderListener {
     Object obj = _ref.get();
 
     if (obj != null)
-      _comp.destroy(obj, new ConfigContext());
+      _comp.destroy(obj);
   }
 
   public String toString()

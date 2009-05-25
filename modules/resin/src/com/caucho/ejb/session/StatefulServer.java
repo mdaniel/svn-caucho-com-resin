@@ -30,7 +30,6 @@
 package com.caucho.ejb.session;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import java.util.*;
@@ -38,6 +37,7 @@ import java.util.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.util.LruCache;
+import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -123,7 +123,7 @@ public class StatefulServer extends SessionServer
       return null;
   }
 
-  protected ComponentImpl createSessionComponent(Class api, Class beanClass)
+  protected InjectionTarget createSessionComponent(Class api, Class beanClass)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
     

@@ -29,7 +29,6 @@
 
 package com.caucho.el;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.*;
 

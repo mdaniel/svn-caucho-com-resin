@@ -53,6 +53,7 @@ import com.caucho.amber.query.ResultSetCacheChunk;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jdbc.JdbcMetaData;
@@ -231,14 +232,21 @@ public class AmberPersistenceUnit {
     if (name == null || "".equals(name))
       name = "default";
 
-    InjectManager webBeans
+    InjectManager manager
       = InjectManager.create(_amberContainer.getParentClassLoader());
 
     EntityManagerFactory factory = new AmberEntityManagerFactory(this);
 
-    webBeans.addSingleton(factory, name, EntityManagerFactory.class);
-    webBeans.addSingleton(new EntityManagerProxy(this), name,
-			  EntityManager.class);
+    BeanFactory beanFactory
+      = manager.createBeanFactory(EntityManagerFactory.class);
+
+    beanFactory.name(name);
+    manager.addBean(beanFactory.singleton(factory));
+
+    beanFactory = manager.createBeanFactory(EntityManager.class);
+    beanFactory.name(name);
+    
+    manager.addBean(beanFactory.singleton(new EntityManagerProxy(this)));
 
     String jndiName
       = AmberContainer.getPersistenceContextJndiPrefix() + '/' + name;

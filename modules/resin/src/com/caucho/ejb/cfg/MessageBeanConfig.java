@@ -38,7 +38,6 @@ import javax.resource.spi.*;
 
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
@@ -92,8 +91,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
     _messageConsumerMax = messageConsumerMax;
   }
 
-  @PostConstruct
-  public void init()
+  public void initImpl()
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-message-bean requires a 'class' attribute"));

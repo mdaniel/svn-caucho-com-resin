@@ -27,32 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.session;
+package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.AbstractInjectionTarget;
+import com.caucho.config.inject.HandleAware;
 import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.ApplicationScope;
 
+import java.io.Closeable;
 import java.lang.annotation.*;
+import java.lang.reflect.Type;
+import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ManagedBean;
 
 /**
- * Component for session beans
+ * SingletonBean represents a singleton instance exported as a web beans.
+ *
+ * <code><pre>
+ * @Current Manager manager;
+ *
+ * manager.addBean(new SingletonBean(myValue));
+ * </pre></code>
  */
-public class StatelessComponent<X> extends AbstractInjectionTarget<X> {
-  private final StatelessProvider _provider;
+public class InjectionBean extends AbstractSingletonBean
+  implements Closeable
+{
+  private InjectionTarget _target;
 
-  public StatelessComponent(StatelessProvider provider, Class api)
+  InjectionBean(ManagedBean managedBean,
+		Set<Type> types,
+		Class<? extends Annotation> deploymentType,
+		Set<Annotation> bindings,
+		Class<? extends Annotation> scopeType,
+		String name,
+		InjectionTarget target)
   {
-    _provider = provider;
+    super(managedBean, types, deploymentType, bindings, scopeType, name);
+
+    _target = target;
   }
 
   @Override
-  public X produce(CreationalContext<X> env)
+  public Object create(CreationalContext env)
   {
-    return (X) _provider.__caucho_get();
+    Object value = _target.produce(env);
+    _target.inject(value, env);
+    _target.postConstruct(value, env);
+    
+    return value;
   }
 }

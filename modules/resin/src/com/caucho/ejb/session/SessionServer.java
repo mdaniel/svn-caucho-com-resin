@@ -30,7 +30,8 @@
 package com.caucho.ejb.session;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.ejb.AbstractContext;
@@ -40,6 +41,7 @@ import com.caucho.ejb.manager.EjbContainer;
 
 import javax.ejb.*;
 import javax.enterprise.inject.Named;
+import javax.enterprise.inject.spi.InjectionTarget;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -52,8 +54,8 @@ abstract public class SessionServer extends AbstractServer
   private final static Logger log
     = Logger.getLogger(SessionServer.class.getName());
 
-  private HashMap<Class,ComponentImpl> _componentMap
-    = new HashMap<Class,ComponentImpl>();
+  private HashMap<Class,InjectionTarget> _componentMap
+    = new HashMap<Class,InjectionTarget>();
 
   public SessionServer(EjbContainer manager)
   {
@@ -80,15 +82,15 @@ abstract public class SessionServer extends AbstractServer
       thread.setContextClassLoader(_loader);
 
       super.init();
-      
-      SingletonBean comp
-	= new SessionSingletonBean(getSessionContext(), getEjbClass());
 
-      _component = comp;
+      InjectManager beanManager = InjectManager.create();
 
-      InjectManager inject = InjectManager.create();
+      BeanFactory factory
+	= beanManager.createBeanFactory(SessionContext.class);
 
-      inject.addBean(comp);
+      _component = factory.singleton(getSessionContext());
+
+      beanManager.addBean(_component);
 
       if (_localHomeClass != null)
 	_localHome = (EJBLocalHome) getLocalObject(_localHomeClass);
@@ -118,38 +120,24 @@ abstract public class SessionServer extends AbstractServer
       if (named != null)
 	beanName = named.value();
 
+      InjectManager beanManager = InjectManager.create();
+      BeanFactory factory = beanManager.createBeanFactory(getEjbClass());
+      factory.name(beanName);
+	
       if (localApiList != null) {
 	for (Class api : localApiList) {
-	  ComponentImpl comp = createSessionComponent(api, getEjbClass());
-
-	  comp.setTargetType(api);
-
-	  comp.setName(beanName);
-
-	  comp.init();
-
-	  webBeans.addComponentByName(beanName, comp);
-	  webBeans.addComponentByType(api, comp);
-	  
-	  _componentMap.put(api, comp);
+	  factory.type(api);
 	}
       }
       
       if (remoteApiList != null) {
 	for (Class api : remoteApiList) {
-	  ComponentImpl comp = createSessionComponent(api, getEjbClass());
-
-	  comp.setTargetType(api);
-
-	  comp.setName(beanName);
-
-	  comp.init();
-	  webBeans.addComponentByName(beanName, comp);
-	  webBeans.addComponentByType(api, comp);
-
-	  _componentMap.put(api, comp);
+	  factory.type(api);
 	}
       }
+
+      // XXX: component
+      beanManager.addBean(factory.bean());
     }
   }
 
@@ -157,15 +145,17 @@ abstract public class SessionServer extends AbstractServer
   {
     super.bindInjection();
 
+    /*
     for (ComponentImpl comp : _componentMap.values()) {
       comp.bind();
     }
+    */
   }
   
-  abstract protected ComponentImpl
+  abstract protected InjectionTarget
     createSessionComponent(Class api, Class beanClass);
 
-  protected ComponentImpl getComponent(Class api)
+  protected InjectionTarget getComponent(Class api)
   {
     return _componentMap.get(api);
   }

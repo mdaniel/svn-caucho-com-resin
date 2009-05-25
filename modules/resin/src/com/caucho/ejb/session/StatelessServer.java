@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
 import com.caucho.ejb.AbstractContext;
@@ -38,6 +37,8 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.*;
 
 import javax.ejb.*;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -92,7 +93,7 @@ public class StatelessServer extends SessionServer {
     return getStatelessContext().getProvider(api);
   }
   
-  protected ComponentImpl createSessionComponent(Class api, Class beanClass)
+  protected InjectionTarget createSessionComponent(Class api, Class beanClass)
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
 
@@ -230,6 +231,7 @@ public class StatelessServer extends SessionServer {
    */
   Object getObjectHandle(StatelessObject obj, Class api)
   {
+    /* XXX:
     ComponentImpl comp = getComponent(api);
 
     // XXX: remote handle differently
@@ -237,6 +239,9 @@ public class StatelessServer extends SessionServer {
       return comp.getHandle();
     else
       return new ObjectSkeletonWrapper(obj.getHandle());
+    */
+
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

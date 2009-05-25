@@ -30,6 +30,7 @@
 package com.caucho.server.security;
 
 import com.caucho.config.cfg.BeanConfig;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.*;
 import com.caucho.util.L10N;
 
@@ -74,12 +75,9 @@ public class LoginResinConfig extends BeanConfig {
 
   public AbstractLogin getLoginObject()
   {
-    return (AbstractLogin) getComponentFactory().get();
-  }
-
-  public String toString()
-  {
-    return "Login[]";
+    InjectManager manager = InjectManager.create();
+    
+    return (AbstractLogin) manager.getReference(getComponentFactory());
   }
 }
 

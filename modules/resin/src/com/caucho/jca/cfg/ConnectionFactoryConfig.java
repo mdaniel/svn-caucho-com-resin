@@ -29,7 +29,7 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
@@ -52,6 +52,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.spi.Bean;
 import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -111,10 +112,12 @@ public class ConnectionFactoryConfig extends BeanConfig {
   {
     super.init();
 
-    ComponentImpl comp = getComponent();
+    Bean comp = getComponent();
+
+    InjectManager manager = InjectManager.create();
     
     ManagedConnectionFactory managedFactory
-      = (ManagedConnectionFactory) comp.get();
+      = (ManagedConnectionFactory) manager.getReference(comp, ManagedConnectionFactory.class);
     
     if (managedFactory instanceof ResourceAdapterAssociation) {
       Class cl = managedFactory.getClass();
@@ -174,15 +177,16 @@ public class ConnectionFactoryConfig extends BeanConfig {
       connectionFactory = cm.init(managedFactory);
       cm.start();
 
-      InjectManager webBeans = InjectManager.create();
+      BeanFactory factory
+	= manager.createBeanFactory(connectionFactory.getClass());
       
       if (getName() != null) {
 	Jndi.bindDeepShort(getName(), connectionFactory);
 
-	webBeans.addSingleton(connectionFactory, getName());
+	factory.name(getName());
       }
-      else
-	webBeans.addSingleton(connectionFactory);
+
+      manager.addBean(factory.singleton(connectionFactory));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

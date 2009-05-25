@@ -32,6 +32,8 @@ package com.caucho.sql;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
+import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
@@ -724,6 +726,9 @@ public class DBPool
       Jndi.bindDeepShort(name, this);
     }
 
+    InjectManager manager = InjectManager.create();
+    BeanFactory factory = manager.createBeanFactory(DataSource.class);
+
     String name = _name;
     
     if (name == null)
@@ -735,24 +740,17 @@ public class DBPool
     Annotation []bindingList = null;
 
     if (_bindingList.size() > 0) {
-      bindingList = new Annotation[_bindingList.size()];
-      _bindingList.toArray(bindingList);
+      factory.binding(_bindingList);
     }
     else if (name != null)
-      bindingList = new Annotation[] { Names.create(name) };
+      factory.binding(Names.create(name));
 
-    SingletonBean bean;
-    if (bindingList != null) {
-      bean = new SingletonBean(this, CauchoDeployment.class, name,
-			       bindingList,
-			       DataSource.class);
-    }
-    else {
-      bean = new SingletonBean(this, CauchoDeployment.class, null,
-			       DataSource.class);
-    }
+    if (name != null)
+      factory.name(name);
 
-    InjectManager.create().addBean(bean);
+    factory.deployment(CauchoDeployment.class);
+
+    manager.addBean(factory.singleton(this));
  }
 
   /**

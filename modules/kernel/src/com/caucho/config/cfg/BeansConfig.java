@@ -31,10 +31,8 @@ package com.caucho.config.cfg;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.inject.SingletonClassComponent;
 import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.scope.ScopeContext;
@@ -70,11 +68,11 @@ public class BeansConfig {
   
   private Path _beansFile;
   
-  private ArrayList<ComponentImpl> _pendingComponentList
-    = new ArrayList<ComponentImpl>();
+  private ArrayList<AbstractBean> _pendingComponentList
+    = new ArrayList<AbstractBean>();
   
-  private ArrayList<ComponentImpl> _pendingBindList
-    = new ArrayList<ComponentImpl>();
+  private ArrayList<AbstractBean> _pendingBindList
+    = new ArrayList<AbstractBean>();
 
   private ArrayList<Interceptor> _interceptorList;
   

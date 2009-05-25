@@ -30,8 +30,8 @@
 package com.caucho.resin;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SimpleBean;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
@@ -159,12 +159,14 @@ public class BeanEmbed
   {
     try {
       InjectManager webBeans = InjectManager.create();
-
+      
       if (_value != null) {
+	BeanFactory factory = webBeans.createBeanFactory(_value.getClass());
+	
 	if (_name != null)
-	  webBeans.addSingleton(_value, _name);
-	else
-	  webBeans.addSingleton(_value);
+	  factory.name(_name);
+
+	webBeans.addBean(factory.singleton(_value));
       }
       else if (_className == null)
 	throw new ConfigException(L.l("BeanEmbed must either have a value or a class"));
@@ -173,19 +175,19 @@ public class BeanEmbed
 	
 	Class cl = Class.forName(_className, false, loader);
 
-	SimpleBean bean = new SimpleBean(cl);
+	BeanFactory factory = webBeans.createBeanFactory(cl);
 
-	bean.setScopeType(ApplicationScoped.class);
+	factory.scope(ApplicationScoped.class);
 
 	if (_name != null)
-	  bean.setName(_name);
+	  factory.name(_name);
 
+	/*
 	if (_init != null)
 	  bean.setInit(_init);
+	*/
 
-	bean.init();
-
-	webBeans.addBean(bean);
+	webBeans.addBean(factory.bean());
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

@@ -30,6 +30,7 @@
 package com.caucho.xmpp;
 
 import com.caucho.bam.Broker;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.Connection;
@@ -87,7 +88,10 @@ public class XmppProtocol extends Protocol
   @PostConstruct
   public void init()
   {
-    InjectManager.create().addSingleton(this);
+    InjectManager manager = InjectManager.create();
+    
+    BeanFactory factory = manager.createBeanFactory(getClass());
+    manager.addBean(factory.singleton(this));
 
     _marshalFactory = new XmppMarshalFactory();
   }

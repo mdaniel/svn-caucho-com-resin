@@ -29,10 +29,10 @@
 
 package com.caucho.jca;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.lifecycle.*;
 import com.caucho.loader.*;
 import com.caucho.util.L10N;
+import com.caucho.config.inject.InjectManager;
 
 import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Bean;
@@ -47,15 +47,18 @@ public class ResourceAdapterController implements EnvironmentListener
   private static final Logger log
     = Logger.getLogger(ResourceAdapterController.class.getName());
 
-  private final ComponentImpl<ResourceAdapter> _comp;
+  private InjectManager _beanManager;
+  private final Bean<ResourceAdapter> _comp;
   private final ResourceArchive _raConfig;
 
   private Lifecycle _lifecycle = new Lifecycle();
   private ResourceAdapter _ra;
 
-  public ResourceAdapterController(ComponentImpl<ResourceAdapter> comp,
+  public ResourceAdapterController(Bean<ResourceAdapter> comp,
 				   ResourceArchive raConfig)
   {
+    _beanManager = InjectManager.create();
+    
     _comp = comp;
     _raConfig = raConfig;
 
@@ -77,7 +80,7 @@ public class ResourceAdapterController implements EnvironmentListener
     if (! _lifecycle.toActive())
       return;
 
-    _ra = (ResourceAdapter) _comp.get();
+    _ra = (ResourceAdapter) _beanManager.getReference(_comp);
 
     try {
       _ra.start(ResourceManagerImpl.create());

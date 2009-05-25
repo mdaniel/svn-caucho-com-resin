@@ -57,8 +57,7 @@ import javax.interceptor.InterceptorBindingType;
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
-public class InjectionTargetImpl<X>
-  extends ComponentImpl<X>
+public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   implements InjectionTarget<X>
 {
   private static final L10N L = new L10N(InjectionTargetImpl.class);
@@ -66,15 +65,25 @@ public class InjectionTargetImpl<X>
     = Logger.getLogger(InjectionTargetImpl.class.getName());
 
   private static final Object []NULL_ARGS = new Object[0];
-  
+
   private boolean _isBound;
 
   private Class _instanceClass;
+
+  private AnnotatedType<X> _beanType;
+
+  private Set<Annotation> _interceptorBindings;
   
-  private AnnotatedType _beanType;
   private AnnotatedConstructor _beanCtor;
   private Constructor _javaCtor;
   private Arg []_args;
+
+  private Method _cauchoPostConstruct;
+  
+  private ConfigProgram []_newArgs;
+  private ConfigProgram []_injectProgram;
+  private ConfigProgram []_initProgram;
+  private ConfigProgram []_destroyProgram;
 
   private Set<InjectionPoint> _injectionPointSet
     = new HashSet<InjectionPoint>();
@@ -85,32 +94,27 @@ public class InjectionTargetImpl<X>
   private ArrayList<SimpleBeanMethod> _methodList
     = new ArrayList<SimpleBeanMethod>();
 
-  private ConfigProgram []_newArgs;
-
-  private Object _scopeAdapter;
-
-  public InjectionTargetImpl(InjectManager webBeans, AnnotatedType beanType)
+  public InjectionTargetImpl(InjectManager beanManager,
+			     AnnotatedType<X> beanType)
   {
-    super(webBeans);
+    super(beanManager, beanType.getType(), beanType);
 
     _beanType = beanType;
 
+    /*
     if (beanType.getType() instanceof Class)
       validateType((Class) beanType.getType());
+    */
+  }
 
-    setTargetType(beanType.getType());
-
+  public void introspect()
+  {
     introspect(_beanType);
   }
 
   public AnnotatedType getAnnotatedType()
   {
     return _beanType;
-  }
-
-  public InjectionTarget getInjectionTarget()
-  {
-    return this;
   }
 
   /**
@@ -214,6 +218,11 @@ public class InjectionTargetImpl<X>
     */
   }
 
+  public Set<Annotation> getInterceptorBindings()
+  {
+    return _interceptorBindings;
+  }
+
   /**
    * Adds a configured method
    */
@@ -272,9 +281,11 @@ public class InjectionTargetImpl<X>
 
       Object value = _javaCtor.newInstance(args);
 
+      /*
       if (isSingleton()) {
 	SerializationAdapter.setHandle(value, getHandle());
       }
+      */
 
       return (X) value;
     } catch (RuntimeException e) {
@@ -324,42 +335,6 @@ public class InjectionTargetImpl<X>
       throw new CreationException(e);
     }
   }
-  
-  public Object getScopeAdapter(CreationalContext cxt)
-  {
-    if (! (cxt instanceof ConfigContext))
-      return null;
-
-    ConfigContext env = (ConfigContext) cxt;
-
-    // ioc/0520
-    if (! env.canInject(_scope)) {
-      Object value = _scopeAdapter;
-	
-      if (value == null) {
-	ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
-	_scopeAdapter = scopeAdapter.wrap(this);
-	value = _scopeAdapter;
-      }
-
-      return value;
-    }
-
-    return null;
-  }
-
-  public Object getScopeAdapter()
-  {
-    Object value = _scopeAdapter;
-	
-    if (value == null) {
-      ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
-      _scopeAdapter = scopeAdapter.wrap(this);
-      value = _scopeAdapter;
-    }
-
-    return value;
-  }
 
   /**
    * Binds parameters
@@ -370,8 +345,6 @@ public class InjectionTargetImpl<X>
       if (_isBound)
 	return;
       _isBound = true;
-
-      super.bind();
 
       Class cl = getTargetClass();
 
@@ -438,26 +411,27 @@ public class InjectionTargetImpl<X>
 
       // introspectObservers(getTargetClass());
 
-      PojoBean bean = new PojoBean(getTargetClass());
-      bean.setSingleton(isSingleton());
-      bean.setBindings(getBindingArray());
+      PojoBean bean = new PojoBean(getBaseType().getRawClass());
+      //bean.setSingleton(isSingleton());
+      bean.setBindings(getBindings());
 
-      bean.setInterceptorBindings(getInterceptorBindingArray());
+      bean.setInterceptorBindings(getInterceptorBindings());
 
-      for (SimpleBeanMethod method : _methodList) {
-	bean.setMethodAnnotations(method.getMethod(),
-				  method.getAnnotations());
+      for (AnnotatedMethod method : _beanType.getMethods()) {
+	bean.setMethodAnnotations(method.getJavaMember(), method);
       }
       
       bean.introspect();
 
       Class instanceClass = bean.generateClass();
 
+      /*
       if (instanceClass == getTargetClass()
 	  && isSingleton()
 	  && ! isUnbound()) {
 	instanceClass = SerializationAdapter.gen(instanceClass);
       }
+      */
       
       if (instanceClass != null && instanceClass != _instanceClass) {
 	try {
@@ -493,6 +467,7 @@ public class InjectionTargetImpl<X>
     return false;
   }
 
+  /*
   protected ComponentImpl createArg(ConfigType type, ConfigProgram program)
   {
     Object value = program.configure(type);
@@ -502,14 +477,7 @@ public class InjectionTargetImpl<X>
     else
       return null;
   }
-  
-  /**
-   * Introspects the methods for any @Produces
-   */
-  protected void introspectBindings(AnnotatedType beanType)
-  {
-    introspectBindings(beanType.getAnnotations());
-  }
+  */
   
   /**
    * Call post-construct
@@ -544,16 +512,18 @@ public class InjectionTargetImpl<X>
    */
   public void introspect(AnnotatedType beanType)
   {
+    super.introspect(beanType);
+    
     Class cl = getIntrospectionClass();
     Class scopeClass = null;
 
-    introspectTypes(beanType.getType());
+    //introspectTypes(beanType.getType());
 
-    introspectAnnotations(beanType.getAnnotations());
+    //introspectAnnotations(beanType.getAnnotations());
 
     introspectConstructor(beanType);
-    introspectBindings(beanType);
-    introspectName(beanType);
+    //introspectBindings(beanType);
+    //introspectName(beanType);
 
     introspectInject(beanType);
 
@@ -573,6 +543,10 @@ public class InjectionTargetImpl<X>
   protected void introspectConstructor(AnnotatedType<?> beanType)
   {
     if (_beanCtor != null)
+      return;
+
+    // XXX: may need to modify BeanFactory
+    if (beanType.getJavaClass().isInterface())
       return;
     
     try {
@@ -646,7 +620,7 @@ public class InjectionTargetImpl<X>
     }
   }
 
-  private Arg []introspectArguments(List<AnnotatedParameter> params)
+  protected Arg []introspectArguments(List<AnnotatedParameter> params)
   {
     Arg []args = new Arg[params.size()];
 
@@ -750,6 +724,11 @@ public class InjectionTargetImpl<X>
     }
 
     return false;
+  }
+
+  private static boolean hasBindingAnnotation(AnnotatedConstructor ctor)
+  {
+    return ctor.isAnnotationPresent(Initializer.class);
   }
 
   private static boolean hasBindingAnnotation(Method method)

@@ -52,36 +52,89 @@ import javax.enterprise.inject.spi.ManagedBean;
  * manager.addBean(new SingletonBean(myValue));
  * </pre></code>
  */
-public class SingletonBean extends AbstractSingletonBean
+abstract public class AbstractSingletonBean extends ManagedBeanWrapper
   implements Closeable
 {
-  private Object _value;
-
-  SingletonBean(ManagedBean managedBean,
-		Set<Type> types,
-		Class<? extends Annotation> deploymentType,
-		Set<Annotation> bindings,
-		Class<? extends Annotation> scopeType,
-		String name,
-		Object value)
+  private Set<Type> _types;
+  private Class<? extends Annotation> _deploymentType;
+  private Set<Annotation> _bindings;
+  private Class<? extends Annotation> _scopeType;
+  private String _name;
+  
+  AbstractSingletonBean(ManagedBean managedBean,
+			Set<Type> types,
+			Class<? extends Annotation> deploymentType,
+			Set<Annotation> bindings,
+			Class<? extends Annotation> scopeType,
+			String name)
   {
-    super(managedBean, types, deploymentType, bindings, scopeType, name);
+    super(managedBean);
 
-    _value = value;
+    _types = types;
+    _deploymentType = deploymentType;
+    _bindings = bindings;
+    _scopeType = scopeType;
+    _name = name;
+  }
+      
+  //
+  // metadata for the bean
+  //
+
+  public Set<Annotation> getBindings()
+  {
+    if (_bindings != null)
+      return _bindings;
+    else
+      return super.getBindings();
+  }
+
+  public Class<? extends Annotation> getDeploymentType()
+  {
+    if (_deploymentType != null)
+      return _deploymentType;
+    else
+      return getBean().getDeploymentType();
+  }
+
+  public String getName()
+  {
+    if (_name != null)
+      return _name;
+    else
+      return getBean().getName();
+  }
+
+  /**
+   * Returns the bean's scope type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    if (_scopeType != null)
+      return _scopeType;
+    else
+      return getBean().getScopeType();
+  }
+
+  /**
+   * Returns the types that the bean exports for bindings.
+   */
+  public Set<Type> getTypes()
+  {
+    if (_types != null)
+      return _types;
+    else
+      return getBean().getTypes();
   }
 
   @Override
-  public Object create(CreationalContext env)
-  {
-    return _value;
-  }
+  abstract public Object create(CreationalContext env);
+
 
   /**
    * Frees the singleton on environment shutdown
    */
   public void close()
   {
-    if (_value != null)
-      destroy(_value);
   }
 }

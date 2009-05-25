@@ -29,16 +29,18 @@
 
 package com.caucho.ejb.cfg;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
+import javax.ejb.Stateless;
+import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.jms.*;
 
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
@@ -54,20 +56,19 @@ public class StatelessBeanConfig extends AbstractBeanConfig
   private static final Logger log
     = Logger.getLogger(StatelessBeanConfig.class.getName());
 
-  private CauchoBean _bean;
-  private EjbStatelessBean _ejbBean;
+  // private CauchoBean _bean;
+  // private EjbStatelessBean _ejbBean;
 
   public StatelessBeanConfig()
   {
   }
 
-  public StatelessBeanConfig(CauchoBean beanConfig)
+  /*
+  public StatelessBeanConfig(ManagedBean beanConfig)
   {
     _bean = beanConfig;
     
-    ComponentImpl comp = (ComponentImpl) beanConfig;
-
-    setClass((Class) comp.getTargetType());
+    setClass((Class) beanConfig.annotatedType().getType());
 
     // XXX:
     //if (beanConfig.getComponentType() != null)
@@ -82,21 +83,31 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     if (comp.getInit() != null)
       setInit(comp.getInit());
   }
+  */
 
-  @PostConstruct
-  public void init()
+  protected void initImpl()
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-stateless-bean requires a 'class' attribute"));
     
+    final String name = getName();
+
+    Annotation ann = new AnnotationLiteral<Stateless>() {
+      public String name() { return name; }
+      public String mappedName() { return name; }
+      public String description() { return ""; }
+    };
+
+    add(ann);
+  }
+  
+  /*
     EjbContainer ejbContainer = EjbContainer.create();
     EjbConfigManager configManager = ejbContainer.getConfigManager();
 
     EjbStatelessBean bean = new EjbStatelessBean(configManager, "config");
     bean.setEJBClass(getInstanceClass());
 
-    String name = getName();
-    
     if (name == null)
       name = getJndiName();
 
@@ -115,10 +126,13 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     // XXX: timing?
     // configManager.start();
   }
+  */
 
+  /*
   public Bean getInjectBean()
   {
     return _bean;
   }
+  */
 }
 

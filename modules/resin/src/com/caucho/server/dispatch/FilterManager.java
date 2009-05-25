@@ -29,7 +29,6 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.config.Config;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
@@ -37,6 +36,7 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
+import javax.enterprise.inject.spi.InjectionTarget;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -54,7 +54,7 @@ public class FilterManager {
   private Hashtable<String,FilterConfigImpl> _filters
     = new Hashtable<String,FilterConfigImpl>();
 
-  private ComponentImpl _comp;
+  private InjectionTarget _comp;
   
   private Hashtable<String,Filter> _instances
     = new Hashtable<String,Filter>();
@@ -123,11 +123,12 @@ public class FilterManager {
         if (filter != null)
           return filter;
 	
-	InjectManager webBeans = InjectManager.create();
+	InjectManager beanManager = InjectManager.create();
       
-	_comp = (ComponentImpl) webBeans.createTransient(filterClass);
+	_comp = beanManager.createInjectionTarget(filterClass);
       
-	filter = (Filter) _comp.createNoInit();
+	filter = (Filter) _comp.produce(null);
+	_comp.inject(filter, null);
 
 	// InjectIntrospector.configure(filter);
 
@@ -137,7 +138,7 @@ public class FilterManager {
         if (init != null)
           init.configure(filter);
 
-	Config.init(filter);
+	_comp.postConstruct(filter, null);
 
         filter.init(config);
         

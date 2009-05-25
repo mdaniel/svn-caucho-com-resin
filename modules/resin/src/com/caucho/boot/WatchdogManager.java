@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.admin.RemoteAdminService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.lib.ResinConfigLibrary;
@@ -127,12 +128,13 @@ class WatchdogManager implements AlarmListener {
     // XXX: needs to be config
     
     InjectManager webBeans = InjectManager.create();
-    webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
-    webBeans.addSingletonByName(elContext.getJavaVar(), "java");
-    webBeans.addSingletonByName(elContext.getResinVar(), "resin");
-    webBeans.addSingletonByName(elContext.getServerVar(), "server");
-    webBeans.addSingletonByName(System.getProperties(), "system");
-    webBeans.addSingletonByName(System.getenv(), "getenv");
+
+    Config.setProperty("resinHome", elContext.getResinHome());
+    Config.setProperty("resin", elContext.getResinVar());
+    Config.setProperty("server", elContext.getServerVar());
+    Config.setProperty("java", elContext.getJavaVar());
+    Config.setProperty("system", System.getProperties());
+    Config.setProperty("getenv", System.getenv());
 
     ResinConfigLibrary.configure(webBeans);
 
@@ -201,9 +203,12 @@ class WatchdogManager implements AlarmListener {
 	auth = _management.getAdminAuthenticator();
 
       if (auth != null) {
-	webBeans.addBean(new SingletonBean(auth, null,
-					   AdminAuthenticator.class,
-					   Authenticator.class));
+	BeanFactory factory = webBeans.createBeanFactory(Authenticator.class);
+
+	factory.type(Authenticator.class);
+	factory.type(AdminAuthenticator.class);
+	
+	webBeans.addBean(factory.singleton(auth));
       }
 
       DependencyCheckInterval depend = new DependencyCheckInterval();

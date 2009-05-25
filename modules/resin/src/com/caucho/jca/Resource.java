@@ -34,6 +34,7 @@ import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.program.ConfigProgram;
@@ -441,25 +442,17 @@ public class Resource {
     if (_name == null)
       name = _jndiName;
     
-    InjectManager webBeans = InjectManager.create();
+    InjectManager beanManager = InjectManager.create();
 
-    SingletonBean singleton;
+    BeanFactory factory = beanManager.createBeanFactory(_object.getClass());
 
     if (name != null) {
-      singleton = new SingletonBean(_object, CauchoDeployment.class, name,
-				    new Annotation[] {
-				      CurrentLiteral.CURRENT,
-				      Names.create(name)
-				    });
-    }
-    else {
-      singleton = new SingletonBean(_object, CauchoDeployment.class, null,
-				    new Annotation[] {
-				      CurrentLiteral.CURRENT,
-				    });
+      factory.name(name);
+      factory.binding(CurrentLiteral.CURRENT);
+      factory.binding(Names.create(name));
     }
     
-    webBeans.addBean(singleton);
+    beanManager.addBean(factory.bean());
 
     if (log.isLoggable(Level.CONFIG))
       logConfig();

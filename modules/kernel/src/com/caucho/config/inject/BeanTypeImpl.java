@@ -30,6 +30,7 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -39,6 +40,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.*;
+import javax.enterprise.context.ScopeType;
+import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -67,7 +70,7 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   
   public BeanTypeImpl(Type type, Class javaClass)
   {
-    super(type, javaClass.getAnnotations());
+    super(type, javaClass.getDeclaredAnnotations());
 
     _javaClass = javaClass;
 
@@ -108,6 +111,8 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
 
   private void introspect(Class cl)
   {
+    introspectInheritedAnnotations(cl.getSuperclass());
+    
     for (Field field : cl.getDeclaredFields()) {
       if (hasBeanAnnotation(field.getAnnotations())) {
 	_fieldSet.add(new BeanFieldImpl(this, field));
@@ -132,6 +137,36 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
 	log.log(Level.FINE, e.toString(), e);
       }
     }
+  }
+  
+  private void introspectInheritedAnnotations(Class cl)
+  {
+    if (cl == null)
+      return;
+    
+    for (Annotation ann : cl.getDeclaredAnnotations()) {
+      if (! ann.annotationType().isAnnotationPresent(Inherited.class)) {
+	continue;
+      }
+
+      if (isAnnotationPresent(cl)) {
+	continue;
+      }
+      
+      if (ann.annotationType().isAnnotationPresent(ScopeType.class)
+	  && hasMetaAnnotation(getAnnotations(), ScopeType.class)) {
+	continue;
+      }
+      
+      if (ann.annotationType().isAnnotationPresent(DeploymentType.class)
+	  && hasMetaAnnotation(getAnnotations(), DeploymentType.class)) {
+	continue;
+      }
+
+      addAnnotation(ann);
+    }
+
+    introspectInheritedAnnotations(cl.getSuperclass());
   }
 
   private boolean hasBeanAnnotation(Method method)
@@ -162,6 +197,23 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
       for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
 	if (isBeanAnnotation(metaAnn.annotationType()))
 	  return true;
+      }
+    }
+
+    return false;
+  }
+
+  private boolean hasMetaAnnotation(Set<Annotation> annotations,
+				    Class metaAnnType)
+  {
+    if (annotations == null)
+      return false;
+    
+    for (Annotation ann : annotations) {
+      for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
+	if (metaAnnType.equals(metaAnn.annotationType())) {
+	  return true;
+	}
       }
     }
 

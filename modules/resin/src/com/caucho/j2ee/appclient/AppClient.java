@@ -348,7 +348,7 @@ public class AppClient implements EnvironmentBean
         log.log(Level.FINER, L.l("work-directory is {0}", WorkDir.getLocalWorkDir()));
 
       InjectManager webBeans = InjectManager.create();
-      webBeans.addSingleton(new ResinVar(), "resin");
+      //webBeans.addSingleton(new ResinVar(), "resin");
 
       _ejbContext = new InitialContext(_ejbEnv);
 

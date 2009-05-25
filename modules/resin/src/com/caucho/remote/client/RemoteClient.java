@@ -30,9 +30,9 @@
 package com.caucho.remote.client;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
@@ -77,31 +77,31 @@ public class RemoteClient extends BeanConfig
 
   protected void deploy()
   {
-    ProtocolProxyFactory factory = (ProtocolProxyFactory) getObject();
+    ProtocolProxyFactory proxyFactory = (ProtocolProxyFactory) getObject();
 
-    Object proxy = factory.createProxy(_interface);
+    Object proxy = proxyFactory.createProxy(_interface);
     
-    InjectManager webBeans = InjectManager.create();
+    InjectManager beanManager = InjectManager.create();
 
-    SimpleBean comp = new SingletonBean(webBeans, proxy);
-
+    BeanFactory factory = beanManager.createBeanFactory(_interface);
+    
     if (getName() != null) {
-      comp.setName(getName());
+      factory = factory.name(getName());
 
       addOptionalStringProperty("name", getName());
     }
 
-    for (Annotation binding : getBindingList())
-      comp.addBinding(binding);
+    for (Annotation binding : getBindingList()) {
+      factory = factory.binding(binding);
+    }
 
-    if (getDeploymentType() != null)
-      comp.setDeploymentType(getDeploymentType());
+    if (getDeploymentType() != null) {
+      factory = factory.deployment(getDeploymentType());
+    }
 
-    comp.init();
+    _comp = (AbstractBean) factory.singleton(proxy);
 
-    _comp = comp;
-
-    webBeans.addBean(comp);
+    beanManager.addBean(_comp);
   }
 }
 

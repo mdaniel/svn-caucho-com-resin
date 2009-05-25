@@ -146,7 +146,7 @@ public class PojoBean extends BeanGenerator {
     ArrayList<Annotation> interceptorBindingList
       = new ArrayList<Annotation>();
 
-    Annotation []xmlInterceptorBindings = getInterceptorBindings();
+    Set<Annotation> xmlInterceptorBindings = getInterceptorBindings();
 
     if (xmlInterceptorBindings != null) {
       for (Annotation ann : xmlInterceptorBindings) {

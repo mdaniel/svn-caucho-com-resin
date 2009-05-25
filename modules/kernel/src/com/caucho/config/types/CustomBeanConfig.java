@@ -32,11 +32,7 @@ package com.caucho.config.types;
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.BeanTypeImpl;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.inject.SimpleBeanField;
-import com.caucho.config.inject.SimpleBeanMethod;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
 import com.caucho.util.*;
@@ -410,13 +406,6 @@ public class CustomBeanConfig {
 
     return null;
   }
-
-  /*
-  public ComponentImpl getComponent()
-  {
-    return _component;
-  }
-  */
 
   @PostConstruct
   public void init()

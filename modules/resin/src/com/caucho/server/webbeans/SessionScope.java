@@ -29,7 +29,6 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
@@ -47,6 +46,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
  * The session scope value
  */
 public class SessionScope extends ScopeContext {
+  private ScopeIdMap _idMap = new ScopeIdMap();
   
   /**
    * Returns true if the scope is currently active.
@@ -80,9 +80,12 @@ public class SessionScope extends ScopeContext {
       return null;
 
     HttpSession session = ((HttpServletRequest) request).getSession();
-    ComponentImpl comp = (ComponentImpl) bean;
 
-    Object result = session.getAttribute(comp.getScopeId());
+    Bean comp = (Bean) bean;
+
+    String id = _idMap.getId(comp);
+
+    Object result = session.getAttribute(id);
 
     return (T) result;
   }
@@ -96,16 +99,19 @@ public class SessionScope extends ScopeContext {
       return null;
 
     HttpSession session = ((HttpServletRequest) request).getSession();
-    ComponentImpl comp = (ComponentImpl) bean;
 
-    Object result = session.getAttribute(comp.getScopeId());
+    Bean comp = (Bean) bean;
+
+    String id = _idMap.getId(comp);
+
+    Object result = session.getAttribute(id);
 
     if (result != null || creationalContext == null)
       return (T) result;
     
     result = comp.create(creationalContext);
 
-    session.setAttribute(comp.getScopeId(), result);
+    session.setAttribute(id, result);
     
     return (T) result;
   }
@@ -126,7 +132,7 @@ public class SessionScope extends ScopeContext {
 	    || scope instanceof SessionScope);
   }
 
-  public void addDestructor(ComponentImpl comp, Object value)
+  public void addDestructor(Bean comp, Object value)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 

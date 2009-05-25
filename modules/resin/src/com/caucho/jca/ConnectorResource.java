@@ -31,6 +31,7 @@ package com.caucho.jca;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.jca.cfg.ObjectConfig;
@@ -329,15 +330,16 @@ public class ConnectorResource implements EnvironmentListener {
 
     ResourceManagerImpl.addResource(_ra);
 
-    InjectManager webBeans = InjectManager.create();
+    InjectManager manager = InjectManager.create();
+    BeanFactory beanFactory = manager.createBeanFactory(_ra.getClass());
     
     if (_resourceAdapter.getName() != null) {
       Jndi.bindDeepShort(_resourceAdapter.getName(), _ra);
 
-      webBeans.addSingleton(_ra, _resourceAdapter.getName());
+      beanFactory.name(_resourceAdapter.getName());
     }
-    else
-      webBeans.addSingleton(_ra, _name);
+
+    manager.addBean(beanFactory.singleton(_ra));
 
     // create a default outbound factory
     if (_outboundList.size() == 0 && _jndiName != null && _rar != null) {
@@ -673,15 +675,18 @@ public class ConnectorResource implements EnvironmentListener {
       Object connectionFactory = cm.init(managedFactory);
       cm.start();
 
-      InjectManager webBeans = InjectManager.create();
+      InjectManager beanManager = InjectManager.create();
+      BeanFactory factory
+	= beanManager.createBeanFactory(connectionFactory.getClass());
       
       if (getName() != null) {
 	Jndi.bindDeepShort(getName(), connectionFactory);
 
-	webBeans.addSingleton(connectionFactory, getName());
+	beanManager.addBean(factory.name(getName())
+			    .singleton(connectionFactory));
       }
       else
-	webBeans.addSingleton(connectionFactory);
+	beanManager.addBean(factory.singleton(connectionFactory));
     }
   }
 
@@ -898,15 +903,18 @@ public class ConnectorResource implements EnvironmentListener {
       if (_ra != null && resourceObject instanceof ResourceAdapterAssociation)
 	((ResourceAdapterAssociation) resourceObject).setResourceAdapter(_ra);
 
-      InjectManager webBeans = InjectManager.create();
+      InjectManager beanManager = InjectManager.create();
 
+      BeanFactory factory = beanManager.createBeanFactory(resourceObject.getClass());
+      
       if (getName() != null) {
 	Jndi.bindDeepShort(getName(), resourceObject);
 
-	webBeans.addSingleton(resourceObject, getName());
+	beanManager.addBean(factory.name(getName()).singleton(resourceObject));
       }
-      else
-	webBeans.addSingleton(resourceObject);
+      else {
+	beanManager.addBean(factory.singleton(resourceObject));
+      }
     }
   }
 }

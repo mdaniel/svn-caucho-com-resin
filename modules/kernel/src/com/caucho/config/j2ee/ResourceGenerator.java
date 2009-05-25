@@ -29,7 +29,6 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.program.ConfigProgram;

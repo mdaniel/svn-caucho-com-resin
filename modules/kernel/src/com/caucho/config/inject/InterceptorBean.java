@@ -29,7 +29,6 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.inject.SimpleBean;
 import com.caucho.util.*;
 
 import java.lang.reflect.*;
@@ -45,6 +44,7 @@ import javax.interceptor.InvocationContext;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.ManagedBean;
 
 /**
  * InterceptorBean represents a Java interceptor
@@ -57,7 +57,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   
   private Class _type;
 
-  private SimpleBean _bean;
+  private ManagedBean _bean;
 
   private Method _aroundInvoke;
   private Method _postConstruct;
@@ -75,7 +75,7 @@ public class InterceptorBean<X> implements Interceptor<X>
 
     _type = type;
 
-    _bean = new SimpleBean(_type);
+    // XXX: _bean = new SimpleBean(_type);
 
     init();
   }
@@ -154,11 +154,13 @@ public class InterceptorBean<X> implements Interceptor<X>
   /**
    * Create a new instance of the bean.
    */
+  /*
   public Object create()
   {
     return _bean.create();
   }
-
+  */
+  
   /**
    * Destroys a bean instance
    */
@@ -232,7 +234,7 @@ public class InterceptorBean<X> implements Interceptor<X>
 
   public void init()
   {
-    _bean.init();
+    // _bean.init();
     
     introspect();
   }

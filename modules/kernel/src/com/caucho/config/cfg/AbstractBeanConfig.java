@@ -30,11 +30,10 @@
 package com.caucho.config.cfg;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanTypeImpl;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.inject.SingletonBean;
-import com.caucho.config.inject.SingletonClassComponent;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
@@ -53,6 +52,9 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.deployment.DeploymentType;
+import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ManagedBean;
 import javax.naming.*;
 
 /**
@@ -71,7 +73,7 @@ abstract public class AbstractBeanConfig {
 
   private Class<? extends Annotation> _deploymentType;
   
-  private ArrayList<Annotation> _bindingList
+  private ArrayList<Annotation> _annotations
     = new ArrayList<Annotation>();
 
   private Class _scope;
@@ -108,7 +110,7 @@ abstract public class AbstractBeanConfig {
   {
     _name = name;
 
-    _bindingList.add(Names.create(name));
+    // _bindingList.add(Names.create(name));
   }
 
   /**
@@ -176,7 +178,15 @@ abstract public class AbstractBeanConfig {
    */
   public void addBinding(Annotation binding)
   {
-    _bindingList.add(binding);
+    _annotations.add(binding);
+  }
+
+  /**
+   * Adds a component binding.
+   */
+  public void add(Annotation binding)
+  {
+    _annotations.add(binding);
   }
 
   /**
@@ -185,37 +195,19 @@ abstract public class AbstractBeanConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = ApplicationScoped.class;
+      add(new AnnotationLiteral<ApplicationScoped>() {});
     else if ("dependent".equals(scope))
-      _scope = Dependent.class;
+      add(new AnnotationLiteral<Dependent>() {});
     else if ("request".equals(scope))
-      _scope = RequestScoped.class;
+      add(new AnnotationLiteral<RequestScoped>() {});
     else if ("session".equals(scope))
-      _scope = SessionScoped.class;
+      add(new AnnotationLiteral<SessionScoped>() {});
     else if ("application".equals(scope))
-      _scope = ApplicationScoped.class;
+      add(new AnnotationLiteral<ApplicationScoped>() {});
     else if ("conversation".equals(scope))
-      _scope = ConversationScoped.class;
+      add(new AnnotationLiteral<ConversationScoped>() {});
     else {
-      Class cl = null;
-      
-      try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	cl = Class.forName(scope, false, loader);
-      } catch (ClassNotFoundException e) {
-      }
-
-      if (cl == null)
-	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
-
-      if (! Annotation.class.isAssignableFrom(cl))
-	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
-
-      if (! cl.isAnnotationPresent(ScopeType.class))
-	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
-
-      _scope = cl;
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
     }
   }
 
@@ -234,56 +226,62 @@ abstract public class AbstractBeanConfig {
   {
     return _init;
   }
-
-  protected void register()
+  
+  protected void initImpl()
   {
-    register(null, null);
   }
 
-  protected void register(Object value)
+  @PostConstruct
+  public final void init()
   {
-    register(value, value != null ? value.getClass() : null);
-  }
+    initImpl();
 
-  protected void register(Object value, Class api)
-  {
-    InjectManager webBeans = InjectManager.create();
-    
-    ComponentImpl comp;
+    if (_cl == null) {
+      throw new ConfigException(L.l("{0} requires a 'class' attribute",
+				    getClass().getSimpleName()));
+    }
+
+    InjectManager beanManager = InjectManager.create();
+
+    BeanTypeImpl beanType = new BeanTypeImpl(_cl, _cl);
+
+    /*
+    if (_name != null)
+      factory.name(_name);
+
+    for (Annotation binding : _bindingList)
+      factory.binding(binding);
+
+    if (_deploymentType != null)
+      factory.deployment(_deploymentType);
+
+    if (_scope != null)
+      factory.scope(_scope);
+    */
+
+    ManagedBean bean = beanManager.createManagedBean(beanType);
+
+    beanManager.addBean(bean);
+    /*
+    Bean bean = bean;
 
     if (value != null) {
-      comp = new SingletonBean(webBeans, value);
+      bean = factory.singleton(value);
     }
     else {
       SimpleBean classComp = new SingletonClassComponent(webBeans);
 
       classComp.setTargetType(_cl);
 
-      comp = classComp;
+      bean = factory.bean();
     }
 
-    if (api != null)
-      comp.setTargetType(api);
-
-    if (_name != null)
-      comp.setName(_name);
-
-    for (Annotation binding : _bindingList)
-      comp.addBinding(binding);
-
-    if (_deploymentType != null)
-      comp.setDeploymentType(_deploymentType);
-
-    if (_scope != null)
-      comp.setScopeType(_scope);
-
-    comp.init();
-
-    webBeans.addBean(comp);
+    webBeans.addBean(bean);
+    */
 
     if (_jndiName != null) {
       try {
-	Jndi.bindDeepShort(_jndiName, comp);
+	Jndi.bindDeepShort(_jndiName, bean);
       } catch (NamingException e) {
 	throw ConfigException.create(e);
       }

@@ -34,14 +34,16 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.jms.*;
+import javax.enterprise.inject.AnnotationLiteral;
 import javax.resource.spi.*;
 
 import com.caucho.bam.*;
 import com.caucho.hemp.broker.HempBroker;
+import com.caucho.config.ConfigException;
 import com.caucho.config.annotation.Start;
+import com.caucho.remote.BamService;
 import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 
 import com.caucho.util.*;
@@ -49,7 +51,7 @@ import com.caucho.util.*;
 /**
  * bam-service configuration
  */
-public class BamServiceConfig extends BeanConfig
+public class BamServiceConfig extends AbstractBeanConfig
 {
   private static final L10N L = new L10N(BamServiceConfig.class);
   private static final Logger log
@@ -67,17 +69,32 @@ public class BamServiceConfig extends BeanConfig
     setScope("singleton");
   }
 
+  /*
   @Override
   public Class getBeanConfigClass()
   {
     return Actor.class;
   }
+  */
 
   public void setThreadMax(int threadMax)
   {
     _threadMax = threadMax;
   }
 
+  protected void initImpl()
+  {
+    if (getInstanceClass() == null)
+      throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
+    
+    final String name = getName();
+
+    add(new AnnotationLiteral<BamService>() {
+	public String name() { return name; }
+      });
+  }
+
+  /*
   @PostConstruct
   public void init()
   {
@@ -88,14 +105,18 @@ public class BamServiceConfig extends BeanConfig
 
     start();
   }
+  */
 
+  /*
   @PreDestroy
   public void destroy()
   {
     if (_service != null)
       _broker.removeActor(_service);
   }
+  */
 
+  /*
   @Start
   public void start()
   {
@@ -132,5 +153,6 @@ public class BamServiceConfig extends BeanConfig
 
     _broker.addActor(service);
   }
+  */
 }
 

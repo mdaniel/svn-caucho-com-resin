@@ -27,7 +27,7 @@
 
 package com.caucho.config;
 
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.Destructor;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.NodeBuilderChildProgram;
@@ -95,13 +95,13 @@ public class ConfigContext implements CreationalContext {
     _parent = parent;
   }
 
-  public ConfigContext(ComponentImpl component,
+  public ConfigContext(AbstractBean bean,
 		       Object value,
 		       ScopeContext scope)
   {
     this();
 
-    _dependentScope = new DependentScope(component, value, scope);
+    _dependentScope = new DependentScope(bean, value, scope);
   }
 
   public ConfigContext(ScopeContext scope)
@@ -163,7 +163,7 @@ public class ConfigContext implements CreationalContext {
    * @param aThis
    * @param value
    */
-  public void addDestructor(ComponentImpl comp, Object value)
+  public void addDestructor(AbstractBean comp, Object value)
   {
     if (_dependentScope != null)
       _dependentScope.addDestructor(comp, value);
@@ -198,8 +198,8 @@ public class ConfigContext implements CreationalContext {
    */
   public Object get(Bean comp)
   {
-    if (_dependentScope != null && comp instanceof ComponentImpl) {
-      Object value = _dependentScope.get((ComponentImpl) comp);
+    if (_dependentScope != null && comp instanceof AbstractBean) {
+      Object value = _dependentScope.get((AbstractBean) comp);
 
       return value;
     }
@@ -218,7 +218,7 @@ public class ConfigContext implements CreationalContext {
    * @param aThis
    * @param obj
    */
-  public void put(ComponentImpl comp, Object obj)
+  public void put(AbstractBean comp, Object obj)
   {
     if (_dependentScope == null)
       _dependentScope = new DependentScope();
@@ -242,10 +242,10 @@ public class ConfigContext implements CreationalContext {
       return null;
   }
   
-  public void remove(ComponentImpl comp)
+  public void remove(Bean comp)
   {
     if (_dependentScope != null)
-      _dependentScope.remove(comp);
+      _dependentScope.remove((AbstractBean) comp);
   }
 
   /**

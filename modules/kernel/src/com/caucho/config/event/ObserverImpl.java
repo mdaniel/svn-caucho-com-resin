@@ -40,7 +40,6 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
@@ -123,7 +122,7 @@ public class ObserverImpl implements Observer {
       Type []param = _method.getGenericParameterTypes();
       Annotation [][]annList = _method.getParameterAnnotations();
 
-      _args = new ComponentImpl[param.length];
+      _args = new Bean[param.length];
 
       String loc = LineConfigException.loc(_method);
       
@@ -139,12 +138,12 @@ public class ObserverImpl implements Observer {
 					  getSimpleName(param[i])));
 	}
 	
-	ComponentImpl comp = null;
+	Bean comp = null;
 
 	// XXX: error checking
 	Iterator iter = beans.iterator();
 	if (iter.hasNext()) {
-	  comp = (ComponentImpl) iter.next();
+	  comp = (Bean) iter.next();
 	}
 
 	_args[i] = comp;
@@ -173,7 +172,7 @@ public class ObserverImpl implements Observer {
 	obj = context.get(_bean);
     }
     else
-      obj = _webBeans.getReference(_bean);
+      obj = _webBeans.getReference(_bean, (Class) null); // XXX:
 
     try {
       if (obj != null) {

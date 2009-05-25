@@ -32,10 +32,22 @@ package com.caucho.config.gen;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorBean;
+import com.caucho.config.inject.BeanMethodImpl;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
@@ -44,15 +56,6 @@ import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.InterceptorBindingType;
 import javax.interceptor.Interceptors;
 import javax.interceptor.ExcludeClassInterceptors;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 
 /**
  * Represents the interception
@@ -172,19 +175,19 @@ public class InterceptorCallChain
       return;
     }
 
-    Annotation[] apiAnnList = getMethodAnnotations(apiMethod);
-    Annotation[] implAnnList = getMethodAnnotations(implMethod);
+    AnnotatedMethod apiAnn = getMethodAnnotations(apiMethod);
+    AnnotatedMethod implAnn = getMethodAnnotations(implMethod);
 
-    if (isAnnotationPresent(apiAnnList, ExcludeClassInterceptors.class))
+    if (apiAnn.isAnnotationPresent(ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
 
-    if (isAnnotationPresent(implAnnList, ExcludeClassInterceptors.class))
+    if (implAnn.isAnnotationPresent(ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
 
-    if (isAnnotationPresent(apiAnnList, ExcludeDefaultInterceptors.class))
+    if (apiAnn.isAnnotationPresent(ExcludeDefaultInterceptors.class))
       _isExcludeDefaultInterceptors = true;
 
-    if (isAnnotationPresent(implAnnList, ExcludeDefaultInterceptors.class))
+    if (implAnn.isAnnotationPresent(ExcludeDefaultInterceptors.class))
       _isExcludeDefaultInterceptors = true;
 
     Interceptors iAnn;
@@ -211,7 +214,7 @@ public class InterceptorCallChain
       }
     }
 
-    iAnn = getAnnotation(apiAnnList, Interceptors.class);
+    iAnn = apiAnn.getAnnotation(Interceptors.class);
 
     if (iAnn != null) {
       for (Class iClass : iAnn.value()) {
@@ -220,7 +223,7 @@ public class InterceptorCallChain
       }
     }
 
-    iAnn = getAnnotation(implAnnList, Interceptors.class);
+    iAnn = implAnn.getAnnotation(Interceptors.class);
 
     if (apiMethod != implMethod && iAnn != null) {
       for (Class iClass : iAnn.value()) {
@@ -241,7 +244,7 @@ public class InterceptorCallChain
       }
     }
 
-    for (Annotation ann : implAnnList) {
+    for (Annotation ann : implAnn.getAnnotations()) {
       Class annType = ann.annotationType();
 
       if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
@@ -268,20 +271,20 @@ public class InterceptorCallChain
     }
   }
 
-  protected Annotation[] getMethodAnnotations(Method method)
+  protected AnnotatedMethod getMethodAnnotations(Method method)
   {
     if (method == null)
-      return NULL_ANN_LIST;
+      return null;
 
-    Annotation[] annList = _view.getBean().getMethodAnnotations(method);
+    AnnotatedMethod annList = _view.getBean().getMethodAnnotations(method);
 
     if (annList != null)
       return annList;
     else
-      return method.getAnnotations();
+      return new BeanMethodImpl(method);
   }
 
-  protected boolean isAnnotationPresent(Annotation[] annList, Class type)
+  protected boolean isAnnotationPresent(Set<Annotation> annList, Class type)
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(type))
@@ -291,7 +294,7 @@ public class InterceptorCallChain
     return false;
   }
 
-  protected <T> T getAnnotation(Annotation[] annList, Class<T> type)
+  protected <T> T getAnnotation(Set<Annotation> annList, Class<T> type)
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(type))

@@ -40,7 +40,7 @@ import javax.enterprise.inject.spi.BeanManager;
 /**
  * Broker
  */
-public class BamRegisterListener implements BeanRegistrationListener
+public class BamRegisterListener // implements BeanRegistrationListener
 {
   public boolean isMatch(Annotation ann)
   {

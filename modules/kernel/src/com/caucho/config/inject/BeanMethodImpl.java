@@ -56,6 +56,11 @@ public class BeanMethodImpl
   private ArrayList<AnnotatedParameter> _parameterList
     = new ArrayList<AnnotatedParameter>();
   
+  public BeanMethodImpl(Method method)
+  {
+    this(null, method);
+  }
+  
   public BeanMethodImpl(AnnotatedType declaringType, Method method)
   {
     super(method.getGenericReturnType(), method.getAnnotations());

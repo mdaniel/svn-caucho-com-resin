@@ -34,6 +34,8 @@ import com.caucho.bam.*;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.functions.FmtFunctions;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.lib.*;
@@ -280,19 +282,22 @@ public class Resin implements EnvironmentBean, SchemaBean
       _management = createResinManagement();
       
       if (webBeans.getBeans(ResinWebBeansProducer.class).size() == 0) {
-	webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
+	Config.setProperty("fmt", new FmtFunctions());
 
 	ResinConfigLibrary.configure(webBeans);
 
 	try {
 	  Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
-	  webBeans.addSingleton(method, "jndi", Standard.class);
-	  webBeans.addSingleton(method, "jndi:lookup", Standard.class);
+	  Config.setProperty("jndi", method);
+	  Config.setProperty("jndi:lookup", method);
 	} catch (Exception e) {
 	  throw ConfigException.create(e);
 	}
 
-	webBeans.addSingleton(new ResinWebBeansProducer());
+	BeanFactory factory
+	  = webBeans.createBeanFactory(ResinWebBeansProducer.class);
+	
+	webBeans.addBean(factory.singleton(new ResinWebBeansProducer()));
 	webBeans.update();
       }
       
@@ -474,7 +479,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void setServerId(String serverId)
   {
-    InjectManager.create().addSingletonByName(serverId, "serverId");
+    Config.setProperty("serverId", serverId);
 
     _serverId = serverId;
     _serverIdLocal.set(serverId);

@@ -29,7 +29,6 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.SingletonGenerator;
 import com.caucho.config.program.ComponentValueGenerator;
@@ -555,7 +554,8 @@ public class InjectIntrospector {
 
     bindJndi(location, jndiName, bean);
 
-    return new ComponentValueGenerator(location, (ComponentImpl) bean);
+    // return new ComponentValueGenerator(location, (AbstractBean) bean);
+    return null;
   }
 
   private static ValueGenerator
@@ -667,7 +667,7 @@ public class InjectIntrospector {
   {
     InjectManager webBeans = InjectManager.create();
 
-    webBeans.createProgram(injectList, method);
+    // webBeans.createProgram(injectList, method);
   }
 
   /**

@@ -29,55 +29,48 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.util.*;
+import com.caucho.config.cfg.*;
 
 import java.lang.annotation.*;
-import javax.enterprise.inject.deployment.Production;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.*;
+
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.spi.Bean;
 
 /**
- * Component for a singleton beans
+ * Wrapper to handle @Specializes
  */
-abstract public class FactoryComponent extends ComponentImpl {
-  public FactoryComponent(Class targetType, String name)
-  {
-    super(InjectManager.create());
+public class RegisteredBean {
+  private final Bean _bean;
 
-    setTargetType(targetType);
-    setName(name);
-    setDeploymentType(Production.class);
+  private RegisteredBean _specialized;
+
+  RegisteredBean(Bean bean)
+  {
+    _bean = bean;
   }
 
-  @Override
-  public void setScope(ScopeContext scope)
+  void setSpecializes(RegisteredBean specialized)
   {
+    _specialized = specialized;
   }
 
-  @Override
-  public Object get()
+  Bean getMostSpecialized()
   {
-    return get(null);
-  }
-
-  @Override
-  public Object get(ConfigContext env)
-  {
-    if (env != null) {
-      Object value = env.get(this);
-
-      if (value != null)
-	return value;
-
-      value = create();
-      
-      env.put(this, value);
-
-      return value;
-    }
+    if (_specialized != null)
+      return _specialized.getMostSpecialized();
     else
-      return create();
+      return _bean;
   }
-
-  abstract public Object create();
 }

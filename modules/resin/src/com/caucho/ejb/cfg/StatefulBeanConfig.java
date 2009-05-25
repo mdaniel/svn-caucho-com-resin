@@ -29,16 +29,19 @@
 
 package com.caucho.ejb.cfg;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.enterprise.inject.AnnotationLiteral;
+
 import javax.annotation.*;
-import javax.jms.*;
+import javax.ejb.Stateful;
 
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.config.cfg.WbComponentConfig;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
@@ -58,9 +61,10 @@ public class StatefulBeanConfig extends AbstractBeanConfig
   {
   }
 
-  public StatefulBeanConfig(CauchoBean beanConfig)
+  /*
+  public StatefulBeanConfig(Bean beanConfig)
   {
-    ComponentImpl comp = (ComponentImpl) beanConfig;
+    AbstractBean comp = (AbstractBean) beanConfig;
     
     setClass((Class) comp.getTargetType());
 
@@ -77,9 +81,10 @@ public class StatefulBeanConfig extends AbstractBeanConfig
     if (comp.getInit() != null)
       setInit(comp.getInit());
   }
+  */
 
-  @PostConstruct
-  public void init()
+  /*
+  protected void initImpl()
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
@@ -107,6 +112,23 @@ public class StatefulBeanConfig extends AbstractBeanConfig
 
     // XXX: timing?
     configManager.start();
+  }
+  */
+
+  protected void initImpl()
+  {
+    if (getInstanceClass() == null)
+      throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
+    
+    final String name = getName();
+
+    Annotation statefulAnn = new AnnotationLiteral<Stateful>() {
+      public String name() { return name; }
+      public String mappedName() { return name; }
+      public String description() { return ""; }
+    };
+
+    add(statefulAnn);
   }
 }
 

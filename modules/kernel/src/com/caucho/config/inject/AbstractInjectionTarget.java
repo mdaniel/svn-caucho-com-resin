@@ -27,17 +27,60 @@
  * @author Scott Ferguson
  */
 
-package javax.annotation;
+package com.caucho.config.inject;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import javax.enterprise.inject.spi.*;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * The @NonBinding annotation for web beans
+ * Abstract introspected view of a Bean injectible field
  */
-@Retention(RUNTIME)
-@Target(METHOD)
-public @interface NonBinding {
+abstract public class AbstractInjectionTarget<X> implements InjectionTarget<X>
+{
+  /**
+   * Instantiate the bean.
+   */
+  abstract public X produce(CreationalContext<X> ctx);
+  
+  /**
+   * Inject the bean.
+   */
+  public void inject(X instance, CreationalContext<X> ctx)
+  {
+  }
+  
+  /**
+   * PostConstruct initialization
+   */
+  public void postConstruct(X instance, CreationalContext<X> ctx)
+  {
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void dispose(X instance)
+  {
+  }
+  
+  /**
+   * Call destroy
+   */
+  public void destroy(X instance)
+  {
+  }
+
+  /**
+   * Returns the injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return new HashSet<InjectionPoint>();
+  }
 }

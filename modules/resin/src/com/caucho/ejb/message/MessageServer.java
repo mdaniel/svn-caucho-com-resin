@@ -30,6 +30,7 @@
 package com.caucho.ejb.message;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
@@ -136,9 +137,10 @@ public class MessageServer extends AbstractServer
   @Override
   protected void bindContext()
   {
-    InjectManager webBeans = InjectManager.create();
+    InjectManager manager = InjectManager.create();
+    BeanFactory factory = manager.createBeanFactory(_context.getClass());
 
-    webBeans.addSingleton(_context);
+    manager.addBean(factory.singleton(_context));
   }
 
   /**

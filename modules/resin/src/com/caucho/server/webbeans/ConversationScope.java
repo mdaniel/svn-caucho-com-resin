@@ -30,7 +30,6 @@
 package com.caucho.server.webbeans;
 
 import com.caucho.util.*;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.server.dispatch.ServletInvocation;
@@ -56,6 +55,8 @@ public class ConversationScope extends ScopeContext
   implements Conversation, java.io.Serializable
 {
   private static final L10N L = new L10N(ConversationScope.class);
+  
+  private ScopeIdMap _idMap = new ScopeIdMap();
 
   public ConversationScope()
   {
@@ -110,8 +111,12 @@ public class ConversationScope extends ScopeContext
 	scope._conversationMap.put(id, map);
     }
 
+    Bean comp = (Bean) bean;
+
+    String scopeId = _idMap.getId(comp);
+
     if (map != null)
-      return (T) map.get(((ComponentImpl) bean).getScopeId());
+      return (T) map.get(scopeId);
     else
       return null;
   }
@@ -126,6 +131,10 @@ public class ConversationScope extends ScopeContext
 
     if (instance != null || cxt == null)
       return instance;
+
+    Bean comp = (Bean) bean;
+
+    String scopeId = _idMap.getId(comp);
 
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
@@ -161,7 +170,7 @@ public class ConversationScope extends ScopeContext
     if (map != null) {
       instance = bean.create(cxt);
 
-      map.put(((ComponentImpl) bean).getScopeId(), instance);
+      map.put(scopeId, instance);
     }
 
     return instance;

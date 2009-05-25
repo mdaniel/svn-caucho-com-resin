@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * Testing and mock beans completely override their parents when enabled
  * if they are marked with a {@literal @Specializes} annotation.
  */
-@Target({PARAMETER})
+@Target({TYPE})
 @Retention(RUNTIME)
 public @interface Specializes {
 }

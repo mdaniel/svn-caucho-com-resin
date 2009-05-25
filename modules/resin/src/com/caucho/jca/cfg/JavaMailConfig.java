@@ -31,6 +31,8 @@ package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.AbstractBeanConfig;
+import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
@@ -211,10 +213,11 @@ public class JavaMailConfig extends AbstractBeanConfig {
     _props.putAll(props);
   }
 
-  @PostConstruct
-  public void init()
+  public void initImpl()
     throws ConfigException
   {
+    super.initImpl();
+    
     try {
       if (getInit() != null)
 	getInit().configure(this);
@@ -229,7 +232,11 @@ public class JavaMailConfig extends AbstractBeanConfig {
       else
 	_session = Session.getInstance(_props);
 
-      register(_session);
+      InjectManager manager = InjectManager.create();
+      BeanFactory factory = manager.createBeanFactory(Session.class);
+      factory.type(Session.class);
+
+      manager.addBean(factory.singleton(_session));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

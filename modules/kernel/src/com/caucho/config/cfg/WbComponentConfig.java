@@ -30,10 +30,8 @@
 package com.caucho.config.cfg;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.inject.SingletonClassComponent;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
@@ -58,6 +56,7 @@ import javax.enterprise.context.ScopeType;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.deployment.DeploymentType;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Configuration for the xml web bean component.
@@ -67,7 +66,7 @@ public class WbComponentConfig {
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private InjectManager _webbeans;
+  private InjectManager _beanManager;
   
   private Class _cl;
 
@@ -83,19 +82,19 @@ public class WbComponentConfig {
   private ArrayList<ConfigProgram> _newArgs;
   private ContainerProgram _init;
 
-  protected ComponentImpl _comp;
+  protected AbstractBean _comp;
 
   // XXX: temp for osgi
   private boolean _isService;
 
   public WbComponentConfig()
   {
-    _webbeans = InjectManager.create();
+    _beanManager = InjectManager.create();
   }
 
   public WbComponentConfig(InjectManager webbeans)
   {
-    _webbeans = webbeans;
+    _beanManager = webbeans;
   }
 
   /**
@@ -160,7 +159,7 @@ public class WbComponentConfig {
     return _cl;
   }
 
-  public ComponentImpl getComponent()
+  public AbstractBean getComponent()
   {
     return _comp;
   }
@@ -294,7 +293,7 @@ public class WbComponentConfig {
   /**
    * Returns the configured component factory.
    */
-  public ComponentImpl getComponentFactory()
+  public AbstractBean getComponentFactory()
   {
     return _comp;
   }
@@ -335,14 +334,13 @@ public class WbComponentConfig {
 
     introspect();
     
-    SimpleBean comp;
+    Bean comp;
 
     /*
     if (Singleton.class.equals(_scope))
       comp = new SingletonClassComponent(InjectManager.create());
     else
-    */
-    comp = new SimpleBean(InjectManager.create());
+    comp = null;//new SimpleBean(InjectManager.create());
 
     comp.setTargetType(_cl);
 
@@ -366,7 +364,7 @@ public class WbComponentConfig {
 
     if (_scope != null) {
       comp.setScopeType(_scope);
-      comp.setScope(_webbeans.getScopeContext(_scope));
+      comp.setScope(_beanManager.getScopeContext(_scope));
     }
 
     if (_isService) {
@@ -384,6 +382,7 @@ public class WbComponentConfig {
     introspectPostInit();
 
     comp.init();
+    */
 
     deploy();
   }
@@ -406,23 +405,28 @@ public class WbComponentConfig {
 
   protected void deploy()
   {
+    /*
     if (_comp != null) {
-      _webbeans.addConfigBean(_comp);
+      _beanManager.addConfigBean(_comp);
     }
+    */
   }
 
   public Object getObject()
   {
     if (_comp != null)
-      return _comp.get();
+      return _beanManager.getReference(_comp, (Class) null);
     else
       return null;
   }
 
   public Object createObjectNoInit()
   {
-    if (_comp != null)
-      return _comp.createNoInit();
+    if (_comp != null) {
+      // XXX:
+      return _beanManager.getReference(_comp, (Class) null);
+      // return _comp.createNoInit();
+    }
     else
       return null;
   }

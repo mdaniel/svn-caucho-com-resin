@@ -29,7 +29,7 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.program.ConfigProgram;
@@ -64,7 +64,7 @@ public class EjbGenerator extends ValueGenerator {
   
   private final String _location;
 
-  private ComponentImpl _component;
+  private AbstractBean _component;
   private boolean _isBound;
 
   EjbGenerator(Class type,

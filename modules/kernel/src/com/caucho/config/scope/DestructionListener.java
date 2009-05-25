@@ -35,7 +35,6 @@ import java.util.*;
 import javax.enterprise.context.spi.Contextual;
 import javax.servlet.http.*;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.*;
 
 /**

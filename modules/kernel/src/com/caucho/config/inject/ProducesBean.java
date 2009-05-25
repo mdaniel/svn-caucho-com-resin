@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.Arg;
 import com.caucho.config.types.*;
@@ -56,8 +55,9 @@ import javax.enterprise.inject.spi.ProducerBean;
 /**
  * Configuration for a @Produces method
  */
-public class ProducesBean<X,T> extends ComponentImpl<T>
-  implements ProducerBean<X,T>, InjectionTarget<T> {
+public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
+  implements ProducerBean<X,T>, InjectionTarget<T>
+{	     
   private static final L10N L = new L10N(ProducesBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];
@@ -75,7 +75,7 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
 			 AnnotatedMethod beanMethod,
 			 Arg []args)
   {
-    super(inject);
+    super(inject, beanMethod.getType(), beanMethod);
 
     _producer = producer;
     _beanMethod = beanMethod;
@@ -83,8 +83,6 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
 
     if (args == null)
       throw new NullPointerException();
-
-    setTargetType(beanMethod.getJavaMember().getGenericReturnType());
   }
 
   public static ProducesBean create(InjectManager inject,
@@ -110,9 +108,7 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
   {
     return _annotationList;
   }
-  */
 
-  @Override
   protected void initDefault()
   {
     if (getDeploymentType() == null
@@ -122,12 +118,14 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
     
     super.initDefault();
   }
-
-  public void introspect()
+  */
+  
+  protected Class getDefaultDeploymentType()
   {
-    introspectTypes(_beanMethod.getType());
-    
-    introspectAnnotations(_beanMethod.getAnnotations());
+    if (_producer.getDeploymentType() != null)
+      return _producer.getDeploymentType();
+
+    return null;// super.getDefaultDeploymentType();
   }
 
   @Override
@@ -160,22 +158,23 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  public T create(CreationalContext<T> createEnv)
+  {
+    return produce(createEnv);
+  }
 
   public InjectionTarget<T> getInjectionTarget()
   {
     return this;
   }
 
-  public T create(CreationalContext<T> createEnv)
+  /**
+   * Produces a new bean instance
+   */
+  public T produce(CreationalContext<T> cxt)
   {
-    T instance = produce(createEnv);
-
-    return instance;
-  }
-  
-  public T produce(CreationalContext<T> createEnv)
-  {
-    ConfigContext env = (ConfigContext) createEnv;
+    ConfigContext env = (ConfigContext) cxt;
       
     X factory = (X) _beanManager.getReference(_producer);
 
@@ -187,14 +186,6 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
     return produce(factory);
   }
 
-  public void inject(T instance, CreationalContext<T> createEnv)
-  {
-  }
-
-  public void postConstruct(T instance, CreationalContext<T> createEnv)
-  {
-  }
-  
   /**
    * Produces a new bean instance
    */
@@ -241,6 +232,14 @@ public class ProducesBean<X,T> extends ComponentImpl<T>
     return createNew(null, null);
   }
   */
+
+  public void inject(T instance, CreationalContext<T> cxt)
+  {
+  }
+
+  public void postConstruct(T instance, CreationalContext<T> cxt)
+  {
+  }
 
   @Override
   public void bind()

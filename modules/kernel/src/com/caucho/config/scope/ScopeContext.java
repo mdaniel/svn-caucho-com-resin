@@ -36,8 +36,6 @@ import javax.enterprise.context.spi.*;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.inject.ComponentImpl;
-
 /**
  * Context for a named EL bean scope
  */

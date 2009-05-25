@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
@@ -144,15 +143,15 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   /**
    * Instantiate the bean.
    */
-  public X instantiate()
+  public X produce(CreationalContext cxt)
   {
-    return (X) _producesBean.instantiate();
+    return (X) _producesBean.produce(cxt);
   }
   
   /**
    * Inject the bean.
    */
-  public void inject(X instance)
+  public void inject(X instance, CreationalContext cxt)
   {
   }
   

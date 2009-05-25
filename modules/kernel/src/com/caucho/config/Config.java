@@ -301,10 +301,8 @@ public class Config {
 
       InjectManager webBeans = InjectManager.create();
 
-      if (webBeans != null && webBeans.getObjectByName("__FILE__") == null)
-	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
-      if (webBeans != null && webBeans.getObjectByName("__DIR__") == null)
-	webBeans.addSingleton(DirVar.__DIR__, "__DIR__");
+      setProperty("__FILE__", FileVar.__FILE__);
+      setProperty("__DIR__", DirVar.__DIR__);
       
       return builder.configure(obj, topNode);
     } finally {
@@ -355,10 +353,8 @@ public class Config {
 
       InjectManager webBeans = InjectManager.create();
       
-      if (webBeans != null && webBeans.findByName("__FILE__") == null)
-	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
-      if (webBeans != null && webBeans.findByName("__DIR__") == null)
-	webBeans.addSingleton(DirVar.__DIR__, "__DIR__");
+      setProperty("__FILE__", FileVar.__FILE__);
+      setProperty("__DIR__", DirVar.__DIR__);
 
       builder.configureBean(obj, topNode);
     } finally {

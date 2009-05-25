@@ -30,7 +30,7 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.util.*;
 
 import java.lang.reflect.*;
@@ -56,7 +56,7 @@ public class DecoratorBean implements Decorator
   
   private Class _type;
 
-  private SimpleBean _bean;
+  private AbstractBean _bean;
 
   private Field _delegateField;
 
@@ -73,7 +73,7 @@ public class DecoratorBean implements Decorator
 
     _type = type;
 
-    _bean = new SimpleBean(_type);
+    _bean = null;//new SimpleBean(_type);
 
     init();
   }
@@ -175,10 +175,12 @@ public class DecoratorBean implements Decorator
   /**
    * Create a new instance of the bean.
    */
+  /*
   public Object create()
   {
     return _bean.create();
   }
+  */
 
   /**
    * Destroys a bean instance
@@ -243,7 +245,7 @@ public class DecoratorBean implements Decorator
 
   public void init()
   {
-    _bean.init();
+    // _bean.init();
     
     introspect();
 

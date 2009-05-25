@@ -29,12 +29,12 @@
 
 package com.caucho.ejb.session;
 
-import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Creates a new instance of a stateful bean
  */
 public interface StatefulProvider {
-  public Object __caucho_createNew(Bean bean, CreationalContext env);
+  public Object __caucho_createNew(InjectionTarget bean, CreationalContext env);
 }

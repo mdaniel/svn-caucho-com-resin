@@ -119,11 +119,12 @@ public class BootManagementConfig
       if (_auth != null) {
 	_auth.init();
       
-	InjectManager webBeans = InjectManager.create();
+	InjectManager manager = InjectManager.create();
+	BeanFactory factory = manager.createBeanFactory(Authenticator.class);
+	factory.type(Authenticator.class);
+	factory.type(AdminAuthenticator.class);
 
-	webBeans.addBean(new SingletonBean(_auth, null,
-					   Authenticator.class,
-					   AdminAuthenticator.class));
+	manager.addBean(factory.singleton(_auth));
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

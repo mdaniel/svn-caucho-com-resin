@@ -29,7 +29,6 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
@@ -112,28 +111,12 @@ public class RequestScope extends ScopeContext
     if (request == null)
       return null;
 
-    ComponentImpl comp = (ComponentImpl) bean;
+    Bean comp = (Bean) bean;
 
-    Object result = request.getAttribute(comp.getScopeId());
+    String id = _idMap.getId(comp);
 
-    if (result != null)
-      return (T) result;
-    
-    result = comp.instantiate();
+    Object result = request.getAttribute(id);
 
-    request.setAttribute(comp.getScopeId(), result);
-
-    boolean isValid = false;
-
-    try {
-      comp.inject(result);
-      comp.postConstruct(result);
-      isValid = true;
-    } finally {
-      if (! isValid)
-	request.removeAttribute(comp.getScopeId());
-    }
-    
     return (T) result;
   }
 
@@ -156,7 +139,7 @@ public class RequestScope extends ScopeContext
 	    || scopeType == Dependent.class);
   }
 
-  public void addDestructor(ComponentImpl comp, Object value)
+  public void addDestructor(Bean comp, Object value)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 

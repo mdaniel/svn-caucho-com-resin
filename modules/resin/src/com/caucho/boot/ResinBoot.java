@@ -117,15 +117,16 @@ public class ResinBoot {
      * XXX: the following setVar calls should not be necessary, but the
      * EL.setEnviornment() call above is not effective:
      */
-    InjectManager webBeans = InjectManager.create();
-    webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
-    webBeans.addSingletonByName(elContext.getJavaVar(), "java");
-    webBeans.addSingletonByName(elContext.getResinVar(), "resin");
-    webBeans.addSingletonByName(elContext.getServerVar(), "server");
-    webBeans.addSingletonByName(System.getProperties(), "system");
-    webBeans.addSingletonByName(System.getenv(), "getenv");
+    InjectManager beanManager = InjectManager.create();
 
-    ResinConfigLibrary.configure(webBeans);
+    Config.setProperty("resinHome", elContext.getResinHome());
+    Config.setProperty("java", elContext.getJavaVar());
+    Config.setProperty("resin", elContext.getResinVar());
+    Config.setProperty("server", elContext.getServerVar());
+    Config.setProperty("system", System.getProperties());
+    Config.setProperty("getenv", System.getenv());
+
+    ResinConfigLibrary.configure(beanManager);
 
     config.configure(bootManager, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");

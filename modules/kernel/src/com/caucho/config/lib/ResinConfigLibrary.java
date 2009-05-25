@@ -29,6 +29,7 @@
 
 package com.caucho.config.lib;
 
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.naming.Jndi;
 
@@ -78,7 +79,9 @@ public class ResinConfigLibrary {
 	if (m.getName().equals("configure"))
 	  continue;
 
-	webBeans.addSingletonByName(m, m.getName());
+	BeanFactory factory = webBeans.createBeanFactory(m.getClass());
+	
+	webBeans.addBean(factory.name(m.getName()).singleton(m));
       }
     } catch (Exception e) {
       log().log(Level.FINE, e.toString(), e);

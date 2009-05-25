@@ -31,7 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.*;
@@ -49,7 +49,6 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
 import javax.ejb.*;
 import javax.enterprise.context.spi.CreationalContext;
@@ -69,7 +68,8 @@ import java.lang.reflect.Method;
  * Base server for a single home/object bean pair.
  */
 abstract public class AbstractServer implements EnvironmentBean {
-  private final static Logger log = Log.open(AbstractServer.class);
+  private final static Logger log
+    = Logger.getLogger(AbstractServer.class.getName());
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected final EjbContainer _ejbContainer;
@@ -129,7 +129,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected long _transactionTimeout;
 
-  protected ComponentImpl _component;
+  protected Bean _component;
 
   private TimerService _timerService;
 
@@ -849,7 +849,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     ConfigContext env = (ConfigContext) cxt;
 
     if (env != null && comp != null)
-      env.put((ComponentImpl) comp, proxy);
+      env.put((AbstractBean) comp, proxy);
 
     if (_initInject != null) {
       Thread thread = Thread.currentThread();
@@ -879,7 +879,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     }
 
     if (env != null && comp != null)
-      env.remove((ComponentImpl) comp);
+      env.remove(comp);
   }
 
   /**

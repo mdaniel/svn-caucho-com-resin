@@ -43,8 +43,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import javax.interceptor.*;
 import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
 /**
  * Generates the skeleton for a bean.
@@ -62,15 +64,15 @@ abstract public class BeanGenerator extends GenClass
   private ArrayList<Class> _defaultInterceptors
     = new ArrayList<Class>();
 
-  private Annotation []_bindings;
+  private Set<Annotation> _bindings;
 
-  private Annotation []_interceptorBindings;
+  private Set<Annotation> _interceptorBindings;
 
   private ArrayList<Type> _decorators
     = new ArrayList<Type>();
 
-  private HashMap<Method,Annotation[]> _methodAnnotations
-    = new HashMap<Method,Annotation[]>();
+  private HashMap<Method,AnnotatedMethod> _methodAnnotations
+    = new HashMap<Method,AnnotatedMethod>();
 
   protected BeanGenerator(String fullClassName, ApiClass ejbClass)
   {
@@ -129,7 +131,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Gets the bindings for the decorators
    */
-  public Annotation []getBindings()
+  public Set<Annotation> getBindings()
   {
     return _bindings;
   }
@@ -137,7 +139,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Sets the bindings for the decorators
    */
-  public void setBindings(Annotation []annotation)
+  public void setBindings(Set<Annotation> annotation)
   {
     _bindings = annotation;
   }
@@ -146,7 +148,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Gets the bindings for the interceptors
    */
-  public Annotation []getInterceptorBindings()
+  public Set<Annotation> getInterceptorBindings()
   {
     return _interceptorBindings;
   }
@@ -154,7 +156,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Sets the bindings for the interceptors
    */
-  public void setInterceptorBindings(Annotation []annotation)
+  public void setInterceptorBindings(Set<Annotation> annotation)
   {
     _interceptorBindings = annotation;
   }
@@ -162,15 +164,15 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Adds the method annotations
    */
-  public void setMethodAnnotations(Method method, Annotation []annotations)
+  public void setMethodAnnotations(Method method, AnnotatedMethod annMethod)
   {
-    _methodAnnotations.put(method, annotations);
+    _methodAnnotations.put(method, annMethod);
   }
 
   /**
    * Adds the method annotations
    */
-  public Annotation []getMethodAnnotations(Method method)
+  public AnnotatedMethod getMethodAnnotations(Method method)
   {
     return _methodAnnotations.get(method);
   }
@@ -205,8 +207,12 @@ abstract public class BeanGenerator extends GenClass
       fillTypes(types, iface);
     }
 
+    Annotation []bindings = new Annotation[_bindings.size()];
+    _bindings.toArray(bindings);
+
     List<Decorator<?>> decorators
-      = webBeans.resolveDecorators(types, _bindings);
+      = webBeans.resolveDecorators(types, bindings);
+    
     for (Decorator decorator : decorators) {
       // XXX:
       fillTypes(_decorators, (Class) decorator.getDelegateType());

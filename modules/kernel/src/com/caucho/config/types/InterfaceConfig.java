@@ -29,7 +29,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.*;
@@ -175,7 +175,7 @@ public class InterfaceConfig extends BeanConfig {
     if (_valueName != null) {
       InjectManager webBeans = InjectManager.create();
       
-      _comp = (ComponentImpl) webBeans.findByName(_valueName);
+      _comp = (AbstractBean) webBeans.findByName(_valueName);
 
       if (_comp == null) {
 	_value = Jndi.lookup(_valueName);

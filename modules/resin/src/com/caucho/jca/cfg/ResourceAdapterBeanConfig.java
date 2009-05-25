@@ -30,6 +30,7 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -92,10 +93,11 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     ResourceAdapterController controller
       = new ResourceAdapterController(getComponent(), ra);
 
-    InjectManager webBeans = InjectManager.create();
+    InjectManager beanManager = InjectManager.create();
+    BeanFactory factory = beanManager.createBeanFactory(controller.getClass());
 
-    webBeans.addSingleton(controller, type.getName());
+    factory.name(type.getName());
 
-    webBeans.update();
+    beanManager.addBean(factory.singleton(controller));
   }
 }
