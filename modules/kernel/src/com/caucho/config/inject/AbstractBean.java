@@ -95,6 +95,10 @@ abstract public class AbstractBean<T> implements Bean<T>
   public AbstractBean()
   {
   }
+
+  public void introspect()
+  {
+  }
   
   abstract public T create(CreationalContext<T> creationalContext);
 

@@ -94,6 +94,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     if (beanType.getType() instanceof Class)
       validateType((Class) beanType.getType());
+
+    _injectionTarget = this;
   }
 
   public ManagedBeanImpl(InjectManager webBeans,
@@ -101,6 +103,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 			 InjectionTarget injectionTarget)
   {
     super(webBeans, beanType);
+    
+    _injectionTarget = injectionTarget;
   }
 
   public AnnotatedType getAnnotatedType()

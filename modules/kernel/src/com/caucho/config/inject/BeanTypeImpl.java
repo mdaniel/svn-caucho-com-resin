@@ -125,16 +125,18 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
       }
     }
 
-    for (Constructor ctor : cl.getDeclaredConstructors()) {
-      _constructorSet.add(new BeanConstructorImpl(this, ctor));
-    }
-
-    if (_constructorSet.size() == 0) {
-      try {
-	Constructor ctor = cl.getConstructor(new Class[0]);
+    if (! cl.isInterface()) {
+      for (Constructor ctor : cl.getDeclaredConstructors()) {
 	_constructorSet.add(new BeanConstructorImpl(this, ctor));
-      } catch (NoSuchMethodException e) {
-	log.log(Level.FINE, e.toString(), e);
+      }
+
+      if (_constructorSet.size() == 0) {
+	try {
+	  Constructor ctor = cl.getConstructor(new Class[0]);
+	  _constructorSet.add(new BeanConstructorImpl(this, ctor));
+	} catch (NoSuchMethodException e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
     }
   }

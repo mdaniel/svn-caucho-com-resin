@@ -315,6 +315,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectDeploymentType(annotated);
     introspectScope(annotated);
     introspectBindings(annotated);
+    introspectName(annotated);
     introspectStereotypes(annotated);
 
     introspectDefault();
@@ -371,35 +372,25 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Introspects the binding annotations
    */
-  protected void introspectName(AnnotatedType beanType)
+  protected void introspectName(Annotated annotated)
   {
-    if (getName() == null) {
-      Annotation ann = beanType.getAnnotation(Named.class);
+    Annotation ann = annotated.getAnnotation(Named.class);
       
-      if (ann != null) {
-	String value = null;
+    if (ann != null) {
+      String value = null;
 	
-	try {
-	  // ioc/0m04
-	  Method m = ann.getClass().getMethod("value", new Class[0]);
-	  value = (String) m.invoke(ann);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-
-	if (value == null)
-	  value = "";
-	  
-	_name = value;
+      try {
+	// ioc/0m04
+	Method m = ann.getClass().getMethod("value", new Class[0]);
+	value = (String) m.invoke(ann);
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
       }
-    }
 
-    if ("".equals(getName())) {
-      String name = beanType.getJavaClass().getSimpleName();
-
-      name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-	
-      _name = name;
+      if (value == null)
+	value = "";
+	  
+      _name = value;
     }
   }
 

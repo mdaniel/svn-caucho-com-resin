@@ -187,6 +187,9 @@ public class InjectManager
   private HashMap<Class,WebComponent> _componentMap
     = new HashMap<Class,WebComponent>();
 
+  private HashMap<Type,Bean> _newBeanMap
+    = new HashMap<Type,Bean>();
+
   private BaseTypeFactory _baseTypeFactory = new BaseTypeFactory();
 
   private HashMap<BaseType,WebComponent> _componentBaseTypeMap
@@ -307,6 +310,9 @@ public class InjectManager
 
       _xmlPlugin = new XmlStandardPlugin(this);
       addPlugin(_xmlPlugin);
+
+      BeanFactory factory = createBeanFactory(InjectManager.class);
+      addBean(factory.singleton(this));
 
       if (_classLoader != null && isSetLocal) {
 	_classLoader.addScanListener(this);
@@ -572,8 +578,7 @@ public class InjectManager
       Set set = resolve(field.getGenericType(), bindings);
 
       if (set == null || set.size() == 0) {
-	addBean(new NewBean(this, new BeanTypeImpl(field.getType(),
-						   field.getType())));
+	addBean(createNewBean(field.getType()));
       }
     }
     else
@@ -1146,7 +1151,11 @@ public class InjectManager
     else if (New.class.equals(bindings[0].annotationType())) {
       // ioc/0721
       HashSet set = new HashSet();
-      set.add(new NewBean(this, new BeanTypeImpl(baseType.getRawClass(), baseType.getRawClass())));
+      AbstractBean newBean = new NewBean(this, new BeanTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      newBean.introspect();
+      
+      set.add(newBean);
+      
       return set;
     }
 
@@ -1186,6 +1195,24 @@ public class InjectManager
 
     return null;
   }
+
+  private Bean createNewBean(Type type)
+  {
+    Bean bean = _newBeanMap.get(type);
+
+    if (bean == null) {
+      BaseType baseType = createBaseType(type);
+      
+      AbstractBean newBean = new NewBean(this, new BeanTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      newBean.introspect();
+
+      _newBeanMap.put(type, bean);
+      bean = newBean;
+    }
+
+    return bean;
+  }
+      
 
   /**
    * Returns the web beans component with a given binding list.
@@ -2266,6 +2293,8 @@ public class InjectManager
       return;
 
     ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
+
+    bean.introspect();
 
     addDiscoveredBean(bean);
 	    

@@ -90,7 +90,11 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 				    AnnotatedMethod beanMethod,
 				    Arg []args)
   {
-    return new ProducesBean(inject, producer, beanMethod, args);
+    ProducesBean bean = new ProducesBean(inject, producer, beanMethod, args);
+
+    bean.introspect(beanMethod);
+
+    return bean;
   }
 
   protected Bean getProducer()
