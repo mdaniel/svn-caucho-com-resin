@@ -31,8 +31,10 @@
 package javax.servlet.http;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletException;
 import java.security.Principal;
 import java.util.Enumeration;
+import java.io.IOException;
 
 /**
  * HttpServletRequest encapsulates client request data.
@@ -265,4 +267,35 @@ public interface HttpServletRequest extends ServletRequest {
    * @deprecated
    */
   public boolean isRequestedSessionIdFromUrl();
+
+  /**
+   * @since Servlet 3.0
+   */
+  public boolean authenticate(HttpServletResponse response)
+      throws IOException,ServletException;
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void login(String username, String password)
+    throws ServletException;
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void logout()
+    throws ServletException;
+
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Iterable<Part> getParts();
+
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Part getPart(String name)
+    throws IllegalArgumentException;
 }

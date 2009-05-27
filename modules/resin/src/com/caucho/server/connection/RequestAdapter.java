@@ -41,6 +41,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -578,6 +579,50 @@ public class RequestAdapter extends RequestWrapper
   public boolean hasRequest()
   {
     return false;
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public boolean authenticate(HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    return getRequest().authenticate(response);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Part getPart(String name)
+    throws IllegalArgumentException
+  {
+    return getRequest().getPart(name);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Iterable<Part> getParts()
+  {
+    return getRequest().getParts();
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void login(String username, String password)
+    throws ServletException
+  {
+    getRequest().login(username, password);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void logout()
+    throws ServletException
+  {
+    getRequest().logout();
   }
 
   /**

@@ -32,8 +32,10 @@ package javax.servlet.http;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletException;
 import java.security.Principal;
 import java.util.Enumeration;
+import java.io.IOException;
 
 /**
  * Wraps a servlet request in another request.  Filters may
@@ -309,5 +311,49 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper
   public boolean isRequestedSessionIdFromUrl()
   {
     return request.isRequestedSessionIdFromUrl();
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public boolean authenticate(HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    return request.authenticate(response);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Part getPart(String name)
+    throws IllegalArgumentException
+  {
+    return request.getPart(name);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Iterable<Part> getParts()
+  {
+    return request.getParts();
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void login(String username, String password)
+    throws ServletException
+  {
+    request.login(username, password);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void logout()
+    throws ServletException
+  {
+    request.logout();
   }
 }

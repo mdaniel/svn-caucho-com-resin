@@ -47,6 +47,7 @@ import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 /**
  * User facade for http requests.
@@ -899,6 +900,50 @@ public class HttpServletRequestImpl implements CauchoRequest
   public boolean isComet()
   {
     return _request.isComet();
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public boolean authenticate(HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    return _request.authenticate(response);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Part getPart(String name)
+    throws IllegalArgumentException
+  {
+    return _request.getPart(name);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Iterable<Part> getParts()
+  {
+    return _request.getParts();
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void login(String username, String password)
+    throws ServletException
+  {
+    _request.login(username, password);
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void logout()
+    throws ServletException
+  {
+    _request.logout();
   }
 
   public ConnectionCometController toComet()

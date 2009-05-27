@@ -56,6 +56,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -2828,7 +2829,45 @@ public abstract class AbstractHttpRequest
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  /**
+   * @since Servlet 3.0
+   */
   public DispatcherType getDispatcherType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public boolean authenticate(HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Part getPart(String name)
+    throws IllegalArgumentException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public Iterable<Part> getParts()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void login(String username, String password)
+    throws ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -2856,7 +2895,6 @@ public abstract class AbstractHttpRequest
   /**
    * Prepare the Request object for a new request.
    *
-   * @param s the raw connection stream
    */
   protected void startInvocation()
     throws IOException
