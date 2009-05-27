@@ -890,19 +890,29 @@ public class WebApp extends ServletContextImpl
   public ServletRegistration.Dynamic addServlet(String servletName,
                                                 String className)
   {
-    return addServlet(servletName, className, null);
+    return addServlet(servletName, className, null, null);
   }
 
   @Override
   public ServletRegistration.Dynamic addServlet(String servletName,
                                                 Class<? extends Servlet> servletClass)
   {
-    return addServlet(servletName, servletClass.getName(), servletClass);
+    return addServlet(servletName, servletClass.getName(), servletClass, null);
+  }
+
+  @Override
+  public ServletRegistration.Dynamic addServlet(String servletName,
+                                                Servlet servlet)
+  {
+    Class cl = servlet.getClass();
+
+    return addServlet(servletName, cl.getName(), cl, servlet);
   }
 
   private ServletRegistration.Dynamic addServlet(String servletName,
                                                  String servletClassName,
-                                                 Class<? extends Servlet> servletClass) {
+                                                 Class<? extends Servlet> servletClass,
+                                                 Servlet servlet) {
     if (! isInitializing())
       throw new IllegalStateException();
 
@@ -913,6 +923,9 @@ public class WebApp extends ServletContextImpl
 
       if (servletClass != null)
         config.setServletClass(servletClass);
+
+      if (servlet != null)
+        config.setServlet(servlet);
 
       addServlet(config);
 

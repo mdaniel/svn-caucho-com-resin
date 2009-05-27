@@ -378,9 +378,10 @@ public class FilterConfigImpl
 
   public void setAsyncSupported(boolean isAsyncSupported)
   {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
     if (true) throw new UnsupportedOperationException("unimplemented");
-
-
   }
 
   /**
