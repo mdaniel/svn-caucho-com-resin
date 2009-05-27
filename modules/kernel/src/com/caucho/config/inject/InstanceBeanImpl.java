@@ -61,6 +61,11 @@ public class InstanceBeanImpl<T> implements Bean<T>
 
     _instance = new InstanceImpl(_beanManager, _type, _bindings);
   }
+
+  public Class getBeanClass()
+  {
+    return (Class) _type;
+  }
   
   public T create(CreationalContext<T> creationalContext)
   {

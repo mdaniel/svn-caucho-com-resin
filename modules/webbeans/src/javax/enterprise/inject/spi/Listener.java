@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,35 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package javax.enterprise.inject.spi;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+
+import java.util.Set;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * HMPP wrapper
+ * Abstract introspected of an observer.
  */
-public class RemoteConnectionFailedException
-  extends ErrorPacketException
+public interface Listener<X,T>
 {
-  public RemoteConnectionFailedException()
-  {
-  }
+  /**
+   * Notify an instance
+   */
+  public void notify(X instance, T event);
 
-  public RemoteConnectionFailedException(String msg)
-  {
-    super(msg);
-  }
-
-  public RemoteConnectionFailedException(String msg, ActorError error)
-  {
-    super(msg, error);
-  }
-
-  public RemoteConnectionFailedException(String msg, ErrorPacketException e)
-  {
-    super(msg, e);
-  }
-
-  public RemoteConnectionFailedException(ActorError error)
-  {
-    super(error);
-  }
+  /**
+   * Returns the injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints();
 }

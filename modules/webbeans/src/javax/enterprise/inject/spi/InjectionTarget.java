@@ -38,13 +38,8 @@ import javax.enterprise.context.spi.CreationalContext;
 /**
  * Abstract introspected view of a Bean injectible field
  */
-public interface InjectionTarget<X>
+public interface InjectionTarget<X> extends Producer<X>
 {
-  /**
-   * Instantiate the bean.
-   */
-  public X produce(CreationalContext<X> ctx);
-  
   /**
    * Inject the bean.
    */
@@ -53,20 +48,10 @@ public interface InjectionTarget<X>
   /**
    * PostConstruct initialization
    */
-  public void postConstruct(X instance, CreationalContext<X> ctx);
+  public void postConstruct(X instance);
   
   /**
    * Call pre-destroy
    */
-  public void dispose(X instance);
-  
-  /**
-   * Call destroy
-   */
-  public void destroy(X instance);
-
-  /**
-   * Returns the injection points.
-   */
-  public Set<InjectionPoint> getInjectionPoints();
+  public void preDestroy(X instance);
 }

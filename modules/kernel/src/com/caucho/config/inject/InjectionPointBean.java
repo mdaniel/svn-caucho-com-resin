@@ -52,6 +52,11 @@ public class InjectionPointBean<T> implements Bean<T>
   //
   // metadata for the bean
   //
+  
+  public Class<T> getBeanClass()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Returns the bean's binding annotations.

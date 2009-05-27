@@ -31,17 +31,25 @@ package com.caucho.config.inject;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.annotation.ServiceBinding;
+import com.caucho.config.ServiceStartup;
 import com.caucho.config.cfg.BeansConfig;
 import com.caucho.vfs.Path;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.ManagedBean;
 import javax.enterprise.inject.spi.Plugin;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessBean;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
@@ -108,6 +116,37 @@ public class XmlStandardPlugin implements Plugin
   {
     if (_configException != null)
       event.addDefinitionError(_configException);
+  }
+
+  public void processBean(@Observes ProcessBean event)
+  {
+    ProcessBeanImpl eventImpl = (ProcessBeanImpl) event;
+
+    if (eventImpl.getManager() != _manager)
+      return;
+    
+    Bean bean = event.getBean();
+
+    if (isStartup(event.getAnnotated())) {
+      _manager.addService(bean);
+    }
+  }
+
+  private boolean isStartup(Annotated annotated)
+  {
+    if (annotated == null)
+      return false;
+
+    for (Annotation ann : annotated.getAnnotations()) {
+      if (ann.annotationType().equals(ServiceStartup.class))
+	return true;
+
+      if (ann.annotationType().isAnnotationPresent(ServiceStartup.class)) {
+	return true;
+      }
+    }
+
+    return false;
   }
 
   @Override

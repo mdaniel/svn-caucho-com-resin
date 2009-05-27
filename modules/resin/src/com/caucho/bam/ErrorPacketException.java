@@ -51,6 +51,13 @@ public class ErrorPacketException extends ActorException {
     _error = error;
   }
 
+  public ErrorPacketException(String msg, ErrorPacketException e)
+  {
+    super(msg, e);
+
+    _error = e.getActorError();
+  }
+
   public ErrorPacketException(ActorError error)
   {
     super(String.valueOf(error));

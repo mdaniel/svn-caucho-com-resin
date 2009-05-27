@@ -46,10 +46,13 @@ import javax.annotation.*;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.Listener;
+import javax.enterprise.inject.spi.Producer;
 import javax.enterprise.inject.spi.ProducerBean;
 
 /**
@@ -62,8 +65,10 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   private static final Object []NULL_ARGS = new Object[0];
   
-  private final Bean _producer;
+  private final Bean _producerBean;
   private final AnnotatedMethod _beanMethod;
+
+  private Producer<T> _producer;
 
   // XXX: needs to be InjectionPoint
   private Arg []_args;
@@ -71,13 +76,13 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   private boolean _isBound;
 
   protected ProducesBean(InjectManager inject,
-			 Bean producer,
+			 Bean producerBean,
 			 AnnotatedMethod beanMethod,
 			 Arg []args)
   {
     super(inject, beanMethod.getType(), beanMethod);
 
-    _producer = producer;
+    _producerBean = producerBean;
     _beanMethod = beanMethod;
     _args = args;
 
@@ -97,9 +102,14 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     return bean;
   }
 
-  protected Bean getProducer()
+  public Producer<T> getProducer()
   {
     return _producer;
+  }
+
+  public void setProducer(Producer<T> producer)
+  {
+    _producer = producer;
   }
 
   protected AnnotatedMethod getMethod()
@@ -126,8 +136,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   
   protected Class getDefaultDeploymentType()
   {
-    if (_producer.getDeploymentType() != null)
-      return _producer.getDeploymentType();
+    if (_producerBean.getDeploymentType() != null)
+      return _producerBean.getDeploymentType();
 
     return null;// super.getDefaultDeploymentType();
   }
@@ -158,9 +168,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Returns the declaring bean
    */
-  public Bean<X> getDeclaringBean()
+  public Bean<X> getParentBean()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _producerBean;
   }
   
   public T create(CreationalContext<T> createEnv)
@@ -180,11 +190,11 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     ConfigContext env = (ConfigContext) cxt;
       
-    X factory = (X) _beanManager.getReference(_producer);
+    X factory = (X) _beanManager.getReference(_producerBean);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
-					  this, _producer));
+					  this, _producerBean));
     }
 
     return produce(factory);
@@ -241,7 +251,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
   }
 
-  public void postConstruct(T instance, CreationalContext<T> cxt)
+  public void postConstruct(T instance)
   {
   }
 
@@ -291,21 +301,29 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Disposes a bean instance
    */
-  public void dispose(T instance)
+  public void preDestroy(T instance)
   {
   }
   
   /**
-   * Destroys a bean instance
+   * Returns the disposer for the bean
    */
-  public void destroys(T instance)
+  public Listener<X,T> getDisposer()
+  {
+    return null;
+  }
+  
+  /**
+   * Returns the disposer for the bean
+   */
+  public void setDisposer(Listener<X,T> producer)
   {
   }
   
   /**
    * Returns the owning producer
    */
-  public AnnotatedMethod<X> getAnnotatedProducer()
+  public AnnotatedMember<X> getProducerMember()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -314,6 +332,11 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
    * Returns the owning disposer
    */
   public AnnotatedMethod<X> getAnnotatedDisposer()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public AnnotatedParameter<X> getDisposedParameter()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

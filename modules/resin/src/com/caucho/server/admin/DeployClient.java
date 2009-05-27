@@ -72,14 +72,22 @@ public class DeployClient
   public DeployClient(String host, int port,
 		      String userName, String password)
   {
-    HmtpClient client = new HmtpClient("http://" + host + ":" + port + "/hmtp");
-    client.setVirtualHost("admin.resin");
-
-    client.connect(userName, password);
-
-    _conn = client;
+    String url = "http://" + host + ":" + port + "/hmtp";
     
-    _deployJid = "deploy@resin.caucho";
+    HmtpClient client = new HmtpClient(url);
+    try {
+      client.setVirtualHost("admin.resin");
+
+      client.connect(userName, password);
+
+      _conn = client;
+    
+      _deployJid = "deploy@resin.caucho";
+    } catch (RemoteConnectionFailedException e) {
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+						    url, e.getMessage()),
+						e);
+    }
   }
 
   /**
@@ -390,7 +398,12 @@ public class DeployClient
 
   private Serializable queryGet(Serializable query)
   {
-    return (Serializable) _conn.queryGet(_deployJid, query);
+    try {
+      return (Serializable) _conn.queryGet(_deployJid, query);
+    } catch (ServiceUnavailableException e) {
+      throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:DeployService> tag\n  " + e.getMessage(),
+					    e);
+    }
   }
 
   private Serializable querySet(Serializable query)

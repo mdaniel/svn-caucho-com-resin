@@ -112,6 +112,11 @@ abstract public class AbstractBean<T> implements Bean<T>
 
   abstract public Set<Type> getTypes();
 
+  public Class getBeanClass()
+  {
+    return null;
+  }
+  
   public Set<Annotation> getBindings()
   {
     return _currentBindings;

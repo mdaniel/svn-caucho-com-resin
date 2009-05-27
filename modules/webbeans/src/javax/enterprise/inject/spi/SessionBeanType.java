@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,35 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package javax.enterprise.inject.spi;
 
 /**
- * HMPP wrapper
+ * session bean types
  */
-public class RemoteConnectionFailedException
-  extends ErrorPacketException
+public enum SessionBeanType
 {
-  public RemoteConnectionFailedException()
-  {
-  }
-
-  public RemoteConnectionFailedException(String msg)
-  {
-    super(msg);
-  }
-
-  public RemoteConnectionFailedException(String msg, ActorError error)
-  {
-    super(msg, error);
-  }
-
-  public RemoteConnectionFailedException(String msg, ErrorPacketException e)
-  {
-    super(msg, e);
-  }
-
-  public RemoteConnectionFailedException(ActorError error)
-  {
-    super(error);
-  }
+  STATELESS,
+  STATEFUL,
+    SINGLETON,
 }
+

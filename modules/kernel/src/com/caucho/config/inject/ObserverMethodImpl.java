@@ -79,7 +79,7 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
   /**
    * Returns the declaring bean
    */
-  public Bean<X> getDeclaringBean()
+  public Bean<X> getParentBean()
   {
     return _bean;
   }
@@ -104,7 +104,7 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
   {
     Class<X> type = null;
     
-    notify(_beanManager.getReference(getDeclaringBean(), type), event);
+    notify(_beanManager.getReference(getParentBean(), type), event);
   }
   
   /**
@@ -115,6 +115,7 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
     Method method = _method.getJavaMember();
     
     try {
+      System.out.println("INV: " + method);
       method.invoke(instance, event);
     } catch (RuntimeException e) {
       throw e;
@@ -131,10 +132,22 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
     }
   }
 
-  /**
-   * Returns the injection points
-   */
   public Set<InjectionPoint> getInjectionPoints()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public AnnotatedParameter<X> getEventParameter()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public Listener<X,T> getListener()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void setListener(Listener<X,T> listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

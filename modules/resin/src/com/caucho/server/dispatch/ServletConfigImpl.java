@@ -1083,7 +1083,7 @@ public class ServletConfigImpl
       alarm.dequeue();
     
     if (_comp != null)
-      _comp.destroy(servlet);
+      _comp.preDestroy(servlet);
 
     if (servlet instanceof Servlet) {
       ((Servlet) servlet).destroy();

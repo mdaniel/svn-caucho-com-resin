@@ -35,6 +35,7 @@ import com.caucho.bam.SimpleActor;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
@@ -59,6 +60,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
+@Service
 public class DeployService extends SimpleActor
 {
   private static final Logger log

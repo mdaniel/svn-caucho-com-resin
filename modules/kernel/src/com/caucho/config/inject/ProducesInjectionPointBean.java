@@ -75,6 +75,11 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
     return _producesBean.getBindings();
   }
 
+  public Class getBeanClass()
+  {
+    return _producesBean.getBeanClass();
+  }
+
   /**
    * Returns the bean's deployment type
    */

@@ -92,8 +92,10 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     _annotatedType = beanType;
 
+    /*
     if (beanType.getType() instanceof Class)
       validateType((Class) beanType.getType());
+    */
 
     _injectionTarget = this;
   }
@@ -102,7 +104,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 			 AnnotatedType beanType,
 			 InjectionTarget injectionTarget)
   {
-    super(webBeans, beanType);
+    this(webBeans, beanType);
     
     _injectionTarget = injectionTarget;
   }
@@ -114,7 +116,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
   public InjectionTarget getInjectionTarget()
   {
-    return this;
+    return _injectionTarget;
+  }
+
+  public void setInjectionTarget(InjectionTarget target)
+  {
+    _injectionTarget = target;
   }
 
   private void validateType(Class type)
@@ -155,7 +162,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     X instance = _injectionTarget.produce(context);
     _injectionTarget.inject(instance, context);
-    _injectionTarget.postConstruct(instance, context);
+    _injectionTarget.postConstruct(instance);
 
     return instance;
   }

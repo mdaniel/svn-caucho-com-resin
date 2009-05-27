@@ -45,6 +45,11 @@ public interface Bean<T> extends Contextual<T>
   //
 
   /**
+   * Returns the bean's scope type.
+   */
+  public abstract Class<?> getBeanClass();
+
+  /**
    * Returns the bean's binding annotations.
    */
   public abstract Set<Annotation> getBindings();

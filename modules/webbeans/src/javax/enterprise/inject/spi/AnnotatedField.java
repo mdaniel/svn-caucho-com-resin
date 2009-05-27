@@ -44,6 +44,6 @@ public interface AnnotatedField<X> extends AnnotatedMember<X>
 
   /**
    * Returns the declaring type
-   */
   public AnnotatedType<X> getDeclaringType();
+   */
 }

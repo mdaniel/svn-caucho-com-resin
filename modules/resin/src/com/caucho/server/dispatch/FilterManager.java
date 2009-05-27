@@ -183,7 +183,7 @@ public class FilterManager {
         if (init != null)
           init.configure(filter);
 
-	_comp.postConstruct(filter, null);
+	_comp.postConstruct(filter);
 
         filter.init(config);
         
@@ -240,7 +240,7 @@ public class FilterManager {
 
       try {
 	if (_comp != null)
-	  _comp.destroy(filter);
+	  _comp.preDestroy(filter);
 
         filter.destroy();
       } catch (Throwable e) {

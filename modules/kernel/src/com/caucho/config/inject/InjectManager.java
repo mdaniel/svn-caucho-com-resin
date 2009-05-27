@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.program.FieldEventProgram;
@@ -87,6 +88,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -231,8 +233,8 @@ public class InjectManager
   private ArrayList<AbstractBean> _pendingBindList
     = new ArrayList<AbstractBean>();
 
-  private ArrayList<ManagedBean> _pendingServiceList
-    = new ArrayList<ManagedBean>();
+  private ArrayList<Bean> _pendingServiceList
+    = new ArrayList<Bean>();
 
   private HashMap<Class,InjectProgram> _injectMap
     = new HashMap<Class,InjectProgram>();
@@ -308,11 +310,11 @@ public class InjectManager
 	}
       }
 
-      _xmlPlugin = new XmlStandardPlugin(this);
-      addPlugin(_xmlPlugin);
-
       BeanFactory factory = createBeanFactory(InjectManager.class);
       addBean(factory.singleton(this));
+
+      _xmlPlugin = new XmlStandardPlugin(this);
+      addPlugin(_xmlPlugin);
 
       if (_classLoader != null && isSetLocal) {
 	_classLoader.addScanListener(this);
@@ -968,7 +970,7 @@ public class InjectManager
    */
   public <T> Bean<T> processBean(Bean<T> bean)
   {
-    ProcessBeanImpl processBean = new ProcessBeanImpl(bean);
+    ProcessBeanImpl processBean = new ProcessBeanImpl(this, bean);
 
     fireEvent(processBean);
 
@@ -980,6 +982,11 @@ public class InjectManager
    */
   public void addBean(Bean<?> bean)
   {
+    bean = processBean(bean);
+
+    if (bean == null)
+      return;
+
     for (Type type : bean.getTypes()) {
       addComponentByType(type, bean);
     }
@@ -2303,36 +2310,25 @@ public class InjectManager
 
   private <X> void addDiscoveredBean(ManagedBean<X> managedBean)
   {
-    Bean bean = processBean(managedBean);
+    for (ProducerBean producerBean : managedBean.getProducerBeans()) {
+      Bean subBean = processBean(producerBean);
 
-    if (bean == null)
-      return;
+      if (subBean != null)
+	addBean(subBean);
+    }
 
-    addBean(bean);
+    for (ObserverMethod observer : managedBean.getObserverMethods()) {
+      observer = processObserver(observer);
 
-    if (bean instanceof ManagedBean) {
-      managedBean = (ManagedBean<X>) bean;
-      
-      for (ProducerBean producerBean : managedBean.getProducerBeans()) {
-	Bean subBean = processBean(producerBean);
-
-	if (subBean != null)
-	  addBean(subBean);
-      }
-
-      for (ObserverMethod observer : managedBean.getObserverMethods()) {
-	observer = processObserver(observer);
-
-	if (observer != null) {
-	  Set<Annotation> annSet = observer.getObservedEventBindings();
+      if (observer != null) {
+	Set<Annotation> annSet = observer.getObservedEventBindings();
 	  
-	  Annotation []bindings = new Annotation[annSet.size()];
-	  annSet.toArray(bindings);
+	Annotation []bindings = new Annotation[annSet.size()];
+	annSet.toArray(bindings);
 	  
-	  addObserver(observer,
-		      observer.getObservedEventType(),
-		      bindings);
-	}
+	addObserver(observer,
+		    observer.getObservedEventType(),
+		    bindings);
       }
     }
   }
@@ -2412,7 +2408,7 @@ public class InjectManager
   {
     Type []param = method.getGenericParameterTypes();
 
-    if (param.length != 1)
+    if (param.length < 1)
       return;
     
     Annotation [][]paramAnn = method.getParameterAnnotations();
@@ -2420,7 +2416,18 @@ public class InjectManager
     if (! hasObserver(paramAnn))
       return;
 
-    Observer observer = new PluginObserver(plugin, method);
+    BeanArg []args = new BeanArg[param.length];
+
+    for (int i = 1; i < param.length; i++) {
+      Annotation []bindings = getBindings(paramAnn[i]);
+
+      if (bindings.length == 0)
+	bindings = new Annotation[] { CurrentLiteral.CURRENT };
+      
+      args[i] = new BeanArg(param[i], bindings);
+    }
+
+    Observer observer = new PluginObserver(plugin, method, args);
 
     addObserver(observer, param[0], getBindings(paramAnn[0]));
 
@@ -2558,27 +2565,34 @@ public class InjectManager
     startServices();
   }
 
+  void addService(Bean bean)
+  {
+    _pendingServiceList.add(bean);
+  }
+  
   /**
    * Initialize all the services
    */
   private void startServices()
   {
-    /*
-    ArrayList<ManagedBean> services;
-    ArrayList<ManagedBean> registerServices;
+    ArrayList<Bean> services;
+    // ArrayList<ManagedBean> registerServices;
 
     synchronized (_pendingServiceList) {
-      services = new ArrayList<ManagedBean>(_pendingServiceList);
+      services = new ArrayList<Bean>(_pendingServiceList);
       _pendingServiceList.clear();
-      
+
+      /*
       registerServices = new ArrayList<ManagedBean>(_pendingRegistrationList);
       _pendingRegistrationList.clear();
+      */
     }
 
-    for (ManagedBean bean : services) {
-      registerBean(bean, bean.getAnnotatedType().getAnnotations());
+    for (Bean bean : services) {
+      getReference(bean, bean.getBeanClass());
     }
 
+    /*
     for (ManagedBean bean : registerServices) {
       startRegistration(bean);
     }
@@ -2939,61 +2953,6 @@ public class InjectManager
     }
   }
 
-  class ProcessBeanImpl<X> implements ProcessBean<X>
-  {
-    private Bean<X> _bean;
-
-    ProcessBeanImpl(Bean<X> bean)
-    {
-      _bean = bean;
-    }
-    
-    public boolean isManagedBean()
-    {
-      return _bean instanceof ManagedBean;
-    }
-    
-    public boolean isSessionBean()
-    {
-      return false;
-    }
-    
-    public boolean isProducerMethod()
-    {
-      return false;
-    }
-    
-    public boolean isProducerField()
-    {
-      return false;
-    }
-
-    public Annotation getAnnotated()
-    {
-      return null;
-    }
-
-    public Bean<X> getBean()
-    {
-      return _bean;
-    }
-    
-    public void setBean(Bean<X> bean)
-    {
-      _bean = bean;
-    }
-
-    public void addDefinitionError(Throwable t)
-    {
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _bean + "]";
-    }
-  }
-
   class ProcessObserverImpl<X> implements ProcessObserver<X>
   {
     private ObserverMethod<X,?> _observer;
@@ -3137,17 +3096,26 @@ public class InjectManager
   static class PluginObserver implements Observer<Object> {
     private Plugin _plugin;
     private Method _method;
+    private BeanArg []_args;
 
-    PluginObserver(Plugin plugin, Method method)
+    PluginObserver(Plugin plugin, Method method, BeanArg []args)
     {
       _plugin = plugin;
       _method = method;
+      _args = args;
     }
 
     public void notify(Object event)
     {
       try {
-	_method.invoke(_plugin, event);
+	Object []args = new Object[_args.length];
+	args[0] = event;
+
+	for (int i = 1; i < args.length; i++) {
+	  args[i] = _args[i].eval(null);
+	}
+
+	_method.invoke(_plugin, args);
       } catch (RuntimeException e) {
 	throw e;
       } catch (InvocationTargetException e) {

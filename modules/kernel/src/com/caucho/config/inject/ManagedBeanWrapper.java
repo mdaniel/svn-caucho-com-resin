@@ -68,9 +68,19 @@ public class ManagedBeanWrapper<X> extends BeanWrapper<X>
     return getBean().getAnnotatedType();
   }
 
+  public Class getBeanClass()
+  {
+    return getBean().getBeanClass();
+  }
+
   public InjectionTarget<X> getInjectionTarget()
   {
     return getBean().getInjectionTarget();
+  }
+
+  public void setInjectionTarget(InjectionTarget<X> target)
+  {
+    getBean().setInjectionTarget(target);
   }
 
   public Set<InjectionPoint> getInjectionPoints()

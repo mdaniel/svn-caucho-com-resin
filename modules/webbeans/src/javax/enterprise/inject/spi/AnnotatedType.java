@@ -50,10 +50,10 @@ public interface AnnotatedType<X> extends Annotated
   /**
    * Returns the abstract introspected methods
    */
-  public Set<AnnotatedMethod<X>> getMethods();
+  public Set<AnnotatedMethod<? super X>> getMethods();
 
   /**
    * Returns the abstract introspected fields
    */
-  public Set<AnnotatedField<X>> getFields();
+  public Set<AnnotatedField<? super X>> getFields();
 }

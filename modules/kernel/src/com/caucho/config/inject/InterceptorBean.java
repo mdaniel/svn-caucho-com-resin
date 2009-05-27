@@ -147,6 +147,11 @@ public class InterceptorBean<X> implements Interceptor<X>
     return _bean.getTypes();
   }
 
+  public Class getBeanClass()
+  {
+    return _bean.getBeanClass();
+  }
+
   //
   // lifecycle
   //

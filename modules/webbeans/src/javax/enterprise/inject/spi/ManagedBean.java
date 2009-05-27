@@ -38,25 +38,6 @@ import javax.enterprise.context.spi.Contextual;
 /**
  * Internal implementation for a Bean
  */
-public interface ManagedBean<X> extends Bean<X>
+public interface ManagedBean<X> extends Bean<X>, BeanClass<X>
 {
-  /**
-   * Returns the annotated type.
-   */
-  public AnnotatedType<X> getAnnotatedType();
-  
-  /**
-   * Returns the annotated type.
-   */
-  public InjectionTarget<X> getInjectionTarget();
-  
-  /**
-   * Returns the producer beans
-   */
-  public Set<ProducerBean<X,?>> getProducerBeans();
-  
-  /**
-   * Returns the observer methods
-   */
-  public Set<ObserverMethod<X,?>> getObserverMethods();
 }

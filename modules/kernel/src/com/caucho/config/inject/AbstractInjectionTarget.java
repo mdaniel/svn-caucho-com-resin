@@ -58,7 +58,7 @@ abstract public class AbstractInjectionTarget<X> implements InjectionTarget<X>
   /**
    * PostConstruct initialization
    */
-  public void postConstruct(X instance, CreationalContext<X> ctx)
+  public void postConstruct(X instance)
   {
   }
   
@@ -72,7 +72,7 @@ abstract public class AbstractInjectionTarget<X> implements InjectionTarget<X>
   /**
    * Call destroy
    */
-  public void destroy(X instance)
+  public void preDestroy(X instance)
   {
   }
 

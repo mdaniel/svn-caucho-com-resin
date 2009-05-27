@@ -172,6 +172,11 @@ public class DecoratorBean implements Decorator
     return _bean.getInjectionPoints();
   }
 
+  public Class getBeanClass()
+  {
+    return _bean.getBeanClass();
+  }
+  
   /**
    * Create a new instance of the bean.
    */

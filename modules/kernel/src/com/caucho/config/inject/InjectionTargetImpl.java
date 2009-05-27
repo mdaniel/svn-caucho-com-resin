@@ -318,13 +318,13 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
-  public void postConstruct(X instance, CreationalContext<X> createEnv)
+  public void postConstruct(X instance)
   {
     try {
       if (! _isBound)
 	bind();
 
-      ConfigContext env = (ConfigContext) createEnv;
+      ConfigContext env = (ConfigContext) null;
 
       for (ConfigProgram program : _initProgram) {
 	program.inject(instance, env);
@@ -482,7 +482,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * Call post-construct
    */
-  public void dispose(X instance)
+  public void preDestroy(X instance)
   {
 
   }

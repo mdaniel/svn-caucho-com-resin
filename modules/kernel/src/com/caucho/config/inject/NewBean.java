@@ -132,7 +132,7 @@ public class NewBean extends InjectionTargetImpl
     
     Object value = target.produce(env);
     target.inject(value, env);
-    target.postConstruct(value, env);
+    target.postConstruct(value);
     
     return value;
   }

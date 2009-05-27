@@ -143,7 +143,7 @@ public class Listener extends DescriptionGroupConfig {
   
   public void destroy()
   {
-    _target.destroy(_object);
+    _target.preDestroy(_object);
   }
 
   public String toString()

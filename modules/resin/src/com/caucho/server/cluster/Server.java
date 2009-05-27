@@ -2008,7 +2008,7 @@ public class Server extends ProtocolDispatchServer
     boolean isModified = _classLoader.isModified();
 
     if (isModified)
-      log.fine(this + " is modified");
+      _classLoader.logModified(log);
 
     return isModified;
   }

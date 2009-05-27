@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,35 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package javax.enterprise.inject.spi;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
+
+import javax.enterprise.context.spi.Contextual;
 
 /**
- * HMPP wrapper
+ * Internal implementation for a Bean
  */
-public class RemoteConnectionFailedException
-  extends ErrorPacketException
+public interface BeanClass<X> extends Bean<X>
 {
-  public RemoteConnectionFailedException()
-  {
-  }
+  /**
+   * Returns the annotated type.
+   */
+  public AnnotatedType<X> getAnnotatedType();
 
-  public RemoteConnectionFailedException(String msg)
-  {
-    super(msg);
-  }
-
-  public RemoteConnectionFailedException(String msg, ActorError error)
-  {
-    super(msg, error);
-  }
-
-  public RemoteConnectionFailedException(String msg, ErrorPacketException e)
-  {
-    super(msg, e);
-  }
-
-  public RemoteConnectionFailedException(ActorError error)
-  {
-    super(error);
-  }
+  /**
+   * Returns the bean's scope type.
+   */
+  public Class<X> getBeanClass();
+  
+  /**
+   * Returns the injection target
+   */
+  public InjectionTarget<X> getInjectionTarget();
+  
+  /**
+   * Sets the injection target
+   */
+  public void setInjectionTarget(InjectionTarget<X> target);
+  
+  /**
+   * Returns the producer beans
+   */
+  public Set<ProducerBean<X,?>> getProducerBeans();
+  
+  /**
+   * Returns the observer methods
+   */
+  public Set<ObserverMethod<X,?>> getObserverMethods();
 }

@@ -43,20 +43,40 @@ public interface ProducerBean<X,T> extends Bean<T>
   /**
    * Returns the owning producer
    */
-  public AnnotatedMember<X> getAnnotatedProducer();
+  public AnnotatedMember<X> getProducerMember();
   
   /**
    * Returns the owning disposer
    */
-  public AnnotatedMethod<X> getAnnotatedDisposer();
+  public AnnotatedParameter<X> getDisposedParameter();
+
+  /**
+   * Returns the bean class
+   */
+  public Class<X> getBeanClass();
 
   /**
    * Returns the declaring bean
    */
-  public Bean<X> getDeclaringBean();
+  public Bean<X> getParentBean();
   
   /**
-   * Returns the InjectionTarget
+   * Returns the producer for the bean
    */
-  public InjectionTarget<T> getInjectionTarget();
+  public Producer<T> getProducer();
+  
+  /**
+   * Returns the producer for the bean
+   */
+  public void setProducer(Producer<T> producer);
+  
+  /**
+   * Returns the disposer for the bean
+   */
+  public Listener<X,T> getDisposer();
+  
+  /**
+   * Returns the disposer for the bean
+   */
+  public void setDisposer(Listener<X,T> producer);
 }

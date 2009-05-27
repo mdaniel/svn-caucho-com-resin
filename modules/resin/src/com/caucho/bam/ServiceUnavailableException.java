@@ -49,6 +49,11 @@ public class ServiceUnavailableException
     super(msg, error);
   }
 
+  public ServiceUnavailableException(String msg, ErrorPacketException e)
+  {
+    super(msg, e);
+  }
+
   public ServiceUnavailableException(ActorError error)
   {
     super(error);

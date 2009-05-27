@@ -40,11 +40,6 @@ import java.util.List;
 public interface AnnotatedCallable<X> extends AnnotatedMember<X>
 {
   /**
-   * Returns the declaring type
-   */
-  public AnnotatedType<X> getDeclaringType();
-
-  /**
    * Returns the method parameters
    */
   public List<AnnotatedParameter<X>> getParameters();

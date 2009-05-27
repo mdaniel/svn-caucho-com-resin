@@ -123,6 +123,11 @@ public class BeanWrapper<T> implements Bean<T>
   {
     return getBean().getTypes();
   }
+  
+  public Class getBeanClass()
+  {
+    return getBean().getBeanClass();
+  }
 
   @Override
   public String toString()

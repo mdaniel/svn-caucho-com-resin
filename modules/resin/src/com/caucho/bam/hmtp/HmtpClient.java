@@ -45,6 +45,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import java.security.PublicKey;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * HMTP client protocol
@@ -194,6 +195,19 @@ public class HmtpClient extends SimpleActorClient {
       _os.flush();
 
       String status = readLine(_is);
+      int statusCode = 0;
+
+      if (status != null) {
+	String []statusLine = status.split("[\\s]+");
+
+	if (statusLine.length > 2) {
+	  try {
+	    statusCode = Integer.parseInt(statusLine[1]);
+	  } catch (Exception e) {
+	    log.finer(String.valueOf(e));
+	  }
+	}
+      }
 
       String header;
 	
@@ -226,8 +240,20 @@ public class HmtpClient extends SimpleActorClient {
 	
 	if (log.isLoggable(Level.FINE))
 	  log.fine(this + " " + status + "\n" + text);
-      
-	throw new RemoteConnectionFailedException("Failed to upgrade to HMTP\n" + status + "\n\n" + text);
+
+	switch (statusCode) {
+	case 0:
+	  throw new RemoteConnectionFailedException("Failed to connect to HMTP\n" + status + "\n\n" + text);
+	  
+	case HttpServletResponse.SC_SERVICE_UNAVAILABLE:
+	  throw new RemoteConnectionFailedException("Failed to connect to HMTP because server is busy or unavailable.\n" + status + "\n\n" + text);
+	  
+	case HttpServletResponse.SC_NOT_FOUND:
+	  throw new RemoteConnectionFailedException("Failed to connect to HMTP because the HMTP service has not been enabled.\n" + status + "\n\n" + text);
+	  
+	default:
+	  throw new RemoteConnectionFailedException("Failed to upgrade to HMTP\n" + status + "\n\n" + text);
+	}
       }
     } catch (ActorException e) {
       _connException = e;

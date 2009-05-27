@@ -89,7 +89,7 @@ public class XmlBean<X> extends ManagedBeanWrapper<X>
   {
     X instance = produce(context);
     inject(instance, context);
-    postConstruct(instance, context);
+    postConstruct(instance);
 
     return instance;
   }
@@ -129,9 +129,9 @@ public class XmlBean<X> extends ManagedBeanWrapper<X>
     }
   }
 
-  public void postConstruct(X instance, CreationalContext<X> env)
+  public void postConstruct(X instance)
   {
-    getBean().getInjectionTarget().postConstruct(instance, env);
+    getBean().getInjectionTarget().postConstruct(instance);
 
     /*
     if (_initProgram.length > 0) {
@@ -143,16 +143,9 @@ public class XmlBean<X> extends ManagedBeanWrapper<X>
   }
   
   /**
-   * Call pre-destroy
-   */
-  public void dispose(X instance)
-  {
-  }
-  
-  /**
    * Call destroy
    */
-  public void destroy(X instance)
+  public void preDestroy(X instance)
   {
   }
 

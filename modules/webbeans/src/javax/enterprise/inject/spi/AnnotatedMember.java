@@ -38,6 +38,11 @@ import java.util.List;
 public interface AnnotatedMember<X> extends Annotated
 {
   /**
+   * Returns the declaring type
+   */
+  public AnnotatedType<X> getDeclaringType();
+
+  /**
    * Returns the reflected Method
    */
   public Member getJavaMember();

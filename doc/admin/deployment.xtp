@@ -155,7 +155,7 @@ the user will be using the new version of the application.
 
 </s1>
 
-<s1 title="Remote Deployment">
+<s1 title="Browser-based Remote Deployment">
 <p>
 As of Resin 4.0.0, it is now possible to deploy web applications remotely
 to a shared repository that is distributed across the cluster.  This feature
@@ -182,6 +182,49 @@ all the servers in the cluster will have the webapp.
 <figure src="deployed-webapp.png"/>
 </li>
 </ol>
+</s1>
+
+<s1 title="ant/maven Remote Deployment">
+
+<p>With remote deployment, you can use an ant or maven task to deploy
+a .war file to a running Resin instance.  This will require some configuration
+of the resin.xml to enable deployment.  For security reasons, remote
+deployment and administration is disabled by default, so you will need
+to enable the features to use them.</p>
+
+<ul>
+<li>Enable remote administration (the HMTP service).</li>
+<li>Add at least one admin user in AdminAuthenticator.</li>
+<li>Enable the remote deploy service.</li>
+</ul>
+
+<p>The first step is enabling remote administration, so you can manage
+the server remotely, either with eclipse, or ant, or maven.
+If disabled, Resin will ignore all remote administration requests.
+The disabled error message will be something like "Failed to connect
+to HMTP because HMTP service has not been enabled."  In
+the resin.xml, the &lt;resin:RemoteAdminService> tag enables remote
+administration:</p>
+
+<example title="Example: resin.xml enable remote administration">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+       ...
+  &lt;cluster id="">
+  
+    &lt;resin:RemoteAdminService>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>The second step is adding at least one administration user, so only
+authorized administrators can update the server.  The <a
+href="security.xtp">&lt;resin:AdminAuthenticator></a> tag configures
+administrators.  If no administrators are added, Resin will reject any
+remote administration requests.</p>
+
 </s1>
 
 </body>

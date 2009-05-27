@@ -41,7 +41,7 @@ public interface ProcessBean<X>
   public boolean isProducerMethod();
   public boolean isProducerField();
 
-  public Annotation getAnnotated();
+  public Annotated getAnnotated();
 
   public Bean<X> getBean();
   public void setBean(Bean<X> bean);

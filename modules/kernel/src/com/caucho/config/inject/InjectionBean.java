@@ -76,7 +76,7 @@ public class InjectionBean extends AbstractSingletonBean
   {
     Object value = _target.produce(env);
     _target.inject(value, env);
-    _target.postConstruct(value, env);
+    _target.postConstruct(value);
     
     return value;
   }

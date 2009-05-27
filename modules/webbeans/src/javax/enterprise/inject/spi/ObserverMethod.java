@@ -44,12 +44,12 @@ public interface ObserverMethod<X,T> extends Observer<T>
   /**
    * Returns the annotated method
    */
-  public AnnotatedMethod<X> getAnnotatedMethod();
+  public AnnotatedParameter<X> getEventParameter();
 
   /**
    * Returns the declaring bean
    */
-  public Bean<X> getDeclaringBean();
+  public Bean<X> getParentBean();
 
   /**
    * Returns the observed event type
@@ -64,10 +64,10 @@ public interface ObserverMethod<X,T> extends Observer<T>
   /**
    * Sends an event
    */
-  public void notify(X instance, T event);
+  public Listener<X,T> getListener();
 
   /**
-   * Returns the injection points
+   * Sends an event
    */
-  public Set<InjectionPoint> getInjectionPoints();
+  public void setListener(Listener<X,T> listener);
 }
