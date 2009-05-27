@@ -37,9 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import javax.enterprise.inject.spi.InjectionTarget;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +56,12 @@ public class FilterManager {
   
   private Hashtable<String,Filter> _instances
     = new Hashtable<String,Filter>();
+
+  private Map<String, Set<String>> _urlPatterns
+    = new HashMap<String, Set<String>>();
+
+  private Map<String, Set<String>> _servletNames
+    = new HashMap<String, Set<String>>();
 
   /**
    * Adds a filter to the filter manager.
@@ -93,6 +97,43 @@ public class FilterManager {
     }
   }
 
+  public void addFilterMapping(FilterMapping filterMapping)
+  {
+    String pattern = filterMapping.getURLPattern();
+    if (pattern != null) {
+      Set<String> urls = _urlPatterns.get(filterMapping.getName());
+
+      if (urls == null) {
+        urls = new HashSet<String>();
+
+        _urlPatterns.put(filterMapping.getName(), urls);
+      }
+
+      urls.add(pattern);
+    }
+
+    List<String> servletNames = filterMapping.getServletNames();
+    if (servletNames != null && servletNames.size() > 0) {
+      Set<String> names = _servletNames.get(filterMapping.getName());
+
+      if (names == null) {
+        names = new HashSet<String>();
+
+        _servletNames.put(filterMapping.getName(), names);
+      }
+      
+      names.addAll(servletNames);
+    }
+  }
+
+  public Set<String> getUrlPatternMappings(String filterName) {
+    return _urlPatterns.get(filterName);
+  }
+
+  public Set<String> getServletNameMappings(String filterName){
+    return _servletNames.get(filterName);
+  }
+
   /**
    * Instantiates a filter given its configuration.
    *
@@ -126,8 +167,12 @@ public class FilterManager {
 	InjectManager beanManager = InjectManager.create();
       
 	_comp = beanManager.createInjectionTarget(filterClass);
-      
-	filter = (Filter) _comp.produce(null);
+
+        filter = config.getFilter();
+
+        if (filter == null)
+	  filter = (Filter) _comp.produce(null);
+        
 	_comp.inject(filter, null);
 
 	// InjectIntrospector.configure(filter);

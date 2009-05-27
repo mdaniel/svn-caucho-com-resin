@@ -949,6 +949,7 @@ public class WebApp extends ServletContextImpl
     throws Exception
   {
     FilterMapping config = new FilterMapping();
+    config.setFilterManager(_filterManager);
     config.setFilterClass(filterClassName);
 
     String filterName = webFilter.filterName();
@@ -998,20 +999,33 @@ public class WebApp extends ServletContextImpl
   public FilterRegistration.Dynamic addFilter(String filterName,
                                               String className)
   {
-    return addFilter(filterName, className, null);
+    return addFilter(filterName, className, null, null);
   }
 
   @Override
   public FilterRegistration.Dynamic addFilter(String filterName,
                                               Class<? extends Filter> filterClass)
   {
-    return addFilter(filterName, filterClass.getName(), filterClass);
+    return addFilter(filterName, filterClass.getName(), filterClass, null);
+  }
+
+  @Override
+  public FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
+  {
+    Class cl = filter.getClass();
+    
+    return addFilter(filterName, cl.getName(), cl, filter);
   }
 
   private FilterRegistration.Dynamic addFilter(String filterName,
                                                String className,
-                                               Class<? extends Filter> filterClass)
+                                               Class<? extends Filter> filterClass,
+                                               Filter filter)
   {
+
+    if (! isInitializing())
+      throw new IllegalStateException();
+
     try {
       FilterConfigImpl config = new FilterConfigImpl();
 
@@ -1020,6 +1034,13 @@ public class WebApp extends ServletContextImpl
 
       config.setFilterName(filterName);
       config.setFilterClass(className);
+
+      if (filterClass != null)
+        config.setFilterClass(filterClass);
+
+      if (filter != null)
+        config.setFilter(filter);
+      
       addFilter(config);
 
       return config;
@@ -1029,13 +1050,6 @@ public class WebApp extends ServletContextImpl
       throw new RuntimeException(e.getMessage(), e);
     }
   }
-
-  @Override
-  public FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
-  {
-    return super.addFilter(filterName, filter);
-  }
-
 
   /**
    * Returns the character encoding.
@@ -1135,6 +1149,9 @@ public class WebApp extends ServletContextImpl
   {
     config.setServletContext(this);
 
+    config.setFilterManager(_filterManager);
+    config.setWebApp(this);
+    
     _filterManager.addFilter(config);
   }
 
@@ -1146,6 +1163,8 @@ public class WebApp extends ServletContextImpl
     throws ServletException
   {
     filterMapping.setServletContext(this);
+
+    _filterManager.addFilterMapping(filterMapping);
 
     if (filterMapping.isRequest()) {
       _filterMapper.addFilterMapping(filterMapping);
@@ -1160,6 +1179,12 @@ public class WebApp extends ServletContextImpl
 
     if (filterMapping.isError())
       _errorFilterMapper.addFilterMapping(filterMapping);
+  }
+
+  @Override
+  public FilterRegistration getFilterRegistration(String filterName)
+  {
+    return _filterManager.getFilter(filterName);
   }
 
   /**

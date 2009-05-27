@@ -106,6 +106,11 @@ public class FilterMapping extends FilterConfigImpl {
     _servletNames.add(servletName);
   }
 
+  public ArrayList<String> getServletNames()
+  {
+    return _servletNames;
+  }
+
   /**
    * Adds a dispatcher.
    */
