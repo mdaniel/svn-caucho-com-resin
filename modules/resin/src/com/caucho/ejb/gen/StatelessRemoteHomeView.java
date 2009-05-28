@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -39,28 +40,27 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Represents a public interface to a bean, e.g. a remote stateless view
  */
-public class StatefulLocalView extends StatefulObjectView {
-  private static final L10N L = new L10N(StatefulLocalView.class);
+public class StatelessRemoteHomeView extends StatelessHomeView {
+  private static final L10N L = new L10N(StatelessRemoteHomeView.class);
 
-  public StatefulLocalView(StatefulGenerator bean, ApiClass api)
+  public StatelessRemoteHomeView(StatelessGenerator bean, ApiClass api)
   {
     super(bean, api);
+  }
+
+  @Override
+  public String getViewClassName()
+  {
+    return getApi().getSimpleName() + "__EJBRemoteHome";
   }
 
   @Override
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
-      out.println("  extends StatefulObject");
-  }
-
-  @Override
-  protected String getViewClassName()
-  {
-    return getApi().getSimpleName() + "__EJBLocal";
+    out.println("  extends StatelessHome");
   }
 
   /**
@@ -70,28 +70,44 @@ public class StatefulLocalView extends StatefulObjectView {
     throws IOException
   {
     out.println();
-    out.println("private " + getViewClassName() + " _localObject;");
-
-    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass())) {
-      out.println();
-      out.println("@Override");
-      out.println("public EJBLocalObject getEJBLocalObject()");
-      out.println("{");
-      out.println("  if (_localObject != null)");
-      out.println("    return _localObject;");
-      out.println("  else");
-      out.println("    return super.getEJBLocalObject();");
-      out.println("}");
-    }
+    out.println("private " + getViewClassName() + " _remoteHome;");
 
     out.println();
-    out.println("public " + getSessionBean().getClassName() +
-		"(" + getContextClassName() + " context, "
-		+ getViewClassName() + " localObject)");
+    out.println("@Override");
+    out.println("public EJBHome getEJBHome()");
     out.println("{");
-    out.println("  this(context);");
-    out.println();
-    out.println("  _localObject = localObject;");
+    out.println("  return _remoteHome;");
     out.println("}");
+  }
+
+  /**
+   * Generates context home's constructor
+   */
+  @Override
+  public void generateContextHomeConstructor(JavaWriter out)
+    throws IOException
+  {
+    out.println("_remoteHome = new " + getViewClassName() + "(this);");
+  }
+
+  /**
+   * Generates context home's constructor
+   */
+  @Override
+  public void generateContextObjectConstructor(JavaWriter out)
+    throws IOException
+  {
+    out.println("_remoteHome = context._remoteHome;");
+  }
+
+  /**
+   * Generates code to create the provider
+   */
+  public void generateCreateProvider(JavaWriter out, String var)
+    throws IOException
+  {
+    out.println();
+    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("  return _remoteHome;");
   }
 }

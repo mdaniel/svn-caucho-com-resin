@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -50,7 +51,7 @@ abstract public class StatefulHomeView extends StatefulView {
     super(bean, api);
   }
 
-  abstract protected String getViewClassName();
+  abstract public String getViewClassName();
 
   /**
    * Generates code to create the provider

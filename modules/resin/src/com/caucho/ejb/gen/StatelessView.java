@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -66,12 +67,12 @@ public class StatelessView extends View {
     return getStatelessBean().getClassName();
   }
 
-  protected String getViewClassName()
+  public String getViewClassName()
   {
     return getApi().getSimpleName() + "__EJBLocal";
   }
 
-  protected String getBeanClassName()
+  public String getBeanClassName()
   {
     return getApi().getSimpleName() + "__Bean";
   }

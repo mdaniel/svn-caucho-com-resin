@@ -27,61 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import java.io.*;
+import javax.ejb.*;
+import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
-import javax.annotation.security.*;
-import javax.ejb.*;
-import static javax.ejb.TransactionAttributeType.*;
-import javax.interceptor.*;
 
 /**
- * Represents the xa interception
+ * Represents a public interface to a bean, e.g. a local stateless view
  */
-public class MessageXaCallChain extends XaCallChain
-{
-  private static final L10N L = new L10N(MessageXaCallChain.class);
-  
-  public MessageXaCallChain(BusinessMethodGenerator bizMethod,
-			    EjbCallChain next)
+public class StatelessRemoteView extends StatelessLocalView {
+  private static final L10N L = new L10N(StatelessRemoteView.class);
+
+  public StatelessRemoteView(StatelessGenerator bean, ApiClass api)
   {
-    super(bizMethod, next);
-  }
-  
-  /**
-   * Sets the transaction type
-   */
-  public void setTransactionType(TransactionAttributeType xa)
-  {
-    if (xa == null
-	|| REQUIRED.equals(xa)
-	|| NOT_SUPPORTED.equals(xa)) {
-      super.setTransactionType(xa);
-    }
-    else
-      throw ConfigException.create(getBusinessMethod().getApiMethod().getMethod(),
-				L.l("'{0}' is not an allowed transaction type for message beans",
-				    xa));
+    super(bean, api);
   }
 
-  @Override
-  protected void generateNext(JavaWriter out)
-    throws IOException
+  public String getViewClassName()
   {
-    if (REQUIRED.equals(getTransactionType())) {
-      out.println();
-      out.println("if (_xaResource != null)");
-      out.println("  _xa.enlist(_xaResource);");
-    }
-
-    out.println("/* ... */");
-      
-    super.generateNext(out);
+    return getApi().getSimpleName() + "__EJBRemote";
   }
 }

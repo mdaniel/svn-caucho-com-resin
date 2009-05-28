@@ -27,29 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
+import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.rmi.*;
-import java.util.*;
-import javax.annotation.security.*;
 import javax.ejb.*;
-import javax.interceptor.*;
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
- * Represents a stateful remove business method
+ * Represents a public interface to a bean, e.g. a local stateless view
  */
-public class StatefulRemoveMethod extends StatefulMethod
-{
-  public StatefulRemoveMethod(StatefulView view,
-			      ApiMethod apiMethod,
-			      ApiMethod implMethod,
-			      int index)
+public class StatelessLocalView extends StatelessObjectView {
+  private static final L10N L = new L10N(StatelessLocalView.class);
+
+  public StatelessLocalView(StatelessGenerator bean, ApiClass api)
   {
-    super(view, apiMethod, implMethod, index);
+    super(bean, api);
+  }
+
+  @Override
+  public String getViewClassName()
+  {
+    return getApi().getSimpleName() + "__EJBLocal";
   }
 }

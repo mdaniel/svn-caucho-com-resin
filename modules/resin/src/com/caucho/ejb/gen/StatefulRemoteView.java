@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -39,27 +40,39 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a remote stateful view
+ * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class StatefulRemoteHomeView extends StatefulHomeView {
-  private static final L10N L = new L10N(StatefulRemoteHomeView.class);
+public class StatefulRemoteView extends StatefulObjectView {
+  private static final L10N L = new L10N(StatefulRemoteView.class);
 
-  public StatefulRemoteHomeView(StatefulGenerator bean, ApiClass api)
+  public StatefulRemoteView(StatefulGenerator bean, ApiClass api)
   {
     super(bean, api);
   }
 
-  @Override
-  protected String getViewClassName()
+  public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBRemoteHome";
+    return getApi().getSimpleName() + "__EJBRemote";
+  }
+
+  public boolean isRemote()
+  {
+    return true;
   }
 
   @Override
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    out.println("  extends StatefulHome");
+    /*
+    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
+      out.println("  extends StatefulObject21");
+    else if (EJBObject.class.isAssignableFrom(getApi().getJavaClass()))
+      out.println("  extends StatefulObject21");
+    else
+      out.println("  extends StatefulObject");
+    */
+    out.println("  extends StatefulObject");
   }
 
   /**
@@ -69,46 +82,35 @@ public class StatefulRemoteHomeView extends StatefulHomeView {
     throws IOException
   {
     out.println();
-    out.println("private " + getViewClassName() + " _remoteHome;");
+    out.println("private " + getViewClassName() + " _remoteObject;");
 
-    if (EJBHome.class.isAssignableFrom(getApi().getJavaClass())) {
+    if (EJBObject.class.isAssignableFrom(getApi().getJavaClass())) {
       out.println();
       out.println("@Override");
-      out.println("public EJBHome getEJBHome()");
+      out.println("public EJBObject getEJBObject()");
       out.println("{");
-      out.println("  return _remoteHome;");
+      out.println("  if (_remoteObject != null)");
+      out.println("    return _remoteObject;");
+      out.println("  else");
+      out.println("    return super.getEJBObject();");
       out.println("}");
     }
-  }
 
-  /**
-   * Generates context home's constructor
-   */
-  @Override
-  public void generateContextHomeConstructor(JavaWriter out)
-    throws IOException
-  {
-    out.println("_remoteHome = new " + getViewClassName() + "(this);");
-  }
-
-  /**
-   * Generates context home's constructor
-   */
-  @Override
-  public void generateContextObjectConstructor(JavaWriter out)
-    throws IOException
-  {
-    out.println("_remoteHome = context._remoteHome;");
-  }
-
-  /**
-   * Generates code to create the provider
-   */
-  public void generateCreateProvider(JavaWriter out, String var)
-    throws IOException
-  {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
-    out.println("  return _remoteHome;");
+    out.println("public " + getSessionBean().getClassName() +
+		"(" + getContextClassName() + " context, "
+		+ getViewClassName() + " remoteObject)");
+    out.println("{");
+    out.println("  this(context);");
+    out.println();
+    out.println("  _remoteObject = remoteObject;");
+    out.println("}");
+  }
+
+  @Override
+  public void generateClassContent(JavaWriter out)
+    throws IOException
+  {
+    super.generateClassContent(out);
   }
 }

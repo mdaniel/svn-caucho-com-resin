@@ -27,68 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import javax.ejb.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import javax.ejb.*;
 
 /**
- * Generates the skeleton for a stateful bean.
+ * Generates the skeleton for a session bean.
  */
-public class StatefulGenerator extends SessionGenerator {
-  private static final L10N L = new L10N(StatefulGenerator.class);
+public class StatelessGenerator extends SessionGenerator {
+  private static final L10N L = new L10N(StatelessGenerator.class);
 
-  public StatefulGenerator(String ejbName, ApiClass ejbClass)
+  public StatelessGenerator(String ejbName, ApiClass ejbClass)
   {
     super(ejbName, ejbClass);
   }
 
   public boolean isStateless()
   {
-    return false;
+    return true;
   }
 
   @Override
   protected View createLocalView(ApiClass api)
   {
-    return new StatefulLocalView(this, api);
+    return new StatelessLocalView(this, api);
   }
 
   @Override
   protected View createLocalHomeView(ApiClass api)
   {
-    return new StatefulLocalHomeView(this, api);
-  }
-
-  @Override
-  protected View createRemoteHomeView(ApiClass api)
-  {
-    return new StatefulRemoteHomeView(this, api);
+    return new StatelessLocalHomeView(this, api);
   }
 
   @Override
   protected View createRemoteView(ApiClass api)
   {
-    return new StatefulRemoteView(this, api);
+    return new StatelessRemoteView(this, api);
   }
 
-  /**
-   * Scans for the @Local interfaces
-   */
   @Override
-  protected ArrayList<ApiClass> introspectLocalDefault()
+  protected View createRemoteHomeView(ApiClass api)
   {
-    ArrayList<ApiClass> apiClass = new ArrayList<ApiClass>();
-
-    apiClass.add(getEjbClass());
-
-    return apiClass;
+    return new StatelessRemoteHomeView(this, api);
   }
-  
+
   /**
    * Generates the stateful session bean
    */
@@ -103,7 +90,6 @@ public class StatefulGenerator extends SessionGenerator {
 
     out.println();
     out.println("import com.caucho.config.*;");
-    out.println("import com.caucho.ejb.*;");
     out.println("import com.caucho.ejb.session.*;");
     out.println();
     out.println("import javax.ejb.*;");
@@ -111,43 +97,16 @@ public class StatefulGenerator extends SessionGenerator {
     
     out.println();
     out.println("public class " + getClassName());
-    out.println("  extends StatefulContext");
+    out.println("  extends StatelessContext");
     out.println("{");
     out.pushDepth();
 
-    out.println();
-    out.println("public " + getClassName() + "(StatefulServer server)");
-    out.println("{");
-    out.pushDepth();
+    generateContext(out);
     
-    out.println("super(server);");
-
-    for (View view : getViews()) {
-      view.generateContextHomeConstructor(out);
-    }
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public " + getClassName() + "(" + getClassName() + " context)");
-    out.println("{");
-    out.pushDepth();
-    
-    out.println("super(context.getStatefulServer());");
-
-    generateContextObjectConstructor(out);
-
-    out.popDepth();
-    out.println("}");
-
-    for (View view : getViews()) {
-      view.generateContextPrologue(out);
-    }
-
     generateCreateProvider(out);
+    
     generateViews(out);
-
+    
     generateDependency(out);
     
     out.popDepth();
@@ -158,13 +117,12 @@ public class StatefulGenerator extends SessionGenerator {
     throws IOException
   {
     out.println();
-    out.println("@Override");
-    out.println("public StatefulProvider getProvider(Class api)");
+    out.println("public StatelessProvider getProvider(Class api)");
     out.println("{");
     out.pushDepth();
     
     for (View view : getViews()) {
-      StatefulView sView = (StatefulView) view;
+      StatelessView sView = (StatelessView) view;
 
       sView.generateCreateProvider(out, "api");
     }
@@ -175,19 +133,78 @@ public class StatefulGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
   }
+  
+  @Override
+  protected void generateContext(JavaWriter out)
+    throws IOException
+  {
+    String shortContextName = getEjbClass().getSimpleName();
 
-  /**
-   * Creates any additional code in the constructor
-   */
-  public void generateContextObjectConstructor(JavaWriter out)
+    int freeStackMax = 16;
+
+    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
+    out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
+
+    String beanClass = getEjbClass().getName();
+
+    out.println();
+    out.println("private " + beanClass + " []_freeBeanStack = new "
+		+ beanClass + "[" + freeStackMax + "];");
+    out.println("private int _freeBeanTop;");
+    out.println();
+    out.println("public " + getClassName() + "(StatelessServer server)");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("super(server);");
+    //out.println("_xaManager = server.getTransactionManager();");
+
+    for (View view : getViews()) {
+      view.generateContextHomeConstructor(out);
+    }
+    
+    out.popDepth();
+    out.println("}");
+
+    for (View view : getViews()) {
+      view.generateContextPrologue(out);
+    }
+
+    out.println();
+    out.println("public void __caucho_timeout_callback(javax.ejb.Timer timer)");
+    out.println("{");
+    out.pushDepth();
+
+    for (View view : getViews()) {
+      view.generateTimer(out);
+    }
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void destroy()");
+    out.println("{");
+    out.pushDepth();
+
+    generateDestroyViews(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  public void generateViews(JavaWriter out)
     throws IOException
   {
     for (View view : getViews()) {
-      view.generateContextObjectConstructor(out);
+      out.println();
+
+      view.generate(out);
     }
   }
 
-  protected void generateContext(JavaWriter out)
+  protected void generateNewInstance(JavaWriter out)
+    throws IOException
   {
   }
 }

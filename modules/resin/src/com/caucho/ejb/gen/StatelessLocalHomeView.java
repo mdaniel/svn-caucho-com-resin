@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -39,20 +40,20 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Represents a public interface to a bean, e.g. a remote stateless view
+ * Represents a public interface to a bean, e.g. a local stateless view
  */
-public class StatelessRemoteHomeView extends StatelessHomeView {
-  private static final L10N L = new L10N(StatelessRemoteHomeView.class);
+public class StatelessLocalHomeView extends StatelessHomeView {
+  private static final L10N L = new L10N(StatelessLocalHomeView.class);
 
-  public StatelessRemoteHomeView(StatelessGenerator bean, ApiClass api)
+  public StatelessLocalHomeView(StatelessGenerator bean, ApiClass api)
   {
     super(bean, api);
   }
 
   @Override
-  protected String getViewClassName()
+  public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBRemoteHome";
+    return getApi().getSimpleName() + "__EJBLocalHome";
   }
 
   @Override
@@ -69,13 +70,13 @@ public class StatelessRemoteHomeView extends StatelessHomeView {
     throws IOException
   {
     out.println();
-    out.println("private " + getViewClassName() + " _remoteHome;");
+    out.println("private " + getViewClassName() + " _localHome;");
 
     out.println();
     out.println("@Override");
     out.println("public EJBHome getEJBHome()");
     out.println("{");
-    out.println("  return _remoteHome;");
+    out.println("  return _localHome;");
     out.println("}");
   }
 
@@ -86,7 +87,7 @@ public class StatelessRemoteHomeView extends StatelessHomeView {
   public void generateContextHomeConstructor(JavaWriter out)
     throws IOException
   {
-    out.println("_remoteHome = new " + getViewClassName() + "(this);");
+    out.println("_localHome = new " + getViewClassName() + "(this);");
   }
 
   /**
@@ -96,7 +97,7 @@ public class StatelessRemoteHomeView extends StatelessHomeView {
   public void generateContextObjectConstructor(JavaWriter out)
     throws IOException
   {
-    out.println("_remoteHome = context._remoteHome;");
+    out.println("_localHome = context._localHome;");
   }
 
   /**
@@ -107,6 +108,6 @@ public class StatelessRemoteHomeView extends StatelessHomeView {
   {
     out.println();
     out.println("if (" + var + " == " + getApi().getName() + ".class)");
-    out.println("  return _remoteHome;");
+    out.println("  return _localHome;");
   }
 }

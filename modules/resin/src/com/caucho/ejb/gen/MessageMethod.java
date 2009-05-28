@@ -27,30 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
-import com.caucho.config.*;
+import com.caucho.config.gen.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import javax.ejb.*;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import javax.annotation.security.*;
+import javax.ejb.*;
+import javax.interceptor.*;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateless view
+ * Represents a message local business method
  */
-public class StatelessRemoteView extends StatelessLocalView {
-  private static final L10N L = new L10N(StatelessRemoteView.class);
-
-  public StatelessRemoteView(StatelessGenerator bean, ApiClass api)
+public class MessageMethod extends BusinessMethodGenerator
+{
+  public MessageMethod(MessageView view,
+		       ApiMethod apiMethod,
+		       ApiMethod implMethod,
+		       int index)
   {
-    super(bean, api);
+    super(view, apiMethod, implMethod, index);
   }
 
-  protected String getViewClassName()
+  @Override
+  protected XaCallChain createXa(EjbCallChain next)
   {
-    return getApi().getSimpleName() + "__EJBRemote";
+    return new MessageXaCallChain(this, next);
+  }
+
+  /**
+   * Session bean default is REQUIRED
+   */
+  @Override
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  {
+    getXa().setTransactionType(TransactionAttributeType.REQUIRED);
+
+    super.introspect(apiMethod, implMethod);
+  }
+
+  /**
+   * Returns true if any interceptors enhance the business method
+   */
+  @Override
+  public boolean isEnhanced()
+  {
+    return true;
   }
 }

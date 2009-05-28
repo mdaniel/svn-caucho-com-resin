@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -40,27 +41,24 @@ import javax.ejb.*;
 import javax.interceptor.*;
 
 /**
- * Represents a stateful create business method
+ * Represents a stateless local business method
  */
-public class StatefulCreateMethod extends BusinessMethodGenerator
+public class StatelessLocalMethod extends BusinessMethodGenerator
 {
-  private StatefulGenerator _bean;
-  private View _objectView;
+  private ApiClass _ejbClass;
+  private String _beanClassName;
   
-  public StatefulCreateMethod(StatefulGenerator bean,
-			      StatefulView homeView,
-			      View objectView,
+  public StatelessLocalMethod(ApiClass ejbClass,
+			      String beanClassName,
+			      StatelessView view,
 			      ApiMethod apiMethod,
 			      ApiMethod implMethod,
 			      int index)
   {
-    super(homeView, apiMethod, implMethod, index);
+    super(view, apiMethod, implMethod, index);
 
-    _bean = bean;
-    _objectView = objectView;
-
-    if (_objectView == null)
-      throw new NullPointerException();
+    _beanClassName = beanClassName;
+    _ejbClass = ejbClass;
   }
 
   /**
@@ -69,16 +67,11 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    getXa().setContainerManaged(false);
+    getXa().setTransactionType(TransactionAttributeType.REQUIRED);
 
     super.introspect(apiMethod, implMethod);
   }
 
-  protected TransactionAttributeType getDefaultTransactionType()
-  {
-    return TransactionAttributeType.REQUIRED;
-  }
-  
   /**
    * Returns true if any interceptors enhance the business method
    */
@@ -88,27 +81,24 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
     return true;
   }
 
+  /**
+   * Generates the underlying bean instance
+   */
   protected void generatePreCall(JavaWriter out)
     throws IOException
   {
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+
+    out.println();
+    out.println(_beanClassName + " bean = _ejb_begin();");
+    out.println("boolean isValid = false;");
+    out.println();
     out.println("try {");
     out.pushDepth();
-    out.println("thread.setContextClassLoader(getStatefulServer().getClassLoader());");
-    
-    out.println(_objectView.getViewClassName() + " remote ="
-		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), (javax.enterprise.context.spi.CreationalContext) null);");
-    
-    out.print(_objectView.getBeanClassName());
-    out.print(" bean = remote._bean;");
-
-    out.println("StatefulContext context = new " + _bean.getFullClassName() + "(_context, remote);");
-    out.println("remote.__caucho_setContext(context);");
-    if (SessionBean.class.isAssignableFrom(_bean.getEjbClass().getJavaClass()))
-      out.println("bean.setSessionContext(context);");
+    out.println("thread.setContextClassLoader(_context.getStatelessServer().getClassLoader());");
   }
-
+  
   /**
    * Generates the underlying bean instance
    */
@@ -117,16 +107,10 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
   {
     out.print("bean");
   }
-
+  
   /**
    * Generates the underlying bean instance
    */
-  protected void generateSuper(JavaWriter out)
-    throws IOException
-  {
-    out.print("bean");
-  }
-
   @Override
   protected String getSuper()
   {
@@ -136,14 +120,26 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
-  @Override
+  protected void generatePreReturn(JavaWriter out)
+    throws IOException
+  {
+    out.println("isValid = true;");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {
-    out.println("return remote;");
     out.popDepth();
     out.println("} finally {");
     out.println("  thread.setContextClassLoader(oldLoader);");
+
+    out.println("  if (bean == null) {");
+    out.println("  } else if (isValid)");
+    out.println("    _ejb_free(bean);");
+    
     out.println("}");
   }
 }

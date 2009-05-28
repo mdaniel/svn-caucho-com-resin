@@ -92,7 +92,7 @@ public class XaCallChain extends AbstractCallChain
     _xa = xa;
   }
 
-  protected TransactionAttributeType getTransactionType()
+  public TransactionAttributeType getTransactionType()
   {
     return _xa;
   }

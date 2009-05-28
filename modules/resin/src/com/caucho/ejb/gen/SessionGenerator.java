@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.config.types.InjectionTarget;
 import com.caucho.java.JavaWriter;
@@ -68,7 +69,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     _contextClassName = "dummy";
   }
 
-  private static String toFullClassName(String ejbName, String className)
+  public static String toFullClassName(String ejbName, String className)
   {
     StringBuilder sb = new StringBuilder();
 
@@ -958,7 +959,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Returns true if the method is implemented.
    */
-  protected boolean hasMethod(String methodName, Class []paramTypes)
+  public boolean hasMethod(String methodName, Class []paramTypes)
   {
     return _ejbClass.hasMethod(methodName, paramTypes);
   }

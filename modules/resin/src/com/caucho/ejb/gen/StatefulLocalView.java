@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -41,37 +42,26 @@ import java.util.*;
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class StatefulRemoteView extends StatefulObjectView {
-  private static final L10N L = new L10N(StatefulRemoteView.class);
+public class StatefulLocalView extends StatefulObjectView {
+  private static final L10N L = new L10N(StatefulLocalView.class);
 
-  public StatefulRemoteView(StatefulGenerator bean, ApiClass api)
+  public StatefulLocalView(StatefulGenerator bean, ApiClass api)
   {
     super(bean, api);
-  }
-
-  protected String getViewClassName()
-  {
-    return getApi().getSimpleName() + "__EJBRemote";
-  }
-
-  public boolean isRemote()
-  {
-    return true;
   }
 
   @Override
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    /*
     if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
-      out.println("  extends StatefulObject21");
-    else if (EJBObject.class.isAssignableFrom(getApi().getJavaClass()))
-      out.println("  extends StatefulObject21");
-    else
       out.println("  extends StatefulObject");
-    */
-    out.println("  extends StatefulObject");
+  }
+
+  @Override
+  public String getViewClassName()
+  {
+    return getApi().getSimpleName() + "__EJBLocal";
   }
 
   /**
@@ -81,35 +71,28 @@ public class StatefulRemoteView extends StatefulObjectView {
     throws IOException
   {
     out.println();
-    out.println("private " + getViewClassName() + " _remoteObject;");
+    out.println("private " + getViewClassName() + " _localObject;");
 
-    if (EJBObject.class.isAssignableFrom(getApi().getJavaClass())) {
+    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass())) {
       out.println();
       out.println("@Override");
-      out.println("public EJBObject getEJBObject()");
+      out.println("public EJBLocalObject getEJBLocalObject()");
       out.println("{");
-      out.println("  if (_remoteObject != null)");
-      out.println("    return _remoteObject;");
+      out.println("  if (_localObject != null)");
+      out.println("    return _localObject;");
       out.println("  else");
-      out.println("    return super.getEJBObject();");
+      out.println("    return super.getEJBLocalObject();");
       out.println("}");
     }
 
     out.println();
     out.println("public " + getSessionBean().getClassName() +
 		"(" + getContextClassName() + " context, "
-		+ getViewClassName() + " remoteObject)");
+		+ getViewClassName() + " localObject)");
     out.println("{");
     out.println("  this(context);");
     out.println();
-    out.println("  _remoteObject = remoteObject;");
+    out.println("  _localObject = localObject;");
     out.println("}");
-  }
-
-  @Override
-  public void generateClassContent(JavaWriter out)
-    throws IOException
-  {
-    super.generateClassContent(out);
   }
 }

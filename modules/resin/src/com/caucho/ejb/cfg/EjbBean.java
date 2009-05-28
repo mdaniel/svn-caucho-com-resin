@@ -34,7 +34,6 @@ import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.BusinessMethodGenerator;
-import com.caucho.config.gen.TransactionChain;
 import com.caucho.config.gen.View;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
@@ -1627,10 +1626,13 @@ public class EjbBean extends DescriptionGroupConfig
                                           ApiMethod implMethod,
                                           String prefix)
   {
+    /*
     return TransactionChain.create(next,
 				   getTransactionAttribute(implMethod, prefix),
                                    apiMethod, implMethod, isEJB3(),
                                    _ejbConfig.getApplicationExceptions());
+    */
+    return null;
   }
 
   public CallChain getSecurityChain(CallChain next,

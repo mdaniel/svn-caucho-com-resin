@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -49,7 +50,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
     super(bean, api);
   }
 
-  protected String getViewClassName()
+  public String getViewClassName()
   {
     return getApi().getSimpleName() + "__EJBLocalHome";
   }

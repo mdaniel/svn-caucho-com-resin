@@ -75,12 +75,12 @@ abstract public class View {
     return _bean.getEjbClass();
   }
 
-  protected String getViewClassName()
+  public String getViewClassName()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  protected String getBeanClassName()
+  public String getBeanClassName()
   {
     return getViewClassName();
   }
@@ -93,7 +93,7 @@ abstract public class View {
   /**
    * Returns the API class.
    */
-  protected ApiClass getApi()
+  public ApiClass getApi()
   {
     return _api;
   }

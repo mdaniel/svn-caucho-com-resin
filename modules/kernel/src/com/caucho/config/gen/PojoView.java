@@ -47,7 +47,7 @@ public class PojoView extends View {
     super(bean, api);
   }
 
-  protected String getViewClassName()
+  public String getViewClassName()
   {
     return getBean().getFullClassName();
   }

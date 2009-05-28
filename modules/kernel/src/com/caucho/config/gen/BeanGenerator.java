@@ -83,7 +83,7 @@ abstract public class BeanGenerator extends GenClass
     addDependency(ejbClass.getJavaClass());
   }
 
-  protected ApiClass getEjbClass()
+  public ApiClass getEjbClass()
   {
     return _ejbClass;
   }
@@ -357,7 +357,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Returns true if the method is implemented.
    */
-  protected boolean hasMethod(String methodName, Class []paramTypes)
+  public boolean hasMethod(String methodName, Class []paramTypes)
   {
     return _ejbClass.hasMethod(methodName, paramTypes);
   }

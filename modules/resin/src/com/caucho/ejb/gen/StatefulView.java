@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
+import com.caucho.config.gen.*;
 import com.caucho.config.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -66,9 +67,9 @@ abstract public class StatefulView extends View {
     return getSessionBean().getClassName();
   }
 
-  abstract protected String getViewClassName();
+  abstract public String getViewClassName();
 
-  protected String getBeanClassName()
+  public String getBeanClassName()
   {
     return getApi().getSimpleName() + "__Bean";
   }
