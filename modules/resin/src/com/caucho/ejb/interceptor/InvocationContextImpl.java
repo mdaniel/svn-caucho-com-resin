@@ -93,6 +93,11 @@ public class InvocationContextImpl implements InvocationContext {
     return _target;
   }
 
+  public Object getTimer()
+  {
+    return null;
+  }
+
   public Method getMethod()
   {
     if (_method == null) {

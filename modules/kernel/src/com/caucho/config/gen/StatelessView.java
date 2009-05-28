@@ -157,7 +157,7 @@ public class StatelessView extends View {
 				 getBeanClassName(),
 				 this,
 				 apiMethod,
-				 implMethod.getMethod(),
+				 implMethod,
 				 index);
 
     return bizMethod;

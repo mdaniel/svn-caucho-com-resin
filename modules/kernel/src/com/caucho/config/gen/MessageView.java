@@ -139,7 +139,7 @@ public class MessageView extends View {
     BusinessMethodGenerator bizMethod
       = new MessageMethod(this,
 			  apiMethod,
-			  implMethod.getMethod(),
+			  implMethod,
 			  index);
 
     return bizMethod;

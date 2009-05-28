@@ -29,6 +29,8 @@
 
 package com.caucho.config.gen;
 
+import com.caucho.config.inject.AnnotatedElementImpl;
+
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
@@ -36,7 +38,7 @@ import java.util.*;
 /**
  * Represents an introspected method.
  */
-public class ApiMethod {
+public class ApiMethod extends ApiMember {
   private Method _method;
   private Class _returnType;
   private Class []_parameterTypes;
@@ -52,6 +54,8 @@ public class ApiMethod {
 		   Method method,
 		   HashMap<String,Type> typeMap)
   {
+    super(apiClass, method.getGenericReturnType(), method.getAnnotations());
+    
     _method = method;
 
     introspect(method, typeMap);
@@ -65,20 +69,17 @@ public class ApiMethod {
     return _method;
   }
 
+  public Method getJavaMember()
+  {
+    return _method;
+  }
+
   /**
    * Returns the method name.
    */
   public String getName()
   {
     return _method.getName();
-  }
-
-  /**
-   * Returns the declaring class
-   */
-  public Class getDeclaringClass()
-  {
-    return _method.getDeclaringClass();
   }
 
   /**
@@ -151,22 +152,6 @@ public class ApiMethod {
   public Class []getExceptionTypes()
   {
     return _exceptionTypes;
-  }
-
-  /**
-   * Returns true if the annotation exists.
-   */
-  public <T extends Annotation> T getAnnotation(Class<T> annType)
-  {
-    return _method.getAnnotation(annType);
-  }
-
-  /**
-   * Returns an annotation.
-   */
-  public boolean isAnnotationPresent(Class annotationType)
-  {
-    return _method.isAnnotationPresent(annotationType);
   }
 
   /**

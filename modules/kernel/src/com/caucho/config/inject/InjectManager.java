@@ -224,6 +224,8 @@ public class InjectManager
   private HashMap<FactoryBinding,Bean> _objectFactoryMap
     = new HashMap<FactoryBinding,Bean>();
 
+  private boolean _isUpdateNeeded = true;
+  
   private ArrayList<Path> _pendingPathList
     = new ArrayList<Path>();
 
@@ -315,6 +317,7 @@ public class InjectManager
 
       _xmlPlugin = new XmlStandardPlugin(this);
       addPlugin(_xmlPlugin);
+      createPlugin("com.caucho.server.webbeans.ResinStandardPlugin");
 
       if (_classLoader != null && isSetLocal) {
 	_classLoader.addScanListener(this);
@@ -323,6 +326,22 @@ public class InjectManager
       Environment.addEnvironmentListener(this, _classLoader);
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  private void createPlugin(String className)
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName(className, false, loader);
+      Constructor ctor= cl.getConstructor(new Class[] { InjectManager.class });
+
+      Plugin plugin = (Plugin) ctor.newInstance(this);
+
+      addPlugin(plugin);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
     }
   }
   
@@ -432,6 +451,8 @@ public class InjectManager
   private void init()
   {
     try {
+      _isUpdateNeeded = true;
+      
       update();
     } catch (RuntimeException e) {
       _configException = e;
@@ -2162,9 +2183,19 @@ public class InjectManager
   {
     _configuredClasses.add(className);
   }
+
+  public void addLoader()
+  {
+    _isUpdateNeeded = true;
+  }
   
   public void update()
   {
+    if (! _isUpdateNeeded)
+      return;
+
+    _isUpdateNeeded = false;
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -2216,8 +2247,10 @@ public class InjectManager
   private void discoverBean(String className)
   {
     try {
-      Class cl = Class.forName(className, false, _classLoader);
+      Class cl;
 
+      cl = Class.forName(className, false, _classLoader);
+      
       if (! isValidSimpleBean(cl))
 	return;
 	    

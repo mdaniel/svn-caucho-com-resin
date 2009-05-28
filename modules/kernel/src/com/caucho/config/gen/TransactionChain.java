@@ -183,7 +183,7 @@ public class TransactionChain extends FilterCallChain
     out.println("} catch (Exception e) {");
     out.pushDepth();
 
-    Class beanClass = _implMethod.getDeclaringClass();
+    ApiClass beanClass = _implMethod.getDeclaringClass();
 
     if (_isEJB3) { // XXX && ! _implMethod.isAnnotationPresent(javax.ejb.Remove.class)) {
       generateExceptionHandling(out);
@@ -246,7 +246,7 @@ public class TransactionChain extends FilterCallChain
     out.println("  e = (Exception) e.getCause();");
     out.println();
 
-    Class beanClass = _implMethod.getDeclaringClass();
+    ApiClass beanClass = _implMethod.getDeclaringClass();
 
     // ejb/0500
     Class exnTypes[]; // = getExceptionTypes();

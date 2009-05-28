@@ -44,6 +44,7 @@ import com.caucho.server.http.*;
 import com.caucho.server.port.*;
 import com.caucho.server.resin.*;
 import com.caucho.server.webapp.*;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 /**
@@ -66,12 +67,16 @@ import com.caucho.vfs.*;
  */
 public class ResinEmbed
 {
+  private static final L10N L = new L10N(ResinEmbed.class);
+  
   private static final String EMBED_CONF
     = "classpath:com/caucho/resin/resin-embed.xml";
   
   private Resin _resin = Resin.create();
   private Cluster _cluster;
   private ClusterServer _clusterServer;
+  private String _serverId;
+  
   private Host _host;
   private Server _server;
 
@@ -106,8 +111,21 @@ public class ResinEmbed
       throw ConfigException.create(e);
     }
 
-    _cluster = _resin.findCluster("");
-    _clusterServer = _cluster.findServer("");
+    if (_resin.getClusters().length == 0)
+      throw new ConfigException(L.l("Resin needs at least one defined <cluster>"));
+    
+    String clusterId = _resin.getClusters()[0].getName();
+    
+    _cluster = _resin.findCluster(clusterId);
+
+    if (_cluster.getPodList().length == 0)
+      throw new ConfigException(L.l("Resin needs at least one defined <server> or <cluster-pod>"));
+
+    if (_cluster.getPodList()[0].getServerList().length == 0)
+      throw new ConfigException(L.l("Resin needs at least one defined <server>"));
+
+    _clusterServer = _cluster.getPodList()[0].getServerList()[0];
+    _resin.setServerId(_clusterServer.getId());
   }
 
   //

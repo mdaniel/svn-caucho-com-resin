@@ -32,6 +32,7 @@ package com.caucho.ejb.cfg;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.config.gen.ApiMethod;
 import com.caucho.util.L10N;
 import java.lang.reflect.*;
 
@@ -80,7 +81,7 @@ public class RemoveMethod {
       // XXX: check for type
       
       for (BusinessMethodGenerator bizMethod : view.getMethods()) {
-	Method apiMethod = bizMethod.getApiMethod();
+	ApiMethod apiMethod = bizMethod.getApiMethod();
 	
 	if (_beanMethod.isMatch(apiMethod)) {
 	  bizMethod.setRemove(true);

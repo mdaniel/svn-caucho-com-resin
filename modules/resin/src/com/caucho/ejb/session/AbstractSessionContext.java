@@ -68,4 +68,9 @@ abstract public class AbstractSessionContext extends AbstractContext
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  public boolean wasCancelCalled()
+  {
+    return false;
+  }
 }

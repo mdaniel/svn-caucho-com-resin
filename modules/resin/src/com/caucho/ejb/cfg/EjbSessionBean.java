@@ -46,10 +46,12 @@ import com.caucho.ejb.session.StatelessServer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.*;
 import java.util.ArrayList;
 import java.lang.reflect.*;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.*;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
  * Configuration for an ejb entity bean.
@@ -70,6 +72,16 @@ public class EjbSessionBean extends EjbBean {
   public EjbSessionBean(EjbConfig ejbConfig, String ejbModuleName)
   {
     super(ejbConfig, ejbModuleName);
+  }
+  
+  /**
+   * Creates a new session bean configuration.
+   */
+  public EjbSessionBean(EjbConfig ejbConfig,
+			AnnotatedType annType,
+			String ejbModuleName)
+  {
+    super(ejbConfig, annType, ejbModuleName);
   }
 
   /**
@@ -212,13 +224,6 @@ public class EjbSessionBean extends EjbBean {
     } catch (ConfigException e) {
       throw new LineConfigException(getLocation() + e.getMessage(), e);
     }
-
-    /*
-    if (isStateless())
-      J2EEManagedObject.register(new StatelessSessionBean(this));
-    else
-      J2EEManagedObject.register(new StatefulSessionBean(this));
-     */
   }
   
   /**
@@ -301,9 +306,12 @@ public class EjbSessionBean extends EjbBean {
     if (_localHome != null || _localList.size() != 0
         || _remoteHome != null || _remoteList.size() != 0) {
     }
-    else if (interfaceList.size() == 0)
-      throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",
+    else if (interfaceList.size() == 0) {
+      if (isStateless()) {
+	throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate Stateless beans without interfaces.",
                                     type.getName()));
+      }
+    }
     else if (interfaceList.size() != 1)
       throw new ConfigException(L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
                                     type.getName(),

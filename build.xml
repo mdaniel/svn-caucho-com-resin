@@ -809,11 +809,13 @@
      <copy tofile="modules/c/src/resin/Makefile.in"
 	   file="${prodir}/modules/c/src/resin/Makefile.in"
            preservelastmodified="true"
+	   failonerror="false"
            overwrite="true"/>
      
      <copy tofile="modules/c/src/resinssl/Makefile.in"
 	   file="${prodir}/modules/c/src/resinssl/Makefile.in"
            preservelastmodified="true"
+	   failonerror="false"
            overwrite="true"/>
      
      <mkdir dir="automake"/>

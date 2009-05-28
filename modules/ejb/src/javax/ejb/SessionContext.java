@@ -48,4 +48,7 @@ public interface SessionContext extends EJBContext {
 
   public MessageContext getMessageContext()
     throws IllegalStateException;
+
+  public boolean wasCancelCalled()
+    throws IllegalStateException;
 }

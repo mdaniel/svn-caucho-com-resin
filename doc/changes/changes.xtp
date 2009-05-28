@@ -11,6 +11,20 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.1 snapshot">
+<ul>
+<li>embed: ResinEmbed support for non-empty cluster and server names (#3498, rep by skot)</li>
+<li>server: isUserInRole NPE in AbstractHttpRequest (#3489, rep by voodude)</li>
+<li>build: ant dist build.xml optional for Makefile.in (#3490, rep by skot)</li>
+<li>hessian: java.lang.Object (#3448)</li>
+<li>hessian: Byte/Short as handles</li>
+<li>jni: RandomAccessFile JNI code missing mode (#3442, rep by koreth)</li>
+<li>jsp: jsp:useBean with generic type and XML validation (#3455, rep by kir)</li>
+<li>jsp: prelude with include NPE (#3508, rep by Shinomiya Nobuaki)</li>
+<li>deploy: error messages and documentation for remote deploy not clear for BAM/HMTP (#3477, rep by Scott Hernandez)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.0">
 <ul>
 <li>server: UTF8Reader with byte-order-mark needs to read full next character (#3525, rep by Fiaz Hossain)</li>

@@ -1901,10 +1901,12 @@ public abstract class AbstractHttpRequest
     
     Login login = app == null ? null : app.getLogin();
 
-    boolean inRole = login.isUserInRole(user, role);
+    boolean inRole = login != null && login.isUserInRole(user, role);
       
     if (log.isLoggable(Level.FINE)) {
-      if (user == null)
+      if (login == null)
+        log.fine("no Login for isUserInRole");
+      else if (user == null)
         log.fine("no user for isUserInRole");
       else if (inRole)
         log.fine(user + " is in role: " + role);

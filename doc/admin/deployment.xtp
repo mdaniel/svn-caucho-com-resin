@@ -210,9 +210,15 @@ administration:</p>
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin">
        ...
+
+  &lt;resin:AdminAuthenticator>
+     &lt;resin:user name="harry" password="..."/>
+  &lt;/resin:AdminAuthenticator>
+  
   &lt;cluster id="">
   
-    &lt;resin:RemoteAdminService>
+    &lt;resin:RemoteAdminService/>
+    &lt;resin:RemoteDeploy/>
 
     ...
   &lt;/cluster>
@@ -224,6 +230,17 @@ authorized administrators can update the server.  The <a
 href="security.xtp">&lt;resin:AdminAuthenticator></a> tag configures
 administrators.  If no administrators are added, Resin will reject any
 remote administration requests.</p>
+
+<p>The third step is enabling the deploy service itself with the
+&lt;resin:DeployService> tag.  The deploy service is responsible for
+managing uploads of new applications and distributing them to the
+servers in the cluster.</p>
+
+<p>When troubleshooting, it's helpful to know that Resin uses BAM/HMTP
+to connect the deployment client with the deployment server.  The
+&lt;resin:RemoteAdminService> enables BAM/HMTP.  If the server is down
+or the remote admin service isn't enabled, the error messages will
+complain that the BAM/HMTP connection is not allowed.</p>
 
 </s1>
 

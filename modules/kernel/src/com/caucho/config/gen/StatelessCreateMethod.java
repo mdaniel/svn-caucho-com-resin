@@ -54,9 +54,7 @@ public class StatelessCreateMethod extends BusinessMethodGenerator
 			       ApiMethod implMethod,
 			       int index)
   {
-    super(homeView, apiMethod,
-	  implMethod != null ? implMethod.getMethod() : null,
-	  index);
+    super(homeView, apiMethod, implMethod, index);
 
     _bean = bean;
     _objectView = objectView;

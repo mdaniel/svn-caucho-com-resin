@@ -31,8 +31,10 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.util.L10N;
 
-import javax.ejb.*;
 import java.lang.reflect.*;
+
+import javax.ejb.*;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
  * Configuration for an ejb stateless session bean.
@@ -46,6 +48,18 @@ public class EjbStatefulBean extends EjbSessionBean {
   public EjbStatefulBean(EjbConfig ejbConfig, String ejbModuleName)
   {
     super(ejbConfig, ejbModuleName);
+
+    setSessionType("Stateful");
+  }
+
+  /**
+   * Creates a new session bean configuration.
+   */
+  public EjbStatefulBean(EjbConfig ejbConfig,
+			 AnnotatedType annType,
+			 Stateful stateful)
+  {
+    super(ejbConfig, annType, stateful.name());
 
     setSessionType("Stateful");
   }

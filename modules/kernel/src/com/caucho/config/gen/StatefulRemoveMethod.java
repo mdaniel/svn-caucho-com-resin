@@ -47,7 +47,7 @@ public class StatefulRemoveMethod extends StatefulMethod
 {
   public StatefulRemoveMethod(StatefulView view,
 			      ApiMethod apiMethod,
-			      Method implMethod,
+			      ApiMethod implMethod,
 			      int index)
   {
     super(view, apiMethod, implMethod, index);

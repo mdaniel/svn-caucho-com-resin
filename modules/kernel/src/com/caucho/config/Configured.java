@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,34 +19,28 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package javax.interceptor;
+package com.caucho.config;
 
-import java.lang.reflect.Method;
-import java.util.Map;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
 
-public interface InvocationContext {
-  public Object getTarget();
+import javax.enterprise.inject.deployment.DeploymentType;
 
-  public Object getTimer();
-
-  public Method getMethod();
-
-  public Object[] getParameters()
-    throws IllegalStateException;
-
-  public void setParameters(Object[] parameters)
-    throws IllegalStateException;
-
-  public Map<String, Object> getContextData();
-
-  public Object proceed()
-    throws Exception;
+/**
+ * Default deployment type for an XML file, with higher priority than
+ * Production.
+ */
+@DeploymentType
+@Documented  
+@Retention(RUNTIME)
+@Target({METHOD, TYPE})
+public @interface Configured {
 }

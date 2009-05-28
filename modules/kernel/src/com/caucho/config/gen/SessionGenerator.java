@@ -215,6 +215,13 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     if (_remoteHome == null && _remoteApi.size() == 0)
       _remoteApi = introspectRemoteApi();
+
+    if (_localHome == null
+	&& _localApi.size() == 0
+	&& _remoteHome == null
+	&& _remoteApi.size() == 0) {
+      _localApi = introspectLocalDefault();
+    }
   }
 
   /**
@@ -281,6 +288,15 @@ abstract public class SessionGenerator extends BeanGenerator {
   protected View createRemoteView(ApiClass api)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Scans for the @Local interfaces
+   */
+  protected ArrayList<ApiClass> introspectLocalDefault()
+  {
+    throw new ConfigException(L.l("'{0}' does not have any interfaces defined.",
+				  getEjbClass().getName()));
   }
 
   /**
@@ -465,7 +481,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     if (isStateless())
       out.println("Bean(" + _contextClassName + " context)");
     else
-      out.println("Bean(" + _contextClassName + " context, javax.context.CreationalContext env)");
+      out.println("Bean(" + _contextClassName + " context, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.pushDepth();
 

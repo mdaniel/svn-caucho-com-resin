@@ -64,6 +64,11 @@ public class InvocationContextImpl implements InvocationContext {
     return _target;
   }
 
+  public Object getTimer()
+  {
+    throw new UnsupportedOperationException();
+  }
+
   public Method getMethod()
   {
     return _method;

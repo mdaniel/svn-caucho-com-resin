@@ -32,12 +32,16 @@ package com.caucho.ejb.session;
 import com.caucho.config.ConfigContext;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
-import java.util.*;
-
+import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.util.LruCache;
+import com.caucho.util.L10N;
+
+import java.util.*;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ManagedBean;
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +53,7 @@ import javax.ejb.NoSuchEJBException;
  */
 public class StatefulServer extends SessionServer
 {
+  private static final L10N L = new L10N(StatefulServer.class);
   private static final Logger log
     = Logger.getLogger(StatefulServer.class.getName());
   
@@ -121,6 +126,20 @@ public class StatefulServer extends SessionServer
     }
     else
       return null;
+  }
+
+  protected Bean createBean(ManagedBean mBean, Class api)
+  {
+    StatefulProvider provider = getStatefulContext().getProvider(api);
+
+    if (provider == null)
+      throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
+					 api, getStatefulContext()));
+    
+    StatefulBeanImpl statefulBean
+      = new StatefulBeanImpl(this, mBean, provider);
+
+    return statefulBean;
   }
 
   protected InjectionTarget createSessionComponent(Class api, Class beanClass)

@@ -104,7 +104,7 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println("}");
 
     out.println();
-    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.Bean bean, javax.context.CreationalContext env)");
+    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.InjectionTarget bean, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.println("  return this;");
     out.println("}");

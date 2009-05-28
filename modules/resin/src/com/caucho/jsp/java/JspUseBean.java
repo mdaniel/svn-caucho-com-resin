@@ -97,15 +97,20 @@ public class JspUseBean extends JspContainerNode {
     os.print("<jsp:userBean");
 
     if (_id != null)
-      os.print(" id=\"" + _id + "\"");
+      printXmlAttribute(os, "id", _id);
+    
     if (_typeName != null)
-      os.print(" type=\"" + _typeName + "\"");
+      printXmlAttribute(os, "type", _typeName);
+
     if (_className != null)
-      os.print(" class=\"" + _className + "\"");
+      printXmlAttribute(os, "class", _className);
+
     if (_beanName != null)
-      os.print(" beanName=\"" + _beanName + "\"");
+      printXmlAttribute(os, "beanName", _beanName);
+
     if (_scope != null)
-      os.print(" scope=\"" + _scope + "\"");
+      printXmlAttribute(os, "scope", _scope);
+
     os.print("/>");
   }
 

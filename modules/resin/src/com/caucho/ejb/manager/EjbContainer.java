@@ -32,8 +32,10 @@ package com.caucho.ejb.manager;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.*;
+import javax.ejb.Stateful;
 import javax.jms.*;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
@@ -303,6 +305,15 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   }
 
   //
+  // Bean configuration and management
+  //
+  
+  public void createBean(AnnotatedType type)
+  {
+    _configManager.addAnnotatedType(type);
+  }
+
+  //
   // AbstractServer management
   //
 
@@ -345,12 +356,6 @@ public class EjbContainer implements ScanListener, EnvironmentListener
       }
     }
 
-    return null;
-  }
-  
-  public Bean createBean(CauchoBean cauchoBean)
-  {
-    
     return null;
   }
 

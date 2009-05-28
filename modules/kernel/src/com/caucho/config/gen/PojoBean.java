@@ -100,13 +100,13 @@ public class PojoBean extends BeanGenerator {
 
       int index = _businessMethods.size();
       BusinessMethodGenerator bizMethod
-	= new BusinessMethodGenerator(_view, method, method.getMethod(), index);
+	= new BusinessMethodGenerator(_view, method, method, index);
 
       // ioc/0i10
       if (_businessMethods.contains(bizMethod))
 	continue;
 
-      bizMethod.introspect(method.getMethod(), method.getMethod());
+      bizMethod.introspect(method, method);
 
       if (! bizMethod.isEnhanced())
 	continue;

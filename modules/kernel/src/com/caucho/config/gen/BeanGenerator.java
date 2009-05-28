@@ -207,6 +207,9 @@ abstract public class BeanGenerator extends GenClass
       fillTypes(types, iface);
     }
 
+    if (_bindings == null)
+      return;
+
     Annotation []bindings = new Annotation[_bindings.size()];
     _bindings.toArray(bindings);
 

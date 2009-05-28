@@ -51,7 +51,7 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
 			      StatefulView homeView,
 			      View objectView,
 			      ApiMethod apiMethod,
-			      Method implMethod,
+			      ApiMethod implMethod,
 			      int index)
   {
     super(homeView, apiMethod, implMethod, index);
@@ -67,7 +67,7 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(Method apiMethod, Method implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     getXa().setContainerManaged(false);
 
@@ -98,7 +98,7 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
     out.println("thread.setContextClassLoader(getStatefulServer().getClassLoader());");
     
     out.println(_objectView.getViewClassName() + " remote ="
-		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), (javax.context.CreationalContext) null);");
+		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), (javax.enterprise.context.spi.CreationalContext) null);");
     
     out.print(_objectView.getBeanClassName());
     out.print(" bean = remote._bean;");

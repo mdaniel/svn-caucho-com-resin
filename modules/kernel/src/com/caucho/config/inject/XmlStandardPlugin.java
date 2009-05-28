@@ -40,9 +40,11 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import javax.ejb.*;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -110,6 +112,16 @@ public class XmlStandardPlugin implements Plugin
 
   public void processType(@Observes ProcessAnnotatedType event)
   {
+    AnnotatedType type = event.getAnnotatedType();
+
+    if (type == null)
+      return;
+
+    if (type.isAnnotationPresent(Stateful.class)
+	|| type.isAnnotationPresent(Stateless.class)
+	|| type.isAnnotationPresent(MessageDriven.class)) {
+      event.setAnnotatedType(null);
+    }
   }
 
   public void processType(@Observes AfterBeanDiscovery event)
@@ -126,8 +138,9 @@ public class XmlStandardPlugin implements Plugin
       return;
     
     Bean bean = event.getBean();
+    Annotated annotated = event.getAnnotated();
 
-    if (isStartup(event.getAnnotated())) {
+    if (isStartup(annotated)) {
       _manager.addService(bean);
     }
   }

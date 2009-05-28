@@ -53,7 +53,7 @@ public class LifecycleMethod extends BusinessMethodGenerator
 			 int index,
 			 Class lifecycleAnn)
   {
-    super(view, implMethod, implMethod.getMethod(), index);
+    super(view, implMethod, implMethod, index);
 
     _ejbClass = ejbClass;
 

@@ -139,10 +139,10 @@ abstract public class StatefulView extends View {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    generateExtends(out);
-    
-    out.print("  implements " + getApi().getDeclarationName());
-    out.println(", StatefulProvider");
+    // generateExtends(out);
+    // out.print("  implements " + getApi().getDeclarationName());
+    out.println("  extends " + getEjbClass().getName());
+    out.println("  implements StatefulProvider");
     out.println("{");
     out.pushDepth();
 
@@ -160,10 +160,11 @@ abstract public class StatefulView extends View {
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
-    out.println("private StatefulContext _context;");
-    out.println("private StatefulServer _server;");
-    out.println("private " + getBeanClassName() + " _bean;");
-    out.println("private boolean _isActive;");
+    out.println("private transient StatefulContext _context;");
+    out.println("private transient StatefulServer _server;");
+    // out.println("private " + getBeanClassName() + " _bean;");
+    out.println("private transient boolean _isValid;");
+    out.println("private transient boolean _isActive;");
 
     out.println();
     out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
@@ -179,12 +180,14 @@ abstract public class StatefulView extends View {
     generateSuper(out, "server");
     
     out.println("_server = server;");
+    out.println("_isValid = true;");
     
     out.popDepth();
     out.println("}");
 
+    /*
     out.println();
-    out.println("public " + getViewClassName() + "(StatefulServer server, javax.context.CreationalContext env)");
+    out.println("public " + getViewClassName() + "(StatefulServer server, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.pushDepth();
     
@@ -194,9 +197,11 @@ abstract public class StatefulView extends View {
 
     out.popDepth();
     out.println("}");
+    */
 
     generateSessionProvider(out);
 
+    /*
     out.println();
     out.println("public " + getViewClassName()
 		+ "(StatefulServer server, "
@@ -209,6 +214,7 @@ abstract public class StatefulView extends View {
     // generateBusinessConstructor(out);
     
     out.println("}");
+    */
 
     out.println();
     out.println("public StatefulServer getStatefulServer()");
@@ -230,11 +236,11 @@ abstract public class StatefulView extends View {
     throws IOException
   {
     out.println();
-    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.Bean injectBean, javax.context.CreationalContext env)");
+    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.InjectionTarget injectBean, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.println("  " + getViewClassName() + " bean"
-		+ " = new " + getViewClassName() + "(_server, env);");
-    out.println("  _server.initInstance(bean._bean, injectBean, bean, env);");
+		+ " = new " + getViewClassName() + "(_server);");
+    out.println("  _server.initInstance(bean, injectBean, bean, env);");
     out.println("  return bean;");
     out.println("}");
   }
@@ -250,7 +256,7 @@ abstract public class StatefulView extends View {
     StatefulMethod bizMethod
       = new StatefulMethod(this,
 			   apiMethod,
-			   implMethod.getMethod(),
+			   implMethod,
 			   index);
 
     return bizMethod;

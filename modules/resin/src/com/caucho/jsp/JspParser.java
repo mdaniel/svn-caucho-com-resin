@@ -1848,7 +1848,8 @@ public class JspParser {
       throw error(L.l("circular include of '{0}' forbidden.  A JSP file may not include itself.", include));
     for (int i = 0; i < _includes.size(); i++) {
       Include inc = _includes.get(i);
-      if (inc._stream.getPath().equals(include) && ! allowDuplicate)
+      if (inc._stream != null && inc._stream.getPath() != null
+	  && inc._stream.getPath().equals(include) && ! allowDuplicate)
 	throw error(L.l("circular include of '{0}'.  A JSP file may not include itself.", include));
     }
 

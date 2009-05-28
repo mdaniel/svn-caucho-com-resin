@@ -105,13 +105,13 @@ public class XaCallChain extends AbstractCallChain
   /**
    * Introspects the method for the default values
    */
-  public void introspect(Method apiMethod, Method implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     if (! _isContainerManaged)
       return;
     
-    Class apiClass = apiMethod.getDeclaringClass();
-    Class implClass = null;
+    ApiClass apiClass = apiMethod.getDeclaringClass();
+    ApiClass implClass = null;
 
     if (implMethod != null)
       implClass = implMethod.getDeclaringClass();
@@ -121,8 +121,7 @@ public class XaCallChain extends AbstractCallChain
     xaAttr = apiMethod.getAnnotation(TransactionAttribute.class);
 
     if (xaAttr == null) {
-      xaAttr = (TransactionAttribute)
-	apiClass.getAnnotation(TransactionAttribute.class);
+      xaAttr = apiClass.getAnnotation(TransactionAttribute.class);
     }
 
     if (xaAttr == null && implMethod != null) {
@@ -130,8 +129,7 @@ public class XaCallChain extends AbstractCallChain
     }
 
     if (xaAttr == null && implClass != null) {
-      xaAttr = (TransactionAttribute)
-	implClass.getAnnotation(TransactionAttribute.class);
+      xaAttr = implClass.getAnnotation(TransactionAttribute.class);
     }
 
     if (xaAttr != null)

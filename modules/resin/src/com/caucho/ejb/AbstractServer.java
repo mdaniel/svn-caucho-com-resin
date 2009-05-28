@@ -53,6 +53,7 @@ import com.caucho.util.L10N;
 import javax.ejb.*;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -842,11 +843,12 @@ abstract public class AbstractServer implements EnvironmentBean {
    * Initialize an instance
    */
   public void initInstance(Object instance,
-			   Bean comp,
+			   InjectionTarget target,
 			   Object proxy,
 			   CreationalContext cxt)
   {
     ConfigContext env = (ConfigContext) cxt;
+    Bean comp = (Bean) target;
 
     if (env != null && comp != null)
       env.put((AbstractBean) comp, proxy);

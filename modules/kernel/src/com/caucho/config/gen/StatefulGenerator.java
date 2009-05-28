@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Generates the skeleton for a stateful bean.
@@ -73,6 +74,19 @@ public class StatefulGenerator extends SessionGenerator {
   protected View createRemoteView(ApiClass api)
   {
     return new StatefulRemoteView(this, api);
+  }
+
+  /**
+   * Scans for the @Local interfaces
+   */
+  @Override
+  protected ArrayList<ApiClass> introspectLocalDefault()
+  {
+    ArrayList<ApiClass> apiClass = new ArrayList<ApiClass>();
+
+    apiClass.add(getEjbClass());
+
+    return apiClass;
   }
   
   /**

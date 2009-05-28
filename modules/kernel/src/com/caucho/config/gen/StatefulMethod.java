@@ -49,7 +49,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   
   public StatefulMethod(StatefulView view,
 			ApiMethod apiMethod,
-			Method implMethod,
+			ApiMethod implMethod,
 			int index)
   {
     super(view, apiMethod, implMethod, index);
@@ -71,7 +71,7 @@ public class StatefulMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(Method apiMethod, Method implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     getXa().setTransactionType(getDefaultTransactionType());
 
@@ -103,12 +103,12 @@ public class StatefulMethod extends BusinessMethodGenerator
   {
     if (getView().isRemote()
 	&& hasException(java.rmi.NoSuchObjectException.class)) {
-      out.println("if (_bean == null)");
+      out.println("if (! _isValid)");
       out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
 		  + getEjbClass().getSimpleName() + " is no longer valid\");");
     }
     else {
-      out.println("if (_bean == null)");
+      out.println("if (! _isValid)");
       out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
 		  + getEjbClass().getSimpleName() + " is no longer valid\");");
     }
@@ -139,9 +139,10 @@ public class StatefulMethod extends BusinessMethodGenerator
 	out.pushDepth();
       }
       
-      out.println("  Object bean = _bean;");
-      out.println("  _bean = null;");
-      out.println("  _server.destroyInstance(bean);");
+      out.println("  boolean isValid = _isValid;");
+      out.println("  _isValid = false;");
+      out.println("  if (isValid)");
+      out.println("    _server.destroyInstance(this);");
       
       if (_isRemoveRetainIfException) {
 	out.popDepth();
@@ -172,7 +173,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   protected void generateThis(JavaWriter out)
     throws IOException
   {
-    out.print("_bean");
+    out.print("this");
   }
 
   /**
@@ -181,7 +182,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   protected void generateSuper(JavaWriter out)
     throws IOException
   {
-    out.print("_bean");
+    out.print("super");
   }
 
   /**
@@ -191,7 +192,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   protected String getSuper()
     throws IOException
   {
-    return "_bean";
+    return "super";
   }
 
   /**

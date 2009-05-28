@@ -128,7 +128,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
 				      this,
 				      localView,
 				      apiMethod,
-				      implMethod.getMethod(),
+				      implMethod,
 				      index);
     }
     else {

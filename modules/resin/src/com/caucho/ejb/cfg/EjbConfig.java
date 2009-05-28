@@ -43,6 +43,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
+import javax.ejb.MessageDriven;
+import javax.enterprise.inject.spi.AnnotatedType;
+
 /**
  * Manages the EJB configuration files.
  */
@@ -340,6 +345,44 @@ public class EjbConfig {
 	bean.setEJBClass(type);
 	
 	setBeanConfig(bean.getEJBName(), bean);
+      }
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  public void addAnnotatedType(AnnotatedType annType)
+  {
+    try {
+      ClassLoader loader = _ejbContainer.getIntrospectionClassLoader();
+
+      Class type = annType.getJavaClass();
+
+      if (findBeanByType(type) != null)
+	return;
+
+      if (annType.isAnnotationPresent(javax.ejb.Stateless.class)) {
+	/*
+	EjbStatelessBean bean = new EjbStatelessBean(this, annType);
+
+	setBeanConfig(bean.getEJBName(), bean);
+	*/
+      }
+      else if (annType.isAnnotationPresent(Stateful.class)) {
+	Stateful stateful = (Stateful) annType.getAnnotation(Stateful.class);
+	
+	EjbStatefulBean bean = new EjbStatefulBean(this, annType, stateful);
+
+	setBeanConfig(bean.getEJBName(), bean);
+      }
+      else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
+	/*
+	EjbMessageBean bean = new EjbMessageBean(this, annType);
+
+	setBeanConfig(bean.getEJBName(), bean);
+	*/
       }
     } catch (ConfigException e) {
       throw e;

@@ -1305,7 +1305,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     // XXX: removed sync block, since handled below
 
-    Class cl = loadClassImpl(name, resolve);
+    Class cl = null;
+
+    cl = loadClassImpl(name, resolve);
 
     if (cl != null)
       return cl;

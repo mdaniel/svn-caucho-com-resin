@@ -43,7 +43,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private final View _view;
   
   private final ApiMethod _apiMethod;
-  private final Method _implMethod;
+  private final ApiMethod _implMethod;
 
   private XaCallChain _xa;
   private SecurityCallChain _security;
@@ -51,7 +51,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   
   public BusinessMethodGenerator(View view,
 				 ApiMethod apiMethod,
-				 Method implMethod,
+				 ApiMethod implMethod,
 				 int index)
   {
     _view = view;
@@ -88,15 +88,15 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Returns the api method
    */
-  public Method getApiMethod()
+  public ApiMethod getApiMethod()
   {
-    return _apiMethod.getMethod();
+    return _apiMethod;
   }
 
   /**
    * Returns the implementation method
    */
-  public Method getImplMethod()
+  public ApiMethod getImplMethod()
   {
     return _implMethod;
   }
@@ -162,7 +162,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     return false;
   }
 
-  public void introspect(Method apiMethod, Method implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     _security.introspect(apiMethod, implMethod);
     _xa.introspect(apiMethod, implMethod);

@@ -73,6 +73,11 @@ public class InvocationContextImpl implements InvocationContext {
   {
     return _apiMethod;
   }
+  
+  public Object getTimer()
+  {
+    return null;
+  }
 
   public Object[] getParameters()
     throws IllegalStateException

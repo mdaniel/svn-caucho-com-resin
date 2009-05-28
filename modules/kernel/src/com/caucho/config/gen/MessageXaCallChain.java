@@ -65,7 +65,7 @@ public class MessageXaCallChain extends XaCallChain
       super.setTransactionType(xa);
     }
     else
-      throw ConfigException.create(getBusinessMethod().getApiMethod(),
+      throw ConfigException.create(getBusinessMethod().getApiMethod().getMethod(),
 				L.l("'{0}' is not an allowed transaction type for message beans",
 				    xa));
   }

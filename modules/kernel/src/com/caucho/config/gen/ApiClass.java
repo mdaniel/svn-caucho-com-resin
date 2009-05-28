@@ -32,6 +32,7 @@ package com.caucho.config.gen;
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.util.*;
 
@@ -44,6 +45,8 @@ public class ApiClass {
     = new ApiClass(javax.ejb.EntityBean.class);
 
   private Class _apiClass;
+  private AnnotatedType _annotatedType;
+  
   private HashMap<String,Type> _typeMap;
   private ArrayList<Type> _typeParam;
     
@@ -58,7 +61,7 @@ public class ApiClass {
    */
   public ApiClass(Class apiClass)
   {
-    this(apiClass, null);
+    this(apiClass, null, null);
   }
   
   /**
@@ -66,12 +69,25 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(Class apiClass, HashMap<String,Type> parentTypeMap)
+  public ApiClass(Class apiClass, AnnotatedType annotatedType)
+  {
+    this(apiClass, annotatedType, null);
+  }
+  
+  /**
+   * Creates a new api class
+   *
+   * @param topClass the api class
+   */
+  public ApiClass(Class apiClass,
+		  AnnotatedType annotatedType,
+		  HashMap<String,Type> parentTypeMap)
   {
     if (apiClass == null)
       throw new NullPointerException();
     
     _apiClass = apiClass;
+    _annotatedType = annotatedType;
 
     _typeMap = new HashMap<String,Type>();
 
@@ -88,10 +104,11 @@ public class ApiClass {
    * @param topClass the api class
    */
   public ApiClass(Class apiClass,
+		  AnnotatedType annotatedType,
 		  HashMap<String,Type> parentTypeMap,
 		  ArrayList<Type> param)
   {
-    this(apiClass, parentTypeMap);
+    this(apiClass, annotatedType, parentTypeMap);
 
     _typeParam = param;
   }
@@ -201,6 +218,11 @@ public class ApiClass {
     return _apiClass.isPrimitive();
   }
 
+  public boolean isAssignableFrom(Class cl)
+  {
+    return _apiClass.isAssignableFrom(cl);
+  }
+
   /**
    * Returns the fields.
    */
@@ -276,7 +298,10 @@ public class ApiClass {
    */
   public boolean isAnnotationPresent(Class annType)
   {
-    return _apiClass.isAnnotationPresent(annType);
+    if (_annotatedType != null)
+      return _annotatedType.isAnnotationPresent(annType);
+    else
+      return _apiClass.isAnnotationPresent(annType);
   }
 
   /**
@@ -284,16 +309,19 @@ public class ApiClass {
    */
   public <A extends Annotation> A getAnnotation(Class<A> annType)
   {
-    return (A) _apiClass.getAnnotation(annType);
+    if (_annotatedType != null)
+      return _annotatedType.getAnnotation(annType);
+    else
+      return (A) _apiClass.getAnnotation(annType);
   }
 
   private void introspectClass(Class cl, HashMap<String,Type> typeMap)
   {
-    if (cl == null)
+    if (cl == null || Object.class.equals(cl))
       return;
 
     HashSet<ApiMethod> methodSet = new HashSet<ApiMethod>();
-    
+
     for (Method method : cl.getDeclaredMethods()) {
       ApiMethod apiMethod = new ApiMethod(this, method, typeMap);
 
@@ -351,7 +379,7 @@ public class ApiClass {
 
       introspectClass(rawType, subMap);
 
-      return new ApiClass(rawType, subMap, paramList);
+      return new ApiClass(rawType, null, subMap, paramList);
     }
     else
       return null;

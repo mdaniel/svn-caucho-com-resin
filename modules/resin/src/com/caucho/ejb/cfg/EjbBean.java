@@ -36,6 +36,7 @@ import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.TransactionChain;
 import com.caucho.config.gen.View;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
@@ -56,9 +57,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.Vfs;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.*;
-import javax.interceptor.*;
 import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -67,6 +65,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.lang.reflect.*;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.*;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.interceptor.*;
 
 /**
  * Configuration for an ejb bean.
@@ -88,6 +91,8 @@ public class EjbBean extends DescriptionGroupConfig
   protected ClassLoader _jClassLoader;
 
   private String _ejbName;
+
+  private AnnotatedType _annotatedType;
 
   // The published name as used by IIOP, Hessian, and
   // jndi-remote-prefix/jndi-local-prefix
@@ -159,7 +164,24 @@ public class EjbBean extends DescriptionGroupConfig
     _ejbModuleName = ejbModuleName;
 
     _loader = ejbConfig.getEjbContainer().getClassLoader();
- }
+  }
+
+  /**
+   * Creates a new entity bean configuration.
+   */
+  public EjbBean(EjbConfig ejbConfig,
+		 AnnotatedType annType,
+		 String ejbModuleName)
+  {
+    _ejbConfig = ejbConfig;
+
+    _annotatedType = annType;
+    _ejbModuleName = ejbModuleName;
+
+    setEJBClass(annType.getJavaClass());
+
+    _loader = ejbConfig.getEjbContainer().getClassLoader();
+  }
 
   public EjbConfig getConfig()
   {
@@ -417,7 +439,7 @@ public class EjbBean extends DescriptionGroupConfig
   public void setEJBClass(Class ejbClass)
     throws ConfigException
   {
-    setEJBClassWrapper(new ApiClass(ejbClass));
+    setEJBClassWrapper(new ApiClass(ejbClass, _annotatedType));
   }
 
   /**
@@ -461,8 +483,16 @@ public class EjbBean extends DescriptionGroupConfig
 
     ApiMethod method = ejbClass.getMethod("finalize", new Class[0]);
 
-    if (method != null && ! method.getDeclaringClass().equals(Object.class))
-      throw error(L.l("'{0}' may not implement finalize().  Bean implementations may not implement finalize().", ejbClass.getName()));
+    if (method != null
+	&& ! method.getMethod().getDeclaringClass().equals(Object.class)) {
+      throw error(L.l("'{0}' may not implement finalize().  Bean implementations may not implement finalize().", method.getMethod().getDeclaringClass().getName()));
+    }
+
+    if (_annotatedType == null) {
+      InjectManager manager = InjectManager.create();
+
+      _annotatedType = manager.createAnnotatedType(_ejbClass.getJavaClass());
+    }
   }
 
   /**
@@ -1309,7 +1339,7 @@ public class EjbBean extends DescriptionGroupConfig
                         method.getDeclaringClass().getName(),
                         getFullMethodName(method),
                         implMethod.getReturnType().getName(),
-                        getShortClassName(implMethod.getDeclaringClass()),
+                        implMethod.getDeclaringClass().getSimpleName(),
                         getFullMethodName(implMethod)));
       }
 
@@ -1340,7 +1370,7 @@ public class EjbBean extends DescriptionGroupConfig
       throw error(L.l("{0}: '{1}' expected to match {2}.{3}",
                       beanClass.getName(),
                       getFullMethodName(methodName, param),
-                      getShortClassName(sourceMethod.getDeclaringClass()),
+                      sourceMethod.getDeclaringClass().getSimpleName(),
                       getFullMethodName(sourceMethod)));
     }
     else if (method == null) {
@@ -1491,7 +1521,7 @@ public class EjbBean extends DescriptionGroupConfig
                       getFullMethodName(methodName, param)));
     }
 
-    Class declaringClass = method.getDeclaringClass();
+    ApiClass declaringClass = method.getDeclaringClass();
 
     if (method.isAbstract()) {
       if (method.getDeclaringClass().getName().equals("javax.ejb.EntityBean"))
@@ -1984,7 +2014,7 @@ public class EjbBean extends DescriptionGroupConfig
                       caller.getDeclaringClass().getName()) +
                   L.l(" {0} must throw all {1}.{2} exceptions.",
                       caller.getName(),
-                      getShortClassName(callee.getDeclaringClass()),
+                      callee.getDeclaringClass().getSimpleName(),
                       callee.getName()));
     }
   }

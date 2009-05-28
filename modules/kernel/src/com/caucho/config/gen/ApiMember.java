@@ -24,29 +24,50 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package javax.interceptor;
+package com.caucho.config.gen;
 
-import java.lang.reflect.Method;
-import java.util.Map;
+import com.caucho.config.inject.AnnotatedElementImpl;
 
-public interface InvocationContext {
-  public Object getTarget();
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.*;
 
-  public Object getTimer();
+/**
+ * Represents an introspected method.
+ */
+abstract public class ApiMember extends AnnotatedElementImpl {
+  private ApiClass _declaringClass;
+  
+  /**
+   * Creates a new method.
+   *
+   * @param topClass the top class
+   * @param method the introspected method
+   */
+  public ApiMember(ApiClass declaringClass,
+		   Type type,
+		   Annotation []annotations)
+  {
+    super(type, annotations);
 
-  public Method getMethod();
+    _declaringClass = declaringClass;
+  }
 
-  public Object[] getParameters()
-    throws IllegalStateException;
+  /**
+   * Returns the declaring ApiClass
+   */
+  public ApiClass getDeclaringClass()
+  {
+    return _declaringClass;
+  }
 
-  public void setParameters(Object[] parameters)
-    throws IllegalStateException;
-
-  public Map<String, Object> getContextData();
-
-  public Object proceed()
-    throws Exception;
+  abstract public Member getJavaMember();
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getJavaMember() + "]";
+  }
 }

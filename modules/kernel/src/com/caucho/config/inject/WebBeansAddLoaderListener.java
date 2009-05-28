@@ -47,10 +47,13 @@ public class WebBeansAddLoaderListener implements AddLoaderListener
    */
   public void addLoader(EnvironmentClassLoader loader)
   {
+    // the calls triggered from this callback cannot call Class.forName
+    // because the addLoader will be triggered itself from Class.forName
+    
     InjectManager container = InjectManager.create(loader);
 
     // jpa/0046, jms/3e01
-    container.update();
+    container.addLoader();
   }
 
   public boolean equals(Object o)

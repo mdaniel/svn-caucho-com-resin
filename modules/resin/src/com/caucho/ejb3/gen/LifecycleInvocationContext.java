@@ -59,6 +59,11 @@ public class LifecycleInvocationContext implements InvocationContext {
   {
     return _target;
   }
+  
+  public Object getTimer()
+  {
+    return null;
+  }
 
   public Method getMethod()
   {

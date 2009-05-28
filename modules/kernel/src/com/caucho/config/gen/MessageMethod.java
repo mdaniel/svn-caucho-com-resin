@@ -46,7 +46,7 @@ public class MessageMethod extends BusinessMethodGenerator
 {
   public MessageMethod(MessageView view,
 		       ApiMethod apiMethod,
-		       Method implMethod,
+		       ApiMethod implMethod,
 		       int index)
   {
     super(view, apiMethod, implMethod, index);
@@ -62,7 +62,7 @@ public class MessageMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(Method apiMethod, Method implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     getXa().setTransactionType(TransactionAttributeType.REQUIRED);
 

@@ -24,29 +24,36 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package javax.interceptor;
+package com.caucho.ejb.inject;
 
-import java.lang.reflect.Method;
-import java.util.Map;
+import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ManagedBeanWrapper;
+import com.caucho.config.inject.ScopeAdapterBean;
+import com.caucho.config.program.Arg;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.util.L10N;
+import javax.enterprise.inject.spi.*;
+import javax.enterprise.inject.spi.InjectionTarget;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
+import java.util.Set;
 
-public interface InvocationContext {
-  public Object getTarget();
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 
-  public Object getTimer();
-
-  public Method getMethod();
-
-  public Object[] getParameters()
-    throws IllegalStateException;
-
-  public void setParameters(Object[] parameters)
-    throws IllegalStateException;
-
-  public Map<String, Object> getContextData();
-
-  public Object proceed()
-    throws Exception;
+/**
+ * Internal implementation for a Bean
+ */
+public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
+{
+  private static final L10N L = new L10N(StatelessBeanImpl.class);
+  
+  public StatelessBeanImpl(ManagedBean<X> bean)
+  {
+    super(bean);
+  }
 }

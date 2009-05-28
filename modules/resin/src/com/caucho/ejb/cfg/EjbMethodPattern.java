@@ -330,7 +330,8 @@ public class EjbMethodPattern {
       // XXX: check for type
       
       for (BusinessMethodGenerator bizMethod : view.getMethods()) {
-	Method apiMethod = bizMethod.getApiMethod();
+	Method apiMethod = bizMethod.getApiMethod().getMethod();
+	
 	if (_signature.isMatch(apiMethod.getName(),
 			       apiMethod.getParameterTypes())) {
 	  configureSecurity(bizMethod);

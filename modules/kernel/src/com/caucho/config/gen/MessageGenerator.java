@@ -175,7 +175,7 @@ public class MessageGenerator extends BeanGenerator {
 
     for (BusinessMethodGenerator bizMethod : _view.getMethods()) {
       if (REQUIRED.equals(bizMethod.getXa().getTransactionType())) {
-	Method api = bizMethod.getApiMethod();
+	Method api = bizMethod.getApiMethod().getMethod();
 	
 	out.print("_xaMethods.add(");
 	out.printClass(api.getDeclaringClass());

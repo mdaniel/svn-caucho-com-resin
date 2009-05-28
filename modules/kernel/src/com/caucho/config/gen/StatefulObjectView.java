@@ -106,7 +106,7 @@ abstract public class StatefulObjectView extends StatefulView {
 
       StatefulMethod method = new StatefulRemoveMethod(this,
 						       apiMethod,
-						       implMethod.getMethod(),
+						       implMethod,
 						       index);
 
       method.getXa().setContainerManaged(false);

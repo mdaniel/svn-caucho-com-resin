@@ -41,7 +41,9 @@ import com.caucho.ejb.manager.EjbContainer;
 
 import javax.ejb.*;
 import javax.enterprise.inject.Named;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ManagedBean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -112,7 +114,7 @@ abstract public class SessionServer extends AbstractServer
     ArrayList<Class> remoteApiList = getRemoteApiList();
 
     if (beanClass != null && (localApiList != null || remoteApiList != null)) {
-      InjectManager webBeans = InjectManager.create();
+      InjectManager beanManager = InjectManager.create();
 
       String beanName = getEJBName();
       Named named = (Named) beanClass.getAnnotation(Named.class);
@@ -120,25 +122,36 @@ abstract public class SessionServer extends AbstractServer
       if (named != null)
 	beanName = named.value();
 
-      InjectManager beanManager = InjectManager.create();
-      BeanFactory factory = beanManager.createBeanFactory(getEjbClass());
-      factory.name(beanName);
-	
+      ManagedBean mBean = beanManager.createManagedBean(getEjbClass());
+
+      Class baseApi = beanClass;
+
       if (localApiList != null) {
 	for (Class api : localApiList) {
-	  factory.type(api);
+	  baseApi = api;
 	}
       }
-      
+
+      Bean bean = createBean(mBean, baseApi);
+	  
+      beanManager.addBean(bean);
+
+      /*
       if (remoteApiList != null) {
 	for (Class api : remoteApiList) {
 	  factory.type(api);
 	}
       }
+      */
 
       // XXX: component
-      beanManager.addBean(factory.bean());
+      // beanManager.addBean(factory.bean());
     }
+  }
+
+  protected Bean createBean(ManagedBean mBean, Class api)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   protected void bindInjection()

@@ -51,7 +51,7 @@ public interface EjbCallChain {
   /**
    * Introspects the method for the default values
    */
-  public void introspect(Method apiMethod, Method implMethod);
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod);
 
   /**
    * Generates the static class prologue

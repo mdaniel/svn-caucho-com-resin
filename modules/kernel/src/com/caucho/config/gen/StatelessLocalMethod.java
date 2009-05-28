@@ -51,7 +51,7 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
 			      String beanClassName,
 			      StatelessView view,
 			      ApiMethod apiMethod,
-			      Method implMethod,
+			      ApiMethod implMethod,
 			      int index)
   {
     super(view, apiMethod, implMethod, index);
@@ -64,7 +64,7 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(Method apiMethod, Method implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     getXa().setTransactionType(TransactionAttributeType.REQUIRED);
 
