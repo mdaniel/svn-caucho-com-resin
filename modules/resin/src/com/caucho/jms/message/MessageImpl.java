@@ -60,8 +60,9 @@ public class MessageImpl implements Message, java.io.Serializable
   private long _timestamp;
   private long _expiration;
   
-  private Destination _destination;
-  private Destination _replyTo;
+  //XXX: 
+  private transient Destination _destination;
+  private transient Destination _replyTo;
 
   private int _deliveryMode = DeliveryMode.PERSISTENT;
   private boolean _isRedelivered;

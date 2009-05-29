@@ -30,18 +30,23 @@
 package com.caucho.jms.queue;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.annotation.*;
-import javax.jms.*;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
 
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
-
-import com.caucho.util.*;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * Implements an abstract queue.

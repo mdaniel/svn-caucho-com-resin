@@ -59,7 +59,7 @@ abstract public class AbstractTopic extends AbstractDestination
     setName(name);
   }
 
-  public void init()
+  protected void init()
   {
   }
 

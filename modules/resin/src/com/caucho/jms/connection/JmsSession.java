@@ -863,7 +863,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     MessageImpl message = _messageFactory.copy(appMessage);
 
     long now = Alarm.getExactTime();
-    long expireTime = now + timeout;
+    long expireTime = message.getJMSExpiration();
+    if (message.getJMSExpiration() == 0) {
+      expireTime = now + timeout;
+    }
 
     message.setJMSMessageID(queue.generateMessageID());
     

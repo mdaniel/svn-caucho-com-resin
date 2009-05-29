@@ -57,6 +57,12 @@ public abstract class QueueEntry
     return _readSequence != 0;
   }
   
+  public boolean isExpired()
+  {
+    return _expiresTime > Alarm.getCurrentTime();
+  }
+  
+  
   public long getReadSequence()
   {
     return _readSequence;
