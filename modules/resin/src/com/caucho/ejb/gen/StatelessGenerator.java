@@ -34,6 +34,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.ejb.*;
 
 /**
@@ -42,9 +43,16 @@ import javax.ejb.*;
 public class StatelessGenerator extends SessionGenerator {
   private static final L10N L = new L10N(StatelessGenerator.class);
 
-  public StatelessGenerator(String ejbName, ApiClass ejbClass)
+  public StatelessGenerator(String ejbName,
+			    ApiClass ejbClass,
+			    ApiClass localHome,
+			    ArrayList<ApiClass> localApi,
+			    ApiClass remoteHome,
+			    ArrayList<ApiClass> remoteApi)
   {
-    super(ejbName, ejbClass);
+    super(ejbName, ejbClass,
+	  localHome, localApi,
+	  remoteHome, remoteApi);
   }
 
   public boolean isStateless()
@@ -138,14 +146,14 @@ public class StatelessGenerator extends SessionGenerator {
   protected void generateContext(JavaWriter out)
     throws IOException
   {
-    String shortContextName = getEjbClass().getSimpleName();
+    String shortContextName = getBeanClass().getSimpleName();
 
     int freeStackMax = 16;
 
     out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
 
-    String beanClass = getEjbClass().getName();
+    String beanClass = getBeanClass().getName();
 
     out.println();
     out.println("private " + beanClass + " []_freeBeanStack = new "

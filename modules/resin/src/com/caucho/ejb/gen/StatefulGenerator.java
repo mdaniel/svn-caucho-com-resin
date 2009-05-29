@@ -43,9 +43,15 @@ import java.util.ArrayList;
 public class StatefulGenerator extends SessionGenerator {
   private static final L10N L = new L10N(StatefulGenerator.class);
 
-  public StatefulGenerator(String ejbName, ApiClass ejbClass)
+  public StatefulGenerator(String ejbName, ApiClass ejbClass,
+			   ApiClass localHome,
+			   ArrayList<ApiClass> localApi,
+			   ApiClass remoteHome,
+			   ArrayList<ApiClass> remoteApi)
   {
-    super(ejbName, ejbClass);
+    super(ejbName, ejbClass,
+	  localHome, localApi,
+	  remoteHome, remoteApi);
   }
 
   public boolean isStateless()
@@ -85,7 +91,7 @@ public class StatefulGenerator extends SessionGenerator {
   {
     ArrayList<ApiClass> apiClass = new ArrayList<ApiClass>();
 
-    apiClass.add(getEjbClass());
+    apiClass.add(getBeanClass());
 
     return apiClass;
   }

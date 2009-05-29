@@ -346,9 +346,11 @@ public class EjbMethodPattern {
     if (_transactionType == null)
       return;
 
-    XaCallChain xa = bizMethod.getXa();
+    // XXX: need to modify ...
+    
+    // XaCallChain xa = bizMethod.getXa();
 
-    xa.setTransactionType(_transactionType);
+    // xa.setTransactionType(_transactionType);
   }
 
   private void configureSecurity(BusinessMethodGenerator bizMethod)
@@ -358,7 +360,7 @@ public class EjbMethodPattern {
 
     SecurityCallChain security = bizMethod.getSecurity();
 
-    security.setRoles(_roles);
+    // security.setRoles(_roles);
   }
 
   /**

@@ -411,7 +411,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       // introspectObservers(getTargetClass());
 
-      PojoBean bean = new PojoBean(getBaseType().getRawClass());
+      PojoBean bean = new PojoBean(new ApiClass(_beanType));
+      /*
       //bean.setSingleton(isSingleton());
       bean.setBindings(getBindings());
 
@@ -420,6 +421,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       for (AnnotatedMethod method : _beanType.getMethods()) {
 	bean.setMethodAnnotations(method.getJavaMember(), method);
       }
+      */
       
       bean.introspect();
 

@@ -62,6 +62,7 @@ public class MessageMethod extends BusinessMethodGenerator
   /**
    * Session bean default is REQUIRED
    */
+  /*
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
@@ -69,6 +70,7 @@ public class MessageMethod extends BusinessMethodGenerator
 
     super.introspect(apiMethod, implMethod);
   }
+  */
 
   /**
    * Returns true if any interceptors enhance the business method

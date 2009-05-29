@@ -39,6 +39,7 @@ import com.caucho.jca.*;
 import com.caucho.util.L10N;
 
 import javax.ejb.MessageDrivenContext;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.jms.*;
 import javax.naming.*;
 import javax.resource.spi.*;
@@ -66,9 +67,9 @@ public class MessageServer extends AbstractServer
 
   private Method _ejbCreate;
 
-  public MessageServer(EjbContainer ejbContainer)
+  public MessageServer(EjbContainer ejbContainer, AnnotatedType annotatedType)
   {
-    super(ejbContainer);
+    super(ejbContainer, annotatedType);
 
     InjectManager webBeans = InjectManager.create();
     UserTransaction ut = webBeans.getObject(UserTransaction.class);

@@ -53,7 +53,7 @@ public class StatefulRemoteHomeView extends StatefulHomeView {
   @Override
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBRemoteHome";
+    return getViewClass().getSimpleName() + "__EJBRemoteHome";
   }
 
   @Override
@@ -72,7 +72,7 @@ public class StatefulRemoteHomeView extends StatefulHomeView {
     out.println();
     out.println("private " + getViewClassName() + " _remoteHome;");
 
-    if (EJBHome.class.isAssignableFrom(getApi().getJavaClass())) {
+    if (EJBHome.class.isAssignableFrom(getViewClass().getJavaClass())) {
       out.println();
       out.println("@Override");
       out.println("public EJBHome getEJBHome()");
@@ -109,7 +109,7 @@ public class StatefulRemoteHomeView extends StatefulHomeView {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return _remoteHome;");
   }
 }

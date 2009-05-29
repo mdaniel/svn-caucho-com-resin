@@ -52,6 +52,6 @@ public class StatelessRemoteView extends StatelessLocalView {
 
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBRemote";
+    return getViewClass().getSimpleName() + "__EJBRemote";
   }
 }

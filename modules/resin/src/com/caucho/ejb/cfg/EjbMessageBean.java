@@ -640,7 +640,7 @@ public class EjbMessageBean extends EjbBean {
 	throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
 
     
-      server = new MessageServer(ejbManager);
+      server = new MessageServer(ejbManager, getAnnotatedType());
 
       server.setConfigLocation(getFilename(), getLine());
 

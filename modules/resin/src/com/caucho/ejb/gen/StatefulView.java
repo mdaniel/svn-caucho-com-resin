@@ -71,7 +71,7 @@ abstract public class StatefulView extends View {
 
   public String getBeanClassName()
   {
-    return getApi().getSimpleName() + "__Bean";
+    return getViewClass().getSimpleName() + "__Bean";
   }
 
   /**
@@ -89,8 +89,8 @@ abstract public class StatefulView extends View {
   @Override
   public void introspect()
   {
-    ApiClass implClass = getEjbClass();
-    ApiClass apiClass = getApi();
+    ApiClass implClass = getBeanClass();
+    ApiClass apiClass = getViewClass();
     
     for (ApiMethod apiMethod : apiClass.getMethods()) {
       if (apiMethod.getDeclaringClass().equals(Object.class))
@@ -125,7 +125,7 @@ abstract public class StatefulView extends View {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return new " + getViewClassName() + "(getStatefulServer());");
   }
 
@@ -141,8 +141,8 @@ abstract public class StatefulView extends View {
     out.println("public static class " + getViewClassName());
 
     // generateExtends(out);
-    // out.print("  implements " + getApi().getDeclarationName());
-    out.println("  extends " + getEjbClass().getName());
+    // out.print("  implements " + getViewClass().getDeclarationName());
+    out.println("  extends " + getBeanClass().getName());
     out.println("  implements StatefulProvider");
     out.println("{");
     out.pushDepth();
@@ -275,14 +275,14 @@ abstract public class StatefulView extends View {
 
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
-    ApiMethod implMethod = getEjbClass().getMethod(apiMethod);
+    ApiMethod implMethod = getBeanClass().getMethod(apiMethod);
 
     if (implMethod != null)
       return implMethod;
   
     throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
 				  apiMethod.getMethod().getDeclaringClass().getSimpleName(),
-				  getFullMethodName(apiMethod),
-				  getEjbClass().getName()));
+				  apiMethod.getFullName(),
+				  getBeanClass().getName()));
   }
 }

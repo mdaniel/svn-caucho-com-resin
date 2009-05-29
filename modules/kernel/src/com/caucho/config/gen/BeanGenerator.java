@@ -55,67 +55,40 @@ abstract public class BeanGenerator extends GenClass
 {
   private static final L10N L = new L10N(BeanGenerator.class);
 
-  protected final ApiClass _ejbClass;
+  protected final ApiClass _beanClass;
 
   protected DependencyComponent _dependency = new DependencyComponent();
   
-  private Method _aroundInvokeMethod;
+  private ApiMethod _aroundInvokeMethod;
 
+  /*
   private ArrayList<Class> _defaultInterceptors
     = new ArrayList<Class>();
+  */
 
-  private Set<Annotation> _bindings;
-
+  private Set<Annotation> _decoratorBindings;
   private Set<Annotation> _interceptorBindings;
 
   private ArrayList<Type> _decorators
     = new ArrayList<Type>();
 
+  /*
   private HashMap<Method,AnnotatedMethod> _methodAnnotations
     = new HashMap<Method,AnnotatedMethod>();
+  */
 
-  protected BeanGenerator(String fullClassName, ApiClass ejbClass)
+  protected BeanGenerator(String fullClassName, ApiClass beanClass)
   {
     super(fullClassName);
     
-    _ejbClass = ejbClass;
+    _beanClass = beanClass;
 
-    addDependency(ejbClass.getJavaClass());
-  }
-
-  public ApiClass getEjbClass()
-  {
-    return _ejbClass;
-  }
-  
-  /**
-   * Sets the remote name
-   */
-  public void setRemoteHome(ApiClass homeClass)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
- 
-  /**
-   * Sets the local name
-   */
-  public void setLocalHome(ApiClass homeClass)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    addDependency(beanClass.getJavaClass());
   }
 
-  /**
-   * Adds a remote
-   */
-  public void addRemote(ApiClass remoteApi)
+  public ApiClass getBeanClass()
   {
-  }
-
-  /**
-   * Adds a local
-   */
-  public void addLocal(ApiClass localApi)
-  {
+    return _beanClass;
   }
 
   protected void addDependency(PersistentDependency depend)
@@ -131,19 +104,10 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Gets the bindings for the decorators
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getDecoratorBindings()
   {
-    return _bindings;
+    return _decoratorBindings;
   }
-
-  /**
-   * Sets the bindings for the decorators
-   */
-  public void setBindings(Set<Annotation> annotation)
-  {
-    _bindings = annotation;
-  }
-
 
   /**
    * Gets the bindings for the interceptors
@@ -154,48 +118,40 @@ abstract public class BeanGenerator extends GenClass
   }
 
   /**
-   * Sets the bindings for the interceptors
-   */
-  public void setInterceptorBindings(Set<Annotation> annotation)
-  {
-    _interceptorBindings = annotation;
-  }
-
-  /**
    * Adds the method annotations
    */
+  /*
   public void setMethodAnnotations(Method method, AnnotatedMethod annMethod)
   {
     _methodAnnotations.put(method, annMethod);
   }
+  */
 
   /**
    * Adds the method annotations
    */
+  /*
   public AnnotatedMethod getMethodAnnotations(Method method)
   {
     return _methodAnnotations.get(method);
   }
+  */
 
   /**
    * Introspects the bean.
    */
   public void introspect()
   {
-    _aroundInvokeMethod = findAroundInvokeMethod(_ejbClass.getJavaClass());
+    _aroundInvokeMethod = findAroundInvokeMethod(_beanClass);
 
-    introspectDecorators(_ejbClass.getJavaClass());
-  }
-
-  public boolean isAnnotationPresent(Class cl)
-  {
-    return _ejbClass.getJavaClass().isAnnotationPresent(cl);
+    // introspectClass(_beanClass);
+    introspectDecorators(_beanClass);
   }
   
   /**
    * Finds the matching decorators for the class
    */
-  protected void introspectDecorators(Class cl)
+  protected void introspectDecorators(ApiClass cl)
   {
     if (cl.isAnnotationPresent(javax.decorator.Decorator.class))
       return;
@@ -203,18 +159,18 @@ abstract public class BeanGenerator extends GenClass
     InjectManager webBeans = InjectManager.create();
 
     HashSet<Type> types = new HashSet<Type>();
-    for (Class iface : cl.getInterfaces()) {
-      fillTypes(types, iface);
+    for (ApiClass iface : cl.getInterfaces()) {
+      fillTypes(types, iface.getJavaClass());
     }
 
-    if (_bindings == null)
+    if (_decoratorBindings == null)
       return;
 
-    Annotation []bindings = new Annotation[_bindings.size()];
-    _bindings.toArray(bindings);
+    Annotation []decoratorBindings = new Annotation[_decoratorBindings.size()];
+    _decoratorBindings.toArray(decoratorBindings);
 
     List<Decorator<?>> decorators
-      = webBeans.resolveDecorators(types, bindings);
+      = webBeans.resolveDecorators(types, decoratorBindings);
     
     for (Decorator decorator : decorators) {
       // XXX:
@@ -258,12 +214,12 @@ abstract public class BeanGenerator extends GenClass
     return _decorators;
   }
 
-  private static Method findAroundInvokeMethod(Class cl)
+  private static ApiMethod findAroundInvokeMethod(ApiClass cl)
   {
     if (cl == null)
       return null;
 
-    for (Method method : cl.getDeclaredMethods()) {
+    for (ApiMethod method : cl.getMethods()) {
       if (method.isAnnotationPresent(AroundInvoke.class)
 	  && method.getParameterTypes().length == 1
 	  && method.getParameterTypes()[0].equals(InvocationContext.class)) {
@@ -271,41 +227,26 @@ abstract public class BeanGenerator extends GenClass
       }
     }
 
-    return findAroundInvokeMethod(cl.getSuperclass());
+    return null;
   }
 
   /**
    * Returns the around-invoke method
    */
-  public Method getAroundInvokeMethod()
+  public ApiMethod getAroundInvokeMethod()
   {
     return _aroundInvokeMethod;
   }
 
   /**
-   * Sets the around-invoke method
-   */
-  public void setAroundInvokeMethod(Method method)
-  {
-    _aroundInvokeMethod = method;
-  }
-
-  /**
-   * Adds a default interceptor
-   */
-  public void addInterceptor(Class cl)
-  {
-    if (_defaultInterceptors.indexOf(cl) < 0)
-      _defaultInterceptors.add(cl);
-  }
-
-  /**
    * Gets the default interceptor
    */
+  /*
   public ArrayList<Class> getDefaultInterceptors()
   {
     return _defaultInterceptors;
   }
+  */
 
   /**
    * Returns the views.
@@ -359,7 +300,7 @@ abstract public class BeanGenerator extends GenClass
    */
   public boolean hasMethod(String methodName, Class []paramTypes)
   {
-    return _ejbClass.hasMethod(methodName, paramTypes);
+    return _beanClass.hasMethod(methodName, paramTypes);
   }
 
   private String generateTypeCasting(String value, Class cl, boolean isEscapeString)
@@ -387,6 +328,6 @@ abstract public class BeanGenerator extends GenClass
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _ejbClass.getJavaClass().getSimpleName() + "]";
+    return getClass().getSimpleName() + "[" + _beanClass.getSimpleName() + "]";
   }
 }

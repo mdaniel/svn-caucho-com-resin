@@ -129,7 +129,7 @@ public class MessageGenerator extends BeanGenerator {
     
     out.println();
     out.println("public class " + getClassName()
-		+ " extends " + getEjbClass().getName()
+		+ " extends " + getBeanClass().getName()
 		+ " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
@@ -159,7 +159,7 @@ public class MessageGenerator extends BeanGenerator {
 
     out.println("_server = server;");
 
-    if (MessageDrivenBean.class.isAssignableFrom(getEjbClass().getJavaClass())) {
+    if (MessageDrivenBean.class.isAssignableFrom(getBeanClass().getJavaClass())) {
       out.println("setMessageDrivenContext(server.getMessageContext());");
     }
 
@@ -228,7 +228,7 @@ public class MessageGenerator extends BeanGenerator {
     out.println("{");
     out.pushDepth();
 
-    if (getEjbClass().hasMethod("ejbRemove", new Class[0])) {
+    if (getBeanClass().hasMethod("ejbRemove", new Class[0])) {
       out.println("ejbRemove();");
     }
     

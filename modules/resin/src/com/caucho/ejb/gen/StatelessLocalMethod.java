@@ -67,7 +67,7 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    getXa().setTransactionType(TransactionAttributeType.REQUIRED);
+    // getXa().setTransactionType(TransactionAttributeType.REQUIRED);
 
     super.introspect(apiMethod, implMethod);
   }

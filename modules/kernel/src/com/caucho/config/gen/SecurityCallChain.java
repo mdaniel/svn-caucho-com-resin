@@ -78,12 +78,14 @@ public class SecurityCallChain extends AbstractCallChain {
   /**
    * Sets the transaction type
    */
+  /*
   public void setRoles(ArrayList<String> roles)
   {
     _roles = new String[roles.size()];
 
     roles.toArray(_roles);
   }
+  */
 
   /**
    * Introspect EJB security annotations:
@@ -92,27 +94,27 @@ public class SecurityCallChain extends AbstractCallChain {
    *   @PermitAll
    *   @DenyAll
    */
-  public void introspect(Method apiMethod, Method implMethod)
+  @Override
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    Class cl = apiMethod.getDeclaringClass();
+    ApiClass cl = apiMethod.getDeclaringClass();
     
-    RunAs runAs = (RunAs) cl.getAnnotation(RunAs.class);
+    RunAs runAs = cl.getAnnotation(RunAs.class);
 
     if (runAs != null)
       _runAs = runAs.value();
     
-    RolesAllowed rolesAllowed
-      = (RolesAllowed) cl.getAnnotation(RolesAllowed.class);
+    RolesAllowed rolesAllowed = cl.getAnnotation(RolesAllowed.class);
     
     if (rolesAllowed != null)
       _roles = rolesAllowed.value();
     
-    PermitAll permitAll = (PermitAll) cl.getAnnotation(PermitAll.class);
+    PermitAll permitAll = cl.getAnnotation(PermitAll.class);
 
     if (permitAll != null)
       _roles = null;
     
-    DenyAll denyAll = (DenyAll) cl.getAnnotation(DenyAll.class);
+    DenyAll denyAll = cl.getAnnotation(DenyAll.class);
 
     if (denyAll != null)
       _roles = new String[0];
@@ -124,12 +126,12 @@ public class SecurityCallChain extends AbstractCallChain {
     if (rolesAllowed != null)
       _roles = rolesAllowed.value();
     
-    permitAll = (PermitAll) apiMethod.getAnnotation(PermitAll.class);
+    permitAll = apiMethod.getAnnotation(PermitAll.class);
 
     if (permitAll != null)
       _roles = null;
     
-    denyAll = (DenyAll) apiMethod.getAnnotation(DenyAll.class);
+    denyAll = apiMethod.getAnnotation(DenyAll.class);
 
     if (denyAll != null)
       _roles = new String[0];

@@ -58,6 +58,7 @@ public class MessageXaCallChain extends XaCallChain
   /**
    * Sets the transaction type
    */
+  /*
   public void setTransactionType(TransactionAttributeType xa)
   {
     if (xa == null
@@ -70,6 +71,7 @@ public class MessageXaCallChain extends XaCallChain
 				L.l("'{0}' is not an allowed transaction type for message beans",
 				    xa));
   }
+  */
 
   @Override
   protected void generateNext(JavaWriter out)

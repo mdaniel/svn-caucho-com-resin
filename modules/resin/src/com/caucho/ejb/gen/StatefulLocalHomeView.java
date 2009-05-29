@@ -52,7 +52,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
 
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBLocalHome";
+    return getViewClass().getSimpleName() + "__EJBLocalHome";
   }
 
   /**
@@ -64,7 +64,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
     out.println();
     out.println("private " + getViewClassName() + " _localHome;");
 
-    if (EJBLocalHome.class.isAssignableFrom(getApi().getJavaClass())) {
+    if (EJBLocalHome.class.isAssignableFrom(getViewClass().getJavaClass())) {
       out.println();
       out.println("@Override");
       out.println("public EJBLocalHome getEJBLocalHome()");
@@ -92,7 +92,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return _localHome;");
   }
 
@@ -111,7 +111,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
     createMethod(ApiMethod apiMethod, int index)
   {
     if (apiMethod.getName().equals("create")) {
-      ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",
+      ApiMethod implMethod = getBeanClass().getMethod("ejbCreate",
 						     apiMethod.getParameterTypes());
 
       if (implMethod == null)
@@ -140,7 +140,7 @@ public class StatefulLocalHomeView extends StatefulHomeView {
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
     if (apiMethod.getName().equals("create")) {
-      return getEjbClass().getMethod("ejbCreate", apiMethod.getParameterTypes());
+      return getBeanClass().getMethod("ejbCreate", apiMethod.getParameterTypes());
     }
     else
       return super.findImplMethod(apiMethod);

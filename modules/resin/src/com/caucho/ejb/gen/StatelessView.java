@@ -69,12 +69,12 @@ public class StatelessView extends View {
 
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBLocal";
+    return getViewClass().getSimpleName() + "__EJBLocal";
   }
 
   public String getBeanClassName()
   {
-    return getApi().getSimpleName() + "__Bean";
+    return getViewClass().getSimpleName() + "__Bean";
   }
 
   /**
@@ -91,8 +91,8 @@ public class StatelessView extends View {
    */
   public void introspect()
   {
-    ApiClass implClass = getEjbClass();
-    ApiClass apiClass = getApi();
+    ApiClass implClass = getBeanClass();
+    ApiClass apiClass = getViewClass();
     
     for (ApiMethod apiMethod : apiClass.getMethods()) {
       if (apiMethod.getDeclaringClass().equals(Object.class))
@@ -131,7 +131,7 @@ public class StatelessView extends View {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return new " + getViewClassName() + "(this);");
   }
 
@@ -149,12 +149,12 @@ public class StatelessView extends View {
     if (implMethod == null) {
       throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
 				    apiMethod.getMethod().getDeclaringClass().getSimpleName(),
-				    getFullMethodName(apiMethod),
-				    getEjbClass().getName()));
+				    apiMethod.getFullName(),
+				    getBeanClass().getName()));
     }
 
     StatelessLocalMethod bizMethod
-      = new StatelessLocalMethod(getEjbClass(),
+      = new StatelessLocalMethod(getBeanClass(),
 				 getBeanClassName(),
 				 this,
 				 apiMethod,
@@ -180,6 +180,6 @@ public class StatelessView extends View {
 
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
-    return getEjbClass().getMethod(apiMethod);
+    return getBeanClass().getMethod(apiMethod);
   }
 }

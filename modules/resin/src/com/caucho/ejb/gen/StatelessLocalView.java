@@ -53,6 +53,6 @@ public class StatelessLocalView extends StatelessObjectView {
   @Override
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBLocal";
+    return getViewClass().getSimpleName() + "__EJBLocal";
   }
 }

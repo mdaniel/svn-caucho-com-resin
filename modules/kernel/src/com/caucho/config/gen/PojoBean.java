@@ -64,18 +64,18 @@ public class PojoBean extends BeanGenerator {
   private boolean _isReadResolveEnhanced;
   private boolean _isSingleton;
   
-  public PojoBean(Class beanClass)
+  public PojoBean(ApiClass beanClass)
   {
-    super(beanClass.getName() + "$ResinWebBean", new ApiClass(beanClass));
+    super(beanClass.getName() + "$ResinWebBean", beanClass);
 
     setSuperClassName(beanClass.getName());
     addInterfaceName("java.io.Serializable");
     
     addImport("javax.transaction.*");
     
-    _view = new PojoView(this, getEjbClass());
+    _view = new PojoView(this, getBeanClass());
     
-    _beanClass = new ApiClass(beanClass);
+    _beanClass = beanClass;
   }
 
   public void setSingleton(boolean isSingleton)
@@ -87,7 +87,7 @@ public class PojoBean extends BeanGenerator {
   {
     super.introspect();
     
-    introspectClass(_beanClass.getJavaClass());
+    introspectClass(_beanClass);
     
     for (ApiMethod method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
@@ -112,17 +112,15 @@ public class PojoBean extends BeanGenerator {
 	continue;
       
       if (! method.isPublic() && ! method.isProtected())
-	throw new ConfigException(L.l("{0}: Resin-IoC/WebBeans annotations are not allowed on private methods.", bizMethod));
+	throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on private methods.", bizMethod));
       if (method.isStatic())
-	throw new ConfigException(L.l("{0}: Resin-Ioc/WebBeans annotations are not allowed on static methods.", bizMethod));
+	throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on static methods.", bizMethod));
       if (method.isFinal())
-	throw new ConfigException(L.l("{0}: Resin-Ioc/WebBeans annotations are not allowed on final methods.", bizMethod));
+	throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on final methods.", bizMethod));
 
-      if (bizMethod.isEnhanced()) {
-	_isEnhanced = true;
+      _isEnhanced = true;
 
-	_businessMethods.add(bizMethod);
-      }
+      _businessMethods.add(bizMethod);
     }
     
     if (Serializable.class.isAssignableFrom(_beanClass.getJavaClass())
@@ -136,10 +134,10 @@ public class PojoBean extends BeanGenerator {
       _isEnhanced = true;
   }
 
-  protected void introspectClass(Class cl)
+  protected void introspectClass(ApiClass cl)
   {
-    if (isAnnotationPresent(Interceptor.class)
-	|| isAnnotationPresent(Decorator.class)) {
+    if (cl.isAnnotationPresent(Interceptor.class)
+	|| cl.isAnnotationPresent(Decorator.class)) {
       return;
     }
     
@@ -173,9 +171,11 @@ public class PojoBean extends BeanGenerator {
       }
     }
 
+    /*
     if (interceptorBindingList.size() > 0) {
       _view.setInterceptorBindings(interceptorBindingList);
     }
+    */
   }
 
   private boolean hasTransientInject(Class cl)

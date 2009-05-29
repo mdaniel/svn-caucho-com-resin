@@ -74,7 +74,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    getXa().setTransactionType(getDefaultTransactionType());
+    // getXa().setTransactionType(getDefaultTransactionType());
 
     super.introspect(apiMethod, implMethod);
 
@@ -106,12 +106,12 @@ public class StatefulMethod extends BusinessMethodGenerator
 	&& hasException(java.rmi.NoSuchObjectException.class)) {
       out.println("if (! _isValid)");
       out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
-		  + getEjbClass().getSimpleName() + " is no longer valid\");");
+		  + getBeanClass().getSimpleName() + " is no longer valid\");");
     }
     else {
       out.println("if (! _isValid)");
       out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
-		  + getEjbClass().getSimpleName() + " is no longer valid\");");
+		  + getBeanClass().getSimpleName() + " is no longer valid\");");
     }
 
     if (_isRemove) {

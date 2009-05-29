@@ -79,6 +79,16 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
+  public ApiClass(AnnotatedType annotatedType)
+  {
+    this(annotatedType.getJavaClass(), annotatedType, null);
+  }
+  
+  /**
+   * Creates a new api class
+   *
+   * @param topClass the api class
+   */
   public ApiClass(Class apiClass,
 		  AnnotatedType annotatedType,
 		  HashMap<String,Type> parentTypeMap)
@@ -314,6 +324,20 @@ public class ApiClass {
     else
       return (A) _apiClass.getAnnotation(annType);
   }
+  
+  public Set<Annotation> getAnnotations()
+  {
+    if (_annotatedType != null)
+      return _annotatedType.getAnnotations();
+    else {
+      LinkedHashSet<Annotation> set = new LinkedHashSet<Annotation>();
+
+      for (Annotation ann : _apiClass.getAnnotations())
+	set.add(ann);
+
+      return set;
+    }
+  }
 
   private void introspectClass(Class cl, HashMap<String,Type> typeMap)
   {
@@ -387,6 +411,6 @@ public class ApiClass {
 
   public String toString()
   {
-    return "ApiClass[" + _apiClass.getName() + "]";
+    return getClass().getSimpleName() + "[" + _apiClass.getName() + "]";
   }
 }

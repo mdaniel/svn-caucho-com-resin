@@ -52,6 +52,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.naming.Context;
@@ -81,6 +82,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _filename;
   protected int _line;
   protected String _location;
+
+  private AnnotatedType _annotatedType;
   
   protected String _id;
   protected String _ejbName;
@@ -154,8 +157,10 @@ abstract public class AbstractServer implements EnvironmentBean {
    *
    * @param manager the owning server container
    */
-  public AbstractServer(EjbContainer container)
+  public AbstractServer(EjbContainer container,
+			AnnotatedType annotatedType)
   {
+    _annotatedType = annotatedType;
     _ejbContainer = container;
 
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
@@ -291,6 +296,11 @@ abstract public class AbstractServer implements EnvironmentBean {
     return url;
   }
 
+  public AnnotatedType getAnnotatedType()
+  {
+    return _annotatedType;
+  }
+  
   /**
    * Sets the ejb class
    */

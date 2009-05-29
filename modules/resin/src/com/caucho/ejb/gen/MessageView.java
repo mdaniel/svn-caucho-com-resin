@@ -86,8 +86,8 @@ public class MessageView extends View {
   @Override
   public void introspect()
   {
-    ApiClass implClass = getEjbClass();
-    ApiClass apiClass = getApi();
+    ApiClass implClass = getBeanClass();
+    ApiClass apiClass = getViewClass();
 
     for (ApiMethod apiMethod : apiClass.getMethods()) {
       if (apiMethod.getDeclaringClass().equals(Object.class))
@@ -148,13 +148,13 @@ public class MessageView extends View {
   
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
-    ApiMethod implMethod = getEjbClass().getMethod(apiMethod);
+    ApiMethod implMethod = getBeanClass().getMethod(apiMethod);
 
     if (implMethod != null)
       return implMethod;
   
     throw ConfigException.create(apiMethod.getMethod(),
 				 L.l("api method has no corresponding implementation in '{0}'",
-				     getEjbClass().getName()));
+				     getBeanClass().getName()));
   }
 }

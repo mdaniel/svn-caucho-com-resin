@@ -53,7 +53,7 @@ public class StatelessRemoteHomeView extends StatelessHomeView {
   @Override
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBRemoteHome";
+    return getViewClass().getSimpleName() + "__EJBRemoteHome";
   }
 
   @Override
@@ -107,7 +107,7 @@ public class StatelessRemoteHomeView extends StatelessHomeView {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return _remoteHome;");
   }
 }

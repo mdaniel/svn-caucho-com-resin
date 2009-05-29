@@ -34,7 +34,9 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import javax.decorator.Decorator;
+import javax.enterprise.inject.Stereotype;
 import javax.interceptor.Interceptor;
+import javax.interceptor.InterceptorBindingType;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -47,16 +49,16 @@ abstract public class View {
   private static final L10N L = new L10N(View.class);
 
   protected final BeanGenerator _bean;
-  protected final ApiClass _api;
+  protected final ApiClass _viewClass;
 
   protected ArrayList<Annotation> _interceptorBindings;
 
-  protected View(BeanGenerator bean, ApiClass api)
+  protected View(BeanGenerator bean, ApiClass viewClass)
   {
     _bean = bean;
-    _api = api;
+    _viewClass = viewClass;
 
-    _bean.addDependency(api.getJavaClass());
+    _bean.addDependency(viewClass.getJavaClass());
   }
 
   /**
@@ -70,14 +72,9 @@ abstract public class View {
   /**
    * Returns the bean's ejbclass
    */
-  protected ApiClass getEjbClass()
+  protected ApiClass getBeanClass()
   {
-    return _bean.getEjbClass();
-  }
-
-  public String getViewClassName()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _bean.getBeanClass();
   }
 
   public String getBeanClassName()
@@ -85,17 +82,22 @@ abstract public class View {
     return getViewClassName();
   }
 
-  public boolean isRemote()
-  {
-    return false;
-  }
-
   /**
    * Returns the API class.
    */
-  public ApiClass getApi()
+  public ApiClass getViewClass()
   {
-    return _api;
+    return _viewClass;
+  }
+
+  public String getViewClassName()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public boolean isRemote()
+  {
+    return false;
   }
 
   /**
@@ -107,24 +109,51 @@ abstract public class View {
   }
 
   /**
-   * Sets any interceptor bindings
-   */
-  public void setInterceptorBindings(ArrayList<Annotation> bindings)
-  {
-    if (_bean.isAnnotationPresent(Interceptor.class)
-	|| _bean.isAnnotationPresent(Decorator.class)) {
-      throw new IllegalStateException(L.l("{0}: invalid because introspectors and decorators may not have interceptors",
-					  this));
-    }
-    
-    _interceptorBindings = bindings;
-  }
-
-  /**
    * Introspects the view
    */
   public void introspect()
   {
+    introspectClass(getViewClass());
+  }
+
+  protected void introspectClass(ApiClass cl)
+  {
+    if (cl.isAnnotationPresent(Interceptor.class)
+	|| cl.isAnnotationPresent(Decorator.class)) {
+      return;
+    }
+    
+    ArrayList<Annotation> interceptorBindingList
+      = new ArrayList<Annotation>();
+
+    ArrayList<Annotation> xmlInterceptorBindings = getInterceptorBindings();
+
+    if (xmlInterceptorBindings != null) {
+      for (Annotation ann : xmlInterceptorBindings) {
+	interceptorBindingList.add(ann);
+      }
+    }
+    else {
+      for (Annotation ann : cl.getAnnotations()) {
+	Class annType = ann.annotationType();
+      
+	if (annType.isAnnotationPresent(Stereotype.class)) {
+	  for (Annotation sAnn : ann.annotationType().getAnnotations()) {
+	    Class sAnnType = sAnn.annotationType();
+	  
+	    if (sAnnType.isAnnotationPresent(InterceptorBindingType.class)) {
+	      interceptorBindingList.add(sAnn);
+	    }
+	  }
+	}
+	  
+	if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+	  interceptorBindingList.add(ann);
+	}
+      }
+    }
+
+    _interceptorBindings = interceptorBindingList;
   }
 
   /**
@@ -138,7 +167,7 @@ abstract public class View {
   /**
    * Returns any around-invoke method
    */
-  public Method getAroundInvokeMethod()
+  public ApiMethod getAroundInvokeMethod()
   {
     return getBean().getAroundInvokeMethod();
   }
@@ -261,41 +290,8 @@ abstract public class View {
     }
   }
 
-  /**
-   * Returns a full method name with arguments.
-   */
-  public static String getFullMethodName(ApiMethod method)
-  {
-    return getFullMethodName(method.getName(), method.getParameterTypes());
-  }
-
-  /**
-   * Returns a full method name with arguments.
-   */
-  public static String getFullMethodName(Method method)
-  {
-    return getFullMethodName(method.getName(), method.getParameterTypes());
-  }
-
-  /**
-   * Returns a full method name with arguments.
-   */
-  public static String getFullMethodName(String methodName, Class []params)
-  {
-    String name = methodName + "(";
-
-    for (int i = 0; i < params.length; i++) {
-      if (i != 0)
-        name += ", ";
-
-      name += params[i].getSimpleName();
-    }
-
-    return name + ")";
-  }
-
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getEjbClass() + "]";
+    return getClass().getSimpleName() + "[" + getBeanClass() + "]";
   }
 }

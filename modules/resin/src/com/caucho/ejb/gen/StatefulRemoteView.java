@@ -52,7 +52,7 @@ public class StatefulRemoteView extends StatefulObjectView {
 
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBRemote";
+    return getViewClass().getSimpleName() + "__EJBRemote";
   }
 
   public boolean isRemote()
@@ -65,9 +65,9 @@ public class StatefulRemoteView extends StatefulObjectView {
     throws IOException
   {
     /*
-    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
+    if (EJBLocalObject.class.isAssignableFrom(getViewClass().getJavaClass()))
       out.println("  extends StatefulObject21");
-    else if (EJBObject.class.isAssignableFrom(getApi().getJavaClass()))
+    else if (EJBObject.class.isAssignableFrom(getViewClass().getJavaClass()))
       out.println("  extends StatefulObject21");
     else
       out.println("  extends StatefulObject");
@@ -84,7 +84,7 @@ public class StatefulRemoteView extends StatefulObjectView {
     out.println();
     out.println("private " + getViewClassName() + " _remoteObject;");
 
-    if (EJBObject.class.isAssignableFrom(getApi().getJavaClass())) {
+    if (EJBObject.class.isAssignableFrom(getViewClass().getJavaClass())) {
       out.println();
       out.println("@Override");
       out.println("public EJBObject getEJBObject()");

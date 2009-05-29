@@ -72,7 +72,7 @@ public class InterceptorCallChain
 
   private String _uniqueName;
   private String _chainName;
-  private Method _implMethod;
+  private ApiMethod _implMethod;
 
   private ArrayList<Interceptor> _defaultInterceptors
     = new ArrayList<Interceptor>();
@@ -127,14 +127,16 @@ public class InterceptorCallChain
    */
   public boolean isEnhanced()
   {
-    if (_view.getBean().isAnnotationPresent(Interceptor.class)
-        || _view.getBean().isAnnotationPresent(Decorator.class)) {
+    if (_view.getBeanClass().isAnnotationPresent(Interceptor.class)
+        || _view.getBeanClass().isAnnotationPresent(Decorator.class)) {
       return false;
     }
     else {
       return (_defaultInterceptors.size() > 0
+	      /*
               || (! _isExcludeDefaultInterceptors
                   && _view.getBean().getDefaultInterceptors().size() > 0)
+	      */
               || _classInterceptors.size() > 0
               || _interceptorBinding.size() > 0
               || _interceptors.size() > 0
@@ -149,7 +151,7 @@ public class InterceptorCallChain
     return _interceptors;
   }
 
-  public Method getAroundInvokeMethod()
+  public ApiMethod getAroundInvokeMethod()
   {
     return _view.getAroundInvokeMethod();
   }
@@ -157,43 +159,43 @@ public class InterceptorCallChain
   /**
    * Introspects the @Interceptors annotation on the method and the class.
    */
-  public void introspect(Method apiMethod, Method implMethod)
+  @Override
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-
     if (implMethod == null)
       return;
 
-    Class apiClass = apiMethod.getDeclaringClass();
+    if (! isValidMethod())
+      return;
 
-    Class implClass = implMethod.getDeclaringClass();
+    ApiClass apiClass = apiMethod.getDeclaringClass();
+
+    ApiClass implClass = implMethod.getDeclaringClass();
 
     _implMethod = implMethod;
 
     // interceptors aren't intercepted
-    if (_view.getBean().isAnnotationPresent(Interceptor.class)
-        || _view.getBean().isAnnotationPresent(Decorator.class)) {
+    if (_view.getBeanClass().isAnnotationPresent(Interceptor.class)
+        || _view.getBeanClass().isAnnotationPresent(Decorator.class)) {
       return;
     }
 
-    AnnotatedMethod apiAnn = getMethodAnnotations(apiMethod);
-    AnnotatedMethod implAnn = getMethodAnnotations(implMethod);
-
-    if (apiAnn.isAnnotationPresent(ExcludeClassInterceptors.class))
+    if (apiMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
 
-    if (implAnn.isAnnotationPresent(ExcludeClassInterceptors.class))
+    if (implMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
 
-    if (apiAnn.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+    if (apiMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
       _isExcludeDefaultInterceptors = true;
 
-    if (implAnn.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+    if (implMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
       _isExcludeDefaultInterceptors = true;
 
     Interceptors iAnn;
 
     if (! _isExcludeClassInterceptors) {
-      iAnn = (Interceptors) apiClass.getAnnotation(Interceptors.class);
+      iAnn = apiClass.getAnnotation(Interceptors.class);
 
       if (iAnn != null) {
         for (Class iClass : iAnn.value()) {
@@ -203,7 +205,7 @@ public class InterceptorCallChain
       }
 
       if (implClass != null) {
-        iAnn = (Interceptors) implClass.getAnnotation(Interceptors.class);
+        iAnn = implClass.getAnnotation(Interceptors.class);
 
         if (apiMethod != implMethod && iAnn != null) {
           for (Class iClass : iAnn.value()) {
@@ -214,7 +216,7 @@ public class InterceptorCallChain
       }
     }
 
-    iAnn = apiAnn.getAnnotation(Interceptors.class);
+    iAnn = apiMethod.getAnnotation(Interceptors.class);
 
     if (iAnn != null) {
       for (Class iClass : iAnn.value()) {
@@ -223,7 +225,7 @@ public class InterceptorCallChain
       }
     }
 
-    iAnn = implAnn.getAnnotation(Interceptors.class);
+    iAnn = implMethod.getAnnotation(Interceptors.class);
 
     if (apiMethod != implMethod && iAnn != null) {
       for (Class iClass : iAnn.value()) {
@@ -238,82 +240,54 @@ public class InterceptorCallChain
     HashMap<Class, Annotation> interceptorTypes
       = new HashMap<Class, Annotation>();
 
-    if (isValidMethod() && _view.getInterceptorBindings() != null) {
-      for (Annotation ann : _view.getInterceptorBindings()) {
-        interceptorTypes.put(ann.annotationType(), ann);
-      }
-    }
-
-    for (Annotation ann : implAnn.getAnnotations()) {
-      Class annType = ann.annotationType();
-
-      if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
-        interceptorTypes.put(ann.annotationType(), ann);
-      }
-    }
+    addInterceptorBindings(interceptorTypes, apiClass.getAnnotations());
+    if (implClass != apiClass)
+      addInterceptorBindings(interceptorTypes, implClass.getAnnotations());
+    
+    addInterceptorBindings(interceptorTypes, apiMethod.getAnnotations());
+    addInterceptorBindings(interceptorTypes, implMethod.getAnnotations());
 
     if (interceptorTypes.size() > 0) {
       _interceptionType = InterceptionType.AROUND_INVOKE;
       _interceptorBinding.addAll(interceptorTypes.values());
     }
 
-    if (isValidMethod()) {
-      ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
+    ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
 
-      for (Type decorator : decorators) {
-	Class decoratorClass = (Class) decorator;
+    for (Type decorator : decorators) {
+      Class decoratorClass = (Class) decorator;
 	
-        for (Method method : decoratorClass.getMethods()) {
-          if (isMatch(method, apiMethod))
-            _decoratorType = decoratorClass;
-        }
+      for (Method method : decoratorClass.getMethods()) {
+	if (isMatch(method, apiMethod.getMethod()))
+	  _decoratorType = decoratorClass;
       }
     }
   }
 
-  protected AnnotatedMethod getMethodAnnotations(Method method)
+  private void addInterceptorBindings(HashMap<Class,Annotation> interceptorTypes,
+				      Set<Annotation> annotations)
   {
-    if (method == null)
-      return null;
+    for (Annotation ann : annotations) {
+      Class annType = ann.annotationType();
 
-    AnnotatedMethod annList = _view.getBean().getMethodAnnotations(method);
-
-    if (annList != null)
-      return annList;
-    else
-      return new BeanMethodImpl(method);
-  }
-
-  protected boolean isAnnotationPresent(Set<Annotation> annList, Class type)
-  {
-    for (Annotation ann : annList) {
-      if (ann.annotationType().equals(type))
-        return true;
+      if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+        interceptorTypes.put(ann.annotationType(), ann);
+      }
     }
-
-    return false;
-  }
-
-  protected <T> T getAnnotation(Set<Annotation> annList, Class<T> type)
-  {
-    for (Annotation ann : annList) {
-      if (ann.annotationType().equals(type))
-        return (T) ann;
-    }
-
-    return null;
   }
 
   protected boolean isValidMethod()
   {
-    if (Modifier.isStatic(_implMethod.getModifiers()))
+    if (_implMethod == null)
+      return false;
+    
+    if (_implMethod.isStatic())
       return false;
 
-    if (Modifier.isFinal(_implMethod.getModifiers()))
+    if (_implMethod.isFinal())
       return false;
 
-    if (! Modifier.isPublic(_implMethod.getModifiers())
-        && ! Modifier.isProtected(_implMethod.getModifiers()))
+    if (! _implMethod.isPublic() && ! _implMethod.isProtected())
       return false;
 
     return true;
@@ -391,9 +365,10 @@ public class InterceptorCallChain
 
     _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
 
-
+    /* XXX:
     if (! _isExcludeDefaultInterceptors)
       _interceptors.addAll(_view.getBean().getDefaultInterceptors());
+    */
 
     // ejb/0fb6
     if (! _isExcludeClassInterceptors && _interceptors.size() == 0) {
@@ -446,7 +421,7 @@ public class InterceptorCallChain
         "private static java.lang.reflect.Method __caucho_aroundInvokeMethod;");
     }
 
-    Class cl = _implMethod.getDeclaringClass();
+    ApiClass cl = _implMethod.getDeclaringClass();
 
     out.println();
     out.println("static {");
@@ -479,7 +454,7 @@ public class InterceptorCallChain
     out.println(_uniqueName + "_implMethod.setAccessible(true);");
 
     if (isAroundInvokePrologue) {
-      Method aroundInvoke = getAroundInvokeMethod();
+      ApiMethod aroundInvoke = getAroundInvokeMethod();
 
       out.print("__caucho_aroundInvokeMethod = ");
       generateGetMethod(out,
@@ -562,7 +537,7 @@ public class InterceptorCallChain
     out.println("private static java.lang.reflect.Method []"
                 + _chainName + "_methodChain;");
 
-    Class cl = _implMethod.getDeclaringClass();
+    ApiClass cl = _implMethod.getDeclaringClass();
 
     out.println();
     out.println("static {");
@@ -1047,7 +1022,7 @@ public class InterceptorCallChain
 
       out.print(_decoratorBeanVar);
       out.print(" = __caucho_manager.resolveDecorators(");
-      out.printClass(_view.getBean().getEjbClass().getJavaClass());
+      out.printClass(_view.getBean().getBeanClass().getJavaClass());
       out.println(".class);");
 
       out.popDepth();

@@ -54,14 +54,14 @@ public class StatefulLocalView extends StatefulObjectView {
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass()))
+    if (EJBLocalObject.class.isAssignableFrom(getViewClass().getJavaClass()))
       out.println("  extends StatefulObject");
   }
 
   @Override
   public String getViewClassName()
   {
-    return getApi().getSimpleName() + "__EJBLocal";
+    return getViewClass().getSimpleName() + "__EJBLocal";
   }
 
   /**
@@ -73,7 +73,7 @@ public class StatefulLocalView extends StatefulObjectView {
     out.println();
     out.println("private " + getViewClassName() + " _localObject;");
 
-    if (EJBLocalObject.class.isAssignableFrom(getApi().getJavaClass())) {
+    if (EJBLocalObject.class.isAssignableFrom(getViewClass().getJavaClass())) {
       out.println();
       out.println("@Override");
       out.println("public EJBLocalObject getEJBLocalObject()");

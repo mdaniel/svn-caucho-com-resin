@@ -36,6 +36,7 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 import javax.ejb.*;
+import javax.transaction.Synchronization;
 
 /**
  * Represents the xa interception
@@ -47,8 +48,8 @@ public class XaCallChain extends AbstractCallChain
   private BusinessMethodGenerator _bizMethod;
   private EjbCallChain _next;
 
-  private boolean _isContainerManaged = true;
   private TransactionAttributeType _xa;
+  private boolean _isContainerManaged = true;
   private boolean _isSynchronization;
 
   public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
@@ -57,6 +58,8 @@ public class XaCallChain extends AbstractCallChain
     
     _bizMethod = bizMethod;
     _next = next;
+
+    _isContainerManaged = bizMethod.isXaContainerManaged();
   }
 
   protected BusinessMethodGenerator getBusinessMethod()
@@ -74,6 +77,7 @@ public class XaCallChain extends AbstractCallChain
 	    && ! _xa.equals(TransactionAttributeType.SUPPORTS));
   }
 
+  /*
   public boolean isContainerManaged()
   {
     return _isContainerManaged;
@@ -83,38 +87,56 @@ public class XaCallChain extends AbstractCallChain
   {
     _isContainerManaged = isContainerManaged;
   }
+  */
+
+  /**
+   * Returns the transaction type
+   */
+  public TransactionAttributeType getTransactionType()
+  {
+    return _xa;
+  }
 
   /**
    * Sets the transaction type
    */
+  /*
   public void setTransactionType(TransactionAttributeType xa)
   {
     _xa = xa;
-  }
-
-  public TransactionAttributeType getTransactionType()
-  {
-    return _xa;
   }
 
   public void setSynchronization(boolean isSynchronization)
   {
     _isSynchronization = isSynchronization;
   }
+  */
 
   /**
    * Introspects the method for the default values
    */
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    if (! _isContainerManaged)
-      return;
-    
     ApiClass apiClass = apiMethod.getDeclaringClass();
+
+    TransactionManagement xaManagement
+      = apiClass.getAnnotation(TransactionManagement.class);
+    
+    if (xaManagement != null
+	&& xaManagement.value() == TransactionManagementType.CONTAINER) {
+      _isContainerManaged = false;
+      return;
+    }
+    
     ApiClass implClass = null;
 
     if (implMethod != null)
       implClass = implMethod.getDeclaringClass();
+
+    if (implClass != null
+	&& Synchronization.class.isAssignableFrom(implClass.getJavaClass())) {
+      _isSynchronization = true;
+    }
     
     TransactionAttribute xaAttr;
     
@@ -133,7 +155,7 @@ public class XaCallChain extends AbstractCallChain
     }
 
     if (xaAttr != null)
-      setTransactionType(xaAttr.value());
+      _xa = xaAttr.value();
   }
 
   /**

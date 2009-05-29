@@ -61,12 +61,23 @@ abstract public class SessionGenerator extends BeanGenerator {
   
   protected String _contextClassName = "dummy";
 
-  public SessionGenerator(String ejbName, ApiClass ejbClass)
+  public SessionGenerator(String ejbName,
+			  ApiClass ejbClass,
+			  ApiClass localHome,
+			  ArrayList<ApiClass> localApi,
+			  ApiClass remoteHome,
+			  ArrayList<ApiClass> remoteApi)
   {
     super(toFullClassName(ejbName, ejbClass.getSimpleName()),
           ejbClass);
     
     _contextClassName = "dummy";
+
+    _localHome = localHome;
+    _localApi = new ArrayList<ApiClass>(localApi);
+    
+    _remoteHome = remoteHome;
+    _remoteApi = new ArrayList<ApiClass>(remoteApi);
   }
 
   public static String toFullClassName(String ejbName, String className)
@@ -99,22 +110,6 @@ abstract public class SessionGenerator extends BeanGenerator {
   public boolean isStateless()
   {
     return false;
-  }
-
-  /**
-   * Sets the local home
-   */
-  public void setLocalHome(ApiClass homeApi)
-  {
-    _localHome = homeApi;
-  }
-
-  /**
-   * Sets the remote home
-   */
-  public void setRemoteHome(ApiClass homeApi)
-  {
-    _remoteHome = homeApi;
   }
   
   /**
@@ -150,28 +145,11 @@ abstract public class SessionGenerator extends BeanGenerator {
   }
 
   /**
-   * Adds a local
-   */
-  public void addLocal(ApiClass localApi)
-  {
-    _localApi.add(localApi);
-  }
-
-  /**
    * Returns the local API list.
    */
   public ArrayList<ApiClass> getLocalApi()
   {
     return _localApi;
-  }
-
-  /**
-   * Adds a remote
-   */
-  @Override
-  public void addRemote(ApiClass remoteApi)
-  {
-    _remoteApi.add(remoteApi);
   }
 
   /**
@@ -196,7 +174,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   public View getView(Class api)
   {
     for (View view : _views) {
-      if (view.getApi().getName().equals(api.getName()))
+      if (view.getViewClass().getName().equals(api.getName()))
 	return view;
     }
 
@@ -297,7 +275,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   protected ArrayList<ApiClass> introspectLocalDefault()
   {
     throw new ConfigException(L.l("'{0}' does not have any interfaces defined.",
-				  getEjbClass().getName()));
+				  getBeanClass().getName()));
   }
 
   /**
@@ -307,8 +285,8 @@ abstract public class SessionGenerator extends BeanGenerator {
   {
     ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
 
-    Local local = (Local) getEjbClass().getAnnotation(Local.class);
-    Remote remote = (Remote) getEjbClass().getAnnotation(Remote.class);
+    Local local = (Local) getBeanClass().getAnnotation(Local.class);
+    Remote remote = (Remote) getBeanClass().getAnnotation(Remote.class);
 
     if (local != null && local.value().length > 0) {
       for (Class api : local.value()) {
@@ -320,7 +298,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     
     boolean hasRemote = remote != null;
 
-    for (ApiClass api : getEjbClass().getInterfaces()) {
+    for (ApiClass api : getBeanClass().getInterfaces()) {
       if (api.getJavaClass().isAnnotationPresent(Local.class))
 	apiList.add(api);
       if (api.getJavaClass().isAnnotationPresent(Remote.class))
@@ -331,7 +309,7 @@ abstract public class SessionGenerator extends BeanGenerator {
       return apiList;
 
     ApiClass singleApi = null;
-    for (ApiClass api : getEjbClass().getInterfaces()) {
+    for (ApiClass api : getBeanClass().getInterfaces()) {
       Class javaApi = api.getJavaClass();
       
       if (javaApi.equals(java.io.Serializable.class))
@@ -348,7 +326,7 @@ abstract public class SessionGenerator extends BeanGenerator {
 
       if (singleApi != null) {
 	throw new ConfigException(L.l("{0}: does not have a unique local API.  Both '{1}' and '{2}' are local.",
-				      getEjbClass().getName(),
+				      getBeanClass().getName(),
 				      singleApi.getName(),
 				      api.getName()));
       }
@@ -363,7 +341,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     }
 
     // XXX: only for stateful?
-    // apiList.add(getEjbClass());
+    // apiList.add(getBeanClass());
 
     return apiList;
   }
@@ -375,7 +353,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   {
     ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
 
-    Remote remote = (Remote) getEjbClass().getAnnotation(Remote.class);
+    Remote remote = (Remote) getBeanClass().getAnnotation(Remote.class);
 
     if (remote != null && remote.value().length > 0) {
       for (Class api : remote.value()) {
@@ -385,7 +363,7 @@ abstract public class SessionGenerator extends BeanGenerator {
       return apiList;
     }
 
-    for (ApiClass api : getEjbClass().getInterfaces()) {
+    for (ApiClass api : getBeanClass().getInterfaces()) {
       Class javaApi = api.getJavaClass();
       
       if (java.io.Serializable.class.equals(javaApi))
@@ -458,12 +436,12 @@ abstract public class SessionGenerator extends BeanGenerator {
     throws IOException
   {
     out.println();
-    out.println("public static class Bean extends " + _ejbClass.getName() + " {");
+    out.println("public static class Bean extends " + getBeanClass().getName() + " {");
     out.pushDepth();
 
     out.println();
     out.println("protected final static java.util.logging.Logger __caucho_log");
-    out.println("  = java.util.logging.Logger.getLogger(\"" + _ejbClass.getName() + "\");");
+    out.println("  = java.util.logging.Logger.getLogger(\"" + getBeanClass().getName() + "\");");
     out.println("private static int __caucho_dbg_id;");
     out.println("private String __caucho_id;");
 
@@ -489,8 +467,8 @@ abstract public class SessionGenerator extends BeanGenerator {
     out.println("if (__caucho_isFiner) {");
     out.pushDepth();
 
-    out.println("synchronized (" + _ejbClass.getName() + ".class) {");
-    out.println("  __caucho_id = \"" + _ejbClass.getName() + "[\" + __caucho_dbg_id++ + \"]\";");
+    out.println("synchronized (" + getBeanClass().getName() + ".class) {");
+    out.println("  __caucho_id = \"" + getBeanClass().getName() + "[\" + __caucho_dbg_id++ + \"]\";");
     out.println("}");
     out.println("__caucho_log.fine(__caucho_id + \":new()\");");
     out.popDepth();
@@ -961,7 +939,7 @@ abstract public class SessionGenerator extends BeanGenerator {
    */
   public boolean hasMethod(String methodName, Class []paramTypes)
   {
-    return _ejbClass.hasMethod(methodName, paramTypes);
+    return getBeanClass().hasMethod(methodName, paramTypes);
   }
 
   private String generateTypeCasting(String value, Class cl, boolean isEscapeString)

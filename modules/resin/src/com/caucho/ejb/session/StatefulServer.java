@@ -39,6 +39,7 @@ import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 
 import java.util.*;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.ManagedBean;
@@ -62,9 +63,10 @@ public class StatefulServer extends SessionServer
   // XXX: need real lifecycle
   private LruCache<String,StatefulObject> _remoteSessions;
 
-  public StatefulServer(EjbContainer ejbContainer)
+  public StatefulServer(EjbContainer ejbContainer,
+			AnnotatedType annotatedType)
   {
-    super(ejbContainer);
+    super(ejbContainer, annotatedType);
   }
 
   @Override

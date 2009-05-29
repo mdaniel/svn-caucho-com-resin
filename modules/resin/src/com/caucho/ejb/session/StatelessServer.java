@@ -37,6 +37,7 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.*;
 
 import javax.ejb.*;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.reflect.*;
@@ -61,9 +62,10 @@ public class StatelessServer extends SessionServer {
    * @param allowJVMCall allows fast calls to the same JVM (with serialization)
    * @param config the session configuration from the ejb.xml
    */
-  public StatelessServer(EjbContainer ejbContainer)
+  public StatelessServer(EjbContainer ejbContainer,
+			 AnnotatedType annotatedType)
   {
-    super(ejbContainer);
+    super(ejbContainer, annotatedType);
   }
 
   @Override

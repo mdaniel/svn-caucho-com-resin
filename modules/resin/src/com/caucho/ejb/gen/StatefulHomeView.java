@@ -61,7 +61,7 @@ abstract public class StatefulHomeView extends StatefulView {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return _localHome;");
   }
   
@@ -119,13 +119,13 @@ abstract public class StatefulHomeView extends StatefulView {
     if (apiMethod.getName().startsWith("create")) {
       String implName = "ejbC" + apiMethod.getName().substring(1);
       
-      ApiMethod implMethod = getEjbClass().getMethod(implName,
+      ApiMethod implMethod = getBeanClass().getMethod(implName,
 						     apiMethod.getParameterTypes());
 
       if (implMethod == null)
 	throw ConfigException.create(apiMethod.getMethod(),
 				     L.l("api has no matching '{0}' method in '{1}'",
-					 implName, getEjbClass().getName()));
+					 implName, getBeanClass().getName()));
 
       View localView = getSessionBean().getView(apiMethod.getReturnType());
 
@@ -142,7 +142,7 @@ abstract public class StatefulHomeView extends StatefulView {
 				   implMethod,
 				   index);
 
-      method.getXa().setContainerManaged(false);
+      // method.getXa().setContainerManaged(false);
 
       return method;
     }
@@ -154,7 +154,7 @@ abstract public class StatefulHomeView extends StatefulView {
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
     if (apiMethod.getName().equals("create")) {
-      return getEjbClass().getMethod("ejbCreate",
+      return getBeanClass().getMethod("ejbCreate",
 				     apiMethod.getParameterTypes());
     }
     else if (apiMethod.getName().equals("remove")

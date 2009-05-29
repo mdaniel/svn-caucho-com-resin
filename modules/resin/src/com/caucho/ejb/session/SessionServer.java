@@ -41,6 +41,7 @@ import com.caucho.ejb.manager.EjbContainer;
 
 import javax.ejb.*;
 import javax.enterprise.inject.Named;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.ManagedBean;
@@ -59,9 +60,10 @@ abstract public class SessionServer extends AbstractServer
   private HashMap<Class,InjectionTarget> _componentMap
     = new HashMap<Class,InjectionTarget>();
 
-  public SessionServer(EjbContainer manager)
+  public SessionServer(EjbContainer manager,
+		       AnnotatedType annotatedType)
   {
-    super(manager);
+    super(manager, annotatedType);
   }
 
   @Override
@@ -122,7 +124,7 @@ abstract public class SessionServer extends AbstractServer
       if (named != null)
 	beanName = named.value();
 
-      ManagedBean mBean = beanManager.createManagedBean(getEjbClass());
+      ManagedBean mBean = beanManager.createManagedBean(getAnnotatedType());
 
       Class baseApi = beanClass;
 

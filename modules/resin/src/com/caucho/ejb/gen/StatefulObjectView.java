@@ -58,7 +58,7 @@ abstract public class StatefulObjectView extends StatefulView {
   {
     out.println();
     out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getEjbClass().getName());
+    out.println("  extends " + getBeanClass().getName());
     out.println("{");
     out.pushDepth();
     
@@ -110,17 +110,19 @@ abstract public class StatefulObjectView extends StatefulView {
 						       implMethod,
 						       index);
 
-      method.getXa().setContainerManaged(false);
+      // method.getXa().setContainerManaged(false);
 
       return method;
     }
     else {
       BusinessMethodGenerator method = super.createMethod(apiMethod, index);
 
-      Class beanClass = getEjbClass().getJavaClass();
+      /*
+      Class beanClass = getBeanClass().getJavaClass();
       if (SessionSynchronization.class.isAssignableFrom(beanClass)) {
 	method.getXa().setSynchronization(true);
       }
+      */
 
       return method;
     }
@@ -134,7 +136,7 @@ abstract public class StatefulObjectView extends StatefulView {
       if (apiMethod.getParameterTypes().length != 0)
 	return null;
 
-      return getEjbClass().getMethod("ejbRemove", new Class[0]);
+      return getBeanClass().getMethod("ejbRemove", new Class[0]);
     }
     else
       return super.findImplMethod(apiMethod);

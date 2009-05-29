@@ -67,13 +67,15 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
   /**
    * Session bean default is REQUIRED
    */
+  /*
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    getXa().setContainerManaged(false);
+    // getXa().setContainerManaged(false);
 
     super.introspect(apiMethod, implMethod);
   }
+  */
 
   protected TransactionAttributeType getDefaultTransactionType()
   {
@@ -87,6 +89,12 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
   public boolean isEnhanced()
   {
     return true;
+  }
+
+  @Override
+  public boolean isXaContainerManaged()
+  {
+    return false;
   }
 
   protected void generatePreCall(JavaWriter out)
@@ -106,7 +114,7 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
 
     out.println("StatefulContext context = new " + _bean.getFullClassName() + "(_context, remote);");
     out.println("remote.__caucho_setContext(context);");
-    if (SessionBean.class.isAssignableFrom(_bean.getEjbClass().getJavaClass()))
+    if (SessionBean.class.isAssignableFrom(_bean.getBeanClass().getJavaClass()))
       out.println("bean.setSessionContext(context);");
   }
 

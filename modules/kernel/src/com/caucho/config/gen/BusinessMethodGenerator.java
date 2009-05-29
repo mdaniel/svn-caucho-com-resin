@@ -80,9 +80,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Returns the bean's ejbclass
    */
-  protected ApiClass getEjbClass()
+  protected ApiClass getBeanClass()
   {
-    return _view.getEjbClass();
+    return _view.getBeanClass();
   }
 
   /**
@@ -121,6 +121,11 @@ public class BusinessMethodGenerator implements EjbCallChain {
    */
   public void setRemoveRetainIfException(boolean isRemoveRetainIfException)
   {
+  }
+
+  public boolean isXaContainerManaged()
+  {
+    return true;
   }
 
   /**

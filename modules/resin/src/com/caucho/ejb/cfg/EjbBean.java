@@ -519,6 +519,11 @@ public class EjbBean extends DescriptionGroupConfig
     return _ejbClass;
   }
 
+  public AnnotatedType getAnnotatedType()
+  {
+    return _annotatedType;
+  }
+
   /**
    * Gets the ejb implementation class.
    */
@@ -1013,6 +1018,7 @@ public class EjbBean extends DescriptionGroupConfig
       
       _bean = createBeanGenerator();
 
+      /*
       if (getLocalHome() != null)
 	_bean.setLocalHome(getLocalHome());
 
@@ -1026,6 +1032,7 @@ public class EjbBean extends DescriptionGroupConfig
       for (ApiClass remoteApi : _remoteList) {
 	_bean.addRemote(remoteApi);
       }
+      */
 
       // XXX: add local api
 
@@ -1046,25 +1053,31 @@ public class EjbBean extends DescriptionGroupConfig
 	  throw error(L.l("'{0}' is an unknown around-invoke method",
 			  _aroundInvokeMethodName));
 	
-	_bean.setAroundInvokeMethod(method.getMethod());
+	// XXX: _bean.setAroundInvokeMethod(method.getMethod());
       }
 
+      /* XXX:
       if (interceptor != null) {
 	for (Class cl : interceptor.getInterceptors()) {
 	  _bean.addInterceptor(cl);
 	}
       }
+      */
 
+      /*
       if (_interceptors != null) {
         for (Interceptor i : _interceptors) {
           _bean.addInterceptor(i.getInterceptorJClass().getJavaClass());
         }
       }
+      */
 
       for (View view : _bean.getViews()) {
 	for (BusinessMethodGenerator bizMethod : view.getMethods()) {
+	  /*
 	  if (! isContainerTransaction())
 	    bizMethod.getXa().setContainerManaged(false);
+	  */
 	}
       }
 
@@ -1183,71 +1196,6 @@ public class EjbBean extends DescriptionGroupConfig
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Creates the views.
-   */
-  protected void createViews21()
-    throws ConfigException
-  {
-    /*
-    if (_remoteHome != null) {
-      _remoteHomeView = createHomeView(_remoteHome, "RemoteHome");
-      _remoteHomeView.introspect();
-    }
-    
-    if (_remote != null) {
-      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
-      list.add(_remote);
-
-      _remoteView = createRemoteObjectView(list, "Remote", "21");
-      _remoteView.introspect();
-    }
-
-    if (_remote21 != null) {
-      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
-      list.add(_remote21);
-
-      _remoteView21 = createRemoteObjectView(list, "Remote", "21");
-      _remoteView21.introspect();
-    }
-
-    else if (_remoteList.size() > 0) {
-      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
-      list.addAll(_remoteList);
-      list.remove(_remote21);
-
-      if (list.size() > 0) {
-        _remoteView = createRemoteObjectView(list, "Remote", "");
-        _remoteView.introspect();
-      }
-    }
-
-    if (_localHome != null) {
-      _localHomeView = createHomeView(_localHome, "LocalHome");
-      _localHomeView.introspect();
-    }
-
-    if (_local21 != null) {
-      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
-      list.add(_local21);
-
-      _localView21 = createObjectView(list, "Local", "21");
-      _localView21.introspect();
-    }
-
-    if (_localList.size() > 0) {
-      ArrayList<ApiClass> list = new ArrayList<ApiClass>();
-      list.addAll(_localList);
-      list.remove(_local21);
-
-      if (list.size() > 0) {
-        _localView = createObjectView(list, "Local", "");
-        _localView.introspect();
-      }
-    }
-    */
   }
 
   /**

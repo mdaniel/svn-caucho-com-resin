@@ -106,8 +106,8 @@ public class EjbSessionBean extends EjbBean {
     if (ejbClass.isAbstract())
       throw error(L.l("'{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
 
-    if (type.isAnnotationPresent(Stateless.class)) {
-      Stateless stateless = (Stateless) type.getAnnotation(Stateless.class);
+    if (ejbClass.isAnnotationPresent(Stateless.class)) {
+      Stateless stateless = ejbClass.getAnnotation(Stateless.class);
 
       if (getEJBName() == null && ! "".equals(stateless.name()))
 	setEJBName(stateless.name());
@@ -115,7 +115,7 @@ public class EjbSessionBean extends EjbBean {
       _isStateless = true;
     }
     else if (ejbClass.isAnnotationPresent(Stateful.class)) {
-      Stateful stateful = (Stateful) type.getAnnotation(Stateful.class);
+      Stateful stateful = ejbClass.getAnnotation(Stateful.class);
 
       if (getEJBName() == null && ! "".equals(stateful.name()))
 	setEJBName(stateful.name());
@@ -232,10 +232,22 @@ public class EjbSessionBean extends EjbBean {
   @Override
   protected BeanGenerator createBeanGenerator()
   {
-    if (_isStateless)
-      _sessionBean = new StatelessGenerator(getEJBName(), getEJBClassWrapper());
-    else
-      _sessionBean = new StatefulGenerator(getEJBName(), getEJBClassWrapper());
+    if (_isStateless) {
+      _sessionBean = new StatelessGenerator(getEJBName(),
+					    getEJBClassWrapper(),
+					    getLocalHome(),
+					    getLocalList(),
+					    getRemoteHome(),
+					    getRemoteList());
+    }
+    else {
+      _sessionBean = new StatefulGenerator(getEJBName(),
+					   getEJBClassWrapper(),
+					   getLocalHome(),
+					   getLocalList(),
+					   getRemoteHome(),
+					   getRemoteList());
+    }
     
     return _sessionBean;
   }
@@ -358,9 +370,9 @@ public class EjbSessionBean extends EjbBean {
     AbstractServer server;
 
     if (isStateless())
-      server = new StatelessServer(ejbContainer);
+      server = new StatelessServer(ejbContainer, getAnnotatedType());
     else
-      server = new StatefulServer(ejbContainer);
+      server = new StatefulServer(ejbContainer, getAnnotatedType());
 
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());

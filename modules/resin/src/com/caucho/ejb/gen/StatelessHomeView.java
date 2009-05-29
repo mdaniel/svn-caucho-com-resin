@@ -60,7 +60,7 @@ abstract public class StatelessHomeView extends StatelessView {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return _localHome;");
   }
 
@@ -73,7 +73,7 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println();
     out.println("public static class " + getViewClassName());
     out.println("  extends StatelessHome");
-    out.println("  implements StatelessProvider, " + getApi().getName());
+    out.println("  implements StatelessProvider, " + getViewClass().getName());
     out.println("{");
     out.pushDepth();
 
@@ -132,7 +132,7 @@ abstract public class StatelessHomeView extends StatelessView {
 						 int index)
   {
     if (apiMethod.getName().equals("create")) {
-      ApiMethod implMethod = getEjbClass().getMethod("ejbCreate",
+      ApiMethod implMethod = getBeanClass().getMethod("ejbCreate",
 						     apiMethod.getParameterTypes());
 
       // ejbCreate optional
@@ -163,7 +163,7 @@ abstract public class StatelessHomeView extends StatelessView {
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
     if (apiMethod.getName().equals("create"))
-      return getEjbClass().getMethod("ejbCreate", apiMethod.getParameterTypes());
+      return getBeanClass().getMethod("ejbCreate", apiMethod.getParameterTypes());
     else
       return super.findImplMethod(apiMethod);
   }

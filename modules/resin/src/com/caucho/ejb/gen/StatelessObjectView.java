@@ -64,15 +64,15 @@ public class StatelessObjectView extends StatelessView {
   {
     super.introspect();
 
-    introspectLifecycle(getEjbClass().getJavaClass());
+    introspectLifecycle(getBeanClass().getJavaClass());
     
     _postConstructInterceptor = new LifecycleInterceptor(PostConstruct.class);
-    _postConstructInterceptor.introspect(getEjbClass().getJavaClass());
+    _postConstructInterceptor.introspect(getBeanClass());
     
     _preDestroyInterceptor = new LifecycleInterceptor(PreDestroy.class);
-    _preDestroyInterceptor.introspect(getEjbClass().getJavaClass());
+    _preDestroyInterceptor.introspect(getBeanClass());
     
-    introspectTimer(getEjbClass());
+    introspectTimer(getBeanClass());
   }
 
   /**
@@ -130,7 +130,7 @@ public class StatelessObjectView extends StatelessView {
   public void generateContextPrologue(JavaWriter out)
     throws IOException
   {
-    String localVar = "_local_" + getApi().getSimpleName();
+    String localVar = "_local_" + getViewClass().getSimpleName();
     
     out.println();
     out.println("private " + getViewClassName() + " " + localVar + ";");
@@ -143,7 +143,7 @@ public class StatelessObjectView extends StatelessView {
   public void generateContextHomeConstructor(JavaWriter out)
     throws IOException
   {
-    String localVar = "_local_" + getApi().getSimpleName();
+    String localVar = "_local_" + getViewClass().getSimpleName();
     
     out.println(localVar + " = new " + getViewClassName() + "(this);");
   }
@@ -155,10 +155,10 @@ public class StatelessObjectView extends StatelessView {
   public void generateCreateProvider(JavaWriter out, String var)
     throws IOException
   {
-    String localVar = "_local_" + getApi().getSimpleName();
+    String localVar = "_local_" + getViewClass().getSimpleName();
     
     out.println();
-    out.println("if (" + var + " == " + getApi().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
     out.println("  return " + localVar + ";");
   }
 
@@ -169,7 +169,7 @@ public class StatelessObjectView extends StatelessView {
   public void generateDestroy(JavaWriter out)
     throws IOException
   {
-    String localVar = "_local_" + getApi().getSimpleName();
+    String localVar = "_local_" + getViewClass().getSimpleName();
     
     out.println();
     out.println(localVar + ".destroy();");
@@ -194,7 +194,7 @@ public class StatelessObjectView extends StatelessView {
   {
     out.println();
     out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getEjbClass().getName());
+    out.println("  extends " + getBeanClass().getName());
     out.println("{");
     out.pushDepth();
 
@@ -239,7 +239,7 @@ public class StatelessObjectView extends StatelessView {
     out.println();
     out.println("public static class " + getViewClassName());
     generateExtends(out);
-    out.print("  implements " + getApi().getDeclarationName());
+    out.print("  implements " + getViewClass().getDeclarationName());
     out.println(", StatelessProvider");
     out.println("{");
     out.pushDepth();
@@ -262,7 +262,7 @@ public class StatelessObjectView extends StatelessView {
     out.println(getViewClassName() + "(" + getBean().getClassName() + " context)");
     out.println("{");
     generateSuper(out, "context.getStatelessServer(), "
-		  + getApi().getName() + ".class");
+		  + getViewClass().getName() + ".class");
     out.println("  _context = context;");
 
     out.println("}");
@@ -334,7 +334,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("try {");
     out.println("  bean = new " + beanClass + "(this);");
 
-    Class implClass = getBean().getEjbClass().getJavaClass();
+    Class implClass = getBean().getBeanClass().getJavaClass();
 
     if (SessionBean.class.isAssignableFrom(implClass)) {
       out.println("  bean.setSessionContext(_context);");
@@ -452,7 +452,7 @@ public class StatelessObjectView extends StatelessView {
     throws IOException
   {
     if (_timeoutMethod != null) {
-      String localVar = "_local_" + getApi().getSimpleName();
+      String localVar = "_local_" + getViewClass().getSimpleName();
 
       out.println(getBeanClassName() + " bean = " + localVar + "._ejb_begin();");
       out.println("bean." + _timeoutMethod + "(timer);");
@@ -462,6 +462,6 @@ public class StatelessObjectView extends StatelessView {
 
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
-    return getEjbClass().getMethod(apiMethod);
+    return getBeanClass().getMethod(apiMethod);
   }
 }
