@@ -65,6 +65,18 @@ public class ArrayType extends ConfigType
     _type = type;
   }
 
+  @Override
+  public boolean isArray()
+  {
+    return true;
+  }
+
+  @Override
+  public ConfigType getComponentType()
+  {
+    return _componentType;
+  }
+
   /**
    * Returns the given type.
    */
@@ -102,14 +114,27 @@ public class ArrayType extends ConfigType
     if (value == null)
       return null;
 
-    List list = (List) value;
+    if (value instanceof List) {
+      List list = (List) value;
 
-    Object []array
-      = (Object []) Array.newInstance(_componentClass, list.size());
+      Object []array
+	= (Object []) Array.newInstance(_componentClass, list.size());
 
-    list.toArray(array);
-    
-    return array;
+      list.toArray(array);
+
+      return array;
+    }
+    else {
+      // ioc/2184
+      value = _componentType.replaceObject(value);
+
+      Object []array
+	= (Object []) Array.newInstance(_componentClass, 1);
+
+      Array.set(array, 0, value);
+      
+      return array;
+    }
   }
   
   /**
@@ -117,8 +142,14 @@ public class ArrayType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _type.getName(), text));
+    Object value = _componentType.valueOf(text);
+    
+    Object []valueArray
+      = (Object []) Array.newInstance(_componentClass, 1);
+
+    Array.set(valueArray, 0, value);
+
+    return valueArray;
   }
 
   public String toString()

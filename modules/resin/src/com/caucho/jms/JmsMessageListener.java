@@ -20,60 +20,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config.type;
+package com.caucho.jms;
 
-import com.caucho.config.*;
-import com.caucho.util.*;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Represents a String[] type.
+ * Configures an EJB message driven bean listening to a JMS queue or topic.
  */
-public final class StringArrayType extends ConfigType
-{
-  private static final L10N L = new L10N(StringArrayType.class);
-  
-  public static final StringArrayType TYPE = new StringArrayType();
-  
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface JmsMessageListener {
   /**
-   * The StringArrayType is a singleton
+   * The JMS queue or topic name
    */
-  private StringArrayType()
-  {
-  }
-  
+  String destination();
   /**
-   * Returns the Java type.
+   * The maximum number of consumer threads
    */
-  public Class getType()
-  {
-    return String[].class;
-  }
-  
-  /**
-   * Converts the string to a value of the type.
-   */
-  public Object valueOf(String text)
-  {
-    return text.split(",");
-  }
-  
-  /**
-   * Converts the value to a value of the type.
-   */
-  public Object valueOf(Object value)
-  {
-    if (value instanceof String[])
-      return value;
-    else if (value == null)
-      return null;
-    else
-      return valueOf(String.valueOf(value));
-  }
+  int consumerMax() default 5;
 }

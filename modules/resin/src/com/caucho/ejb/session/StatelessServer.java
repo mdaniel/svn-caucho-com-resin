@@ -33,12 +33,15 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.*;
+import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ManagedBean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.reflect.*;
 import java.util.*;
@@ -49,6 +52,8 @@ import java.util.logging.Logger;
  * Server home container for a stateless session bean
  */
 public class StatelessServer extends SessionServer {
+  private static final L10N L = new L10N(StatelessServer.class);
+  
   protected static Logger log
     = Logger.getLogger(StatelessServer.class.getName());
 
@@ -93,6 +98,20 @@ public class StatelessServer extends SessionServer {
   public Object getLocalObject(Class api)
   {
     return getStatelessContext().getProvider(api);
+  }
+
+  protected Bean createBean(ManagedBean mBean, Class api)
+  {
+    StatelessProvider provider = getStatelessContext().getProvider(api);
+
+    if (provider == null)
+      throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
+					 api, getStatelessContext()));
+    
+    StatelessBeanImpl statelessBean
+      = new StatelessBeanImpl(this, mBean, provider);
+
+    return statelessBean;
   }
   
   protected InjectionTarget createSessionComponent(Class api, Class beanClass)

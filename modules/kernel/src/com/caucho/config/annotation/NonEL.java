@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,53 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.type;
+package com.caucho.config.annotation;
 
-import com.caucho.config.*;
-import com.caucho.util.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Represents a String[] type.
+ * The @NonEL annotation for annotations not evaluating el
  */
-public final class StringArrayType extends ConfigType
-{
-  private static final L10N L = new L10N(StringArrayType.class);
-  
-  public static final StringArrayType TYPE = new StringArrayType();
-  
-  /**
-   * The StringArrayType is a singleton
-   */
-  private StringArrayType()
-  {
-  }
-  
-  /**
-   * Returns the Java type.
-   */
-  public Class getType()
-  {
-    return String[].class;
-  }
-  
-  /**
-   * Converts the string to a value of the type.
-   */
-  public Object valueOf(String text)
-  {
-    return text.split(",");
-  }
-  
-  /**
-   * Converts the value to a value of the type.
-   */
-  public Object valueOf(Object value)
-  {
-    if (value instanceof String[])
-      return value;
-    else if (value == null)
-      return null;
-    else
-      return valueOf(String.valueOf(value));
-  }
+@Retention(RUNTIME)
+@Target(METHOD)
+public @interface NonEL {
 }

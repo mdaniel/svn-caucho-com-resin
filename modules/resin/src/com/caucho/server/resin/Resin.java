@@ -1159,7 +1159,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     int i = 0;
 
     while (i < len) {
-      RandomUtil.addRandom(argv[i]);
+      // RandomUtil.addRandom(argv[i]);
 
       if (i + 1 < len
 	  && (argv[i].equals("-stdout")
@@ -1469,6 +1469,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private void addRandom()
   {
+    /*
     RandomUtil.addRandom(System.currentTimeMillis());
     RandomUtil.addRandom(Runtime.getRuntime().freeMemory());
 
@@ -1480,7 +1481,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       RandomUtil.addRandom(InetAddress.getLocalHost().toString());
     } catch (Throwable e) {
     }
+    */
 
+    /*
     // for systems with /dev/urandom, read more bits from it.
     try {
       InputStream is = new FileInputStream("/dev/urandom");
@@ -1493,6 +1496,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     RandomUtil.addRandom(System.currentTimeMillis());
+    */
   }
 
   /**

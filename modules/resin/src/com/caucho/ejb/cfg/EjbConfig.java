@@ -35,6 +35,7 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.jms.JmsMessageListener;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -363,26 +364,34 @@ public class EjbConfig {
       if (findBeanByType(type) != null)
 	return;
 
-      if (annType.isAnnotationPresent(javax.ejb.Stateless.class)) {
-	/*
-	EjbStatelessBean bean = new EjbStatelessBean(this, annType);
+      if (annType.isAnnotationPresent(Stateless.class)) {
+	Stateless stateless = annType.getAnnotation(Stateless.class);
+	
+	EjbStatelessBean bean = new EjbStatelessBean(this, annType, stateless);
 
 	setBeanConfig(bean.getEJBName(), bean);
-	*/
       }
       else if (annType.isAnnotationPresent(Stateful.class)) {
-	Stateful stateful = (Stateful) annType.getAnnotation(Stateful.class);
+	Stateful stateful = annType.getAnnotation(Stateful.class);
 	
 	EjbStatefulBean bean = new EjbStatefulBean(this, annType, stateful);
 
 	setBeanConfig(bean.getEJBName(), bean);
       }
-      else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
-	/*
-	EjbMessageBean bean = new EjbMessageBean(this, annType);
+      else if (annType.isAnnotationPresent(MessageDriven.class)) {
+	MessageDriven message = annType.getAnnotation(MessageDriven.class);
+	EjbMessageBean bean = new EjbMessageBean(this, annType, message);
 
 	setBeanConfig(bean.getEJBName(), bean);
-	*/
+      }
+      else if (annType.isAnnotationPresent(JmsMessageListener.class)) {
+	JmsMessageListener listener
+	  = annType.getAnnotation(JmsMessageListener.class);
+	
+	EjbMessageBean bean = new EjbMessageBean(this, annType,
+						 listener.destination());
+
+	setBeanConfig(bean.getEJBName(), bean);
       }
     } catch (ConfigException e) {
       throw e;

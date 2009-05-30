@@ -35,17 +35,22 @@ import com.caucho.util.*;
 /**
  * Represents a String[] type.
  */
-public final class StringArrayType extends ConfigType
+public final class RawStringArrayType extends ConfigType
 {
-  private static final L10N L = new L10N(StringArrayType.class);
+  private static final L10N L = new L10N(RawStringArrayType.class);
   
-  public static final StringArrayType TYPE = new StringArrayType();
+  public static final RawStringArrayType TYPE = new RawStringArrayType();
   
   /**
    * The StringArrayType is a singleton
    */
-  private StringArrayType()
+  private RawStringArrayType()
   {
+  }
+
+  public boolean isEL()
+  {
+    return false;
   }
   
   /**

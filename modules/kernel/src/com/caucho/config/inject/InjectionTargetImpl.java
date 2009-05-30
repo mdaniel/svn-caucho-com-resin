@@ -267,6 +267,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       ConfigContext env = (ConfigContext) contextEnv;
 
+      if (_args == null)
+	throw new NullPointerException(toString());
+      
       Object []args;
       int size = _args.length;
       if (size > 0) {
@@ -515,7 +518,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   public void introspect(AnnotatedType beanType)
   {
     super.introspect(beanType);
-    
+
     Class cl = getIntrospectionClass();
     Class scopeClass = null;
 

@@ -162,6 +162,14 @@ abstract public class ConfigType
   }
 
   /**
+   * Returns true for an array type
+   */
+  public boolean isArray()
+  {
+    return false;
+  }
+
+  /**
    * Return true if the object is replaced
    */
   public boolean isReplace()
@@ -175,6 +183,11 @@ abstract public class ConfigType
   public boolean isProgram()
   {
     return ConfigProgram.class.equals(getType());
+  }
+
+  public ConfigType getComponentType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public Attribute getDefaultAttribute(QName qName)

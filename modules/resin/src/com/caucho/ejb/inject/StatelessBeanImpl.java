@@ -34,14 +34,17 @@ import com.caucho.config.inject.ManagedBeanWrapper;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.ejb.session.StatelessProvider;
+import com.caucho.ejb.session.StatelessServer;
 import com.caucho.util.L10N;
-import javax.enterprise.inject.spi.*;
-import javax.enterprise.inject.spi.InjectionTarget;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Set;
 
+import javax.enterprise.inject.spi.*;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 
@@ -51,9 +54,31 @@ import javax.enterprise.context.spi.CreationalContext;
 public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
 {
   private static final L10N L = new L10N(StatelessBeanImpl.class);
+
+  private StatelessServer _server;
+  private String _name;
+  private StatelessProvider _producer;
+
+  private InjectionTarget _target;
   
-  public StatelessBeanImpl(ManagedBean<X> bean)
+  public StatelessBeanImpl(StatelessServer server,
+			  ManagedBean<X> bean,
+			  StatelessProvider producer)
   {
     super(bean);
+
+    _server = server;
+    _producer = producer;
+
+    if (producer == null)
+      throw new NullPointerException();
+
+    _target = bean.getInjectionTarget();
+  }
+
+  @Override
+  public X create(CreationalContext context)
+  {
+    return (X) _producer.__caucho_get();
   }
 }

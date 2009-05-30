@@ -71,6 +71,23 @@ public class AnnotationConfig implements InvocationHandler {
     if ("#text".equals(name))
       name = "value";
 
+    Object oldValue = _valueMap.get(name);
+
+    if (oldValue != null
+	&& oldValue.getClass().isArray()
+	&& value != null
+	&& oldValue.getClass() == value.getClass()) {
+      Object []oldArray = (Object []) oldValue;
+      Object []valueArray = (Object []) value;
+      Class componentType = oldValue.getClass().getComponentType();
+      value = Array.newInstance(componentType,
+				oldArray.length + valueArray.length);
+
+      System.arraycopy(oldArray, 0, value, 0, oldArray.length);
+      System.arraycopy(valueArray, 0,
+		       value, oldArray.length, valueArray.length);
+    }
+
     _valueMap.put(name, value);
   }
 
@@ -124,6 +141,11 @@ public class AnnotationConfig implements InvocationHandler {
     return (Annotation) Proxy.newProxyInstance(loader,
 					       new Class[] { _annotationType },
 					       this);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _annotationType + "]";
   }
 
   static {

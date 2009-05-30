@@ -42,6 +42,7 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.*;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
+import com.caucho.jms.JmsMessageListener;
 import com.caucho.jca.cfg.*;
 import com.caucho.util.L10N;
 
@@ -57,6 +58,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.resource.spi.*;
 import javax.naming.NamingException;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import java.lang.reflect.*;
 import java.util.logging.Level;
@@ -91,6 +93,29 @@ public class EjbMessageBean extends EjbBean {
   public EjbMessageBean(EjbConfig config, String ejbModuleName)
   {
     super(config, ejbModuleName);
+  }
+  
+  /**
+   * Creates a new session bean configuration.
+   */
+  public EjbMessageBean(EjbConfig ejbConfig,
+			AnnotatedType annType,
+			MessageDriven messageDriven)
+  {
+    super(ejbConfig, annType, messageDriven.name());
+
+    System.out.println("NAME: " + this);
+  }
+
+  
+  /**
+   * Creates a new session bean configuration.
+   */
+  public EjbMessageBean(EjbConfig ejbConfig,
+			AnnotatedType annType,
+			String ejbName)
+  {
+    super(ejbConfig, annType, ejbName);
   }
 
   /**
@@ -344,6 +369,10 @@ public class EjbMessageBean extends EjbBean {
     else if ("messageSelector".equals(name)) {
       _messageSelector = (String) value;
     }
+    else if ("message-consumer-max".equals(name)
+	     || "consumer-max".equals(name)) {
+      setMessageConsumerMax(Integer.parseInt(String.valueOf(value)));
+    }
     else
       log.log(Level.FINE, L.l("activation-config-property '{0}' is unknown, ignored",
                               name));
@@ -418,7 +447,7 @@ public class EjbMessageBean extends EjbBean {
     super.introspect();
 
     MessageDriven messageDriven
-      = (MessageDriven) getEJBClass().getAnnotation(MessageDriven.class);
+      = getEJBClassWrapper().getAnnotation(MessageDriven.class);
 
     if (messageDriven != null) {
       ActivationConfigProperty []activationConfig
@@ -435,6 +464,15 @@ public class EjbMessageBean extends EjbBean {
       Class type = messageDriven.messageListenerInterface();
       if (type != null && ! Object.class.equals(type))
 	_messagingType = type;
+    }
+
+    JmsMessageListener listener
+      = getEJBClassWrapper().getAnnotation(JmsMessageListener.class);
+
+    if (listener != null) {
+      addActivationConfigProperty("destination", listener.destination());
+      addActivationConfigProperty("consumer-max",
+				  String.valueOf(listener.consumerMax()));
     }
   }
   

@@ -36,8 +36,6 @@ import java.util.Random;
  * System-wide random number generator.
  */
 public class RandomUtil {
-  private static long _seed = System.currentTimeMillis();
-
   private static FreeList<Random> _freeRandomList
     = new FreeList<Random>(64);
   
@@ -91,39 +89,11 @@ public class RandomUtil {
   }
 
   /**
-   * Adds a random number based on a string.
-   */
-  public static void addRandom(String random)
-  {
-    if (random == null)
-      return;
-    
-    for (int i = 0; i < random.length(); i++)
-      addRandom(random.charAt(i));
-  }
-
-  /**
-   * Adds a random number to the server seed.
-   */
-  public static void addRandom(long seed)
-  {
-    /*
-    Random random = getRandom();
-    
-    if (random instanceof SecureRandom)
-      ((SecureRandom) random).setSeed(seed);
-    */
-  }
-
-  /**
    * Returns the random generator.
    */
   private static Random getRandom()
   {
     if (_isTest) {
-      if (_testRandom == null)
-	_testRandom = new Random(_seed);
-
       return _testRandom;
     }
 
@@ -140,36 +110,7 @@ public class RandomUtil {
    */
   public static void setTestSeed(long seed)
   {
-    _seed = seed;
     _isTest = true;
     _testRandom = new Random(seed);
   }
-
-  /**
-   * Sets the specific seed.  Only for testing.
-   */
-  /*
-  public static void setSecureRandom(SecureRandom random)
-  {
-    _secureRandom = random;
-  }
-  */
-
-  /**
-   * Sets the specific seed.  Only for testing.
-   */
-  /*
-  public static SecureRandom getSecureRandom()
-  {
-    if (_secureRandom == null)
-      _secureRandom = new SecureRandom();
-    
-    return _secureRandom;
-  }
-
-  public static Random getTestRandom()
-  {
-    return _testRandom;
-  }
-  */
 }

@@ -30,6 +30,7 @@
 package com.caucho.config.type;
 
 import java.beans.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
@@ -37,6 +38,7 @@ import java.util.logging.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.*;
+import com.caucho.config.annotation.NonEL;
 import com.caucho.config.attribute.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
@@ -84,12 +86,27 @@ public class AnnotationInterfaceType extends ConfigType
       else if (method.getName().equals("annotationType"))
 	continue;
 
+      
+      boolean isEL = ! isAnnotationPresent(method.getAnnotations(),
+					   NonEL.class);
+
       _attributeMap.put(method.getName(),
 			new AnnotationAttribute(method.getName(),
-						method.getReturnType()));
+						method.getReturnType(),
+						isEL));
     }
 
     // createProxy(annClass);
+  }
+
+  private boolean isAnnotationPresent(Annotation []annList, Class annType)
+  {
+    for (int i = 0; i < annList.length; i++) {
+      if (annList[i].annotationType().equals(annType))
+	return true;
+    }
+
+    return false;
   }
 
   /**
@@ -136,7 +153,9 @@ public class AnnotationInterfaceType extends ConfigType
       attr.setText(ann, TEXT, text);
     }
 
-    return ann;
+    // ioc/2183
+
+    return ann.replace();
     /*
     Object value = ann.replace();
     System.out.println("V: " + value

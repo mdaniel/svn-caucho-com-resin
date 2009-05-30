@@ -32,6 +32,7 @@ package com.caucho.config.attribute;
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
+import com.caucho.config.types.RawString;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -41,10 +42,18 @@ public class AnnotationAttribute extends Attribute {
   private String _name;
   private ConfigType _type;
 
-  public AnnotationAttribute(String name, Class type)
+  public AnnotationAttribute(String name, Class type, boolean isEL)
   {
     _name = name;
-    _type = TypeFactory.getType(type);
+
+    if (isEL)
+      _type = TypeFactory.getType(type);
+    else if (String.class.equals(type))
+      _type = RawStringType.TYPE;
+    else if (String[].class.equals(type))
+      _type = RawStringArrayType.TYPE;
+    else
+      _type = TypeFactory.getType(type);
   }
   
   /**
@@ -53,6 +62,19 @@ public class AnnotationAttribute extends Attribute {
   public ConfigType getConfigType()
   {
     return _type;
+  }
+
+  /**
+   * Creates the child bean.
+   */
+  public Object create(Object parent, QName name)
+    throws ConfigException
+  {
+    // ejb/1332 - need to refactor to remove isArray test
+    if (_type.isArray())
+      return _type.getComponentType().create(parent, name);
+    else
+      return _type.create(parent, name);
   }
   
   /**
