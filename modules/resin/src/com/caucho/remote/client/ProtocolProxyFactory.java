@@ -31,11 +31,25 @@ package com.caucho.remote.client;
 
 import com.caucho.remote.*;
 
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.inject.spi.Annotated;
+
 /**
  * A factory for creating a proxy
  */
 public interface ProtocolProxyFactory
 {
+  /**
+   * Sets the ProxyType annotation
+   */
+  public void setProxyType(Annotation ann);
+  
+  /**
+   * Sets the ServiceType annotated
+   */
+  public void setAnnotated(Annotated annotated);
+  
   /**
    * Creates a new proxy based on an API.
    *

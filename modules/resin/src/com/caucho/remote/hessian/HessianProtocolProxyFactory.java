@@ -34,6 +34,8 @@ import com.caucho.hessian.client.*;
 import com.caucho.remote.*;
 import com.caucho.remote.client.*;
 
+import java.lang.annotation.Annotation;
+
 /**
  * Hessian factory for creating remote-client proxies
  */
@@ -50,6 +52,14 @@ public class HessianProtocolProxyFactory
   public void setURL(String url)
   {
     _url = url;
+  }
+
+  @Override
+  public void setProxyType(Annotation ann)
+  {
+    HessianClient client = (HessianClient) ann;
+
+    setURL(client.url());
   }
   
   /**

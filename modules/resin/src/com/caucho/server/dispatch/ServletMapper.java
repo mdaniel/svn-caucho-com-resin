@@ -59,7 +59,8 @@ public class ServletMapper {
   
   private ServletManager _servletManager;
   
-  private UrlMap<String> _servletMap = new UrlMap<String>();
+  private UrlMap<ServletMapping> _servletMap
+    = new UrlMap<ServletMapping>();
   
   private ArrayList<String> _welcomeFileList = new ArrayList<String>();
   
@@ -112,7 +113,7 @@ public class ServletMapper {
   public void addUrlRegexp(String regexp, ServletMapping mapping)
     throws ServletException
   {
-    _servletMap.addRegexp(regexp, regexp);
+    _servletMap.addRegexp(regexp, mapping);
     _regexpMap.put(regexp, mapping);
   }
 
@@ -142,6 +143,8 @@ public class ServletMapper {
 	
 	return;
       }
+      else if (mapping.getBean() != null) {
+      }
       else if (_servletManager.getServlet(servletName) == null)
         throw new ConfigException(L.l("'{0}' is an unknown servlet-name.  servlet-mapping requires that the named servlet be defined in a <servlet> configuration before the <servlet-mapping>.", servletName));
 
@@ -149,10 +152,10 @@ public class ServletMapper {
         _defaultServlet = servletName;
       }
       else if (mapping.isStrictMapping()) {
-        _servletMap.addStrictMap(urlPattern, null, servletName);
+        _servletMap.addStrictMap(urlPattern, null, mapping);
       }
       else
-        _servletMap.addMap(urlPattern, servletName);
+        _servletMap.addMap(urlPattern, mapping);
 
       Set<String> patterns = _urlPatterns.get(servletName);
 
@@ -218,8 +221,13 @@ public class ServletMapper {
 
     invocation.setClassLoader(Thread.currentThread().getContextClassLoader());
 
+    ServletConfigImpl config = null;
+
     if (_servletMap != null) {
-      servletName = _servletMap.map(contextURI, vars);
+      ServletMapping servletMap = _servletMap.map(contextURI, vars);
+
+      if (servletMap != null && servletMap.isServletConfig())
+	config = servletMap;
 
       ServletMapping servletRegexp = _regexpMap.get(servletName);
 
@@ -228,6 +236,10 @@ public class ServletMapper {
 					       _servletManager,
 					       vars);
       }
+      else if (servletMap != null) {
+	servletName = servletMap.getServletName();
+      }
+
     }
 
     if (servletName == null) {
@@ -274,7 +286,10 @@ public class ServletMapper {
 	    return new RedirectFilterChain(contextPath + contextURI + "/");
           }
           else {
-            servletName = _servletMap.map(welcomeURI, vars);
+	    ServletMapping servletMap = _servletMap.map(welcomeURI, vars);
+
+	    if (servletMap != null)
+	      servletName = servletMap.getServletName();
 
             if (servletName != null || _defaultServlet != null) {
               contextURI = welcomeURI;
@@ -324,8 +339,12 @@ public class ServletMapper {
 
     ServletMapping regexp = _regexpMap.get(servletName);
 
-    if (regexp != null)
+    if (regexp != null) {
       servletName = regexp.initRegexp(_servletContext, _servletManager, vars);
+
+      if (regexp.isServletConfig())
+	config = regexp;
+    }
 
     if (servletName.equals("invoker"))
       servletName = handleInvoker(invocation);
@@ -337,13 +356,15 @@ public class ServletMapper {
 	       + contextURI + " -> " + servletName + ")");
     }
 
-    ServletConfigImpl config = _servletManager.getServlet(servletName);
+    if (config == null)
+      config = _servletManager.getServlet(servletName);
 
     if (config != null) {
       invocation.setSecurityRoleMap(config.getRoleMap());
     }
 
-    FilterChain chain = _servletManager.createServletChain(servletName);
+    FilterChain chain
+      = _servletManager.createServletChain(servletName, config);
 
     if (chain instanceof PageFilterChain) {
       PageFilterChain pageChain = (PageFilterChain) chain;

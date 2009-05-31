@@ -42,7 +42,10 @@ import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.remote.BamService;
 import com.caucho.security.*;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.resin.*;
@@ -58,13 +61,17 @@ import java.security.Principal;
 import java.lang.ref.*;
 import java.io.Serializable;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.ProcessBean;
+import javax.enterprise.inject.spi.Plugin;
 
 /**
  * Broker
  */
-public class HempBroker implements Broker, ActorStream
+public class HempBroker
+  implements Broker, ActorStream, Plugin
 {
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
@@ -99,6 +106,9 @@ public class HempBroker implements Broker, ActorStream
   private ArrayList<String> _aliasList = new ArrayList<String>();
 
   private ActorManager []_actorManagerList = new ActorManager[0];
+
+  private ArrayList<ActorStartup> _pendingActors
+    = new ArrayList<ActorStartup>();
 
   private volatile boolean _isClosed;
 
@@ -829,44 +839,57 @@ public class HempBroker implements Broker, ActorStream
   /**
    * Called when a @Actor is annotated on the actor
    */
-  public void registerActor(@Observes @BamServiceBinding
-			    BeanStartupEvent event)
+  public void registerActor(@Observes ProcessBean event)
   {
-    BeanManager manager = event.getManager();
+    Annotated annotated = event.getAnnotated();
     Bean bean = event.getBean();
 
-    if (bean instanceof CauchoBean) {
-      CauchoBean cauchoBean = (CauchoBean) bean;
+    if (annotated.isAnnotationPresent(BamService.class)) {
+      BamService bamService = annotated.getAnnotation(BamService.class);
 
-      AbstractActor actor
-	= manager.getReference(bean, AbstractActor.class);
-
-      Annotation []ann = cauchoBean.getAnnotations();
-
-      actor.setBrokerStream(this);
-
-      String jid = getJid(actor, ann);
-
-      actor.setJid(jid);
-
-      int threadMax = getThreadMax(ann);
-
-      Actor bamActor = actor;
-
-      // queue
-      if (threadMax > 0) {
-	bamActor = new MemoryQueueServiceFilter(bamActor,
-						  this,
-						  threadMax);
-      }
-
-      addActor(bamActor);
-
-      Environment.addCloseListener(new ActorClose(bamActor));
+      addStartupActor(bean, bamService);
     }
-    else {
-      log.warning(this + " can't register " + bean + " because it's not a CauchoBean");
+  }
+
+  private void addStartupActor(Bean bean, BamService bamService)
+  {
+    ActorStartup startup = new ActorStartup(bean, bamService);
+    
+    Environment.addEnvironmentListener(startup);
+  }
+
+  private void startActor(Bean bean, BamService bamService)
+  {
+    InjectManager beanManager = InjectManager.getCurrent();
+      
+    Actor actor = beanManager.getReference(bean, Actor.class);
+
+    actor.setBrokerStream(this);
+
+    String jid = bamService.name();
+
+    if (jid == null || "".equals(jid))
+      jid = bean.getName();
+
+    if (jid == null || "".equals(jid))
+      jid = bean.getBeanClass().getSimpleName();
+
+    actor.setJid(jid);
+
+    int threadMax = bamService.threadMax();
+
+    Actor bamActor = actor;
+
+    // queue
+    if (threadMax > 0) {
+      bamActor = new MemoryQueueServiceFilter(bamActor,
+					      this,
+					      threadMax);
     }
+
+    addActor(bamActor);
+
+    Environment.addCloseListener(new ActorClose(bamActor));
   }
 
   public void close()
@@ -885,7 +908,7 @@ public class HempBroker implements Broker, ActorStream
 
   private String getJid(Actor actor, Annotation []annList)
   {
-    com.caucho.config.BamService bamAnn = findActor(annList);
+    com.caucho.remote.BamService bamAnn = findActor(annList);
 
     String name = "";
 
@@ -907,7 +930,7 @@ public class HempBroker implements Broker, ActorStream
 
   private int getThreadMax(Annotation []annList)
   {
-    com.caucho.config.BamService bamAnn = findActor(annList);
+    com.caucho.remote.BamService bamAnn = findActor(annList);
 
     if (bamAnn != null)
       return bamAnn.threadMax();
@@ -915,11 +938,11 @@ public class HempBroker implements Broker, ActorStream
       return 1;
   }
 
-  private com.caucho.config.BamService findActor(Annotation []annList)
+  private com.caucho.remote.BamService findActor(Annotation []annList)
   {
     for (Annotation ann : annList) {
-      if (ann.annotationType().equals(com.caucho.config.BamService.class))
-	return (com.caucho.config.BamService) ann;
+      if (ann.annotationType().equals(com.caucho.remote.BamService.class))
+	return (com.caucho.remote.BamService) ann;
 
       // XXX: stereotypes
     }
@@ -933,7 +956,58 @@ public class HempBroker implements Broker, ActorStream
     return getClass().getSimpleName() + "[" + _domain + "]";
   }
 
-  class ActorClose {
+  public class ActorStartup implements EnvironmentListener{
+    private Bean _bean;
+    private BamService _service;
+
+    ActorStartup(Bean bean, BamService service)
+    {
+      _bean = bean;
+      _service = service;
+    }
+
+    Bean getBean()
+    {
+      return _bean;
+    }
+
+    BamService getBamService()
+    {
+      return _service;
+    }
+    
+    /**
+     * Handles the case where the environment is configuring and
+     * registering beans
+     */
+    public void environmentConfigure(EnvironmentClassLoader loader)
+    {
+    }
+  
+    /**
+     * Handles the case where the environment is binding injection targets
+     */
+    public void environmentBind(EnvironmentClassLoader loader)
+    {
+    }
+  
+    /**
+     * Handles the case where the environment is starting (after init).
+     */
+    public void environmentStart(EnvironmentClassLoader loader)
+    {
+      startActor(_bean, _service);
+    }
+  
+    /**
+     * Handles the case where the environment is stopping (after init).
+     */
+    public void environmentStop(EnvironmentClassLoader loader)
+    {
+    }
+  }
+
+  public class ActorClose {
     private Actor _actor;
 
     ActorClose(Actor actor)

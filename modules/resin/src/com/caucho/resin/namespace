@@ -3,6 +3,7 @@ com.caucho.config
 com.caucho.distcache
 com.caucho.jms
 com.caucho.protocols
+com.caucho.remote
 com.caucho.resources
 com.caucho.rewrite
 com.caucho.security

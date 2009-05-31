@@ -113,7 +113,6 @@ public class ServletMapping extends ServletConfigImpl {
     if (getServletName() == null)
       setServletName(getServletNameDefault());
 
-
     for (int i = 0; i < _mappingList.size(); i++) {
       Mapping mapping = _mappingList.get(i);
 

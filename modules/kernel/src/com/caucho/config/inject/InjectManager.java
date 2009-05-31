@@ -164,7 +164,7 @@ public class InjectManager
   private EnvironmentClassLoader _classLoader;
   private ClassLoader _tempClassLoader;
 
-  private HashSet<URL> _pluginSet = new HashSet<URL>();
+  private HashSet<URL> _extensionSet = new HashSet<URL>();
 
   private AtomicInteger _beanId = new AtomicInteger();
 
@@ -255,7 +255,7 @@ public class InjectManager
   private boolean _isAfterBeanDiscoveryComplete;
 
   private ApplicationScope _applicationScope = new ApplicationScope();
-  private XmlStandardPlugin _xmlPlugin;
+  private XmlStandardPlugin _xmlExtension;
 
   private RuntimeException _configException;
 
@@ -315,9 +315,9 @@ public class InjectManager
       BeanFactory factory = createBeanFactory(InjectManager.class);
       addBean(factory.singleton(this));
 
-      _xmlPlugin = new XmlStandardPlugin(this);
-      addPlugin(_xmlPlugin);
-      createPlugin("com.caucho.server.webbeans.ResinStandardPlugin");
+      _xmlExtension = new XmlStandardPlugin(this);
+      addExtension(_xmlExtension);
+      createExtension("com.caucho.server.webbeans.ResinStandardPlugin");
 
       if (_classLoader != null && isSetLocal) {
 	_classLoader.addScanListener(this);
@@ -329,7 +329,7 @@ public class InjectManager
     }
   }
 
-  private void createPlugin(String className)
+  private void createExtension(String className)
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -337,9 +337,9 @@ public class InjectManager
       Class cl = Class.forName(className, false, loader);
       Constructor ctor= cl.getConstructor(new Class[] { InjectManager.class });
 
-      Plugin plugin = (Plugin) ctor.newInstance(this);
+      Plugin extension = (Plugin) ctor.newInstance(this);
 
-      addPlugin(plugin);
+      addExtension(extension);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
@@ -2086,7 +2086,7 @@ public class InjectManager
     try {
       thread.setContextClassLoader(_classLoader);
 
-      updatePlugins();
+      updateExtensions();
 
       if (! _isBeforeBeanDiscoveryComplete) {
 	_isBeforeBeanDiscoveryComplete = true;
@@ -2202,7 +2202,7 @@ public class InjectManager
     try {
       thread.setContextClassLoader(_classLoader);
 
-      updatePlugins();
+      updateExtensions();
 
       ArrayList<WebBeansRootContext> rootContextList
 	= new ArrayList<WebBeansRootContext>(_pendingRootContextList);
@@ -2213,7 +2213,7 @@ public class InjectManager
 	return;
       
       for (WebBeansRootContext context : rootContextList) {
-	_xmlPlugin.addRoot(context.getRoot());
+	_xmlExtension.addRoot(context.getRoot());
       }
       
       _isBeforeBeanDiscoveryComplete = true;
@@ -2272,8 +2272,9 @@ public class InjectManager
 
       type = processAnnotatedType(type);
 
-      if (type == null)
+      if (type == null) {
 	return;
+      }
 
       if (type.isAnnotationPresent(Specializes.class)) {
 	for (Class parent = cl.getSuperclass();
@@ -2343,11 +2344,16 @@ public class InjectManager
 
   private <X> void addDiscoveredBean(ManagedBean<X> managedBean)
   {
+    addBean(managedBean);
+    
     for (ProducerBean producerBean : managedBean.getProducerBeans()) {
+      /*
       Bean subBean = processBean(producerBean);
 
       if (subBean != null)
 	addBean(subBean);
+      */
+      addBean(producerBean);
     }
 
     for (ObserverMethod observer : managedBean.getObserverMethods()) {
@@ -2366,7 +2372,7 @@ public class InjectManager
     }
   }
 
-  public void updatePlugins()
+  public void updateExtensions()
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -2376,10 +2382,10 @@ public class InjectManager
       while (e.hasMoreElements()) {
 	URL url = (URL) e.nextElement();
 
-	if (_pluginSet.contains(url))
+	if (_extensionSet.contains(url))
 	  continue;
 
-	_pluginSet.add(url);
+	_extensionSet.add(url);
 
 	InputStream is = null;
 	try {
@@ -2395,7 +2401,7 @@ public class InjectManager
 	    line = line.trim();
 
 	    if (line.length() > 0) {
-	      loadPlugin(line);
+	      loadExtension(line);
 	    }
 	  }
 
@@ -2411,7 +2417,7 @@ public class InjectManager
     }
   }
 
-  private void loadPlugin(String className)
+  private void loadExtension(String className)
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -2419,21 +2425,21 @@ public class InjectManager
       Class cl = Class.forName(className, false, loader);
 
       if (! Plugin.class.isAssignableFrom(cl))
-	throw new InjectionException(L.l("'{0}' is not a valid plugin because it does not implement {1}",
+	throw new InjectionException(L.l("'{0}' is not a valid extension because it does not implement {1}",
 					 cl, Plugin.class.getName()));
 
-      Plugin plugin = (Plugin) cl.newInstance();
+      Plugin extension = (Plugin) cl.newInstance();
 
-      addPlugin(plugin);
+      addExtension(extension);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
 
-  private void addPlugin(Plugin plugin)
+  public void addExtension(Plugin extension)
   {
-    for (Method method : plugin.getClass().getMethods()) {
-      bindObserver(plugin, method);
+    for (Method method : extension.getClass().getMethods()) {
+      bindObserver(extension, method);
     }
   }
 

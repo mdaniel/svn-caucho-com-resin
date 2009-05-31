@@ -407,7 +407,7 @@ public class CustomBeanConfig {
     return null;
   }
 
-  @PostConstruct
+  //  @PostConstruct
   public void init()
   {
     if (_annotatedType != null) {

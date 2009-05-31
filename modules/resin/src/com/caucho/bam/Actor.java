@@ -79,6 +79,11 @@ public interface Actor
   public void setJid(String jid);
 
   /**
+   * Sets the stream to the broker during registration
+   */
+  public void setBrokerStream(ActorStream brokerStream);
+
+  /**
    * Returns the custom {@link com.caucho.bam.ActorStream} to the
    * {@link com.caucho.bam.Broker}, so the Broker can send messages to
    * the agent.

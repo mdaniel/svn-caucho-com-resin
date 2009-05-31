@@ -180,10 +180,12 @@ public class ServletManager {
   /**
    * Creates the servlet chain for the servlet.
    */
-  public FilterChain createServletChain(String servletName)
+  public FilterChain createServletChain(String servletName,
+					ServletConfigImpl config)
     throws ServletException
   {
-    ServletConfigImpl config = _servlets.get(servletName);
+    if (config == null)
+      config = _servlets.get(servletName);
 
     if (config == null) {
       throw new ServletConfigException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));

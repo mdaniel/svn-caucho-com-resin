@@ -159,7 +159,7 @@ public class WebApp extends ServletContextImpl
   private WebAppController _controller;
 
   // The webbeans container
-  private InjectManager _webBeans;
+  private InjectManager _beanManager;
 
   // The webApp directory.
   private final Path _appDir;
@@ -348,7 +348,7 @@ public class WebApp extends ServletContextImpl
   WebApp(WebAppController controller)
   {
     _server = Server.getCurrent();
-    
+
     String contextPath = controller.getContextPath();
     setContextPathId(contextPath);
 
@@ -380,10 +380,6 @@ public class WebApp extends ServletContextImpl
 
       Vfs.setPwd(_appDir, _classLoader);
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
-
-      InjectManager inject = InjectManager.create(_classLoader);
-
-      inject.addPath(_appDir.lookup("WEB-INF/beans.xml"));
 
       // map.put("app", _appVar);
 
@@ -434,6 +430,10 @@ public class WebApp extends ServletContextImpl
                && _appDir.equals(_parent.getRootDirectory())) {
         throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n", _appDir.getURL()));
       }
+      
+      _beanManager = InjectManager.create(_classLoader);
+      _beanManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
+      _beanManager.addExtension(new WebAppInjectExtension(_beanManager, this));
     } catch (Throwable e) {
       setConfigException(e);
     }
@@ -2178,12 +2178,12 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getId());
 
-      _webBeans = InjectManager.getCurrent();
+      _beanManager = InjectManager.getCurrent();
 
       try {
 	// server/1a36
 	
-	Authenticator auth = _webBeans.getInstanceByType(Authenticator.class);
+	Authenticator auth = _beanManager.getInstanceByType(Authenticator.class);
 
 	setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
@@ -2191,7 +2191,7 @@ public class WebApp extends ServletContextImpl
       }
 
       try {
-	_login = _webBeans.getInstanceByType(Login.class);
+	_login = _beanManager.getInstanceByType(Login.class);
 
 	setAttribute("caucho.login", _login);
       } catch (Exception e) {
@@ -2199,7 +2199,7 @@ public class WebApp extends ServletContextImpl
       }
 
       /*
-      _webBeans.addObserver(new WebBeansObserver(),
+      _beanManager.addObserver(new WebBeansObserver(),
 			    BeanManager.class,
 			    new AnnotationLiteral<Initialized>() {});
       */
@@ -2959,7 +2959,8 @@ public class WebApp extends ServletContextImpl
   public RequestDispatcher getNamedDispatcher(String servletName)
   {
     try {
-      FilterChain chain = _servletManager.createServletChain(servletName);
+      FilterChain chain
+	= _servletManager.createServletChain(servletName, null);
 
       FilterChain includeChain
         = _includeFilterMapper.buildFilterChain(chain, servletName);

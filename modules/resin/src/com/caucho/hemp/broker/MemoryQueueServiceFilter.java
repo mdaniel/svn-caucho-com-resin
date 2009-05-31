@@ -71,6 +71,10 @@ public class MemoryQueueServiceFilter implements Actor
     _serviceStream
       = new HempMemoryQueue(null, broker, service.getActorStream());
   }
+
+  public void setBrokerStream(ActorStream stream)
+  {
+  }
   
   /**
    * Returns the service's jid

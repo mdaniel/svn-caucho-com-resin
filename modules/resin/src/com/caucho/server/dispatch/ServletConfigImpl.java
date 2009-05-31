@@ -50,6 +50,7 @@ import com.caucho.servlet.comet.CometServlet;
 import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.naming.NamingException;
 import javax.servlet.*;
@@ -80,6 +81,7 @@ public class ServletConfigImpl
   
   private String _servletClassName;
   private Class _servletClass;
+  private Bean _bean;
   private String _jspFile;
   private String _displayName;
   private int _loadOnStartup = Integer.MIN_VALUE;
@@ -264,6 +266,25 @@ public class ServletConfigImpl
   }
 
   /**
+   * Set the bean
+   */
+  @Configurable
+  public void setBean(Bean bean)
+  {
+    _bean = bean;
+  }
+
+  public Bean getBean()
+  {
+    return _bean;
+  }
+
+  public boolean isServletConfig()
+  {
+    return _bean != null || _servletClassName != null;
+  }
+  
+  /**
    * Sets the servlet class.
    */
   @Configurable
@@ -294,6 +315,9 @@ public class ServletConfigImpl
    */
   public Class getServletClass()
   {
+    if (_bean != null)
+      return _bean.getBeanClass();
+    
     if (_servletClassName == null)
       return null;
     
@@ -586,6 +610,14 @@ public class ServletConfigImpl
   }
 
   /**
+   * Sets the web service protocol.
+   */
+  public void setProtocolFactory(ProtocolServletFactory factory)
+  {
+    _protocolFactory = factory;
+  }
+
+  /**
    * Sets the init exception
    */
   public void setInitException(ServletException exn)
@@ -701,7 +733,7 @@ public class ServletConfigImpl
 
       if (Servlet.class.isAssignableFrom(_servletClass)) {
       }
-      else if (_protocolConfig != null) {
+      else if (_protocolConfig != null || _protocolFactory != null) {
       }
       /*
       else if (_servletClass.isAnnotationPresent(WebService.class)) {
@@ -832,7 +864,7 @@ public class ServletConfigImpl
     else if (SingleThreadModel.class.isAssignableFrom(servletClass)) {
       servletChain = new SingleThreadServletFilterChain(this);
     }
-    else if (_protocolConfig != null) {
+    else if (_protocolConfig != null || _protocolFactory != null) {
       servletChain = new WebServiceFilterChain(this);
     }
     else if (CometServlet.class.isAssignableFrom(servletClass))
@@ -966,7 +998,12 @@ public class ServletConfigImpl
       if (_protocolFactory == null)
 	_protocolFactory = _protocolConfig.createFactory();
 
-      Servlet servlet = _protocolFactory.createServlet(_servletClass, service);
+      if (_protocolFactory == null)
+	throw new IllegalStateException(L.l("unknown protocol factory for '{0}'",
+					    this));
+
+      Servlet servlet
+	= _protocolFactory.createServlet(getServletClass(), service);
 
       servlet.init(this);
 

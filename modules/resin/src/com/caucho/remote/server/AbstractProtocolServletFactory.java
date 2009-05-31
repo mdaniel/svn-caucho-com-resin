@@ -32,8 +32,13 @@ package com.caucho.remote.server;
 import com.caucho.config.*;
 import com.caucho.remote.*;
 
+import java.lang.annotation.Annotation;
+
 import javax.ejb.*;
 import javax.jws.*;
+import javax.servlet.*;
+
+import javax.enterprise.inject.spi.Annotated;
 import javax.servlet.*;
 
 /**
@@ -42,6 +47,20 @@ import javax.servlet.*;
 abstract public class AbstractProtocolServletFactory
   implements ProtocolServletFactory
 {
+  /**
+   * Sets the ServiceType annotation
+   */
+  public void setServiceType(Annotation ann)
+  {
+  }
+  
+  /**
+   * Sets the ServiceType annotated
+   */
+  public void setAnnotated(Annotated annotated)
+  {
+  }
+  
   /**
    * Creates a new servlet skeleton based on an API and an object
    *

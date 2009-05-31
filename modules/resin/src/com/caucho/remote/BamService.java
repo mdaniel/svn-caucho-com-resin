@@ -35,7 +35,6 @@ import java.lang.annotation.*;
 
 import javax.enterprise.inject.BindingType;
 import com.caucho.config.annotation.StartupType;
-import com.caucho.hemp.BamServiceBinding;
 
 /**
  * The @BamService registers a bean with the bam service registry.
@@ -46,4 +45,6 @@ import com.caucho.hemp.BamServiceBinding;
 @Retention(RUNTIME)
 public @interface BamService {
   public String name() default "";
+
+  public int threadMax() default 1;
 }

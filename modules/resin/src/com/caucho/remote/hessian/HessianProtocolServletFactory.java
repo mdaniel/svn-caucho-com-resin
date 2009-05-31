@@ -39,7 +39,7 @@ import javax.jws.*;
 import javax.servlet.*;
 
 /**
- * Hessian factory for creating @WebService and @Remote servlets. 
+ * Hessian factory for creating @HessianService servlets. 
  */
 public class HessianProtocolServletFactory
   extends AbstractProtocolServletFactory

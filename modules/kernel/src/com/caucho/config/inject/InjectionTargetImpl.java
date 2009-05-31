@@ -268,7 +268,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       ConfigContext env = (ConfigContext) contextEnv;
 
       if (_args == null)
-	throw new NullPointerException(toString());
+	throw new IllegalStateException(L.l("Can't instantiate bean because it is not a valid ManagedBean: '{0}'", toString()));
       
       Object []args;
       int size = _args.length;

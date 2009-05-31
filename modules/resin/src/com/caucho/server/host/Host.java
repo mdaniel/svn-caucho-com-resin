@@ -537,6 +537,8 @@ public class Host extends WebAppContainer
 
     webBeans.addBean(webBeans.createBeanFactory(Broker.class)
 		     .name("bamBroker").singleton(_bamBroker));
+
+    webBeans.addExtension(_bamBroker);
     
     // XXX: webBeans.addRegistrationListener(new BamRegisterListener());
   }

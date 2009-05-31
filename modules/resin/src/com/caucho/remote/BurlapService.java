@@ -27,27 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.remote;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.BindingType;
-import com.caucho.config.annotation.StartupType;
-import com.caucho.hemp.BamServiceBinding;
+import com.caucho.remote.annotation.ServiceType;
+import com.caucho.remote.burlap.BurlapProtocolServletFactory;
 
 /**
- * The @BamService registers a bean with the bam service registry.
+ * The @BurlapService registers a service with the burlap protocol
+ *
+ * <code><pre>
+ * &lt;web-app xmlns="http://caucho.com/ns/resin"
+ *        xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *    &lt;mypkg:MyService xmlns:mypkg="urn:java:com.foo.mypkg">
+ *      &lt;mypkg:BurlapService urlPattern="/my-service"/>
+ *    &lt;/mypkg:MyService>
+ *
+ * &lt;/web-app>
+ * </pre></code>
  */
 
-@StartupType
-@BamServiceBinding  
 @Documented
-@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Target({TYPE})
 @Retention(RUNTIME)
-public @interface BamService {
-  public String name() default "";
-
-  public int threadMax() default 1;
+@ServiceType(defaultFactory=BurlapProtocolServletFactory.class)
+public @interface BurlapService {
+  public String urlPattern();
 }

@@ -27,53 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.remote.burlap;
+package com.caucho.remote;
 
-import com.caucho.burlap.client.*;
-import com.caucho.remote.*;
-import com.caucho.remote.client.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.*;
 
-import java.lang.annotation.Annotation;
+import com.caucho.remote.annotation.ProxyType;
+import com.caucho.remote.burlap.BurlapProtocolProxyFactory;
 
 /**
- * Burlap factory for creating remote-client proxies
+ * The @BurlapClient registers a client with burlap
+ *
+ * <code><pre>
+ * &lt;web-app xmlns="http://caucho.com/ns/resin"
+ *        xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *    &lt;mypkg:MyService xmlns:mypkg="urn:java:com.foo.mypkg">
+ *      &lt;mypkg:BurlapClient url="http://localhost:8080/test"/>
+ *    &lt;/mypkg:MyService>
+ *
+ * &lt;/web-app>
+ * </pre></code>
  */
-public class BurlapProtocolProxyFactory
-  extends AbstractProtocolProxyFactory
-{
-  private BurlapProxyFactory _factory = new BurlapProxyFactory();
 
-  private String _url;
-
-  /**
-   * Sets the proxy URL.
-   */
-  public void setURL(String url)
-  {
-    _url = url;
-  }
-
-  @Override
-  public void setProxyType(Annotation ann)
-  {
-    BurlapClient client = (BurlapClient) ann;
-
-    setURL(client.url());
-  }
-  
-  /**
-   * Creates a new proxy based on an API
-   *
-   * @param api the api exposed to the client
-   */
-  public Object createProxy(Class api)
-  {
-    try {
-      return _factory.create(api, _url);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ServiceException(e);
-    }
-  }
+@Documented
+@Target({TYPE})
+@Retention(RUNTIME)
+@ProxyType(defaultFactory=BurlapProtocolProxyFactory.class)
+public @interface BurlapClient {
+  public String url();
 }
