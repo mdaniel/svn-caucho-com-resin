@@ -43,6 +43,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.lang.reflect.Method;
 
+import javax.servlet.annotation.WebServlet;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Plugin;
@@ -73,7 +74,28 @@ public class WebAppInjectExtension implements Plugin
       for (Annotation ann : annotated.getAnnotations()) {
 	Class annType = ann.annotationType();
 	
-	if (annType.isAnnotationPresent(ServiceType.class)) {
+	if (annType.equals(WebServlet.class)) {
+	  WebServlet webServlet = (WebServlet) ann;
+      
+	  ServletMapping mapping = new ServletMapping();
+
+	  for (String value : webServlet.value()) {
+	    mapping.addURLPattern(value);
+	  }
+	  
+	  for (String value : webServlet.urlPatterns()) {
+	    mapping.addURLPattern(value);
+	  }
+	  
+	  mapping.setBean(bean);
+	
+	  mapping.init();
+
+	  _webApp.addServletMapping(mapping);
+
+	  event.setBean(null);
+	}
+	else if (annType.isAnnotationPresent(ServiceType.class)) {
 	  ServiceType serviceType
 	    = (ServiceType) annType.getAnnotation(ServiceType.class);
 

@@ -10,5 +10,6 @@ javax.enterprise.event
 javax.interceptor
 javax.jms
 javax.persistence
+javax.servlet.annotation
 javax.sql
 javax.xml.ws

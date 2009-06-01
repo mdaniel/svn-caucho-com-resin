@@ -1020,6 +1020,11 @@ public class ServletConfigImpl
   private Object createServletImpl()
     throws Exception
   {
+    if (_bean != null) {
+      ConfigContext env = ConfigContext.create();
+      return _bean.create(env);
+    }
+      
     Class servletClass = getServletClass();
 
     Object servlet;
