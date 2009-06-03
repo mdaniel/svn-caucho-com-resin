@@ -1025,6 +1025,14 @@ public class InjectManager
       addComponentByName(bean.getName(), bean);
     }
 
+    if (bean instanceof ManagedBean) {
+      ManagedBean<?> mBean = (ManagedBean) bean;
+
+      for (ProducerBean producerBean : mBean.getProducerBeans()) {
+	addBean(producerBean);
+      }
+    }
+
     registerJmx(bean);
   }
 
@@ -2354,16 +2362,6 @@ public class InjectManager
   private <X> void addDiscoveredBean(ManagedBean<X> managedBean)
   {
     addBean(managedBean);
-    
-    for (ProducerBean producerBean : managedBean.getProducerBeans()) {
-      /*
-      Bean subBean = processBean(producerBean);
-
-      if (subBean != null)
-	addBean(subBean);
-      */
-      addBean(producerBean);
-    }
 
     for (ObserverMethod observer : managedBean.getObserverMethods()) {
       observer = processObserver(observer);

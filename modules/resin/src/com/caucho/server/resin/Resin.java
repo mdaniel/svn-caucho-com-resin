@@ -124,7 +124,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private String _serverId = "";
   private String _resinId;
-  private boolean _isWatchdog;
+  private final boolean _isWatchdog;
   private DynamicServer _dynamicServer;
   
   private ClusterPod _dynPod;
@@ -343,9 +343,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     try {
       Class cl = Class.forName("com.caucho.server.resin.ProResin");
-      Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class });
+      Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class, boolean.class });
 
-      resin = (Resin) ctor.newInstance(loader);
+      resin = (Resin) ctor.newInstance(loader, isWatchdog);
     } catch (ConfigException e) {
       log().log(Level.FINER, e.toString(), e);
 
@@ -499,6 +499,11 @@ public class Resin implements EnvironmentBean, SchemaBean
   public boolean isResinServer()
   {
     return ! _isWatchdog;
+  }
+
+  public boolean isWatchdog()
+  {
+    return _isWatchdog;
   }
 
   public String getUniqueServerName()

@@ -1756,10 +1756,19 @@ public class Server extends ProtocolDispatchServer
         if (resin != null) {
           log.info("resin.home = " + resin.getResinHome().getNativePath());
           log.info("resin.root = " + resin.getRootDirectory().getNativePath());
-          log.info("resin.conf = " + resin.getResinConf());
+	  if (resin.getResinConf() != null)
+	    log.info("resin.conf = " + resin.getResinConf());
+
           log.info("");
 
-          log.info("server     = "
+	  String serverType;
+	  
+	  if (resin.isWatchdog())
+	    serverType = "watchdog";
+	  else
+	    serverType = "server";
+
+          log.info(serverType + "     = "
 		   + _selfServer.getClusterPort().getAddress()
 		   + ":" + _selfServer.getClusterPort().getPort()
 		   + " (" + getCluster().getId()

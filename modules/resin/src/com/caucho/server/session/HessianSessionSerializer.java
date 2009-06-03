@@ -30,6 +30,7 @@
 package com.caucho.server.session;
 
 import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianDebugOutputStream;
 
 import java.io.OutputStream;
 import java.io.IOException;
@@ -47,6 +48,10 @@ public class HessianSessionSerializer extends SessionSerializer {
 
   public HessianSessionSerializer(OutputStream os)
   {
+    if (log.isLoggable(Level.FINEST)) {
+      os = new HessianDebugOutputStream(os, log, Level.FINEST);
+    }
+    
     _out = new Hessian2Output(os);
   }
   

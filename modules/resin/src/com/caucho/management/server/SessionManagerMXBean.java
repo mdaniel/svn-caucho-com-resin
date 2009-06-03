@@ -207,4 +207,14 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
    */
   @Description("The total number of times a session has timed out")
   public long getSessionTimeoutCountTotal();
+
+  //
+  // operations
+  //
+
+  /**
+   * Returns the debug string for a session
+   */
+  @Description("A string representation of the serialized session")
+  public String getSessionSerializationDebug(String id);
 }

@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.distcache.CacheSerializer;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
@@ -47,8 +48,6 @@ import javax.cache.CacheLoader;
 abstract public class DistributedCacheManager
 {
   private final Server _server;
-
-  private CacheLoader _cacheLoader;
 
   protected DistributedCacheManager(Server server)
   {
@@ -148,14 +147,25 @@ abstract public class DistributedCacheManager
     }
   }
 
-  public CacheLoader getCacheLoader()
+  /**
+   * Returns the key hash
+   */
+  public HashKey createSelfHashKey(Object key, CacheSerializer keySerializer)
   {
-    return _cacheLoader;
-  }
+    try {
+      MessageDigest digest
+	= MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
 
-  public void setCacheLoader(CacheLoader cacheLoader)
-  {
-    _cacheLoader = cacheLoader;
+      NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
+
+      keySerializer.serialize(key, dOut);
+
+      HashKey hashKey = new HashKey(dOut.digest());
+
+      return hashKey;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -195,4 +205,4 @@ abstract public class DistributedCacheManager
     {
     }
   }
-    }
+}

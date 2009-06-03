@@ -52,6 +52,7 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.RandomUtil;
+import com.caucho.vfs.TempOutputStream;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -1153,8 +1154,12 @@ public final class SessionManager implements AlarmListener
       }
       else {
 	// if the load failed, then the session died out from underneath
-	if (! isNew)
-	  session.reset(now);
+	if (! isNew) {
+	  if (log.isLoggable(Level.FINER))
+	    log.fine(session + " load failed for existing session");
+
+	  session.setModified();
+	}
       }
     }
 
@@ -1242,7 +1247,11 @@ public final class SessionManager implements AlarmListener
     }
     else if (! session.load(isNew)) {
       // if the load failed, then the session died out from underneath
-      session.reset(now);
+      if (log.isLoggable(Level.FINER))
+	log.fine(session + " load failed for existing session");
+
+      session.setModified();
+
       isNew = true;
     }
 
@@ -1406,6 +1415,44 @@ public final class SessionManager implements AlarmListener
   void removeSession(SessionImpl session)
   {
     _sessions.remove(session.getId());
+  }
+
+  /**
+   * Returns a debug string for the session
+   */
+  public String getSessionSerializationDebug(String id)
+  {
+    ByteStreamCache cache = getCache();
+
+    if (cache == null)
+      return null;
+      
+    try {
+      TempOutputStream os = new TempOutputStream();
+    
+      if (cache.get(id, os)) {
+	InputStream is = os.getInputStream();
+
+	StringWriter writer = new StringWriter();
+
+	HessianDebugInputStream dis
+	  = new HessianDebugInputStream(is, new PrintWriter(writer));
+
+	int ch;
+	while ((ch = dis.read()) >= 0) {
+	}
+
+	return writer.toString();
+      }
+
+      os.close();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return e.toString();
+    }
+
+    return null;
   }
 
   /**

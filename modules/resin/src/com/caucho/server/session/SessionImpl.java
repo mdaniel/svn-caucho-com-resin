@@ -271,6 +271,12 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
   }
 
+  void setModified()
+  {
+    if (_values.size() > 0)
+      _isModified = true;
+  }
+  
   /**
    * Sets a session attribute.  If the value is a listener, notify it
    * of the objectModified.  If the value has changed mark the session as changed
@@ -570,6 +576,11 @@ public class SessionImpl implements HttpSession, CacheListener {
 
 	SessionDeserializer in = new HessianSessionDeserializer(is);
 
+	if (log.isLoggable(Level.FINE)) {
+	  log.fine(this + " session load valueHash="
+		   + (entry != null ? entry.getValueHashKey() : null));
+	}
+
 	load(in);
 
 	in.close();
@@ -579,6 +590,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 
 	return true;
       }
+      else
+	_cacheEntry = null;
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -658,7 +671,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   void reset(long now)
   {
-    if (log.isLoggable(Level.FINE))
+    if (log.isLoggable(Level.FINER))
       log.fine(this + " reset");
 
     unbind();
@@ -727,6 +740,11 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
 					    _idleTimeout);
+
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(this + " session save valueHash="
+		 + (_cacheEntry != null ? _cacheEntry.getValueHashKey() : null));
+      }
 
       os.close();
     } catch (Exception e) {

@@ -287,6 +287,14 @@ public class SessionManagerAdmin extends AbstractManagedObject
     */
     return "unknown";
   }
+
+  /**
+   * Returns a debug string for the session
+   */
+  public String getSessionSerializationDebug(String id)
+  {
+    return _manager.getSessionSerializationDebug(id);
+  }
   
   /**
    * Unregisters the object with JMX.
@@ -298,6 +306,6 @@ public class SessionManagerAdmin extends AbstractManagedObject
 
   public String toString()
   {
-    return "SessionManagerAdmin[" + getObjectName() + "]";
+    return getClass().getSimpleName() + "[" + getObjectName() + "]";
   }
 }

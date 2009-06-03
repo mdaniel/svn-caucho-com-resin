@@ -48,10 +48,13 @@ public class HessianSessionDeserializer extends SessionDeserializer {
 
   public HessianSessionDeserializer(InputStream is)
   {
-    /*
-    if (log.isLoggable(Level.FINEST))
-      is = new HessianDebugInputStream(is, log);
-    */
+    if (log.isLoggable(Level.FINEST)) {
+      HessianDebugInputStream dis
+	= new HessianDebugInputStream(is, log, Level.FINEST);
+      log.finest("session serialized load data:");
+      dis.setDepth(2);
+      is = dis;
+    }
   
     _in = new Hessian2Input(is);
   }

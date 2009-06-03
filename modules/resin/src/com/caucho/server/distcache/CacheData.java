@@ -40,18 +40,21 @@ import java.lang.ref.SoftReference;
 public final class CacheData {
   private final HashKey _key;
   private final HashKey _value;
+  private final HashKey _cacheKey;
   private final int _flags;
   private final long _version;
   private final long _accessTime;
 
   public CacheData(HashKey key,
 		   HashKey value,
+		   HashKey cacheKey,
 		   int flags,
 		   long version,
 		   long accessTime)
   {
     _key = key;
     _value = value;
+    _cacheKey = cacheKey;
     _flags = flags;
     _version = version;
     
@@ -66,6 +69,11 @@ public final class CacheData {
   public HashKey getValue()
   {
     return _value;
+  }
+
+  public HashKey getCacheKey()
+  {
+    return _cacheKey;
   }
 
   public int getFlags()

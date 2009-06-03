@@ -55,10 +55,10 @@ public class FileCacheEntry extends DistCacheEntry {
   }
 
   public FileCacheEntry(Object key,
-			   HashKey keyHash,
-			   ClusterPod.Owner owner,
-			   FileCacheManager manager,
-                           CacheConfig config)
+			HashKey keyHash,
+			ClusterPod.Owner owner,
+			FileCacheManager manager,
+			CacheConfig config)
   {
     super(key, keyHash, owner, config);
 

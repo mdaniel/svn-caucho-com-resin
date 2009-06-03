@@ -37,6 +37,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.*;
 import com.caucho.util.L10N;
+import com.caucho.util.HashKey;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
@@ -83,7 +84,7 @@ abstract public class AbstractCache extends AbstractMap
   private boolean _isInit;
   private boolean _isClosed;
 
-  private DistributedCacheManager _distributedCacheManager;
+  private DistributedCacheManager _manager;
 
   private long _priorMisses = 0;
   private long _priorHits = 0;
@@ -383,15 +384,15 @@ abstract public class AbstractCache extends AbstractMap
 
       _isInit = true;
 
+      _config.init();
+      
+      initServer();
+
       initName(_name);
 
       initScope(_scopeName);
 
       initPersistence(_persistenceOption);
-
-      initServer();
-
-      _config.init();
 
       _entryCache = new LruCache<Object,DistCacheEntry>(512);
     }
@@ -551,7 +552,7 @@ abstract public class AbstractCache extends AbstractMap
     DistCacheEntry cacheEntry = _entryCache.get(key);
 
     if (cacheEntry == null) {
-      cacheEntry = _distributedCacheManager.getCacheEntry(key, _config);
+      cacheEntry = _manager.getCacheEntry(key, _config);
       
       _entryCache.put(key, cacheEntry);
     }
@@ -818,7 +819,8 @@ abstract public class AbstractCache extends AbstractMap
     if (value != null)
       return value;
 
-    CacheLoader loader = _distributedCacheManager.getCacheLoader();
+    CacheLoader loader = _config.getCacheLoader();
+    
     value = (loader != null) ? loader.load(key) : null;
 
     if (value != null)
@@ -916,62 +918,75 @@ abstract public class AbstractCache extends AbstractMap
     return getClass().getSimpleName() + "[" + _guid + "]";
   }
 
-  private void initName(String name) throws ConfigException
-   {
-     if (_name == null || _name.length() == 0)
-       throw new ConfigException(L.l("Each Cache must have a name."));
+  private void initName(String name)
+    throws ConfigException
+  {
+    if (_name == null || _name.length() == 0)
+      throw new ConfigException(L.l("Each Cache must have a name."));
 
-     HashSet<String> cacheNameSet = getLocalCacheNameSet();
-     String contextId = Environment.getEnvironmentName();
+    HashSet<String> cacheNameSet = getLocalCacheNameSet();
+    String contextId = Environment.getEnvironmentName();
 
-     if (_guid == null)
-       _guid = contextId + ":" + _name;
+    if (_guid == null)
+      _guid = contextId + ":" + _name;
      
-     _config.setGuid(_guid);
+    _config.setGuid(_guid);
 
-     if (!cacheNameSet.contains(_guid))
-       cacheNameSet.add(_guid);
-     else
-       throw new ConfigException(L.l(
-         "'{0}' is an invalid Cache name because it's already used by another cache.",
-         _name));
-   }
+    _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
+						   _config.getKeySerializer()));
+    
+    if (! cacheNameSet.contains(_guid))
+      cacheNameSet.add(_guid);
+    else
+      throw new ConfigException(L.l(
+				    "'{0}' is an invalid Cache name because it's already used by another cache.",
+				    _name));
+  }
 
-   private void initPersistence(String persistence) throws ConfigException
-    {
-      Persistence result  = Persistence.TRIPLE;
-      if (persistence != null)
-        try {
-          result = Persistence.valueOf(persistence.toUpperCase());
-        }
-        catch (Exception e) {
-          throw new ConfigException(L.l("'{0}' is not a valid Persistence option", persistence));
-        }
-      setPersistenceMode(result);
+  private void initPersistence(String persistence)
+    throws ConfigException
+  {
+    Persistence result  = Persistence.TRIPLE;
+    
+    if (persistence != null) {
+      try {
+	result = Persistence.valueOf(persistence.toUpperCase());
+      }
+      catch (Exception e) {
+	throw new ConfigException(L.l("'{0}' is not a valid Persistence option", persistence));
+      }
     }
+    
+    setPersistenceMode(result);
+  }
 
-   private void initScope(String scopeName) throws ConfigException
-   {
-     Scope scope = null;
-       if (_scopeName != null)
-       try {
-         scope = Scope.valueOf(_scopeName.toUpperCase());
-       }
-       catch (Exception e) {
-         throw new ConfigException(L.l("'{0}' is not a valid Scope option", scopeName));
-       }
-       setScopeMode(scope);
-   }
+  private void initScope(String scopeName)
+    throws ConfigException
+  {
+    Scope scope = null;
+    
+    if (_scopeName != null) {
+      try {
+	scope = Scope.valueOf(_scopeName.toUpperCase());
+      }
+      catch (Exception e) {
+	throw new ConfigException(L.l("'{0}' is not a valid Scope option", scopeName));
+      }
+    }
+    
+    setScopeMode(scope);
+  }
 
-  private void initServer() throws ConfigException
+  private void initServer()
+    throws ConfigException
   {
     Server server = Server.getCurrent();
+    
     if (server == null)
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
-        getClass().getSimpleName()));
+				    getClass().getSimpleName()));
 
-    _distributedCacheManager = server.getDistributedCacheManager();
-    _distributedCacheManager.setCacheLoader(_config.getCacheLoader());
+    _manager = server.getDistributedCacheManager();
   }
   
 

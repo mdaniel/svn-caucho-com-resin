@@ -100,7 +100,8 @@ public class FileCacheManager extends DistributedCacheManager {
     while (cacheEntry == null) {
       ClusterPod.Owner owner = ClusterPod.Owner.A_B;
 
-      cacheEntry = new FileCacheEntry(key, hashKey, owner, this);
+      cacheEntry = new FileCacheEntry(key, hashKey,
+				      owner, this);
 
       cacheEntry = _entryCache.putIfNew(hashKey, cacheEntry);
     }
@@ -120,8 +121,9 @@ public class FileCacheManager extends DistributedCacheManager {
 
       cacheEntry = new FileCacheEntry(null, hashKey, owner, this);
 
-      if (!_entryCache.compareAndPut(null, hashKey, cacheEntry))
+      if (! _entryCache.compareAndPut(null, hashKey, cacheEntry)) {
         cacheEntry = _entryCache.get(hashKey);
+      }
     }
 
     return cacheEntry;
@@ -210,8 +212,8 @@ public class FileCacheManager extends DistributedCacheManager {
    * Gets a cache entry
    */
   public boolean get(FileCacheEntry entry,
-    OutputStream os,
-    CacheConfig config)
+		     OutputStream os,
+		     CacheConfig config)
   {
     return false;
   }
@@ -220,8 +222,8 @@ public class FileCacheManager extends DistributedCacheManager {
    * Sets a cache entry
    */
   public MnodeValue put(FileCacheEntry entry,
-    Object value,
-    CacheConfig config)
+			Object value,
+			CacheConfig config)
   {
     HashKey key = entry.getKeyHash();
     MnodeValue oldEntryValue = loadLocalEntry(entry);
@@ -230,25 +232,27 @@ public class FileCacheManager extends DistributedCacheManager {
       = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
 
     HashKey valueHash = writeData(oldValueHash, value,
-      config.getValueSerializer());
+				  config.getValueSerializer());
 
     if (valueHash.equals(oldValueHash))
       return oldEntryValue;
+
+    HashKey cacheHash = entry.getCacheHash();
 
     long version = oldEntryValue != null ? oldEntryValue.getVersion() + 1 : 1;
     int flags = config.getFlags();
 
     long expireTimeout = config.getExpireTimeout();
     long idleTimeout = (oldEntryValue != null
-      ? oldEntryValue.getIdleTimeout()
-      : config.getIdleTimeout());
+			? oldEntryValue.getIdleTimeout()
+			: config.getIdleTimeout());
     long localReadTimeout = config.getLocalReadTimeout();
     long leaseTimeout = config.getLeaseTimeout();
 
     long accessTime = Alarm.getExactTime();
     long updateTime = Alarm.getExactTime();
 
-    MnodeValue mnodeValue = new MnodeValue(valueHash, value,
+    MnodeValue mnodeValue = new MnodeValue(valueHash, value, cacheHash,
 					   flags, version,
 					   expireTimeout,
 					   idleTimeout,
@@ -261,7 +265,7 @@ public class FileCacheManager extends DistributedCacheManager {
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
 
-    if (!entry.compareAndSet(oldEntryValue, mnodeValue)) {
+    if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
       log.fine(this + " mnodeValue update failed due to timing conflict"
         + " (key=" + key + ")");
 
@@ -269,12 +273,12 @@ public class FileCacheManager extends DistributedCacheManager {
     }
 
     if (oldEntryValue == null) {
-      if (_mnodeStore.insert(key, valueHash,
-        flags, version,
-        expireTimeout,
-        idleTimeout,
-        leaseTimeout,
-        localReadTimeout)) {
+      if (_mnodeStore.insert(key, valueHash, cacheHash,
+			     flags, version,
+			     expireTimeout,
+			     idleTimeout,
+			     leaseTimeout,
+			     localReadTimeout)) {
       } else {
         log.fine(this + " db insert failed due to timing conflict"
           + "(key=" + key + ")");
@@ -323,6 +327,7 @@ public class FileCacheManager extends DistributedCacheManager {
     HashKey oldValueHash
       = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
 
+    HashKey cacheHash = entry.getCacheHash();
     long version = oldEntryValue != null ? oldEntryValue.getVersion() + 1 : 1;
     int flags = oldEntryValue != null ? oldEntryValue.getFlags() : 0;
 
@@ -344,6 +349,7 @@ public class FileCacheManager extends DistributedCacheManager {
 
     long localExpireTime = accessTime + 100L;
     MnodeValue mnodeValue = new MnodeValue(null, null,
+					   cacheHash,
 					   flags, version,
 					   expireTimeout,
 					   idleTimeout,
@@ -379,7 +385,7 @@ public class FileCacheManager extends DistributedCacheManager {
     return oldValueHash != null;
   }
 
-  FileCacheEntry getLocalEntry(HashKey key)
+  FileCacheEntry getLocalEntry(HashKey key, HashKey cacheKey)
   {
     FileCacheEntry entryKey = getCacheEntry(key);
 

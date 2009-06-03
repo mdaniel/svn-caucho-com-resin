@@ -63,8 +63,8 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   private int _hits;
 
   public DistCacheEntry(Object key,
-		    HashKey keyHash,
-		    ClusterPod.Owner owner)
+			HashKey keyHash,
+			ClusterPod.Owner owner)
   {
     _key = key;
     _keyHash = keyHash;
@@ -72,9 +72,9 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   }
 
   public DistCacheEntry(Object key,
-		    HashKey keyHash,
-		    ClusterPod.Owner owner,
-		    CacheConfig config)
+			HashKey keyHash,
+			ClusterPod.Owner owner,
+			CacheConfig config)
   {
     _key = key;
     _keyHash = keyHash;
@@ -112,6 +112,14 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   public final HashKey getKeyHash()
   {
     return _keyHash;
+  }
+
+  /**
+   * Returns the cacheHash
+   */
+  public final HashKey getCacheHash()
+  {
+    return getMnodeValue().getCacheHashKey();
   }
 
   /**

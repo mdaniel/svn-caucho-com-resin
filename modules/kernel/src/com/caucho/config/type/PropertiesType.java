@@ -32,6 +32,7 @@ package com.caucho.config.type;
 import com.caucho.config.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.xml.QName;
 
 import java.util.*;
 import java.util.regex.*;
@@ -59,6 +60,15 @@ public final class PropertiesType extends ConfigType
   {
     return Properties.class;
   }
+  
+  /**
+   * Creates a new instance of the type.
+   */
+  public Object create(Object parent, QName name)
+  {
+    throw new ConfigException(L.l("java.util.Properties syntax is a string in .properties file syntax like the following:\n  a=b\n  b=c"));
+  }
+
   
   /**
    * Converts the string to a value of the type.

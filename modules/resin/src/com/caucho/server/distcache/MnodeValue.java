@@ -40,9 +40,10 @@ import java.lang.ref.SoftReference;
  */
 public final class MnodeValue implements ExtCacheEntry {
   public static final MnodeValue NULL
-    = new MnodeValue(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
+    = new MnodeValue(null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
   
   private final HashKey _valueHash;
+  private final HashKey _cacheHash;
   private final int _flags;
   private final long _version;
   
@@ -70,6 +71,7 @@ public final class MnodeValue implements ExtCacheEntry {
 
   public MnodeValue(HashKey valueHash,
 		    Object value,
+		    HashKey cacheHash,
 		    int flags,
 		    long version,
 		    long expireTimeout,
@@ -82,6 +84,7 @@ public final class MnodeValue implements ExtCacheEntry {
 		    boolean isImplicitNull)
   {
     _valueHash = valueHash;
+    _cacheHash = cacheHash;
     _flags = flags;
     _version = version;
     
@@ -107,6 +110,7 @@ public final class MnodeValue implements ExtCacheEntry {
 		    long lastUpdateTime)
   {
     _valueHash = oldMnodeValue.getValueHashKey();
+    _cacheHash = oldMnodeValue.getCacheHashKey();
     _flags = oldMnodeValue.getFlags();
     _version = oldMnodeValue.getVersion();
     
@@ -357,6 +361,19 @@ public final class MnodeValue implements ExtCacheEntry {
   public HashKey getValueHashKey()
   {
     return _valueHash;
+  }
+
+  public byte []getCacheHash()
+  {
+    if (_cacheHash != null)
+      return _cacheHash.getHash();
+    else
+      return null;
+  }
+
+  public HashKey getCacheHashKey()
+  {
+    return _cacheHash;
   }
 
   /**

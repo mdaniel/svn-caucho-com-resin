@@ -13,6 +13,7 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>candi: resin-web.xml needs to override scanned beans (#3546, rep by voodude0</li>
 <li>hessian: issues with 2 vs 1 version detection (#3036, rep by skipper13)</li>
 <li>candi: stack overflow with EL config (#3480, rep by Scott Hernandez)</li>
 <li>ejb: @Current SessionContext injection for stateful/session (#3506, rep by skot)</li>

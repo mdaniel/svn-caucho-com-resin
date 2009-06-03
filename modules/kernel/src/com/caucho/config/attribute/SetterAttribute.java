@@ -133,13 +133,13 @@ public class SetterAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      if (configType != null
-	  && _type.isAssignableFrom(configType.getType())) {
+      if (configType != null && _type.isAssignableFrom(configType.getType())) {
 	// ioc/2172
 	return configType.create(parent, name);
       }
-      else
+      else {
 	return getConfigType().create(parent, name);
+      }
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

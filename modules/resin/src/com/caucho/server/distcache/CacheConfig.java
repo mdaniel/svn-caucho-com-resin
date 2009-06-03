@@ -34,6 +34,7 @@ import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.HessianSerializer;
 import com.caucho.util.Alarm;
+import com.caucho.util.HashKey;
 
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
@@ -52,6 +53,7 @@ public class CacheConfig
   public static final int FLAG_GLOBAL = 0x10;
 
   private String _guid;
+  private HashKey _cacheKey;
 
   private int _flags = (FLAG_BACKUP | FLAG_TRIPLICATE);
 
@@ -108,6 +110,23 @@ public class CacheConfig
   public void setGuid(String guid)
   {
     _guid = guid;
+  }
+
+
+  /**
+   * Returns the globally-unique id for the cache.
+   */
+  public HashKey getCacheKey()
+  {
+    return _cacheKey;
+  }
+
+  /**
+   * Sets the globally-unique id for the cache
+   */
+  public void setCacheKey(HashKey cacheKey)
+  {
+    _cacheKey = cacheKey;
   }
 
   /**
