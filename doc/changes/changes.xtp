@@ -13,6 +13,10 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>hessian: issues with 2 vs 1 version detection (#3036, rep by skipper13)</li>
+<li>candi: stack overflow with EL config (#3480, rep by Scott Hernandez)</li>
+<li>ejb: @Current SessionContext injection for stateful/session (#3506, rep by skot)</li>
+<li>candi: increase priority of XML over discovered beans (#3507, rep by Jeff Schnitzer)</li>
 <li>embed: ResinEmbed support for non-empty cluster and server names (#3498, rep by skot)</li>
 <li>server: isUserInRole NPE in AbstractHttpRequest (#3489, rep by voodude)</li>
 <li>build: ant dist build.xml optional for Makefile.in (#3490, rep by skot)</li>

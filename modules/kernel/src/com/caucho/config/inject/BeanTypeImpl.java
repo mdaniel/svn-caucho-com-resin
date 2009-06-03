@@ -70,7 +70,7 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   
   public BeanTypeImpl(Type type, Class javaClass)
   {
-    super(type, javaClass.getDeclaredAnnotations());
+    super(type, null, javaClass.getDeclaredAnnotations());
 
     _javaClass = javaClass;
 
@@ -102,6 +102,24 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   }
 
   /**
+   * Returns the matching method, creating one if necessary.
+   */
+  public AnnotatedMethod createMethod(Method method)
+  {
+    for (AnnotatedMethod annMethod : _methodSet) {
+      if (BeanMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
+	return annMethod;
+      }
+    }
+
+    AnnotatedMethod annMethod = new BeanMethodImpl(this, null, method);
+
+    _methodSet.add(annMethod);
+
+    return annMethod;
+  }
+
+  /**
    * Returns the abstract introspected fields
    */
   public Set<AnnotatedField> getFields()
@@ -121,7 +139,7 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
 
     for (Method method : cl.getDeclaredMethods()) {
       if (hasBeanAnnotation(method)) {
-	_methodSet.add(new BeanMethodImpl(this, method));
+	_methodSet.add(new BeanMethodImpl(this, null, method));
       }
     }
 

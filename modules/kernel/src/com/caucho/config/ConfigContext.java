@@ -781,7 +781,7 @@ public class ConfigContext implements CreationalContext {
   }
 
   //
-  // XXX: required by args ...
+  // Used for args
   //
   public Object create(Node childNode, ConfigType type)
     throws ConfigException
@@ -790,7 +790,7 @@ public class ConfigContext implements CreationalContext {
       Object childBean;
       String text;
 
-      if ((text = getTextValue(childNode)) != null) {
+      if ((text = getArgTextValue(childNode)) != null) {
 	boolean isTrim = isTrim(childNode);
 
 	if (isEL() && type.isEL()
@@ -1059,7 +1059,6 @@ public class ConfigContext implements CreationalContext {
       return cData.getData();
     }
       
-
     if (! (node instanceof Element))
       return null;
 
@@ -1092,6 +1091,17 @@ public class ConfigContext implements CreationalContext {
     }
 
     return "";
+  }
+
+  /**
+   * Returns the text value of the node.
+   */
+  String getArgTextValue(Node node)
+  {
+    if (node instanceof Element && ! node.getLocalName().equals("value"))
+      return null;
+
+    return getTextValue(node);
   }
 
   private Object eval(ConfigType type, String data)

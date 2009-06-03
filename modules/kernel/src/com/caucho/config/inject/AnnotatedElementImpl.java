@@ -49,15 +49,22 @@ public class AnnotatedElementImpl implements Annotated
   private LinkedHashSet<Annotation> _annSet
     = new LinkedHashSet<Annotation>();
   
-  protected AnnotatedElementImpl(Type type, Annotation []annList)
+  protected AnnotatedElementImpl(Type type,
+				 Annotated annotated,
+				 Annotation []annList)
   {
     _type = type;
     
     if (annList == null)
       annList = new Annotation[0];
-    
-    for (Annotation ann : annList) {
-      _annSet.add(ann);
+
+    if (annotated != null) {
+      _annSet.addAll(annotated.getAnnotations());
+    }
+    else {
+      for (Annotation ann : annList) {
+	_annSet.add(ann);
+      }
     }
   }
 

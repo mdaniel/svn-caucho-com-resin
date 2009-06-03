@@ -37,6 +37,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -58,12 +59,14 @@ public class BeanMethodImpl
   
   public BeanMethodImpl(Method method)
   {
-    this(null, method);
+    this(null, null, method);
   }
   
-  public BeanMethodImpl(AnnotatedType declaringType, Method method)
+  public BeanMethodImpl(AnnotatedType declaringType,
+			Annotated annotated,
+			Method method)
   {
-    super(method.getGenericReturnType(), method.getAnnotations());
+    super(method.getGenericReturnType(), annotated, method.getAnnotations());
 
     _declaringType = declaringType;
     _method = method;
@@ -108,6 +111,44 @@ public class BeanMethodImpl
     
       _parameterList.add(param);
     }
+  }
+
+  public static boolean isMatch(Method methodA, Method methodB)
+  {
+    if (! methodA.getName().equals(methodB.getName()))
+      return false;
+
+    Class []paramA = methodA.getParameterTypes();
+    Class []paramB = methodB.getParameterTypes();
+
+    if (paramA.length != paramB.length)
+      return false;
+
+    for (int i = 0; i < paramA.length; i++) {
+      if (! paramA[i].equals(paramB[i]))
+	return false;
+    }
+
+    return true;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return _method.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj)
+      return true;
+    else if (! (obj instanceof BeanMethodImpl))
+      return false;
+
+    BeanMethodImpl method = (BeanMethodImpl) obj;
+
+    return isMatch(_method, method._method);
   }
 
   @Override

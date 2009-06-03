@@ -40,7 +40,7 @@ import javax.enterprise.context.spi.CreationalContext;
 /**
  * Internal implementation for a Bean
  */
-public class BeanWrapper<T> implements Bean<T>
+public class BeanWrapper<T> extends AbstractBean<T>
 {
   private final Bean<T> _bean;
 
@@ -129,9 +129,11 @@ public class BeanWrapper<T> implements Bean<T>
     return getBean().getBeanClass();
   }
 
+  /*
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _bean + "]";
   }
+  */
 }

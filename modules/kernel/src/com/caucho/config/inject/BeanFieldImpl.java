@@ -52,7 +52,7 @@ public class BeanFieldImpl
   
   public BeanFieldImpl(AnnotatedType declaringType, Field field)
   {
-    super(field.getGenericType(), field.getAnnotations());
+    super(field.getGenericType(), null, field.getAnnotations());
 
     _declaringType = declaringType;
     _field = field;

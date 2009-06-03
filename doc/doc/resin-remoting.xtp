@@ -71,7 +71,7 @@ just like writing a servlet.</p>
 
 <p>In this example, the implementation is trivial, just returning
 the "hello, world" string.  More complicated services might
-delegate to WebBeans or EJB services.</p>
+delegate to Java Injection or EJB services.</p>
 
 <example title="Example: MyService.java - Service">
 package qa;
@@ -94,11 +94,8 @@ servlets.  Resin lets you configure your services just
 like a servlet.  The only additional configuration necessary
 is choosing the protocol.</p>
 
-<p>Protocol drivers like Hessian or CXF register the
-protocol implementation with a URI scheme
-like "hessian:" or "cxf:".  Your service configuration will
-just select the appropriate protocol in a &lt;protocol>
-configuration tag.</p>
+<p>Protocol drivers like Hessian or CXF create a class annotation
+to expose the service.</p>
 
 <p>In the example, we'll use Hessian, since it's a fast binary
 protocol with several language implementations.  If you want
@@ -106,96 +103,40 @@ to export multiple protocol bindings, you can just add new
 &lt;servlet-mapping> definitions.</p>
 
 <example title="Example: WEB-INF/resin-web.xml - Hessian Service">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.remote"
+          xmlns:qa="urn:java:qa">
 
-  &lt;servlet-mapping url-pattern="/hello" servlet-class="qa.MyService">
-    &lt;protocol uri="hessian:"/>
-  &lt;/servlet-mapping>
+  &lt;qa:MyService>
+    &lt;resin:HessianService urlPattern="/hello"/>
+  &lt;/qa:MyService>
 
 &lt;/web-app>
 </example>
 
 <p>We can easily change the protocol to use CXF instead of
-Hessian by changing the scheme from "hessian:" to "cxf:".</p>
+Hessian by changing the service from @HessianService to @CxfService.</p>
 
 <example title="Example: WEB-INF/resin-web.xml - CXF Service">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.remote"
+          xmlns:qa="urn:java:qa">
 
-  &lt;servlet-mapping url-pattern="/hello" servlet-class="qa.MyService">
-    &lt;protocol uri="cxf:"/>
-  &lt;/servlet-mapping>
+  &lt;qa:MyService>
+    &lt;resin:CxfService urlPattern="/hello"/>
+  &lt;/qa:MyService>
 
 &lt;/web-app>
 </example>
 
-</s2>
-
-<s2 title="Client servlet - using the protocol">
-
-<p>On the client side, the application needs a proxy to
-invoke the server methods.  Since the protocols themselves are
-generic, the client will work with any server even if written
-in a different language like C#, as long as the protocol is
-compatible.</p>
-
-<p>The client uses Resin's dependency injection to get a client proxy
-for the protocol.  By using dependency injection, the client code
-remains independent of the protocol choice or any protocol-setup
-housekeeping.  The only dependency is on the client API itself.
-Because the client uses the type-safe API, the Java compiler
-validates the protocol, making compatibility as certain as
-possible.</p>
-
-<p>The <code>@javax.webbeans.In</code> annotation asks Resin to
-lookup the <code>qa.Hello</code> client stub that's been configured
-and gives it to the servlet.  Since the client stub is thread-safe
-it can be safely used in the servlet code.</p>
-
-<example title="Example: qa/MyServlet.java - Servlet Client">
-package qa;
-
-import java.io.*;
-import javax.servlet.*;
-import javax.webbeans.*;
-
-public class MyServlet extends GenericServlet {
-  @In private Hello _hello;
-
-  public void service(ServletRequest request,
-                      ServletResponse response)
-    throws IOException
-  {
-    out.println("hello: " + _hello.hello());
-  }
-}
-</example>
-
-<p>Although most clients will just have a single <code>Hello</code>
-proxy and can use the <code>@In</code> tag, more complicated
-applications can use the <code>@Named</code> tag or even custom
-<code>@BindingTag</code> annotations to select the right proxy.
-The <a href="resin-ioc.xtp">Resin IoC</a> documentation has more
-details.</p>
-
-</s2>
-
-<s2 title="Configuration - selecting the protocol">
-
-<p>To configure the client, you need to specify the protocol
-type, the URL, and the API class in a
-<code>&lt;remote-client></code> tag in the resin-web.xml.
-Since the client code uses injection to get the proxy, we can switch
-protocols if necessary.</p>
-
-<p>The example uses Hessian, so the <code>uri</code> attribute
-uses a "hessian:" scheme with Hessian's <code>url</code>
-parameter.  The API class is <code>qa.Hello</code>.</p>
-
 <example title="Example: WEB-INF/resin-web.xml - Hessian Client">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:qa="urn:java:qa">
 
-  &lt;remote-client class="qa.Hello"
-                 uri="hessian:url=http://localhost:8080/hello"/>
+  &lt;qa:Hello>
+    &lt;resin:HessianClient url="http://localhost:8080/hello"/>
+  &lt;/qa:Hello>
 
   &lt;servlet-mapping url-pattern="/demo"
                    servlet-class="qa.MyServlet"/>
@@ -208,10 +149,13 @@ to use CXF (SOAP) just requires changing the protocol scheme
 from "hessian:" to "cxf:".</p>
 
 <example title="Example: WEB-INF/resin-web.xml - CXF Client">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:qa="urn:java:qa">
 
-  &lt;remote-client class="qa.Hello"
-                 uri="cxf:url=http://localhost:8080/hello"/>
+  &lt;qa:Hello>
+    &lt;resin:CxfClient url="http://localhost:8080/hello"/>
+  &lt;/qa:Hello>
 
   &lt;servlet-mapping url-pattern="/demo"
                    servlet-class="qa.MyServlet"/>
@@ -225,18 +169,20 @@ from "hessian:" to "cxf:".</p>
 
 <s1 title="Available Protocols">
 
-<p>Resin 3.1.5 has the following protocol drivers available:</p>
+<p>Resin 4.0.0 has the following protocol drivers available:</p>
 
 <ul>
-<li>hessian: The <a href="http://hessian.caucho.com">Hessian</a>
+<li>HessianService: The <a href="http://hessian.caucho.com">Hessian</a>
 protocol is a fast, compact binary protocol with implementations
 available in a large number of languages including Flash, PHP
 and C#.</li>
-<li>burlap: The <a href="http://hessian.caucho.com">Burlap</a>
+<li>BurlapService: The <a href="http://hessian.caucho.com">Burlap</a>
 protocol is the XML-based cousin of Hessian.
 </li>
+<!--
 <li>cxf: The <a href="http://wiki.caucho.com/CXF">CXF</a> driver
 uses the Apache CXF project for SOAP client and server protocols.</li>
+-->
 </ul>
 
 </s1>
@@ -290,9 +236,24 @@ URI scheme.  In this case, the interface
 is <code>com.caucho.remote.server.ProtocolServletFactory</code>, so it
 the scheme mappings are added to a file with the same name:</p>
 
-<example title="com.caucho.remote.server.ProtocolServletFactory">
-burlap=com.caucho.remote.burlap.BurlapProtocolServletFactory
-hessian=com.caucho.remote.hessian.HessianProtocolServletFactory
+<example title="com.caucho.remote.HessianService">
+
+package com.caucho.remote;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.*;
+
+import com.caucho.remote.annotation.ServiceType;
+import com.caucho.remote.hessian.HessianProtocolServletFactory;
+
+@Documented
+@Target({TYPE})
+@Retention(RUNTIME)
+@ServiceType(defaultFactory=HessianProtocolServletFactory.class)
+public @interface HessianService {
+  public String urlPattern();
+}
 </example>
 
 </s2>

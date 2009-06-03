@@ -208,6 +208,11 @@ public class WebComponent {
       return String.valueOf(type);
   }
 
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _rawType + "]";
+  }
+
   class BeanEntry {
     private Bean<?> _bean;
     private BaseType _type;

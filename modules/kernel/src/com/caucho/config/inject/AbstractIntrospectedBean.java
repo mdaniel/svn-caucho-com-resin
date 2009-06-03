@@ -590,51 +590,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       sb.append(_deploymentType.getSimpleName());
     }
     
-    if (_scopeType != null) {
-      sb.append(", @");
-      sb.append(_scopeType.getSimpleName());
-    }
-
-    sb.append("]");
-
-    return sb.toString();
-  }
-
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-
-    sb.append(getTargetSimpleName());
-    sb.append(", {");
-
-    for (int i = 0; i < _bindings.size(); i++) {
-      Annotation ann = _bindings.get(i);
-
-      if (i != 0)
-	sb.append(", ");
-
-      sb.append(ann);
-    }
-
-    sb.append("}, ");
-
-    if (_deploymentType != null) {
-      sb.append("@");
-      sb.append(_deploymentType.getSimpleName());
-    }
-    else
-      sb.append("@null");
-    
-    if (_name != null) {
-      sb.append(", ");
-      sb.append("name=");
-      sb.append(_name);
-    }
-    
-    if (_scopeType != null) {
+    if (_scopeType != null && _scopeType != Dependent.class) {
       sb.append(", @");
       sb.append(_scopeType.getSimpleName());
     }

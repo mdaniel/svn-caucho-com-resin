@@ -71,6 +71,9 @@ public class WebAppInjectExtension implements Plugin
       Bean<?> bean = event.getBean();
       Annotated annotated = event.getAnnotated();
 
+      if (annotated == null || annotated.getAnnotations() == null)
+	return;
+
       for (Annotation ann : annotated.getAnnotations()) {
 	Class annType = ann.annotationType();
 	

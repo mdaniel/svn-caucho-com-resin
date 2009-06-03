@@ -152,6 +152,51 @@ abstract public class AbstractBean<T> implements Bean<T>
     return Dependent.class;
   }
 
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append(getBeanClass().getSimpleName());
+    sb.append(", {");
+
+    ArrayList<Annotation> bindings = new ArrayList<Annotation>(getBindings());
+    for (int i = 0; i < bindings.size(); i++) {
+      Annotation ann = bindings.get(i);
+
+      if (i != 0)
+	sb.append(", ");
+
+      sb.append(ann);
+    }
+
+    sb.append("}, ");
+
+    if (getDeploymentType() != null) {
+      sb.append("@");
+      sb.append(getDeploymentType().getSimpleName());
+    }
+    else
+      sb.append("@null");
+    
+    if (getName() != null) {
+      sb.append(", ");
+      sb.append("name=");
+      sb.append(getName());
+    }
+    
+    if (getScopeType() != null && getScopeType() != Dependent.class) {
+      sb.append(", @");
+      sb.append(getScopeType().getSimpleName());
+    }
+
+    sb.append("]");
+
+    return sb.toString();
+  }
+
   static {
     _currentBindings = new HashSet<Annotation>();
     _currentBindings.add(CurrentLiteral.CURRENT);

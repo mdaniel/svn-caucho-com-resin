@@ -123,11 +123,11 @@ public class XaCallChain extends AbstractCallChain
       = apiClass.getAnnotation(TransactionManagement.class);
     
     if (xaManagement != null
-	&& xaManagement.value() == TransactionManagementType.CONTAINER) {
+	&& xaManagement.value() != TransactionManagementType.CONTAINER) {
       _isContainerManaged = false;
       return;
     }
-    
+
     ApiClass implClass = null;
 
     if (implMethod != null)

@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -451,8 +452,15 @@ public class Resource {
       factory.binding(CurrentLiteral.CURRENT);
       factory.binding(Names.create(name));
     }
-    
-    beanManager.addBean(factory.bean());
+
+    // server/12dt
+    // for backward compatibility <resource> is always ApplicationScoped
+    factory.scope(ApplicationScoped.class);
+
+    if (_object != null)
+      beanManager.addBean(factory.singleton(_object));
+    else
+      beanManager.addBean(factory.bean());
 
     if (log.isLoggable(Level.CONFIG))
       logConfig();

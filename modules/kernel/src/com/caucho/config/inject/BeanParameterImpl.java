@@ -58,7 +58,7 @@ public class BeanParameterImpl
 			   Type type,
 			   Annotation []annList)
   {
-    super(type, annList);
+    super(type, null, annList);
 
     _callable = callable;
   }

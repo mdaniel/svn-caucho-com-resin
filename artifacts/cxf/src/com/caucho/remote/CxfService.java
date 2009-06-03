@@ -27,50 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.remote;
 
-import com.caucho.config.inject.AnnotatedElementImpl;
-
-import java.lang.reflect.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
-import java.util.*;
 
-import javax.enterprise.inject.spi.Annotated;
+import com.caucho.remote.annotation.ServiceType;
+import com.caucho.cxf.CXFProtocolServletFactory;
 
 /**
- * Represents an introspected method.
+ * The @CxfService registers a service with the hessian
+ *
+ * <code><pre>
+ * &lt;web-app xmlns="http://caucho.com/ns/resin"
+ *        xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *    &lt;mypkg:MyService xmlns:mypkg="urn:java:com.foo.mypkg">
+ *      &lt;mypkg:CxfService urlPattern="/my-service"/>
+ *    &lt;/mypkg:MyService>
+ *
+ * &lt;/web-app>
+ * </pre></code>
  */
-abstract public class ApiMember extends AnnotatedElementImpl {
-  private ApiClass _declaringClass;
-  
-  /**
-   * Creates a new method.
-   *
-   * @param topClass the top class
-   * @param method the introspected method
-   */
-  public ApiMember(ApiClass declaringClass,
-		   Type type,
-		   Annotated annotated,
-		   Annotation []annotations)
-  {
-    super(type, annotated, annotations);
 
-    _declaringClass = declaringClass;
-  }
-
-  /**
-   * Returns the declaring ApiClass
-   */
-  public ApiClass getDeclaringClass()
-  {
-    return _declaringClass;
-  }
-
-  abstract public Member getJavaMember();
-  
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getJavaMember() + "]";
-  }
+@Documented
+@Target({TYPE})
+@Retention(RUNTIME)
+@ServiceType(defaultFactory=CxfProtocolServletFactory.class)
+public @interface CxfService {
+  public String urlPattern();
 }

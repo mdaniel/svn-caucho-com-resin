@@ -302,6 +302,7 @@ public class InjectManager
       _deploymentMap.put(Standard.class, 0);
       _deploymentMap.put(CauchoDeployment.class, 1);
       _deploymentMap.put(Production.class, 2);
+      _deploymentMap.put(Configured.class, 3);
 
       for (Class cl : _factoryClasses) {
 	try {
@@ -313,6 +314,7 @@ public class InjectManager
       }
 
       BeanFactory factory = createBeanFactory(InjectManager.class);
+      factory.deployment(Standard.class);
       addBean(factory.singleton(this));
 
       _xmlExtension = new XmlStandardPlugin(this);
@@ -474,15 +476,22 @@ public class InjectManager
 
   public void setDeploymentTypes(ArrayList<Class> deploymentList)
   {
-    if (deploymentList.size() < 1 ||
-	! deploymentList.get(0).equals(Standard.class)) {
+    if (deploymentList.size() < 1
+	|| ! deploymentList.get(0).equals(Standard.class)) {
       throw new ConfigException(L.l("<Deploy> must contain @javax.webbeans.Standard as its first element because @Standard is always an enabled @DeploymentType"));
     }
 
     _deploymentMap.clear();
 
-    for (int i = 0; i < deploymentList.size(); i++) {
-      _deploymentMap.put(deploymentList.get(i), i);
+    boolean hasConfigured = deploymentList.contains(Configured.class);
+
+    int i = 0;
+    for (Class deploymentType : deploymentList) {
+      _deploymentMap.put(deploymentType, i++);
+
+      if (! hasConfigured && deploymentType == Production.class) {
+	_deploymentMap.put(Configured.class, i++);
+      }
     }
   }
   

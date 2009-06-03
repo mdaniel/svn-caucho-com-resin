@@ -151,10 +151,15 @@ public class XmlStandardPlugin implements Plugin
       return false;
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().equals(ServiceStartup.class))
+      Class annType = ann.annotationType();
+      
+      if (annType.equals(Startup.class))
+	return true;
+      
+      if (annType.equals(ServiceStartup.class))
 	return true;
 
-      if (ann.annotationType().isAnnotationPresent(ServiceStartup.class)) {
+      if (annType.isAnnotationPresent(ServiceStartup.class)) {
 	return true;
       }
     }

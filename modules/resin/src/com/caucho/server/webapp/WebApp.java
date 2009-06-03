@@ -2191,7 +2191,8 @@ public class WebApp extends ServletContextImpl
       }
 
       try {
-	_login = _beanManager.getInstanceByType(Login.class);
+	if (_login == null)
+	  _login = _beanManager.getInstanceByType(Login.class);
 
 	setAttribute("caucho.login", _login);
       } catch (Exception e) {

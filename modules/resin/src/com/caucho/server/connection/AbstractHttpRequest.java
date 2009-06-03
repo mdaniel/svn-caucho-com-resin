@@ -1751,8 +1751,6 @@ public abstract class AbstractHttpRequest
 	  log.finer("authentication failed, no login module found for "
 		    + app);
 
-	Thread.dumpStack();
-      
 	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
 	
 	return false;

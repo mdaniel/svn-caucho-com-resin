@@ -31,7 +31,9 @@ package com.caucho.config.types;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
+import com.caucho.config.inject.AnnotatedElementImpl;
 import com.caucho.config.inject.BeanTypeImpl;
+import com.caucho.config.inject.BeanMethodImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
@@ -45,9 +47,11 @@ import java.lang.annotation.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.ScopeType;
+import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -103,6 +107,10 @@ public class CustomBeanConfig {
     }
 
     _configType = TypeFactory.getCustomBeanType(cl);
+
+    // defaults to @Configured
+    clearAnnotations(_annotatedType, DeploymentType.class);
+    _annotatedType.addAnnotation(new AnnotationLiteral<Configured>() {});
   }
 
   public ConfigType getConfigType()
@@ -150,6 +158,23 @@ public class CustomBeanConfig {
 
     _args.add(arg);
   }
+
+  public void addArgs(ArrayList<ConfigProgram> args)
+  {
+    _args = new ArrayList<ConfigProgram>(args);
+  }
+
+  /*
+  public void setNew(ConfigProgram []args)
+  {
+    if (_args == null)
+      _args = new ArrayList<ConfigProgram>();
+
+    for (ConfigProgram arg : args) {
+      _args.add(arg);
+    }
+  }
+  */
 
   public void addAdd(ConfigProgram add)
   {
@@ -234,9 +259,7 @@ public class CustomBeanConfig {
       clearBindings(_annotatedType);
     }
     
-    if (ann.annotationType().isAnnotationPresent(DeploymentType.class)
-	&& ! _hasDeployment) {
-      _hasDeployment = true;
+    if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
       clearAnnotations(_annotatedType, DeploymentType.class);
     }
     
@@ -314,7 +337,23 @@ public class CustomBeanConfig {
     Method method = methodConfig.getMethod();
     Annotation []annList = methodConfig.getAnnotations();
 
+    AnnotatedMethod annMethod = _annotatedType.createMethod(method);
+
+    if (annMethod instanceof BeanMethodImpl) {
+      BeanMethodImpl methodImpl = (BeanMethodImpl) annMethod;
+
+      addAnnotations(methodImpl, annList);
+    }
+    
     //_component.addMethod(new SimpleBeanMethod(method, annList));
+  }
+
+  private void addAnnotations(AnnotatedElementImpl annotated,
+			      Annotation []annList)
+  {
+    for (Annotation ann : annList) {
+      annotated.addAnnotation(ann);
+    }
   }
 
   public void addField(CustomBeanFieldConfig fieldConfig)
@@ -371,6 +410,17 @@ public class CustomBeanConfig {
       if (ann.annotationType().isAnnotationPresent(annType))
 	beanType.removeAnnotation(ann);
     }
+  }
+
+  private Annotation getAnnotation(BeanTypeImpl beanType,
+				   Class<? extends Annotation> annType)
+  {
+    for (Annotation ann : beanType.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(annType))
+	return ann;
+    }
+
+    return null;
   }
 
   private Class createClass(QName name)
@@ -478,7 +528,7 @@ public class CustomBeanConfig {
     }
     else
       injectProgram = new ConfigProgram[0];
-    
+
     _component = new XmlBean(managedBean, javaCtor, newProgram, injectProgram);
 
     beanManager.addBean(_component);
@@ -487,6 +537,7 @@ public class CustomBeanConfig {
       beanManager.addBean(producerBean);
     }
   }
+
 
   protected Bean bindParameter(String loc,
 			       Type type,

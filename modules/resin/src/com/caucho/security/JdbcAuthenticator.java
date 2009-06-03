@@ -40,6 +40,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.ServletContext;
@@ -74,5 +75,6 @@ import java.util.logging.Logger;
  * </pre></code>
  */
 
+@ApplicationScoped
 public class JdbcAuthenticator extends DatabaseAuthenticator {
 }

@@ -99,6 +99,10 @@ public class DatabaseAuthenticator extends AbstractCookieAuthenticator {
   protected long _cookieMaxAge = 365L * 24L * 3600L * 1000L;
   
   private CharBuffer _cb = new CharBuffer();
+
+  public DatabaseAuthenticator()
+  {
+  }
     
   /**
    * Gets the database

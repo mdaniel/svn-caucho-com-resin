@@ -32,8 +32,10 @@ package com.caucho.config.gen;
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.inject.BeanMethodImpl;
 import com.caucho.util.*;
 
 /**
@@ -45,7 +47,7 @@ public class ApiClass {
     = new ApiClass(javax.ejb.EntityBean.class);
 
   private Class _apiClass;
-  private AnnotatedType _annotatedType;
+  private AnnotatedType<?> _annotatedType;
   
   private HashMap<String,Type> _typeMap;
   private ArrayList<Type> _typeParam;
@@ -347,7 +349,9 @@ public class ApiClass {
     HashSet<ApiMethod> methodSet = new HashSet<ApiMethod>();
 
     for (Method method : cl.getDeclaredMethods()) {
-      ApiMethod apiMethod = new ApiMethod(this, method, typeMap);
+      AnnotatedMethod annMethod = findAnnotatedMethod(method);
+      
+      ApiMethod apiMethod = new ApiMethod(this, method, annMethod, typeMap);
 
       methodSet.add(apiMethod);
     }
@@ -362,6 +366,18 @@ public class ApiClass {
       if (cl == _apiClass && iface != null)
 	_interfaces.add(iface);
     }
+  }
+
+  private AnnotatedMethod findAnnotatedMethod(Method method)
+  {
+    if (_annotatedType != null) {
+      for (AnnotatedMethod annMethod : _annotatedType.getMethods()) {
+	if (BeanMethodImpl.isMatch(annMethod.getJavaMember(), method))
+	  return annMethod;
+      }
+    }
+
+    return null;
   }
 
   private ApiClass introspectGenericClass(Type type,

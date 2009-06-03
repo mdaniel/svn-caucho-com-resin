@@ -68,6 +68,10 @@ public class CustomBeanType extends ConfigType
   private static final QName W_VALUE = new QName("", "value", WEBBEANS_NS);
   private static final QName R_VALUE = new QName("", "value", RESIN_NS);
   private static final QName A_VALUE = new QName("value", null);
+  
+  private static final QName W_NEW = new QName("", "new", WEBBEANS_NS);
+  private static final QName R_NEW = new QName("", "new", RESIN_NS);
+  private static final QName A_NEW = new QName("new", null);
 
   private static final Object _introspectLock = new Object();
 
@@ -96,6 +100,7 @@ public class CustomBeanType extends ConfigType
     int p = beanClass.getName().lastIndexOf('.');
     _namespaceURI = "urn:java:" + beanClass.getName().substring(0, p);
 
+    /*
     _hasZeroArg = false;
 
     try {
@@ -112,6 +117,9 @@ public class CustomBeanType extends ConfigType
     
       _nsAttributeMap.put(TEXT, CustomBeanValueArgAttribute.ATTRIBUTE);
     }
+    */
+
+    _attributeMap.put("new", CustomBeanNewAttribute.ATTRIBUTE);
   }
 
   /**
@@ -175,10 +183,16 @@ public class CustomBeanType extends ConfigType
       return new CustomBeanFieldAttribute(_beanClass, field);
     }
 
+    /*
     if ("value".equals(qName.getLocalName())
 	&& (uri.equals("urn:java:ee") || (uri.equals(RESIN_NS)))) {
       // ioc/022k
       return CustomBeanValueArgAttribute.ATTRIBUTE;
+    }
+    */
+
+    if ("new".equals(qName.getLocalName())) {
+      return CustomBeanNewAttribute.ATTRIBUTE;
     }
 
     Attribute envAttr
@@ -214,7 +228,9 @@ public class CustomBeanType extends ConfigType
     if (addAttribute != null)
       return new CustomBeanAddAttribute(cl);
 
-    return new CustomBeanArgAttribute(cl);
+    throw new ConfigException(L.l("'{0}' is an unknown field or annotation",
+				  qName));
+    // return new CustomBeanArgAttribute(cl);
   }
 
   @Override

@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 public class LoginConfig {
   private static final Logger log
     = Logger.getLogger(LoginConfig.class.getName());
-  static final L10N L = new L10N(LoginConfig.class);
+  private static final L10N L = new L10N(LoginConfig.class);
 
   private String _authMethod = "basic";
   private String _realmName;

@@ -58,7 +58,7 @@ public class BeanConstructorImpl
   
   public BeanConstructorImpl(AnnotatedType declaringType, Constructor ctor)
   {
-    super(declaringType.getType(), ctor.getAnnotations());
+    super(declaringType.getType(), null, ctor.getAnnotations());
 
     _declaringType = declaringType;
     

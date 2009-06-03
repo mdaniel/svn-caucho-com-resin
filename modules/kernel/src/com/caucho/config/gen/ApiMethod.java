@@ -35,6 +35,8 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
 /**
  * Represents an introspected method.
  */
@@ -52,9 +54,12 @@ public class ApiMethod extends ApiMember {
    */
   public ApiMethod(ApiClass apiClass,
 		   Method method,
+		   AnnotatedMethod annMethod,
 		   HashMap<String,Type> typeMap)
   {
-    super(apiClass, method.getGenericReturnType(), method.getAnnotations());
+    super(apiClass,
+	  method.getGenericReturnType(), annMethod,
+	  method.getAnnotations());
     
     _method = method;
 

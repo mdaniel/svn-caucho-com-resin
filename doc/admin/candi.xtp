@@ -77,6 +77,50 @@ configuration.</p>
 you've enabled.  For heavyweight services, this documentation is critical,
 while lightweight components do not need this extra housekeeping overhead.</p>
 
+<s2 title="Component overview">
+
+<deftable title="Component/Bean configuration template">
+<tr>
+<td>
+<code><pre>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:mypkg="urn:java:com.mycom.mypkg">
+	   
+  &lt;mypkg:MyBean>
+    [class annotations, service, and registration]
+    
+    [bean constructor args]
+    
+    [property configuration]
+    
+    [method annotation configuration]
+  &lt;/mypkg:MyBean>
+  
+&lt;/web-app>
+</pre></code>
+</td></tr>
+</deftable>
+
+<ol>
+<li>The Bean/Component name and package is the Java class which implements
+the resource you're configuring, either your own application class, or a
+library class.</li>
+<li>The class annotations register up the bean using a binding-type, or
+a name and may register the bean as a service, like a servlet, or EJB or
+remote service.</li>
+<li>The optional bean constructor args are needed for some specialized
+beans.  The application or library JavaDocs will document if you need to
+use the constructor.</li>
+<li>The properties configure the bean, like setting a database's url or
+max-connections.  Each XML tag represents a bean property, and matches
+exactly with the bean's JavaDoc.</li>
+<li>The optional and rare method annotations are for special cases
+like aspect-oriented interception.  Typically, these annotations are
+configured by the library developers.</li>
+</ol>
+
+</s2>
+
 <s2 title="bean and component registration">
 
 <p>The <code>&lt;my:MyBean></code> tags register
@@ -521,6 +565,158 @@ initializes beans lazily to handle circular references.</p>
 use beans as factories in the EL expressions.</p>
 
 </s2>
+
+</s1>
+
+<s1 title="Custom Services">
+
+<p>Some of your application's beans will be configured as custom
+services, like Java servlets or Hessian services, using CanDI to
+configure a service annotation.  These custom services combine your own
+Java code with Resin capabilities, usually to expose them as external web
+services.
+</p>
+
+<deftable title="Custom Service Configuration">
+<tr>
+  <th>Annotation</th>
+  <th>Description</th>
+  <th>Sample</th>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/remote/BamService.html">@BamService</a>
+  </td>
+  <td>BAM service</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;resin:BamService name="my-service"/>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/remote/HessianClient.html">@HessianClient</a>
+  </td>
+  <td>Hessian client proxy</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyApi>
+  &lt;resin:HessianClient
+               url="http://localhost:8080/test"/>
+&lt;/mypkg:MyApi>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/remote/HessianService.html">@HessianService</a>
+  </td>
+  <td>Hessian service</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;resin:HessianService urlPattern="/test"/>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/jms/JmsListener.html">@JmsListener</a>
+  </td>
+  <td>JMS based EJB message driven bean</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;resin:JmsListener destination="my_queue"/>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/javax/ejb/MessageDriven.html">@MessageDriven</a>
+  </td>
+  <td>EJB message driven bean</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;ee:MessageDriven>
+    &lt;ee:activationConfig
+               propertyName="destination"
+               propertyValue="my_queue"/>
+  &lt;/ee:MessageDriven>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/javax/ejb/Startup.html">@Startup</a>
+  </td>
+  <td>Start on initialization</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;ee:Startup/>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/javax/ejb/Stateful.html">@Stateful</a>
+  </td>
+  <td>EJB stateful session bean</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;ee:Stateful/>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/javax/ejb/Stateless.html">@Stateless</a>
+  </td>
+  <td>EJB stateless session bean</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyBean>
+  &lt;ee:Stateless/>
+&lt;/mypkg:MyBean>
+</code></pre>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="http://caucho.com/resin-4.0-javadoc/javax/servlet/annotation/WebServlet.html">@WebServlet</a>
+  </td>
+  <td>Servlet mapping</td>
+  <td>
+<pre><code>
+&lt;mypkg:MyServlet>
+  &lt;ee:WebServlet value="/test"/>
+&lt;/mypkg:MyServlet>
+</code></pre>
+  </td>
+</tr>
+
+</deftable>
+
 
 </s1>
 

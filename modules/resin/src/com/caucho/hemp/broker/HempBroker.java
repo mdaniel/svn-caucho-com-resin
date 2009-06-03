@@ -844,6 +844,9 @@ public class HempBroker
     Annotated annotated = event.getAnnotated();
     Bean bean = event.getBean();
 
+    if (annotated == null)
+      return;
+
     if (annotated.isAnnotationPresent(BamService.class)) {
       BamService bamService = annotated.getAnnotation(BamService.class);
 

@@ -146,7 +146,11 @@ public class BeanFactory<T>
 
   public Bean bean()
   {
-    // XXX:
-    return _managedBean;
+    return new ManagedSingletonBean(_managedBean,
+				    _types,
+				    _deploymentType,
+				    _bindings,
+				    _scopeType,
+				    _name);
   }
 }

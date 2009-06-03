@@ -87,6 +87,7 @@ abstract public class ScopeContext implements Context {
     if (scopeMap == null)
       scopeMap = createScopeMap();
 
+
     instance = bean.create(creationalContext);
 
     scopeMap.put(bean, instance);
