@@ -345,6 +345,14 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Returns true for the watchdog server.
+   */
+  public boolean isWatchdog()
+  {
+    return getResin().isWatchdog();
+  }
+
+  /**
    * Returns the cluster
    */
   public Cluster getCluster()
@@ -493,9 +501,6 @@ public class Server extends ProtocolDispatchServer
    */
   public DistributedCacheManager getDistributedCacheManager()
   {
-    if (! isResinServer())
-      return null;
-    
     if (_distributedCacheManager == null)
       _distributedCacheManager = createDistributedCacheManager();
 
@@ -507,9 +512,6 @@ public class Server extends ProtocolDispatchServer
    */
   protected DistributedCacheManager createDistributedCacheManager()
   {
-    if (! isResinServer())
-      return null;
-    
     return new FileCacheManager(this);
   }
 
@@ -1808,7 +1810,6 @@ public class Server extends ProtocolDispatchServer
 	startPorts();
       }
 
-      
       if (_distributedCacheManager == null)
 	_distributedCacheManager = createDistributedCacheManager();
 

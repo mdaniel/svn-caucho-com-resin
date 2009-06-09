@@ -127,6 +127,7 @@ public class BootManagementConfig
 	manager.addBean(factory.singleton(_auth));
       }
     } catch (Exception e) {
+      e.printStackTrace();
       throw ConfigException.create(e);
     }
   }

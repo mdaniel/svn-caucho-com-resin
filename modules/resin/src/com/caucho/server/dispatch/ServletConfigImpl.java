@@ -300,6 +300,9 @@ public class ServletConfigImpl
       if (_servletContext instanceof WebApp)
 	((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
     }
+
+    InjectManager beanManager = InjectManager.create();
+    beanManager.addConfiguredBean(servletClassName);
   }
 
   @DisableConfig

@@ -31,6 +31,7 @@ package com.caucho.config.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
@@ -82,7 +83,7 @@ public class WbComponentConfig {
   private ArrayList<ConfigProgram> _newArgs;
   private ContainerProgram _init;
 
-  protected AbstractBean _comp;
+  protected Bean _comp;
 
   // XXX: temp for osgi
   private boolean _isService;
@@ -161,7 +162,7 @@ public class WbComponentConfig {
 
   public AbstractBean getComponent()
   {
-    return _comp;
+    return (AbstractBean) _comp;
   }
 
   /**
@@ -295,7 +296,7 @@ public class WbComponentConfig {
    */
   public AbstractBean getComponentFactory()
   {
-    return _comp;
+    return (AbstractBean) _comp;
   }
 
   // XXX: temp for OSGI
@@ -333,56 +334,56 @@ public class WbComponentConfig {
     */
 
     introspect();
-    
-    Bean comp;
 
-    /*
-    if (Singleton.class.equals(_scope))
-      comp = new SingletonClassComponent(InjectManager.create());
-    else
-    comp = null;//new SimpleBean(InjectManager.create());
-
-    comp.setTargetType(_cl);
+    InjectManager beanManager = InjectManager.create();
+    BeanFactory factory =  beanManager.createBeanFactory(_cl);
 
     if (_name != null) {
-      comp.setName(_name);
+      factory.name(_name);
 
       // server/2n00
       if (! Map.class.isAssignableFrom(_cl))
 	addOptionalStringProperty("name", _name);
     }
 
+    /*
     if (getMBeanName() != null)
       comp.setMBeanName(getMBeanName());
+    */
 
     for (Annotation binding : _bindingList) {
-      comp.addBinding(binding);
+      factory.binding(binding);
     }
 
     if (_deploymentType != null)
-      comp.setDeploymentType(_deploymentType);
+      factory.deployment(_deploymentType);
 
     if (_scope != null) {
-      comp.setScopeType(_scope);
-      comp.setScope(_beanManager.getScopeContext(_scope));
+      factory.scope(_scope);
+      // comp.setScope(_beanManager.getScopeContext(_scope));
     }
 
+    /*
     if (_isService) {
       comp.addAnnotation(new AnnotationLiteral<Service>() {});
     }
+    */
 
+    /*
     if (_newArgs != null)
       comp.setNewArgs(_newArgs);
+    */
 
+    /*
     if (_init != null)
       comp.setInit(_init);
+    */
 
-    _comp = comp;
+    _comp = factory.bean();
 
     introspectPostInit();
 
-    comp.init();
-    */
+    // comp.init();
 
     deploy();
   }
@@ -414,8 +415,14 @@ public class WbComponentConfig {
 
   public Object getObject()
   {
-    if (_comp != null)
-      return _beanManager.getReference(_comp, (Class) null);
+    if (_comp != null) {
+      Object value = _beanManager.getReference(_comp, (Class) null);
+
+      if (_init != null)
+	_init.inject(value, null);
+      
+      return value;
+    }
     else
       return null;
   }

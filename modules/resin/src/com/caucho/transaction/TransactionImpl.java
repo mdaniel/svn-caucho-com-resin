@@ -210,11 +210,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
   public boolean enlistResource(XAResource resource)
     throws RollbackException, SystemException
   {
-    if (resource == null)
+    if (resource == null) {
       throw new IllegalArgumentException(L.l("Resource must not be null in enlistResource"));
+    }
 
-    if (_isSuspended)
-      throw new IllegalStateException(L.l("can't enlist with suspended transaction"));
+    if (_isSuspended) {
+      throw new IllegalStateException(L.l("Can't enlist resource {0} because the transaction is suspended.",
+					  resource));
+    }
+    
     if (_status == Status.STATUS_ACTIVE) {
       // normal
     }
@@ -225,12 +229,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
       else if (_rollbackException != null)
         throw RollbackExceptionWrapper.create(_rollbackException);
       else
-        throw new RollbackException(L.l("can't enlist with rollback-only transaction"));
+        throw new RollbackException(L.l("Can't enlist resource {0} because the transaction is marked rollback-only.",
+					resource));
 
       if (_status == Status.STATUS_NO_TRANSACTION)
-        throw new IllegalStateException(L.l("can't enlist with inactive transaction"));
+        throw new IllegalStateException(L.l("Can't enlist resource {0} because the transaction is not active",
+					    resource));
 
-      throw new IllegalStateException(L.l("can't enlist with transaction in '{0}' state",
+      throw new IllegalStateException(L.l("Can't enlist resource {0} because the transaction is not in an active state.  state='{1}'",
+					  resource,
                                           xaState(_status)));
     }
 
@@ -272,7 +279,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
       else if ((_resourceState[i] & RES_ACTIVE) != 0) {
         IllegalStateException exn;
-        exn = new IllegalStateException(L.l("Can't enlist same resource twice.  Delist is required before calling enlist with an old resource."));
+        exn = new IllegalStateException(L.l("Can't enlist same resource {0} twice.  Delist is required before calling enlist with an old resource.",
+					    resource));
 
         setRollbackOnly(exn);
         throw exn;
@@ -314,7 +322,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     } catch (XAException e) {
       setRollbackOnly(e);
 
-      String message = L.l("Failed to enlist resource due to: {0}", e);
+      String message = L.l("Failed to enlist resource {0} in transaction because of exception:\n{1}", resource, e);
+      
       log.log(Level.SEVERE, message, e);
 
       throw new SystemException(message);
@@ -528,8 +537,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
     throws SystemException
   {
     if (_status != Status.STATUS_ACTIVE
-	&& _status != Status.STATUS_MARKED_ROLLBACK)
-      throw new IllegalStateException(L.l("can't set rollback-only"));
+	&& _status != Status.STATUS_MARKED_ROLLBACK) {
+      throw new IllegalStateException(L.l("Can't set rollback-only because the transaction is not active. state={0}.",
+					  xaState(_status)));
+    }
 
     _status = Status.STATUS_MARKED_ROLLBACK;
 
@@ -537,6 +548,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " rollback-only");
+
+    if (_rollbackException == null) {
+      _rollbackException = new RollbackException(L.l("Transaction marked rollback-only"));
+      _rollbackException.fillInStackTrace();
+    }
   }
 
   /**
@@ -545,16 +561,19 @@ public class TransactionImpl implements Transaction, AlarmListener {
   public void setRollbackOnly(Throwable exn)
   {
     if (_status != Status.STATUS_ACTIVE
-	&& _status != Status.STATUS_MARKED_ROLLBACK)
-      throw new IllegalStateException(L.l("can't set rollback-only"));
+	&& _status != Status.STATUS_MARKED_ROLLBACK) {
+      throw new IllegalStateException(L.l("Can't set rollback-only because the transaction is not active. state={0}.",
+					  xaState(_status)));
+    }
 
     _status = Status.STATUS_MARKED_ROLLBACK;
 
     if (_rollbackException == null)
       _rollbackException = exn;
 
-    if (log.isLoggable(Level.FINE))
+    if (log.isLoggable(Level.FINE)) {
       log.fine(this + " rollback-only: " + exn.toString());
+    }
   }
 
   /**
@@ -569,22 +588,30 @@ public class TransactionImpl implements Transaction, AlarmListener {
     Exception heuristicExn = null;
 
     try {
-      if (_status != Status.STATUS_ACTIVE) {
-        switch (_status) {
-        case Status.STATUS_MARKED_ROLLBACK:
-	  break;
+      switch (_status) {
+      case Status.STATUS_ACTIVE:
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " commit (active)");
+	break;
+	
+      case Status.STATUS_MARKED_ROLLBACK:
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " commit (marked rollback)");
+	break;
 
-        case Status.STATUS_NO_TRANSACTION:
-          throw new IllegalStateException(L.l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
+      case Status.STATUS_NO_TRANSACTION:
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " commit (no transaction)");
+	
+	throw new IllegalStateException(L.l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
 
-        default:
-          rollbackInt();
-          throw new IllegalStateException(L.l("can't commit {0}", String.valueOf(_status)));
-        }
+      default:
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " commit (unknown: " + _status + ")");
+	
+	rollbackInt();
+	throw new IllegalStateException(L.l("Can't commit because the transaction state is {0}", String.valueOf(_status)));
       }
-
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " committing");
 
       try {
 	callBeforeCompletion();
@@ -607,9 +634,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	rollbackInt();
 	
 	if (_rollbackException != null)
-	  throw new RollbackExceptionWrapper(_rollbackException);
+	  throw new RollbackExceptionWrapper(L.l("Transaction can't commit because it has been marked rolled back\n  {0}", _rollbackException));
 	else
-	  throw new RollbackException(L.l("Transaction has been marked rolled back."));
+	  throw new RollbackException(L.l("Transaction can't commit because it has been marked rolled back."));
       }
 
       if (_resourceCount > 0) {
@@ -1089,6 +1116,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       return "COMMITTING";
     case Status.STATUS_ROLLING_BACK:
       return "ROLLING_BACK";
+    case Status.STATUS_NO_TRANSACTION:
+      return "NO_TRANSACTION";
     default:
       return "XA-STATE(" + xaState + ")";
     }

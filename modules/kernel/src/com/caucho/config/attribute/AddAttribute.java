@@ -132,15 +132,19 @@ public class AddAttribute extends Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
-    CustomBeanConfig config = (CustomBeanConfig) create(bean, name);
+    Object objValue = create(bean, name);
 
-    if (! value.trim().equals("")) {
-      config.addArg(new TextArgProgram(value));
+    if (objValue instanceof CustomBeanConfig) {
+      CustomBeanConfig config = (CustomBeanConfig) objValue;
+
+      if (! value.trim().equals("")) {
+	config.addArg(new TextArgProgram(value));
+      }
+
+      config.init();
     }
 
-    config.init();
-
-    setValue(bean, name, config);
+    setValue(bean, name, objValue);
   }
   
   
@@ -151,9 +155,16 @@ public class AddAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      CustomBeanConfig config = (CustomBeanConfig) value;
+      if (value instanceof CustomBeanConfig) {
+	CustomBeanConfig config = (CustomBeanConfig) value;
 
-      value = config.toObject();
+	value = config.toObject();
+      }
+      else if (value instanceof AnnotationConfig) {
+	AnnotationConfig config = (AnnotationConfig) value;
+
+	value = config.replace();
+      }
 
       if (_setMethod != null && value != null) {
 	if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))

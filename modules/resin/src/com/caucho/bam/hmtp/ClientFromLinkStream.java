@@ -48,18 +48,18 @@ public class ClientFromLinkStream extends FromLinkStream implements Runnable
 
   private static long _gId;
   
-  private HmtpClient _client;
+  private LinkClient _client;
   private ClassLoader _loader;
 
   private ActorStream _toLinkStream;
   private ActorStream _toClientStream;
 
-  ClientFromLinkStream(HmtpClient client,
+  ClientFromLinkStream(LinkClient client,
 		       InputStream is)
   {
     super(is);
 
-    _toLinkStream = client.getBrokerStream();
+    _toLinkStream = client.getLinkStream();
     _toClientStream = client.getActorStream();
 
     if (_toLinkStream == null)

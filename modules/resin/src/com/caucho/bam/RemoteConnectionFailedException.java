@@ -44,6 +44,11 @@ public class RemoteConnectionFailedException
     super(msg);
   }
 
+  public RemoteConnectionFailedException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+
   public RemoteConnectionFailedException(String msg, ActorError error)
   {
     super(msg, error);

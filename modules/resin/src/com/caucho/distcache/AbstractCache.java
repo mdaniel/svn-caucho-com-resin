@@ -394,6 +394,9 @@ abstract public class AbstractCache extends AbstractMap
 
       initPersistence(_persistenceOption);
 
+      _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
+						     _config.getKeySerializer()));
+
       _entryCache = new LruCache<Object,DistCacheEntry>(512);
     }
   }
@@ -931,9 +934,6 @@ abstract public class AbstractCache extends AbstractMap
       _guid = contextId + ":" + _name;
      
     _config.setGuid(_guid);
-
-    _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
-						   _config.getKeySerializer()));
     
     if (! cacheNameSet.contains(_guid))
       cacheNameSet.add(_guid);
@@ -987,6 +987,9 @@ abstract public class AbstractCache extends AbstractMap
 				    getClass().getSimpleName()));
 
     _manager = server.getDistributedCacheManager();
+
+    if (_manager == null)
+      throw new IllegalStateException("distributed cache manager not available");
   }
   
 

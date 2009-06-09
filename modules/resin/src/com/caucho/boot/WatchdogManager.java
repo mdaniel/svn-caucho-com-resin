@@ -39,6 +39,7 @@ import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.Period;
 import com.caucho.hemp.broker.HempBroker;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
@@ -80,6 +81,8 @@ class WatchdogManager implements AlarmListener {
 
   private static WatchdogManager _watchdog;
 
+  private Lifecycle _lifecycle = new Lifecycle();
+  
   private WatchdogArgs _args;
 
   private int _watchdogPort;
@@ -236,6 +239,8 @@ class WatchdogManager implements AlarmListener {
       broker.addActor(service);
 
       _server.start();
+
+      _lifecycle.toActive();
 
       // valid checker
       new Alarm(this).queue(60000);
@@ -513,6 +518,18 @@ class WatchdogManager implements AlarmListener {
     return watchdog;
   }
 
+  public void waitForExit()
+  {
+    while (_lifecycle.isActive()) {
+      try {
+	synchronized (this) {
+	  wait();
+	}
+      } catch (Exception e) {
+      }
+    }
+  }
+
   public void handleAlarm(Alarm alarm)
   {
     try {
@@ -545,11 +562,14 @@ class WatchdogManager implements AlarmListener {
       manager.startServer(argv);
 
       isValid = manager.isActive() && manager.isValid();
+
+      if (isValid) {
+	manager.waitForExit();
+      }
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     } finally {
-      if (! isValid)
-	System.exit(1);
+      System.exit(1);
     }
   }
 

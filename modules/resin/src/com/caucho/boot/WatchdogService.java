@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import java.util.logging.*;
@@ -45,12 +46,12 @@ class WatchdogService extends SimpleActor
   private static final Logger log
     = Logger.getLogger(WatchdogService.class.getName());
 
-  private final WatchdogManager _watchdog;
+  private final WatchdogManager _manager;
   private final String _jid;
 
-  WatchdogService(WatchdogManager watchdog, String jid)
+  WatchdogService(WatchdogManager manager, String jid)
   {
-    _watchdog = watchdog;
+    _manager = manager;
     _jid = jid;
   }
 
@@ -72,7 +73,7 @@ class WatchdogService extends SimpleActor
     String []argv = start.getArgv();
 
     try {
-      _watchdog.startServer(argv);
+      _manager.startServer(argv);
 
       String msg = L.l("{0}: started server", this);
     
@@ -80,9 +81,14 @@ class WatchdogService extends SimpleActor
 				    new ResultStatus(true, msg));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
-      String msg = L.l("{0}: start server failed because of exception\n{1}'",
-		       this, e.toString());
+
+      String msg;
+
+      if (e instanceof ConfigException)
+	msg = e.getMessage();
+      else
+	msg = L.l("{0}: start server failed because of exception\n  {1}'",
+		  this, e.toString());
     
       getBrokerStream().queryResult(id, from, to,
 				    new ResultStatus(false, msg));
@@ -99,7 +105,7 @@ class WatchdogService extends SimpleActor
 				WatchdogStatusQuery status)
   {
     try {
-      String result = _watchdog.status();
+      String result = _manager.status();
     
       getBrokerStream().queryResult(id, from, to,
 				    new ResultStatus(true, result));
@@ -126,7 +132,7 @@ class WatchdogService extends SimpleActor
     String serverId = stop.getServerId();
 
     try {
-      _watchdog.stopServer(serverId);
+      _manager.stopServer(serverId);
 
       String msg = L.l("{0}: stopped server='{1}'", this, serverId);
     
@@ -155,7 +161,7 @@ class WatchdogService extends SimpleActor
     String serverId = kill.getServerId();
 
     try {
-      _watchdog.killServer(serverId);
+      _manager.killServer(serverId);
 
       String msg = L.l("{0}: killed server='{1}'", this, serverId);
     

@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterPod;
+import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 
 import javax.cache.CacheLoader;
@@ -79,8 +80,10 @@ public class FileCacheEntry extends DistCacheEntry {
    */
   //@Override
   public Object get(CacheConfig config)
-  {                
-    return _manager.get(this, config);
+  {
+    long now = Alarm.getCurrentTime();
+  
+  return _manager.get(this, config, now);
   }
 
   /**
@@ -90,19 +93,8 @@ public class FileCacheEntry extends DistCacheEntry {
   public boolean getStream(OutputStream os, CacheConfig config)
     throws IOException
   {
-    return _manager.get(this, os, config);
+    return _manager.getStream(this, os, config);
   }
-
-  /**
-   * Fills the value with a stream
-   */
-  /*
-  @Override
-  public IntCacheEntry<Object> getMnodeValue()
-  {
-    return null;
-  }
-  */
 
   /**
    * Sets the current value
@@ -122,7 +114,7 @@ public class FileCacheEntry extends DistCacheEntry {
 			   long idleTimeout)
     throws IOException
   {
-    return _manager.put(this, is, config, idleTimeout);
+    return _manager.putStream(this, is, config, idleTimeout);
   }
 
   /**

@@ -638,7 +638,7 @@ public class InjectManager
     if (set != null && set.size() > 1) {
       throw injectError(field, L.l("Can't inject a bean for '{0}' because multiple beans match: {1}",
 				   field.getType().getName(),
-				   set));
+				   toLineList(set)));
     }
     
     if (! isOptional) {
@@ -2611,6 +2611,11 @@ public class InjectManager
     startServices();
   }
 
+  public void addConfiguredBean(String className)
+  {
+    _xmlExtension.addConfiguredBean(className);
+  }
+  
   void addService(Bean bean)
   {
     _pendingServiceList.add(bean);

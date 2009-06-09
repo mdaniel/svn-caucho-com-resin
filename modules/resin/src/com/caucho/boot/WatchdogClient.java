@@ -30,6 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.bam.ActorClient;
+import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.bam.hmtp.SelfEncryptedCredentials;
 import com.caucho.config.*;
@@ -233,12 +234,13 @@ class WatchdogClient
 
       if (status.isSuccess())
 	return;
-      
-      throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
-				     this, status.getMessage()));
 
-    } catch (Exception e) {
+      throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
+				    this, status.getMessage()));
+    } catch (RemoteConnectionFailedException e) {
       log.log(Level.FINE, e.toString(), e);
+    } catch (RuntimeException e) {
+      throw e;
     } finally {
       if (conn != null)
 	conn.close();

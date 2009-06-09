@@ -45,14 +45,15 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.*;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.ManagedBean;
 import javax.naming.*;
@@ -74,6 +75,9 @@ abstract public class AbstractBeanConfig {
   private Class<? extends Annotation> _deploymentType;
   
   private ArrayList<Annotation> _annotations
+    = new ArrayList<Annotation>();
+  
+  private ArrayList<Annotation> _bindings
     = new ArrayList<Annotation>();
 
   private Class _scope;
@@ -187,6 +191,9 @@ abstract public class AbstractBeanConfig {
   public void add(Annotation binding)
   {
     _annotations.add(binding);
+
+    if (binding.annotationType().isAnnotationPresent(BindingType.class))
+      _bindings.add(binding);
   }
 
   /**
@@ -245,11 +252,12 @@ abstract public class AbstractBeanConfig {
 
     BeanTypeImpl beanType = new BeanTypeImpl(_cl, _cl);
 
-    /*
+    BeanFactory factory = beanManager.createBeanFactory(_cl);
+
     if (_name != null)
       factory.name(_name);
 
-    for (Annotation binding : _bindingList)
+    for (Annotation binding : _bindings)
       factory.binding(binding);
 
     if (_deploymentType != null)
@@ -257,28 +265,20 @@ abstract public class AbstractBeanConfig {
 
     if (_scope != null)
       factory.scope(_scope);
-    */
 
-    ManagedBean bean = beanManager.createManagedBean(beanType);
-
-    beanManager.addBean(bean);
-    /*
-    Bean bean = bean;
+    Object value = replaceObject();
+    Bean bean = null;
 
     if (value != null) {
       bean = factory.singleton(value);
     }
     else {
-      SimpleBean classComp = new SingletonClassComponent(webBeans);
-
-      classComp.setTargetType(_cl);
-
-      bean = factory.bean();
+      bean = factory.singleton(value);
     }
+      
+    beanManager.addBean(bean);
 
-    webBeans.addBean(bean);
-    */
-
+    // XXXX: JNDI isn't right
     if (_jndiName != null) {
       try {
 	Jndi.bindDeepShort(_jndiName, bean);
@@ -286,5 +286,10 @@ abstract public class AbstractBeanConfig {
 	throw ConfigException.create(e);
       }
     }
+  }
+
+  protected Object replaceObject()
+  {
+    return null;
   }
 }

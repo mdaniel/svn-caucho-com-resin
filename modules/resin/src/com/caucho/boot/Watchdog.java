@@ -313,7 +313,16 @@ class Watchdog
     WatchdogTask task = new WatchdogTask(this);
 
     if (! _taskRef.compareAndSet(null, task)) {
-      throw new IllegalStateException(L.l("Can't start new task because of old task '{0}'", task));
+      WatchdogTask oldTask = _taskRef.get();
+      
+      if (oldTask != null && ! oldTask.isActive()) {
+	_taskRef.set(task);
+      }
+      else if (_taskRef.compareAndSet(null, task)) {
+      }
+      else {
+	throw new IllegalStateException(L.l("Can't start new Resin server '{0}' because one is already running '{1}'", _id, task));
+      }
     }
 
     task.start();

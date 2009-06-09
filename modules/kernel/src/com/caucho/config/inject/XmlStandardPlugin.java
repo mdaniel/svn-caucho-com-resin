@@ -110,12 +110,22 @@ public class XmlStandardPlugin implements Plugin
     }
   }
 
+  public void addConfiguredBean(String className)
+  {
+    _configuredBeans.add(className);
+  }
+
   public void processType(@Observes ProcessAnnotatedType event)
   {
     AnnotatedType type = event.getAnnotatedType();
 
     if (type == null)
       return;
+
+    if (_configuredBeans.contains(type.getJavaClass().getName())) {
+      event.setAnnotatedType(null);
+      return;
+    }
 
     if (type.isAnnotationPresent(Stateful.class)
 	|| type.isAnnotationPresent(Stateless.class)

@@ -77,6 +77,7 @@ import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.RandomUtil;
+import com.caucho.util.ThreadPool;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QJniServerSocket;
@@ -87,9 +88,7 @@ import com.caucho.vfs.WriteStream;
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 import javax.enterprise.inject.deployment.Standard;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
+import java.io.*;
 import java.lang.reflect.*;
 import java.net.BindException;
 import java.net.InetAddress;
@@ -184,6 +183,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private ObjectName _objectName;
   private ResinAdmin _resinAdmin;
+  private ResinActor _resinActor;
 
   private InputStream _waitIn;
 
@@ -245,19 +245,24 @@ public class Resin implements EnvironmentBean, SchemaBean
       else
 	setResinHome(Vfs.getPwd());
 
-      setRootDirectory(getResinHome());
+      if (getRootDirectory() == null) {
+	setRootDirectory(getResinHome());
 
-      // server.root backwards compat
-      String serverRoot = System.getProperty("server.root");
+	// server.root backwards compat
+	String serverRoot = System.getProperty("server.root");
       
-      if (serverRoot != null)
-	setRootDirectory(Vfs.lookup(serverRoot));
+	if (serverRoot != null)
+	  setRootDirectory(Vfs.lookup(serverRoot));
 
-      // resin.root backwards compat
-      serverRoot = System.getProperty("resin.root");
+	// resin.root backwards compat
+	serverRoot = System.getProperty("resin.root");
 
-      if (serverRoot != null)
-	setRootDirectory(Vfs.lookup(serverRoot));
+	if (serverRoot != null)
+	  setRootDirectory(Vfs.lookup(serverRoot));
+      }
+
+      if (getRootDirectory() == null)
+	throw new NullPointerException();
 
       // default server id
       setServerId("");
@@ -347,10 +352,12 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       resin = (Resin) ctor.newInstance(loader, isWatchdog);
     } catch (ConfigException e) {
+      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       licenseErrorMessage = e.getMessage();
     } catch (Throwable e) {
+      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
@@ -586,6 +593,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setRootDirectory(Path root)
   {
     _rootDirectory = root;
+    if (root == null)
+      throw new NullPointerException();
   }
 
   /**
@@ -602,7 +611,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Path getResinDataDirectory()
   {
     Path path;
-    
+
     if (_resinDataDirectory != null)
       path = _resinDataDirectory;
     else if (_isWatchdog)
@@ -1294,12 +1303,14 @@ public class Resin implements EnvironmentBean, SchemaBean
           System.exit(0);
         }
 
+	/*
 	if (argv[i].equals("-socketwait") || argv[i].equals("--socketwait"))
           _waitIn = socket.getInputStream();
-	else
-	  _pingSocket = socket;
+	*/
 
-        socket.setSoTimeout(60000);
+	_pingSocket = socket;
+
+        //socket.setSoTimeout(60000);
 
 	i += 2;
       }
@@ -1323,6 +1334,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
       else if (argv[i].equals("-verbose")
 	       || argv[i].equals("--verbose")) {
+	i += 1;
+      }
+      else if (argv[i].equals("console")) {
 	i += 1;
       }
       else if (argv[i].equals("-fine")
@@ -1663,6 +1677,8 @@ public class Resin implements EnvironmentBean, SchemaBean
       DestroyThread destroyThread = new DestroyThread(resin);
       destroyThread.start();
 
+      resin.startResinActor();
+
       resin.waitForExit();
 
       destroyThread.shutdown();
@@ -1719,6 +1735,21 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
     } finally {
       System.exit(1);
+    }
+  }
+
+  private void startResinActor()
+    throws IOException
+  {
+    _resinActor = new ResinActor(this);
+
+    if (_pingSocket != null) {
+      InputStream is = _pingSocket.getInputStream();
+      OutputStream os = _pingSocket.getOutputStream();
+
+      ResinLink link = new ResinLink(_resinActor, is, os);
+
+      ThreadPool.getThreadPool().schedule(link);
     }
   }
 

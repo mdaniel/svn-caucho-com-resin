@@ -59,6 +59,9 @@ class WatchdogTask implements Runnable
   WatchdogTask(Watchdog watchdog)
   {
     _watchdog = watchdog;
+
+    if (watchdog == null)
+      throw new NullPointerException();
   }
 
   /**
@@ -98,14 +101,11 @@ class WatchdogTask implements Runnable
     if (! _lifecycle.toActive())
       return;
 
-    Thread thread = new Thread(this, "watchdog-" + _watchdog.getId());
-    thread.setDaemon(false);
-
-    thread.start();
+    ThreadPool.getCurrent().schedule(this);
   }
 
   /**
-   * Stops the watchdog process.  Once stopped, the WatchdogTask will
+   * Stops the watchdog process.  Once stopped, the WatchdogProcess will
    * not be reused.
    */
   public void stop()
@@ -116,8 +116,11 @@ class WatchdogTask implements Runnable
     WatchdogProcess process = _process;
     _process = null;
     
-    if (process != null)
+    if (process != null) {
       process.stop();
+
+      process.waitForExit();
+    }
   }
 
   /**
@@ -126,6 +129,9 @@ class WatchdogTask implements Runnable
   public void run()
   {
     try {
+      Thread thread = Thread.currentThread();
+      thread.setName("watchdog-" + _watchdog.getId());
+      
       int i = 0;
       long retry = Long.MAX_VALUE;
     
@@ -133,8 +139,11 @@ class WatchdogTask implements Runnable
 	String id = String.valueOf(i);
 
 	_watchdog.notifyTaskStarted();
+
+	log.info(_watchdog + " starting");
 	
 	_process = new WatchdogProcess(id, _watchdog);
+	
 	try {
 	  _process.run();
 	} catch (Exception e) {
@@ -144,9 +153,13 @@ class WatchdogTask implements Runnable
 	  _process = null;
 
 	  if (process != null)
-	    process.destroy();
+	    process.kill();
 	}
       }
+	
+      log.info(_watchdog + " stopped");
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       _lifecycle.toDestroy();
 
@@ -165,7 +178,7 @@ class WatchdogTask implements Runnable
     _process = null;
     
     if (process != null)
-      process.destroy();
+      process.kill();
   }
 
   @Override

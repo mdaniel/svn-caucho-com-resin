@@ -59,6 +59,7 @@ public class JavaMailConfig extends AbstractBeanConfig {
   
   public JavaMailConfig()
   {
+    setClass(Session.class);
   }
 
   /**
@@ -232,16 +233,19 @@ public class JavaMailConfig extends AbstractBeanConfig {
       else
 	_session = Session.getInstance(_props);
 
+      /*
       InjectManager manager = InjectManager.create();
       BeanFactory factory = manager.createBeanFactory(Session.class);
       factory.type(Session.class);
 
       manager.addBean(factory.singleton(_session));
+      */
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
   }
 
+  @Override
   public Object replaceObject()
   {
     return _session;

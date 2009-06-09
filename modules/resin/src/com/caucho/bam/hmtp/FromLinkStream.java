@@ -78,7 +78,15 @@ abstract public class FromLinkStream {
     if (in == null)
       return false;
 
-    Hessian2Input hIn = in.startPacket();
+    Hessian2Input hIn = null;
+
+    try {
+      hIn = in.startPacket();
+    } catch (IOException e) {
+      log.fine(this + " exception while reading HMTP packet\n  " + e);
+      
+      log.log(Level.FINER, e.toString(), e);
+    }
 
     if (hIn == null) {
       close();

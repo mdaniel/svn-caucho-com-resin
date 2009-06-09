@@ -33,7 +33,7 @@ class WatchdogArgs
   private String _serverId = "";
   private int _watchdogPort;
   private boolean _isVerbose;
-  private StartMode _startMode = StartMode.DIRECT;
+  private StartMode _startMode;
 
   private boolean _isDynamicServer;
   private String _dynamicCluster;
@@ -167,7 +167,7 @@ class WatchdogArgs
 
   boolean isSingle()
   {
-    return _startMode == StartMode.DIRECT;
+    return _startMode == StartMode.CONSOLE;
   }
 
   public ResinELContext getELContext()
@@ -268,6 +268,9 @@ class WatchdogArgs
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.CONFIG);
       }
+      else if ("console".equals(arg)) {
+	_startMode = StartMode.CONSOLE;
+      }
       else if ("status".equals(arg)) {
 	_startMode = StartMode.STATUS;
       }
@@ -294,6 +297,18 @@ class WatchdogArgs
       }
     }
 
+    if (_startMode == null) {
+      System.out.println(L().l("Resin requires a command:"
+			       + "\n  console - start Resin in console mode"
+			       + "\n  status - watchdog status"
+			       + "\n  start - start a Resin server"
+			       + "\n  stop - stop a Resin server"
+			       + "\n  restart - restart a Resin server"
+			       + "\n  kill - force a kill of a Resin server"
+			       + "\n  shutdown - shutdown the watchdog"));
+      System.exit(1);
+    }
+
     if (resinConf != null) {
       _resinConf = Vfs.getPwd().lookup(resinConf);
 
@@ -310,7 +325,7 @@ class WatchdogArgs
 
   private static void usage()
   {
-    System.err.println(L().l("usage: java -jar resin.jar [-options] [status | start | stop | restart | kill | shutdown]"));
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | stop | restart | kill | shutdown]"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));
@@ -586,8 +601,8 @@ class WatchdogArgs
   }
 
   enum StartMode {
+    CONSOLE,
     STATUS,
-    DIRECT,
     START,
     STOP,
     KILL,

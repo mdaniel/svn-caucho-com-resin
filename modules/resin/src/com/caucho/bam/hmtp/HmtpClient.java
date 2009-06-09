@@ -50,7 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * HMTP client protocol
  */
-public class HmtpClient extends SimpleActorClient {
+public class HmtpClient extends SimpleActorClient implements LinkClient {
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
 
@@ -260,7 +260,7 @@ public class HmtpClient extends SimpleActorClient {
 
       throw _connException;
     } catch (IOException e) {
-      _connException = new ActorException(e);
+      _connException = new RemoteConnectionFailedException("Failed to connect to server at " + _host + ":" + _port + "\n  " + e, e);
 
       throw _connException;
     }
@@ -333,6 +333,11 @@ public class HmtpClient extends SimpleActorClient {
       return jid;
   }
 
+  public ActorStream getLinkStream()
+  {
+    return getBrokerStream();
+  }
+  
   /**
    * Returns the current stream to the broker, throwing an exception if
    * it's unavailable
@@ -378,7 +383,7 @@ public class HmtpClient extends SimpleActorClient {
   /**
    * Spawns the thread to handle the inbound packets
    */
-  protected void executeThread (Runnable r)
+  protected void executeThread(Runnable r)
   {
     Thread thread = new Thread(r);
     thread.setName("hmtp-reader-" + _host + "-" + _port);

@@ -116,6 +116,11 @@ public final class ThreadPool {
     init();
   }
 
+  public static ThreadPool getCurrent()
+  {
+    return getThreadPool();
+  }
+  
   public static ThreadPool getThreadPool()
   {
     synchronized (ThreadPool.class) {

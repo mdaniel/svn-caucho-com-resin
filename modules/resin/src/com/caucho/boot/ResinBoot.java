@@ -201,13 +201,18 @@ public class ResinBoot {
 				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
       } catch (Exception e) {
-	e.printStackTrace();
+	String eMsg;
+
+	if (e instanceof ConfigException)
+	  eMsg = e.getMessage();
+	else
+	  eMsg = e.toString();
 	
-	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at {2}:{3}.\n{4}",
+	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at {2}:{3}.\n  {4}",
 				 Version.VERSION, _client.getId(),
 				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort(),
-				 e.toString()));
+				 eMsg));
 
 	log().log(Level.FINE, e.toString(), e);
 
@@ -264,7 +269,7 @@ public class ResinBoot {
       try {
 	_client.restartWatchdog(_args.getArgv());
 	
-	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
+	System.out.println(L().l("Resin/{0} restarted -server '{1}' for watchdog at {2}:{3}",
 				 Version.VERSION, _client.getId(),
 				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));

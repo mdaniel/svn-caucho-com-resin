@@ -158,7 +158,7 @@ public class MnodeStore implements AlarmListener {
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
-	 + " SET value=?"
+	 + " SET value=?,"
 	 + "     server_version=?,item_version=?,"
 	 + "     idle_timeout=?,update_time=?"
 	 + " WHERE id=? AND item_version<=?");

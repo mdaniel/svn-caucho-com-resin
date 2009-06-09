@@ -13,6 +13,12 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>watchdog: start can create a new task if the old one is in the process of shutting down (#3527, rep by Rob Lockston)</li>
+<li>watchdog: stop needs to wait for Resin to exit (#3528, #3418, rep by Rob Lockstone)</li>
+<li>watchdog: require "console" option, and forbid command-line without command</li>
+<li>hessian: hessian 1.0/2.0 debug conflict for date ('d' vs \x4a) (#3452, rep by Rick Mann)</li>
+<li>candi: multiple registration issue with @ApplicationScoped HessianService (#3543, rep by skot)</li>
+<li>dist-session: open source wasn't properly saving (#3545, rep by Mattias Jiderhamn)</li>
 <li>candi: resin-web.xml needs to override scanned beans (#3546, rep by voodude0</li>
 <li>hessian: issues with 2 vs 1 version detection (#3036, rep by skipper13)</li>
 <li>candi: stack overflow with EL config (#3480, rep by Scott Hernandez)</li>
