@@ -632,6 +632,11 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public StringValue get_server_info(Env env)
   {
+    String version = env.getQuercus().getMysqlVersion();
+    
+    if (version != null)
+      return env.createString(version);
+    
     try {
       return env.createString(validateConnection().getServerInfo());
     } catch (SQLException e) {
@@ -1534,12 +1539,14 @@ public class Mysqli extends JdbcConnectionResource {
         if (_checkedDriverVersion.length() != 0)
           return;
         
+        /*
         String message = "Unable to detect MySQL Connector/J JDBC driver " +
                          "version.  The recommended JDBC version is " +
                          "3.1.14+/5+.";
 
         log.log(Level.WARNING, message);
         env.warning(message);
+        */
       }
     }
   }

@@ -781,7 +781,7 @@ public class MysqliResult extends JdbcResultResource {
       ResultSetMetaData md = getMetaData();
 
       return md.getColumnTypeName(fieldOffset + 1);
-    } catch (Exception e) {
+    } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return null;
     }
@@ -947,7 +947,8 @@ public class MysqliResult extends JdbcResultResource {
     String encoding = null;
 
     try {
-      encoding = (String) getColumnCharacterSetMethod.invoke(md, column);
+      if (getColumnCharacterSetMethod != null)
+        encoding = (String) getColumnCharacterSetMethod.invoke(md, column);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
