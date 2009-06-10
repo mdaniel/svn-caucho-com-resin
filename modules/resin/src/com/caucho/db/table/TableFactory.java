@@ -79,6 +79,16 @@ public class TableFactory {
   /**
    * Adds a varchar
    */
+  public Column addTinytext(String name)
+  {
+    _row.allocateColumn();
+
+    return _row.addColumn(new StringColumn(_row, name, 256));
+  }
+  
+  /**
+   * Adds a varchar
+   */
   public Column addVarchar(String name, int size)
   {
     _row.allocateColumn();
@@ -193,9 +203,10 @@ public class TableFactory {
   {
     Column column = _row.getColumn(name);
 
-    if (column == null)
-      throw new SQLException(L.l("`{0}' is not a valid column for primary key",
-				 name));
+    if (column == null) {
+      throw new SQLException(L.l("'{0}' is not a valid column for primary key",
+                                 name));
+    }
 
     column.setUnique();
     column.setNotNull();
@@ -212,8 +223,8 @@ public class TableFactory {
     Column column = _row.getColumn(name);
 
     if (column == null)
-      throw new SQLException(L.l("`{0}' is not a valid column for NOT NULL",
-				 name));
+      throw new SQLException(L.l("'{0}' is not a valid column for NOT NULL",
+                                 name));
 
     column.setNotNull();
   }
@@ -227,8 +238,8 @@ public class TableFactory {
     Column column = _row.getColumn(name);
 
     if (column == null)
-      throw new SQLException(L.l("`{0}' is not a valid column for DEFAULT",
-				 name));
+      throw new SQLException(L.l("'{0}' is not a valid column for DEFAULT",
+                                  name));
 
     column.setDefault(expr);
   }
@@ -243,7 +254,7 @@ public class TableFactory {
 
     if (column == null)
       throw new SQLException(L.l("'{0}' is not a valid column for NOT NULL",
-				 name));
+                                 name));
 
     column.setUnique();
 

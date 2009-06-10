@@ -90,7 +90,7 @@ public class ResultSetMetaDataImpl implements ResultSetMetaData {
    */
   public int isNullable(int column)
   {
-    throw new UnsupportedOperationException();
+    return columnNullableUnknown;
   }
 
   /**

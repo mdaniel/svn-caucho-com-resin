@@ -100,6 +100,7 @@ public class Parser {
   final static int UPDATE = DROP + 1;
   final static int SET = UPDATE + 1;
   final static int DELETE = SET + 1;
+  final static int SHOW = DELETE + 1;
 
   final static int CONSTRAINT = DELETE + 1;
   final static int UNIQUE = CONSTRAINT + 1;
@@ -185,6 +186,9 @@ public class Parser {
 
     case UPDATE:
       return parseUpdate();
+    
+    //case SHOW:
+      //return parseShow();
 
     default:
       throw new SQLParseException(L.l("unknown query at `{0}'",
@@ -674,8 +678,14 @@ public class Parser {
 	break;
 
       case UNIQUE:
-	factory.addUnique(parseColumnNames());
-	break;
+        token = scanToken();
+        
+        if (token != KEY) {
+          _token = token;
+        }
+        
+        factory.addUnique(parseColumnNames());
+        break;
 
       case PRIMARY:
 	token = scanToken();
@@ -787,6 +797,15 @@ public class Parser {
     }
     else if (type.equalsIgnoreCase("blob")) {
       factory.addBlob(name);
+    }
+    else if (type.equalsIgnoreCase("tinytext")) {
+      factory.addTinytext(name);
+    }
+    else if (type.equalsIgnoreCase("mediumtext")) {
+      factory.addVarchar(name, 256);
+    }
+    else if (type.equalsIgnoreCase("longtext")) {
+      factory.addVarchar(name, 512);
     }
     else if (type.equalsIgnoreCase("smallint")
 	     || type.equalsIgnoreCase("tinyint")
@@ -958,8 +977,9 @@ public class Parser {
 	token = scanToken();
       } while (token == ',');
 
-      if (token != ')')
+      if (token != ')') {
 	throw error(L.l("expected ')' at '{0}'", tokenName(token)));
+      }
     }
     else if (token == IDENTIFIER) {
       columns.add(_lexeme);
@@ -1165,6 +1185,26 @@ public class Parser {
 
     return query;
   }
+  
+  /*
+  private Query parseShow()
+    throws SQLException
+  {
+    int token;
+
+    if ((token = scanToken()) != IDENTIFIER)
+      throw error(L.l("expected identifier at `{0}'", tokenName(token)));
+
+    String name = _lexeme;
+    
+    if (name.equalsIgnoreCase("tables"))
+      return new ShowTablesQuery();
+    else if (name.equalsIgnoreCase("databases"))
+      return new ShowDatabasesQuery();
+    else
+      throw error(L.l("`{0}' is an unknown type in SHOW.", name));
+  }
+  */
 
   /**
    * Parses a set item.
