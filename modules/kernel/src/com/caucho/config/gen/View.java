@@ -34,7 +34,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import javax.decorator.Decorator;
-import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.stereotype.Stereotype;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBindingType;
 import java.io.IOException;

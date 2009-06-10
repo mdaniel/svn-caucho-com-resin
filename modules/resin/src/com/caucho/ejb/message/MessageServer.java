@@ -72,7 +72,8 @@ public class MessageServer extends AbstractServer
     super(ejbContainer, annotatedType);
 
     InjectManager webBeans = InjectManager.create();
-    UserTransaction ut = webBeans.getInstanceByType(UserTransaction.class);
+    
+    UserTransaction ut = webBeans.getReference(UserTransaction.class);
     
     // ejb/0fbl
     _context = new MessageDrivenContextImpl(this, ut);

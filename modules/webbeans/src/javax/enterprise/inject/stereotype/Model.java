@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.enterprise.inject.stereotype;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.ElementType.METHOD;
@@ -39,7 +39,6 @@ import java.lang.annotation.Target;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Named;
-import javax.enterprise.inject.Stereotype;
 
 /**
  * A standard @Stereotype

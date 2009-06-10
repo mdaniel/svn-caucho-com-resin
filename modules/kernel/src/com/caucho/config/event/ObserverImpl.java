@@ -36,6 +36,7 @@ import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.IfExists;
 import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.*;
@@ -171,8 +172,11 @@ public class ObserverImpl implements Observer {
       if (context != null && context.isActive())
 	obj = context.get(_bean);
     }
-    else
-      obj = _webBeans.getReference(_bean, (Class) null); // XXX:
+    else {
+      CreationalContext env = null;
+      
+      obj = _webBeans.getReference(_bean, (Class) null, env); // XXX:
+    }
 
     try {
       if (obj != null) {
@@ -181,8 +185,11 @@ public class ObserverImpl implements Observer {
 	for (int i = 0; i < _args.length; i++) {
 	  Bean bean = _args[i];
 	  
-	  if (bean != null)
-	    args[i] = _webBeans.getReference(bean);
+	  if (bean != null) {
+	    CreationalContext env = _webBeans.createCreationalContext();
+	    
+	    args[i] = _webBeans.getReference(bean, bean.getBeanClass(), env);
+	  }
 	  else
 	    args[i] = event;
 	}

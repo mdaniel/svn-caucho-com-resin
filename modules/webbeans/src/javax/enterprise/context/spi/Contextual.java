@@ -69,5 +69,5 @@ public interface Contextual<T>
    *
    * @param instance the instance to destroy
    */
-  public void destroy(T instance);
+  public void destroy(T instance, CreationalContext<T> creationalContext);
 }

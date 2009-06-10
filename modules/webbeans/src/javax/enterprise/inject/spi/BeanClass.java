@@ -38,7 +38,7 @@ import javax.enterprise.context.spi.Contextual;
 /**
  * Internal implementation for a Bean
  */
-public interface BeanClass<X> extends Bean<X>
+public interface BeanClass<X>
 {
   /**
    * Returns the annotated type.

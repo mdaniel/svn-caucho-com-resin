@@ -34,6 +34,8 @@ import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.loader.*;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 /**
  * Waits for the close event and calls a destroy() method.
  */
@@ -61,8 +63,11 @@ public class ComponentClose implements ClassLoaderListener {
   {
     Object obj = _ref.get();
 
-    if (obj != null)
-      _comp.destroy(obj);
+    if (obj != null) {
+      CreationalContext env = null;
+      
+      _comp.destroy(obj, env);
+    }
   }
 
   public String toString()

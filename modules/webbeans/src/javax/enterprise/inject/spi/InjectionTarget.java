@@ -38,20 +38,20 @@ import javax.enterprise.context.spi.CreationalContext;
 /**
  * Abstract introspected view of a Bean injectible field
  */
-public interface InjectionTarget<X> extends Producer<X>
+public interface InjectionTarget<T> extends Producer<T>
 {
   /**
    * Inject the bean.
    */
-  public void inject(X instance, CreationalContext<X> ctx);
+  public void inject(T instance, CreationalContext<T> ctx);
   
   /**
    * PostConstruct initialization
    */
-  public void postConstruct(X instance);
+  public void postConstruct(T instance);
   
   /**
    * Call pre-destroy
    */
-  public void preDestroy(X instance);
+  public void preDestroy(T instance);
 }

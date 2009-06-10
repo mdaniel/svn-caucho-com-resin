@@ -45,19 +45,23 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Hashtable;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ResinModule
   extends AbstractQuercusModule
@@ -107,9 +111,17 @@ public class ResinModule
    */
   public static Object java_bean(String name)
   {
-    InjectManager webBeans = InjectManager.create();
+    InjectManager beanManager = InjectManager.create();
 
-    return webBeans.getInstanceByName(name);
+    Set<Bean<?>> beans = beanManager.getBeans(name);
+
+    if (beans.size() == 0)
+      return null;
+
+    Bean bean = beanManager.getHighestPrecedenceBean(beans);
+    CreationalContext env = beanManager.createCreationalContext();
+    
+    return beanManager.getReference(bean, bean.getBeanClass(), env);
   }
 
   /**

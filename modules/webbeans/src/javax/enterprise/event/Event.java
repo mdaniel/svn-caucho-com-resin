@@ -33,7 +33,9 @@ import javax.enterprise.inject.TypeLiteral;
 
 public interface Event<T> {
   public void fire(T event, Annotation... bindings);
-  public void observe(Observer<T> observer, Annotation... bindings);
+  
+  public void addObserver(Observer<T> observer);
+  public void removeObserver(Observer<T> observer);
 
   public Event<T> select(Annotation... bindings);
   public <U extends T> Event<U> select(Class<U> subtype, Annotation... bindings);

@@ -38,7 +38,7 @@ import javax.enterprise.context.spi.Contextual;
 /**
  * Internal implementation for a Bean
  */
-public interface SessionBean<X> extends Bean<X>, BeanClass<X>
+public interface SessionBean<X> extends Bean<Object>, BeanClass<X>
 {
   /**
    * Returns the ejb name

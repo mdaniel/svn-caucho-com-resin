@@ -32,7 +32,7 @@ package com.caucho.config.scope;
 import com.caucho.config.inject.AbstractBean;
 
 import java.io.Closeable;
-
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * The application scope value
@@ -40,6 +40,7 @@ import java.io.Closeable;
 public class ComponentDestructor implements Closeable {
   private AbstractBean _owner;
   private Object _value;
+  private CreationalContext _env;
 
   public ComponentDestructor(AbstractBean owner, Object value)
   {
@@ -49,7 +50,7 @@ public class ComponentDestructor implements Closeable {
 
   public void close()
   {
-    _owner.destroy(_value);
+    _owner.destroy(_value, _env);
   }
 
   public String toString()

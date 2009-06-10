@@ -62,8 +62,8 @@ public class ResourceAdapterAssociationProgram extends ConfigProgram {
     InjectManager webBeans = InjectManager.create();
     
     _raController
-      = webBeans.getInstanceByType(ResourceAdapterController.class,
-				   Names.create(ra.getResourceAdapterClass().getName()));
+      = webBeans.getReference(ResourceAdapterController.class,
+			      Names.create(ra.getResourceAdapterClass().getName()));
     
     if (_raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",

@@ -48,7 +48,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 /**
  * DecoratorBean represents a Java decorator
  */
-public class DecoratorBean implements Decorator
+public class DecoratorBean<T> implements Decorator<T>
 {
   private static final L10N L = new L10N(DecoratorBean.class);
 
@@ -67,7 +67,7 @@ public class DecoratorBean implements Decorator
     = new HashSet<Annotation>();
   
   public DecoratorBean(InjectManager beanManager,
-		       Class type)
+		       Class<T> type)
   {
     _beanManager = beanManager;
 
@@ -152,9 +152,9 @@ public class DecoratorBean implements Decorator
   // lifecycle
   //
   
-  public Object create(CreationalContext creationalContext)
+  public T create(CreationalContext<T> creationalContext)
   {
-    return _bean.create(creationalContext);
+    return (T) _bean.create(creationalContext);
   }
 
   /*
@@ -324,7 +324,7 @@ public class DecoratorBean implements Decorator
   /**
    * Instantiate the bean.
    */
-  public Object instantiate()
+  public T instantiate()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -332,7 +332,7 @@ public class DecoratorBean implements Decorator
   /**
    * Inject the bean.
    */
-  public void inject(Object instance)
+  public void inject(T instance)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -356,7 +356,7 @@ public class DecoratorBean implements Decorator
   /**
    * Call destroy
    */
-  public void destroy(Object instance)
+  public void destroy(T instance, CreationalContext<T> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

@@ -46,6 +46,7 @@ import java.lang.reflect.Method;
 import javax.servlet.annotation.WebServlet;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanClass;
 import javax.enterprise.inject.spi.Plugin;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.event.Observes;
@@ -69,7 +70,13 @@ public class WebAppInjectExtension implements Plugin
   {
     try {
       Bean<?> bean = event.getBean();
-      Annotated annotated = event.getAnnotated();
+
+      if (! (bean instanceof BeanClass))
+	return;
+
+      BeanClass mBean = (BeanClass) bean;
+      
+      Annotated annotated = mBean.getAnnotatedType();
 
       if (annotated == null || annotated.getAnnotations() == null)
 	return;

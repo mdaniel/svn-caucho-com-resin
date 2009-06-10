@@ -37,6 +37,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
@@ -149,10 +150,12 @@ public class EjbUtil {
   {
     InjectManager webBeans = InjectManager.create();
 
+    CreationalContext env = webBeans.createCreationalContext();
+    
     for (int i = beans.size() - 1; i >= 0; i--) {
       Decorator bean = beans.get(i);
 
-      Object instance = webBeans.getReference(bean);
+      Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
 
       // XXX:
       // bean.setDelegate(instance, tail);
@@ -169,10 +172,12 @@ public class EjbUtil {
   {
     Object []instances = new Object[beans.size()];
 
+    CreationalContext env = webBeans.createCreationalContext();
+    
     for (int i = 0; i < beans.size(); i++) {
       Decorator bean = beans.get(i);
 
-      Object instance = webBeans.getReference(bean);
+      Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
 
       // XXX:
       // bean.setDelegate(instance, proxy);

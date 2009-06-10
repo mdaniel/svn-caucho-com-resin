@@ -81,7 +81,10 @@ public class SingletonBean extends AbstractSingletonBean
    */
   public void close()
   {
-    if (_value != null)
-      destroy(_value);
+    if (_value != null) {
+      CreationalContext env = null;
+      
+      destroy(_value, env);
+    }
   }
 }

@@ -69,22 +69,14 @@ public class EventImpl<T> implements Event<T>
     }
   }
 
-  public void observe(Observer<T> observer, Annotation... bindings)
+  public void addObserver(Observer<T> observer)
   {
-    if (_bindings.length == 0)
-      _manager.addObserver(observer, _eventType, bindings);
-    else if (bindings == null || bindings.length == 0)
-      _manager.addObserver(observer, _eventType, _bindings);
-    else {
-      Annotation []fullBindings
-	= new Annotation[_bindings.length + bindings.length];
+    _manager.addObserver(observer);
+  }
 
-      System.arraycopy(_bindings, 0, fullBindings, 0, _bindings.length);
-      System.arraycopy(bindings, 0, fullBindings, _bindings.length,
-		       bindings.length);
-
-      _manager.addObserver(observer, _eventType, fullBindings);
-    }
+  public void removeObserver(Observer<T> observer)
+  {
+    _manager.removeObserver(observer);
   }
 
   public Event<T> select(Annotation... bindings)

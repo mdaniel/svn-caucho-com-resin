@@ -67,12 +67,12 @@ public class InstanceBeanImpl<T> implements Bean<T>
     return (Class) _type;
   }
   
-  public T create(CreationalContext<T> creationalContext)
+  public T create(CreationalContext<T> env)
   {
     return (T) _instance;
   }
   
-  public void destroy(T instance)
+  public void destroy(T instance, CreationalContext<T> env)
   {
   }
   

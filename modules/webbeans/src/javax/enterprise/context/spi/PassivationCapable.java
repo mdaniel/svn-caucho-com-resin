@@ -27,24 +27,16 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.enterprise.context.spi;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import javax.enterprise.context.spi.Contextual;
 
 /**
- * The @Stereotype annotation for web beans
+ * Beans which can be passivated need to return a unique id.
  */
-@Documented  
-@Retention(RUNTIME)
-@Target(ANNOTATION_TYPE)
-public @interface Stereotype {
-  public Class<?>[] requiredTypes() default {};
-  
-  public Class<? extends Annotation>[] supportedScopes() default {};
+public interface PassivationCapable {
+  /**
+   * Returns the unique context id for the bean.
+   */
+  public String getId();
 }

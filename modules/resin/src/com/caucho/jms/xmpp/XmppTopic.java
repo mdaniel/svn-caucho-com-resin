@@ -29,12 +29,6 @@
 
 package com.caucho.jms.xmpp;
 
-import java.io.Serializable;
-import java.util.logging.*;
-
-import javax.annotation.*;
-import javax.jms.*;
-
 import com.caucho.config.inject.InjectManager;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
@@ -42,6 +36,13 @@ import com.caucho.jms.queue.*;
 import com.caucho.jms.connection.*;
 import com.caucho.util.*;
 import com.caucho.xmpp.XmppProtocol;
+
+import java.io.Serializable;
+import java.util.logging.*;
+
+import javax.annotation.*;
+import javax.enterprise.inject.Current;
+import javax.jms.*;
 
 /**
  * Implements an xmpp topic.
@@ -52,6 +53,8 @@ public class XmppTopic extends AbstractTopic
   
   private static final Logger log
     = Logger.getLogger(XmppTopic.class.getName());
+
+  private @Current XmppProtocol _protocol;
 
   private int _id;
 
@@ -71,14 +74,6 @@ public class XmppTopic extends AbstractTopic
   public void init()
   {
     super.init();
-
-    InjectManager webBeans = InjectManager.create();
-    
-    XmppProtocol xmpp = webBeans.getInstanceByType(XmppProtocol.class);
-
-    if (xmpp == null)
-      throw new java.lang.IllegalStateException(L.l("Need xmpp protocol"));
-
   }
 
   @Override

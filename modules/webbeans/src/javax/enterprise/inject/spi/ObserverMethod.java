@@ -42,11 +42,6 @@ import javax.enterprise.event.Observer;
 public interface ObserverMethod<X,T> extends Observer<T>
 {
   /**
-   * Returns the annotated method
-   */
-  public AnnotatedParameter<X> getEventParameter();
-
-  /**
    * Returns the declaring bean
    */
   public Bean<X> getParentBean();
@@ -55,6 +50,11 @@ public interface ObserverMethod<X,T> extends Observer<T>
    * Returns the observed event type
    */
   public Type getObservedEventType();
+  
+  /**
+   * Returns the annotated method
+   */
+  public AnnotatedParameter<? super X> getEventParameter();
 
   /**
    * Returns the observed event bindings
@@ -64,10 +64,10 @@ public interface ObserverMethod<X,T> extends Observer<T>
   /**
    * Sends an event
    */
-  public Listener<X,T> getListener();
+  public Listener<T> getListener();
 
   /**
    * Sends an event
    */
-  public void setListener(Listener<X,T> listener);
+  public void setListener(Listener<T> listener);
 }

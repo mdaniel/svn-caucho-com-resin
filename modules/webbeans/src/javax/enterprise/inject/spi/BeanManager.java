@@ -34,31 +34,73 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
+import javax.el.ELResolver;
+import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observer;
 import javax.enterprise.inject.TypeLiteral;
 
 /**
- * API for the Java Injection manager
+ * API for the Java Injection (JSR-299) BeanManager.
  *
- * Applications needing a programmatic interface to WebBeans will obtain an
- * instance of the Manager either though webbeans itself or in JNDI at
- * "java:comp/env/Manager"
+ * Applications needing a programmatic interface to BeanManager can use
+ * JNDI at "java:comp/BeanManager".  Bean registered with CanDI can use
+ * injection to get the manager.
+ *
+ * <code><pre>
+ * @Current BeanManager _manager;
+ * </pre></code>
  */
 public interface BeanManager
 {
   //
-  // deployment types
+  // enabled deployment types, scopes, and binding types
   //
 
   /**
    * Returns the enabled deployment types
    */
-  public List<Class<?>> getEnabledDeploymentTypes();
+  public List<Class<? extends Annotation>> getEnabledDeploymentTypes();
+
+  /**
+   * Tests if an annotation is an enabled scope type
+   */
+  public boolean isScopeType(Class<? extends Annotation> annotationType);
+
+  /**
+   * Returns the scope definition for a scope type
+   */
+  public ScopeType getScopeDefinition(Class<? extends Annotation> scopeType);
+
+  /**
+   * Tests if an annotation is an enabled binding type
+   */
+  public boolean isBindingType(Class<? extends Annotation> annotationType);
+
+  /**
+   * Tests if an annotation is an enabled interceptor binding type
+   */
+  public boolean isInterceptorBindingTypeDefinition(Class<? extends Annotation> annotationType);
+
+  /**
+   * Returns the bindings for an interceptor binding type
+   */
+  public Set<Annotation> getInterceptorBindingTypeDefinition(Class<? extends Annotation> bindingType);
+
+  /**
+   * Tests if an annotation is an enabled stereotype.
+   */
+  public boolean isStereotypeDefinition(Class<? extends Annotation> annotationType);
+
+  /**
+   * Returns the annotations associated with a stereotype
+   */
+  public Set<Annotation> getStereotypeDefinition(Class<? extends Annotation> stereotype);
+  
   
   //
-  // bean registration
+  // bean registration and discovery
   //
 
   /**
@@ -99,28 +141,9 @@ public interface BeanManager
    * Returns the beans matching a class and annotation set
    *
    * @param type the bean's class
-   * @param bindings required @BindingType annotations
+   * @param bindings array of required @BindingType annotations
    */
-  public <T> Set<Bean<T>> getBeans(Class<T> type,
-				   Annotation... bindings);
-
-  /**
-   * Returns the beans matching a generic type and annotation set
-   *
-   * @param type the bean's primary type
-   * @param bindings required @BindingType annotations
-   */
-  public <T> Set<Bean<T>> getBeans(TypeLiteral<T> type,
-				   Annotation... bindings);
-
-  /**
-   * Returns the beans matching a generic type and annotation set
-   *
-   * @param type the bean's primary type
-   * @param bindings required @BindingType annotations
-   */
-  public Set<Bean<?>> getBeans(Type type,
-			       Annotation... bindings);
+  public Set<Bean<?>> getBeans(Type beanType, Annotation... bindings);
 
   /**
    * Returns the bean definitions matching a given name
@@ -130,26 +153,39 @@ public interface BeanManager
   public Set<Bean<?>> getBeans(String name);
 
   /**
-   * Returns the most specialized bean
+   * Returns the most specialized bean, i.e. the most specific subclass
+   * with a @Specialized annotation.
    *
-   * @param name the basic bean
+   * @param bean the bean to specialize
    */
-  public <X> Bean<X> getMostSpecializedBean(Bean<X> bean);
+  public <X> Bean<? extends X> getMostSpecializedBean(Bean<X> bean);
+
+  /**
+   * Returns the bean with the highest precedence deployment type from a set.
+   *
+   * @param beans the set of beans to select from
+   */
+  public <X> Bean<? extends X>
+  getHighestPrecedenceBean(Set<Bean<? extends X>> beans);
+
+  /**
+   * Returns the passivation-capable bean with the given id.  Used by
+   * custom Contexts during deserialization to get the beans needed for
+   * destruction.
+   *
+   * @param id the basic bean
+   */
+  public Bean<?> getPassivationCapableBean(String id);
 
   //
   // Bean instantiation
   //
 
   /**
-   * Returns an instance for the given bean.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param bean the metadata for the bean
-   * @param beanType the expected type
-   *
-   * @return an instance of the bean obeying scope
+   * Creates a new CreationalContext for instantiating a bean.  Normally
+   * used for getReference by frameworks.
    */
-  public Object getReference(Bean<?> bean, Type beanType);
+  public CreationalContext<?> createCreationalContext();
 
   /**
    * Returns an instance for the given bean.  This method will obey
@@ -157,34 +193,42 @@ public interface BeanManager
    *
    * @param bean the metadata for the bean
    * @param beanType the expected type
+   * @param env the creational context environment for the bean
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getReference(Bean<? extends T> bean, Class<T> beanType);
-
-  /**
-   * Returns an instance for the given bean.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param bean the metadata for the bean
-   * @param beanType the expected type
-   *
-   * @return an instance of the bean obeying scope
-   */
-  public <T> T getReference(Bean<? extends T> bean, TypeLiteral<T> beanType);
+  public Object getReference(Bean<?> bean,
+			     Type beanType,
+			     CreationalContext<?> env);
 
   /**
    * Internal callback during creation to get a new injection instance.
    */
-  public <T> T getInjectableReference(InjectionPoint ij,
-				      CreationalContext<?> ctx);
+  public Object getInjectableReference(InjectionPoint ij,
+				       CreationalContext<?> ctx);
+
+  //
+  // contexts
+  //
 
   /**
-   * Returns an instance of bean matching a given name
-   *
-   * @param name the name of the bean to match
+   * Adds a new scope context
    */
-  public Object getInstanceByName(String name);
+  public void addContext(Context context);
+
+  /**
+   * Returns the scope context for the given type
+   */
+  public Context getContext(Class<? extends Annotation> scopeType);
+
+  //
+  // EL integration
+  //
+  
+  /**
+   * Returns the BeanManager's EL resolver.
+   */
+  public ELResolver getELResolver();
 
   //
   // Observer registration
@@ -194,67 +238,24 @@ public interface BeanManager
    * Registers an event observer
    *
    * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      Class<T> eventType,
-			      Annotation... bindings);
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      TypeLiteral<T> eventType,
-			      Annotation... bindings);
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
    * @param bindings the binding set for the event
    */
   public void addObserver(Observer<?> observer,
-			  Type eventType,
 			  Annotation... bindings);
 
   /**
    * Removes an event observer
    *
    * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
    */
-  public <T> void removeObserver(Observer<T> observer,
-				 Class<T> eventType,
-				 Annotation... bindings);
+  public void removeObserver(Observer<?> observer);
 
   /**
-   * Removes an event observer
+   * Registers an event observer
    *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
+   * @param observerMethod the observer method
    */
-  public <T> void removeObserver(Observer<T> observer,
-				 TypeLiteral<T> eventType,
-				 Annotation... bindings);
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public void removeObserver(Observer<?> observer,
-			     Type eventType,
-			     Annotation... bindings);
+  public void addObserver(ObserverMethod<?,?> observerMethod);
 
   //
   // Observer resolution
@@ -269,32 +270,13 @@ public interface BeanManager
   public <T> Set<Observer<T>> resolveObservers(T event,
 					       Annotation... bindings);
 
-  //
-  // scopes
-  //
-
-  /**
-   * Adds a new scope context
-   */
-  public void addContext(Context context);
-
-  /**
-   * Returns the scope context for the given type
-   */
-  public Context getContext(Class<? extends Annotation> scopeType);
-
-  //
-  // event management
-  //
-
   /**
    * Fires an event
    *
    * @param event the event to fire
    * @param bindings the event bindings
    */
-  public void fireEvent(Object event,
-			Annotation... bindings);
+  public void fireEvent(Object event, Annotation... bindings);
 
   //
   // interceptor support

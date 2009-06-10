@@ -740,7 +740,8 @@ public class Config {
    */
   public static Object getCurrentVar(String var)
   {
-    return InjectManager.create().findByName(var);
+    // return InjectManager.create().findByName(var);
+    return getProperty(var);
   }
 
   /**

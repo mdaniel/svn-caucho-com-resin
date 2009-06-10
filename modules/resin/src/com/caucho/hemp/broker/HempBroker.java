@@ -63,6 +63,7 @@ import java.io.Serializable;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanClass;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.Plugin;
@@ -841,8 +842,12 @@ public class HempBroker
    */
   public void registerActor(@Observes ProcessBean event)
   {
-    Annotated annotated = event.getAnnotated();
     Bean bean = event.getBean();
+    
+    Annotated annotated = null;
+
+    if (bean instanceof BeanClass)
+      annotated = ((BeanClass) bean).getAnnotatedType();
 
     if (annotated == null)
       return;
@@ -865,7 +870,8 @@ public class HempBroker
   {
     InjectManager beanManager = InjectManager.getCurrent();
       
-    Actor actor = beanManager.getReference(bean, Actor.class);
+    Actor actor = (Actor) beanManager.getReference(bean, Actor.class,
+						   beanManager.createCreationalContext());
 
     actor.setBrokerStream(this);
 
@@ -979,32 +985,19 @@ public class HempBroker
       return _service;
     }
     
-    /**
-     * Handles the case where the environment is configuring and
-     * registering beans
-     */
     public void environmentConfigure(EnvironmentClassLoader loader)
     {
     }
   
-    /**
-     * Handles the case where the environment is binding injection targets
-     */
     public void environmentBind(EnvironmentClassLoader loader)
     {
     }
   
-    /**
-     * Handles the case where the environment is starting (after init).
-     */
     public void environmentStart(EnvironmentClassLoader loader)
     {
       startActor(_bean, _service);
     }
   
-    /**
-     * Handles the case where the environment is stopping (after init).
-     */
     public void environmentStop(EnvironmentClassLoader loader)
     {
     }

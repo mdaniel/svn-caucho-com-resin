@@ -156,6 +156,7 @@ public class ResinWebBeansProducer
   /**
    * Starts a bean based on a ServiceStartup event
    */
+  /*
   public void serviceStartup(@Observes @ServiceBinding BeanStartupEvent beanEvent)
   {
     Bean bean = beanEvent.getBean();
@@ -167,6 +168,7 @@ public class ResinWebBeansProducer
 
     webBeans.getReference(bean);
   }
+  */
 
   /**
    * Registers a bean with OSGi based on a ServiceStartup event

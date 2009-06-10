@@ -178,6 +178,11 @@ abstract public class BaseType
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public BaseType findClass(Class cl)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   public String getSimpleName()
   {
     return getRawClass().getSimpleName();

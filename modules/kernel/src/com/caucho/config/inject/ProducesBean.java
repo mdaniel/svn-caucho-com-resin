@@ -189,8 +189,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   public T produce(CreationalContext<T> cxt)
   {
     ConfigContext env = (ConfigContext) cxt;
+    Class type = _producerBean.getBeanClass();
       
-    X factory = (X) _beanManager.getReference(_producerBean);
+    X factory = (X) _beanManager.getReference(_producerBean, type, env);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
@@ -308,7 +309,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Returns the disposer for the bean
    */
-  public Listener<X,T> getDisposer()
+  public Listener<T> getDisposer()
   {
     return null;
   }
@@ -316,7 +317,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Returns the disposer for the bean
    */
-  public void setDisposer(Listener<X,T> producer)
+  public void setDisposer(Listener<T> producer)
   {
   }
   

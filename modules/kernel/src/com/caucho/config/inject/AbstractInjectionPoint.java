@@ -120,10 +120,16 @@ public class AbstractInjectionPoint implements InjectionPoint
     if (_injectionBean == null)
       _injectionBean = _inject.resolveByInjectionPoint(this);
 
-    return _inject.getReference(_injectionBean); // XXX: cxt
+    return _inject.getReference(_injectionBean,
+				_injectionBean.getBeanClass(), cxt);
   }
 
   public boolean isDelegate()
+  {
+    return false;
+  }
+
+  public boolean isTransient()
   {
     return false;
   }

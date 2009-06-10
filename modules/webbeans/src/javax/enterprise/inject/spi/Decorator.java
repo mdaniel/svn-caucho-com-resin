@@ -32,7 +32,7 @@ package javax.enterprise.inject.spi;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
-import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.stereotype.Stereotype;
 
 /**
  * Internal implementation for a Decorator

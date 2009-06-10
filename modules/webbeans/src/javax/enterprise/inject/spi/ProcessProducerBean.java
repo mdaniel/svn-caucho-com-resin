@@ -29,10 +29,12 @@
 
 package javax.enterprise.inject.spi;
 
+import java.lang.annotation.Annotation;
+
 /**
- * Framework callback after all bean discovery
+ * Framework callback before processing an annotated type
  */
-public interface AfterDeploymentValidation
+public interface ProcessProducerBean<X,T> extends ProcessBean<T>
 {
-  public void addDeploymentProblem(Throwable t);
+  public ProducerBean<X,T> getProducerBean();
 }

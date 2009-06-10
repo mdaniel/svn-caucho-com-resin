@@ -29,10 +29,19 @@
 
 package javax.enterprise.inject.spi;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
+
 /**
- * Framework callback after all bean discovery
+ * Framework callback before processing an annotated type
  */
-public interface AfterDeploymentValidation
+public interface ProcessObserverMethod<X,T>
 {
-  public void addDeploymentProblem(Throwable t);
+  public ObserverMethod<X,T> getObserverMethod();
+  public void setObserverMethod(ObserverMethod<X,T> method);
+
+  public void veto();
+
+  public void addDefinitionError(Throwable t);
 }

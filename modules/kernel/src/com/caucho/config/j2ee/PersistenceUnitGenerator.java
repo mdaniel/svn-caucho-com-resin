@@ -41,13 +41,13 @@ import javax.enterprise.inject.AnnotationLiteral;
 import java.util.logging.Logger;
 
 
-public class PersistenceUnitGenerator extends ValueGenerator
+public class PersistenceUnitGenerator extends WebBeanGenerator
   implements ObjectProxy {
   private static final Logger log
     = Logger.getLogger(PersistenceUnitGenerator.class.getName());
   private static final L10N L = new L10N(PersistenceUnitGenerator.class);
 
-  private InjectManager _webBeans = InjectManager.create();
+  private InjectManager _beanManager = InjectManager.create();
   
   private String _location;
   private String _jndiName;
@@ -86,18 +86,14 @@ public class PersistenceUnitGenerator extends ValueGenerator
    */
   public Object create()
   {
-    EntityManagerFactory factory
-      = _webBeans.getInstanceByType(EntityManagerFactory.class,
-	   new AnnotationLiteral<JpaPersistenceContext>() {
-	     public String value() { return _unitName; }
-      });
-
-    if (factory == null)
-      throw new ConfigException(_location
-				+ L.l("@PersistenceUnit '{0}' is an unknown unit",
-				      _unitName));
-				
-    return factory;
+    try {
+      return create(EntityManagerFactory.class,
+		    new AnnotationLiteral<JpaPersistenceContext>() {
+		      public String value() { return _unitName; }
+		    });
+    } catch (Exception e) {
+      throw ConfigException.create(_location, e);
+    }
   }
 
   @Override

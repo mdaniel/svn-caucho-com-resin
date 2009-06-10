@@ -41,9 +41,4 @@ public interface AnnotatedField<X> extends AnnotatedMember<X>
    * Returns the reflected Field
    */
   public Field getJavaMember();
-
-  /**
-   * Returns the declaring type
-  public AnnotatedType<X> getDeclaringType();
-   */
 }

@@ -246,7 +246,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Call pre-destroy
    */
-  public void destroy(X instance)
+  public void destroy(X instance, CreationalContext<X> env)
   {
 
   }

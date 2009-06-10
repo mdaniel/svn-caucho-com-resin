@@ -66,6 +66,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.Conversation;
@@ -76,7 +77,6 @@ import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.New;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.TypeLiteral;
 import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.InjectionException;
@@ -107,6 +107,7 @@ import javax.enterprise.inject.spi.ProcessObserver;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProducerBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
+import javax.enterprise.inject.stereotype.Stereotype;
 import javax.naming.*;
 
 /**
@@ -253,6 +254,8 @@ public class InjectManager
   private Lifecycle _lifecycle = new Lifecycle();
   private boolean _isBeforeBeanDiscoveryComplete;
   private boolean _isAfterBeanDiscoveryComplete;
+
+  private ELResolver _elResolver;
 
   private ApplicationScope _applicationScope = new ApplicationScope();
   private XmlStandardPlugin _xmlExtension;
@@ -556,20 +559,6 @@ public class InjectManager
     return false;
   }
 
-  public ArrayList<Bean> getBeansOfType(Type type)
-  {
-    ArrayList<Bean> beans = new ArrayList<Bean>();
-
-    WebComponent webComponent = getWebComponent(type);
-
-    if (webComponent == null)
-      return beans;
-
-    beans.addAll(webComponent.resolve(type, new Annotation[0]));
-
-    return beans;
-  }
-
   /**
    * Returns the scope context corresponding to the scope annotation type.
    *
@@ -696,7 +685,7 @@ public class InjectManager
   /**
    * Finds a component by its component name.
    */
-  public Bean findByName(String name)
+  protected Bean findByName(String name)
   {
     // #3334 - shutdown timing issues
     HashMap<String,Bean> namedComponentMap = _namedComponentMap;
@@ -710,21 +699,6 @@ public class InjectManager
       return comp;
     else if (_parent != null)
       return _parent.findByName(name);
-    else
-      return null;
-  }
-
-  /**
-   * Finds a component by its component name.
-   */
-  public Object getObjectByName(String name)
-  {
-
-    Bean bean = _namedComponentMap.get(name);
-    if (bean != null)
-      return getReference(bean);
-    else if (_parent != null)
-      return _parent.getObjectByName(name);
     else
       return null;
   }
@@ -857,20 +831,6 @@ public class InjectManager
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> T getObject(Class<T> type, Annotation ... ann)
-  {
-    Set<Bean<T>> beans = getBeans(type, ann);
-
-    if (beans == null || beans.size() == 0)
-      return (T) createTransientObject(type);
-    else
-      return getInstanceByType(type, ann);
-  }
-
-  /**
-   * Returns a new instance for a class, but does not register the
-   * component with webbeans.
-   */
   public <T> BeanFactory<T> createBeanFactory(ManagedBean<T> managedBean)
   {
     return new BeanFactory(managedBean);
@@ -895,13 +855,69 @@ public class InjectManager
   }
 
   //
-  // javax.webbeans.Manager API
+  // enabled deployment types, scopes, and binding types
   //
 
   /**
    * Returns the enabled deployment types
    */
-  public List<Class<?>> getEnabledDeploymentTypes()
+  public List<Class<? extends Annotation>> getEnabledDeploymentTypes()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Tests if an annotation is an enabled scope type
+   */
+  public boolean isScopeType(Class<? extends Annotation> annotationType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the scope definition for a scope type
+   */
+  public ScopeType getScopeDefinition(Class<? extends Annotation> scopeType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Tests if an annotation is an enabled binding type
+   */
+  public boolean isBindingType(Class<? extends Annotation> annotationType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Tests if an annotation is an enabled interceptor binding type
+   */
+  public boolean isInterceptorBindingTypeDefinition(Class<? extends Annotation> annotationType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bindings for an interceptor binding type
+   */
+  public Set<Annotation> getInterceptorBindingTypeDefinition(Class<? extends Annotation> bindingType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Tests if an annotation is an enabled stereotype.
+   */
+  public boolean isStereotypeDefinition(Class<? extends Annotation> annotationType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the annotations associated with a stereotype
+   */
+  public Set<Annotation> getStereotypeDefinition(Class<? extends Annotation> stereotype)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -1081,41 +1097,14 @@ public class InjectManager
    */
   public Set<Bean<?>> getBeans(String name)
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+    HashSet<Bean<?>> beans = new HashSet<Bean<?>>();
 
-  /**
-   * Returns the beans matching a class and annotation set
-   *
-   * @param type the bean's class
-   * @param bindings required @BindingType annotations
-   */
-  public <T> Set<Bean<T>> getBeans(Class<T> type,
-				   Annotation... bindings)
-  {
-    Set<Bean<T>> set = resolve(type, bindings);
+    Bean bean = findByName(name);
 
-    if (set != null)
-      return set;
-    else
-      return new HashSet<Bean<T>>();
-  }
+    if (bean != null)
+      beans.add(bean);
 
-  /**
-   * Returns the beans matching a generic type and annotation set
-   *
-   * @param type the bean's primary type
-   * @param bindings required @BindingType annotations
-   */
-  public <T> Set<Bean<T>> getBeans(TypeLiteral<T> type,
-				   Annotation... bindings)
-  {
-    Set set = resolve(type.getType(), bindings);
-
-    if (set != null)
-      return (Set<Bean<T>>) set;
-    else
-      return new HashSet<Bean<T>>();
+    return beans;
   }
 
   /**
@@ -1138,6 +1127,16 @@ public class InjectManager
   public <X> Bean<X> getMostSpecializedBean(Bean<X> bean)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public <X> Bean<? extends X> getHighestPrecedenceBean(Set<Bean<? extends X>> beans)
+  {
+    // XXX:
+    for (Bean bean : beans) {
+      return bean;
+    }
+
+    return null;
   }
 
   public void validate(InjectionPoint ij)
@@ -1328,7 +1327,24 @@ public class InjectManager
 
     return comp;
   }
-  
+
+  public CreationalContext<?> createCreationalContext()
+  {
+    return new ConfigContext();
+  }
+
+  /**
+   * Convenience-class for Resin.
+   */
+  public <T> T getReference(Class<T> type, Annotation... bindings)
+  {
+    Set<Bean<?>> beans = getBeans(type);
+    Bean<?> bean = getHighestPrecedenceBean(beans);
+
+    CreationalContext<?> env = createCreationalContext();
+
+    return (T) getReference(bean, type, env);
+  }
   /**
    * Returns an instance for the given bean.  This method will obey
    * the scope of the bean, so a singleton will return the single bean.
@@ -1337,26 +1353,28 @@ public class InjectManager
    *
    * @return an instance of the bean obeying scope
    */
-  public <T> T getReference(Bean<T> bean,
-			    CreationalContext<T> createContext)
+  public Object getReference(Bean<?> bean,
+			     Type type,
+			     CreationalContext<?> createContext)
   {
-    ConfigContext cxt = (ConfigContext) createContext;
+    ConfigContext env = (ConfigContext) createContext;
 
-    if (cxt != null) {
-      T object = (T) cxt.get(bean);
+    if (env != null) {
+      Object object = env.get(bean);
 
       if (object != null)
 	return object;
     }
     
-    T object = getInstanceRec(bean, createContext, this);
+    Object object = getInstanceRec(bean, type, env, this);
 
     return object;
   }
   
-  private <T> T getInstanceRec(Bean<T> bean,
-			       CreationalContext<T> createContext,
-			       InjectManager topManager)
+  private Object getInstanceRec(Bean<?> bean,
+				Type type,
+				CreationalContext createContext,
+				InjectManager topManager)
   {
     /* XXX: temp API change
     if (bean.getManager() != this) {
@@ -1375,7 +1393,7 @@ public class InjectManager
 
     if (Dependent.class.equals(scopeType)) {
       // server/4764
-      T instance = (T) bean.create(createContext);
+      Object instance = bean.create(createContext);
 
       return instance;
     }
@@ -1403,109 +1421,7 @@ public class InjectManager
       createContext = new ConfigContext(parent);
     }
 
-    return (T) context.get(bean, createContext);
-    //return (T) context.get(bean);
-  }
-
-  /**
-   * Returns an instance for the given bean.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param bean the metadata for the bean
-   *
-   * @return an instance of the bean obeying scope
-   */
-  public <T> T getReference(Bean<T> bean)
-  {
-    return (T) getReference(bean, new ConfigContext(ConfigContext.create()));
-  }
-
-  /**
-   * Returns an instance for the given bean.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param bean the metadata for the bean
-   *
-   * @return an instance of the bean obeying scope
-   */
-  public Object getReference(Bean<?> bean, Type beanType)
-  {
-    return getReference(bean, new ConfigContext(ConfigContext.create()));
-  }
-
-  /**
-   * Returns an instance for the given bean.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param bean the metadata for the bean
-   *
-   * @return an instance of the bean obeying scope
-   */
-  public <T> T getReference(Bean<? extends T> bean, Class<T> beanType)
-  {
-    return (T) getReference(bean, new ConfigContext(ConfigContext.getCurrent()));
-  }
-
-  /**
-   * Returns an instance for the given bean.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param bean the metadata for the bean
-   *
-   * @return an instance of the bean obeying scope
-   */
-  public <T> T getReference(Bean<? extends T> bean, TypeLiteral<T> beanType)
-  {
-    return (T) getReference(bean, new ConfigContext(ConfigContext.getCurrent()));
-  }
-
-  /**
-   * Returns an instance of bean matching a given name
-   *
-   * @param name the name of the bean to match
-   */
-  public Object getInstanceByName(String name)
-  {
-    Bean bean = _namedComponentMap.get(name);
-
-    if (bean != null)
-      return getReference(bean);
-    else if (_parent != null)
-      return _parent.getInstanceByName(name);
-    else
-      return null;
-  }
-
-  /**
-   * Creates an instance for the given type.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param type the bean's class
-   * @param bindings required @BindingType annotations
-   */
-  public <T> T getInstanceByType(Class<T> type,
-				 Annotation... bindings)
-  {
-    Set<Bean<T>> set = getBeans(type, bindings);
-
-    if (set == null || set.size() == 0) {
-    }
-    else if (set.size() == 1) {
-      Iterator<Bean<T>> iter = set.iterator();
-
-      if (iter.hasNext()) {
-	Bean<T> bean = iter.next();
-      
-	return (T) getReference(bean);
-      }
-    }
-    else {
-      throw new AmbiguousResolutionException(L.l("'{0}' matches too many configured beans{1}",
-						 type.getName(),
-						 toLineList(set)));
-    }
-
-    return null;
+    return context.get(bean, createContext);
   }
 
   private RuntimeException unsatisfiedException(Type type,
@@ -1563,23 +1479,10 @@ public class InjectManager
   }
 
   /**
-   * Creates an instance for the given type.  This method will obey
-   * the scope of the bean, so a singleton will return the single bean.
-   *
-   * @param type the bean's primary type
-   * @param bindings required @BindingType annotations
-   */
-  public <T> T getInstanceByType(TypeLiteral<T> type,
-				 Annotation... bindings)
-  {
-    return (T) getInstanceByType((Class) type.getType(), bindings);
-  }
-
-  /**
    * Internal callback during creation to get a new injection instance.
    */
-  public <T> T getInjectableReference(InjectionPoint ij,
-				      CreationalContext<?> cxt)
+  public Object getInjectableReference(InjectionPoint ij,
+				       CreationalContext<?> cxt)
   {
     Bean bean = resolveByInjectionPoint(ij);
 
@@ -1589,10 +1492,10 @@ public class InjectManager
       Object adapter = simpleBean.getScopeAdapter(cxt);
 
       if (adapter != null)
-	return (T) adapter;
+	return adapter;
     }
 	
-    return (T) getReference(bean, cxt);
+    return getReference(bean, ij.getType(), cxt);
   }
 
   /**
@@ -1646,6 +1549,11 @@ public class InjectManager
     return null;
   }
 
+  public ELResolver getELResolver()
+  {
+    return _elResolver;
+  }
+
   //
   // scopes
   //
@@ -1672,9 +1580,79 @@ public class InjectManager
 					      scopeType.getName()));
   }
 
+  /**
+   * Returns the bean for the given passivation id.
+   */
+  public Bean getPassivationCapableBean(String id)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
   //
   // event management
   //
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param bindings the binding set for the event
+   */
+  public void addObserver(Observer<?> observer,
+			  Annotation... bindings)
+  {
+    BaseType baseType = createBaseType(observer.getClass());
+    BaseType observerType = baseType.findClass(Observer.class);
+
+    Class eventType = observerType.getParameters()[0].getRawClass();
+
+    checkActive();
+
+    /*
+    if (eventType.getTypeParameters() != null
+	&& eventType.getTypeParameters().length > 0) {
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
+					     eventType));
+    }
+    */
+
+    synchronized (_observerMap) {
+      ObserverMap map = _observerMap.get(eventType);
+      
+      if (map == null) {
+	map = new ObserverMap(eventType);
+	_observerMap.put(eventType, map);
+      }
+
+      map.addObserver(observer, bindings);
+    }
+
+    synchronized (_observerListCache) {
+      _observerListCache.clear();
+    }
+  }
+
+  /**
+   * Removes an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public void removeObserver(Observer<?> observer)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observerMethod the observer method
+   */
+  public void addObserver(ObserverMethod<?,?> observerMethod)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Sends the specified event to any observer instances in the scope
@@ -1722,115 +1700,6 @@ public class InjectManager
     fireEvent(processObserver);
 
     return processObserver.getObserverMethod();
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      Class<T> eventType,
-			      Annotation... bindings)
-  {
-    addObserver(observer, (Type) eventType, bindings);
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void addObserver(Observer<T> observer,
-			      TypeLiteral<T> eventType,
-			      Annotation... bindings)
-  {
-    addObserver(observer, (Class) eventType.getType(), bindings);
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public void addObserver(Observer<?> observer,
-			  Type type,
-			  Annotation... bindings)
-  {
-    Class eventType = (Class) type;
-
-    checkActive();
-
-    /*
-    if (eventType.getTypeParameters() != null
-	&& eventType.getTypeParameters().length > 0) {
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
-					     eventType));
-    }
-    */
-
-    synchronized (_observerMap) {
-      ObserverMap map = _observerMap.get(eventType);
-      
-      if (map == null) {
-	map = new ObserverMap(eventType);
-	_observerMap.put(eventType, map);
-      }
-
-      map.addObserver(observer, bindings);
-    }
-
-    synchronized (_observerListCache) {
-      _observerListCache.clear();
-    }
-  }
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void removeObserver(Observer<T> observer,
-				 Class<T> eventType,
-				 Annotation... bindings)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public <T> void removeObserver(Observer<T> observer,
-				 TypeLiteral<T> eventType,
-				 Annotation... bindings)
-  {
-    removeObserver(observer, (Class) eventType.getType(), bindings);
-  }
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public void removeObserver(Observer<?> observer,
-			     Type eventType,
-			     Annotation... bindings)
-  {
-    removeObserver(observer, eventType, bindings);
   }
 
   //
@@ -2373,7 +2242,6 @@ public class InjectManager
 	annSet.toArray(bindings);
 	  
 	addObserver(observer,
-		    observer.getObservedEventType(),
 		    bindings);
       }
     }
@@ -2473,6 +2341,7 @@ public class InjectManager
       args[i] = new BeanArg(param[i], bindings);
     }
 
+    /* XXX:
     Observer observer = new PluginObserver(plugin, method, args);
 
     addObserver(observer, param[0], getBindings(paramAnn[0]));
@@ -2487,6 +2356,7 @@ public class InjectManager
 	&& param[0].equals(AfterBeanDiscovery.class)) {
       observer.notify(new AfterBeanDiscoveryImpl());
     }
+    */
   }
 
   private boolean hasObserver(Annotation [][]paramAnn)
@@ -2640,7 +2510,9 @@ public class InjectManager
     }
 
     for (Bean bean : services) {
-      getReference(bean, bean.getBeanClass());
+      CreationalContext<?> env = createCreationalContext();
+      
+      getReference(bean, bean.getBeanClass(), env);
     }
 
     /*
@@ -2787,8 +2659,12 @@ public class InjectManager
    */
   public boolean isRootScannable(Path root)
   {
-    if (! root.lookup("META-INF/beans.xml").canRead())
-      return false;
+    if (! root.lookup("META-INF/beans.xml").canRead()) {
+      if (root.getFullPath().endsWith("WEB-INF/classes/")
+	  && ! root.lookup("../beans.xml").canRead()) {
+	return false;
+      }
+    }
 
     WebBeansRootContext context = _rootContextMap.get(root);
 
@@ -2912,7 +2788,8 @@ public class InjectManager
     {
     }
 
-    public void addInterceptorBindingType(Class<? extends Annotation> bindingType)
+    public void addInterceptorBindingType(Class<? extends Annotation> bindingType,
+					  Annotation... bindings)
     {
     }
 

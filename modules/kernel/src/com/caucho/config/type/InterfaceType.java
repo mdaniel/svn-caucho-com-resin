@@ -36,6 +36,10 @@ import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
 
+import java.util.Set;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+
 /**
  * Represents an interface.  The interface will try to lookup the
  * value in webbeans.
@@ -104,17 +108,26 @@ public class InterfaceType extends ConfigType
     if (text == null)
       return null;
 
-    InjectManager webBeans = InjectManager.create();
+    InjectManager beanManager = InjectManager.create();
 
     Object value;
 
-    if (! text.equals(""))
-      value = webBeans.getInstanceByType(_type, Names.create(text));
-    else
-      value = webBeans.getInstanceByType(_type);
+    Set<Bean<?>> beans;
 
-    if (value != null)
+    if (! text.equals(""))
+      beans = beanManager.getBeans(_type, Names.create(text));
+    else
+      beans = beanManager.getBeans(_type);
+
+    if (beans.iterator().hasNext()) {
+      Bean bean = beanManager.getHighestPrecedenceBean(beans);
+
+      CreationalContext<?> env = beanManager.createCreationalContext(); 
+    
+      value = beanManager.getReference(bean, _type, env);
+      
       return value;
+    }
 
     value = Jndi.lookup(text);
 

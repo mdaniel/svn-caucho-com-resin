@@ -90,6 +90,8 @@ public class MessageDestination extends DescriptionGroupConfig {
     if (log.isLoggable(Level.FINEST))
       log.finest(L.l("resolving <message-destination> '{0}'", name));
 
+    throw new UnsupportedOperationException(getClass().getName());
+    /*
     destination = (Destination) webBeans.getObjectByName(name);
 
     if (destination == null) {
@@ -98,6 +100,7 @@ public class MessageDestination extends DescriptionGroupConfig {
     }
 
     _destination = destination;
+    */
   }
 
   public String toString()

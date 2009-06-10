@@ -35,7 +35,8 @@ import com.caucho.server.security.*;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Instance;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.*;
@@ -94,14 +95,14 @@ public abstract class AbstractLogin implements Login {
   protected Authenticator _auth;
   protected SingleSignon _singleSignon;
 
-  private InjectManager _webBeans;
+  private @Current Instance<Authenticator> _authInstance;
+  private @Current Instance<SingleSignon> _signonInstance;
 
   private boolean _isSessionSaveLogin = true;
   private boolean _isLogoutOnTimeout = true;
   
   protected AbstractLogin()
   {
-    _webBeans = InjectManager.create();
   }
 
   /**
@@ -118,11 +119,8 @@ public abstract class AbstractLogin implements Login {
   public Authenticator getAuthenticator()
   {
     if (_auth == null) {
-      try {
-	_auth = _webBeans.getInstanceByType(Authenticator.class);
-      } catch (UnsatisfiedResolutionException e) {
-        log.finer(e.toString());
-	log.log(Level.FINEST, e.toString(), e);
+      if ( ! _authInstance.isUnsatisfied()) {
+	_auth = _authInstance.get();
       }
 
       if (_auth == null) {
@@ -211,11 +209,8 @@ public abstract class AbstractLogin implements Login {
     */
 
     // XXX: order
-    try {
-      if (_singleSignon == null)
-	_singleSignon = _webBeans.getInstanceByType(SingleSignon.class);
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
+    if (_singleSignon == null && ! _signonInstance.isUnsatisfied()) {
+      _singleSignon = _signonInstance.get();
     }
   }
 

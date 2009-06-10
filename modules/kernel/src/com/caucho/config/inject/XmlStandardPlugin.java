@@ -36,6 +36,7 @@ import com.caucho.config.ServiceStartup;
 import com.caucho.config.cfg.BeansConfig;
 import com.caucho.vfs.Path;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +47,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanClass;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.ManagedBean;
@@ -58,6 +60,8 @@ import javax.enterprise.inject.spi.ProcessBean;
  */
 public class XmlStandardPlugin implements Plugin
 {
+  private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
+  
   private InjectManager _manager;
   private ClassLoader _classLoader;
 
@@ -91,15 +95,12 @@ public class XmlStandardPlugin implements Plugin
 
     try {
       for (Path root : paths) {
-	Path beansPath = root.lookup("META-INF/beans.xml");
-	beansPath.setUserPath(beansPath.getURL());
+	configurePath(root.lookup("META-INF/beans.xml"));
+	configurePath(root.lookup("META-INF/resin-beans.xml"));
 
-	if (beansPath.canRead()) {
-	  BeansConfig beans = new BeansConfig(_manager, beansPath);
-
-	  new Config().configure(beans, beansPath);
-
-	  _pendingBeans.add(beans);
+	if (root.getFullPath().endsWith("WEB-INF/classes/")) {
+	  configurePath(root.lookup("../beans.xml"));
+	  configurePath(root.lookup("../resin-beans.xml"));
 	}
       }
     } catch (Exception e) {
@@ -107,6 +108,20 @@ public class XmlStandardPlugin implements Plugin
 	_configException = e;
       
       throw ConfigException.create(e);
+    }
+  }
+
+  private void configurePath(Path beansPath)
+    throws IOException
+  {
+    if (beansPath.canRead()) {
+      BeansConfig beans = new BeansConfig(_manager, beansPath);
+
+      beansPath.setUserPath(beansPath.getURL());
+
+      new Config().configure(beans, beansPath, SCHEMA);
+
+      _pendingBeans.add(beans);
     }
   }
 
@@ -148,10 +163,13 @@ public class XmlStandardPlugin implements Plugin
       return;
     
     Bean bean = event.getBean();
-    Annotated annotated = event.getAnnotated();
 
-    if (isStartup(annotated)) {
-      _manager.addService(bean);
+    if (bean instanceof BeanClass) {
+      Annotated annotated = ((BeanClass) bean).getAnnotatedType();
+
+      if (isStartup(annotated)) {
+	_manager.addService(bean);
+      }
     }
   }
 
@@ -164,6 +182,9 @@ public class XmlStandardPlugin implements Plugin
       Class annType = ann.annotationType();
       
       if (annType.equals(Startup.class))
+	return true;
+      
+      if (annType.isAnnotationPresent(Startup.class))
 	return true;
       
       if (annType.equals(ServiceStartup.class))

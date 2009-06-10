@@ -34,6 +34,7 @@ import com.caucho.loader.*;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
+import javax.enterprise.inject.spi.BeanManager;
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
 
@@ -45,16 +46,18 @@ public class EnvironmentLevelELResolver extends ELResolver {
     = new EnvironmentLocal<EnvironmentLevelELResolver>();
   
   private final ClassLoader _loader;
-  private final InjectManager _webBeans;
+  private final ELResolver _beanResolver;
 
   private EnvironmentLevelELResolver(ClassLoader loader)
   {
     _loader = loader;
 
-    if (Environment.getEnvironmentClassLoader(loader) != null)
-      _webBeans = InjectManager.create(loader);
+    if (Environment.getEnvironmentClassLoader(loader) != null) {
+      BeanManager beanManager = InjectManager.create(loader);
+      _beanResolver = beanManager.getELResolver();
+    }
     else
-      _webBeans = null;
+      _beanResolver = null;
   }
   
   /**
@@ -147,8 +150,8 @@ public class EnvironmentLevelELResolver extends ELResolver {
 
     String var = (String) property;
 
-    if (_webBeans != null) {
-      Object value = _webBeans.getInstanceByName(var);
+    if (_beanResolver != null) {
+      Object value = _beanResolver.getValue(env, base, property);
 
       if (value != null) {
 	env.setPropertyResolved(true);

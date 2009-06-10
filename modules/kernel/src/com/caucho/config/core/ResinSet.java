@@ -29,6 +29,7 @@
 
 package com.caucho.config.core;
 
+import com.caucho.config.Config;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.naming.Jndi;
@@ -109,6 +110,14 @@ public class ResinSet {
       InjectManager webBeans = InjectManager.create();
 
       if (_value != null) {
+	Config.setProperty(_var, _value);
+      }
+      else if (_default != null) {
+	Config.setProperty(_var, _default);
+      }
+      
+      /*
+      if (_value != null) {
 	BeanFactory factory = webBeans.createBeanFactory(_value.getClass());
 	factory.name(_var);
 	factory.type();
@@ -122,6 +131,7 @@ public class ResinSet {
 	
 	webBeans.addBean(factory.singleton(_default));
       }
+      */
     }
   }
 }

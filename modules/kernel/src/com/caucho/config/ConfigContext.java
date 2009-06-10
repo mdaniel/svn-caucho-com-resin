@@ -1463,4 +1463,8 @@ public class ConfigContext implements CreationalContext {
   public void push(Object obj)
   {
   }
+
+  public void release()
+  {
+  }
 }

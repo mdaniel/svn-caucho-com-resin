@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.spi.Bean;
 
@@ -52,6 +53,7 @@ import javax.enterprise.inject.spi.Bean;
 public class BeanInstance<T> {
   private Contextual<T> _bean;
   private T _value;
+  private CreationalContext<T> _env = null;
 
   public BeanInstance(Contextual<T> bean, T value)
   {
@@ -61,7 +63,7 @@ public class BeanInstance<T> {
 
   public void destroy()
   {
-    _bean.destroy(_value);
+    _bean.destroy(_value, _env);
   }
 
   public T getValue()

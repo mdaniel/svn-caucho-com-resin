@@ -2183,7 +2183,7 @@ public class WebApp extends ServletContextImpl
       try {
 	// server/1a36
 	
-	Authenticator auth = _beanManager.getInstanceByType(Authenticator.class);
+	Authenticator auth = _beanManager.getReference(Authenticator.class);
 
 	setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
@@ -2192,7 +2192,7 @@ public class WebApp extends ServletContextImpl
 
       try {
 	if (_login == null)
-	  _login = _beanManager.getInstanceByType(Login.class);
+	  _login = _beanManager.getReference(Login.class);
 
 	setAttribute("caucho.login", _login);
       } catch (Exception e) {

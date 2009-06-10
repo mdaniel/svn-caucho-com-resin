@@ -51,7 +51,14 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.Bean;
 import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
@@ -62,11 +69,6 @@ import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.resource.spi.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Configuration for the connection-factory pattern.
@@ -81,6 +83,8 @@ public class ConnectionFactoryConfig extends BeanConfig {
 
   private int _maxConnections = 1024;
   private long _maxActiveTime = Long.MAX_VALUE / 2;
+
+  private @Current Instance<ResourceAdapterController> _raControllerInstance;
 
   public ConnectionFactoryConfig()
   {
@@ -115,9 +119,9 @@ public class ConnectionFactoryConfig extends BeanConfig {
     Bean comp = getComponent();
 
     InjectManager manager = InjectManager.create();
-    
+
     ManagedConnectionFactory managedFactory
-      = (ManagedConnectionFactory) manager.getReference(comp, ManagedConnectionFactory.class);
+      = (ManagedConnectionFactory) manager.getReference(comp, ManagedConnectionFactory.class, manager.createCreationalContext());
     
     if (managedFactory instanceof ResourceAdapterAssociation) {
       Class cl = managedFactory.getClass();
@@ -207,15 +211,18 @@ public class ConnectionFactoryConfig extends BeanConfig {
       
     InjectManager webBeans = InjectManager.create();
 
-    ResourceAdapterController raController
-      = webBeans.getInstanceByType(ResourceAdapterController.class,
-				   Names.create(ra.getResourceAdapterClass().getName()));
+    Instance<ResourceAdapterController> instance
+      = _raControllerInstance.select(Names.create(ra.getResourceAdapterClass().getName()));
     
+    ResourceAdapterController raController = instance.get();
+
+    /*
     if (raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
 				    ra.getResourceAdapterClass().getName(),
 				    cl.getName()));
     }
+    */
 
     return raController.getResourceAdapter();
   }

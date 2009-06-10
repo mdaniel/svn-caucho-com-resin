@@ -41,20 +41,10 @@ import javax.enterprise.context.spi.Contextual;
 public interface ProducerBean<X,T> extends Bean<T>
 {
   /**
-   * Returns the owning producer
-   */
-  public AnnotatedMember<X> getProducerMember();
-  
-  /**
-   * Returns the owning disposer
-   */
-  public AnnotatedParameter<X> getDisposedParameter();
-
-  /**
    * Returns the bean class
    */
   public Class<X> getBeanClass();
-
+  
   /**
    * Returns the declaring bean
    */
@@ -71,12 +61,22 @@ public interface ProducerBean<X,T> extends Bean<T>
   public void setProducer(Producer<T> producer);
   
   /**
-   * Returns the disposer for the bean
+   * Returns the owning producer
    */
-  public Listener<X,T> getDisposer();
+  public AnnotatedMember<? super X> getProducerMember();
   
   /**
    * Returns the disposer for the bean
    */
-  public void setDisposer(Listener<X,T> producer);
+  public Listener<T> getDisposer();
+  
+  /**
+   * Returns the disposer for the bean
+   */
+  public void setDisposer(Listener<T> producer);
+  
+  /**
+   * Returns the owning disposer
+   */
+  public AnnotatedParameter<? super X> getDisposedParameter();
 }

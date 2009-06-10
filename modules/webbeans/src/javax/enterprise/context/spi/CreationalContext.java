@@ -44,4 +44,9 @@ public interface CreationalContext<T>
    * Pushes an incomplete instance into the creational context.
    */
   public void push(T incompleteInstance);
+
+  /**
+   * Destroys all dependent objects.
+   */
+  public void release();
 }

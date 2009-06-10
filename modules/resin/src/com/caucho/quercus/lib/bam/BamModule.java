@@ -99,8 +99,7 @@ public class BamModule extends AbstractQuercusModule
 
     // create a connection lazily
     if (connection == null) {
-      HempBroker broker = 
-        InjectManager.getCurrent().getInstanceByType(HempBroker.class);
+      HempBroker broker = HempBroker.getCurrent();
 
       String jid = "php@" + env.getGlobalVar("_SERVER").get(SERVER_NAME);
       String resource = env.getGlobalVar("_SERVER").get(PHP_SELF).toString();

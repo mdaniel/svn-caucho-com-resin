@@ -34,11 +34,6 @@ package javax.enterprise.inject.spi;
  */
 public interface ProcessInjectionTarget<X>
 {
-  public boolean isManagedBean();
-  public boolean isSessionBean();
-  public boolean isProducerMethod();
-  public boolean isProducerField();
-
   public AnnotatedType<X> getAnnotatedType();
 
   public InjectionTarget<X> getInjectionTarget();

@@ -159,7 +159,7 @@ public class InjectionPointBean<T> implements Bean<T>
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void destroy(T instance)
+  public void destroy(T instance, CreationalContext<T> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

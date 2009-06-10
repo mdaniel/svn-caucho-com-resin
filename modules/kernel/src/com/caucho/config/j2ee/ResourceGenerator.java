@@ -42,6 +42,7 @@ import javax.persistence.*;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.rmi.*;
 import java.util.*;
@@ -144,8 +145,11 @@ public class ResourceGenerator extends ValueGenerator {
       }
     }
 
-    if (_bean != null)
-      return _webBeans.getReference(_bean);
+    if (_bean != null) {
+      CreationalContext<?> env = _webBeans.createCreationalContext();
+      
+      return _webBeans.getReference(_bean, _bean.getBeanClass(), env);
+    }
     else
       return getJndiValue(_type);
   }

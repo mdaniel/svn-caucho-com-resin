@@ -80,8 +80,10 @@ public class ResourceAdapterController implements EnvironmentListener
     if (! _lifecycle.toActive())
       return;
 
-    _ra = (ResourceAdapter) _beanManager.getReference(_comp);
-
+    _ra = (ResourceAdapter) _beanManager.getReference(_comp,
+						      ResourceAdapter.class,
+						      _beanManager.createCreationalContext());
+    
     try {
       _ra.start(ResourceManagerImpl.create());
     } catch (RuntimeException e) {

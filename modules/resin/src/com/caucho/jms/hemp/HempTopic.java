@@ -38,6 +38,7 @@ import java.util.logging.*;
 
 import java.io.Serializable;
 import javax.annotation.*;
+import javax.enterprise.inject.Current;
 import javax.jms.*;
 
 import com.caucho.config.*;
@@ -61,21 +62,13 @@ public class HempTopic extends AbstractTopic
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private Broker _broker;
+  private @Current Broker _broker;
   private ActorStream _brokerStream;
 
   private TopicResource _resource = new TopicResource();
 
   private int _id;
   private boolean _isInit;
-
-  /**
-   * Sets the broker
-   */
-  public void setBroker(Broker broker)
-  {
-    _broker = broker;
-  }
 
   //
   // JMX configuration
@@ -95,17 +88,6 @@ public class HempTopic extends AbstractTopic
   public void init()
   {
     super.init();
-
-    if (_broker == null) {
-      InjectManager webBeans = InjectManager.create();
-    
-      _broker = webBeans.getInstanceByType(Broker.class);
-
-      if (_broker == null)
-	throw new ConfigException(L.l("hmpp protocol needs a Broker"));
-
-      _brokerStream = _broker.getBrokerStream();
-    }
 
     String jid = getName();
 

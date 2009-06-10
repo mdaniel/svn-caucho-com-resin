@@ -122,4 +122,9 @@ public class InjectionPointImpl implements InjectionPoint
   {
     return false;
   }
+
+  public boolean isTransient()
+  {
+    return false;
+  }
 }

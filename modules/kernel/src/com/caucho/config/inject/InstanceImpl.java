@@ -29,12 +29,14 @@
 
 package com.caucho.config.inject;
 
-import javax.enterprise.inject.*;
-import javax.enterprise.inject.spi.*;
 import java.lang.reflect.Type;
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
 import java.util.Set;
+
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.*;
+import javax.enterprise.inject.spi.*;
 
 /**
  * Factory to create instances of a bean.
@@ -70,7 +72,9 @@ public class InstanceImpl<T> implements Instance<T>
    */
   public T get()
   {
-    return (T) _beanManager.getReference(_bean);
+    CreationalContext<?> env = _beanManager.createCreationalContext();
+    
+    return (T) _beanManager.getReference(_bean, _bean.getBeanClass(), env);
   }
 
   /**
@@ -101,11 +105,52 @@ public class InstanceImpl<T> implements Instance<T>
 
   public Iterator<T> iterator()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new InstanceIterator(_beanManager, _beanSet.iterator());
   }
 
+  public boolean isAmbiguous()
+  {
+    return _beanSet.size() > 1;
+  }
+
+  public boolean isUnsatisfied()
+  {
+    return _beanSet.size() == 0;
+  }
+
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+
+  static class InstanceIterator<T> implements Iterator<T> {
+    private final BeanManager _manager;
+    private final Iterator<Bean<T>> _beanIter;
+
+    InstanceIterator(BeanManager manager, Iterator<Bean<T>> beanIter)
+    {
+      _manager = manager;
+      _beanIter = beanIter;
+    }
+
+    public boolean hasNext()
+    {
+      return _beanIter.hasNext();
+    }
+
+    public T next()
+    {
+      Bean<T> bean = _beanIter.next();
+
+      CreationalContext<?> env = _manager.createCreationalContext();
+
+      return (T) _manager.getReference(bean, bean.getBeanClass(), env);
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
   }
 }

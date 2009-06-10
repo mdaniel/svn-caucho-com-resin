@@ -104,6 +104,6 @@ public class BeanArg extends Arg {
       bind();
 
     // XXX: getInstance for injection?
-    return _beanManager.getReference(_bean, _type);
+    return _beanManager.getReference(_bean, _type, env);
   }
 }

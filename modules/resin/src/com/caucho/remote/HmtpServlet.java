@@ -29,9 +29,6 @@
 
 package com.caucho.remote;
 
-import java.io.*;
-import javax.servlet.*;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.*;
@@ -45,8 +42,13 @@ import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
+import java.io.*;
 import java.util.logging.*;
+
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Instance;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
 
 /**
  * Main protocol handler for the HTTP version of HeMPP.
@@ -58,6 +60,9 @@ public class HmtpServlet extends GenericServlet {
 
   private boolean _isAdmin;
   private boolean _isAuthenticationRequired = true;
+
+  private @Current Instance<Authenticator> _authInstance;
+  private @Current Instance<AdminAuthenticator> _adminInstance;
   
   private Authenticator _auth;
   private ServerLinkManager _linkManager;
@@ -90,12 +95,10 @@ public class HmtpServlet extends GenericServlet {
       _isAdmin = true;
 
     try {
-      InjectManager webBeans = InjectManager.getCurrent();
-
       if (_isAdmin)
-	_auth = webBeans.getInstanceByType(AdminAuthenticator.class);
+	_auth = _adminInstance.get();
       else
-	_auth = webBeans.getInstanceByType(Authenticator.class);
+	_auth = _authInstance.get();
     } catch (Exception e) {
       if (log.isLoggable(Level.FINER)) {
 	log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",

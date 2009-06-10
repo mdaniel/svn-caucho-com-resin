@@ -178,7 +178,7 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   /**
    * Call destroy
    */
-  public void destroy(X instance)
+  public void destroy(X instance, CreationalContext<X> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

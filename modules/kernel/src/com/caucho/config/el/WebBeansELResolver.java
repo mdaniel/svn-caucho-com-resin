@@ -35,6 +35,9 @@ import javax.el.*;
 
 import com.caucho.config.inject.InjectManager;
 
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+
 /**
  * Variable resolution for webbeans variables
  */
@@ -86,7 +89,15 @@ public class WebBeansELResolver extends ELResolver {
 
     Object result = null;
 
-    result = _webBeans.getInstanceByName(name);
+    Set<Bean<?>> beans = _webBeans.getBeans(name);
+
+    if (beans.size() == 0)
+      return null;
+
+    Bean bean = _webBeans.getHighestPrecedenceBean(beans);
+    CreationalContext env = _webBeans.createCreationalContext();
+    
+    result = _webBeans.getReference(bean, bean.getBeanClass(), env);
 
     if (result != null) {
       context.setPropertyResolved(true);

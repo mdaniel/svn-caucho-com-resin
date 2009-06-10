@@ -46,6 +46,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Instance;
 import javax.el.*;
 import javax.resource.spi.work.Work;
 import javax.servlet.*;
@@ -80,6 +81,8 @@ public class ScheduledTask
   private MethodExpression _method;
   
   private String _url;
+
+  private @Current Instance<WebApp> _webAppInstance;
   private WebApp _webApp;
   
   private Alarm _alarm;
@@ -147,12 +150,12 @@ public class ScheduledTask
     
     _url = url;
 
-    _webApp
-      = InjectManager.create().getInstanceByType(WebApp.class);
+    _webApp = _webAppInstance.get();
 
-    if (_webApp == null)
+    /*
       throw new ConfigException(L.l("relative url '{0}' requires web-app context",
 				    url));
+    */
   }
 
   /**

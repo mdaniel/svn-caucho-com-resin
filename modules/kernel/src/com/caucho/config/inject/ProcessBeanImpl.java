@@ -56,6 +56,7 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
 {
   private InjectManager _manager;
   private Bean<X> _bean;
+  private boolean _isVeto;
 
   ProcessBeanImpl(InjectManager manager, Bean<X> bean)
     {
@@ -66,26 +67,6 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
   public InjectManager getManager()
   {
     return _manager;
-  }
-    
-  public boolean isManagedBean()
-  {
-    return _bean instanceof ManagedBean;
-  }
-    
-  public boolean isSessionBean()
-  {
-    return false;
-  }
-    
-  public boolean isProducerMethod()
-  {
-    return false;
-  }
-    
-  public boolean isProducerField()
-  {
-    return false;
   }
 
   public Annotated getAnnotated()
@@ -108,6 +89,11 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
 
   public void addDefinitionError(Throwable t)
   {
+  }
+
+  public void veto()
+  {
+    _isVeto = true;
   }
 
   @Override

@@ -54,6 +54,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.context.ScopeType;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.deployment.DeploymentType;
@@ -416,7 +417,9 @@ public class WbComponentConfig {
   public Object getObject()
   {
     if (_comp != null) {
-      Object value = _beanManager.getReference(_comp, (Class) null);
+      CreationalContext env = _beanManager.createCreationalContext();
+      
+      Object value = _beanManager.getReference(_comp, (Class) null, env);
 
       if (_init != null)
 	_init.inject(value, null);
@@ -430,8 +433,9 @@ public class WbComponentConfig {
   public Object createObjectNoInit()
   {
     if (_comp != null) {
+      CreationalContext env = _beanManager.createCreationalContext();
       // XXX:
-      return _beanManager.getReference(_comp, (Class) null);
+      return _beanManager.getReference(_comp, (Class) null, env);
       // return _comp.createNoInit();
     }
     else

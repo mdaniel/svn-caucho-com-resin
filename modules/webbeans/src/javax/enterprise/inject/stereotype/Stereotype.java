@@ -27,12 +27,24 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.spi;
+package javax.enterprise.inject.stereotype;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Framework callback after all bean discovery
+ * The @Stereotype annotation for web beans
  */
-public interface AfterDeploymentValidation
-{
-  public void addDeploymentProblem(Throwable t);
+@Documented  
+@Retention(RUNTIME)
+@Target(ANNOTATION_TYPE)
+public @interface Stereotype {
+  public Class<?>[] requiredTypes() default {};
+  
+  public Class<? extends Annotation>[] supportedScopes() default {};
 }

@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Introspected annotation binding
@@ -50,6 +51,7 @@ import javax.enterprise.inject.spi.Bean;
 public class Destructor {
   private Bean _bean;
   private Object _value;
+  private CreationalContext<?> _env;
 
   public Destructor(Bean bean, Object value)
   {
@@ -59,7 +61,7 @@ public class Destructor {
 
   public void destroy()
   {
-    _bean.destroy(_value);
+    _bean.destroy(_value, _env);
   }
 
   public String toString()

@@ -30,6 +30,7 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
@@ -64,6 +65,7 @@ import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration for an ejb entity bean.
@@ -356,12 +358,15 @@ public class EjbMessageBean extends EjbBean {
 
         Destination dest = null;
 
-        List<Bean> beans = webBeans.getBeansOfType(Destination.class);
-        
-        for (Bean bean : beans) {
-          if (destinationName.equals(bean.getName()))
-            dest = (Destination) webBeans.getReference(bean);
-        }
+        Set<Bean<?>> beans = webBeans.getBeans(Destination.class,
+					       Names.create(destinationName));
+
+	if (beans.size() > 0) {
+	  Bean bean = webBeans.getHighestPrecedenceBean(beans);
+
+	  dest = (Destination) webBeans.getReference(bean, Destination.class,
+						     webBeans.createCreationalContext());
+	}
 
 	setDestination(dest);
       }
@@ -583,7 +588,7 @@ public class EjbMessageBean extends EjbBean {
     if (factory == null) {
       InjectManager webBeans = InjectManager.create();
 
-      factory = webBeans.getObject(ConnectionFactory.class);
+      factory = webBeans.getReference(ConnectionFactory.class);
     }
       
     if (_destination != null)
@@ -649,7 +654,7 @@ public class EjbMessageBean extends EjbBean {
       InjectManager webBeans = InjectManager.create();
 
       ResourceAdapter ra
-	= (ResourceAdapter) webBeans.getInstanceByType(raClass);
+	= (ResourceAdapter) webBeans.getReference(raClass);
 
       if (ra == null) {
 	throw error(L.l("resource-adapter '{0}' must be configured in a <connector> tag.",

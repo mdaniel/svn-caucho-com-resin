@@ -69,4 +69,9 @@ public interface InjectionPoint
    * A delegate injection point is true for Decorators
    */
   public boolean isDelegate();
+
+  /**
+   * Test if the injection point is a java transient
+   */
+  public boolean isTransient();
 }

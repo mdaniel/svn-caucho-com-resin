@@ -58,14 +58,14 @@ public class BeanWrapper<T> extends AbstractBean<T>
   // from javax.enterprise.inject.InjectionTarget
   //
   
-  public T create(CreationalContext<T> cxt)
+  public T create(CreationalContext<T> env)
   {
-    return getBean().create(cxt);
+    return getBean().create(env);
   }
 
-  public void destroy(T instance)
+  public void destroy(T instance, CreationalContext<T> env)
   {
-    getBean().destroy(instance);
+    getBean().destroy(instance, env);
   }
       
   //
@@ -98,14 +98,6 @@ public class BeanWrapper<T> extends AbstractBean<T>
   public boolean isNullable()
   {
     return getBean().isNullable();
-  }
-
-  /**
-   * Returns true if the bean is serializable
-   */
-  public boolean isPassivationCapable()
-  {
-    return getBean().isPassivationCapable();
   }
 
   /**

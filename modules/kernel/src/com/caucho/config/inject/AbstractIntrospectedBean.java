@@ -66,7 +66,6 @@ import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.deployment.Production;
 import javax.enterprise.inject.spi.Bean;
@@ -77,6 +76,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.stereotype.Stereotype;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -521,7 +521,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Instantiate the bean.
    */
-  public T create(CreationalContext<T> cxt)
+  public T create(CreationalContext<T> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -529,7 +529,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Call destroy
    */
-  public void destroy(T instance)
+  public void destroy(T instance, CreationalContext<T> env)
   {
   }
   

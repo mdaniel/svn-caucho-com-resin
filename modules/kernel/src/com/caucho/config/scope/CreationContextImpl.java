@@ -52,5 +52,8 @@ public class CreationContextImpl implements CreationalContext {
   public void push(Object incompleteInstance)
   {
   }
-  
+
+  public void release()
+  {
+  }
 }

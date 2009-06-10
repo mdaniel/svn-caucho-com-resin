@@ -169,9 +169,9 @@ public class InterceptorBean<X> implements Interceptor<X>
   /**
    * Destroys a bean instance
    */
-  public void destroy(Object instance)
+  public void destroy(X instance, CreationalContext<X> env)
   {
-    _bean.destroy(instance);
+    _bean.destroy(instance, env);
   }
 
   //

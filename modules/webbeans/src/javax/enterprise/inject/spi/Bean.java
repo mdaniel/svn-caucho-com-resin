@@ -76,11 +76,6 @@ public interface Bean<T> extends Contextual<T>
   public abstract boolean isNullable();
 
   /**
-   * Returns true if the bean is serializable
-   */
-  public abstract boolean isPassivationCapable();
-
-  /**
    * Returns the bean's scope type.
    */
   public abstract Class<? extends Annotation> getScopeType();

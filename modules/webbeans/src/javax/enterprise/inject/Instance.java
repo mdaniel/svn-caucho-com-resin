@@ -77,4 +77,14 @@ public interface Instance<T> extends Iterable<T>
    */
   public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
 					  Annotation... bindings);
+
+  /**
+   * Test if there are any beans that match the instance.
+   */
+  public boolean isUnsatisfied();
+
+  /**
+   * Test if there are multiple beans that match the instance.
+   */
+  public boolean isAmbiguous();
 }

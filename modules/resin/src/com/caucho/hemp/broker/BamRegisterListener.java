@@ -49,9 +49,11 @@ public class BamRegisterListener // implements BeanRegistrationListener
 
   public void start(BeanManager manager, CauchoBean bean)
   {
+    /*
     HempBroker broker = HempBroker.getCurrent();
     
-    Actor service = manager.getReference(bean, Actor.class);
+    Actor service = manager.getReference(bean, Actor.class,
+					 manager.createCreationalContext());
 
     com.caucho.remote.BamService serviceAnn
       = getAnnotation(bean, com.caucho.remote.BamService.class);
@@ -75,6 +77,7 @@ public class BamRegisterListener // implements BeanRegistrationListener
     broker.addActor(service);
 
     // XXX: shutdown
+    */
   }
 
   private <T> T getAnnotation(CauchoBean bean, Class<T> annType)

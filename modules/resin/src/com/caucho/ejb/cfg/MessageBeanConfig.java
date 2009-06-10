@@ -29,13 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-import javax.jms.*;
-import javax.resource.spi.*;
-
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.config.inject.InjectManager;
@@ -43,6 +36,15 @@ import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
 
 import com.caucho.util.*;
+
+import java.util.*;
+import java.util.logging.*;
+
+import javax.annotation.*;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.jms.*;
+import javax.resource.spi.*;
 
 /**
  * ejb-message-bean configuration
@@ -129,17 +131,27 @@ public class MessageBeanConfig extends AbstractBeanConfig
       bean.setActivationSpec(_activationSpec);
     }
     else {
-      Object destComp;
-
       Class destinationType = _destinationType;
       
       if (_destinationType == null)
 	destinationType = Destination.class;
 
+      Set<Bean<?>> beanSet;
+
       if (_destinationName != null)
-	destComp = webBeans.getInstanceByName(_destinationName);
+	beanSet = webBeans.getBeans(_destinationName);
       else
-	destComp = webBeans.getInstanceByType(destinationType);
+	beanSet = webBeans.getBeans(destinationType);
+
+      Object destComp = null;
+
+      if (beanSet.size() > 0) {
+	Bean destBean = webBeans.getHighestPrecedenceBean(beanSet);
+	CreationalContext env = webBeans.createCreationalContext();
+
+	destComp
+	  = webBeans.getReference(destBean, destBean.getBeanClass(), env);
+      }
 
       if (destComp == null)
 	throw new ConfigException(L.l("{0}: '{1}' is an unknown destination type '{2}'",
@@ -149,7 +161,13 @@ public class MessageBeanConfig extends AbstractBeanConfig
 
       bean.setDestinationValue((Destination) destComp);
 
-      Object comp = webBeans.getInstanceByType(ConnectionFactory.class);
+      beanSet = webBeans.getBeans(ConnectionFactory.class);
+
+      Bean factoryBean = webBeans.getHighestPrecedenceBean(beanSet);
+      CreationalContext env = webBeans.createCreationalContext();
+      
+      Object comp = webBeans.getReference(factoryBean, ConnectionFactory.class,
+					  env);
 
       if (comp == null)
 	throw new ConfigException(L.l("ejb-message-bean requires a configured JMS ConnectionFactory"));

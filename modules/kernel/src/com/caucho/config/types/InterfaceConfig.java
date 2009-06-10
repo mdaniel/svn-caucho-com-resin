@@ -38,6 +38,8 @@ import com.caucho.config.cfg.*;
 import com.caucho.util.L10N;
 
 import java.util.logging.*;
+import java.util.Set;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Configures an interface type.  Allows class and uri syntax
@@ -174,8 +176,12 @@ public class InterfaceConfig extends BeanConfig {
   {
     if (_valueName != null) {
       InjectManager webBeans = InjectManager.create();
-      
-      _comp = (AbstractBean) webBeans.findByName(_valueName);
+
+      Set<Bean<?>> beans = webBeans.getBeans(_valueName);
+
+      if (beans.size() > 0) {
+	_comp = (AbstractBean) beans.iterator().next();
+      }
 
       if (_comp == null) {
 	_value = Jndi.lookup(_valueName);

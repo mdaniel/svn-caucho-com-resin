@@ -40,8 +40,7 @@ import javax.enterprise.inject.AnnotationLiteral;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class PersistenceContextGenerator
-  extends ValueGenerator
+public class PersistenceContextGenerator extends WebBeanGenerator
 {
   private static final Logger log
     = Logger.getLogger(PersistenceContextGenerator.class.getName());
@@ -104,30 +103,25 @@ public class PersistenceContextGenerator
     if (_manager != null)
       return _manager;
 
-    InjectManager webBeans = InjectManager.create();
-
-    EntityManager manager;
-
-    if (PersistenceContextType.EXTENDED.equals(_type)) {
-      manager = webBeans.getInstanceByType(EntityManager.class,
-	          new AnnotationLiteral<JpaPersistenceContext>() {
-	           public String value() { return _unitName; }
-	           public boolean extended() { return true; }
-                  });
+    try {
+      if (PersistenceContextType.EXTENDED.equals(_type)) {
+	_manager = create(EntityManager.class,
+		      new AnnotationLiteral<JpaPersistenceContext>() {
+			public String value() { return _unitName; }
+			public boolean extended() { return true; }
+		      });
+      }
+      else {
+	_manager = create(EntityManager.class,
+		      new AnnotationLiteral<JpaPersistenceContext>() {
+			public String value() { return _unitName; }
+		      });
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(_location, e);
     }
-    else {
-      manager = webBeans.getInstanceByType(EntityManager.class,
-          new AnnotationLiteral<JpaPersistenceContext>() {
-           public String value() { return _unitName; }
-          });
-    }
- 
-    if (manager == null)
-      throw new ConfigException(_location
-				+ L.l("@PersistenceContext '{0}' is an unknown unit",
-				      _unitName));
-				
-    return manager;
+
+    return _manager;
   }
 
   @Override

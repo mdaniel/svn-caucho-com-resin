@@ -102,9 +102,12 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
 
   public void notify(T event)
   {
+    getListener().notify(event);
+    /*
     Class<X> type = null;
     
     notify(_beanManager.getReference(getParentBean(), type), event);
+    */
   }
   
   /**
@@ -142,12 +145,12 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Listener<X,T> getListener()
+  public Listener<T> getListener()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void setListener(Listener<X,T> listener)
+  public void setListener(Listener<T> listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

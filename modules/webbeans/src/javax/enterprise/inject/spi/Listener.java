@@ -29,21 +29,17 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-
 import java.util.Set;
-import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Abstract introspected of an observer.
  */
-public interface Listener<X,T>
+public interface Listener<T>
 {
   /**
    * Notify an instance
    */
-  public void notify(X instance, T event);
+  public void notify(T instance);
 
   /**
    * Returns the injection points.

@@ -19,30 +19,23 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
-
-import javax.enterprise.inject.Stereotype;
+package javax.enterprise.event;
 
 /**
- * @OsgiService is a startup @Stereotype for an @ApplicationScoped bean
- * that registers with OSGi automatically.
+ * event types
  */
-
-@Stereotype
-@OsgiServiceStartup  
-@Documented  
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
-public @interface OsgiService {
+public enum Notify
+{
+  IF_EXISTS,
+    SYNCHRONOUSLY,
+    ASYNCHRONOUSLY
 }
+

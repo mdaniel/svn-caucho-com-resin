@@ -47,6 +47,7 @@ import java.lang.annotation.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.ScopeType;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.deployment.DeploymentType;
@@ -565,7 +566,12 @@ public class CustomBeanConfig {
 
   public Object toObject()
   {
-    return InjectManager.create().getReference(_component);
+    InjectManager beanManager = InjectManager.create();
+    
+    CreationalContext<?> env = beanManager.createCreationalContext();
+    Class type = _component.getBeanClass();
+    
+    return InjectManager.create().getReference(_component, type, env);
   }
 
   public String toString()
@@ -605,7 +611,8 @@ public class CustomBeanConfig {
 	bind();
 
       // XXX: getInstance for injection?
-      return _beanManager.getReference(_bean);
+      Type type = null;
+      return _beanManager.getReference(_bean, type, env);
     }
   }
 

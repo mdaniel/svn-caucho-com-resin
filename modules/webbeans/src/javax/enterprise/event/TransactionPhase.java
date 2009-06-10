@@ -27,12 +27,17 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.spi;
+package javax.enterprise.event;
 
 /**
- * Framework callback after all bean discovery
+ * event types
  */
-public interface AfterDeploymentValidation
+public enum TransactionPhase
 {
-  public void addDeploymentProblem(Throwable t);
+  IN_PROGRESS,
+    BEFORE_COMPLETION,
+    AFTER_COMPLETION,
+    AFTER_FAILURE,
+    AFTER_SUCCESS,
 }
+

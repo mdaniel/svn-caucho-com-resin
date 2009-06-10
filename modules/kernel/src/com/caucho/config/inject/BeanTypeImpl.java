@@ -130,12 +130,8 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   private void introspect(Class cl)
   {
     introspectInheritedAnnotations(cl.getSuperclass());
-    
-    for (Field field : cl.getDeclaredFields()) {
-      if (hasBeanAnnotation(field.getAnnotations())) {
-	_fieldSet.add(new BeanFieldImpl(this, field));
-      }
-    }
+
+    introspectFields(cl);
 
     for (Method method : cl.getDeclaredMethods()) {
       if (hasBeanAnnotation(method)) {
@@ -155,6 +151,20 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
 	} catch (NoSuchMethodException e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
+      }
+    }
+  }
+
+  private void introspectFields(Class cl)
+  {
+    if (cl == null)
+      return;
+
+    introspectFields(cl.getSuperclass());
+    
+    for (Field field : cl.getDeclaredFields()) {
+      if (hasBeanAnnotation(field.getAnnotations())) {
+	_fieldSet.add(new BeanFieldImpl(this, field));
       }
     }
   }

@@ -32,6 +32,7 @@ package com.caucho.config.program;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import java.util.logging.Logger;
 
@@ -43,7 +44,7 @@ public class ComponentValueGenerator extends ValueGenerator {
     = Logger.getLogger(ComponentValueGenerator.class.getName());
   private static final L10N L = new L10N(ComponentValueGenerator.class);
 
-  private final InjectManager _webBeans;
+  private final InjectManager _beanManager;
   private final Bean _comp;
   
   private final String _location;
@@ -55,7 +56,7 @@ public class ComponentValueGenerator extends ValueGenerator {
     
     _location = location;
 
-    _webBeans = InjectManager.create();
+    _beanManager = InjectManager.create();
     _comp = comp;
   }
 
@@ -64,6 +65,9 @@ public class ComponentValueGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    return _webBeans.getReference(_comp);
+    CreationalContext<?> env = _beanManager.createCreationalContext();
+    Class type = _comp.getBeanClass();
+    
+    return _beanManager.getReference(_comp, type, env);
   }
 }

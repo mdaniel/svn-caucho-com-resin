@@ -85,7 +85,8 @@ public class SingletonHandle implements Serializable //, HessianHandle
     try {
       InjectManager inject = InjectManager.create();
 
-      return inject.getInstanceByType(_type, _bindings);
+      // return inject.getInstanceByType(_type, _bindings);
+      throw new UnsupportedOperationException(getClass().getName());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
