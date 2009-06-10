@@ -30,7 +30,7 @@
 package com.caucho.ejb.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.ManagedBeanWrapper;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
@@ -62,7 +62,7 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   private InjectionTarget _target;
   
   public StatelessBeanImpl(StatelessServer server,
-			  ManagedBean<X> bean,
+			   ManagedBeanImpl<X> bean,
 			  StatelessProvider producer)
   {
     super(bean);

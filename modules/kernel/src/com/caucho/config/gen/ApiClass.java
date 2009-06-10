@@ -35,7 +35,7 @@ import java.lang.annotation.*;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.inject.BeanMethodImpl;
+import com.caucho.config.inject.AnnotatedMethodImpl;
 import com.caucho.util.*;
 
 /**
@@ -372,7 +372,7 @@ public class ApiClass {
   {
     if (_annotatedType != null) {
       for (AnnotatedMethod annMethod : _annotatedType.getMethods()) {
-	if (BeanMethodImpl.isMatch(annMethod.getJavaMember(), method))
+	if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method))
 	  return annMethod;
       }
     }

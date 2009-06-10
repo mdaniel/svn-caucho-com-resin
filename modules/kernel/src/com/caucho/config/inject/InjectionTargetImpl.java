@@ -97,7 +97,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   public InjectionTargetImpl(InjectManager beanManager,
 			     AnnotatedType<X> beanType)
   {
-    super(beanManager, beanType.getType(), beanType);
+    super(beanManager, beanType.getBaseType(), beanType);
 
     _beanType = beanType;
 
@@ -380,7 +380,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 	// XXX:
 	AnnotatedType beanType = _beanType;
 	if (beanType != null)
-	  beanType = new BeanTypeImpl(cl, cl);
+	  beanType = new AnnotatedTypeImpl(cl, cl);
 	
 	introspectConstructor(beanType);
       }
@@ -632,7 +632,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter param = params.get(i);
 
-      args[i] = new BeanArg(param.getType(), getBindings(param));
+      args[i] = new BeanArg(param.getBaseType(), getBindings(param));
     }
 
     return args;

@@ -30,7 +30,8 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.ManagedBeanWrapper;
+import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
@@ -47,26 +48,33 @@ import javax.enterprise.context.spi.CreationalContext;
 /**
  * Internal implementation for a Bean
  */
-public class XmlBean<X> extends ManagedBeanWrapper<X>
+public class XmlBean<X> extends BeanWrapper<X>
   implements InjectionTarget<X>, ScopeAdapterBean
 {
   private static final L10N L = new L10N(XmlBean.class);
-  
+
+  ManagedBeanImpl _bean;
   private Constructor _ctor;
   private Arg []_newProgram;
   private ConfigProgram []_injectProgram;
   
-  public XmlBean(ManagedBean<X> bean,
+  public XmlBean(ManagedBeanImpl bean,
 		 Constructor ctor,
 		 Arg []newProgram,
 		 ConfigProgram []injectProgram)
   {
     super(bean);
 
+    _bean = bean;
     _ctor = ctor;
     _newProgram = newProgram;
 
     _injectProgram = injectProgram;
+  }
+
+  public ManagedBeanImpl getBean()
+  {
+    return _bean;
   }
 
   public InjectionTarget<X> getInjectionTarget()
@@ -99,7 +107,7 @@ public class XmlBean<X> extends ManagedBeanWrapper<X>
     ConfigContext env = (ConfigContext) context;
     
     if (_ctor == null)
-      return getBean().getInjectionTarget().produce(env);
+      return (X) getBean().getInjectionTarget().produce(env);
     else {
       Object []args = new Object[_newProgram.length];
 

@@ -45,16 +45,16 @@ import java.lang.reflect.Method;
 
 import javax.servlet.annotation.WebServlet;
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanClass;
-import javax.enterprise.inject.spi.Plugin;
-import javax.enterprise.inject.spi.ProcessBean;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.event.Observes;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
-public class WebAppInjectExtension implements Plugin
+public class WebAppInjectExtension implements Extension
 {
   private InjectManager _beanManager;
   private WebApp _webApp;
@@ -66,22 +66,16 @@ public class WebAppInjectExtension implements Plugin
     _webApp = webApp;
   }
 
-  public void processBean(@Observes ProcessBean event)
+  public void processAnnotatedType(@Observes ProcessAnnotatedType event)
   {
     try {
-      Bean<?> bean = event.getBean();
+      AnnotatedType annotatedType = event.getAnnotatedType();
+      // Bean<?> bean = event.getBean();
 
-      if (! (bean instanceof BeanClass))
+      if (annotatedType == null || annotatedType.getAnnotations() == null)
 	return;
 
-      BeanClass mBean = (BeanClass) bean;
-      
-      Annotated annotated = mBean.getAnnotatedType();
-
-      if (annotated == null || annotated.getAnnotations() == null)
-	return;
-
-      for (Annotation ann : annotated.getAnnotations()) {
+      for (Annotation ann : annotatedType.getAnnotations()) {
 	Class annType = ann.annotationType();
 	
 	if (annType.equals(WebServlet.class)) {
@@ -97,13 +91,13 @@ public class WebAppInjectExtension implements Plugin
 	    mapping.addURLPattern(value);
 	  }
 	  
-	  mapping.setBean(bean);
+	  mapping.setBean(_beanManager.createManagedBean(annotatedType));
 	
 	  mapping.init();
 
 	  _webApp.addServletMapping(mapping);
 
-	  event.setBean(null);
+	  event.veto();
 	}
 	else if (annType.isAnnotationPresent(ServiceType.class)) {
 	  ServiceType serviceType
@@ -114,7 +108,7 @@ public class WebAppInjectExtension implements Plugin
 	    = (ProtocolServletFactory) factoryClass.newInstance();
 
 	  factory.setServiceType(ann);
-	  factory.setAnnotated(annotated);
+	  factory.setAnnotated(annotatedType);
 
 	  Method urlPatternMethod = annType.getMethod("urlPattern");
 
@@ -122,7 +116,7 @@ public class WebAppInjectExtension implements Plugin
       
 	  ServletMapping mapping = new ServletMapping();
 	  mapping.addURLPattern(urlPattern);
-	  mapping.setBean(bean);
+	  mapping.setBean(_beanManager.createManagedBean(annotatedType));
 
 	  mapping.setProtocolFactory(factory);
 	
@@ -130,7 +124,7 @@ public class WebAppInjectExtension implements Plugin
 
 	  _webApp.addServletMapping(mapping);
 
-	  event.setBean(null);
+	  event.veto();
 	}
 	else if (annType.isAnnotationPresent(ProxyType.class)) {
 	  ProxyType proxyType
@@ -141,7 +135,7 @@ public class WebAppInjectExtension implements Plugin
 	    = (ProtocolProxyFactory) factoryClass.newInstance();
 
 	  proxyFactory.setProxyType(ann);
-	  proxyFactory.setAnnotated(annotated);
+	  proxyFactory.setAnnotated(annotatedType);
 
 	  /*
 	  HessianProtocolProxyFactory proxyFactory
@@ -149,11 +143,12 @@ public class WebAppInjectExtension implements Plugin
 	  proxyFactory.setURL(client.url());
 	  */
 	
-	  Object proxy = proxyFactory.createProxy(bean.getBeanClass());
+	  Object proxy = proxyFactory.createProxy((Class) annotatedType.getBaseType());
 
 	  BeanFactory factory
-	    = _beanManager.createBeanFactory(bean.getBeanClass());
+	    = _beanManager.createBeanFactory(annotatedType);
 
+	  /*
 	  factory.name(bean.getName());
 
 	  for (Type type : bean.getTypes()) {
@@ -165,10 +160,11 @@ public class WebAppInjectExtension implements Plugin
 	  }
 
 	  factory.deployment(bean.getDeploymentType());
+	  */
 
 	  _beanManager.addBean(factory.singleton(proxy));
 
-	  event.setBean(null);
+	  //event.setBean(null);
 	}
       }
     } catch (Exception e) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,62 +29,47 @@
 
 package com.caucho.config.inject;
 
-import javax.enterprise.inject.spi.*;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedCallable;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 
 /**
- * Internal implementation for a Bean
+ * Abstract introspected view of a Bean
  */
-public class ManagedBeanWrapper<X> extends BeanWrapper<X>
-  implements ManagedBean<X>
+public class AnnotatedParameterImpl
+  extends AnnotatedElementImpl implements AnnotatedParameter
 {
-  public ManagedBeanWrapper(ManagedBean<X> bean)
-  {
-    super(bean);
-  }
-
-  @Override
-  public ManagedBean<X> getBean()
-  {
-    return (ManagedBean<X>) super.getBean();
-  }
+  private AnnotatedCallable _callable;
   
-  public Set<ProducerBean<X,?>> getProducerBeans()
+  public AnnotatedParameterImpl(AnnotatedCallable callable,
+				Type type,
+				Annotation []annList)
   {
-    return getBean().getProducerBeans();
+    super(type, null, annList);
+
+    _callable = callable;
   }
 
-  public Set<ObserverMethod<X,?>> getObserverMethods()
+  public AnnotatedCallable getDeclaringCallable()
   {
-    return getBean().getObserverMethods();
+    return _callable;
   }
 
-  public AnnotatedType getAnnotatedType()
+  public int getPosition()
   {
-    return getBean().getAnnotatedType();
-  }
-
-  public Class getBeanClass()
-  {
-    return getBean().getBeanClass();
-  }
-
-  public InjectionTarget<X> getInjectionTarget()
-  {
-    return getBean().getInjectionTarget();
-  }
-
-  public void setInjectionTarget(InjectionTarget<X> target)
-  {
-    getBean().setInjectionTarget(target);
-  }
-
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    return getBean().getInjectionPoints();
+    return -1;
   }
 }

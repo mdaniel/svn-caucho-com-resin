@@ -29,9 +29,13 @@
 
 package javax.enterprise.inject.spi;
 
+import java.lang.annotation.Annotation;
+
 /**
- * Framework interface for initialization
+ * Framework callback before processing an annotated type
  */
-public interface Plugin
+public interface ProcessProducerMethod<X,T> extends ProcessBean<T>
 {
+  public AnnotatedMethod<X> getAnnotatedProducerMethod();
+  public AnnotatedParameter<X> getAnnotatedDisposedParameter();
 }

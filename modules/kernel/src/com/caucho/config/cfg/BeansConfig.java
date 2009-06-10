@@ -35,6 +35,8 @@ import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InterceptorBean;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.ProducesBean;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.*;
@@ -51,8 +53,6 @@ import javax.decorator.Decorator;
 import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.deployment.Standard;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ManagedBean;
-import javax.enterprise.inject.spi.ProducerBean;
 import javax.enterprise.inject.spi.Interceptor;
 
 /**
@@ -218,7 +218,7 @@ public class BeansConfig {
 	  if (injectManager.getWebComponent(cl) != null)
 	    continue;
 
-	  ManagedBean<?> bean;
+	  ManagedBeanImpl<?> bean;
 
 	  /*
 	  if (cl.isAnnotationPresent(Singleton.class))
@@ -235,7 +235,7 @@ public class BeansConfig {
 	  
 	  injectManager.addBean(bean);
 
-	  for (ProducerBean producerBean : bean.getProducerBeans()) {
+	  for (ProducesBean producerBean : bean.getProducerBeans()) {
 	    injectManager.addBean(producerBean);
 	  }
 

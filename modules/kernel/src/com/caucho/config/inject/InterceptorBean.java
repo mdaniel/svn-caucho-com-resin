@@ -44,7 +44,6 @@ import javax.interceptor.InvocationContext;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ManagedBean;
 
 /**
  * InterceptorBean represents a Java interceptor
@@ -57,7 +56,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   
   private Class _type;
 
-  private ManagedBean _bean;
+  private ManagedBeanImpl _bean;
 
   private Method _aroundInvoke;
   private Method _postConstruct;
@@ -75,7 +74,7 @@ public class InterceptorBean<X> implements Interceptor<X>
 
     _type = type;
 
-    // XXX: _bean = new SimpleBean(_type);
+    _bean = beanManager.createManagedBean(_type);
 
     init();
   }

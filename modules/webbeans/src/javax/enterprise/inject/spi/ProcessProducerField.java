@@ -30,23 +30,11 @@
 package javax.enterprise.inject.spi;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.enterprise.context.spi.Contextual;
 
 /**
- * Internal implementation for a Bean
+ * Framework callback before processing an annotated type
  */
-public interface SessionBean<X> extends Bean<Object>, BeanClass<X>
+public interface ProcessProducerField<X,T> extends ProcessBean<T>
 {
-  /**
-   * Returns the ejb name
-   */
-  public String getEjbName();
-
-  /**
-   * Returns the type of the session bean
-   */
-  public SessionBeanType getSessionBeanType();
+  public AnnotatedField<X> getAnnotatedProducerField();
 }

@@ -36,10 +36,9 @@ import java.lang.annotation.Annotation;
  */
 public interface ProcessBean<X>
 {
+  public Annotated getAnnotated();
+  
   public Bean<X> getBean();
-  public void setBean(Bean<X> bean);
-
-  public void veto();
   
   public void addDefinitionError(Throwable t);
 }

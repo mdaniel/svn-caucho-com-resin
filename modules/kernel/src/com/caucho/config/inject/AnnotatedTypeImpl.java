@@ -52,10 +52,10 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 /**
  * Abstract introspected view of a Bean
  */
-public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
+public class AnnotatedTypeImpl extends AnnotatedElementImpl implements AnnotatedType
 {
   private static final Logger log
-    = Logger.getLogger(BeanTypeImpl.class.getName());
+    = Logger.getLogger(AnnotatedTypeImpl.class.getName());
 
   private Class _javaClass;
 
@@ -68,7 +68,7 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   private Set<AnnotatedMethod> _methodSet
     = new LinkedHashSet<AnnotatedMethod>();
   
-  public BeanTypeImpl(Type type, Class javaClass)
+  public AnnotatedTypeImpl(Type type, Class javaClass)
   {
     super(type, null, javaClass.getDeclaredAnnotations());
 
@@ -107,12 +107,12 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
   public AnnotatedMethod createMethod(Method method)
   {
     for (AnnotatedMethod annMethod : _methodSet) {
-      if (BeanMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
+      if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
 	return annMethod;
       }
     }
 
-    AnnotatedMethod annMethod = new BeanMethodImpl(this, null, method);
+    AnnotatedMethod annMethod = new AnnotatedMethodImpl(this, null, method);
 
     _methodSet.add(annMethod);
 
@@ -135,19 +135,19 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
 
     for (Method method : cl.getDeclaredMethods()) {
       if (hasBeanAnnotation(method)) {
-	_methodSet.add(new BeanMethodImpl(this, null, method));
+	_methodSet.add(new AnnotatedMethodImpl(this, null, method));
       }
     }
 
     if (! cl.isInterface()) {
       for (Constructor ctor : cl.getDeclaredConstructors()) {
-	_constructorSet.add(new BeanConstructorImpl(this, ctor));
+	_constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
       }
 
       if (_constructorSet.size() == 0) {
 	try {
 	  Constructor ctor = cl.getConstructor(new Class[0]);
-	  _constructorSet.add(new BeanConstructorImpl(this, ctor));
+	  _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
 	} catch (NoSuchMethodException e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
@@ -164,7 +164,7 @@ public class BeanTypeImpl extends AnnotatedElementImpl implements AnnotatedType
     
     for (Field field : cl.getDeclaredFields()) {
       if (hasBeanAnnotation(field.getAnnotations())) {
-	_fieldSet.add(new BeanFieldImpl(this, field));
+	_fieldSet.add(new AnnotatedFieldImpl(this, field));
       }
     }
   }

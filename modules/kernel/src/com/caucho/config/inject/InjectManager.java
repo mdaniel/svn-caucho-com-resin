@@ -62,7 +62,6 @@ import javax.decorator.Decorates;
 import javax.el.*;
 import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
-//import javax.enterprise.event.Observable;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.ConversationScoped;
@@ -93,19 +92,13 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Decorator;
-//import javax.enterprise.inject.spi.Deployed;
-//import javax.enterprise.inject.spi.Initialized;
+import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
-import javax.enterprise.inject.spi.ManagedBean;
-import javax.enterprise.inject.spi.ObserverMethod;
-import javax.enterprise.inject.spi.Plugin;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserver;
 import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.ProducerBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.naming.*;
@@ -147,7 +140,7 @@ public class InjectManager
     "javax.servlet.ServletRequestListener",
     "javax.ejb.EnterpriseBean",
     "javax.faces.component.UIComponent",
-    "javax.enterprise.inject.spi.Plugin",
+    "javax.enterprise.inject.spi.Extension",
   };
 
   private static final String []FACTORY_CLASSES = {
@@ -219,8 +212,8 @@ public class InjectManager
   private ArrayList<DecoratorEntry> _decoratorList
     = new ArrayList<DecoratorEntry>();
 
-  private HashMap<String,SoftReference<ManagedBean>> _transientMap
-    = new HashMap<String,SoftReference<ManagedBean>>();
+  private HashMap<String,SoftReference<InjectionTarget>> _transientMap
+    = new HashMap<String,SoftReference<InjectionTarget>>();
 
   private HashMap<FactoryBinding,Bean> _objectFactoryMap
     = new HashMap<FactoryBinding,Bean>();
@@ -241,9 +234,6 @@ public class InjectManager
 
   private HashMap<Class,InjectProgram> _injectMap
     = new HashMap<Class,InjectProgram>();
-
-  private ArrayList<BeanRegistrationListener> _registrationListenerList
-    = new ArrayList<BeanRegistrationListener>();
 
   private ArrayList<Bean> _pendingRegistrationList
     = new ArrayList<Bean>();
@@ -342,7 +332,7 @@ public class InjectManager
       Class cl = Class.forName(className, false, loader);
       Constructor ctor= cl.getConstructor(new Class[] { InjectManager.class });
 
-      Plugin extension = (Plugin) ctor.newInstance(this);
+      Extension extension = (Extension) ctor.newInstance(this);
 
       addExtension(extension);
     } catch (Exception e) {
@@ -759,7 +749,7 @@ public class InjectManager
    */
   public <T> T createTransientObject(Class<T> type)
   {
-    ManagedBean<T> factory = createManagedBean(type);
+    ManagedBeanImpl<T> factory = createManagedBean(type);
 
     // server/10gn
     //return factory.create(new ConfigContext());
@@ -831,7 +821,7 @@ public class InjectManager
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> BeanFactory<T> createBeanFactory(ManagedBean<T> managedBean)
+  public <T> BeanFactory<T> createBeanFactory(ManagedBeanImpl<T> managedBean)
   {
     return new BeanFactory(managedBean);
   }
@@ -893,7 +883,7 @@ public class InjectManager
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
-  public boolean isInterceptorBindingTypeDefinition(Class<? extends Annotation> annotationType)
+  public boolean isInterceptorBindingType(Class<? extends Annotation> annotationType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -909,7 +899,7 @@ public class InjectManager
   /**
    * Tests if an annotation is an enabled stereotype.
    */
-  public boolean isStereotypeDefinition(Class<? extends Annotation> annotationType)
+  public boolean isStereotype(Class<? extends Annotation> annotationType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -939,7 +929,7 @@ public class InjectManager
    */
   public <T> AnnotatedType<T> createAnnotatedType(Class<T> cl)
   {
-    return new BeanTypeImpl(cl, cl);
+    return new AnnotatedTypeImpl(cl, cl);
   }
 
   /**
@@ -991,7 +981,7 @@ public class InjectManager
   /**
    * Creates a managed bean.
    */
-  public ManagedBean createManagedBean(AnnotatedType type)
+  public ManagedBeanImpl createManagedBean(AnnotatedType type)
   {
     InjectionTarget target = createInjectionTarget(type);
     
@@ -1004,9 +994,9 @@ public class InjectManager
   /**
    * Creates a managed bean.
    */
-  public ManagedBean createManagedBean(Class cl)
+  public ManagedBeanImpl createManagedBean(Class cl)
   {
-    AnnotatedType type = new BeanTypeImpl(cl, cl);
+    AnnotatedType type = new AnnotatedTypeImpl(cl, cl);
     
     return createManagedBean(type);
   }
@@ -1041,13 +1031,15 @@ public class InjectManager
       addComponentByName(bean.getName(), bean);
     }
 
-    if (bean instanceof ManagedBean) {
-      ManagedBean<?> mBean = (ManagedBean) bean;
+    /*
+    if (bean instanceof ManagedBeanImpl) {
+      ManagedBeanImpl<?> mBean = (ManagedBeanImpl) bean;
 
-      for (ProducerBean producerBean : mBean.getProducerBeans()) {
+      for (ProducesBean producerBean : mBean.getProducerBeans()) {
 	addBean(producerBean);
       }
     }
+    */
 
     registerJmx(bean);
   }
@@ -1195,7 +1187,7 @@ public class InjectManager
     else if (New.class.equals(bindings[0].annotationType())) {
       // ioc/0721
       HashSet set = new HashSet();
-      AbstractBean newBean = new NewBean(this, new BeanTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      AbstractBean newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
       newBean.introspect();
       
       set.add(newBean);
@@ -1247,7 +1239,7 @@ public class InjectManager
     if (bean == null) {
       BaseType baseType = createBaseType(type);
       
-      AbstractBean newBean = new NewBean(this, new BeanTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      AbstractBean newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
       newBean.introspect();
 
       _newBeanMap.put(type, bean);
@@ -1649,10 +1641,12 @@ public class InjectManager
    *
    * @param observerMethod the observer method
    */
+  /*
   public void addObserver(ObserverMethod<?,?> observerMethod)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Sends the specified event to any observer instances in the scope
@@ -1693,6 +1687,7 @@ public class InjectManager
   /**
    * Processes the discovered bean
    */
+  /*
   public <T> ObserverMethod<T,?> processObserver(ObserverMethod<T,?> observer)
   {
     ProcessObserverImpl processObserver = new ProcessObserverImpl(observer);
@@ -1701,6 +1696,7 @@ public class InjectManager
 
     return processObserver.getObserverMethod();
   }
+  */
 
   //
   // events
@@ -1904,59 +1900,6 @@ public class InjectManager
   public BeanManager setCurrent(Class<? extends Annotation> scopeType)
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  //
-  // registration and startup
-  //
-
-  /**
-   * Adds a listener for new beans matching an annotation
-   */
-  public void addRegistrationListener(BeanRegistrationListener listener)
-  {
-    _registrationListenerList.add(listener);
-  }
-
-  /**
-   * Checks if the bean matches one if the registration listeners
-   */
-  public boolean isRegistrationMatch(ManagedBean bean)
-  {
-    if (_parent != null && _parent.isRegistrationMatch(bean))
-      return true;
-
-    for (BeanRegistrationListener listener : _registrationListenerList) {
-      for (Annotation ann : bean.getAnnotatedType().getAnnotations()) {
-	if (listener.isMatch(ann))
-	  return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Starts registrations
-   */
-  public void startRegistration(ManagedBean bean)
-  {
-    if (_parent != null)
-      _parent.startRegistration(bean);
-
-    for (BeanRegistrationListener listener : _registrationListenerList) {
-      boolean isMatch = false;
-      
-      for (Annotation ann : bean.getAnnotatedType().getAnnotations()) {
-	if (listener.isMatch(ann)) {
-	  isMatch = true;
-	  break;
-	}
-      }
-
-      if (isMatch)
-	listener.start(this, bean);
-    }
   }
 
   //
@@ -2228,12 +2171,12 @@ public class InjectManager
     // beans.addScannedClass(cl);
   }
 
-  private <X> void addDiscoveredBean(ManagedBean<X> managedBean)
+  private <X> void addDiscoveredBean(ManagedBeanImpl<X> managedBean)
   {
     addBean(managedBean);
 
-    for (ObserverMethod observer : managedBean.getObserverMethods()) {
-      observer = processObserver(observer);
+    for (ObserverMethodImpl observer : managedBean.getObserverMethods()) {
+      // observer = processObserver(observer);
 
       if (observer != null) {
 	Set<Annotation> annSet = observer.getObservedEventBindings();
@@ -2241,8 +2184,7 @@ public class InjectManager
 	Annotation []bindings = new Annotation[annSet.size()];
 	annSet.toArray(bindings);
 	  
-	addObserver(observer,
-		    bindings);
+	// XXX: addObserver(observer, bindings);
       }
     }
   }
@@ -2252,7 +2194,7 @@ public class InjectManager
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
-      Enumeration e = loader.getResources("META-INF/services/" + Plugin.class.getName());
+      Enumeration e = loader.getResources("META-INF/services/" + Extension.class.getName());
 
       while (e.hasMoreElements()) {
 	URL url = (URL) e.nextElement();
@@ -2299,11 +2241,11 @@ public class InjectManager
 
       Class cl = Class.forName(className, false, loader);
 
-      if (! Plugin.class.isAssignableFrom(cl))
+      if (! Extension.class.isAssignableFrom(cl))
 	throw new InjectionException(L.l("'{0}' is not a valid extension because it does not implement {1}",
-					 cl, Plugin.class.getName()));
+					 cl, Extension.class.getName()));
 
-      Plugin extension = (Plugin) cl.newInstance();
+      Extension extension = (Extension) cl.newInstance();
 
       addExtension(extension);
     } catch (Exception e) {
@@ -2311,14 +2253,14 @@ public class InjectManager
     }
   }
 
-  public void addExtension(Plugin extension)
+  public void addExtension(Extension extension)
   {
     for (Method method : extension.getClass().getMethods()) {
       bindObserver(extension, method);
     }
   }
 
-  private void bindObserver(Plugin plugin, Method method)
+  private void bindObserver(Extension extension, Method method)
   {
     Type []param = method.getGenericParameterTypes();
 
@@ -2342,7 +2284,7 @@ public class InjectManager
     }
 
     /* XXX:
-    Observer observer = new PluginObserver(plugin, method, args);
+    Observer observer = new ExtensionObserver(extension, method, args);
 
     addObserver(observer, param[0], getBindings(paramAnn[0]));
 
@@ -2773,6 +2715,9 @@ public class InjectManager
 
   class BeforeBeanDiscoveryImpl implements BeforeBeanDiscovery
   {
+    public void addAnnotatedType(AnnotatedType<?> annType)
+    {
+    }
     public void addBindingType(Class<? extends Annotation> bindingType)
     {
     }
@@ -2819,6 +2764,10 @@ public class InjectManager
       _annotatedType = type;
     }
 
+    public void veto()
+    {
+    }
+
     @Override
     public String toString()
     {
@@ -2833,26 +2782,6 @@ public class InjectManager
     ProcessInjectionTargetImpl(InjectionTarget<X> target)
     {
       _target = target;
-    }
-    
-    public boolean isManagedBean()
-    {
-      return _target instanceof ManagedBean;
-    }
-    
-    public boolean isSessionBean()
-    {
-      return false;
-    }
-    
-    public boolean isProducerMethod()
-    {
-      return false;
-    }
-    
-    public boolean isProducerField()
-    {
-      return false;
     }
 
     public AnnotatedType<X> getAnnotatedType()
@@ -2881,53 +2810,13 @@ public class InjectManager
     }
   }
 
-  class ProcessObserverImpl<X> implements ProcessObserver<X>
-  {
-    private ObserverMethod<X,?> _observer;
-
-    ProcessObserverImpl(ObserverMethod<X,?> observer)
-    {
-      _observer = observer;
-    }
-    
-    public AnnotatedMethod<?> getAnnotatedMethod()
-    {
-      return null;
-    }
-
-    public Type getObservedEventType()
-    {
-      return null;
-    }
-    
-    public Set<Annotation> getObservedEventBindings()
-    {
-      return null;
-    }
-
-    public ObserverMethod<X,?> getObserverMethod()
-    {
-      return _observer;
-    }
-    
-    public void setObserverMethod(ObserverMethod<X,?> method)
-    {
-      _observer = method;
-    }
-
-    public void addDefinitionError(Throwable t)
-    {
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _observer + "]";
-    }
-  }
-
   class AfterBeanDiscoveryImpl implements AfterBeanDiscovery
   {
+    public void addBean(Bean bean)
+    {
+      InjectManager.this.addBean(bean);
+    }
+    
     public void addDefinitionError(Throwable t)
     {
       if (_configException != null) {
@@ -3021,14 +2910,14 @@ public class InjectManager
     }
   }
 
-  static class PluginObserver implements Observer<Object> {
-    private Plugin _plugin;
+  static class ExtensionObserver implements Observer<Object> {
+    private Extension _extension;
     private Method _method;
     private BeanArg []_args;
 
-    PluginObserver(Plugin plugin, Method method, BeanArg []args)
+    ExtensionObserver(Extension extension, Method method, BeanArg []args)
     {
-      _plugin = plugin;
+      _extension = extension;
       _method = method;
       _args = args;
     }
@@ -3043,15 +2932,15 @@ public class InjectManager
 	  args[i] = _args[i].eval(null);
 	}
 
-	_method.invoke(_plugin, args);
+	_method.invoke(_extension, args);
       } catch (RuntimeException e) {
 	throw e;
       } catch (InvocationTargetException e) {
-	String loc = (_plugin + "." + _method.getName() + ": ");
+	String loc = (_extension + "." + _method.getName() + ": ");
 	
 	throw new InjectionException(loc + e.getMessage(), e.getCause());
       } catch (Exception e) {
-	String loc = (_plugin + "." + _method.getName() + ": ");
+	String loc = (_extension + "." + _method.getName() + ": ");
 	
 	throw new InjectionException(loc + e.getMessage(), e);
       }
@@ -3059,7 +2948,7 @@ public class InjectManager
 
     public String toString()
     {
-      return getClass().getSimpleName() + "[" + _plugin + "," + _method.getName() + "]";
+      return getClass().getSimpleName() + "[" + _extension + "," + _method.getName() + "]";
     }
   }
 

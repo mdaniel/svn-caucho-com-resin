@@ -45,7 +45,10 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 public class AnnotatedElementImpl implements Annotated
 {
   private Type _type;
-  
+
+  private LinkedHashSet<Type> _typeSet
+    = new LinkedHashSet<Type>();
+
   private LinkedHashSet<Annotation> _annSet
     = new LinkedHashSet<Annotation>();
   
@@ -54,6 +57,8 @@ public class AnnotatedElementImpl implements Annotated
 				 Annotation []annList)
   {
     _type = type;
+
+    _typeSet.add(type);
     
     if (annList == null)
       annList = new Annotation[0];
@@ -68,9 +73,14 @@ public class AnnotatedElementImpl implements Annotated
     }
   }
 
-  public Type getType()
+  public Type getBaseType()
   {
     return _type;
+  }
+
+  public Set<Type> getTypeClosure()
+  {
+    return _typeSet;
   }
 
   public void addAnnotation(Annotation newAnn)

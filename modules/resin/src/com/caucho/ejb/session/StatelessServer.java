@@ -31,6 +31,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatelessBeanImpl;
@@ -41,7 +42,6 @@ import com.caucho.util.L10N;
 import javax.ejb.*;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ManagedBean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.reflect.*;
 import java.util.*;
@@ -100,7 +100,7 @@ public class StatelessServer extends SessionServer {
     return getStatelessContext().getProvider(api);
   }
 
-  protected Bean createBean(ManagedBean mBean, Class api)
+  protected Bean createBean(ManagedBeanImpl mBean, Class api)
   {
     StatelessProvider provider = getStatelessContext().getProvider(api);
 

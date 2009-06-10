@@ -41,7 +41,6 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ManagedBean;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -57,7 +56,7 @@ public class SingletonBean extends AbstractSingletonBean
 {
   private Object _value;
 
-  SingletonBean(ManagedBean managedBean,
+  SingletonBean(ManagedBeanImpl managedBean,
 		Set<Type> types,
 		Class<? extends Annotation> deploymentType,
 		Set<Annotation> bindings,

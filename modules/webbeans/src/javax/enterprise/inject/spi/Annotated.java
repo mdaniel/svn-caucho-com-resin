@@ -43,7 +43,12 @@ public interface Annotated
   /**
    * Returns the declared Type
    */
-  public Type getType();
+  public Type getBaseType();
+
+  /**
+   * Returns all exposed types
+   */
+  public Set<Type> getTypeClosure();
 
   /**
    * Returns the specified annotation or null if no annotation is declared

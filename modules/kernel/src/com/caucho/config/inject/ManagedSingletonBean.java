@@ -41,7 +41,6 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ManagedBean;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -55,7 +54,7 @@ import javax.enterprise.inject.spi.ManagedBean;
 public class ManagedSingletonBean extends AbstractSingletonBean
   implements Closeable
 {
-  ManagedSingletonBean(ManagedBean managedBean,
+  ManagedSingletonBean(ManagedBeanImpl managedBean,
 		       Set<Type> types,
 		       Class<? extends Annotation> deploymentType,
 		       Set<Annotation> bindings,

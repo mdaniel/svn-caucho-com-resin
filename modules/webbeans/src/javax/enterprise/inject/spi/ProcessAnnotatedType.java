@@ -37,4 +37,6 @@ public interface ProcessAnnotatedType<X>
   public AnnotatedType<X> getAnnotatedType();
 
   public void setAnnotatedType(AnnotatedType<X> type);
+
+  public void veto();
 }

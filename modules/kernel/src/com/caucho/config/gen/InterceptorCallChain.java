@@ -32,7 +32,7 @@ package com.caucho.config.gen;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorBean;
-import com.caucho.config.inject.BeanMethodImpl;
+import com.caucho.config.inject.AnnotatedMethodImpl;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 import java.io.IOException;

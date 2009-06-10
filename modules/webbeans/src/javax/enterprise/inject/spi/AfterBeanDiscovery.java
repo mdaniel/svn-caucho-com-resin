@@ -34,5 +34,7 @@ package javax.enterprise.inject.spi;
  */
 public interface AfterBeanDiscovery
 {
+  public void addBean(Bean<?> bean);
+  
   public void addDefinitionError(Throwable t);
 }

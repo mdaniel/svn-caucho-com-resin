@@ -46,11 +46,8 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.ManagedBean;
-import javax.enterprise.inject.spi.Plugin;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
-
 
 public class ProcessBeanImpl<X> implements ProcessBean<X>
 {
@@ -59,10 +56,10 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
   private boolean _isVeto;
 
   ProcessBeanImpl(InjectManager manager, Bean<X> bean)
-    {
-      _manager = manager;
-      _bean = bean;
-    }
+  {
+    _manager = manager;
+    _bean = bean;
+  }
 
   public InjectManager getManager()
   {
@@ -71,8 +68,8 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
 
   public Annotated getAnnotated()
   {
-    if (_bean instanceof ManagedBean)
-      return ((ManagedBean) _bean).getAnnotatedType();
+    if (_bean instanceof ManagedBeanImpl)
+      return ((ManagedBeanImpl) _bean).getAnnotatedType();
     else
       return null;
   }

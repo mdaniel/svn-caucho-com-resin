@@ -31,13 +31,12 @@ package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -47,31 +46,25 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 /**
  * Abstract introspected view of a Bean
  */
-public class BeanMethodImpl
-  extends AnnotatedElementImpl implements AnnotatedMethod
+public class AnnotatedConstructorImpl
+  extends AnnotatedElementImpl implements AnnotatedConstructor
 {
-  private AnnotatedType _declaringType;
+  private final AnnotatedType _declaringType;
   
-  private Method _method;
+  private final Constructor _ctor;
 
-  private ArrayList<AnnotatedParameter> _parameterList
+  private final ArrayList<AnnotatedParameter> _parameterList
     = new ArrayList<AnnotatedParameter>();
   
-  public BeanMethodImpl(Method method)
+  public AnnotatedConstructorImpl(AnnotatedType declaringType, Constructor ctor)
   {
-    this(null, null, method);
-  }
-  
-  public BeanMethodImpl(AnnotatedType declaringType,
-			Annotated annotated,
-			Method method)
-  {
-    super(method.getGenericReturnType(), annotated, method.getAnnotations());
+    super(declaringType.getBaseType(), null, ctor.getAnnotations());
 
     _declaringType = declaringType;
-    _method = method;
+    
+    _ctor = ctor;
 
-    introspect(method);
+    introspect(ctor);
   }
 
   public AnnotatedType getDeclaringType()
@@ -80,11 +73,11 @@ public class BeanMethodImpl
   }
   
   /**
-   * Returns the reflected Method
+   * Returns the reflected Constructor
    */
-  public Method getJavaMember()
+  public Constructor getJavaMember()
   {
-    return _method;
+    return _ctor;
   }
 
   /**
@@ -97,63 +90,25 @@ public class BeanMethodImpl
 
   public boolean isStatic()
   {
-    return Modifier.isStatic(_method.getModifiers());
+    return false;
   }
 
-  private void introspect(Method method)
+  private void introspect(Constructor ctor)
   {
-    Type []paramTypes = method.getGenericParameterTypes();
-    Annotation [][]annTypes = method.getParameterAnnotations();
+    Type []paramTypes = ctor.getGenericParameterTypes();
+    Annotation [][]annTypes = ctor.getParameterAnnotations();
     
     for (int i = 0; i < paramTypes.length; i++) {
-      BeanParameterImpl param
-	= new BeanParameterImpl(this, paramTypes[i], annTypes[i]);
-    
+      AnnotatedParameterImpl param
+	= new AnnotatedParameterImpl(this, paramTypes[i], annTypes[i]);
+	
       _parameterList.add(param);
     }
-  }
-
-  public static boolean isMatch(Method methodA, Method methodB)
-  {
-    if (! methodA.getName().equals(methodB.getName()))
-      return false;
-
-    Class []paramA = methodA.getParameterTypes();
-    Class []paramB = methodB.getParameterTypes();
-
-    if (paramA.length != paramB.length)
-      return false;
-
-    for (int i = 0; i < paramA.length; i++) {
-      if (! paramA[i].equals(paramB[i]))
-	return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return _method.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj)
-      return true;
-    else if (! (obj instanceof BeanMethodImpl))
-      return false;
-
-    BeanMethodImpl method = (BeanMethodImpl) obj;
-
-    return isMatch(_method, method._method);
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _method + "]";
+    return getClass().getSimpleName() + "[" + _ctor + "]";
   }
 }

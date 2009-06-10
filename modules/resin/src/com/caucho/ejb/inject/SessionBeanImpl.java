@@ -31,6 +31,7 @@ package com.caucho.ejb.inject;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
@@ -53,7 +54,7 @@ public class SessionBeanImpl<X> extends BeanWrapper<X>
 {
   private static final L10N L = new L10N(SessionBeanImpl.class);
   
-  public SessionBeanImpl(ManagedBean<X> bean)
+  public SessionBeanImpl(ManagedBeanImpl<X> bean)
   {
     super(bean);
   }

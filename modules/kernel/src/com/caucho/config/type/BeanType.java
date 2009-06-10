@@ -35,7 +35,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
-import javax.enterprise.inject.spi.ManagedBean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.program.ConfigProgram;
@@ -44,6 +43,7 @@ import com.caucho.config.*;
 import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.attribute.*;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
@@ -103,7 +103,7 @@ public class BeanType extends ConfigType
   private Attribute _addCustomBean;
   private Attribute _addAnnotation;
   
-  private ManagedBean _component;
+  private ManagedBeanImpl _component;
 
   private ArrayList<ConfigProgram> _injectList;
   private ArrayList<ConfigProgram> _initList;

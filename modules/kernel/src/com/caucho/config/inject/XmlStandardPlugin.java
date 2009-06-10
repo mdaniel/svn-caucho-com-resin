@@ -47,18 +47,16 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanClass;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.ManagedBean;
-import javax.enterprise.inject.spi.Plugin;
+import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
-public class XmlStandardPlugin implements Plugin
+public class XmlStandardPlugin implements Extension
 {
   private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
   
@@ -161,15 +159,12 @@ public class XmlStandardPlugin implements Plugin
 
     if (eventImpl.getManager() != _manager)
       return;
-    
+
+    Annotated annotated = event.getAnnotated();
     Bean bean = event.getBean();
 
-    if (bean instanceof BeanClass) {
-      Annotated annotated = ((BeanClass) bean).getAnnotatedType();
-
-      if (isStartup(annotated)) {
-	_manager.addService(bean);
-      }
+    if (isStartup(annotated)) {
+      _manager.addService(bean);
     }
   }
 

@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
@@ -44,7 +45,6 @@ import javax.enterprise.inject.Named;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.ManagedBean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -124,7 +124,7 @@ abstract public class SessionServer extends AbstractServer
       if (named != null)
 	beanName = named.value();
 
-      ManagedBean mBean = beanManager.createManagedBean(getAnnotatedType());
+      ManagedBeanImpl mBean = beanManager.createManagedBean(getAnnotatedType());
 
       Class baseApi = beanClass;
 
@@ -151,7 +151,7 @@ abstract public class SessionServer extends AbstractServer
     }
   }
 
-  protected Bean createBean(ManagedBean mBean, Class api)
+  protected Bean createBean(ManagedBeanImpl mBean, Class api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

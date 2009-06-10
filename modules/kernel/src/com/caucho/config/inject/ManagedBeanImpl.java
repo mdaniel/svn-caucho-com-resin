@@ -60,7 +60,7 @@ import javax.interceptor.InterceptorBindingType;
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
-  implements ManagedBean<X>, ScopeAdapterBean
+  implements ScopeAdapterBean
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
   private static final Logger log
@@ -75,11 +75,11 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   private Set<InjectionPoint> _injectionPointSet
     = new LinkedHashSet<InjectionPoint>();
 
-  private HashSet<ProducerBean<X,?>> _producerBeans
-    = new LinkedHashSet<ProducerBean<X,?>>();
+  private HashSet<ProducesBean<X,?>> _producerBeans
+    = new LinkedHashSet<ProducesBean<X,?>>();
 
-  private HashSet<ObserverMethod<X,?>> _observerMethods
-    = new LinkedHashSet<ObserverMethod<X,?>>();
+  private HashSet<ObserverMethodImpl<X,?>> _observerMethods
+    = new LinkedHashSet<ObserverMethodImpl<X,?>>();
 
   private Class _instanceClass;
   private boolean _isBound;
@@ -109,7 +109,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     _injectionTarget = injectionTarget;
   }
 
-  public AnnotatedType getAnnotatedType()
+  public AnnotatedType<X> getAnnotatedType()
   {
     return _annotatedType;
   }
@@ -222,7 +222,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     return value;
   }
   
-  public Set<ProducerBean<X,?>> getProducerBeans()
+  public Set<ProducesBean<X,?>> getProducerBeans()
   {
     return _producerBeans;
   }
@@ -230,7 +230,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Returns the observer methods
    */
-  public Set<ObserverMethod<X,?>> getObserverMethods()
+  public Set<ObserverMethodImpl<X,?>> getObserverMethods()
   {
     return _observerMethods;
   }
@@ -305,7 +305,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter param = params.get(i);
 
-      args[i] = new BeanArg(param.getType(), getBindings(param));
+      args[i] = new BeanArg(param.getBaseType(), getBindings(param));
     }
 
     return args;

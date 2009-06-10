@@ -31,6 +31,7 @@ package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.HandleAware;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ApplicationScope;
 
@@ -41,7 +42,6 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ManagedBean;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -52,7 +52,7 @@ import javax.enterprise.inject.spi.ManagedBean;
  * manager.addBean(new SingletonBean(myValue));
  * </pre></code>
  */
-abstract public class AbstractSingletonBean extends ManagedBeanWrapper
+abstract public class AbstractSingletonBean extends BeanWrapper
   implements Closeable
 {
   private Set<Type> _types;
@@ -61,7 +61,7 @@ abstract public class AbstractSingletonBean extends ManagedBeanWrapper
   private Class<? extends Annotation> _scopeType;
   private String _name;
   
-  AbstractSingletonBean(ManagedBean managedBean,
+  AbstractSingletonBean(ManagedBeanImpl managedBean,
 			Set<Type> types,
 			Class<? extends Annotation> deploymentType,
 			Set<Annotation> bindings,

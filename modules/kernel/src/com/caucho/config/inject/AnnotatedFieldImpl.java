@@ -31,45 +31,60 @@ package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.AnnotatedCallable;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
 
 /**
  * Abstract introspected view of a Bean
  */
-public class BeanParameterImpl
-  extends AnnotatedElementImpl implements AnnotatedParameter
+public class AnnotatedFieldImpl
+  extends AnnotatedElementImpl implements AnnotatedField
 {
-  private AnnotatedCallable _callable;
+  private AnnotatedType _declaringType;
   
-  public BeanParameterImpl(AnnotatedCallable callable,
-			   Type type,
-			   Annotation []annList)
+  private Field _field;
+  
+  public AnnotatedFieldImpl(AnnotatedType declaringType, Field field)
   {
-    super(type, null, annList);
+    super(field.getGenericType(), null, field.getAnnotations());
 
-    _callable = callable;
+    _declaringType = declaringType;
+    _field = field;
+
+    introspect(field);
   }
 
-  public AnnotatedCallable getDeclaringCallable()
+  public AnnotatedType getDeclaringType()
   {
-    return _callable;
+    return _declaringType;
+  }
+  
+  /**
+   * Returns the reflected Method
+   */
+  public Field getJavaMember()
+  {
+    return _field;
   }
 
-  public int getPosition()
+  public boolean isStatic()
   {
-    return -1;
+    return Modifier.isStatic(_field.getModifiers());
+  }
+
+  private void introspect(Field field)
+  {
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _field + "]";
   }
 }

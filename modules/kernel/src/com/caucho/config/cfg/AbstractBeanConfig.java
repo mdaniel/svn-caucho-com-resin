@@ -32,7 +32,7 @@ package com.caucho.config.cfg;
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanFactory;
-import com.caucho.config.inject.BeanTypeImpl;
+import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ContainerProgram;
@@ -55,7 +55,6 @@ import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ManagedBean;
 import javax.naming.*;
 
 /**
@@ -250,7 +249,7 @@ abstract public class AbstractBeanConfig {
 
     InjectManager beanManager = InjectManager.create();
 
-    BeanTypeImpl beanType = new BeanTypeImpl(_cl, _cl);
+    AnnotatedTypeImpl beanType = new AnnotatedTypeImpl(_cl, _cl);
 
     BeanFactory factory = beanManager.createBeanFactory(_cl);
 

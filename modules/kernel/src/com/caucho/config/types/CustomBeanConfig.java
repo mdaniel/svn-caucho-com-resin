@@ -32,9 +32,11 @@ package com.caucho.config.types;
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.AnnotatedElementImpl;
-import com.caucho.config.inject.BeanTypeImpl;
-import com.caucho.config.inject.BeanMethodImpl;
+import com.caucho.config.inject.AnnotatedTypeImpl;
+import com.caucho.config.inject.AnnotatedMethodImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.ProducesBean;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
 import com.caucho.util.*;
@@ -56,8 +58,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.ManagedBean;
-import javax.enterprise.inject.spi.ProducerBean;
 import javax.interceptor.InterceptorBindingType;
 
 import org.w3c.dom.Node;
@@ -77,7 +77,7 @@ public class CustomBeanConfig {
   private InjectManager _beanManager;
   
   private Class _class;
-  private BeanTypeImpl _annotatedType;
+  private AnnotatedTypeImpl _annotatedType;
   private Bean _component;
   private ConfigType _configType;
 
@@ -104,7 +104,7 @@ public class CustomBeanConfig {
       // XXX:
       // _component = new SimpleBean(cl);
       // _component.setScopeClass(Dependent.class);
-      _annotatedType = new BeanTypeImpl(cl, cl);
+      _annotatedType = new AnnotatedTypeImpl(cl, cl);
     }
 
     _configType = TypeFactory.getCustomBeanType(cl);
@@ -340,8 +340,8 @@ public class CustomBeanConfig {
 
     AnnotatedMethod annMethod = _annotatedType.createMethod(method);
 
-    if (annMethod instanceof BeanMethodImpl) {
-      BeanMethodImpl methodImpl = (BeanMethodImpl) annMethod;
+    if (annMethod instanceof AnnotatedMethodImpl) {
+      AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) annMethod;
 
       addAnnotations(methodImpl, annList);
     }
@@ -390,7 +390,7 @@ public class CustomBeanConfig {
   }
   */
 
-  private void clearBindings(BeanTypeImpl beanType)
+  private void clearBindings(AnnotatedTypeImpl beanType)
   {
     HashSet<Annotation> annSet
       = new HashSet<Annotation>(beanType.getAnnotations());
@@ -401,7 +401,7 @@ public class CustomBeanConfig {
     }
   }
 
-  private void clearAnnotations(BeanTypeImpl beanType,
+  private void clearAnnotations(AnnotatedTypeImpl beanType,
 				Class<? extends Annotation> annType)
   {
     HashSet<Annotation> annSet
@@ -413,7 +413,7 @@ public class CustomBeanConfig {
     }
   }
 
-  private Annotation getAnnotation(BeanTypeImpl beanType,
+  private Annotation getAnnotation(AnnotatedTypeImpl beanType,
 				   Class<? extends Annotation> annType)
   {
     for (Annotation ann : beanType.getAnnotations()) {
@@ -478,7 +478,7 @@ public class CustomBeanConfig {
 
     beanManager.addConfiguredClass(_annotatedType.getJavaClass().getName());
     
-    ManagedBean<?> managedBean = beanManager.createManagedBean(_annotatedType);
+    ManagedBeanImpl<?> managedBean = beanManager.createManagedBean(_annotatedType);
 
     Arg []newProgram = null;
     Constructor javaCtor = null;
@@ -534,8 +534,8 @@ public class CustomBeanConfig {
 
     beanManager.addBean(_component);
 
-    for (ProducerBean producerBean : managedBean.getProducerBeans()) {
-      beanManager.addBean(producerBean);
+    for (ProducesBean producesBean : managedBean.getProducerBeans()) {
+      beanManager.addBean(producesBean);
     }
   }
 

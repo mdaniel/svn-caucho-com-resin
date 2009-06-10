@@ -44,7 +44,7 @@ import javax.enterprise.inject.InjectionException;
 /**
  * Internal implementation for a producer Bean
  */
-public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
+public class ObserverMethodImpl<X,T>
 {
   private BeanManager _beanManager;
   
@@ -102,7 +102,9 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
 
   public void notify(T event)
   {
+    /*
     getListener().notify(event);
+    */
     /*
     Class<X> type = null;
     
@@ -141,16 +143,6 @@ public class ObserverMethodImpl<X,T> implements ObserverMethod<X,T>
   }
   
   public AnnotatedParameter<X> getEventParameter()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public Listener<T> getListener()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public void setListener(Listener<T> listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

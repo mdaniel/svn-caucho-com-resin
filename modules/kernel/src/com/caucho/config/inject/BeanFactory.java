@@ -52,7 +52,7 @@ import javax.enterprise.inject.spi.*;
  */
 public class BeanFactory<T>
 {
-  private ManagedBean<T> _managedBean;
+  private ManagedBeanImpl<T> _managedBean;
   
   private Object _value;
 
@@ -62,7 +62,7 @@ public class BeanFactory<T>
   private Class<? extends Annotation> _deploymentType;
   private Class<? extends Annotation> _scopeType;
 
-  public BeanFactory(ManagedBean managedBean)
+  public BeanFactory(ManagedBeanImpl managedBean)
   {
     _managedBean = managedBean;
   }

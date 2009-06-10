@@ -81,7 +81,7 @@ public interface BeanManager
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
-  public boolean isInterceptorBindingTypeDefinition(Class<? extends Annotation> annotationType);
+  public boolean isInterceptorBindingType(Class<? extends Annotation> annotationType);
 
   /**
    * Returns the bindings for an interceptor binding type
@@ -91,7 +91,7 @@ public interface BeanManager
   /**
    * Tests if an annotation is an enabled stereotype.
    */
-  public boolean isStereotypeDefinition(Class<? extends Annotation> annotationType);
+  public boolean isStereotype(Class<? extends Annotation> annotationType);
 
   /**
    * Returns the annotations associated with a stereotype
@@ -104,29 +104,14 @@ public interface BeanManager
   //
 
   /**
-   * Creates a managed bean.
+   * Creates an introspected annotated type.
    */
-  public <T> ManagedBean<T> createManagedBean(AnnotatedType<T> type);
-
-  /**
-   * Creates a managed bean.
-   */
-  public <T> ManagedBean<T> createManagedBean(Class<T> type);
+  public <T> AnnotatedType<T> createAnnotatedType(Class<T> type);
 
   /**
    * Creates an injection target
    */
   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type);
-
-  /**
-   * Creates a managed bean.
-   */
-  public <T> InjectionTarget<T> createInjectionTarget(Class<T> type);
-  
-  /**
-   * Adds a new bean definition to the manager
-   */
-  public void addBean(Bean<?> bean);
 
   /**
    * Internal callback during creation to get a new injection instance.
@@ -255,7 +240,7 @@ public interface BeanManager
    *
    * @param observerMethod the observer method
    */
-  public void addObserver(ObserverMethod<?,?> observerMethod);
+  //  public void addObserver(ObserverMethod<?,?> observerMethod);
 
   //
   // Observer resolution

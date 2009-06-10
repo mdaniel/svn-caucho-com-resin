@@ -44,7 +44,7 @@ import com.caucho.config.*;
 import com.caucho.config.bytecode.*;
 import com.caucho.config.cfg.*;
 import com.caucho.config.event.ObserverImpl;
-import com.caucho.config.inject.BeanTypeImpl;
+import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.config.program.BeanArg;
 
 import java.lang.reflect.*;

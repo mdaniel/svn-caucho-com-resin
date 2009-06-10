@@ -63,16 +63,15 @@ import java.io.Serializable;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanClass;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.Plugin;
 
 /**
  * Broker
  */
 public class HempBroker
-  implements Broker, ActorStream, Plugin
+  implements Broker, ActorStream, Extension
 {
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
@@ -844,10 +843,7 @@ public class HempBroker
   {
     Bean bean = event.getBean();
     
-    Annotated annotated = null;
-
-    if (bean instanceof BeanClass)
-      annotated = ((BeanClass) bean).getAnnotatedType();
+    Annotated annotated = event.getAnnotated();
 
     if (annotated == null)
       return;

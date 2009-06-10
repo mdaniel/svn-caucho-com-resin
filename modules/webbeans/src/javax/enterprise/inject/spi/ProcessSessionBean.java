@@ -34,7 +34,9 @@ import java.lang.annotation.Annotation;
 /**
  * Framework callback before processing an annotated type
  */
-public interface ProcessSessionBean<X> extends ProcessBean<X>
+public interface ProcessSessionBean<X> extends ProcessBean<Object>
 {
-  public SessionBean<X> getSessionBean();
+  public AnnotatedType<X> getAnnotatedBeanClass();
+  public String getEjbName();
+  public SessionBeanType getSessionBeanType();
 }

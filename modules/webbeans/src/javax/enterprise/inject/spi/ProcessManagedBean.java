@@ -36,5 +36,5 @@ import java.lang.annotation.Annotation;
  */
 public interface ProcessManagedBean<X> extends ProcessBean<X>
 {
-  public ManagedBean<X> getManagedBean();
+  public AnnotatedType<X> getAnnotatedBeanClass();
 }

@@ -36,6 +36,8 @@ import java.lang.annotation.Annotation;
  */
 public interface BeforeBeanDiscovery
 {
+  public void addAnnotatedType(AnnotatedType<?> type);
+  
   public void addBindingType(Class<? extends Annotation> bindingType);
 
   public void addScopeType(Class<? extends Annotation> scopeType,

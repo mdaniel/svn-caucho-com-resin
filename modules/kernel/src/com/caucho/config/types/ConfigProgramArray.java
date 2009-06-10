@@ -32,8 +32,6 @@ package com.caucho.config.types;
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.AnnotatedElementImpl;
-import com.caucho.config.inject.BeanTypeImpl;
-import com.caucho.config.inject.BeanMethodImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
@@ -44,22 +42,6 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-
-import javax.annotation.*;
-import javax.enterprise.context.ScopeType;
-import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.BindingType;
-import javax.enterprise.inject.deployment.DeploymentType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.ManagedBean;
-import javax.enterprise.inject.spi.ProducerBean;
-import javax.interceptor.InterceptorBindingType;
-
-import org.w3c.dom.Node;
 
 /**
  * Custom bean configured by namespace

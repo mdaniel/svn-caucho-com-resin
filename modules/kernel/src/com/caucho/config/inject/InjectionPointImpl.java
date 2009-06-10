@@ -82,7 +82,7 @@ public class InjectionPointImpl implements InjectionPoint
    */
   public Type getType()
   {
-    return _annotated.getType();
+    return _annotated.getBaseType();
   }
   
   /**

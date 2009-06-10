@@ -37,6 +37,7 @@ public interface ProcessInjectionTarget<X>
   public AnnotatedType<X> getAnnotatedType();
 
   public InjectionTarget<X> getInjectionTarget();
+  
   public void setInjectionTarget(InjectionTarget<X> bean);
 
   public void addDefinitionError(Throwable t);

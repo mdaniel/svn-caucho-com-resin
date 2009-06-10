@@ -31,7 +31,7 @@ package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
-import com.caucho.config.inject.BeanTypeImpl;
+import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
@@ -50,7 +50,6 @@ import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.ManagedBean;
 import javax.interceptor.InterceptorBindingType;
 
 import org.w3c.dom.Node;

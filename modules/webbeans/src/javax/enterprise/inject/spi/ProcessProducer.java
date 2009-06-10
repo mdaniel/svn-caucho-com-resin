@@ -29,15 +29,16 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.enterprise.context.spi.Contextual;
-
 /**
- * Internal implementation for a Bean
+ * Framework callback before processing an annotated type
  */
-public interface ManagedBean<X> extends Bean<X>, BeanClass<X>
+public interface ProcessProducer<X,T>
 {
+  public AnnotatedMember<X> getAnnotatedMember();
+
+  public Producer<T> getProducer();
+  
+  public void setProducer(Producer<X> producer);
+
+  public void addDefinitionError(Throwable t);
 }
