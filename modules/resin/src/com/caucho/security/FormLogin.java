@@ -198,7 +198,6 @@ public class FormLogin extends AbstractLogin
    * Logs a user in with a user name and a password.
    *
    * @param request servlet request
-   * @param response servlet response, in case any cookie need sending.
    *
    * @return the logged in principal on success, null on failure.
    */

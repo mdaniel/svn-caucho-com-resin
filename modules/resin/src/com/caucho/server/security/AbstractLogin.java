@@ -98,7 +98,7 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
   {
     return null;
   }
-  
+
   /**
    * Returns true if the current user plays the named role.
    * <code>isUserInRole</code> is called in response to the

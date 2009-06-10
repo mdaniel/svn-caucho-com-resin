@@ -54,6 +54,8 @@ import java.util.logging.Logger;
  */
 public interface Login {
   public static final String LOGIN_NAME = "caucho.login";
+  public static final String LOGIN_USER = "caucho.user";
+  public static final String LOGIN_PASSWORD = "caucho.password";
 
   /**
    * Returns the authentication type.  <code>getAuthType</code> is called
@@ -92,6 +94,13 @@ public interface Login {
   public Principal login(HttpServletRequest request,
 			 HttpServletResponse response,
 			 boolean isFail);
+
+  /**
+   * Returns true if username and password based authentication is supported.
+   * @see BasicLogin
+   * @return
+   */
+  public boolean isPasswordBased();
 
   /**
    * Returns true if the current user plays the named role.

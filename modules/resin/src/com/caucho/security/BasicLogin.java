@@ -68,6 +68,11 @@ public class BasicLogin extends AbstractLogin {
     return "Basic";
   }
 
+  public boolean isPasswordBased()
+  {
+    return true;
+  }
+
   /**
    * Returns the principal from a basic authentication
    *
@@ -76,22 +81,32 @@ public class BasicLogin extends AbstractLogin {
   @Override
   protected Principal getUserPrincipalImpl(HttpServletRequest request)
   {
-    String value = request.getHeader("authorization");
-    if (value == null)
-      return null;
-    
-    int i = value.indexOf(' ');
-    if (i <= 0)
-      return null;
+    final String authorization = request.getHeader("authorization");
 
-    String decoded = Base64.decode(value.substring(i + 1));
+    String userName = (String) request.getAttribute(LOGIN_NAME);
+    char []password = null;
 
-    int index = decoded.indexOf(':');
-    if (index < 0)
+    if (authorization != null) {
+      int i = authorization.indexOf(' ');
+      if (i <= 0)
+        return null;
+
+      String decoded = Base64.decode(authorization.substring(i + 1));
+
+      int index = decoded.indexOf(':');
+      if (index < 0)
+        return null;
+
+      userName = decoded.substring(0, index);
+      password = decoded.substring(index + 1).toCharArray();
+    } else if (userName != null) {
+      final String value = (String) request.getAttribute(LOGIN_PASSWORD);
+
+      if (value != null)
+        password = value.toCharArray();
+    } else {
       return null;
-
-    String userName = decoded.substring(0, index);
-    char []password = decoded.substring(index + 1).toCharArray();
+    }
 
     Authenticator auth = getAuthenticator();
     BasicPrincipal user = new BasicPrincipal(userName);

@@ -31,14 +31,10 @@ package com.caucho.security;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.server.session.SessionImpl;
-import com.caucho.server.security.*;
-import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Current;
 import javax.enterprise.inject.Instance;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -361,7 +357,12 @@ public abstract class AbstractLogin implements Login {
     if (sessionId != null && singleSignon != null)
       singleSignon.put(sessionId, user);
   }
-  
+
+  public boolean isPasswordBased()
+  {
+    return false;
+  }
+
   /**
    * Gets the user from a persistent cookie, using authenticateCookie
    * to actually look the cookie up.
@@ -479,8 +480,6 @@ public abstract class AbstractLogin implements Login {
   /**
    * Logs the user out from the session.
    *
-   * @param application the application
-   * @param timeoutSession the session timing out, null if not a timeout logout
    * @param user the logged in user
    */
   /*
