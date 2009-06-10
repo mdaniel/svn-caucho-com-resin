@@ -2866,19 +2866,22 @@ public abstract class AbstractHttpRequest
     if (! login.isPasswordBased())
       throw new ServletException(L.l("Authentication mechanism '{0}' does not support password authentication", login));
 
+    removeAttribute(Login.LOGIN_USER);
+    removeAttribute(Login.LOGIN_PASSWORD);
+    
     Principal principal = login.getUserPrincipal(this);
 
     if (principal != null)
       throw new ServletException(L.l("UserPrincipal object has already been established"));
 
-    setAttribute(Login.LOGIN_NAME, username);
+    setAttribute(Login.LOGIN_USER, username);
     setAttribute(Login.LOGIN_PASSWORD, password);
 
     try {
       login.login(this, getResponse(), true);
     }
     finally {
-      removeAttribute(Login.LOGIN_NAME);
+      removeAttribute(Login.LOGIN_USER);
       removeAttribute(Login.LOGIN_PASSWORD);
     }
   }
