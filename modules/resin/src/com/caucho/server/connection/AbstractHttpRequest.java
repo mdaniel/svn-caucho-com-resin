@@ -34,13 +34,11 @@ import com.caucho.i18n.CharacterEncoding;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
 import com.caucho.security.RoleMapManager;
-import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.port.TcpConnection;
-import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
@@ -265,7 +263,7 @@ public abstract class AbstractHttpRequest
   /**
    * Prepare the Request object for a new request.
    *
-   * @param s the raw connection stream
+   * @param httpBuffer the raw connection stream
    */
   protected void startRequest(HttpBufferStore httpBuffer)
     throws IOException
@@ -1167,7 +1165,7 @@ public abstract class AbstractHttpRequest
    * Parses a single cookie
    *
    * @param cookies the array of cookies read
-   * @param rawCook the input for the cookie
+   * @param rawCookie the input for the cookie
    */
   private void fillCookie(ArrayList cookies, CharSegment rawCookie)
   {
@@ -1380,8 +1378,6 @@ public abstract class AbstractHttpRequest
 
   /**
    * Returns the current session.
-   *
-   * @param create true if a new session should be created
    *
    * @return the current session
    */
@@ -2843,6 +2839,25 @@ public abstract class AbstractHttpRequest
   public boolean authenticate(HttpServletResponse response)
     throws IOException, ServletException
   {
+    Login login = getLogin();
+
+    if (login == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+
+    Principal principal = login.login(this, response, true);
+
+    if (principal != null)
+      return true;
+
+    return false;
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  public void login(String username, String password)
+    throws ServletException
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
@@ -2859,15 +2874,6 @@ public abstract class AbstractHttpRequest
    * @since Servlet 3.0
    */
   public Iterable<Part> getParts()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @since Servlet 3.0
-   */
-  public void login(String username, String password)
-    throws ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

@@ -237,7 +237,6 @@ public abstract class AbstractLogin implements Login {
    * <p/>authenticate is used for the security checks.
    *
    * @param request servlet request
-   * @param application servlet application
    *
    * @return the logged in principal on success, null on failure.
    */
@@ -274,7 +273,7 @@ public abstract class AbstractLogin implements Login {
    *
    * @param request servlet request
    * @param response servlet response for a failed authentication.
-   * @param application servlet application
+   * @param isFail if true send a challenge (Form|HTTP Basic,etc.)
    *
    * @return the logged in principal on success, null on failure.
    */
@@ -419,8 +418,8 @@ public abstract class AbstractLogin implements Login {
    * <code>isUserInRole</code> is called in response to the
    * <code>HttpServletRequest.isUserInRole</code> call.
    *
-   * @param request servlet request
-   * @param application servlet application
+   * @param user UserPrincipal object associated with request
+   * @param role to be tested
    *
    * @return the logged in principal on success, null on failure.
    */

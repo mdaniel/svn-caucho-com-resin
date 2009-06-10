@@ -29,11 +29,8 @@
 
 package com.caucho.security;
 
-import com.caucho.security.BasicPrincipal;
 import com.caucho.util.Base64;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -74,7 +71,7 @@ public class BasicLogin extends AbstractLogin {
   /**
    * Returns the principal from a basic authentication
    *
-   * @param auth the authenticator for this application.
+   * @param request
    */
   @Override
   protected Principal getUserPrincipalImpl(HttpServletRequest request)
@@ -111,7 +108,8 @@ public class BasicLogin extends AbstractLogin {
   /**
    * Returns the principal from a basic authentication
    *
-   * @param auth the authenticator for this application.
+   * @param request
+   * @param savedUser 
    */
   @Override
   protected boolean isSavedUserValid(HttpServletRequest request,

@@ -228,7 +228,6 @@ public class AbstractAuthenticator
   /**
    * Returns true if the user plays the named role.
    *
-   * @param request the servlet request
    * @param user the user to test
    * @param role the role to test
    */
@@ -245,8 +244,6 @@ public class AbstractAuthenticator
   /**
    * Logs the user out from the session.
    *
-   * @param application the application
-   * @param timeoutSession the session timing out, null if not a timeout logout
    * @param user the logged in user
    */
   public void logout(Principal user)

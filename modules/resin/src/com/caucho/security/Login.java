@@ -92,7 +92,7 @@ public interface Login {
   public Principal login(HttpServletRequest request,
 			 HttpServletResponse response,
 			 boolean isFail);
-  
+
   /**
    * Returns true if the current user plays the named role.
    * <code>isUserInRole</code> is called in response to the
