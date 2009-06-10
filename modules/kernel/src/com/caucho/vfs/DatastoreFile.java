@@ -93,8 +93,10 @@ public class DatastoreFile
       
       e.printStackTrace();
     } finally {
-      if (! DatastorePath.IS_USE_HASHMAP)
+      if (! DatastorePath.IS_USE_HASHMAP) {
+        em.merge(this);
         em.getTransaction().commit();
+      }
     }
   }
   
@@ -114,8 +116,10 @@ public class DatastoreFile
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
-      if (! DatastorePath.IS_USE_HASHMAP)
+      if (! DatastorePath.IS_USE_HASHMAP) {
+        em.merge(this);
         em.getTransaction().commit();
+      }
     }
   }
   
