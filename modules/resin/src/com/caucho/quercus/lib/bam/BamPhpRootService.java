@@ -98,8 +98,8 @@ public class BamPhpRootService extends SimpleActor {
       actor = new BamPhpActor(_script, _encoding);
       actor.setJid(jid);
 
-      InjectManager container = InjectManager.getCurrent();
-      container.injectObject(actor);
+      //InjectManager container = InjectManager.getCurrent();
+      //container.injectObject(actor);
 
       _actors.put(jid, actor);
     }

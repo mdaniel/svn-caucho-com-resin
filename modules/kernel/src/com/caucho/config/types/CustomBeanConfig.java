@@ -542,26 +542,17 @@ public class CustomBeanConfig {
 
   protected Bean bindParameter(String loc,
 			       Type type,
-			       Set<Annotation> bindings)
+			       Set<Annotation> bindingSet)
   {
-    Set set = _beanManager.resolve(type, bindings);
+    Annotation []bindings = new Annotation[bindingSet.size()];
+    bindingSet.toArray(bindings);
+    
+    Set<Bean<?>> set = _beanManager.getBeans(type, bindings);
 
     if (set == null || set.size() == 0)
       return null;
 
-    if (set.size() > 1) {
-      throw new ConfigException(L.l("{0}: can't bind webbeans '{1}' because multiple matching beans were found: {2}",
-				    loc, type, set));
-    }
-
-    Iterator iter = set.iterator();
-    if (iter.hasNext()) {
-      Bean bean = (Bean) iter.next();
-
-      return bean;
-    }
-
-    return null;
+    return _beanManager.getHighestPrecedenceBean(set);
   }
 
   public Object toObject()

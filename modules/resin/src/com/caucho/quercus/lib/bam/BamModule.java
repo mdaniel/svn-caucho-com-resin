@@ -209,8 +209,8 @@ public class BamModule extends AbstractQuercusModule
     child.setScript(path);
     // child.setBroker(manager.getBroker());
 
-    InjectManager container = InjectManager.getCurrent();
-    container.injectObject(child);
+    //InjectManager container = InjectManager.getCurrent();
+    //container.injectObject(child);
 
     manager.addChild(jid, child);
 
@@ -268,8 +268,8 @@ public class BamModule extends AbstractQuercusModule
 
     child.setScript(path);
 
-    InjectManager container = InjectManager.getCurrent();
-    container.injectObject(child);
+    //InjectManager container = InjectManager.getCurrent();
+    //container.injectObject(child);
 
     actor.addChild(jid, child);
 

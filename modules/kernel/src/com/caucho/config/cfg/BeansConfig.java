@@ -217,8 +217,10 @@ public class BeansConfig {
 	_pendingClasses.clear();
 
 	for (Class cl : pendingClasses) {
+	  /*
 	  if (injectManager.getWebComponent(cl) != null)
 	    continue;
+	  */
 
 	  ManagedBeanImpl<?> bean;
 

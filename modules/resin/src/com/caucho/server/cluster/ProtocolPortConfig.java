@@ -98,8 +98,11 @@ public class ProtocolPortConfig extends Port
     if (_protocolClass != null) {
       InjectManager webBeans = InjectManager.create();
 
+      /*
       Protocol protocol
 	= (Protocol) webBeans.createTransientObjectNoInit(_protocolClass);
+      */
+      Protocol protocol = null;
       
       if (_init != null)
 	_init.configure(protocol);

@@ -613,12 +613,10 @@ public class InjectManager
   // javax.webbeans.Container
   //
 
-  /*
   public Conversation createConversation()
   {
     return (Conversation) _contextMap.get(ConversationScoped.class);
   }
-  */
 
   /**
    * Creates an object, but does not register the
