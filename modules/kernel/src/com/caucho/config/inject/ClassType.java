@@ -105,6 +105,15 @@ public class ClassType extends BaseType
       return true;
   }
 
+  @Override
+  public BaseType findClass(Class cl)
+  {
+    if (_type.equals(cl))
+      return this;
+    else
+      return null;
+  }
+
   public int hashCode()
   {
     return _type.hashCode();

@@ -101,6 +101,16 @@ public class XmlStandardPlugin implements Extension
 	  configurePath(root.lookup("../resin-beans.xml"));
 	}
       }
+
+      for (int i = 0; i < _pendingBeans.size(); i++) {
+	BeansConfig config = _pendingBeans.get(i);
+
+	ArrayList<Class> deployList = config.getDeployList();
+
+	if (deployList != null && deployList.size() > 0) {
+	  _manager.setDeploymentTypes(deployList);
+	}
+      }
     } catch (Exception e) {
       if (_configException == null)
 	_configException = e;

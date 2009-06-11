@@ -68,11 +68,8 @@ public class BeansConfig {
   
   private Path _beansFile;
   
-  private ArrayList<AbstractBean> _pendingComponentList
-    = new ArrayList<AbstractBean>();
-  
-  private ArrayList<AbstractBean> _pendingBindList
-    = new ArrayList<AbstractBean>();
+  private ArrayList<Class> _deployList
+    = new ArrayList<Class>();
 
   private ArrayList<Interceptor> _interceptorList;
   
@@ -81,7 +78,7 @@ public class BeansConfig {
 
   private ArrayList<Class> _pendingClasses
     = new ArrayList<Class>();
-
+  
   private boolean _isConfigured;
 
   public BeansConfig(InjectManager injectManager, Path root)
@@ -143,6 +140,11 @@ public class BeansConfig {
   public void setConfigured(boolean isConfigured)
   {
     _isConfigured = isConfigured;
+  }
+
+  public ArrayList<Class> getDeployList()
+  {
+    return _deployList;
   }
 
   //
@@ -318,9 +320,6 @@ public class BeansConfig {
 
   public class DeployConfig {
     private String _location;
-    
-    private ArrayList<Class> _deployList
-      = new ArrayList<Class>();
 
     public void setConfigLocation(String location)
     {

@@ -44,7 +44,7 @@ import javax.enterprise.inject.InjectionException;
 /**
  * Internal implementation for a producer Bean
  */
-public class ObserverMethodImpl<X,T>
+public class ObserverMethodImpl<X,T> implements Observer<T>
 {
   private BeanManager _beanManager;
   

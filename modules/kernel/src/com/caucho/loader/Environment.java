@@ -679,6 +679,23 @@ public class Environment {
 
     return Thread.currentThread().getContextClassLoader().toString();
   }
+  
+  /**
+   * Apply the action to visible classloaders
+   */
+  public static void applyVisibleModules(EnvironmentApply apply)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+	envLoader.applyVisibleModules(apply);
+
+	return;
+      }
+    }
+  }
 
   /**
    * Returns the classpath for the environment level.

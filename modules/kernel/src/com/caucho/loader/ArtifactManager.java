@@ -153,6 +153,15 @@ public class ArtifactManager
     }
   }
 
+  void applyVisibleModules(EnvironmentApply apply)
+  {
+    resolve();
+    
+    for (Entry entry : _entryList) {
+      apply.apply(entry.getLoader());
+    }
+  }
+
   private void resolve()
   {
     synchronized (this) {

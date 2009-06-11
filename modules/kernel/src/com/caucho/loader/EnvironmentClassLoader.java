@@ -619,6 +619,28 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   }
 
   /**
+   * Applies the action to all visible environment modules.  The
+   * action may apply to the same environment more than once.
+   */
+  public void applyVisibleModules(EnvironmentApply apply)
+  {
+    apply.apply(this);
+
+    for (ClassLoader parent = getParent();
+	 parent != null;
+	 parent = parent.getParent()) {
+      if (parent instanceof EnvironmentClassLoader) {
+	EnvironmentClassLoader env = (EnvironmentClassLoader) parent;
+	env.applyVisibleModules(apply);
+	break;
+      }
+    }
+
+    if (_artifactManager != null)
+      _artifactManager.applyVisibleModules(apply);
+  }
+
+  /**
    * Called when the <class-loader> completes.
    */
   @Override

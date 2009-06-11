@@ -134,22 +134,9 @@ public class WebComponent {
       return beans;
     }
 
-    int priority = 0;
-
     for (BeanEntry beanEntry : _beanList) {
       if (beanEntry.isMatch(type, bindings)) {
 	Bean<?> bean = beanEntry.getBean();
-
-	int beanPriority
-	  = _beanManager.getDeploymentPriority(bean.getDeploymentType());
-
-	if (beanPriority < priority)
-	  continue;
-
-	if (priority < beanPriority && bindings.length > 0) {
-	  beans = null;
-	  priority = beanPriority;
-	}
 
 	if (beans == null)
 	  beans = new LinkedHashSet<Bean<?>>();
