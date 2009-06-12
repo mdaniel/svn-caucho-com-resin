@@ -485,11 +485,26 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   */
   
   /**
-   * Call post-construct
+   * Call pre-destroy
    */
   public void preDestroy(X instance)
   {
+    try {
+      if (!_isBound)
+        bind();
 
+      ConfigContext env = (ConfigContext) null;
+
+      for (ConfigProgram program : _destroyProgram) {
+        program.inject(instance, env);
+      }
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new CreationException(e);
+    }
   }
   
   /**
