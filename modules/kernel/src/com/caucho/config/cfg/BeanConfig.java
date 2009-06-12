@@ -229,8 +229,6 @@ public class BeanConfig extends WbComponentConfig {
 
     super.init();
     
-    System.out.println("CB: " + _customBean + " " + _comp +  " " + this);
-    
     try {
       if (_comp == null) {
       }
