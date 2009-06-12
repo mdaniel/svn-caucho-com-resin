@@ -32,9 +32,9 @@ package com.caucho.jsf.integration;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.enterprise.inject.spi.*;
-import javax.enterprise.inject.Current;
 import javax.servlet.ServletContext;
 
 import com.sun.faces.spi.*;
@@ -45,7 +45,10 @@ import com.caucho.util.L10N;
 public class Mojarra12InjectionProvider
   extends DiscoverableInjectionProvider
 {
-  
+  private static final L10N L = new L10N(InjectManager.class);
+  private static final Logger log
+    = Logger.getLogger(InjectManager.class.getName());
+
   protected ServletContext _context;
   protected BeanManager _manager;
 
@@ -59,6 +62,12 @@ public class Mojarra12InjectionProvider
   {
     _context = context;
     _manager = InjectManager.getCurrent();
+
+    if (log.isLoggable(Level.FINEST))
+      log.finest(L.l(
+        "Created Mojarra12InjectionProvider using InjectManager {0} for context {1}",
+        _manager,
+        _context));
   }
 
   public void inject(Object o)
@@ -68,6 +77,9 @@ public class Mojarra12InjectionProvider
 
     InjectionTarget target = getInjectionTarget(cl);
 
+    if (log.isLoggable(Level.FINEST))
+       log.fine(L.l("Injecting bean '{0}'", o));
+    
     target.inject(o, null);
   }
 
@@ -78,6 +90,9 @@ public class Mojarra12InjectionProvider
 
     InjectionTarget target = getInjectionTarget(cl);
 
+    if (log.isLoggable(Level.FINEST))
+       log.fine(L.l("PreDestroy bean '{0}'", o));
+
     target.preDestroy(o);
   }
 
@@ -87,6 +102,9 @@ public class Mojarra12InjectionProvider
     Class cl = o.getClass();
 
     InjectionTarget target = getInjectionTarget(cl);
+
+    if (log.isLoggable(Level.FINEST))
+       log.fine(L.l("PreDestroy bean '{0}'", o));
 
     target.postConstruct(o);
   }
