@@ -50,6 +50,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   String _version;
 
   private String _systemId;
+  private String _documentURI;
 
   private HashMap<String,String> _namespaces;
 
@@ -904,12 +905,12 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   public String getDocumentURI()
   {
-    throw new UnsupportedOperationException();
+    return _documentURI;
   }
 
   public void setDocumentURI(String documentURI)
   {
-    throw new UnsupportedOperationException();
+    _documentURI = documentURI;
   }
 
   public Node adoptNode(Node source)

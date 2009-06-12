@@ -885,7 +885,10 @@ abstract public class AbstractParser implements XMLReader, Parser
     
     ReadStream is = path.openRead();
     try {
-      return parseDocument(is);
+      Document document = parseDocument(is);
+      document.setDocumentURI(path.getURL());
+
+      return document;
     } finally {
       is.close();
     }
