@@ -77,9 +77,9 @@ public class BeanWrapper<T> extends AbstractBean<T>
     return getBean().getBindings();
   }
 
-  public Class<? extends Annotation> getDeploymentType()
+  public Set<Annotation> getStereotypes()
   {
-    return getBean().getDeploymentType();
+    return getBean().getStereotypes();
   }
 
   public Set<InjectionPoint> getInjectionPoints()

@@ -56,6 +56,13 @@ w_deploy = element Deploy {
   w_bean-Field-Custom*
   & w_standard?
   & w_production?
+  & w_class*
+  & w_stereotype*
+}
+
+w_enable = element enable {
+  w_class*
+  & w_stereotype*
 }
 
 w_component-type =
@@ -90,6 +97,10 @@ w_production = element Production {
   empty
 }  
 
+w_stereotype = element stereotype {
+  string
+}
+
 w_type = element type {
   string
 }
@@ -110,6 +121,8 @@ w_Beans = element Beans {
   & w_decorators?
   
   & w_deploy?
+  
+  & w_enable?
   
   & w_interceptors?
 }

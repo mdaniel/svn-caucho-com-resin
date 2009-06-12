@@ -66,8 +66,6 @@ import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.deployment.DeploymentType;
-import javax.enterprise.inject.deployment.Production;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Annotated;
@@ -122,9 +120,9 @@ abstract public class AbstractBean<T> implements Bean<T>
     return _currentBindings;
   }
 
-  public Class<? extends Annotation> getDeploymentType()
+  public Set<Annotation> getStereotypes()
   {
-    return Production.class;
+    return null;
   }
 
   public Set<InjectionPoint> getInjectionPoints()
@@ -172,14 +170,7 @@ abstract public class AbstractBean<T> implements Bean<T>
       sb.append(ann);
     }
 
-    sb.append("}, ");
-
-    if (getDeploymentType() != null) {
-      sb.append("@");
-      sb.append(getDeploymentType().getSimpleName());
-    }
-    else
-      sb.append("@null");
+    sb.append("}");
     
     if (getName() != null) {
       sb.append(", ");

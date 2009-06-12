@@ -89,20 +89,21 @@ public class InterceptorBean<X> implements Interceptor<X>
   //
 
   /**
-   * Returns the bean's deployment type
-   */
-  public Class getDeploymentType()
-  {
-    return _bean.getDeploymentType();
-  }
-
-  /**
    * Returns the bean's bindings
    */
   @Override
   public Set<Annotation> getBindings()
   {
     return _bean.getBindings();
+  }
+
+  /**
+   * Returns the bean's stereotypes
+   */
+  @Override
+  public Set<Annotation> getStereotypes()
+  {
+    return _bean.getStereotypes();
   }
 
   /**

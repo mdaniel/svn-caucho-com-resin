@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,13 +32,64 @@ package javax.enterprise.event;
 import java.lang.annotation.*;
 import javax.enterprise.inject.TypeLiteral;
 
+/**
+ * Injectable interface providing simplified access to the event system.
+ *
+ * <code><pre>
+ * class MyBean {
+ *   @Any Event&lt;MyEvent> _myEvent;
+ *
+ *   void myMethod()
+ *   {
+ *     _myEvent.fire(new MyEvent("test"));
+ *   }
+ * }
+ * </pre></code>
+ */
 public interface Event<T> {
-  public void fire(T event, Annotation... bindings);
-  
+  /**
+   * Fires an event with the Event object's bindings.
+   *
+   * @param event the event to fire
+   */
+  public void fire(T event);
+
+  /**
+   * Adds an observer to listen to the event, with the Event's bindings.
+   *
+   * @param observer the new observer of the event
+   */
   public void addObserver(Observer<T> observer);
+  
+  /**
+   * Removes an observer listening to the event.
+   *
+   * @param observer the new observer of the event
+   */
   public void removeObserver(Observer<T> observer);
 
+  /**
+   * Adds the current set of bindings, returning a new Event object.
+   *
+   * @param bindings the additional bindings
+   */
   public Event<T> select(Annotation... bindings);
-  public <U extends T> Event<U> select(Class<U> subtype, Annotation... bindings);
-  public <U extends T> Event<U> select(TypeLiteral<U> subtype, Annotation... bindings);
+  
+  /**
+   * Adds the current set of bindings, returning a new Event object.
+   *
+   * @param subtype the restricted type
+   * @param bindings the additional bindings
+   */
+  public <U extends T> Event<U> select(Class<U> subtype,
+				       Annotation... bindings);
+  
+  /**
+   * Adds the current set of bindings, returning a new Event object.
+   *
+   * @param subtype the restricted type
+   * @param bindings the additional bindings
+   */
+  public <U extends T> Event<U> select(TypeLiteral<U> subtype,
+				       Annotation... bindings);
 }

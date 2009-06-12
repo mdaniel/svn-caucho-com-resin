@@ -79,9 +79,15 @@ public class ObserverMap {
       ObserverEntry observer = _observerList.get(i);
 
       if (observer.isMatch(bindings)) {
-	observer.getObserver().notify(event);
+ 	observer.getObserver().notify(event);
       }
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _type + "]";
   }
 
   static class ObserverEntry {

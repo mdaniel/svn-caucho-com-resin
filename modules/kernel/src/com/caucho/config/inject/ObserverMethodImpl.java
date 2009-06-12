@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.event.Observer;
 import javax.enterprise.inject.InjectionException;
@@ -100,27 +101,17 @@ public class ObserverMethodImpl<X,T> implements Observer<T>
     return _bindings;
   }
 
-  public void notify(T event)
+  public boolean notify(T event)
   {
-    /*
-    getListener().notify(event);
-    */
-    /*
     Class<X> type = null;
+
+    CreationalContext env = _beanManager.createCreationalContext();
+
+    Object instance = _beanManager.getReference(getParentBean(), type, env);
     
-    notify(_beanManager.getReference(getParentBean(), type), event);
-    */
-  }
-  
-  /**
-   * Sends an event
-   */
-  public void notify(X instance, T event)
-  {
     Method method = _method.getJavaMember();
     
     try {
-      System.out.println("INV: " + method);
       method.invoke(instance, event);
     } catch (RuntimeException e) {
       throw e;
@@ -135,6 +126,8 @@ public class ObserverMethodImpl<X,T> implements Observer<T>
       
       throw new InjectionException(loc + e.getMessage(), e.getCause());
     }
+
+    return false;
   }
 
   public Set<InjectionPoint> getInjectionPoints()

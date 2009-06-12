@@ -57,7 +57,6 @@ import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Initializer;
-import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.Bean;
 
 /**
@@ -72,11 +71,12 @@ public class WbComponentConfig {
   
   private Class _cl;
 
-  private Class<? extends Annotation> _deploymentType;
-
   private String _name;
   
   private ArrayList<Annotation> _bindingList
+    = new ArrayList<Annotation>();
+
+  private ArrayList<Annotation> _stereotypeList
     = new ArrayList<Annotation>();
 
   private Class _scope;
@@ -126,26 +126,6 @@ public class WbComponentConfig {
   }
 
   /**
-   * Sets the component type.
-   */
-  public void setDeploymentType(Class type)
-  {
-    if (! type.isAnnotationPresent(DeploymentType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid deployment-type annotation because it's missing a @DeploymentType annotation.",
-				    type.getName()));
-    
-    _deploymentType = type;
-  }
-
-  /**
-   * Gets the component type.
-   */
-  public Class<? extends Annotation> getDeploymentType()
-  {
-    return _deploymentType;
-  }
-
-  /**
    * Sets the component implementation class.
    */
   public void setClass(Class cl)
@@ -177,6 +157,11 @@ public class WbComponentConfig {
   public ArrayList<Annotation> getBindingList()
   {
     return _bindingList;
+  }
+
+  public ArrayList<Annotation> getStereotypeList()
+  {
+    return _stereotypeList;
   }
 
   /**
@@ -356,8 +341,9 @@ public class WbComponentConfig {
       factory.binding(binding);
     }
 
-    if (_deploymentType != null)
-      factory.deployment(_deploymentType);
+    for (Annotation stereotype : _stereotypeList) {
+      factory.stereotype(stereotype);
+    }
 
     if (_scope != null) {
       factory.scope(_scope);

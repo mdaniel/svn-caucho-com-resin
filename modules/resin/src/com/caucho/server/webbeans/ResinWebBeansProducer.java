@@ -57,7 +57,6 @@ import javax.enterprise.event.Observes;
 import javax.management.*;
 import javax.transaction.*;
 import javax.enterprise.inject.*;
-import javax.enterprise.inject.deployment.Standard;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -83,7 +82,6 @@ public class ResinWebBeansProducer
    * Returns the web beans container.
    */
   @Produces
-  @Standard
   public BeanManager getManager()
   {
     return InjectManager.create();
@@ -93,7 +91,6 @@ public class ResinWebBeansProducer
    * Returns the web beans conversation controller
    */
   @Produces
-  @Standard
   public Conversation getConversation()
   {
     return InjectManager.create().createConversation();

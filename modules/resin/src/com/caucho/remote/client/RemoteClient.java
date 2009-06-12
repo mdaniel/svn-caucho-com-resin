@@ -95,10 +95,11 @@ public class RemoteClient extends BeanConfig
       factory = factory.binding(binding);
     }
 
-    if (getDeploymentType() != null)
-      factory.deployment(getDeploymentType());
-    else
-      factory.deployment(Configured.class);
+    for (Annotation stereotype : getStereotypeList()) {
+      factory = factory.stereotype(stereotype);
+    }
+
+    factory.stereotype(ConfiguredLiteral.create());
 
     _comp = (AbstractBean) factory.singleton(proxy);
 

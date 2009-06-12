@@ -66,8 +66,6 @@ import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.deployment.DeploymentType;
-import javax.enterprise.inject.deployment.Production;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Annotated;
@@ -112,8 +110,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   private LinkedHashSet<Type> _typeClasses
     = new LinkedHashSet<Type>();
   
-  private Class<? extends Annotation> _deploymentType;
-  
   private ArrayList<Annotation> _bindings
     = new ArrayList<Annotation>();
 
@@ -145,14 +141,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public InjectManager getBeanManager()
   {
     return _beanManager;
-  }
-
-  /**
-   * Returns the bean's deployment type
-   */
-  public Class<? extends Annotation> getDeploymentType()
-  {
-    return _deploymentType;
   }
 
   public BaseType getBaseType()
@@ -219,6 +207,20 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     for (Annotation binding : _bindings) {
       set.add(binding);
+    }
+
+    return set;
+  }
+
+  /**
+   * Returns the bean's stereotypes
+   */
+  public Set<Annotation> getStereotypes()
+  {
+    Set<Annotation> set = new LinkedHashSet<Annotation>();
+
+    for (Annotation stereotype : _stereotypes) {
+      set.add(stereotype);
     }
 
     return set;
@@ -317,31 +319,12 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   protected void introspect(Annotated annotated)
   {
-    introspectDeploymentType(annotated);
     introspectScope(annotated);
     introspectBindings(annotated);
     introspectName(annotated);
     introspectStereotypes(annotated);
 
     introspectDefault();
-  }
-
-  /**
-   * Called for implicit introspection.
-   */
-  protected void introspectDeploymentType(Annotated annotated)
-  {
-    for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
-	if (_deploymentType != null && _deploymentType != ann.annotationType())
-	  throw new ConfigException(L.l("{0}: @DeploymentType annotation @{1} is invalid because it conflicts with @{2}.  Java Injection components may only have a single @DeploymentType.",
-					getTargetName(),
-					_deploymentType.getName(),
-					ann.annotationType().getName()));
-
-	_deploymentType = ann.annotationType();
-      }
-    }
   }
 
   /**
@@ -406,22 +389,14 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     for (Annotation stereotype : annotated.getAnnotations()) {
       Class stereotypeType = stereotype.annotationType();
+
+      _stereotypes.add(stereotype);
 	
       for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
 	Class annType = ann.annotationType();
 	  
 	if (_scopeType == null && annType.isAnnotationPresent(ScopeType.class))
 	  _scopeType = annType;
-
-	if (annType.isAnnotationPresent(DeploymentType.class)) {
-	  // XXX: potential issue where getDeploymentPriority isn't set yet
-	  
-	  if (_deploymentType == null
-	      || (_beanManager.getDeploymentPriority(_deploymentType)
-		  < _beanManager.getDeploymentPriority(annType))) {
-	    _deploymentType = annType;
-	  }
-	}
 	  
 	if (annType.equals(Named.class) && _name == null) {
 	  Named named = (Named) ann;
@@ -435,52 +410,12 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 	  throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @BindingType annotations",
 					ann, stereotype));
 	}
-
-	/*
-	if (ann instanceof Stereotype) {
-	  Stereotype stereotype = (Stereotype) ann;
-      
-	  for (Class requiredType : stereotype.requiredTypes()) {
-	    if (! requiredType.isAssignableFrom(getTargetClass())) {
-	      throw new ConfigException(L.l("'{0}' may not have '{1}' because it does not implement the required type '{2}'",
-					    getTargetName(),
-					    stereotypeAnn,
-					    requiredType.getName()));
-	    }
-	  }
-
-	  boolean hasScope = stereotype.supportedScopes().length == 0;
-	  for (Class supportedScope : stereotype.supportedScopes()) {
-	    Class scopeType = getScopeType();
-	    if (scopeType == null)
-	      scopeType = Dependent.class;
-	    
-	    if (supportedScope.equals(scopeType))
-	      hasScope = true;
-	  }
-
-	  if (! hasScope) {
-	    ArrayList<String> scopeNames = new ArrayList<String>();
-
-	    for (Class supportedScope : stereotype.supportedScopes())
-	      scopeNames.add("@" + supportedScope.getSimpleName());
-	    
-	    throw new ConfigException(L.l("'{0}' may not have '{1}' because it does not implement a supported scope {2}",
-					  getTargetName(),
-					  stereotypeAnn,
-					  scopeNames));
-	  }
-	}
-	*/
       }
     }
   }
 
   protected void introspectDefault()
   {
-    if (_deploymentType == null)
-      _deploymentType = Production.class;
-
     if (_bindings.size() == 0)
       _bindings.add(CurrentLiteral.CURRENT);
 
@@ -585,11 +520,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       sb.append(binding);
     }
 
-    if (_deploymentType != null) {
-      sb.append(", @");
-      sb.append(_deploymentType.getSimpleName());
-    }
-    
     if (_scopeType != null && _scopeType != Dependent.class) {
       sb.append(", @");
       sb.append(_scopeType.getSimpleName());

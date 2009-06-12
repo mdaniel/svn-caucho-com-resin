@@ -32,8 +32,6 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.deployment.DeploymentType;
-
 /**
  * Disables deployment for a bean by default, forcing configuration in an
  * XML file.
@@ -42,7 +40,7 @@ import javax.enterprise.inject.deployment.DeploymentType;
  * beans might conflict, or if a {@link javax.inject.Produces @Produces}
  * method should take precedence over a scanned simple bean.
  */
-@DeploymentType
+
 @Documented  
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})

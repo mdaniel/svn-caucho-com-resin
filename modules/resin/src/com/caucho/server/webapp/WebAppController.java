@@ -520,7 +520,7 @@ public class WebAppController
     BeanFactory factory = beanManager.createBeanFactory(WebApp.class);
     factory.type(WebApp.class);
     factory.type(ServletContext.class);
-    factory.deployment(CauchoDeployment.class);
+    // factory.stereotype(CauchoDeploymentLiteral.create());
 
     beanManager.addBean(factory.singleton(app));
 

@@ -50,12 +50,6 @@ public interface WebBeanMXBean extends ManagedObjectMXBean {
   public String []getBeanTypes();
 
   /**
-   * Returns the deployment type attribute
-   */
-  @Description("The @DeploymentType")
-  public String getDeploymentType();
-
-  /**
    * Returns the scope type attribute
    */
   @Description("The @ScopeType")

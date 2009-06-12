@@ -19,28 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.deployment;
+package javax.enterprise.inject;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
- * Production and testing-mode beans are enabled using
- * {@literal @DeploymentType} annotations.
+ * Disables the bean from the initial discovery.
  */
-@Documented
+@Target({TYPE})
 @Retention(RUNTIME)
-@Target(ANNOTATION_TYPE)
-public @interface DeploymentType {
+@Documented  
+public @interface Disabled {
 }

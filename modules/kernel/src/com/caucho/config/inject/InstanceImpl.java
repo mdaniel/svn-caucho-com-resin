@@ -59,12 +59,6 @@ public class InstanceImpl<T> implements Instance<T>
     _bindings = bindings;
 
     _beanSet = beanManager.getBeans(type, bindings);
-
-    if (_beanSet.size() == 1) {
-      for (Bean bean : _beanSet) {
-	_bean = bean;
-      }
-    }
   }
   
   /**
@@ -72,6 +66,10 @@ public class InstanceImpl<T> implements Instance<T>
    */
   public T get()
   {
+    if (_bean == null) {
+      _bean = _beanManager.getHighestPrecedenceBean(_beanSet);
+    }
+    
     CreationalContext<?> env = _beanManager.createCreationalContext();
     
     return (T) _beanManager.getReference(_bean, _bean.getBeanClass(), env);
@@ -121,7 +119,7 @@ public class InstanceImpl<T> implements Instance<T>
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _type + "]";
   }
 
   static class InstanceIterator<T> implements Iterator<T> {

@@ -748,7 +748,7 @@ public class DBPool
     if (name != null)
       factory.name(name);
 
-    factory.deployment(CauchoDeployment.class);
+    // factory.stereotype(CauchoDeployment.class);
 
     manager.addBean(factory.singleton(this));
  }

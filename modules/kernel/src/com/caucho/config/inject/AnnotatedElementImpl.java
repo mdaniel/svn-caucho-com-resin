@@ -72,6 +72,11 @@ public class AnnotatedElementImpl implements Annotated
       }
     }
   }
+  
+  public AnnotatedElementImpl(Annotated annotated)
+  {
+    this(annotated.getBaseType(), annotated, null);
+  }
 
   public Type getBaseType()
   {

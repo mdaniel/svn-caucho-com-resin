@@ -94,9 +94,9 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the bean's deployment type
    */
-  public Class<? extends Annotation> getDeploymentType()
+  public Set<Annotation> getStereotypes()
   {
-    return _bean.getDeploymentType();
+    return _bean.getStereotypes();
   }
 
   /**

@@ -89,9 +89,9 @@ public class InstanceBeanImpl<T> implements Bean<T>
   }
 
   /**
-   * Returns the bean's deployment type
+   * Returns the bean's stereotype annotations.
    */
-  public Class<? extends Annotation> getDeploymentType()
+  public Set<Annotation> getStereotypes()
   {
     return null;
   }

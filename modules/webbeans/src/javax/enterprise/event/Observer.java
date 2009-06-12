@@ -37,5 +37,5 @@ public interface Observer<T>
   /**
    * Called to notify the observer on an event
    */
-  public void notify(T event);
+  public boolean notify(T event);
 }

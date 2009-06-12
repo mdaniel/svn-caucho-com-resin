@@ -162,7 +162,7 @@ public class ObserverImpl implements Observer {
     return false;
   }
 
-  public void notify(Object event)
+  public boolean notify(Object event)
   {
     Object obj = null;
 
@@ -173,10 +173,13 @@ public class ObserverImpl implements Observer {
 	obj = context.get(_bean);
     }
     else {
-      CreationalContext env = null;
+      // XXX: perf
+      CreationalContext env = _webBeans.createCreationalContext();
       
-      obj = _webBeans.getReference(_bean, (Class) null, env); // XXX:
+      obj = _webBeans.getReference(_bean, _bean.getBeanClass(), env); 
     }
+
+    System.out.println("OBJ: " + obj);
 
     try {
       if (obj != null) {
@@ -203,6 +206,8 @@ public class ObserverImpl implements Observer {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    return false;
   }
 
   public boolean equals(Object obj)

@@ -131,7 +131,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     super.initDefault();
   }
   */
-  
+
+  /*
   protected Class getDefaultDeploymentType()
   {
     if (_producerBean.getDeploymentType() != null)
@@ -139,6 +140,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
     return null;// super.getDefaultDeploymentType();
   }
+  */
 
   @Override
   protected String getDefaultName()
@@ -367,10 +369,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       sb.append(getName());
     }
 
-    if (getDeploymentType() != null) {
-      sb.append(", @");
-      sb.append(getDeploymentType().getSimpleName());
-    }
     sb.append("]");
 
     return sb.toString();

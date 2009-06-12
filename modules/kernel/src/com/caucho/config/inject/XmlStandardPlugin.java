@@ -146,14 +146,14 @@ public class XmlStandardPlugin implements Extension
       return;
 
     if (_configuredBeans.contains(type.getJavaClass().getName())) {
-      event.setAnnotatedType(null);
+      event.veto();
       return;
     }
 
     if (type.isAnnotationPresent(Stateful.class)
 	|| type.isAnnotationPresent(Stateless.class)
 	|| type.isAnnotationPresent(MessageDriven.class)) {
-      event.setAnnotatedType(null);
+      event.veto();
     }
   }
 

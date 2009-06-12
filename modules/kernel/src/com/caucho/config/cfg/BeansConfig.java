@@ -50,8 +50,6 @@ import java.util.zip.*;
 
 import javax.annotation.PostConstruct;
 import javax.decorator.Decorator;
-import javax.enterprise.inject.deployment.DeploymentType;
-import javax.enterprise.inject.deployment.Standard;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Interceptor;
 
@@ -165,6 +163,14 @@ public class BeansConfig {
   public DeployConfig createDeploy()
   {
     return new DeployConfig();
+  }
+
+  /**
+   * Adds a deploy
+   */
+  public EnableConfig createEnable()
+  {
+    return new EnableConfig();
   }
 
   /**
@@ -340,11 +346,17 @@ public class BeansConfig {
 
       _deployList.add(cl);
     }
-    
-    @PostConstruct
-    public void init()
+  }
+
+  public class EnableConfig {
+    public void addClass(Class cl)
     {
-      _injectManager.setDeploymentTypes(_deployList);
+      _deployList.add(cl);
+    }
+    
+    public void addStereotype(Class cl)
+    {
+      _deployList.add(cl);
     }
   }
 }

@@ -67,6 +67,14 @@ public class InjectionPointBean<T> implements Bean<T>
   }
 
   /**
+   * Returns the bean's stereotype annotations.
+   */
+  public Set<Annotation> getStereotypes()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Returns the bean's deployment type
    */
   public Class<? extends Annotation> getDeploymentType()

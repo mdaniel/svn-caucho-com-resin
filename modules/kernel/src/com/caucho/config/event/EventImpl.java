@@ -51,22 +51,9 @@ public class EventImpl<T> implements Event<T>
     _bindings = bindings;
   }
   
-  public void fire(T event, Annotation... bindings)
+  public void fire(T event)
   {
-    if (_bindings.length == 0)
-      _manager.fireEvent(event, bindings);
-    else if (bindings == null || bindings.length == 0)
-      _manager.fireEvent(event, _bindings);
-    else {
-      Annotation []fullBindings
-	= new Annotation[_bindings.length + bindings.length];
-
-      System.arraycopy(_bindings, 0, fullBindings, 0, _bindings.length);
-      System.arraycopy(bindings, 0, fullBindings, _bindings.length,
-		       bindings.length);
-
-      _manager.fireEvent(event, fullBindings);
-    }
+    _manager.fireEvent(event, _bindings);
   }
 
   public void addObserver(Observer<T> observer)

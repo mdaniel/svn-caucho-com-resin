@@ -39,6 +39,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -56,12 +57,14 @@ public class ManagedSingletonBean extends AbstractSingletonBean
 {
   ManagedSingletonBean(ManagedBeanImpl managedBean,
 		       Set<Type> types,
-		       Class<? extends Annotation> deploymentType,
+		       Annotated annotated,
 		       Set<Annotation> bindings,
+		       Set<Annotation> stereotypes,
 		       Class<? extends Annotation> scopeType,
 		       String name)
   {
-    super(managedBean, types, deploymentType, bindings, scopeType, name);
+    super(managedBean, types, annotated, bindings, stereotypes,
+	  scopeType, name);
   }
 
   @Override

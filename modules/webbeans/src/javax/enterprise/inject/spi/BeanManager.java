@@ -235,13 +235,6 @@ public interface BeanManager
    */
   public void removeObserver(Observer<?> observer);
 
-  /**
-   * Registers an event observer
-   *
-   * @param observerMethod the observer method
-   */
-  //  public void addObserver(ObserverMethod<?,?> observerMethod);
-
   //
   // Observer resolution
   //

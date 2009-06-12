@@ -172,19 +172,13 @@ public class WebComponent {
     for (BeanEntry beanEntry : _beanList) {
       Bean<?> bean = beanEntry.getBean();
 
-      int beanPriority
-	= _beanManager.getDeploymentPriority(bean.getDeploymentType());
+      int beanPriority = _beanManager.getDeploymentPriority(bean);
 
       if (priority <= beanPriority)
 	list.add(bean);
     }
 
     return list;
-  }
-
-  private int getPriority(Class deploymentType)
-  {
-    return _beanManager.getDeploymentPriority(deploymentType);
   }
 
   static String getName(Type type)

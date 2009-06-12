@@ -92,10 +92,11 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     
     final String name = getName();
 
-    Annotation ann = new AnnotationLiteral<Stateless>() {
-      public String name() { return name; }
-      public String mappedName() { return name; }
-      public String description() { return ""; }
+    Annotation ann = new Stateless() {
+	public Class annotationType() { return Stateless.class; }
+	public String name() { return name; }
+	public String mappedName() { return name; }
+	public String description() { return ""; }
     };
 
     add(ann);

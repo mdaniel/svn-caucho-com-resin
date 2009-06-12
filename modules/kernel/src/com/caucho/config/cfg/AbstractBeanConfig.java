@@ -53,7 +53,7 @@ import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
-import javax.enterprise.inject.deployment.DeploymentType;
+import javax.enterprise.inject.stereotype.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.naming.*;
 
@@ -71,12 +71,13 @@ abstract public class AbstractBeanConfig {
 
   private Class _cl;
 
-  private Class<? extends Annotation> _deploymentType;
-  
   private ArrayList<Annotation> _annotations
     = new ArrayList<Annotation>();
   
   private ArrayList<Annotation> _bindings
+    = new ArrayList<Annotation>();
+  
+  private ArrayList<Annotation> _stereotypes
     = new ArrayList<Annotation>();
 
   private Class _scope;
@@ -157,26 +158,6 @@ abstract public class AbstractBeanConfig {
   }
 
   /**
-   * Sets the component type.
-   */
-  public void setComponentType(Class type)
-  {
-    if (! type.isAnnotationPresent(DeploymentType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid component annotation because deployment types must be annotated by @DeploymentType.",
-				    type.getName()));
-
-    _deploymentType = type;
-  }
-
-  /**
-   * Gets the component type.
-   */
-  public Class<? extends Annotation> getDeploymentType()
-  {
-    return _deploymentType;
-  }
-
-  /**
    * Adds a component binding.
    */
   public void addBinding(Annotation binding)
@@ -253,14 +234,24 @@ abstract public class AbstractBeanConfig {
 
     BeanFactory factory = beanManager.createBeanFactory(_cl);
 
-    if (_name != null)
+    if (_name != null) {
+      beanType.addAnnotation(Names.create(_name));
       factory.name(_name);
+    }
 
-    for (Annotation binding : _bindings)
+    for (Annotation binding : _bindings) {
+      beanType.addAnnotation(binding);
       factory.binding(binding);
+    }
 
-    if (_deploymentType != null)
-      factory.deployment(_deploymentType);
+    for (Annotation stereotype : _stereotypes) {
+      beanType.addAnnotation(stereotype);
+      factory.stereotype(stereotype);
+    }
+    
+    for (Annotation ann : _annotations) {
+      beanType.addAnnotation(ann);
+    }
 
     if (_scope != null)
       factory.scope(_scope);
@@ -270,12 +261,13 @@ abstract public class AbstractBeanConfig {
 
     if (value != null) {
       bean = factory.singleton(value);
+      beanManager.addBean(bean);
     }
     else {
-      bean = factory.singleton(value);
+      // bean = factory.bean();
+      beanManager.addAnnotatedType(beanType);
     }
       
-    beanManager.addBean(bean);
 
     // XXXX: JNDI isn't right
     if (_jndiName != null) {

@@ -40,6 +40,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -53,26 +54,33 @@ import javax.enterprise.inject.spi.InjectionPoint;
  * </pre></code>
  */
 abstract public class AbstractSingletonBean extends BeanWrapper
-  implements Closeable
+  implements Closeable, AnnotatedBean
 {
+  private ManagedBeanImpl _managedBean;
+  
   private Set<Type> _types;
-  private Class<? extends Annotation> _deploymentType;
+  private Annotated _annotated;
   private Set<Annotation> _bindings;
+  private Set<Annotation> _stereotypes;
   private Class<? extends Annotation> _scopeType;
   private String _name;
   
   AbstractSingletonBean(ManagedBeanImpl managedBean,
 			Set<Type> types,
-			Class<? extends Annotation> deploymentType,
+			Annotated annotated,
 			Set<Annotation> bindings,
+			Set<Annotation> stereotypes,
 			Class<? extends Annotation> scopeType,
 			String name)
   {
     super(managedBean);
 
+    _managedBean = managedBean;
+
     _types = types;
-    _deploymentType = deploymentType;
+    _annotated = annotated;
     _bindings = bindings;
+    _stereotypes = stereotypes;
     _scopeType = scopeType;
     _name = name;
   }
@@ -80,6 +88,14 @@ abstract public class AbstractSingletonBean extends BeanWrapper
   //
   // metadata for the bean
   //
+
+  public Annotated getAnnotated()
+  {
+    if (_annotated != null)
+      return _annotated;
+    else
+      return _managedBean.getAnnotated();
+  }
 
   public Set<Annotation> getBindings()
   {
@@ -89,12 +105,12 @@ abstract public class AbstractSingletonBean extends BeanWrapper
       return super.getBindings();
   }
 
-  public Class<? extends Annotation> getDeploymentType()
+  public Set<Annotation> getStereotypes()
   {
-    if (_deploymentType != null)
-      return _deploymentType;
+    if (_stereotypes != null)
+      return _stereotypes;
     else
-      return getBean().getDeploymentType();
+      return getBean().getStereotypes();
   }
 
   public String getName()

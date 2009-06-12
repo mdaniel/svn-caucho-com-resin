@@ -57,9 +57,10 @@ public class BeanFactory<T>
   private Object _value;
 
   private Set<Type> _types;
+  private AnnotatedElementImpl _annotated;
   private Set<Annotation> _bindings;
+  private Set<Annotation> _stereotypes;
   private String _name;
-  private Class<? extends Annotation> _deploymentType;
   private Class<? extends Annotation> _scopeType;
 
   public BeanFactory(ManagedBeanImpl managedBean)
@@ -94,9 +95,44 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory deployment(Class<? extends Annotation> deploymentType)
+  public BeanFactory stereotype(Annotation ann)
   {
-    _deploymentType = deploymentType;
+    if (_stereotypes == null)
+      _stereotypes = new LinkedHashSet<Annotation>();
+
+    _stereotypes.add(ann);
+    
+    return this;
+  }
+
+  public BeanFactory stereotype(Collection<Annotation> list)
+  {
+    if (_stereotypes == null)
+      _stereotypes = new LinkedHashSet<Annotation>();
+
+    _stereotypes.addAll(list);
+    
+    return this;
+  }
+
+  public BeanFactory annotation(Annotation ann)
+  {
+    if (_annotated == null)
+      _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
+
+    _annotated.addAnnotation(ann);
+    
+    return this;
+  }
+
+  public BeanFactory annotation(Collection<Annotation> list)
+  {
+    if (_annotated == null)
+      _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
+
+    for (Annotation ann : list) {
+      _annotated.addAnnotation(ann);
+    }
     
     return this;
   }
@@ -126,8 +162,9 @@ public class BeanFactory<T>
   {
     return new SingletonBean(_managedBean,
 			     _types,
-			     _deploymentType,
+			     _annotated,
 			     _bindings,
+			     _stereotypes,
 			     _scopeType,
 			     _name,
 			     value);
@@ -137,8 +174,9 @@ public class BeanFactory<T>
   {
     return new InjectionBean(_managedBean,
 			     _types,
-			     _deploymentType,
+			     _annotated,
 			     _bindings,
+			     _stereotypes,
 			     _scopeType,
 			     _name,
 			     injection);
@@ -148,8 +186,9 @@ public class BeanFactory<T>
   {
     return new ManagedSingletonBean(_managedBean,
 				    _types,
-				    _deploymentType,
+				    _annotated,
 				    _bindings,
+				    _stereotypes,
 				    _scopeType,
 				    _name);
   }

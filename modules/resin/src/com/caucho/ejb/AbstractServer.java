@@ -32,6 +32,8 @@ package com.caucho.ejb;
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.*;
@@ -84,6 +86,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _location;
 
   private AnnotatedType _annotatedType;
+  private InjectionTarget _injectionTarget;
   
   protected String _id;
   protected String _ejbName;
@@ -164,6 +167,11 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbContainer = container;
 
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
+
+    InjectManager beanManager = InjectManager.create();
+    ManagedBeanImpl managedBean = beanManager.createManagedBean(annotatedType);
+
+    _injectionTarget = managedBean.getInjectionTarget();
   }
 
   /**
@@ -299,6 +307,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   public AnnotatedType getAnnotatedType()
   {
     return _annotatedType;
+  }
+
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
   }
   
   /**
@@ -846,7 +859,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void initInstance(Object instance)
   {
-    initInstance(instance, null, null, new ConfigContext());
+    initInstance(instance, _injectionTarget, null, new ConfigContext());
   }
 
   /**
@@ -862,6 +875,9 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     if (env != null && comp != null)
       env.put((AbstractBean) comp, proxy);
+
+    if (target != null)
+      target.inject(instance, env);
 
     if (_initInject != null) {
       Thread thread = Thread.currentThread();
@@ -882,7 +898,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     try {
       if (_cauchoPostConstruct != null)
-      _cauchoPostConstruct.invoke(instance, null);
+	_cauchoPostConstruct.invoke(instance, null);
     }
     catch (Throwable e) {
       log.log(Level.FINER,

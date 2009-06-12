@@ -87,7 +87,6 @@ import com.caucho.vfs.WriteStream;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
-import javax.enterprise.inject.deployment.Standard;
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.BindException;

@@ -41,7 +41,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.*;
 import javax.enterprise.context.ScopeType;
-import javax.enterprise.inject.deployment.DeploymentType;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -187,11 +186,13 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
 	  && hasMetaAnnotation(getAnnotations(), ScopeType.class)) {
 	continue;
       }
-      
+
+      /*
       if (ann.annotationType().isAnnotationPresent(DeploymentType.class)
 	  && hasMetaAnnotation(getAnnotations(), DeploymentType.class)) {
 	continue;
       }
+      */
 
       addAnnotation(ann);
     }

@@ -3424,8 +3424,9 @@ public class WebApp extends ServletContextImpl
   /**
    * WebBeans callbacks
    */
+  /*
   class WebBeansObserver implements Observer<BeanManager> {
-    public void notify(BeanManager manager)
+    public boolean notify(BeanManager manager)
     {
       // search for servlets
 
@@ -3444,8 +3445,11 @@ public class WebApp extends ServletContextImpl
 	  }
 	}
       }
+
+      return false;
     }
   }
+  */
 
   static class FilterChainEntry {
     FilterChain _filterChain;

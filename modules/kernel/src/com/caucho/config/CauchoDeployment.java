@@ -34,13 +34,13 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.inject.deployment.DeploymentType;
+import javax.enterprise.inject.stereotype.Stereotype;
 
 /**
  * The @CauchoDeployment is for Caucho automatic objects
  */
 
-@DeploymentType
+@Stereotype
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface CauchoDeployment {

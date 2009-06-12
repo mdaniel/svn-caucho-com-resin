@@ -132,19 +132,6 @@ public class InjectBeanAdmin extends AbstractManagedObject
   }
 
   /**
-   * Returns the @DeploymentType attribute
-   */
-  public String getDeploymentType()
-  {
-    Class annType = _bean.getDeploymentType();
-
-    if (annType != null)
-      return annType.getName();
-    else
-      return null;
-  }
-
-  /**
    * Returns the @ScopeType attribute
    */
   public String getScopeType()

@@ -47,41 +47,41 @@ public interface Bean<T> extends Contextual<T>
   /**
    * Returns the bean's scope type.
    */
-  public abstract Class<?> getBeanClass();
+  public Class<?> getBeanClass();
 
   /**
    * Returns the bean's binding annotations.
    */
-  public abstract Set<Annotation> getBindings();
-
-  /**
-   * Returns the bean's deployment type
-   */
-  public abstract Class<? extends Annotation> getDeploymentType();
+  public Set<Annotation> getBindings();
 
   /**
    * Returns the set of injection points, for validation.
    */
-  public abstract Set<InjectionPoint> getInjectionPoints();
+  public Set<InjectionPoint> getInjectionPoints();
 
   /**
    * Returns the bean's name or null if the bean does not have a
    * primary name.
    */
-  public abstract String getName();
+  public String getName();
 
   /**
    * Returns true if the bean can be null
    */
-  public abstract boolean isNullable();
+  public boolean isNullable();
 
   /**
    * Returns the bean's scope type.
    */
-  public abstract Class<? extends Annotation> getScopeType();
+  public Class<? extends Annotation> getScopeType();
+
+  /**
+   * Returns the stereotypes that the bean uses for priority
+   */
+  public Set<Annotation> getStereotypes();
 
   /**
    * Returns the types that the bean exports for bindings.
    */
-  public abstract Set<Type> getTypes();
+  public Set<Type> getTypes();
 }

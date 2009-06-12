@@ -33,10 +33,21 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
 /**
- * The @Observes annotation for web beans
+ * The @Observes parameter annotation marks a method as capable of
+ * receiving events.  The method must be thread safe, because the
+ * BeanManager may fire multiple events at once.
+ *
+ * The parameter type determines the events the method will observe.
+ *
+ * <code><pre>
+ * public void myObserver(@Observes MyEvent event);
+ * </pre></code>
  */
 @Documented
 @Retention(RUNTIME)
 @Target({PARAMETER})
 public @interface Observes {
+  TransactionPhase during() default TransactionPhase.IN_PROGRESS;
+  
+  Notify notifyType() default Notify.SYNCHRONOUSLY;
 }

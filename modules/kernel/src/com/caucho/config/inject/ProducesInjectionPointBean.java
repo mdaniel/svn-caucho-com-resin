@@ -75,19 +75,19 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
     return _producesBean.getBindings();
   }
 
+  /**
+   * Returns the bean's stereotype annotations.
+   */
+  public Set<Annotation> getStereotypes()
+  {
+    return _producesBean.getStereotypes();
+  }
+
   public Class getBeanClass()
   {
     return _producesBean.getBeanClass();
   }
-
-  /**
-   * Returns the bean's deployment type
-   */
-  public Class<? extends Annotation> getDeploymentType()
-  {
-    return _producesBean.getDeploymentType();
-  }
-
+  
   /**
    * Returns the set of injection points, for validation.
    */

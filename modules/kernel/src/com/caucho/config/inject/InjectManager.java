@@ -72,17 +72,16 @@ import javax.enterprise.context.spi.Conversation;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.Disabled;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.New;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.TypeLiteral;
 import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.deployment.Standard;
-import javax.enterprise.inject.deployment.Production;
-import javax.enterprise.inject.deployment.Specializes;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -114,13 +113,11 @@ public class InjectManager
   private static final Logger log
     = Logger.getLogger(InjectManager.class.getName());
 
-  private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
-
   private static final EnvironmentLocal<InjectManager> _localContainer
     = new EnvironmentLocal<InjectManager>();
-  
-  private static final Annotation []NULL_ANN = new Annotation[0];
 
+  private static final int DEFAULT_PRIORITY = 1;
+  
   private static final Annotation []CURRENT_ANN
     = CurrentLiteral.CURRENT_ANN_LIST;
 
@@ -182,7 +179,7 @@ public class InjectManager
     = new HashMap<Class,ObserverMap>();
 
   //
-  // combined configuration
+  // combined visibility configuration
   //
 
   private HashMap<Class,WebComponent> _beanMap
@@ -280,13 +277,13 @@ public class InjectManager
       addContext("com.caucho.server.webbeans.ConversationScope");
       addContext(_applicationScope);
 
-      _deploymentMap.put(Standard.class, 0);
-      _deploymentMap.put(CauchoDeployment.class, 1);
-      _deploymentMap.put(Production.class, 2);
-      _deploymentMap.put(Configured.class, 3);
+      _deploymentMap.put(CauchoDeployment.class, 0);
+      // DEFAULT_PRIORITY
+      _deploymentMap.put(Configured.class, 2);
 
       BeanFactory factory = createBeanFactory(InjectManager.class);
-      factory.deployment(Standard.class);
+      // factory.deployment(Standard.class);
+      factory.annotation(ModulePrivateLiteral.create());
       addBean(factory.singleton(this));
 
       _xmlExtension = new XmlStandardPlugin(this);
@@ -448,22 +445,19 @@ public class InjectManager
 
   public void setDeploymentTypes(ArrayList<Class> deploymentList)
   {
-    if (deploymentList.size() < 1
-	|| ! deploymentList.get(0).equals(Standard.class)) {
-      throw new ConfigException(L.l("<Deploy> must contain @javax.webbeans.Standard as its first element because @Standard is always an enabled @DeploymentType"));
-    }
-
     _deploymentMap.clear();
 
-    boolean hasConfigured = deploymentList.contains(Configured.class);
+    _deploymentMap.put(CauchoDeployment.class, 0);
+    // DEFAULT_PRIORITY
 
-    int i = 0;
+    int i = DEFAULT_PRIORITY + 1;
+    
+    if (! deploymentList.contains(Configured.class)) {
+      _deploymentMap.put(Configured.class, i++);
+    }
+
     for (Class deploymentType : deploymentList) {
       _deploymentMap.put(deploymentType, i++);
-
-      if (! hasConfigured && deploymentType == Production.class) {
-	_deploymentMap.put(Configured.class, i++);
-      }
     }
   }
 
@@ -500,7 +494,7 @@ public class InjectManager
   {
     if (type == null)
       return;
-    
+
     if (log.isLoggable(Level.FINEST))
       log.finest(bean + "(" + type + ") added to " + this);
 
@@ -583,7 +577,7 @@ public class InjectManager
       _classLoader.applyVisibleModules(new FillByName(name, beanList));
 
       for (int i = beanList.size() - 1; i >= 0; i--) {
-	if (getDeploymentPriority(beanList.get(i).getDeploymentType()) < 0) {
+	if (getDeploymentPriority(beanList.get(i)) < 0) {
 	  beanList.remove(i);
 	}
       }
@@ -600,7 +594,7 @@ public class InjectManager
 
     if (localBeans != null) {
       for (Bean<?> bean : localBeans) {
-	if (getDeploymentPriority(bean.getDeploymentType()) < 0)
+	if (getDeploymentPriority(bean) < 0)
 	  continue;
 	
 	if (! beanList.contains(bean))
@@ -766,9 +760,33 @@ public class InjectManager
     ProcessAnnotatedTypeImpl processType
       = new ProcessAnnotatedTypeImpl(type);
 
-    fireEvent(processType);
+    fireLocalEvent(processType);
 
-    return processType.getAnnotatedType();
+    if (! processType.isVeto())
+      return processType.getAnnotatedType();
+    else
+      return null;
+  }
+
+  public void addAnnotatedType(AnnotatedType<?> type)
+  {
+    type = processAnnotatedType(type);
+
+    if (type == null) {
+      return;
+    }
+
+    /*
+    if (type.isAnnotationPresent(Specializes.class)) {
+      for (Class parent = cl.getSuperclass();
+	   parent != null;
+	   parent = parent.getSuperclass()) {
+	_specializedClasses.add(parent);
+      }
+    }
+    */
+
+    _pendingAnnotatedTypes.add(type);
   }
 
   /**
@@ -1067,13 +1085,16 @@ public class InjectManager
     if (beanSet == null) {
       HashSet<TypedBean> typedBeans = new HashSet<TypedBean>();
 
-      if (_classLoader != null)
-	_classLoader.applyVisibleModules(new FillByType(baseType, typedBeans));
+      if (_classLoader != null) {
+	FillByType fillByType = new FillByType(baseType, typedBeans, this);
+	
+	_classLoader.applyVisibleModules(fillByType);
+      }
 
       beanSet = new WebComponent(this, baseType.getRawClass());
       
       for (TypedBean typedBean : typedBeans) {
-	if (getDeploymentPriority(typedBean.getBean().getDeploymentType()) < 0)
+	if (getDeploymentPriority(typedBean.getBean()) < 0)
 	  continue;
 
 	beanSet.addComponent(typedBean.getType(), typedBean.getBean());
@@ -1085,13 +1106,18 @@ public class InjectManager
     return beanSet;
   }
 
-  private void fillByType(BaseType baseType, HashSet<TypedBean> beanSet)
+  private void fillByType(BaseType baseType,
+			  HashSet<TypedBean> beanSet,
+			  InjectManager beanManager)
   {
     Set<TypedBean> localBeans = _selfBeanMap.get(baseType.getRawClass());
 
     if (localBeans != null) {
       for (TypedBean bean : localBeans) {
-	if (getDeploymentPriority(bean.getBean().getDeploymentType()) < 0)
+	if (getDeploymentPriority(bean.getBean()) < 0)
+	  continue;
+
+	if (bean.isModulePrivate() && this != beanManager)
 	  continue;
 	
 	beanSet.add(bean);
@@ -1106,12 +1132,27 @@ public class InjectManager
   
   public <X> Bean<? extends X> getHighestPrecedenceBean(Set<Bean<? extends X>> beans)
   {
-    // XXX:
+    Bean bestBean = null;
+    Bean secondBean = null;
+    int bestPriority = -1;
+
     for (Bean bean : beans) {
-      return bean;
+      int priority = getDeploymentPriority(bean);
+
+      if (bestPriority < priority) {
+	bestBean = bean;
+	secondBean = null;
+	bestPriority = priority;
+      }
+      else if (bestPriority == priority) {
+	secondBean = bean;
+      }
     }
 
-    return null;
+    if (secondBean == null)
+      return bestBean;
+    else
+      throw ambiguousException(beans, bestPriority);
   }
 
   public void validate(InjectionPoint ij)
@@ -1119,14 +1160,22 @@ public class InjectManager
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public int getDeploymentPriority(Class deploymentType)
+  public int getDeploymentPriority(Bean bean)
   {
-    Integer value = _deploymentMap.get(deploymentType);
+    Set<Annotation> stereotypes = bean.getStereotypes();
 
-    if (value != null)
-      return value;
-    else
-      return -1;
+    int priority = DEFAULT_PRIORITY;
+
+    if (stereotypes != null) {
+      for (Annotation ann : stereotypes) {
+	Integer value = _deploymentMap.get(ann.annotationType());
+
+	if (value != null && priority < value)
+	  priority = value;
+      }
+    }
+
+    return priority;
   }
 
   private Set resolveAllBeans()
@@ -1365,6 +1414,22 @@ public class InjectManager
     }
 
     return null;
+  }
+
+  private <X> AmbiguousResolutionException
+    ambiguousException(Set<Bean<? extends X>> beanSet, int bestPriority)
+  {
+    ArrayList<Bean<?>> matchBeans = new ArrayList<Bean<?>>();
+    
+    for (Bean<?> bean : beanSet) {
+      int priority = getDeploymentPriority(bean);
+
+      if (priority == bestPriority)
+	matchBeans.add(bean);
+    }
+
+    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Stereotype and <enable> tags to choose a precedence.  Beans:{0}",
+						toLineList(matchBeans)));
   }
 
   public ELResolver getELResolver()
@@ -1869,6 +1934,9 @@ public class InjectManager
 	  return;
       }
 
+      if (isDisabled(cl))
+	return;
+
       AnnotatedType type = createAnnotatedType(cl);
 
       type = processAnnotatedType(type);
@@ -1889,6 +1957,26 @@ public class InjectManager
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+
+  private boolean isDisabled(Class type)
+  {
+    boolean isDisabled = false;
+    
+    for (Annotation ann : type.getAnnotations()) {
+      Class annType = ann.annotationType();
+
+      // check stereotypes
+      if (_deploymentMap.containsKey(annType))
+	return false;
+      
+      if (annType.equals(Disabled.class)
+	  || annType.isAnnotationPresent(Disabled.class)) {
+	isDisabled = true;
+      }
+    }
+
+    return isDisabled && ! _deploymentMap.containsKey(type);
   }
   
   private boolean isValidSimpleBean(Class type)
@@ -2482,11 +2570,19 @@ public class InjectManager
   static class TypedBean {
     private final BaseType _type;
     private final Bean _bean;
+    private final boolean _isModulePrivate;
 
     TypedBean(BaseType type, Bean bean)
     {
       _type = type;
       _bean = bean;
+
+      _isModulePrivate = isModulePrivate(bean);
+    }
+
+    boolean isModulePrivate()
+    {
+      return _isModulePrivate;
     }
 
     BaseType getType()
@@ -2497,6 +2593,28 @@ public class InjectManager
     Bean getBean()
     {
       return _bean;
+    }
+
+    static boolean isModulePrivate(Bean bean)
+    {
+      if (! (bean instanceof AnnotatedBean))
+	return false;
+      
+      Annotated annotated = ((AnnotatedBean) bean).getAnnotated();
+
+      if (annotated == null)
+	return false;
+
+      for (Annotation ann : annotated.getAnnotations()) {
+	Class annType = ann.annotationType();
+
+	if (annType.equals(ModulePrivate.class)
+	    || annType.isAnnotationPresent(ModulePrivate.class)) {
+	  return true;
+	}
+      }
+
+      return false;
     }
 
     @Override
@@ -2540,18 +2658,22 @@ public class InjectManager
   {
     private BaseType _baseType;
     private HashSet<TypedBean> _beanSet;
+    private InjectManager _manager;
 
-    FillByType(BaseType baseType, HashSet<TypedBean> beanSet)
+    FillByType(BaseType baseType,
+	       HashSet<TypedBean> beanSet,
+	       InjectManager manager)
     {
       _baseType = baseType;
       _beanSet = beanSet;
+      _manager = manager;
     }
     
     public void apply(EnvironmentClassLoader loader)
     {
       InjectManager beanManager = InjectManager.getCurrent(loader);
 
-      beanManager.fillByType(_baseType, _beanSet);
+      beanManager.fillByType(_baseType, _beanSet, _manager);
     }
   }
 
@@ -2590,9 +2712,13 @@ public class InjectManager
   class ProcessAnnotatedTypeImpl<X> implements ProcessAnnotatedType<X>
   {
     private AnnotatedType<X> _annotatedType;
+    private boolean _isVeto;
 
     ProcessAnnotatedTypeImpl(AnnotatedType<X> annotatedType)
     {
+      if (annotatedType == null)
+	throw new NullPointerException();
+      
       _annotatedType = annotatedType;
     }
     
@@ -2606,8 +2732,14 @@ public class InjectManager
       _annotatedType = type;
     }
 
+    boolean isVeto()
+    {
+      return _isVeto;
+    }
+
     public void veto()
     {
+      _isVeto = true;
     }
 
     @Override
@@ -2764,7 +2896,7 @@ public class InjectManager
       _args = args;
     }
 
-    public void notify(Object event)
+    public boolean notify(Object event)
     {
       try {
 	Object []args = new Object[_args.length];
@@ -2775,6 +2907,8 @@ public class InjectManager
 	}
 
 	_method.invoke(_extension, args);
+
+	return false;
       } catch (RuntimeException e) {
 	throw e;
       } catch (InvocationTargetException e) {
