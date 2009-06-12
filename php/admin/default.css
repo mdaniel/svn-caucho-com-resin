@@ -249,7 +249,7 @@ div.definition {
 
 .def-caption {
   margin-left : 1.3em;
-  font-style: bold;
+  font-weight: bold;
   font-family: Helvetica, Arial, sans-serif;
   color : #666666;
   text-align : left;
@@ -258,7 +258,7 @@ div.definition {
 
 .caption {
   margin-left : 1.3em;
-  font-style: bold;
+  font-weight: bold;
   font-family: Helvetica, Arial, sans-serif;
   color : #990033;
   text-align : left;
@@ -316,14 +316,14 @@ table.threads {
 
 table.deftable {
   margin : 1em 0em 1em 1.6em;
-  border : solid, 1px;
+  border : solid 1px;
   width : 90%;
   border-collapse: collapse;
 }
 
 caption {
   padding : 0.3em 0em;
-  font-style: bold;
+  font-weight: bold;
   font-family: Helvetica, Arial, Helvetica, sans-serif;
   color : #990033;
   text-align : left;
@@ -507,7 +507,7 @@ dl.atoc-1 {
 
 dl.atoc-top > dt {
     font-size : large;
-    font-style : bold;
+    font-weight : bold;
     background : #ccddff;
     padding : 5px;
     margin : 0.5em;
@@ -598,7 +598,7 @@ th.fail {
 td.leftnav {
   background : #E0E6F8;
   color : black;
-  valign : top;
+  vertical-align : top;
   padding : 3px;
 }
 .nav-cluster {
@@ -612,4 +612,57 @@ td.leftnav {
   font-size : 110%;
 }
 
+/* Form styling */
 
+table.form td {
+  text-align: left;
+  vertical-align: top;
+padding: 0.5em;
+}
+
+table.form td input {
+  width: 100%;
+}
+
+table.form th {
+  text-align: left;
+  vertical-align: top;
+}
+
+.missing-value {
+  color: red;
+}
+
+div.subform {
+  border: solid 1px #aaa;
+  width: 100%;
+  background-color: #f4f4f4;
+padding: 2px;
+}
+
+div.subform table {
+  width: 100%;
+}
+
+div.hide-link {
+  display: none;
+}
+
+div.show-link {
+  display: block;
+}
+
+.form-title {
+  font-weight: bold;
+  font-size: 1.5em;
+background: #cde;
+  width: 100%;
+}
+
+div.hidden-content {
+  display: none;
+}
+
+div.form-submit {
+  text-align: right;
+}
