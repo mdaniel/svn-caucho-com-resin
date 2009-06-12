@@ -31,18 +31,23 @@ package com.caucho.jsf.integration;
 
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.*;
+import javax.enterprise.inject.Current;
+import javax.servlet.ServletContext;
 
 import com.sun.faces.spi.*;
 
 import com.caucho.config.inject.InjectManager;
+import com.caucho.util.L10N;
 
 public class Mojarra12InjectionProvider
   extends DiscoverableInjectionProvider
 {
-
-  private BeanManager _manager;
+  
+  protected ServletContext _context;
+  protected BeanManager _manager;
 
   private Map<Class, AnnotatedType> _types
     = new HashMap<Class, AnnotatedType>();
@@ -50,9 +55,10 @@ public class Mojarra12InjectionProvider
   private Map<AnnotatedType, InjectionTarget> _targets
     = new HashMap<AnnotatedType, InjectionTarget>();
 
-  public Mojarra12InjectionProvider()
+  public Mojarra12InjectionProvider(ServletContext context)
   {
-    _manager = InjectManager.create();
+    _context = context;
+    _manager = InjectManager.getCurrent();
   }
 
   public void inject(Object o)
