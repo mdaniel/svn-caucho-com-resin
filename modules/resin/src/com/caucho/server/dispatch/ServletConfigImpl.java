@@ -293,6 +293,7 @@ public class ServletConfigImpl
     _servletClassName = servletClassName;
 
     // JSF is special
+/**
     if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
       if (_loadOnStartup < 0)
 	_loadOnStartup = 1;
@@ -300,7 +301,7 @@ public class ServletConfigImpl
       if (_servletContext instanceof WebApp)
 	((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
     }
-
+*/
     InjectManager beanManager = InjectManager.create();
     beanManager.addConfiguredBean(servletClassName);
   }

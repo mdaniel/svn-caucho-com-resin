@@ -9,7 +9,7 @@
   <property name="shell" value="bash"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management">
+          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management">
   </target>
 
   <!--
@@ -251,13 +251,15 @@
     </antcall>
   </target>
 
+  <!--
+    We now ship Sun's jsf-api.jar and jsf-impl.jar in modules/ext/
   <target name="jsf" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jsf"/>
       <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="jsf-12.jar"/>
     </antcall>
-  </target>
+  </target-->
 
   <target name="jstl" depends="init, servlet16">
     <antcall target="module" inheritRefs="true">
@@ -518,7 +520,7 @@
     </antcall>
   </target>
   
-  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-kernel, version, resin-compile"/>
+  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, portlet, script, resin-kernel, version, resin-compile"/>
 
   <!--
   <target name="jaf" depends="init">
