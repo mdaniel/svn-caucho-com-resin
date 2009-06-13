@@ -128,7 +128,7 @@ namespace Caucho
           _user = args[argsIdx + 1];
           
           if (! _user.StartsWith(".\\") && _user.IndexOf('\\') < 0)
-             _user = ".\\" + _user;
+            _user = ".\\" + _user;
           
           argsIdx += 2;
         } else if ("-password".Equals(args[argsIdx])) {
@@ -260,8 +260,6 @@ namespace Caucho
                    "shutdown".Equals(args[argsIdx])) {
           _command = args[argsIdx];
 
-          //main = "com.caucho.boot.ResinBoot"; XXX not supported - was used with jview
-
           _standalone = true;
           
           argsIdx++;
@@ -306,7 +304,6 @@ namespace Caucho
       if (_javaExe == null)
         _javaExe = "java.exe";
 
-
       try {
         Directory.SetCurrentDirectory(_rootDirectory);
       } catch (Exception e) {
@@ -340,15 +337,22 @@ namespace Caucho
       } else if (_service) {
         ServiceBase.Run(new ServiceBase[]{this});
       } else if (_standalone) {
-        StartResin();
-        Join();
-        return _process.ExitCode;
-
+        if (StartResin()) {
+          Join();
+          
+          if (_process != null)
+            return _process.ExitCode;
+        }
+        
+        return 1;
       } else {
-        ResinWindow window = new ResinWindow(this, _displayName);
-        window.Show();
-        StartResin();
-        Application.Run();
+        if (StartResin()) {
+          ResinWindow window = new ResinWindow(this, _displayName);
+          window.Show();
+          Application.Run();
+        }
+        
+        return 1;
       }
       
       return 0;
@@ -455,14 +459,25 @@ namespace Caucho
       base.OnStop();
     }
     
-    public void StartResin() {
+    public bool StartResin() {
       if (!_service && _process != null)
-        return;
+        return false;
       
-      if (_service)
-        ExecuteJava("start");
-      else
-        ExecuteJava(_command);
+      try {
+        if (_service)
+          ExecuteJava("start");
+        else
+          ExecuteJava(_command);
+        
+        return true;
+      } catch (Exception e) {
+        StringBuilder message = new StringBuilder("Unable to start application. Make sure java is in your path. Use option -verbose for more detail.\n");
+        message.Append(e.ToString());
+        
+        Info(message.ToString());
+        
+        return false;
+      }
     }
     
     public void ExecuteJava(String command) {
@@ -505,14 +520,22 @@ namespace Caucho
       if (_service) {
         startInfo.RedirectStandardError = true;
         startInfo.RedirectStandardOutput = true;
-        Process process = Process.Start(startInfo);
+        
+        Process process = null;
+        try {
+          process = Process.Start(startInfo);
+        } catch (Exception e) {
+          EventLog.WriteEntry(ServiceName, e.ToString(), EventLogEntryType.Error);
+          
+          return;
+        }
         
         StringBuilder error = new StringBuilder();
         StringBuilder output = new StringBuilder();
         process.ErrorDataReceived += delegate(Object sendingProcess, DataReceivedEventArgs err) {
           error.Append(err.Data).Append('\n');
         };
-        process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs err) { 
+        process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs err) {
           output.Append(err.Data).Append('\n');
         };
         process.BeginErrorReadLine();
@@ -691,10 +714,16 @@ namespace Caucho
             javaHome = Directory.GetCurrentDirectory().Substring(0, 2) + dir;
         }
         
-        dirs = Directory.GetDirectories("\\Program Files\\java", "jdk*");
-        foreach (String dir in dirs) {
-          if (File.Exists(dir + "\\bin\\java.exe"))
-            javaHome = Directory.GetCurrentDirectory().Substring(0, 2) + dir;
+        String programFilesJava
+          = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+          + "\\java";
+        
+        if (Directory.Exists(programFilesJava)) {
+          dirs = Directory.GetDirectories(programFilesJava, "jdk*");
+          foreach (String dir in dirs) {
+            if (File.Exists(dir + "\\bin\\java.exe"))
+              javaHome = dir;
+          }
         }
       }
       
