@@ -12,6 +12,7 @@
 
 <s2 title="3.1 snapshot">
 <ul>
+<li>jsp: prelude with include NPE (#3508, rep by Shinomiya Nobuaki)</li>
 <li>rewrite: &lt;dispatch> should not modify uri unless it has a target (#3295, rep by Ethan Larson)</li>
 </ul>
 </s2>
