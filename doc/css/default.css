@@ -296,6 +296,10 @@ table.deftable tr.b {
   background : #f8f8f8;
 }
 
+td.leftnav ul {
+  width: 170px;
+}
+
 /* XXX: netscape ignores
 caption {
   font-size : 10em;
