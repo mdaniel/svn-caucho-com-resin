@@ -129,6 +129,21 @@ div.section-title {
   padding : 0.2em;
 }
 
+td.leftnav ul {
+  width: 170px;
+}
+
+ul.leftnav {
+  list-style : none;
+  padding-left : 1em;
+  margin : 0;
+  list-style-position : outside;
+}
+
+ul.leftnav li.selected {
+  list-style : disc;
+}
+
 .leftnav {
 /*  background : #b9cef7; */
 /*  bgcolor : #b9cef7; */
