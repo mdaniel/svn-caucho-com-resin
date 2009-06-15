@@ -97,6 +97,7 @@ public class Table extends Node implements ContentItem {
       _columns = Math.max(_columns, row.getNumberOfColumns());
 
     out.println("\\begin{filecontents}{ltx" + _myCount + ".tex}");
+
     out.print("\\begin{longtable}");
 
     out.print("{");
@@ -106,18 +107,19 @@ public class Table extends Node implements ContentItem {
 
     out.println("}");
 
+    out.println("\\hline");
+
     writeRows(out);
 
     out.println("\\end{longtable}");
     out.println("\\end{filecontents}");
-
-
+    
     out.println("\\begin{center}");
-
-    out.println("\\LTXtable{\\linewidth}{ltx" + _myCount + "}");
 
     if (_title != null)
       out.println("\\textbf{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+
+    out.println("\\LTXtable{\\linewidth}{ltx" + _myCount + "}");
 
     out.println("\\end{center}");
   }

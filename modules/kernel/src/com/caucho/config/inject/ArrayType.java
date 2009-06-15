@@ -84,6 +84,12 @@ public class ArrayType extends BaseType implements GenericArrayType
       return false;
   }
 
+  @Override
+  public boolean isAssignableFrom(BaseType type)
+  {
+    return equals(type);
+  }
+
   public int hashCode()
   {
     return 17 + 37 * _componentType.hashCode();
@@ -100,6 +106,12 @@ public class ArrayType extends BaseType implements GenericArrayType
     }
     else
       return false;
+  }
+
+  @Override
+  public String getSimpleName()
+  {
+    return _componentType.getSimpleName() + "[]";
   }
 
   public String toString()

@@ -32,14 +32,39 @@ package com.caucho.xtpdoc;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import com.caucho.config.ConfigException;
+import com.caucho.util.*;
 
 public class Book {
+  private static final L10N L = new L10N(Book.class);
+  
   private String _title;
   private ArrayList<Chapter> _chapters = new ArrayList<Chapter>();
+  private String _type = "book";
 
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  public void setType(String type)
+  {
+    _type = type;
+
+    if (! "book".equals(type)
+	&& ! "article".equals(type)) {
+      throw new ConfigException(L.l("'{0}' is an unknown document type", type));
+    }
+  }
+
+  public boolean isBook()
+  {
+    return "book".equals(_type);
+  }
+
+  public boolean isArticle()
+  {
+    return "article".equals(_type);
   }
 
   public void addChapter(Chapter chapter)
@@ -50,7 +75,11 @@ public class Book {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\documentclass[twoside]{book}");
+    if (isBook())
+      out.println("\\documentclass[twoside]{book}");
+    else
+      out.println("\\documentclass{article}");
+    
     out.println();
     out.println("\\usepackage{url}");
     out.println("\\usepackage{hyperref}");
@@ -69,8 +98,10 @@ public class Book {
     out.println("\\pagestyle{fancy}");
     out.println();
 
-    out.println("\\lhead[\\leftmark]{}");
-    out.println("\\rhead[]{\\rightmark}");
+    if (isBook()) {
+      out.println("\\lhead[\\leftmark]{}");
+      out.println("\\rhead[]{\\rightmark}");
+    }
 
     out.println();
     out.println("\\definecolor{example-gray}{gray}{0.8}");
@@ -79,11 +110,23 @@ public class Book {
     out.println("\\title{" + _title + "}");
 
     out.println("\\begin{document}");
+
+    if (! isBook()) {
+      out.println("\\maketitle");
+    }
     out.println("\\tableofcontents");
+    
     out.println("\\sloppy");
 
-    for (Chapter chapter : _chapters)
-      chapter.writeLaTeX(out);
+    for (Chapter chapter : _chapters) {
+      if (isBook()) {
+	chapter.writeLaTeX(out);
+      }
+      else {
+	// technically, the article should only have one chapter
+	chapter.writeLaTeXArticle(out);
+      }
+    }
 
     out.println("\\end{document}");
   }

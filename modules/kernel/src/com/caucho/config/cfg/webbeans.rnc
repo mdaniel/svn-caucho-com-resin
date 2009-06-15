@@ -15,6 +15,8 @@ w_bean-Custom = element * - w:* {
    & (attribute name { string }
       | element Named { attribute value { string }? | string }?)
   
+   & w_new?
+  
    & element ApplicationScoped { empty }?
    & element ConversationScoped { empty }?
    & element RequestScoped { empty }?
@@ -84,6 +86,10 @@ w_name = element name {
 w_init = element init {
   w_Any
 }
+
+w_new =
+  attribute new { string }
+  | element new { w_Any }
 
 w_interceptors = element Interceptors {
   w_bean-Field-Custom*

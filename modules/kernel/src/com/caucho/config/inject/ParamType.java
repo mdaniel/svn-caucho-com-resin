@@ -124,6 +124,31 @@ public class ParamType extends BaseType implements ParameterizedType
 
     return true;
   }
+
+  @Override
+  public BaseType findClass(InjectManager manager, Class cl)
+  {
+    if (_type.equals(cl))
+      return this;
+
+    for (Type type : _type.getGenericInterfaces()) {
+      BaseType ifaceType = manager.createBaseType(type, _paramMap);
+
+      BaseType baseType = ifaceType.findClass(manager, cl);
+
+      if (baseType != null)
+	return baseType;
+    }
+
+    Class superclass = _type.getSuperclass();
+
+    if (superclass == null)
+      return null;
+
+    BaseType superType = manager.createBaseType(superclass, _paramMap);
+
+    return superType.findClass(manager, cl);
+  }
   
   public boolean isMatch(Type type)
   {
@@ -175,6 +200,25 @@ public class ParamType extends BaseType implements ParameterizedType
     }
 
     return true;
+  }
+
+  @Override
+  public String getSimpleName()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getRawClass().getSimpleName());
+    sb.append("<");
+
+    for (int i = 0; i < _param.length; i++) {
+      if (i != 0)
+	sb.append(",");
+      
+      sb.append(_param[i].getSimpleName());
+    }
+    sb.append(">");
+
+    return sb.toString();
   }
 
   public String toString()

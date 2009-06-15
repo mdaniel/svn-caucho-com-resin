@@ -223,4 +223,17 @@ public class Header {
     
     out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
   }
+
+  public void writeLaTeXArticle(PrintWriter out)
+    throws IOException
+  {
+    /*
+    String label = _document.getDocumentPath().getUserPath();
+    
+    out.println("\\label{" + label + "}");
+    out.println("\\hypertarget{" + label + "}{}");
+    
+    out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    */
+  }
 }

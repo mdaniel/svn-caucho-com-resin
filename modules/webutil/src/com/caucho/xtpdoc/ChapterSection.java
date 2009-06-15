@@ -35,4 +35,10 @@ import java.io.PrintWriter;
 public abstract class ChapterSection {
   public abstract void writeLaTeX(PrintWriter out)
     throws IOException;
+  
+  public void writeLaTeXArticle(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
 }

@@ -199,7 +199,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
       if (value == null) {
 	ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
-	_scopeAdapter = scopeAdapter.wrap(this);
+	_scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
 	value = _scopeAdapter;
       }
 
@@ -215,7 +215,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 	
     if (value == null) {
       ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
-      _scopeAdapter = scopeAdapter.wrap(this);
+      _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
       value = _scopeAdapter;
     }
 

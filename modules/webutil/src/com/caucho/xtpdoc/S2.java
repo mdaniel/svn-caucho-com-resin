@@ -88,8 +88,12 @@ public class S2 extends Section {
     if (_type != null && _type.equals("defun"))
       out.println("\\newpage");
 
-    if (_title != null) 
-      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    if (_title != null) {
+      if (isArticle())
+	out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+      else
+	out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    }
 
     super.writeLaTeX(out);
   }

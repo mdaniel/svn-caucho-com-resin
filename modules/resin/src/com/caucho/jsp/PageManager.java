@@ -32,6 +32,7 @@ package com.caucho.jsp;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -46,6 +47,8 @@ import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.PageContext;
@@ -319,14 +322,16 @@ abstract public class PageManager {
       page.cauchoIsModified();
 
       try {
-	ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
-	InjectIntrospector.introspectInject(injectList, page.getClass());
+	InjectManager beanManager = InjectManager.create();
+	
+	AnnotatedType annType
+	  = beanManager.createAnnotatedType(page.getClass());
+	InjectionTarget inject = beanManager.createInjectionTarget(annType);
 
 	ConfigContext env = new ConfigContext();
-	
-	for (ConfigProgram inject : injectList) {
-	  inject.inject(page, env);
-	}
+
+	inject.inject(page, env);
+	inject.postConstruct(page);
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {

@@ -57,7 +57,21 @@ public class Chapter {
   {
     out.println("\\chapter{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
+    writeLaTeXBody(out);
+  }
+  
+  public void writeLaTeXBody(PrintWriter out)
+    throws IOException
+  {
     for (ChapterSection section : _sections)
       section.writeLaTeX(out);
+  }
+  
+  public void writeLaTeXArticle(PrintWriter out)
+    throws IOException
+  {
+    for (ChapterSection section : _sections) {
+      section.writeLaTeXArticle(out);
+    }
   }
 }

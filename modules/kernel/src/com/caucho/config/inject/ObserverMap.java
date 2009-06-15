@@ -55,30 +55,36 @@ public class ObserverMap {
     _type = type;
   }
 
-  public void addObserver(Observer observer, Annotation []bindings)
+  public void addObserver(Observer observer,
+			  BaseType type,
+			  Annotation []bindings)
   {
-    ObserverEntry entry = new ObserverEntry(observer, bindings);
+    ObserverEntry entry = new ObserverEntry(observer, type, bindings);
 
     _observerList.add(entry);
   }
 
-  public <T> void resolveObservers(Set<Observer<T>> set, Annotation []bindings)
+  public <T> void resolveObservers(Set<Observer<T>> set,
+				   BaseType eventType,
+				   Annotation []bindings)
   {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry observer = _observerList.get(i);
 
-      if (observer.isMatch(bindings)) {
+      if (observer.isMatch(eventType, bindings)) {
 	set.add(observer.getObserver());
       }
     }
   }
 
-  public void fireEvent(Object event, Annotation []bindings)
+  public void fireEvent(Object event,
+			BaseType eventType,
+			Annotation []bindings)
   {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry observer = _observerList.get(i);
 
-      if (observer.isMatch(bindings)) {
+      if (observer.isMatch(eventType, bindings)) {
  	observer.getObserver().notify(event);
       }
     }
@@ -92,11 +98,15 @@ public class ObserverMap {
 
   static class ObserverEntry {
     private final Observer _observer;
+    private final BaseType _type;
     private final Binding []_bindings;
 
-    ObserverEntry(Observer observer, Annotation []bindings)
+    ObserverEntry(Observer observer,
+		  BaseType type,
+		  Annotation []bindings)
     {
       _observer = observer;
+      _type = type;
 
       _bindings = new Binding[bindings.length];
       for (int i = 0; i < bindings.length; i++) {
@@ -109,8 +119,12 @@ public class ObserverMap {
       return _observer;
     }
 
-    boolean isMatch(Annotation []bindings)
+    boolean isMatch(BaseType type, Annotation []bindings)
     {
+      if (! _type.isAssignableFrom(type)) {
+	return false;
+      }
+      
       if (bindings.length < _bindings.length)
 	return false;
       

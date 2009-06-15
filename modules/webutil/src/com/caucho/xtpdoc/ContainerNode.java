@@ -41,6 +41,7 @@ public abstract class ContainerNode implements ContentItem {
 
   private Document _document;
   private ArrayList<ContentItem> _items = new ArrayList<ContentItem>();
+  private boolean _isWebOnly;
 
   public ContainerNode(Document document)
   {
@@ -50,6 +51,21 @@ public abstract class ContainerNode implements ContentItem {
   public Document getDocument()
   {
     return _document;
+  }
+
+  public void setWebOnly(boolean isWebOnly)
+  {
+    _isWebOnly = true;
+  }
+
+  public boolean isWebOnly()
+  {
+    return _isWebOnly;
+  }
+
+  public boolean isArticle()
+  {
+    return _document.isArticle();
   }
 
   protected void addItem(ContentItem item)
@@ -88,5 +104,12 @@ public abstract class ContainerNode implements ContentItem {
   {
     for (ContentItem item : _items)
       item.writeLaTeXEnclosed(out);
+  }
+
+  public void writeLaTeXArticle(PrintWriter out)
+    throws IOException
+  {
+    for (ContentItem item : _items)
+      item.writeLaTeXTop(out);
   }
 }

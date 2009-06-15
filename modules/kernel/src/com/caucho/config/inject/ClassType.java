@@ -106,12 +106,28 @@ public class ClassType extends BaseType
   }
 
   @Override
-  public BaseType findClass(Class cl)
+  public BaseType findClass(InjectManager manager, Class cl)
   {
     if (_type.equals(cl))
       return this;
-    else
+
+    for (Type type : _type.getGenericInterfaces()) {
+      BaseType ifaceType = manager.createBaseType(type);
+
+      BaseType baseType = ifaceType.findClass(manager, cl);
+
+      if (baseType != null)
+	return baseType;
+    }
+
+    Class superclass = _type.getSuperclass();
+
+    if (superclass == null)
       return null;
+
+    BaseType superType = manager.createBaseType(superclass);
+
+    return superType.findClass(manager, cl);
   }
 
   public int hashCode()

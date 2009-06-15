@@ -56,6 +56,7 @@ public class Document {
   private NavigationItem _navItem;
   private String _encoding;
   private boolean _hasChildren;
+  private boolean _isArticle;
 
   private String _redirect;
 
@@ -80,6 +81,16 @@ public class Document {
     _contextPath = contextPath;
     _uri = uri;
     _encoding = encoding;
+  }
+
+  public boolean isArticle()
+  {
+    return _isArticle;
+  }
+
+  public void setArticle(boolean isArticle)
+  {
+    _isArticle = isArticle;
   }
 
   public Path getRealPath(String uri)
@@ -327,6 +338,16 @@ public class Document {
   {
     _header.writeLaTeXEnclosed(out);
     _body.writeLaTeXEnclosed(out);
+  }
+
+  public void writeLaTeXArticle(PrintWriter out)
+    throws IOException
+  {
+    setArticle(true);
+    
+    // out.println("\\documentclass{article}");
+    _header.writeLaTeXArticle(out);
+    _body.writeLaTeX(out);
   }
 
   public String toString()

@@ -1,0 +1,623 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>CanDI (Java Injection) Pattern Tutorial</title>
+    <description>
+      <p>
+      Four of the primary Java Injection patterns.
+      </p>
+      </description>
+ <tutorial-startpage>set</tutorial-startpage>
+
+</header>
+
+  <body>
+<localtoc/>
+
+<s1 title="Overview">
+
+<p>CanDI (Contexts and Dependency Injection) aims to promote good code
+by encouraging  declarative programming of resources.</p>
+
+<p>Classes declare their dependencies on services and resources with
+adjective binding annotations like <code>@Current</code> or
+<code>@Blue</code> to describe which resource they need.  In many
+cases, the service is unique and can use <code>@Current</code>.  For
+example, a mail list manager might have a <code>PostOffice</code>
+service which delivers messages.  Since the <code>PostOffice</code> is
+unique, any class needing a post office can use
+<code>@Current</code>.</p>
+
+<deftable title="CanDI Application Patterns">
+<tr>
+  <th>Pattern</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Service Pattern</td>
+  <td>Organize the application as a collection of services.</td>
+</tr>
+<tr>
+  <td>Resource Configuration Pattern</td>
+  <td>Bind and resources with declarative annotations and configure with XML.</td>
+</tr>
+<tr>
+  <td>Startup Pattern</td>
+  <td>Use @Startup beans to initialize application state.</td>
+</tr>
+<tr>
+  <td>Plugin/Extension Pattern</td>
+  <td>Discover plugin/extension classes for a service.</td>
+</tr>
+</deftable>
+
+<s2 title="Tutorial Architecture">
+
+<figure src="ioc-binding.png"/>
+
+<p>The service pattern tutorial uses <code>MyService</code> and
+<code>MyServiceBean</code> for all the users: <code>GetServlet</code>,
+<code>SetServlet</code>, <code>index.jsp</code>, and
+<code>index.php</code>.  Since it's a service, only one instance of
+<code>MyServiceBean</code> is used.  In other words, services
+typically hold state to be shared among the whole application. In a
+sense, their whole purpose is to encapsulate state.</p>
+
+<p>The resource pattern typically has multiple driver classes and needs
+configuration.  In resource tutorial, we use
+<code>MyResource</code> as a general resource API,
+like <code>DataSource</code>, or <code>EntityManager</code>.  Because
+resource APIs are general, they
+need an application-specific description to document their purpose in
+the code.  The binding annotations like the tutorial's
+<code>@Red</code> and <code>@Blue</code> are simple examples.  The
+driver classes <code>BlueResourceBean</code> are typically selected
+and configured in an XML, like selecting and configuring a
+database.</p>
+
+<p>Most applications need some startup processing to initialize
+services, and can use the startup pattern.  Because CanDI discovers
+beans through classpath scanning, you can create startup beans with
+just a <code>@Startup</code> annotation and a
+<code>@PostConstruct</code> method.</p>
+
+<p>Applications of any significant complexity will generally need a
+plugin or extension capability, and can use CanDI's discovery process
+for their plugin architecture without creating a new infrastructure.
+In the tutorial, we reuse the <code>MyResource</code> API as a plugin
+API and grab all implementations using the CanDI <code>Instance</code>
+interface and the <code>@Any</code> annotation.</p>
+
+</s2>
+
+<s2 title="Java Injection API">
+
+<p>Since many applications will only use the service and resource
+patterns, the most important CanDI classes are just three annotations:
+<code>@Current</code>, <code>@BindingType</code>
+and <code>@ApplicationScoped</code>.  By using these three
+annotations effectively, you can improve the readability and
+maintainability of your application's services and resources.</p>
+
+<deftable title="Service and Resource Pattern CanDI classes" >
+<tr>
+ <th>Annotation/Class</th>
+ <th>Description</th>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/context/ApplicationScoped.html">@ApplicationScoped</a></td>
+  <td>scope annotation marking the service as a singleton</td>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/BindingType.html">@BindingType</a></td>
+  <td>descriptive application bindings are marked with this meta-annotation</td>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Current.html">@Current</a></td>
+  <td>Default binding for unique beans (service pattern).</td>
+</tr>
+</deftable>
+
+<p>If your application provides scripting access to services or
+resources, you will also use the <code>@Named</code> annotation to
+provide a scripting name for your beans.</p>
+
+<deftable title="Scripting Support CanDI classes" >
+<tr>
+ <th>Annotation/Class</th>
+ <th>Description</th>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Named.html">Named</a></td>
+  <td>Scriping and JSP/JSF EL access to CanDI beans (service pattern)</td>
+</tr>
+</deftable>
+
+<p>The startup pattern uses two additional annotations,
+<code>@Startup</code> to mark the bean as needing creation on
+container start, and <code>@PostConstruct</code> marking a method to
+be initialized.</p>
+
+<deftable title="Startup Pattern CanDI classes" >
+<tr>
+ <th>Annotation/Class</th>
+ <th>Description</th>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/ejb/Startup.html">@Startup</a></td>
+  <td>starts a bean when the container starts</td>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/annotation/PostConstruct.html">@PostConstruct</a></td>
+  <td>marks a method to be called when a bean is created</td>
+</tr>
+</deftable>
+
+<p>Applications with a plugin or extension architecture can use two
+additional CanDI classes to easily find plugins discovered during
+CanDI's classpath scanning.  <code>Instance&lt;T></code> provides an
+iterator over all the discovered and configured beans, and
+<code>@Any</code> selects all beans independent of their
+<code>@BindingType</code>.</p> 
+
+<deftable title="Plugin/Extension Pattern CanDI classes" >
+<tr>
+ <th>Annotation/Class</th>
+ <th>Description</th>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Instance.html">Instance&lt;T></a></td>
+  <td>Programmatic access to all implementations of an interface.</td>
+</tr>
+<tr>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/All.html">@All</a></td>
+  <td>Selects all matching beans for an interface.</td>
+</tr>
+</deftable>
+
+</s2>
+
+</s1>
+
+<s1 title="Files in this tutorial" web-only='true'>
+
+<deftable title="Files: Service Pattern">
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MyServiceBean.java"/></td>
+  <td>Implementation of the MyService service bean.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MyService.java"/></td>
+  <td>Service interface for the resource pattern.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/GetServlet.java"/></td>
+  <td>Demonstration of four CanDI patterns.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/SetServlet.java"/></td>
+  <td>Demonstration of four CanDI patterns.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="test.php"/></td>
+  <td>PHP using a service with java_bean() and the @Named annotation.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="test.jsp"/></td>
+  <td>JSP using a service with java_bean() and the @Named annotation.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/beans.xml"/></td>
+  <td>CanDI beans.xml triggering classpath scanning.</td>
+</tr>
+</deftable>
+
+<deftable title="Files: Configuration and Plugin Pattern">
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configuration of custom resources.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/Blue.java"/></td>
+  <td>Binding Type annotation for the @Blue resource.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/BlueResourceBean.java"/></td>
+  <td>Implementation of the @Blue bean.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MyResource.java"/></td>
+  <td>Resource interface for the resource pattern.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/SetServlet.java"/></td>
+  <td>Demonstration of four CanDI patterns.</td>
+</tr>
+</deftable>
+
+<deftable title="Files: Startup Pattern">
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/MyStartupBean.java"/></td>
+  <td>Startup bean to configure other resources on web-app initialization.</td>
+</tr>
+</deftable>
+</s1>
+
+<s1 title="Service Pattern">
+
+<p>Applications generally self-organize around a relatively small
+number of services: classes that act as managers or central stores of
+data.
+Other pieces of the application use the services to process
+requests or to store data.  Because service are often unique in an
+application, a singleton class implementing a service interface,
+specifying the service interface itself is enough to uniquely identify
+the service.  Good architecture design makes the services
+clear and prominent and documents where the services are used.</p>
+
+<example title="Example: GetServlet.java">
+package example;
+
+import javax.enterprise.inject.Current;
+...
+
+public class GetServlet extends HttpServlet {
+  private @Current MyService _service;
+
+  ...
+}
+</example>
+
+<p>Users of the service will access it through an interface
+like <code>MyService</code>.  The implementation will be a concrete
+class like <code>MyServiceBean</code>.  (A good naming convention uses
+<code>xxxBean</code> for implementations and <code>xxx</code> for the
+interface API.  <code>xxxImpl</code> is also a decent implementation
+convention.  "My" is only for tutorial purposes.)  The interface API
+in CanDI is a plain Java interface with no CanDI-specific annotations
+or references.</p>
+
+<example title="Example: MyService.java">
+package example;
+
+public interface MyService {
+  public void setMessage(String message);
+  
+  public String getMessage();
+}
+</example>
+
+<p>Because the service implementation is discovered through CanDI's
+classpath scanning, all the information relevant to its deployment is
+on the class itself.  The service's deployment is self-documenting.
+Since services are generally singletons, they will typically have the
+<code>@ApplicationScoped</code> annotation.  (Because EJB already has
+a <code>@Singleton</code> annotation, CanDI needed to create a new
+name.)  Other annotations are optional and describe the service
+registration or behavior.  For example, the tutorial uses
+the <code>@Named</code> tag, because the <code>test.jsp</code> and
+<code>test.php</code> need a named reference.</p>
+
+<p>The <code>@Named</code> annotation on a CanDI bean is used for integration
+with the JSP EL expression language, and to give PHP access to
+CanDI beans.  Most services will not use <code>@Named</code>
+because they will only be injected to its users in the Java code.
+Similarly, most services will use the default binding
+(<code>@Current</code>) because services are typically unique.  If
+your application has a <code>PostOffice</code> service, the using code
+will want the unique <code>PostOffice</code>, i.e. the
+<code>@Current</code> one.</p>
+
+<example title="Example: MyServiceBean.java">
+package example;
+
+import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.inject.Named;
+
+@ApplicationScoped
+@Named("myService")  
+public class MyServiceBean implements MyService {
+  private String _message = "default";
+  
+  public void setMessage(String message)
+  {
+    _message = message;
+  }
+  
+  public String getMessage()
+  {
+    return _message;
+  }
+}
+</example>
+
+<s2 title="Using Services from PHP and JSP">
+
+<p>CanDI is designed to integrate closely with scripting languages
+like PHP and JSP.  The scripting languages locate a CanDI service or
+resource using a string, because scripting lacks the strong typing
+needed for full dependency injection.  As mentioned above, the name of
+a CanDI service is declared by the <code>@Named</code> anntation on
+the bean itself.  The PHP or JSP code will use the name to obtain a
+reference to the bean.  For PHP, the function call is
+<code>java_bean</code> as follows:</p>
+
+<example title="Example: test.php">
+&lt;?php
+
+$myService = java_bean("myService");
+
+echo $myService->getMessage();
+
+?>
+</example>
+
+<p>While PHP has a function access to the CanDI service or resource,
+JSP and JSF grab the CanDI bean with using the JSP expression
+language.  Any CanDI bean with a <code>@Named</code> annotation
+automatically becomes available to EL expressions as follows:</p>
+
+<example title="Example: test.jsp">
+message: ${myService.message}
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Resource XML Configuration Pattern">
+
+<p>While services are generally self-describing and unique based on
+their interface name and don't need user-configuration, resources
+like databases, and queues fit unique roles and need description
+beyond their generic <code>DataSource</code> and
+<code>BlockingQueue</code> APIs.  In CanDI, custom binding type
+annotations document the purpose of the resources.</p>
+
+<p>CanDI encourages you to create a small number of binding
+annotations, used as adjectives to describe your resources.  A typical
+medium application like a mail list manager might use half a dozen
+custom binding adjectives.  You may need fewer or more depending on
+the number of unique resources.  For example, each database, queue,
+mail, and JPA EntityManager, will generally have a unique name.  If
+you allow customization and configuration of internal resources by
+your users, you may have additional binding types.  If you have a
+single database, you might only have one, or might just
+use <code>@Current</code>.</p>
+
+<p>The purpose of the binding annotation is to self-document the
+resource in the using code.  If you have a <code>@ShoppingCart</code>
+database and a <code>@ProductCatalog</code> database, your code will
+ask for them by their description.  In other words, you declare your
+code's requirement in a meaningful way, and let CanDI and your
+configuration give you the resource you need.</p>
+
+<p>In the example, we have a <code>@Red</code> and a
+<code>@Blue</code> resource, which happen to be configured in XML,
+because our users might want to change the configuration.
+To use the resource in the <code>SetServlet</code>, we add the
+adjective annotation to the field declaration as follows:</p>
+
+<example title="Example: SetServlet.java">
+public class SetServlet extends HttpServlet {
+  private @Red MyResource _red;
+  private @Blue MyResource _blue;
+
+  ...
+}
+</example>
+
+<p>Because the XML is only required for customization, it's short and
+restricted to meaningful data.  For databases and JMS queues, you'll
+always need to configure the database driver and add the binding
+adjective.  If your applications resources are configured, you'll use
+XML to configure them.  But unique internal classes like most services
+will stay out of the XML.  In our example, we let the users configure
+the <code>data</code> field of the resource and let them choose the
+implementation class.</p>
+
+<p>The XML configuration needs three pieces of data: the driver class,
+the descriptive binding annotation, and any customization data.
+Because the driver is the most important, CanDI uses the class as the
+XML tag and uses the package as the XML namespace. 
+While scanning the
+XML, the driver class it as top and prominent, reflecting its
+importance. In our example, <code>&lt;example:BlueResourceBean></code>
+is the driver class.
+</p>
+
+<example title="Example: BlueResourceBean instance configuration">
+&lt;example:BlueResourceBean xmlns:example="urn:java:example">
+  ...
+&lt;/example:BlueResourceBean>
+</example>
+
+<p>Because CanDI's XML is consistent, the binding annotation is also
+an XML tag, represented by its classname and package.  In CanDI,
+classes and annotations get XML tags with camel-case names matching
+the classname, and XML for properties are lower case.  This case
+distinction lets you distinguish annotations from properties in
+the configuration.</p>
+
+<example title="Example: @Blue annotation configuration">
+&lt;example:Blue xmlns:example="urn:java:example"/>
+</example>
+
+<p>Properties of a resource use the standard beans-style names, so
+<code>&lt;example:data></code> sets the bean's <code>setData</code>
+property.  CanDI converts the XML string value to the property's
+actual value.  In this case, the conversion is trivial, but CanDI can
+convert to integers, doubles, enumerations, classes, URLs, etc.  For
+class arguments, Resin can also configure subclasses including
+embedded Java instances.  Because Resin uses CanDI for all its own
+configuration, all the capabilities of resin.xml and resin-web.xml
+classes are available for your own custom resources.</p>
+
+<example title="Example: resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+	 xmlns:example="urn:java:example">
+
+  &lt;example:BlueResourceBean>
+    &lt;example:Blue/>
+    &lt;example:data>blue resource&lt;/example:data>
+  &lt;/example:BlueResourceBean>
+
+  &lt;example:RedResourceBean>
+    &lt;example:Red/>
+    &lt;example:data>red resource&lt;/example:data>
+  &lt;/example:RedResourceBean>
+
+&lt;/web-app>  
+</example>
+
+<p>The <code>@Blue</code> binding annotation itself is a normal Java
+annotation marked by a CanDI <code>@BindingType</code> annotation.
+Binding types should generally be descriptive adjectives, so it can
+describe the injection clearly.  Anyone reading your code should
+understand immediately which resource you're talking about.  Because
+of its importance and because there are only a small number of custom
+annotations, you'll want to spend time choosing a descriptive name for
+the annotation.</p>
+
+<example title="Example: Blue.java">
+package example;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
+import javax.enterprise.inject.BindingType;
+
+@BindingType
+@Documented
+@Target({TYPE, METHOD, FIELD, PARAMETER})
+@Retention(RUNTIME)
+public @interface Blue {
+}
+</example>
+
+<p>The resource implementation itself is straightforward.  If you need
+a singleton, you will need to add a <code>@ApplicationScoped</code>
+annotation, just like a resource.  By default, CanDI will inject a new
+instance of the bean at every injection point.</p>
+
+<example title="Example: BlueResourceBean.java">
+package example;
+
+public class BlueResourceBean {
+  private String _data;
+  
+  public void setData(String data)
+  {
+    _data = data;
+  }
+}
+</example>
+
+</s1>
+
+<s1 title="Startup Pattern">
+
+<p>When your application needs startup initialization, you can use a
+<code>@Startup</code> bean.
+Because the startup bean is discovered through classpath
+scanning like the other beans, your initialization is controlled by
+the startup class itself.  In other words, looking at the startup
+class is all you need to know, you don't need to look at any XML.  The
+startup bean uses the <code>@PostConstruct</code> annotation on an
+initialization method to start initialization code.</p>
+
+<example title="Example: MyStartupBean.java">
+package example;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
+import javax.enterprise.inject.Current;
+
+@Startup
+public class MyStartupBean {
+  private @Current MyService _service;
+
+  @PostConstruct
+  public void init()
+  {
+    _service.setMessage(this + ": initial value");
+  }
+}
+</example>
+
+</s1>
+
+<s1 title="Plugin/Extension Pattern">
+
+<p>At some point in any significant application, you'll want a plugin
+or extension system to select different processing methods, like a
+filtering system, or blueprints or custom actions.  For a plugin
+system, you can take advantage of CanDI's discovery system to find all
+implementations of your plugin class.  The <code>Instance</code>
+iterator together with the special <code>@Any</code> binding
+annotation gives you all implementations of a resource.</p>
+
+<p>The CanDI <code>Instance</code> interface has two uses: return a
+unique instance programmatically with the <code>get()</code> method,
+and list all instances for a plugin capability.  Since
+<code>Instance</code> implements the JDK's <code>Iterable</code>
+interface, you can use it in a <code>for</code> loop.  Each returned
+instance obeys the standard CanDI scoping rules, either returning the
+single value for <code>@ApplicationScoped</code> singletons, or
+creating a new instance for the default.</p>
+
+<p>The <code>@Any</code> annotation works with <code>Instance</code>
+to select all values.  Because bindings default to the
+<code>@Current</code> binding type, we need to override the default to
+get all instances.</p>
+
+<example title="Example: GetServlet.java">
+package example;
+
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+...
+
+public class GetServlet extends HttpServlet {
+  @Any Instance&lt;MyResource> _resources;
+
+  public void service(HttpServletRequest request,
+                      HttpServletResponse response)
+    throws IOException, ServletException		       
+  {
+    PrintWriter out = response.getWriter();
+
+    for (MyResource resource : _resources) {
+      out.println("resource: " + resource);
+    }
+  }
+}
+</example>
+
+</s1>
+
+<s1 title="Summary">
+
+<p>The four main CanDI patterns share a common goal: improve code with
+a declarative injection style.  When Java classes cleanly describe
+their dependencies, their lifecycles, and their exports, they are
+self-documenting.  You can read the classes and understand how they
+will behave, i.e. you don't need to read the code side-by-side with
+XML configuration to understand the system's behavior.</p>
+
+<p>The custom, typesafe binding annotations are key to CanDI's
+self-documentation, because injection points clearly describe the
+resources or services they expect with adjective-oriented
+annotations.  Because the annotations are true Java classes, they
+are documented in JavaDoc and verified by the compiler.  The small
+number of meaningful adjectives means they don't impose a significant
+coding burden, and are well worth the small extra development
+time.</p>
+
+<p>In sum, the CanDI patterns encourage a declarative injection style,
+where the class itself declares its requirements in meaningful fashion.</p>
+
+</s1>
+
+  </body>
+</document>

@@ -53,6 +53,7 @@ public class DefinitionTable extends Table {
     }
 
     int count = 0;
+    
     for (TableRow row : _rows)
       row.writeHtml(out, count++);
 
@@ -65,6 +66,7 @@ public class DefinitionTable extends Table {
     for (TableRow row : _rows) {
       out.print("\\rowcolor[gray]{0.9}");
       row.writeLaTeX(out);
+      out.println(" \\hline");
     }
   }
 }

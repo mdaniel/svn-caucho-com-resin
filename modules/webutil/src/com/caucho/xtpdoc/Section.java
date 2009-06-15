@@ -326,6 +326,9 @@ public abstract class Section extends ContainerNode {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
+    if (isWebOnly())
+      return;
+    
     writeLaTeXLabel(out);
     
     super.writeLaTeX(out);

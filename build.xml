@@ -777,6 +777,10 @@
     <generate-pdf name="test"/>
   </target>
 
+  <target name="test-pdf" depends="init">
+    <generate-pdf name="test"/>
+  </target>
+
   <target name="relaxng">
     <mkdir dir="xsd"/>
     

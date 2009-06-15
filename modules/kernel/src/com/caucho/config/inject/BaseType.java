@@ -178,7 +178,7 @@ abstract public class BaseType
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public BaseType findClass(Class cl)
+  public BaseType findClass(InjectManager manager, Class cl)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

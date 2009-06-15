@@ -39,6 +39,7 @@ import com.caucho.bytecode.*;
 import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.config.cfg.*;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -67,10 +68,10 @@ public class ScopeAdapter {
     return adapter;
   }
     
-  public Object wrap(Bean comp)
+  public Object wrap(InjectManager manager, Bean comp)
   {
     try {
-      Object v = _proxyCtor.newInstance(comp);
+      Object v = _proxyCtor.newInstance(manager, comp);
       return v;
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -120,13 +121,13 @@ public class ScopeAdapter {
       managerField.setAccessFlags(Modifier.PRIVATE);
       
       JavaField beanField
-	= jClass.createField("_cxt", "Ljavax/enterprise/inject/spi/Bean;");
+	= jClass.createField("_bean", "Ljavax/enterprise/inject/spi/Bean;");
       beanField.setAccessFlags(Modifier.PRIVATE);
 
       JavaMethod ctor
 	= jClass.createMethod("<init>",
 			      "(Lcom/caucho/config/inject/InjectManager;"
-			      + "Ljavax/enterprise/inject/spi/Bean)V");
+			      + "Ljavax/enterprise/inject/spi/Bean;)V");
       ctor.setAccessFlags(Modifier.PUBLIC);
       
       CodeWriterAttribute code = ctor.createCodeWriter();
@@ -204,7 +205,7 @@ public class ScopeAdapter {
     
     code.invoke("com/caucho/config/inject/InjectManager",
 		"create",
-		"(Ljavax/enterprise/inject/spi/Bean)Ljava/lang/Object;",
+		"(Ljavax/enterprise/inject/spi/Bean;)Ljava/lang/Object;",
 		1, 1);
     
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));

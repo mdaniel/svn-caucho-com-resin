@@ -103,6 +103,12 @@ public class PropertyStringProgram extends ConfigProgram {
     }
   }
 
+  public Object configure(ConfigType type, ConfigContext env)
+    throws ConfigException
+  {
+    return type.valueOf(_value);
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _qName + "," + _value + "]";

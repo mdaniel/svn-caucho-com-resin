@@ -68,4 +68,9 @@ public class BaseTypeFactory
 
     return baseType;
   }
+
+  public BaseType create(Type type, HashMap paramMap)
+  {
+    return BaseType.create(type, paramMap);
+  }
 }

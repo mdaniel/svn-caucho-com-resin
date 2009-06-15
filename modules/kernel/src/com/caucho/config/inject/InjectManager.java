@@ -532,17 +532,6 @@ public class InjectManager
       return null;
   }
 
-  private String listToLines(List list)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < list.size(); i++) {
-      sb.append("\n    ").append(list.get(i));
-    }
-
-    return sb.toString();
-  }
-
   private Annotation []getBindings(Annotation []annotations)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
@@ -742,6 +731,14 @@ public class InjectManager
   public BaseType createBaseType(Type type)
   {
     return _baseTypeFactory.create(type);
+  }
+
+  /**
+   * Creates a BaseType from a Type
+   */
+  public BaseType createBaseType(Type type, HashMap paramMap)
+  {
+    return _baseTypeFactory.create(type, paramMap);
   }
   
   /**
@@ -1030,23 +1027,6 @@ public class InjectManager
 
     return null;
   }
-
-  private Bean createNewBean(Type type)
-  {
-    Bean bean = _newBeanMap.get(type);
-
-    if (bean == null) {
-      BaseType baseType = createBaseType(type);
-      
-      AbstractBean newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
-      newBean.introspect();
-
-      _newBeanMap.put(type, bean);
-      bean = newBean;
-    }
-
-    return bean;
-  }
       
 
   /**
@@ -1188,7 +1168,8 @@ public class InjectManager
       for (WebComponent comp : _beanMap.values()) {
 	Set set = comp.resolve(Object.class, bindings);
 
-	beans.addAll(set);
+	if (set != null)
+	  beans.addAll(set);
       }
 
       return beans;
@@ -1236,6 +1217,16 @@ public class InjectManager
     Object object = getInstanceRec(bean, type, env, this);
 
     return object;
+  }
+
+  /**
+   * Used by ScopeProxy
+   */
+  public Object create(Bean<?> bean)
+  {
+    CreationalContext<?> env = createCreationalContext();
+
+    return getReference(bean, bean.getBeanClass(), env);
   }
   
   private Object getInstanceRec(Bean<?> bean,
@@ -1297,25 +1288,42 @@ public class InjectManager
     WebComponent component = getWebComponent(createBaseType(type));
 
     if (component == null) {
-      throw new UnsatisfiedResolutionException(L.l("Can't find a component for '{0}' because no beans implementing that class have been registered with the injection Manager.",
+      throw new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans implementing that class have been registered with the injection Manager.",
 						   type));
     }
     else {
       ArrayList<Bean<?>> enabledList = component.getEnabledBeanList();
 
       if (enabledList.size() == 0) {
-	return new UnsatisfiedResolutionException(L.l("Can't find a component for '{0}' because any matching beans are disabled, i.e. non-enabled Deploy.\nDisabled beans:{2}",
-						     type,
-						     toList(bindings),
-						     listToLines(component.getBeanList())));
+	throw new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans implementing that class have been registered with the injection Manager.",
+						     type));
       }
       else {
-	return new UnsatisfiedResolutionException(L.l("Can't find a component for '{0}' because no enabled beans match the bindings {1}.\nEnabled beans:{2}",
+	return new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans match the type and bindings {1}.\nBeans:{2}",
 						      type,
 						      toList(bindings),
 						      listToLines(enabledList)));
       }
     }
+  }
+
+  private String listToLines(List list)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    ArrayList<String> lines = new ArrayList<String>();
+    
+    for (int i = 0; i < list.size(); i++) {
+      lines.add(list.get(i).toString());
+    }
+
+    Collections.sort(lines);
+      
+    for (String line : lines) {
+      sb.append("\n    ").append(lines);
+    }
+
+    return sb.toString();
   }
 
   /**
@@ -1383,6 +1391,11 @@ public class InjectManager
     if (bindingSet != null) {
       bindings = new Annotation[bindingSet.size()];
       bindingSet.toArray(bindings);
+
+      if (bindings.length == 1
+	  && bindings[0].annotationType().equals(New.class)) {
+	return createNewBean(type);
+      }
     }
     else
       bindings = new Annotation[] { CurrentLiteral.CURRENT };
@@ -1414,6 +1427,23 @@ public class InjectManager
     }
 
     return null;
+  }
+
+  private Bean createNewBean(Type type)
+  {
+    Bean bean = _newBeanMap.get(type);
+
+    if (bean == null) {
+      BaseType baseType = createBaseType(type);
+      
+      AbstractBean newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      newBean.introspect();
+
+      _newBeanMap.put(type, bean);
+      bean = newBean;
+    }
+
+    return bean;
   }
 
   private <X> AmbiguousResolutionException
@@ -1485,11 +1515,11 @@ public class InjectManager
 			  Annotation... bindings)
   {
     BaseType baseType = createBaseType(observer.getClass());
-    BaseType observerType = baseType.findClass(Observer.class);
+    BaseType observerType = baseType.findClass(this, Observer.class);
 
-    Class eventType = observerType.getParameters()[0].getRawClass();
+    BaseType eventType = observerType.getParameters()[0];
 
-    addObserver(observer, observerType.getParameters()[0], bindings);
+    addObserver(observer, eventType, bindings);
   }
 
   /**
@@ -1502,9 +1532,6 @@ public class InjectManager
 			  BaseType eventBaseType,
 			  Annotation... bindings)
   {
-    BaseType baseType = createBaseType(observer.getClass());
-    BaseType observerType = baseType.findClass(Observer.class);
-
     Class eventType = eventBaseType.getRawClass();
 
     checkActive();
@@ -1525,10 +1552,11 @@ public class InjectManager
 	_observerMap.put(eventType, map);
       }
 
-      map.addObserver(observer, bindings);
+      map.addObserver(observer, eventBaseType, bindings);
     }
 
     synchronized (_observerListCache) {
+      // XXX: mark the map as changed
       _observerListCache.clear();
     }
   }
@@ -1565,13 +1593,17 @@ public class InjectManager
     if (log.isLoggable(Level.FINE))
       log.fine(this + " fireEvent " + event);
 
-    fireEventImpl(event, bindings);
+    BaseType eventType = createBaseType(event.getClass());
+
+    fireEventImpl(event, eventType, bindings);
   }
   
-  protected void fireEventImpl(Object event, Annotation... bindings)
+  protected void fireEventImpl(Object event,
+			       BaseType eventType,
+			       Annotation... bindings)
   {
     if (_parent != null)
-      _parent.fireEventImpl(event, bindings);
+      _parent.fireEventImpl(event, eventType, bindings);
 
     ArrayList<ObserverMap> observerList;
 
@@ -1581,7 +1613,7 @@ public class InjectManager
       if (observerList == null) {
 	observerList = new ArrayList<ObserverMap>();
 	
-	fillLocalObserverList(observerList, event.getClass());
+	fillLocalObserverList(observerList, eventType);
 	
 	_observerListCache.put(event.getClass(), observerList);
       }
@@ -1589,35 +1621,59 @@ public class InjectManager
 
     int size = observerList.size();
     for (int i = 0; i < size; i++) {
-      observerList.get(i).fireEvent(event, bindings);
+      observerList.get(i).fireEvent(event, eventType, bindings);
     }
+  }
+
+  /**
+   * Returns the observers listening for an event
+   *
+   * @param eventType event to resolve
+   * @param bindings the binding set for the event
+   */
+  public <T> Set<Observer<T>> resolveObservers(T event,
+					       Annotation... bindings)
+  {
+    HashSet<Observer<T>> set = new HashSet<Observer<T>>();
+    
+    ObserverMap map = _observerMap.get(event.getClass());
+
+    if (map != null) {
+      BaseType eventType = createBaseType(event.getClass());
+      
+      map.resolveObservers(set, eventType, bindings);
+    }
+
+    return set;
   }
   
   private void fireLocalEvent(Object event, Annotation... bindings)
   {
     ArrayList<ObserverMap> observerList = new ArrayList<ObserverMap>();
+    BaseType eventType = createBaseType(event.getClass());
 	
-    fillLocalObserverList(observerList, event.getClass());
+    fillLocalObserverList(observerList, eventType);
 
     int size = observerList.size();
     for (int i = 0; i < size; i++) {
-      observerList.get(i).fireEvent(event, bindings);
+      observerList.get(i).fireEvent(event, eventType, bindings);
     }
   }
 
-  private void fillLocalObserverList(ArrayList<ObserverMap> list, Class cl)
+  private void fillLocalObserverList(ArrayList<ObserverMap> list,
+				     BaseType eventType)
   {
-    if (cl == null)
-      return;
-
+    Class cl = eventType.getRawClass();
+    
     // XXX: generic
-    fillLocalObserverList(list, cl.getSuperclass());
+    if (cl.getSuperclass() != null)
+      fillLocalObserverList(list, createBaseType(cl.getSuperclass()));
 
     for (Class iface : cl.getInterfaces()) {
-      fillLocalObserverList(list, iface);
+      fillLocalObserverList(list, createBaseType(iface));
     }
 
-    ObserverMap map = _observerMap.get(cl);
+    ObserverMap map = _observerMap.get(eventType.getRawClass());
 
     if (map != null)
       list.add(map);
@@ -1640,25 +1696,6 @@ public class InjectManager
   //
   // events
   //
-
-  /**
-   * Returns the observers listening for an event
-   *
-   * @param eventType event to resolve
-   * @param bindings the binding set for the event
-   */
-  public <T> Set<Observer<T>> resolveObservers(T event,
-					       Annotation... bindings)
-  {
-    HashSet<Observer<T>> set = new HashSet<Observer<T>>();
-    
-    ObserverMap map = _observerMap.get(event);
-
-    if (map != null)
-      map.resolveObservers(set, bindings);
-
-    return set;
-  }
 
   //
   // interceptor support
@@ -1874,9 +1911,6 @@ public class InjectManager
 	= new ArrayList<WebBeansRootContext>(_pendingRootContextList);
       
       _pendingRootContextList.clear();
-
-      if (rootContextList.size() == 0)
-	return;
       
       for (WebBeansRootContext context : rootContextList) {
 	_xmlExtension.addRoot(context.getRoot());
@@ -1884,6 +1918,10 @@ public class InjectManager
       
       _isBeforeBeanDiscoveryComplete = true;
       fireEvent(new BeforeBeanDiscoveryImpl());
+
+      // ioc/0061
+      if (rootContextList.size() == 0)
+	return;
 
       for (WebBeansRootContext context : rootContextList) {
 	for (String className : context.getClassNameList()) {
@@ -2048,6 +2086,10 @@ public class InjectManager
 	  
 	addObserver(observer, baseType, bindings);
       }
+    }
+
+    for (ProducesBean producerBean : managedBean.getProducerBeans()) {
+      addBean(producerBean);
     }
   }
 
@@ -2458,9 +2500,9 @@ public class InjectManager
    */
   public boolean isRootScannable(Path root)
   {
-    if (! root.lookup("META-INF/beans.xml").canRead()
-	&& ! (root.getFullPath().endsWith("WEB-INF/classes/")
-	      && ! root.lookup("../beans.xml").canRead())) {
+    if (! (root.lookup("META-INF/beans.xml").canRead()
+	   || (root.getFullPath().endsWith("WEB-INF/classes/")
+	       && root.lookup("../beans.xml").canRead()))) {
       return false;
     }
 
