@@ -77,6 +77,12 @@ public class XmlBean<X> extends BeanWrapper<X>
     return _bean;
   }
 
+  @Override
+  public Annotated getAnnotated()
+  {
+    return _bean.getAnnotated();
+  }
+
   public InjectionTarget<X> getInjectionTarget()
   {
     return this;

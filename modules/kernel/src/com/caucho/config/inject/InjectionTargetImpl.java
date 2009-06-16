@@ -327,8 +327,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       for (ConfigProgram program : _initProgram) {
 	program.inject(instance, env);
       }
+
+      if (_cauchoPostConstruct != null) {
+	_cauchoPostConstruct.invoke(instance);
+      }
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      throw ConfigException.create(e.getCause());
     } catch (Exception e) {
       throw new CreationException(e);
     }
@@ -409,21 +415,15 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       // introspectObservers(getTargetClass());
 
-      PojoBean bean = new PojoBean(new ApiClass(_beanType));
-      /*
-      //bean.setSingleton(isSingleton());
-      bean.setBindings(getBindings());
+      Class instanceClass = null;
 
-      bean.setInterceptorBindings(getInterceptorBindings());
+      if (! (_beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
+	     || _beanType.isAnnotationPresent(javax.decorator.Decorator.class))) {
+	PojoBean bean = new PojoBean(new ApiClass(_beanType));
+	bean.introspect();
 
-      for (AnnotatedMethod method : _beanType.getMethods()) {
-	bean.setMethodAnnotations(method.getJavaMember(), method);
+	instanceClass = bean.generateClass();
       }
-      */
-      
-      bean.introspect();
-
-      Class instanceClass = bean.generateClass();
 
       /*
       if (instanceClass == getTargetClass()

@@ -1726,21 +1726,25 @@ public class InjectManager
    * @return the matching interceptors
    */
   public List<Interceptor<?>> resolveInterceptors(InterceptionType type,
-					       Annotation... bindings)
+						  Annotation... bindings)
   {
     if (bindings == null || bindings.length == 0)
       throw new IllegalArgumentException(L.l("resolveInterceptors requires at least one @InterceptorBindingType"));
     
-    ArrayList<Interceptor<?>> interceptorList = new ArrayList<Interceptor<?>>();
+    ArrayList<Interceptor<?>> interceptorList
+      = new ArrayList<Interceptor<?>>();
+
 
     for (InterceptorEntry entry : _interceptorList) {
       Interceptor interceptor = entry.getInterceptor();
       
-      if (! interceptor.intercepts(type))
+      if (! interceptor.intercepts(type)) {
 	continue;
+      }
 
-      if (entry.isMatch(bindings))
+      if (entry.isMatch(bindings)) {
 	interceptorList.add(interceptor);
+      }
     }
 
     return interceptorList;

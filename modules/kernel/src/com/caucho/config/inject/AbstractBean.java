@@ -94,6 +94,11 @@ abstract public class AbstractBean<T> implements Bean<T>
   {
   }
 
+  public Annotated getAnnotated()
+  {
+    return null;
+  }
+
   public void introspect()
   {
   }

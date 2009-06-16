@@ -127,8 +127,8 @@ public class InterceptorCallChain
    */
   public boolean isEnhanced()
   {
-    if (_view.getBeanClass().isAnnotationPresent(Interceptor.class)
-        || _view.getBeanClass().isAnnotationPresent(Decorator.class)) {
+    if (_view.getViewClass().isAnnotationPresent(Interceptor.class)
+        || _view.getViewClass().isAnnotationPresent(Decorator.class)) {
       return false;
     }
     else {
@@ -323,7 +323,7 @@ public class InterceptorCallChain
 
     for (Annotation annotation : annotations) {
       if (annotation.annotationType()
-        .isAnnotationPresent(InterceptorBindingType.class))
+	  .isAnnotationPresent(InterceptorBindingType.class))
         return annotation;
     }
 
@@ -387,7 +387,6 @@ public class InterceptorCallChain
       if (_interceptors.indexOf(iClass) < 0)
         _interceptors.add(iClass);
     }
-
 
     if (hasInterceptor())
       generateInterceptorPrologue(out, map);
@@ -472,6 +471,7 @@ public class InterceptorCallChain
 
     out.popDepth();
     out.println("} catch (Exception e) {");
+    out.println("  e.printStackTrace();");
     out.println("  throw new RuntimeException(e);");
     out.println("}");
     out.popDepth();
@@ -1108,7 +1108,7 @@ public class InterceptorCallChain
         out.print(") ");
       }
 
-      out.print("new com.caucho.ejb3.gen.InvocationContextImpl(");
+      out.print("new com.caucho.config.gen.InvocationContextImpl(");
       generateThis(out);
       out.print(", ");
       generateThis(out);

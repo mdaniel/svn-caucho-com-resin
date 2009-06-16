@@ -170,7 +170,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _baseType.getRawClass();
   }
 
-  protected Annotated getAnnotated()
+  @Override
+  public Annotated getAnnotated()
   {
     return _annotated;
   }

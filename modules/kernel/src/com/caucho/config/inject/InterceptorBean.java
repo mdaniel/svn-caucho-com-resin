@@ -217,7 +217,7 @@ public class InterceptorBean<X> implements Interceptor<X>
    */
   public boolean intercepts(InterceptionType type)
   {
-    return false;
+    return getMethod(type) != null;
   }
 
   public Object create(CreationalContext creationalContext)

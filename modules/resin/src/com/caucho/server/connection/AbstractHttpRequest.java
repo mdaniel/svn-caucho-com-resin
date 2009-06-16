@@ -1875,7 +1875,7 @@ public abstract class AbstractHttpRequest
 
     if (user == null) {
       if (log.isLoggable(Level.FINE))
-        log.fine("no user for isUserInRole");
+        log.fine(this + " no user for isUserInRole");
     
       return false;
     }
@@ -1896,16 +1896,16 @@ public abstract class AbstractHttpRequest
     Login login = app == null ? null : app.getLogin();
 
     boolean inRole = login != null && login.isUserInRole(user, role);
-      
+
     if (log.isLoggable(Level.FINE)) {
       if (login == null)
-        log.fine("no Login for isUserInRole");
+        log.fine(this + " no Login for isUserInRole");
       else if (user == null)
-        log.fine("no user for isUserInRole");
+        log.fine(this + " no user for isUserInRole");
       else if (inRole)
-        log.fine(user + " is in role: " + role);
+        log.fine(this + " " + user + " is in role: " + role);
       else
-        log.fine("failed " + user + " in role: " + role);
+        log.fine(this + " failed " + user + " in role: " + role);
     }
 
     return inRole;

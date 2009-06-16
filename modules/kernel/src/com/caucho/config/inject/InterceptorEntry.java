@@ -96,4 +96,9 @@ public class InterceptorEntry<X> {
 
     return false;
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _interceptor + "," + _bindings + "]";
+  }
 }

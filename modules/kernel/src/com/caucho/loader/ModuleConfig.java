@@ -128,7 +128,7 @@ public class ModuleConfig
       ArtifactRepository repository = ArtifactRepository.getCurrent();
 
       if (repository == null)
-	throw new IllegalStateException(L.l("Cannot find dependency because not repositories are configured."));
+	throw new IllegalStateException(L.l("Cannot find dependency because no repositories are configured."));
 
       ArtifactDependency dependency
 	= new ArtifactDependency(_org, null, _name, _version);

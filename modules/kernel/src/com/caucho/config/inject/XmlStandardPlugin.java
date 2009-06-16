@@ -43,7 +43,9 @@ import java.util.HashSet;
 
 import javax.ejb.*;
 import javax.enterprise.event.Observes;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
@@ -69,6 +71,8 @@ public class XmlStandardPlugin implements Extension
   private ArrayList<Path> _pendingPaths = new ArrayList<Path>();
   
   private ArrayList<BeansConfig> _pendingBeans = new ArrayList<BeansConfig>();
+
+  private ArrayList<Bean> _pendingService = new ArrayList<Bean>();
 
   private Throwable _configException;
 
@@ -174,10 +178,22 @@ public class XmlStandardPlugin implements Extension
     Bean bean = event.getBean();
 
     if (isStartup(annotated)) {
-      _manager.addService(bean);
+      _pendingService.add(bean);
     }
   }
 
+  public void processAfterValidation(@Observes AfterDeploymentValidation event)
+  {
+    ArrayList<Bean> startupBeans = new ArrayList<Bean>(_pendingService);
+    _pendingService.clear();
+
+    for (Bean bean : startupBeans) {
+      CreationalContext<?> env = _manager.createCreationalContext();
+      
+      _manager.getReference(bean, bean.getBeanClass(), env);
+    }
+  }
+  
   private boolean isStartup(Annotated annotated)
   {
     if (annotated == null)

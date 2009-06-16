@@ -30,6 +30,7 @@
 package com.caucho.config.gen;
 
 import com.caucho.config.inject.DecoratorBean;
+import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
@@ -107,7 +108,7 @@ public class EjbUtil {
       int index = indexChain[i];
 
       // XXX:
-      Method method = null; // beans.get(index).getMethod(type);
+      Method method = ((InterceptorBean) beans.get(index)).getMethod(type);
 
       if (method == null)
 	throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",

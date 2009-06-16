@@ -68,8 +68,8 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
 
   public Annotated getAnnotated()
   {
-    if (_bean instanceof ManagedBeanImpl)
-      return ((ManagedBeanImpl) _bean).getAnnotatedType();
+    if (_bean instanceof AbstractBean)
+      return ((AbstractBean) _bean).getAnnotated();
     else
       return null;
   }

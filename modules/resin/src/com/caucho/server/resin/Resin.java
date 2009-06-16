@@ -222,100 +222,6 @@ public class Resin implements EnvironmentBean, SchemaBean
       _classLoader = EnvironmentClassLoader.create();
   }
 
-  protected void initEnvironment()
-  {
-    if (_lifecycle != null)
-      return;
-    
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_classLoader);
-
-      _resinLocal.set(this, _classLoader);
-
-      _lifecycle = new Lifecycle(log(), "Resin[]");
-
-      String resinHome = System.getProperty("resin.home");
-
-      if (resinHome != null)
-	setResinHome(Vfs.lookup(resinHome));
-      else
-	setResinHome(Vfs.getPwd());
-
-      if (getRootDirectory() == null) {
-	setRootDirectory(getResinHome());
-
-	// server.root backwards compat
-	String serverRoot = System.getProperty("server.root");
-      
-	if (serverRoot != null)
-	  setRootDirectory(Vfs.lookup(serverRoot));
-
-	// resin.root backwards compat
-	serverRoot = System.getProperty("resin.root");
-
-	if (serverRoot != null)
-	  setRootDirectory(Vfs.lookup(serverRoot));
-      }
-
-      if (getRootDirectory() == null)
-	throw new NullPointerException();
-
-      // default server id
-      setServerId("");
-      
-      // watchdog/0212
-      // else
-      //  setRootDirectory(Vfs.getPwd());
-
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
-      Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
-      InjectManager webBeans = InjectManager.create();
-
-      Config.setProperty("resinHome", getResinHome());
-      Config.setProperty("resin", new Var());
-      Config.setProperty("server", new Var());
-      Config.setProperty("java", new JavaVar());
-      Config.setProperty("system", System.getProperties());
-      Config.setProperty("getenv", System.getenv());
-
-      _brokerManager = new HempBrokerManager();
-
-      _management = createResinManagement();
-      
-      if (webBeans.getBeans(ResinWebBeansProducer.class).size() == 0) {
-	Config.setProperty("fmt", new FmtFunctions());
-
-	ResinConfigLibrary.configure(webBeans);
-
-	try {
-	  Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
-	  Config.setProperty("jndi", method);
-	  Config.setProperty("jndi:lookup", method);
-	} catch (Exception e) {
-	  throw ConfigException.create(e);
-	}
-
-	BeanFactory factory
-	  = webBeans.createBeanFactory(ResinWebBeansProducer.class);
-	
-	webBeans.addBean(factory.singleton(new ResinWebBeansProducer()));
-	webBeans.update();
-      }
-      
-      _threadPoolAdmin = ThreadPoolAdmin.create();
-      _resinAdmin = new ResinAdmin(this);
-
-      _threadPoolAdmin.register();
-      
-      _memoryAdmin = MemoryAdmin.create();
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
   /**
    * Creates a new Resin instance
    */
@@ -386,7 +292,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     _resinLocal.set(resin, loader);
     
-    resin.initEnvironment();
+    // resin.initEnvironment();
 
     return resin;
   }
@@ -421,6 +327,104 @@ public class Resin implements EnvironmentBean, SchemaBean
   public static Resin getCurrent()
   {
     return getLocal();
+  }
+
+  /**
+   * Must be called after the Resin.create()
+   */
+  public void preConfigureInit()
+  {
+    if (_lifecycle != null)
+      return;
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      _resinLocal.set(this, _classLoader);
+
+      _lifecycle = new Lifecycle(log(), "Resin[]");
+
+      String resinHome = System.getProperty("resin.home");
+
+      if (resinHome != null)
+	setResinHome(Vfs.lookup(resinHome));
+      else
+	setResinHome(Vfs.getPwd());
+
+      if (getRootDirectory() == null) {
+	setRootDirectory(getResinHome());
+
+	// server.root backwards compat
+	String serverRoot = System.getProperty("server.root");
+      
+	if (serverRoot != null)
+	  setRootDirectory(Vfs.lookup(serverRoot));
+
+	// resin.root backwards compat
+	serverRoot = System.getProperty("resin.root");
+
+	if (serverRoot != null)
+	  setRootDirectory(Vfs.lookup(serverRoot));
+      }
+
+      if (getRootDirectory() == null)
+	throw new NullPointerException();
+
+      // default server id
+      if (getServerId() == null)
+	setServerId("");
+      
+      // watchdog/0212
+      // else
+      //  setRootDirectory(Vfs.getPwd());
+
+      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+      Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
+      InjectManager webBeans = InjectManager.create();
+
+      Config.setProperty("resinHome", getResinHome());
+      Config.setProperty("resin", new Var());
+      Config.setProperty("server", new Var());
+      Config.setProperty("java", new JavaVar());
+      Config.setProperty("system", System.getProperties());
+      Config.setProperty("getenv", System.getenv());
+
+      _brokerManager = new HempBrokerManager();
+
+      _management = createResinManagement();
+      
+      if (webBeans.getBeans(ResinWebBeansProducer.class).size() == 0) {
+	Config.setProperty("fmt", new FmtFunctions());
+
+	ResinConfigLibrary.configure(webBeans);
+
+	try {
+	  Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
+	  Config.setProperty("jndi", method);
+	  Config.setProperty("jndi:lookup", method);
+	} catch (Exception e) {
+	  throw ConfigException.create(e);
+	}
+
+	BeanFactory factory
+	  = webBeans.createBeanFactory(ResinWebBeansProducer.class);
+	
+	webBeans.addBean(factory.singleton(new ResinWebBeansProducer()));
+	webBeans.update();
+      }
+      
+      _threadPoolAdmin = ThreadPoolAdmin.create();
+      _resinAdmin = new ResinAdmin(this);
+
+      _threadPoolAdmin.register();
+      
+      _memoryAdmin = MemoryAdmin.create();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
@@ -592,6 +596,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setRootDirectory(Path root)
   {
     _rootDirectory = root;
+    
     if (root == null)
       throw new NullPointerException();
   }
@@ -961,7 +966,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void start()
   {
-    initEnvironment();
+    preConfigureInit();
     
     if (! _lifecycle.toActive())
       return;
@@ -1380,6 +1385,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void initMain()
     throws Throwable
   {
+    preConfigureInit();
+    
     _mainThread = Thread.currentThread();
     _mainThread.setContextClassLoader(_systemClassLoader);
 

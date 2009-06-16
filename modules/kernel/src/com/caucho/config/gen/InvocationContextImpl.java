@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb3.gen;
+package com.caucho.config.gen;
 
 import java.lang.reflect.*;
 import java.util.*;
