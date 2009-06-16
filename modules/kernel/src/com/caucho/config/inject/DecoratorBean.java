@@ -73,7 +73,7 @@ public class DecoratorBean<T> implements Decorator<T>
 
     _type = type;
 
-    _bean = null;//new SimpleBean(_type);
+    _bean = beanManager.createManagedBean(type);
 
     init();
   }

@@ -84,6 +84,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     _beanMethod = beanMethod;
     _args = args;
 
+    if (beanMethod == null)
+      throw new NullPointerException();
+
     if (args == null)
       throw new NullPointerException();
   }
@@ -94,7 +97,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 				    Arg []args)
   {
     ProducesBean bean = new ProducesBean(inject, producer, beanMethod, args);
-
+    bean.introspect();
     bean.introspect(beanMethod);
 
     return bean;
@@ -144,7 +147,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   @Override
   protected String getDefaultName()
-  { 
+  {
     String methodName = _beanMethod.getJavaMember().getName();
       
     if (methodName.startsWith("get") && methodName.length() > 3) {

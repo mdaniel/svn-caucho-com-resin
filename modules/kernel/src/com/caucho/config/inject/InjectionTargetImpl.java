@@ -107,11 +107,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     */
   }
 
-  public void introspect()
-  {
-    introspect(_beanType);
-  }
-
   public AnnotatedType getAnnotatedType()
   {
     return _beanType;
@@ -527,13 +522,19 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   // introspection
   //
 
+  @Override
+  public void introspect()
+  {
+    super.introspect();
+    
+    introspect(_beanType);
+  }
+
   /**
    * Called for implicit introspection.
    */
   public void introspect(AnnotatedType beanType)
   {
-    super.introspect(beanType);
-
     Class cl = getIntrospectionClass();
     Class scopeClass = null;
 

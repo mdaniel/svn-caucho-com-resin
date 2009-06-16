@@ -262,7 +262,7 @@ public class InjectManager
 
       try {
 	InitialContext ic = new InitialContext();
-	ic.rebind("java:comp/Manager", new WebBeansJndiProxy());
+	ic.rebind("java:comp/BeanManager", new WebBeansJndiProxy());
       } catch (Throwable e) {
 	log.log(Level.FINEST, e.toString(), e);
       }
@@ -283,6 +283,8 @@ public class InjectManager
 
       BeanFactory factory = createBeanFactory(InjectManager.class);
       // factory.deployment(Standard.class);
+      factory.type(InjectManager.class);
+      factory.type(BeanManager.class);
       factory.annotation(ModulePrivateLiteral.create());
       addBean(factory.singleton(this));
 
@@ -1753,7 +1755,9 @@ public class InjectManager
    */
   public BeanManager addDecorator(Decorator decorator)
   {
-    _decoratorList.add(new DecoratorEntry(decorator));
+    BaseType baseType = createBaseType(decorator.getDelegateType());
+    
+    _decoratorList.add(new DecoratorEntry(decorator, baseType));
 
     return this;
   }
@@ -1778,19 +1782,20 @@ public class InjectManager
       Decorator decorator = entry.getDecorator();
 
       // XXX: delegateTypes
-      /*
-      if (isTypeContained(types, decorator.getDelegateType())
+      if (isTypeContained(types, entry.getDelegateType())
 	  && entry.isMatch(bindings)) {
 	decorators.add(decorator);
       }
-      */
     }
 
     return decorators;
   }
 
-  public List<Decorator> resolveDecorators(Class type)
+  public List<Decorator<?>> resolveDecorators(Class type)
   {
+    HashSet<Type> types = new HashSet<Type>();
+    types.add(type);
+    
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : type.getAnnotations()) {
@@ -1803,22 +1808,8 @@ public class InjectManager
 
     Annotation []bindings = new Annotation[bindingList.size()];
     bindingList.toArray(bindings);
-    
-    ArrayList<Decorator> decorators = new ArrayList<Decorator>();
 
-    for (DecoratorEntry entry : _decoratorList) {
-      Decorator decorator = entry.getDecorator();
-
-      // XXX: delegateTypes
-      /*
-      if (decorator.getDelegateTypes().isAssignableFrom(type)
-	  && entry.isMatch(bindings)) {
-	decorators.add(decorator);
-      }
-      */
-    }
-
-    return decorators;
+    return resolveDecorators(types, bindings);
   }
 
   private Class getRawType(Type type)
@@ -1844,10 +1835,13 @@ public class InjectManager
       throw new UnsupportedOperationException(String.valueOf(type));
   }
 
-  private boolean isTypeContained(Set<Class<?>> types, Class delegateType)
+  private boolean isTypeContained(Set<Type> types,
+				  BaseType delegateType)
   {
-    for (Class type : types) {
-      if (delegateType.isAssignableFrom(type))
+    for (Type type : types) {
+      BaseType baseType = createBaseType(type);
+      
+      if (delegateType.isAssignableFrom(baseType))
 	return true;
     }
 

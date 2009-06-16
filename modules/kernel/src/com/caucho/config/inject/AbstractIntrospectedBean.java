@@ -133,9 +133,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     
     _type = type;
     _baseType = manager.createBaseType(type);
-
-    introspectTypes(_baseType.toType());
-    introspect(_annotated);
   }
 
   public InjectManager getBeanManager()
@@ -317,6 +314,14 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return baseType;
   }
 
+  public void introspect()
+  {
+    super.introspect();
+    
+    introspectTypes(_baseType.toType());
+    introspect(_annotated);
+  }
+
   protected void introspect(Annotated annotated)
   {
     introspectScope(annotated);
@@ -390,7 +395,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     for (Annotation stereotype : annotated.getAnnotations()) {
       Class stereotypeType = stereotype.annotationType();
 
-      _stereotypes.add(stereotype);
+      if (stereotypeType.isAnnotationPresent(Stereotype.class))
+	_stereotypes.add(stereotype);
 	
       for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
 	Class annType = ann.annotationType();

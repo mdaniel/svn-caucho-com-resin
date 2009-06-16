@@ -72,7 +72,7 @@ public class PojoBean extends BeanGenerator {
     addInterfaceName("java.io.Serializable");
     
     addImport("javax.transaction.*");
-    
+
     _view = new PojoView(this, getBeanClass());
     
     _beanClass = beanClass;
@@ -83,12 +83,13 @@ public class PojoBean extends BeanGenerator {
     _isSingleton = isSingleton;
   }
 
+  @Override
   public void introspect()
   {
     super.introspect();
     
     introspectClass(_beanClass);
-    
+
     for (ApiMethod method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
 	continue;

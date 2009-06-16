@@ -59,9 +59,13 @@ public class DecoratorEntry<X> {
   private ArrayList<Binding> _bindings
     = new ArrayList<Binding>();
 
-  public DecoratorEntry(Decorator<X> decorator)
+  private BaseType _delegateType;
+
+  public DecoratorEntry(Decorator<X> decorator,
+			BaseType delegateType)
   {
     _decorator = decorator;
+    _delegateType = delegateType;
 
     for (Annotation ann : decorator.getDelegateBindings()) {
       _bindings.add(new Binding(ann));
@@ -74,6 +78,11 @@ public class DecoratorEntry<X> {
   public Decorator<X> getDecorator()
   {
     return _decorator;
+  }
+
+  public BaseType getDelegateType()
+  {
+    return _delegateType;
   }
 
   public boolean isMatch(Annotation []bindingAnn)

@@ -259,6 +259,9 @@ public class CustomBeanConfig {
       clearBindings(_annotatedType);
     }
     
+    if (ann.annotationType().isAnnotationPresent(ScopeType.class))
+      clearAnnotations(_annotatedType, ScopeType.class);
+	
     _annotatedType.addAnnotation(ann);
 
     /*

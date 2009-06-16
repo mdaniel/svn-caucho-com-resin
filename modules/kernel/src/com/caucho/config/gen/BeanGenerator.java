@@ -163,11 +163,14 @@ abstract public class BeanGenerator extends GenClass
       fillTypes(types, iface.getJavaClass());
     }
 
-    if (_decoratorBindings == null)
-      return;
+    Annotation []decoratorBindings;
 
-    Annotation []decoratorBindings = new Annotation[_decoratorBindings.size()];
-    _decoratorBindings.toArray(decoratorBindings);
+    if (_decoratorBindings != null) {
+      decoratorBindings = new Annotation[_decoratorBindings.size()];
+      _decoratorBindings.toArray(decoratorBindings);
+    }
+    else
+      decoratorBindings = new Annotation[0];
 
     List<Decorator<?>> decorators
       = webBeans.resolveDecorators(types, decoratorBindings);

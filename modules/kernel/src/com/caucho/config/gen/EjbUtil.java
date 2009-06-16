@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.util;
+package com.caucho.config.gen;
 
+import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
@@ -167,7 +168,7 @@ public class EjbUtil {
   }
 
   public static Object []generateProxyDelegate(InjectManager webBeans,
-					       List<Decorator> beans,
+					       List<Decorator<?>> beans,
 					       Object proxy)
   {
     Object []instances = new Object[beans.size()];
@@ -180,7 +181,7 @@ public class EjbUtil {
       Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
 
       // XXX:
-      // bean.setDelegate(instance, proxy);
+      ((DecoratorBean) bean).setDelegate(instance, proxy);
 
       instances[beans.size() - 1 - i] = instance;
     }
@@ -193,8 +194,9 @@ public class EjbUtil {
 				 int index)
   {
     for (index--; index >= 0; index--) {
-      if (api.isAssignableFrom(beans[index].getClass()))
+      if (api.isAssignableFrom(beans[index].getClass())) {
 	return index;
+      }
     }
 
     return index;
