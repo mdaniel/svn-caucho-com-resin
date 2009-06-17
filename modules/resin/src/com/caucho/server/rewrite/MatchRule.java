@@ -297,6 +297,11 @@ public class MatchRule
     }
   }
 
+  public String rewriteUri(String uri, String queryString)
+  {
+    return uri;
+  }
+
   public FilterChain dispatch(String uri,
 			      String queryString,
                               FilterChain accept,

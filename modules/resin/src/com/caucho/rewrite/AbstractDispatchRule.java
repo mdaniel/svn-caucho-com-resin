@@ -58,6 +58,11 @@ abstract public class AbstractDispatchRule implements DispatchRule
     _regexp = regexp;
   }
 
+  public Pattern getRegexp()
+  {
+    return _regexp;
+  }
+
   public boolean isRequest()
   {
     return true;
@@ -97,6 +102,11 @@ abstract public class AbstractDispatchRule implements DispatchRule
   {
     add(new RewriteFilterAdapter(filter));
   }
+
+  public String rewriteUri(String uri, String queryString)
+  {
+    return uri;
+  }
   
   public FilterChain map(String uri,
 			 String queryString,
@@ -107,17 +117,7 @@ abstract public class AbstractDispatchRule implements DispatchRule
     Matcher matcher = null;
 
     if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
-      String target = null;
-
-      if (matcher != null)
-	uri = rewrite(matcher, uri);
-
-      if (queryString == null)
-	target = uri;
-      else if (uri.indexOf('?') >= 0)
-	target = uri + "&" + queryString;
-      else
-	target = uri + "?" + queryString;
+      String target = rewriteTarget(matcher, uri, queryString);
 
       FilterChain chain = createDispatch(uri, queryString, target, tail);
 
@@ -142,9 +142,16 @@ abstract public class AbstractDispatchRule implements DispatchRule
     return next;
   }
 
-  protected String rewrite(Matcher matcher, String uri)
+  protected String rewriteTarget(Matcher matcher,
+				 String uri,
+				 String queryString)
   {
-    return uri;
+    if (queryString == null)
+      return uri;
+    else if (uri.indexOf('?') >= 0)
+      return uri + "&" + queryString;
+    else
+      return uri + "?" + queryString;
   }
 
   public String toString()

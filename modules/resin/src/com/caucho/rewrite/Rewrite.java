@@ -33,87 +33,51 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
-import com.caucho.server.rewrite.SetHeaderFilterChain;
 import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-/**
- * Filter container which matches URLs and conditions and contains child
- * actions.
+/*
+ * Redirect a request using a HTTP redirect.
+ * protocol.
  *
  * <pre>
- * &lt;web-app xmlns="http://caucho.com/ns/resin"
- *        xmlns:resin="urn:java:com.caucho.resin">
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
  *
- * &lt;resin:Location regexp="^/admin">
- *  &lt;resin:IfSecure/>
- *  &lt;resin:SetHeader name="Foo" value="bar"/>
- * &lt;/resin:Location>
+ *   &lt;resin:Redirect regexp="^/foo" target="/bar"/>
  *
  * &lt;/web-app>
  * </pre>
  */
 @Configurable
-public class Location extends AbstractDispatchRule
+public class Rewrite extends AbstractTargetDispatchRule
 {
-  private ArrayList<DispatchRule> _ruleList
-    = new ArrayList<DispatchRule>();
+  private static final L10N L = new L10N(Rewrite.class);
 
-  private DispatchRule []_rules = new DispatchRule[0];
-
-  /**
-   * Adds a child dispatch rule
-   */
-  public void add(DispatchRule rule)
+  public String rewriteUri(String uri, String queryString)
   {
-    _ruleList.add(rule);
-    _rules = new DispatchRule[_ruleList.size()];
-    _ruleList.toArray(_rules);
-  }
+    Pattern regexp = getRegexp();
 
-  @Override
+    if (regexp == null)
+      return uri;
+
+    Matcher matcher = regexp.matcher(uri);
+
+    if (! matcher.find())
+      return uri;
+
+    return rewriteTarget(matcher, uri, queryString);
+  }
+  
   public FilterChain map(String uri,
 			 String queryString,
 			 FilterChain next,
 			 FilterChain tail)
     throws ServletException
   {
-    return super.map(uri, queryString, next, next);
-  }
-
-  @Override
-  protected FilterChain createDispatch(String uri,
-				       String queryString,
-				       String target,
-				       FilterChain next)
-  {
-    return mapChain(0, uri, queryString, next);
-  }
-
-  private FilterChain mapChain(int index,
-			       String uri, String queryString,
-			       FilterChain chain)
-  {
-    try {
-      if (_rules.length <= index)
-	return chain;
-
-      DispatchRule rule = _rules[index];
-    
-      uri = rule.rewriteUri(uri, queryString);
-
-      FilterChain next = mapChain(index + 1, uri, queryString, chain);
-
-      return rule.map(uri, queryString, next, chain);
-    } catch (ServletException e) {
-      throw ConfigException.create(e);
-    }
+    return next;
   }
 }
-

@@ -76,7 +76,9 @@ abstract public class AbstractTargetDispatchRule extends AbstractDispatchRule
   }
 
   @Override
-  protected String rewrite(Matcher matcher, String uri)
+  protected String rewriteTarget(Matcher matcher,
+				 String uri,
+				 String queryString)
   {
     if (_target != null)
       return matcher.replaceFirst(_target);

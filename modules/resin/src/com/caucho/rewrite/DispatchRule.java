@@ -67,6 +67,12 @@ public interface DispatchRule
   public boolean isForward();
 
   /**
+   * Rewrites the URI for further processing.  Rules following the current
+   * one will use the new URI.
+   */
+  public String rewriteUri(String uri, String queryString);
+
+  /**
    * Creates a FilterChain for the action based on the uri and query string.
    *
    * Matching requests will use <code>tail</code>, and mismatching
