@@ -29,12 +29,14 @@
 
 package com.caucho.server.dispatch;
 
-import javax.servlet.FilterChain;
+import com.caucho.server.connection.AbstractHttpRequest;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
+import javax.servlet.annotation.MultipartConfig;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -48,11 +50,12 @@ public class ServletFilterChain extends AbstractFilterChain {
   private ServletConfigImpl _config;
   // servlet
   private Servlet _servlet;
+  private MultipartConfig _multipartConfig;
 
   /**
    * Create the filter chain servlet.
    *
-   * @param servlet the underlying servlet
+   * @param config the underlying ServletConfig
    */
   public ServletFilterChain(ServletConfigImpl config)
   {
@@ -60,6 +63,7 @@ public class ServletFilterChain extends AbstractFilterChain {
       throw new NullPointerException();
     
     _config = config;
+    _multipartConfig = config.getMultipartConfig();
   }
 
   /**
@@ -103,6 +107,10 @@ public class ServletFilterChain extends AbstractFilterChain {
     }
     
     try {
+      //XXX: Better way of passing this in is needed
+      request.setAttribute(AbstractHttpRequest.MULTIPARTCONFIG,
+                           _config.getMultipartConfig());
+
       _servlet.service(request, response);
     } catch (UnavailableException e) {
       _servlet = null;

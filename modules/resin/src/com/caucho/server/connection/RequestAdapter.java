@@ -594,7 +594,7 @@ public class RequestAdapter extends RequestWrapper
    * @since Servlet 3.0
    */
   public Part getPart(String name)
-    throws IllegalArgumentException
+    throws IOException, ServletException
   {
     return getRequest().getPart(name);
   }
@@ -603,6 +603,7 @@ public class RequestAdapter extends RequestWrapper
    * @since Servlet 3.0
    */
   public Iterable<Part> getParts()
+    throws IOException, ServletException
   {
     return getRequest().getParts();
   }

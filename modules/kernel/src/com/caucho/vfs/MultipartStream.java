@@ -34,6 +34,8 @@ import com.caucho.util.CharBuffer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 /*
  * A stream for reading multipart/mime files.
@@ -66,7 +68,8 @@ public class MultipartStream extends StreamImpl {
   private boolean _isPartDone;
   private boolean _isDone;
   private boolean _isComplete;
-  private HashMap<String,String> _headers = new HashMap<String,String>();
+  private HashMap<String, List<String>> _headers
+    = new HashMap<String, List<String>>();
   private CharBuffer _line = new CharBuffer();
 
   private String _defaultEncoding;
@@ -190,9 +193,14 @@ public class MultipartStream extends StreamImpl {
   /**
    * Returns a read attribute from the multipart mime.
    */
-  public Object getAttribute(String key)
+  public String getAttribute(String key)
   {
-    return _headers.get(key.toLowerCase());
+    List<String> values = _headers.get(key.toLowerCase());
+
+    if (values != null && values.size() > 0)
+      return values.get(0);
+
+    return null;
   }
 
   /**
@@ -201,6 +209,11 @@ public class MultipartStream extends StreamImpl {
   public Iterator getAttributeNames()
   {
     return _headers.keySet().iterator();
+  }
+
+  public HashMap<String, List<String>> getHeaders()
+  {
+    return _headers;
   }
 
   /**
@@ -239,7 +252,14 @@ public class MultipartStream extends StreamImpl {
         key = _line.substring(0, i).trim().toLowerCase();
         value = _line.substring(i + 1).trim();
 
-        _headers.put(key, value);
+        List<String> values = _headers.get(key);
+
+        if (values == null)
+          values = new ArrayList<String>();
+
+        values.add(value);
+        
+        _headers.put(key, values);
       }
     }
     

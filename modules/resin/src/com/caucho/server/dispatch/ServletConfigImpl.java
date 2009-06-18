@@ -54,6 +54,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.naming.NamingException;
 import javax.servlet.*;
+import javax.servlet.annotation.MultipartConfig;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.security.Principal;
@@ -645,6 +646,11 @@ public class ServletConfigImpl
   public Object getServlet()
   {
     return _servlet;
+  }
+
+  public MultipartConfig getMultipartConfig()
+  {
+    return (MultipartConfig) getServletClass().getAnnotation(MultipartConfig.class);
   }
 
   /**

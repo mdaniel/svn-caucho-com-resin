@@ -38,9 +38,12 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.List;
+import java.util.HashMap;
 
 /**
  * Multipart form handling.
@@ -51,10 +54,12 @@ class MultipartForm {
   static final L10N L = new L10N(MultipartForm.class);
   
   static void parsePostData(HashMapImpl<String,String[]> table,
+                            List<Part> parts,
                             ReadStream rawIs, String boundary,
                             AbstractHttpRequest request,
                             String javaEncoding,
-                            long uploadMax)
+                            long uploadMax,
+                            long fileUploadMax)
     throws IOException
   {
     MultipartStream ms = new MultipartStream(rawIs, boundary);
@@ -118,6 +123,13 @@ class MultipartForm {
           tempFile.remove();
           
           throw new IOException(msg);
+        } else if (fileUploadMax > 0 && fileUploadMax < tempFile.getLength()){
+          String msg = L.l("multipart form data part '{0}':'{1}' is greater then the accepted value of '{2}'",
+                           name, "" + tempFile.getLength(), fileUploadMax);
+
+          tempFile.remove();
+
+          throw new IllegalStateException(msg);
         }
 	else if (tempFile.getLength() != totalLength) {
           String msg = L.l("multipart form upload failed (possibly due to full disk).");
@@ -144,8 +156,8 @@ class MultipartForm {
 	  addTable(table, name + ".filename", filename);
 	  addTable(table, name + ".content-type", contentType);
 	}
-        
-        if (log.isLoggable(Level.FINE))
+
+      if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");
       } else {
         CharBuffer value = new CharBuffer();
@@ -159,6 +171,9 @@ class MultipartForm {
 
         addTable(table, name, value.toString());
       }
+
+      parts.add(request.createPart(name,
+                                   new HashMap<String, List<String>>(ms.getHeaders())));
     }
 
     if (! ms.isComplete()) {

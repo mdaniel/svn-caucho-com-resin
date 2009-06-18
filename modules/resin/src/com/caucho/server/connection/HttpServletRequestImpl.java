@@ -915,7 +915,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    * @since Servlet 3.0
    */
   public Part getPart(String name)
-    throws IllegalArgumentException
+    throws IOException, ServletException
   {
     return _request.getPart(name);
   }
@@ -924,6 +924,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    * @since Servlet 3.0
    */
   public Iterable<Part> getParts()
+    throws IOException, ServletException
   {
     return _request.getParts();
   }
