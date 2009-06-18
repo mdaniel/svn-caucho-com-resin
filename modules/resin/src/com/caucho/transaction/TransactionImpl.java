@@ -116,6 +116,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
     _alarm = new Alarm("xa-timeout", this, ClassLoader.getSystemClassLoader());
   }
 
+  public static TransactionImpl getCurrent()
+  {
+    return TransactionManagerImpl.getLocal().getCurrent();
+  }
+
   /**
    * Sets the user transaction.
    */
@@ -872,9 +877,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private void callBeforeCompletion()
     throws RollbackException
   {
-    int length = _syncList == null ? 0 : _syncList.size();
-
-    for (int i = 0; i < length; i++) {
+    if (_syncList == null)
+      return;
+    
+    // server/16h2
+    for (int i = 0; i < _syncList.size(); i++) {
       Synchronization sync = _syncList.get(i);
 
       try {

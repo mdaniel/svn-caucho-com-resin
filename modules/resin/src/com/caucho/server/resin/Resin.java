@@ -412,7 +412,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	BeanFactory factory
 	  = webBeans.createBeanFactory(ResinWebBeansProducer.class);
 	
-	webBeans.addBean(factory.singleton(new ResinWebBeansProducer()));
+	webBeans.addManagedBean(webBeans.createManagedBean(ResinWebBeansProducer.class));
 	webBeans.update();
       }
       
@@ -1170,9 +1170,11 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
   }
 
-  private void parseCommandLine(String []argv)
+  public void parseCommandLine(String []argv)
     throws Exception
   {
+    preConfigureInit();
+    
     int len = argv.length;
     int i = 0;
 
@@ -1674,6 +1676,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       final Resin resin = Resin.create();
 
+      resin.preConfigureInit();
+      
       resin.parseCommandLine(argv);
 
       resin.initMain();

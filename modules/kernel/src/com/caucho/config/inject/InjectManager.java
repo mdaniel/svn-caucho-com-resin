@@ -2091,6 +2091,30 @@ public class InjectManager
     }
   }
 
+  public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
+  {
+    addBean(managedBean);
+
+    for (ObserverMethodImpl observer : managedBean.getObserverMethods()) {
+      // observer = processObserver(observer);
+
+      if (observer != null) {
+	Set<Annotation> annSet = observer.getObservedEventBindings();
+	  
+	Annotation []bindings = new Annotation[annSet.size()];
+	annSet.toArray(bindings);
+
+	BaseType baseType = createBaseType(observer.getObservedEventType());
+	  
+	addObserver(observer, baseType, bindings);
+      }
+    }
+
+    for (ProducesBean producerBean : managedBean.getProducerBeans()) {
+      addBean(producerBean);
+    }
+  }
+
   public void updateExtensions()
   {
     try {

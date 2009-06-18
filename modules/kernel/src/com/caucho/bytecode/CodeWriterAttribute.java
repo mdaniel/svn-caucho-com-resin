@@ -111,7 +111,6 @@ public class CodeWriterAttribute extends CodeAttribute {
     }
     else {
       write(CodeVisitor.ALOAD);
-      write(index >> 8);
       write(index);
     }
   }
@@ -125,7 +124,6 @@ public class CodeWriterAttribute extends CodeAttribute {
     }
     else {
       write(CodeVisitor.ILOAD);
-      write(index >> 8);
       write(index);
     }
   }
@@ -139,7 +137,6 @@ public class CodeWriterAttribute extends CodeAttribute {
     }
     else {
       write(CodeVisitor.LLOAD);
-      write(index >> 8);
       write(index);
     }
   }
@@ -153,7 +150,6 @@ public class CodeWriterAttribute extends CodeAttribute {
     }
     else {
       write(CodeVisitor.FLOAD);
-      write(index >> 8);
       write(index);
     }
   }
@@ -167,7 +163,6 @@ public class CodeWriterAttribute extends CodeAttribute {
     }
     else {
       write(CodeVisitor.DLOAD);
-      write(index >> 8);
       write(index);
     }
   }

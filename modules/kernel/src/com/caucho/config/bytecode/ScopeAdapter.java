@@ -165,11 +165,9 @@ public class ScopeAdapter {
 
       byte []buffer = bos.toByteArray();
       
-      /*
       out = Vfs.lookup("file:/tmp/caucho/qa/temp.class").openWrite();
       out.write(buffer, 0, buffer.length);
       out.close();
-      */
 
       String cleanName = thisClassName.replace('/', '.');
       _proxyClass = new ProxyClassLoader().loadClass(cleanName, buffer);
