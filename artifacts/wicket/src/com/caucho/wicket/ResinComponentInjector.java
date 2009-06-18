@@ -33,6 +33,9 @@ import com.caucho.config.*;
 import com.caucho.util.*;
 import com.caucho.config.inject.*;
 
+import javax.enterprise.context.spi.*;
+import javax.enterprise.inject.spi.*;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.application.*;
 
@@ -48,6 +51,10 @@ public class ResinComponentInjector implements IComponentInstantiationListener
    */
   public void onInstantiation(Component component)
   {
-    _webBeans.injectObject(component);
+    InjectionTarget inject
+      = _webBeans.createInjectionTarget(component.getClass());
+
+    CreationalContext<?> env = _webBeans.createCreationalContext();
+    inject.inject(component, env);
   }
 }

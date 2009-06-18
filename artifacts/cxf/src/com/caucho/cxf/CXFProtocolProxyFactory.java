@@ -35,6 +35,9 @@ import com.caucho.remote.client.*;
 
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
+import java.lang.annotation.Annotation;
+import javax.enterprise.inject.spi.Annotated;
+
 /**
  * CXF factory for creating remote-client proxies
  */
@@ -42,6 +45,8 @@ public class CXFProtocolProxyFactory
   implements ProtocolProxyFactory
 {
   private String _url;
+  private Annotated _annotated;
+  private Annotation _proxyType;
 
   /**
    * Sets the proxy URL.
@@ -49,6 +54,21 @@ public class CXFProtocolProxyFactory
   public void setURL(String url)
   {
     _url = url;
+  }
+
+  public void setAnnotated(Annotated annotated)
+  {
+    _annotated = annotated;
+  }
+
+  public void setProxyType(Annotation proxyType)
+  {
+    _proxyType = proxyType;
+  }
+
+  public Annotated getAnnotated()
+  {
+    return _annotated;
   }
   
   /**

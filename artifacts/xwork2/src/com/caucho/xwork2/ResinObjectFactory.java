@@ -34,7 +34,7 @@ import com.caucho.config.inject.*;
 import com.opensymphony.xwork2.ObjectFactory;
 
 import java.util.*;
-import javax.inject.*;
+import javax.enterprise.inject.*;
 
 
 /**
@@ -53,6 +53,6 @@ public class ResinObjectFactory extends ObjectFactory
   public Object buildBean(Class clazz, Map extraContext)
     throws Exception
   {
-    return _webBeans.getObject(clazz);
+    return _webBeans.getReference(clazz);
   }
 }

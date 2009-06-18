@@ -64,7 +64,7 @@ public class ResinApplicationFactory implements IWebApplicationFactory
 
       InjectManager webBeans = InjectManager.create();
 
-      return (WebApplication) webBeans.getObject(cl);
+      return (WebApplication) webBeans.getReference(cl);
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {

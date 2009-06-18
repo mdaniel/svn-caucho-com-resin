@@ -33,6 +33,9 @@ import com.caucho.config.*;
 import com.caucho.remote.*;
 import com.caucho.remote.client.*;
 
+import java.lang.annotation.Annotation;
+import javax.enterprise.inject.spi.Annotated;
+
 import org.codehaus.xfire.client.XFireProxyFactory;
 import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.service.binding.ObjectServiceFactory;
@@ -44,6 +47,24 @@ public class XFireProtocolProxyFactory
   implements ProtocolProxyFactory
 {
   private String _url;
+  private Annotation _proxyType;
+  private Annotated _annotated;
+  
+  /**
+   * Sets the ProxyType annotation
+   */
+  public void setProxyType(Annotation proxyType)
+  {
+    _proxyType = proxyType;
+  }
+  
+  /**
+   * Sets the ServiceType annotated
+   */
+  public void setAnnotated(Annotated annotated)
+  {
+    _annotated = annotated;
+  }
 
   /**
    * Sets the proxy URL.

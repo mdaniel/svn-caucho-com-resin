@@ -160,8 +160,10 @@ public class IncludeResponseStream extends ToByteResponseStream {
 
       _writer.write(buffer, 0, charLength);
     
-      if (_cacheWriter != null)
+      if (_cacheWriter != null) {
+	System.out.println("WRITE-IRS: " + _cacheWriter + " " + new String(buffer, 0, charLength));
 	_cacheWriter.write(buffer, 0, charLength);
+      }
     }
     else
       super.flushCharBuffer();
@@ -217,10 +219,22 @@ public class IncludeResponseStream extends ToByteResponseStream {
     if (false && _isCauchoResponseStream) // jsp/15dv
       super.write(buf, offset, length);
     else {
+      // server/2h0m
+      
       if (_os == null)
 	_os = _next.getOutputStream();
 
+      if (_cacheStream != null)
+	_cacheStream.write(buf, offset, length);
+
+      if (_cacheWriter != null) {
+	// server/2h0m
+	_response.killCache();
+      }
+
       _os.write(buf, offset, length);
+
+      System.out.println("WRIII: " + new String(buf, offset, length) + " " + _os + " " + _cacheStream + " " + _cacheWriter);
     }
   }
 
@@ -245,13 +259,16 @@ public class IncludeResponseStream extends ToByteResponseStream {
       if (length == 0)
 	return;
     
-      if (_cacheStream != null)
+      if (_cacheStream != null) {
+	System.out.println("WRITE-CRS: " + _cacheStream + " " + new String(buf, offset, length));
 	_cacheStream.write(buf, offset, length);
+      }
 
       if (_os == null)
 	_os = _next.getOutputStream();
 
       _os.write(buf, offset, length);
+      System.out.println("POST-N: " + new String(buf, offset, length) + " " + _os + " " + _next + " " +_cacheWriter);
     } catch (IOException e) {
       if (_next instanceof CauchoResponse)
 	((CauchoResponse) _next).killCache();
@@ -337,5 +354,10 @@ public class IncludeResponseStream extends ToByteResponseStream {
 
     _cacheStream = null;
     _cacheWriter = null;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
   }
 }

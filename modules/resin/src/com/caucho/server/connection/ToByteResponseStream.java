@@ -54,7 +54,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   private int _charLength;
 
   // head of the expandable buffer
-  private TempBuffer _head = TempBuffer.allocate();
+  private final TempBuffer _head = TempBuffer.allocate();
   private TempBuffer _tail;
   
   private byte []_tailByteBuffer;
@@ -86,15 +86,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void start()
   {
     _bufferCapacity = SIZE;
-    
-    _charLength = 0;
-    
-    _head.clear();
-    _tail = _head;
-    _tailByteBuffer = _tail.getBuffer();
-    _tailByteLength = 0;
-    
-    _bufferSize = 0;
+
+    clearBuffer();
     
     _isHead = false;
     _isClosed = false;
@@ -282,10 +275,12 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void clearBuffer()
   {
     TempBuffer next = _head.getNext();
+    
     if (next != null) {
       _head.setNext(null);
       TempBuffer.freeAll(next);
     }
+    
     _head.clear();
     _tail = _head;
     _tailByteBuffer = _tail.getBuffer();
@@ -564,14 +559,12 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
     TempBuffer ptr = _head;
     do {
-      _head = ptr;
-      
       TempBuffer next = ptr.getNext();
       ptr.setNext(null);
 
       writeNext(ptr.getBuffer(), 0, ptr.getLength(), _isFinished);
 
-      if (next != null) {
+      if (ptr != _head) {
 	TempBuffer.free(ptr);
         ptr = null;
       }

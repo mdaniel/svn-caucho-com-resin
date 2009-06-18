@@ -54,7 +54,7 @@ import com.caucho.cxf.CXFProtocolServletFactory;
 @Documented
 @Target({TYPE})
 @Retention(RUNTIME)
-@ServiceType(defaultFactory=CxfProtocolServletFactory.class)
+@ServiceType(defaultFactory=CXFProtocolServletFactory.class)
 public @interface CxfService {
   public String urlPattern();
 }

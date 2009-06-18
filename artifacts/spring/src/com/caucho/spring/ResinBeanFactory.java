@@ -31,7 +31,9 @@ package com.caucho.spring;
 
 import com.caucho.config.inject.*;
 import com.caucho.util.*;
-import javax.inject.manager.*;
+
+import javax.enterprise.inject.spi.*;
+import java.util.Set;
 
 import org.springframework.beans.*;
 import org.springframework.beans.factory.*;
@@ -62,9 +64,9 @@ public class ResinBeanFactory extends DefaultListableBeanFactory
   @Override
   public boolean containsBeanDefinition(String beanName)
   {
-    Bean bean = _webBeans.findByName(beanName);
+    Set<Bean<?>> beans = _webBeans.getBeans(beanName);
 
-    return bean != null;
+    return beans != null && beans.size() > 0;
   }
 
   /**
@@ -78,6 +80,11 @@ public class ResinBeanFactory extends DefaultListableBeanFactory
 
   public Object getBean(String name, Class requiredType, Object []args)
   {
-    return _webBeans.getInstanceByName(name);
+    Set<Bean<?>> beans = _webBeans.getBeans(name);
+
+    if (beans != null && beans.size() > 0) {
+      return _webBeans.create(_webBeans.getHighestPrecedenceBean(beans));
+    }
+    return null;
   }
 }

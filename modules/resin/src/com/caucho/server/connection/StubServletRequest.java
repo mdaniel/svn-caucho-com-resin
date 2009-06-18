@@ -62,6 +62,12 @@ public class StubServletRequest extends AbstractHttpRequest {
       log.log(Level.FINER, e.toString(), e);
     }
   }
+
+  @Override
+  protected AbstractHttpResponse createResponse()
+  {
+    return null;
+  }
   
   @Override
   public Object getAttribute(String name)

@@ -129,7 +129,6 @@ public class HttpRequest extends AbstractHttpRequest
   {
     super(server, conn);
 
-    _response = new HttpResponse(this, conn.getWriteStream());
     // _response.init(conn.getWriteStream());
 
     /*
@@ -163,6 +162,12 @@ public class HttpRequest extends AbstractHttpRequest
       _headerValues[i] = new CharSegment();
     }
     */
+  }
+
+  @Override
+  protected HttpResponse createResponse()
+  {
+    return new HttpResponse(this, _conn.getWriteStream());
   }
 
   /**

@@ -85,7 +85,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected static final int HEADER_SERVER = HEADER_DATE + 1;
   protected static final int HEADER_CONNECTION = HEADER_SERVER + 1;
 
-  protected CauchoRequest _originalRequest;
+  protected final CauchoRequest _originalRequest;
   protected CauchoRequest _request;
 
   protected int _statusCode;
@@ -103,11 +103,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected final ArrayList<String> _footerValues = new ArrayList<String>();
 
   protected final ArrayList<Cookie> _cookiesOut = new ArrayList<Cookie>();
-  
-  private final AbstractResponseStream _originalResponseStream;
 
   // the raw output stream.
   private final WriteStream _rawWrite;
+  
+  private final AbstractResponseStream _originalResponseStream;
 
   private AbstractResponseStream _responseStream;
   
@@ -163,28 +163,22 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected boolean _forbidForward;
   protected boolean _hasError;
 
-  private boolean _isCacheHit;
-
   protected AbstractHttpResponse()
   {
     _rawWrite = null;
-    _originalResponseStream = createResponseStream();
 
-    if (_originalResponseStream == null)
-      throw new NullPointerException();
+    _originalRequest = null;
+    _originalResponseStream = createResponseStream();
   }
 
   protected AbstractHttpResponse(CauchoRequest request, WriteStream rawWrite)
   {
     _rawWrite = rawWrite;
     
-    _request = request;
     _originalRequest = request;
-
     _originalResponseStream = createResponseStream();
 
-    if (_originalResponseStream == null)
-      throw new NullPointerException();
+    _request = request;
   }
   
   protected AbstractResponseStream
@@ -204,11 +198,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public boolean isIgnoreClientDisconnect()
   {
-    if (! (_originalRequest instanceof AbstractHttpRequest))
-      return true;
-    else {
+    if (_originalRequest instanceof AbstractHttpRequest)
       return ((AbstractHttpRequest) _originalRequest).isIgnoreClientDisconnect();
-    }
+  else
+      return true;
   }
 
   /**
@@ -224,7 +217,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void clientDisconnect()
   {
-    _originalRequest.clientDisconnect();
+    if (_originalRequest != null)
+      _originalRequest.clientDisconnect();
     
     _isClientDisconnect = true;
   }
@@ -234,11 +228,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public boolean isTop()
   {
-    if (! (_request instanceof AbstractHttpRequest))
-      return false;
-    else {
+    if (_request instanceof AbstractHttpRequest)
       return ((AbstractHttpRequest) _request).isTop();
-    }
+    else
+      return false;
   }
 
   /**
@@ -273,7 +266,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void init(CauchoRequest request)
   {
     _request = request;
-    _originalRequest = request;
     _responseStream = _originalResponseStream;
   }
 
@@ -291,9 +283,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void setRequest(CauchoRequest req)
   {
     _request = req;
-
-    if (_originalRequest == null)
-      _originalRequest = req;
   }
 
   /**
@@ -352,6 +341,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _hasSessionCookie = false;
     _cookiesOut.clear();
 
+    _responseStream = _originalResponseStream;
+    _responseStream.start();
+
+    _responseOutputStream.init(_responseStream);
+    _responsePrintWriter.init(_responseStream);
+
     _isHeaderWritten = false;
     _isChunked = false;
     _isClientDisconnect = false;
@@ -360,12 +355,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _contentType = null;
     _contentPrefix = null;
     _locale = null;
-
-    _responseStream = _originalResponseStream;
-    _responseStream.start();
-
-    _responseOutputStream.init(_responseStream);
-    _responsePrintWriter.init(_responseStream);
     
     _flushBuffer = null;
 
@@ -389,7 +378,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _allowCache = true;
     _isNoCache = false;
     _isTopCache = false;
-    _isCacheHit = false;
 
     _sessionId = null;
 
@@ -419,22 +407,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected final boolean isHead()
   {
     return _originalResponseStream.isHead();
-  }
-
-  /**
-   * Set true for a cache hit.
-   */
-  public void setCacheHit(boolean isHit)
-  {
-    _isCacheHit = isHit;
-  }
-
-  /**
-   * Set true for a cache hit.
-   */
-  public boolean isCacheHit()
-  {
-    return _isCacheHit;
   }
 
   /**
@@ -524,7 +496,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       message = "Not Modified";
     
     else if (message == null) {
-      message = (String) _errors.get(String.valueOf(code));
+      message = _errors.get(String.valueOf(code));
 
       if (message == null)
         message = L.l("Internal Server Error");
@@ -597,8 +569,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         return;
       }
       else if (errorManager != null) {
-        errorManager.sendError(getOriginalRequest(), this,
-			       code, _statusMessage);
+	if (getOriginalRequest() != null && code != SC_NOT_FOUND) {
+	  errorManager.sendError(getOriginalRequest(), this,
+				 code, _statusMessage);
+	}
+	else {
+	  // server/10su
+	  errorManager.sendError(getRequest(), this,
+				 code, _statusMessage);
+	}
+
         // _request.killKeepalive();
         // close, but don't force a flush
         // XXX: finish(false);
@@ -1943,7 +1923,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	webApp.addStatus500();
     }
 
-    HttpSession session = _originalRequest.getMemorySession();
+    HttpSession session = _request.getMemorySession();
     if (session instanceof SessionImpl)
       ((SessionImpl) session).saveBeforeHeaders();
 
@@ -2588,7 +2568,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected void free()
   {
     _request = null;
-    _originalRequest = null;
     _cacheInvocation = null;
     _newCacheEntry = null;
     _matchCacheEntry = null;

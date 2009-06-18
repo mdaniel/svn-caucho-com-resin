@@ -172,8 +172,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       return;
     }
 
-    if (res instanceof AbstractHttpResponse)
-      response = (AbstractHttpResponse) res;
+    if (res instanceof CauchoResponse)
+      response = ((CauchoResponse) res).getAbstractHttpResponse();
 
     ServletResponse resPtr = res;
     boolean isError = "error".equals(method);

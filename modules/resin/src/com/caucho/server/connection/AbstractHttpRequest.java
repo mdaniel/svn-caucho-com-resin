@@ -124,7 +124,12 @@ public abstract class AbstractHttpRequest
   protected final Connection _conn;
   protected final TcpConnection _tcpConn;
 
-  protected AbstractHttpResponse _response;
+  protected final AbstractHttpResponse _response;
+
+  // Connection stream
+  protected final ReadStream _rawRead;
+  // Stream for reading post contents
+  protected final ReadStream _readStream;
 
   protected Invocation _invocation;
 
@@ -153,11 +158,6 @@ public abstract class AbstractHttpRequest
 
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
-
-  // Connection stream
-  protected final ReadStream _rawRead;
-  // Stream for reading post contents
-  protected final ReadStream _readStream;
 
   // True if the post stream has been initialized
   protected boolean _hasReadStream;
@@ -211,6 +211,7 @@ public abstract class AbstractHttpRequest
     _server = server;
 
     _conn = conn;
+    
     if (conn != null)
       _rawRead = conn.getReadStream();
     else
@@ -225,7 +226,11 @@ public abstract class AbstractHttpRequest
     _readStream.setReuseBuffer(true);
 
     _bufferedReader = new BufferedReaderAdapter(_readStream);
+
+    _response = createResponse();
   }
+
+  abstract protected AbstractHttpResponse createResponse();
 
   /**
    * Initialization.

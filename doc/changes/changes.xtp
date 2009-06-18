@@ -13,6 +13,8 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>cache: jsp/include/html was not properly cached (#3379, rep by Driss Louriagli)</li>
+<li>servlet: error page file-not-found is reporting the original URL, not the missing error page (#3561, rep by Abhishek Neralla)</li>
 <li>watchdog: start can create a new task if the old one is in the process of shutting down (#3527, rep by Rob Lockston)</li>
 <li>watchdog: stop needs to wait for Resin to exit (#3528, #3418, rep by Rob Lockstone)</li>
 <li>watchdog: require "console" option, and forbid command-line without command</li>

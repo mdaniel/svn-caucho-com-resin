@@ -48,8 +48,8 @@ public class ResponseStream extends ToByteResponseStream {
   static final L10N L = new L10N(ResponseStream.class);
 
   private static final int _tailChunkedLength = 7;
-  private static final byte []_tailChunked =
-    new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
+  private static final byte []_tailChunked
+    = new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
   
   private AbstractHttpResponse _response;
   
@@ -625,8 +625,8 @@ public class ResponseStream extends ToByteResponseStream {
       CauchoRequest request = _response.getRequest();
       ServletContext app = request.getWebApp();
       
-      Exception exn =
-	  new IllegalStateException(L.l("{0}: tried to write {1} bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
+      Exception exn
+	= new IllegalStateException(L.l("{0}: Can't write {1} extra bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
 					request.getRequestURL(),
 					"" + (length + _contentLength),
 					"" + contentLengthHeader));
@@ -800,13 +800,6 @@ public class ResponseStream extends ToByteResponseStream {
           log.fine(dbgId() + "finish/keepalive");
         }
       }
-      
-      /*
-      else if (flush) {
-        //_next.flush();
-        _next.flushBuffer();
-      }
-      */
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
       

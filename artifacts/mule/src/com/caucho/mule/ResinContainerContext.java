@@ -35,7 +35,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.manager.Bean;
+
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.util.L10N;
 import com.caucho.config.inject.*;
@@ -114,23 +115,23 @@ public class ResinContainerContext implements UMOContainerContext
         bean = _beanMap.get(clazz);
 
         if (bean == null) {
-          Set<Bean> set = _webBeans.resolveByType(clazz);
+          Set<Bean<?>> set = _webBeans.getBeans(clazz);
 
-	  Iterator<Bean> iter = set.iterator();
+	  Iterator<Bean<?>> iter = set.iterator();
 	  if (iter.hasNext())
 	    bean = iter.next();
 
           if (bean == null)
-            bean = _webBeans.createTransient(clazz);
+            bean = _webBeans.createManagedBean(clazz);
 
           _beanMap.put(clazz, bean);
         }
       }
 
-      return _webBeans.getInstance(bean);
+      return _webBeans.create(bean);
     }
     else if (key instanceof String) {
-      return _webBeans.getInstanceByName((String) key);
+      return _webBeans.getBeans((String) key);
     }
     else {
       throw new ObjectNotFoundException(L.l("Component keys of type {0} are not understood", key.getClass().getName()));

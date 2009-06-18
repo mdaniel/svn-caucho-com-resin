@@ -291,8 +291,6 @@ public class HmuxRequest extends AbstractHttpRequest
     _writeStream = new WriteStream();
     _writeStream.setReuseBuffer(true);
 
-    _response = new HmuxResponse(this, _writeStream);
-
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
     _server = Server.getCurrent();
@@ -341,6 +339,12 @@ public class HmuxRequest extends AbstractHttpRequest
     _lengthBuf = new byte[16];
 
     _filter = new ServletFilter();
+  }
+
+  @Override
+  protected HmuxResponse createResponse()
+  {
+    return new HmuxResponse(this, _writeStream);
   }
 
   public boolean isWaitForRead()

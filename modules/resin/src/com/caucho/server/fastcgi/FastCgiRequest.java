@@ -192,7 +192,12 @@ public class FastCgiRequest extends AbstractHttpRequest
     _writeStream = new WriteStream();
     _writeStream.setReuseBuffer(true);
     
-    _response = new FastCgiResponse(this, _writeStream);
+  }
+
+  @Override
+  protected FastCgiResponse createResponse()
+  {
+    return new FastCgiResponse(this, _writeStream);
   }
 
   /**
