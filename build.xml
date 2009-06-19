@@ -475,15 +475,15 @@
         <exclude name="**/.*"/>
       </fileset>
       
+      <fileset dir="${resin.modules}/jcache/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
       <fileset dir="${resin.modules}/jms/classes">
         <exclude name="**/.*"/>
       </fileset>
       
       <fileset dir="${resin.modules}/jpa/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/servlet16/classes">
         <exclude name="**/.*"/>
       </fileset>
 
@@ -502,6 +502,10 @@
       </fileset>
       
       <fileset dir="${resin.modules}/jws/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/servlet16/classes">
         <exclude name="**/.*"/>
       </fileset>
       

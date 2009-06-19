@@ -236,6 +236,10 @@ public class ResinEmbed
       _server.addHost(hostConfig);
       _host = _server.getHost("", 0);
 
+      if (_host == null) {
+	throw new ConfigException(L.l("ResinEmbed requires a <host> to be configured in the resin.xml, because the webapps must belong to a host."));
+      }
+
       thread.setContextClassLoader(_host.getClassLoader());
 
       for (WebAppEmbed webApp : _webAppList) {

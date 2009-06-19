@@ -1,6 +1,6 @@
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
-  
+       xmlns:resin="urn:java:com.caucho.resin">
+
   <class-loader>
     <tree-loader path="${resin.root}/ext-lib"/>
   </class-loader>
@@ -8,9 +8,6 @@
   <cluster id="">
     <server id="" port="0">
     </server>
-
-    <host id="">
-    </host>
     
 <web-app-default>
   <prologue>
@@ -254,5 +251,8 @@
   <resin:import path="WEB-INF/resin-web.xml" optional="true"/>
 
     </web-app-default>
+
+    <host id="">
+    </host>
   </cluster>
 </resin>

@@ -257,12 +257,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       resin = (Resin) ctor.newInstance(loader, isWatchdog);
     } catch (ConfigException e) {
-      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       licenseErrorMessage = e.getMessage();
     } catch (Throwable e) {
-      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
@@ -908,6 +906,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   @PostConstruct
   public void init()
   {
+    preConfigureInit();
+    
     _lifecycle.toInit();
   }
 

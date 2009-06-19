@@ -283,23 +283,32 @@ abstract public class
     oldController = (EnvironmentDeployController) oldControllerV;
     // setId(oldController.getId());
 
-    _configDefaults.addAll(oldController._configDefaults);
-
-    if (getConfig() == null)
-      setConfig(oldController.getConfig());
-    else if (oldController.getConfig() != null) {
-      _configDefaults.add(getConfig());
-
-      setConfig(oldController.getConfig());
-    }
+    ArrayList<C> configDefaults = new ArrayList<C>();
 
     if (getPrologue() == null)
       setPrologue(oldController.getPrologue());
     else if (oldController.getPrologue() != null) {
-      _configDefaults.add(0, (C) getPrologue()); // XXX: must be first
+      configDefaults.add(0, (C) getPrologue()); // XXX: must be first
 
       setPrologue(oldController.getPrologue());
     }
+
+    configDefaults.addAll(oldController._configDefaults);
+    
+    if (getConfig() == null)
+      setConfig(oldController.getConfig());
+    else if (oldController.getConfig() != null) {
+      configDefaults.add(getConfig());
+
+      setConfig(oldController.getConfig());
+    }
+
+    for (C config : _configDefaults) {
+      if (! configDefaults.contains(config))
+	configDefaults.add(config);
+    }
+    
+    _configDefaults = configDefaults;
 
     mergeStartupMode(oldController.getStartupMode());
 
