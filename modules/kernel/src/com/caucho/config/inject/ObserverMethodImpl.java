@@ -29,119 +29,108 @@
 
 package com.caucho.config.inject;
 
-import javax.enterprise.inject.spi.*;;
-
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.event.Observer;
 import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * Internal implementation for a producer Bean
  */
-public class ObserverMethodImpl<X,T> implements Observer<T>
-{
-  private BeanManager _beanManager;
-  
-  private Bean<X> _bean;
-  private AnnotatedMethod<X> _method;
+public class ObserverMethodImpl<X, T> implements Observer<T> {
+	private BeanManager _beanManager;
 
-  private Type _type;
-  private Set<Annotation> _bindings;
-  
-  ObserverMethodImpl(InjectManager beanManager,
-		     Bean<X> bean,
-		     AnnotatedMethod<X> method,
-		     Type type,
-		     Set<Annotation> bindings)
-  {
-    _beanManager = beanManager;
-    _bean = bean;
-    _method = method;
-    _method.getJavaMember().setAccessible(true);
-    _type = type;
-    _bindings = bindings;
-  }
-  
-  /**
-   * Returns the annotated method
-   */
-  public AnnotatedMethod<X> getAnnotatedMethod()
-  {
-    return _method;
-  }
+	private Bean<X> _bean;
+	private AnnotatedMethod<X> _method;
 
-  /**
-   * Returns the declaring bean
-   */
-  public Bean<X> getParentBean()
-  {
-    return _bean;
-  }
+	private Type _type;
+	private Set<Annotation> _bindings;
 
-  /**
-   * Returns the observed event type
-   */
-  public Type getObservedEventType()
-  {
-    return _type;
-  }
+	ObserverMethodImpl(InjectManager beanManager, Bean<X> bean,
+			AnnotatedMethod<X> method, Type type, Set<Annotation> bindings) {
+		_beanManager = beanManager;
+		_bean = bean;
+		_method = method;
+		_method.getJavaMember().setAccessible(true);
+		_type = type;
+		_bindings = bindings;
+	}
 
-  /**
-   * Returns the observed event bindings
-   */
-  public Set<Annotation> getObservedEventBindings()
-  {
-    return _bindings;
-  }
+	/**
+	 * Returns the annotated method
+	 */
+	public AnnotatedMethod<X> getAnnotatedMethod() {
+		return _method;
+	}
 
-  public boolean notify(T event)
-  {
-    Class<X> type = null;
+	/**
+	 * Returns the declaring bean
+	 */
+	public Bean<X> getParentBean() {
+		return _bean;
+	}
 
-    CreationalContext env = _beanManager.createCreationalContext();
+	/**
+	 * Returns the observed event type
+	 */
+	public Type getObservedEventType() {
+		return _type;
+	}
 
-    Object instance = _beanManager.getReference(getParentBean(), type, env);
-    
-    Method method = _method.getJavaMember();
-    
-    try {
-      method.invoke(instance, event);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (InvocationTargetException e) {
-      String loc = (method.getDeclaringClass().getSimpleName()
-		    + "." + method.getName() + ": ");
-      
-      throw new InjectionException(loc + e.getMessage(), e.getCause());
-    } catch (Exception e) {
-      String loc = (method.getDeclaringClass().getSimpleName()
-		    + "." + method.getName() + ": ");
-      
-      throw new InjectionException(loc + e.getMessage(), e.getCause());
-    }
+	/**
+	 * Returns the observed event bindings
+	 */
+	public Set<Annotation> getObservedEventBindings() {
+		return _bindings;
+	}
 
-    return false;
-  }
+	public boolean notify(T event) {
+		Class<X> type = null;
 
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
-  public AnnotatedParameter<X> getEventParameter()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+		CreationalContext env = _beanManager.createCreationalContext();
 
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _method + "]";
-  }
+		Object instance = _beanManager.getReference(getParentBean(), type, env);
+
+		Method method = _method.getJavaMember();
+
+		try {
+			method.invoke(instance, event);
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (InvocationTargetException e) {
+			String loc = (method.getDeclaringClass().getSimpleName() + "."
+					+ method.getName() + ": ");
+
+			throw new InjectionException(loc + e.getMessage(), e.getCause());
+		} catch (Exception e) {
+			String loc = (method.getDeclaringClass().getSimpleName() + "."
+					+ method.getName() + ": ");
+
+			throw new InjectionException(loc + e.getMessage(), e.getCause());
+		}
+
+		return false;
+	}
+
+	public Set<InjectionPoint> getInjectionPoints() {
+		throw new UnsupportedOperationException(getClass().getName());
+	}
+
+	public AnnotatedParameter<X> getEventParameter() {
+		throw new UnsupportedOperationException(getClass().getName());
+	}
+
+	public String toString() {
+		return getClass().getSimpleName() + "[" + _method + "]";
+	}
 }
