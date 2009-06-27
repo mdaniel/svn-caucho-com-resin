@@ -26,18 +26,12 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.HashMap;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.annotation.security.*;
-import javax.ejb.*;
-import javax.interceptor.*;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a filter for invoking a method
@@ -56,18 +50,18 @@ public interface EjbCallChain {
   /**
    * Generates the static class prologue
    */
-  public void generatePrologue(JavaWriter out, HashMap map)
-    throws IOException;
+  @SuppressWarnings("unchecked")
+  public void generatePrologue(JavaWriter out, HashMap map) throws IOException;
 
   /**
    * Generates initialization in the constructor
    */
+  @SuppressWarnings("unchecked")
   public void generateConstructor(JavaWriter out, HashMap map)
-    throws IOException;
+      throws IOException;
 
   /**
    * Generates the method interception code
    */
-  public void generateCall(JavaWriter out)
-    throws IOException;
+  public void generateCall(JavaWriter out) throws IOException;
 }
