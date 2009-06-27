@@ -26,15 +26,12 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.HashMap;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a business method
@@ -174,6 +171,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _interceptor.introspect(apiMethod, implMethod);
   }
 
+  @SuppressWarnings("unchecked")
   public final void generatePrologueTop(JavaWriter out, HashMap prologueMap)
     throws IOException
   {
@@ -185,6 +183,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     generateInterceptorTarget(out);
   }
 
+  @SuppressWarnings("unchecked")
   public final void generateConstructorTop(JavaWriter out, HashMap prologueMap)
     throws IOException
   {
@@ -194,6 +193,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _security.generateConstructor(out, prologueMap);
   }
 
+  @SuppressWarnings("unchecked")
   public final void generatePostConstruct(JavaWriter out, HashMap map)
     throws IOException
   {
@@ -203,6 +203,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _interceptor.generatePostConstruct(out, map);
   }
 
+  @SuppressWarnings("unchecked")
   public final void generate(JavaWriter out, HashMap prologueMap)
     throws IOException
   {
@@ -220,6 +221,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     out.println("}");
   }
 
+  @SuppressWarnings("unchecked")
   protected void generateInterceptorTarget(JavaWriter out)
     throws IOException
   {
@@ -255,6 +257,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void generateHeader(JavaWriter out)
     throws IOException
   {
@@ -308,16 +311,19 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Generates any additional configuration in the constructor
    */
+  @SuppressWarnings("unchecked")
   public void generateConstructor(JavaWriter out, HashMap map)
     throws IOException
   {
   }
 
+  @SuppressWarnings("unchecked")
   public void generatePrologue(JavaWriter out, HashMap map)
     throws IOException
   {
   }
 
+  @SuppressWarnings("unchecked")
   protected void generateThrows(JavaWriter out, Class []exnCls)
     throws IOException
   {
@@ -341,6 +347,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     generateCall(out, getSuper());
   }
 
+  @SuppressWarnings("unchecked")
   public void generateCall(JavaWriter out, String superVar)
     throws IOException
   {
@@ -414,6 +421,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   {
   }
 
+  @SuppressWarnings("unchecked")
   protected boolean hasException(Class exn)
   {
     for (Class apiExn : _implMethod.getExceptionTypes()) {
@@ -424,6 +432,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     return false;
   }
 
+  @SuppressWarnings("unchecked")
   boolean matches(String name, Class[] parameterTypes)
   {
     if (! _apiMethod.getName().equals(name))
