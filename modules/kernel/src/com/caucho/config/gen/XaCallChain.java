@@ -42,7 +42,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
- * Represents the xa interception
+ * Represents the XA interception
  */
 public class XaCallChain extends AbstractCallChain {
   @SuppressWarnings("unused")
@@ -76,29 +76,12 @@ public class XaCallChain extends AbstractCallChain {
         .equals(TransactionAttributeType.SUPPORTS));
   }
 
-  /*
-   * public boolean isContainerManaged() { return _isContainerManaged; }
-   * 
-   * public void setContainerManaged(boolean isContainerManaged) {
-   * _isContainerManaged = isContainerManaged; }
-   */
-
   /**
    * Returns the transaction type
    */
   public TransactionAttributeType getTransactionType() {
     return _xa;
   }
-
-  /**
-   * Sets the transaction type
-   */
-  /*
-   * public void setTransactionType(TransactionAttributeType xa) { _xa = xa; }
-   * 
-   * public void setSynchronization(boolean isSynchronization) {
-   * _isSynchronization = isSynchronization; }
-   */
 
   /**
    * Introspects the method for the default values
