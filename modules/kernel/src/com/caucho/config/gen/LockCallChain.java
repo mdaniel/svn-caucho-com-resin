@@ -49,33 +49,35 @@ public class LockCallChain extends AbstractCallChain {
   @SuppressWarnings("unused")
   private static final L10N L = new L10N(LockCallChain.class);
 
-  private BusinessMethodGenerator businessMethod;
-  private EjbCallChain next;
+  private BusinessMethodGenerator _businessMethod;
+  private EjbCallChain _next;
 
-  private TransactionAttributeType transactionAttribute;
-  private boolean isContainerManaged;
-  private boolean isSynchronization;
+  private TransactionAttributeType _transactionAttribute;
+  private boolean _isContainerManaged;
+  private boolean _isSynchronization;
 
   public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next) {
     super(next);
 
-    this.businessMethod = businessMethod;
-    this.next = next;
+    _businessMethod = businessMethod;
+    _next = next;
 
     // TODO What would be the synchronization counter-part? Is this just for
     // defaulting?
-    this.isContainerManaged = businessMethod.isXaContainerManaged();
+    _isContainerManaged = businessMethod.isXaContainerManaged();
   }
 
-  protected BusinessMethodGenerator getBusinessMethod() {
-    return businessMethod;
+  protected BusinessMethodGenerator getBusinessMethod()
+  {
+    return _businessMethod;
   }
 
   /**
    * Returns true if the business method has any active XA annotation.
    */
   @Override
-  public boolean isEnhanced() {
+  public boolean isEnhanced()
+  {
     // TODO This should scan for locking annotations?
     return false;
   }
@@ -84,7 +86,8 @@ public class LockCallChain extends AbstractCallChain {
    * Introspects the method for the default values
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod) {
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
     TransactionManagement xaManagement = apiClass
@@ -92,7 +95,7 @@ public class LockCallChain extends AbstractCallChain {
 
     if (xaManagement != null
         && xaManagement.value() != TransactionManagementType.CONTAINER) {
-      isContainerManaged = false;
+      _isContainerManaged = false;
       return;
     }
 
@@ -103,7 +106,7 @@ public class LockCallChain extends AbstractCallChain {
 
     if (implClass != null
         && Synchronization.class.isAssignableFrom(implClass.getJavaClass())) {
-      isSynchronization = true;
+      _isSynchronization = true;
     }
 
     TransactionAttribute xaAttr;
@@ -123,7 +126,7 @@ public class LockCallChain extends AbstractCallChain {
     }
 
     if (xaAttr != null)
-      transactionAttribute = xaAttr.value();
+      _transactionAttribute = xaAttr.value();
   }
 
   /**
@@ -131,8 +134,9 @@ public class LockCallChain extends AbstractCallChain {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void generatePrologue(JavaWriter out, HashMap map) throws IOException {
-    if (isContainerManaged && map.get("caucho.ejb.xa") == null) {
+  public void generatePrologue(JavaWriter out, HashMap map) throws IOException
+  {
+    if (_isContainerManaged && map.get("caucho.ejb.xa") == null) {
       map.put("caucho.ejb.xa", "done");
 
       out.println();
@@ -140,18 +144,19 @@ public class LockCallChain extends AbstractCallChain {
       out.println("  = new com.caucho.ejb3.xa.XAManager();");
     }
 
-    next.generatePrologue(out, map);
+    _next.generatePrologue(out, map);
   }
 
   /**
    * Generates the method interceptor code
    */
   @SuppressWarnings("unchecked")
-  public void generateCall(JavaWriter out) throws IOException {
+  public void generateCall(JavaWriter out) throws IOException
+  {
     boolean isPushDepth = false;
 
-    if (isContainerManaged && transactionAttribute != null) {
-      switch (transactionAttribute) {
+    if (_isContainerManaged && _transactionAttribute != null) {
+      switch (_transactionAttribute) {
       case MANDATORY: {
         out.println("_xa.beginMandatory();");
       }
@@ -191,17 +196,17 @@ public class LockCallChain extends AbstractCallChain {
       }
     }
 
-    if (isSynchronization) {
+    if (_isSynchronization) {
       out.println("_xa.registerSynchronization(_bean);");
     }
 
     generateNext(out);
 
-    if (isContainerManaged && transactionAttribute != null) {
+    if (_isContainerManaged && _transactionAttribute != null) {
       if (isPushDepth)
         out.popDepth();
 
-      for (Class exn : businessMethod.getApiMethod().getExceptionTypes()) {
+      for (Class exn : _businessMethod.getApiMethod().getExceptionTypes()) {
         ApplicationException appExn = (ApplicationException) exn
             .getAnnotation(ApplicationException.class);
 
@@ -219,7 +224,7 @@ public class LockCallChain extends AbstractCallChain {
         }
       }
 
-      switch (transactionAttribute) {
+      switch (_transactionAttribute) {
       case REQUIRED:
       case REQUIRES_NEW: {
         out.println("} catch (RuntimeException e) {");
@@ -228,7 +233,7 @@ public class LockCallChain extends AbstractCallChain {
       }
       }
 
-      switch (transactionAttribute) {
+      switch (_transactionAttribute) {
       case NOT_SUPPORTED: {
         out.println("} finally {");
         out.println("  if (xa != null)");
@@ -255,7 +260,8 @@ public class LockCallChain extends AbstractCallChain {
     }
   }
 
-  protected void generateNext(JavaWriter out) throws IOException {
-    next.generateCall(out);
+  protected void generateNext(JavaWriter out) throws IOException
+  {
+    _next.generateCall(out);
   }
 }
