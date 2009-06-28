@@ -64,29 +64,33 @@ public class XaCallChain extends AbstractCallChain {
     _isContainerManaged = bizMethod.isXaContainerManaged();
   }
 
-  protected BusinessMethodGenerator getBusinessMethod() {
+  protected BusinessMethodGenerator getBusinessMethod()
+  {
     return _bizMethod;
   }
 
   /**
    * Returns true if the business method has any active XA annotation.
    */
-  public boolean isEnhanced() {
-    return (_isContainerManaged && _xa != null && !_xa
-        .equals(TransactionAttributeType.SUPPORTS));
+  public boolean isEnhanced()
+  {
+    return (_isContainerManaged && _xa != null
+	    && !_xa.equals(TransactionAttributeType.SUPPORTS));
   }
 
   /**
    * Returns the transaction type
    */
-  public TransactionAttributeType getTransactionType() {
+  public TransactionAttributeType getTransactionType()
+  {
     return _xa;
   }
 
   /**
    * Introspects the method for the default values
    */
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod) {
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
     TransactionManagement xaManagement = apiClass
@@ -133,7 +137,9 @@ public class XaCallChain extends AbstractCallChain {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void generatePrologue(JavaWriter out, HashMap map) throws IOException {
+  public void generatePrologue(JavaWriter out, HashMap map)
+    throws IOException
+  {
     if (_isContainerManaged && map.get("caucho.ejb.xa") == null) {
       map.put("caucho.ejb.xa", "done");
 
@@ -149,7 +155,9 @@ public class XaCallChain extends AbstractCallChain {
    * Generates the method interceptor code
    */
   @SuppressWarnings("unchecked")
-  public void generateCall(JavaWriter out) throws IOException {
+  public void generateCall(JavaWriter out)
+    throws IOException
+  {
     boolean isPushDepth = false;
 
     if (_isContainerManaged && _xa != null) {
@@ -210,12 +218,13 @@ public class XaCallChain extends AbstractCallChain {
         if (appExn == null)
           continue;
 
-        if (!RuntimeException.class.isAssignableFrom(exn) && appExn.rollback()) {
+        if (! RuntimeException.class.isAssignableFrom(exn)
+	    && appExn.rollback()) {
           out.println("} catch (" + exn.getName() + " e) {");
           out.println("  _xa.markRollback(e);");
           out.println("  throw e;");
         } else if (RuntimeException.class.isAssignableFrom(exn)
-            && !appExn.rollback()) {
+		   && !appExn.rollback()) {
           out.println("} catch (" + exn.getName() + " e) {");
           out.println("  throw e;");
         }
@@ -257,7 +266,9 @@ public class XaCallChain extends AbstractCallChain {
     }
   }
 
-  protected void generateNext(JavaWriter out) throws IOException {
+  protected void generateNext(JavaWriter out)
+    throws IOException
+  {
     _next.generateCall(out);
   }
 }

@@ -39,7 +39,8 @@ import com.caucho.java.JavaWriter;
 abstract public class AbstractCallChain implements EjbCallChain {
   private EjbCallChain _next;
 
-  AbstractCallChain(EjbCallChain next) {
+  AbstractCallChain(EjbCallChain next)
+  {
     if (next == null)
       throw new NullPointerException();
 
@@ -54,14 +55,17 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Introspects the method for the default values
    */
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod) {
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  {
   }
 
   /**
    * Generates the static class prologue
    */
   @SuppressWarnings("unchecked")
-  public void generatePrologue(JavaWriter out, HashMap map) throws IOException {
+  public void generatePrologue(JavaWriter out, HashMap map)
+    throws IOException
+  {
     _next.generatePrologue(out, map);
   }
 
@@ -70,14 +74,17 @@ abstract public class AbstractCallChain implements EjbCallChain {
    */
   @SuppressWarnings("unchecked")
   public void generateConstructor(JavaWriter out, HashMap map)
-      throws IOException {
+      throws IOException
+  {
     _next.generateConstructor(out, map);
   }
 
   /**
    * Generates the method interception code
    */
-  public void generateCall(JavaWriter out) throws IOException {
+  public void generateCall(JavaWriter out)
+    throws IOException
+  {
     _next.generateCall(out);
   }
 }
