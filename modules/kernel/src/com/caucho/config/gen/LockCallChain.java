@@ -52,8 +52,8 @@ public class LockCallChain extends AbstractCallChain {
   private BusinessMethodGenerator _businessMethod;
   private EjbCallChain _next;
 
-  private TransactionAttributeType _transactionAttribute;
   private boolean _isContainerManaged;
+  private TransactionAttributeType _transactionAttribute;
   private boolean _isSynchronization;
 
   public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next)
