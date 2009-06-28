@@ -167,7 +167,7 @@ public class LockCallChain extends AbstractCallChain {
         out.println("try {");
         // Increasing indentation depth.
         out.pushDepth();
-        out.println("_lockManager.beginReadLock();");
+        out.println("_lockManager.acquireReadLock();");
         out.println();
         break;
 
@@ -176,7 +176,7 @@ public class LockCallChain extends AbstractCallChain {
         out.println("try {");
         // Increasing indentation depth.
         out.pushDepth();
-        out.println("_lockManager.beginWriteLock();");
+        out.println("_lockManager.acquireWriteLock();");
         out.println();
         break;
       }
@@ -196,13 +196,13 @@ public class LockCallChain extends AbstractCallChain {
       switch (_lockType) {
       case READ:
         out.println("} finally {");
-        out.println("  _lockManager.endReadLock();");
+        out.println("  _lockManager.releaseReadLock();");
         out.println("}");
         out.println();
         break;
       case WRITE:
         out.println("} finally {");
-        out.println("  _lockManager.endWriteLock();");
+        out.println("  _lockManager.releaseWriteLock();");
         out.println("}");
         out.println();
         break;
