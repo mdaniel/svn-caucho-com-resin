@@ -99,6 +99,11 @@ public class WbComponentConfig {
     _beanManager = webbeans;
   }
 
+  public InjectManager getBeanManager()
+  {
+    return _beanManager;
+  }
+
   /**
    * Returns the component's EL binding name.
    */
@@ -395,7 +400,7 @@ public class WbComponentConfig {
   {
     /*
     if (_comp != null) {
-      _beanManager.addConfigBean(_comp);
+      _beanManager.addBean(_comp);
     }
     */
   }
@@ -444,5 +449,10 @@ public class WbComponentConfig {
 	}
       }
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _cl + "]";
   }
 }

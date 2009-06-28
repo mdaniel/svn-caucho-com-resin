@@ -211,11 +211,12 @@ public class BeanConfig extends WbComponentConfig {
   {
     _customBean = customBean;
   }
-  
+
   public void init()
   {
     if (_customBean != null) {
       _customBean.initComponent();
+
       /* XXX:
       _comp = _customBean.getComponent();
 
@@ -251,6 +252,15 @@ public class BeanConfig extends WbComponentConfig {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+
+  @Override
+  protected void deploy()
+  {
+    // ejb/1030
+    if (_comp != null) {
+      getBeanManager().addBean(_comp);
     }
   }
 
