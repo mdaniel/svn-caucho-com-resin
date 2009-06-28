@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Reza Rahman
  */
 package com.caucho.config.gen;
 
@@ -62,7 +62,7 @@ public class LockCallChain extends AbstractCallChain {
     this.businessMethod = businessMethod;
     this.next = next;
 
-    isContainerManaged = businessMethod.isXaContainerManaged();
+    this.isContainerManaged = businessMethod.isXaContainerManaged();
   }
 
   protected BusinessMethodGenerator getBusinessMethod() {
