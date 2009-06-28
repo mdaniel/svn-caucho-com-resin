@@ -53,7 +53,7 @@ public class LockCallChain extends AbstractCallChain {
   private EjbCallChain next;
 
   private TransactionAttributeType transactionAttribute;
-  private boolean isContainerManaged = true;
+  private boolean isContainerManaged;
   private boolean isSynchronization;
 
   public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next) {
@@ -62,6 +62,8 @@ public class LockCallChain extends AbstractCallChain {
     this.businessMethod = businessMethod;
     this.next = next;
 
+    // TODO What would be the synchronization counter-part? Is this just for
+    // defaulting?
     this.isContainerManaged = businessMethod.isXaContainerManaged();
   }
 
@@ -72,21 +74,16 @@ public class LockCallChain extends AbstractCallChain {
   /**
    * Returns true if the business method has any active XA annotation.
    */
+  @Override
   public boolean isEnhanced() {
-    return (isContainerManaged && transactionAttribute != null && !transactionAttribute
-        .equals(TransactionAttributeType.SUPPORTS));
-  }
-
-  /**
-   * Returns the transaction type
-   */
-  public TransactionAttributeType getTransactionType() {
-    return transactionAttribute;
+    // TODO This should scan for locking annotations?
+    return false;
   }
 
   /**
    * Introspects the method for the default values
    */
+  @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod) {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
