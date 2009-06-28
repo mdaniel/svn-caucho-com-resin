@@ -56,7 +56,8 @@ public class LockCallChain extends AbstractCallChain {
   private boolean _isContainerManaged;
   private boolean _isSynchronization;
 
-  public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next) {
+  public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next)
+  {
     super(next);
 
     _businessMethod = businessMethod;
