@@ -31,11 +31,10 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.ejb.ApplicationException;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.transaction.Synchronization;
 
 import com.caucho.java.JavaWriter;
@@ -45,57 +44,53 @@ import com.caucho.util.L10N;
  * Represents EJB lock type specification interception. The specification gears
  * it towards EJB singletons, but it can be used for other bean types.
  */
+// TODO What bean types (e.g. JCDI scopes) do we foresee a use for?
 public class LockCallChain extends AbstractCallChain {
   @SuppressWarnings("unused")
   private static final L10N L = new L10N(LockCallChain.class);
 
-  private BusinessMethodGenerator _businessMethod;
   private EjbCallChain _next;
 
   private boolean _isContainerManaged;
-  private TransactionAttributeType _transactionAttribute;
+  private LockType _lockType;
   private boolean _isSynchronization;
 
   public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next)
   {
     super(next);
 
-    _businessMethod = businessMethod;
     _next = next;
 
     // TODO What would be the synchronization counter-part? Is this just for
-    // defaulting?
+    // defaulting? Will be default of "true" suffice?
     _isContainerManaged = businessMethod.isXaContainerManaged();
-  }
 
-  protected BusinessMethodGenerator getBusinessMethod()
-  {
-    return _businessMethod;
+    // TODO Should the lock type be defaulted to "WRITE"? This would be true for
+    // EJB 3.1 singletons...
   }
 
   /**
-   * Returns true if the business method has any active XA annotation.
+   * Returns true if the business method has a lock annotation.
    */
   @Override
   public boolean isEnhanced()
   {
-    // TODO This should scan for locking annotations?
-    return false;
+    return (_isContainerManaged && _lockType != null);
   }
 
   /**
-   * Introspects the method for the default values
+   * Introspects the method for locking attributes.
    */
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implementationMethod)
   {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
-    ConcurrencyManagement concurrencyManagement = apiClass
+    ConcurrencyManagement concurrencyManagementAnnotation = apiClass
         .getAnnotation(ConcurrencyManagement.class);
 
-    if (concurrencyManagement != null
-        && concurrencyManagement.value() != ConcurrencyManagementType.CONTAINER) {
+    if (concurrencyManagementAnnotation != null
+        && concurrencyManagementAnnotation.value() != ConcurrencyManagementType.CONTAINER) {
       _isContainerManaged = false;
       return;
     }
@@ -115,152 +110,101 @@ public class LockCallChain extends AbstractCallChain {
       _isSynchronization = true;
     }
 
-    TransactionAttribute xaAttr;
+    Lock lockAttribute;
 
-    xaAttr = apiMethod.getAnnotation(TransactionAttribute.class);
+    lockAttribute = apiMethod.getAnnotation(Lock.class);
 
-    if (xaAttr == null) {
-      xaAttr = apiClass.getAnnotation(TransactionAttribute.class);
+    if (lockAttribute == null) {
+      lockAttribute = apiClass.getAnnotation(Lock.class);
     }
 
-    if (xaAttr == null && implementationMethod != null) {
-      xaAttr = implementationMethod.getAnnotation(TransactionAttribute.class);
+    if (lockAttribute == null && implementationMethod != null) {
+      lockAttribute = implementationMethod.getAnnotation(Lock.class);
     }
 
-    if (xaAttr == null && implementationClass != null) {
-      xaAttr = implementationClass.getAnnotation(TransactionAttribute.class);
+    if (lockAttribute == null && implementationClass != null) {
+      lockAttribute = implementationClass.getAnnotation(Lock.class);
     }
 
-    if (xaAttr != null)
-      _transactionAttribute = xaAttr.value();
+    if (lockAttribute != null) {
+      _lockType = lockAttribute.value();
+    }
   }
 
   /**
-   * Generates the static class prologue
+   * Generates the class prologue.
    */
   @SuppressWarnings("unchecked")
   @Override
   public void generatePrologue(JavaWriter out, HashMap map) throws IOException
   {
-    if (_isContainerManaged && map.get("caucho.ejb.xa") == null) {
-      map.put("caucho.ejb.xa", "done");
+    if (_isContainerManaged && map.get("caucho.ejb.lock") == null) {
+      // TODO Does this need be registered somewhere?
+      map.put("caucho.ejb.lock", "done");
 
       out.println();
-      out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
-      out.println("  = new com.caucho.ejb3.xa.XAManager();");
+      // TODO Should this be static? Should locks be placed at the instance or
+      // class level? The class level is fine for EJB singletons, but not
+      // necessarily for other bean types.
+      out
+          .println("private final com.caucho.ejb3.lock.LockManager _lockManager");
+      out.println("  = new com.caucho.ejb3.lock.LockManager();");
     }
 
     _next.generatePrologue(out, map);
   }
 
   /**
-   * Generates the method interceptor code
+   * Generates the method interception code.
    */
-  @SuppressWarnings("unchecked")
+  @Override
   public void generateCall(JavaWriter out) throws IOException
   {
-    boolean isPushDepth = false;
-
-    if (_isContainerManaged && _transactionAttribute != null) {
-      switch (_transactionAttribute) {
-      case MANDATORY: {
-        out.println("_xa.beginMandatory();");
-      }
-        break;
-
-      case NEVER: {
-        out.println("_xa.beginNever();");
-      }
-        break;
-
-      case NOT_SUPPORTED: {
-        out.println("Transaction xa = _xa.beginNotSupported();");
+    if (_isContainerManaged && _lockType != null) {
+      switch (_lockType) {
+      case READ:
         out.println();
         out.println("try {");
+        // Increasing indentation depth.
         out.pushDepth();
-        isPushDepth = true;
-      }
+        out.println("_lockManager.beginReadLock();");
+        out.println();
         break;
 
-      case REQUIRED: {
-        out.println("Transaction xa = _xa.beginRequired();");
+      case WRITE:
         out.println();
         out.println("try {");
+        // Increasing indentation depth.
         out.pushDepth();
-        isPushDepth = true;
-      }
-        break;
-
-      case REQUIRES_NEW: {
-        out.println("Transaction xa = _xa.beginRequiresNew();");
+        out.println("_lockManager.beginWriteLock();");
         out.println();
-        out.println("try {");
-        out.pushDepth();
-        isPushDepth = true;
-      }
         break;
       }
     }
 
+    // TODO Is an equivalent needed here?
     if (_isSynchronization) {
       out.println("_xa.registerSynchronization(_bean);");
     }
 
     generateNext(out);
 
-    if (_isContainerManaged && _transactionAttribute != null) {
-      if (isPushDepth)
-        out.popDepth();
+    if (_isContainerManaged && _lockType != null) {
+      // Decrease indentation depth.
+      out.popDepth();
 
-      for (Class exn : _businessMethod.getApiMethod().getExceptionTypes()) {
-        ApplicationException appExn = (ApplicationException) exn
-            .getAnnotation(ApplicationException.class);
-
-        if (appExn == null)
-          continue;
-
-        if (!RuntimeException.class.isAssignableFrom(exn) && appExn.rollback()) {
-          out.println("} catch (" + exn.getName() + " e) {");
-          out.println("  _xa.markRollback(e);");
-          out.println("  throw e;");
-        } else if (RuntimeException.class.isAssignableFrom(exn)
-            && !appExn.rollback()) {
-          out.println("} catch (" + exn.getName() + " e) {");
-          out.println("  throw e;");
-        }
-      }
-
-      switch (_transactionAttribute) {
-      case REQUIRED:
-      case REQUIRES_NEW: {
-        out.println("} catch (RuntimeException e) {");
-        out.println("  _xa.markRollback(e);");
-        out.println("  throw e;");
-      }
-      }
-
-      switch (_transactionAttribute) {
-      case NOT_SUPPORTED: {
+      switch (_lockType) {
+      case READ:
         out.println("} finally {");
-        out.println("  if (xa != null)");
-        out.println("    _xa.resume(xa);");
+        out.println("  _lockManager.endReadLock();");
         out.println("}");
-      }
+        out.println();
         break;
-
-      case REQUIRED: {
+      case WRITE:
         out.println("} finally {");
-        out.println("  if (xa == null)");
-        out.println("    _xa.commit();");
+        out.println("  _lockManager.endWriteLock();");
         out.println("}");
-      }
-        break;
-
-      case REQUIRES_NEW: {
-        out.println("} finally {");
-        out.println("  _xa.endRequiresNew(xa);");
-        out.println("}");
-      }
+        out.println();
         break;
       }
     }

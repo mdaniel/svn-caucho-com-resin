@@ -50,11 +50,13 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Returns true if this filter will generate code.
    */
+  @Override
   abstract public boolean isEnhanced();
 
   /**
    * Introspects the method for the default values
    */
+  @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
   }
@@ -63,8 +65,8 @@ abstract public class AbstractCallChain implements EjbCallChain {
    * Generates the static class prologue
    */
   @SuppressWarnings("unchecked")
-  public void generatePrologue(JavaWriter out, HashMap map)
-    throws IOException
+  @Override
+  public void generatePrologue(JavaWriter out, HashMap map) throws IOException
   {
     _next.generatePrologue(out, map);
   }
@@ -73,6 +75,7 @@ abstract public class AbstractCallChain implements EjbCallChain {
    * Generates initialization in the constructor
    */
   @SuppressWarnings("unchecked")
+  @Override
   public void generateConstructor(JavaWriter out, HashMap map)
       throws IOException
   {
@@ -82,8 +85,8 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Generates the method interception code
    */
-  public void generateCall(JavaWriter out)
-    throws IOException
+  @Override
+  public void generateCall(JavaWriter out) throws IOException
   {
     _next.generateCall(out);
   }
