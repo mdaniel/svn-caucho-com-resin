@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import javax.ejb.ApplicationException;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
@@ -87,26 +89,31 @@ public class LockCallChain extends AbstractCallChain {
    * Introspects the method for the default values
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(ApiMethod apiMethod, ApiMethod implementationMethod)
   {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
-    TransactionManagement xaManagement = apiClass
-        .getAnnotation(TransactionManagement.class);
+    ConcurrencyManagement concurrencyManagement = apiClass
+        .getAnnotation(ConcurrencyManagement.class);
 
-    if (xaManagement != null
-        && xaManagement.value() != TransactionManagementType.CONTAINER) {
+    if (concurrencyManagement != null
+        && concurrencyManagement.value() != ConcurrencyManagementType.CONTAINER) {
       _isContainerManaged = false;
       return;
     }
 
-    ApiClass implClass = null;
+    ApiClass implementationClass = null;
 
-    if (implMethod != null)
-      implClass = implMethod.getDeclaringClass();
+    if (implementationMethod != null) {
+      implementationClass = implementationMethod.getDeclaringClass();
+    }
 
-    if (implClass != null
-        && Synchronization.class.isAssignableFrom(implClass.getJavaClass())) {
+    // TODO What is this checking for? Whether the implementing class is a
+    // subclass of Synchronization? Is this pertinent to the locking
+    // implementation?
+    if (implementationClass != null
+        && Synchronization.class.isAssignableFrom(implementationClass
+            .getJavaClass())) {
       _isSynchronization = true;
     }
 
@@ -118,12 +125,12 @@ public class LockCallChain extends AbstractCallChain {
       xaAttr = apiClass.getAnnotation(TransactionAttribute.class);
     }
 
-    if (xaAttr == null && implMethod != null) {
-      xaAttr = implMethod.getAnnotation(TransactionAttribute.class);
+    if (xaAttr == null && implementationMethod != null) {
+      xaAttr = implementationMethod.getAnnotation(TransactionAttribute.class);
     }
 
-    if (xaAttr == null && implClass != null) {
-      xaAttr = implClass.getAnnotation(TransactionAttribute.class);
+    if (xaAttr == null && implementationClass != null) {
+      xaAttr = implementationClass.getAnnotation(TransactionAttribute.class);
     }
 
     if (xaAttr != null)
