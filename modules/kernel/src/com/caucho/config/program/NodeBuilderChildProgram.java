@@ -47,6 +47,9 @@ public class NodeBuilderChildProgram extends FlowProgram {
 
   public NodeBuilderChildProgram(Node node)
   {
+    if (node == null)
+      throw new NullPointerException();
+    
     _node = node;
   }
 

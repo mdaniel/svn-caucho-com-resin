@@ -215,8 +215,11 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       if (_args.length > 0) {
 	args = new Object[_args.length];
 
+	ConfigContext env
+	  = (ConfigContext) _beanManager.createCreationalContext();
+
 	for (int i = 0; i < args.length; i++) {
-	  args[i] = _args[i].eval(null);
+	  args[i] = _args[i].eval(env);
 	  /*
 	  if (_args[i] instanceof InjectionPointBean) {
 	    if (ij != null)

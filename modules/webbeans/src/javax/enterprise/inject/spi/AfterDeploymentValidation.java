@@ -30,7 +30,17 @@
 package javax.enterprise.inject.spi;
 
 /**
- * Framework callback after all bean discovery
+ * Extension callback after all bean injection points have been validated.
+ *
+ * <code><pre>
+ * public class MyExtension implements Extension
+ * {
+ *  public void afterBeanValidation(@Observes AfterBeanValidation event)
+ *  {
+ *    ...
+ *  }
+ * }
+ * </pre></code>
  */
 public interface AfterDeploymentValidation
 {

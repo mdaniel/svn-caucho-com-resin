@@ -29,14 +29,20 @@
 
 package com.caucho.config.inject;
 
+import com.caucho.config.ConfigContext;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.BeanArg;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observer;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -48,13 +54,15 @@ import javax.enterprise.inject.spi.InjectionPoint;
  * Internal implementation for a producer Bean
  */
 public class ObserverMethodImpl<X, T> implements Observer<T> {
-  private BeanManager _beanManager;
+  private InjectManager _beanManager;
 
   private Bean<X> _bean;
   private AnnotatedMethod<X> _method;
 
   private Type _type;
   private Set<Annotation> _bindings;
+  
+  private BeanArg []_args;
 
   ObserverMethodImpl(InjectManager beanManager,
 		     Bean<X> bean,
@@ -68,6 +76,8 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
     _method.getJavaMember().setAccessible(true);
     _type = type;
     _bindings = bindings;
+
+    introspect();
   }
 
   /**
@@ -102,18 +112,42 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
     return _bindings;
   }
 
+  private void introspect()
+  {
+    List<AnnotatedParameter<X>> parameters = _method.getParameters();
+
+    if (parameters.size() == 1)
+      return;
+
+    _args = new BeanArg[parameters.size()];
+
+    for (int i = 0; i < _args.length; i++) {
+      AnnotatedParameter<?> param = parameters.get(i);
+
+      if (param.isAnnotationPresent(Observes.class))
+	continue;
+
+      _args[i] = new BeanArg(param.getBaseType(),
+			     _beanManager.getBindings(param.getAnnotations()));
+    }
+  }
+
+  /**
+   * Send the event notification.
+   */
   public boolean notify(T event)
   {
-    Class<X> type = null;
-
-    CreationalContext env = _beanManager.createCreationalContext();
-
-    Object instance = _beanManager.getReference(getParentBean(), type, env);
+    Object instance = getInstance();
 
     Method method = _method.getJavaMember();
 
     try {
-      method.invoke(instance, event);
+      method.invoke(instance, getEventArguments(event));
+    } catch (IllegalArgumentException e) {
+      String loc = (method.getDeclaringClass().getSimpleName() + "."
+		    + method.getName() + ": ");
+
+      throw new InjectionException(loc + e.getMessage(), e.getCause());
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
@@ -129,6 +163,35 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
     }
 
     return false;
+  }
+
+  protected Object getInstance()
+  {
+    Class<X> type = null;
+
+    CreationalContext env = _beanManager.createCreationalContext();
+    
+    return _beanManager.getReference(getParentBean(), type, env);
+  }
+
+  protected Object[] getEventArguments(Object event)
+  {
+    if (_args == null)
+      return new Object[] { event };
+
+    Object []args = new Object[_args.length];
+
+    CreationalContext env = _beanManager.createCreationalContext();
+    for (int i = 0; i < _args.length; i++) {
+      BeanArg arg = _args[i];
+
+      if (arg != null)
+	args[i] = arg.eval((ConfigContext) env);
+      else
+	args[i] = event;
+    }
+
+    return args;
   }
 
   public Set<InjectionPoint> getInjectionPoints()

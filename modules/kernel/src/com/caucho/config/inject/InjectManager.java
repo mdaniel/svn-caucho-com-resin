@@ -452,14 +452,14 @@ public class InjectManager
     _deploymentMap.put(CauchoDeployment.class, 0);
     // DEFAULT_PRIORITY
 
-    int i = DEFAULT_PRIORITY + 1;
+    int priority = DEFAULT_PRIORITY + 1;
     
     if (! deploymentList.contains(Configured.class)) {
-      _deploymentMap.put(Configured.class, i++);
+      _deploymentMap.put(Configured.class, priority++);
     }
 
-    for (Class deploymentType : deploymentList) {
-      _deploymentMap.put(deploymentType, i++);
+    for (int i = deploymentList.size() - 1; i >= 0; i--) {
+      _deploymentMap.put(deploymentList.get(i), priority++);
     }
   }
 
@@ -534,6 +534,21 @@ public class InjectManager
       return null;
   }
 
+  Annotation []getBindings(Set<Annotation> annotations)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindingList.add(ann);
+    }
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    return bindings;
+  }
+  
   private Annotation []getBindings(Annotation []annotations)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
@@ -1139,7 +1154,7 @@ public class InjectManager
 
   public void validate(InjectionPoint ij)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //     throw new UnsupportedOperationException(getClass().getName());
   }
 
   public int getDeploymentPriority(Bean bean)
@@ -1236,6 +1251,9 @@ public class InjectManager
 				CreationalContext createContext,
 				InjectManager topManager)
   {
+    if (createContext == null)
+      throw new NullPointerException();
+    
     /* XXX: temp API change
     if (bean.getManager() != this) {
       if (getParent() == null) {
@@ -1322,7 +1340,7 @@ public class InjectManager
     Collections.sort(lines);
       
     for (String line : lines) {
-      sb.append("\n    ").append(lines);
+      sb.append("\n    ").append(line);
     }
 
     return sb.toString();
@@ -1342,17 +1360,6 @@ public class InjectManager
     }
 
     return list;
-  }
-
-  private String toLineList(Iterable list)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    for (Object item : list) {
-      sb.append("\n  ").append(item);
-    }
-
-    return sb.toString();
   }
 
   /**
@@ -1383,11 +1390,16 @@ public class InjectManager
     return (T) getInjectableReference(ij, new ConfigContext());
   }
 
-  public Bean resolveByInjectionPoint(InjectionPoint ij)
+  private Bean resolveByInjectionPoint(InjectionPoint ij)
   {
     Type type = ij.getType();
     Set<Annotation> bindingSet = ij.getBindings();
 
+    return resolveByInjectionPoint(type, bindingSet);
+  }
+
+  public Bean resolveByInjectionPoint(Type type, Set<Annotation> bindingSet)
+  {
     Annotation []bindings;
 
     if (bindingSet != null) {
@@ -1402,21 +1414,20 @@ public class InjectManager
     else
       bindings = new Annotation[] { CurrentLiteral.CURRENT };
 
-    Set set = getBeans(type, bindings);
+    Set<Bean<?>> set = getBeans(type, bindings);
 
     if (set == null || set.size() == 0) {
       throw unsatisfiedException(type, bindings);
     }
+
+    return getHighestPrecedenceBean(set);
+
+    /*
     else if (set.size() == 1) {
       Iterator iter = set.iterator();
 
       if (iter.hasNext()) {
 	Bean bean = (Bean) iter.next();
-
-	/*
-	if (bean instanceof ComponentImpl)
- 	  bean = ((ComponentImpl) bean).bindInjectionPoint(ij);
-	*/
 
 	return bean;
       }
@@ -1429,6 +1440,7 @@ public class InjectManager
     }
 
     return null;
+*/
   }
 
   private Bean createNewBean(Type type)
@@ -1461,7 +1473,7 @@ public class InjectManager
     }
 
     return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Stereotype and <enable> tags to choose a precedence.  Beans:{0}",
-						toLineList(matchBeans)));
+						listToLines(matchBeans)));
   }
 
   public ELResolver getELResolver()

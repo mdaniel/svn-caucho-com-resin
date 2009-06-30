@@ -144,4 +144,10 @@ public class AnnotatedElementImpl implements Annotated
 
     return false;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _type + "]";
+  }
 }

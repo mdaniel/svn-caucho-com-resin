@@ -52,6 +52,7 @@ import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
+import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -110,7 +111,16 @@ public class CustomBeanConfig {
 
     // defaults to @Configured
     // clearAnnotations(_annotatedType, DeploymentType.class);
-    _annotatedType.addAnnotation(new AnnotationLiteral<Configured>() {});
+    _annotatedType.addAnnotation(ConfiguredLiteral.create());
+
+    for (AnnotatedMethod method : _annotatedType.getMethods()) {
+      // ioc/0614
+      
+      AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) method;
+
+      if (methodImpl.isAnnotationPresent(Produces.class))
+	methodImpl.addAnnotation(ConfiguredLiteral.create());
+    }
   }
 
   public ConfigType getConfigType()

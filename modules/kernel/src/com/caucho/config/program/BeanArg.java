@@ -60,7 +60,7 @@ import org.w3c.dom.Node;
 public class BeanArg extends Arg {
   private static final L10N L = new L10N(BeanArg.class);
   
-  private BeanManager _beanManager;
+  private InjectManager _beanManager;
   private Type _type;
   private Annotation []_bindings;
   private Bean _bean;
@@ -76,6 +76,14 @@ public class BeanArg extends Arg {
   public void bind()
   {
     if (_bean == null) {
+      HashSet<Annotation> bindings = new HashSet<Annotation>();
+      
+      for (Annotation ann : _bindings) {
+	bindings.add(ann);
+      }
+      
+      _bean = _beanManager.resolveByInjectionPoint(_type, bindings);
+      /*
       for (Bean bean : _beanManager.getBeans(_type, _bindings)) {
 	_bean = bean;
       }
@@ -83,6 +91,7 @@ public class BeanArg extends Arg {
       if (_bean == null)
 	throw new ConfigException(L.l("No matching bean for '{0}' with bindings {1}",
 				      _type, toList(_bindings)));
+      */
     }
   }
 

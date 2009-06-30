@@ -48,7 +48,7 @@ public final class ConfiguredLiteral {
       public Class annotationType() { return Configured.class; }
       public String toString()
       {
-	return "@Configured()";
+	return "@" + Configured.class.getName() + "()";
       }
       };
   }

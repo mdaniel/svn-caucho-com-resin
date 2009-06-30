@@ -32,7 +32,19 @@ package javax.enterprise.inject.spi;
 import java.lang.annotation.Annotation;
 
 /**
- * Framework callback before processing an annotated type
+ * {@link javax.enterprise.inject.spi.Extension} callback while processing
+ * a bean.
+ *
+ * <code><pre>
+ * public class MyExtension implements Extension
+ * {
+ *  &lt;T> public void
+ *  processBean(@Observes ProcessBean&lt;X> event)
+ *  {
+ *    ...
+ *  }
+ * }
+ * </pre></code>
  */
 public interface ProcessBean<X>
 {

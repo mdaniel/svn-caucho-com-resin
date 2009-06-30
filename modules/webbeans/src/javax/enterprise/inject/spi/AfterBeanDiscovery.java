@@ -31,10 +31,29 @@ package javax.enterprise.inject.spi;
 
 /**
  * Framework callback after all bean discovery
+ *
+ * <code><pre>
+ * public class MyExtension implements Extension
+ * {
+ *  public void afterBeanDiscovery(@Observes AfterBeanDiscovery event)
+ *  {
+ *    ...
+ *  }
+ * }
+ * </pre></code>
  */
 public interface AfterBeanDiscovery
 {
+  /**
+   * Registers an extension bean with the BeanManager
+   */
   public void addBean(Bean<?> bean);
-  
+
+  /**
+   * Registers an error with the BeanManager, causing the container to abort
+   * deployment.
+   *
+   * @param t the exception representing the error
+   */
   public void addDefinitionError(Throwable t);
 }

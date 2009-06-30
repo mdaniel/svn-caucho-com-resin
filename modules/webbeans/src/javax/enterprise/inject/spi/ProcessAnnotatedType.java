@@ -30,7 +30,19 @@
 package javax.enterprise.inject.spi;
 
 /**
- * Framework callback before processing an annotated type
+ * Extension callback while processing a discovered annotated type.
+ *
+ *
+ * <code><pre>
+ * public class MyExtension implements Extension
+ * {
+ *  &lt;T> public void
+ *  processAnnotatedType(@Observes ProcessAnnotatedType&lt;T> event)
+ *  {
+ *    ...
+ *  }
+ * }
+ * </pre></code>
  */
 public interface ProcessAnnotatedType<X>
 {

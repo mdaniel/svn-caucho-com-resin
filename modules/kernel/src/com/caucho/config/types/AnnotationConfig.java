@@ -143,6 +143,7 @@ public class AnnotationConfig implements InvocationHandler {
 					       this);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _annotationType + "]";

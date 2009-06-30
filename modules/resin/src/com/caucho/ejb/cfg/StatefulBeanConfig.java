@@ -40,7 +40,6 @@ import javax.ejb.Stateful;
 
 import com.caucho.config.*;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.cfg.WbComponentConfig;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.types.*;

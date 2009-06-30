@@ -30,7 +30,24 @@
 package javax.enterprise.inject.spi;
 
 /**
- * Framework interface for initialization
+ * Extension interface receiving callbacks.
+ *
+ * <ol>
+ * <li>{@link BeforeBeanDiscovery}
+ * <ul>
+ * <li>{@link ProcessAnnotatedType}
+ * <li>{@link ProcessProducer}
+ * <li>{@link ProcessBean}
+ * <li>{@link ProcessManagedBean}
+ * <li>{@link ProcessSessionBean}
+ * <li>{@link ProcessProducerMethod}
+ * <li>{@link ProcessProducerField}
+ * <li>{@link ProcessInjectionTarget}
+ * </ul>
+ * <li>{@link AfterBeanDiscovery}
+ * <li>{@link AfterDeploymentValidation}
+ * <li>{@link BeforeShutdown}
+ * </ol>
  */
 public interface Extension
 {

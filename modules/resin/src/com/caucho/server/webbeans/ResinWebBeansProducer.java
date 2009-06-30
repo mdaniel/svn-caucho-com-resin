@@ -81,11 +81,13 @@ public class ResinWebBeansProducer
   /**
    * Returns the web beans container.
    */
+  /*
   @Produces
   public BeanManager getManager()
   {
     return InjectManager.create();
   }
+  */
   
   /**
    * Returns the web beans conversation controller

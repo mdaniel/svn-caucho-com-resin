@@ -184,7 +184,7 @@ iterator over all the discovered and configured beans, and
   <td>Programmatic access to all implementations of an interface.</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/All.html">@All</a></td>
+  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Any.html">@Any</a></td>
   <td>Selects all matching beans for an interface.</td>
 </tr>
 </deftable>
