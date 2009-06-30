@@ -205,8 +205,9 @@ namespace Caucho
       
       process.BeginErrorReadLine();
       process.BeginOutputReadLine();
-      while(! process.HasExited) {
-        process.WaitForExit(100);
+      while(! (process.HasExited)) {
+        //Vista needs more time
+        process.WaitForExit(3000);
       }
       process.CancelErrorRead();
       process.CancelOutputRead();

@@ -574,12 +574,16 @@ namespace Caucho
         ExecuteJava("stop");
       } else {
         if (_process != null && ! _process.HasExited) {
-          Info("Stopping Resin");
+          Info("Stopping Resin ", false);
           
           _process.Kill();
           
-          while(!_process.HasExited)
-            Thread.Sleep(500);
+          while(! (_process.HasExited)) {
+            Info(".", false);
+            _process.WaitForExit(500);
+          }
+          
+          Info(". done.");
         }
         
         _process = null;
@@ -599,10 +603,16 @@ namespace Caucho
     }
     
     public void Info(String message) {
+      Info(message, true);
+    }
+    
+    public void Info(String message, bool newLine) {
       if (_service && EventLog != null)
         EventLog.WriteEntry(this.ServiceName, message, EventLogEntryType.Information);
-      else
+      else if (newLine)
         Console.WriteLine(message);
+      else 
+        Console.Write(message);
     }
     
     public static int Main(String []args) {
