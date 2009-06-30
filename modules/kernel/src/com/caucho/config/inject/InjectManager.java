@@ -1390,7 +1390,7 @@ public class InjectManager
     return (T) getInjectableReference(ij, new ConfigContext());
   }
 
-  private Bean resolveByInjectionPoint(InjectionPoint ij)
+  public Bean resolveByInjectionPoint(InjectionPoint ij)
   {
     Type type = ij.getType();
     Set<Annotation> bindingSet = ij.getBindings();
