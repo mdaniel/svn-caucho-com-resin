@@ -413,6 +413,7 @@ public class HmuxRequest extends AbstractHttpRequest
     try {
       HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
       startRequest(httpBuffer);
+
       _response.startRequest(httpBuffer);
 
       startInvocation();

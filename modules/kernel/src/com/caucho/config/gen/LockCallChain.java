@@ -33,6 +33,7 @@ import java.util.HashMap;
 
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
+import static javax.ejb.ConcurrencyManagementType.CONTAINER;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.transaction.Synchronization;
@@ -87,11 +88,11 @@ public class LockCallChain extends AbstractCallChain {
   {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
-    ConcurrencyManagement concurrencyManagementAnnotation = apiClass
-        .getAnnotation(ConcurrencyManagement.class);
+    ConcurrencyManagement concurrencyManagementAnnotation
+      = apiClass.getAnnotation(ConcurrencyManagement.class);
 
     if (concurrencyManagementAnnotation != null
-        && concurrencyManagementAnnotation.value() != ConcurrencyManagementType.CONTAINER) {
+        && concurrencyManagementAnnotation.value() != CONTAINER) {
       _isContainerManaged = false;
       return;
     }
@@ -147,8 +148,7 @@ public class LockCallChain extends AbstractCallChain {
       // TODO Should this be static? Should locks be placed at the instance or
       // class level? The class level is fine for EJB singletons, but not
       // necessarily for other bean types.
-      out
-          .println("private final com.caucho.ejb3.lock.LockManager _lockManager");
+      out.println("private final com.caucho.ejb3.lock.LockManager _lockManager");
       out.println("  = new com.caucho.ejb3.lock.LockManager();");
     }
 

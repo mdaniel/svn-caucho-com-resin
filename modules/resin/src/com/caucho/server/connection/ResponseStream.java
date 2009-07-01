@@ -249,7 +249,8 @@ public class ResponseStream extends ToByteResponseStream {
       _response.setHeaderWritten(false);
     }
 
-    _next.setBufferOffset(_bufferStartOffset);
+    if (_next != null)
+      _next.setBufferOffset(_bufferStartOffset);
   }
 
   /**

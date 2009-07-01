@@ -1232,6 +1232,9 @@ public class InjectManager
     Set<Bean<?>> beans = getBeans(type);
     Bean<?> bean = getHighestPrecedenceBean(beans);
 
+    if (bean == null)
+      return null;
+
     CreationalContext<?> env = createCreationalContext();
 
     return (T) getReference(bean, type, env);
