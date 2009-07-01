@@ -439,8 +439,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 	  
 	  _instanceClass = instanceClass;
 	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	  // throw ConfigException.create(e);
+	  // log.log(Level.FINE, e.toString(), e);
+	  throw ConfigException.create(e);
 	}
       }
 

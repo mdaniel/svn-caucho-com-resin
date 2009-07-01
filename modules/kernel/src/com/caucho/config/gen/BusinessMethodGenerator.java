@@ -42,8 +42,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private final ApiMethod _apiMethod;
   private final ApiMethod _implMethod;
 
-  private XaCallChain _xa;
   private SecurityCallChain _security;
+  private LockCallChain _lock;
+  private XaCallChain _xa;
   private InterceptorCallChain _interceptor;
   
   public BusinessMethodGenerator(View view,
@@ -58,7 +59,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     _interceptor = new InterceptorCallChain(this, view);
     _xa = createXa(_interceptor);
-    _security = new SecurityCallChain(this, _xa);
+    _lock = new LockCallChain(this, _xa);
+    _security = new SecurityCallChain(this, _lock);
   }
 
   protected XaCallChain createXa(EjbCallChain next)
@@ -160,6 +162,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
       return true;
     else if (_interceptor.isEnhanced())
       return true;
+    else if (_lock.isEnhanced())
+      return true;
 
     return false;
   }
@@ -167,6 +171,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     _security.introspect(apiMethod, implMethod);
+    _lock.introspect(apiMethod, implMethod);
     _xa.introspect(apiMethod, implMethod);
     _interceptor.introspect(apiMethod, implMethod);
   }
