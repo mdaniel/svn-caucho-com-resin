@@ -28,6 +28,7 @@
  */
 package com.caucho.ejb3.lock;
 
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -36,7 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Reza Rahman
  */
 public class LockMonitor {
-  private static final ThreadLocal<ReentrantReadWriteLock> threadLocal = new ThreadLocal<ReentrantReadWriteLock>();
+  private static final ThreadLocal<ReadWriteLock> threadLocal = new ThreadLocal<ReadWriteLock>();
 
   /**
    * Setting the lock to be monitored.
@@ -44,7 +45,7 @@ public class LockMonitor {
    * @param lock
    *          The lock to be monitored.
    */
-  synchronized static void setLock(ReentrantReadWriteLock lock)
+  synchronized static void setLock(ReadWriteLock lock)
   {
     threadLocal.set(lock);
   }
@@ -56,7 +57,7 @@ public class LockMonitor {
    */
   public synchronized static int getNumberOfWaitingThreads()
   {
-    return threadLocal.get().getQueueLength();
+    return ((ReentrantReadWriteLock) threadLocal.get()).getQueueLength();
   }
 
   /**
@@ -66,7 +67,7 @@ public class LockMonitor {
    */
   public synchronized static int getNumberOfReadLocks()
   {
-    return threadLocal.get().getReadLockCount();
+    return ((ReentrantReadWriteLock) threadLocal.get()).getReadLockCount();
   }
 
   /**
@@ -76,6 +77,6 @@ public class LockMonitor {
    */
   public synchronized static boolean isWriteLocked()
   {
-    return threadLocal.get().isWriteLocked();
+    return ((ReentrantReadWriteLock) threadLocal.get()).isWriteLocked();
   }
 }

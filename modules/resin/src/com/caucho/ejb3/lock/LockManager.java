@@ -51,6 +51,11 @@ public class LockManager {
   public LockManager()
   {
     _readWriteLock = new ReentrantReadWriteLock();
+
+    // TODO This should probably be abstracted and saved in the EJB component
+    // environment JNDI name-space. Using thread local in a managed environment
+    // might be problematic.
+    LockMonitor.setLock(_readWriteLock);
   }
 
   /**
