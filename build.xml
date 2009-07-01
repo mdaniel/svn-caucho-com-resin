@@ -462,7 +462,7 @@
     </copy>
   </target>
 
-  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jstl, jta, jws, inject">
+  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jcache, jstl, jta, jws, inject">
     <!--
        - javaee-16.jar
       -->
