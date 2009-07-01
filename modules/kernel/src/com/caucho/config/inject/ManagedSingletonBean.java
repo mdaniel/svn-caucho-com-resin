@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.HandleAware;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ApplicationScope;
 

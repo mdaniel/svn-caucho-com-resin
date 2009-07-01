@@ -177,12 +177,13 @@ public class JsfViewRoot extends JsfNode
     // XXX: eventually use pre-allocated long
     
     out.print(_var + " = ");
-    out.print("com.caucho.jsp.jsf.JsfTagUtil.findRoot(_jsp_faces_context, request, " + digest + "L);");
+    out.println("com.caucho.jsp.jsf.JsfTagUtil.findRoot(_jsp_faces_context, request, " + digest + "L);");
 
-    if (isJsfParentRequired())
+    if (isJsfParentRequired()) {
       out.println("request.setAttribute(\"caucho.jsf.parent\""
-		    + ", new com.caucho.jsp.jsf.JsfComponentTag("
-		    + _var + ", true, " + _bodyVar + "));");
+		  + ", new com.caucho.jsp.jsf.JsfComponentTag("
+		  + _var + ", true, " + _bodyVar + "));");
+    }
 
     for (int i = 0; i < _attrList.size(); i++) {
       Attr attr = (Attr) _attrList.get(i);
@@ -220,19 +221,14 @@ public class JsfViewRoot extends JsfNode
         String[] values = value.split("[-_]");
 
         if (values.length > 2)
-          out.print("new java.util.Locale(\"" +
-                    values[0] +
-                    "\",\"" +
-                    values[1] +
-                    "\",\"" +
-                    values[2] +
-                    "\")");
+          out.print("new java.util.Locale(\"" +values[0]
+		    + "\",\"" + values[1]
+		    + "\",\"" + values[2]
+		    + "\")");
         else if (values.length > 1)
-          out.print("new java.util.Locale(\"" +
-                    values[0] +
-                    "\",\"" +
-                    values[1] +
-                    "\")");
+          out.print("new java.util.Locale(\"" + values[0]
+		    + "\",\"" + values[1]
+		    + "\")");
 
         else
           out.print("new java.util.Locale(\"" + value + "\")");

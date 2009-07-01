@@ -34,47 +34,30 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.util.*;
-// import com.caucho.hessian.io.HessianHandle;
 import com.caucho.config.cfg.*;
 
 /**
  * Handle for webbeans serialization
  */
-public class SingletonHandle implements Serializable //, HessianHandle
+public class SingletonHandle implements Serializable
 {
   private static final L10N L = new L10N(SingletonHandle.class);
   private static final Logger log
     = Logger.getLogger(SingletonHandle.class.getName());
   
-  private Class _type;
-  private Annotation []_bindings;
+  private final String _id;
 
-  public SingletonHandle()
+  private SingletonHandle()
   {
+    _id = null;
   }
-  
-  public SingletonHandle(Type type, Annotation ... bindings)
+
+  public SingletonHandle(String id)
   {
-    if (type instanceof Class)
-      _type = (Class) type;
-
-    if (bindings != null && bindings.length > 0)
-      _bindings = bindings;
-  }
-  
-  public SingletonHandle(Type type, Set<Annotation> bindingSet)
-  {
-    if (type instanceof Class)
-      _type = (Class) type;
-
-    if (bindingSet.size() > 0) {
-      ArrayList bindingList = new ArrayList<Annotation>(bindingSet);
-
-      _bindings = new Annotation[bindingList.size()];
-      bindingList.toArray(_bindings);
-    }
+    _id = id;
   }
 
   /**
@@ -85,8 +68,13 @@ public class SingletonHandle implements Serializable //, HessianHandle
     try {
       InjectManager inject = InjectManager.create();
 
-      // return inject.getInstanceByType(_type, _bindings);
-      throw new UnsupportedOperationException(getClass().getName());
+      Bean bean = inject.getPassivationCapableBean(_id);
+
+      if (bean == null)
+	throw new NullPointerException(L.l("'{0}' is an unknown SingletonHandle bean.",
+					   _id));
+
+      return inject.create(bean);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -97,23 +85,6 @@ public class SingletonHandle implements Serializable //, HessianHandle
   @Override
   public String toString()
   {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    sb.append(_type.getName());
-    sb.append(", {");
-
-    if (_bindings != null) {
-      for (int i = 0; i < _bindings.length; i++) {
-	if (i != 0)
-	  sb.append(", ");
-	sb.append(_bindings[i]);
-      }
-    }
-
-    sb.append("}]");
-    
-    return sb.toString();
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

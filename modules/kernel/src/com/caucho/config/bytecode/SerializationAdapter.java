@@ -109,10 +109,12 @@ public class SerializationAdapter {
       jClass.setThisClass(thisClassName);
 
       jClass.addInterface("java/io/Serializable");
+      jClass.addInterface("com/caucho/config/inject/HandleAware");
 
       generateConstructors(jClass, superClassName);
       
       generateWriteReplace(jClass);
+      generateSetHandle(jClass);
 
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       WriteStream out = Vfs.openWrite(bos);
@@ -199,6 +201,33 @@ public class SerializationAdapter {
 		   "Ljava/lang/Object;");
 
     code.addObjectReturn();
+    
+    code.close();
+  }
+
+  private void generateSetHandle(JavaClass jClass)
+  {
+    /*
+    JavaField jField
+      = jClass.createField("__caucho_handle", "Ljava/lang/Object;");
+    jField.setAccessFlags(Modifier.PRIVATE);
+    */
+    
+    JavaMethod jMethod
+      = jClass.createMethod("setSerializationHandle", "(Ljava/lang/Object;)V");
+    
+    jMethod.setAccessFlags(Modifier.PUBLIC);
+      
+    CodeWriterAttribute code = jMethod.createCodeWriter();
+    code.setMaxLocals(5);
+    code.setMaxStack(5);
+
+    code.pushObjectVar(0);
+    code.pushObjectVar(1);
+    code.putField(jClass.getThisClass(), "__caucho_handle",
+		  "Ljava/lang/Object;");
+
+    code.addReturn();
     
     code.close();
   }

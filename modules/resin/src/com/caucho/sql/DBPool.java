@@ -31,6 +31,7 @@ package com.caucho.sql;
 
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
+import com.caucho.config.SerializeHandle;
 import com.caucho.config.Names;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
@@ -110,6 +111,7 @@ import javax.sql.XADataSource;
  * that they will be removed and closed.  This reduces the load on the DB
  * and also protects against the database dropping old connections.
  */
+
 public class DBPool
   implements DataSource, java.io.Serializable, HandleAware
 {

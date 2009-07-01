@@ -30,6 +30,7 @@
 package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observer;
@@ -39,15 +40,15 @@ import javax.enterprise.inject.TypeLiteral;
 public class EventImpl<T> implements Event<T>
 {
   private final BeanManager _manager;
-  private final Class _eventType;
+  private final Type _type;
   private final Annotation []_bindings;
 
   public EventImpl(BeanManager manager,
-		   Class eventType,
+		   Type type,
 		   Annotation []bindings)
   {
     _manager = manager;
-    _eventType = eventType;
+    _type = type;
     _bindings = bindings;
   }
   
@@ -58,7 +59,7 @@ public class EventImpl<T> implements Event<T>
 
   public void addObserver(Observer<T> observer)
   {
-    _manager.addObserver(observer);
+    _manager.addObserver(observer, _bindings);
   }
 
   public void removeObserver(Observer<T> observer)
@@ -68,7 +69,17 @@ public class EventImpl<T> implements Event<T>
 
   public Event<T> select(Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (bindings == null)
+      return this;
+
+    Annotation []newBindings
+      = new Annotation[_bindings.length + bindings.length];
+
+    System.arraycopy(_bindings, 0, newBindings, 0, _bindings.length);
+    System.arraycopy(bindings, 0, newBindings, _bindings.length,
+		     bindings.length);
+
+    return new EventImpl(_manager, _type, newBindings);
   }
   
   public <U extends T> Event<U> select(Class<U> subtype,

@@ -31,6 +31,7 @@ package com.caucho.config.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
+import com.caucho.config.el.WebBeansContextResolver;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
@@ -60,6 +61,7 @@ import java.util.logging.*;
 
 import javax.decorator.Decorates;
 import javax.el.*;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
 import javax.enterprise.context.ContextNotActiveException;
@@ -70,6 +72,7 @@ import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.Conversation;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.Disabled;
@@ -107,7 +110,7 @@ import javax.naming.*;
  */
 public class InjectManager
   implements BeanManager, ScanListener, EnvironmentListener,
-	     java.io.Serializable
+	     java.io.Serializable, HandleAware
 {
   private static final L10N L = new L10N(InjectManager.class);
   private static final Logger log
@@ -178,6 +181,9 @@ public class InjectManager
   private HashMap<Class,ObserverMap> _selfObserverMap
     = new HashMap<Class,ObserverMap>();
 
+  private HashMap<String,Bean<?>> _selfPassivationBeanMap
+    = new HashMap<String,Bean<?>>();
+
   //
   // combined visibility configuration
   //
@@ -230,12 +236,15 @@ public class InjectManager
   private boolean _isBeforeBeanDiscoveryComplete;
   private boolean _isAfterBeanDiscoveryComplete;
 
-  private ELResolver _elResolver;
+  // XXX: needs to be a local resolver
+  private ELResolver _elResolver = new WebBeansContextResolver();
 
   private ApplicationScope _applicationScope = new ApplicationScope();
   private XmlStandardPlugin _xmlExtension;
 
   private RuntimeException _configException;
+
+  private Object _serializationHandle;
 
   private InjectManager(String id,
 			InjectManager parent,
@@ -899,6 +908,13 @@ public class InjectManager
     }
     */
 
+    if (bean instanceof PassivationCapable) {
+      PassivationCapable pass = (PassivationCapable) bean;
+
+      if (pass.getId() != null)
+	_selfPassivationBeanMap.put(pass.getId(), bean);
+    }
+
     registerJmx(bean);
   }
 
@@ -1023,7 +1039,18 @@ public class InjectManager
       set.add(new InstanceBeanImpl(this, beanType, bindings));
       return set;
     }
-    else {
+    else if (Event.class.equals(rawType)) {
+      BaseType []param = baseType.getParameters();
+
+      Type beanType;
+      if (param.length > 0)
+	beanType = param[0].getRawClass();
+      else
+	beanType = Object.class;
+      
+      HashSet<Bean<?>> set = new HashSet<Bean<?>>();
+      set.add(new EventBeanImpl(this, beanType, bindings));
+      return set;
     }
     
     if (_parent != null) {
@@ -1182,11 +1209,10 @@ public class InjectManager
     synchronized (_beanMap) {
       LinkedHashSet beans = new LinkedHashSet();
 
-      for (WebComponent comp : _beanMap.values()) {
-	Set set = comp.resolve(Object.class, bindings);
-
-	if (set != null)
-	  beans.addAll(set);
+      for (Set<TypedBean> comp : _selfBeanMap.values()) {
+	for (TypedBean typedBean : comp) {
+	  beans.add(typedBean.getBean());
+	}
       }
 
       return beans;
@@ -1512,7 +1538,7 @@ public class InjectManager
    */
   public Bean getPassivationCapableBean(String id)
   {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
+    return _selfPassivationBeanMap.get(id);
   }
 
   //
@@ -1532,6 +1558,21 @@ public class InjectManager
     BaseType observerType = baseType.findClass(this, Observer.class);
 
     BaseType eventType = observerType.getParameters()[0];
+
+    addObserver(observer, eventType, bindings);
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param bindings the binding set for the event
+   */
+  public void addObserver(Observer<?> observer,
+			  Type type,
+			  Annotation... bindings)
+  {
+    BaseType eventType = createBaseType(type);
 
     addObserver(observer, eventType, bindings);
   }
@@ -2618,12 +2659,17 @@ public class InjectManager
     context.addClassName(className);
   }
 
+  public void setSerializationHandle(Object handle)
+  {
+    _serializationHandle = handle;
+  }
+  
   /**
    * Serialization rewriting
    */
   public Object writeReplace()
   {
-    return new SingletonHandle(BeanManager.class);
+    return _serializationHandle;
   }
 
   private void checkActive()

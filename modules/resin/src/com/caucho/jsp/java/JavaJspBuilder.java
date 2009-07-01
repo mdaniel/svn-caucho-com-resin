@@ -232,9 +232,9 @@ public class JavaJspBuilder extends JspBuilder {
     if (cl == null && isFastJsf()) {
       Class type = _jsfTagMap.get(qname);
 
-      if (JsfFacetNode.class.equals(type) &&
-	  _currentNode != null &&
-	  ! JsfTagNode.class.isAssignableFrom(_currentNode.getClass())) {
+      if (JsfFacetNode.class.equals(type)
+	  && _currentNode != null
+	  && ! JsfTagNode.class.isAssignableFrom(_currentNode.getClass())) {
       }
       else {
 	cl = type;

@@ -194,7 +194,7 @@ abstract public class JspBuilder {
     JsfPropertyGroup jsf = getJsfPropertyGroup();
 
     if (jsf == null)
-      return true;
+      return false;
     else
       return jsf.isFastJsf();
   }

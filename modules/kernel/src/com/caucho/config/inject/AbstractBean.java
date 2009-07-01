@@ -51,7 +51,7 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 import java.util.logging.*;
-import java.io.Serializable;
+import java.io.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
@@ -65,6 +65,7 @@ import javax.enterprise.inject.Current;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
+import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -92,6 +93,11 @@ abstract public class AbstractBean<T> implements Bean<T>
   
   public AbstractBean()
   {
+  }
+
+  public String getId()
+  {
+    return null;
   }
 
   public Annotated getAnnotated()
@@ -153,6 +159,65 @@ abstract public class AbstractBean<T> implements Bean<T>
   public Class<? extends Annotation> getScopeType()
   {
     return Dependent.class;
+  }
+
+  protected String calculatePassivationId()
+  {
+    Sha256OutputStream os = new Sha256OutputStream(new NullOutputStream());
+    PrintWriter out = new PrintWriter(new OutputStreamWriter(os));
+
+    // XXX: getTypes?
+    out.print(getBeanClass());
+
+    ArrayList<String> annList = new ArrayList<String>();
+    
+    for (Annotation ann : getBindings()) {
+      annList.add(bindingToString(ann));
+    }
+
+    Collections.sort(annList);
+
+    for (String annString : annList) {
+      out.print(";");
+      out.print(annString);
+    }
+
+    out.close();
+    
+    return Base64.encodeFromByteArray(os.getDigest());
+  }
+
+  private String bindingToString(Annotation ann)
+  {
+    StringBuilder sb = new StringBuilder(ann.annotationType().getName());
+
+    ArrayList<String> propList = new ArrayList<String>();
+    
+    for (Method method : ann.annotationType().getDeclaredMethods()) {
+      if (method.getName().equals("annotationType"))
+	continue;
+      
+      if (method.isAnnotationPresent(NonBinding.class))
+	continue;
+      
+      if (method.getParameterTypes().length != 0)
+	continue;
+
+      try {
+	String prop = method.getName() + "," + method.invoke(ann);
+
+	propList.add(prop);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString());
+      }
+    }
+
+    Collections.sort(propList);
+    for (String prop : propList) {
+      sb.append(",").append(prop);
+    }
+
+    return sb.toString();
   }
 
   public String toString()

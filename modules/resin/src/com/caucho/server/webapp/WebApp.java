@@ -434,6 +434,8 @@ public class WebApp extends ServletContextImpl
       _beanManager = InjectManager.create(_classLoader);
       _beanManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
       _beanManager.addExtension(new WebAppInjectExtension(_beanManager, this));
+      
+      _jspApplicationContext.addELResolver(_beanManager.getELResolver());
     } catch (Throwable e) {
       setConfigException(e);
     }
@@ -3413,7 +3415,7 @@ public class WebApp extends ServletContextImpl
    */
   private Object writeReplace()
   {
-    return new SingletonHandle(WebApp.class);
+    return new SingletonBindingHandle(WebApp.class);
   }
 
   public String toString()

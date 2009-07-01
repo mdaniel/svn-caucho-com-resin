@@ -83,6 +83,11 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     return Object.class; // technically bounds(?)
   }
 
+  public boolean isWildcard()
+  {
+    return true;
+  }
+
   public Type getGenericComponentType()
   {
     return null;

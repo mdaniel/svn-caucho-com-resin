@@ -35,7 +35,7 @@ import java.util.concurrent.*;
 
 import com.caucho.loader.*;
 import com.caucho.util.*;
-import com.caucho.config.inject.SingletonHandle;
+import com.caucho.config.inject.SingletonBindingHandle;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override
@@ -445,16 +445,16 @@ public class ScheduledThreadPool
    */
   public Object writeReplace()
   {
-    return new SingletonHandle(ScheduledExecutorService.class);
+    return new SingletonBindingHandle(ScheduledExecutorService.class);
   }
 
   @Override
   public String toString()
   {
     if (_loader instanceof EnvironmentClassLoader)
-      return "ScheduledThreadPool[" + ((EnvironmentClassLoader) _loader).getId() + "]";
+      return getClass().getSimpleName() + "[" + ((EnvironmentClassLoader) _loader).getId() + "]";
     else
-      return "ScheduledThreadPool[" + _loader + "]";
+      return getClass().getSimpleName() + "[" + _loader + "]";
   }
 
   class TaskFuture<T> implements Future<T>, Runnable {

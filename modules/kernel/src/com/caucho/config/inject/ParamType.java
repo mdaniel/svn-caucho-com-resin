@@ -118,8 +118,9 @@ public class ParamType extends BaseType implements ParameterizedType
       return false;
 
     for (int i = 0; i < paramA.length; i++) {
-      if (! paramA[i].isParamAssignableFrom(paramB[i]))
+      if (! paramA[i].isParamAssignableFrom(paramB[i])) {
 	return false;
+      }
     }
 
     return true;
@@ -162,7 +163,7 @@ public class ParamType extends BaseType implements ParameterizedType
       return false;
 
     Type []args = pType.getActualTypeArguments();
-    
+
     if (_param.length != args.length)
       return false;
 

@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.HandleAware;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ApplicationScope;
@@ -40,6 +39,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -54,7 +54,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
  * </pre></code>
  */
 abstract public class AbstractSingletonBean extends BeanWrapper
-  implements Closeable, AnnotatedBean
+  implements Closeable, AnnotatedBean, PassivationCapable
 {
   private ManagedBeanImpl _managedBean;
   
@@ -64,6 +64,8 @@ abstract public class AbstractSingletonBean extends BeanWrapper
   private Set<Annotation> _stereotypes;
   private Class<? extends Annotation> _scopeType;
   private String _name;
+
+  private String _passivationId;
   
   AbstractSingletonBean(ManagedBeanImpl managedBean,
 			Set<Type> types,
@@ -119,6 +121,17 @@ abstract public class AbstractSingletonBean extends BeanWrapper
       return _name;
     else
       return getBean().getName();
+  }
+  
+  /**
+   * Return passivation id
+   */
+  public String getId()
+  {
+    if (_passivationId == null)
+      _passivationId = calculatePassivationId();
+    
+    return _passivationId;
   }
 
   /**

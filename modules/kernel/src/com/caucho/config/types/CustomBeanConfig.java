@@ -90,6 +90,7 @@ public class CustomBeanConfig {
 
   private ContainerProgram _init;
   private boolean _hasBindings;
+  private boolean _hasInterceptorBindings;
   private boolean _hasDeployment;
 
   public CustomBeanConfig(QName name, Class cl)
@@ -267,6 +268,12 @@ public class CustomBeanConfig {
 	&& ! _hasBindings) {
       _hasBindings = true;
       clearBindings(_annotatedType);
+    }
+    
+    if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)
+	&& ! _hasInterceptorBindings) {
+      _hasInterceptorBindings = true;
+      clearAnnotations(_annotatedType, InterceptorBindingType.class);
     }
     
     if (ann.annotationType().isAnnotationPresent(ScopeType.class))

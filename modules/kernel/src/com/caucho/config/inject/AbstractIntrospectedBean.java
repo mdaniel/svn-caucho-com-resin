@@ -51,7 +51,7 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 import java.util.logging.*;
-import java.io.Serializable;
+import java.io.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
@@ -65,6 +65,7 @@ import javax.enterprise.inject.Current;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
+import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -119,6 +120,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     = new ArrayList<Annotation>();
 
   private String _name;
+
+  private String _passivationId;
 
   private boolean _isNullable;
 
@@ -208,6 +211,14 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     }
 
     return set;
+  }
+
+  public String getId()
+  {
+    if (_passivationId == null)
+      _passivationId = calculatePassivationId();
+    
+    return _passivationId;
   }
 
   /**

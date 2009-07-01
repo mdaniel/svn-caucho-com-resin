@@ -52,6 +52,8 @@ import com.caucho.util.*;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.faces.*;
+import javax.faces.application.*;
 import javax.naming.NamingException;
 import javax.servlet.*;
 import javax.servlet.annotation.MultipartConfig;
@@ -294,21 +296,23 @@ public class ServletConfigImpl
     _servletClassName = servletClassName;
 
     // JSF is special
-/**
     if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
+      // ioc/0566
+      
       if (_loadOnStartup < 0)
 	_loadOnStartup = 1;
 
       if (_servletContext instanceof WebApp)
 	((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
     }
-*/
+
     InjectManager beanManager = InjectManager.create();
     beanManager.addConfiguredBean(servletClassName);
   }
 
   @DisableConfig
-  public void setServletClass(Class<? extends Servlet> servletClass) {
+  public void setServletClass(Class<? extends Servlet> servletClass)
+  {
     if (_servletClass != null)
       throw new IllegalStateException();
 
@@ -691,12 +695,13 @@ public class ServletConfigImpl
       }
     }
 
+    InjectManager webBeans = InjectManager.create();
+    
     if (_var != null) {
       validateClass(true);
       
       Object servlet = createServlet(false);
 
-      InjectManager webBeans = InjectManager.create();
       BeanFactory factory = webBeans.createBeanFactory(servlet.getClass());
       factory.name(_var);
       
@@ -950,6 +955,10 @@ public class ServletConfigImpl
 
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
+    
+    if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
+      addFacesResolvers();
+    }
 
     try {
       synchronized (this) {
@@ -996,6 +1005,22 @@ public class ServletConfigImpl
       throw e;
     } catch (Throwable e) {
       throw new ServletException(e);
+    }
+  }
+
+  private void addFacesResolvers()
+  {
+    ApplicationFactory appFactory = (ApplicationFactory)
+      FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
+
+    if (appFactory != null) {
+      Application app = appFactory.getApplication();
+
+      if (app != null) {
+	InjectManager beanManager = InjectManager.create();
+
+	app.addELResolver(beanManager.getELResolver());
+      }
     }
   }
 

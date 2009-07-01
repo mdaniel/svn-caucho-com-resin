@@ -108,8 +108,8 @@ public class InjectIntrospector {
       if (annList == null)
 	annList = method.getAnnotations();
       
-      if (! isAnnotationPresent(annList, PostConstruct.class)
-	  && ! isAnnotationPresent(annList, Initializer.class)) {
+      if (! isAnnotationPresent(annList, PostConstruct.class)) {
+	// && ! isAnnotationPresent(annList, Initializer.class)) {
 	continue;
       }
 

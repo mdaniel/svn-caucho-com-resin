@@ -79,7 +79,7 @@ public class TldManager {
   private String _tldDir;
   private FileSetType _tldFileSet;
 
-  private boolean _isFastJsf = true;
+  private boolean _isFastJsf = false; // ioc/0560
 
   private volatile boolean _isInit;
 

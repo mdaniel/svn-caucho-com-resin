@@ -69,6 +69,11 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public boolean isWildcard()
+  {
+    return true;
+  }
+
   public Type []getBounds()
   {
     Type []bounds = new Type[_bounds.length];
@@ -97,6 +102,9 @@ public class VarType<D extends GenericDeclaration> extends BaseType
 
   public boolean isAssignableFrom(BaseType type)
   {
+    if (type.isWildcard())
+      return true;
+    
     for (BaseType bound : _bounds) {
       if (! bound.isAssignableFrom(type))
 	return false;

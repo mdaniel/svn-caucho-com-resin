@@ -76,7 +76,7 @@ public class WebBeansContextResolver extends ELResolver {
     throws PropertyNotFoundException,
 	   ELException
   {
-    if (base != null || ! (property instanceof String))
+    if (! (property instanceof String) || base != null)
       return null;
 
     String name = (String) property;
@@ -92,7 +92,6 @@ public class WebBeansContextResolver extends ELResolver {
       return null;
 
     Bean bean = webBeans.getHighestPrecedenceBean(beans);
-    
     Object result = webBeans.getReference(bean, bean.getBeanClass(),
 					  webBeans.createCreationalContext());
 

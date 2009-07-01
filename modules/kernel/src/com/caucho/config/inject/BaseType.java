@@ -55,8 +55,28 @@ abstract public class BaseType
   
   public static BaseType create(Type type, HashMap paramMap)
   {
-    if (type instanceof Class)
-      return new ClassType((Class) type);
+    if (type instanceof Class) {
+      TypeVariable []typeParam = ((Class) type).getTypeParameters();
+      
+      if (typeParam == null || typeParam.length == 0)
+	return new ClassType((Class) type);
+
+      BaseType []args = new BaseType[typeParam.length];
+
+      HashMap newParamMap = new HashMap();
+
+      for (int i = 0; i < args.length; i++) {
+	args[i] = ClassType.OBJECT_TYPE;
+	
+	if (args[i] == null) {
+	  throw new NullPointerException("unsupported BaseType: " + type);
+	}
+	
+	newParamMap.put(typeParam[i].getName(), args[i]);
+      }
+
+      return new ParamType((Class) type, args, newParamMap);
+    }
     else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
 
@@ -156,6 +176,11 @@ abstract public class BaseType
   public BaseType []getParameters()
   {
     return NULL_PARAM;
+  }
+
+  public boolean isWildcard()
+  {
+    return false;
   }
 
   abstract public boolean isMatch(Type type);

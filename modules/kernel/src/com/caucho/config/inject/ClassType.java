@@ -49,7 +49,7 @@ import javax.annotation.*;
  */
 public class ClassType extends BaseType
 {
-  private static final BaseType OBJECT_TYPE;
+  public static final BaseType OBJECT_TYPE;
   
   private static final HashMap<Class,Class> _boxTypeMap
     = new HashMap<Class,Class>();
@@ -85,7 +85,12 @@ public class ClassType extends BaseType
   @Override
   public boolean isParamAssignableFrom(BaseType type)
   {
-    return _type.equals(type.getRawClass());
+    if (_type.equals(type.getRawClass()))
+      return true;
+    else if (type.isWildcard())
+      return true;
+    else
+      return false;
   }
     
   @Override

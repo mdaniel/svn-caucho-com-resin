@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.inject.HandleAware;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ApplicationScope;
 
@@ -70,6 +69,14 @@ public class SingletonBean extends AbstractSingletonBean
 	  stereotypes, scopeType, name);
 
     _value = value;
+
+    if (value instanceof HandleAware) {
+      HandleAware handleAware = (HandleAware) value;
+      String id = getId();
+
+      if (id != null)
+	handleAware.setSerializationHandle(new SingletonHandle(id));
+    }
   }
 
   @Override

@@ -279,11 +279,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       Object value = _javaCtor.newInstance(args);
 
-      /*
-      if (isSingleton()) {
+      if (value instanceof HandleAware) {
 	SerializationAdapter.setHandle(value, getHandle());
       }
-      */
 
       return (X) value;
     } catch (RuntimeException e) {
@@ -296,6 +294,11 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     } catch (Exception e) {
       throw new CreationException(e);
     }
+  }
+
+  protected Object getHandle()
+  {
+    return new SingletonHandle(getId());
   }
 
   public void inject(X instance, CreationalContext<X> createEnv)
@@ -417,21 +420,17 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       Class instanceClass = null;
 
-      if (! (_beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
-	     || _beanType.isAnnotationPresent(javax.decorator.Decorator.class))) {
+      if (! _beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
+	  && ! _beanType.isAnnotationPresent(javax.decorator.Decorator.class)) {
 	PojoBean bean = new PojoBean(new ApiClass(_beanType));
 	bean.introspect();
 
 	instanceClass = bean.generateClass();
       }
 
-      /*
-      if (instanceClass == getTargetClass()
-	  && isSingleton()
-	  && ! isUnbound()) {
+      if (instanceClass == getTargetClass() && isSerializeHandle()) {
 	instanceClass = SerializationAdapter.gen(instanceClass);
       }
-      */
       
       if (instanceClass != null && instanceClass != _instanceClass) {
 	try {
@@ -440,7 +439,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 	  
 	  _instanceClass = instanceClass;
 	} catch (Exception e) {
-	  throw ConfigException.create(e);
+	  log.log(Level.FINE, e.toString(), e);
+	  // throw ConfigException.create(e);
 	}
       }
 
@@ -465,6 +465,11 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
 
     return false;
+  }
+
+  private boolean isSerializeHandle()
+  {
+    return getAnnotated().isAnnotationPresent(SerializeHandle.class);
   }
 
   /*
@@ -591,7 +596,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 	}
 	else if (hasBindingAnnotation(ctor)) {
 	  if (best != null && hasBindingAnnotation(best))
-	    throw new ConfigException(L.l("Simple bean {0} can't have two constructors with @BindingType or @Initializer, because the Manager can't tell which one to use.",
+	    throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Initializer or by a @BindingType, because the Java Injection BeanManager can't tell which one to use.",
 					  beanType.getJavaClass().getName()));
 	  best = ctor;
 	  second = null;

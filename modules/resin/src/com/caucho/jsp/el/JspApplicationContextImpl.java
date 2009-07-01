@@ -157,6 +157,6 @@ public class JspApplicationContextImpl implements JspApplicationContext
 
   public String toString()
   {
-    return "JspApplicationContextImpl[" + _webApp + "]";
+    return getClass().getSimpleName() + "[" + _webApp + "]";
   }
 }

@@ -41,7 +41,8 @@ import java.util.logging.Logger;
  * Implementation of the UserTransactionImpl for a thread instance.
  */
 public class UserTransactionProxy
-  implements UserTransaction, TransactionManager, java.io.Serializable
+  implements UserTransaction, TransactionManager,
+	     java.io.Serializable
 {
   private static final Logger log
     = Logger.getLogger(UserTransactionProxy.class.getName());
@@ -253,12 +254,12 @@ public class UserTransactionProxy
    */
   private Object writeReplace()
   {
-    return new SingletonHandle(UserTransaction.class);
+    return new SingletonBindingHandle(UserTransaction.class);
   }
 
   public String toString()
   {
-    return "UserTransactionProxy[]";
+    return getClass().getSimpleName() + "[]";
   }
 }
 
