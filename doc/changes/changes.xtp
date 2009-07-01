@@ -13,6 +13,7 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>jsf: ViewExpiredException with JSF RI(#3517, on behalf of Matthew Schmidt)</li>
 <li>server: host-default and web-app-default were included multiple times (#3554, rep by Jean Padilla)</li>
 <li>candi: scope-adapter bytecode issues with more than 3 arguments (#3564, rep by wesley)</li>
 <li>xa: allow synchronization added in beforeCompletion to also be called by beforeCompletion (#3559, rep by Peter Pastrnak)</li>
