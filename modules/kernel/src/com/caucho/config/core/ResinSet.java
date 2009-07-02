@@ -92,11 +92,13 @@ public class ResinSet {
   {
     InjectManager webBeans = InjectManager.create();
     
-    BeanFactory factory = webBeans.createBeanFactory(value.getClass());
-    factory.name(name);
-    factory.type();
+    //BeanFactory factory = webBeans.createBeanFactory(value.getClass());
+    //factory.name(name);
+    //factory.type();
 	
-    webBeans.addBean(factory.singleton(value));
+    // webBeans.addBean(factory.singleton(value));
+
+    Config.setProperty(name, value);
   }
 
   @PostConstruct

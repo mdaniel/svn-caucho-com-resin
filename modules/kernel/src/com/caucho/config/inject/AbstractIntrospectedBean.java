@@ -135,7 +135,13 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     _annotated = annotated;
     
     _type = type;
-    _baseType = manager.createBaseType(type);
+
+    if (type instanceof Class) {
+      // ioc/024d
+      _baseType = manager.createClassBaseType((Class) type);
+    }
+    else
+      _baseType = manager.createBaseType(type);
   }
 
   public InjectManager getBeanManager()

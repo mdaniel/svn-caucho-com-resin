@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ApplicationScope;
+import com.caucho.config.program.*;
 
 import java.io.Closeable;
 import java.lang.annotation.*;
@@ -61,6 +62,7 @@ public class BeanFactory<T>
   private Set<Annotation> _stereotypes;
   private String _name;
   private Class<? extends Annotation> _scopeType;
+  private ContainerProgram _init;
 
   public BeanFactory(ManagedBeanImpl managedBean)
   {
@@ -157,6 +159,18 @@ public class BeanFactory<T>
     return this;
   }
 
+  public BeanFactory init(ConfigProgram init)
+  {
+    if (init != null) {
+      if (_init == null)
+	_init = new ContainerProgram();
+
+      _init.addProgram(init);
+    }
+
+    return this;
+  }
+
   public Bean singleton(Object value)
   {
     return new SingletonBean(_managedBean,
@@ -189,6 +203,7 @@ public class BeanFactory<T>
 				    _bindings,
 				    _stereotypes,
 				    _scopeType,
-				    _name);
+				    _name,
+				    _init);
   }
 }

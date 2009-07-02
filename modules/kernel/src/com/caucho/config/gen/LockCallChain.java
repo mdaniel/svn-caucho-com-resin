@@ -148,7 +148,7 @@ public class LockCallChain extends AbstractCallChain {
       // TODO Should this be static? Should locks be placed at the instance or
       // class level? The class level is fine for EJB singletons, but not
       // necessarily for other bean types.
-      out.println("private final com.caucho.ejb3.lock.LockManager _lockManager");
+      out.println("private transient final com.caucho.ejb3.lock.LockManager _lockManager");
       out.println("  = new com.caucho.ejb3.lock.LockManager();");
     }
 

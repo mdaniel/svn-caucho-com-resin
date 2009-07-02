@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ApplicationScope;
+import com.caucho.config.program.ConfigProgram;
 
 import java.io.Closeable;
 import java.lang.annotation.*;
@@ -54,21 +55,31 @@ import javax.enterprise.inject.spi.InjectionPoint;
 public class ManagedSingletonBean extends AbstractSingletonBean
   implements Closeable
 {
+  private ConfigProgram _init;
+  
   ManagedSingletonBean(ManagedBeanImpl managedBean,
 		       Set<Type> types,
 		       Annotated annotated,
 		       Set<Annotation> bindings,
 		       Set<Annotation> stereotypes,
 		       Class<? extends Annotation> scopeType,
-		       String name)
+		       String name,
+		       ConfigProgram init)
   {
     super(managedBean, types, annotated, bindings, stereotypes,
 	  scopeType, name);
+
+    _init = init;
   }
 
   @Override
   public Object create(CreationalContext env)
   {
-    return getBean().create(env);
+    Object value = getBean().create(env);
+
+    if (_init != null)
+      _init.inject(value, (ConfigContext) env);
+
+    return value;
   }
 }

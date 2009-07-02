@@ -512,10 +512,8 @@ public class BeanConfig {
       comp.setNewArgs(_newArgs);
     */
 
-    /*
     if (_init != null)
-      comp.setInit(_init);
-    */
+      factory.init(_init);
 
     _comp = factory.bean();
 
@@ -560,7 +558,7 @@ public class BeanConfig {
       Object value = _beanManager.getReference(_comp, (Class) null, env);
 
       if (_init != null)
-	_init.inject(value, null);
+	_init.inject(value, (ConfigContext) env);
       
       return value;
     }

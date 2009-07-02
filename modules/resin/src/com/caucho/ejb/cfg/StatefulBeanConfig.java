@@ -121,10 +121,11 @@ public class StatefulBeanConfig extends AbstractBeanConfig
     
     final String name = getName();
 
-    Annotation statefulAnn = new AnnotationLiteral<Stateful>() {
-      public String name() { return name; }
-      public String mappedName() { return name; }
-      public String description() { return ""; }
+    Annotation statefulAnn = new Stateful() {
+	public Class annotationType() { return Stateful.class; }
+	public String name() { return name; }
+	public String mappedName() { return name; }
+	public String description() { return ""; }
     };
 
     add(statefulAnn);

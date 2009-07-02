@@ -658,7 +658,7 @@ public class BeanType extends ConfigType
 	  && String.class.equals(paramTypes[0])
 	  && Modifier.isStatic(method.getModifiers())) {
 	_valueOf = method;
-	_replaceObject.setAccessible(true);
+	_valueOf.setAccessible(true);
 	continue;
       }
       

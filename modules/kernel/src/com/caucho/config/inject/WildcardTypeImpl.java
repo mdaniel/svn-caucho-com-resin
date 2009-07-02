@@ -115,9 +115,8 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
   
   public boolean isMatch(Type type)
   {
-    if (type instanceof WildcardType) {
+    if (type instanceof WildcardType || type instanceof TypeVariable)
       return true;
-    }
     else
       return false;
   }

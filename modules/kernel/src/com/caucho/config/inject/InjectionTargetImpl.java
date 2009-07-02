@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.BeanArg;
+import com.caucho.config.program.ValueArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.gen.*;
 import com.caucho.config.type.TypeFactory;
@@ -48,6 +49,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
+import javax.decorator.Decorates;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
@@ -653,7 +655,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter param = params.get(i);
 
-      args[i] = new BeanArg(param.getBaseType(), getBindings(param));
+      Annotation []bindings = getBindings(param);
+
+      if (bindings.length > 0)
+	args[i] = new BeanArg(param.getBaseType(), bindings);
+      else
+	args[i] = new ValueArg(param.getBaseType());
     }
 
     return args;
@@ -683,7 +690,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     // configureClassResources(injectList, type);
 
     for (AnnotatedField field : type.getFields()) {
-      if (hasBindingAnnotation(field)) {
+      if (field.isAnnotationPresent(Decorates.class))
+	continue;
+      else if (hasBindingAnnotation(field)) {
 	boolean isOptional = isBindingOptional(field);
 
 	InjectionPoint ij = new InjectionPointImpl(this, field);

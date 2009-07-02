@@ -30,6 +30,7 @@
 package com.caucho.config.gen;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.SerializeHandle;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.util.L10N;
@@ -63,13 +64,20 @@ public class PojoBean extends BeanGenerator {
   private boolean _hasReadResolve;
   private boolean _isReadResolveEnhanced;
   private boolean _isSingleton;
+  private boolean _isSerializeHandle;
   
   public PojoBean(ApiClass beanClass)
   {
     super(beanClass.getName() + "$ResinWebBean", beanClass);
 
     setSuperClassName(beanClass.getName());
-    addInterfaceName("java.io.Serializable");
+
+    if (beanClass.isAnnotationPresent(SerializeHandle.class)) {
+      _isSerializeHandle = true;
+      
+      addInterfaceName("java.io.Serializable");
+      addInterfaceName("com.caucho.config.inject.HandleAware");
+    }
     
     addImport("javax.transaction.*");
 
@@ -280,10 +288,31 @@ public class PojoBean extends BeanGenerator {
       out.println("  = new com.caucho.ejb3.xa.XAManager();");
     }
 
+    if (_isSerializeHandle) {
+      generateSerializeHandle(out);
+    }
+
     /*
     if (_isReadResolveEnhanced)
       generateReadResolve(out);
     */
+  }
+
+  protected void generateSerializeHandle(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private transient Object _serializationHandle;");
+    out.println();
+    out.println("public void setSerializationHandle(Object handle)");
+    out.println("{");
+    out.println("  _serializationHandle = handle;");
+    out.println("}");
+    out.println();
+    out.println("private Object writeReplace()");
+    out.println("{");
+    out.println("  return _serializationHandle;");
+    out.println("}");
   }
 
   protected void generateReadResolve(JavaWriter out)

@@ -152,6 +152,34 @@ abstract public class BaseType
     }
   }
 
+  /**
+   * Create a class-based type, where any parameters are filled with the
+   * variables, not Object.
+   */
+  public static BaseType createClass(Class type)
+  {
+    TypeVariable []typeParam = ((Class) type).getTypeParameters();
+      
+    if (typeParam == null || typeParam.length == 0)
+      return new ClassType((Class) type);
+
+    BaseType []args = new BaseType[typeParam.length];
+
+    HashMap newParamMap = new HashMap();
+
+    for (int i = 0; i < args.length; i++) {
+      args[i] = create(typeParam[i], newParamMap);
+	
+      if (args[i] == null) {
+	throw new NullPointerException("unsupported BaseType: " + type);
+      }
+	
+      newParamMap.put(typeParam[i].getName(), args[i]);
+    }
+
+    return new ParamType((Class) type, args, newParamMap);
+  }
+
   private static BaseType []toBaseType(Type []types, HashMap paramMap)
   {
     if (types == null)

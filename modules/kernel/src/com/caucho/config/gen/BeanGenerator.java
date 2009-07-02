@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import javax.interceptor.*;
+import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
@@ -61,21 +62,11 @@ abstract public class BeanGenerator extends GenClass
   
   private ApiMethod _aroundInvokeMethod;
 
-  /*
-  private ArrayList<Class> _defaultInterceptors
-    = new ArrayList<Class>();
-  */
-
   private Set<Annotation> _decoratorBindings;
   private Set<Annotation> _interceptorBindings;
 
   private ArrayList<Type> _decorators
     = new ArrayList<Type>();
-
-  /*
-  private HashMap<Method,AnnotatedMethod> _methodAnnotations
-    = new HashMap<Method,AnnotatedMethod>();
-  */
 
   protected BeanGenerator(String fullClassName, ApiClass beanClass)
   {
@@ -161,6 +152,15 @@ abstract public class BeanGenerator extends GenClass
     HashSet<Type> types = new HashSet<Type>();
     for (ApiClass iface : cl.getInterfaces()) {
       fillTypes(types, iface.getJavaClass());
+    }
+
+    for (Annotation ann : cl.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+	if (_decoratorBindings == null)
+	  _decoratorBindings = new HashSet<Annotation>();
+	
+	_decoratorBindings.add(ann);
+      }
     }
 
     Annotation []decoratorBindings;
@@ -304,29 +304,6 @@ abstract public class BeanGenerator extends GenClass
   public boolean hasMethod(String methodName, Class []paramTypes)
   {
     return _beanClass.hasMethod(methodName, paramTypes);
-  }
-
-  private String generateTypeCasting(String value, Class cl, boolean isEscapeString)
-  {
-    if (cl.equals(String.class)) {
-      if (isEscapeString)
-        value = "\"" + value + "\"";
-    } else if (cl.equals(Character.class))
-      value = "'" + value + "'";
-    else if (cl.equals(Byte.class))
-      value = "(byte) " + value;
-    else if (cl.equals(Short.class))
-      value = "(short) " + value;
-    else if (cl.equals(Integer.class))
-      value = "(int) " + value;
-    else if (cl.equals(Long.class))
-      value = "(long) " + value;
-    else if (cl.equals(Float.class))
-      value = "(float) " + value;
-    else if (cl.equals(Double.class))
-      value = "(double) " + value;
-
-    return value;
   }
 
   public String toString()

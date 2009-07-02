@@ -72,14 +72,8 @@ public class EventImpl<T> implements Event<T>
     if (bindings == null)
       return this;
 
-    Annotation []newBindings
-      = new Annotation[_bindings.length + bindings.length];
-
-    System.arraycopy(_bindings, 0, newBindings, 0, _bindings.length);
-    System.arraycopy(bindings, 0, newBindings, _bindings.length,
-		     bindings.length);
-
-    return new EventImpl(_manager, _type, newBindings);
+    // ioc/0b54 - union would cause problems with @Current
+    return new EventImpl(_manager, _type, bindings);
   }
   
   public <U extends T> Event<U> select(Class<U> subtype,

@@ -42,6 +42,7 @@ import com.caucho.util.L10N;
 
 
 import javax.annotation.*;
+import javax.decorator.Decorates;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.naming.*;
@@ -415,6 +416,8 @@ public class InjectIntrospector {
       gen = generateWebService(location, field.getType(), jndiName, webService);
     }
     */
+    else if (field.isAnnotationPresent(Decorates.class)) {
+    }
     else if (hasBindingAnnotation(field))
       introspectWebBean(injectList, field);
 

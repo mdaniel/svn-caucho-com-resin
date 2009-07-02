@@ -135,5 +135,10 @@ public class ObserverMap {
 
       return true;
     }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _observer + "," + _type + "]";
+    }
   }
 }

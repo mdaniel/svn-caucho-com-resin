@@ -51,7 +51,11 @@ import javax.enterprise.inject.spi.BeanManager;
  */
 public class BaseTypeFactory
 {
-  private LruCache<Type,BaseType> _cache = new LruCache<Type,BaseType>(128);
+  private LruCache<Type,BaseType> _cache
+    = new LruCache<Type,BaseType>(128);
+  
+  private LruCache<Class,BaseType> _classCache
+    = new LruCache<Class,BaseType>(128);
 
   public BaseType create(Type type)
   {
@@ -64,6 +68,22 @@ public class BaseTypeFactory
 	throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
 
       _cache.put(type, baseType);
+    }
+
+    return baseType;
+  }
+
+  public BaseType createClass(Class type)
+  {
+    BaseType baseType = _classCache.get(type);
+
+    if (baseType == null) {
+      baseType = BaseType.createClass(type);
+
+      if (baseType == null)
+	throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
+
+      _classCache.put(type, baseType);
     }
 
     return baseType;

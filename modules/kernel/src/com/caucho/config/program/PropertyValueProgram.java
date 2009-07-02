@@ -101,4 +101,12 @@ public class PropertyValueProgram extends ConfigProgram {
       throw ConfigException.create(e);
     }
   }
+
+  public Object configure(ConfigType type, ConfigContext env)
+    throws ConfigException
+  {
+    // ioc/04d7
+    
+    return type.valueOf(_value);
+  }
 }

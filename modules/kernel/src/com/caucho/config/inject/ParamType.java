@@ -108,7 +108,8 @@ public class ParamType extends BaseType implements ParameterizedType
   @Override
   public boolean isAssignableFrom(BaseType type)
   {
-    if (! getRawClass().equals(type.getRawClass()))
+    // ioc/0062
+    if (! getRawClass().isAssignableFrom(type.getRawClass()))
       return false;
 
     BaseType []paramA = getParameters();

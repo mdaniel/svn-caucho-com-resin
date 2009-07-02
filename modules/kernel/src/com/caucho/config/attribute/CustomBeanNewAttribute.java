@@ -34,6 +34,7 @@ import java.lang.reflect.*;
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.config.types.ConfigProgramArray;
 import com.caucho.util.L10N;
@@ -71,9 +72,14 @@ public class CustomBeanNewAttribute extends Attribute {
     throws ConfigException
   {
     CustomBeanConfig customBean = (CustomBeanConfig) bean;
-    ConfigProgramArray args = (ConfigProgramArray) value;
 
-    customBean.addArgs(args.getArgs());
+    if (value instanceof ConfigProgramArray) {
+      ConfigProgramArray args = (ConfigProgramArray) value;
+
+      customBean.addArgs(args.getArgs());
+    }
+    else
+      customBean.addArg(new PropertyValueProgram("value", value));
   }
   
   /**

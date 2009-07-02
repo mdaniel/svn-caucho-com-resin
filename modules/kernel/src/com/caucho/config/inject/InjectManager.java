@@ -485,6 +485,8 @@ public class InjectManager
     }
     
     beanList.add(bean);
+
+    _namedBeanMap.remove(name);
   }
 
   /**
@@ -519,6 +521,7 @@ public class InjectManager
       beanSet = new HashSet<TypedBean>();
       _selfBeanMap.put(rawType, beanSet);
     }
+    _beanMap.remove(rawType);
 
     beanSet.add(new TypedBean(type, bean));
   }
@@ -762,6 +765,14 @@ public class InjectManager
   /**
    * Creates a BaseType from a Type
    */
+  public BaseType createClassBaseType(Class type)
+  {
+    return _baseTypeFactory.createClass(type);
+  }
+
+  /**
+   * Creates a BaseType from a Type
+   */
   public BaseType createBaseType(Type type, HashMap paramMap)
   {
     return _baseTypeFactory.create(type, paramMap);
@@ -898,6 +909,7 @@ public class InjectManager
       addBeanByName(bean.getName(), bean);
     }
 
+
     /*
     if (bean instanceof ManagedBeanImpl) {
       ManagedBeanImpl<?> mBean = (ManagedBeanImpl) bean;
@@ -1006,12 +1018,13 @@ public class InjectManager
     if (component != null) {
       Set beans = component.resolve(baseType, bindings);
 
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " bind(" + baseType.getSimpleName()
-		  + "," + toList(bindings) + ") -> " + beans);
+      if (beans != null && beans.size() > 0) {
+	if (log.isLoggable(Level.FINER))
+	  log.finer(this + " bind(" + baseType.getSimpleName()
+		     + "," + toList(bindings) + ") -> " + beans);
 
-      if (beans != null && beans.size() > 0)
 	return beans;
+      }
     }
     else if (New.class.equals(bindings[0].annotationType())) {
       // ioc/0721
@@ -1064,8 +1077,8 @@ public class InjectManager
       }
     }
     
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " bind(" + baseType.getSimpleName()
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " bind(" + baseType.getSimpleName()
 		+ "," + toList(bindings) + ") -> none");
     }
 
@@ -1693,22 +1706,42 @@ public class InjectManager
 					       Annotation... bindings)
   {
     HashSet<Observer<T>> set = new HashSet<Observer<T>>();
-    
-    ObserverMap map = _observerMap.get(event.getClass());
 
-    if (map != null) {
-      BaseType eventType = createBaseType(event.getClass());
-      
+    BaseType eventType = createBaseType(event.getClass());
+    
+    for (ObserverMap map : getLocalObserverList(event.getClass())) {
       map.resolveObservers(set, eventType, bindings);
     }
 
     return set;
   }
+
+  private ArrayList<ObserverMap> getLocalObserverList(Class cl)
+  {
+    ArrayList<ObserverMap> observerList;
+
+    synchronized (_observerListCache) {
+      observerList = _observerListCache.get(cl);
+
+      if (observerList == null) {
+	observerList = new ArrayList<ObserverMap>();
+
+	BaseType eventType = createClassBaseType(cl);
+
+	fillLocalObserverList(observerList, eventType);
+	
+	_observerListCache.put(cl, observerList);
+      }
+    }
+
+    return observerList;
+  }
   
   private void fireLocalEvent(Object event, Annotation... bindings)
   {
     ArrayList<ObserverMap> observerList = new ArrayList<ObserverMap>();
-    BaseType eventType = createBaseType(event.getClass());
+    // ioc/0062 - class with type-param handled specially
+    BaseType eventType = createClassBaseType(event.getClass());
 	
     fillLocalObserverList(observerList, eventType);
 
@@ -1831,7 +1864,7 @@ public class InjectManager
    * @return the matching interceptors
    */
   public List<Decorator<?>> resolveDecorators(Set<Type> types,
-					   Annotation... bindings)
+					      Annotation... bindings)
   {
     ArrayList<Decorator<?>> decorators = new ArrayList<Decorator<?>>();
 
