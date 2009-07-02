@@ -107,25 +107,25 @@ public class DependencyComponent extends ClassComponent {
         Path path = depend.getPath();
 
         out.print("_caucho_depend[" + i + "] = new com.caucho.vfs.Depend(");
+        
+        // php/3b33
+        String relativePath;
+        if (searchPath != null)
+          relativePath = searchPath.lookup(path.getRelativePath()).getRelativePath();
+        else {
+          String fullPath = path.getFullPath();
+          String pwd = Vfs.lookup().getFullPath();
 
-	// php/3b33
-	String relativePath;
-	if (searchPath != null)
-	  relativePath = searchPath.lookup(path.getRelativePath()).getRelativePath();
-	else {
-	  String fullPath = path.getFullPath();
-	  String pwd = Vfs.lookup().getFullPath();
-
-	  if (fullPath.startsWith(pwd))
-	    relativePath = "./" + fullPath.substring(pwd.length());
-	  else
-	    relativePath = fullPath;
-	}
+          if (fullPath.startsWith(pwd))
+            relativePath = "./" + fullPath.substring(pwd.length());
+          else
+            relativePath = fullPath;
+        }
 	
-	out.print("path.lookup(\"" + relativePath + "\"), ");
-	  
-	out.println(depend.getDigest() + "L, " +
-		    depend.getRequireSource() + ");");
+        out.print("path.lookup(\"" + relativePath + "\"), ");
+    
+        out.println(depend.getDigest() + "L, "
+                    + depend.getRequireSource() + ");");
       }
       else {
         out.print("_caucho_depend[" + i + "] = ");

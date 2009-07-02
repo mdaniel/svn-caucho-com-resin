@@ -34,6 +34,7 @@ import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.SourceDebugExtensionAttribute;
 import com.caucho.config.*;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Loader;
 import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
@@ -45,6 +46,8 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -271,6 +274,14 @@ public class JavaCompiler {
     if (classPath == null && _loader instanceof DynamicClassLoader) {
       classPath = ((DynamicClassLoader) _loader).getClassPath();
     }
+    else if (true || _loader instanceof URLClassLoader) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(CauchoSystem.getClassPath());
+      
+      buildClassPath(sb, (URLClassLoader) _loader);
+
+      classPath = sb.toString();
+    }
     else if (classPath == null)
       classPath = CauchoSystem.getClassPath();
 
@@ -288,6 +299,34 @@ public class JavaCompiler {
     classPath = classDirName + sep + classPath;
 
     return classPath;
+  }
+  
+  private static void buildClassPath(StringBuilder sb, ClassLoader loader)
+  {
+    ClassLoader parent = loader.getParent();
+    
+    if (parent != null)
+      buildClassPath(sb, parent);
+    
+    if (loader instanceof URLClassLoader) {
+      for (URL url : ((URLClassLoader) loader).getURLs()) {
+        if (sb.length() > 0)
+          sb.append(CauchoSystem.getPathSeparatorChar());
+        
+        String urlString = url.toString();
+        if (urlString.startsWith("file:"))
+          urlString = urlString.substring("file:".length());
+        
+        // https://issues.apache.org/bugzilla/show_bug.cgi?id=47053
+        // Tomcat's WebAppClassLoader.getURLs() returns paths with spaces
+        // replaced by %20
+        if (Path.isWindows() && urlString.contains("%20")) {
+          urlString = urlString.replace("%20", " ");
+        }
+        
+        sb.append(urlString);
+      }
+    }
   }
 
   /**
