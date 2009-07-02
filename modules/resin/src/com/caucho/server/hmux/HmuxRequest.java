@@ -288,8 +288,11 @@ public class HmuxRequest extends AbstractHttpRequest
     _hmuxProtocol = protocol;
 
     _rawWrite = conn.getWriteStream();
-    _writeStream = new WriteStream();
-    _writeStream.setReuseBuffer(true);
+
+    if (_writeStream == null) {
+      _writeStream = new WriteStream();
+      _writeStream.setReuseBuffer(true);
+    }
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
@@ -344,6 +347,11 @@ public class HmuxRequest extends AbstractHttpRequest
   @Override
   protected HmuxResponse createResponse()
   {
+    if (_writeStream == null) {
+      _writeStream = new WriteStream();
+      _writeStream.setReuseBuffer(true);
+    }
+    
     return new HmuxResponse(this, _writeStream);
   }
 

@@ -44,7 +44,7 @@ import java.io.IOException;
  * a web server plugin.
  */
 public class HmuxResponse extends AbstractHttpResponse {
-  HmuxRequest _req;
+  private HmuxRequest _req;
   
   HmuxResponse(HmuxRequest request, WriteStream rawWrite)
   {

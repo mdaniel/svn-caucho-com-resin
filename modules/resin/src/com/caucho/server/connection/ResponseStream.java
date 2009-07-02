@@ -93,6 +93,9 @@ public class ResponseStream extends ToByteResponseStream {
 
   public void init(WriteStream next)
   {
+    if (next == null)
+      throw new NullPointerException();
+    
     _next = next;
   }
   
