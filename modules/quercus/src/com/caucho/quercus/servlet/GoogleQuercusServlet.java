@@ -30,29 +30,8 @@
 package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
-import com.caucho.quercus.*;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusValueException;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.resin.Resin;
-import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
