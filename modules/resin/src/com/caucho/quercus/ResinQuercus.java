@@ -206,7 +206,7 @@ public class ResinQuercus extends Quercus
     return ((UserStatement) stmt).getStatement();
   }
   
-  /*
+  /**
    * Returns true if Quercus is running under Resin.
    */
   @Override
