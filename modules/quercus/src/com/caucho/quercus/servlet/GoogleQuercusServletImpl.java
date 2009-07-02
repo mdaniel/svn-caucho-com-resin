@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,93 +29,118 @@
 
 package com.caucho.quercus.servlet;
 
-import com.caucho.java.WorkDir;
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusDieException;
-import com.caucho.quercus.QuercusErrorException;
-import com.caucho.quercus.QuercusExitException;
-import com.caucho.quercus.QuercusLineRuntimeException;
-import com.caucho.quercus.QuercusRequestAdapter;
-import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.*;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.L10N;
-import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.Vfs;
-import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.WriterStreamImpl;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.GenericServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServlet;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Servlet to call PHP through javax.script.
  */
-public class QuercusServletImpl extends HttpServlet
+public class GoogleQuercusServletImpl extends QuercusServletImpl
 {
-  private static final L10N L = new L10N(QuercusServletImpl.class);
+  private static final L10N L = new L10N(GoogleQuercusServletImpl.class);
   private static final Logger log
-    = Logger.getLogger(QuercusServletImpl.class.getName());
+    = Logger.getLogger(GoogleQuercusServletImpl.class.getName());
 
-  protected Quercus _quercus;
-  protected ServletConfig _config;
-  protected ServletContext _servletContext;
+  private ServletContext _webApp;
 
   /**
    * initialize the script manager.
    */
+  @Override
   public void init(ServletConfig config)
     throws ServletException
   {
-    _config = config;
-    _servletContext = config.getServletContext();
+    super.init(config);
 
-    checkServletAPIVersion();
+    _webApp = config.getServletContext();
+
+    GoogleQuercus quercus = (GoogleQuercus) getQuercus();
+
+    // _quercus.setWebApp(_webApp);
     
-    getQuercus().setPwd(new FilePath(_servletContext.getRealPath("/")));
+    _quercus.setPwd(Vfs.lookup(_webApp.getRealPath(".")));
 
-    // need to set this for non-Resin containers
-    if (! getQuercus().isResin())
-      WorkDir.setLocalWorkDir(getQuercus().getPwd().lookup("WEB-INF/work"));
-
-    getQuercus().init();
+    _quercus.start();
   }
 
+  protected QuercusServletImpl getQuercusServlet()
+  {
+    return this;
+  }
+
+  protected WriteStream openWrite(HttpServletResponse response)
+    throws IOException
+  {
+    WriteStream ws;
+
+    OutputStream out = response.getOutputStream();
+
+    ws = Vfs.openWrite(out);
+
+    return ws;
+  }
+
+  Path getPath(HttpServletRequest req)
+  {
+    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
+
+    Path pwd = Vfs.lookup();
+
+    Path path = pwd.lookup(req.getRealPath(scriptPath));
+
+    if (path.isFile())
+      return path;
+
+    // XXX: include
+
+    String fullPath;
+    if (pathInfo != null)
+      fullPath = scriptPath + pathInfo;
+    else
+      fullPath = scriptPath;
+
+    return Vfs.lookup().lookup(req.getRealPath(fullPath));
+  }
   /**
-   * Sets the profiling mode
+   * Service.
    */
-  public void setProfileProbability(double probability)
-  {
-  }
-
   /*
-   * Makes sure the servlet container supports Servlet API 2.4+.
-   */
-  protected void checkServletAPIVersion()
+  public void service(HttpServletRequest request,
+                      HttpServletResponse response)
+    throws ServletException, IOException
   {
-    int major = _servletContext.getMajorVersion();
-    int minor = _servletContext.getMinorVersion();
-
-    if (major < 2 || major == 2 && minor < 4)
-      throw new QuercusRuntimeException(L.l("Quercus requires Servlet API 2.4+."));
+    try {
+    super.service(request, response);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      OutputStream os = response.getOutputStream();
+      WriteStream out = Vfs.openWrite(os);
+      out.println(e);
+      out.close();
+    }
   }
-
+  */
+  
   /**
    * Service.
    */
@@ -143,7 +168,6 @@ public class QuercusServletImpl extends HttpServlet
         return;
       }
 
-
       ws = openWrite(response);
       
       // php/6006
@@ -157,9 +181,10 @@ public class QuercusServletImpl extends HttpServlet
       try {
         env.start();
         
-        env.setGlobalValue("request", env.wrapJava(request));
-        env.setGlobalValue("response", env.wrapJava(response));
-        env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
+        // GoogleAppEngine SDK is missing non-essential Jetty classes
+        //env.setGlobalValue("request", env.wrapJava(request));
+        //env.setGlobalValue("response", env.wrapJava(response));
+        //env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
 
         StringValue prepend
           = quercus.getIniValue("auto_prepend_file").toStringValue(env);
@@ -199,12 +224,12 @@ public class QuercusServletImpl extends HttpServlet
       catch (QuercusLineRuntimeException e) {
         log.log(Level.FINE, e.toString(), e);
 
-        ws.println(e.getMessage());
-        //  return;
+    ws.println(e.getMessage());
+    //  return;
       }
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);
-	
+    
         ws.println(e.toString());
 
         //  return;
@@ -238,68 +263,28 @@ public class QuercusServletImpl extends HttpServlet
       // error exit
       log.log(Level.FINE, e.toString(), e);
     }
-    catch (RuntimeException e) {
-      throw e;
-    }
     catch (Throwable e) {
-      throw new ServletException(e);
+      log.log(Level.WARNING, e.toString(), e);
+      
+      OutputStream os = response.getOutputStream();
+      WriteStream out = Vfs.openWrite(os);
+      out.println(e);
+      out.close();
     }
-  }
-
-  protected WriteStream openWrite(HttpServletResponse response)
-    throws IOException
-  {
-    WriteStream ws;
-    
-    OutputStream out = response.getOutputStream();
-
-    ws = Vfs.openWrite(out);
-
-    return ws;
-  }
-
-  Path getPath(HttpServletRequest req)
-  {
-    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
-    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
-
-    Path pwd = new FilePath(System.getProperty("user.dir"));
-
-    Path path = pwd.lookup(req.getRealPath(scriptPath));
-
-    if (path.isFile())
-      return path;
-
-    // XXX: include
-
-    String fullPath;
-    if (pathInfo != null)
-      fullPath = scriptPath + pathInfo;
-    else
-      fullPath = scriptPath;
-
-    return pwd.lookup(req.getRealPath(fullPath));
   }
 
   /**
    * Returns the Quercus instance.
    */
+  @Override
   protected Quercus getQuercus()
   {
     synchronized (this) {
       if (_quercus == null)
-	_quercus = new Quercus();
+        _quercus = new GoogleQuercus();
     }
 
     return _quercus;
-  }
-
-  /**
-   * Gets the script manager.
-   */
-  public void destroy()
-  {
-    _quercus.close();
   }
 }
 

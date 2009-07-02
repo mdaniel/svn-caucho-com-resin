@@ -108,7 +108,7 @@ public class RegexpModule
   @Hide
   public static void setRegexpCacheSize(int size)
   {
-    if (_regexpCache.getCapacity() == size)
+    if (size < 0 || size == _regexpCache.getCapacity())
       return;
     
     _regexpCache = new LruCache<StringValue, Regexp>(size);

@@ -163,7 +163,7 @@ public class PageManager
    */
   public void setPageCacheSize(int size)
   {
-    if (_programCache.getCapacity() != size)
+    if (size >= 0 && size != _programCache.getCapacity())
       _programCache = new LruCache<Path,QuercusProgram>(size);
   }
 
@@ -250,16 +250,16 @@ public class PageManager
       if (program == null || isModified) {
         clearProgram(path, program);
 
-	program = preloadProgram(path, fileName);
+        program = preloadProgram(path, fileName);
 
-	if (program == null) {
-	  program = QuercusParser.parse(_quercus,
-					path,
-					_quercus.getScriptEncoding(),
-					fileName,
-					line);
-	}
-        
+        if (program == null) {
+          program = QuercusParser.parse(_quercus,
+                                        path,
+                                        _quercus.getScriptEncoding(),
+                                        fileName,
+                                        line);
+        }
+
         _programCache.put(path, program);
       }
 
