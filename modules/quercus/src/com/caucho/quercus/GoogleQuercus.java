@@ -98,6 +98,7 @@ public class GoogleQuercus extends Quercus
     return new GoogleEnv(this, page, out, request, response);
   }
 
+  /*
   @Override
   public String getVersion()
   {
@@ -109,5 +110,6 @@ public class GoogleQuercus extends Quercus
   {
     return com.caucho.Version.VERSION_DATE;
   }
+  */
 }
 

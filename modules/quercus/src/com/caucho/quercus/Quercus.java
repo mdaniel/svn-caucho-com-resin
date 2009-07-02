@@ -270,7 +270,7 @@ public class Quercus
 
   public String getVersionDate()
   {
-    return "20090301T2777";
+    return "20090701T2777";
   }
 
   public boolean isProfile()
