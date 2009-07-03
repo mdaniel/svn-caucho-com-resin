@@ -31,12 +31,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Declares a concurrency lock for a bean method.
+ * Specifies the amount of time in a given time unit that a concurrent access
+ * attempt on a Singleton session bean should block before timing out.
  */
 @Target( { ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AccessTimeout {
-  LockType value() default LockType.WRITE;
+  long timeout();
+  TimeUnit unit() default TimeUnit.MILLISECONDS;
 }
