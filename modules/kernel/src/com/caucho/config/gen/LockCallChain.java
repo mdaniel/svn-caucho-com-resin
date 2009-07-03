@@ -28,15 +28,14 @@
  */
 package com.caucho.config.gen;
 
+import static javax.ejb.ConcurrencyManagementType.CONTAINER;
+
 import java.io.IOException;
 import java.util.HashMap;
 
 import javax.ejb.ConcurrencyManagement;
-import javax.ejb.ConcurrencyManagementType;
-import static javax.ejb.ConcurrencyManagementType.CONTAINER;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
-import javax.transaction.Synchronization;
 
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -45,7 +44,6 @@ import com.caucho.util.L10N;
  * Represents EJB lock type specification interception. The specification gears
  * it towards EJB singletons, but it can be used for other bean types.
  */
-// TODO What bean types (e.g. JCDI scopes) do we foresee a use for?
 public class LockCallChain extends AbstractCallChain {
   @SuppressWarnings("unused")
   private static final L10N L = new L10N(LockCallChain.class);
@@ -54,10 +52,8 @@ public class LockCallChain extends AbstractCallChain {
 
   private boolean _isContainerManaged;
   private LockType _lockType;
-  private boolean _isSynchronization;
 
-  public LockCallChain(BusinessMethodGenerator businessMethod,
-		       EjbCallChain next)
+  public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next)
   {
     super(next);
 
@@ -88,8 +84,8 @@ public class LockCallChain extends AbstractCallChain {
   {
     ApiClass apiClass = apiMethod.getDeclaringClass();
 
-    ConcurrencyManagement concurrencyManagementAnnotation
-      = apiClass.getAnnotation(ConcurrencyManagement.class);
+    ConcurrencyManagement concurrencyManagementAnnotation = apiClass
+        .getAnnotation(ConcurrencyManagement.class);
 
     if (concurrencyManagementAnnotation != null
         && concurrencyManagementAnnotation.value() != CONTAINER) {
@@ -101,15 +97,6 @@ public class LockCallChain extends AbstractCallChain {
 
     if (implementationMethod != null) {
       implementationClass = implementationMethod.getDeclaringClass();
-    }
-
-    // TODO What is this checking for? Whether the implementing class is a
-    // subclass of Synchronization? Is this pertinent to the locking
-    // implementation?
-    if (implementationClass != null
-        && Synchronization.class.isAssignableFrom(implementationClass
-            .getJavaClass())) {
-      _isSynchronization = true;
     }
 
     Lock lockAttribute;
@@ -148,7 +135,8 @@ public class LockCallChain extends AbstractCallChain {
       // TODO Should this be static? Should locks be placed at the instance or
       // class level? The class level is fine for EJB singletons, but not
       // necessarily for other bean types.
-      out.println("private transient final com.caucho.ejb3.lock.LockManager _lockManager");
+      out
+          .println("private transient final com.caucho.ejb3.lock.LockManager _lockManager");
       out.println("  = new com.caucho.ejb3.lock.LockManager();");
     }
 
@@ -181,11 +169,6 @@ public class LockCallChain extends AbstractCallChain {
         out.println();
         break;
       }
-    }
-
-    // TODO Is an equivalent needed here?
-    if (_isSynchronization) {
-      out.println("_xa.registerSynchronization(_bean);");
     }
 
     generateNext(out);
