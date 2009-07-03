@@ -127,4 +127,10 @@ public class InjectionPointImpl implements InjectionPoint
   {
     return false;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getMember() + "]";
+  }
 }

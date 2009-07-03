@@ -127,6 +127,14 @@ public class CreateAttribute extends Attribute {
   }
 
   /**
+   * Returns true for attributes which create objects.
+   */
+  public boolean isSetter()
+  {
+    return _setter != null;
+  }
+
+  /**
    * Creates the child bean.
    */
   @Override

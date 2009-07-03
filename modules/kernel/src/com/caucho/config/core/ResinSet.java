@@ -115,7 +115,8 @@ public class ResinSet {
 	Config.setProperty(_var, _value);
       }
       else if (_default != null) {
-	Config.setProperty(_var, _default);
+	if (Config.getProperty(_var) == null)
+	  Config.setProperty(_var, _default);
       }
       
       /*

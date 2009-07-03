@@ -269,7 +269,7 @@ public class CustomBeanConfig {
       _hasBindings = true;
       clearBindings(_annotatedType);
     }
-    
+
     if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)
 	&& ! _hasInterceptorBindings) {
       _hasInterceptorBindings = true;
@@ -357,6 +357,9 @@ public class CustomBeanConfig {
 
     if (annMethod instanceof AnnotatedMethodImpl) {
       AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) annMethod;
+
+      // ioc/0c64
+      methodImpl.clearAnnotations();
 
       addAnnotations(methodImpl, annList);
     }

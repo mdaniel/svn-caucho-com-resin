@@ -161,6 +161,9 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   public X create(CreationalContext<X> context)
   {
     X instance = _injectionTarget.produce(context);
+
+    context.push(instance);
+
     _injectionTarget.inject(instance, context);
     _injectionTarget.postConstruct(instance);
 
@@ -248,7 +251,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
    */
   public void destroy(X instance, CreationalContext<X> env)
   {
-
+    getInjectionTarget().preDestroy(instance);
   }
 
   /**
@@ -305,7 +308,10 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter param = params.get(i);
 
-      args[i] = new BeanArg(param.getBaseType(), getBindings(param));
+      if (InjectionPoint.class.equals(param.getBaseType()))
+	args[i] = new InjectionPointArg();
+      else
+	args[i] = new BeanArg(param.getBaseType(), getBindings(param));
     }
 
     return args;

@@ -51,6 +51,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
+import javax.enterprise.inject.stereotype.Stereotype;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.InterceptorBindingType;
@@ -269,10 +270,22 @@ public class InterceptorCallChain
 				      Set<Annotation> annotations)
   {
     for (Annotation ann : annotations) {
-      Class annType = ann.annotationType();
+      addInterceptorBindings(interceptorTypes, ann);
+    }
+  }
+  
+  private void addInterceptorBindings(HashMap<Class,Annotation> interceptorTypes,
+				      Annotation ann)
+  {
+    Class annType = ann.annotationType();
 
-      if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
-        interceptorTypes.put(ann.annotationType(), ann);
+    if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+      interceptorTypes.put(ann.annotationType(), ann);
+    }
+      
+    if (annType.isAnnotationPresent(Stereotype.class)) {
+      for (Annotation subAnn : annType.getAnnotations()) {
+	addInterceptorBindings(interceptorTypes, subAnn);
       }
     }
   }

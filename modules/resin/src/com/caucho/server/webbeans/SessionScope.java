@@ -32,6 +32,7 @@ package com.caucho.server.webbeans;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.ContextContainer;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import java.lang.annotation.Annotation;
@@ -81,13 +82,19 @@ public class SessionScope extends ScopeContext {
 
     HttpSession session = ((HttpServletRequest) request).getSession();
 
-    Bean comp = (Bean) bean;
+    if (session == null)
+      return null;
 
-    String id = _idMap.getId(comp);
+    ContextContainer context
+      = (ContextContainer) session.getAttribute("webbeans.resin");
 
-    Object result = session.getAttribute(id);
+    if (context != null) {
+      String id = ((PassivationCapable) bean).getId();
+      
+      return (T) context.get(id);
+    }
 
-    return (T) result;
+    return null;
   }
 
   public <T> T get(Contextual<T> bean,
@@ -102,16 +109,24 @@ public class SessionScope extends ScopeContext {
 
     Bean comp = (Bean) bean;
 
-    String id = _idMap.getId(comp);
+    String id = ((PassivationCapable) bean).getId();
 
-    Object result = session.getAttribute(id);
+    ContextContainer context
+      = (ContextContainer) session.getAttribute("webbeans.resin");
+
+    if (context == null) {
+      context = new SessionContextContainer();
+      session.setAttribute("webbeans.resin", context);
+    }
+    
+    Object result = context.get(id);
 
     if (result != null || creationalContext == null)
       return (T) result;
     
     result = comp.create(creationalContext);
 
-    session.setAttribute(id, result);
+    context.put(id, result);
     
     return (T) result;
   }

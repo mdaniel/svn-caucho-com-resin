@@ -53,10 +53,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * The ConfigContext contains the state of the current configuration.
@@ -78,6 +80,10 @@ public class ConfigContext implements CreationalContext {
 
   private ConfigContext _parent;
   private DependentScope _dependentScope;
+
+  private ScopeContext _scope;
+  private Contextual<?> _bean;
+  private InjectionPoint _ij;
   
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
@@ -147,6 +153,22 @@ public class ConfigContext implements CreationalContext {
   static void setCurrentBuilder(ConfigContext builder)
   {
     _currentBuilder.set(builder);
+  }
+
+  public InjectionPoint getInjectionPoint()
+  {
+    return _ij;
+  }
+
+  public void setInjectionPoint(InjectionPoint ij)
+  {
+    _ij = ij;
+  }
+
+  public void setScope(ScopeContext scope, Contextual<?> bean)
+  {
+    _scope = scope;
+    _bean = bean;
   }
 
   /**
@@ -545,7 +567,7 @@ public class ConfigContext implements CreationalContext {
       ConfigType childType = attrStrategy.getConfigType();
 	  
       Object value = childType.valueOf(evalObject(text));
-	  
+      
       attrStrategy.setValue(bean, qName, value);
     }
     else
@@ -557,6 +579,10 @@ public class ConfigContext implements CreationalContext {
 				      QName qName,
 				      Attribute attrStrategy)
   {
+    // ioc/2013
+    if (! attrStrategy.isSetter())
+      return false;
+    
     String text = getTextValue(childNode);
 
     if (text == null)
@@ -570,7 +596,7 @@ public class ConfigContext implements CreationalContext {
 	text = text.trim();
 	  
       Object elValue = eval(attrStrategy.getConfigType(), text);
-
+      
       // ioc/2410
       if (elValue != NULL)
 	attrStrategy.setValue(bean, qName, elValue);
@@ -1462,6 +1488,8 @@ public class ConfigContext implements CreationalContext {
 
   public void push(Object obj)
   {
+    if (_scope != null)
+      _scope.put(_bean, obj);
   }
 
   public void release()

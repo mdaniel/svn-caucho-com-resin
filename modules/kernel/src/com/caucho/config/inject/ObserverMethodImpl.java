@@ -40,9 +40,11 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.IfExists;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -63,6 +65,7 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
   private Set<Annotation> _bindings;
   
   private BeanArg []_args;
+  private boolean _isIfExists;
 
   ObserverMethodImpl(InjectManager beanManager,
 		     Bean<X> bean,
@@ -116,19 +119,25 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
   {
     List<AnnotatedParameter<X>> parameters = _method.getParameters();
 
-    if (parameters.size() == 1)
+    if (parameters.size() == 1) {
+      if (parameters.get(0).isAnnotationPresent(IfExists.class))
+	_isIfExists = true;
       return;
+    }
 
     _args = new BeanArg[parameters.size()];
 
     for (int i = 0; i < _args.length; i++) {
       AnnotatedParameter<?> param = parameters.get(i);
 
-      if (param.isAnnotationPresent(Observes.class))
-	continue;
-
-      _args[i] = new BeanArg(param.getBaseType(),
-			     _beanManager.getBindings(param.getAnnotations()));
+      if (param.isAnnotationPresent(Observes.class)) {
+	if (param.isAnnotationPresent(IfExists.class))
+	  _isIfExists = true;
+      }
+      else {
+	_args[i] = new BeanArg(param.getBaseType(),
+			       _beanManager.getBindings(param.getAnnotations()));
+      }
     }
   }
 
@@ -138,6 +147,9 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
   public boolean notify(T event)
   {
     Object instance = getInstance();
+
+    if (instance == null)
+      return false;
 
     Method method = _method.getJavaMember();
 
@@ -167,7 +179,18 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
 
   protected Object getInstance()
   {
-    Class<X> type = null;
+    Bean<X> bean = getParentBean();
+    Class<?> type = bean.getBeanClass();
+
+    if (_isIfExists) {
+      Class scopeType = bean.getScopeType();
+      Context context = _beanManager.getContext(scopeType);
+
+      if (context != null)
+	return context.get(bean);
+      else
+	return null;
+    }
 
     CreationalContext env = _beanManager.createCreationalContext();
     

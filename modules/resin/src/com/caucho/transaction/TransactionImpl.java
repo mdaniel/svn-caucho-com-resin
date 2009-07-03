@@ -877,11 +877,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private void callBeforeCompletion()
     throws RollbackException
   {
-    if (_syncList == null)
-      return;
-    
     // server/16h2
-    for (int i = 0; i < _syncList.size(); i++) {
+    for (int i = 0; _syncList != null && i < _syncList.size(); i++) {
       Synchronization sync = _syncList.get(i);
 
       try {

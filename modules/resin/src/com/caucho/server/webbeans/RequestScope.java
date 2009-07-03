@@ -32,6 +32,7 @@ package com.caucho.server.webbeans;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.ContextContainer;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import java.lang.annotation.Annotation;
@@ -68,16 +69,24 @@ public class RequestScope extends ScopeContext
   
   public <T> T get(Contextual<T> bean)
   {
+    if (! (bean instanceof PassivationCapable))
+      return null;
+    
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request == null)
       return null;
 
-    Bean comp = (Bean) bean;
+    ContextContainer context
+      = (ContextContainer) request.getAttribute("webbeans.resin");
 
-    Object result = request.getAttribute(_idMap.getId(comp));
+    if (context != null) {
+      String id = ((PassivationCapable) bean).getId();
+      
+      return (T) context.get(id);
+    }
 
-    return (T) result;
+    return null;
   }
   
   public <T> T get(Contextual<T> bean,
@@ -90,20 +99,29 @@ public class RequestScope extends ScopeContext
 
     Bean comp = (Bean) bean;
 
-    String id = _idMap.getId(comp);
+    String id = ((PassivationCapable) bean).getId();
+
+    ContextContainer context
+      = (ContextContainer) request.getAttribute("webbeans.resin");
+
+    if (context == null) {
+      context = new ContextContainer();
+      request.setAttribute("webbeans.resin", context);
+    }
     
-    Object result = request.getAttribute(id);
+    Object result = context.get(id);
 
     if (result != null || creationalContext == null)
       return (T) result;
     
     result = comp.create(creationalContext);
 
-    request.setAttribute(id, result);
+    context.put(id, result);
     
     return (T) result;
   }
-  
+
+  /*
   public <T> T get(InjectionTarget<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
@@ -119,6 +137,7 @@ public class RequestScope extends ScopeContext
 
     return (T) result;
   }
+  */
 
   @Override
   public boolean canInject(ScopeContext scope)

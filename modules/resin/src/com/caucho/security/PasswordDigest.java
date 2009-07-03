@@ -133,7 +133,7 @@ public class PasswordDigest {
     }
     else if (value.equals("none")) {
       setAlgorithm(null);
-      setAlgorithm(null);
+      setFormat(null);
     }
     else
       throw new ConfigException(L.l("{0} is an illegal algorithm.  Expected 'none' or 'algorithm-format', for example 'MD5-base64'.", value));

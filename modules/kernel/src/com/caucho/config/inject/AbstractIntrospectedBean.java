@@ -57,6 +57,7 @@ import javax.annotation.*;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.event.IfExists;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.AnnotationLiteral;
@@ -83,6 +84,7 @@ import javax.interceptor.InterceptorBindingType;
  */
 //  implements ObjectProxy
 public class AbstractIntrospectedBean<T> extends AbstractBean<T>
+  implements PassivationCapable
 {
   private static final L10N L = new L10N(AbstractIntrospectedBean.class);
   private static final Logger log

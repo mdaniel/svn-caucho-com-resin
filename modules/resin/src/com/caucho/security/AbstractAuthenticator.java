@@ -270,6 +270,9 @@ public class AbstractAuthenticator
     
     char []password = cred.getPassword();
     char []digest = getPasswordDigest(principal.getName(), password);
+    
+    if (digest == null)
+      return null;
 
     if (! isMatch(digest, user.getPassword()) && ! user.isAnonymous()) {
       user = null;
@@ -290,14 +293,17 @@ public class AbstractAuthenticator
    */
   protected char []getPasswordDigest(String user, char []password)
   {
-    if (_passwordDigest != null)
-      return _passwordDigest.getPasswordDigest(user, password);
-    else {
-      char []digest = new char[password.length];
-      System.arraycopy(password, 0, digest, 0, password.length);
-      
-      return digest;
+    if (_passwordDigest != null) {
+      char []digest = _passwordDigest.getPasswordDigest(user, password);
+
+      if (digest != null)
+	return digest;
     }
+
+    char []digest = new char[password.length];
+    System.arraycopy(password, 0, digest, 0, password.length);
+      
+    return digest;
   }
 
   //

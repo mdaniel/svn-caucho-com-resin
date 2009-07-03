@@ -1252,6 +1252,23 @@ public class InjectManager
 
     return (T) getReference(bean, type, env);
   }
+
+  /**
+   * Convenience-class for Resin.
+   */
+  public <T> T getReference(String name)
+  {
+    Set<Bean<?>> beans = getBeans(name);
+    Bean<?> bean = getHighestPrecedenceBean(beans);
+
+    if (bean == null)
+      return null;
+
+    CreationalContext<?> env = createCreationalContext();
+
+    return (T) getReference(bean, bean.getBeanClass(), env);
+  }
+  
   /**
    * Returns an instance for the given bean.  This method will obey
    * the scope of the bean, so a singleton will return the single bean.
@@ -1420,7 +1437,14 @@ public class InjectManager
       if (adapter != null)
 	return adapter;
     }
-	
+
+    if (cxt instanceof ConfigContext) {
+      ConfigContext env = (ConfigContext) cxt;
+
+      // ioc/0770
+      env.setInjectionPoint(ij);
+    }
+    
     return getReference(bean, ij.getType(), cxt);
   }
 

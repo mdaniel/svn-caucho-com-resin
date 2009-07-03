@@ -134,6 +134,14 @@ public abstract class Attribute {
     throws ConfigException;
 
   /**
+   * Returns true for attributes which create objects.
+   */
+  public boolean isSetter()
+  {
+    return true;
+  }
+
+  /**
    * Creates the child bean.
    */
   public Object create(Object parent, QName name, ConfigType type)

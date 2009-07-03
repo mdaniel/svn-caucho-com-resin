@@ -110,6 +110,11 @@ public class AnnotatedElementImpl implements Annotated
       }
     }
   }
+
+  public void clearAnnotations()
+  {
+    _annSet.clear();
+  }
   
   /**
    * Returns the declared annotations
