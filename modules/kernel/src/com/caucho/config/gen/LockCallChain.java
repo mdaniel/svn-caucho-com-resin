@@ -32,6 +32,7 @@ import static javax.ejb.ConcurrencyManagementType.CONTAINER;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.Lock;
@@ -52,6 +53,8 @@ public class LockCallChain extends AbstractCallChain {
 
   private boolean _isContainerManaged;
   private LockType _lockType;
+  private long _lockTimeout;
+  private TimeUnit _lockTimeoutUnit;
 
   public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next)
   {
@@ -63,8 +66,9 @@ public class LockCallChain extends AbstractCallChain {
     // defaulting? Will a default of "true" suffice?
     _isContainerManaged = businessMethod.isXaContainerManaged();
 
-    // TODO Should the lock type be defaulted to "WRITE"? This would be true for
-    // EJB 3.1 singletons...
+    // TODO Should these be set from a configuration mechanism?
+    _lockTimeout = 1;
+    _lockTimeoutUnit = TimeUnit.SECONDS;
   }
 
   /**
