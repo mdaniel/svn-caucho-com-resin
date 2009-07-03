@@ -63,10 +63,22 @@
       <executionStrategy>once-per-session</executionStrategy>
       <parameters>
         <parameter>
-	  <name>rootDirectory</name>
-	  <type>java.io.File</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>rootDirectory</name>
+          <type>java.io.File</type>
+          <required>true</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>config</name>
+          <type>java.io.File</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>compiler</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
         </parameter>
       </parameters>
       <configuration>

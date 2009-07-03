@@ -32,6 +32,9 @@ package com.caucho.maven;
 import com.caucho.jsp.*;
 
 import java.io.*;
+import java.util.List;
+import java.util.ArrayList;
+
 import org.apache.maven.plugin.*;
 
 /**
@@ -42,6 +45,8 @@ import org.apache.maven.plugin.*;
 public class MavenJspc extends AbstractMojo
 {
   private File _rootDirectory;
+  private File _config;
+  private String _compiler = "javac";
 
   /**
    * Sets the web-app's root directory
@@ -51,15 +56,37 @@ public class MavenJspc extends AbstractMojo
     _rootDirectory = rootDirectory;
   }
 
+  public void setConfig(File file) {
+    _config = file;
+  }
+
+  public void setCompiler(String compiler) {
+    _compiler = compiler;
+  }
+
   /**
    * Executes the maven resin:jspc task
    */
   public void execute() throws MojoExecutionException
   {
+
+    List<String> args = new ArrayList<String>();
+
+    args.add("-app-dir");
+    args.add(_rootDirectory.getAbsolutePath());
+
+    if (_config != null) {
+      args.add("-conf");
+      args.add(_config.getAbsolutePath());
+    }
+
+    if (_compiler != null) {
+      args.add("-compiler");
+      args.add(_compiler);
+    }
+
     try {
-      JspCompiler.main(new String[] {
-	"-app-dir", _rootDirectory.getAbsolutePath(),
-      });
+      JspCompiler.main(args.toArray(new String[args.size()]));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -639,6 +639,7 @@ public class JspCompiler implements EnvironmentBean {
       System.out.println(" -app-dir  : The directory root of the web-app.");
       System.out.println(" -class-dir: The working directory to use as output.");
       System.out.println(" -conf: A configuration file for the compiler.");
+      System.out.println(" -compiler: javac|internal|eclipse|groovyc.");
       System.exit(1);
     }
 
