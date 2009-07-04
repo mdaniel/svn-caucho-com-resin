@@ -156,17 +156,15 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public void generatePrologue(JavaWriter out, HashMap map) throws IOException
   {
-    if (_isContainerManaged && map.get("caucho.ejb.lock") == null) {
+    if (_isContainerManaged && (map.get("caucho.ejb.lock") == null)) {
       // TODO Does this need be registered somewhere?
       map.put("caucho.ejb.lock", "done");
 
       out.println();
-      // TODO Should this be static? Should locks be placed at the instance or
-      // class level? The class level is fine for EJB singletons, but not
-      // necessarily for other bean types.
       out
           .println("private transient final com.caucho.ejb3.lock.LockManager _lockManager");
       out.println("  = new com.caucho.ejb3.lock.LockManager();");
+      out.println();
     }
 
     _next.generatePrologue(out, map);
