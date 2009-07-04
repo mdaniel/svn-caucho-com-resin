@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import javax.ejb.AccessTimeout;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
@@ -65,6 +66,7 @@ public class LockCallChain extends AbstractCallChain {
     // TODO What would be the synchronization counter-part? Is this just for
     // defaulting? Will a default of "true" suffice?
     _isContainerManaged = businessMethod.isXaContainerManaged();
+    _lockType = LockType.WRITE;
 
     // TODO Should these be set from a configuration mechanism?
     _lockTimeout = 1;
@@ -77,7 +79,7 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public boolean isEnhanced()
   {
-    return (_isContainerManaged && _lockType != null);
+    return _isContainerManaged;
   }
 
   /**
@@ -91,8 +93,8 @@ public class LockCallChain extends AbstractCallChain {
     ConcurrencyManagement concurrencyManagementAnnotation = apiClass
         .getAnnotation(ConcurrencyManagement.class);
 
-    if (concurrencyManagementAnnotation != null
-        && concurrencyManagementAnnotation.value() != CONTAINER) {
+    if ((concurrencyManagementAnnotation != null)
+        && (concurrencyManagementAnnotation.value() != CONTAINER)) {
       _isContainerManaged = false;
       return;
     }
@@ -111,16 +113,39 @@ public class LockCallChain extends AbstractCallChain {
       lockAttribute = apiClass.getAnnotation(Lock.class);
     }
 
-    if (lockAttribute == null && implementationMethod != null) {
+    if ((lockAttribute == null) && (implementationMethod != null)) {
       lockAttribute = implementationMethod.getAnnotation(Lock.class);
     }
 
-    if (lockAttribute == null && implementationClass != null) {
+    if ((lockAttribute == null) && (implementationClass != null)) {
       lockAttribute = implementationClass.getAnnotation(Lock.class);
     }
 
     if (lockAttribute != null) {
       _lockType = lockAttribute.value();
+    }
+
+    AccessTimeout accessTimeoutAttribute;
+
+    accessTimeoutAttribute = apiMethod.getAnnotation(AccessTimeout.class);
+
+    if (accessTimeoutAttribute == null) {
+      accessTimeoutAttribute = apiClass.getAnnotation(AccessTimeout.class);
+    }
+
+    if ((accessTimeoutAttribute == null) && (implementationMethod != null)) {
+      accessTimeoutAttribute = implementationMethod
+          .getAnnotation(AccessTimeout.class);
+    }
+
+    if ((accessTimeoutAttribute == null) && (implementationClass != null)) {
+      accessTimeoutAttribute = implementationClass
+          .getAnnotation(AccessTimeout.class);
+    }
+
+    if (accessTimeoutAttribute != null) {
+      _lockTimeout = accessTimeoutAttribute.timeout();
+      _lockTimeoutUnit = accessTimeoutAttribute.unit();
     }
   }
 
