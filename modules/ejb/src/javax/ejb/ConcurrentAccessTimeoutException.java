@@ -35,9 +35,9 @@ public class ConcurrentAccessTimeoutException extends ConcurrentAccessException 
   private static final long serialVersionUID = 1L;
 
   /**
-   * Constructs a new runtime exception with <code>null</code> as its detail
-   * message. The cause is not initialized, and may subsequently be initialized
-   * by a call to {@link #initCause}.
+   * Constructs a new concurrent access timeout exception with <code>null</code>
+   * as its detail message. The cause is not initialized, and may subsequently
+   * be initialized by a call to {@link #initCause}.
    */
   public ConcurrentAccessTimeoutException()
   {
@@ -45,9 +45,9 @@ public class ConcurrentAccessTimeoutException extends ConcurrentAccessException 
   }
 
   /**
-   * Constructs a new runtime exception with the specified detail message. The
-   * cause is not initialized, and may subsequently be initialized by a call to
-   * {@link #initCause}.
+   * Constructs a new concurrent access timeout exception with the specified
+   * detail message. The cause is not initialized, and may subsequently be
+   * initialized by a call to {@link #initCause}.
    * 
    * @param message
    *          the detail message. The detail message is saved for later
