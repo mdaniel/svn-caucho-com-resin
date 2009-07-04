@@ -176,14 +176,15 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public void generateCall(JavaWriter out) throws IOException
   {
-    if (_isContainerManaged && _lockType != null) {
+    if (_isContainerManaged) {
       switch (_lockType) {
       case READ:
         out.println();
         out.println("try {");
         // Increasing indentation depth.
         out.pushDepth();
-        out.println("_lockManager.acquireReadLock();");
+        out.println("_lockManager.acquireReadLock("
+            + _lockTimeoutUnit.toMillis(_lockTimeout) + ");");
         out.println();
         break;
 
@@ -192,7 +193,8 @@ public class LockCallChain extends AbstractCallChain {
         out.println("try {");
         // Increasing indentation depth.
         out.pushDepth();
-        out.println("_lockManager.acquireWriteLock();");
+        out.println("_lockManager.acquireWriteLock("
+            + _lockTimeoutUnit.toMillis(_lockTimeout) + ");");
         out.println();
         break;
       }
@@ -200,7 +202,7 @@ public class LockCallChain extends AbstractCallChain {
 
     generateNext(out);
 
-    if (_isContainerManaged && _lockType != null) {
+    if (_isContainerManaged) {
       // Decrease indentation depth.
       out.popDepth();
 
