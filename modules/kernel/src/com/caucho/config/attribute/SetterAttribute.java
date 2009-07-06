@@ -37,7 +37,7 @@ import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
 public class SetterAttribute extends Attribute {
-  private final L10N L = new L10N(SetterAttribute.class);
+  private static final L10N L = new L10N(SetterAttribute.class);
   
   private final Method _setter;
   private final Class _type;

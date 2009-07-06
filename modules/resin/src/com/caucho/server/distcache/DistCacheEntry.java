@@ -119,7 +119,12 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    */
   public final HashKey getCacheHash()
   {
-    return getMnodeValue().getCacheHashKey();
+    MnodeValue value = getMnodeValue();
+
+    if (value != null)
+      return value.getCacheHashKey();
+    else
+      return null;
   }
 
   /**
@@ -252,7 +257,6 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return 0;
   }
 
-  //TODO(fred): implement as time of first put for key.
   public long getCreationTime()
   {
     return getMnodeValue().getCreationTime();

@@ -191,16 +191,16 @@ public class LockCallChain extends AbstractCallChain {
   public void generateCall(JavaWriter out) throws IOException
   {
     // TODO Is this too much code to be in-lined?
-    if (_isContainerManaged && (_lockType != null)) {
+    if (_isContainerManaged && _lockType != null) {
       switch (_lockType) {
       case READ:
         out.println();
         out.println("try {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out.println("if (_readWriteLock.readLock().tryLock("
             + _lockTimeoutUnit.toMillis(_lockTimeout)
             + ", java.util.concurrent.TimeUnit.MILLISECONDS)) {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out.println("try {");
         out.println();
         break;
@@ -208,11 +208,11 @@ public class LockCallChain extends AbstractCallChain {
       case WRITE:
         out.println();
         out.println("try {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out.println("if (_readWriteLock.writeLock().tryLock("
             + _lockTimeoutUnit.toMillis(_lockTimeout)
             + ", java.util.concurrent.TimeUnit.MILLISECONDS)) {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out.println("try {");
         out.println();
         break;
@@ -221,51 +221,51 @@ public class LockCallChain extends AbstractCallChain {
 
     generateNext(out);
 
-    if (_isContainerManaged && (_lockType != null)) {
+    if (_isContainerManaged && _lockType != null) {
       switch (_lockType) {
       case READ:
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth(); 
         out.println("} finally {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out.println("_readWriteLock.readLock().unlock();");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("}");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("} else {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out
             .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("}");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("} catch (InterruptedException interruptedException) {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out
             .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("}");
         out.println();
         break;
       case WRITE:
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("} finally {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out.println("_readWriteLock.writeLock().unlock();");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("}");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("} else {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out
             .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring write lock.\");");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("}");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("} catch (InterruptedException interruptedException) {");
-        out.pushDepth(); // Increasing indentation depth.
+        out.pushDepth();
         out
             .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring write lock: \" + interruptedException.getMessage());");
-        out.popDepth(); // Decrease indentation depth.
+        out.popDepth();
         out.println("}");
         out.println();
         break;

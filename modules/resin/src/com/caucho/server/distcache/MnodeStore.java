@@ -481,11 +481,17 @@ public class MnodeStore implements AlarmListener {
 
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
+      
       if (value != null)
 	stmt.setBytes(2, value.getHash());
       else
 	stmt.setBytes(2, null);
-      stmt.setBytes(3, cacheId.getHash());
+      
+      if (cacheId != null)
+	stmt.setBytes(3, cacheId.getHash());
+      else
+	stmt.setBytes(3, null);
+      
       stmt.setLong(4, flags);
       stmt.setLong(5, version);
       stmt.setLong(6, _serverVersion);
