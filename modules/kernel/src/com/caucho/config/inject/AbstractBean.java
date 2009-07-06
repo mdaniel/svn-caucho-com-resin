@@ -90,6 +90,8 @@ abstract public class AbstractBean<T> implements Bean<T>
   private static final Set<Annotation> _currentBindings;
   private static final Set<InjectionPoint> _nullInjectionPoints
     = new HashSet<InjectionPoint>();
+
+  private String _passivationId;
   
   public AbstractBean()
   {
@@ -97,7 +99,10 @@ abstract public class AbstractBean<T> implements Bean<T>
 
   public String getId()
   {
-    return null;
+    if (_passivationId == null)
+      _passivationId = calculatePassivationId();
+
+    return _passivationId;
   }
 
   public Annotated getAnnotated()
@@ -168,6 +173,11 @@ abstract public class AbstractBean<T> implements Bean<T>
 
     // XXX: getTypes?
     out.print(getBeanClass());
+
+    if (getName() != null) {
+      out.print(";name=");
+      out.print(getName());
+    }
 
     ArrayList<String> annList = new ArrayList<String>();
     

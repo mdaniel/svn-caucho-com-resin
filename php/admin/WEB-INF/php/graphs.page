@@ -1,0 +1,372 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+$mbean_server = $g_mbean_server;
+
+$stat = $g_mbean_server->lookup("resin:type=StatService");
+
+if (! $stat)
+  return;
+
+$names = array();
+
+$full_height = 500;
+$full_width = 600;
+
+$p_checks = $_REQUEST['checks'];
+$p_servers = $_REQUEST['servers'];
+$p_period = $_REQUEST['period'];
+
+if (! $p_period) {
+  $p_period = 24 * 60 * 60;
+}
+
+foreach ($p_checks as $check) {
+  foreach ($p_servers as $server) {
+    $p_names[] = "$server|$check";
+  }
+}
+
+$p_name = $p_names[0];
+
+if (! $p_name) {
+  $p_name = "00|Resin|Server|Server Index";
+  $p_names[] = $p_name;
+}
+
+echo "<h2>$p_name</h2>";
+
+echo "<form method='post'>"
+echo "Interval: <select name='period'>\n";
+
+echo "<option ";
+if ($p_period == 60 * 60)
+  echo " selected";
+echo " value='" . (60 * 60) . "'>1 hour\n";
+
+echo "<option ";
+if ($p_period == 6 * 60 * 60)
+  echo " selected";
+echo " value='" . (6 * 60 * 60) . "'>6 hours\n";
+
+echo "<option ";
+if ($p_period == 24 * 60 * 60)
+  echo " selected";
+echo " value='" . (24 * 60 * 60) . "'>1 day\n";
+
+echo "</select>\n";
+
+?>
+
+<p>
+<canvas id="graph" width="<?= $full_width ?>" height="<?= $full_height ?>">
+HTML 5 &lt;canvas> is not supported in this browser
+</canvas>
+
+<script type="application/x-javascript">
+  function select_name(src, dst)
+  {
+    var source_list = document.getElementById(src);
+
+    if (source_list.selectedIndex <= 0)
+      return;
+
+    var selected_value = source_list.options[source_list.selectedIndex];
+
+    if (! selected_value)
+      return;
+    
+    var dest_list = document.getElementById(dst);
+    dest_list.add(selected_value);
+  }
+  
+  function start_bounds(x1, y1, x2, y2)
+  {
+    var canvas = document.getElementById("graph");
+    if (canvas.getContext) {
+      var ctx = canvas.getContext("2d");
+    }
+
+    if (! ctx)
+      return;
+
+    width = <?= $full_width; ?>;
+    height = <?= $full_height ?>;
+
+    ctx.save();
+    
+    ctx.fillStyle = "#eeeedd";
+    ctx.rect(0, 0, <?= $full_width ?>, <?= $full_height ?>);
+    ctx.fill();
+//    ctx.stroke();
+//    ctx.beginPath();
+    ctx.strokeStyle = "#000000";
+    
+    ctx.translate(50, 10);
+//    ctx.scale((width - 20) / (x2 - x1), (height - 20) / (y1 - y2));
+//    ctx.translate(0, -y2);
+    ctx.strokeStyle = "#ff00ee";
+    ctx.fillStyle = "#ff00ee";
+
+    ctx.beginPath();    
+    ctx.moveTo(x1, y1);
+
+    return ctx;
+  }
+
+  function rl(c, x, y)
+  {
+    c.lineTo(x, y);
+    c.stroke();
+  }
+</script>
+
+<?php
+
+$full_names = $stat->statisticsNames();
+
+$names = array();
+$servers = array();
+foreach ($full_names as $name) {
+  $values = preg_split('/[|]/', $name);
+
+  $server = array_shift($values);
+
+  if (! in_array($server, $servers)) {
+    $servers[] = $server;
+  }
+  
+  $section_array = null;
+  $section_array[] = array_shift($values);
+  $section_array[] = array_shift($values);
+
+  $section = join($section_array, '|');
+
+  $name = join($values, '|');
+
+  $names = $sections[$section];
+  if (! in_array($name, $names))
+    $names[] = $name;
+  $sections[$section] = $names;
+}
+/*
+echo "<ul>";
+foreach ($sections as $section => $names) {
+  echo "<li>$section\n";
+  echo "<ul>";
+  foreach ($names as $name) {
+    echo "<li>$name\n";
+  }
+  echo "</ul>";
+}
+echo "</ul>";
+*/
+
+// data selection
+/*
+echo "<table width='600'>";
+echo "<tr align='top'>";
+echo "<td valign='top' width='40%'>";
+echo "<select id='name_src' multiple='yes'>";
+echo "<option disabled='true'>-- select at least one --</option>\n";
+ksort($sections);
+foreach ($sections as $section => $names) {
+  sort($names);
+  foreach ($names as $name) {
+    echo "<option>$section|$name\n";
+  }
+}
+echo "</select>";
+echo "<td valign='top' align='center'>";
+echo "<font size='+1'><a href='#' onclick=\"select_name('name_src', 'name_dst')\">>>></a></font><br>";
+echo "<font size='+1'><a href='#' onclick=\"select_name('name_dst', 'name_src')\">&lt;&lt;&lt;</a></font>";
+echo "<td valign='top' width='40%'>";
+echo "<select id='name_dst' multiple='yes' name='names'>";
+echo "<option disabled='true'>-- select at least one --</option>\n";
+echo "</select>\n";
+echo "</tr>";
+echo "</table>\n";
+*/
+
+ksort($sections);
+echo "<ul>"
+foreach ($sections as $section => $names) {
+  echo "<li>$section";
+  sort($names);
+  echo "<ul style='list-style-type:none'>";
+  foreach ($names as $name) {
+    echo "<li><input type='checkbox' name='checks[]'";
+    if (in_array("$section|$name", $p_checks))
+      echo " checked='true'";
+      
+    echo "value='$section|$name'>$name<br>\n";
+  }
+  echo "</ul>";
+}
+echo "</ul>"
+
+// server
+echo "Servers: ";
+ksort($servers);
+foreach ($servers as $server) {
+  echo "<input type='checkbox' name='servers[]'";
+  if (in_array($server, $p_servers))
+    echo " checked='true'";
+  echo " value='$server'>$server\n";      
+}
+echo "<br>";
+
+echo "<input type='submit'>\n";
+
+echo "</form>\n";
+
+$name = $p_name;
+
+$width = 600 - 60;
+$height = 400 - 40;
+
+$now = time();
+$start = $now - $p_period;
+
+$value_set = array();
+
+foreach ($p_names as $name) {
+  $values = $stat->statisticsData($name, $start * 1000, -1);
+
+  $bounds = calculate_bounds($bounds, $values);
+
+  $value_set[$name] = $values;
+}  
+
+list($x1, $y1, $x2, $y2) = $bounds;
+$x0 = $x1;
+$x1 = $start * 1000;
+$x2 - $now * 1000;
+
+$dx = ($x2 - $x1) / $width;
+$dy = ($y2 - $y1) / $height;
+
+if ($dx == 0)
+  $dx = 1;
+  
+if ($dy == 0)
+  $dy = 1;
+
+$colors[] = "#ff0000"; // red
+$colors[] = "#4040ff"; // blue
+$colors[] = "#ffb000"; // orange
+$colors[] = "#00c0c0"; // cyan
+$colors[] = "#000000"; // black
+$colors[] = "#800080"; // magenta
+$colors[] = "#a0a0f0"; // gray
+$colors[] = "#808000"; // brown
+$colors[] = "#108010"; // green
+$colors[] = "#ff00ff"; // magenta
+$colors[] = "#00d000"; // green
+$colors[] = "#ffa0ff"; // magenta
+$colors[] = "#80f080"; // green
+
+echo "<script type='application/x-javascript'>\n";
+echo "c = start_bounds(0, 0, 100, 100);\n";
+
+$i = 0;
+foreach ($value_set as $name => $values) {
+  echo "c.save();";
+  echo "c.strokeStyle = '" . $colors[$i] . "';\n";
+  echo "c.beginPath();\n";
+  echo "c.moveTo(" . ($values[0]->time - $x1) / $dx
+        . "," . (($dy - $values[0]->value) / $dy + $height) . ");\n";
+
+  foreach ($values as $v) {
+    printf("rl(c,%.2f,%.2f);\n",
+           ($v->time - $x1) / $dx,
+           (($dy - $v->value) / $dy + $height));
+  }
+
+  echo "c.translate(" . (-40 + 200 * floor($i / 10))
+       . ", " . ($height + 25 + 10 * ($i % 10)) . ");";
+
+  echo "c.beginPath();";
+  //echo "c.strokeStyle = '" . $colors[$i] . "';";
+  echo "c.moveTo(0, 10);";
+  echo "c.lineTo(30, 10);";
+  echo "c.stroke();";
+  echo "c.beginPath();";
+  echo "c.fillStyle = '#000000';\n";
+
+  $name_seg = preg_split('/[|]/', $name);
+  $server = array_shift($name_seg);
+  array_shift($name_seg);
+  array_shift($name_seg);
+  $name = join('|', $name_seg);
+
+  echo "c.fillText(" . sprintf("'%s - %s'", $server, $name) . ", 40, 13);";
+  echo "c.restore();";
+
+  $i++;
+}  
+
+echo "c.beginPath();";
+echo "c.strokeStyle ='#000000';\n";
+echo "c.font = '10px Monotype';\n";
+echo "c.fillStyle ='#000000';\n";
+echo "c.fillText('" . print_value($y1) . "', -45, " . ($height) . ");\n";
+echo "c.fillText('" . print_value($y2) . "', -45, " . (10) . ");\n";
+echo "c.fillText('" . date("H:i", $x1 / 1000) . "', -10, " . ($height + 10) . ");\n";
+echo "c.fillText('" . date("m-d", $x1 / 1000) . "', -10, " . ($height + 20) . ");\n";
+echo "c.fillText('" . date("H:i", $x2 / 1000) . "', " . ($width - 20) . ", " . ($height + 10) . ");\n";
+echo "c.fillText('" . date("m-d", $x2 / 1000) . "', " . ($width - 20) . ", " . ($height + 20) . ");\n";
+
+echo "</script>\n";
+
+function print_value($value)
+{
+  if ($value > 1e11)
+    return sprintf("%.2g", $value);
+  else if ($value >= 1e9)
+    return sprintf("%.1fG", $value / 1e9);
+  else if ($value >= 1e6)
+    return sprintf("%.1fM", $value / 1e6);
+  else if ($value >= 1e3)
+    return sprintf("%.1fk", $value / 1e3);
+  else if ($value >= 1)
+    return sprintf("%.1f", $value);
+  else
+    return sprintf("%.2g", $value);
+}
+
+function calculate_bounds($bounds, $values)
+{
+  if ($bounds) {
+    list($min_x, $min_y, $max_x, $max_y) = $bounds;
+  }
+  else {
+    $min_x = 1e50;
+    $min_y = 1e50;
+    $max_x = -1e50;
+    $max_y = -1e50;
+  }
+  
+  foreach ($values as $v) {
+    if ($v->getTime() < $min_x)
+      $min_x = $v->getTime();
+      
+    if ($max_x < $v->getTime())
+      $max_x = $v->getTime();
+      
+    if ($v->getValue() < $min_y)
+      $min_y = $v->getValue();
+      
+    if ($max_y < $v->getValue())
+      $max_y = $v->getValue();
+  }
+
+  return array($min_x, $min_y, $max_x, $max_y);
+}  
+
+?>

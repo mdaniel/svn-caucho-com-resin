@@ -45,11 +45,13 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.PassivationCapable;
+
 /**
  * Internal implementation for a Bean
  */
 public class XmlBean<X> extends BeanWrapper<X>
-  implements InjectionTarget<X>, ScopeAdapterBean
+  implements InjectionTarget<X>, ScopeAdapterBean, PassivationCapable
 {
   private static final L10N L = new L10N(XmlBean.class);
 

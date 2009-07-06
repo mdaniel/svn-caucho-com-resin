@@ -163,6 +163,7 @@ class WatchdogManager implements AlarmListener {
 
     Resin resin = Resin.createWatchdog();
 
+    resin.preConfigureInit();
     resin.setConfigFile(_args.getResinConf().getNativePath());
 
     Thread thread = Thread.currentThread();

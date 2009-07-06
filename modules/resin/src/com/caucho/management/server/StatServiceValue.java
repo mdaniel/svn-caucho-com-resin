@@ -35,7 +35,7 @@ package com.caucho.management.server;
 public class StatServiceValue implements java.io.Serializable
 {
   private final long _time;
-  private final double _value;
+  private final long _value;
 
   /**
    * Null constructor for Hessian
@@ -49,7 +49,7 @@ public class StatServiceValue implements java.io.Serializable
   /**
    * Standard constructor
    */
-  public StatServiceValue(long time, double value)
+  public StatServiceValue(long time, long value)
   {
     _time = time;
     _value = value;
@@ -66,7 +66,7 @@ public class StatServiceValue implements java.io.Serializable
   /**
    * Returns the value's value
    */
-  public double getValue()
+  public long getValue()
   {
     return _value;
   }

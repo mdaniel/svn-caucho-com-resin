@@ -128,7 +128,7 @@ if ($profile) {
       $totalTicks += $entries[$i]->getCount();
     }
 
-    echo "<tr class='head'><th colspan='4' align='left'>$name (" . sizeof($entries) . ")";
+    echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($entries) . ")";
 
     $show = "hide('s_$name');show('h_$name');";
     $hide = "show('s_$name');hide('h_$name');";
@@ -177,19 +177,25 @@ if ($profile) {
       echo "</td>";
       echo "</tr>\n";
 
-      echo "<tr id='t_{$name}_{$i}' style='display:none'>";
-      echo "<td colspan='3'>";
+//      echo "<tr id='t_{$name}_{$i}' style='display:none; cellpadding:0'>";
+      echo "<tr>";
+
+      echo "<td colspan='1'>";
       echo "</td>";
-      echo "<td colspan='3'>";
+
+      echo "<td colspan='4'>";
 
       if ($profileQuercus)
-        echo "<div class='quercus-stack-trace'>";
-      else
-        echo "<div class='stack-trace'>";
+        echo "<div class='quercus-stack-trace'";
+      else {
+        echo "<div class='stack-trace'";
+      }
+      echo " id='t_{$name}_{$i}' style='display:none'>";
 
       foreach ($entry->getStackTrace() as $stack) {
         echo "  at " . print_stack_entry($stack);
       }
+      
       echo "</div>";
       echo "</td>";
       echo "</tr>\n";

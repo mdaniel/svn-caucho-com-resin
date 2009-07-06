@@ -45,12 +45,13 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.spi.PassivationCapable;
 
 /**
  * Internal implementation for a Bean
  */
 public class SessionBeanImpl<X> extends BeanWrapper<X>
-  implements ScopeAdapterBean
+  implements ScopeAdapterBean, PassivationCapable
 {
   private static final L10N L = new L10N(SessionBeanImpl.class);
   

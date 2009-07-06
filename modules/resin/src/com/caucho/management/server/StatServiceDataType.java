@@ -27,34 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.webbeans;
-
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.DestructionListener;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.server.dispatch.ServletInvocation;
-
-import java.lang.annotation.Annotation;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
+package com.caucho.management.server;
 
 /**
- * Configuration for the xml web bean component.
+ * Value for a statistics data point.
  */
-public class SessionContextContainer extends ContextContainer
-  implements HttpSessionBindingListener
+public enum StatServiceDataType
 {
-  public void valueBound(HttpSessionBindingEvent event)
-  {
-  }
-  
-  public void valueUnbound(HttpSessionBindingEvent event)
-  {
-    close();
-  }
+  LONG,
+    PERCENT,
+    MILLS;
 }
