@@ -63,9 +63,7 @@ public class LockCallChain extends AbstractCallChain {
 
     _next = next;
 
-    // TODO What would be the synchronization counter-part? Is this just for
-    // defaulting? Will a default of "true" suffice?
-    _isContainerManaged = businessMethod.isXaContainerManaged();
+    _isContainerManaged = true;
     _lockType = LockType.WRITE;
 
     // TODO Should these be set from a configuration mechanism?
