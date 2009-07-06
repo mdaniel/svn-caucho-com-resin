@@ -26,6 +26,7 @@
  *
  * @author Reza Rahman
  */
+
 package com.caucho.config.gen;
 
 import static javax.ejb.ConcurrencyManagementType.CONTAINER;
@@ -39,6 +40,8 @@ import javax.ejb.ConcurrencyManagement;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 
+import com.caucho.config.Configurable;
+import com.caucho.config.types.Period;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -64,11 +67,22 @@ public class LockCallChain extends AbstractCallChain {
     _next = next;
 
     _isContainerManaged = true;
-    // _lockType = LockType.WRITE;
+    _lockType = null;
 
-    // TODO Should these be set from a configuration mechanism?
     _lockTimeout = 10000;
     _lockTimeoutUnit = TimeUnit.MILLISECONDS;
+  }
+
+  /**
+   * Sets the lock timeout.
+   * 
+   * @param timeout
+   *          The timeout period.
+   */
+  @Configurable
+  public void setTimeout(Period timeout)
+  {
+    _lockTimeout = timeout.getPeriod();
   }
 
   /**
@@ -77,7 +91,7 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public boolean isEnhanced()
   {
-    return _isContainerManaged && _lockType != null;
+    return (_isContainerManaged && (_lockType != null));
   }
 
   /**
@@ -154,7 +168,8 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public void generatePrologue(JavaWriter out, HashMap map) throws IOException
   {
-    if (_isContainerManaged && (map.get("caucho.ejb.lock") == null)) {
+    if ((_isContainerManaged && (_lockType != null))
+        && (map.get("caucho.ejb.lock") == null)) {
       // TODO Does this need be registered somewhere?
       map.put("caucho.ejb.lock", "done");
 
@@ -176,7 +191,7 @@ public class LockCallChain extends AbstractCallChain {
   public void generateCall(JavaWriter out) throws IOException
   {
     // TODO Is this too much code to be in-lined?
-    if (_isContainerManaged) {
+    if (_isContainerManaged && (_lockType != null)) {
       switch (_lockType) {
       case READ:
         out.println();
@@ -184,7 +199,7 @@ public class LockCallChain extends AbstractCallChain {
         out.pushDepth(); // Increasing indentation depth.
         out.println("if (_readWriteLock.readLock().tryLock("
             + _lockTimeoutUnit.toMillis(_lockTimeout)
-            + ", TimeUnit.MILLISECONDS)) {");
+            + ", java.util.concurrent.TimeUnit.MILLISECONDS)) {");
         out.pushDepth(); // Increasing indentation depth.
         out.println("try {");
         out.println();
@@ -196,7 +211,7 @@ public class LockCallChain extends AbstractCallChain {
         out.pushDepth(); // Increasing indentation depth.
         out.println("if (_readWriteLock.writeLock().tryLock("
             + _lockTimeoutUnit.toMillis(_lockTimeout)
-            + ", TimeUnit.MILLISECONDS)) {");
+            + ", java.util.concurrent.TimeUnit.MILLISECONDS)) {");
         out.pushDepth(); // Increasing indentation depth.
         out.println("try {");
         out.println();
@@ -206,7 +221,7 @@ public class LockCallChain extends AbstractCallChain {
 
     generateNext(out);
 
-    if (_isContainerManaged) {
+    if (_isContainerManaged && (_lockType != null)) {
       switch (_lockType) {
       case READ:
         out.popDepth(); // Decrease indentation depth.
@@ -219,14 +234,14 @@ public class LockCallChain extends AbstractCallChain {
         out.println("} else {");
         out.pushDepth(); // Increasing indentation depth.
         out
-            .println("throw new ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
+            .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
         out.popDepth(); // Decrease indentation depth.
         out.println("}");
         out.popDepth(); // Decrease indentation depth.
         out.println("} catch (InterruptedException interruptedException) {");
         out.pushDepth(); // Increasing indentation depth.
         out
-            .println("throw new ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
+            .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
         out.popDepth(); // Decrease indentation depth.
         out.println("}");
         out.println();
@@ -242,14 +257,14 @@ public class LockCallChain extends AbstractCallChain {
         out.println("} else {");
         out.pushDepth(); // Increasing indentation depth.
         out
-            .println("throw new ConcurrentAccessTimeoutException(\"Timed out acquiring write lock.\");");
+            .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring write lock.\");");
         out.popDepth(); // Decrease indentation depth.
         out.println("}");
         out.popDepth(); // Decrease indentation depth.
         out.println("} catch (InterruptedException interruptedException) {");
         out.pushDepth(); // Increasing indentation depth.
         out
-            .println("throw new ConcurrentAccessTimeoutException(\"Thread interruption acquiring write lock: \" + interruptedException.getMessage());");
+            .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring write lock: \" + interruptedException.getMessage());");
         out.popDepth(); // Decrease indentation depth.
         out.println("}");
         out.println();
