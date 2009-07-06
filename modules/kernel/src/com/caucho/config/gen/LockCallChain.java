@@ -64,7 +64,7 @@ public class LockCallChain extends AbstractCallChain {
     _next = next;
 
     _isContainerManaged = true;
-    _lockType = LockType.WRITE;
+    // _lockType = LockType.WRITE;
 
     // TODO Should these be set from a configuration mechanism?
     _lockTimeout = 10000;
@@ -77,7 +77,7 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public boolean isEnhanced()
   {
-    return _isContainerManaged;
+    return _isContainerManaged && _lockType != null;
   }
 
   /**
