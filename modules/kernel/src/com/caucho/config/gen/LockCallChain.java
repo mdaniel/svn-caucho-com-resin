@@ -69,8 +69,8 @@ public class LockCallChain extends AbstractCallChain {
     _lockType = LockType.WRITE;
 
     // TODO Should these be set from a configuration mechanism?
-    _lockTimeout = 1;
-    _lockTimeoutUnit = TimeUnit.SECONDS;
+    _lockTimeout = 10000;
+    _lockTimeoutUnit = TimeUnit.MILLISECONDS;
   }
 
   /**
@@ -162,8 +162,9 @@ public class LockCallChain extends AbstractCallChain {
 
       out.println();
       out
-          .println("private transient final com.caucho.ejb3.lock.LockManager _lockManager");
-      out.println("  = new com.caucho.ejb3.lock.LockManager();");
+          .println("private transient final java.util.concurrent.locks.ReadWriteLock _readWriteLock");
+      out
+          .println("  = new java.util.concurrent.locks.ReentrantReadWriteLock();");
       out.println();
     }
 
@@ -176,25 +177,30 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public void generateCall(JavaWriter out) throws IOException
   {
+    // TODO Is this too much code to be in-lined?
     if (_isContainerManaged) {
       switch (_lockType) {
       case READ:
         out.println();
         out.println("try {");
-        // Increasing indentation depth.
-        out.pushDepth();
-        out.println("_lockManager.acquireReadLock("
-            + _lockTimeoutUnit.toMillis(_lockTimeout) + ");");
+        out.pushDepth(); // Increasing indentation depth.
+        out.println("if (_readWriteLock.readLock().tryLock("
+            + _lockTimeoutUnit.toMillis(_lockTimeout)
+            + ", TimeUnit.MILLISECONDS)) {");
+        out.pushDepth(); // Increasing indentation depth.
+        out.println("try {");
         out.println();
         break;
 
       case WRITE:
         out.println();
         out.println("try {");
-        // Increasing indentation depth.
-        out.pushDepth();
-        out.println("_lockManager.acquireWriteLock("
-            + _lockTimeoutUnit.toMillis(_lockTimeout) + ");");
+        out.pushDepth(); // Increasing indentation depth.
+        out.println("if (_readWriteLock.writeLock().tryLock("
+            + _lockTimeoutUnit.toMillis(_lockTimeout)
+            + ", TimeUnit.MILLISECONDS)) {");
+        out.pushDepth(); // Increasing indentation depth.
+        out.println("try {");
         out.println();
         break;
       }
@@ -203,19 +209,50 @@ public class LockCallChain extends AbstractCallChain {
     generateNext(out);
 
     if (_isContainerManaged) {
-      // Decrease indentation depth.
-      out.popDepth();
-
       switch (_lockType) {
       case READ:
+        out.popDepth(); // Decrease indentation depth.
         out.println("} finally {");
-        out.println("  _lockManager.releaseReadLock();");
+        out.pushDepth(); // Increasing indentation depth.
+        out.println("_readWriteLock.readLock().unlock();");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("}");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("} else {");
+        out.pushDepth(); // Increasing indentation depth.
+        out
+            .println("throw new ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("}");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("} catch (InterruptedException interruptedException) {");
+        out.pushDepth(); // Increasing indentation depth.
+        out
+            .println("throw new ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
+        out.popDepth(); // Decrease indentation depth.
         out.println("}");
         out.println();
         break;
       case WRITE:
+        out.popDepth(); // Decrease indentation depth.
         out.println("} finally {");
-        out.println("  _lockManager.releaseWriteLock();");
+        out.pushDepth(); // Increasing indentation depth.
+        out.println("_readWriteLock.writeLock().unlock();");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("}");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("} else {");
+        out.pushDepth(); // Increasing indentation depth.
+        out
+            .println("throw new ConcurrentAccessTimeoutException(\"Timed out acquiring write lock.\");");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("}");
+        out.popDepth(); // Decrease indentation depth.
+        out.println("} catch (InterruptedException interruptedException) {");
+        out.pushDepth(); // Increasing indentation depth.
+        out
+            .println("throw new ConcurrentAccessTimeoutException(\"Thread interruption acquiring write lock: \" + interruptedException.getMessage());");
+        out.popDepth(); // Decrease indentation depth.
         out.println("}");
         out.println();
         break;
