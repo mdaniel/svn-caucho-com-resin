@@ -31,6 +31,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.SingletonGenerator;
+import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ComponentValueGenerator;
 import com.caucho.config.program.FieldGeneratorProgram;
 import com.caucho.config.program.MethodGeneratorProgram;
@@ -50,6 +51,7 @@ import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
+import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.Bean;
 import javax.interceptor.*;
 import javax.persistence.*;
@@ -246,8 +248,8 @@ public class InjectIntrospector {
 
     configureClassResources(injectList, type);
 
-    /*
     for (Field field : type.getDeclaredFields()) {
+      /*
       if (hasBindingAnnotation(field)) {
         InjectManager webBeans = InjectManager.create();
 
@@ -257,10 +259,10 @@ public class InjectIntrospector {
 
         continue;
       }
+      */
       
       introspect(injectList, field);
     }
-    */
 
     /*
     for (Method method : type.getDeclaredMethods()) {
@@ -374,6 +376,13 @@ public class InjectIntrospector {
     ValueGenerator gen
       = generatePersistenceContext(location, EntityManager.class,
 				   "", pContext);
+  }
+
+  public static void introspect(ArrayList<ConfigProgram> injectList,
+				AnnotatedField field)
+    throws ConfigException
+  {
+    introspect(injectList, field.getJavaMember());
   }
 
   private static void introspect(ArrayList<ConfigProgram> injectList,
@@ -538,7 +547,8 @@ public class InjectIntrospector {
     bindJndi(location, jndiName, bean);
 
     // return new ComponentValueGenerator(location, (AbstractBean) bean);
-    return null;
+
+    return new BeanValueGenerator(location, bean);
   }
 
   private static ValueGenerator

@@ -95,9 +95,11 @@ public class StatelessView extends View {
     ApiClass apiClass = getViewClass();
     
     for (ApiMethod apiMethod : apiClass.getMethods()) {
-      if (apiMethod.getDeclaringClass().equals(Object.class))
+      Method javaMethod = apiMethod.getJavaMember();
+      
+      if (javaMethod.getDeclaringClass().equals(Object.class))
 	continue;
-      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
+      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
 	continue;
  
       if (apiMethod.getName().startsWith("ejb")) {
@@ -144,6 +146,12 @@ public class StatelessView extends View {
   protected BusinessMethodGenerator createMethod(ApiMethod apiMethod,
 						 int index)
   {
+    Method javaMethod = apiMethod.getJavaMember();
+    
+    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
+      return null;
+    }
+    
     ApiMethod implMethod = findImplMethod(apiMethod);
 
     if (implMethod == null) {

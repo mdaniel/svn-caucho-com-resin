@@ -155,6 +155,12 @@ abstract public class StatelessHomeView extends StatelessView {
 				       implMethod,
 				       index);
     }
+    else if (apiMethod.getJavaMember().getDeclaringClass().getName().startsWith("javax.ejb.")) {
+      return null;
+    }
+    else if (apiMethod.getName().equals("remove")) {
+      return null;
+    }
     else {
       return super.createMethod(apiMethod, index);
     }

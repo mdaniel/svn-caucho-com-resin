@@ -67,6 +67,11 @@ abstract public class StatefulView extends View {
     return getSessionBean().getClassName();
   }
 
+  public boolean isProxy()
+  {
+    return ! getViewClass().equals(getBeanClass());
+  }
+
   abstract public String getViewClassName();
 
   public String getBeanClassName()
@@ -93,15 +98,17 @@ abstract public class StatefulView extends View {
     ApiClass apiClass = getViewClass();
     
     for (ApiMethod apiMethod : apiClass.getMethods()) {
-      if (apiMethod.getDeclaringClass().equals(Object.class))
+      Method javaMethod = apiMethod.getJavaMember();
+      
+      if (javaMethod.getDeclaringClass().equals(Object.class))
 	continue;
-      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
+      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
 	  && ! apiMethod.getName().equals("remove"))
 	continue;
 
       if (apiMethod.getName().startsWith("ejb")) {
 	throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
-				      apiMethod.getDeclaringClass(),
+				      javaMethod.getDeclaringClass(),
 				      apiMethod.getName()));
       }
 
@@ -140,10 +147,16 @@ abstract public class StatefulView extends View {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    // generateExtends(out);
-    // out.print("  implements " + getViewClass().getDeclarationName());
-    out.println("  extends " + getBeanClass().getName());
-    out.println("  implements StatefulProvider");
+    if (isProxy()) {
+      generateExtends(out);
+      out.print("  implements StatefulProvider, ");
+      out.println(getViewClass().getName());
+    }
+    else {
+      out.println("  extends " + getBeanClass().getName());
+      out.println("  implements StatefulProvider");
+    }
+    
     out.println("{");
     out.pushDepth();
 
@@ -163,7 +176,11 @@ abstract public class StatefulView extends View {
   {
     out.println("private transient StatefulContext _context;");
     out.println("private transient StatefulServer _server;");
-    // out.println("private " + getBeanClassName() + " _bean;");
+
+    if (isProxy()) {
+      out.println("private " + getBeanClassName() + " _bean;");
+    }
+    
     out.println("private transient boolean _isValid;");
     out.println("private transient boolean _isActive;");
 
@@ -182,6 +199,7 @@ abstract public class StatefulView extends View {
     
     out.println("_server = server;");
     out.println("_isValid = true;");
+    out.println("_bean = new " + getBeanClassName() + "(this);");
     
     out.popDepth();
     out.println("}");
@@ -253,7 +271,7 @@ abstract public class StatefulView extends View {
 
     if (implMethod == null)
       return null;
-    
+
     StatefulMethod bizMethod
       = new StatefulMethod(this,
 			   apiMethod,

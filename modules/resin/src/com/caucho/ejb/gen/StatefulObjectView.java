@@ -98,8 +98,10 @@ abstract public class StatefulObjectView extends StatefulView {
   protected BusinessMethodGenerator
     createMethod(ApiMethod apiMethod, int index)
   {
+    Method javaMethod = apiMethod.getJavaMember();
+    
     if (apiMethod.getName().equals("remove")
-	&& apiMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
+	&& javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
       ApiMethod implMethod = findImplMethod(apiMethod);
       
       if (implMethod == null)
@@ -131,8 +133,10 @@ abstract public class StatefulObjectView extends StatefulView {
   @Override
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
+    Method javaMethod = apiMethod.getJavaMember();
+    
     if (apiMethod.getName().equals("remove")
-	&& apiMethod.getDeclaringClass().getName().startsWith("javax.ejb")) {
+	&& javaMethod.getDeclaringClass().getName().startsWith("javax.ejb")) {
       if (apiMethod.getParameterTypes().length != 0)
 	return null;
 

@@ -261,8 +261,8 @@ public class StatelessServer extends SessionServer {
     else
       return new ObjectSkeletonWrapper(obj.getHandle());
     */
-
-    throw new UnsupportedOperationException(getClass().getName());
+    
+    return new ObjectSkeletonWrapper(obj.getHandle());
   }
 
   /**

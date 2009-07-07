@@ -36,6 +36,8 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.inject.AnnotatedMethodImpl;
+import com.caucho.config.inject.AnnotatedTypeImpl;
+import com.caucho.config.inject.AnnotatedElementImpl;
 import com.caucho.util.*;
 
 /**
@@ -98,6 +100,9 @@ public class ApiClass {
     if (apiClass == null)
       throw new NullPointerException();
     
+    if (annotatedType == null)
+      annotatedType = new AnnotatedTypeImpl(apiClass, apiClass);
+
     _apiClass = apiClass;
     _annotatedType = annotatedType;
 
@@ -326,7 +331,7 @@ public class ApiClass {
     else
       return (A) _apiClass.getAnnotation(annType);
   }
-  
+
   public Set<Annotation> getAnnotations()
   {
     if (_annotatedType != null)
@@ -340,6 +345,12 @@ public class ApiClass {
       return set;
     }
   }
+  
+  public void addAnnotation(Annotation ann)
+  {
+    ((AnnotatedElementImpl) _annotatedType).addAnnotation(ann);
+  }
+  
 
   private void introspectClass(Class cl, HashMap<String,Type> typeMap)
   {

@@ -36,6 +36,7 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.*;
+import java.lang.reflect.Method;
 
 /**
  * Represents a public interface to a stateful bean, e.g. a stateful view
@@ -90,9 +91,11 @@ public class MessageView extends View {
     ApiClass apiClass = getViewClass();
 
     for (ApiMethod apiMethod : apiClass.getMethods()) {
-      if (apiMethod.getDeclaringClass().equals(Object.class))
+      Method javaMethod = apiMethod.getJavaMember();
+      
+      if (javaMethod.getDeclaringClass().equals(Object.class))
 	continue;
-      if (apiMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
+      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
 	  && ! apiMethod.getName().equals("remove"))
 	continue;
 

@@ -232,9 +232,13 @@ public class EjbSessionBean extends EjbBean {
   @Override
   protected BeanGenerator createBeanGenerator()
   {
+    ApiClass ejbClass = getEJBClassWrapper();
+
+    fillClassDefaults(ejbClass);
+    
     if (_isStateless) {
       _sessionBean = new StatelessGenerator(getEJBName(),
-					    getEJBClassWrapper(),
+					    ejbClass,
 					    getLocalHome(),
 					    getLocalList(),
 					    getRemoteHome(),
@@ -242,7 +246,7 @@ public class EjbSessionBean extends EjbBean {
     }
     else {
       _sessionBean = new StatefulGenerator(getEJBName(),
-					   getEJBClassWrapper(),
+					   ejbClass,
 					   getLocalHome(),
 					   getLocalList(),
 					   getRemoteHome(),
@@ -252,6 +256,28 @@ public class EjbSessionBean extends EjbBean {
     return _sessionBean;
   }
 
+  private void fillClassDefaults(ApiClass ejbClass)
+  {
+    TransactionAttribute ann
+      = ejbClass.getAnnotation(TransactionAttribute.class);
+
+    if (ann == null) {
+      // ejb/1100
+      
+      ann = new TransactionAttribute() {
+	  public Class annotationType() { return TransactionAttribute.class; }
+	  public TransactionAttributeType value() {
+	    return TransactionAttributeType.REQUIRED;
+	  }
+	  public String toString() {
+	    return "@TransactionAttribute(REQUIRED)";
+	  };
+	};
+
+      ejbClass.addAnnotation(ann);
+    }
+  }
+  
   /**
    * Obtain and apply initialization from annotations.
    */
@@ -570,8 +596,10 @@ public class EjbSessionBean extends EjbBean {
       Class []param = method.getParameterTypes();
       Class retType = method.getReturnType();
 
-      if (method.getDeclaringClass().isAssignableFrom(EJBHome.class)
-	  || method.getDeclaringClass().isAssignableFrom(EJBLocalHome.class))
+      Method javaMethod = method.getJavaMember();
+
+      if (javaMethod.getDeclaringClass().isAssignableFrom(EJBHome.class)
+	  || javaMethod.getDeclaringClass().isAssignableFrom(EJBLocalHome.class))
         continue;
 
       if (EJBHome.class.isAssignableFrom(homeClass.getJavaClass()))

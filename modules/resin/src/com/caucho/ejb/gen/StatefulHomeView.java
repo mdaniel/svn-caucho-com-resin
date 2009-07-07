@@ -153,12 +153,14 @@ abstract public class StatefulHomeView extends StatefulView {
 
   protected ApiMethod findImplMethod(ApiMethod apiMethod)
   {
+    Method javaMethod = apiMethod.getJavaMember();
+    
     if (apiMethod.getName().equals("create")) {
       return getBeanClass().getMethod("ejbCreate",
 				     apiMethod.getParameterTypes());
     }
     else if (apiMethod.getName().equals("remove")
-	     && apiMethod.getDeclaringClass().getName().startsWith("javax.ejb")) {
+	     && javaMethod.getDeclaringClass().getName().startsWith("javax.ejb")) {
       return null;
     }
     else

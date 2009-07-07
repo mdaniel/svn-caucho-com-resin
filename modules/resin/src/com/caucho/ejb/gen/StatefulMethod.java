@@ -54,6 +54,11 @@ public class StatefulMethod extends BusinessMethodGenerator
 			int index)
   {
     super(view, apiMethod, implMethod, index);
+
+    if (apiMethod == implMethod) {
+      System.out.println("TH: " + this);
+      Thread.dumpStack();
+    }
   }
 
   @Override
@@ -66,6 +71,11 @@ public class StatefulMethod extends BusinessMethodGenerator
   public void setRemoveRetainIfException(boolean isRetain)
   {
     _isRemoveRetainIfException = isRetain;
+  }
+
+  protected boolean isProxy()
+  {
+    return getApiMethod() != getImplMethod();
   }
 
   /**
@@ -183,7 +193,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   protected void generateSuper(JavaWriter out)
     throws IOException
   {
-    out.print("super");
+    out.print(getSuper());
   }
 
   /**
@@ -193,7 +203,13 @@ public class StatefulMethod extends BusinessMethodGenerator
   protected String getSuper()
     throws IOException
   {
-    return "super";
+    if (isProxy())
+      return "_bean";
+    else {
+      System.out.println("SUPERDUPER:" + this + " " + getApiMethod() + " " + getImplMethod());
+      
+      return "super";
+    }
   }
 
   /**

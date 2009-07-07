@@ -690,6 +690,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     // configureClassResources(injectList, type);
 
     for (AnnotatedField field : type.getFields()) {
+      if (field.getAnnotations().size() == 0)
+	continue;
+      
       if (field.isAnnotationPresent(Decorates.class))
 	continue;
       else if (hasBindingAnnotation(field)) {
@@ -701,9 +704,15 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 	
 	_injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
       }
+      else {
+	InjectIntrospector.introspect(_injectProgramList, field);
+      }
     }
 
     for (AnnotatedMethod method : type.getMethods()) {
+      if (method.getAnnotations().size() == 0)
+	continue;
+      
       if (method.isAnnotationPresent(Initializer.class)) {
 	// boolean isOptional = isBindingOptional(field);
 

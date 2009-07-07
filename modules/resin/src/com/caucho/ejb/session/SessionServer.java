@@ -134,6 +134,12 @@ abstract public class SessionServer extends AbstractServer
 	}
       }
 
+      if (remoteApiList != null) {
+	for (Class api : remoteApiList) {
+	  baseApi = api;
+	}
+      }
+
       Bean bean = createBean(mBean, baseApi);
 	  
       beanManager.addBean(bean);

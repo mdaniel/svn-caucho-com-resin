@@ -1015,6 +1015,20 @@ public class EjbBean extends DescriptionGroupConfig
       if (getEJBClassWrapper() == null)
 	throw error(L.l("ejb-class is not defined for '{0}'",
 			getEJBName()));
+
+      for (EjbMethodPattern methodPattern : _methodList) {
+	for (ApiClass localList : _localList) {
+	  for (ApiMethod apiMethod : localList.getMethods()) {
+	    methodPattern.configure(apiMethod);
+	  }
+	}
+	
+	for (ApiClass remoteList : _remoteList) {
+	  for (ApiMethod apiMethod : remoteList.getMethods()) {
+	    methodPattern.configure(apiMethod);
+	  }
+	}
+      }
       
       _bean = createBeanGenerator();
 
@@ -1073,17 +1087,19 @@ public class EjbBean extends DescriptionGroupConfig
       */
 
       for (View view : _bean.getViews()) {
-	for (BusinessMethodGenerator bizMethod : view.getMethods()) {
 	  /*
+	for (BusinessMethodGenerator bizMethod : view.getMethods()) {
 	  if (! isContainerTransaction())
 	    bizMethod.getXa().setContainerManaged(false);
-	  */
 	}
+	  */
       }
 
+      /*
       for (EjbMethodPattern method : _methodList) {
 	method.configure(_bean);
       }
+      */
 
       for (RemoveMethod method : _removeMethods) {
 	method.configure(_bean);
@@ -1252,9 +1268,11 @@ public class EjbBean extends DescriptionGroupConfig
       Class []param = method.getParameterTypes();
       Class retType = method.getReturnType();
 
-      if (method.getDeclaringClass().isAssignableFrom(EJBObject.class))
+      Method javaMethod = method.getJavaMember();
+
+      if (javaMethod.getDeclaringClass().isAssignableFrom(EJBObject.class))
         continue;
-      if (method.getDeclaringClass().isAssignableFrom(EJBLocalObject.class))
+      if (javaMethod.getDeclaringClass().isAssignableFrom(EJBLocalObject.class))
         continue;
 
       if (EJBObject.class.isAssignableFrom(objectClass.getJavaClass()))
@@ -1570,9 +1588,9 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   public CallChain getTransactionChain(CallChain next,
-                                          ApiMethod apiMethod,
-                                          ApiMethod implMethod,
-                                          String prefix)
+				       ApiMethod apiMethod,
+				       ApiMethod implMethod,
+				       String prefix)
   {
     /*
     return TransactionChain.create(next,
@@ -1684,8 +1702,7 @@ public class EjbBean extends DescriptionGroupConfig
     if (! isContainerTransaction())
       return null;
 
-    TransactionAttributeType transaction
-      = TransactionAttributeType.REQUIRED;
+    TransactionAttributeType transaction = null;
 
     EjbMethodPattern ejbMethod = getMethodPattern(null, null);
 
