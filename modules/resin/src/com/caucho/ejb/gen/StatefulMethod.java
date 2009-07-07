@@ -184,7 +184,10 @@ public class StatefulMethod extends BusinessMethodGenerator
   protected void generateThis(JavaWriter out)
     throws IOException
   {
-    out.print("this");
+    if (isProxy())
+      out.print("_bean");
+    else
+      out.print("this");
   }
 
   /**
@@ -206,8 +209,6 @@ public class StatefulMethod extends BusinessMethodGenerator
     if (isProxy())
       return "_bean";
     else {
-      System.out.println("SUPERDUPER:" + this + " " + getApiMethod() + " " + getImplMethod());
-      
       return "super";
     }
   }

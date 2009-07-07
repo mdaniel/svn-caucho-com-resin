@@ -215,7 +215,7 @@ class StubGenerator extends MarshalGenerator {
     for (int i = 0; i < params.length; i++)
       printMarshalType(params[i], "_arg" + i);
 
-    println("HessianInput in = out.doCall();");
+    println("Hessian2Input in = out.doCall();");
 
     if (! void.class.equals(ret)) {
       printClass(ret);

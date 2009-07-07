@@ -39,6 +39,7 @@ import java.rmi.*;
 import java.util.*;
 import javax.annotation.security.*;
 import javax.ejb.*;
+import static javax.ejb.TransactionAttributeType.*;
 import javax.interceptor.*;
 
 /**
@@ -52,5 +53,10 @@ public class StatefulRemoveMethod extends StatefulMethod
 			      int index)
   {
     super(view, apiMethod, implMethod, index);
+
+    if (apiMethod != null)
+      apiMethod.addAnnotation(XaAnnotation.create(NEVER));
+    if (implMethod != null)
+      implMethod.addAnnotation(XaAnnotation.create(NEVER));
   }
 }

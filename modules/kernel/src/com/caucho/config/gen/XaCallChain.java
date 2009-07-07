@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import javax.ejb.ApplicationException;
+import javax.ejb.SessionSynchronization;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
@@ -53,7 +54,7 @@ public class XaCallChain extends AbstractCallChain {
 
   private TransactionAttributeType _xa;
   private boolean _isContainerManaged = true;
-  private boolean _isSynchronization;
+  private boolean _isSessionSynchronization;
 
   public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next) {
     super(next);
@@ -74,8 +75,9 @@ public class XaCallChain extends AbstractCallChain {
    */
   public boolean isEnhanced()
   {
-    return (_isContainerManaged && _xa != null
-	    && !_xa.equals(TransactionAttributeType.SUPPORTS));
+    return (_isContainerManaged
+	    && _xa != null
+	    && ! _xa.equals(TransactionAttributeType.SUPPORTS));
   }
 
   /**
@@ -92,9 +94,13 @@ public class XaCallChain extends AbstractCallChain {
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     ApiClass apiClass = apiMethod.getDeclaringClass();
+    ApiClass beanClass = _bizMethod.getBeanClass();
 
-    TransactionManagement xaManagement = apiClass
-        .getAnnotation(TransactionManagement.class);
+    TransactionManagement xaManagement
+      = beanClass.getAnnotation(TransactionManagement.class);
+
+    if (xaManagement == null)
+      xaManagement = apiClass.getAnnotation(TransactionManagement.class);
 
     if (xaManagement != null
         && xaManagement.value() != TransactionManagementType.CONTAINER) {
@@ -102,14 +108,11 @@ public class XaCallChain extends AbstractCallChain {
       return;
     }
 
-    ApiClass implClass = null;
+    Class javaClass = beanClass.getJavaClass();
 
-    if (implMethod != null)
-      implClass = implMethod.getDeclaringClass();
-
-    if (implClass != null
-        && Synchronization.class.isAssignableFrom(implClass.getJavaClass())) {
-      _isSynchronization = true;
+    if (javaClass != null
+	&& SessionSynchronization.class.isAssignableFrom(javaClass)) {
+      _isSessionSynchronization = true;
     }
 
     TransactionAttribute xaAttr;
@@ -124,8 +127,8 @@ public class XaCallChain extends AbstractCallChain {
       xaAttr = implMethod.getAnnotation(TransactionAttribute.class);
     }
 
-    if (xaAttr == null && implClass != null) {
-      xaAttr = implClass.getAnnotation(TransactionAttribute.class);
+    if (xaAttr == null && beanClass != null) {
+      xaAttr = beanClass.getAnnotation(TransactionAttribute.class);
     }
 
     if (xaAttr != null)
@@ -201,8 +204,10 @@ public class XaCallChain extends AbstractCallChain {
       }
     }
 
-    if (_isSynchronization) {
-      out.println("_xa.registerSynchronization(_bean);");
+    if (_isContainerManaged && _isSessionSynchronization) {
+      out.print("_xa.registerSynchronization(");
+      _bizMethod.generateThis(out);
+      out.println(");");
     }
 
     generateNext(out);

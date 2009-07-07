@@ -413,6 +413,15 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Generates the underlying bean instance
    */
+  protected void generateBean(JavaWriter out)
+    throws IOException
+  {
+    generateThis(out);
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
   protected void generatePreReturn(JavaWriter out)
     throws IOException
   {

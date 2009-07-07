@@ -76,6 +76,9 @@ public class HessianEjbSkeleton extends Skeleton {
     
     int code = is.read();
 
+    if (code < 0)
+      return;
+
     int major = is.read();
     int minor = is.read();
 

@@ -37,6 +37,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.XaAnnotation;
 import com.caucho.ejb.gen.SessionGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
@@ -51,6 +52,7 @@ import java.lang.reflect.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
+import static javax.ejb.TransactionAttributeType.*;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
@@ -258,23 +260,16 @@ public class EjbSessionBean extends EjbBean {
 
   private void fillClassDefaults(ApiClass ejbClass)
   {
+    if (! _isContainerTransaction) {
+      ejbClass.addAnnotation(XaAnnotation.createBeanManaged());
+    }
+    
     TransactionAttribute ann
       = ejbClass.getAnnotation(TransactionAttribute.class);
 
     if (ann == null) {
       // ejb/1100
-      
-      ann = new TransactionAttribute() {
-	  public Class annotationType() { return TransactionAttribute.class; }
-	  public TransactionAttributeType value() {
-	    return TransactionAttributeType.REQUIRED;
-	  }
-	  public String toString() {
-	    return "@TransactionAttribute(REQUIRED)";
-	  };
-	};
-
-      ejbClass.addAnnotation(ann);
+      ejbClass.addAnnotation(XaAnnotation.create(REQUIRED));
     }
   }
   
