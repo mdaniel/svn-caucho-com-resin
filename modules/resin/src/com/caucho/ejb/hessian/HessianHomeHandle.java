@@ -47,7 +47,9 @@ public class HessianHomeHandle extends AbstractHomeHandle {
   /**
    * Null arg constructor for serialization.
    */
-  public HessianHomeHandle() {}
+  private HessianHomeHandle()
+  {
+  }
 
   /**
    * Creates a new HomeHandle.
@@ -67,7 +69,6 @@ public class HessianHomeHandle extends AbstractHomeHandle {
   public HessianHomeHandle(EJBHome home, String url)
   {
     this.url = url;
-
     this.home = home;
   }
   

@@ -36,10 +36,12 @@ import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianProtocolException;
 import com.caucho.hessian.io.HessianRemote;
 import com.caucho.services.name.NameServerRemote;
+import com.caucho.util.*;
 
 import javax.ejb.EJBHome;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,6 +55,7 @@ import java.util.logging.Logger;
  * to execute the request.
  */
 public class NameContextSkeleton extends Skeleton {
+  private static final L10N L = new L10N(NameContextSkeleton.class);
   private static final Logger log
     = Logger.getLogger(NameContextSkeleton.class.getName());
 
@@ -71,22 +74,32 @@ public class NameContextSkeleton extends Skeleton {
   public void _service(InputStream is, OutputStream os)
     throws Exception
   {
+    int ch = is.read();
+
+    if (ch != 'H')
+      throw new IOException(L.l("expected 'H' for Hessian 2 at '{0}'", String.valueOf((char) ch)));
+
+    is.read();
+    is.read();
+
     Hessian2Input in = new HessianReader(is);
     Hessian2Output out = new HessianWriter(os);
 
     in.startCall();
 
     String method = in.getMethod();
+    Object []args = in.readArguments();
+    in.completeCall();
 
     try {
       if (method.equals("lookup") ||
           method.equals("lookup_string") ||
           method.equals("lookup_1"))
-        executeLookup(in, out);
+        executeLookup(args, in, out);
       else if (method.equals("list"))
-        executeList(in, out);
+        executeList(args, in, out);
       else
-        executeUnknown(method, in, out);
+        executeUnknown(method, args, in, out);
     } catch (HessianProtocolException e) {
       throw e;
     } catch (Throwable e) {
@@ -96,14 +109,16 @@ public class NameContextSkeleton extends Skeleton {
       out.writeFault("ServiceException", e.getMessage(), e);
       out.completeReply();
     }
+    
+    out.flush();
   }
 
-  private void executeLookup(Hessian2Input in,
+  private void executeLookup(Object []args,
+			     Hessian2Input in,
 			     Hessian2Output out)
     throws Throwable
   {
-    String name = in.readString();
-    in.completeCall();
+    String name = (String) args[0];
 
     while (name.startsWith("/"))
       name = name.substring(1);
@@ -161,11 +176,11 @@ public class NameContextSkeleton extends Skeleton {
     }
   }
 
-  private void executeList(Hessian2Input in, Hessian2Output out)
+  private void executeList(Object []args,
+			   Hessian2Input in,
+			   Hessian2Output out)
     throws Throwable
   {
-    in.completeCall();
-
     EjbProtocolManager container = _protocol.getProtocolManager();
     
     AbstractServer server = container.getServerByEJBName(_prefix);
@@ -204,13 +219,13 @@ public class NameContextSkeleton extends Skeleton {
    * @param out the hessian output stream
    */
   protected void executeUnknown(String method,
+				Object []args,
                                 Hessian2Input in,
 				Hessian2Output out)
     throws Exception
   {
     if (method.equals("_hessian_getAttribute")) {
-      String key = in.readString();
-      in.completeCall();
+      String key = (String) args[0];
 
       out.startReply();
 
@@ -226,7 +241,7 @@ public class NameContextSkeleton extends Skeleton {
         out.writeString(NameServerRemote.class.getName());
       else
         out.writeNull();
-      
+
       out.completeReply();
     }
     else {

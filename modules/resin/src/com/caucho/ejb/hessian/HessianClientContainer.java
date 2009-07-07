@@ -93,6 +93,7 @@ public class HessianClientContainer implements HessianRemoteResolver {
     _serverId = serverId;
 
     _proxyFactory = new HessianProxyFactory();
+    _proxyFactory.setHessian2Request(true); // force Hessian 2.0
 
     Environment.addCloseListener(this);
    }

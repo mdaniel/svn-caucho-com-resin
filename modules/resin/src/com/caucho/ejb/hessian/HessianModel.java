@@ -129,6 +129,7 @@ public class HessianModel extends AbstractModel {
       String cacheName = urlPrefix + _namePrefix + name;
       
       Object obj = _root._cache.get(cacheName);
+      
       if (obj != null)
         return obj;
 

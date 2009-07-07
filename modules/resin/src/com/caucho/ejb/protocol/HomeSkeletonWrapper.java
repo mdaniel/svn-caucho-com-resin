@@ -72,10 +72,10 @@ public class HomeSkeletonWrapper implements Serializable {
   public Object readResolve()
     throws ObjectStreamException
   {
-    /*
     try {
       if (handle != null)
         return handle.getEJBHome();
+      /*
       else {
         client = server.find(localId);
         if (client == null)
@@ -83,13 +83,18 @@ public class HomeSkeletonWrapper implements Serializable {
         else
           return client.getEJBLocalHome();
       }
+      */
+
+      throw new IllegalStateException(this + " expected a handle");
+    } catch (RuntimeException e) {
+      throw e;
+      /*
     } catch (ObjectStreamException e) {
       throw e;
+      */
     } catch (Exception e) {
       throw new ObjectExceptionWrapper(e);
     }
-    */
-    return null;
   }
 
   static class ObjectExceptionWrapper extends ObjectStreamException {
