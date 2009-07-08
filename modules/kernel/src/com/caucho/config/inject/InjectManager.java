@@ -901,6 +901,8 @@ public class InjectManager
     if (bean == null)
       return;
 
+    bean = new InjectBean(bean);
+
     for (Type type : bean.getTypes()) {
       addBeanByType(type, bean);
     }
@@ -3107,6 +3109,31 @@ public class InjectManager
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _extension + "," + _method.getName() + "]";
+    }
+  }
+
+  static class InjectBean<X> extends BeanWrapper<X> {
+    private ClassLoader _loader;
+
+    InjectBean(Bean<X> bean)
+    {
+      super(bean);
+
+      _loader = Thread.currentThread().getContextClassLoader();
+    }
+
+    public X create(CreationalContext<X> env)
+    {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(_loader);
+
+	return getBean().create(env);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
     }
   }
 

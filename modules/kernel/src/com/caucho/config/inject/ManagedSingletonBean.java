@@ -42,6 +42,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -75,10 +76,17 @@ public class ManagedSingletonBean extends AbstractSingletonBean
   @Override
   public Object create(CreationalContext env)
   {
-    Object value = getBean().create(env);
+    InjectionTarget target
+      = ((ManagedBeanImpl) getBean()).getInjectionTarget();
+
+    Object value = target.produce(env);
+
+    target.inject(value, env);
 
     if (_init != null)
       _init.inject(value, (ConfigContext) env);
+
+    target.postConstruct(value);
 
     return value;
   }

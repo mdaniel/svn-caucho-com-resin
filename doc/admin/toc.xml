@@ -24,7 +24,8 @@
     <!--
        - Jar Repository
       -->
-    <item link="jar-repository.xtp" title="Jar Repository"/>
+    <item link="jar-repository.xtp" title="Jar Repository"
+	  description="use Maven pom.xml to load jars from a global repository" />
 
     <!--
        - IoC

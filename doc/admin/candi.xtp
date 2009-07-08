@@ -152,11 +152,11 @@ annotations:</p>
 </tr>
 <tr>
   <td>&lt;Named></td>
-  <td>the <code>@javax.annotation.Name</code> annotations for EL naming</td>
+  <td>the <a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Named.html">@javax.enterprise.inject.Named</a> annotations for EL naming</td>
 </tr>
 <tr>
   <td>&lt;BindingType></td>
-  <td>any <code>@javax.annotation.BindingType</code> annotations for
+  <td>any <a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/BindingType">@javax.enterprise.inject.BindingType</a> annotations for
   injection</td>
 </tr>
 <tr>

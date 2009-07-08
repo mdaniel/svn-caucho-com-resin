@@ -90,7 +90,7 @@ public class BeanConfig {
   private ArrayList<ConfigProgram> _newArgs;
   private ContainerProgram _init;
 
-  protected Bean _comp;
+  protected Bean _bean;
 
   // XXX: temp for osgi
   private boolean _isService;
@@ -173,7 +173,7 @@ public class BeanConfig {
 
   public AbstractBean getComponent()
   {
-    return (AbstractBean) _comp;
+    return (AbstractBean) _bean;
   }
 
   /**
@@ -312,7 +312,7 @@ public class BeanConfig {
    */
   public AbstractBean getComponentFactory()
   {
-    return (AbstractBean) _comp;
+    return (AbstractBean) _bean;
   }
 
   // XXX: temp for OSGI
@@ -515,17 +515,17 @@ public class BeanConfig {
     if (_init != null)
       factory.init(_init);
 
-    _comp = factory.bean();
+    _bean = factory.bean();
 
     introspectPostInit();
 
     deploy();
     
     try {
-      if (_comp == null) {
+      if (_bean == null) {
       }
       else if (_jndiName != null) {
-	Jndi.bindDeepShort(_jndiName, _comp);
+	Jndi.bindDeepShort(_jndiName, _bean);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -545,20 +545,22 @@ public class BeanConfig {
   protected void deploy()
   {
     // ejb/1030
-    if (_comp != null) {
-      getBeanManager().addBean(_comp);
+    if (_bean != null) {
+      getBeanManager().addBean(_bean);
     }
   }
 
   public Object getObject()
   {
-    if (_comp != null) {
+    if (_bean != null) {
       CreationalContext env = _beanManager.createCreationalContext();
       
-      Object value = _beanManager.getReference(_comp, (Class) null, env);
+      Object value = _beanManager.getReference(_bean, _bean.getBeanClass(), env);
 
+      /*
       if (_init != null)
 	_init.inject(value, (ConfigContext) env);
+      */
       
       return value;
     }
@@ -568,11 +570,11 @@ public class BeanConfig {
 
   public Object createObjectNoInit()
   {
-    if (_comp != null) {
+    if (_bean != null) {
       CreationalContext env = _beanManager.createCreationalContext();
       // XXX:
-      return _beanManager.getReference(_comp, (Class) null, env);
-      // return _comp.createNoInit();
+      return _beanManager.getReference(_bean, (Class) null, env);
+      // return _bean.createNoInit();
     }
     else
       return null;

@@ -128,8 +128,10 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public boolean setInitParameter(String name, String value)
   {
+    /* server/12bv
     if (! isInit())
       throw new IllegalStateException();
+    */
     
     if (_initParams.containsKey(name))
       return false;
@@ -492,7 +494,8 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("unimplemented");
   }
   
-  public boolean isInit() {
+  public boolean isInit()
+  {
     throw new UnsupportedOperationException("unimplemented");
   }
 }
