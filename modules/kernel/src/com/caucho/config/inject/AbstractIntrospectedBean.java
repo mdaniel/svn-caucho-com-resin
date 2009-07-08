@@ -99,8 +99,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public static final Annotation []CURRENT_ANN
     = new Annotation[] { new CurrentLiteral() };
 
-  protected InjectManager _beanManager;
-
   // AnnotatedType for ManagedBean, AnnotatedMethod for produces
   private Annotated _annotated;
   
@@ -133,7 +131,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 				  Type type,
 				  Annotated annotated)
   {
-    _beanManager = manager;
+    super(manager);
     _annotated = annotated;
     
     _type = type;
@@ -144,11 +142,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     }
     else
       _baseType = manager.createBaseType(type);
-  }
-
-  public InjectManager getBeanManager()
-  {
-    return _beanManager;
   }
 
   public BaseType getBaseType()

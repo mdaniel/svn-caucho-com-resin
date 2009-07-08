@@ -51,6 +51,8 @@ public class PersistenceContextComponent extends AbstractBean {
   public PersistenceContextComponent(String name,
 				     EntityManagerTransactionProxy proxy)
   {
+    super(InjectManager.create());
+    
     _types.add(EntityManager.class);
     
     _proxy = proxy;

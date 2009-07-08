@@ -1359,7 +1359,7 @@ public class InjectManager
     InjectManager ownerManager;
 
     if (bean instanceof InjectBean)
-      ownerManager = ((InjectBean) bean).getInjectManager();
+      ownerManager = ((InjectBean) bean).getBeanManager();
     else
       ownerManager = this;
     
@@ -3135,20 +3135,13 @@ public class InjectManager
   }
 
   static class InjectBean<X> extends BeanWrapper<X> {
-    private InjectManager _beanManager;
     private ClassLoader _loader;
 
     InjectBean(Bean<X> bean, InjectManager beanManager)
     {
-      super(bean);
+      super(beanManager, bean);
 
-      _beanManager = beanManager;
       _loader = Thread.currentThread().getContextClassLoader();
-    }
-
-    public InjectManager getInjectManager()
-    {
-      return _beanManager;
     }
 
     public X create(CreationalContext<X> env)
@@ -3163,6 +3156,21 @@ public class InjectManager
       } finally {
 	thread.setContextClassLoader(oldLoader);
       }
+    }
+
+    public int hashCode()
+    {
+      return getBean().hashCode();
+    }
+    
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof InjectBean))
+	return false;
+
+      InjectBean bean = (InjectBean) o;
+
+      return getBean().equals(bean.getBean());
     }
   }
 

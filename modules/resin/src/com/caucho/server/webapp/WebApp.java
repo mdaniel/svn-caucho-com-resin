@@ -57,6 +57,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.Authenticator;
+import com.caucho.security.BasicLogin;
 import com.caucho.security.Login;
 import com.caucho.security.Deny;
 import com.caucho.rewrite.IfSecure;
@@ -2195,6 +2196,11 @@ public class WebApp extends ServletContextImpl
       try {
 	if (_login == null)
 	  _login = _beanManager.getReference(Login.class);
+
+	if (_login == null) {
+	  _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
+	  _login = _beanManager.getReference(Login.class);
+	}
 
 	setAttribute("caucho.login", _login);
       } catch (Exception e) {

@@ -81,7 +81,7 @@ import javax.interceptor.InterceptorBindingType;
 /**
  * Common bean introspection for Produces and ManagedBean.
  */
-abstract public class AbstractBean<T> implements Bean<T>
+abstract public class AbstractBean<T> implements Bean<T>, ObjectProxy
 {
   private static final L10N L = new L10N(AbstractBean.class);
   private static final Logger log
@@ -91,10 +91,18 @@ abstract public class AbstractBean<T> implements Bean<T>
   private static final Set<InjectionPoint> _nullInjectionPoints
     = new HashSet<InjectionPoint>();
 
+  private InjectManager _beanManager;
+  
   private String _passivationId;
   
-  public AbstractBean()
+  public AbstractBean(InjectManager beanManager)
   {
+    _beanManager = beanManager;
+  }
+
+  public InjectManager getBeanManager()
+  {
+    return _beanManager;
   }
 
   public String getId()
@@ -229,7 +237,18 @@ abstract public class AbstractBean<T> implements Bean<T>
 
     return sb.toString();
   }
+  
+  /**
+   * Creates the object from the proxy.
+   *
+   * @return the object named by the proxy.
+   */
+  public Object createObject(Hashtable env)
+  {
+    return _beanManager.create(this);
+  }
 
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();

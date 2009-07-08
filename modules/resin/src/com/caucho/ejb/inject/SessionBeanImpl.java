@@ -57,7 +57,7 @@ public class SessionBeanImpl<X> extends BeanWrapper<X>
   
   public SessionBeanImpl(ManagedBeanImpl<X> bean)
   {
-    super(bean);
+    super(bean.getBeanManager(), bean);
   }
 
   public Object getScopeAdapter(CreationalContext context)

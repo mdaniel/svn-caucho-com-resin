@@ -73,12 +73,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   private boolean _isBound;
 
-  protected ProducesBean(InjectManager inject,
+  protected ProducesBean(InjectManager manager,
 			 Bean producerBean,
 			 AnnotatedMethod beanMethod,
 			 Arg []args)
   {
-    super(inject, beanMethod.getBaseType(), beanMethod);
+    super(manager, beanMethod.getBaseType(), beanMethod);
 
     _producerBean = producerBean;
     _beanMethod = beanMethod;
@@ -91,12 +91,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       throw new NullPointerException();
   }
 
-  public static ProducesBean create(InjectManager inject,
+  public static ProducesBean create(InjectManager manager,
 				    Bean producer,
 				    AnnotatedMethod beanMethod,
 				    Arg []args)
   {
-    ProducesBean bean = new ProducesBean(inject, producer, beanMethod, args);
+    ProducesBean bean = new ProducesBean(manager, producer, beanMethod, args);
     bean.introspect();
     bean.introspect(beanMethod);
 
@@ -194,7 +194,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     ConfigContext env = (ConfigContext) cxt;
     Class type = _producerBean.getBeanClass();
       
-    X factory = (X) _beanManager.getReference(_producerBean, type, env);
+    X factory = (X) getBeanManager().getReference(_producerBean, type, env);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
@@ -216,7 +216,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 	args = new Object[_args.length];
 
 	ConfigContext env
-	  = (ConfigContext) _beanManager.createCreationalContext();
+	  = (ConfigContext) getBeanManager().createCreationalContext();
 
 	for (int i = 0; i < args.length; i++) {
 	  if (_args[i] instanceof InjectionPointArg)

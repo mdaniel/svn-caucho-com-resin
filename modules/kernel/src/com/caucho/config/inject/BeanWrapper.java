@@ -44,8 +44,10 @@ public class BeanWrapper<T> extends AbstractBean<T>
 {
   private final Bean<T> _bean;
 
-  public BeanWrapper(Bean<T> bean)
+  public BeanWrapper(InjectManager manager, Bean<T> bean)
   {
+    super(manager);
+    
     _bean = bean;
   }
 

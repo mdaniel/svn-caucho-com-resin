@@ -59,6 +59,8 @@ public class EntityManagerFactoryComponent extends AbstractBean {
                                        PersistenceProvider provider,
 				       PersistenceUnitConfig unit)
   {
+    super(beanManager);
+    
     _types.add(EntityManagerFactory.class);
     
     _amber = amber;

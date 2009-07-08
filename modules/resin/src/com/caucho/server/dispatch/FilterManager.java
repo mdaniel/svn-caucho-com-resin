@@ -36,6 +36,7 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionTarget;
 import java.util.*;
 import java.util.logging.Level;
@@ -170,10 +171,11 @@ public class FilterManager {
 
         filter = config.getFilter();
 
+	CreationalContext env = beanManager.createCreationalContext();
         if (filter == null)
-	  filter = (Filter) _comp.produce(null);
-        
-	_comp.inject(filter, null);
+	  filter = (Filter) _comp.produce(env);
+
+	_comp.inject(filter, env);
 
 	// InjectIntrospector.configure(filter);
 

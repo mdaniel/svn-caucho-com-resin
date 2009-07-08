@@ -293,7 +293,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     Arg []args = introspectArguments(beanMethod.getParameters());
     
-    ProducesBean bean = ProducesBean.create(_beanManager, this, beanMethod,
+    ProducesBean bean = ProducesBean.create(getBeanManager(), this, beanMethod,
 					    args);
 
     // bean.init();
@@ -387,7 +387,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     }
 
     ObserverMethodImpl observerMethod
-      = new ObserverMethodImpl(_beanManager, this, beanMethod,
+      = new ObserverMethodImpl(getBeanManager(), this, beanMethod,
 			       eventType, bindingSet);
 
     _observerMethods.add(observerMethod);

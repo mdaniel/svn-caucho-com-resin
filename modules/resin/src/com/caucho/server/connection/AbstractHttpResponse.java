@@ -464,15 +464,13 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
     AbstractCacheFilterChain oldCache = _cacheInvocation;
-    _cacheInvocation = null;
+    _cacheInvocation = cacheInvocation;
     
     AbstractCacheEntry oldEntry = _newCacheEntry;
     _newCacheEntry = null;
 
     if (oldEntry != null)
       oldCache.killCaching(oldEntry);
-      
-    _cacheInvocation = cacheInvocation;
   }
 
   public void setTopCache(boolean isTopCache)
@@ -2010,8 +2008,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
                        String contentType, String charEncoding,
 		       boolean isByte)
   {
-    if (_cacheInvocation == null)
+    if (_cacheInvocation == null) {
       return false;
+    }
     /*
       // jsp/17ah
     else if (_responseStream != _originalResponseStream) {
@@ -2021,14 +2020,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else if (! isCauchoResponseStream()) {
       return false;
     }
+    /* server/131x
     else if (! (_originalRequest instanceof CauchoRequest)) {
       return false;
     }
+    */
     else if (! _allowCache) {
       return false;
     }
     else {
-      CauchoRequest request = (CauchoRequest) _originalRequest;
+      CauchoRequest request = (CauchoRequest) _request;
       
       _newCacheEntry = _cacheInvocation.startCaching(request,
 						     this, keys, values,

@@ -67,7 +67,7 @@ public class XmlBean<X> extends BeanWrapper<X>
 		 Arg []newProgram,
 		 ConfigProgram []injectProgram)
   {
-    super(bean);
+    super(bean.getBeanManager(), bean);
 
     _bean = bean;
     _ctor = ctor;

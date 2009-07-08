@@ -75,7 +75,7 @@ abstract public class AbstractSingletonBean extends BeanWrapper
 			Class<? extends Annotation> scopeType,
 			String name)
   {
-    super(managedBean);
+    super(managedBean.getBeanManager(), managedBean);
 
     _managedBean = managedBean;
 

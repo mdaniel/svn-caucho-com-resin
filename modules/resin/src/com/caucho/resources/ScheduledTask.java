@@ -150,7 +150,7 @@ public class ScheduledTask
     
     _url = url;
 
-    _webApp = _webAppInstance.get();
+    _webApp = WebApp.getCurrent();
 
     /*
       throw new ConfigException(L.l("relative url '{0}' requires web-app context",
