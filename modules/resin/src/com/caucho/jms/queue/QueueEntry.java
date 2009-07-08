@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * Basic implementation of an entry in the Queue.
  */
-public abstract class QueueEntry
+public abstract class QueueEntry implements Serializable
 {  
   private final int _priority;
 
