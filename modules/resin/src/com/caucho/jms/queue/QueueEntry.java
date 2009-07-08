@@ -44,6 +44,16 @@ public abstract class QueueEntry
     return _msgId;
   }
   
+  public long getLeaseExpires()
+  {
+    return _leaseExpire;
+  }
+  
+  public long getExpiresTime()
+  {
+    return _expiresTime;
+  }
+  
   /**
    * Returns true if we can get a lease to this entry
    */
