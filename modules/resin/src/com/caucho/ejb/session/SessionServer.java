@@ -124,7 +124,8 @@ abstract public class SessionServer extends AbstractServer
       if (named != null)
 	beanName = named.value();
 
-      ManagedBeanImpl mBean = beanManager.createManagedBean(getAnnotatedType());
+      ManagedBeanImpl mBean
+	= beanManager.createManagedBean(getAnnotatedType());
 
       Class baseApi = beanClass;
 

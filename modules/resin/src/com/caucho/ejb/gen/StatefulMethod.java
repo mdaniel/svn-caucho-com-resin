@@ -54,11 +54,6 @@ public class StatefulMethod extends BusinessMethodGenerator
 			int index)
   {
     super(view, apiMethod, implMethod, index);
-
-    if (apiMethod == implMethod) {
-      System.out.println("TH: " + this);
-      Thread.dumpStack();
-    }
   }
 
   @Override

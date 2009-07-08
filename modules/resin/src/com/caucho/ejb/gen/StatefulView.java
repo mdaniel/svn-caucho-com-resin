@@ -133,7 +133,7 @@ abstract public class StatefulView extends View {
   {
     out.println();
     out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getStatefulServer());");
+    out.println("  return new " + getViewClassName() + "(getStatefulServer(), true);");
   }
 
   /**
@@ -200,6 +200,19 @@ abstract public class StatefulView extends View {
     out.println("_server = server;");
     out.println("_isValid = true;");
     out.println("_bean = new " + getBeanClassName() + "(this);");
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println(getViewClassName() + "(StatefulServer server, boolean isProvider)");
+    out.println("{");
+    out.pushDepth();
+    
+    generateSuper(out, "server");
+    
+    out.println("_server = server;");
+    out.println("_isValid = true;");
     
     out.popDepth();
     out.println("}");

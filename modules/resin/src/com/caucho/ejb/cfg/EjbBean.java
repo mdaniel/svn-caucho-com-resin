@@ -744,10 +744,12 @@ public class EjbBean extends DescriptionGroupConfig
     if (! local.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
 
+    /*
     if (EJBLocalObject.class.isAssignableFrom(local.getJavaClass())) {
     }
     else if (! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
+    */
 
     if (! _localList.contains(local)) {
       _localList.add(local);

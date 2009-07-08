@@ -334,6 +334,26 @@ public class EjbSessionBean extends EjbBean {
       if (! interfaceList.contains(localApi))
         interfaceList.add(localApi);
     }
+    
+    Local local = type.getAnnotation(Local.class);
+    if (local != null && local.value() != null) {
+      _localList.clear();
+      
+      for (Class api : local.value()) {
+	// XXX: grab from type?
+	_localList.add(new ApiClass(api));
+      }
+    }
+    
+    Remote remote = type.getAnnotation(Remote.class);
+    if (remote != null && remote.value() != null) {
+      _remoteList.clear();
+      
+      for (Class api : remote.value()) {
+	// XXX: grab from type?
+	_remoteList.add(new ApiClass(api));
+      }
+    }
 
     // if (getLocalList().size() != 0 || getRemoteList().size() != 0) {
     if (_localHome != null || _localList.size() != 0

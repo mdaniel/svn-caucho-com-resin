@@ -731,6 +731,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 	_injectProgramList.add(new MethodInjectProgram(method.getJavaMember(),
 						       args));
       }
+      else {
+	InjectIntrospector.introspect(_injectProgramList, method);
+      }
     }
 
     /*

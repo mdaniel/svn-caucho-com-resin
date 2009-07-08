@@ -52,6 +52,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
 import javax.interceptor.*;
 import javax.persistence.*;
@@ -383,6 +384,13 @@ public class InjectIntrospector {
     throws ConfigException
   {
     introspect(injectList, field.getJavaMember());
+  }
+
+  public static void introspect(ArrayList<ConfigProgram> injectList,
+				AnnotatedMethod method)
+    throws ConfigException
+  {
+    introspect(injectList, method.getJavaMember());
   }
 
   private static void introspect(ArrayList<ConfigProgram> injectList,

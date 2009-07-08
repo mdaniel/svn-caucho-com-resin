@@ -319,8 +319,10 @@ public class EjbConfig {
   public void addIntrospectableClass(String className)
   {
     try {
-      ClassLoader loader = _ejbContainer.getIntrospectionClassLoader();
+      ClassLoader tempLoader = _ejbContainer.getIntrospectionClassLoader();
+      ClassLoader loader = _ejbContainer.getClassLoader();
 
+      // ejb/0f20
       Class type = Class.forName(className, false, loader);
 
       if (findBeanByType(type) != null)
