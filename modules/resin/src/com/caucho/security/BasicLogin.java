@@ -115,7 +115,7 @@ public class BasicLogin extends AbstractLogin {
     Principal principal = auth.authenticate(user, credentials, request);
 
     if (log.isLoggable(Level.FINE))
-      log.fine("basic: " + user + " -> " + principal); 
+      log.fine("basic: " + user + " -> " + principal + " (" + auth + ")");
 
     return principal;
   }

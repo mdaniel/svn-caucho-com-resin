@@ -57,6 +57,7 @@ import java.lang.ref.*;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
 import javax.decorator.Decorates;
@@ -156,6 +157,7 @@ public class InjectManager
   private HashSet<URL> _extensionSet = new HashSet<URL>();
 
   private AtomicInteger _beanId = new AtomicInteger();
+  private AtomicLong _version = new AtomicLong();
 
   private HashSet<String> _configuredClasses
     = new HashSet<String>();
@@ -309,6 +311,14 @@ public class InjectManager
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Returns the modification version.
+   */
+  public long getVersion()
+  {
+    return _version.get();
   }
 
   private void createExtension(String className)
@@ -901,7 +911,12 @@ public class InjectManager
     if (bean == null)
       return;
 
-    bean = new InjectBean(bean);
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " add bean " + bean);
+
+    _version.incrementAndGet();
+    
+    bean = new InjectBean(bean, this);
 
     for (Type type : bean.getTypes()) {
       addBeanByType(type, bean);
@@ -1291,7 +1306,7 @@ public class InjectManager
       if (object != null)
 	return object;
     }
-    
+
     Object object = getInstanceRec(bean, type, env, this);
 
     return object;
@@ -1340,8 +1355,15 @@ public class InjectManager
     if (scopeType == null) {
       throw new IllegalStateException("Unknown scope for " + bean);
     }
-      
-    Context context = getContext(scopeType);
+
+    InjectManager ownerManager;
+
+    if (bean instanceof InjectBean)
+      ownerManager = ((InjectBean) bean).getInjectManager();
+    else
+      ownerManager = this;
+    
+    Context context = ownerManager.getContext(scopeType);
 
     if (context == null)
       return null;
@@ -3113,13 +3135,20 @@ public class InjectManager
   }
 
   static class InjectBean<X> extends BeanWrapper<X> {
+    private InjectManager _beanManager;
     private ClassLoader _loader;
 
-    InjectBean(Bean<X> bean)
+    InjectBean(Bean<X> bean, InjectManager beanManager)
     {
       super(bean);
 
+      _beanManager = beanManager;
       _loader = Thread.currentThread().getContextClassLoader();
+    }
+
+    public InjectManager getInjectManager()
+    {
+      return _beanManager;
     }
 
     public X create(CreationalContext<X> env)

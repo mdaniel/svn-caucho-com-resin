@@ -47,6 +47,7 @@ public class InstanceImpl<T> implements Instance<T>
   private Type _type;
   private Annotation []_bindings;
 
+  private long _version;
   private Set<Bean<?>> _beanSet;
   private Bean _bean;
 
@@ -57,8 +58,9 @@ public class InstanceImpl<T> implements Instance<T>
     _beanManager = beanManager;
     _type = type;
     _bindings = bindings;
-
+    
     _beanSet = beanManager.getBeans(type, bindings);
+    _version = beanManager.getVersion();
   }
   
   /**
@@ -67,7 +69,7 @@ public class InstanceImpl<T> implements Instance<T>
   public T get()
   {
     if (_bean == null) {
-      _bean = _beanManager.getHighestPrecedenceBean(_beanSet);
+      _bean = _beanManager.getHighestPrecedenceBean(getBeanSet());
     }
     
     CreationalContext<?> env = _beanManager.createCreationalContext();
@@ -103,17 +105,27 @@ public class InstanceImpl<T> implements Instance<T>
 
   public Iterator<T> iterator()
   {
-    return new InstanceIterator(_beanManager, _beanSet.iterator());
+    return new InstanceIterator(_beanManager, getBeanSet().iterator());
   }
 
   public boolean isAmbiguous()
   {
-    return _beanSet.size() > 1;
+    return getBeanSet().size() > 1;
   }
 
   public boolean isUnsatisfied()
   {
-    return _beanSet.size() == 0;
+    return getBeanSet().size() == 0;
+  }
+
+  private Set<Bean<?>> getBeanSet()
+  {
+    if (_version != _beanManager.getVersion()) {
+      _beanSet = _beanManager.getBeans(_type, _bindings);
+      _version = _beanManager.getVersion();
+    }
+
+    return _beanSet;
   }
 
   @Override

@@ -115,7 +115,7 @@ public abstract class AbstractLogin implements Login {
   public Authenticator getAuthenticator()
   {
     if (_auth == null) {
-      if ( ! _authInstance.isUnsatisfied()) {
+      if (! _authInstance.isUnsatisfied()) {
 	_auth = _authInstance.get();
       }
 
