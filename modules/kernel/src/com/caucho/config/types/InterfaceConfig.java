@@ -180,14 +180,14 @@ public class InterfaceConfig extends BeanConfig {
       Set<Bean<?>> beans = webBeans.getBeans(_valueName);
 
       if (beans.size() > 0) {
-	_comp = (AbstractBean) beans.iterator().next();
+	_bean = (AbstractBean) beans.iterator().next();
       }
 
-      if (_comp == null) {
+      if (_bean == null) {
 	_value = Jndi.lookup(_valueName);
       }
 
-      if (_comp == null && _value == null)
+      if (_bean == null && _value == null)
 	throw new ConfigException(L.l("'{0}' is an unknown bean",
 				      _valueName));
     }

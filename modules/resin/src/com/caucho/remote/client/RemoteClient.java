@@ -101,9 +101,9 @@ public class RemoteClient extends BeanConfig
 
     factory.stereotype(ConfiguredLiteral.create());
 
-    _comp = (AbstractBean) factory.singleton(proxy);
+    _bean = (AbstractBean) factory.singleton(proxy);
 
-    beanManager.addBean(_comp);
+    beanManager.addBean(_bean);
   }
 }
 
