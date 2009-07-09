@@ -1216,9 +1216,9 @@ public class InjectManager
 
   public int getDeploymentPriority(Bean bean)
   {
-    Set<Annotation> stereotypes = bean.getStereotypes();
-
     int priority = DEFAULT_PRIORITY;
+
+    Set<Annotation> stereotypes = bean.getStereotypes();
 
     if (stereotypes != null) {
       for (Annotation ann : stereotypes) {
@@ -1228,6 +1228,16 @@ public class InjectManager
 	  priority = value;
       }
     }
+
+    if (bean instanceof AbstractBean) {
+      // ioc/0213
+      AbstractBean absBean = (AbstractBean) bean;
+
+      if (absBean.getBeanManager() == this)
+	priority += 1000000;
+    }
+    else
+      priority += 1000000;
 
     return priority;
   }
@@ -1358,8 +1368,8 @@ public class InjectManager
 
     InjectManager ownerManager;
 
-    if (bean instanceof InjectBean)
-      ownerManager = ((InjectBean) bean).getBeanManager();
+    if (bean instanceof AbstractBean)
+      ownerManager = ((AbstractBean) bean).getBeanManager();
     else
       ownerManager = this;
     
@@ -3134,7 +3144,9 @@ public class InjectManager
     }
   }
 
-  static class InjectBean<X> extends BeanWrapper<X> {
+  static class InjectBean<X> extends BeanWrapper<X>
+    implements PassivationCapable
+  {
     private ClassLoader _loader;
 
     InjectBean(Bean<X> bean, InjectManager beanManager)
@@ -3142,6 +3154,16 @@ public class InjectManager
       super(beanManager, bean);
 
       _loader = Thread.currentThread().getContextClassLoader();
+    }
+
+    public String getId()
+    {
+      Bean bean = getBean();
+      
+      if (bean instanceof PassivationCapable)
+	return ((PassivationCapable) bean).getId();
+      else
+	return null;
     }
 
     public X create(CreationalContext<X> env)
@@ -3171,6 +3193,11 @@ public class InjectManager
       InjectBean bean = (InjectBean) o;
 
       return getBean().equals(bean.getBean());
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + getBean() + "]";
     }
   }
 
