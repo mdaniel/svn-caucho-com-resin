@@ -25,24 +25,51 @@
  *
  * @author Scott Ferguson
  */
-
 package javax.ejb;
 
 /**
- * The main ejb context.
+ * A ConcurrentAccessException indicates that the client has attempted an
+ * invocation on a stateful session bean while another invocation is in
+ * progress.
  */
 public class ConcurrentAccessException extends EJBException {
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * Constructs an ConcurrentAccessException with no detail message.
+   */
   public ConcurrentAccessException()
   {
+    super();
   }
-  
-  public ConcurrentAccessException(String msg)
+
+  /**
+   * Constructs an ConcurrentAccessException with the specified detailed
+   * message.
+   * 
+   * @param message
+   *          The detail message. The detail message is saved for later
+   *          retrieval by the {@link #getMessage()} method.
+   */
+  public ConcurrentAccessException(String message)
   {
-    super(msg);
+    super(message);
   }
-  
-  public ConcurrentAccessException(String msg, Exception e)
+
+  /**
+   * Constructs an ConcurrentAccessException with the specified detail message
+   * and a nested exception.
+   * 
+   * @param message
+   *          the detail message (which is saved for later retrieval by the
+   *          {@link #getMessage()} method).
+   * @param ex
+   *          The cause (which is saved for later retrieval by the
+   *          {@link #getCause()} method). (A <tt>null</tt> value is permitted,
+   *          and indicates that the cause is nonexistent or unknown.)
+   */
+  public ConcurrentAccessException(String message, Exception ex)
   {
-    super(msg, e);
+    super(message, ex);
   }
 }

@@ -19,18 +19,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Reza Rahman
  */
-package javax.ejb;
+package com.caucho.ejb.locking;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Concurrency management type.
+ * Declares an exclusive lock with no concurrency allowed. When concurrency is
+ * detected on the target, an exception must be thrown and no wait will occur to
+ * acquire the exclusive lock for the target bean/method.
  */
-public enum ConcurrencyManagementType {
-  CONTAINER, BEAN, CONCURRENCY_NOT_ALLOWED
+@Target( { ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ConcurrencyNotAllowedLock {
+  // No elements
 }
