@@ -129,8 +129,9 @@ public class ObserverMap {
 	return false;
       
       for (Binding binding : _bindings) {
-	if (! binding.isMatch(bindings))
+	if (! binding.isMatch(bindings)) {
 	  return false;
+	}
       }
 
       return true;

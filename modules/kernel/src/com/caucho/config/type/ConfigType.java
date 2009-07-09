@@ -36,6 +36,7 @@ import com.caucho.el.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
 
+import java.lang.reflect.Constructor;
 import javax.el.*;
 
 import org.w3c.dom.Node;
@@ -103,6 +104,15 @@ abstract public class ConfigType
   public Object replaceObject(Object bean)
   {
     return bean;
+  }
+
+  /**
+   * Returns the constructor with the given number of arguments
+   */
+  public Constructor getConstructor(int count)
+  {
+    throw new ConfigException(L.l("'{0}' does not support <new> constructors",
+				  this));
   }
   
   /**

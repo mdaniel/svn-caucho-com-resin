@@ -50,6 +50,8 @@ import org.w3c.dom.*;
 import javax.el.*;
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -544,6 +546,10 @@ public class ConfigContext implements CreationalContext {
 		    childNode);
       }
 
+      // ioc/23m2
+      if ("new".equals(localName))
+	return null;
+
       throw error(L.l("'{0}' is an unknown property of '{1}'.",
 		      qName.getName(), type.getTypeName()),
 		  childNode);
@@ -639,7 +645,15 @@ public class ConfigContext implements CreationalContext {
 
     // server/0219
     // Object childBean = attrStrategy.create(parent, qName, type);
-    Object childBean = type.create(parent, qName);
+
+    Element childNew = getChildNewElement(childNode);
+
+    Object childBean;
+
+    if (childNew != null)
+      childBean = createNew(type, parent, childNew);
+    else
+      childBean = type.create(parent, qName);
 
     if (childBean == null)
       return false;
@@ -653,6 +667,67 @@ public class ConfigContext implements CreationalContext {
     attrStrategy.setValue(parent, qName, childBean);
 
     return true;
+  }
+
+  private Object configureObjectBean(ConfigType type, Element node)
+  {
+    String text = getTextValue(node);
+
+    Object value = null;
+
+    if (text != null) {
+      boolean isTrim = isTrim(node);
+	  
+      if (isEL()
+	  && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+	if (isTrim)
+	  text = text.trim();
+	  
+	return eval(type, text);
+      }
+      else
+	return type.valueOf(text);
+    }
+    else if ((value = configureInlineObject(type, node)) != null)
+      return value;
+    else {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private Object configureInlineObject(ConfigType type, Element node)
+  {
+    QName qName = ((QNode) node).getQName();
+    
+    type = TypeFactory.getFactory().getEnvironmentType(qName);
+
+    if (type == null) {
+      // server/6500
+      return null;
+    }
+
+    // server/0219
+    // Object childBean = attrStrategy.create(parent, qName, type);
+
+    Element childNew = getChildNewElement(node);
+
+    Object childBean;
+
+    if (childNew != null)
+      childBean = createNew(type, null, childNew);
+    else
+      childBean = type.create(null, qName);
+
+    if (childBean == null)
+      return null;
+
+    // server/1af3
+    ConfigType childType = TypeFactory.getType(childBean);
+
+    childBean = configureChildBean(childBean, childType,
+				   node, null);
+
+    return childBean;
   }
   
   private void configureBeanProperties(Node childNode,
@@ -735,6 +810,77 @@ public class ConfigContext implements CreationalContext {
     }
 
     return child;
+  }
+
+  private Object createNew(ConfigType type,
+				Object parent,
+				Element newNode)
+  {
+    String text = getTextValue(newNode);
+    
+    if (text != null) {
+      text = text.trim();
+
+      return type.valueOf(text);
+    }
+
+    int count = countNewChildren(newNode);
+
+    Constructor ctor = type.getConstructor(count);
+
+    Class []paramTypes = ctor.getParameterTypes();
+
+    Object []args = new Object[paramTypes.length];
+    int i = 0;
+    for (Node child = newNode.getFirstChild();
+	 child != null;
+	 child = child.getNextSibling()) {
+      if (! (child instanceof Element))
+	continue;
+
+      ConfigType childType = TypeFactory.getType(paramTypes[i]);
+
+      args[i++] = configureObjectBean(childType, (Element) child);
+    }
+
+    try {
+      return ctor.newInstance(args);
+    } catch (InvocationTargetException e) {
+      throw ConfigException.create(ctor.getName(), e.getCause());
+    } catch (Exception e) {
+      throw ConfigException.create(ctor.getName(), e);
+    }
+  }
+
+  private int countNewChildren(Element newNode)
+  {
+    int count = 0;
+    
+    for (Node child = newNode.getFirstChild();
+	 child != null;
+	 child = child.getNextSibling()) {
+      if (child instanceof Element)
+	count++;
+    }
+
+    return count;
+  }
+
+  private Element getChildNewElement(Node node)
+  {
+    if (! (node instanceof Element))
+      return null;
+    
+    Element elt = (Element) node;
+
+    for (Node child = elt.getFirstChild();
+	 child != null;
+	 child = child.getNextSibling()) {
+      if ("new".equals(child.getLocalName()))
+	return (Element) child;
+    }
+
+    return null;
   }
 
   private boolean isEmptyText(Node node)

@@ -182,6 +182,21 @@ public class BeanType extends ConfigType
   }
 
   /**
+   * Returns a constructor with a given number of arguments
+   */
+  @Override
+  public Constructor getConstructor(int count)
+  {
+    for (Constructor ctor : _beanClass.getConstructors()) {
+      if (ctor.getParameterTypes().length == count)
+	return ctor;
+    }
+    
+    throw new ConfigException(L.l("{0} does not have any constructor with {1} arguments",
+				  this, count));
+  }
+
+  /**
    * Called before the children are configured.
    */
   @Override

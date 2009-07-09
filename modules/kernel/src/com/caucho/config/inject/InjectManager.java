@@ -1392,6 +1392,10 @@ public class InjectManager
       createContext = new ConfigContext(parent);
     }
 
+    // ioc/0b10
+    if (bean instanceof InjectBean)
+      bean = ((InjectBean) bean).getBean();
+
     return context.get(bean, createContext);
   }
 
@@ -3145,7 +3149,7 @@ public class InjectManager
   }
 
   static class InjectBean<X> extends BeanWrapper<X>
-    implements PassivationCapable
+    implements PassivationCapable, ScopeAdapterBean
   {
     private ClassLoader _loader;
 
@@ -3162,6 +3166,16 @@ public class InjectManager
       
       if (bean instanceof PassivationCapable)
 	return ((PassivationCapable) bean).getId();
+      else
+	return null;
+    }
+    
+    public Object getScopeAdapter(CreationalContext cxt)
+    {
+      Bean bean = getBean();
+      
+      if (bean instanceof ScopeAdapterBean)
+	return ((ScopeAdapterBean) bean).getScopeAdapter(cxt);
       else
 	return null;
     }

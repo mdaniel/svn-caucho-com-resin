@@ -120,8 +120,10 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
     List<AnnotatedParameter<X>> parameters = _method.getParameters();
 
     if (parameters.size() == 1) {
-      if (parameters.get(0).isAnnotationPresent(IfExists.class))
+      if (parameters.get(0).isAnnotationPresent(IfExists.class)) {
 	_isIfExists = true;
+      }
+      
       return;
     }
 
@@ -131,8 +133,9 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
       AnnotatedParameter<?> param = parameters.get(i);
 
       if (param.isAnnotationPresent(Observes.class)) {
-	if (param.isAnnotationPresent(IfExists.class))
+	if (param.isAnnotationPresent(IfExists.class)) {
 	  _isIfExists = true;
+	}
       }
       else {
 	_args[i] = new BeanArg(param.getBaseType(),
