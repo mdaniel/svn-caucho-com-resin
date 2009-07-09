@@ -74,15 +74,20 @@ public class ManagedSingletonBean extends AbstractSingletonBean
   }
 
   @Override
-  public Object create(CreationalContext env)
+  public Object create(CreationalContext cxt)
   {
     InjectionTarget target
       = ((ManagedBeanImpl) getBean()).getInjectionTarget();
 
+
+    ConfigContext env = (ConfigContext) cxt;
+
     Object value = target.produce(env);
 
-    target.inject(value, env);
+    env.push(value);
 
+    target.inject(value, env);
+    
     if (_init != null)
       _init.inject(value, (ConfigContext) env);
 
