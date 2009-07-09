@@ -200,8 +200,6 @@ public final class PacketQueue
 	      }
 	    }
 
-	    // head.clearNext();
-
 	    if (next != null) {
 	      Packet packet = next.getPacket();
 	      next.clearPacket();
