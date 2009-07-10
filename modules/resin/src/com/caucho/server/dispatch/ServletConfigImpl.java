@@ -654,7 +654,12 @@ public class ServletConfigImpl
 
   public MultipartConfig getMultipartConfig()
   {
-    return (MultipartConfig) getServletClass().getAnnotation(MultipartConfig.class);
+    Class servletClass = getServletClass();
+
+    if (servletClass != null)
+      return (MultipartConfig) servletClass.getAnnotation(MultipartConfig.class);
+    else
+      return null;
   }
 
   /**

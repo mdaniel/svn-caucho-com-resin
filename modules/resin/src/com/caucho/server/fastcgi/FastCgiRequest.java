@@ -189,15 +189,23 @@ public class FastCgiRequest extends AbstractHttpRequest
     _protocol = new CharBuffer();
 
     _rawWrite = conn.getWriteStream();
-    _writeStream = new WriteStream();
-    _writeStream.setReuseBuffer(true);
-    
+    getWriteStream();
   }
 
   @Override
   protected FastCgiResponse createResponse()
   {
-    return new FastCgiResponse(this, _writeStream);
+    return new FastCgiResponse(this, getWriteStream());
+  }
+
+  private WriteStream getWriteStream()
+  {
+    if (_writeStream == null) {
+      _writeStream = new WriteStream();
+      _writeStream.setReuseBuffer(true);
+    }
+
+    return _writeStream;
   }
 
   /**

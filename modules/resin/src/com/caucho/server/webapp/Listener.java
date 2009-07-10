@@ -38,6 +38,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.util.L10N;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import javax.servlet.ServletContextAttributeListener;
@@ -128,15 +129,18 @@ public class Listener extends DescriptionGroupConfig {
 
     InjectManager webBeans = InjectManager.create();
     _target = webBeans.createInjectionTarget(_listenerClass);
+
+    CreationalContext env = webBeans.createCreationalContext();
     
-    _object = _target.produce(null);
-    _target.inject(_object, null);
+    _object = _target.produce(env);
+    _target.inject(_object, env);
 
     if (_init != null) {
       // _init.configure(_object);
 
       _init.init(_object);
     }
+    _target.postConstruct(_object);
 
     return _object;
   }

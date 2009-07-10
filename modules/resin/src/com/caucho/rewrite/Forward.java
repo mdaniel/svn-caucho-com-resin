@@ -93,7 +93,7 @@ public class Forward extends AbstractDispatchRule
     if (_target != null)
       uri = matcher.replaceAll(_target);
 
-    return rewriteTarget(matcher, uri, queryString);
+    return super.rewriteTarget(matcher, uri, queryString);
   }
 
   //  @Override

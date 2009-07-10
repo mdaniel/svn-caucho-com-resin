@@ -177,11 +177,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       throw new NullPointerException();
     
     _rawWrite = rawWrite;
-    
-    _originalRequest = request;
-    _originalResponseStream = createResponseStream();
 
     _request = request;
+    _originalRequest = request;
+    
+    _originalResponseStream = createResponseStream();
   }
   
   protected AbstractResponseStream
@@ -2085,7 +2085,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       /* XXX: complications with filters */
       if (_cacheInvocation != null
-	  && _cacheInvocation.fillFromCache((CauchoRequest) _originalRequest,
+	  && _cacheInvocation.fillFromCache(_request,
 					    this, _matchCacheEntry, isTop)) {
         _matchCacheEntry.updateExpiresDate();
         _cacheInvocation = null;

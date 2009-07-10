@@ -52,10 +52,10 @@ public class RollbackExceptionWrapper extends RollbackException {
     _rootCause = e;
   }
 
-  public static RollbackExceptionWrapper create(Throwable e)
+  public static RollbackException create(Throwable e)
   {
-    if (e instanceof RollbackExceptionWrapper)
-      return (RollbackExceptionWrapper) e;
+    if (e instanceof RollbackException)
+      return (RollbackException) e;
     else
       return new RollbackExceptionWrapper(e);
   }

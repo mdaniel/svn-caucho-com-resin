@@ -43,7 +43,8 @@ import java.util.logging.Logger;
 public class TransactionManager
 {
   private static L10N L = new L10N(TransactionManager.class);
-  private static Logger log = Log.open(TransactionManager.class);
+  private static Logger log
+    = Logger.getLogger(TransactionManager.class.getName());
 
   private final Management _management;
   private final Resin _resin;

@@ -873,8 +873,10 @@ abstract public class AbstractServer implements EnvironmentBean {
     ConfigContext env = (ConfigContext) cxt;
     Bean comp = (Bean) target;
 
-    if (env != null && comp != null)
+    if (env != null && comp != null) {
       env.put((AbstractBean) comp, proxy);
+      env.push(proxy);
+    }
 
     if (target != null)
       target.inject(instance, env);
