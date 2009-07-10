@@ -88,8 +88,8 @@
     
     <!--
        - Amber
-      -->
     <item link="amber.xtp" title="Amber"/>
+      -->
 
     <!--
        - BAM
@@ -158,8 +158,8 @@
 
     <!--
        - JSF
-      -->
     <item link="jsf.xtp" title="JSF"/>
+      -->
     
     <!--
        - JSP
