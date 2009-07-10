@@ -1167,6 +1167,14 @@ public class InjectManager
     Set<TypedBean> localBeans = _selfBeanMap.get(baseType.getRawClass());
 
     if (localBeans != null) {
+      // ioc/0k00 - XXX: not exactly right.  want local beans to have
+      // priority if type and binding match
+      if (this == beanManager)
+	beanSet.clear();
+      else if (beanSet.size() > 0) {
+	return;
+      }
+      
       for (TypedBean bean : localBeans) {
 	if (getDeploymentPriority(bean.getBean()) < 0)
 	  continue;
@@ -3158,6 +3166,17 @@ public class InjectManager
       super(beanManager, bean);
 
       _loader = Thread.currentThread().getContextClassLoader();
+      
+      if (bean instanceof AbstractBean) {
+	AbstractBean absBean = (AbstractBean) bean;
+	Annotated annotated = absBean.getAnnotated();
+
+	if (annotated != null
+	    && annotated.isAnnotationPresent(ContextDependent.class)) {
+	  // ioc/0e17
+	  _loader = null;
+	}
+      }
     }
 
     public String getId()
@@ -3186,7 +3205,10 @@ public class InjectManager
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(_loader);
+	if (_loader != null) {
+	  // ioc/0e17
+	  thread.setContextClassLoader(_loader);
+	}
 
 	return getBean().create(env);
       } finally {
