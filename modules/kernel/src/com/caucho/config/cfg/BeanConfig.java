@@ -489,6 +489,11 @@ public class BeanConfig {
       comp.setMBeanName(getMBeanName());
     */
 
+    // server/21q1
+    factory.annotation(new Startup() {
+	public Class annotationType() { return Startup.class; }
+      });
+    
     for (Annotation binding : _bindingList) {
       factory.binding(binding);
     }

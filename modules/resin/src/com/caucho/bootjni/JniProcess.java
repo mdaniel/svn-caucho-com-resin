@@ -32,7 +32,7 @@ public class JniProcess extends Process
   private static final Logger log
     = Logger.getLogger(JniProcess.class.getName());
 
-  private static Throwable _jniLoadException;
+  private static RuntimeException _jniLoadException;
   
   private static boolean _hasJni;
 
@@ -134,6 +134,9 @@ public class JniProcess extends Process
 
   public void chown(String path, String user, String group)
   {
+    if (_jniLoadException != null)
+      throw _jniLoadException;
+    
     byte []name = path.getBytes();
     int len = name.length;
 
@@ -211,8 +214,11 @@ public class JniProcess extends Process
       System.loadLibrary("resin_os");
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
-      
-      _jniLoadException = e;
+
+      if (e instanceof RuntimeException)
+	_jniLoadException = (RuntimeException) e;
+      else
+	_jniLoadException = new RuntimeException(e);
     }
   }
 }

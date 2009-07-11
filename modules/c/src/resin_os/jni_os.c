@@ -409,7 +409,6 @@ Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
 					      jstring user,
 					      jstring group)
 {
-  return;
 }
 
 #else /* WIN32 */

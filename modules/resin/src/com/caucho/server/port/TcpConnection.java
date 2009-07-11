@@ -636,13 +636,14 @@ public class TcpConnection extends Connection
        result = RequestState.EXIT;
 
        _isWake = false;
-       
+
        if ((result = keepaliveRead()) != RequestState.REQUEST) {
 	 break;
        }
 
-       if (! getRequest().handleRequest())
+       if (! getRequest().handleRequest()) {
 	 _isKeepalive = false;
+       }
 
        // statistics
        if (_requestStartTime > 0) {
@@ -812,21 +813,30 @@ public class TcpConnection extends Connection
       timeout = port.getBlockingTimeoutForSelect();
     }
 
-    if (timeout > 0 && timeout < port.getSocketTimeout()) {
-      port.keepaliveThreadBegin();
+    if (port.getSocketTimeout() < timeout)
+      timeout = port.getSocketTimeout();
+    
+    if (timeout < 0)
+      timeout = 0;
 
-      try {
-	boolean result = is.fillWithTimeout(timeout);
+    // server/2l02
+    
+    port.keepaliveThreadBegin();
 
-	return result;
-      } finally {
-	port.keepaliveThreadEnd();
-      }
+    try {
+      boolean result = is.fillWithTimeout(timeout);
+
+      return result;
+    } finally {
+      port.keepaliveThreadEnd();
     }
-    else if (isSelectManager)
+
+    /*
+    if (isSelectManager)
       return false;
     else
       return true;
+    */
   }
 
   /**
