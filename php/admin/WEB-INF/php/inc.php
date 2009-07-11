@@ -708,7 +708,7 @@ function info($name,$wiki="")
     $wiki = $name;
 
   echo $name;
-  echo "<sup><small><a href='http://wiki.caucho.com/Admin:$wiki' class='info'>?</a></small></sup>";
+  echo "<sup><small><a href='http://wiki.caucho.com/Admin: $wiki' class='info'>?</a></small></sup>";
 }
 
 function sort_host($a, $b)

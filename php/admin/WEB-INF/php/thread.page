@@ -14,11 +14,12 @@ $server = $g_mbean_server->lookup("resin:type=Server");
 <?php
 
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
+$si = sprintf("%02d", $server->Index);
 
 if ($stat_service) {
   echo "<img src='graph.php?";
-  echo "g[0][0]=java.lang:type=Threading&g[0][1]=ThreadCount&g[0][2]=$g_server_id"
-  echo "&g[1][0]=resin:type=ThreadPool&g[1][1]=ThreadCount&g[0][2]=$g_server_id"
+  echo "g[0][0]=$si|Resin|Thread|Resin Active Thread Count"
+  echo "&g[1][0]=$si|Resin|Thread|Resin Thread Count"
   echo "&width=600&height=300' width='600' height='300'>\n"
 }
 
@@ -122,7 +123,7 @@ foreach ($groups as $name) {
   echo "</th></tr>\n";
 
   echo "<tr>";
-  echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
+//  echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
   echo "<th>id</th>";
   echo "<th>name</th>";
   echo "<th>method</th>";
@@ -137,7 +138,7 @@ foreach ($groups as $name) {
 
     $id = $info->threadId;
 
-    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
+//    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
     echo "<td>" . $id . "</td>";
     echo "<td>" . $info->threadName . "</td>";
 
@@ -163,24 +164,23 @@ foreach ($groups as $name) {
 
     echo "</tr>\n";
     
-    echo "<tr id='t_$id' style='display:none' class='stack_trace'>";
-    echo "<td style='border-width:0'></td>";
+      echo "<tr class='stack_trace'>";
+//    echo "<td style='border-width:0'>&nbsp;</td>";
     echo "<td colspan='5'>";
-    echo "<pre>\n";
+    echo "<pre id='t_$id' style='display:none' class='stack_trace'>";
     
     // echo $info;
 
     // XXX: need to look at the JDK 1.6 for locks
-    /*
-    var_dump($info->getLockedMonitors());
-    var_dump($info->getLockedSynchronizers());
-    */
-    
+    // var_dump($info->getLockedMonitors());
+    // var_dump($info->getLockedSynchronizers());
+
     foreach ($info->stackTrace as $elt) {
       echo " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
     }
 
     echo "</pre>\n";
+
     echo "</td>";
     echo "</tr>\n";
   }

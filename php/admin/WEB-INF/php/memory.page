@@ -7,13 +7,17 @@ require_once "WEB-INF/php/inc.php";
 
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
+$si = sprintf("%02d", $g_server->Index);
+
 if ($stat_service) {
+  echo "<h2>Graphs</h2>\n";
+  
   echo "<p>";
   echo "<img src='graph.php?";
-  echo "g[0][0]=resin:type=Server&g[0][1]=RuntimeMemory"
-  echo "&g[1][0]=resin:type=Server&g[1][1]=RuntimeMemoryFree"
-  echo "&g[2][0]=resin:type=Memory&g[2][1]=TenuredUsed"
-  echo "&g[3][0]=resin:type=Memory&g[3][1]=PermGenUsed"
+  echo "g[0][0]=$si|JVM|Memory|Heap Memory Used"
+  echo "&g[1][0]=$si|JVM|Memory|Heap Memory Free"
+  echo "&g[2][0]=$si|JVM|Memory|Tenured Memory Used"
+  echo "&g[3][0]=$si|JVM|Memory|PermGen Memory Used"
   echo "&width=600&height=300' width='600' height='300'>\n"
 }
 

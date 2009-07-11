@@ -204,7 +204,13 @@ public class RewriteDispatch
       chain = _matchRule.map(uri, queryString, chain);
     }
 
-    return mapChain(0, uri, queryString, chain);
+    chain = mapChain(0, uri, queryString, chain);
+
+    for (int i = _filterList.size() - 1; i >= 0; i--) {
+      chain = _filterList.get(i).map(uri, queryString, chain);
+    }
+
+    return chain;
   }
 
   private FilterChain mapChain(int index,

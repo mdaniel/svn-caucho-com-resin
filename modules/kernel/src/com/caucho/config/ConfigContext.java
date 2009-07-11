@@ -820,8 +820,8 @@ public class ConfigContext implements CreationalContext {
     
     if (text != null) {
       text = text.trim();
-
-      return type.valueOf(text);
+      
+      return type.valueOf(create(newNode, StringType.TYPE));
     }
 
     int count = countNewChildren(newNode);
@@ -840,7 +840,7 @@ public class ConfigContext implements CreationalContext {
 
       ConfigType childType = TypeFactory.getType(paramTypes[i]);
 
-      args[i++] = configureObjectBean(childType, (Element) child);
+      args[i++] = create(child, childType);
     }
 
     try {
@@ -1634,8 +1634,9 @@ public class ConfigContext implements CreationalContext {
 
   public void push(Object obj)
   {
-    if (_scope != null)
+    if (_scope != null) {
       _scope.put(_bean, obj);
+    }
   }
 
   public void release()

@@ -67,6 +67,11 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   private Set<AnnotatedMethod> _methodSet
     = new LinkedHashSet<AnnotatedMethod>();
   
+  public AnnotatedTypeImpl(Class javaClass)
+  {
+    this(javaClass, javaClass);
+  }
+  
   public AnnotatedTypeImpl(Type type, Class javaClass)
   {
     super(type, null, javaClass.getDeclaredAnnotations());

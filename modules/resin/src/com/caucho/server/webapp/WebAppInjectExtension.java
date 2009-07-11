@@ -30,8 +30,12 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Enhanced;
+import com.caucho.config.EnhancedLiteral;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ProcessBeanImpl;
+import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.remote.annotation.ServiceType;
 import com.caucho.remote.annotation.ProxyType;
 import com.caucho.remote.client.ProtocolProxyFactory;
@@ -44,6 +48,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.Method;
 
 import javax.servlet.annotation.WebServlet;
+import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
@@ -66,16 +71,19 @@ public class WebAppInjectExtension implements Extension
     _webApp = webApp;
   }
 
-  public void processAnnotatedType(@Observes ProcessAnnotatedType event)
+  public void processBean(@Observes ProcessBeanImpl event)
   {
     try {
-      AnnotatedType annotatedType = event.getAnnotatedType();
-      // Bean<?> bean = event.getBean();
+      Annotated annotated = event.getAnnotated();
+      Bean<?> bean = event.getBean();
 
-      if (annotatedType == null || annotatedType.getAnnotations() == null)
+      if (annotated == null
+	  || annotated.getAnnotations() == null
+	  || annotated.isAnnotationPresent(Enhanced.class)) {
 	return;
+      }
 
-      for (Annotation ann : annotatedType.getAnnotations()) {
+      for (Annotation ann : annotated.getAnnotations()) {
 	Class annType = ann.annotationType();
 	
 	if (annType.equals(WebServlet.class)) {
@@ -91,7 +99,7 @@ public class WebAppInjectExtension implements Extension
 	    mapping.addURLPattern(value);
 	  }
 	  
-	  mapping.setBean(_beanManager.createManagedBean(annotatedType));
+	  mapping.setBean(_beanManager.createManagedBean((AnnotatedType) annotated));
 	
 	  mapping.init();
 
@@ -108,7 +116,7 @@ public class WebAppInjectExtension implements Extension
 	    = (ProtocolServletFactory) factoryClass.newInstance();
 
 	  factory.setServiceType(ann);
-	  factory.setAnnotated(annotatedType);
+	  factory.setAnnotated(annotated);
 
 	  Method urlPatternMethod = annType.getMethod("urlPattern");
 
@@ -116,7 +124,7 @@ public class WebAppInjectExtension implements Extension
       
 	  ServletMapping mapping = new ServletMapping();
 	  mapping.addURLPattern(urlPattern);
-	  mapping.setBean(_beanManager.createManagedBean(annotatedType));
+	  mapping.setBean(_beanManager.createManagedBean((AnnotatedType) annotated));
 
 	  mapping.setProtocolFactory(factory);
 	
@@ -135,15 +143,14 @@ public class WebAppInjectExtension implements Extension
 	    = (ProtocolProxyFactory) factoryClass.newInstance();
 
 	  proxyFactory.setProxyType(ann);
-	  proxyFactory.setAnnotated(annotatedType);
+	  proxyFactory.setAnnotated(annotated);
 
-	  /*
-	  HessianProtocolProxyFactory proxyFactory
-	    = new HessianProtocolProxyFactory();
-	  proxyFactory.setURL(client.url());
-	  */
-	
-	  Object proxy = proxyFactory.createProxy((Class) annotatedType.getBaseType());
+	  Object proxy = proxyFactory.createProxy((Class) annotated.getBaseType());
+
+	  AnnotatedTypeImpl annotatedType
+	    = new AnnotatedTypeImpl((Class) annotated.getBaseType());
+
+	  annotatedType.addAnnotation(EnhancedLiteral.ANNOTATION);
 
 	  BeanFactory factory
 	    = _beanManager.createBeanFactory(annotatedType);
@@ -155,16 +162,17 @@ public class WebAppInjectExtension implements Extension
 	    factory.type(type);
 	  }
 
-	  for (Annotation binding : bean.getBindings()) {
-	    factory.binding(binding);
-	  }
-
-	  factory.deployment(bean.getDeploymentType());
 	  */
+	  for (Annotation binding : annotated.getAnnotations()) {
+	    Class bindingType = binding.annotationType();
+	    
+	    if (bindingType.isAnnotationPresent(BindingType.class))
+	      factory.binding(binding);
+	  }
 
 	  _beanManager.addBean(factory.singleton(proxy));
 
-	  //event.setBean(null);
+	  event.veto();
 	}
       }
     } catch (Exception e) {

@@ -874,8 +874,9 @@ abstract public class AbstractServer implements EnvironmentBean {
     Bean comp = (Bean) target;
 
     if (env != null && comp != null) {
+      // server/4762
       env.put((AbstractBean) comp, proxy);
-      env.push(proxy);
+      // env.push(proxy);
     }
 
     if (target != null)

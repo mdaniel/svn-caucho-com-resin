@@ -168,6 +168,7 @@ if ($mbean_server) {
 <?php
 /* graphs */
 
+$si = sprintf("%02d", $server->Index);
 $stat_service = $mbean_server->lookup("resin:type=StatService");
 
 if ($stat_service) {
@@ -175,19 +176,18 @@ if ($stat_service) {
   
   echo "<p>";
   echo "<img src='graph.php?";
-  echo "g[0][0]=resin:type=Server&g[0][1]=RuntimeMemory"
-  echo "&g[1][0]=resin:type=Server&g[1][1]=RuntimeMemoryFree"
-  echo "&g[2][0]=resin:type=Memory&g[2][1]=TenuredUsed"
-  echo "&g[3][0]=resin:type=Memory&g[3][1]=PermGenUsed"
+  echo "g[0][0]=$si|JVM|Memory|Heap Memory Used"
+  echo "&g[1][0]=$si|JVM|Memory|Heap Memory Free"
+  echo "&g[2][0]=$si|JVM|Memory|Tenured Memory Used"
+  echo "&g[3][0]=$si|JVM|Memory|PermGen Memory Used"
   echo "&width=300&height=240' width='300' height='240'>\n"
   
   echo "<img src='graph.php?";
-  echo "g[0][0]=resin:type=Server&g[0][1]=CpuLoadAvg"
+  echo "g[0][0]=$si|OS|System|CPU Load"
   echo "&width=300&height=240' width='300' height='240'>\n"
   
   echo "<img src='graph.php?";
-  echo "g[0][0]=java.lang:type=Threading&g[0][1]=ThreadCount"
-  echo "&g[1][0]=resin:type=ThreadPool&g[1][1]=ThreadCount"
+  echo "g[0][0]=$si|Resin|Thread|Resin Thread Count"
   echo "&width=300&height=240' width='300' height='240'>\n"
 }
 ?>
@@ -367,8 +367,13 @@ foreach ($connInfoList as $connInfo) {
     
     echo sprintf("%.3fs", $connInfo->requestTime * 0.001);
     // echo " thread=" . $threadId;
-    echo " conn-" . $connInfo->id;
-    echo " " . $connInfo->state;
+    echo " {conn-" . $connInfo->id . "} ";
+    
+    $conn = $server->findConnectionByThreadId($threadId);
+    if ($conn)
+      echo $conn->getUrl();
+    else
+      echo $connInfo->state;
     echo "\n";
     
     echo "<pre id='h1_$pname' style='display:none'>";
@@ -379,6 +384,7 @@ foreach ($connInfoList as $connInfo) {
       echo "     at " . $trace->className . "." . $trace->methodName . "\n";
     }
     */
+
     echo $thread;
 
     echo "</pre>";
@@ -466,8 +472,8 @@ if ($db_pools) {
 <table class="data">
   <tr>
     <th>&nbsp;</th>
-    <th colspan='5'>Connections</th>
-    <th colspan='2'>Config</th>
+    <th colspan='5'><?= info("Connections", "Database_Connections") ?></th>
+    <th colspan='2'><?= info("Config", "Database_Connections") ?></th>
   </tr>
   <tr>
     <th>Name</th>
@@ -494,7 +500,7 @@ if ($db_pools) {
     <td class='<?= format_ago_class($pool->LastFailTime) ?>'>
         <?= format_ago($pool->LastFailTime) ?></td>
     <td><?= $pool->MaxConnections ?></td>
-    <td><?= $pool->MaxIdleTime ?></td>
+    <td><?= sprintf("%.2fs", $pool->MaxIdleTime * 0.001) ?></td>
   </tr>
 <?php
   }

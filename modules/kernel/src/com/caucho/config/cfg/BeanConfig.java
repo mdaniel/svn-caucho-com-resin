@@ -448,7 +448,8 @@ public class BeanConfig {
   public void init()
   {
     if (_customBean != null) {
-      _customBean.initComponent();
+      // server/1a37
+      // _customBean.initComponent();
       
       return;
     }

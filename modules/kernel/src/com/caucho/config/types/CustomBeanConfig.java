@@ -557,7 +557,6 @@ public class CustomBeanConfig {
     }
   }
 
-
   protected Bean bindParameter(String loc,
 			       Type type,
 			       Set<Annotation> bindingSet)

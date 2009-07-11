@@ -93,6 +93,11 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
     _isVeto = true;
   }
 
+  public boolean isVeto()
+  {
+    return _isVeto;
+  }
+
   @Override
   public String toString()
   {

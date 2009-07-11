@@ -45,10 +45,13 @@ import java.io.IOException;
 public class SetRequestSecureFilterChain extends AbstractFilterChain
 {
   private final FilterChain _next;
+  private Boolean _isSecure;
 
-  public SetRequestSecureFilterChain(FilterChain next)
+  public SetRequestSecureFilterChain(FilterChain next,
+				     Boolean isSecure)
   {
     _next = next;
+    _isSecure = isSecure;
   }
 
   @Override
@@ -57,24 +60,29 @@ public class SetRequestSecureFilterChain extends AbstractFilterChain
   {
     HttpServletRequest req = (HttpServletRequest) request;
 
-    req = new SecureServletRequestWrapper(req);
+    req = new SecureServletRequestWrapper(req, _isSecure);
 
     _next.doFilter(req, response);
   }
 
   public static class SecureServletRequestWrapper extends RequestAdapter
   {
-    public SecureServletRequestWrapper(HttpServletRequest request)
+    private Boolean _isSecure;
+    
+    public SecureServletRequestWrapper(HttpServletRequest request,
+				       Boolean isSecure)
     {
       setRequest(request);
 
       if (request instanceof CauchoRequest)
 	setWebApp(((CauchoRequest) request).getWebApp());
+
+      _isSecure = isSecure;
     }
 
     public boolean isSecure()
     {
-      return true;
+      return _isSecure;
     }
 
     /**

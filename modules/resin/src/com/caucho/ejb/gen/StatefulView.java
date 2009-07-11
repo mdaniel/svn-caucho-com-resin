@@ -272,7 +272,11 @@ abstract public class StatefulView extends View {
     out.println("{");
     out.println("  " + getViewClassName() + " bean"
 		+ " = new " + getViewClassName() + "(_server);");
-    out.println("  _server.initInstance(bean, injectBean, bean, env);");
+
+    if (isProxy())
+      out.println("  _server.initInstance(bean._bean, injectBean, bean, env);");
+    else
+      out.println("  _server.initInstance(bean, injectBean, bean, env);");
     out.println("  return bean;");
     out.println("}");
   }

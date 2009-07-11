@@ -898,7 +898,10 @@ public class InjectManager
 
     fireEvent(processBean);
 
-    return processBean.getBean();
+    if (processBean.isVeto())
+      return null;
+    else
+      return processBean.getBean();
   }
 
   /**

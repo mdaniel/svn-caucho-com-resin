@@ -50,7 +50,7 @@ public class SetRequestSecure extends AbstractRewriteFilter
 					  String queryString,
 					  FilterChain next)
   {
-    return new SetRequestSecureFilterChain(next);
+    return new SetRequestSecureFilterChain(next, true);
   }
 }
 

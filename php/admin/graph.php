@@ -8,12 +8,13 @@ require_once "WEB-INF/php/inc.php";
 //echo "<pre>";
 $mbean_server = new MBeanServer();
 
+$server = $mbean_server->lookup("resin:type=Server");
 $stat_service = $mbean_server->lookup("resin:type=StatService");
 
 if (! $stat_service) {
   echo "stat service not available";
   return;
-}  
+}
 
 $now = time(0) * 1000;
 $hour = 3600 * 1000;
@@ -42,7 +43,7 @@ $g_server_unique = true;
 foreach ($items as $item) {
   $stat_data = new StatData();
   $stat_data->name = $item[0];
-  $stat_data->attr = $item[1];
+  // $stat_data->attr = $item[1];
 
   $server_id = $item[2];
   if (! $server_id)
@@ -58,6 +59,7 @@ foreach ($items as $item) {
   
   if (isset($test_server) && $test_server != $server_id)
     $g_server_unique = false;
+    
   $test_server = $server_id;
 
   $stat_service = $mbean_server->lookup("resin:type=StatService");
@@ -67,16 +69,16 @@ foreach ($items as $item) {
     
 //  resin_var_dump($stat_data);
 
-  $stat = find_stat($stat_service, $stat_data->name, $stat_data->attr);
+  $stat = find_stat($stat_service, $stat_data->name);
 
   if (! $stat) {
 //  resin_var_dump($stat_data);
-    echo "$item->name with attr=$item->attr is an unknown statistic\n";
+    echo "$stat_data->name is an unknown statistic\n";
     return;
   }
 
   $stat_data->desc = $stat->description;
-  $val = $stat_service->statisticsData($stat_data->name, $stat_data->attr,
+  $val = $stat_service->statisticsData($stat_data->name,
                                        $now - 24 * $hour, $now);
 
   $stat_data->val = $val;
@@ -191,11 +193,18 @@ foreach ($graph->stat_list as $data) {
 header("Content-Type: image/png");
 imagepng($im);
 
-function find_stat($stat_service, $name, $attr)
+function find_stat($stat_service, $name)
 {
-  foreach ($stat_service->getActiveAttributes() as $stat) {
-    if ($stat->name == $name && $stat->attribute == $attr) {
-      return $stat;
+  foreach ($stat_service->statisticsNames() as $stat) {
+    if ($stat == $name) {
+      $value = null;
+      $value->name = $name;
+      $values = preg_split("/[|]/", $name);
+      $index = array_shift($values);
+      array_shift($values);
+      array_shift($values);
+      $value->description = $index . ": " . join('|', $values);
+      return $value;
     }
   }
 

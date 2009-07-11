@@ -227,7 +227,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       }
       else
 	args = NULL_ARGS;
-      
+
       T value = (T) _beanMethod.getJavaMember().invoke(bean, args);
       
       return value;
