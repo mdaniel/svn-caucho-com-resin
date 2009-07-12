@@ -63,8 +63,8 @@ public class AnnotatedMethodImpl
   }
   
   public AnnotatedMethodImpl(AnnotatedType declaringType,
-			Annotated annotated,
-			Method method)
+			     Annotated annotated,
+			     Method method)
   {
     super(method.getGenericReturnType(), annotated, method.getAnnotations());
 

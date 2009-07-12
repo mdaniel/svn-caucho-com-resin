@@ -307,12 +307,10 @@ public class Quercus
 
   public ModuleContext getLocalContext(ClassLoader loader)
   {
-    if (_moduleContext == null) {
-      synchronized (this) {
-	if (_moduleContext == null) {
-	  _moduleContext = createModuleContext(null, loader);
-	  _moduleContext.init();
-	}
+    synchronized (this) {
+      if (_moduleContext == null) {
+	_moduleContext = createModuleContext(null, loader);
+	_moduleContext.init();
       }
     }
 

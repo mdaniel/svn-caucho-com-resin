@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -87,6 +88,7 @@ public class CauchoSystem {
   private static String _user;
   private static String _group;
   private static String _classPath;
+  private static ArrayList<String> _classPathList;
 
   static CpuUsage _cpuUsage;
   
@@ -501,6 +503,30 @@ public class CauchoSystem {
     _classPath = cb.toString();
 
     return _classPath;
+  }
+
+  /**
+   * Returns the system classpath, including the bootpath
+   */
+  public static ArrayList<String> getClassPathList()
+  {
+    if (_classPathList != null)
+      return _classPathList;
+
+    ArrayList<String> list = new ArrayList<String>();
+
+    String classPath = getClassPath();
+    String []classPathArray
+      = classPath.split("[" + getPathSeparatorChar() + "]");
+
+    for (int i = 0; i < classPathArray.length; i++) {
+      if (! list.contains(classPathArray[i]))
+	list.add(classPathArray[i]);
+    }
+
+    _classPathList = list;
+
+    return _classPathList;
   }
 
   public static double getLoadAvg()

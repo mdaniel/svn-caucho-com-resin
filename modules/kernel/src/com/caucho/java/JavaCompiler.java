@@ -290,6 +290,7 @@ public class JavaCompiler {
     
     char sep = CauchoSystem.getPathSeparatorChar();
 
+
     if (_extraClassPath != null)
       classPath = classPath + sep + _extraClassPath;
 

@@ -38,6 +38,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import com.caucho.config.inject.AnnotatedMethodImpl;
 import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.config.inject.AnnotatedElementImpl;
+import com.caucho.config.inject.ReflectionAnnotatedFactory;
 import com.caucho.util.*;
 
 /**
@@ -50,6 +51,8 @@ public class ApiClass {
 
   private Class _apiClass;
   private AnnotatedType<?> _annotatedType;
+
+  private boolean _isReadOnly;
   
   private HashMap<String,Type> _typeMap;
   private ArrayList<Type> _typeParam;
@@ -65,7 +68,17 @@ public class ApiClass {
    */
   public ApiClass(Class apiClass)
   {
-    this(apiClass, null, null);
+    this(apiClass, null, null, false);
+  }
+  
+  /**
+   * Creates a new api class
+   *
+   * @param topClass the api class
+   */
+  public ApiClass(Class apiClass, boolean isReadOnly)
+  {
+    this(apiClass, null, null, isReadOnly);
   }
   
   /**
@@ -75,7 +88,7 @@ public class ApiClass {
    */
   public ApiClass(Class apiClass, AnnotatedType annotatedType)
   {
-    this(apiClass, annotatedType, null);
+    this(apiClass, annotatedType, null, false);
   }
   
   /**
@@ -83,9 +96,9 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(AnnotatedType annotatedType)
+  public ApiClass(AnnotatedType annotatedType, boolean isReadOnly)
   {
-    this(annotatedType.getJavaClass(), annotatedType, null);
+    this(annotatedType.getJavaClass(), annotatedType, null, isReadOnly);
   }
   
   /**
@@ -95,16 +108,22 @@ public class ApiClass {
    */
   public ApiClass(Class apiClass,
 		  AnnotatedType annotatedType,
-		  HashMap<String,Type> parentTypeMap)
+		  HashMap<String,Type> parentTypeMap,
+		  boolean isReadOnly)
   {
     if (apiClass == null)
       throw new NullPointerException();
     
-    if (annotatedType == null)
-      annotatedType = new AnnotatedTypeImpl(apiClass, apiClass);
+    if (annotatedType == null) {
+      if (isReadOnly)
+	annotatedType = ReflectionAnnotatedFactory.introspectSimpleType(apiClass);
+      else
+	annotatedType = new AnnotatedTypeImpl(apiClass, apiClass);
+    }
 
     _apiClass = apiClass;
     _annotatedType = annotatedType;
+    _isReadOnly = isReadOnly;
 
     _typeMap = new HashMap<String,Type>();
 
@@ -123,9 +142,10 @@ public class ApiClass {
   public ApiClass(Class apiClass,
 		  AnnotatedType annotatedType,
 		  HashMap<String,Type> parentTypeMap,
-		  ArrayList<Type> param)
+		  ArrayList<Type> param,
+		  boolean isReadOnly)
   {
-    this(apiClass, annotatedType, parentTypeMap);
+    this(apiClass, annotatedType, parentTypeMap, isReadOnly);
 
     _typeParam = param;
   }
@@ -400,7 +420,10 @@ public class ApiClass {
     if (type instanceof Class) {
       introspectClass((Class) type, typeMap);
 
-      return new ApiClass((Class) type);
+      if (_isReadOnly)
+	return ApiClassFactory.introspect((Class) type);
+      else
+	return new ApiClass((Class) type);
     }
     else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
@@ -430,7 +453,7 @@ public class ApiClass {
 
       introspectClass(rawType, subMap);
 
-      return new ApiClass(rawType, null, subMap, paramList);
+      return new ApiClass(rawType, null, subMap, paramList, _isReadOnly);
     }
     else
       return null;

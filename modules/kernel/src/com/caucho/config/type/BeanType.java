@@ -72,8 +72,8 @@ public class BeanType extends ConfigType
 
   private final Class _beanClass;
   
-  private ConcurrentHashMap<QName,Attribute> _nsAttributeMap
-    = new ConcurrentHashMap<QName,Attribute>();
+  private HashMap<QName,Attribute> _nsAttributeMap
+    = new HashMap<QName,Attribute>();
   
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
@@ -241,16 +241,18 @@ public class BeanType extends ConfigType
   @Override
   public Attribute getAttribute(QName name)
   {
-    Attribute attr = _nsAttributeMap.get(name);
+    synchronized (_nsAttributeMap) {
+      Attribute attr = _nsAttributeMap.get(name);
 
-    if (attr == null) {
-      attr = getAttributeImpl(name);
+      if (attr == null) {
+	attr = getAttributeImpl(name);
 
-      if (attr != null)
-	_nsAttributeMap.put(name, attr);
+	if (attr != null)
+	  _nsAttributeMap.put(name, attr);
+      }
+
+      return attr;
     }
-
-    return attr;
   }
 
   protected Attribute getAttributeImpl(QName name)

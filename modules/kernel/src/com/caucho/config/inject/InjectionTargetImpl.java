@@ -424,7 +424,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       if (! _beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
 	  && ! _beanType.isAnnotationPresent(javax.decorator.Decorator.class)) {
-	PojoBean bean = new PojoBean(new ApiClass(_beanType));
+	ApiClass apiClass = new ApiClass(_beanType, true);
+	
+	PojoBean bean = new PojoBean(apiClass);
 	bean.introspect();
 
 	instanceClass = bean.generateClass();

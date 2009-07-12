@@ -635,7 +635,7 @@ public class ModuleContext
     synchronized (_moduleInfoMap) {
       if (_moduleInfoMap.get(cl.getName()) != null)
 	return;
-      
+
       log.finest("Quercus loading module " + cl.getName());
 
       QuercusModule module = (QuercusModule) cl.newInstance();

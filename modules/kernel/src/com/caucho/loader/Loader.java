@@ -187,33 +187,10 @@ abstract public class Loader {
   }
   
   /**
-   * Adds the classpath of this loader.
-   */
-  public final void buildClassPath(StringBuilder head)
-  {
-    ArrayList<String> pathList = new ArrayList<String>();
-    buildClassPath(pathList);
-    
-    for (int i = 0; i < pathList.size(); i++) {
-      if (head.length() > 0)
-	head.append(CauchoSystem.getPathSeparatorChar());
-      head.append(pathList.get(i));
-    }
-  }
-  
-  /**
    * Adds the sourcepath of this loader.
    */
   protected void buildClassPath(ArrayList<String> pathList)
   {
-  }
-  
-  /**
-   * Adds the sourcepath of this loader.
-   */
-  protected void buildSourcePath(StringBuilder head)
-  {
-    buildClassPath(head);
   }
   
   /**

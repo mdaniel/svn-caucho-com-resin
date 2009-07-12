@@ -165,6 +165,7 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Special quercus-only import statements.
    */
+  @Name("quercus_import")
   public static void quercus_import(Env env, String name)
   {
     if (name.endsWith("*"))

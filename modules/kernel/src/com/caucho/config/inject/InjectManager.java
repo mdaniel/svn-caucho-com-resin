@@ -793,7 +793,7 @@ public class InjectManager
    */
   public <T> AnnotatedType<T> createAnnotatedType(Class<T> cl)
   {
-    return new AnnotatedTypeImpl(cl, cl);
+    return ReflectionAnnotatedFactory.introspectType(cl);
   }
 
   /**
@@ -884,7 +884,7 @@ public class InjectManager
    */
   public ManagedBeanImpl createManagedBean(Class cl)
   {
-    AnnotatedType type = new AnnotatedTypeImpl(cl, cl);
+    AnnotatedType type = createAnnotatedType(cl);
     
     return createManagedBean(type);
   }
