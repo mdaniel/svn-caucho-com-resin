@@ -431,7 +431,7 @@ public class MnodeStore implements AlarmListener {
 	  = valueHash != null ? new HashKey(valueHash) : null;
 	
 	if (log.isLoggable(Level.FINER))
-	  log.finer(this + " load " + id + " value=" + valueHashKey + " cache=" + cacheHash);
+	  log.finer(this + " load " + id + " value=" + valueHashKey + " cache=" + cacheHashKey);
 
 	return new MnodeValue(valueHashKey, null, cacheHashKey,
 			      flags, itemVersion,
