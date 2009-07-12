@@ -34,6 +34,7 @@ import com.caucho.config.Names;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.XaAnnotation;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
@@ -50,6 +51,8 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.interceptor.AroundInvoke;
@@ -447,8 +450,6 @@ public class EjbMessageBean extends EjbBean {
 
   protected void introspect()
   {
-    _messageBean.setApi(new ApiClass(_messagingType));
-    
     super.introspect();
 
     MessageDriven messageDriven
@@ -480,17 +481,6 @@ public class EjbMessageBean extends EjbBean {
 				  String.valueOf(listener.consumerMax()));
     }
   }
-  
-  /**
-   * Creates the bean generator for the session bean.
-   */
-  @Override
-  protected BeanGenerator createBeanGenerator()
-  {
-    _messageBean = new MessageGenerator(getEJBName(), getEJBClassWrapper());
-    
-    return _messageBean;
-  }
 
   /**
    * Obtain and apply initialization from annotations.
@@ -511,6 +501,10 @@ public class EjbMessageBean extends EjbBean {
       return;
 
     // XXX: annotations in super classes?
+
+    if (! type.isAnnotationPresent(TransactionAttribute.class)) {
+      type.addAnnotation(XaAnnotation.create(TransactionAttributeType.REQUIRED));
+    }
 
     javax.ejb.MessageDriven messageDriven
       = type.getAnnotation(javax.ejb.MessageDriven.class);
@@ -541,6 +535,19 @@ public class EjbMessageBean extends EjbBean {
 
       configureMethods(type);
     }
+  }
+  
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  @Override
+  protected BeanGenerator createBeanGenerator()
+  {
+    _messageBean = new MessageGenerator(getEJBName(), getEJBClassWrapper());
+    
+    _messageBean.setApi(new ApiClass(_messagingType));
+    
+    return _messageBean;
   }
 
   private void configureMethods(ApiClass type)

@@ -56,7 +56,8 @@ public class XaCallChain extends AbstractCallChain {
   private boolean _isContainerManaged = true;
   private boolean _isSessionSynchronization;
 
-  public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next) {
+  public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
+  {
     super(next);
 
     _bizMethod = bizMethod;
@@ -275,5 +276,10 @@ public class XaCallChain extends AbstractCallChain {
     throws IOException
   {
     _next.generateCall(out);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bizMethod + "]";
   }
 }

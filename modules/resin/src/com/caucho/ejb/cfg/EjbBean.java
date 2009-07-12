@@ -1031,8 +1031,6 @@ public class EjbBean extends DescriptionGroupConfig
 	  }
 	}
       }
-      
-      _bean = createBeanGenerator();
 
       /*
       if (getLocalHome() != null)
@@ -1055,6 +1053,10 @@ public class EjbBean extends DescriptionGroupConfig
       introspect();
 
       initIntrospect();
+      
+      _bean = createBeanGenerator();
+
+      _bean.introspect();
 
       _bean.createViews();
 
@@ -1117,7 +1119,7 @@ public class EjbBean extends DescriptionGroupConfig
 
   protected void introspect()
   {
-    _bean.introspect();
+    // _bean.introspect();
   }
   
   /**
