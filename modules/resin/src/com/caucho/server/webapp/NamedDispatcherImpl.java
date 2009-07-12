@@ -30,6 +30,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.RequestAdapter;
 
 import javax.servlet.FilterChain;
@@ -110,10 +111,11 @@ class NamedDispatcherImpl implements RequestDispatcher {
 
     // this is not in a finally block so we can return a real error message
     // if it's not handled.
-    // server/1328
-    if (res instanceof AbstractHttpResponse) {
-      ((AbstractHttpResponse) res).finishInvocation();
-      ((AbstractHttpResponse) res).finishRequest();
+    // server/1328, server/125i
+    if (res instanceof CauchoResponse) {
+      CauchoResponse cRes = (CauchoResponse) res;
+      
+      cRes.close();
     }
     else {
         try {

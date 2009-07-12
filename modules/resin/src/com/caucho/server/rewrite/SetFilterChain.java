@@ -80,9 +80,9 @@ public class SetFilterChain
 	= new SetRequestSecureFilterChain.SecureServletRequestWrapper((HttpServletRequest) request,
 								      _isRequestSecure);
 
-      if (response instanceof AbstractHttpResponse
+      if (response instanceof CauchoResponse
 	  && cauchoRequest.getWebApp() != null) {
-	cauchoResponse = (AbstractHttpResponse) response;
+	cauchoResponse = ((CauchoResponse) response).getAbstractHttpResponse();
 
 	oldRequest = cauchoResponse.getRequest();
 	cauchoResponse.setRequest(cauchoRequest);

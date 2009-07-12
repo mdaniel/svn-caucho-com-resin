@@ -58,11 +58,34 @@ public class SetRequestSecureFilterChain extends AbstractFilterChain
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
+    doFilter(request, response, _next, _isSecure);
+  }
+
+  public static void doFilter(ServletRequest request,
+			      ServletResponse response,
+			      FilterChain next,
+			      boolean isSecure)
+    throws ServletException, IOException
+  {
     HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
 
-    req = new SecureServletRequestWrapper(req, _isSecure);
+    req = new SecureServletRequestWrapper(req, isSecure);
 
-    _next.doFilter(req, response);
+    if (res instanceof CauchoResponse) {
+      // server/125i - XXX: needs refactor
+      CauchoResponse cRes = (CauchoResponse) res;
+      CauchoRequest oldReq = cRes.getAbstractHttpResponse().getRequest();
+      
+      cRes.getAbstractHttpResponse().setRequest((CauchoRequest) req);
+      try {
+	next.doFilter(req, res);
+      } finally {
+	cRes.getAbstractHttpResponse().setRequest(oldReq);
+      }
+    }
+    else
+      next.doFilter(req, res);
   }
 
   public static class SecureServletRequestWrapper extends RequestAdapter

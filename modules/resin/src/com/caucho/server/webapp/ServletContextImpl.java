@@ -132,9 +132,12 @@ public class ServletContextImpl extends ServletContextCompat
     if (! isInit())
       throw new IllegalStateException();
     */
-    
+
+    // server/1h12
+    /*
     if (_initParams.containsKey(name))
       return false;
+    */
 
     _initParams.put(name, value);
 

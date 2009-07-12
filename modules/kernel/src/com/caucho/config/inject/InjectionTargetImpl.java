@@ -830,7 +830,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
 	_field.set(instance, value);
       } catch (Exception e) {
-	e.printStackTrace();
 	throw ConfigException.create(_field, e);
       }
     }

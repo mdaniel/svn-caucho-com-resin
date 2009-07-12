@@ -320,8 +320,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	// server/1732 wants this commented out
 	// jsp/15m9 (tck)
         ServletResponse closePtr = cauchoRes;
-        while (closePtr instanceof CauchoResponse &&
-               !(closePtr instanceof JspResponseWrapper)) {
+        while (closePtr instanceof CauchoResponse
+	       && ! (closePtr instanceof JspResponseWrapper)) {
           ((CauchoResponse) closePtr).close();
 
           closePtr = ((CauchoResponse) closePtr).getResponse();
