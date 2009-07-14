@@ -79,9 +79,12 @@ public class InjectionBean extends AbstractSingletonBean
   }
 
   @Override
-  public Object create(CreationalContext env)
+  public Object create(CreationalContext ctx)
   {
+    ConfigContext env = (ConfigContext) ctx;
+    
     Object value = _target.produce(env);
+    env.put(this, value);
     _target.inject(value, env);
     _target.postConstruct(value);
     

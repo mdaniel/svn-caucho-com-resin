@@ -82,7 +82,8 @@ import javax.interceptor.InterceptorBindingType;
 /**
  * Common bean introspection for Produces and ManagedBean.
  */
-abstract public class AbstractBean<T> implements Bean<T>, ObjectProxy
+abstract public class AbstractBean<T>
+  implements Bean<T>, ObjectProxy, AnnotatedBean
 {
   private static final L10N L = new L10N(AbstractBean.class);
   private static final Logger log
@@ -121,7 +122,12 @@ abstract public class AbstractBean<T> implements Bean<T>, ObjectProxy
 
   public AnnotatedType getAnnotatedType()
   {
-    return null;
+    Annotated annotated = getAnnotated();
+
+    if (annotated instanceof AnnotatedType)
+      return (AnnotatedType) annotated;
+    else
+      return null;
   }
 
   public InjectionTarget getInjectionTarget()

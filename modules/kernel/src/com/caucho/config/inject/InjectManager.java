@@ -109,6 +109,7 @@ import javax.naming.*;
 /**
  * The web beans container for a given environment.
  */
+@ModulePrivate
 public class InjectManager
   implements BeanManager, ScanListener, EnvironmentListener,
 	     java.io.Serializable, HandleAware
@@ -1173,13 +1174,15 @@ public class InjectManager
     Set<TypedBean> localBeans = _selfBeanMap.get(baseType.getRawClass());
 
     if (localBeans != null) {
-      // ioc/0k00 - XXX: not exactly right.  want local beans to have
+      // ioc/0k00, ioc/0400 - XXX: not exactly right.  want local beans to have
       // priority if type and binding match
+      /*
       if (this == beanManager)
 	beanSet.clear();
       else if (beanSet.size() > 0) {
 	return;
       }
+      */
       
       for (TypedBean bean : localBeans) {
 	if (getDeploymentPriority(bean.getBean()) < 0)

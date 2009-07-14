@@ -248,6 +248,9 @@ public class ConfigContext implements CreationalContext {
       _dependentScope = new DependentScope();
 
     _dependentScope.put(comp, obj);
+
+    if (_scope != null)
+      _scope.put(comp, obj);
   }
 
   public Object findByName(String name)

@@ -74,6 +74,16 @@ public class BeanWrapper<T> extends AbstractBean<T>
   // metadata for the bean
   //
 
+  public Annotated getAnnotated()
+  {
+    Bean bean = getBean();
+
+    if (bean instanceof AnnotatedBean)
+      return ((AnnotatedBean) bean).getAnnotated();
+    else
+      return null;
+  }
+
   public Set<Annotation> getBindings()
   {
     return getBean().getBindings();
