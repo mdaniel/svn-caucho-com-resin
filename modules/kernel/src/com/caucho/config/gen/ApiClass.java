@@ -120,6 +120,10 @@ public class ApiClass {
       else
 	annotatedType = new AnnotatedTypeImpl(apiClass, apiClass);
     }
+    else if (! isReadOnly && ! (annotatedType instanceof AnnotatedTypeImpl)) {
+      // XXX:
+      annotatedType = new AnnotatedTypeImpl(apiClass, apiClass);
+    }
 
     _apiClass = apiClass;
     _annotatedType = annotatedType;

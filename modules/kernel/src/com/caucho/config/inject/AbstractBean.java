@@ -75,6 +75,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.interceptor.InterceptorBindingType;
 
@@ -114,6 +115,16 @@ abstract public class AbstractBean<T> implements Bean<T>, ObjectProxy
   }
 
   public Annotated getAnnotated()
+  {
+    return null;
+  }
+
+  public AnnotatedType getAnnotatedType()
+  {
+    return null;
+  }
+
+  public InjectionTarget getInjectionTarget()
   {
     return null;
   }

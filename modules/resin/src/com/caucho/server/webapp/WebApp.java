@@ -1367,7 +1367,7 @@ public class WebApp extends ServletContextImpl
       String key = iter.next();
       String value = map.get(key);
 
-      setInitParameter(key, value);
+      setInitParam(key, value);
     }
   }
 

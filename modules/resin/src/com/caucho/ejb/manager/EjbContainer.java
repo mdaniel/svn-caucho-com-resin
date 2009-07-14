@@ -36,6 +36,7 @@ import javax.ejb.Stateful;
 import javax.jms.*;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
@@ -308,9 +309,10 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   // Bean configuration and management
   //
   
-  public void createBean(AnnotatedType type)
+  public void createBean(AnnotatedType type,
+			 InjectionTarget injectionTarget)
   {
-    _configManager.addAnnotatedType(type);
+    _configManager.addAnnotatedType(type, injectionTarget);
   }
 
   //

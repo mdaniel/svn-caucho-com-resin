@@ -78,9 +78,9 @@ public class Mojarra12InjectionProvider
     InjectionTarget target = getInjectionTarget(cl);
 
     if (log.isLoggable(Level.FINEST))
-       log.fine(L.l("Injecting bean '{0}'", o));
+      log.fine(L.l("{0} injecting bean '{1}'", this, o));
     
-    target.inject(o, null);
+    target.inject(o, _manager.createCreationalContext());
   }
 
   public void invokePreDestroy(Object o)
@@ -91,7 +91,7 @@ public class Mojarra12InjectionProvider
     InjectionTarget target = getInjectionTarget(cl);
 
     if (log.isLoggable(Level.FINEST))
-       log.fine(L.l("PreDestroy bean '{0}'", o));
+      log.fine(L.l("{0} PreDestroy bean '{1}'", this, o));
 
     target.preDestroy(o);
   }
@@ -104,7 +104,7 @@ public class Mojarra12InjectionProvider
     InjectionTarget target = getInjectionTarget(cl);
 
     if (log.isLoggable(Level.FINEST))
-       log.fine(L.l("PreDestroy bean '{0}'", o));
+      log.fine(L.l("{0} PreDestroy bean '{1}'", this, o));
 
     target.postConstruct(o);
   }
@@ -117,7 +117,6 @@ public class Mojarra12InjectionProvider
       type = _manager.createAnnotatedType(cl);
       _types.put(cl, type);
     }
-
 
     InjectionTarget target = _targets.get(type);
 

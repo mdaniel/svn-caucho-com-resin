@@ -99,6 +99,14 @@ abstract public class AbstractSingletonBean extends BeanWrapper
       return _managedBean.getAnnotated();
   }
 
+  public AnnotatedType getAnnotatedType()
+  {
+    if (_annotated instanceof AnnotatedType)
+      return (AnnotatedType) _annotated;
+    else
+      return _managedBean.getAnnotatedType();
+  }
+
   public Set<Annotation> getBindings()
   {
     if (_bindings != null)

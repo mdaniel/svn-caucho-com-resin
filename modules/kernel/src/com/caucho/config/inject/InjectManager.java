@@ -1136,6 +1136,9 @@ public class InjectManager
   private WebComponent getWebComponent(BaseType baseType)
   {
     Class rawClass = baseType.getRawClass();
+
+    if (_beanMap == null)
+      return null;
     
     WebComponent beanSet = _beanMap.get(baseType.getRawClass());
 
@@ -1368,7 +1371,15 @@ public class InjectManager
 
     if (Dependent.class.equals(scopeType)) {
       // server/4764
-      Object instance = bean.create(createContext);
+      ConfigContext env = (ConfigContext) createContext;
+
+      if (bean instanceof InjectBean)
+	bean = ((InjectBean) bean).getBean();
+
+      Object instance = env.get(bean);
+
+      if (instance == null)
+	instance = bean.create(env);
 
       return instance;
     }

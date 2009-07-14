@@ -68,8 +68,9 @@ public class ServletMapping extends ServletConfigImpl {
    */
   public void addURLPattern(String pattern)
   {
-    if (pattern.indexOf('\n') > -1)
-      throw new ConfigException(L.l("`{0}' cannot contain newline", "url-pattern"));
+    if (pattern.indexOf('\n') > -1) {
+      throw new ConfigException(L.l("'url-pattern' cannot contain newline"));
+    }
 
     _mappingList.add(new Mapping(pattern, null));
 
@@ -133,11 +134,10 @@ public class ServletMapping extends ServletConfigImpl {
 	  mapper.getServletManager().addServlet(this);
       }
 
-      if (urlPattern != null) {
+      if (urlPattern != null)
 	mapper.addUrlMapping(urlPattern, getServletName(), this);
-      }
       else
-	mapper.addUrlRegexp(urlRegexp, this);
+	mapper.addUrlRegexp(urlRegexp, getServletName(), this);
     }
 
     /*

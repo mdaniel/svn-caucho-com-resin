@@ -108,8 +108,6 @@ public class EjbMessageBean extends EjbBean {
 			MessageDriven messageDriven)
   {
     super(ejbConfig, annType, messageDriven.name());
-
-    System.out.println("NAME: " + this);
   }
 
   

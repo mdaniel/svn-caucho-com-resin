@@ -34,9 +34,11 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.annotation.ServiceBinding;
 import com.caucho.config.ServiceStartup;
 import com.caucho.config.cfg.BeansConfig;
+import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ProcessBeanImpl;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.inject.EjbGeneratedBean;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.vfs.Path;
 
@@ -83,9 +85,36 @@ public class ResinStandardPlugin implements Extension
 	|| annotatedType.isAnnotationPresent(MessageDriven.class)
 	|| annotatedType.isAnnotationPresent(JmsMessageListener.class)) {
       EjbContainer ejbContainer = EjbContainer.create();
-      
-      ejbContainer.createBean(annotatedType);
+      System.out.println("NULLSOZ:");
+      ejbContainer.createBean(annotatedType, null);
       event.veto();
+    }
+  }
+
+  public void processBean(@Observes ProcessBeanImpl event)
+  {
+    Annotated annotated = event.getAnnotated();
+    Bean bean = event.getBean();
+
+    if (annotated == null
+	|| bean instanceof EjbGeneratedBean
+	|| ! (bean instanceof AbstractBean)) {
+      return;
+    }
+    
+    AbstractBean absBean = (AbstractBean) bean;
+
+    if (annotated.isAnnotationPresent(Stateful.class)
+	|| annotated.isAnnotationPresent(Stateless.class)
+	|| annotated.isAnnotationPresent(MessageDriven.class)
+	|| annotated.isAnnotationPresent(JmsMessageListener.class)) {
+      EjbContainer ejbContainer = EjbContainer.create();
+      AnnotatedType annType = absBean.getAnnotatedType();
+      
+      if (annType != null) {
+	ejbContainer.createBean(annType, absBean.getInjectionTarget());
+	event.veto();
+      }
     }
   }
 

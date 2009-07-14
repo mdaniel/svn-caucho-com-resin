@@ -68,6 +68,7 @@ import java.lang.reflect.*;
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.interceptor.*;
 
 /**
@@ -106,6 +107,8 @@ public class EjbBean extends DescriptionGroupConfig
   // these classes are loaded with the parent (configuration) loader, not
   // the server loader
   private ApiClass _ejbClass;
+
+  private InjectionTarget _injectionTarget;
 
   protected ApiClass _remoteHome;
   
@@ -208,6 +211,16 @@ public class EjbBean extends DescriptionGroupConfig
 
     // ejb/0fbb
     _aroundInvokeMethodName = aroundInvoke.getMethodName();
+  }
+
+  public void setInjectionTarget(InjectionTarget injectTarget)
+  {
+    _injectionTarget = injectTarget;
+  }
+
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
   }
 
   /**

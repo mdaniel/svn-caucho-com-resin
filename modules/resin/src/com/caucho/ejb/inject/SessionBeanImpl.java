@@ -51,7 +51,7 @@ import javax.enterprise.context.spi.PassivationCapable;
  * Internal implementation for a Bean
  */
 public class SessionBeanImpl<X> extends BeanWrapper<X>
-  implements ScopeAdapterBean, PassivationCapable
+  implements ScopeAdapterBean, PassivationCapable, EjbGeneratedBean
 {
   private static final L10N L = new L10N(SessionBeanImpl.class);
   

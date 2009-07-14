@@ -79,7 +79,6 @@ public class ManagedSingletonBean extends AbstractSingletonBean
     InjectionTarget target
       = ((ManagedBeanImpl) getBean()).getInjectionTarget();
 
-
     ConfigContext env = (ConfigContext) cxt;
 
     Object value = target.produce(env);

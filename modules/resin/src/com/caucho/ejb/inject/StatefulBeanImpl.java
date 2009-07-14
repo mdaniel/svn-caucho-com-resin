@@ -78,6 +78,6 @@ public class StatefulBeanImpl<X> extends SessionBeanImpl<X>
   @Override
   public X create(CreationalContext context)
   {
-    return (X) _producer.__caucho_createNew(_target, context);
+    return (X) _producer.__caucho_createNew(getInjectionTarget(), context);
   }
 }

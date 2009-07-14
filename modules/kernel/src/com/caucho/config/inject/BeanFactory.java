@@ -62,11 +62,19 @@ public class BeanFactory<T>
   private Set<Annotation> _stereotypes;
   private String _name;
   private Class<? extends Annotation> _scopeType;
+
+  private InjectionTarget<T> _injectionTarget;
   private ContainerProgram _init;
 
-  public BeanFactory(ManagedBeanImpl managedBean)
+  public BeanFactory(ManagedBeanImpl<T> managedBean)
   {
     _managedBean = managedBean;
+    _injectionTarget = managedBean.getInjectionTarget();
+  }
+
+  public AnnotatedType getAnnotatedType()
+  {
+    return _managedBean.getAnnotatedType();
   }
 
   public BeanFactory name(String name)
@@ -162,8 +170,10 @@ public class BeanFactory<T>
   public BeanFactory init(ConfigProgram init)
   {
     if (init != null) {
-      if (_init == null)
+      if (_init == null) {
 	_init = new ContainerProgram();
+	_injectionTarget = new InjectionTargetFilter(_injectionTarget, _init);
+      }
 
       _init.addProgram(init);
     }
@@ -197,13 +207,13 @@ public class BeanFactory<T>
 
   public Bean bean()
   {
-    return new ManagedSingletonBean(_managedBean,
-				    _types,
-				    _annotated,
-				    _bindings,
-				    _stereotypes,
-				    _scopeType,
-				    _name,
-				    _init);
+    return new InjectionBean(_managedBean,
+			     _types,
+			     _annotated,
+			     _bindings,
+			     _stereotypes,
+			     _scopeType,
+			     _name,
+			     _injectionTarget);
   }
 }

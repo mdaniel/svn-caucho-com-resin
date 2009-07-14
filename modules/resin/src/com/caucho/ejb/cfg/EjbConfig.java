@@ -48,6 +48,7 @@ import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.ejb.MessageDriven;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 /**
  * Manages the EJB configuration files.
@@ -356,7 +357,8 @@ public class EjbConfig {
     }
   }
 
-  public void addAnnotatedType(AnnotatedType annType)
+  public void addAnnotatedType(AnnotatedType annType,
+			       InjectionTarget injectTarget)
   {
     try {
       ClassLoader loader = _ejbContainer.getIntrospectionClassLoader();
@@ -370,6 +372,7 @@ public class EjbConfig {
 	Stateless stateless = annType.getAnnotation(Stateless.class);
 	
 	EjbStatelessBean bean = new EjbStatelessBean(this, annType, stateless);
+	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
       }
@@ -377,12 +380,14 @@ public class EjbConfig {
 	Stateful stateful = annType.getAnnotation(Stateful.class);
 	
 	EjbStatefulBean bean = new EjbStatefulBean(this, annType, stateful);
+	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
       }
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
 	MessageDriven message = annType.getAnnotation(MessageDriven.class);
 	EjbMessageBean bean = new EjbMessageBean(this, annType, message);
+	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
       }
@@ -392,6 +397,7 @@ public class EjbConfig {
 	
 	EjbMessageBean bean = new EjbMessageBean(this, annType,
 						 listener.destination());
+	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
       }

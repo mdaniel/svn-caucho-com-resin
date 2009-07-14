@@ -73,6 +73,12 @@ public class InjectionBean extends AbstractSingletonBean
   }
 
   @Override
+  public InjectionTarget getInjectionTarget()
+  {
+    return _target;
+  }
+
+  @Override
   public Object create(CreationalContext env)
   {
     Object value = _target.produce(env);

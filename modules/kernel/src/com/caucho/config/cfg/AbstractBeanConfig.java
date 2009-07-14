@@ -232,29 +232,29 @@ abstract public class AbstractBeanConfig {
 
     AnnotatedTypeImpl beanType = new AnnotatedTypeImpl(_cl, _cl);
 
-    BeanFactory factory = beanManager.createBeanFactory(_cl);
-
     if (_name != null) {
       beanType.addAnnotation(Names.create(_name));
-      factory.name(_name);
     }
 
     for (Annotation binding : _bindings) {
       beanType.addAnnotation(binding);
-      factory.binding(binding);
     }
 
     for (Annotation stereotype : _stereotypes) {
       beanType.addAnnotation(stereotype);
-      factory.stereotype(stereotype);
     }
     
     for (Annotation ann : _annotations) {
       beanType.addAnnotation(ann);
     }
 
+    BeanFactory factory = beanManager.createBeanFactory(beanType);
+
     if (_scope != null)
       factory.scope(_scope);
+
+    if (_init != null)
+      factory.init(_init);
 
     Object value = replaceObject();
     Bean bean = null;
@@ -264,8 +264,8 @@ abstract public class AbstractBeanConfig {
       beanManager.addBean(bean);
     }
     else {
-      // bean = factory.bean();
-      beanManager.addAnnotatedType(beanType);
+      bean = factory.bean();
+      beanManager.addBean(bean);
     }
       
 

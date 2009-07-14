@@ -32,7 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.loader.EnvironmentLocal;
 
 import java.lang.ref.SoftReference;
-import java.util.HashMap;
+import java.util.WeakHashMap;
 
 /**
  * Factory for introspecting reflected types.
@@ -42,11 +42,11 @@ public class ReflectionAnnotatedFactory
   private static EnvironmentLocal<ReflectionAnnotatedFactory> _current
     = new EnvironmentLocal<ReflectionAnnotatedFactory>();
 
-  private HashMap<String,SoftReference<ReflectionSimpleAnnotatedType>> _simpleTypeMap
-    = new HashMap<String,SoftReference<ReflectionSimpleAnnotatedType>>();
+  private WeakHashMap<Class,SoftReference<ReflectionSimpleAnnotatedType>> _simpleTypeMap
+    = new WeakHashMap<Class,SoftReference<ReflectionSimpleAnnotatedType>>();
 
-  private HashMap<String,SoftReference<ReflectionAnnotatedType>> _typeMap
-    = new HashMap<String,SoftReference<ReflectionAnnotatedType>>();
+  private WeakHashMap<Class,SoftReference<ReflectionAnnotatedType>> _typeMap
+    = new WeakHashMap<Class,SoftReference<ReflectionAnnotatedType>>();
 
   /**
    * Returns the factory for the given loader.
@@ -81,7 +81,7 @@ public class ReflectionAnnotatedFactory
   private ReflectionSimpleAnnotatedType introspectSimpleTypeImpl(Class cl)
   {
     SoftReference<ReflectionSimpleAnnotatedType> typeRef
-      = _simpleTypeMap.get(cl.getName());
+      = _simpleTypeMap.get(cl);
 
     ReflectionSimpleAnnotatedType type = null;
 
@@ -93,7 +93,7 @@ public class ReflectionAnnotatedFactory
 
       typeRef = new SoftReference<ReflectionSimpleAnnotatedType>(type);
 
-      _simpleTypeMap.put(cl.getName(), typeRef);
+      _simpleTypeMap.put(cl, typeRef);
     }
 
     return type;
@@ -115,7 +115,7 @@ public class ReflectionAnnotatedFactory
   private ReflectionAnnotatedType introspectTypeImpl(Class cl)
   {
     SoftReference<ReflectionAnnotatedType> typeRef
-      = _typeMap.get(cl.getName());
+      = _typeMap.get(cl);
 
     ReflectionAnnotatedType type = null;
 
@@ -127,7 +127,7 @@ public class ReflectionAnnotatedFactory
 
       typeRef = new SoftReference<ReflectionAnnotatedType>(type);
 
-      _typeMap.put(cl.getName(), typeRef);
+      _typeMap.put(cl, typeRef);
     }
 
     return type;

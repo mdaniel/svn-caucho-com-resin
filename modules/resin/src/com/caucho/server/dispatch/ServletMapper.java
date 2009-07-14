@@ -110,11 +110,13 @@ public class ServletMapper {
   /**
    * Adds a servlet mapping
    */
-  public void addUrlRegexp(String regexp, ServletMapping mapping)
+  public void addUrlRegexp(String regexp,
+			   String servletName,
+			   ServletMapping mapping)
     throws ServletException
   {
     _servletMap.addRegexp(regexp, mapping);
-    _regexpMap.put(regexp, mapping);
+    _regexpMap.put(servletName, mapping);
   }
 
   /**
@@ -344,6 +346,12 @@ public class ServletMapper {
 
       if (regexp.isServletConfig())
 	config = regexp;
+
+      if (servletName == null) {
+	log.fine(L.l("'{0}' has no matching servlet", contextURI));
+      
+	return new ErrorFilterChain(404);
+      }
     }
 
     if (servletName.equals("invoker"))

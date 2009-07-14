@@ -86,6 +86,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _location;
 
   private AnnotatedType _annotatedType;
+  private Bean _bean;
   private InjectionTarget _injectionTarget;
   
   protected String _id;
@@ -171,6 +172,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     InjectManager beanManager = InjectManager.create();
     ManagedBeanImpl managedBean = beanManager.createManagedBean(annotatedType);
 
+    _bean = managedBean;
     _injectionTarget = managedBean.getInjectionTarget();
   }
 
@@ -210,6 +212,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String getType()
   {
     return "ejb:";
+  }
+
+  public Bean getDeployBean()
+  {
+    return _bean;
   }
 
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
@@ -307,11 +314,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   public AnnotatedType getAnnotatedType()
   {
     return _annotatedType;
-  }
-
-  public InjectionTarget getInjectionTarget()
-  {
-    return _injectionTarget;
   }
   
   /**
@@ -839,6 +841,22 @@ abstract public class AbstractServer implements EnvironmentBean {
     throws FinderException;
 
   /**
+   * Sets the injection target
+   */
+  public void setInjectionTarget(InjectionTarget injectionTarget)
+  {
+    _injectionTarget = injectionTarget;
+  }
+
+  /**
+   * Gets the injection target
+   */
+  public InjectionTarget getInjectionTarget()
+  {
+    return _injectionTarget;
+  }
+
+  /**
    * Sets the init program.
    */
   public void setInitProgram(ConfigProgram init)
@@ -859,7 +877,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void initInstance(Object instance)
   {
-    initInstance(instance, _injectionTarget, null, new ConfigContext());
+    initInstance(instance, null, null, new ConfigContext());
   }
 
   /**
@@ -871,16 +889,22 @@ abstract public class AbstractServer implements EnvironmentBean {
 			   CreationalContext cxt)
   {
     ConfigContext env = (ConfigContext) cxt;
-    Bean comp = (Bean) target;
+    
+    Bean bean = getDeployBean();
 
-    if (env != null && comp != null) {
+    if (env != null && bean != null) {
       // server/4762
-      env.put((AbstractBean) comp, proxy);
+      env.put((AbstractBean) bean, proxy);
       // env.push(proxy);
     }
 
-    if (target != null)
+    if (target != null) {
       target.inject(instance, env);
+    }
+    
+    if (getInjectionTarget() != null && target != getInjectionTarget()) {
+      getInjectionTarget().inject(instance, env);
+    }
 
     if (_initInject != null) {
       Thread thread = Thread.currentThread();
@@ -909,8 +933,8 @@ abstract public class AbstractServer implements EnvironmentBean {
               e);
     }
 
-    if (env != null && comp != null)
-      env.remove(comp);
+    if (env != null && bean != null)
+      env.remove(bean);
   }
 
   /**

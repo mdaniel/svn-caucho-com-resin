@@ -90,6 +90,7 @@ public class BeanConfig {
   private ArrayList<ConfigProgram> _newArgs;
   private ContainerProgram _init;
 
+  private AnnotatedType _annotatedType;
   protected Bean _bean;
 
   // XXX: temp for osgi
@@ -475,6 +476,8 @@ public class BeanConfig {
 
     InjectManager beanManager = InjectManager.create();
     BeanFactory factory =  beanManager.createBeanFactory(_cl);
+    
+    _annotatedType = factory.getAnnotatedType();
 
     if (_name != null) {
       factory.name(_name);
@@ -490,9 +493,13 @@ public class BeanConfig {
     */
 
     // server/21q1
-    factory.annotation(new Startup() {
-	public Class annotationType() { return Startup.class; }
-      });
+    if (! _annotatedType.isAnnotationPresent(Stateful.class)
+	&& ! _annotatedType.isAnnotationPresent(Stateless.class)
+	&& ! _annotatedType.isAnnotationPresent(MessageDriven.class)) {
+      factory.annotation(new Startup() {
+	  public Class annotationType() { return Startup.class; }
+	});
+    }
     
     for (Annotation binding : _bindingList) {
       factory.binding(binding);
@@ -550,8 +557,8 @@ public class BeanConfig {
 
   protected void deploy()
   {
-    // ejb/1030
     if (_bean != null) {
+      // ejb/1030
       getBeanManager().addBean(_bean);
     }
   }

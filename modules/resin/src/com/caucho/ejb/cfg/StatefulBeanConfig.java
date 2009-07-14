@@ -60,60 +60,6 @@ public class StatefulBeanConfig extends AbstractBeanConfig
   {
   }
 
-  /*
-  public StatefulBeanConfig(Bean beanConfig)
-  {
-    AbstractBean comp = (AbstractBean) beanConfig;
-    
-    setClass((Class) comp.getTargetType());
-
-    // XXX:
-    //if (beanConfig.getComponentType() != null)
-    //  setComponentType(beanConfig.getComponentType());
-    
-    if (comp.getName() != null)
-      setName(comp.getName());
-    
-    // XXX:
-    // setScope(beanConfig.getScope());
-
-    if (comp.getInit() != null)
-      setInit(comp.getInit());
-  }
-  */
-
-  /*
-  protected void initImpl()
-  {
-    if (getInstanceClass() == null)
-      throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
-    
-    EjbContainer ejbContainer = EjbContainer.create();
-    EjbConfigManager configManager = ejbContainer.getConfigManager();
-
-    EjbStatefulBean bean = new EjbStatefulBean(configManager, "config");
-    bean.setEJBClass(getInstanceClass());
-
-    String name = getName();
-    
-    if (name == null)
-      name = getJndiName();
-
-    if (name == null)
-      name = getInstanceClass().getSimpleName();
-
-    bean.setEJBName(name);
-
-    if (getInit() != null)
-      bean.setInit(getInit());
-
-    configManager.setBeanConfig(name, bean);
-
-    // XXX: timing?
-    configManager.start();
-  }
-  */
-
   protected void initImpl()
   {
     if (getInstanceClass() == null)

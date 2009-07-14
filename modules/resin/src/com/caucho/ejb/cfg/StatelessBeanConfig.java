@@ -56,34 +56,9 @@ public class StatelessBeanConfig extends AbstractBeanConfig
   private static final Logger log
     = Logger.getLogger(StatelessBeanConfig.class.getName());
 
-  // private CauchoBean _bean;
-  // private EjbStatelessBean _ejbBean;
-
   public StatelessBeanConfig()
   {
   }
-
-  /*
-  public StatelessBeanConfig(ManagedBean beanConfig)
-  {
-    _bean = beanConfig;
-    
-    setClass((Class) beanConfig.annotatedType().getType());
-
-    // XXX:
-    //if (beanConfig.getComponentType() != null)
-    //  setComponentType(beanConfig.getComponentType());
-    
-    if (beanConfig.getName() != null)
-      setName(beanConfig.getName());
-    
-    // XXX:
-    // setScope(beanConfig.getScope());
-
-    if (comp.getInit() != null)
-      setInit(comp.getInit());
-  }
-  */
 
   protected void initImpl()
   {
@@ -101,39 +76,5 @@ public class StatelessBeanConfig extends AbstractBeanConfig
 
     add(ann);
   }
-  
-  /*
-    EjbContainer ejbContainer = EjbContainer.create();
-    EjbConfigManager configManager = ejbContainer.getConfigManager();
-
-    EjbStatelessBean bean = new EjbStatelessBean(configManager, "config");
-    bean.setEJBClass(getInstanceClass());
-
-    if (name == null)
-      name = getJndiName();
-
-    if (name == null)
-      name = getInstanceClass().getSimpleName();
-
-    bean.setEJBName(name);
-
-    if (getInit() != null)
-      bean.setInit(getInit());
-
-    _ejbBean = bean;
-
-    configManager.setBeanConfig(name, bean);
-
-    // XXX: timing?
-    // configManager.start();
-  }
-  */
-
-  /*
-  public Bean getInjectBean()
-  {
-    return _bean;
-  }
-  */
 }
 

@@ -32,7 +32,7 @@ package com.caucho.config.gen;
 import com.caucho.loader.EnvironmentLocal;
 
 import java.lang.ref.SoftReference;
-import java.util.HashMap;
+import java.util.WeakHashMap;
 
 /**
  * Factory for introspecting reflected types.
@@ -42,8 +42,8 @@ public class ApiClassFactory
   private static EnvironmentLocal<ApiClassFactory> _current
     = new EnvironmentLocal<ApiClassFactory>();
 
-  private HashMap<String,SoftReference<ApiClass>> _apiClassMap
-    = new HashMap<String,SoftReference<ApiClass>>();
+  private WeakHashMap<Class,SoftReference<ApiClass>> _apiClassMap
+    = new WeakHashMap<Class,SoftReference<ApiClass>>();
 
   /**
    * Returns the factory for the given loader.
@@ -78,7 +78,7 @@ public class ApiClassFactory
   private ApiClass introspectImpl(Class cl)
   {
     SoftReference<ApiClass> apiClassRef
-      = _apiClassMap.get(cl.getName());
+      = _apiClassMap.get(cl);
 
     ApiClass apiClass = null;
 
@@ -90,7 +90,7 @@ public class ApiClassFactory
 
       apiClassRef = new SoftReference<ApiClass>(apiClass);
 
-      _apiClassMap.put(cl.getName(), apiClassRef);
+      _apiClassMap.put(cl, apiClassRef);
     }
 
     return apiClass;

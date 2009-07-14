@@ -128,20 +128,24 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public boolean setInitParameter(String name, String value)
   {
-    /* server/12bv
-    if (! isInit())
-      throw new IllegalStateException();
-    */
+    if (isActive())
+      throw new IllegalStateException(L.l("setInitParameter must be called before the web-app has been initialized, because it's required by the servlet spec."));
 
     // server/1h12
-    /*
     if (_initParams.containsKey(name))
       return false;
-    */
 
     _initParams.put(name, value);
 
     return true;
+  }
+
+  /**
+   * Sets an init param
+   */
+  protected void setInitParam(String name, String value)
+  {
+    _initParams.put(name, value);
   }
 
   /**
@@ -497,7 +501,7 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("unimplemented");
   }
   
-  public boolean isInit()
+  protected boolean isActive()
   {
     throw new UnsupportedOperationException("unimplemented");
   }

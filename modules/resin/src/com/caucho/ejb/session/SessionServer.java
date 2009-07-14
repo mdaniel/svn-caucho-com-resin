@@ -60,6 +60,8 @@ abstract public class SessionServer extends AbstractServer
   private HashMap<Class,InjectionTarget> _componentMap
     = new HashMap<Class,InjectionTarget>();
 
+  private Bean _bean;
+
   public SessionServer(EjbContainer manager,
 		       AnnotatedType annotatedType)
   {
@@ -70,6 +72,12 @@ abstract public class SessionServer extends AbstractServer
   protected String getType()
   {
     return "session:";
+  }
+
+  @Override
+  public Bean getDeployBean()
+  {
+    return _bean;
   }
 
   /**
@@ -141,9 +149,9 @@ abstract public class SessionServer extends AbstractServer
 	}
       }
 
-      Bean bean = createBean(mBean, baseApi);
+      _bean = createBean(mBean, baseApi);
 	  
-      beanManager.addBean(bean);
+      beanManager.addBean(_bean);
 
       /*
       if (remoteApiList != null) {

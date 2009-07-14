@@ -201,7 +201,7 @@ public class XmlStandardPlugin implements Extension
 
     for (Annotation ann : annotated.getAnnotations()) {
       Class annType = ann.annotationType();
-      
+
       if (annType.equals(Startup.class))
 	return true;
       
