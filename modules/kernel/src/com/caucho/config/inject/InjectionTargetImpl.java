@@ -828,7 +828,10 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     public void inject(Object instance, ConfigContext env)
     {
       try {
-	Object value = getBeanManager().getInjectableReference(_ij, env);
+	// server/30i1
+	InjectManager beanManager = InjectManager.getCurrent();
+	
+	Object value = beanManager.getInjectableReference(_ij, env);
 
 	_field.set(instance, value);
       } catch (Exception e) {

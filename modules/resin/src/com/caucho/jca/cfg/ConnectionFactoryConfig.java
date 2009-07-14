@@ -216,19 +216,18 @@ public class ConnectionFactoryConfig extends BeanConfig {
     }
       
     InjectManager webBeans = InjectManager.create();
+    String raName = ra.getResourceAdapterClass().getName();
 
     Instance<ResourceAdapterController> instance
-      = _raControllerInstance.select(Names.create(ra.getResourceAdapterClass().getName()));
+      = _raControllerInstance.select(Names.create(raName));
     
     ResourceAdapterController raController = instance.get();
 
-    /*
     if (raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
-				    ra.getResourceAdapterClass().getName(),
+				    raName,
 				    cl.getName()));
     }
-    */
 
     return raController.getResourceAdapter();
   }

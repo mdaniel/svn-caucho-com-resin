@@ -71,6 +71,9 @@ public class InstanceImpl<T> implements Instance<T>
     if (_bean == null) {
       _bean = _beanManager.getHighestPrecedenceBean(getBeanSet());
     }
+
+    if (_bean == null)
+      return null;
     
     CreationalContext<?> env = _beanManager.createCreationalContext();
     
@@ -82,7 +85,7 @@ public class InstanceImpl<T> implements Instance<T>
    */
   public Instance<T> select(Annotation ... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new InstanceImpl(_beanManager, _type, bindings);
   }
 
   /**

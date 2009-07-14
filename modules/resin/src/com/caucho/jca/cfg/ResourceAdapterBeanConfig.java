@@ -99,10 +99,8 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     BeanFactory factory = beanManager.createBeanFactory(controller.getClass());
 
     factory.name(type.getName());
-    if (type.getName() != null) {
-      factory.binding(Names.create(type.getName()));
-      factory.binding(CurrentLiteral.CURRENT);
-    }
+    factory.binding(Names.create(type.getName()));
+    factory.binding(CurrentLiteral.CURRENT);
 
     beanManager.addBean(factory.singleton(controller));
   }
