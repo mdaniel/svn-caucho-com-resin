@@ -30,6 +30,7 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
@@ -188,9 +189,14 @@ public class ConnectionFactoryConfig extends BeanConfig {
 	Jndi.bindDeepShort(getName(), connectionFactory);
 
 	factory.name(getName());
+	factory.binding(Names.create(getName()));
+	// server/30i0
+	factory.binding(CurrentLiteral.CURRENT);
       }
 
-      manager.addBean(factory.singleton(connectionFactory));
+      Bean bean = factory.singleton(connectionFactory);
+
+      manager.addBean(bean);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

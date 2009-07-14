@@ -30,8 +30,10 @@ package com.caucho.jca;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.jca.cfg.ObjectConfig;
@@ -699,6 +701,9 @@ public class ConnectorConfig implements EnvironmentListener {
 	Jndi.bindDeepShort(getName(), connectionFactory);
 
 	factory.name(getName());
+	// server/30b4
+	factory.binding(Names.create(getName()));
+	factory.binding(CurrentLiteral.CURRENT);
       }
       
       manager.addBean(factory.singleton(connectionFactory));

@@ -99,7 +99,7 @@ public class WebAppInjectExtension implements Extension
 	    mapping.addURLPattern(value);
 	  }
 	  
-	  mapping.setBean(_beanManager.createManagedBean((AnnotatedType) annotated));
+	  mapping.setBean(bean);
 	
 	  mapping.init();
 
@@ -124,7 +124,7 @@ public class WebAppInjectExtension implements Extension
       
 	  ServletMapping mapping = new ServletMapping();
 	  mapping.addURLPattern(urlPattern);
-	  mapping.setBean(_beanManager.createManagedBean((AnnotatedType) annotated));
+	  mapping.setBean(bean);
 
 	  mapping.setProtocolFactory(factory);
 	
