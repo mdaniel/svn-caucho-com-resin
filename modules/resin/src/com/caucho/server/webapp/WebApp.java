@@ -105,6 +105,7 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.*;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.context.spi.CreationalContext;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -921,17 +922,18 @@ public class WebApp extends ServletContextImpl
       config.setServletClass(servletClassName);
 
       if (servlet != null) {
-        ConfigContext env = ConfigContext.create();
+        CreationalContext context = _beanManager.createCreationalContext();
 
-        InjectionTarget target
+        InjectionTarget injectionTarget
           = _beanManager.createInjectionTarget(servlet.getClass());
 
-        target.inject(servlet,  env);
+        injectionTarget.inject(servlet, context);
 
         servlet.init(config);
 
         config.setServlet(servlet);
-      } else if(servletClass != null) {
+      }
+      else if (servletClass != null) {
         config.setServletClass(servletClass);
       }
 
