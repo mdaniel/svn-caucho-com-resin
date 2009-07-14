@@ -923,10 +923,10 @@ public class WebApp extends ServletContextImpl
       if (servlet != null) {
         ConfigContext env = ConfigContext.create();
 
-        InjectionTarget t
+        InjectionTarget target
           = _beanManager.createInjectionTarget(servlet.getClass());
 
-        t.inject(servlet,  env);
+        target.inject(servlet,  env);
 
         servlet.init(config);
 
