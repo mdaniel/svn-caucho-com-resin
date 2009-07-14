@@ -35,6 +35,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.inject.*;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.ConfigContext;
 import com.caucho.config.el.WebBeansELResolver;
 import com.caucho.config.types.*;
 import com.caucho.i18n.CharacterEncoding;
@@ -103,14 +104,9 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.*;
-import javax.enterprise.event.Observer;
-import javax.enterprise.inject.*;
-import javax.enterprise.inject.spi.Bean;
-//import javax.enterprise.inject.spi.Initialized;
-import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionTarget;
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -924,11 +920,20 @@ public class WebApp extends ServletContextImpl
       config.setServletName(servletName);
       config.setServletClass(servletClassName);
 
-      if (servletClass != null)
-        config.setServletClass(servletClass);
+      if (servlet != null) {
+        ConfigContext env = ConfigContext.create();
 
-      if (servlet != null)
+        InjectionTarget t
+          = _beanManager.createInjectionTarget(servlet.getClass());
+
+        t.inject(servlet,  env);
+
+        servlet.init(config);
+
         config.setServlet(servlet);
+      } else if(servletClass != null) {
+        config.setServletClass(servletClass);
+      }
 
       addServlet(config);
 
