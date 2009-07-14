@@ -426,8 +426,8 @@ public class HempMemoryQueue implements ActorStream, Runnable
     WaitQueue.Item item = _wait.create();
     
     try {
-      if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " spawn {threadCount:" + _threadCount.get()
+      if (log.isLoggable(Level.FINEST)) {
+	log.finest(this + " spawn {threadCount:" + _threadCount.get()
 		 + ", queueSize:" + _queue.getSize() + "}");
       }
 

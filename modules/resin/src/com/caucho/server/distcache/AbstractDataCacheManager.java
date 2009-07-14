@@ -522,10 +522,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
     MnodeValue oldEntryValue = entry.getMnodeValue();
 
-    if (oldEntryValue != null
-	&& mnodeValue.getVersion() <= oldEntryValue.getVersion()) {
-      // XXX: if version equals, is still possible for value to mismatch
-
+    if (oldEntryValue != null && mnodeValue.compareTo(oldEntryValue) <= 0) {
       return oldEntryValue;
     }
 
@@ -777,9 +774,11 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
     long oldVersion = oldEntryValue != null ? oldEntryValue.getVersion() : 0;
     long now = Alarm.getCurrentTime();
-    
-    if (valueHash != null && valueHash.equals(oldValueHash)
-	|| version <= oldVersion) {
+
+    if (version < oldVersion
+	|| (version == oldVersion
+	    && valueHash != null
+	    && valueHash.compareTo(oldValueHash) <= 0)) {
       // lease ownership updates even if value doesn't
       if (oldEntryValue != null) {
         oldEntryValue.setLeaseOwner(leaseOwner, now);
@@ -805,7 +804,6 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 					   updateTime,
 					   true,
 					   false);
-
     mnodeValue.setLeaseOwner(leaseOwner, now);
 
     // the failure cases are not errors because this put() could

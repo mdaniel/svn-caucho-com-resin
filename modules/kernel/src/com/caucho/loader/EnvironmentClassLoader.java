@@ -612,10 +612,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       return null;
   }
 
-  protected void buildImportClassPath(StringBuilder sb)
+  @Override
+  protected void buildImportClassPath(ArrayList<String> cp)
   {
     if (_artifactManager != null)
-      _artifactManager.buildImportClassPath(sb);
+      _artifactManager.buildImportClassPath(cp);
   }
 
   /**

@@ -44,13 +44,21 @@ public final class CacheData {
   private final int _flags;
   private final long _version;
   private final long _accessTime;
+  private final long _expireTimeout;
+  private final long _idleTimeout;
+  private final long _leaseTimeout;
+  private final long _localReadTimeout;
 
   public CacheData(HashKey key,
 		   HashKey value,
 		   HashKey cacheKey,
 		   int flags,
 		   long version,
-		   long accessTime)
+		   long accessTime,
+		   long expireTimeout,
+		   long idleTimeout,
+		   long leaseTimeout,
+		   long localReadTimeout)
   {
     _key = key;
     _value = value;
@@ -59,6 +67,11 @@ public final class CacheData {
     _version = version;
     
     _accessTime = accessTime;
+
+    _expireTimeout = expireTimeout;
+    _idleTimeout = idleTimeout;
+    _leaseTimeout = leaseTimeout;
+    _localReadTimeout = localReadTimeout;
   }
 
   public HashKey getKey()
@@ -89,6 +102,26 @@ public final class CacheData {
   public long getAccessTime()
   {
     return _accessTime;
+  }
+
+  public long getExpireTimeout()
+  {
+    return _expireTimeout;
+  }
+
+  public long getIdleTimeout()
+  {
+    return _idleTimeout;
+  }
+
+  public long getLeaseTimeout()
+  {
+    return _leaseTimeout;
+  }
+
+  public long getLocalReadTimeout()
+  {
+    return _localReadTimeout;
   }
 
   public String toString()

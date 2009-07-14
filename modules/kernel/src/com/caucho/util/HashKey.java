@@ -125,6 +125,26 @@ public class HashKey {
     return true;
   }
 
+  public int compareTo(HashKey key)
+  {
+    if (key == null)
+      return 1;
+
+    byte []hashA = _hash;
+    byte []hashB = key._hash;
+
+    int len = hashA.length;
+
+    for (int i = 0; i < len; i++) {
+      int delta = hashA[i] - hashB[i];
+
+      if (delta != 0)
+	return delta;
+    }
+
+    return 0;
+  }
+
   @Override
   public String toString()
   {

@@ -393,6 +393,21 @@ public final class MnodeValue implements ExtCacheEntry {
     return _isImplicitNull;
   }
 
+  /**
+   * Compares values
+   */
+  public int compareTo(MnodeValue mnode)
+  {
+    if (getVersion() < mnode.getVersion())
+      return -1;
+    else if (mnode.getVersion() < getVersion())
+      return 1;
+    else if (getValueHashKey() == null)
+      return -1;
+    else
+      return getValueHashKey().compareTo(mnode.getValueHashKey());
+  }
+
   //
   // jcache stubs
   //

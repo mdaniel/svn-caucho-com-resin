@@ -178,14 +178,15 @@ public class MnodeStore implements AlarmListener {
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
     
-    _updatesSinceQuery = ("SELECT id,value,cache_id,flags,item_version,update_time"
+    _updatesSinceQuery = ("SELECT id,value,cache_id,flags,item_version,update_time,expire_timeout,idle_timeout,lease_timeout,local_read_timeout"
 			  + " FROM " + _tableName
 			  + " WHERE ? <= update_time"
 			  + " LIMIT 1024");
 
     int global = CacheConfig.FLAG_GLOBAL;
     
-    _globalUpdatesSinceQuery = ("SELECT id,value,cache_id,flags,item_version,update_time"
+    _globalUpdatesSinceQuery = ("SELECT id,value,cache_id,flags,item_version,update_time,"
+				+ " expire_timeout,idle_timeout,lease_timeout,local_read_timeout"
 				+ " FROM " + _tableName
 				+ " WHERE ? <= update_time"
 				+ "   AND bitand(flags, " + global + ") <> 0"
@@ -370,7 +371,11 @@ public class MnodeStore implements AlarmListener {
 	int flags = rs.getInt(4);
 	long version = rs.getLong(5);
 	long itemUpdateTime = rs.getLong(6);
-
+	long expireTimeout = rs.getLong(7);
+	long idleTimeout = rs.getLong(8);
+	long leaseTimeout = rs.getLong(9);
+	long localReadTimeout = rs.getLong(10);
+	
 	HashKey value = valueHash != null ? new HashKey(valueHash) : null;
 
 	entryList.add(new CacheData(new HashKey(keyHash),
@@ -378,7 +383,11 @@ public class MnodeStore implements AlarmListener {
 				    new HashKey(cacheHash),
 				    flags,
 				    version,
-				    itemUpdateTime));
+				    itemUpdateTime,
+				    expireTimeout,
+				    idleTimeout,
+				    leaseTimeout,
+				    localReadTimeout));
       }
 
       if (entryList.size() > 0)
@@ -548,7 +557,7 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(7, itemVersion);
 
       int count = stmt.executeUpdate();
-        
+
       if (log.isLoggable(Level.FINER)) 
 	log.finer(this + " updateSave key=" + id + " value=" + value);
 	  

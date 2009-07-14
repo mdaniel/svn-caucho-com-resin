@@ -102,10 +102,12 @@ public class ArtifactClassLoader extends EnvironmentClassLoader
     return null;
   }
 
-  protected void buildClassPathImpl(StringBuilder sb)
+  protected void buildClassPathImpl(ArrayList<String> cp)
   {
-    sb.append(File.pathSeparatorChar);
-    sb.append(_artifact.getPath().getNativePath());
+    String path = _artifact.getPath().getNativePath();
+
+    if (! cp.contains(path))
+      cp.add(path);
   }
 }
 
