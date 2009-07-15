@@ -142,6 +142,8 @@ public class DBPool
   // serialization handle
   private Object _serializationHandle;
 
+  private QueryAdmin _queryAdmin = new QueryAdmin(this);
+
   /**
    * Null constructor for the Driver interface; called by the JNDI
    * configuration.  Applications should not call this directly.
@@ -753,6 +755,8 @@ public class DBPool
     // factory.stereotype(CauchoDeployment.class);
 
     manager.addBean(factory.singleton(this));
+
+    _queryAdmin.register();
  }
 
   /**
