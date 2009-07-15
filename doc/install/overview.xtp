@@ -185,16 +185,17 @@ injection to match the style of the application.</p>
 application components and beans can use EJB aspects such
 as @TransactionAttribute, @Stateless, @InterceptorClass, and @AroundInvoke.</p>
 
-<p>The WebBeans IoC capabilities provide finely-controlled interception
+<p>The Java Injection capabilities provide finely-controlled interception
 with @InterceptorType binding, and type-safe dependency-injection
 with @BindingType annotations.  Testing with mock components are automatically
 supported with custom @ComponentType annotations.</p>
 
-<p>Event handling is fully integrated with the WebBeans API using a flexible
+<p>Event handling is fully integrated with the CanDI API using a flexible
 @Observes parameter attribute, enabling any bean or component to listen to
-any matching typed event thrown through the WebBeans Container interface.</p>
+any matching typed event thrown through the Java Injection
+BeanManager interface.</p>
 
-<p>Resin-managed classes are automatically enlisted in the IoC engine.  So
+<p>Resin-managed classes are automatically enlisted in the CanDI engine.  So
 Servlets, Filters, application listener classes, remote objects, and
 EJBs can all use Resin-IoC capabilities without any
 additional configuration.</p>
@@ -259,7 +260,7 @@ and reliability.
 <li>See <a href="../doc/amber.xtp">Amber (JPA)</a> documentation</li>
 </ul>
 
-<p>Resin's EJB support is fully integrated with Resin-IoC and WebBeans.
+<p>Resin's EJB support is fully integrated with Java Injection.
 This integration means you can use only the EJB capabilities you need
 without the overhead of .ear packaging.  (Although, .ears are
 fully supported.)  A servlet, for example, can use EJB's
@@ -351,9 +352,10 @@ dispatching.</p>
 
 </s1>
 
-<s1 title="Maven Project Jar Repository">
+<s1 title="Pomegranate - Maven Jar Repository">
 
 <ul>
+<li>See <a href="http://caucho.com/projects/pomegranate">pomegranate project</a></li>
 <li>See <a href="../admin/project-jars.xtp">project jar repository</a> documentation</li>
 </ul>
 
