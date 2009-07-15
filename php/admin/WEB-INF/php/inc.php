@@ -197,6 +197,19 @@ function format_count($count)
     return sprintf("%.1fG", $count / (1000.0 * 1000.0 * 1000.0));
 }
 
+function indent($string, $count = 2)
+{
+  $lines = explode("\n", $string);
+  $output = "";
+  $indent = str_repeat(" ", $count);
+
+  foreach ($lines as $line) {
+    $output .= $indent . $line . "\n";
+  }
+
+  return $output;
+}
+
 function uri($path)
 {
   global $home_uri;
@@ -512,6 +525,22 @@ function display_header($script, $title, $server, $allow_remote = false)
     function show(id) { document.getElementById(id).style.display = 'block'; }
     function showInline(id) { document.getElementById(id).style.display = 'inline'; }
     function setValue(id, v) { document.getElementById(id).value = v; }
+    function selectChoice(root, name)
+    {
+      var textInput = document.getElementById(root + "_" + name + "_text");
+      var choice = document.getElementById(root + "_" + name + "_choice");
+      var infoId = root + "_" + name + "_" + textInput.value + "_info";
+      infoId = infoId.replace(/\./g, "_");
+
+      if (textInput.value != "")
+        hide(infoId);
+
+      textInput.value = choice.options[choice.selectedIndex].value;
+
+      infoId = root + "_" + name + "_" + textInput.value + "_info";
+      infoId = infoId.replace(/\./g, "_");
+      show(infoId);
+    }
   </script>
 </head>
 

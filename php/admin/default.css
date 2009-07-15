@@ -614,6 +614,10 @@ td.leftnav {
 
 /* Form styling */
 
+table.form {
+  width: 70%;
+}
+
 table.form td {
   text-align: left;
   vertical-align: top;
@@ -631,6 +635,10 @@ table.form th {
 
 .missing-value {
   color: red;
+}
+
+table.form td.invalid-input {
+  background: red;
 }
 
 div.subform {

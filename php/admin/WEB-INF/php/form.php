@@ -117,7 +117,6 @@ class FormSubmit implements FormItem {
   }
 }
 
-
 abstract class FormField implements FormItem {
   private $_name;
   private $_label;
@@ -209,7 +208,16 @@ abstract class FormField implements FormItem {
 
     echo "<tr>\n";
     echo "<th class='{$class}'>{$label}</th>\n";
-    echo "<td>" . $this->generate_input_tag() "</td>\n";
+
+    if ($this->get_root_form()->is_submitted() 
+        && $this->get_value() 
+        && ! $this->validate()) {
+      echo "<td class='invalid-input'>" . $this->generate_input_tag() "</td>\n";
+    }
+    else {
+      echo "<td>" . $this->generate_input_tag() "</td>\n";
+    }
+
     echo "<td>(default: " . $this->get_default() . ")</td>\n";
     echo "</tr>\n";
   }
@@ -264,12 +272,15 @@ class TextField extends FormField {
     if ($this->get_root_form()->is_submitted() && $this->get_value())
       $value = $this->get_value();
 
-    if ($value != NULL) {
-      echo "<input name='{$this->get_name()}' type='text' value='{$value}'/>";
-    }
-    else {
-      echo "<input name='{$this->get_name()}' type='text'/>";
-    }
+    $name = $this->get_name();
+    $root = $this->get_root_form()->get_name();
+
+    echo "<input name='{$name}' id='{$root}_{$name}_text' type='text'";
+
+    if ($value != NULL)
+      echo " value='{$value}'/>";
+    else
+      echo "/>";
   }
 }
 
@@ -365,6 +376,34 @@ class FileUploadField extends FormField {
   }
 }
 
+class Choice {
+  private $_name;
+  private $_info;
+  private $_doc_url;
+
+  public function __construct($value, $info, $doc_url) 
+  {
+    $this->_value = $value;
+    $this->_info = $info;
+    $this->_doc_url = $doc_url;
+  }
+
+  public function get_value()
+  {
+    return $this->_value;
+  }
+
+  public function get_info()
+  {
+    return $this->_info;
+  }
+
+  public function get_doc_url()
+  {
+    return $this->_doc_url;
+  }
+}
+
 class ChoiceField extends TextField {
   private $_title = NULL;
   private $_choices = array();
@@ -388,9 +427,8 @@ class ChoiceField extends TextField {
 
     echo "<br/>\n";
     echo "<select name='{$name}_choice' type='text'";
-    echo " onChange='document.{$root}.{$name}.value=";
-    echo            "document.{$root}.{$name}_choice.options";
-    echo              "[document.{$root}.{$name}_choice.selectedIndex].value;'>\n";
+    echo "  id='{$root}_{$name}_choice'";
+    echo "  onChange='selectChoice(\"{$root}\", \"{$name}\")'>\n";
 
     if ($this->_title != NULL) {
       if ($this->get_value() == NULL)
@@ -400,12 +438,28 @@ class ChoiceField extends TextField {
     }
 
     foreach ($this->_choices as $choice) {
-      if ($this->get_value() == $choice)
-        echo "  <option selected value='$choice'>$choice</option>\n";
+      $choice_value = $choice->get_value();
+      if ($this->get_value() == $choice_value)
+        echo "  <option selected value='$choice_value'>$choice_value</option>\n";
       else
-        echo "  <option value='$choice'>$choice</option>\n";
+        echo "  <option value='$choice_value'>$choice_value</option>\n";
     }
     echo "</select>\n";
+
+    foreach ($this->_choices as $choice) {
+      $id = $root . "_" . $name . "_" . $choice->get_value() . "_info";
+      $info = $choice->get_info();
+      $id = str_replace(".", "_", $id);
+
+      if ($this->get_value() == $choice->get_value())
+        echo "<div id='{$id}' style='display: block'>{$info} ";
+      else
+        echo "<div id='{$id}' style='display: none'>{$info} ";
+
+      echo "[<a target='_blank' href='";
+      echo $choice->get_doc_url();
+      echo "'>documentation</a>]</div>";
+    }
   }
 }
 
@@ -561,7 +615,7 @@ class RootForm extends SubForm {
   {
     $this->add_submit();
 
-    echo "<form name='{$this->_name}' method='POST'>";
+    echo "<form id='{$this->_name}' name='{$this->_name}' method='POST'>";
     echo "<input type='hidden' name='form-name' value='{$this->_name}'/>\n";
 
     echo "<table class='form'>\n";
