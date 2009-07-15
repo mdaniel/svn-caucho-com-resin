@@ -118,7 +118,7 @@ public class UTF8Reader extends EncodingReader {
       int ch = ((ch1 & 0x1f) << 12) + ((ch2 & 0x3f) << 6) + (ch3 & 0x3f);
 
       if (ch == 0xfeff) // handle some writers, e.g. microsoft
-        return is.read();
+        return read();
       else
         return ch;
     }

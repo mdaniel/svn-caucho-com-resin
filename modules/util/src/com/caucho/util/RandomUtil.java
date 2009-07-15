@@ -36,7 +36,6 @@ import java.util.Random;
  * System-wide random number generator.
  */
 public class RandomUtil {
-  private static long _seed = System.currentTimeMillis();
   private static SecureRandom _secureRandom;
   private static Random _random;
   private static boolean _isTest;
@@ -74,9 +73,11 @@ public class RandomUtil {
    */
   public static void addRandom(long seed)
   {
+    /*
     Random random = getRandom();
     if (random instanceof SecureRandom)
       ((SecureRandom) random).setSeed(seed);
+    */
   }
 
   /**
@@ -86,7 +87,6 @@ public class RandomUtil {
   {
     if (_random == null) {
       _random = new SecureRandom();
-      _random.setSeed(_seed);
     }
 
     return _random;
@@ -97,7 +97,6 @@ public class RandomUtil {
    */
   public static void setTestSeed(long seed)
   {
-    _seed = seed;
     _isTest = true;
     _random = new Random(seed);
   }

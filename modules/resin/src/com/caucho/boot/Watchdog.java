@@ -308,6 +308,7 @@ public class Watchdog
   public void stop()
   {
     WatchdogTask task = _task;
+    _task = null;
     
     if (task != null)
       task.stop();

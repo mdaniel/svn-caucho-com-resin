@@ -2584,13 +2584,14 @@ public abstract class AbstractHttpRequest
 	
 	_attributes.clear();
       }
+      
+      _cookiesIn = null;
+      _cookies.clear();
     }
 
     if (_form != null)
       _form.clear();
     _filledForm = null;
-    _cookiesIn = null;
-    _cookies.clear();
   }
 
   protected String dbgId()

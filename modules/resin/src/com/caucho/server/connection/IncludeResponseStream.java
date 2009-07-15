@@ -214,6 +214,14 @@ public class IncludeResponseStream extends ToByteResponseStream {
       if (_os == null)
 	_os = _next.getOutputStream();
 
+      if (_cacheStream != null)
+	_cacheStream.write(buf, offset, length);
+
+      if (_cacheWriter != null) {
+	// server/2h0m
+	_response.killCache();
+      }
+
       _os.write(buf, offset, length);
     }
   }
