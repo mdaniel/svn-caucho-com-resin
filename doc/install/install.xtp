@@ -128,8 +128,10 @@ Resin Configuration summary:
       OpenSSL libraries:  -lssl -lcrypto
 
   JAVA_HOME: /usr/lib/jvm/java-6-sun
-    + 32-bit JNI in -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux
-      JNI CFLAGS: -g -O2 -DPOLL -DEPOLL -D_POSIX_PTHREAD_SEMANTICS -DHAS_SOCK_TIMEOUT -DHAS_JVMTI
+    + 32-bit JNI in -I/usr/lib/jvm/java-6-sun/include \
+                    -I/usr/lib/jvm/java-6-sun/include/linux
+      JNI CFLAGS: -g -O2 -DPOLL -DEPOLL -D_POSIX_PTHREAD_SEMANTICS \
+                  -DHAS_SOCK_TIMEOUT -DHAS_JVMTI
 </example>
 </s3>
 
@@ -269,7 +271,7 @@ command line when starting the server.  For example:
 </p>
 
 <example>
-java -jar ${resin.home}/lib/resin.jar --root-directory /var/www
+java -jar ${resin.home}/lib/resin.jar --root-directory /var/www start
 </example>
 
 <p>

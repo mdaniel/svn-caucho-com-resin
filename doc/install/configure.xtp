@@ -1,7 +1,7 @@
 <document>
   <header>
     <product>resin</product>
-    <version>Resin 3.1</version>
+    <version>Resin 4.0</version>
     <title>Command-Line Configuration</title>
     <description>
       <p>While most configuration options have been made available in
@@ -52,7 +52,7 @@
     </s1>
     
     <s1 title="Startup Options">
-      <p>As of Resin 3.1, startup options should be declared in the
+      <p>As of Resin 4.0, startup options should be declared in the
         configuration file. However, some startup options are available
         via the command line.</p>
       <s2 name="command-line" title="Command-line arguments">
@@ -77,6 +77,11 @@
         <td>-verbose</td>
         <td>Show the Java environment before starting Resin.</td>
         <td>off</td>
+      </tr>
+      <tr>
+        <td>console</td>
+        <td>Starts Resin in console mode for development and debugging</td>
+        <td>n/a</td>
       </tr>
       <tr>
         <td>start</td>

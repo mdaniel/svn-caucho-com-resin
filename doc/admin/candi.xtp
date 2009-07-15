@@ -9,8 +9,8 @@ and resources including servlets, EJBs, messaging,
 remoting, and databases.  Applications can take advantage of Java
 Injection using standard annotations and interfaces.</p>
 
-<p>Because Resin-DI is used for servlets, CanDI and EJBs, any application
-bean can use EJB annotations like @TransactionAttribute or WebBeans
+<p>Because CanDI is used for servlets, managed beans and EJBs, any application
+bean can use EJB annotations like @TransactionAttribute or CanDI
 @InterceptionTypes or event @Observes capabilities, in addition to the
 dependency injection and IoC configuration.</p>
 
@@ -44,7 +44,7 @@ are available to any registered bean.  The basic capability types are:</p>
 <li><b>Lifecycle model:</b> Java, <code>@Stateless</code>, <code>@Stateful</code>,
 or <code>@MessageDriven</code>.
 Resin-managed objects like Servlets and Filters are Java model beans.</li>
-<li><b>Dependency injection:</b> injection annotations from <code>javax.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
+<li><b>Dependency injection:</b> injection annotations from <code>javax.enterprise.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
 available to all beans.</li>
 <li><b>Registration:</b> all beans are registered in a unified typed-namespace
 registry (i.e. the registration half of dependency injection.)</li>

@@ -2,7 +2,7 @@ package example;
 
 import java.util.ArrayList;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 public class MovieLister {
   @Current private MovieFinder _finder;

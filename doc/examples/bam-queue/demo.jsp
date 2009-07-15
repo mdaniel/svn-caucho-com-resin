@@ -3,7 +3,7 @@
 @com.caucho.config.Name("bam-java-queue")
 ExampleService _service;
 
-@javax.inject.Current
+@javax.enterprise.inject.Current
 ExampleMessages _messages;
 
 LocalActorClient _client = new LocalActorClient();

@@ -34,6 +34,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.security.AdminAuthenticator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -129,6 +130,19 @@ public class BootResinConfig implements EnvironmentBean
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+
+  public void add(AdminAuthenticator auth)
+  {
+    createManagement().setAdminAuthenticator(auth);
+  }
+
+  public BootManagementConfig createManagement()
+  {
+    if (_management == null)
+      _management = new BootManagementConfig();
+
+    return _management;
   }
 
   /**

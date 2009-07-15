@@ -1,92 +1,6 @@
 <navigation threaded="true">
   <item link="index.xtp" title="Resin 4.0">
     <!--
-       - Overview
-      -->    
-    <item link="overview.xtp" title="Overview"/>
-    
-    <!--
-       - Quick Start
-      -->    
-    <item link="starting.xtp" title="Quick Start"/>
-    
-    <!--
-       - Installation
-      -->    
-    <item link="install.xtp" title="Installation">
-      <item link="resin-web-server.xtp" title="Resin Web Server"/>
-      <item link="install-apache.xtp" title="Apache"/>
-      <item link="install-iis.xtp" title="IIS"/>
-      <item link="plugin-dispatch.xtp" title="Plugin Dispatch"/>
-      <item link="linux-boot.xtp" title="Linux Boot"/>
-      <!--
-      <item link="isp.xtp" title="ISP"/>
-      -->
-    </item>
-
-    <!--
-       - Command-line
-      -->
-    <item link="config-cmdline.xtp" title="Command-Line" />
-
-    <!--
-       - Configuration
-      -->    
-    <item link="config.xtp" title="Configuration">
-    <!--
-      <item link="config-overview.xtp" title="overview"/>
-      -->
-      <item link="cluster-tags.xtp" title="&lt;cluster>"
-            description="clustering, caching, load-balancing, and distributed sessions"/>
-      <item link="database-tags.xtp" title="&lt;database>"
-	    description="connection pool and database driver configuration"/>
-      <item link="host-tags.xtp" title="&lt;host>"
-	    description="virtual hosts" />
-      <item link="port-tags.xtp" title="Ports"
-             description="HTTP, SSL, addresses and ports"/>
-      <item link="resin-tags.xtp" title="&lt;resin>"
-            description="top-level configuration container"/>
-      <item link="env-tags.xtp" title="Resource tags"
-            description="database, classloader, jms, bean, and IoC"/>
-      <item link="rewrite-tags.xtp" title="Rewrite"
-	    description="URL rewriting, dispatching, and load-balancing"/>
-      <item link="server-tags.xtp" title="&lt;server>"
-            description="threading, keepalive, timeout, and jvm arguments"/>
-      <item link="session-tags.xtp" title="session"
-	    description="servlet sessions"/>
-      <item link="el-var.xtp" title="variables"
-	    description="configuration variables"/>
-      <item link="webapp-tags.xtp" title="&lt;web-app>"
-	    description="servlet and filter configuration"/>
-      <item link="index-tags.xtp" title="Index"
-	    description="alphabetical list of tags" />
-
-      <item title="Relax Schema" link="schema.xtp">
-        <item link="env-schema.xtp" title="Environment"/>
-        <item link="resin-j2ee-schema.xtp" title="Resin J2EE"/>
-        <item link="resin-web-xml-schema.xtp" title="Resin web.xml"/>
-        <item link="resin-schema.xtp" title="resin.conf"/>
-
-        <item link="j2ee-schema.xtp" title="J2EE Common"/>
-        <item link="j2ee-web-xml-schema.xtp" title="J2EE web.xml"/>
-      </item>
-    </item>
-
-    <!-- line/rule goes here? -->
-
-    <!--
-       - Guides
-      -->
-    <item link="guide-admin.xtp" title="Guide: Admin"/>
-    
-    <!-- line/rule goes here? -->
-    
-    <!--
-       - Admin/JMX
-      -->
-    <item link="resin-admin.xtp" title="Admin"/>
-    
-    <!--
        - Amber
     <item link="amber.xtp" title="Amber"/>
       -->
@@ -100,25 +14,7 @@
        - Caching
       -->
     <item link="proxy-cache.xtp" title="Caching"/>
-      
-    <item link="resin-clustering.xtp" title="Clustering"/>
-    <!--
-      <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
-      <item link="config-sessions.xtp" title="Sessions"/>
-      <item link="resin-load-balance.xtp" title="Load Balancing"/>
-    </item>
-    -->
-      
-    <!--
-       - Database
-      -->
-    <item link="config-database.xtp" title="Database"/>
-      
-    <!--
-       - Deployment
-      -->
-    <item link="webapp-deploy.xtp" title="Deployment"/>
-    
+
     <!--
        - EJB
       -->
@@ -153,8 +49,8 @@
        - IoC
       -->
 	  
-    <item link="resin-ioc.xtp" title="IoC"
-          description="Resin's IoC/Dependency Injection"/>
+    <item link="resin-ioc.xtp" title="CanDI"
+          description="Java Injection/CanDI (JSR-299)"/>
 
     <!--
        - JSF
@@ -192,7 +88,6 @@
     
     <!--
        - Performance
-      -->
     <item link="performance.xtp" title="Performance">
       <item link="performance-benchmarks.xtp" title="Benchmarks"/>
       <item link="jvm-tuning.xtp" title="JVM Tuning"/>
@@ -200,6 +95,7 @@
       <item link="performance-scrapbook.xtp" title="Performance Scrapbook"/>
       <item link="tuning.xtp" title="Tuning"/>
     </item>
+      -->
 
     <!--
        - Quercus
@@ -212,12 +108,6 @@
       
     <item link="resin-remoting.xtp" title="Remoting"
           description="exposing Java services as HTTP/Web protocols"/>
-
-    <!--
-       - resources
-      -->
-    <item link="resources.xtp" title="Scheduled Tasks"
-          description="executing tasks, methods and URLs based on cron triggers"/>
     
     <!--
        - Security
@@ -234,36 +124,5 @@
        - Servlet
       -->
     <item link="servlet.xtp" title="Servlets"/>
-
-    <!--
-       - Third party
-      -->      
-    <item link="thirdparty.xtp" title="Third-party"/>
-    
-    <item link="troubleshoot.xtp" title="Troubleshooting"/>
-      
-    <item link="virtual-host.xtp" title="Virtual Hosting"/>
-      
-    <item link="resin-watchdog.xtp" title="Watchdog"/>
-      
-    <item link="webapp-overview.xtp" title="WebApp"/>
-    
-    <!--
-       - XML
-      -->
-    <item link="xml.xtp" title="XML and XSLT">
-      <item link="xml-intro.xtp" title="Introduction"/>
-
-      <item link="jaxp.xtp" title="JAXP"/>
-
-      <item link="xpath.xtp" title="XML Path Language (XPath)"/>
-      <item link="xslt-filter.xtp" title="XSLT Filter"/>
-
-      <item link="xslt-fun.xtp" title="XSLT"/>
-      <item link="xpath-fun.xtp" title="XPath Functions"/>
-    </item>
-    <!--
-    <item link="" title="PDF Manuals" atoc-descend="true"/>
-    -->
   </item>
 </navigation>

@@ -603,7 +603,8 @@ public class InjectManager
     if (beanList == null) {
       beanList = new ArrayList<Bean<?>>();
 
-      _classLoader.applyVisibleModules(new FillByName(name, beanList));
+      if (_classLoader != null)
+	_classLoader.applyVisibleModules(new FillByName(name, beanList));
 
       for (int i = beanList.size() - 1; i >= 0; i--) {
 	if (getDeploymentPriority(beanList.get(i)) < 0) {

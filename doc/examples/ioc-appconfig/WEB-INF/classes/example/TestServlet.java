@@ -5,7 +5,7 @@ import javax.servlet.http.*;
 
 import java.io.*;
 import java.util.*;
-import javax.inject.*;
+import javax.enterprise.inject.*;
 
 public class TestServlet extends HttpServlet {
   @Current AppConfig _appConfig;

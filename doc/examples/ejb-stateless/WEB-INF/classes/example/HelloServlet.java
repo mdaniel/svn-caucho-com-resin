@@ -3,7 +3,7 @@ package example;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 import javax.servlet.ServletException;
 

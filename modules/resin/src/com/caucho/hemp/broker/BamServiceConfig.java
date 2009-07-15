@@ -89,7 +89,9 @@ public class BamServiceConfig extends AbstractBeanConfig
     
     final String name = getName();
 
-    add(new AnnotationLiteral<BamService>() {
+    add(new BamService() {
+	public Class annotationType() { return BamService.class; }
+	public int threadMax() { return 5; }
 	public String name() { return name; }
       });
   }

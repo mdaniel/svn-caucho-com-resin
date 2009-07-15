@@ -32,7 +32,9 @@ Before adding a dynamic server, you must:
 </p>
 <ul>
 <li>Set up and start a cluster with a triad, e.g.
-<example>
+<example title="Example: conf/resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
 &lt;cluster id="app-tier">
   ...
   &lt;server id="triad-a" address="234.56.78.90" port="6800"/>
@@ -44,6 +46,8 @@ Before adding a dynamic server, you must:
 <var>admin-users.xml</var></li>
 <li>Enable the RemoteAdminService for the cluster, e.g.
 <example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
 &lt;cluster id="app-tier">
   ...
   &lt;admin:RemoteAdminService xmlns:admin="urn:java:com.caucho.admin"/>
@@ -52,6 +56,8 @@ Before adding a dynamic server, you must:
 </li>
 <li>Enable the dynamic servers for the cluster, e.g.
 <example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
 &lt;cluster id="app-tier">
   ...
   &lt;dynamic-server-enable>true&lt;/dynamic-server-enable>
@@ -118,7 +124,7 @@ all be specified on the command line when starting the server:
 </p>
 <example>
 dynamic-server> java -jar $RESIN_HOME/lib/resin.jar -conf /etc/resin/resin.xml \
-                     -dynamic-server app-tier:123.45.67.89:6800
+                     -dynamic-server app-tier:123.45.67.89:6800 start
 </example>
 <p>
 Specifying the configuration file allows the new server to configure

@@ -95,11 +95,11 @@ agent, e.g. a user logged into messaging with a cellphone.</p>
 <p>Writing a BAM client involves the following steps:</p>
 
 <ol>
-<li>Create a <code>BamClient</code></li>
+<li>Create an <code>ActorClient</code></li>
 <li>Sending messages</li>
 </ol>
 
-<p>In the example, the servlet creates a <code>BamClient</code> 
+<p>In the example, the servlet creates a <code>ActorClient</code> 
 and sends the message.  The special jid syntax "service@" uses the
 local domain as a destination.</p>
 
@@ -107,11 +107,12 @@ local domain as a destination.</p>
 package example;
 
 import javax.servlet.*;
-import com.caucho.bam.BamClient;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.LocalActorClient;
 
 public class TestClient extends GenericServlet
 {
-  private BamClient _client = new BamClient();
+  private ActorClient _client = new LocalActorClient();
 
   public void service(ServletRequest req, ServletResponse response)
   {
@@ -123,13 +124,13 @@ public class TestClient extends GenericServlet
 <p>Writing a BAM message/queuing service involves the following steps:</p>
 
 <ol>
-<li>Implementing <code>BamService</code> (usually by extending <code>SimpleBamService</code>)</li>
-<li>Configuring the <code>BamService</code> using <code>&lt;bam-service></code>, which will automatically register the service with the
-<code>BamBroker</code>.</li>
-<li>Receiving messages by overriding <code>BamStream</code> methods in <code>SimpleBamService</code>.</li>
+<li>Implementing <code>Actor</code> (usually by extending <code>SimpleActor</code>)</li>
+<li>Configuring the <code>Actor</code> using <code>&lt;resin:BamService></code>, which will automatically register the service with the
+<code>Broker</code>.</li>
+<li>Receiving messages by creating message in <code>SimpleActor</code>.</li>
 </ol>
 
-<p>By configuring <code>&lt;bam-service></code>, the service automatically
+<p>By configuring <code>&lt;resin:BamService></code>, the service automatically
 gains a queuing ability.  The broker will queue the message and spawn a
 new thread before calling the service's <code>message</code>, in order
 to isolate the receiver from the sender.  Advanced applications can
@@ -138,17 +139,18 @@ disable the queue if appropriate.</p>
 <example title="Example: LogService.java">
 package example;
 
-import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.SimpleActor;
+import com.caucho.bam.Message;
 import java.io.Serializable;
 import java.util.logging.*;
 
-public class LogService extends SimpleBamService
+public class LogService extends SimpleActor
 {
   private static final Logger log
     = Logger.getLogger(LogService.class.getName());
 
-  @Override
-  public void message(String to, String from, Serializable value)
+  @Message 
+  public void doMessage(String to, String from, Serializable value)
   {
     log.info(this + " message from=" + from + " value=" + value);
   }
@@ -156,12 +158,16 @@ public class LogService extends SimpleBamService
 </example>
 
 <p>The BAM configuration the service
-configured with <a href="resin-ioc.xtp">Resin IoC</a>.</p>
+configured with <a href="resin-ioc.xtp">CanDI</a>.</p>
 
 <example title="Example: WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin"
+          xmlns:example="urn:java:example">
 
-    &lt;bam-service name="test" class="example.LogService"/>
+    &lt;example:LogService>
+      &lt;resin:BamService name="test"/>
+    &lt;/example:LogService>
 
 &lt;/web-app>
 </example>
@@ -197,6 +203,7 @@ The example sends a single <code>TestQuery</code> query to the
 <example title="Example: TestClient.java">
 package example;
 
+import com.caucho.bam.ActorClient;
 import com.caucho.hmtp.client.HmtpClient;
 
 public class TestClient
@@ -220,7 +227,7 @@ public class TestClient
 <p>To implement the server side of an RPC call, the service implements
 <code>queryGet</code> or <code>querySet</code> and examines the
 query to see if it understands the query class.  To simplify the
-query dispatching, <code>SimpleBamService</code> introspects the
+query dispatching, <code>SimpleActor</code> introspects the
 methods looking for <code>@QueryGet</code> annotations and creating a
 map of query types, in this case <code>TestQuery</code>.</p>
 
@@ -242,18 +249,16 @@ RPC-style calls.</p>
 <example title="Example: TestService.java">
 package example;
 
-import com.caucho.bam.SimpleBamService;
-import com.caucho.bam.annotation.QueryGet;
+import com.caucho.bam.SimpleActor;
+import com.caucho.bam.QueryGet;
 
-public class TestService extends SimpleBamService
+public class TestService extends SimpleActor
 {
   @QueryGet
-  public boolean testQueryGet(long id, String to, String from,
-                              TestQuery query)
+  public void testQueryGet(long id, String to, String from,
+                           TestQuery query)
   {
     getBrokerStream().sendQueryResult(id, to, from, "hello response");
-
-    return true;
   }
 }
 </example>
@@ -261,7 +266,7 @@ public class TestService extends SimpleBamService
 <p>The configuration for a service now has two components:</p>
 
 <ol>
-<li>Any registered <code>BamService</code>, e.g. the TestService</li>
+<li>Any registered <code>Actor</code>, e.g. the TestService</li>
 <li>The exposed HMTP service protocol, implemented
 with <code>HempServlet</code></li>
 </ol>
@@ -271,9 +276,13 @@ remotely.  The remote HMTP servlet exists only so the remote client
 can login to the local broker.</p>
 
 <example title="Example: WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:example="urn:java:example">
 
-    &lt;bam-service name="test" class="example.TestService"/>
+    &lt;example:TestService>
+      &lt;resin:BamService name="test"/>
+    &lt;/example:TestService>
 
     &lt;servlet-mapping url-pattern="/hmtp"
                      servlet-class="com.caucho.hemp.servlet.HempServlet"/>
@@ -427,8 +436,9 @@ with a single thread.  Unlike EJB message driven beans, &lt;bam-service>
 uses a single instance like a servlet, not a pool of instances.
 </p>
 
-<p>The bean has full access to Resin-IoC capabilities, including
-dependency injection, transaction attributes, and aspect interception.
+<p>The bean has full access to <a href="resin-ioc.xtp">CanDI</a>
+capabilities, including dependency injection, transaction attributes,
+and aspect interception.
 </p>
 
 <deftable title="&lt;bam-service> attributes">
@@ -1228,7 +1238,7 @@ abstract public class SimpleBamService implements BamService, BamStream
 <s3 title="annotations">
 
 <def title="annotations">
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 public @interface Message {}
 public @interface MessageError {}

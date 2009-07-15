@@ -13,7 +13,7 @@ application.</p>
 
 <p>This implementation of the concept allows you to configure a base
 directory for configuration files.  An object of type
-<code>AppConfig</code> is obtained with a <code>javax.webbeans.In</code>
+<code>AppConfig</code> is obtained with a <code>javax.enterprise.inject.Current</code>
 injection. It is used to open
 files relative to the base directory.</p>
 </description>
@@ -121,7 +121,7 @@ will not be able to read the files, just the application.</p>
 
 <p>An instance of the object is retrieved in the application using
 dependency injection. In this example servlet, we'll use field-based
-injection, marked by the <code>@javax.inject.Current</code> annotation.
+injection, marked by the <code>@javax.enterprise.inject.Current</code> annotation.
 We could also use method injection.</p>
 
 <p>Resin will look in the WebBeans registry for the <code>AppConfig</code>
@@ -132,7 +132,7 @@ resin.conf or if you've configured multiple <code>AppConfig</code>
 instances.</p>
 
 <example title="Obtaining the AppConfig object">
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 public class TestServlet extends GenericServlet {
   @Current AppConfig _appConfig;
@@ -262,7 +262,7 @@ package example;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.Current;
+import javax.enterprise.inject.Current;
 
 import java.io.*;
 import java.util.*;

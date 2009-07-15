@@ -1,4 +1,4 @@
-<%@ page import='javax.inject.Current, javax.management.*, example.TestAdmin' %>
+<%@ page import='javax.enterprise.inject.Current, javax.management.*, example.TestAdmin' %>
 <%!
 @Current MBeanServer _server;
 %><%

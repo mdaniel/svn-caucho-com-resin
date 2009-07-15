@@ -1,6 +1,6 @@
 <document>
 <header>
-<title>Resin IoC</title>
+<title>Java Injection (JSR-299)</title>
 <description>
 
 <p>Resin is designed around the Java Dependency Injection specification
@@ -9,8 +9,8 @@ and resources including servlets, EJBs, messaging,
 remoting, and databases.  Applications can take advantage of Java
 Injection using standard annotations and interfaces.</p>
 
-<p>Since Resin-IoC is used for servlets, WebBeans and EJBs, any application
-bean can use EJB annotations like @TransactionAttribute or WebBeans
+<p>Since CanDI is used for servlets, managed beans and EJBs, any application
+bean can use EJB annotations like @TransactionAttribute or CanDI
 @InterceptionTypes or event @Observes capabilities, in addition to the
 dependency injection and IoC configuration.</p>
 
@@ -65,7 +65,7 @@ are available to any registered bean.  The basic capability types are:</p>
 <li><b>Lifecycle model:</b> Java, <code>@Stateless</code>, <code>@Stateful</code>,
 or <code>@MessageDriven</code>.
 Resin-managed objects like Servlets and Filters are Java model beans.</li>
-<li><b>Dependency injection:</b> injection annotations from <code>javax.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
+<li><b>Dependency injection:</b> injection annotations from <code>javax.enterprise.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
 available to all beans.</li>
 <li><b>Registration:</b> all beans are registered in a unified typed-namespace
 registry (i.e. the registration half of dependency injection.)</li>
@@ -100,7 +100,7 @@ before calling the servlet's <code>init()</code> method.</p>
 <example title="Example: DataSource and UserTransaction">
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 public class MyServlet extends GenericServlet {
   @Current private DataSource _ds;
@@ -191,7 +191,7 @@ will schedule that method to be injected.  Method parameters can
 also use <code>@New</code>.  The method does not need to follow bean-style
 setting conventions; any method will work.</p>
 
-<example title="Example: method injection with @Named">
+<example title="Example: method injection with @Name">
 import com.caucho.config.Name;
 
 public class MyBean {
@@ -209,7 +209,7 @@ values to be injected.</p>
 <code>@Current</code> or have a <code>@BindingType</code> value.</p>
 
 <example title="Example: constructor injection">
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 public class MyBean {
   @Current
@@ -252,12 +252,12 @@ The starting set of managed objects is pretty broad and includes:</p>
 injectable code. Since these resources are unique, your application
 will use <code>@Current</code> as the annotation.</p>
 
-<p><b><code>javax.inject.manager.Manager</code></b> provides a reference to
+<p><b><code>javax.enterprise.inject.spi.BeanManager</code></b> provides a reference to
 the Java Injection manager itself.  Applications can use the
-<code>Manager</code> to raise <code>javax.event</code> events, and
+<code>Manager</code> to raise <code>javax.enterprise.event</code> events, and
 lookup components programmatically.</p>
 
-<p><b><code>javax.context.Conversation</code></b> injects the Java
+<p><b><code>javax.enterprise.context.Conversation</code></b> injects the Java
 Injection conversation scope for a JSF application.  The conversatio scope lets
 JSF views store data local to the page itself, separate from the
 HTTP session scope.</p>
@@ -289,8 +289,8 @@ tasks when restarting a web-app.</p>
 
 <s2 title="Resin configured resources">
 
-<p>All Resin configured resources are available through WebBeans, since
-Resin uses WebBeans as its internal registry.</p>
+<p>All Resin configured resources are available through CanDI, since
+Resin uses CanDI as its internal registry.</p>
 
 <p><b><code>&lt;my:MyBean></code></b> is an application-specific
 custom bean.  They can
@@ -319,10 +319,10 @@ configuration, or rely on the standard EJB discovery mechanism.
 Each injection or bean lookup will return a new stateful bean
 reference, modified by the bean's scope (see below.)
 Each EJB 3.0 <code>@Local</code> interface is registered separately
-in the WebBeans registry.</p>
+in the CanDI registry.</p>
 
 <p><b>EntityManager</b> and <b>EntityManagerFactory</b> objects
-from JPA are automatically registered with WebBeans.  The default
+from JPA are automatically registered with CanDI.  The default
 Resin <code>@Name</code> value is the <code>persistence-unit</code> name.</p>
 
 <p><b>&lt;env-entry></b> tags register their values with
@@ -331,24 +331,24 @@ the <code>env-entry-name</code>.  The registered type is the
 <code>env-entry-type</code>.</p>
 
 <p><b>&lt;jms-connection-factory></b> automatically registers the configured
-factory with WebBeans. 
+factory with CanDI. 
 Connection factories can also be configured with &lt;bean> or &lt;resource>,
 depending on the JMS provider.  The registered type is the <code>class</code>
 of the connection factory, usually <code>javax.jms.ConnectionFactory</code></p>
 
 <p><b>&lt;jms-topic></b> automatically registers the configured
-topic with WebBeans.  The default <code>@Named</code> value is the
+topic with CanDI.  The default <code>@Named</code> value is the
 topic name.  Topic can also be configured with &lt;bean> or &lt;resource>,
 depending on the JMS provider.  The registered type is
 <code>javax.jms.Topic</code></p>
 
 <p><b>&lt;jms-queue></b> automatically registers the configured
-queue with WebBeans.  The default <code>@Named</code> value is the
+queue with CanDI.  The default <code>@Named</code> value is the
 queue name.  Queue can also be configured with &lt;bean> or &lt;resource>,
 depending on the JMS provider.  The registered type is
 <code>javax.jms.Queue</code></p>
 
-<p><b>&lt;remote-client></b> registers remoting clients with WebBeans.
+<p><b>&lt;remote-client></b> registers remoting clients with CanDI.
 The &lt;remote-client> tag will configure the protocol used and the
 expected proxy class.  The registered type is the API <code>class</code>
 of the remote service.</p>
@@ -382,7 +382,7 @@ for decades, but in practice developing components and services is
 a difficult task, in large part because the configuration and
 assembly of the components has been just as
 complicated as the code itself.  There are no silver bullets in software,
-but the WebBeans registry does significatly reduce the housekeeping code
+but the CanDI registry does significatly reduce the housekeeping code
 and XML which gets in the way of good design.</p>
 
 <s2 title="Annotation-based Component Discovery">
@@ -437,7 +437,7 @@ complete.</p>
 use <code>@Current Movie</code> to inject the movie resource.</p>
 
 <example title="Example: MyServlet.java">
-import javax.inject.In;
+import javax.exterprise.inject.Current;
 
 public class MyServlet extends GenericServlet {
   @Current Movie _movie;
@@ -537,7 +537,7 @@ scope definition. Since <code>@New</code> replaces
 can be used.</p>
 
 <example title="Example: MyServlet.java">
-import javax.inject.New;
+import javax.enterprise.inject.New;
 
 public class MyServlet extends GenericServlet {
   @New Movie _movie;
@@ -590,11 +590,11 @@ and the <code>@PreDestroy</code> method will stop the timer.</p>
 
 <example title="Example: Timer Service">
 import javax.annotation.PostConstruct;
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 import java.util.concurrent.ScheduledExecutorService;
-import com.caucho.config.Service;
+import javax.ejb.Startup;
 
-@Service
+@Startup
 public class TimerService {
   @Current ScheduledExecutorService _timer;
 
@@ -1053,7 +1053,7 @@ with <code>addXXX</code>.</p>
 <p>Resin-IoC configuration files can use EL expressions to get references
 to resources, beans, system properties, and calculate generatal expressions
 based on those values.  Since all Resin's resources are added to
-the WebBeans registry automatically, application components have access to
+the CanDI registry automatically, application components have access to
 anything they need.</p>
 
 <p>Both the JSP immediate syntax and deferred syntax are
@@ -1085,7 +1085,7 @@ use beans as factories in the EL expressions.</p>
 <s1 title="Scripting: PHP, JSF and JSP">
 
 <p>If your application is using a scripting language like PHP for the
-presentation layer, the WebBeans registry provides a simple interface to
+presentation layer, the CanDI registry provides a simple interface to
 use your components and services.  Although Java Injection injection is typed,
 each simple bean can bean registered under its name for scripting applications.
 The name must be globally unique, of course, unlike the typed injection
@@ -1189,7 +1189,7 @@ producers, or event observers.</p>
 <example title="Example: ReadOnly.java">
 package com.foo.webbeans;
 
-import javax.inject.BindingType;
+import javax.enterprise.inject.BindingType;
 
 @BindingType
 @Target({TYPE, METHOD, FIELD, PARAMETER})
@@ -1205,11 +1205,11 @@ public @interface ReadOnly {
 <p>Some components are more easily produced using a factory method rather
 than getting instantiated directly.  In those cases, your application
 can mark a factory component's method with the <code>@Produces</code>
-annotation.  Resin will register the results of the method with WebBeans.</p>
+annotation.  Resin will register the results of the method with CanDI.</p>
 
 <example title="Example: @Produces">
-import javax.inject.Produces;
-import javax.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class MyFactory {
@@ -1229,7 +1229,7 @@ like a class-based component can.</p>
 
 <p>Some functions like security, logging and transaction handing need
 to be used for each method invidually, but require a common
-implementation pattern.  The WebBeans AOP uses a single method as
+implementation pattern.  The CanDI AOP uses a single method as
 a interceptor for each method invocation.</p>
 
 <p>Your method will use an <code>@InterceptorType</code> annotation
@@ -1284,7 +1284,7 @@ from any surprising interceptors.</p>
 
 <s1 title="Event Handling">
 
-<p>Your components can also handle events thrown through the WebBeans API.
+<p>Your components can also handle events thrown through the CanDI API.
 Any method with an <code>@Observes</code> parameter will receive events
 with the proper type.  The event can be any Java class.</p>
 
@@ -1301,18 +1301,18 @@ public class MyHandler {
 }
 </example>
 
-<p>Your application can throw events through the WebBeans
-<code>Manager</code> API, which is available through injection:</p>
+<p>Your application can throw events through the CanDI
+<code>BeanManager</code> API, which is available through injection:</p>
 
 <example title="Example: raising events">
-import javax.inject.manager.Manager;
+import javax.enterprise.inject.spi.BeanManager;
 
 public void MyServlet extends GenericServlet {
-  @Current Manager _webbeans;
+  @Current BeanManager _beanManager;
 
   public void service(ServletRequest req, ServletResponse res)
   {
-    _webbeans.fireEvent(new Movie("A Bridge Too Far"));
+    _beanManager.fireEvent(new Movie("A Bridge Too Far"));
   }
 }
 </example>
@@ -1381,7 +1381,7 @@ public @interface DenyAll {
 <s2 title="@Interceptor">
 
 <p><code>@Interceptor</code> marks a class as an interceptor using
-WebBeans-style interception.  The class will normally also have
+CanDI-style interception.  The class will normally also have
 an <code>@AroundInvoke</code> method as well as any
 <code>InterceptorBindingType</code> annotations.</p>
 
@@ -1649,11 +1649,11 @@ public @interface TransactionAttribute {
 
 <p><code>@BindingType</code> is a meta-annotation for creating custom
 injection binding types.  Applications can create their own injection
-annotations like <code>@Named</code> to provide application-specific
+annotations like <code>@Name</code> to provide application-specific
 binding.  For example, a database might have a <code>@XA</code>
 and a <code>@NonXA</code> connector implemented.</p>
 
-<def title="javax.inject.BindingType">
+<def title="javax.enterprise.inject.BindingType">
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface BindingType {
@@ -1745,7 +1745,7 @@ void setFoo(example.Test test)
 When used with a constructor, it marks the given constructor as
 the constructor to use when creating new instances.</p>
 
-<def title="javax.inject.Current">
+<def title="javax.enterprise.inject.Current">
 @Target({CONSTRUCTOR, METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
 public @interface Current {
@@ -1787,10 +1787,10 @@ public @interface Named {
 
 <p>Marks a field, method, or parameter for injection with a new
 instance of the object.  If the type of the <code>@New</code>
-has not yet been registered with the WebBeans directory, it will
+has not yet been registered with the CanDI directory, it will
 be registered automatically..</p>
 
-<def title="javax.inject.New">
+<def title="javax.enterprise.inject.New">
 @Target({METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
 public @interface New {
@@ -1819,7 +1819,7 @@ public @interface NonBinding {
 <example title="Example: @Demo with @NonBinding">
 package demo;
 
-import javax.inject.BindingType;
+import javax.enterprise.inject.BindingType;
 
 @BindingType
 @Target({TYPE, METHOD, FIELD, PARAMETER})
@@ -1841,7 +1841,7 @@ JNDI value by itself.</p>
 <p>In general, it's better to use the Java Injection
 annotations: <code>@Current</code>, Resin's <code>@Name</code>
 or custom <code>@BindingType</code> annotations, since they use the
-type-safe WebBeans registry instead of JNDI.  <code>@Resource</code>
+type-safe CanDI registry instead of JNDI.  <code>@Resource</code>
 is supported for backwards compatibility.</p>
 
 <deftable-childtags>
@@ -1922,7 +1922,7 @@ package com.caucho.xwork2;
 import com.caucho.config.inject.*;
 import com.opensymphony.xwork2.ObjectFactory;
 import java.util.*;
-import javax.inject.*;
+import javax.enterprise.inject.*;
 
 public class ResinObjectFactory extends ObjectFactory
 {

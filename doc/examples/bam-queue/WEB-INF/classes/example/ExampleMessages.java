@@ -2,8 +2,8 @@ package example;
 
 import java.util.ArrayList;
 
-import javax.annotation.Named;
-import javax.context.ApplicationScoped;
+import javax.enterprise.inject.Named;
+import javax.enterprise.context.ApplicationScoped;
 
 @Named
 @ApplicationScoped

@@ -3,13 +3,9 @@
 
     <!--
        - Amber
-      -->
     <item link="amber.xtp" title="Amber (JPA)">
       <item link="amber-basic-field/index.xtp" title="Field"/>
       <item link="amber-basic/index.xtp" title="Property"/>
-      <!--
-      <item link="amber-create/index.xtp" title="Create"/>
-      -->
       <item link="amber-query/index.xtp" title="Query"/>
       <item link="amber-many2one/index.xtp" title="Many-to-One"/>
       <item link="amber-one2many/index.xtp" title="One-to-Many"/>
@@ -17,18 +13,21 @@
       <item link="amber-inherit/index.xtp" title="Inherit"/>
       <item link="amber-session/index.xtp" title="Sessions"/>
     </item>
+      -->
 
     <!--
        - IoC
       -->
-    <item link="ioc.xtp" title="Java Injection">
+    <item link="ioc.xtp" title="Java Injection (CanDI)">
       <!--
       <item link="jaxb-bean-config/index.xtp" title="JAXB IoC"/>
       <item link="ioc-services/index.xtp" title="Services"/>
       -->
       <item link="ioc-binding/index.xtp" title="Binding Patterns"
 	    description="Service, Resource, Startup, and Plugin Patterns for CanDI (JSR-299)"/>
+      <!--
       <item link="ioc-basic/index.xtp" title="Basic Resource"/>
+      -->
       <item link="ioc-injection/index.xtp" title="Injection"/>
       <item link="ioc-periodictask/index.xtp" title="Periodic Task"/>
       <item link="ioc-appconfig/index.xtp" title="IoC appconfig"/>
@@ -63,8 +62,8 @@
        - JSF
       -->
     <item link="jsf.xtp" title="JSF">
-      <item link="jsf-webbeans/index.xtp" title="JSF/WebBeans"/>
-     </item>
+      <item link="jsf-webbeans/index.xtp" title="JSF/CanDI"/>
+    </item>
 
     <!--
        - Messaging
@@ -84,7 +83,9 @@
       <item link="quercus-module/index.xtp" title="Java Modules"/>
       <item link="quercus-json/index.xtp" title="JSON" />
       <item link="quercus-pdo/index.xtp" title="PDO" />
+      <!--
       <item link="quercus-gettext/index.xtp" title="Gettext" />
+      -->
     </item>
 
     <!--

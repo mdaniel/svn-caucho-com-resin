@@ -1,7 +1,7 @@
 package example;
 
-import javax.annotation.Named;
-import javax.context.RequestScoped;
+import javax.enterprise.inject.Named;
+import javax.enterprise.context.RequestScoped;
 
 @RequestScoped
 @Named("calc")  

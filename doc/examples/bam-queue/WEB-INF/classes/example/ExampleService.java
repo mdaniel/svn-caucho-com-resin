@@ -6,7 +6,7 @@ import com.caucho.bam.Message;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 public class ExampleService extends SimpleActor
 {

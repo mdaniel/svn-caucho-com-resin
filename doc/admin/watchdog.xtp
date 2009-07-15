@@ -141,7 +141,7 @@ port 6600 for commands.</p>
     &lt;http port="80"/>
   &lt;/server>
 
-  &lt;resin:import path="${resin.home}/conf/app-default.xml"/>
+  &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
   &lt;host id="">
     &lt;web-app id="" path="/var/www/htdocs"/>

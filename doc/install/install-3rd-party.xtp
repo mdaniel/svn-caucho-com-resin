@@ -3,7 +3,7 @@
     <product>resin</product>
     <title>Resin with Apache and IIS</title>
     <description>
-      <p>Resin provides a fast servlet runner for Apache 2.0, Apache 2.2, and IIS
+      <p>Resin provides a fast servlet runner for Apache 2.2, and IIS
          allowing these HTTP servers to dispatch requests to Resin.
       </p>
 
@@ -171,15 +171,15 @@ to use Apache's document area, you configure an explicit
 
 <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+       xmlns:resin="urn:java:com.caucho.resin"&gt;
   ...
-  &lt;server&gt;
+  &lt;cluster id=""&gt;
     ...
     &lt;host id=""&gt;
       &lt;web-app id='/' document-directory="/usr/local/apache/htdocs"/&gt;
     &lt;/host&gt;
     ...
-  &lt;/server&gt;
+  &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 

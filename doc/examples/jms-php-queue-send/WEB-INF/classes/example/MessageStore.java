@@ -3,8 +3,8 @@ package example;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.annotation.Named;
-import javax.context.ApplicationScoped;
+import javax.enterprise.inject.Named;
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Custom singleton bean to store messages

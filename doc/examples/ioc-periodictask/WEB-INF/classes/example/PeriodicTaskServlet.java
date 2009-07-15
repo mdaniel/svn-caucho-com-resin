@@ -17,7 +17,7 @@ import java.util.concurrent.Executor;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 /**
  * A Servlet that provides a user interface for managing a PeriodicTask.

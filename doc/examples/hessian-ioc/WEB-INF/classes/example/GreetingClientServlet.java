@@ -8,7 +8,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 /**
  * The greeting client calls the GreetingAPI client.

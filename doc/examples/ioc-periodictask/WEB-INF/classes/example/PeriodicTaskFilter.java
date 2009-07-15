@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 /**
  * Filter to show a maintenance page if the MaintenanceRunner is active.

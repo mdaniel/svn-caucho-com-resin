@@ -80,6 +80,11 @@ public class BootManagementConfig
     return _auth;
   }
 
+  public void setAdminAuthenticator(AdminAuthenticator auth)
+  {
+    _auth = auth;
+  }
+
   public String getAdminCookie()
   {
     if (_auth != null)

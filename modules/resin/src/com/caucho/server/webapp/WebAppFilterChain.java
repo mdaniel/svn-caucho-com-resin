@@ -175,9 +175,9 @@ public class WebAppFilterChain extends AbstractFilterChain {
       if (_securityRoleMap != null && request instanceof AbstractHttpRequest)
 	((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
       */
-
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);
+	System.out.println("REL: " + event + " "+ _requestListeners[i]);
 	
 	_requestListeners[i].requestInitialized(event);
       }

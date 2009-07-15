@@ -51,6 +51,12 @@ public class CustomSimpleTag extends GenericTag
   {
     return false;
   }
+
+  @Override
+  protected void addTagDepend()
+  {
+    // jsp/10i0 - #3578
+  }
   
   /**
    * Called when the attributes end.

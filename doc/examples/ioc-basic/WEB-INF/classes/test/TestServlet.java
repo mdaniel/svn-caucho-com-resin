@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 /**
  * A simple servlet that uses the resource.

@@ -1,11 +1,1 @@
-<document>
-  <header>
-    <product>resin</product>
-    <title>Performance</title>
-    <type>contents</type>
-  </header>
-
-  <body>
-    <summary/>
-  </body>
-</document>
+<document redirect="../admin/performance.xtp"/>

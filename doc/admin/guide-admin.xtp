@@ -363,7 +363,7 @@ symbolic link to the Resin version, so you can upgrade easily.</p>
 
 <example title="Example: /etc/resin/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="urn:java:com.caucho.resin">
   &lt;root-directory>/var/www&lt;/root-directory>
   
   &lt;cluster id="">
@@ -425,7 +425,7 @@ set the host's root.</p>
 
 <example title="Example: /etc/resin/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="urn:java:com.caucho.resin">
   &lt;root-directory>/var/www&lt;/root-directory>
   
   &lt;cluster id="">
@@ -485,7 +485,7 @@ files in a <code>webapps</code> directory.</p>
 
 <example title="Example: /etc/resin/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="urn:java:com.caucho.resin">
   &lt;root-directory>/var/www&lt;/root-directory>
   
   &lt;cluster id="">

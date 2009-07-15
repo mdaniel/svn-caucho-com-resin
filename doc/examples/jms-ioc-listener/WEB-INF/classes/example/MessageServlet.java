@@ -11,7 +11,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 public class MessageServlet extends GenericServlet {
   private static final Logger log =

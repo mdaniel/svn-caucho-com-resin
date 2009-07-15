@@ -94,6 +94,8 @@ public class HmtpServlet extends GenericServlet {
     if ("true".equals(admin))
       _isAdmin = true;
 
+    System.out.println("AUTH: " + _adminInstance + " " + _authInstance);
+
     try {
       if (_isAdmin)
 	_auth = _adminInstance.get();
@@ -109,6 +111,8 @@ public class HmtpServlet extends GenericServlet {
 		   this));
       }
     }
+
+    System.out.println("AUTH: " + _auth);
 
     _linkManager = new ServerLinkManager(_auth);
   }

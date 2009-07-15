@@ -35,6 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.Period;
@@ -203,6 +204,7 @@ class WatchdogManager implements AlarmListener {
     try {
       thread.setContextClassLoader(_server.getClassLoader());
 
+      webBeans = InjectManager.create();
       AdminAuthenticator auth = null;
 
       if (_management != null)
@@ -213,6 +215,7 @@ class WatchdogManager implements AlarmListener {
 
 	factory.type(Authenticator.class);
 	factory.type(AdminAuthenticator.class);
+	factory.binding(CurrentLiteral.CURRENT);
 	
 	webBeans.addBean(factory.singleton(auth));
       }

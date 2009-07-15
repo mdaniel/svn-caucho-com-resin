@@ -1,6 +1,7 @@
 <web-app xmlns="http://caucho.com/ns/resin">
-
+  <!--
   <jsf enable-developer-aid="true"/>
+  -->
   
   <servlet-mapping url-pattern="*.jsf"
                    servlet-class="javax.faces.webapp.FacesServlet"/>

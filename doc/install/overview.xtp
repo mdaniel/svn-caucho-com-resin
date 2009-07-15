@@ -171,8 +171,13 @@ and may provide significant cost savings.
 <s1 title="Java Injection (CanDI, JSR-299) Injection">
 
 <ul>
+<li>See <a href="http://caucho.com/projects/candi">CanDI project</a>.</li>
 <li>See <a href="../admin/candi.xtp">Java Injection</a> documentation.</li>
 </ul>
+
+<p>Resin 4.0.x includes an early access implementation of the Java
+Injection (JSR-299) specification.  ("Early access" means the
+specification is not yet final.)</p>
 
 <p>Resin uses Java Injection (JSR-299) all of its JavaEE
 configuration.  With the new specification draft, Resin
@@ -197,7 +202,7 @@ BeanManager interface.</p>
 
 <p>Resin-managed classes are automatically enlisted in the CanDI engine.  So
 Servlets, Filters, application listener classes, remote objects, and
-EJBs can all use Resin-IoC capabilities without any
+EJBs can all use Java Injection capabilities without any
 additional configuration.</p>
 
 <p>CanDI provides a straightforward driver for integrating Resin
@@ -257,7 +262,9 @@ and reliability.
 
 <ul>
 <li>See <a href="../doc/ejb.xtp">Resin EJB 3.0</a> documentation</li>
+<!--
 <li>See <a href="../doc/amber.xtp">Amber (JPA)</a> documentation</li>
+-->
 </ul>
 
 <p>Resin's EJB support is fully integrated with Java Injection.
@@ -310,7 +317,7 @@ reducing memory consumption and improving performance.  Because of Resin's
 reuse, application libraries must strictly follow the JSP tag
 specification.</p>
 
-<p>Resin-IoC beans are always available through JSP EL expressions.
+<p>Java Injection beans are always available through JSP EL expressions.
 This IoC integration means your custom components and beans are directly
 accessible to your HTML generating code.</p>
 
@@ -325,13 +332,15 @@ the overhead of the JSTL tag libraries.</p>
 
 </s1>
 
-<s1 name="servlet" title="Servlet 2.5">
+<s1 name="servlet" title="Servlet 3.0">
+
+<p>Resin 4.0.x includes an early access implementation of the
+Servlet 3.0 specification, including asynchronous/comet support.
+("Early access" means the specification is not yet final.)</p>
 
 <p>Since the servlet engine of Resin is built on a CanDI foundation,
 servlets can use Java Injection, event observation, and
-interception.  Remember that Resin injection is fully integrated with its
-EJB support?  By transitivity, Resin servlets automatically have access
-to EJB transaction aspects without any extra overhead.</p>
+interception.</p>
 
 <p>Remote services are tied into servlet capabilities as well.  Because remote
 services are URL-based, they naturally fit into the the familiar servlet
@@ -388,7 +397,7 @@ Resin's embedded testing interface, your tests can send HTTP requests directly
 to the server, skipping the overhead of TCP connections, and saving
 time on test setup and teardown.</p>
 
-<p>The embedded API gives you hooks into Resin-IoC, so you can
+<p>The embedded API gives you hooks into Java Injection, so you can
 inject mock services into your tests, and still ensure that your application
 is tested in the full application server environment.  Since integration
 testing uses the actual, deployment environment, elusive production bugs
@@ -415,19 +424,19 @@ a simple driver API based on Servlets, your services can choose the
 protocol to expose at deployment time, whether its a fast, binary
 wire-protocol like Hessian, or an XML-based wire-protocol like SOAP.
 Resin remoting clients select the wire-protocol matched with service API,
-and register with Resin-IoC/WebBeans, so
+and register with Java Injection, so
 application code can obtain the client proxy with simple, typed
 dependency injection.</p>
 
 </s1>
-
+<!--
 <s1 title="JPA (Java Persistence Architecture)">
 <ul>
 <li>See <a href="../doc/amber.xtp">Resin's Amber</a> documentation</li>
 </ul>
 
 </s1>
-
+-->
 <s1 title="Resin Watchdog">
 
 <ul>
@@ -479,7 +488,7 @@ configuration needed is a binding between the service class and the
 queue it wants to receive messages from.  Three lines of XML is sufficient
 for that binding, with no need for any extra packaging.</p>
 
-<p>Of course, the message listeners are can use all Resin-IoC capabilities,
+<p>Of course, the message listeners are can use all Java Injection capabilities,
 including injecting JPA <code>EntityManager</code> for database management, or
 other queues to filter and pass the message along.</p>
 
@@ -492,7 +501,7 @@ suppport, including transaction logging for reliable transaction recovery.
 The transaction capabilities are integrated throughout Resin, so your
 databases, JCA connections, and EJBs work together.  Since Resin's
 <code>UserTransaction</code> and <code>TransactionManager</code> are
-registered with Resin-IoC, injecting these managers into any IoC-enabled
+registered with Java Injection, injecting these managers into any IoC-enabled
 component is just adding an @In annotation.</p>
 
 </s1>

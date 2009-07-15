@@ -1,7 +1,7 @@
 package example;
 
 import javax.jms.*;
-import javax.inject.*;
+import javax.enterprise.inject.*;
 
 public class MyListener implements MessageListener {
   @Current

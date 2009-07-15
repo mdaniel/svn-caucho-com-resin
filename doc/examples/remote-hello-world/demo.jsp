@@ -1,4 +1,4 @@
-<%@ page import="com.caucho.config.Name, javax.inject.Current" %>
+<%@ page import="com.caucho.config.Name, javax.enterprise.inject.Current" %>
 <%@ page import="example.HelloService" %>
 <%!
 @Name("hessian") HelloService _hessianHello;
