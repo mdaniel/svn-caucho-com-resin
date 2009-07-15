@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="resin_os"
 	ProjectGUID="{6D652088-91A4-44B1-983F-E52AE1904791}"
 	Keyword="MFCProj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -83,6 +84,8 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/resin_os.pdb"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\Debug/resin_os.lib"
 				TargetMachine="1"
 			/>
@@ -103,9 +106,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -146,7 +146,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="e:\program files\java\jdk1.5.0_10\include,e:\program files\java\jdk1.5.0_10\include\win32,..\common,c:\local\ssl\include"
+				AdditionalIncludeDirectories="c:\program files\java\jdk1.6.0_14\include,c:\program files\java\jdk1.6.0_14\include\win32,..\common,c:\local\ssl\include"
 				PreprocessorDefinitions="WIN32;HAS_JVMTI;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -180,6 +180,8 @@
 				ModuleDefinitionFile=".\resin_os.def"
 				ProgramDatabaseFile=".\Release/resin_os.pdb"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary=".\Release/resin_os.lib"
 				TargetMachine="1"
 			/>
@@ -200,9 +202,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
