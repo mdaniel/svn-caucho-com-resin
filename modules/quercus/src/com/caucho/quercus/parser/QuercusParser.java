@@ -3557,8 +3557,29 @@ public class QuercusParser {
       else
         return _factory.createClassConst(className, name);
     }
-    else if (name.equals("__FILE__"))
-      return createString(_parserLocation.getFileName());
+    else if (name.equals("__FILE__")) {
+      Path pwd = _quercus.getPwd();
+      String pwdStr = pwd.getNativePath();
+      
+      String fileName = _parserLocation.getFileName();
+
+      if (fileName.contains(pwdStr)) {
+        int end = pwdStr.length();
+
+        fileName = fileName.substring(end);
+        
+        char ch = fileName.charAt(0);
+        
+        if (ch == '/') { 
+        }
+        else if (ch == '\\')
+          fileName = '/' + fileName.substring(1);
+        else
+          fileName = '/' + fileName;
+      }
+      
+      return _factory.createFileName(fileName);
+    }
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
     else if (name.equals("__CLASS__") && _classDef != null)

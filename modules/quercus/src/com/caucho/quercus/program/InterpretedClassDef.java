@@ -183,7 +183,8 @@ public class InterpretedClassDef extends ClassDef
     if (_constructor != null) {
       cl.setConstructor(_constructor);
 
-      cl.addMethod("__construct", _constructor);
+      // php/093o
+      //cl.addMethod("__construct", _constructor);
     }
     
     if (_destructor != null) {

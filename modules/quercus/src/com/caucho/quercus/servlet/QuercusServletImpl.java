@@ -88,11 +88,15 @@ public class QuercusServletImpl extends HttpServlet
 
     checkServletAPIVersion();
     
-    getQuercus().setPwd(new FilePath(_servletContext.getRealPath("/")));
+    Path pwd = new FilePath(_servletContext.getRealPath("/"));
+    
+    getQuercus().setPwd(pwd);
 
-    // need to set this for non-Resin containers
-    if (! getQuercus().isResin())
-      WorkDir.setLocalWorkDir(getQuercus().getPwd().lookup("WEB-INF/work"));
+    // need to set these for non-Resin containers
+    if (! getQuercus().isResin()) {
+      Vfs.setPwd(pwd);
+      WorkDir.setLocalWorkDir(pwd.lookup("WEB-INF/work"));
+    }
 
     getQuercus().init();
   }

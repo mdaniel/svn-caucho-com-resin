@@ -252,11 +252,11 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Gets the magic quotes value.
    */
-  public static Value get_magic_quotes_gpc(Env env)
+  public static LongValue get_magic_quotes_gpc(Env env)
   {
     return (env.getIniBoolean("magic_quotes_gpc")
-	    ? BooleanValue.TRUE
-	    : BooleanValue.FALSE);
+	    ? LongValue.ONE
+	    : LongValue.ZERO);
   }
 
   /**

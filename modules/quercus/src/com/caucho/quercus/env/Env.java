@@ -1282,7 +1282,22 @@ public class Env {
     return _uploadPath;
   }
   
-  /*
+  /**
+   * Returns the real path.
+   */
+  public String getRealPath(String path)
+  {
+    String realPath;
+    
+    if (getRequest() != null)
+      realPath = getRequest().getRealPath(path);
+    else
+      realPath = getSelfDirectory().lookup(path).getNativePath();
+
+    return realPath;
+  }
+  
+  /**
    * Returns the temp directory (used by tmpfile()).
    */
   public Path getTempDirectory()

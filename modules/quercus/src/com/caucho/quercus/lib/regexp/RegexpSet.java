@@ -100,7 +100,7 @@ class RegexpSet {
     for (int i = 0; i < BITSET_CHARS; i++)
       _bitset[i] = _bitset[i] || ! b._bitset[i];
 
-    _range.unionNegate(b._range, 0, 0xffff);
+    _range.unionNegate(b._range, 0, 0xfffff);
   }
 
   /**
@@ -108,8 +108,9 @@ class RegexpSet {
    */
   void setRange(int low, int high)
   {
-    if (low > high || low < 0 || high > 0xffff)
-	throw new RuntimeException("Range out of range");
+    // 0xeffff is highest unicode assigned value
+    if (low > high || low < 0 || high > 0xfffff)
+      throw new RuntimeException("Range out of range (" + low + ", " + high + ")");
 
     if (low < BITSET_CHARS) {
       for (int i = low; i < Math.min(high + 1, BITSET_CHARS); i++)

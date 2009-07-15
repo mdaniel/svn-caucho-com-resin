@@ -960,11 +960,11 @@ class Regcomp {
     
     if (isIgnoreCase()) {
       if (Character.isLowerCase(a) && Character.isLowerCase(b)) {
-	set.setRange(Character.toUpperCase(a), Character.toUpperCase(b));
+        set.setRange(Character.toUpperCase(a), Character.toUpperCase(b));
       }
 	  
       if (Character.isUpperCase(a) && Character.isUpperCase(b)) {
-	set.setRange(Character.toLowerCase(a), Character.toLowerCase(b));
+        set.setRange(Character.toLowerCase(a), Character.toLowerCase(b));
       }
     }
   }

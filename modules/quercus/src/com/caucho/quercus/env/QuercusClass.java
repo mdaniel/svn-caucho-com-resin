@@ -592,7 +592,7 @@ public class QuercusClass {
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
     AbstractFunction existingFun = _methodMap.get(name);
-    
+
     if (existingFun == null && ! fun.isAbstract())
       _methodMap.put(name, fun);
   }

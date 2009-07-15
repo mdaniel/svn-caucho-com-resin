@@ -145,6 +145,14 @@ public class ExprFactory {
   {
     return new VarVarExpr(var);
   }
+  
+  /**
+   * Creates a __FILE__ expression.
+   */
+  public FileNameExpr createFileName(String fileName)
+  {
+    return new FileNameExpr(fileName);
+  }
 
   /**
    * Creates a const expression.

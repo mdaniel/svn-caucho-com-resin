@@ -76,7 +76,7 @@ public class QuercusServlet
   private int _pageCacheSize = -1;
   private int _regexpCacheSize = -1;
   private boolean _isConnectionPool = true;
-  private String _iniFile;
+  private String _iniPath;
   private String _scriptEncoding;
   private String _mysqlVersion;
   private String _phpVersion;
@@ -376,9 +376,7 @@ public class QuercusServlet
     Path path = quercus.getPwd().lookup(realPath);
     */
     
-    String realPath = getServletContext().getRealPath(relPath);
-    
-    _iniFile = realPath;
+    _iniPath = relPath;
   }
 
   /**
@@ -528,8 +526,10 @@ public class QuercusServlet
     quercus.setRegexpCacheSize(_regexpCacheSize);
     quercus.setConnectionPool(_isConnectionPool);
     
-    if (_iniFile != null)
-      quercus.setIniFile(getQuercus().getPwd().lookup(_iniFile));
+    if (_iniPath != null) {
+      String realPath = getServletContext().getRealPath(_iniPath);
+      quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
+    }
     
     if (_scriptEncoding != null)
       quercus.setScriptEncoding(_scriptEncoding);
