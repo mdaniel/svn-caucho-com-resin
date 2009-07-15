@@ -47,22 +47,27 @@ namespace Caucho
     public static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
     
     public static String USAGE = @"usage: {0} [flags]
-  -h                 : this help
-  -verbose           : information on launching java
-  -java_home <dir>   : sets the JAVA_HOME
-  -java_exe <path>   : path to java executable
-  -resin_home <dir>  : home of Resin
-  -classpath <dir>   : java classpath
-  -Jxxx              : JVM arg xxx
-  -J-Dfoo=bar        : Set JVM variable
-  -Xxxx              : JVM -X parameter
-  -install           : install as NT service
-  -install-as <name> : install as a named NT service
-  -remove            : remove as NT service
-  -remove-as <name>  : remove as a named NT service
-  -user <name>       : specify username for NT service
-  -password <pwd>    : specify password for NT
-  -conf <resin.conf> : alternate configuration file";
+  -h                                     : this help
+  -verbose                               : information on launching java
+  -java_home <dir>                       : sets the JAVA_HOME
+  -java_exe <path>                       : path to java executable
+  -classpath <dir>                       : java classpath
+  -Jxxx                                  : JVM arg xxx
+  -J-Dfoo=bar                            : Set JVM variable
+  -Xxxx                                  : JVM -X parameter
+  -install                               : install as NT service
+  -install-as <name>                     : install as a named NT service
+  -remove                                : remove as NT service
+  -remove-as <name>                      : remove as a named NT service
+  -user <name>                           : specify username for NT service
+  -password <pwd>                        : specify password for NT
+  -resin_home <dir>                      : home of Resin
+  -root-directory <dir>                  : select a root directory
+  -log-directory  <dir>                  : select a logging directory
+  -dynamic-server <cluster:address:port> : initialize a dynamic server
+  -watchdog-port  <port>                 : override the watchdog-port
+  -server <id>                           : select a <server> to run
+  -conf <resin.conf>                     : alternate configuration file";
 
     private bool _verbose;
     private bool _nojit;
