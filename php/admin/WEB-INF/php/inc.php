@@ -510,6 +510,7 @@ function display_header($script, $title, $server, $allow_remote = false)
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
     function show(id) { document.getElementById(id).style.display = 'block'; }
+    function showInline(id) { document.getElementById(id).style.display = 'inline'; }
     function setValue(id, v) { document.getElementById(id).value = v; }
   </script>
 </head>

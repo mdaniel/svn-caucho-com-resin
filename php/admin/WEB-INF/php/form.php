@@ -10,8 +10,113 @@ interface FormItem {
   public function set_root_form($form);
   public function process_input();
   public function render();
-  public function generate_xml();
 }
+
+class FormContent implements FormItem {
+  private $_root_form;
+  private $_content;
+
+  public function __construct($content)
+  {
+    $this->_content = $content;
+  }
+
+  public function get_root_form()
+  {
+    return $this->_root_form;
+  }
+
+  public function set_root_form($form)
+  {
+    $this->_root_form = $form;
+  }
+
+  public function process_input()
+  {
+    return true;
+  }
+
+  public function render()
+  {
+    echo "<tr><td colspan='3'>\n";
+    echo $this->_content;
+    echo "</td></tr>\n";
+  }
+}
+
+class FormOutput implements FormItem {
+  private $_root_form;
+  private $_callback;
+  private $_userdata;
+
+  public function __construct($callback, $userdata)
+  {
+    $this->_callback = $callback;
+    $this->_userdata = $userdata;
+  }
+
+  public function get_root_form()
+  {
+    return $this->_root_form;
+  }
+
+  public function set_root_form($form)
+  {
+    $this->_root_form = $form;
+  }
+
+  public function process_input()
+  {
+    return true;
+  }
+
+  public function render()
+  {
+    echo "<tr><td colspan='3'>\n";
+    echo "<div class='subform'>\n";
+    call_user_func($this->_callback, 
+                   $this->_root_form,
+                   $this->_userdata);
+    echo "</div>\n";
+    echo "</td></tr>\n";
+  }
+}
+
+class FormSubmit implements FormItem {
+  private $_root_form;
+  private $_label;
+
+  public function __construct($label)
+  {
+    $this->_label = $label;
+  }
+
+  public function get_root_form()
+  {
+    return $this->_root_form;
+  }
+
+  public function set_root_form($form)
+  {
+    $this->_root_form = $form;
+  }
+
+  public function process_input()
+  {
+    return true;
+  }
+
+  public function render()
+  {
+    echo "<tr><td colspan='3'>\n";
+    echo "<div class='form-submit'>\n";
+    echo "* indicates a required field";
+    echo "<input type='submit' value='{$this->_label}'/>";
+    echo "</div>\n";
+    echo "</td></tr>\n";
+  }
+}
+
 
 abstract class FormField implements FormItem {
   private $_name;
@@ -20,15 +125,14 @@ abstract class FormField implements FormItem {
   private $_value;
   private $_form;
   private $_default;
-  private $_xml;
+  private $_root_form;
 
-  public function __construct($name, $label, $required, $xml, $default)
+  public function __construct($name, $label, $required, $default)
   {
     $this->_name = $name;
     $this->_label = $label;
     $this->_required = $required;
     $this->_default = $default;
-    $this->_xml = $xml;
   }
 
   public function get_default()
@@ -110,14 +214,6 @@ abstract class FormField implements FormItem {
     echo "</tr>\n";
   }
 
-  public function generate_xml()
-  {
-    if ($this->get_value())
-      return "<{$this->_xml}>{$this->get_value()}</{$this->_xml}>";
-
-    return "";
-  }
-
   protected function validate()
   {
     return true;
@@ -130,12 +226,18 @@ class TextField extends FormField {
   private $_max_length;
   private $_initial_value;
 
-  public function __construct($name, $label, $required, $xml, $default = 'N/A',
-                              $initial_value = null, $max_length = 0)
+  public function __construct($name, $label, $required, $default = 'N/A')
   {
-    parent::__construct($name, $label, $required, $xml, $default);
+    parent::__construct($name, $label, $required, $default);
+  }
 
+  public function set_initial_value($initial_value)
+  {
     $this->_initial_value = $initial_value;
+  }
+
+  public function set_max_length($max_length)
+  {
     $this->_max_length = $max_length;
   }
 
@@ -162,7 +264,7 @@ class TextField extends FormField {
     if ($this->get_root_form()->is_submitted() && $this->get_value())
       $value = $this->get_value();
 
-    if ($value) {
+    if ($value != NULL) {
       echo "<input name='{$this->get_name()}' type='text' value='{$value}'/>";
     }
     else {
@@ -174,7 +276,7 @@ class TextField extends FormField {
 class NumberField extends FormField {
   protected function validate() 
   {
-    return is_numeric($this->_value);
+    return is_numeric($this->get_value());
   }
 
   public function generate_input_tag()
@@ -184,12 +286,75 @@ class NumberField extends FormField {
     if ($this->get_root_form()->is_submitted() && $this->get_value())
       $value = $this->get_value();
 
-    if ($value) {
+    if ($value != NULL) {
       echo "<input name='{$this->get_name()}' type='text' value='{$value}'/>";
     }
     else {
       echo "<input name='{$this->get_name()}' type='text'/>";
     }
+  }
+}
+
+class PeriodField extends FormField {
+  protected function validate() 
+  {
+    $this->set_value(trim($this->get_value()));
+    return ereg("^([0-9]+)(ms|s|m|h|D|W|M|Y)$", $this->get_value());
+  }
+
+  public function generate_input_tag()
+  {
+    $value = $this->_initial_value;
+
+    if ($this->get_root_form()->is_submitted() && $this->get_value())
+      $value = $this->get_value();
+
+    if ($value != NULL) {
+      echo "<input name='{$this->get_name()}' type='text' value='{$value}'/>";
+    }
+    else {
+      echo "<input name='{$this->get_name()}' type='text'/>";
+    }
+  }
+}
+
+class BooleanField extends FormField {
+  public function __construct($name, $label, $required, $default = 'false')
+  {
+    parent::__construct($name, $label, $required, $default);
+  }
+
+  protected function validate() 
+  {
+    return ($this->get_value() == "true") || ($this->get_value() == "false");
+  }
+
+  public function generate_input_tag()
+  {
+    $value = "";
+
+    if ($this->get_root_form()->is_submitted() && $this->get_value())
+      $value = $this->get_value();
+
+    echo "<select name='{$this->get_name()}' type='text'>\n";
+
+    if ($value == "true") {
+      echo "  <option value=''>---</option>\n";
+      echo "  <option selected value='true'>true</option>\n";
+      echo "  <option value='false'>false</option>\n";
+    }
+    elseif ($value == 'false') {
+      echo "  <option value=''>---</option>\n";
+      echo "  <option value='true'>true</option>\n";
+      echo "  <option selected value='false'>false</option>\n";
+    }
+    else {
+      echo "  <option selected value=''>---</option>\n";
+      echo "  <option value='true'>true</option>\n";
+      echo "  <option value='false'>false</option>\n";
+    }
+
+    echo "</select>\n";
   }
 }
 
@@ -249,31 +414,32 @@ class SubForm implements FormItem {
   private $_name;
   private $_root_form;
   private $_validator;
-  private $_show_on_valid_input;
   private $_children;
   private $_field_map;
-  private $_xml;
 
-  public function __construct($name, $title, $xml = NULL,
-                              $validator = NULL, 
-                              $show_on_valid_input = false)
+  public function __construct($name, $title)
   {
     $this->_name = $name;
     $this->_title = $title;
-    $this->_validator = $validator;
-    $this->_show_on_valid_input = $show_on_valid_input;
     $this->_field_map = array();
     $this->_children = array();
-    $this->_xml = $xml;
+  }
+
+  public function set_validator($validator)
+  {
+    $this->_validator = $validator;
   }
 
   public function add_child($child)
   {
     $this->_children[] = $child;
     $child->set_root_form($this);
+  }
 
-    if ($child instanceof SubForm)
-      $child->_show_on_valid_input = $this->_show_on_valid_input;
+  public function add_children($children)
+  {
+    foreach ($children as $child)
+      $this->add_child($child);
   }
 
   public function get_title()
@@ -300,27 +466,9 @@ class SubForm implements FormItem {
     }
   }
 
-  public function process()
+  protected function get_children()
   {
-    if ($this->is_submitted()) {
-      $valid = $this->process_input($this->get_root_form());
-
-      if ($valid && $this->_validator) {
-        if (! call_user_func($this->_validator, $this->_field_map))
-          $valid = false;
-      }
-
-      if ($valid) {
-        if ($this->_show_on_valid_input)
-          $this->render();
-
-        return $this->_field_map;
-      }
-    }
-
-    $this->render();
-
-    return NULL;
+    return $this->_children;
   }
 
   protected function is_submitted()
@@ -331,6 +479,11 @@ class SubForm implements FormItem {
   protected function set_field($name, $field)
   {
     $this->_field_map[$name] = $field;
+  }
+
+  public function get_field($name)
+  {
+    return $this->_field_map[$name];
   }
 
   protected function process_input()
@@ -360,43 +513,14 @@ class SubForm implements FormItem {
     echo "</div>\n";
     echo "</td></tr>";
   }
-
-  public function generate_xml()
-  {
-    $output = "";
-
-    if ($this->_xml)
-      $output .= "<{$this->_xml}>\n";
-    
-    $child_output = "";
-    foreach ($this->_children as $child) {
-      $child_xml = $child->generate_xml();
-      
-      if ($child_xml)
-        $child_output .= $child_xml . "\n";
-    }
-
-    if ($child_output) {
-      if ($this->_xml) {
-        $output .= "  ";
-        $child_output = substr($child_output, 0, -1);
-        $output .= str_replace("\n", "\n  ", $child_output);
-      }
-      else {
-        $output .= $child_output;
-      }
-    }
-
-    if ($this->_xml)
-      $output .= "\n</{$this->_xml}>";
-    else
-      $output = rtrim($output);
-
-    return $output;
-  }
 }
 
 class RootForm extends SubForm {
+  public function __construct($name, $title)
+  {
+    parent::__construct($name, $title);
+  }
+
   public function get_root_form()
   {
     return $this;
@@ -407,69 +531,108 @@ class RootForm extends SubForm {
     // this is always the root form
   }
 
+  public function process($callback, $userdata = NULL)
+  {
+    $valid = false;
+
+    if ($this->is_submitted()) {
+      $valid = $this->process_input($this->get_root_form());
+
+      if ($valid && $this->_validator) {
+        if (! call_user_func($this->_validator, $this->_field_map))
+          $valid = false;
+      }
+    }
+
+    if ($valid) {
+      $this->add_output($callback, $userdata);
+    }
+
+    $this->render();
+  }
+
+  protected function add_output($callback, $userdata)
+  {
+    $output_item = new FormOutput($callback, $userdata);
+    $this->add_child($output_item);
+  }
+
   protected function render()
   {
-    echo "<form name='{$this->_name}' " .
-               "method='POST'>";
-               //"enctype='multipart/form-data'>\n";
+    $this->add_submit();
+
+    echo "<form name='{$this->_name}' method='POST'>";
     echo "<input type='hidden' name='form-name' value='{$this->_name}'/>\n";
 
     echo "<table class='form'>\n";
     parent::render();
-
-    echo "<tr><td colspan='3'>\n";
-    echo "<div class='form-submit'>\n";
-    echo "* indicates a required field";
-    echo "<input type='submit' value='Generate'/>\n";
-    echo "</div>\n";
-    echo "</td></tr>\n";
     echo "</table>\n";
+
     echo "</form>\n";
+  }
+
+  protected function add_submit()
+  {
+    $this->add_child(new FormSubmit("Submit"));
   }
 }
 
 class OptionalForm extends SubForm {
+  private $_display = false;
+
+  public function set_default_display($display)
+  {
+    $this->_display = $display;
+  }
+
   protected function render()
   {
     echo "<tr><td colspan='3'>";
+    echo "  <div class='subform'>\n";
 
-    if ($_POST[$this->get_name() . "_display"] == "true")
+    if ($_POST[$this->get_name() . "_display"] == NULL) 
+      $display = $this->_display;
+    else if ($_POST[$this->get_name() . "_display"] == "true")
       $display = true;
     else
       $display = false;
 
     if ($display) 
       echo "<input type='hidden' " .
+                  "id='{$this->get_name()}_display' " .
                   "name='{$this->get_name()}_display' " .
                   "value='true'/>\n";
     else
       echo "<input type='hidden' " .
+                  "id='{$this->get_name()}_display' " .
                   "name='{$this->get_name()}_display' " .
                   "value='false'/>\n";
 
+    echo "  <div class='form-title'>{$this->get_title()}";
+
     if ($display) 
-      echo "<div style='display: none' id='{$this->get_name()}_show'>\n";
+      echo "<span style='display: none' id='{$this->get_name()}_show'>\n";
     else
-      echo "<div style='display: block' id='{$this->get_name()}_show'>\n";
+      echo "<span style='display: inline' id='{$this->get_name()}_show'>\n";
 
     echo "<a href='javascript:show(\"{$this->get_name()}_hidden\")," . 
-                             "show(\"{$this->get_name()}_hide\")," .
+                             "showInline(\"{$this->get_name()}_hide\")," .
                              "hide(\"{$this->get_name()}_show\")," .
                              "setValue(\"{$this->get_name()}_display\", \"true\")'>" .
-                             //"document.getElementById(\"{$this->get_name()}_display\").value=\"true\"'>" .
-                             "show: {$this->get_title()}</a>\n";
-    echo "</div>\n";
+                             "(show)</a>\n";
+    echo "</span>\n";
 
     if ($display) 
-      echo "<div style='display: block' id='{$this->get_name()}_hide'>\n";
+      echo "<span style='display: inline' id='{$this->get_name()}_hide'>\n";
     else
-      echo "<div style='display: none' id='{$this->get_name()}_hide'>\n";
+      echo "<span style='display: none' id='{$this->get_name()}_hide'>\n";
 
     echo "<a href='javascript:hide(\"{$this->get_name()}_hidden\")," . 
                              "hide(\"{$this->get_name()}_hide\")," .
-                             "show(\"{$this->get_name()}_show\")," .
-                             "document.getElementById(\"{$this->get_name()}_display\").value=\"fals\"'>" .
-                             "hide: {$this->get_title()}</a>\n";
+                             "showInline(\"{$this->get_name()}_show\")," .
+                             "setValue(\"{$this->get_name()}_display\", \"false\")'>" .
+                             "(hide)</a>\n";
+    echo "</span>\n";
     echo "</div>\n";
 
     if ($display) 
@@ -477,8 +640,6 @@ class OptionalForm extends SubForm {
     else
       echo "<div style='display: none' id='{$this->get_name()}_hidden'>\n";
 
-    echo "  <div class='subform'>\n";
-    echo "  <div class='form-title'>{$this->get_title()}</div>\n";
     echo "  <table class='form'>\n";
     foreach ($this->_children as $child) {
       $child->render();

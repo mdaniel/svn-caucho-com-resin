@@ -4,25 +4,104 @@
  */
 
 require_once "WEB-INF/php/inc.php";
-require_once "WEB-INF/php/form.php";
+require_once "WEB-INF/php/wizard.php";
 
-/*
-$drivers = $g_mbean_server->query("resin:type=JdbcDriver");
+$drivers = $g_mbean_server->query("resin:type=JdbcQuery,*");
 
-echo "<ul>\n";
 foreach ($drivers as $driver) {
-  echo "<li>{$driver->Name}</li>\n";
+  $driver_form = new RootForm("query_" . $driver->Name, 
+                              $driver->Name . " SQL");
+  $driver_form->add_child(new FormContent("<b>URL</b>: " . $driver->getUrl()));
+
+  $pool = $g_mbean_server->query("resin:*,name={$driver->Name},type=ConnectionPool");
+
+  if (count($pool) == 1) {
+    require_once "WEB-INF/php/db.php";
+    $driver_form->add_child(new FormContent(print_db_pools($pool)));
+  }
+
+  // schema browser
+  $schema_browser = new OptionalForm("schema_browser", "Browse tables");
+  $driver_form->add_child($schema_browser);
+
+  $tables = $driver->listTables();
+  foreach ($tables as $table) {
+    $table_form = new OptionalForm("{$table}_browser", 
+                                   "Browse table '{$table}'");
+    $schema_browser->add_child($table_form);
+
+    $columns = $driver->listColumns($table);
+
+    $schema_html = "<table class='schema'>\n";
+
+    $schema_html .= "<tr><th>Column name</th><th>Column type</th></tr>\n";
+    foreach ($columns as $column) {
+      $schema_html .= "<tr>\n";
+      $schema_html .= "<td>" . $column->getName() . "</td>\n";
+      $schema_html .= "<td>" . $column->getType() . "</td>\n";
+      $schema_html .= "</tr>\n";
+    }
+
+    $schema_html .= "</table>\n";
+
+    $table_form->add_child(new FormContent($schema_html));
+  }
+
+  $driver_form->add_child(new TextField("{$driver->Name}-sql", 
+                                        "SQL Query", true));
+
+  function sql_result_processor($form, $driver)
+  {
+    $sql = $form->get_field("{$driver->Name}-sql")->get_value();
+
+    try {
+      $results = $driver->query($sql);
+      $row_names = $results->getRowNames();
+      $result_data = $results->getResultData();
+
+      echo "<div class='sql'>\n";
+      echo "<h3>Query Results</h3>\n"
+      echo "<span style='font-size: 150%;'><tt>$sql</tt></span>\n"
+      echo "<table class='sql'>\n";
+
+      echo "<tr>";
+      foreach ($row_names as $name) {
+        echo "<th>$name</th>";
+      }
+      echo "</tr>\n";
+
+      foreach ($result_data as $row) {
+        echo "<tr>";
+        foreach ($row as $cell) {
+          echo "<td>$cell</td>";
+        }
+        echo "</tr>\n";
+      }
+      echo "</table>\n</div>\n";
+    }
+    catch (Exception $e) {
+      resin_var_dump($e);
+    }
+  }
+
+  $driver_form->process("sql_result_processor", $driver);
 }
-echo "</ul>\n";
-*/
 
-$wizard_form = new RootForm("db_wizard", "Database Pool Configuration Wizard", 
-                            "database", NULL, true);
-$wizard_form->add_child(new TextField("jndi-name", "JNDI Name", true, 
-                                      "jndi-name"));
+$wizard_form = new WizardRootForm("db_wizard", 
+                                  "Database Pool Configuration Wizard", 
+                                  "database");
+$wizard_form->add_child(new WizardTextField("jndi-name",  
+                                            "JNDI Name", 
+                                            /* required = */true,
+                                            /* default = */'N/A',
+                                            "jndi-name"));
 
-$driver_form = new SubForm("driver_form", "Driver Parameters", "driver");
-$driver_field = new ChoiceField("driver", "JDBC Driver Class", true, "type");
+$driver_form = new WizardSubForm("driver_form", "Driver Parameters", "driver");
+$driver_field = new WizardChoiceField("driver", 
+                                      "JDBC Driver Class", 
+                                      /* required = */true,
+                                      /* default = */'N/A',
+                                      "type");
 $driver_field->set_title(" -- Common Drivers -- ");
 $driver_field->add_choice("com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource");
 $driver_field->add_choice("oracle.jdbc.pool.OracleConnectionPoolDataSource");
@@ -31,36 +110,142 @@ $driver_field->add_choice("org.postgresql.Driver");
 $driver_field->add_choice("com.microsoft.jdbcx.sqlserver.SQLServerDataSource");
 
 $driver_form->add_child($driver_field);
-$driver_form->add_child(new TextField("url", "Database URL", true, "url"));
-$driver_form->add_child(new TextField("user", "User", true, "user"));
-$driver_form->add_child(new TextField("password", "Password", false, 
-                                      "password"));
+$driver_form->add_child(new WizardTextField("url", 
+                                            "Database URL", 
+                                            /* required = */true,
+                                            /* default = */'N/A',
+                                            "url"));
+$driver_form->add_child(new WizardTextField("user", 
+                                            "User", 
+                                            /* required = */true,
+                                            /* default = */'N/A',
+                                            "user"));
+$driver_form->add_child(new WizardTextField("password", 
+                                            "Password", 
+                                            /* required = */false,
+                                            /* default = */'N/A',
+                                            "password"));
 
 $wizard_form->add_child($driver_form);
 
-$options_form = new OptionalForm("db_options", "Pool Options");
-$options_form->add_child(new NumberField("prepared-statement-cache-size",
-                                         "Prepared statement cache size",
-                                         false, 
-                                         "prepared-statement-cache-size",
-                                         0));
-$options_form->add_child(new NumberField("max-connections", 
-                                         "Max connections", 
-                                         false, 
-                                         "max-connections", 
-                                         128));
-$options_form->add_child(new TextField("max-idle-time", 
-                                       "Max idle time", 
-                                       false, 
-                                       "max-idle-time", 
-                                       "30s"));
+$options_form = new WizardOptionalForm("db_options", "Pool Options");
+$options_form->add_children(array(
+    new WizardPeriodField("connection-wait-time", 
+                          "Connection Wait Time", 
+                          /* required = */false, 
+                          /* default = */"10m",
+                          "connections-wait-time",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#connection-wait-time"),
+    new WizardBooleanField("close-dangling-connections",
+                          "Close Dangling Connections",
+                          /* required = */false, 
+                          /* default = */"true",
+                          "close-dangling-connections",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#close-dangling-connections"),
+    new WizardPeriodField("max-active-time", 
+                          "Max Active Time", 
+                          /* required = */false, 
+                          /* default = */"6h",
+                          "max-active-time",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-active-time"),
+    new WizardNumberField("max-close-statements", 
+                          "Max close statements", 
+                          /* required = */false, 
+                          /* default = */256,
+                          "max-close-statements",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-close-statements"),
+    new WizardNumberField("max-connections", 
+                          "Max connections", 
+                          /* required = */false, 
+                          /* default = */128,
+                          "max-connections",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-connections"),
+    new WizardNumberField("max-create-connections", 
+                          "Max create connections", 
+                          /* required = */false, 
+                          /* default = */5,
+                          "max-create-connections",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-create-connections"),
+    new WizardPeriodField("max-idle-time", 
+                          "Max idle time", 
+                          /* required = */false, 
+                          /* default = */"30s",
+                          "max-idle-time",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-idle-time"),
+    new WizardNumberField("max-overflow-connections", 
+                          "Max connections", 
+                          /* required = */false, 
+                          /* default = */128,
+                          "max-overflow-connections",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-overflow-connections"),
+    new WizardPeriodField("max-pool-time", 
+                          "Max pool time", 
+                          /* required = */false, 
+                          /* default = */"24h",
+                          "max-pool-time",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#max-pool-time"),
+    new WizardBooleanField("ping",
+                          "Ping", 
+                          /* required = */false, 
+                          /* default = */"false",
+                          "ping",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#ping"),
+    new WizardTextField(  "ping-table",
+                          "Ping table", 
+                          /* required = */false, 
+                          /* default = */"N/A",
+                          "ping-table",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#ping-table"),
+    new WizardTextField(  "ping-query",
+                          "Ping query", 
+                          /* required = */false, 
+                          /* default = */"N/A",
+                          "ping-query",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#ping-query"),
+    new WizardPeriodField("ping-interval", 
+                          "Ping interval", 
+                          /* required = */false, 
+                          /* default = */"1s",
+                          "ping-interval",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#ping-interval"),
+    new WizardNumberField("prepared-statement-cache-size",
+                          "Prepared statement cache size",
+                          /* required = */false, 
+                          /* default = */0,
+                          "prepared-statement-cache-size",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#prepared-statement-cache-size"),
+    new WizardBooleanField("save-allocation-stack-trace",
+                          "Save allocation stack track", 
+                          /* required = */false, 
+                          /* default = */"false",
+                          "save-allocation-stack-trace",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#save-allocation-stack-trace"),
+    new WizardBooleanField("spy",
+                          "Spy connections",
+                          /* required = */false, 
+                          /* default = */"false",
+                          "spy",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#spy"),
+    new WizardNumberField("transaction-timeout",
+                          "Transaction timeout",
+                          /* required = */false, 
+                          /* default = */-1,
+                          "transaction-timeout",
+                          "http://www.caucho.com/resin/doc/database-tags.xtp#transaction-timeout"),
+));
+
 $wizard_form->add_child($options_form);
 
-if ($wizard_form->process()) {
+function database_config_processor($form, $userdata)
+{
+  echo "<h3>Configuration Snippet</h3>\n";
+  echo "<p>Insert this XML into your resin.xml, resin-web.xml, or host.xml</p>";
   echo "<pre>\n";
-  echo str_replace("<", "&lt;", $wizard_form->generate_xml());
+  echo str_replace("<", "&lt;", $form->generate_xml());
   echo "</pre>\n";
 }
+
+$wizard_form->process("database_config_processor");
 
 ?>
 

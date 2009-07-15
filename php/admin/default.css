@@ -617,7 +617,7 @@ td.leftnav {
 table.form td {
   text-align: left;
   vertical-align: top;
-padding: 0.5em;
+  padding: 0.5em;
 }
 
 table.form td input {
@@ -626,7 +626,7 @@ table.form td input {
 
 table.form th {
   text-align: left;
-  vertical-align: top;
+  vertical-align: center;
 }
 
 .missing-value {
@@ -637,7 +637,7 @@ div.subform {
   border: solid 1px #aaa;
   width: 100%;
   background-color: #f4f4f4;
-padding: 2px;
+  padding: 2px;
 }
 
 div.subform table {
@@ -655,7 +655,7 @@ div.show-link {
 .form-title {
   font-weight: bold;
   font-size: 1.5em;
-background: #cde;
+  background: #cde;
   width: 100%;
 }
 
@@ -665,4 +665,39 @@ div.hidden-content {
 
 div.form-submit {
   text-align: right;
+}
+
+table.sql {
+  border: 1px solid;
+}
+
+table.sql td {
+  border: 1px solid;
+}
+
+div.sql {
+  overflow: auto;
+  width: 50em;
+  height: 25em;
+}
+
+span.show-hide a {
+  text-align: right;
+}
+
+table.schema {
+  background: black;
+  border-spacing: 1px;
+  margin: 0;
+}
+
+table.schema tr td {
+  background: #f4f4f4;
+  margin: 0;
+  padding: 0.2em;
+}
+
+table.schema tr th {
+  background: #f4f4f4;
+  padding: 0.2em;
 }
