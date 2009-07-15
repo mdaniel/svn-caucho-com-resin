@@ -274,16 +274,16 @@ public class JavaCompiler {
     if (classPath == null && _loader instanceof DynamicClassLoader) {
       classPath = ((DynamicClassLoader) _loader).getClassPath();
     }
-    else if (true || _loader instanceof URLClassLoader) {
+    else { // if (true || _loader instanceof URLClassLoader) {
       StringBuilder sb = new StringBuilder();
       sb.append(CauchoSystem.getClassPath());
       
-      buildClassPath(sb, (URLClassLoader) _loader);
+      buildClassPath(sb, _loader);
 
       classPath = sb.toString();
     }
-    else if (classPath == null)
-      classPath = CauchoSystem.getClassPath();
+    //else if (classPath == null)
+      //classPath = CauchoSystem.getClassPath();
 
     String srcDirName = getSourceDirName();
     String classDirName = getClassDirName();
