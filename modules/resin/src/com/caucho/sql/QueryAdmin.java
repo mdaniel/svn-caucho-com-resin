@@ -36,14 +36,15 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.SQLException;
+
+import java.util.ArrayList;
+
 import javax.management.*;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.JdbcQueryMXBean;
 import com.caucho.management.server.JdbcQueryResult;
 import com.caucho.management.server.JdbcTableColumn;
-
-import java.util.ArrayList;
 
 public class QueryAdmin extends AbstractManagedObject
   implements JdbcQueryMXBean
@@ -72,32 +73,32 @@ public class QueryAdmin extends AbstractManagedObject
       JdbcQueryResult result = new JdbcQueryResult();
 
       if (statement.execute(sql)) {
-        ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
+        ArrayList<String[]> rows = new ArrayList<String[]>();
 
         ResultSet resultSet = statement.getResultSet();
         ResultSetMetaData metadata = resultSet.getMetaData();
         int columnCount = metadata.getColumnCount();
 
         // add column names
-        ArrayList<String> names = new ArrayList<String>(columnCount);
+        String []names = new String[columnCount];
 
-        for (int i = 1; i <= columnCount; i++)
-          names.add(metadata.getColumnName(i));
+        for (int i = 0; i < columnCount; i++)
+          names[i] = metadata.getColumnName(i + 1);
 
         result.setRowNames(names);
 
         // add results
         while (resultSet.next()) {
-          ArrayList<String> row = new ArrayList<String>(columnCount);
+          String []row = new String[columnCount];
 
-          for (int i = 1; i <= columnCount; i++) {
+          for (int i = 0; i < columnCount; i++) {
             try {
-              row.add(resultSet.getString(i));
+              row[i] = resultSet.getString(i + 1);
             }
             catch (SQLException e) {
               // MySQL zero date conversion issue
               if (e.getMessage().startsWith("Cannot convert value '0000-00-00"))
-                row.add("0000-00-00 00:00:00");
+                row[i] = "0000-00-00 00:00:00";
               else
                 throw e;
             }
@@ -106,7 +107,10 @@ public class QueryAdmin extends AbstractManagedObject
           rows.add(row);
         }
 
-        result.setResultData(rows);
+        String [][]rowsArray = new String[rows.size()][];
+        rows.toArray(rowsArray);
+
+        result.setResultData(rowsArray);
 
         return result;
       }
@@ -119,7 +123,7 @@ public class QueryAdmin extends AbstractManagedObject
     }
   }
 
-  public ArrayList<String> listTables()
+  public String []listTables()
     throws SQLException
   {
     Connection connection = null;
@@ -137,7 +141,10 @@ public class QueryAdmin extends AbstractManagedObject
         tables.add(table);
       }
 
-      return tables;
+      String []tablesArray = new String[tables.size()];
+      tables.toArray(tablesArray);
+
+      return tablesArray;
     }
     finally {
       if (connection != null)
@@ -145,7 +152,7 @@ public class QueryAdmin extends AbstractManagedObject
     }
   }
 
-  public ArrayList<JdbcTableColumn> listColumns(String table)
+  public JdbcTableColumn []listColumns(String table)
     throws SQLException
   {
     Connection connection = null;
@@ -163,7 +170,10 @@ public class QueryAdmin extends AbstractManagedObject
         columns.add(new JdbcTableColumn(name, type));
       }
 
-      return columns;
+      JdbcTableColumn []columnsArray = new JdbcTableColumn[columns.size()];
+      columns.toArray(columnsArray);
+
+      return columnsArray;
     }
     finally {
       if (connection != null)

@@ -29,43 +29,42 @@
 
 package com.caucho.management.server;
 
-import java.util.ArrayList;
 import java.io.Serializable;
 
 /**
  * Wrapper bean for results returned from a JdbcQueryMXBean.
  **/
 public class JdbcQueryResult implements Serializable {
-  private ArrayList<String> _rowNames;
-  private ArrayList<ArrayList<String>> _resultData;
+  private String []_rowNames;
+  private String [][]_resultData;
 
   public JdbcQueryResult()
   {
   }
 
-  public JdbcQueryResult(ArrayList<String> rowNames,
-                         ArrayList<ArrayList<String>> resultData)
+  public JdbcQueryResult(String []rowNames,
+                         String [][]resultData)
   {
     _rowNames = rowNames;
     _resultData = resultData;
   }
 
-  public void setRowNames(ArrayList<String> rowNames)
+  public void setRowNames(String []rowNames)
   {
     _rowNames = rowNames;
   }
 
-  public ArrayList<String> getRowNames()
+  public String []getRowNames()
   {
     return _rowNames;
   }
 
-  public void setResultData(ArrayList<ArrayList<String>> resultData)
+  public void setResultData(String [][]resultData)
   {
     _resultData = resultData;
   }
 
-  public ArrayList<ArrayList<String>> getResultData()
+  public String [][]getResultData()
   {
     return _resultData;
   }

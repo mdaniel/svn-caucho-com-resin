@@ -32,7 +32,6 @@ package com.caucho.management.server;
 import com.caucho.jmx.Description;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  * MBean API to perform simple queries using a pooled JDBC driver.
@@ -51,10 +50,10 @@ public interface JdbcQueryMXBean extends ManagedObjectMXBean {
     throws SQLException;
 
   @Description("lists the tables in the database")
-  public ArrayList<String> listTables()
+  public String []listTables()
     throws SQLException;
 
   @Description("lists the columns in a table")
-  public ArrayList<JdbcTableColumn> listColumns(String table)
+  public JdbcTableColumn []listColumns(String table)
     throws SQLException;
 }

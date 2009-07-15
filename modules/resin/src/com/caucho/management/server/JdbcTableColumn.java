@@ -29,7 +29,6 @@
 
 package com.caucho.management.server;
 
-import java.util.ArrayList;
 import java.io.Serializable;
 
 /**
