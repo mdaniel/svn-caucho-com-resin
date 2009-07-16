@@ -182,10 +182,8 @@ public class BeanEmbed
 	if (_name != null)
 	  factory.name(_name);
 
-	/*
 	if (_init != null)
-	  bean.setInit(_init);
-	*/
+	  factory.init(_init);
 
 	webBeans.addBean(factory.bean());
       }

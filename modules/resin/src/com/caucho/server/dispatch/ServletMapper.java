@@ -241,7 +241,6 @@ public class ServletMapper {
       else if (servletMap != null) {
 	servletName = servletMap.getServletName();
       }
-
     }
 
     if (servletName == null) {
@@ -340,18 +339,17 @@ public class ServletMapper {
       invocation.setPathInfo(null);
 
     ServletMapping regexp = _regexpMap.get(servletName);
-
     if (regexp != null) {
       servletName = regexp.initRegexp(_servletContext, _servletManager, vars);
-
-      if (regexp.isServletConfig())
-	config = regexp;
 
       if (servletName == null) {
 	log.fine(L.l("'{0}' has no matching servlet", contextURI));
       
 	return new ErrorFilterChain(404);
       }
+
+      if (regexp.isServletConfig())
+	config = regexp;
     }
 
     if (servletName.equals("invoker"))

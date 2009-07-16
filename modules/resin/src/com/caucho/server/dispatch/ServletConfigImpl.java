@@ -163,6 +163,18 @@ public class ServletConfigImpl
     return _servletName;
   }
 
+  public ServletConfigImpl createRegexpConfig(String servletName)
+    throws ServletException
+  {
+    ServletConfigImpl config = new ServletConfigImpl();
+    config.setServletName(servletName);
+    config.setServletClass(servletName);
+
+    config.init();
+
+    return config;
+  }
+
   public String getClassName()
   {
     return _servletClassName;
