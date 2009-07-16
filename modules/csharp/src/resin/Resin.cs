@@ -46,7 +46,7 @@ namespace Caucho
     private static String HKEY_JDK = "Software\\JavaSoft\\Java Development Kit";
     private static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
     
-    private static String USAGE = @"usage: {0} [flags] [gui |console | status | start | stop | restart | kill | shutdown]
+    private static String USAGE = @"usage: {0} [flags] gui |console | status | start | stop | restart | kill | shutdown
   -h                                     : this help
   -verbose                               : information on launching java
   -java_home <dir>                       : sets the JAVA_HOME
