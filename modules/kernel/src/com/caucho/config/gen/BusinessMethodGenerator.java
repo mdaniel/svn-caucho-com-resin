@@ -164,8 +164,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
       return true;
     else if (_lock.isEnhanced())
       return true;
-    else if (_scheduling.isEnhanced()) { // TODO This will likely never need to
-      // be enhanced. Should this be removed?
+    else if (_scheduling.isEnhanced()) {
       return true;
     }
 
