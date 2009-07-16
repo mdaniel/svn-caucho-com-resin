@@ -194,6 +194,6 @@ public class QueryAdmin extends AbstractManagedObject
 
   public String toString()
   {
-    return "JdbcDriverAdmin[" + getObjectName() + "]";
+    return getClass().getSimpleName() + "[" + getObjectName() + "]";
   }
 }
