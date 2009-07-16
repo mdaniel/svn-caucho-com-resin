@@ -92,7 +92,11 @@ public class Scheduler {
               .l("The scheduled method threw an unexpected exception."), e);
         }
       }
-    }, new CronType("*  *  *  *  *"));
+    },
+        new CronType(schedule.getSecond(), schedule.getMinute(), schedule
+            .getHour(), schedule.getDayOfWeek(), schedule.getDayOfMonth(),
+            schedule.getMonth(), schedule.getYear(), schedule.getStart(),
+            schedule.getEnd()));
   }
 
   /**
@@ -121,7 +125,7 @@ public class Scheduler {
 
       long nextTime = _trigger.nextTime(now + 500);
 
-      new Alarm("cron-resource", this, nextTime - now);
+      new Alarm(this, nextTime - now);
     }
 
     /**
