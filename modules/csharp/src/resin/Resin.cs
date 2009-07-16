@@ -46,7 +46,7 @@ namespace Caucho
     private static String HKEY_JDK = "Software\\JavaSoft\\Java Development Kit";
     private static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
     
-    private static String USAGE = @"usage: {0} [flags] [console | status | start | stop | restart | kill | shutdown]
+    private static String USAGE = @"usage: {0} [flags] [gui |console | status | start | stop | restart | kill | shutdown]
   -h                                     : this help
   -verbose                               : information on launching java
   -java_home <dir>                       : sets the JAVA_HOME
@@ -70,6 +70,7 @@ namespace Caucho
   -conf <resin.conf>                     : alternate configuration file";
     
     private static String REQUIRE_COMMAND_MSG = @"Resin requires a command:
+  gui - start Resin with a Graphic UI
   console - start Resin in console mode
   status - watchdog status
   start - start a Resin server
@@ -267,6 +268,10 @@ namespace Caucho
           argsIdx++;
         } else if("-e".Equals(args[argsIdx]) ||
                   "-compile".Equals(args[argsIdx])) {
+          argsIdx++;
+        } else if ("gui".Equals(args[argsIdx])) {
+          _command = args[argsIdx];
+          
           argsIdx++;
         } else if ("console".Equals(args[argsIdx]) ||
                    "status".Equals(args[argsIdx])  ||
@@ -480,8 +485,10 @@ namespace Caucho
       try {
         if (_service)
           ExecuteJava("start");
+        else if ("gui".Equals(_command))
+          ExecuteJava("console");
         else
-          ExecuteJava(_command);
+        ExecuteJava(_command);
         
         return true;
       } catch (Exception e) {
