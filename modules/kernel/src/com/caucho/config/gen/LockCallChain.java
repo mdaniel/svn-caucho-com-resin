@@ -26,7 +26,6 @@
  *
  * @author Reza Rahman
  */
-
 package com.caucho.config.gen;
 
 import static javax.ejb.ConcurrencyManagementType.CONTAINER;

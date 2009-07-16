@@ -37,7 +37,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.transaction.Synchronization;
 
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -76,9 +75,8 @@ public class XaCallChain extends AbstractCallChain {
    */
   public boolean isEnhanced()
   {
-    return (_isContainerManaged
-	    && _xa != null
-	    && ! _xa.equals(TransactionAttributeType.SUPPORTS));
+    return (_isContainerManaged && _xa != null && !_xa
+        .equals(TransactionAttributeType.SUPPORTS));
   }
 
   /**
@@ -92,13 +90,14 @@ public class XaCallChain extends AbstractCallChain {
   /**
    * Introspects the method for the default values
    */
+  @SuppressWarnings("unchecked")
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
     ApiClass apiClass = apiMethod.getDeclaringClass();
     ApiClass beanClass = _bizMethod.getBeanClass();
 
-    TransactionManagement xaManagement
-      = beanClass.getAnnotation(TransactionManagement.class);
+    TransactionManagement xaManagement = beanClass
+        .getAnnotation(TransactionManagement.class);
 
     if (xaManagement == null)
       xaManagement = apiClass.getAnnotation(TransactionManagement.class);
@@ -112,7 +111,7 @@ public class XaCallChain extends AbstractCallChain {
     Class javaClass = beanClass.getJavaClass();
 
     if (javaClass != null
-	&& SessionSynchronization.class.isAssignableFrom(javaClass)) {
+        && SessionSynchronization.class.isAssignableFrom(javaClass)) {
       _isSessionSynchronization = true;
     }
 
@@ -141,8 +140,7 @@ public class XaCallChain extends AbstractCallChain {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void generatePrologue(JavaWriter out, HashMap map)
-    throws IOException
+  public void generatePrologue(JavaWriter out, HashMap map) throws IOException
   {
     if (_isContainerManaged && map.get("caucho.ejb.xa") == null) {
       map.put("caucho.ejb.xa", "done");
@@ -159,8 +157,7 @@ public class XaCallChain extends AbstractCallChain {
    * Generates the method interceptor code
    */
   @SuppressWarnings("unchecked")
-  public void generateCall(JavaWriter out)
-    throws IOException
+  public void generateCall(JavaWriter out) throws IOException
   {
     boolean isPushDepth = false;
 
@@ -224,13 +221,12 @@ public class XaCallChain extends AbstractCallChain {
         if (appExn == null)
           continue;
 
-        if (! RuntimeException.class.isAssignableFrom(exn)
-	    && appExn.rollback()) {
+        if (!RuntimeException.class.isAssignableFrom(exn) && appExn.rollback()) {
           out.println("} catch (" + exn.getName() + " e) {");
           out.println("  _xa.markRollback(e);");
           out.println("  throw e;");
         } else if (RuntimeException.class.isAssignableFrom(exn)
-		   && !appExn.rollback()) {
+            && !appExn.rollback()) {
           out.println("} catch (" + exn.getName() + " e) {");
           out.println("  throw e;");
         }
@@ -272,8 +268,7 @@ public class XaCallChain extends AbstractCallChain {
     }
   }
 
-  protected void generateNext(JavaWriter out)
-    throws IOException
+  protected void generateNext(JavaWriter out) throws IOException
   {
     _next.generateCall(out);
   }
