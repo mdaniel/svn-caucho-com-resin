@@ -62,7 +62,7 @@ public class UserTransactionImpl
     = new ArrayList<CloseResource>();
 
   private boolean _isInContext;
-  private int _xaDepth;
+  private boolean _isTransactionActive;
   
   /**
    * Creates the proxy.
@@ -213,7 +213,7 @@ public class UserTransactionImpl
 			Subject subject,
 			ConnectionRequestInfo info)
   {
-    if (_xaDepth == 0)
+    if (! _isTransactionActive)
       return null;
     
     ArrayList<PoolItem> poolItems = _poolItems;
@@ -237,7 +237,7 @@ public class UserTransactionImpl
    */
   PoolItem findJoin(PoolItem item)
   {
-    if (_xaDepth == 0)
+    if (! _isTransactionActive)
       return null;
     
     ArrayList<PoolItem> poolItems = _poolItems;
@@ -287,8 +287,11 @@ public class UserTransactionImpl
   public void begin()
     throws NotSupportedException, SystemException
   {
+    if (_isTransactionActive)
+      throw new IllegalStateException(L.l("UserTransaction.begin() is not allowed because an active transaction already exists.  This may be caused by either a missing commit/rollback or a nested begin().  Nested transactions are not supported."));
+    
     _transactionManager.begin();
-    _xaDepth++;
+    _isTransactionActive = true;
     boolean isOkay = false;
 
     try {
@@ -345,10 +348,12 @@ public class UserTransactionImpl
       isOkay = true;
     } finally {
       if (! isOkay) {
-	log.warning("Rolling back transaction from failed begin()");
+	Exception e1 = new IllegalStateException(L.l("Rolling back transaction from failed begin."));
+	e1.fillInStackTrace();
+	log.log(Level.WARNING, e1.toString(), e1);
 	
 	// something has gone very wrong
-	_xaDepth--;
+	_isTransactionActive = false;
 
 	ArrayList<PoolItem> recoveryList = new ArrayList<PoolItem>(_poolItems);
 	_poolItems.clear();
@@ -376,10 +381,10 @@ public class UserTransactionImpl
    */
   public UserTransactionSuspendState userSuspend()
   {
-    if (_xaDepth == 0)
-      throw new IllegalStateException(L.l("suspend may only be called in a transaction."));
+    if (! _isTransactionActive)
+      throw new IllegalStateException(L.l("UserTransaction.suspend may only be called in a transaction, but no transaction is active."));
 
-    _xaDepth--;
+    _isTransactionActive = false;
     
     UserTransactionSuspendState state;
     state = new UserTransactionSuspendState(_poolItems);
@@ -393,12 +398,10 @@ public class UserTransactionImpl
    */
   public void userResume(UserTransactionSuspendState state)
   {
-    /*
-    if (_inTransaction)
-      throw new IllegalStateException(L.l("resume may only be called outside of a transaction."));
-    */
+    if (_isTransactionActive)
+      throw new IllegalStateException(L.l("UserTransaction.resume may only be called outside of a transaction, because the resumed transaction must not conflict with an active transaction."));
 
-    _xaDepth++;
+    _isTransactionActive = true;
 
     _poolItems.addAll(state.getPoolItems());
   }
@@ -429,16 +432,15 @@ public class UserTransactionImpl
 	   HeuristicRollbackException, SecurityException, SystemException
   {
     try {
-      /* XXX: interaction with hessian XA
-      if (_xaDepth == 0)
-	throw new IllegalStateException("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back.");
-      */
-      
+      // XXX: interaction with hessian XA
+      if (! _isTransactionActive)
+	throw new IllegalStateException("UserTransaction.commit() requires an active transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back.");
+
       _transactionManager.commit();
     } finally {
       _poolItems.clear();
-      if (_xaDepth > 0)
-	_xaDepth--;
+
+      _isTransactionActive = false;
     }
   }
   
@@ -451,9 +453,9 @@ public class UserTransactionImpl
     try {
       _transactionManager.rollback();
     } finally {
+      _isTransactionActive = false;
+      
       _poolItems.clear();
-      if (_xaDepth > 0)
-	_xaDepth--;
     }
   }
 
@@ -467,17 +469,17 @@ public class UserTransactionImpl
 
     _isInContext = false;
     
-    boolean inTransaction = _xaDepth > 0;
-    _xaDepth = 0;
+    boolean isTransactionActive = _isTransactionActive;
+    _isTransactionActive = false;
 
-    if (! inTransaction && _poolItems.size() > 0) {
-      Exception e = new IllegalStateException("user transaction pool broken");
+    if (! isTransactionActive && _poolItems.size() > 0) {
+      Exception e = new IllegalStateException("Internal error: user transaction pool broken because poolItems exist, but no transaction is active.");
       log.log(Level.WARNING, e.toString(), e);
     }
     
     _poolItems.clear();
 
-    if (inTransaction) {
+    if (isTransactionActive) {
       try {
 	TransactionImpl xa = (TransactionImpl) _transactionManager.getTransaction();
 
