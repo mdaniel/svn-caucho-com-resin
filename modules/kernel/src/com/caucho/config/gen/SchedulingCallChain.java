@@ -28,14 +28,16 @@
  */
 package com.caucho.config.gen;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 
 import javax.ejb.Schedule;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.Schedules;
 
 import com.caucho.ejb.scheduler.Scheduler;
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
@@ -48,10 +50,21 @@ public class SchedulingCallChain extends AbstractCallChain {
   @SuppressWarnings("unused")
   private static final L10N L = new L10N(SchedulingCallChain.class);
 
+  private EjbCallChain _next;
+
+  private Schedule _schedule;
+  private Schedules _schedules;
+
+  @SuppressWarnings("unchecked")
+  private Class _targetBean;
+  private Method _targetMethod;
+
   public SchedulingCallChain(BusinessMethodGenerator businessMethod,
       EjbCallChain next)
   {
     super(next);
+
+    _next = next;
   }
 
   /**
@@ -60,7 +73,7 @@ public class SchedulingCallChain extends AbstractCallChain {
   @Override
   public boolean isEnhanced()
   {
-    return false; // Will not need to generate code on the bean class itself.
+    return ((_schedule != null) || (_schedules != null));
   }
 
   /**
@@ -69,40 +82,62 @@ public class SchedulingCallChain extends AbstractCallChain {
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implementationMethod)
   {
-    List<Schedule> _schedules = new LinkedList<Schedule>();
+    _schedule = apiMethod.getAnnotation(Schedule.class);
 
-    Schedules schedulesAttribute = apiMethod.getAnnotation(Schedules.class);
-
-    if ((schedulesAttribute == null) && (implementationMethod != null)) {
-      schedulesAttribute = implementationMethod.getAnnotation(Schedules.class);
+    if ((_schedule == null) && (implementationMethod != null)) {
+      _schedule = implementationMethod.getAnnotation(Schedule.class);
     }
 
-    if (schedulesAttribute != null) {
-      for (Schedule schedule : schedulesAttribute.value()) {
-        _schedules.add(schedule);
+    if (_schedule != null) {
+      _schedules = apiMethod.getAnnotation(Schedules.class);
+
+      if ((_schedules == null) && (implementationMethod != null)) {
+        _schedules = implementationMethod.getAnnotation(Schedules.class);
       }
     }
 
-    Schedule scheduleAttribute = apiMethod.getAnnotation(Schedule.class);
+    if ((_schedule != null) || (_schedules != null)) {
+      // TODO What happens when implementation method is null? Can it be null in
+      // this case?
+      if (implementationMethod != null) {
+        _targetBean = implementationMethod.getDeclaringClass().getJavaClass();
+        _targetMethod = implementationMethod.getMethod();
+      }
+    }
+  }
 
-    if ((scheduleAttribute == null) && (implementationMethod != null)) {
-      scheduleAttribute = implementationMethod.getAnnotation(Schedule.class);
+  /**
+   * Generates the class prologue.
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public void generatePrologue(JavaWriter out, HashMap map) throws IOException
+  {
+    if (((_schedule != null) || (_schedules != null))
+        && (map.get("caucho.ejb.scheduling") == null)) {
+      map.put("caucho.ejb.scheduling", "done");
+
+      // TODO Should an alternate paradigm be used for this since this is not
+      // really generating code?
+
+      if (_schedule != null) {
+        Scheduler.schedule(_targetBean, _targetMethod, new ScheduleExpression()
+            .second(_schedule.second()).minute(_schedule.minute()).hour(
+                _schedule.hour()).dayOfWeek(_schedule.dayOfWeek()).dayOfMonth(
+                _schedule.dayOfMonth()).month(_schedule.month()).year(
+                _schedule.year()), _schedule.info(), _schedule.persistent());
+      } else {
+        for (Schedule schedule : _schedules.value()) {
+          Scheduler.schedule(_targetBean, _targetMethod,
+              new ScheduleExpression().second(schedule.second()).minute(
+                  schedule.minute()).hour(schedule.hour()).dayOfWeek(
+                  schedule.dayOfWeek()).dayOfMonth(schedule.dayOfMonth())
+                  .month(schedule.month()).year(schedule.year()), schedule
+                  .info(), schedule.persistent());
+        }
+      }
     }
 
-    if (scheduleAttribute != null) {
-      _schedules.add(scheduleAttribute);
-    }
-
-    // TODO Should an alternate paradigm be used for this since this is not
-    // really generating code?
-    for (Schedule schedule : _schedules) {
-      Scheduler.schedule(implementationMethod.getDeclaringClass()
-          .getJavaClass(), implementationMethod.getMethod(),
-          new ScheduleExpression().second(schedule.second()).minute(
-              schedule.minute()).hour(schedule.hour()).dayOfWeek(
-              schedule.dayOfWeek()).dayOfMonth(schedule.dayOfMonth()).month(
-              schedule.month()).year(schedule.year()), schedule.info(),
-          schedule.persistent());
-    }
+    _next.generatePrologue(out, map);
   }
 }
