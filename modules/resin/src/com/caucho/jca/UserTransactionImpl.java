@@ -66,7 +66,7 @@ public class UserTransactionImpl implements UserTransaction {
   private ArrayList<CloseResource> _closeResources
     = new ArrayList<CloseResource>();
 
-  private int _xaDepth;
+  private boolean _isTransaction;
   
   /**
    * Creates the proxy.
@@ -199,7 +199,7 @@ public class UserTransactionImpl implements UserTransaction {
 			Subject subject,
 			ConnectionRequestInfo info)
   {
-    if (_xaDepth == 0)
+    if (! _isTransaction)
       return null;
     
     ArrayList<PoolItem> poolItems = _poolItems;
@@ -223,7 +223,7 @@ public class UserTransactionImpl implements UserTransaction {
    */
   PoolItem findJoin(PoolItem item)
   {
-    if (_xaDepth == 0)
+    if (! _isTransaction)
       return null;
     
     ArrayList<PoolItem> poolItems = _poolItems;
@@ -273,8 +273,11 @@ public class UserTransactionImpl implements UserTransaction {
   public void begin()
     throws NotSupportedException, SystemException
   {
+    if (_isTransaction)
+      throw new IllegalStateException(L.l("UserTransaction.begin() is not allowed when a transaction is active."));
+    
     _transactionManager.begin();
-    _xaDepth++;
+    _isTransaction = true;
     boolean isOkay = false;
 
     try {
@@ -331,7 +334,7 @@ public class UserTransactionImpl implements UserTransaction {
 	log.warning("Rolling back transaction from failed begin()");
 	
 	// something has gone very wrong
-	_xaDepth--;
+	_isTransaction = false;
 
 	ArrayList<PoolItem> recoveryList = new ArrayList<PoolItem>(_poolItems);
 	_poolItems.clear();
@@ -359,10 +362,10 @@ public class UserTransactionImpl implements UserTransaction {
    */
   public UserTransactionSuspendState suspend()
   {
-    if (_xaDepth == 0)
+    if (! _isTransaction)
       throw new IllegalStateException(L.l("suspend may only be called in a transaction."));
 
-    _xaDepth--;
+    _isTransaction = false;
     
     UserTransactionSuspendState state;
     state = new UserTransactionSuspendState(_poolItems);
@@ -381,7 +384,7 @@ public class UserTransactionImpl implements UserTransaction {
       throw new IllegalStateException(L.l("resume may only be called outside of a transaction."));
     */
 
-    _xaDepth++;
+    _isTransaction = true;
 
     _poolItems.addAll(state.getPoolItems());
   }
@@ -411,8 +414,8 @@ public class UserTransactionImpl implements UserTransaction {
       _transactionManager.commit();
     } finally {
       _poolItems.clear();
-      if (_xaDepth > 0)
-	_xaDepth--;
+
+      _isTransaction = false;
     }
   }
   
@@ -426,8 +429,8 @@ public class UserTransactionImpl implements UserTransaction {
       _transactionManager.rollback();
     } finally {
       _poolItems.clear();
-      if (_xaDepth > 0)
-	_xaDepth--;
+
+      _isTransaction = false;
     }
   }
 
@@ -439,8 +442,8 @@ public class UserTransactionImpl implements UserTransaction {
   {
     IllegalStateException exn = null;
 
-    boolean inTransaction = _xaDepth > 0;
-    _xaDepth = 0;
+    boolean inTransaction = _isTransaction;
+    _isTransaction = false;
 
     if (! inTransaction && _poolItems.size() > 0) {
       Exception e = new IllegalStateException("user transaction pool broken");

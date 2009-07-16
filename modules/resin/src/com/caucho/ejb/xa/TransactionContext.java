@@ -416,13 +416,10 @@ public class TransactionContext implements Synchronization {
                           Status.STATUS_COMMITTED);
         }
       }
-      else if (_rollbackOnly ||
-               _transaction.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
-	hasCompletion = true;
-        _userTransaction.rollback();
-      }
-      else if (_transaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
-	hasCompletion = true;
+      else {
+	if (_rollbackOnly && _transaction.getStatus() == Status.STATUS_ACTIVE)
+	  _userTransaction.setRollbackOnly();
+	
         _userTransaction.commit();
       }
     } catch (Exception e) {

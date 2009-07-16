@@ -2,7 +2,13 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
-<s2 title="3.0.28 snap">
+<s2 title="3.0.29 snap">
+<ul>
+<li>xa: updated UserTransaction to use boolean instead of depth.</li>
+</ul>
+</s2>
+
+<s2 title="3.0.28 - May 18, 2009">
 <ul>
 <li>ThreadPool: validation of idle items (#3454, rep by Takahiro Fukuda)</li>
 <li>win32: O_BINARY required for configuation saving (#3337, rep by Takahiro Fukuda)</li>
