@@ -33,7 +33,7 @@ and load-balancing with failover.
 <p>The Control Panel is used to configure two environment variables:</p>
 <example>
 JAVA_HOME=C:\jdk1.5.0
-RESIN_HOME=C:\resin-3.2
+RESIN_HOME=C:\resin-4.0
 </example>
 </s1>
 

@@ -316,6 +316,15 @@ multiple Resin services using the <var>-install-as</var> option:
 <example>
 C:\Resin\resin.exe -install-as ResinA
 </example>
+<s3 title="Running resin.exe on Windows Vista and Windows Server 2008">
+<p>
+Note: the command prompt i.e. cmd.exe on Windows Vista and Windows Server 2008
+will need to be run with administrative priviliges by choosing "Run As Administrator"
+from the context menu(given by Windows on right click). The cmd.exe locations
+for Windows Vista and Windows Server 2008 are %WINDIR%/system32 and
+%WINDIR%/sytemwow64 respectively.
+</p>
+</s3>
 </s2>
 </s1>
 
