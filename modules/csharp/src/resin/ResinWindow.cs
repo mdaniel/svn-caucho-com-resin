@@ -28,6 +28,7 @@
 using System;
 using System.Windows.Forms;
 using System.Drawing;
+using System.ComponentModel;
 
 namespace Caucho
 {
@@ -39,6 +40,8 @@ namespace Caucho
     public ResinWindow(Resin resin, String title)
     {
       _resin = resin;
+      
+      Console.CancelKeyPress += new ConsoleCancelEventHandler(quit);
       
       GroupBox groupBox = new System.Windows.Forms.GroupBox();
       groupBox.SuspendLayout();
@@ -97,6 +100,7 @@ namespace Caucho
       // 
       // Form1
       // 
+      this.Closing += new CancelEventHandler(quit);
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.AutoSize = true;
@@ -107,8 +111,7 @@ namespace Caucho
       groupBox.ResumeLayout(false);
       groupBox.PerformLayout();
       this.ResumeLayout(false);
-    }
-    
+    }    
 
     void processAction(object sender, EventArgs e)
     {
@@ -120,7 +123,19 @@ namespace Caucho
         _resin.StopResin();
     }
     
+    void quit(Object sender,  ConsoleCancelEventArgs args){
+      quit_();
+    }
+    
     void quit(Object sender, EventArgs evt) {
+      quit_();
+    }
+    
+    void quit(Object sender, CancelEventArgs evt) {
+      quit_();
+    }
+    
+    void quit_(){
       try {
         _resin.StopResin();
       } catch(Exception e) {
@@ -129,6 +144,5 @@ namespace Caucho
       
       Application.Exit();
     }
-    
   }
 }

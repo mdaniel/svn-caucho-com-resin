@@ -488,7 +488,7 @@ namespace Caucho
         else if ("gui".Equals(_command))
           ExecuteJava("console");
         else
-        ExecuteJava(_command);
+          ExecuteJava(_command);
         
         return true;
       } catch (Exception e) {
@@ -512,9 +512,10 @@ namespace Caucho
           
           _process.Kill();
           
-          while(! (_process.HasExited)) {
+          //give server time to close
+          for (int i = 0; i < 14; i++) {
             Info(".", false);
-            _process.WaitForExit(500);
+            Thread.CurrentThread.Join(1000);
           }
           
           Info(". done.");
@@ -557,7 +558,7 @@ namespace Caucho
       startInfo.Arguments = arguments.ToString();
       
       if (_verbose)
-        Info("Using Command Line :" + _javaExe + ' ' + startInfo.Arguments);
+        Info("Using Command Line: " + _javaExe + ' ' + startInfo.Arguments);
       
       startInfo.UseShellExecute = false;
       startInfo.WorkingDirectory = _rootDirectory;
