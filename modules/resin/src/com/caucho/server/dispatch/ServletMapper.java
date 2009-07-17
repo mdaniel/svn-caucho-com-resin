@@ -128,6 +128,8 @@ public class ServletMapper {
     throws ServletException
   {
     try {
+      boolean isIgnore = false;
+      
       if (servletName == null) {
 	throw new ConfigException(L.l("servlets need a servlet-name."));
       }
@@ -137,6 +139,7 @@ public class ServletMapper {
       else if (servletName.equals("plugin_match")
 	       || servletName.equals("plugin-match")) {
         // special case
+	isIgnore = true;
       }
       else if (servletName.equals("plugin_ignore")
 	       || servletName.equals("plugin-ignore")) {
@@ -157,7 +160,7 @@ public class ServletMapper {
         _servletMap.addStrictMap(urlPattern, null, mapping);
       }
       else
-        _servletMap.addMap(urlPattern, mapping);
+        _servletMap.addMap(urlPattern, mapping, isIgnore);
 
       Set<String> patterns = _urlPatterns.get(servletName);
 
@@ -179,7 +182,8 @@ public class ServletMapper {
     }
   }
 
-  public Set<String> getUrlPatterns(String servletName) {
+  public Set<String> getUrlPatterns(String servletName)
+  {
     return _urlPatterns.get(servletName);
   }
   
