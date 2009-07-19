@@ -1,33 +1,35 @@
 package example;
 
-import com.caucho.servlet.comet.*;
+import javax.servlet.*;
 
 public class CometState {
-  private final CometController _controller;
+  private final AsyncContext _async;
 
   private int _count;
 
-  public CometState(CometController controller)
+  public CometState(AsyncContext async)
   {
-    _controller = controller;
+    _async = async;
   }
 
   public boolean isClosed()
   {
-    return _controller.isClosed();
+    ServletRequest request = _async.getRequest();
+
+    return request == null || ! request.isAsyncStarted();
   }
 
   public boolean wake()
   {
-    _controller.setAttribute("comet.count", ++_count);
+    _async.getRequest().setAttribute("comet.count", ++_count);
 
     if (_count <= 10) {
-      _controller.wake();
-    
-      return ! _controller.isClosed();
+      _async.dispatch();
+
+      return ! isClosed();
     }
     else {
-      _controller.close();
+      _async.complete();
 
       return false;
     }

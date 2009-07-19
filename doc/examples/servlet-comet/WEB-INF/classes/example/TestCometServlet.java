@@ -7,26 +7,30 @@ import java.util.concurrent.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import javax.inject.Current;
+import javax.enterprise.inject.Current;
 
 import com.caucho.servlet.comet.*;
 
-public class TestCometServlet extends GenericCometServlet
+public class TestCometServlet extends GenericServlet
 {
   @Current private TimerService _timerService;
-  
+
   private ArrayList<CometState> _itemList
     = new ArrayList<CometState>();
-  
+
   @Override
-  public boolean service(ServletRequest request,
-                         ServletResponse response,
-                         CometController controller)
+  public void service(ServletRequest request,
+                      ServletResponse response)
     throws IOException, ServletException
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
-    
+
+    if (req.isAsyncStarted()) {
+      resume(request, response, req.getAsyncContext());
+      return;
+    }
+
     PrintWriter out = res.getWriter();
     res.setHeader("Cache-Control", "no-cache, must-revalidate");
     res.setHeader("Expires", "Mon, 27 Jul 1997 05:00:00 GMT");
@@ -45,31 +49,27 @@ public class TestCometServlet extends GenericCometServlet
     out.println("var comet_update = window.parent.comet_update;");
     out.println("</script>");
 
-    CometState state = new CometState(controller);
-    
+    AsyncContext async = request.startAsync();
+    CometState state = new CometState(async);
+
     // Add the comet state to the controller
     _timerService.addCometState(state);
-
-    return true;
   }
-  
-  @Override
-  public boolean resume(ServletRequest request,
-                        ServletResponse response,
-                        CometController controller)
+
+  private void resume(ServletRequest request,
+                      ServletResponse response,
+                      AsyncContext async)
     throws IOException, ServletException
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
-    
+
     PrintWriter out = res.getWriter();
 
-    Object count = controller.getAttribute("comet.count");
+    Object count = req.getAttribute("comet.count");
 
     out.println("<script type='text/javascript'>");
     out.println("comet_update(" + count + ");");
     out.println("</script>");
-
-    return true;
   }
 }

@@ -61,7 +61,7 @@ import java.util.logging.Logger;
 public class WebAppFilterChain extends AbstractFilterChain {
   private static final Logger log
     = Logger.getLogger(WebAppFilterChain.class.getName());
-  
+
   // Next filter chain
   private FilterChain _next;
 
@@ -113,8 +113,8 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
     try {
       if (_isTop) {
-	_tm = TransactionManagerImpl.getInstance();
-	_utm = UserTransactionProxy.getInstance();
+        _tm = TransactionManagerImpl.getInstance();
+        _utm = UserTransactionProxy.getInstance();
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -136,7 +136,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
   {
     return _next;
   }
-  
+
   /**
    * Invokes the next filter in the chain or the final servlet at
    * the end of the chain.
@@ -153,33 +153,32 @@ public class WebAppFilterChain extends AbstractFilterChain {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     WebApp app = _app;
-    
+
     UserTransactionImpl ut = null;
     if (_isTop)
       ut = _utm.getUserTransaction();
-    
+
     try {
       thread.setContextClassLoader(app.getClassLoader());
 
       if (! app.enterWebApp() && app.getConfigException() == null) {
-	if (response instanceof HttpServletResponse) {
-	  HttpServletResponse res = (HttpServletResponse) response;
+        if (response instanceof HttpServletResponse) {
+          HttpServletResponse res = (HttpServletResponse) response;
 
-	  res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-	}
-	
-	return;
+          res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        }
+
+        return;
       }
 
       /*
       if (_securityRoleMap != null && request instanceof AbstractHttpRequest)
-	((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
+        ((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
       */
       for (int i = 0; i < _requestListeners.length; i++) {
-	ServletRequestEvent event = new ServletRequestEvent(_app, request);
-	System.out.println("REL: " + event + " "+ _requestListeners[i]);
-	
-	_requestListeners[i].requestInitialized(event);
+        ServletRequestEvent event = new ServletRequestEvent(_app, request);
+
+        _requestListeners[i].requestInitialized(event);
       }
 
       _next.doFilter(request, response);
@@ -189,24 +188,24 @@ public class WebAppFilterChain extends AbstractFilterChain {
       app.exitWebApp();
 
       for (int i = _requestListeners.length - 1; i >= 0; i--) {
-	try {
-	  ServletRequestEvent event = new ServletRequestEvent(_app, request);
-	
-	  _requestListeners[i].requestDestroyed(event);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          ServletRequestEvent event = new ServletRequestEvent(_app, request);
+
+          _requestListeners[i].requestDestroyed(event);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       if (_isTop) {
-	((CauchoResponse) response).close();
-	
-	try {
-	  if (ut != null)
-	    ut.abortTransaction();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        ((CauchoResponse) response).close();
+
+        try {
+          if (ut != null)
+            ut.abortTransaction();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       // put finish() before access log so the session isn't tied up while
@@ -217,19 +216,19 @@ public class WebAppFilterChain extends AbstractFilterChain {
         ((HttpServletRequestImpl) request).finishInvocation();
 
       try {
-	if (_accessLog != null) {
-	  _accessLog.log((HttpServletRequest) request,
-			 (HttpServletResponse) response,
-			 _app);
-	}
+        if (_accessLog != null) {
+          _accessLog.log((HttpServletRequest) request,
+                         (HttpServletResponse) response,
+                         _app);
+        }
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * Resumes the request for comet-style.
    *
@@ -239,27 +238,27 @@ public class WebAppFilterChain extends AbstractFilterChain {
    */
   @Override
   public boolean doResume(ServletRequest request,
-			  ServletResponse response)
+                          ServletResponse response)
     throws ServletException, IOException
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     WebApp app = _app;
-    
+
     try {
       thread.setContextClassLoader(app.getClassLoader());
 
       if (! app.enterWebApp())
-	return false;
+        return false;
 
       if (_next instanceof CometFilterChain) {
-	CometFilterChain next = (CometFilterChain) _next;
+        CometFilterChain next = (CometFilterChain) _next;
 
-	return next.doResume(request, response);
+        return next.doResume(request, response);
       }
       else
-	return false;
+        return false;
     } catch (Throwable e) {
       _errorPageManager.sendServletError(e, request, response);
 
@@ -268,13 +267,13 @@ public class WebAppFilterChain extends AbstractFilterChain {
       app.exitWebApp();
 
       if (_isTop) {
-	((HttpServletResponseImpl) response).close();
-	
-	try {
-	  _utm.abortTransaction();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        ((HttpServletResponseImpl) response).close();
+
+        try {
+          _utm.abortTransaction();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       // put finish() before access log so the session isn't tied up while
@@ -286,16 +285,16 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
       /*
       try {
-	if (_accessLog != null) {
-	  _accessLog.log((HttpServletRequest) request,
-			 (HttpServletResponse) response,
-			 _app);
-	}
+        if (_accessLog != null) {
+          _accessLog.log((HttpServletRequest) request,
+                         (HttpServletResponse) response,
+                         _app);
+        }
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
       */
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }

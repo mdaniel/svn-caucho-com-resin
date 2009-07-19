@@ -1,11 +1,10 @@
-<web-app xmlns="http://caucho.com/ns/resin">
-  <servlet servlet-name="hello"
-           servlet-class="test.HelloServlet">
-    <init>
-      <greeting>Hello, bean-style World</greeting>
-    </init>
-  </servlet>
+<web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:test="urn:java:test">
+  
+  <test:HelloServlet>
+    <WebServlet urlPatterns="/hello"/>
 
-  <servlet-mapping url-pattern="/hello"
-                   servlet-name="hello"/>
+    <test:greeting>Hello, bean-style World</test:greeting>
+  </test:HelloServlet>
+
 </web-app>

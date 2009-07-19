@@ -41,6 +41,10 @@ if (! $p_name) {
 
 echo "<h2>$p_name</h2>";
 
+echo "<p><b>Note:</b> this page requires HTML 5 canvas support.  You may need
+to use Firefox 3.5 or other HTML 5-capable browser
+to see the graphs properly.</p>\n";
+
 echo "<form method='post'>"
 echo "Interval: <select name='period'>\n";
 
@@ -58,6 +62,11 @@ echo "<option ";
 if ($p_period == 24 * 60 * 60)
   echo " selected";
 echo " value='" . (24 * 60 * 60) . "'>1 day\n";
+
+echo "<option ";
+if ($p_period == 7 * 24 * 60 * 60)
+  echo " selected";
+echo " value='" . (7 * 24 * 60 * 60) . "'>1 week\n";
 
 echo "</select>\n";
 

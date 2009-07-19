@@ -88,22 +88,20 @@ integers and doubles as well as strings.  After Resin calls the <code>setXXX</co
 the following calls:</p>
 
 <ol>
-<li><code>servlet = new test.HelloServlet();</code>
-</li><li><code>servlet.setGreeting("Hello, World!");</code>
-</li><li><code>servlet.init(servletConfig);</code>
-</li></ol>
+<li><code>servlet = new test.HelloServlet();</code></li>
+<li><code>servlet.setGreeting("Hello, World!");</code></li>
+<li><code>servlet.init(servletConfig);</code></li>
+</ol>
 
 <example title="WEB-INF/web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;servlet servlet-name="hello"
-            servlet-class="test.HelloServlet"&gt;
-    &lt;init&gt;
-      &lt;greeting&gt;Hello, World!&lt;/greeting&gt;
-    &lt;/init&gt;
-  &lt;/servlet&gt;
+  
+  &lt;test:HelloServlet>
+    &lt;WebServlet urlPatterns="/hello"/>
 
-  &lt;servlet-mapping url-pattern="/hello"
-            servlet-name="hello"/&gt;
+    &lt;test:greeting>Hello, bean-style World&lt;/test:greeting>
+  &lt;/test:HelloServlet>
+  
 &lt;/web-app&gt;
 </example>
 

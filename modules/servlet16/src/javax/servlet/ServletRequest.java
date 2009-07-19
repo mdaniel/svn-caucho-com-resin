@@ -313,8 +313,8 @@ public interface ServletRequest {
    * @since Servlet 3.0
    */
   public void addAsyncListener(AsyncListener listener,
-			       ServletRequest request,
-			       ServletResponse response);
+                               ServletRequest request,
+                               ServletResponse response);
 
   /**
    * Returns the async context for the request
@@ -375,7 +375,7 @@ public interface ServletRequest {
     throws IllegalStateException;
 
   /**
-   * Returns DispatherType
+   * Returns DispatcherType
    * @return
    */
   public DispatcherType getDispatcherType();

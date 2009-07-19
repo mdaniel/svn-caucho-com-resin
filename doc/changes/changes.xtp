@@ -13,6 +13,8 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>server: chunking issues with filled content (rep by Rick Mann)</li>
+<li>gzip: empty gzip response should return 0 bytes (#3599, rep by martin thompson)</li>
 <li>jsp: jsp recompilation detection for WEB-INF/tags (#3578, rep by rmann)</li>
 <li>(2009-07-14) jsf: ViewExpiredException with JSF RI(#3517, on behalf of Matthew Schmidt)</li>
 <li>server: host-default and web-app-default were included multiple times (#3554, rep by Jean Padilla)</li>

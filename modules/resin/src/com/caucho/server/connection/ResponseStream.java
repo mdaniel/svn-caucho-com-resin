@@ -283,6 +283,7 @@ public class ResponseStream extends ToByteResponseStream {
   /**
    * Returns the byte buffer.
    */
+  /* hessian/3544
   @Override
   public void write(byte []buffer, int offset, int length)
     throws IOException
@@ -295,6 +296,7 @@ public class ResponseStream extends ToByteResponseStream {
     else
       super.write(buffer, offset, length);
   }
+  */
 
   /**
    * Returns the byte buffer.
@@ -400,7 +402,7 @@ public class ResponseStream extends ToByteResponseStream {
 	buffer = _next.nextBuffer(offset);
 	      
 	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "write-chunk(" + offset + ")");
+	  log.fine(dbgId() + "write-chunk1(" + offset + ")");
 
 	_bufferStartOffset = 8 + _next.getBufferOffset();
 	_next.setBufferOffset(_bufferStartOffset);
@@ -415,7 +417,7 @@ public class ResponseStream extends ToByteResponseStream {
 	_bufferStartOffset = _next.getBufferOffset();
 	      
 	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "write-chunk(" + offset + ")");
+	  log.fine(dbgId() + "write-chunk2(" + offset + ")");
 
 	return buffer;
       }
@@ -473,7 +475,7 @@ public class ResponseStream extends ToByteResponseStream {
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() +  "write-chunk(" + length + ")");
+      log.fine(dbgId() +  "write-chunk3(" + length + ")");
 
     if (! _isHead) {
       // server/051e
@@ -540,7 +542,7 @@ public class ResponseStream extends ToByteResponseStream {
 
       if (_next != null && ! _isHead) {
 	if (length > 0 && log.isLoggable(Level.FINE)) {
-	  log.fine(dbgId() +  "write-chunk(" + length + ")");
+	  log.fine(dbgId() +  "write-chunk4(" + length + ")");
 	}
 	
 	if (_chunkedEncoding) {
@@ -572,7 +574,7 @@ public class ResponseStream extends ToByteResponseStream {
 	      buffer = _next.nextBuffer(bufferOffset);
 	      
 	      if (log.isLoggable(Level.FINE))
-		log.fine(dbgId() + "write-chunk(" + bufferOffset + ")");
+		log.fine(dbgId() + "write-chunk5(" + bufferOffset + ")");
 	      
 	      bufferStart = _next.getBufferOffset() + 8;
 	      bufferOffset = bufferStart;
@@ -851,7 +853,7 @@ public class ResponseStream extends ToByteResponseStream {
       }
 
       if (log.isLoggable(Level.FINE))
-	log.fine(dbgId() + "write-chunk(" + _tailChunkedLength + ")");
+	log.fine(dbgId() + "write-chunk6(" + _tailChunkedLength + ")");
     }
   }
 

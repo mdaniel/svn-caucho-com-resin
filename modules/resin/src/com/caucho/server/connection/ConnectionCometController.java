@@ -29,7 +29,9 @@
 
 package com.caucho.server.connection;
 
+import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.servlet.comet.CometController;
@@ -44,13 +46,19 @@ import com.caucho.util.*;
 public class ConnectionCometController extends ConnectionController
   implements CometController
 {
+  private static final L10N L = new L10N(ConnectionCometController.class);
+  private static final Logger log
+    = Logger.getLogger(ConnectionCometController.class.getName());
+
   private Connection _conn;
-  
+
   private HashMap<String,Object> _map;
 
   private ServletRequest _request;
   private ServletResponse _response;
-  
+
+  private AsyncListenerNode _listenerNode;
+
   private boolean _isTimeout;
 
   private boolean _isTop;
@@ -59,13 +67,13 @@ public class ConnectionCometController extends ConnectionController
   private boolean _isComplete;
 
   private String _forwardPath;
-  
+
   private long _maxIdleTime;
 
   public ConnectionCometController(Connection conn,
-				   boolean isTop,
-				   ServletRequest request,
-				   ServletResponse response)
+                                   boolean isTop,
+                                   ServletRequest request,
+                                   ServletResponse response)
   {
     _conn = conn;
 
@@ -73,7 +81,7 @@ public class ConnectionCometController extends ConnectionController
     _request = request;
     _response = response;
   }
-  
+
   /**
    * Sets the max idle time.
    */
@@ -82,7 +90,7 @@ public class ConnectionCometController extends ConnectionController
     if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
       _maxIdleTime = Long.MAX_VALUE / 2;
   }
-  
+
   /**
    * Gets the max idle time.
    */
@@ -138,6 +146,16 @@ public class ConnectionCometController extends ConnectionController
     _isComplete = true;
     _isSuspended = false;
 
+    for (AsyncListenerNode node = _listenerNode;
+         node != null;
+         node = node.getNext()) {
+      try {
+        node.onComplete();
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
     wake();
   }
 
@@ -149,7 +167,7 @@ public class ConnectionCometController extends ConnectionController
     _isSuspended = false;
     _isInitial = false;
   }
-  
+
   /**
    * Wakes the connection.
    */
@@ -179,6 +197,16 @@ public class ConnectionCometController extends ConnectionController
     _isTimeout = true;
     _isComplete = true;
 
+    for (AsyncListenerNode node = _listenerNode;
+         node != null;
+         node = node.getNext()) {
+      try {
+        node.onTimeout();
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
     wake();
   }
 
@@ -205,7 +233,23 @@ public class ConnectionCometController extends ConnectionController
   {
     return _conn != null && ! _isComplete;
   }
-  
+
+  /**
+   * Sets the async listener
+   */
+  public void setAsyncListenerNode(AsyncListenerNode node)
+  {
+    _listenerNode = node;
+  }
+
+  public void addAsyncListener(AsyncListener listener,
+                               ServletRequest request,
+                               ServletResponse response)
+  {
+    _listenerNode
+      = new AsyncListenerNode(listener, request, response, _listenerNode);
+  }
+
   /**
    * Gets a request attribute.
    */
@@ -213,13 +257,13 @@ public class ConnectionCometController extends ConnectionController
   {
     if (_map != null) {
       synchronized (_map) {
-	return _map.get(name);
+        return _map.get(name);
       }
     }
     else
       return null;
   }
-  
+
   /**
    * Sets a request attribute.
    */
@@ -227,16 +271,16 @@ public class ConnectionCometController extends ConnectionController
   {
     if (_map == null) {
       synchronized (this) {
-	if (_map == null)
-	  _map = new HashMap<String,Object>(8);
+        if (_map == null)
+          _map = new HashMap<String,Object>(8);
       }
     }
-      
+
     synchronized (_map) {
       _map.put(name, value);
     }
   }
-  
+
   /**
    * Remove a request attribute.
    */
@@ -244,7 +288,7 @@ public class ConnectionCometController extends ConnectionController
   {
     if (_map != null) {
       synchronized (_map) {
-	_map.remove(name);
+        _map.remove(name);
       }
     }
   }
@@ -256,12 +300,12 @@ public class ConnectionCometController extends ConnectionController
   {
     return _conn == null || _isComplete;
   }
-  
+
   public ServletRequest getRequest()
   {
     return _request;
   }
-  
+
   public ServletResponse getResponse()
   {
     return _response;
@@ -285,14 +329,14 @@ public class ConnectionCometController extends ConnectionController
       conn.wake();
     }
   }
-  
+
   public void dispatch(String path)
   {
     _forwardPath = path;
 
     dispatch();
   }
-  
+
   public void dispatch(ServletContext context, String path)
   {
     _forwardPath = path;
@@ -302,6 +346,10 @@ public class ConnectionCometController extends ConnectionController
 
   public void start(Runnable task)
   {
+    if (_conn != null)
+      ThreadPool.getCurrent().schedule(task);
+    else
+      throw new IllegalStateException(L.l("AsyncContext.start() is not allowed because the AsyncContext has been completed."));
   }
 
   /**
@@ -316,13 +364,13 @@ public class ConnectionCometController extends ConnectionController
   public void closeImpl()
   {
     // complete();
-    
+
     Connection conn = _conn;
     _conn = null;
 
     _request = null;
     _response = null;
-    
+
     _isComplete = true;
 
     if (conn != null)
@@ -346,12 +394,12 @@ public class ConnectionCometController extends ConnectionController
 
     if (_isComplete)
       sb.append(",complete");
-    
+
     if (_isSuspended)
       sb.append(",suspended");
-    
+
     if (_conn instanceof TcpConnection
-	&& ((TcpConnection) _conn).isWake())
+        && ((TcpConnection) _conn).isWake())
       sb.append(",wake");
 
     sb.append("]");

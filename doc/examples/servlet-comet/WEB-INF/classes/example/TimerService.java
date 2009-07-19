@@ -3,9 +3,9 @@ package example;
 import java.util.*;
 import java.util.concurrent.*;
 
-import javax.context.ApplicationScoped;
-import javax.inject.Current;
-import javax.inject.Initializer;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Initializer;
 
 import com.caucho.servlet.comet.*;
 
@@ -29,9 +29,9 @@ import com.caucho.servlet.comet.*;
 @ApplicationScoped
 public class TimerService implements Runnable {
   private ScheduledExecutorService _timer;
-  
+
   private Future _timerFuture;
-  
+
   private ArrayList<CometState> _stateList
     = new ArrayList<CometState>();
 
@@ -44,7 +44,7 @@ public class TimerService implements Runnable {
   public TimerService(@Current ScheduledExecutorService timer)
   {
     _timer = timer;
-    
+
     _timerFuture = _timer.scheduleAtFixedRate(this, 0, 2, TimeUnit.SECONDS);
   }
 
@@ -67,8 +67,9 @@ public class TimerService implements Runnable {
       for (int i = _stateList.size() - 1; i >= 0; i--) {
         CometState state = _stateList.get(i);
 
-        if (! state.wake())
+        if (! state.wake()) {
           _stateList.remove(i);
+        }
       }
     }
   }

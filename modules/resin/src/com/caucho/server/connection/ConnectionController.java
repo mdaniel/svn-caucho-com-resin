@@ -48,7 +48,7 @@ public class ConnectionController
   public void suspend()
   {
   }
-  
+
   public boolean isSuspended()
   {
     return false;
@@ -57,6 +57,10 @@ public class ConnectionController
   public String getForwardPath()
   {
     return null;
+  }
+
+  public void timeout()
+  {
   }
 
   /**
