@@ -1701,17 +1701,19 @@ public class FileModule extends AbstractQuercusModule {
                                   @NotNull BinaryOutput handle, 
                                   long size)
   {
-    if (handle instanceof FileOutput) {
-      Path path = ((FileOutput) handle).getPath();
+    Path path = null;
 
-      try {
-        return path.truncate(size);
-      } catch (IOException e) {
-        return false;
-      }
+    if (handle instanceof FileOutput) 
+      path = ((FileOutput) handle).getPath();
+    else if (handle instanceof FileInputOutput)
+      path = ((FileInputOutput) handle).getPath();
+    else return false;
+    
+    try {
+      return path.truncate(size);
+    } catch (IOException e) {
+      return false;
     }
-
-    return false;
   }
 
   /**
