@@ -60,7 +60,7 @@ public class FileNameExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return env.createString(env.getRealPath(_fileName));
+    return env.createString(_fileName);
   }
 
   public String toString()

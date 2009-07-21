@@ -194,6 +194,7 @@ public class QuercusClass {
     // php/093n
     if (_constructor != null
         && ! _constructor.getName().equals("__construct")) {
+      addMethodIfNotExist("__construct", _constructor);
       addMethodIfNotExist(_className, _constructor);
     }
 

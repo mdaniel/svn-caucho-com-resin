@@ -2467,14 +2467,23 @@ class RegexpNode {
     int match(StringValue string, int strlen, int offset, RegexpState state)
     {
       if (strlen <= offset)
-	return -1;
+        return -1;
 
-      char ch = string.charAt(offset);
-
+      char ch = string.charAt(offset++);
+      
       if (ch < 128)
-        return _asciiSet[ch] ? offset + 1 : -1;
-      else
-        return _range.contains(ch) ? offset + 1 : -1;
+        return _asciiSet[ch] ? offset : -1;
+      
+      int codePoint = ch;
+      
+      if ('\uD800' <= ch && ch <= '\uDBFF' && offset < strlen) {
+        char low = string.charAt(offset++);
+        
+        if ('\uDC00' <= low && ch <= '\uDFFF')
+          codePoint = Character.toCodePoint(ch, low);
+      }
+
+      return _range.contains(codePoint) ? offset : -1;
     }
   }
 

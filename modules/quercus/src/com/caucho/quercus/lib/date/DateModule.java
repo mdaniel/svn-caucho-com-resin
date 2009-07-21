@@ -1223,10 +1223,12 @@ public class DateModule extends AbstractQuercusModule {
     return new DateTimeZone(timeZone);
   }
   
+  /* commented out for wordpress-2.8.1
   public static Value timezone_transitions_get(DateTimeZone dateTimeZone)
   {
     return dateTimeZone.getTransitions();
   }
+  */
   
   static class DateParser {
     private static final int INT = 1;

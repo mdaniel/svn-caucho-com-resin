@@ -524,6 +524,14 @@ abstract public class Expr {
   {
     return eval(env).toDouble();
   }
+  
+  /**
+   * Evaluates the expression as an isset() statement.
+   */
+  public boolean evalIsset(Env env)
+  {
+    return eval(env).isset();
+  }
 
   /**
    * Prints to the output as an echo.

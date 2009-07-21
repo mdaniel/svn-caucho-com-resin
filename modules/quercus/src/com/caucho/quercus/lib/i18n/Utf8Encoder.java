@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,13 +29,8 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.util.logging.Logger;
 
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
@@ -48,9 +43,9 @@ public class Utf8Encoder
 
   private static final L10N L = new L10N(Utf8Encoder.class);
   
-  public Utf8Encoder(String charset)
+  public Utf8Encoder()
   {
-    super(charset);
+    super("utf-8");
   }
   
   @Override
@@ -68,11 +63,11 @@ public class Utf8Encoder
       if (ch <= 0x7F)
         continue;
       
-      if ('\uD800' <= ch && ch <= '\uDBFF') {
+      if (0xD800 <= ch && ch <= 0xDBFF) {
         char ch2;
         
         if (i + 1 < len
-            && '\uDC00' <= (ch2 = str.charAt(i + 1)) && ch2 <= '\uDFFF') {
+            && 0xDC00 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xDFFF) {
           i++;
         }
         else
@@ -99,15 +94,15 @@ public class Utf8Encoder
       
       int code = ch;
       
-      if ('\uD800' <= ch && ch <= '\uDBFF') {
+      
+      if (0xD800 <= ch && ch <= 0xDBFF) {
         char ch2;
         
         if (i + 1 < len
-            && '\uDC00' <= (ch2 = str.charAt(i + 1)) && ch2 <= '\uDFFF') {
+            && 0xDC00 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xDFFF) {
           i++;
           
-          code = 0x10000 + ((code & 0xFF) << 8);
-          code = code + (ch2 & 0xFF);
+          code = 0x10000 + ((ch - 0xD800) << 10) + (ch2 - 0xDC00);
         }
         else {
           if (_isIgnore) {
@@ -120,7 +115,7 @@ public class Utf8Encoder
           continue;
         }
       }
-      
+            
       if (0x80 <= code && code <= 0x7FF) {
         sb.appendByte(0xC0 | (code >> 6));
         sb.appendByte(0x80 | (code & 0x3F));

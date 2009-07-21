@@ -640,7 +640,7 @@ public class ZlibModule extends AbstractQuercusModule {
       TempBuffer.free(tempBuf);
 
       if (inflater != null)
-	inflater.end();
+        inflater.end();
     }
   }
 

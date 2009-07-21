@@ -36,6 +36,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.lib.i18n.Utf8Encoder;
 import com.caucho.util.*;
 
 public class Regexp {
@@ -262,9 +263,11 @@ public class Regexp {
     for (int i = 0; i < len; i++) {
       char ch = source.charAt(i);
 
-      if (ch < 0x80)
+      if (ch < 0x80) {
         target.append(ch);
-      else if ((ch & 0xe0) == 0xc0) {
+      }
+      else if ((ch & 0xE0) == 0xC0) {
+        
         if (i + 1 >= len) {
           log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
           return null;
@@ -272,9 +275,10 @@ public class Regexp {
         
         char ch2 = source.charAt(++i);
 
-        target.append((char) (((ch & 0x1f) << 6) + (ch2 & 0x3f)));
+        target.append((char) (((ch & 0x1F) << 6)
+                              + (ch2 & 0x3F)));
       }
-      else {
+      else if ((ch & 0xF0) == 0xE0) {
         if (i + 2 >= len) {
           log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
           return null;
@@ -282,10 +286,31 @@ public class Regexp {
         
         char ch2 = source.charAt(++i);
         char ch3 = source.charAt(++i);
-
-        target.append((char) (((ch & 0xf) << 12)
-                      + ((ch2 & 0x3f) << 6)
-                      + (ch3 & 0x3f)));
+        
+        target.append((char) (((ch & 0x0F) << 12)
+                              + ((ch2 & 0x3F) << 6)
+                              + (ch3 & 0x3F)));
+      }
+      else {
+        if (i + 3 >= len) {
+          log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
+          return null;
+        }
+        
+        char ch2 = source.charAt(++i);
+        char ch3 = source.charAt(++i);
+        char ch4 = source.charAt(++i);
+        
+        int codePoint = ((ch & 0x07) << 18)
+                         + ((ch2 & 0x3F) << 12)
+                         + ((ch3 & 0x3F) << 6)
+                         + (ch4 & 0x3F);
+        
+        int high = ((codePoint - 0x10000) >> 10) + 0xD800;
+        int low = (codePoint & 0x3FF) + 0xDC00;
+        
+        target.append((char) high);
+        target.append((char) low);
       }
     }
 
@@ -294,27 +319,9 @@ public class Regexp {
 
   static StringValue toUtf8(Env env, StringValue source)
   {
-    StringValue target = env.createBinaryBuilder();
-    int len = source.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = source.charAt(i);
-
-      if (ch < 0x80) {
-        target.append(ch);
-      }
-      else if (ch < 0x800) {
-        target.append((char) (0xc0 | (ch >> 6)));
-        target.append((char) (0x80 | (ch & 0x3f)));
-      }
-      else {
-        target.append((char) (0xe0 | (ch >> 12)));
-        target.append((char) (0x80 | ((ch >> 6) & 0x3f)));
-        target.append((char) (0x80 | (ch & 0x3f)));
-      }
-    }
-
-    return target;
+    Utf8Encoder encoder = new Utf8Encoder();
+    
+    return encoder.encode(env, source);
   }
   
   public String toString()

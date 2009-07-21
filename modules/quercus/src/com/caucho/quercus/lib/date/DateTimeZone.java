@@ -33,6 +33,7 @@ import java.util.TimeZone;
 
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -135,10 +136,13 @@ public class DateTimeZone
     return _timeZone.getOffset(dateTime.getTime()) / 1000L;
   }
 
-  public Value getTransitions()
+  /* commented out for wordpress-2.8.1
+  public Value getTransitions(@Optional int timestampBegin,
+                              @Optional int timestampEnd)
   {
     throw new UnimplementedException("DateTimeZone->getTransitions()");
   }
+  */
   
   protected TimeZone getTimeZone()
   {

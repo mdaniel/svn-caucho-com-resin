@@ -188,6 +188,18 @@ public class ArrayGetExpr extends AbstractVarExpr {
 
     array.put(index, value);
   }
+  
+  /**
+   * Evalues the expression as an isset(
+   */
+  @Override
+  public boolean evalIsset(Env env)
+  {
+    Value array = _expr.evalArray(env);
+    Value index = _index.eval(env);
+
+    return array.isset(index);
+  }
 
   /**
    * Evaluates the expression.

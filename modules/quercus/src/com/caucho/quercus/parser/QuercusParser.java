@@ -257,9 +257,7 @@ public class QuercusParser {
     _encoding = encoding;
 
     if (sourceFile != null) {
-      // php/600a
-      // need to return proper Windows paths (for joomla)
-      _parserLocation.setFileName(sourceFile.getNativePath());
+      _parserLocation.setFileName(sourceFile);
       _sourceFile = sourceFile;
     }
     else {
@@ -3558,6 +3556,7 @@ public class QuercusParser {
         return _factory.createClassConst(className, name);
     }
     else if (name.equals("__FILE__")) {
+      /*
       Path pwd = _quercus.getPwd();
       String pwdStr = pwd.getNativePath();
       
@@ -3579,6 +3578,9 @@ public class QuercusParser {
       }
       
       return _factory.createFileName(fileName);
+      */
+      
+      return _factory.createFileNameExpr(_parserLocation.getFileName());
     }
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
@@ -5575,6 +5577,8 @@ public class QuercusParser {
   private class ParserLocation {
     private int _lineNumber = 1;
     private String _fileName;
+    private String _userPath;
+    
     private String _lastClassName;
     private String _lastFunctionName;
 
@@ -5605,7 +5609,22 @@ public class QuercusParser {
     public void setFileName(String fileName)
     {
       _fileName = fileName;
+      _userPath = fileName;
+      
       _location = null;
+    }
+    
+    public void setFileName(Path path)
+    {
+      // php/600a
+      // need to return proper Windows paths (for joomla)
+      _fileName = path.getNativePath();
+      _userPath = path.getUserPath();
+    }
+    
+    public String getUserPath()
+    {
+      return _userPath;
     }
 
     public Location getLocation()

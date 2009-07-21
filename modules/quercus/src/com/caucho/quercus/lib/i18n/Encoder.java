@@ -57,7 +57,7 @@ abstract public class Encoder
   {
     if (charset.equalsIgnoreCase("utf8")
         || charset.equalsIgnoreCase("utf-8"))
-      return new Utf8Encoder(charset);
+      return new Utf8Encoder();
     else if (charset.equalsIgnoreCase("big5")
              || charset.equalsIgnoreCase("big-5"))
       return new Big5Encoder(charset);

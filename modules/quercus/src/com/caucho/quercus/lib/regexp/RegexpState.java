@@ -316,24 +316,24 @@ public class RegexpState {
       RegexpNode prog = _regexp._prog;
       
       if (_regexp._isAnchorBegin)
-	end = start;
+        end = start;
 
       for (; start <= end; start++) {
-	if (firstSet != null && (start < end || minLength > 0)) {
-	  char firstChar = subject.charAt(start);
-	
-	  if (firstChar < 256 && ! firstSet[firstChar])
-	    continue;
-	}
-      
-	int value = prog.match(subject, subjectLength, start, this);
+        if (firstSet != null && (start < end || minLength > 0)) {
+          char firstChar = subject.charAt(start);
 
-	if (value >= 0) {
-	  _groupBegin[0] = start;
-	  _groupEnd[0] = value;
-	
-	  return start;
-	}
+          if (firstChar < 256 && ! firstSet[firstChar])
+            continue;
+        }
+        
+        int value = prog.match(subject, subjectLength, start, this);
+
+        if (value >= 0) {
+          _groupBegin[0] = start;
+          _groupEnd[0] = value;
+        
+          return start;
+        }
       }
 
       return -1;

@@ -519,21 +519,25 @@ public class CurlModule
     }
 
     int j = url.indexOf("://");
-
-    String protocol;
+    
     if (j < 0) {
-      protocol = "http://";
-      j = 0;
-    }
-    else {
-      j += 3;
-      protocol = url.substring(0, j);
-    }
-
-    int colonIndex = url.indexOf(':', j);
-
-    if (colonIndex < 0)
+      curl.setURL("http://" + url);
       return;
+    }
+    else if (url.indexOf('/', j + 3) < atSignIndex) {
+      curl.setURL(url);
+      return;
+    }
+    
+    j += 3;
+    
+    String protocol = url.substring(0, j);
+    int colonIndex = url.indexOf(':', j + protocol.length());
+    
+    if (colonIndex < 0 || colonIndex > atSignIndex) {
+      curl.setURL(url);
+      return;
+    }
 
     curl.setUsername(url.substring(j, colonIndex++));
     curl.setPassword(url.substring(colonIndex, atSignIndex++));

@@ -65,7 +65,7 @@ public class IssetExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    return _expr.eval(env).isset() ? BooleanValue.TRUE : BooleanValue.FALSE;
+    return _expr.evalIsset(env) ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
 
   public String toString()

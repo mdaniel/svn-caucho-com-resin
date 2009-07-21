@@ -332,7 +332,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       Encoder encoder;
       
       if (isEndUtf8)
-        encoder = new Utf8Encoder(outCharset);
+        encoder = new Utf8Encoder();
       else
         encoder = Encoder.create(outCharset);
       
