@@ -203,6 +203,15 @@ public class ServerArrayValue extends ArrayValueImpl
 
     super.put(_env.createString(key), _env.createString(value));
   }
+  
+  /**
+   * Returns true if the value is isset().
+   */
+  @Override
+  public boolean isset(Value key)
+  {
+    return get(key).isset();
+  }
 
   /**
    * Prints the value.

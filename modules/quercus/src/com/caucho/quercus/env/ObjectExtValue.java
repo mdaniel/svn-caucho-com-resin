@@ -713,6 +713,20 @@ public class ObjectExtValue extends ObjectValue
     else
       return super.remove(key);
   }
+  
+  /**
+   * Returns the array value with the given key.
+   */
+  @Override
+  public boolean isset(Value key)
+  {
+    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
+
+    if (delegate != null)
+      return delegate.isset(this, key);
+    else
+      return get(key).isset();
+  }
 
   //
   // Foreach/Traversable functions

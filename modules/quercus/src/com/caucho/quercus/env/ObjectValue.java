@@ -265,7 +265,7 @@ abstract public class ObjectValue extends Value {
     if (delegate != null)
       return delegate.isset(this, key);
     else
-      return super.isset(key);
+      return get(key).isset();
   }
 
   /**

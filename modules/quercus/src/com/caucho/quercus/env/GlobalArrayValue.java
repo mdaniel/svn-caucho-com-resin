@@ -142,6 +142,15 @@ public class GlobalArrayValue extends ArrayValueImpl {
   }
   
   /**
+   * Returns true if the index isset().
+   */
+  @Override
+  public boolean isset(Value key)
+  {
+    return get(key).isset();
+  }
+  
+  /**
    * Prints the value.
    * @param env
    */
