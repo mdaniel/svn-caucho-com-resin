@@ -941,10 +941,23 @@
       </fileset>
     </jar>
 
+    <!-- Tomcat will not load entire user JAR if JAR classes conflict
+         with J2SE or J2EE ones -->
+    <!--
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin.jar"
           file="${resin.lib}/resin.jar"/>
+    -->
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"
+          file="${resin.lib}/quercus.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"
+          file="${resin.lib}/resin-kernel.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"
+          file="${resin.lib}/inject-16.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/pro.jar"
+          file="${resin.lib}/pro.jar"/>
+    
     <!--
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/script-10.jar"
           file="${resin.lib}/script-10.jar"/>
@@ -952,8 +965,14 @@
 
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${install}/php/quercus-war">
+         <!--
         <include name="WEB-INF/lib/resin.jar"/>
+        -->
+        <include name="WEB-INF/lib/quercus.jar"/>
+        <include name="WEB-INF/lib/resin-kernel.jar"/>
+        <include name="WEB-INF/lib/inject-16.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
+        <include name="WEB-INF/lib/pro.jar"/>
 	<!--
         <include name="WEB-INF/lib/script-10.jar"/>
 	-->
@@ -970,8 +989,12 @@
     
     <delete file="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"/>
-    <delete file="${install}/php/quercus-war/WEB-INF/lib/javamail-14.jar"/>
+    <delete file="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"/>
+    <delete file="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"/>
+    <delete file="${install}/php/quercus-war/WEB-INF/lib/pro.jar"/>
+    <!--
     <delete file="${install}/php/quercus-war/WEB-INF/lib/script-10.jar"/>
+    -->
 
     <jar destfile="${dist}/quercus-${version}-src.jar">
       <fileset dir="${resin.modules}/kernel/src">
