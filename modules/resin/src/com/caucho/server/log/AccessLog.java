@@ -110,7 +110,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   {
     setRolloverSize(new Bytes(ROLLOVER_SIZE));
   }
-  
+
   /**
    * Sets the access log format.
    */
@@ -258,7 +258,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     }
 
     _logWriter.init();
-    _sharedBufferLock = _logWriter.getBufferLock();
+    // _sharedBufferLock = _logWriter.getBufferLock();
 
     if (_autoFlushTime > 0 && _alarm != null)
       _alarm.queue(_autoFlushTime);
@@ -360,26 +360,27 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       }
     }
 
-    if (_isSharedBuffer && (! _isAutoFlush || _autoFlushTime <= 0)) {
-      synchronized (_sharedBufferLock) {
-	byte []buffer = _logWriter.getBuffer(BUFFER_GAP);
-	int length = _logWriter.getLength();
+    LogBuffer logBuffer = LogBuffer.allocate();
 
-	length = log(request, response,
-		     buffer, length, buffer.length - length);
-
-	_logWriter.setLength(length);
-      }
-    }
-    else {
-      byte []buffer = request.getLogBuffer();
+    try {
+      byte []buffer = logBuffer.getBuffer();
 
       int length = log(request, response, buffer, 0, buffer.length);
 
-      if (_isAutoFlush && _autoFlushTime > 0)
-	_logWriter.writeThrough(buffer, 0, length);
-      else
-	_logWriter.writeBuffer(buffer, 0, length);
+      logBuffer.setLength(length);
+
+      if (_isAutoFlush && _autoFlushTime > 0) {
+        _logWriter.writeThrough(buffer, 0, length);
+        _logWriter.flush();
+      }
+      else {
+	_logWriter.writeBuffer(logBuffer);
+      
+        logBuffer = null;
+      }
+    } finally {
+      if (logBuffer != null)
+	logBuffer.free();
     }
   }
   
