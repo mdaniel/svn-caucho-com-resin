@@ -941,16 +941,8 @@
       </fileset>
     </jar>
 
-    <!-- Tomcat will not load entire user JAR if JAR classes conflict
-         with J2SE or J2EE ones -->
-    <!--
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin.jar"
           file="${resin.lib}/resin.jar"/>
-    -->
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"
-          file="${resin.lib}/quercus.jar"/>
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"
-          file="${resin.lib}/resin-kernel.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"
           file="${resin.lib}/inject-16.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
@@ -965,14 +957,9 @@
 
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${install}/php/quercus-war">
-         <!--
         <include name="WEB-INF/lib/resin.jar"/>
-        -->
-        <include name="WEB-INF/lib/quercus.jar"/>
-        <include name="WEB-INF/lib/resin-kernel.jar"/>
         <include name="WEB-INF/lib/inject-16.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
-        <include name="WEB-INF/lib/pro.jar"/>
 	<!--
         <include name="WEB-INF/lib/script-10.jar"/>
 	-->
@@ -987,8 +974,24 @@
       </fileset>
     </jar>
     
-    <delete file="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"/>
-    <delete file="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"/>
+    <jar destfile="${dist}/quercus-pro-${version}.war">
+      <fileset dir="${install}/php/quercus-war">
+        <include name="WEB-INF/lib/resin.jar"/>
+        <include name="WEB-INF/lib/inject-16.jar"/>
+        <include name="WEB-INF/lib/javamail-141.jar"/>
+        <include name="WEB-INF/lib/pro.jar"/>
+	<!--
+        <include name="WEB-INF/lib/script-10.jar"/>
+	-->
+        <include name="WEB-INF/web.xml"/>
+        <include name="images/caucho-white.jpg"/>
+        <include name="images/dragonfly-tiny.png"/>
+        <include name="index.php"/>
+        <include name="README"/>
+      </fileset>
+    </jar>
+    
+    <delete file="${install}/php/quercus-war/WEB-INF/lib/resin.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/pro.jar"/>
@@ -1020,6 +1023,9 @@
 
     <copy tofile="${dist}/quercus-4_0-snap.war"
           file="${dist}/quercus-${version}.war"/>
+    
+    <copy tofile="${dist}/quercus-4_0-pro-snap.war"
+          file="${dist}/quercus-pro-${version}.war"/>
 
     <copy tofile="${dist}/quercus-4_0-snap-src.jar"
           file="${dist}/quercus-${version}-src.jar"/>
