@@ -1977,6 +1977,17 @@ abstract public class StringValue
   {
     return createStringBuilder().append(this);
   }
+  
+  /**
+   * Return true if the array value is set
+   */
+  public boolean isset(Value indexV)
+  {
+    int index = indexV.toInt();
+    int len = length();
+    
+    return 0 <= index && index < len;
+  }
 
   /**
    * Writes to a stream

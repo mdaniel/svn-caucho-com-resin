@@ -869,6 +869,9 @@ public class ArrayValueImpl extends ArrayValue
   @Override
   public boolean isset(Value key)
   {
+    return get(key).isset();
+    
+    /*
     key = key.toKey();
 
     Entry []entries = _entries;
@@ -878,20 +881,21 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = entries[hash];
 	   entry != null;
 	   entry = entry._nextHash) {
-	if (key.equals(entry._key))
-	  return true;
+        if (key.equals(entry._key))
+          return entry._value.isset();
       }
     }
     else {
       for (Entry entry = _head;
 	   entry != null;
 	   entry = entry._next) {
-	if (key.equals(entry._key))
-	  return true;
+        if (key.equals(entry._key))
+          return entry._value.isset();
       }
     }
 
     return false;
+    */
   }
 
   /**

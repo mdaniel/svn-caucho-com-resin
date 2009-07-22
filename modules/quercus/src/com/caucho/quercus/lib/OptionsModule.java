@@ -264,7 +264,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value get_magic_quotes_runtime(Env env)
   {
-    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
+    return LongValue.ZERO; // PHP 6 removes, so we don't support
   }
 
   /**

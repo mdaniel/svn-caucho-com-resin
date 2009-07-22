@@ -519,12 +519,13 @@ public class CurlModule
     }
 
     int j = url.indexOf("://");
-    
     if (j < 0) {
       curl.setURL("http://" + url);
       return;
     }
-    else if (url.indexOf('/', j + 3) < atSignIndex) {
+    
+    int slashIndex = url.indexOf('/', j + 3);
+    if (0 < slashIndex && slashIndex < atSignIndex) {
       curl.setURL(url);
       return;
     }
@@ -532,13 +533,13 @@ public class CurlModule
     j += 3;
     
     String protocol = url.substring(0, j);
-    int colonIndex = url.indexOf(':', j + protocol.length());
-    
+    int colonIndex = url.indexOf(':', j);
+
     if (colonIndex < 0 || colonIndex > atSignIndex) {
       curl.setURL(url);
       return;
     }
-
+    
     curl.setUsername(url.substring(j, colonIndex++));
     curl.setPassword(url.substring(colonIndex, atSignIndex++));
     curl.setURL(protocol + url.substring(atSignIndex));

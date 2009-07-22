@@ -1578,6 +1578,16 @@ public class StringBuilderValue
   {
     return _buffer.length;
   }
+  
+  /**
+   * Return true if the array value is set
+   */
+  public boolean isset(Value indexV)
+  {
+    int index = indexV.toInt();
+
+    return 0 <= index && index < _length;
+  }
 
   //
   // Java generator code

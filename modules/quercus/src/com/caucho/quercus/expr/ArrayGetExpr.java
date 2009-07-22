@@ -195,7 +195,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public boolean evalIsset(Env env)
   {
-    Value array = _expr.evalArray(env);
+    Value array = _expr.eval(env);
     Value index = _index.eval(env);
     
     return array.isset(index);

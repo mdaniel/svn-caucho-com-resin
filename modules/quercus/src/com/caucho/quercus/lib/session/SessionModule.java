@@ -193,7 +193,7 @@ public class SessionModule extends AbstractQuercusModule
     else
       oldValue = "";
 
-    if (id != null && ! "".equals(id))
+    if (id != null && id.length() > 0)
       env.setSpecialValue("caucho.session_id", env.createString(id));
 
     return oldValue;
@@ -229,7 +229,7 @@ public class SessionModule extends AbstractQuercusModule
   {
     Value value = env.getIni("session.name");
 
-    if (newValue != null && ! newValue.equals(""))
+    if (newValue != null && newValue.length() > 0)
       env.setIni("session.name", newValue);
 
     return value;
@@ -438,7 +438,7 @@ public class SessionModule extends AbstractQuercusModule
     //
 
     if (env.getIniBoolean("session.use_trans_sid")
-	&& ! env.getIniBoolean("session.use_only_cookies")) {
+        && ! env.getIniBoolean("session.use_only_cookies")) {
       if (sessionId == null) {
         if (sessionIdValue != null)
           sessionId = sessionIdValue.toString();
