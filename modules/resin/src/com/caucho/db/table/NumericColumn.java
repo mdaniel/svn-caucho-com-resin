@@ -277,7 +277,7 @@ class NumericColumn extends Column {
     if (index == null)
       return;
 
-    index.insert(block, rowOffset + _columnOffset, 8, rowAddr, xa, false);
+    index.insert(block, rowOffset + _columnOffset, 8, rowAddr, false);
   }
 
   /**

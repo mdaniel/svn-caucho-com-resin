@@ -96,6 +96,7 @@ public final class BTree {
   private KeyCompare _keyCompare;
 
   private int _blockCount;
+  private long _timeout = 120000L;
 
   private volatile boolean _isStarted;
 
@@ -213,15 +214,14 @@ public final class BTree {
 		     int keyOffset,
 		     int keyLength,
 		     long value,
-		     Transaction xa,
 		     boolean isOverride)
     throws SQLException
   {
     try {
       while (! insert(keyBuffer, keyOffset, keyLength,
-		      value, xa, isOverride,
+		      value, isOverride, true,
 		      _rootBlockId)) {
-	splitRoot(_rootBlockId, xa);
+	splitRoot(_rootBlockId);
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -239,8 +239,8 @@ public final class BTree {
 			 int keyOffset,
 			 int keyLength,
 			 long value,
-			 Transaction xa,
 			 boolean isOverride,
+                         boolean isRead,
 			 long blockId)
     throws IOException, SQLException
   {
@@ -254,46 +254,101 @@ public final class BTree {
       block = _store.readBlock(blockId);
     
     try {
-      Lock blockLock = block.getLock();
-      xa.lockRead(blockLock);
-      
-      try {
-	byte []buffer = block.getBuffer();
-
-	int length = getLength(buffer);
-
-	if (length == _n) {
-	  // return false if the block needs to be split
-	  return false;
-	}
-	
-	if (isLeaf(buffer)) {
-	  insertValue(keyBuffer, keyOffset, keyLength,
-		      value, xa, isOverride, block);
-
-	  return true;
-	}
-
-	long childBlockId = lookupTuple(blockId, buffer,
-					keyBuffer, keyOffset, keyLength,
-					false);
-
-	while (! insert(keyBuffer, keyOffset, keyLength,
-			value, xa, isOverride,
-			childBlockId)) {
-	  split(block, childBlockId, xa);
-
-	  childBlockId = lookupTuple(blockId, buffer,
-				     keyBuffer, keyOffset, keyLength,
-				     false);
-	}
-
-	return true;
-      } finally {
-	xa.unlockRead(blockLock);
-      }
+      if (isRead && insertReadChild(keyBuffer, keyOffset, keyLength,
+                                    value, isOverride, block))
+        return true;
+      else
+        return insertWriteChild(keyBuffer, keyOffset, keyLength,
+                                value, isOverride, block);
     } finally {
       block.free();
+    }
+  }
+
+  private boolean insertReadChild(byte []keyBuffer,
+                                  int keyOffset,
+                                  int keyLength,
+                                  long value,
+                                  boolean isOverride,
+                                  Block block)
+    throws IOException, SQLException
+  {
+    Lock blockLock = block.getLock();
+    blockLock.lockRead(_timeout);
+      
+    try {
+      long blockId = block.getBlockId();
+      byte []buffer = block.getBuffer();
+
+      int length = getLength(buffer);
+
+      if (length == _n) {
+        // return false if the block needs to be split
+        return false;
+      }
+	
+      if (isLeaf(buffer)) {
+        return false;
+      }
+
+      long childBlockId = lookupTuple(blockId, buffer,
+                                      keyBuffer, keyOffset, keyLength,
+                                      false);
+
+      return insert(keyBuffer, keyOffset, keyLength,
+                    value, isOverride, true,
+                    childBlockId);
+    } finally {
+      blockLock.unlockRead();
+    }
+  }
+
+  private boolean insertWriteChild(byte []keyBuffer,
+                                   int keyOffset,
+                                   int keyLength,
+                                   long value,
+                                   boolean isOverride,
+                                   Block block)
+    throws IOException, SQLException
+  {
+    Lock blockLock = block.getLock();
+    blockLock.lockReadAndWrite(_timeout);
+      
+    try {
+      long blockId = block.getBlockId();
+      byte []buffer = block.getBuffer();
+
+      int length = getLength(buffer);
+
+      if (length == _n) {
+        // return false if the block needs to be split
+        return false;
+      }
+	
+      if (isLeaf(buffer)) {
+        insertValue(keyBuffer, keyOffset, keyLength,
+                    value, isOverride, block);
+
+        return true;
+      }
+
+      long childBlockId = lookupTuple(blockId, buffer,
+                                      keyBuffer, keyOffset, keyLength,
+                                      false);
+
+      while (! insert(keyBuffer, keyOffset, keyLength,
+                      value, isOverride, true,
+                      childBlockId)) {
+        split(block, childBlockId);
+
+        childBlockId = lookupTuple(blockId, buffer,
+                                   keyBuffer, keyOffset, keyLength,
+                                   false);
+      }
+
+      return true;
+    } finally {
+      blockLock.unlockReadAndWrite();
     }
   }
     
@@ -304,26 +359,18 @@ public final class BTree {
 			   int keyOffset,
 			   int keyLength,
 			   long value,
-			   Transaction xa,
 			   boolean isOverride,
 			   Block block)
     throws IOException, SQLException
   {
     byte []buffer = block.getBuffer();
 
-    Lock blockLock = block.getLock();
-    xa.lockWrite(blockLock);
-    try {
-      block.setFlushDirtyOnCommit(false);
-      block.setDirty(0, Store.BLOCK_SIZE);
+    block.setFlushDirtyOnCommit(false);
+    block.setDirty(0, Store.BLOCK_SIZE);
 	    
-      insertLeafBlock(block.getBlockId(), buffer,
-		      keyBuffer, keyOffset, keyLength,
-		      value,
-		      isOverride);
-    } finally {
-      xa.unlockWrite(blockLock);
-    }
+    insertLeafBlock(block.getBlockId(), buffer,
+                    keyBuffer, keyOffset, keyLength,
+                    value, isOverride);
   }
 
   /**
@@ -429,32 +476,26 @@ public final class BTree {
 
   /**
    * The length in lBuf is assumed to be the length of the buffer.
+   *
+   * parent must already be locked
    */
   private void split(Block parent,
-		     long blockId,
-		     Transaction xa)
+		     long blockId)
     throws IOException, SQLException
   {
-    Lock parentLock = parent.getLock();
-    xa.lockWrite(parentLock);
-    
-    try {
-      Block block = _store.readBlock(blockId);
+    Block block = _store.readBlock(blockId);
 
-      try {
-	Lock blockLock = block.getLock();
-	xa.lockReadAndWrite(blockLock);
+    try {
+      Lock blockLock = block.getLock();
+      blockLock.lockReadAndWrite(_timeout);
 	
-	try {
-	  split(parent, block, xa);
-	} finally {
-	  xa.unlockReadAndWrite(blockLock);
-	}
+      try {
+        split(parent, block);
       } finally {
-	block.free();
+        blockLock.unlockReadAndWrite();
       }
     } finally {
-      xa.unlockWrite(parentLock);
+      block.free();
     }
   }
 
@@ -462,8 +503,7 @@ public final class BTree {
    * The length in lBuf is assumed to be the length of the buffer.
    */
   private void split(Block parentBlock,
-		     Block block,
-		     Transaction xa)
+		     Block block)
     throws IOException, SQLException
   {
     long parentId = parentBlock.getBlockId();
@@ -538,8 +578,7 @@ public final class BTree {
   /**
    * The length in lBuf is assumed to be the length of the buffer.
    */
-  private void splitRoot(long rootBlockId,
-			 Transaction xa)
+  private void splitRoot(long rootBlockId)
     throws IOException, SQLException
   {
     Block rootBlock = _rootBlock; // store.readBlock(rootBlockId);
@@ -547,12 +586,12 @@ public final class BTree {
 
     try {
       Lock rootLock = rootBlock.getLock();
-      xa.lockReadAndWrite(rootLock);
+      rootLock.lockReadAndWrite(_timeout);
       
       try {
-	splitRoot(rootBlock, xa);
+	splitRoot(rootBlock);
       } finally {
-	xa.unlockReadAndWrite(rootLock);
+	rootLock.unlockReadAndWrite();
       }
     } finally {
       rootBlock.free();
@@ -563,7 +602,7 @@ public final class BTree {
    * Splits the current leaf into two.  Half of the entries go to the
    * left leaf and half go to the right leaf.
    */
-  private void splitRoot(Block parentBlock, Transaction xa)
+  private void splitRoot(Block parentBlock)
     throws IOException
   {
     long parentId = parentBlock.getBlockId();
@@ -659,14 +698,9 @@ public final class BTree {
       rootBlock.allocate();
 
       try {
-	Lock rootLock = rootBlock.getLock();
-	xa.lockRead(rootLock);
-
-	try {
-	  remove(rootBlock, keyBuffer, keyOffset, keyLength, xa);
-	} finally {
-	  xa.unlockRead(rootLock);
-	}
+        if (! removeRead(rootBlock, keyBuffer, keyOffset, keyLength)) {
+          removeWrite(rootBlock, keyBuffer, keyOffset, keyLength);
+        }
       } finally {
 	rootBlock.free();
       }
@@ -680,69 +714,101 @@ public final class BTree {
    *
    * block is read-locked by the parent.
    */
-  private boolean remove(Block block,
-			 byte []keyBuffer,
-			 int keyOffset,
-			 int keyLength,
-			 Transaction xa)
+  private boolean removeRead(Block block,
+                             byte []keyBuffer,
+                             int keyOffset,
+                             int keyLength)
+    throws IOException, SQLException
+  {
+    Lock blockLock = block.getLock();
+    blockLock.lockRead(_timeout);
+
+    try {
+      byte []buffer = block.getBuffer();
+      long blockId = block.getBlockId();
+
+      if (isLeaf(buffer))
+        return false;
+      
+      long childId;
+	
+      childId = lookupTuple(blockId, buffer,
+                            keyBuffer, keyOffset, keyLength,
+                            false);
+
+      if (childId == FAIL)
+        return true;
+
+      Block childBlock = _store.readBlock(childId);
+        
+      try {
+        if (removeRead(childBlock, keyBuffer, keyOffset, keyLength))
+          return true;
+        else
+          return removeWrite(childBlock, keyBuffer, keyOffset, keyLength);
+      } finally {
+        childBlock.free();
+      }
+    } finally {
+      blockLock.unlockRead();
+    }
+  }
+
+  /**
+   * Recursively remove a key from the index.
+   *
+   * block is read-locked by the parent.
+   */
+  private boolean removeWrite(Block block,
+                              byte []keyBuffer,
+                              int keyOffset,
+                              int keyLength)
     throws IOException, SQLException
   {
     byte []buffer = block.getBuffer();
     long blockId = block.getBlockId();
+    
+    Lock blockLock = block.getLock();
+    blockLock.lockReadAndWrite(_timeout);
 
-    boolean isLeaf = isLeaf(buffer);
+    try {
+      boolean isLeaf = isLeaf(buffer);
 
-    if (isLeaf) {
-      Lock blockLock = block.getLock();
-      
-      xa.lockWrite(blockLock);
+      if (isLeaf) {
+        block.setFlushDirtyOnCommit(false);
+        block.setDirty(0, Store.BLOCK_SIZE);
 
-      try {
-	block.setFlushDirtyOnCommit(false);
-	block.setDirty(0, Store.BLOCK_SIZE);
-
-	removeLeafEntry(blockId, buffer,
-			keyBuffer, keyOffset, keyLength);
-      } finally {
-	xa.unlockWrite(blockLock);
+        removeLeafEntry(blockId, buffer,
+                        keyBuffer, keyOffset, keyLength);
       }
-    }
-    else {
-      long childId;
+      else {
+        long childId;
 	
-      childId = lookupTuple(blockId, buffer,
-			    keyBuffer, keyOffset, keyLength,
-			    isLeaf);
+        childId = lookupTuple(blockId, buffer,
+                              keyBuffer, keyOffset, keyLength,
+                              isLeaf);
 
-      if (childId == FAIL)
-	return true;
+        if (childId == FAIL)
+          return true;
 
-      Block childBlock = _store.readBlock(childId);
-      try {
-	boolean isJoin = false;
+        Block childBlock = _store.readBlock(childId);
+        try {
+          boolean isJoin = false;
 
-	Lock childLock = childBlock.getLock();
-	xa.lockRead(childLock);
+          isJoin = ! removeWrite(childBlock, keyBuffer, keyOffset, keyLength);
 
-	try {
-	  isJoin = ! remove(childBlock,
-			    keyBuffer, keyOffset, keyLength,
-			    xa);
-	} finally {
-	  xa.unlockRead(childLock);
-	}
-
-	if (isJoin) {
-	  if (joinBlocks(block, childBlock, xa)) {
-	    xa.deallocateBlock(childBlock);
-	  }
-	}
-      } finally {
-	childBlock.free();
+          if (isJoin && joinBlocks(block, childBlock)) {
+            childBlock.deallocate();
+          }
+        } finally {
+          childBlock.free();
+        }
       }
-    }
       
-    return _minN <= getLength(buffer);
+      return _minN <= getLength(buffer);
+    } finally {
+      blockLock.unlockReadAndWrite();
+    }
   }
 
   /**
@@ -754,8 +820,7 @@ public final class BTree {
    * @return true if the block should be deleted/freed
    */
   private boolean joinBlocks(Block parent,
-			     Block block,
-			     Transaction xa)
+			     Block block)
     throws IOException, SQLException
   {
     byte []parentBuffer = parent.getBuffer();
@@ -764,186 +829,178 @@ public final class BTree {
     long blockId = block.getBlockId();
     byte []buffer = block.getBuffer();
     
-    Lock parentLock = parent.getLock();
-    xa.lockWrite(parentLock);
-    try {
-      long leftBlockId = getLeftBlockId(parent, blockId);
-      long rightBlockId = getRightBlockId(parent, blockId);
+    long leftBlockId = getLeftBlockId(parent, blockId);
+    long rightBlockId = getRightBlockId(parent, blockId);
 
-      // try to shift from left and right first
-      if (leftBlockId > 0) {
-	Block leftBlock = _store.readBlock(leftBlockId);
+    // try to shift from left and right first
+    if (leftBlockId > 0) {
+      Block leftBlock = _store.readBlock(leftBlockId);
 
-	try {
-	  byte []leftBuffer = leftBlock.getBuffer();
+      try {
+        byte []leftBuffer = leftBlock.getBuffer();
 	
-	  Lock leftLock = leftBlock.getLock();
-	  xa.lockReadAndWrite(leftLock);
+        Lock leftLock = leftBlock.getLock();
+        leftLock.lockReadAndWrite(_timeout);
 	  
-	  try {
-	    int leftLength = getLength(leftBuffer);
+        try {
+          int leftLength = getLength(leftBuffer);
 
-	    Lock blockLock = block.getLock();
-	    xa.lockReadAndWrite(blockLock);
+          Lock blockLock = block.getLock();
+          blockLock.lockReadAndWrite(_timeout);
 	    
-	    try {
-	      if (_minN < leftLength
-		  && isLeaf(buffer) == isLeaf(leftBuffer)) {
-		parent.setFlushDirtyOnCommit(false);
-		parent.setDirty(0, Store.BLOCK_SIZE);
+          try {
+            if (_minN < leftLength && isLeaf(buffer) == isLeaf(leftBuffer)) {
+              parent.setFlushDirtyOnCommit(false);
+              parent.setDirty(0, Store.BLOCK_SIZE);
 	    
-		leftBlock.setFlushDirtyOnCommit(false);
-		leftBlock.setDirty(0, Store.BLOCK_SIZE);
+              leftBlock.setFlushDirtyOnCommit(false);
+              leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
-		// System.out.println("MOVE_FROM_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
-		moveFromLeft(parentBuffer, leftBuffer, buffer, blockId);
+              // System.out.println("MOVE_FROM_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
+              moveFromLeft(parentBuffer, leftBuffer, buffer, blockId);
 
-		return false;
-	      }
-	    } finally {
-	      xa.unlockReadAndWrite(blockLock);
-	    }
-	  } finally {
-	    xa.unlockReadAndWrite(leftLock);
-	  }
-	} finally {
-	  leftBlock.free();
-	}
+              return false;
+            }
+          } finally {
+            blockLock.unlockReadAndWrite();
+          }
+        } finally {
+          leftLock.unlockReadAndWrite();
+        }
+      } finally {
+        leftBlock.free();
       }
-
-      if (rightBlockId > 0) {
-	Block rightBlock = _store.readBlock(rightBlockId);
-
-	try {
-	  byte []rightBuffer = rightBlock.getBuffer();
-	
-	  Lock blockLock = block.getLock();
-	  xa.lockReadAndWrite(blockLock);
-
-	  try {
-	    Lock rightLock = rightBlock.getLock();
-	    xa.lockReadAndWrite(rightLock);
-	      
-	    try {
-	      int rightLength = getLength(rightBuffer);
-
-	      if (_minN < rightLength
-		  && isLeaf(buffer) == isLeaf(rightBuffer)) {
-		parent.setFlushDirtyOnCommit(false);
-		parent.setDirty(0, Store.BLOCK_SIZE);
-	    
-		rightBlock.setFlushDirtyOnCommit(false);
-		rightBlock.setDirty(0, Store.BLOCK_SIZE);
-
-		// System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
-	    
-		moveFromRight(parentBuffer, buffer, rightBuffer, blockId);
-
-		return false;
-	      }
-	    } finally {
-	      xa.unlockReadAndWrite(rightLock);
-	    }
-	  } finally {
-	    xa.unlockReadAndWrite(blockLock);
-	  }
-	} finally {
-	  rightBlock.free();
-	}
-      }
-
-      if (parentLength < 2)
-	return false;
-    
-      if (leftBlockId > 0) {
-	Block leftBlock = _store.readBlock(leftBlockId);
-      
-	try {
-	  byte []leftBuffer = leftBlock.getBuffer();
-	  
-	  Lock leftLock = leftBlock.getLock();
-	  xa.lockReadAndWrite(leftLock);
-
-	  try {
-	    int leftLength = getLength(leftBuffer);
-	    
-	    Lock blockLock = block.getLock();
-	    xa.lockReadAndWrite(blockLock);
-
-	    try {
-	      int length = getLength(buffer);
-	      
-	      if (isLeaf(leftBuffer) == isLeaf(buffer)
-		  && length + leftLength <= _n) {
-		parent.setFlushDirtyOnCommit(false);
-		parent.setDirty(0, Store.BLOCK_SIZE);
-	  
-		leftBlock.setFlushDirtyOnCommit(false);
-		leftBlock.setDirty(0, Store.BLOCK_SIZE);
-      
-		// System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
-	    
-		mergeLeft(parentBuffer, leftBuffer, buffer, blockId);
-
-		return true;
-	      }
-	    } finally {
-	      xa.unlockReadAndWrite(blockLock);
-	    }
-	  } finally {
-	    xa.unlockReadAndWrite(leftLock);
-	  }
-	} finally {
-	  leftBlock.free();
-	}
-      }
-    
-      if (rightBlockId > 0) {
-	Block rightBlock = _store.readBlock(rightBlockId);
-
-	try {
-	  byte []rightBuffer = rightBlock.getBuffer();
-
-	  Lock blockLock = block.getLock();
-	  xa.lockReadAndWrite(blockLock);
-
-	  try {
-	    Lock rightLock = rightBlock.getLock();
-	    xa.lockReadAndWrite(rightLock);
-
-	    try {
-	      int length = getLength(buffer);
-	      int rightLength = getLength(rightBuffer);
-	      
-	      if (isLeaf(rightBuffer) == isLeaf(buffer)
-		  && length + rightLength <= _n) {
-		rightBlock.setFlushDirtyOnCommit(false);
-		rightBlock.setDirty(0, Store.BLOCK_SIZE);
-	  
-		parent.setFlushDirtyOnCommit(false);
-		parent.setDirty(0, Store.BLOCK_SIZE);
-	  
-		// System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
-	    
-		mergeRight(parentBuffer, buffer, rightBuffer, blockId);
-
-		return true;
-	      }
-	    } finally {
-	      xa.unlockReadAndWrite(rightLock);
-	    }
-	  } finally {
-	    xa.unlockReadAndWrite(blockLock);
-	  }
-	} finally {
-	  rightBlock.free();
-	}
-      }
-
-      return false;
-    } finally {
-      xa.unlockWrite(parentLock);
     }
+
+    if (rightBlockId > 0) {
+      Block rightBlock = _store.readBlock(rightBlockId);
+
+      try {
+        byte []rightBuffer = rightBlock.getBuffer();
+	
+        Lock blockLock = block.getLock();
+        blockLock.lockReadAndWrite(_timeout);
+
+        try {
+          Lock rightLock = rightBlock.getLock();
+          rightLock.lockReadAndWrite(_timeout);
+	      
+          try {
+            int rightLength = getLength(rightBuffer);
+
+            if (_minN < rightLength && isLeaf(buffer) == isLeaf(rightBuffer)) {
+              parent.setFlushDirtyOnCommit(false);
+              parent.setDirty(0, Store.BLOCK_SIZE);
+	    
+              rightBlock.setFlushDirtyOnCommit(false);
+              rightBlock.setDirty(0, Store.BLOCK_SIZE);
+
+              // System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
+	    
+              moveFromRight(parentBuffer, buffer, rightBuffer, blockId);
+
+              return false;
+            }
+          } finally {
+            rightLock.unlockReadAndWrite();
+          }
+        } finally {
+          blockLock.unlockReadAndWrite();
+        }
+      } finally {
+        rightBlock.free();
+      }
+    }
+
+    if (parentLength < 2)
+      return false;
+    
+    if (leftBlockId > 0) {
+      Block leftBlock = _store.readBlock(leftBlockId);
+      
+      try {
+        byte []leftBuffer = leftBlock.getBuffer();
+	  
+        Lock leftLock = leftBlock.getLock();
+        leftLock.lockReadAndWrite(_timeout);
+
+        try {
+          int leftLength = getLength(leftBuffer);
+	    
+          Lock blockLock = block.getLock();
+          blockLock.lockReadAndWrite(_timeout);
+
+          try {
+            int length = getLength(buffer);
+	      
+            if (isLeaf(leftBuffer) == isLeaf(buffer)
+                && length + leftLength <= _n) {
+              parent.setFlushDirtyOnCommit(false);
+              parent.setDirty(0, Store.BLOCK_SIZE);
+	  
+              leftBlock.setFlushDirtyOnCommit(false);
+              leftBlock.setDirty(0, Store.BLOCK_SIZE);
+      
+              // System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
+	    
+              mergeLeft(parentBuffer, leftBuffer, buffer, blockId);
+
+              return true;
+            }
+          } finally {
+            blockLock.unlockReadAndWrite();
+          }
+        } finally {
+          leftLock.unlockReadAndWrite();
+        }
+      } finally {
+        leftBlock.free();
+      }
+    }
+    
+    if (rightBlockId > 0) {
+      Block rightBlock = _store.readBlock(rightBlockId);
+
+      try {
+        byte []rightBuffer = rightBlock.getBuffer();
+
+        Lock blockLock = block.getLock();
+        blockLock.lockReadAndWrite(_timeout);
+
+        try {
+          Lock rightLock = rightBlock.getLock();
+          rightLock.lockReadAndWrite(_timeout);
+
+          try {
+            int length = getLength(buffer);
+            int rightLength = getLength(rightBuffer);
+	      
+            if (isLeaf(rightBuffer) == isLeaf(buffer)
+                && length + rightLength <= _n) {
+              rightBlock.setFlushDirtyOnCommit(false);
+              rightBlock.setDirty(0, Store.BLOCK_SIZE);
+	  
+              parent.setFlushDirtyOnCommit(false);
+              parent.setDirty(0, Store.BLOCK_SIZE);
+	  
+              // System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
+	    
+              mergeRight(parentBuffer, buffer, rightBuffer, blockId);
+
+              return true;
+            }
+          } finally {
+            rightLock.unlockReadAndWrite();
+          }
+        } finally {
+          blockLock.unlockReadAndWrite();
+        }
+      } finally {
+        rightBlock.free();
+      }
+    }
+
+    return false;
   }
 
   /**

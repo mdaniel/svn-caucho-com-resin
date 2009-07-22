@@ -35,6 +35,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CpuUsage;
 import com.caucho.util.Crc64;
+import com.caucho.util.ThreadDump;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -556,7 +557,7 @@ public class CauchoSystem {
   {
     try {
       System.err.println(cl + " Resin restarting due to OutOfMemoryError " + e);
-      Thread.dumpStack();
+      ThreadDump.dumpThreads();
     } finally {
       Runtime.getRuntime().halt(EXIT_OOM);
     }

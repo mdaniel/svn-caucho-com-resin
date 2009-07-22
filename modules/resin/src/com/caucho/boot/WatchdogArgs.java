@@ -165,7 +165,7 @@ class WatchdogArgs
     return _startMode == StartMode.SHUTDOWN;
   }
 
-  boolean isSingle()
+  boolean isConsole()
   {
     return _startMode == StartMode.CONSOLE;
   }

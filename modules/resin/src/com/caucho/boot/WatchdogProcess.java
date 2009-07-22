@@ -155,7 +155,7 @@ class WatchdogProcess
 	  
       kill();
       
-      if (jvmOut != null && ! _watchdog.isSingle()) {
+      if (jvmOut != null && ! _watchdog.isConsole()) {
 	try {
 	  jvmOut.close();
 	} catch (Exception e) {
@@ -385,15 +385,15 @@ class WatchdogProcess
     }
 
     if (_watchdog.getUserName() != null) {
-      if (_watchdog.isSingle())
-	throw new ConfigException(L.l("<user-name> requires compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a foreground process."));
+      if (_watchdog.isConsole())
+	throw new ConfigException(L.l("<user-name> requires compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a console process."));
       else
 	throw new ConfigException(L.l("<user-name> requires compiled JNI."));
     }
       
     if (_watchdog.getGroupName() != null) {
-      if (_watchdog.isSingle())
-	throw new ConfigException(L.l("<group-name> compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a foreground process."));
+      if (_watchdog.isConsole())
+	throw new ConfigException(L.l("<group-name> compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a console process."));
       else
 	throw new ConfigException(L.l("<group-name> compiled JNI."));
     }
@@ -635,37 +635,37 @@ class WatchdogProcess
   private WriteStream createJvmOut()
     throws IOException
   {
-    if (! _watchdog.isSingle()) {
-      String name;
-      String id = _watchdog.getId();
-      Path jvmPath = _watchdog.getLogPath();
-
-      try {
-	Path dir = jvmPath.getParent();
-	    
-	if (! dir.exists()) {
-	  dir.mkdirs();
-
-	  String userName = _watchdog.getUserName();
-	  if (userName != null)
-	    dir.changeOwner(userName);
-
-	  String groupName = _watchdog.getGroupName();
-	  if (groupName != null)
-	    dir.changeGroup(groupName);
-	}
-      } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
-
-      RotateStream rotateStream = RotateStream.create(jvmPath);
-      rotateStream.getRolloverLog().setRolloverSizeBytes(64L * 1024 * 1024);
-      _watchdog.getConfig().logInit(rotateStream);
-      rotateStream.init();
-      return rotateStream.getStream();
-    }
-    else
+    if (_watchdog.isConsole()) {
       return Vfs.openWrite(System.out);
+    }
+    
+    String name;
+    String id = _watchdog.getId();
+    Path jvmPath = _watchdog.getLogPath();
+
+    try {
+      Path dir = jvmPath.getParent();
+	    
+      if (! dir.exists()) {
+        dir.mkdirs();
+
+        String userName = _watchdog.getUserName();
+        if (userName != null)
+          dir.changeOwner(userName);
+
+        String groupName = _watchdog.getGroupName();
+        if (groupName != null)
+          dir.changeGroup(groupName);
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    RotateStream rotateStream = RotateStream.create(jvmPath);
+    rotateStream.getRolloverLog().setRolloverSizeBytes(64L * 1024 * 1024);
+    _watchdog.getConfig().logInit(rotateStream);
+    rotateStream.init();
+    return rotateStream.getStream();
   }
 
   @Override
@@ -712,7 +712,8 @@ class WatchdogProcess
 	log.log(Level.WARNING, e.toString(), e);
       } finally {
 	try {
-	  _out.close();
+          if (! _watchdog.isConsole())
+            _out.close();
 	} catch (IOException e) {
 	}
       

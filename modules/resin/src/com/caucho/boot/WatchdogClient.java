@@ -173,13 +173,13 @@ class WatchdogClient
     return _config.getShutdownWaitTime();
   }
 
-  public int startSingle()
+  public int startConsole()
     throws IOException
   {
     if (_watchdog == null)
       _watchdog = new Watchdog(_config);
     
-    return _watchdog.startSingle();
+    return _watchdog.startConsole();
   }
 
   //

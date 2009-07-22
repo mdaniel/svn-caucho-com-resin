@@ -334,7 +334,6 @@ class BinaryColumn extends Column {
 	index.insert(block,
 		     rowOffset + _columnOffset, getLength(),
 		     rowAddr,
-		     xa,
 		     false);
       } catch (SqlIndexAlreadyExistsException e) {
 	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",

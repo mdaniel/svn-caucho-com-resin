@@ -274,7 +274,7 @@ class ShortColumn extends Column {
     if (index == null)
       return;
 
-    index.insert(block, rowOffset + _columnOffset, 2, rowAddr, xa, false);
+    index.insert(block, rowOffset + _columnOffset, 2, rowAddr, false);
   }
 
   /**

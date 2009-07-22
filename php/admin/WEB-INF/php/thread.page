@@ -18,8 +18,8 @@ $si = sprintf("%02d", $server->Index);
 
 if ($stat_service) {
   echo "<img src='graph.php?";
-  echo "g[0][0]=$si|Resin|Thread|Resin Active Thread Count"
-  echo "&g[1][0]=$si|Resin|Thread|Resin Thread Count"
+  echo "g[0][0]=$si|Resin|Thread|Active Thread Count"
+  echo "&g[1][0]=$si|Resin|Thread|Thread Count"
   echo "&width=600&height=300' width='600' height='300'>\n"
 }
 
@@ -106,15 +106,19 @@ foreach ($groups as $name) {
   $show = "hide('s_$name');show('h_$name');";
   foreach ($threads as $thread) {
     $info = $thread["info"];
-    
-    $show .= "show('t_{$info->threadId}');";
+
+    if ($info->threadId) {
+      $show .= "show('t_{$info->threadId}');";
+    }
   }
 
   $hide = "show('s_$name');hide('h_$name');";
   foreach ($threads as $thread) {
     $info = $thread["info"];
     
-    $hide .= "hide('t_{$info->threadId}');";
+    if ($info->threadId) {
+      $hide .= "hide('t_{$info->threadId}');";
+    }
   }
 
   echo " <a id='s_$name' href=\"javascript:$show\">show</a> ";
@@ -133,6 +137,9 @@ foreach ($groups as $name) {
 
   foreach ($threads as $thread) {
     $info = $thread["info"];
+
+    if ($info == null)
+      continue;
     
     echo "<tr>";
 
@@ -233,10 +240,7 @@ function partition_threads($threads)
     $info = $thread["info"];
     
     $stackTrace = $info->stackTrace;
-    if ($stackTrace[0]->className == "java.lang.Object"
-        && $stackTrace[0]->methodName == "wait"
-        && $stackTrace[1]->className == "com.caucho.util.ThreadPool\$Item"
-        && $stackTrace[1]->methodName == "runTasks") {
+    if (is_idle_pool_thread($info)) {
       $partition["idle"][] = $thread;
     }
     else if (is_accept_thread($info)) {
@@ -275,6 +279,10 @@ function is_keepalive_thread($info)
     $item = $stackTrace[$i];
   
     if ($item->className == "com.caucho.server.port.TcpConnection"
+	&& $item->methodName == "waitForKeepalive")
+      return true;
+
+    if ($item->className == "com.caucho.server.port.TcpConnection"
 	&& $item->methodName == "run") {
       $prev = $stackTrace[$i - 1];
       
@@ -283,6 +291,28 @@ function is_keepalive_thread($info)
 	return true;
       else if ($prev->className == "com.caucho.server.port.TcpConnection"
   	       && $prev->methodName == "waitForKeepalive")
+	return true;
+      else
+	return false;
+    }
+  }
+
+  return false;
+}
+
+function is_idle_pool_thread($info)
+{
+  $stackTrace = $info->stackTrace;
+  
+  for ($i = 0; $i < sizeof($stackTrace); $i++) {
+    $item = $stackTrace[$i];
+  
+    if ($item->className == "com.caucho.util.ThreadPool\$PoolThread"
+        && $item->methodName == "runTasks") {
+      $prev = $stackTrace[$i - 1];
+      
+      if ($prev->className == "java.util.concurrent.locks.LockSupport"
+  	  && $prev->methodName == "park")
 	return true;
       else
 	return false;

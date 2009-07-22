@@ -172,8 +172,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       }
     }
 
-    if (queueSize == 0)
-      scheduleThread();
+    scheduleThread(queueSize);
   }
 
   // must be synchronized by _bufferLock.
@@ -275,6 +274,11 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 	delta = 1000;
 
       try {
+        Thread thread = _flushThread;
+
+        if (thread != null)
+          LockSupport.unpark(thread);
+        
 	Thread.sleep(delta);
       } catch (Exception e) {
       }
@@ -296,7 +300,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     rolloverLog();
   }
 
-  private void scheduleThread()
+  private void scheduleThread(int queueSize)
   {
     if (! _hasFlushThread.getAndSet(true)) {
       ThreadPool.getThreadPool().schedulePriority(this);
@@ -304,7 +308,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 
     Thread thread = _flushThread;
 
-    if (thread != null)
+    if (thread != null && queueSize > 32)
       LockSupport.unpark(thread);
   }
 
@@ -312,7 +316,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   {
     try {
       _flushThread = Thread.currentThread();
-      int fullCount = 4 * 60;
+      int fullCount = 60;
       int count = fullCount;
 
       while (true) {
@@ -325,11 +329,14 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
           return;
         
 	Thread.interrupted();
-	LockSupport.parkNanos(250 * 1000000L);
+	LockSupport.parkNanos(1000 * 1000000L);
       }
     } finally {
       _flushThread = null;
       _hasFlushThread.set(false);
+
+      if (_logHead != null)
+        scheduleThread(0);
     }
   }
 

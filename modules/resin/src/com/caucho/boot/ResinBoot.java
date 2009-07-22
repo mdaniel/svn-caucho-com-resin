@@ -307,8 +307,8 @@ public class ResinBoot {
 
       return false;
     }
-    else if (_args.isSingle()) {
-      return _client.startSingle() != 0;
+    else if (_args.isConsole()) {
+      return _client.startConsole() != 0;
     }
     else {
       throw new IllegalStateException(L().l("Unknown start mode"));

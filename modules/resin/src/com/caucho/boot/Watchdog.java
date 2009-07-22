@@ -60,7 +60,7 @@ class Watchdog
   private AtomicReference<WatchdogTask> _taskRef
     = new AtomicReference<WatchdogTask>();
   
-  private boolean _isSingle;
+  private boolean _isConsole;
 
   // statistics
   private Date _initialStartTime;
@@ -184,9 +184,9 @@ class Watchdog
   /**
    * Returns true for a standalone start.
    */
-  public boolean isSingle()
+  public boolean isConsole()
   {
-    return _isSingle;
+    return _isConsole;
   }
 
   /**
@@ -291,9 +291,9 @@ class Watchdog
     return _config.isVerbose();
   }
 
-  public int startSingle()
+  public int startConsole()
   {
-    _isSingle = true;
+    _isConsole = true;
     
     WatchdogTask task = new WatchdogTask(this);
 

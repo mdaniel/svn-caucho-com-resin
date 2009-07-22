@@ -259,7 +259,7 @@ public final class IndexCache
 	    }
 	    else if (value != 0) {
 	      btree.insert(key.getBuffer(), key.getOffset(), key.getLength(),
-			   value, xa, true);
+			   value, true);
 	    }
 	    else {
 	      btree.remove(key.getBuffer(), key.getOffset(), key.getLength(),

@@ -521,7 +521,7 @@ abstract public class Column {
 		   xa);
     */
     index.insert(block, rowOffset + getColumnOffset(), getLength(),
-		 rowAddr, xa, false);
+		 rowAddr, false);
   }
   
   /**

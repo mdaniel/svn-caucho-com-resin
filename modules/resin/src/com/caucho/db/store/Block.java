@@ -284,6 +284,12 @@ abstract public class Block implements SyncCacheListener {
     return _dirtyMin < _dirtyMax;
   }
 
+  public void deallocate()
+    throws IOException
+  {
+    getStore().freeBlock(getBlockId());
+  }
+
   /**
    * Return true if this is a free block.
    */

@@ -165,7 +165,7 @@ public class Transaction extends StoreTransaction {
       if (_readLocks.contains(lock))
 	throw new SQLException(L.l("lockRead must not already have a read lock"));
       
-      lock.lockRead(this, _timeout);
+      lock.lockRead(_timeout);
       _readLocks.add(lock);
     } catch (SQLException e) {
       setRollbackOnly(e);
@@ -199,7 +199,7 @@ public class Transaction extends StoreTransaction {
       if (_writeLocks.contains(lock))
 	throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
       
-      lock.lockReadAndWrite(this, _timeout);
+      lock.lockReadAndWrite(_timeout);
       _readLocks.add(lock);
       _writeLocks.add(lock);
     } catch (SQLException e) {
@@ -251,6 +251,7 @@ public class Transaction extends StoreTransaction {
   /**
    * Acquires a new write lock.
    */
+  /*
   public void lockWrite(Lock lock)
     throws SQLException
   {
@@ -283,6 +284,7 @@ public class Transaction extends StoreTransaction {
       throw e;
     }
   }
+  */
 
   /**
    * Adds a block for update.
@@ -328,7 +330,8 @@ public class Transaction extends StoreTransaction {
       try {
 	commit();
       } finally {
-	lock.unlockWrite();
+	// lock.unlockWrite();
+	lock.unlockReadAndWrite();
       }
     }
   }
@@ -342,7 +345,8 @@ public class Transaction extends StoreTransaction {
       lock.unlockReadAndWrite();
     }
   }
-  
+
+  /*
   public void unlockWrite(Lock lock)
     throws SQLException
   {
@@ -350,6 +354,7 @@ public class Transaction extends StoreTransaction {
       lock.unlockWrite();
     }
   }
+  */
 
   /**
    * Returns a read block.
