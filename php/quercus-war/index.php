@@ -74,7 +74,7 @@ The README is available <a href="README">here</a>.
 <hr/>
 
 <div class="footer">
-Copyright &copy; 1998-2007
+Copyright &copy; 1998-2009
 <a href="http://www.caucho.com">Caucho Technology, Inc</a>. 
 All rights reserved.<br/>
 
