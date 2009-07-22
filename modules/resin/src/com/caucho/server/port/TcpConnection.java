@@ -255,17 +255,6 @@ public class TcpConnection extends Connection
   }
 
   /**
-   * Sets the keepalive state.  Called only by the SelectManager and Port.
-   */
-  public void clearKeepalive()
-  {
-    if (! _isKeepalive)
-      log.warning(this + " illegal state: clearing keepalive with inactive keepalive");
-
-    _isKeepalive = false;
-  }
-
-  /**
    * Returns the keepalive expire time.
    */
   public long getKeepaliveExpireTime()
@@ -371,32 +360,9 @@ public class TcpConnection extends Connection
     return _admin;
   }
 
-  /**
-   * Initialize the socket for a new connection
-   */
-  public void initSocket()
-    throws IOException
-  {
-    _idleTimeMax = _port.getKeepaliveTimeout();
-
-    getWriteStream().init(_socket.getStream());
-    getReadStream().init(_socket.getStream(), getWriteStream());
-
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(dbgId() + "starting connection " + this + ", total=" + _port.getConnectionCount());
-    }
-  }
-
-  /**
-   * Returns the connection's socket
-   */
-  public QSocket startSocket()
-  {
-    _isClosed = false;
-
-    return _socket;
-  }
-
+  //
+  // port/socket predicates
+  //
 
   /**
    * Returns the local address of the socket.
@@ -462,6 +428,19 @@ public class TcpConnection extends Connection
   }
 
   /**
+   * Returns the virtual host.
+   */
+  @Override
+  public String getVirtualHost()
+  {
+    return getPort().getVirtualHost();
+  }
+
+  //
+  // state predicates
+  //
+
+  /**
    * Returns the state string.
    */
   public final String getState()
@@ -474,14 +453,48 @@ public class TcpConnection extends Connection
     return _state.isDestroyed();
   }
 
-  /**
-   * Returns the virtual host.
-   */
   @Override
-  public String getVirtualHost()
+  public boolean isComet()
   {
-    return getPort().getVirtualHost();
+    return _state.isComet();
   }
+
+  public boolean isSuspend()
+  {
+    return _controller != null && _controller.isSuspended();
+  }
+
+  @Override
+  public boolean isDuplex()
+  {
+    return _state.isDuplex();
+  }
+
+  public boolean isWake()
+  {
+    return _isWake;
+  }
+
+  //
+  // comet predicates
+  //
+
+  public ConnectionController getController()
+  {
+    return _controller;
+  }
+
+  public String getCometPath()
+  {
+    if (_controller != null)
+      return _controller.getForwardPath();
+    else
+      return null;
+  }
+
+  //
+  // statistics
+  //
 
   /**
    * Returns the thread id.
@@ -507,97 +520,14 @@ public class TcpConnection extends Connection
       return -1;
   }
 
-  void setResume()
-  {
-    _isWake = false;
-    _suspendTime = 0;
-  }
-
-  void setWake()
-  {
-    _isWake = true;
-  }
-
-  public boolean isWake()
-  {
-    return _isWake;
-  }
-
-  @Override
-  public boolean isComet()
-  {
-    return _state.isComet();
-  }
-
-  public boolean isSuspend()
-  {
-    return _controller != null && _controller.isSuspended();
-  }
-
-  public void suspend()
-  {
-    if (_controller != null)
-      _controller.suspend();
-  }
-
-  public ConnectionController getController()
-  {
-    return _controller;
-  }
-
-  public String getCometPath()
-  {
-    if (_controller != null)
-      return _controller.getForwardPath();
-    else
-      return null;
-  }
-
-  @Override
-  public boolean isDuplex()
-  {
-    return _state.isDuplex();
-  }
-
-  /**
-   * Begins an active connection.
-   */
-  public final long beginActive()
-  {
-    _state = _state.toActive();
-    _requestStartTime = Alarm.getCurrentTime();
-    return _requestStartTime;
-  }
-
   public final long getRequestStartTime()
   {
     return _requestStartTime;
   }
 
-  /**
-   * Ends an active connection.
-   */
-  public final void endActive()
-  {
-    // state change?
-    // _requestStartTime = 0;
-  }
-
-  void toSuspend()
-  {
-    _suspendTime = Alarm.getCurrentTime();
-    _keepaliveExpireTime = _suspendTime + _idleTimeMax;
-  }
-
-  public boolean toKeepalive()
-  {
-    if (! _isKeepalive)
-      return false;
-
-    _isKeepalive = _port.allowKeepalive(_connectionStartTime);
-
-    return _isKeepalive;
-  }
+  //
+  // request processing
+  //
 
   /**
    * Starts the connection.
@@ -651,28 +581,7 @@ public class TcpConnection extends Connection
        }
 
        // statistics
-       if (_requestStartTime > 0) {
-         long startTime = _requestStartTime;
-         _requestStartTime = 0;
-
-         if (isStatKeepalive)
-           _port.addLifetimeKeepaliveCount();
-
-         _port.addLifetimeRequestCount();
-
-         long now = Alarm.getCurrentTime();
-         _port.addLifetimeRequestTime(now - startTime);
-
-         ReadStream rs = getReadStream();
-         long readCount = rs.getPosition();
-         rs.clearPosition();
-         _port.addLifetimeReadBytes(readCount);
-
-         WriteStream ws = getWriteStream();
-         long writeCount = ws.getPosition();
-         ws.clearPosition();
-         _port.addLifetimeWriteBytes(writeCount);
-       }
+       gatherStatistics(isStatKeepalive);
 
        if (_state == ConnectionState.DUPLEX) {
          // duplex (xmpp/hmtp) handling
@@ -721,6 +630,32 @@ public class TcpConnection extends Connection
     }
 
     return RequestState.EXIT;
+  }
+
+  private void gatherStatistics(boolean isStatKeepalive)
+  {
+    if (_requestStartTime > 0) {
+      long startTime = _requestStartTime;
+      _requestStartTime = 0;
+
+      if (isStatKeepalive)
+        _port.addLifetimeKeepaliveCount();
+
+      _port.addLifetimeRequestCount();
+
+      long now = Alarm.getCurrentTime();
+      _port.addLifetimeRequestTime(now - startTime);
+
+      ReadStream rs = getReadStream();
+      long readCount = rs.getPosition();
+      rs.clearPosition();
+      _port.addLifetimeReadBytes(readCount);
+
+      WriteStream ws = getWriteStream();
+      long writeCount = ws.getPosition();
+      ws.clearPosition();
+      _port.addLifetimeWriteBytes(writeCount);
+    }
   }
 
   /**
@@ -845,6 +780,116 @@ public class TcpConnection extends Connection
   }
 
   /**
+   * Closes on shutdown.
+   */
+  public void closeOnShutdown()
+  {
+    QSocket socket = _socket;
+
+    if (socket != null) {
+      try {
+        socket.close();
+      } catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+
+      // Thread.yield();
+    }
+  }
+
+  //
+  // state transitions
+  //
+
+  /**
+   * Initialize the socket for a new connection
+   */
+  public void initSocket()
+    throws IOException
+  {
+    _idleTimeMax = _port.getKeepaliveTimeout();
+
+    getWriteStream().init(_socket.getStream());
+    getReadStream().init(_socket.getStream(), getWriteStream());
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(dbgId() + "starting connection " + this + ", total=" + _port.getConnectionCount());
+    }
+  }
+
+  /**
+   * Returns the connection's socket
+   */
+  public QSocket startSocket()
+  {
+    _isClosed = false;
+
+    return _socket;
+  }
+
+
+  /**
+   * Sets the keepalive state.  Called only by the SelectManager and Port.
+   */
+  public void clearKeepalive()
+  {
+    if (! _isKeepalive)
+      log.warning(this + " illegal state: clearing keepalive with inactive keepalive");
+
+    _isKeepalive = false;
+  }
+
+  void setResume()
+  {
+    _isWake = false;
+    _suspendTime = 0;
+  }
+
+  /**
+   * Begins an active connection.
+   */
+  public final long beginActive()
+  {
+    _state = _state.toActive();
+    _requestStartTime = Alarm.getCurrentTime();
+    return _requestStartTime;
+  }
+
+  /**
+   * Ends an active connection.
+   */
+  public final void endActive()
+  {
+    // state change?
+    // _requestStartTime = 0;
+  }
+
+  /**
+   * Finish a request.
+   */
+  public void finishRequest()
+  {
+    ConnectionController controller = _controller;
+    _controller = null;
+
+    if (controller != null)
+      controller.closeImpl();
+
+    // XXX: to finishRequest
+    _state = _state.toCompleteComet();
+  }
+
+  public boolean toKeepalive()
+  {
+    if (! _isKeepalive)
+      return false;
+
+    _isKeepalive = _port.allowKeepalive(_connectionStartTime);
+
+    return _isKeepalive;
+  }
+
+  /**
    * Starts a comet request
    */
   @Override
@@ -867,6 +912,43 @@ public class TcpConnection extends Connection
     _state = ConnectionState.COMET;
 
     return controller;
+  }
+
+  void setWake()
+  {
+    _isWake = true;
+  }
+
+  public void suspend()
+  {
+    if (_controller != null)
+      _controller.suspend();
+  }
+
+  void toSuspend()
+  {
+    _suspendTime = Alarm.getCurrentTime();
+    _keepaliveExpireTime = _suspendTime + _idleTimeMax;
+  }
+
+  /**
+   * Wakes the connection (comet-style).
+   */
+  protected boolean wake()
+  {
+    if (! _state.isComet())
+      return false;
+
+    _isWake = true;
+
+    // comet
+    if (getPort().resume(this)) {
+      log.fine(dbgId() + " wake");
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -899,42 +981,23 @@ public class TcpConnection extends Connection
     return duplex;
   }
 
-  /**
-   * Wakes the connection (comet-style).
-   */
-  protected boolean wake()
+  public void closeController(ConnectionCometController controller)
   {
-    if (! _state.isComet())
-      return false;
+    if (controller == _controller) {
+      _controller = null;
 
-    _isWake = true;
-
-    // comet
-    if (getPort().resume(this)) {
-      log.fine(dbgId() + " wake");
-      return true;
-    }
-    else {
-      return false;
+      closeControllerImpl();
     }
   }
 
   /**
-   * Closes on shutdown.
+   * Closes the controller.
    */
-  public void closeOnShutdown()
+  protected void closeControllerImpl()
   {
-    QSocket socket = _socket;
+    _state = _state.toCompleteComet();
 
-    if (socket != null) {
-      try {
-        socket.close();
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-
-      // Thread.yield();
-    }
+    getPort().resume(this);
   }
 
   public void close()
@@ -1007,40 +1070,6 @@ public class TcpConnection extends Connection
         log.log(Level.FINE, e.toString(), e);
       }
     }
-  }
-
-  public void closeController(ConnectionCometController controller)
-  {
-    if (controller == _controller) {
-      _controller = null;
-
-      closeControllerImpl();
-    }
-  }
-
-  /**
-   * Finish a request.
-   */
-  public void finishRequest()
-  {
-    ConnectionController controller = _controller;
-    _controller = null;
-
-    if (controller != null)
-      controller.closeImpl();
-
-    // XXX: to finishRequest
-    _state = _state.toCompleteComet();
-  }
-
-  /**
-   * Closes the controller.
-   */
-  protected void closeControllerImpl()
-  {
-    _state = _state.toCompleteComet();
-
-    getPort().resume(this);
   }
 
   /**
