@@ -50,6 +50,8 @@ public class SingleClusterPod extends ClusterPod
 
   private ClusterServer _serverA;
 
+  private ArrayList<ClusterServer> _staticServerList
+    = new ArrayList<ClusterServer>();
   private ClusterServer []_serverList = new ClusterServer[0];
 
   /**
@@ -71,6 +73,14 @@ public class SingleClusterPod extends ClusterPod
   public ClusterServer []getServerList()
   {
     return _serverList;
+  }
+
+  /**
+   * Return the servers in the pod
+   */
+  public ArrayList<ClusterServer> getStaticServerList()
+  {
+    return _staticServerList;
   }
   
   /**

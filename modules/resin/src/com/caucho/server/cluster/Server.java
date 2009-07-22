@@ -1787,23 +1787,10 @@ public class Server extends ProtocolDispatchServer
 
       _lifecycle.toStarting();
 
-      // server/2l32
-      // getAdminAuthenticator();
+      startClusterNetwork();
 
       if (_resin != null && _resin.getManagement() != null)
 	_resin.getManagement().start(this);
-
-      AbstractSelectManager selectManager = getSelectManager();
-      
-      if (! _keepaliveSelectEnable
-	  || selectManager == null
-	  || ! selectManager.start()) {
-	initSelectManager(null);
-      }
-
-      startClusterPort();
-
-      notifyStart();
 
       if (! _isBindPortsAtEnd) {
         bindPorts();
@@ -1874,6 +1861,36 @@ public class Server extends ProtocolDispatchServer
     }
   }
 
+  private void startClusterNetwork()
+    throws Exception
+  {
+    // server/2l32
+    // getAdminAuthenticator();
+
+    AbstractSelectManager selectManager = getSelectManager();
+      
+    if (! _keepaliveSelectEnable
+	|| selectManager == null
+	|| ! selectManager.start()) {
+      initSelectManager(null);
+    }
+
+    startClusterPort();
+
+    for (Cluster cluster : getResin().getClusterList()) {
+      for (ClusterPod pod : cluster.getPodList()) {
+	for (ClusterServer server : pod.getStaticServerList()) {
+	  ServerPool pool = server.getServerPool();
+
+	  if (pool != null)
+	    pool.start();
+	}
+      }
+    }
+
+    notifyClusterStart();
+  }
+
   public void startClusterUpdate()
   {
     /*
@@ -1909,6 +1926,13 @@ public class Server extends ProtocolDispatchServer
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Notifications to cluster servers that we've started
+   */
+  protected void notifyClusterStart()
+  {
   }
 
   /**
@@ -2292,13 +2316,6 @@ public class Server extends ProtocolDispatchServer
       
       super.stop();
     }
-  }
-
-  /**
-   * Notifications to cluster servers that we've started
-   */
-  protected void notifyStart()
-  {
   }
 
   /**

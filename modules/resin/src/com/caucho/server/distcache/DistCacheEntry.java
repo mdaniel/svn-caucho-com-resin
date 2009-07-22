@@ -91,6 +91,14 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   }
 
   /**
+   * Returns the keyHash
+   */
+  public final HashKey getKeyHash()
+  {
+    return _keyHash;
+  }
+
+  /**
    * Returns the value of the cache entry.
    */
   public Object getValue()
@@ -104,14 +112,6 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   public boolean isValueNull()
   {
     return getMnodeValue().isValueNull();
-  }
-
-  /**
-   * Returns the keyHash
-   */
-  public final HashKey getKeyHash()
-  {
-    return _keyHash;
   }
 
   /**

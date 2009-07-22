@@ -429,7 +429,6 @@ public final class SessionManager implements AlarmListener
     
     if ("before-headers".equals(mode)) {
       _sessionSaveMode = (SAVE_BEFORE_HEADERS
-			  | SAVE_AFTER_REQUEST
 			  | SAVE_ON_SHUTDOWN);
     }
     else if ("after-request".equals(mode)) {
@@ -1159,6 +1158,11 @@ public final class SessionManager implements AlarmListener
 	    log.fine(session + " load failed for existing session");
 
 	  session.setModified();
+
+	  // Return the existing session for timing reasons, e.g.
+	  // if a second request hits before the first has finished saving
+	  
+	  return session;
 	}
       }
     }

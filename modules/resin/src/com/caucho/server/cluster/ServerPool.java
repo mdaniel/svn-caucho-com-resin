@@ -308,8 +308,6 @@ public class ServerPool
     if (_failChunkTime <= 0)
       _failChunkTime = 1;
 
-    _state = ST_STARTING;
-    
     String address = getAddress();
 
     if (address == null)
@@ -905,6 +903,15 @@ public class ServerPool
 	return null;
       
       _startingCount++;
+    }
+
+    int state = _state;
+    if (state == ST_NEW || state == ST_CLOSED) {
+      IllegalStateException e = new IllegalStateException(L.l("'{0}' connection cannot be opened because the server pool has not been started.", this));
+
+      log.log(Level.WARNING, e.toString(), e);
+
+      throw e;
     }
     
     try {

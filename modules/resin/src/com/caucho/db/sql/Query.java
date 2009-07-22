@@ -376,14 +376,15 @@ abstract public class Query {
 
     _whereExprs = whereExprs;
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine("where-" + (whereExprs.length - 1) +  ": static " + whereExprs[whereExprs.length - 1]);
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest("where-" + (whereExprs.length - 1) +  ": static " + whereExprs[whereExprs.length - 1]);
 
       for (int i = whereExprs.length - 2; i >= 0; i--) {
 	if (_indexExprs[i] != null)
-	  log.fine("index-" + i + ": " + _fromItems[i] + " " + _indexExprs[i]);
+	  log.finest("index-" + i + ": " + _fromItems[i]
+		     + " " + _indexExprs[i]);
 
-	log.fine("where-" + i + ": " + _fromItems[i] + " " + whereExprs[i]);
+	log.finest("where-" + i + ": " + _fromItems[i] + " " + whereExprs[i]);
       }
     }
   }

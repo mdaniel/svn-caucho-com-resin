@@ -366,6 +366,7 @@ public class MnodeStore implements AlarmListener {
       rs.relative(offset);
       while (rs.next()) {
 	byte []keyHash = rs.getBytes(1);
+
 	byte []valueHash = rs.getBytes(2);
 	byte []cacheHash = rs.getBytes(3);
 	int flags = rs.getInt(4);
@@ -377,10 +378,14 @@ public class MnodeStore implements AlarmListener {
 	long localReadTimeout = rs.getLong(10);
 	
 	HashKey value = valueHash != null ? new HashKey(valueHash) : null;
+	HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
+
+	if (keyHash == null)
+	  continue;
 
 	entryList.add(new CacheData(new HashKey(keyHash),
 				    value,
-				    new HashKey(cacheHash),
+				    cacheKey,
 				    flags,
 				    version,
 				    itemUpdateTime,
@@ -434,7 +439,8 @@ public class MnodeStore implements AlarmListener {
 	long updateTime = rs.getLong(10);
 	long accessTime = Alarm.getExactTime();
 
-	HashKey cacheHashKey = new HashKey(cacheHash);
+	HashKey cacheHashKey
+	  = cacheHash != null ? new HashKey(cacheHash) : null;
 
 	HashKey valueHashKey
 	  = valueHash != null ? new HashKey(valueHash) : null;

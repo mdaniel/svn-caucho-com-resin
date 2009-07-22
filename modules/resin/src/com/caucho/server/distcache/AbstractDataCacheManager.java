@@ -106,7 +106,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     while (cacheEntry == null) {
       cacheEntry = createCacheEntry(key, hashKey);
 
-      cacheEntry = _entryCache.putIfNew(hashKey, cacheEntry);
+      cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
     }
 
     return cacheEntry;
@@ -124,8 +124,11 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     while (cacheEntry == null) {
       cacheEntry = createCacheEntry(null, hashKey);
 
-      if (! _entryCache.compareAndPut(null, hashKey, cacheEntry))
+      if (! _entryCache.compareAndPut(null,
+				      cacheEntry.getKeyHash(),
+				      cacheEntry)) {
         cacheEntry = _entryCache.get(hashKey);
+      }
     }
 
     return cacheEntry;
@@ -356,6 +359,11 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
 
     HashKey valueHash = writeData(oldValueHash, is);
+
+    if (valueHash != null && valueHash.equals(oldValueHash)) {
+      return mnodeValue;
+    }
+    
     HashKey cacheHash = config.getCacheKey();
 
     // add 25% window for update efficiency
@@ -383,21 +391,6 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   protected void putCluster(HashKey key, HashKey value, HashKey cacheKey,
 			    MnodeValue mnodeValue)
   {
-    /*
-    DataStreamSource dataSource = createDataSource(valueHash);
-
-    if (! mnodeValue.isImplicitNull()) {
-      _cacheService.put(key, valueHash,
-			cacheKey,
-			mnodeValue.getFlags(), mnodeValue.getVersion(),
-			mnodeValue.getExpireTimeout(),
-			mnodeValue.getIdleTimeout(),
-			mnodeValue.getLeaseTimeout(),
-			mnodeValue.getLocalReadTimeout(),
-			getSelfIndex(),
-			dataSource);
-    }
-    */
   }
 
   /*
@@ -878,9 +871,10 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       int length = os.getLength();
 
       StreamSource source = new StreamSource(os);
-      if (!_dataStore.save(valueHash, source, length))
-        throw new RuntimeException(L.l("Can't save the data '{0}'",
-          valueHash));
+      if (! _dataStore.save(valueHash, source, length)) {
+        throw new IllegalStateException(L.l("Can't save the data '{0}'",
+				       valueHash));
+      }
 
       return valueHash;
     } catch (Exception e) {

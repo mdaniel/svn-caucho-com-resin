@@ -13,6 +13,7 @@
 
 <s2 title="4.0.1 snapshot">
 <ul>
+<li>session: save-mode='before-header' should not serialize sessions after the request (rep by Gagan Chaudhari)</li>
 <li>server: chunking issues with filled content (rep by Rick Mann)</li>
 <li>gzip: empty gzip response should return 0 bytes (#3599, rep by martin thompson)</li>
 <li>jsp: jsp recompilation detection for WEB-INF/tags (#3578, rep by rmann)</li>

@@ -83,8 +83,8 @@ public final class ClusterServer {
   
   private ServerPool _serverPool;
 
-  private long _socketTimeout = 65000L;
-  private long _keepaliveTimeout = 15000L;
+  private long _socketTimeout = 90000L;
+  private long _keepaliveTimeout = 75000L;
   
   private int _loadBalanceConnectionMin = 0;
   private long _loadBalanceIdleTime = DEFAULT;

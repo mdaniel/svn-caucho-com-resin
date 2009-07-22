@@ -102,6 +102,11 @@ abstract public class ClusterPod
    * Return the servers statically configured in the triad
    */
   abstract public ClusterServer []getServerList();
+
+  /**
+   * Return the servers statically configured in the triad
+   */
+  abstract public ArrayList<ClusterServer> getStaticServerList();
   
   /**
    * Returns the triad's first server

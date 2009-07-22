@@ -422,13 +422,19 @@ public final class LruCache<K,V> {
       if (item._hitCount++ == 1) {
 	if (prevLru != null)
 	  prevLru._nextLru = nextLru;
-	else
+	else if (_head1 == item)
 	  _head1 = nextLru;
+	else { // item deleted before updateLru called
+	  return;
+	}
 
 	if (nextLru != null)
 	  nextLru._prevLru = prevLru;
-	else
+	else if (_tail1 == item)
 	  _tail1 = prevLru;
+	else { // item deleted before updateLru called
+	  return;
+	}
 
 	item._prevLru = null;
 	if (_head2 != null)
@@ -445,6 +451,9 @@ public final class LruCache<K,V> {
       else {
 	if (prevLru == null)
 	  return;
+	else if (nextLru == null && _tail2 != item) {
+	  return; // deleted before LRU called
+	}
       
 	prevLru._nextLru = nextLru;
 
