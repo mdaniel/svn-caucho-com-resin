@@ -26,31 +26,49 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.server.util;
 
-import java.util.*;
-import java.util.logging.*;
-import java.util.concurrent.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.caucho.loader.*;
-import com.caucho.util.*;
 import com.caucho.config.inject.SingletonBindingHandle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
 
 /**
- * A wrapper for Caucho system variables, allowing tests to override
- * the default variables.
+ * A wrapper for Caucho system variables, allowing tests to override the default
+ * variables.
  */
-public class ScheduledThreadPool
-  implements ScheduledExecutorService, EnvironmentListener,
-	     java.io.Serializable
-{
-  private static Logger log
-    = Logger.getLogger(ScheduledThreadPool.class.getName());
+public class ScheduledThreadPool implements ScheduledExecutorService,
+    EnvironmentListener, java.io.Serializable {
+  private static final long serialVersionUID = 1L;
+
+  private static Logger log = Logger.getLogger(ScheduledThreadPool.class
+      .getName());
   private static L10N L = new L10N(ScheduledThreadPool.class);
 
-  private static EnvironmentLocal<ScheduledThreadPool> _local
-    = new EnvironmentLocal<ScheduledThreadPool>();
+  private static EnvironmentLocal<ScheduledThreadPool> _local = new EnvironmentLocal<ScheduledThreadPool>();
 
   private ThreadPool _threadPool;
 
@@ -59,8 +77,8 @@ public class ScheduledThreadPool
 
   private ClassLoader _loader;
 
-  private final HashSet<Future> _futureSet
-    = new HashSet<Future>();
+  @SuppressWarnings("unchecked")
+  private final Set<Future> _futureSet = new HashSet<Future>();
 
   private ScheduledThreadPool()
   {
@@ -76,14 +94,14 @@ public class ScheduledThreadPool
       ScheduledThreadPool pool = _local.getLevel();
 
       if (pool == null) {
-	pool = new ScheduledThreadPool();
-	_local.set(pool);
+        pool = new ScheduledThreadPool();
+        _local.set(pool);
       }
 
       return pool;
     }
   }
-  
+
   //
   // Executor
   //
@@ -91,6 +109,7 @@ public class ScheduledThreadPool
   /**
    * Launches a thread to execute a command.
    */
+  @SuppressWarnings("unchecked")
   public void execute(Runnable command)
   {
     if (_isShutdown)
@@ -100,7 +119,7 @@ public class ScheduledThreadPool
 
     synchronized (_futureSet) {
       _futureSet.add(future);
-    
+
       _threadPool.scheduleExecutorTask(future);
     }
   }
@@ -120,6 +139,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
+  @SuppressWarnings("unchecked")
   public List invokeAll(Collection tasks)
   {
     throw new UnsupportedOperationException();
@@ -128,6 +148,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
+  @SuppressWarnings("unchecked")
   public List invokeAll(Collection tasks, long timeout, TimeUnit unit)
   {
     // XXX: todo
@@ -137,6 +158,7 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
+  @SuppressWarnings("unchecked")
   public Object invokeAny(Collection tasks)
   {
     // XXX: todo
@@ -146,9 +168,8 @@ public class ScheduledThreadPool
   /**
    * Invokes a set of tasks.
    */
-  public Object invokeAny(Collection tasks,
-			  long timeout,
-			  TimeUnit unit)
+  @SuppressWarnings("unchecked")
+  public Object invokeAny(Collection tasks, long timeout, TimeUnit unit)
   {
     // XXX: todo
     throw new UnsupportedOperationException();
@@ -198,7 +219,7 @@ public class ScheduledThreadPool
 
     synchronized (_futureSet) {
       _futureSet.add(future);
-    
+
       _threadPool.scheduleExecutorTask(future);
     }
 
@@ -208,16 +229,18 @@ public class ScheduledThreadPool
   /**
    * Submits a task for execution.
    */
+  @SuppressWarnings("unchecked")
   public Future<?> submit(Runnable command)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L
+          .l("Can't submit after ThreadPool has closed"));
 
     TaskFuture future = new TaskFuture(_loader, command, null);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
-    
+
       _threadPool.scheduleExecutorTask(future);
     }
 
@@ -230,13 +253,14 @@ public class ScheduledThreadPool
   public <T> Future<T> submit(Runnable task, T result)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L
+          .l("Can't submit after ThreadPool has closed"));
 
     TaskFuture<T> future = new TaskFuture<T>(_loader, task, result);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
-    
+
       _threadPool.scheduleExecutorTask(future);
     }
 
@@ -250,20 +274,18 @@ public class ScheduledThreadPool
   /**
    * Schedules a future task.
    */
-  public <V> ScheduledFuture<V> schedule(Callable<V> callable,
-					 long delay,
-					 TimeUnit unit)
+  @SuppressWarnings("unchecked")
+  public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay,
+      TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L
+          .l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getCurrentTime() + unit.toMillis(delay);
-    
-    AlarmFuture future = new AlarmFuture(_loader,
-					 callable,
-					 initialExpires,
-					 0,
-					 0);
+
+    AlarmFuture future = new AlarmFuture(_loader, callable, initialExpires, 0,
+        0);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -277,20 +299,16 @@ public class ScheduledThreadPool
   /**
    * Schedules a future task.
    */
-  public ScheduledFuture<?> schedule(Runnable command,
-				     long delay,
-				     TimeUnit unit)
+  @SuppressWarnings("unchecked")
+  public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L
+          .l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getCurrentTime() + unit.toMillis(delay);
-    
-    AlarmFuture future = new AlarmFuture(_loader,
-					 command,
-					 initialExpires,
-					 0,
-					 0);
+
+    AlarmFuture future = new AlarmFuture(_loader, command, initialExpires, 0, 0);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -304,21 +322,18 @@ public class ScheduledThreadPool
   /**
    * Schedules a future task.
    */
+  @SuppressWarnings("unchecked")
   public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-						long initialDelay,
-						long period,
-						TimeUnit unit)
+      long initialDelay, long period, TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L
+          .l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getExactTime() + unit.toMillis(initialDelay);
-    
-    AlarmFuture future = new AlarmFuture(_loader,
-					 command,
-					 initialExpires,
-					 unit.toMillis(period),
-					 0);
+
+    AlarmFuture future = new AlarmFuture(_loader, command, initialExpires, unit
+        .toMillis(period), 0);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -332,21 +347,18 @@ public class ScheduledThreadPool
   /**
    * Schedules with fixed delay
    */
+  @SuppressWarnings("unchecked")
   public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
-						   long initialDelay,
-						   long delay,
-						   TimeUnit unit)
+      long initialDelay, long delay, TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L
+          .l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getCurrentTime() + unit.toMillis(initialDelay);
-    
-    AlarmFuture future = new AlarmFuture(_loader,
-					 command,
-					 initialExpires,
-					 0,
-					 unit.toMillis(delay));
+
+    AlarmFuture future = new AlarmFuture(_loader, command, initialExpires, 0,
+        unit.toMillis(delay));
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -376,6 +388,7 @@ public class ScheduledThreadPool
   /**
    * Stops the pool on environment shutdown.
    */
+  @SuppressWarnings("unchecked")
   private void stop()
   {
     _isShutdown = true;
@@ -384,22 +397,23 @@ public class ScheduledThreadPool
       Future future = null;
 
       synchronized (_futureSet) {
-	Iterator<Future> iter = _futureSet.iterator();
+        Iterator<Future> iter = _futureSet.iterator();
 
-	if (iter.hasNext()) {
-	  future = iter.next();
+        if (iter.hasNext()) {
+          future = iter.next();
 
-	  _futureSet.remove(future);
-	}
+          _futureSet.remove(future);
+        }
       }
 
       if (future == null)
-	break;
-      
+        break;
+
       future.cancel(true);
     }
   }
 
+  @SuppressWarnings("unchecked")
   void removeFuture(Future future)
   {
     synchronized (_futureSet) {
@@ -452,7 +466,8 @@ public class ScheduledThreadPool
   public String toString()
   {
     if (_loader instanceof EnvironmentClassLoader)
-      return getClass().getSimpleName() + "[" + ((EnvironmentClassLoader) _loader).getId() + "]";
+      return getClass().getSimpleName() + "["
+          + ((EnvironmentClassLoader) _loader).getId() + "]";
     else
       return getClass().getSimpleName() + "[" + _loader + "]";
   }
@@ -461,7 +476,7 @@ public class ScheduledThreadPool
     private final ClassLoader _loader;
     private final Callable<T> _callable;
     private final Runnable _runnable;
-    
+
     private Thread _thread;
 
     private boolean _isCancelled;
@@ -494,127 +509,121 @@ public class ScheduledThreadPool
     {
       return _isDone;
     }
-    
+
     public boolean cancel(boolean mayInterrupt)
     {
       synchronized (this) {
-	removeFuture(this);
+        removeFuture(this);
 
-	if (_isCancelled || _isDone)
-	  return false;
+        if (_isCancelled || _isDone)
+          return false;
 
-	_isCancelled = true;
+        _isCancelled = true;
 
-	notifyAll();
+        notifyAll();
       }
 
       Thread thread = _thread;
-      
+
       if (mayInterrupt && thread != null)
-	thread.interrupt();
+        thread.interrupt();
 
       return true;
     }
 
-    public T get()
-      throws InterruptedException,
-	     ExecutionException
+    public T get() throws InterruptedException, ExecutionException
     {
       try {
-	return get(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
+        return get(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
       } catch (TimeoutException e) {
-	throw new IllegalStateException(e);
+        throw new IllegalStateException(e);
       }
     }
 
-    public T get(long timeout, TimeUnit unit)
-      throws InterruptedException,
-	     ExecutionException,
-	     TimeoutException
+    public T get(long timeout, TimeUnit unit) throws InterruptedException,
+        ExecutionException, TimeoutException
     {
       long expire = Alarm.getCurrentTime() + unit.toMillis(timeout);
 
       synchronized (this) {
-	while (! _isDone && ! _isCancelled
-	       && Alarm.getCurrentTime() < expire
-	       && ! Thread.currentThread().isInterrupted()) {
-	  if (! Alarm.isTest())
-	    wait(expire - Alarm.getCurrentTime());
-	  else {
-	    wait(1000);
-	    break;
-	  }
-	}
+        while (!_isDone && !_isCancelled && Alarm.getCurrentTime() < expire
+            && !Thread.currentThread().isInterrupted()) {
+          if (!Alarm.isTest())
+            wait(expire - Alarm.getCurrentTime());
+          else {
+            wait(1000);
+            break;
+          }
+        }
       }
 
       if (_exception != null)
-	throw new ExecutionException(_exception);
+        throw new ExecutionException(_exception);
       else if (_isDone)
-	return _value;
+        return _value;
       else if (_isCancelled)
-	throw new CancellationException();
+        throw new CancellationException();
       else
-	throw new TimeoutException();
+        throw new TimeoutException();
     }
 
     public void run()
     {
       _thread = Thread.currentThread();
       ClassLoader oldLoader = _thread.getContextClassLoader();
-      
+
       try {
-	if (_isCancelled || _isDone || _isShutdown)
-	  return;
+        if (_isCancelled || _isDone || _isShutdown)
+          return;
 
-	_thread.setContextClassLoader(_loader);
+        _thread.setContextClassLoader(_loader);
 
-	if (_callable != null)
-	  _value = _callable.call();
-	else
-	  _runnable.run();
+        if (_callable != null)
+          _value = _callable.call();
+        else
+          _runnable.run();
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	_exception = e;
+        _exception = e;
       } finally {
-	_thread.setContextClassLoader(oldLoader);
-	_thread = null;
-	_isDone = true;
+        _thread.setContextClassLoader(oldLoader);
+        _thread = null;
+        _isDone = true;
 
-	_threadPool.completeExecutorTask();
+        _threadPool.completeExecutorTask();
 
-	// alarm
+        // alarm
 
-	removeFuture(this);
+        removeFuture(this);
 
-	synchronized (this) {
-	  notifyAll();
-	}
+        synchronized (this) {
+          notifyAll();
+        }
       }
     }
 
     public String toString()
     {
       Object task = _callable != null ? _callable : _runnable;
-      
+
       if (_isDone)
-	return "TaskFuture[" + task + ",done]";
+        return "TaskFuture[" + task + ",done]";
       else if (_thread != null) {
-	if (Alarm.isTest())
-	  return "TaskFuture[" + task + ",active]";
-	else
-	  return "TaskFuture[" + task + "," + _thread + "]";
-      }
-      else if (_isCancelled)
-	return "TaskFuture[" + task + ",cancelled]";
+        if (Alarm.isTest())
+          return "TaskFuture[" + task + ",active]";
+        else
+          return "TaskFuture[" + task + "," + _thread + "]";
+      } else if (_isCancelled)
+        return "TaskFuture[" + task + ",cancelled]";
       else
-	return "TaskFuture[" + task + ",pending]";
+        return "TaskFuture[" + task + ",pending]";
     }
   }
 
   class AlarmFuture<T> implements ScheduledFuture<T>, AlarmListener {
     private final String _name;
-    
+
     private final ClassLoader _loader;
     private final Callable<T> _callable;
     private final Runnable _runnable;
@@ -626,7 +635,7 @@ public class ScheduledThreadPool
     private final long _delay;
 
     private long _nextTime;
-    
+
     private Thread _thread;
 
     private boolean _isCancelled;
@@ -636,14 +645,11 @@ public class ScheduledThreadPool
     private Exception _exception;
     private T _value;
 
-    AlarmFuture(ClassLoader loader,
-		Callable<T> callable,
-		long initialExpires,
-		long period,
-		long delay)
+    AlarmFuture(ClassLoader loader, Callable<T> callable, long initialExpires,
+        long period, long delay)
     {
       _name = "Scheduled[" + callable + "]";
-      
+
       _loader = loader;
       _callable = callable;
       _runnable = null;
@@ -656,14 +662,11 @@ public class ScheduledThreadPool
       _alarm = new Alarm(_name, this, loader);
     }
 
-    AlarmFuture(ClassLoader loader,
-		Runnable runnable,
-		long initialExpires,
-		long period,
-		long delay)
+    AlarmFuture(ClassLoader loader, Runnable runnable, long initialExpires,
+        long period, long delay)
     {
       _name = "Scheduled[" + runnable + "]";
-      
+
       _loader = loader;
       _callable = null;
       _runnable = runnable;
@@ -689,166 +692,156 @@ public class ScheduledThreadPool
     {
       return _isDone;
     }
-    
+
     public long getDelay(TimeUnit unit)
     {
       long delay = _nextTime - Alarm.getCurrentTime();
-      
+
       return TimeUnit.MILLISECONDS.convert(delay, unit);
     }
 
     public int compareTo(Delayed b)
     {
-      long delta = (getDelay(TimeUnit.MILLISECONDS)
-		   - b.getDelay(TimeUnit.MILLISECONDS));
+      long delta = (getDelay(TimeUnit.MILLISECONDS) - b
+          .getDelay(TimeUnit.MILLISECONDS));
 
       if (delta < 0)
-	return -1;
+        return -1;
       else if (delta > 0)
-	return 1;
+        return 1;
       else
-	return 0;
+        return 0;
     }
-    
+
     public boolean cancel(boolean mayInterrupt)
     {
       synchronized (this) {
-	if (_isCancelled || _isDone)
-	  return false;
+        if (_isCancelled || _isDone)
+          return false;
 
-	_isCancelled = true;
+        _isCancelled = true;
 
-	_alarm.dequeue();
+        _alarm.dequeue();
 
-	notifyAll();
+        notifyAll();
       }
 
       removeFuture(this);
 
       Thread thread = _thread;
-      
+
       if (mayInterrupt && thread != null)
-	thread.interrupt();
+        thread.interrupt();
 
       return true;
     }
 
-    public T get()
-      throws InterruptedException,
-	     ExecutionException
+    public T get() throws InterruptedException, ExecutionException
     {
       try {
-	return get(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
+        return get(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
       } catch (TimeoutException e) {
-	throw new IllegalStateException(e);
+        throw new IllegalStateException(e);
       }
     }
 
-    public T get(long timeout, TimeUnit unit)
-      throws InterruptedException,
-	     ExecutionException,
-	     TimeoutException
+    public T get(long timeout, TimeUnit unit) throws InterruptedException,
+        ExecutionException, TimeoutException
     {
       long expire = Alarm.getCurrentTime() + unit.toMillis(timeout);
       int count = _alarmCount;
 
-      while (! _isDone
-	     && ! _isCancelled
-	     && count == _alarmCount
-	     && Alarm.getCurrentTime() < expire
-	     && ! Thread.currentThread().isInterrupted()) {
-	synchronized (this) {
-	  wait(expire - Alarm.getCurrentTime());
-	}
+      while (!_isDone && !_isCancelled && count == _alarmCount
+          && Alarm.getCurrentTime() < expire
+          && !Thread.currentThread().isInterrupted()) {
+        synchronized (this) {
+          wait(expire - Alarm.getCurrentTime());
+        }
       }
 
       if (_exception != null)
-	throw new ExecutionException(_exception);
+        throw new ExecutionException(_exception);
       else if (_isDone || count != _alarmCount)
-	return _value;
+        return _value;
       else if (_isCancelled)
-	throw new CancellationException();
+        throw new CancellationException();
       else
-	throw new TimeoutException();
+        throw new TimeoutException();
     }
 
     public void handleAlarm(Alarm alarm)
     {
       if (_isCancelled || _isDone || _isShutdown)
-	return;
+        return;
 
       _thread = Thread.currentThread();
       ClassLoader oldLoader = _thread.getContextClassLoader();
       String oldName = _thread.getName();
-      
+
       try {
-	_thread.setContextClassLoader(_loader);
-	_thread.setName(_name);
+        _thread.setContextClassLoader(_loader);
+        _thread.setName(_name);
 
-	if (_callable != null)
-	  _value = _callable.call();
-	else
-	  _runnable.run();
+        if (_callable != null)
+          _value = _callable.call();
+        else
+          _runnable.run();
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	_exception = e;
-	_isCancelled = true;
+        log.log(Level.FINE, e.toString(), e);
+
+        _exception = e;
+        _isCancelled = true;
       } finally {
-	_thread.setContextClassLoader(oldLoader);
-	_thread.setName(oldName);
-	_thread = null;
+        _thread.setContextClassLoader(oldLoader);
+        _thread.setName(oldName);
+        _thread = null;
 
-	synchronized (this) {
-	  _alarmCount++;
-	  
-	  if (_isCancelled || _isDone) {
-	    removeFuture(this);
-	  }
-	  else if (_delay > 0) {
-	    _nextTime = Alarm.getCurrentTime() + _delay;
-	      
-	    _alarm.queue(_delay);
-	  }
-	  else if (_period > 0) {
+        synchronized (this) {
+          _alarmCount++;
+
+          if (_isCancelled || _isDone) {
+            removeFuture(this);
+          } else if (_delay > 0) {
+            _nextTime = Alarm.getCurrentTime() + _delay;
+
+            _alarm.queue(_delay);
+          } else if (_period > 0) {
             long now = Alarm.getCurrentTime();
-	    long next;
+            long next;
 
-	    do {
-	      next = _initialExpires + _alarmCount * _period;
+            do {
+              next = _initialExpires + _alarmCount * _period;
 
-	      if (next < now)
-		_alarmCount++;
-	    } while (next < now);
+              if (next < now)
+                _alarmCount++;
+            } while (next < now);
 
-	    _alarm.queueAt(next);
-	  }
-	  else {
-	    _isDone = true;
-	    removeFuture(this);
-	  }
+            _alarm.queueAt(next);
+          } else {
+            _isDone = true;
+            removeFuture(this);
+          }
 
-	  notifyAll();
-	}
+          notifyAll();
+        }
       }
     }
 
     public String toString()
     {
       Object task = _callable != null ? _callable : _runnable;
-      
+
       if (_isDone)
-	return "AlarmFuture[" + task + ",done]";
+        return "AlarmFuture[" + task + ",done]";
       else if (_thread != null) {
-	if (Alarm.isTest())
-	  return "AlarmFuture[" + task + ",active]";
-	else
-	  return "AlarmFuture[" + task + "," + _thread + "]";
-      }
-      else if (_isCancelled)
-	return "AlarmFuture[" + task + ",cancelled]";
+        if (Alarm.isTest())
+          return "AlarmFuture[" + task + ",active]";
+        else
+          return "AlarmFuture[" + task + "," + _thread + "]";
+      } else if (_isCancelled)
+        return "AlarmFuture[" + task + ",cancelled]";
       else
-	return "AlarmFuture[" + task + ",pending]";
+        return "AlarmFuture[" + task + ",pending]";
     }
   }
 }
