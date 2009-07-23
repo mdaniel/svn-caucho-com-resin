@@ -29,13 +29,13 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 /**
  * Configuration for around-invoke.
  */
 public class AroundInvokeConfig {
+  @SuppressWarnings("unused")
   private static final L10N L = new L10N(AroundInvokeConfig.class);
 
   private String _className;
