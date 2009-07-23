@@ -28,21 +28,22 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.*;
-import com.caucho.ejb.AbstractContext;
-import com.caucho.util.*;
-
-import javax.ejb.*;
+import javax.ejb.EJBException;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.SessionContext;
 import javax.xml.rpc.handler.MessageContext;
+
+import com.caucho.ejb.AbstractContext;
+import com.caucho.util.L10N;
 
 /**
  * Abstract base class for an session context
  */
-abstract public class AbstractSessionContext extends AbstractContext
-  implements SessionContext
-{
+abstract public class AbstractSessionContext extends AbstractContext implements
+    SessionContext {
   private static final L10N L = new L10N(AbstractSessionContext.class);
-  
+
   /**
    * Returns the EJBHome stub for the container.
    */
@@ -50,7 +51,7 @@ abstract public class AbstractSessionContext extends AbstractContext
   {
     throw new EJBException(L.l("EJBHome does not exist for this class"));
   }
-  
+
   /**
    * Returns the EJBLocalHome stub for the container.
    */
@@ -58,7 +59,7 @@ abstract public class AbstractSessionContext extends AbstractContext
   {
     throw new EJBException(L.l("EJBLocalHome does not exist for this class"));
   }
-  
+
   public <T> T getBusinessObject(Class<T> type)
   {
     throw new UnsupportedOperationException(getClass().getName());
