@@ -25,30 +25,27 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.loader;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Creates a ClassLoader dependent variable.
- * The value of the ClassLoaderLocal
+ * Creates a ClassLoader dependent variable. The value of the ClassLoaderLocal
  * variable depends on the context ClassLoader.
  */
 public class EnvironmentLocal<E> {
   // true on initialization if getting the system classloader is allowed,
   // i.e. not forbiggen by the security manager
-  
+
   private static Boolean _isSystemClassLoader;
-    
+
   private static AtomicLong _varCount = new AtomicLong();
-  
+
   private String _varName;
   private E _globalValue;
 
   /**
-   * Creates a new environment local variable with an anonymous
-   * identifier.
+   * Creates a new environment local variable with an anonymous identifier.
    */
   public EnvironmentLocal()
   {
@@ -68,6 +65,7 @@ public class EnvironmentLocal<E> {
   /**
    * Returns the variable for the context classloader.
    */
+  @SuppressWarnings("unchecked")
   public E get()
   {
     Thread thread = Thread.currentThread();
@@ -92,6 +90,7 @@ public class EnvironmentLocal<E> {
   /**
    * Returns the variable for the context classloader.
    */
+  @SuppressWarnings("unchecked")
   public E get(ClassLoader loader)
   {
     Object value = null;
@@ -113,6 +112,7 @@ public class EnvironmentLocal<E> {
   /**
    * Returns the variable for the context classloader.
    */
+  @SuppressWarnings("unchecked")
   public E getLevel()
   {
     Thread thread = Thread.currentThread();
@@ -132,6 +132,7 @@ public class EnvironmentLocal<E> {
   /**
    * Returns the variable for the context classloader.
    */
+  @SuppressWarnings("unchecked")
   public E getLevel(ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
@@ -147,16 +148,18 @@ public class EnvironmentLocal<E> {
 
   /**
    * Sets the variable for the context classloader.
-   *
-   * @param value the new value
-   *
+   * 
+   * @param value
+   *          the new value
+   * 
    * @return the old value
    */
+  @SuppressWarnings("unchecked")
   public final E set(E value)
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
@@ -170,11 +173,13 @@ public class EnvironmentLocal<E> {
 
   /**
    * Sets the variable for the context classloader.
-   *
-   * @param value the new value
-   *
+   * 
+   * @param value
+   *          the new value
+   * 
    * @return the old value
    */
+  @SuppressWarnings("unchecked")
   public final E set(E value, ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
@@ -190,14 +195,15 @@ public class EnvironmentLocal<E> {
 
   /**
    * Removes this variable
-   *
+   * 
    * @return the old value
    */
+  @SuppressWarnings("unchecked")
   public final E remove()
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
@@ -211,15 +217,16 @@ public class EnvironmentLocal<E> {
 
   /**
    * Removes the variable for the context classloader.
-   *
+   * 
    * @return the old value
    */
+  @SuppressWarnings("unchecked")
   public final E remove(ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
-	
+
         return (E) envLoader.removeAttribute(_varName);
       }
     }
@@ -229,15 +236,16 @@ public class EnvironmentLocal<E> {
 
   /**
    * Sets the global value.
-   *
-   * @param value the new value
-   *
+   * 
+   * @param value
+   *          the new value
+   * 
    * @return the old value
    */
   public E setGlobal(E value)
   {
     E oldValue = _globalValue;
-    
+
     _globalValue = value;
 
     ClassLoader systemLoader = getSystemClassLoader();
@@ -253,6 +261,7 @@ public class EnvironmentLocal<E> {
   /**
    * Returns the global value.
    */
+  @SuppressWarnings("unchecked")
   public E getGlobal()
   {
     ClassLoader systemLoader = getSystemClassLoader();
@@ -267,11 +276,11 @@ public class EnvironmentLocal<E> {
   {
     if (_isSystemClassLoader == null) {
       _isSystemClassLoader = false;
-      
-      try {
-	ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-	_isSystemClassLoader = true;
+      try {
+        ClassLoader.getSystemClassLoader();
+
+        _isSystemClassLoader = true;
       } catch (Throwable e) {
       }
     }
