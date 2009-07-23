@@ -372,7 +372,8 @@ public final class LruCache<K,V> {
 	  item._nextLru = _head1;
 	  if (_head1 != null)
 	    _head1._prevLru = item;
-	  else
+          
+	  if (_tail1 == null)
 	    _tail1 = item;
 	  
 	  _head1 = item;
@@ -439,7 +440,8 @@ public final class LruCache<K,V> {
 	item._prevLru = null;
 	if (_head2 != null)
 	  _head2._prevLru = item;
-	else
+
+        if (_tail2 == null)
 	  _tail2 = item;
       
 	item._nextLru = _head2;
@@ -465,7 +467,8 @@ public final class LruCache<K,V> {
       
 	if (nextLru != null)
 	  nextLru._prevLru = prevLru;
-	else
+        
+	if (_tail2 == item)
 	  _tail2 = prevLru;
       }
     }
@@ -494,6 +497,8 @@ public final class LruCache<K,V> {
       ((LruListener) oldValue).lruEvent();
     
     V value = remove(tail._key);
+    
+    removeLruItem(tail);
     
     return true;
   }
@@ -541,6 +546,8 @@ public final class LruCache<K,V> {
       ((LruListener) oldValue).lruEvent();
 
     V value = remove(tail._key);
+
+    removeLruItem(tail);
     
     return true;
   }
@@ -576,37 +583,7 @@ public final class LruCache<K,V> {
 	  else
 	    _entries[hash] = nextHash;
 
-	  synchronized (_lruLock) {
-	    CacheItem<K,V> prevLru = item._prevLru;
-	    CacheItem<K,V> nextLru = item._nextLru;
-
-	    if (item._hitCount == 1) {
-	      _size1--; 
-
-	      if (prevLru != null)
-		prevLru._nextLru = nextLru;
-	      else
-		_head1 = nextLru;
-
-	      if (nextLru != null)
-		nextLru._prevLru = prevLru;
-	      else
-		_tail1 = prevLru;
-	    }
-	    else {
-	      _size2--; 
-
-	      if (prevLru != null)
-		prevLru._nextLru = nextLru;
-	      else
-		_head2 = nextLru;
-
-	      if (nextLru != null)
-		nextLru._prevLru = prevLru;
-	      else
-		_tail2 = prevLru;
-	    }
-	  }
+          removeLruItem(item);
 
 	  value = item._value;
 	  break;
@@ -623,6 +600,46 @@ public final class LruCache<K,V> {
       ((CacheListener) value).removeEvent();
 
     return value;
+  }
+
+  private void removeLruItem(CacheItem<K,V> item)
+  {
+    synchronized (_lruLock) {
+      CacheItem<K,V> prevLru = item._prevLru;
+      CacheItem<K,V> nextLru = item._nextLru;
+
+      int hitCount = item._hitCount;
+      item._hitCount = -1;
+
+      if (hitCount <= 0)
+        return;
+      else if (hitCount == 1) {
+        _size1--; 
+
+        if (prevLru != null)
+          prevLru._nextLru = nextLru;
+        else if (item == _head1)
+          _head1 = nextLru;
+
+        if (nextLru != null)
+          nextLru._prevLru = prevLru;
+        else if (item == _tail1)
+          _tail1 = prevLru;
+      }
+      else {
+        _size2--; 
+
+        if (prevLru != null)
+          prevLru._nextLru = nextLru;
+        else if (_head2 == item)
+          _head2 = nextLru;
+
+        if (nextLru != null)
+          nextLru._prevLru = prevLru;
+        else if (_tail2 == item)
+          _tail2 = prevLru;
+      }
+    }
   }
 
   /**
