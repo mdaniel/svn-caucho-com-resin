@@ -52,6 +52,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Servlet to call PHP through javax.script.
@@ -553,11 +555,16 @@ public class QuercusServlet
     }
     
     for (PhpIni ini : _phpIniList) {
-      quercus.setIni(ini._key, ini._value);
+      for (Map.Entry<String,String> entry : ini._propertyMap.entrySet()) {
+        quercus.setIni(entry.getKey(), entry.getValue());
+      }
     }
     
     for (ServerEnv serverEnv : _serverEnvList) {
-      quercus.setServerEnv(serverEnv._key, serverEnv._value);
+      for (Map.Entry<String,String> entry
+           : serverEnv._propertyMap.entrySet()) {
+        quercus.setIni(entry.getKey(), entry.getValue());
+      }
     }
   }
 
@@ -592,8 +599,8 @@ public class QuercusServlet
   }
 
   public static class PhpIni {
-    String _key;
-    String _value;
+    HashMap<String,String> _propertyMap
+      = new HashMap<String,String>();
     
     PhpIni()
     {
@@ -606,14 +613,13 @@ public class QuercusServlet
     {
       //_quercus.setIni(key, value);
       
-      _key = key;
-      _value = value;
+      _propertyMap.put(key, value);
     }
   }
 
   public static class ServerEnv {
-    String _key;
-    String _value;
+    HashMap<String,String> _propertyMap
+      = new HashMap<String,String>();
     
     ServerEnv()
     {
@@ -626,8 +632,7 @@ public class QuercusServlet
     {
       //_quercus.setServerEnv(key, value);
       
-      _key = key;
-      _value = value;
+      _propertyMap.put(key, value);
     }
   }
 }
