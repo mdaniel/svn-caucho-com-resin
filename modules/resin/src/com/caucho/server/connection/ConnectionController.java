@@ -29,15 +29,10 @@
 
 package com.caucho.server.connection;
 
-
-import java.util.*;
-import java.util.logging.Logger;
-
 /**
  * Controls a tcp connection for comet.
  */
-public class ConnectionController
-{
+public class ConnectionController {
   /**
    * Creates a new TcpConnectionController.
    */
