@@ -583,7 +583,6 @@ public class TcpConnection extends Connection
 
        if (! isRequestValid) {
          _isKeepalive = false;
-         return RequestState.EXIT;
        }
 
        if (_state == ConnectionState.DUPLEX) {

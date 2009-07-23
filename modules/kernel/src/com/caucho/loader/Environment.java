@@ -52,20 +52,20 @@ public class Environment {
   private static boolean _isStaticInit;
 
   private static Logger _log;
-  
+
   private static ArrayList<EnvironmentListener> _globalEnvironmentListeners
     = new ArrayList<EnvironmentListener>();
-  
+
   private static ArrayList<ClassLoaderListener> _globalLoaderListeners
     = new ArrayList<ClassLoaderListener>();
-  
+
   /**
    * Returns the local environment.
    */
   public static EnvironmentClassLoader getEnvironmentClassLoader()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader)
         return (EnvironmentClassLoader) loader;
@@ -73,7 +73,7 @@ public class Environment {
 
     return null;
   }
-  
+
   /**
    * Returns the local environment.
    */
@@ -87,7 +87,7 @@ public class Environment {
 
     return null;
   }
-  
+
   /**
    * Add listener.
    *
@@ -99,7 +99,7 @@ public class Environment {
 
     addEnvironmentListener(listener, loader);
   }
-  
+
   /**
    * Add listener.
    *
@@ -107,7 +107,7 @@ public class Environment {
    * @param loader the context class loader
    */
   public static void addEnvironmentListener(EnvironmentListener listener,
-					    ClassLoader loader)
+                                            ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
@@ -118,7 +118,7 @@ public class Environment {
 
     _globalEnvironmentListeners.add(listener);
   }
-  
+
   /**
    * Remove listener.
    *
@@ -130,7 +130,7 @@ public class Environment {
 
     removeEnvironmentListener(listener, loader);
   }
-  
+
   /**
    * Remove listener.
    *
@@ -138,7 +138,7 @@ public class Environment {
    * @param loader the context class loader
    */
   public static void removeEnvironmentListener(EnvironmentListener listener,
-					    ClassLoader loader)
+                                            ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
@@ -149,7 +149,7 @@ public class Environment {
 
     _globalEnvironmentListeners.remove(listener);
   }
-  
+
   /**
    * Add listener.
    *
@@ -159,10 +159,10 @@ public class Environment {
   public static void addChildEnvironmentListener(EnvironmentListener listener)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     addChildEnvironmentListener(listener, loader);
   }
-  
+
   /**
    * Add listener.
    *
@@ -170,7 +170,7 @@ public class Environment {
    * @param loader the context class loader
    */
   public static void addChildEnvironmentListener(EnvironmentListener listener,
-						 ClassLoader loader)
+                                                 ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
@@ -179,7 +179,7 @@ public class Environment {
       }
     }
   }
-  
+
   /**
    * Add listener.
    *
@@ -189,10 +189,10 @@ public class Environment {
   public static void addChildLoaderListener(AddLoaderListener listener)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     addChildLoaderListener(listener, loader);
   }
-  
+
   /**
    * Add listener.
    *
@@ -200,7 +200,7 @@ public class Environment {
    * @param loader the context class loader
    */
   public static void addChildLoaderListener(AddLoaderListener listener,
-					    ClassLoader loader)
+                                            ClassLoader loader)
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
@@ -209,7 +209,7 @@ public class Environment {
       }
     }
   }
-  
+
   /**
    * Add listener.
    *
@@ -221,7 +221,7 @@ public class Environment {
 
     addClassLoaderListener(listener, loader);
   }
-  
+
   /**
    * Add listener.
    *
@@ -240,7 +240,18 @@ public class Environment {
 
     _globalLoaderListeners.add(listener);
   }
-  
+
+  /**
+   * Add start listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addStartListener(Object obj)
+  {
+    addEnvironmentListener(new StartListener(obj));
+  }
+
   /**
    * Add close listener.
    *
@@ -258,7 +269,7 @@ public class Environment {
   public static void init()
   {
     initializeEnvironment();
-    
+
     init(Thread.currentThread().getContextClassLoader());
   }
 
@@ -304,7 +315,7 @@ public class Environment {
     }
 
     init(loader);
-    
+
     for (int i = 0; i < _globalEnvironmentListeners.size(); i++) {
       EnvironmentListener listener = _globalEnvironmentListeners.get(i);
 
@@ -336,14 +347,14 @@ public class Environment {
     listeners = new ArrayList<EnvironmentListener>();
     listeners.addAll(_globalEnvironmentListeners);
     _globalEnvironmentListeners.clear();
-    
+
     for (int i = 0; i < listeners.size(); i++) {
       EnvironmentListener listener = listeners.get(i);
 
       listener.environmentStop(null);
     }
   }
-  
+
   /**
    * Adds a dependency to the current environment.
    *
@@ -379,7 +390,7 @@ public class Environment {
   public static DynamicClassLoader getDynamicClassLoader()
   {
     Thread thread = Thread.currentThread();
-    
+
     return getDynamicClassLoader(thread.getContextClassLoader());
   }
 
@@ -398,7 +409,7 @@ public class Environment {
 
     return null;
   }
-  
+
   /**
    * Adds a dependency to the current environment.
    *
@@ -440,7 +451,7 @@ public class Environment {
   public static long getDependencyCheckInterval()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof DynamicClassLoader)
         return ((DynamicClassLoader) loader).getDependencyCheckInterval();
@@ -552,7 +563,7 @@ public class Environment {
         Object oldValue = envLoader.getAttribute(name);
 
         envLoader.setAttribute(name, value);
-        
+
         if (oldValue != null)
           return oldValue;
       }
@@ -571,7 +582,7 @@ public class Environment {
   public static void addPermission(Permission perm)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     addPermission(perm, loader);
   }
 
@@ -588,7 +599,7 @@ public class Environment {
       if (loader instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	envLoader.addPermission(perm);
+        envLoader.addPermission(perm);
       }
     }
   }
@@ -610,12 +621,12 @@ public class Environment {
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+        EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	Object owner = envLoader.getOwner();
-	
-	if (owner != null)
-	  return owner;
+        Object owner = envLoader.getOwner();
+
+        if (owner != null)
+          return owner;
       }
     }
 
@@ -628,14 +639,14 @@ public class Environment {
   public static void setConfigException(Throwable e)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+        EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	envLoader.setConfigException(e);
+        envLoader.setConfigException(e);
 
-	return;
+        return;
       }
     }
   }
@@ -646,19 +657,19 @@ public class Environment {
   public static Throwable getConfigException()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+        EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
 
-	if (envLoader.getConfigException() != null)
-	  return envLoader.getConfigException();
+        if (envLoader.getConfigException() != null)
+          return envLoader.getConfigException();
       }
     }
 
     return null;
   }
-  
+
   /**
    * Returns the environment name.
    */
@@ -668,18 +679,18 @@ public class Environment {
 
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	String name = ((EnvironmentClassLoader) loader).getId();
+        String name = ((EnvironmentClassLoader) loader).getId();
 
-	if (name != null)
-	  return name;
-	else
-	  return "";
+        if (name != null)
+          return name;
+        else
+          return "";
       }
     }
 
     return Thread.currentThread().getContextClassLoader().toString();
   }
-  
+
   /**
    * Apply the action to visible classloaders
    */
@@ -689,10 +700,10 @@ public class Environment {
 
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
-	envLoader.applyVisibleModules(apply);
+        EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
+        envLoader.applyVisibleModules(apply);
 
-	return;
+        return;
       }
     }
   }
@@ -703,10 +714,10 @@ public class Environment {
   public static String getLocalClassPath()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     return getLocalClassPath(loader);
   }
-    
+
   /**
    * Returns the classpath for the environment level.
    */
@@ -714,7 +725,7 @@ public class Environment {
   {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
-	return ((EnvironmentClassLoader) loader).getLocalClassPath();
+        return ((EnvironmentClassLoader) loader).getLocalClassPath();
       }
     }
 
@@ -730,7 +741,7 @@ public class Environment {
     listeners = new ArrayList<ClassLoaderListener>();
     listeners.addAll(_globalLoaderListeners);
     _globalLoaderListeners.clear();
-    
+
     for (int i = 0; i < listeners.size(); i++) {
       ClassLoaderListener listener = listeners.get(i);
 
@@ -779,65 +790,65 @@ public class Environment {
                   "com.caucho.log.LogManagerImpl");
       }
       */
-      
+
       ClassLoader envClassLoader
-	= EnvironmentClassLoader.class.getClassLoader();
+        = EnvironmentClassLoader.class.getClassLoader();
 
       boolean isGlobalLoadable = false;
       try {
-	Class cl = Class.forName("com.caucho.naming.InitialContextFactoryImpl",
-				 false,
-				 systemLoader);
+        Class cl = Class.forName("com.caucho.naming.InitialContextFactoryImpl",
+                                 false,
+                                 systemLoader);
 
-	isGlobalLoadable = (cl != null);
+        isGlobalLoadable = (cl != null);
       } catch (Exception e) {
-	log().log(Level.FINER, e.toString(), e);
+        log().log(Level.FINER, e.toString(), e);
       }
-	
+
       if (isGlobalLoadable) {
-	// These properties require Resin to be at the system loader
-	
-	if (props.get("java.naming.factory.initial") == null) {
-	  props.put("java.naming.factory.initial",
-		    "com.caucho.naming.InitialContextFactoryImpl");
-	}
+        // These properties require Resin to be at the system loader
 
-	props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
+        if (props.get("java.naming.factory.initial") == null) {
+          props.put("java.naming.factory.initial",
+                    "com.caucho.naming.InitialContextFactoryImpl");
+        }
 
-	EnvironmentProperties.enableEnvironmentSystemProperties(true);
+        props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
 
-	String oldBuilder = props.getProperty("javax.management.builder.initial");
-	if (oldBuilder == null) {
-	  oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
-	  props.put("javax.management.builder.initial", oldBuilder);
-	}
+        EnvironmentProperties.enableEnvironmentSystemProperties(true);
 
-	/*
-	  props.put("javax.management.builder.initial",
-	  "com.caucho.jmx.EnvironmentMBeanServerBuilder");
-	*/
+        String oldBuilder = props.getProperty("javax.management.builder.initial");
+        if (oldBuilder == null) {
+          oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
+          props.put("javax.management.builder.initial", oldBuilder);
+        }
 
-	if (MBeanServerFactory.findMBeanServer(null).size() == 0)
-	  MBeanServerFactory.createMBeanServer("Resin");
-	
-	ManagementFactory.getPlatformMBeanServer();
+        /*
+          props.put("javax.management.builder.initial",
+          "com.caucho.jmx.EnvironmentMBeanServerBuilder");
+        */
+
+        if (MBeanServerFactory.findMBeanServer(null).size() == 0)
+          MBeanServerFactory.createMBeanServer("Resin");
+
+        ManagementFactory.getPlatformMBeanServer();
       }
 
       Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
                     Jmx.getGlobalMBeanServer());
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
                     Jmx.getGlobalMBeanServer());
-      
+
       try {
-	Class cl = Class.forName("com.caucho.server.resin.EnvInit",
-				 false,
-				 systemLoader);
-	
-	cl.newInstance();
+        Class cl = Class.forName("com.caucho.server.resin.EnvInit",
+                                 false,
+                                 systemLoader);
+
+        cl.newInstance();
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
- 
+
       /*
       try {
         Jndi.rebindDeep("java:comp/ORB",

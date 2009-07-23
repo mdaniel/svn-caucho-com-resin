@@ -63,7 +63,7 @@ public class HmtpServlet extends GenericServlet {
 
   private @Current Instance<Authenticator> _authInstance;
   private @Current Instance<AdminAuthenticator> _adminInstance;
-  
+
   private Authenticator _auth;
   private ServerLinkManager _linkManager;
 
@@ -88,35 +88,31 @@ public class HmtpServlet extends GenericServlet {
 
     if ("false".equals(authRequired))
       _isAuthenticationRequired = false;
-    
+
     String admin = getInitParameter("admin");
 
     if ("true".equals(admin))
       _isAdmin = true;
 
-    System.out.println("AUTH: " + _adminInstance + " " + _authInstance);
-
     try {
       if (_isAdmin)
-	_auth = _adminInstance.get();
+        _auth = _adminInstance.get();
       else
-	_auth = _authInstance.get();
+        _auth = _authInstance.get();
     } catch (Exception e) {
       if (log.isLoggable(Level.FINER)) {
-	log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",
-				 this), e);
+        log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",
+                                 this), e);
       }
       else {
-	log.info(L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.  In the resin.xml, add an <sec:AdminAuthenticator>",
-		   this));
+        log.info(L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.  In the resin.xml, add an <sec:AdminAuthenticator>",
+                   this));
       }
     }
 
-    System.out.println("AUTH: " + _auth);
-
     _linkManager = new ServerLinkManager(_auth);
   }
-  
+
   /**
    * Service handling
    */
@@ -143,15 +139,15 @@ public class HmtpServlet extends GenericServlet {
       broker = Server.getCurrent().getAdminBroker();
     else
       broker = HempBroker.getCurrent();
-    
+
     String address = req.getRemoteAddr();
 
     ServerFromLinkStream fromLinkStream
       = new ServerFromLinkStream(broker, _linkManager, is, os, address,
-				 _auth, _isAuthenticationRequired);
+                                 _auth, _isAuthenticationRequired);
 
     TcpDuplexController controller = res.upgradeProtocol(fromLinkStream);
-    
+
     controller.setIdleTimeMax(30 * 60 * 1000L);
   }
 }
