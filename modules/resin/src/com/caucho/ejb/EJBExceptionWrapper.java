@@ -35,20 +35,23 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Wraps the actual exception with an EJB exception
  */
-public class EJBExceptionWrapper extends EJBException
-{
+public class EJBExceptionWrapper extends EJBException {
+  private static final long serialVersionUID = 1L;
+
   private Throwable _rootCause;
-  
+
   /**
    * Null constructor for beans
    */
   public EJBExceptionWrapper()
   {
   }
+
   /**
    * Create a basic EJBExceptionWrapper with a message.
-   *
-   * @param msg the exception message.
+   * 
+   * @param msg
+   *          the exception message.
    */
   public EJBExceptionWrapper(String msg)
   {
@@ -57,29 +60,31 @@ public class EJBExceptionWrapper extends EJBException
 
   /**
    * Create a EJBExceptionWrapper wrapping a root exception.
-   *
-   * @param rootCause the underlying wrapped exception.
+   * 
+   * @param rootCause
+   *          the underlying wrapped exception.
    */
   public EJBExceptionWrapper(Throwable rootCause)
   {
     super(rootCause.toString());
 
     _rootCause = rootCause;
-    
+
     initCause(rootCause);
   }
 
   /**
    * Create a EJBExceptionWrapper wrapping a root exception.
-   *
-   * @param rootCause the underlying wrapped exception.
+   * 
+   * @param rootCause
+   *          the underlying wrapped exception.
    */
   public EJBExceptionWrapper(String msg, Throwable rootCause)
   {
     super(msg);
 
     _rootCause = rootCause;
-    
+
     initCause(rootCause);
   }
 
@@ -112,4 +117,3 @@ public class EJBExceptionWrapper extends EJBException
       return new EJBExceptionWrapper(rootCause);
   }
 }
-

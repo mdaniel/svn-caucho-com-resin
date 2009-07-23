@@ -25,15 +25,8 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.ejb;
 
-import com.caucho.security.SecurityContext;
-import com.caucho.security.SecurityContextException;
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import javax.transaction.UserTransaction;
 import java.rmi.RemoteException;
 import java.security.Identity;
 import java.security.Principal;
@@ -41,16 +34,33 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.EJBContext;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBMetaData;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import javax.ejb.HomeHandle;
+import javax.ejb.RemoveException;
+import javax.ejb.TimerService;
+import javax.transaction.UserTransaction;
+
+import com.caucho.security.SecurityContext;
+import com.caucho.security.SecurityContextException;
+import com.caucho.util.L10N;
+
 /**
  * Base class for an abstract context
  */
 abstract public class AbstractContext implements EJBContext {
   private static final L10N L = new L10N(AbstractContext.class);
-  private static final Logger log
-    = Logger.getLogger(AbstractContext.class.getName());
+  private static final Logger log = Logger.getLogger(AbstractContext.class
+      .getName());
 
   private boolean _isDead;
 
+  @SuppressWarnings("unchecked")
   private Class _invokedBusinessInterface;
 
   /**
@@ -92,7 +102,8 @@ abstract public class AbstractContext implements EJBContext {
 
       // ejb/0f61
       if (localHome == null && getServer().getEJBHome() == null)
-        throw new IllegalStateException("getEJBLocalHome() is only allowed through EJB 2.1 interfaces");
+        throw new IllegalStateException(
+            "getEJBLocalHome() is only allowed through EJB 2.1 interfaces");
 
       return null;
     } catch (RuntimeException e) {
@@ -121,11 +132,13 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Returns the local object in the context.
    */
-  public EJBLocalObject getEJBLocalObject()
-    throws IllegalStateException
+  public EJBLocalObject getEJBLocalObject() throws IllegalStateException
   {
-    throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
-                                        getServer()));
+    throw new IllegalStateException(
+        L
+            .l(
+                "`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
+                getServer()));
   }
 
   /**
@@ -144,14 +157,16 @@ abstract public class AbstractContext implements EJBContext {
     EJBObject obj = getRemoteView();
 
     if (obj == null)
-      throw new IllegalStateException("getEJBObject() is only allowed through EJB 2.1 interfaces");
+      throw new IllegalStateException(
+          "getEJBObject() is only allowed through EJB 2.1 interfaces");
 
     return obj;
 
     /*
-      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                          getServer().getEJBName()));
-    */
+     * throw newIllegalStateException(L.l(
+     * "`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context."
+     * , getServer().getEJBName()));
+     */
   }
 
   /**
@@ -162,9 +177,10 @@ abstract public class AbstractContext implements EJBContext {
     return null;
 
     /*
-      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                          getServer()));
-    */
+     * throw newIllegalStateException(L.l(
+     * "`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context."
+     * , getServer()));
+     */
   }
 
   /**
@@ -174,9 +190,10 @@ abstract public class AbstractContext implements EJBContext {
   {
     return null;
     /*
-      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                          getServer().getEJBName()));
-    */
+     * throw newIllegalStateException(L.l(
+     * "`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context."
+     * , getServer().getEJBName()));
+     */
   }
 
   /**
@@ -186,9 +203,10 @@ abstract public class AbstractContext implements EJBContext {
   {
     return null;
     /*
-      throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
-                                          getServer().getEJBName()));
-    */
+     * throw newIllegalStateException(L.l(
+     * "`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context."
+     * , getServer().getEJBName()));
+     */
   }
 
   /**
@@ -253,8 +271,7 @@ abstract public class AbstractContext implements EJBContext {
     return SecurityContext.isUserInRole(roleName);
   }
 
-  public void remove()
-    throws RemoveException
+  public void remove() throws RemoveException
   {
     EJBObject obj = null;
     try {
@@ -283,14 +300,14 @@ abstract public class AbstractContext implements EJBContext {
   }
 
   /**
-   * Returns the current UserTransaction.  Only Session beans with
-   * bean-managed transactions may use this.
+   * Returns the current UserTransaction. Only Session beans with bean-managed
+   * transactions may use this.
    */
-  public UserTransaction getUserTransaction()
-    throws IllegalStateException
+  public UserTransaction getUserTransaction() throws IllegalStateException
   {
     if (getServer().isContainerTransaction())
-      throw new IllegalStateException("getUserTransaction() is not allowed with container-managed transaction");
+      throw new IllegalStateException(
+          "getUserTransaction() is not allowed with container-managed transaction");
 
     return getServer().getUserTransaction();
   }
@@ -298,8 +315,7 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Looks the timer service.
    */
-  public TimerService getTimerService()
-    throws IllegalStateException
+  public TimerService getTimerService() throws IllegalStateException
   {
     return getServer().getTimerService();
   }
@@ -307,11 +323,11 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Forces a rollback of the current transaction.
    */
-  public void setRollbackOnly()
-    throws IllegalStateException
+  public void setRollbackOnly() throws IllegalStateException
   {
-    if (! getServer().isContainerTransaction())
-      throw new IllegalStateException("setRollbackOnly() is only allowed with container-managed transaction");
+    if (!getServer().isContainerTransaction())
+      throw new IllegalStateException(
+          "setRollbackOnly() is only allowed with container-managed transaction");
 
     try {
       getServer().getUserTransaction().setRollbackOnly();
@@ -323,11 +339,11 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Returns true if the current transaction will rollback.
    */
-  public boolean getRollbackOnly()
-    throws IllegalStateException
+  public boolean getRollbackOnly() throws IllegalStateException
   {
-    if (! getServer().isContainerTransaction())
-      throw new IllegalStateException("getRollbackOnly() is only allowed with container-managed transaction");
+    if (!getServer().isContainerTransaction())
+      throw new IllegalStateException(
+          "getRollbackOnly() is only allowed with container-managed transaction");
 
     throw new IllegalStateException("invalid transaction");
   }
@@ -340,16 +356,17 @@ abstract public class AbstractContext implements EJBContext {
     _isDead = true;
   }
 
-  public Class getInvokedBusinessInterface()
-    throws IllegalStateException
+  public Class getInvokedBusinessInterface() throws IllegalStateException
   {
     if (_invokedBusinessInterface == null)
-      throw new IllegalStateException("SessionContext.getInvokedBusinessInterface() is only allowed through EJB 3.0 interfaces");
+      throw new IllegalStateException(
+          "SessionContext.getInvokedBusinessInterface() is only allowed through EJB 3.0 interfaces");
 
     return _invokedBusinessInterface;
   }
 
-  public void __caucho_setInvokedBusinessInterface(Class invokedBusinessInterface)
+  public void __caucho_setInvokedBusinessInterface(
+      Class invokedBusinessInterface)
   {
     _invokedBusinessInterface = invokedBusinessInterface;
   }
@@ -359,7 +376,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public void __caucho_timeout_callback(javax.ejb.Timer timer)
   {
-    throw new IllegalStateException(L.l("'{0}' does not have a @Timeout callback",
-					getClass().getName()));
+    throw new IllegalStateException(L.l(
+        "'{0}' does not have a @Timeout callback", getClass().getName()));
   }
 }

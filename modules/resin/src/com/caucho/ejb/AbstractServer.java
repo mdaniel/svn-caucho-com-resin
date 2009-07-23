@@ -72,14 +72,13 @@ import java.lang.reflect.Method;
  * Base server for a single home/object bean pair.
  */
 abstract public class AbstractServer implements EnvironmentBean {
-  private final static Logger log
-    = Logger.getLogger(AbstractServer.class.getName());
+  private final static Logger log = Logger.getLogger(AbstractServer.class
+      .getName());
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected final EjbContainer _ejbContainer;
-  
-  protected final UserTransaction _ut
-    = UserTransactionProxy.getInstance();
+
+  protected final UserTransaction _ut = UserTransactionProxy.getInstance();
 
   protected String _filename;
   protected int _line;
@@ -88,7 +87,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   private AnnotatedType _annotatedType;
   private Bean _bean;
   private InjectionTarget _injectionTarget;
-  
+
   protected String _id;
   protected String _ejbName;
   protected String _moduleName;
@@ -101,7 +100,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   private ConfigProgram _serverProgram;
 
-  protected HashMap<String,HandleEncoder> _protocolEncoderMap;
+  protected HashMap<String, HandleEncoder> _protocolEncoderMap;
   protected HandleEncoder _handleEncoder;
 
   protected DataSource _dataSource;
@@ -110,7 +109,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   // The original bean implementation class
   protected Class _ejbClass;
-  
+
   // The class for the extended bean
   protected Class _contextImplClass;
 
@@ -142,8 +141,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   private TimerService _timerService;
 
   protected ConfigProgram _initProgram;
-  protected ConfigProgram []_initInject;
-  protected ConfigProgram []_destroyInject;
+  protected ConfigProgram[] _initInject;
+  protected ConfigProgram[] _destroyInject;
 
   private AroundInvokeConfig _aroundInvokeConfig;
 
@@ -158,11 +157,11 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   /**
    * Creates a new server container
-   *
-   * @param manager the owning server container
+   * 
+   * @param manager
+   *          the owning server container
    */
-  public AbstractServer(EjbContainer container,
-			AnnotatedType annotatedType)
+  public AbstractServer(EjbContainer container, AnnotatedType annotatedType)
   {
     _annotatedType = annotatedType;
     _ejbContainer = container;
@@ -273,7 +272,6 @@ abstract public class AbstractServer implements EnvironmentBean {
     while (mappedName.endsWith("/"))
       mappedName = mappedName.substring(0, mappedName.length() - 1);
 
-
     _mappedName = mappedName;
   }
 
@@ -301,7 +299,8 @@ abstract public class AbstractServer implements EnvironmentBean {
     if (cl == null)
       return getProtocolId();
 
-    // XXX TCK: ejb30/bb/session/stateless/callback/defaultinterceptor/descriptor/defaultInterceptorsForCallbackBean1
+    // XXX TCK:
+    // ejb30/bb/session/stateless/callback/defaultinterceptor/descriptor/defaultInterceptorsForCallbackBean1
     if (cl.getName().startsWith("java."))
       return getProtocolId();
 
@@ -315,7 +314,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     return _annotatedType;
   }
-  
+
   /**
    * Sets the ejb class
    */
@@ -347,8 +346,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     try {
       _cauchoPostConstruct = cl.getDeclaredMethod("__caucho_postConstruct");
       _cauchoPostConstruct.setAccessible(true);
-    }
-    catch (NoSuchMethodException e) {
+    } catch (NoSuchMethodException e) {
     }
   }
 
@@ -492,13 +490,14 @@ abstract public class AbstractServer implements EnvironmentBean {
     try {
       Class keyClass = getPrimaryKeyClass();
 
-      encoder = _ejbContainer.getProtocolManager().createHandleEncoder(this, keyClass, protocol);
+      encoder = _ejbContainer.getProtocolManager().createHandleEncoder(this,
+          keyClass, protocol);
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
     }
 
     if (_protocolEncoderMap == null)
-      _protocolEncoderMap = new HashMap<String,HandleEncoder>(8);
+      _protocolEncoderMap = new HashMap<String, HandleEncoder>(8);
 
     _protocolEncoderMap.put(protocol, encoder);
 
@@ -533,7 +532,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     }
 
     if (_protocolEncoderMap == null)
-      _protocolEncoderMap = new HashMap<String,HandleEncoder>(8);
+      _protocolEncoderMap = new HashMap<String, HandleEncoder>(8);
 
     _protocolEncoderMap.put(protocol, encoder);
 
@@ -576,7 +575,6 @@ abstract public class AbstractServer implements EnvironmentBean {
       throw new IllegalArgumentException(e);
     }
   }
-
 
   public UserTransaction getUserTransaction()
   {
@@ -631,7 +629,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     // ejb/0fj0
     if (_timerService == null) {
       _timerService = EjbTimerService.getLocal(_ejbContainer.getClassLoader(),
-                                               getContext());
+          getContext());
     }
 
     return _timerService;
@@ -657,7 +655,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void remove(Object primaryKey)
   {
-    //throw new UnsupportedOperationException();
+    // throw new UnsupportedOperationException();
   }
 
   /**
@@ -693,14 +691,12 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     if (_metaData == null) {
       try {
-	EJBHome home = getEJBHome();
-	
-        _metaData = new EJBMetaDataImpl(home,
-                                        getRemoteHomeClass(),
-                                        getRemoteObjectClass(),
-                                        getPrimaryKeyClass());
+        EJBHome home = getEJBHome();
+
+        _metaData = new EJBMetaDataImpl(home, getRemoteHomeClass(),
+            getRemoteObjectClass(), getPrimaryKeyClass());
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
         throw new EJBException(e);
       }
@@ -708,8 +704,7 @@ abstract public class AbstractServer implements EnvironmentBean {
       if (this instanceof StatelessServer) {
         _metaData.setSession(true);
         _metaData.setStatelessSession(true);
-      }
-      else if (this instanceof SessionServer) {
+      } else if (this instanceof SessionServer) {
         _metaData.setSession(true);
       }
     }
@@ -773,23 +768,27 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   /**
    * Returns the remote skeleton for the given API
-   *
-   * @param api the bean's api to return a value for
-   * @param protocol the remote protocol
+   * 
+   * @param api
+   *          the bean's api to return a value for
+   * @param protocol
+   *          the remote protocol
    */
   abstract public Object getRemoteObject(Class api, String protocol);
 
   /**
    * Returns the a new local stub for the given API
-   *
-   * @param api the bean's api to return a value for
+   * 
+   * @param api
+   *          the bean's api to return a value for
    */
   abstract public Object getLocalObject(Class api);
-  
+
   /**
    * Returns the local jndi proxy for the given API
-   *
-   * @param api the bean's api to return a value for
+   * 
+   * @param api
+   *          the bean's api to return a value for
    */
   abstract public Object getLocalProxy(Class api);
 
@@ -801,8 +800,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     return _primaryKeyClass;
   }
 
-  public EJBObject getEJBObject(Object key)
-    throws FinderException
+  public EJBObject getEJBObject(Object key) throws FinderException
   {
     return getContext(key).getEJBObject();
   }
@@ -810,8 +808,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Returns the remote object.
    */
-  public Object getRemoteObject(Object key)
-    throws FinderException
+  public Object getRemoteObject(Object key) throws FinderException
   {
     // XXX TCK: ejb30/.../remove
     return getContext(key).createRemoteView();
@@ -822,14 +819,12 @@ abstract public class AbstractServer implements EnvironmentBean {
     return null;
   }
 
-  public AbstractContext getContext(Object key)
-    throws FinderException
+  public AbstractContext getContext(Object key) throws FinderException
   {
     return getContext(key, true);
   }
 
-  public AbstractContext getContext(long key)
-    throws FinderException
+  public AbstractContext getContext(long key) throws FinderException
   {
     return getContext(new Long(key));
   }
@@ -838,7 +833,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    * Returns the context with the given key
    */
   abstract public AbstractContext getContext(Object key, boolean forceLoad)
-    throws FinderException;
+      throws FinderException;
 
   /**
    * Sets the injection target
@@ -883,13 +878,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Initialize an instance
    */
-  public void initInstance(Object instance,
-			   InjectionTarget target,
-			   Object proxy,
-			   CreationalContext cxt)
+  public void initInstance(Object instance, InjectionTarget target,
+      Object proxy, CreationalContext cxt)
   {
     ConfigContext env = (ConfigContext) cxt;
-    
+
     Bean bean = getDeployBean();
 
     if (env != null && bean != null) {
@@ -901,7 +894,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     if (target != null) {
       target.inject(instance, env);
     }
-    
+
     if (getInjectionTarget() != null && target != getInjectionTarget()) {
       getInjectionTarget().inject(instance, env);
     }
@@ -913,11 +906,11 @@ abstract public class AbstractServer implements EnvironmentBean {
       try {
         thread.setContextClassLoader(_loader);
 
-	if (env == null)
-	  env = new ConfigContext();
+        if (env == null)
+          env = new ConfigContext();
 
-	for (ConfigProgram inject : _initInject)
-	  inject.inject(instance, env);
+        for (ConfigProgram inject : _initInject)
+          inject.inject(instance, env);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -925,12 +918,10 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     try {
       if (_cauchoPostConstruct != null)
-	_cauchoPostConstruct.invoke(instance, null);
-    }
-    catch (Throwable e) {
-      log.log(Level.FINER,
-              L.l("Error invoking method {0}", _cauchoPostConstruct),
-              e);
+        _cauchoPostConstruct.invoke(instance, null);
+    } catch (Throwable e) {
+      log.log(Level.FINER, L.l("Error invoking method {0}",
+          _cauchoPostConstruct), e);
     }
 
     if (env != null && bean != null)
@@ -949,29 +940,27 @@ abstract public class AbstractServer implements EnvironmentBean {
       try {
         thread.setContextClassLoader(_loader);
 
-	ConfigContext env = null;
-	if (env == null)
-	  env = new ConfigContext();
+        ConfigContext env = null;
+        if (env == null)
+          env = new ConfigContext();
 
-	for (ConfigProgram inject : _destroyInject)
-	  inject.inject(instance, env);
+        for (ConfigProgram inject : _destroyInject)
+          inject.inject(instance, env);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
     }
   }
 
-  public void init()
-    throws Exception
+  public void init() throws Exception
   {
     _loader.init();
     // _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
 
-  public boolean start()
-    throws Exception
+  public boolean start() throws Exception
   {
-    if (! _lifecycle.toActive())
+    if (!_lifecycle.toActive())
       return false;
 
     Thread thread = Thread.currentThread();
@@ -983,10 +972,10 @@ abstract public class AbstractServer implements EnvironmentBean {
       _loader.start();
 
       bindContext();
-      
+
       if (_serverProgram != null)
         _serverProgram.configure(this);
-      
+
       bindInjection();
 
       log.config(this + " active");
@@ -999,7 +988,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected void bindContext()
   {
-    
+
   }
 
   protected void bindInjection()
@@ -1012,11 +1001,11 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     if (_initProgram != null)
       injectList.add(_initProgram);
-    
+
     InjectIntrospector.introspectInit(injectList, getEjbClass(), null);
     // XXX: add init from xml here
 
-    ConfigProgram []injectArray = new ConfigProgram[injectList.size()];
+    ConfigProgram[] injectArray = new ConfigProgram[injectList.size()];
     injectList.toArray(injectArray);
 
     if (injectArray.length > 0)
@@ -1034,7 +1023,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
-				   Class ejbClass)
+      Class ejbClass)
   {
     InjectIntrospector.introspectDestroy(injectList, getEjbClass());
   }
@@ -1060,13 +1049,13 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public boolean isLocal()
   {
-    return (_localHome != null
-            || _localApiList != null && _localApiList.size() > 0);
+    return (_localHome != null || _localApiList != null
+        && _localApiList.size() > 0);
   }
 
   /**
-   * Returns true is there is a remote home or remote client object
-   * for the bean.
+   * Returns true is there is a remote home or remote client object for the
+   * bean.
    */
   public boolean isRemote()
   {
@@ -1078,7 +1067,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public boolean isDead()
   {
-    return ! _lifecycle.isActive();
+    return !_lifecycle.isActive();
   }
 
   /**
@@ -1120,7 +1109,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
       if (_remoteHomeClass != null)
         sb.append("<home>" + _remoteHomeClass.getName() + "</home>\n");
-      
+
       sb.append("<remote>" + _remoteApiList.get(0).getName() + "</remote>\n");
       sb.append("</ejb-ref>\n");
     }
@@ -1137,7 +1126,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   public String toString()
   {
     if (getMappedName() != null)
-      return getClass().getSimpleName() + "[" + getEJBName() + "," + getMappedName() + "]";
+      return getClass().getSimpleName() + "[" + getEJBName() + ","
+          + getMappedName() + "]";
     else
       return getClass().getSimpleName() + "[" + getEJBName() + "]";
   }
