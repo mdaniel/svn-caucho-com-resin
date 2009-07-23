@@ -30,41 +30,46 @@
 package com.caucho.ejb.manager;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.logging.*;
-import javax.ejb.Stateful;
-import javax.jms.*;
-import javax.enterprise.inject.spi.Bean;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.jms.ConnectionFactory;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.config.*;
-import com.caucho.config.inject.CauchoBean;
-import com.caucho.config.inject.InjectManager;
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.EjbConfigManager;
 import com.caucho.ejb.cfg.EjbRootConfig;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.java.WorkDir;
-import com.caucho.loader.*;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanMatch;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
 
 /**
  * Environment-based container.
  */
-public class EjbContainer implements ScanListener, EnvironmentListener
-{
+public class EjbContainer implements ScanListener, EnvironmentListener {
   private static final L10N L = new L10N(EjbContainer.class);
-  private static final Logger log
-    = Logger.getLogger(EjbContainer.class.getName());
+  private static final Logger log = Logger.getLogger(EjbContainer.class
+      .getName());
 
-  private static final EnvironmentLocal<EjbContainer> _localContainer
-    = new EnvironmentLocal<EjbContainer>();
+  private static final EnvironmentLocal<EjbContainer> _localContainer = new EnvironmentLocal<EjbContainer>();
 
   private final EnvironmentClassLoader _classLoader;
   private final ClassLoader _tempClassLoader;
@@ -73,7 +78,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
 
   private final EjbConfigManager _configManager;
   private final EjbProtocolManager _protocolManager;
-  
+
   private AmberPersistenceUnit _ejbPersistenceUnit;
 
   private HashSet<String> _ejbUrls = new HashSet<String>();
@@ -92,8 +97,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   // active servers
   //
 
-  private ArrayList<AbstractServer> _serverList
-    = new ArrayList<AbstractServer>();
+  private ArrayList<AbstractServer> _serverList = new ArrayList<AbstractServer>();
 
   private EjbContainer(ClassLoader loader)
   {
@@ -193,7 +197,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   {
     return _parentContainer;
   }
-  
+
   /**
    * Returns the protocol manager.
    */
@@ -213,8 +217,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener
 
         _ejbPersistenceUnit = amber.createPersistenceUnit("resin-ejb");
         _ejbPersistenceUnit.setBytecodeGenerator(false);
-	ClassLoader loader = SimpleLoader.create(getWorkDir());
-	_ejbPersistenceUnit.setEnhancedLoader(loader);
+        ClassLoader loader = SimpleLoader.create(getWorkDir());
+        _ejbPersistenceUnit.setEnhancedLoader(loader);
         _ejbPersistenceUnit.initLoaders();
         // _ejbPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
       } catch (RuntimeException e) {
@@ -308,9 +312,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   //
   // Bean configuration and management
   //
-  
-  public void createBean(AnnotatedType type,
-			 InjectionTarget injectionTarget)
+
+  public void createBean(AnnotatedType type, InjectionTarget injectionTarget)
   {
     _configManager.addAnnotatedType(type, injectionTarget);
   }
@@ -318,7 +321,6 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   //
   // AbstractServer management
   //
-
 
   /**
    * Adds a server.
@@ -335,7 +337,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
    */
   public AbstractServer getServer(String ejbName)
   {
-    for  (AbstractServer server : _serverList) {
+    for (AbstractServer server : _serverList) {
       if (server.getEJBName().equals(ejbName)) {
         return server;
       }
@@ -345,14 +347,13 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   }
 
   /**
-   * Returns the server specified by the path and ejbName,
-   * or null if not found.
+   * Returns the server specified by the path and ejbName, or null if not found.
    */
   public AbstractServer getServer(Path path, String ejbName)
   {
     String mappedName = path.getFullPath() + "#" + ejbName;
 
-    for  (AbstractServer server : _serverList) {
+    for (AbstractServer server : _serverList) {
       if (mappedName.equals(server.getId())) {
         return server;
       }
@@ -366,9 +367,9 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   //
 
   /**
-   * Returns the information for a client remote configuration, e.g.
-   * the <ejb-ref> needed for the client to properly connect.
-   *
+   * Returns the information for a client remote configuration, e.g. the
+   * <ejb-ref> needed for the client to properly connect.
+   * 
    * Only needed for the TCK.
    */
   public String getClientRemoteConfig()
@@ -418,8 +419,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   public boolean isRootScannable(Path root)
   {
     if (_ejbUrls.contains(root.getURL())) {
-    }
-    else if (! root.lookup("META-INF/ejb-jar.xml").canRead())
+    } else if (!root.lookup("META-INF/ejb-jar.xml").canRead())
       return false;
 
     EjbRootConfig context = _configManager.createRootConfig(root);
@@ -457,9 +457,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   /**
    * Callback to note the class matches
    */
-  public void classMatchEvent(EnvironmentClassLoader loader,
-                              Path root,
-                              String className)
+  public void classMatchEvent(EnvironmentClassLoader loader, Path root,
+      String className)
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
     config.addClassName(className);
@@ -478,8 +477,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
     _configManager.start();
   }
 
-  public void start()
-    throws ConfigException
+  public void start() throws ConfigException
   {
     try {
       AmberContainer.create().start();
@@ -496,7 +494,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener
           thread.setContextClassLoader(oldLoader);
         }
       }
-      
+
       AmberContainer.create().start();
     } catch (RuntimeException e) {
       throw e;
@@ -511,9 +509,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   public void destroy()
   {
     /*
-      if (! _lifecycle.toDestroy())
-        return;
-    */
+     * if (! _lifecycle.toDestroy()) return;
+     */
 
     try {
       ArrayList<AbstractServer> servers;
@@ -579,10 +576,10 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   {
     return getClass().getSimpleName() + "[" + _classLoader + "]";
   }
-  
+
   /**
-   * Sorts the servers so they can be destroyed in a consistent order.
-   * (To make QA sane.)
+   * Sorts the servers so they can be destroyed in a consistent order. (To make
+   * QA sane.)
    */
   static class ServerCmp implements Comparator<AbstractServer> {
     public int compare(AbstractServer a, AbstractServer b)
