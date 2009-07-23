@@ -38,14 +38,13 @@ import javax.enterprise.context.spi.Contextual;
 /**
  * Internal implementation for a Bean
  */
-public interface Bean<T> extends Contextual<T>
-{
+public interface Bean<T> extends Contextual<T> {
   //
   // metadata for the bean
   //
 
   /**
-   * Returns the bean's scope type.
+   * Returns the bean class.
    */
   public Class<?> getBeanClass();
 
@@ -60,8 +59,7 @@ public interface Bean<T> extends Contextual<T>
   public Set<InjectionPoint> getInjectionPoints();
 
   /**
-   * Returns the bean's name or null if the bean does not have a
-   * primary name.
+   * Returns the bean's name or null if the bean does not have a primary name.
    */
   public String getName();
 

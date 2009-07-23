@@ -29,14 +29,12 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
 
 /**
  * Abstract introspected view of a Bean
  */
-public interface AnnotatedType<X> extends Annotated
-{
+public interface AnnotatedType<X> extends Annotated {
   /**
    * Returns the concrete Java class
    */
