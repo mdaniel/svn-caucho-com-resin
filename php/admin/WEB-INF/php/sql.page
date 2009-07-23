@@ -6,7 +6,23 @@
 require_once "WEB-INF/php/inc.php";
 require_once "WEB-INF/php/wizard.php";
 
+?>
+<h1>JDBC Pool Query Utility</h1>
+<p>
+This utility allows you to make SQL queries through any of the JDBC pools
+that you have configured in any of your applications.
+</p>
+<?php
+
 $drivers = $g_mbean_server->query("resin:type=JdbcQuery,*");
+
+if (count($drivers) == 0) {
+?>
+<span class="warn">You don't have any JDBC pools configured yet.  If you need
+help configuring a pool, try using the 
+<a href="<?= "?q=wizards&server-id=$g_server_id" ?>">database configuration wizard.</a></span>
+<?php
+}
 
 foreach ($drivers as $driver) {
   $driver_form = new RootForm("query_" . $driver->Name, 

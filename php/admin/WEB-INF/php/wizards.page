@@ -5,6 +5,21 @@
 
 require_once "WEB-INF/php/inc.php";
 require_once "WEB-INF/php/wizard.php";
+?>
+<h1>Configuration wizards</h1>
+<p>
+This page features wizards that guide you through the process of
+creating various Resin configurations. These wizards <strong><em>do not
+add this configuration to your active Resin configuration</em></strong>,
+they simply help you with the XML syntax and show you the available
+options.  Once you have created an XML snippet using a wizard, you'll 
+need to place this configuration into the appropriate file (e.g.
+resin.xml, host.xml, or resin-web.xml). Note that adding configuration
+to a running Resin instance may cause a restart of a webapp, a host, or
+even the entire server.  These wizards do not change your configuration
+so that you have control over when these changes happen.
+</p>
+<?php
 
 $wizard_form = new WizardRootForm("db_wizard", 
                                   "Database Pool Configuration Wizard", 
