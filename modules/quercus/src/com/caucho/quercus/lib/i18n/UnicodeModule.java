@@ -208,7 +208,7 @@ public class UnicodeModule extends AbstractQuercusModule {
   public static Value iconv_substr(Env env,
                        StringValue str,
                        int offset,
-                       @Optional("7fffffff") int length,
+                       @Optional("0x7fffffff") int length,
                        @Optional("") String charset)
   {
     if (charset.length() == 0)
