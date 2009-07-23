@@ -26,10 +26,9 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.resources;
 
-import com.caucho.config.types.*;
+import com.caucho.config.types.Trigger;
 
 /**
  * Trigger for delay, period
@@ -37,6 +36,43 @@ import com.caucho.config.types.*;
 public class TimerTrigger implements Trigger {
   private long _firstTime;
   private long _period;
+
+  /**
+   * Constructs a new timer trigger.
+   */
+  public TimerTrigger()
+  {
+    super();
+  }
+
+  /**
+   * Creates a timer trigger.
+   * 
+   * @param firstTime
+   *          The first time the trigger should fire, in milliseconds.
+   */
+  public TimerTrigger(long firstTime)
+  {
+    super();
+
+    _firstTime = firstTime;
+  }
+
+  /**
+   * Creates a timer trigger.
+   * 
+   * @param firstTime
+   *          The first time the trigger should fire, in milliseconds.
+   * @param period
+   *          The interval, in milliseconds, the timer should be triggered.
+   */
+  public TimerTrigger(long firstTime, long period)
+  {
+    super();
+
+    _firstTime = firstTime;
+    _period = period;
+  }
 
   public void setFirstTime(long firstTime)
   {
@@ -57,13 +93,15 @@ public class TimerTrigger implements Trigger {
   {
     return _period;
   }
-  
+
   /**
    * Returns the time of the next trigger event
-   *
-   * @param now the current time
-   * @return the next trigger time
+   * 
+   * @param now
+   *          The current time.
+   * @return The next trigger time.
    */
+  @Override
   public long nextTime(long now)
   {
     if (now < _firstTime)
