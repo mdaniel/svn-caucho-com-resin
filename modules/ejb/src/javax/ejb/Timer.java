@@ -25,28 +25,127 @@
  *
  * @author Scott Ferguson
  */
-
 package javax.ejb;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * The timer interface
+ * The Timer interface contains information about a timer that was created
+ * through the EJB Timer Service.
  */
 public interface Timer {
-  public void cancel()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public TimerHandle getHandle()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Serializable getInfo()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Date getNextTimeout()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public long getTimeRemaining()
-    throws NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Cause the timer and all its associated expiration notifications to be
+   * Canceled.
+   * 
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public void cancel() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Get a serializable handle to the timer. This handle can be used at a later
+   * time to re-obtain the timer reference.
+   * 
+   * @return A serializable handle to the timer.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public TimerHandle getHandle() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Get the information associated with the timer at the time of creation.
+   * 
+   * @return The Serializable object that was passed in at timer creation, or
+   *         null if the info argument passed in at timer creation was null.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public Serializable getInfo() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Get the point in time at which the next timer expiration is scheduled to
+   * occur.
+   * 
+   * @return The point in time at which the next timer expiration is scheduled
+   *         to occur.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public Date getNextTimeout() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Get the number of milliseconds that will elapse before the next scheduled
+   * timer expiration.
+   * 
+   * @return The number of milliseconds that will elapse before the next
+   *         scheduled timer expiration.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public long getTimeRemaining() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Get the schedule expression corresponding to this timer.
+   * 
+   * @return Schedule expression corresponding to this timer.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method. Also thrown if invoked on a
+   *           timer that was created with one of the non-ScheduleExpression
+   *           TimerService.createTimer APIs.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public ScheduleExpression getSchedule() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Query whether this timer has persistent semantics.
+   * 
+   * @return true if this timer has persistent guarantees.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public boolean isPersistent() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
 }

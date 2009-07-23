@@ -25,15 +25,28 @@
  *
  * @author Scott Ferguson
  */
-
 package javax.ejb;
 
 import java.io.Serializable;
 
 /**
- * The timer interface
+ * The TimerHandle interface is implemented by all EJB timer handles.
  */
 public interface TimerHandle extends Serializable {
-  public Timer getTimer()
-    throws NoSuchObjectLocalException, EJBException;
+
+  /**
+   * Obtain a reference to the timer represented by this handle.
+   * 
+   * @return A reference to the timer represented by this handle.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a handle whose associated timer has expired or has
+   *           been canceled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public Timer getTimer() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
 }

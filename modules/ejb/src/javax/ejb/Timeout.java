@@ -25,7 +25,6 @@
  *
  * @author Scott Ferguson
  */
-
 package javax.ejb;
 
 import java.lang.annotation.ElementType;
@@ -34,7 +33,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The @Timeout annotation.
+ * Designates a method on the bean that should receive EJB timer expirations for
+ * that bean.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
