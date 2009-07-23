@@ -684,6 +684,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
       if (_server.isDestroyed()) {
 	log.fine(dbgId() + " request after server close");
+        killKeepalive();
 	return false;
       }
 
@@ -691,6 +692,7 @@ public class HmuxRequest extends AbstractHttpRequest
       case -1:
         if (isLoggable)
           log.fine(dbgId() + "r: end of file");
+        killKeepalive();
         return false;
 
       case HMUX_CHANNEL:
@@ -1051,12 +1053,26 @@ public class HmuxRequest extends AbstractHttpRequest
 	}
 
       default:
-        len = (is.read() << 8) + is.read();
+        {
+          int d1 = is.read();
+          int d2 = is.read();
 
-	if (isLoggable)
-	  log.fine(dbgId() + (char) code + " " + len);
-	is.skip(len);
-	break;
+          if (d2 < 0) {
+            if (isLoggable)
+              log.fine(dbgId() + "r: unexpected end of file");
+
+            killKeepalive();
+            return false;
+          }
+          
+          len = (d1 << 8) + d2;
+
+          if (isLoggable)
+            log.fine(dbgId() + (char) code + " " + len);
+        
+          is.skip(len);
+          break;
+        }
       }
     }
 

@@ -576,12 +576,15 @@ public class TcpConnection extends Connection
          break;
        }
 
-       if (! getRequest().handleRequest()) {
-         _isKeepalive = false;
-       }
+       boolean isRequestValid = getRequest().handleRequest();
 
        // statistics
        gatherStatistics(isStatKeepalive);
+
+       if (! isRequestValid) {
+         _isKeepalive = false;
+         return RequestState.EXIT;
+       }
 
        if (_state == ConnectionState.DUPLEX) {
          // duplex (xmpp/hmtp) handling

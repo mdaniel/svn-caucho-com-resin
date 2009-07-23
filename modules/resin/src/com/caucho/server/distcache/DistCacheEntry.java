@@ -249,7 +249,10 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
 
   public void clearLease()
   {
-    getMnodeValue().clearLease();
+    MnodeValue mnodeValue = getMnodeValue();
+
+    if (mnodeValue != null)
+      mnodeValue.clearLease();
   }
 
   public long getCost()
