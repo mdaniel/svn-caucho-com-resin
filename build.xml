@@ -423,6 +423,7 @@
   <target name="inject" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="webbeans"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="inject-16.jar"/>
     </antcall>
   </target>
