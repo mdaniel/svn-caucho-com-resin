@@ -949,7 +949,10 @@
           file="${resin.lib}/inject-16.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
-
+    <!--
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/pro.jar"
+          file="${resin.lib}/pro.jar"/>
+    -->
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${install}/php/quercus-war">
         <include name="WEB-INF/lib/resin.jar"/>
@@ -990,9 +993,10 @@
 
     <copy tofile="${dist}/quercus-4_0-snap.war"
           file="${dist}/quercus-${version}.war"/>
-    
+    <!--
     <copy tofile="${dist}/quercus-4_0-pro-snap.war"
           file="${dist}/quercus-pro-${version}.war"/>
+    -->
 
     <copy tofile="${dist}/quercus-4_0-snap-src.jar"
           file="${dist}/quercus-${version}-src.jar"/>
