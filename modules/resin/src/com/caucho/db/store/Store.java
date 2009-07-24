@@ -39,6 +39,7 @@ import com.caucho.vfs.RandomAccessStream;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.sql.SQLException;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -154,6 +155,7 @@ public class Store {
 
   private Object _fileLock = new Object();
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
+  private final Semaphore _rowFileSemaphore = new Semaphore(4);
   
   private Lock _rowLock;
 
@@ -1770,6 +1772,23 @@ public class Store {
   private RandomAccessWrapper openRowFile()
     throws IOException
   {
+    // limit number of active row files
+
+    try {
+      _rowFileSemaphore.acquire();
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+
+    return openRowFileImpl();
+  }
+
+  /**
+   * Opens the underlying file to the database.
+   */
+  private RandomAccessWrapper openRowFileImpl()
+    throws IOException
+  {
     RandomAccessStream file = null;
     RandomAccessWrapper wrapper = null;
     
@@ -1797,6 +1816,8 @@ public class Store {
   private void freeRowFile(RandomAccessWrapper wrapper)
     throws IOException
   {
+    _rowFileSemaphore.release();
+
     synchronized (this) {
       if (_cachedRowFile == null) {
 	_cachedRowFile = new SoftReference<RandomAccessWrapper>(wrapper);

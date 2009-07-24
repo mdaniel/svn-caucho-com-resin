@@ -231,9 +231,7 @@ abstract public class Block implements SyncCacheListener {
 	if (log.isLoggable(Level.FINEST))
 	  log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
-	//System.out.println(this + " WRITE_BEGIN");
 	writeImpl(dirtyMin, dirtyMax - dirtyMin);
-	//System.out.println(this + " WRITE_END");
       } finally {
 	free();
       }

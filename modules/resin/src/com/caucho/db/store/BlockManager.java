@@ -54,7 +54,7 @@ public final class BlockManager
   private static BlockManager _staticManager;
 
   private final byte []_storeMask = new byte[8192];
-  private final LongKeyLruCache<Block> _blockCache;
+  private LongKeyLruCache<Block> _blockCache;
 
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   private int _writeQueueMax = 32;
@@ -102,7 +102,7 @@ public final class BlockManager
    */
   public void ensureCapacity(int minCapacity)
   {
-    _blockCache.ensureCapacity(minCapacity);
+    _blockCache = _blockCache.ensureCapacity(minCapacity);
   }
 
   /**

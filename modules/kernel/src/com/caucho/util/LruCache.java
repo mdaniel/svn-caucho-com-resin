@@ -420,7 +420,11 @@ public final class LruCache<K,V> {
       CacheItem<K,V> prevLru = item._prevLru;
       CacheItem<K,V> nextLru = item._nextLru;
 
-      if (item._hitCount++ == 1) {
+      if (item._hitCount <= 0) {
+        // item deleted before update
+        return;
+      }
+      else if (item._hitCount++ == 1) {
 	item._prevLru = null;
 	item._nextLru = _head2;
         
@@ -566,7 +570,7 @@ public final class LruCache<K,V> {
 
     V value = null;
 
-    synchronized (this) {
+    synchronized (_entries) {
       CacheItem<K,V> prevItem = null;
       
       for (CacheItem<K,V> item = _entries[hash];
