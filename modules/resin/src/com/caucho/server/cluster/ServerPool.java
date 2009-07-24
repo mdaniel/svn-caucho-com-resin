@@ -77,7 +77,7 @@ public class ServerPool
   private final boolean _isSecure;
 
   private String _debugId;
-  
+
   private Path _tcpPath;
 
   private int _maxConnections = Integer.MAX_VALUE / 2;
@@ -89,7 +89,7 @@ public class ServerPool
   private long _loadBalanceRecoverTime = 15000;
   private long _loadBalanceWarmupTime = 60000;
   private int _loadBalanceWeight = 100;
-  
+
   private ClusterStream []_idle = new ClusterStream[64];
   private volatile int _idleHead;
   private volatile int _idleTail;
@@ -98,7 +98,7 @@ public class ServerPool
   private int _streamCount;
 
   private long _warmupChunkTime;
-  
+
   private long _failRecoverTime;
   private long _failChunkTime;
 
@@ -112,11 +112,11 @@ public class ServerPool
 
   // numeric value representing the throttle state
   private volatile int _warmupState;
-  
+
   // load management data
   private volatile long _lastFailConnectTime;
   private volatile long _dynamicFailRecoverTime = 1000L;
-  
+
   private volatile long _lastFailTime;
   private volatile long _lastBusyTime;
 
@@ -136,10 +136,10 @@ public class ServerPool
   private volatile long _cpuSetTime;
 
   public ServerPool(String serverId,
-		    String targetId,
-		    String address,
-		    int port,
-		    boolean isSecure)
+                    String targetId,
+                    String address,
+                    int port,
+                    boolean isSecure)
   {
     _serverId = serverId;
     _targetId = targetId;
@@ -150,13 +150,13 @@ public class ServerPool
   }
 
   public ServerPool(String serverId,
-		    ClusterServer server)
+                    ClusterServer server)
   {
     this(serverId,
-	 server.getId(),
-	 server.getClusterPort().getAddress(),
-	 server.getClusterPort().getPort(),
-	 server.getClusterPort().isSSL());
+         server.getId(),
+         server.getClusterPort().getAddress(),
+         server.getClusterPort().getPort(),
+         server.getClusterPort().isSSL());
 
     _loadBalanceConnectTimeout = server.getLoadBalanceConnectTimeout();
     _loadBalanceConnectionMin = server.getLoadBalanceConnectionMin();
@@ -303,7 +303,7 @@ public class ServerPool
     _warmupChunkTime = _loadBalanceWarmupTime / WARMUP_MAX;
     if (_warmupChunkTime <= 0)
       _warmupChunkTime = 1;
-    
+
     _failChunkTime = _loadBalanceRecoverTime / WARMUP_MAX;
     if (_failChunkTime <= 0)
       _failChunkTime = 1;
@@ -320,6 +320,8 @@ public class ServerPool
       _tcpPath = Vfs.lookup("tcps://" + address + ":" + _port, attr);
     else
       _tcpPath = Vfs.lookup("tcp://" + address + ":" + _port, attr);
+
+    _state = ST_STARTING;
   }
 
   /**
@@ -469,7 +471,7 @@ public class ServerPool
   public final boolean isActive()
   {
     int state = _state;
-    
+
     return state == ST_ACTIVE || state == ST_STARTING || state == ST_WARMUP;
     /*
     switch (_state) {
@@ -482,13 +484,13 @@ public class ServerPool
 
     case ST_FAIL:
       return (_failTime + _failRecoverTime <= Alarm.getCurrentTime());
-      
+
     default:
       return false;
     }
     */
   }
-  
+
   /**
    * Returns true if the server is dead.
    */
@@ -519,7 +521,7 @@ public class ServerPool
   public String getState()
   {
     updateWarmup();
-    
+
     switch (_state) {
     case ST_NEW:
       return "init";
@@ -565,23 +567,23 @@ public class ServerPool
       long now = Alarm.getCurrentTime();
 
       if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
-	return false;
+        return false;
       }
 
       int warmupState = _warmupState;
 
       if (warmupState < 0) {
-	return (_failTime - warmupState * _failChunkTime < now);
+        return (_failTime - warmupState * _failChunkTime < now);
       }
       else if (WARMUP_MAX <= warmupState)
-	return true;
+        return true;
 
       int connectionMax = WARMUP_CONNECTION_MAX[warmupState];
 
       int idleCount = getIdleCount();
       int activeCount = _activeCount + _startingCount;
       int totalCount = activeCount + idleCount;
-      
+
       return totalCount < connectionMax;
     }
     else {
@@ -595,42 +597,42 @@ public class ServerPool
   public boolean isEnabled()
   {
     int state = _state;
-    
+
     return ST_STARTING <= state && state <= ST_ACTIVE;
   }
-  
+
   private void toActive()
   {
     synchronized (this) {
       if (_state < ST_CLOSED)
-	_state = ST_ACTIVE;
+        _state = ST_ACTIVE;
     }
   }
-  
+
   public void toBusy()
   {
     _lastBusyTime = Alarm.getCurrentTime();
     _firstSuccessTime = 0;
-    
+
     synchronized (this) {
       _busyCountTotal++;
-      
+
       if (_state < ST_CLOSED)
-	_state = ST_BUSY;
+        _state = ST_BUSY;
     }
   }
-  
+
   public void toFail()
   {
     _failTime = Alarm.getCurrentTime();
     _lastFailTime = _failTime;
     _firstSuccessTime = 0;
-    
+
     synchronized (this) {
       _failCountTotal++;
-      
+
       if (_state < ST_CLOSED)
-	_state = ST_FAIL;
+        _state = ST_FAIL;
     }
 
     clearRecycle();
@@ -643,22 +645,22 @@ public class ServerPool
   {
     synchronized (this) {
       _failCountTotal++;
-      
+
       long now = Alarm.getCurrentTime();
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
       if (now - _failTime >= 100) {
-	_warmupState--;
-	_failTime = now;
-	_lastFailTime = _failTime;
+        _warmupState--;
+        _failTime = now;
+        _lastFailTime = _failTime;
       }
 
       if (_warmupState < WARMUP_MIN)
-	_warmupState = WARMUP_MIN;
-      
+        _warmupState = WARMUP_MIN;
+
       if (_state < ST_CLOSED)
-	_state = ST_FAIL;
+        _state = ST_FAIL;
     }
   }
 
@@ -669,7 +671,7 @@ public class ServerPool
   {
     synchronized (this) {
       _failCountTotal++;
-      
+
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
@@ -680,13 +682,13 @@ public class ServerPool
       _lastFailConnectTime = now;
       _dynamicFailRecoverTime *= 2;
       if (_failRecoverTime < _dynamicFailRecoverTime)
-	_dynamicFailRecoverTime = _failRecoverTime;
+        _dynamicFailRecoverTime = _failRecoverTime;
 
       if (_warmupState < WARMUP_MIN)
-	_warmupState = WARMUP_MIN;
-      
+        _warmupState = WARMUP_MIN;
+
       if (_state < ST_CLOSED)
-	_state = ST_FAIL;
+        _state = ST_FAIL;
     }
   }
 
@@ -698,15 +700,15 @@ public class ServerPool
     synchronized (this) {
       _lastBusyTime = Alarm.getCurrentTime();
       _firstSuccessTime = 0;
-      
+
       _warmupState--;
       if (_warmupState < 0)
-	_warmupState = 0;
-    
+        _warmupState = 0;
+
       _busyCountTotal++;
-      
+
       if (_state < ST_CLOSED)
-	_state = ST_BUSY;
+        _state = ST_BUSY;
     }
   }
 
@@ -719,7 +721,7 @@ public class ServerPool
       if (_state == ST_ACTIVE) {
       }
       else if (_state < ST_CLOSED)
-	_state = ST_STARTING;
+        _state = ST_STARTING;
     }
   }
 
@@ -730,7 +732,7 @@ public class ServerPool
   {
     synchronized (this) {
       if (_state < ST_CLOSED)
-	_state = ST_STANDBY;
+        _state = ST_STANDBY;
     }
   }
 
@@ -741,7 +743,7 @@ public class ServerPool
   {
     synchronized (this) {
       if (_state < ST_CLOSED && _state != ST_STANDBY)
-	_state = ST_SESSION_ONLY;
+        _state = ST_SESSION_ONLY;
     }
   }
 
@@ -821,7 +823,7 @@ public class ServerPool
     if (now < _failTime + _failRecoverTime) {
       return null;
     }
-    
+
     if (now < _lastBusyTime + _failRecoverTime) {
       return null;
     }
@@ -871,9 +873,9 @@ public class ServerPool
 
         if (now < freeTime + _loadBalanceIdleTime) {
           _activeCount++;
-	  _keepaliveCountTotal++;
+          _keepaliveCountTotal++;
 
-	  stream.clearFreeTime();
+          stream.clearFreeTime();
 
           return stream;
         }
@@ -882,9 +884,9 @@ public class ServerPool
 
     if (stream != null) {
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " close idle " + stream
-		  + " expire=" + QDate.formatISO8601(stream.getFreeTime() + _loadBalanceIdleTime));
-      
+        log.finer(this + " close idle " + stream
+                  + " expire=" + QDate.formatISO8601(stream.getFreeTime() + _loadBalanceIdleTime));
+
       stream.closeImpl();
     }
 
@@ -900,8 +902,8 @@ public class ServerPool
   {
     synchronized (this) {
       if (_maxConnections <= _activeCount + _startingCount)
-	return null;
-      
+        return null;
+
       _startingCount++;
     }
 
@@ -913,7 +915,7 @@ public class ServerPool
 
       throw e;
     }
-    
+
     try {
       ReadWritePair pair = openTCPPair();
       ReadStream rs = pair.getReadStream();
@@ -921,42 +923,42 @@ public class ServerPool
 
       synchronized (this) {
         _activeCount++;
-	_connectCountTotal++;
+        _connectCountTotal++;
       }
 
       ClusterStream stream = new ClusterStream(this, _streamCount++,
-					       rs, pair.getWriteStream());
-      
+                                               rs, pair.getWriteStream());
+
       if (log.isLoggable(Level.FINER))
-	log.finer("connect " + stream);
+        log.finer("connect " + stream);
 
       if (_firstSuccessTime <= 0) {
-	if (ST_STARTING <= _state && _state < ST_ACTIVE) {
-	  if (_loadBalanceWarmupTime > 0)
-	    _state = ST_WARMUP;
-	  else
-	    _state = ST_ACTIVE;
+        if (ST_STARTING <= _state && _state < ST_ACTIVE) {
+          if (_loadBalanceWarmupTime > 0)
+            _state = ST_WARMUP;
+          else
+            _state = ST_ACTIVE;
 
-	  _firstSuccessTime = Alarm.getCurrentTime();
-	}
+          _firstSuccessTime = Alarm.getCurrentTime();
+        }
 
-	if (_warmupState < 0)
-	  _warmupState = 0;
+        if (_warmupState < 0)
+          _warmupState = 0;
       }
-      
+
       return stream;
     } catch (IOException e) {
       if (log.isLoggable(Level.FINEST))
-	log.log(Level.FINEST, this + " " + e.toString(), e);
+        log.log(Level.FINEST, this + " " + e.toString(), e);
       else
-	log.finer(this + " " + e.toString());
+        log.finer(this + " " + e.toString());
 
       failConnect();
-      
+
       return null;
     } finally {
       synchronized (this) {
-	_startingCount--;
+        _startingCount--;
       }
     }
   }
@@ -969,7 +971,7 @@ public class ServerPool
   {
     synchronized (this) {
       if (_state == ST_FAIL) {
-	_state = ST_STARTING;
+        _state = ST_STARTING;
       }
 
       _failTime = 0;
@@ -991,7 +993,7 @@ public class ServerPool
         _idleHead = (_idleHead + 1) % _idle.length;
         _idle[_idleHead] = stream;
 
-	stream = null;
+        stream = null;
       }
 
       long now = Alarm.getCurrentTime();
@@ -999,45 +1001,45 @@ public class ServerPool
       long prevSuccessTime = _prevSuccessTime;
 
       if (prevSuccessTime > 0) {
-	_latencyFactor = (0.95 * _latencyFactor
-			  + 0.05 * (now - prevSuccessTime));
+        _latencyFactor = (0.95 * _latencyFactor
+                          + 0.05 * (now - prevSuccessTime));
       }
 
       if (_activeCount > 0)
-	_prevSuccessTime = now;
+        _prevSuccessTime = now;
       else
-	_prevSuccessTime = 0;
-	
+        _prevSuccessTime = 0;
+
       _lastSuccessTime = now;
     }
-    
+
     updateWarmup();
 
     long now = Alarm.getCurrentTime();
     long maxIdleTime = _loadBalanceIdleTime;
     ClusterStream oldStream = null;
-    
+
     do {
       oldStream = null;
 
       synchronized (this) {
-	if (_idleHead != _idleTail) {
-	  int nextTail = (_idleTail + 1) % _idle.length;
-	  
-	  oldStream = _idle[nextTail];
+        if (_idleHead != _idleTail) {
+          int nextTail = (_idleTail + 1) % _idle.length;
 
-	  if (oldStream != null
-	      && oldStream.getFreeTime() + maxIdleTime < now) {
-	    _idle[nextTail] = null;
-	    _idleTail = nextTail;
-	  }
-	  else
-	    oldStream = null;
-	}
+          oldStream = _idle[nextTail];
+
+          if (oldStream != null
+              && oldStream.getFreeTime() + maxIdleTime < now) {
+            _idle[nextTail] = null;
+            _idleTail = nextTail;
+          }
+          else
+            oldStream = null;
+        }
       }
 
       if (oldStream != null)
-	oldStream.closeImpl();
+        oldStream.closeImpl();
     } while (oldStream != null);
 
     if (stream != null)
@@ -1048,21 +1050,21 @@ public class ServerPool
   {
     synchronized (this) {
       if (! isEnabled())
-	return;
-    
+        return;
+
       long now = Alarm.getCurrentTime();
       int warmupState = _warmupState;
 
       if (warmupState >= 0 && _firstSuccessTime > 0) {
-	warmupState = (int) ((now - _firstSuccessTime) / _warmupChunkTime);
+        warmupState = (int) ((now - _firstSuccessTime) / _warmupChunkTime);
 
-	// reset the connection fail recover time
-	_dynamicFailRecoverTime = 1000L;
+        // reset the connection fail recover time
+        _dynamicFailRecoverTime = 1000L;
 
-	if (WARMUP_MAX <= warmupState) {
-	  warmupState = WARMUP_MAX;
-	  toActive();
-	}
+        if (WARMUP_MAX <= warmupState) {
+          warmupState = WARMUP_MAX;
+          toActive();
+        }
       }
 
       _warmupState = warmupState;
@@ -1077,7 +1079,7 @@ public class ServerPool
   {
     if (log.isLoggable(Level.FINER))
       log.finer("close " + stream);
-    
+
     synchronized (this) {
       _activeCount--;
     }
@@ -1141,11 +1143,11 @@ public class ServerPool
   {
     synchronized (this) {
       if (_state == ST_CLOSED)
-	return;
+        return;
 
       _state = ST_CLOSED;
     }
-    
+
     synchronized (this) {
       _idleHead = _idleTail = 0;
     }
@@ -1215,21 +1217,21 @@ public class ServerPool
       stream = open();
 
       if (stream != null) {
-	stream.message(to, "", message);
+        stream.message(to, "", message);
 
-	isQuit = true;
+        isQuit = true;
       }
     } catch (Exception e) {
       isQuit = false;
-      
+
       throw ConfigException.create(e);
     } finally {
       if (stream == null) {
       }
       else if (isQuit)
-	stream.free();
+        stream.free();
       else
-	stream.close();
+        stream.close();
     }
 
     return isQuit;
@@ -1255,22 +1257,22 @@ public class ServerPool
       int code = stream.getReadStream().read();
 
       if (code == 'Q')
-	isQuit = true;
+        isQuit = true;
       else if (code != 'X')
-	throw new IllegalStateException("unexpected code " + (char) code);
+        throw new IllegalStateException("unexpected code " + (char) code);
 
       return result;
     } catch (Exception e) {
       isQuit = false;
-      
+
       throw ConfigException.create(e);
     } finally {
       if (stream == null) {
       }
       else if (isQuit)
-	stream.free();
+        stream.free();
       else
-	stream.close();
+        stream.close();
     }
   }
 
@@ -1279,15 +1281,15 @@ public class ServerPool
   {
     ClusterStream stream = null;
     boolean isQuit = false;
-    
+
     try {
       stream = open();
 
       if (stream == null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " can't open for querySet");
-	
-	return null;
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " can't open for querySet");
+
+        return null;
       }
 
       long id = 0;
@@ -1299,9 +1301,9 @@ public class ServerPool
       int code = stream.getReadStream().read();
 
       if (code == 'Q')
-	isQuit = true;
+        isQuit = true;
       else if (code != 'X')
-	throw new IllegalStateException("unexpected code " + (char) code);
+        throw new IllegalStateException("unexpected code " + (char) code);
 
       return result;
     } catch (IOException e) {
@@ -1310,15 +1312,15 @@ public class ServerPool
       throw e;
     } catch (Exception e) {
       isQuit = false;
-      
+
       throw new IOException(e);
     } finally {
       if (stream == null) {
       }
       else if (isQuit)
-	stream.free();
+        stream.free();
       else
-	stream.close();
+        stream.close();
     }
   }
 
@@ -1326,7 +1328,7 @@ public class ServerPool
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + getDebugId()
-	    + "," + _address + ":" + _port + "]");
+            + "[" + getDebugId()
+            + "," + _address + ":" + _port + "]");
   }
 }
