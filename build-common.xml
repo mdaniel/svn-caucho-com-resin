@@ -1259,7 +1259,7 @@
     </exec>
   </target>
   
-  <target name="debian" depends="compile,resin.dist.jar,debian-libexec">
+  <target name="debian" depends="compile,resin.dist.jar,debian-libexec,debian-perm">
     <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
     </exec>
@@ -1296,7 +1296,7 @@
           overwrite="true">
       <filterset>
         <filter token="JAVA_HOME" value="/usr/lib/jvm/java-6-sun"/>
-        <filter token="resin_home" value="/usr/lib/resin"/>
+        <filter token="resin_home" value="/usr/share/resin"/>
         <filter token="resin_root" value="/var/www"/>
         <filter token="resin_log" value="/var/log/resin"/>
         <filter token="resin_conf" value="/etc/resin"/>
@@ -1309,17 +1309,19 @@
       </fileset>
     </chmod>
 
-    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/lib"/>
-    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/libexec"/>
-    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/keys"/>
+    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/lib"/>
+    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/libexec"/>
+    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/keys"/>
+    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/licenses"/>
     
-    <copy todir="dist-debian/usr/lib/${shortproduct}-${version}"
+    <copy todir="dist-debian/usr/share/${shortproduct}-${version}"
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${dist}/${shortproduct}-${version}">
         <include name="lib/activation.jar"/>
         <include name="lib/javaee-16.jar"/>
         <include name="lib/javamail-141.jar"/>
+        <include name="lib/jaxstream-15.jar"/>
 	<!--
         <include name="lib/osgi-14.jar"/>
 	-->
@@ -1331,26 +1333,26 @@
       </fileset>
       
       <fileset dir="${resin.install}">
-        <include name="lib/activation.jar"/>
-        <include name="lib/javamail-141.jar"/>
-	<!--
-        <include name="lib/osgi-14.jar"/>
-	-->
-        <include name="lib/jcache.jar"/>
-        <include name="lib/jaxrpc-15.jar"/>
-        <include name="lib/jsf-12.jar"/>
-        <include name="lib/webutil.jar"/>
-	
         <include name="bin/resin.sh"/>
       </fileset>
       
       <fileset dir="dist/libexec">
         <include name="**"/>
+        <exclude name="aclocal.m4"/>
+        <exclude name="automake"/>
+        <exclude name="automake/**"/>
+        <exclude name="*config*"/>
+        <exclude name="init.d"/>
+        <exclude name="init.d/**"/>
+        <exclude name="libtool"/>
+        <exclude name="Makefile*"/>
+        <exclude name="modules"/>
+        <exclude name="modules/**"/>
       </fileset>
     </copy>
-    
+
     <chmod perm="ugo+rx">
-      <fileset dir="dist-debian/usr/lib/${shortproduct}-${version}">
+      <fileset dir="dist-debian/usr/share/${shortproduct}-${version}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
       </fileset>
@@ -1359,7 +1361,7 @@
     <exec executable="ln">
       <arg value="-s"/>
       <arg value="${shortproduct}-${version}"/>
-      <arg value="dist-debian/usr/lib/resin"/>
+      <arg value="dist-debian/usr/share/resin"/>
     </exec>
     
     <copy todir="dist-debian/var/www"
@@ -1373,18 +1375,27 @@
     <copy todir="dist-debian/var/www/webapps/ROOT"
           preservelastmodified="true"
           overwrite="true">
-      <fileset dir="${basedir}/webapps/ROOT">
+      <fileset dir="${basedir}/../resin/webapps/ROOT">
         <include name="index.jsp"/>
         <include name="favicon.ico"/>
       </fileset>
     </copy>
 
-    <copy file="${install}/debian/control"
-          tofile="dist-debian/DEBIAN/control"/>
+    <copy file="${install}/debian/control.in"
+          tofile="dist-debian/DEBIAN/control">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
 
     <copy file="${install}/debian/conffiles"
           tofile="dist-debian/DEBIAN/conffiles"/>
-    
+
+    <copy file="${install}/debian/postinst"
+          tofile="dist-debian/DEBIAN/postinst"/>
+
+    <chmod perm="755" file="dist-debian/DEBIAN/postinst"/>
+
     <exec executable="${basedir}/debian-perm"/>
         
     <exec executable="dpkg">
@@ -1408,15 +1419,15 @@
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${resindir}">
-	<exclude name="**/classes/**"/>
-	<exclude name="**/dist/**"/>
-	<exclude name="**/*~"/>
-	<exclude name="**/*.class"/>
-	<exclude name="**/.svn/*"/>
+        <exclude name="**/classes/**"/>
+        <exclude name="**/dist/**"/>
+        <exclude name="**/*~"/>
+        <exclude name="**/*.class"/>
+        <exclude name="**/.svn/*"/>
 
-	<include name="modules/**"/>
-	<include name="conf/**"/>
-	<include name="artifacts/**"/>
+        <include name="modules/**"/>
+        <include name="conf/**"/>
+        <include name="artifacts/**"/>
       </fileset>
     </copy>
 
@@ -1441,7 +1452,6 @@
         <filter token="RESIN_ROOT" value="${shortproduct}-${version}"/>
       </filterset>
     </copy>
-
 
     <exec executable="cc">
       <arg value="-o"/>

@@ -62,7 +62,7 @@ main(int argc, char **argv)
   chown_rec("dist-debian", 0, 0);
   chown_rec("dist-debian/var/www", user->pw_uid, user->pw_gid);
   chown_rec("dist-debian/var/log/resin", user->pw_uid, user->pw_gid);
-  chown_rec("dist-debian/usr/lib/@RESIN_ROOT@", user->pw_uid, user->pw_gid);
+  chown_rec("dist-debian/usr/share/@RESIN_ROOT@", user->pw_uid, user->pw_gid);
 
   return 0;
 }
