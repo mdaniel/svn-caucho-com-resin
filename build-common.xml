@@ -974,27 +974,9 @@
       </fileset>
     </jar>
     
-    <jar destfile="${dist}/quercus-pro-${version}.war">
-      <fileset dir="${install}/php/quercus-war">
-        <include name="WEB-INF/lib/resin.jar"/>
-        <include name="WEB-INF/lib/inject-16.jar"/>
-        <include name="WEB-INF/lib/javamail-141.jar"/>
-        <include name="WEB-INF/lib/pro.jar"/>
-	<!--
-        <include name="WEB-INF/lib/script-10.jar"/>
-	-->
-        <include name="WEB-INF/web.xml"/>
-        <include name="images/caucho-white.jpg"/>
-        <include name="images/dragonfly-tiny.png"/>
-        <include name="index.php"/>
-        <include name="README"/>
-      </fileset>
-    </jar>
-    
     <delete file="${install}/php/quercus-war/WEB-INF/lib/resin.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"/>
-    <delete file="${install}/php/quercus-war/WEB-INF/lib/pro.jar"/>
     <!--
     <delete file="${install}/php/quercus-war/WEB-INF/lib/script-10.jar"/>
     -->
