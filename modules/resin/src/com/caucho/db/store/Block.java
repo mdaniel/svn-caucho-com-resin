@@ -59,6 +59,7 @@ abstract public class Block implements SyncCacheListener {
 
   private final Object _writeLock = new Object();
   private final AtomicBoolean _isWriting = new AtomicBoolean();
+  private final AtomicInteger _writeCount = new AtomicInteger();
   private volatile boolean _isWriteRequired;
 
   private boolean _isFlushDirtyOnCommit;
@@ -189,6 +190,18 @@ abstract public class Block implements SyncCacheListener {
    * Forces a write of the data (should be private?)
    */
   public void write()
+    throws IOException
+  {
+    if (_writeCount.getAndIncrement() < 2) {
+      try {
+        writeImpl();
+      } finally {
+        _writeCount.getAndDecrement();
+      }
+    }
+  }
+
+  private void writeImpl()
     throws IOException
   {
     synchronized (_writeLock) {

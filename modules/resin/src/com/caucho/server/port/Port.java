@@ -168,6 +168,7 @@ public class Port
 
   // semaphore to request a new start thread
   private Thread _portThread;
+  private final AtomicBoolean _isPortStart = new AtomicBoolean();
 
   // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
@@ -1340,8 +1341,13 @@ public class Port
         // create a new one
         Thread portThread = _portThread;
 
-        if (portThread != null)
-          LockSupport.unpark(portThread);
+        if (portThread != null && _isPortStart.compareAndSet(false, true)) {
+          try {
+            LockSupport.unpark(portThread);
+          } finally {
+            _isPortStart.set(false);
+          }
+        }
       }
     }
 

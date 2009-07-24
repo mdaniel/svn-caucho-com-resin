@@ -131,7 +131,7 @@ abstract public class DistributedCacheManager
   {
     try {
       MessageDigest digest
-	= MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+        = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
 
       NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
 

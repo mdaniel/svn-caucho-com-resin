@@ -36,7 +36,7 @@ import javax.ejb.Schedule;
 import javax.ejb.ScheduleExpression;
 import javax.ejb.Schedules;
 
-import com.caucho.ejb.scheduler.Scheduler;
+//import com.caucho.ejb.scheduler.Scheduler;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -120,6 +120,7 @@ public class SchedulingCallChain extends AbstractCallChain {
       // TODO Should an alternate paradigm be used for this since this is not
       // really generating code?
 
+      /*
       if (_schedule != null) {
         Scheduler.schedule(_targetBean, _targetMethod, new ScheduleExpression()
             .second(_schedule.second()).minute(_schedule.minute()).hour(
@@ -136,6 +137,7 @@ public class SchedulingCallChain extends AbstractCallChain {
                   .info(), schedule.persistent());
         }
       }
+      */
     }
 
     _next.generatePrologue(out, map);

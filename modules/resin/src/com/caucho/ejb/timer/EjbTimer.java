@@ -171,12 +171,24 @@ public class EjbTimer implements javax.ejb.Timer, Runnable {
 
     return delay;
   }
+  
+  public ScheduleExpression getSchedule()
+    throws IllegalStateException, NoSuchObjectLocalException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public boolean isPersistent() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
 
   public String toString()
   {
-    return "EjbTimer[" + _timerId + ", "
-      + _expiration + ", "
-      + _interval + ", "
-      + _info + "]";
+    return ("EjbTimer[" + _timerId + ", "
+            + _expiration + ", "
+            + _interval + ", "
+            + _info + "]");
   }
 }

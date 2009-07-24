@@ -173,6 +173,50 @@ public class EjbTimerService implements TimerService {
 
     return null;
   }
+  
+  public Timer createCalendarTimer(ScheduleExpression schedule,
+                                   Serializable info)
+    throws IllegalArgumentException, IllegalStateException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public Timer createCalendarTimer(ScheduleExpression schedule,
+                                   TimerConfig timerConfig)
+    throws IllegalArgumentException, IllegalStateException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public Timer createSingleActionTimer(long duration, TimerConfig timerConfig)
+      throws IllegalArgumentException, IllegalStateException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public Timer createIntervalTimer(long initialDuration,
+                                   long intervalDuration,
+                                   TimerConfig timerConfig)
+    throws IllegalArgumentException,
+           IllegalStateException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public Timer createSingleActionTimer(Date expiration,
+                                       TimerConfig timerConfig)
+      throws IllegalArgumentException, IllegalStateException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public Timer createIntervalTimer(Date initialExpiration,
+                                   long intervalDuration,
+                                   TimerConfig timerConfig)
+      throws IllegalArgumentException, IllegalStateException, EJBException
+  {
+    throw new UnsupportedOperationException();
+  }
 
   public String toString()
   {
