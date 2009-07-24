@@ -153,6 +153,9 @@ abstract public class Block implements SyncCacheListener {
   public void read()
     throws IOException
   {
+    if (_isValid)
+      return;
+    
     synchronized (this) {
       if (! _isValid) {
 	if (log.isLoggable(Level.FINEST))

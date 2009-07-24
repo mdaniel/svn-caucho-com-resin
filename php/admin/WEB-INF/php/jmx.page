@@ -16,6 +16,8 @@ ksort($mbean_group);
 foreach ($mbean_group as $group_name => $group_mbeans) {
   echo "<h1>" . $group_name . "</h1>\n";
 
+  display_jmx($mbean_server, $group_mbeans);
+/*
   $type_partition = jmx_partition($group_mbeans, array("type"));
   ksort($type_partition);
 
@@ -64,14 +66,15 @@ foreach ($mbean_group as $group_name => $group_mbeans) {
 	echo "<td>";
 	
 	display_jmx_data($v);
-	  
-	echo "</td>\n";
+
+  	echo "</td>\n";
         echo "</tr>";
       }
     }
   }
   
   echo "</table>";
+*/
 }
 
 // var_dump($mbean_group);

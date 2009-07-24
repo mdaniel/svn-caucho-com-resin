@@ -357,9 +357,9 @@ public final class LruCache<K,V> {
 	CacheItem<K,V> next = _entries[hash];
 	
 	item = new CacheItem<K,V>((K) okey, value);
-	item._nextHash = next;
-	_entries[hash] = item;
 
+        // item must be added to lru first, because a get() hit can update
+        // the lru, and the item must be in the lru before that happens
 	synchronized (_lruLock) {
           assert(item._hitCount == 1);
           
@@ -375,7 +375,10 @@ public final class LruCache<K,V> {
 	  if (_tail1 == null)
 	    _tail1 = item;
 	}
-
+        
+	item._nextHash = next;
+	_entries[hash] = item;
+        
 	return null;
       }
 

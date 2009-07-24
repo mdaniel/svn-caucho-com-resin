@@ -187,7 +187,7 @@ if ($stat_service) {
   echo "&width=300&height=240' width='300' height='240'>\n"
   
   echo "<img src='graph.php?";
-  echo "g[0][0]=$si|Resin|Thread|Resin Thread Count"
+  echo "g[0][0]=$si|Resin|Thread|Thread Count"
   echo "&width=300&height=240' width='300' height='240'>\n"
 }
 ?>

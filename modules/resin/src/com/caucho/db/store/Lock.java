@@ -55,9 +55,7 @@ public final class Lock {
 
   private final Object _lock = new Object();
   
-  private LockNode _lockHead;
-  private LockNode _lockTail;
-  private boolean _isWake;
+  private int _activeLockCount;
   
   public Lock(String id)
   {
@@ -93,10 +91,10 @@ public final class Lock {
     }
     
     if (lock < WRITE_LOCK) {
-      return; // read-only locks
+      return; // read-only automatically locks
     }
 
-    lock(timeout, READ_LOCK);
+    lock(timeout, READ_LOCK, 0);
   }
 
   /**
@@ -113,7 +111,8 @@ public final class Lock {
          lock = _lockCount.get()) {
     }
 
-    unlock();
+    if (WRITE_LOCK <= lock)
+      unlock();
   }
 
   /**
@@ -136,12 +135,8 @@ public final class Lock {
          ! _lockCount.compareAndSet(lock, lock + (READ_LOCK|WRITE_LOCK));
          lock = _lockCount.get()) {
     }
-
-    if (lock == 0) {
-      return; // if only locker, return
-    }
     
-    lock(timeout, READ_LOCK|WRITE_LOCK);
+    lock(timeout, READ_LOCK|WRITE_LOCK, lock);
   }
 
   /**
@@ -159,7 +154,24 @@ public final class Lock {
                  + "0x" + Long.toHexString(_lockCount.get()));
     }
 
-    return _lockCount.compareAndSet(0, READ_LOCK|WRITE_LOCK);
+    long value = READ_LOCK|WRITE_LOCK;
+
+    if (_lockCount.compareAndSet(0, value)) {
+      synchronized (_lock) {
+        if (_activeLockCount == 0) {
+          _activeLockCount = 1;
+          return true;
+        }
+      }
+
+      long lock;
+      for (lock = _lockCount.get();
+           ! _lockCount.compareAndSet(lock, lock - value);
+           lock = _lockCount.get()) {
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -185,55 +197,6 @@ public final class Lock {
   }
 
   /**
-   * Tries to get a write lock when already have a read lock.
-   *
-   * @param timeout how long to wait for a timeout
-   */
-  /*
-  void lockWrite(Transaction xa, long timeout)
-    throws SQLException
-  {
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(this + " lockWrite "
-                 "0x" + + Long.toHexString(_lockCount.get()));
-    }
-
-    long lock = 0;
-    
-    // add to the read lock
-    for (lock = _lockCount.get();
-         ! _lockCount.compareAndSet(lock, lock + WRITE_LOCK);
-         lock = _lockCount.get()) {
-    }
-
-    if (lock == READ_LOCK) {
-      return; // if only locker, return
-    }
-    
-    lock(timeout, WRITE_LOCK);
-  }
-  */
-
-  /**
-   * Clears a write lock.
-   */
-  /*
-  void unlockWrite()
-    throws SQLException
-  {
-    long lock = 0;
-    
-    // add to the read lock
-    for (lock = _lockCount.get();
-         ! _lockCount.compareAndSet(lock, lock - WRITE_LOCK);
-         lock = _lockCount.get()) {
-    }
-
-    unlock();
-  }
-  */
-
-  /**
    * Waits until all the writers drain before committing, see Block.commit()
    */
   void waitForCommit()
@@ -255,55 +218,34 @@ public final class Lock {
   }
   */
 
-  private void lock(long timeout, long value)
+  private void lock(long timeout, long value, long initialValue)
     throws LockTimeoutException
   {
     long expires = Alarm.getCurrentTime() + timeout;
 
-    LockNode node = new LockNode();
+    boolean isWrite = (value == (READ_LOCK|WRITE_LOCK));
 
     synchronized (_lock) {
-      if (_lockTail != null) {
-        _lockTail.setNext(node);
-        _lockTail = node;
-      }
-      else {
-        _lockHead = node;
-        _lockTail = node;
-      }
-    }
+      if (isWrite && initialValue < WRITE_LOCK)
+        _activeLockCount += (int) initialValue;
 
-    while (true) {
-      synchronized (_lock) {
-        while (! _lockHead.isValid()) {
-          _lockHead = _lockHead.getNext();
-        }
-        
-        if (_lockHead == node) {
-          return;
-        }
-      }
+      while (_activeLockCount > 0) {
+        long delta = expires - Alarm.getCurrentTime();
 
-      if (expires < Alarm.getCurrentTime()) {
-        node.setValid(false);
-
-        long lock;
-        for (lock = _lockCount.get();
-             ! _lockCount.compareAndSet(lock, lock - value);
-             lock = _lockCount.get()) {
+        if (delta < 0) {
+          long lock;
+          for (lock = _lockCount.get();
+               ! _lockCount.compareAndSet(lock, lock - value);
+               lock = _lockCount.get()) {
+          }
+          
+          throw new LockTimeoutException(L.l("{0} lock timed out ({1}ms) 0x{2}",
+                                             this, timeout, Long.toHexString(_lockCount.get())));
         }
 
-        unlock();
-
-        throw new LockTimeoutException(L.l("{0} lock timed out ({1}ms) 0x{2}",
-                                           this, timeout, Long.toHexString(_lockCount.get())));
-      }
-
-      long delta = expires - Alarm.getCurrentTime();
-      if (delta > 0) {
         try {
           Thread.interrupted();
-          LockSupport.parkNanos(delta * 1000000L);
+          _lock.wait(delta);
         } catch (Exception e) {
         }
       }
@@ -312,31 +254,15 @@ public final class Lock {
 
   private void unlock()
   {
-    if (_lockHead == null)
-      return;
-    
-    Thread thread = Thread.currentThread();
-    Thread nextThread = null;
-
     synchronized (_lock) {
-      LockNode node;
-      
-      for (node = _lockHead; node != null; node = _lockHead) {
-        if (! node.isValid() || node.getThread() == thread) {
-          _lockHead = node.getNext();
+      _activeLockCount--;
 
-          if (_lockHead == null)
-            _lockTail = null;
-        }
-        else {
-          nextThread = node.getThread();
-          break;
-        }
+      if (_activeLockCount == 0) {
+        if (_lockCount.get() < WRITE_LOCK)
+          _lock.notifyAll();
+        else
+          _lock.notify();
       }
-    }
-
-    if (nextThread != null) {
-      LockSupport.unpark(nextThread);
     }
   }
 
@@ -348,12 +274,15 @@ public final class Lock {
 
   static final class LockNode {
     private LockNode _next;
-    private Thread _thread;
+    private final Thread _thread;
     private boolean _isValid = true;
+    private boolean _isAcquire;
+    private final boolean _isWrite;
 
-    LockNode()
+    LockNode(boolean isWrite)
     {
       _thread = Thread.currentThread();
+      _isWrite = isWrite;
     }
 
     public final Thread getThread()
@@ -379,6 +308,26 @@ public final class Lock {
     public void setValid(boolean isValid)
     {
       _isValid = isValid;
+    }
+
+    public boolean isAcquire()
+    {
+      return _isAcquire;
+    }
+
+    public void setAcquire(boolean isAcquire)
+    {
+      _isAcquire = isAcquire;
+    }
+
+    public boolean isRead()
+    {
+      return ! _isWrite;
+    }
+
+    public boolean isWrite()
+    {
+      return _isWrite;
     }
   }
 }

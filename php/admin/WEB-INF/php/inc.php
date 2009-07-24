@@ -348,10 +348,14 @@ function display_jmx($mbean_server, $group_mbeans)
       $s = "show('h$start_id');hide('s$start_id');";
       $h = "hide('h$start_id');show('s$start_id');";
 
+/*
       for ($i = 0; $i < count($attr_names); $i++) {
         $s .= "show('jmx" . ($i + $start_id) . "');";
         $h .= "hide('jmx" . ($i + $start_id) . "');";
       }
+*/
+        $s .= "show('jmx" . ($start_id) . "');";
+        $h .= "hide('jmx" . ($start_id) . "');";
       
       echo "<tr><td class='item' colspan='2'>";
       echo "<a id='s$start_id' href=\"javascript:$s\">[show]</a>\n";
@@ -359,12 +363,15 @@ function display_jmx($mbean_server, $group_mbeans)
       echo jmx_short_name($mbean->mbean_name, $group_array);
       echo "</td></tr>\n";
 
+      echo "<tr><td>";
+      echo "<table id='jmx${start_id}' class='data' style='display:none'>\n";
       $row = 0;
 
       foreach ($attr_names as $attr_name) {
         $id = "jmx" . $data_id++;
       
-        echo "<tr id='$id' style='display:none'>";
+//        echo "<tr id='$id' style='display:none'>";
+        echo "<tr>";
 	echo "<td>" . $attr_name . "</td>";
 
 	$v = $mbean->$attr_name;
@@ -375,8 +382,9 @@ function display_jmx($mbean_server, $group_mbeans)
 	
         echo "</td>\n";
 
-        echo "</tr>";
+        echo "</tr>\n";
       }
+      echo "</table>";
     }
   }
   
