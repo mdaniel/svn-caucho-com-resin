@@ -33,10 +33,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.ejb.Schedule;
-import javax.ejb.ScheduleExpression;
 import javax.ejb.Schedules;
 
-//import com.caucho.ejb.scheduler.Scheduler;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -122,19 +120,28 @@ public class SchedulingCallChain extends AbstractCallChain {
 
       /*
       if (_schedule != null) {
-        Scheduler.schedule(_targetBean, _targetMethod, new ScheduleExpression()
-            .second(_schedule.second()).minute(_schedule.minute()).hour(
-                _schedule.hour()).dayOfWeek(_schedule.dayOfWeek()).dayOfMonth(
-                _schedule.dayOfMonth()).month(_schedule.month()).year(
-                _schedule.year()), _schedule.info(), _schedule.persistent());
+        // TODO This should probably be a proper lookup of the timer service
+        // (perhaps via JCDI).
+        // EjbTimerService.getCurrent().createScheduledTimer(
+        // _targetBean,
+        // _targetMethod,
+        // new ScheduleExpression().second(_schedule.second()).minute(
+        // _schedule.minute()).hour(_schedule.hour()).dayOfWeek(
+        // _schedule.dayOfWeek()).dayOfMonth(_schedule.dayOfMonth())
+        // .month(_schedule.month()).year(_schedule.year()),
+        // _schedule.info(), _schedule.persistent());
       } else {
         for (Schedule schedule : _schedules.value()) {
-          Scheduler.schedule(_targetBean, _targetMethod,
-              new ScheduleExpression().second(schedule.second()).minute(
-                  schedule.minute()).hour(schedule.hour()).dayOfWeek(
-                  schedule.dayOfWeek()).dayOfMonth(schedule.dayOfMonth())
-                  .month(schedule.month()).year(schedule.year()), schedule
-                  .info(), schedule.persistent());
+          // TODO This should probably be a proper lookup of the timer service
+          // (perhaps via JCDI).
+          // EjbTimerService.getCurrent().createScheduledTimer(
+          // _targetBean,
+          // _targetMethod,
+          // new ScheduleExpression().second(schedule.second()).minute(
+          // schedule.minute()).hour(schedule.hour()).dayOfWeek(
+          // schedule.dayOfWeek()).dayOfMonth(schedule.dayOfMonth())
+          // .month(schedule.month()).year(schedule.year()),
+          // schedule.info(), schedule.persistent());
         }
       }
       */
