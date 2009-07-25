@@ -2,7 +2,7 @@ Package: resin
 Version: @VERSION@
 Section: web
 Priority: optional
-Architecture: i386
+Architecture: @ARCHITECTURE@
 Maintainer: Scott Ferguson <ferg@caucho.com>
 Provides: resin
 Description: Resin application server

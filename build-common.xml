@@ -1281,7 +1281,6 @@
     </chmod>
 
     <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/lib"/>
-    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/libexec"/>
     <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/keys"/>
     <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/licenses"/>
     
@@ -1352,10 +1351,24 @@
       </fileset>
     </copy>
 
+    <exec executable="uname" outputproperty="architecture">
+      <arg value="-m"/>
+ 
+      <redirector>
+        <outputfilterchain>
+          <replacestring from="i486" to="i386"/>
+          <replacestring from="i586" to="i386"/>
+          <replacestring from="i686" to="i386"/>
+          <replacestring from="x86_64" to="amd64"/>
+        </outputfilterchain>
+      </redirector>
+    </exec>
+
     <copy file="${install}/debian/control.in"
           tofile="dist-debian/DEBIAN/control">
       <filterset>
         <filter token="VERSION" value="${version}"/>
+        <filter token="ARCHITECTURE" value="${architecture}"/>
       </filterset>
     </copy>
 
@@ -1372,7 +1385,7 @@
     <exec executable="dpkg">
       <arg value="-b"/>
       <arg value="dist-debian"/>
-      <arg value="${dist}/${shortproduct}_${version}-i386.deb"/>
+      <arg value="${dist}/${shortproduct}_${version}-${architecture}.deb"/>
     </exec>
   </target>
   
