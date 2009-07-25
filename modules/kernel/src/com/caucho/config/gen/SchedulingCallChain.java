@@ -35,7 +35,13 @@ import java.util.HashMap;
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
 
+import com.caucho.config.types.CronType;
+import com.caucho.config.types.Trigger;
+import com.caucho.ejb.timer.EjbTimer;
 import com.caucho.java.JavaWriter;
+import com.caucho.scheduling.CronExpression;
+import com.caucho.scheduling.ScheduledTask;
+import com.caucho.scheduling.Scheduler;
 import com.caucho.util.L10N;
 
 /**
@@ -117,36 +123,37 @@ public class SchedulingCallChain extends AbstractCallChain {
 
       // TODO Should an alternate paradigm be used for this since this is not
       // really generating code?
-
-      /*
       if (_schedule != null) {
-        // TODO This should probably be a proper lookup of the timer service
-        // (perhaps via JCDI).
-        // EjbTimerService.getCurrent().createScheduledTimer(
-        // _targetBean,
-        // _targetMethod,
-        // new ScheduleExpression().second(_schedule.second()).minute(
-        // _schedule.minute()).hour(_schedule.hour()).dayOfWeek(
-        // _schedule.dayOfWeek()).dayOfMonth(_schedule.dayOfMonth())
-        // .month(_schedule.month()).year(_schedule.year()),
-        // _schedule.info(), _schedule.persistent());
+        addSchedule(_schedule);
       } else {
         for (Schedule schedule : _schedules.value()) {
-          // TODO This should probably be a proper lookup of the timer service
-          // (perhaps via JCDI).
-          // EjbTimerService.getCurrent().createScheduledTimer(
-          // _targetBean,
-          // _targetMethod,
-          // new ScheduleExpression().second(schedule.second()).minute(
-          // schedule.minute()).hour(schedule.hour()).dayOfWeek(
-          // schedule.dayOfWeek()).dayOfMonth(schedule.dayOfMonth())
-          // .month(schedule.month()).year(schedule.year()),
-          // schedule.info(), schedule.persistent());
+          addSchedule(schedule);
         }
       }
-      */
+
     }
 
     _next.generatePrologue(out, map);
+  }
+
+  private void addSchedule(final Schedule schedule)
+  {
+    CronExpression cronExpression = new CronExpression(schedule.second(),
+        schedule.minute(), schedule.hour(), schedule.dayOfWeek(), schedule
+            .dayOfMonth(), schedule.month(), schedule.year());
+    Trigger trigger = new CronType(schedule.second(), schedule.minute(),
+        schedule.hour(), schedule.dayOfWeek(), schedule.dayOfMonth(), schedule
+            .month(), schedule.year(), null, null);
+    EjbTimer timer = new EjbTimer();
+
+    // TODO What really needs to be passed in is a unique reference to the bean
+    // (maybe a JCDI Bean definition?), not just the bean class. Is there an
+    // easy way to do that?
+    ScheduledTask scheduledTask = new ScheduledTask(_targetBean, _targetMethod,
+        timer, cronExpression, trigger, -1, -1, schedule.info());
+    timer.setScheduledTask(scheduledTask);
+
+    // TODO This should probably be an injection of the scheduler by JCDI.
+    Scheduler.addScheduledTask(scheduledTask);
   }
 }
