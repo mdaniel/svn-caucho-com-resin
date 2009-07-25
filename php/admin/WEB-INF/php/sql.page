@@ -25,8 +25,9 @@ help configuring a pool, try using the
 }
 
 foreach ($drivers as $driver) {
-  $driver_form = new RootForm("query_" . $driver->Name, 
-                              $driver->Name . " SQL");
+  $safe_name = str_replace("/", "_", $driver->Name);
+
+  $driver_form = new RootForm("query_{$safe_name}", "{$safe_name} SQL");
   $driver_form->add_child(new FormContent("<b>URL</b>: " . $driver->getUrl()));
 
   $pool = $g_mbean_server->query("resin:*,name={$driver->Name},type=ConnectionPool");
@@ -37,12 +38,12 @@ foreach ($drivers as $driver) {
   }
 
   // schema browser
-  $schema_browser = new OptionalForm("schema_browser", "Browse tables");
+  $schema_browser = new OptionalForm("schema_browser_{$safe_name}", "Browse tables");
   $driver_form->add_child($schema_browser);
 
   $tables = $driver->listTables();
   foreach ($tables as $table) {
-    $table_form = new OptionalForm("{$table}_browser", 
+    $table_form = new OptionalForm("schema_browser_{$safe_name}_{$table}", 
                                    "Browse table '{$table}'");
     $schema_browser->add_child($table_form);
 
@@ -63,42 +64,43 @@ foreach ($drivers as $driver) {
     $table_form->add_child(new FormContent($schema_html));
   }
 
-  $driver_form->add_child(new TextField("{$driver->Name}-sql", 
+  $driver_form->add_child(new TextField("{$safe_name}-sql", 
                                         "SQL Query", true));
 
-  function sql_result_processor($form, $driver)
-  {
-    $sql = $form->get_field("{$driver->Name}-sql")->get_value();
+  $driver_form->process("sql_result_processor", $driver);
+}
 
-    try {
-      $results = $driver->query($sql);
-      $row_names = $results->getRowNames();
-      $result_data = $results->getResultData();
+function sql_result_processor($form, $driver)
+{
+  $safe_name = str_replace("/", "_", $driver->Name);
+  $sql = $form->get_field("{$safe_name}-sql")->get_value();
 
-      echo "<div class='sql'>\n";
-      echo "<h3>Query Results</h3>\n"
-      echo "<span style='font-size: 150%;'><tt>$sql</tt></span>\n"
-      echo "<table class='sql'>\n";
+  try {
+    $results = $driver->query($sql);
+    $row_names = $results->getRowNames();
+    $result_data = $results->getResultData();
 
+    echo "<div class='sql'>\n";
+    echo "<h3>Query Results</h3>\n"
+    echo "<span style='font-size: 150%;'><tt>$sql</tt></span>\n"
+    echo "<table class='sql'>\n";
+
+    echo "<tr>";
+    foreach ($row_names as $name) {
+      echo "<th>$name</th>";
+    }
+    echo "</tr>\n";
+
+    foreach ($result_data as $row) {
       echo "<tr>";
-      foreach ($row_names as $name) {
-        echo "<th>$name</th>";
+      foreach ($row as $cell) {
+        echo "<td>$cell</td>";
       }
       echo "</tr>\n";
-
-      foreach ($result_data as $row) {
-        echo "<tr>";
-        foreach ($row as $cell) {
-          echo "<td>$cell</td>";
-        }
-        echo "</tr>\n";
-      }
-      echo "</table>\n</div>\n";
     }
-    catch (Exception $e) {
-      resin_var_dump($e);
-    }
+    echo "</table>\n</div>\n";
   }
-
-  $driver_form->process("sql_result_processor", $driver);
+  catch (Exception $e) {
+    resin_var_dump($e);
+  }
 }
