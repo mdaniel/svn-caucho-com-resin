@@ -265,12 +265,12 @@ public class Quercus
 
   public String getVersion()
   {
-    return "Open Source 4.0.0";
+    return "Open Source 4.0.1";
   }
 
   public String getVersionDate()
   {
-    return "20090701T2777";
+    return "20090801";
   }
 
   public boolean isProfile()
