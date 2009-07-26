@@ -73,7 +73,7 @@ PHP is being interpreted, but not by Quercus&#153;!  Please check your configura
 </div>
 
 <div>
-Documentation is available at <a href="http://www.caucho.com">http://quercus.caucho.com</a>
+Documentation is available at <a href="http://www.caucho.com">http://www.caucho.com</a>
 </div>
 
 <div>
