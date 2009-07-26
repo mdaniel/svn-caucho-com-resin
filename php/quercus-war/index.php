@@ -37,9 +37,14 @@ Quercus&#153; Start Page
     <?php if (! quercus_test()) echo "display: block;"; ?> 
 }
 
-#success {
+#success_pro {
     display: none;
-    <?php if (quercus_test()) echo "display: block;"; ?> 
+    <?php if (quercus_is_pro() && quercus_test()) echo "display: block;"; ?> 
+}
+
+#success_open_source {
+    display: none;
+    <?php if (! quercus_is_pro() && quercus_test()) echo "display: block;"; ?> 
 }
 </style>
 </head>
@@ -59,12 +64,16 @@ PHP files are not being interpreted by Quercus&#153;.
 PHP is being interpreted, but not by Quercus&#153;!  Please check your configuration.
 </div>
 
-<div class="message" id="success">
-<img src="images/dragonfly-tiny.png">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> seems to be working fine.  Have fun!
+<div class="message" id="success_pro">
+<img src="images/dragonfly-tiny.png">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> is compiling PHP pages.  Have fun!
+</div>
+
+<div class="message" id="success_open_source">
+<img src="images/dragonfly-tiny.png">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> is interpreting PHP pages.  Have fun!
 </div>
 
 <div>
-Documentation is available at <a href="http://quercus.caucho.com">http://quercus.caucho.com</a>
+Documentation is available at <a href="http://www.caucho.com">http://quercus.caucho.com</a>
 </div>
 
 <div>
