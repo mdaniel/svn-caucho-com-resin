@@ -125,17 +125,26 @@ abstract public class Repository
     if (sha1 == null || sha1.equals(oldSha1)) {
       return true;
     }
-    else {
-      try {
-	RepositoryTagMap tagMap = new RepositoryTagMap(this, sha1);
 
-	return setTagMap(tagMap);
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
-    }
+    updateLoad(sha1);
 
     return false;
+  }
+
+  protected void updateLoad(String sha1)
+  {
+    updateTagMap(sha1);
+  }
+
+  protected void updateTagMap(String sha1)
+  {
+    try {
+      RepositoryTagMap tagMap = new RepositoryTagMap(this, sha1);
+
+      setTagMap(tagMap);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   //
@@ -149,7 +158,7 @@ abstract public class Repository
   {
     return _tagMap.getCommitHash();
   }
-  
+
   /**
    * Returns the tag map.
    */
@@ -182,12 +191,12 @@ abstract public class Repository
    * @param version symbolic version name for the commit
    */
   abstract public boolean setTag(String tag,
-				 String sha1,
-				 String user,
-				 String server,
-				 String message,
-				 String version);
-  
+                                 String sha1,
+                                 String user,
+                                 String server,
+                                 String message,
+                                 String version);
+
   /**
    * Removes a tag
    *
@@ -197,9 +206,9 @@ abstract public class Repository
    * @param message user's message for the commit
    */
   abstract public boolean removeTag(String tag,
-				    String user,
-				    String server,
-				    String message);
+                                    String user,
+                                    String server,
+                                    String message);
 
   /**
    * Creates a tag entry
@@ -211,40 +220,40 @@ abstract public class Repository
    * @param version symbolic version name for the commit
    */
   protected RepositoryTagMap addTagData(String tag,
-				    String root,
-				    String user,
-				    String server,
-				    String message,
-				    String version)
+                                        String root,
+                                        String user,
+                                        String server,
+                                        String message,
+                                        String version)
   {
     try {
       update();
-	
+
       RepositoryTagMap repositoryTagMap = _tagMap;
-      
+
       Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
       if (! validateFile(root))
-	throw new RepositoryException(L.l("'{0}' is an invalid .git file",
-					  root));
+        throw new RepositoryException(L.l("'{0}' is an invalid .git file",
+                                          root));
 
       RepositoryTagEntry oldEntry = tagMap.get(tag);
       String parent = null;
 
       RepositoryTagEntry entry
-	= new RepositoryTagEntry(this, tag, root, parent);
+        = new RepositoryTagEntry(this, tag, root, parent);
 
       Map<String,RepositoryTagEntry> newTagMap
-	= new TreeMap<String,RepositoryTagEntry>(tagMap);
-    
+        = new TreeMap<String,RepositoryTagEntry>(tagMap);
+
       newTagMap.put(tag, entry);
 
       RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
-						      repositoryTagMap,
-						      newTagMap);
+                                                      repositoryTagMap,
+                                                      newTagMap);
 
       if (_tagMap == repositoryTagMap) {
-	return newDeployTagMap;
+        return newDeployTagMap;
       }
     } catch (RuntimeException e) {
       throw e;
@@ -265,33 +274,33 @@ abstract public class Repository
    * @param version symbolic version name for the commit
    */
   protected RepositoryTagMap removeTagData(String tag,
-				       String user,
-				       String server,
-				       String message)
+                                       String user,
+                                       String server,
+                                       String message)
   {
     try {
       update();
-	
+
       RepositoryTagMap repositoryTagMap = _tagMap;
-      
+
       Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
       RepositoryTagEntry oldEntry = tagMap.get(tag);
 
       if (oldEntry == null)
-	return repositoryTagMap;
+        return repositoryTagMap;
 
       Map<String,RepositoryTagEntry> newTagMap
-	= new TreeMap<String,RepositoryTagEntry>(tagMap);
-    
+        = new TreeMap<String,RepositoryTagEntry>(tagMap);
+
       newTagMap.remove(tag);
 
       RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
-						      repositoryTagMap,
-						      newTagMap);
+                                                      repositoryTagMap,
+                                                      newTagMap);
 
       if (_tagMap == repositoryTagMap) {
-	return newDeployTagMap;
+        return newDeployTagMap;
       }
     } catch (RuntimeException e) {
       throw e;
@@ -306,17 +315,17 @@ abstract public class Repository
   {
     synchronized (this) {
       if (_tagMap.getSequence() < tagMap.getSequence()) {
-	_tagMap = tagMap;
+        _tagMap = tagMap;
 
-	setTag(getRepositoryTag(), tagMap.getCommitHash());
+        setTag(getRepositoryTag(), tagMap.getCommitHash());
 
-	if (log.isLoggable(Level.FINER))
-	  log.finer(this + " updating deployment " + tagMap);
+        if (log.isLoggable(Level.FINER))
+          log.finer(this + " updating deployment " + tagMap);
 
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     }
   }
 
@@ -333,7 +342,7 @@ abstract public class Repository
    * Writes the sha1 stored at the gitTag
    */
   abstract protected void setTag(String gitTag, String sha1);
-  
+
   //
   // git file management
   //
@@ -371,7 +380,7 @@ abstract public class Repository
   {
     return GitType.COMMIT == getType(sha1);
   }
-  
+
   /**
    * Validates a file, checking that it and its dependencies exist.
    */
@@ -382,39 +391,39 @@ abstract public class Repository
 
     if (type == GitType.BLOB) {
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " valid " + type + " " + sha1);
-      
+        log.finest(this + " valid " + type + " " + sha1);
+
       return true;
     }
     else if (type == GitType.COMMIT) {
       GitCommit commit = readCommit(sha1);
 
       if (commit == null)
-	return false;
-      
+        return false;
+
       return validateFile(commit.getTree());
     }
     else if (type == GitType.TREE) {
       GitTree tree = readTree(sha1);
 
       for (GitTree.Entry entry : tree.entries()) {
-	if (! validateFile(entry.getSha1())) {
-	  if (log.isLoggable(Level.FINE))
-	    log.fine(this + " invalid " + entry);
+        if (! validateFile(entry.getSha1())) {
+          if (log.isLoggable(Level.FINE))
+            log.fine(this + " invalid " + entry);
 
-	  return false;
-	}
+          return false;
+        }
       }
-      
+
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " valid " + type + " " + sha1);
-      
+        log.finest(this + " valid " + type + " " + sha1);
+
       return true;
     }
     else {
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " invalid " + sha1);
-      
+        log.fine(this + " invalid " + sha1);
+
       return false;
     }
   }

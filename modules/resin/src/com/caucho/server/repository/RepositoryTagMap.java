@@ -42,16 +42,16 @@ import java.util.*;
 public class RepositoryTagMap
 {
   private static final L10N L = new L10N(RepositoryTagMap.class);
-  
+
   private final String _commitHash;
   private final GitCommit _commit;
-  
+
   private final long _sequence;
 
   private final GitTree _tree;
-    
+
   private final Map<String,RepositoryTagEntry> _tagMap;
-  
+
   public RepositoryTagMap()
   {
     _commitHash = null;
@@ -63,20 +63,8 @@ public class RepositoryTagMap
     _tree = null;
   }
 
-  /*
-  public DeployTagMap(String sha1,
-		      Map<String,DeployTagEntry> tagMap)
-  {
-    _sha1 = sha1;
-    _tagMap
-      = Collections.unmodifiableMap(new HashMap<String,DeployTagEntry>());
-    
-    _sequence = 1;
-  }
-  */
-  
   public RepositoryTagMap(Repository repository,
-			  String commitHash)
+                          String commitHash)
     throws IOException
   {
     _commitHash = commitHash;
@@ -89,17 +77,17 @@ public class RepositoryTagMap
     _sequence = Long.parseLong(_commit.get("sequence"));
 
     _tree = repository.readTree(_commit.getTree());
-    
+
     _tagMap = readTagMap(repository, _tree.getHash("tags"));
   }
-  
+
   public RepositoryTagMap(Repository repository,
-		      RepositoryTagMap parent,
-		      Map<String,RepositoryTagEntry> tagMap)
+                      RepositoryTagMap parent,
+                      Map<String,RepositoryTagEntry> tagMap)
     throws IOException
   {
     _tagMap = Collections.unmodifiableMap(tagMap);
-    
+
     _sequence = parent.getSequence() + 1;
 
     TempStream os = new TempStream();
@@ -127,18 +115,18 @@ public class RepositoryTagMap
 
       String sha1 = entry.getSha1();
       String root = entry.getRoot();
-      
+
       _tree.addBlob(sha1, 0644, sha1);
-      
+
       GitType type = repository.getType(root);
-      
+
       if (type == GitType.BLOB)
-	_tree.addBlob(root, 0644, root);
+        _tree.addBlob(root, 0644, root);
       else if (type == GitType.TREE)
-	_tree.addDir(root, root);
+        _tree.addDir(root, root);
       else
-	throw new IllegalStateException(L.l("'{0}' has an unknown type {1}",
-					    root, type));
+        throw new IllegalStateException(L.l("'{0}' has an unknown type {1}",
+                                            root, type));
     }
 
     String treeHash = repository.addTree(_tree);
@@ -175,7 +163,7 @@ public class RepositoryTagMap
   }
 
   private Map<String,RepositoryTagEntry> readTagMap(Repository repository,
-						String sha1)
+                                                String sha1)
     throws IOException
   {
     TreeMap<String,RepositoryTagEntry> map
@@ -188,11 +176,11 @@ public class RepositoryTagMap
       String tag;
 
       while ((tag = in.readLine()) != null) {
-	String entrySha1 = in.readLine();
+        String entrySha1 = in.readLine();
 
-	RepositoryTagEntry entry = new RepositoryTagEntry(repository, entrySha1);
+        RepositoryTagEntry entry = new RepositoryTagEntry(repository, entrySha1);
 
-	map.put(tag, entry);
+        map.put(tag, entry);
       }
     } finally {
       is.close();

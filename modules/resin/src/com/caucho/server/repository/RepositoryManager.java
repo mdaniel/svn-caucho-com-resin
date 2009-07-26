@@ -56,7 +56,7 @@ public class RepositoryManager
   protected RepositoryManager(Server server)
   {
     _server = server;
-    
+
     _repository = _server.getRepository();
   }
 
@@ -82,13 +82,13 @@ public class RepositoryManager
    * @param version symbolic version name for the commit
    */
   public boolean setTag(String tag,
-			String sha1,
-			String user,
-			String message,
-			String version)
+                        String sha1,
+                        String user,
+                        String message,
+                        String version)
   {
     return _repository.setTag(tag, sha1, user, _server.getServerId(),
-			      message, version);
+                              message, version);
   }
 
   /**
@@ -99,11 +99,11 @@ public class RepositoryManager
    * @param message user's message for the commit
    */
   public boolean removeTag(String tag,
-			   String user,
-			   String message)
+                           String user,
+                           String message)
   {
     return _repository.removeTag(tag, user, _server.getServerId(),
-				 message);
+                                 message);
   }
 
   //
@@ -133,7 +133,7 @@ public class RepositoryManager
   {
     return getType(sha1) == GitType.BLOB;
   }
-  
+
   /**
    * Adds a new path to the repository
    */
@@ -143,7 +143,7 @@ public class RepositoryManager
 
     return _repository.addPath(path);
   }
-  
+
   /**
    * Adds a .git tree to the repository
    */
@@ -152,7 +152,7 @@ public class RepositoryManager
   {
     return _repository.addTree(tree);
   }
-  
+
   /**
    * Adds the raw git file to the repository.
    *
@@ -164,7 +164,7 @@ public class RepositoryManager
   {
     _repository.writeRawGitFile(sha1, is);
   }
-  
+
   /**
    * Writes a file to a stream
    */
@@ -172,7 +172,7 @@ public class RepositoryManager
   {
     _repository.writeToStream(os, sha1);
   }
-  
+
   /**
    * Extracts the git tree to a path
    */
@@ -180,7 +180,7 @@ public class RepositoryManager
   {
     _repository.expandToPath(path, sha1);
   }
-  
+
   @Override
   public String toString()
   {
