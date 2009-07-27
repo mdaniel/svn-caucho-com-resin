@@ -88,10 +88,10 @@ package demo;
 
 import java.io.*;
 import javax.servlet.*;
-import javax.webbeans.*;
+import javax.enterprise.inject.*;
 
 public MyServlet extends GenericServlet {
-  @In private Bean _bean;
+  @Current private Bean _bean;
 
   public void service(ServletRequest, ServletResponse res)
     throws ServletException, IOException
@@ -104,9 +104,10 @@ public MyServlet extends GenericServlet {
 </example>
 
 <example title="Example: WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:demo="urn:java:demo">
 
-  &lt;bean class="demo.MyBean"/>
+  &lt;demo:MyBean/>
 
   &lt;servlet-mapping url-pattern="/test"
                    servlet-class="demo.MyServlet"/>
@@ -469,7 +470,7 @@ WebBeans-style interception.  The class will normally also have
 an <code>@AroundInvoke</code> method as well as any
 <code>InterceptorBindingType</code> annotations.</p>
 
-<def title="javax.webbeans.Interceptor">
+<def title="javax.interceptor.Interceptor">
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface Interceptor {
@@ -487,7 +488,7 @@ interceptors.  The WebBeans-style of interception decouples the
 interception declaration from the interceptor classes, in contrast
 with the EJB-style which specifies the interceptor class directly.</p>
 
-<def title="javax.webbeans.InterceptorBindingType">
+<def title="javax.interceptor.InterceptorBindingType">
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface InterceptorBindingType {

@@ -46,12 +46,12 @@ import java.security.AccessControlException;
  */
 public class FilePath extends FilesystemPath {
   private static Logger log = Logger.getLogger(FilePath.class.getName());
-  
+
   // The underlying Java File object.
   private static byte []NEWLINE = getNewlineString().getBytes();
 
   private static FilesystemPath PWD;
-  
+
   private File _file;
   protected boolean _isWindows;
 
@@ -61,7 +61,7 @@ public class FilePath extends FilesystemPath {
   protected FilePath(FilesystemPath root, String userPath, String path)
   {
     super(root, userPath, path);
-    
+
     _separatorChar = getFileSeparatorChar();
     _isWindows = _separatorChar == '\\';
   }
@@ -69,7 +69,7 @@ public class FilePath extends FilesystemPath {
   public FilePath(String path)
   {
     this(null,  //PWD != null ? PWD._root : null,
-	 path, normalizePath("/", initialPath(path),
+         path, normalizePath("/", initialPath(path),
                              0, getFileSeparatorChar()));
 
     if (_root == null) {
@@ -77,7 +77,7 @@ public class FilePath extends FilesystemPath {
       _root._root = _root;
 
       if (PWD == null)
-	PWD = _root;
+        PWD = _root;
     }
 
     _separatorChar = _root._separatorChar;
@@ -96,7 +96,7 @@ public class FilePath extends FilesystemPath {
     else {
       String dir = getPwd();
 
-      if (dir.length() > 0 && dir.charAt(dir.length() - 1) == '/') 
+      if (dir.length() > 0 && dir.charAt(dir.length() - 1) == '/')
         return dir + path;
       else
         return dir + "/" + path;
@@ -122,38 +122,38 @@ public class FilePath extends FilesystemPath {
    * a:xxx -> /a:xxx
    * ///a:xxx -> /a:xxx
    * //xxx -> /:/xxx
-   * 
+   *
    */
   private static String convertFromWindowsPath(String path)
   {
     int colon = path.indexOf(':');
     int length = path.length();
     char ch;
-    
+
     if (colon == 1 && (ch = path.charAt(0)) != '/' && ch != '\\')
       return "/" + path.charAt(0) + ":/" + path.substring(2);
     else if (length > 1
-	     && ((ch = path.charAt(0)) == '/' || ch == '\\')
-	     && ((ch = path.charAt(1)) == '/' || ch == '\\')) {
+             && ((ch = path.charAt(0)) == '/' || ch == '\\')
+             && ((ch = path.charAt(1)) == '/' || ch == '\\')) {
       if (colon < 0)
-	return "/:" + path;
+        return "/:" + path;
 
       for (int i = colon - 2; i > 1; i--) {
-	if ((ch = path.charAt(i)) != '/' && ch != '\\')
-	  return "/:" + path;
+        if ((ch = path.charAt(i)) != '/' && ch != '\\')
+          return "/:" + path;
       }
 
       ch = path.charAt(colon - 1);
 
       if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
-	return path.substring(colon - 2);
+        return path.substring(colon - 2);
       else
-	return "/:" + path;
+        return "/:" + path;
     }
     else
       return path;
   }
-  
+
   @Override
   public long getDiskSpaceFree()
   {
@@ -181,14 +181,14 @@ public class FilePath extends FilesystemPath {
    */
   protected Path schemeWalk(String userPath,
                             Map<String,Object> attributes,
-			    String filePath,
+                            String filePath,
                             int offset)
   {
     if (! isWindows())
       return super.schemeWalk(userPath, attributes, filePath, offset);
-    
+
     String canonicalPath;
-    
+
     if (filePath.length() < offset + 2)
       return super.schemeWalk(userPath, attributes, filePath, offset);
 
@@ -196,13 +196,13 @@ public class FilePath extends FilesystemPath {
     char ch2 = filePath.charAt(offset);
 
     if ((ch2 == '/' || ch2 == _separatorChar)
-	&& (ch1 == '/' || ch1 == _separatorChar))
+        && (ch1 == '/' || ch1 == _separatorChar))
       return super.schemeWalk(userPath, attributes,
                               convertFromWindowsPath(filePath.substring(offset)), 0);
     else
       return super.schemeWalk(userPath, attributes, filePath, offset);
   }
-  
+
   /**
    * Lookup the actual path relative to the filesystem root.
    *
@@ -213,8 +213,8 @@ public class FilePath extends FilesystemPath {
    * @return the selected path
    */
   public Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
+                        Map<String,Object> attributes,
+                        String path)
   {
     return new FilePath(_root, userPath, path);
   }
@@ -240,28 +240,28 @@ public class FilePath extends FilesystemPath {
   {
     if (! isWindows())
       return escapeURL("file:" + getFullPath());
-    
+
     String path = getFullPath();
     int length = path.length();
     CharBuffer cb = new CharBuffer();
 
     // #2725, server/1495
     cb.append("file:");
-    
+
     char ch;
     int offset = 0;
     // For windows, convert /c: to c:
     if (length >= 3
-	&& path.charAt(0) == '/'
-	&& path.charAt(2) == ':'
-	&& ('a' <= (ch = path.charAt(1)) && ch <= 'z'
-	    || 'A' <= ch && ch <= 'Z')) {
+        && path.charAt(0) == '/'
+        && path.charAt(2) == ':'
+        && ('a' <= (ch = path.charAt(1)) && ch <= 'z'
+            || 'A' <= ch && ch <= 'Z')) {
       // offset = 1;
     }
     else if (length >= 3
-	     && path.charAt(0) == '/'
-	     && path.charAt(1) == ':'
-	     && path.charAt(2) == '/') {
+             && path.charAt(0) == '/'
+             && path.charAt(1) == ':'
+             && path.charAt(2) == '/') {
       cb.append('/');
       cb.append('/');
       cb.append('/');
@@ -273,13 +273,13 @@ public class FilePath extends FilesystemPath {
       ch = path.charAt(offset);
 
       if (ch == '\\')
-	cb.append('/');
+        cb.append('/');
       else
-	cb.append(ch);
+        cb.append(ch);
     }
 
     return escapeURL(cb.toString());
-        
+
   }
 
   /**
@@ -289,13 +289,13 @@ public class FilePath extends FilesystemPath {
   {
     if (! isWindows())
       return getFullPath();
-    
+
     String path = getFullPath();
     int length = path.length();
     CharBuffer cb = new CharBuffer();
     char ch;
     int offset = 0;
-    
+
     // For windows, convert /c: to c:
     if (length >= 3
         && path.charAt(0) == '/'
@@ -316,9 +316,9 @@ public class FilePath extends FilesystemPath {
     for (; offset < length; offset++) {
       ch = path.charAt(offset);
       if (ch == '/')
-	cb.append(_separatorChar);
+        cb.append(_separatorChar);
       else
-	cb.append(ch);
+        cb.append(ch);
     }
 
     return cb.close();
@@ -328,12 +328,12 @@ public class FilePath extends FilesystemPath {
   {
     try {
       if (_isWindows && isAux())
-	return false;
+        return false;
       else
-	return getFile().exists();
+        return getFile().exists();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return false;
     }
   }
@@ -341,7 +341,7 @@ public class FilePath extends FilesystemPath {
   public int getMode()
   {
     int perms = 0;
-    
+
     if (isDirectory()) {
       perms += 01000;
       perms += 0111;
@@ -362,7 +362,7 @@ public class FilePath extends FilesystemPath {
       return getFile().isDirectory();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return false;
     }
   }
@@ -371,12 +371,12 @@ public class FilePath extends FilesystemPath {
   {
     try {
       if (_isWindows && isAux())
-	return false;
+        return false;
       else
-	return getFile().isFile();
+        return getFile().isFile();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return false;
     }
   }
@@ -387,7 +387,7 @@ public class FilePath extends FilesystemPath {
       return getFile().length();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return -1;
     }
   }
@@ -398,7 +398,7 @@ public class FilePath extends FilesystemPath {
       return getFile().lastModified();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return -1;
     }
   }
@@ -413,14 +413,14 @@ public class FilePath extends FilesystemPath {
   {
     try {
       File file = getFile();
-    
+
       if (_isWindows && isAux())
-	return false;
+        return false;
       else
-	return file.canRead();
+        return file.canRead();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return false;
     }
   }
@@ -429,14 +429,14 @@ public class FilePath extends FilesystemPath {
   {
     try {
       File file = getFile();
-    
+
       if (_isWindows && isAux())
-	return false;
+        return false;
       else
-	return file.canWrite();
+        return file.canWrite();
     } catch (AccessControlException e) {
       log.finer(e.toString());
-      
+
       return false;
     }
   }
@@ -450,49 +450,49 @@ public class FilePath extends FilesystemPath {
       String []list = getFile().list();
 
       if (list != null)
-	return list;
+        return list;
     } catch (AccessControlException e) {
       log.finer(e.toString());
     }
 
     return new String[0];
   }
-  
+
   public boolean mkdir()
     throws IOException
   {
     boolean value = getFile().mkdir();
-    
+
     if (! value && ! getFile().isDirectory())
       throw new IOException("cannot create directory");
 
     return value;
   }
-  
+
   public boolean mkdirs()
     throws IOException
   {
     File file = getFile();
-    
+
     boolean value;
 
     synchronized (file) {
       value = file.mkdirs();
     }
-    
+
     clearStatusCache();
-    
+
     if (! value && ! file.isDirectory())
       throw new IOException("Cannot create directory: " + getFile());
 
     return value;
   }
-  
+
   public boolean remove()
   {
     if (getFile().delete()) {
       clearStatusCache();
-      
+
       return true;
     }
 
@@ -513,6 +513,8 @@ public class FilePath extends FilesystemPath {
   {
     File file = getFile();
 
+    clearStatusCache();
+
     FileOutputStream fos = new FileOutputStream(file);
 
     try {
@@ -523,13 +525,16 @@ public class FilePath extends FilesystemPath {
       fos.close();
     }
   }
-  
+
   public boolean renameTo(Path path)
   {
     if (! (path instanceof FilePath))
       return false;
 
     FilePath file = (FilePath) path;
+
+    clearStatusCache();
+    file.clearStatusCache();
 
     return this.getFile().renameTo(file.getFile());
   }
@@ -588,7 +593,7 @@ public class FilePath extends FilesystemPath {
                        this);
 
     os.setNewline(NEWLINE);
-    
+
     return os;
   }
 
@@ -618,7 +623,7 @@ public class FilePath extends FilesystemPath {
   {
     if (this == b)
       return true;
-    
+
     if (! (b instanceof FilePath))
       return false;
 
@@ -650,7 +655,7 @@ public class FilePath extends FilesystemPath {
   {
     if (! _isWindows)
       return false;
-    
+
     File file = getFile();
 
     String path = getFullPath().toLowerCase();
@@ -660,18 +665,18 @@ public class FilePath extends FilesystemPath {
     int ch;
     if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;
-    
+
     p = path.indexOf("/con");
     if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;
-    
+
     p = path.indexOf("/lpt");
     if (p >= 0
-	&& (len <= p + 5 || path.charAt(p + 5) == '.')
-	&& '0' <= (ch = path.charAt(p + 4)) && ch <= '9') {
+        && (len <= p + 5 || path.charAt(p + 5) == '.')
+        && '0' <= (ch = path.charAt(p + 4)) && ch <= '9') {
       return true;
     }
-    
+
     p = path.indexOf("/nul");
     if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;

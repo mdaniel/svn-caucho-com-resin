@@ -143,10 +143,10 @@ The <code>DataSource</code> is thread-safe, so it
 can be used simultaneously by any of the requesting threads.</p>
 
 <example>
-import javax.webbeans.Named;
+import com.caucho.config.Name;
 
 public class BasicServlet extends HttpServlet {
-  @Named("jdbc/basic")
+  @Name("jdbc/basic")
   private DataSource _ds;
 
   ...

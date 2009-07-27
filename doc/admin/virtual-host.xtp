@@ -176,7 +176,7 @@ hide configuration details in case an error occurs on a live site.</p>
 
   &lt;development-mode-error-page/>
 
-  &lt;resin:import path="${__FILE__}/../app-default.xml"/>
+  &lt;resin:import path="${__DIR__}/app-default.xml"/>
   
   &lt;host-default&gt;
     &lt;resin:import path="host.xml" optional="true"/>
@@ -254,7 +254,9 @@ Apache configuration, so it can be used to upgrade an Apache/PHP site
 to use <a href="../doc/quercus.xtp">Quercus</a> for security and performance.</p>
 
 <example title="Example: /etc/resin/resin.xml">
-&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+        
 &lt;cluster id="app-tier">
   &lt;server id="app-a" address="192.168.1.10" port="6800"&gt;
     &lt;http port="8080"/>
@@ -262,7 +264,7 @@ to use <a href="../doc/quercus.xtp">Quercus</a> for security and performance.</p
 
   &lt;development-mode-error-page/>
 
-  &lt;resin:import path="${__FILE__}/../app-default.xml"/>
+  &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
   &lt;host id="">
     &lt;root-directory&gt;/var/www&lt;/root-directory&gt;
@@ -455,9 +457,12 @@ unix&gt; java -jar lib/resin.jar -server web -conf conf/resin.xml stop
 <p>With Windows, each JVM is installed as a service.</p>
 
 <example title="Example: installing as win32 service">
-win&gt; resin.exe -install-as "Resin" -server resin -conf conf/resin.xml
-win&gt; resin.exe -install-as "Resin www.gryffindor.com" -server gryffindor -conf conf/gryffindor.xml
-win&gt; resin.exe -install-as "Resin www.slytherin.com"-server slytherin -conf conf/slytherin.xml
+win&gt; resin.exe -install-as "Resin" \
+            -server resin -conf conf/resin.xml
+win&gt; resin.exe -install-as "Resin www.gryffindor.com" \
+            -server gryffindor -conf conf/gryffindor.xml
+win&gt; resin.exe -install-as "Resin www.slytherin.com" \
+            -server slytherin -conf conf/slytherin.xml
 </example>
 
 <p>You will either need to reboot the machine or start the service from the
@@ -664,7 +669,7 @@ machine can be used to map a virtual host name to an IP address.
 "www.slytherin.com" names to "127.0.0.1", pointing these host names back to
 computer that the client is running on.</p>
 
-<p>Unix user's edit the file <code>/etc/hosts</code>:</p>
+<p>Unix users edit the file <code>/etc/hosts</code>:</p>
 
 <example title="/etc/hosts">
 127.0.0.1       localhost

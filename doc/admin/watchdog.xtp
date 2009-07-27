@@ -65,6 +65,19 @@ will run with their respective user ids.</p>
 main class, <code>ResinBoot</code>.  The major operations are: start, stop, restart, shutdown
 and status.</p>
 
+<s2 title="console">
+
+<p>The "console" command starts a new Resin instance in a console window for
+development.  The standard output of the Resin instance will appear in the
+console window.</p>
+
+<example title="Example: watchdog console">
+resin-4.0.x> java -jar lib/resin.jar -conf conf/test.conf -server a console
+...
+</example>
+
+</s2>
+
 <s2 title="start">
 
 <p>The "start" command starts a new Resin instance with the given server id.

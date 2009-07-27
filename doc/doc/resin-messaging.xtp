@@ -40,11 +40,11 @@ package demo;
 import java.io.*;
 import javax.servlet.*;
 import java.util.BlockingQueue;
-import javax.webbeans.Named;
+import com.caucho.config.Name;
 
 public MySendingServlet extends GenericServlet
 {
-  @Named("myQueue") private BlockingQueue _queue;
+  @Name("myQueue") private BlockingQueue _queue;
 
   public void service(ServletRequest req, ServletResponse res)
     throws IOException, ServletException

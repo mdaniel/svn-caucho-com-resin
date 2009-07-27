@@ -197,11 +197,6 @@ matching the -server-id on the command line.</p>
   <td></td>
 </tr>
 <tr>
-  <td>persistent-store</td>
-  <td>Configures the distributed/persistent store</td>
-  <td></td>
-</tr>
-<tr>
   <td>ping</td>
   <td>Periodic checking of server URLs to verify server activity</td>
   <td></td>
@@ -294,7 +289,6 @@ element cluster {
   &amp; invocation-cache-size?
   &amp; invocation-cache-max-url-length?
   &amp; machine*
-  &amp; persistent-store?
   &amp; ping*
   &amp; redeploy-mode?
   &amp; resin:choose*
@@ -577,238 +571,6 @@ element invocation-cache-max-url-length {
   r_int-Type
 }
 </def>
-
-</defun>
-
-<defun title="&lt;persistent-store>" version="Resin 3.0.8">
-<parents>cluster</parents>
-
-<p>Defines the cluster-aware persistent store used for
-sharing distributed sessions.  The allowed types are "jdbc", "cluster"
-and "file".  The "file" type is only recommended in single-server
-configurations.</p>
-
-<p>The &lt;persistent-store&gt; configuration is in the &lt;server&gt; level
-because it needs to share update information across the
-active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level.
-Sessions activate the persistent store with the &lt;use-persistent-store&gt;
-tag of the &lt;session-config&gt;.</p>
-
-<p>See <a href="../admin/clustering.xtp">Persistent sessions</a> for more details.</p>
-
-<deftable title="&lt;persistent-store> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>init</td>
-  <td>initialization parameters for the persistent-store</td>
-  <td></td>
-</tr>
-<tr>
-  <td>type</td>
-  <td>cluster, jdbc, or file</td>
-  <td>required</td>
-</tr>
-</deftable>
-
-<def title="&lt;persistent-store> schema">
-element persistent-store {
-  type
-  &amp; init?
-}
-</def>
-
-<s2 name="cluster-store" title="cluster store">
-
-<p>The cluster store shares copies of the sessions on multiple servers.
-The original server is used as the primary, and is always more efficient
-than the backup servers.  In general, the cluster store is preferred because
-it is more scalable, and with the "triplicate" attribute, the
-most reliable..</p>
-
-<deftable title="cluster tags">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>always-load</td>
-  <td>Always load the value</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>always-save</td>
-  <td>Always save the value</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>max-idle-time</td>
-  <td>How long idle objects are stored (session-timeout will invalidate
-items earlier)</td>
-  <td>24h</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>Directory to store the objects</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>save-backup</td>
-  <td>Saves backup copies of all distributed objects (3.2.0).</td>
-  <td>true</td>
-</tr>
-<tr>
-  <td>triplicate</td>
-  <td>Saves three copies of all distributed objects (3.2.0).</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>wait-for-acknowledge</td>
-  <td>Requires the sending server to wait for all acks.</td>
-  <td>false</td>
-</tr>
-</deftable>
-
-<def title="cluster schema">
-element persistent-store {
-  type { "cluster "}
-
-  element init {
-    always-load?
-    &amp; always-save?
-    &amp; max-idle-time?
-    &amp; triplicate?
-    &amp; wait-for-acknowledge?
-  }
-}
-</def>
-
-<example title="Example: cluster store">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;cluster&gt;
-  &lt;server id="a" address="192.168.0.1" port="6800"/&gt;
-  &lt;server id="b" address="192.168.0.2" port="6800"/&gt;
-
-  &lt;persistent-store type="cluster"&gt;
-    &lt;init&gt;
-      &lt;triplicate&gt;true&lt;/triplicate&gt;
-    &lt;/init&gt;
-  &lt;/persistent-store&gt;
-
-  &lt;web-app-default&gt;
-    &lt;session-config use-persistent-store="true"/&gt;
-  &lt;/web-app-default&gt;
-&lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-</s2>
-
-<s2 title="jdbc store">
-
-<p>The JDBC store saves sessions in a JDBC database.  Often, this will be
-a dedicated database to avoid overloading the main database.</p>
-
-<deftable title="jdbc store Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>always-load</td>
-  <td>Always load the value</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>always-save</td>
-  <td>Always save the value</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>blob-type</td>
-  <td>Schema type to store values</td>
-  <td>from JDBC meta info</td>
-</tr>
-<tr>
-  <td>data-source</td>
-  <td>The JDBC data source</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>table-name</td>
-  <td>Database table</td>
-  <td>persistent_session</td>
-</tr>
-<tr>
-  <td>max-idle-time</td>
-  <td>How long idle objects are stored</td>
-  <td>24h</td>
-</tr>
-</deftable>
-
-<example title="Example: jdbc-store">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;cluster&gt;
-  &lt;server id="a" address="192.168.0.1" port="6800"/&gt;
-  &lt;server id="b" address="192.168.0.2" port="6800"/&gt;
-
-  &lt;persistent-store type="jdbc"&gt;
-    &lt;init&gt;
-      &lt;data-source&gt;jdbc/session&lt;/data-source&gt;
-
-      &lt;max-idle-time&gt;24h&lt;/max-idle-time&gt;
-    &lt;/init&gt;
-  &lt;/persistent-store&gt;
-
-  &lt;web-app-default&gt;
-    &lt;session-config use-persistent-store="true"/&gt;
-  &lt;/web-app-default&gt;
-&lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-</s2>
-
-<s2 title="file store">
-
-<p>The file store is a persistent store for development and testing or
-for single servers.  Since it is not aware of the clusters, it cannot
-implement true distributed objects.</p>
-
-<deftable title="file tags">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>always-load</td>
-  <td>Always load the value</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>always-save</td>
-  <td>Always save the value</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>max-idle-time</td>
-  <td>How long idle objects are stored</td>
-  <td>24h</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>Directory to store the sessions</td>
-  <td>required</td>
-</tr>
-</deftable>
-
-</s2>
 
 </defun>
 
@@ -1277,7 +1039,7 @@ element server {
 
 <defun title="&lt;server-header>" version="Resin 3.1">
 <parents>cluster</parents>
-<default>Resin/3.1.x</default>
+<default>Resin/4.0.x</default>
 
 <p>Configures the HTTP Server: header which Resin sends back to any
 HTTP client.</p>

@@ -122,6 +122,35 @@ web.xml match the expected values.</p>
 
 </s2>
 
+<s2 title="graphs tab">
+
+<p>The graphs tab displays statistics that Resin gathers every 60 seconds.
+The root triad (server 00) will contain statistics from all the server in
+the cluster pod.</p>
+
+</s2>
+
+<s2 title="memory tab">
+
+<p>The heap dump tab lets you gather a heap memory information at any
+time, giving you critical information at times when you may not have
+a dedicated profiler available.</p>
+
+</s2>
+
+<s2 title="profile tab">
+
+<p>The cpu profile tab lets you gather basic profiling information on
+a running Resin server.  Because the overhead is low, it's even possible
+to run a profile on a deployment server, which will give much better
+information about the performance of your system than any artificial
+benchmarks.</p>
+
+<p>With Resin's integrated profiling, there's no excuse to skip the
+profiling step for your application.</p>
+
+</s2>
+
 <s2 title="threads tab">
 
 <p>The threads tab is a critical debugging tab.  It shows the state
@@ -136,27 +165,6 @@ what looks different.</p>
 
 <p>In particular, any freeze or slowness of Resin should immediately
 suggest looking at the thread page.</p>
-
-</s2>
-
-<s2 title="cpu profile tab">
-
-<p>The cpu profile tab lets you gather basic profiling information on
-a running Resin server.  Because the overhead is low, it's even possible
-to run a profile on a deployment server, which will give much better
-information about the performance of your system than any artificial
-benchmarks.</p>
-
-<p>With Resin's integrated profiling, there's no excuse to skip the
-profiling step for your application.</p>
-
-</s2>
-
-<s2 title="heap dump tab">
-
-<p>The heap dump tab lets you gather a heap memory information at any
-time, giving you critical information at times when you may not have
-a dedicated profiler available.</p>
 
 </s2>
 

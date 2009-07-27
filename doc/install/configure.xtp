@@ -148,9 +148,9 @@
     </s1>
       <s1 title="JDK arguments">
 
-      <p>Resin 3.1 has moved all JDK arguments into the resin.xml
+      <p>Resin 4.0 has moved all JDK arguments into the resin.xml
       file, in the &lt;<a href="../reference/server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
-      tag. Because the Resin 3.1 watchdog starts each Resin server instance,
+      tag. Because the Resin 4.0 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration
       is easier and more maintainable.</p>
@@ -165,6 +165,7 @@
             &lt;jvm-arg>-Xss1m&lt;/jvm-arg>
             &lt;jvm-arg>-verbosegc&lt;/jvm-arg>
             &lt;jvm-arg>-Dfoo=bar&lt;/jvm-arg>
+            &lt;jvm-arg>-Dcaucho.smallmem&lt;/jvm-arg>
             &lt;jvm-arg>-agentlib:resin&lt;/jvm-arg>
             &lt;jvm-arg>-Xdebug&lt;/jvm-arg>
             

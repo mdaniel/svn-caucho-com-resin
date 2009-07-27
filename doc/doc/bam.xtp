@@ -424,68 +424,6 @@ in IM session.</td>
 
 </s1>
 
-<s1 title="bam-service">
-
-<p>&lt;bam-service> configures a <code>BamService</code> to
-listen for messages.  The service is always a single multithreaded
-instance like a servlet; it is never pooled.</p>
-
-<p>&lt;bam-service> can be used as a simple queueing service, replacing
-JMS queues and ejb-message-bean.  By default the queue is consumed 
-with a single thread.  Unlike EJB message driven beans, &lt;bam-service>
-uses a single instance like a servlet, not a pool of instances.
-</p>
-
-<p>The bean has full access to <a href="resin-ioc.xtp">CanDI</a>
-capabilities, including dependency injection, transaction attributes,
-and aspect interception.
-</p>
-
-<deftable title="&lt;bam-service> attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>class</td>
-  <td>Classname of the BamService bean</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC configuration for the listener bean</td>
-  <td></td>
-</tr>
-<tr>
-  <td>name</td>
-  <td>The JID of the service, used by clients to send messages to</td>
-  <td></td>
-</tr>
-<tr>
-  <td>thread-max</td>
-  <td>The number of threads to handle the queue.  If 0, the service
-  is not queued, but handles messages directly.</td>
-  <td>1</td>
-</tr>
-<tr>
-  <td>uri</td>
-  <td>A shortcut name for the service, defined in META-INF/caucho/com.caucho.uri/com.caucho.bam.BamService.</td>
-  <td></td>
-</tr>
-</deftable>
-
-<def title="&lt;bam-service> schema">
-element ejb-message-bean {
-  (class | uri)
-  &amp; init?
-  &amp; name?
-  &amp; thread-max?
-}
-</def>
-
-</s1>
-
 <s1 title="Resin Services">
 
 <p>Resin includes a number of predefined BAM services for JMS compatibility,
@@ -812,38 +750,36 @@ underlying streaming architecture for a cleaner and simpler
 application model.</p>
 
 <ul>
-<li><code>BamBroker</code> - Interface for the hub message routing, and
+<li><code>Broker</code> - Interface for the hub message routing, and
 service/agent registration.</li>
-<li><code>BamClient</code> - Client class for sending and receiving
+<li><code>LocalActorClient</code> - Client class for sending and receiving
 messages calls from a local Java client, implementing
-<code>BamConnection</code>.</li>
-<li><code>BamConnection</code> - Client interface for sending and
+<code>ActorClient</code>.</li>
+<li><code>ActorClient</code> - Client interface for sending and
 receving messages/rpc calls.</li>
-<li><code>BamConnectionFactory</code> - Factory interface for creating
-connections to a broker.</li>
-<li><code>BamQueryCallback</code> - client API to handle asyncronous RPC
+<li><code>QueryCallback</code> - client API to handle asyncronous RPC
 responses.</li>
-<li><code>BamService</code> - Interface implemented by all registered
+<li><code>Actor</code> - Interface implemented by all registered
 BAM services.</li>
-<li><code>BamServiceManager</code> - Optional interface for dynamically
+<li><code>ActorManager</code> - Optional interface for dynamically
 registered services, e.g. an IM user manager.</li>
-<li><code>BamStream</code> - Stream interface for all message routing
+<li><code>ActorStream</code> - Stream interface for all message routing
 and filtering.</li>
 <li><code>HmtpClient</code> - client class for remote Hessian messaging</li>
-<li><code>SimpleBamService</code> - abstract class extended by most
+<li><code>SimpleActor</code> - abstract class extended by most
 BAM services, providing automatic typed dispatching.</li>
 <li><code>XmppClient</code> - client class for remote XMPP (Jabber)</li>
 </ul>
 
 <s2 title="Client API">
 
-<s3 title="BamClient">
+<s3 title="ActorClient">
 
-<p><code>BamClient</code> is the primary client class for
-local clients.  The <code>BamClient</code> will automatically create
+<p><code>ActorClient</code> is the primary client class for
+local clients.  The <code>ActorClient</code> will automatically create
 a connection with the local broker.  Messages are sent using the
-<code>BamConnection</code> methods.  Messages are received by
-setting a BamStream handler.</p>
+<code>ActorStream</code> methods.  Messages are received by
+setting a ActorStream handler.</p>
 
 <def title="BamClient">
 package com.caucho.bam;

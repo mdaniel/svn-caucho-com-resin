@@ -28,7 +28,9 @@ need the performance and reliability enhancements of Resin Professional.
 <s2 name="resin10k" title="Resin 10,000">
 
 <p>Resin 4.0 has been tested with over 10,000 simultaneous keepalive
-connections, using JNI for advanced operating-specific non-blocking i/o.</p>
+connections, and 10,000 simultaneous asynchronous comet connections.
+Resin uses operating-system specific capabilities like the Linux EPOLL
+for high-performance scalable I/O.</p>
 
 </s2>
 
@@ -275,7 +277,7 @@ fully supported.)  A servlet, for example, can use EJB's
 
 </s1>
 
-<s1 title="Server Push (Comet)">
+<s1 title="Server Push/Comet (Servlet 3.0 Async)">
 
 <ul>
 <li>See <a href="../doc/resin-comet.xtp">Resin Comet</a> documentation.</li>

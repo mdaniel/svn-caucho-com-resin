@@ -11,7 +11,9 @@
   <s1 title="Resin 10,000">
 
 <p>Resin 4.0 has been load tested with 10,000 simultaneous
-keepalive connections.  In a HTTP server, most of the browsers are
+keepalive connections and 10,000 simulteneous async comet connections.</p>
+
+<p>In a HTTP server, most of the browsers are
 idle, waiting for the user to finish reading and click on the next page.
 The browser and Resin can keep the TCP socket connected for
 improved efficiency, while taking minimal resources until the next page

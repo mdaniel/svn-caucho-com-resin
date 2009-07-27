@@ -145,7 +145,7 @@ has an server listener on port 6800.
 
 <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+       xmlns:resin="urn:java:com.caucho.resin"&gt;
   ...
   &lt;cluster id="app-tier"&gt;
     ...

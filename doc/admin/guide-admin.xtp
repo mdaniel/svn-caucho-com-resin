@@ -371,7 +371,7 @@ symbolic link to the Resin version, so you can upgrade easily.</p>
       &lt;http port="8080"/>
     &lt;/server>
 
-    &lt;resin:import path="/etc/resin/app-default.xml"/>
+    &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
     &lt;host-default>
       &lt;resin:import path="host.xml" optional="true"/>
@@ -433,7 +433,7 @@ set the host's root.</p>
       &lt;http port="8080"/>
     &lt;/server>
 
-    &lt;resin:import path="/etc/resin/app-default.xml"/>
+    &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
     &lt;host id="">
     
@@ -493,7 +493,7 @@ files in a <code>webapps</code> directory.</p>
       &lt;http port="8080"/>
     &lt;/server>
 
-    &lt;resin:import path="/etc/resin/app-default.xml"/>
+    &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
     &lt;host id="">
     

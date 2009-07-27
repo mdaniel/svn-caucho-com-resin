@@ -6,7 +6,7 @@
     <title>Using Dependency-Injection with JDBC Databases</title>
     <description>
     <p>This tutorial describes the standard pattern
-for using a database in Resin, following the Dependency-Injection/Inversion-of-Control pattern using WebBeans annotations.</p>
+for using a database in Resin, following the Dependency-Injection/Inversion-of-Control pattern using Java Injection annotations.</p>
     </description>
   </header>
 
@@ -18,7 +18,7 @@ for using a database in Resin, following the Dependency-Injection/Inversion-of-C
 
 <ul>
 <li>Configuring the &lt;database&gt; in the resin-web.xml or resin.conf</li>
-<li>Injecting the <code>DataSource</code> to a field with a <code>@javax.webbeans.Id</code> annotation.</li>
+<li>Injecting the <code>DataSource</code> to a field with a <code>@com.caucho.config.Name</code> annotation.</li>
 <li>Using a <code>Connection</code> from the <code>DataSource</code>
 to execute the SQL.</li>
 </ul>
@@ -67,9 +67,9 @@ INSERT INTO jdbc_basic_brooms (name, cost) VALUES ('shooting star', 50)
 
 <s1 title="Database Configuration">
 
-<p>In Resin 3.0, the &lt;database&gt; tag configures the database
+<p>In Resin 4.0, the &lt;database&gt; tag configures the database
 pool and driver and saves the connection factory (DataSource) in
-the Resin WebBeans directory.  WebBeans is an IoC (inversion-of-control)
+the Java Injection manager.  Java Injection is an IoC (inversion-of-control)
 configuration system, making it straightforward to separate resource
 configuration from the application code.</p>
 

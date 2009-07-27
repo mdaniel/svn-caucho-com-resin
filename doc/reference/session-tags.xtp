@@ -287,6 +287,13 @@ idle session before invalidating it.  The value is specified in minutes.</p>
 
 </defun>
 
+<defun title="&lt;use-persistent-store>">
+<parents>session-config</parents>
+
+<p>&lt;use-persistent-store> enables clustered sessions.</p>
+
+</defun>
+
 </body>
 
 </document>

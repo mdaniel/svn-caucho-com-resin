@@ -57,7 +57,7 @@ with new data.</li>
   <li>Servlet: TestCometServlet generates &lt;script> protocol tags from
 new data from the TimerService on each <code>resume</code>.</li>
   <li>State: CometState encapsulates both the item's state (the timer count),
-and the <a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometController.html">CometController</a> needed to wake the servlet and
+and the <a href="http://caucho.com/resin-javadoc/javax/servlet/AsyncContext.html">AsyncContext</a> needed to wake the servlet and
 pass updated data.</li>
   </ul>
 </li>
@@ -136,37 +136,37 @@ function comet_update(value) {
 
 </s1>
 
-<s1 title="CometController">
+<s1 title="AsyncContext">
 
-<p>The <a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometController.html">CometController</a> is Resin's thread-safe encapsulation
+<p>The <a href="http://caucho.com/resin-javadoc/javax/servlet/AsyncContext.html">AsyncContext</a> is the Servlet 3.0 encapsulation
 of control and communication from the application's service to the
-Comet servlet.  Applications may safely pass the <code>CometController</code>
-to different threads, wake the servlet with <code>wake()</code>, and send
-data with <code>setAttribute</code>.</p>
+Comet servlet.  Applications may safely pass the <code>AsyncContext</code>
+to different threads, and wake the servlet with <code>dispatch()</code>,
+and return the request and response with <code>getRequest()</code>.  The
+servlet request methods are <em>not</em> thread safe.</p>
 
 <p>In the example, the <code>TimerService</code> passes the updated
 count to the servlet by calling
-<code>setAttribute("caucho.count", count)</code>, and wakes the servlet
-by calling <code>wake()</code>.  When the servlet resumes, it will
+<code>setAttribute("caucho.count", count)</code> on the request, and
+wakes the servlet
+by calling <code>dispatch()</code>.  When the servlet resumes, it will
 retrieve the count using <code>request.getAttribute("caucho.count")</code>.
-Note, applications must only use the thread-safe
-<code>CometController</code> in other threads.  As with other servlets, the
+Note, these calls are not thread safe.
+As with other servlets, the
 <code>ServletRequest</code>, <code>ServletResponse</code>, writers and
 output stream can only be used by the servlet thread itself, never by
 any other threads.</p>
 
-<example title="com.caucho.servlet.comet.CometController">
-package com.caucho.servlet.comet;
+<example title="javax.servlet.AsyncContext">
+package javax.servlet;
 
 public interface CometController
 {
-  public void wake();
+  public void dispatch();
+  public void complete();
 
-  public Object getAttribute(String name);
-  public void setAttribute(String name, Object value);
-  public void removeAttribute(String name);
-
-  public void close();
+  public ServletRequest getRequest();
+  public ServletResponse getResponse();
 }
 </example>
 
@@ -178,32 +178,32 @@ public interface CometController
 
 <ol>
 <li>Process the initial request (<code>service</code>).</li>
-<li>Register the <code>CometController</code> with the service (<code>service</code>).</li>
+<li>Register the <code>AsyncContext</code> with the service (<code>service</code>).</li>
 <li>Send streaming data as it becomes available (<code>resume</code>).</li>
 </ol>
 
 <p>
-Like other servlets, only the comet servlet
-may use the <code>ServletRequest</code>, <code>ServletResponse</code> or any
-output writer or stream.  No other thread may use these servlet objects,
-and the application must never store these objects in fields or objects
-accessible by other threads.  Even in a comet servlet, the servlet objects
-are not thread-safe.  Other services and threads must use
-the <code>CometController</code> to communicate with the servlet.</p>
+Like other servlets, the
+<code>ServletRequest</code>, <code>ServletResponse</code> are not thread-safe.
+Normally, only the servlet thread will access these methods.  If the
+application needs to use the output stream or pass attributes, it must
+synchronize with the servlet.
+Even in a comet servlet, the servlet objects
+are not thread-safe.</p>
 
 <p><b>Process the initial request:</b> our servlet just calls
 <code>setContentType("text/html")</code>, since it's a trivial example.
 A real application would do necessary database lookups and possibly
 send more complicated data to the client.</p>
 
-<p><b>Register the <code>CometController</code>:</b>
+<p><b>Register the <code>AsyncContext</code>:</b>
 our servlet registers the controller with the timer service by calling
 <code>addCometState</code>. In general, the application state object will
-contain the <code>CometController</code> as part of the registration
+contain the <code>AsyncContext</code> as part of the registration
 process.</p>
 
 <p><b>Send streaming data:</b>.  The <code>TimerService</code> will set new
-data in the <code>"comet.count"</code> attribute and <code>wake()</code>
+data in the <code>"comet.count"</code> attribute and <code>dispatch()</code>
 the controller.  When the servlet executes the <code>resume()</code> method,
 it will retrieve the data, and send the next packet to the client.</p>
 
@@ -215,36 +215,31 @@ import java.io.*;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
-import com.caucho.servlet.comet.GenericCometServlet;
-import com.caucho.servlet.comet.CometController;
-
-public class TestComet extends GenericCometServlet {
+public class TestComet extends GenericServlet {
   @Override
   public boolean service(ServletRequest request,
-                         ServletResponse response,
-                         CometController controller)
+                         ServletResponse response)
     throws IOException, ServletException
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
+
+    if (req.isAsyncStarted()) {
+      resume(req, res);
+      return;
+    }
 
     res.setContentType("text/html");
 
-    TestState state = new TestState(controller);
+    TestState state = new TestState(req.startAsync());
 
     _service.addCometState(state);
-
-    return true;
   }
   
-  @Override
-  public boolean resume(ServletRequest request,
-                        ServletResponse response,
-                        CometController controller)
+  private void resume(HttpServletRequest req,
+                      HttpServletResponse req)
     throws IOException, ServletException
   {
-    HttpServletRequest req = (HttpServletRequest) request;
-    HttpServletResponse res = (HttpServletResponse) response;
 
     PrintWriter out = res.getWriter();
 
@@ -253,16 +248,13 @@ public class TestComet extends GenericCometServlet {
     out.print("&lt;script type='text/javascript'>");
     out.print("comet_update(" + count + ");");
     out.print("&lt;/script>");
-
-    return true;
   }
 }
 </example>
 
-<p>The connection can close for a number of reasons.  Either the
-<code>service()</code> or <code>resume()</code> methods may return false,
-telling Resin to close the connection.  The service might call
-<code>CometController.close()</code> which will also close the connection.
+<p>The connection can close for a number of reasons.
+The service might call
+<code>AsyncContext.complete()</code> which will close the connection.
 Finally, the client may close the connection itself.</p>
 
 <p>The sequence of calls for the example looks like the following:</p>
@@ -272,8 +264,8 @@ Finally, the client may close the connection itself.</p>
 <li><code>_service.addCometState()</code> registers with the <code>TimerService</code></li>
 <li>after the <code>service()</code> completes, Resin suspends the servlet.</li>
 <li>The <code>TimerService</code> detects an event, in this case the timer event.</li>
-<li>The <code>TimerService</code> calls <code>controller.setAttribute()</code> to send new data.</li>
-<li>The <code>TimerService</code> calls <code>controller.wake()</code> to wake the servlet.</li>
+<li>The <code>TimerService</code> calls <code>request.setAttribute()</code> to send new data.</li>
+<li>The <code>TimerService</code> calls <code>async.dispatch()</code> to wake the servlet.</li>
 <li><code>servlet.resume()</code> processes the data and sends the next packet.</li>
 <li>After the <code>resume()</code> completes, Resin suspends the servlet again and we repeat as after step #3.</li>
 <li>After the 10th data, the <code>TimerService</code> calls <code>controller.close()</code>, closing the servlet connection.</li>

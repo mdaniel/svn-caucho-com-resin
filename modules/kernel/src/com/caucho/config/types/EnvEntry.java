@@ -31,6 +31,7 @@ package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.el.Expr;
@@ -163,7 +164,11 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
     InjectManager webBeans = InjectManager.create();
     BeanFactory factory = webBeans.createBeanFactory(value.getClass());
-    webBeans.addBean(factory.name(_name).singleton(value));
+    factory.name(_name);
+    // server/1516
+    factory.binding(Names.create(_name));
+
+    webBeans.addBean(factory.singleton(value));
 
     Jndi.bindDeepShort(_name, value);
   }
