@@ -4,7 +4,7 @@
 <table border='0' width='100%'>
   <tr>
     <td>
-      <a href="<c:url value='/index.jsp'/>">Hogwart's Home</a>
+      <a href="<c:url value='/index.jsp'/>">Hogwarts Home</a>
     </td>
 
     <%-- is the user logged in? --%>

@@ -91,21 +91,21 @@ public final class SessionManager implements AlarmListener
   private static final int SAVE_BEFORE_FLUSH = 0x2;
   private static final int SAVE_AFTER_REQUEST = 0x4;
   private static final int SAVE_ON_SHUTDOWN = 0x8;
-  
+
   private final WebApp _webApp;
   private final SessionManagerAdmin _admin;
-  
+
   private final Server _server;
   private final ClusterServer _selfServer;
   private final int _selfIndex;
-  
+
   private AbstractCache _sessionStore;
 
   // active sessions
   private LruCache<String,SessionImpl> _sessions;
   // total sessions
   private int _totalSessions;
-  
+
   // iterator to purge sessions (to reduce gc)
   private Iterator<SessionImpl> _sessionIter;
   // array list for session timeout
@@ -118,7 +118,7 @@ public final class SessionManager implements AlarmListener
   private boolean _isModuloSessionId = false;
   private boolean _isAppendServerIndex = false;
   private boolean _isTwoDigitSessionIndex = false;
-  
+
   // invalidate the session after the listeners have been called
   private boolean _isInvalidateAfterListener;
 
@@ -129,11 +129,11 @@ public final class SessionManager implements AlarmListener
 
   private String _cookieName = "JSESSIONID";
   private String _sslCookieName;
-  
+
   // Rewriting strings.
   private String _sessionSuffix = ";jsessionid=";
   private String _sessionPrefix;
-  
+
   // default cookie version
   private int _cookieVersion;
   private String _cookieDomain;
@@ -159,17 +159,17 @@ public final class SessionManager implements AlarmListener
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;
-  
+
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionActivationListener> _activationListeners;
-  
+
   // List of the HttpSessionAttributeListeners from the configuration file
   private ArrayList<HttpSessionAttributeListener> _attributeListeners;
 
   //
   // Compatibility fields
   //
-  
+
   // private Store _sessionStore;
   private int _alwaysLoadSession;
   private int _alwaysSaveSession;
@@ -194,12 +194,12 @@ public final class SessionManager implements AlarmListener
     throws Exception
   {
     _webApp = webApp;
-    
+
     _server = Server.getCurrent();
 
     if (_server == null) {
       throw new IllegalStateException(L.l("Server is not active in this context {0}",
-					  Thread.currentThread().getContextClassLoader()));
+                                          Thread.currentThread().getContextClassLoader()));
     }
     _selfServer = _server.getSelfServer();
     _selfIndex = _selfServer.getIndex();
@@ -226,7 +226,7 @@ public final class SessionManager implements AlarmListener
 
     String hostName = webApp.getHostName();
     String contextPath = webApp.getContextPath();
-    
+
     if (hostName == null || hostName.equals(""))
       hostName = "default";
 
@@ -234,7 +234,7 @@ public final class SessionManager implements AlarmListener
 
     if (_distributionId == null)
       _distributionId = name;
-    
+
     _alarm = new Alarm(this);
     _admin = new SessionManagerAdmin(this);
   }
@@ -401,7 +401,7 @@ public final class SessionManager implements AlarmListener
   {
     return (_sessionSaveMode & SAVE_AFTER_REQUEST) != 0;
   }
-  
+
   /**
    * Determines how many digits are used to encode the server
    */
@@ -420,27 +420,27 @@ public final class SessionManager implements AlarmListener
     /* XXX: probably don't want to implement this.
     if ("before-flush".equals(mode)) {
       _sessionSaveMode = (SAVE_BEFORE_FLUSH|
-			  SAVE_BEFORE_HEADERS|
-			  SAVE_AFTER_REQUEST|
-			  SAVE_ON_SHUTDOWN);
+                          SAVE_BEFORE_HEADERS|
+                          SAVE_AFTER_REQUEST|
+                          SAVE_ON_SHUTDOWN);
     }
     else
     */
-    
+
     if ("before-headers".equals(mode)) {
       _sessionSaveMode = (SAVE_BEFORE_HEADERS
-			  | SAVE_ON_SHUTDOWN);
+                          | SAVE_ON_SHUTDOWN);
     }
     else if ("after-request".equals(mode)) {
       _sessionSaveMode = (SAVE_AFTER_REQUEST
-			  | SAVE_ON_SHUTDOWN);
+                          | SAVE_ON_SHUTDOWN);
     }
     else if ("on-shutdown".equals(mode)) {
       _sessionSaveMode = (SAVE_ON_SHUTDOWN);
     }
     else
       throw new ConfigException(L.l("'{0}' is an unknown session save-mode.  Values are: before-headers, after-request, and on-shutdown.",
-				    mode));
+                                    mode));
 
   }
 
@@ -467,7 +467,7 @@ public final class SessionManager implements AlarmListener
   public void setSaveOnlyOnShutdown(boolean save)
   {
     log.warning("<save-only-on-shutdown> is deprecated.  Use <save-mode>on-shutdown</save-mode> instead");
-    
+
     if (save)
       _sessionSaveMode = SAVE_ON_SHUTDOWN;
   }
@@ -493,7 +493,7 @@ public final class SessionManager implements AlarmListener
       _isHessianSerialization = false;
     else
       throw new ConfigException(L.l("'{0}' is an unknown valud for serialization-type.  The valid types are 'hessian' and 'java'.",
-				    type));
+                                    type));
   }
 
   /**
@@ -652,7 +652,7 @@ public final class SessionManager implements AlarmListener
   public boolean reuseSessionId(boolean fromCookie)
   {
     int reuseSessionId = _reuseSessionId;
-    
+
     return reuseSessionId == TRUE || fromCookie && reuseSessionId == COOKIE;
   }
 
@@ -666,8 +666,8 @@ public final class SessionManager implements AlarmListener
     if (reuse == null)
       _reuseSessionId = COOKIE;
     else if (reuse.equalsIgnoreCase("true")
-	     || reuse.equalsIgnoreCase("yes")
-	     || reuse.equalsIgnoreCase("cookie"))
+             || reuse.equalsIgnoreCase("yes")
+             || reuse.equalsIgnoreCase("cookie"))
       _reuseSessionId = COOKIE;
     else if (reuse.equalsIgnoreCase("false") || reuse.equalsIgnoreCase("no"))
       _reuseSessionId = FALSE;
@@ -675,7 +675,7 @@ public final class SessionManager implements AlarmListener
       _reuseSessionId = TRUE;
     else
       throw new ConfigException(L.l("'{0}' is an invalid value for reuse-session-id.  'true' or 'false' are the allowed values.",
-				    reuse));
+                                    reuse));
   }
 
   /**
@@ -752,7 +752,7 @@ public final class SessionManager implements AlarmListener
   {
     if (max < 1)
       throw new ConfigException(L.l("session-max '{0}' is too small.  session-max must be a positive number", max));
-    
+
     _sessionMax = max;
   }
 
@@ -771,7 +771,7 @@ public final class SessionManager implements AlarmListener
   {
     _enableSessionCookies = enableCookies;
   }
-  
+
   /**
    * Returns true if sessions can use the session rewriting.
    */
@@ -779,7 +779,7 @@ public final class SessionManager implements AlarmListener
   {
     return _enableSessionUrls;
   }
-  
+
   /**
    * Returns true if sessions can use the session rewriting.
    */
@@ -925,8 +925,8 @@ public final class SessionManager implements AlarmListener
   public void init()
   {
     if (_sessionSaveMode == SAVE_ON_SHUTDOWN
-	&& (_alwaysSaveSession == SET_TRUE
-	    || _alwaysLoadSession == SET_TRUE))
+        && (_alwaysSaveSession == SET_TRUE
+            || _alwaysLoadSession == SET_TRUE))
       throw new ConfigException(L.l("save-mode='on-shutdown' cannot be used with <always-save-session/> or <always-load-session/>"));
     _sessions = new LruCache<String,SessionImpl>(_sessionMax);
     _sessionIter = _sessions.values();
@@ -944,22 +944,22 @@ public final class SessionManager implements AlarmListener
 
       _sessionStore = sessionCache;
     }
-    
+
     /*
     if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId,
-						_objectManager);
+                                                _objectManager);
       _sessionStore.setMaxIdleTime(_sessionTimeout);
-      
+
       if (_alwaysLoadSession == SET_TRUE)
-	_sessionStore.setAlwaysLoad(true);
+        _sessionStore.setAlwaysLoad(true);
       else if (_alwaysLoadSession == SET_FALSE)
-	_sessionStore.setAlwaysLoad(false);
-      
+        _sessionStore.setAlwaysLoad(false);
+
       if (_alwaysSaveSession == SET_TRUE)
-	_sessionStore.setAlwaysSave(true);
+        _sessionStore.setAlwaysSave(true);
       else if (_alwaysSaveSession == SET_FALSE)
-	_sessionStore.setAlwaysSave(false);
+        _sessionStore.setAlwaysSave(false);
     }
 
     _objectManager.setStore(_sessionStore);
@@ -1048,26 +1048,26 @@ public final class SessionManager implements AlarmListener
     int index = _selfIndex;
 
     ClusterServer server = _selfServer;
-    
+
     if (owner == null) {
     }
     else if (owner instanceof Number) {
       index = ((Number) owner).intValue();
 
       int podIndex = _selfServer.getClusterPod().getIndex();
-      
+
       server = _selfServer.getCluster().findServer(podIndex, index);
 
       if (server == null)
-	server = _selfServer;
+        server = _selfServer;
     }
     else if (owner instanceof String) {
       server = _selfServer.getCluster().findServer((String) owner);
 
       if (server == null)
-	server = _selfServer;
+        server = _selfServer;
     }
-    
+
     index = server.getIndex();
 
     server.generateIdPrefix(sb);
@@ -1119,51 +1119,55 @@ public final class SessionManager implements AlarmListener
    * @return the cached session.
    */
   public SessionImpl createSession(boolean isCreate,
-				   HttpServletRequest request,
-				   String sessionId,
-				   long now,
-				   boolean fromCookie)
+                                   HttpServletRequest request,
+                                   String sessionId,
+                                   long now,
+                                   boolean fromCookie)
   {
     if (_sessions == null)
       return null;
 
     SessionImpl session = _sessions.get(sessionId);
-    
+
     boolean isNew = false;
     boolean killSession = false;
 
     if (session == null
-	&& sessionId != null
-	&& _sessionStore != null) {
+        && sessionId != null
+        && _sessionStore != null) {
       ExtCacheEntry entry = _sessionStore.getExtCacheEntry(sessionId);
 
       if (entry != null && ! entry.isValueNull()) {
-	session = create(sessionId, now, isCreate);
-      
-	isNew = true;
+        session = create(sessionId, now, isCreate);
+
+        isNew = true;
       }
     }
-    
+
     if (session != null) {
       if (session.load(isNew)) {
-	session.addUse();
-	session.setAccess(now);
-	
-	return session;
+        session.addUse();
+        session.setAccess(now);
+
+        return session;
       }
       else {
-	// if the load failed, then the session died out from underneath
-	if (! isNew) {
-	  if (log.isLoggable(Level.FINER))
-	    log.fine(session + " load failed for existing session");
+        // if the load failed, then the session died out from underneath
+        if (! isNew) {
+          if (log.isLoggable(Level.FINER))
+            log.fine(session + " load failed for existing session");
 
-	  session.setModified();
+          // server/0174
+          session.reset(0);
+          /*
+          session.setModified();
 
-	  // Return the existing session for timing reasons, e.g.
-	  // if a second request hits before the first has finished saving
-	  
-	  return session;
-	}
+          // Return the existing session for timing reasons, e.g.
+          // if a second request hits before the first has finished saving
+
+          return session;
+          */
+        }
       }
     }
 
@@ -1171,8 +1175,8 @@ public final class SessionManager implements AlarmListener
       return null;
 
     if (sessionId == null
-	|| sessionId.length() <= 6
-	|| ! reuseSessionId(fromCookie)) {
+        || sessionId.length() <= 6
+        || ! reuseSessionId(fromCookie)) {
       sessionId = createSessionId(request, true);
     }
 
@@ -1191,9 +1195,9 @@ public final class SessionManager implements AlarmListener
     _sessionCreateCount++;
 
     session.create(now, true);
-    
+
     handleCreateListeners(session);
-    
+
     return session;
   }
 
@@ -1207,7 +1211,7 @@ public final class SessionManager implements AlarmListener
    * @return the cached session.
    */
   public SessionImpl getSession(String key, long now,
-				boolean create, boolean fromCookie)
+                                boolean create, boolean fromCookie)
   {
     SessionImpl session;
     boolean isNew = false;
@@ -1231,20 +1235,20 @@ public final class SessionManager implements AlarmListener
     if (session == null && _sessionStore != null) {
       /*
       if (! _objectManager.isInSessionGroup(key))
-	return null;
+        return null;
       */
 
       session = create(key, now, create);
 
       if (! session.addUse())
-	session = null;
-      
+        session = null;
+
       isNew = true;
     }
 
     if (session == null)
       return null;
-    
+
     if (isNew) {
       killSession = ! load(session, now, create);
       isNew = killSession;
@@ -1252,7 +1256,7 @@ public final class SessionManager implements AlarmListener
     else if (! session.load(isNew)) {
       // if the load failed, then the session died out from underneath
       if (log.isLoggable(Level.FINER))
-	log.fine(session + " load failed for existing session");
+        log.fine(session + " load failed for existing session");
 
       session.setModified();
 
@@ -1265,14 +1269,14 @@ public final class SessionManager implements AlarmListener
       _sessions.remove(key);
       // XXX:
       // session._isValid = false;
-        
+
       return null;
     }
     else if (isNew)
       handleCreateListeners(session);
     else
       session.setAccess(now);
-    
+
     return session;
   }
 
@@ -1285,22 +1289,22 @@ public final class SessionManager implements AlarmListener
    */
   public SessionImpl createSession(String oldId, long now,
                                    HttpServletRequest request,
-				   boolean fromCookie)
+                                   boolean fromCookie)
   {
     if (_sessions == null) {
       log.fine(this + " createSession called when sessionManager closed");
-      
+
       return null;
     }
-    
+
     String id = oldId;
 
     if (id == null
-	|| id.length() < 4
+        || id.length() < 4
         || ! reuseSessionId(fromCookie)) {
       // server/0175
       // || ! _objectManager.isInSessionGroup(id)
-      
+
       id = createSessionId(request, true);
     }
 
@@ -1317,12 +1321,12 @@ public final class SessionManager implements AlarmListener
       if (_isPersistenceEnabled && id.equals(oldId))
         load(session, now, true);
       else
-	session.create(now, true);
+        session.create(now, true);
     }
 
     // after load so a reset doesn't clear any setting
     handleCreateListeners(session);
-    
+
     return session;
   }
 
@@ -1359,7 +1363,7 @@ public final class SessionManager implements AlarmListener
   {
     if (_listeners != null) {
       HttpSessionEvent event = new HttpSessionEvent(session);
-      
+
       for (int i = 0; i < _listeners.size(); i++) {
         HttpSessionListener listener = _listeners.get(i);
 
@@ -1382,8 +1386,8 @@ public final class SessionManager implements AlarmListener
 
       /*
       if (session.getUseCount() > 1) {
-	// if used by more than just us, 
-	return true;
+        // if used by more than just us,
+        return true;
       }
       else*/
 
@@ -1401,7 +1405,7 @@ public final class SessionManager implements AlarmListener
       log.log(Level.FINE, e.toString(), e);
       session.reset(now);
     }
-    
+
     return false;
   }
 
@@ -1430,23 +1434,23 @@ public final class SessionManager implements AlarmListener
 
     if (cache == null)
       return null;
-      
+
     try {
       TempOutputStream os = new TempOutputStream();
-    
+
       if (cache.get(id, os)) {
-	InputStream is = os.getInputStream();
+        InputStream is = os.getInputStream();
 
-	StringWriter writer = new StringWriter();
+        StringWriter writer = new StringWriter();
 
-	HessianDebugInputStream dis
-	  = new HessianDebugInputStream(is, new PrintWriter(writer));
+        HessianDebugInputStream dis
+          = new HessianDebugInputStream(is, new PrintWriter(writer));
 
-	int ch;
-	while ((ch = dis.read()) >= 0) {
-	}
+        int ch;
+        while ((ch = dis.read()) >= 0) {
+        }
 
-	return writer.toString();
+        return writer.toString();
       }
 
       os.close();
@@ -1472,38 +1476,38 @@ public final class SessionManager implements AlarmListener
       int liveSessions = 0;
 
       if (_isClosed)
-	return;
+        return;
 
       long now = Alarm.getCurrentTime();
 
       synchronized (_sessions) {
-	_sessionIter = _sessions.values(_sessionIter);
-	while (_sessionIter.hasNext()) {
-	  SessionImpl session = _sessionIter.next();
+        _sessionIter = _sessions.values(_sessionIter);
+        while (_sessionIter.hasNext()) {
+          SessionImpl session = _sessionIter.next();
 
-	  if (session.isIdle(now))
-	    _sessionList.add(session);
-	  else
-	    liveSessions++;
-	}
+          if (session.isIdle(now))
+            _sessionList.add(session);
+          else
+            liveSessions++;
+        }
       }
-      
+
       _sessionTimeoutCount += _sessionList.size();
 
       for (int i = 0; i < _sessionList.size(); i++) {
-	SessionImpl session = _sessionList.get(i);
+        SessionImpl session = _sessionList.get(i);
 
-	try {
-	  session.timeout();
+        try {
+          session.timeout();
 
-	  _sessions.remove(session.getId());
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+          _sessions.remove(session.getId());
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     } finally {
       if (! _isClosed)
-	_alarm.queue(60000);
+        _alarm.queue(60000);
     }
   }
 
@@ -1522,9 +1526,9 @@ public final class SessionManager implements AlarmListener
       return;
 
     _alarm.dequeue();
-    
+
     ArrayList<SessionImpl> list = new ArrayList<SessionImpl>();
-    
+
     // XXX: messy way of dealing with saveOnlyOnShutdown
     synchronized (_sessions) {
       _sessionIter = _sessions.values(_sessionIter);
@@ -1542,12 +1546,12 @@ public final class SessionManager implements AlarmListener
     boolean isError = false;
     for (int i = list.size() - 1; i >= 0; i--) {
       SessionImpl session = list.get(i);
-      
+
       if (log.isLoggable(Level.FINE))
         log.fine("close session " + session.getId());
-      
+
       try {
-	session.saveOnShutdown();
+        session.saveOnShutdown();
 
         _sessions.remove(session.getId());
       } catch (Exception e) {
@@ -1569,7 +1573,7 @@ public final class SessionManager implements AlarmListener
   private static char convert(long code)
   {
     code = code & 0x3f;
-    
+
     if (code < 26)
       return (char) ('a' + code);
     else if (code < 52)

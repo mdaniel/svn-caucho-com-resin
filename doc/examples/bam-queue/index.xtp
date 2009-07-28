@@ -75,15 +75,15 @@ messaging system.
 <s1 title="Producer">
 
 <p>In this example, the Producer is a Servlet which sends a simple message.
-The Producer creates a <code>BamClient</code> 
+The Producer creates a <code>LocalActorClient</code> 
 to send the message.</p>
 
-<example title="Example: MessageServlet using BamClient">
-import com.caucho.bam.BamClient;
+<example title="Example: MessageServlet using LocalActorClient">
+import com.caucho.bam.LocalActorClient;
 
 public void send()
 {
-  BamClient client = new BamClient();
+  LocalActorClient client = new LocalActorClient();
 
   ExampleMessage message = new ExampleMessage("sample message");
 
@@ -117,10 +117,10 @@ implements <code>com.caucho.bam.BamService</code>.</p>
 <example title="Example: ExampleService">
 package example;
 
-import com.caucho.bam.SimpleBamService;
-import com.caucho.bam.annotation.Message;
+import com.caucho.bam.SimpleActor;
+import com.caucho.bam.Message;
 
-public class ExampleService extends SimpleBamService
+public class ExampleService extends SimpleActor;
 {
   @Message
   public void onMessage(String to, String from, ExampleMessage message)
@@ -155,8 +155,9 @@ bam_dispatch();
 <example title="Example: resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;bam-service name="java-consumer"
-               class="example.ExampleService"/>
+  &lt;example:ExampleService>
+     &lt;resin:BamService name="java-consumer"/>
+  &lt;/example:ExampleService>
 
   &lt;bam-service name="php-consumer"
                uri="caucho.php:">

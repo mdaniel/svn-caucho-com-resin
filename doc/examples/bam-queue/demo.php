@@ -6,7 +6,7 @@ $messages = java_bean("exampleMessages");
 
 echo "<ol>\n";
 
-foreach ($service->getMessages() as $msg) {
+foreach ($messages->getMessages() as $msg) {
   echo "<li>$msg\n";
 }
 
@@ -19,7 +19,7 @@ $adj1 = $_REQUEST['adj1'];
 if ($color1 && $noun1 && $adj1) {
   $msg = "The " . $color1 . " " . $noun1 . " is " . $adj1 . ".";
 
-  bam_send_message("bam-java-queue@", $msg);
+  bam_send_message("bam-java-queue@localhost", $msg);
 }
 
 ?>

@@ -122,11 +122,11 @@ value which overrides the default name of "HelloBean".</p>
 
 </s2>
 
-<s2 title="@Named">
+<s2 title="@Name">
 
-<p>The <a href="doc|webbeans-annotations.xtp#@Named">@javax.webbeans.Named</a>
-annotation tells Resin to lookup the greeting <code>String</code>
-in the WebBeans directory with the name binding "greeting" when the
+<p>The <a href="http://caucho.com/resin-javadoc/com/caucho/config/Name.html">@com.caucho.config.Name</a> annotation tells Resin to lookup the
+greeting <code>String</code>
+in Java Injection directory using Resin's internal @Name binding "greeting" when the
 session bean is created.</p>
 
 <p>In this example, the greeting is configured with an &lt;env-entry&gt;
@@ -137,18 +137,16 @@ in the web.xml.</p>
 <s2 title="Alternate Dependency Injection">
 
 <p>In some cases, it may be clearer to configure the session bean directly,
-rather than using WebBeans injection.  Instead of creating a separate
+rather than using Java Injection injection.  Instead of creating a separate
 &lt;env-entry>, you can configure the greeting value using XML
 straight from the resin-web.xml file.</p>
 
 <example title="resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;ejb-stateless-bean class="qa.TestBean">
-    &lt;init>
-      &lt;greeting>Hello, World from web.xml&lt;/greeting>
-    &lt;/init>
-  &lt;/ejb-stateless-bean&gt;
+  &lt;qa:TestBean xmlns:qa="urn:java:qa">
+    &lt;qa:greeting>Hello, World from web.xml&lt;/qa:greeting>
+  &lt;/qa:TestBean>
 
 &lt;/web-app>
 </example>
@@ -196,9 +194,9 @@ already exists.  It's used when updating database values.</p>
 
 <s1 title="Configuring the EJB stateless bean">
 
-<p><code>&lt;ejb-stateless-bean&gt;</code> configure the session bean
+<p><code>&lt;StatelessBean&gt;</code> configure the session bean
 from the resin-web.xml.
-The &lt;ejb-stateless-bean&gt; entry will
+The &lt;StatelessBean&gt; entry will
 look at the bean's annotations to enhance the class.</p>
 
 <example title="ejb-stateless-bean in web.xml">
@@ -208,13 +206,15 @@ look at the bean's annotations to enhance the class.</p>
              env-entry-type="java.lang.String"
              env-entry-value="Hello, World."/&gt;
 
-  &lt;ejb-stateless-bean class="qa.TestBean"/>
-
+  &lt;qa:TestBean xmlns:qa="urn:java:qa">
+    &lt;StatelessBean/>
+  &lt;/qa:TestBean>
+  
 &lt;/web-app&gt;
 </example>
 
-<p>The &lt;ejb-stateless-bean&gt; can optionally configure the bean
-directly with an &lt;init&gt; tag as described in the alternate
+<p>The &lt;qa:TestBean&gt; can optionally configure the bean
+directly with its properites as described in the alternate
 dependency injection section.</p>
 
 </s1>
@@ -222,10 +222,10 @@ dependency injection section.</p>
 <s1 title="Client">
 
 <example title="HelloServlet.java">
-import javax.webbeans.In;
+import javax.enterprise.inject.Current;
 
 public class HelloServlet extends GenericServlet {
-  @In private Hello _hello;
+  @Current private Hello _hello;
 
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws IOException, ServletException
@@ -239,8 +239,9 @@ public class HelloServlet extends GenericServlet {
 
 <s2 title="@EJB">
 
-<p>The <a href="doc|webbeans-annotations.xtp#@In">@In</a> annotation tells
-Resin to look for a <code>Hello</code> component in the WebBeans directory.
+<p>The <a href="http://caucho.com/resin-javadoc/com/caucho/enterprise/inject/Current.html">@Current</a> annotation tells
+Resin to look for a <code>Hello</code> component in the Java Injection
+repository.
 </p>
 
 <p>The servlet could also lookup the Hello bean with JNDI in the
@@ -248,8 +249,10 @@ Resin to look for a <code>Hello</code> component in the WebBeans directory.
 web.xml:
 
 <example title="alternative configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
 &lt;servlet servlet-name="hello" servlet-class="example.HelloServlet"&gt;
-  &lt;init hello="${HelloBean}"/&gt;
+  &lt;init hello="${Hello}"/&gt;
 &lt;/servlet&gt;
 </example>
 

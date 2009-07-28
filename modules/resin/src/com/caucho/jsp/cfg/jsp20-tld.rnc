@@ -120,6 +120,8 @@ jsp20_taglib = element taglib {
   j2ee_description-Group,
 
   element tlib-version { j2ee_dewey-version },
+  
+  element jsp-version { j2ee_dewey-version }?,
 
   element short-name { string }?,
 

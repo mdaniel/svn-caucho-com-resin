@@ -76,7 +76,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   private long _accessTime;
   // maximum time the session may stay alive.
   private long _idleTimeout;
-  
+
   // true if the session is new
   private boolean _isNew = true;
   // true if the application has modified the data
@@ -87,10 +87,10 @@ public class SessionImpl implements HttpSession, CacheListener {
   private boolean _isClosing = false;
   // true if the session is being closed from an invalidation
   private boolean _isInvalidating = false;
-  
+
   // the cache entry saved in the session
   private ExtCacheEntry _cacheEntry;
-  
+
   // to protect for threading
   private final AtomicInteger _useCount = new AtomicInteger();
 
@@ -110,7 +110,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _idleTimeout = manager.getSessionTimeout();
 
     _id = id;
- 
+
     _values = createValueMap();
 
     if (log.isLoggable(Level.FINE))
@@ -276,7 +276,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (_values.size() > 0)
       _isModified = true;
   }
-  
+
   /**
    * Sets a session attribute.  If the value is a listener, notify it
    * of the objectModified.  If the value has changed mark the session as changed
@@ -293,10 +293,10 @@ public class SessionImpl implements HttpSession, CacheListener {
     Object oldValue;
 
     if (value != null
-	&& ! (value instanceof Serializable)
-	&& log.isLoggable(Level.FINE)) {
+        && ! (value instanceof Serializable)
+        && log.isLoggable(Level.FINE)) {
       log.fine(L.l("{0} attribute '{1}' value is non-serializable type '{2}'",
-		   this, name, value.getClass().getName()));
+                   this, name, value.getClass().getName()));
     }
 
     synchronized (_values) {
@@ -314,7 +314,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       listener = (HttpSessionBindingListener) oldValue;
 
       listener.valueUnbound(new HttpSessionBindingEvent(SessionImpl.this,
-							name, oldValue));
+                                                        name, oldValue));
     }
 
     if (value instanceof HttpSessionBindingListener) {
@@ -322,12 +322,12 @@ public class SessionImpl implements HttpSession, CacheListener {
       listener = (HttpSessionBindingListener) value;
 
       listener.valueBound(new HttpSessionBindingEvent(SessionImpl.this,
-						      name, value));
+                                                      name, value));
     }
 
     // Notify the attribute listeners
     ArrayList listeners = _manager.getAttributeListeners();
-    
+
     if (listeners != null && listeners.size() > 0) {
       HttpSessionBindingEvent event;
 
@@ -380,7 +380,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     synchronized (_values) {
       if (! _isValid)
-	throw new IllegalStateException(L.l("{0} can't call getAttributeNames() when session is no longer valid.", this));
+        throw new IllegalStateException(L.l("{0} can't call getAttributeNames() when session is no longer valid.", this));
 
       return Collections.enumeration(_values.keySet());
     }
@@ -417,17 +417,17 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     synchronized (_values) {
       if (! _isValid)
-	throw new IllegalStateException(L.l("{0} can't call getValueNames() when session is no longer valid.", this));
+        throw new IllegalStateException(L.l("{0} can't call getValueNames() when session is no longer valid.", this));
 
       if (_values == null)
-	return new String[0];
+        return new String[0];
 
       String []s = new String[_values.size()];
 
       Enumeration e = getAttributeNames();
       int count = 0;
       while (e.hasMoreElements())
-	s[count++] = (String) e.nextElement();
+        s[count++] = (String) e.nextElement();
 
       return s;
     }
@@ -471,7 +471,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     /*
     synchronized (this) {
       if (_isClosing)
-	return false;
+        return false;
 
       _useCount++;
 
@@ -503,7 +503,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     // server/01k0
     if (_useCount.get() > 1)
       return;
-    
+
     _isNew = false;
 
     /*
@@ -545,7 +545,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (! _isValid)
       return false;
-    
+
     // server/01k0
     if (_useCount.get() > 1)
       return true;
@@ -554,44 +554,48 @@ public class SessionImpl implements HttpSession, CacheListener {
       ByteStreamCache cache = _manager.getCache();
 
       if (cache == null)
-	return ! isNew;
+        return ! isNew;
 
       // server/015m
       if (! isNew && _manager.isSaveOnShutdown())
-	return true;
+        return true;
 
       ExtCacheEntry entry = cache.getExtCacheEntry(_id);
       ExtCacheEntry cacheEntry = _cacheEntry;
 
       if (entry != null && cacheEntry != null
-	  && cacheEntry.getValueHashKey() != null
-	  && cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {
-	return true;
+          && cacheEntry.getValueHashKey() != null
+          && cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {
+        return true;
       }
-      
+
       TempOutputStream os = new TempOutputStream();
 
       if (cache.get(_id, os)) {
-	InputStream is = os.getInputStream();
+        InputStream is = os.getInputStream();
 
-	SessionDeserializer in = new HessianSessionDeserializer(is);
+        SessionDeserializer in = new HessianSessionDeserializer(is);
 
-	if (log.isLoggable(Level.FINE)) {
-	  log.fine(this + " session load valueHash="
-		   + (entry != null ? entry.getValueHashKey() : null));
-	}
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(this + " session load valueHash="
+                   + (entry != null ? entry.getValueHashKey() : null));
+        }
 
-	load(in);
+        load(in);
 
-	in.close();
-	is.close();
-      
-	_cacheEntry = entry;
+        in.close();
+        is.close();
 
-	return true;
+        _cacheEntry = entry;
+
+        return true;
       }
-      else
-	_cacheEntry = null;
+      else {
+        _cacheEntry = null;
+
+        if (cacheEntry == null)
+          return true;
+      }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -610,39 +614,39 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     synchronized (this) {
       synchronized (_values) {
-	// server/017u
-	_values.clear();
-	// unbind();
+        // server/017u
+        _values.clear();
+        // unbind();
 
-	try {
-	  int size = in.readInt();
+        try {
+          int size = in.readInt();
 
-	  //System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+          //System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
 
-	  for (int i = 0; i < size; i++) {
-	    String key = (String) in.readObject();
-	    Object value = in.readObject();
+          for (int i = 0; i < size; i++) {
+            String key = (String) in.readObject();
+            Object value = in.readObject();
 
-	    if (value != null) {
-	      _values.put(key, value);
-	      
-	      if (value instanceof HttpSessionActivationListener) {
-		HttpSessionActivationListener listener
-		  = (HttpSessionActivationListener) value;
+            if (value != null) {
+              _values.put(key, value);
 
-		if (event == null)
-		  event = new HttpSessionEvent(this);
+              if (value instanceof HttpSessionActivationListener) {
+                HttpSessionActivationListener listener
+                  = (HttpSessionActivationListener) value;
 
-		if (listeners == null)
-		  listeners = new ArrayList<HttpSessionActivationListener>();
+                if (event == null)
+                  event = new HttpSessionEvent(this);
 
-		listeners.add(listener);
-	      }
-	    }
-	  }
-	} catch (Exception e) {
-	  throw IOExceptionWrapper.create(e);
-	}
+                if (listeners == null)
+                  listeners = new ArrayList<HttpSessionActivationListener>();
+
+                listeners.add(listener);
+              }
+            }
+          }
+        } catch (Exception e) {
+          throw IOExceptionWrapper.create(e);
+        }
       }
     }
 
@@ -650,8 +654,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       HttpSessionActivationListener listener = listeners.get(i);
 
       if (event == null)
-	event = new HttpSessionEvent(this);
-	
+        event = new HttpSessionEvent(this);
+
       listener.sessionDidActivate(event);
     }
 
@@ -660,8 +664,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       HttpSessionActivationListener listener = listeners.get(i);
 
       if (event == null)
-	event = new HttpSessionEvent(this);
-	
+        event = new HttpSessionEvent(this);
+
       listener.sessionDidActivate(event);
     }
   }
@@ -724,11 +728,11 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     try {
       if (! _isModified && ! _manager.getAlwaysSaveSession())
-	return;
-      
+        return;
+
       if (! _manager.isPersistenceEnabled())
-	return;
-      
+        return;
+
       _isModified = false;
 
       TempOutputStream os = new TempOutputStream();
@@ -739,11 +743,11 @@ public class SessionImpl implements HttpSession, CacheListener {
       out.close();
 
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
-					    _idleTimeout);
+                                            _idleTimeout);
 
       if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " session save valueHash="
-		 + (_cacheEntry != null ? _cacheEntry.getValueHashKey() : null));
+        log.fine(this + " session save valueHash="
+                 + (_cacheEntry != null ? _cacheEntry.getValueHashKey() : null));
       }
 
       os.close();
@@ -760,9 +764,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     /*
         if (session.isValid()) {
           synchronized (session) {
-	    // server/016i, server/018x
-	    if (! session.isEmpty())
-	      session.saveOnShutdown();
+            // server/016i, server/018x
+            if (! session.isEmpty())
+              session.saveOnShutdown();
           }
         }
     */
@@ -773,8 +777,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       ClusterObject clusterObject = _clusterObject;
 
       if (clusterObject != null) {
-	clusterObject.objectModified();
-	clusterObject.objectStore(this);
+        clusterObject.objectModified();
+        clusterObject.objectStore(this);
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, this + ": can't serialize session", e);
@@ -797,80 +801,80 @@ public class SessionImpl implements HttpSession, CacheListener {
     throws IOException
   {
     Set<Map.Entry<String,Object>> set = null;
-    
+
     HttpSessionEvent event = null;
     ArrayList<HttpSessionActivationListener> listeners;
-    
+
     synchronized (_values) {
       set = _values.entrySet();
 
       int size = set == null ? 0 : set.size();
 
       if (size == 0) {
-	out.writeInt(0);
-	return;
+        out.writeInt(0);
+        return;
       }
 
       listeners = _manager.getActivationListeners();
 
       if (listeners != null && listeners.size() > 0) {
-	if (event == null)
-	  event = new HttpSessionEvent(this);
+        if (event == null)
+          event = new HttpSessionEvent(this);
 
-	for (int i = 0; i < listeners.size(); i++) {
-	  HttpSessionActivationListener listener = listeners.get(i);
-	  
-	  listener.sessionWillPassivate(event);
-	}
+        for (int i = 0; i < listeners.size(); i++) {
+          HttpSessionActivationListener listener = listeners.get(i);
+
+          listener.sessionWillPassivate(event);
+        }
       }
 
       for (Map.Entry entry : set) {
-	Object value = entry.getValue();
-	      
-	if (value instanceof HttpSessionActivationListener) {
-	  HttpSessionActivationListener listener
-	    = (HttpSessionActivationListener) value;
+        Object value = entry.getValue();
 
-	  if (event == null)
-	    event = new HttpSessionEvent(this);
+        if (value instanceof HttpSessionActivationListener) {
+          HttpSessionActivationListener listener
+            = (HttpSessionActivationListener) value;
 
-	  listener.sessionWillPassivate(event);
-	}
+          if (event == null)
+            event = new HttpSessionEvent(this);
+
+          listener.sessionWillPassivate(event);
+        }
       }
     }
 
     synchronized (this) {
       synchronized (_values) {
-	set = _values.entrySet();
+        set = _values.entrySet();
 
-	int size = set == null ? 0 : set.size();
+        int size = set == null ? 0 : set.size();
 
-	out.writeInt(size);
+        out.writeInt(size);
 
-	if (size == 0)
-	  return;
+        if (size == 0)
+          return;
 
-	boolean ignoreNonSerializable
-	  = getManager().getIgnoreSerializationErrors();
+        boolean ignoreNonSerializable
+          = getManager().getIgnoreSerializationErrors();
 
-	for (Map.Entry entry : set) {
-	  Object value = entry.getValue();
+        for (Map.Entry entry : set) {
+          Object value = entry.getValue();
 
-	  out.writeObject(entry.getKey());
+          out.writeObject(entry.getKey());
 
-	  if (ignoreNonSerializable && ! (value instanceof Serializable)) {
-	    out.writeObject(null);
-	    continue;
-	  }
+          if (ignoreNonSerializable && ! (value instanceof Serializable)) {
+            out.writeObject(null);
+            continue;
+          }
 
-	  try {
-	    out.writeObject(value);
-	  } catch (NotSerializableException e) {
-	    log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
-			    this, entry.getKey(), String.valueOf(e)));
-	    throw e;
-	  }
-	}
+          try {
+            out.writeObject(value);
+          } catch (NotSerializableException e) {
+            log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}",
+                            this, entry.getKey(), String.valueOf(e)));
+            throw e;
+          }
+        }
       }
     }
   }
@@ -881,7 +885,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   /**
    * Invalidates the session, called by user code.
-   * 
+   *
    * This should never be called by Resin code (for logging purposes)
    */
   public void invalidate()
@@ -921,7 +925,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       else if (session.getSrunIndex() != _selfIndex && _selfIndex >= 0) {
       if (log.isLoggable(Level.FINE))
       log.fine(session + " timeout (backup)");
-            
+
       // if not the owner, then just remove
       _sessions.remove(session.getId());
     }
@@ -939,15 +943,15 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     synchronized (this) {
       if (_isInvalidating || _useCount.get() <= 0)
-	_isClosing = true;
+        _isClosing = true;
     }
 
     if (! _isClosing) {
       log.warning(L.l("{0} LRU while in use (use-count={1}).  Consider increasing session-count.",
-		      this,
-		      _useCount));
+                      this,
+                      _useCount));
     }
-    
+
     boolean isValid = _isValid;
 
     if (log.isLoggable(Level.FINE))
@@ -957,8 +961,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     // server/015k, server/10g2
     if (_isInvalidating
-	|| ! _manager.isPersistenceEnabled()
-	|| _accessTime + getMaxInactiveInterval() < now) {
+        || ! _manager.isPersistenceEnabled()
+        || _accessTime + getMaxInactiveInterval() < now) {
       notifyDestroy();
     }
 
@@ -972,7 +976,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (_clusterObject != null && ! _clusterObject.isPrimary())
       return;
     */
-    
+
     ArrayList listeners = _manager.getListeners();
 
     if (listeners != null) {
@@ -986,7 +990,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       }
     }
   }
-  
+
   /**
    * Invalidates a session based on a logout.
    */
@@ -994,11 +998,11 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " logout");
-   
+
     _isInvalidating = true;
     invalidate(Logout.INVALIDATE);
   }
-  
+
   /**
    * Invalidates a session based on a timeout
    */
@@ -1008,10 +1012,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       log.fine(this + " timeout");
 
     _isInvalidating = _manager.isOwner(_id);
-    
+
     invalidate(Logout.TIMEOUT);
   }
-  
+
   /**
    * Invalidates a session based on a LRU
    */
@@ -1019,13 +1023,13 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " lru");
-    
+
     invalidateImpl(Logout.LRU);
   }
 
   /**
    * Invalidates the session, called by user code.
-   * 
+   *
    * This should never be called by Resin code (for logging purposes)
    */
   public void invalidateRemote()
@@ -1052,7 +1056,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       Login login = _manager.getWebApp().getLogin();
 
       if (login != null)
-	login.sessionInvalidate(this, logout == Logout.TIMEOUT);
+        login.sessionInvalidate(this, logout == Logout.TIMEOUT);
 
       _manager.removeSession(this);
 
@@ -1074,24 +1078,24 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     try {
       if (_isInvalidating && _manager.getSessionStore() != null) {
-	boolean isRemove = false;
-	
-	if (logout == Logout.TIMEOUT) {
-	  // server/016r
-	  ExtCacheEntry entry
-	    = _manager.getSessionStore().peekExtCacheEntry(_id);
+        boolean isRemove = false;
 
-	  long now = Alarm.getCurrentTime();
+        if (logout == Logout.TIMEOUT) {
+          // server/016r
+          ExtCacheEntry entry
+            = _manager.getSessionStore().peekExtCacheEntry(_id);
 
-	  if (entry == null || ! entry.isValid()) {
-	    isRemove = true;
-	  }
-	}
-	else
-	  isRemove = true;
+          long now = Alarm.getCurrentTime();
 
-	if (isRemove)
-	  _manager.getSessionStore().remove(_id);
+          if (entry == null || ! entry.isValid()) {
+            isRemove = true;
+          }
+        }
+        else
+          isRemove = true;
+
+        if (isRemove)
+          _manager.getSessionStore().remove(_id);
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1107,7 +1111,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (_isValid && ! _isInvalidating) {
       if (_manager.isSaveOnlyOnShutdown()) {
-	save();
+        save();
       }
     }
 
@@ -1126,21 +1130,21 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     ArrayList<String> names = new ArrayList<String>();
     ArrayList<Object> values = new ArrayList<Object>();
-    
+
     synchronized (_values) {
       /*
       if (_useCount > 0)
-	Thread.dumpStack();
+        Thread.dumpStack();
       */
 
       for (Map.Entry<String,Object> entry : _values.entrySet()) {
-	names.add(entry.getKey());
-	values.add(entry.getValue());
+        names.add(entry.getKey());
+        values.add(entry.getValue());
       }
-      
+
       _values.clear();
     }
-    
+
     // server/015a
     for (int i = 0; i < names.size(); i++) {
       String name = names.get(i);
@@ -1163,8 +1167,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       listener = (HttpSessionBindingListener) oldValue;
 
       listener.valueUnbound(new HttpSessionBindingEvent(this,
-							name,
-							oldValue));
+                                                        name,
+                                                        oldValue));
     }
 
     // Notify the attributes listeners
@@ -1187,15 +1191,15 @@ public class SessionImpl implements HttpSession, CacheListener {
   public String toString()
   {
     String contextPath = "";
-    
+
     SessionManager manager = _manager;
     if (manager != null) {
       WebApp webApp = manager.getWebApp();
 
       if (webApp != null)
-	contextPath = "," + webApp.getContextPath();
+        contextPath = "," + webApp.getContextPath();
     }
-    
+
     return getClass().getSimpleName() + "[" + getId() + contextPath + "]";
   }
 

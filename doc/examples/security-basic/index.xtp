@@ -1,7 +1,6 @@
 <document>
 <header>
 <product>resin</product>
-<version>Resin 3.0</version>
 <type>tutorial</type>
 <title>Basic Security and Resin's XmlAuthenticator</title>
 <description>
@@ -86,13 +85,7 @@ in <code>web.xml</code>.</p>
 have an additional role of <var>gryffindor</var>,
 <var>slytherin</var>, <var>hufflepuf</var>, or <var>ravenclaw</var>,
 indicating which house they belong to (or none at all).</p>
-      
-<example>
-&lt;security-role&gt;
-  &lt;role-name&gt;professor&lt;/role-name&gt;
-&lt;/security-role&gt;
-</example>
-    
+
 </s1>
     
 <s1 title="Specifying secure areas">
@@ -102,15 +95,14 @@ that is required.  In JSP/Servlet terminology, this is called <var>Declarative S
 </p>
       
 <example title="Declarative Security in web.xml">
-&lt;security-constraint&gt;
-  &lt;web-resource-collection&gt;
-    &lt;web-resource-name&gt;Professors&lt;/web-resource-name&gt;
-    &lt;url-pattern&gt;/professors/*&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-  &lt;auth-constraint&gt;
-    &lt;role-name&gt;professor&lt;/role-name&gt;
-  &lt;/auth-constraint&gt;
-&lt;/security-constraint&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+        
+  &lt;resin:Allow url-pattern="/professors/*">
+    &lt;resin:IfUserInRole role="professor"/>
+  &lt;/resin:Allow url-pattern="/professors/*">
+
+&lt;/web-app>
 </example>
 </s1>
     
@@ -124,14 +116,16 @@ same JSP file.  If the form is being redisplayed because of an
 error the <code>login_error</code> request parameter is set to '1'.</p>
       
 <example title="login-config: Getting Resin to use the login form">
-&lt;login-config&gt;
-  &lt;auth-method&gt;form&lt;/auth-method&gt;
-    &lt;form-login-config&gt;
-      &lt;form-login-page&gt;/login.jsp&lt;/form-login-page&gt; 
-      &lt;form-error-page&gt;/login.jsp?login_error=1&lt;/form-error-page&gt;
-    &lt;/form-login-config&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+        
+  &lt;resin:FormLogin>
+      &lt;login-page&gt;/login.jsp&lt;/login-page&gt; 
+      &lt;error-page&gt;/login.jsp?login_error=1&lt;/error-page&gt;
+  &lt;/resin:FormLogin>
+
     ...
-&lt;/login-config&gt;
+&lt;/web-app&gt;
 </example>
 
 <example title="An example login form">
@@ -163,20 +157,19 @@ unauthenticated user trying to access it will first be
 presented with the login form.</p>
 
 <example title="Accessing a jsp in a secure area causes the login to occur">
-&lt;security-constraint&gt;
-  &lt;web-resource-collection&gt;
-    &lt;web-resource-name&gt;Home&lt;/web-resource-name&gt;
-    &lt;url-pattern&gt;/home.jsp&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-  &lt;auth-constraint&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:Allow url-pattern="/home.jsp">
     &lt;!-- 
       '*' for a &lt;role-name&gt; means "authenticated user with any role"
       The user must be logged in with some kind of role to access
       the home page.  
     --&gt;
-    &lt;role-name&gt;*&lt;/role-name&gt;
-  &lt;/auth-constraint&gt;
-&lt;/security-constraint&gt;
+    &lt;resin:IfUserInRole role="*"/>
+  &lt;/resin:Allow&gt;
+  
+&lt;/web-app&gt;
 </example>
 
 <example title="Making a link to cause a login">
@@ -300,19 +293,18 @@ configuration, or in an xml file, or both.</p>
 <p>The example below uses digest passwords.  Digest passwords avoid the storage of passwords in cleartext, and are discussed under the security section of the Resin documentation.</p>
 
 <example title="Specifying the XmlAuthenticator as the authenticator to use">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         resin:xmlns="urn:java:com.caucho.resin">
 
   &lt;!-- Resin-specific XmlAuthenticator configuration --&gt;
-  &lt;authenticator uri="xml:"&gt;
-    &lt;init&gt;
+  &lt;resin:XmlAuthenticator>
       &lt;!-- Optionally put user information here.  --&gt;
       &lt;user&gt;pince:Txpd1jQc/xwhISIqodEjfw==:staff,website&lt;/user&gt;
       &lt;user&gt;filch:KmZIq2RKXAHV4BaoNHfupQ==:staff&lt;/user&gt;
 
       &lt;!-- You can also use an external file --&gt; 
       &lt;path&gt;WEB-INF/password.xml&lt;/path&gt;
-    &lt;/init&gt;
-  &lt;/authenticator&gt;
+  &lt;/resin:XmlAuthenticator&gt;
   
 &lt;/web-app>
 </example>
@@ -332,6 +324,19 @@ configuration, or in an xml file, or both.</p>
   &lt;user name='lmalfoy' password='sj/yhtU1h4LZPw7/Uy9IVA==' roles='alumni,gryffindor'/&gt;
 &lt;/authenticator&gt;
 </example>
+</s1>
+
+<s1 title="Documenting Roles">
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+&lt;security-role&gt;
+  &lt;role-name&gt;professor&lt;/role-name&gt;
+&lt;/security-role&gt;
+
+&lt;/web-app>
+</example>
+    
 </s1>
 </body>
 </document>

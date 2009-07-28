@@ -7,7 +7,7 @@
 
 <html>
   <head>
-    <title>Hogwart's</title>
+    <title>Hogwarts</title>
   </head>
 
   <body>

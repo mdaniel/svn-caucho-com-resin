@@ -1,6 +1,6 @@
 <%@ page import="com.caucho.bam.LocalActorClient, java.util.*, example.*"
 %><%!
-@com.caucho.config.Name("bam-java-queue")
+@javax.enterprise.inject.Current
 ExampleService _service;
 
 @javax.enterprise.inject.Current
@@ -29,7 +29,7 @@ if (color1 != null && noun1 != null && adj1 != null) {
 
   ExampleMessage exMsg = new ExampleMessage(msg);
 
-  _client.message("bam-php-queue@", exMsg);
+  _client.message("bam-php-queue@localhost", exMsg);
 }
 
 %>
