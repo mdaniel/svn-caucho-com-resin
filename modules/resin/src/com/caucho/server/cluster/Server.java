@@ -124,7 +124,7 @@ public class Server extends ProtocolDispatchServer
   private final ClusterServer _selfServer;
 
   private final String _id;
-  
+
   private EnvironmentClassLoader _classLoader;
 
   private Throwable _configException;
@@ -136,7 +136,7 @@ public class Server extends ProtocolDispatchServer
   private AdminAuthenticator _adminAuth;
 
   private InjectManager _webBeans;
-  
+
   private HempBrokerManager _brokerManager;
   private DomainManager _domainManager;
   private HempBroker _broker;
@@ -158,7 +158,7 @@ public class Server extends ProtocolDispatchServer
 
   // <server> configuration compat
   private int _acceptListenBacklog = 100;
-  
+
   private int _acceptThreadMin = 4;
   private int _acceptThreadMax = 8;
 
@@ -166,22 +166,22 @@ public class Server extends ProtocolDispatchServer
 
   // default is in Port
   private int _keepaliveMax = -1;
-  
+
   private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
-  
+
   private boolean _keepaliveSelectEnable = true;
   private int _keepaliveSelectMax = -1;
   private long _keepaliveSelectThreadTimeout = 1000;
 
   private Management _management;
-  
+
   private long _suspendTimeMax = 600000L;
 
   private long _memoryFreeMin = 1024 * 1024;
   private long _permGenFreeMin = 1024 * 1024;
-  
+
   private long _shutdownWaitMax = 60 * 1000;
-  
+
   private int _threadMax = 4096;
   private int _threadExecutorTaskMax = -1;
   private int _threadIdleMin = -1;
@@ -237,12 +237,12 @@ public class Server extends ProtocolDispatchServer
     _classLoader.setId("server:" + podId);
 
     _serverLocal.set(this, _classLoader);
-    
+
     if (! Alarm.isTest())
       _serverHeader = "Resin/" + com.caucho.Version.VERSION;
     else
       _serverHeader = "Resin/1.1";
-    
+
     try {
       Thread thread = Thread.currentThread();
 
@@ -255,30 +255,30 @@ public class Server extends ProtocolDispatchServer
 
       try {
         thread.setContextClassLoader(_classLoader);
-	
-	_serverIdLocal.set(_selfServer.getId());
+
+        _serverIdLocal.set(_selfServer.getId());
 
         _hostContainer = new HostContainer();
         _hostContainer.setClassLoader(_classLoader);
         _hostContainer.setDispatchServer(this);
 
-	_admin = new ServerAdmin(this);
+        _admin = new ServerAdmin(this);
 
-	_alarm = new Alarm(this);
+        _alarm = new Alarm(this);
 
-	_webBeans = InjectManager.create();
+        _webBeans = InjectManager.create();
 
-	_brokerManager = createBrokerManager();
-	_domainManager = createDomainManager();
+        _brokerManager = createBrokerManager();
+        _domainManager = createDomainManager();
 
-	_broker = new HempBroker(getBamAdminName());
-	
-	_brokerManager.addBroker(getBamAdminName(), _broker);
-	_brokerManager.addBroker("resin.caucho", _broker);
+        _broker = new HempBroker(getBamAdminName());
 
-	// Config.setProperty("server", new ServerVar(server), _classLoader);
-	
-	_selfServer.getServerProgram().configure(this);
+        _brokerManager.addBroker(getBamAdminName(), _broker);
+        _brokerManager.addBroker("resin.caucho", _broker);
+
+        // Config.setProperty("server", new ServerVar(server), _classLoader);
+
+        _selfServer.getServerProgram().configure(this);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -391,25 +391,25 @@ public class Server extends ProtocolDispatchServer
   {
     if (! isResinServer())
       return null;
-    
+
     synchronized (this) {
       if (_git == null && _resin != null) {
-	// initialize git repository
-	Path root = _resin.getResinDataDirectory();
+        // initialize git repository
+        Path root = _resin.getResinDataDirectory();
 
-	// QA
-	if (root instanceof MemoryPath)
-	  root = Vfs.lookup("file:/tmp/caucho/qa");
+        // QA
+        if (root instanceof MemoryPath)
+          root = Vfs.lookup("file:/tmp/caucho/qa");
 
-	_git = new GitRepository(root.lookup(".git"));
+        _git = new GitRepository(root.lookup(".git"));
 
-	try {
-	  _git.initDb();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          _git.initDb();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
-      
+
       return _git;
     }
   }
@@ -421,10 +421,10 @@ public class Server extends ProtocolDispatchServer
   {
     if (! isResinServer())
       return null;
-    
+
     synchronized (this) {
       if (_repository == null)
-	_repository = createRepository();
+        _repository = createRepository();
     }
 
     _repository.init();
@@ -439,10 +439,10 @@ public class Server extends ProtocolDispatchServer
   {
     if (! isResinServer())
       return null;
-    
+
     synchronized (this) {
       if (_localRepository == null)
-	_localRepository = new FileRepository(this);
+        _localRepository = new FileRepository(this);
     }
 
     return _localRepository;
@@ -519,7 +519,7 @@ public class Server extends ProtocolDispatchServer
   {
     if (! isResinServer())
       return null;
-    
+
     return _resin.getTempFileManager();
   }
 
@@ -586,23 +586,23 @@ public class Server extends ProtocolDispatchServer
     if (_adminAuth == null) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
-      
-      try {
-	thread.setContextClassLoader(getClassLoader());
-	
-	_adminAuth = _webBeans.getReference(AdminAuthenticator.class);
-      } catch (Exception e) {
-	if (log.isLoggable(Level.FINEST))
-	  log.log(Level.FINEST, e.toString(), e);
-	else
-	  log.finer(e.toString());
 
-	_adminAuth = new AdminAuthenticator();
+      try {
+        thread.setContextClassLoader(getClassLoader());
+
+        _adminAuth = _webBeans.getReference(AdminAuthenticator.class);
+      } catch (Exception e) {
+        if (log.isLoggable(Level.FINEST))
+          log.log(Level.FINEST, e.toString(), e);
+        else
+          log.finer(e.toString());
+
+        _adminAuth = new AdminAuthenticator();
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
-    
+
     return _adminAuth;
   }
 
@@ -707,7 +707,7 @@ public class Server extends ProtocolDispatchServer
   {
     if (_persistentStoreConfig == null)
       _persistentStoreConfig = new PersistentStoreConfig();
-    
+
     return _persistentStoreConfig;
   }
 
@@ -718,7 +718,7 @@ public class Server extends ProtocolDispatchServer
   {
     return _persistentStoreConfig;
   }
-  
+
   public void startPersistentStore()
   {
   }
@@ -994,8 +994,8 @@ public class Server extends ProtocolDispatchServer
   {
     if (max < 0)
       throw new ConfigException(L.l("<thread-max> ({0}) must be greater than zero.",
-				    max));
-    
+                                    max));
+
     _threadMax = max;
   }
 
@@ -1188,7 +1188,7 @@ public class Server extends ProtocolDispatchServer
     throws ConfigException
   {
     log.warning(L.l("<cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
-    
+
     return new AbstractCache();
   }
 
@@ -1423,7 +1423,7 @@ public class Server extends ProtocolDispatchServer
       invocation.setFilterChain(new ExceptionFilterChain(_configException));
       invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
-      
+
       return invocation;
     }
     else if (_lifecycle.waitForActive(_waitForActiveTime)) {
@@ -1494,7 +1494,7 @@ public class Server extends ProtocolDispatchServer
     else
       return getErrorWebApp();
   }
-  
+
   /**
    * Returns the matching web-app for a URL.
    */
@@ -1590,14 +1590,14 @@ public class Server extends ProtocolDispatchServer
   {
     synchronized (this) {
       if (_systemStore == null) {
-	_systemStore = new ClusterCache("resin:system");
-	_systemStore.setGuid("resin:system");
-	// XXX: need to set reliability values
+        _systemStore = new ClusterCache("resin:system");
+        _systemStore.setGuid("resin:system");
+        // XXX: need to set reliability values
       }
     }
 
     _systemStore.init();
-    
+
     return _systemStore;
   }
 
@@ -1608,14 +1608,14 @@ public class Server extends ProtocolDispatchServer
   {
     synchronized (this) {
       if (_globalStore == null) {
-	_globalStore = new GlobalCache();
-	_globalStore.setName("resin:global");
-	_globalStore.setGuid("resin:global");
-	_globalStore.setLocalReadTimeoutMillis(5000);
-	// XXX: need to set reliability values
+        _globalStore = new GlobalCache();
+        _globalStore.setName("resin:global");
+        _globalStore.setGuid("resin:global");
+        _globalStore.setLocalReadTimeoutMillis(5000);
+        // XXX: need to set reliability values
       }
     }
-    
+
     _globalStore.init();
 
     return _globalStore;
@@ -1665,34 +1665,34 @@ public class Server extends ProtocolDispatchServer
     }
 
     if (_threadIdleMax > 0
-	&& _threadMax > 0
-	&& _threadMax < _threadIdleMax)
+        && _threadMax > 0
+        && _threadMax < _threadIdleMax)
       throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
-				    _threadIdleMax, _threadMax));
+                                    _threadIdleMax, _threadMax));
 
     if (_threadIdleMin > 0
-	&& _threadIdleMax > 0
-	&& _threadIdleMax < _threadIdleMin)
+        && _threadIdleMax > 0
+        && _threadIdleMax < _threadIdleMin)
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})",
-				    _threadIdleMin, _threadIdleMax));
+                                    _threadIdleMin, _threadIdleMax));
 
     if (_threadMax > 0
-	&& _threadExecutorTaskMax > 0
-	&& _threadMax < _threadExecutorTaskMax)
+        && _threadExecutorTaskMax > 0
+        && _threadMax < _threadExecutorTaskMax)
       throw new ConfigException(L.l("<thread-executor-task-max> ({0}) must be less than <thread-max> ({1})",
-				    _threadExecutorTaskMax, _threadMax));
-    
+                                    _threadExecutorTaskMax, _threadMax));
+
     ThreadPool threadPool = ThreadPool.getThreadPool();
 
     if (_threadMax > 0)
       threadPool.setThreadMax(_threadMax);
-    
+
     if (_threadIdleMax > 0)
       threadPool.setThreadIdleMax(_threadIdleMax);
-    
+
     if (_threadIdleMin > 0)
       threadPool.setThreadIdleMin(_threadIdleMin);
-    
+
     threadPool.setExecutorTaskMax(_threadExecutorTaskMax);
 
     if (_keepaliveSelectEnable) {
@@ -1710,8 +1710,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       if (getSelectManager() != null) {
-	if (_keepaliveSelectMax > 0)
-	  getSelectManager().setSelectMax(_keepaliveSelectMax);
+        if (_keepaliveSelectMax > 0)
+          getSelectManager().setSelectMax(_keepaliveSelectMax);
       }
     }
   }
@@ -1737,52 +1737,50 @@ public class Server extends ProtocolDispatchServer
         log.info("");
 
         log.info(System.getProperty("os.name")
-		 + " " + System.getProperty("os.version")
-		 + " " + System.getProperty("os.arch"));
+                 + " " + System.getProperty("os.version")
+                 + " " + System.getProperty("os.arch"));
 
-	log.info(System.getProperty("java.runtime.name")
-		 + " " + System.getProperty("java.runtime.version")
-		 + ", " + System.getProperty("file.encoding")
-		 + ", " + System.getProperty("user.language"));
-		 
+        log.info(System.getProperty("java.runtime.name")
+                 + " " + System.getProperty("java.runtime.version")
+                 + ", " + System.getProperty("file.encoding")
+                 + ", " + System.getProperty("user.language"));
+
         log.info(System.getProperty("java.vm.name")
-		 + " " + System.getProperty("java.vm.version")
-		 + ", " + System.getProperty("sun.arch.data.model")
-		 + ", " + System.getProperty("java.vm.info")
-		 + ", " + System.getProperty("java.vm.vendor"));
+                 + " " + System.getProperty("java.vm.version")
+                 + ", " + System.getProperty("sun.arch.data.model")
+                 + ", " + System.getProperty("java.vm.info")
+                 + ", " + System.getProperty("java.vm.vendor"));
 
-	log.info("");
+        log.info("");
 
         Resin resin = Resin.getCurrent();
 
         if (resin != null) {
           log.info("resin.home = " + resin.getResinHome().getNativePath());
           log.info("resin.root = " + resin.getRootDirectory().getNativePath());
-	  if (resin.getResinConf() != null)
-	    log.info("resin.conf = " + resin.getResinConf());
+          if (resin.getResinConf() != null)
+            log.info("resin.conf = " + resin.getResinConf());
 
           log.info("");
 
-	  String serverType;
-	  
-	  if (resin.isWatchdog())
-	    serverType = "watchdog";
-	  else
-	    serverType = "server";
+          String serverType;
+
+          if (resin.isWatchdog())
+            serverType = "watchdog";
+          else
+            serverType = "server";
 
           log.info(serverType + "     = "
-		   + _selfServer.getClusterPort().getAddress()
-		   + ":" + _selfServer.getClusterPort().getPort()
-		   + " (" + getCluster().getId()
-		   + ":" + getServerId() + ")");
+                   + _selfServer.getClusterPort().getAddress()
+                   + ":" + _selfServer.getClusterPort().getPort()
+                   + " (" + getCluster().getId()
+                   + ":" + getServerId() + ")");
         }
         else {
           log.info("resin.home = " + System.getProperty("resin.home"));
         }
-	
-        log.info("user.name  = " + System.getProperty("user.name"));
 
-        log.info("");
+        log.info("user.name  = " + System.getProperty("user.name"));
       }
 
       _lifecycle.toStarting();
@@ -1790,34 +1788,34 @@ public class Server extends ProtocolDispatchServer
       startClusterNetwork();
 
       if (_resin != null && _resin.getManagement() != null)
-	_resin.getManagement().start(this);
+        _resin.getManagement().start(this);
 
       if (! _isBindPortsAtEnd) {
         bindPorts();
-	startPorts();
+        startPorts();
       }
 
       if (_distributedCacheManager == null)
-	_distributedCacheManager = createDistributedCacheManager();
+        _distributedCacheManager = createDistributedCacheManager();
 
       if (_distributedCacheManager != null)
-	_distributedCacheManager.start();
+        _distributedCacheManager.start();
 
       // initialize the system distributed store
       if (isResinServer())
-	getSystemStore();
+        getSystemStore();
 
       // start the repository
       Repository repository = getRepository();
       if (repository != null)
-	repository.start();
-      
+        repository.start();
+
       getCluster().start();
 
       _classLoader.start();
 
       _hostContainer.start();
-      
+
       // initialize the environment admin
       _classLoader.getAdmin();
 
@@ -1826,39 +1824,48 @@ public class Server extends ProtocolDispatchServer
       // will only occur if bind-ports-at-end is true
       if (_isBindPortsAtEnd) {
         bindPorts();
-	startPorts();
+        startPorts();
       }
 
       getCluster().startRemote();
 
       _alarm.queue(ALARM_INTERVAL);
-      
+
       _lifecycle.toActive();
 
       // dynamic updates from the cluster start after we're capable of
       // handling messages
       startClusterUpdate();
+
+      logModules();
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       _lifecycle.toError();
-      
+
       throw e;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       _lifecycle.toError();
-      
+
       // if the server can't start, it needs to completely fail, especially
       // for the watchdog
       throw new RuntimeException(e);
-      
+
       // log.log(Level.WARNING, e.toString(), e);
 
       // _configException = e;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  /**
+   * Display activated modules
+   */
+  protected void logModules()
+  {
   }
 
   private void startClusterNetwork()
@@ -1868,10 +1875,10 @@ public class Server extends ProtocolDispatchServer
     // getAdminAuthenticator();
 
     AbstractSelectManager selectManager = getSelectManager();
-      
+
     if (! _keepaliveSelectEnable
-	|| selectManager == null
-	|| ! selectManager.start()) {
+        || selectManager == null
+        || ! selectManager.start()) {
       initSelectManager(null);
     }
 
@@ -1879,12 +1886,12 @@ public class Server extends ProtocolDispatchServer
 
     for (Cluster cluster : getResin().getClusterList()) {
       for (ClusterPod pod : cluster.getPodList()) {
-	for (ClusterServer server : pod.getStaticServerList()) {
-	  ServerPool pool = server.getServerPool();
+        for (ClusterServer server : pod.getStaticServerList()) {
+          ServerPool pool = server.getServerPool();
 
-	  if (pool != null)
-	    pool.start();
-	}
+          if (pool != null)
+            pool.start();
+        }
       }
     }
 
@@ -1917,11 +1924,11 @@ public class Server extends ProtocolDispatchServer
       Port port = _selfServer.getClusterPort();
 
       if (port != null && port.getPort() != 0) {
-	log.info("");
-	port.setServer(this);
-	port.bind();
-	port.start();
-	log.info("");
+        log.info("");
+        port.setServer(this);
+        port.bind();
+        port.start();
+        log.info("");
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1951,19 +1958,19 @@ public class Server extends ProtocolDispatchServer
 
       ArrayList<Port> ports = _selfServer.getPorts();
       if (ports.size() > 0
-	  && (ports.get(0) != _selfServer.getClusterPort()
-	      || ports.size() > 1)) {
-	log.info("");
+          && (ports.get(0) != _selfServer.getClusterPort()
+              || ports.size() > 1)) {
+        log.info("");
 
-	for (int i = 0; i < ports.size(); i++) {
-	  Port port = ports.get(i);
+        for (int i = 0; i < ports.size(); i++) {
+          Port port = ports.get(i);
 
-	  port.setServer(this);
+          port.setServer(this);
 
-	  port.bind();
-	}
-      
-	log.info("");
+          port.bind();
+        }
+
+        log.info("");
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1985,7 +1992,7 @@ public class Server extends ProtocolDispatchServer
       for (int i = 0; i < ports.size(); i++) {
         Port port = ports.get(i);
 
-	port.start();
+        port.start();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -2012,8 +2019,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-	ArrayList<Port> ports = _selfServer.getPorts();
-	
+        ArrayList<Port> ports = _selfServer.getPorts();
+
         for (int i = 0; i < ports.size(); i++) {
           Port port = ports.get(i);
 
@@ -2201,7 +2208,7 @@ public class Server extends ProtocolDispatchServer
       TcpConnection conn = port.findConnectionByThreadId(threadId);
 
       if (conn != null)
-	return conn;
+        return conn;
     }
 
     return null;
@@ -2214,17 +2221,17 @@ public class Server extends ProtocolDispatchServer
   {
     return null;
   }
-  
+
   public void addDynamicServer(String clusterId,
-			       String serverId,
-			       String address,
-			       int port)
+                               String serverId,
+                               String address,
+                               int port)
   {
   }
-  
+
   public void removeDynamicServer(String clusterId,
-				  String address,
-				  int port)
+                                  String address,
+                                  int port)
   {
   }
 
@@ -2252,15 +2259,15 @@ public class Server extends ProtocolDispatchServer
         alarm.dequeue();
 
       try {
-	if (_systemStore != null)
-	  _systemStore.close();
+        if (_systemStore != null)
+          _systemStore.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
 
       try {
-	if (_globalStore != null)
-	  _globalStore.close();
+        if (_globalStore != null)
+          _globalStore.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -2280,10 +2287,10 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-	if (_selfServer.getClusterPort() != null)
-	  _selfServer.getClusterPort().close();
+        if (_selfServer.getClusterPort() != null)
+          _selfServer.getClusterPort().close();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
 
       try {
@@ -2298,8 +2305,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-	if (_hostContainer != null)
-	  _hostContainer.stop();
+        if (_hostContainer != null)
+          _hostContainer.stop();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -2313,7 +2320,7 @@ public class Server extends ProtocolDispatchServer
       _lifecycle.toStop();
     } finally {
       thread.setContextClassLoader(oldLoader);
-      
+
       super.stop();
     }
   }
@@ -2342,11 +2349,11 @@ public class Server extends ProtocolDispatchServer
       thread.setContextClassLoader(_classLoader);
 
       try {
-	Management management = _management;
-	_management = null;
+        Management management = _management;
+        _management = null;
 
-	if (management != null)
-	  management.destroy();
+        if (management != null)
+          management.destroy();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -2364,7 +2371,7 @@ public class Server extends ProtocolDispatchServer
       _classLoader.destroy();
 
       if (_distributedCacheManager != null)
-	_distributedCacheManager.close();
+        _distributedCacheManager.close();
 
       _hostContainer = null;
       _cache = null;
@@ -2381,7 +2388,7 @@ public class Server extends ProtocolDispatchServer
   public String toString()
   {
     return (getClass().getSimpleName() + "[id=" + getServerId()
-	    + ",cluster=" + _selfServer.getCluster().getId() + "]");
+            + ",cluster=" + _selfServer.getCluster().getId() + "]");
   }
 
   public static class SelectManagerCompat {

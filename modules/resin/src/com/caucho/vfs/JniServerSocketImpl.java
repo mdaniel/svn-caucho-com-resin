@@ -22,10 +22,10 @@ public class JniServerSocketImpl extends QServerSocket {
   private static final L10N L = new L10N(JniServerSocketImpl.class);
   private static final Logger log
     = Logger.getLogger(JniServerSocketImpl.class.getName());
-  
+
   private static boolean _hasInitJni;
   private static Throwable _jniInitException;
-  
+
   private long _fd;
   private String _id;
 
@@ -41,8 +41,8 @@ public class JniServerSocketImpl extends QServerSocket {
 
     if (_fd == 0)
       throw new IOException(L.l("Socket bind failed for {0}:{1} while running as {2}.  Check for other processes listening to the port and check for permissions (root on unix).",
-				host, port,
-				System.getProperty("user.name")));
+                                host, port,
+                                System.getProperty("user.name")));
   }
 
   /**
@@ -54,9 +54,22 @@ public class JniServerSocketImpl extends QServerSocket {
     _fd = nativeOpenPort(fd, port);
 
     _id = "fd=" + fd + ",port=" + port;
-    
+
     if (_fd == 0)
       throw new java.net.BindException(L.l("Socket bind failed for port {0} fd={1} opened by watchdog.  Check that the watchdog and Resin permissions are properly configured.", port, fd));
+  }
+
+  public static boolean isEnabled()
+  {
+    return _hasInitJni;
+  }
+
+  public static String getInitMessage()
+  {
+    if (_jniInitException != null)
+      return _jniInitException.getMessage();
+    else
+      return null;
   }
 
   /**
@@ -67,10 +80,10 @@ public class JniServerSocketImpl extends QServerSocket {
   {
     return _fd;
   }
-  
+
   public boolean isJNI()
   {
-    return true;
+    return _hasInitJni;
   }
 
   public boolean setSaveOnExec()
@@ -113,9 +126,9 @@ public class JniServerSocketImpl extends QServerSocket {
   {
     if (! _hasInitJni) {
       throw new IOException(L.l("Socket JNI is not available"
-				+ " because JNI support has not been compiled.\n"
-				+ "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n  {2}",
-				host, port, _jniInitException));
+                                + " because JNI support has not been compiled.\n"
+                                + "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n  {2}",
+                                host, port, _jniInitException));
     }
   }
 
@@ -126,7 +139,7 @@ public class JniServerSocketImpl extends QServerSocket {
   {
     if (host == null)
       return 0;
-    
+
     byte []addr = host.getAddress();
     long ip = 0;
 
@@ -157,7 +170,7 @@ public class JniServerSocketImpl extends QServerSocket {
     throws IOException
   {
     JniSocketImpl jniSocket = (JniSocketImpl) socket;
-    
+
     if (_fd == 0)
       throw new IOException("accept from closed socket");
 

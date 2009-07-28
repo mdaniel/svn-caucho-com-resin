@@ -1,7 +1,7 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Resin 4.0.0 Release Notes</title>
+    <title>Resin 4.0.1 Release Notes</title>
   </header>
 
 <body>
@@ -10,10 +10,22 @@
 
 <s1 title="Resin 4.0.x">
 
-<p>Resin 4.0.x is now the development branch.  Due to the addition of
+<p>Resin 4.0.x is the active development branch.  Due to the addition of
 new features, it may be more unstable than the production branch.</p>
 
 <p>The 3.1.x branch is the stable branch.</p>
+
+</s1>
+
+<s1 title="Servlet 3.0 Early Access">
+
+<p>Resin 4.0.1 has implemented the Servlet 3.0 draft specification as
+an early access release.  Importantly, Resin's server
+push/comet support has changed to the Servlet
+<a href="http://caucho.com/resin-javadoc/javax/servlet/AsyncContext.html">AsyncContext</a> model.  Developers who have used Resin's experimental comet API,
+should see the <a href="../examples/servlet-comet/index.xtp">new comet
+using AsyncContext tutorial</a>. Future Resin versions will concentrate on
+the AsyncContext API and will eventually drop the experimental API.</p>
 
 </s1>
 

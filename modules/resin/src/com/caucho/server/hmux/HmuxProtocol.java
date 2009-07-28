@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -44,11 +45,11 @@ import com.caucho.loader.*;
 public class HmuxProtocol extends Protocol {
   private static EnvironmentLocal<HmuxProtocol> _localManager
     = new EnvironmentLocal<HmuxProtocol>();
-  
-  private String _protocolName = "hmux";
+
+  private String _protocolName = "cluster";
 
   private ClassLoader _classLoader;
-  
+
   private HashMap<Integer,WeakReference<HmuxExtension>> _extensionMap
     = new HashMap<Integer,WeakReference<HmuxExtension>>();
 
@@ -73,7 +74,7 @@ public class HmuxProtocol extends Protocol {
   {
     return _protocolName;
   }
-  
+
   /**
    * Sets the protocol name.
    */
