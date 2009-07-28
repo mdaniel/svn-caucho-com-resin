@@ -53,7 +53,6 @@ BEGIN
     "#endif //_WIN32\r\n"
     "#include ""isapi_srun.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
-    "#include ""afxisapi.rc""       // Internet Support resources\r\n"
     "#endif\r\n"
     "\0"
 END
@@ -137,7 +136,6 @@ LANGUAGE 9, 1
 #endif //_WIN32
 #include "isapi_srun.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
-#include "afxisapi.rc"       // Internet Support resources
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
