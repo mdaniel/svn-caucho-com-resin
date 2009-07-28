@@ -1319,6 +1319,10 @@
         <exclude name="modules"/>
         <exclude name="modules/**"/>
       </fileset>
+
+      <fileset dir="${basedir}">
+        <include name="LICENSE"/>
+      </fileset>
     </copy>
 
     <chmod perm="ugo+rx">
