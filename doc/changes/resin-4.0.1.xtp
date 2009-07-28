@@ -41,11 +41,11 @@ for Linux EPOLL enables this large-scale keepalive support.
 
 <s1 title="Java Injection (JSR-299, CanDI)">
 
-<p>The Java Injection specification has updated considerably from Resin 4.0.0
+<p>The Java Injection specification has been updated considerably from Resin 4.0.0
 to Resin 4.0.1.  Most of the spec changes have been on the SPI side, because
 CanDI now has a full SPI for custom configuration.</p>
 
-<p>The packaging has also changed, which the main package in
+<p>The packaging has also changed, with the main package now being
 <a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/package.html">javax.enterprise.inject</a>.</p>
 
 <p>The <a href="http://caucho.com/projects/candi">CanDI project page</a>
@@ -61,6 +61,14 @@ gives more information, including a link to a CanDI tutorial.</p>
 When viewed from the "00" server, statistics from all the servers in
 the cluster are available.</p>
 
+<p>A new "SQL" tab allows you to browse the schema and make queries to 
+any configured database pool in the server.</p>
+
+<p>A new "Wizards" tab helps new users configure various parts of the
+server by showing XML syntax and options.  Currently only database pool
+configuration is supported, with other wizards coming in future releases.
+</p>
+
 </s1>
 
 <s1 title="Distributed Deployment">
@@ -69,6 +77,13 @@ the cluster are available.</p>
 automatic retry on restart.  If a triad server is not yet available when
 a server starts, Resin will continue retry the server until the triad is
 up and available.</p>
+
+</s1>
+
+<s1 title="Ubuntu/Debian 64-bit packages">
+
+<p>.deb packages are now provided for both Resin Open Source and Resin
+Professional for 32-bit and 64-bit x86 architectures.</p>
 
 </s1>
 
