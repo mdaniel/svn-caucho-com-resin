@@ -35,11 +35,11 @@ import java.util.HashMap;
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
 
-import com.caucho.config.types.CronType;
 import com.caucho.config.types.Trigger;
 import com.caucho.ejb.timer.EjbTimer;
 import com.caucho.java.JavaWriter;
 import com.caucho.scheduling.CronExpression;
+import com.caucho.scheduling.CronTrigger;
 import com.caucho.scheduling.ScheduledTask;
 import com.caucho.scheduling.Scheduler;
 import com.caucho.util.L10N;
@@ -141,9 +141,7 @@ public class SchedulingCallChain extends AbstractCallChain {
     CronExpression cronExpression = new CronExpression(schedule.second(),
         schedule.minute(), schedule.hour(), schedule.dayOfWeek(), schedule
             .dayOfMonth(), schedule.month(), schedule.year());
-    Trigger trigger = new CronType(schedule.second(), schedule.minute(),
-        schedule.hour(), schedule.dayOfWeek(), schedule.dayOfMonth(), schedule
-            .month(), schedule.year(), null, null);
+    Trigger trigger = new CronTrigger(cronExpression, -1, -1);
     EjbTimer timer = new EjbTimer();
 
     // TODO What really needs to be passed in is a unique reference to the bean
