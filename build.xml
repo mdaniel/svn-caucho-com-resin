@@ -625,14 +625,14 @@
           file="${win32}/resin/modules/csharp/src/resin/Release/resin.exe"/>
     <copy todir="${install}"
           file="${win32}/resin/modules/csharp/src/setup/Release/setup.exe"/>
-    <copy todir="${install}/win32/apache-2.0"
-          file="${win32}/resin/modules/c/src/apache2/Release/mod_caucho.dll"/>
-    <copy todir="${install}/win32/apache-2.2"
-          file="${win32}/resin/modules/c/src/apache22/Release/mod_caucho.dll"/>
     <copy todir="${install}/win32"
           file="${win32}/resin/modules/c/src/isapi_srun/Release/isapi_srun.dll"/>
     <copy todir="${install}/win64"
           file="${win32}/resin/modules/c/src/isapi_64/Release/isapi_srun.dll"/>
+    <copy todir="${install}/win32/apache-2.2"
+          file="${win32}/resin/modules/c/src/apache22/Release/mod_caucho.dll"/>
+    <copy todir="${install}/win32/apache-2.0"
+          file="${win32}/resin/modules/c/src/apache2/Release/mod_caucho.dll"/>
 
     <chmod perm="ugo+rx">
       <fileset dir="${install}">
