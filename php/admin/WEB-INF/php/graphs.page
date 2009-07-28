@@ -133,6 +133,13 @@ HTML 5 &lt;canvas> is not supported in this browser
     c.lineTo(x, y);
     c.stroke();
   }
+
+  function rline(c, x0, y0, x1, y1)
+  {
+    c.moveTo(x0, y0);
+    c.lineTo(x1, y1);
+    c.stroke();
+  }
 </script>
 
 <?php
@@ -324,6 +331,7 @@ echo "c.beginPath();";
 echo "c.strokeStyle ='#000000';\n";
 echo "c.font = '10px Monotype';\n";
 echo "c.fillStyle ='#000000';\n";
+draw_grid($x1, $y1, $x2, $y2, 0, 0, 100, 100, "#808000", "#008080");
 echo "c.fillText('" . print_value($y1) . "', -45, " . ($height) . ");\n";
 echo "c.fillText('" . print_value($y2) . "', -45, " . (10) . ");\n";
 echo "c.fillText('" . date("H:i", $x1 / 1000) . "', -10, " . ($height + 10) . ");\n";
@@ -356,7 +364,7 @@ function calculate_bounds($bounds, $values)
   }
   else {
     $min_x = 1e50;
-    $min_y = 1e50;
+    $min_y = 0;//1e50;
     $max_x = -1e50;
     $max_y = -1e50;
   }
@@ -376,6 +384,78 @@ function calculate_bounds($bounds, $values)
   }
 
   return array($min_x, $min_y, $max_x, $max_y);
-}  
+}
+
+function draw_line($x_0, $y_0, $x_1, $y_1)
+{
+  global $x1, $dx, $dy, $height;
+
+  printf("rline(c,%.2f,%.2f,%.2f,%.2f)\n",
+           ($x_0 - $x1) / $dx,
+           ($dy - $y_0) / $dy + $height,
+           ($x_1 - $x1) / $dx,
+           ($dy - $y_1) / $dy + $height);
+}
+
+function draw_grid($min_x, $min_y, $max_x, $max_y,
+                   $x0, $y0, $width, $height, $low_color, $high_color)
+{
+  // x-grid
+  $x = $min_x;
+
+  for ($x = $min_x; $x < $max_x; $x += 3600000) {
+    $hour_x = ($x + 3599999);
+    $hour_x -= $hour_x % 3600000;
+
+    $hour_time = $hour_x / 1000;
+    $hour_time += date_create($hour_x)->offset;
+    $day_hour = $hour_time / 3600 % 24;
+
+    if ($hour_x < $max_x) {
+      $xp = $x0 + ($hour_x - $min_x) * $width / ($max_x - $min_x);
+
+      if ($day_hour % 6 == 0) {
+        $color = $high_color;
+      }
+      else
+        $color = $low_color;
+
+      if ($min_x < $x && $x + 3600000 < $max_x) {
+        $s = date("H", $hour_x / 1000);
+        // imagestring($im, 1, $xp - 2, $y0 + $height + 2, $s, $color);
+      }
+
+      draw_line($xp, $y0, $xp, $y0 + $height);
+    }
+  }
+  
+  // y-grid
+  $y = $min_y;
+
+  $digit = (int) ($max_y / pow(10, floor(log10($max_y - $min_y))) + 0.5);
+  $high_mod = 2;
+  
+  if ($digit == 1)
+    $digit = 10;
+  else if ($digit == 2) {
+    $high_mod = 5;
+    $digit = 10;
+  }
+  else if ($digit == 3)
+    $digit = 6;
+
+  $delta = ($max_y - $min_y) / $digit;
+
+  $i = 1;
+  for ($y = $min_y + $delta; $y < $max_y; $y += $delta) {
+    $yp = $y0 + ($y - $min_y) * $height / ($max_y - $min_y);
+
+    $color = $i % $high_mod == 0 ? $high_color : $low_color;
+
+    // imageline($im, $x0, $yp, $x0 + $width, $yp, $color);
+
+    $i++;
+  }
+}
 
 ?>

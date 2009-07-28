@@ -287,17 +287,18 @@ public class WriteStream extends OutputStreamWithBuffer
     int bufferLength = buffer.length;
     int writeLength = _writeLength;
 
+    StreamImpl source = _source;
+    if (source == null)
+      return;
+    
     if (bufferLength <= length) {
-      if (_source == null)
-	return;
-
-      if (_source.write(buffer, 0, writeLength,
+      if (source.write(buffer, 0, writeLength,
 			buf, offset, length, false)) {
 	_position += (writeLength + length);
 	return;
       }
     }
-    
+
     while (length > 0) {
       int sublen = bufferLength - writeLength;
 
@@ -313,7 +314,7 @@ public class WriteStream extends OutputStreamWithBuffer
       if (bufferLength <= writeLength) {
 	int len = writeLength;
 	writeLength = 0;
-	_source.write(buffer, 0, len, false);
+	source.write(buffer, 0, len, false);
 	_position += len;
       }
     }

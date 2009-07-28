@@ -57,15 +57,14 @@ import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 
 /**
- * A wrapper for Caucho system variables, allowing tests to override the default
- * variables.
+ * Scheduler for custom services.
  */
 public class ScheduledThreadPool implements ScheduledExecutorService,
     EnvironmentListener, java.io.Serializable {
   private static final long serialVersionUID = 1L;
 
-  private static Logger log = Logger.getLogger(ScheduledThreadPool.class
-      .getName());
+  private static Logger log
+    = Logger.getLogger(ScheduledThreadPool.class.getName());
   private static L10N L = new L10N(ScheduledThreadPool.class);
 
   private static EnvironmentLocal<ScheduledThreadPool> _local = new EnvironmentLocal<ScheduledThreadPool>();
@@ -233,8 +232,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   public Future<?> submit(Runnable command)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L
-          .l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
     TaskFuture future = new TaskFuture(_loader, command, null);
 
@@ -253,8 +251,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   public <T> Future<T> submit(Runnable task, T result)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L
-          .l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
     TaskFuture<T> future = new TaskFuture<T>(_loader, task, result);
 
@@ -275,17 +272,17 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
    * Schedules a future task.
    */
   @SuppressWarnings("unchecked")
-  public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay,
-      TimeUnit unit)
+  public <V> ScheduledFuture<V> schedule(Callable<V> callable,
+                                         long delay,
+                                         TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L
-          .l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getCurrentTime() + unit.toMillis(delay);
 
-    AlarmFuture future = new AlarmFuture(_loader, callable, initialExpires, 0,
-        0);
+    AlarmFuture future = new AlarmFuture(_loader, callable,
+                                         initialExpires, 0, 0);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -300,11 +297,12 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
    * Schedules a future task.
    */
   @SuppressWarnings("unchecked")
-  public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit)
+  public ScheduledFuture<?> schedule(Runnable command,
+                                     long delay,
+                                     TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L
-          .l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getCurrentTime() + unit.toMillis(delay);
 
@@ -324,16 +322,17 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
    */
   @SuppressWarnings("unchecked")
   public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
-      long initialDelay, long period, TimeUnit unit)
+                                                long initialDelay,
+                                                long period,
+                                                TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L
-          .l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getExactTime() + unit.toMillis(initialDelay);
 
-    AlarmFuture future = new AlarmFuture(_loader, command, initialExpires, unit
-        .toMillis(period), 0);
+    AlarmFuture future = new AlarmFuture(_loader, command, initialExpires,
+                                         unit.toMillis(period), 0);
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -349,16 +348,17 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
    */
   @SuppressWarnings("unchecked")
   public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
-      long initialDelay, long delay, TimeUnit unit)
+                                                   long initialDelay,
+                                                   long delay,
+                                                   TimeUnit unit)
   {
     if (_isShutdown)
-      throw new IllegalStateException(L
-          .l("Can't submit after ThreadPool has closed"));
+      throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
     long initialExpires = Alarm.getCurrentTime() + unit.toMillis(initialDelay);
 
-    AlarmFuture future = new AlarmFuture(_loader, command, initialExpires, 0,
-        unit.toMillis(delay));
+    AlarmFuture future = new AlarmFuture(_loader, command,
+                                         initialExpires, 0, unit.toMillis(delay));
 
     synchronized (_futureSet) {
       _futureSet.add(future);
@@ -391,6 +391,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   @SuppressWarnings("unchecked")
   private void stop()
   {
+    Thread.dumpStack();
+    
     _isShutdown = true;
 
     while (true) {
@@ -465,9 +467,10 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   @Override
   public String toString()
   {
-    if (_loader instanceof EnvironmentClassLoader)
-      return getClass().getSimpleName() + "["
-          + ((EnvironmentClassLoader) _loader).getId() + "]";
+    if (_loader instanceof EnvironmentClassLoader) {
+      return (getClass().getSimpleName()
+              + "[" + ((EnvironmentClassLoader) _loader).getId() + "]");
+    }
     else
       return getClass().getSimpleName() + "[" + _loader + "]";
   }
@@ -531,7 +534,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       return true;
     }
 
-    public T get() throws InterruptedException, ExecutionException
+    public T get()
+      throws InterruptedException, ExecutionException
     {
       try {
         return get(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
@@ -540,15 +544,15 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       }
     }
 
-    public T get(long timeout, TimeUnit unit) throws InterruptedException,
-        ExecutionException, TimeoutException
+    public T get(long timeout, TimeUnit unit)
+      throws InterruptedException, ExecutionException, TimeoutException
     {
       long expire = Alarm.getCurrentTime() + unit.toMillis(timeout);
 
       synchronized (this) {
         while (!_isDone && !_isCancelled && Alarm.getCurrentTime() < expire
-            && !Thread.currentThread().isInterrupted()) {
-          if (!Alarm.isTest())
+               && !Thread.currentThread().isInterrupted()) {
+          if (! Alarm.isTest())
             wait(expire - Alarm.getCurrentTime());
           else {
             wait(1000);
@@ -614,7 +618,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
           return "TaskFuture[" + task + ",active]";
         else
           return "TaskFuture[" + task + "," + _thread + "]";
-      } else if (_isCancelled)
+      }
+      else if (_isCancelled)
         return "TaskFuture[" + task + ",cancelled]";
       else
         return "TaskFuture[" + task + ",pending]";
@@ -801,11 +806,13 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
 
           if (_isCancelled || _isDone) {
             removeFuture(this);
-          } else if (_delay > 0) {
+          }
+          else if (_delay > 0) {
             _nextTime = Alarm.getCurrentTime() + _delay;
 
             _alarm.queue(_delay);
-          } else if (_period > 0) {
+          }
+          else if (_period > 0) {
             long now = Alarm.getCurrentTime();
             long next;
 
@@ -817,7 +824,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
             } while (next < now);
 
             _alarm.queueAt(next);
-          } else {
+          }
+          else {
             _isDone = true;
             removeFuture(this);
           }
