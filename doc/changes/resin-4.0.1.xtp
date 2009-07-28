@@ -22,7 +22,7 @@ new features, it may be more unstable than the production branch.</p>
 <p>Resin 4.0.1 has implemented the Servlet 3.0 draft specification as
 an early access release.  Importantly, Resin's server
 push/comet support has changed to the Servlet
-<a href="http://caucho.com/resin-javadoc/javax/servlet/AsyncContext.html">AsyncContext</a> model.  Developers who have used Resin's experimental comet API,
+<a href="http://caucho.com/resin-javadoc/javax/servlet/AsyncContext.html">AsyncContext</a> model.  Developers who have used Resin's experimental comet API
 should see the <a href="../examples/servlet-comet/index.xtp">new comet
 using AsyncContext tutorial</a>. Future Resin versions will concentrate on
 the AsyncContext API and will eventually drop the experimental API.</p>
@@ -42,8 +42,8 @@ for Linux EPOLL enables this large-scale keepalive support.
 <s1 title="Java Injection (JSR-299, CanDI)">
 
 <p>The Java Injection specification has been updated considerably from Resin 4.0.0
-to Resin 4.0.1.  Most of the spec changes have been on the SPI side, because
-CanDI now has a full SPI for custom configuration.</p>
+to Resin 4.0.1.  Most of the spec changes have been on the SPI side with a complete
+new SPI for custom configuration.</p>
 
 <p>The packaging has also changed, with the main package now being
 <a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/package.html">javax.enterprise.inject</a>.</p>
@@ -55,10 +55,11 @@ gives more information, including a link to a CanDI tutorial.</p>
 
 <s1 title="/resin-admin">
 
-<p>We've added /resin-admin features to improve visibility to the server.</p>
+<p>We've added /resin-admin features to improve visibility to the server, 
+  development and debugging, and adminstration.</p>
 
 <p>A new "graphs" tab lets you view recent statistics from the servers.
-When viewed from the "00" server, statistics from all the servers in
+When viewed from the first triad server, statistics from all the servers in
 the cluster are available.</p>
 
 <p>A new "SQL" tab allows you to browse the schema and make queries to 
