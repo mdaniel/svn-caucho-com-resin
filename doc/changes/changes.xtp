@@ -43,6 +43,8 @@
 <li>jsp: jsp:useBean with generic type and XML validation (#3455, rep by kir)</li>
 <li>jsp: prelude with include NPE (#3508, rep by Shinomiya Nobuaki)</li>
 <li>deploy: error messages and documentation for remote deploy not clear for BAM/HMTP (#3477, rep by Scott Hernandez)</li>
+<li>quercus: Curl has issues with urls having @ in it (#3585, rep by anash)</li>
+<li>quercus: Wordpress 2.8.1 parent constructor call (#3597, rep by csw)</li>
 </ul>
 </s2>
 
