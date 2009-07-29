@@ -40,6 +40,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.admin.RemoteMBeanConnectionFactory;
+import com.caucho.util.L10N;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -51,7 +52,9 @@ import java.util.TreeSet;
 import java.util.logging.*;
 
 public class MBeanServer {
-  private static Logger log = Logger.getLogger(MBeanServer.class.getName());
+  private static final L10N L = new L10N(MBeanServer.class);
+  private static final Logger log
+    = Logger.getLogger(MBeanServer.class.getName());
 
   private static final Comparator<ObjectName> OBJECTNAME_COMPARATOR;
 
@@ -66,8 +69,8 @@ public class MBeanServer {
   public MBeanServer(@Optional String serverId)
   {
     if (serverId == null
-	|| "".equals(serverId)
-	|| Server.getCurrent().getServerId().equals(serverId)) {
+        || "".equals(serverId)
+        || Server.getCurrent().getServerId().equals(serverId)) {
       _server = Jmx.getGlobalMBeanServer();
     }
     else {
@@ -105,7 +108,8 @@ public class MBeanServer {
         return null;
     }
     catch (MalformedObjectNameException e) {
-      throw new QuercusModuleException(e);
+      throw new QuercusModuleException(L.l("'{0}' is an invalid JMX name.\n{1}",
+                                           name, e.getMessage()), e);
     }
     catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);

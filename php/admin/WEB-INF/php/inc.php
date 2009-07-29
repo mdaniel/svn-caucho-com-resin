@@ -711,11 +711,14 @@ function display_left_navigation($current_server)
     sort($client_names);
 
     foreach ($client_names as $client) {
-      $client_server = $mbean_server->lookup("resin:type=ServerConnector,name=$client");
-
       $name = $client;
       if ($name == "")
         $name = "default";
+
+      if (! $client)
+        $client = '""';
+        
+      $client_server = $mbean_server->lookup("resin:type=ClusterServer,name=$client");
 
       if ($client == $current_server->Id) {
         echo "<div class='nav-this'>$name</div>\n";
@@ -724,7 +727,7 @@ function display_left_navigation($current_server)
         echo "<div class='nav-dead'>$name</div>\n";
       }
       else {
-        echo "<div class='nav-server'><a href='?q=$g_page&server-id=$client'>";
+        echo "<div class='nav-server'><a href='?q=$g_page&server-id=$name'>";
         echo "$name</a></div>\n";
       }
     }

@@ -46,7 +46,7 @@ public class HmuxProtocol extends Protocol {
   private static EnvironmentLocal<HmuxProtocol> _localManager
     = new EnvironmentLocal<HmuxProtocol>();
 
-  private String _protocolName = "cluster";
+  private String _protocolName = "server";
 
   private ClassLoader _classLoader;
 
