@@ -385,7 +385,7 @@ abstract public class AbstractCache extends AbstractMap
       _isInit = true;
 
       _config.init();
-      
+
       initServer();
 
       initName(_name);
@@ -395,7 +395,7 @@ abstract public class AbstractCache extends AbstractMap
       initPersistence(_persistenceOption);
 
       _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
-						     _config.getKeySerializer()));
+                                                     _config.getKeySerializer()));
 
       _entryCache = new LruCache<Object,DistCacheEntry>(512);
     }
@@ -418,6 +418,15 @@ abstract public class AbstractCache extends AbstractMap
   public Object get(Object key)
   {
     return getDistCacheEntry(key).get(_config);
+  }
+
+  /**
+   * Returns the object with the given key, updating the backing
+   * store if necessary.
+   */
+  public Object getLazy(Object key)
+  {
+    return getDistCacheEntry(key).getLazy(_config);
   }
 
   /**
@@ -476,8 +485,8 @@ abstract public class AbstractCache extends AbstractMap
    * @param idleTimeout the idle timeout for the item
    */
   public ExtCacheEntry put(Object key,
-			   InputStream is,
-			   long idleTimeout)
+                           InputStream is,
+                           long idleTimeout)
     throws IOException
   {
     return getDistCacheEntry(key).put(is, _config, idleTimeout);
@@ -493,8 +502,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long version,
-			       Object value)
+                               long version,
+                               Object value)
   {
     put(key, value);
 
@@ -511,8 +520,8 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long version,
-			       InputStream inputStream)
+                               long version,
+                               InputStream inputStream)
     throws IOException
   {
     put(key, inputStream);
@@ -540,7 +549,7 @@ abstract public class AbstractCache extends AbstractMap
 
     if (cacheEntry.getVersion() == version) {
       remove(key);
-      
+
       return true;
     }
 
@@ -556,10 +565,10 @@ abstract public class AbstractCache extends AbstractMap
 
     if (cacheEntry == null) {
       cacheEntry = _manager.getCacheEntry(key, _config);
-      
+
       _entryCache.put(key, cacheEntry);
     }
-    
+
     return cacheEntry;
   }
 
@@ -823,7 +832,7 @@ abstract public class AbstractCache extends AbstractMap
       return value;
 
     CacheLoader loader = _config.getCacheLoader();
-    
+
     value = (loader != null) ? loader.load(key) : null;
 
     if (value != null)
@@ -904,7 +913,7 @@ abstract public class AbstractCache extends AbstractMap
 
     return cacheNameSet;
   }
-  
+
   public boolean isClosed()
   {
     return _isClosed;
@@ -932,31 +941,31 @@ abstract public class AbstractCache extends AbstractMap
 
     if (_guid == null)
       _guid = contextId + ":" + _name;
-     
+
     _config.setGuid(_guid);
-    
+
     if (! cacheNameSet.contains(_guid))
       cacheNameSet.add(_guid);
     else
       throw new ConfigException(L.l(
-				    "'{0}' is an invalid Cache name because it's already used by another cache.",
-				    _name));
+                                    "'{0}' is an invalid Cache name because it's already used by another cache.",
+                                    _name));
   }
 
   private void initPersistence(String persistence)
     throws ConfigException
   {
     Persistence result  = Persistence.TRIPLE;
-    
+
     if (persistence != null) {
       try {
-	result = Persistence.valueOf(persistence.toUpperCase());
+        result = Persistence.valueOf(persistence.toUpperCase());
       }
       catch (Exception e) {
-	throw new ConfigException(L.l("'{0}' is not a valid Persistence option", persistence));
+        throw new ConfigException(L.l("'{0}' is not a valid Persistence option", persistence));
       }
     }
-    
+
     setPersistenceMode(result);
   }
 
@@ -964,16 +973,16 @@ abstract public class AbstractCache extends AbstractMap
     throws ConfigException
   {
     Scope scope = null;
-    
+
     if (_scopeName != null) {
       try {
-	scope = Scope.valueOf(_scopeName.toUpperCase());
+        scope = Scope.valueOf(_scopeName.toUpperCase());
       }
       catch (Exception e) {
-	throw new ConfigException(L.l("'{0}' is not a valid Scope option", scopeName));
+        throw new ConfigException(L.l("'{0}' is not a valid Scope option", scopeName));
       }
     }
-    
+
     setScopeMode(scope);
   }
 
@@ -981,17 +990,17 @@ abstract public class AbstractCache extends AbstractMap
     throws ConfigException
   {
     Server server = Server.getCurrent();
-    
+
     if (server == null)
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
 
     _manager = server.getDistributedCacheManager();
 
     if (_manager == null)
       throw new IllegalStateException("distributed cache manager not available");
   }
-  
+
 
   /**
    * Defines the scope options for a cache.

@@ -40,7 +40,12 @@ public interface ObjectCache extends Cache
    * Returns the extended entry
    */
   public ExtCacheEntry getExtCacheEntry(Object entry);
-  
+
+  /**
+   * Gets the value, with a lazy update
+   */
+  public Object getLazy(Object key);
+
   /**
    * Updates the cache if the old value hash matches the current value.
    * A null value for the old value hash only adds the entry if it's new

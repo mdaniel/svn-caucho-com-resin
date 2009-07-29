@@ -125,8 +125,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       cacheEntry = createCacheEntry(null, hashKey);
 
       if (! _entryCache.compareAndPut(null,
-				      cacheEntry.getKeyHash(),
-				      cacheEntry)) {
+                                      cacheEntry.getKeyHash(),
+                                      cacheEntry)) {
         cacheEntry = _entryCache.get(hashKey);
       }
     }
@@ -138,8 +138,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Gets a cache entry
    */
   public Object get(E entry,
-		    CacheConfig config,
-		    long now)
+                    CacheConfig config,
+                    long now)
   {
     MnodeValue mnodeValue = getMnodeValue(entry, config, now);
 
@@ -159,8 +159,44 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     updateAccessTime(entry, mnodeValue, now);
 
     value = readData(valueHash,
-		     config.getFlags(),
-		     config.getValueSerializer());
+                     config.getFlags(),
+                     config.getValueSerializer());
+
+    if (value == null) {
+    }
+
+    mnodeValue.setObjectValue(value);
+
+    return value;
+  }
+
+  /**
+   * Gets a cache entry
+   */
+  public Object getLazy(E entry,
+                        CacheConfig config,
+                        long now)
+  {
+    MnodeValue mnodeValue = getMnodeValue(entry, config, now);
+
+    if (mnodeValue == null)
+      return null;
+
+    Object value = mnodeValue.getValue();
+
+    if (value != null)
+      return value;
+
+    HashKey valueHash = mnodeValue.getValueHashKey();
+
+    if (valueHash == null || valueHash == HashManager.NULL)
+      return null;
+
+    updateAccessTime(entry, mnodeValue, now);
+
+    value = readData(valueHash,
+                     config.getFlags(),
+                     config.getValueSerializer());
 
     if (value == null) {
     }
@@ -174,8 +210,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Gets a cache entry as a stream
    */
   public boolean getStream(E entry,
-			   OutputStream os,
-			   CacheConfig config)
+                           OutputStream os,
+                           CacheConfig config)
     throws IOException
   {
     long now = Alarm.getCurrentTime();
@@ -196,19 +232,16 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   public MnodeValue getMnodeValue(E entry,
-				  CacheConfig config,
-				  long now)
+                                  CacheConfig config,
+                                  long now)
   {
     MnodeValue mnodeValue = loadMnodeValue(entry);
 
-    if (mnodeValue == null) {
-      loadExpiredValue(entry, config, now);
-    }
-    else if (! isLocalReadValid(mnodeValue, now)) {
+    if (mnodeValue == null || ! isLocalReadValid(mnodeValue, now)) {
       // only one thread may update the expired data
       if (entry.startReadUpdate()) {
         try {
-	  loadExpiredValue(entry, config, now);
+          loadExpiredValue(entry, config, now);
         } finally {
           entry.finishReadUpdate();
         }
@@ -231,15 +264,15 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   private void updateAccessTime(E entry,
-				MnodeValue mnodeValue,
-				long now)
+                                MnodeValue mnodeValue,
+                                long now)
   {
     if (mnodeValue != null) {
       long idleTimeout = mnodeValue.getIdleTimeout();
       long updateTime = mnodeValue.getLastUpdateTime();
 
       if (idleTimeout < CacheConfig.TIME_INFINITY
-	  && updateTime + mnodeValue.getIdleWindow() < now) {
+          && updateTime + mnodeValue.getIdleWindow() < now) {
         MnodeValue newMnodeValue
           = new MnodeValue(mnodeValue, idleTimeout, now);
 
@@ -249,8 +282,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   private void loadExpiredValue(E entry,
-				CacheConfig config,
-				long now)
+                                CacheConfig config,
+                                long now)
   {
     MnodeValue mnodeValue = loadClusterValue(entry, config);
 
@@ -258,23 +291,23 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       CacheLoader loader = config.getCacheLoader();
 
       if (loader != null && entry.getKey() != null) {
-	Object value = loader.load(entry.getKey());
+        Object value = loader.load(entry.getKey());
 
-	if (value != null) {
-	  put(entry, value, config, now, mnodeValue);
+        if (value != null) {
+          put(entry, value, config, now, mnodeValue);
 
-	  return;
-	}
+          return;
+        }
       }
 
       MnodeValue nullMnodeValue = new MnodeValue(null, null, null,
-						 0, 0,
-						 config.getExpireTimeout(),
-						 config.getIdleTimeout(),
-						 config.getLeaseTimeout(),
-						 config.getLocalReadTimeout(),
-						 now, now,
-						 true, true);
+                                                 0, 0,
+                                                 config.getExpireTimeout(),
+                                                 config.getIdleTimeout(),
+                                                 config.getLeaseTimeout(),
+                                                 config.getLocalReadTimeout(),
+                                                 now, now,
+                                                 true, true);
 
       entry.compareAndSet(mnodeValue, nullMnodeValue);
     }
@@ -291,8 +324,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   public Object put(E entry,
-		    Object value,
-		    CacheConfig config)
+                    Object value,
+                    CacheConfig config)
   {
     long now = Alarm.getCurrentTime();
 
@@ -306,35 +339,35 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   protected Object put(E entry,
-		       Object value,
-		       CacheConfig config,
-		       long now,
-		       MnodeValue mnodeValue)
+                       Object value,
+                       CacheConfig config,
+                       long now,
+                       MnodeValue mnodeValue)
   {
     long idleTimeout = config.getIdleTimeout() * 5L / 4;
     HashKey key = entry.getKeyHash();
 
     HashKey oldValueHash = (mnodeValue != null
-			    ? mnodeValue.getValueHashKey()
-			    : null);
+                            ? mnodeValue.getValueHashKey()
+                            : null);
     Object oldValue = mnodeValue != null ? mnodeValue.getValue() : null;
     long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
 
     HashKey valueHash = writeData(oldValueHash, value,
-				  config.getValueSerializer());
+                                  config.getValueSerializer());
 
     HashKey cacheKey = config.getCacheKey();
 
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
     mnodeValue = putLocalValue(entry, version + 1,
-			       valueHash, value, cacheKey,
-			       config.getFlags(),
-			       config.getExpireTimeout(),
-			       idleTimeout,
-			       config.getLeaseTimeout(),
-			       config.getLocalReadTimeout(),
-			       leaseOwner);
+                               valueHash, value, cacheKey,
+                               config.getFlags(),
+                               config.getExpireTimeout(),
+                               idleTimeout,
+                               config.getLeaseTimeout(),
+                               config.getLocalReadTimeout(),
+                               leaseOwner);
 
     if (mnodeValue == null)
       return oldValue;
@@ -345,17 +378,17 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   public ExtCacheEntry putStream(E entry,
-				 InputStream is,
-				 CacheConfig config,
-				 long idleTimeout)
+                                 InputStream is,
+                                 CacheConfig config,
+                                 long idleTimeout)
     throws IOException
   {
     HashKey key = entry.getKeyHash();
     MnodeValue mnodeValue = loadMnodeValue(entry);
 
     HashKey oldValueHash = (mnodeValue != null
-			    ? mnodeValue.getValueHashKey()
-			    : null);
+                            ? mnodeValue.getValueHashKey()
+                            : null);
     long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
 
     HashKey valueHash = writeData(oldValueHash, is);
@@ -363,7 +396,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     if (valueHash != null && valueHash.equals(oldValueHash)) {
       return mnodeValue;
     }
-    
+
     HashKey cacheHash = config.getCacheKey();
 
     // add 25% window for update efficiency
@@ -372,13 +405,13 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
 
     mnodeValue = putLocalValue(entry, version + 1,
-			       valueHash, null, cacheHash,
-			       config.getFlags(),
-			       config.getExpireTimeout(),
-			       idleTimeout,
-			       config.getLeaseTimeout(),
-			       config.getLocalReadTimeout(),
-			       leaseOwner);
+                               valueHash, null, cacheHash,
+                               config.getFlags(),
+                               config.getExpireTimeout(),
+                               idleTimeout,
+                               config.getLeaseTimeout(),
+                               config.getLocalReadTimeout(),
+                               leaseOwner);
 
     if (mnodeValue == null)
       return null;
@@ -389,7 +422,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   protected void putCluster(HashKey key, HashKey value, HashKey cacheKey,
-			    MnodeValue mnodeValue)
+                            MnodeValue mnodeValue)
   {
   }
 
@@ -404,7 +437,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   {
     if (key == null)
       throw new NullPointerException();
-    
+
     E entry = getCacheEntry(key);
 
     return entry;
@@ -414,13 +447,13 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   {
     if (key == null)
       throw new NullPointerException();
-    
+
     E entry = getCacheEntry(key);
 
     long now = Alarm.getCurrentTime();
 
     if (entry.getMnodeValue() == null
-	|| entry.getMnodeValue().isEntryExpired(now)) {
+        || entry.getMnodeValue().isEntryExpired(now)) {
       forceLoadMnodeValue(entry);
     }
 
@@ -448,9 +481,9 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     long now = Alarm.getCurrentTime();
 
     if (idleTimeout < CacheConfig.TIME_INFINITY
-	&& updateTime + mnodeValue.getIdleWindow() < now) {
+        && updateTime + mnodeValue.getIdleWindow() < now) {
       MnodeValue newMnodeValue
-	= new MnodeValue(mnodeValue, idleTimeout, now);
+        = new MnodeValue(mnodeValue, idleTimeout, now);
 
       saveUpdateTime(entry, newMnodeValue);
     }
@@ -530,41 +563,41 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     }
 
     if (oldEntryValue == null
-	|| oldEntryValue.isImplicitNull()
-	|| oldEntryValue == MnodeValue.NULL) {
+        || oldEntryValue.isImplicitNull()
+        || oldEntryValue == MnodeValue.NULL) {
       if (_mnodeStore.insert(key, mnodeValue.getValueHashKey(),
-			     mnodeValue.getCacheHashKey(),
-			     mnodeValue.getFlags(),
-			     mnodeValue.getVersion(),
-			     mnodeValue.getExpireTimeout(),
-			     mnodeValue.getIdleTimeout(),
-			     mnodeValue.getLeaseTimeout(),
-			     mnodeValue.getLocalReadTimeout())) {
+                             mnodeValue.getCacheHashKey(),
+                             mnodeValue.getFlags(),
+                             mnodeValue.getVersion(),
+                             mnodeValue.getExpireTimeout(),
+                             mnodeValue.getIdleTimeout(),
+                             mnodeValue.getLeaseTimeout(),
+                             mnodeValue.getLocalReadTimeout())) {
         return mnodeValue;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
-		 + "(key=" + key + ")");
+                 + "(key=" + key + ")");
 
         return entry.getMnodeValue();
       }
     } else {
       if (_mnodeStore.updateSave(key, mnodeValue.getValueHashKey(),
-				      mnodeValue.getVersion(), timeout)) {
+                                      mnodeValue.getVersion(), timeout)) {
         return mnodeValue;
       }
       else if (_mnodeStore.insert(key, mnodeValue.getValueHashKey(),
-				  mnodeValue.getCacheHashKey(),
-				  mnodeValue.getFlags(),
-				  mnodeValue.getVersion(),
-				  mnodeValue.getExpireTimeout(),
-				  mnodeValue.getIdleTimeout(),
-				  mnodeValue.getLeaseTimeout(),
-				  mnodeValue.getLocalReadTimeout())) {
+                                  mnodeValue.getCacheHashKey(),
+                                  mnodeValue.getFlags(),
+                                  mnodeValue.getVersion(),
+                                  mnodeValue.getExpireTimeout(),
+                                  mnodeValue.getIdleTimeout(),
+                                  mnodeValue.getLeaseTimeout(),
+                                  mnodeValue.getLocalReadTimeout())) {
         return mnodeValue;
       }
       else {
         log.fine(this + " db update failed due to timing conflict"
-		 + "(key=" + key + ")");
+                 + "(key=" + key + ")");
 
         return entry.getMnodeValue();
       }
@@ -575,7 +608,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   MnodeValue saveUpdateTime(E entryKey,
-			    MnodeValue mnodeValue)
+                            MnodeValue mnodeValue)
   {
     MnodeValue newEntryValue = saveLocalUpdateTime(entryKey, mnodeValue);
 
@@ -596,9 +629,9 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   void saveLocalUpdateTime(HashKey key,
-			   long version,
-			   long idleTimeout,
-			   long updateTime)
+                           long version,
+                           long idleTimeout,
+                           long updateTime)
   {
     DistCacheEntry entry = _entryCache.get(key);
 
@@ -620,12 +653,12 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   MnodeValue saveLocalUpdateTime(DistCacheEntry entry,
-				 MnodeValue mnodeValue)
+                                 MnodeValue mnodeValue)
   {
     MnodeValue oldEntryValue = entry.getMnodeValue();
 
     if (oldEntryValue != null
-	&& mnodeValue.getVersion() < oldEntryValue.getVersion()) {
+        && mnodeValue.getVersion() < oldEntryValue.getVersion()) {
       return oldEntryValue;
     }
 
@@ -634,19 +667,19 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
     if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
       log.fine(this + " mnodeValue updateTime failed due to timing conflict"
-	       + " (key=" + entry.getKeyHash() + ")");
+               + " (key=" + entry.getKeyHash() + ")");
 
       return entry.getMnodeValue();
     }
 
     if (_mnodeStore.updateUpdateTime(entry.getKeyHash(),
-				     mnodeValue.getVersion(),
-				     mnodeValue.getIdleTimeout(),
-				     mnodeValue.getLastUpdateTime())) {
+                                     mnodeValue.getVersion(),
+                                     mnodeValue.getIdleTimeout(),
+                                     mnodeValue.getLastUpdateTime())) {
       return mnodeValue;
     } else {
       log.fine(this + " db updateTime failed due to timing conflict"
-	       + "(key=" + entry.getKeyHash() + ", version=" + mnodeValue.getVersion() + ")");
+               + "(key=" + entry.getKeyHash() + ", version=" + mnodeValue.getVersion() + ")");
 
       return entry.getMnodeValue();
     }
@@ -661,29 +694,29 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
     MnodeValue mnodeValue = loadMnodeValue(entry);
     HashKey oldValueHash = mnodeValue != null ? mnodeValue.getValueHashKey() : null;
-    
+
     HashKey cacheKey = entry.getCacheHash();
-    
+
     int flags = mnodeValue != null ? mnodeValue.getFlags() : 0;
     long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
 
     long expireTimeout = config.getExpireTimeout();
     long idleTimeout = (mnodeValue != null
-			? mnodeValue.getIdleTimeout()
-			: config.getIdleTimeout());
+                        ? mnodeValue.getIdleTimeout()
+                        : config.getIdleTimeout());
     long leaseTimeout = (mnodeValue != null
-			 ? mnodeValue.getLeaseTimeout()
-			 : config.getLeaseTimeout());
+                         ? mnodeValue.getLeaseTimeout()
+                         : config.getLeaseTimeout());
     long localReadTimeout = (mnodeValue != null
-			     ? mnodeValue.getLocalReadTimeout()
-			     : config.getLocalReadTimeout());
+                             ? mnodeValue.getLocalReadTimeout()
+                             : config.getLocalReadTimeout());
     int leaseOwner = (mnodeValue != null ? mnodeValue.getLeaseOwner() : -1);
 
     mnodeValue = putLocalValue(entry, version + 1, null, null, cacheKey,
-			       flags,
-			       expireTimeout, idleTimeout,
-			       leaseTimeout, localReadTimeout,
-			       leaseOwner);
+                               flags,
+                               expireTimeout, idleTimeout,
+                               leaseTimeout, localReadTimeout,
+                               leaseOwner);
 
     if (mnodeValue == null)
       return oldValueHash != null;
@@ -694,8 +727,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   protected void removeCluster(HashKey key,
-			       HashKey cacheKey,
-			       MnodeValue mnodeValue)
+                               HashKey cacheKey,
+                               MnodeValue mnodeValue)
   {
   }
 
@@ -707,7 +740,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   {
     E entry = getCacheEntry(key);
     MnodeValue mnodeValue = entry.getMnodeValue();
-    
+
     HashKey oldValueHash = mnodeValue != null ? mnodeValue.getValueHashKey() : null;
     HashKey cacheKey = mnodeValue != null ? mnodeValue.getCacheHashKey() : null;
 
@@ -721,9 +754,9 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
     mnodeValue = putLocalValue(entry, version + 1, null, null, cacheKey,
-			       flags,
-			       expireTimeout, idleTimeout,
-			       leaseTimeout, localReadTimeout, leaseOwner);
+                               flags,
+                               expireTimeout, idleTimeout,
+                               leaseTimeout, localReadTimeout, leaseOwner);
 
     if (mnodeValue == null)
       return oldValueHash != null;
@@ -731,13 +764,13 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     putCluster(key, null, cacheKey, mnodeValue);
     /*
     _cacheService.put(key, null, cacheKey,
-		      mnodeValue.getFlags(), mnodeValue.getVersion(),
-		      mnodeValue.getExpireTimeout(),
-		      mnodeValue.getIdleTimeout(),
-		      mnodeValue.getLeaseTimeout(),
-		      mnodeValue.getLocalReadTimeout(),
-		      getSelfIndex(),
-		      null);
+                      mnodeValue.getFlags(), mnodeValue.getVersion(),
+                      mnodeValue.getExpireTimeout(),
+                      mnodeValue.getIdleTimeout(),
+                      mnodeValue.getLeaseTimeout(),
+                      mnodeValue.getLocalReadTimeout(),
+                      getSelfIndex(),
+                      null);
     */
 
     return oldValueHash != null;
@@ -747,16 +780,16 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   MnodeValue putLocalValue(DistCacheEntry entry,
-			   long version,
-			   HashKey valueHash,
-			   Object value,
-			   HashKey cacheHash,
-			   int flags,
-			   long expireTimeout,
-			   long idleTimeout,
-			   long leaseTimeout,
-			   long localReadTimeout,
-			   int leaseOwner)
+                           long version,
+                           HashKey valueHash,
+                           Object value,
+                           HashKey cacheHash,
+                           int flags,
+                           long expireTimeout,
+                           long idleTimeout,
+                           long leaseTimeout,
+                           long localReadTimeout,
+                           int leaseOwner)
   {
     HashKey key = entry.getKeyHash();
 
@@ -769,9 +802,9 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     long now = Alarm.getCurrentTime();
 
     if (version < oldVersion
-	|| (version == oldVersion
-	    && valueHash != null
-	    && valueHash.compareTo(oldValueHash) <= 0)) {
+        || (version == oldVersion
+            && valueHash != null
+            && valueHash.compareTo(oldValueHash) <= 0)) {
       // lease ownership updates even if value doesn't
       if (oldEntryValue != null) {
         oldEntryValue.setLeaseOwner(leaseOwner, now);
@@ -787,16 +820,16 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     long updateTime = accessTime;
 
     MnodeValue mnodeValue = new MnodeValue(valueHash, value,
-					   cacheHash,
-					   flags, version,
-					   expireTimeout,
-					   idleTimeout,
-					   leaseTimeout,
-					   localReadTimeout,
-					   accessTime,
-					   updateTime,
-					   true,
-					   false);
+                                           cacheHash,
+                                           flags, version,
+                                           expireTimeout,
+                                           idleTimeout,
+                                           leaseTimeout,
+                                           localReadTimeout,
+                                           accessTime,
+                                           updateTime,
+                                           true,
+                                           false);
     mnodeValue.setLeaseOwner(leaseOwner, now);
 
     // the failure cases are not errors because this put() could
@@ -804,20 +837,20 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
     if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
       log.fine(this + " mnodeValue update failed due to timing conflict"
-	       + " (key=" + key + ")");
+               + " (key=" + key + ")");
 
       return null;
     }
 
     if (oldEntryValue == null
-	|| oldEntryValue.isImplicitNull()
-	|| oldEntryValue == MnodeValue.NULL) {
+        || oldEntryValue.isImplicitNull()
+        || oldEntryValue == MnodeValue.NULL) {
       if (_mnodeStore.insert(key, valueHash, cacheHash,
-				  flags, version,
-				  expireTimeout,
-				  idleTimeout,
-				  leaseTimeout,
-				  localReadTimeout)) {
+                                  flags, version,
+                                  expireTimeout,
+                                  idleTimeout,
+                                  leaseTimeout,
+                                  localReadTimeout)) {
         return mnodeValue;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
@@ -828,11 +861,11 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
         return mnodeValue;
       }
       else if (_mnodeStore.insert(key, valueHash, cacheHash,
-				  flags, version,
-				  expireTimeout,
-				  idleTimeout,
-				  leaseTimeout,
-				  localReadTimeout)) {
+                                  flags, version,
+                                  expireTimeout,
+                                  idleTimeout,
+                                  leaseTimeout,
+                                  localReadTimeout)) {
         return mnodeValue;
       }
       else {
@@ -845,8 +878,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   protected HashKey writeData(HashKey oldValueHash,
-			      Object value,
-			      CacheSerializer serializer)
+                              Object value,
+                              CacheSerializer serializer)
   {
     TempOutputStream os = null;
 
@@ -873,7 +906,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       StreamSource source = new StreamSource(os);
       if (! _dataStore.save(valueHash, source, length)) {
         throw new IllegalStateException(L.l("Can't save the data '{0}'",
-				       valueHash));
+                                       valueHash));
       }
 
       return valueHash;
@@ -886,7 +919,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   protected HashKey writeData(HashKey oldValueHash,
-			      InputStream is)
+                              InputStream is)
     throws IOException
   {
     TempOutputStream os = null;
@@ -909,7 +942,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       HashKey valueHash = new HashKey(hash);
 
       if (valueHash.equals(oldValueHash)) {
-	os.destroy();
+        os.destroy();
         return valueHash;
       }
 
@@ -918,7 +951,7 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
       if (! _dataStore.save(valueHash, source, length))
         throw new RuntimeException(L.l("Can't save the data '{0}'",
-				       valueHash));
+                                       valueHash));
 
       return valueHash;
     } catch (RuntimeException e) {
@@ -938,8 +971,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   protected Object readData(HashKey valueKey,
-			    int flags,
-			    CacheSerializer serializer)
+                            int flags,
+                            CacheSerializer serializer)
   {
     if (valueKey == null || valueKey == HashManager.NULL)
       return null;
@@ -952,12 +985,12 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       WriteStream out = Vfs.openWrite(os);
 
       if (! _dataStore.load(valueKey, out)) {
-	requestClusterData(valueKey, flags);
+        requestClusterData(valueKey, flags);
 
-	if (! _dataStore.load(valueKey, out)) {
-	  out.close();
-	  return null;
-	}
+        if (! _dataStore.load(valueKey, out)) {
+          out.close();
+          return null;
+        }
       }
 
       out.close();
@@ -984,8 +1017,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
   }
 
   protected boolean readData(HashKey valueKey,
-			     int flags,
-			     OutputStream os)
+                             int flags,
+                             OutputStream os)
     throws IOException
   {
     if (valueKey == null || valueKey == HashManager.NULL)

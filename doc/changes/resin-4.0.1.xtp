@@ -8,7 +8,18 @@
 
 <localtoc/>
 
-<s1 title="Resin 4.0.x">
+<s1 title="Resin 4.0.1 Overview">
+
+<p>The focus of Resin 4.0.1 development was the following:</p>
+<ul>
+<li>CanDI major refactor to match major changes to the JSR-299
+specification.</li>
+<li>Servlet 3.0  early access implementation, including replacing Resin's
+experimental comet support with Servlet 3.0 async</li>
+<li>Quercus Pro support for other application servers, and increased
+support for Google App Engine.</li>
+<li>Stability and performance work for clustered caching and sessions</li>
+</ul>
 
 <p>Resin 4.0.x is the active development branch.  Due to the addition of
 new features, it may be more unstable than the production branch.</p>
@@ -72,6 +83,18 @@ configuration is supported, with other wizards coming in future releases.
 
 </s1>
 
+<s1 title="Watchdog">
+
+<p>The command-line to start Resin now requires an explicit "console" for
+console-mode, because some users were using unix background processing instead
+of using the "start" command.</p>
+
+<p>The watchdog-Resin socket now uses HMTP/BAM for communication.  On
+shutdown, this lets the watchdog close Resin gracefully before forcing
+an exit.</p>
+
+</s1>
+
 <s1 title="Distributed Deployment">
 
 <p>The distributed deployment reliability has been enhanced by adding
@@ -90,8 +113,8 @@ Professional for 32-bit and 64-bit x86 architectures.</p>
 
 <s1 title="Quercus: Availability on other Application Servers">
 
-<p>Quercus is now available on any JavaEE application server with
-the quercus.war download.</p>
+<p>Quercus Professional is now available on any JavaEE application server
+with the quercus-pro.war download.</p>
 
 </s1>
 

@@ -391,8 +391,6 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   @SuppressWarnings("unchecked")
   private void stop()
   {
-    Thread.dumpStack();
-    
     _isShutdown = true;
 
     while (true) {

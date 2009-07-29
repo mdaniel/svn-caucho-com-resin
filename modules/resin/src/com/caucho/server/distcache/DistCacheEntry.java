@@ -56,15 +56,15 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   private Object _key;
 
   private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
-  
+
   private final AtomicReference<MnodeValue> _mnodeValue
     = new AtomicReference<MnodeValue>();
 
   private int _hits;
 
   public DistCacheEntry(Object key,
-			HashKey keyHash,
-			ClusterPod.Owner owner)
+                        HashKey keyHash,
+                        ClusterPod.Owner owner)
   {
     _key = key;
     _keyHash = keyHash;
@@ -72,9 +72,9 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   }
 
   public DistCacheEntry(Object key,
-			HashKey keyHash,
-			ClusterPod.Owner owner,
-			CacheConfig config)
+                        HashKey keyHash,
+                        ClusterPod.Owner owner,
+                        CacheConfig config)
   {
     _key = key;
     _keyHash = keyHash;
@@ -154,11 +154,14 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the object, checking the backing store if necessary.
    */
-  public Object get(CacheConfig config)
+  abstract public Object get(CacheConfig config);
+
+  /**
+   * Returns the object, updating the backing store if necessary.
+   */
+  public Object getLazy(CacheConfig config)
   {
-    CacheLoader cacheLoader = config.getCacheLoader();
-    
-    return (cacheLoader == null) ? null : cacheLoader.load(getKey());
+    return get(config);
   }
 
   /**
@@ -185,8 +188,8 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    * Sets the value by an input stream
    */
   abstract public ExtCacheEntry put(InputStream is,
-				    CacheConfig config,          
-				    long idleTimeout)
+                                    CacheConfig config,
+                                    long idleTimeout)
     throws IOException;
 
   /**
@@ -217,7 +220,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    * Sets the current value.
    */
   public final boolean compareAndSet(MnodeValue oldMnodeValue,
-				     MnodeValue mnodeValue)
+                                     MnodeValue mnodeValue)
   {
     return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
   }
@@ -304,9 +307,9 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[key=" + _key
-	    + ",keyHash=" + Hex.toHex(_keyHash.getHash(), 0, 4)
-	    + ",owner=" + _owner
-	    + "]");
+            + "[key=" + _key
+            + ",keyHash=" + Hex.toHex(_keyHash.getHash(), 0, 4)
+            + ",owner=" + _owner
+            + "]");
   }
 }
