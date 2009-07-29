@@ -129,9 +129,6 @@ public final class ISO8859_1Writer extends EncodingWriter {
 	bOffset = os.getBufferOffset();
 	bEnd = bBuf.length;
       }
-
-      if (bOffset == bEnd)
-        System.out.println("ZERO: " + bOffset + " " + bEnd + " " + os);
     }
 
     os.setBufferOffset(bOffset);
