@@ -141,6 +141,9 @@ public class SchedulingCallChain extends AbstractCallChain {
     CronExpression cronExpression = new CronExpression(schedule.second(),
         schedule.minute(), schedule.hour(), schedule.dayOfWeek(), schedule
             .dayOfMonth(), schedule.month(), schedule.year());
+    // TODO This may throw a parsing error. What is the standard way to handle
+    // deployment issues? Log entries or a specialized exception indicating a
+    // deployment problem?
     Trigger trigger = new CronTrigger(cronExpression, -1, -1);
     EjbTimer timer = new EjbTimer();
 
