@@ -91,7 +91,7 @@ public class TcpDuplexController extends ConnectionController {
 
     TcpConnection conn = _conn;
     if (conn != null)
-      conn.setIdleTimeMax(idleTime);
+      conn.setIdleTimeout(idleTime);
   }
 
   /**
@@ -102,7 +102,7 @@ public class TcpDuplexController extends ConnectionController {
     TcpConnection conn = _conn;
 
     if (conn != null)
-      return conn.getIdleTimeMax();
+      return conn.getIdleTimeout();
     else
       return -1;
   }

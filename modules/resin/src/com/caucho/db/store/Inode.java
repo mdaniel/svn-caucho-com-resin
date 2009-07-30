@@ -70,20 +70,20 @@ import java.util.logging.Logger;
  * <pre>
  *  0-511) single indirect fragment addresses (4M, 2^12)
  *  512-767) double indirect block addresses (128G, 2^37)
- *  768-1023) triple indirect fragment addresses (to 1P, 2^50)
+ *  768-1023) triple indirect block addresses (to 1P, 2^50)
  * </pre>
  */
 public class Inode {
   private static final L10N L = new L10N(Inode.class);
   private static final Logger log
     = Logger.getLogger(Inode.class.getName());
-  
+
   public static final int INODE_SIZE = 128;
   public static final int INLINE_BLOB_SIZE = 120;
   public static final int BLOCK_SIZE = Store.BLOCK_SIZE;
   public static final int INODE_BLOCK_SIZE = Store.FRAGMENT_SIZE;
   public static final int FRAGMENT_SIZE = Store.FRAGMENT_SIZE;
-  
+
   public static final int MINI_FRAG_SIZE = Store.MINI_FRAG_SIZE;
 
   public static final int MINI_FRAG_BLOB_SIZE
@@ -101,23 +101,23 @@ public class Inode {
   public static final int TRIPLE_INDIRECT_BLOCKS = 256;
 
   public static final long INLINE_MAX = 120;
-  
+
   public static final int MINI_FRAG_MAX
     = (INLINE_BLOB_SIZE / 8) * MINI_FRAG_SIZE;
-  
+
   public static final long DIRECT_MAX
     = FRAGMENT_SIZE * DIRECT_BLOCKS;
-  
+
   public static final long SINGLE_INDIRECT_MAX
     = DIRECT_MAX + SINGLE_INDIRECT_BLOCKS * FRAGMENT_SIZE;
-  
+
   public static final long FRAGMENT_MAX
     = SINGLE_INDIRECT_MAX;
-  
+
   public static final long DOUBLE_INDIRECT_MAX
     = (SINGLE_INDIRECT_MAX
        + DOUBLE_INDIRECT_BLOCKS * (BLOCK_SIZE / 8L) * BLOCK_SIZE);
-  
+
   private static final byte []NULL_BYTES = new byte[INODE_SIZE];
 
   private Store _store;
@@ -147,7 +147,7 @@ public class Inode {
   {
     return _store;
   }
-  
+
   /**
    * Returns the buffer.
    */
@@ -165,7 +165,7 @@ public class Inode {
   }
 
   public void init(Store store, StoreTransaction xa,
-		   byte []buffer, int offset)
+                   byte []buffer, int offset)
   {
     _store = store;
     _xa = xa;
@@ -194,31 +194,31 @@ public class Inode {
    * Writes the inode value to a stream.
    */
   public void writeToStream(OutputStreamWithBuffer os,
-			    long offset, long length)
+                            long offset, long length)
     throws IOException
   {
     byte []buffer = os.getBuffer();
     int writeLength = buffer.length;
     int writeOffset = os.getBufferOffset();
-    
+
     while (length > 0) {
       int sublen = writeLength - writeOffset;
 
       if (sublen == 0) {
-	buffer = os.nextBuffer(writeOffset);
-	writeOffset = os.getBufferOffset();
-	sublen = writeLength - writeOffset;
+        buffer = os.nextBuffer(writeOffset);
+        writeOffset = os.getBufferOffset();
+        sublen = writeLength - writeOffset;
       }
 
       if (length < sublen)
-	sublen = (int) length;
+        sublen = (int) length;
 
       int len = read(_bytes, 0, _store,
-		     offset,
-		     buffer, writeOffset, sublen);
+                     offset,
+                     buffer, writeOffset, sublen);
 
       if (len <= 0)
-	break;
+        break;
 
       writeOffset += len;
       offset += len;
@@ -239,16 +239,16 @@ public class Inode {
     char []buffer = tempBuffer.getBuffer();
     int writeLength = buffer.length;
     long offset = 0;
-    
+
     while (true) {
       int sublen = writeLength;
 
       int len = read(_bytes, 0, _store,
-		     offset,
-		     buffer, 0, sublen);
+                     offset,
+                     buffer, 0, sublen);
 
       if (len <= 0)
-	break;
+        break;
 
       writer.write(buffer, 0, len);
 
@@ -272,9 +272,9 @@ public class Inode {
    * @return the number of bytes read
    */
   static int read(byte []inode, int inodeOffset,
-		  Store store,
-		  long fileOffset, 
-		  byte []buffer, int bufferOffset, int bufferLength)
+                  Store store,
+                  long fileOffset,
+                  byte []buffer, int bufferOffset, int bufferLength)
     throws IOException
   {
     long fileLength = readLong(inode, inodeOffset);
@@ -282,13 +282,13 @@ public class Inode {
     int sublen = bufferLength;
     if (fileLength - fileOffset < sublen)
       sublen = (int) (fileLength - fileOffset);
-      
+
     if (sublen <= 0)
       return -1;
 
     if (fileLength <= INLINE_MAX) {
       System.arraycopy(inode, inodeOffset + 8 + (int) fileOffset,
-		       buffer, bufferOffset, sublen);
+                       buffer, bufferOffset, sublen);
 
       return sublen;
     }
@@ -297,10 +297,10 @@ public class Inode {
       int fragOffset = (int) (fileOffset % MINI_FRAG_SIZE);
 
       if (MINI_FRAG_SIZE - fragOffset < sublen)
-	sublen = MINI_FRAG_SIZE - fragOffset;
+        sublen = MINI_FRAG_SIZE - fragOffset;
 
       store.readMiniFragment(fragAddr, fragOffset,
-			     buffer, bufferOffset, sublen);
+                             buffer, bufferOffset, sublen);
 
       return sublen;
     }
@@ -309,7 +309,7 @@ public class Inode {
       int fragOffset = (int) (fileOffset % FRAGMENT_SIZE);
 
       if (FRAGMENT_SIZE - fragOffset < sublen)
-	sublen = FRAGMENT_SIZE - fragOffset;
+        sublen = FRAGMENT_SIZE - fragOffset;
 
       store.readFragment(fragAddr, fragOffset, buffer, bufferOffset, sublen);
 
@@ -320,20 +320,20 @@ public class Inode {
       int offset = (int) ((fileOffset - FRAGMENT_MAX) % BLOCK_SIZE);
 
       if (BLOCK_SIZE - offset < sublen)
-	sublen = BLOCK_SIZE - offset;
+        sublen = BLOCK_SIZE - offset;
 
       store.readBlock(addr, offset, buffer, bufferOffset, sublen);
-    
+
       return sublen;
     }
   }
-  
+
   /**
    * Updates the buffer.  Called only from the blob classes.
    */
   static void append(byte []inode, int inodeOffset,
-		     Store store, StoreTransaction xa,
-		     byte []buffer, int offset, int length)
+                     Store store, StoreTransaction xa,
+                     byte []buffer, int offset, int length)
     throws IOException
   {
     long currentLength = readLong(inode, inodeOffset);
@@ -343,66 +343,66 @@ public class Inode {
 
     if (newLength <= INLINE_MAX) {
       System.arraycopy(buffer, offset,
-		       inode, (int) (inodeOffset + 8 + currentLength),
-		       length);
+                       inode, (int) (inodeOffset + 8 + currentLength),
+                       length);
     }
     else if (newLength <= MINI_FRAG_MAX) {
       while (length > 0) {
-	int sublen = length;
-	
-	if (MINI_FRAG_SIZE < sublen)
-	  sublen = MINI_FRAG_SIZE;
-	
-	long miniFragAddr = store.allocateMiniFragment(xa);
+        int sublen = length;
 
-	if (miniFragAddr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(L.l("{0} illegal mini fragment",
-					      store));
-	}
+        if (MINI_FRAG_SIZE < sublen)
+          sublen = MINI_FRAG_SIZE;
 
-	writeMiniFragAddr(inode, inodeOffset,
-			  store, xa,
-			  currentLength, miniFragAddr);
+        long miniFragAddr = store.allocateMiniFragment(xa);
 
-	store.writeMiniFragment(xa, miniFragAddr, 0, buffer, offset, sublen);
+        if (miniFragAddr == 0) {
+          store.setCorrupted(true);
 
-	offset += sublen;
-	length -= sublen;
-	currentLength += sublen;
+          throw new IllegalStateException(L.l("{0} illegal mini fragment",
+                                              store));
+        }
+
+        writeMiniFragAddr(inode, inodeOffset,
+                          store, xa,
+                          currentLength, miniFragAddr);
+
+        store.writeMiniFragment(xa, miniFragAddr, 0, buffer, offset, sublen);
+
+        offset += sublen;
+        length -= sublen;
+        currentLength += sublen;
       }
     }
     else {
       if (currentLength > 0 && currentLength < MINI_FRAG_MAX)
-	throw new IllegalStateException(L.l("illegal length transition {0} to {1}",
-					    currentLength, newLength));
-      
+        throw new IllegalStateException(L.l("illegal length transition {0} to {1}",
+                                            currentLength, newLength));
+
       if (currentLength < FRAGMENT_MAX) {
-	int sublen = length;
+        int sublen = length;
 
-	if (FRAGMENT_MAX - currentLength < sublen)
-	  sublen = (int) (FRAGMENT_MAX - currentLength);
-	
-	appendFragment(inode, inodeOffset, store, xa,
-		       buffer, offset, length, currentLength);
+        if (FRAGMENT_MAX - currentLength < sublen)
+          sublen = (int) (FRAGMENT_MAX - currentLength);
 
-	offset += sublen;
-	length -= sublen;
-	currentLength += sublen;
+        appendFragment(inode, inodeOffset, store, xa,
+                       buffer, offset, length, currentLength);
+
+        offset += sublen;
+        length -= sublen;
+        currentLength += sublen;
       }
 
       if (length > 0) {
-	appendBlock(inode, inodeOffset, store, xa,
-		    buffer, offset, length, currentLength);
+        appendBlock(inode, inodeOffset, store, xa,
+                    buffer, offset, length, currentLength);
       }
     }
   }
 
   private static void appendFragment(byte []inode, int inodeOffset,
-				     Store store, StoreTransaction xa,
-				     byte []buffer, int offset, int length,
-				     long currentLength)
+                                     Store store, StoreTransaction xa,
+                                     byte []buffer, int offset, int length,
+                                     long currentLength)
     throws IOException
   {
     // XXX: theoretically deal with case of appending to inline, although
@@ -410,62 +410,62 @@ public class Inode {
 
     while (length > 0 && currentLength < FRAGMENT_MAX) {
       if (currentLength % FRAGMENT_SIZE != 0) {
-	long fragAddr = readFragmentAddr(inode, inodeOffset,
-					 store,
-					 currentLength);
+        long fragAddr = readFragmentAddr(inode, inodeOffset,
+                                         store,
+                                         currentLength);
 
-	if (fragAddr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(store + " inode: illegal fragment at " + currentLength);
-	}
+        if (fragAddr == 0) {
+          store.setCorrupted(true);
 
-	int fragOffset = (int) (currentLength % FRAGMENT_SIZE);
-	int sublen = length;
+          throw new IllegalStateException(store + " inode: illegal fragment at " + currentLength);
+        }
 
-	if (FRAGMENT_SIZE - fragOffset < sublen)
-	  sublen = FRAGMENT_SIZE - fragOffset;
+        int fragOffset = (int) (currentLength % FRAGMENT_SIZE);
+        int sublen = length;
 
-	store.writeFragment(xa, fragAddr, fragOffset, buffer, offset, sublen);
+        if (FRAGMENT_SIZE - fragOffset < sublen)
+          sublen = FRAGMENT_SIZE - fragOffset;
 
-	offset += sublen;
-	length -= sublen;
+        store.writeFragment(xa, fragAddr, fragOffset, buffer, offset, sublen);
 
-	currentLength += sublen;
+        offset += sublen;
+        length -= sublen;
+
+        currentLength += sublen;
       }
       else {
-	int sublen = length;
+        int sublen = length;
 
-	if (FRAGMENT_SIZE < sublen)
-	  sublen = FRAGMENT_SIZE;
+        if (FRAGMENT_SIZE < sublen)
+          sublen = FRAGMENT_SIZE;
 
-	long fragAddr = store.allocateFragment(xa);
+        long fragAddr = store.allocateFragment(xa);
 
-	if (fragAddr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(L.l("{0} illegal fragment",
-					      store));
-	}
+        if (fragAddr == 0) {
+          store.setCorrupted(true);
 
-	writeFragmentAddr(inode, inodeOffset,
-			  store, xa,
-			  currentLength, fragAddr);
+          throw new IllegalStateException(L.l("{0} illegal fragment",
+                                              store));
+        }
 
-	store.writeFragment(xa, fragAddr, 0, buffer, offset, sublen);	
+        writeFragmentAddr(inode, inodeOffset,
+                          store, xa,
+                          currentLength, fragAddr);
 
-	offset += sublen;
-	length -= sublen;
+        store.writeFragment(xa, fragAddr, 0, buffer, offset, sublen);
 
-	currentLength += sublen;
+        offset += sublen;
+        length -= sublen;
+
+        currentLength += sublen;
       }
     }
   }
 
   private static void appendBlock(byte []inode, int inodeOffset,
-				  Store store, StoreTransaction xa,
-				  byte []buffer, int offset, int length,
-				  long currentLength)
+                                  Store store, StoreTransaction xa,
+                                  byte []buffer, int offset, int length,
+                                  long currentLength)
     throws IOException
   {
     // XXX: theoretically deal with case of appending to inline, although
@@ -473,58 +473,58 @@ public class Inode {
 
     while (length > 0) {
       if ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE != 0) {
-	long addr = readBlockAddr(inode, inodeOffset,
-				  store,
-				  currentLength);
+        long addr = readBlockAddr(inode, inodeOffset,
+                                  store,
+                                  currentLength);
 
-	if (addr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
-	}
+        if (addr == 0) {
+          store.setCorrupted(true);
 
-	int blockOffset = (int) ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE);
-	int sublen = length;
+          throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
+        }
 
-	if (BLOCK_SIZE - blockOffset < sublen)
-	  sublen = BLOCK_SIZE - blockOffset;
+        int blockOffset = (int) ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE);
+        int sublen = length;
 
-	store.writeBlock(xa, addr, blockOffset, buffer, offset, sublen);
+        if (BLOCK_SIZE - blockOffset < sublen)
+          sublen = BLOCK_SIZE - blockOffset;
 
-	offset += sublen;
-	length -= sublen;
+        store.writeBlock(xa, addr, blockOffset, buffer, offset, sublen);
 
-	currentLength += sublen;
+        offset += sublen;
+        length -= sublen;
+
+        currentLength += sublen;
       }
       else {
-	int sublen = length;
+        int sublen = length;
 
-	if (BLOCK_SIZE < sublen)
-	  sublen = BLOCK_SIZE;
+        if (BLOCK_SIZE < sublen)
+          sublen = BLOCK_SIZE;
 
-	Block block = store.allocateBlock();
-	
-	long blockAddr = Store.blockIdToAddress(block.getBlockId());
+        Block block = store.allocateBlock();
 
-	block.free();
+        long blockAddr = Store.blockIdToAddress(block.getBlockId());
 
-	if (blockAddr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(L.l("{0}: illegal block",
-					      store));
-	}
+        block.free();
 
-	writeBlockAddr(inode, inodeOffset,
-		       store, xa,
-		       currentLength, blockAddr);
+        if (blockAddr == 0) {
+          store.setCorrupted(true);
 
-	store.writeBlock(xa, blockAddr, 0, buffer, offset, sublen);	
+          throw new IllegalStateException(L.l("{0}: illegal block",
+                                              store));
+        }
 
-	offset += sublen;
-	length -= sublen;
+        writeBlockAddr(inode, inodeOffset,
+                       store, xa,
+                       currentLength, blockAddr);
 
-	currentLength += sublen;
+        store.writeBlock(xa, blockAddr, 0, buffer, offset, sublen);
+
+        offset += sublen;
+        length -= sublen;
+
+        currentLength += sublen;
       }
     }
   }
@@ -543,8 +543,8 @@ public class Inode {
    * @return the number of characters read
    */
   static int read(byte []inode, int inodeOffset, Store store,
-		  long fileOffset, 
-		  char []buffer, int bufferOffset, int bufferLength)
+                  long fileOffset,
+                  char []buffer, int bufferOffset, int bufferLength)
     throws IOException
   {
     long fileLength = readLong(inode, inodeOffset);
@@ -552,7 +552,7 @@ public class Inode {
     int sublen = (int) (fileLength - fileOffset) / 2;
     if (bufferLength < sublen)
       sublen = bufferLength;
-      
+
     if (sublen <= 0)
       return -1;
 
@@ -560,12 +560,12 @@ public class Inode {
       int baseOffset = inodeOffset + 8 + (int) fileOffset;
 
       for (int i = 0; i < sublen; i++) {
-	char ch = (char) (((inode[baseOffset] & 0xff) << 8) +
-			  ((inode[baseOffset + 1] & 0xff)));
+        char ch = (char) (((inode[baseOffset] & 0xff) << 8) +
+                          ((inode[baseOffset + 1] & 0xff)));
 
-	buffer[bufferOffset + i] = ch;
+        buffer[bufferOffset + i] = ch;
 
-	baseOffset += 2;
+        baseOffset += 2;
       }
 
       return sublen;
@@ -575,10 +575,10 @@ public class Inode {
       int fragOffset = (int) (fileOffset % Inode.MINI_FRAG_SIZE);
 
       if (MINI_FRAG_SIZE - fragOffset < 2 * sublen)
-	sublen = (MINI_FRAG_SIZE - fragOffset) / 2;
+        sublen = (MINI_FRAG_SIZE - fragOffset) / 2;
 
       store.readMiniFragment(fragAddr, fragOffset,
-			     buffer, bufferOffset, sublen);
+                             buffer, bufferOffset, sublen);
 
       return sublen;
     }
@@ -587,10 +587,10 @@ public class Inode {
       int fragOffset = (int) (fileOffset % Inode.INODE_BLOCK_SIZE);
 
       if (FRAGMENT_SIZE - fragOffset < 2 * sublen)
-	sublen = (FRAGMENT_SIZE - fragOffset) / 2;
+        sublen = (FRAGMENT_SIZE - fragOffset) / 2;
 
       store.readFragment(fragAddr, fragOffset, buffer, bufferOffset, sublen);
-    
+
       return sublen;
     }
     else {
@@ -598,10 +598,10 @@ public class Inode {
       int offset = (int) ((fileOffset - FRAGMENT_MAX) % BLOCK_SIZE);
 
       if (BLOCK_SIZE - offset < sublen)
-	sublen = BLOCK_SIZE - offset;
+        sublen = BLOCK_SIZE - offset;
 
       store.readBlock(addr, offset, buffer, bufferOffset, sublen);
-    
+
       return sublen;
     }
   }
@@ -610,23 +610,23 @@ public class Inode {
    * Updates the buffer.  Called only from the clob classes.
    */
   static void append(byte []inode, int inodeOffset,
-		     Store store, StoreTransaction xa,
-		     char []buffer, int offset, int length)
+                     Store store, StoreTransaction xa,
+                     char []buffer, int offset, int length)
     throws IOException
   {
     long currentLength = readLong(inode, inodeOffset);
     long newLength = currentLength + length;
-    
+
     writeLong(inode, inodeOffset, newLength);
 
     if (newLength <= INLINE_BLOB_SIZE) {
       int writeOffset = (int) (inodeOffset + 8 + currentLength);
-      
-      for (int i = 0; i < length; i++) {
-	char ch = buffer[offset + i];
 
-	inode[writeOffset++] = (byte) (ch >> 8);
-	inode[writeOffset++] = (byte) (ch);
+      for (int i = 0; i < length; i++) {
+        char ch = buffer[offset + i];
+
+        inode[writeOffset++] = (byte) (ch >> 8);
+        inode[writeOffset++] = (byte) (ch);
       }
     }
     else {
@@ -634,50 +634,50 @@ public class Inode {
       // the blobs are the only writers and will avoid that case.
 
       if (currentLength % FRAGMENT_SIZE != 0) {
-	long fragAddr = readFragmentAddr(inode, inodeOffset,
-					 store,
-					 currentLength);
+        long fragAddr = readFragmentAddr(inode, inodeOffset,
+                                         store,
+                                         currentLength);
 
-	int fragOffset = (int) (currentLength % FRAGMENT_SIZE);
-	int sublen = 2 * length;
+        int fragOffset = (int) (currentLength % FRAGMENT_SIZE);
+        int sublen = 2 * length;
 
-	if (INODE_BLOCK_SIZE - fragOffset < sublen)
-	  sublen = INODE_BLOCK_SIZE - fragOffset;
+        if (INODE_BLOCK_SIZE - fragOffset < sublen)
+          sublen = INODE_BLOCK_SIZE - fragOffset;
 
-	store.writeFragment(xa, fragAddr, fragOffset, buffer, offset, sublen);
+        store.writeFragment(xa, fragAddr, fragOffset, buffer, offset, sublen);
 
-	offset += sublen / 2;
-	length -= sublen / 2;
+        offset += sublen / 2;
+        length -= sublen / 2;
 
-	currentLength += sublen;
+        currentLength += sublen;
       }
-      
+
       while (length > 0) {
-	int sublen = 2 * length;
+        int sublen = 2 * length;
 
-	if (INODE_BLOCK_SIZE < sublen)
-	  sublen = INODE_BLOCK_SIZE;
+        if (INODE_BLOCK_SIZE < sublen)
+          sublen = INODE_BLOCK_SIZE;
 
-	long fragAddr = store.allocateFragment(xa);
+        long fragAddr = store.allocateFragment(xa);
 
-	writeFragmentAddr(inode, inodeOffset,
-			  store, xa,
-			  currentLength, fragAddr);
+        writeFragmentAddr(inode, inodeOffset,
+                          store, xa,
+                          currentLength, fragAddr);
 
-	store.writeFragment(xa, fragAddr, 0, buffer, offset, sublen);	
+        store.writeFragment(xa, fragAddr, 0, buffer, offset, sublen);
 
-	offset += sublen / 2;
-	length -= sublen / 2;
+        offset += sublen / 2;
+        length -= sublen / 2;
 
-	currentLength += sublen;
+        currentLength += sublen;
       }
     }
   }
 
   private void appendFragment(byte []inode, int inodeOffset,
-			      Store store, StoreTransaction xa,
-			      char []buffer, int offset, int length,
-			      long currentLength)
+                              Store store, StoreTransaction xa,
+                              char []buffer, int offset, int length,
+                              long currentLength)
     throws IOException
   {
     // XXX: theoretically deal with case of appending to inline, although
@@ -685,62 +685,62 @@ public class Inode {
 
     while (length > 0 && currentLength <= FRAGMENT_MAX) {
       if (currentLength % FRAGMENT_SIZE != 0) {
-	long fragAddr = readFragmentAddr(inode, inodeOffset,
-					 store,
-					 currentLength);
+        long fragAddr = readFragmentAddr(inode, inodeOffset,
+                                         store,
+                                         currentLength);
 
-	if (fragAddr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(store + " inode: illegal fragment at " + currentLength);
-	}
+        if (fragAddr == 0) {
+          store.setCorrupted(true);
 
-	int fragOffset = (int) (currentLength % INODE_BLOCK_SIZE);
-	int sublen = 2 * length;
+          throw new IllegalStateException(store + " inode: illegal fragment at " + currentLength);
+        }
 
-	if (INODE_BLOCK_SIZE - fragOffset < sublen)
-	  sublen = INODE_BLOCK_SIZE - fragOffset;
+        int fragOffset = (int) (currentLength % INODE_BLOCK_SIZE);
+        int sublen = 2 * length;
 
-	store.writeFragment(xa, fragAddr, fragOffset, buffer, offset, sublen);
+        if (INODE_BLOCK_SIZE - fragOffset < sublen)
+          sublen = INODE_BLOCK_SIZE - fragOffset;
 
-	offset += sublen / 2;
-	length -= sublen / 2;
+        store.writeFragment(xa, fragAddr, fragOffset, buffer, offset, sublen);
 
-	currentLength += sublen;
+        offset += sublen / 2;
+        length -= sublen / 2;
+
+        currentLength += sublen;
       }
       else {
-	int sublen = 2 * length;
+        int sublen = 2 * length;
 
-	if (FRAGMENT_SIZE < sublen)
-	  sublen = FRAGMENT_SIZE;
+        if (FRAGMENT_SIZE < sublen)
+          sublen = FRAGMENT_SIZE;
 
-	long fragAddr = store.allocateFragment(xa);
+        long fragAddr = store.allocateFragment(xa);
 
-	if (fragAddr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(L.l("{0}: illegal fragment",
-					      store));
-	}
+        if (fragAddr == 0) {
+          store.setCorrupted(true);
 
-	writeFragmentAddr(inode, inodeOffset,
-			  store, xa,
-			  currentLength, fragAddr);
+          throw new IllegalStateException(L.l("{0}: illegal fragment",
+                                              store));
+        }
 
-	store.writeFragment(xa, fragAddr, 0, buffer, offset, sublen);	
+        writeFragmentAddr(inode, inodeOffset,
+                          store, xa,
+                          currentLength, fragAddr);
 
-	offset += sublen / 2;
-	length -= sublen / 2;
+        store.writeFragment(xa, fragAddr, 0, buffer, offset, sublen);
 
-	currentLength += sublen;
+        offset += sublen / 2;
+        length -= sublen / 2;
+
+        currentLength += sublen;
       }
     }
   }
 
   private void appendBlock(byte []inode, int inodeOffset,
-			   Store store, StoreTransaction xa,
-			   char []buffer, int offset, int length,
-			   long currentLength)
+                           Store store, StoreTransaction xa,
+                           char []buffer, int offset, int length,
+                           long currentLength)
     throws IOException
   {
     // XXX: theoretically deal with case of appending to inline, although
@@ -748,53 +748,53 @@ public class Inode {
 
     while (length > 0) {
       if ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE != 0) {
-	long addr = readBlockAddr(inode, inodeOffset,
-				  store,
-				  currentLength);
+        long addr = readBlockAddr(inode, inodeOffset,
+                                  store,
+                                  currentLength);
 
-	if (addr == 0) {
-	  store.setCorrupted(true);
-	  
-	  throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
-	}
+        if (addr == 0) {
+          store.setCorrupted(true);
 
-	int blockOffset = (int) ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE);
-	int sublen = 2 * length;
+          throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
+        }
 
-	if (BLOCK_SIZE - blockOffset < sublen)
-	  sublen = BLOCK_SIZE - blockOffset;
+        int blockOffset = (int) ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE);
+        int sublen = 2 * length;
 
-	store.writeBlock(xa, addr, blockOffset, buffer, offset, sublen);
+        if (BLOCK_SIZE - blockOffset < sublen)
+          sublen = BLOCK_SIZE - blockOffset;
 
-	offset += sublen / 2;
-	length -= sublen / 2;
+        store.writeBlock(xa, addr, blockOffset, buffer, offset, sublen);
 
-	currentLength += sublen;
+        offset += sublen / 2;
+        length -= sublen / 2;
+
+        currentLength += sublen;
       }
       else {
-	int sublen = 2 * length;
+        int sublen = 2 * length;
 
-	if (BLOCK_SIZE < sublen)
-	  sublen = BLOCK_SIZE;
+        if (BLOCK_SIZE < sublen)
+          sublen = BLOCK_SIZE;
 
-	long blockAddr = store.allocateFragment(xa);
+        long blockAddr = store.allocateFragment(xa);
 
-	if (blockAddr == 0) {
-	  store.setCorrupted(true);
-	  throw new IllegalStateException(L.l("{0}: illegal fragment",
-					      store));
-	}
+        if (blockAddr == 0) {
+          store.setCorrupted(true);
+          throw new IllegalStateException(L.l("{0}: illegal fragment",
+                                              store));
+        }
 
-	writeBlockAddr(inode, inodeOffset,
-		       store, xa,
-		       currentLength, blockAddr);
+        writeBlockAddr(inode, inodeOffset,
+                       store, xa,
+                       currentLength, blockAddr);
 
-	store.writeBlock(xa, blockAddr, 0, buffer, offset, sublen);	
+        store.writeBlock(xa, blockAddr, 0, buffer, offset, sublen);
 
-	offset += sublen / 2;
-	length -= sublen / 2;
+        offset += sublen / 2;
+        length -= sublen / 2;
 
-	currentLength += sublen;
+        currentLength += sublen;
       }
     }
   }
@@ -846,88 +846,88 @@ public class Inode {
       byte []bytes = _bytes;
 
       try {
-	if (length <= INLINE_BLOB_SIZE || bytes == null)
-	  return;
-	else if (length <= MINI_FRAG_BLOB_SIZE) {
-	  for (; length > 0; length -= MINI_FRAG_SIZE) {
-	    long fragAddr = readMiniFragAddr(bytes, 0, _store, length - 1);
+        if (length <= INLINE_BLOB_SIZE || bytes == null)
+          return;
+        else if (length <= MINI_FRAG_BLOB_SIZE) {
+          for (; length > 0; length -= MINI_FRAG_SIZE) {
+            long fragAddr = readMiniFragAddr(bytes, 0, _store, length - 1);
 
-	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
-	      _store.setCorrupted(true);
-	      
-	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+            if ((fragAddr & Store.BLOCK_MASK) == 0) {
+              _store.setCorrupted(true);
 
-	      throw stateError(msg);
-	    }
-	    else if (fragAddr < 0) {
-	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
-	    
-	      _store.setCorrupted(true);
-	      
-	      throw stateError(msg);
-	    }
+              String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
 
-	    _store.deleteMiniFragment(_xa, fragAddr);
-	  }
-	}
-	else {
-	  long initLength = length;
-	  for (; length > 0; length -= INODE_BLOCK_SIZE) {
-	    long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
+              throw stateError(msg);
+            }
+            else if (fragAddr < 0) {
+              String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 
-	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
-	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
-	      log.warning(msg);
-	      _store.setCorrupted(true);
-	      continue;
-	    }
-	    else if (fragAddr < 0) {
-	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
-	    
-	      log.warning(msg);
-	      _store.setCorrupted(true);
-	      continue;
-	    }
+              _store.setCorrupted(true);
 
-	    _store.deleteFragment(_xa, fragAddr);
+              throw stateError(msg);
+            }
 
-	    int fragCount = (int) ((length - 1) / INODE_BLOCK_SIZE);
+            _store.deleteMiniFragment(_xa, fragAddr);
+          }
+        }
+        else {
+          long initLength = length;
+          for (; length > 0; length -= INODE_BLOCK_SIZE) {
+            long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
 
-	    int dblFragCount = fragCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
+            if ((fragAddr & Store.BLOCK_MASK) == 0) {
+              String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+              log.warning(msg);
+              _store.setCorrupted(true);
+              continue;
+            }
+            else if (fragAddr < 0) {
+              String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 
-	    // remove the double indirect blocks
-	    if (dblFragCount >= 0
-		&& dblFragCount % INDIRECT_BLOCKS == 0) {
-	      fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
-	    
-	      int dblIndex = (int) (fragCount / INDIRECT_BLOCKS);
+              log.warning(msg);
+              _store.setCorrupted(true);
+              continue;
+            }
 
-	      fragAddr = _store.readFragmentLong(fragAddr, dblIndex);
+            _store.deleteFragment(_xa, fragAddr);
 
-	      if (fragAddr != 0)
-		_store.deleteFragment(_xa, fragAddr);
-	    }
+            int fragCount = (int) ((length - 1) / INODE_BLOCK_SIZE);
 
-	    // remove the indirect blocks
-	    if (fragCount == DIRECT_BLOCKS) {
-	      fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+            int dblFragCount = fragCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
 
-	      if (fragAddr != 0) {
-		_store.deleteFragment(_xa, fragAddr);
-	      }
-	    }
-	  }
-	}
+            // remove the double indirect blocks
+            if (dblFragCount >= 0
+                && dblFragCount % INDIRECT_BLOCKS == 0) {
+              fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+
+              int dblIndex = (int) (fragCount / INDIRECT_BLOCKS);
+
+              fragAddr = _store.readFragmentLong(fragAddr, dblIndex);
+
+              if (fragAddr != 0)
+                _store.deleteFragment(_xa, fragAddr);
+            }
+
+            // remove the indirect blocks
+            if (fragCount == DIRECT_BLOCKS) {
+              fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+
+              if (fragAddr != 0) {
+                _store.deleteFragment(_xa, fragAddr);
+              }
+            }
+          }
+        }
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	System.arraycopy(NULL_BYTES, 0, _bytes, 0, NULL_BYTES.length);
+        System.arraycopy(NULL_BYTES, 0, _bytes, 0, NULL_BYTES.length);
 
-	try {
-	  _store.saveAllocation();
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          _store.saveAllocation();
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }
@@ -947,11 +947,11 @@ public class Inode {
    * Returns the fragment id for the given offset.
    */
   static long readMiniFragAddr(byte []inode, int inodeOffset,
-				   Store store, long fileOffset)
+                                   Store store, long fileOffset)
     throws IOException
   {
     long fragCount = fileOffset / MINI_FRAG_SIZE;
-    
+
     return readLong(inode, (int) (inodeOffset + 8 + 8 * fragCount));
   }
 
@@ -959,18 +959,18 @@ public class Inode {
    * Writes the block id into the inode.
    */
   private static void writeMiniFragAddr(byte []inode, int offset,
-					Store store, StoreTransaction xa,
-					long fragLength, long fragAddr)
+                                        Store store, StoreTransaction xa,
+                                        long fragLength, long fragAddr)
     throws IOException
   {
     int fragCount = (int) (fragLength / MINI_FRAG_SIZE);
-    
+
     if ((fragAddr & Store.BLOCK_MASK) == 0) {
       store.setCorrupted(true);
-      
+
       throw new IllegalStateException(store + ": inode block " + fragLength + " has zero value " + fragAddr);
     }
-    
+
     writeLong(inode, offset + (fragCount + 1) * 8, fragAddr);
   }
 
@@ -978,21 +978,21 @@ public class Inode {
    * Returns the fragment id for the given offset.
    */
   static long readFragmentAddr(byte []inode, int inodeOffset,
-			       Store store,
-			       long fileOffset)
+                               Store store,
+                               long fileOffset)
     throws IOException
   {
     int fragCount = (int) (fileOffset / FRAGMENT_SIZE);
-    
+
     if (fragCount < DIRECT_BLOCKS)
       return readLong(inode, inodeOffset + 8 * (fragCount + 1));
     else if (fragCount < DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS) {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-	store.setCorrupted(true);
-	
-	throw new IllegalStateException(L.l("{0} null block id", store));
+        store.setCorrupted(true);
+
+        throw new IllegalStateException(L.l("{0} null block id", store));
       }
 
       int fragOffset = 8 * (fragCount - DIRECT_BLOCKS);
@@ -1003,9 +1003,9 @@ public class Inode {
     }
     else {
       store.setCorrupted(true);
-      
+
       throw new IllegalStateException(L.l("{0} fragment address is over 64M ({1}), internal error",
-					  store, fragCount));
+                                          store, fragCount));
 
     }
   }
@@ -1014,25 +1014,25 @@ public class Inode {
    * Writes the block id into the inode.
    */
   private static void writeFragmentAddr(byte []inode, int inodeOffset,
-					Store store, StoreTransaction xa,
-					long fileOffset, long fragAddr)
+                                        Store store, StoreTransaction xa,
+                                        long fileOffset, long fragAddr)
     throws IOException
   {
     if (FRAGMENT_MAX <= fileOffset) {
       store.setCorrupted(true);
-      
+
       throw new IllegalStateException(L.l("{0} fragment address is over {1}M ({2}), internal error",
-					  store, FRAGMENT_MAX / (1024 * 1024),
-					  fileOffset));
+                                          store, FRAGMENT_MAX / (1024 * 1024),
+                                          fileOffset));
 
     }
-    
+
     int fragCount = (int) (fileOffset / FRAGMENT_SIZE);
-    
+
     // XXX: not sure if correct, needs XA?
     if ((fragAddr & Store.BLOCK_MASK) == 0) {
       store.setCorrupted(true);
-      
+
       String msg = store + ": inode block " + fragCount + " writing 0 fragment";
       throw stateError(msg);
     }
@@ -1044,20 +1044,20 @@ public class Inode {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-	indAddr = store.allocateFragment(xa);
+        indAddr = store.allocateFragment(xa);
 
-	writeLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8, indAddr);
+        writeLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8, indAddr);
       }
 
       int fragOffset = 8 * (fragCount - DIRECT_BLOCKS);
-      
+
       store.writeFragmentLong(xa, indAddr, fragOffset, fragAddr);
     }
     else {
       store.setCorrupted(true);
-      
+
       throw new IllegalStateException(L.l("{0}: can't yet support data over 64M (count={1})",
-					  store, fragCount));
+                                          store, fragCount));
     }
   }
 
@@ -1065,23 +1065,23 @@ public class Inode {
    * Returns the fragment id for the given offset.
    */
   static long readBlockAddr(byte []inode, int inodeOffset,
-			    Store store,
-			    long fileOffset)
+                            Store store,
+                            long fileOffset)
     throws IOException
   {
     if (fileOffset < FRAGMENT_MAX) {
       store.setCorrupted(true);
-      
+
       throw new IllegalStateException(store + " block/fragment mixup at " + fileOffset);
     }
-    
+
     if (fileOffset < DOUBLE_INDIRECT_MAX) {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-	store.setCorrupted(true);
-	
-	throw new IllegalStateException(L.l("{0} null block id", store));
+        store.setCorrupted(true);
+
+        throw new IllegalStateException(L.l("{0} null block id", store));
       }
 
       int blockCount = (int) ((fileOffset - FRAGMENT_MAX) / BLOCK_SIZE);
@@ -1093,21 +1093,21 @@ public class Inode {
       long dblIndAddr = store.readFragmentLong(indAddr, dblBlockIndex);
 
       if (dblIndAddr == 0) {
-	store.setCorrupted(true);
-	
-	throw new IllegalStateException(L.l("null indirect block id"));
+        store.setCorrupted(true);
+
+        throw new IllegalStateException(L.l("null indirect block id"));
       }
-      
+
       int blockOffset = 8 * (blockCount % (BLOCK_SIZE / 8));
 
       return store.readBlockLong(dblIndAddr, blockOffset);
     }
     else {
       store.setCorrupted(true);
-    
+
       throw new IllegalStateException(L.l("{0} size over {1}M not supported",
-					  store,
-					  (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
+                                          store,
+                                          (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
     }
   }
 
@@ -1115,23 +1115,23 @@ public class Inode {
    * Writes the block id into the inode.
    */
   private static void writeBlockAddr(byte []inode, int inodeOffset,
-				     Store store, StoreTransaction xa,
-				     long fileOffset, long blockAddr)
+                                     Store store, StoreTransaction xa,
+                                     long fileOffset, long blockAddr)
     throws IOException
   {
     if (fileOffset < FRAGMENT_MAX) {
       store.setCorrupted(true);
-      
+
       throw new IllegalStateException(store + " block/fragment mixup at " + fileOffset);
     }
-    
+
     if (fileOffset < DOUBLE_INDIRECT_MAX) {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-	store.setCorrupted(true);
-	
-	throw new IllegalStateException(L.l("{0} null block id", store));
+        store.setCorrupted(true);
+
+        throw new IllegalStateException(L.l("{0} null block id", store));
       }
 
       int blockCount = (int) ((fileOffset - FRAGMENT_MAX) / BLOCK_SIZE);
@@ -1142,25 +1142,25 @@ public class Inode {
       long dblIndAddr = store.readFragmentLong(indAddr, dblBlockIndex);
 
       if (dblIndAddr == 0) {
-	Block block = store.allocateBlock();
-	
-	dblIndAddr = Store.blockIdToAddress(block.getBlockId());
+        Block block = store.allocateBlock();
 
-	block.free();
+        dblIndAddr = Store.blockIdToAddress(block.getBlockId());
 
-	store.writeFragmentLong(xa, indAddr, dblBlockIndex, dblIndAddr);
+        block.free();
+
+        store.writeFragmentLong(xa, indAddr, dblBlockIndex, dblIndAddr);
       }
 
       int blockOffset = 8 * (blockCount % (BLOCK_SIZE / 8));
-      
+
       store.writeBlockLong(xa, dblIndAddr, blockOffset, blockAddr);
     }
     else {
       store.setCorrupted(true);
 
       throw new IllegalStateException(L.l("{0} size over {1}M not supported",
-					  store,
-					  (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
+                                          store,
+                                          (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
     }
   }
 
@@ -1170,13 +1170,13 @@ public class Inode {
   public static long readLong(byte []buffer, int offset)
   {
     return (((buffer[offset + 0] & 0xffL) << 56)
-	    + ((buffer[offset + 1] & 0xffL) << 48)
-	    + ((buffer[offset + 2] & 0xffL) << 40)
-	    + ((buffer[offset + 3] & 0xffL) << 32)
-	    + ((buffer[offset + 4] & 0xffL) << 24)
-	    + ((buffer[offset + 5] & 0xffL) << 16)
-	    + ((buffer[offset + 6] & 0xffL) << 8)
-	    + ((buffer[offset + 7] & 0xffL)));
+            + ((buffer[offset + 1] & 0xffL) << 48)
+            + ((buffer[offset + 2] & 0xffL) << 40)
+            + ((buffer[offset + 3] & 0xffL) << 32)
+            + ((buffer[offset + 4] & 0xffL) << 24)
+            + ((buffer[offset + 5] & 0xffL) << 16)
+            + ((buffer[offset + 6] & 0xffL) << 8)
+            + ((buffer[offset + 7] & 0xffL)));
   }
 
   /**
@@ -1188,7 +1188,7 @@ public class Inode {
     buffer[offset + 1] = (byte) (v >> 48);
     buffer[offset + 2] = (byte) (v >> 40);
     buffer[offset + 3] = (byte) (v >> 32);
-    
+
     buffer[offset + 4] = (byte) (v >> 24);
     buffer[offset + 5] = (byte) (v >> 16);
     buffer[offset + 6] = (byte) (v >> 8);
@@ -1201,7 +1201,7 @@ public class Inode {
   private static int readShort(byte []buffer, int offset)
   {
     return (((buffer[offset + 0] & 0xff) << 8)
-	    + ((buffer[offset + 1] & 0xff)));
+            + ((buffer[offset + 1] & 0xff)));
   }
 
   /**

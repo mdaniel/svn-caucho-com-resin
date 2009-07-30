@@ -47,9 +47,11 @@ import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SSLFactory;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -1286,7 +1288,7 @@ public class Port
    * @param isStart boolean to mark the first request on the thread for
    *   bookkeeping.
    */
-  public boolean accept(TcpConnection conn, boolean isStart)
+  public boolean accept(QSocket socket, boolean isStart)
   {
     boolean isDecrement = true;
 
@@ -1298,7 +1300,7 @@ public class Port
 
         if (count < 0) {
           _startThreadCount.set(0);
-          log.warning(conn + " _startThreadCount assertion failure");
+          log.warning(this + " _startThreadCount assertion failure");
           // conn.getStartThread().printStackTrace();
         }
       }
@@ -1317,12 +1319,8 @@ public class Port
           return false;
         }
 
-        QSocket socket = conn.startSocket();
-
         Thread.interrupted();
         if (_serverSocket.accept(socket)) {
-          conn.initSocket();
-
           if (_throttle.accept(socket))
             return true;
           else
@@ -1470,6 +1468,45 @@ public class Port
   }
 
   /**
+   * Reads data from a keepalive connection
+   */
+  boolean keepaliveThreadRead(ReadStream is)
+    throws IOException
+  {
+    if (isClosed())
+      return false;
+
+    if (is.getBufferAvailable() > 0)
+      return true;
+
+    long timeout = getKeepaliveTimeout();
+
+    boolean isSelectManager = getServer().isSelectManagerEnabled();
+
+    if (isSelectManager) {
+      timeout = getBlockingTimeoutForSelect();
+    }
+
+    if (getSocketTimeout() < timeout)
+      timeout = getSocketTimeout();
+
+    if (timeout < 0)
+      timeout = 0;
+
+    // server/2l02
+
+    keepaliveThreadBegin();
+
+    try {
+      boolean result = is.fillWithTimeout(timeout);
+
+      return result;
+    } finally {
+      keepaliveThreadEnd();
+    }
+  }
+
+  /**
    * Suspends the controller (for comet-style ajax)
    *
    * @return true if the connection was added to the suspend list
@@ -1480,7 +1517,7 @@ public class Port
 
     if (conn.isWake()) {
       isResume = true;
-      conn.setResume();
+      conn.toResume();
     }
     else if (conn.isComet()) {
       conn.toSuspend();
@@ -1515,7 +1552,7 @@ public class Port
   boolean resume(TcpConnection conn)
   {
     if (_suspendConnectionSet.remove(conn)) {
-      conn.setResume();
+      conn.toResume();
 
       _threadPool.schedule(conn.getResumeTask());
 
@@ -1571,7 +1608,6 @@ public class Port
 
           if (startConn == null || startConn.isDestroyed()) {
             startConn = new TcpConnection(this, _serverSocket.createSocket());
-            startConn.setRequest(_protocol.createRequest(startConn));
           }
           else
             startConn._isFree = false; // XXX: validation for 4.0
@@ -1806,7 +1842,7 @@ public class Port
           while (iter.hasNext()) {
             TcpConnection conn = iter.next();
 
-            if (conn.getSuspendTime() + _suspendTimeMax < now) {
+            if (conn.getIdleStartTime() + _suspendTimeMax < now) {
               iter.remove();
 
               if (oldList == null)

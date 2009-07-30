@@ -54,7 +54,7 @@ public class JspParser {
   static L10N L = new L10N(JspParser.class);
   private static final Logger log
     = Logger.getLogger(JspParser.class.getName());
-  
+
   public static final String JSP_NS = "http://java.sun.com/JSP/Page";
   public static final String JSTL_CORE_URI = "http://java.sun.com/jsp/jstl/core";
   public static final String JSTL_FMT_URI = "http://java.sun.com/jsp/jstl/fmt";
@@ -63,56 +63,56 @@ public class JspParser {
   public static final QName TAGLIB = new QName("taglib");
   public static final QName TAGDIR = new QName("tagdir");
   public static final QName URI = new QName("uri");
-  
+
   public static final QName JSP_DECLARATION =
     new QName("jsp", "declaration", JSP_NS);
-  
+
   public static final QName JSP_SCRIPTLET =
     new QName("jsp", "scriptlet", JSP_NS);
-  
+
   public static final QName JSP_EXPRESSION =
     new QName("jsp", "expression", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_PAGE =
     new QName("jsp", "directive.page", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_INCLUDE =
     new QName("jsp", "directive.include", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_CACHE =
     new QName("jsp", "directive.cache", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_TAGLIB =
     new QName("jsp", "directive.taglib", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_ATTRIBUTE =
     new QName("jsp", "directive.attribute", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_VARIABLE =
     new QName("jsp", "directive.variable", JSP_NS);
-  
+
   public static final QName JSP_DIRECTIVE_TAG =
     new QName("jsp", "directive.tag", JSP_NS);
-  
+
   public static final QName JSTL_CORE_OUT =
     new QName("resin-c", "out", "urn:jsptld:" + JSTL_CORE_URI);
-  
+
   public static final QName JSTL_CORE_CHOOSE =
     new QName("resin-c", "choose", "urn:jsptld:" + JSTL_CORE_URI);
-  
+
   public static final QName JSTL_CORE_WHEN =
     new QName("resin-c", "when", "urn:jsptld:" + JSTL_CORE_URI);
-  
+
   public static final QName JSTL_CORE_OTHERWISE =
     new QName("resin-c", "otherwise", "urn:jsptld:" + JSTL_CORE_URI);
-  
+
   public static final QName JSTL_CORE_FOREACH =
     new QName("resin-c", "forEach", "urn:jsptld:" + JSTL_CORE_URI);
 
   private static final int TAG_UNKNOWN = 0;
   private static final int TAG_JSP = 1;
   private static final int TAG_RAW = 2;
-  
+
   private ParseState _parseState;
   private JspBuilder _jspBuilder;
   private ParseTagManager _tagManager;
@@ -121,13 +121,13 @@ public class JspParser {
 
   private ArrayList<String> _preludeList = new ArrayList<String>();
   private ArrayList<String> _codaList = new ArrayList<String>();
-  
+
   private ArrayList<Include> _includes = new ArrayList<Include>();
 
   private Set<String> _prefixes = new HashSet<String>();
   // jsp/18cy, jsp/18cz
   private Set<String> _localPrefixes = new HashSet<String>();
-  
+
   private Path _jspPath;
   private ReadStream _stream;
   private String _uriPwd;
@@ -136,7 +136,7 @@ public class JspParser {
   private String _filename = "";
   private int _line;
   private int _lineStart;
-  
+
   private int _charCount;
   private int _startText;
 
@@ -145,10 +145,10 @@ public class JspParser {
 
   private Namespace _namespaces
     = new Namespace(null, "jsp", JSP_NS);
-  
+
   private boolean _isXml;
   private boolean _isTop = true;
-  
+
   private CharBuffer _tag = new CharBuffer();
   private CharBuffer _value = new CharBuffer();
 
@@ -249,7 +249,7 @@ public class JspParser {
     _isXml = _parseState.isXml();
 
     _filename = _contextPath + uri;
- 
+
     if (uri != null) {
       int p = uri.lastIndexOf('/');
       _uriPwd = p <= 0 ? "/" : uri.substring(0, p + 1);
@@ -283,7 +283,7 @@ public class JspParser {
     throws Exception
   {
     _parseState.setTag(true);
-    
+
     parse(path, uri);
   }
 
@@ -301,12 +301,12 @@ public class JspParser {
     _includes.clear();
 
     String uriPwd = _uriPwd;
-    
+
     for (int i = _codaList.size() - 1; i >= 0; i--)
       pushInclude(_codaList.get(i), true);
-    
+
     addInclude(stream, uriPwd);
-    
+
     for (int i = _preludeList.size() - 1; i >= 0; i--)
       pushInclude(_preludeList.get(i), true);
 
@@ -319,52 +319,52 @@ public class JspParser {
 
     if (pageEncoding != null) {
       _parseState.setPageEncoding(pageEncoding);
-      
+
       stream.setEncoding(pageEncoding);
     }
 
     switch ((ch = stream.read())) {
     case 0xfe:
       if ((ch = stream.read()) != 0xff) {
-	throw error(L.l("Expected 0xff in UTF-16 header.  UTF-16 pages with the initial byte 0xfe expect 0xff immediately following.  The 0xfe 0xff sequence is used by some application to suggest UTF-16 encoding without a directive."));
+        throw error(L.l("Expected 0xff in UTF-16 header.  UTF-16 pages with the initial byte 0xfe expect 0xff immediately following.  The 0xfe 0xff sequence is used by some application to suggest UTF-16 encoding without a directive."));
       }
       else {
-	//_parseState.setContentType("text/html; charset=UTF-16BE");
-	_parseState.setPageEncoding("UTF-16BE");
-	stream.setEncoding("UTF-16BE");
+        //_parseState.setContentType("text/html; charset=UTF-16BE");
+        _parseState.setPageEncoding("UTF-16BE");
+        stream.setEncoding("UTF-16BE");
       }
       break;
-      
+
     case 0xff:
       if ((ch = stream.read()) != 0xfe) {
-	throw error(L.l("Expected 0xfe in UTF-16 header.  UTF-16 pages with the initial byte 0xff expect 0xfe immediately following.  The 0xff 0xfe sequence is used by some application to suggest UTF-16 encoding without a directive."));
+        throw error(L.l("Expected 0xfe in UTF-16 header.  UTF-16 pages with the initial byte 0xff expect 0xfe immediately following.  The 0xff 0xfe sequence is used by some application to suggest UTF-16 encoding without a directive."));
       }
       else {
-	//_parseState.setContentType("text/html; charset=UTF-16LE");
-	_parseState.setPageEncoding("UTF-16LE");
-	stream.setEncoding("UTF-16LE");
+        //_parseState.setContentType("text/html; charset=UTF-16LE");
+        _parseState.setPageEncoding("UTF-16LE");
+        stream.setEncoding("UTF-16LE");
       }
       break;
-      
+
     case 0xef:
       if ((ch = stream.read()) != 0xbb) {
-	stream.unread();
-	stream.unread();
+        stream.unread();
+        stream.unread();
       }
       else if ((ch = stream.read()) != 0xbf) {
-	throw error(L.l("Expected 0xbf in UTF-8 header.  UTF-8 pages with the initial byte 0xbb expect 0xbf immediately following.  The 0xbb 0xbf sequence is used by some application to suggest UTF-8 encoding without a directive."));
+        throw error(L.l("Expected 0xbf in UTF-8 header.  UTF-8 pages with the initial byte 0xbb expect 0xbf immediately following.  The 0xbb 0xbf sequence is used by some application to suggest UTF-8 encoding without a directive."));
       }
       else {
-	// jsp/002a, #3062
-	// _parseState.setContentType("text/html; charset=UTF-8");
-	_parseState.setPageEncoding("UTF-8");
-	stream.setEncoding("UTF-8");
+        // jsp/002a, #3062
+        // _parseState.setContentType("text/html; charset=UTF-8");
+        _parseState.setPageEncoding("UTF-8");
+        stream.setEncoding("UTF-8");
       }
       break;
 
     case -1:
       break;
-      
+
     default:
       stream.unread();
       break;
@@ -373,13 +373,13 @@ public class JspParser {
     ch = read();
 
     ch = parseXmlDeclaration(ch);
-    
+
     try {
       parseNode(ch);
     } finally {
       for (int i = 0; i < _includes.size(); i++) {
-	Include inc = _includes.get(i);
-	inc._stream.close();
+        Include inc = _includes.get(i);
+        inc._stream.close();
       }
     }
 
@@ -414,7 +414,7 @@ public class JspParser {
     }
 
     String encoding = null;
-    
+
     addText("<?xml ");
     ch = skipWhitespace(ch);
     while (XmlChar.isNameStart(ch)) {
@@ -437,7 +437,7 @@ public class JspParser {
       addText("\"");
 
       if (name.equals("encoding"))
-	encoding = value;
+        encoding = value;
 
       ch = read();
       if (XmlChar.isWhitespace(ch))
@@ -455,31 +455,31 @@ public class JspParser {
       addText("?>");
 
       if (encoding != null) {
-	_stream.setEncoding(encoding);
-	_parseState.setPageEncoding(encoding);
+        _stream.setEncoding(encoding);
+        _parseState.setPageEncoding(encoding);
       }
-      
+
       return read();
     }
   }
-    
+
   private void parseNode(int ch)
     throws IOException, JspParseException
   {
     while (ch != -1) {
       switch (ch) {
       case '<':
-	{
-	  switch ((ch = read())) {
-	  case '%':
-	    if (_isXml)
-	      throw error(L.l("'<%' syntax is not allowed in JSP/XML syntax."));
-	    
-	    parseScriptlet();
-	    _startText = _charCount;
+        {
+          switch ((ch = read())) {
+          case '%':
+            if (_isXml)
+              throw error(L.l("'<%' syntax is not allowed in JSP/XML syntax."));
+
+            parseScriptlet();
+            _startText = _charCount;
 
             // escape '\\' after scriptlet at end of line
-	    if ((ch = read()) == '\\') {
+            if ((ch = read()) == '\\') {
               if ((ch = read()) == '\n') {
                 ch = read();
               }
@@ -490,20 +490,20 @@ public class JspParser {
               else
                 addText('\\');
             }
-	    break;
+            break;
 
-	  case '/':
-	    ch = parseCloseTag();
-	    break;
+          case '/':
+            ch = parseCloseTag();
+            break;
 
-	  case '\\':
-	    if ((ch = read()) == '%') {
-	      addText("<%");
-	      ch = read();
-	    }
+          case '\\':
+            if ((ch = read()) == '%') {
+              addText("<%");
+              ch = read();
+            }
             else
-	      addText("<\\");
-	    break;
+              addText("<\\");
+            break;
 
           case '!':
             if (! _isXml)
@@ -519,38 +519,38 @@ public class JspParser {
             ch = read();
             break;
 
-	  default:
-	    if (! XmlChar.isNameStart(ch)) {
-	      addText('<');
-	      break;
-	    }
+          default:
+            if (! XmlChar.isNameStart(ch)) {
+              addText('<');
+              break;
+            }
 
-	    ch = readName(ch);
-	    String name = _tag.toString();
+            ch = readName(ch);
+            String name = _tag.toString();
             int tagCode = getTag(name);
-	    if (! _isXml && tagCode == TAG_UNKNOWN) {
-	      addText("<");
-	      addText(name);
-	      break;
-	    }
+            if (! _isXml && tagCode == TAG_UNKNOWN) {
+              addText("<");
+              addText(name);
+              break;
+            }
 
-	    if (_isTop && name.equals("jsp:root")) {
-	      if (_parseState.isForbidXml())
-		throw error(L.l("jsp:root must be in a JSP (XML) document, not a plain JSP."));
+            if (_isTop && name.equals("jsp:root")) {
+              if (_parseState.isForbidXml())
+                throw error(L.l("jsp:root must be in a JSP (XML) document, not a plain JSP."));
 
               _text.clear();
               _isXml = true;
-	      _parseState.setELIgnoredDefault(false);
-	      _parseState.setXml(true);
+              _parseState.setELIgnoredDefault(false);
+              _parseState.setXml(true);
             }
-            
+
             _isTop = false;
-	    parseOpenTag(name, ch, tagCode == TAG_UNKNOWN);
+            parseOpenTag(name, ch, tagCode == TAG_UNKNOWN);
 
             ch = read();
-            
+
             // escape '\\' after scriptlet at end of line
-	    if (! _isXml && ch == '\\') {
+            if (! _isXml && ch == '\\') {
               if ((ch = read()) == '\n') {
                 ch = read();
               }
@@ -559,16 +559,16 @@ public class JspParser {
                   ch = read();
               }
             }
-	  }
-	  break;
-	}
+          }
+          break;
+        }
 
       case '&':
         if (! _isXml)
           addText((char) ch);
         else {
           addText((char) parseEntity());
-	}
+        }
         ch = read();
         break;
 
@@ -587,14 +587,14 @@ public class JspParser {
         if (isVelocity()) {
           ch = parseVelocity(ch);
         }
-	else if (ch != '{' || isELIgnored()) {
+        else if (ch != '{' || isELIgnored()) {
           addText('#');
-	}
+        }
         else if (isDeferredSyntaxAllowedAsLiteral()) {
           addText('#');
-	}
+        }
         else
-	  throw error(L.l("Deferred syntax ('#{...}') not allowed as literal."));
+          throw error(L.l("Deferred syntax ('#{...}') not allowed as literal."));
         break;
 
       case '\\':
@@ -607,7 +607,7 @@ public class JspParser {
           else
             addText('\\');
           break;
-	  
+
         case '#':
           if (! isELIgnored()) {
             addText('#');
@@ -628,12 +628,12 @@ public class JspParser {
         break;
 
       default:
-	addText((char) ch);
-	ch = read();
+        addText((char) ch);
+        ch = read();
         break;
       }
     }
-    
+
     addText();
 
     /* XXX: end document
@@ -681,10 +681,10 @@ public class JspParser {
       _jspBuilder.endElement(JSP_DIRECTIVE_TAGLIB.getName());
       */
       _jspBuilder.addNamespace(prefix, JSTL_CORE_URI);
-      
+
       processTaglib(prefix, JSTL_CORE_URI);
     }
-    
+
     setLocation(jspPath, filename, line);
     _jspBuilder.startElement(JSTL_CORE_OUT);
     _jspBuilder.attribute(new QName("value"), cb.close());
@@ -715,7 +715,7 @@ public class JspParser {
         JspNode node = _jspBuilder.getCurrentNode();
         if (! "resin-c:when".equals(node.getTagName()))
           throw error(L.l("#elseif is missing a corresponding #if.  Velocity-style #if syntax needs matching #if ... #elseif ... #else ... #end.  The #if statements must also nest properly with any tags."));
-              
+
         _jspBuilder.endElement("resin-c:when");
         ch = parseVelocityIf("elseif");
       }
@@ -801,7 +801,7 @@ public class JspParser {
     createText();
 
     _jspBuilder.endElement(JSP_SCRIPTLET.getName());
-    
+
     ch = read();
 
     if (ch == '\r') {
@@ -836,7 +836,7 @@ public class JspParser {
     throws IOException, JspParseException
   {
     int ch;
-    
+
     for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
     }
 
@@ -861,10 +861,10 @@ public class JspParser {
     }
 
     String name = cb.toString();
-    
+
     cb.clear();
     parseVelocityName(cb);
-    
+
     if (cb.length() == 0) {
       throw error(L.l("Expected 'in' for #foreach at `{0}'.  The velocity-style #foreach syntax is: #foreach ($a in expr)",
                       badChar(ch)));
@@ -893,7 +893,7 @@ public class JspParser {
       if (expr.charAt(h) != '[')
         throw error(L.l("Expected '[' for #foreach `{0}'.  The velocity-style #foreach syntax is: #foreach ([Type] $a in [min .. max])",
                         badChar(expr.charAt(h))));
-      
+
       int t = expr.length() - 1;
       for (; Character.isWhitespace(expr.charAt(t)); t--) {
       }
@@ -901,12 +901,12 @@ public class JspParser {
       if (expr.charAt(t) != ']')
         throw error(L.l("Expected ']' for #foreach `{0}'.  The velocity-style #foreach syntax is: #foreach ($a in [min .. max])",
                         badChar(expr.charAt(t))));
-      
+
       int p = expr.indexOf("..");
-      
+
       String min = expr.substring(h + 1, p);
       String max = expr.substring(p + 2, t);
-      
+
       _jspBuilder.attribute(new QName("begin"), "${" + min + "}");
       _jspBuilder.attribute(new QName("end"), "${" + max + "}");
     }
@@ -925,7 +925,7 @@ public class JspParser {
     throws IOException, JspParseException
   {
     int ch;
-    
+
     for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
     }
 
@@ -936,7 +936,7 @@ public class JspParser {
     addText();
 
     processTaglib("resin-c", JSTL_CORE_URI);
-    
+
     setLocation(_jspPath, _filename, _line);
     if (eltName.equals("if")) {
       _jspBuilder.startElement(JSTL_CORE_CHOOSE);
@@ -957,7 +957,7 @@ public class JspParser {
     throws IOException, JspParseException
   {
     int ch;
-    
+
     for (ch = read(); XmlChar.isWhitespace(ch); ch = read()) {
     }
 
@@ -971,7 +971,7 @@ public class JspParser {
     throws IOException, JspParseException
   {
     int ch;
-    
+
     for (ch = read(); ch >= 0; ch = read()) {
       if (ch != '$')
         cb.append((char) ch);
@@ -1016,7 +1016,7 @@ public class JspParser {
         cb.append((char) ch);
       }
     }
-    
+
     return ch;
   }
 
@@ -1042,7 +1042,7 @@ public class JspParser {
 
     String filename = _filename;
     int line = _line;
-                  
+
     while ((ch = read()) >= 0) {
       while (ch == ']') {
         if ((ch = read()) != ']')
@@ -1119,12 +1119,12 @@ public class JspParser {
 
     case '-':
       if ((ch = read()) == '-') {
-	parseComment();
-	return;
+        parseComment();
+        return;
       }
       else {
         eltName = JSP_SCRIPTLET;
-	addText('-');
+        addText('-');
       }
       break;
 
@@ -1140,41 +1140,41 @@ public class JspParser {
     while (ch >= 0) {
       switch (ch) {
       case '\\':
-	addText('\\');
-	ch = read();
-	if (ch >= 0)
-	  addText((char) ch);
-	ch = read();
-	break;
+        addText('\\');
+        ch = read();
+        if (ch >= 0)
+          addText((char) ch);
+        ch = read();
+        break;
 
       case '%':
-	ch = read();
-	if (ch == '>') {
+        ch = read();
+        if (ch == '>') {
           createText();
           setLocation();
           _jspBuilder.endElement(eltName.getName());
-	  return;
-	}
-	else if (ch == '\\') {
-	  ch = read();
-	  if (ch == '>') {
-	    addText("%");
-	  }
-	  else
-	    addText("%\\");
-	}
-	else
-	  addText('%');
-	break;
+          return;
+        }
+        else if (ch == '\\') {
+          ch = read();
+          if (ch == '>') {
+            addText("%");
+          }
+          else
+            addText("%\\");
+        }
+        else
+          addText('%');
+        break;
 
       default:
-	addText((char) ch);
-	ch = read();
-	break;
+        addText((char) ch);
+        ch = read();
+        break;
       }
     }
 
-    createText();    
+    createText();
     setLocation();
     _jspBuilder.endElement(eltName.getName());
   }
@@ -1217,7 +1217,7 @@ public class JspParser {
       throw error(L.l("'{0}' is an unknown jsp directive.  Only <%@ page ... %>, <%@ include ... %>, <%@ taglib ... %>, and <%@ cache ... %> are known.", directive));
 
     unread(ch);
-    
+
     ArrayList<QName> keys = new ArrayList<QName>();
     ArrayList<String> values = new ArrayList<String>();
     ArrayList<String> prefixes = new ArrayList<String>();
@@ -1240,7 +1240,7 @@ public class JspParser {
       _jspBuilder.attribute(keys.get(i), values.get(i));
     }
     _jspBuilder.endAttributes();
-  
+
     if (qname.equals(JSP_DIRECTIVE_TAGLIB))
       processTaglibDirective(keys, values);
 
@@ -1248,7 +1248,7 @@ public class JspParser {
     _jspBuilder.endElement(qname.getName());
 
     if (qname.equals(JSP_DIRECTIVE_PAGE)
-	|| qname.equals(JSP_DIRECTIVE_TAG)) {
+        || qname.equals(JSP_DIRECTIVE_TAG)) {
       String contentEncoding = _parseState.getPageEncoding();
       if (contentEncoding == null)
         contentEncoding = _parseState.getCharEncoding();
@@ -1257,10 +1257,10 @@ public class JspParser {
         try {
           _stream.setEncoding(contentEncoding);
         } catch (Exception e) {
-	  log.log(Level.FINER, e.toString(), e);
-	  
+          log.log(Level.FINER, e.toString(), e);
+
           throw error(L.l("unknown content encoding '{0}'", contentEncoding),
-		      e);
+                      e);
         }
       }
     }
@@ -1282,26 +1282,26 @@ public class JspParser {
 
     while (ch >= 0) {
       if (ch == '-') {
-	ch = read();
-	while (ch == '-') {
-	  if ((ch = read()) == '-')
-	    continue;
-	  else if (ch == '%' && (ch = read()) == '>')
-	    return;
-	  else if (ch == '-')
-	    ch = read();
-	}
+        ch = read();
+        while (ch == '-') {
+          if ((ch = read()) == '-')
+            continue;
+          else if (ch == '%' && (ch = read()) == '>')
+            return;
+          else if (ch == '-')
+            ch = read();
+        }
       }
       else
-	ch = read();
+        ch = read();
     }
   }
-  
+
   private void parseXmlComment()
     throws IOException, JspParseException
   {
     int ch;
-    
+
     while ((ch = read()) >= 0) {
       while (ch == '-') {
         if ((ch = read()) == '-' && (ch = read()) == '>')
@@ -1340,7 +1340,7 @@ public class JspParser {
     for (int i = 0; i < keys.size(); i++) {
       QName key = keys.get(i);
       String value = values.get(i);
-      
+
       _jspBuilder.attribute(key, value);
     }
 
@@ -1355,16 +1355,16 @@ public class JspParser {
 
     if (qname.equals(JSP_DIRECTIVE_TAGLIB))
       processTaglibDirective(keys, values);
-    
+
     ch = skipWhitespace(read());
 
     JspNode node = _jspBuilder.getCurrentNode();
 
     if (ch == '/') {
       if ((ch = read()) != '>')
-	throw error(L.l("expected '/>' at '{0}' (for tag '<{1}>' at line {2}).  The XML empty tag syntax is: <tag attr1='value1'/>",
+        throw error(L.l("expected '/>' at '{0}' (for tag '<{1}>' at line {2}).  The XML empty tag syntax is: <tag attr1='value1'/>",
                         badChar(ch), name, String.valueOf(_lineStart)));
-      
+
       setLocation();
       _jspBuilder.endElement(qname.getName());
     }
@@ -1375,12 +1375,12 @@ public class JspParser {
     else if ("tagdependent".equals(node.getBodyContent()) && ! _isXml) {
       String tail = "</" + name + ">";
       for (ch = read(); ch >= 0; ch = read()) {
-	_text.append((char) ch);
-	if (_text.endsWith(tail)) {
-	  _text.setLength(_text.length() - tail.length());
-	  addText();
+        _text.append((char) ch);
+        if (_text.endsWith(tail)) {
+          _text.setLength(_text.length() - tail.length());
+          addText();
           _jspBuilder.endElement(qname.getName());
-	  return;
+          return;
         }
       }
       throw error(L.l("expected '{0}' at end of file (for tag <{1}> at line {2}).  Tags with 'tagdependent' content need close tags.",
@@ -1452,35 +1452,35 @@ public class JspParser {
       String key = _tag.toString();
 
       readValue(key, ch, _isXml);
-      String value = _value.toString(); 
+      String value = _value.toString();
 
       if (key.startsWith("xmlns:")) {
         String prefix = key.substring(6);
 
-	_jspBuilder.startPrefixMapping(prefix, value);
-	//_parseState.pushNamespace(prefix, value);
+        _jspBuilder.startPrefixMapping(prefix, value);
+        //_parseState.pushNamespace(prefix, value);
         prefixes.add(prefix);
         uris.add(value);
-        
+
         _namespaces = new Namespace(_namespaces, prefix, value);
       }
       else if (key.equals("xmlns")) {
-	_jspBuilder.startPrefixMapping("", value);
-	//_parseState.pushNamespace(prefix, value);
-	//_parseState.pushNamespace("", value);
+        _jspBuilder.startPrefixMapping("", value);
+        //_parseState.pushNamespace(prefix, value);
+        //_parseState.pushNamespace("", value);
         _namespaces = new Namespace(_namespaces, "", value);
       }
       else {
         names.add(getAttributeQName(key));
         values.add(value);
       }
-      
+
       ch = skipWhitespace(read());
     }
 
     unread(ch);
   }
-  
+
   /**
    * Reads an attribute value.
    */
@@ -1488,7 +1488,7 @@ public class JspParser {
     throws IOException, JspParseException
   {
     boolean isRuntimeAttribute = false;
-    
+
     _value.clear();
 
     ch = skipWhitespace(ch);
@@ -1533,8 +1533,8 @@ public class JspParser {
         case '\\':
         case '\'':
         case '\"':
-	  // jsp/1505 vs jsp/184s
-	  // _value.append('\\');
+          // jsp/1505 vs jsp/184s
+          // _value.append('\\');
           _value.append((char) ch);
           ch = read();
           break;
@@ -1639,7 +1639,7 @@ public class JspParser {
       cb.append((char) ch);
 
     if (ch != ';') {
-      
+
       log.warning(L.l("expected ';' at '{0}' in entity '&{1}'.  The XML entity syntax is &name;",
                       badChar(ch), cb));
     }
@@ -1668,7 +1668,7 @@ public class JspParser {
       addText("</");
       return ch;
     }
-    
+
     ch = readName(ch);
     String name = _tag.toString();
     if (! _isXml && getTag(name) == TAG_UNKNOWN) {
@@ -1716,9 +1716,9 @@ public class JspParser {
     String prefix = values.get(p);
 
     if (_prefixes.contains(prefix)
-	&& _parseState.getQName(prefix) == null) {
+        && _parseState.getQName(prefix) == null) {
       throw error(L.l("The taglib prefix '{0}' must be defined before it is used.",
-		      prefix));
+                      prefix));
     }
 
     if (_localPrefixes.contains(prefix))
@@ -1731,12 +1731,12 @@ public class JspParser {
     p = keys.indexOf(URI);
     if (p >= 0)
       uri = values.get(p);
-    
+
     String tagdir = null;
     p = keys.indexOf(TAGDIR);
     if (p >= 0)
       tagdir = values.get(p);
-    
+
     if (uri != null)
       processTaglib(prefix, uri);
     else if (tagdir != null)
@@ -1750,7 +1750,7 @@ public class JspParser {
     throws JspParseException
   {
     Taglib taglib = null;
-    
+
     int colon = uri.indexOf(':');
     int slash = uri.indexOf('/');
 
@@ -1788,7 +1788,7 @@ public class JspParser {
     throws JspParseException
   {
     Taglib taglib = null;
-    
+
     try {
       taglib = _tagManager.addTaglibDir(prefix, tagDir);
       String tagURI = "urn:jsptagdir:" + tagDir;
@@ -1818,7 +1818,7 @@ public class JspParser {
   {
     pushInclude(value, false);
   }
-  
+
   public void pushInclude(String value, boolean allowDuplicate)
     throws IOException, JspParseException
   {
@@ -1837,20 +1837,20 @@ public class JspParser {
       newUrl = value;
     else
       newUrl = _uriPwd + value;
-    
+
     include.setUserPath(newUrl);
 
     String newUrlPwd;
     int p = newUrl.lastIndexOf('/');
     newUrlPwd = newUrl.substring(0, p + 1);
-    
+
     if (_jspPath != null && _jspPath.equals(include) && ! allowDuplicate)
       throw error(L.l("circular include of '{0}' forbidden.  A JSP file may not include itself.", include));
     for (int i = 0; i < _includes.size(); i++) {
       Include inc = _includes.get(i);
       if (inc._stream != null && inc._stream.getPath() != null
-	  && inc._stream.getPath().equals(include) && ! allowDuplicate)
-	throw error(L.l("circular include of '{0}'.  A JSP file may not include itself.", include));
+          && inc._stream.getPath().equals(include) && ! allowDuplicate)
+        throw error(L.l("circular include of '{0}'.  A JSP file may not include itself.", include));
     }
 
     try {
@@ -1882,11 +1882,11 @@ public class JspParser {
                         _line,
                         _uriPwd,
                         _parseState.isLocalScriptingInvalid());
-      
+
       _parseState.setLocalScriptingInvalid(false);
 
       _includes.add(inc);
-      
+
       _localPrefixes = new HashSet<String>();
     }
 
@@ -1895,7 +1895,7 @@ public class JspParser {
     try {
       String encoding = _stream.getEncoding();
       if (encoding != null)
-	stream.setEncoding(encoding);
+        stream.setEncoding(encoding);
     } catch (Exception e) {
     }
     _stream = stream;
@@ -1920,7 +1920,7 @@ public class JspParser {
   {
     for (; XmlChar.isWhitespace(ch); ch = read()) {
     }
-    
+
     return ch;
   }
 
@@ -1945,7 +1945,7 @@ public class JspParser {
           return ch;
       }
     }
-    
+
     return ch;
   }
 
@@ -1964,7 +1964,7 @@ public class JspParser {
   {
     if (_text.length() > 0)
       createText();
-    
+
     _startText = _charCount;
     _lineStart = _line;
   }
@@ -1980,7 +1980,7 @@ public class JspParser {
     }
     else
       _jspBuilder.text(string, _filename, _lineStart, _line);
-    
+
     _lineStart = _line;
     _text.clear();
     _startText = _charCount;
@@ -1992,12 +1992,12 @@ public class JspParser {
 
     for (int i = 0; i < length; i++) {
       if (! Character.isWhitespace(s.charAt(i)))
-	return false;
+        return false;
     }
 
     return true;
   }
-  
+
 
   /**
    * Checks to see if the element name represents a tag.
@@ -2011,7 +2011,7 @@ public class JspParser {
 
     String prefix = name.substring(0, p);
     String local = name.substring(p + 1);
-    
+
     _prefixes.add(prefix);
     _localPrefixes.add(prefix);
 
@@ -2043,7 +2043,7 @@ public class JspParser {
   {
     _peek = ch;
   }
-  
+
   /**
    * Reads the next character we're in the middle of cr/lf.
    */
@@ -2053,10 +2053,10 @@ public class JspParser {
       int ch = read();
 
       if (ch != '\n')
-	_peek = ch;
+        _peek = ch;
     }
   }
-  
+
   /**
    * Reads the next character.
    */
@@ -2073,7 +2073,7 @@ public class JspParser {
     try {
       if ((ch = _stream.readChar()) >= 0) {
         _charCount++;
-        
+
         if (ch == '\r') {
           _line++;
           _charCount = 0;
@@ -2082,14 +2082,14 @@ public class JspParser {
         else if (ch == '\n' && _seenCr) {
           _seenCr = false;
           _charCount = 0;
-	}
+        }
         else if (ch == '\n') {
           _line++;
           _charCount = 0;
         }
         else {
           _seenCr = false;
-	}
+        }
 
         return ch;
       }
@@ -2099,10 +2099,10 @@ public class JspParser {
 
     _stream.close();
     _seenCr = false;
-    
+
     if (_includes.size() > 0) {
       setLocation(_jspPath, _filename, _line);
-      
+
       Include include = _includes.get(_includes.size() - 1);
       _includes.remove(_includes.size() - 1);
 
@@ -2118,7 +2118,7 @@ public class JspParser {
       _parseState.setLocalScriptingInvalid(include._oldLocalScriptingDisabled);
 
       setLocation(_jspPath, _filename, _line);
-      
+
       return read();
     }
 
@@ -2149,14 +2149,14 @@ public class JspParser {
 
     if (_lineMap == null)
       return new JspLineParseException(_filename + ":" + _line + ": "  + message,
-				       e);
+                                       e);
     else {
       LineMap.Line line = _lineMap.getLine(_line);
-      
+
       return new JspLineParseException(line.getSourceFilename() + ":" +
-				       line.getSourceLine(_line) + ": "  +
-				       message,
-				       e);
+                                       line.getSourceLine(_line) + ": "  +
+                                       message,
+                                       e);
     }
   }
 
@@ -2168,19 +2168,19 @@ public class JspParser {
   public JspParseException error(String message)
   {
     JspGenerator gen = _jspBuilder.getGenerator();
-    
+
     if (_lineMap == null) {
       if (gen != null)
-	return new JspLineParseException(_filename + ":" + _line + ": "  + message + gen.getSourceLines(_jspPath, _line));
+        return new JspLineParseException(_filename + ":" + _line + ": "  + message + gen.getSourceLines(_jspPath, _line));
       else
-	return new JspLineParseException(_filename + ":" + _line + ": "  + message);
+        return new JspLineParseException(_filename + ":" + _line + ": "  + message);
     }
     else {
       LineMap.Line line = _lineMap.getLine(_line);
-      
+
       return new JspLineParseException(line.getSourceFilename() + ":" +
-				       line.getSourceLine(_line) + ": "  +
-				       message);
+                                       line.getSourceLine(_line) + ": "  +
+                                       message);
     }
   }
 
@@ -2195,11 +2195,11 @@ public class JspParser {
       return new JspLineParseException(_filename + ":" + _line + ": "  + message, e);
     else {
       LineMap.Line line = _lineMap.getLine(_line);
-      
+
       return new JspLineParseException(line.getSourceFilename() + ":" +
-				       line.getSourceLine(_line) + ": "  +
-				       message,
-				       e);
+                                       line.getSourceLine(_line) + ": "  +
+                                       message,
+                                       e);
     }
   }
 
@@ -2227,7 +2227,7 @@ public class JspParser {
 
       if (srcLine != null) {
         _jspBuilder.setLocation(jspPath,
-				srcLine.getSourceFilename(),
+                                srcLine.getSourceFilename(),
                                 srcLine.getSourceLine(line));
       }
     }
@@ -2252,9 +2252,9 @@ public class JspParser {
     for (int b = 3; b >= 0; b--) {
       int v = (value >> (4 * b)) & 0xf;
       if (v < 10)
-	cb.append((char) (v + '0'));
+        cb.append((char) (v + '0'));
       else
-	cb.append((char) (v - 10 + 'a'));
+        cb.append((char) (v - 10 + 'a'));
     }
 
     return cb.toString();
