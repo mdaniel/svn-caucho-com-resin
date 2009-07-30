@@ -44,11 +44,13 @@ public class CronTrigger implements Trigger {
 
   private AtomicReference<QDate> _localCalendar = new AtomicReference<QDate>();
 
+  private boolean[] _seconds;
   private boolean[] _minutes;
   private boolean[] _hours;
   private boolean[] _days;
   private boolean[] _months;
   private boolean[] _daysOfWeek;
+  private boolean[] _years;
   private long _start = -1;
   private long _end = -1;
 
@@ -67,6 +69,10 @@ public class CronTrigger implements Trigger {
   public CronTrigger(final CronExpression cronExpression, final long start,
       final long end)
   {
+    if (cronExpression.getSecond() != null) {
+      _seconds = parseRange(cronExpression.getSecond(), 0, 59);
+    }
+
     if (cronExpression.getMinute() != null) {
       _minutes = parseRange(cronExpression.getMinute(), 0, 59);
     }
@@ -177,24 +183,39 @@ public class CronTrigger implements Trigger {
   {
     QDate calendar = allocateCalendar();
 
-    long time = now + 60000 - now % 60000;
+    // Round up to seconds.
+    long time = now + 1000 - now % 1000;
 
     calendar.setGMTTime(time);
+
+    // Look for the next time slot match in the current time.
+    int second = nextInterval(_seconds, calendar.getSecond());
+
+    if (second < 0) {
+      // No match in the current second, start looking at the next minute.
+      calendar.setMinute(calendar.getMinute() + 1);
+
+      // Now look for the next time slot in this minute, a match will be found.
+      second = nextInterval(_seconds, 0);
+    }
 
     int minute = nextInterval(_minutes, calendar.getMinute());
 
     if (minute < 0) {
-      minute = nextInterval(_minutes, 0);
-
       calendar.setHour(calendar.getHour() + 1);
+
+      minute = nextInterval(_minutes, 0);
+      second = nextInterval(_seconds, 0);
     }
 
     int hour = nextInterval(_hours, calendar.getHour());
+
     if (hour < 0) {
+      calendar.setDayOfMonth(calendar.getDayOfMonth() + 1);
+
       hour = nextInterval(_hours, 0);
       minute = nextInterval(_minutes, 0);
-
-      calendar.setDayOfMonth(calendar.getDayOfMonth() + 1);
+      second = nextInterval(_seconds, 0);
     }
 
     int day = calendar.getDayOfMonth();
@@ -209,6 +230,7 @@ public class CronTrigger implements Trigger {
         day = nextInterval(_days, calendar.getDayOfMonth());
         hour = nextInterval(_hours, 0);
         minute = nextInterval(_minutes, 0);
+        second = nextInterval(_seconds, 0);
       }
     }
 
@@ -230,25 +252,27 @@ public class CronTrigger implements Trigger {
 
     freeCalendar(calendar);
 
-    long nextTime = nextTime(year, month, day, hour, minute);
+    long nextTime = nextTime(year, month, day, hour, minute, second);
 
     if (now < nextTime)
       return nextTime;
     else
-      return nextTime(now + 3600000L); // DST
+      return nextTime(now + 3600000L); // Daylight savings time.
   }
 
   private int nextInterval(boolean[] values, int now)
   {
     for (; now < values.length; now++) {
-      if (values[now])
+      if (values[now]) {
         return now;
+      }
     }
 
     return -1;
   }
 
-  private long nextTime(int year, int month, int day, int hour, int minute)
+  private long nextTime(int year, int month, int day, int hour, int minute,
+      int second)
   {
     QDate calendar = allocateCalendar();
 
@@ -259,6 +283,7 @@ public class CronTrigger implements Trigger {
     calendar.setDayOfMonth(day);
     calendar.setHour(hour);
     calendar.setMinute(minute);
+    calendar.setSecond(second);
 
     long time = calendar.getGMTTime();
 
@@ -269,12 +294,13 @@ public class CronTrigger implements Trigger {
 
   private QDate allocateCalendar()
   {
-    QDate cal = _localCalendar.getAndSet(null);
+    QDate calendar = _localCalendar.getAndSet(null);
 
-    if (cal == null)
-      cal = QDate.createLocal();
+    if (calendar == null) {
+      calendar = QDate.createLocal();
+    }
 
-    return cal;
+    return calendar;
   }
 
   private void freeCalendar(QDate cal)
