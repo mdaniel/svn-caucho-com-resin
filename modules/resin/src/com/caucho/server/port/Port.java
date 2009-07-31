@@ -1288,22 +1288,12 @@ public class Port
    * @param isStart boolean to mark the first request on the thread for
    *   bookkeeping.
    */
-  public boolean accept(QSocket socket, boolean isStart)
+  public boolean accept(QSocket socket)
   {
-    boolean isDecrement = true;
+    boolean isDecrementIdle = true;
 
     try {
       int idleThreadCount = _idleThreadCount.incrementAndGet();
-
-      if (isStart) {
-        int count = _startThreadCount.decrementAndGet();
-
-        if (count < 0) {
-          _startThreadCount.set(0);
-          log.warning(this + " _startThreadCount assertion failure");
-          // conn.getStartThread().printStackTrace();
-        }
-      }
 
       while (_lifecycle.isActive()) {
         long now = Alarm.getCurrentTime();
@@ -1313,7 +1303,7 @@ public class Port
         if (_idleThreadMax < idleThreadCount
             && _idleThreadCount.compareAndSet(idleThreadCount,
                                               idleThreadCount - 1)) {
-          isDecrement = false;
+          isDecrementIdle = false;
           _idleCloseExpire = now + _idleCloseTimeout;
 
           return false;
@@ -1331,7 +1321,7 @@ public class Port
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
     } finally {
-      if (isDecrement)
+      if (isDecrementIdle)
         _idleThreadCount.decrementAndGet();
 
       if (isStartThreadRequired()) {
@@ -1511,31 +1501,24 @@ public class Port
    *
    * @return true if the connection was added to the suspend list
    */
-  boolean suspend(TcpConnection conn)
+  void suspend(TcpConnection conn)
   {
     boolean isResume = false;
 
     if (conn.isWake()) {
-      isResume = true;
       conn.toResume();
+
+      _threadPool.schedule(conn.getResumeTask());
     }
     else if (conn.isComet()) {
       conn.toSuspend();
 
       _suspendConnectionSet.add(conn);
-
-      return true;
     }
     else {
-      return false;
+      throw new IllegalStateException(L.l("{0} suspend is not allowed because the connection is not an asynchronous connection",
+                                          conn));
     }
-
-    if (isResume) {
-      _threadPool.schedule(conn.getResumeTask());
-      return true;
-    }
-    else
-      return false;
   }
 
   /**
@@ -1611,17 +1594,17 @@ public class Port
           }
           else
             startConn._isFree = false; // XXX: validation for 4.0
-
-          _startThreadCount.incrementAndGet();
-          _activeConnectionCount.incrementAndGet();
-          _activeConnectionSet.add(startConn);
         }
         else {
           LockSupport.park();
         }
 
         if (startConn != null) {
-          _threadPool.schedule(startConn.getReadTask());
+          _startThreadCount.incrementAndGet();
+          _activeConnectionCount.incrementAndGet();
+          _activeConnectionSet.add(startConn);
+
+          _threadPool.schedule(startConn.getAcceptTask());
         }
       } catch (Throwable e) {
         log.log(Level.SEVERE, e.toString(), e);

@@ -83,7 +83,8 @@ public class TcpConnection extends Connection
   private final ServerRequest _request;
 
   private final AcceptTask _acceptTask = new AcceptTask();
-  private final KeepaliveTask _keepaliveTask = new KeepaliveTask();
+  private final KeepaliveRequestTask _keepaliveRequestTask
+    = new KeepaliveRequestTask();
   private final ResumeTask _resumeTask = new ResumeTask();
 
   private final Admin _admin = new Admin();
@@ -96,7 +97,7 @@ public class TcpConnection extends Connection
   private boolean _isKeepalive;
   private boolean _isWake;
 
-  private Runnable _readTask = _acceptTask;
+  private ConnectionReadTask _keepaliveTask = _keepaliveRequestTask;
 
   private long _idleTimeout;
 
@@ -430,17 +431,19 @@ public class TcpConnection extends Connection
   }
 
   /**
-   * Returns the current read task
+   * Returns the current keepalive task
    */
-  public Runnable getReadTask()
+  public Runnable getAcceptTask()
   {
-    if (_state.isClosed())
-      Thread.dumpStack();
-    /* XXX: debugging
-    setStartThread();
-    */
+    return _acceptTask;
+  }
 
-    return _readTask;
+  /**
+   * Returns the current keepalive task (request or duplex)
+   */
+  public Runnable getKeepaliveTask()
+  {
+    return _keepaliveTask;
   }
 
   /**
@@ -476,6 +479,7 @@ public class TcpConnection extends Connection
    * Handles a new connection/socket from the client.
    */
   RequestState handleRequests()
+    throws IOException
   {
     Thread thread = Thread.currentThread();
 
@@ -492,27 +496,30 @@ public class TcpConnection extends Connection
    } catch (ClientDisconnectException e) {
      _port.addLifetimeClientDisconnectCount();
 
-      if (log.isLoggable(Level.FINER)) {
-        log.finer(dbgId() + e);
-      }
-    } catch (InterruptedIOException e) {
-      if (log.isLoggable(Level.FINEST)) {
-        log.log(Level.FINEST, dbgId() + e, e);
-      }
-    } catch (IOException e) {
-      if (log.isLoggable(Level.FINE)) {
-        log.log(Level.FINE, dbgId() + e, e);
-      }
-    } finally {
-      thread.setContextClassLoader(_systemClassLoader);
+     if (log.isLoggable(Level.FINER)) {
+       log.finer(dbgId() + e);
+     }
+   } catch (InterruptedIOException e) {
+     if (log.isLoggable(Level.FINEST)) {
+       log.log(Level.FINEST, dbgId() + e, e);
+     }
+   } catch (IOException e) {
+     if (log.isLoggable(Level.FINE)) {
+       log.log(Level.FINE, dbgId() + e, e);
+     }
+   } finally {
+     thread.setContextClassLoader(_systemClassLoader);
 
-      _currentRequest.set(null);
+     _currentRequest.set(null);
 
-      if (result == null)
-        destroy();
-    }
+     if (result == null)
+       destroy();
+   }
 
-    return RequestState.EXIT;
+   if (result == RequestState.DUPLEX)
+     return _keepaliveTask.doTask();
+   else
+     return result;
   }
 
   /**
@@ -524,52 +531,43 @@ public class TcpConnection extends Connection
     Thread thread = Thread.currentThread();
     ClassLoader systemLoader = _systemClassLoader;
 
-    boolean isStatKeepalive = _state.isKeepalive();
-    boolean isKeepalive;
     RequestState result = null;
 
     do {
       thread.setContextClassLoader(systemLoader);
 
-      if (_controller != null)
-        throw new IllegalStateException(L.l("can't shift to active from duplex {0} controller {1}",
-                                            _state, _controller));
-
-      _state = _state.toActive();
-
       if (_port.isClosed()) {
         return RequestState.EXIT;
       }
 
-      result = RequestState.EXIT;
+      boolean isStatKeepalive = _state.isKeepalive();
 
+      _state = _state.toActive();
       _isWake = false;
+
+      if (_controller != null)
+        throw new IllegalStateException(L.l("can't shift to active from duplex {0} controller {1}",
+                                            _state, _controller));
 
       if ((result = processKeepalive()) != RequestState.REQUEST) {
         return result;
       }
 
-      boolean isRequestValid = getRequest().handleRequest();
+      if (! getRequest().handleRequest()) {
+        _isKeepalive = false;
+      }
 
       // statistics
       gatherStatistics(isStatKeepalive);
 
-      if (! isRequestValid) {
-        _isKeepalive = false;
-      }
-
       if (_state == ConnectionState.DUPLEX) {
         // duplex (xmpp/hmtp) handling
-        return ((DuplexReadTask) _readTask).doTask(false);
+        return RequestState.DUPLEX;
       }
       else if (_state == ConnectionState.COMET) {
-        if (_port.suspend(this)) {
-          return RequestState.THREAD_DETACHED;
-        }
-        else {
-          throw new IllegalStateException(L.l("{0} suspend not allowed for comet connection",
-                                              this));
-        }
+        _port.suspend(this);
+
+        return RequestState.THREAD_DETACHED;
       }
     } while (_isKeepalive
              && (result = processKeepalive()) == RequestState.REQUEST);
@@ -851,7 +849,7 @@ public class TcpConnection extends Connection
 
     _state = ConnectionState.DUPLEX;
     _isKeepalive = false;
-    _readTask = new DuplexReadTask(duplex);
+    _keepaliveTask = new DuplexReadTask(duplex);
 
     return duplex;
   }
@@ -979,7 +977,6 @@ public class TcpConnection extends Connection
       }
 
       _state = _state.toIdle();
-      _readTask = _acceptTask;
 
       getPort().free(this);
     }
@@ -1009,6 +1006,7 @@ public class TcpConnection extends Connection
   enum RequestState {
     REQUEST,
     THREAD_DETACHED,
+    DUPLEX,
     EXIT
   };
 
@@ -1016,10 +1014,15 @@ public class TcpConnection extends Connection
     /**
      * Handles the read request for the connection
      */
-    abstract RequestState doTask(boolean isThreadStart)
+    abstract RequestState doTask()
       throws IOException;
 
     public void run()
+    {
+      runThread();
+    }
+
+    public void runThread()
     {
       Thread thread = Thread.currentThread();
       String oldThreadName = thread.getName();
@@ -1030,16 +1033,12 @@ public class TcpConnection extends Connection
       ClassLoader systemLoader = _systemClassLoader;
       thread.setContextClassLoader(systemLoader);
 
-      if (_state.isKeepalive()) {
-        _port.keepaliveEnd(TcpConnection.this);
-      }
-
       RequestState result = null;
 
       _port.threadBegin(TcpConnection.this);
 
       try {
-        result = doTask(true);
+        result = doTask();
       } catch (OutOfMemoryError e) {
         CauchoSystem.exitOom(getClass(), e);
       } catch (Throwable e) {
@@ -1064,20 +1063,26 @@ public class TcpConnection extends Connection
   }
 
   class AcceptTask extends ConnectionReadTask {
+    public void run()
+    {
+      Port port = _port;
+
+      port.startConnection(TcpConnection.this);
+
+      runThread();
+    }
+
     /**
      * Loop to accept new connections.
-     *
-     * @param isThreadStart true if the thread has just started to
-     * properly account for thread housekeeping
      */
     @Override
-    RequestState doTask(boolean isThreadStart)
+    RequestState doTask()
       throws IOException
     {
       Port port = _port;
 
       // next state is keepalive
-      _readTask = _keepaliveTask;
+      _keepaliveTask = _keepaliveRequestTask;
 
       ServerRequest request = getRequest();
 
@@ -1092,13 +1097,11 @@ public class TcpConnection extends Connection
 
         _state = _state.toAccept();
 
-        if (! _port.accept(_socket, isThreadStart)) {
+        if (! _port.accept(_socket)) {
           close();
 
           return RequestState.EXIT;
         }
-
-        assert(_readTask == _keepaliveTask);
 
         _connectionStartTime = Alarm.getCurrentTime();
 
@@ -1111,6 +1114,9 @@ public class TcpConnection extends Connection
 
         if (result == RequestState.THREAD_DETACHED) {
           return result;
+        }
+        else if (result == RequestState.DUPLEX) {
+          return _keepaliveTask.doTask();
         }
 
         close();
@@ -1136,9 +1142,18 @@ public class TcpConnection extends Connection
     }
   }
 
-  class KeepaliveTask extends ConnectionReadTask {
+  class KeepaliveRequestTask extends ConnectionReadTask {
+    public void run()
+    {
+      Port port = _port;
+
+      port.keepaliveEnd(TcpConnection.this);
+
+      runThread();
+    }
+
     @Override
-    public RequestState doTask(boolean isThreadStart)
+    public RequestState doTask()
       throws IOException
     {
       _state = _state.toActive();
@@ -1148,9 +1163,12 @@ public class TcpConnection extends Connection
       if (result == RequestState.THREAD_DETACHED) {
         return result;
       }
+      else if (result == RequestState.DUPLEX) {
+        return _keepaliveTask.doTask();
+      }
 
       // acceptTask significantly faster than finishing
-      return _acceptTask.doTask(false);
+      return _acceptTask.doTask();
     }
   }
 
@@ -1162,8 +1180,17 @@ public class TcpConnection extends Connection
       _duplex = duplex;
     }
 
+    public void run()
+    {
+      Port port = _port;
+
+      port.keepaliveEnd(TcpConnection.this);
+
+      runThread();
+    }
+
     @Override
-    public RequestState doTask(boolean isThreadStart)
+    public RequestState doTask()
       throws IOException
     {
       _state = _state.toActive();
@@ -1193,8 +1220,9 @@ public class TcpConnection extends Connection
 
         _isWake = false;
 
-        if (getRequest().handleResume()
-            && _port.suspend(TcpConnection.this)) {
+        if (getRequest().handleResume()) {
+          _port.suspend(TcpConnection.this);
+
           isValid = true;
         }
         else if (_isKeepalive) {
