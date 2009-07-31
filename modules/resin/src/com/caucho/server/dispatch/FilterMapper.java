@@ -50,7 +50,7 @@ public class FilterMapper {
   private static final L10N L = new L10N(FilterMapper.class);
 
   private ServletContext _servletContext;
-  
+
   private int _unique;
   private FilterManager _filterManager;
 
@@ -59,7 +59,7 @@ public class FilterMapper {
 
   private ArrayList<FilterChainBuilder> _topFilters
   = new ArrayList<FilterChainBuilder>();
-  
+
   private ArrayList<FilterChainBuilder> _bottomFilters
   = new ArrayList<FilterChainBuilder>();
 
@@ -105,11 +105,11 @@ public class FilterMapper {
       String filterName = mapping.getFilterName();
 
       if (filterName == null)
-	filterName = mapping.getFilterClassName();
+        filterName = mapping.getFilterClassName();
 
       if (mapping.getFilterClassName() != null
-	  && _filterManager.getFilter(filterName) == null) {
-	_filterManager.addFilter(mapping);
+          && _filterManager.getFilter(filterName) == null) {
+        _filterManager.addFilter(mapping);
       }
 
       if (_filterManager.getFilter(filterName) == null)
@@ -133,7 +133,7 @@ public class FilterMapper {
   {
     _topFilters.add(filterBuilder);
   }
-  
+
   /**
    * Fills in the invocation.
    */
@@ -147,10 +147,10 @@ public class FilterMapper {
 
         if (map.isMatch(invocation.getServletName())) {
           String filterName = map.getFilterName();
-        
+
           Filter filter = _filterManager.createFilter(filterName);
 
-	  chain = addFilter(chain, filter);
+          chain = addFilter(chain, filter);
         }
       }
     }
@@ -161,7 +161,7 @@ public class FilterMapper {
 
         if (map.isMatch(invocation)) {
           String filterName = map.getFilterName();
-        
+
           Filter filter = _filterManager.createFilter(filterName);
 
           chain = addFilter(chain, filter);
@@ -178,12 +178,12 @@ public class FilterMapper {
 
     invocation.setFilterChain(chain);
   }
-  
+
   /**
    * Fills in the invocation.
    */
   public FilterChain buildFilterChain(FilterChain chain,
-				     String servletName)
+                                     String servletName)
     throws ServletException
   {
     synchronized (_filterMap) {
@@ -192,7 +192,7 @@ public class FilterMapper {
 
         if (map.isMatch(servletName)) {
           String filterName = map.getFilterName();
-        
+
           Filter filter = _filterManager.createFilter(filterName);
 
           chain = addFilter(chain, filter);
@@ -205,14 +205,6 @@ public class FilterMapper {
 
   private FilterChain addFilter(FilterChain chain, Filter filter)
   {
-    if (filter instanceof CometFilter
-	&& chain instanceof CometFilterChain) {
-      CometFilter cometFilter = (CometFilter) filter;
-      CometFilterChain cometChain = (CometFilterChain) chain;
-	    
-      return new CometFilterFilterChain(cometChain, cometFilter);
-    }
-    else
-      return new FilterFilterChain(chain, filter);
+    return new FilterFilterChain(chain, filter);
   }
 }

@@ -54,16 +54,16 @@ public interface ServerRequest {
    * Called when the connection starts, i.e. just after the accept
    */
   public void startConnection();
-  
+
   /**
    * Handles a new connection.  The controlling TcpServer may call
-   * handleConnection again after the connection completes, so 
+   * handleConnection again after the connection completes, so
    * the implementation must initialize any variables for each connection.
    */
   public boolean handleRequest() throws IOException;
-  
+
   /**
-   * Resumes processing after a wait.
+   * Handles a resumption of the connection.
    */
   public boolean handleResume() throws IOException;
 

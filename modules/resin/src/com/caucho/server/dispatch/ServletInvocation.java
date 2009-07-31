@@ -31,7 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.port.ServerRequest;
-  
+
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.util.L10N;
 
@@ -56,15 +56,15 @@ public class ServletInvocation {
   private final boolean _isFiner;
 
   private ClassLoader _classLoader;
-  
+
   private String _contextPath = "";
-  
+
   private String _contextUri;
   private String _servletPath;
   private String _pathInfo;
-  
+
   private String _queryString;
-  
+
   private String _servletName;
   private FilterChain _filterChain;
 
@@ -260,26 +260,8 @@ public class ServletInvocation {
 
     if (_isFiner)
       log.finer("Dispatch '" + _contextUri + "' to " + _filterChain);
-      
+
     _filterChain.doFilter(request, response);
-  }
-
-  /**
-   * Resume a request.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   */
-  public boolean doResume(ServletRequest request, ServletResponse response)
-    throws IOException, ServletException
-  {
-    if (_filterChain instanceof CometFilterChain) {
-      CometFilterChain filterChain = (CometFilterChain) _filterChain;
-
-      return filterChain.doResume(request, response);
-    }
-    else
-      return false;
   }
 
   /**
@@ -289,16 +271,16 @@ public class ServletInvocation {
   {
     _classLoader = invocation._classLoader;
     _contextPath = invocation._contextPath;
-  
+
     _contextUri = invocation._contextUri;
     _servletPath = invocation._servletPath;
     _pathInfo = invocation._pathInfo;
-  
+
     _queryString = invocation._queryString;
-  
+
     _servletName = invocation._servletName;
     _filterChain = invocation._filterChain;
-    
+
     _securityRoleMap = invocation._securityRoleMap;
   }
 
@@ -314,7 +296,7 @@ public class ServletInvocation {
       sb.append("?").append(_queryString);
 
     sb.append("]");
-    
+
     return sb.toString();
   }
 }

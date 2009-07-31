@@ -42,14 +42,14 @@ import com.caucho.servlet.comet.CometFilterChain;
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-public class FilterFilterChain extends AbstractFilterChain
+public class FilterFilterChain implements FilterChain
 {
   private static final Logger log
     = Logger.getLogger(FilterFilterChain.class.getName());
-  
+
   // Next filter chain
   private FilterChain _next;
-  
+
   // filter
   private Filter _filter;
 
@@ -68,7 +68,7 @@ public class FilterFilterChain extends AbstractFilterChain
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
-  
+
   /**
    * Invokes the next filter in the chain or the final servlet at
    * the end of the chain.
@@ -83,32 +83,11 @@ public class FilterFilterChain extends AbstractFilterChain
   {
     if (_isFinest)
       log.finest("Dispatch " + request + " filter=" + _filter + " next=" + _next);
-    
+
     _filter.doFilter(request, response, _next);
   }
-  
-  /**
-   * Resumes the request.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   *
-   * @since Resin 3.1.3
-   */
+
   @Override
-  public boolean doResume(ServletRequest request,
-			  ServletResponse response)
-    throws ServletException, IOException
-  {
-    if (_next instanceof CometFilterChain) {
-      CometFilterChain next = (CometFilterChain) _next;
-
-      return next.doResume(request, response);
-    }
-    else
-      return false;
-  }
-
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _filter + "]";

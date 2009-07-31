@@ -36,6 +36,7 @@ import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.server.connection.*;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
@@ -463,7 +464,12 @@ public class TcpConnection extends Connection
     return _controller;
   }
 
-  public String getCometPath()
+  public WebApp getAsyncDispatchWebApp()
+  {
+    return null;
+  }
+
+  public String getAsyncDispatchUrl()
   {
     if (_controller != null)
       return _controller.getForwardPath();
@@ -1221,6 +1227,7 @@ public class TcpConnection extends Connection
         _isWake = false;
 
         if (getRequest().handleResume()) {
+          // XXX:keepalive?
           _port.suspend(TcpConnection.this);
 
           isValid = true;

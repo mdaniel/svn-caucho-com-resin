@@ -37,7 +37,6 @@ import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpServletResponseImpl;
-import com.caucho.server.dispatch.AbstractFilterChain;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.transaction.TransactionManagerImpl;
 
@@ -58,7 +57,7 @@ import java.util.logging.Logger;
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-public class WebAppFilterChain extends AbstractFilterChain {
+public class WebAppFilterChain implements FilterChain {
   private static final Logger log
     = Logger.getLogger(WebAppFilterChain.class.getName());
 
@@ -229,78 +228,11 @@ public class WebAppFilterChain extends AbstractFilterChain {
     }
   }
 
-  /**
-   * Resumes the request for comet-style.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   * @since Resin 3.1.3
-   */
   @Override
-  public boolean doResume(ServletRequest request,
-                          ServletResponse response)
-    throws ServletException, IOException
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    WebApp app = _app;
-
-    try {
-      thread.setContextClassLoader(app.getClassLoader());
-
-      if (! app.enterWebApp())
-        return false;
-
-      if (_next instanceof CometFilterChain) {
-        CometFilterChain next = (CometFilterChain) _next;
-
-        return next.doResume(request, response);
-      }
-      else
-        return false;
-    } catch (Throwable e) {
-      _errorPageManager.sendServletError(e, request, response);
-
-      return false;
-    } finally {
-      app.exitWebApp();
-
-      if (_isTop) {
-        ((HttpServletResponseImpl) response).close();
-
-        try {
-          _utm.abortTransaction();
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-
-      // put finish() before access log so the session isn't tied up while
-      // logging
-
-      // needed for things like closing the session
-      if (request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).finishInvocation();
-
-      /*
-      try {
-        if (_accessLog != null) {
-          _accessLog.log((HttpServletRequest) request,
-                         (HttpServletResponse) response,
-                         _app);
-        }
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-      */
-
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _app.getURL() + ", next=" + _next + "]";
+    return (getClass().getSimpleName()
+            + "[" + _app.getURL()
+            + ", next=" + _next + "]");
   }
 }

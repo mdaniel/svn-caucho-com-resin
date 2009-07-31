@@ -31,6 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.server.connection.AbstractHttpRequest;
 
+import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -43,9 +44,9 @@ import java.util.HashMap;
 /**
  * Represents the final servlet in a filter chain.
  */
-public class ServletFilterChain extends AbstractFilterChain {
+public class ServletFilterChain implements FilterChain {
   public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
-  
+
   // servlet config
   private ServletConfigImpl _config;
   // servlet
@@ -61,7 +62,7 @@ public class ServletFilterChain extends AbstractFilterChain {
   {
     if (config == null)
       throw new NullPointerException();
-    
+
     _config = config;
     _multipartConfig = config.getMultipartConfig();
   }
@@ -80,8 +81,8 @@ public class ServletFilterChain extends AbstractFilterChain {
   public HashMap<String,String> getRoleMap()
   {
     return _config.getRoleMap();
-  }  
-  
+  }
+
   /**
    * Invokes the final servlet at the end of the chain.
    *
@@ -105,7 +106,7 @@ public class ServletFilterChain extends AbstractFilterChain {
         throw new ServletException(e);
       }
     }
-    
+
     try {
       //XXX: Better way of passing this in is needed
       request.setAttribute(AbstractHttpRequest.MULTIPARTCONFIG,
@@ -128,24 +129,6 @@ public class ServletFilterChain extends AbstractFilterChain {
       request.setAttribute(SERVLET_NAME, _config.getServletName());
       throw e;
     }
-  }
-  
-  /**
-   * Resumes the final servlet for a comet request.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   *
-   * @since Resin 3.1.3
-   */
-  @Override
-  public boolean doResume(ServletRequest request,
-			  ServletResponse response)
-    throws ServletException, IOException
-  {
-    doFilter(request, response);
-    
-    return false;
   }
 
   public String toString()

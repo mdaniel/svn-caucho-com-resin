@@ -42,22 +42,21 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class SetHeaderFilterChain extends AbstractFilterChain
+public class SetHeaderFilterChain implements FilterChain
 {
   private final String _name;
   private final String _value;
   private final FilterChain _next;
 
   public SetHeaderFilterChain(FilterChain next,
-			      String name,
-			      String value)
+                              String name,
+                              String value)
   {
     _next = next;
     _name = name;
     _value = value;
   }
 
-  @Override
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {

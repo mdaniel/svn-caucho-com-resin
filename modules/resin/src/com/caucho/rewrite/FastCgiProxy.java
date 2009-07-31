@@ -76,7 +76,7 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
   public FastCgiProxy()
   {
     _proxyServlet = new FastCGIServlet();
-    
+
     _servlet = new ServletConfigImpl();
 
     _servlet.setServletName("resin-dispatch-lb");
@@ -106,7 +106,7 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
     _proxyServlet.setFailRecoverTime(period);
   }
   */
-  
+
   @PostConstruct
   public void init()
     throws ConfigException
@@ -117,7 +117,7 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
       _proxyServlet.init(webApp);
 
       if (webApp != null)
-	webApp.addServlet(_servlet);
+        webApp.addServlet(_servlet);
     }
     catch (ServletException ex) {
       throw ConfigException.create(ex);
@@ -126,19 +126,19 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
 
   @Override
   public FilterChain createDispatch(String uri,
-				    String queryString,
-				    String target,
-				    FilterChain next)
+                                    String queryString,
+                                    String target,
+                                    FilterChain next)
   {
     try {
       return new ProxyFilterChain(_servlet.createServletChain(),
-				  uri, queryString);
+                                  uri, queryString);
     } catch (ServletException e) {
       throw ConfigException.create(e);
     }
   }
 
-  public static class ProxyFilterChain extends AbstractFilterChain {
+  public static class ProxyFilterChain implements FilterChain {
     private final FilterChain _next;
     private final String _uri;
     private final String _queryString;
@@ -152,7 +152,7 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
     }
 
     public void doFilter(ServletRequest req,
-			 ServletResponse res)
+                         ServletResponse res)
       throws IOException, ServletException
     {
       _next.doFilter(new ProxyRequest(req, _uri, _queryString), res);
@@ -162,10 +162,10 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
   public static class ProxyRequest extends HttpServletRequestWrapper {
     private String _uri;
     private String _queryString;
-    
+
     ProxyRequest(ServletRequest req,
-		 String uri,
-		 String queryString)
+                 String uri,
+                 String queryString)
     {
       super((HttpServletRequest) req);
 

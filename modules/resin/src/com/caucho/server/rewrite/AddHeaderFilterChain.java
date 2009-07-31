@@ -42,15 +42,15 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class AddHeaderFilterChain extends AbstractFilterChain
+public class AddHeaderFilterChain implements FilterChain
 {
   private final String _name;
   private final String _value;
   private final FilterChain _next;
 
   public AddHeaderFilterChain(FilterChain next,
-			      String name,
-			      String value)
+                              String name,
+                              String value)
   {
     _next = next;
     _name = name;

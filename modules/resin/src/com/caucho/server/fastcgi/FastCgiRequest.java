@@ -76,7 +76,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
   private static final int FCGI_HEADER_LEN = 8;
   private static final int FCGI_VERSION_1 = 1;
-  
+
   private static final int FCGI_BEGIN_REQUEST = 1;
   private static final int FCGI_ABORT_REQUEST = 2;
   private static final int FCGI_END_REQUEST = 3;
@@ -89,11 +89,11 @@ public class FastCgiRequest extends AbstractHttpRequest
   private static final int FCGI_GET_VALUES_RESULT = 10;
   private static final int FCGI_UNKNOWN_TYPE = 11;
   private static final int FCGI_MAXTYPE = FCGI_UNKNOWN_TYPE;
-  
+
   private static final int FCGI_NULL_REQUEST_ID = 0;
-  
+
   private static final int FCGI_KEEP_CONN = 1;
-  
+
   private static final int FCGI_RESPONDER = 1;
   private static final int FCGI_AUTHORIZER = 2;
   private static final int FCGI_FILTER = 3;
@@ -107,16 +107,16 @@ public class FastCgiRequest extends AbstractHttpRequest
   private static final int HTTP_1_1 = 0x11;
 
   private static final int LEN_CONTENT_LENGTH = 14;
-  
+
   private static final int HU_CONTENT_LENGTH = (14 << 8) | 'C';
   private static final int HL_CONTENT_LENGTH = (14 << 8) | 'c';
-  
+
   private static final int LEN_CONTENT_TYPE = 12;
 
   private static final byte []REQUEST_METHOD = "REQUEST_METHOD".getBytes();
   private static final int HU_REQUEST_METHOD = (14 << 8) | 'R';
   private static final int HL_REQUEST_METHOD = (14 << 8) | 'r';
-  
+
   private static final byte []REQUEST_URI = "REQUEST_URI".getBytes();
   private static final int HU_REQUEST_URI = (11 << 8) | 'R';
   private static final int HL_REQUEST_URI = (11 << 8) | 'r';
@@ -124,7 +124,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   private static final byte []SERVER_PROTOCOL = "SERVER_PROTOCOL".getBytes();
   private static final int HU_SERVER_PROTOCOL = (15 << 8) | 'S';
   private static final int HL_SERVER_PROTOCOL = (15 << 8) | 's';
-  
+
   private static final int LEN_SCRIPT_NAME = 11;
 
   private CharBuffer _method;       // "GET"
@@ -224,7 +224,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   {
     return _hasRequest;
   }
-  
+
   /**
    * Handles a new HTTP request.
    *
@@ -240,17 +240,17 @@ public class FastCgiRequest extends AbstractHttpRequest
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       thread.setContextClassLoader(_server.getClassLoader());
-      
+
       HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
-      
+
       startRequest(httpBuffer);
       startInvocation();
 
       _response.startRequest(httpBuffer);
-      
+
       _filter.init(_rawRead, _rawWrite);
       _writeStream.init(_filter);
       // _writeStream.setWritePrefix(3);
@@ -261,62 +261,62 @@ public class FastCgiRequest extends AbstractHttpRequest
       _requestFacade.setResponse(_responseFacade);
 
       try {
-	_hasRequest = false;
-	
-	while (readPacket(_rawRead)) {
-	}
+        _hasRequest = false;
 
-	if (! _hasRequest) {
-	  if (log.isLoggable(Level.FINE))
-	    log.fine(dbgId() + "read timeout");
+        while (readPacket(_rawRead)) {
+        }
 
-	  return false;
-	}
+        if (! _hasRequest) {
+          if (log.isLoggable(Level.FINE))
+            log.fine(dbgId() + "read timeout");
 
-	setStartTime();
+          return false;
+        }
 
-	_isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
+        setStartTime();
 
-	/*
-	if (_protocol.length() == 0)
-	  _protocol.append("HTTP/0.9");
+        _isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
 
-	if (log.isLoggable(Level.FINE)) {
-	  log.fine(dbgId() + _method + " " +
-		   new String(_uri, 0, _uriLength) + " " + _protocol);
-	  log.fine(dbgId() + "Remote-IP: " + _conn.getRemoteHost() + ":" + _conn.getRemotePort());
-	}
+        /*
+        if (_protocol.length() == 0)
+          _protocol.append("HTTP/0.9");
 
-	parseHeaders(_rawRead);
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(dbgId() + _method + " " +
+                   new String(_uri, 0, _uriLength) + " " + _protocol);
+          log.fine(dbgId() + "Remote-IP: " + _conn.getRemoteHost() + ":" + _conn.getRemotePort());
+        }
 
-	if (getVersion() >= HTTP_1_1 && isForce10()) {
-	  _protocol.clear();
-	  _protocol.append("HTTP/1.0");
-	  _version = HTTP_1_0;
-	}
-	*/
+        parseHeaders(_rawRead);
+
+        if (getVersion() >= HTTP_1_1 && isForce10()) {
+          _protocol.clear();
+          _protocol.append("HTTP/1.0");
+          _version = HTTP_1_0;
+        }
+        */
       } catch (ClientDisconnectException e) {
-	throw e;
+        throw e;
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
 
-	throw new BadRequestException(String.valueOf(e), e);
+        throw new BadRequestException(String.valueOf(e), e);
       }
 
       CharSequence host = getHost();
 
       String ipHost = _conn.getVirtualHost();
       if (ipHost != null)
-	host = ipHost;
+        host = ipHost;
 
       _invocationKey.init(_isSecure,
-			  host, _conn.getLocalPort(),
-			  _uri, _uriLength);
+                          host, _conn.getLocalPort(),
+                          _uri, _uriLength);
 
       Invocation invocation = getInvocation(host);
 
       if (invocation == null)
-	return false;
+        return false;
 
       setInvocation(invocation);
 
@@ -344,9 +344,9 @@ public class FastCgiRequest extends AbstractHttpRequest
       */
 
       if (_server instanceof Server) {
-	WebApp webApp = ((Server) _server).getDefaultWebApp();
-	if (webApp != null)
-	  webApp.accessLog(_requestFacade, _responseFacade);
+        WebApp webApp = ((Server) _server).getDefaultWebApp();
+        if (webApp != null)
+          webApp.accessLog(_requestFacade, _responseFacade);
       }
 
       return false;
@@ -354,9 +354,9 @@ public class FastCgiRequest extends AbstractHttpRequest
       finishInvocation();
 
       if (! isSuspend()) {
-	finishRequest();
+        finishRequest();
       }
-      
+
       thread.setContextClassLoader(oldLoader);
     }
 
@@ -378,18 +378,18 @@ public class FastCgiRequest extends AbstractHttpRequest
       invocation.setSecure(_isSecure);
 
       if (host != null) {
-	String hostName = host.toString().toLowerCase();
+        String hostName = host.toString().toLowerCase();
 
-	invocation.setHost(hostName);
-	invocation.setPort(_conn.getLocalPort());
+        invocation.setHost(hostName);
+        invocation.setPort(_conn.getLocalPort());
 
-	// Default host name if the host doesn't have a canonical
-	// name
-	int p = hostName.indexOf(':');
-	if (p > 0)
-	  invocation.setHostName(hostName.substring(0, p));
-	else
-	  invocation.setHostName(hostName);
+        // Default host name if the host doesn't have a canonical
+        // name
+        int p = hostName.indexOf(':');
+        if (p > 0)
+          invocation.setHostName(hostName.substring(0, p));
+        else
+          invocation.setHostName(hostName);
       }
 
       InvocationDecoder decoder = _server.getInvocationDecoder();
@@ -397,19 +397,19 @@ public class FastCgiRequest extends AbstractHttpRequest
       decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
 
       if (_server.isModified()) {
-	_server.logModified(log);
+        _server.logModified(log);
 
-	_invocation = invocation;
-	if (_server instanceof Server)
-	  _invocation.setWebApp(((Server) _server).getDefaultWebApp());
+        _invocation = invocation;
+        if (_server instanceof Server)
+          _invocation.setWebApp(((Server) _server).getDefaultWebApp());
 
-	restartServer();
-	
-	return null;
+        restartServer();
+
+        return null;
       }
 
       invocation = _server.buildInvocation(_invocationKey.clone(),
-					   invocation);
+                                           invocation);
     }
 
     invocation = invocation.getRequestInvocation(this);
@@ -468,10 +468,10 @@ public class FastCgiRequest extends AbstractHttpRequest
         _methodString = cb.toString();
       }
       */
-      
+
       _methodString = cb.toString();
     }
-      
+
     return _methodString;
 
   }
@@ -706,12 +706,12 @@ public class FastCgiRequest extends AbstractHttpRequest
 
       int j;
       for (j = 0; j < names.size(); j++) {
-	String oldName = names.get(j);
-	if (name.matches(oldName))
-	  break;
+        String oldName = names.get(j);
+        if (name.matches(oldName))
+          break;
       }
       if (j == names.size())
-	names.add(j, name.toString());
+        names.add(j, name.toString());
     }
 
     return Collections.enumeration(names);
@@ -727,7 +727,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
     return true;
   }
-  
+
   /**
    * Handles a comet-style resume.
    *
@@ -742,26 +742,26 @@ public class FastCgiRequest extends AbstractHttpRequest
       startInvocation();
 
       if (! isComet())
-	return false;
+        return false;
 
       String url = _tcpConn.getCometPath();
 
       // servlet 3.0 spec defaults to suspend
       _tcpConn.suspend();
-	  
+
       if (url != null) {
-	WebApp webApp = getWebApp();
+        WebApp webApp = getWebApp();
 
-	RequestDispatcherImpl disp
-	  = (RequestDispatcherImpl) webApp.getRequestDispatcher(url);
+        RequestDispatcherImpl disp
+          = (RequestDispatcherImpl) webApp.getRequestDispatcher(url);
 
-	if (disp != null) {
-	  disp.forwardResume(_requestFacade, _responseFacade);
-	  
-	  return isSuspend();
-	}
+        if (disp != null) {
+          disp.forwardResume(_requestFacade, _responseFacade);
+
+          return isSuspend();
+        }
       }
-	
+
       _invocation.doResume(_requestFacade, _responseFacade);
     } catch (ClientDisconnectException e) {
       _response.killCache();
@@ -777,9 +777,9 @@ public class FastCgiRequest extends AbstractHttpRequest
       return false;
     } finally {
       finishInvocation();
-	
+
       if (! isSuspend())
-	finishRequest();
+        finishRequest();
     }
 
     if (log.isLoggable(Level.FINE)) {
@@ -819,10 +819,10 @@ public class FastCgiRequest extends AbstractHttpRequest
     _method.clear();
     _methodString = null;
     _protocol.clear();
-    
+
     _uriLength = 0;
     _uri = httpBuffer.getUriBuffer();
-    
+
     _uriHost.clear();
     _host = null;
 
@@ -878,7 +878,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
     case FCGI_STDIN:
       return readStdin(is, id, len, pad);
-      
+
     default:
       log.warning(this + " unexpected fastcgi code '" + code + "'");
       return false;
@@ -886,7 +886,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
     /*
     int i = 0;
-    
+
 
     byte []readBuffer = s.getBuffer();
     int readOffset = s.getOffset();
@@ -927,11 +927,11 @@ public class FastCgiRequest extends AbstractHttpRequest
       if (length <= offset) {
       }
       else if (ch >= 'a' && ch <= 'z')
-	buffer[offset++] = ((char) (ch + 'A' - 'a'));
+        buffer[offset++] = ((char) (ch + 'A' - 'a'));
       else if (ch > ' ')
-	buffer[offset++] = (char) ch;
+        buffer[offset++] = (char) ch;
       else
-	break;
+        break;
 
       if (readLength <= readOffset) {
         if ((readLength = s.fillBuffer()) < 0)
@@ -1023,7 +1023,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     while (true) {
       switch (ch) {
       case ' ': case '\t': case '\n': case '\r':
-	break uri;
+        break uri;
 
       default:
         // There's no check for overrunning the length because
@@ -1063,9 +1063,9 @@ public class FastCgiRequest extends AbstractHttpRequest
       if (offset >= length) {
       }
       else if (ch >= 'a' && ch <= 'z')
-	buffer[offset++] = ((char) (ch + 'A' - 'a'));
+        buffer[offset++] = ((char) (ch + 'A' - 'a'));
       else
-	buffer[offset++] = (char) ch;
+        buffer[offset++] = (char) ch;
 
       if (readOffset >= readLength) {
         readOffset = 0;
@@ -1145,7 +1145,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       // end of params
       return true;
     }
-    
+
     long pos = is.getPosition();
     long end = pos + len;
 
@@ -1180,38 +1180,38 @@ public class FastCgiRequest extends AbstractHttpRequest
   }
 
   private void readParam(ReadStream is,
-			 byte []key, int keyLength,
-			 int valueLength)
+                         byte []key, int keyLength,
+                         int valueLength)
     throws IOException
   {
     int ch = key[0];
-    
+
     switch ((keyLength << 8) | ch) {
     case HU_REQUEST_URI:
     case HL_REQUEST_URI:
       if (isMatch(key, REQUEST_URI, keyLength)) {
-	is.readAll(_uri, 0, valueLength);
-	_uriLength = valueLength;
-	_hasRequest = true;
-	return;
+        is.readAll(_uri, 0, valueLength);
+        _uriLength = valueLength;
+        _hasRequest = true;
+        return;
       }
       break;
-      
+
     case HU_REQUEST_METHOD:
     case HL_REQUEST_METHOD:
       if (isMatch(key, REQUEST_METHOD, keyLength)) {
-	_method.setLength(valueLength);
-	is.readAll(_method.getBuffer(), 0, valueLength);
-	return;
+        _method.setLength(valueLength);
+        is.readAll(_method.getBuffer(), 0, valueLength);
+        return;
       }
       break;
-      
+
     case HU_SERVER_PROTOCOL:
     case HL_SERVER_PROTOCOL:
       if (isMatch(key, SERVER_PROTOCOL, keyLength)) {
-	_protocol.setLength(valueLength);
-	is.readAll(_protocol.getBuffer(), 0, valueLength);
-	return;
+        _protocol.setLength(valueLength);
+        is.readAll(_protocol.getBuffer(), 0, valueLength);
+        return;
       }
       break;
     }
@@ -1221,21 +1221,21 @@ public class FastCgiRequest extends AbstractHttpRequest
     char []headerBuffer = _headerBuffer;
 
     if (keyLength > 5
-	&& ch == 'H'
-	&& key[1] == 'T'
-	&& key[2] == 'T'
-	&& key[3] == 'P'
-	&& key[4] == '_') {
-      
-      int headerOffset = _headerOffset;
-      
-      for (int i = 5; i < keyLength; i++) {
-	ch = (char) (key[i] & 0xff);
+        && ch == 'H'
+        && key[1] == 'T'
+        && key[2] == 'T'
+        && key[3] == 'P'
+        && key[4] == '_') {
 
-	if (ch == '_')
-	  ch = '-';
-	
-	headerBuffer[headerOffset++] = (char) ch;
+      int headerOffset = _headerOffset;
+
+      for (int i = 5; i < keyLength; i++) {
+        ch = (char) (key[i] & 0xff);
+
+        if (ch == '_')
+          ch = '-';
+
+        headerBuffer[headerOffset++] = (char) ch;
       }
 
       headerKey.init(headerBuffer, _headerOffset, keyLength - 5);
@@ -1247,7 +1247,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       _headerOffset = headerOffset + valueLength;
 
       _headerSize++;
-      
+
       return;
     }
 
@@ -1261,7 +1261,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   {
     for (int i = length - 1; i >= 0; i--) {
       if (bufferA[i] != bufferB[i])
-	return false;
+        return false;
     }
 
     return true;
@@ -1280,7 +1280,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   {
     return _requestFacade;
   }
-  
+
   public final void protocolCloseEvent()
   {
   }
@@ -1294,7 +1294,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     throws IOException
   {
     super.finishRequest();
-    
+
     skip();
 
     finishResponse();
@@ -1318,7 +1318,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     tempBuf[5] = (byte) 0;
     tempBuf[6] = 0;
     tempBuf[7] = 0;
-      
+
     _rawWrite.write(tempBuf, 0, 8);
 
     tempBuf[0] = FCGI_VERSION_1;
@@ -1331,7 +1331,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     tempBuf[7] = 0;
 
     _rawWrite.write(tempBuf, 0, 8);
-    
+
     int status = 0;
     tempBuf[0] = (byte) (status >> 24);
     tempBuf[1] = (byte) (status >> 16);
@@ -1341,7 +1341,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     tempBuf[5] = 0;
     tempBuf[6] = 0;
     tempBuf[7] = 0;
-      
+
     _rawWrite.write(tempBuf, 0, 8);
     _rawWrite.flush();
   }
@@ -1360,7 +1360,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       return getClass().getSimpleName() + "[" + _conn.getId() + "]";
     else {
       return (getClass().getSimpleName() + "[" + _server.getServerId()
-	      + ", " + _conn.getId() + "]");
+              + ", " + _conn.getId() + "]");
     }
   }
 
@@ -1425,11 +1425,11 @@ public class FastCgiRequest extends AbstractHttpRequest
       throws IOException
     {
       if (_pendingData <= 0)
-	return -1;
-      
+        return -1;
+
       int sublen = _pendingData;
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       ReadStream is = _request._rawRead;
 
@@ -1438,20 +1438,20 @@ public class FastCgiRequest extends AbstractHttpRequest
       _pendingData -= sublen;
 
       if (_pendingData == 0) {
-	if (_pad > 0)
-	  is.skip(_pad);
+        if (_pad > 0)
+          is.skip(_pad);
 
-	_pad = 0;
-	
-	int version = is.read();
-	int code = is.read();
-	int id = (is.read() << 8) + is.read();
-	_pendingData = (is.read() << 8) + is.read();
-	_pad = is.read();
-	int reserved = is.read();
+        _pad = 0;
 
-	if (reserved < 0 || code != FCGI_STDIN)
-	  _pendingData = 0;
+        int version = is.read();
+        int code = is.read();
+        int id = (is.read() << 8) + is.read();
+        _pendingData = (is.read() << 8) + is.read();
+        _pad = is.read();
+        int reserved = is.read();
+
+        if (reserved < 0 || code != FCGI_STDIN)
+          _pendingData = 0;
       }
 
       return sublen;
@@ -1471,36 +1471,36 @@ public class FastCgiRequest extends AbstractHttpRequest
       throws IOException
     {
       if (log.isLoggable(Level.FINE)) {
-	log.fine(_request.dbgId() + ":data " + length);
-        
+        log.fine(_request.dbgId() + ":data " + length);
+
         if (log.isLoggable(Level.FINEST))
           log.finest(_request.dbgId() + "data <" + new String(buf, offset, length) + ">");
       }
 
       byte []tempBuf = _buffer;
-      
+
       while (length > 0) {
-	int sublen = length;
+        int sublen = length;
 
-	if (32 * 1024 < sublen)
-	  sublen = 32 * 1024;
+        if (32 * 1024 < sublen)
+          sublen = 32 * 1024;
 
-	int id = 1;
-	
-	tempBuf[0] = FCGI_VERSION_1;
-	tempBuf[1] = FCGI_STDOUT;
-	tempBuf[2] = (byte) (id >> 8);
-	tempBuf[3] = (byte) (id);
-	tempBuf[4] = (byte) (sublen >> 8);
-	tempBuf[5] = (byte) sublen;
-	tempBuf[6] = 0;
-	tempBuf[7] = 0;
+        int id = 1;
 
-	_os.write(tempBuf, 0, 8);
-	_os.write(buf, offset, sublen);
+        tempBuf[0] = FCGI_VERSION_1;
+        tempBuf[1] = FCGI_STDOUT;
+        tempBuf[2] = (byte) (id >> 8);
+        tempBuf[3] = (byte) (id);
+        tempBuf[4] = (byte) (sublen >> 8);
+        tempBuf[5] = (byte) sublen;
+        tempBuf[6] = 0;
+        tempBuf[7] = 0;
 
-	length -= sublen;
-	offset += sublen;
+        _os.write(tempBuf, 0, 8);
+        _os.write(buf, offset, sublen);
+
+        length -= sublen;
+        offset += sublen;
       }
 
     }
@@ -1510,11 +1510,11 @@ public class FastCgiRequest extends AbstractHttpRequest
       throws IOException
     {
       if (! _request._hasRequest)
-	return;
-      
+        return;
+
       if (log.isLoggable(Level.FINE))
-	log.fine(_request.dbgId() + ":flush");
-      
+        log.fine(_request.dbgId() + ":flush");
+
       _os.flush();
     }
 
@@ -1523,19 +1523,19 @@ public class FastCgiRequest extends AbstractHttpRequest
       throws IOException
     {
       if (_isClosed)
-	return;
+        return;
 
       _isClosed = true;
 
       if (_pendingData > 0) {
-	_is.skip(_pendingData);
-	_pendingData = 0;
+        _is.skip(_pendingData);
+        _pendingData = 0;
       }
 
       boolean keepalive = _request.allowKeepalive();
 
       if (! _isClientClosed) {
-	if (log.isLoggable(Level.FINE)) {
+        if (log.isLoggable(Level.FINE)) {
           if (keepalive)
             log.fine(_request.dbgId() + " quit channel");
           else

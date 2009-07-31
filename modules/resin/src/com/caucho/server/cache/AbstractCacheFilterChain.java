@@ -31,8 +31,6 @@ package com.caucho.server.cache;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
 
-import com.caucho.server.dispatch.AbstractFilterChain;
-
 import javax.servlet.FilterChain;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +41,7 @@ import java.util.ArrayList;
  * Represents the final servlet in a filter chain.
  */
 abstract public class AbstractCacheFilterChain
-  extends AbstractFilterChain implements FilterChain {
+  implements FilterChain {
   /**
    * fillFromCache is called when the client needs the entire result, and
    * the result is already in the cache.
@@ -54,11 +52,11 @@ abstract public class AbstractCacheFilterChain
    * @param isTop if true, the not-modified should be sent to the browser
    */
   abstract public boolean fillFromCache(CauchoRequest req,
-					AbstractHttpResponse response,
-					AbstractCacheEntry abstractEntry,
-					boolean isTop)
+                                        AbstractHttpResponse response,
+                                        AbstractCacheEntry abstractEntry,
+                                        boolean isTop)
     throws IOException;
-  
+
   /**
    * Starts the caching after the headers have been sent.
    *
@@ -73,12 +71,12 @@ abstract public class AbstractCacheFilterChain
    *         uncacheable.
    */
   abstract public AbstractCacheEntry startCaching(CauchoRequest req,
-						  AbstractHttpResponse res,
-						  ArrayList<String> keys,
-						  ArrayList<String> values,
-						  String contentType,
-						  String charEncoding,
-						  long contentLength);
+                                                  AbstractHttpResponse res,
+                                                  ArrayList<String> keys,
+                                                  ArrayList<String> values,
+                                                  String contentType,
+                                                  String charEncoding,
+                                                  long contentLength);
 
   /**
    * Update the headers when the caching has finished.

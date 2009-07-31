@@ -32,7 +32,6 @@ package com.caucho.server.security;
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.dispatch.AbstractFilterChain;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -44,9 +43,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SecurityFilterChain extends AbstractFilterChain {
+public class SecurityFilterChain implements FilterChain {
   private FilterChain _next;
-  
+
   private ServletContext _webApp;
 
   private AbstractConstraint []_constraints;
@@ -94,17 +93,17 @@ public class SecurityFilterChain extends AbstractFilterChain {
       constraints = _constraints;
 
     AuthorizationResult result = AuthorizationResult.NONE;
-    
+
     boolean isPrivateCache = false;
     if (constraints != null) {
       for (AbstractConstraint constraint : constraints) {
-	result = constraint.isAuthorized(req, res, _webApp);
+        result = constraint.isAuthorized(req, res, _webApp);
 
-	if (constraint.isPrivateCache())
-	  isPrivateCache = true;
+        if (constraint.isPrivateCache())
+          isPrivateCache = true;
 
-	if (! result.isFallthrough())
-	  break;
+        if (! result.isFallthrough())
+          break;
       }
     }
 
@@ -114,41 +113,19 @@ public class SecurityFilterChain extends AbstractFilterChain {
     // server/1af3, server/12d2
     if (req.isLoginRequested() && req.login(result.isFail())) {
       if (result.isResponseSent())
-	return;
+        return;
     }
 
     if (result.isFail()) {
       if (! result.isResponseSent()
-	  && ! res.isCommitted()
-	  && res.getStatusCode() / 100 == 2) {
-	res.sendError(HttpServletResponse.SC_FORBIDDEN);
+          && ! res.isCommitted()
+          && res.getStatusCode() / 100 == 2) {
+        res.sendError(HttpServletResponse.SC_FORBIDDEN);
       }
-      
+
       return;
     }
-    
-    _next.doFilter(request, response);
-  }
-  
-  /**
-   * Resumes the request.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   *
-   * @since Resin 3.1.3
-   */
-  @Override
-  public boolean doResume(ServletRequest request,
-			  ServletResponse response)
-    throws ServletException, IOException
-  {
-    if (_next instanceof CometFilterChain) {
-      CometFilterChain next = (CometFilterChain) _next;
 
-      return next.doResume(request, response);
-    }
-    else
-      return false;
+    _next.doFilter(request, response);
   }
 }

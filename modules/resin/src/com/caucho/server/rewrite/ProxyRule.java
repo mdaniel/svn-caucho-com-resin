@@ -80,17 +80,17 @@ public class ProxyRule
 
   @Override
   public FilterChain dispatch(String uri,
-			      String queryString,
+                              String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
     throws ServletException
   {
     if (_target != null)
       return new ProxyFilterChain(_servlet.createServletChain(),
-				  _target, queryString);
+                                  _target, queryString);
     else
       return new ProxyFilterChain(_servlet.createServletChain(),
-				  uri, queryString);
+                                  uri, queryString);
   }
 
   @Override
@@ -120,7 +120,7 @@ public class ProxyRule
     }
   }
 
-  public static class ProxyFilterChain extends AbstractFilterChain {
+  public static class ProxyFilterChain implements FilterChain {
     private final FilterChain _next;
     private final String _uri;
     private final String _queryString;
@@ -134,7 +134,7 @@ public class ProxyRule
     }
 
     public void doFilter(ServletRequest req,
-			 ServletResponse res)
+                         ServletResponse res)
       throws IOException, ServletException
     {
       _next.doFilter(new ProxyRequest(req, _uri, _queryString), res);
@@ -144,10 +144,10 @@ public class ProxyRule
   public static class ProxyRequest extends HttpServletRequestWrapper {
     private String _uri;
     private String _queryString;
-    
+
     ProxyRequest(ServletRequest req,
-		 String uri,
-		 String queryString)
+                 String uri,
+                 String queryString)
     {
       super((HttpServletRequest) req);
 

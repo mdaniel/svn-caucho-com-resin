@@ -43,7 +43,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-public class StatisticsFilterChain extends AbstractFilterChain
+public class StatisticsFilterChain implements FilterChain
 {
   private final FilterChain _next;
   private WebApp _webApp;
@@ -91,7 +91,7 @@ public class StatisticsFilterChain extends AbstractFilterChain
         if (clientDisconnectException != null)
           throw clientDisconnectException;
 
-	return;
+        return;
       }
     }
 

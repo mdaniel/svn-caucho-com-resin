@@ -77,26 +77,26 @@ public abstract class AbstractHttpRequest
   static final L10N L = new L10N(AbstractHttpRequest.class);
 
   protected static final CaseInsensitiveIntMap _headerCodes;
-  
+
   public static final String REQUEST_URI = "javax.servlet.include.request_uri";
   public static final String CONTEXT_PATH = "javax.servlet.include.context_path";
   public static final String SERVLET_PATH = "javax.servlet.include.servlet_path";
   public static final String PATH_INFO = "javax.servlet.include.path_info";
   public static final String QUERY_STRING = "javax.servlet.include.query_string";
-  
+
   public static final String STATUS_CODE = "javax.servlet.error.status_code";
   public static final String EXCEPTION_TYPE = "javax.servlet.error.exception_type";
   public static final String MESSAGE = "javax.servlet.error.message";
   public static final String EXCEPTION = "javax.servlet.error.exception";
   public static final String ERROR_URI = "javax.servlet.error.request_uri";
   public static final String SERVLET_NAME = "javax.servlet.error.servlet_name";
-  
+
   public static final String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
-  
+
   public static final String SHUTDOWN = "com.caucho.shutdown";
 
   public static final String MULTIPARTCONFIG = "com.caucho.multipart-config";
-  
+
   private static final String CHAR_ENCODING = "resin.form.character.encoding";
   private static final String FORM_LOCALE = "resin.form.local";
   private static final String CAUCHO_CHAR_ENCODING = "caucho.form.character.encoding";
@@ -106,7 +106,7 @@ public abstract class AbstractHttpRequest
   private static final char []CONTENT_LENGTH = "content-length".toCharArray();
   private static final char []EXPECT = "expect".toCharArray();
   private static final char []HOST = "host".toCharArray();
-  
+
   private static final char []CONTINUE_100 = "100-continue".toCharArray();
   private static final char []CLOSE = "close".toCharArray();
 
@@ -118,9 +118,9 @@ public abstract class AbstractHttpRequest
 
   private static final Cookie []NULL_COOKIES
     = new Cookie[0];
-  
+
   protected final DispatchServer _server;
-  
+
   protected final Connection _conn;
   protected final TcpConnection _tcpConn;
 
@@ -135,16 +135,16 @@ public abstract class AbstractHttpRequest
 
   private boolean _keepalive;
   private long _startTime;
-  
+
   private String _runAs;
   private boolean _isLoginRequested;
 
   protected CharSegment _hostHeader;
   protected boolean _expect100Continue;
-    
+
   private Cookie []_cookiesIn;
   private ArrayList<Cookie> _cookies = new ArrayList<Cookie>();
-  
+
   // True if the page depends on cookies
   private boolean _varyCookies;
   // The cookie the page depends on
@@ -172,7 +172,7 @@ public abstract class AbstractHttpRequest
 
   private boolean _hasReader;
   private boolean _hasInputStream;
-  
+
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   // HttpServletRequest stuff
@@ -181,7 +181,7 @@ public abstract class AbstractHttpRequest
     = new HashMapImpl<String,String[]>();
   private HashMapImpl<String,String[]> _filledForm;
   private List<Part> _parts;
-  
+
   private final HashMapImpl<String,Object> _attributes
     = new HashMapImpl<String,Object>();
 
@@ -199,7 +199,7 @@ public abstract class AbstractHttpRequest
   private HttpBufferStore _httpBuffer;
 
   private ServletRequestAttributeListener []_attributeListeners;
-  
+
   /**
    * Create a new Request.  Because the actual initialization occurs with
    * the start() method, this just allocates statics.
@@ -211,7 +211,7 @@ public abstract class AbstractHttpRequest
     _server = server;
 
     _conn = conn;
-    
+
     if (conn != null)
       _rawRead = conn.getReadStream();
     else
@@ -261,7 +261,7 @@ public abstract class AbstractHttpRequest
   public void startConnection()
   {
   }
-  
+
   /**
    * Prepare the Request object for a new request.
    *
@@ -276,10 +276,10 @@ public abstract class AbstractHttpRequest
     _varyCookies = false;
     _varyCookie = null;
     _hasCookie = false;
-    
+
     _hostHeader = null;
     _expect100Continue = false;
-    
+
     _cookiesIn = null;
     _cookies.clear();
 
@@ -288,7 +288,7 @@ public abstract class AbstractHttpRequest
     _sessionGroup = -1;
     _session = null;
     _sessionIsLoaded = false;
-    
+
     _hasReadStream = false;
     _hasReader = false;
     _hasInputStream = false;
@@ -334,16 +334,16 @@ public abstract class AbstractHttpRequest
     // server/183c
 
     Invocation invocation = _invocation;
-    
+
     if (invocation == null)
       return true;
     else {
       WebApp webApp = invocation.getWebApp();
 
       if (webApp != null)
-	return webApp.isIgnoreClientDisconnect();
+        return webApp.isIgnoreClientDisconnect();
       else
-	return true;
+        return true;
     }
   }
 
@@ -388,27 +388,27 @@ public abstract class AbstractHttpRequest
     if (host == null && _invocation != null)
       host = _invocation.getHostName();
     */
-    
+
     CharSequence rawHost;
     if (host == null && (rawHost = getHost()) != null) {
       if (rawHost instanceof CharSegment) {
-	CharSegment cb = (CharSegment) rawHost;
-	
-	char []buffer = cb.getBuffer();
-	int offset = cb.getOffset();
-	int length = cb.getLength();
+        CharSegment cb = (CharSegment) rawHost;
 
-	for (int i = length - 1; i >= 0; i--) {
-	  char ch = buffer[i + offset];
+        char []buffer = cb.getBuffer();
+        int offset = cb.getOffset();
+        int length = cb.getLength();
 
-	  if ('A' <= ch && ch <= 'Z')
-	    buffer[i + offset] = (char) (ch + 'a' - 'A');
-	}
-	
-	host = new String(buffer, offset, length);
+        for (int i = length - 1; i >= 0; i--) {
+          char ch = buffer[i + offset];
+
+          if ('A' <= ch && ch <= 'Z')
+            buffer[i + offset] = (char) (ch + 'a' - 'A');
+        }
+
+        host = new String(buffer, offset, length);
       }
       else
-	return rawHost.toString().toLowerCase();
+        return rawHost.toString().toLowerCase();
     }
 
     if (host == null) {
@@ -419,7 +419,7 @@ public abstract class AbstractHttpRequest
     int p1 = host.lastIndexOf('/');
     if (p1 < 0)
       p1 = 0;
-    
+
     int p = host.lastIndexOf(':');
     if (p >= 0 && p1 < p)
       return host.substring(p1, p);
@@ -438,27 +438,27 @@ public abstract class AbstractHttpRequest
   public int getServerPort()
   {
     String host = _conn.getVirtualHost();
-    
+
     CharSequence rawHost;
     if (host == null && (rawHost = getHost()) != null) {
       int length = rawHost.length();
       int i;
 
       for (i = length - 1; i >= 0; i--) {
-	if (rawHost.charAt(i) == ':') {
-	  int port = 0;
+        if (rawHost.charAt(i) == ':') {
+          int port = 0;
 
-	  for (i++; i < length; i++) {
-	    char ch = rawHost.charAt(i);
+          for (i++; i < length; i++) {
+            char ch = rawHost.charAt(i);
 
-	    if ('0' <= ch && ch <= '9')
-	      port = 10 * port + ch - '0';
-	  }
+            if ('0' <= ch && ch <= '9')
+              port = 10 * port + ch - '0';
+          }
 
-	  return port;
-	}
+          return port;
+        }
       }
-      
+
       return isSecure() ? 443 : 80;
     }
 
@@ -473,10 +473,10 @@ public abstract class AbstractHttpRequest
       int port = 0;
 
       for (int i = p1 + 1; i < length; i++) {
-	char ch = host.charAt(i);
+        char ch = host.charAt(i);
 
-	if ('0' <= ch && ch <= '9')
-	  port = 10 * port + ch - '0';
+        if ('0' <= ch && ch <= '9')
+          port = 10 * port + ch - '0';
       }
 
       return port;
@@ -548,7 +548,7 @@ public abstract class AbstractHttpRequest
   /**
    * Returns the URI for the request
    */
-  public String getRequestURI() 
+  public String getRequestURI()
   {
     if (_invocation != null)
       return _invocation.getRawURI();
@@ -574,7 +574,7 @@ public abstract class AbstractHttpRequest
    * Returns the context part of the uri.  The context part is the part
    * that maps to an webApp.
    */
-  public String getContextPath() 
+  public String getContextPath()
   {
     if (_invocation != null)
       return _invocation.getContextPath();
@@ -586,7 +586,7 @@ public abstract class AbstractHttpRequest
    * Returns the context part of the uri.  For included files, this will
    * return the included context-path.
    */
-  public String getPageContextPath() 
+  public String getPageContextPath()
   {
     return getContextPath();
   }
@@ -642,8 +642,8 @@ public abstract class AbstractHttpRequest
   /**
    * Returns the URL for the request
    */
-  public StringBuffer getRequestURL() 
-  { 
+  public StringBuffer getRequestURL()
+  {
     StringBuffer sb = new StringBuffer();
 
     sb.append(getScheme());
@@ -651,10 +651,10 @@ public abstract class AbstractHttpRequest
 
     sb.append(getServerName());
     int port = getServerPort();
-    
+
     if (port > 0 &&
-	port != 80 &&
-	port != 443) {
+        port != 80 &&
+        port != 443) {
       sb.append(":");
       sb.append(port);
     }
@@ -678,7 +678,7 @@ public abstract class AbstractHttpRequest
     String context = getPageContextPath();
     if (context != null)
       uri = uri.substring(context.length());
-    
+
     int p = uri.lastIndexOf('/');
     if (p >= 0)
       path = uri.substring(0, p + 1) + path;
@@ -759,7 +759,7 @@ public abstract class AbstractHttpRequest
   public CharSegment getHeaderBuffer(String name)
   {
     String value = getHeader(name);
-    
+
     if (value != null)
       return new CharBuffer(value);
     else
@@ -787,48 +787,48 @@ public abstract class AbstractHttpRequest
   {
     if (keyLen < 4)
       return true;
-    
+
     int key1 = keyBuf[keyOff];
     switch (key1) {
     case 'c':
     case 'C':
       if (keyLen == CONNECTION.length
-	  && match(keyBuf, keyOff, keyLen, CONNECTION)) {
-	if (match(value.getBuffer(), value.getOffset(), value.getLength(),
-		  CLOSE)) {
-	  connectionClose();
-	}
+          && match(keyBuf, keyOff, keyLen, CONNECTION)) {
+        if (match(value.getBuffer(), value.getOffset(), value.getLength(),
+                  CLOSE)) {
+          connectionClose();
+        }
       }
       else if (keyLen == COOKIE.length
-	       && match(keyBuf, keyOff, keyLen, COOKIE)) {
-	fillCookie(_cookies, value);
+               && match(keyBuf, keyOff, keyLen, COOKIE)) {
+        fillCookie(_cookies, value);
       }
       else if (keyLen == CONTENT_LENGTH.length
-	       && match(keyBuf, keyOff, keyLen, CONTENT_LENGTH)) {
-	setContentLength(value);
+               && match(keyBuf, keyOff, keyLen, CONTENT_LENGTH)) {
+        setContentLength(value);
       }
-      
+
       return true;
-      
+
     case 'e':
     case 'E':
       if (match(keyBuf, keyOff, keyLen, EXPECT)) {
-	if (match(value.getBuffer(), value.getOffset(), value.getLength(),
-		  CONTINUE_100)) {
-	  _expect100Continue = true;
+        if (match(value.getBuffer(), value.getOffset(), value.getLength(),
+                  CONTINUE_100)) {
+          _expect100Continue = true;
           return false;
-	}
+        }
       }
-      
+
       return true;
-      
+
     case 'h':
     case 'H':
       if (match(keyBuf, keyOff, keyLen, HOST)) {
-	_hostHeader = value;
+        _hostHeader = value;
       }
       return true;
-      
+
     default:
       return true;
     }
@@ -839,11 +839,11 @@ public abstract class AbstractHttpRequest
     int contentLength = 0;
     int ch;
     int i = 0;
-    
+
     int length = value.length();
     for (;
-	 i < length && (ch = value.charAt(i)) >= '0' && ch <= '9';
-	 i++) {
+         i < length && (ch = value.charAt(i)) >= '0' && ch <= '9';
+         i++) {
       contentLength = 10 * contentLength + ch - '0';
     }
 
@@ -865,7 +865,7 @@ public abstract class AbstractHttpRequest
   private boolean match(char []a, int aOff, int aLength, char []b)
   {
     int bLength = b.length;
-    
+
     if (aLength != bLength)
       return false;
 
@@ -874,7 +874,7 @@ public abstract class AbstractHttpRequest
       char chB = b[i];
 
       if (chA != chB && chA + 'a' - 'A' != chB) {
-	return false;
+        return false;
       }
     }
 
@@ -938,15 +938,15 @@ public abstract class AbstractHttpRequest
     int sign = 1;
     if (ch == '+') {
       if (i + 1 < len)
-	ch = value.charAt(++i);
+        ch = value.charAt(++i);
       else
-	throw new NumberFormatException(value.toString());
+        throw new NumberFormatException(value.toString());
     } else if (ch == '-') {
       sign = -1;
       if (i + 1 < len)
-	ch = value.charAt(++i);
+        ch = value.charAt(++i);
       else
-	throw new NumberFormatException(value.toString());
+        throw new NumberFormatException(value.toString());
     }
 
     for (; i < len && (ch = value.charAt(i)) >= '0' && ch <= '9'; i++)
@@ -976,7 +976,7 @@ public abstract class AbstractHttpRequest
       date = _calendar.parseDate(value);
 
       if (date == Long.MAX_VALUE)
-	throw new IllegalArgumentException("getDateHeader(" + value + ")");
+        throw new IllegalArgumentException("getDateHeader(" + value + ")");
 
       return date;
     } catch (RuntimeException e) {
@@ -1025,7 +1025,7 @@ public abstract class AbstractHttpRequest
   {
     if (_readEncoding != null)
       return _readEncoding;
-    
+
     CharSegment value = getHeaderBuffer("Content-Type");
 
     if (value == null)
@@ -1057,19 +1057,19 @@ public abstract class AbstractHttpRequest
       }
 
       _readEncoding = Encoding.getMimeName(value.substring(i, tail));
-      
+
       return _readEncoding;
     }
 
     int tail;
     for (tail = i; tail < len; tail++) {
       if (Character.isWhitespace(value.charAt(tail)) ||
-	  value.charAt(tail) == ';')
-	break;
+          value.charAt(tail) == ';')
+        break;
     }
 
     _readEncoding = Encoding.getMimeName(value.substring(i, tail));
-    
+
     return _readEncoding;
   }
 
@@ -1080,11 +1080,11 @@ public abstract class AbstractHttpRequest
     throws UnsupportedEncodingException
   {
     _readEncoding = encoding;
-    
+
     try {
       // server/122d (tck)
       //if (_hasReadStream)
-      
+
       _readStream.setEncoding(_readEncoding);
     } catch (UnsupportedEncodingException e) {
       throw e;
@@ -1102,7 +1102,7 @@ public abstract class AbstractHttpRequest
   {
     // The page varies depending on the presense of any cookies
     setVaryCookie(null);
-    
+
     if (_cookiesIn == null)
       fillCookies();
 
@@ -1138,7 +1138,7 @@ public abstract class AbstractHttpRequest
     int length = _cookiesIn.length;
     for (int i = 0; i < length; i++) {
       Cookie cookie = _cookiesIn[i];
-      
+
       if (cookie.getName().equals(name)) {
         setHasCookie();
         return cookie;
@@ -1182,13 +1182,13 @@ public abstract class AbstractHttpRequest
 
       CharBuffer cbName = _cbName;
       CharBuffer cbValue = _cbValue;
-      
+
       cbName.clear();
       cbValue.clear();
 
       for (;
-	   j < end && ((ch = buf[j]) == ' ' || ch == ';' || ch ==',');
-	   j++) {
+           j < end && ((ch = buf[j]) == ' ' || ch == ';' || ch ==',');
+           j++) {
       }
 
       if (end <= j)
@@ -1201,18 +1201,18 @@ public abstract class AbstractHttpRequest
       }
 
       for (; j < end; j++) {
-	ch = buf[j];
-	if (ch < 128 && TOKEN[ch])
-	  cbName.append(ch);
-	else
-	  break;
+        ch = buf[j];
+        if (ch < 128 && TOKEN[ch])
+          cbName.append(ch);
+        else
+          break;
       }
 
       for (; j < end && (ch = buf[j]) == ' '; j++) {
       }
 
       if (end <= j)
-	break;
+        break;
       else if (ch == ';' || ch == ',') {
         try {
           cookie = new Cookie(cbName.toString(), "");
@@ -1248,9 +1248,9 @@ public abstract class AbstractHttpRequest
         for (; j < end; j++) {
           ch = buf[j];
           if (ch < 128 && VALUE[ch])
-	    cbValue.append(ch);
-	  else
-	    break;
+            cbValue.append(ch);
+          else
+            break;
         }
       }
 
@@ -1288,13 +1288,13 @@ public abstract class AbstractHttpRequest
       _varyCookie = cookie;
     else if (_varyCookie != null && ! _varyCookie.equals(cookie))
       _varyCookie = null;
-    
+
     _varyCookies = true;
 
     // XXX: server/1315 vs 2671
     // _response.setPrivateOrResinCache(true);
   }
-  
+
   /**
    * Returns true if the page depends on cookies.
    */
@@ -1302,7 +1302,7 @@ public abstract class AbstractHttpRequest
   {
     return _varyCookies;
   }
-  
+
   /**
    * Returns the cookie the page depends on, or null if the page
    * depends on several cookies.
@@ -1318,7 +1318,7 @@ public abstract class AbstractHttpRequest
   public void setHasCookie()
   {
     _hasCookie = true;
-    
+
     // XXX: 1171 vs 1240
     // _response.setPrivateOrResinCache(true);
   }
@@ -1366,7 +1366,7 @@ public abstract class AbstractHttpRequest
   {
     if (_session != null) {
       if (_session.isValid())
-	return _session;
+        return _session;
     }
     else if (! create && _sessionIsLoaded)
       return null;
@@ -1374,7 +1374,7 @@ public abstract class AbstractHttpRequest
     _sessionIsLoaded = true;
 
     _session = createSession(create);
-    
+
     return _session;
   }
 
@@ -1401,7 +1401,7 @@ public abstract class AbstractHttpRequest
 
     if (id == null)
       return false;
-    
+
     SessionImpl session = _session;
 
     if (session == null)
@@ -1446,7 +1446,7 @@ public abstract class AbstractHttpRequest
     String varyCookie = _varyCookie;
     boolean hasCookie = _hasCookie;
     boolean privateCache = _response.getPrivateCache();
-    
+
     String id = getRequestedSessionId();
 
     _varyCookies = varyCookies;
@@ -1468,14 +1468,14 @@ public abstract class AbstractHttpRequest
     SessionManager manager = getSessionManager();
 
     String cookieName = null;
-    
+
     if (manager != null && manager.enableSessionCookies()) {
       setVaryCookie(getSessionCookie(manager));
 
       String id = findSessionIdFromCookie();
 
       if (id != null) {
-	_isSessionIdFromCookie = true;
+        _isSessionIdFromCookie = true;
         setHasCookie();
         return id;
       }
@@ -1508,7 +1508,7 @@ public abstract class AbstractHttpRequest
   private String findSessionIdFromCookie()
   {
     SessionManager manager = getSessionManager();
-    
+
     if (manager == null || ! manager.enableSessionCookies())
       return null;
 
@@ -1566,57 +1566,12 @@ public abstract class AbstractHttpRequest
       = manager.createSession(create, this, id, now, _isSessionIdFromCookie);
 
     if (session != null
-	&& (id == null || ! session.getId().equals(id))
-	&& manager.enableSessionCookies()) {
+        && (id == null || ! session.getId().equals(id))
+        && manager.enableSessionCookies()) {
       getResponse().setSessionId(session.getId());
     }
-        
-    return session;
-
-    /*
-    if (id != null && id.length() > 6) {
-      // server/01t0
-      session = manager.getSession(id, now, false, _isSessionIdFromCookie);
-
-      if (session == null) {
-      }
-      else if (session.isValid()) {
-        if (session != null) {
-	  setVaryCookie(getSessionCookie(manager));
-          setHasCookie();
-	}
-	
-        if (! session.getId().equals(id) && manager.enableSessionCookies())
-          getResponse().setSessionId(session.getId());
-        
-        return session;
-      }
-    }
-    else
-      id = null;
-
-    if (! create)
-      return null;
-
-    // Must accept old ids because different webApps in the same
-    // server must share the same cookie
-    //
-    // But, if the session group doesn't match, then create a new
-    // session.
-
-    session = manager.createSession(id, now, this, _isSessionIdFromCookie);
-
-    if (session != null)
-      setHasCookie();
-      
-    if (session.getId().equals(id))
-      return session;
-
-    if (manager.enableSessionCookies())
-      getResponse().setSessionId(session.getId());
 
     return session;
-    */
   }
 
   /**
@@ -1631,7 +1586,7 @@ public abstract class AbstractHttpRequest
     else
       return null;
   }
-  
+
   /**
    * Returns the session cookie.
    */
@@ -1652,7 +1607,7 @@ public abstract class AbstractHttpRequest
 
     if (login instanceof X509Certificate)
       return CLIENT_CERT_AUTH;
-    
+
     WebApp app = getWebApp();
 
     if (app != null && app.getLogin() != null && getUserPrincipal() != null)
@@ -1713,50 +1668,50 @@ public abstract class AbstractHttpRequest
       user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
 
       if (user != null)
-	return true;
+        return true;
       */
 
       WebApp app = getWebApp();
       if (app == null) {
-	if (log.isLoggable(Level.FINE))
-	  log.finer("authentication failed, no web-app found");
-      
-	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
-	
-	return false;
+        if (log.isLoggable(Level.FINE))
+          log.finer("authentication failed, no web-app found");
+
+        _response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+        return false;
       }
 
       // If the authenticator can find the user, return it.
       Login login = app.getLogin();
 
       if (login != null) {
-	Principal user = login.login(getRequestFacade(),
-				     getResponse(),
-				     isFail);
+        Principal user = login.login(getRequestFacade(),
+                                     getResponse(),
+                                     isFail);
 
-	return user != null;
-	/*
-	if (user == null)
-	  return false;
-	
-	setAttribute(AbstractLogin.LOGIN_NAME, user);
+        return user != null;
+        /*
+        if (user == null)
+          return false;
 
-	return true;
-	*/
+        setAttribute(AbstractLogin.LOGIN_NAME, user);
+
+        return true;
+        */
       }
       else if (isFail) {
-	if (log.isLoggable(Level.FINE))
-	  log.finer("authentication failed, no login module found for "
-		    + app);
+        if (log.isLoggable(Level.FINE))
+          log.finer("authentication failed, no login module found for "
+                    + app);
 
-	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
-	
-	return false;
+        _response.sendError(HttpServletResponse.SC_FORBIDDEN);
+
+        return false;
       }
       else {
-	// if a non-failure, then missing login is fine
-	
-	return false;
+        // if a non-failure, then missing login is fine
+
+        return false;
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -1764,7 +1719,7 @@ public abstract class AbstractHttpRequest
       return false;
     }
   }
-  
+
   /**
    * Gets the remote user from the authorization type
    */
@@ -1777,14 +1732,14 @@ public abstract class AbstractHttpRequest
     else
       return null;
   }
-  
+
   /**
    * Returns the Principal representing the logged in user.
    */
   public Principal getUserPrincipal()
   {
     _isLoginRequested = true;
-    
+
     Principal user;
     user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
 
@@ -1794,7 +1749,7 @@ public abstract class AbstractHttpRequest
     WebApp app = getWebApp();
     if (app == null)
       return null;
-    
+
     // If the authenticator can find the user, return it.
     Login login = app.getLogin();
 
@@ -1802,12 +1757,12 @@ public abstract class AbstractHttpRequest
       user = login.getUserPrincipal(getRequestFacade());
 
       if (user != null) {
-	_response.setPrivateCache(true);
+        _response.setPrivateCache(true);
       }
       else {
-	// server/123h, server/1920
-	// distinguishes between setPrivateCache and setPrivateOrResinCache
-	// _response.setPrivateOrResinCache(true);
+        // server/123h, server/1920
+        // distinguishes between setPrivateCache and setPrivateOrResinCache
+        // _response.setPrivateOrResinCache(true);
       }
     }
 
@@ -1837,7 +1792,7 @@ public abstract class AbstractHttpRequest
       _session.logout();
     */
   }
-  
+
   /**
    * Sets the overriding role.
    */
@@ -1849,7 +1804,7 @@ public abstract class AbstractHttpRequest
 
     return oldRunAs;
   }
-  
+
   /**
    * Returns true if the user represented by the current request
    * plays the named role.
@@ -1860,25 +1815,25 @@ public abstract class AbstractHttpRequest
   public boolean isUserInRole(String role)
   {
     HashMap<String,String> roleMap = _invocation.getSecurityRoleMap();
-    
+
     if (roleMap != null) {
       String linkRole = roleMap.get(role);
-      
+
       if (linkRole != null)
-	role = linkRole;
+        role = linkRole;
     }
 
     if (_runAs != null)
       return _runAs.equals(role);
-    
+
     WebApp app = getWebApp();
-    
+
     Principal user = getUserPrincipal();
 
     if (user == null) {
       if (log.isLoggable(Level.FINE))
         log.fine(this + " no user for isUserInRole");
-    
+
       return false;
     }
 
@@ -1888,13 +1843,13 @@ public abstract class AbstractHttpRequest
       Boolean result = roleManager.isUserInRole(role, user);
 
       if (result != null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " userInRole(" + role + ")->" + result);
-	
-	return result;
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " userInRole(" + role + ")->" + result);
+
+        return result;
       }
     }
-    
+
     Login login = app == null ? null : app.getLogin();
 
     boolean inRole = login != null && login.isUserInRole(user, role);
@@ -1938,20 +1893,20 @@ public abstract class AbstractHttpRequest
   {
     if (! _hasReadStream) {
       _hasReadStream = true;
-      
+
       initStream(_readStream, _rawRead);
 
       if (isReader) {
-	// Encoding is based on getCharacterEncoding.
-	// getReader needs the encoding.
-	String charEncoding = getCharacterEncoding();
-	String javaEncoding = Encoding.getJavaName(charEncoding);
-	_readStream.setEncoding(javaEncoding);
+        // Encoding is based on getCharacterEncoding.
+        // getReader needs the encoding.
+        String charEncoding = getCharacterEncoding();
+        String javaEncoding = Encoding.getJavaName(charEncoding);
+        _readStream.setEncoding(javaEncoding);
       }
 
       if (_expect100Continue) {
-	_expect100Continue = false;
-	_response.writeContinue();
+        _expect100Continue = false;
+        _response.writeContinue();
       }
     }
 
@@ -1972,7 +1927,7 @@ public abstract class AbstractHttpRequest
     if (! _hasReadStream) {
       if (! initStream(_readStream, _rawRead))
         return;
-      
+
       _hasReadStream = true;
     }
 
@@ -2012,7 +1967,7 @@ public abstract class AbstractHttpRequest
 
     return _is;
   }
-  
+
   /**
    * Returns a Reader for the POST contents
    */
@@ -2076,7 +2031,7 @@ public abstract class AbstractHttpRequest
   public String getParameter(String name)
   {
     String []values = getParameterValues(name);
-    
+
     if (values != null && values.length > 0)
       return values[0];
     else
@@ -2090,7 +2045,7 @@ public abstract class AbstractHttpRequest
    * assume the encoded form uses the same encoding as
    * getCharacterEncoding().
    *
-   * <p/>If the request doesn't provide the encoding, use the 
+   * <p/>If the request doesn't provide the encoding, use the
    * character-encoding parameter from the webApp.
    *
    * <p/>Otherwise use the default system encoding.
@@ -2099,18 +2054,18 @@ public abstract class AbstractHttpRequest
   {
     try {
       _form.clear();
-      
+
       String query = getQueryString();
       CharSegment contentType = getContentTypeBuffer();
 
       if (query == null && contentType == null)
         return _form;
-      
+
       String charEncoding = getCharacterEncoding();
       if (charEncoding == null)
-	charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
+        charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
       if (charEncoding == null)
-	charEncoding = (String) getAttribute(CHAR_ENCODING);
+        charEncoding = (String) getAttribute(CHAR_ENCODING);
       if (charEncoding == null) {
         Locale locale = (Locale) getAttribute(FORM_LOCALE);
         if (locale != null)
@@ -2118,33 +2073,33 @@ public abstract class AbstractHttpRequest
       }
 
       if (query != null) {
-	String queryEncoding = charEncoding;
-	
-	if (queryEncoding == null && _server != null)
-	  queryEncoding = _server.getURLCharacterEncoding();
-      
-	if (queryEncoding == null)
-	  queryEncoding = CharacterEncoding.getLocalEncoding();
+        String queryEncoding = charEncoding;
 
-	String javaEncoding = Encoding.getJavaName(queryEncoding);
-	
-	_formParser.parseQueryString(_form, query, javaEncoding, true);
+        if (queryEncoding == null && _server != null)
+          queryEncoding = _server.getURLCharacterEncoding();
+
+        if (queryEncoding == null)
+          queryEncoding = CharacterEncoding.getLocalEncoding();
+
+        String javaEncoding = Encoding.getJavaName(queryEncoding);
+
+        _formParser.parseQueryString(_form, query, javaEncoding, true);
       }
-      
+
       if (charEncoding == null)
-	charEncoding = CharacterEncoding.getLocalEncoding();
-      
+        charEncoding = CharacterEncoding.getLocalEncoding();
+
       String javaEncoding = Encoding.getJavaName(charEncoding);
 
       if (contentType == null || ! "POST".equalsIgnoreCase(getMethod())) {
       }
-      
+
       else if (contentType.startsWith("application/x-www-form-urlencoded")) {
- 	_formParser.parsePostData(_form, getInputStream(), javaEncoding);
+        _formParser.parsePostData(_form, getInputStream(), javaEncoding);
       }
 
       else if (getWebApp().doMultipartForm()
-	       && contentType.startsWith("multipart/form-data")) {
+               && contentType.startsWith("multipart/form-data")) {
         int length = contentType.length();
         int i = contentType.indexOf("boundary=");
 
@@ -2153,9 +2108,9 @@ public abstract class AbstractHttpRequest
 
         long formUploadMax = getWebApp().getFormUploadMax();
 
-	Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
-	if (uploadMax instanceof Number)
-	  formUploadMax = ((Number) uploadMax).longValue();
+        Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
+        if (uploadMax instanceof Number)
+          formUploadMax = ((Number) uploadMax).longValue();
 
         // XXX: should this be an error?
         if (formUploadMax >= 0 && formUploadMax < getLongContentLength()) {
@@ -2163,7 +2118,7 @@ public abstract class AbstractHttpRequest
                        L.l("Multipart form upload of '{0}' bytes was too large.",
                            String.valueOf(getLongContentLength())));
           setAttribute("caucho.multipart.form.error.size",
-		       new Long(getLongContentLength()));
+                       new Long(getLongContentLength()));
 
           return _form;
         }
@@ -2207,7 +2162,7 @@ public abstract class AbstractHttpRequest
         }
 
         _parts = new ArrayList<Part>();
-        
+
         try {
           MultipartForm.parsePostData(_form,
                                       _parts,
@@ -2262,27 +2217,27 @@ public abstract class AbstractHttpRequest
   }
 
   protected void setAttribute(ServletRequest request,
-			      String name,
-			      Object value)
+                              String name,
+                              Object value)
   {
     if (value != null) {
       Object oldValue = _attributes.put(name, value);
-      
+
       for (int i = 0; i < _attributeListeners.length; i++) {
-	ServletRequestAttributeEvent event;
+        ServletRequestAttributeEvent event;
 
-	if (oldValue != null) {
-	  event = new ServletRequestAttributeEvent(getWebApp(), request,
-						   name, oldValue);
+        if (oldValue != null) {
+          event = new ServletRequestAttributeEvent(getWebApp(), request,
+                                                   name, oldValue);
 
-	  _attributeListeners[i].attributeReplaced(event);
-	}
-	else {
-	  event = new ServletRequestAttributeEvent(getWebApp(), request,
-						   name, value);
+          _attributeListeners[i].attributeReplaced(event);
+        }
+        else {
+          event = new ServletRequestAttributeEvent(getWebApp(), request,
+                                                   name, value);
 
-	  _attributeListeners[i].attributeAdded(event);
-	}
+          _attributeListeners[i].attributeAdded(event);
+        }
       }
     }
     else
@@ -2305,15 +2260,15 @@ public abstract class AbstractHttpRequest
    * @param name the attribute name.
    */
   protected void removeAttribute(ServletRequest request,
-				 String name)
+                                 String name)
   {
     Object oldValue = _attributes.remove(name);
-    
+
     for (int i = 0; i < _attributeListeners.length; i++) {
       ServletRequestAttributeEvent event;
 
       event = new ServletRequestAttributeEvent(getWebApp(), request,
-					       name, oldValue);
+                                               name, oldValue);
 
       _attributeListeners[i].attributeRemoved(event);
     }
@@ -2336,7 +2291,7 @@ public abstract class AbstractHttpRequest
       return getWebApp().getRequestDispatcher(path);
     else {
       CharBuffer cb = new CharBuffer();
-      
+
       ServletContext app = getWebApp();
 
       String servletPath = getPageServletPath();
@@ -2345,20 +2300,20 @@ public abstract class AbstractHttpRequest
       String pathInfo = getPagePathInfo();
       if (pathInfo != null)
         cb.append(pathInfo);
-      
+
       int p = cb.lastIndexOf('/');
       if (p >= 0)
-	cb.setLength(p);
+        cb.setLength(p);
       cb.append('/');
       cb.append(path);
 
       if (app != null)
-	return app.getRequestDispatcher(cb.toString());
+        return app.getRequestDispatcher(cb.toString());
 
       return app.getRequestDispatcher(cb.toString());
     }
   }
-  
+
   /*
    * jsdk 2.2
    */
@@ -2384,7 +2339,7 @@ public abstract class AbstractHttpRequest
   {
     if (_locales.size() > 0)
       return;
-    
+
     Enumeration headers = getHeaders("Accept-Language");
     if (headers == null) {
       _locales.add(Locale.getDefault());
@@ -2397,44 +2352,44 @@ public abstract class AbstractHttpRequest
       StringCharCursor cursor = new StringCharCursor(header);
 
       while (cursor.current() != cursor.DONE) {
-	char ch;
-	for (; Character.isWhitespace(cursor.current()); cursor.next()) {
-	}
+        char ch;
+        for (; Character.isWhitespace(cursor.current()); cursor.next()) {
+        }
 
-	cb.clear();
-	for (; (ch = cursor.current()) >= 'a' && ch <= 'z' ||
-	       ch >= 'A' && ch <= 'Z' ||
-	       ch >= '0' && ch <= '0';
-	     cursor.next()) {
-	  cb.append(cursor.current());
-	}
+        cb.clear();
+        for (; (ch = cursor.current()) >= 'a' && ch <= 'z' ||
+               ch >= 'A' && ch <= 'Z' ||
+               ch >= '0' && ch <= '0';
+             cursor.next()) {
+          cb.append(cursor.current());
+        }
 
-	String language = cb.toString();
-	String country = "";
-	String var = "";
+        String language = cb.toString();
+        String country = "";
+        String var = "";
 
-	if (cursor.current() == '_' || cursor.current() == '-') {
-	  cb.clear();
-	  for (cursor.next();
-	       (ch = cursor.current()) >= 'a' && ch <= 'z' ||
-	       ch >= 'A' && ch <= 'Z' ||
-	       ch >= '0' && ch <= '9';
-	       cursor.next()) {
-	    cb.append(cursor.current());
-	  }
-	  country = cb.toString();
-	}
+        if (cursor.current() == '_' || cursor.current() == '-') {
+          cb.clear();
+          for (cursor.next();
+               (ch = cursor.current()) >= 'a' && ch <= 'z' ||
+               ch >= 'A' && ch <= 'Z' ||
+               ch >= '0' && ch <= '9';
+               cursor.next()) {
+            cb.append(cursor.current());
+          }
+          country = cb.toString();
+        }
 
-	if (language.length() > 0) {
-	  Locale locale = new Locale(language, country);
-	  _locales.add(locale);
-	}
+        if (language.length() > 0) {
+          Locale locale = new Locale(language, country);
+          _locales.add(locale);
+        }
 
-	for (;
-	     cursor.current() != cursor.DONE && cursor.current() != ',';
-	     cursor.next()) {
-	}
-	cursor.next();
+        for (;
+             cursor.current() != cursor.DONE && cursor.current() != ',';
+             cursor.next()) {
+        }
+        cursor.next();
       }
     }
 
@@ -2476,79 +2431,12 @@ public abstract class AbstractHttpRequest
   }
 
   /**
-   * Suspend the request
-   *
-   * @since Servlet 3.0
-   */
-  public void suspend(long timeout)
-  {
-  }
-
-  /**
-   * Suspend the request
-   *
-   * @since Servlet 3.0
-   */
-  public void suspend()
-  {
-  }
-
-  /**
-   * Resume the request
-   *
-   * @since Servlet 3.0
-   */
-  public void resume()
-  {
-  }
-
-  /**
    * Complete the request
    *
    * @since Servlet 3.0
    */
   public void complete()
   {
-  }
-
-  /**
-   * Returns true if the servlet is suspended
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isSuspended()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the servlet is resumed
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isResumed()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the servlet timed out
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isTimeout()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true for the initial dispatch
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isInitial()
-  {
-    return true;
   }
 
   //
@@ -2572,10 +2460,10 @@ public abstract class AbstractHttpRequest
 
     if (invocation != null) {
       // server/2m05
-      
+
       WebApp app = invocation.getWebApp();
       if (app != null)
-	_attributeListeners = app.getRequestAttributeListeners();
+        _attributeListeners = app.getRequestAttributeListeners();
     }
   }
 
@@ -2594,7 +2482,7 @@ public abstract class AbstractHttpRequest
     else
       _startTime = Alarm.getCurrentTime();
   }
-  
+
   /**
    * Returns the date for the current request.
    */
@@ -2681,17 +2569,6 @@ public abstract class AbstractHttpRequest
   {
     return 0;
   }
-  
-  /**
-   * Handles a comet-style resume.
-   *
-   * @return true if the connection should stay open (keepalive)
-   */
-  public boolean handleResume()
-    throws IOException
-  {
-    return false;
-  }
 
   /**
    * Kills the keepalive.
@@ -2747,7 +2624,7 @@ public abstract class AbstractHttpRequest
       return false;
 
     TcpConnection tcpConn = _tcpConn;
-    
+
     if (tcpConn == null)
       return true;
 
@@ -2755,6 +2632,17 @@ public abstract class AbstractHttpRequest
       _keepalive = false;
 
     return _keepalive;
+  }
+
+  /**
+   * Handles a comet-style resume.
+   *
+   * @return true if the connection should stay open (keepalive)
+   */
+  public boolean handleResume()
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   //
@@ -2777,8 +2665,8 @@ public abstract class AbstractHttpRequest
    * @since Servlet 3.0
    */
   public void addAsyncListener(AsyncListener listener,
-			       ServletRequest request,
-			       ServletResponse response)
+                               ServletRequest request,
+                               ServletResponse response)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -2844,7 +2732,7 @@ public abstract class AbstractHttpRequest
    * @since Servlet 3.0
    */
   public AsyncContext startAsync(ServletRequest request,
-				 ServletResponse response)
+                                 ServletResponse response)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -2892,7 +2780,7 @@ public abstract class AbstractHttpRequest
 
     removeAttribute(Login.LOGIN_USER);
     removeAttribute(Login.LOGIN_PASSWORD);
-    
+
     Principal principal = login.getUserPrincipal(this);
 
     if (principal != null)
@@ -2918,7 +2806,7 @@ public abstract class AbstractHttpRequest
   {
     if (! getContentType().startsWith("multipart/form-data"))
       throw new ServletException("Content-Type must be of 'multipart/form-data'.");
-    
+
     if (_filledForm == null)
       _filledForm = parseQuery();
 
@@ -2941,7 +2829,7 @@ public abstract class AbstractHttpRequest
 
     if (_filledForm == null)
       _filledForm = parseQuery();
-    
+
     return _parts;
   }
 
@@ -2993,7 +2881,7 @@ public abstract class AbstractHttpRequest
       log.finer(e.toString());
     }
   }
-	   
+
   /**
    * Cleans up at the end of the request
    */
@@ -3003,14 +2891,14 @@ public abstract class AbstractHttpRequest
     try {
       // server/0219, but must be freed for GC
       _invocation = null;
-      
+
       _response.finishRequest();
 
       SessionImpl session = _session;
 
       if (session != null)
         session.finishRequest();
-      
+
       cleanup();
     } catch (Exception e) {
       e.printStackTrace();
@@ -3027,32 +2915,32 @@ public abstract class AbstractHttpRequest
       _closeOnExit.clear();
 
       if (_tcpConn != null) {
-	_tcpConn.endActive();
+        _tcpConn.endActive();
 
-	_tcpConn.finishRequest();
+        _tcpConn.finishRequest();
       }
 
       HttpBufferStore httpBuffer = _httpBuffer;
       _httpBuffer = null;
 
       if (httpBuffer != null)
-	HttpBufferStore.free(httpBuffer);
+        HttpBufferStore.free(httpBuffer);
     }
   }
 
   public void cleanup()
   {
     _session = null;
-      
+
     if (_attributes.size() > 0) {
       for (Map.Entry<String,Object> entry : _attributes.entrySet()) {
-	Object value = entry.getValue();
+        Object value = entry.getValue();
 
-	if (value instanceof ScopeRemoveListener) {
-	  ((ScopeRemoveListener) value).removeEvent(this, entry.getKey());
-	}
+        if (value instanceof ScopeRemoveListener) {
+          ((ScopeRemoveListener) value).removeEvent(this, entry.getKey());
+        }
       }
-	
+
       _attributes.clear();
     }
 
@@ -3092,7 +2980,7 @@ public abstract class AbstractHttpRequest
     {
       if (_newPath != null)
         _newPath.remove();
-      
+
       Object value = getValue();
 
       if (! (value instanceof FilePath))
@@ -3171,7 +3059,6 @@ public abstract class AbstractHttpRequest
     public void write(String fileName)
       throws IOException
     {
-
       if (_newPath != null)
         throw new IOException(L.l(
           "Contents of part '{0}' has already been written to '{1}'",
@@ -3234,10 +3121,11 @@ public abstract class AbstractHttpRequest
       }
     }
 
-    private Object getValue() {
+    private Object getValue()
+    {
       if (_value != null)
         return _value;
-      
+
       String []values = _filledForm.get(_name + ".file");
 
       if (values != null && values.length > 0) {
