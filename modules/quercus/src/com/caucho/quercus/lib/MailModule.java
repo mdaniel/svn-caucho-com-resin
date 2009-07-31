@@ -355,9 +355,42 @@ public class MailModule extends AbstractQuercusModule {
 
       for (;
            i < len
-	     && ((ch = headers.charAt(i)) != '\r' && ch != '\n');
+           && ((ch = headers.charAt(i)) != '\r' && ch != '\n');
            i++) {
         buffer.append((char) ch);
+      }
+
+      //
+      // check for multi-line values
+      //
+
+      for (;
+           i < len 
+           && ((ch = headers.charAt(i)) == '\r' || ch == '\n');
+           i++) {
+        buffer.append((char) ch);
+      }
+
+      while (i < len 
+             && ((ch = headers.charAt(i)) == '\t' || ch == ' ')) {
+        for (;
+             i < len
+             && ((ch = headers.charAt(i)) != '\r' && ch != '\n');
+             i++) {
+          buffer.append((char) ch);
+        }
+
+        for (;
+             i < len 
+             && ((ch = headers.charAt(i)) == '\r' || ch == '\n');
+             i++) {
+          buffer.append((char) ch);
+        }
+      }
+
+      while (buffer.length() > 0
+             && ((ch = buffer.getLastChar()) == '\r' || ch == '\n')) {
+        buffer.deleteCharAt(buffer.length() - 1);
       }
 
       String value = buffer.toString();

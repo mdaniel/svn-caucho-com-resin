@@ -604,6 +604,15 @@ abstract public class ArrayValue extends Value {
   {
     return get(key);
   }
+
+  /**
+   * Returns true if the value is set.
+   */
+  @Override
+  public boolean isset(Value key)
+  {
+    return get(key).isset();
+  }
   
   /**
    * Removes a value.
