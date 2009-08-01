@@ -188,71 +188,11 @@ public class CronTrigger implements Trigger {
 
     calendar.setGMTTime(time);
 
-    // Look for the next time slot match in the current time.
-    int second = nextInterval(_seconds, calendar.getSecond());
+    calendar = getNextTime(calendar);
 
-    if (second < 0) {
-      // No match in the current second, start looking at the next minute.
-      calendar.setMinute(calendar.getMinute() + 1);
-
-      // Now look for the next time slot in this minute, a match will be found.
-      second = nextInterval(_seconds, 0);
-    }
-
-    int minute = nextInterval(_minutes, calendar.getMinute());
-
-    if (minute < 0) {
-      calendar.setHour(calendar.getHour() + 1);
-
-      minute = nextInterval(_minutes, 0);
-      second = nextInterval(_seconds, 0);
-    }
-
-    int hour = nextInterval(_hours, calendar.getHour());
-
-    if (hour < 0) {
-      calendar.setDayOfMonth(calendar.getDayOfMonth() + 1);
-
-      hour = nextInterval(_hours, 0);
-      minute = nextInterval(_minutes, 0);
-      second = nextInterval(_seconds, 0);
-    }
-
-    int day = calendar.getDayOfMonth();
-
-    if (_days != null) {
-      day = nextInterval(_days, calendar.getDayOfMonth());
-
-      if (day < 0) {
-        calendar.setMonth(calendar.getMonth() + 1);
-        calendar.setDayOfMonth(1);
-
-        day = nextInterval(_days, calendar.getDayOfMonth());
-        hour = nextInterval(_hours, 0);
-        minute = nextInterval(_minutes, 0);
-        second = nextInterval(_seconds, 0);
-      }
-    }
-
-    if (_daysOfWeek != null) {
-      int oldDayOfWeek = calendar.getDayOfWeek() - 1;
-      int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
-
-      if (dayOfWeek >= 0) {
-        day += (dayOfWeek - oldDayOfWeek);
-      } else {
-        dayOfWeek = nextInterval(_daysOfWeek, 0);
-
-        day += (dayOfWeek - oldDayOfWeek + 7);
-      }
-    }
-
-    int month = calendar.getMonth();
-    int year = (int) calendar.getYear();
+    long nextTime = calendar.getGMTTime();
 
     freeCalendar(calendar);
-
-    long nextTime = nextTime(year, month, day, hour, minute, second);
 
     if (now < nextTime)
       return nextTime;
@@ -260,36 +200,197 @@ public class CronTrigger implements Trigger {
       return nextTime(now + 3600000L); // Daylight savings time.
   }
 
-  private int nextInterval(boolean[] values, int now)
+  private QDate getNextTime(QDate currentTime)
   {
-    for (; now < values.length; now++) {
-      if (values[now]) {
-        return now;
+    int year = currentTime.getYear();
+
+    QDate nextTime = getNextTimeInYear(currentTime);
+
+    while (nextTime == null) {
+      year++;
+
+      currentTime.setYear(year);
+      currentTime.setMonth(0); // The QDate implementation uses 0 indexed
+                               // months, but cron does not.
+      currentTime.setDayOfMonth(1);
+      currentTime.setHour(0);
+      currentTime.setMinute(0);
+      currentTime.setSecond(0);
+
+      nextTime = getNextTimeInYear(currentTime);
+    }
+
+    return nextTime;
+  }
+
+  private QDate getNextTimeInYear(QDate currentTime)
+  {
+    int month = getNextMatch(_months, (currentTime.getMonth() + 1));
+
+    if (month == -1) {
+      return null;
+    } else {
+      if (month > (currentTime.getMonth() + 1)) {
+        currentTime.setMonth(month - 1);
+        currentTime.setDayOfMonth(1);
+        currentTime.setHour(0);
+        currentTime.setMinute(0);
+        currentTime.setSecond(0);
+      }
+
+      QDate nextTime = getNextTimeInMonth(currentTime);
+
+      while ((month < _months.length) && (nextTime == null)) {
+        month++;
+        month = getNextMatch(_months, month);
+
+        if (month == -1) {
+          return null;
+        } else {
+          currentTime.setMonth(month - 1);
+          currentTime.setDayOfMonth(1);
+          currentTime.setHour(0);
+          currentTime.setMinute(0);
+          currentTime.setSecond(0);
+
+          nextTime = getNextTimeInMonth(currentTime);
+        }
+      }
+
+      return nextTime;
+    }
+  }
+
+  private QDate getNextTimeInMonth(QDate currentTime)
+  {
+    int day = getNextMatch(_days, currentTime.getDayOfMonth(), currentTime
+        .getDaysInMonth());
+
+    if (day == -1) {
+      return null;
+    } else {
+      if (day > currentTime.getDayOfMonth()) {
+        currentTime.setDayOfMonth(day);
+        currentTime.setHour(0);
+        currentTime.setMinute(0);
+        currentTime.setSecond(0);
+      }
+
+      QDate nextTime = getNextTimeInDay(currentTime);
+
+      if (nextTime == null) {
+        day++;
+        day = getNextMatch(_days, day, currentTime.getDaysInMonth());
+
+        if (day == -1) {
+          return null;
+        } else {
+          currentTime.setDayOfMonth(day);
+          currentTime.setHour(0);
+          currentTime.setMinute(0);
+          currentTime.setSecond(0);
+
+          return getNextTimeInDay(currentTime);
+        }
+      }
+
+      return nextTime;
+    }
+  }
+
+  private QDate getNextTimeInDay(QDate currentTime)
+  {
+    int hour = getNextMatch(_hours, currentTime.getHour());
+
+    if (hour == -1) {
+      return null;
+    } else {
+      if (hour > currentTime.getHour()) {
+        currentTime.setHour(hour);
+        currentTime.setMinute(0);
+        currentTime.setSecond(0);
+      }
+
+      QDate nextTime = getNextTimeInHour(currentTime);
+
+      if (nextTime == null) {
+        hour++;
+        hour = getNextMatch(_hours, hour);
+
+        if (hour == -1) {
+          return null;
+        } else {
+          currentTime.setHour(hour);
+          currentTime.setMinute(0);
+          currentTime.setSecond(0);
+
+          return getNextTimeInHour(currentTime);
+        }
+      }
+
+      return nextTime;
+    }
+  }
+
+  private QDate getNextTimeInHour(QDate currentTime)
+  {
+    int minute = getNextMatch(_minutes, currentTime.getMinute());
+
+    if (minute == -1) {
+      return null;
+    } else {
+      if (minute > currentTime.getMinute()) {
+        currentTime.setMinute(minute);
+        currentTime.setSecond(0);
+      }
+
+      QDate nextTime = getNextTimeInMinute(currentTime);
+
+      if (nextTime == null) {
+        minute++;
+        minute = getNextMatch(_minutes, minute);
+
+        if (minute == -1) {
+          return null;
+        } else {
+          currentTime.setMinute(minute);
+          currentTime.setSecond(0);
+
+          return getNextTimeInMinute(currentTime);
+        }
+      }
+
+      return nextTime;
+    }
+  }
+
+  private QDate getNextTimeInMinute(QDate currentTime)
+  {
+    int second = getNextMatch(_seconds, currentTime.getSecond());
+
+    if (second == -1) {
+      return null;
+    } else {
+      currentTime.setSecond(second);
+
+      return currentTime;
+    }
+  }
+
+  private int getNextMatch(boolean[] range, int start)
+  {
+    return getNextMatch(range, start, range.length);
+  }
+
+  private int getNextMatch(boolean[] range, int start, int end)
+  {
+    for (int match = start; match < end; match++) {
+      if (range[match]) {
+        return match;
       }
     }
 
     return -1;
-  }
-
-  private long nextTime(int year, int month, int day, int hour, int minute,
-      int second)
-  {
-    QDate calendar = allocateCalendar();
-
-    calendar.setLocalTime(0);
-
-    calendar.setYear(year);
-    calendar.setMonth(month);
-    calendar.setDayOfMonth(day);
-    calendar.setHour(hour);
-    calendar.setMinute(minute);
-    calendar.setSecond(second);
-
-    long time = calendar.getGMTTime();
-
-    freeCalendar(calendar);
-
-    return time;
   }
 
   private QDate allocateCalendar()
