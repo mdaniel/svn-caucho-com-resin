@@ -54,7 +54,7 @@ public class RegexpModule
 {
   private static final Logger log =
     Logger.getLogger(RegexpModule.class.getName());
-  
+
   private static final L10N L = new L10N(RegexpModule.class);
 
   public static final int PREG_REPLACE_EVAL = 0x01;
@@ -77,19 +77,19 @@ public class RegexpModule
 
   private static LruCache<StringValue, Regexp> _regexpCache
     = new LruCache<StringValue, Regexp>(1024);
-  
+
   private static LruCache<StringValue, Ereg> _eregCache
     = new LruCache<StringValue, Ereg>(1024);
-  
+
   private static LruCache<StringValue, Eregi> _eregiCache
     = new LruCache<StringValue, Eregi>(1024);
-  
+
   private static LruCache<UnicodeEregKey, UnicodeEreg> _unicodeEregCache
     = new LruCache<UnicodeEregKey, UnicodeEreg>(1024);
-  
+
   private static LruCache<UnicodeEregKey, UnicodeEregi> _unicodeEregiCache
     = new LruCache<UnicodeEregKey, UnicodeEregi>(1024);
-  
+
   private static LruCache<StringValue, ArrayList<Replacement>> _replacementCache
     = new LruCache<StringValue, ArrayList<Replacement>>(1024);
 
@@ -104,27 +104,27 @@ public class RegexpModule
   {
     return _regexpCache.getCapacity();
   }
-  
+
   @Hide
   public static void setRegexpCacheSize(int size)
   {
     if (size < 0 || size == _regexpCache.getCapacity())
       return;
-    
+
     _regexpCache = new LruCache<StringValue, Regexp>(size);
-  
+
     _eregCache = new LruCache<StringValue, Ereg>(size);
-  
+
     _eregiCache = new LruCache<StringValue, Eregi>(size);
-  
+
     _unicodeEregCache = new LruCache<UnicodeEregKey, UnicodeEreg>(size);
-  
+
     _unicodeEregiCache = new LruCache<UnicodeEregKey, UnicodeEregi>(size);
-  
+
     _replacementCache
       = new LruCache<StringValue, ArrayList<Replacement>>(size);
   }
-  
+
   /**
    * Returns the index of the first match.
    *
@@ -135,12 +135,12 @@ public class RegexpModule
                            StringValue string,
                            @Optional @Reference Value regsV)
   {
-    
+
     if (regexp.getRawRegexp().length() == 0) {
       env.warning(L.l("empty pattern argument"));
       return BooleanValue.FALSE;
     }
-    
+
     return eregImpl(env, regexp, string, regsV);
   }
 
@@ -154,12 +154,12 @@ public class RegexpModule
                             StringValue string,
                             @Optional @Reference Value regsV)
   {
-    
+
     if (regexp.getRawRegexp().length() == 0) {
       env.warning(L.l("empty pattern argument"));
       return BooleanValue.FALSE;
     }
-    
+
     //  php/1511 : error when pattern argument is null or an empty string
     return eregImpl(env, regexp, string, regsV);
   }
@@ -176,10 +176,10 @@ public class RegexpModule
   {
     if (regexp == null)
       return BooleanValue.FALSE;
-    
+
     // php/1512 : non-string pattern argument is converted to
     // an integer value and formatted as a string.
-    
+
     /*
     if (! rawPattern.isString())
       rawPatternStr = rawPattern.toLongValue().toStringValue();
@@ -191,7 +191,7 @@ public class RegexpModule
 
     if (regexpState.exec(env, string, 0) < 0) {
       RegexpState.free(env, regexpState);
-  
+
       return BooleanValue.FALSE;
     }
 
@@ -225,11 +225,11 @@ public class RegexpModule
     }
     else {
       RegexpState.free(env, regexpState);
-  
+
       return LongValue.ONE;
     }
   }
-  
+
   public static Regexp createRegexp(StringValue regexpValue)
   {
     try {
@@ -238,10 +238,10 @@ public class RegexpModule
       }
 
       Regexp regexp = _regexpCache.get(regexpValue);
-      
+
       if (regexp == null)
         regexp = new Regexp(regexpValue);
-      
+
       _regexpCache.put(regexpValue, regexp);
 
       return regexp;
@@ -250,7 +250,7 @@ public class RegexpModule
       throw new QuercusException(e);
     }
   }
-  
+
   public static Regexp createRegexp(Env env, StringValue regexpValue)
   {
     try {
@@ -258,12 +258,12 @@ public class RegexpModule
         env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
         return null;
       }
-      
+
       Regexp regexp = _regexpCache.get(regexpValue);
-      
+
       if (regexp == null)
         regexp = new Regexp(regexpValue);
-      
+
       _regexpCache.put(regexpValue, regexp);
 
       return regexp;
@@ -271,7 +271,7 @@ public class RegexpModule
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return null;
     }
   }
@@ -280,15 +280,15 @@ public class RegexpModule
   {
     if (pattern.isArray()) {
       ArrayValue array = (ArrayValue) pattern;
-      
+
       Regexp []regexpArray = new Regexp[array.getSize()];
-      
+
       int i = 0;
       for (Value value : array.values()) {
         Regexp regexp = createRegexp(value.toStringValue());
         regexpArray[i++] = regexp;
       }
-      
+
       return regexpArray;
     }
     else {
@@ -297,20 +297,20 @@ public class RegexpModule
       return new Regexp [] { regexp };
     }
   }
-  
+
   public static Regexp []createRegexpArray(Env env, Value pattern)
   {
     if (pattern.isArray()) {
       ArrayValue array = pattern.toArrayValue(env);
-      
+
       Regexp []regexpArray = new Regexp[array.getSize()];
-      
+
       int i = 0;
       for (Value value : array.values()) {
         Regexp regexp = createRegexp(env, value.toStringValue(env));
         regexpArray[i++] = regexp;
       }
-      
+
       return regexpArray;
     }
     else {
@@ -319,7 +319,7 @@ public class RegexpModule
       return new Regexp [] { regexp };
     }
   }
-  
+
   public static Ereg createEreg(Env env, Value value)
   {
     try {
@@ -333,91 +333,91 @@ public class RegexpModule
         regexpStr = value.toStringValue();
 
       Ereg ereg = _eregCache.get(regexpStr);
-      
+
       if (ereg == null) {
         StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
 
         ereg = new Ereg(cleanPattern);
-        
+
         _eregCache.put(regexpStr, ereg);
       }
-      
+
       return ereg;
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return null;
     }
   }
-  
+
   public static Ereg createEreg(Value value)
   {
     try {
       StringValue regexpStr;
-      
+
       if (value.isNull() || value.isBoolean())
         regexpStr = StringValue.EMPTY;
       else if (! value.isString())
         regexpStr = value.toLongValue().toStringValue();
       else
         regexpStr = value.toStringValue();
-      
+
       Ereg ereg = _eregCache.get(regexpStr);
-      
+
       if (ereg == null) {
         StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
 
         ereg = new Ereg(cleanPattern);
-        
+
         _eregCache.put(regexpStr, ereg);
       }
-      
+
       return ereg;
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
     }
   }
-  
+
   public static Eregi createEregi(Env env, Value value)
   {
     try {
       StringValue regexpStr;
-      
+
       if (value.isNull() || value.isBoolean())
         regexpStr = env.getEmptyString();
       else if (! value.isString())
         regexpStr = value.toLongValue().toStringValue();
       else
         regexpStr = value.toStringValue();
-      
+
       Eregi eregi = _eregiCache.get(regexpStr);
-      
+
       if (eregi == null) {
         StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
 
         eregi = new Eregi(cleanPattern);
-        
+
         _eregiCache.put(regexpStr, eregi);
       }
-      
+
       return eregi;
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return null;
     }
   }
-  
+
   public static Eregi createEregi(Value value)
   {
     try {
       StringValue regexpStr;
-      
+
       if (value.isNull() || value.isBoolean())
         regexpStr = StringValue.EMPTY;
       else if (! value.isString())
@@ -426,80 +426,80 @@ public class RegexpModule
         regexpStr = value.toStringValue();
 
       Eregi eregi = _eregiCache.get(regexpStr);
-      
+
       if (eregi == null) {
         StringValue cleanPattern = cleanEregRegexp(regexpStr, false);
 
         eregi = new Eregi(cleanPattern);
-        
+
         _eregiCache.put(regexpStr, eregi);
       }
-      
+
       return eregi;
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
     }
   }
-  
+
   public static UnicodeEreg createUnicodeEreg(Env env, StringValue pattern)
   {
     return createUnicodeEreg(env, pattern, MbstringModule.getEncoding(env));
   }
-  
+
   public static UnicodeEreg createUnicodeEreg(Env env,
                                               StringValue pattern,
                                               String encoding)
   {
     try {
       UnicodeEregKey key = new UnicodeEregKey(pattern, encoding);
-      
+
       UnicodeEreg ereg = _unicodeEregCache.get(key);
-      
+
       if (ereg == null) {
         pattern = pattern.convertToUnicode(env, encoding);
 
         StringValue cleanPattern = cleanEregRegexp(pattern, false);
-        
+
         ereg = new UnicodeEreg(cleanPattern);
-        
+
         _unicodeEregCache.put(key, ereg);
       }
-      
+
       return ereg;
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return null;
     }
   }
-  
+
   public static UnicodeEregi createUnicodeEregi(Env env, StringValue pattern)
   {
     return createUnicodeEregi(env, pattern, MbstringModule.getEncoding(env));
   }
-  
+
   public static UnicodeEregi createUnicodeEregi(Env env,
                                                StringValue pattern,
                                                String encoding)
   {
     try {
       UnicodeEregKey key = new UnicodeEregKey(pattern, encoding);
-      
+
       UnicodeEregi ereg = _unicodeEregiCache.get(key);
-      
+
       if (ereg == null) {
         pattern = pattern.convertToUnicode(env, encoding);
 
         StringValue cleanPattern = cleanEregRegexp(pattern, false);
-        
+
         ereg = new UnicodeEregi(cleanPattern);
-        
+
         _unicodeEregiCache.put(key, ereg);
       }
-      
+
       return ereg;
     }
     catch (IllegalRegexpException e) {
@@ -509,7 +509,7 @@ public class RegexpModule
       return null;
     }
   }
-  
+
   public static Value preg_match(Env env,
                                  Regexp regexp,
                                  StringValue subject,
@@ -521,7 +521,7 @@ public class RegexpModule
       return BooleanValue.FALSE;
 
     StringValue empty = subject.EMPTY;
-      
+
     RegexpState regexpState = RegexpState.create(env, regexp, subject);
 
     ArrayValue regs;
@@ -536,7 +536,7 @@ public class RegexpModule
         matchRef.set(regs);
 
       env.freeRegexpState(regexpState);
-    
+
       return LongValue.ZERO;
     }
 
@@ -557,9 +557,9 @@ public class RegexpModule
       for (int i = 1; i < count; i++) {
     if (! regexpState.isMatchedGroup(i))
       continue;
-          
+
     StringValue group = regexpState.group(env, i);
-    
+
     if (isOffsetCapture) {
       // php/151u
       // add unmatched groups first
@@ -599,7 +599,7 @@ public class RegexpModule
 
       matchRef.set(regs);
     }
-      
+
     env.freeRegexpState(regexpState);
 
     return LongValue.ONE;
@@ -690,12 +690,12 @@ public class RegexpModule
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
 
     StringValue emptyStr = subject.EMPTY;
-    
+
     for (int j = 0; j < groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
 
       Value patternName = regexpState.getGroupName(j);
-      
+
       // XXX: named subpatterns causing conflicts with array indexes?
       if (patternName != null)
         matches.put(patternName, values);
@@ -711,23 +711,23 @@ public class RegexpModule
 
       for (int j = 0; j < groupCount; j++) {
         ArrayValue values = matchList[j];
-        
+
         if (! regexpState.isMatchedGroup(j)) {
           /*
           if (j == groupCount || (flags & PREG_OFFSET_CAPTURE) == 0)
             values.put(emptyStr);
           else {
             Value result = new ArrayValueImpl();
-            
+
             result.put(emptyStr);
             result.put(LongValue.MINUS_ONE);
-            
+
             values.put(result);
           }
           */
-          
+
           values.put(emptyStr);
-            
+
           continue;
         }
 
@@ -771,7 +771,7 @@ public class RegexpModule
     }
 
     StringValue empty = subject.EMPTY;
-    
+
     int count = 0;
 
     do {
@@ -889,13 +889,16 @@ public class RegexpModule
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
 
-        for (Value value : ((ArrayValue) subject).values()) {
-          result.put(pregReplace(env,
-                                 regexp,
-                                 replacement,
-                                 value.toStringValue(),
-                                 limit,
-                                 count));
+        for (Map.Entry<Value,Value> entry : ((ArrayValue) subject).entrySet()) {
+          Value key = entry.getKey();
+          Value value = entry.getValue();
+
+          result.put(key, pregReplace(env,
+                                      regexp,
+                                      replacement,
+                                      value.toStringValue(),
+                                      limit,
+                                      count));
         }
 
         return result;
@@ -913,11 +916,11 @@ public class RegexpModule
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Replaces values using regexps
    */
@@ -960,13 +963,13 @@ public class RegexpModule
                                  limit,
                                  countV);
     }
-    
+
     if (string != null)
       return string;
     else
       return NullValue.NULL;
   }
-  
+
   /**
    * Loops through subject if subject is array of strings
    *
@@ -988,7 +991,7 @@ public class RegexpModule
   {
     try {
       Regexp []regexpList = createRegexpArray(pattern);
-      
+
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
 
@@ -1016,7 +1019,7 @@ public class RegexpModule
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -1067,7 +1070,7 @@ public class RegexpModule
                                    countV);
       }
     }
-    
+
     if (string != null)
       return string;
     else
@@ -1093,7 +1096,7 @@ public class RegexpModule
     throws IllegalRegexpException
   {
     StringValue empty = subject.EMPTY;
-    
+
     long numberOfMatches = 0;
 
     if (limit < 0)
@@ -1144,7 +1147,7 @@ public class RegexpModule
 
     return result;
   }
-  
+
   static StringValue pregReplaceString(Env env,
                                        Regexp regexp,
                                        StringValue replacement,
@@ -1153,7 +1156,7 @@ public class RegexpModule
                                        Value countV)
   {
     RegexpState regexpState = RegexpState.create(env, regexp);
-    
+
     if (! regexpState.setSubject(env, subject))
       return null;
 
@@ -1191,7 +1194,7 @@ public class RegexpModule
                                    StringValue subject)
   {
     StringValue regexpStr;
-    
+
     if (regexpValue.isLong())
       regexpStr = env.createString((char) regexpValue.toInt());
     else
@@ -1201,9 +1204,9 @@ public class RegexpModule
       env.warning(L.l("empty pattern argument"));
       return BooleanValue.FALSE;
     }
-    
+
     Ereg regexp = createEreg(env, regexpStr);
-    
+
     return eregReplaceImpl(env, regexp, replacement, subject, false);
   }
 
@@ -1216,7 +1219,7 @@ public class RegexpModule
                                     StringValue subject)
   {
     StringValue regexpStr;
-    
+
     if (regexpValue.isLong())
       regexpStr = env.createString((char) regexpValue.toInt());
     else
@@ -1226,9 +1229,9 @@ public class RegexpModule
       env.warning(L.l("empty pattern argument"));
       return BooleanValue.FALSE;
     }
-    
+
     Ereg regexp = createEregi(env, regexpStr);
-    
+
     return eregReplaceImpl(env, regexp, replacement, subject, true);
   }
 
@@ -1243,7 +1246,7 @@ public class RegexpModule
                                       boolean isCaseInsensitive)
   {
     StringValue replacementStr;
-    
+
     // php/150u : If a non-string type argument is passed
     // for the pattern or replacement argument, it is
     // converted to a string of length 1 that contains
@@ -1259,7 +1262,7 @@ public class RegexpModule
     }
 
     RegexpState regexpState = RegexpState.create(env, regexp);
-    
+
     regexpState.setSubject(env, subject);
 
     ArrayList<Replacement> replacementProgram
@@ -1304,12 +1307,12 @@ public class RegexpModule
 
     int tail = 0;
     boolean isMatched = false;
-    
+
     int replacementLen = replacementProgram.size();
 
     while (limit-- > 0 && regexpState.find()) {
       isMatched = true;
-      
+
       // Increment countV (note: if countV != null, then it should be a Var)
       if (countV != null && countV instanceof Var) {
         countV.set(LongValue.create(countV.toLong() + 1));
@@ -1319,7 +1322,7 @@ public class RegexpModule
       int start = regexpState.start();
       if (tail < start)
         result = result.append(regexpState.substring(env, tail, start));
-      
+
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
@@ -1327,7 +1330,7 @@ public class RegexpModule
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
-          
+
           evalString = replacement.eval(env, evalString, regexpState);
         }
 
@@ -1338,21 +1341,21 @@ public class RegexpModule
         } catch (IOException e) {
           throw new QuercusException(e);
         }
-        
+
       } else {
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
-          
+
           result = replacement.eval(env, result, regexpState);
         }
       }
 
       tail = regexpState.end();
     }
-    
+
     if (! isMatched)
       return subject;
-    
+
     if (tail < regexpState.getSubjectLength())
       result = result.append(regexpState.substring(env, tail));
 
@@ -1403,14 +1406,14 @@ public class RegexpModule
         return env.getEmptyString();
       }
     }
-    catch (IllegalRegexpException e) { 
+    catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Loops through subject if subject is array of strings
    */
@@ -1424,13 +1427,13 @@ public class RegexpModule
     if (! regexpValue.isArray()) {
       Regexp regexp = createRegexp(env, regexpValue.toStringValue());
 
-      
+
       return preg_replace_callback(env, regexp,
                                    fun, subject, limit, count);
     }
-    
+
     Regexp []regexpList = createRegexpArray(env, regexpValue);
-    
+
     try {
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1457,10 +1460,10 @@ public class RegexpModule
         return env.getEmptyString();
       }
     }
-    catch (IllegalRegexpException e) { 
+    catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -1491,7 +1494,7 @@ public class RegexpModule
                                      countV);
     }
   }
-  
+
   /**
    * Replaces values using regexps
    */
@@ -1538,7 +1541,7 @@ public class RegexpModule
   {
     if (regexp == null)
       return BooleanValue.FALSE;
-    
+
     if (limit <= 0)
       limit = LONG_MAX;
 
@@ -1553,12 +1556,12 @@ public class RegexpModule
     long count = 0;
 
     boolean allowEmpty = (flags & PREG_SPLIT_NO_EMPTY) == 0;
-    boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0; 
+    boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0;
     boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
 
     GroupNeighborMap neighborMap
       = new GroupNeighborMap(regexp.getPattern(), regexpState.groupCount());
-  
+
     while (regexpState.find()) {
       int startPosition = head;
       StringValue unmatched;
@@ -1664,7 +1667,7 @@ public class RegexpModule
     }
 
     env.freeRegexpState(regexpState);
-    
+
     return result;
   }
 
@@ -1749,7 +1752,7 @@ public class RegexpModule
     // php/151c
 
     RegexpState regexpState = RegexpState.create(env, regexp);
-    
+
     regexpState.setSubject(env, string);
 
     ArrayValue result = new ArrayValueImpl();
@@ -1775,7 +1778,7 @@ public class RegexpModule
     if (head <= string.length() && count != limit) {
       result.put(regexpState.substring(env, head));
     }
-    
+
     env.freeRegexpState(regexpState);
 
     return result;
@@ -1819,21 +1822,21 @@ public class RegexpModule
     }
 
     env.freeRegexpState(regexpState);
-    
+
     return matchArray;
   }
-  
+
   private static StringValue addDelimiters(Env env,
                                            StringValue str,
                                            String startDelim,
                                            String endDelim)
   {
     StringValue sb = str.createStringBuilder();
-    
+
     sb = sb.appendBytes(startDelim);
     sb = sb.append(str);
     sb = sb.appendBytes(endDelim);
-    
+
     return sb;
   }
 
@@ -2192,7 +2195,7 @@ public class RegexpModule
     {
       if (_group < regexpState.groupCount())
         sb = sb.append(regexpState.group(env, _group));
-      
+
       return sb;
     }
 
@@ -2247,7 +2250,7 @@ public class RegexpModule
           }
         }
       }
-      
+
       return sb;
     }
 
@@ -2267,7 +2270,7 @@ public class RegexpModule
     private static int UNSET = -1;
 
     public GroupNeighborMap(CharSequence regexp, int groups)
-    { 
+    {
       _neighborMap = new int[groups + 1];
 
       for (int i = 1; i <= groups; i++) {
@@ -2345,30 +2348,30 @@ public class RegexpModule
       return _neighborMap[group];
     }
   }
-  
+
   static class UnicodeEregKey
   {
     StringValue _regexpValue;
     String _encoding;
-    
+
     UnicodeEregKey(StringValue regexpValue, String encoding)
     {
       _regexpValue = regexpValue;
       _encoding = encoding;
     }
-    
+
     public boolean equals(Object o)
     {
       if (! (o instanceof UnicodeEregKey))
         return false;
-      
+
       UnicodeEregKey ereg = (UnicodeEregKey) o;
-      
+
       return _regexpValue.equals(ereg._regexpValue)
         && _encoding.equals(ereg._encoding);
     }
   }
-  
+
   static {
     PREG_QUOTE['\\'] = true;
     PREG_QUOTE['+'] = true;
