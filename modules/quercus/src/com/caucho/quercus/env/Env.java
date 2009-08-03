@@ -5240,7 +5240,7 @@ public class Env {
     ArrayList<String> list = new ArrayList<String>();
 
     for (Path path : _includeMap.keySet()) {
-      list.add(path.toString());
+      list.add(path.getNativePath());
     }
       
     Collections.sort(list);

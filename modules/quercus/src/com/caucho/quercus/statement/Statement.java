@@ -104,7 +104,7 @@ abstract public class Statement {
   {
     E typedT;
 
-    if (!cl.isAssignableFrom(t.getClass())) {
+    if (! cl.isAssignableFrom(t.getClass())) {
       try {
         typedT = cl.newInstance();
         typedT.initCause(t);

@@ -365,15 +365,19 @@ public class Xml {
     if (isFinal) {
       InputSource is;
       
-      if (_xmlString.isUnicode())
+      if (_xmlString.isUnicode()) {
         is = new InputSource(_xmlString.toReader("utf-8"));
-      else if (_xmlOptionTargetEncoding != null)
-        is = new InputSource(_xmlString.toReader(_xmlOptionTargetEncoding));
-      else
-        is = new InputSource(_xmlString.toInputStream());
-      
-      if (_xmlOptionTargetEncoding == null)
+        
         _xmlOptionTargetEncoding = is.getEncoding();
+      }
+      else if (_xmlOptionTargetEncoding != null
+               && _xmlOptionTargetEncoding.length() > 0)
+        is = new InputSource(_xmlString.toReader(_xmlOptionTargetEncoding));
+      else {
+        is = new InputSource(_xmlString.toInputStream());
+        
+        _xmlOptionTargetEncoding = is.getEncoding();
+      }
       
       try {
         _errorCode = XmlModule.XML_ERROR_NONE;

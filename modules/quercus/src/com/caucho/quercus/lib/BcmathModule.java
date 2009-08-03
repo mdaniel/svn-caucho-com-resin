@@ -47,9 +47,12 @@ import java.math.RoundingMode;
 public class BcmathModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(BcmathModule.class);
 
-  private static final BigDecimal ZERO = BigDecimal.ZERO;
-  private static final BigDecimal ONE = BigDecimal.ONE;
-  private static final BigDecimal TWO = new BigDecimal(2);
+  private static final BigDecimal DECIMAL_TWO
+    = new BigDecimal(2);
+  
+  private static final BigInteger INTEGER_MAX
+    = new BigInteger("" + Integer.MAX_VALUE);
+  
   private static final int SQRT_MAX_ITERATIONS = 50;
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
@@ -80,14 +83,14 @@ public class BcmathModule extends AbstractQuercusModule {
         return new BigDecimal(value.toString());
     }
     catch (NumberFormatException ex) {
-      return ZERO;
+      return BigDecimal.ZERO;
     }
     catch (IllegalArgumentException ex) {
-      return ZERO;
+      return BigDecimal.ZERO;
     }
   }
 
-  private static int calculateScale(Env env, int scale)
+  private static int getScale(Env env, int scale)
   {
     if (scale < 0) {
       Value iniValue = env.getIni("bcmath.scale");
@@ -111,7 +114,7 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static String bcadd(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);
@@ -133,7 +136,7 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static int bccomp(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);
@@ -155,12 +158,12 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static String bcdiv(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);
 
-    if (bd2.compareTo(ZERO) == 0) {
+    if (bd2.compareTo(BigDecimal.ZERO) == 0) {
       env.warning(L.l("division by zero"));
       return null;
     }
@@ -188,20 +191,23 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static String bcmod(Env env, Value value, Value modulus)
   {
-    BigDecimal bd1 = toBigDecimal(value).setScale(0, RoundingMode.DOWN);
-    BigDecimal bd2 = toBigDecimal(modulus).setScale(0, RoundingMode.DOWN);
+    BigDecimal base = toBigDecimal(value).setScale(0, RoundingMode.DOWN);
+    BigDecimal mod = toBigDecimal(modulus).setScale(0, RoundingMode.DOWN);
 
-    if (bd2.compareTo(ZERO) == 0) {
+    if (mod.compareTo(BigDecimal.ZERO) == 0) {
       env.warning(L.l("division by zero"));
       return null;
     }
-
-    BigDecimal bd = bd1.remainder(bd2, MathContext.DECIMAL128);
-
-    // scale is always 0 in php
-    bd = bd.setScale(0, RoundingMode.DOWN);
-
-    return bd.toPlainString();
+    
+    return bcmodImpl(base, mod).toString();
+  }
+  
+  private static BigInteger bcmodImpl(BigDecimal base, BigDecimal mod)
+  {
+    // php/1w0a
+    BigDecimal result = base.remainder(mod, MathContext.UNLIMITED);
+    
+    return result.toBigInteger();
   }
 
   /**
@@ -213,7 +219,7 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static String bcmul(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);
@@ -221,7 +227,7 @@ public class BcmathModule extends AbstractQuercusModule {
     BigDecimal bd = bd1.multiply(bd2);
 
     // odd php special case for 0, scale is ignored:
-    if (bd.compareTo(ZERO) == 0) {
+    if (bd.compareTo(BigDecimal.ZERO) == 0) {
       if (scale > 0)
         return "0.0";
       else
@@ -243,45 +249,60 @@ public class BcmathModule extends AbstractQuercusModule {
    * the result, the default is the value of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
-  public static String bcpow(Env env, Value base, Value exp, @Optional("-1") int scale)
+  public static String bcpow(Env env, Value base, Value exp,
+                             @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
-    BigDecimal bd1 = toBigDecimal(base);
-    BigDecimal bd2 = toBigDecimal(exp);
+    BigDecimal baseD = toBigDecimal(base);
+    BigDecimal expD = toBigDecimal(exp);
 
-    if (bd2.scale() > 0)
+    if (expD.scale() > 0)
       env.warning("fractional exponent not supported");
-
-    int exponent = bd2.toBigInteger().intValue();
-
-    if (exponent == 0)
-      return "1";
+    
+    BigInteger expI = expD.toBigInteger();
+    
+    return bcpowImpl(baseD, expI, scale).toPlainString();
+  }
+  
+  private static BigDecimal bcpowImpl(BigDecimal base,
+                                      BigInteger exp,
+                                      int scale)
+  {
+    if (exp.compareTo(BigInteger.ZERO) == 0)
+      return BigDecimal.ONE;
 
     boolean isNeg;
 
-    if (exponent < 0)  {
+    if (exp.compareTo(BigInteger.ZERO) < 0)  {
       isNeg = true;
-      exponent *= -1;
+      exp = exp.negate();
     }
     else
       isNeg = false;
-
-    BigDecimal bd = bd1.pow(exponent);
+    
+    BigDecimal result = BigDecimal.ZERO;
+    
+    while (exp.compareTo(BigInteger.ZERO) > 0) {
+      BigInteger expSub = exp.min(INTEGER_MAX);
+      exp = exp.subtract(expSub);
+      
+      result = result.add(base.pow(expSub.intValue()));
+    }
 
     if (isNeg)
-      bd = ONE.divide(bd, scale + 2, RoundingMode.DOWN);
+      result = BigDecimal.ONE.divide(result, scale + 2, RoundingMode.DOWN);
 
-    bd = bd.setScale(scale, RoundingMode.DOWN);
+    result = result.setScale(scale, RoundingMode.DOWN);
 
-    if (bd.compareTo(BigDecimal.ZERO) == 0)
-      return "0";
+    if (result.compareTo(BigDecimal.ZERO) == 0)
+      return BigDecimal.ZERO;
 
-    bd = bd.stripTrailingZeros();
+    result = result.stripTrailingZeros();
 
-    return bd.toPlainString();
+    return result;
   }
-
+  
   /**
    * Raise one arbitrary precision number (base) to the power of another (exp),
    * and then return the modulus.
@@ -293,19 +314,34 @@ public class BcmathModule extends AbstractQuercusModule {
    * the pow calculation, the default is the value of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
-  public static String bcpowmod(Env env, Value base, Value exp, Value modulus, @Optional("-1") int scale)
+  public static String bcpowmod(Env env,
+                                BigDecimal base,
+                                BigDecimal exp,
+                                BigDecimal modulus,
+                                @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
+    
+    if (base.scale() != 0) {
+      if (exp.scale() != 0)
+        env.warning("fractional exponent not supported");
+      
+      BigInteger expI = exp.toBigInteger();
+      
+      BigDecimal pow = bcpowImpl(base, expI, scale);
+      
+      return bcmodImpl(pow, modulus).toString();
+    }
+    else {
+      BigInteger baseI = base.toBigInteger();
+      BigInteger expI = exp.toBigInteger();
+      BigInteger modulusI = modulus.toBigInteger();
 
-    // XXX: this is inefficient, s/b fast-exponentiation
-    String pow = bcpow(env, base, exp, scale);
+      BigInteger result = baseI.modPow(expI, modulusI);
 
-    if (pow == null)
-      return null;
-
-    return bcmod(env, env.createString(pow), modulus);
+      return result.toString();
+    }
   }
-
 
   /**
    * Set the default scale to use for subsequent calls to bcmath functions.
@@ -333,11 +369,11 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static String bcsqrt(Env env, Value operand, @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
     BigDecimal value = toBigDecimal(operand);
 
-    int compareToZero = value.compareTo(ZERO);
+    int compareToZero = value.compareTo(BigDecimal.ZERO);
 
     if (compareToZero < 0) {
       env.warning(L.l("square root of negative number"));
@@ -347,7 +383,7 @@ public class BcmathModule extends AbstractQuercusModule {
       return "0";
     }
 
-    int compareToOne = value.compareTo(ONE);
+    int compareToOne = value.compareTo(BigDecimal.ONE);
 
     if (compareToOne == 0)
       return "1";
@@ -361,7 +397,7 @@ public class BcmathModule extends AbstractQuercusModule {
     BigDecimal initialGuess;
 
     if (compareToOne < 1) {
-      initialGuess = ONE;
+      initialGuess = BigDecimal.ONE;
       cscale = value.scale();
     }
     else {
@@ -374,7 +410,7 @@ public class BcmathModule extends AbstractQuercusModule {
 
       length /= 2;
 
-      initialGuess = ONE.movePointRight(length);
+      initialGuess = BigDecimal.ONE.movePointRight(length);
 
       cscale = Math.max(scale, value.scale()) + 2;
     }
@@ -389,7 +425,7 @@ public class BcmathModule extends AbstractQuercusModule {
       lastGuess = guess;
       guess = value.divide(guess, cscale, RoundingMode.DOWN);
       guess = guess.add(lastGuess);
-      guess = guess.divide(TWO, cscale, RoundingMode.DOWN);
+      guess = guess.divide(DECIMAL_TWO, cscale, RoundingMode.DOWN);
 
       if (lastGuess.equals(guess)) {
           break;
@@ -412,7 +448,7 @@ public class BcmathModule extends AbstractQuercusModule {
    */
   public static String bcsub(Env env, Value value1, Value value2, @Optional("-1") int scale)
   {
-    scale = calculateScale(env, scale);
+    scale = getScale(env, scale);
 
     BigDecimal bd1 = toBigDecimal(value1);
     BigDecimal bd2 = toBigDecimal(value2);

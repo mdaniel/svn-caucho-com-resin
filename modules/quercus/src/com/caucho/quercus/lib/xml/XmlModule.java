@@ -246,9 +246,9 @@ public class XmlModule extends AbstractQuercusModule {
    * returns a new Xml Parser
    */
   public Xml xml_parser_create(Env env,
-                               @Optional String outputEncoding)
+                               @Optional("'UTF-8'") String outputEncoding)
   {
-    if (outputEncoding == null || outputEncoding.length() == 0)
+    if (outputEncoding == null)
       outputEncoding = "UTF-8";
     
     return new Xml(env, outputEncoding, null);
@@ -264,9 +264,12 @@ public class XmlModule extends AbstractQuercusModule {
    * @return namespace aware Xml Parser
    */
   public Xml xml_parser_create_ns(Env env,
-                                       @Optional String outputEncoding,
-                                       @Optional("':'") String separator)
+                                  @Optional("'UTF-8'") String outputEncoding,
+                                  @Optional("':'") String separator)
   {
+    if (outputEncoding == null)
+      outputEncoding = "UTF-8";
+    
     return new Xml(env, outputEncoding, separator);
   }
 
@@ -297,7 +300,7 @@ public class XmlModule extends AbstractQuercusModule {
    * @return false if parser == null
    */
   public Value xml_parser_get_option(@NotNull Xml parser,
-                                       @NotNull int option)
+                                     @NotNull int option)
   {
     if (parser == null)
       return BooleanValue.FALSE;
