@@ -62,13 +62,13 @@ public class CustomBeanType extends ConfigType
     = "http://caucho.com/ns/resin";
   private static final String WEBBEANS_NS
     = "urn:java:javax.webbeans";
-  
+
   private static final QName TEXT = new QName("#text");
-  
+
   private static final QName W_VALUE = new QName("", "value", WEBBEANS_NS);
   private static final QName R_VALUE = new QName("", "value", RESIN_NS);
   private static final QName A_VALUE = new QName("value", null);
-  
+
   private static final QName W_NEW = new QName("", "new", WEBBEANS_NS);
   private static final QName R_NEW = new QName("", "new", RESIN_NS);
   private static final QName A_NEW = new QName("new", null);
@@ -82,10 +82,10 @@ public class CustomBeanType extends ConfigType
   private String _namespaceURI;
 
   private boolean _hasZeroArg;
-  
+
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
-  
+
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
 
@@ -114,7 +114,7 @@ public class CustomBeanType extends ConfigType
       _nsAttributeMap.put(R_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
       _nsAttributeMap.put(W_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
       _nsAttributeMap.put(A_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
-    
+
       _nsAttributeMap.put(TEXT, CustomBeanValueArgAttribute.ATTRIBUTE);
     }
     */
@@ -148,11 +148,11 @@ public class CustomBeanType extends ConfigType
 
     if (attr == null) {
       attr = getAttributeImpl(qName);
-      
+
       if (attr != null)
-	_nsAttributeMap.put(qName, attr);
+        _nsAttributeMap.put(qName, attr);
     }
-    
+
     return attr;
   }
 
@@ -165,7 +165,7 @@ public class CustomBeanType extends ConfigType
     }
 
     String uri = qName.getNamespaceURI();
-    
+
     if (uri == null)
       return null;
     else if (! uri.startsWith("urn:java:") && ! uri.equals(RESIN_NS))
@@ -173,19 +173,19 @@ public class CustomBeanType extends ConfigType
 
     Method method = null;
     if (uri.equals(_namespaceURI)
-	&& (method = findMethod(qName.getLocalName())) != null) {
+        && (method = findMethod(qName.getLocalName())) != null) {
       return new CustomBeanMethodAttribute(_beanClass, method);
     }
 
     Field field = null;
     if (uri.equals(_namespaceURI)
-	&& (field = findField(qName.getLocalName())) != null) {
+        && (field = findField(qName.getLocalName())) != null) {
       return new CustomBeanFieldAttribute(_beanClass, field);
     }
 
     /*
     if ("value".equals(qName.getLocalName())
-	&& (uri.equals("urn:java:ee") || (uri.equals(RESIN_NS)))) {
+        && (uri.equals("urn:java:ee") || (uri.equals(RESIN_NS)))) {
       // ioc/022k
       return CustomBeanValueArgAttribute.ATTRIBUTE;
     }
@@ -199,37 +199,38 @@ public class CustomBeanType extends ConfigType
       = TypeFactory.getFactory().getEnvironmentAttribute(qName);
 
     if (envAttr instanceof FlowAttribute) {
-      //	|| envAttr instanceof EnvironmentAttribute) {
+      //        || envAttr instanceof EnvironmentAttribute) {
       // ioc/04c1
       return envAttr;
     }
-    
+
     ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
 
     if (type == null) {
       if (Character.isLowerCase(qName.getLocalName().charAt(0))) {
-	throw new ConfigException(L.l("'{0}' is an unknown field of {1}",
-				      qName.getLocalName(),
-				      _beanClass.getName()));
+        throw new ConfigException(L.l("'{0}' is an unknown field of {1}",
+                                      qName.getLocalName(),
+                                      _beanClass.getName()));
       }
       else {
-	throw new ConfigException(L.l("'{0}' cannot be instantiated because it does not map to a known class",
-				      qName));
+        throw new ConfigException(L.l("'{0}' cannot be instantiated because it does not map to a known class",
+                                      qName));
       }
     }
 
     Class cl = type.getType();
 
-    if (Annotation.class.isAssignableFrom(cl))
+    if (Annotation.class.isAssignableFrom(cl)) {
       return new CustomBeanAnnotationAttribute(cl);
+    }
 
     AddAttribute addAttribute = (AddAttribute) _beanType.getAddAttribute(cl);
-    
+
     if (addAttribute != null)
       return new CustomBeanAddAttribute(cl);
 
     throw new ConfigException(L.l("'{0}' is an unknown field or annotation",
-				  qName));
+                                  qName));
     // return new CustomBeanArgAttribute(cl);
   }
 
@@ -254,10 +255,10 @@ public class CustomBeanType extends ConfigType
   {
     if (cl == null || cl.equals(Object.class))
       return null;
-    
+
     for (Method method : cl.getDeclaredMethods()) {
       if (method.getName().equals(name))
-	return method;
+        return method;
     }
 
     return findMethod(cl.getSuperclass(), name);
@@ -272,10 +273,10 @@ public class CustomBeanType extends ConfigType
   {
     if (cl == null || cl.equals(Object.class))
       return null;
-    
+
     for (Field field : cl.getDeclaredFields()) {
       if (field.getName().equals(name))
-	return field;
+        return field;
     }
 
     return findField(cl.getSuperclass(), name);
@@ -308,7 +309,7 @@ public class CustomBeanType extends ConfigType
 
     return cl;
   }
-  
+
   /**
    * Converts the string to a value of the type.
    */

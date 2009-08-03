@@ -121,7 +121,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     ClassLoader parent = Thread.currentThread().getContextClassLoader();
     String id = null;
-    
+
     return create(parent, id);
   }
 
@@ -131,7 +131,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public static EnvironmentClassLoader create(String id)
   {
     ClassLoader parent = Thread.currentThread().getContextClassLoader();
-    
+
     return create(parent, id);
   }
 
@@ -141,7 +141,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public static EnvironmentClassLoader create(ClassLoader parent)
   {
     String id = null;
-    
+
     return create(parent, id);
   }
 
@@ -224,7 +224,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public void init()
   {
     super.init();
-    
+
     initEnvironment();
   }
 
@@ -446,7 +446,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       }
 
       if (! listeners.contains(listener)) {
-	listeners.add(listener);
+        listeners.add(listener);
       }
     }
 
@@ -486,14 +486,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   protected void configureEnhancerEvent()
   {
     ArrayList<AddLoaderListener> listeners = getLoaderListeners();
-    
+
     for (int i = 0;
-	 listeners != null && i < listeners.size();
-	 i++) {
+         listeners != null && i < listeners.size();
+         i++) {
       AddLoaderListener listener = listeners.get(i);
 
       if (listener.isEnhancer())
-	listeners.get(i).addLoader(this);
+        listeners.get(i).addLoader(this);
     }
   }
 
@@ -503,14 +503,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   protected void configurePostEnhancerEvent()
   {
     ArrayList<AddLoaderListener> listeners = getLoaderListeners();
-    
+
     for (int i = 0;
-	 listeners != null && i < listeners.size();
-	 i++) {
+         listeners != null && i < listeners.size();
+         i++) {
       AddLoaderListener listener = listeners.get(i);
 
       if (! listener.isEnhancer())
-	listeners.get(i).addLoader(this);
+        listeners.get(i).addLoader(this);
     }
   }
 
@@ -522,7 +522,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     if (containsURL(url))
       return;
-    
+
     super.addURL(url);
 
     _pendingScanUrls.add(url);
@@ -539,32 +539,32 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     int i = 0;
     for (; i < _scanListeners.size(); i++) {
       if (listener.getPriority() < _scanListeners.get(i).getPriority())
-	break;
+        break;
     }
     _scanListeners.add(i, listener);
-    
+
     ArrayList<URL> urlList = new ArrayList<URL>();
     for (URL url : getURLs()) {
       if (! _pendingScanUrls.contains(url))
-	urlList.add(url);
+        urlList.add(url);
     }
 
     if (urlList.size() > 0) {
       try {
-	make();
+        make();
       } catch (Exception e) {
-	log().log(Level.WARNING, e.toString(), e);
-	
-	if (_configException == null)
-	  _configException = e;
+        log().log(Level.WARNING, e.toString(), e);
+
+        if (_configException == null)
+          _configException = e;
       }
-      
+
       ArrayList<ScanListener> selfList = new ArrayList<ScanListener>();
       selfList.add(listener);
       ScanManager scanManager = new ScanManager(selfList);
 
       for (URL url : urlList) {
-	scanManager.scan(this, url);
+        scanManager.scan(this, url);
       }
     }
   }
@@ -576,8 +576,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     synchronized (this) {
       if (_artifactManager == null)
-	_artifactManager = new ArtifactManager(this);
-      
+        _artifactManager = new ArtifactManager(this);
+
       return _artifactManager;
     }
   }
@@ -628,12 +628,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     apply.apply(this);
 
     for (ClassLoader parent = getParent();
-	 parent != null;
-	 parent = parent.getParent()) {
+         parent != null;
+         parent = parent.getParent()) {
       if (parent instanceof EnvironmentClassLoader) {
-	EnvironmentClassLoader env = (EnvironmentClassLoader) parent;
-	env.applyVisibleModules(apply);
-	break;
+        EnvironmentClassLoader env = (EnvironmentClassLoader) parent;
+        env.applyVisibleModules(apply);
+        break;
       }
     }
 
@@ -654,34 +654,34 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public void scan()
   {
     configureEnhancerEvent();
-    
+
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
 
     try {
       if (_scanListeners != null && urlList.size() > 0) {
-	try {
-	  make();
-	} catch (Exception e) {
-	  log().log(Level.WARNING, e.toString(), e);
-	
-	  if (_configException == null)
-	    _configException = e;
-	}
-      
-	ScanManager scanManager = new ScanManager(_scanListeners);
-      
-	for (URL url : urlList) {
-	  scanManager.scan(this, url);
-	}
+        try {
+          make();
+        } catch (Exception e) {
+          log().log(Level.WARNING, e.toString(), e);
+
+          if (_configException == null)
+            _configException = e;
+        }
+
+        ScanManager scanManager = new ScanManager(_scanListeners);
+
+        for (URL url : urlList) {
+          scanManager.scan(this, url);
+        }
       }
 
       // configureEnhancerEvent();
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
-	
+
       if (_configException == null)
-	_configException = e;
+        _configException = e;
     }
   }
 
@@ -691,7 +691,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private void config()
   {
     sendAddLoaderEvent();
-      
+
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     int size = listeners.size();
@@ -700,7 +700,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentConfigure(this);
     }
-    
+
     // _isConfigComplete = true;
   }
 
@@ -710,7 +710,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private void bind()
   {
     config();
-      
+
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     int size = listeners.size();
@@ -719,7 +719,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentBind(this);
     }
-    
+
     _isConfigComplete = true;
   }
 
@@ -733,12 +733,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       return;
 
     sendAddLoaderEvent();
-    
+
     bind();
 
     if (_artifactManager != null)
       _artifactManager.start();
-      
+
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     int size = listeners.size();
@@ -747,10 +747,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentStart(this);
     }
-    
+
     _admin = new EnvironmentAdmin(this);
     _admin.register();
-    
+
     _lifecycle.toActive();
   }
 
@@ -778,7 +778,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
           EnvironmentListener listener = listeners.get(i);
 
           try {
-	    listener.environmentStop(this);
+            listener.environmentStop(this);
           } catch (Throwable e) {
             log().log(Level.WARNING, e.toString(), e);
           }
@@ -788,7 +788,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       thread.setContextClassLoader(oldLoader);
 
        // drain the thread pool for GC
-      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
+      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this);
     }
   }
 
@@ -851,18 +851,26 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _admin = null;
 
       if (admin != null)
-	admin.unregister();
+        admin.unregister();
     }
   }
 
   @Override
   public String toString()
   {
-    if (getId() != null)
-      return getClass().getSimpleName() + "[" + getId() + "]";
-    else {
-      return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(getId());
+
+    if (! _lifecycle.isActive()) {
+      sb.append(",");
+      sb.append(_lifecycle.getStateName());
     }
+    sb.append("]");
+
+    return sb.toString();
   }
 
   private static final Logger log()

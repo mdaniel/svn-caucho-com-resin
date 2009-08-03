@@ -64,17 +64,12 @@ public class AnnotationInterfaceType extends ConfigType
   private static final Object _introspectLock = new Object();
 
   private final Class _annClass;
-  
+
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
-  
+
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
-
-  /*
-  private HashMap<String,Method> _createMap
-    = new HashMap<String,Method>();
-  */
 
   public AnnotationInterfaceType(Class annClass)
   {
@@ -82,18 +77,18 @@ public class AnnotationInterfaceType extends ConfigType
 
     for (Method method : annClass.getMethods()) {
       if (method.getParameterTypes().length != 0)
-	continue;
+        continue;
       else if (method.getName().equals("annotationType"))
-	continue;
+        continue;
 
-      
+
       boolean isEL = ! isAnnotationPresent(method.getAnnotations(),
-					   NonEL.class);
+                                           NonEL.class);
 
       _attributeMap.put(method.getName(),
-			new AnnotationAttribute(method.getName(),
-						method.getReturnType(),
-						isEL));
+                        new AnnotationAttribute(method.getName(),
+                                                method.getReturnType(),
+                                                isEL));
     }
 
     // createProxy(annClass);
@@ -103,7 +98,7 @@ public class AnnotationInterfaceType extends ConfigType
   {
     for (int i = 0; i < annList.length; i++) {
       if (annList[i].annotationType().equals(annType))
-	return true;
+        return true;
     }
 
     return false;
@@ -116,7 +111,7 @@ public class AnnotationInterfaceType extends ConfigType
   {
     return _annClass;
   }
-  
+
   /**
    * Creates a new instance of the type.
    */
@@ -134,7 +129,7 @@ public class AnnotationInterfaceType extends ConfigType
   {
     return ((AnnotationConfig) bean).replace();
   }
-  
+
   /**
    * Converts the string to a value of the type.
    */
@@ -147,8 +142,8 @@ public class AnnotationInterfaceType extends ConfigType
       Attribute attr = getAttribute(TEXT);
 
       if (attr == null)
-	throw new ConfigException(L.l("'{0}' does not support value",
-				      this));
+        throw new ConfigException(L.l("'{0}' does not support value",
+                                      this));
 
       attr.setText(ann, TEXT, text);
     }
@@ -156,11 +151,6 @@ public class AnnotationInterfaceType extends ConfigType
     // ioc/2183
 
     return ann.replace();
-    /*
-    Object value = ann.replace();
-    System.out.println("V: " + value
-    return
-    */
   }
 
   /**
@@ -169,7 +159,7 @@ public class AnnotationInterfaceType extends ConfigType
   public Attribute getAttribute(QName qName)
   {
     String name = qName.getLocalName();
-    
+
     if ("#text".equals(name))
       name = "value";
 
@@ -188,7 +178,7 @@ public class AnnotationInterfaceType extends ConfigType
     boolean isFirst = true;
     for (Map.Entry<String,Object> entry : valueMap.entrySet()) {
       if (! isFirst)
-	sb.append(",");
+        sb.append(",");
       isFirst = false;
 
       sb.append(entry.getKey());

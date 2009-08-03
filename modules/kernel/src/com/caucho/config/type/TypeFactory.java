@@ -67,12 +67,14 @@ public class TypeFactory implements AddLoaderListener
   private static L10N L = new L10N(TypeFactory.class);
 
   private static final String RESIN_NS = "http://caucho.com/ns/resin";
-  
+
   private static final HashMap<Class,ConfigType> _primitiveTypes
     = new HashMap<Class,ConfigType>();
-  
+
   private static final EnvironmentLocal<TypeFactory> _localFactory
     = new EnvironmentLocal<TypeFactory>();
+
+  private static final ClassLoader _systemClassLoader;
 
   private static final Object _introspectLock = new Object();
 
@@ -84,10 +86,10 @@ public class TypeFactory implements AddLoaderListener
 
   private final HashMap<String,ArrayList<String>> _packageImportMap
     = new HashMap<String,ArrayList<String>>();
-  
+
   private final HashMap<String,ConfigType> _typeMap
     = new HashMap<String,ConfigType>();
-  
+
   private final HashMap<String,CustomBeanType> _customBeanMap
     = new HashMap<String,CustomBeanType>();
 
@@ -108,18 +110,18 @@ public class TypeFactory implements AddLoaderListener
 
   private final HashSet<URL> _driverTypeSet
     = new HashSet<URL>();
-  
+
   private final HashMap<String,HashMap<String,String>> _driverTypeMap
     = new HashMap<String,HashMap<String,String>>();
 
   private final AtomicBoolean _isInInit = new AtomicBoolean();
-  
+
   private TypeFactory(ClassLoader loader)
   {
     _loader = Environment.getEnvironmentClassLoader(loader);
 
     _localFactory.set(this, loader);
-    
+
     if (_loader != null) {
       _parent = getFactory(_loader.getParent());
 
@@ -140,7 +142,7 @@ public class TypeFactory implements AddLoaderListener
       return ((CustomBeanConfig) bean).getConfigType();
     else if (bean instanceof AnnotationConfig)
       return ((AnnotationConfig) bean).getConfigType();
-	
+
     return getType(bean.getClass());
   }
 
@@ -216,9 +218,9 @@ public class TypeFactory implements AddLoaderListener
       type = getEnvironmentType(new QName(name.getLocalName()));
 
       if (type != null) {
-	_attrMap.put(name, type);
-	
-	return type;
+        _attrMap.put(name, type);
+
+        return type;
       }
     }
 
@@ -234,15 +236,16 @@ public class TypeFactory implements AddLoaderListener
   {
     ConfigType type = _attrMap.get(name);
 
-    if (type != null)
+    if (type != null) {
       return type == NotFoundConfigType.NULL ? null : type;
+    }
 
     if (_parent != null)
       type = _parent.getEnvironmentTypeRec(name);
 
     if (type != null) {
       _attrMap.put(name, type);
-	
+
       return type;
     }
 
@@ -254,11 +257,11 @@ public class TypeFactory implements AddLoaderListener
       ns.loadBeans();
 
       type = ns.getBean(name.getLocalName());
-	
+
       if (type != null) {
-	_attrMap.put(name, type);
-	
-	return type;
+        _attrMap.put(name, type);
+
+        return type;
       }
     }
 
@@ -272,10 +275,10 @@ public class TypeFactory implements AddLoaderListener
       Class cl = loadClassImpl(pkg, className);
 
       if (cl != null) {
-	return getType(cl);
+        return getType(cl);
       }
     }
-    
+
     _attrMap.put(name, NotFoundConfigType.NULL);
 
     return null;
@@ -290,12 +293,12 @@ public class TypeFactory implements AddLoaderListener
       Attribute attr = _listAttrMap.get(name);
 
       if (attr != null)
-	return attr;
+        return attr;
 
       ConfigType type = getEnvironmentType(name);
 
       if (type == null)
-	return null;
+        return null;
 
       attr = new ListValueAttribute(type);
 
@@ -314,12 +317,12 @@ public class TypeFactory implements AddLoaderListener
       Attribute attr = _setAttrMap.get(name);
 
       if (attr != null)
-	return attr;
+        return attr;
 
       ConfigType type = getEnvironmentType(name);
 
       if (type == null)
-	return null;
+        return null;
 
       attr = new SetValueAttribute(type);
 
@@ -358,17 +361,20 @@ public class TypeFactory implements AddLoaderListener
   {
     String className = pkg + "." + name;
 
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    ClassLoader loader = _loader;
+
+    if (_loader == null)
+      loader = _systemClassLoader;
 
     ArrayList<String> pkgList = loadPackageList(pkg);
 
     for (String pkgName : pkgList) {
       try {
-	Class cl = Class.forName(pkgName + '.' + name, false, loader);
+        Class cl = Class.forName(pkgName + '.' + name, false, loader);
 
-	return cl;
+        return cl;
       } catch (ClassNotFoundException e) {
-	log.log(Level.ALL, e.toString(), e);
+        log.log(Level.ALL, e.toString(), e);
       }
     }
 
@@ -381,38 +387,38 @@ public class TypeFactory implements AddLoaderListener
       ArrayList<String> pkgList = _packageImportMap.get(pkg);
 
       if (pkgList != null)
-	return pkgList;
+        return pkgList;
 
       pkgList = new ArrayList<String>();
       pkgList.add(pkg);
-      
+
       InputStream is = null;
       try {
-	ClassLoader loader = _loader;
+        ClassLoader loader = _loader;
 
-	if (loader == null)
-	  loader = ClassLoader.getSystemClassLoader();
+        if (loader == null)
+          loader = ClassLoader.getSystemClassLoader();
 
-	is = loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
+        is = loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
 
-	if (is != null) {
-	  ReadStream in = Vfs.openRead(is);
-	  String line;
-	  while ((line = in.readLine()) != null) {
-	    for (String name : line.split("[ \t\r\n]+")) {
-	      if (! "".equals(name)) {
-		if (! pkgList.contains(name))
-		  pkgList.add(name);
-	      }
-	    }
-	  }
-	}
+        if (is != null) {
+          ReadStream in = Vfs.openRead(is);
+          String line;
+          while ((line = in.readLine()) != null) {
+            for (String name : line.split("[ \t\r\n]+")) {
+              if (! "".equals(name)) {
+                if (! pkgList.contains(name))
+                  pkgList.add(name);
+              }
+            }
+          }
+        }
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       } finally {
-	IoUtil.close(is);
+        IoUtil.close(is);
       }
-      
+
       _packageImportMap.put(pkg, pkgList);
 
       return pkgList;
@@ -425,14 +431,14 @@ public class TypeFactory implements AddLoaderListener
       ConfigType strategy = _typeMap.get(type.getName());
 
       if (strategy == null) {
-	strategy = _primitiveTypes.get(type);
+        strategy = _primitiveTypes.get(type);
 
-	if (strategy == null)
-	  strategy = createType(type);
+        if (strategy == null)
+          strategy = createType(type);
 
-	_typeMap.put(type.getName(), strategy);
+        _typeMap.put(type.getName(), strategy);
 
-	strategy.introspect();
+        strategy.introspect();
       }
 
       return strategy;
@@ -445,9 +451,9 @@ public class TypeFactory implements AddLoaderListener
 
     if (ConfigType.class.isAssignableFrom(type)) {
       try {
-	return (ConfigType) type.newInstance();
+        return (ConfigType) type.newInstance();
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
     else if ((editor = findEditor(type)) != null)
@@ -457,12 +463,12 @@ public class TypeFactory implements AddLoaderListener
     else if (Set.class.isAssignableFrom(type))
       return new SetType(type);
     else if (Collection.class.isAssignableFrom(type)
-	     && ! Queue.class.isAssignableFrom(type)) {
+             && ! Queue.class.isAssignableFrom(type)) {
       // jms/2300
       return new ListType(type);
     }
     else if (Map.class.isAssignableFrom(type)
-	     && type.getName().startsWith("java.util")) {
+             && type.getName().startsWith("java.util")) {
       return new MapType(type);
     }
     else if (EnvironmentBean.class.isAssignableFrom(type))
@@ -471,7 +477,7 @@ public class TypeFactory implements AddLoaderListener
       return new FlowBeanType(type);
     else if (type.isArray()) {
       Class compType = type.getComponentType();
-      
+
       return new ArrayType(getType(compType), compType);
     }
     else if (Annotation.class.isAssignableFrom(type)) {
@@ -493,13 +499,13 @@ public class TypeFactory implements AddLoaderListener
   private static PropertyEditor findEditor(Class type)
   {
     // none of the caucho classes has a ProperyEditorManager
-    
+
     if (type.getName().startsWith("com.caucho"))
       return null;
     else
       return PropertyEditorManager.findEditor(type);
   }
-  
+
   /**
    * Returns the appropriate strategy.
    */
@@ -516,8 +522,8 @@ public class TypeFactory implements AddLoaderListener
       CustomBeanType beanType = _customBeanMap.get(type.getName());
 
       if (beanType == null) {
-	beanType = new CustomBeanType(type);
-	_customBeanMap.put(type.getName(), beanType);
+        beanType = new CustomBeanType(type);
+        _customBeanMap.put(type.getName(), beanType);
       }
 
       return beanType;
@@ -539,25 +545,25 @@ public class TypeFactory implements AddLoaderListener
       _nsMap.clear();
       _driverTypeSet.clear();
       _driverTypeMap.clear();
-      
+
       Enumeration<URL> urls
-	= loader.getResources("META-INF/caucho/com.caucho.config.namespace.xml");
+        = loader.getResources("META-INF/caucho/com.caucho.config.namespace.xml");
 
       while (urls.hasMoreElements()) {
-	URL url = urls.nextElement();
+        URL url = urls.nextElement();
 
-	if (hasConfig(url))
-	  continue;
+        if (hasConfig(url))
+          continue;
 
-	_configSet.add(url);
+        _configSet.add(url);
 
-	InputStream is = url.openStream();
+        InputStream is = url.openStream();
 
-	try {
-	  new Config(loader).configure(this, is);
-	} finally {
-	  is.close();
-	}
+        try {
+          new Config(loader).configure(this, is);
+        } finally {
+          is.close();
+        }
       }
     } catch (RuntimeException e) {
       throw e;
@@ -599,9 +605,9 @@ public class TypeFactory implements AddLoaderListener
       getDriverSchemes(schemes, api.getName());
 
       Collections.sort(schemes);
-      
+
       throw new ConfigException(L.l("'{0}' is an unknown scheme for driver '{1}'.  The available schemes are '{2}'",
-				    scheme, api.getName(), schemes));
+                                    scheme, api.getName(), schemes));
     }
 
     try {
@@ -609,16 +615,16 @@ public class TypeFactory implements AddLoaderListener
       Class cl = Class.forName(typeName, false, loader);
 
       if (! api.isAssignableFrom(cl))
-	throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
-				      cl.getName(), api.getName(),
-				      scheme));
+        throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
+                                      cl.getName(), api.getName(),
+                                      scheme));
 
       return cl;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(L.l("'{0}' is an undefined class for scheme '{1}'",
-				    typeName, scheme), e);
+                                    typeName, scheme), e);
     }
   }
 
@@ -635,9 +641,9 @@ public class TypeFactory implements AddLoaderListener
       getDriverSchemes(schemes, api.getName());
 
       Collections.sort(schemes);
-      
+
       throw new ConfigException(L.l("'{0}' is an unknown scheme for driver '{1}'.  The available schemes are '{2}'",
-				    scheme, api.getName(), schemes));
+                                    scheme, api.getName(), schemes));
     }
 
     try {
@@ -645,16 +651,16 @@ public class TypeFactory implements AddLoaderListener
       Class cl = Class.forName(typeName, false, loader);
 
       if (! api.isAssignableFrom(cl))
-	throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
-				      cl.getName(), api.getName(),
-				      scheme));
+        throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
+                                      cl.getName(), api.getName(),
+                                      scheme));
 
       return cl;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(L.l("'{0}' is an undefined class for scheme '{1}'",
-				    typeName, scheme), e);
+                                    typeName, scheme), e);
     }
   }
 
@@ -677,12 +683,12 @@ public class TypeFactory implements AddLoaderListener
     ContainerProgram program = new ContainerProgram();
     for (String prop : props) {
       if (prop.length() == 0)
-	continue;
-      
+        continue;
+
       String []values = prop.split("[=]");
 
       if (values.length != 2)
-	throw new ConfigException(L.l("'{0}' is an invalid URL.  Bean URL syntax is 'scheme:prop1=value1;prop2=value2'", url));
+        throw new ConfigException(L.l("'{0}' is an invalid URL.  Bean URL syntax is 'scheme:prop1=value1;prop2=value2'", url));
 
       program.addProgram(new PropertyStringProgram(values[0], values[1]));
     }
@@ -699,7 +705,7 @@ public class TypeFactory implements AddLoaderListener
   public String getDriverType(String apiType, String scheme)
   {
     HashMap<String,String> driverMap = getDriverTypeMap(apiType);
-    
+
     return driverMap.get(scheme);
   }
 
@@ -716,18 +722,18 @@ public class TypeFactory implements AddLoaderListener
     ClassLoader loader = _loader;
     if (_loader == null)
       loader = ClassLoader.getSystemClassLoader();
-    
+
     for (Map.Entry<String,String> entry : driverMap.entrySet()) {
       String scheme = entry.getKey();
       String type = entry.getValue();
 
       try {
-	Class cl = Class.forName(type, false, loader);
+        Class cl = Class.forName(type, false, loader);
 
-	if (cl != null)
-	  schemes.add(scheme);
+        if (cl != null)
+          schemes.add(scheme);
       } catch (Exception e) {
-	log.finest(apiType + " schemes: " + e.toString());
+        log.finest(apiType + " schemes: " + e.toString());
       }
     }
   }
@@ -741,14 +747,14 @@ public class TypeFactory implements AddLoaderListener
       HashMap<String,String> driverMap = _driverTypeMap.get(apiType);
 
       if (driverMap == null) {
-	driverMap = new HashMap<String,String>();
+        driverMap = new HashMap<String,String>();
 
-	if (_parent != null)
-	  driverMap.putAll(_parent.getDriverTypeMap(apiType));
+        if (_parent != null)
+          driverMap.putAll(_parent.getDriverTypeMap(apiType));
 
-	loadDriverTypeMap(driverMap, apiType);
+        loadDriverTypeMap(driverMap, apiType);
 
-	_driverTypeMap.put(apiType, driverMap);
+        _driverTypeMap.put(apiType, driverMap);
       }
 
       return driverMap;
@@ -759,39 +765,39 @@ public class TypeFactory implements AddLoaderListener
    * Reads the drivers from the META-INF/caucho
    */
   private void loadDriverTypeMap(HashMap<String,String> driverMap,
-				 String apiType)
+                                 String apiType)
   {
     try {
       ClassLoader loader = _loader;
 
       if (loader == null)
-	loader = ClassLoader.getSystemClassLoader();
-      
+        loader = ClassLoader.getSystemClassLoader();
+
       Enumeration<URL> urls
-	= loader.getResources("META-INF/caucho/com.caucho.config.uri/"
-			      + apiType);
+        = loader.getResources("META-INF/caucho/com.caucho.config.uri/"
+                              + apiType);
 
       while (urls.hasMoreElements()) {
-	URL url = urls.nextElement();
+        URL url = urls.nextElement();
 
-	if (hasDriver(url))
-	  continue;
+        if (hasDriver(url))
+          continue;
 
-	_driverTypeSet.add(url);
+        _driverTypeSet.add(url);
 
-	InputStream is = url.openStream();
+        InputStream is = url.openStream();
 
-	try {
-	  Properties props = new Properties();
+        try {
+          Properties props = new Properties();
 
-	  props.load(is);
+          props.load(is);
 
-	  for (Map.Entry entry : props.entrySet()) {
-	    driverMap.put((String) entry.getKey(), (String) entry.getValue());
-	  }
-	} finally {
-	  is.close();
-	}
+          for (Map.Entry entry : props.entrySet()) {
+            driverMap.put((String) entry.getKey(), (String) entry.getValue());
+          }
+        } finally {
+          is.close();
+        }
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -802,11 +808,11 @@ public class TypeFactory implements AddLoaderListener
   {
     synchronized (_driverTypeSet) {
       if (_driverTypeSet.contains(url))
-	return true;
+        return true;
       else if (_parent != null)
-	return _parent.hasDriver(url);
+        return _parent.hasDriver(url);
       else
-	return false;
+        return false;
     }
   }
 
@@ -818,7 +824,7 @@ public class TypeFactory implements AddLoaderListener
   {
     return false;
   }
-  
+
   /**
    * Called with the loader config changes.
    */
@@ -855,7 +861,7 @@ public class TypeFactory implements AddLoaderListener
     private String _ns = "";
     private boolean _isDefault;
     private Path _path;
-    
+
     private AtomicBoolean _isBeansLoaded = new AtomicBoolean();
 
     private HashMap<String,BeanConfig> _beanMap
@@ -864,8 +870,8 @@ public class TypeFactory implements AddLoaderListener
     public void setName(String ns)
     {
       if ("default".equals(ns))
-	ns = "";
-      
+        ns = "";
+
       _ns = ns;
     }
 
@@ -887,9 +893,9 @@ public class TypeFactory implements AddLoaderListener
     public void setPath(String path)
     {
       if (path.indexOf(':') < 0)
-	_path = Vfs.lookup("classpath:" + path);
+        _path = Vfs.lookup("classpath:" + path);
       else
-	_path = Vfs.lookup(path);
+        _path = Vfs.lookup(path);
     }
 
     public Path getPath()
@@ -900,12 +906,12 @@ public class TypeFactory implements AddLoaderListener
     public void loadBeans()
     {
       if (_isBeansLoaded.getAndSet(true))
-	return;
+        return;
 
       try {
-	new Config().configure(this, _path);
+        new Config().configure(this, _path);
       } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
@@ -914,9 +920,9 @@ public class TypeFactory implements AddLoaderListener
       BeanConfig beanConfig = _beanMap.get(name);
 
       if (beanConfig != null)
-	return beanConfig.getConfigType();
+        return beanConfig.getConfigType();
       else
-	return null;
+        return null;
     }
 
     public BeanConfig createBean()
@@ -975,21 +981,21 @@ public class TypeFactory implements AddLoaderListener
     public ConfigType getConfigType()
     {
       try {
-	if (_configType == null) {
-	  QName qName = new QName(null, _name, _ns);
-	
-	  Class cl = Class.forName(_className, false, _loader);
+        if (_configType == null) {
+          QName qName = new QName(null, _name, _ns);
 
-	  ConfigType type = createType(cl);
+          Class cl = Class.forName(_className, false, _loader);
 
-	  type.introspect();
+          ConfigType type = createType(cl);
 
-	  _configType = type;
-	}
-      
-	return _configType;
+          type.introspect();
+
+          _configType = type;
+        }
+
+        return _configType;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
@@ -997,10 +1003,10 @@ public class TypeFactory implements AddLoaderListener
     public void init()
     {
       if (_name == null)
-	throw new ConfigException(L.l("bean requires a 'name' attribute"));
-      
+        throw new ConfigException(L.l("bean requires a 'name' attribute"));
+
       if (_className == null)
-	throw new ConfigException(L.l("bean requires a 'class' attribute"));
+        throw new ConfigException(L.l("bean requires a 'class' attribute"));
     }
   }
 
@@ -1036,12 +1042,12 @@ public class TypeFactory implements AddLoaderListener
     _primitiveTypes.put(Character.class, CharacterType.TYPE);
 
     _primitiveTypes.put(Object.class, ObjectType.TYPE);
-    
+
     _primitiveTypes.put(String.class, StringType.TYPE);
     _primitiveTypes.put(RawString.class, RawStringType.TYPE);
-    
+
     _primitiveTypes.put(String[].class, StringArrayType.TYPE);
-    
+
     _primitiveTypes.put(Class.class, ClassType.TYPE);
     _primitiveTypes.put(Path.class, PathType.TYPE);
     _primitiveTypes.put(File.class, FileType.TYPE);
@@ -1052,9 +1058,18 @@ public class TypeFactory implements AddLoaderListener
     _primitiveTypes.put(QDate.class, QDateType.TYPE);
     _primitiveTypes.put(Date.class, DateType.TYPE);
     _primitiveTypes.put(Properties.class, PropertiesType.TYPE);
-    
+
     // _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);
-    
+
     _primitiveTypes.put(MethodExpression.class, MethodExpressionType.TYPE);
+
+    ClassLoader systemClassLoader = null;
+
+    try {
+      systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Exception e) {
+    }
+
+    _systemClassLoader = systemClassLoader;
   }
 }

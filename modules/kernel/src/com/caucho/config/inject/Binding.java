@@ -51,9 +51,9 @@ import javax.enterprise.inject.NonBinding;
 public class Binding {
   private static final Logger log = Logger.getLogger(Binding.class.getName());
   private static final L10N L = new L10N(Binding.class);
-  
+
   private static final Class []NULL_ARG = new Class[0];
-  
+
   private Annotation _ann;
 
   private ArrayList<Method> _methodList
@@ -67,15 +67,15 @@ public class Binding {
 
     for (Method method : methods) {
       if (method.getName().equals("annotationType"))
-	continue;
+        continue;
       else if (method.isAnnotationPresent(NonBinding.class))
-	continue;
+        continue;
       else if (method.getParameterTypes().length > 0)
-	continue;
+        continue;
       else if (Object.class.equals(method.getDeclaringClass()))
-	continue;
+        continue;
       else if (Annotation.class.equals(method.getDeclaringClass()))
-	continue;
+        continue;
 
       _methodList.add(method);
     }
@@ -85,7 +85,7 @@ public class Binding {
   {
     for (Annotation ann : annList) {
       if (isMatch(ann))
-	return true;
+        return true;
     }
 
     return false;
@@ -93,47 +93,48 @@ public class Binding {
 
   boolean isMatch(Annotation ann)
   {
-    if (! _ann.annotationType().equals(ann.annotationType()))
+    if (! _ann.annotationType().equals(ann.annotationType())) {
       return false;
+    }
 
     for (int i = 0; i < _methodList.size(); i++) {
       Method method = _methodList.get(i);
 
       try {
-	Object a = method.invoke(_ann);
+        Object a = method.invoke(_ann);
 
-	Object b;
+        Object b;
 
-	if (method.getDeclaringClass().isAssignableFrom(ann.getClass()))
-	  b = method.invoke(ann);
-	else {
-	  Method bMethod = null;
+        if (method.getDeclaringClass().isAssignableFrom(ann.getClass()))
+          b = method.invoke(ann);
+        else {
+          Method bMethod = null;
 
-	  try {
-	    bMethod = 
-	      ann.getClass().getMethod(method.getName(), NULL_ARG);
-	  } catch (NoSuchMethodException e) {
-	    log.log(Level.FINEST, e.toString(), e);
-	  }
+          try {
+            bMethod =
+              ann.getClass().getMethod(method.getName(), NULL_ARG);
+          } catch (NoSuchMethodException e) {
+            log.log(Level.FINEST, e.toString(), e);
+          }
 
-	  if (bMethod != null) {
-	    bMethod.setAccessible(true);
-	    b = bMethod.invoke(ann);
-	  }
-	  else
-	    b = method.getDefaultValue();
-	}
+          if (bMethod != null) {
+            bMethod.setAccessible(true);
+            b = bMethod.invoke(ann);
+          }
+          else
+            b = method.getDefaultValue();
+        }
 
-	if (a == b)
-	  continue;
-	else if (a == null)
-	  return false;
-	else if (! a.equals(b))
-	  return false;
+        if (a == b)
+          continue;
+        else if (a == null)
+          return false;
+        else if (! a.equals(b))
+          return false;
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
 
-	return false;
+        return false;
       }
     }
 

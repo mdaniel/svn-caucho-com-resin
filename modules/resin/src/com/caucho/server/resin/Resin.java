@@ -1422,8 +1422,12 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     // validateEnvironment();
 
+    Thread thread = Thread.currentThread();
+
+    thread.setContextClassLoader(_systemClassLoader);
+
     if (_classLoader != null)
-      _mainThread.setContextClassLoader(_classLoader);
+      thread.setContextClassLoader(_classLoader);
 
     Path pwd = Vfs.getPwd();
 
@@ -1470,8 +1474,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     _resinConf = resinConf;
 
     // server.setServerRoot(_serverRoot);
-
-    _mainThread.setContextClassLoader(_systemClassLoader);
 
     Vfs.setPwd(getRootDirectory());
 

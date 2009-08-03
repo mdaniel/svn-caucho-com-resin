@@ -55,7 +55,7 @@ public class ObserverImpl implements Observer {
 
   private final InjectManager _webBeans;
   private final AbstractBean _bean;
-  
+
   private final Method _method;
   private final int _paramIndex;
 
@@ -65,9 +65,9 @@ public class ObserverImpl implements Observer {
   private Bean []_args;
 
   public ObserverImpl(InjectManager webBeans,
-		      AbstractBean bean,
-		      Method method,
-		      int paramIndex)
+                      AbstractBean bean,
+                      Method method,
+                      int paramIndex)
   {
     _webBeans = webBeans;
     _bean = bean;
@@ -77,7 +77,7 @@ public class ObserverImpl implements Observer {
 
     for (Annotation ann : method.getParameterAnnotations()[paramIndex]) {
       if (ann instanceof IfExists)
-	_ifExists = true;
+        _ifExists = true;
     }
 
     bind();
@@ -100,15 +100,15 @@ public class ObserverImpl implements Observer {
       Named named = (Named) _cl.getAnnotation(Named.class);
 
       if (named != null)
-	_name = named.value();
+        _name = named.value();
 
       if (_name == null || "".equals(_name)) {
-	String className = _targetType.getName();
-	int p = className.lastIndexOf('.');
-      
-	char ch = Character.toLowerCase(className.charAt(p + 1));
-      
-	_name = ch + className.substring(p + 2);
+        String className = _targetType.getName();
+        int p = className.lastIndexOf('.');
+
+        char ch = Character.toLowerCase(className.charAt(p + 1));
+
+        _name = ch + className.substring(p + 2);
       }
     }
     */
@@ -118,36 +118,36 @@ public class ObserverImpl implements Observer {
   {
     synchronized (this) {
       if (_args != null)
-	return;
-      
+        return;
+
       Type []param = _method.getGenericParameterTypes();
       Annotation [][]annList = _method.getParameterAnnotations();
 
       _args = new Bean[param.length];
 
       String loc = LineConfigException.loc(_method);
-      
+
       for (int i = 0; i < param.length; i++) {
-	if (hasObserves(annList[i]))
-	  continue;
+        if (hasObserves(annList[i]))
+          continue;
 
-	Set beans = _webBeans.getBeans(param[i], annList[i]);
-	
-	if (beans == null || beans.size() == 0) {
-	  throw new ConfigException(loc
-				    + L.l("Parameter '{0}' binding does not have a matching component",
-					  getSimpleName(param[i])));
-	}
-	
-	Bean comp = null;
+        Set beans = _webBeans.getBeans(param[i], annList[i]);
 
-	// XXX: error checking
-	Iterator iter = beans.iterator();
-	if (iter.hasNext()) {
-	  comp = (Bean) iter.next();
-	}
+        if (beans == null || beans.size() == 0) {
+          throw new ConfigException(loc
+                                    + L.l("Parameter '{0}' binding does not have a matching component",
+                                          getSimpleName(param[i])));
+        }
 
-	_args[i] = comp;
+        Bean comp = null;
+
+        // XXX: error checking
+        Iterator iter = beans.iterator();
+        if (iter.hasNext()) {
+          comp = (Bean) iter.next();
+        }
+
+        _args[i] = comp;
       }
     }
   }
@@ -156,7 +156,7 @@ public class ObserverImpl implements Observer {
   {
     for (Annotation ann : annList) {
       if (ann instanceof Observes)
-	return true;
+        return true;
     }
 
     return false;
@@ -170,34 +170,32 @@ public class ObserverImpl implements Observer {
       Context context = _webBeans.getContext(_bean.getScopeType());
 
       if (context != null && context.isActive())
-	obj = context.get(_bean);
+        obj = context.get(_bean);
     }
     else {
       // XXX: perf
       CreationalContext env = _webBeans.createCreationalContext();
-      
-      obj = _webBeans.getReference(_bean, _bean.getBeanClass(), env); 
-    }
 
-    System.out.println("OBJ: " + obj);
+      obj = _webBeans.getReference(_bean, _bean.getBeanClass(), env);
+    }
 
     try {
       if (obj != null) {
-	Object []args = new Object[_args.length];
+        Object []args = new Object[_args.length];
 
-	for (int i = 0; i < _args.length; i++) {
-	  Bean bean = _args[i];
-	  
-	  if (bean != null) {
-	    CreationalContext env = _webBeans.createCreationalContext();
-	    
-	    args[i] = _webBeans.getReference(bean, bean.getBeanClass(), env);
-	  }
-	  else
-	    args[i] = event;
-	}
-	
-	_method.invoke(obj, args);
+        for (int i = 0; i < _args.length; i++) {
+          Bean bean = _args[i];
+
+          if (bean != null) {
+            CreationalContext env = _webBeans.createCreationalContext();
+
+            args[i] = _webBeans.getReference(bean, bean.getBeanClass(), env);
+          }
+          else
+            args[i] = event;
+        }
+
+        _method.invoke(obj, args);
       }
     } catch (RuntimeException e) {
       throw e;

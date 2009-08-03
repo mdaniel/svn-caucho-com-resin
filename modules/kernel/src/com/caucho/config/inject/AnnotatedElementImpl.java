@@ -51,15 +51,15 @@ public class AnnotatedElementImpl implements Annotated
 
   private LinkedHashSet<Annotation> _annSet
     = new LinkedHashSet<Annotation>();
-  
+
   protected AnnotatedElementImpl(Type type,
-				 Annotated annotated,
-				 Annotation []annList)
+                                 Annotated annotated,
+                                 Annotation []annList)
   {
     _type = type;
 
     _typeSet.add(type);
-    
+
     if (annList == null)
       annList = new Annotation[0];
 
@@ -68,11 +68,11 @@ public class AnnotatedElementImpl implements Annotated
     }
     else {
       for (Annotation ann : annList) {
-	_annSet.add(ann);
+        _annSet.add(ann);
       }
     }
   }
-  
+
   public AnnotatedElementImpl(Annotated annotated)
   {
     this(annotated.getBaseType(), annotated, null);
@@ -92,9 +92,9 @@ public class AnnotatedElementImpl implements Annotated
   {
     for (Annotation oldAnn : _annSet) {
       if (newAnn.annotationType().equals(oldAnn.annotationType())) {
-	_annSet.remove(oldAnn);
-	_annSet.add(newAnn);
-	return;
+        _annSet.remove(oldAnn);
+        _annSet.add(newAnn);
+        return;
       }
     }
 
@@ -105,8 +105,8 @@ public class AnnotatedElementImpl implements Annotated
   {
     for (Annotation oldAnn : _annSet) {
       if (ann.annotationType().equals(oldAnn.annotationType())) {
-	_annSet.remove(oldAnn);
-	return;
+        _annSet.remove(oldAnn);
+        return;
       }
     }
   }
@@ -115,7 +115,7 @@ public class AnnotatedElementImpl implements Annotated
   {
     _annSet.clear();
   }
-  
+
   /**
    * Returns the declared annotations
    */
@@ -131,7 +131,7 @@ public class AnnotatedElementImpl implements Annotated
   {
     for (Annotation ann : getAnnotations()) {
       if (annType.equals(ann.annotationType()))
-	return (T) ann;
+        return (T) ann;
     }
 
     return null;
@@ -144,7 +144,7 @@ public class AnnotatedElementImpl implements Annotated
   {
     for (Annotation ann : getAnnotations()) {
       if (annType.equals(ann.annotationType()))
-	return true;
+        return true;
     }
 
     return false;

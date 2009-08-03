@@ -47,15 +47,15 @@ public class AnnotationConfig implements InvocationHandler {
   private Class _annotationType;
 
   private HashMap<String,Object> _valueMap = new HashMap<String,Object>(8);
-  
+
   public AnnotationConfig(Class annotationType)
   {
     this((AnnotationInterfaceType) TypeFactory.getType(annotationType),
-	 annotationType);
+         annotationType);
   }
 
   public AnnotationConfig(AnnotationInterfaceType configType,
-			  Class annotationType)
+                          Class annotationType)
   {
     _configType = configType;
     _annotationType = annotationType;
@@ -74,18 +74,18 @@ public class AnnotationConfig implements InvocationHandler {
     Object oldValue = _valueMap.get(name);
 
     if (oldValue != null
-	&& oldValue.getClass().isArray()
-	&& value != null
-	&& oldValue.getClass() == value.getClass()) {
+        && oldValue.getClass().isArray()
+        && value != null
+        && oldValue.getClass() == value.getClass()) {
       Object []oldArray = (Object []) oldValue;
       Object []valueArray = (Object []) value;
       Class componentType = oldValue.getClass().getComponentType();
       value = Array.newInstance(componentType,
-				oldArray.length + valueArray.length);
+                                oldArray.length + valueArray.length);
 
       System.arraycopy(oldArray, 0, value, 0, oldArray.length);
       System.arraycopy(valueArray, 0,
-		       value, oldArray.length, valueArray.length);
+                       value, oldArray.length, valueArray.length);
     }
 
     _valueMap.put(name, value);
@@ -111,24 +111,25 @@ public class AnnotationConfig implements InvocationHandler {
       Object value = _valueMap.get(method.getName());
 
       if (value != null)
-	return value;
+        return value;
 
       if (Annotation.class.isAssignableFrom(method.getDeclaringClass()))
-	return method.getDefaultValue();
+        return method.getDefaultValue();
     }
-    
+
     throw new IllegalArgumentException("AnnotationProxy: " + method.toString());
   }
 
   private boolean equalsImpl(Object o)
   {
       if (o == null)
-	return false;
-      else if (! _annotationType.isAssignableFrom(o.getClass()))
-	return false;
+        return false;
+      else if (! _annotationType.equals(o.getClass())) {
+        return false;
+      }
 
       // XXX:
-      
+
       return true;
   }
 
@@ -139,8 +140,8 @@ public class AnnotationConfig implements InvocationHandler {
     // Thread.currentThread().getContextClassLoader();
 
     return (Annotation) Proxy.newProxyInstance(loader,
-					       new Class[] { _annotationType },
-					       this);
+                                               new Class[] { _annotationType },
+                                               this);
   }
 
   @Override
@@ -160,7 +161,7 @@ public class AnnotationConfig implements InvocationHandler {
       hashCode = Object.class.getMethod("hashCode", new Class[] {});
       toString = Object.class.getMethod("toString", new Class[] {});
       annotationType
-	= Annotation.class.getMethod("annotationType", new Class[] {});
+        = Annotation.class.getMethod("annotationType", new Class[] {});
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }

@@ -68,14 +68,14 @@ import org.w3c.dom.Node;
 public class CustomBeanConfig {
   private static final Logger log
     = Logger.getLogger(CustomBeanConfig.class.getName());
-  
+
   private static final L10N L = new L10N(CustomBeanConfig.class);
 
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
 
   private InjectManager _beanManager;
-  
+
   private Class _class;
   private AnnotatedTypeImpl _annotatedType;
   private Bean _component;
@@ -116,11 +116,11 @@ public class CustomBeanConfig {
 
     for (AnnotatedMethod method : _annotatedType.getMethods()) {
       // ioc/0614
-      
+
       AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) method;
 
       if (methodImpl.isAnnotationPresent(Produces.class))
-	methodImpl.addAnnotation(ConfiguredLiteral.create());
+        methodImpl.addAnnotation(ConfiguredLiteral.create());
     }
   }
 
@@ -133,7 +133,7 @@ public class CustomBeanConfig {
   {
     return _class;
   }
-  
+
   public void setConfigLocation(String filename, int line)
   {
     _filename = filename;
@@ -199,13 +199,13 @@ public class CustomBeanConfig {
 
       /*
       if (_component != null)
-	_component.setInit(_init);
+        _component.setInit(_init);
       */
     }
-    
+
     _init.addProgram(program);
   }
-  
+
   public void addBuilderProgram(ConfigProgram program)
   {
     QName name = program.getQName();
@@ -215,7 +215,7 @@ public class CustomBeanConfig {
 
       return;
     }
-    
+
     Class cl = createClass(name);
 
     if (cl == null) {
@@ -228,29 +228,29 @@ public class CustomBeanConfig {
       Node node = getProgramNode(program);
 
       if (node != null)
-	ConfigContext.getCurrent().configureNode(node, bean, type);
-      
+        ConfigContext.getCurrent().configureNode(node, bean, type);
+
       Annotation ann = (Annotation) type.replaceObject(bean);
 
       addAnnotation(ann);
 
       return;
     }
-    
+
     if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
       Method method;
-      
+
       if (_configType.getAttribute(name) != null)
-	addInitProgram(program);
+        addInitProgram(program);
       else {
-	throw new ConfigException(L.l("'{0}' is an unknown field for '{1}'",
-				      name.getLocalName(), _class.getName()));
+        throw new ConfigException(L.l("'{0}' is an unknown field for '{1}'",
+                                      name.getLocalName(), _class.getName()));
       }
     }
 
     else
       throw new ConfigException(L.l("'{0}' is an unknown field name.  Fields must belong to the same namespace as the class",
-				    name.getCanonicalName()));
+                                    name.getCanonicalName()));
   }
 
   private Node getProgramNode(ConfigProgram program)
@@ -263,89 +263,23 @@ public class CustomBeanConfig {
   public void addAnnotation(Annotation ann)
   {
     // XXX: some annotations also remove other annotations
-    
+
     if (ann.annotationType().isAnnotationPresent(BindingType.class)
-	&& ! _hasBindings) {
+        && ! _hasBindings) {
       _hasBindings = true;
       clearBindings(_annotatedType);
     }
 
     if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)
-	&& ! _hasInterceptorBindings) {
+        && ! _hasInterceptorBindings) {
       _hasInterceptorBindings = true;
       clearAnnotations(_annotatedType, InterceptorBindingType.class);
     }
-    
+
     if (ann.annotationType().isAnnotationPresent(ScopeType.class))
       clearAnnotations(_annotatedType, ScopeType.class);
-	
+
     _annotatedType.addAnnotation(ann);
-
-    /*
-    Class type = ann.annotationType();
-
-    Class metaType = null;
-
-
-    if (type.isAnnotationPresent(ScopeType.class)) {
-      metaType = ScopeType.class;
-
-      _component.setScopeType(type);
-    }
-    
-    if (type.isAnnotationPresent(DeploymentType.class)) {
-      if (metaType != null)
-	throw new ConfigException(L.l("@{0} is an illegal @DeploymentType because it also has a @{1} annotation",
-				      type.getName(), metaType.getName()));
-      
-      metaType = DeploymentType.class;
-
-      _component.setDeploymentType(type);
-    }
-    
-    if (type.isAnnotationPresent(BindingType.class)) {
-      if (metaType != null)
-	throw new ConfigException(L.l("@{0} is an illegal @BindingType because it also has a @{1} annotation",
-				      type.getName(), metaType.getName()));
-      
-      metaType = BindingType.class;
-
-      _component.addBinding(ann);
-    }
-    
-    if (type.isAnnotationPresent(InterceptorBindingType.class)) {
-      if (metaType != null)
-	throw new ConfigException(L.l("@{0} is an illegal @InterceptorBindingType because it also has a @{1} annotation",
-				      type.getName(), metaType.getName()));
-      
-      metaType = InterceptorBindingType.class;
-
-      _component.addInterceptorBinding(ann);
-    }
-
-    if (type.equals(Named.class)) {
-      metaType = Named.class;
-
-      _component.setName(((Named) ann).value());
-    }
-    
-    if (type.isAnnotationPresent(Stereotype.class)) {
-      metaType = Stereotype.class;
-
-      _component.addStereotype(ann);
-    }
-
-    if (type.isAnnotationPresent(StartupType.class)) {
-      metaType = StartupType.class;
-    }
-    */
-
-    // ioc/0l00, server/6600
-    /*
-    if (metaType == null)
-      throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType, @InterceptorBindingType",
-				    ann));
-    */
   }
 
   public void addMethod(CustomBeanMethodConfig methodConfig)
@@ -363,12 +297,12 @@ public class CustomBeanConfig {
 
       addAnnotations(methodImpl, annList);
     }
-    
+
     //_component.addMethod(new SimpleBeanMethod(method, annList));
   }
 
   private void addAnnotations(AnnotatedElementImpl annotated,
-			      Annotation []annList)
+                              Annotation []annList)
   {
     for (Annotation ann : annList) {
       annotated.addAnnotation(ann);
@@ -388,21 +322,21 @@ public class CustomBeanConfig {
   {
     for (Annotation ann : type.getAnnotations()) {
       Class annType = ann.annotationType();
-      
+
       if (annType.equals(Named.class)) {
-	if (_component.getName() == null)
-	  _component.setName("");
+        if (_component.getName() == null)
+          _component.setName("");
       }
       else if (annType.isAnnotationPresent(DeploymentType.class)) {
-	if (_component.getDeploymentType() == null)
-	  _component.setDeploymentType(annType);
+        if (_component.getDeploymentType() == null)
+          _component.setDeploymentType(annType);
       }
       else if (annType.isAnnotationPresent(ScopeType.class)) {
-	if (_component.getScopeType() == null)
-	  _component.setScopeType(annType);
+        if (_component.getScopeType() == null)
+          _component.setScopeType(annType);
       }
       else if (annType.isAnnotationPresent(BindingType.class)) {
-	_component.addBinding(ann);
+        _component.addBinding(ann);
       }
     }
   }
@@ -415,28 +349,28 @@ public class CustomBeanConfig {
 
     for (Annotation ann : annSet) {
       if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	beanType.removeAnnotation(ann);
+        beanType.removeAnnotation(ann);
     }
   }
 
   private void clearAnnotations(AnnotatedTypeImpl beanType,
-				Class<? extends Annotation> annType)
+                                Class<? extends Annotation> annType)
   {
     HashSet<Annotation> annSet
       = new HashSet<Annotation>(beanType.getAnnotations());
 
     for (Annotation ann : annSet) {
       if (ann.annotationType().isAnnotationPresent(annType))
-	beanType.removeAnnotation(ann);
+        beanType.removeAnnotation(ann);
     }
   }
 
   private Annotation getAnnotation(AnnotatedTypeImpl beanType,
-				   Class<? extends Annotation> annType)
+                                   Class<? extends Annotation> annType)
   {
     for (Annotation ann : beanType.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(annType))
-	return ann;
+        return ann;
     }
 
     return null;
@@ -487,7 +421,7 @@ public class CustomBeanConfig {
   public void initComponent()
   {
     /* XXX: constructor
-       
+
     if (_args != null)
       _component.setNewArgs(_args);
     */
@@ -495,7 +429,7 @@ public class CustomBeanConfig {
     InjectManager beanManager = InjectManager.create();
 
     beanManager.addConfiguredClass(_annotatedType.getJavaClass().getName());
-    
+
     ManagedBeanImpl<?> managedBean = beanManager.createManagedBean(_annotatedType);
 
     Arg []newProgram = null;
@@ -503,35 +437,35 @@ public class CustomBeanConfig {
 
     if (_args != null) {
       AnnotatedConstructor ctor = null;
-      
+
       for (AnnotatedConstructor<?> testCtor
-	     : managedBean.getAnnotatedType().getConstructors()) {
-	if (testCtor.getParameters().size() == _args.size())
-	  ctor = testCtor;
+             : managedBean.getAnnotatedType().getConstructors()) {
+        if (testCtor.getParameters().size() == _args.size())
+          ctor = testCtor;
       }
 
       if (ctor == null) {
-	throw new ConfigException(L.l("No matching constructor found for '{0}' with {1} arguments.",
-				      managedBean, _args.size()));
+        throw new ConfigException(L.l("No matching constructor found for '{0}' with {1} arguments.",
+                                      managedBean, _args.size()));
       }
 
       javaCtor = ctor.getJavaMember();
       ArrayList<ConfigProgram> newList = _args;
-      
+
       newProgram = new Arg[newList.size()];
 
       Type []genericParam = javaCtor.getGenericParameterTypes();
       List<AnnotatedParameter> parameters = ctor.getParameters();
       String loc = null;
-      
-      for (int i = 0; i < _args.size(); i++) {
-	ConfigProgram argProgram = _args.get(i);
-	ConfigType type = TypeFactory.getType(genericParam[i]);
 
-	if (argProgram != null)
-	  newProgram[i] = new ProgramArg(type, argProgram);
-	else
-	  newProgram[i] = new BeanArg(loc, genericParam[i], parameters.get(i).getAnnotations());
+      for (int i = 0; i < _args.size(); i++) {
+        ConfigProgram argProgram = _args.get(i);
+        ConfigType type = TypeFactory.getType(genericParam[i]);
+
+        if (argProgram != null)
+          newProgram[i] = new ProgramArg(type, argProgram);
+        else
+          newProgram[i] = new BeanArg(loc, genericParam[i], parameters.get(i).getAnnotations());
       }
     }
     else
@@ -541,7 +475,7 @@ public class CustomBeanConfig {
 
     if (_init != null) {
       ArrayList<ConfigProgram> programList = _init.getProgramList();
-      
+
       injectProgram = new ConfigProgram[programList.size()];
       programList.toArray(injectProgram);
     }
@@ -558,12 +492,12 @@ public class CustomBeanConfig {
   }
 
   protected Bean bindParameter(String loc,
-			       Type type,
-			       Set<Annotation> bindingSet)
+                               Type type,
+                               Set<Annotation> bindingSet)
   {
     Annotation []bindings = new Annotation[bindingSet.size()];
     bindingSet.toArray(bindings);
-    
+
     Set<Bean<?>> set = _beanManager.getBeans(type, bindings);
 
     if (set == null || set.size() == 0)
@@ -575,10 +509,10 @@ public class CustomBeanConfig {
   public Object toObject()
   {
     InjectManager beanManager = InjectManager.create();
-    
+
     CreationalContext<?> env = beanManager.createCreationalContext();
     Class type = _component.getBeanClass();
-    
+
     return InjectManager.create().getReference(_component, type, env);
   }
 
@@ -605,18 +539,18 @@ public class CustomBeanConfig {
     public void bind()
     {
       if (_bean == null) {
-	_bean = bindParameter(_loc, _type, _bindings);
+        _bean = bindParameter(_loc, _type, _bindings);
 
-	if (_bean == null)
-	  throw new ConfigException(L.l("{0}: {1} does not have valid arguments",
-					_loc, _ctor));
+        if (_bean == null)
+          throw new ConfigException(L.l("{0}: {1} does not have valid arguments",
+                                        _loc, _ctor));
       }
     }
-    
+
     public Object eval(ConfigContext env)
     {
       if (_bean == null)
-	bind();
+        bind();
 
       // XXX: getInstance for injection?
       Type type = null;
@@ -633,7 +567,7 @@ public class CustomBeanConfig {
       _type = type;
       _program = program;
     }
-    
+
     public Object eval(ConfigContext env)
     {
       return _program.configure(_type, env);

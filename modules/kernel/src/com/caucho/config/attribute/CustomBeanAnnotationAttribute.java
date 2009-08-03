@@ -66,7 +66,7 @@ public class CustomBeanAnnotationAttribute extends Attribute {
   {
     return _configType.create(parent, qName);
   }
-  
+
   /**
    * Sets the value of the attribute
    */
@@ -83,7 +83,7 @@ public class CustomBeanAnnotationAttribute extends Attribute {
       customBean.addAnnotation(annConfig.replace());
     }
   }
-  
+
   /**
    * Sets the value of the attribute
    */
@@ -106,7 +106,7 @@ public class CustomBeanAnnotationAttribute extends Attribute {
     }
     else {
       throw new ConfigException(L.l("'{0}' does not have a 'value' attribute, so it cannot have a text value.",
-				    name));
+                                    name));
     }
   }
 }
