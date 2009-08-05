@@ -123,9 +123,6 @@ public class HttpRequest extends AbstractHttpRequest
   private ChunkedInputStream _chunkedInputStream = new ChunkedInputStream();
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
 
-  private HttpServletRequestImpl _requestFacade;
-  private HttpServletResponseImpl _responseFacade;
-
   private AverageTimeProbe _requestTimeProbe;
   private SampleCountProbe _requestCountProbe;
 
@@ -151,12 +148,6 @@ public class HttpRequest extends AbstractHttpRequest
     return new HttpResponse(this, _conn.getWriteStream());
   }
 
-  @Override
-  public HttpServletRequestImpl getRequestFacade()
-  {
-    return _requestFacade;
-  }
-
   /**
    * Return true if the request waits for a read before beginning.
    */
@@ -171,7 +162,7 @@ public class HttpRequest extends AbstractHttpRequest
   @Override
   public boolean hasRequest()
   {
-    return _requestFacade != null;
+    return getRequestFacade() != null;
   }
 
   /**
@@ -784,7 +775,7 @@ public class HttpRequest extends AbstractHttpRequest
 
       startInvocation();
 
-      invocation.service(_requestFacade, _responseFacade);
+      invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
       _response.killCache();
       killKeepalive();
@@ -802,7 +793,7 @@ public class HttpRequest extends AbstractHttpRequest
     } finally {
       finishInvocation();
 
-      if (_requestFacade != null) {
+      if (getRequestFacade() != null) {
         _requestTimeProbe.addData(Alarm.getCurrentTime() - getStartTime());
         _requestCountProbe.addData();
       }
@@ -876,16 +867,12 @@ public class HttpRequest extends AbstractHttpRequest
     _headerValues = httpBuffer.getHeaderValues();
     
     // XXX: reuse for keepalive?
+    /*
     _requestFacade = new HttpServletRequestImpl(this);
     _responseFacade = _requestFacade.getResponse();
+    */
     
     _response.startRequest(httpBuffer);
-  }
-
-  protected void clearRequest()
-  {
-    _requestFacade = null;
-    _responseFacade = null;
   }
 
   /**
@@ -1294,8 +1281,8 @@ public class HttpRequest extends AbstractHttpRequest
     if (_server instanceof Server) {
       WebApp webApp = ((Server) _server).getDefaultWebApp();
       
-      if (webApp != null && _requestFacade != null) {
-        webApp.accessLog(_requestFacade, _responseFacade);
+      if (webApp != null && getRequestFacade() != null) {
+        webApp.accessLog(getRequestFacade(), getResponseFacade());
       }
     }
   }
@@ -1329,13 +1316,13 @@ public class HttpRequest extends AbstractHttpRequest
           = (RequestDispatcherImpl) webApp.getRequestDispatcher(url);
 
         if (disp != null) {
-          disp.dispatchResume(_requestFacade, _responseFacade);
+          disp.dispatchResume(getRequestFacade(), getResponseFacade());
 
           return isSuspend();
         }
       }
 
-      _invocation.service(_requestFacade, _responseFacade);
+      _invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
       _response.killCache();
 

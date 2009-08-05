@@ -88,7 +88,7 @@ public class Store {
     = Logger.getLogger(Store.class.getName());
   private final static L10N L = new L10N(Store.class);
   
-  public final static int BLOCK_BITS = 16;
+  public final static int BLOCK_BITS = 14;
   public final static int BLOCK_SIZE = 1 << BLOCK_BITS;
   public final static long BLOCK_INDEX_MASK = BLOCK_SIZE - 1;
   public final static long BLOCK_MASK = ~ BLOCK_INDEX_MASK;
@@ -96,7 +96,8 @@ public class Store {
 
   private final static int ALLOC_BYTES_PER_BLOCK = 2;
 
-  private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
+  //private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
+  private final static int ALLOC_CHUNK_SIZE = BLOCK_SIZE;
   
   public final static int ALLOC_FREE      = 0x00;
   public final static int ALLOC_ROW       = 0x01;
@@ -106,7 +107,7 @@ public class Store {
   public final static int ALLOC_MINI_FRAG = 0x05;
   public final static int ALLOC_MASK      = 0x0f;
 
-  public final static int FRAGMENT_SIZE = 8 * 1024;
+  public final static int FRAGMENT_SIZE = BLOCK_SIZE; // 16 * 1024;
   public final static int FRAGMENT_PER_BLOCK
     = (int) (BLOCK_SIZE / FRAGMENT_SIZE);
   
@@ -1842,8 +1843,8 @@ public class Store {
    */
   private static int readShort(byte []buffer, int offset)
   {
-    return (((buffer[offset + 0] & 0xff) << 8) |
-	    ((buffer[offset + 1] & 0xff)));
+    return (((buffer[offset + 0] & 0xff) << 8)
+            | ((buffer[offset + 1] & 0xff)));
   }
 
   /**
@@ -1928,14 +1929,14 @@ public class Store {
    */
   public static long readLong(byte []buffer, int offset)
   {
-    return (((buffer[offset + 0] & 0xffL) << 56) +
-	    ((buffer[offset + 1] & 0xffL) << 48) +
-	    ((buffer[offset + 2] & 0xffL) << 40) +
-	    ((buffer[offset + 3] & 0xffL) << 32) +
-	    ((buffer[offset + 4] & 0xffL) << 24) +
-	    ((buffer[offset + 5] & 0xffL) << 16) +
-	    ((buffer[offset + 6] & 0xffL) << 8) +
-	    ((buffer[offset + 7] & 0xffL)));
+    return (((buffer[offset + 0] & 0xffL) << 56)
+            + ((buffer[offset + 1] & 0xffL) << 48)
+            + ((buffer[offset + 2] & 0xffL) << 40)
+            + ((buffer[offset + 3] & 0xffL) << 32)
+            + ((buffer[offset + 4] & 0xffL) << 24)
+            + ((buffer[offset + 5] & 0xffL) << 16)
+            + ((buffer[offset + 6] & 0xffL) << 8)
+            + ((buffer[offset + 7] & 0xffL)));
   }
 
   /**

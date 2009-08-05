@@ -274,9 +274,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private ActorClient _bamAdminConn;
   private ActorClient _bamBamConn;
 
-  private HttpServletRequestImpl _requestFacade;
-  private HttpServletResponseImpl _responseFacade;
-
   public HmuxRequest(Server server,
 		     Connection conn,
 		     HmuxProtocol protocol)
@@ -500,12 +497,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
 	setInvocation(invocation);
 
-	_requestFacade = new HttpServletRequestImpl(this);
-	_responseFacade = _requestFacade.getResponse();
-
 	startInvocation();
 
-        invocation.service(_requestFacade, _responseFacade);
+        invocation.service(getRequestFacade(), getResponseFacade());
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Throwable e) {

@@ -185,6 +185,9 @@ public abstract class AbstractHttpRequest
   protected final CharBuffer _cb = new CharBuffer();
 
   private HttpBufferStore _httpBuffer;
+  
+  private HttpServletRequestImpl _requestFacade;
+  private HttpServletResponseImpl _responseFacade;
 
   /**
    * Create a new Request.  Because the actual initialization occurs with
@@ -291,6 +294,9 @@ public abstract class AbstractHttpRequest
     _runAs = null;
     _isLoginRequested = false;
 
+    _requestFacade = new HttpServletRequestImpl(this);
+    _responseFacade = _requestFacade.getResponse();
+
     /*
     _attributeListeners = NULL_LISTENERS;
 
@@ -299,12 +305,18 @@ public abstract class AbstractHttpRequest
     */
   }
 
+  protected void clearRequest()
+  {
+    _requestFacade = null;
+    _responseFacade = null;
+  }
+
   /**
    * Returns true if a request has been set
    */
   public boolean hasRequest()
   {
-    return false;
+    return _requestFacade != null;
   }
 
   /**
@@ -353,9 +365,14 @@ public abstract class AbstractHttpRequest
       _tcpConn.close();
   }
 
-  public HttpServletRequestImpl getRequestFacade()
+  public final HttpServletRequestImpl getRequestFacade()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _requestFacade;
+  }
+
+  public final HttpServletResponseImpl getResponseFacade()
+  {
+    return _responseFacade;
   }
 
   /**
@@ -2824,8 +2841,15 @@ public abstract class AbstractHttpRequest
         _tcpConn.finishRequest();
       }
 
+      HttpServletRequestImpl requestFacade = _requestFacade;
+      _requestFacade = null;
+
+      HttpServletResponseImpl responseFacade = _responseFacade;
+      _responseFacade = null;
+      
       HttpBufferStore httpBuffer = _httpBuffer;
       _httpBuffer = null;
+
 
       if (httpBuffer != null)
         HttpBufferStore.free(httpBuffer);

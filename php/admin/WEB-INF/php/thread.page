@@ -161,6 +161,8 @@ foreach ($groups as $name) {
       echo "<td></td>";
     
     echo "<td>" . $info->threadState;
+    if ($info->isInNative())
+      echo " (JNI)";
     if ($info->getBlockedTime() > 0)
       echo sprintf(" (%dms)", $info->getBlockedTime())
     else if ($info->getWaitedTime() > 0)
@@ -175,6 +177,11 @@ foreach ($groups as $name) {
 //    echo "<td style='border-width:0'>&nbsp;</td>";
     echo "<td colspan='5'>";
     echo "<pre id='t_$id' style='display:none' class='stack_trace'>";
+
+    if ($info->getLockName()) {
+      echo "Lock " . $info->getLockName() . " owned by ";
+      echo $info->getLockOwnerId() . "\n\n";
+    }
     
     // echo $info;
 

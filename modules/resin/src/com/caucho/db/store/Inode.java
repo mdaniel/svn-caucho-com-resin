@@ -94,11 +94,11 @@ public class Inode {
   // direct addresses are stored in the inode itself (112k of data).
   public static final int DIRECT_BLOCKS = 14;
   // single indirect addresses are stored in the indirect block (4M data)
-  public static final int SINGLE_INDIRECT_BLOCKS = 512;
+  public static final int SINGLE_INDIRECT_BLOCKS = INDIRECT_BLOCKS / 2;
   // double indirect addresses (2^37 = 128G data)
-  public static final int DOUBLE_INDIRECT_BLOCKS = 256;
+  public static final int DOUBLE_INDIRECT_BLOCKS = INDIRECT_BLOCKS / 4;
   // triple indirect addresses (2^50 = 2P data)
-  public static final int TRIPLE_INDIRECT_BLOCKS = 256;
+  public static final int TRIPLE_INDIRECT_BLOCKS = INDIRECT_BLOCKS / 4;
 
   public static final long INLINE_MAX = 120;
 

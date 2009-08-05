@@ -169,9 +169,6 @@ public class FastCgiRequest extends AbstractHttpRequest
 
   private ServletFilter _filter = new ServletFilter(this);
 
-  private HttpServletRequestImpl _requestFacade;
-  private HttpServletResponseImpl _responseFacade;
-
   private boolean _initAttributes;
   private byte []_buffer = new byte[16];
 
@@ -255,10 +252,6 @@ public class FastCgiRequest extends AbstractHttpRequest
       _writeStream.init(_filter);
       // _writeStream.setWritePrefix(3);
 
-      // XXX: use same one for keepalive?
-      _requestFacade = new HttpServletRequestImpl(this);
-      _responseFacade = _requestFacade.getResponse();
-
       try {
         _hasRequest = false;
 
@@ -321,7 +314,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
       startInvocation();
 
-      invocation.service(_requestFacade, _responseFacade);
+      invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
       _response.killCache();
 
@@ -345,7 +338,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       if (_server instanceof Server) {
         WebApp webApp = ((Server) _server).getDefaultWebApp();
         if (webApp != null)
-          webApp.accessLog(_requestFacade, _responseFacade);
+          webApp.accessLog(getRequestFacade(), getResponseFacade());
       }
 
       return false;
@@ -1272,12 +1265,6 @@ public class FastCgiRequest extends AbstractHttpRequest
   public ReadStream getRawInput()
   {
     return _rawRead;
-  }
-
-  @Override
-  public HttpServletRequestImpl getRequestFacade()
-  {
-    return _requestFacade;
   }
 
   public final void protocolCloseEvent()
