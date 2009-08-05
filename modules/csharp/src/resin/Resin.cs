@@ -46,8 +46,8 @@ namespace Caucho
     private static String HKEY_JRE = "Software\\JavaSoft\\Java Runtime Environment";
     private static String HKEY_JDK = "Software\\JavaSoft\\Java Development Kit";
     private static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
-    
-    private static String USAGE = @"usage: {0} [flags] gui |console | status | start | stop | restart | kill | shutdown
+
+    private static String USAGE = @"usage: {0} [flags] gui | console | status | start | stop | restart | kill | shutdown
   -h                                     : this help
   -verbose                               : information on launching java
   -java_home <dir>                       : sets the JAVA_HOME
@@ -106,7 +106,7 @@ namespace Caucho
     private String _displayName;
     private String _passToServiceArgs;
     private String _command;
-    
+    private String _resinDataDir;
     
     private StringBuilder _args;
     
@@ -309,7 +309,8 @@ namespace Caucho
       if (_command == null &&
           (! _install) &&
           (! _uninstall)&&
-          (! _service)) {
+          (! _service) &&
+          (! _help)) {
         Info(REQUIRE_COMMAND_MSG);
         
         Environment.Exit(-1);
@@ -323,6 +324,53 @@ namespace Caucho
       _passToServiceArgs = passToServiceArgs.ToString();
     }
     
+    public bool StartResin() {
+      if (!_service && _process != null)
+        return false;
+      
+      try {
+        if (_service)
+          ExecuteJava("start");
+        else if ("gui".Equals(_command))
+          ExecuteJava("console");
+        else
+          ExecuteJava(_command);
+        
+        return true;
+      } catch (Exception e) {
+        StringBuilder message = new StringBuilder("Unable to start application. Make sure java is in your path. Use option -verbose for more detail.\n");
+        message.Append(e.ToString());
+        
+        Info(message.ToString());
+        
+        return false;
+      }
+    }
+    
+    public void StopResin() {
+      if (_service) {
+        Info("Stopping Resin");
+        
+        ExecuteJava("stop");
+      } else {
+        if (_process != null && ! _process.HasExited) {
+          Info("Stopping Resin ", false);
+          
+          _process.Kill();
+          
+          //give server time to close
+          for (int i = 0; i < 14; i++) {
+            Info(".", false);
+            Thread.CurrentThread.Join(1000);
+          }
+          
+          Info(". done.");
+        }
+        
+        _process = null;
+      }
+    }
+
     private int Execute() {
       if (_help) {
         Usage(ServiceName);
@@ -365,6 +413,12 @@ namespace Caucho
                                                        Environment.GetEnvironmentVariable("PATH"),
                                                        _resinHome));
 
+      _resinDataDir = System.Reflection.Assembly.GetExecutingAssembly().Location;
+      _resinDataDir = _resinDataDir.Substring(0, _resinDataDir.LastIndexOf('\\')) + "\\resin-data";
+      
+      if (! Directory.Exists(_resinDataDir))
+        Directory.CreateDirectory(_resinDataDir);
+      
       if (_install || _uninstall) {
         return InstallOrRemoveService();
       } else if (_service) {
@@ -400,14 +454,13 @@ namespace Caucho
       TextWriter stdErr = Console.Error;
       
       String childOutputFile
-        = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "\\child." + ServiceName + ".tmp";
+        = _resinDataDir + "\\service." + ServiceName + ".tmp";
 
       TextWriter childWriter = null;
       if (_isChild)
         childWriter = new StreamWriter(childOutputFile);
       
       //buffer all the output of the Installer for use in case of error only.
-      
       StringWriter output = new StringWriter();
       
       Console.SetOut(output);
@@ -422,13 +475,9 @@ namespace Caucho
           UninstallService(_isChild? childWriter: stdOut);
         
         success = true;
-      } //catch(System.InvalidOperationException e) {
-      //occurs when user is not an administor
-      //Error("Service installation requires administrative privileges.", e, stdErr);
-      
-      //return 1;
-      //}
-      catch (Exception e) {
+      } catch (StateNofFoundException) {
+        //
+      } catch (Exception e) {
         exception = e;
         
         Exception cause = e.GetBaseException();
@@ -444,7 +493,7 @@ namespace Caucho
             Info("Starting service installation with elevated security privileges...", stdOut, true);
             
             ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName= System.Reflection.Assembly.GetExecutingAssembly().Location;
+            psi.FileName = System.Reflection.Assembly.GetExecutingAssembly().Location;
             
             _args.Append("--child");
             psi.Arguments = _args.ToString();
@@ -452,6 +501,7 @@ namespace Caucho
             psi.Verb = "runas";
             psi.UseShellExecute = true;
             psi.WindowStyle = ProcessWindowStyle.Hidden;
+            psi.LoadUserProfile = false;
             
             Process process = Process.Start(psi);
             
@@ -465,6 +515,8 @@ namespace Caucho
           } catch (Exception pe) {
             Error("Failed to install using elevated security privileges due to:", pe);
           }
+        } else {
+          Info("Service installation requires administrative privileges.");
         }
       } finally {
         Console.SetOut(stdOut);
@@ -500,7 +552,10 @@ namespace Caucho
       else if (success && ! hasChild) {
         return 0;
       } else {
-        Error("ServiceInstaller failed with the following due to:", exception);
+        if (exception != null)
+          Error("ServiceInstaller failed with due to:", exception);
+        
+        Info(output.ToString());
         
         if (hasChild) {
           Info("Atempted installation with elevated privileges failed: \n");
@@ -562,7 +617,7 @@ namespace Caucho
         Info(String.Format("\nService {0} does not appear to be installed", ServiceName), writer, true);
       } else {
         Hashtable state = LoadState(ServiceName);
-        
+
         Installer installer = InitInstaller();
         
         installer.Uninstall(state);
@@ -596,78 +651,41 @@ namespace Caucho
 
       return txInst;
     }
-    private static String GetResinAppDataDir() {
-      return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + '\\' + CAUCHO_APP_DATA;
-    }
-    private static void StoreState(Hashtable state, String serviceName) {
-      String dir = GetResinAppDataDir();
-      if (! Directory.Exists(dir))
-        Directory.CreateDirectory(dir);
-      
-      FileStream fs = new FileStream(dir + '\\' + serviceName + ".srv", FileMode.Create, FileAccess.Write);
+
+    private void StoreState(Hashtable state, String serviceName) {
+      FileStream fs = new FileStream(_resinDataDir + '\\' + serviceName + ".srv", FileMode.Create, FileAccess.Write);
       BinaryFormatter serializer = new BinaryFormatter();
       serializer.Serialize(fs, state);
       fs.Flush();
       fs.Close();
     }
     
-    private static Hashtable LoadState(String serviceName) {
-      String dir = GetResinAppDataDir();
-      FileStream fs = new FileStream(dir + '\\' + serviceName + ".srv", FileMode.Open, FileAccess.Read);
-      BinaryFormatter serializer = new BinaryFormatter();
-      Hashtable state = (Hashtable)serializer.Deserialize(fs);
-      fs.Close();
+    private Hashtable LoadState(String serviceName) {
+      String stateFile = _resinDataDir + '\\' + serviceName + ".srv";
+      
+      if (! File.Exists(stateFile))
+        stateFile = GetResinAppDataDir() + '\\' + serviceName + ".srv";
+      
+      Hashtable state = null;
+      try {
+        FileStream fs = new FileStream(stateFile, FileMode.Open, FileAccess.Read);
+        BinaryFormatter serializer = new BinaryFormatter();
+        state = (Hashtable)serializer.Deserialize(fs);
+        fs.Close();
+      } catch (Exception e) {
+        Error(String.Format("Cannot load service installation state file '{0}' due to:", stateFile), e);
+        
+        throw new StateNofFoundException();
+      }
       
       return state;
     }
     
-    public bool StartResin() {
-      if (!_service && _process != null)
-        return false;
-      
-      try {
-        if (_service)
-          ExecuteJava("start");
-        else if ("gui".Equals(_command))
-          ExecuteJava("console");
-        else
-          ExecuteJava(_command);
-        
-        return true;
-      } catch (Exception e) {
-        StringBuilder message = new StringBuilder("Unable to start application. Make sure java is in your path. Use option -verbose for more detail.\n");
-        message.Append(e.ToString());
-        
-        Info(message.ToString());
-        
-        return false;
-      }
-    }
-    
-    public void StopResin() {
-      if (_service) {
-        Info("Stopping Resin");
-        
-        ExecuteJava("stop");
-      } else {
-        if (_process != null && ! _process.HasExited) {
-          Info("Stopping Resin ", false);
-          
-          _process.Kill();
-          
-          //give server time to close
-          for (int i = 0; i < 14; i++) {
-            Info(".", false);
-            Thread.CurrentThread.Join(1000);
-          }
-          
-          Info(". done.");
-        }
-        
-        _process = null;
-      }
+    private static String GetResinAppDataDir() {
+      return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + '\\' + CAUCHO_APP_DATA;
     }
 
+    
     private void ExecuteJava(String command) {
       if (_verbose) {
         StringBuilder info = new StringBuilder();
@@ -684,8 +702,6 @@ namespace Caucho
       
       ProcessStartInfo startInfo = new ProcessStartInfo();
       startInfo.FileName = _javaExe;
-      foreach (String s in startInfo.Verbs)
-        Info("Verb: " + s);
       
       StringBuilder arguments = new StringBuilder(_jvmArgs).Append(' ');
       
@@ -957,5 +973,8 @@ namespace Caucho
     private void Usage(String name) {
       Info(String.Format(USAGE, name));
     }
+  }
+  
+  class StateNofFoundException : Exception {
   }
 }
