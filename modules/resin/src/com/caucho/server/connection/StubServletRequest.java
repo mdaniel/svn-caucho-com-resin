@@ -109,10 +109,7 @@ public class StubServletRequest extends AbstractHttpRequest {
   public void setCharacterEncoding(String encoding) { }
   public int getContentLength() { return -1; }
   public String getContentType() { return "application/octet-stream"; }
-  public ServletInputStream getInputStream()
-  {
-    throw new IllegalStateException();
-  }
+
   public String getParameter(String name) { return null; }
   public Enumeration<String> getParameterNames()
   {
@@ -122,10 +119,6 @@ public class StubServletRequest extends AbstractHttpRequest {
   public Map<String,String[]> getParameterMap() { return null; }
   public String getProtocol() { return "none"; }
   
-  public BufferedReader getReader()
-  {
-    throw new IllegalStateException();
-  }
   public String getRemoteAddr() { return "127.0.0.1"; }
   public String getRemoteHost() { return "127.0.0.1"; }
   public int getRemotePort() { return 6666; }

@@ -28,6 +28,7 @@
 
 package com.caucho.server.http;
 
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
@@ -67,6 +68,6 @@ public class HttpProtocol extends Protocol {
    */
   public ServerRequest createRequest(Connection conn)
   {
-    return new HttpRequest(getServer(), conn);
+    return new HttpRequest((Server) getServer(), conn);
   }
 }

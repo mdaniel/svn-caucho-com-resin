@@ -32,6 +32,7 @@ package com.caucho.server.hmux;
 import java.lang.ref.*;
 import java.util.*;
 
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
@@ -88,7 +89,7 @@ public class HmuxProtocol extends Protocol {
    */
   public ServerRequest createRequest(Connection conn)
   {
-    return new HmuxRequest(getServer(), conn, this);
+    return new HmuxRequest((Server) getServer(), conn, this);
   }
 
   public ClassLoader getClassLoader()

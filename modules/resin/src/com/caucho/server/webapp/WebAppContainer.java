@@ -730,7 +730,7 @@ public class WebAppContainer
    * Creates the invocation.
    */
   public Invocation buildInvocation(Invocation invocation)
-    throws Exception
+    throws ConfigException
   {
     if (_configException != null) {
       FilterChain chain = new ExceptionFilterChain(_configException);
@@ -958,7 +958,6 @@ public class WebAppContainer
    */
   private WebApp getWebApp(Invocation invocation,
 				     boolean enableRedeploy)
-    throws ServletException
   {
     try {
       WebAppController controller = getWebAppController(invocation);
@@ -982,8 +981,10 @@ public class WebAppContainer
       else {
         return null;
       }
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw ConfigException.create(e);
     }
   }
 
@@ -1017,7 +1018,6 @@ public class WebAppContainer
    * Creates the invocation.
    */
   public WebApp findWebAppByURI(String uri)
-    throws Exception
   {
     WebAppController controller = findByURI(uri);
 
@@ -1031,7 +1031,6 @@ public class WebAppContainer
    * Creates the invocation.
    */
   public WebApp findSubWebAppByURI(String uri)
-    throws Exception
   {
     WebAppController controller = findByURI(uri);
 

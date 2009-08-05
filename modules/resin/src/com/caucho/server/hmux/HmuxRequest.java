@@ -277,13 +277,13 @@ public class HmuxRequest extends AbstractHttpRequest
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
 
-  public HmuxRequest(DispatchServer server,
+  public HmuxRequest(Server server,
 		     Connection conn,
 		     HmuxProtocol protocol)
   {
     super(server, conn);
 
-    _server = (Server) server;
+    _server = server;
     
     _hmuxProtocol = protocol;
 
@@ -501,8 +501,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	setInvocation(invocation);
 
 	_requestFacade = new HttpServletRequestImpl(this);
-	_responseFacade = new HttpServletResponseImpl(_response);
-	_requestFacade.setResponse(_responseFacade);
+	_responseFacade = _requestFacade.getResponse();
 
 	startInvocation();
 

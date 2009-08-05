@@ -290,7 +290,6 @@ public class HostContainer implements DispatchBuilder {
    * Creates the invocation.
    */
   public Invocation buildInvocation(Invocation invocation)
-    throws Throwable
   {
     String rawHost = invocation.getHost();
     int rawPort = invocation.getPort();

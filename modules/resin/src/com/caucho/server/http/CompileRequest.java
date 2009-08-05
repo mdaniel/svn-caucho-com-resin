@@ -28,6 +28,7 @@
 
 package com.caucho.server.http;
 
+import com.caucho.server.cluster.Server;
 import com.caucho.server.port.ProtocolDispatchServer;
 
 /**
@@ -41,7 +42,7 @@ public class CompileRequest extends HttpRequest {
    */
   CompileRequest(ProtocolDispatchServer server) 
   {
-    super(server, null);
+    super((Server) server, null);
   }
 
   public boolean isTop()

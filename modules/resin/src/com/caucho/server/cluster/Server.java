@@ -1417,7 +1417,7 @@ public class Server extends ProtocolDispatchServer
    * Sets the invocation
    */
   public Invocation buildInvocation(Invocation invocation)
-    throws Throwable
+    throws ConfigException
   {
     if (_configException != null) {
       invocation.setFilterChain(new ExceptionFilterChain(_configException));

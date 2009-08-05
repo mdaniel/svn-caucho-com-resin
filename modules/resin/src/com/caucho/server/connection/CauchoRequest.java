@@ -50,7 +50,6 @@ public interface CauchoRequest extends HttpServletRequest {
   public int getRequestDepth(int depth);
   public void setHeader(String key, String value);
   public boolean getVaryCookies();
-  public String getVaryCookie();
   public void setVaryCookie(String cookie);
   public boolean getHasCookie();
 

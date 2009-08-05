@@ -29,6 +29,7 @@
 
 package com.caucho.server.dispatch;
 
+import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Dependency;
@@ -204,7 +205,7 @@ public class DispatchServer implements Dependency {
    * @param invocation the invocation to build.
    */
   public Invocation buildInvocation(Object protocolKey, Invocation invocation)
-    throws Throwable
+    throws ConfigException
   {
     invocation = buildInvocation(invocation);
 
@@ -231,7 +232,7 @@ public class DispatchServer implements Dependency {
    * Builds the invocation.
    */
   public Invocation buildInvocation(Invocation invocation)
-    throws Throwable
+    throws ConfigException
   {
     return getDispatchBuilder().buildInvocation(invocation);
   }

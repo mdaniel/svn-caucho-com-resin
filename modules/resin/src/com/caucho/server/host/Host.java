@@ -557,7 +557,7 @@ public class Host extends WebAppContainer
    * Builds the invocation for the host.
    */
   public Invocation buildInvocation(Invocation invocation)
-    throws Exception
+    throws ConfigException
   {
     invocation.setHostName(_serverName);
     invocation.setPort(_serverPort);

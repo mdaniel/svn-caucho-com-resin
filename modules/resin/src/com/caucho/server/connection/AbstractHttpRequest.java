@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
@@ -71,10 +70,10 @@ import java.util.logging.Logger;
 public abstract class AbstractHttpRequest
   implements CauchoRequest, SecurityContextProvider
 {
-  protected static final Logger log
+  private static final Logger log
     = Logger.getLogger(AbstractHttpRequest.class.getName());
 
-  static final L10N L = new L10N(AbstractHttpRequest.class);
+  private static final L10N L = new L10N(AbstractHttpRequest.class);
 
   protected static final CaseInsensitiveIntMap _headerCodes;
 
@@ -116,10 +115,9 @@ public abstract class AbstractHttpRequest
   private static final ServletRequestAttributeListener []NULL_LISTENERS
     = new ServletRequestAttributeListener[0];
 
-  private static final Cookie []NULL_COOKIES
-    = new Cookie[0];
+  private static final Cookie []NULL_COOKIES = new Cookie[0];
 
-  protected final DispatchServer _server;
+  protected final Server _server;
 
   protected final Connection _conn;
   protected final TcpConnection _tcpConn;
@@ -133,7 +131,6 @@ public abstract class AbstractHttpRequest
 
   protected Invocation _invocation;
 
-  private boolean _keepalive;
   private long _startTime;
 
   private String _runAs;
@@ -147,17 +144,15 @@ public abstract class AbstractHttpRequest
 
   // True if the page depends on cookies
   private boolean _varyCookies;
-  // The cookie the page depends on
-  private String _varyCookie;
   private boolean _hasCookie;
   private boolean _isSessionIdFromCookie;
 
   protected int _sessionGroup;
 
-  private long _contentLength;
-
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
+
+  private long _contentLength;
 
   // True if the post stream has been initialized
   protected boolean _hasReadStream;
@@ -170,9 +165,6 @@ public abstract class AbstractHttpRequest
   // Reader for post contents
   private final BufferedReaderAdapter _bufferedReader;
 
-  private boolean _hasReader;
-  private boolean _hasInputStream;
-
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   // HttpServletRequest stuff
@@ -181,9 +173,6 @@ public abstract class AbstractHttpRequest
     = new HashMapImpl<String,String[]>();
   private HashMapImpl<String,String[]> _filledForm;
   private List<Part> _parts;
-
-  private final HashMapImpl<String,Object> _attributes
-    = new HashMapImpl<String,Object>();
 
   private ArrayList<Locale> _locales = new ArrayList<Locale>();
 
@@ -194,11 +183,8 @@ public abstract class AbstractHttpRequest
   private final CharBuffer _cbName = new CharBuffer();
   private final CharBuffer _cbValue = new CharBuffer();
   protected final CharBuffer _cb = new CharBuffer();
-  // private final ArrayList<CharSegment> _arrayList = new ArrayList<CharSegment>();
 
   private HttpBufferStore _httpBuffer;
-
-  private ServletRequestAttributeListener []_attributeListeners;
 
   /**
    * Create a new Request.  Because the actual initialization occurs with
@@ -206,7 +192,7 @@ public abstract class AbstractHttpRequest
    *
    * @param server the parent server
    */
-  protected AbstractHttpRequest(DispatchServer server, Connection conn)
+  protected AbstractHttpRequest(Server server, Connection conn)
   {
     _server = server;
 
@@ -231,6 +217,11 @@ public abstract class AbstractHttpRequest
   }
 
   abstract protected AbstractHttpResponse createResponse();
+
+  protected AbstractHttpResponse getAbstractHttpResponse()
+  {
+    return _response;
+  }
 
   /**
    * Initialization.
@@ -274,7 +265,6 @@ public abstract class AbstractHttpRequest
     _invocation = null;
 
     _varyCookies = false;
-    _varyCookie = null;
     _hasCookie = false;
 
     _hostHeader = null;
@@ -290,24 +280,23 @@ public abstract class AbstractHttpRequest
     _sessionIsLoaded = false;
 
     _hasReadStream = false;
-    _hasReader = false;
-    _hasInputStream = false;
 
     _filledForm = null;
     _locales.clear();
 
     _readEncoding = null;
 
-    _keepalive = true;
     _isSessionIdFromCookie = false;
 
     _runAs = null;
     _isLoginRequested = false;
 
+    /*
     _attributeListeners = NULL_LISTENERS;
 
     if (_attributes.size() > 0)
       _attributes.clear();
+    */
   }
 
   /**
@@ -364,9 +353,9 @@ public abstract class AbstractHttpRequest
       _tcpConn.close();
   }
 
-  public HttpServletRequest getRequestFacade()
+  public HttpServletRequestImpl getRequestFacade()
   {
-    return this;
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -856,7 +845,10 @@ public abstract class AbstractHttpRequest
    */
   protected void connectionClose()
   {
-    killKeepalive();
+    TcpConnection conn = _tcpConn;
+
+    if (conn != null)
+      conn.killKeepalive();
   }
 
   /**
@@ -1284,11 +1276,6 @@ public abstract class AbstractHttpRequest
    */
   public void setVaryCookie(String cookie)
   {
-    if (_varyCookies == false)
-      _varyCookie = cookie;
-    else if (_varyCookie != null && ! _varyCookie.equals(cookie))
-      _varyCookie = null;
-
     _varyCookies = true;
 
     // XXX: server/1315 vs 2671
@@ -1301,15 +1288,6 @@ public abstract class AbstractHttpRequest
   public boolean getVaryCookies()
   {
     return _varyCookies;
-  }
-
-  /**
-   * Returns the cookie the page depends on, or null if the page
-   * depends on several cookies.
-   */
-  public String getVaryCookie()
-  {
-    return _varyCookie;
   }
 
   /**
@@ -1443,14 +1421,12 @@ public abstract class AbstractHttpRequest
   public String getRequestedSessionIdNoVary()
   {
     boolean varyCookies = _varyCookies;
-    String varyCookie = _varyCookie;
     boolean hasCookie = _hasCookie;
     boolean privateCache = _response.getPrivateCache();
 
     String id = getRequestedSessionId();
 
     _varyCookies = varyCookies;
-    _varyCookie = varyCookie;
     _hasCookie = hasCookie;
     _response.setPrivateOrResinCache(privateCache);
 
@@ -1953,14 +1929,9 @@ public abstract class AbstractHttpRequest
   /**
    * Returns a stream for reading POST data.
    */
-  public ServletInputStream getInputStream()
+  public final ServletInputStream getInputStream()
     throws IOException
   {
-    if (_hasReader)
-      throw new IllegalStateException(L.l("getInputStream() can't be called after getReader()"));
-
-    _hasInputStream = true;
-
     ReadStream stream = getStream(false);
 
     _is.init(stream);
@@ -1971,14 +1942,9 @@ public abstract class AbstractHttpRequest
   /**
    * Returns a Reader for the POST contents
    */
-  public BufferedReader getReader()
+  public final BufferedReader getReader()
     throws IOException
   {
-    if (_hasInputStream)
-      throw new IllegalStateException(L.l("getReader() can't be called after getInputStream()"));
-
-    _hasReader = true;
-
     try {
       // bufferedReader is just an adapter to get the signature right.
       _bufferedReader.init(getStream(true));
@@ -2183,14 +2149,16 @@ public abstract class AbstractHttpRequest
     return _form;
   }
 
+  //
   // request attributes
+  //
 
   /**
    * Returns an enumeration of the request attribute names.
    */
   public Enumeration<String> getAttributeNames()
   {
-    return Collections.enumeration(_attributes.keySet());
+    return getRequestFacade().getAttributeNames();
   }
 
   /**
@@ -2202,7 +2170,7 @@ public abstract class AbstractHttpRequest
    */
   public Object getAttribute(String name)
   {
-    return _attributes.get(name);
+    return getRequestFacade().getAttribute(name);
   }
 
   /**
@@ -2213,35 +2181,7 @@ public abstract class AbstractHttpRequest
    */
   public void setAttribute(String name, Object value)
   {
-    setAttribute(this, name, value);
-  }
-
-  protected void setAttribute(ServletRequest request,
-                              String name,
-                              Object value)
-  {
-    if (value != null) {
-      Object oldValue = _attributes.put(name, value);
-
-      for (int i = 0; i < _attributeListeners.length; i++) {
-        ServletRequestAttributeEvent event;
-
-        if (oldValue != null) {
-          event = new ServletRequestAttributeEvent(getWebApp(), request,
-                                                   name, oldValue);
-
-          _attributeListeners[i].attributeReplaced(event);
-        }
-        else {
-          event = new ServletRequestAttributeEvent(getWebApp(), request,
-                                                   name, value);
-
-          _attributeListeners[i].attributeAdded(event);
-        }
-      }
-    }
-    else
-      removeAttribute(request, name);
+    getRequestFacade().setAttribute(name, value);
   }
 
   /**
@@ -2251,31 +2191,12 @@ public abstract class AbstractHttpRequest
    */
   public void removeAttribute(String name)
   {
-    removeAttribute(this, name);
+    getRequestFacade().removeAttribute(name);
   }
 
-  /**
-   * Removes the value of the named request attribute.
-   *
-   * @param name the attribute name.
-   */
-  protected void removeAttribute(ServletRequest request,
-                                 String name)
+  protected void initAttributes(HttpServletRequestImpl facade)
   {
-    Object oldValue = _attributes.remove(name);
-
-    for (int i = 0; i < _attributeListeners.length; i++) {
-      ServletRequestAttributeEvent event;
-
-      event = new ServletRequestAttributeEvent(getWebApp(), request,
-                                               name, oldValue);
-
-      _attributeListeners[i].attributeRemoved(event);
-    }
-
-    if (oldValue instanceof ScopeRemoveListener) {
-      ((ScopeRemoveListener) oldValue).removeEvent(this, name);
-    }
+    
   }
 
   /**
@@ -2458,6 +2379,7 @@ public abstract class AbstractHttpRequest
   {
     _invocation = invocation;
 
+    /*
     if (invocation != null) {
       // server/2m05
 
@@ -2465,22 +2387,12 @@ public abstract class AbstractHttpRequest
       if (app != null)
         _attributeListeners = app.getRequestAttributeListeners();
     }
+    */
   }
 
   public AbstractHttpRequest getAbstractHttpRequest()
   {
     return this;
-  }
-
-  /**
-   * Sets the start time to the current time.
-   */
-  protected final void setStartTime()
-  {
-    if (_tcpConn != null)
-      _tcpConn.beginActive();
-    else
-      _startTime = Alarm.getCurrentTime();
   }
 
   /**
@@ -2575,7 +2487,10 @@ public abstract class AbstractHttpRequest
    */
   public void killKeepalive()
   {
-    _keepalive = false;
+    TcpConnection conn = _tcpConn;
+
+    if (conn != null)
+      conn.killKeepalive();
 
     /*
     ConnectionController controller = _conn.getController();
@@ -2589,7 +2504,7 @@ public abstract class AbstractHttpRequest
    */
   protected boolean isKeepalive()
   {
-    return _keepalive;
+    return _tcpConn != null && _tcpConn.isKeepalive();
   }
 
   public boolean isComet()
@@ -2620,18 +2535,12 @@ public abstract class AbstractHttpRequest
    */
   public boolean allowKeepalive()
   {
-    if (! _keepalive)
-      return false;
-
     TcpConnection tcpConn = _tcpConn;
 
-    if (tcpConn == null)
+    if (tcpConn != null)
+      return tcpConn.toKeepalive();
+    else
       return true;
-
-    if (! tcpConn.toKeepalive())
-      _keepalive = false;
-
-    return _keepalive;
   }
 
   /**
@@ -2841,12 +2750,7 @@ public abstract class AbstractHttpRequest
    * Restarts the server.
    */
   protected void restartServer()
-    throws IOException, ServletException
   {
-    HttpServletResponse res = (HttpServletResponse) getResponse();
-
-    res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-
     _server.update();
   }
 
@@ -2932,6 +2836,12 @@ public abstract class AbstractHttpRequest
   {
     _session = null;
 
+    HttpServletRequestImpl requestFacade = getRequestFacade();
+
+    if (requestFacade != null)
+      requestFacade.cleanup();
+    
+    /*
     if (_attributes.size() > 0) {
       for (Map.Entry<String,Object> entry : _attributes.entrySet()) {
         Object value = entry.getValue();
@@ -2943,6 +2853,7 @@ public abstract class AbstractHttpRequest
 
       _attributes.clear();
     }
+    */
 
     if (_form != null)
       _form.clear();

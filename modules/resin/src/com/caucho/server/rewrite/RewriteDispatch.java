@@ -179,38 +179,43 @@ public class RewriteDispatch
   public FilterChain map(String uri,
 			 String queryString,
 			 FilterChain chain)
-    throws ServletException
   {
-    if (_isFinest)
-      log.finest("rewrite-dispatch check uri '" + uri + "'");
+    try {
+      if (_isFinest)
+        log.finest("rewrite-dispatch check uri '" + uri + "'");
 
-    /*
-    if (_matchRule == null || _matchRule.isModified()) {
-      if (_matchRule != null)
+      /*
+        if (_matchRule == null || _matchRule.isModified()) {
+        if (_matchRule != null)
 	_matchRule.destroy();
       
-      _matchRule = new MatchRule(this);
-      _matchRule.setRegexp(Pattern.compile(".*"));
+        _matchRule = new MatchRule(this);
+        _matchRule.setRegexp(Pattern.compile(".*"));
 
-      _program.configure(_matchRule);
+        _program.configure(_matchRule);
 
-      _matchRule.init();
-    }
-    */
+        _matchRule.init();
+        }
+      */
 
-    if (_matchRule != null) {
-      // uri = _matchRule.rewriteUri(uri, queryString);
+      if (_matchRule != null) {
+        // uri = _matchRule.rewriteUri(uri, queryString);
       
-      chain = _matchRule.map(uri, queryString, chain);
+        chain = _matchRule.map(uri, queryString, chain);
+      }
+
+      chain = mapChain(0, uri, queryString, chain);
+
+      for (int i = _filterList.size() - 1; i >= 0; i--) {
+        chain = _filterList.get(i).map(uri, queryString, chain);
+      }
+
+      return chain;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
-
-    chain = mapChain(0, uri, queryString, chain);
-
-    for (int i = _filterList.size() - 1; i >= 0; i--) {
-      chain = _filterList.get(i).map(uri, queryString, chain);
-    }
-
-    return chain;
   }
 
   private FilterChain mapChain(int index,

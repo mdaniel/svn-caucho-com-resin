@@ -29,15 +29,19 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.server.connection.ConnectionCometController;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.NullEnumeration;
+import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -61,13 +65,19 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   private AbstractHttpRequest _request;
 
-  private HttpServletResponseImpl _response;
+  private final HttpServletResponseImpl _response;
+
+  private boolean _isSecure;
+  private HashMapImpl<String,Object> _attributes;
 
   private AsyncListenerNode _asyncListenerNode;
   private long _asyncTimeout = 10000;
   private ConnectionCometController _comet;
 
   private boolean _isSuspend;
+
+  private boolean _hasReader;
+  private boolean _hasInputStream;
 
   /**
    * Create a new Request.  Because the actual initialization occurs with
@@ -78,11 +88,15 @@ public class HttpServletRequestImpl implements CauchoRequest
   public HttpServletRequestImpl(AbstractHttpRequest request)
   {
     _request = request;
+
+    _response = new HttpServletResponseImpl(request.getAbstractHttpResponse());
+
+    _isSecure = request.isSecure();
   }
 
-  public void setResponse(HttpServletResponseImpl response)
+  public HttpServletResponseImpl getResponse()
   {
-    _response = response;
+    return _response;
   }
 
   //
@@ -284,6 +298,11 @@ public class HttpServletRequestImpl implements CauchoRequest
   public ServletInputStream getInputStream()
     throws IOException
   {
+    if (_hasReader)
+      throw new IllegalStateException(L.l("getInputStream() can't be called after getReader()"));
+
+    _hasInputStream = true;
+
     return _request.getInputStream();
   }
 
@@ -295,6 +314,11 @@ public class HttpServletRequestImpl implements CauchoRequest
   public BufferedReader getReader()
     throws IOException, IllegalStateException
   {
+    if (_hasInputStream)
+      throw new IllegalStateException(L.l("getReader() can't be called after getInputStream()"));
+
+    _hasReader = true;
+
     return _request.getReader();
   }
 
@@ -350,48 +374,135 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isSecure()
   {
-    return _request.isSecure();
+    return _isSecure;
   }
 
+  //
+  // request attributes
+  //
+
   /**
-   * Returns an attribute value.
+   * Returns the value of the named request attribute.
    *
-   * @param name the attribute name
-   * @return the attribute value
+   * @param name the attribute name.
+   *
+   * @return the attribute value.
    */
   public Object getAttribute(String name)
   {
-    return _request.getAttribute(name);
+    HashMapImpl<String,Object> attributes = _attributes;
+    
+    if (attributes != null)
+      return attributes.get(name);
+    else if (isSecure()) {
+      _attributes = new HashMapImpl<String,Object>();
+      _attributes = attributes;
+      _request.initAttributes(this);
+      
+      return attributes.get(name);
+    }
+    else
+      return null;
   }
 
   /**
-   * Sets an attribute value.
-   *
-   * @param name the attribute name
-   * @param o the attribute value
+   * Returns an enumeration of the request attribute names.
    */
-  public void setAttribute(String name, Object o)
+  public Enumeration<String> getAttributeNames()
   {
-    _request.setAttribute(this, name, o);
+    HashMapImpl<String,Object> attributes = _attributes;
+    
+    if (attributes != null) {
+      return Collections.enumeration(attributes.keySet());
+    }
+    else if (isSecure()) {
+      _attributes = new HashMapImpl<String,Object>();
+      _attributes = attributes;
+      _request.initAttributes(this);
+      
+      return Collections.enumeration(attributes.keySet());
+    }
+    else
+      return (Enumeration<String>) NullEnumeration.create();
   }
 
   /**
-   * Enumerates all attribute names in the request.
-   */
-  public Enumeration getAttributeNames()
-  {
-    return _request.getAttributeNames();
-  }
-
-  /**
-   * Removes the given attribute.
+   * Sets the value of the named request attribute.
    *
-   * @param name the attribute name
+   * @param name the attribute name.
+   * @param value the new attribute value.
+   */
+  public void setAttribute(String name, Object value)
+  {
+    HashMapImpl<String,Object> attributes = _attributes;
+    
+    if (value != null) {
+      if (attributes == null) {
+        attributes = new HashMapImpl<String,Object>();
+        _attributes = attributes;
+        _request.initAttributes(this);
+      }
+      
+      Object oldValue = attributes.put(name, value);
+
+      WebApp webApp = getWebApp();
+
+      for (ServletRequestAttributeListener listener
+             : webApp.getRequestAttributeListeners()) {
+        ServletRequestAttributeEvent event;
+
+        if (oldValue != null) {
+          event = new ServletRequestAttributeEvent(webApp, this,
+                                                   name, oldValue);
+
+          listener.attributeReplaced(event);
+        }
+        else {
+          event = new ServletRequestAttributeEvent(webApp, this,
+                                                   name, value);
+
+          listener.attributeAdded(event);
+        }
+      }
+    }
+    else
+      removeAttribute(name);
+  }
+
+  /**
+   * Removes the value of the named request attribute.
+   *
+   * @param name the attribute name.
    */
   public void removeAttribute(String name)
   {
-    _request.removeAttribute(this, name);
+    HashMapImpl<String,Object> attributes = _attributes;
+
+    if (attributes == null)
+      return;
+    
+    Object oldValue = attributes.remove(name);
+    
+    WebApp webApp = getWebApp();
+
+    for (ServletRequestAttributeListener listener
+           : webApp.getRequestAttributeListeners()) {
+      ServletRequestAttributeEvent event;
+
+      event = new ServletRequestAttributeEvent(webApp, this,
+                                               name, oldValue);
+
+      listener.attributeRemoved(event);
+    }
+
+    if (oldValue instanceof ScopeRemoveListener) {
+      ((ScopeRemoveListener) oldValue).removeEvent(this, name);
+    }
   }
+
+  //
+  // request dispatching
+  //
 
   /**
    * Returns a request dispatcher for later inclusion or forwarding.  This
@@ -866,11 +977,6 @@ public class HttpServletRequestImpl implements CauchoRequest
     return _request.getVaryCookies();
   }
 
-  public String getVaryCookie()
-  {
-    return _request.getVaryCookie();
-  }
-
   public void setVaryCookie(String cookie)
   {
     _request.setVaryCookie(cookie);
@@ -1155,6 +1261,21 @@ public class HttpServletRequestImpl implements CauchoRequest
   public DispatcherType getDispatcherType()
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void cleanup()
+  {
+    HashMapImpl<String,Object> attributes = _attributes;
+    
+    if (attributes != null) {
+      for (Map.Entry<String,Object> entry : attributes.entrySet()) {
+        Object value = entry.getValue();
+
+        if (value instanceof ScopeRemoveListener) {
+          ((ScopeRemoveListener) value).removeEvent(this, entry.getKey());
+        }
+      }
+    }
   }
 
   @Override

@@ -2,6 +2,7 @@ package com.caucho.protocols.flash;
 
 import java.io.*;
 
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.port.ServerRequest;
@@ -16,7 +17,7 @@ public class SocketPolicyRequest extends HttpRequest
   private final Path _policy;
   private final Connection _connection;
 
-  public SocketPolicyRequest(DispatchServer server,
+  public SocketPolicyRequest(Server server,
 			     Connection connection,
 			     Path policy)
   {

@@ -446,6 +446,9 @@ function draw_grid($min_x, $min_y, $max_x, $max_y,
 
   $delta = ($max_y - $min_y) / $digit;
 
+  if ($delta <= 0)
+    $delta = 1;
+
   $i = 1;
   for ($y = $min_y + $delta; $y < $max_y; $y += $delta) {
     $yp = $y0 + ($y - $min_y) * $height / ($max_y - $min_y);

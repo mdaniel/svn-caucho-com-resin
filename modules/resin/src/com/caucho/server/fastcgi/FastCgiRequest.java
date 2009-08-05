@@ -180,7 +180,7 @@ public class FastCgiRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public FastCgiRequest(DispatchServer server, Connection conn)
+  public FastCgiRequest(Server server, Connection conn)
   {
     super(server, conn);
 
@@ -257,8 +257,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
       // XXX: use same one for keepalive?
       _requestFacade = new HttpServletRequestImpl(this);
-      _responseFacade = new HttpServletResponseImpl(_response);
-      _requestFacade.setResponse(_responseFacade);
+      _responseFacade = _requestFacade.getResponse();
 
       try {
         _hasRequest = false;
@@ -273,7 +272,7 @@ public class FastCgiRequest extends AbstractHttpRequest
           return false;
         }
 
-        setStartTime();
+        startInvocation();
 
         _isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
 
@@ -1276,7 +1275,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   }
 
   @Override
-  public HttpServletRequest getRequestFacade()
+  public HttpServletRequestImpl getRequestFacade()
   {
     return _requestFacade;
   }

@@ -32,6 +32,7 @@ package com.caucho.server.fastcgi;
 import java.lang.ref.*;
 import java.util.*;
 
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
@@ -73,7 +74,7 @@ public class FastCgiProtocol extends Protocol {
    */
   public ServerRequest createRequest(Connection conn)
   {
-    return new FastCgiRequest(getServer(), conn);
+    return new FastCgiRequest((Server) getServer(), conn);
   }
 
   public ClassLoader getClassLoader()

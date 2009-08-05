@@ -347,16 +347,6 @@ public class RequestAdapter extends RequestWrapper
       ((CauchoRequest) getRequest()).setVaryCookie(cookie);
   }
 
-  public String getVaryCookie()
-  {
-    // super.setVaryCookie(cookie);
-
-    if (getRequest() instanceof CauchoRequest)
-      return ((CauchoRequest) getRequest()).getVaryCookie();
-    else
-      return null;
-  }
-
   public boolean getVaryCookies()
   {
     // super.setVaryCookie(cookie);

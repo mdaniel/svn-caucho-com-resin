@@ -92,11 +92,10 @@ public class TcpConnection extends Connection
 
   private ConnectionState _state = ConnectionState.IDLE;
   private ConnectionController _controller;
-
-  private boolean _isClosed;
-
   private boolean _isKeepalive;
   private boolean _isWake;
+
+  private boolean _isClosed;
 
   private ConnectionReadTask _keepaliveTask = _keepaliveRequestTask;
 
@@ -270,6 +269,11 @@ public class TcpConnection extends Connection
     return _state.isDestroyed();
   }
 
+  public boolean isKeepalive()
+  {
+    return _isKeepalive;
+  }
+  
   @Override
   public boolean isComet()
   {
@@ -547,7 +551,6 @@ public class TcpConnection extends Connection
       }
 
       boolean isStatKeepalive = _state.isKeepalive();
-
       _state = _state.toActive();
       _isWake = false;
 
@@ -731,6 +734,11 @@ public class TcpConnection extends Connection
     _state = _state.toCompleteComet();
   }
 
+  public void killKeepalive()
+  {
+    _isKeepalive = false;
+  }
+  
   public boolean toKeepalive()
   {
     if (! _isKeepalive)
