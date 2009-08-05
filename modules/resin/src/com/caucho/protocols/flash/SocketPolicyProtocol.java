@@ -4,6 +4,7 @@ import javax.annotation.*;
 import java.io.*;
 
 import com.caucho.config.*;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
@@ -61,6 +62,6 @@ public class SocketPolicyProtocol extends Protocol
 
   public ServerRequest createRequest(Connection conn)
   {
-    return new SocketPolicyRequest(getServer(), conn, _policy);
+    return new SocketPolicyRequest((Server) getServer(), conn, _policy);
   }
 }
