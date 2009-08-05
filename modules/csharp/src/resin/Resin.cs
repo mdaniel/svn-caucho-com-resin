@@ -37,6 +37,7 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Configuration.Install;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Principal;
 
 namespace Caucho
 {
@@ -87,6 +88,11 @@ namespace Caucho
     private bool _standalone = false;
     private bool _help = false;
     
+    //used with -install / -remove.
+    //value of true indicates that the process is started
+    //from resin.exe with elevated privileges
+    private bool _isChild = false;
+    
     private String _user;
     private String _password;
     private String _javaExe;
@@ -101,10 +107,14 @@ namespace Caucho
     private String _passToServiceArgs;
     private String _command;
     
+    
+    private StringBuilder _args;
+    
     private Process _process;
     
     private Resin(String[] args)
     {
+      _args = new StringBuilder();
       _displayName = "Resin Web Server";
       StringBuilder jvmArgs = new StringBuilder();
       StringBuilder resinArgs = new StringBuilder();
@@ -112,6 +122,8 @@ namespace Caucho
       
       int argsIdx = 1;
       while (argsIdx < args.Length) {
+        _args.Append(args[argsIdx]).Append(' ');
+        
         if ("-verbose".Equals(args[argsIdx])) {
           _verbose = true;
           
@@ -285,6 +297,10 @@ namespace Caucho
           _standalone = true;
           
           argsIdx++;
+        } else if("--child".Equals(args[argsIdx])) {
+          _isChild = true;
+          
+          argsIdx++;
         } else {
           resinArgs.Append(' ').Append(args[argsIdx++]);
         }
@@ -349,24 +365,12 @@ namespace Caucho
                                                        Environment.GetEnvironmentVariable("PATH"),
                                                        _resinHome));
 
-      if (_install) {
-        try {
-          InstallService();
-        } catch (Exception e) {
-          Error(e.Message, e);
-          
-          return 1;
-        }
-      } else if (_uninstall) {
-        try {
-          UninstallService();
-        } catch (Exception e) {
-          Error(e.Message, e);
-          
-          return 1;
-        }
+      if (_install || _uninstall) {
+        return InstallOrRemoveService();
       } else if (_service) {
         ServiceBase.Run(new ServiceBase[]{this});
+        
+        return 0;
       } else if (_standalone) {
         if (StartResin()) {
           Join();
@@ -375,7 +379,7 @@ namespace Caucho
             return _process.ExitCode;
         }
         
-        return 1;
+        return 0;
       } else {
         if (StartResin()) {
           ResinWindow window = new ResinWindow(this, _displayName);
@@ -383,49 +387,188 @@ namespace Caucho
           Application.Run();
         }
         
-        return 1;
+        return 0;
+      }
+    }
+    
+    private int InstallOrRemoveService() {
+      Exception exception = null;
+      int exitCode = 1;
+      bool hasChild = false;
+      
+      TextWriter stdOut = Console.Out;
+      TextWriter stdErr = Console.Error;
+      
+      String childOutputFile
+        = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "\\child." + ServiceName + ".tmp";
+
+      TextWriter childWriter = null;
+      if (_isChild)
+        childWriter = new StreamWriter(childOutputFile);
+      
+      //buffer all the output of the Installer for use in case of error only.
+      
+      StringWriter output = new StringWriter();
+      
+      Console.SetOut(output);
+      Console.SetError(output);
+      
+      bool success = false;
+      
+      try {
+        if (_install)
+          InstallService(_isChild? childWriter: stdOut);
+        else
+          UninstallService(_isChild? childWriter: stdOut);
+        
+        success = true;
+      } //catch(System.InvalidOperationException e) {
+      //occurs when user is not an administor
+      //Error("Service installation requires administrative privileges.", e, stdErr);
+      
+      //return 1;
+      //}
+      catch (Exception e) {
+        exception = e;
+        
+        Exception cause = e.GetBaseException();
+        
+        if (cause is System.Security.SecurityException && ! _isChild) {
+          try {
+            //occurs on Vista and supposedly Server 2008 when user is an administrator
+            //but program is started using the 'user' (secondary) security token with
+            //all the administrative privileges stripped away
+            //this should not occur when the UAC is disabled.
+            hasChild = true;
+            
+            Info("Starting service installation with elevated security privileges...", stdOut, true);
+            
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName= System.Reflection.Assembly.GetExecutingAssembly().Location;
+            
+            _args.Append("--child");
+            psi.Arguments = _args.ToString();
+            
+            psi.Verb = "runas";
+            psi.UseShellExecute = true;
+            psi.WindowStyle = ProcessWindowStyle.Hidden;
+            
+            Process process = Process.Start(psi);
+            
+            while (! process.HasExited)
+              process.WaitForExit(500);
+            
+            exitCode = process.ExitCode;
+            
+            if (exitCode == 0)
+              success = true;
+          } catch (Exception pe) {
+            Error("Failed to install using elevated security privileges due to:", pe);
+          }
+        }
+      } finally {
+        Console.SetOut(stdOut);
+        Console.SetError(stdErr);
       }
       
-      return 0;
-    }
-    
-    private void InstallService() {
-      Installer installer = InitInstaller();
-      Hashtable installState = new Hashtable();
-      installer.Install(installState);
+      if (_isChild) {
+        if (! success) {
+          Info(output.ToString(), childWriter, true);
+          Error("Exception occured during installation: ", exception, childWriter);
+        }
+        
+        childWriter.Flush();
+        childWriter.Close();
+      }
       
-      RegistryKey system = Registry.LocalMachine.OpenSubKey("System");
-      RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet");
-      RegistryKey servicesKey = currentControlSet.OpenSubKey("Services");
-      RegistryKey serviceKey = servicesKey.OpenSubKey(ServiceName, true);
-      
-      StringBuilder builder = new StringBuilder((String)serviceKey.GetValue("ImagePath"));
-      builder.Append(" -service -name ").Append(ServiceName).Append(' ');
-      
-      if (_passToServiceArgs.Length > 0)
-        builder.Append(_passToServiceArgs).Append(' ');
-      
-      if (_jvmArgs.Length > 0)
-        builder.Append(_jvmArgs).Append(' ');
-      
-      if (_resinArgs.Length > 0)
-        builder.Append(_resinArgs).Append(' ');
-      
-      serviceKey.SetValue("ImagePath", builder.ToString());
+      String childData = null;
+      if (hasChild) {
+        StreamReader reader = new StreamReader(childOutputFile);
+        
+        childData = reader.ReadToEnd();
+        
+        reader.Close();
+        
+        File.Delete(childOutputFile);
+      }
 
-      StoreState(installState, ServiceName);
+      if (success && hasChild) {
+        Info(childData, false);
+        
+        return 0;
+      }
+      else if (success && ! hasChild) {
+        return 0;
+      } else {
+        Error("ServiceInstaller failed with the following due to:", exception);
+        
+        if (hasChild) {
+          Info("Atempted installation with elevated privileges failed: \n");
+          Info(childData);
+        }
+      }
       
-      Info(String.Format("\nInstalled {0} as Windows Service", ServiceName));
+      
+      return exitCode;
     }
     
-    private void UninstallService() {
-      Hashtable state = LoadState(ServiceName);
+    private bool ServiceExists(String serviceName) {
+      ServiceController[] services = ServiceController.GetServices();
       
-      Installer installer = InitInstaller();
+      foreach (ServiceController service in services) {
+        if (ServiceName.Equals(service.ServiceName)) {
+          return true;
+        }
+      }
       
-      installer.Uninstall(state);
-      
-      Info(String.Format("\nRemoved {0} as Windows Service", ServiceName));
+      return false;
+    }
+    
+    private void InstallService(TextWriter writer) {
+      if (ServiceExists(ServiceName)) {
+        Info(String.Format("\nService {0} appears to be already installed", ServiceName), writer, true);
+      } else {
+        Installer installer = InitInstaller();
+        Hashtable installState = new Hashtable();
+        installer.Install(installState);
+        
+        RegistryKey system = Registry.LocalMachine.OpenSubKey("System");
+        RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet");
+        RegistryKey servicesKey = currentControlSet.OpenSubKey("Services");
+        RegistryKey serviceKey = servicesKey.OpenSubKey(ServiceName, true);
+        
+        StringBuilder builder = new StringBuilder((String)serviceKey.GetValue("ImagePath"));
+        builder.Append(" -service -name ").Append(ServiceName).Append(' ');
+        
+        if (_passToServiceArgs.Length > 0)
+          builder.Append(_passToServiceArgs).Append(' ');
+        
+        if (_jvmArgs.Length > 0)
+          builder.Append(_jvmArgs).Append(' ');
+        
+        if (_resinArgs.Length > 0)
+          builder.Append(_resinArgs).Append(' ');
+        
+        serviceKey.SetValue("ImagePath", builder.ToString());
+
+        StoreState(installState, ServiceName);
+        
+        Info(String.Format("\nInstalled {0} as Windows Service", ServiceName), writer, true);
+      }
+    }
+    
+    private void UninstallService(TextWriter writer) {
+      if (! ServiceExists(ServiceName)) {
+        Info(String.Format("\nService {0} does not appear to be installed", ServiceName), writer, true);
+      } else {
+        Hashtable state = LoadState(ServiceName);
+        
+        Installer installer = InitInstaller();
+        
+        installer.Uninstall(state);
+        
+        Info(String.Format("\nRemoved {0} as Windows Service", ServiceName), writer, true);
+      }
     }
     
     private Installer InitInstaller() {
@@ -541,6 +684,9 @@ namespace Caucho
       
       ProcessStartInfo startInfo = new ProcessStartInfo();
       startInfo.FileName = _javaExe;
+      foreach (String s in startInfo.Verbs)
+        Info("Verb: " + s);
+      
       StringBuilder arguments = new StringBuilder(_jvmArgs).Append(' ');
       
       if (_nojit)
@@ -631,28 +777,52 @@ namespace Caucho
     }
     
     public void Error(String message, Exception e) {
-      if (_service && EventLog != null)
-        EventLog.WriteEntry(this.ServiceName, message, EventLogEntryType.Error);
-      else
-        Console.WriteLine(message);
+      Error(message, e, null);
     }
+    
+    public void Error(String message, Exception e, TextWriter writer) {
+      StringBuilder data = new StringBuilder(message);
+      
+      if (e != null)
+        data.Append('\n').Append(e.ToString());
+
+      if (writer != null)
+        writer.WriteLine(data.ToString());
+      else if (_service && EventLog != null)
+        EventLog.WriteEntry(this.ServiceName, data.ToString(), EventLogEntryType.Error);
+      else
+        Console.WriteLine(data.ToString());
+    }
+    
     
     private void Info(String message) {
-      Info(message, true);
+      Info(message, null, true);
+    }
+
+    private void Info(String message, bool newLine) {
+      Info(message, null, newLine);
     }
     
-    private void Info(String message, bool newLine) {
-      if (_service && EventLog != null)
+    private void Info(String message, TextWriter writer, bool newLine) {
+      if (writer != null && newLine)
+        writer.WriteLine(message);
+      else if(writer != null && ! newLine)
+        writer.Write(message);
+      else if (_service && EventLog != null)
         EventLog.WriteEntry(this.ServiceName, message, EventLogEntryType.Information);
       else if (newLine)
         Console.WriteLine(message);
-      else 
+      else
         Console.Write(message);
     }
     
     public static int Main(String []args) {
       Resin resin = new Resin(Environment.GetCommandLineArgs());
-      return resin.Execute();
+      
+      //return resin.Execute();
+      int exitCode = resin.Execute();
+      
+      return exitCode;
     }
 
     private static String GetJavaExe(String javaHome) {
@@ -670,8 +840,8 @@ namespace Caucho
       if(cp != null && ! "".Equals(cp))
         buffer.Append(cp).Append(';');
 
-//      buffer.Append(resinHome + "\\classes;");
-//      buffer.Append(resinHome + "\\lib\\resin.jar;");
+      //      buffer.Append(resinHome + "\\classes;");
+      //      buffer.Append(resinHome + "\\lib\\resin.jar;");
       
       if (javaHome != null) {
         
