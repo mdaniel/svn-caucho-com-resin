@@ -254,7 +254,7 @@ public class TempFileInode {
 	Thread.dumpStack();
       for (long fragment : fragmentArray) {
 	try {
-	  _store.deleteFragment(xa, fragment);
+	  _store.deleteFragment(fragment);
 	} catch (IOException e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
@@ -267,7 +267,7 @@ public class TempFileInode {
       
       for (long fragment : fragmentList) {
 	try {
-	  _store.deleteFragment(xa, fragment);
+	  _store.deleteFragment(fragment);
 	} catch (IOException e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}

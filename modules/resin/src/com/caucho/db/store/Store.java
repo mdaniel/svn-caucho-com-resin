@@ -96,6 +96,10 @@ public class Store {
 
   private final static int ALLOC_BYTES_PER_BLOCK = 2;
 
+  // total size of an allocation group
+  private final static long ALLOC_GROUP_SIZE
+    = 1L * BLOCK_SIZE * BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK;
+
   //private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
   private final static int ALLOC_CHUNK_SIZE = BLOCK_SIZE;
   
@@ -107,7 +111,7 @@ public class Store {
   public final static int ALLOC_MINI_FRAG = 0x05;
   public final static int ALLOC_MASK      = 0x0f;
 
-  public final static int FRAGMENT_SIZE = BLOCK_SIZE; // 16 * 1024;
+  public final static int FRAGMENT_SIZE = BLOCK_SIZE / 4; // 16 * 1024;
   public final static int FRAGMENT_PER_BLOCK
     = (int) (BLOCK_SIZE / FRAGMENT_SIZE);
   
@@ -409,7 +413,7 @@ public class Store {
 	if (BLOCK_SIZE < len)
 	  len = BLOCK_SIZE;
 	
-	readBlock((long) i / ALLOC_BYTES_PER_BLOCK * BLOCK_SIZE,
+	readBlock((long) i / ALLOC_BYTES_PER_BLOCK * ALLOC_GROUP_SIZE,
 		  _allocationTable, i, len);
       }
     } finally {
@@ -604,8 +608,8 @@ public class Store {
 			 _allocationTable.length);
 	_allocationTable = newTable;
 
-	// if the allocation table is over 32k, allocate the block for the
-	// extension (each allocation block of 32k allocates 2G)
+	// if the allocation table is over 8k, allocate the block for the
+	// extension (each allocation block of 8k allocates 512m)
 	if (blockIndex % (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK) == 0) {
 	  setAllocation(blockIndex, ALLOC_USED);
 	  blockIndex++;
@@ -705,7 +709,14 @@ public class Store {
       return;
     
     synchronized (_allocationLock) {
-      setAllocation(blockIdToIndex(blockId), ALLOC_FREE);
+      long index = blockIdToIndex(blockId);
+      
+      if (getAllocation(index) == ALLOC_FREE) {
+        throw new IllegalStateException(L.l("{0} double free of {1}",
+                                            this, Long.toHexString(blockId)));
+      }
+      
+      setAllocation(index, ALLOC_FREE);
     }
 
     saveAllocation();
@@ -775,7 +786,7 @@ public class Store {
       for (;
 	   dirtyMin < dirtyMax;
 	   dirtyMin = (dirtyMin + BLOCK_SIZE) - dirtyMin % BLOCK_SIZE) {
-	int block = dirtyMin / (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK);
+	int allocGroup = dirtyMin / (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK);
 	
 	int offset = dirtyMin % BLOCK_SIZE;
 	int length;
@@ -785,7 +796,7 @@ public class Store {
 	else
 	  length = dirtyMax - dirtyMin;
 
-	writeBlock((long) block * BLOCK_SIZE + offset,
+	writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
 		   _allocationTable, offset, length);
       }
     }
@@ -1054,7 +1065,7 @@ public class Store {
   /**
    * Deletes a fragment.
    */
-  public void deleteFragment(StoreTransaction xa, long fragmentAddress)
+  public void deleteFragment(long fragmentAddress)
     throws IOException
   {
     synchronized (_allocationLock) {
@@ -1255,9 +1266,11 @@ public class Store {
    */
   public void writeBlock(StoreTransaction xa,
 			 long blockAddress, int blockOffset,
-			 char []buffer, int offset, int length)
+			 char []buffer, int offset, int charLength)
     throws IOException
   {
+    int length = 2 * charLength;
+    
     if (BLOCK_SIZE - blockOffset < length)
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
 					     blockOffset, length));
@@ -1272,7 +1285,7 @@ public class Store {
       synchronized (blockBuffer) {
 	int blockTail = blockOffset;
 	
-	for (int i = 0; i < length; i++) {
+	for (int i = 0; i < charLength; i++) {
 	  char ch = buffer[offset + i];
 
 	  blockBuffer[blockTail] = (byte) (ch >> 8);
