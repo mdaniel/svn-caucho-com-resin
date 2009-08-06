@@ -464,7 +464,7 @@ public class Inode {
     long fileLength = readLong(inode, inodeOffset);
 
     int charSublen = (int) (fileLength - fileOffset) / 2;
-    if (bufferLength < sublen)
+    if (bufferLength < charSublen)
       charSublen = bufferLength;
 
     if (charSublen <= 0)
@@ -538,7 +538,7 @@ public class Inode {
       assert(currentLength == 0);
       
       while (charLength > 0) {
-        int sublen = 2 * length;
+        int sublen = 2 * charLength;
 
         if (MINI_FRAG_SIZE < sublen)
           sublen = MINI_FRAG_SIZE;
