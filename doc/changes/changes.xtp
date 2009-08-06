@@ -12,6 +12,7 @@
 
 <s2 title="3.1 snapshot">
 <ul>
+<li>session: boundary issues over 4M session (rep by Chris Pratt)</li>
 <li>comet: cookies cleared before resume</li>
 <li>cache: jsp/include/html was not properly cached (#3379, rep by Driss Louriagli)</li>
 <li>jsp: prelude with include NPE (#3508, rep by Shinomiya Nobuaki)</li>

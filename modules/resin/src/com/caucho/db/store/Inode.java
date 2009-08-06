@@ -856,7 +856,7 @@ public class Inode {
 		dblFragCount % INDIRECT_BLOCKS == 0) {
 	      fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
 	    
-	      int dblIndex = (int) (fragCount / INDIRECT_BLOCKS);
+	      int dblIndex = (int) 8 * (fragCount / INDIRECT_BLOCKS);
 
 	      fragAddr = _store.readFragmentLong(fragAddr, dblIndex);
 
@@ -964,7 +964,7 @@ public class Inode {
 
       fragCount -= DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS;
 
-      int index = (int) (fragCount / INDIRECT_BLOCKS);
+      int index = (int) 8 * (fragCount / INDIRECT_BLOCKS);
       
       long doubleIndirectAddr = store.readFragmentLong(indirectAddr, index);
 					  

@@ -445,7 +445,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
     
     if ("before-headers".equals(mode)) {
       _sessionSaveMode = (SAVE_BEFORE_HEADERS|
-			  SAVE_AFTER_REQUEST|
 			  SAVE_ON_SHUTDOWN);
     }
     else if ("after-request".equals(mode)) {
