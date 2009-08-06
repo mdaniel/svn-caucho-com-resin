@@ -463,49 +463,49 @@ public class Inode {
   {
     long fileLength = readLong(inode, inodeOffset);
 
-    int sublen = (int) (fileLength - fileOffset) / 2;
+    int charSublen = (int) (fileLength - fileOffset) / 2;
     if (bufferLength < sublen)
-      sublen = bufferLength;
+      charSublen = bufferLength;
 
-    if (sublen <= 0)
+    if (charSublen <= 0)
       return -1;
 
     if (fileLength <= INLINE_MAX) {
       int baseOffset = inodeOffset + 8 + (int) fileOffset;
 
-      for (int i = 0; i < sublen; i++) {
-        char ch = (char) (((inode[baseOffset] & 0xff) << 8) +
-                          ((inode[baseOffset + 1] & 0xff)));
+      for (int i = 0; i < charSublen; i++) {
+        char ch = (char) (((inode[baseOffset] & 0xff) << 8)
+                          + ((inode[baseOffset + 1] & 0xff)));
 
         buffer[bufferOffset + i] = ch;
 
         baseOffset += 2;
       }
 
-      return sublen;
+      return charSublen;
     }
     else if (fileLength <= MINI_FRAG_MAX) {
       long fragAddr = readMiniFragAddr(inode, inodeOffset, store, fileOffset);
       int fragOffset = (int) (fileOffset % Inode.MINI_FRAG_SIZE);
 
-      if (MINI_FRAG_SIZE - fragOffset < 2 * sublen)
-        sublen = (MINI_FRAG_SIZE - fragOffset) / 2;
+      if (MINI_FRAG_SIZE - fragOffset < 2 * charSublen)
+        charSublen = (MINI_FRAG_SIZE - fragOffset) / 2;
 
       store.readMiniFragment(fragAddr, fragOffset,
-                             buffer, bufferOffset, sublen);
+                             buffer, bufferOffset, charSublen);
 
-      return sublen;
+      return charSublen;
     }
     else {
       long addr = readBlockAddr(inode, inodeOffset, store, fileOffset);
       int offset = (int) (fileOffset % BLOCK_SIZE);
 
-      if (BLOCK_SIZE - offset < sublen)
-        sublen = BLOCK_SIZE - offset;
+      if (BLOCK_SIZE - offset < 2 * charSublen)
+        charSublen = (BLOCK_SIZE - offset) / 2;
 
-      store.readBlock(addr, offset, buffer, bufferOffset, sublen);
+      store.readBlock(addr, offset, buffer, bufferOffset, charSublen);
 
-      return sublen;
+      return charSublen;
     }
   }
 
@@ -514,11 +514,11 @@ public class Inode {
    */
   static void append(byte []inode, int inodeOffset,
                      Store store, StoreTransaction xa,
-                     char []buffer, int offset, int length)
+                     char []buffer, int offset, int charLength)
     throws IOException
   {
     long currentLength = readLong(inode, inodeOffset);
-    long newLength = currentLength + 2 * length;
+    long newLength = currentLength + 2 * charLength;
 
     writeLong(inode, inodeOffset, newLength);
 
@@ -527,7 +527,7 @@ public class Inode {
       
       int writeOffset = (int) (inodeOffset + 8 + currentLength);
 
-      for (int i = 0; i < length; i++) {
+      for (int i = 0; i < charLength; i++) {
         char ch = buffer[offset + i];
 
         inode[writeOffset++] = (byte) (ch >> 8);
@@ -537,7 +537,7 @@ public class Inode {
     else if (newLength <= MINI_FRAG_MAX) {
       assert(currentLength == 0);
       
-      while (length > 0) {
+      while (charLength > 0) {
         int sublen = 2 * length;
 
         if (MINI_FRAG_SIZE < sublen)
@@ -562,7 +562,7 @@ public class Inode {
                                 buffer, offset, charSublen);
 
         offset += charSublen;
-        length -= charSublen;
+        charLength -= charSublen;
         currentLength += sublen;
       }
     }
@@ -572,20 +572,20 @@ public class Inode {
                                             currentLength, newLength));
 
       appendBlock(inode, inodeOffset, store, xa,
-                  buffer, offset, length, currentLength);
+                  buffer, offset, charLength, currentLength);
     }
   }
 
   static void appendBlock(byte []inode, int inodeOffset,
                           Store store, StoreTransaction xa,
-                          char []buffer, int offset, int length,
+                          char []buffer, int offset, int charLength,
                           long currentLength)
     throws IOException
   {
     // XXX: theoretically deal with case of appending to inline, although
     // the blobs are the only writers and will avoid that case.
 
-    while (length > 0) {
+    while (charLength > 0) {
       if (currentLength % BLOCK_SIZE != 0) {
         long addr = readBlockAddr(inode, inodeOffset,
                                   store,
@@ -598,7 +598,7 @@ public class Inode {
         }
 
         int blockOffset = (int) (currentLength % BLOCK_SIZE);
-        int sublen = 2 * length;
+        int sublen = 2 * charLength;
 
         if (BLOCK_SIZE - blockOffset < sublen)
           sublen = BLOCK_SIZE - blockOffset;
@@ -608,12 +608,12 @@ public class Inode {
         store.writeBlock(xa, addr, blockOffset, buffer, offset, charSublen);
 
         offset += charSublen;
-        length -= charSublen;
+        charLength -= charSublen;
 
         currentLength += sublen;
       }
       else {
-        int sublen = 2 * length;
+        int sublen = 2 * charLength;
 
         if (BLOCK_SIZE < sublen)
           sublen = BLOCK_SIZE;
@@ -631,7 +631,7 @@ public class Inode {
                        currentLength, blockAddr);
 
         offset += charSublen;
-        length -= charSublen;
+        charLength -= charSublen;
 
         currentLength += sublen;
       }
@@ -840,8 +840,8 @@ public class Inode {
   {
     int blockCount = (int) (fileOffset / BLOCK_SIZE);
     
-    if (blockCount < DIRECT_BLOCKS)
-      return readLong(inode, inodeOffset + 8 * blockCount + 8);
+    if (fileOffset < DIRECT_MAX)
+      return readLong(inode, inodeOffset + (blockCount + 1) * 8);
     else {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
@@ -860,7 +860,7 @@ public class Inode {
       }
       else if (fileOffset < DOUBLE_INDIRECT_MAX) {
         blockCount = blockCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
-        
+
         int dblBlockCount = blockCount / INDIRECT_BLOCKS;
 
         int dblBlockIndex = 8 * (SINGLE_INDIRECT_BLOCKS + dblBlockCount);
@@ -905,10 +905,10 @@ public class Inode {
       throw stateError(msg);
     }
 
-    if (blockCount < DIRECT_BLOCKS) {
+    if (fileOffset < DIRECT_MAX) {
       writeLong(inode, inodeOffset + 8 * (blockCount + 1), blockAddr);
     }
-    else if (blockCount < DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS) {
+    else if (fileOffset < SINGLE_INDIRECT_MAX) {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
