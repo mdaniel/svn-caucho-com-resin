@@ -206,12 +206,12 @@ public class CronTrigger implements Trigger {
 
     QDate nextTime = getNextTimeInYear(currentTime);
 
-    while (nextTime == null) {
+    while (nextTime == null) { // TODO Limit year iterations to three.
       year++;
 
       currentTime.setYear(year);
       currentTime.setMonth(0); // The QDate implementation uses 0 indexed
-                               // months, but cron does not.
+      // months, but cron does not.
       currentTime.setDayOfMonth(1);
       currentTime.setHour(0);
       currentTime.setMinute(0);
@@ -263,7 +263,8 @@ public class CronTrigger implements Trigger {
 
   private QDate getNextTimeInMonth(QDate currentTime)
   {
-    int day = getNextMatch(_days, currentTime.getDayOfMonth(), currentTime
+    int day = getNextDayMatch(currentTime.getDayOfMonth(), currentTime
+        .getDayOfWeek(), currentTime.getDayOfMonth(), currentTime
         .getDaysInMonth());
 
     if (day == -1) {
@@ -280,7 +281,8 @@ public class CronTrigger implements Trigger {
 
       if (nextTime == null) {
         day++;
-        day = getNextMatch(_days, day, currentTime.getDaysInMonth());
+        day = getNextDayMatch(currentTime.getDayOfMonth(), currentTime
+            .getDayOfWeek(), day, currentTime.getDaysInMonth());
 
         if (day == -1) {
           return null;
@@ -296,6 +298,31 @@ public class CronTrigger implements Trigger {
 
       return nextTime;
     }
+  }
+
+  private int getNextDayMatch(int initialDayOfMonth, int initialDayOfWeek,
+      int day, int daysInMonth)
+  {
+    while (day <= daysInMonth) {
+      day = getNextMatch(_days, day, (daysInMonth + 1));
+
+      if (day == -1) {
+        return -1;
+      }
+
+      int dayOfWeek = (((initialDayOfWeek - 1) + ((day - initialDayOfMonth) % 7)) % 7) + 1;
+      int nextDayOfWeek = getNextMatch(_daysOfWeek, dayOfWeek);
+
+      if (nextDayOfWeek == dayOfWeek) {
+        return day;
+      } else if (nextDayOfWeek == -1) {
+        day += ((7 - dayOfWeek) + 1);
+      } else {
+        day += (nextDayOfWeek - dayOfWeek);
+      }
+    }
+
+    return -1;
   }
 
   private QDate getNextTimeInDay(QDate currentTime)
