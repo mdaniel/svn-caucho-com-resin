@@ -493,9 +493,9 @@ public class HmuxRequest extends AbstractHttpRequest
 					       invocation);
         }
 
-	invocation = invocation.getRequestInvocation(this);
+	invocation = invocation.getRequestInvocation(getRequestFacade());
 
-	setInvocation(invocation);
+	getRequestFacade().setInvocation(invocation);
 
 	startInvocation();
 
@@ -506,7 +506,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	log.log(Level.FINER, e.toString(), e);
 	
         try {
-          _errorManager.sendServletError(e, this, _response);
+          _errorManager.sendServletError(e, getRequestFacade(),
+                                         getResponseFacade());
         } catch (ClientDisconnectException e1) {
           throw e1;
         } catch (Exception e1) {
@@ -579,17 +580,19 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private void getClientCertificate()
   {
+    HttpServletRequestImpl request = getRequestFacade();
+    
     String cipher = getHeader("SSL_CIPHER");
     if (cipher == null)
       cipher = getHeader("HTTPS_CIPHER");
     if (cipher != null)
-      setAttribute("javax.servlet.request.cipher_suite", cipher);
+      request.setAttribute("javax.servlet.request.cipher_suite", cipher);
     
     String keySize = getHeader("SSL_CIPHER_USEKEYSIZE");
     if (keySize == null)
       keySize = getHeader("SSL_SECRETKEYSIZE");
     if (keySize != null)
-      setAttribute("javax.servlet.request.key_size", keySize);
+      request.setAttribute("javax.servlet.request.key_size", keySize);
     
     if (_clientCert.size() == 0)
       return;
@@ -599,10 +602,11 @@ public class HmuxRequest extends AbstractHttpRequest
       InputStream is = _clientCert.createInputStream();
       Object cert = cf.generateCertificate(is);
       is.close();
-      setAttribute("javax.servlet.request.X509Certificate", cert);
-      setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
-                   ((X509Certificate) cert).getSubjectDN());
-    } catch (Throwable e) {
+      
+      request.setAttribute("javax.servlet.request.X509Certificate", cert);
+      request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
+                           ((X509Certificate) cert).getSubjectDN());
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
   }
@@ -980,8 +984,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	_rawRead.readAll(_cb, len);
 	if (isLoggable)
 	  log.fine(dbgId() + (char) code + " " + _cb);
-        setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
-                     new com.caucho.security.BasicPrincipal(_cb.toString()));
+        getRequestFacade().setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
+                                        new com.caucho.security.BasicPrincipal(_cb.toString()));
 	break;
 	
       case CSE_DATA:

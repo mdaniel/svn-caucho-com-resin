@@ -38,7 +38,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.dispatch.Invocation;
 
@@ -92,22 +92,20 @@ public class DispatchFilterChain implements FilterChain {
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    CauchoRequest cauchoReq = null;
-    AbstractHttpRequest abstractReq = null;
+    HttpServletRequestImpl cauchoReq = null;
     Invocation oldInvocation = null;
 
-    if (request instanceof CauchoRequest) {
-      cauchoReq = (CauchoRequest) request;
-      abstractReq = cauchoReq.getAbstractHttpRequest();
-      oldInvocation = abstractReq.getInvocation();
+    if (request instanceof HttpServletRequestImpl) {
+      cauchoReq = (HttpServletRequestImpl) request;
+      oldInvocation = cauchoReq.getInvocation();
     }
     
     try {
       thread.setContextClassLoader(_classLoader);
 
       // server/1061
-      if (abstractReq != null && oldInvocation == null)
-	abstractReq.setInvocation(_invocation);
+      if (cauchoReq != null && oldInvocation == null)
+	cauchoReq.setInvocation(_invocation);
 
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);
@@ -123,8 +121,8 @@ public class DispatchFilterChain implements FilterChain {
 	_requestListeners[i].requestDestroyed(event);
       }
 
-      if (abstractReq != null)
-	abstractReq.setInvocation(oldInvocation);
+      if (cauchoReq != null)
+	cauchoReq.setInvocation(oldInvocation);
       
       thread.setContextClassLoader(oldLoader);
     }

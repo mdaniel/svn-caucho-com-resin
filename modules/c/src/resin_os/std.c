@@ -249,9 +249,13 @@ std_write(connection_t *conn, char *buf, int len)
     if (result >= 0)
       return result;
 
+    error = errno;
+    
     if (errno == EINTR || errno == EAGAIN) {
-      error = errno;
       poll_write(fd, conn->socket_timeout);
+    }
+    else {
+      return write_exception_status(conn, errno);
     }
   } while (retry-- >= 0);
 

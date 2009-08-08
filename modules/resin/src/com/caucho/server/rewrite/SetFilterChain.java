@@ -80,6 +80,7 @@ public class SetFilterChain
 	= new SetRequestSecureFilterChain.SecureServletRequestWrapper((HttpServletRequest) request,
 								      _isRequestSecure);
 
+      /* XXX:
       if (response instanceof CauchoResponse
 	  && cauchoRequest.getWebApp() != null) {
 	cauchoResponse = ((CauchoResponse) response).getAbstractHttpResponse();
@@ -87,6 +88,7 @@ public class SetFilterChain
 	oldRequest = cauchoResponse.getRequest();
 	cauchoResponse.setRequest(cauchoRequest);
       }
+      */
 
       request = cauchoRequest;
 
@@ -99,11 +101,14 @@ public class SetFilterChain
     if (_responseContentType != null)
       response.setContentType(_responseContentType);
 
+    super.doFilter(request, response);
+    /*
     try {
       super.doFilter(request, response);
     } finally {
       if (cauchoResponse != null && request != oldRequest)
 	cauchoResponse.setRequest(oldRequest);
     }
+    */
   }
 }

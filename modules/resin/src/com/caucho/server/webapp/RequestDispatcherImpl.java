@@ -143,7 +143,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
    * @param res the servlet response.
    * @param method special to tell if from error.
    */
-  public void forward(HttpServletRequest req, HttpServletResponse res,
+  public void forward2(HttpServletRequest req, HttpServletResponse res,
                       String method, Invocation invocation)
     throws ServletException, IOException
   {
@@ -287,19 +287,23 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     CauchoRequest oldRequest = null;
     AbstractResponseStream oldStream = null;
+    /* XXX:
     if (response != null) {
       oldRequest = response.getRequest();
       oldStream = response.getResponseStream();
     }
+    */
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      /*
       if (response != null) {
         response.setRequest(subRequest);
         response.setResponseStream(response.getOriginalStream());
       }
+      */
 
       // server/1732 wants this commented out
       // jsp/15m9 (tck)
@@ -348,11 +352,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       thread.setContextClassLoader(oldLoader);
 
+      /* XXX:
       if (response != null) {
         response.setRequest(oldRequest);
         response.setResponseStream(oldStream);
         //response.setWriter(oldWriter);
       }
+      */
 
       DispatchRequest.free(subRequest);
 
@@ -388,6 +394,53 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         ptr = ((CauchoResponse) ptr).getResponse();
       }
       */
+    }
+  }
+
+  /**
+   * Forwards the request to the servlet named by the request dispatcher.
+   *
+   * @param req the servlet request.
+   * @param res the servlet response.
+   * @param method special to tell if from error.
+   */
+  public void forward(HttpServletRequest req, HttpServletResponse res,
+                      String method, Invocation invocation)
+    throws ServletException, IOException
+  {
+    CauchoResponse cauchoRes = null;
+
+    if (res instanceof CauchoResponse)
+      cauchoRes = (CauchoResponse) res;
+
+    // jsp/15m8
+    if (res.isCommitted() && method == null) {
+      IllegalStateException exn;
+      exn = new IllegalStateException("forward() not allowed after buffer has committed.");
+
+      if (cauchoRes == null || ! cauchoRes.hasError()) {
+        if (cauchoRes != null)
+          cauchoRes.setHasError(true);
+        throw exn;
+      }
+
+      _webApp.log(exn.getMessage(), exn);
+
+      return;
+    }
+
+    ForwardRequest subRequest = new ForwardRequest(req, res, invocation);
+    ForwardResponse subResponse = subRequest.getResponse();
+    
+    HttpServletRequest topRequest = subRequest;
+    HttpServletResponse topResponse = subResponse;
+
+    subRequest.startRequest();
+
+    try {
+      invocation.service(topRequest, topResponse);
+    } finally {
+      subRequest.finishRequest();
     }
   }
 
@@ -511,19 +564,23 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     CauchoRequest oldRequest = null;
     AbstractResponseStream oldStream = null;
+    /* XXX:
     if (response != null) {
       oldRequest = response.getRequest();
       oldStream = response.getResponseStream();
     }
+    */
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      /* XXX:
       if (response != null) {
         response.setRequest(subRequest);
         response.setResponseStream(response.getOriginalStream());
       }
+      */
 
       invocation.service(topRequest, res);
     } finally {
@@ -531,11 +588,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       thread.setContextClassLoader(oldLoader);
 
+      /* XXX:
       if (response != null) {
         response.setRequest(oldRequest);
         response.setResponseStream(oldStream);
         //response.setWriter(oldWriter);
       }
+      */
 
       // XXX: are these necessary?
       if (oldUri != null)
@@ -568,10 +627,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   /**
    * Include a request into the current page.
    */
-  public void include(ServletRequest request, ServletResponse response,
+  public void include2(ServletRequest request, ServletResponse response,
                       String method)
     throws ServletException, IOException
   {
+    /*
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
@@ -713,10 +773,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       subRequest.finishRequest();
 
-      /* XXX:
-      if (s != null)
-        s.setDisableClose(oldDisableClose);
-      */
+      //if (s != null)
+      //  s.setDisableClose(oldDisableClose);
       if (oldUri != null)
         req.setAttribute(REQUEST_URI, oldUri);
       else
@@ -747,12 +805,10 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       subResponse.close();
 
-      /*
       if (! (res instanceof CauchoResponse)) {
         if (s != null)
           s.close();
       }
-      */
 
       IncludeDispatchRequest.free(subRequest);
       DispatchResponse.free(subResponse);
@@ -764,6 +820,34 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         resWrapper.setResponse(parentResponse);
 
       HttpBufferStore.free(httpBuffer);
+    }
+    */
+  }
+
+  /**
+   * Include a request into the current page.
+   */
+  public void include(ServletRequest request, ServletResponse response,
+                      String method)
+    throws ServletException, IOException
+  {
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
+
+    Invocation invocation = _includeInvocation;
+    
+    IncludeRequest subRequest = new IncludeRequest(req, res, invocation);
+    IncludeResponse subResponse = subRequest.getResponse();
+    
+    HttpServletRequest topRequest = subRequest;
+    HttpServletResponse topResponse = subResponse;
+
+    subRequest.startRequest();
+
+    try {
+      invocation.service(topRequest, topResponse);
+    } finally {
+      subRequest.finishRequest();
     }
   }
 

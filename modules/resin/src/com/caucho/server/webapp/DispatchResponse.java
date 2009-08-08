@@ -33,6 +33,7 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.IncludeResponseStream;
+import com.caucho.server.connection.StubServletResponse;
 import com.caucho.util.FreeList;
 import com.caucho.vfs.WriteStream;
 
@@ -44,7 +45,7 @@ import java.io.IOException;
 /**
  * Internal response for an include() or forward()
  */
-class DispatchResponse extends AbstractHttpResponse
+class DispatchResponse extends StubServletResponse // XXX:
 {
   private static final FreeList<DispatchResponse> _freeList
     = new FreeList<DispatchResponse>(32);
@@ -106,7 +107,7 @@ class DispatchResponse extends AbstractHttpResponse
   @Override
   protected AbstractResponseStream createResponseStream()
   {
-    _stream = new IncludeResponseStream(this);
+    // XXX: _stream = new IncludeResponseStream(this);
     
     return _stream;
   }
@@ -137,8 +138,7 @@ class DispatchResponse extends AbstractHttpResponse
   /**
    * included() responses don't print the headers.
    */
-  protected boolean writeHeadersInt(WriteStream os, int length, boolean isHead)
-    throws IOException
+  public boolean writeHeadersInt(WriteStream os, int length, boolean isHead)
   {
     return false;
   }
@@ -233,7 +233,7 @@ class DispatchResponse extends AbstractHttpResponse
    */
   public void free()
   {
-    super.free();
+    // XXX: super.free();
 
     if (_stream != null)
       _stream.init(null);

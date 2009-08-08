@@ -310,9 +310,11 @@ public class FastCgiRequest extends AbstractHttpRequest
       if (invocation == null)
         return false;
 
+      /*
       setInvocation(invocation);
 
       startInvocation();
+      */
 
       invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
@@ -388,6 +390,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
       decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
 
+      /* XXX: common to AbstractHttpRequest
       if (_server.isModified()) {
         _server.logModified(log);
 
@@ -399,12 +402,13 @@ public class FastCgiRequest extends AbstractHttpRequest
 
         return null;
       }
+      */
 
       invocation = _server.buildInvocation(_invocationKey.clone(),
                                            invocation);
     }
 
-    invocation = invocation.getRequestInvocation(this);
+    invocation = invocation.getRequestInvocation(getRequestFacade());
 
     return invocation;
   }

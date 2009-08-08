@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jni: JNI detection of clientdisconnect issues (rep by Fiaz Hossain)</li>
 <li>quercus: image fixes for vbulletin</li>
 <li>quercus: ksort fixes for vbulletin</li>
 </ul>

@@ -67,6 +67,8 @@ public interface SecurityContextProvider {
   /**
    * Logs the principal out.
    */
+  /*
   public void logout()
     throws SecurityContextException;
+  */
 }

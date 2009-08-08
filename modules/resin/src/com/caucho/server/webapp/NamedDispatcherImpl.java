@@ -78,8 +78,9 @@ class NamedDispatcherImpl implements RequestDispatcher {
     //AbstractResponseStream s = res.getResponseStream();
     // s.setDisableClose(true);
 
+    /* XXX:
     DispatchResponse subResponse = DispatchResponse.createDispatch();
-    subResponse.init(req);
+    // XXX: subResponse.init(req);
     subResponse.setNextResponse(res);
     // subResponse.init(req, s);
     subResponse.startRequest(null);
@@ -95,6 +96,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
       RequestAdapter.free(reqAdapt);
 
     DispatchResponse.free(subResponse);
+    */
   }
 
   /**

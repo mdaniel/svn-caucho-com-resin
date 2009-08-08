@@ -38,7 +38,9 @@ import com.caucho.util.CharBuffer;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 public class HttpResponse extends AbstractHttpResponse
@@ -113,7 +115,7 @@ public class HttpResponse extends AbstractHttpResponse
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
     TcpConnection conn
-      = (TcpConnection) ((TcpServerRequest) getOriginalRequest()).getConnection();
+      = (TcpConnection) ((TcpServerRequest) getRequest()).getConnection();
     
     TcpDuplexController controller = conn.toDuplex(handler);
     
@@ -183,7 +185,10 @@ public class HttpResponse extends AbstractHttpResponse
   {
     if (! _request.hasRequest())
       return false;
-    
+
+    HttpServletRequestImpl requestFacade = _request.getRequestFacade();
+    HttpServletResponseImpl responseFacade = _request.getResponseFacade();
+
     boolean isChunked = false;
 
     int version = _request.getVersion();
@@ -194,6 +199,8 @@ public class HttpResponse extends AbstractHttpResponse
       return false;
     }
 
+    WebApp webApp = requestFacade.getWebApp();
+    
     String contentType = _contentType;
 
     int statusCode = _statusCode;
@@ -227,8 +234,8 @@ public class HttpResponse extends AbstractHttpResponse
     if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
-    } else if (statusCode == SC_NOT_MODIFIED
-	       || statusCode == SC_NO_CONTENT) {
+    } else if (statusCode == HttpServletResponse.SC_NOT_MODIFIED
+	       || statusCode == HttpServletResponse.SC_NO_CONTENT) {
       // php/1b0k
 
       contentType = null;
@@ -297,24 +304,27 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     long now = Alarm.getCurrentTime();
-    size = _cookiesOut.size();
-    for (int i = 0; i < _cookiesOut.size(); i++) {
-      Cookie cookie = _cookiesOut.get(i);
-      int cookieVersion = cookie.getVersion();
+    ArrayList<Cookie> cookiesOut = responseFacade.getCookies();
 
-      CharBuffer cb = _cb;
-      // XXX:
-      fillCookie(cb, cookie, now, cookieVersion, false);
-      os.print("\r\nSet-Cookie: ");
-      os.print(cb.getBuffer(), 0, cb.getLength());
-      if (cookieVersion > 0) {
-        fillCookie(cb, cookie, now, cookieVersion, true);
-        os.print("\r\nSet-Cookie2: ");
+    if (cookiesOut != null) {
+      for (int i = 0; i < cookiesOut.size(); i++) {
+        Cookie cookie = cookiesOut.get(i);
+        int cookieVersion = cookie.getVersion();
+
+        CharBuffer cb = _cb;
+        // XXX:
+        fillCookie(cb, cookie, now, cookieVersion, false);
+        os.print("\r\nSet-Cookie: ");
         os.print(cb.getBuffer(), 0, cb.getLength());
-      }
+        if (cookieVersion > 0) {
+          fillCookie(cb, cookie, now, cookieVersion, true);
+          os.print("\r\nSet-Cookie2: ");
+          os.print(cb.getBuffer(), 0, cb.getLength());
+        }
 
-      if (debug)
-        log.fine(_request.dbgId() + "Set-Cookie: " + cb);
+        if (debug)
+          log.fine(_request.dbgId() + "Set-Cookie: " + cb);
+      }
     }
 
     if (contentType == null) {
@@ -333,7 +343,6 @@ public class HttpResponse extends AbstractHttpResponse
         }
       }
       else {
-	WebApp webApp = _request.getWebApp();
 	String charEncoding = (webApp != null
 			       ? webApp.getCharacterEncoding()
 			       : null);
@@ -365,7 +374,6 @@ public class HttpResponse extends AbstractHttpResponse
       }
     }
     else {
-      WebApp webApp = _request.getWebApp();
       String charEncoding = (webApp != null
 			     ? webApp.getCharacterEncoding()
 			     : null);
@@ -410,7 +418,7 @@ public class HttpResponse extends AbstractHttpResponse
       if (debug)
         log.fine(_request.dbgId() + "Content-Length: " + _contentLength);
     }
-    else if (statusCode == SC_NOT_MODIFIED) {
+    else if (statusCode == HttpServletResponse.SC_NOT_MODIFIED) {
       // #3089
       // In the HTTP spec, a 304 has no message body so the content-length
       // is not needed.  The content-length is not explicitly forbidden,
@@ -418,7 +426,7 @@ public class HttpResponse extends AbstractHttpResponse
       hasContentLength = true;
       setHead();
     }
-    else if (statusCode == SC_NO_CONTENT) {
+    else if (statusCode == HttpServletResponse.SC_NO_CONTENT) {
       hasContentLength = true;
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(0);

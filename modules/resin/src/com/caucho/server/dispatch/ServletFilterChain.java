@@ -29,7 +29,7 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.HttpServletRequestImpl;
 
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
@@ -109,7 +109,7 @@ public class ServletFilterChain implements FilterChain {
 
     try {
       //XXX: Better way of passing this in is needed
-      request.setAttribute(AbstractHttpRequest.MULTIPARTCONFIG,
+      request.setAttribute(HttpServletRequestImpl.MULTIPARTCONFIG,
                            _config.getMultipartConfig());
 
       _servlet.service(request, response);

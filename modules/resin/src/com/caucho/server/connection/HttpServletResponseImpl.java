@@ -30,15 +30,20 @@
 package com.caucho.server.connection;
 
 import com.caucho.util.L10N;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.session.SessionManager;
+import com.caucho.server.session.CookieImpl;
 import com.caucho.vfs.FlushBuffer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
 
 /**
  * User facade for http responses.
@@ -47,12 +52,24 @@ public class HttpServletResponseImpl implements CauchoResponse
 {
   private static final L10N L = new L10N(HttpServletResponseImpl.class);
   
-  private AbstractHttpRequest _request;
+  private final HttpServletRequestImpl _request;
   private AbstractHttpResponse _response;
 
-  public HttpServletResponseImpl(AbstractHttpResponse response)
+  private String _sessionId;
+  private ArrayList<Cookie> _cookiesOut;
+
+  private CacheStream _cacheStream;
+
+  public HttpServletResponseImpl(HttpServletRequestImpl request,
+                                 AbstractHttpResponse response)
   {
+    _request = request;
     _response = response;
+  }
+
+  public HttpServletRequestImpl getRequest()
+  {
+    return _request;
   }
 
   //
@@ -375,13 +392,91 @@ public class HttpServletResponseImpl implements CauchoResponse
   {
     getAbstractHttpResponse().addIntHeader(name, value);
   }
-  
+
   /**
-   * Sends a new cookie to the client.
+   * Adds a cookie to the response.
+   *
+   * @param cookie the response cookie
    */
   public void addCookie(Cookie cookie)
   {
-    getAbstractHttpResponse().addCookie(cookie);
+    _request.setHasCookie();
+
+    if (cookie == null)
+      return;
+
+    if (_cookiesOut == null)
+      _cookiesOut = new ArrayList<Cookie>();
+    
+    _cookiesOut.add(cookie);
+  }
+
+  public Cookie getCookie(String name)
+  {
+    if (_cookiesOut == null)
+      return null;
+
+    for (int i = _cookiesOut.size() - 1; i >= 0; i--) {
+      Cookie cookie = _cookiesOut.get(i);
+
+      if (cookie.getName().equals(name))
+        return cookie;
+    }
+
+    return null;
+  }
+
+  public ArrayList<Cookie> getCookies()
+  {
+    return _cookiesOut;
+  }
+
+  public void setSessionId(String id)
+  {
+    _sessionId = id;
+
+    // XXX: server/1315 vs server/0506 vs server/170k
+    // could also set the nocache=JSESSIONID
+    _response.setPrivateOrResinCache(true);
+  }
+
+  protected void addServletCookie(WebApp webApp)
+  {
+    if (_sessionId != null)
+      addCookie(createServletCookie(webApp));
+  }
+
+  protected Cookie createServletCookie(WebApp webApp)
+  {
+    SessionManager manager = webApp.getSessionManager();
+
+    String cookieName;
+
+    if (_request.isSecure())
+      cookieName = manager.getSSLCookieName();
+    else
+      cookieName = manager.getCookieName();
+      
+    CookieImpl cookie = new CookieImpl(cookieName, _sessionId);
+    cookie.setVersion(manager.getCookieVersion());
+    String domain = manager.getCookieDomain();
+    if (domain != null)
+      cookie.setDomain(domain);
+    long maxAge = manager.getCookieMaxAge();
+    if (maxAge > 0)
+      cookie.setMaxAge((int) (maxAge / 1000));
+    cookie.setPath("/");
+      
+    cookie.setPort(manager.getCookiePort());
+    if (manager.getCookieSecure()) {
+      cookie.setSecure(_request.isSecure());
+      /*
+	else if (manager.getCookiePort() == null)
+	cookie.setPort(String.valueOf(_request.getServerPort()));
+      */
+    }
+
+    return cookie;
   }
   
   /**
@@ -391,21 +486,107 @@ public class HttpServletResponseImpl implements CauchoResponse
    * @param url the url to encode
    * @return a url with session information encoded
    */
-  public String encodeURL(String url)
+  public String encodeURL(String string)
   {
-    return getAbstractHttpResponse().encodeURL(url);
+    HttpServletRequestImpl request = getRequest();
+    
+    WebApp webApp = request.getWebApp();
+
+    if (webApp == null)
+      return string;
+    
+    if (request.isRequestedSessionIdFromCookie())
+      return string;
+
+    HttpSession session = request.getSession(false);
+    if (session == null)
+      return string;
+
+    SessionManager sessionManager = webApp.getSessionManager();
+    if (! sessionManager.enableSessionUrls())
+      return string;
+
+    StringBuilder cb = new StringBuilder();
+
+    String altPrefix = sessionManager.getAlternateSessionPrefix();
+
+    if (altPrefix == null) {
+      // standard url rewriting
+      int p = string.indexOf('?');
+
+      if (p == 0) {
+	cb.append(string);
+      }
+      else if (p > 0) {
+        cb.append(string, 0, p);
+        cb.append(sessionManager.getSessionPrefix());
+        cb.append(session.getId());
+        cb.append(string, p, string.length());
+      }
+      else if ((p = string.indexOf('#')) >= 0) {
+        cb.append(string, 0, p);
+        cb.append(sessionManager.getSessionPrefix());
+        cb.append(session.getId());
+        cb.append(string, p, string.length());
+      }
+      else {
+        cb.append(string);
+        cb.append(sessionManager.getSessionPrefix());
+        cb.append(session.getId());
+      }
+    }
+    else {
+      int p = string.indexOf("://");
+      
+      if (p < 0) {
+	cb.append(altPrefix);
+	cb.append(session.getId());
+	
+	if (! string.startsWith("/")) {
+	  cb.append(_request.getContextPath());
+	  cb.append('/');
+	}
+        cb.append(string);
+      }
+      else {
+	int q = string.indexOf('/', p + 3);
+
+	if (q < 0) {
+	  cb.append(string);
+	  cb.append(altPrefix);
+	  cb.append(session.getId());
+	}
+	else {
+	  cb.append(string.substring(0, q));
+	  cb.append(altPrefix);
+	  cb.append(session.getId());
+	  cb.append(string.substring(q));
+	}
+      }
+    }
+
+    return cb.toString();
   }
-  
-  /**
-   * Encodes session information in a URL suitable for
-   * <code>sendRedirect()</code> 
-   *
-   * @param url the url to encode
-   * @return a url with session information encoded
-   */
-  public String encodeRedirectURL(String name)
+
+  public String encodeRedirectURL(String string)
   {
-    return getAbstractHttpResponse().encodeRedirectURL(name);
+    return encodeURL(string);
+  }
+
+    /**
+     * @deprecated
+     */
+  public String encodeRedirectUrl(String string)
+  {
+    return encodeRedirectURL(string);
+  }
+
+    /**
+     * @deprecated
+     */
+  public String encodeUrl(String string)
+  {
+    return encodeURL(string);
   }
   
   /**
@@ -415,22 +596,7 @@ public class HttpServletResponseImpl implements CauchoResponse
   {
     getAbstractHttpResponse().setStatus(sc, msg);
   }
-  
-  /**
-   * @deprecated
-   */
-  public String encodeUrl(String url)
-  {
-    return getAbstractHttpResponse().encodeUrl(url);
-  }
-  
-  /**
-   * @deprecated
-   */
-  public String encodeRedirectUrl(String url)
-  {
-    return getAbstractHttpResponse().encodeRedirectUrl(url);
-  }
+
 
   //
   // CauchoResponse methods
@@ -520,11 +686,6 @@ public class HttpServletResponseImpl implements CauchoResponse
     getAbstractHttpResponse().setHasError(error);
   }
 
-  public void setSessionId(String id)
-  {
-    getAbstractHttpResponse().setSessionId(id);
-  }
-
   public void killCache()
   {
     getAbstractHttpResponse().killCache();
@@ -546,6 +707,12 @@ public class HttpServletResponseImpl implements CauchoResponse
 
   public ServletResponse getResponse()
   {
+    return null;
+  }
+  
+  /*
+  public ServletResponse getResponse()
+  {
     AbstractHttpResponse response = _response;
 
     if (response == null)
@@ -554,12 +721,12 @@ public class HttpServletResponseImpl implements CauchoResponse
     
     return response;
   }
+  */
 
   public AbstractHttpResponse getAbstractHttpResponse()
   {
     return _response;
   }
-
 
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {

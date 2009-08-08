@@ -70,8 +70,7 @@ public class SetRequestSecureFilterChain implements FilterChain
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    req = new SecureServletRequestWrapper(req, isSecure);
-
+    /*
     if (res instanceof CauchoResponse) {
       // server/125i - XXX: needs refactor
       CauchoResponse cRes = (CauchoResponse) res;
@@ -84,8 +83,21 @@ public class SetRequestSecureFilterChain implements FilterChain
         cRes.getAbstractHttpResponse().setRequest(oldReq);
       }
     }
-    else
+    */
+    if (req instanceof HttpServletRequestImpl) {
+      HttpServletRequestImpl requestFacade = (HttpServletRequestImpl) req;
+
+      // XXX: requestFacade.setSecure(true);
+
+      // XXX: finally
+
       next.doFilter(req, res);
+    }
+    else {
+      req = new SecureServletRequestWrapper(req, isSecure);
+
+      next.doFilter(req, res);
+    }
   }
 
   public static class SecureServletRequestWrapper extends RequestAdapter

@@ -30,7 +30,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.server.webapp.WebApp;
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 
@@ -41,8 +41,9 @@ import java.util.logging.Logger;
  */
 public class Invocation extends ServletInvocation implements Dependency
 {
-  static final L10N L = new L10N(Invocation.class);
-  static final Logger log = Logger.getLogger(Invocation.class.getName());
+  private static final L10N L = new L10N(Invocation.class);
+  private static final Logger log
+    = Logger.getLogger(Invocation.class.getName());
 
   private String _rawHost;
 
@@ -276,7 +277,7 @@ public class Invocation extends ServletInvocation implements Dependency
    *
    * @param request the servlet request
    */
-  public Invocation getRequestInvocation(AbstractHttpRequest request)
+  public Invocation getRequestInvocation(HttpServletRequestImpl request)
   {
     return this;
   }

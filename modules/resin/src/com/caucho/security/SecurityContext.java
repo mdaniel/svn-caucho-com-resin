@@ -152,6 +152,7 @@ public class SecurityContext {
   /**
    * Logs the principal out.
    */
+  /*
   public static void logout()
     throws SecurityContextException
   {
@@ -160,6 +161,7 @@ public class SecurityContext {
     if (provider != null)
       provider.logout();
   }
+  */
 
   /**
    * Gets the provider for the current thread.

@@ -29,8 +29,7 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -38,6 +37,7 @@ import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.Cookie;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Handles a response for a srun connection, i.e. a connection to
@@ -79,7 +79,7 @@ public class HmuxResponse extends AbstractHttpResponse {
 				    boolean isHead)
     throws IOException
   {
-    if (! _originalRequest.hasRequest())
+    if (! _request.hasRequest())
       return false;
     
     CharBuffer cb = _cb;
@@ -129,17 +129,23 @@ public class HmuxResponse extends AbstractHttpResponse {
       _req.writeHeader("Content-Length", cb);
     }
 
+    HttpServletResponseImpl responseFacade = _request.getResponseFacade();
+    
     long now = Alarm.getCurrentTime();
-    size = _cookiesOut.size();
-    for (int i = 0; i < size; i++) {
-      Cookie cookie = (Cookie) _cookiesOut.get(i);
-      int cookieVersion = cookie.getVersion();
+    ArrayList<Cookie> cookiesOut = responseFacade.getCookies();
 
-      fillCookie(cb, cookie, now, 0, false);
-      _req.writeHeader("Set-Cookie", cb);
-      if (cookieVersion > 0) {
-        fillCookie(cb, cookie, now, cookieVersion, true);
-        _req.writeHeader("Set-Cookie2", cb);
+    if (cookiesOut != null) {
+      size = cookiesOut.size();
+      for (int i = 0; i < size; i++) {
+        Cookie cookie = cookiesOut.get(i);
+        int cookieVersion = cookie.getVersion();
+
+        fillCookie(cb, cookie, now, 0, false);
+        _req.writeHeader("Set-Cookie", cb);
+        if (cookieVersion > 0) {
+          fillCookie(cb, cookie, now, cookieVersion, true);
+          _req.writeHeader("Set-Cookie2", cb);
+        }
       }
     }
 

@@ -28,8 +28,8 @@
 
 package com.caucho.server.cache;
 
-import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.connection.CauchoResponse;
 
 import javax.servlet.FilterChain;
 import java.io.IOException;
@@ -52,7 +52,7 @@ abstract public class AbstractCacheFilterChain
    * @param isTop if true, the not-modified should be sent to the browser
    */
   abstract public boolean fillFromCache(CauchoRequest req,
-                                        AbstractHttpResponse response,
+                                        CauchoResponse response,
                                         AbstractCacheEntry abstractEntry,
                                         boolean isTop)
     throws IOException;
@@ -71,7 +71,7 @@ abstract public class AbstractCacheFilterChain
    *         uncacheable.
    */
   abstract public AbstractCacheEntry startCaching(CauchoRequest req,
-                                                  AbstractHttpResponse res,
+                                                  CauchoResponse res,
                                                   ArrayList<String> keys,
                                                   ArrayList<String> values,
                                                   String contentType,

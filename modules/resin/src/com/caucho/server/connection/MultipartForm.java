@@ -56,7 +56,7 @@ class MultipartForm {
   static void parsePostData(HashMapImpl<String,String[]> table,
                             List<Part> parts,
                             ReadStream rawIs, String boundary,
-                            AbstractHttpRequest request,
+                            HttpServletRequestImpl request,
                             String javaEncoding,
                             long uploadMax,
                             long fileUploadMax)

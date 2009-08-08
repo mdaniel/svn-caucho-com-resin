@@ -537,12 +537,14 @@ public class ErrorPageManager {
 
   private String getServletName(ServletRequest request)
   {
-    if (request instanceof AbstractHttpRequest)
-      return ((AbstractHttpRequest) request).getServletName();
+    if (request instanceof HttpServletRequestImpl)
+      return ((HttpServletRequestImpl) request).getServletName();
     else if (request instanceof ServletRequestWrapper)
       return getServletName(((ServletRequestWrapper) request).getRequest());
+    /*
     else if (request instanceof CauchoRequest)
       return getServletName(((CauchoRequest) request).getAbstractHttpRequest());
+    */
     else {
       return null;
     }

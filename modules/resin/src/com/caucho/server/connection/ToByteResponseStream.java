@@ -552,7 +552,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       }
       return;
     }
-    
+
     _tail.setLength(_tailByteLength);
     _bufferSize += _tailByteLength;
     _tailByteLength = 0;

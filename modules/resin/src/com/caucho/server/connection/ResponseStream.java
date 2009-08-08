@@ -77,7 +77,7 @@ public class ResponseStream extends ToByteResponseStream {
   
   private final byte []_buffer = new byte[16];
 
-  ResponseStream()
+  public ResponseStream()
   {
   }
 
@@ -135,7 +135,7 @@ public class ResponseStream extends ToByteResponseStream {
   {
     _cacheStream = cacheStream;
     
-    CauchoRequest req = _response.getRequest();
+    AbstractHttpRequest req = _response.getRequest();
     WebApp app = req.getWebApp();
     _cacheMaxLength = app.getCacheMaxLength();
   }
@@ -628,7 +628,7 @@ public class ResponseStream extends ToByteResponseStream {
     if (_response.isClientDisconnect() || _isHead || _isClosed) {
     }
     else if (contentLengthHeader < _contentLength) {
-      CauchoRequest request = _response.getRequest();
+      AbstractHttpRequest request = _response.getRequest();
       ServletContext app = request.getWebApp();
       
       Exception exn
@@ -651,7 +651,7 @@ public class ResponseStream extends ToByteResponseStream {
       int ch = buf[i];
 
       if (ch != '\r' && ch != '\n' && ch != ' ' && ch != '\t') {
-	CauchoRequest request = _response.getRequest();
+	AbstractHttpRequest request = _response.getRequest();
 	ServletContext app = request.getWebApp();
 	String graph = "";
 	    
@@ -788,7 +788,7 @@ public class ResponseStream extends ToByteResponseStream {
     try {
       writeTail(bufferStart);
 
-      CauchoRequest req = _response.getRequest();
+      AbstractHttpRequest req = _response.getRequest();
       if (req.isComet() || req.isDuplex()) {
       }
       else if (! req.allowKeepalive()) {

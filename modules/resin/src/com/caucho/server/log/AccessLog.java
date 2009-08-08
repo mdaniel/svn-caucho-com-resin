@@ -340,16 +340,15 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 		  ServletContext application)
     throws IOException
   {
-    CauchoRequest requestImpl = (CauchoRequest) req;
+    HttpServletRequestImpl request = (HttpServletRequestImpl) req;
     HttpServletResponseImpl responseImpl = (HttpServletResponseImpl) res;
 
-    AbstractHttpRequest request = requestImpl.getAbstractHttpRequest();
     AbstractHttpResponse response = responseImpl.getAbstractHttpResponse();
 
     // skip excluded urls
     if (_excludes.length > 0) {
-      byte []data = request.getUriBuffer();
-      int sublen = request.getUriLength();
+      byte []data = request.getAbstractHttpRequest().getUriBuffer();
+      int sublen = request.getAbstractHttpRequest().getUriLength();
 
       String uri = new String(data, 0, sublen);
 
@@ -365,7 +364,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     try {
       byte []buffer = logBuffer.getBuffer();
 
-      int length = log(request, response, buffer, 0, buffer.length);
+      int length = log(request, responseImpl, response, buffer, 0, buffer.length);
 
       logBuffer.setLength(length);
 
@@ -395,11 +394,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @return the new tail of the buffer
    */
-  private int log(AbstractHttpRequest request,
+  private int log(HttpServletRequestImpl request,
+                  HttpServletResponseImpl responseFacade,
                   AbstractHttpResponse response,
                   byte []buffer, int offset, int length)
     throws IOException
   {
+    AbstractHttpRequest absRequest = request.getAbstractHttpRequest();
+    
     int len = _segments.length;
     for (int i = 0; i < len; i++) {
       Segment segment = _segments[i];
@@ -430,7 +432,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'c':
         Cookie cookie = request.getCookie(segment._string);
         if (cookie == null)
-          cookie = response.getCookie(segment._string);
+          cookie = responseFacade.getCookie(segment._string);
         if (cookie == null)
           buffer[offset++] = (byte) '-';
         else
@@ -439,7 +441,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         
         // set cookie
       case Segment.SET_COOKIE:
-        ArrayList cookies = response.getCookies();
+        ArrayList cookies = responseFacade.getCookies();
         if (cookies == null || cookies.size() == 0)
           buffer[offset++] = (byte) '-';
         else {
@@ -458,12 +460,12 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 	  offset = print(buffer, offset, addr.getHostName());
 	}
 	else
-	  offset = request.printRemoteAddr(buffer, offset);
+	  offset = absRequest.printRemoteAddr(buffer, offset);
 	break;
 
         // input header
       case 'i':
-	csValue = request.getHeaderBuffer(segment._string);
+	csValue = absRequest.getHeaderBuffer(segment._string);
         if (csValue == null)
           buffer[offset++] = (byte) '-';
         else
@@ -497,8 +499,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         
         buffer[offset++] = (byte) ' ';
         
-        data = request.getUriBuffer();
-        sublen = request.getUriLength();
+        data = absRequest.getUriBuffer();
+        sublen = absRequest.getUriLength();
 	
 	// server/02e9
 	if (buffer.length - offset - 128 < sublen) {

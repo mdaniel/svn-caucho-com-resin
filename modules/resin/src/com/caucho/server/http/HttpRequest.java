@@ -766,16 +766,18 @@ public class HttpRequest extends AbstractHttpRequest
 
       CharSequence host = getInvocationHost();
 
-      Invocation invocation = getInvocation(host);
+      Invocation invocation = getInvocation(host, _uri, _uriLength);
 
       if (invocation == null)
         return false;
 
-      setInvocation(invocation);
+      HttpServletRequestImpl requestFacade = getRequestFacade();
+
+      requestFacade.setInvocation(invocation);
 
       startInvocation();
 
-      invocation.service(getRequestFacade(), getResponseFacade());
+      invocation.service(requestFacade, getResponseFacade());
     } catch (ClientDisconnectException e) {
       _response.killCache();
       killKeepalive();
@@ -1210,143 +1212,6 @@ public class HttpRequest extends AbstractHttpRequest
 
       _headerSize = headerSize;
     }
-  }
-
-  private Invocation getInvocation(CharSequence host)
-    throws IOException
-  {
-    _invocationKey.init(_conn.isSecure(),
-                        host, _conn.getLocalPort(),
-                        _uri, _uriLength);
-
-    Invocation invocation = _server.getInvocation(_invocationKey);
-
-    if (invocation != null)
-      return invocation.getRequestInvocation(this);
-    
-    invocation = _server.createInvocation();
-    invocation.setSecure(isSecure());
-
-    if (host != null) {
-      String hostName = host.toString().toLowerCase();
-
-      invocation.setHost(hostName);
-      invocation.setPort(_conn.getLocalPort());
-
-      // Default host name if the host doesn't have a canonical
-      // name
-      int p = hostName.indexOf(':');
-      if (p > 0)
-        invocation.setHostName(hostName.substring(0, p));
-      else
-        invocation.setHostName(hostName);
-    }
-
-    InvocationDecoder decoder = _server.getInvocationDecoder();
-
-    decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
-
-    if (_server.isModified()) {
-      _server.logModified(log);
-
-      _invocation = invocation;
-      if (_server instanceof Server)
-        _invocation.setWebApp(((Server) _server).getDefaultWebApp());
-
-      HttpServletResponse res = (HttpServletResponse) getResponse();
-      res.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-
-      restartServer();
-
-      return null;
-    }
-
-    invocation = _server.buildInvocation(_invocationKey.clone(),
-                                         invocation);
-
-    return invocation.getRequestInvocation(this);
-  }
-
-  private void sendRequestError(Throwable e)
-    throws IOException
-  {
-    try {
-      getErrorManager().sendServletError(e, this, _response);
-    } catch (ClientDisconnectException e1) {
-      throw e1;
-    } catch (Throwable e1) {
-      log.log(Level.FINE, e1.toString(), e1);
-    }
-
-    if (_server instanceof Server) {
-      WebApp webApp = ((Server) _server).getDefaultWebApp();
-      
-      if (webApp != null && getRequestFacade() != null) {
-        webApp.accessLog(getRequestFacade(), getResponseFacade());
-      }
-    }
-  }
-
-  /**
-   * Handles a comet-style resume.
-   *
-   * @return true if the connection should stay open (keepalive)
-   */
-  @Override
-  public boolean handleResume()
-    throws IOException
-  {
-    try {
-      startInvocation();
-
-      if (! isComet())
-        return false;
-
-      WebApp webApp = _tcpConn.getAsyncDispatchWebApp();
-      String url = _tcpConn.getAsyncDispatchUrl();
-
-      // servlet 3.0 spec defaults to suspend
-      _tcpConn.suspend();
-
-      if (url != null) {
-        if (webApp == null)
-          webApp = getWebApp();
-
-        RequestDispatcherImpl disp
-          = (RequestDispatcherImpl) webApp.getRequestDispatcher(url);
-
-        if (disp != null) {
-          disp.dispatchResume(getRequestFacade(), getResponseFacade());
-
-          return isSuspend();
-        }
-      }
-
-      _invocation.service(getRequestFacade(), getResponseFacade());
-    } catch (ClientDisconnectException e) {
-      _response.killCache();
-
-      throw e;
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      _response.killCache();
-      killKeepalive();
-
-      return false;
-    } finally {
-      finishInvocation();
-
-      if (! isSuspend())
-        finishRequest();
-    }
-
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(dbgId() +
-               (isKeepalive() ? "keepalive" : "no-keepalive"));
-    }
-
-    return isSuspend();
   }
 
   public final void protocolCloseEvent()

@@ -29,11 +29,7 @@
 
 package com.caucho.server.fastcgi;
 
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.AbstractResponseStream;
-import com.caucho.server.connection.ResponseStream;
-import com.caucho.server.connection.HttpBufferStore;
+import com.caucho.server.connection.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -41,6 +37,7 @@ import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.Cookie;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Handles a response for a srun connection, i.e. a connection to
@@ -95,7 +92,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
 				    boolean isHead)
     throws IOException
   {
-    if (! _originalRequest.hasRequest())
+    if (! _request.hasRequest())
       return false;
 
     os.print("Status: ");
@@ -133,24 +130,30 @@ public class FastCgiResponse extends AbstractHttpResponse {
       os.print("\r\n");
     }
 
+    HttpServletResponseImpl response = _request.getResponseFacade();
+    
     long now = Alarm.getCurrentTime();
-    size = _cookiesOut.size();
-    for (int i = 0; i < size; i++) {
-      Cookie cookie = (Cookie) _cookiesOut.get(i);
-      int cookieVersion = cookie.getVersion();
+    ArrayList<Cookie> cookiesOut = response.getCookies();
+    
+    if (cookiesOut != null) {
+      size = cookiesOut.size();
+      for (int i = 0; i < size; i++) {
+        Cookie cookie = cookiesOut.get(i);
+        int cookieVersion = cookie.getVersion();
 
-      fillCookie(cb, cookie, now, 0, false);
+        fillCookie(cb, cookie, now, 0, false);
 
-      os.print("Set-Cookie: ");
-      os.print(cb);
-      os.print("\r\n");
+        os.print("Set-Cookie: ");
+        os.print(cb);
+        os.print("\r\n");
 
-      if (cookieVersion > 0) {
-        fillCookie(cb, cookie, now, cookieVersion, true);
+        if (cookieVersion > 0) {
+          fillCookie(cb, cookie, now, cookieVersion, true);
 	
-	os.print("Set-Cookie2: ");
-	os.print(cb);
-	os.print("\r\n");
+          os.print("Set-Cookie2: ");
+          os.print(cb);
+          os.print("\r\n");
+        }
       }
     }
 

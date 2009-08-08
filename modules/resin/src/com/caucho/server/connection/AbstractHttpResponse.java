@@ -70,7 +70,7 @@ import java.util.logging.Logger;
  * Encapsulates the servlet response, controlling response headers and the
  * response stream.
  */
-abstract public class AbstractHttpResponse implements CauchoResponse {
+abstract public class AbstractHttpResponse {
   static final protected Logger log
     = Logger.getLogger(AbstractHttpResponse.class.getName());
   static final L10N L = new L10N(AbstractHttpResponse.class);
@@ -85,8 +85,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected static final int HEADER_SERVER = HEADER_DATE + 1;
   protected static final int HEADER_CONNECTION = HEADER_SERVER + 1;
 
-  protected final CauchoRequest _originalRequest;
-  protected CauchoRequest _request;
+  protected final AbstractHttpRequest _request;
 
   protected int _statusCode;
   protected String _statusMessage;
@@ -101,8 +100,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   
   protected final ArrayList<String> _footerKeys = new ArrayList<String>();
   protected final ArrayList<String> _footerValues = new ArrayList<String>();
-
-  protected final ArrayList<Cookie> _cookiesOut = new ArrayList<Cookie>();
 
   // the raw output stream.
   private final WriteStream _rawWrite;
@@ -129,7 +126,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected final CharBuffer _cb = new CharBuffer();
   protected final char [] _headerBuffer = new char[256];
 
-  private String _sessionId;
   private boolean _hasSessionCookie;
 
   private Locale _locale;
@@ -151,7 +147,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   private AbstractCacheEntry _newCacheEntry;
   private OutputStream _cacheStream;
   private Writer _cacheWriter;
-
+  
   protected boolean _isNoCache;
   private boolean _allowCache;
   private boolean _isPrivateCache;
@@ -167,11 +163,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     _rawWrite = null;
 
-    _originalRequest = null;
+    _request = null;
     _originalResponseStream = createResponseStream();
   }
 
-  protected AbstractHttpResponse(CauchoRequest request, WriteStream rawWrite)
+  protected AbstractHttpResponse(AbstractHttpRequest request,
+                                 WriteStream rawWrite)
   {
     if (rawWrite == null)
       throw new NullPointerException();
@@ -179,7 +176,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _rawWrite = rawWrite;
 
     _request = request;
-    _originalRequest = request;
     
     _originalResponseStream = createResponseStream();
   }
@@ -201,10 +197,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public boolean isIgnoreClientDisconnect()
   {
-    if (_originalRequest instanceof AbstractHttpRequest)
-      return ((AbstractHttpRequest) _originalRequest).isIgnoreClientDisconnect();
-  else
-      return true;
+    return _request.isIgnoreClientDisconnect();
   }
 
   /**
@@ -220,8 +213,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public void clientDisconnect()
   {
-    if (_originalRequest != null)
-      _originalRequest.clientDisconnect();
+    _request.clientDisconnect();
     
     _isClientDisconnect = true;
   }
@@ -262,38 +254,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   */
 
   /**
-   * Initialize the response for a new request.
-   *
-   * @param request the matching request.
-   */
-  public void init(CauchoRequest request)
-  {
-    _request = request;
-    _responseStream = _originalResponseStream;
-  }
-
-  /**
    * Returns the corresponding request.
    */
-  public CauchoRequest getRequest()
+  public AbstractHttpRequest getRequest()
   {
     return _request;
-  }
-
-  /**
-   * Sets the corresponding request.
-   */
-  public void setRequest(CauchoRequest req)
-  {
-    _request = req;
-  }
-
-  /**
-   * Returns the corresponding original
-   */
-  public CauchoRequest getOriginalRequest()
-  {
-    return _originalRequest;
   }
 
   protected WriteStream getRawWrite()
@@ -313,7 +278,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       finishRequest(true);
     }
-    // getStream().flush();
   }
 
   /**
@@ -342,7 +306,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _footerValues.clear();
 
     _hasSessionCookie = false;
-    _cookiesOut.clear();
 
     _responseStream = _originalResponseStream;
     _responseStream.start();
@@ -381,8 +344,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _allowCache = true;
     _isNoCache = false;
     _isTopCache = false;
-
-    _sessionId = null;
 
     _forbidForward = false;
   }
@@ -490,10 +451,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (message != null) {
     }
-    else if (code == SC_OK)  
+    else if (code == HttpServletResponse.SC_OK)  
       message = "OK";
     
-    else if (code == SC_NOT_MODIFIED)  
+    else if (code == HttpServletResponse.SC_NOT_MODIFIED)  
       message = "Not Modified";
     
     else if (message == null) {
@@ -504,7 +465,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     }
 
     // server/2h0g
-    if (code != SC_OK && code != SC_NOT_MODIFIED)
+    if (code != HttpServletResponse.SC_OK
+        && code != HttpServletResponse.SC_NOT_MODIFIED)
       killCache();
 
     _statusCode = code;
@@ -536,7 +498,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void sendError(int code, String value)
     throws IOException
   {
-    if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
+    if (code == HttpServletResponse.SC_NOT_MODIFIED
+        && _matchCacheEntry != null) {
       setStatus(code, value);
       if (handleNotModified(_isTopCache))
         return;
@@ -549,7 +512,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     //setStream(_originalStream);
     resetBuffer();
 
-    if (code != SC_NOT_MODIFIED)
+    if (code != HttpServletResponse.SC_NOT_MODIFIED)
       killCache();
 
     /* XXX: if we've already got an error, won't this just mask it?
@@ -565,20 +528,18 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     setStatus(code, value);
     try {
-      if (code == SC_NOT_MODIFIED || code == SC_NO_CONTENT) {
+      if (code == HttpServletResponse.SC_NOT_MODIFIED
+          || code == HttpServletResponse.SC_NO_CONTENT) {
         finishInvocation();
         return;
       }
       else if (errorManager != null) {
-	if (getOriginalRequest() != null && code != SC_NOT_FOUND) {
-	  errorManager.sendError(getOriginalRequest(), this,
-				 code, _statusMessage);
-	}
-	else {
-	  // server/10su
-	  errorManager.sendError(getRequest(), this,
-				 code, _statusMessage);
-	}
+        HttpServletRequestImpl requestFacade = getRequest().getRequestFacade();
+        HttpServletResponseImpl responseFacade = getRequest().getResponseFacade();
+        
+        // server/10su
+        errorManager.sendError(requestFacade, responseFacade,
+                               code, _statusMessage);
 
         // _request.killKeepalive();
         // close, but don't force a flush
@@ -608,7 +569,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       if (code == HttpServletResponse.SC_NOT_FOUND) {
         s.println(L.l("{0} was not found on this server.",
-                      HTTPUtil.encodeString(getRequest().getPageURI())));
+                      HTTPUtil.encodeString(getRequest().getRequestFacade().getPageURI())));
       }
       else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
         s.println(L.l("The server is temporarily unavailable due to maintenance downtime or excessive load."));
@@ -667,7 +628,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _responseStream = _originalResponseStream;
     resetBuffer();
     
-    setStatus(SC_MOVED_TEMPORARILY);
+    setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
     String path = getAbsolutePath(url);
 
     // Bug #3051
@@ -720,11 +681,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     out.println("The URL has moved <a href=\"" + path + "\">here</a>");
     // closeConnection();
     
-    if (_request instanceof AbstractHttpRequest) {
-      AbstractHttpRequest request = (AbstractHttpRequest) _request;
-
-      request.saveSession(); // #503
-    }
+    _request.getRequestFacade().saveSession(); // #503
 
     close();
   }
@@ -1320,53 +1277,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   }
 
   /**
-   * Adds a cookie to the response.
-   *
-   * @param cookie the response cookie
-   */
-  public void addCookie(Cookie cookie)
-  {
-    _request.setHasCookie();
-
-    if (_disableHeaders)
-      return;
-
-    if (cookie == null)
-      return;
-
-    _cookiesOut.add(cookie);
-  }
-
-  public Cookie getCookie(String name)
-  {
-    if (_cookiesOut == null)
-      return null;
-
-    for (int i = _cookiesOut.size() - 1; i >= 0; i--) {
-      Cookie cookie = (Cookie) _cookiesOut.get(i);
-
-      if (cookie.getName().equals(name))
-        return cookie;
-    }
-
-    return null;
-  }
-
-  public ArrayList getCookies()
-  {
-    return _cookiesOut;
-  }
-
-  public void setSessionId(String id)
-  {
-    _sessionId = id;
-
-    // XXX: server/1315 vs server/0506 vs server/170k
-    // could also set the nocache=JSESSIONID
-    setPrivateOrResinCache(true);
-  }
-
-  /**
    * Sets a footer, replacing an already-existing footer
    *
    * @param key the header key to set.
@@ -1532,117 +1442,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return null;
   }
 
-  /**
-   * Encode the URL with the session jd.
-   *
-   * @param string the url to be encoded
-   *
-   * @return the encoded url
-   */
-  public String encodeURL(String string)
-  {
-    CauchoRequest request = getRequest();
-    
-    WebApp app = request.getWebApp();
-
-    if (app == null)
-      return string;
-    
-    if (request.isRequestedSessionIdFromCookie())
-      return string;
-
-    HttpSession session = request.getSession(false);
-    if (session == null)
-      return string;
-
-    SessionManager sessionManager = app.getSessionManager();
-    if (! sessionManager.enableSessionUrls())
-      return string;
-
-    CharBuffer cb = _cb;
-    cb.clear();
-
-    String altPrefix = sessionManager.getAlternateSessionPrefix();
-
-    if (altPrefix == null) {
-      // standard url rewriting
-      int p = string.indexOf('?');
-
-      if (p == 0) {
-	cb.append(string);
-      }
-      else if (p > 0) {
-        cb.append(string, 0, p);
-        cb.append(sessionManager.getSessionPrefix());
-        cb.append(session.getId());
-        cb.append(string, p, string.length() - p);
-      }
-      else if ((p = string.indexOf('#')) >= 0) {
-        cb.append(string, 0, p);
-        cb.append(sessionManager.getSessionPrefix());
-        cb.append(session.getId());
-        cb.append(string, p, string.length() - p);
-      }
-      else {
-        cb.append(string);
-        cb.append(sessionManager.getSessionPrefix());
-        cb.append(session.getId());
-      }
-    }
-    else {
-      int p = string.indexOf("://");
-      
-      if (p < 0) {
-	cb.append(altPrefix);
-	cb.append(session.getId());
-	
-	if (! string.startsWith("/")) {
-	  cb.append(_request.getContextPath());
-	  cb.append('/');
-	}
-        cb.append(string);
-      }
-      else {
-	int q = string.indexOf('/', p + 3);
-
-	if (q < 0) {
-	  cb.append(string);
-	  cb.append(altPrefix);
-	  cb.append(session.getId());
-	}
-	else {
-	  cb.append(string.substring(0, q));
-	  cb.append(altPrefix);
-	  cb.append(session.getId());
-	  cb.append(string.substring(q));
-	}
-      }
-    }
-
-    return cb.toString();
-  }
-
-  public String encodeRedirectURL(String string)
-  {
-    return encodeURL(string);
-  }
-
-    /**
-     * @deprecated
-     */
-  public String encodeRedirectUrl(String string)
-  {
-    return encodeRedirectURL(string);
-  }
-
-    /**
-     * @deprecated
-     */
-  public String encodeUrl(String string)
-  {
-    return encodeURL(string);
-  }
-
   /*
    * jsdk 2.2
    */
@@ -1729,8 +1528,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _headerKeys.clear();
     _headerValues.clear();
-
-    // cookiesOut.clear();
 
     _contentLength = -1;
     //_isNoCache = false;
@@ -1924,57 +1721,27 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	webApp.addStatus500();
     }
 
-    HttpSession session = _request.getMemorySession();
-    if (session instanceof SessionImpl)
-      ((SessionImpl) session).saveBeforeHeaders();
+    HttpServletRequestImpl req = _request.getRequestFacade();
+    HttpServletResponseImpl res = _request.getResponseFacade();
 
-    if (_sessionId != null && ! _hasSessionCookie) {
-      _hasSessionCookie = true;
+    if (req != null) {
+      HttpSession session = req.getMemorySession();
+      if (session instanceof SessionImpl)
+        ((SessionImpl) session).saveBeforeHeaders();
 
-      addServletCookie(webApp);
+      res.addServletCookie(webApp);
+      /* XXX:
+      if (_sessionId != null && ! _hasSessionCookie) {
+        _hasSessionCookie = true;
+
+        addServletCookie(webApp);
+      }
+      */
     }
 
     _isChunked = writeHeadersInt(os, length, isHead);
 
     return _isChunked;
-  }
-
-  protected void addServletCookie(WebApp webApp)
-  {
-    addCookie(createServletCookie(webApp));
-  }
-
-  protected Cookie createServletCookie(WebApp webApp)
-  {
-    SessionManager manager = webApp.getSessionManager();
-
-    String cookieName;
-
-    if (_request.isSecure())
-      cookieName = manager.getSSLCookieName();
-    else
-      cookieName = manager.getCookieName();
-      
-    CookieImpl cookie = new CookieImpl(cookieName, _sessionId);
-    cookie.setVersion(manager.getCookieVersion());
-    String domain = manager.getCookieDomain();
-    if (domain != null)
-      cookie.setDomain(domain);
-    long maxAge = manager.getCookieMaxAge();
-    if (maxAge > 0)
-      cookie.setMaxAge((int) (maxAge / 1000));
-    cookie.setPath("/");
-      
-    cookie.setPort(manager.getCookiePort());
-    if (manager.getCookieSecure()) {
-      cookie.setSecure(_request.isSecure());
-      /*
-	else if (manager.getCookiePort() == null)
-	cookie.setPort(String.valueOf(_request.getServerPort()));
-      */
-    }
-
-    return cookie;
   }
 
   /**
@@ -1986,7 +1753,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return false;
     _isHeaderWritten = true;
 
-    if (_statusCode == SC_OK && ! _disableCaching) // && getBufferSize() > 0)
+    if (_statusCode == HttpServletResponse.SC_OK
+        && ! _disableCaching) // && getBufferSize() > 0)
       return startCaching(_headerKeys, _headerValues,
 			  _contentType, _charEncoding, isByte);
     else
@@ -2029,10 +1797,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return false;
     }
     else {
-      CauchoRequest request = (CauchoRequest) _request;
+      CauchoRequest request = _request.getRequestFacade();
+      CauchoResponse response = _request.getResponseFacade();
       
-      _newCacheEntry = _cacheInvocation.startCaching(request,
-						     this, keys, values,
+      _newCacheEntry = _cacheInvocation.startCaching(request, response,
+                                                     keys, values,
 						     contentType,
 						     charEncoding,
 						     _contentLength);
@@ -2071,7 +1840,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   private boolean handleNotModified(boolean isTop)
     throws IOException
   {
-    if (_statusCode != SC_NOT_MODIFIED) {
+    if (_statusCode != HttpServletResponse.SC_NOT_MODIFIED) {
       return false;
     }
     else if (_matchCacheEntry != null) {
@@ -2085,8 +1854,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       /* XXX: complications with filters */
       if (_cacheInvocation != null
-	  && _cacheInvocation.fillFromCache(_request,
-					    this, _matchCacheEntry, isTop)) {
+	  && _cacheInvocation.fillFromCache(_request.getRequestFacade(),
+                                            _request.getResponseFacade(),
+                                            _matchCacheEntry, isTop)) {
         _matchCacheEntry.updateExpiresDate();
         _cacheInvocation = null;
         _matchCacheEntry = null;
@@ -2098,10 +1868,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     }
     // server/13dh
     else if (_cacheInvocation != null) {
-      CauchoRequest req = (CauchoRequest) _originalRequest;
-      WebApp app = req.getWebApp();
+      WebApp webApp = _request.getWebApp();
       
-      long maxAge = app.getMaxAge(req.getRequestURI());
+      long maxAge = webApp.getMaxAge(_request.getRequestURI());
 
       if (maxAge > 0 && ! containsHeader("Expires")) {
 	setDateHeader("Expires", maxAge + Alarm.getCurrentTime());
@@ -2115,97 +1884,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 					     int length,
 					     boolean isHead)
     throws IOException;
-
-  /**
-   * Sets true if the cache is only for the browser, but not
-   * Resin's cache or proxies.
-   *
-   * <p>Since proxy caching also caches headers, cached pages with
-   * session ids can't be cached in the browser.
-   *
-   * XXX: but doesn't this just mean that Resin shouldn't
-   * send the session information back if the page is cached?
-   * Because a second request where everything is identical
-   * would see the same response except for the cookies.
-   */
-  public void setPrivateCache(boolean isPrivate)
-  {
-    // XXX: let the webApp override this?
-    _isPrivateCache = isPrivate;
-
-    // server/12dm
-    _allowCache = false;
-  }
-
-  /**
-   * Sets true if the cache is only for the browser and 
-   * Resin's cache but not proxies.
-   */
-  public void setPrivateOrResinCache(boolean isPrivate)
-  {
-    // XXX: let the webApp override this?
-
-    _isPrivateCache = isPrivate;
-  }
-
-  /**
-   * Set no cache w/o vary
-   */
-  public void setNoCacheUnlessVary(boolean isNoCacheUnlessVary)
-  {
-    _isNoCacheUnlessVary = isNoCacheUnlessVary;
-  }
-
-  /**
-   * Return true if no-cache without var.
-   */
-  public boolean isNoCacheUnlessVary()
-  {
-    return _isNoCacheUnlessVary;
-  }
-  
-  /**
-   * Returns the value of the private cache.
-   */
-  public boolean getPrivateCache()
-  {
-    return _isPrivateCache;
-  }
-
-  /**
-   * Returns true if the response should contain a Cache-Control: private
-   */
-  protected boolean isPrivateCache()
-  {
-    return ! _hasCacheControl && _isPrivateCache;
-  }
-
-  /**
-   * Set if the page is non-cacheable.
-   */
-  public void setNoCache(boolean isNoCache)
-  {
-    _isNoCache = isNoCache;
-  }
-
-  /**
-   * Returns true if the page is non-cacheable
-   */
-  public boolean isNoCache()
-  {
-    return _isNoCache;
-  }
-
-  /**
-   * Set if the page is non-cacheable.
-   */
-  public void killCache()
-  {
-    _allowCache = false;
-
-    // server/1b15
-    // setNoCache(true);
-  }
 
   /**
    * Fills the response for a cookie
@@ -2384,18 +2062,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     Connection conn = null;
 
     try {
-      if (_originalRequest instanceof AbstractHttpRequest) {
-	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
-	
-	conn = request.getConnection();
-      }
+      conn = _request.getConnection();
 
       /* XXX:
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
 	handleNotModified(_isTopCache);
       }
       */
-      if (_statusCode == SC_NOT_MODIFIED) {
+      if (_statusCode == HttpServletResponse.SC_NOT_MODIFIED) {
 	handleNotModified(_isTopCache);
       }
       
@@ -2451,19 +2125,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     Connection conn = null;
 
     try {
-      if (_originalRequest instanceof AbstractHttpRequest) {
-	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
+      AbstractHttpRequest request = _request;
 	
-	conn = request.getConnection();
+      conn = request.getConnection();
 
-	try {
-	  request.skip();
-	} catch (BadRequestException e) {
-	  log.warning(e.toString());
-	  log.log(Level.FINE, e.toString(), e);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+      try {
+        request.skip();
+      } catch (BadRequestException e) {
+        log.warning(e.toString());
+        log.log(Level.FINE, e.toString(), e);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
 
       finishCache();
@@ -2495,6 +2167,96 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       _responseStream = null;
     }
+  }
+  /**
+   * Sets true if the cache is only for the browser, but not
+   * Resin's cache or proxies.
+   *
+   * <p>Since proxy caching also caches headers, cached pages with
+   * session ids can't be cached in the browser.
+   *
+   * XXX: but doesn't this just mean that Resin shouldn't
+   * send the session information back if the page is cached?
+   * Because a second request where everything is identical
+   * would see the same response except for the cookies.
+   */
+  public void setPrivateCache(boolean isPrivate)
+  {
+    // XXX: let the webApp override this?
+    _isPrivateCache = isPrivate;
+
+    // server/12dm
+    _allowCache = false;
+  }
+
+  /**
+   * Sets true if the cache is only for the browser and 
+   * Resin's cache but not proxies.
+   */
+  public void setPrivateOrResinCache(boolean isPrivate)
+  {
+    // XXX: let the webApp override this?
+
+    _isPrivateCache = isPrivate;
+  }
+
+  /**
+   * Set no cache w/o vary
+   */
+  public void setNoCacheUnlessVary(boolean isNoCacheUnlessVary)
+  {
+    _isNoCacheUnlessVary = isNoCacheUnlessVary;
+  }
+
+  /**
+   * Return true if no-cache without var.
+   */
+  public boolean isNoCacheUnlessVary()
+  {
+    return _isNoCacheUnlessVary;
+  }
+  
+  /**
+   * Returns the value of the private cache.
+   */
+  public boolean getPrivateCache()
+  {
+    return _isPrivateCache;
+  }
+
+  /**
+   * Returns true if the response should contain a Cache-Control: private
+   */
+  protected boolean isPrivateCache()
+  {
+    return ! _hasCacheControl && _isPrivateCache;
+  }
+
+  /**
+   * Set if the page is non-cacheable.
+   */
+  public void setNoCache(boolean isNoCache)
+  {
+    _isNoCache = isNoCache;
+  }
+
+  /**
+   * Returns true if the page is non-cacheable
+   */
+  public boolean isNoCache()
+  {
+    return _isNoCache;
+  }
+
+  /**
+   * Set if the page is non-cacheable.
+   */
+  public void killCache()
+  {
+    _allowCache = false;
+
+    // server/1b15
+    // setNoCache(true);
   }
 
   public void finishCache()
@@ -2571,7 +2333,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   protected void free()
   {
-    _request = null;
     _cacheInvocation = null;
     _newCacheEntry = null;
     _matchCacheEntry = null;

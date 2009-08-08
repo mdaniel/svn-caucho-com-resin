@@ -31,7 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.session.SessionManager;
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Dependency;
@@ -105,7 +105,7 @@ public class VersionInvocation extends Invocation
    *
    * @param request the servlet request
    */
-  public Invocation getRequestInvocation(AbstractHttpRequest request)
+  public Invocation getRequestInvocation(HttpServletRequestImpl request)
   {
     if (_expireTime < Alarm.getCurrentTime())
       return _invocation;
