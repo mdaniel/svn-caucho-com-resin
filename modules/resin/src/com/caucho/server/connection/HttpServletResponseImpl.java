@@ -29,42 +29,82 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.util.L10N;
-import com.caucho.server.webapp.WebApp;
+import com.caucho.server.cache.*;
+import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.session.CookieImpl;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.ErrorPageManager;
+import com.caucho.util.*;
 import com.caucho.vfs.FlushBuffer;
+import com.caucho.xml.XmlChar;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Locale;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 /**
  * User facade for http responses.
  */
-public class HttpServletResponseImpl implements CauchoResponse
+public final class HttpServletResponseImpl implements CauchoResponse
 {
+  private static final Logger log
+    = Logger.getLogger(HttpServletResponseImpl.class.getName());
   private static final L10N L = new L10N(HttpServletResponseImpl.class);
   
+  private static final HashMap<Integer,String> _errors;
+
   private final HttpServletRequestImpl _request;
   private AbstractHttpResponse _response;
+
+  private int _status = 200;
+  private String _statusMessage = "OK";
 
   private String _sessionId;
   private ArrayList<Cookie> _cookiesOut;
 
-  private CacheStream _cacheStream;
+  private AbstractResponseStream _responseStream;
+  private ServletOutputStreamImpl _outputStream;
+  private ResponseWriter _writer;
+
+  private String _charEncoding;
+  private String _contentPrefix;
+  private String _contentType;
+
+  private Locale _locale;
+
+  // caching
+  private boolean _isTopCache = true;
+  
+  private AbstractCacheFilterChain _cacheInvocation;
+
+  // the cache entry for a match/if-modified-since
+  private AbstractCacheEntry _matchCacheEntry;
+
+  // the new cache for a request getting filled
+  private AbstractCacheEntry _newCacheEntry;
+  private OutputStream _cacheStream;
+  private Writer _cacheWriter;
+  
+  protected boolean _isNoCache;
+  private boolean _allowCache;
+  private boolean _isPrivateCache;
+  private boolean _hasCacheControl;
+  private boolean _isNoCacheUnlessVary;
+  private boolean _disableCaching;
 
   public HttpServletResponseImpl(HttpServletRequestImpl request,
                                  AbstractHttpResponse response)
   {
     _request = request;
     _response = response;
+
+    _responseStream = response.getResponseStream();
   }
 
   public HttpServletRequestImpl getRequest()
@@ -75,74 +115,10 @@ public class HttpServletResponseImpl implements CauchoResponse
   //
   // servlet response
   //
-  
-  /**
-   * Sets the response content type.  The content type includes
-   * the character encoding.  The content type must be set before
-   * calling <code>getWriter()</code> so the writer can use the
-   * proper character encoding.
-   *
-   * <p>To set the output character encoding to ISO-8859-2, use the
-   * following:
-   *
-   * <code><pre>
-   * response.setContentType("text/html; charset=ISO-8859-2");
-   * </pre></code>
-   *
-   * @param type the mime type of the output
-   */
-  public void setContentType(String type)
-  {
-    getAbstractHttpResponse().setContentType(type);
-  }
-  
-  /**
-   * Returns the content type for the response.
-   *
-   * @since 2.4
-   */
-  public String getContentType()
-  {
-    return getAbstractHttpResponse().getContentType();
-  }
 
-  /**
-   * Returns the character encoding the response is using for output.
-   * If no character encoding is specified, ISO-8859-1 will be used.
-   */
-  public String getCharacterEncoding()
-  {
-    return getAbstractHttpResponse().getCharacterEncoding();
-  }
-
-  /**
-   * Sets the character encoding the response is using for output.
-   * If no character encoding is specified, ISO-8859-1 will be used.
-   *
-   * @since 2.4
-   */
-  public void setCharacterEncoding(String charset)
-  {
-    getAbstractHttpResponse().setCharacterEncoding(charset);
-  }
-  
-  /**
-   * Sets the output locale.  The response will set the character encoding
-   * based on the locale.  For example, setting the "kr" locale will set
-   * the character encoding to "EUC_KR".
-   */
-  public void setLocale(Locale locale)
-  {
-    getAbstractHttpResponse().setLocale(locale);
-  }
-  
-  /**
-   * Returns the output locale.
-   */
-  public Locale getLocale()
-  {
-    return getAbstractHttpResponse().getLocale();
-  }
+  //
+  // output stream
+  // 
   
   /**
    * Returns an output stream for writing to the client.  You can use
@@ -151,9 +127,30 @@ public class HttpServletResponseImpl implements CauchoResponse
   public ServletOutputStream getOutputStream()
     throws IOException
   {
-    return getAbstractHttpResponse().getOutputStream();
+    if (_outputStream != null)
+      return _outputStream;
+    
+    /*
+    if (_hasWriter)
+      throw new IllegalStateException(L.l("getOutputStream() can't be called after getWriter()."));
+    */
+
+    _outputStream = _response.getResponseOutputStream();
+    _outputStream.init(_responseStream);
+
+    /*
+    // server/10a2
+    if (! _hasWriter) {
+      // jsp/0510 vs jsp/1b00
+      // _responseStream.setOutputStreamOnly(true);
+    }
+    */
+    // jsp/1cie, jsp/1civ
+    // _responseStream.setEncoding(null);
+    
+    return _outputStream;
   }
-  
+
   /**
    * Returns a PrintWriter with the proper character encoding for writing
    * text data to the client.
@@ -161,7 +158,22 @@ public class HttpServletResponseImpl implements CauchoResponse
   public PrintWriter getWriter()
     throws IOException
   {
-    return getAbstractHttpResponse().getWriter();
+    if (_writer != null)
+      return _writer;
+    
+    /*
+    if (_hasOutputStream)
+      throw new IllegalStateException(L.l("getWriter() can't be called after getOutputStream()."));
+    */
+
+    _writer = _response.getResponsePrintWriter();
+    _writer.init(_responseStream);
+
+    if (_charEncoding != null) {
+      _responseStream.setEncoding(_charEncoding);
+    }
+    
+    return _writer;
   }
   
   /**
@@ -172,24 +184,31 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setBufferSize(int size)
   {
-    getAbstractHttpResponse().setBufferSize(size);
+    _responseStream.setBufferSize(size);
   }
-  
+
   /**
    * Returns the size of the output buffer.
    */
   public int getBufferSize()
   {
-    return getAbstractHttpResponse().getBufferSize();
+    return _responseStream.getBufferSize();
   }
   
+  // needed to support JSP
+  public int getRemaining()
+  {
+    return _responseStream.getRemaining();
+  }
+
   /**
    * Flushes the buffer to the client.
    */
   public void flushBuffer()
     throws IOException
   {
-    getAbstractHttpResponse().flushBuffer();
+    // server/10sn
+    _responseStream.flush();
   }
   
   /**
@@ -198,7 +217,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean isCommitted()
   {
-    return getAbstractHttpResponse().isCommitted();
+    return _response.isCommitted();
   }
   
   /**
@@ -209,7 +228,38 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void reset()
   {
-    getAbstractHttpResponse().reset();
+    reset(false);
+  }
+
+  /**
+   * Clears the response for a forward()
+   *
+   * @param force if not true and the response stream has committed,
+   *   throw the IllegalStateException.
+   */
+  void reset(boolean force)
+  {
+    if (! force && isCommitted())
+      throw new IllegalStateException(L.l("response cannot be reset() after committed"));
+    
+    _responseStream.clearBuffer();
+    
+    _status = 200;
+    _statusMessage = "OK";
+
+    _charEncoding = null;
+    _locale = null;
+
+    _outputStream = null;
+    _writer = null;
+    
+    try {
+      _responseStream.setLocale(null);
+      _responseStream.setEncoding(null);
+    } catch (Exception e) {
+    }
+
+    _response.reset();
   }
   
   /**
@@ -220,7 +270,14 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void resetBuffer()
   {
-    getAbstractHttpResponse().resetBuffer();
+    _responseStream.clearBuffer();
+
+    // jsp/15ma
+    killCaching();
+    /*
+    if (_currentWriter instanceof JspPrintWriter)
+      ((JspPrintWriter) _currentWriter).clear();
+    */
   }
   
   /**
@@ -229,7 +286,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setContentLength(int len)
   {
-    getAbstractHttpResponse().setContentLength(len);
+    _response.setContentLength(len);
   }
 
   /**
@@ -239,7 +296,6 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void disable()
   {
-    getAbstractHttpResponse().disable();
   }
 
   /**
@@ -249,7 +305,6 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void enable()
   {
-    getAbstractHttpResponse().enable();
   }
 
   /**
@@ -259,7 +314,317 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean isDisabled()
   {
-    return getAbstractHttpResponse().isDisabled();
+    return false;
+  }
+
+  public void setLocale(Locale locale)
+  {
+    _locale = locale;
+
+    if (_charEncoding != null && ! isCommitted()) {
+      _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
+
+      _response.setCharEncoding(_charEncoding);
+
+      try {
+        if (_charEncoding != null) {
+          // _originalStream.setEncoding(_charEncoding);
+          _responseStream.setEncoding(_charEncoding);
+	}
+      } catch (IOException e) {
+      }
+    }
+
+    StringBuilder cb = new StringBuilder();
+    cb.append(locale.getLanguage());
+    if (locale.getCountry() != null &&  ! "".equals(locale.getCountry())) {
+      cb.append("-");
+      cb.append(locale.getCountry());
+      if (locale.getVariant() != null && ! "".equals(locale.getVariant())) {
+        cb.append("-");
+        cb.append(locale.getVariant());
+      }
+    }
+    
+    setHeader("Content-Language", cb.toString());
+  }
+
+  public Locale getLocale()
+  {
+    if (_locale != null)
+      return _locale;
+    else
+      return Locale.getDefault();
+  }
+
+  //
+  // proxy caching
+  //
+  
+  /**
+   * Sets true if the cache is only for the browser, but not
+   * Resin's cache or proxies.
+   *
+   * <p>Since proxy caching also caches headers, cached pages with
+   * session ids can't be cached in the browser.
+   *
+   * XXX: but doesn't this just mean that Resin shouldn't
+   * send the session information back if the page is cached?
+   * Because a second request where everything is identical
+   * would see the same response except for the cookies.
+   */
+  public void setPrivateCache(boolean isPrivate)
+  {
+    // XXX: let the webApp override this?
+    _isPrivateCache = isPrivate;
+
+    // server/12dm
+    _allowCache = false;
+  }
+
+  /**
+   * Sets true if the cache is only for the browser and 
+   * Resin's cache but not proxies.
+   */
+  public void setPrivateOrResinCache(boolean isPrivate)
+  {
+    // XXX: let the webApp override this?
+
+    _isPrivateCache = isPrivate;
+  }
+
+  /**
+   * Sets the cache entry so we can use it if the servlet returns
+   * not_modified response.
+   *
+   * @param entry the saved cache entry
+   */
+  public void setMatchCacheEntry(AbstractCacheEntry entry)
+  {
+    _matchCacheEntry = entry;
+  }
+
+  /**
+   * Sets the cache invocation to indicate that the response might be
+   * cacheable.
+   */
+  public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
+  {
+    AbstractCacheFilterChain oldCache = _cacheInvocation;
+    _cacheInvocation = cacheInvocation;
+    
+    AbstractCacheEntry oldEntry = _newCacheEntry;
+    _newCacheEntry = null;
+
+    if (oldEntry != null)
+      oldCache.killCaching(oldEntry);
+  }
+
+  public void setTopCache(boolean isTopCache)
+  {
+    _isTopCache = isTopCache;
+  }
+
+  /**
+   * Set no cache w/o vary
+   */
+  public void setNoCacheUnlessVary(boolean isNoCacheUnlessVary)
+  {
+    _isNoCacheUnlessVary = isNoCacheUnlessVary;
+  }
+
+  /**
+   * Return true if no-cache without var.
+   */
+  public boolean isNoCacheUnlessVary()
+  {
+    return _isNoCacheUnlessVary;
+  }
+  
+  /**
+   * Returns the value of the private cache.
+   */
+  public boolean getPrivateCache()
+  {
+    return _isPrivateCache;
+  }
+
+  /**
+   * Returns true if the response should contain a Cache-Control: private
+   */
+  public boolean isPrivateCache()
+  {
+    return ! _hasCacheControl && _isPrivateCache;
+  }
+
+  /**
+   * Set if the page is non-cacheable.
+   */
+  public void setNoCache(boolean isNoCache)
+  {
+    _isNoCache = isNoCache;
+  }
+
+  /**
+   * Returns true if the page is non-cacheable
+   */
+  public boolean isNoCache()
+  {
+    return _isNoCache;
+  }
+
+  /**
+   * Set if the page is non-cacheable.
+   */
+  public void killCache()
+  {
+    _allowCache = false;
+
+    // server/1b15
+    // setNoCache(true);
+  }
+
+  /**
+   * Called to start caching.
+   */
+  protected boolean startCaching(boolean isByte)
+  {
+    if (_status == SC_OK
+        && ! _disableCaching) // && getBufferSize() > 0)
+      return startCaching(_response.getHeaderKeys(),
+                          _response.getHeaderValues(),
+			  _contentType,
+                          _charEncoding, isByte);
+    else
+      return false;
+  }
+
+  /**
+   * Tests to see if the response is cacheable.
+   *
+   * @param keys the header keys of the response
+   * @param values the header values of the response
+   * @param contentType the contentType of the response
+   * @param charEncoding the character encoding of the response
+   *
+   * @return true if caching has started
+   */
+  boolean startCaching(ArrayList<String> keys,
+                       ArrayList<String> values,
+                       String contentType, String charEncoding,
+		       boolean isByte)
+  {
+    if (_cacheInvocation == null) {
+      return false;
+    }
+    /*
+      // jsp/17ah
+    else if (_responseStream != _originalResponseStream) {
+      return false;
+    }
+    */
+    else if (! isCauchoResponseStream()) {
+      return false;
+    }
+    /* server/131x
+    else if (! (_originalRequest instanceof CauchoRequest)) {
+      return false;
+    }
+    */
+    else if (! _allowCache) {
+      return false;
+    }
+    else {
+      int contentLength = -1;
+      
+      _newCacheEntry = _cacheInvocation.startCaching(_request, this,
+                                                     keys, values,
+						     contentType,
+						     charEncoding,
+						     contentLength);
+
+      if (_newCacheEntry == null) {
+	return false;
+      }
+      else if (isByte) {
+	_cacheStream = _newCacheEntry.openOutputStream();
+
+	if (_cacheStream != null)
+	  _responseStream.setByteCacheStream(_cacheStream);
+      
+	return _cacheStream != null;
+      }
+      else {
+	_cacheWriter = _newCacheEntry.openWriter();
+
+	if (_cacheWriter != null)
+	  _responseStream.setCharCacheStream(_cacheWriter);
+      
+	return _cacheWriter != null;
+      }
+    }
+  }
+
+  public void finishCache()
+    throws IOException
+  {
+    try {
+      _responseStream.close();
+      
+      if (_newCacheEntry != null && _cacheInvocation != null) {
+	OutputStream cacheStream = _cacheStream;
+	_cacheStream = null;
+	
+	Writer cacheWriter = _cacheWriter;
+	_cacheWriter = null;
+
+	if (cacheStream != null)
+	  cacheStream.close();
+
+	if (cacheWriter != null)
+	  cacheWriter.close();
+	
+	WebApp webApp = _request.getWebApp();
+	if (_status == 200 && _allowCache
+	    && webApp != null && webApp.isActive()) {
+	  AbstractCacheFilterChain cache = _cacheInvocation;
+	  _cacheInvocation = null;
+
+	  AbstractCacheEntry cacheEntry = _newCacheEntry;
+	  _newCacheEntry = null;
+	  
+	  cache.finishCaching(cacheEntry);
+	}
+      }
+    } finally {
+      AbstractCacheFilterChain cache = _cacheInvocation;
+      _cacheInvocation = null;
+      
+      AbstractCacheEntry cacheEntry = _newCacheEntry;
+      _newCacheEntry = null;
+      
+      _cacheStream = null;
+      _cacheWriter = null;
+
+      if (cacheEntry != null)
+	cache.killCaching(cacheEntry);
+    }
+  }
+
+  public void killCaching()
+  {
+    AbstractCacheFilterChain cache = _cacheInvocation;
+    _cacheInvocation = null;
+    
+    AbstractCacheEntry cacheEntry = _newCacheEntry;
+    _newCacheEntry = null;
+
+    if (cacheEntry != null) {
+      cache.killCaching(cacheEntry);
+      _cacheStream = null;
+      _cacheWriter = null;
+      _responseStream.killCaching();
+    }
   }
 
   //
@@ -271,9 +636,43 @@ public class HttpServletResponseImpl implements CauchoResponse
    *
    * @param sc the HTTP status code
    */
-  public void setStatus(int sc)
+  public void setStatus(int code)
   {
-    getAbstractHttpResponse().setStatus(sc);
+    setStatus(code, null);
+  }
+
+  /**
+   * Sets the HTTP status
+   *
+   * @param sc the HTTP status code
+   * @param message the HTTP status message
+   */
+  public void setStatus(int code, String message)
+  {
+    if (code < 0)
+      code = 500;
+
+    if (message != null) {
+    }
+    else if (code == SC_OK)  
+      message = "OK";
+    
+    else if (code == SC_NOT_MODIFIED)  
+      message = "Not Modified";
+    
+    else if (message == null) {
+      message = _errors.get(code);
+
+      if (message == null)
+        message = L.l("Internal Server Error");
+    }
+
+    // server/2h0g
+    if (code != SC_OK && code != SC_NOT_MODIFIED)
+      killCache();
+
+    _status = code;
+    _statusMessage = message;
   }
   
   /**
@@ -281,32 +680,521 @@ public class HttpServletResponseImpl implements CauchoResponse
    *
    * @param sc the HTTP status code
    */
-  public void sendError(int sc, String msg)
+  public void sendError(int code)
     throws IOException
   {
-    getAbstractHttpResponse().sendError(sc, msg);
+    sendError(code, null);
+  }
+
+  /**
+   * Sends an HTTP error to the browser.
+   *
+   * @param code the HTTP error code
+   * @param value a string message
+   */
+  public void sendError(int code, String value)
+    throws IOException
+  {
+    if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
+      setStatus(code, value);
+      if (handleNotModified(_isTopCache))
+        return;
+    }
+    
+    if (isCommitted())
+      throw new IllegalStateException(L.l("sendError() forbidden after buffer has been committed."));
+
+    //_currentWriter = null;
+    //setStream(_originalStream);
+    resetBuffer();
+
+    if (code != SC_NOT_MODIFIED)
+      killCache();
+
+    /* XXX: if we've already got an error, won't this just mask it?
+    if (responseStream.isCommitted())
+      throw new IllegalStateException("response can't sendError() after commit");
+    */
+
+    WebApp webApp = getRequest().getWebApp();
+
+    ErrorPageManager errorManager = null;
+    if (webApp != null)
+      errorManager = webApp.getErrorPageManager();
+
+    setStatus(code, value);
+    try {
+      if (code == SC_NOT_MODIFIED || code == SC_NO_CONTENT) {
+        _response.finishInvocation();
+        return;
+      }
+      else if (errorManager != null) {
+        // server/10su
+        errorManager.sendError(_request, this, code, _statusMessage);
+
+        // _request.killKeepalive();
+        // close, but don't force a flush
+        // XXX: finish(false);
+        _response.finishInvocation();
+        return;
+      }
+
+      setContentType("text/html");
+      ServletOutputStream s = getOutputStream();
+
+      s.println("<html>");
+      if (! isCommitted()) {
+        s.print("<head><title>");
+        s.print(code);
+        s.print(" ");
+        s.print(_statusMessage);
+        s.println("</title></head>");
+      }
+      s.println("<body>");
+
+      s.print("<h1>");
+      s.print(code);
+      s.print(" ");
+      s.print(_statusMessage);
+      s.println("</h1>");
+
+      if (code == SC_NOT_FOUND) {
+        s.println(L.l("{0} was not found on this server.",
+                      HTTPUtil.encodeString(getRequest().getPageURI())));
+      }
+      else if (code == SC_SERVICE_UNAVAILABLE) {
+        s.println(L.l("The server is temporarily unavailable due to maintenance downtime or excessive load."));
+      }
+
+      String version = null;
+
+      if (webApp == null) {
+      }
+      else if (webApp.getServer() != null
+	       && webApp.getServer().getServerHeader() != null) {
+	version = webApp.getServer().getServerHeader();
+      }
+      else if (CauchoSystem.isTesting()) {
+      }
+      else
+	version = com.caucho.Version.FULL_VERSION;
+    
+      if (version != null) {
+	s.println("<p /><hr />");
+	s.println("<small>");
+	
+	s.println(version);
+	  
+	s.println("</small>");
+      }
+      
+      s.println("</body></html>");
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    _request.killKeepalive();
+    // close, but don't force a flush
+    _response.finishInvocation();
   }
   
+
   /**
-   * Sends an HTTP error page based on the status code
+   * Handle a SC_NOT_MODIFIED response.  If we've got a cache, fill the
+   * results from the cache.
    *
-   * @param sc the HTTP status code
+   * @param isTop if true, this is the top-level request.
+   *
+   * @return true if we filled from the cache
    */
-  public void sendError(int sc)
+  private boolean handleNotModified(boolean isTop)
     throws IOException
   {
-    getAbstractHttpResponse().sendError(sc);
+    if (_status != SC_NOT_MODIFIED) {
+      return false;
+    }
+    else if (_matchCacheEntry != null) {
+      if (_responseStream.isCommitted())
+        return false;
+
+      // need to unclose because the not modified might be detected only
+      // when flushing the data
+      // _originalResponseStream.clearClosed();
+
+      /* XXX: complications with filters */
+      if (_cacheInvocation != null
+	  && _cacheInvocation.fillFromCache(getRequest(), this,
+                                            _matchCacheEntry, isTop)) {
+        _matchCacheEntry.updateExpiresDate();
+        _cacheInvocation = null;
+        _matchCacheEntry = null;
+
+        _response.finishInvocation(); // Don't force a flush to avoid extra TCP packet
+      
+        return true;
+      }
+    }
+    // server/13dh
+    else if (_cacheInvocation != null) {
+      WebApp webApp = _request.getWebApp();
+      
+      long maxAge = webApp.getMaxAge(_request.getRequestURI());
+
+      if (maxAge > 0 && ! containsHeader("Expires")) {
+	setDateHeader("Expires", maxAge + Alarm.getCurrentTime());
+      }
+    }
+
+    return false;
   }
-  
+
   /**
-   * Redirects the client to another page.
+   * Sets the browser content type.  If the value contains a charset,
+   * the output encoding will be changed to match.
    *
-   * @param location the location to redirect to.
+   * <p>For example, to set the output encoding to use UTF-8 instead of
+   * the default ISO-8859-1 (Latin-1), use the following:
+   * <code><pre>
+   * setContentType("text/html; charset=UTF-8");
+   * </pre></code>
    */
-  public void sendRedirect(String location)
+  public void setContentType(String value)
+  {
+    if (isCommitted())
+      return;
+
+    if (value == null) {
+      _response.setContentType(null);
+      return;
+    }
+    else if (value == "text/html" || value.equals("text/html")) {
+      _response.setContentType("text/html");
+      return;
+    }
+    
+    _contentType = value;
+    
+    int length = value.length();
+    int i;
+    int ch;
+
+    for (i = 0;
+	 i < length && value.charAt(i) != ';'
+	   && ! Character.isWhitespace(value.charAt(i));
+	 i++) {
+    }
+
+    if (i < length)
+      _contentPrefix = _contentType.substring(0, i);
+    else
+      _contentPrefix = _contentType;
+
+    while ((i = value.indexOf(';', i)) > 0) {
+      int semicolon = i;
+      for (i++; i < length && XmlChar.isWhitespace(value.charAt(i)); i++) {
+      }
+
+      int j;
+      for (j = i + 1;
+           j < length && ! XmlChar.isWhitespace((ch = value.charAt(j))) &&
+             ch != '=';
+           j++) {
+      }
+      
+      if (length <= j)
+	break;
+      else if ((ch = value.charAt(i)) != 'c' && ch != 'C') {
+      }
+      else if (value.substring(i, j).equalsIgnoreCase("charset")) {
+	for (; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
+	}
+
+        if (length <= j || value.charAt(j) != '=')
+          continue;
+        
+	for (j++; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
+	}
+
+        String encoding;
+
+        if (j < length && value.charAt(j) == '"') {
+          int k = ++j;
+          
+          for (; j < length && value.charAt(j) != '"'; j++) {
+          }
+
+          encoding = value.substring(k, j);
+        }
+        else {
+          int k = j;
+          for (k = j;
+               j < length && ! XmlChar.isWhitespace(ch = value.charAt(j)) && ch != ';';
+               j++) {
+          }
+
+          encoding = value.substring(k, j);
+        }
+
+	int tail = value.indexOf(';', semicolon + 1);
+
+	StringBuilder sb = new StringBuilder();
+	sb.append(value, 0, semicolon);
+	if (tail > 0)
+	  sb.append(value, tail, value.length());
+	
+	_contentType = sb.toString();
+
+	if (_writer != null) {
+	  _charEncoding = encoding;
+	}
+	break;
+      }
+      else
+	i = j;
+    }
+    
+    _response.setContentType(_contentType);
+    _response.setCharEncoding(_charEncoding);
+
+    // XXX: conflict with servlet exception throwing order?
+    try {
+      _responseStream.setEncoding(_charEncoding);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Gets the content type.
+   */
+  public String getContentType()
+  {
+    if (_contentType == null)
+      return null;
+
+    String charEncoding = getCharacterEncoding();
+
+    if (charEncoding != null)
+      return _contentType + "; charset=" + charEncoding;
+    else
+      return _contentType;
+  }
+
+  /**
+   * Gets the character encoding.
+   */
+  public String getCharacterEncoding()
+  {
+    if (_charEncoding != null)
+      return _charEncoding;
+
+    WebApp app = _request.getWebApp();
+
+    String encoding = null;
+    
+    if (app != null)
+      encoding = app.getCharacterEncoding();
+
+    if (encoding != null)
+      return encoding;
+    else
+      return "iso-8859-1";
+  }
+
+  /**
+   * Sets the character encoding.
+   */
+  public void setCharacterEncoding(String encoding)
+  {
+    if (isCommitted())
+      return;
+    if (_writer != null)
+      return;
+
+    if (encoding == null
+        || encoding.equals("ISO-8859-1")
+        || encoding.equals("")) {
+      encoding = null;
+      _charEncoding = "iso-8859-1";
+    }
+    else
+      _charEncoding = encoding;
+
+    _response.setCharEncoding(_charEncoding);
+
+    try {
+      _responseStream.setEncoding(encoding);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Sends a redirect to the browser.  If the URL is relative, it gets
+   * combined with the current url.
+   *
+   * @param url the possibly relative url to send to the browser
+   */
+  public void sendRedirect(String url)
     throws IOException
   {
-    getAbstractHttpResponse().sendRedirect(location);
+    if (url == null)
+      throw new NullPointerException();
+    
+    if (isCommitted())
+      throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
+
+    _responseStream.clearBuffer();
+    // _responseStream.clearBuffer();
+    
+    // _responseStream = _originalResponseStream;
+    resetBuffer();
+    
+    setStatus(SC_MOVED_TEMPORARILY);
+    String path = getAbsolutePath(url);
+
+    // Bug #3051
+    String encoding = getCharacterEncoding();
+
+    boolean isLatin1 = "iso-8859-1".equals(encoding);
+
+    StringBuilder cb = new StringBuilder();
+
+    for (int i = 0; i < path.length(); i++) {
+      char ch = path.charAt(i);
+
+      if (ch == '<')
+	cb.append("%3c");
+      else if (ch < 0x80)
+	cb.append(ch);
+      else if (isLatin1) {
+	addHex(cb, ch);
+      }
+      else if (ch < 0x800) {
+	int d1 = 0xc0 + ((ch >> 6) & 0x1f);
+	int d2 = 0x80 + (ch & 0x3f);
+
+	addHex(cb, d1);
+	addHex(cb, d2);
+      }
+      else if (ch < 0x8000) {
+	int d1 = 0xe0 + ((ch >> 12) & 0xf);
+	int d2 = 0x80 + ((ch >> 6) & 0x3f);
+	int d3 = 0x80 + (ch & 0x3f);
+
+	addHex(cb, d1);
+	addHex(cb, d2);
+	addHex(cb, d3);
+      }
+    }
+
+    path = cb.toString();
+    
+    setHeader("Location", path);
+
+    if (isLatin1)
+      setHeader("Content-Type", "text/html; charset=iso-8859-1");
+    else
+      setHeader("Content-Type", "text/html; charset=utf-8");
+
+    // The data is required for some WAP devices that can't handle an
+    // empty response.
+    ServletOutputStream out = getOutputStream();
+    out.println("The URL has moved <a href=\"" + path + "\">here</a>");
+    // closeConnection();
+    
+    _request.saveSession(); // #503
+
+    close();
+  }
+
+  /**
+   * Returns the absolute path for a given relative path.
+   *
+   * @param path the possibly relative url to send to the browser
+   */
+  private String getAbsolutePath(String path)
+  {
+    int slash = path.indexOf('/');
+    
+    int len = path.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = path.charAt(i);
+
+      if (ch == ':')
+        return path;
+      else if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
+        continue;
+      else
+        break;
+    }
+
+    WebApp app = getRequest().getWebApp();
+
+    String hostPrefix = null;
+    String host = _request.getHeader("Host");
+    String serverName = app.getHostName();
+
+    if (serverName == null
+	|| serverName.equals("")
+	|| serverName.equals("default")) {
+      serverName = _request.getServerName();
+    }
+
+    int port = _request.getServerPort();
+
+    if (hostPrefix != null && ! hostPrefix.equals("")) {
+    }
+    else if (serverName.startsWith("http:")
+	     || serverName.startsWith("https:"))
+      hostPrefix = serverName;
+    else if (host != null) {
+      hostPrefix = _request.getScheme() + "://" + host;
+    }
+    else {
+      hostPrefix = _request.getScheme() + "://" + serverName;
+      
+      if (serverName.indexOf(':') < 0
+	  && port != 0 && port != 80 && port != 443)
+        hostPrefix += ":" + port;
+    }
+
+    if (slash == 0)
+      return hostPrefix + path;
+
+    String uri = _request.getRequestURI();
+    String queryString = null;
+
+    int p = path.indexOf('?');
+    if (p > 0) {
+      queryString = path.substring(p + 1);
+      path = path.substring(0, p);
+    }
+    
+    p = uri.lastIndexOf('/');
+
+    if (p >= 0)
+      path = uri.substring(0, p + 1) + path;
+
+    try {
+      if (queryString != null)
+        return hostPrefix + InvocationDecoder.normalizeUri(path) + '?' + queryString;
+      else
+        return hostPrefix + InvocationDecoder.normalizeUri(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void addHex(StringBuilder cb, int hex)
+  {
+    int d1 = (hex >> 4) & 0xf;
+    int d2 = (hex) & 0xf;
+    
+    cb.append('%');
+    cb.append(d1 < 10 ? (char) (d1 + '0') : (char) (d1 - 10 + 'a'));
+    cb.append(d2 < 10 ? (char) (d2 + '0') : (char) (d2 - 10 + 'a'));
   }
   
   /**
@@ -318,7 +1206,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setHeader(String name, String value)
   {
-    getAbstractHttpResponse().setHeader(name, value);
+    _response.setHeader(name, value);
   }
   
   /**
@@ -330,7 +1218,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addHeader(String name, String value)
   {
-    getAbstractHttpResponse().addHeader(name, value);
+    _response.addHeader(name, value);
   }
   
   /**
@@ -340,7 +1228,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean containsHeader(String name)
   {
-    return getAbstractHttpResponse().containsHeader(name);
+    return _response.containsHeader(name);
   }
   
   /**
@@ -357,7 +1245,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setDateHeader(String name, long date)
   {
-    getAbstractHttpResponse().setDateHeader(name, date);
+    _response.setDateHeader(name, date);
   }
   
   /**
@@ -368,7 +1256,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addDateHeader(String name, long date)
   {
-    getAbstractHttpResponse().addDateHeader(name, date);
+    _response.addDateHeader(name, date);
   }
     
   /**
@@ -379,7 +1267,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void setIntHeader(String name, int value)
   {
-    getAbstractHttpResponse().setIntHeader(name, value);
+    _response.setIntHeader(name, value);
   }
   
   /**
@@ -390,7 +1278,7 @@ public class HttpServletResponseImpl implements CauchoResponse
    */
   public void addIntHeader(String name, int value)
   {
-    getAbstractHttpResponse().addIntHeader(name, value);
+    _response.addIntHeader(name, value);
   }
 
   /**
@@ -437,7 +1325,7 @@ public class HttpServletResponseImpl implements CauchoResponse
 
     // XXX: server/1315 vs server/0506 vs server/170k
     // could also set the nocache=JSESSIONID
-    _response.setPrivateOrResinCache(true);
+    setPrivateOrResinCache(true);
   }
 
   protected void addServletCookie(WebApp webApp)
@@ -588,15 +1476,6 @@ public class HttpServletResponseImpl implements CauchoResponse
   {
     return encodeURL(string);
   }
-  
-  /**
-   * @deprecated
-   */
-  public void setStatus(int sc, String msg)
-  {
-    getAbstractHttpResponse().setStatus(sc, msg);
-  }
-
 
   //
   // CauchoResponse methods
@@ -604,42 +1483,48 @@ public class HttpServletResponseImpl implements CauchoResponse
 
   public AbstractResponseStream getResponseStream()
   {
-    return getAbstractHttpResponse().getResponseStream();
+    return _responseStream;
   }
   
-  public void setResponseStream(AbstractResponseStream os)
+  public void setResponseStream(AbstractResponseStream responseStream)
   {
-    getAbstractHttpResponse().setResponseStream(os);
+    _responseStream = responseStream;
+
+    if (_outputStream != null)
+      _outputStream.init(responseStream);
+    
+    if (_writer != null)
+      _writer.init(responseStream);
   }
 
   public boolean isCauchoResponseStream()
   {
-    return getAbstractHttpResponse().isCauchoResponseStream();
+    return _responseStream.isCauchoResponseStream();
   }
-  
+
   public void setFlushBuffer(FlushBuffer out)
   {
-    getAbstractHttpResponse().setFlushBuffer(out);
+    _response.setFlushBuffer(out);
   }
   
   public FlushBuffer getFlushBuffer()
   {
-    return getAbstractHttpResponse().getFlushBuffer();
+    return _response.getFlushBuffer();
   }
   
   public String getHeader(String key)
   {
-    return getAbstractHttpResponse().getHeader(key);
+    return _response.getHeader(key);
   }
   
   public void setFooter(String key, String value)
   {
-    getAbstractHttpResponse().setFooter(key, value);
+    _response.setFooter(key, value);
   }
   
   public void addFooter(String key, String value)
   {
-    getAbstractHttpResponse().addFooter(key, value);
+    _response.addFooter(key, value);
   }
 
   // XXX: really close invocation
@@ -648,57 +1533,32 @@ public class HttpServletResponseImpl implements CauchoResponse
     throws IOException
   {
     // tck - jsp include
-    getAbstractHttpResponse().close();
+    _response.close();
   }
 
   public boolean disableHeaders(boolean disable)
   {
-    return getAbstractHttpResponse().disableHeaders(disable);
+    return _response.disableHeaders(disable);
   }
 
   public boolean getForbidForward()
   {
-    return getAbstractHttpResponse().getForbidForward();
+    return _response.getForbidForward();
   }
   
   public void setForbidForward(boolean forbid)
   {
-    getAbstractHttpResponse().setForbidForward(forbid);
-  }
-
-  public int getStatusCode()
-  {
-    return getAbstractHttpResponse().getStatusCode();
-  }
-  
-  public String getStatusMessage()
-  {
-    return getAbstractHttpResponse().getStatusMessage();
+    _response.setForbidForward(forbid);
   }
 
   public boolean hasError()
   {
-    return getAbstractHttpResponse().hasError();
+    return _response.hasError();
   }
   
   public void setHasError(boolean error)
   {
-    getAbstractHttpResponse().setHasError(error);
-  }
-
-  public void killCache()
-  {
-    getAbstractHttpResponse().killCache();
-  }
-  
-  public void setNoCache(boolean killCache)
-  {
-    getAbstractHttpResponse().setNoCache(killCache);
-  }
-  
-  public void setPrivateCache(boolean isPrivate)
-  {
-    getAbstractHttpResponse().setPrivateCache(isPrivate);
+    _response.setHasError(error);
   }
 
   //
@@ -730,25 +1590,30 @@ public class HttpServletResponseImpl implements CauchoResponse
 
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
-    return getAbstractHttpResponse().upgradeProtocol(handler);
+    return _response.upgradeProtocol(handler);
   }
 
   public int getStatus()
   {
     // XXX: test
-    return getAbstractHttpResponse().getStatus();
+    return _status;
+  }
+  
+  public String getStatusMessage()
+  {
+    return _statusMessage;
   }
 
   public Iterable<String> getHeaders(String name)
   {
     // XXX: test
-    return getAbstractHttpResponse().getHeaders(name);
+    return _response.getHeaders(name);
   }
 
   public Iterable<String> getHeaderNames()
   {
     // XXX: test
-    return getAbstractHttpResponse().getHeaderNames();
+    return _response.getHeaderNames();
   }
 
   public void closeImpl()
@@ -766,5 +1631,49 @@ public class HttpServletResponseImpl implements CauchoResponse
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _response + "]";
+  }
+
+  static {
+    _errors = new HashMap<Integer,String>();
+    _errors.put(100, "Continue");
+    _errors.put(101, "Switching Protocols");
+    _errors.put(200, "OK");
+    _errors.put(201, "Created");
+    _errors.put(202, "Accepted");
+    _errors.put(203, "Non-Authoritative Information");
+    _errors.put(204, "No Content");
+    _errors.put(205, "Reset Content");
+    _errors.put(206, "Partial Content");
+    _errors.put(300, "Multiple Choices");
+    _errors.put(301, "Moved Permanently");
+    _errors.put(302, "Found");
+    _errors.put(303, "See Other");
+    _errors.put(304, "Not Modified");
+    _errors.put(305, "Use Proxy");
+    _errors.put(307, "Temporary Redirect");
+    _errors.put(400, "Bad Request");
+    _errors.put(401, "Unauthorized");
+    _errors.put(402, "Payment Required");
+    _errors.put(403, "Forbidden");
+    _errors.put(404, "Not Found");
+    _errors.put(405, "Method Not Allowed");
+    _errors.put(406, "Not Acceptable");
+    _errors.put(407, "Proxy Authentication Required");
+    _errors.put(408, "Request Timeout");
+    _errors.put(409, "Conflict");
+    _errors.put(410, "Gone");
+    _errors.put(411, "Length Required");
+    _errors.put(412, "Precondition Failed");
+    _errors.put(413, "Request Entity Too Large");
+    _errors.put(414, "Request-URI Too Long");
+    _errors.put(415, "Unsupported Media Type");
+    _errors.put(416, "Requested Range Not Satisfiable");
+    _errors.put(417, "Expectation Failed");
+    _errors.put(500, "Internal Server Error");
+    _errors.put(501, "Not Implemented");
+    _errors.put(502, "Bad Gateway");
+    _errors.put(503, "Service Temporarily Unavailable");
+    _errors.put(504, "Gateway Timeout");
+    _errors.put(505, "Http Version Not Supported");
   }
 }

@@ -87,9 +87,6 @@ abstract public class AbstractHttpResponse {
 
   protected final AbstractHttpRequest _request;
 
-  protected int _statusCode;
-  protected String _statusMessage;
-
   protected String _contentType;
   protected String _contentPrefix;
   protected String _charEncoding;
@@ -104,9 +101,7 @@ abstract public class AbstractHttpResponse {
   // the raw output stream.
   private final WriteStream _rawWrite;
   
-  private final AbstractResponseStream _originalResponseStream;
-
-  private AbstractResponseStream _responseStream;
+  private final AbstractResponseStream _responseStream;
   
   private final ServletOutputStreamImpl _responseOutputStream
     = new ServletOutputStreamImpl();
@@ -128,33 +123,11 @@ abstract public class AbstractHttpResponse {
 
   private boolean _hasSessionCookie;
 
-  private Locale _locale;
   protected boolean _disableHeaders;
   protected boolean _disableCaching;
   protected long _contentLength;
   protected boolean _isClosed;
   protected boolean _hasSentLog;
-  
-  protected boolean _hasWriter;
-  protected boolean _hasOutputStream;
-
-  private AbstractCacheFilterChain _cacheInvocation;
-
-  // the cache entry for a match/if-modified-since
-  private AbstractCacheEntry _matchCacheEntry;
-
-  // the new cache for a request getting filled
-  private AbstractCacheEntry _newCacheEntry;
-  private OutputStream _cacheStream;
-  private Writer _cacheWriter;
-  
-  protected boolean _isNoCache;
-  private boolean _allowCache;
-  private boolean _isPrivateCache;
-  private boolean _hasCacheControl;
-  private boolean _isNoCacheUnlessVary;
-
-  protected boolean _isTopCache;
 
   protected boolean _forbidForward;
   protected boolean _hasError;
@@ -164,7 +137,7 @@ abstract public class AbstractHttpResponse {
     _rawWrite = null;
 
     _request = null;
-    _originalResponseStream = createResponseStream();
+    _responseStream = createResponseStream();
   }
 
   protected AbstractHttpResponse(AbstractHttpRequest request,
@@ -177,7 +150,7 @@ abstract public class AbstractHttpResponse {
 
     _request = request;
     
-    _originalResponseStream = createResponseStream();
+    _responseStream = createResponseStream();
   }
   
   protected AbstractResponseStream
@@ -296,9 +269,6 @@ abstract public class AbstractHttpResponse {
   {
     _bufferStore = bufferStore;
     
-    _statusCode = 200;
-    _statusMessage = "OK";
-
     _headerKeys.clear();
     _headerValues.clear();
     
@@ -307,11 +277,7 @@ abstract public class AbstractHttpResponse {
 
     _hasSessionCookie = false;
 
-    _responseStream = _originalResponseStream;
     _responseStream.start();
-
-    _responseOutputStream.init(_responseStream);
-    _responsePrintWriter.init(_responseStream);
 
     _isHeaderWritten = false;
     _isChunked = false;
@@ -320,30 +286,13 @@ abstract public class AbstractHttpResponse {
     _hasCharEncoding = false;
     _contentType = null;
     _contentPrefix = null;
-    _locale = null;
     
     _flushBuffer = null;
 
     _contentLength = -1;
     _disableHeaders = false;
-    _disableCaching = false;
     _isClosed = false;
     _hasSentLog = false;
-
-    _hasWriter = false;
-    _hasOutputStream = false;
-
-    _cacheInvocation = null;
-    _matchCacheEntry = null;
-    _newCacheEntry = null;
-    _cacheStream = null;
-    _cacheWriter = null;
-    _isPrivateCache = false;
-    _isNoCacheUnlessVary = false;
-    _hasCacheControl = false;
-    _allowCache = true;
-    _isNoCache = false;
-    _isTopCache = false;
 
     _forbidForward = false;
   }
@@ -362,7 +311,7 @@ abstract public class AbstractHttpResponse {
    */
   protected void setHead()
   {
-    _originalResponseStream.setHead();
+    _responseStream.setHead();
   }
 
   /**
@@ -370,7 +319,7 @@ abstract public class AbstractHttpResponse {
    */
   protected final boolean isHead()
   {
-    return _originalResponseStream.isHead();
+    return _responseStream.isHead();
   }
 
   /**
@@ -408,295 +357,6 @@ abstract public class AbstractHttpResponse {
   }
 
   /**
-   * Sets the cache entry so we can use it if the servlet returns
-   * not_modified response.
-   *
-   * @param entry the saved cache entry
-   */
-  public void setMatchCacheEntry(AbstractCacheEntry entry)
-  {
-    _matchCacheEntry = entry;
-  }
-
-  /**
-   * Sets the cache invocation to indicate that the response might be
-   * cacheable.
-   */
-  public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
-  {
-    AbstractCacheFilterChain oldCache = _cacheInvocation;
-    _cacheInvocation = cacheInvocation;
-    
-    AbstractCacheEntry oldEntry = _newCacheEntry;
-    _newCacheEntry = null;
-
-    if (oldEntry != null)
-      oldCache.killCaching(oldEntry);
-  }
-
-  public void setTopCache(boolean isTopCache)
-  {
-    _isTopCache = isTopCache;
-  }
-
-  public void setStatus(int code)
-  {
-    setStatus(code, null);
-  }
-
-  public void setStatus(int code, String message)
-  {
-    if (code < 0)
-      code = 500;
-
-    if (message != null) {
-    }
-    else if (code == HttpServletResponse.SC_OK)  
-      message = "OK";
-    
-    else if (code == HttpServletResponse.SC_NOT_MODIFIED)  
-      message = "Not Modified";
-    
-    else if (message == null) {
-      message = _errors.get(String.valueOf(code));
-
-      if (message == null)
-        message = L.l("Internal Server Error");
-    }
-
-    // server/2h0g
-    if (code != HttpServletResponse.SC_OK
-        && code != HttpServletResponse.SC_NOT_MODIFIED)
-      killCache();
-
-    _statusCode = code;
-    _statusMessage = message;
-  }
-
-  public int getStatusCode()
-  {
-    return _statusCode;
-  }
-
-  public String getStatusMessage()
-  {
-    return _statusMessage;
-  }
-
-  public void sendError(int code)
-    throws IOException
-  {
-    sendError(code, null);
-  }
-
-  /**
-   * Sends an HTTP error to the browser.
-   *
-   * @param code the HTTP error code
-   * @param value a string message
-   */
-  public void sendError(int code, String value)
-    throws IOException
-  {
-    if (code == HttpServletResponse.SC_NOT_MODIFIED
-        && _matchCacheEntry != null) {
-      setStatus(code, value);
-      if (handleNotModified(_isTopCache))
-        return;
-    }
-    
-    if (isCommitted())
-      throw new IllegalStateException(L.l("sendError() forbidden after buffer has been committed."));
-
-    //_currentWriter = null;
-    //setStream(_originalStream);
-    resetBuffer();
-
-    if (code != HttpServletResponse.SC_NOT_MODIFIED)
-      killCache();
-
-    /* XXX: if we've already got an error, won't this just mask it?
-    if (responseStream.isCommitted())
-      throw new IllegalStateException("response can't sendError() after commit");
-    */
-
-    WebApp app = getRequest().getWebApp();
-
-    ErrorPageManager errorManager = null;
-    if (app != null)
-      errorManager = app.getErrorPageManager();
-
-    setStatus(code, value);
-    try {
-      if (code == HttpServletResponse.SC_NOT_MODIFIED
-          || code == HttpServletResponse.SC_NO_CONTENT) {
-        finishInvocation();
-        return;
-      }
-      else if (errorManager != null) {
-        HttpServletRequestImpl requestFacade = getRequest().getRequestFacade();
-        HttpServletResponseImpl responseFacade = getRequest().getResponseFacade();
-        
-        // server/10su
-        errorManager.sendError(requestFacade, responseFacade,
-                               code, _statusMessage);
-
-        // _request.killKeepalive();
-        // close, but don't force a flush
-        // XXX: finish(false);
-        finishInvocation();
-        return;
-      }
-
-      setContentType("text/html");
-      ServletOutputStream s = getOutputStream();
-
-      s.println("<html>");
-      if (! isCommitted()) {
-        s.print("<head><title>");
-        s.print(code);
-        s.print(" ");
-        s.print(_statusMessage);
-        s.println("</title></head>");
-      }
-      s.println("<body>");
-
-      s.print("<h1>");
-      s.print(code);
-      s.print(" ");
-      s.print(_statusMessage);
-      s.println("</h1>");
-
-      if (code == HttpServletResponse.SC_NOT_FOUND) {
-        s.println(L.l("{0} was not found on this server.",
-                      HTTPUtil.encodeString(getRequest().getRequestFacade().getPageURI())));
-      }
-      else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
-        s.println(L.l("The server is temporarily unavailable due to maintenance downtime or excessive load."));
-      }
-
-      String version = null;
-
-      if (app == null) {
-      }
-      else if (app.getServer() != null
-	       && app.getServer().getServerHeader() != null) {
-	version = app.getServer().getServerHeader();
-      }
-      else if (CauchoSystem.isTesting()) {
-      }
-      else
-	version = com.caucho.Version.FULL_VERSION;
-    
-      if (version != null) {
-	s.println("<p /><hr />");
-	s.println("<small>");
-	
-	s.println(version);
-	  
-	s.println("</small>");
-      }
-      
-      s.println("</body></html>");
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    _request.killKeepalive();
-    // close, but don't force a flush
-    finishInvocation();
-  }
-
-  /**
-   * Sends a redirect to the browser.  If the URL is relative, it gets
-   * combined with the current url.
-   *
-   * @param url the possibly relative url to send to the browser
-   */
-  public void sendRedirect(String url)
-    throws IOException
-  {
-    if (url == null)
-      throw new NullPointerException();
-    
-    if (_originalResponseStream.isCommitted())
-      throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
-
-    _responseStream.clearBuffer();
-    _originalResponseStream.clearBuffer();
-    
-    _responseStream = _originalResponseStream;
-    resetBuffer();
-    
-    setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-    String path = getAbsolutePath(url);
-
-    // Bug #3051
-    String encoding = getCharacterEncoding();
-
-    boolean isLatin1 = "iso-8859-1".equals(encoding);
-
-    CharBuffer cb = new CharBuffer();
-
-    for (int i = 0; i < path.length(); i++) {
-      char ch = path.charAt(i);
-
-      if (ch == '<')
-	cb.append("%3c");
-      else if (ch < 0x80)
-	cb.append(ch);
-      else if (isLatin1) {
-	addHex(cb, ch);
-      }
-      else if (ch < 0x800) {
-	int d1 = 0xc0 + ((ch >> 6) & 0x1f);
-	int d2 = 0x80 + (ch & 0x3f);
-
-	addHex(cb, d1);
-	addHex(cb, d2);
-      }
-      else if (ch < 0x8000) {
-	int d1 = 0xe0 + ((ch >> 12) & 0xf);
-	int d2 = 0x80 + ((ch >> 6) & 0x3f);
-	int d3 = 0x80 + (ch & 0x3f);
-
-	addHex(cb, d1);
-	addHex(cb, d2);
-	addHex(cb, d3);
-      }
-    }
-
-    path = cb.toString();
-    
-    setHeader("Location", path);
-
-    if (isLatin1)
-      setHeader("Content-Type", "text/html; charset=iso-8859-1");
-    else
-      setHeader("Content-Type", "text/html; charset=utf-8");
-
-    // The data is required for some WAP devices that can't handle an
-    // empty response.
-    ServletOutputStream out = getOutputStream();
-    out.println("The URL has moved <a href=\"" + path + "\">here</a>");
-    // closeConnection();
-    
-    _request.getRequestFacade().saveSession(); // #503
-
-    close();
-  }
-
-  private void addHex(CharBuffer cb, int hex)
-  {
-    int d1 = (hex >> 4) & 0xf;
-    int d2 = (hex) & 0xf;
-    
-    cb.append('%');
-    cb.append(d1 < 10 ? (char) (d1 + '0') : (char) (d1 - 10 + 'a'));
-    cb.append(d2 < 10 ? (char) (d2 + '0') : (char) (d2 - 10 + 'a'));
-  }
-
-  /**
    * Switch to raw socket mode.
    */
   public void switchToRaw()
@@ -712,85 +372,6 @@ abstract public class AbstractHttpResponse {
     throws IOException
   {
     throw new UnsupportedOperationException(L.l("raw mode is not supported in this configuration"));
-  }
-
-  /**
-   * Returns the absolute path for a given relative path.
-   *
-   * @param path the possibly relative url to send to the browser
-   */
-  private String getAbsolutePath(String path)
-  {
-    int slash = path.indexOf('/');
-    
-    int len = path.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = path.charAt(i);
-
-      if (ch == ':')
-        return path;
-      else if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
-        continue;
-      else
-        break;
-    }
-
-    WebApp app = getRequest().getWebApp();
-
-    String hostPrefix = null;
-    String host = _request.getHeader("Host");
-    String serverName = app.getHostName();
-
-    if (serverName == null
-	|| serverName.equals("")
-	|| serverName.equals("default")) {
-      serverName = _request.getServerName();
-    }
-
-    int port = _request.getServerPort();
-
-    if (hostPrefix != null && ! hostPrefix.equals("")) {
-    }
-    else if (serverName.startsWith("http:")
-	     || serverName.startsWith("https:"))
-      hostPrefix = serverName;
-    else if (host != null) {
-      hostPrefix = _request.getScheme() + "://" + host;
-    }
-    else {
-      hostPrefix = _request.getScheme() + "://" + serverName;
-      
-      if (serverName.indexOf(':') < 0
-	  && port != 0 && port != 80 && port != 443)
-        hostPrefix += ":" + port;
-    }
-
-    if (slash == 0)
-      return hostPrefix + path;
-
-    String uri = _request.getRequestURI();
-    String queryString = null;
-
-    int p = path.indexOf('?');
-    if (p > 0) {
-      queryString = path.substring(p + 1);
-      path = path.substring(0, p);
-    }
-    
-    p = uri.lastIndexOf('/');
-
-    if (p >= 0)
-      path = uri.substring(0, p + 1) + path;
-
-    try {
-      if (queryString != null)
-        return hostPrefix + InvocationDecoder.normalizeUri(path) + '?' + queryString;
-      else
-        return hostPrefix + InvocationDecoder.normalizeUri(path);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
@@ -906,6 +487,8 @@ abstract public class AbstractHttpResponse {
     }
   }
 
+
+
   /**
    * Adds a new header.  If an old header with that name exists,
    * both headers are output.
@@ -955,12 +538,14 @@ abstract public class AbstractHttpResponse {
 
     switch (_headerCodes.get(_headerBuffer, length)) {
     case HEADER_CACHE_CONTROL:
+      /*
       if (value.startsWith("max-age")) {
       }
       else if (value.equals("x-anonymous")) {
       }
       else
 	_hasCacheControl = true;
+      */
       return false;
 	
     case HEADER_CONNECTION:
@@ -1063,6 +648,16 @@ abstract public class AbstractHttpResponse {
     addHeader(key, _calendar.printDate());
   }
 
+  public ArrayList<String> getHeaderKeys()
+  {
+    return _headerKeys;
+  }
+
+  public ArrayList<String> getHeaderValues()
+  {
+    return _headerValues;
+  }
+
   public Iterable<String> getHeaders(String name)
   {
     throw new UnsupportedOperationException("unimplemented");
@@ -1093,182 +688,14 @@ abstract public class AbstractHttpResponse {
     return _contentLength;
   }
 
-  /**
-   * Sets the browser content type.  If the value contains a charset,
-   * the output encoding will be changed to match.
-   *
-   * <p>For example, to set the output encoding to use UTF-8 instead of
-   * the default ISO-8859-1 (Latin-1), use the following:
-   * <code><pre>
-   * setContentType("text/html; charset=UTF-8");
-   * </pre></code>
-   */
-  public void setContentType(String value)
+  void setContentType(String contentType)
   {
-    if (isCommitted())
-      return;
-
-    if (_disableHeaders || value == null) {
-      _contentType = null;
-      return;
-    }
-    else if (value == "text/html" || value.equals("text/html")) {
-      _contentType = "text/html";
-      return;
-    }
-    
-    _contentType = value;
-    
-    int length = value.length();
-    int i;
-    int ch;
-
-    for (i = 0;
-	 i < length && value.charAt(i) != ';'
-	   && ! Character.isWhitespace(value.charAt(i));
-	 i++) {
-    }
-
-    if (i < length)
-      _contentPrefix = _contentType.substring(0, i);
-    else
-      _contentPrefix = _contentType;
-
-    while ((i = value.indexOf(';', i)) > 0) {
-      int semicolon = i;
-      for (i++; i < length && XmlChar.isWhitespace(value.charAt(i)); i++) {
-      }
-
-      int j;
-      for (j = i + 1;
-           j < length && ! XmlChar.isWhitespace((ch = value.charAt(j))) &&
-             ch != '=';
-           j++) {
-      }
-      
-      if (length <= j)
-	break;
-      else if ((ch = value.charAt(i)) != 'c' && ch != 'C') {
-      }
-      else if (value.substring(i, j).equalsIgnoreCase("charset")) {
-	for (; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
-	}
-
-        if (length <= j || value.charAt(j) != '=')
-          continue;
-        
-	for (j++; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
-	}
-
-        String encoding;
-
-        if (j < length && value.charAt(j) == '"') {
-          int k = ++j;
-          
-          for (; j < length && value.charAt(j) != '"'; j++) {
-          }
-
-          encoding = value.substring(k, j);
-        }
-        else {
-          int k = j;
-          for (k = j;
-               j < length && ! XmlChar.isWhitespace(ch = value.charAt(j)) && ch != ';';
-               j++) {
-          }
-
-          encoding = value.substring(k, j);
-        }
-
-	int tail = value.indexOf(';', semicolon + 1);
-
-	StringBuilder sb = new StringBuilder();
-	sb.append(value, 0, semicolon);
-	if (tail > 0)
-	  sb.append(value, tail, value.length());
-	
-	_contentType = sb.toString();
-
-	if (! _hasWriter) {
-	  _hasCharEncoding = true;
-	  _charEncoding = encoding;
-	}
-	break;
-      }
-      else
-	i = j;
-    }
-
-    // XXX: conflict with servlet exception throwing order?
-    try {
-      _responseStream.setEncoding(_charEncoding);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    _contentType = contentType;
   }
 
-  /**
-   * Gets the content type.
-   */
-  public String getContentType()
+  void setCharEncoding(String charEncoding)
   {
-    if (_contentType == null)
-      return null;
-
-    String charEncoding = getCharacterEncoding();
-
-    if (charEncoding != null)
-      return _contentType + "; charset=" + charEncoding;
-    else
-      return _contentType;
-  }
-
-  /**
-   * Gets the character encoding.
-   */
-  public String getCharacterEncoding()
-  {
-    if (_charEncoding != null)
-      return _charEncoding;
-
-    WebApp app = _request.getWebApp();
-
-    String encoding = null;
-    
-    if (app != null)
-      encoding = app.getCharacterEncoding();
-
-    if (encoding != null)
-      return encoding;
-    else
-      return "iso-8859-1";
-  }
-
-  /**
-   * Sets the character encoding.
-   */
-  public void setCharacterEncoding(String encoding)
-  {
-    if (isCommitted())
-      return;
-    if (_hasWriter)
-      return;
-
-    _hasCharEncoding = true;
-    if (encoding == null
-        || encoding.equals("ISO-8859-1")
-        || encoding.equals("")) {
-      encoding = null;
-      _charEncoding = "iso-8859-1";
-    }
-    else
-      _charEncoding = encoding;
-
-    try {
-      _responseStream.setEncoding(encoding);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    _charEncoding = charEncoding;
   }
 
   String getRealCharacterEncoding()
@@ -1339,63 +766,11 @@ abstract public class AbstractHttpResponse {
   }
 
   /**
-   * Sets the ResponseStream
-   */
-  public void setResponseStream(AbstractResponseStream responseStream)
-  {
-    _responseStream = responseStream;
-
-    _responseOutputStream.init(responseStream);
-    _responsePrintWriter.init(responseStream);
-  }
-
-  /**
    * Gets the response stream.
    */
-  public AbstractResponseStream getResponseStream()
+  protected AbstractResponseStream getResponseStream()
   {
     return _responseStream;
-  }
-
-  /**
-   * Gets the response stream.
-   */
-  public AbstractResponseStream getOriginalStream()
-  {
-    return _originalResponseStream;
-  }
-
-  /**
-   * Returns true for a Caucho response stream.
-   */
-  public boolean isCauchoResponseStream()
-  {
-    return _responseStream.isCauchoResponseStream();
-  }
-  
-  /**
-   * Returns the ServletOutputStream for the response.
-   */
-  public ServletOutputStream getOutputStream() throws IOException
-  {
-    /*
-    if (_hasWriter)
-      throw new IllegalStateException(L.l("getOutputStream() can't be called after getWriter()."));
-    */
-
-    _hasOutputStream = true;
-
-    /*
-    // server/10a2
-    if (! _hasWriter) {
-      // jsp/0510 vs jsp/1b00
-      // _responseStream.setOutputStreamOnly(true);
-    }
-    */
-    // jsp/1cie, jsp/1civ
-    // _responseStream.setEncoding(null);
-    
-    return _responseOutputStream;
   }
 
   /**
@@ -1414,23 +789,13 @@ abstract public class AbstractHttpResponse {
     return _flushBuffer;
   }
 
-  /**
-   * Returns a PrintWriter for the response.
-   */
-  public PrintWriter getWriter() throws IOException
+  protected ServletOutputStreamImpl getResponseOutputStream()
   {
-    /*
-    if (_hasOutputStream)
-      throw new IllegalStateException(L.l("getWriter() can't be called after getOutputStream()."));
-    */
+    return _responseOutputStream;
+  }
 
-    if (! _hasWriter) {
-      _hasWriter = true;
-
-      if (_charEncoding != null && _responseStream != null)
-	_responseStream.setEncoding(_charEncoding);
-    }
-    
+  protected ResponseWriter getResponsePrintWriter()
+  {
     return _responsePrintWriter;
   }
 
@@ -1445,23 +810,6 @@ abstract public class AbstractHttpResponse {
   /*
    * jsdk 2.2
    */
-
-  public void setBufferSize(int size)
-  {
-    _responseStream.setBufferSize(size);
-  }
-
-  public int getBufferSize()
-  {
-    return _responseStream.getBufferSize();
-  }
-
-  public void flushBuffer()
-    throws IOException
-  {
-    // server/10sn
-    _responseStream.flush();
-  }
 
   public void flushHeader()
     throws IOException
@@ -1479,7 +827,7 @@ abstract public class AbstractHttpResponse {
    */
   public boolean isCommitted()
   {
-    if (_originalResponseStream.isCommitted())
+    if (_responseStream.isCommitted())
       return true;
 
     if (_contentLength >= 0
@@ -1490,147 +838,28 @@ abstract public class AbstractHttpResponse {
     return false;
   }
 
-  public void reset()
+  protected void reset()
   {
-    reset(false);
-  }
-
-  public void resetBuffer()
-  {
-    _responseStream.clearBuffer();
-
-    // jsp/15ma
-    killCaching();
-    /*
-    if (_currentWriter instanceof JspPrintWriter)
-      ((JspPrintWriter) _currentWriter).clear();
-    */
-  }
-
-  /**
-   * Clears the response for a forward()
-   *
-   * @param force if not true and the response stream has committed,
-   *   throw the IllegalStateException.
-   */
-  void reset(boolean force)
-  {
-    if (! force && _originalResponseStream.isCommitted())
-      throw new IllegalStateException(L.l("response cannot be reset() after committed"));
-    
-    _responseStream.clearBuffer();
-    /*
-    if (_currentWriter instanceof JspPrintWriter)
-      ((JspPrintWriter) _currentWriter).clear();
-    */
-    _statusCode = 200;
-    _statusMessage = "OK";
-
     _headerKeys.clear();
     _headerValues.clear();
 
     _contentLength = -1;
-    //_isNoCache = false;
-    //_isPrivateCache = false;
-    
-    _charEncoding = null;
-    _locale = null;
-
-    _hasOutputStream = false;
-    _hasWriter = false;
-    try {
-      _responseStream.setLocale(null);
-      _responseStream.setEncoding(null);
-    } catch (Exception e) {
-    }
   }
 
   // XXX: hack to deal with forwarding
+  /*
   public void clearBuffer()
   {
     _responseStream.clearBuffer();
   }
-
-  public void setLocale(Locale locale)
-  {
-    _locale = locale;
-
-    if (! _hasCharEncoding && ! isCommitted()) {
-      _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
-
-      try {
-        if (_charEncoding != null) {
-          // _originalStream.setEncoding(_charEncoding);
-          _responseStream.setEncoding(_charEncoding);
-	}
-      } catch (IOException e) {
-      }
-    }
-
-    CharBuffer cb = _cb;
-    cb.clear();
-    cb.append(locale.getLanguage());
-    if (locale.getCountry() != null &&  ! "".equals(locale.getCountry())) {
-      cb.append("-");
-      cb.append(locale.getCountry());
-      if (locale.getVariant() != null && ! "".equals(locale.getVariant())) {
-        cb.append("-");
-        cb.append(locale.getVariant());
-      }
-    }
-    
-    setHeader("Content-Language", cb.toString());
-  }
-
-  public Locale getLocale()
-  {
-    if (_locale != null)
-      return _locale;
-    else
-      return Locale.getDefault();
-  }
-
-  // needed to support JSP
-  
-  public int getRemaining()
-  {
-    return _responseStream.getRemaining();
-  }
+  */
 
   /**
    * Returns the number of bytes sent to the output.
    */
   public int getContentLength()
   {
-    return _originalResponseStream.getContentLength();
-  }
-
-  /**
-   * Disables the response
-   *
-   * @since Servlet 3.0
-   */
-  public void disable()
-  {
-  }
-
-  /**
-   * Enables the response
-   *
-   * @since Servlet 3.0
-   */
-  public void enable()
-  {
-  }
-
-  /**
-   * Returns true if the response is disabled
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isDisabled()
-  {
-    return false;
+    return _responseStream.getContentLength();
   }
 
   public boolean disableHeaders(boolean disable)
@@ -1645,11 +874,6 @@ abstract public class AbstractHttpResponse {
     boolean old = _disableCaching;
     _disableCaching = disable;
     return old;
-  }
-
-  public int getStatus()
-  {
-    throw new UnsupportedOperationException("unimplemented");
   }
 
   /**
@@ -1702,27 +926,33 @@ abstract public class AbstractHttpResponse {
     if (isHeaderWritten())
       return _isChunked;
 
+    HttpServletRequestImpl req = _request.getRequestFacade();
+    HttpServletResponseImpl res = _request.getResponseFacade();
+
+    if (res == null)
+      return false;
+
     // server/1373 for getBufferSize()
-    boolean canCache = startCaching(true);
+    boolean canCache = res.startCaching(true);
+
     _isHeaderWritten = true;
     boolean isHead = false;
     
     if (_request.getMethod().equals("HEAD")) {
       isHead = true;
-      _originalResponseStream.setHead();
+      _responseStream.setHead();
     }
 
     WebApp webApp = _request.getWebApp();
 
-    int majorCode = _statusCode / 100;
+    int statusCode = res.getStatus();
+    
+    int majorCode = statusCode / 100;
 
     if (webApp != null) {
       if (majorCode == 5)
 	webApp.addStatus500();
     }
-
-    HttpServletRequestImpl req = _request.getRequestFacade();
-    HttpServletResponseImpl res = _request.getResponseFacade();
 
     if (req != null) {
       HttpSession session = req.getMemorySession();
@@ -1742,142 +972,6 @@ abstract public class AbstractHttpResponse {
     _isChunked = writeHeadersInt(os, length, isHead);
 
     return _isChunked;
-  }
-
-  /**
-   * Called to start caching.
-   */
-  protected boolean startCaching(boolean isByte)
-  {
-    if (_isHeaderWritten)
-      return false;
-    _isHeaderWritten = true;
-
-    if (_statusCode == HttpServletResponse.SC_OK
-        && ! _disableCaching) // && getBufferSize() > 0)
-      return startCaching(_headerKeys, _headerValues,
-			  _contentType, _charEncoding, isByte);
-    else
-      return false;
-  }
-
-  /**
-   * Tests to see if the response is cacheable.
-   *
-   * @param keys the header keys of the response
-   * @param values the header values of the response
-   * @param contentType the contentType of the response
-   * @param charEncoding the character encoding of the response
-   *
-   * @return true if caching has started
-   */
-  boolean startCaching(ArrayList<String> keys,
-                       ArrayList<String> values,
-                       String contentType, String charEncoding,
-		       boolean isByte)
-  {
-    if (_cacheInvocation == null) {
-      return false;
-    }
-    /*
-      // jsp/17ah
-    else if (_responseStream != _originalResponseStream) {
-      return false;
-    }
-    */
-    else if (! isCauchoResponseStream()) {
-      return false;
-    }
-    /* server/131x
-    else if (! (_originalRequest instanceof CauchoRequest)) {
-      return false;
-    }
-    */
-    else if (! _allowCache) {
-      return false;
-    }
-    else {
-      CauchoRequest request = _request.getRequestFacade();
-      CauchoResponse response = _request.getResponseFacade();
-      
-      _newCacheEntry = _cacheInvocation.startCaching(request, response,
-                                                     keys, values,
-						     contentType,
-						     charEncoding,
-						     _contentLength);
-
-      if (_newCacheEntry == null) {
-	return false;
-      }
-      else if (isByte) {
-	_cacheStream = _newCacheEntry.openOutputStream();
-
-	if (_cacheStream != null)
-	  _originalResponseStream.setByteCacheStream(_cacheStream);
-      
-	return _cacheStream != null;
-      }
-      else {
-	_cacheWriter = _newCacheEntry.openWriter();
-
-	if (_cacheWriter != null)
-	  _originalResponseStream.setCharCacheStream(_cacheWriter);
-      
-	return _cacheWriter != null;
-      }
-    }
-  }
-  
-
-  /**
-   * Handle a SC_NOT_MODIFIED response.  If we've got a cache, fill the
-   * results from the cache.
-   *
-   * @param isTop if true, this is the top-level request.
-   *
-   * @return true if we filled from the cache
-   */
-  private boolean handleNotModified(boolean isTop)
-    throws IOException
-  {
-    if (_statusCode != HttpServletResponse.SC_NOT_MODIFIED) {
-      return false;
-    }
-    else if (_matchCacheEntry != null) {
-      if (_originalResponseStream.isCommitted())
-        return false;
-
-      // need to unclose because the not modified might be detected only
-      // when flushing the data
-      _originalResponseStream.clearClosed();
-      _isClosed = false;
-
-      /* XXX: complications with filters */
-      if (_cacheInvocation != null
-	  && _cacheInvocation.fillFromCache(_request.getRequestFacade(),
-                                            _request.getResponseFacade(),
-                                            _matchCacheEntry, isTop)) {
-        _matchCacheEntry.updateExpiresDate();
-        _cacheInvocation = null;
-        _matchCacheEntry = null;
-
-        finishInvocation(); // Don't force a flush to avoid extra TCP packet
-      
-        return true;
-      }
-    }
-    // server/13dh
-    else if (_cacheInvocation != null) {
-      WebApp webApp = _request.getWebApp();
-      
-      long maxAge = webApp.getMaxAge(_request.getRequestURI());
-
-      if (maxAge > 0 && ! containsHeader("Expires")) {
-	setDateHeader("Expires", maxAge + Alarm.getCurrentTime());
-      }
-    }
-
-    return false;
   }
 
   abstract protected boolean writeHeadersInt(WriteStream os,
@@ -2013,11 +1107,6 @@ abstract public class AbstractHttpResponse {
   }
   */
 
-  public AbstractHttpResponse getAbstractHttpResponse()
-  {
-    return this;
-  }
-
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
     throw new IllegalStateException(L.l("'{0}' does not support upgrading",
@@ -2068,10 +1157,10 @@ abstract public class AbstractHttpResponse {
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
 	handleNotModified(_isTopCache);
       }
-      */
-      if (_statusCode == HttpServletResponse.SC_NOT_MODIFIED) {
+      if (_statusCode == SC_NOT_MODIFIED) {
 	handleNotModified(_isTopCache);
       }
+      */
       
       if (_responseStream == null) {
       }
@@ -2079,9 +1168,11 @@ abstract public class AbstractHttpResponse {
 	_responseStream.close();
 	finishResponseStream(isClose);
       }
+      /*
       else if (_responseStream != _originalResponseStream) {
 	_responseStream.finish();
       }
+      */
       else {
 	_responseStream.flush();
 	finishResponseStream(isClose);
@@ -2138,7 +1229,7 @@ abstract public class AbstractHttpResponse {
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      finishCache();
+      // XXX: finishCache();
       
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
@@ -2164,160 +1255,6 @@ abstract public class AbstractHttpResponse {
       throw e;
     } finally {
       _isClosed = true;
-
-      _responseStream = null;
-    }
-  }
-  /**
-   * Sets true if the cache is only for the browser, but not
-   * Resin's cache or proxies.
-   *
-   * <p>Since proxy caching also caches headers, cached pages with
-   * session ids can't be cached in the browser.
-   *
-   * XXX: but doesn't this just mean that Resin shouldn't
-   * send the session information back if the page is cached?
-   * Because a second request where everything is identical
-   * would see the same response except for the cookies.
-   */
-  public void setPrivateCache(boolean isPrivate)
-  {
-    // XXX: let the webApp override this?
-    _isPrivateCache = isPrivate;
-
-    // server/12dm
-    _allowCache = false;
-  }
-
-  /**
-   * Sets true if the cache is only for the browser and 
-   * Resin's cache but not proxies.
-   */
-  public void setPrivateOrResinCache(boolean isPrivate)
-  {
-    // XXX: let the webApp override this?
-
-    _isPrivateCache = isPrivate;
-  }
-
-  /**
-   * Set no cache w/o vary
-   */
-  public void setNoCacheUnlessVary(boolean isNoCacheUnlessVary)
-  {
-    _isNoCacheUnlessVary = isNoCacheUnlessVary;
-  }
-
-  /**
-   * Return true if no-cache without var.
-   */
-  public boolean isNoCacheUnlessVary()
-  {
-    return _isNoCacheUnlessVary;
-  }
-  
-  /**
-   * Returns the value of the private cache.
-   */
-  public boolean getPrivateCache()
-  {
-    return _isPrivateCache;
-  }
-
-  /**
-   * Returns true if the response should contain a Cache-Control: private
-   */
-  protected boolean isPrivateCache()
-  {
-    return ! _hasCacheControl && _isPrivateCache;
-  }
-
-  /**
-   * Set if the page is non-cacheable.
-   */
-  public void setNoCache(boolean isNoCache)
-  {
-    _isNoCache = isNoCache;
-  }
-
-  /**
-   * Returns true if the page is non-cacheable
-   */
-  public boolean isNoCache()
-  {
-    return _isNoCache;
-  }
-
-  /**
-   * Set if the page is non-cacheable.
-   */
-  public void killCache()
-  {
-    _allowCache = false;
-
-    // server/1b15
-    // setNoCache(true);
-  }
-
-  public void finishCache()
-    throws IOException
-  {
-    try {
-      _responseStream.close();
-      
-      if (_newCacheEntry != null && _cacheInvocation != null) {
-	OutputStream cacheStream = _cacheStream;
-	_cacheStream = null;
-	
-	Writer cacheWriter = _cacheWriter;
-	_cacheWriter = null;
-
-	if (cacheStream != null)
-	  cacheStream.close();
-
-	if (cacheWriter != null)
-	  cacheWriter.close();
-	
-	WebApp webApp = _request.getWebApp();
-	if (_statusCode == 200 && _allowCache
-	    && webApp != null && webApp.isActive()) {
-	  AbstractCacheFilterChain cache = _cacheInvocation;
-	  _cacheInvocation = null;
-
-	  AbstractCacheEntry cacheEntry = _newCacheEntry;
-	  _newCacheEntry = null;
-	  
-	  cache.finishCaching(cacheEntry);
-	}
-      }
-    } finally {
-      AbstractCacheFilterChain cache = _cacheInvocation;
-      _cacheInvocation = null;
-      
-      AbstractCacheEntry cacheEntry = _newCacheEntry;
-      _newCacheEntry = null;
-      
-      _cacheStream = null;
-      _cacheWriter = null;
-
-      if (cacheEntry != null)
-	cache.killCaching(cacheEntry);
-    }
-  }
-
-  public void killCaching()
-  {
-    AbstractCacheFilterChain cache = _cacheInvocation;
-    _cacheInvocation = null;
-    
-    AbstractCacheEntry cacheEntry = _newCacheEntry;
-    _newCacheEntry = null;
-
-    if (cacheEntry != null) {
-      cache.killCaching(cacheEntry);
-      _cacheStream = null;
-      _cacheWriter = null;
-      _responseStream.killCaching();
     }
   }
 
@@ -2333,11 +1270,6 @@ abstract public class AbstractHttpResponse {
 
   protected void free()
   {
-    _cacheInvocation = null;
-    _newCacheEntry = null;
-    _matchCacheEntry = null;
-    _cacheStream = null;
-    _cacheWriter = null;
   }
 
   static {

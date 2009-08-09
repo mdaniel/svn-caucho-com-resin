@@ -119,7 +119,7 @@ public class SecurityFilterChain implements FilterChain {
     if (result.isFail()) {
       if (! result.isResponseSent()
           && ! res.isCommitted()
-          && res.getStatusCode() / 100 == 2) {
+          && res.getStatus() / 100 == 2) {
         res.sendError(HttpServletResponse.SC_FORBIDDEN);
       }
 

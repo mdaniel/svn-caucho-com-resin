@@ -31,6 +31,7 @@ package com.caucho.server.connection;
 
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.cache.AbstractCacheFilterChain;
 
 import java.io.*;
 import java.util.*;
@@ -344,13 +345,6 @@ public class CauchoResponseWrapper implements CauchoResponse {
     cResponse.setForbidForward(forbid);
   }
   
-  public int getStatusCode()
-  {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-    
-    return cResponse.getStatusCode();
-  }
-  
   public String getStatusMessage()
   {
     CauchoResponse cResponse = (CauchoResponse) _response;
@@ -405,6 +399,10 @@ public class CauchoResponseWrapper implements CauchoResponse {
     CauchoResponse cResponse = (CauchoResponse) _response;
     
     return cResponse.getAbstractHttpResponse();
+  }
+  
+  public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
+  {
   }
   
   public ServletResponse getResponse()

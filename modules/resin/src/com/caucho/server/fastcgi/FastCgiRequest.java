@@ -318,13 +318,13 @@ public class FastCgiRequest extends AbstractHttpRequest
 
       invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
-      _response.killCache();
+      // XXX: _response.killCache();
 
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
-      _response.killCache();
+      // XXX: _response.killCache();
       killKeepalive();
 
       /*

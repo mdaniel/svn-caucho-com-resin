@@ -156,7 +156,7 @@ public class IncludeResponseStream extends ToByteResponseStream {
       setCharOffset(0);
       char []buffer = getCharBuffer();
 
-      _response.startCaching(false);
+      // XXX: _response.startCaching(false);
 
       _writer.write(buffer, 0, charLength);
     
@@ -228,7 +228,7 @@ public class IncludeResponseStream extends ToByteResponseStream {
 
       if (_cacheWriter != null) {
 	// server/2h0m
-	_response.killCache();
+	// XXX: _response.killCache();
       }
 
       _os.write(buf, offset, length);
@@ -267,9 +267,11 @@ public class IncludeResponseStream extends ToByteResponseStream {
     } catch (IOException e) {
       if (_next instanceof CauchoResponse)
 	((CauchoResponse) _next).killCache();
-      
+
+      /*
       if (_response != null)
 	_response.killCache();
+      */
 
       throw e;
     }

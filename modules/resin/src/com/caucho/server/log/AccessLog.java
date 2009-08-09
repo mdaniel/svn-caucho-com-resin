@@ -422,7 +422,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 	break;
 
       case 'b':
-        if (response.getStatusCode() == 304)
+        if (responseFacade.getStatus() == 304)
           buffer[offset++] = (byte) '-';
         else
           offset = print(buffer, offset, response.getContentLength());
@@ -522,7 +522,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 	break;
 
       case 's':
-        int status = response.getStatusCode();
+        int status = responseFacade.getStatus();
         buffer[offset++] = (byte) ('0' + (status / 100) % 10);
         buffer[offset++] = (byte) ('0' + (status / 10) % 10);
         buffer[offset++] = (byte) ('0' + status % 10);

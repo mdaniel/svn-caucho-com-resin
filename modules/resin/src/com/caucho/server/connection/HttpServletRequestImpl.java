@@ -1405,13 +1405,13 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     boolean varyCookies = _varyCookies;
     boolean hasCookie = _hasCookie;
-    boolean privateCache = _response.getAbstractHttpResponse().getPrivateCache();
+    boolean privateCache = _response.getPrivateCache();
 
     String id = getRequestedSessionId();
 
     _varyCookies = varyCookies;
     _hasCookie = hasCookie;
-    _response.getAbstractHttpResponse().setPrivateOrResinCache(privateCache);
+    _response.setPrivateOrResinCache(privateCache);
 
     return id;
   }

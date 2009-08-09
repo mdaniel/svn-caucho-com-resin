@@ -29,6 +29,7 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.vfs.FlushBuffer;
 
 import javax.servlet.http.HttpServletResponse;
@@ -60,7 +61,6 @@ public interface CauchoResponse extends HttpServletResponse {
   public boolean getForbidForward();
   public void setForbidForward(boolean forbid);
 
-  public int getStatusCode();
   public String getStatusMessage();
 
   public boolean hasError();
@@ -71,6 +71,7 @@ public interface CauchoResponse extends HttpServletResponse {
   public void killCache();
   public void setNoCache(boolean killCache);
   public void setPrivateCache(boolean isPrivate);
+  public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain);
 
   public AbstractHttpResponse getAbstractHttpResponse();
   /**

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 import com.caucho.util.L10N;
+import com.caucho.server.cache.AbstractCacheFilterChain;
 
 /**
  * Wraps a servlet response in another response.  Filters may
@@ -452,7 +453,10 @@ public class ResponseWrapper implements ServletResponse {
   {
     return false;
   }
-  
+
+  public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
+  {
+  }
 
   //
   // caucho methods

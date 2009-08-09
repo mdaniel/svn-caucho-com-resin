@@ -31,7 +31,7 @@ package com.caucho.server.rewrite;
 
 import com.caucho.rewrite.RequestPredicate;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.HttpServletResponseImpl;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -66,9 +66,9 @@ public class MatchFilterChain
   {
     HttpServletRequest req = (HttpServletRequest) request;
 
-    if (response instanceof CauchoResponse) {
-      AbstractHttpResponse res
-	= ((CauchoResponse) response).getAbstractHttpResponse();
+    if (response instanceof HttpServletResponseImpl) {
+      HttpServletResponseImpl res
+	= (HttpServletResponseImpl) response;
 
       // server/1k67
       res.setNoCacheUnlessVary(true);

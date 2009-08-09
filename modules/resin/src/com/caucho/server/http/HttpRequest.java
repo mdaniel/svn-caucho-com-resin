@@ -33,11 +33,7 @@ import com.caucho.admin.AverageTimeProbe;
 import com.caucho.admin.SampleCountProbe;
 import com.caucho.admin.ProbeManager;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.HttpBufferStore;
-import com.caucho.server.connection.HttpServletRequestImpl;
-import com.caucho.server.connection.HttpServletResponseImpl;
+import com.caucho.server.connection.*;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
@@ -779,14 +775,14 @@ public class HttpRequest extends AbstractHttpRequest
 
       invocation.service(requestFacade, getResponseFacade());
     } catch (ClientDisconnectException e) {
-      _response.killCache();
+      getResponseFacade().killCache();
       killKeepalive();
 
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
-      _response.killCache();
+      getResponseFacade().killCache();
       killKeepalive();
 
       sendRequestError(e);

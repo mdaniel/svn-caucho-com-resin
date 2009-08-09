@@ -1476,13 +1476,13 @@ public abstract class AbstractHttpRequest
 
       invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
-      _response.killCache();
+      _responseFacade.killCache();
 
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
-      _response.killCache();
+      _responseFacade.killCache();
       killKeepalive();
 
       return false;

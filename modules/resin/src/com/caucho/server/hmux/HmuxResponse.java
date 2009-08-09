@@ -81,29 +81,33 @@ public class HmuxResponse extends AbstractHttpResponse {
   {
     if (! _request.hasRequest())
       return false;
+
+    HttpServletResponseImpl response = _request.getResponseFacade();
+
+    int statusCode = response.getStatus();
     
     CharBuffer cb = _cb;
     cb.clear();
-    cb.append((char) ((_statusCode / 100) % 10 + '0'));
-    cb.append((char) ((_statusCode / 10) % 10 + '0'));
-    cb.append((char) (_statusCode % 10 + '0'));
+    cb.append((char) ((statusCode / 100) % 10 + '0'));
+    cb.append((char) ((statusCode / 10) % 10 + '0'));
+    cb.append((char) (statusCode % 10 + '0'));
     cb.append(' ');
-    cb.append(_statusMessage);
+    cb.append(response.getStatusMessage());
 
     _req.writeStatus(cb);
 
-    if (_statusCode >= 400) {
+    if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
     }
-    else if (_isNoCache) {
+    else if (response.isNoCache()) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
 
       setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
       _req.writeHeader("Cache-Control", "no-cache");
     }
-    else if (isPrivateCache())
+    else if (response.isPrivateCache())
       _req.writeHeader("Cache-Control", "private");
 
     int load = (int) (1000 * CauchoSystem.getLoadAvg());

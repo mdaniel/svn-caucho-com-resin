@@ -423,7 +423,7 @@ public class ResponseStream extends ToByteResponseStream {
       }
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
-      _response.killCache();
+      // XXX: _response.killCache();
 
       if (_response.isIgnoreClientDisconnect()) {
 	return _next.getBuffer();
@@ -431,7 +431,7 @@ public class ResponseStream extends ToByteResponseStream {
       else
         throw e;
     } catch (IOException e) {
-      _response.killCache();
+      // XXX: _response.killCache();
       
       throw e;
     }
@@ -614,7 +614,7 @@ public class ResponseStream extends ToByteResponseStream {
       }
     } catch (ClientDisconnectException e) {
       // server/183c
-      _response.killCache();
+      // XXX: _response.killCache();
       _response.clientDisconnect();
 
       if (! _response.isIgnoreClientDisconnect())
@@ -902,7 +902,7 @@ public class ResponseStream extends ToByteResponseStream {
     
     if (_cacheMaxLength < _contentLength) {
       _cacheStream = null;
-      _response.killCache();
+      // XXX: _response.killCache();
     }
     else {
       _cacheStream.write(buf, offset, length);

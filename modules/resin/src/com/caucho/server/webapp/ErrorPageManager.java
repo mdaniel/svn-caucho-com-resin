@@ -35,11 +35,7 @@ import com.caucho.i18n.CharacterEncoding;
 import com.caucho.java.LineMap;
 import com.caucho.java.LineMapException;
 import com.caucho.java.ScriptStackTrace;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.connection.*;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.util.CauchoSystem;
@@ -194,9 +190,10 @@ public class ErrorPageManager {
     } catch (IllegalStateException e1) {
     }
 
-    if (response instanceof AbstractHttpResponse) {
-      ((AbstractHttpResponse) response).killCache();
-      ((AbstractHttpResponse) response).setNoCache(true);
+    if (response instanceof HttpServletResponseImpl) {
+      HttpServletResponseImpl resFacade = (HttpServletResponseImpl) response;
+      resFacade.killCache();
+      resFacade.setNoCache(true);
     }
     
     if (rootExn instanceof ClientDisconnectException)

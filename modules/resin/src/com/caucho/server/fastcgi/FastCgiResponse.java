@@ -95,19 +95,24 @@ public class FastCgiResponse extends AbstractHttpResponse {
     if (! _request.hasRequest())
       return false;
 
+    HttpServletResponseImpl response = _request.getResponseFacade();
+
+    int statusCode = response.getStatus();
+    String statusMessage = response.getStatusMessage();
+
     os.print("Status: ");
-    os.print(_statusCode);
+    os.print(statusCode);
     os.print(' ');
-    os.print(_statusMessage);
+    os.print(statusMessage);
     os.print("\r\n");
 
     CharBuffer cb = _cb;
     
-    if (_statusCode >= 400) {
+    if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
     }
-    else if (_isNoCache) {
+    else if (response.isNoCache()) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
 
@@ -115,7 +120,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
       os.print("Cache-Control: no-cache\r\n");
     }
-    else if (isPrivateCache()) {
+    else if (response.isPrivateCache()) {
       os.print("Cache-Control: private\r\n");
     }
 
@@ -130,8 +135,6 @@ public class FastCgiResponse extends AbstractHttpResponse {
       os.print("\r\n");
     }
 
-    HttpServletResponseImpl response = _request.getResponseFacade();
-    
     long now = Alarm.getCurrentTime();
     ArrayList<Cookie> cookiesOut = response.getCookies();
     

@@ -74,8 +74,8 @@ public class WrapperResponseStream extends AbstractResponseStream {
    */
   public boolean isCauchoResponseStream()
   {
-    if (_next instanceof AbstractHttpResponse)
-      return ((AbstractHttpResponse) _next).isCauchoResponseStream();
+    if (_next instanceof HttpServletResponseImpl)
+      return ((HttpServletResponseImpl) _next).isCauchoResponseStream();
     else
       return false;
   }

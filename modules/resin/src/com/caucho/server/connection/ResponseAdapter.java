@@ -259,14 +259,6 @@ public class ResponseAdapter extends ResponseWrapper
     return false;
   }
 
-  public int getStatusCode()
-  {
-    if (_response instanceof CauchoResponse)
-      return ((CauchoResponse) _response).getStatusCode();
-
-    throw new UnsupportedOperationException();
-  }
-
   public String getStatusMessage()
   {
     if (_response instanceof CauchoResponse)

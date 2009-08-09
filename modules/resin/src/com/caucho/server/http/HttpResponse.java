@@ -89,9 +89,8 @@ public class HttpResponse extends AbstractHttpResponse
   public void switchToRaw()
     throws IOException
   {
-    clearBuffer();
-
-    setStatus(101);
+    _request.getResponseFacade().resetBuffer();
+    _request.getResponseFacade().setStatus(101);
 
     finishInvocation(); // don't need to flush since it'll close anyway
     finishRequest(); // don't need to flush since it'll close anyway
@@ -118,8 +117,10 @@ public class HttpResponse extends AbstractHttpResponse
       = (TcpConnection) ((TcpServerRequest) getRequest()).getConnection();
     
     TcpDuplexController controller = conn.toDuplex(handler);
-    
-    setStatus(101);
+
+    HttpServletResponseImpl response = _request.getResponseFacade();
+
+    response.setStatus(101);
     setContentLength(0);
 
     if (log.isLoggable(Level.FINE))
@@ -183,11 +184,11 @@ public class HttpResponse extends AbstractHttpResponse
 				    boolean isHead)
     throws IOException
   {
-    if (! _request.hasRequest())
+    HttpServletRequestImpl request = _request.getRequestFacade();
+    HttpServletResponseImpl response = _request.getResponseFacade();
+    
+    if (request == null)
       return false;
-
-    HttpServletRequestImpl requestFacade = _request.getRequestFacade();
-    HttpServletResponseImpl responseFacade = _request.getResponseFacade();
 
     boolean isChunked = false;
 
@@ -199,11 +200,11 @@ public class HttpResponse extends AbstractHttpResponse
       return false;
     }
 
-    WebApp webApp = requestFacade.getWebApp();
+    WebApp webApp = request.getWebApp();
     
-    String contentType = _contentType;
+    String contentType = response.getContentType();
 
-    int statusCode = _statusCode;
+    int statusCode = response.getStatus();
     if (statusCode == 200) {
       if (version < HttpRequest.HTTP_1_1)
 	os.write(_http10ok, 0, _http10ok.length);
@@ -219,12 +220,12 @@ public class HttpResponse extends AbstractHttpResponse
       os.write((statusCode / 10) % 10 + '0');
       os.write(statusCode % 10 + '0');
       os.write(' ');
-      os.print(_statusMessage);
+      os.print(response.getStatusMessage());
     }
 
     if (debug) {
       log.fine(_request.dbgId() + "HTTP/1.1 " +
-	       _statusCode + " " + _statusMessage);
+	       statusCode + " " + response.getStatusMessage());
     }
 
     if (! containsHeader("Server")) {
@@ -239,7 +240,7 @@ public class HttpResponse extends AbstractHttpResponse
       // php/1b0k
 
       contentType = null;
-    } else if (_isNoCache) {
+    } else if (response.isNoCache()) {
       // server/1b15
       removeHeader("ETag");
       removeHeader("Last-Modified");
@@ -248,7 +249,7 @@ public class HttpResponse extends AbstractHttpResponse
       // automatically set cache headers
       setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
 
-      if (_isNoCache)
+      if (response.isNoCache())
 	os.print("\r\nCache-Control: no-cache");
       else {
 	// server/1k68
@@ -260,14 +261,15 @@ public class HttpResponse extends AbstractHttpResponse
                  "Expires: Thu, 01 Dec 1994 16:00:00 GMT");
       }
     }
-    else if (isNoCacheUnlessVary() && ! containsHeader("Vary")) {
+    else if (response.isNoCacheUnlessVary()
+             && ! containsHeader("Vary")) {
       os.print("\r\nCache-Control: private");
 
       if (debug) {
         log.fine(_request.dbgId() + "Cache-Control: private");
       }
     }
-    else if (! isPrivateCache()) {
+    else if (! response.isPrivateCache()) {
     }
     else if (HttpRequest.HTTP_1_1 <= version) {
       // technically, this could be private="Set-Cookie,Set-Cookie2"
@@ -304,7 +306,7 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     long now = Alarm.getCurrentTime();
-    ArrayList<Cookie> cookiesOut = responseFacade.getCookies();
+    ArrayList<Cookie> cookiesOut = response.getCookies();
 
     if (cookiesOut != null) {
       for (int i = 0; i < cookiesOut.size(); i++) {
