@@ -153,11 +153,14 @@ public class HmuxResponse extends AbstractHttpResponse {
       }
     }
 
-    if (_contentType != null) {
-      if (_charEncoding != null)
-	_req.writeHeader("Content-Type", _contentType + "; charset=" + _charEncoding);
+    String contentType = responseFacade.getContentTypeImpl();
+    String charEncoding = responseFacade.getCharacterEncodingImpl();
+
+    if (contentType != null) {
+      if (charEncoding != null)
+	_req.writeHeader("Content-Type", contentType + "; charset=" + charEncoding);
       else
-	_req.writeHeader("Content-Type", _contentType);
+	_req.writeHeader("Content-Type", contentType);
       
     }
 

@@ -160,17 +160,20 @@ public class FastCgiResponse extends AbstractHttpResponse {
       }
     }
 
-    if (_contentType != null) {
-      if (_charEncoding != null) {
+    String contentType = response.getContentTypeImpl();
+    String charEncoding = response.getCharacterEncodingImpl();
+
+    if (contentType != null) {
+      if (charEncoding != null) {
 	os.print("Content-Type: ");
-	os.print(_contentType);
+	os.print(contentType);
 	os.print("; charset=");
-	os.print(_charEncoding);
+	os.print(charEncoding);
 	os.print("\r\n");
       }
       else {
 	os.print("Content-Type: ");
-	os.print(_contentType);
+	os.print(contentType);
 	os.print("\r\n");
       }      
     }
