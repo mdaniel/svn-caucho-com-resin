@@ -209,13 +209,13 @@ public class CronTrigger implements Trigger {
     while (nextTime == null) { // TODO Limit year iterations to three.
       year++;
 
-      currentTime.setYear(year);
+      currentTime.setSecond(0);
+      currentTime.setMinute(0);
+      currentTime.setHour(0);
+      currentTime.setDayOfMonth(1);
       currentTime.setMonth(0); // The QDate implementation uses 0 indexed
       // months, but cron does not.
-      currentTime.setDayOfMonth(1);
-      currentTime.setHour(0);
-      currentTime.setMinute(0);
-      currentTime.setSecond(0);
+      currentTime.setYear(year);
 
       nextTime = getNextTimeInYear(currentTime);
     }
@@ -231,11 +231,11 @@ public class CronTrigger implements Trigger {
       return null;
     } else {
       if (month > (currentTime.getMonth() + 1)) {
-        currentTime.setMonth(month - 1);
-        currentTime.setDayOfMonth(1);
-        currentTime.setHour(0);
-        currentTime.setMinute(0);
         currentTime.setSecond(0);
+        currentTime.setMinute(0);
+        currentTime.setHour(0);
+        currentTime.setDayOfMonth(1);
+        currentTime.setMonth(month - 1);
       }
 
       QDate nextTime = getNextTimeInMonth(currentTime);
@@ -247,11 +247,11 @@ public class CronTrigger implements Trigger {
         if (month == -1) {
           return null;
         } else {
-          currentTime.setMonth(month - 1);
-          currentTime.setDayOfMonth(1);
-          currentTime.setHour(0);
-          currentTime.setMinute(0);
           currentTime.setSecond(0);
+          currentTime.setMinute(0);
+          currentTime.setHour(0);
+          currentTime.setDayOfMonth(1);
+          currentTime.setMonth(month - 1);
 
           nextTime = getNextTimeInMonth(currentTime);
         }
@@ -271,10 +271,10 @@ public class CronTrigger implements Trigger {
       return null;
     } else {
       if (day > currentTime.getDayOfMonth()) {
-        currentTime.setDayOfMonth(day);
-        currentTime.setHour(0);
-        currentTime.setMinute(0);
         currentTime.setSecond(0);
+        currentTime.setMinute(0);
+        currentTime.setHour(0);
+        currentTime.setDayOfMonth(day);
       }
 
       QDate nextTime = getNextTimeInDay(currentTime);
@@ -287,10 +287,10 @@ public class CronTrigger implements Trigger {
         if (day == -1) {
           return null;
         } else {
-          currentTime.setDayOfMonth(day);
-          currentTime.setHour(0);
-          currentTime.setMinute(0);
           currentTime.setSecond(0);
+          currentTime.setMinute(0);
+          currentTime.setHour(0);
+          currentTime.setDayOfMonth(day);
 
           return getNextTimeInDay(currentTime);
         }
@@ -333,9 +333,9 @@ public class CronTrigger implements Trigger {
       return null;
     } else {
       if (hour > currentTime.getHour()) {
-        currentTime.setHour(hour);
-        currentTime.setMinute(0);
         currentTime.setSecond(0);
+        currentTime.setMinute(0);
+        currentTime.setHour(hour);
       }
 
       QDate nextTime = getNextTimeInHour(currentTime);
@@ -347,9 +347,9 @@ public class CronTrigger implements Trigger {
         if (hour == -1) {
           return null;
         } else {
-          currentTime.setHour(hour);
-          currentTime.setMinute(0);
           currentTime.setSecond(0);
+          currentTime.setMinute(0);
+          currentTime.setHour(hour);
 
           return getNextTimeInHour(currentTime);
         }
@@ -367,8 +367,8 @@ public class CronTrigger implements Trigger {
       return null;
     } else {
       if (minute > currentTime.getMinute()) {
-        currentTime.setMinute(minute);
         currentTime.setSecond(0);
+        currentTime.setMinute(minute);
       }
 
       QDate nextTime = getNextTimeInMinute(currentTime);
@@ -380,8 +380,8 @@ public class CronTrigger implements Trigger {
         if (minute == -1) {
           return null;
         } else {
+          currentTime.setSecond(0);          
           currentTime.setMinute(minute);
-          currentTime.setSecond(0);
 
           return getNextTimeInMinute(currentTime);
         }
