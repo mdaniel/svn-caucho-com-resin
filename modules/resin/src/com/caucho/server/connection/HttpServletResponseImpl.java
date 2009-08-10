@@ -323,8 +323,6 @@ public final class HttpServletResponseImpl implements CauchoResponse
     if (_charEncoding != null && ! isCommitted()) {
       _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
 
-      _response.setCharEncoding(_charEncoding);
-
       try {
         if (_charEncoding != null) {
           // _originalStream.setEncoding(_charEncoding);
@@ -738,11 +736,11 @@ public final class HttpServletResponseImpl implements CauchoResponse
       return;
 
     if (value == null) {
-      _response.setContentType(null);
+      _contentType = null;
       return;
     }
     else if (value == "text/html" || value.equals("text/html")) {
-      _response.setContentType("text/html");
+      _contentType = "text/html";
       return;
     }
     
@@ -827,9 +825,6 @@ public final class HttpServletResponseImpl implements CauchoResponse
 	i = j;
     }
     
-    _response.setContentType(_contentType);
-    _response.setCharEncoding(_charEncoding);
-
     // XXX: conflict with servlet exception throwing order?
     try {
       _responseStream.setEncoding(_charEncoding);
@@ -855,6 +850,14 @@ public final class HttpServletResponseImpl implements CauchoResponse
   }
 
   /**
+   * Gets the content type.
+   */
+  public String getContentTypeImpl()
+  {
+    return _contentType;
+  }
+
+  /**
    * Gets the character encoding.
    */
   public String getCharacterEncoding()
@@ -876,6 +879,14 @@ public final class HttpServletResponseImpl implements CauchoResponse
   }
 
   /**
+   * Gets the character encoding.
+   */
+  public String getCharacterEncodingImpl()
+  {
+    return _charEncoding;
+  }
+
+  /**
    * Sets the character encoding.
    */
   public void setCharacterEncoding(String encoding)
@@ -893,8 +904,6 @@ public final class HttpServletResponseImpl implements CauchoResponse
     }
     else
       _charEncoding = encoding;
-
-    _response.setCharEncoding(_charEncoding);
 
     try {
       _responseStream.setEncoding(encoding);

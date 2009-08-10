@@ -108,9 +108,6 @@ abstract public class AbstractHttpResponse {
 
   private HttpBufferStore _bufferStore;
 
-  protected String _contentType;
-  protected String _charEncoding;
-
   private boolean _isHeaderWritten;
   private boolean _isClientDisconnect;
 
@@ -246,8 +243,6 @@ abstract public class AbstractHttpResponse {
 
     _isHeaderWritten = false;
     _isClientDisconnect = false;
-    _charEncoding = null;
-    _contentType = null;
     
     _contentLength = -1;
     _isClosed = false;
@@ -297,7 +292,7 @@ abstract public class AbstractHttpResponse {
     }
 
     if (name.equalsIgnoreCase("content-type"))
-      return _contentType != null;
+      return _request.getResponseFacade().getContentType() != null;
     
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0;
@@ -323,7 +318,7 @@ abstract public class AbstractHttpResponse {
     }
 
     if (name.equalsIgnoreCase("content-type"))
-      return _contentType;
+      return _request.getResponseFacade().getContentType();
  
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0 ? String.valueOf(_contentLength) : null;
@@ -460,7 +455,7 @@ abstract public class AbstractHttpResponse {
       return true;
 	
     case HEADER_CONTENT_TYPE:
-      setContentType(value);
+      _request.getResponseFacade().setContentType(value);
       return true;
 	
     case HEADER_CONTENT_LENGTH:
@@ -589,21 +584,6 @@ abstract public class AbstractHttpResponse {
   public long getContentLengthHeader()
   {
     return _contentLength;
-  }
-
-  void setContentType(String contentType)
-  {
-    _contentType = contentType;
-  }
-
-  void setCharEncoding(String charEncoding)
-  {
-    _charEncoding = charEncoding;
-  }
-
-  String getRealCharacterEncoding()
-  {
-    return _charEncoding;
   }
 
   /**

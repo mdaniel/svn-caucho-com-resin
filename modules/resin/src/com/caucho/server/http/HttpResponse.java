@@ -167,7 +167,8 @@ public class HttpResponse extends AbstractHttpResponse
 
     WebApp webApp = request.getWebApp();
     
-    String contentType = response.getContentType();
+    String contentType = response.getContentTypeImpl();
+    String charEncoding = response.getCharacterEncodingImpl();
 
     int statusCode = response.getStatus();
     if (statusCode == 200) {
@@ -299,19 +300,19 @@ public class HttpResponse extends AbstractHttpResponse
       os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
       os.print(contentType);
 
-      if (_charEncoding != null) {
+      if (charEncoding != null) {
 	os.write(_charsetBytes, 0, _charsetBytes.length);
-	os.print(_charEncoding);
+	os.print(charEncoding);
 
         if (debug) {
           log.fine(_request.dbgId() + "Content-Type: " + contentType
-                   + "; charset=" + _charEncoding);
+                   + "; charset=" + charEncoding);
         }
       }
       else {
-	String charEncoding = (webApp != null
-			       ? webApp.getCharacterEncoding()
-			       : null);
+	charEncoding = (webApp != null
+                        ? webApp.getCharacterEncoding()
+                        : null);
 
 	if (charEncoding != null) {
 	  os.write(_charsetBytes, 0, _charsetBytes.length);
@@ -319,7 +320,7 @@ public class HttpResponse extends AbstractHttpResponse
           
           if (debug) {
             log.fine(_request.dbgId() + "Content-Type: " + contentType
-                     + "; charset=" + _charEncoding);
+                     + "; charset=" + charEncoding);
           }
 	}
         else {
@@ -329,20 +330,20 @@ public class HttpResponse extends AbstractHttpResponse
         }
       }
     }
-    else if (_charEncoding != null) {
+    else if (charEncoding != null) {
       os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
       os.write(_charsetBytes, 0, _charsetBytes.length);
-      os.print(_charEncoding);
+      os.print(charEncoding);
       
       if (debug) {
         log.fine(_request.dbgId() + "Content-Type: text/html; charset="
-                 + _charEncoding);
+                 + charEncoding);
       }
     }
     else {
-      String charEncoding = (webApp != null
-			     ? webApp.getCharacterEncoding()
-			     : null);
+      charEncoding = (webApp != null
+                      ? webApp.getCharacterEncoding()
+                      : null);
 
       os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
       if (charEncoding != null) {

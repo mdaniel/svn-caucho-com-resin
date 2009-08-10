@@ -531,8 +531,6 @@ public class ResponseStream extends ToByteResponseStream {
       if (_disableAutoFlush && ! isFinished)
 	throw new IOException(L.l("auto-flushing has been disabled"));
 
-      _isCommitted = true;
-
       boolean isFirst = _isFirst;
       _isFirst = false;
 
@@ -936,8 +934,8 @@ public class ResponseStream extends ToByteResponseStream {
     
     ArrayList<String> keys = res.getHeaderKeys();
     ArrayList<String> values = res.getHeaderValues();
-    String contentType = res.getContentType();
-    String charEncoding = res.getCharacterEncoding();
+    String contentType = res.getContentTypeImpl();
+    String charEncoding = res.getCharacterEncodingImpl();
     
     int contentLength = -1;
       
