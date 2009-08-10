@@ -19,28 +19,12 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 @SuppressWarnings("restriction")
-public class ResinGitPublisher extends AntPublisher {
+public class ResinGitPublisher extends AntPublisher 
+                               implements ResinIdentifiers 
+{ 
   public static final String PUBLISHER_ID = 
     "org.eclipse.jst.server.generic.resin.resingitpublisher";
   
-  public static final String RESIN_CONFIGURATION_FILE_NAME_ID =
-    "resin.configuration.file";
-  
-  public static final String RESIN_SERVER_ADDRESS_ID =
-    "resin.server.address";
-  
-  public static final String RESIN_VIRTUAL_HOST_ID =
-    "resin.virtual.host";
-
-  public static final String RESIN_DEPLOY_USERNAME_ID =
-    "resin.deploy.username";
-  
-  public static final String RESIN_DEPLOY_PASSWORD_ID =
-    "resin.deploy.password";
-
-  public static final String RESIN_HTTP_PORT_ID =
-    "resin.http.port";
-
   private DeployClient _client = null;
   
   @Override

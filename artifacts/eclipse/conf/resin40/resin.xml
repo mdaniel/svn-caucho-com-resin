@@ -10,14 +10,14 @@
 
   <cluster id="">
     <server id="">
-      <http port="${system['server.port']}"/>
+      <http port="${system['wtp.port']}"/>
     </server>
 
     <resin:import path="${resin.root}/conf/app-default.xml"/>
 
     <host id="" root-directory=".">
-      <web-app id="/${system['webapp.id']}" 
-               root-directory="${system['webapp.dir']}"/>
+      <web-app id="/${system['wtp.webapp.id']}" 
+               root-directory="${system['wtp.webapp.dir']}"/>
     </host>
   </cluster>
 </resin>

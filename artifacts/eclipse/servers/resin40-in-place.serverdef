@@ -5,39 +5,39 @@
   xsi:schemaLocation="http://eclipse.org/jst/server/generic/ServerTypeDefinition ServerTypeDefinitionSchema.xsd "
   name="Resin Application Server" version="v4.0">
 
-  <property id="resinHome"
-    label="%ResinHome"
-    type="directory"
-    context="runtime"
-    default="/usr/share/resin" />
+  <property id="resin.home"
+            label="%ResinHome"
+            type="directory"
+            context="server"
+            default="/usr/share/resin" />
 
-  <property id="serverAddress"
+  <property id="server.address"
             label="%ServerAddress"
             type="string"
             context="server"
             default="127.0.0.1" />
 
-  <property id="rootDirectory"
-            label="%RootDirectory"
+  <property id="server.port"
+            label="%ServerPort"
             type="string"
-            context=""
-            default=""/>
+            context="server"
+            default="8080" />
 
-  <property id="wtp.port"
-    label="%ServerPort"
-    type="string"
-    context="server"
-    default="8080" />
-
+  <property id="resin.conf.bundle.location"
+            label=""
+            type="string"
+            context="internal"
+            default="conf/resin40/in-place.xml"/>            
+    
   <port>
-    <no>${wtp.port}</no>
+    <no>${server.port}</no>
     <name>Http</name>
     <protocol>http</protocol>
   </port>
 
   <module>
     <type>jst.web</type>
-    <publishDir>${resinHome}/webapps</publishDir>
+    <publishDir>${resin.home}/webapps</publishDir>
     <publisherReference>org.eclipse.jst.server.generic.resin.resininplacepublisher</publisherReference>
   </module>
 
@@ -45,19 +45,25 @@
     <classpathReference>resin.project</classpathReference>
   </project>
 
-  <!-- whatever process this starts must not exit -->
   <start>
-    <mainClass>com.caucho.boot.ResinBoot</mainClass>
-    <workingDirectory>${resinHome}</workingDirectory>
-    <programArguments>-conf ${resin.configuration.file}</programArguments>
-    <vmParameters>-Dwtp.port="${wtp.port}" -Dwtp.webapp.id="${wtp.webapp.id}" -Dwtp.webapp.dir="${wtp.webapp.dir}"</vmParameters>
-    <classpathReference>resin</classpathReference>
+    <mainClass>com.caucho.server.resin.Resin</mainClass>
+    <workingDirectory>${resin.home}</workingDirectory>
+    <programArguments>-conf "${resin.configuration.file}"</programArguments>
+    <vmParameters>-Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
+                  -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
+                  -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
+                  -Djava.awt.headless=true 
+                  -Dresin.home=${resin.home}
+                  -Xss1m -Xmx512m -server
+                  -Dserver.port="${server.port}" -Dwebapp.id="${webapp.id}" -Dwebapp.dir="${webapp.dir}"
+                  </vmParameters>
+    <classpathReference>resin.project</classpathReference>
   </start>
-
+  
   <!-- this is not actually used, see ResinServerBehaviour#stop(boolean) -->
   <stop>
     <mainClass>com.caucho.boot.ResinBoot</mainClass>
-    <workingDirectory>${resinHome}</workingDirectory>
+    <workingDirectory>${resin.home}</workingDirectory>
     <programArguments>stop</programArguments>
     <vmParameters></vmParameters>
     <classpathReference>resin</classpathReference>
@@ -66,7 +72,7 @@
   <publisher id="org.eclipse.jst.server.generic.resin.resininplacepublisher">
     <publisherdata>
       <dataname>build.file</dataname>
-      <datavalue>/buildfiles/resin31.xml</datavalue>
+      <datavalue>/buildfiles/resin40.xml</datavalue>
     </publisherdata>
     <publisherdata>
       <dataname>resin.configuration.file</dataname>
@@ -83,22 +89,22 @@
   </publisher>
 
   <classpath id="resin">
-    <archive path="${resinHome}/lib/resin.jar" />
+    <archive path="${resin.home}/lib" />
   </classpath>
   
   <classpath id="resin.project" >
-    <fileset dir="${resinHome}">
+    <fileset dir="${resin.home}">
       <include name="lib/*.jar" />
       <exclude name="lib/resin.jar" />
     </fileset>
     
     <!-- required so validation works -->
-    <archive path="${resinHome}/lib/resin.jar" />
+    <archive path="${resin.home}/lib/resin.jar" />
   </classpath>
 
   <!--
   <jndiConnection>
-    <providerUrl>jnp://${serverAddress}:${jndiPort}</providerUrl>
+    <providerUrl>jnp://${server.address}:${jndiPort}</providerUrl>
     <initialContextFactory>org.jnp.interfaces.NamingContextFactory</initialContextFactory>
     <jndiProperty>
       <name></name>

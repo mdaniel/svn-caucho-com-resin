@@ -133,9 +133,9 @@
     <!-- 3.1 -->
     <serverType
       behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServer"
+      class="com.caucho.resin.eclipse.ResinServer"
       description="%resin31serverTypeDescription"
-      hasConfiguration="false"
+      hasConfiguration="true"
       id="org.eclipse.jst.server.generic.resin31"
       initialState="stopped"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
@@ -148,9 +148,9 @@
     
     <serverType
       behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServer"
+      class="com.caucho.resin.eclipse.ResinServer"
       description="%resin31inPlaceServerTypeDescription"
-      hasConfiguration="false"
+      hasConfiguration="true"
       id="org.eclipse.jst.server.generic.resin31inPlace"
       initialState="stopped"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
@@ -164,9 +164,9 @@
     <!-- 4.0 -->
     <serverType
       behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServer"
+      class="com.caucho.resin.eclipse.ResinServer"
       description="%resin40serverTypeDescription"
-      hasConfiguration="false"
+      hasConfiguration="true"
       id="org.eclipse.jst.server.generic.resin40"
       initialState="stopped"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
@@ -179,9 +179,9 @@
     
     <serverType
       behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServer"
+      class="com.caucho.resin.eclipse.ResinServer"
       description="%resin40inPlaceServerTypeDescription"
-      hasConfiguration="false"
+      hasConfiguration="true"
       id="org.eclipse.jst.server.generic.resin40inPlace"
       initialState="stopped"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
@@ -194,9 +194,9 @@
 
     <serverType
           behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
-          class="org.eclipse.jst.server.generic.core.internal.GenericServer"
+          class="com.caucho.resin.eclipse.ResinServer"
           description="%resin40hotDeployServerTypeDescription"
-          hasConfiguration="false"
+          hasConfiguration="true"
           id="org.eclipse.jst.server.generic.resin40hotDeploy"
           initialState="stopped"
           launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
@@ -219,7 +219,7 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin31"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"/>
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
     <fragment
       id="org.eclipse.jst.server.generic.runtime"
       typeIds="org.eclipse.jst.server.generic.runtime.resin31inPlace"
@@ -227,7 +227,7 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin31inPlace"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"/>   
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>   
 
     <!-- 4.0 -->
     <fragment
@@ -237,7 +237,7 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin40"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"/>
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
     <fragment
       id="org.eclipse.jst.server.generic.runtime"
       typeIds="org.eclipse.jst.server.generic.runtime.resin40inPlace"
@@ -245,7 +245,7 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin40inPlace"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"/>
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
     <fragment
       id="org.eclipse.jst.server.generic.runtime"
       typeIds="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"
@@ -253,7 +253,7 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin40hotDeploy"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"/>   
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>   
   </extension>
 
   <extension point="org.eclipse.wst.server.ui.serverImages">
@@ -388,9 +388,10 @@
   <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
     <!-- 3.1 -->
     <runtimeFacetMapping
-      runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31"
-      runtime-component="org.eclipse.jst.server.generic.runtime.resin"
-      version="3.1"/>
+          runtime-component="org.eclipse.jst.server.generic.runtime.resin"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31"
+          version="3.1">
+    </runtimeFacetMapping>
     <runtimeFacetMapping
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31inPlace"
       runtime-component="org.eclipse.jst.server.generic.runtime.resin"
@@ -426,5 +427,47 @@
            id="org.eclipse.jst.server.generic.resin.resingitpublisher">
      </genericpublisher>
   </extension>
+  <!--
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.facets">
+     <project-facet
+           id="resin.xml">
+        <label>
+           %resinXmlFacetLabel
+        </label>
+        <description>
+           %resinXmlFacetDescription
+        </description>
+     </project-facet>
+     <project-facet-version
+           facet="resin.xml"
+           version="3.1">
+        <action
+              id="resin31.install"
+              type="INSTALL">
+           <delegate
+                 class="com.caucho.resin.eclipse.ResinXmlInstallDelegate">
+           </delegate>
+        </action>
+     </project-facet-version>
+     <project-facet-version
+           facet="resin.xml"
+           version="4.0">
+       <action id="resin40.install" type="INSTALL">
+         <delegate class="com.caucho.resin.eclipse.ResinXmlInstallDelegate"/>
+         <config-factory class="com.caucho.resin.eclipse.ResinXmlFacetInstallConfig$Factory"/>
+       </action>
+     </project-facet-version>
+     <preset id="resin.preset">
+       <label>Resin Configuration Facet Preset</label>
+       <facet id="resin.xml" version="3.1,4.0"/>
+     </preset>
+  </extension>
 
+  <extension point="org.eclipse.wst.common.project.facet.ui.wizardPages">
+     <wizard-pages action="resin40.install">
+        <page class="com.caucho.resin.eclipse.ResinXmlFacetWizard"/>
+     </wizard-pages>
+  </extension>
+  -->
 </plugin>

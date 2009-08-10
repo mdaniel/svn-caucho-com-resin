@@ -48,9 +48,6 @@ public class ResinServerBehaviour extends GenericServerBehaviour
       ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
     throws CoreException
   {
-    /*    Map properties = getRuntimeDelegate().getServerInstanceProperties();
-            String filename = (String) properties.get();*/
-
     ServerRuntime typeDef = getRuntimeDelegate().getServerTypeDefinition();
     String filename = 
       PublisherUtil.getPublisherData(typeDef, ResinGitPublisher.PUBLISHER_ID,
@@ -65,10 +62,6 @@ public class ResinServerBehaviour extends GenericServerBehaviour
       File tempFile = FileUtil.createTempFile("webapps", dir);
 
       VariableUtil.setVariable("wtp.webapp.deploydir", tempFile.toString());
-
-      /*
-            VariableUtil.setVariable("wtp.webapp.dir", webContentFolder);
-            VariableUtil.setVariable("wtp.webapp.id", webappId);*/
     }
 
     super.setupLaunchConfiguration(workingCopy, monitor);

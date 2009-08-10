@@ -1,6 +1,7 @@
 package com.caucho.resin.eclipse;
 
 import java.io.File;
+import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.CoreException;
@@ -10,6 +11,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.GenericPublisher;
+import org.eclipse.jst.server.generic.core.internal.GenericServer;
 import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 import org.eclipse.wst.server.core.IModuleArtifact;
 
@@ -23,13 +25,12 @@ import org.eclipse.wst.server.core.IModuleArtifact;
  *
  */
 @SuppressWarnings("restriction")
-public class ResinInPlacePublisher extends GenericPublisher {
+public class ResinInPlacePublisher extends GenericPublisher
+                                   implements ResinIdentifiers
+{
   public static final String PUBLISHER_ID = 
     "org.eclipse.jst.server.generic.resin.resininplacepublisher";
-  
-  public static final String RESIN_CONFIGURATION_FILE_NAME_ID =
-    "resin.configuration.file";
-  
+
   @Override
   public IStatus[] publish(IModuleArtifact[] resource, 
                            IProgressMonitor monitor)
@@ -58,17 +59,18 @@ public class ResinInPlacePublisher extends GenericPublisher {
       if (monitor.isCanceled())
         return null;
 
-      ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition();
-      String filename = 
-        PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                       RESIN_CONFIGURATION_FILE_NAME_ID);
-      File configFile = PublisherUtil.locateBundleFile(typeDef, filename);
+      ResinServer resinServer = (ResinServer) getServer();
+      Map properties = resinServer.getServerInstanceProperties(); 
+      
+      String configLocation = 
+        (String) properties.get(ResinServer.RESIN_CONF_PROJECT_LOCATION);
       
       VariableUtil.setVariable(RESIN_CONFIGURATION_FILE_NAME_ID, 
-                               configFile.toString());
-      VariableUtil.setVariable("wtp.webapp.dir", webContentFolder);
-      VariableUtil.setVariable("wtp.webapp.id", webappId);
-    } catch (CoreException e) {
+                               configLocation);
+      VariableUtil.setVariable("webapp.dir", webContentFolder);
+      VariableUtil.setVariable("webapp.id", webappId);
+    } 
+    catch (CoreException e) {
       IStatus s = new Status(IStatus.ERROR, 
                              CorePlugin.PLUGIN_ID, 0, 
                              "In place Resin publish failed",

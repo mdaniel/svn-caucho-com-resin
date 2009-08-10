@@ -78,14 +78,8 @@ class PublisherUtil {
         return tempFile;
       } 
       catch (IOException e) {
-        IStatus s = new Status(IStatus.ERROR, 
-                               CorePlugin.PLUGIN_ID, 0, 
-                               "error extracting file from bundle: " +
-                               filename, 
-                               e);
-        CorePlugin.getDefault().getLog().log(s);
-        
-        throw new CoreException(s);
+        throwCoreException("error extracting file from bundle: " + filename, 
+                           e);
       } 
       finally {
         try {
@@ -96,6 +90,7 @@ class PublisherUtil {
             os.close();  
         } 
         catch (IOException e) {
+          throwCoreException("error closing file from bundle: " + filename, e);
         }
       }
     } 
@@ -110,7 +105,7 @@ class PublisherUtil {
    * @return the resolved value of the variable
    */
   @SuppressWarnings("unchecked")
-public static String getPublisherData(ServerRuntime typeDef,
+  public static String getPublisherData(ServerRuntime typeDef,
                                         String publisherId,
                                         String key) 
   {
@@ -130,5 +125,21 @@ public static String getPublisherData(ServerRuntime typeDef,
     }
     
     return null;
+  }
+  
+  public static void throwCoreException(String message)
+    throws CoreException
+  {
+    throwCoreException(message, null);
+  }
+  
+  public static void throwCoreException(String message, Exception e)
+    throws CoreException
+  {
+    IStatus s = new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, 0, 
+                           message, e);
+    CorePlugin.getDefault().getLog().log(s);
+
+    throw new CoreException(s);
   }
 }
