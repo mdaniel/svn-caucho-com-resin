@@ -63,9 +63,11 @@ public class HttpResponse extends AbstractHttpResponse
   private final HttpRequest _request;
 
   private final byte []_dateBuffer = new byte[256];
-  private int _dateBufferLength;
   private final CharBuffer _dateCharBuffer = new CharBuffer();
+  
+  private int _dateBufferLength;
   private long _lastDate;
+  private boolean _isChunked;
 
   /**
    * Creates a new HTTP-protocol response.
@@ -82,30 +84,6 @@ public class HttpResponse extends AbstractHttpResponse
 
     _resinServerBytes = ("\r\nServer: " + server.getServerHeader()).getBytes();
   }
-
-  /**
-   * Switch to raw socket mode.
-   */
-  public void switchToRaw()
-    throws IOException
-  {
-    _request.getResponseFacade().resetBuffer();
-    _request.getResponseFacade().setStatus(101);
-
-    finishInvocation(); // don't need to flush since it'll close anyway
-    finishRequest(); // don't need to flush since it'll close anyway
-  }
-
-  /**
-   * Switch to raw socket mode.
-   */
-  /*
-  public WriteStream getRawOutput()
-    throws IOException
-  {
-    return _rawWrite;
-  }
-  */
 
   /**
    * Upgrade protocol
@@ -127,19 +105,6 @@ public class HttpResponse extends AbstractHttpResponse
       log.fine(this + " upgrade HTTP to " + handler);
     
     return controller;
-  }
-
-  /**
-   * Return true for the top request.
-   */
-  @Override
-  public boolean isTop()
-  {
-    if (! (_request instanceof AbstractHttpRequest))
-      return false;
-    else {
-      return ((AbstractHttpRequest) _request).isTop();
-    }
   }
 
   /**
@@ -190,7 +155,7 @@ public class HttpResponse extends AbstractHttpResponse
     if (request == null)
       return false;
 
-    boolean isChunked = false;
+    _isChunked = false;
 
     int version = _request.getVersion();
     boolean debug = log.isLoggable(Level.FINE);
@@ -235,12 +200,17 @@ public class HttpResponse extends AbstractHttpResponse
     if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
-    } else if (statusCode == HttpServletResponse.SC_NOT_MODIFIED
-	       || statusCode == HttpServletResponse.SC_NO_CONTENT) {
+    }
+    else if (statusCode == HttpServletResponse.SC_NOT_MODIFIED
+             || statusCode == HttpServletResponse.SC_NO_CONTENT) {
       // php/1b0k
 
       contentType = null;
-    } else if (response.isNoCache()) {
+    }
+    else if (response.isCacheControl()) {
+      // application manages cache control
+    }
+    else if (response.isNoCache()) {
       // server/1b15
       removeHeader("ETag");
       removeHeader("Last-Modified");
@@ -249,16 +219,11 @@ public class HttpResponse extends AbstractHttpResponse
       // automatically set cache headers
       setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
 
-      if (response.isNoCache())
-	os.print("\r\nCache-Control: no-cache");
-      else {
-	// server/1k68
-	os.print("\r\nCache-Control: private");
-      }
+      os.print("\r\nCache-Control: no-cache");
 
       if (debug) {
         log.fine(_request.dbgId() + "" +
-                 "Expires: Thu, 01 Dec 1994 16:00:00 GMT");
+                 "Cache-Control: no-cache");
       }
     }
     else if (response.isNoCacheUnlessVary()
@@ -269,23 +234,22 @@ public class HttpResponse extends AbstractHttpResponse
         log.fine(_request.dbgId() + "Cache-Control: private");
       }
     }
-    else if (! response.isPrivateCache()) {
-    }
-    else if (HttpRequest.HTTP_1_1 <= version) {
-      // technically, this could be private="Set-Cookie,Set-Cookie2"
-      // but caches don't recognize it, so there's no real extra value
-      os.print("\r\nCache-Control: private");
+    else if (response.isPrivateCache()) {
+      if (HttpRequest.HTTP_1_1 <= version) {
+        // technically, this could be private="Set-Cookie,Set-Cookie2"
+        // but caches don't recognize it, so there's no real extra value
+        os.print("\r\nCache-Control: private");
 
-      if (debug)
-        log.fine(_request.dbgId() + "Cache-Control: private");
-    }
-    else if (! containsHeader("Cache-Control")) {
-      setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
-      os.print("\r\nCache-Control: no-cache");
+        if (debug)
+          log.fine(_request.dbgId() + "Cache-Control: private");
+      }
+      else {
+        setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+        os.print("\r\nCache-Control: no-cache");
 
-      if (debug) {
-        log.fine(_request.dbgId() + "" +
-                 "Expires: Thu, 01 Dec 1994 16:00:00 GMT");
+        if (debug) {
+          log.fine(_request.dbgId() + "CacheControl: no-cache");
+        }
       }
     }
 
@@ -472,7 +436,7 @@ public class HttpResponse extends AbstractHttpResponse
         && ! hasContentLength
         && ! isHead) {
       os.print("\r\nTransfer-Encoding: chunked");
-      isChunked = true;
+      _isChunked = true;
 
       if (debug)
         log.fine(_request.dbgId() + "Transfer-Encoding: chunked");
@@ -482,12 +446,12 @@ public class HttpResponse extends AbstractHttpResponse
       fillDate(now);
     }
 
-    if (isChunked)
+    if (_isChunked)
       os.write(_dateBuffer, 0, _dateBufferLength - 2);
     else
       os.write(_dateBuffer, 0, _dateBufferLength);
 
-    return isChunked;
+    return _isChunked;
   }
 
   private void fillDate(long now)

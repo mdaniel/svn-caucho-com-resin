@@ -78,25 +78,24 @@ public final class HttpServletResponseImpl implements CauchoResponse
 
   private Locale _locale;
 
-  // caching
-  private boolean _isTopCache = true;
-  
+  private boolean _hasError;
+  private boolean _forbidForward;
+
   private AbstractCacheFilterChain _cacheInvocation;
 
   // the cache entry for a match/if-modified-since
   private AbstractCacheEntry _matchCacheEntry;
 
-  // the new cache for a request getting filled
-  private AbstractCacheEntry _newCacheEntry;
-  private OutputStream _cacheStream;
-  private Writer _cacheWriter;
-  
-  protected boolean _isNoCache;
-  private boolean _allowCache;
+  // send a Cache-Control: no-cache
+  private boolean _isNoCache;
+  // cache private, e.g. for session cookie
   private boolean _isPrivateCache;
-  private boolean _hasCacheControl;
+  // application has set cache control
+  private boolean _isCacheControl;
+  // rewrite: cache disable unless a Vary exists (to handle rewrite issues)
   private boolean _isNoCacheUnlessVary;
-  private boolean _disableCaching;
+  // disable the cache
+  private boolean _isDisableCache;
 
   public HttpServletResponseImpl(HttpServletRequestImpl request,
                                  AbstractHttpResponse response)
@@ -273,7 +272,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
     _responseStream.clearBuffer();
 
     // jsp/15ma
-    killCaching();
+    _responseStream.killCaching();
     /*
     if (_currentWriter instanceof JspPrintWriter)
       ((JspPrintWriter) _currentWriter).clear();
@@ -379,7 +378,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
     _isPrivateCache = isPrivate;
 
     // server/12dm
-    _allowCache = false;
+    killCache();
   }
 
   /**
@@ -410,19 +409,13 @@ public final class HttpServletResponseImpl implements CauchoResponse
    */
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
-    AbstractCacheFilterChain oldCache = _cacheInvocation;
+    assert(_cacheInvocation == null);
     _cacheInvocation = cacheInvocation;
-    
-    AbstractCacheEntry oldEntry = _newCacheEntry;
-    _newCacheEntry = null;
-
-    if (oldEntry != null)
-      oldCache.killCaching(oldEntry);
   }
 
-  public void setTopCache(boolean isTopCache)
+  AbstractCacheFilterChain getCacheInvocation()
   {
-    _isTopCache = isTopCache;
+    return _cacheInvocation;
   }
 
   /**
@@ -454,7 +447,26 @@ public final class HttpServletResponseImpl implements CauchoResponse
    */
   public boolean isPrivateCache()
   {
-    return ! _hasCacheControl && _isPrivateCache;
+    return ! _isCacheControl && _isPrivateCache;
+  }
+
+  /**
+   * True if the application has a set a cache-control directive
+   * that Resin doesn't understand.
+   */
+  public boolean isCacheControl()
+  {
+    return _isCacheControl;
+  }
+
+  /**
+   * True if the application has a set a cache-control directive
+   * that Resin doesn't understand.
+   */
+  public void setCacheControl(boolean isCacheControl)
+  {
+    _isCacheControl = isCacheControl;
+    killCache();
   }
 
   /**
@@ -463,6 +475,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
   public void setNoCache(boolean isNoCache)
   {
     _isNoCache = isNoCache;
+    killCache();
   }
 
   /**
@@ -478,153 +491,13 @@ public final class HttpServletResponseImpl implements CauchoResponse
    */
   public void killCache()
   {
-    _allowCache = false;
-
-    // server/1b15
-    // setNoCache(true);
+    _isDisableCache = true;
+    _responseStream.killCaching();
   }
 
-  /**
-   * Called to start caching.
-   */
-  protected boolean startCaching(boolean isByte)
+  public boolean isDisableCache()
   {
-    if (_status == SC_OK
-        && ! _disableCaching) // && getBufferSize() > 0)
-      return startCaching(_response.getHeaderKeys(),
-                          _response.getHeaderValues(),
-			  _contentType,
-                          _charEncoding, isByte);
-    else
-      return false;
-  }
-
-  /**
-   * Tests to see if the response is cacheable.
-   *
-   * @param keys the header keys of the response
-   * @param values the header values of the response
-   * @param contentType the contentType of the response
-   * @param charEncoding the character encoding of the response
-   *
-   * @return true if caching has started
-   */
-  boolean startCaching(ArrayList<String> keys,
-                       ArrayList<String> values,
-                       String contentType, String charEncoding,
-		       boolean isByte)
-  {
-    if (_cacheInvocation == null) {
-      return false;
-    }
-    /*
-      // jsp/17ah
-    else if (_responseStream != _originalResponseStream) {
-      return false;
-    }
-    */
-    else if (! isCauchoResponseStream()) {
-      return false;
-    }
-    /* server/131x
-    else if (! (_originalRequest instanceof CauchoRequest)) {
-      return false;
-    }
-    */
-    else if (! _allowCache) {
-      return false;
-    }
-    else {
-      int contentLength = -1;
-      
-      _newCacheEntry = _cacheInvocation.startCaching(_request, this,
-                                                     keys, values,
-						     contentType,
-						     charEncoding,
-						     contentLength);
-
-      if (_newCacheEntry == null) {
-	return false;
-      }
-      else if (isByte) {
-	_cacheStream = _newCacheEntry.openOutputStream();
-
-	if (_cacheStream != null)
-	  _responseStream.setByteCacheStream(_cacheStream);
-      
-	return _cacheStream != null;
-      }
-      else {
-	_cacheWriter = _newCacheEntry.openWriter();
-
-	if (_cacheWriter != null)
-	  _responseStream.setCharCacheStream(_cacheWriter);
-      
-	return _cacheWriter != null;
-      }
-    }
-  }
-
-  public void finishCache()
-    throws IOException
-  {
-    try {
-      _responseStream.close();
-      
-      if (_newCacheEntry != null && _cacheInvocation != null) {
-	OutputStream cacheStream = _cacheStream;
-	_cacheStream = null;
-	
-	Writer cacheWriter = _cacheWriter;
-	_cacheWriter = null;
-
-	if (cacheStream != null)
-	  cacheStream.close();
-
-	if (cacheWriter != null)
-	  cacheWriter.close();
-	
-	WebApp webApp = _request.getWebApp();
-	if (_status == 200 && _allowCache
-	    && webApp != null && webApp.isActive()) {
-	  AbstractCacheFilterChain cache = _cacheInvocation;
-	  _cacheInvocation = null;
-
-	  AbstractCacheEntry cacheEntry = _newCacheEntry;
-	  _newCacheEntry = null;
-	  
-	  cache.finishCaching(cacheEntry);
-	}
-      }
-    } finally {
-      AbstractCacheFilterChain cache = _cacheInvocation;
-      _cacheInvocation = null;
-      
-      AbstractCacheEntry cacheEntry = _newCacheEntry;
-      _newCacheEntry = null;
-      
-      _cacheStream = null;
-      _cacheWriter = null;
-
-      if (cacheEntry != null)
-	cache.killCaching(cacheEntry);
-    }
-  }
-
-  public void killCaching()
-  {
-    AbstractCacheFilterChain cache = _cacheInvocation;
-    _cacheInvocation = null;
-    
-    AbstractCacheEntry cacheEntry = _newCacheEntry;
-    _newCacheEntry = null;
-
-    if (cacheEntry != null) {
-      cache.killCaching(cacheEntry);
-      _cacheStream = null;
-      _cacheWriter = null;
-      _responseStream.killCaching();
-    }
+    return _isDisableCache;
   }
 
   //
@@ -697,7 +570,8 @@ public final class HttpServletResponseImpl implements CauchoResponse
   {
     if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
       setStatus(code, value);
-      if (handleNotModified(_isTopCache))
+      
+      if (handleNotModified())
         return;
     }
     
@@ -803,13 +677,13 @@ public final class HttpServletResponseImpl implements CauchoResponse
    * Handle a SC_NOT_MODIFIED response.  If we've got a cache, fill the
    * results from the cache.
    *
-   * @param isTop if true, this is the top-level request.
-   *
    * @return true if we filled from the cache
    */
-  private boolean handleNotModified(boolean isTop)
+  private boolean handleNotModified()
     throws IOException
   {
+    boolean isTop = true;
+    
     if (_status != SC_NOT_MODIFIED) {
       return false;
     }
@@ -840,8 +714,8 @@ public final class HttpServletResponseImpl implements CauchoResponse
       
       long maxAge = webApp.getMaxAge(_request.getRequestURI());
 
-      if (maxAge > 0 && ! containsHeader("Expires")) {
-	setDateHeader("Expires", maxAge + Alarm.getCurrentTime());
+      if (maxAge > 0 && ! containsHeader("Cache-Control")) {
+	addHeader("Cache-Control", "max-age=" + (maxAge / 1000L));
       }
     }
 
@@ -1330,6 +1204,13 @@ public final class HttpServletResponseImpl implements CauchoResponse
 
   protected void addServletCookie(WebApp webApp)
   {
+      /* XXX:
+      if (_sessionId != null && ! _hasSessionCookie) {
+        _hasSessionCookie = true;
+
+        addServletCookie(webApp);
+      }
+      */
     if (_sessionId != null)
       addCookie(createServletCookie(webApp));
   }
@@ -1502,6 +1383,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
     return _responseStream.isCauchoResponseStream();
   }
 
+  /*
   public void setFlushBuffer(FlushBuffer out)
   {
     _response.setFlushBuffer(out);
@@ -1511,10 +1393,21 @@ public final class HttpServletResponseImpl implements CauchoResponse
   {
     return _response.getFlushBuffer();
   }
+  */
   
   public String getHeader(String key)
   {
     return _response.getHeader(key);
+  }
+
+  ArrayList<String> getHeaderKeys()
+  {
+    return _response.getHeaderKeys();
+  }
+
+  ArrayList<String> getHeaderValues()
+  {
+    return _response.getHeaderValues();
   }
   
   public void setFooter(String key, String value)
@@ -1536,29 +1429,32 @@ public final class HttpServletResponseImpl implements CauchoResponse
     _response.close();
   }
 
-  public boolean disableHeaders(boolean disable)
-  {
-    return _response.disableHeaders(disable);
-  }
-
-  public boolean getForbidForward()
-  {
-    return _response.getForbidForward();
-  }
-  
+  /**
+   * When set to true, RequestDispatcher.forward() is disallowed on
+   * this stream.
+   */
   public void setForbidForward(boolean forbid)
   {
-    _response.setForbidForward(forbid);
+    _forbidForward = forbid;
+  }
+
+  /**
+   * Returns true if RequestDispatcher.forward() is disallowed on
+   * this stream.
+   */
+  public boolean getForbidForward()
+  {
+    return _forbidForward;
   }
 
   public boolean hasError()
   {
-    return _response.hasError();
+    return _hasError;
   }
   
   public void setHasError(boolean error)
   {
-    _response.setHasError(error);
+    _hasError = error;
   }
 
   //

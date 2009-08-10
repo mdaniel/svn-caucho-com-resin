@@ -1886,7 +1886,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   public boolean isTop()
   {
-    return _request.isTop();
+    return true;
   }
 
   public boolean isComet()
@@ -1914,6 +1914,9 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public void addCloseOnExit(Path path)
   {
+    if (_closeOnExit == null)
+      _closeOnExit = new ArrayList<Path>();
+    
     _closeOnExit.add(path);
   }
 

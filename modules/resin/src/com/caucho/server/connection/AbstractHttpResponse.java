@@ -75,8 +75,6 @@ abstract public class AbstractHttpResponse {
     = Logger.getLogger(AbstractHttpResponse.class.getName());
   static final L10N L = new L10N(AbstractHttpResponse.class);
 
-  static final HashMap<String,String> _errors;
-
   protected static final CaseInsensitiveIntMap _headerCodes;
   protected static final int HEADER_CACHE_CONTROL = 1;
   protected static final int HEADER_CONTENT_TYPE = HEADER_CACHE_CONTROL + 1;
@@ -86,11 +84,6 @@ abstract public class AbstractHttpResponse {
   protected static final int HEADER_CONNECTION = HEADER_SERVER + 1;
 
   protected final AbstractHttpRequest _request;
-
-  protected String _contentType;
-  protected String _contentPrefix;
-  protected String _charEncoding;
-  protected boolean _hasCharEncoding;
   
   protected final ArrayList<String> _headerKeys = new ArrayList<String>();
   protected final ArrayList<String> _headerValues = new ArrayList<String>();
@@ -107,30 +100,22 @@ abstract public class AbstractHttpResponse {
     = new ServletOutputStreamImpl();
   private final ResponseWriter _responsePrintWriter
     = new ResponseWriter();
-
-  private HttpBufferStore _bufferStore;
-
-  // any stream that needs flusing before getting the writer.
-  private FlushBuffer _flushBuffer;
-
-  private boolean _isHeaderWritten;
-  private boolean _isChunked;
-  private boolean _isClientDisconnect;
+  
   protected final QDate _calendar = new QDate(false);
 
   protected final CharBuffer _cb = new CharBuffer();
   protected final char [] _headerBuffer = new char[256];
 
-  private boolean _hasSessionCookie;
+  private HttpBufferStore _bufferStore;
 
-  protected boolean _disableHeaders;
-  protected boolean _disableCaching;
+  protected String _contentType;
+  protected String _charEncoding;
+
+  private boolean _isHeaderWritten;
+  private boolean _isClientDisconnect;
+
   protected long _contentLength;
   protected boolean _isClosed;
-  protected boolean _hasSentLog;
-
-  protected boolean _forbidForward;
-  protected boolean _hasError;
 
   protected AbstractHttpResponse()
   {
@@ -163,6 +148,16 @@ abstract public class AbstractHttpResponse {
 
     return responseStream;
   }
+
+  TempBuffer getBuffer()
+  {
+    return _bufferStore.getTempBuffer();
+  }
+
+  protected final QDate getCalendar()
+  {
+    return _calendar;
+  }
   
   /**
    * If set true, client disconnect exceptions are no propagated to the
@@ -194,6 +189,7 @@ abstract public class AbstractHttpResponse {
   /**
    * Return true for the top request.
    */
+  /*
   public boolean isTop()
   {
     if (_request instanceof AbstractHttpRequest)
@@ -201,6 +197,7 @@ abstract public class AbstractHttpResponse {
     else
       return false;
   }
+  */
 
   /**
    * Returns the next response.
@@ -209,22 +206,6 @@ abstract public class AbstractHttpResponse {
   {
     return null;
   }
-
-  /**
-   * Initialize the response for a new request.
-   *
-   * @param stream the underlying output stream.
-   */
-  /*
-  public void init(WriteStream stream)
-  {
-    _rawWrite = stream;
-    
-    if (_originalResponseStream instanceof ResponseStream)
-      ((ResponseStream) _originalResponseStream).init(_rawWrite);
-
-  }
-  */
 
   /**
    * Returns the corresponding request.
@@ -237,20 +218,6 @@ abstract public class AbstractHttpResponse {
   protected WriteStream getRawWrite()
   {
     return _rawWrite;
-  }
-  
-  /**
-   * Closes the request, called from web-app for early close.
-   */
-  public void close()
-    throws IOException
-  {
-    // server/125i
-    if (! _request.isSuspend()) {
-      finishInvocation(true);
-
-      finishRequest(true);
-    }
   }
 
   /**
@@ -275,26 +242,15 @@ abstract public class AbstractHttpResponse {
     _footerKeys.clear();
     _footerValues.clear();
 
-    _hasSessionCookie = false;
-
     _responseStream.start();
 
     _isHeaderWritten = false;
-    _isChunked = false;
     _isClientDisconnect = false;
     _charEncoding = null;
-    _hasCharEncoding = false;
     _contentType = null;
-    _contentPrefix = null;
     
-    _flushBuffer = null;
-
     _contentLength = -1;
-    _disableHeaders = false;
     _isClosed = false;
-    _hasSentLog = false;
-
-    _forbidForward = false;
   }
 
   protected AbstractResponseStream createResponseStream()
@@ -322,57 +278,9 @@ abstract public class AbstractHttpResponse {
     return _responseStream.isHead();
   }
 
-  /**
-   * When set to true, RequestDispatcher.forward() is disallowed on
-   * this stream.
-   */
-  public void setForbidForward(boolean forbid)
-  {
-    _forbidForward = forbid;
-  }
-
-  /**
-   * Returns true if RequestDispatcher.forward() is disallowed on
-   * this stream.
-   */
-  public boolean getForbidForward()
-  {
-    return _forbidForward;
-  }
-
-  /**
-   * Set to true while processing an error.
-   */
-  public void setHasError(boolean hasError)
-  {
-    _hasError = hasError;
-  }
-
-  /**
-   * Returns true if we're processing an error.
-   */
-  public boolean hasError()
-  {
-    return _hasError;
-  }
-
-  /**
-   * Switch to raw socket mode.
-   */
-  public void switchToRaw()
-    throws IOException
-  {
-    throw new UnsupportedOperationException(L.l("raw mode is not supported in this configuration"));
-  }
-
-  /**
-   * Switch to raw socket mode.
-   */
-  public WriteStream getRawOutput()
-    throws IOException
-  {
-    throw new UnsupportedOperationException(L.l("raw mode is not supported in this configuration"));
-  }
+  //
+  // headers
+  //
 
   /**
    * Returns true if the response already contains the named header.
@@ -431,9 +339,7 @@ abstract public class AbstractHttpResponse {
    */
   public void setHeader(String key, String value)
   {
-    if (_disableHeaders)
-      return;
-    else if (value == null)
+    if (value == null)
       throw new NullPointerException();
 
     if (setSpecial(key, value))
@@ -515,9 +421,6 @@ abstract public class AbstractHttpResponse {
    */
   public void addHeaderImpl(String key, String value)
   {
-    if (_disableHeaders)
-      return;
-
     if (setSpecial(key, value))
       return;
 
@@ -538,14 +441,17 @@ abstract public class AbstractHttpResponse {
 
     switch (_headerCodes.get(_headerBuffer, length)) {
     case HEADER_CACHE_CONTROL:
-      /*
       if (value.startsWith("max-age")) {
+      }
+      else if (value.startsWith("s-max-age")) {
       }
       else if (value.equals("x-anonymous")) {
       }
+      else if (value.equals("public")) {
+      }
       else
-	_hasCacheControl = true;
-      */
+	_request.getResponseFacade().setCacheControl(true);
+      
       return false;
 	
     case HEADER_CONNECTION:
@@ -574,9 +480,6 @@ abstract public class AbstractHttpResponse {
   
   public void removeHeader(String key)
   {
-    if (_disableHeaders)
-      return;
-    
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
     
@@ -665,7 +568,7 @@ abstract public class AbstractHttpResponse {
 
   public Iterable<String> getHeaderNames()
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return _headerKeys;
   }
 
   /**
@@ -711,9 +614,7 @@ abstract public class AbstractHttpResponse {
    */
   public void setFooter(String key, String value)
   {
-    if (_disableHeaders)
-      return;
-    else if (value == null)
+    if (value == null)
       throw new NullPointerException();
 
     int i = 0;
@@ -750,9 +651,6 @@ abstract public class AbstractHttpResponse {
    */
   public void addFooter(String key, String value)
   {
-    if (_disableHeaders)
-      return;
-
     if (setSpecial(key, value))
       return;
 
@@ -773,22 +671,6 @@ abstract public class AbstractHttpResponse {
     return _responseStream;
   }
 
-  /**
-   * Sets the flush buffer
-   */
-  public void setFlushBuffer(FlushBuffer flushBuffer)
-  {
-    _flushBuffer = flushBuffer;
-  }
-
-  /**
-   * Gets the flush buffer
-   */
-  public FlushBuffer getFlushBuffer()
-  {
-    return _flushBuffer;
-  }
-
   protected ServletOutputStreamImpl getResponseOutputStream()
   {
     return _responseOutputStream;
@@ -797,29 +679,6 @@ abstract public class AbstractHttpResponse {
   protected ResponseWriter getResponsePrintWriter()
   {
     return _responsePrintWriter;
-  }
-
-  /**
-   * Returns the parent writer.
-   */
-  public PrintWriter getNextWriter()
-  {
-    return null;
-  }
-
-  /*
-   * jsdk 2.2
-   */
-
-  public void flushHeader()
-    throws IOException
-  {
-    _responseStream.flushBuffer();
-  }
-
-  public void setDisableAutoFlush(boolean disable)
-  {
-    // XXX: _responseStream.setDisableAutoFlush(disable);
   }
 
   /**
@@ -846,34 +705,12 @@ abstract public class AbstractHttpResponse {
     _contentLength = -1;
   }
 
-  // XXX: hack to deal with forwarding
-  /*
-  public void clearBuffer()
-  {
-    _responseStream.clearBuffer();
-  }
-  */
-
   /**
    * Returns the number of bytes sent to the output.
    */
   public int getContentLength()
   {
     return _responseStream.getContentLength();
-  }
-
-  public boolean disableHeaders(boolean disable)
-  {
-    boolean old = _disableHeaders;
-    _disableHeaders = disable;
-    return old;
-  }
-
-  public boolean disableCaching(boolean disable)
-  {
-    boolean old = _disableCaching;
-    _disableCaching = disable;
-    return old;
   }
 
   /**
@@ -924,16 +761,13 @@ abstract public class AbstractHttpResponse {
     throws IOException
   {
     if (isHeaderWritten())
-      return _isChunked;
+      return false;
 
     HttpServletRequestImpl req = _request.getRequestFacade();
     HttpServletResponseImpl res = _request.getResponseFacade();
 
     if (res == null)
       return false;
-
-    // server/1373 for getBufferSize()
-    boolean canCache = res.startCaching(true);
 
     _isHeaderWritten = true;
     boolean isHead = false;
@@ -960,18 +794,9 @@ abstract public class AbstractHttpResponse {
         ((SessionImpl) session).saveBeforeHeaders();
 
       res.addServletCookie(webApp);
-      /* XXX:
-      if (_sessionId != null && ! _hasSessionCookie) {
-        _hasSessionCookie = true;
-
-        addServletCookie(webApp);
-      }
-      */
     }
 
-    _isChunked = writeHeadersInt(os, length, isHead);
-
-    return _isChunked;
+    return writeHeadersInt(os, length, isHead);
   }
 
   abstract protected boolean writeHeadersInt(WriteStream os,
@@ -1094,23 +919,24 @@ abstract public class AbstractHttpResponse {
     return true;
   }
 
-  /*
-  protected ConnectionController getController()
-  {
-    if (_originalRequest instanceof AbstractHttpRequest) {
-      AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
-      Connection conn = request.getConnection();
-      return conn.getController();
-    }
-    else
-      return null;
-  }
-  */
-
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
     throw new IllegalStateException(L.l("'{0}' does not support upgrading",
 					this));
+  }
+  
+  /**
+   * Closes the request, called from web-app for early close.
+   */
+  public void close()
+    throws IOException
+  {
+    // server/125i
+    if (! _request.isSuspend()) {
+      finishInvocation(true);
+
+      finishRequest(true);
+    }
   }
   
   /**
@@ -1258,63 +1084,11 @@ abstract public class AbstractHttpResponse {
     }
   }
 
-  TempBuffer getBuffer()
-  {
-    return _bufferStore.getTempBuffer();
-  }
-
-  protected final QDate getCalendar()
-  {
-    return _calendar;
-  }
-
   protected void free()
   {
   }
 
   static {
-    _errors = new HashMap<String,String>();
-    _errors.put("100", "Continue");
-    _errors.put("101", "Switching Protocols");
-    _errors.put("200", "OK");
-    _errors.put("201", "Created");
-    _errors.put("202", "Accepted");
-    _errors.put("203", "Non-Authoritative Information");
-    _errors.put("204", "No Content");
-    _errors.put("205", "Reset Content");
-    _errors.put("206", "Partial Content");
-    _errors.put("300", "Multiple Choices");
-    _errors.put("301", "Moved Permanently");
-    _errors.put("302", "Found");
-    _errors.put("303", "See Other");
-    _errors.put("304", "Not Modified");
-    _errors.put("305", "Use Proxy");
-    _errors.put("307", "Temporary Redirect");
-    _errors.put("400", "Bad Request");
-    _errors.put("401", "Unauthorized");
-    _errors.put("402", "Payment Required");
-    _errors.put("403", "Forbidden");
-    _errors.put("404", "Not Found");
-    _errors.put("405", "Method Not Allowed");
-    _errors.put("406", "Not Acceptable");
-    _errors.put("407", "Proxy Authentication Required");
-    _errors.put("408", "Request Timeout");
-    _errors.put("409", "Conflict");
-    _errors.put("410", "Gone");
-    _errors.put("411", "Length Required");
-    _errors.put("412", "Precondition Failed");
-    _errors.put("413", "Request Entity Too Large");
-    _errors.put("414", "Request-URI Too Long");
-    _errors.put("415", "Unsupported Media Type");
-    _errors.put("416", "Requested Range Not Satisfiable");
-    _errors.put("417", "Expectation Failed");
-    _errors.put("500", "Internal Server Error");
-    _errors.put("501", "Not Implemented");
-    _errors.put("502", "Bad Gateway");
-    _errors.put("503", "Service Temporarily Unavailable");
-    _errors.put("504", "Gateway Timeout");
-    _errors.put("505", "Http Version Not Supported");
-
     _headerCodes = new CaseInsensitiveIntMap();
     _headerCodes.put("cache-control", HEADER_CACHE_CONTROL);
     _headerCodes.put("connection", HEADER_CONNECTION);

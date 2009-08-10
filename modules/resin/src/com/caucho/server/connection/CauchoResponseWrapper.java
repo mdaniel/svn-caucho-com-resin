@@ -289,20 +289,6 @@ public class CauchoResponseWrapper implements CauchoResponse {
     return cResponse.isCauchoResponseStream();
   }
   
-  public void setFlushBuffer(FlushBuffer out)
-  {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-    
-    cResponse.setFlushBuffer(out);
-  }
-  
-  public FlushBuffer getFlushBuffer()
-  {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-    
-    return cResponse.getFlushBuffer();
-  }
-  
   public void setFooter(String key, String value)
   {
     CauchoResponse cResponse = (CauchoResponse) _response;
@@ -322,13 +308,6 @@ public class CauchoResponseWrapper implements CauchoResponse {
     CauchoResponse cResponse = (CauchoResponse) _response;
     
     cResponse.close();
-  }
-  
-  public boolean disableHeaders(boolean disable)
-  {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-    
-    return cResponse.disableHeaders(disable);
   }
   
   public boolean getForbidForward()

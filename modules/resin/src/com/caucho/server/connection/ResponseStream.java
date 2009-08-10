@@ -29,14 +29,18 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.server.cache.AbstractCacheEntry;
+import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +49,7 @@ public class ResponseStream extends ToByteResponseStream {
   private static final Logger log
     = Logger.getLogger(ResponseStream.class.getName());
   
-  static final L10N L = new L10N(ResponseStream.class);
+  private static final L10N L = new L10N(ResponseStream.class);
 
   private static final int _tailChunkedLength = 7;
   private static final byte []_tailChunked
@@ -54,7 +58,9 @@ public class ResponseStream extends ToByteResponseStream {
   private AbstractHttpResponse _response;
   
   private WriteStream _next;
-  
+
+  private AbstractCacheFilterChain _cacheInvocation;
+  private AbstractCacheEntry _newCacheEntry;
   private OutputStream _cacheStream;
   private long _cacheMaxLength;
   // used for the direct copy and caching
@@ -134,10 +140,18 @@ public class ResponseStream extends ToByteResponseStream {
   public void setByteCacheStream(OutputStream cacheStream)
   {
     _cacheStream = cacheStream;
+
+    if (cacheStream == null)
+      return;
     
     AbstractHttpRequest req = _response.getRequest();
     WebApp app = req.getWebApp();
     _cacheMaxLength = app.getCacheMaxLength();
+  }
+
+  protected OutputStream getByteCacheStream()
+  {
+    return _cacheStream;
   }
 
   /**
@@ -267,7 +281,13 @@ public class ResponseStream extends ToByteResponseStream {
   private void writeHeaders(int length)
     throws IOException
   {
+    if (_isCommitted)
+      return;
+    
     _isCommitted = true;
+
+    startCaching(true);
+
     _chunkedEncoding = _response.writeHeaders(_next, length);
   }
 
@@ -889,9 +909,52 @@ public class ResponseStream extends ToByteResponseStream {
       return (byte) ('a' + value - 10);
   }
 
-  protected void killCaching()
+  //
+  // proxy caching
+  //
+
+  /**
+   * Called to start caching.
+   */
+  protected void startCaching(boolean isByte)
   {
-    _cacheStream = null;
+    // server/1373 for getBufferSize()
+    HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
+
+    if (res == null
+        || res.getStatus() != HttpServletResponse.SC_OK
+        || res.isDisableCache()) {
+      return;
+    }
+    
+    _cacheInvocation = res.getCacheInvocation();
+
+    if (_cacheInvocation == null)
+      return;
+    
+    HttpServletRequestImpl req = _response.getRequest().getRequestFacade();
+    
+    ArrayList<String> keys = res.getHeaderKeys();
+    ArrayList<String> values = res.getHeaderValues();
+    String contentType = res.getContentType();
+    String charEncoding = res.getCharacterEncoding();
+    
+    int contentLength = -1;
+      
+    _newCacheEntry = _cacheInvocation.startCaching(req, res, 
+                                                   keys, values,
+                                                   contentType,
+                                                   charEncoding,
+                                                   contentLength);
+
+    if (_newCacheEntry == null) {
+    }
+    else if (isByte) {
+      setByteCacheStream(_newCacheEntry.openOutputStream());
+    }
+    else {
+      setCharCacheStream(_newCacheEntry.openWriter());
+    }
   }
 
   private void writeCache(byte []buf, int offset, int length)
@@ -909,6 +972,72 @@ public class ResponseStream extends ToByteResponseStream {
     }
   }
 
+  public void killCaching()
+  {
+    AbstractCacheEntry cacheEntry = _newCacheEntry;
+    _newCacheEntry = null;
+
+    if (cacheEntry != null) {
+      _cacheInvocation.killCaching(cacheEntry);
+      setByteCacheStream(null);
+      setCharCacheStream(null);
+    }
+  }
+
+  /**
+   * Closes the stream.
+   */
+  public void close()
+    throws IOException
+  {
+    finish();
+    finishCache();
+  }
+
+  public void finishCache()
+    throws IOException
+  {
+    try {
+      OutputStream cacheStream = getByteCacheStream();
+      setByteCacheStream(null);
+	
+      Writer cacheWriter = getCharCacheStream();
+      setCharCacheStream(null);
+
+      if (cacheStream != null)
+        cacheStream.close();
+
+      if (cacheWriter != null)
+        cacheWriter.close();
+
+      if (_newCacheEntry != null) {
+        HttpServletRequestImpl request
+          = _response.getRequest().getRequestFacade();
+
+        if (request == null)
+          return;
+
+	WebApp webApp = request.getWebApp();
+	if (webApp != null && webApp.isActive()) {
+          AbstractCacheEntry cacheEntry = _newCacheEntry;
+
+	  _cacheInvocation.finishCaching(cacheEntry);
+          
+          _newCacheEntry = null;
+        }
+      }
+    } finally {
+      AbstractCacheFilterChain cache = _cacheInvocation;
+      _cacheInvocation = null;
+      
+      AbstractCacheEntry cacheEntry = _newCacheEntry;
+      _newCacheEntry = null;
+
+      if (cache != null && cacheEntry != null)
+	cache.killCaching(cacheEntry);
+    }
+  }
+
   private String dbgId()
   {
     Object request = _response.getRequest();
@@ -920,15 +1049,6 @@ public class ResponseStream extends ToByteResponseStream {
     }
     else
       return "inc ";
-  }
-
-  /**
-   * Closes the stream.
-   */
-  public void close()
-    throws IOException
-  {
-    finish();
   }
 
   public String toString()

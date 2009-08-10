@@ -127,34 +127,20 @@ public abstract class AbstractHttpRequest
   // Stream for reading post contents
   protected final ReadStream _readStream;
 
-  private long _startTime;
+  private final ArrayList<Cookie> _cookies = new ArrayList<Cookie>();
 
-  protected CharSegment _hostHeader;
-  protected boolean _expect100Continue;
-
-  private ArrayList<Cookie> _cookies = new ArrayList<Cookie>();
-
-  private long _contentLength;
-
-  // True if the post stream has been initialized
-  protected boolean _hasReadStream;
+  private final ArrayList<Locale> _locales = new ArrayList<Locale>();
 
   // Servlet input stream for post contents
   private final ServletInputStreamImpl _is = new ServletInputStreamImpl();
-
-  // character incoding for a Post
-  private String _readEncoding;
   // Reader for post contents
   private final BufferedReaderAdapter _bufferedReader;
 
-  private ErrorPageManager _errorManager = new ErrorPageManager(null);
-
-  // HttpServletRequest stuff
   private final Form _formParser = new Form();
   private final HashMapImpl<String,String[]> _form
     = new HashMapImpl<String,String[]>();
 
-  private ArrayList<Locale> _locales = new ArrayList<Locale>();
+  private final ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   // Efficient date class for printing date headers
   protected final QDate _calendar = new QDate();
@@ -166,6 +152,17 @@ public abstract class AbstractHttpRequest
   
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
+
+  private long _startTime;
+
+  protected CharSegment _hostHeader;
+  protected boolean _expect100Continue;
+
+  private long _contentLength;
+  // True if the post stream has been initialized
+  protected boolean _hasReadStream;
+  // character incoding for a Post
+  private String _readEncoding;
 
   /**
    * Create a new Request.  Because the actual initialization occurs with
@@ -932,40 +929,6 @@ public abstract class AbstractHttpRequest
       return _cookiesIn;
     */
   }
-
-  /**
-   * Returns the named cookie from the browser
-   */
-  /*
-  public Cookie getCookie(String name)
-  {
-    // The page varies depending on the presense of any cookies
-    setVaryCookie(name);
-
-    return findCookie(name);
-  }
-
-  private Cookie findCookie(String name)
-  {
-    if (_cookiesIn == null)
-      fillCookies();
-
-    if (_cookiesIn == null)
-      return null;
-
-    int length = _cookiesIn.length;
-    for (int i = 0; i < length; i++) {
-      Cookie cookie = _cookiesIn[i];
-
-      if (cookie.getName().equals(name)) {
-        setHasCookie();
-        return cookie;
-      }
-    }
-
-    return null;
-  }
-  */
 
   /**
    * Parses cookie information from the cookie headers.

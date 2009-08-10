@@ -178,7 +178,16 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    */
   public void setByteCacheStream(OutputStream cacheStream)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (cacheStream != null)
+      throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Sets a byte cache stream.
+   */
+  protected OutputStream getByteCacheStream()
+  {
+    return null;
   }
 
   /**
@@ -186,7 +195,16 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    */
   public void setCharCacheStream(Writer cacheStream)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (cacheStream != null)
+      throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Sets a char cache stream.
+   */
+  protected Writer getCharCacheStream()
+  {
+    return null;
   }
 
   /**

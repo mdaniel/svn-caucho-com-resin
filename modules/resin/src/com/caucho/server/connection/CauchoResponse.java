@@ -42,10 +42,6 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setResponseStream(AbstractResponseStream os);
 
   public boolean isCauchoResponseStream();
-  
-  public void setFlushBuffer(FlushBuffer out);
-  public FlushBuffer getFlushBuffer();
-  
   public String getHeader(String key);
   
   public void setFooter(String key, String value);
@@ -55,8 +51,6 @@ public interface CauchoResponse extends HttpServletResponse {
 
   // to support the JSP getRemaining
   //  public int getRemaining();
-
-  public boolean disableHeaders(boolean disable);
 
   public boolean getForbidForward();
   public void setForbidForward(boolean forbid);

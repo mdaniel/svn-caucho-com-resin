@@ -1350,7 +1350,7 @@ public class PageContextImpl extends PageContext
       */
 
       getCauchoResponse().setResponseStream(_responseStream);
-      getCauchoResponse().setFlushBuffer(null);
+      // getCauchoResponse().setFlushBuffer(null);
 
       _request = null;
       _webApp = null;
