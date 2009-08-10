@@ -53,18 +53,8 @@
 <li>deploy: error messages and documentation for remote deploy not clear for BAM/HMTP (#3477, rep by Scott Hernandez)</li>
 <li>quercus: Curl has issues with urls having @ in it (#3585, rep by anash)</li>
 <li>quercus: Wordpress 2.8.1 parent constructor call (#3597, rep by csw)</li>
-</ul>
-</s2>
-
-<s2 title="4.0.0">
-<ul>
 <li>server: UTF8Reader with byte-order-mark needs to read full next character (#3525, rep by Fiaz Hossain)</li>
 <li>jca: max-active-time default needs to changed to Long.MAX_VALUE instead of Integer.MAX_VALUE (rep by KC Baltz)</li>
-</ul>
-</s2>
-
-<s2 title="4.0.0">
-<ul>
 <li>log: SyslogHandler has improper initialization (rep by Michael Glenney)</li>
 <li>class loader: remove potential classloadering deadlock based on ClassEntry lock (#3423, rep by stbu)</li>
 <li>database: driver support for META-INF/services and url without type</li>

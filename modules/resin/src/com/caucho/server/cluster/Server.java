@@ -2234,6 +2234,16 @@ public class Server extends ProtocolDispatchServer
                                   int port)
   {
   }
+  
+  /**
+   * Creates an returns a load balancer based on the cluster name.
+   *
+   * @param clusterName the name of the cluster
+   */
+  public LoadBalanceManager createClusterLoadBalancer(String clusterName)
+  {
+    throw new ConfigException(L.l("Cluster LoadBalancer requires Resin Professional."));
+  }
 
   /**
    * Closes the server.
