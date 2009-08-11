@@ -67,7 +67,7 @@ public class FastCgiResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void writeTail(int bufferStart)
+  protected void writeTail()
     throws IOException
   {
     flushBuffer();
