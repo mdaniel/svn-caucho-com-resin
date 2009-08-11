@@ -261,6 +261,8 @@ public abstract class AbstractHttpRequest
 
     _requestFacade = new HttpServletRequestImpl(this);
     _responseFacade = _requestFacade.getResponse();
+
+    _response.startRequest(httpBuffer);
   }
 
   protected void clearRequest()
@@ -1327,22 +1329,13 @@ public abstract class AbstractHttpRequest
     return _httpBuffer.getLogBuffer();
   }
 
-  /**
-   * Returns true for the top-level request, but false for any include()
-   * or forward()
-   */
-  public boolean isTop()
-  {
-    return false;
-  }
-
   protected Invocation getInvocation(CharSequence host,
                                      byte []uri,
                                      int uriLength)
     throws IOException
   {
     _invocationKey.init(isSecure(),
-                        host, _conn.getLocalPort(),
+                        host, getServerPort(),
                         uri, uriLength);
 
     Invocation invocation = _server.getInvocation(_invocationKey);
@@ -1357,7 +1350,7 @@ public abstract class AbstractHttpRequest
       String hostName = host.toString().toLowerCase();
 
       invocation.setHost(hostName);
-      invocation.setPort(_conn.getLocalPort());
+      invocation.setPort(getServerPort());
 
       // Default host name if the host doesn't have a canonical
       // name
@@ -1604,6 +1597,8 @@ public abstract class AbstractHttpRequest
       _tcpConn.beginActive();
     else
       _startTime = Alarm.getCurrentTime();
+
+    _response.startInvocation();
   }
 
   /**

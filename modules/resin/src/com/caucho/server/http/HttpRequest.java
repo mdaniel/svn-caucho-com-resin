@@ -863,14 +863,6 @@ public class HttpRequest extends AbstractHttpRequest
     _headerBuffer = httpBuffer.getHeaderBuffer();
     _headerKeys = httpBuffer.getHeaderKeys();
     _headerValues = httpBuffer.getHeaderValues();
-    
-    // XXX: reuse for keepalive?
-    /*
-    _requestFacade = new HttpServletRequestImpl(this);
-    _responseFacade = _requestFacade.getResponse();
-    */
-    
-    _response.startRequest(httpBuffer);
   }
 
   /**

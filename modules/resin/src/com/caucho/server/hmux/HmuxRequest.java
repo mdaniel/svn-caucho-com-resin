@@ -294,21 +294,6 @@ public class HmuxRequest extends AbstractHttpRequest
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
     _server = Server.getCurrent();
-    /*
-    if (_server != null) {
-      try {
-	Class cl = Class.forName("com.caucho.server.hmux.HmuxClusterRequest");
-
-	_clusterRequest = (AbstractClusterRequest) cl.newInstance();
-	_clusterRequest.setRequest(this);
-	_clusterRequest.setServer(_server);
-      } catch (ClassNotFoundException e) {
-	log.finer(e.toString());
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-    }
-    */
     
     _dispatchRequest = new HmuxDispatchRequest(this);
     
@@ -408,10 +393,6 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _filter.init(this, _rawRead, _rawWrite);
     _writeStream.init(_filter);
-    // _writeStream.setWritePrefix(3);
-
-    _serverType = 0;
-    _uri.setLength(0);
 
     _hasRequest = false;
     
@@ -419,103 +400,9 @@ public class HmuxRequest extends AbstractHttpRequest
       HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
       startRequest(httpBuffer);
 
-      _response.startRequest(httpBuffer);
-
       startInvocation();
-      
-      try {
-        if (! scanHeaders()) {
-          killKeepalive();
-          return false;
-        }
-        else if (_uri.size() == 0) {
-          return true;
-	}
-      } catch (InterruptedIOException e) {
-        killKeepalive();
-        log.fine(dbgId() + "interrupted keepalive");
-        return false;
-      }
 
-      if (_isSecure)
-        getClientCertificate();
-
-      _hasRequest = true;
-      // setStartDate();
-
-      if (_server == null || _server.isDestroyed()) {
-	log.fine(dbgId() + "server is closed");
-	
-	try {
-	  _writeStream.setDisableClose(false);
-	  _writeStream.close();
-	} catch (Throwable e) {
-	}
-	
-	try {
-	  _readStream.setDisableClose(false);
-	  _readStream.close();
-	} catch (Throwable e) {
-	}
-
-	return false;
-      }
-
-      _filter.setPending(_pendingData);
-
-      try {
-        if (_method.getLength() == 0)
-          throw new RuntimeException("HTTP protocol exception");
-          
-        _invocationKey.init(_isSecure,
-			    getHost(), getServerPort(),
-                            _uri.getBuffer(), _uri.getLength());
-
-        Invocation invocation;
-
-        invocation = _server.getInvocation(_invocationKey);
-
-        if (invocation == null) {
-          invocation = _server.createInvocation();
-
-          if (_host != null)
-            invocation.setHost(_host.toString());
-          
-          invocation.setPort(getServerPort());
-
-          InvocationDecoder decoder = _server.getInvocationDecoder();
-
-	  decoder.splitQueryAndUnescape(invocation,
-					_uri.getBuffer(),
-					_uri.getLength());
-
-          invocation = _server.buildInvocation(_invocationKey.clone(),
-					       invocation);
-        }
-
-	invocation = invocation.getRequestInvocation(getRequestFacade());
-
-	getRequestFacade().setInvocation(invocation);
-
-	startInvocation();
-
-        invocation.service(getRequestFacade(), getResponseFacade());
-      } catch (ClientDisconnectException e) {
-        throw e;
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-        try {
-          _errorManager.sendServletError(e, getRequestFacade(),
-                                         getResponseFacade());
-        } catch (ClientDisconnectException e1) {
-          throw e1;
-        } catch (Exception e1) {
-          log.log(Level.FINE, e1.toString(), e1);
-        }
-
-	return false;
-      }
+      return handleInvocation();
     } finally {
       if (! _hasRequest)
 	_response.setHeaderWritten(true);
@@ -553,17 +440,80 @@ public class HmuxRequest extends AbstractHttpRequest
         log.log(Level.FINE, dbgId() + e, e);
       }
     }
+  }
 
-    boolean allowKeepalive = isKeepalive();
-    
-    if (log.isLoggable(Level.FINE)) {
-      if (allowKeepalive)
-	log.fine(dbgId() + "complete request - keepalive");
-      else
-	log.fine(dbgId() + "complete request");
+  private boolean handleInvocation()
+    throws IOException
+  {
+    try {
+      if (! scanHeaders()) {
+        killKeepalive();
+        return false;
+      }
+      else if (_uri.size() == 0) {
+        return true;
+      }
+    } catch (InterruptedIOException e) {
+      killKeepalive();
+      log.fine(dbgId() + "interrupted keepalive");
+      return false;
     }
 
-    return allowKeepalive;
+    if (_isSecure)
+      getClientCertificate();
+
+    _hasRequest = true;
+    // setStartDate();
+
+    if (_server == null || _server.isDestroyed()) {
+      log.fine(dbgId() + "server is closed");
+	
+      try {
+        _writeStream.setDisableClose(false);
+        _writeStream.close();
+      } catch (Exception e) {
+      }
+	
+      try {
+        _readStream.setDisableClose(false);
+        _readStream.close();
+      } catch (Exception e) {
+      }
+
+      return false;
+    }
+
+    _filter.setPending(_pendingData);
+
+    try {
+      if (_method.getLength() == 0)
+        throw new RuntimeException("HTTP protocol exception");
+
+      Invocation invocation;
+
+      invocation = getInvocation(_host, _uri.getBuffer(), _uri.getLength());
+
+      getRequestFacade().setInvocation(invocation);
+
+      startInvocation();
+
+      invocation.service(getRequestFacade(), getResponseFacade());
+    } catch (ClientDisconnectException e) {
+      throw e;
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+	
+      try {
+        _errorManager.sendServletError(e, getRequestFacade(),
+                                       getResponseFacade());
+      } catch (ClientDisconnectException e1) {
+        throw e1;
+      } catch (Exception e1) {
+        log.log(Level.FINE, e1.toString(), e1);
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -609,16 +559,6 @@ public class HmuxRequest extends AbstractHttpRequest
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
-  }
-
-  /**
-   * Returns true for the top-level request, but false for any include()
-   * or forward()
-   */
-  @Override
-  public boolean isTop()
-  {
-    return true;
   }
   
   protected boolean checkLogin()
@@ -669,7 +609,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private boolean scanHeaders()
     throws IOException
   {
-    boolean hasURI = false;
     CharBuffer cb = _cb;
     boolean isLoggable = log.isLoggable(Level.FINE);
     ReadStream is = _rawRead;
@@ -679,7 +618,7 @@ public class HmuxRequest extends AbstractHttpRequest
     while (true) {
       code = is.read();
 
-      if (_server.isDestroyed()) {
+      if (_server == null || _server.isDestroyed()) {
 	log.fine(dbgId() + " request after server close");
         killKeepalive();
 	return false;
@@ -708,7 +647,7 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + (char) code + "-r: end of request");
         
-        return hasURI;
+        return true;
 
       case HMUX_EXIT:
         if (isLoggable)
@@ -716,7 +655,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
         killKeepalive();
         
-        return hasURI;
+        return true;
 
       case HMUX_PROTOCOL:
         len = (is.read() << 8) + is.read();
@@ -732,75 +671,10 @@ public class HmuxRequest extends AbstractHttpRequest
 		     + (is.read() << 8)
 		     + (is.read()));
 
-	int result = HMUX_EXIT;
-	boolean isKeepalive = false;
-        if (value == HMUX_CLUSTER_PROTOCOL) {
-          if (isLoggable)
-            log.fine(dbgId() + (char) code + "-r: cluster protocol");
-          _filter.setClientClosed(true);
-	  
-	  if (_server == null || _server.isDestroyed()) {
-	    return false;
-	  }
-
-          result = _clusterRequest.handleRequest(is, _rawWrite);
-        }
-        else if (value == HMUX_DISPATCH_PROTOCOL) {
-          if (isLoggable)
-            log.fine(dbgId() + (char) code + "-r: dispatch protocol");
-          _filter.setClientClosed(true);
-	  
-	  if (_server == null || _server.isDestroyed()) {
-	    return false;
-	  }
-	  
-          isKeepalive = _dispatchRequest.handleRequest(is, _rawWrite);
-
-	  if (isKeepalive)
-	    result = HMUX_QUIT;
-	  else
-	    result = HMUX_EXIT;
-        }
-	else {
-	  if (_server == null || _server.isDestroyed()) {
-	    return false;
-	  }
-	  
-	  HmuxExtension ext = _hmuxProtocol.getExtension(value);
-
-	  if (ext != null) {
-	    if (isLoggable)
-	      log.fine(dbgId() + (char) code + "-r: extension " + ext);
-	    _filter.setClientClosed(true);
-
-	    result = ext.handleRequest(this, is, _rawWrite);
-	  }
-	  else {
-	    log.fine(dbgId() + (char) code + "-r: unknown protocol (" + value + ")");
-	    result = HMUX_EXIT;
-	  }
-	}
-
-	if (result == HMUX_YIELD)
-	  break;
-	else {
-	  if (result == HMUX_QUIT && ! allowKeepalive())
-	    result = HMUX_EXIT;
-	
-	  if (result == HMUX_QUIT) {
-	    _rawWrite.write(HMUX_QUIT);
-	    _rawWrite.flush();
-	  }
-	  else {
-	    _rawWrite.write(HMUX_EXIT);
-	    _rawWrite.close();
-	  }
-
-	  return result == HMUX_QUIT;
-	}
+        dispatchProtocol(is, code, value);
+        return true;
 
       case HMUX_URI:
-        hasURI = true;
         len = (is.read() << 8) + is.read();
         _uri.setLength(len);
 	_rawRead.readAll(_uri.getBuffer(), 0, len);
@@ -887,7 +761,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	  log.fine(dbgId() + (char) code + " protocol: " + _protocol);
 	for (int i = 0; i < len; i++) {
 	  char ch = _protocol.charAt(i);
-	  if (ch >= '0' && ch <= '9')
+          
+	  if ('0' <= ch && ch <= '9')
 	    _version = 16 * _version + ch - '0';
 	  else if (ch == '.')
 	    _version = 16 * _version;
@@ -945,8 +820,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	_headerValues[_headerSize].clear();
 	_rawRead.readAll(_headerValues[_headerSize], len);
 	if (isLoggable)
-	  log.fine(dbgId() + (char) code + " content-type=" +
-                   _headerValues[_headerSize]);
+	  log.fine(dbgId() + (char) code
+                   + " content-type=" + _headerValues[_headerSize]);
 	_headerSize++;
 	break;
 
@@ -964,8 +839,8 @@ public class HmuxRequest extends AbstractHttpRequest
         _clientCert.setLength(len);
 	_rawRead.readAll(_clientCert.getBuffer(), 0, len);
 	if (isLoggable)
-	  log.fine(dbgId() + (char) code + " cert=" + _clientCert +
-                   " len:" + len);
+	  log.fine(dbgId() + (char) code + " cert=" + _clientCert
+                   + " len:" + len);
 	break;
 
       case CSE_SERVER_TYPE:
@@ -993,7 +868,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	_pendingData = len;
 	if (isLoggable)
 	  log.fine(dbgId() + (char) code + " post-data: " + len);
-	return hasURI;
+	return true;
 
       case HMTP_MESSAGE:
 	{
@@ -1001,8 +876,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	  boolean isAdmin = is.read() != 0;
 
 	  readHmtpMessage(code, is, isAdmin);
-	  
-	  hasURI = true;
 	  break;
 	}
 
@@ -1012,7 +885,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	  boolean isAdmin = is.read() != 0;
 
 	  readHmtpQueryGet(code, is, isAdmin);
-	  hasURI = true;
 	  break;
 	}
 
@@ -1022,8 +894,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	  boolean isAdmin = is.read() != 0;
 	  
 	  readHmtpQuerySet(code, is, isAdmin);
-	  
-	  hasURI = true;
 	  break;
 	}
 
@@ -1033,8 +903,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	  boolean isAdmin = is.read() != 0;
 
 	  readHmtpQueryResult(code, is, isAdmin);
-	  
-	  hasURI = true;
 	  break;
 	}
 
@@ -1044,8 +912,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	  boolean isAdmin = is.read() != 0;
 
 	  readHmtpQueryError(code, is, isAdmin);
-	  
-	  hasURI = true;
 	  break;
 	}
 
@@ -1072,10 +938,65 @@ public class HmuxRequest extends AbstractHttpRequest
         }
       }
     }
+  }
 
-    // _filter.setClientClosed(true);
+  private void dispatchProtocol(ReadStream is, int code, int value)
+    throws IOException
+  {
+    int result = HMUX_EXIT;
+    boolean isKeepalive = false;
+    if (value == HMUX_CLUSTER_PROTOCOL) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(dbgId() + (char) code + "-r: cluster protocol");
+      _filter.setClientClosed(true);
 
-    // return false;
+      result = _clusterRequest.handleRequest(is, _rawWrite);
+    }
+    else if (value == HMUX_DISPATCH_PROTOCOL) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(dbgId() + (char) code + "-r: dispatch protocol");
+      
+      _filter.setClientClosed(true);
+	  
+      isKeepalive = _dispatchRequest.handleRequest(is, _rawWrite);
+
+      if (isKeepalive)
+        result = HMUX_QUIT;
+      else
+        result = HMUX_EXIT;
+    }
+    else {
+      HmuxExtension ext = _hmuxProtocol.getExtension(value);
+
+      if (ext != null) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(dbgId() + (char) code + "-r: extension " + ext);
+        _filter.setClientClosed(true);
+
+        result = ext.handleRequest(this, is, _rawWrite);
+      }
+      else {
+        log.fine(dbgId() + (char) code + "-r: unknown protocol (" + value + ")");
+        result = HMUX_EXIT;
+      }
+    }
+
+    if (result == HMUX_YIELD)
+      return; // XXX:
+    else {
+      if (result == HMUX_QUIT && ! allowKeepalive())
+        result = HMUX_EXIT;
+	
+      if (result == HMUX_QUIT) {
+        _rawWrite.write(HMUX_QUIT);
+        _rawWrite.flush();
+      }
+      else {
+        killKeepalive();
+        _rawWrite.write(HMUX_EXIT);
+        _rawWrite.close();
+      }
+    }
   }
 
   private ActorStream getLinkStream()

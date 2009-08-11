@@ -54,18 +54,6 @@ public class HmuxResponse extends AbstractHttpResponse {
   }
 
   /**
-   * Return true for the top request.
-   */
-  public boolean isTop()
-  {
-    if (! (_request instanceof AbstractHttpRequest))
-      return false;
-    else {
-      return ((AbstractHttpRequest) _request).isTop();
-    }
-  }
-
-  /**
    * headersWritten cannot be undone for hmux
    */
   @Override

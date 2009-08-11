@@ -32,7 +32,33 @@ package com.caucho.server.cluster;
 /**
  * Manages a load balancer.
  */
-public class LoadBalanceManager {
+abstract public class LoadBalanceManager {
+  private Strategy _strategyType = Strategy.ADAPTIVE;
+  
+  public void setStrategy(Strategy strategy)
+  {
+    _strategyType = strategy;
+  }
+  
+  public Strategy getStrategy()
+  {
+    return _strategyType;
+  }
+  
+  public void init()
+  {
+  }
+  
+  /**
+   * Opens the next available server.
+   */
+  abstract public ClusterStream
+    openServer(String sessionId, ServerPool oldSrun);
+
+  public void destroy()
+  {
+  }
+  
   public String toString()
   {
     return getClass().getSimpleName() + "[]";

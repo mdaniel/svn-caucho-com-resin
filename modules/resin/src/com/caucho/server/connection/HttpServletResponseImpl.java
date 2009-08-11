@@ -398,6 +398,8 @@ public final class HttpServletResponseImpl implements CauchoResponse
    */
   public void setMatchCacheEntry(AbstractCacheEntry entry)
   {
+    assert(_matchCacheEntry == null);
+    
     _matchCacheEntry = entry;
   }
 
@@ -408,6 +410,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
     assert(_cacheInvocation == null);
+    
     _cacheInvocation = cacheInvocation;
   }
 

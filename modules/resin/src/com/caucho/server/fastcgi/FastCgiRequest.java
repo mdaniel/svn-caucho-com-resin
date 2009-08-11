@@ -246,8 +246,6 @@ public class FastCgiRequest extends AbstractHttpRequest
       startRequest(httpBuffer);
       startInvocation();
 
-      _response.startRequest(httpBuffer);
-
       _filter.init(_rawRead, _rawWrite);
       _writeStream.init(_filter);
       // _writeStream.setWritePrefix(3);

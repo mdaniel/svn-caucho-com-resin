@@ -85,6 +85,17 @@ public class HttpResponse extends AbstractHttpResponse
     _resinServerBytes = ("\r\nServer: " + server.getServerHeader()).getBytes();
   }
 
+  @Override
+  protected AbstractResponseStream createResponseStream()
+  {
+    return new HttpResponseStream(this, getRawWrite());
+  }
+
+  boolean isChunkedEncoding()
+  {
+    return _isChunked;
+  }
+
   /**
    * Upgrade protocol
    */
@@ -144,7 +155,7 @@ public class HttpResponse extends AbstractHttpResponse
    *
    * @return true if the data in the request should use chunked encoding.
    */
-  protected boolean writeHeadersInt(WriteStream os,
+  protected boolean writeHeadersInt(WriteStream tos,
 				    int length,
 				    boolean isHead)
     throws IOException
@@ -169,6 +180,8 @@ public class HttpResponse extends AbstractHttpResponse
     
     String contentType = response.getContentTypeImpl();
     String charEncoding = response.getCharacterEncodingImpl();
+
+    WriteStream os = getRawWrite();
 
     int statusCode = response.getStatus();
     if (statusCode == 200) {

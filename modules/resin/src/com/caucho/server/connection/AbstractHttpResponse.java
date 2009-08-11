@@ -225,6 +225,10 @@ abstract public class AbstractHttpResponse {
     return _isClosed;
   }
 
+  public void startInvocation()
+  {
+  }
+  
   /**
    * Initializes the Response at the beginning of the request.
    */
@@ -564,6 +568,16 @@ abstract public class AbstractHttpResponse {
   public Iterable<String> getHeaderNames()
   {
     return _headerKeys;
+  }
+
+  public ArrayList<String> getFooterKeys()
+  {
+    return _footerKeys;
+  }
+
+  public ArrayList<String> getFooterValues()
+  {
+    return _footerValues;
   }
 
   /**

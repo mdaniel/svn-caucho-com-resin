@@ -278,7 +278,7 @@ public class ResponseStream extends ToByteResponseStream {
     _isClosed = false;
   }
 
-  private void writeHeaders(int length)
+  protected void writeHeaders(int length)
     throws IOException
   {
     if (_isCommitted)
@@ -328,7 +328,7 @@ public class ResponseStream extends ToByteResponseStream {
     if (_isCommitted) {
       flushBuffer();
       
-      return _next.getBuffer();
+      return getNextBuffer();
     }
     else
       return super.getBuffer();
@@ -344,117 +344,8 @@ public class ResponseStream extends ToByteResponseStream {
       return super.getBufferOffset();
     
     flushBuffer();
-      
-    int offset;
 
-    offset = _next.getBufferOffset();
-
-    if (! _chunkedEncoding) {
-      //_bufferStartOffset = offset;
-      return offset;
-    }
-    else if (_bufferStartOffset > 0) {
-      return offset;
-    }
-
-    byte []buffer;
-    // chunked allocates 8 bytes for the chunk header
-    buffer = _next.getBuffer();
-    if (buffer.length - offset < 8) {
-      _next.flushBuffer();
-      
-      buffer = _next.getBuffer();
-      offset = _next.getBufferOffset();
-    }
-
-    _bufferStartOffset = offset + 8;
-    _next.setBufferOffset(offset + 8);
-
-    return _bufferStartOffset;
-  }
-
-  /**
-   * Sets the next buffer
-   */
-  public byte []nextBuffer(int offset)
-    throws IOException
-  {
-    if (! _isCommitted) {
-      // server/055b
-      return super.nextBuffer(offset);
-      // _bufferStartOffset = _next.getBufferOffset();
-    }
-    
-    if (_isClosed)
-      return _next.getBuffer();
-    
-    flushBuffer();
-      
-    int startOffset = _bufferStartOffset;
-    _bufferStartOffset = 0;
-
-    int length = offset - startOffset;
-    long lengthHeader = _response.getContentLengthHeader();
-
-    if (lengthHeader > 0 && lengthHeader < _contentLength + length) {
-      _isCommitted = true;
-    
-      lengthException(_next.getBuffer(), startOffset, length, lengthHeader);
-
-      length = (int) (lengthHeader - _contentLength);
-      offset = startOffset + length;
-    }
-
-    _contentLength += length;
-
-    try {
-      if (_isHead) {
-	return _next.getBuffer();
-      }
-      else if (_chunkedEncoding) {
-	if (length == 0)
-	  throw new IllegalStateException();
-      
-	byte []buffer = _next.getBuffer();
-
-	writeChunkHeader(buffer, startOffset, length);
-
-	buffer = _next.nextBuffer(offset);
-	      
-	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "write-chunk1(" + offset + ")");
-
-	_bufferStartOffset = 8 + _next.getBufferOffset();
-	_next.setBufferOffset(_bufferStartOffset);
-
-	return buffer;
-      }
-      else {
-	if (_cacheStream != null)
-	  writeCache(_next.getBuffer(), startOffset, length);
-	
-	byte []buffer = _next.nextBuffer(offset);
-	_bufferStartOffset = _next.getBufferOffset();
-	      
-	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "write-chunk2(" + offset + ")");
-
-	return buffer;
-      }
-    } catch (ClientDisconnectException e) {
-      _response.clientDisconnect();
-      // XXX: _response.killCache();
-
-      if (_response.isIgnoreClientDisconnect()) {
-	return _next.getBuffer();
-      }
-      else
-        throw e;
-    } catch (IOException e) {
-      // XXX: _response.killCache();
-      
-      throw e;
-    }
+    return getNextBufferOffset();
   }
 
   /**
@@ -473,15 +364,17 @@ public class ResponseStream extends ToByteResponseStream {
 
     flushBuffer();
     
-    int startOffset = _bufferStartOffset;
+    int startOffset = getNextStartOffset();
     if (offset == startOffset)
       return;
+
+    byte []nextBuffer = getNextBuffer();
     
     int length = offset - startOffset;
     long lengthHeader = _response.getContentLengthHeader();
 
     if (lengthHeader > 0 && lengthHeader < _contentLength + length) {
-      lengthException(_next.getBuffer(), startOffset, length, lengthHeader);
+      lengthException(nextBuffer, startOffset, length, lengthHeader);
 
       length = (int) (lengthHeader - _contentLength);
       offset = startOffset + length;
@@ -489,17 +382,12 @@ public class ResponseStream extends ToByteResponseStream {
 
     _contentLength += length;
     
-    if (_cacheStream != null && ! _chunkedEncoding) {
-      _bufferStartOffset = offset;
-      writeCache(_next.getBuffer(), startOffset, length);
-    }
-
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() +  "write-chunk3(" + length + ")");
 
     if (! _isHead) {
       // server/051e
-      _next.setBufferOffset(offset);
+      setNextBufferOffset(offset);
 
       /*
       if (_chunkedEncoding && offset != startOffset) {
@@ -510,6 +398,65 @@ public class ResponseStream extends ToByteResponseStream {
 
       _next.flush();
       */
+    }
+  }
+
+  /**
+   * Sets the next buffer
+   */
+  public byte []nextBuffer(int offset)
+    throws IOException
+  {
+    if (! _isCommitted) {
+      // server/055b
+      return super.nextBuffer(offset);
+      // _bufferStartOffset = _next.getBufferOffset();
+    }
+    
+    if (_isClosed)
+      return getNextBuffer();
+    
+    flushBuffer();
+
+    byte []nextBuffer = getNextBuffer();
+    int startOffset = getNextStartOffset();
+
+    int length = offset - startOffset;
+    long lengthHeader = _response.getContentLengthHeader();
+
+    if (lengthHeader > 0 && lengthHeader < _contentLength + length) {
+      _isCommitted = true;
+    
+      lengthException(nextBuffer, startOffset, length, lengthHeader);
+
+      length = (int) (lengthHeader - _contentLength);
+      offset = startOffset + length;
+    }
+
+    _contentLength += length;
+
+    try {
+      if (_isHead) {
+	return nextBuffer;
+      }
+      
+      if (_cacheStream != null)
+        writeCache(nextBuffer, startOffset, length);
+
+      return writeNextBuffer(offset);
+    } catch (ClientDisconnectException e) {
+      _response.clientDisconnect();
+      // XXX: _response.killCache();
+
+      if (_response.isIgnoreClientDisconnect()) {
+	return _next.getBuffer();
+      }
+      else
+        throw e;
+    } catch (IOException e) {
+      // XXX: _response.killCache();
+      
+      throw e;
     }
   }
   
@@ -541,8 +488,8 @@ public class ResponseStream extends ToByteResponseStream {
       else
 	writeHeaders(-1);
 
-      int bufferStart = _bufferStartOffset;
-      int bufferOffset = _next.getBufferOffset();
+      int bufferStart = getNextStartOffset();
+      int bufferOffset = getNextBufferOffset();
 
       // server/05e2
       if (length == 0 && ! isFinished && bufferStart == bufferOffset)
@@ -558,78 +505,45 @@ public class ResponseStream extends ToByteResponseStream {
 	length = (int) (contentLengthHeader - _contentLength);
       }
 
-      if (_next != null && ! _isHead) {
-	if (length > 0 && log.isLoggable(Level.FINE)) {
-	  log.fine(dbgId() +  "write-chunk4(" + length + ")");
-	}
-	
-	if (_chunkedEncoding) {
-	  byte []buffer = _next.getBuffer();
-	  int writeLength = length;
-
-	  if (bufferStart == 0 && writeLength > 0) {
-	    bufferStart = bufferOffset + 8;
-	    bufferOffset = bufferStart;
-	  }
-
-	  while (writeLength > 0) {
-	    int sublen = buffer.length - bufferOffset;
-
-	    if (writeLength < sublen)
-	      sublen = writeLength;
-
-	    System.arraycopy(buf, offset, buffer, bufferOffset, sublen);
-
-	    writeLength -= sublen;
-	    offset += sublen;
-	    bufferOffset += sublen;
-
-	    if (writeLength > 0) {
-	      int delta = bufferOffset - bufferStart;
-	      writeChunkHeader(buffer, bufferStart, delta);
-			   
-	      _isCommitted = true;
-	      buffer = _next.nextBuffer(bufferOffset);
-	      
-	      if (log.isLoggable(Level.FINE))
-		log.fine(dbgId() + "write-chunk5(" + bufferOffset + ")");
-	      
-	      bufferStart = _next.getBufferOffset() + 8;
-	      bufferOffset = bufferStart;
-	    }
-	  }
-
-	  _next.setBufferOffset(bufferOffset);
-	  _bufferStartOffset = bufferStart;
-	}
-	else {
-	  byte []nextBuffer = _next.getBuffer();
-	  int nextOffset = _next.getBufferOffset();
-
-	  if (nextOffset + length < nextBuffer.length) {
-	    System.arraycopy(buf, offset, nextBuffer, nextOffset, length);
-	    _next.setBufferOffset(nextOffset + length);
-	  }
-	  else {
-	    _isCommitted = true;
-
-	    _next.write(buf, offset, length);
-
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(dbgId() + "write-data(" + _tailChunkedLength + ")");
-	  }
-
-	  if (_cacheStream != null)
-	    writeCache(buf, offset, length);
-
-	  // server/1975
-	  _bufferStartOffset = _next.getBufferOffset();
-	}
+      if (_isHead) {
+        return;
       }
+      
+      if (_cacheStream != null)
+        writeCache(buf, offset, length);
 
       if (! _response.isClientDisconnect()) {
         _contentLength += length;
       }
+      
+      if (length > 0 && log.isLoggable(Level.FINE)) {
+        log.fine(dbgId() +  "write-chunk4(" + length + ")");
+      }
+	
+      byte []buffer = getNextBuffer();
+      int writeLength = length;
+
+      while (writeLength > 0) {
+        int sublen = buffer.length - bufferOffset;
+
+        if (writeLength < sublen)
+          sublen = writeLength;
+
+        System.arraycopy(buf, offset, buffer, bufferOffset, sublen);
+
+        writeLength -= sublen;
+        offset += sublen;
+        bufferOffset += sublen;
+
+        if (writeLength > 0) {
+          buffer = nextBuffer(bufferOffset);
+              
+          bufferStart = getNextStartOffset();
+          bufferOffset = bufferStart;
+        }
+      }
+
+      setNextBufferOffset(bufferOffset);
     } catch (ClientDisconnectException e) {
       // server/183c
       // XXX: _response.killCache();
@@ -780,7 +694,6 @@ public class ResponseStream extends ToByteResponseStream {
     boolean isClosed = _isClosed;
 
     if (isClosed) {
-      _isClosed = true;
       return;
     }
 
@@ -795,16 +708,14 @@ public class ResponseStream extends ToByteResponseStream {
 
     // flushBuffer can force 304 and then a cache write which would
     // complete the finish.
-    if (isClosed || _next == null) {
+    if (isClosed) {
       return;
     }
     
-    int bufferStart = _bufferStartOffset;
-    _bufferStartOffset = 0;
     _isClosed = true;
     
     try {
-      writeTail(bufferStart);
+      writeTail();
 
       AbstractHttpRequest req = _response.getRequest();
       if (req.isComet() || req.isDuplex()) {
@@ -833,9 +744,11 @@ public class ResponseStream extends ToByteResponseStream {
     }
   }
 
-  protected void writeTail(int bufferStart)
+  protected void writeTail()
     throws IOException
   {
+    int bufferStart = getNextStartOffset();
+
     if (_chunkedEncoding) {
       int bufferOffset = _next.getBufferOffset();
 
@@ -905,6 +818,40 @@ public class ResponseStream extends ToByteResponseStream {
       return (byte) ('0' + value);
     else
       return (byte) ('a' + value - 10);
+  }
+
+  //
+  // implementations
+  //
+
+  protected byte []getNextBuffer()
+  {
+    return _next.getBuffer();
+  }
+
+  protected int getNextStartOffset()
+  {
+    return _bufferStartOffset;
+  }
+  
+  protected void setNextBufferOffset(int offset)
+  {
+    _next.setBufferOffset(offset);
+  }
+      
+  protected int getNextBufferOffset()
+    throws IOException
+  {
+    return _next.getBufferOffset();
+  }
+
+  protected byte []writeNextBuffer(int offset)
+    throws IOException
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "write-chunk2(" + offset + ")");
+    
+    return _next.nextBuffer(offset);
   }
 
   //
@@ -1036,7 +983,7 @@ public class ResponseStream extends ToByteResponseStream {
     }
   }
 
-  private String dbgId()
+  protected String dbgId()
   {
     Object request = _response.getRequest();
     
