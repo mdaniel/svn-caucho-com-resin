@@ -1054,7 +1054,7 @@ abstract public class AbstractHttpResponse {
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
       // Never send flush?
-      _responseStream.close();
+      // _responseStream.close();
 
       _isClosed = true;
 

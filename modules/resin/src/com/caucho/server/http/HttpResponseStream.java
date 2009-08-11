@@ -49,17 +49,13 @@ public class HttpResponseStream extends ResponseStream {
   private static final byte []_tailChunked
     = new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
   
+  private final byte []_buffer = new byte[16];
+  
   private HttpResponse _response;
+  private WriteStream _next;
   
   private boolean _isChunkedEncoding;
   private int _bufferStartOffset;
-
-  private byte []_singleByteBuffer = new byte[1];
-  // True for the first chunk
-  private boolean _isFirst;
-  private WriteStream _next;
-  
-  private final byte []_buffer = new byte[16];
 
   HttpResponseStream(HttpResponse response, WriteStream next)
   {
@@ -80,6 +76,10 @@ public class HttpResponseStream extends ResponseStream {
     _bufferStartOffset = 0;
   }
 
+  //
+  // implementations
+  //
+
   @Override
   protected void writeHeaders(int length)
     throws IOException
@@ -88,138 +88,6 @@ public class HttpResponseStream extends ResponseStream {
 
     _isChunkedEncoding = _response.isChunkedEncoding();
   }
-
-  /**
-   * Returns the byte offset.
-   */
-  public int getBufferOffset()
-    throws IOException
-  {
-    if (! _isCommitted)
-      return super.getBufferOffset();
-    
-    flushBuffer();
-      
-    int offset;
-
-    offset = _next.getBufferOffset();
-
-    if (! _isChunkedEncoding) {
-      //_bufferStartOffset = offset;
-      return offset;
-    }
-    else if (_bufferStartOffset > 0) {
-      return offset;
-    }
-
-    byte []buffer;
-    // chunked allocates 8 bytes for the chunk header
-    buffer = _next.getBuffer();
-    if (buffer.length - offset < 8) {
-      _next.flushBuffer();
-      
-      buffer = _next.getBuffer();
-      offset = _next.getBufferOffset();
-    }
-
-    _bufferStartOffset = offset + 8;
-    _next.setBufferOffset(offset + 8);
-
-    return _bufferStartOffset;
-  }
-
-  /**
-   * Sets the next buffer
-   */
-  public byte []nextBuffer2(int offset)
-    throws IOException
-  {
-    if (! _isCommitted) {
-      // server/055b
-      return super.nextBuffer(offset);
-      // _bufferStartOffset = _next.getBufferOffset();
-    }
-    
-    flushBuffer();
-      
-    int startOffset = _bufferStartOffset;
-    _bufferStartOffset = 0;
-
-    int length = offset - startOffset;
-    long lengthHeader = _response.getContentLengthHeader();
-
-    try {
-      if (_isChunkedEncoding) {
-	if (length == 0)
-	  throw new IllegalStateException();
-      
-	byte []buffer = _next.getBuffer();
-
-	writeChunkHeader(buffer, startOffset, length);
-
-	buffer = _next.nextBuffer(offset);
-	      
-	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "write-chunk1(" + offset + ")");
-
-	_bufferStartOffset = 8 + _next.getBufferOffset();
-	_next.setBufferOffset(_bufferStartOffset);
-
-	return buffer;
-      }
-      else {
-	byte []buffer = _next.nextBuffer(offset);
-	_bufferStartOffset = _next.getBufferOffset();
-	      
-	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + "write-chunk2(" + offset + ")");
-
-	return buffer;
-      }
-    } catch (ClientDisconnectException e) {
-      _response.clientDisconnect();
-      // XXX: _response.killCache();
-
-      if (_response.isIgnoreClientDisconnect()) {
-	return _next.getBuffer();
-      }
-      else
-        throw e;
-    } catch (IOException e) {
-      // XXX: _response.killCache();
-      
-      throw e;
-    }
-  }
-
-  /**
-   * Sets the byte offset.
-   */
-  public void setBufferOffset(int offset)
-    throws IOException
-  {
-    if (! _isCommitted) {
-      super.setBufferOffset(offset);
-      return;
-    }
-
-    flushBuffer();
-    
-    int startOffset = _bufferStartOffset;
-    if (offset == startOffset)
-      return;
-    
-    int length = 666;
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() +  "write-chunk3(" + length + ")");
-
-    _next.setBufferOffset(offset);
-  }
-
-  //
-  // implementations
-  //
 
   @Override
   protected byte []getNextBuffer()
@@ -230,20 +98,34 @@ public class HttpResponseStream extends ResponseStream {
   @Override
   protected int getNextStartOffset()
   {
+    if (_isChunkedEncoding) {
+      if (_bufferStartOffset == 0) {
+        _bufferStartOffset = _next.getBufferOffset() + 8;
+        _next.setBufferOffset(_bufferStartOffset);
+      }
+    }
+    
     return _bufferStartOffset;
-  }
-  
-  @Override
-  protected void setNextBufferOffset(int offset)
-  {
-    _next.setBufferOffset(offset);
   }
       
   @Override
   protected int getNextBufferOffset()
     throws IOException
   {
+    if (_isChunkedEncoding) {
+      if (_bufferStartOffset == 0) {
+        _bufferStartOffset = _next.getBufferOffset() + 8;
+        _next.setBufferOffset(_bufferStartOffset);
+      }
+    }
+    
     return _next.getBufferOffset();
+  }
+  
+  @Override
+  protected void setNextBufferOffset(int offset)
+  {
+    _next.setBufferOffset(offset);
   }
 
   @Override
@@ -252,50 +134,73 @@ public class HttpResponseStream extends ResponseStream {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + "write-chunk2(" + offset + ")");
+
+    WriteStream next = _next;
+
+    int bufferStart = _bufferStartOffset;
     
-    return _next.nextBuffer(offset);
+    if (bufferStart > 0) {
+      byte []buffer = next.getBuffer();
+
+      writeChunkHeader(buffer, bufferStart, offset - bufferStart);
+      
+      _bufferStartOffset = 0;
+    }
+
+    return next.nextBuffer(offset);
   }
 
-  protected void writeTail(int bufferStart)
+  @Override
+  protected void flushNext()
     throws IOException
   {
-    if (_isChunkedEncoding) {
-      int bufferOffset = _next.getBufferOffset();
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "flush()");
 
-      if (bufferStart > 0 && bufferOffset != bufferStart) {
-	byte []buffer = _next.getBuffer();
+    _next.flush();
 
-	writeChunkHeader(buffer, bufferStart, bufferOffset - bufferStart);
-      }
-      else {
-	// server/05b3
-	_next.setBufferOffset(0);
-      }
+    _bufferStartOffset = 0;
+  }
 
-      _isCommitted = true;
-	
-      ArrayList<String> footerKeys = _response.getFooterKeys();
+  @Override
+  protected void writeTail()
+    throws IOException
+  {
+    int bufferStart = _bufferStartOffset;
+    if (! _isChunkedEncoding)
+      return;
 
-      if (footerKeys.size() == 0)
-	_next.write(_tailChunked, 0, _tailChunkedLength);
-      else {
-	ArrayList<String> footerValues = _response.getFooterValues();
-	  
-	_next.print("\r\n0\r\n");
+    int bufferOffset = _next.getBufferOffset();
 
-	for (int i = 0; i < footerKeys.size(); i++) {
-	  _next.print(footerKeys.get(i));
-	  _next.print(": ");
-	  _next.print(footerValues.get(i));
-	  _next.print("\r\n");
-	}
-	  
-	_next.print("\r\n");
-      }
+    if (bufferStart > 0) {
+      byte []buffer = _next.getBuffer();
 
-      if (log.isLoggable(Level.FINE))
-	log.fine(dbgId() + "write-chunk6(" + _tailChunkedLength + ")");
+      writeChunkHeader(buffer, bufferStart, bufferOffset - bufferStart);
+
+      _bufferStartOffset = 0;
     }
+	
+    ArrayList<String> footerKeys = _response.getFooterKeys();
+
+    if (footerKeys.size() == 0)
+      _next.write(_tailChunked, 0, _tailChunkedLength);
+    else {
+      ArrayList<String> footerValues = _response.getFooterValues();
+	  
+      _next.print("\r\n0\r\n");
+
+      for (int i = 0; i < footerKeys.size(); i++) {
+        _next.print(footerKeys.get(i));
+        _next.print(": ");
+        _next.print(footerValues.get(i));
+        _next.print("\r\n");
+      }
+	  
+      _next.print("\r\n");
+    }
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "write-chunk-tail(" + _tailChunkedLength + ")");
   }
 
   /**

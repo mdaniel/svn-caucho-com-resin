@@ -263,6 +263,8 @@ public abstract class AbstractHttpRequest
     _responseFacade = _requestFacade.getResponse();
 
     _response.startRequest(httpBuffer);
+
+    _startTime = -1;
   }
 
   protected void clearRequest()
@@ -1595,8 +1597,8 @@ public abstract class AbstractHttpRequest
   {
     if (_tcpConn != null)
       _tcpConn.beginActive();
-    else
-      _startTime = Alarm.getCurrentTime();
+
+    _startTime = Alarm.getCurrentTime();
 
     _response.startInvocation();
   }
@@ -1606,6 +1608,10 @@ public abstract class AbstractHttpRequest
    */
   public void finishInvocation()
   {
+    // to avoid finish when no request server/05b0
+    if (_startTime < 0)
+      return;
+    
     try {
       _response.finishInvocation();
     } catch (IOException e) {

@@ -748,6 +748,8 @@ public class HttpRequest extends AbstractHttpRequest
   public boolean handleRequest()
     throws IOException
   {
+    boolean isInvocation = false;
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -771,6 +773,7 @@ public class HttpRequest extends AbstractHttpRequest
 
       requestFacade.setInvocation(invocation);
 
+      isInvocation = true;
       startInvocation();
 
       invocation.service(requestFacade, getResponseFacade());
@@ -789,9 +792,9 @@ public class HttpRequest extends AbstractHttpRequest
 
       return false;
     } finally {
-      finishInvocation();
+      if (isInvocation) {
+        finishInvocation();
 
-      if (getRequestFacade() != null) {
         _requestTimeProbe.addData(Alarm.getCurrentTime() - getStartTime());
         _requestCountProbe.addData();
       }
