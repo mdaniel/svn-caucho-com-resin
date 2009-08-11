@@ -263,8 +263,10 @@ public class CronTrigger implements Trigger {
 
   private QDate getNextTimeInMonth(QDate currentTime)
   {
-    int day = getNextDayMatch(currentTime.getDayOfMonth(), currentTime
-        .getDayOfWeek(), currentTime.getDayOfMonth(), currentTime
+    // Note, QDate uses a 1 indexed weekday, while cron uses a 0 indexed
+    // weekday.
+    int day = getNextDayMatch(currentTime.getDayOfMonth(), (currentTime
+        .getDayOfWeek() - 1), currentTime.getDayOfMonth(), currentTime
         .getDaysInMonth());
 
     if (day == -1) {
@@ -281,8 +283,10 @@ public class CronTrigger implements Trigger {
 
       if (nextTime == null) {
         day++;
-        day = getNextDayMatch(currentTime.getDayOfMonth(), currentTime
-            .getDayOfWeek(), day, currentTime.getDaysInMonth());
+        // Note, QDate uses a 1 indexed weekday, while cron uses a 0 indexed
+        // weekday.
+        day = getNextDayMatch(currentTime.getDayOfMonth(), (currentTime
+            .getDayOfWeek() - 1), day, currentTime.getDaysInMonth());
 
         if (day == -1) {
           return null;
@@ -310,13 +314,13 @@ public class CronTrigger implements Trigger {
         return -1;
       }
 
-      int dayOfWeek = (((initialDayOfWeek - 1) + ((day - initialDayOfMonth) % 7)) % 7) + 1;
+      int dayOfWeek = ((initialDayOfWeek + ((day - initialDayOfMonth) % 7)) % 7);
       int nextDayOfWeek = getNextMatch(_daysOfWeek, dayOfWeek);
 
       if (nextDayOfWeek == dayOfWeek) {
         return day;
       } else if (nextDayOfWeek == -1) {
-        day += ((7 - dayOfWeek) + 1);
+        day += (7 - dayOfWeek);
       } else {
         day += (nextDayOfWeek - dayOfWeek);
       }
@@ -380,7 +384,7 @@ public class CronTrigger implements Trigger {
         if (minute == -1) {
           return null;
         } else {
-          currentTime.setSecond(0);          
+          currentTime.setSecond(0);
           currentTime.setMinute(minute);
 
           return getNextTimeInMinute(currentTime);
