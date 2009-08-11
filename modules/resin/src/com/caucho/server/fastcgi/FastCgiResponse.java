@@ -59,11 +59,9 @@ public class FastCgiResponse extends AbstractHttpResponse {
   @Override
   protected AbstractResponseStream createResponseStream()
   {
-    FastCgiResponseStream responseStream = new FastCgiResponseStream(this);
-    responseStream.setRequest((FastCgiRequest) _request);
-    responseStream.init(getRawWrite());
-
-    return responseStream;
+    FastCgiRequest request = (FastCgiRequest) _request;
+    
+    return new FastCgiResponseStream(request, this, getRawWrite());
   }
 
   /**
@@ -74,9 +72,9 @@ public class FastCgiResponse extends AbstractHttpResponse {
   {
     // server/265a
   }
-  
-  protected boolean writeHeadersInt(WriteStream os,
-				    int length,
+
+  @Override
+  protected boolean writeHeadersInt(int length,
 				    boolean isHead)
     throws IOException
   {
@@ -87,6 +85,8 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
     int statusCode = response.getStatus();
     String statusMessage = response.getStatusMessage();
+
+    WriteStream os = getRawWrite();
 
     os.print("Status: ");
     os.print(statusCode);

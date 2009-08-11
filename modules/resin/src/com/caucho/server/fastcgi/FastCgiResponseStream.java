@@ -52,18 +52,69 @@ public class FastCgiResponseStream extends ResponseStream {
   private static final L10N L = new L10N(FastCgiResponseStream.class);
 
   private FastCgiRequest _request;
+  private WriteStream _next;
 
-  FastCgiResponseStream(AbstractHttpResponse response)
+  FastCgiResponseStream(FastCgiRequest request,
+                        FastCgiResponse response,
+                        WriteStream next)
   {
-    super(response);//, rawStream);
+    super(response);
+
+    _request = request;
+    _next = next;
+  }
+  
+  //
+  // implementations
+  //
+
+  @Override
+  protected byte []getNextBuffer()
+  {
+    return _next.getBuffer();
+  }
+      
+  @Override
+  protected int getNextBufferOffset()
+    throws IOException
+  {
+    return _next.getBufferOffset();
+  }
+  
+  @Override
+  protected void setNextBufferOffset(int offset)
+  {
+    _next.setBufferOffset(offset);
   }
 
-  void setRequest(FastCgiRequest request)
+  @Override
+  protected byte []writeNextBuffer(int offset)
+    throws IOException
   {
-    _request = request;
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "write-chunk(" + offset + ")");
 
-    if (request == null)
-      throw new NullPointerException();
+    return _next.nextBuffer(offset);
+  }
+
+  @Override
+  protected void flushNext()
+    throws IOException
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "flush()");
+
+    _next.flush();
+  }
+
+  @Override
+  protected void closeNext()
+    throws IOException
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "flush()");
+
+    _next.flush();
   }
 
   @Override

@@ -135,17 +135,6 @@ abstract public class AbstractHttpResponse {
     _responseStream = createResponseStream();
   }
   
-  protected AbstractResponseStream
-    createResponseStream(HttpBufferStore bufferStore)
-  {
-    ResponseStream responseStream = new ResponseStream();
-
-    responseStream.setResponse(this);
-    responseStream.init(_rawWrite);
-
-    return responseStream;
-  }
-
   TempBuffer getBuffer()
   {
     return _bufferStore.getTempBuffer();
@@ -252,14 +241,7 @@ abstract public class AbstractHttpResponse {
     _isClosed = false;
   }
 
-  protected AbstractResponseStream createResponseStream()
-  {
-    ResponseStream responseStream = new ResponseStream(this);
-
-    responseStream.init(_rawWrite);
-
-    return responseStream;
-  }
+  abstract protected AbstractResponseStream createResponseStream();
 
   /**
    * For a HEAD request, the response stream should write no data.
@@ -751,7 +733,7 @@ abstract public class AbstractHttpResponse {
    * @param length length of the response if known, or -1 is unknown.
    * @return true if the content is chunked.
    */
-  protected boolean writeHeaders(WriteStream os, int length)
+  protected boolean writeHeaders(int length)
     throws IOException
   {
     if (isHeaderWritten())
@@ -790,11 +772,10 @@ abstract public class AbstractHttpResponse {
       res.addServletCookie(webApp);
     }
 
-    return writeHeadersInt(os, length, isHead);
+    return writeHeadersInt(length, isHead);
   }
 
-  abstract protected boolean writeHeadersInt(WriteStream os,
-					     int length,
+  abstract protected boolean writeHeadersInt(int length,
 					     boolean isHead)
     throws IOException;
 

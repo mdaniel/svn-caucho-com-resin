@@ -45,24 +45,22 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ResponseStream extends ToByteResponseStream {
+abstract public class ResponseStream extends ToByteResponseStream {
   private static final Logger log
     = Logger.getLogger(ResponseStream.class.getName());
   
   private static final L10N L = new L10N(ResponseStream.class);
   
-  private AbstractHttpResponse _response;
+  private final byte []_buffer = new byte[16];
+  private final byte []_singleByteBuffer = new byte[1];
   
-  private WriteStream _next;
+  private AbstractHttpResponse _response;
 
   private AbstractCacheFilterChain _cacheInvocation;
   private AbstractCacheEntry _newCacheEntry;
   private OutputStream _cacheStream;
   private long _cacheMaxLength;
-  // used for the direct copy and caching
-  private int _bufferStartOffset;
   
-  private byte []_singleByteBuffer = new byte[1];
   private int _bufferSize;
   private boolean _disableAutoFlush;
   
@@ -74,8 +72,6 @@ public class ResponseStream extends ToByteResponseStream {
   private boolean _allowFlush = true;
   private boolean _isHead = false;
   private boolean _isClosed = false;
-  
-  private final byte []_buffer = new byte[16];
 
   public ResponseStream()
   {
@@ -89,14 +85,6 @@ public class ResponseStream extends ToByteResponseStream {
   public void setResponse(AbstractHttpResponse response)
   {
     _response = response;
-  }
-
-  public void init(WriteStream next)
-  {
-    if (next == null)
-      throw new NullPointerException();
-    
-    _next = next;
   }
   
   /**
@@ -113,7 +101,6 @@ public class ResponseStream extends ToByteResponseStream {
     _isHead = false;
     _cacheStream = null;
     _isHeaderWritten = false;
-    _bufferStartOffset = 0;
   }
 
   /**
@@ -254,7 +241,6 @@ public class ResponseStream extends ToByteResponseStream {
     if (! _isCommitted) {
       // jsp/15la
       _isHeaderWritten = false;
-      _bufferStartOffset = 0;
       _response.setHeaderWritten(false);
     }
 
@@ -279,7 +265,7 @@ public class ResponseStream extends ToByteResponseStream {
 
     startCaching(true);
 
-    _response.writeHeaders(_next, length);
+    _response.writeHeaders(length);
   }
 
   @Override
@@ -391,7 +377,6 @@ public class ResponseStream extends ToByteResponseStream {
     if (! _isCommitted) {
       // server/055b
       return super.nextBuffer(offset);
-      // _bufferStartOffset = _next.getBufferOffset();
     }
     
     if (_isClosed)
@@ -430,7 +415,7 @@ public class ResponseStream extends ToByteResponseStream {
       // XXX: _response.killCache();
 
       if (_response.isIgnoreClientDisconnect()) {
-	return _next.getBuffer();
+	return nextBuffer;
       }
       else
         throw e;
@@ -692,7 +677,7 @@ public class ResponseStream extends ToByteResponseStream {
           log.fine(dbgId() + "close stream");
         }
       
-        _next.close();
+        closeNext();
       }
       else {
 	_isClosed = true;
@@ -714,44 +699,26 @@ public class ResponseStream extends ToByteResponseStream {
   // implementations
   //
 
-  protected byte []getNextBuffer()
-  {
-    return _next.getBuffer();
-  }
+  abstract protected byte []getNextBuffer();
 
   protected int getNextStartOffset()
   {
-    return _bufferStartOffset;
+    return 0;
   }
   
-  protected void setNextBufferOffset(int offset)
-  {
-    _next.setBufferOffset(offset);
-  }
+  abstract protected void setNextBufferOffset(int offset);
       
-  protected int getNextBufferOffset()
-    throws IOException
-  {
-    return _next.getBufferOffset();
-  }
+  abstract protected int getNextBufferOffset()
+    throws IOException;
 
-  protected byte []writeNextBuffer(int offset)
-    throws IOException
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "write-chunk2(" + offset + ")");
+  abstract protected byte []writeNextBuffer(int offset)
+    throws IOException;
 
-    return _next.nextBuffer(offset);
-  }
+  abstract protected void flushNext()
+    throws IOException;
 
-  protected void flushNext()
-    throws IOException
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "flush()");
-    
-    _next.flush();
-  }
+  abstract protected void closeNext()
+    throws IOException;
 
   protected void clearNext()
   {

@@ -53,6 +53,12 @@ public class HmuxResponse extends AbstractHttpResponse {
     _req = request;
   }
 
+  @Override
+  protected AbstractResponseStream createResponseStream()
+  {
+    return new HmuxResponseStream(_req, this, getRawWrite());
+  }
+
   /**
    * headersWritten cannot be undone for hmux
    */
@@ -61,9 +67,9 @@ public class HmuxResponse extends AbstractHttpResponse {
   {
     // server/265a
   }
-  
-  protected boolean writeHeadersInt(WriteStream os,
-				    int length,
+
+  @Override
+  protected boolean writeHeadersInt(int length,
 				    boolean isHead)
     throws IOException
   {

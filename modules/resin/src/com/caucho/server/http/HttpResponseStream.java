@@ -163,6 +163,18 @@ public class HttpResponseStream extends ResponseStream {
   }
 
   @Override
+  protected void closeNext()
+    throws IOException
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "close()");
+
+    _next.close();
+
+    _bufferStartOffset = 0;
+  }
+
+  @Override
   protected void writeTail()
     throws IOException
   {

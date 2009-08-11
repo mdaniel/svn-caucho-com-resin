@@ -155,8 +155,8 @@ public class HttpResponse extends AbstractHttpResponse
    *
    * @return true if the data in the request should use chunked encoding.
    */
-  protected boolean writeHeadersInt(WriteStream tos,
-				    int length,
+  @Override
+  protected boolean writeHeadersInt(int length,
 				    boolean isHead)
     throws IOException
   {
