@@ -35,6 +35,15 @@
             context="internal"
             default="false"/>                        
         
+  <property id="resin.help.text"
+            label=""
+            type="string"
+            context="internal"
+            default="   server.address - IP or hostname of the server\n
+  server.port - HTTP port of the server\n
+  webapp.id - Context root for the webapp\n
+  webapp.dir - root directory for the webapp"/>                                    
+
   <port>
     <no>${server.port}</no>
     <name>Http</name>

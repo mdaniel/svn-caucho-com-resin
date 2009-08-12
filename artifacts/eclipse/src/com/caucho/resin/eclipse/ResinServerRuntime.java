@@ -35,18 +35,18 @@ import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.GenericServerRuntime;
 import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 
+@SuppressWarnings("restriction")
 public class ResinServerRuntime extends GenericServerRuntime {
 
   @Override
   protected IStatus validateClasspaths(ServerRuntime serverTypeDefinition)
   {
     // Just pretend that the class paths are valid until we've actually
-    // had a chance to set the resin.home
-    
-    String serverPropertiesComplete =
-      (String) getServerInstanceProperties().get(ResinServerWizardFragment.SERVER_PROPERTIES_COMPLETE);
+    // had a chance to set the resin.home    
+    String serverPropertiesEntered =
+      (String) getServerInstanceProperties().get(ResinServerWizardFragment.SERVER_PROPERTIES_ENTERED);
       
-    if (! "true".equals(serverPropertiesComplete))
+    if (! "true".equals(serverPropertiesEntered))
       return new Status(IStatus.OK, CorePlugin.PLUGIN_ID, 0, "", null);
     
     return super.validateClasspaths(serverTypeDefinition);

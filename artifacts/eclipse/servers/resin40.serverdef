@@ -41,6 +41,13 @@
             context="internal"
             default="true"/>                        
     
+  <property id="resin.help.text"
+            label=""
+            type="string"
+            context="internal"
+            default="   server.address - IP or hostname of the server\n
+  server.port - HTTP port of the server"/>                                  
+    
   <port>
     <no>${server.port}</no>
     <name>Http</name>

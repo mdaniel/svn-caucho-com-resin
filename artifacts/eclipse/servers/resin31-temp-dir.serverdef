@@ -33,20 +33,21 @@
             label=""
             type="string"
             context="internal"
-            default="conf/resin31/resin.xml"/>
+            default="conf/resin31/temp-dir.xml"/>
             
   <property id="resin.changeable.root"
             label=""
             type="string"
             context="internal"
-            default="true"/>                        
-    
+            default="false"/>                        
+
   <property id="resin.help.text"
             label=""
             type="string"
             context="internal"
             default="   server.address - IP or hostname of the server\n
-  server.port - HTTP port of the server"/>                                  
+  server.port - HTTP port of the server\n
+  webapp.deploydir - the temporary web app deploy directory"/>
     
   <port>
     <no>${server.port}</no>
@@ -56,20 +57,9 @@
 
   <module>
     <type>jst.web</type>
-    <publishDir>${resin.root}/webapps</publishDir>
+    <publishDir>${webapp.deploydir}</publishDir>
     <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
   </module>
-  <module>
-    <type>jst.ejb</type>
-    <publishDir>${resin.root}/deploy</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
-  </module>
-  <module>
-    <type>jst.ear</type>
-    <publishDir>${resin.root}/deploy</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
-  </module>
-
 
   <project>
     <classpathReference>resin.project</classpathReference>
@@ -89,6 +79,7 @@
       -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
       -Djava.awt.headless=true 
       -Dresin.home="${resin.home}"
+      -Dwebapp.deploydir="${webapp.deploydir}"
       -Dserver.address="${server.address}" 
       -Dserver.port="${server.port}"
       -Xss1m -Xmx512m -server

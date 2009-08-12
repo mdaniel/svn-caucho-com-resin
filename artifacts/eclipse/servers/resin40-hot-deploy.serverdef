@@ -52,6 +52,15 @@
             type="string"
             context="runtime"
             default="password" />
+            
+  <property id="resin.help.text"
+            label=""
+            type="string"
+            context="internal"
+            default="   server.address - IP or hostname of the server\n
+  server.port - HTTP port of the server\n
+  deploy.username - the username to be used to deploy the application\n
+  deploy.password - the password to be used to deploy the application"/>
     
   <port>
     <no>${server.port}</no>

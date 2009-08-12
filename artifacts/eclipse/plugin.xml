@@ -53,6 +53,34 @@
         types="jst.utility"
         versions="1.0"/>
     </runtimeType>
+    <runtimeType
+          class="com.caucho.resin.eclipse.ResinServerRuntime"
+          description="%resin31tempDirRuntimeTypeDescription"
+          id="org.eclipse.jst.server.generic.runtime.resin31tempDir"
+          name="%resin31tempDirRuntimeTypeName"
+          vendor="%resinCategory"
+          version="3.1">
+       <moduleType
+             types="jst.web"
+             versions="2.2, 2.3, 2.4, 2.5">
+       </moduleType>
+       <moduleType
+             types="jst.ejb"
+             versions="1.1, 2.0, 2.1, 3.0">
+       </moduleType>
+       <moduleType
+             types="jst.ear"
+             versions="1.2, 1.3, 1.4, 5.0">
+       </moduleType>
+       <moduleType
+             types="jst.connector"
+             versions="1.0, 1.5">
+       </moduleType>
+       <moduleType
+             types="jst.utility"
+             versions="1.0">
+       </moduleType>
+    </runtimeType>
 
     <!-- 4.0 -->
     <runtimeType
@@ -79,29 +107,6 @@
         versions="1.0"/>
     </runtimeType>
     
-    <runtimeType
-      id="org.eclipse.jst.server.generic.runtime.resin40inPlace"
-      name="%resin40inPlaceRuntimeTypeName"
-      description="%resin40inPlaceRuntimeTypeDescription"
-      vendor="%resinCategory"
-      version="4.0"
-      class="com.caucho.resin.eclipse.ResinServerRuntime">
-      <moduleType
-        types="jst.web"
-        versions="2.2, 2.3, 2.4, 2.5"/>
-      <moduleType
-        types="jst.ejb"
-        versions="1.1, 2.0, 2.1, 3.0"/>
-      <moduleType
-        types="jst.ear"
-        versions="1.2, 1.3, 1.4, 5.0"/>
-      <moduleType
-        types="jst.connector"
-        versions="1.0, 1.5"/>
-      <moduleType
-        types="jst.utility"
-        versions="1.0"/>
-    </runtimeType>
 
     <runtimeType
       id="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"
@@ -125,6 +130,34 @@
       <moduleType
         types="jst.utility"
         versions="1.0"/>
+    </runtimeType>
+    <runtimeType
+          class="com.caucho.resin.eclipse.ResinServerRuntime"
+          description="%resin40inPlaceRuntimeTypeDescription"
+          id="org.eclipse.jst.server.generic.runtime.resin40inPlace"
+          name="%resin40inPlaceRuntimeTypeName"
+          vendor="%resinCategory"
+          version="4.0">
+       <moduleType
+             types="jst.web"
+             versions="2.2, 2.3, 2.4, 2.5">
+       </moduleType>
+       <moduleType
+             types="jst.ejb"
+             versions="1.1, 2.0, 2.1, 3.0">
+       </moduleType>
+       <moduleType
+             types="jst.ear"
+             versions="1.2, 1.3, 1.4, 5.0">
+       </moduleType>
+       <moduleType
+             types="jst.connector"
+             versions="1.0, 1.5">
+       </moduleType>
+       <moduleType
+             types="jst.utility"
+             versions="1.0">
+       </moduleType>
     </runtimeType>
     <runtimeType
           class="com.caucho.resin.eclipse.ResinServerRuntime"
@@ -188,6 +221,20 @@
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31inPlace"
       supportsRemoteHosts="false">
     </serverType>
+    <serverType
+          behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
+          class="com.caucho.resin.eclipse.ResinServer"
+          description="%resin31tempDirServerTypeDescription"
+          hasConfiguration="true"
+          id="org.eclipse.jst.server.generic.resin31tempDir"
+          initialState="stopped"
+          launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
+          launchModes="run"
+          name="%resin31tempDirServerTypeName"
+          runtime="true"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31tempDir"
+          supportsRemoteHosts="false">
+    </serverType>
 
     <!-- 4.0 -->
     <serverType
@@ -205,20 +252,6 @@
       supportsRemoteHosts="false">
     </serverType>
     
-    <serverType
-      behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
-      class="com.caucho.resin.eclipse.ResinServer"
-      description="%resin40inPlaceServerTypeDescription"
-      hasConfiguration="true"
-      id="org.eclipse.jst.server.generic.resin40inPlace"
-      initialState="stopped"
-      launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-      launchModes="run"
-      name="%resin40inPlaceServerTypeName"
-      runtime="true"
-      runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40inPlace"
-      supportsRemoteHosts="false">
-    </serverType>
 
     <serverType
           behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
@@ -234,6 +267,20 @@
           runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"
           startBeforePublish="true"
           supportsRemoteHosts="true">
+    </serverType>
+    <serverType
+          behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
+          class="com.caucho.resin.eclipse.ResinServer"
+          description="%resin40inPlaceServerTypeDescription"
+          hasConfiguration="true"
+          id="org.eclipse.jst.server.generic.resin40inPlace"
+          initialState="stopped"
+          launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
+          launchModes="run"
+          name="%resin40inPlaceServerTypeName"
+          runtime="true"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40inPlace"
+          supportsRemoteHosts="false">
     </serverType>
     <serverType
           behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
@@ -269,25 +316,28 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin31inPlace"
-      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>   
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
+    <fragment
+          class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
+          id="org.eclipse.jst.server.generic.runtime"
+          typeIds="org.eclipse.jst.server.generic.runtime.resin31tempDir">
+    </fragment>
+    <fragment
+          class="com.caucho.resin.eclipse.ResinServerWizardFragment"
+          id="org.eclipse.jst.server.generic.server"
+          typeIds="org.eclipse.jst.server.generic.resin31tempDir">
+    </fragment>
 
     <!-- 4.0 -->
     <fragment
       id="org.eclipse.jst.server.generic.runtime"
       typeIds="org.eclipse.jst.server.generic.runtime.resin40"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"/>           
+      class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"/>
     <fragment
-      id="org.eclipse.jst.server.generic.server"
-      typeIds="org.eclipse.jst.server.generic.resin40"
-      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
-    <fragment
-      id="org.eclipse.jst.server.generic.runtime"
-      typeIds="org.eclipse.jst.server.generic.runtime.resin40inPlace"
-      class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"/>           
-    <fragment
-      id="org.eclipse.jst.server.generic.server"
-      typeIds="org.eclipse.jst.server.generic.resin40inPlace"
-      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
+          class="com.caucho.resin.eclipse.ResinServerWizardFragment"
+          id="org.eclipse.jst.server.generic.server"
+          typeIds="org.eclipse.jst.server.generic.resin40">
+    </fragment>           
     <fragment
       id="org.eclipse.jst.server.generic.runtime"
       typeIds="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"
@@ -297,15 +347,25 @@
       typeIds="org.eclipse.jst.server.generic.resin40hotDeploy"
       class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
     <fragment
+          class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
+          id="org.eclipse.jst.server.generic.runtime"
+          typeIds="org.eclipse.jst.server.generic.runtime.resin40inPlace">
+    </fragment>
+    <fragment
           class="com.caucho.resin.eclipse.ResinServerWizardFragment"
           id="org.eclipse.jst.server.generic.server"
-          typeIds="org.eclipse.jst.server.generic.resin40tempDir">
+          typeIds="org.eclipse.jst.server.generic.resin40inPlace">
     </fragment>
     <fragment
           class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
           id="org.eclipse.jst.server.generic.runtime"
           typeIds="org.eclipse.jst.server.generic.runtime.resin40tempDir">
-    </fragment>   
+    </fragment>
+    <fragment
+          class=""
+          id="org.eclipse.jst.server.generic.server"
+          typeIds="org.eclipse.jst.server.generic.resin40tempDir">
+    </fragment>
   </extension>
 
   <extension point="org.eclipse.wst.server.ui.serverImages">
@@ -326,6 +386,16 @@
       id="org.eclipse.jst.server.generic.image"
       icon="icons/obj16/resin.png"
       typeIds="org.eclipse.jst.server.generic.resin31inPlace"/>
+    <image
+          icon="icons/obj16/resin.png"
+          id="org.eclipse.jst.server.generic.image"
+          typeIds="org.eclipse.jst.server.generic.runtime.resin31tempDir">
+    </image>
+    <image
+          icon="icons/obj16/resin.png"
+          id="org.eclipse.jst.server.generic.image"
+          typeIds="org.eclipse.jst.server.generic.resin31tempDir">
+    </image>
 
     <!-- 4.0 -->
     <image
@@ -339,19 +409,21 @@
     <image
       id="org.eclipse.jst.server.generic.image"
       icon="icons/obj16/resin.png"
-      typeIds="org.eclipse.jst.server.generic.runtime.resin40inPlace"/>
-    <image
-      id="org.eclipse.jst.server.generic.image"
-      icon="icons/obj16/resin.png"
-      typeIds="org.eclipse.jst.server.generic.resin40inPlace"/>
-    <image
-      id="org.eclipse.jst.server.generic.image"
-      icon="icons/obj16/resin.png"
       typeIds="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"/>
     <image
       id="org.eclipse.jst.server.generic.image"
       icon="icons/obj16/resin.png"
       typeIds="org.eclipse.jst.server.generic.resin40hotDeploy"/>
+    <image
+          icon="icons/obj16/resin.png"
+          id="org.eclipse.jst.server.generic.image"
+          typeIds="org.eclipse.jst.server.generic.runtime.resin40inPlace">
+    </image>
+    <image
+          icon="icons/obj16/resin.png"
+          id="org.eclipse.jst.server.generic.image"
+          typeIds="org.eclipse.jst.server.generic.resin40inPlace">
+    </image>
     <image
       id="org.eclipse.jst.server.generic.image"
       icon="icons/obj16/resin.png"
@@ -373,12 +445,13 @@
     <!-- 3.1 -->
     <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31" definitionfile="/servers/resin31.serverdef"/>
     <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31inPlace" definitionfile="/servers/resin31-in-place.serverdef"/>
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31tempDir" definitionfile="/servers/resin31-temp-dir.serverdef"/>
 
     <!-- 4.0 -->
     <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40" definitionfile="/servers/resin40.serverdef"/>
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40inPlace" definitionfile="/servers/resin40-in-place.serverdef"/>
     <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40hotDeploy" definitionfile="/servers/resin40-hot-deploy.serverdef"/>
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40tempDir" definitionfile="/servers/resin40-temp-dir.serverdef"/>  
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40inPlace" definitionfile="/servers/resin40-in-place.serverdef"/>
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40tempDir" definitionfile="/servers/resin40-temp-dir.serverdef"/>
   </extension>
   
   <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
@@ -451,15 +524,16 @@
     <runtimeFacetMapping
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31inPlace"
       runtime-component="org.eclipse.jst.server.generic.runtime.resin"
-      version="3.1"/>      
+      version="3.1"/>
+    <runtimeFacetMapping
+          runtime-component="org.eclipse.jst.server.generic.runtime.resin"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31tempDir"
+          version="3.1">
+    </runtimeFacetMapping>      
 
     <!-- 4.0 -->
     <runtimeFacetMapping
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40"
-      runtime-component="org.eclipse.jst.server.generic.runtime.resin"
-      version="4.0"/>
-    <runtimeFacetMapping
-      runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40inPlace"
       runtime-component="org.eclipse.jst.server.generic.runtime.resin"
       version="4.0"/>
     <runtimeFacetMapping
@@ -468,39 +542,26 @@
       version="4.0"/>
     <runtimeFacetMapping
           runtime-component="org.eclipse.jst.server.generic.runtime.resin"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40inPlace"
+          version="4.0">
+    </runtimeFacetMapping>
+    <runtimeFacetMapping
+          runtime-component="org.eclipse.jst.server.generic.runtime.resin"
           runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40tempDir"
           version="4.0">
-    </runtimeFacetMapping>            
+    </runtimeFacetMapping>
   </extension>
 
-  <extension
-        point="org.eclipse.jst.server.generic.core.genericpublisher">
-     <genericpublisher
-           class="com.caucho.resin.eclipse.ResinInPlacePublisher"
-           id="org.eclipse.jst.server.generic.resin.resininplacepublisher">
-     </genericpublisher>
+  <extension point="org.eclipse.jst.server.generic.core.genericpublisher">
+     <genericpublisher id="org.eclipse.jst.server.generic.resin.resininplacepublisher" class="com.caucho.resin.eclipse.ResinInPlacePublisher"/>
   </extension>
-  
-  <extension
-        point="org.eclipse.jst.server.generic.core.genericpublisher">
-     <genericpublisher
-           class="com.caucho.resin.eclipse.ResinGitPublisher"
-           id="org.eclipse.jst.server.generic.resin.resingitpublisher">
-     </genericpublisher>
+  <extension point="org.eclipse.jst.server.generic.core.genericpublisher">
+    <genericpublisher id="org.eclipse.jst.server.generic.resin.resingitpublisher" class="com.caucho.resin.eclipse.ResinGitPublisher"/>
   </extension>
-  <extension
-        point="org.eclipse.jst.server.generic.core.genericpublisher">
-     <genericpublisher
-           class="com.caucho.resin.eclipse.ResinPublisher"
-           id="org.eclipse.jst.server.generic.resin.resinpublisher">
-     </genericpublisher>
+  <extension point="org.eclipse.jst.server.generic.core.genericpublisher">
+    <genericpublisher id="org.eclipse.jst.server.generic.resin.resinpublisher" class="com.caucho.resin.eclipse.ResinPublisher"/>
   </extension>
-  <extension
-        point="org.eclipse.core.variables.dynamicVariables">
-     <variable
-           description="description"
-           name="webapp.deploydir"
-           resolver="com.caucho.resin.eclipse.DeployDirResolver">
-     </variable>
+  <extension point="org.eclipse.core.variables.dynamicVariables">
+    <variable description="description" name="webapp.deploydir" resolver="com.caucho.resin.eclipse.DeployDirResolver"/>
   </extension>
 </plugin>

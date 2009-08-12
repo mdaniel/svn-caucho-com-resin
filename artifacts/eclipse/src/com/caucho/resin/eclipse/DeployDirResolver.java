@@ -12,12 +12,12 @@ public class DeployDirResolver implements IDynamicVariableResolver {
   private String _tempDirectory = null;
   
   public String resolveValue(IDynamicVariable variable, String argument)
-      throws CoreException
+    throws CoreException
   {
     if (_tempDirectory == null) {
       // create a webapp deploy directory in case we're doing hot deploy
       String dir = CorePlugin.getDefault().getStateLocation().toOSString(); 
-      File tempFile = FileUtil.createTempFile("tempRoot", dir);
+      File tempFile = FileUtil.createTempFile("webapps", dir);
       
       _tempDirectory = tempFile.toString();
     }

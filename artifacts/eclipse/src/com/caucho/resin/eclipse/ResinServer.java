@@ -62,6 +62,7 @@ public class ResinServer extends GenericServer
   static final String RESIN_CONF_BUNDLE = "resin.conf.bundle";
   static final String RESIN_CONF_RESIN_HOME = "resin.conf.resin.home";
   static final String RESIN_CONF_USER = "resin.conf.user";
+  static final String RESIN_CONF_COPY = "resin.conf.copy";
   
   static final String RESIN_CONF_USER_LOCATION 
     = "resin.conf.user.location";
@@ -89,38 +90,19 @@ public class ResinServer extends GenericServer
     ServerRuntime typeDef = genericRuntime.getServerTypeDefinition();
 
     String confType = (String) instanceProperties.get(RESIN_CONF_TYPE);
+    boolean copyConfig = 
+      "true".equals(instanceProperties.get(RESIN_CONF_COPY));
     
     IFile configIFile = null;
+    IFolder configFolder = server.getServerConfiguration();
     
     if (RESIN_CONF_BUNDLE.equals(confType)) {
       String filename = 
         getPropertyDefault(typeDef, RESIN_CONF_BUNDLE_LOCATION);
       File configFile = PublisherUtil.locateBundleFile(typeDef, filename);
-      FileInputStream fileContents = null;
+      configIFile = configFolder.getFile(configFile.getName());
       
-      try {
-        fileContents = new FileInputStream(configFile);
-      
-        IFolder configFolder = server.getServerConfiguration();
-        configIFile = configFolder.getFile(configFile.getName());
-        configIFile.create(fileContents, true, monitor);
-      }
-      catch (IOException e) {
-        PublisherUtil.throwCoreException("error copying file from bundle: "
-                                         + filename,
-                                         e);
-      }
-      finally {
-        try {
-          if (fileContents != null)
-            fileContents.close();
-        }
-        catch (IOException e) {
-          PublisherUtil.throwCoreException("error closing file from bundle: "
-                                           + filename, 
-                                           e);
-        }
-      }
+      copyFileToWorkspace(configFile, configIFile, monitor);
     }
     else if (RESIN_CONF_RESIN_HOME.equals(confType)) {
       String resinHome = 
@@ -128,29 +110,35 @@ public class ResinServer extends GenericServer
       IPath resinConfPath = new Path(resinHome).append("conf");
       
       IPath resinConfFilePath = resinConfPath.append("resin.xml");
-      File resinConfFile = resinConfFilePath.toFile();
+      File configFile = resinConfFilePath.toFile();
       
-      if (! resinConfFile.exists()) {
+      if (! configFile.exists()) {
         resinConfFilePath = resinConfPath.append("resin.conf");
-        resinConfFile = resinConfFilePath.toFile();
+        configFile = resinConfFilePath.toFile();
         
-        if (! resinConfFile.exists())
+        if (! configFile.exists())
           PublisherUtil.throwCoreException("Cannot file Resin configuration in Resin home directory");
       }
     
-      IFolder configFolder = server.getServerConfiguration();
-      configIFile = configFolder.getFile(resinConfFile.getName());
-      configIFile.createLink(resinConfFilePath, IResource.NONE, monitor);
+      configIFile = configFolder.getFile(configFile.getName());
+      
+      if (copyConfig)
+        copyFileToWorkspace(configFile, configIFile, monitor);
+      else
+        configIFile.createLink(resinConfFilePath, IResource.NONE, monitor);
     }
     else if (RESIN_CONF_USER.equals(confType)) {
       String userConf = 
         (String) instanceProperties.get(RESIN_CONF_USER_LOCATION);
       IPath userConfPath = new Path(userConf);
-      File userConfFile = userConfPath.toFile(); 
+      File configFile = userConfPath.toFile(); 
 
-      IFolder configFolder = server.getServerConfiguration();
-      configIFile = configFolder.getFile(userConfFile.getName());
-      configIFile.createLink(userConfPath, IResource.NONE, monitor);
+      configIFile = configFolder.getFile(configFile.getName());
+      
+      if (copyConfig)
+        copyFileToWorkspace(configFile, configIFile, monitor);
+      else
+        configIFile.createLink(userConfPath, IResource.NONE, monitor);
     }
     else {
       PublisherUtil.throwCoreException("Internal configuration error");
@@ -160,6 +148,30 @@ public class ResinServer extends GenericServer
                            configIFile.getLocation().toOSString());
     VariableUtil.setVariable(ResinPropertyIds.CONFIG_FILE_NAME,
                              configIFile.getLocation().toOSString());
+  }
+  
+  private void copyFileToWorkspace(File source, IFile destination, 
+                                   IProgressMonitor monitor)
+    throws CoreException
+  {
+    FileInputStream fileContents = null;
+    
+    try {
+      fileContents = new FileInputStream(source);
+      destination.create(fileContents, true, monitor);
+    }
+    catch (IOException e) {
+      PublisherUtil.throwCoreException("error copying file: " + source, e);
+    }
+    finally {
+      try {
+        if (fileContents != null)
+          fileContents.close();
+      }
+      catch (IOException e) {
+        PublisherUtil.throwCoreException("error closing file: " + source, e);
+      }
+    }
   }
   
   /**

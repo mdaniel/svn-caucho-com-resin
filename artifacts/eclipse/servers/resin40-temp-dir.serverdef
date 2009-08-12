@@ -40,6 +40,14 @@
             type="string"
             context="internal"
             default="false"/>                        
+
+  <property id="resin.help.text"
+            label=""
+            type="string"
+            context="internal"
+            default="   server.address - IP or hostname of the server\n
+  server.port - HTTP port of the server\n
+  webapp.deploydir - the temporary web app deploy directory"/>
     
   <port>
     <no>${server.port}</no>
@@ -49,21 +57,9 @@
 
   <module>
     <type>jst.web</type>
-    <publishDir>${webapp.deploydir}/webapps</publishDir>
+    <publishDir>${webapp.deploydir}</publishDir>
     <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
   </module>
-  <!--
-  <module>
-    <type>jst.ejb</type>
-    <publishDir>${resin.root}/deploy</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
-  </module>
-  <module>
-    <type>jst.ear</type>
-    <publishDir>${resin.root}/deploy</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
-  </module>
-  -->
 
   <project>
     <classpathReference>resin.project</classpathReference>
