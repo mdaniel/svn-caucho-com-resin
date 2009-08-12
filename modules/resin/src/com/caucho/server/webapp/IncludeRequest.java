@@ -33,6 +33,7 @@ import com.caucho.server.connection.*;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.IntMap;
+import com.caucho.util.HashMapImpl;
 import com.caucho.vfs.*;
 
 import java.io.*;
@@ -65,6 +66,8 @@ public class IncludeRequest extends CauchoRequestWrapper {
   private Invocation _invocation;
 
   private IncludeResponse _response;
+
+  private HashMapImpl<String,String[]> _filledForm;
   
   public IncludeRequest()
   {
@@ -80,20 +83,6 @@ public class IncludeRequest extends CauchoRequestWrapper {
     _response = new IncludeResponse(response);
 
     _invocation = invocation;
-  }
-
-  /**
-   * Starts the request
-   */
-  void startRequest()
-  {
-    _response.startRequest();
-  }
-  
-  void finishRequest()
-    throws IOException
-  {
-    _response.finishRequest();
   }
 
   IncludeResponse getResponse()
@@ -155,6 +144,88 @@ public class IncludeRequest extends CauchoRequestWrapper {
   */
 
   //
+  // parameters
+  //
+
+
+  //
+  // parameter/form
+  //
+
+  /**
+   * Returns an enumeration of the form names.
+   */
+  public Enumeration<String> getParameterNames()
+  {
+    if (_filledForm == null)
+      _filledForm = parseQuery();
+
+    return Collections.enumeration(_filledForm.keySet());
+  }
+
+  /**
+   * Returns a map of the form.
+   */
+  public Map<String,String[]> getParameterMap()
+  {
+    if (_filledForm == null)
+      _filledForm = parseQuery();
+
+    return Collections.unmodifiableMap(_filledForm);
+  }
+
+  /**
+   * Returns the form's values for the given name.
+   *
+   * @param name key in the form
+   * @return value matching the key
+   */
+  public String []getParameterValues(String name)
+  {
+    if (_filledForm == null)
+      _filledForm = parseQuery();
+
+    return (String []) _filledForm.get(name);
+  }
+
+  /**
+   * Returns the form primary value for the given name.
+   */
+  public String getParameter(String name)
+  {
+    String []values = getParameterValues(name);
+
+    if (values != null && values.length > 0)
+      return values[0];
+    else
+      return null;
+  }
+
+  private HashMapImpl<String,String[]> parseQuery()
+  {
+    String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
+
+    HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
+
+    form.putAll(getRequest().getParameterMap());
+    
+    Form formParser = Form.allocate();
+
+    try {
+      String queryString = _invocation.getQueryString();
+      
+      if (queryString != null) {
+        formParser.parseQueryString(form, queryString, javaEncoding, false);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return form;
+  }
+  
+
+  //
   // attributes
   //
 
@@ -179,6 +250,46 @@ public class IncludeRequest extends CauchoRequestWrapper {
     default:
       return super.getAttribute(name);
     }
+  }
+
+  @Override
+  public Enumeration getAttributeNames()
+  {
+    ArrayList list = new ArrayList();
+
+    Enumeration e = super.getAttributeNames();
+    
+    while (e.hasMoreElements()) {
+      list.add(e.nextElement());
+    }
+
+    if (! list.contains(REQUEST_URI)) {
+      list.add(REQUEST_URI);
+      list.add(CONTEXT_PATH);
+      list.add(SERVLET_PATH);
+      list.add(PATH_INFO);
+      list.add(QUERY_STRING);
+    }
+
+    return Collections.enumeration(list);
+  }
+
+  //
+  // lifecycle
+  //
+
+  /**
+   * Starts the request
+   */
+  void startRequest()
+  {
+    _response.startRequest();
+  }
+  
+  void finishRequest()
+    throws IOException
+  {
+    _response.finishRequest();
   }
 
   static {

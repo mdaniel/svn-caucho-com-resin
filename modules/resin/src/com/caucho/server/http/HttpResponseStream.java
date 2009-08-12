@@ -138,7 +138,7 @@ public class HttpResponseStream extends ResponseStream {
     WriteStream next = _next;
 
     int bufferStart = _bufferStartOffset;
-    
+
     if (bufferStart > 0) {
       byte []buffer = next.getBuffer();
 
@@ -156,6 +156,11 @@ public class HttpResponseStream extends ResponseStream {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + "flush()");
+
+    if (_bufferStartOffset > 0) {
+      // server/0506
+      _next.setBufferOffset(_bufferStartOffset - 8);
+    }
 
     _next.flush();
 

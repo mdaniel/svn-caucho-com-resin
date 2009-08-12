@@ -152,6 +152,20 @@ public abstract class Connection
   {
   }
 
+  public boolean isKeepalive()
+  {
+    return false;
+  }
+
+  public boolean toKeepalive()
+  {
+    return false;
+  }
+
+  public void killKeepalive()
+  {
+  }
+
   /**
    * Returns true for a comet connection
    */

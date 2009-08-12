@@ -388,7 +388,7 @@ public class HttpServletRequestImpl implements CauchoRequest
       return attributes.get(name);
     else if (isSecure()) {
       _attributes = new HashMapImpl<String,Object>();
-      _attributes = attributes;
+      attributes = _attributes;
       _request.initAttributes(this);
       
       return attributes.get(name);

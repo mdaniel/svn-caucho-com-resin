@@ -47,6 +47,7 @@ public class StreamConnection extends Connection {
   private InetAddress _remoteAddress;
   private int _remotePort;
   private boolean _isSecure;
+  private boolean _isKeepalive = true;
 
   public StreamConnection()
   {
@@ -112,6 +113,24 @@ public class StreamConnection extends Connection {
   public boolean isSecure()
   {
     return _isSecure;
+  }
+
+  @Override
+  public boolean isKeepalive()
+  {
+    return _isKeepalive;
+  }
+
+  @Override
+  public boolean toKeepalive()
+  {
+    return _isKeepalive;
+  }
+
+  @Override
+  public void killKeepalive()
+  {
+    _isKeepalive = false;
   }
 
   public void setLocalAddress(InetAddress addr)

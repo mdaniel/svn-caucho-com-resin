@@ -502,14 +502,18 @@ abstract public class ResponseStream extends ToByteResponseStream {
         bufferOffset += sublen;
 
         if (writeLength > 0) {
-          buffer = nextBuffer(bufferOffset);
+          buffer = writeNextBuffer(bufferOffset);
               
           bufferStart = getNextStartOffset();
           bufferOffset = bufferStart;
         }
       }
 
-      setNextBufferOffset(bufferOffset);
+      // server/051c
+      if (bufferOffset < buffer.length)
+        setNextBufferOffset(bufferOffset);
+      else
+        writeNextBuffer(bufferOffset);
     } catch (ClientDisconnectException e) {
       // server/183c
       // XXX: _response.killCache();

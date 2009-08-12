@@ -269,6 +269,7 @@ public class TcpConnection extends Connection
     return _state.isDestroyed();
   }
 
+  @Override
   public boolean isKeepalive()
   {
     return _isKeepalive;
@@ -734,11 +735,13 @@ public class TcpConnection extends Connection
     _state = _state.toCompleteComet();
   }
 
+  @Override
   public void killKeepalive()
   {
     _isKeepalive = false;
   }
   
+  @Override
   public boolean toKeepalive()
   {
     if (! _isKeepalive)

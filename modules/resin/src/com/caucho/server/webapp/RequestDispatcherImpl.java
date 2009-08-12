@@ -429,6 +429,9 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       return;
     }
 
+    if (method == null)
+      res.resetBuffer();
+
     ForwardRequest subRequest = new ForwardRequest(req, res, invocation);
     ForwardResponse subResponse = subRequest.getResponse();
     

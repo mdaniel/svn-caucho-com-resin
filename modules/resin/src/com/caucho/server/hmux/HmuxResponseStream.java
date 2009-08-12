@@ -53,6 +53,7 @@ public class HmuxResponseStream extends ResponseStream {
 
   private HmuxRequest _request;
   private WriteStream _next;
+  private int _bufferStartOffset;
 
   HmuxResponseStream(HmuxRequest request,
                      HmuxResponse response,
@@ -73,11 +74,27 @@ public class HmuxResponseStream extends ResponseStream {
   {
     return _next.getBuffer();
   }
+
+  @Override
+  protected int getNextStartOffset()
+  {
+    if (_bufferStartOffset == 0) {
+      _bufferStartOffset = _next.getBufferOffset() + 3;
+      _next.setBufferOffset(_bufferStartOffset);
+    }
+    
+    return _bufferStartOffset;
+  }
       
   @Override
   protected int getNextBufferOffset()
     throws IOException
   {
+    if (_bufferStartOffset == 0) {
+      _bufferStartOffset = _next.getBufferOffset() + 3;
+      _next.setBufferOffset(_bufferStartOffset);
+    }
+      
     return _next.getBufferOffset();
   }
   
@@ -92,9 +109,29 @@ public class HmuxResponseStream extends ResponseStream {
     throws IOException
   {
     if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "write-chunk(" + offset + ")");
+      log.fine(dbgId() + "write-chunk2(" + offset + ")");
+    
+    WriteStream next = _next;
 
-    return _next.nextBuffer(offset);
+    int bufferStart = _bufferStartOffset;
+    
+    if (offset == bufferStart) {
+      if (offset > 0)
+        offset = bufferStart - 3;
+    }
+    else if (bufferStart > 0) {
+      byte []buffer = next.getBuffer();
+
+      int length = offset - bufferStart;
+
+      buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
+      buffer[bufferStart - 2] = (byte) (length >> 8);
+      buffer[bufferStart - 1] = (byte) (length);
+      
+      _bufferStartOffset = 0;
+    }
+
+    return next.nextBuffer(offset);
   }
 
   @Override
@@ -105,6 +142,8 @@ public class HmuxResponseStream extends ResponseStream {
       log.fine(dbgId() + "flush()");
 
     _next.flush();
+
+    _bufferStartOffset = 0;
   }
 
   @Override

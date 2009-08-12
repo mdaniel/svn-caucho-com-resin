@@ -318,12 +318,22 @@ public abstract class AbstractHttpRequest
 
   public StringBuffer getRequestURL()
   {
-    return getRequestFacade().getRequestURL();
+    HttpServletRequestImpl request = getRequestFacade();
+    
+    if (request != null)
+      return request.getRequestURL();
+    else
+      return null;
   }
 
   public String getRequestURI()
   {
-    return getRequestFacade().getRequestURI();
+    HttpServletRequestImpl request = getRequestFacade();
+
+    if (request != null)
+      return request.getRequestURI();
+    else
+      return null;
   }
 
   /**
@@ -607,7 +617,7 @@ public abstract class AbstractHttpRequest
           && match(keyBuf, keyOff, keyLen, CONNECTION)) {
         if (match(value.getBuffer(), value.getOffset(), value.getLength(),
                   CLOSE)) {
-          connectionClose();
+          killKeepalive();
         }
       }
       else if (keyLen == COOKIE.length
@@ -667,7 +677,7 @@ public abstract class AbstractHttpRequest
    */
   protected void connectionClose()
   {
-    TcpConnection conn = _tcpConn;
+    Connection conn = _conn;
 
     if (conn != null)
       conn.killKeepalive();
@@ -1512,7 +1522,7 @@ public abstract class AbstractHttpRequest
    */
   public void killKeepalive()
   {
-    TcpConnection conn = _tcpConn;
+    Connection conn = _conn;
 
     if (conn != null)
       conn.killKeepalive();
@@ -1529,7 +1539,7 @@ public abstract class AbstractHttpRequest
    */
   protected boolean isKeepalive()
   {
-    return _tcpConn != null && _tcpConn.isKeepalive();
+    return _conn != null && _conn.isKeepalive();
   }
 
   public boolean isComet()
@@ -1560,10 +1570,10 @@ public abstract class AbstractHttpRequest
    */
   public boolean allowKeepalive()
   {
-    TcpConnection tcpConn = _tcpConn;
+    Connection conn = _conn;
 
-    if (tcpConn != null)
-      return tcpConn.toKeepalive();
+    if (conn != null)
+      return conn.toKeepalive();
     else
       return true;
   }

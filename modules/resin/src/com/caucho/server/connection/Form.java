@@ -30,6 +30,7 @@
 package com.caucho.server.connection;
 
 import com.caucho.util.CharCursor;
+import com.caucho.util.FreeList;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.StringCharCursor;
 import com.caucho.vfs.ByteToChar;
@@ -44,9 +45,27 @@ import java.util.logging.Logger;
  * Form handling.
  */
 public class Form {
-  static final Logger log = Logger.getLogger(Form.class.getName());
+  private static final Logger log = Logger.getLogger(Form.class.getName());
+
+  private static final FreeList<Form> _freeList = new FreeList<Form>(32);
 
   private final ByteToChar _converter = ByteToChar.create();
+
+
+  public static Form allocate()
+  {
+    Form form = _freeList.allocate();
+
+    if (form == null)
+      form = new Form();
+
+    return form;
+  }
+
+  public static void free(Form form)
+  {
+    _freeList.free(form);
+  }
   
   /**
    * Parses the values from a query string.
@@ -98,10 +117,15 @@ public class Form {
       }
       else if (oldValue == null)
 	table.put(key, new String[] { value });
-      else {
+      else if (isTop) {
 	String []newValue = new String[oldValue.length + 1];
 	System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
 	newValue[oldValue.length] = value;
+	table.put(key, newValue);
+      } else {
+	String []newValue = new String[oldValue.length + 1];
+	System.arraycopy(oldValue, 0, newValue, 1, oldValue.length);
+	newValue[0] = value;
 	table.put(key, newValue);
       }
     }

@@ -243,14 +243,10 @@ public class HmuxRequest extends AbstractHttpRequest
 
   // write stream from the connection
   private WriteStream _rawWrite;
-  // servlet write stream
-  private WriteStream _writeStream;
   
   // StreamImpl to break reads and writes to the underlying protocol
   private ServletFilter _filter;
   private int _pendingData;
-
-  private InvocationKey _invocationKey = new InvocationKey();
 
   private CharBuffer _cb1;
   private CharBuffer _cb2;
@@ -285,11 +281,6 @@ public class HmuxRequest extends AbstractHttpRequest
     _hmuxProtocol = protocol;
 
     _rawWrite = conn.getWriteStream();
-
-    if (_writeStream == null) {
-      _writeStream = new WriteStream();
-      _writeStream.setReuseBuffer(true);
-    }
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
@@ -329,12 +320,7 @@ public class HmuxRequest extends AbstractHttpRequest
   @Override
   protected HmuxResponse createResponse()
   {
-    if (_writeStream == null) {
-      _writeStream = new WriteStream();
-      _writeStream.setReuseBuffer(true);
-    }
-    
-    return new HmuxResponse(this, _writeStream);
+    return new HmuxResponse(this, _conn.getWriteStream());
   }
 
   public boolean isWaitForRead()
@@ -392,7 +378,6 @@ public class HmuxRequest extends AbstractHttpRequest
       log.fine(dbgId() + "start request");
 
     _filter.init(this, _rawRead, _rawWrite);
-    _writeStream.init(_filter);
 
     _hasRequest = false;
     
@@ -413,19 +398,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	// server/0190
 	finishRequest();
       } catch (ClientDisconnectException e) {
-        throw e;
-      } catch (Exception e) {
-	killKeepalive();
-        log.log(Level.FINE, dbgId() + e, e);
-      }
-
-      try {
-	_writeStream.setDisableClose(false);
-	_writeStream.close();
-      } catch (ClientDisconnectException e) {
-	killKeepalive();
-        log.log(Level.FINE, dbgId() + e, e);
-
         throw e;
       } catch (Exception e) {
 	killKeepalive();
@@ -467,12 +439,6 @@ public class HmuxRequest extends AbstractHttpRequest
 
     if (_server == null || _server.isDestroyed()) {
       log.fine(dbgId() + "server is closed");
-	
-      try {
-        _writeStream.setDisableClose(false);
-        _writeStream.close();
-      } catch (Exception e) {
-      }
 	
       try {
         _readStream.setDisableClose(false);
@@ -1758,6 +1724,10 @@ public class HmuxRequest extends AbstractHttpRequest
       return super.getRequestURI();
 
     String _rawURI = super.getRequestURI();
+
+    if (_rawURI == null)
+      return null;
+    
     CharBuffer cb = CharBuffer.allocate();
 
     for (int i = 0; i < _rawURI.length(); i++) {

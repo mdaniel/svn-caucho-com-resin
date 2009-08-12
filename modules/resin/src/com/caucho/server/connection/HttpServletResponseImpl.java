@@ -414,7 +414,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
     _cacheInvocation = cacheInvocation;
   }
 
-  AbstractCacheFilterChain getCacheInvocation()
+  public final AbstractCacheFilterChain getCacheInvocation()
   {
     return _cacheInvocation;
   }
@@ -819,7 +819,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
 	
 	_contentType = sb.toString();
 
-	if (_writer != null) {
+	if (_writer == null) {
 	  _charEncoding = encoding;
 	}
 	break;
