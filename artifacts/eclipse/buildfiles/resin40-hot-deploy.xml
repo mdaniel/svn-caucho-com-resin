@@ -1,6 +1,6 @@
 <project name="deployextension"  default="deploy.j2ee.web"  basedir=".">
-  <property name="pause.deploy" value="10"/>
-  <property name="pause.undeploy" value="5"/>
+  <property name="pause.deploy" value="1"/>
+  <property name="pause.undeploy" value="1"/>
 
   <target name="deploy.j2ee.web">
     <jar destfile="${project.working.dir}/${module.name}.war"> 

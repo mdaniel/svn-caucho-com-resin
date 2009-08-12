@@ -9,11 +9,11 @@
 
 
   <cluster id="">
-    <server id="">
+    <server id="" address="${system['server.address']}">
       <http port="${system['server.port']}"/>
     </server>
 
-    <resin:import path="${resin.root}/conf/app-default.xml"/>
+    <resin:import path="${resin.home}/conf/app-default.xml"/>
 
     <host id="" root-directory=".">
       <web-app id="/${system['webapp.id']}" 

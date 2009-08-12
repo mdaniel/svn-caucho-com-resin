@@ -16,7 +16,7 @@
     <resin:import path="${resin.home}/conf/app-default.xml"/>
 
     <host id="" root-directory=".">
-      <web-app-deploy path="webapps"/>
+      <web-app-deploy path="${system['webapp.deploydir']}/webapps"/>
     </host>
   </cluster>
 </resin>

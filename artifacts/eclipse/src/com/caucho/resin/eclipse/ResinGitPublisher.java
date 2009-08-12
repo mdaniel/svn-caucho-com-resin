@@ -1,7 +1,38 @@
+/*
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Emil Ong
+ */
+
 package com.caucho.resin.eclipse;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -9,6 +40,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.publishers.AntPublisher;
+import org.eclipse.jst.server.generic.internal.core.util.FileUtil;
 import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleArtifact;
@@ -20,7 +52,7 @@ import com.caucho.vfs.Vfs;
 
 @SuppressWarnings("restriction")
 public class ResinGitPublisher extends AntPublisher 
-                               implements ResinIdentifiers 
+                               implements ResinPropertyIds 
 { 
   public static final String PUBLISHER_ID = 
     "org.eclipse.jst.server.generic.resin.resingitpublisher";
@@ -42,9 +74,9 @@ public class ResinGitPublisher extends AntPublisher
     
     ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition();
     String host = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                 RESIN_VIRTUAL_HOST_ID);
+                                                 VIRTUAL_HOST);
     String user = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                 RESIN_DEPLOY_USERNAME_ID);
+                                                 DEPLOY_USERNAME);
     
     Path war = getWarPath();
     String tag = "wars/" + host + "/" + getModuleName(); 
@@ -70,7 +102,6 @@ public class ResinGitPublisher extends AntPublisher
   @Override
   public IStatus[] unpublish(IProgressMonitor monitor)
   {
-    // TODO Auto-generated method stub
     return null;
   }
   
@@ -80,14 +111,14 @@ public class ResinGitPublisher extends AntPublisher
       ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition();
 
       String user = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                   RESIN_DEPLOY_USERNAME_ID);
+                                                   DEPLOY_USERNAME);
       String pass = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                   RESIN_DEPLOY_PASSWORD_ID);
+                                                   DEPLOY_PASSWORD);
       
       String server = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                     RESIN_SERVER_ADDRESS_ID);
+                                                     SERVER_ADDRESS);
       String portString = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                         RESIN_HTTP_PORT_ID);
+                                                         HTTP_PORT);
  
       int port = Integer.valueOf(portString);
 

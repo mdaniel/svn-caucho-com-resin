@@ -12,7 +12,7 @@
       description="%resin31runtimeTypeDescription"
       vendor="%resinCategory"
       version="3.1"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime">
+      class="com.caucho.resin.eclipse.ResinServerRuntime">
       <moduleType
         types="jst.web"
         versions="2.2, 2.3, 2.4, 2.5"/>
@@ -36,7 +36,7 @@
       description="%resin31inPlaceRuntimeTypeDescription"
       vendor="%resinCategory"
       version="3.1"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime">
+      class="com.caucho.resin.eclipse.ResinServerRuntime">
       <moduleType
         types="jst.web"
         versions="2.2, 2.3, 2.4, 2.5"/>
@@ -61,7 +61,7 @@
       description="%resin40runtimeTypeDescription"
       vendor="%resinCategory"
       version="4.0"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime">
+      class="com.caucho.resin.eclipse.ResinServerRuntime">
       <moduleType
         types="jst.web"
         versions="2.2, 2.3, 2.4, 2.5"/>
@@ -85,7 +85,7 @@
       description="%resin40inPlaceRuntimeTypeDescription"
       vendor="%resinCategory"
       version="4.0"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime">
+      class="com.caucho.resin.eclipse.ResinServerRuntime">
       <moduleType
         types="jst.web"
         versions="2.2, 2.3, 2.4, 2.5"/>
@@ -109,7 +109,7 @@
       description="%resin40hotDeployRuntimeTypeDescription"
       vendor="%resinCategory"
       version="4.0"
-      class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime">
+      class="com.caucho.resin.eclipse.ResinServerRuntime">
       <moduleType
         types="jst.web"
         versions="2.2, 2.3, 2.4, 2.5"/>
@@ -125,6 +125,34 @@
       <moduleType
         types="jst.utility"
         versions="1.0"/>
+    </runtimeType>
+    <runtimeType
+          class="com.caucho.resin.eclipse.ResinServerRuntime"
+          description="%resin40tempDirRuntimeTypeDescription"
+          id="org.eclipse.jst.server.generic.runtime.resin40tempDir"
+          name="%resin40tempDirRuntimeTypeName"
+          vendor="%resinCategory"
+          version="4.0">
+       <moduleType
+             types="jst.web"
+             versions="2.2, 2.3, 2.4, 2.5">
+       </moduleType>
+       <moduleType
+             types="jst.ejb"
+             versions="1.1, 2.0, 2.1, 3.0">
+       </moduleType>
+       <moduleType
+             types="jst.ear"
+             versions="1.2, 1.3, 1.4, 5.0">
+       </moduleType>
+       <moduleType
+             types="jst.connector"
+             versions="1.0, 1.5">
+       </moduleType>
+       <moduleType
+             types="jst.utility"
+             versions="1.0">
+       </moduleType>
     </runtimeType>
 
   </extension>
@@ -207,6 +235,20 @@
           startBeforePublish="true"
           supportsRemoteHosts="true">
     </serverType>
+    <serverType
+          behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
+          class="com.caucho.resin.eclipse.ResinServer"
+          description="%resin40tempDirServerTypeDescription"
+          hasConfiguration="true"
+          id="org.eclipse.jst.server.generic.resin40tempDir"
+          initialState="stopped"
+          launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
+          launchModes="run"
+          name="%resin40tempDirServerTypeName"
+          runtime="true"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40tempDir"
+          supportsRemoteHosts="false">
+    </serverType>
 
   </extension>
   
@@ -253,7 +295,17 @@
     <fragment
       id="org.eclipse.jst.server.generic.server"
       typeIds="org.eclipse.jst.server.generic.resin40hotDeploy"
-      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>   
+      class="com.caucho.resin.eclipse.ResinServerWizardFragment"/>
+    <fragment
+          class="com.caucho.resin.eclipse.ResinServerWizardFragment"
+          id="org.eclipse.jst.server.generic.server"
+          typeIds="org.eclipse.jst.server.generic.resin40tempDir">
+    </fragment>
+    <fragment
+          class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
+          id="org.eclipse.jst.server.generic.runtime"
+          typeIds="org.eclipse.jst.server.generic.runtime.resin40tempDir">
+    </fragment>   
   </extension>
 
   <extension point="org.eclipse.wst.server.ui.serverImages">
@@ -300,6 +352,14 @@
       id="org.eclipse.jst.server.generic.image"
       icon="icons/obj16/resin.png"
       typeIds="org.eclipse.jst.server.generic.resin40hotDeploy"/>
+    <image
+      id="org.eclipse.jst.server.generic.image"
+      icon="icons/obj16/resin.png"
+      typeIds="org.eclipse.jst.server.generic.runtime.resin40tempDir"/>
+    <image
+      id="org.eclipse.jst.server.generic.image"
+      icon="icons/obj16/resin.png"
+      typeIds="org.eclipse.jst.server.generic.resin40tempDir"/>
   </extension>
 
   <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
@@ -311,18 +371,14 @@
 
   <extension point="org.eclipse.jst.server.generic.core.serverdefinition">
     <!-- 3.1 -->
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31" definitionfile="/servers/resin31.serverdef">
-    </serverdefinition>   
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31inPlace" definitionfile="/servers/resin31-in-place.serverdef">
-    </serverdefinition>   
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31" definitionfile="/servers/resin31.serverdef"/>
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin31inPlace" definitionfile="/servers/resin31-in-place.serverdef"/>
 
     <!-- 4.0 -->
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40" definitionfile="/servers/resin40.serverdef">
-    </serverdefinition>   
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40inPlace" definitionfile="/servers/resin40-in-place.serverdef">
-    </serverdefinition>
-    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40hotDeploy" definitionfile="/servers/resin40-hot-deploy.serverdef">
-    </serverdefinition>   
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40" definitionfile="/servers/resin40.serverdef"/>
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40inPlace" definitionfile="/servers/resin40-in-place.serverdef"/>
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40hotDeploy" definitionfile="/servers/resin40-hot-deploy.serverdef"/>
+    <serverdefinition id="org.eclipse.jst.server.generic.runtime.resin40tempDir" definitionfile="/servers/resin40-temp-dir.serverdef"/>  
   </extension>
   
   <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
@@ -409,7 +465,12 @@
     <runtimeFacetMapping
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"
       runtime-component="org.eclipse.jst.server.generic.runtime.resin"
-      version="4.0"/>            
+      version="4.0"/>
+    <runtimeFacetMapping
+          runtime-component="org.eclipse.jst.server.generic.runtime.resin"
+          runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40tempDir"
+          version="4.0">
+    </runtimeFacetMapping>            
   </extension>
 
   <extension
@@ -427,47 +488,19 @@
            id="org.eclipse.jst.server.generic.resin.resingitpublisher">
      </genericpublisher>
   </extension>
-  <!--
   <extension
-        point="org.eclipse.wst.common.project.facet.core.facets">
-     <project-facet
-           id="resin.xml">
-        <label>
-           %resinXmlFacetLabel
-        </label>
-        <description>
-           %resinXmlFacetDescription
-        </description>
-     </project-facet>
-     <project-facet-version
-           facet="resin.xml"
-           version="3.1">
-        <action
-              id="resin31.install"
-              type="INSTALL">
-           <delegate
-                 class="com.caucho.resin.eclipse.ResinXmlInstallDelegate">
-           </delegate>
-        </action>
-     </project-facet-version>
-     <project-facet-version
-           facet="resin.xml"
-           version="4.0">
-       <action id="resin40.install" type="INSTALL">
-         <delegate class="com.caucho.resin.eclipse.ResinXmlInstallDelegate"/>
-         <config-factory class="com.caucho.resin.eclipse.ResinXmlFacetInstallConfig$Factory"/>
-       </action>
-     </project-facet-version>
-     <preset id="resin.preset">
-       <label>Resin Configuration Facet Preset</label>
-       <facet id="resin.xml" version="3.1,4.0"/>
-     </preset>
+        point="org.eclipse.jst.server.generic.core.genericpublisher">
+     <genericpublisher
+           class="com.caucho.resin.eclipse.ResinPublisher"
+           id="org.eclipse.jst.server.generic.resin.resinpublisher">
+     </genericpublisher>
   </extension>
-
-  <extension point="org.eclipse.wst.common.project.facet.ui.wizardPages">
-     <wizard-pages action="resin40.install">
-        <page class="com.caucho.resin.eclipse.ResinXmlFacetWizard"/>
-     </wizard-pages>
+  <extension
+        point="org.eclipse.core.variables.dynamicVariables">
+     <variable
+           description="description"
+           name="webapp.deploydir"
+           resolver="com.caucho.resin.eclipse.DeployDirResolver">
+     </variable>
   </extension>
-  -->
 </plugin>

@@ -39,34 +39,38 @@ import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 
 @SuppressWarnings("restriction")
 public class ResinServerBehaviour extends GenericServerBehaviour
+                                  implements ResinPropertyIds
 {
-  public static final String RESIN_CONFIGURATION_FILE_NAME_ID =
-    "resin.configuration.file";
-  
+/*
   @Override
   public void setupLaunchConfiguration(
       ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
     throws CoreException
   {
+    
+    // special hack for git publisher
+    // 
+    // This does really belong in ResinGitPublisher, but if we don't set
+    // the variables here, they'll never be resolved.  In other words,
+    // variables are resolved after this method and before the publisher's
+    // publish method is ever called.
     ServerRuntime typeDef = getRuntimeDelegate().getServerTypeDefinition();
-    String filename = 
+    
+    // get username, just to see if we're using the git publisher
+    String username = 
       PublisherUtil.getPublisherData(typeDef, ResinGitPublisher.PUBLISHER_ID,
-                                     RESIN_CONFIGURATION_FILE_NAME_ID);
-    if (filename != null) {
-      File configFile = PublisherUtil.locateBundleFile(typeDef, filename);
-      VariableUtil.setVariable(RESIN_CONFIGURATION_FILE_NAME_ID, 
-                               configFile.toString());
-
+                                     DEPLOY_USERNAME);
+    if (username != null) {
       // create a webapp deploy directory in case we're doing hot deploy
       String dir = CorePlugin.getDefault().getStateLocation().toOSString(); 
       File tempFile = FileUtil.createTempFile("webapps", dir);
 
-      VariableUtil.setVariable("wtp.webapp.deploydir", tempFile.toString());
+      VariableUtil.setVariable("webapp.deploydir", tempFile.toString());
     }
 
     super.setupLaunchConfiguration(workingCopy, monitor);
   }
-
+*/
 
   @Override
   public void stop(boolean force)

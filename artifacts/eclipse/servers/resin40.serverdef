@@ -33,7 +33,13 @@
             label=""
             type="string"
             context="internal"
-            default="conf/resin40/resin.xml"/>            
+            default="conf/resin40/resin.xml"/>
+            
+  <property id="resin.changeable.root"
+            label=""
+            type="string"
+            context="internal"
+            default="true"/>                        
     
   <port>
     <no>${server.port}</no>
@@ -43,18 +49,18 @@
 
   <module>
     <type>jst.web</type>
-    <publishDir>${resin.home}/webapps</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.antpublisher</publisherReference>
+    <publishDir>${resin.root}/webapps</publishDir>
+    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
   </module>
   <module>
     <type>jst.ejb</type>
-    <publishDir>${resin.home}/deploy</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.antpublisher</publisherReference>
+    <publishDir>${resin.root}/deploy</publishDir>
+    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
   </module>
   <module>
     <type>jst.ear</type>
-    <publishDir>${resin.home}/deploy</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.antpublisher</publisherReference>
+    <publishDir>${resin.root}/deploy</publishDir>
+    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
   </module>
 
 
@@ -66,13 +72,20 @@
   <start>
     <mainClass>com.caucho.server.resin.Resin</mainClass>
     <workingDirectory>${resin.home}</workingDirectory>
-    <programArguments>--root-directory ${resin.root}</programArguments>
-    <vmParameters>-Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
-                  -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
-                  -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
-                  -Djava.awt.headless=true 
-                  -Dresin.home=${resin.home}
-                  -Xss1m -Xmx512m -server</vmParameters>
+    <programArguments>
+      --root-directory "${resin.root}" 
+      -conf "${resin.configuration.file}"
+    </programArguments>
+    <vmParameters>
+      -Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
+      -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
+      -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
+      -Djava.awt.headless=true 
+      -Dresin.home="${resin.home}"
+      -Dserver.address="${server.address}" 
+      -Dserver.port="${server.port}"
+      -Xss1m -Xmx512m -server
+    </vmParameters>
     <classpathReference>resin.project</classpathReference>
   </start>
 
@@ -116,10 +129,6 @@
     </publisherdata>				
   </publisher>
 
-  <classpath id="resin">
-    <archive path="${resin.home}/lib" />
-  </classpath>
-  
   <classpath id="resin.project" >
     <fileset dir="${resin.home}">
       <include name="lib/*.jar" />

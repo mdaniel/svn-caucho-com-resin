@@ -3,14 +3,20 @@
   xmlns:tns="http://eclipse.org/jst/server/generic/ServerTypeDefinition"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://eclipse.org/jst/server/generic/ServerTypeDefinition ServerTypeDefinitionSchema.xsd "
-  name="Resin Application Server" version="v3.1">
-  
+  name="Resin Application Server" version="v4.0">
+
   <property id="resin.home"
             label="%ResinHome"
             type="directory"
             context="internal"
             default="/usr/share/resin" />
 
+  <property id="resin.root"
+            label="%ResinRoot"
+            type="directory"
+            context="internal"
+            default="webapps" />
+            
   <property id="server.address"
             label="%ServerAddress"
             type="string"
@@ -27,14 +33,14 @@
             label=""
             type="string"
             context="internal"
-            default="conf/resin31/in-place.xml"/>            
+            default="conf/resin40/temp-dir.xml"/>
             
   <property id="resin.changeable.root"
             label=""
             type="string"
             context="internal"
             default="false"/>                        
-        
+    
   <port>
     <no>${server.port}</no>
     <name>Http</name>
@@ -43,59 +49,86 @@
 
   <module>
     <type>jst.web</type>
-    <publishDir>${resin.home}/webapps</publishDir>
-    <publisherReference>org.eclipse.jst.server.generic.resin.resininplacepublisher</publisherReference>
+    <publishDir>${webapp.deploydir}/webapps</publishDir>
+    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
   </module>
+  <!--
+  <module>
+    <type>jst.ejb</type>
+    <publishDir>${resin.root}/deploy</publishDir>
+    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
+  </module>
+  <module>
+    <type>jst.ear</type>
+    <publishDir>${resin.root}/deploy</publishDir>
+    <publisherReference>org.eclipse.jst.server.generic.resin.resinpublisher</publisherReference>
+  </module>
+  -->
 
   <project>
     <classpathReference>resin.project</classpathReference>
   </project>
 
+  <!-- whatever process this starts must not exit -->
   <start>
     <mainClass>com.caucho.server.resin.Resin</mainClass>
     <workingDirectory>${resin.home}</workingDirectory>
-    <programArguments>-conf "${resin.configuration.file}"</programArguments>
+    <programArguments>
+      --root-directory "${resin.root}" 
+      -conf "${resin.configuration.file}"
+    </programArguments>
     <vmParameters>
       -Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
       -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
       -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
       -Djava.awt.headless=true 
       -Dresin.home="${resin.home}"
+      -Dwebapp.deploydir="${webapp.deploydir}"
       -Dserver.address="${server.address}" 
-      -Dserver.port="${server.port}" 
-      -Dwebapp.id="${webapp.id}" 
-      -Dwebapp.dir="${webapp.dir}"
+      -Dserver.port="${server.port}"
       -Xss1m -Xmx512m -server
     </vmParameters>
     <classpathReference>resin.project</classpathReference>
   </start>
-  
+
   <!-- this is not actually used, see ResinServerBehaviour#stop(boolean) -->
   <stop>
-    <mainClass>com.caucho.boot.ResinBoot</mainClass>
+    <mainClass>com.caucho.boot.Resin</mainClass>
     <workingDirectory>${resin.home}</workingDirectory>
     <programArguments>stop</programArguments>
     <vmParameters></vmParameters>
     <classpathReference>resin</classpathReference>
   </stop>
 
-  <publisher id="org.eclipse.jst.server.generic.resin.resininplacepublisher">
+  <publisher id="org.eclipse.jst.server.generic.antpublisher">
     <publisherdata>
       <dataname>build.file</dataname>
-      <datavalue>/buildfiles/resin31.xml</datavalue>
-    </publisherdata>
-    <publisherdata>
-      <dataname>resin.configuration.file</dataname>
-      <datavalue>/conf/resin31/in-place.xml</datavalue>
+      <datavalue>/buildfiles/resin40.xml</datavalue>
     </publisherdata>
     <publisherdata>
       <dataname>target.publish.jst.web</dataname>
       <datavalue>deploy.j2ee.web</datavalue>
     </publisherdata>
     <publisherdata>
+      <dataname>target.publish.jst.ejb</dataname>
+      <datavalue>deploy.j2ee.ejb</datavalue>
+    </publisherdata>
+    <publisherdata>
       <dataname>target.unpublish.jst.web</dataname>
       <datavalue>undeploy.j2ee.web</datavalue>
     </publisherdata>
+    <publisherdata>
+      <dataname>target.unpublish.jst.ejb</dataname>
+      <datavalue>undeploy.j2ee.ejb</datavalue>
+    </publisherdata>		
+    <publisherdata>
+      <dataname>target.publish.jst.ear</dataname>
+      <datavalue>deploy.j2ee.ear</datavalue>
+    </publisherdata>
+    <publisherdata>
+      <dataname>target.unpublish.jst.ear</dataname>
+      <datavalue>undeploy.j2ee.ear</datavalue>
+    </publisherdata>				
   </publisher>
 
   <classpath id="resin.project" >

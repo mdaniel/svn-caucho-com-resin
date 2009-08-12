@@ -4,11 +4,11 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://eclipse.org/jst/server/generic/ServerTypeDefinition ServerTypeDefinitionSchema.xsd "
   name="Resin Application Server" version="v4.0">
-
+  
   <property id="resin.home"
             label="%ResinHome"
             type="directory"
-            context="server"
+            context="internal"
             default="/usr/share/resin" />
 
   <property id="server.address"
@@ -28,7 +28,13 @@
             type="string"
             context="internal"
             default="conf/resin40/in-place.xml"/>            
-    
+            
+  <property id="resin.changeable.root"
+            label=""
+            type="string"
+            context="internal"
+            default="false"/>                        
+        
   <port>
     <no>${server.port}</no>
     <name>Http</name>
@@ -49,14 +55,18 @@
     <mainClass>com.caucho.server.resin.Resin</mainClass>
     <workingDirectory>${resin.home}</workingDirectory>
     <programArguments>-conf "${resin.configuration.file}"</programArguments>
-    <vmParameters>-Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
-                  -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
-                  -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
-                  -Djava.awt.headless=true 
-                  -Dresin.home=${resin.home}
-                  -Xss1m -Xmx512m -server
-                  -Dserver.port="${server.port}" -Dwebapp.id="${webapp.id}" -Dwebapp.dir="${webapp.dir}"
-                  </vmParameters>
+    <vmParameters>
+      -Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
+      -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
+      -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 
+      -Djava.awt.headless=true 
+      -Dresin.home="${resin.home}"
+      -Dserver.address="${server.address}" 
+      -Dserver.port="${server.port}"
+      -Dwebapp.id="${webapp.id}" 
+      -Dwebapp.dir="${webapp.dir}"
+      -Xss1m -Xmx512m -server
+    </vmParameters>
     <classpathReference>resin.project</classpathReference>
   </start>
   
@@ -88,10 +98,6 @@
     </publisherdata>
   </publisher>
 
-  <classpath id="resin">
-    <archive path="${resin.home}/lib" />
-  </classpath>
-  
   <classpath id="resin.project" >
     <fileset dir="${resin.home}">
       <include name="lib/*.jar" />

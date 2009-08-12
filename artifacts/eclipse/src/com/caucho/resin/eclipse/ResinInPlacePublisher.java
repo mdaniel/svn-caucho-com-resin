@@ -1,6 +1,34 @@
+/*
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Emil Ong
+ */
+
 package com.caucho.resin.eclipse;
 
-import java.io.File;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -11,8 +39,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.GenericPublisher;
-import org.eclipse.jst.server.generic.core.internal.GenericServer;
-import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 import org.eclipse.wst.server.core.IModuleArtifact;
 
 /**
@@ -26,7 +52,7 @@ import org.eclipse.wst.server.core.IModuleArtifact;
  */
 @SuppressWarnings("restriction")
 public class ResinInPlacePublisher extends GenericPublisher
-                                   implements ResinIdentifiers
+                                   implements ResinPropertyIds
 {
   public static final String PUBLISHER_ID = 
     "org.eclipse.jst.server.generic.resin.resininplacepublisher";
@@ -60,13 +86,10 @@ public class ResinInPlacePublisher extends GenericPublisher
         return null;
 
       ResinServer resinServer = (ResinServer) getServer();
-      Map properties = resinServer.getServerInstanceProperties(); 
+      Map properties = resinServer.getServerInstanceProperties();
+      String configLocation = (String) properties.get(CONFIG_FILE_NAME);
       
-      String configLocation = 
-        (String) properties.get(ResinServer.RESIN_CONF_PROJECT_LOCATION);
-      
-      VariableUtil.setVariable(RESIN_CONFIGURATION_FILE_NAME_ID, 
-                               configLocation);
+      VariableUtil.setVariable(CONFIG_FILE_NAME, configLocation);
       VariableUtil.setVariable("webapp.dir", webContentFolder);
       VariableUtil.setVariable("webapp.id", webappId);
     } 

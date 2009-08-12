@@ -1,3 +1,32 @@
+/*
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Emil Ong
+ */
+
 package com.caucho.resin.eclipse;
 
 import java.io.File;
@@ -5,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -25,7 +55,9 @@ import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
 
 @SuppressWarnings("restriction")
-public class ResinServer extends GenericServer {
+public class ResinServer extends GenericServer
+                         implements ResinPropertyIds
+{
   static final String RESIN_CONF_TYPE = "resin.conf.type";
   static final String RESIN_CONF_BUNDLE = "resin.conf.bundle";
   static final String RESIN_CONF_RESIN_HOME = "resin.conf.resin.home";
@@ -35,9 +67,6 @@ public class ResinServer extends GenericServer {
     = "resin.conf.user.location";
   static final String RESIN_CONF_BUNDLE_LOCATION 
     = "resin.conf.bundle.location";
-  
-  static final String RESIN_CONF_PROJECT_LOCATION 
-  = "resin.conf.project.location";
 
   @Override
   public void saveConfiguration(IProgressMonitor monitor) 
@@ -45,8 +74,9 @@ public class ResinServer extends GenericServer {
   {
     super.saveConfiguration(monitor);
     
+    Map instanceProperties = getServerInstanceProperties(); 
     String resinConfProjectLocation = 
-      (String) getServerInstanceProperties().get(RESIN_CONF_PROJECT_LOCATION);
+      (String) instanceProperties.get(CONFIG_FILE_NAME);
     
     if (resinConfProjectLocation != null)
       return;
@@ -58,8 +88,7 @@ public class ResinServer extends GenericServer {
                                                  null);
     ServerRuntime typeDef = genericRuntime.getServerTypeDefinition();
 
-    String confType = 
-      (String) getServerInstanceProperties().get(RESIN_CONF_TYPE);
+    String confType = (String) instanceProperties.get(RESIN_CONF_TYPE);
     
     IFile configIFile = null;
     
@@ -95,7 +124,7 @@ public class ResinServer extends GenericServer {
     }
     else if (RESIN_CONF_RESIN_HOME.equals(confType)) {
       String resinHome = 
-        (String) getServerInstanceProperties().get(ResinIdentifiers.RESIN_HOME_PROPERTY);
+        (String) instanceProperties.get(ResinPropertyIds.RESIN_HOME);
       IPath resinConfPath = new Path(resinHome).append("conf");
       
       IPath resinConfFilePath = resinConfPath.append("resin.xml");
@@ -115,7 +144,7 @@ public class ResinServer extends GenericServer {
     }
     else if (RESIN_CONF_USER.equals(confType)) {
       String userConf = 
-        (String) getServerInstanceProperties().get(RESIN_CONF_USER_LOCATION);
+        (String) instanceProperties.get(RESIN_CONF_USER_LOCATION);
       IPath userConfPath = new Path(userConf);
       File userConfFile = userConfPath.toFile(); 
 
@@ -127,8 +156,10 @@ public class ResinServer extends GenericServer {
       PublisherUtil.throwCoreException("Internal configuration error");
     }
     
-    getServerInstanceProperties().put(RESIN_CONF_PROJECT_LOCATION,
-                                      configIFile.getLocation().toOSString());
+    instanceProperties.put(ResinPropertyIds.CONFIG_FILE_NAME,
+                           configIFile.getLocation().toOSString());
+    VariableUtil.setVariable(ResinPropertyIds.CONFIG_FILE_NAME,
+                             configIFile.getLocation().toOSString());
   }
   
   /**
@@ -152,4 +183,22 @@ public class ResinServer extends GenericServer {
     
     return null;
   }
+  
+  String getPropertyDefault(String key)
+  {
+    IRuntime runtime = getServer().getRuntime();
+    GenericServerRuntime genericRuntime = 
+      (GenericServerRuntime) runtime.loadAdapter(GenericServerRuntime.class, 
+                                                 null);
+    ServerRuntime typeDef = genericRuntime.getServerTypeDefinition();
+    
+    return getPropertyDefault(typeDef, key);
+  }
+  
+  GenericServerRuntime getRuntimeDelegate()
+  {
+    IRuntime runtime = getServer().getRuntime();
+    return (GenericServerRuntime) runtime.loadAdapter(GenericServerRuntime.class,
+                                                      null);
+  } 
 }
