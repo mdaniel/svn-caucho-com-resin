@@ -738,10 +738,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
       return;
     }
     
-    _cacheInvocation = res.getCacheInvocation();
+    AbstractCacheFilterChain cacheInvocation = res.getCacheInvocation();
 
-    if (_cacheInvocation == null)
+    if (cacheInvocation == null)
       return;
+    
+    _cacheInvocation = cacheInvocation;
     
     HttpServletRequestImpl req = _response.getRequest().getRequestFacade();
     
@@ -751,20 +753,25 @@ abstract public class ResponseStream extends ToByteResponseStream {
     String charEncoding = res.getCharacterEncodingImpl();
     
     int contentLength = -1;
-      
-    _newCacheEntry = _cacheInvocation.startCaching(req, res, 
-                                                   keys, values,
-                                                   contentType,
-                                                   charEncoding,
-                                                   contentLength);
+    
+    AbstractCacheEntry newCacheEntry
+      = cacheInvocation.startCaching(req, res, 
+                                     keys, values,
+                                     contentType,
+                                     charEncoding,
+                                     contentLength);
 
-    if (_newCacheEntry == null) {
+    if (newCacheEntry == null) {
     }
     else if (isByte) {
-      setByteCacheStream(_newCacheEntry.openOutputStream());
+      _newCacheEntry = newCacheEntry;
+      
+      setByteCacheStream(newCacheEntry.openOutputStream());
     }
     else {
-      setCharCacheStream(_newCacheEntry.openWriter());
+      _newCacheEntry = newCacheEntry;
+      
+      setCharCacheStream(newCacheEntry.openWriter());
     }
   }
 

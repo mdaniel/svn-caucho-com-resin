@@ -112,7 +112,8 @@ if ($profile) {
   $results = $profile->getResults();
 
   $partition = do_partition_profile($results);
-  $groups = array("active", "resin", "keepalive", "wait", "accept", "single");
+  $groups = array("active", "jni", "resin", "keepalive", "wait", "block",
+                  "accept", "single");
 
   echo "<table class='threads'>\n";
 
@@ -220,6 +221,15 @@ function do_partition_profile($entries)
     }
     else if ($info->getCount() < 2) {
       $partition["single"][] = $info;
+    }
+    else if ($info->isBlocked()) {
+      $partition["block"][] = $info;
+    }
+    else if ($info->isJni()) {
+      $partition["jni"][] = $info;
+    }
+    else if ($info->isWaiting() || $info->isParked() || $info->isSleeping()) {
+      $partition["wait"][] = $info;
     }
     else if ($stackTrace[0]->className == "java.lang.Object"
         && $stackTrace[0]->methodName == "wait") {

@@ -347,6 +347,24 @@ Java_com_caucho_vfs_JniSocketImpl_nativeClose(JNIEnv *env,
   }
 }
 
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeCloseNative(JNIEnv *env,
+                                                   jobject obj,
+                                                   jlong conn_fd,
+                                                   jbyteArray buf,
+                                                   jint offset,
+                                                   jint length)
+{
+  int value;
+
+  value = Java_com_caucho_vfs_JniSocketImpl_writeNative(env, obj, conn_fd,
+                                                        buf, offset, length);
+
+  Java_com_caucho_vfs_JniSocketImpl_nativeClose(env, obj, conn_fd);
+
+  return value;
+}
+
 JNIEXPORT void JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeFree(JNIEnv *env,
 					     jobject obj,

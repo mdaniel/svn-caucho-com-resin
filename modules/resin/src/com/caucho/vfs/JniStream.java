@@ -28,13 +28,6 @@ public class JniStream extends StreamImpl {
   private long _totalReadBytes;
   private long _totalWriteBytes;
 
-  /* XXX: dead code 2005-05-24
-  private static boolean _hasInitJni;
-
-  private boolean _flushOnNewline;
-  private boolean _closeChildOnClose = true;
-   */
-
   /**
    * Create a new JniStream based on the java.io.* stream.
    */
@@ -121,7 +114,7 @@ public class JniStream extends StreamImpl {
     else if (offset < 0 || buf.length < offset + length)
       throw new ArrayIndexOutOfBoundsException();
 
-    int result = _socket.write(buf, offset, length);
+    int result = _socket.write(buf, offset, length, isEnd);
 
     if (result <= -1) {
       // server/1l21: -1 with exception is necessary to catch client disconnect

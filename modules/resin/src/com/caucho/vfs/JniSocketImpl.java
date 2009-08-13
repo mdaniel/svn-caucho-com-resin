@@ -289,11 +289,17 @@ public class JniSocketImpl extends QSocket {
   /**
    * Writes to the socket.
    */
-  public int write(byte []buffer, int offset, int length)
+  public int write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
     synchronized (_writeLock) {
-      return writeNative(_fd, buffer, offset, length);
+      if (! isEnd)
+        return writeNative(_fd, buffer, offset, length);
+      else {
+        _isClosed.set(true);
+        
+        return writeCloseNative(_fd, buffer, offset, length);
+      }
     }
   }
 
@@ -391,7 +397,7 @@ public class JniSocketImpl extends QSocket {
   
   native boolean nativeReadNonBlock(long fd, int ms);
   
-  native int nativeInit(long fd);
+  private native int nativeInit(long fd);
   
   native int getRemoteIP(long fd, byte []buffer, int offset, int length);
   
@@ -416,7 +422,11 @@ public class JniSocketImpl extends QSocket {
 			long timeout)
     throws IOException;
 
-  native int writeNative(long fd, byte []buf, int offset, int length)
+  private native int writeNative(long fd, byte []buf, int offset, int length)
+    throws IOException;
+
+  private native int writeCloseNative(long fd,
+                                      byte []buf, int offset, int length)
     throws IOException;
 
   native int writeNative2(long fd,
@@ -426,8 +436,8 @@ public class JniSocketImpl extends QSocket {
 
   native int flushNative(long fd) throws IOException;
 
-  native void nativeCloseFd(long fd);
-  native void nativeClose(long fd);
+  private native void nativeCloseFd(long fd);
+  private native void nativeClose(long fd);
 
   native long nativeAllocate();
   

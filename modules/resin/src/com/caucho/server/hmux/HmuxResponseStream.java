@@ -156,16 +156,37 @@ public class HmuxResponseStream extends ResponseStream {
   protected void closeNext()
     throws IOException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "flush()");
+    flushNext();
+  }
 
-    if (_bufferStartOffset == _next.getBufferOffset()
-        && _bufferStartOffset > 0) {
-      _next.setBufferOffset(_bufferStartOffset - 3);
+  @Override
+  protected void writeTail()
+    throws IOException
+  {
+    WriteStream next = _next;
+
+    int bufferStart = _bufferStartOffset;
+    int offset = next.getBufferOffset();
+    
+    if (offset == bufferStart) {
+      if (offset > 0)
+        offset = bufferStart - 3;
     }
+    else if (bufferStart > 0) {
+      byte []buffer = next.getBuffer();
 
-    _next.flush();
+      int length = offset - bufferStart;
 
-    _bufferStartOffset = 0;
+      buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
+      buffer[bufferStart - 2] = (byte) (length >> 8);
+      buffer[bufferStart - 1] = (byte) (length);
+      
+      _bufferStartOffset = 0;
+    }
+    
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "write-tail(" + (offset - bufferStart) + ")");
+
+    next.nextBuffer(offset);
   }
 }
