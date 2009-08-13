@@ -52,6 +52,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.JspContext;
 import javax.servlet.ServletConfig;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -71,6 +72,9 @@ abstract public class PageManager {
 
   private FreeList<PageContextImpl> _freePages
     = new FreeList<PageContextImpl>(256);
+
+  private FreeList<PageContextWrapper> _freePageWrappers
+    = new FreeList<PageContextWrapper>(256);
 
   protected WebApp _webApp;
   private Path _classDir;
@@ -163,6 +167,7 @@ abstract public class PageManager {
 					     boolean autoFlush)
   {
     PageContextImpl pc = _freePages.allocate();
+
     if (pc == null)
       pc = new PageContextImpl();
 
@@ -189,6 +194,7 @@ abstract public class PageManager {
 					     boolean isPrintNullAsBlank)
   {
     PageContextImpl pc = _freePages.allocate();
+
     if (pc == null)
       pc = new PageContextImpl();
 
@@ -206,6 +212,22 @@ abstract public class PageManager {
       if (pc instanceof PageContextImpl)
 	_freePages.free((PageContextImpl) pc);
     }
+  }
+
+  public PageContextWrapper createPageContextWrapper(JspContext parent)
+  {
+    PageContextWrapper wrapper = _freePageWrappers.allocate();
+    if (wrapper == null)
+      wrapper = new PageContextWrapper();
+
+    wrapper.init((PageContextImpl) parent);
+
+    return wrapper;
+  }
+
+  public void freePageContextWrapper(PageContextWrapper wrapper)
+  {
+    _freePageWrappers.free(wrapper);
   }
   
   /**

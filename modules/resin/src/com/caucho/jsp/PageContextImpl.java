@@ -267,11 +267,12 @@ public class PageContextImpl extends PageContext
     _locale = null;
 
     // XXX: recycling is important for performance reasons
-    // _elContext = null;
-    // _elResolver = null;
-    // _bundleManager = null;
-    // _varResolver = null;
-
+    /* 
+     _elContext = null;
+     _elResolver = null;
+     _bundleManager = null;
+     _varResolver = null;
+    */
     _hasException = false;
     //if (_attributes.size() > 0)
     //  _attributes.clear();

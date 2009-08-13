@@ -351,6 +351,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.pushDepth();
 
     out.println("private final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
+    // jsp/107{0,1}
+    out.println("private static com.caucho.jsp.PageManager _jsp_pageManager;");
 
     out.println("private boolean _caucho_isDead;");
 
@@ -452,7 +454,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.pushDepth();
 
     out.println("javax.servlet.jsp.JspContext _jsp_parentContext = getJspContext();");
-    out.println("com.caucho.jsp.PageContextWrapper pageContext = com.caucho.jsp.PageContextWrapper.create(_jsp_parentContext);");
+    out.println("com.caucho.jsp.PageContextWrapper pageContext = _jsp_pageManager.createPageContextWrapper(_jsp_parentContext);");
     // jsp/1056
     out.println("setJspContext(pageContext);");
 
@@ -499,7 +501,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       generateTagVariablesAtEnd(out);
       
       out.println("setJspContext(_jsp_parentContext);");
-      out.println("com.caucho.jsp.PageContextWrapper.free(pageContext);");
+      out.println("_jsp_pageManager.freePageContextWrapper(pageContext);");
       
       out.popDepth();
       out.println("}");
@@ -587,7 +589,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
     generateTagVariablesAtEnd(out);
       
-    out.println("com.caucho.jsp.PageContextWrapper.free(pageContext);");
+    out.println("_jsp_pageManager.freePageContextWrapper(pageContext);");
       
     out.popDepth();
     out.println("}");

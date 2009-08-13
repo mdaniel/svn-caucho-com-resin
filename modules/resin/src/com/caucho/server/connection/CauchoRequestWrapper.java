@@ -29,6 +29,7 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
 
@@ -209,9 +210,35 @@ public class CauchoRequestWrapper implements CauchoRequest {
     _request.removeAttribute(name);
   }
   
-  public RequestDispatcher getRequestDispatcher(String uri)
+  public RequestDispatcher getRequestDispatcher(String path)
   {
-    return _request.getRequestDispatcher(uri);
+    if (path == null || path.length() == 0)
+      return null;
+    else if (path.charAt(0) == '/')
+      return getWebApp().getRequestDispatcher(path);
+    else {
+      CharBuffer cb = new CharBuffer();
+
+      WebApp webApp = getWebApp();
+
+      String servletPath = getPageServletPath();
+      if (servletPath != null)
+        cb.append(servletPath);
+      String pathInfo = getPagePathInfo();
+      if (pathInfo != null)
+        cb.append(pathInfo);
+
+      int p = cb.lastIndexOf('/');
+      if (p >= 0)
+        cb.setLength(p);
+      cb.append('/');
+      cb.append(path);
+
+      if (webApp != null)
+        return webApp.getRequestDispatcher(cb.toString());
+
+      return null;
+    }
   }
 
   public String getRealPath(String uri)
@@ -302,10 +329,30 @@ public class CauchoRequestWrapper implements CauchoRequest {
   {
     return _request.getRequestURI();
   }
-  
+
+  /**
+   * Returns the URL for the request
+   */
   public StringBuffer getRequestURL()
   {
-    return _request.getRequestURL();
+    StringBuffer sb = new StringBuffer();
+
+    sb.append(getScheme());
+    sb.append("://");
+
+    sb.append(getServerName());
+    int port = getServerPort();
+
+    if (port > 0 &&
+        port != 80 &&
+        port != 443) {
+      sb.append(":");
+      sb.append(port);
+    }
+
+    sb.append(getRequestURI());
+
+    return sb;
   }
   
   public String getContextPath()
@@ -322,10 +369,19 @@ public class CauchoRequestWrapper implements CauchoRequest {
   {
     return _request.getPathInfo();
   }
-  
+
+  /**
+   * Returns the real path of pathInfo.
+   */
   public String getPathTranslated()
   {
-    return _request.getPathTranslated();
+    // server/106w
+    String pathInfo = getPathInfo();
+
+    if (pathInfo == null)
+      return null;
+    else
+      return getRealPath(pathInfo);
   }
   
   public String getQueryString()

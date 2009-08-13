@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.crypto.*;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
@@ -85,7 +86,6 @@ public class JsseSSLFactory implements SSLFactory {
   {
     _cipherSuites = ciphers;
   }
-  
 
   /**
    * Sets the key store
@@ -259,16 +259,18 @@ public class JsseSSLFactory implements SSLFactory {
       
       sslContext.init(kmf.getKeyManagers(), null, null);
 
+      /*
       if (_cipherSuites != null)
 	sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
 
       if (_protocols != null)
 	sslContext.createSSLEngine().setEnabledProtocols(_protocols);
+      */
 
       factory = sslContext.getServerSocketFactory();
     }
     else {
-      factory = createAnonymousFactory();
+      factory = createAnonymousFactory(host, port);
     }
 
     ServerSocket serverSocket;
@@ -281,53 +283,55 @@ public class JsseSSLFactory implements SSLFactory {
       serverSocket = factory.createServerSocket(port, listen, host);
 
     SSLServerSocket sslServerSocket = (SSLServerSocket) serverSocket;
+
+    if (_cipherSuites != null) {
+      sslServerSocket.setEnabledCipherSuites(_cipherSuites);
+    }
+
+    if (_protocols != null) {
+      sslServerSocket.setEnabledProtocols(_protocols);
+    }
     
     if ("required".equals(_verifyClient))
       sslServerSocket.setNeedClientAuth(true);
 
-    /*
-    boolean hasRestriction = false;
-    ArrayList<String> protocols = new ArrayList();
-    if (node.getBoolean("tls1", true)) {
-      protocols.add("TLSv1");
-      protocols.add("TLS");
-    }
-    else
-      hasRestriction = true;
-    
-    if (node.getBoolean("ssl2", true)) {
-      protocols.add("SSLv2");
-    }
-    else
-      hasRestriction = true;
-    
-    if (node.getBoolean("ssl3", true)) {
-      protocols.add("SSLv3");
-    }
-    else
-      hasRestriction = true;
-
-    if (hasRestriction)
-      sslServerSocket.setEnabledProtocols((String []) protocols.toArray(new String[protocols.size()]));
-    */
-
     return new QServerSocketWrapper(serverSocket);
   }
 
-  private SSLServerSocketFactory createAnonymousFactory()
+  private SSLServerSocketFactory createAnonymousFactory(InetAddress hostAddr,
+                                                        int port)
     throws IOException, GeneralSecurityException
   {
-    SelfSignedCert cert = SelfSignedCert.create(_selfSignedName);
+    SSLContext sslContext = SSLContext.getInstance(_sslContext);
+
+    String []cipherSuites = _cipherSuites;
+
+    if (cipherSuites == null)
+      cipherSuites = sslContext.createSSLEngine().getSupportedCipherSuites();
+
+    String selfSignedName = _selfSignedName;
+
+    if (selfSignedName == null
+        || "".equals(selfSignedName)
+        || "*".equals(selfSignedName)) {
+      if (hostAddr != null)
+        selfSignedName = hostAddr.getHostName();
+      else {
+        InetAddress addr = InetAddress.getLocalHost();
+
+        selfSignedName = addr.getHostAddress();
+      }
+    }
+    
+    SelfSignedCert cert = SelfSignedCert.create(selfSignedName,
+                                                cipherSuites);
 
     if (cert == null)
       throw new ConfigException(L.l("Cannot generate anonymous certificate"));
-
-    SSLContext sslContext = SSLContext.getInstance(_sslContext);
       
     sslContext.init(cert.getKeyManagers(), null, null);
 
-    if (_cipherSuites != null)
-      sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
+    // SSLEngine engine = sslContext.createSSLEngine();
 
     SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
 

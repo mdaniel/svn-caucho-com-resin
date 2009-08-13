@@ -78,11 +78,38 @@ public class SelfSignedCert {
     _kmf = kmf;
   }
 
-  public static SelfSignedCert create(String name)
+  public static SelfSignedCert create(String name,
+                                      String []cipherSuites)
   {
     try {
-      String keyAlgName = "DSA";
-      String sigAlgName = "SHA1WithDSA";
+      //String keyAlgName = "DSA";
+      //String sigAlgName = "SHA1WithDSA";
+      
+      String keyAlgName = null;
+      String sigAlgName = null;
+
+      for (String s : cipherSuites) {
+        if (s.indexOf("RSA") >= 0 && s.indexOf("SHA") >= 0) {
+          keyAlgName = "RSA";
+          sigAlgName = "SHA1WithRSA";
+        }
+        else if (sigAlgName == null
+                 && s.indexOf("DSS") >= 0 && s.indexOf("SHA") >= 0) {
+          keyAlgName = "DSA";
+          sigAlgName = "SHA1WithDSA";
+        }
+        else if (sigAlgName == null
+                 && s.indexOf("RSA") >= 0 && s.indexOf("MD5") >= 0) {
+          keyAlgName = "RSA";
+          sigAlgName = "MD5WithRSA";
+        }
+      }
+
+      if (sigAlgName == null) {
+        keyAlgName = "DSA";
+        sigAlgName = "SHA1WithDSA";
+      }
+      
       String providerName = null;
       int keysize = 1024;
       int days = 365;

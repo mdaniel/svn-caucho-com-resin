@@ -70,8 +70,8 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
    * Creates the new host deploy.
    */
   public HostRegexpDeployGenerator(DeployContainer<HostController> container,
-			  HostContainer hostContainer,
-			  HostConfig config)
+                                   HostContainer hostContainer,
+                                   HostConfig config)
   {
     super(container);
     
@@ -144,7 +144,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       controller.setRegexp(regexp);
       controller.setRootDirectoryPattern(_config.getRootDirectory());
-
+      System.out.println("CREATE:" + name + " " + varMap + " " + _config.getRootDirectory());
 
       // XXX: not dynamic-deploy in the sense that the mappings are known
       //controller.setDynamicDeploy(true);

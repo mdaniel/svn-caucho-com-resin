@@ -345,22 +345,20 @@ abstract public class ResponseStream extends ToByteResponseStream {
     if (offset == startOffset)
       return;
 
-    byte []nextBuffer = getNextBuffer();
-    
-    int length = offset - startOffset;
+    int oldOffset = getNextBufferOffset();
+    int sublen = (offset - oldOffset);
     long lengthHeader = _response.getContentLengthHeader();
 
-    if (lengthHeader > 0 && lengthHeader < _contentLength + length) {
-      lengthException(nextBuffer, startOffset, length, lengthHeader);
+    if (lengthHeader > 0 && lengthHeader < _contentLength + sublen) {
+      byte []nextBuffer = getNextBuffer();
+      
+      lengthException(nextBuffer, oldOffset, sublen, lengthHeader);
 
-      length = (int) (lengthHeader - _contentLength);
-      offset = startOffset + length;
+      sublen = (int) (lengthHeader - _contentLength);
+      offset = oldOffset + sublen;
     }
-
-    _contentLength += length;
     
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() +  "write-chunk3(" + length + ")");
+    _contentLength += sublen;
 
     if (! _isHead) {
       // server/051e
@@ -386,20 +384,18 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     byte []nextBuffer = getNextBuffer();
     int startOffset = getNextStartOffset();
-
-    int length = offset - startOffset;
+    int oldOffset = getNextBufferOffset();
+    
+    int sublen = offset - oldOffset;
     long lengthHeader = _response.getContentLengthHeader();
 
-    if (lengthHeader > 0 && lengthHeader < _contentLength + length) {
-      _isCommitted = true;
-    
-      lengthException(nextBuffer, startOffset, length, lengthHeader);
+    if (lengthHeader > 0 && lengthHeader < _contentLength + sublen) {
+      lengthException(nextBuffer, startOffset, sublen, lengthHeader);
 
-      length = (int) (lengthHeader - _contentLength);
-      offset = startOffset + length;
+      sublen = (int) (lengthHeader - _contentLength);
     }
 
-    _contentLength += length;
+    _contentLength += sublen;
 
     try {
       if (_isHead) {
@@ -407,8 +403,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
       }
       
       if (_cacheStream != null)
-        writeCache(nextBuffer, startOffset, length);
-
+        writeCache(nextBuffer, startOffset, offset - startOffset);
+      
       return writeNextBuffer(offset);
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
@@ -478,14 +474,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
       if (_cacheStream != null)
         writeCache(buf, offset, length);
 
-      if (! _response.isClientDisconnect()) {
-        _contentLength += length;
-      }
-      
-      if (length > 0 && log.isLoggable(Level.FINE)) {
-        log.fine(dbgId() +  "write-chunk4(" + length + ")");
-      }
-	
       byte []buffer = getNextBuffer();
       int writeLength = length;
 
@@ -500,20 +488,23 @@ abstract public class ResponseStream extends ToByteResponseStream {
         writeLength -= sublen;
         offset += sublen;
         bufferOffset += sublen;
+        _contentLength += sublen;
 
         if (writeLength > 0) {
+          
           buffer = writeNextBuffer(bufferOffset);
               
           bufferStart = getNextStartOffset();
           bufferOffset = bufferStart;
         }
       }
-
+      
       // server/051c
       if (bufferOffset < buffer.length)
         setNextBufferOffset(bufferOffset);
-      else
+      else {
         writeNextBuffer(bufferOffset);
+      }
     } catch (ClientDisconnectException e) {
       // server/183c
       // XXX: _response.killCache();
@@ -533,16 +524,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
       AbstractHttpRequest request = _response.getRequest();
       ServletContext app = request.getWebApp();
       
-      Exception exn
-	= new IllegalStateException(L.l("{0}: Can't write {1} extra bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
-					request.getRequestURL(),
-					"" + (length + _contentLength),
-					"" + contentLengthHeader));
+      String msg = L.l("{0}: Can't write {1} extra bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
+                       request.getRequestURL(),
+                       "" + (length + _contentLength),
+                       "" + contentLengthHeader);
 
-      if (app != null)
-	app.log(exn.getMessage(), exn);
-      else
-	exn.printStackTrace();
+      log.fine(msg);
 
       return false;
     }
@@ -560,18 +547,15 @@ abstract public class ResponseStream extends ToByteResponseStream {
 	if (Character.isLetterOrDigit((char) ch))
 	  graph = "'" + (char) ch + "', ";
 	    
-	Exception exn =
-	  new IllegalStateException(L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
+	String msg =
+	  L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
 					request.getRequestURL(),
 					"" + (length + _contentLength),
 					"" + contentLengthHeader,
 					graph,
-					"" + ch));
+					"" + ch);
 
-	if (app != null)
-	  app.log(exn.toString(), exn);
-	else
-	  exn.printStackTrace();
+        log.fine(msg);
 	break;
       }
     }
@@ -596,6 +580,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
         int bufferOffset = getNextBufferOffset();
 
         if (bufferStart != bufferOffset) {
+          _contentLength += (bufferOffset - bufferStart);
+          
           writeNextBuffer(bufferOffset);
 	}
 
@@ -710,7 +696,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
     return 0;
   }
   
-  abstract protected void setNextBufferOffset(int offset);
+  abstract protected void setNextBufferOffset(int offset)
+    throws IOException;
       
   abstract protected int getNextBufferOffset()
     throws IOException;

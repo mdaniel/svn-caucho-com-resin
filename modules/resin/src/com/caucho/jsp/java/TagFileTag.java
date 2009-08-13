@@ -185,7 +185,7 @@ public class TagFileTag extends GenericTag {
     String name = _contextVarName;
 
     out.println("com.caucho.jsp.PageContextWrapper " + name);
-    out.println("  = com.caucho.jsp.PageContextWrapper.create(pageContext);");
+    out.println(" = _jsp_pageManager.createPageContextWrapper(pageContext);");
 
     TagAttributeInfo attrs[] = _tagInfo.getAttributes();
 
@@ -194,7 +194,7 @@ public class TagFileTag extends GenericTag {
       int p = indexOf(_attributeNames, attrs[i].getName());
       
       if (p < 0 && attrs[i].isRequired()) {
-	throw error(L.l("required attribute `{0}' missing from <{1}>",
+	throw error(L.l("required attribute '{0}' missing from <{1}>",
                         attrs[i].getName(),
                         getTagName()));
       }

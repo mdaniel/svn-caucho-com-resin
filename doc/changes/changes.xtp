@@ -13,6 +13,9 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>server: content-length counting issues (#3619, rep by Matthew Schmidt)</li>
+<li>jmx: IntrospectionMBean _attrGetMap needs to be synchronized (#3620, rep by ebarlas)</li>
+<li>jsse: added jsse cipher-suite support (#3593, rep by vbavin)</li>
 <li>jni: JNI detection of clientdisconnect issues (rep by Fiaz Hossain)</li>
 <li>quercus: image fixes for vbulletin</li>
 <li>quercus: ksort fixes for vbulletin</li>

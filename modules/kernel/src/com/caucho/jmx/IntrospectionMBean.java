@@ -215,15 +215,22 @@ public class IntrospectionMBean implements DynamicMBean {
    */
   private OpenModelMethod getGetMethod(String name)
   {
-    OpenModelMethod method = _attrGetMap.get(name);
+    OpenModelMethod method;
+
+    synchronized (_attrGetMap) {
+      method = _attrGetMap.get(name);
+    }
 
     if (method != null)
       return method;
 
     method = createGetMethod(name);
 
-    if (method != null)
-      _attrGetMap.put(name, method);
+    if (method != null) {
+      synchronized (_attrGetMap) {
+        _attrGetMap.put(name, method);
+      }
+    }
 
     return method;
   }

@@ -132,12 +132,12 @@ public class HttpResponseStream extends ResponseStream {
   protected byte []writeNextBuffer(int offset)
     throws IOException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "write-chunk2(" + offset + ")");
-
     WriteStream next = _next;
 
     int bufferStart = _bufferStartOffset;
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "write-chunk2(" + (offset - bufferStart) + ")");
 
     if (bufferStart > 0) {
       byte []buffer = next.getBuffer();
@@ -184,10 +184,16 @@ public class HttpResponseStream extends ResponseStream {
     throws IOException
   {
     int bufferStart = _bufferStartOffset;
-    if (! _isChunkedEncoding)
-      return;
 
     int bufferOffset = _next.getBufferOffset();
+
+    if (bufferStart < bufferOffset) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(dbgId() + "write-chunk-tail(" + (bufferOffset - bufferStart) + ")");
+    }
+    
+    if (! _isChunkedEncoding)
+      return;
 
     if (bufferStart > 0) {
       byte []buffer = _next.getBuffer();

@@ -55,21 +55,7 @@ public class PageContextWrapper extends PageContextImpl {
     = Logger.getLogger(PageContextWrapper.class.getName());
   static final L10N L = new L10N(PageContextWrapper.class);
 
-  private static final FreeList<PageContextWrapper> _freeList
-    = new FreeList<PageContextWrapper>(32);
-
   private PageContextImpl _parent;
-
-  public static PageContextWrapper create(JspContext parent)
-  {
-    PageContextWrapper wrapper = _freeList.allocate();
-    if (wrapper == null)
-      wrapper = new PageContextWrapper();
-
-    wrapper.init((PageContextImpl) parent);
-
-    return wrapper;
-  }
 
   public void init(PageContextImpl parent)
   {
@@ -265,10 +251,5 @@ public class PageContextWrapper extends PageContextImpl {
   public ExpressionEvaluator getExpressionEvaluator()
   {
     return _parent.getExpressionEvaluator();
-  }
-
-  public static void free(PageContextWrapper wrapper)
-  {
-    _freeList.free(wrapper);
   }
 }

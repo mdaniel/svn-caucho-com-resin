@@ -204,7 +204,10 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       // XXX: _response.killCache();
     }
 
-    getOutputStream().write(buf, offset, length);
+    if (_stream != null)
+      super.write(buf, offset, length);
+    else
+      getOutputStream().write(buf, offset, length);
   }
 
   /**

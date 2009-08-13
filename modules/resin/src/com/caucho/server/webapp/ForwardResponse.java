@@ -58,6 +58,12 @@ class ForwardResponse extends CauchoResponseWrapper
   }
 
   void finishRequest()
+    throws IOException
   {
+    // server/106f
+    AbstractResponseStream stream = getResponseStream();
+
+    if (stream != null)
+      stream.close();
   }
 }

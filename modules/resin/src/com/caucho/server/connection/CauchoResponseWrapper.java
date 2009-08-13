@@ -270,9 +270,13 @@ public class CauchoResponseWrapper implements CauchoResponse {
 
   public AbstractResponseStream getResponseStream()
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-    
-    return cResponse.getResponseStream();
+    if (_response instanceof CauchoResponse) {
+      CauchoResponse cResponse = (CauchoResponse) _response;
+
+      return cResponse.getResponseStream();
+    }
+    else
+      return null;
   }
   
   public void setResponseStream(AbstractResponseStream os)

@@ -100,6 +100,7 @@ public class HmuxResponseStream extends ResponseStream {
   
   @Override
   protected void setNextBufferOffset(int offset)
+    throws IOException
   {
     _next.setBufferOffset(offset);
   }
@@ -141,6 +142,11 @@ public class HmuxResponseStream extends ResponseStream {
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + "flush()");
 
+    if (_bufferStartOffset == _next.getBufferOffset()
+        && _bufferStartOffset > 0) {
+      _next.setBufferOffset(_bufferStartOffset - 3);
+    }
+
     _next.flush();
 
     _bufferStartOffset = 0;
@@ -153,6 +159,13 @@ public class HmuxResponseStream extends ResponseStream {
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + "flush()");
 
+    if (_bufferStartOffset == _next.getBufferOffset()
+        && _bufferStartOffset > 0) {
+      _next.setBufferOffset(_bufferStartOffset - 3);
+    }
+
     _next.flush();
+
+    _bufferStartOffset = 0;
   }
 }

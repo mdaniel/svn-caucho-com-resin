@@ -1876,9 +1876,9 @@ public class JavaJspGenerator extends JspGenerator {
       
     if (! isTag()) {
       out.println("init(config);");
-
-      out.println("_jsp_pageManager = webApp.getJspApplicationContext().getPageManager();");
     }
+
+    out.println("_jsp_pageManager = webApp.getJspApplicationContext().getPageManager();");
       
     out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
 
