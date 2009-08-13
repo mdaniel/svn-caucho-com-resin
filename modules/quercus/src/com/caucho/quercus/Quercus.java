@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -199,6 +199,11 @@ public class Quercus
     _pageManager = createPageManager();
     
     _sessionManager = createSessionManager();
+    
+    for (Map.Entry<String,String> entry : System.getenv().entrySet()) {
+       _serverEnvMap.put(createString(entry.getKey()),
+                         createString(entry.getValue()));
+    }
   }
   
   /**
@@ -271,6 +276,14 @@ public class Quercus
   public String getVersionDate()
   {
     return "20090801";
+  }
+  
+  /**
+   * Returns the SAPI (Server API) name.
+   */
+  public String getSapiName()
+  {
+    return "apache";
   }
 
   public boolean isProfile()

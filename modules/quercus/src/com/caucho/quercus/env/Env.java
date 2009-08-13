@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -274,10 +274,10 @@ public class Env {
   private HttpServletRequest _request;
   private HttpServletResponse _response;
 
-  private ArrayValue _postArray;
+  private ArrayValue _postArray = new ArrayValueImpl();
+  private ArrayValue _files = new ArrayValueImpl();
   private StringValue _inputData;
   
-  private ArrayValue _files;
   private SessionArrayValue _session;
   private HttpSession _javaSession;
 
@@ -399,28 +399,10 @@ public class Env {
     _internalAutoload
       = new InternalAutoloadCallback("com/caucho/quercus/php/");
     
-    if (_request != null && _request.getMethod().equals("POST")) {
-      _postArray = new ArrayValueImpl();
-      _files = new ArrayValueImpl();
-      Post.fillPost(this,
-                    _postArray,
-                    _files,
-                    _request,
-                    getIniBoolean("magic_quotes_gpc"));
-    } else if (_request != null && ! _request.getMethod().equals("GET")) {
-      InputStream is = null;
-      
-      try {
-        is = _request.getInputStream();
-      } catch (IOException e) {
-        warning(e);
-      }
-      
-      StringValue bb = createBinaryBuilder();
-      bb.appendReadAll(is, Integer.MAX_VALUE);
-      
-      setInputData(bb);
-    }
+    fillPost(_postArray,
+             _files,
+             _request,
+             getIniBoolean("magic_quotes_gpc"));
 
     // Define the constant string PHP_VERSION
 
@@ -448,6 +430,33 @@ public class Env {
   public static Env getInstance()
   {
     return getCurrent();
+  }
+  
+  protected void fillPost(ArrayValue postArray,
+                             ArrayValue files,
+                             HttpServletRequest request,
+                             boolean isMagicQuotes)
+  {
+    if (request != null && request.getMethod().equals("POST")) {
+      Post.fillPost(this,
+                    postArray,
+                    files,
+                    request,
+                    isMagicQuotes);
+    } else if (request != null && ! request.getMethod().equals("GET")) {
+      InputStream is = null;
+      
+      try {
+        is = request.getInputStream();
+      } catch (IOException e) {
+        warning(e);
+      }
+      
+      StringValue bb = createBinaryBuilder();
+      bb.appendReadAll(is, Integer.MAX_VALUE);
+      
+      setInputData(bb);
+    }
   }
 
   protected AbstractFunction []getDefaultFunctionMap()
@@ -1261,10 +1270,7 @@ public class Env {
   public Path getUploadDirectory()
   {
     if (_uploadPath == null) {
-      String realPath = getIniString("upload_tmp_dir");
-
-      if (realPath == null)
-        realPath = getRequest().getRealPath("/WEB-INF/upload");
+      String realPath = getUploadPath();
 
       _uploadPath = _quercus.getPwd().lookup(realPath);
 
@@ -1280,6 +1286,18 @@ public class Env {
     }
 
     return _uploadPath;
+  }
+  
+  protected String getUploadPath()
+  {
+    String realPath = getIniString("upload_tmp_dir");
+
+    if (realPath == null && getRequest() != null)
+      realPath = getRequest().getRealPath("/WEB-INF/upload");
+    else
+      realPath = "/tmp/caucho/upload";
+    
+    return realPath;
   }
   
   /**
@@ -2084,7 +2102,7 @@ public class Env {
 	
       case _POST: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2092,13 +2110,7 @@ public class Env {
 
         envVar.set(post);
 
-        if (_request == null)
-          return null;
-
-        if (! "POST".equals(_request.getMethod()))
-          return envVar;
-
-        if (_postArray != null) {
+        if (_postArray.getSize() > 0) {
           for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
             post.put(entry.getKey(), entry.getValue());
           }
@@ -2152,14 +2164,11 @@ public class Env {
         _globalMap.put(name, envVar);
 
         ArrayValue array = new ArrayValueImpl();
-
         envVar.set(array);
-
-        if (_request == null)
-          return envVar;
         
-        String queryString = _request.getQueryString();
-        if (queryString == null)
+        String queryString = getQueryString();
+        
+        if (queryString == null || queryString.length() == 0)
           return envVar;
 
         StringUtility.parseStr(this,
@@ -2173,7 +2182,7 @@ public class Env {
       
       case _REQUEST: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         ArrayValue array = new ArrayValueImpl();
 
@@ -2244,14 +2253,19 @@ public class Env {
       }
 
       case HTTP_RAW_POST_DATA: {
-        if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
-          return null;
+        if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this)) {
+          String contentType = getContentType();
+          
+          if (contentType != null
+              && ! contentType.equals("unknown/type"))
+            return null;
+        }
         
         if (_inputData == null)
           return null;
         
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
         
@@ -2263,23 +2277,50 @@ public class Env {
       case HTTP_SERVER_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
-	else
-	  return getGlobalEnvVar("_SERVER");
+        else
+          return getGlobalEnvVar("_SERVER");
       
       case _SERVER: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
-        var.set(new ServerArrayValue(this));
+        Value serverEnv = new ServerArrayValue(this);
+        
+        var.set(serverEnv);
+        
+        String query = getQueryString();
+        
+        if (_quercus.getIniBoolean("register_argc_argv")
+            && query != null) {
+          ArrayValue argv = new ArrayValueImpl();
+
+          int i = 0;
+          int j = 0;
+          while ((j = query.indexOf('+', i)) >= 0) {
+            String sub = query.substring(i, j);
+            
+            argv.put(sub);
+            
+            i = j + 1;
+          }
+          
+          if (i < query.length())
+            argv.put(query.substring(i));
+          
+          serverEnv.put(createString("argc"),
+                        LongValue.create(argv.getSize()));
+          
+          serverEnv.put(createString("argv"), argv);
+        }
 
         return envVar;
       }
 
       case _GLOBAL: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2291,37 +2332,16 @@ public class Env {
       case HTTP_COOKIE_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
-	else
-	  return getGlobalEnvVar("_COOKIE");
+        else
+          return getGlobalEnvVar("_COOKIE");
       
       case _COOKIE: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
-        if (_request == null)
-          return envVar;
-        
-        ArrayValue array = new ArrayValueImpl();
-
-        Cookie []cookies = _request.getCookies();
-        if (cookies != null) {
-          for (int i = 0; i < cookies.length; i++) {
-            Cookie cookie = cookies[i];
-
-            String value = decodeValue(cookie.getValue());
-
-            StringValue valueAsValue = createString(value);
-
-            if (getIniBoolean("magic_quotes_gpc")) // php/0876
-              valueAsValue = StringModule.addslashes(valueAsValue);
-
-            array.append(createString(cookie.getName()), valueAsValue);
-          }
-        }
-
-        var.set(array);
+        var.set(getCookies());
 
         return envVar;
       }
@@ -2345,13 +2365,71 @@ public class Env {
         return null;
     }
   }
+  
+  protected String getQueryString()
+  {
+    if (_request != null)
+      return _request.getQueryString();
+    else
+      return null;
+  }
+  
+  protected String getContentType()
+  {
+    if (_request != null)
+      return _request.getContentType();
+    else
+      return null;
+  }
+  
+  protected ArrayValue getCookies()
+  {
+    ArrayValue array = new ArrayValueImpl();
+    boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
+    
+    Cookie []cookies = _request.getCookies();
+    if (cookies != null) {
+      for (int i = 0; i < cookies.length; i++) {
+        Cookie cookie = cookies[i];
+
+        String value = decodeValue(cookie.getValue());
+
+        StringValue valueAsValue = createString(value);
+
+        if (isMagicQuotes) // php/0876
+          valueAsValue = StringModule.addslashes(valueAsValue);
+
+        array.append(createString(cookie.getName()), valueAsValue);
+      }
+    }
+    
+    return array;
+  }
+  
+  public void setArgs(String []args)
+  {
+    if (_quercus.getIniBoolean("register_argc_argv")) {
+      ArrayValue argv = new ArrayValueImpl();
+      
+      for (String arg : args) {
+        argv.put(arg);
+      }
+      
+      Value serverEnv = getGlobalValue("_SERVER");
+      
+      serverEnv.put(createString("argc"),
+                    LongValue.create(args.length));
+      
+      serverEnv.put(createString("argv"), argv);
+    }
+  }
 
   /**
    * Gets a value.
    */
   protected EnvVar getGlobalSpecialRef(String name)
   {
-    if (_quercus.isSuperGlobal(name))
+    if (Quercus.isSuperGlobal(name))
       return _globalMap.get(name);
     else
       return null;
@@ -2396,7 +2474,7 @@ public class Env {
     return envVar;
   }
 
-  private static String decodeValue(String s)
+  protected static String decodeValue(String s)
   {
     int len = s.length();
     StringBuilder sb = new StringBuilder();
@@ -3386,6 +3464,43 @@ public class Env {
       return NullValue.NULL;
     else
       return value;
+  }
+  
+  /**
+   * Evaluates the top-level code and prepend and append code.
+   */
+  public void execute()
+    throws IOException
+  {
+    StringValue prepend
+      = _quercus.getIniValue("auto_prepend_file").toStringValue(this);
+    
+    if (prepend.length() > 0) {
+      Path prependPath = lookup(prepend);
+      
+      if (prependPath == null)
+        error(L.l("auto_prepend_file '{0}' not found.", prepend));
+      else {
+        QuercusPage prependPage = _quercus.parse(prependPath);
+        prependPage.executeTop(this);
+      }
+    }
+
+    executeTop();
+
+    StringValue append
+      = _quercus.getIniValue("auto_append_file").toStringValue(this);
+    
+    if (append.length() > 0) {
+      Path appendPath = lookup(append);
+      
+      if (appendPath == null)
+        error(L.l("auto_append_file '{0}' not found.", append));
+      else {
+        QuercusPage appendPage = getQuercus().parse(appendPath);
+        appendPage.executeTop(this);
+      }
+    }
   }
   
   /**

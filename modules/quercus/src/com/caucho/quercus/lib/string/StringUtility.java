@@ -142,8 +142,8 @@ public class StringUtility
 
       if (! isRef) {
         ArrayModule.extract(env, result,
-			    ArrayModule.EXTR_OVERWRITE,
-			    null);
+                            ArrayModule.EXTR_OVERWRITE,
+                            null);
       }
 
       return NullValue.NULL;

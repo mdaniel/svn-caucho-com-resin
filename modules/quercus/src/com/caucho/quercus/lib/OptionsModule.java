@@ -280,12 +280,8 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value getenv(Env env, StringValue key)
   {
-    Value val = env.getQuercus().getServerEnv(key);
-
-    if (val == null) {
-      ArrayValue serverVars = env.getGlobalVar("_SERVER").toArrayValue(env);
-      val = serverVars.get(key);
-    }
+    Value serverVars = env.getGlobalVar("_SERVER");;
+    Value val = serverVars.get(key);
 
     if (val == null || ! val.isset())
       return BooleanValue.FALSE;
@@ -514,9 +510,9 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Returns the sapi type.
    */
-  public static String php_sapi_name()
+  public static String php_sapi_name(Env env)
   {
-    return "apache";
+    return env.getQuercus().getSapiName();
   }
 
   /**
@@ -708,7 +704,7 @@ public class OptionsModule extends AbstractQuercusModule {
     StringValue key = settings.substring(0, eqIndex);
     StringValue val = settings.substring(eqIndex + 1);
 
-    env.getQuercus().setServerEnv(key, val);
+    env.getGlobalVar("_SERVER").put(key, val);
 
     return true;
   }
@@ -962,7 +958,7 @@ public class OptionsModule extends AbstractQuercusModule {
   static final IniDefinition INI_AUTO_GLOBALS_JIT
     = _iniDefinitions.add("auto_globals_jit", "1", PHP_INI_ALL);
   static final IniDefinition INI_REGISTER_ARGC_ARGV
-    = _iniDefinitions.add("register_argc_argv", true, PHP_INI_ALL);
+    = _iniDefinitions.add("register_argc_argv", false, PHP_INI_ALL);
   static final IniDefinition INI_POST_MAX_SIZE
     = _iniDefinitions.add("post_max_size", "8M", PHP_INI_ALL);
   static final IniDefinition INI_GPC_ORDER

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.MultipartStream;
 import com.caucho.vfs.Path;
@@ -49,57 +50,38 @@ import java.util.Map;
 /**
  * Handling of POST requests.
  */
-public class Post {
+public class Post
+{
+  private static final L10N L = new L10N(Post.class);
+  
   static void fillPost(Env env,
-                       ArrayValue postArray, ArrayValue files,
+                       ArrayValue postArray,
+                       ArrayValue files,
                        HttpServletRequest request,
                        boolean addSlashesToValues)
   {
     InputStream is = null;
 
     try {
-      if (request.getMethod().equals("POST")) {
-        String encoding = request.getCharacterEncoding();
-        
-        if (encoding == null)
-          encoding = env.getHttpInputEncoding();
+      String encoding = request.getCharacterEncoding();
+      String contentType = request.getHeader("Content-Type");
 
-        String contentType = request.getHeader("Content-Type");
+      is = request.getInputStream();
 
-        is = request.getInputStream();
-        
-        if (contentType != null
-            && contentType.startsWith("multipart/form-data")) {
-          String boundary = getBoundary(contentType);
+      fillPost(env,
+               postArray,
+               files,
+               is,
+               contentType,
+               encoding,
+               Integer.MAX_VALUE,
+               addSlashesToValues);
 
-          ReadStream rs = new ReadStream(new VfsStream(is, null));
-          MultipartStream ms = new MultipartStream(rs, boundary);
-          
-          if (encoding != null)
-            ms.setEncoding(encoding);
-
-          readMultipartStream(env, ms, postArray, files, addSlashesToValues);
-
-          rs.close();
-        }
-        else {
-          StringValue bb = env.createBinaryBuilder();
-          
-          bb.appendReadAll(is, Integer.MAX_VALUE);
-          
-          env.setInputData(bb);
-          
-          if (contentType != null
-              && contentType.startsWith("application/x-www-form-urlencoded"))
-            StringUtility.parseStr(env, bb, postArray, false, encoding);
-        }
-        
-        if (postArray.getSize() == 0) {
-          // needs to be last or else this function will consume the inputstream
-          putRequestMap(env, postArray, files, request, addSlashesToValues);
-        }
+      if (postArray.getSize() == 0) {
+        // needs to be last or else this function will consume the inputstream
+        putRequestMap(env, postArray, files, request, addSlashesToValues);
       }
-      
+
     } catch (IOException e) {
       env.warning(e);
     } finally {
@@ -108,6 +90,60 @@ public class Post {
           is.close();
       } catch (IOException e) {
       }
+    }
+  }
+  
+  static void fillPost(Env env,
+                       ArrayValue postArray,
+                       ArrayValue files,
+                       InputStream is,
+                       String contentType,
+                       String encoding,
+                       int contentLength,
+                       boolean addSlashesToValues)
+  {
+    long maxPostSize = env.getIniBytes("post_max_size", 0);
+
+    try {
+      if (encoding == null)
+        encoding = env.getHttpInputEncoding();
+      
+      if (contentType != null
+          && contentType.startsWith("multipart/form-data")) {
+        String boundary = getBoundary(contentType);
+
+        ReadStream rs = new ReadStream(new VfsStream(is, null));
+        MultipartStream ms = new MultipartStream(rs, boundary);
+        
+        if (encoding != null)
+          ms.setEncoding(encoding);
+
+        readMultipartStream(env, ms, postArray, files, addSlashesToValues);
+
+        rs.close();
+      }
+      else {
+        StringValue bb = env.createBinaryBuilder();
+        
+        bb.appendReadAll(is, Integer.MAX_VALUE);
+        
+        if (bb.length() > maxPostSize) {
+          env.warning(L.l("POST length of {0} exceeds max size of {1}",
+                          bb.length(),
+                          maxPostSize));
+          return;
+        }
+        
+        env.setInputData(bb);
+        
+        if (contentType != null
+            && contentType.startsWith("application/x-www-form-urlencoded"))
+          StringUtility.parseStr(env, bb, postArray, false, encoding);
+      }
+      
+    } catch (IOException e) {
+      env.warning(e);
+    } finally {
     }
   }
 

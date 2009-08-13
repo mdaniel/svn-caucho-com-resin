@@ -214,15 +214,6 @@ public class ServerArrayValue extends ArrayValueImpl
   }
 
   /**
-   * Prints the value.
-   * @param env
-   */
-  public void print(Env env)
-  {
-    env.print("Array");
-  }
-
-  /**
    * Fills the map.
    */
   private void fillMap()
@@ -231,12 +222,6 @@ public class ServerArrayValue extends ArrayValueImpl
       return;
 
     _isFilled = true;
-
-    for (Map.Entry<String,String> entry
-	   : System.getenv().entrySet()) {
-      super.put(_env.createString(entry.getKey()),
-		_env.createString(entry.getValue()));
-    }
 
     for (Map.Entry<Value,Value> entry
 	   : _env.getQuercus().getServerEnvMap().entrySet()) {
@@ -361,11 +346,11 @@ public class ServerArrayValue extends ArrayValueImpl
       char ch = key.charAt(i);
 
       if (Character.isLowerCase(ch))
-	sb.append(Character.toUpperCase(ch));
+        sb.append(Character.toUpperCase(ch));
       else if (ch == '-')
-	sb.append('_');
+        sb.append('_');
       else
-	sb.append(ch);
+        sb.append(ch);
     }
 
     return sb;
