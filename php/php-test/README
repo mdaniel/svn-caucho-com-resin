@@ -1,0 +1,3 @@
+To run, just specify the resin directory and the tests to run:
+
+php run-tests.php --resin-home c:/caucho/checkout/resin tests/strings/001.phpt
