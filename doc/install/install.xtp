@@ -181,7 +181,7 @@ apt-get update
 Finally, install Resin Professional using the following:
 </p>
 <example>
-apt-get resin-pro
+apt-get install resin-pro
 </example>
 <p>
 If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
@@ -190,7 +190,7 @@ If you have a license file for Resin, save it in <var>/usr/local/resin/licenses<
 Or install Resin Open Source with this command:
 </p>
 <example>
-apt-get resin
+apt-get install resin
 </example>
 </s3>
 </s2>
