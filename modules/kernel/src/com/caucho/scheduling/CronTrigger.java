@@ -39,8 +39,23 @@ import com.caucho.util.QDate;
  * Implements a cron-style trigger. This trigger is primarily intended for the
  * EJB calendar style timer service functionality.
  */
+// TODO Is this class getting too large? Maybe separate into a parser/lexer
+// sub-component?
 public class CronTrigger implements Trigger {
   private static final L10N L = new L10N(CronTrigger.class);
+  // Order of search is important in the token maps.
+  private static final String[][] MONTH_TOKEN_MAP = { { "january", "1" },
+      { "february", "2" }, { "march", "3" }, { "april", "4" }, { "may", "5" },
+      { "june", "6" }, { "july", "7" }, { "august", "8" },
+      { "september", "9" }, { "october", "10" }, { "november", "11" },
+      { "december", "12" }, { "jan", "1" }, { "feb", "2" }, { "mar", "3" },
+      { "apr", "4" }, { "jun", "6" }, { "jul", "7" }, { "aug", "8" },
+      { "sep", "9" }, { "oct", "10" }, { "nov", "11" }, { "dec", "12" } };
+  private static final String[][] DAY_OF_WEEK_TOKEN_MAP = { { "sunday", "0" },
+      { "monday", "1" }, { "tuesday", "2" }, { "wednesday", "3" },
+      { "thursday", "4" }, { "friday", "5" }, { "saturday", "6" },
+      { "sun", "0" }, { "mon", "1" }, { "tue", "2" }, { "wed", "3" },
+      { "thu", "4" }, { "fri", "5" }, { "sat", "6" } };
 
   private AtomicReference<QDate> _localCalendar = new AtomicReference<QDate>();
 
@@ -82,7 +97,8 @@ public class CronTrigger implements Trigger {
     }
 
     if (cronExpression.getDayOfWeek() != null) {
-      _daysOfWeek = parseRange(cronExpression.getDayOfWeek(), 0, 7);
+      _daysOfWeek = parseRange(
+          tokenizeDayOfWeek(cronExpression.getDayOfWeek()), 0, 7);
     }
 
     if (_daysOfWeek[7]) {
@@ -94,11 +110,37 @@ public class CronTrigger implements Trigger {
     }
 
     if (cronExpression.getMonth() != null) {
-      _months = parseRange(cronExpression.getMonth(), 1, 12);
+      _months = parseRange(tokenizeMonth(cronExpression.getMonth()), 1, 12);
     }
 
     _start = start;
     _end = end;
+  }
+
+  private String tokenizeDayOfWeek(String dayOfWeek)
+  {
+    // TODO The String processing is more resource intensive than necessary. See
+    // if StringBuilder can work with regex?
+
+    for (int i = 0; i < DAY_OF_WEEK_TOKEN_MAP.length; i++) {
+      dayOfWeek = dayOfWeek.replaceAll("(?i)" + DAY_OF_WEEK_TOKEN_MAP[i][0],
+          DAY_OF_WEEK_TOKEN_MAP[i][1]);
+    }
+
+    return dayOfWeek;
+  }
+
+  private String tokenizeMonth(String month)
+  {
+    // TODO The String processing is more resource intensive than necessary. See
+    // if StringBuilder can work with regex?
+
+    for (int i = 0; i < MONTH_TOKEN_MAP.length; i++) {
+      month = month.replaceAll("(?i)" + MONTH_TOKEN_MAP[i][0],
+          MONTH_TOKEN_MAP[i][1]);
+    }
+
+    return month;
   }
 
   /**
