@@ -175,7 +175,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletRequestWrapper reqWrapper = null;
 
     if (req instanceof HttpServletRequestWrapper) {
-      reqWrapper = (HttpServletRequestWrapper)  req;
+      reqWrapper = (HttpServletRequestWrapper) req;
       parentReq = (HttpServletRequest) reqWrapper.getRequest();
     }
 
@@ -183,12 +183,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletResponseWrapper resWrapper = null;
 
     if (res instanceof HttpServletResponseWrapper) {
-      resWrapper = (HttpServletResponseWrapper)  res;
+      resWrapper = (HttpServletResponseWrapper) res;
       parentRes = (HttpServletResponse) resWrapper.getResponse();
     }
     
     ForwardRequest subRequest
       = new ForwardRequest(parentReq, parentRes, invocation);
+    System.out.println("SUB:" + parentReq + " " + subRequest);
     ForwardResponse subResponse = subRequest.getResponse();
 
     HttpServletRequest topRequest = subRequest;

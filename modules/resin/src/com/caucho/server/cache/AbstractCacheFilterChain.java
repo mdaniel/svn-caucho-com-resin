@@ -49,12 +49,10 @@ abstract public class AbstractCacheFilterChain
    * @param req the servlet request trying to get data from the cache
    * @param response the servlet response which will receive data
    * @param entry the cache entry to use
-   * @param isTop if true, the not-modified should be sent to the browser
    */
   abstract public boolean fillFromCache(CauchoRequest req,
                                         CauchoResponse response,
-                                        AbstractCacheEntry abstractEntry,
-                                        boolean isTop)
+                                        AbstractCacheEntry abstractEntry)
     throws IOException;
 
   /**

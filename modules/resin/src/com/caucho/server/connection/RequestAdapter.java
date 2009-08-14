@@ -333,6 +333,15 @@ public class RequestAdapter extends RequestWrapper
   public void setHeader(String key, String value)
   {
   }
+
+  public void setSyntheticCacheHeader(boolean isSynthetic)
+  {
+  }
+
+  public boolean isSyntheticCacheHeader()
+  {
+    return false;
+  }
   
   public WebApp getWebApp()
   {

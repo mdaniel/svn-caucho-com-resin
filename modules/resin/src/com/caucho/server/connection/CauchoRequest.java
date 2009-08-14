@@ -53,6 +53,9 @@ public interface CauchoRequest extends HttpServletRequest {
   public void setVaryCookie(String cookie);
   public boolean getHasCookie();
 
+  public void setSyntheticCacheHeader(boolean isTop);
+  public boolean isSyntheticCacheHeader();
+  
   public boolean isTop();
 
   public boolean hasRequest();

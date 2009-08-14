@@ -28,6 +28,7 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.vfs.FlushBuffer;
 import com.caucho.vfs.WriteStream;
@@ -339,6 +340,10 @@ public class StubServletResponse implements CauchoResponse {
   }
 
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
+  {
+  }
+
+  public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
   }
 }

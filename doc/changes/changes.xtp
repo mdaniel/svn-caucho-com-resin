@@ -13,6 +13,9 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>servlet: include/forward should not trigger request events (#3111, rep by tempestse)</li>
+<li>http: refactor to eliminate buffer/session reuse for subsequent requests (#3557, rep by Kevin Kilmer-Choi)</li>
+<li>servlet: forward attribute issues with wrappers (#3059, rep by masum)</li>
 <li>server: content-length counting issues (#3619, rep by Matthew Schmidt)</li>
 <li>jmx: IntrospectionMBean _attrGetMap needs to be synchronized (#3620, rep by ebarlas)</li>
 <li>jsse: added jsse cipher-suite support (#3593, rep by vbavin)</li>

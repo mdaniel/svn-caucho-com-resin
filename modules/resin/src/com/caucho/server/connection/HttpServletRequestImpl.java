@@ -118,6 +118,9 @@ public class HttpServletRequestImpl implements CauchoRequest
   // servlet attributes
   private HashMapImpl<String,Object> _attributes;
 
+  // proxy caching
+  private boolean _isSyntheticCacheHeader;
+
   // comet
   private AsyncListenerNode _asyncListenerNode;
   private long _asyncTimeout = 10000;
@@ -1836,6 +1839,16 @@ public class HttpServletRequestImpl implements CauchoRequest
   public void setHeader(String key, String value)
   {
     _request.setHeader(key, value);
+  }
+
+  public void setSyntheticCacheHeader(boolean isTop)
+  {
+    _isSyntheticCacheHeader = isTop;
+  }
+
+  public boolean isSyntheticCacheHeader()
+  {
+    return _isSyntheticCacheHeader;
   }
 
   /**

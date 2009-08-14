@@ -373,6 +373,15 @@ public class StubServletRequest implements CauchoRequest {
     return null;
   }
 
+  public boolean isSyntheticCacheHeader()
+  {
+    return false;
+  }
+
+  public void setSyntheticCacheHeader(boolean isSynthetic)
+  {
+  }
+
   public DispatcherType getDispatcherType()
   {
     return null;

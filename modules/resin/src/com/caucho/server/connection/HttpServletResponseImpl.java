@@ -571,7 +571,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
   {
     if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
       setStatus(code, value);
-      
+
       if (handleNotModified())
         return;
     }
@@ -684,7 +684,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
     throws IOException
   {
     boolean isTop = true;
-    
+
     if (_status != SC_NOT_MODIFIED) {
       return false;
     }
@@ -694,12 +694,12 @@ public final class HttpServletResponseImpl implements CauchoResponse
 
       // need to unclose because the not modified might be detected only
       // when flushing the data
-      // _originalResponseStream.clearClosed();
+      // _responseStream.clearClosed();
 
       /* XXX: complications with filters */
       if (_cacheInvocation != null
 	  && _cacheInvocation.fillFromCache(getRequest(), this,
-                                            _matchCacheEntry, isTop)) {
+                                            _matchCacheEntry)) {
         _matchCacheEntry.updateExpiresDate();
         _cacheInvocation = null;
         _matchCacheEntry = null;

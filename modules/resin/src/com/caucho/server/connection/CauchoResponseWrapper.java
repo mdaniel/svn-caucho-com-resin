@@ -31,6 +31,7 @@ package com.caucho.server.connection;
 
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 
 import java.io.*;
@@ -385,6 +386,10 @@ public class CauchoResponseWrapper implements CauchoResponse {
   }
   
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
+  {
+  }
+  
+  public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
   }
   

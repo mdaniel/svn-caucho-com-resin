@@ -57,7 +57,6 @@ public class DispatchFilterChain implements FilterChain {
   private WebApp _app;
   // class loader
   private ClassLoader _classLoader;
-  private Invocation _invocation;
 
   private ServletRequestListener []_requestListeners;
   
@@ -68,12 +67,10 @@ public class DispatchFilterChain implements FilterChain {
    * @param app the webApp
    */
   public DispatchFilterChain(FilterChain next,
-			     WebApp app,
-			     Invocation invocation)
+			     WebApp app)
   {
     _next = next;
     _app = app;
-    _invocation = invocation;
     _classLoader = app.getClassLoader();
     _requestListeners = app.getRequestListeners();
   }
@@ -93,19 +90,9 @@ public class DispatchFilterChain implements FilterChain {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     HttpServletRequestImpl cauchoReq = null;
-    Invocation oldInvocation = null;
-
-    if (request instanceof HttpServletRequestImpl) {
-      cauchoReq = (HttpServletRequestImpl) request;
-      oldInvocation = cauchoReq.getInvocation();
-    }
     
     try {
       thread.setContextClassLoader(_classLoader);
-
-      // server/1061
-      if (cauchoReq != null && oldInvocation == null)
-	cauchoReq.setInvocation(_invocation);
 
       for (int i = 0; i < _requestListeners.length; i++) {
 	ServletRequestEvent event = new ServletRequestEvent(_app, request);
@@ -121,9 +108,6 @@ public class DispatchFilterChain implements FilterChain {
 	_requestListeners[i].requestDestroyed(event);
       }
 
-      if (cauchoReq != null)
-	cauchoReq.setInvocation(oldInvocation);
-      
       thread.setContextClassLoader(oldLoader);
     }
   }

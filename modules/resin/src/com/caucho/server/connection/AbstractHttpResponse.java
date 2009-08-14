@@ -424,11 +424,9 @@ abstract public class AbstractHttpResponse {
     case HEADER_CACHE_CONTROL:
       if (value.startsWith("max-age")) {
       }
-      else if (value.startsWith("s-max-age")) {
+      else if (value.startsWith("s-maxage")) {
       }
       else if (value.equals("x-anonymous")) {
-      }
-      else if (value.equals("public")) {
       }
       else
 	_request.getResponseFacade().setCacheControl(true);

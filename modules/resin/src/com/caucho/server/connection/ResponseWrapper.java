@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 import com.caucho.util.L10N;
+import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 
 /**
@@ -455,6 +456,10 @@ public class ResponseWrapper implements ServletResponse {
   }
 
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
+  {
+  }
+
+  public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
   }
 

@@ -359,6 +359,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
     }
     
     _contentLength += sublen;
+    
+    if (_cacheStream != null) {
+      byte []nextBuffer = getNextBuffer();
+      
+      writeCache(nextBuffer, oldOffset, sublen);
+    }
 
     if (! _isHead) {
       // server/051e
@@ -403,7 +409,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       }
       
       if (_cacheStream != null)
-        writeCache(nextBuffer, startOffset, offset - startOffset);
+        writeCache(nextBuffer, oldOffset, offset - oldOffset);
       
       return writeNextBuffer(offset);
     } catch (ClientDisconnectException e) {

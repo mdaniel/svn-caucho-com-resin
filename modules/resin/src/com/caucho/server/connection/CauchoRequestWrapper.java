@@ -571,6 +571,20 @@ public class CauchoRequestWrapper implements CauchoRequest {
     cRequest.setHeader(key, value);
   }
   
+  public boolean isSyntheticCacheHeader()
+  {
+    CauchoRequest cRequest = (CauchoRequest) _request;
+
+    return cRequest.isSyntheticCacheHeader();
+  }
+  
+  public void setSyntheticCacheHeader(boolean isSynthetic)
+  {
+    CauchoRequest cRequest = (CauchoRequest) _request;
+
+    cRequest.setSyntheticCacheHeader(isSynthetic);
+  }
+  
   public boolean getVaryCookies()
   {
     CauchoRequest cRequest = (CauchoRequest) _request;
