@@ -129,10 +129,6 @@ public class Server extends ProtocolDispatchServer
 
   private Throwable _configException;
 
-  private HostContainer _hostContainer;
-
-  private String _serverHeader;
-
   private AdminAuthenticator _adminAuth;
 
   private InjectManager _webBeans;
@@ -149,6 +145,12 @@ public class Server extends ProtocolDispatchServer
   private PersistentStoreConfig _persistentStoreConfig;
 
   private DistributedCacheManager _distributedCacheManager;
+
+  private HostContainer _hostContainer;
+
+  private String _staging = "default";
+  
+  private String _serverHeader;
 
   private int _urlLengthMax = 8192;
 
@@ -748,6 +750,25 @@ public class Server extends ProtocolDispatchServer
    */
   public void addJvmClasspath(String args)
   {
+  }
+
+  /**
+   * Sets the staging id
+   */
+  public void setStaging(String staging)
+  {
+    if (staging == null || "".equals(staging))
+      _staging = "staging";
+    else
+      _staging = staging;
+  }
+
+  /**
+   * Returns the staging id
+   */
+  public String getStaging()
+  {
+    return _staging;
   }
 
   /**

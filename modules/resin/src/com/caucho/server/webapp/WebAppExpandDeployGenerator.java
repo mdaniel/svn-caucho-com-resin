@@ -94,14 +94,21 @@ public class WebAppExpandDeployGenerator
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    if (Server.getCurrent() != null) {
-      setRepository(Server.getCurrent().getRepository());
+    Server server = Server.getCurrent();
+
+    if (server != null) {
+      setRepository(server.getRepository());
       
       String hostName = webAppContainer.getHostName();
       if ("".equals(hostName))
 	hostName = "default";
+
+      String staging = "default";
+
+      if (server != null)
+        staging = server.getStaging();
     
-      setRepositoryTag("wars/" + hostName);
+      setRepositoryTag(staging + "/wars/" + hostName);
       
       setEntryNamePrefix("/");
     }

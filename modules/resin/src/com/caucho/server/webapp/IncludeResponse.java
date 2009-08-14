@@ -96,6 +96,10 @@ class IncludeResponse extends CauchoResponseWrapper
   {
   }
 
+  public void setContentLength(int length)
+  {
+  }
+
   /**
    * Sets the ResponseStream
    */
