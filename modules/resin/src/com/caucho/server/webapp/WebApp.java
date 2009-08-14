@@ -721,6 +721,14 @@ public class WebApp extends ServletContextImpl
   {
   }
 
+  public boolean isMetadataComplete() {
+    return _metadataComplete;
+  }
+
+  public void setMetadataComplete(boolean metadataComplete) {
+    _metadataComplete = metadataComplete;
+  }
+
   @Configurable
   public void setDistributable(boolean isDistributable)
   {

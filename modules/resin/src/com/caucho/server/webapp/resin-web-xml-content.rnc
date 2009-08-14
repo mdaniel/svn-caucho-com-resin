@@ -1051,6 +1051,7 @@ r_versioning =
   | element versioning { r_boolean-Type }
 
 r_web-app-default = element web-app-default {
+  attribute metadata-complete { r_boolean-Type }?,
   r_web-app-Content
 }
 
@@ -1249,7 +1250,7 @@ r_web-app-Content =
 r_web-app = element web-app {
   attribute version { string }?,
   attribute xsi:schemaLocation { string }?,
-
+  attribute metadata-complete { r_boolean-Type }?,
   r_web-app-Content
 }
 
@@ -1257,7 +1258,8 @@ rc_web-app = element web-app {
   (attribute id { string }
   | attribute url-prefix { string } | element url-prefix { string }
   | attribute url-regexp { string } | element url-regexp { string }),
-
+  attribute metadata-complete { r_boolean-Type }?,
+  
   (r_context-path?
 
   & (r_root-directory | r_document-directory)?
