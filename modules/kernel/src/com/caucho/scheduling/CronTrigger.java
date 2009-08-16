@@ -149,11 +149,13 @@ public class CronTrigger implements Trigger {
   private boolean[] parseRange(String range, int rangeMin, int rangeMax)
       throws ConfigException
   {
+    // TODO This does not handle spaces.
+
     boolean[] values = new boolean[rangeMax + 1];
 
-    int j = 0;
-    while (j < range.length()) {
-      char character = range.charAt(j);
+    int i = 0;
+    while (i < range.length()) {
+      char character = range.charAt(i);
 
       int min = 0;
       int max = 0;
@@ -162,52 +164,63 @@ public class CronTrigger implements Trigger {
       if (character == '*') {
         min = rangeMin;
         max = rangeMax;
-        j++;
-      } else if ('0' <= character && character <= '9') {
-        for (; j < range.length() && '0' <= (character = range.charAt(j))
-            && character <= '9'; j++) {
+        i++;
+      } else if ('0' <= character && character <= '9') { // This does not work
+        // for -N
+        for (; i < range.length() && '0' <= (character = range.charAt(i))
+            && character <= '9'; i++) {
           min = 10 * min + character - '0';
         }
 
-        if (j < range.length() && character == '-') {
-          for (j++; j < range.length() && '0' <= (character = range.charAt(j))
-              && character <= '9'; j++) {
+        if (i < range.length() && character == '-') {
+          for (i++; i < range.length() && '0' <= (character = range.charAt(i))
+              && character <= '9'; i++) {
             max = 10 * max + character - '0';
           }
-        } else
+        } else {
           max = min;
-      } else
+        }
+      } else {
         throw new ConfigException(L.l("'{0}' is an illegal cron range", range));
+      }
 
-      if (min < rangeMin)
+      if (min < rangeMin) {
         throw new ConfigException(L.l(
             "'{0}' is an illegal cron range (min value is too small)", range));
-      else if (rangeMax < max)
+      } else if (rangeMax < max) {
         throw new ConfigException(L.l(
             "'{0}' is an illegal cron range (max value is too large)", range));
+      }
 
-      if (j < range.length() && (character = range.charAt(j)) == '/') {
+      // TODO Need to handle N/M
+      if ((i < range.length()) && ((character = range.charAt(i)) == '/')) {
         step = 0;
 
-        for (j++; j < range.length() && '0' <= (character = range.charAt(j))
-            && character <= '9'; j++) {
+        for (i++; i < range.length() && '0' <= (character = range.charAt(i))
+            && character <= '9'; i++) {
           step = 10 * step + character - '0';
         }
 
-        if (step == 0)
+        if (min == max) {
+          max = rangeMax;
+        }
+
+        if (step == 0) {
           throw new ConfigException(L
               .l("'{0}' is an illegal cron range", range));
+        }
       }
 
-      if (range.length() <= j) {
-      } else if (character == ',')
-        j++;
-      else {
+      if (range.length() <= i) {
+      } else if (character == ',') {
+        i++;
+      } else {
         throw new ConfigException(L.l("'{0}' is an illegal cron range", range));
       }
 
-      for (; min <= max; min += step)
+      for (; min <= max; min += step) {
         values[min] = true;
+      }
     }
 
     return values;
