@@ -89,6 +89,43 @@ class IncludeResponse extends CauchoResponseWrapper
   {
   }
 
+  //
+  // headers
+  //
+  
+  public void setHeader(String name, String value)
+  {
+  }
+  
+  public void addHeader(String name, String value)
+  {
+  }
+  
+  public boolean containsHeader(String name)
+  {
+    return false;
+  }
+  
+  public void setDateHeader(String name, long date)
+  {
+  }
+  
+  public void addDateHeader(String name, long date)
+  {
+  }
+  
+  public void setIntHeader(String name, int value)
+  {
+  }
+  
+  public void addIntHeader(String name, int value)
+  {
+  }
+  
+  public void addCookie(Cookie cookie)
+  {
+  }
+
   /**
    * included response can't set the content type.
    */

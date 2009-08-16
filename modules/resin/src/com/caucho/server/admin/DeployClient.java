@@ -164,6 +164,24 @@ public class DeployClient
   }
 
   /**
+   * Undeploys a tag
+   *
+   * @param tag symbolic name of the jar file to add
+   * @param user user name for the commit message
+   * @param message the commit message
+   */
+  public Boolean copyTag(String tag,
+                         String sourceTag,
+			 String user,
+			 String message,
+			 String version)
+  {
+    CopyTagQuery query = new CopyTagQuery(tag, sourceTag, user, message, version);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
    * Deploys a war, but does not start it
    *
    * @param host the virtual host
@@ -428,3 +446,4 @@ public class DeployClient
       return getClass().getSimpleName() + "[" + _conn + "]";
   }
 }
+

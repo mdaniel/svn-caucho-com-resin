@@ -614,7 +614,7 @@ abstract public class DeployController<I extends DeployInstance>
    * Returns the instance for a top-level request
    * @return the request object or null for none.
    */
-  public I request()
+  public final I request()
   {
     if (_lifecycle.isDestroyed())
       return null;
@@ -629,7 +629,7 @@ abstract public class DeployController<I extends DeployInstance>
    *
    * @return the request object or null for none.
    */
-  public I subrequest()
+  public final I subrequest()
   {
     if (_lifecycle.isDestroyed())
       return null;

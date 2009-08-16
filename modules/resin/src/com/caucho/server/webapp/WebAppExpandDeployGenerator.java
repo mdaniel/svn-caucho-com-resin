@@ -34,8 +34,10 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
+import com.caucho.server.deploy.VersionEntry;
 import com.caucho.server.repository.Repository;
 import com.caucho.server.cluster.Server;
+import com.caucho.util.L10N;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 
@@ -53,6 +55,7 @@ public class WebAppExpandDeployGenerator
   extends ExpandDeployGenerator<WebAppController>
   implements EnvironmentListener
 {
+  private static final L10N L = new L10N(WebAppExpandDeployGenerator.class);
   private static final Logger log
     = Logger.getLogger(WebAppExpandDeployGenerator.class.getName());
 
@@ -274,22 +277,50 @@ public class WebAppExpandDeployGenerator
 	     && CaseInsensitive.isCaseInsensitive())
       contextPath = "";
 
-    ArrayList<String> versionNames = getVersionNames(segmentName);
-
-    if (versionNames == null || versionNames.size() == 0) {
+    if (isVersioning())
+      return createVersioningController(name, contextPath, segmentName);
+    else {
       return makeController(name,
 			    _urlPrefix + contextPath,
 			    _urlPrefix + segmentName);
     }
+  }
+
+  private WebAppController createVersioningController(String name,
+                                                      String contextPath,
+                                                      String segmentName)
+  {
+    VersionEntry entry = getVersionEntry(segmentName);
+
+    if (entry == null)
+      return null;
 
     String baseName = name;
 
+    String baseContextPath = _urlPrefix + entry.getBaseContextPath();
+    String versionContextPath = _urlPrefix + entry.getContextPath();
+
+    if (! baseContextPath.equals(versionContextPath))
+      return makeController(name, baseContextPath, versionContextPath);
+
+    VersionEntry versionEntry = getVersionEntryByRoot(entry.getRoot());
+    
+    if (versionEntry == null) {
+      throw new ConfigException(L.l("Versioned web-app '{0}' is not valid because it does not have a concrete version.  Check that the web-app is properly configured.", name));
+    }
+    
+    return new WebAppVersioningController(segmentName,
+                                          baseContextPath,
+                                          this, _container);
+      
+    /*
     WebAppController controller
       = new WebAppVersioningController(_urlPrefix + contextPath,
 				       _urlPrefix + contextPath,
 				       baseName, this, _container);
 
     return controller;
+    */
   }
 
   private WebAppController makeController(String name,
@@ -298,18 +329,6 @@ public class WebAppExpandDeployGenerator
   {
     String version = "";
     String baseName = contextPath;
-
-    if (isVersioning()) {
-      int p = versionName.lastIndexOf('-');
-      
-      if (p > 0) {
-	version = versionName.substring(p + 1);
-	baseName = versionName.substring(0, p);
-
-	if ("ROOT".equals(baseName))
-	  baseName = "";
-      }
-    }
 
     int p = versionName.lastIndexOf('/');
 

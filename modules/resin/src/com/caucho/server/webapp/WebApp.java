@@ -164,6 +164,7 @@ public class WebApp extends ServletContextImpl
 
   // The context path
   private String _contextPath = "";
+  private String _versionContextPath = "";
 
   // A description
   private String _description = "";
@@ -349,6 +350,8 @@ public class WebApp extends ServletContextImpl
 
     String contextPath = controller.getContextPath();
     setContextPathId(contextPath);
+
+    setVersionContextPath(controller.getId());
 
     _controller = controller;
     _appDir = controller.getRootDirectory();
@@ -692,6 +695,14 @@ public class WebApp extends ServletContextImpl
   private void setContextPath(String contextPath)
   {
     _contextPath = contextPath;
+  }
+
+  /**
+   * Sets the context path
+   */
+  private void setVersionContextPath(String contextPath)
+  {
+    _versionContextPath = contextPath;
 
     if (getServletContextName() == null)
       setDisplayName(contextPath);
@@ -751,9 +762,9 @@ public class WebApp extends ServletContextImpl
   public String getId()
   {
     if (_parent != null)
-      return _parent.getId() + _contextPath;
+      return _parent.getId() + _versionContextPath;
     else
-      return _contextPath;
+      return _versionContextPath;
   }
 
   /**

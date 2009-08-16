@@ -31,6 +31,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
+import com.caucho.server.deploy.VersionEntry;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -45,8 +46,6 @@ public class WebAppVersioningController extends WebAppController {
     = Logger.getLogger(WebAppController.class.getName());
 
   private static final long EXPIRE_PERIOD = 3600 * 1000L;
-
-  private final String _baseName;
 
   private long _versionRolloverTime = EXPIRE_PERIOD;
   
@@ -63,24 +62,17 @@ public class WebAppVersioningController extends WebAppController {
 
   public WebAppVersioningController(String name,
 				    String contextPath,
-				    String baseName,
 				    WebAppExpandDeployGenerator generator,
 				    WebAppContainer container)
   {
     super(name, contextPath, null, container);
 
-    _baseName = baseName;
     _generator = generator;
   }
 
   void setModified(boolean isModified)
   {
     _isModified = isModified;
-  }
-
-  protected String getBaseName()
-  {
-    return _baseName;
   }
 
   public boolean isVersioning()
@@ -103,34 +95,12 @@ public class WebAppVersioningController extends WebAppController {
    * @return the request object or null for none.
    */
   @Override
-  public WebApp request()
+  public WebApp instantiateDeployInstance()
   {
-    if (_isModified)
-      updateVersionImpl();
-
     WebAppController controller = _primaryController;
 
     if (controller != null)
-      return controller.request();
-    else
-      return null;
-  }
-
-  /**
-   * Returns the instance for a subrequest.
-   *
-   * @return the request object or null for none.
-   */
-  @Override
-  public WebApp subrequest()
-  {
-    if (_isModified)
-      updateVersionImpl();
-
-    WebAppController controller = _primaryController;
-
-    if (controller != null)
-      return controller.request();
+      return controller.getDeployInstance();
     else
       return null;
   }
@@ -141,8 +111,7 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   protected WebApp startImpl()
   {
-    if (_isModified)
-      updateVersionImpl();
+    updateVersionImpl();
 
     WebAppController controller = _primaryController;
 
@@ -163,6 +132,20 @@ public class WebAppVersioningController extends WebAppController {
     */
   }
 
+  public boolean isModified()
+  {
+    if (_isModified)
+      return true;
+
+    VersionEntry entry = _generator.getVersionEntry(getId());
+
+    if (entry == null)
+      return false;
+
+
+    return false;
+  }
+
   public void updateVersion()
   {
     _isModified = true;
@@ -177,41 +160,37 @@ public class WebAppVersioningController extends WebAppController {
 
     try {
       synchronized (this) {
-	if (! _isModified)
-	  return;
-	_isModified = false;
-      
-	_controllerList = new ArrayList<WebAppController>();
+        String versionName = _generator.getPrimaryVersion(getId());
 
-	ArrayList<String> versionNames
-	  = _generator.getVersionNames(getBaseName());
+        WebAppController oldPrimaryController = _primaryController;
+        
+        WebAppController newPrimaryController
+          = _container.getWebAppGenerator().findController(versionName);
 
-	if (versionNames != null) {
-	  Collections.sort(versionNames, new VersionNameComparator());
-	
-	  for (int i = 0; i < versionNames.size() && i < 2; i++) {
-	    String versionName = versionNames.get(i);
+        if (newPrimaryController == oldPrimaryController)
+          return;
 
-	    WebAppController newController
-	      = _container.getWebAppGenerator().findController(versionName);
+        log.fine(this + " updating primary to " + newPrimaryController);
 
-	    _controllerList.add(newController);
-	  }
+        if (oldPrimaryController != null
+            && oldPrimaryController != newPrimaryController) {
+          _controllerList.add(oldPrimaryController);
+        }
 
-	  //Collections.sort(_controllerList, new VersionComparator());
+        _primaryController = newPrimaryController;
 
-	  _primaryController = _controllerList.get(0);
+        _controllerList.remove(newPrimaryController);
 
-	  if (_restartTime > 0 && _controllerList.size() > 1) {
-	    long expireTime = Alarm.getCurrentTime() + _versionRolloverTime;
+        int size = _controllerList.size();
+        if (size > 0) {
+          WebAppController oldController = _controllerList.get(size - 1);
 
-	    _primaryController.setOldWebApp(_controllerList.get(1),
-					    expireTime);
-	  
-	  }
+          long expireTime = Alarm.getCurrentTime() + _versionRolloverTime;
 
-	  _restartTime = Alarm.getCurrentTime();
-	}
+          _primaryController.setOldWebApp(oldController, expireTime);
+        }
+
+        _restartTime = Alarm.getCurrentTime();
       }
     } finally {
       _isUpdating.set(false);

@@ -67,6 +67,7 @@ public class WebAppController
 
   // The context path is the URL prefix for the web-app
   private String _contextPath;
+  private String _versionContextPath;
   private String _version = "";
 
   // Any old version web-app
@@ -100,16 +101,18 @@ public class WebAppController
     this("/", "/", null, null);
   }
 
-  public WebAppController(String name,
+  public WebAppController(String versionContextPath,
 			  String contextPath,
 			  Path rootDirectory,
 			  WebAppContainer container)
   {
-    super(name, rootDirectory);
+    super(versionContextPath, rootDirectory);
 
     _container = container;
 
     setContextPath(contextPath);
+
+    _versionContextPath = versionContextPath;
   }
 
   /**
@@ -384,9 +387,9 @@ public class WebAppController
   public boolean isNameMatch(String url)
   {
     if (CauchoSystem.isCaseInsensitive())
-      return url.equalsIgnoreCase(_contextPath);
+      return url.equalsIgnoreCase(_versionContextPath);
     else
-      return url.equals(_contextPath);
+      return url.equals(_versionContextPath);
   }
 
   /**

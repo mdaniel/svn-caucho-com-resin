@@ -689,22 +689,33 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     return digest;
   }
 
-  public ArrayList<String> getVersionNames(String name)
+  public VersionEntry getVersionEntry(String name)
   {
     if (! isVersioning())
       return null;
     
-    TreeSet<String> entryNames;
+    TreeMap<String,VersionEntry> map = buildVersionMap();
 
-    try {
-      entryNames = findEntryNames();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    return map.get(name);
+  }
+
+  public VersionEntry getVersionEntryByRoot(String root)
+  {
+    if (! isVersioning())
+      return null;
+    
+    TreeMap<String,VersionEntry> map = buildVersionMap();
+
+    for (Map.Entry<String,VersionEntry> mapEntry : map.entrySet()) {
+      VersionEntry vEntry = mapEntry.getValue();
+
+      if (vEntry.getRoot().equals(root)
+          && ! vEntry.getContextPath().equals(vEntry.getBaseContextPath())) {
+        return vEntry;
+      }
     }
 
-    TreeMap<String,ArrayList<String>> versionMap = buildVersionMap(entryNames);
-
-    return versionMap.get(name);
+    return null;
   }
   
   /**
@@ -840,27 +851,61 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       }
     }
   }
+
+  public String getPrimaryVersion(String name)
+  {
+    VersionEntry entry = getVersionEntry(name);
+
+    if (entry != null) {
+      VersionEntry versionEntry = getVersionEntryByRoot(entry.getRoot());
+
+      if (versionEntry != null)
+        return versionEntry.getContextPath();
+    }
+    
+    return null;
+  }
   
   /**
-   * Return the entry names for all deployed objects.
+   * Version map uses the repository
    */
-  private TreeMap<String,ArrayList<String>>
-    buildVersionMap(TreeSet<String> entryNames)
+  private TreeMap<String,VersionEntry> buildVersionMap()
   {
-    TreeMap<String,ArrayList<String>> versionMap;
-    versionMap = new TreeMap<String,ArrayList<String>>();
+    if (_repository == null || getRepositoryTag() == null)
+      return null;
+    
+    String prefix = getRepositoryTag() + "/";
+    
+    Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
 
-    for (String name : entryNames) {
-      String baseName = versionedNameToBaseName(name);
+    TreeMap<String,VersionEntry> versionMap;
+    versionMap = new TreeMap<String,VersionEntry>();
 
-      if (_isVersioning && ! baseName.equals(name)) {
-	ArrayList<String> list = versionMap.get(baseName);
-	if (list == null)
-	  list = new ArrayList<String>();
+    for (Map.Entry<String,RepositoryTagEntry> entry : tagMap.entrySet()) {
+      String tagName = entry.getKey();
 
-	list.add(name);
+      if (tagName.startsWith(prefix)) {
+        String name = tagName.substring(prefix.length());
+        String baseName = name;
 
-	versionMap.put(baseName, list);
+        int p = baseName.lastIndexOf('-');
+        int ch;
+        if (p > 0 && p + 1 < baseName.length()
+            && '0' <= baseName.charAt(p + 1)
+            && baseName.charAt(p + 1) <= '9') {
+          baseName = baseName.substring(0, p);
+        }
+
+        // XXX: url-prefix?
+        String versionContextPath = "/" + name;
+        String baseContextPath = "/" + baseName;
+
+        VersionEntry versionEntry
+          = new VersionEntry(name, versionContextPath, baseContextPath,
+                             entry.getValue().getSha1(),
+                             entry.getValue().getRoot());
+        
+        versionMap.put(versionContextPath, versionEntry);
       }
     }
 
@@ -1211,5 +1256,4 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     
     return name + "[" + getExpandDirectory() + "]";
   }
-
 }

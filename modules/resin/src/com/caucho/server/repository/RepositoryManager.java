@@ -68,6 +68,14 @@ public class RepositoryManager
     return _repository.getTagMap();
   }
 
+  /**
+   * Returns the current tag map.
+   */
+  public RepositoryTagEntry getTag(String name)
+  {
+    return _repository.getTagMap().get(name);
+  }
+
   //
   // tag management
   //

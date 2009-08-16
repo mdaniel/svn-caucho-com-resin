@@ -44,6 +44,7 @@ import com.caucho.management.server.WebAppMXBean;
 import com.caucho.management.server.WebAppDeployMXBean;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.repository.RepositoryManager;
+import com.caucho.server.repository.RepositoryTagEntry;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.host.HostController;
 import com.caucho.server.webapp.WebAppController;
@@ -174,7 +175,7 @@ public class DeployService extends SimpleActor
     ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
 
     for (String tag : _repository.getTagMap().keySet()) {
-      if (tag.startsWith("wars/") || tag.startsWith("ears/")) {
+      if (tag.startsWith("default/wars/") || tag.startsWith("default/ears/")) {
 	int p = tag.indexOf('/');
 	int q = tag.indexOf('/', p + 1);
 
@@ -309,6 +310,31 @@ public class DeployService extends SimpleActor
     getBrokerStream().queryResult(id, from, to, true);
 
     return true;
+  }
+
+  @QuerySet
+  public void tagCopy(long id,
+                      String to,
+                      String from,
+                      CopyTagQuery query)
+  {
+    String tag = query.getTag();
+    String sourceTag = query.getSourceTag();
+
+    log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
+
+    RepositoryTagEntry entry = _repository.getTag(sourceTag);
+
+    if (entry == null) {
+      getBrokerStream().queryResult(id, from, to, "failed because tag doesn't exist");
+      return;
+    }
+
+    boolean result
+      = _repository.setTag(tag, entry.getRoot(), query.getUser(),
+			   query.getMessage(), query.getVersion());
+    
+    getBrokerStream().queryResult(id, from, to, result);
   }
 
   private String start(String tag)
