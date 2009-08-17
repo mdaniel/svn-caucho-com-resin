@@ -56,13 +56,18 @@ public class CronTrigger implements Trigger {
       { "thursday", "4" }, { "friday", "5" }, { "saturday", "6" },
       { "sun", "0" }, { "mon", "1" }, { "tue", "2" }, { "wed", "3" },
       { "thu", "4" }, { "fri", "5" }, { "sat", "6" } };
+  private static final String[][] RELATIVE_DAY_OF_WEEK_TOKEN_MAP = {
+      { "last", "-0" }, { "1st", "1" }, { "2nd", "2" }, { "3rd", "3" },
+      { "4th", "4" }, { "5th", "5" } };
 
   private AtomicReference<QDate> _localCalendar = new AtomicReference<QDate>();
 
   private boolean[] _seconds;
   private boolean[] _minutes;
   private boolean[] _hours;
+  private boolean _isDaysFilterRelative;
   private boolean[] _days;
+  private String _daysFilter;
   private boolean[] _months;
   private boolean[] _daysOfWeek;
   private boolean[] _years;
@@ -85,20 +90,20 @@ public class CronTrigger implements Trigger {
       final long end)
   {
     if (cronExpression.getSecond() != null) {
-      _seconds = parseRange(cronExpression.getSecond(), 0, 59);
+      _seconds = parseRange(cronExpression.getSecond(), 0, 59, false);
     }
 
     if (cronExpression.getMinute() != null) {
-      _minutes = parseRange(cronExpression.getMinute(), 0, 59);
+      _minutes = parseRange(cronExpression.getMinute(), 0, 59, false);
     }
 
     if (cronExpression.getHour() != null) {
-      _hours = parseRange(cronExpression.getHour(), 0, 23);
+      _hours = parseRange(cronExpression.getHour(), 0, 23, false);
     }
 
     if (cronExpression.getDayOfWeek() != null) {
       _daysOfWeek = parseRange(
-          tokenizeDayOfWeek(cronExpression.getDayOfWeek()), 0, 7);
+          tokenizeDayOfWeek(cronExpression.getDayOfWeek()), 0, 7, false);
     }
 
     if (_daysOfWeek[7]) {
@@ -106,11 +111,13 @@ public class CronTrigger implements Trigger {
     }
 
     if (cronExpression.getDayOfMonth() != null) {
-      _days = parseRange(cronExpression.getDayOfMonth(), 1, 31);
+      _daysFilter = tokenizeDayOfMonth(cronExpression.getDayOfMonth());
+      _days = parseRange(_daysFilter, 1, 31, true);
     }
 
     if (cronExpression.getMonth() != null) {
-      _months = parseRange(tokenizeMonth(cronExpression.getMonth()), 1, 12);
+      _months = parseRange(tokenizeMonth(cronExpression.getMonth()), 1, 12,
+          false);
     }
 
     _start = start;
@@ -119,35 +126,43 @@ public class CronTrigger implements Trigger {
 
   private String tokenizeDayOfWeek(String dayOfWeek)
   {
-    // TODO The String processing is more resource intensive than necessary. See
-    // if StringBuilder can work with regex?
-
-    for (int i = 0; i < DAY_OF_WEEK_TOKEN_MAP.length; i++) {
-      dayOfWeek = dayOfWeek.replaceAll("(?i)" + DAY_OF_WEEK_TOKEN_MAP[i][0],
-          DAY_OF_WEEK_TOKEN_MAP[i][1]);
-    }
+    dayOfWeek = tokenize(dayOfWeek, DAY_OF_WEEK_TOKEN_MAP);
 
     return dayOfWeek;
   }
 
+  private String tokenizeDayOfMonth(String dayOfMonth)
+  {
+    dayOfMonth = tokenize(dayOfMonth, RELATIVE_DAY_OF_WEEK_TOKEN_MAP);
+    dayOfMonth = tokenize(dayOfMonth, DAY_OF_WEEK_TOKEN_MAP);
+
+    return dayOfMonth;
+  }
+
   private String tokenizeMonth(String month)
+  {
+    month = tokenize(month, MONTH_TOKEN_MAP);
+
+    return month;
+  }
+
+  private String tokenize(String value, String[][] tokenMap)
   {
     // TODO The String processing is more resource intensive than necessary. See
     // if StringBuilder can work with regex?
 
-    for (int i = 0; i < MONTH_TOKEN_MAP.length; i++) {
-      month = month.replaceAll("(?i)" + MONTH_TOKEN_MAP[i][0],
-          MONTH_TOKEN_MAP[i][1]);
+    for (int i = 0; i < tokenMap.length; i++) {
+      value = value.replaceAll("(?i)" + tokenMap[i][0], tokenMap[i][1]);
     }
 
-    return month;
+    return value;
   }
 
   /**
    * parses a range, following cron rules.
    */
-  private boolean[] parseRange(String range, int rangeMin, int rangeMax)
-      throws ConfigException
+  private boolean[] parseRange(String range, int rangeMin, int rangeMax,
+      boolean parseDayOfMonth) throws ConfigException
   {
     // TODO This does not handle spaces.
 
@@ -165,8 +180,7 @@ public class CronTrigger implements Trigger {
         min = rangeMin;
         max = rangeMax;
         i++;
-      } else if ('0' <= character && character <= '9') { // This does not work
-        // for -N
+      } else if ('0' <= character && character <= '9') {
         for (; i < range.length() && '0' <= (character = range.charAt(i))
             && character <= '9'; i++) {
           min = 10 * min + character - '0';
@@ -177,11 +191,105 @@ public class CronTrigger implements Trigger {
               && character <= '9'; i++) {
             max = 10 * max + character - '0';
           }
+        } else if (parseDayOfMonth && (i < range.length())
+            && (character == ' ')) {
+          _isDaysFilterRelative = true; // This is the Nth weekday case.
+
+          int dayOfWeek = 0;
+
+          for (i++; i < range.length() && '0' <= (character = range.charAt(i))
+              && character <= '9'; i++) {
+            dayOfWeek = 10 * dayOfWeek + character - '0';
+          }
+
+          if ((dayOfWeek < 0) || (dayOfWeek > 6)) {
+            throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                range));
+          }
+
+          if ((i < range.length()) && ((character = range.charAt(i)) == '/')) {
+            step = 0;
+
+            for (i++; i < range.length()
+                && '0' <= (character = range.charAt(i)) && character <= '9'; i++) {
+              step = 10 * step + character - '0';
+            }
+
+            if (step == 0) {
+              throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                  range));
+            }
+          }
+
+          if (range.length() <= i) {
+          } else if (character == ',') {
+            i++;
+          } else {
+            throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                range));
+          }
+
+          continue;
         } else {
           max = min;
         }
       } else {
-        throw new ConfigException(L.l("'{0}' is an illegal cron range", range));
+        if (parseDayOfMonth && (character == '-')) { // This is a -N days of
+          // month case.
+          _isDaysFilterRelative = true;
+
+          // This is just for further parsing validation, the filter value
+          // cannot be processed right now.
+          for (i++; i < range.length() && '0' <= (character = range.charAt(i))
+              && character <= '9'; i++) {
+            // Don't need to do anything, evaluation will be done later, just
+            // need to validate parsing for now.
+          }
+
+          if ((i < range.length()) && ((character = range.charAt(i)) == '/')) {
+            step = 0;
+
+            for (i++; i < range.length()
+                && '0' <= (character = range.charAt(i)) && character <= '9'; i++) {
+              step = 10 * step + character - '0';
+            }
+
+            if (step == 0) {
+              throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                  range));
+            }
+          }
+
+          // The case of the Nth weekday (-0 in this case)
+          if ((i < range.length()) && ((character = range.charAt(i)) == ' ')) {
+            // Just need to do validation parsing, evaluation will be done
+            // later.
+            int dayOfWeek = 0;
+
+            for (i++; i < range.length()
+                && '0' <= (character = range.charAt(i)) && character <= '9'; i++) {
+              dayOfWeek = 10 * dayOfWeek + character - '0';
+            }
+
+            if ((dayOfWeek < 0) || (dayOfWeek > 6)) {
+              throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                  range));
+            }
+          }
+
+          if (range.length() <= i) {
+          } else if (character == ',') {
+            i++;
+          } else {
+            throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                range));
+          }
+
+          continue;
+        } else {
+          throw new ConfigException(L
+              .l("'{0}' is an illegal cron range", range));
+        }
       }
 
       if (min < rangeMin) {
@@ -192,7 +300,6 @@ public class CronTrigger implements Trigger {
             "'{0}' is an illegal cron range (max value is too large)", range));
       }
 
-      // TODO Need to handle N/M
       if ((i < range.length()) && ((character = range.charAt(i)) == '/')) {
         step = 0;
 
@@ -201,7 +308,8 @@ public class CronTrigger implements Trigger {
           step = 10 * step + character - '0';
         }
 
-        if (min == max) {
+        if (min == max) { // This is in the form of N/M, where N is the interval
+          // start.
           max = rangeMax;
         }
 
