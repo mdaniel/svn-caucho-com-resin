@@ -29,14 +29,20 @@
 
 package com.caucho.server.deploy;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import com.caucho.config.types.FileSetType;
-import com.caucho.git.GitCommit;
-import com.caucho.git.GitRepository;
-import com.caucho.git.GitTree;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.server.repository.Repository;
-import com.caucho.server.repository.RepositoryTagEntry;;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Depend;
@@ -44,15 +50,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.
