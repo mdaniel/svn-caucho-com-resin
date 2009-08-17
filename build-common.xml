@@ -942,7 +942,7 @@
     <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
 
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin.jar"
-          file="${resin.lib}/resin.jar"/>
+          file="${dist}/${dist.name}/lib/resin.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"
           file="${resin.lib}/inject-16.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
