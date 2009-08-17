@@ -29,6 +29,7 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.server.deploy.VersionEntry;
@@ -162,6 +163,10 @@ public class WebAppVersioningController extends WebAppController {
       synchronized (this) {
         String versionName = _generator.getPrimaryVersion(getId());
 
+        if (versionName == null) {
+          throw new ConfigException(L.l(this + " does not have an implementing version"));
+        }
+
         WebAppController oldPrimaryController = _primaryController;
         
         WebAppController newPrimaryController
@@ -177,6 +182,7 @@ public class WebAppVersioningController extends WebAppController {
           _controllerList.add(oldPrimaryController);
         }
 
+        newPrimaryController.setVersionAlias(true);
         _primaryController = newPrimaryController;
 
         _controllerList.remove(newPrimaryController);

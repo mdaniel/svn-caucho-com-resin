@@ -70,6 +70,9 @@ public class WebAppController
   private String _versionContextPath;
   private String _version = "";
 
+  // true if the versioned web-app is an alias for the base web-app
+  private boolean _isVersionAlias;
+  
   // Any old version web-app
   private WebAppController _oldWebAppController;
   private long _oldWebAppExpireTime;
@@ -116,11 +119,19 @@ public class WebAppController
   }
 
   /**
-   * Returns the webApp's context path
+   * Returns the webApp's canonical context path
    */
   public String getContextPath()
   {
     return _contextPath;
+  }
+
+  /**
+   * Returns the webApp's version context path
+   */
+  public String getVersionContextPath()
+  {
+    return _versionContextPath;
   }
 
   /**
@@ -142,8 +153,12 @@ public class WebAppController
    */
   public String getContextPath(String uri)
   {
-    if (getConfig() == null || getConfig().getURLRegexp() == null)
-      return getContextPath();
+    if (getConfig() == null || getConfig().getURLRegexp() == null) {
+      if (uri.startsWith(getVersionContextPath()))
+        return getVersionContextPath();
+      else
+        return getContextPath();
+    }
 
     Pattern regexp = getConfig().getURLRegexp();
     Matcher matcher = regexp.matcher(uri);
@@ -328,6 +343,24 @@ public class WebAppController
   }
 
   /**
+   * versionAlias is true if a versioned web-app is currently acting
+   * as the primary web-app.
+   */
+  public void setVersionAlias(boolean isVersionAlias)
+  {
+    _isVersionAlias = isVersionAlias;
+  }
+
+  /**
+   * versionAlias is true if a versioned web-app is currently acting
+   * as the primary web-app.
+   */
+  public boolean isVersionAlias()
+  {
+    return _isVersionAlias;
+  }
+
+  /**
    * Sets the old version web-app.
    */
   public void setOldWebApp(WebAppController oldWebApp, long expireTime)
@@ -466,9 +499,10 @@ public class WebAppController
   /**
    * Adding any dependencies.
    */
+  @Override
   protected void addDependencies()
-    throws Exception
   {
+    super.addDependencies();
   }
 
   /**

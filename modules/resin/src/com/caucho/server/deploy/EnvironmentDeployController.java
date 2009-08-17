@@ -378,8 +378,7 @@ abstract public class
       thread.setContextClassLoader(instance.getClassLoader());
       Vfs.setPwd(getRootDirectory());
 
-      if (getArchivePath() != null)
-        Environment.addDependency(getArchivePath());
+      addDependencies();
 
       instance.preConfigInit();
 

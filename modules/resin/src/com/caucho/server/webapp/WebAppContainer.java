@@ -1006,7 +1006,8 @@ public class WebAppContainer
 
     String contextPath = controller.getContextPath(invocationURI);
 
-    invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
+    // invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
+    invocation.setContextPath(contextPath);
 
     String uri = invocationURI.substring(contextPath.length());
     invocation.setContextURI(uri);

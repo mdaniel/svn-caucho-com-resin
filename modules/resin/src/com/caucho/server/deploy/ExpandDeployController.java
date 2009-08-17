@@ -36,6 +36,7 @@ import com.caucho.git.GitTree;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.server.repository.Repository;
+import com.caucho.server.repository.RepositoryTagEntry;;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Depend;
@@ -526,6 +527,20 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     }
 
     return true;
+  }
+
+  protected void addDependencies()
+  {
+    if (getArchivePath() != null)
+      Environment.addDependency(getArchivePath());
+
+    if (getRepository() != null && getRepositoryTag() != null) {
+      String tag = getRepositoryTag();
+      
+      String value = getRepository().getTagRoot(tag);
+
+      Environment.addDependency(new RepositoryDependency(tag, value));
+    }
   }
 
   /**

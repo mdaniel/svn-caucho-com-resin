@@ -686,7 +686,10 @@ public class WebApp extends ServletContextImpl
    */
   public String getContextPath()
   {
-    return _contextPath;
+    if (isVersionAlias())
+      return _contextPath;
+    else
+      return _versionContextPath;
   }
 
   /**
@@ -706,6 +709,11 @@ public class WebApp extends ServletContextImpl
 
     if (getServletContextName() == null)
       setDisplayName(contextPath);
+  }
+
+  private String getVersionContextPath()
+  {
+    return _versionContextPath;
   }
 
   /**
@@ -751,9 +759,9 @@ public class WebApp extends ServletContextImpl
   public String getURL()
   {
     if (_parent != null)
-      return _parent.getURL() + _contextPath;
+      return _parent.getURL() + getContextPath();
     else
-      return _contextPath;
+      return getContextPath();
   }
 
   /**
@@ -832,6 +840,11 @@ public class WebApp extends ServletContextImpl
     _isDisableCrossContext = isDisable;
   }
 
+  public boolean isVersionAlias()
+  {
+    return _controller.isVersionAlias();
+  }
+  
   /**
    * Sets the old version web-app.
    */
@@ -2831,7 +2844,7 @@ public class WebApp extends ServletContextImpl
     Invocation dispatchInvocation = new SubInvocation();
     InvocationDecoder decoder = new InvocationDecoder();
 
-    String rawURI = escapeURL(_contextPath + url);
+    String rawURI = escapeURL(getContextPath() + url);
 
     try {
       decoder.splitQuery(includeInvocation, rawURI);
@@ -2847,7 +2860,7 @@ public class WebApp extends ServletContextImpl
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
 	throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
-					    _contextPath));
+					    getVersionContextPath()));
       }
       else {
         FilterChain chain = _servletMapper.mapServlet(includeInvocation);
@@ -2953,7 +2966,7 @@ public class WebApp extends ServletContextImpl
     Invocation errorInvocation = new Invocation();
     InvocationDecoder decoder = new InvocationDecoder();
 
-    String rawURI = _contextPath + url;
+    String rawURI = getContextPath() + url;
 
     try {
       decoder.splitQuery(loginInvocation, rawURI);
@@ -2961,7 +2974,7 @@ public class WebApp extends ServletContextImpl
 
       if (! _lifecycle.waitForActive(_activeWaitTime)) {
 	throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
-					    _contextPath));
+					    getVersionContextPath()));
       }
       else if (_parent != null) {
         _parent.buildInvocation(loginInvocation);

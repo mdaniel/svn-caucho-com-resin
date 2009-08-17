@@ -189,7 +189,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     
     ForwardRequest subRequest
       = new ForwardRequest(parentReq, parentRes, invocation);
-    System.out.println("SUB:" + parentReq + " " + subRequest);
+
     ForwardResponse subResponse = subRequest.getResponse();
 
     HttpServletRequest topRequest = subRequest;
