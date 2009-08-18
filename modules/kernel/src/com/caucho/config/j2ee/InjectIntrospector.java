@@ -53,6 +53,7 @@ import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
 import javax.inject.Qualifier;
 import javax.interceptor.*;
 import javax.persistence.*;
@@ -828,7 +829,9 @@ public class InjectIntrospector {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
 
-      if (annType.isAnnotationPresent(Qualifier.class))
+      if (annType.equals(Inject.class))
+        return true;
+      else if (annType.isAnnotationPresent(Qualifier.class))
 	return true;
     }
 
@@ -872,6 +875,9 @@ public class InjectIntrospector {
 	  return false;
 	if (annType.equals(Disposes.class))
 	  return false;
+	else if (annType.equals(Inject.class))
+	  hasBinding = true;
+        // XXX: implicit qualifier needs to be removed
         else if (annType.isAnnotationPresent(Qualifier.class))
 	  hasBinding = true;
       }

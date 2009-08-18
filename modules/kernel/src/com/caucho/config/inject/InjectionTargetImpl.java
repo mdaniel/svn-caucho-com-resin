@@ -55,6 +55,7 @@ import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.inject.Qualifier;
+import javax.inject.Inject;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -746,6 +747,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
 
+      if (annType.equals(Inject.class))
+        return true;
+      // XXX: no longer true
       if (annType.isAnnotationPresent(Qualifier.class))
         return true;
     }
