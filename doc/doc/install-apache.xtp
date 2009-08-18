@@ -225,8 +225,8 @@ server takes place using an <var>srun</var> port.
 
 <p>
 The <code>resin.conf</code> for the backend server contains
-an <code>srun</code> to enable the port.  The default <code>resin.conf</code>
-has an srun listener on port 6802.
+an <code>server</code> to enable the port.  The default <code>resin.conf</code>
+has an server listener on port 6800.
 </p>
 
 <example title="resin.conf">
@@ -241,7 +241,7 @@ has an srun listener on port 6802.
     ...
 
     &lt;cluster&gt;
-      <b>&lt;srun server-id="" host="127.0.0.1" port="6802"/&gt;</b>
+      <b>&lt;server id="" address="127.0.0.1" port="6802"/&gt;</b>
     &lt;/cluster&gt;
 
     ...
@@ -319,7 +319,7 @@ Starting Resin on Mon, 04 Aug 2006 09:43:39 -0700 (PDT)
 
 <p>
 Resin will print every port it's listening to.  In the above example,
-Resin has an http listener on port 8080 and an srun listener on port 6802
+Resin has an http listener on port 8080 and an srun listener on port 6800
 (using its custom `hmux' protocol).  mod_caucho establishes connections  to
 Resin using port 6802, and a web browser can connect using port 8080.   Usually
 the 8080 port will be unused, because web browsers will make requests to Apache,
@@ -340,7 +340,7 @@ configuration for the above example.</p>
       &lt;http address="*" port="8080"/&gt;
     &lt;/server-default&gt;
 
-    &lt;server id="" host="192.168.2.10" port="6800"/&gt;
+    &lt;server id="" address="192.168.2.10" port="6800"/&gt;
 
     ...
   &lt;/cluster&gt;
@@ -436,8 +436,8 @@ CauchoHost 127.0.0.1 6802
 
 <deftable>
 <tr><th width="30%">Apache Command</th><th>Meaning
-</th></tr><tr><td>CauchoHost <var>host</var> <var>port</var></td><td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an srun port at host:port as a backend server.
-</td></tr><tr><td>CauchoBackup <var>host</var> <var>port</var></td><td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an srun port at host:port as a backup backend server.
+</th></tr><tr><td>CauchoHost <var>host</var> <var>port</var></td><td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an server port at host:port as a backend server.
+</td></tr><tr><td>CauchoBackup <var>host</var> <var>port</var></td><td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an server port at host:port as a backup backend server.
 </td></tr></deftable>
 
 <deftable>
@@ -477,7 +477,7 @@ ResinConfigServer 192.168.0.1 6802
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
-    &lt;srun id="" host="192.168.0.1" port="6802"/&gt;
+    &lt;server id="" address="192.168.0.1" port="6802"/&gt;
   &lt;/cluster&gt;
 
   &lt;host id='www.gryffindor.com'&gt;
@@ -518,7 +518,7 @@ ResinConfigServer 192.168.0.1 6803
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
-    &lt;srun id="" host="192.168.0.1" port="6802"/&gt;
+    &lt;server id="" address="192.168.0.1" port="6802"/&gt;
   &lt;/cluster&gt;
 
   &lt;host id=''&gt;
@@ -532,7 +532,7 @@ ResinConfigServer 192.168.0.1 6803
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
-    &lt;srun id="" host="192.168.0.1" port="6803"/&gt;
+    &lt;server id="" address="192.168.0.1" port="6803"/&gt;
   &lt;/cluster&gt;
 
   &lt;host id=''&gt;
@@ -573,11 +573,11 @@ down.</p>
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
-    &lt;srun id="a" host="192.168.0.11" port="6802" index="1"/&gt;
-    &lt;srun id="b" host="192.168.0.11" port="6803" index="2" 
+    &lt;server id="a" address="192.168.0.11" port="6802"/&gt;
+    &lt;server id="b" address="192.168.0.11" port="6803"
              backup="true"/&gt;
-    &lt;srun id="c" host="192.168.0.12" port="6802" index="3"/&gt;
-    &lt;srun id="d" host="192.168.0.12" port="6803" index="4" 
+    &lt;server id="c" address="192.168.0.12" port="6802"/&gt;
+    &lt;server id="d" address="192.168.0.12" port="6803"
              backup="true"/&gt;
   &lt;/cluster&gt;
   ...
@@ -652,7 +652,7 @@ CauchoBackup 192.168.0.12 6803
 In other words, add a &lt;http port='8080'/&gt; and check port 8080.
 </li><li>Check http://localhost/caucho-status.  That will tell if
 mod_caucho has properly connected to the backend Resin server.
-</li><li>Each srun host should be green and the mappings should
+</li><li>Each server host should be green and the mappings should
 match your resin.conf.
 </li><li>If caucho-status fails entirely, the problem is in the mod_caucho
 installation and the Apache httpd.conf.
@@ -665,9 +665,9 @@ will show red, and Resin hasn't started properly.
 </li><li>If Resin doesn't start properly, you should look at the logs
 in resin-3.1.x/log.  You should start <var>httpd.sh -verbose</var> or
 <var>httpd.exe -verbose</var> to get more information.
-</li><li>If Resin never shows a "srun listening to *:6802" line,
+</li><li>If Resin never shows a "srun listening to *:6800" line,
 it's not listening for connections from mod_caucho.
- You'll need to add a &lt;srun&gt; line.
+ You'll need to add a &lt;server&gt; line.
 </li><li>If you get Resin's "file not found", the Apache configuration
 is good but the resin.conf probably points to the wrong directories.
 </li></ol>
