@@ -1632,7 +1632,7 @@ public class Server extends ProtocolDispatchServer
         _globalStore = new GlobalCache();
         _globalStore.setName("resin:global");
         _globalStore.setGuid("resin:global");
-        _globalStore.setLocalReadTimeoutMillis(5000);
+        _globalStore.setLocalReadTimeoutMillis(60000);
         // XXX: need to set reliability values
       }
     }
