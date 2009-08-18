@@ -42,9 +42,9 @@ import java.util.HashSet;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Qualifier;
 
 public class FieldComponentProgram extends ConfigProgram
 
@@ -71,7 +71,7 @@ public class FieldComponentProgram extends ConfigProgram
     HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 
     for (Annotation ann : _field.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
 	bindingSet.add(ann);
     }
 

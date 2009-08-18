@@ -47,13 +47,13 @@ import javax.decorator.Decorates;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.naming.*;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Qualifier;
 import javax.interceptor.*;
 import javax.persistence.*;
 import javax.enterprise.event.Observes;
@@ -828,7 +828,7 @@ public class InjectIntrospector {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
 
-      if (annType.isAnnotationPresent(BindingType.class))
+      if (annType.isAnnotationPresent(Qualifier.class))
 	return true;
     }
 
@@ -840,7 +840,7 @@ public class InjectIntrospector {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
       
-      if (annType.isAnnotationPresent(BindingType.class))
+      if (annType.isAnnotationPresent(Qualifier.class))
 	return false;
     }
 
@@ -872,7 +872,7 @@ public class InjectIntrospector {
 	  return false;
 	if (annType.equals(Disposes.class))
 	  return false;
-        else if (annType.isAnnotationPresent(BindingType.class))
+        else if (annType.isAnnotationPresent(Qualifier.class))
 	  hasBinding = true;
       }
     }

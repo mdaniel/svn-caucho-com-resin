@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.inject;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
@@ -37,7 +38,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Custom binding annotations are marked with @BindingType
+ * Custom binding annotations are marked with @Qualifier
  * as a meta-annotation.
  *
  * <h2>Example: creating a custom binding type</h2>
@@ -49,9 +50,9 @@ import java.lang.annotation.Target;
  * import static java.lang.annotation.RetentionPolicy.Runtime;
  * import java.lang.annotation.*;
  *
- * import javax.enterprise.inject.BindingType;
+ * import javax.inject.Qualifier;
  *
- * {@literal @BindingType}
+ * {@literal @Qualifier}
  * {@literal @Documented}
  * Target({TYPE, METHOD, FIELD, PARAMETER})
  * Retention(RUNTIME)
@@ -81,7 +82,7 @@ import java.lang.annotation.Target;
  * }
  * </pre></code>
  *
- * <h2>Example: configuring using a custom binding type</h2>
+ * <h2>Example: configuring using a custom qualifier</h2>
  *
  * META-INF/beans.xml
  *
@@ -89,7 +90,7 @@ import java.lang.annotation.Target;
  * &lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
  *
  *   &lt;example:MyBean>
- *     &lt;example:MyBinding/>
+ *     &lt;example:MyQualifier/>
  *   &lt;/example:MyBean>
  *
  * &lt;/Beans>
@@ -97,6 +98,6 @@ import java.lang.annotation.Target;
  */
 @Documented  
 @Retention(RUNTIME)
-@Target(ANNOTATION_TYPE)
-public @interface BindingType {
+@Target({METHOD, FIELD})
+public @interface Inject {
 }

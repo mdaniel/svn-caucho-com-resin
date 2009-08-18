@@ -81,7 +81,7 @@ import java.lang.annotation.Target;
  * }
  * </pre></code>
  *
- * <h2>Example: configuring using a custom binding type</h2>
+ * <h2>Example: configuring using a custom qualifier</h2>
  *
  * META-INF/beans.xml
  *
@@ -89,7 +89,7 @@ import java.lang.annotation.Target;
  * &lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
  *
  *   &lt;example:MyBean>
- *     &lt;example:MyBinding/>
+ *     &lt;example:MyQualifier/>
  *   &lt;/example:MyBean>
  *
  * &lt;/Beans>

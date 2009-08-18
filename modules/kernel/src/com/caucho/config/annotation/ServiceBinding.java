@@ -33,13 +33,13 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
 /**
  * The @ServiceBinding is used startup a basic service.
  */
 
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)

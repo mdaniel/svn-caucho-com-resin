@@ -40,9 +40,9 @@ import java.lang.annotation.*;
 import java.util.*;
 import javax.decorator.Decorator;
 import javax.enterprise.inject.NonBinding;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Qualifier;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBindingType;
 
@@ -203,7 +203,7 @@ public class PojoBean extends BeanGenerator {
 	continue;
 
       for (Annotation ann : annList) {
-	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	if (ann.annotationType().isAnnotationPresent(Qualifier.class))
 	  return true;
 
 	/*

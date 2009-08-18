@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import javax.interceptor.*;
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
@@ -155,7 +155,7 @@ abstract public class BeanGenerator extends GenClass
     }
 
     for (Annotation ann : cl.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
 	if (_decoratorBindings == null)
 	  _decoratorBindings = new HashSet<Annotation>();
 	

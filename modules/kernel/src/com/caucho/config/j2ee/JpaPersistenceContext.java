@@ -33,14 +33,14 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
 /**
  * JpaPersistenceContext is a binding type for the JPA EntityManager, letting
  * you select the context by its name and allowing the extended value to
  * be selected.
  */
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE,FIELD,METHOD,PARAMETER})
 @Retention(RUNTIME)

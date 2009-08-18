@@ -42,7 +42,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 import com.caucho.jmx.Jmx;
 import com.caucho.server.connection.Connection;

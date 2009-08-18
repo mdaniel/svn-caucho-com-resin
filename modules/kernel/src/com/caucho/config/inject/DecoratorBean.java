@@ -40,10 +40,10 @@ import java.util.*;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.decorator.Decorates;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.BindingType;
-import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Qualifier;
 
 /**
  * DecoratorBean represents a Java decorator
@@ -312,13 +312,13 @@ public class DecoratorBean<T> implements Decorator<T>
   protected void introspectBindingTypes(Annotation []annList)
   {
     for (Annotation ann : annList) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
 	_bindings.add(ann);
       }
     }
 
     if (_bindings.size() == 0)
-      _bindings.add(new AnnotationLiteral<Current>() {});
+      _bindings.add(CurrentLiteral.CURRENT);
   }
   
   /**

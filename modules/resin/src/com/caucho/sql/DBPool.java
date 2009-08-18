@@ -57,7 +57,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -213,7 +213,7 @@ public class DBPool
    */
   public void addAnnotation(Annotation ann)
   {
-    if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+    if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
       _bindingList.add(ann);
     }
     else

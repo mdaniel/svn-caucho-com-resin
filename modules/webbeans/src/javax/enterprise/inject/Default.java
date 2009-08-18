@@ -34,18 +34,20 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
- * Default bean injection uses @Current as the injection point's
- * {@link javax.inject.BindingType @BindingType}.
+ * Default bean injection uses @Default as the injection point's
+ * {@link javax.inject.Qualifier @Qualifier}.
  *
- * The @Current annotation for Java injection is the default, single
+ * The @Default annotation for Java injection is the default, single
  * bean with the given type.
  *
- * @see BindingType
+ * @see Qualifier
  */
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
-public @interface Current {
+public @interface Default {
 }

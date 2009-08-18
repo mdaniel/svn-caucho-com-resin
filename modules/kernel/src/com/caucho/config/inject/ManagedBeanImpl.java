@@ -54,6 +54,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.inject.Qualifier;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -322,7 +323,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
 	bindingList.add(ann);
       }
     }
@@ -369,7 +370,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 	if (ann.annotationType().equals(IfExists.class))
 	  continue;
 	  
-	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	if (ann.annotationType().isAnnotationPresent(Qualifier.class))
 	  bindingSet.add(ann);
       }
     }

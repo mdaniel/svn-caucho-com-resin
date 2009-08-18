@@ -41,7 +41,7 @@ import java.io.Serializable;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.jms.*;
 
 /**
@@ -54,7 +54,7 @@ public class XmppTopic extends AbstractTopic
   private static final Logger log
     = Logger.getLogger(XmppTopic.class.getName());
 
-  private @Current XmppProtocol _protocol;
+  private @Inject XmppProtocol _protocol;
 
   private int _id;
 

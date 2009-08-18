@@ -33,13 +33,13 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
 /**
  * The @Unbound binding marks the bean as ephemeral, i.e. not injectible.
  */
 
-@BindingType
+@Qualifier
 @Documented  
 @Retention(RUNTIME)
 @Target({TYPE})

@@ -48,13 +48,13 @@ import java.lang.reflect.Type;
 import java.lang.reflect.Method;
 
 import javax.servlet.annotation.WebServlet;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.event.Observes;
+import javax.inject.Qualifier;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
@@ -166,7 +166,7 @@ public class WebAppInjectExtension implements Extension
 	  for (Annotation binding : annotated.getAnnotations()) {
 	    Class bindingType = binding.annotationType();
 	    
-	    if (bindingType.isAnnotationPresent(BindingType.class))
+	    if (bindingType.isAnnotationPresent(Qualifier.class))
 	      factory.binding(binding);
 	  }
 

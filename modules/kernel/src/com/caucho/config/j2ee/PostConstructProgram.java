@@ -42,7 +42,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Logger;
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 import javax.enterprise.inject.spi.Bean;
 
 
@@ -90,7 +90,7 @@ public class PostConstructProgram extends ConfigProgram
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
 	bindingList.add(ann);
     }
 

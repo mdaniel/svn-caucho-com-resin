@@ -33,7 +33,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.server.session.SessionImpl;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.enterprise.inject.Instance;
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -91,8 +91,8 @@ public abstract class AbstractLogin implements Login {
   protected Authenticator _auth;
   protected SingleSignon _singleSignon;
 
-  private @Current Instance<Authenticator> _authInstance;
-  private @Current Instance<SingleSignon> _signonInstance;
+  private @Inject Instance<Authenticator> _authInstance;
+  private @Inject Instance<SingleSignon> _signonInstance;
 
   private boolean _isSessionSaveLogin = true;
   private boolean _isLogoutOnTimeout = true;

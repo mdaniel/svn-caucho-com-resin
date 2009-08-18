@@ -61,8 +61,7 @@ import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.event.IfExists;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.BindingType;
-import javax.enterprise.inject.Current;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Named;
@@ -77,6 +76,7 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.stereotype.Stereotype;
+import javax.inject.Qualifier;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -369,7 +369,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   protected void introspectBindings(Annotated annotated)
   {
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
 	_bindings.add(ann);
       }
     }
@@ -425,8 +425,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 	    throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition, because @Stereotypes are used with multiple beans."));
 	}
 	
-	if (annType.isAnnotationPresent(BindingType.class)) {
-	  throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @BindingType annotations",
+	if (annType.isAnnotationPresent(Qualifier.class)) {
+	  throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @Qualifier annotations",
 					ann, stereotype));
 	}
       }

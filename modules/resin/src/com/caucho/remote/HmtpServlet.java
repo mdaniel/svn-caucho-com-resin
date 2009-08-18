@@ -45,7 +45,7 @@ import com.caucho.vfs.*;
 import java.io.*;
 import java.util.logging.*;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.enterprise.inject.Instance;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.*;
@@ -61,8 +61,8 @@ public class HmtpServlet extends GenericServlet {
   private boolean _isAdmin;
   private boolean _isAuthenticationRequired = true;
 
-  private @Current Instance<Authenticator> _authInstance;
-  private @Current Instance<AdminAuthenticator> _adminInstance;
+  private @Inject Instance<Authenticator> _authInstance;
+  private @Inject Instance<AdminAuthenticator> _adminInstance;
 
   private Authenticator _auth;
   private ServerLinkManager _linkManager;

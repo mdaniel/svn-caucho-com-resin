@@ -51,13 +51,13 @@ import javax.annotation.*;
 import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Qualifier;
 import javax.interceptor.InterceptorBindingType;
 
 import org.w3c.dom.Node;
@@ -264,7 +264,7 @@ public class CustomBeanConfig {
   {
     // XXX: some annotations also remove other annotations
 
-    if (ann.annotationType().isAnnotationPresent(BindingType.class)
+    if (ann.annotationType().isAnnotationPresent(Qualifier.class)
         && ! _hasBindings) {
       _hasBindings = true;
       clearBindings(_annotatedType);
@@ -335,7 +335,7 @@ public class CustomBeanConfig {
         if (_component.getScopeType() == null)
           _component.setScopeType(annType);
       }
-      else if (annType.isAnnotationPresent(BindingType.class)) {
+      else if (annType.isAnnotationPresent(Qualifier.class)) {
         _component.addBinding(ann);
       }
     }
@@ -348,7 +348,7 @@ public class CustomBeanConfig {
       = new HashSet<Annotation>(beanType.getAnnotations());
 
     for (Annotation ann : annSet) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
         beanType.removeAnnotation(ann);
     }
   }

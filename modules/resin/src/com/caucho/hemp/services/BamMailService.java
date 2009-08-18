@@ -49,7 +49,7 @@ import javax.mail.internet.AddressException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 /**
  * mail service
@@ -61,7 +61,7 @@ public class BamMailService
   private static final Logger log
     = Logger.getLogger(BamMailService.class.getName());
 
-  @Current
+  @Inject
   private Session _session;
 
   private long _delayTime = 60000L;

@@ -38,7 +38,7 @@ import java.util.logging.*;
 
 import java.io.Serializable;
 import javax.annotation.*;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.jms.*;
 
 import com.caucho.config.*;
@@ -62,7 +62,7 @@ public class HempTopic extends AbstractTopic
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private @Current Broker _broker;
+  private @Inject Broker _broker;
   private ActorStream _brokerStream;
 
   private TopicResource _resource = new TopicResource();

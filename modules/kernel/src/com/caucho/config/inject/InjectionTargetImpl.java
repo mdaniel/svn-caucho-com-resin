@@ -54,6 +54,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.inject.Qualifier;
 import javax.interceptor.InterceptorBindingType;
 
 /**
@@ -589,7 +590,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         }
         else if (hasBindingAnnotation(ctor)) {
           if (best != null && hasBindingAnnotation(best))
-            throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Initializer or by a @BindingType, because the Java Injection BeanManager can't tell which one to use.",
+            throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Initializer or by a @Qualifier, because the Java Injection BeanManager can't tell which one to use.",
                                           beanType.getJavaClass().getName()));
           best = ctor;
           second = null;
@@ -662,7 +663,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
         bindingList.add(ann);
       }
     }
@@ -745,7 +746,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
 
-      if (annType.isAnnotationPresent(BindingType.class))
+      if (annType.isAnnotationPresent(Qualifier.class))
         return true;
     }
 
@@ -757,7 +758,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
 
-      if (annType.isAnnotationPresent(BindingType.class))
+      if (annType.isAnnotationPresent(Qualifier.class))
         return false;
     }
 
@@ -794,7 +795,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
           return false;
         if (annType.equals(Disposes.class))
           return false;
-        else if (annType.isAnnotationPresent(BindingType.class))
+        else if (annType.isAnnotationPresent(Qualifier.class))
           hasBinding = true;
       }
     }

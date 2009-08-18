@@ -33,14 +33,14 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
 /**
  * The @OsgiServiceBinding fires a startup event to register the
  * bean as an osgi service.
  */
 
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)

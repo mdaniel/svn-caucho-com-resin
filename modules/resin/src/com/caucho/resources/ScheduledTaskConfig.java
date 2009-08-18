@@ -44,7 +44,6 @@ import com.caucho.server.webapp.*;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.Current;
 import javax.el.*;
 import javax.resource.spi.work.Work;
 import javax.servlet.*;

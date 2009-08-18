@@ -33,9 +33,6 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.BindingType;
-import com.caucho.config.annotation.StartupType;
-
 /**
  * The @BamService registers a bean with the bam service registry.
  */

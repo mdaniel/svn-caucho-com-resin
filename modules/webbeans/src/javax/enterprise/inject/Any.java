@@ -35,13 +35,15 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
  * Binding injection representing any matching bean.
  * {@link javax.enterprise.inject.BindingType @BindingType}.
  *
  * @see BindingType
  */
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)

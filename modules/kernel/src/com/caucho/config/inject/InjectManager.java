@@ -75,7 +75,6 @@ import javax.enterprise.context.spi.Conversation;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.Disabled;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Instance;
@@ -104,6 +103,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 import javax.enterprise.inject.stereotype.Stereotype;
+import javax.inject.Qualifier;
 import javax.naming.*;
 
 /**
@@ -562,7 +562,7 @@ public class InjectManager
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
         bindingList.add(ann);
     }
 
@@ -577,7 +577,7 @@ public class InjectManager
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
         bindingList.add(ann);
     }
 
@@ -987,7 +987,7 @@ public class InjectManager
    * Returns the beans matching a class and annotation set
    *
    * @param type the bean's class
-   * @param bindings required @BindingType annotations
+   * @param bindings required @Qualifier annotations
    */
   public Set<Bean<?>> getBeans(Type type,
                                Annotation... bindings)
@@ -1093,8 +1093,8 @@ public class InjectManager
     }
 
     for (Annotation ann : bindings) {
-      if (! ann.annotationType().isAnnotationPresent(BindingType.class)) {
-        throw new IllegalArgumentException(L.l("'{0}' is an invalid binding annotation because it does not have a @BindingType meta-annotation",
+      if (! ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+        throw new IllegalArgumentException(L.l("'{0}' is an invalid binding annotation because it does not have a @Qualifier meta-annotation",
                                                ann));
       }
     }
@@ -1980,7 +1980,7 @@ public class InjectManager
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
     for (Annotation ann : type.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
         bindingList.add(ann);
     }
 
@@ -2602,7 +2602,7 @@ public class InjectManager
     for (Annotation bindingAnn : ann.annotationType().getAnnotations()) {
       Class<? extends Annotation> annType = bindingAnn.annotationType();
 
-      if (annType.isAnnotationPresent(BindingType.class))
+      if (annType.isAnnotationPresent(Qualifier.class))
         bindingList.add(bindingAnn);
     }
 

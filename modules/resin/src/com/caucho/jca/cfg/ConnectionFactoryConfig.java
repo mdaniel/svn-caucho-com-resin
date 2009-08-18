@@ -58,7 +58,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.Bean;
 import javax.management.Attribute;
@@ -85,7 +85,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
   private int _maxConnections = 1024;
   private long _maxActiveTime = Long.MAX_VALUE / 2;
 
-  private @Current Instance<ResourceAdapterController> _raControllerInstance;
+  private @Inject Instance<ResourceAdapterController> _raControllerInstance;
 
   public ConnectionFactoryConfig()
   {

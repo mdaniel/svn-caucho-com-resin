@@ -33,13 +33,13 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
 /**
  * The @BamServiceBinding is used to locate the bam service registry.
  */
 
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)

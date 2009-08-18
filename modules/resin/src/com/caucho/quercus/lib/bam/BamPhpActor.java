@@ -60,7 +60,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 /**
@@ -83,7 +83,7 @@ public class BamPhpActor extends SimpleActor {
   
   private String _encoding = "ISO-8859-1";
 
-  @Current
+  @Inject
   private Broker _broker;
 
   public BamPhpActor()

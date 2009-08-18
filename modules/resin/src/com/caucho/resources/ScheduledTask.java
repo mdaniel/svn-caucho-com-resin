@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.el.ELContext;
 import javax.el.MethodExpression;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 import javax.enterprise.inject.Instance;
 import javax.resource.spi.work.Work;
 import javax.servlet.RequestDispatcher;
@@ -90,7 +90,7 @@ public class ScheduledTask
   private String _url;
 
   @SuppressWarnings("unused")
-  private @Current Instance<WebApp> _webAppInstance;
+  private @Inject Instance<WebApp> _webAppInstance;
   private WebApp _webApp;
   
   private Alarm _alarm;

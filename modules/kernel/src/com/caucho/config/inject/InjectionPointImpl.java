@@ -34,8 +34,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.Member;
 import java.util.Set;
 import java.util.HashSet;
-import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.inject.Qualifier;
 
 /**
  */
@@ -67,7 +67,7 @@ public class InjectionPointImpl implements InjectionPoint
     _member = member;
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
 	_bindings.add(ann);
       }
     }

@@ -52,9 +52,9 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Qualifier;
 import javax.naming.*;
 
 /**
@@ -172,7 +172,7 @@ abstract public class AbstractBeanConfig {
   {
     _annotations.add(binding);
 
-    if (binding.annotationType().isAnnotationPresent(BindingType.class))
+    if (binding.annotationType().isAnnotationPresent(Qualifier.class))
       _bindings.add(binding);
   }
 

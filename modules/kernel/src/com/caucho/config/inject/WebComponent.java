@@ -44,9 +44,9 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.BindingType;
 import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Qualifier;
 
 /**
  * Configuration for the xml web bean component.
@@ -245,8 +245,8 @@ public class WebComponent {
     {
       for (Annotation arg : bindingArgs) {
         if (! isMatch(arg)) {
-          if (! arg.annotationType().isAnnotationPresent(BindingType.class)) {
-            throw new ConfigException(L.l("'{0}' is an invalid binding annotation because it does not have a @BindingType meta-annotation.",
+          if (! arg.annotationType().isAnnotationPresent(Qualifier.class)) {
+            throw new ConfigException(L.l("'{0}' is an invalid binding annotation because it does not have a @Qualifier meta-annotation.",
                                           arg));
           }
 

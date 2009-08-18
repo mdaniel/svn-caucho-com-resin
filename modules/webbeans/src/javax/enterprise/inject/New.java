@@ -34,9 +34,11 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.inject.Qualifier;
+
 /**
  * New bean creation and injection uses the {@literal @New} annotation as the
- * {@link javax.enterprise.inject.BindingType @BindingType} for the injection point.
+ * {@link javax.inject.Qualifier @Qualifier} for the injection point.
  * 
  * The {@literal @New} annotation injects a new instance of a bean to
  * the injection
@@ -66,7 +68,7 @@ import java.lang.annotation.Target;
  * }
  * </pre></code>
  */
-@BindingType
+@Qualifier
 @Documented  
 @Retention(RUNTIME)
 @Target({FIELD, METHOD, PARAMETER, TYPE})
