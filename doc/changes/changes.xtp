@@ -13,6 +13,8 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>build: jsf-api.jar needs to be in src distribution (#3633, rep by joey)</li>
+<li>loader: sync/deadlock in EnvironmentClassLoader on startup (rep by Patrik Styme, #3641)</li>
 <li>jms: ClusterQueue single consumer (#2766, rep by Eric Masson)</li>
 <li>servlet: include/forward should not trigger request events (#3111, rep by tempestse)</li>
 <li>http: refactor to eliminate buffer/session reuse for subsequent requests (#3557, rep by Kevin Kilmer-Choi)</li>

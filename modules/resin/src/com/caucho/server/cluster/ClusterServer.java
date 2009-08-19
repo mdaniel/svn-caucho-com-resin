@@ -39,6 +39,7 @@ import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.*;
 import com.caucho.server.resin.*;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.QServerSocket;
 
@@ -81,7 +82,9 @@ public final class ClusterServer {
   private ClusterPort _clusterPort;
   private boolean _isClusterPortConfig;
   
-  private ServerPool _serverPool;
+  //
+  // config parameters
+  //
 
   private long _socketTimeout = 90000L;
   private long _keepaliveTimeout = 75000L;
@@ -104,7 +107,16 @@ public final class ClusterServer {
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
   private boolean _isSelf;
-  
+
+  // runtime
+
+  private ServerPool _serverPool;
+
+  private boolean _isActive;
+  private long _stateTimestamp;
+
+  // admin
+
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
   public ClusterServer(ClusterPod pod, int index)
@@ -710,21 +722,63 @@ public final class ClusterServer {
   }
 
   /**
-   * Notify that a start event has been received.
+   * Test if the server is active, i.e. has received an active message.
    */
-  public void notifyStart()
+  public boolean isActive()
   {
-    if (_serverPool != null)
-      _serverPool.notifyStart();
+    return _isActive;
+  }
+
+  /**
+   * Returns the last state change timestamp.
+   */
+  public long getStateTimestamp()
+  {
+    return _stateTimestamp;
   }
 
   /**
    * Notify that a start event has been received.
    */
-  public void notifyStop()
+  public void notifyStart(long timestamp)
+  {
+    if (_serverPool != null)
+      _serverPool.notifyStart();
+
+    synchronized (this) {
+      if (timestamp <= _stateTimestamp)
+        return;
+    
+      _isActive = true;
+      _stateTimestamp = timestamp;
+    }
+
+    Server server = Server.getCurrent();
+
+    if (server != null)
+      server.notifyServerStart(this);
+  }
+
+  /**
+   * Notify that a start event has been received.
+   */
+  public void notifyStop(long timestamp)
   {
     if (_serverPool != null)
       _serverPool.notifyStop();
+
+    synchronized (this) {
+      if (timestamp <= _stateTimestamp)
+        return;
+    
+      _isActive = false;
+      _stateTimestamp = timestamp;
+    }
+
+    Server server = Server.getCurrent();
+
+    if (server != null)
+      server.notifyServerStop(this);
   }
 
   /**
@@ -734,8 +788,19 @@ public final class ClusterServer {
     throws StartLifecycleException
   {
     _isSelf = true;
+    _isActive = true;
+    _stateTimestamp = Alarm.getCurrentTime();
     
     return _cluster.startServer(this);
+  }
+
+  /**
+   * Starts the server.
+   */
+  public void stopServer()
+  {
+    _isActive = false;
+    _stateTimestamp = Alarm.getCurrentTime();
   }
 
   /**

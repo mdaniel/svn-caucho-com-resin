@@ -67,6 +67,8 @@ import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.distcache.PersistentStoreConfig;
+import com.caucho.server.distlock.AbstractLockManager;
+import com.caucho.server.distlock.SingleLockManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -145,6 +147,7 @@ public class Server extends ProtocolDispatchServer
   private PersistentStoreConfig _persistentStoreConfig;
 
   private DistributedCacheManager _distributedCacheManager;
+  private AbstractLockManager _distributedLockManager;
 
   private HostContainer _hostContainer;
 
@@ -208,6 +211,13 @@ public class Server extends ProtocolDispatchServer
   // reliable system store
   private ClusterCache _systemStore;
   private GlobalCache _globalStore;
+
+  //
+  // listeners
+  //
+
+  private ArrayList<ServerListener> _serverListeners
+    = new ArrayList<ServerListener>();
 
   // stats
 
@@ -515,6 +525,25 @@ public class Server extends ProtocolDispatchServer
   protected DistributedCacheManager createDistributedCacheManager()
   {
     return new FileCacheManager(this);
+  }
+
+  /**
+   * Returns the distributed lock manager
+   */
+  public AbstractLockManager getDistributedLockManager()
+  {
+    if (_distributedLockManager == null)
+      _distributedLockManager = createDistributedLockManager();
+
+    return _distributedLockManager;
+  }
+
+  /**
+   * Returns the distributed cache manager
+   */
+  protected AbstractLockManager createDistributedLockManager()
+  {
+    return new SingleLockManager(this);
   }
 
   public TempFileManager getTempFileManager()
@@ -1428,6 +1457,57 @@ public class Server extends ProtocolDispatchServer
     }
 
     return null;
+  }
+
+  //
+  // listeners
+  //
+
+  public void addServerListener(ServerListener listener)
+  {
+    synchronized (_serverListeners) {
+      _serverListeners.add(listener);
+    }
+
+    for (ClusterServer server : _selfServer.getClusterPod().getServerList()) {
+      if (server.isActive())
+        listener.serverStart(server);
+    }
+  }
+
+  public void removeServerListener(ServerListener listener)
+  {
+    synchronized (_serverListeners) {
+      _serverListeners.remove(listener);
+    }
+  }
+
+  protected void notifyServerStart(ClusterServer server)
+  {
+    ArrayList<ServerListener> serverListeners
+      = new ArrayList<ServerListener>();
+
+    synchronized (_serverListeners) {
+      serverListeners.addAll(_serverListeners);
+    }
+
+    for (ServerListener listener : serverListeners) {
+      listener.serverStart(server);
+    }
+  }
+
+  protected void notifyServerStop(ClusterServer server)
+  {
+    ArrayList<ServerListener> serverListeners
+      = new ArrayList<ServerListener>();
+
+    synchronized (_serverListeners) {
+      serverListeners.addAll(_serverListeners);
+    }
+
+    for (ServerListener listener : serverListeners) {
+      listener.serverStop(server);
+    }
   }
 
   //

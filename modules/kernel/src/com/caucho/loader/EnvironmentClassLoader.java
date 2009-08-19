@@ -48,6 +48,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,12 +84,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private ArrayList<ScanListener> _scanListeners;
   private ArrayList<URL> _pendingScanUrls = new ArrayList<URL>();
 
+  private AtomicReference<ArtifactManager> _artifactManagerRef
+    = new AtomicReference<ArtifactManager>();
   private ArtifactManager _artifactManager;
 
   // Array of listeners
   // XXX: this used to be a weak reference list, but that caused problems
   // server/306i  - can't be weak reference, instead create WeakStopListener
-  private ArrayList<EnvironmentListener> _listeners;
+  private ArrayList<EnvironmentListener> _listeners
+    = new ArrayList<EnvironmentListener>();
+  
   private WeakStopListener _stopListener;
 
   // The state of the environment
@@ -277,14 +282,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public void addListener(EnvironmentListener listener)
   {
-    synchronized (this) {
-      if (_listeners == null) {
-        _listeners = new ArrayList<EnvironmentListener>();
-
-        initListeners();
-      }
-    }
-
     synchronized (_listeners) {
       for (int i = _listeners.size() - 1; i >= 0; i--) {
         EnvironmentListener oldListener = _listeners.get(i);
@@ -574,12 +571,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public ArtifactManager createArtifactManager()
   {
-    synchronized (this) {
-      if (_artifactManager == null)
-        _artifactManager = new ArtifactManager(this);
+    if (_artifactManager == null) {
+      ArtifactManager manager = new ArtifactManager(this);
 
-      return _artifactManager;
+      _artifactManagerRef.compareAndSet(null, manager);
+      _artifactManager = _artifactManagerRef.get();
     }
+
+    return _artifactManager;
   }
 
   /**
