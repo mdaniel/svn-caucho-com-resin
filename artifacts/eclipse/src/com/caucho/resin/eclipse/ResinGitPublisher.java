@@ -51,7 +51,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 @SuppressWarnings("restriction")
-public class ResinGitPublisher extends AntPublisher 
+public class ResinGitPublisher extends ResinPublisher 
                                implements ResinPropertyIds 
 { 
   public static final String PUBLISHER_ID = 

@@ -29,7 +29,11 @@
 
 package com.caucho.resin.eclipse;
 
+import java.io.File;
+
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jst.server.generic.core.internal.GenericServer;
 import org.eclipse.jst.server.generic.core.internal.GenericServerRuntime;
@@ -101,81 +105,79 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     final Button resinHomeBrowseButton = new Button(composite, SWT.PUSH);
     resinHomeBrowseButton.setText("Browse");
 
-    if (isChangeableRoot()) {
-      final Button resinRootButton = new Button(composite, SWT.CHECK);
-      resinRootButton.setText("Use Resin home as Resin root");
-      resinRootButton.setLayoutData(indentedRowFillGridData);
-      resinRootButton.setSelection(true);
+    final Button resinRootButton = new Button(composite, SWT.CHECK);
+    resinRootButton.setText("Use Resin home as Resin root");
+    resinRootButton.setLayoutData(indentedRowFillGridData);
+    resinRootButton.setSelection(true);
 
-      final Label resinRootLabel = new Label(composite, SWT.NONE);
-      resinRootLabel.setText("Resin Root");
-      resinRootLabel.setEnabled(false);
-    
-    
-      _resinRootTextField = new Text(composite, 
-                                     SWT.SINGLE 
-                                     | SWT.SHADOW_IN 
-                                     | SWT.BORDER);
-      _resinRootTextField.setText("/usr/share/resin");
-      _resinRootTextField.setEnabled(false);
-      _resinRootTextField.setLayoutData(singleColumnFillGridData);
+    final Label resinRootLabel = new Label(composite, SWT.NONE);
+    resinRootLabel.setText("Resin Root");
+    resinRootLabel.setEnabled(false);
+  
+  
+    _resinRootTextField = new Text(composite, 
+                                   SWT.SINGLE 
+                                   | SWT.SHADOW_IN 
+                                   | SWT.BORDER);
+    _resinRootTextField.setText("/usr/share/resin");
+    _resinRootTextField.setEnabled(false);
+    _resinRootTextField.setLayoutData(singleColumnFillGridData);
 
-      final Button resinRootBrowseButton = new Button(composite, SWT.PUSH);
-      resinRootBrowseButton.setText("Browse");
-      resinRootBrowseButton.setEnabled(false);
-      
+    final Button resinRootBrowseButton = new Button(composite, SWT.PUSH);
+    resinRootBrowseButton.setText("Browse");
+    resinRootBrowseButton.setEnabled(false);
+    
     // listeners
-    
-      _resinHomeTextField.addModifyListener(new ModifyListener() {
-        public void modifyText(ModifyEvent event)
-        {
-          if (resinRootButton.getSelection())
-            _resinRootTextField.setText(_resinHomeTextField.getText());
+  
+    _resinHomeTextField.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent event)
+      {
+        if (resinRootButton.getSelection())
+          _resinRootTextField.setText(_resinHomeTextField.getText());
+      }
+    });
+
+    resinRootButton.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) 
+      {
+        if (resinRootButton.getSelection()) {
+          resinRootLabel.setEnabled(false);
+          _resinRootTextField.setEnabled(false);
+          resinRootBrowseButton.setEnabled(false);
+
+          _resinRootTextField.setText(_resinHomeTextField.getText());
         }
-      });
+        else {
+          resinRootLabel.setEnabled(true);
+          _resinRootTextField.setEnabled(true);
+          resinRootBrowseButton.setEnabled(true);
+        }       
+      }
 
-      resinRootButton.addSelectionListener(new SelectionListener() {
-        public void widgetSelected(SelectionEvent e) 
-        {
-          if (resinRootButton.getSelection()) {
-            resinRootLabel.setEnabled(false);
-            _resinRootTextField.setEnabled(false);
-            resinRootBrowseButton.setEnabled(false);
+      public void widgetDefaultSelected(SelectionEvent e) 
+      {
+        widgetSelected(e);
+      }
+    });
 
-            _resinRootTextField.setText(_resinHomeTextField.getText());
-          }
-          else {
-            resinRootLabel.setEnabled(true);
-            _resinRootTextField.setEnabled(true);
-            resinRootBrowseButton.setEnabled(true);
-          }       
-        }
+    resinRootBrowseButton.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) 
+      {
+        DirectoryDialog dialog = new DirectoryDialog(parent.getShell());
+        String currentText = 
+          _resinRootTextField.getText().replace('\\', '/');
+        dialog.setFilterPath(currentText);
+        String filename = dialog.open();
 
-        public void widgetDefaultSelected(SelectionEvent e) 
-        {
-          widgetSelected(e);
-        }
-      });
+        if (filename != null)
+          _resinRootTextField.setText(filename.replace('\\', '/'));
+      }
 
-      resinRootBrowseButton.addSelectionListener(new SelectionListener() {
-        public void widgetSelected(SelectionEvent e) 
-        {
-          DirectoryDialog dialog = new DirectoryDialog(parent.getShell());
-          String currentText = 
-            _resinRootTextField.getText().replace('\\', '/');
-          dialog.setFilterPath(currentText);
-          String filename = dialog.open();
-
-          if (filename != null)
-            _resinRootTextField.setText(filename.replace('\\', '/'));
-        }
-
-        public void widgetDefaultSelected(SelectionEvent e) 
-        {
-          widgetSelected(e);
-        }
-      });
-    }
+      public void widgetDefaultSelected(SelectionEvent e) 
+      {
+        widgetSelected(e);
+      }
+    });
     
     _resinHomeTextField.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent arg0)
@@ -237,15 +239,27 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     resinHomeConfigCopy.setEnabled(false);
     resinHomeConfigCopy.setSelection(false);
     
+    final Label resinHomeAppDefaultLabel = new Label(composite, 
+                                                     SWT.LEFT
+                                                     | SWT.WRAP
+                                                     | SWT.SHADOW_IN);
+    resinHomeAppDefaultLabel.setVisible(false);
+
+    GridData resinHomeAppDefaultLabelGridData =
+      new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
+    resinHomeAppDefaultLabelGridData.widthHint = 
+      composite.getShell().getClientArea().width;
+    resinHomeAppDefaultLabelGridData.horizontalIndent = 20;
+    resinHomeAppDefaultLabel.setLayoutData(resinHomeAppDefaultLabelGridData);
+    
     final Button userConfig = new Button(composite, SWT.RADIO);
     userConfig.setText("Use a configuration file from another location");                               
     userConfig.setLayoutData(rowFillGridData);
     
-    _userConfTextField = new Text(composite, 
-                                  SWT.SINGLE 
-                                  | SWT.SHADOW_IN 
-                                  | SWT.BORDER);
-    _userConfTextField.setText("/path/to/resin.conf_or_resin.xml");
+    _userConfTextField = new Text(composite, SWT.SINGLE 
+                                             | SWT.SHADOW_IN 
+                                             | SWT.BORDER);
+    _userConfTextField.setText("/etc/resin/resin.xml");
     _userConfTextField.setEnabled(false);
     GridData indentedTwoColumnGridData =
       new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
@@ -261,18 +275,28 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     userConfigCopy.setText("Copy configuration to project");
     userConfigCopy.setEnabled(false);
     userConfigCopy.setSelection(false);
-    
-    final Label helpText = new Label(composite, SWT.LEFT 
-                                                | SWT.WRAP
-                                                | SWT.SHADOW_IN); 
-    helpText.setVisible(true);
 
-    final GridData helpTextGridData =
+    final Label userAppDefaultLabel = new Label(composite, SWT.LEFT 
+                                                           | SWT.WRAP
+                                                           | SWT.SHADOW_IN); 
+    userAppDefaultLabel.setVisible(false);
+
+    GridData userAppDefaultLabelGridData =
       new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
-    helpTextGridData.widthHint = composite.getShell().getClientArea().width;
-    helpText.setLayoutData(helpTextGridData);
+    userAppDefaultLabelGridData.widthHint = 
+      composite.getShell().getClientArea().width;
+    userAppDefaultLabelGridData.horizontalIndent = 20;
+    userAppDefaultLabel.setLayoutData(userAppDefaultLabelGridData);
     
+    final Label helpLabel = new Label(composite, SWT.LEFT 
+                                                 | SWT.WRAP
+                                                 | SWT.SHADOW_IN); 
+    helpLabel.setVisible(false);
 
+    GridData helpLabelGridData =
+      new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
+    helpLabelGridData.widthHint = composite.getShell().getClientArea().width;
+    helpLabel.setLayoutData(helpLabelGridData);
     
     // listeners
 
@@ -282,12 +306,8 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
         _resinConfType = ResinServer.RESIN_CONF_BUNDLE;
         _copyConfig = resinHomeConfigCopy.getSelection();
         
-        if (bundleConfig.getSelection()) {
-          helpText.setVisible(false);
-          helpText.setText("");
-          helpText.redraw();
-          composite.getShell().pack();
-        }        
+        if (bundleConfig.getSelection())
+          setLabelText(helpLabel, "");
       }
 
       public void widgetDefaultSelected(SelectionEvent e) 
@@ -304,18 +324,31 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
         if (resinHomeConfig.getSelection()) {
           resinHomeConfigCopy.setEnabled(true);
           
-          helpText.setVisible(true);
-          helpText.setText(getHelpText());
-          helpText.redraw();
-          composite.getShell().pack();
+          setLabelText(helpLabel, getHelpText());
+          
+          File resinConfDir = 
+            new Path(_resinHomeTextField.getText()).append("conf").toFile();
+          checkAppDefault(resinConfDir, resinHomeAppDefaultLabel);
         }
-        else
+        else {
           resinHomeConfigCopy.setEnabled(false);
+          
+          setLabelText(resinHomeAppDefaultLabel, "");
+        }
       }
 
       public void widgetDefaultSelected(SelectionEvent e) 
       {
         widgetSelected(e);
+      }
+    });
+    
+    _resinHomeTextField.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent arg0)
+      {
+        File resinConfDir = 
+          new Path(_resinHomeTextField.getText()).append("conf").toFile();
+        checkAppDefault(resinConfDir, resinHomeAppDefaultLabel);
       }
     });
 
@@ -338,16 +371,19 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
           userBrowseButton.setEnabled(true);
           _userConfTextField.setEnabled(true);
           userConfigCopy.setEnabled(true);
-          
-          helpText.setVisible(true);
-          helpText.setText(getHelpText());
-          helpText.redraw();
-          composite.getShell().pack();
+    
+          setLabelText(helpLabel, getHelpText());
+       
+          File resinConfDir = 
+            new File(_userConfTextField.getText()).getParentFile();
+          checkAppDefault(resinConfDir, userAppDefaultLabel);
         }
         else {
           userBrowseButton.setEnabled(false);
           _userConfTextField.setEnabled(false);
           userConfigCopy.setEnabled(false);
+          
+          setLabelText(userAppDefaultLabel, "");
         }
         
         _resinConfType = ResinServer.RESIN_CONF_USER;
@@ -357,6 +393,15 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
       public void widgetDefaultSelected(SelectionEvent e) 
       {
         widgetSelected(e);
+      }
+    });
+    
+    _userConfTextField.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent arg0)
+      {
+        File resinConfDir = 
+          new File(_userConfTextField.getText()).getParentFile();
+        checkAppDefault(resinConfDir, userAppDefaultLabel);
       }
     });
     
@@ -413,20 +458,6 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     runtime.getServerInstanceProperties().put(key, value);
   }
   
-  private String getProperty(String key)
-  {
-    return (String) getResinServer().getServerInstanceProperties().get(key);
-  }
-  
-  private boolean isChangeableRoot()
-  {
-    ResinServer server = getResinServer();
-    String changeableRoot = 
-      server.getPropertyDefault(ResinPropertyIds.CHANGEABLE_ROOT); 
-     
-    return "true".equals(changeableRoot);
-  }
-  
   private String getHelpText()
   {    
     ResinServer server = getResinServer();
@@ -456,6 +487,31 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     }
   }
   
+  private void checkAppDefault(File resinConfDir, Label label)
+  {
+    File appDefault = new File(resinConfDir, "app-default.xml");
+    
+    if (! appDefault.exists()) {
+      setLabelText(label, "Warning: app-default.xml could not be found in " 
+                          + resinConfDir);
+    }
+    else {
+      setLabelText(label, "");
+    }
+  }
+  
+  private void setLabelText(Label label, String text)
+  {
+    if ("".equals(text))
+      label.setVisible(false);
+    else
+      label.setVisible(true);
+    
+    label.setText(text);
+    label.redraw();
+    label.getShell().pack();      
+  }
+  
   @Override
   public void enter()
   {
@@ -472,10 +528,7 @@ public class ResinServerWizardFragment extends GenericServerWizardFragment
     super.exit();
     
     setProperty(ResinPropertyIds.RESIN_HOME, _resinHomeTextField.getText());
-    
-    if (isChangeableRoot())
-      setProperty(ResinPropertyIds.RESIN_ROOT, _resinRootTextField.getText());
-
+    setProperty(ResinPropertyIds.RESIN_ROOT, _resinRootTextField.getText());
     setProperty(ResinServer.RESIN_CONF_TYPE, _resinConfType);
     
     if (ResinServer.RESIN_CONF_USER.equals(_resinConfType)) {

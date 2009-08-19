@@ -14,7 +14,7 @@
     </server>
 
     <resin:import path="${resin.home}/conf/app-default.xml"/>
-
+    
     <host id="" root-directory=".">
       <web-app-deploy path="webapps"/>
     </host>

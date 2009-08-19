@@ -35,12 +35,6 @@
             context="internal"
             default="conf/resin31/resin.xml"/>
             
-  <property id="resin.changeable.root"
-            label=""
-            type="string"
-            context="internal"
-            default="true"/>                        
-    
   <property id="resin.help.text"
             label=""
             type="string"
@@ -84,6 +78,7 @@
       -conf "${resin.configuration.file}"
     </programArguments>
     <vmParameters>
+      -Djava.library.path="${resin.home}/libexec:${resin.home}/libexec64"
       -Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
       -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
       -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 

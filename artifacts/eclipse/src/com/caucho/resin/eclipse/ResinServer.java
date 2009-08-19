@@ -92,14 +92,17 @@ public class ResinServer extends GenericServer
     String confType = (String) instanceProperties.get(RESIN_CONF_TYPE);
     boolean copyConfig = 
       "true".equals(instanceProperties.get(RESIN_CONF_COPY));
-    
+
+    File configFile = null;
     IFile configIFile = null;
     IFolder configFolder = server.getServerConfiguration();
     
     if (RESIN_CONF_BUNDLE.equals(confType)) {
+      copyConfig = true;
+      
       String filename = 
         getPropertyDefault(typeDef, RESIN_CONF_BUNDLE_LOCATION);
-      File configFile = PublisherUtil.locateBundleFile(typeDef, filename);
+      configFile = PublisherUtil.locateBundleFile(typeDef, filename);
       configIFile = configFolder.getFile(configFile.getName());
       
       copyFileToWorkspace(configFile, configIFile, monitor);
@@ -110,14 +113,14 @@ public class ResinServer extends GenericServer
       IPath resinConfPath = new Path(resinHome).append("conf");
       
       IPath resinConfFilePath = resinConfPath.append("resin.xml");
-      File configFile = resinConfFilePath.toFile();
+      configFile = resinConfFilePath.toFile();
       
       if (! configFile.exists()) {
         resinConfFilePath = resinConfPath.append("resin.conf");
         configFile = resinConfFilePath.toFile();
         
         if (! configFile.exists())
-          PublisherUtil.throwCoreException("Cannot file Resin configuration in Resin home directory");
+          PublisherUtil.throwCoreException("Cannot find Resin configuration in Resin home directory");
       }
     
       configIFile = configFolder.getFile(configFile.getName());
@@ -131,7 +134,7 @@ public class ResinServer extends GenericServer
       String userConf = 
         (String) instanceProperties.get(RESIN_CONF_USER_LOCATION);
       IPath userConfPath = new Path(userConf);
-      File configFile = userConfPath.toFile(); 
+      configFile = userConfPath.toFile(); 
 
       configIFile = configFolder.getFile(configFile.getName());
       
@@ -142,6 +145,19 @@ public class ResinServer extends GenericServer
     }
     else {
       PublisherUtil.throwCoreException("Internal configuration error");
+    }
+
+    File appDefaultFile = 
+      new Path(configFile.getParentFile().toString())
+          .append("app-default.xml").toFile();
+    IFile appDefaultIFile = configFolder.getFile("app-default.xml");
+    
+    if (appDefaultFile.exists()) {
+      if (copyConfig)
+        copyFileToWorkspace(appDefaultFile, appDefaultIFile, monitor);
+      else
+        appDefaultIFile.createLink(new Path(appDefaultFile.toString()),
+                                   IResource.NONE, monitor);
     }
     
     instanceProperties.put(ResinPropertyIds.CONFIG_FILE_NAME,

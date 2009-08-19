@@ -38,6 +38,5 @@ public interface ResinPropertyIds {
   public static final String HTTP_PORT = "resin.http.port";
   public static final String RESIN_HOME = "resin.home";
   public static final String RESIN_ROOT = "resin.root";
-  public static final String CHANGEABLE_ROOT = "resin.changeable.root";
   public static final String HELP_TEXT = "resin.help.text";
 }

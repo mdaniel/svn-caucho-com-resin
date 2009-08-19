@@ -108,7 +108,6 @@ public class ResinInPlacePublisher extends GenericPublisher
   @Override
   public IStatus[] unpublish(IProgressMonitor monitor)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 }

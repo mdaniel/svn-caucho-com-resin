@@ -11,6 +11,12 @@
             context="internal"
             default="/usr/share/resin" />
 
+  <property id="resin.root"
+            label="%ResinRoot"
+            type="directory"
+            context="internal"
+            default="webapps" />
+            
   <property id="server.address"
             label="%ServerAddress"
             type="string"
@@ -28,12 +34,6 @@
             type="string"
             context="internal"
             default="conf/resin31/in-place.xml"/>            
-            
-  <property id="resin.changeable.root"
-            label=""
-            type="string"
-            context="internal"
-            default="false"/>                        
         
   <property id="resin.help.text"
             label=""
@@ -63,8 +63,12 @@
   <start>
     <mainClass>com.caucho.server.resin.Resin</mainClass>
     <workingDirectory>${resin.home}</workingDirectory>
-    <programArguments>-conf "${resin.configuration.file}"</programArguments>
+    <programArguments>
+      --root-directory "${resin.root}" 
+      -conf "${resin.configuration.file}"
+    </programArguments>
     <vmParameters>
+      -Djava.library.path="${resin.home}/libexec:${resin.home}/libexec64"
       -Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
       -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
       -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 

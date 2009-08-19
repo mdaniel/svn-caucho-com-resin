@@ -215,7 +215,7 @@
       id="org.eclipse.jst.server.generic.resin31inPlace"
       initialState="stopped"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-      launchModes="run"
+      launchModes="run,debug"
       name="%resin31inPlaceServerTypeName"
       runtime="true"
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31inPlace"
@@ -229,7 +229,7 @@
           id="org.eclipse.jst.server.generic.resin31tempDir"
           initialState="stopped"
           launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-          launchModes="run"
+          launchModes="run,debug"
           name="%resin31tempDirServerTypeName"
           runtime="true"
           runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31tempDir"
@@ -245,7 +245,7 @@
       id="org.eclipse.jst.server.generic.resin40"
       initialState="stopped"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-      launchModes="run"
+      launchModes="run,debug"
       name="%resin40serverTypeName"
       runtime="true"
       runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40"
@@ -261,7 +261,7 @@
           id="org.eclipse.jst.server.generic.resin40hotDeploy"
           initialState="stopped"
           launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-          launchModes="run"
+          launchModes="run,debug"
           name="%resin40hotDeployServerTypeName"
           runtime="true"
           runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40hotDeploy"
@@ -276,7 +276,7 @@
           id="org.eclipse.jst.server.generic.resin40inPlace"
           initialState="stopped"
           launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-          launchModes="run"
+          launchModes="run,debug"
           name="%resin40inPlaceServerTypeName"
           runtime="true"
           runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40inPlace"
@@ -290,7 +290,7 @@
           id="org.eclipse.jst.server.generic.resin40tempDir"
           initialState="stopped"
           launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-          launchModes="run"
+          launchModes="run,debug"
           name="%resin40tempDirServerTypeName"
           runtime="true"
           runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin40tempDir"
@@ -362,7 +362,7 @@
           typeIds="org.eclipse.jst.server.generic.runtime.resin40tempDir">
     </fragment>
     <fragment
-          class=""
+          class="com.caucho.resin.eclipse.ResinServerWizardFragment"
           id="org.eclipse.jst.server.generic.server"
           typeIds="org.eclipse.jst.server.generic.resin40tempDir">
     </fragment>

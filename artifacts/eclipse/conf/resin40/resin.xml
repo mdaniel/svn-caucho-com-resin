@@ -13,7 +13,7 @@
       <http port="${system['server.port']}"/>
     </server>
 
-    <resin:import path="${resin.home}/conf/app-default.xml"/>
+    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <host id="" root-directory=".">
       <web-app-deploy path="webapps"/>

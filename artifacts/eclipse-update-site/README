@@ -2,7 +2,7 @@ Building the Eclipse plugin
 ---------------------------
 1. Build Resin
 
-2. Copy resin.jar, resin-kernel.jar, hessian.jar to 
+2. Copy resin.jar from the "dist" target
    resin/artifacts/eclipse/lib
 
 Within Eclipse...

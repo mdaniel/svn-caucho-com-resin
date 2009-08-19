@@ -2,7 +2,7 @@
 <feature
       id="com.caucho.resin.eclipse"
       label="Resin Eclipse Feature"
-      version="4.0.0"
+      version="4.0.1.s090817"
       provider-name="Caucho Technology">
 
    <description url="http://www.caucho.com/">
@@ -81,6 +81,6 @@ along with Resin Open Source; if not, write to the
          id="com.caucho.resin.eclipse"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="4.0.1.s090817"/>
 
 </feature>
