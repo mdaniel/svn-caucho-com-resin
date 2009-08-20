@@ -40,29 +40,24 @@ import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.Path;
 
-/**
- * Ant task to deploy war files to resin
- */
-public class ResinDeploy {
+public abstract class ResinDeployClientTask {
   private String _server;
   private int _port = -1;
-  private String _warFile;
   private String _user;
   private String _message;
   private String _password;
   private String _version;
   private String _virtualHost = "default";
-
-  /**
-   * For ant.
-   **/
-  public ResinDeploy()
-  {
-  }
+  private String _contextRoot = null;
 
   public void setServer(String server)
   {
     _server = server;
+  }
+
+  public String getServer()
+  {
+    return _server;
   }
 
   public void setPort(int port)
@@ -70,9 +65,19 @@ public class ResinDeploy {
     _port = port;
   }
 
-  public void setWarFile(String warFile)
+  public int getPort()
   {
-    _warFile = warFile;
+    return _port;
+  }
+
+  public void setContextRoot(String contextRoot)
+  {
+    _contextRoot = contextRoot;
+  }
+
+  public String getContextRoot()
+  {
+    return _contextRoot;
   }
 
   public void setCommitMessage(String message)
@@ -80,9 +85,19 @@ public class ResinDeploy {
     _message = message;
   }
 
+  public String getCommitMessage()
+  {
+    return _message;
+  }
+
   public void setUser(String user)
   {
     _user = user;
+  }
+
+  public String getUser()
+  {
+    return _user;
   }
 
   public void setPassword(String password)
@@ -90,9 +105,19 @@ public class ResinDeploy {
     _password = password;
   }
 
+  public String getPassword()
+  {
+    return _password;
+  }
+
   public void setVersion(String version)
   {
     _version = version;
+  }
+
+  public String getVersion()
+  {
+    return _version;
   }
 
   public void setVirtualHost(String virtualHost)
@@ -100,37 +125,49 @@ public class ResinDeploy {
     _virtualHost = virtualHost;
   }
 
+  public String getVirtualHost()
+  {
+    return _virtualHost;
+  }
+
+  protected String getWarTag(String prefix)
+  {
+    return prefix + "/wars/" + _virtualHost + "/" + _contextRoot;
+  }
+
+  protected String getVersionedWarTag(String prefix)
+  {
+    if (_version != null)
+      return getWarTag(prefix) + "-" + _version;
+
+    return getWarTag(prefix);
+  }
+
+  protected abstract String getTaskName();
+
+  protected void validate()
+    throws BuildException
+  {
+    if (_server == null)
+      throw new BuildException("server is required by " + getTaskName());
+
+    if (_port == -1)
+      throw new BuildException("port is required by " + getTaskName());
+
+    if (_user == null)
+      throw new BuildException("user is required by " + getTaskName());
+  }
+
+  protected abstract void doTask(DeployClient client)
+    throws BuildException;
+
   /**
    * Executes the ant task.
    **/
   public void execute()
     throws BuildException
   {
-    if (_warFile == null)
-      throw new BuildException("war-file is required by resin-deploy");
-
-    if (! _warFile.endsWith(".war"))
-      throw new BuildException("war-file must have .war extension");
-
-    if (_server == null)
-      throw new BuildException("server is required by resin-deploy");
-
-    if (_port == -1)
-      throw new BuildException("port is required by resin-deploy");
-
-    if (_user == null)
-      throw new BuildException("user is required by resin-deploy");
-
-    // compute the git tag
-
-    int lastSlash = _warFile.lastIndexOf("/");
-
-    if (lastSlash < 0)
-      lastSlash = 0;
-
-    String name = _warFile.substring(lastSlash, 
-                                     _warFile.length() - ".war".length());
-    String tag = "wars/" + _virtualHost + "/" + name;
+    validate();
 
     // fix the class loader
 
@@ -142,12 +179,7 @@ public class ResinDeploy {
     try {
       thread.setContextClassLoader(loader);
 
-      DeployClient client = new DeployClient(_server, _port, _user, _password);
-      com.caucho.vfs.Path path = Vfs.lookup(_warFile);
-      client.deployJarContents(path, tag, _user, _message, _version, null);
-    }
-    catch (IOException e) {
-      throw new BuildException(e);
+      doTask(new DeployClient(_server, _port, _user, _password));
     }
     finally {
       thread.setContextClassLoader(oldLoader);
