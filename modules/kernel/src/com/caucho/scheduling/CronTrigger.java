@@ -39,8 +39,10 @@ import com.caucho.util.QDate;
  * Implements a cron-style trigger. This trigger is primarily intended for the
  * EJB calendar style timer service functionality.
  */
-// TODO Is this class getting too large? Maybe separate into a parser/lexer
-// sub-component?
+// TODO Is this class getting too large? Maybe separate into a
+// parser/lexer/interpreter sub-component? Also, is parsing better done/more
+// readable/maintainable via creating compiler style grammar tokens instead of
+// direct String processing?
 public class CronTrigger implements Trigger {
   private static final L10N L = new L10N(CronTrigger.class);
   // Order of search is important in the token maps.
@@ -161,11 +163,10 @@ public class CronTrigger implements Trigger {
   /**
    * parses a range, following cron rules.
    */
+  // TODO This does not handle extra spaces between tokens, should it?
   private boolean[] parseRange(String range, int rangeMin, int rangeMax,
       boolean parseDayOfMonth) throws ConfigException
   {
-    // TODO This does not handle spaces.
-
     boolean[] values = new boolean[rangeMax + 1];
 
     int i = 0;
@@ -207,20 +208,6 @@ public class CronTrigger implements Trigger {
                 range));
           }
 
-          if ((i < range.length()) && ((character = range.charAt(i)) == '/')) {
-            step = 0;
-
-            for (i++; i < range.length()
-                && '0' <= (character = range.charAt(i)) && character <= '9'; i++) {
-              step = 10 * step + character - '0';
-            }
-
-            if (step == 0) {
-              throw new ConfigException(L.l("'{0}' is an illegal cron range",
-                  range));
-            }
-          }
-
           if (range.length() <= i) {
           } else if (character == ',') {
             i++;
@@ -244,6 +231,7 @@ public class CronTrigger implements Trigger {
               && character <= '9'; i++) {
             // Don't need to do anything, evaluation will be done later, just
             // need to validate parsing for now.
+            // TODO Maybe validate a range here?
           }
 
           if ((i < range.length()) && ((character = range.charAt(i)) == '/')) {
@@ -260,10 +248,15 @@ public class CronTrigger implements Trigger {
             }
           }
 
-          // The case of the Nth weekday (-0 in this case)
+          // The case of the last (-0) weekday
           if ((i < range.length()) && ((character = range.charAt(i)) == ' ')) {
             // Just need to do validation parsing, evaluation will be done
             // later.
+            if (min != 0) {
+              throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                  range));
+            }
+
             int dayOfWeek = 0;
 
             for (i++; i < range.length()
@@ -426,6 +419,12 @@ public class CronTrigger implements Trigger {
 
   private QDate getNextTimeInMonth(QDate currentTime)
   {
+    // If the days filter is relative to particular months, the days map should
+    // be re-calculated.
+    if (_isDaysFilterRelative) {
+      calculateDays(currentTime);
+    }
+
     // Note, QDate uses a 1 indexed weekday, while cron uses a 0 indexed
     // weekday.
     int day = getNextDayMatch(currentTime.getDayOfMonth(), (currentTime
@@ -464,6 +463,111 @@ public class CronTrigger implements Trigger {
       }
 
       return nextTime;
+    }
+  }
+
+  private void calculateDays(QDate currentTime)
+  {
+    _days = new boolean[currentTime.getDaysInMonth() + 1];
+
+    int i = 0;
+    while (i < _daysFilter.length()) {
+      char character = _daysFilter.charAt(i);
+
+      int min = 0;
+      int max = min;
+      int step = 1;
+
+      if (character == '*') {
+        min = 1;
+        max = currentTime.getDaysInMonth();
+        i++;
+      } else if ('0' <= character && character <= '9') {
+        for (; i < _daysFilter.length()
+            && '0' <= (character = _daysFilter.charAt(i)) && character <= '9'; i++) {
+          min = 10 * min + character - '0';
+        }
+
+        if (i < _daysFilter.length() && character == '-') {
+          for (i++; i < _daysFilter.length()
+              && '0' <= (character = _daysFilter.charAt(i)) && character <= '9'; i++) {
+            max = 10 * max + character - '0';
+          }
+        } else if ((i < _daysFilter.length()) && (character == ' ')) {
+          // This is the Nth weekday case.
+          int dayOfWeek = 0;
+
+          for (i++; i < _daysFilter.length()
+              && '0' <= (character = _daysFilter.charAt(i)) && character <= '9'; i++) {
+            dayOfWeek = 10 * dayOfWeek + character - '0';
+          }
+
+          int n = min;
+          min = 1;
+          int monthStartDayofWeek = ((currentTime.getDayOfWeek() - 1)
+              - ((currentTime.getDayOfMonth() - min) % 7) + 7) % 7;
+
+          min = min + ((dayOfWeek - monthStartDayofWeek + 7) % 7);
+
+          min = min + ((n - 1) * 7);
+
+          max = min;
+        } else {
+          max = min;
+        }
+      } else if (character == '-') { // This is a -N days from end of month
+        // case.
+        for (i++; i < _daysFilter.length()
+            && '0' <= (character = _daysFilter.charAt(i)) && character <= '9'; i++) {
+          min = 10 * min + character - '0';
+        }
+
+        min = currentTime.getDaysInMonth() - min;
+
+        // The case of the last (-0) weekday case.
+        if ((i < _daysFilter.length())
+            && ((character = _daysFilter.charAt(i)) == ' ')) {
+          int dayOfWeek = 0;
+
+          for (i++; i < _daysFilter.length()
+              && '0' <= (character = _daysFilter.charAt(i)) && character <= '9'; i++) {
+            dayOfWeek = 10 * dayOfWeek + character - '0';
+          }
+
+          min = 1;
+          int monthStartDayofWeek = ((currentTime.getDayOfWeek() - 1)
+              - ((currentTime.getDayOfMonth() - min) % 7) + 7) % 7;
+
+          min = min + ((dayOfWeek - monthStartDayofWeek + 7) % 7);
+
+          // This is an integer division.
+          min = min + (((currentTime.getDaysInMonth() - min) / 7) * 7);
+        }
+
+        max = min;
+      }
+
+      if ((i < _daysFilter.length())
+          && ((character = _daysFilter.charAt(i)) == '/')) {
+        for (i++; i < _daysFilter.length()
+            && '0' <= (character = _daysFilter.charAt(i)) && character <= '9'; i++) {
+          step = 10 * step + character - '0';
+        }
+
+        if (min == max) { // This is in the form of N/M, where N is the interval
+          // start and the end is the max value.
+          max = currentTime.getDaysInMonth();
+        }
+      }
+
+      for (int day = min; ((day > 0) && (day <= max) && (day <= currentTime
+          .getDaysInMonth())); day += step) {
+        _days[day] = true;
+      }
+
+      if (character == ',') {
+        i++;
+      }
     }
   }
 
