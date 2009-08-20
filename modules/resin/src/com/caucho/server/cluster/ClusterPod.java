@@ -428,22 +428,99 @@ abstract public class ClusterPod
     ServerPool pool;
 
     server = getPrimary(owner);
+
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
+    
+      if (pool != null && pool.isActive() && server != oldServer)
+        return server;
+    }
+
+    server = getSecondary(owner);
+
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
+    
+      if (pool != null && pool.isActive() && server != oldServer)
+        return server;
+    }
+
+    server = getTertiary(owner);
+
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
+    
+      if (pool != null && pool.isActive() && server != oldServer)
+        return server;
+    }
+
+    // force the send
+
+    server = getPrimary(owner);
     pool = server != null ? server.getServerPool() : null;
     
-    if (pool != null && pool.isActive() && server != oldServer)
+    if (pool != null && server != oldServer)
       return server;
 
     server = getSecondary(owner);
     pool = server != null ? server.getServerPool() : null;
     
-    if (pool != null && pool.isActive() && server != oldServer)
+    if (pool != null && server != oldServer)
       return server;
 
     server = getTertiary(owner);
     pool = server != null ? server.getServerPool() : null;
     
-    if (pool != null && pool.isActive() && server != oldServer)
+    if (pool != null && server != oldServer)
       return server;
+
+    return null;
+  }
+
+  /**
+   * Returns the best primary or secondary triad server.
+   */
+  public ClusterServer getActiveOrSelfServer(Owner owner,
+                                             ClusterServer oldServer)
+  {
+    ClusterServer server;
+    ServerPool pool;
+
+    server = getPrimary(owner);
+
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
+
+      if (pool == null)
+        return server;
+    
+      if (pool.isActive() && server != oldServer)
+        return server;
+    }
+
+    server = getSecondary(owner);
+
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
+
+      if (pool == null)
+        return server;
+    
+      if (pool.isActive() && server != oldServer)
+        return server;
+    }
+
+    server = getTertiary(owner);
+
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
+
+      if (pool == null)
+        return server;
+    
+      if (pool.isActive() && server != oldServer)
+        return server;
+    }
 
     // force the send
 
@@ -471,7 +548,7 @@ abstract public class ClusterPod
   /**
    * Returns the owner for an index
    */
-  public Owner getOwner(long index)
+  public static Owner getOwner(long index)
   {
     return OWNER_VALUES[(int) (index % OWNER_VALUES.length & 0x7fffffff)];
   }

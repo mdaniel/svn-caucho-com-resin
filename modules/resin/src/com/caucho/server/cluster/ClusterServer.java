@@ -801,6 +801,9 @@ public final class ClusterServer {
   {
     _isActive = false;
     _stateTimestamp = Alarm.getCurrentTime();
+
+    if (_serverPool != null)
+      _serverPool.notifyStop();
   }
 
   /**

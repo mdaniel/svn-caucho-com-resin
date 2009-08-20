@@ -69,6 +69,8 @@ import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.distlock.AbstractLockManager;
 import com.caucho.server.distlock.SingleLockManager;
+import com.caucho.server.distlock.AbstractVoteManager;
+import com.caucho.server.distlock.SingleVoteManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -148,6 +150,7 @@ public class Server extends ProtocolDispatchServer
 
   private DistributedCacheManager _distributedCacheManager;
   private AbstractLockManager _distributedLockManager;
+  private AbstractVoteManager _distributedVoteManager;
 
   private HostContainer _hostContainer;
 
@@ -544,6 +547,25 @@ public class Server extends ProtocolDispatchServer
   protected AbstractLockManager createDistributedLockManager()
   {
     return new SingleLockManager(this);
+  }
+
+  /**
+   * Returns the distributed vote manager
+   */
+  public AbstractVoteManager getDistributedVoteManager()
+  {
+    if (_distributedVoteManager == null)
+      _distributedVoteManager = createDistributedVoteManager();
+
+    return _distributedVoteManager;
+  }
+
+  /**
+   * Returns the distributed vote manager
+   */
+  protected AbstractVoteManager createDistributedVoteManager()
+  {
+    return new SingleVoteManager(this);
   }
 
   public TempFileManager getTempFileManager()
