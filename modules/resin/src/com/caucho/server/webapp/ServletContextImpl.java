@@ -112,7 +112,7 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public int getMajorVersion()
   {
-    return 2;
+    return 3;
   }
 
   /**
@@ -120,7 +120,7 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public int getMinorVersion()
   {
-    return 5;
+    return 0;
   }
 
   /**

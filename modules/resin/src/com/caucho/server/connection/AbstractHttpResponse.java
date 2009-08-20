@@ -885,7 +885,7 @@ abstract public class AbstractHttpResponse {
     }
 
     WebApp app = _request.getWebApp();
-    if (app.getCookieHttpOnly()) {
+    if (app.getCookieHttpOnly() || app.getSessionManager().isCookieHttpOnly()) {
       cb.append("; HttpOnly");
     }
 

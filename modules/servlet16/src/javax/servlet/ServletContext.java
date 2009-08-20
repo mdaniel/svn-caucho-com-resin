@@ -305,13 +305,6 @@ public interface ServletContext {
   public void log(Exception exception, String msg);
 
   /**
-   * The session cookie configuration
-   *
-   * @Since Servlet 3.0
-   */
-  public void setSessionCookieConfig(SessionCookieConfig cookieConfig);
-
-  /**
    * Sets the session cookie configuration
    *
    * @Since Servlet 3.0

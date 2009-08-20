@@ -29,7 +29,6 @@
 
 package com.caucho.server.session;
 
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ByteStreamCache;
@@ -39,13 +38,11 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
-import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.distcache.PersistentStoreConfig;
-import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -54,13 +51,12 @@ import com.caucho.util.LruCache;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.TempOutputStream;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import javax.servlet.SessionCookieConfig;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -73,7 +69,7 @@ import java.util.logging.Logger;
 /**
  * Manages sessions in a web-webApp.
  */
-public final class SessionManager implements AlarmListener
+public final class SessionManager implements SessionCookieConfig, AlarmListener
 {
   static protected final L10N L = new L10N(SessionManager.class);
   static protected final Logger log
@@ -137,6 +133,7 @@ public final class SessionManager implements AlarmListener
   // default cookie version
   private int _cookieVersion;
   private String _cookieDomain;
+  private String _cookiePath = "/";
   private long _cookieMaxAge;
   private boolean _cookieSecure;
   private int _isCookieHttpOnly;
@@ -788,6 +785,83 @@ public final class SessionManager implements AlarmListener
     _enableSessionUrls = enableUrls;
   }
 
+  //SessionCookieConfig implementation (Servlet 3.0)
+  public void setName(String name) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
+    setCookieName(name);
+  }
+
+  public String getName() {
+    return getCookieName();
+  }
+
+  public void setDomain(String domain) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
+    setCookieDomain(domain);
+  }
+
+  public String getDomain() {
+    return getCookieDomain();
+  }
+
+  public void setPath(String path) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
+    _cookiePath = path;
+  }
+
+  public String getPath() {
+    return _cookiePath;
+  }
+
+  public void setComment(String comment) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+  }
+
+  public String getComment() {
+    return null;
+  }
+
+  public void setHttpOnly(boolean httpOnly) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
+    setCookieHttpOnly(httpOnly);
+  }
+
+  public boolean isHttpOnly() {
+    return isCookieHttpOnly();
+  }
+
+  public void setSecure(boolean secure) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+  }
+
+  public boolean isSecure() {
+    return false;
+  }
+
+  public void setMaxAge(int maxAge) {
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
+    _cookieMaxAge = maxAge * 1000;
+  }
+
+  public int getMaxAge() {
+    return (int) (_cookieMaxAge / 1000);
+  }
+
+  public void setCookieName(String cookieName) {
+    _cookieName = cookieName;
+  }
   /**
    * Returns the default cookie name.
    */
@@ -1284,8 +1358,8 @@ public final class SessionManager implements AlarmListener
    * Create a new session.
    *
    * @param oldId the id passed to the request.  Reuse if possible.
-   * @param now the current date
-   * @param sessionGroup the srun index for this machine
+   * @param request - current HttpServletRequest
+   * @param fromCookie
    */
   public SessionImpl createSession(String oldId, long now,
                                    HttpServletRequest request,

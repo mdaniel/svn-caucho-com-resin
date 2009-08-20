@@ -44,14 +44,6 @@ import java.util.logging.Logger;
  * Bare-bones servlet context implementation.
  */
 public class ServletContextCompat {
-  /**
-   * The session cookie configuration
-   *
-   * @Since Servlet 3.0
-   */
-  public void setSessionCookieConfig(SessionCookieConfig cookieConfig)
-  {
-  }
 
   /**
    * Sets the session cookie configuration

@@ -1246,8 +1246,8 @@ public final class HttpServletResponseImpl implements CauchoResponse
     long maxAge = manager.getCookieMaxAge();
     if (maxAge > 0)
       cookie.setMaxAge((int) (maxAge / 1000));
-    cookie.setPath("/");
-      
+    cookie.setPath(manager.getPath());
+
     cookie.setPort(manager.getCookiePort());
     if (manager.getCookieSecure()) {
       cookie.setSecure(_request.isSecure());

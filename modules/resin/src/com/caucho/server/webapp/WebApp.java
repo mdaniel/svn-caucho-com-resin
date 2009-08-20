@@ -35,7 +35,6 @@ import com.caucho.config.Configurable;
 import com.caucho.config.inject.*;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.ConfigContext;
 import com.caucho.config.el.WebBeansELResolver;
 import com.caucho.config.types.*;
 import com.caucho.i18n.CharacterEncoding;
@@ -3144,6 +3143,11 @@ public class WebApp extends ServletContextImpl
       return login.getAuthenticator();
     else
       return null;
+  }
+
+  @Override
+  public SessionCookieConfig getSessionCookieConfig() {
+    return getSessionManager();
   }
 
   /**
