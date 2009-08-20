@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,41 +23,49 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Alex Rojkov
+ * @author Emil Ong
  */
 
 package com.caucho.server.admin;
 
 import java.io.Serializable;
-import java.net.URL;
 
-public class TagQuery implements Serializable {
-  private String _tag;
-  
+public class QueryTagsQuery implements Serializable {
+  private String _staging;
   private String _host;
-  private String _url;
+  private String _type;
+  private String _name;
 
-  // root hash of the tag
-  private String _root;
-
-  public TagQuery()
+  public QueryTagsQuery()
   {
   }
 
-  public TagQuery(String host, String tag)
+  public QueryTagsQuery(String staging, String type, String host, String name)
   {
+    _staging = staging;
+    _type = type;
     _host = host;
-    _tag = tag;
+    _name = name;
   }
 
-  public String getTag()
+  public String getStaging()
   {
-    return _tag;
+    return _staging;
   }
 
-  public void setTag(String tag)
+  public void setStaging(String staging)
   {
-    _tag = tag;
+    _staging = staging;
+  }
+
+  public String getType()
+  {
+    return _type;
+  }
+
+  public void setType(String type)
+  {
+    _type = type;
   }
 
   public String getHost()
@@ -70,29 +78,20 @@ public class TagQuery implements Serializable {
     _host = host;
   }
 
-  public String getRoot()
+  public String getName()
   {
-    return _root;
+    return _name;
   }
 
-  public void setRoot(String root)
+  public void setName(String name)
   {
-    _root = root;
+    _name = name;
   }
 
-  public String getUrl()
-  {
-    return _url;
-  }
-
-  public void setUrl(String url)
-  {
-    _url = url;
-  }
-
+  @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[" + _tag + ",host=" + _host + ",url=" + _url + "]");
+    return getClass().getSimpleName() + 
+      "[" + _staging + "/" + _type + "/" + _host + "/" + _name + "]";
   }
 }

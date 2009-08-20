@@ -30,6 +30,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.Broker;
+import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.QueryGet;
@@ -55,6 +56,7 @@ import com.caucho.vfs.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -134,29 +136,31 @@ public class DeployService extends SimpleActor
 
   @QueryGet
   public boolean listWebApps(long id,
-			     String to,
-			     String from,
-			     ListWebAppsQuery listQuery)
+                             String to,
+                             String from,
+                             ListWebAppsQuery listQuery)
   {
     ArrayList<WebAppQuery> apps = new ArrayList<WebAppQuery>();
-    
+
+    String staging = _server.getStaging();
+
     for (HostController host : _server.getHostControllers()) {
       if (listQuery.getHost().equals(host.getName())) {
-	for (WebAppController webApp
-	       : host.getDeployInstance().getWebAppList()) {
-	  WebAppQuery q = new WebAppQuery();
-	  String name = webApp.getId();
+        for (WebAppController webApp
+            : host.getDeployInstance().getWebAppList()) {
+          WebAppQuery q = new WebAppQuery();
+          String name = webApp.getId();
 
-	  if (name.startsWith("/"))
-	    name = name.substring(1);
+          if (name.startsWith("/"))
+            name = name.substring(1);
 
-	  q.setTag("wars/" + host.getName() + "/" + name);
-	    
-	  q.setHost(host.getName());
-	  q.setUrl(webApp.getURL());
+          q.setTag(staging + "/wars/" + host.getName() + "/" + name);
 
-	  apps.add(q);
-	}
+          q.setHost(host.getName());
+          q.setUrl(webApp.getURL());
+
+          apps.add(q);
+        }
       }
     }
 
@@ -168,25 +172,84 @@ public class DeployService extends SimpleActor
 
   @QueryGet
   public boolean listTags(long id,
-			  String to,
-			  String from,
-			  ListTagsQuery listQuery)
+                          String to,
+                          String from,
+                          ListTagsQuery listQuery)
   {
     ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
 
     for (String tag : _repository.getTagMap().keySet()) {
       if (tag.startsWith("default/wars/") || tag.startsWith("default/ears/")) {
-	int p = tag.indexOf('/');
-	int q = tag.indexOf('/', p + 1);
+        int p = tag.indexOf('/', "default/".length());
+        int q = tag.indexOf('/', p + 1);
 
-	if (q < 0)
-	  continue;
+        if (q < 0)
+          continue;
 
-	String host = tag.substring(p + 1, q);
-	String name = tag.substring(q + 1);
-	
-	tags.add(new TagQuery(host, tag));
+        String host = tag.substring(p + 1, q);
+        String name = tag.substring(q + 1);
+
+        tags.add(new TagQuery(host, tag));
       }
+    }
+
+    getBrokerStream()
+      .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
+
+    return true;
+  }
+
+  @QueryGet
+  public boolean queryTags(long id,
+                           String to,
+                           String from,
+                           QueryTagsQuery tagsQuery)
+  {
+    ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
+
+    for (Map.Entry<String, RepositoryTagEntry> entry : 
+         _repository.getTagMap().entrySet()) {
+      String tag = entry.getKey();
+      int p = 0;
+
+      if (tagsQuery.getStaging() != null &&
+          ! tag.startsWith(tagsQuery.getStaging() + '/', p))
+        continue;
+
+      p = tag.indexOf('/', p);
+
+      if (p < 0)
+        continue;
+
+      if (tagsQuery.getType() != null &&
+          ! tag.startsWith(tagsQuery.getType() + '/', p + 1))
+        continue;
+
+      p = tag.indexOf('/', p + 1);
+
+      if (p < 0)
+        continue;
+
+      if (tagsQuery.getHost() != null &&
+          ! tag.startsWith(tagsQuery.getHost() + '/', p + 1))
+        continue;
+
+      p = tag.indexOf('/', p + 1);
+
+      if (p < 0)
+        continue;
+
+      // allow versions
+      if (tagsQuery.getName() != null &&
+          ! (tag.endsWith(tagsQuery.getName())
+             || tag.startsWith(tagsQuery.getName() + '-', p + 1)))
+        continue;
+
+      TagQuery tagQuery = new TagQuery();
+      tagQuery.setTag(tag);
+      tagQuery.setRoot(entry.getValue().getRoot());
+
+      tags.add(tagQuery);
     }
 
     getBrokerStream()
@@ -221,9 +284,9 @@ public class DeployService extends SimpleActor
 
   @QueryGet
   public boolean status(long id,
-			String to,
-			String from,
-			StatusQuery query)
+                        String to,
+                        String from,
+                        StatusQuery query)
   {
     String tag = query.getTag();
 
@@ -239,9 +302,9 @@ public class DeployService extends SimpleActor
 
   @QuerySet
   public boolean controllerDeploy(long id,
-				   String to,
-				   String from,
-				   ControllerDeployQuery query)
+                                  String to,
+                                  String from,
+                                  ControllerDeployQuery query)
   {
     String status = deploy(query.getTag());
     
@@ -269,9 +332,9 @@ public class DeployService extends SimpleActor
 
   @QuerySet
   public boolean controllerStop(long id,
-				   String to,
-				   String from,
-				   ControllerStopQuery query)
+                                String to,
+                                String from,
+                                ControllerStopQuery query)
   {
     String status = stop(query.getTag());
     
@@ -284,9 +347,9 @@ public class DeployService extends SimpleActor
 
   @QuerySet
   public boolean controllerUndeploy(long id,
-				   String to,
-				   String from,
-				   ControllerUndeployQuery query)
+                                    String to,
+                                    String from,
+                                    ControllerUndeployQuery query)
   {
     String status = undeploy(query.getTag());
 
@@ -326,7 +389,10 @@ public class DeployService extends SimpleActor
     RepositoryTagEntry entry = _repository.getTag(sourceTag);
 
     if (entry == null) {
-      getBrokerStream().queryResult(id, from, to, "failed because tag doesn't exist");
+      getBrokerStream().queryError(id, from, to, query, 
+                                   new ActorError(ActorError.TYPE_CANCEL,
+                                                  ActorError.ITEM_NOT_FOUND,
+                                                  "unknown tag"));
       return;
     }
 
@@ -503,12 +569,12 @@ public class DeployService extends SimpleActor
       DeployControllerMXBean deploy = findController(tag);
 
       if (deploy == null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " sendAddFileQuery '" + tag + "' is an unknown DeployController");
-	
-	getBrokerStream().queryResult(id, from, to, "no-deploy: " + tag);
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " sendAddFileQuery '" + tag + "' is an unknown DeployController");
 
-	return true;
+        getBrokerStream().queryResult(id, from, to, "no-deploy: " + tag);
+
+        return true;
       }
 
       Path root = Vfs.lookup(deploy.getRootDirectory());
@@ -517,13 +583,13 @@ public class DeployService extends SimpleActor
       Path path = root.lookup(name);
 
       _repository.expandToPath(path, hex);
-      
+
       getBrokerStream().queryResult(id, from, to, "ok");
 
       return true;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       getBrokerStream().queryResult(id, from, to, "fail");
 
       return true;
@@ -533,34 +599,39 @@ public class DeployService extends SimpleActor
   private String deploy(String gitPath)
   {
     int p = gitPath.indexOf('/');
-    int q = gitPath.lastIndexOf('/');
+    int q = gitPath.indexOf('/', p + 1);
+    int r = gitPath.lastIndexOf('/');
 
-    String type = gitPath.substring(0, p);
-    String host = gitPath.substring(p + 1, q);
-    String name = gitPath.substring(q + 1);
+    if (p < 0 || q < 0 || r < 0) 
+      return L.l("'{0}' is an unknown type", gitPath);
+
+    String staging = gitPath.substring(0, p);
+    String type = gitPath.substring(p + 1, q);
+    String host = gitPath.substring(q + 1, r);
+    String name = gitPath.substring(r + 1);
 
     try {
       if (type.equals("ears")) {
-	ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
+        ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
 
-	for (Object proxy : Jmx.query(pattern)) {
-	  EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
+        for (Object proxy : Jmx.query(pattern)) {
+          EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
 
-	  earDeploy.deploy(name);
-	  
-	  return statusMessage(gitPath);
-	}
+          earDeploy.deploy(name);
+
+          return statusMessage(gitPath);
+        }
       }
       else if (type.equals("wars")) {
-	ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
+        ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
 
-	for (Object proxy : Jmx.query(pattern)) {
-	  WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+        for (Object proxy : Jmx.query(pattern)) {
+          WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
 
-	  warDeploy.deploy(name);
+          warDeploy.deploy(name);
 
-	  return statusMessage(gitPath);
-	}
+          return statusMessage(gitPath);
+        }
       }
 
       return L.l("'{0}' is an unknown type", gitPath);
@@ -574,50 +645,55 @@ public class DeployService extends SimpleActor
   private String statusMessage(String tag)
   {
     int p = tag.indexOf('/');
-    int q = tag.lastIndexOf('/');
+    int q = tag.indexOf('/', p + 1);
+    int r = tag.lastIndexOf('/');
 
-    String type = tag.substring(0, p);
-    String host = tag.substring(p + 1, q);
-    String name = getTagName(tag.substring(q + 1));
+    if (p < 0 || q < 0 || r < 0) 
+      return L.l("'{0}' is an unknown type", tag);
+
+    String staging = tag.substring(0, p);
+    String type = tag.substring(p + 1, q);
+    String host = tag.substring(q + 1, r);
+    String name = tag.substring(r + 1);
 
     String state = null;
     String errorMessage = tag + " is an unknown resource";
 
     try {
       if (type.equals("ears")) {
-	String pattern
-	  = "resin:type=EApp,Host=" + host + ",name=" + name;
+        String pattern
+          = "resin:type=EApp,Host=" + host + ",name=" + name;
 
-	EAppMXBean ear = (EAppMXBean) Jmx.findGlobal(pattern);
+        EAppMXBean ear = (EAppMXBean) Jmx.findGlobal(pattern);
 
-	if (ear != null) {
-	  ear.update();
-	  state = ear.getState();
-	  errorMessage = ear.getErrorMessage();
+        if (ear != null) {
+          ear.update();
+          state = ear.getState();
+          errorMessage = ear.getErrorMessage();
 
-	  return errorMessage;
-	}
-	else
-	  return L.l("'{0}' is an unknown ear", tag);
+          return errorMessage;
+        }
+        else
+          return L.l("'{0}' is an unknown ear", tag);
       }
       else if (type.equals("wars")) {
-	String pattern
-	  = "resin:type=WebApp,Host=" + host + ",name=/" + name;
+        String pattern
+          = "resin:type=WebApp,Host=" + host + ",name=/" + name;
 
-	WebAppMXBean war = (WebAppMXBean) Jmx.findGlobal(pattern);
+        WebAppMXBean war = (WebAppMXBean) Jmx.findGlobal(pattern);
 
-	if (war != null) {
-	  war.update();
-	  state = war.getState();
-	  errorMessage = war.getErrorMessage();
+        if (war != null) {
+          war.update();
+          state = war.getState();
+          errorMessage = war.getErrorMessage();
 
-	  return errorMessage;
-	}
-	else
-	  return L.l("'{0}' is an unknown war", tag);
+          return errorMessage;
+        }
+        else
+          return L.l("'{0}' is an unknown war", tag);
       }
       else
-	return L.l("'{0}' is an unknown tag", tag);
+        return L.l("'{0}' is an unknown tag", tag);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -628,30 +704,35 @@ public class DeployService extends SimpleActor
   private DeployControllerMXBean findController(String tag)
   {
     int p = tag.indexOf('/');
-    int q = tag.lastIndexOf('/');
+    int q = tag.indexOf('/', p + 1);
+    int r = tag.lastIndexOf('/');
 
-    String type = tag.substring(0, p);
-    String host = tag.substring(p + 1, q);
-    String name = getTagName(tag.substring(q + 1));
+    if (p < 0 || q < 0 || r < 0) 
+      return null;
+
+    String staging = tag.substring(0, p);
+    String type = tag.substring(p + 1, q);
+    String host = tag.substring(q + 1, r);
+    String name = tag.substring(r + 1);
 
     String state = null;
 
     try {
       if (type.equals("ears")) {
-	String pattern
-	  = "resin:type=EApp,Host=" + host + ",name=" + name;
+        String pattern
+          = "resin:type=EApp,Host=" + host + ",name=" + name;
 
-	EAppMXBean ear = (EAppMXBean) Jmx.findGlobal(pattern);
+        EAppMXBean ear = (EAppMXBean) Jmx.findGlobal(pattern);
 
-	return ear;
+        return ear;
       }
       else if (type.equals("wars")) {
-	String pattern
-	  = "resin:type=WebApp,Host=" + host + ",name=/" + name;
+        String pattern
+          = "resin:type=WebApp,Host=" + host + ",name=/" + name;
 
-	WebAppMXBean war = (WebAppMXBean) Jmx.findGlobal(pattern);
+        WebAppMXBean war = (WebAppMXBean) Jmx.findGlobal(pattern);
 
-	return war;
+        return war;
       }
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
@@ -664,7 +745,7 @@ public class DeployService extends SimpleActor
   {
     for (int i = 0; i < name.length(); i++) {
       if (name.charAt(i) != '/')
-	return name.substring(i);
+        return name.substring(i);
     }
 
     return name;

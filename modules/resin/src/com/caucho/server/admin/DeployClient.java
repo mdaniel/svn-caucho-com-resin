@@ -103,11 +103,11 @@ public class DeployClient
    * @param extraAttr any extra information for the commit
    */
   public String deployJarContents(Path jar,
-				  String tag,
-				  String user,
-				  String message,
-				  String version,
-				  HashMap<String,String> extraAttr)
+                                  String tag,
+                                  String user,
+                                  String message,
+                                  String version,
+                                  HashMap<String,String> extraAttr)
     throws IOException
   {
     GitCommitJar commit = new GitCommitJar(jar);
@@ -130,11 +130,11 @@ public class DeployClient
    * @param extraAttr any extra information for the commit
    */
   public String deployJarContents(InputStream is,
-				  String tag,
-				  String user,
-				  String message,
-				  String version,
-				  HashMap<String,String> extraAttr)
+                                  String tag,
+                                  String user,
+                                  String message,
+                                  String version,
+                                  HashMap<String,String> extraAttr)
     throws IOException
   {
     GitCommitJar commit = new GitCommitJar(is);
@@ -154,9 +154,9 @@ public class DeployClient
    * @param message the commit message
    */
   public Boolean undeploy(String tag,
-			 String user,
-			 String message,
-			 HashMap<String,String> extraAttr)
+                          String user,
+                          String message,
+                          HashMap<String,String> extraAttr)
   {
     RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
 
@@ -302,11 +302,11 @@ public class DeployClient
   //
 
   private String deployJar(GitCommitJar commit,
-			   String tag,
-			   String user,
-			   String message,
-			   String version,
-			   HashMap<String,String> extraAttr)
+                           String tag,
+                           String user,
+                           String message,
+                           String version,
+                           HashMap<String,String> extraAttr)
     throws IOException
   {
     String []files = getCommitList(commit.getCommitList());
@@ -327,9 +327,7 @@ public class DeployClient
     return result;
   }
 
-  public void sendFile(String sha1,
-		       long length,
-		       InputStream is)
+  public void sendFile(String sha1, long length, InputStream is)
     throws IOException
   {
     InputStream blobIs = GitCommitTree.writeBlob(is, length);
@@ -337,8 +335,7 @@ public class DeployClient
     sendRawFile(sha1, blobIs);
   }
 
-  public void sendRawFile(String sha1,
-			  InputStream is)
+  public void sendRawFile(String sha1, InputStream is)
     throws IOException
   {
     InputStreamSource iss = new InputStreamSource(is);
@@ -377,11 +374,11 @@ public class DeployClient
    * Public for QA, but not normally exposed.
    */
   private String commit(String tag,
-		       String sha1,
-		       String user,
-		       String message,
-		       String version,
-		       HashMap<String,String> attr)
+                        String sha1,
+                        String user,
+                        String message,
+                        String version,
+                        HashMap<String,String> attr)
   {
     // server/2o66
     DeployCommitQuery query
@@ -414,6 +411,16 @@ public class DeployClient
     return (TagQuery []) queryGet(new ListTagsQuery(host));
   }
 
+  public TagQuery []queryTags(String staging, 
+                              String type, 
+                              String host, 
+                              String name)
+  {
+    QueryTagsQuery query = new QueryTagsQuery(staging, type, host, name);
+
+    return (TagQuery []) queryGet(query);
+  }
+
   private Serializable queryGet(Serializable query)
   {
     try {
@@ -431,10 +438,18 @@ public class DeployClient
 
   private String createTag(String type, String host, String name)
   {
+    return createTag("default", type, host, name);
+  }
+
+  private String createTag(String staging, 
+                           String type, 
+                           String host, 
+                           String name)
+  {
     while (name.startsWith("/"))
       name = name.substring(1);
     
-    return type + "/" + host + "/" + name;
+    return staging + "/" + type + "/" + host + "/" + name;
   }
 
   @Override
