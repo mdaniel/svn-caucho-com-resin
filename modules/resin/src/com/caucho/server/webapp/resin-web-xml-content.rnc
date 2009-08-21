@@ -169,6 +169,9 @@ r_filter = element filter {
    & (attribute filter-class { r_class-Type }
       | element filter-class { r_class-Type })
 
+   & (attribute async-supported { r_class-Type }
+      | element async-supported { r_class-Type })?
+
    & r_init*
    & r_init-param*
 }

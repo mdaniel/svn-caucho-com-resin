@@ -67,6 +67,7 @@ public class FilterConfigImpl
   private ServletContext _servletContext;
   private FilterManager _filterManager;
   private Filter _filter;
+  private boolean _asyncSupported;
 
   /**
    * Creates a new filter configuration object.
@@ -378,10 +379,14 @@ public class FilterConfigImpl
 
   public void setAsyncSupported(boolean isAsyncSupported)
   {
-    if (! _webApp.isInitializing())
+    if (_webApp != null && !_webApp.isInitializing())
       throw new IllegalStateException();
+    
+   _asyncSupported = isAsyncSupported;
+  }
 
-    if (true) throw new UnsupportedOperationException("unimplemented");
+  public boolean isAsyncSupported() {
+    return _asyncSupported;
   }
 
   /**
