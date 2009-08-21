@@ -57,7 +57,7 @@ public class HempMemoryQueue implements ActorStream, Runnable
   // how long the thread should wait for a new request before exiting
   private long _queueIdleTimeout = 250L;
   
-  private final Executor _executor = ScheduledThreadPool.getLocal();
+  private final ScheduledThreadPool _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
   
@@ -324,8 +324,10 @@ public class HempMemoryQueue implements ActorStream, Runnable
 	return;
       }
       else if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
-	_executor.execute(this);
-	return;
+        if (! _executor.isShutdown()) {
+          _executor.execute(this);
+        }
+        return;
       }
       else if (_threadCount.get() > 0) {
 	// other thread already added

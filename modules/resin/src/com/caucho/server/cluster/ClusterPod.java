@@ -550,7 +550,7 @@ abstract public class ClusterPod
    */
   public static Owner getOwner(long index)
   {
-    return OWNER_VALUES[(int) (index % OWNER_VALUES.length & 0x7fffffff)];
+    return OWNER_VALUES[(int) ((index & Long.MAX_VALUE) % OWNER_VALUES.length)];
   }
 
   @Override
