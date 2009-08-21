@@ -306,8 +306,11 @@ public class JsseSSLFactory implements SSLFactory {
 
     String []cipherSuites = _cipherSuites;
 
-    if (cipherSuites == null)
+    /*
+    if (cipherSuites == null) {
       cipherSuites = sslContext.createSSLEngine().getSupportedCipherSuites();
+    }
+    */
 
     String selfSignedName = _selfSignedName;
 
