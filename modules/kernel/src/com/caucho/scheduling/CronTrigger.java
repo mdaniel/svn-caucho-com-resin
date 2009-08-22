@@ -24,10 +24,12 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Reza Rahman
  */
 package com.caucho.scheduling;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.caucho.config.ConfigException;
@@ -72,7 +74,7 @@ public class CronTrigger implements Trigger {
   private String _daysFilter;
   private boolean[] _months;
   private boolean[] _daysOfWeek;
-  private boolean[] _years;
+  private YearsFilter _yearsFilter;
   private long _start = -1;
   private long _end = -1;
 
@@ -120,6 +122,10 @@ public class CronTrigger implements Trigger {
     if (cronExpression.getMonth() != null) {
       _months = parseRange(tokenizeMonth(cronExpression.getMonth()), 1, 12,
           false);
+    }
+
+    if (cronExpression.getYear() != null) {
+      _yearsFilter = parseYear(cronExpression.getYear());
     }
 
     _start = start;
@@ -327,6 +333,79 @@ public class CronTrigger implements Trigger {
     return values;
   }
 
+  private YearsFilter parseYear(String year)
+  {
+    YearsFilter yearsFilter = new YearsFilter();
+
+    int i = 0;
+    while (i < year.length()) {
+      YearsFilterValue filterValue = new YearsFilterValue();
+
+      char character = year.charAt(i);
+
+      if (character == '*') {
+        filterValue.setAnyYear(true);
+        i++;
+      } else if ('0' <= character && character <= '9') {
+        int startYear = 0;
+
+        for (; i < year.length() && '0' <= (character = year.charAt(i))
+            && character <= '9'; i++) {
+          startYear = 10 * startYear + character - '0';
+        }
+
+        filterValue.setStartYear(startYear);
+
+        if (i < year.length() && character == '-') {
+          int endYear = 0;
+
+          for (i++; i < year.length() && '0' <= (character = year.charAt(i))
+              && character <= '9'; i++) {
+            endYear = 10 * endYear + character - '0';
+          }
+
+          filterValue.setEndYear(endYear);
+        } else {
+          filterValue.setEndYear(startYear);
+        }
+      } else {
+        throw new ConfigException(L.l("'{0}' is an illegal cron range", year));
+      }
+
+      if ((i < year.length()) && ((character = year.charAt(i)) == '/')) {
+        filterValue.setAnyYear(false);
+        int increment = 0;
+
+        for (i++; i < year.length() && '0' <= (character = year.charAt(i))
+            && character <= '9'; i++) {
+          increment = 10 * increment + character - '0';
+        }
+
+        if (increment == 0) {
+          throw new ConfigException(L.l("'{0}' is an illegal cron range", year));
+        } else {
+          filterValue.setIncrement(increment);
+        }
+
+        if (filterValue.getStartYear() == filterValue.getEndYear()) {
+          // This is in the form of N/M, where N is the interval start.
+          filterValue.setEndYear(Integer.MAX_VALUE);
+        }
+      }
+
+      yearsFilter.addFilterValue(filterValue);
+
+      if (year.length() <= i) {
+      } else if (character == ',') {
+        i++;
+      } else {
+        throw new ConfigException(L.l("'{0}' is an illegal cron range", year));
+      }
+    }
+
+    return yearsFilter;
+  }
+
   /**
    * Gets the next time this trigger should be fired.
    * 
@@ -344,39 +423,66 @@ public class CronTrigger implements Trigger {
 
     calendar.setGMTTime(time);
 
-    calendar = getNextTime(calendar);
+    QDate nextTime = getNextTime(calendar);
 
-    long nextTime = calendar.getGMTTime();
+    if (nextTime != null) {
+      time = nextTime.getGMTTime();
+    } else {
+      time = Long.MAX_VALUE; // This trigger is inactive.
+    }
 
     freeCalendar(calendar);
 
-    if (now < nextTime)
-      return nextTime;
+    if (now < time)
+      return time;
     else
       return nextTime(now + 3600000L); // Daylight savings time.
   }
 
   private QDate getNextTime(QDate currentTime)
   {
-    int year = currentTime.getYear();
+    int year = _yearsFilter.getNextMatch(currentTime.getYear());
 
-    QDate nextTime = getNextTimeInYear(currentTime);
+    if (year == -1) {
+      return null;
+    } else {
+      if (year > currentTime.getYear()) {
+        currentTime.setSecond(0);
+        currentTime.setMinute(0);
+        currentTime.setHour(0);
+        currentTime.setDayOfMonth(1);
+        currentTime.setMonth(0); // The QDate implementation uses 0 indexed
+        // months, but cron does not.
+        currentTime.setYear(year);
+      }
 
-    while (nextTime == null) { // TODO Limit year iterations to three.
-      year++;
+      QDate nextTime = getNextTimeInYear(currentTime);
 
-      currentTime.setSecond(0);
-      currentTime.setMinute(0);
-      currentTime.setHour(0);
-      currentTime.setDayOfMonth(1);
-      currentTime.setMonth(0); // The QDate implementation uses 0 indexed
-      // months, but cron does not.
-      currentTime.setYear(year);
+      int count = 0;
 
-      nextTime = getNextTimeInYear(currentTime);
+      // Don't look more than approximately five years ahead.
+      while ((count < 5) && (nextTime == null)) {
+        count++;
+        year++;
+        year = _yearsFilter.getNextMatch(year);
+
+        if (year == -1) {
+          return null;
+        } else {
+          currentTime.setSecond(0);
+          currentTime.setMinute(0);
+          currentTime.setHour(0);
+          currentTime.setDayOfMonth(1);
+          currentTime.setMonth(0); // The QDate implementation uses 0 indexed
+          // months, but cron does not.
+          currentTime.setYear(year);
+
+          nextTime = getNextTimeInYear(currentTime);
+        }
+      }
+
+      return nextTime;
     }
-
-    return nextTime;
   }
 
   private QDate getNextTimeInYear(QDate currentTime)
@@ -705,5 +811,90 @@ public class CronTrigger implements Trigger {
   private void freeCalendar(QDate cal)
   {
     _localCalendar.set(cal);
+  }
+
+  private class YearsFilter {
+    private List<YearsFilterValue> _filterValues = new LinkedList<YearsFilterValue>();
+    private boolean _anyYear = false;
+    private int _endYear = 0;
+
+    private void addFilterValue(YearsFilterValue filterValue)
+    {
+      if (filterValue.isAnyYear()) {
+        _anyYear = true;
+      } else if (filterValue.getEndYear() > _endYear) {
+        _endYear = filterValue.getEndYear();
+      }
+
+      _filterValues.add(filterValue);
+    }
+
+    private int getNextMatch(int year)
+    {
+      if (_anyYear) {
+        return year;
+      }
+
+      while (year <= _endYear) {
+        for (YearsFilterValue filterValue : _filterValues) {
+          if ((year >= filterValue.getStartYear())
+              && (year <= filterValue.getEndYear())
+              && ((year % filterValue.getIncrement()) == 0)) {
+            return year;
+          }
+        }
+
+        year++;
+      }
+
+      return -1;
+    }
+  }
+
+  private class YearsFilterValue {
+    private boolean _anyYear = false;
+    private int _startYear = 0;
+    private int _endYear = 0;
+    private int _increment = 1;
+
+    public boolean isAnyYear()
+    {
+      return _anyYear;
+    }
+
+    public void setAnyYear(boolean anyYear)
+    {
+      _anyYear = anyYear;
+    }
+
+    public int getStartYear()
+    {
+      return _startYear;
+    }
+
+    public void setStartYear(int startYear)
+    {
+      _startYear = startYear;
+    }
+
+    public int getEndYear()
+    {
+      return _endYear;
+    }
+
+    public void setEndYear(int endYear)
+    {
+      _endYear = endYear;
+    }
+
+    public void setIncrement(int increment)
+    {
+      _increment = increment;
+    }
+
+    public int getIncrement()
+    {
+      return _increment;
+    }
   }
 }
