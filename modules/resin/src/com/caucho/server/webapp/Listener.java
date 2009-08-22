@@ -140,6 +140,9 @@ public class Listener extends DescriptionGroupConfig {
 
       _init.init(_object);
     }
+
+    Config.inject(_object);
+    
     _target.postConstruct(_object);
 
     return _object;

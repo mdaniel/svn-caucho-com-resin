@@ -1136,6 +1136,7 @@ public class ServletConfigImpl
     if (init != null)
       init.configure(servlet);
 
+    Config.inject(servlet);
     Config.init(servlet);
   }
 
