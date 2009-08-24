@@ -49,5 +49,6 @@ public class ClusterLock extends AbstractLock
   public ClusterLock(String name)
   {
     setName(name);
+    init();
   }
 }

@@ -13,6 +13,8 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jsp: BeanELResolver accessible issues (#3598, rep by rymsha)</li>
+<li>deploy: staging and versioning capacilibies (#3514, rep by Yujin Kim)</li>
 <li>cluster: add com.caucho.cluster.LockManager for distributed locking (#3464, rep by Martin Thompson)</li>
 <li>build: jsf-api.jar needs to be in src distribution (#3633, rep by joey)</li>
 <li>loader: sync/deadlock in EnvironmentClassLoader on startup (rep by Patrik Styme, #3641)</li>
