@@ -13,6 +13,12 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>eclipse: server wizard cleanup and enhancement</li>
+<li>eclipse: spaces in path (#3589, rep by Michael Ludwig)</li>
+<li>eclipse: respect http port (#3502, rep by Michael Ludwig)</li>
+<li>eclipse: invalid chars in hot deploy (#3503, rep by Michael Ludwig)</li>
+<li>eclipse: deploy from temp directory (#3515, req by Yujin Kim)</li>
+<li>eclipse: breakpoints (#3484, rep by Doug and sblommers)</li>
 <li>embed: EmbedPort getLocalPort() returns ephemeral port (#3567, rep by zed)</li>
 <li>xml: XMLStreamReaderImpl on bad input (#2989, rep by Bill Au)</li>
 <li>servlet: footer/md5 HTTP handling (#3044, rep by Eric Bowman)</li>
@@ -32,12 +38,6 @@
 <li>jni: JNI detection of clientdisconnect issues (rep by Fiaz Hossain)</li>
 <li>quercus: image fixes for vbulletin</li>
 <li>quercus: ksort fixes for vbulletin</li>
-<li>eclipse: server wizard cleanup and enhancement</li>
-<li>eclipse: spaces in path (#3589, rep by Michael Ludwig)</li>
-<li>eclipse: respect http port (#3502, rep by Michael Ludwig)</li>
-<li>eclipse: invalid chars in hot deploy (#3503, rep by Michael Ludwig)</li>
-<li>eclipse: deploy from temp directory (#3515, req by Yujin Kim)</li>
-<li>eclipse: breakpoints (#3484, rep by Doug and sblommers)</li>
 </ul>
 </s2>
 
