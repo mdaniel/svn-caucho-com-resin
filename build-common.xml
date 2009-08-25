@@ -172,6 +172,7 @@
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
         <dirset dir="${resin.modules}">
+           <exclude name="servlet15/**"/>
            <include name="*/classes"/>
         </dirset>
         <dirset dir="${modules}">
@@ -252,6 +253,7 @@
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
         <dirset dir="${modules}">
+          <exclude name="servlet15/**"/>
           <include name="*/classes"/>
        </dirset>
         <fileset dir="${artifacts}/${artifact.name}">
@@ -345,6 +347,7 @@
         <classpath>
           <pathelement location="${java.home}/../lib/tools.jar"/>
           <dirset dir="${modules}">
+            <exclude name="servlet15/**"/>
             <include name="*/classes"/>
           </dirset>
           <fileset dir="${modules}/ext">
