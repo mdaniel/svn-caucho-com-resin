@@ -100,11 +100,11 @@ public class MergePath extends FilesystemPath {
    */
   protected Path schemeWalk(String userPath,
                             Map<String,Object> attributes,
-			    String filePath,
+                            String filePath,
                             int offset)
   {
     int length = filePath.length();
-    
+
     if (length <= offset || filePath.charAt(offset) != '(')
       return super.schemeWalk(userPath, attributes, filePath, offset);
 
@@ -115,51 +115,51 @@ public class MergePath extends FilesystemPath {
     int tail = head;
     while (tail < length) {
       int ch = filePath.charAt(tail);
-      
+
       if (ch == ')') {
-	if (head + 1 != tail) {
-	  String subPath = filePath.substring(head, tail);
+        if (head + 1 != tail) {
+          String subPath = filePath.substring(head, tail);
 
-	  if (subPath.startsWith("(") && subPath.endsWith(")"))
-	    subPath = subPath.substring(1, subPath.length() - 1);
+          if (subPath.startsWith("(") && subPath.endsWith(")"))
+            subPath = subPath.substring(1, subPath.length() - 1);
 
-	  mergePath.addMergePath(Vfs.lookup(subPath));
-	}
+          mergePath.addMergePath(Vfs.lookup(subPath));
+        }
 
-	if (tail + 1 == length)
-	  return mergePath;
-	else
-	  return mergePath.fsWalk(userPath, attributes, filePath.substring(tail + 1));
+        if (tail + 1 == length)
+          return mergePath;
+        else
+          return mergePath.fsWalk(userPath, attributes, filePath.substring(tail + 1));
       }
       else if (ch == ';') {
-	String subPath = filePath.substring(head, tail);
+        String subPath = filePath.substring(head, tail);
 
-	if (subPath.startsWith("(") && subPath.endsWith(")"))
-	  subPath = subPath.substring(1, subPath.length() - 1);
+        if (subPath.startsWith("(") && subPath.endsWith(")"))
+          subPath = subPath.substring(1, subPath.length() - 1);
 
-	mergePath.addMergePath(Vfs.lookup(subPath));
+        mergePath.addMergePath(Vfs.lookup(subPath));
 
-	head = ++tail;
+        head = ++tail;
       }
       else if (ch == '(') {
-	int depth = 1;
+        int depth = 1;
 
-	for (tail++; tail < length; tail++) {
-	  if (filePath.charAt(tail) == '(')
-	    depth++;
-	  else if (filePath.charAt(tail) == ')') {
-	    tail++;
-	    depth--;
-	    if (depth == 0)
-	      break;
-	  }
-	}
+        for (tail++; tail < length; tail++) {
+          if (filePath.charAt(tail) == '(')
+            depth++;
+          else if (filePath.charAt(tail) == ')') {
+            tail++;
+            depth--;
+            if (depth == 0)
+              break;
+          }
+        }
 
-	if (depth != 0)
-	  return new NotFoundPath(filePath);
+        if (depth != 0)
+          return new NotFoundPath(filePath);
       }
       else
-	tail++;
+        tail++;
     }
 
     return new NotFoundPath(filePath);
@@ -181,7 +181,7 @@ public class MergePath extends FilesystemPath {
       ArrayList<Path> pathList = ((MergePath) _root)._pathList;
 
       if (! pathList.contains(path))
-	pathList.add(path);
+        pathList.add(path);
     }
     else if (((MergePath) path)._root == _root)
       return;
@@ -192,7 +192,7 @@ public class MergePath extends FilesystemPath {
 
       for (int i = 0; i < subPaths.size(); i++) {
         Path subPath = subPaths.get(i);
-        
+
         addMergePath(subPath.lookup(pathName));
       }
     }
@@ -205,7 +205,7 @@ public class MergePath extends FilesystemPath {
   {
     addClassPath(Thread.currentThread().getContextClassLoader());
   }
-  
+
   /**
    * Adds the classpath for the loader as paths in the MergePath.
    *
@@ -214,7 +214,7 @@ public class MergePath extends FilesystemPath {
   public void addClassPath(ClassLoader loader)
   {
     String classpath = null;
-    
+
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getClassPath();
     else
@@ -222,7 +222,7 @@ public class MergePath extends FilesystemPath {
 
     addClassPath(classpath);
   }
-  
+
   /**
    * Adds the classpath for the loader as paths in the MergePath.
    *
@@ -231,7 +231,7 @@ public class MergePath extends FilesystemPath {
   public void addResourceClassPath(ClassLoader loader)
   {
     String classpath = null;
-    
+
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getResourcePathSpecificFirst();
     else
@@ -247,7 +247,7 @@ public class MergePath extends FilesystemPath {
   {
     addLocalClassPath(Thread.currentThread().getContextClassLoader());
   }
-  
+
   /**
    * Adds the classpath for the loader as paths in the MergePath.
    *
@@ -256,7 +256,7 @@ public class MergePath extends FilesystemPath {
   public void addLocalClassPath(ClassLoader loader)
   {
     String classpath = null;
-    
+
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getLocalClassPath();
     else
@@ -264,7 +264,7 @@ public class MergePath extends FilesystemPath {
 
     addClassPath(classpath);
   }
-  
+
   /**
    * Adds the classpath for the loader as paths in the MergePath.
    *
@@ -310,11 +310,11 @@ public class MergePath extends FilesystemPath {
    * until opening.
    */
   public Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
+                        Map<String,Object> attributes,
+                        String path)
   {
     ArrayList<Path> pathList = getMergePaths();
-    
+
     if (! userPath.startsWith("/") || pathList.size() == 0)
       return new MergePath((MergePath) _root, userPath, attributes, path);
 
@@ -336,7 +336,7 @@ public class MergePath extends FilesystemPath {
 
       return new MergePath((MergePath) _root, userPath, attributes, path);
     }
-    
+
     return pathList.get(0).lookup(userPath, attributes);
   }
 
@@ -469,7 +469,7 @@ public class MergePath extends FilesystemPath {
       ArrayList<Path> subResources = path.getResources(pathName);
       for (int j = 0; j < subResources.size(); j++) {
         Path newPath = subResources.get(j);
-        
+
         if (! list.contains(newPath))
           list.add(newPath);
       }
@@ -499,7 +499,7 @@ public class MergePath extends FilesystemPath {
       ArrayList<Path> subResources = path.getResources();
       for (int j = 0; j < subResources.size(); j++) {
         Path newPath = subResources.get(j);
-        
+
         if (! list.contains(newPath))
           list.add(newPath);
       }
@@ -546,7 +546,7 @@ public class MergePath extends FilesystemPath {
   {
     return getWritePath().mkdir();
   }
-  
+
   /**
    * XXX: Probably should mkdir in the first path
    */
@@ -555,7 +555,7 @@ public class MergePath extends FilesystemPath {
   {
     return getWritePath().mkdirs();
   }
-  
+
   /**
    * Remove the matching path.
    */
@@ -648,7 +648,7 @@ public class MergePath extends FilesystemPath {
       return pathList.get(0).createDepend();
 
     DependencyList dependList = new DependencyList();
-    
+
     for (int i = 0; i < pathList.size(); i++) {
       Path path = pathList.get(i);
 
@@ -707,23 +707,23 @@ public class MergePath extends FilesystemPath {
       Path path = pathList.get(0);
 
       if (pathname.startsWith("/"))
-	pathname = "." + pathname;
+        pathname = "." + pathname;
 
       Path realPath = path.lookup(pathname);
 
       realPath.setUserPath(_userPath);
-      
+
       return realPath;
     }
 
     return new NotFoundPath(_userPath);
   }
-  
+
   /**
    * Returns a name for the path
    */
   public String toString()
   {
-    return "MergePath[" + _pathname + "]";
+    return getClass().getSimpleName() + "[" + _pathname + "]";
   }
 }

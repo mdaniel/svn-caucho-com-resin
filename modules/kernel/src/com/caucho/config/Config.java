@@ -70,7 +70,7 @@ public class Config {
 
   private static final EnvironmentLocal<ConfigProperties> _envProperties
     = new EnvironmentLocal<ConfigProperties>();
-  
+
   // the context class loader of the config
   private ClassLoader _classLoader;
 
@@ -150,7 +150,7 @@ public class Config {
   public static void setProperty(String key, Object value)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     setProperty(key, value, loader);
   }
 
@@ -180,7 +180,7 @@ public class Config {
 
     if (envLoader != null) {
       ConfigProperties parent = createConfigProperties(envLoader.getParent());
-      
+
       props = new ConfigProperties(parent);
     }
     else
@@ -217,7 +217,7 @@ public class Config {
     throws Exception
   {
     QDocument doc = parseDocument(is, null);
-    
+
     return configure(obj, doc.getDocumentElement());
   }
 
@@ -261,8 +261,8 @@ public class Config {
    * Configures a bean with a configuration file.
    */
   public Object configure(Object obj,
-			  InputStream is,
-			  String schemaLocation)
+                          InputStream is,
+                          String schemaLocation)
     throws Exception
   {
     Schema schema = findCompactSchema(schemaLocation);
@@ -276,8 +276,8 @@ public class Config {
    * Configures a bean with a configuration file.
    */
   public Object configure(Object obj,
-			  InputStream is,
-			  Schema schema)
+                          InputStream is,
+                          Schema schema)
     throws Exception
   {
     QDocument doc = parseDocument(is, schema);
@@ -303,7 +303,7 @@ public class Config {
 
       setProperty("__FILE__", FileVar.__FILE__);
       setProperty("__DIR__", DirVar.__DIR__);
-      
+
       return builder.configure(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -314,8 +314,8 @@ public class Config {
    * Configures a bean with a configuration file and schema.
    */
   public void configureBean(Object obj,
-			    Path path,
-			    String schemaLocation)
+                            Path path,
+                            String schemaLocation)
     throws Exception
   {
     Schema schema = findCompactSchema(schemaLocation);
@@ -352,7 +352,7 @@ public class Config {
       ConfigContext builder = createBuilder();
 
       InjectManager webBeans = InjectManager.create();
-      
+
       setProperty("__FILE__", FileVar.__FILE__);
       setProperty("__DIR__", DirVar.__DIR__);
 
@@ -371,15 +371,15 @@ public class Config {
    * Configures a bean with a configuration file and schema.
    */
   public void configureBean(Object obj,
-			    Path path,
-			    Schema schema)
+                            Path path,
+                            Schema schema)
     throws Exception
   {
     QDocument doc = parseDocument(path, schema);
 
     configureBean(obj, doc.getDocumentElement());
   }
-  
+
   /**
    * Configures the bean from a path
    */
@@ -394,9 +394,9 @@ public class Config {
       doc = docRef.get();
 
       if (doc != null && ! doc.isModified())
-	return doc;
+        return doc;
     }
-    
+
     ReadStream is = path.openRead();
 
     try {
@@ -409,14 +409,14 @@ public class Config {
       is.close();
     }
   }
-  
+
   /**
    * Configures the bean from an input stream.
    */
   private QDocument parseDocument(InputStream is, Schema schema)
     throws LineConfigException,
-	   IOException,
-	   org.xml.sax.SAXException
+           IOException,
+           org.xml.sax.SAXException
   {
     QDocument doc = new QDocument();
     DOMBuilder builder = new DOMBuilder();
@@ -461,29 +461,30 @@ public class Config {
 
     return doc;
   }
-  
+
   private Schema findCompactSchema(String location)
     throws IOException, ConfigException
   {
     try {
       if (location == null)
-	return null;
+        return null;
 
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
 
       if (loader == null)
         loader = ClassLoader.getSystemClassLoader();
-      
+
       URL url = loader.getResource(location);
-      
+      System.out.println("GET: " + url + " " + loader);
+
       if (url == null)
         return null;
-      
+
       Path path = Vfs.lookup(URLDecoder.decode(url.toString()));
 
       // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-          
+
       CompactVerifierFactoryImpl factory;
       factory = new CompactVerifierFactoryImpl();
 
@@ -494,7 +495,7 @@ public class Config {
       throw ConfigException.create(e);
     }
   }
-  
+
   /**
    * Returns true if the class can be instantiated.
    */
@@ -528,7 +529,7 @@ public class Config {
       throw new ConfigException(L.l("The zero-argument constructor for '{0}' isn't public.  Bean classes must have a public zero-argument constructor.", beanClass.getName()));
     }
   }
-  
+
   /**
    * Returns true if the class can be instantiated.
    */
@@ -539,7 +540,7 @@ public class Config {
 
     if (! api.isAssignableFrom(cl)) {
       throw new ConfigException(L.l("{0} must implement {1}.",
-				    cl.getName(), api.getName()));
+                                    cl.getName(), api.getName()));
     }
   }
 
@@ -548,23 +549,23 @@ public class Config {
    * or constructor that accepts an instance of class passed in type argument
    */
   public static void checkCanInstantiate(Class beanClass,
-					 Class type)
+                                         Class type)
     throws ConfigException
   {
     if (beanClass == null)
       throw new ConfigException(L.l("null classes can't be instantiated."));
     else if (beanClass.isInterface())
       throw new ConfigException(L.l(
-	"'{0}' must be a concrete class.  Interfaces cannot be instantiated.",
-	beanClass.getName()));
+        "'{0}' must be a concrete class.  Interfaces cannot be instantiated.",
+        beanClass.getName()));
     else if (! Modifier.isPublic(beanClass.getModifiers()))
       throw new ConfigException(L.l(
-	"Custom bean class '{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.",
-	beanClass.getName()));
+        "Custom bean class '{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.",
+        beanClass.getName()));
     else if (Modifier.isAbstract(beanClass.getModifiers()))
       throw new ConfigException(L.l(
-	"Custom bean class '{0}' is abstract.  Bean classes must be public, concrete, and have a zero-argument constructor.",
-	beanClass.getName()));
+        "Custom bean class '{0}' is abstract.  Bean classes must be public, concrete, and have a zero-argument constructor.",
+        beanClass.getName()));
 
     Constructor [] constructors = beanClass.getDeclaredConstructors();
 
@@ -573,50 +574,50 @@ public class Config {
     Constructor singleArgConstructor = null;
 
     for (int i = 0; i < constructors.length; i++) {
-	   if (constructors [i].getParameterTypes().length == 0) {
-	     zeroArgsConstructor = constructors [i];
+           if (constructors [i].getParameterTypes().length == 0) {
+             zeroArgsConstructor = constructors [i];
 
-	     if (singleArgConstructor != null)
-	       break;
-	   }
-	   else if (type != null
-		    && constructors [i].getParameterTypes().length == 1 &&
-		    type.isAssignableFrom(constructors[i].getParameterTypes()[0])) {
-	     singleArgConstructor = constructors [i];
+             if (singleArgConstructor != null)
+               break;
+           }
+           else if (type != null
+                    && constructors [i].getParameterTypes().length == 1 &&
+                    type.isAssignableFrom(constructors[i].getParameterTypes()[0])) {
+             singleArgConstructor = constructors [i];
 
-	     if (zeroArgsConstructor != null)
-	       break;
-	   }
-	 }
+             if (zeroArgsConstructor != null)
+               break;
+           }
+         }
 
     if (zeroArgsConstructor == null &&
-	     singleArgConstructor == null)
-	   if (type != null)
-	     throw new ConfigException(L.l(
-	       "Custom bean class '{0}' doesn't have a zero-arg constructor, or a constructor accepting parameter of type '{1}'.  Bean class '{0}' must have a zero-argument constructor, or a constructor accepting parameter of type '{1}'",
-	       beanClass.getName(),
-	       type.getName()));
-	   else
-	     throw new ConfigException(L.l(
-	       "Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must have a zero-argument constructor.",
-	       beanClass.getName()));
+             singleArgConstructor == null)
+           if (type != null)
+             throw new ConfigException(L.l(
+               "Custom bean class '{0}' doesn't have a zero-arg constructor, or a constructor accepting parameter of type '{1}'.  Bean class '{0}' must have a zero-argument constructor, or a constructor accepting parameter of type '{1}'",
+               beanClass.getName(),
+               type.getName()));
+           else
+             throw new ConfigException(L.l(
+               "Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must have a zero-argument constructor.",
+               beanClass.getName()));
 
 
     if (singleArgConstructor != null) {
       if (! Modifier.isPublic(singleArgConstructor.getModifiers()) &&
-	  (zeroArgsConstructor == null ||
-	   ! Modifier.isPublic(zeroArgsConstructor.getModifiers()))) {
-	throw new ConfigException(L.l(
-	  "The constructor for bean '{0}' accepting parameter of type '{1}' is not public.  Constructor accepting parameter of type '{1}' must be public.",
-	  beanClass.getName(),
-	  type.getName()));
+          (zeroArgsConstructor == null ||
+           ! Modifier.isPublic(zeroArgsConstructor.getModifiers()))) {
+        throw new ConfigException(L.l(
+          "The constructor for bean '{0}' accepting parameter of type '{1}' is not public.  Constructor accepting parameter of type '{1}' must be public.",
+          beanClass.getName(),
+          type.getName()));
       }
     }
     else if (zeroArgsConstructor != null) {
       if (! Modifier.isPublic(zeroArgsConstructor.getModifiers()))
-	throw new ConfigException(L.l(
-	  "The zero-argument constructor for '{0}' isn't public.  Bean classes must have a public zero-argument constructor.",
-	  beanClass.getName()));
+        throw new ConfigException(L.l(
+          "The zero-argument constructor for '{0}' isn't public.  Bean classes must have a public zero-argument constructor.",
+          beanClass.getName()));
     }
   }
 
@@ -627,7 +628,7 @@ public class Config {
 
     if (! api.isAssignableFrom(cl)) {
       throw new ConfigException(L.l("{0} must implement {1}.",
-				    cl.getName(), api.getName()));
+                                    cl.getName(), api.getName()));
     }
   }
 
@@ -647,14 +648,14 @@ public class Config {
     Attribute attrStrategy = type.getAttribute(attrName);
     if (attrStrategy == null)
       throw new ConfigException(L.l("{0}: '{1}' is an unknown attribute.",
-				    obj.getClass().getName(),
-				    attrName.getName()));
+                                    obj.getClass().getName(),
+                                    attrName.getName()));
 
     value = attrStrategy.getConfigType().valueOf(value);
 
     attrStrategy.setValue(obj, attrName, value);
   }
-  
+
   /**
    * Sets an attribute with a value.
    *
@@ -671,7 +672,7 @@ public class Config {
 
     builder.configureAttribute(obj, qAttr);
   }
-  
+
   public static void init(Object bean)
     throws ConfigException
   {
@@ -685,7 +686,7 @@ public class Config {
       throw ConfigException.create(e);
     }
   }
-  
+
   public static void inject(Object bean)
     throws ConfigException
   {
@@ -699,7 +700,7 @@ public class Config {
       throw ConfigException.create(e);
     }
   }
-  
+
   public static Object replaceObject(Object bean) throws Exception
   {
     ConfigType type = TypeFactory.getType(bean.getClass());
@@ -790,21 +791,21 @@ public class Config {
   }
 
   public static RuntimeException createLine(String systemId, int line,
-					    Throwable e)
+                                            Throwable e)
   {
     while (e.getCause() != null
-	   && (e instanceof InstantiationException
-	       || e instanceof InvocationTargetException
-	       || e.getClass().equals(ConfigRuntimeException.class))) {
+           && (e instanceof InstantiationException
+               || e instanceof InvocationTargetException
+               || e.getClass().equals(ConfigRuntimeException.class))) {
       e = e.getCause();
     }
-    
+
     if (e instanceof LineConfigException)
       throw (LineConfigException) e;
 
     String lines = getSourceLines(systemId, line);
     String loc = systemId + ":" + line + ": ";
-    
+
     if (e instanceof DisplayableException) {
       return new LineConfigException(loc + e.getMessage() + "\n" + lines, e);
     }
@@ -830,7 +831,7 @@ public class Config {
   {
     if (systemId == null)
       return "";
-    
+
     ReadStream is = null;
     try {
       is = Vfs.lookup().lookup(systemId).openRead();
@@ -838,14 +839,14 @@ public class Config {
       StringBuilder sb = new StringBuilder("\n\n");
       String text;
       while ((text = is.readLine()) != null) {
-	line++;
+        line++;
 
-	if (errorLine - 2 <= line && line <= errorLine + 2) {
-	  sb.append(line);
-	  sb.append(": ");
-	  sb.append(text);
-	  sb.append("\n");
-	}
+        if (errorLine - 2 <= line && line <= errorLine + 2) {
+          sb.append(line);
+          sb.append(": ");
+          sb.append(text);
+          sb.append("\n");
+        }
       }
 
       return sb.toString();
@@ -855,7 +856,7 @@ public class Config {
       return "";
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
   }
 
@@ -873,11 +874,11 @@ public class Config {
       Object value = _properties.get(key);
 
       if (value != null)
-	return value;
+        return value;
       else if (_parent != null)
-	return _parent.get(key);
+        return _parent.get(key);
       else
-	return null;
+        return null;
     }
 
     public void put(String key, Object value)

@@ -57,7 +57,7 @@ public class NotFoundPath extends Path {
    * Dummy return.
    */
   public Path schemeWalk(String userPath,
-			 Map<String,Object> attributes,
+                         Map<String,Object> attributes,
                          String path, int offset)
   {
     return this;
@@ -98,7 +98,7 @@ public class NotFoundPath extends Path {
   public StreamImpl openReadImpl()
     throws IOException
   {
-    throw new FileNotFoundException(_url);
+    throw new FileNotFoundException(getURL());
   }
 
   protected Path copyCache()

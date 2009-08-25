@@ -659,12 +659,17 @@
         <include name="xsd/**"/>
 	
         <include name="lib/activation.jar"/>
+        <include name="lib/activation.LICENSE"/>
         <include name="lib/javamail-141.jar"/>
+        <include name="lib/javamail-14.LICENSE"/>
         <include name="lib/jcache.jar"/>
         <include name="lib/jaxstream-15.jar"/>
-        <include name="lib/jsf-12.jar"/>
+        <include name="lib/jsf-api.jar"/>
+        <include name="lib/jsf-impl.jar"/>
+        <include name="lib/jsf.LICENSE"/>
         <include name="lib/webutil.jar"/>
         <include name="lib/webservices-api.jar"/>
+        <include name="lib/webservices.LICENSE"/>
 
 	<!--
         <include name="webapps/resin-doc.war"/>

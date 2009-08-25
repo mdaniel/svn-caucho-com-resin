@@ -54,7 +54,7 @@ import com.caucho.config.inject.HandleAware;
 abstract public class AbstractDestination
   extends java.util.AbstractQueue
   implements javax.jms.Destination, BlockingQueue,
-	     java.io.Serializable, HandleAware
+             java.io.Serializable, HandleAware
 {
   private static final L10N L = new L10N(AbstractDestination.class);
   private static final Logger log
@@ -62,7 +62,7 @@ abstract public class AbstractDestination
 
   private static long _idRandom;
   private static final AtomicLong _idCount = new AtomicLong();
-  
+
   private String _name = "default";
 
   // serialization
@@ -84,7 +84,7 @@ abstract public class AbstractDestination
   {
     _name = name;
   }
-  
+
   public String getName()
   {
     return _name;
@@ -94,7 +94,7 @@ abstract public class AbstractDestination
   {
     return getName();
   }
-  
+
   public String getTopicName()
   {
     return getName();
@@ -152,21 +152,23 @@ abstract public class AbstractDestination
    * Sends a message to the queue
    */
   abstract public void send(String msgId,
-			    Serializable msg,
-			    int priority,
-			    long expires)
+                            Serializable msg,
+                            int priority,
+                            long expires)
     throws MessageException;
-  
+
   /**
    * Sends a message to the queue
    */
+  /*
   abstract public void send(String msgId,
                             Serializable msg,
                             int priority,
                             long expires,
                             Session sendingSession)
     throws MessageException;
-  
+  */
+
   public Serializable receive(long timeout)
     throws MessageException
   {
@@ -180,16 +182,16 @@ abstract public class AbstractDestination
   {
     return false;
   }
-  
+
   /**
    * Acknowledge receipt of the message.
-   * 
+   *
    * @param msgId message to acknowledge
    */
   public void acknowledge(String msgId)
   {
   }
-  
+
   /**
    * Rollback the message read.
    */
