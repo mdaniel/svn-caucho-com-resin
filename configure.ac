@@ -8,7 +8,7 @@ AC_SUBST(FULL_VERSION)
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(resin, 4.0.0)
+AM_INIT_AUTOMAKE(resin, 4.0.2)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -710,11 +710,11 @@ if test -z "${LD_SHLIB}"; then
  	LDFLAGS_SHLIB="-dynamiclib -undefined suppress -flat_namespace"
 	if test -n "$b64"; then
   	  CFLAGS="$CFLAGS -arch x86_64"
-  	  LDFLAGS_SHLIB="-arch x86_64 $LD_FLAGS_SHLIB"
+  	  LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
 	fi
 	if test -n "$b64_jni"; then
   	  CFLAGS_JNI="$CFLAGS_JNI -m64"
-  	  LDFLAGS_SHLIB="-arch x86_64 $LD_FLAGS_SHLIB"
+  	  LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
    	fi
         ;;
 

@@ -36,7 +36,7 @@ import com.caucho.server.cluster.*;
  */
 abstract public class PortEmbed
 {
-  private int _port;
+  private int _port = -1;
   private String _address;
 
   /**
@@ -54,6 +54,11 @@ abstract public class PortEmbed
   {
     return _port;
   }
+
+  /**
+   * Returns the local, bound port
+   */
+  abstract public int getLocalPort();
 
   /**
    * The binding address

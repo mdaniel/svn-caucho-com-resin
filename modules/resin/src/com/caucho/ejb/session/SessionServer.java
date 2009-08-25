@@ -36,10 +36,10 @@ import java.util.logging.Logger;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.SessionContext;
-import javax.enterprise.inject.Named;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.inject.Named;
 
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;

@@ -52,7 +52,7 @@ public class ClusterPort extends Port {
     try {
       setAddress("127.0.0.1");
       
-      setPort(0);
+      setPort(-1);
       
       setProtocol(new HmuxProtocol());
     } catch (Exception e) {

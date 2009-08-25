@@ -63,7 +63,6 @@ import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Initializer;
-import javax.enterprise.inject.Named;
 import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Bean;
@@ -76,6 +75,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.stereotype.Stereotype;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.interceptor.InterceptorBindingType;
 

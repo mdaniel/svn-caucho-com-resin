@@ -38,6 +38,8 @@ import com.caucho.server.port.*;
  */
 public class HttpEmbed extends PortEmbed
 {
+  private Port _port;
+  
   /**
    * Creates a new HttpEmbed configuration.
    */
@@ -66,6 +68,17 @@ public class HttpEmbed extends PortEmbed
     setPort(port);
     setAddress(ipAddress);
   }
+
+  /**
+   * Returns the local, bound port
+   */
+  public int getLocalPort()
+  {
+    if (_port != null)
+      return _port.getLocalPort();
+    else
+      return getPort();
+  }
   
   /**
    * Binds the port to the server
@@ -73,10 +86,10 @@ public class HttpEmbed extends PortEmbed
   public void bindTo(ClusterServer server)
   {
     try {
-      Port httpPort = server.createHttp();
+      _port = server.createHttp();
 
-      httpPort.setPort(getPort());
-      httpPort.setAddress(getAddress());
+      _port.setPort(getPort());
+      _port.setAddress(getAddress());
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

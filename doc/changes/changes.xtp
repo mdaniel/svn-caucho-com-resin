@@ -13,6 +13,10 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>embed: EmbedPort getLocalPort() returns ephemeral port (#3567, rep by zed)</li>
+<li>xml: XMLStreamReaderImpl on bad input (#2989, rep by Bill Au)</li>
+<li>servlet: footer/md5 HTTP handling (#3044, rep by Eric Bowman)</li>
+<li>thread: ThreadPool cleanup (#3645, rep by Daniel Wigenfors)</li>
 <li>jsp: BeanELResolver accessible issues (#3598, rep by rymsha)</li>
 <li>deploy: staging and versioning capacilibies (#3514, rep by Yujin Kim)</li>
 <li>cluster: add com.caucho.cluster.LockManager for distributed locking (#3464, rep by Martin Thompson)</li>

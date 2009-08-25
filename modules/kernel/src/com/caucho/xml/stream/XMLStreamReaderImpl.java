@@ -260,7 +260,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     StringBuilder sb = new StringBuilder();
 
-    for (int eventType = next(); eventType != END_ELEMENT; eventType = next()) {
+    for (int eventType = next();
+         eventType != END_ELEMENT;
+         eventType = next()) {
       switch (eventType) {
         case CHARACTERS:
         case CDATA:
@@ -653,6 +655,10 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
         readProcessingDirective();
         return PROCESSING_INSTRUCTION;
 
+      case -1:
+        close();
+        return -1;
+
       default:
         unread();
 
@@ -690,6 +696,11 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
       _isShortTag = true;
 
       expect('>');
+    }
+    else if (ch < 0) {
+      // #2989, xml/3033
+      close();
+      return;
     }
     else
       throw error(L.l("Expected {0} at {1}", ">", charName(ch)));

@@ -99,7 +99,7 @@ public class Port
   // The address
   private String _address;
   // The port
-  private int _port;
+  private int _port = -1;
 
   // URL for debugging
   private String _url;
@@ -387,6 +387,17 @@ public class Port
   public int getPort()
   {
     return _port;
+  }
+
+  /**
+   * Gets the local port (for ephemeral ports)
+   */
+  public int getLocalPort()
+  {
+    if (_serverSocket != null)
+      return _serverSocket.getLocalPort();
+    else
+      return _port;
   }
 
   /**
@@ -1022,19 +1033,18 @@ public class Port
     if (_protocol == null)
       throw new IllegalStateException(L.l("'{0}' must have a configured protocol before starting.", this));
 
-    if (_port == 0)
+    // server 1e07
+    if (_port < 0)
       return;
 
     if (_throttle == null)
       _throttle = new Throttle();
 
     if (_serverSocket != null) {
-      if (_port == 0) {
-      }
-      else if (_address != null)
-        log.info("listening to " + _address + ":" + _port);
+      if (_address != null)
+        log.info("listening to " + _address + ":" + _serverSocket.getLocalPort());
       else
-        log.info("listening to " + _port);
+        log.info("listening to " + _serverSocket.getLocalPort());
     }
     else if (_sslFactory != null && _socketAddress != null) {
       _serverSocket = _sslFactory.create(_socketAddress, _port);
@@ -1058,12 +1068,13 @@ public class Port
       _serverSocket = QJniServerSocket.create(_socketAddress, _port,
                                               _acceptListenBacklog);
 
-      log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _port);
+      log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _serverSocket.getLocalPort());
     }
     else {
       _serverSocket = QJniServerSocket.create(_port, _acceptListenBacklog);
 
-      log.info(_protocol.getProtocolName() + " listening to *:" + _port);
+      log.info(_protocol.getProtocolName() + " listening to *:"
+               + _serverSocket.getLocalPort());
     }
 
     assert(_serverSocket != null);
@@ -1106,6 +1117,9 @@ public class Port
     if (_isPostBind.getAndSet(true))
       return;
 
+    if (_serverSocket == null)
+      return;
+    
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
@@ -1183,7 +1197,7 @@ public class Port
   public void start()
     throws Exception
   {
-    if (_port == 0)
+    if (_port < 0)
       return;
 
     if (! _lifecycle.toStarting())
@@ -1217,7 +1231,8 @@ public class Port
   void enable()
   {
     if (_lifecycle.toActive()) {
-      _serverSocket.listen(_acceptListenBacklog);
+      if (_serverSocket != null)
+        _serverSocket.listen(_acceptListenBacklog);
     }
   }
 
@@ -1227,15 +1242,16 @@ public class Port
   void disable()
   {
     if (_lifecycle.toStop()) {
-      _serverSocket.listen(0);
+      if (_serverSocket != null)
+        _serverSocket.listen(0);
 
-      if (_port == 0) {
+      if (_port < 0) {
       }
       else if (_address != null)
         log.info(_protocol.getProtocolName() + " disabled "
-                 + _address + ":" + _port);
+                 + _address + ":" + getLocalPort());
       else
-        log.info(_protocol.getProtocolName() + " disabled *:" + _port);
+        log.info(_protocol.getProtocolName() + " disabled *:" + getLocalPort());
     }
   }
 

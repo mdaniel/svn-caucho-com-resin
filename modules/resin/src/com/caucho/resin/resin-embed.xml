@@ -6,7 +6,7 @@
   </class-loader>
     
   <cluster id="">
-    <server id="" port="0">
+    <server id="" port="-1">
     </server>
     
 <web-app-default>
