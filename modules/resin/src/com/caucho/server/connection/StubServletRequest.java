@@ -419,6 +419,10 @@ public class StubServletRequest implements CauchoRequest {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public void setAsyncSupported(boolean asyncSupported) {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   public void setAsyncTimeout(long timeout)
   {
     throw new UnsupportedOperationException(getClass().getName());
