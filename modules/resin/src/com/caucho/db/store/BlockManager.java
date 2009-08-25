@@ -248,7 +248,6 @@ public final class BlockManager
         }
       }
 
-      System.out.println("BID: " + Long.toHexString(blockId) + " " + Long.toHexString(Store.BLOCK_MASK));
       if ((blockId & Store.BLOCK_MASK) == 0)
         throw stateError(L.l("Block 0 is reserved."));
 

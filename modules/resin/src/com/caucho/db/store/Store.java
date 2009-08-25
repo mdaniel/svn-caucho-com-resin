@@ -629,7 +629,6 @@ public class Store {
     }
 
     long blockId = blockIndexToBlockId(blockIndex);
-    System.out.println("INDEX: " + blockIndex + " " + blockId);
 
     Block block = _blockManager.getBlock(this, blockId);
 
