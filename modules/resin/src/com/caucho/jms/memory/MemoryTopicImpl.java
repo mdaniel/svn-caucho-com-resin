@@ -30,14 +30,17 @@
 package com.caucho.jms.memory;
 
 import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.connection.*;
+import javax.jms.Session;
+
+import com.caucho.jms.connection.JmsSession;
+import com.caucho.jms.queue.AbstractQueue;
+import com.caucho.jms.queue.AbstractTopic;
+import com.caucho.jms.queue.MessageException;
 
 /**
  * Implements a memory topic.
@@ -72,11 +75,12 @@ public class MemoryTopicImpl extends AbstractTopic
   public void send(String msgId,
 		   Serializable payload,
 		   int priority,
-		   long timeout)
+		   long timeout,
+		   Session sendingSession)
     throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(msgId, payload, priority, timeout);
+      _subscriptionList.get(i).send(msgId, payload, priority, timeout, sendingSession);
     }
   }
 

@@ -120,14 +120,14 @@ public class QueueSessionImpl extends JmsSession
 
     AbstractQueue dest = (AbstractQueue) queue;
 
-    if (dest instanceof TemporaryQueueImpl) {
+    /*if (dest instanceof TemporaryQueueImpl) {
       TemporaryQueueImpl temp = (TemporaryQueueImpl) dest;
 
       if (temp.getSession() != this) {
         throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
                                                       queue, this));
       }
-    }
+    }*/
 
     return new QueueSenderImpl(this, dest);
   }

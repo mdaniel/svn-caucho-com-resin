@@ -40,6 +40,15 @@ public class FileTopic extends FileTopicImpl
 {
   public FileTopic()
   {
-  }
+  }  
+  
+  /**
+   * Test interface
+   */
+  public FileTopic(Path path, String name)
+  {
+    super(path, name, "anon");
+  } 
+  
 }
 

@@ -176,7 +176,8 @@ public class HempTopic extends AbstractTopic
   public void send(String msgId,
 		   Serializable payload,
 		   int priority,
-		   long timeout)
+		   long timeout,
+		   Session sendingSession)
   {
     // _xmppNode.send(session, msg, timeout);
   }

@@ -382,6 +382,16 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     if (destination == null)
       throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createConsumer"));
+    
+    if (destination instanceof TemporaryQueueImpl) {
+      
+      // Consumer can not be created on a different Connection on Temporary Queue.
+      if (!((TemporaryQueueImpl)destination).getSession().getConnection()
+          .equals(_connection)) {
+        throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
+            destination, this));
+      }
+    }    
 
     MessageConsumerImpl consumer;
     
@@ -667,18 +677,21 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     _isXA = false;
 
     ArrayList<TransactedMessage> messages = _transactedMessages;
-    if (messages != null) {
-      try {
-	for (int i = 0; i < messages.size(); i++) {
-	  TransactedMessage msg = messages.get(i);
-
-	  if (msg != null)
-	    msg.commit();
-	}
-      } finally {
-	messages.clear();
-      }
+    if (messages == null || messages.size() == 0) {
+      throw new IllegalStateException(L.l("commit() can only be called only when there are transactions to be committed."));
     }
+    
+    try {
+      for (int i = 0; i < messages.size(); i++) {
+	TransactedMessage msg = messages.get(i);
+
+	if (msg != null)
+	  msg.commit();
+      }
+    } finally {
+      messages.clear();
+    }
+    
 
     if (! isXA)
       acknowledge();
@@ -860,25 +873,35 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (queue == null)
       throw new UnsupportedOperationException(L.l("empty queue is not allowed for this session."));
     
-    MessageImpl message = _messageFactory.copy(appMessage);
-
-    long now = Alarm.getExactTime();
-    long expireTime = message.getJMSExpiration();
-    if (message.getJMSExpiration() == 0) {
-      expireTime = now + timeout;
-    }
-
-    message.setJMSMessageID(queue.generateMessageID());
+    if (appMessage.getJMSDestination() == null)
+      appMessage.setJMSDestination(queue);
     
-    if (message.getJMSDestination() == null)
-      message.setJMSDestination(queue);
-    message.setJMSDeliveryMode(deliveryMode);
-    if (message.getJMSTimestamp() == 0)
-      message.setJMSTimestamp(now);
-    if (message.getJMSExpiration() == 0)
-      message.setJMSExpiration(expireTime);
-    message.setJMSPriority(priority);
-
+    // <P>When a message is sent, the <CODE>JMSExpiration</CODE> header field 
+    // is left unassigned. After completion of the <CODE>send</CODE> or 
+    // <CODE>publish</CODE> method, it holds the expiration time of the message.
+    // This is the sum of the time-to-live value specified by the client 
+    // and the GMT at the time of the <CODE>send</CODE> or <CODE>publish</CODE>.
+    // <P>If the time-to-live is specified as zero, 
+    // <CODE>JMSExpiration</CODE> is set to zero to indicate that the message 
+    // does not expire. <P>When a message's expiration time is reached, a 
+    // provider should discard it. The JMS API does not define any form 
+    // of notification of message expiration. <P>Clients should not receive 
+    // messages that have expired; however, the JMS API does not 
+    // guarantee that this will not happen.
+    long now = Alarm.getExactTime();
+    long expireTime = now + timeout;
+    appMessage.setJMSExpiration(expireTime);
+    
+    appMessage.setJMSMessageID(queue.generateMessageID());
+    
+    appMessage.setJMSPriority(priority);
+    
+    appMessage.setJMSTimestamp(now);
+    
+    appMessage.setJMSDeliveryMode(deliveryMode);
+    
+    MessageImpl message = _messageFactory.copy(appMessage);
+    
     // ejb/0970
 
     boolean isXA = false;
@@ -906,7 +929,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
 
-      queue.send(message.getJMSMessageID(), message, priority, expireTime);
+      queue.send(message.getJMSMessageID(), message, priority, expireTime, this);
     }
   }
 

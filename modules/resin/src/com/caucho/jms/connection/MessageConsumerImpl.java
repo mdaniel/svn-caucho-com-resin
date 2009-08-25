@@ -243,7 +243,7 @@ public class MessageConsumerImpl implements MessageConsumer
   /**
    * Receives a message from the queue.
    */
-  private Message receiveImpl(long timeout)
+  protected Message receiveImpl(long timeout)
     throws JMSException
   {
     if (_isClosed || _session.isClosed())

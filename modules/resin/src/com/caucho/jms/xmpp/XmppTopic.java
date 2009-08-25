@@ -93,7 +93,8 @@ public class XmppTopic extends AbstractTopic
     public void send(String msgId,
 		   Serializable payload,
 		   int priority,
-		   long timeout)
+		   long timeout,
+		   Session sendingSession)
     throws MessageException
   {
   }

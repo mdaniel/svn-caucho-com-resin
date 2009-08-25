@@ -65,6 +65,23 @@ public class FileTopicImpl extends AbstractTopic
   {
     _store = FileQueueStore.create();
   }
+  
+  protected FileTopicImpl(Path path, String name, String serverId)
+  {
+    try {
+      path.mkdirs();
+    } catch (Exception e) {
+    }
+
+    if (serverId == null)
+      serverId = "anon";
+    
+    _store = new FileQueueStore(path, serverId);
+
+    setName(name);
+
+    init();
+  }  
 
   //
   // Configuration
@@ -134,11 +151,12 @@ public class FileTopicImpl extends AbstractTopic
   public void send(String msgId,
 		   Serializable payload,
 		   int priority,
-		   long timeout)
+		   long timeout,
+		   Session sendingSession)
     throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(msgId, payload, priority, timeout);
+      _subscriptionList.get(i).send(msgId, payload, priority, timeout, sendingSession);
     }
   }
 

@@ -72,6 +72,12 @@ abstract public class AbstractTopic extends AbstractDestination
     _admin.register();
   }
   
+  public void send(String msgId, Serializable msg, int priority, long expires) 
+    throws MessageException
+  {    
+    send(msgId, msg, priority, expires, null);
+  }
+  
   /**
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.

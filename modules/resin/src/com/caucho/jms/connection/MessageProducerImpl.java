@@ -29,16 +29,15 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.queue.*;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
+
+import com.caucho.jms.queue.AbstractDestination;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * A basic message producer.
@@ -258,11 +257,11 @@ public class MessageProducerImpl implements MessageProducer {
     if (destination == null)
       destination = _queue;
     else if (_queue != null && destination != _queue)
-      throw new IllegalArgumentException(L.l("MessageProducer: '{0}' does not match the queue '{1}'",
+      throw new UnsupportedOperationException(L.l("MessageProducer: '{0}' does not match the queue '{1}'",
                                                   destination, _queue));
 
     if (destination == null)
-      throw new NullPointerException(L.l("MessageProducer: null destination is not supported."));
+      throw new UnsupportedOperationException(L.l("MessageProducer: null destination is not supported."));
 
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));

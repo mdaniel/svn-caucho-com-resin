@@ -42,6 +42,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import com.caucho.jms.message.MessageImpl;
@@ -90,7 +91,7 @@ abstract public class AbstractQueue extends AbstractDestination
     _admin = new QueueAdmin(this);
     _admin.register();
   }
-
+  
   /**
    * Sends a message to the queue
    */
@@ -102,6 +103,14 @@ abstract public class AbstractQueue extends AbstractDestination
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+
+  public void send(String msgId, Serializable msg, int priority, long expires,
+                   Session sendingSession) 
+    throws MessageException
+  {    
+    send(msgId, msg, priority, expires);
+  }  
 
   /**
    * Primary message receiving, registers a callback for any new
@@ -149,7 +158,7 @@ abstract public class AbstractQueue extends AbstractDestination
   //
   // convenience methods
   //
-
+  
   /**
    * Receives a message, blocking until expireTime if no message is
    * available.

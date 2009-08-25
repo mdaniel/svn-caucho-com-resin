@@ -156,7 +156,16 @@ abstract public class AbstractDestination
 			    int priority,
 			    long expires)
     throws MessageException;
-
+  
+  /**
+   * Sends a message to the queue
+   */
+  abstract public void send(String msgId,
+                            Serializable msg,
+                            int priority,
+                            long expires,
+                            Session sendingSession)
+    throws MessageException;
   
   public Serializable receive(long timeout)
     throws MessageException

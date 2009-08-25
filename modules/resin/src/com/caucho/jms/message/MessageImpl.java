@@ -110,8 +110,8 @@ public class MessageImpl implements Message, java.io.Serializable
       setObjectProperty(name, msg.getObjectProperty(name));
     }
 
-    _isHeaderWriteable = false;
-    _isBodyWriteable = false;
+    _isHeaderWriteable = true;
+    _isBodyWriteable = true;
   }
   
   public MessageImpl(MessageImpl msg)

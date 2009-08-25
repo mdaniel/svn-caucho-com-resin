@@ -29,13 +29,12 @@
 package com.caucho.jms.memory;
 
 import java.io.Serializable;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.jms.*;
+import javax.jms.Session;
 
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.connection.*;
+import com.caucho.jms.connection.JmsSession;
 
 /**
  * Implements a memory queue.
@@ -54,21 +53,22 @@ public class MemorySubscriberQueue extends MemoryQueue
     _isNoLocal = noLocal;
   }
 
-  /*
+  
   @Override
   public void send(String msgId,
 		   Serializable msg,
 		   int priority,
-		   long timeout)
+		   long timeout,
+		   Session sendingSession)
   {
     if (_isNoLocal && _session == sendingSession)
       return;
-    else {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " send message " + msg);
+    
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " send message " + msg);
       
     super.send(msgId, msg, priority, timeout);
   }
-  */
+  
 }
 

@@ -32,6 +32,7 @@ package com.caucho.jms.connection;
 import com.caucho.jms.queue.*;
 import com.caucho.util.L10N;
 import javax.jms.*;
+
 import java.util.logging.Logger;
 
 /**
@@ -46,6 +47,8 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 
   private AbstractTopic _topic;
   private AbstractQueue _subscription;
+  
+  private boolean _isSubscriptionClosed;
   
   TopicSubscriberImpl(JmsSession session,
 		      AbstractTopic topic,
@@ -72,12 +75,49 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
     _topic = topic;
     _subscription = subscription;
   }
+  
+  /**
+   * Returns the message consumer's selector.
+   */
+  public String getMessageSelector()
+    throws JMSException
+  {
+    if (isClosed() || _isSubscriptionClosed)
+      throw new javax.jms.IllegalStateException(L.l("getMessageSelector(): MessageConsumer is closed."));
+
+    return super.getMessageSelector();
+  }
+  
+  /**
+   * Returns true if local messages are not sent.
+   */
+  public boolean getNoLocal()
+    throws JMSException
+  {
+    if (isClosed() || _isSubscriptionClosed)
+      throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
+
+    return super.getNoLocal();
+  }  
 
   public Topic getTopic()
     throws JMSException
   {
+    if (isClosed() || _isSubscriptionClosed)
+      throw new javax.jms.IllegalStateException(L.l("getTopic(): TopicSubscriber is closed."));
+    
     return _topic;
   }
+  
+  protected Message receiveImpl(long timeout)
+    throws JMSException
+  {
+    if (isClosed() || _isSubscriptionClosed)
+      throw new javax.jms.IllegalStateException(L.l("receiveNoWait(): TopicSubscriber is closed."));
+    
+    return super.receiveImpl(timeout);
+  }
+  
 
   @Override
   public void close()
@@ -89,6 +129,7 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
       _topic.closeSubscriber(subscription);
 
       subscription.close();
+      _isSubscriptionClosed = Boolean.TRUE;
     }
   }
 }
