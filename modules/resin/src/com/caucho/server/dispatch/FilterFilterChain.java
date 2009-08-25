@@ -36,7 +36,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.logging.*;
 
-import com.caucho.servlet.comet.CometFilterChain;
+import com.caucho.server.connection.CauchoRequest;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will
@@ -53,6 +53,8 @@ public class FilterFilterChain implements FilterChain
   // filter
   private Filter _filter;
 
+  final private boolean _isAsyncSupported;
+
   private boolean _isFinest;
 
   /**
@@ -61,10 +63,13 @@ public class FilterFilterChain implements FilterChain
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public FilterFilterChain(FilterChain next, Filter filter)
+  public FilterFilterChain(FilterChain next,
+                           Filter filter,
+                           boolean isAsyncSupported)
   {
     _next = next;
     _filter = filter;
+    _isAsyncSupported = isAsyncSupported;
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
@@ -83,6 +88,9 @@ public class FilterFilterChain implements FilterChain
   {
     if (_isFinest)
       log.finest("Dispatch " + request + " filter=" + _filter + " next=" + _next);
+
+    if (request instanceof CauchoRequest)
+      ((CauchoRequest)request).setAsyncSupported(_isAsyncSupported);
 
     _filter.doFilter(request, response, _next);
   }

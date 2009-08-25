@@ -1047,6 +1047,8 @@ public class WebApp extends ServletContextImpl
     for (DispatcherType dispatcher : webFilter.dispatcherTypes())
       config.addDispatcher(dispatcher);
 
+    config.setAsyncSupported(webFilter.asyncSupported());
+
     addFilterMapping(config);
   }
 

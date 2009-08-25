@@ -149,8 +149,9 @@ public class FilterMapper {
           String filterName = map.getFilterName();
 
           Filter filter = _filterManager.createFilter(filterName);
+          FilterConfigImpl config = _filterManager.getFilter(filterName);
 
-          chain = addFilter(chain, filter);
+          chain = addFilter(chain, filter, config.isAsyncSupported());
         }
       }
     }
@@ -163,8 +164,9 @@ public class FilterMapper {
           String filterName = map.getFilterName();
 
           Filter filter = _filterManager.createFilter(filterName);
+          FilterConfigImpl config = _filterManager.getFilter(filterName);
 
-          chain = addFilter(chain, filter);
+          chain = addFilter(chain, filter, config.isAsyncSupported());
         }
       }
     }
@@ -195,7 +197,7 @@ public class FilterMapper {
 
           Filter filter = _filterManager.createFilter(filterName);
 
-          chain = addFilter(chain, filter);
+          chain = addFilter(chain, filter, true);
         }
       }
     }
@@ -203,8 +205,10 @@ public class FilterMapper {
     return chain;
   }
 
-  private FilterChain addFilter(FilterChain chain, Filter filter)
+  private FilterChain addFilter(FilterChain chain,
+                                Filter filter,
+                                boolean isAsyncSupported)
   {
-    return new FilterFilterChain(chain, filter);
+    return new FilterFilterChain(chain, filter, isAsyncSupported);
   }
 }
