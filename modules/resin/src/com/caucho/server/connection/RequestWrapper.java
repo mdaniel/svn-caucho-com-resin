@@ -671,10 +671,10 @@ public class RequestWrapper implements ServletRequest {
     return getRequest().isAsyncStarted();
   }
 
-  public void setAsyncSupported(boolean asyncSupported) {
+  public void setAsyncSupported(boolean isAsyncSupported) {
     HttpServletRequest request = getRequest();
     if (request instanceof CauchoRequest)
-      ((CauchoRequest)request).setAsyncSupported(asyncSupported);
+      ((CauchoRequest)request).setAsyncSupported(isAsyncSupported);
   }
 
   /**

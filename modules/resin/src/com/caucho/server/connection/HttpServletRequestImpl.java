@@ -37,7 +37,6 @@ import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.ConnectionCometController;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.port.TcpConnection;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
@@ -122,7 +121,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   private boolean _isSyntheticCacheHeader;
 
   // comet
-  private boolean _asyncSupported = true;
+  private boolean _isAsyncSupported = true;
   private AsyncListenerNode _asyncListenerNode;
   private long _asyncTimeout = 10000;
   private ConnectionCometController _comet;
@@ -2070,16 +2069,16 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isAsyncSupported()
   {
-    return _asyncSupported;
+    return _isAsyncSupported;
   }
 
   /**
    * Once set to false remains false 
-   * @param asyncSupported
+   * @param isAsyncSupported
    */
-  public void setAsyncSupported(boolean asyncSupported) {
-    if (_asyncSupported)
-      _asyncSupported = asyncSupported;
+  public void setAsyncSupported(boolean isAsyncSupported) {
+    if (_isAsyncSupported)
+      _isAsyncSupported = isAsyncSupported;
   }
 
 
@@ -2105,7 +2104,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public AsyncContext startAsync()
   {
-    if (! _asyncSupported)
+    if (!_isAsyncSupported)
       throw new IllegalStateException(L.l("Async is not supported. Check that all Filters and Servlets at '{0}' support asynchronous mode.", getServletPath()));
 
     if (_comet == null) {
