@@ -34,7 +34,9 @@ import java.util.HashMap;
 
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
+import javax.ejb.Timer;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.Trigger;
 import com.caucho.ejb.timer.EjbTimer;
 import com.caucho.java.JavaWriter;
@@ -83,6 +85,7 @@ public class SchedulingCallChain extends AbstractCallChain {
   /**
    * Introspects the method for locking attributes.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implementationMethod)
   {
@@ -105,7 +108,21 @@ public class SchedulingCallChain extends AbstractCallChain {
       // this case?
       if (implementationMethod != null) {
         _targetBean = implementationMethod.getDeclaringClass().getJavaClass();
-        _targetMethod = implementationMethod.getMethod();
+
+        Method method = implementationMethod.getMethod();
+        Class[] parameters = method.getParameterTypes();
+
+        if (parameters.length != 0) {
+          if (!(parameters.length == 1)
+              || !(Timer.class.isAssignableFrom(parameters[0]))
+              || !(parameters[0].isAssignableFrom(Timer.class))) {
+            throw new ConfigException(L.l(
+                "{0}.{1} is not a valid timeout method.",
+                _targetBean.getName(), method.getName()));
+          }
+        }
+
+        _targetMethod = method;
       }
     }
   }
@@ -141,9 +158,6 @@ public class SchedulingCallChain extends AbstractCallChain {
     CronExpression cronExpression = new CronExpression(schedule.second(),
         schedule.minute(), schedule.hour(), schedule.dayOfWeek(), schedule
             .dayOfMonth(), schedule.month(), schedule.year());
-    // TODO This may throw a parsing error. What is the standard way to handle
-    // deployment issues? Log entries or a specialized exception indicating a
-    // deployment problem?
     Trigger trigger = new CronTrigger(cronExpression, -1, -1);
     EjbTimer timer = new EjbTimer();
 
