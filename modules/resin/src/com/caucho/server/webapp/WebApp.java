@@ -913,6 +913,7 @@ public class WebApp extends ServletContextImpl
       mapping.setInitParam(initParam.name(), initParam.value()); //omit description
 
     mapping.setLoadOnStartup(webServlet.loadOnStartup());
+    mapping.setAsyncSupported(webServlet.asyncSupported());
 
     addServletMapping(mapping);
   }

@@ -71,6 +71,8 @@ public interface CauchoRequest extends HttpServletRequest {
   public boolean isClientDisconnect();
   public void clientDisconnect();
 
+  public void setAsyncSupported(boolean asyncSupported);
+
   public boolean isLoginRequested();
   public boolean login(boolean isFail);
 

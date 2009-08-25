@@ -37,6 +37,8 @@ javaee_filter = element filter {
   javaee_filter-name,
 
   element filter-class { javaee_fully-qualified-class },
+  
+  element async-supported { javaee_boolean }?, 
 
   javaee_init-param*
 }
@@ -174,6 +176,8 @@ javaee_servlet = element servlet {
 
   (element servlet-class { javaee_fully-qualified-class }
    | element jsp-file { string }),
+
+  element async-supported { javaee_boolean }?, 
 
   javaee_init-param*,
 

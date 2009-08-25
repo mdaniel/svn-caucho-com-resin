@@ -88,6 +88,7 @@ public class ServletConfigImpl
   private String _jspFile;
   private String _displayName;
   private int _loadOnStartup = Integer.MIN_VALUE;
+  private boolean _asyncSupported;
 
   private Servlet _singletonServlet;
 
@@ -248,12 +249,16 @@ public class ServletConfigImpl
     return _initParams;
   }
 
-  public void setAsyncSupported(boolean isAsyncSupported)
+  public void setAsyncSupported(boolean asyncSupported)
   {
-    if (! _webApp.isInitializing())
+    if (_webApp != null && ! _webApp.isInitializing())
       throw new IllegalStateException();
 
-    throw new UnsupportedOperationException(ServletConfigImpl.class.getName());
+    _asyncSupported = asyncSupported;
+  }
+
+  public boolean isAsyncSupported() {
+    return _asyncSupported;
   }
 
   /**

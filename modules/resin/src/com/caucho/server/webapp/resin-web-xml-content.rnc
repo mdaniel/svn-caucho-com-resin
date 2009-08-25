@@ -847,7 +847,10 @@ r_servlet = element servlet {
 }
 
 r_servlet-Content =
-   r_jndi-name?
+   (attribute async-supported { r_boolean-Type }
+      | element async-supported { r_boolean-Type })?
+
+   & r_jndi-name?
 
    & r_var?
 

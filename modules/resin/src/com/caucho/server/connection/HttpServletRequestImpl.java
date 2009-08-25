@@ -122,6 +122,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   private boolean _isSyntheticCacheHeader;
 
   // comet
+  private boolean _asyncSupported = true;
   private AsyncListenerNode _asyncListenerNode;
   private long _asyncTimeout = 10000;
   private ConnectionCometController _comet;
@@ -2069,8 +2070,18 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isAsyncSupported()
   {
-    return true;
+    return _asyncSupported;
   }
+
+  /**
+   * Once set to false remains false 
+   * @param asyncSupported
+   */
+  public void setAsyncSupported(boolean asyncSupported) {
+    if (_asyncSupported)
+      _asyncSupported = asyncSupported;
+  }
+
 
   /**
    * Sets the async timeout
@@ -2094,6 +2105,9 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public AsyncContext startAsync()
   {
+    if (! _asyncSupported)
+      throw new IllegalStateException(L.l("Async is not supported. Check that all Filters and Servlets at '{0}' support asynchronous mode.", getServletPath()));
+
     if (_comet == null) {
       _comet = _request.getConnection().toComet(true, this, _response);
       if (_asyncTimeout > 0)

@@ -30,6 +30,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.connection.CauchoRequest;
 
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
@@ -111,6 +112,13 @@ public class ServletFilterChain implements FilterChain {
       //XXX: Better way of passing this in is needed
       request.setAttribute(HttpServletRequestImpl.MULTIPARTCONFIG,
                            _config.getMultipartConfig());
+
+      if (request instanceof CauchoRequest) {
+        CauchoRequest cauchoRequest
+          = (CauchoRequest) request;
+
+        cauchoRequest.setAsyncSupported(_config.isAsyncSupported());
+      }
 
       _servlet.service(request, response);
     } catch (UnavailableException e) {
