@@ -352,9 +352,6 @@ public class InjectIntrospector {
       ValueGenerator gen
 	= generateResource(location(field), field.getType(), "", resource);
 
-      if (gen != null)
-        initList.add(new FieldGeneratorProgram(field, gen));
-
       return;
     }
 

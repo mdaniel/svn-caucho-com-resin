@@ -177,8 +177,6 @@ public class FilterManager {
 
 	_comp.inject(filter, env);
 
-        Config.inject(filter);
-
 	// InjectIntrospector.configure(filter);
 
         // Initialize bean properties
