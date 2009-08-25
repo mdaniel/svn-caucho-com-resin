@@ -39,7 +39,6 @@ import java.util.logging.*;
 import java.io.Serializable;
 import javax.annotation.*;
 import javax.inject.Inject;
-import javax.jms.*;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
@@ -55,7 +54,7 @@ import com.caucho.util.*;
 public class HempTopic extends AbstractTopic
 {
   private static final L10N L = new L10N(HempTopic.class);
-  
+
   private static final Logger log
     = Logger.getLogger(HempTopic.class.getName());
 
@@ -104,20 +103,20 @@ public class HempTopic extends AbstractTopic
   }
 
   @Override
-  public AbstractQueue createSubscriber(JmsSession session,
+  public AbstractQueue createSubscriber(Object publisher,
                                         String name,
                                         boolean noLocal)
   {
     MemoryQueue queue;
 
     if (name != null) {
-      queue = new MemorySubscriberQueue(session, noLocal);
+      queue = new MemorySubscriberQueue(publisher, noLocal);
       queue.setName(getName() + ":sub-" + name);
 
       _subscriptionList.add(queue);
     }
     else {
-      queue = new MemorySubscriberQueue(session, noLocal);
+      queue = new MemorySubscriberQueue(publisher, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);
@@ -134,7 +133,7 @@ public class HempTopic extends AbstractTopic
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close-subscriber(" + queue + ")");
-    
+
     _subscriptionList.remove(queue);
   }
 
@@ -144,40 +143,42 @@ public class HempTopic extends AbstractTopic
       javax.jms.Message msg = null;
 
       if (value instanceof javax.jms.Message)
-	msg = (javax.jms.Message) value;
+        msg = (javax.jms.Message) value;
       else {
-	msg = new ObjectMessageImpl(value);
+        msg = new ObjectMessageImpl(value);
       }
 
       synchronized (_subscriptionList) {
-	for (int i = 0; i < _subscriptionList.size(); i++) {
-	  MemorySubscriberQueue queue
-	    = (MemorySubscriberQueue) _subscriptionList.get(i);
+        for (int i = 0; i < _subscriptionList.size(); i++) {
+          MemorySubscriberQueue queue
+            = (MemorySubscriberQueue) _subscriptionList.get(i);
 
-	  queue.offer(msg);
-	}
+          queue.offer(msg);
+        }
       }
-    } catch (JMSException e) {
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
   public void sendMessageError(String to,
-			       String from,
-			       Serializable value,
-			       ActorError error)
+                               String from,
+                               Serializable value,
+                               ActorError error)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " sendMessageError to=" + to + " from=" + from +
-		" error=" + error);
+                " error=" + error);
   }
 
   @Override
   public void send(String msgId,
-		   Serializable payload,
-		   int priority,
-		   long timeout,
-		   Session sendingSession)
+                   Serializable payload,
+                   int priority,
+                   long timeout,
+                   Object publisher)
   {
     // _xmppNode.send(session, msg, timeout);
   }
@@ -187,7 +188,7 @@ public class HempTopic extends AbstractTopic
     {
       super.setJid(jid);
     }
-    
+
     public void message(String to, String from, Serializable msg)
     {
       HempTopic.this.sendMessage(to, from, msg);

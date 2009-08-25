@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,10 +33,6 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.jms.Session;
-
-import com.caucho.jms.connection.JmsSession;
-
 /**
  * Implements a memory queue.
  */
@@ -43,32 +40,32 @@ public class MemorySubscriberQueue extends MemoryQueue
 {
   private static final Logger log
     = Logger.getLogger(MemorySubscriberQueue.class.getName());
-  
-  private JmsSession _session;
+
+  private Object _publisher;
   private boolean _isNoLocal;
-  
-  public MemorySubscriberQueue(JmsSession session, boolean noLocal)
+
+  public MemorySubscriberQueue(Object publisher, boolean noLocal)
   {
-    _session = session;
+    _publisher = publisher;
     _isNoLocal = noLocal;
   }
 
-  
+
   @Override
   public void send(String msgId,
-		   Serializable msg,
-		   int priority,
-		   long timeout,
-		   Session sendingSession)
+                   Serializable msg,
+                   int priority,
+                   long timeout,
+                   Object publisher)
   {
-    if (_isNoLocal && _session == sendingSession)
+    if (_isNoLocal && _publisher == publisher)
       return;
-    
+
     if (log.isLoggable(Level.FINE))
       log.fine(this + " send message " + msg);
-      
+
     super.send(msgId, msg, priority, timeout);
   }
-  
+
 }
 

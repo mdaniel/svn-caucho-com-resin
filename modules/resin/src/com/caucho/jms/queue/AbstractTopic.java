@@ -71,13 +71,13 @@ abstract public class AbstractTopic extends AbstractDestination
     _admin = new TopicAdmin(this);
     _admin.register();
   }
-  
-  public void send(String msgId, Serializable msg, int priority, long expires) 
+
+  public void send(String msgId, Serializable msg, int priority, long expires)
     throws MessageException
-  {    
+  {
     send(msgId, msg, priority, expires, null);
   }
-  
+
   /**
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
@@ -87,7 +87,7 @@ abstract public class AbstractTopic extends AbstractDestination
     throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
   }
 
-  public abstract AbstractQueue createSubscriber(JmsSession session,
+  public abstract AbstractQueue createSubscriber(Object publisher,
                                                  String name,
                                                  boolean noLocal);
 
@@ -113,11 +113,11 @@ abstract public class AbstractTopic extends AbstractDestination
   public boolean offer(Object value, long timeout, TimeUnit unit)
   {
     int priority = 0;
-      
+
     timeout = unit.toMillis(timeout);
 
     long expires = Alarm.getCurrentTime() + timeout;
-      
+
     send(generateMessageID(), (Serializable) value, priority, expires);
 
     return true;
@@ -136,21 +136,21 @@ abstract public class AbstractTopic extends AbstractDestination
   public Object poll(long timeout, TimeUnit unit)
   {
     long msTimeout = unit.toMillis(timeout);
-    
+
     Serializable payload = receive(msTimeout);
 
     try {
       if (payload == null)
-	return null;
+        return null;
       else if (payload instanceof ObjectMessage)
-	return ((ObjectMessage) payload).getObject();
+        return ((ObjectMessage) payload).getObject();
       else if (payload instanceof TextMessage)
-	return ((TextMessage) payload).getText();
+        return ((TextMessage) payload).getText();
       else if (payload instanceof Serializable)
-	return payload;
+        return payload;
       else
-	throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
-				       payload));
+        throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
+                                       payload));
     } catch (JMSException e) {
       throw new MessageException(e);
     }

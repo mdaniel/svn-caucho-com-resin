@@ -35,12 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
 
-import javax.jms.*;
-
 import com.caucho.jms.memory.*;
-import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
-import com.caucho.jms.connection.*;
 
 /**
  * Implements a event topic.
@@ -49,7 +45,7 @@ public class EventTopic extends AbstractTopic
 {
   private static final Logger log
     = Logger.getLogger(EventTopic.class.getName());
-    
+
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
@@ -68,20 +64,20 @@ public class EventTopic extends AbstractTopic
   }
 
   @Override
-  public AbstractQueue createSubscriber(JmsSession session,
+  public AbstractQueue createSubscriber(Object publisher,
                                         String name,
                                         boolean noLocal)
   {
     MemoryQueue queue;
 
     if (name != null) {
-      queue = new MemorySubscriberQueue(session, noLocal);
+      queue = new MemorySubscriberQueue(publisher, noLocal);
       queue.setName(getName() + ":sub-" + name);
 
       _subscriptionList.add(queue);
     }
     else {
-      queue = new MemorySubscriberQueue(session, noLocal);
+      queue = new MemorySubscriberQueue(publisher, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);
@@ -98,20 +94,21 @@ public class EventTopic extends AbstractTopic
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close-subscriber(" + queue + ")");
-    
+
     _subscriptionList.remove(queue);
   }
 
   @Override
   public void send(String msgId,
-		   Serializable payload,
-		   int priority,
-		   long timeout,
-		   Session sendingSession)
+                   Serializable payload,
+                   int priority,
+                   long timeout,
+                   Object publisher)
     throws MessageException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(msgId, payload, priority, timeout, sendingSession);
+      _subscriptionList.get(i).send(msgId, payload, priority, timeout,
+                                    publisher);
     }
   }
 }

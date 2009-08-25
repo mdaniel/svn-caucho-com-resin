@@ -31,14 +31,14 @@ package com.caucho.jms.queue;
 
 import java.util.logging.*;
 
-import javax.jms.*;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.jms.Destination;
 
 import com.caucho.jms.JmsRuntimeException;
 import com.caucho.jms.message.*;
@@ -160,14 +160,15 @@ abstract public class AbstractDestination
   /**
    * Sends a message to the queue
    */
-  /*
-  abstract public void send(String msgId,
-                            Serializable msg,
-                            int priority,
-                            long expires,
-                            Session sendingSession)
-    throws MessageException;
-  */
+  public void send(String msgId,
+                   Serializable msg,
+                   int priority,
+                   long expires,
+                   Object publisher)
+    throws MessageException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   public Serializable receive(long timeout)
     throws MessageException

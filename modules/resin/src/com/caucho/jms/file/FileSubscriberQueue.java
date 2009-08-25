@@ -33,8 +33,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.*;
 
-import javax.jms.*;
-
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.memory.*;
@@ -46,13 +44,13 @@ import com.caucho.jms.connection.*;
 public class FileSubscriberQueue extends MemoryQueueImpl
 {
   private FileTopicImpl _topic;
-  private JmsSession _session;
+  private Object _publisher;
   private boolean _isNoLocal;
-  
-  FileSubscriberQueue(FileTopicImpl topic, JmsSession session, boolean noLocal)
+
+  FileSubscriberQueue(FileTopicImpl topic, Object publisher, boolean noLocal)
   {
     _topic = topic;
-    _session = session;
+    _publisher = publisher;
     _isNoLocal = noLocal;
   }
 
@@ -60,9 +58,9 @@ public class FileSubscriberQueue extends MemoryQueueImpl
 
   @Override
   public void send(String msgId,
-		   Serializable payload,
-		   int priority,
-		   long timeout)
+                   Serializable payload,
+                   int priority,
+                   long timeout)
   {
     if (_isNoLocal && _session == session)
       return;
@@ -73,7 +71,7 @@ public class FileSubscriberQueue extends MemoryQueueImpl
 
   public String toString()
   {
-    return "FileSubscriberQueue[" + _topic.getName() + "]";
+    return getClass().getSimpleName() + "[" + _topic.getName() + "]";
   }
 }
 

@@ -42,7 +42,6 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.inject.Inject;
-import javax.jms.*;
 
 /**
  * Implements an xmpp topic.
@@ -50,7 +49,7 @@ import javax.jms.*;
 public class XmppTopic extends AbstractTopic
 {
   private static final L10N L = new L10N(XmppTopic.class);
-  
+
   private static final Logger log
     = Logger.getLogger(XmppTopic.class.getName());
 
@@ -77,7 +76,7 @@ public class XmppTopic extends AbstractTopic
   }
 
   @Override
-  public AbstractQueue createSubscriber(JmsSession session,
+  public AbstractQueue createSubscriber(Object publisher,
                                         String name,
                                         boolean noLocal)
   {
@@ -91,10 +90,10 @@ public class XmppTopic extends AbstractTopic
 
   @Override
     public void send(String msgId,
-		   Serializable payload,
-		   int priority,
-		   long timeout,
-		   Session sendingSession)
+                     Serializable payload,
+                     int priority,
+                     long timeout,
+                     Object publisher)
     throws MessageException
   {
   }
