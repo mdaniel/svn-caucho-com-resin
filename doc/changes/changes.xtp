@@ -32,6 +32,12 @@
 <li>jni: JNI detection of clientdisconnect issues (rep by Fiaz Hossain)</li>
 <li>quercus: image fixes for vbulletin</li>
 <li>quercus: ksort fixes for vbulletin</li>
+<li>eclipse: server wizard cleanup and enhancement</li>
+<li>eclipse: spaces in path (#3589, rep by Michael Ludwig)</li>
+<li>eclipse: respect http port (#3502, rep by Michael Ludwig)</li>
+<li>eclipse: invalid chars in hot deploy (#3503, rep by Michael Ludwig)</li>
+<li>eclipse: deploy from temp directory (#3515, req by Yujin Kim)</li>
+<li>eclipse: breakpoints (#3484, rep by Doug and sblommers)</li>
 </ul>
 </s2>
 
