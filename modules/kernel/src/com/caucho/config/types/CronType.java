@@ -83,11 +83,12 @@ public class CronType implements Trigger {
    * @param end
    *          Schedule end date.
    */
-  public CronType(String second, String minute, String hour, String dayOfWeek,
-      String dayOfMonth, String month, String year, Date start, Date end)
+  public CronType(String second, String minute, String hour,
+                  String dayOfWeek, String dayOfMonth,
+                  String month, String year, Date start, Date end)
   {
     _text = String.format("%s %s %s %s %s %s %s", second, minute, hour,
-        dayOfWeek, dayOfMonth, month, year);
+                          dayOfWeek, dayOfMonth, month, year);
 
     _minutes = parseRange(minute, 0, 59);
     _hours = parseRange(hour, 0, 23);
@@ -128,6 +129,7 @@ public class CronType implements Trigger {
 
     if (split.length > 4) {
       _daysOfWeek = parseRange(split[4], 0, 7);
+      
       if (_daysOfWeek[7])
         _daysOfWeek[0] = _daysOfWeek[7];
     }

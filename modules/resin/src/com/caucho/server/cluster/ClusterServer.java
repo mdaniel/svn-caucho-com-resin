@@ -45,6 +45,7 @@ import com.caucho.vfs.QServerSocket;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -746,8 +747,11 @@ public final class ClusterServer {
       _serverPool.notifyStart();
 
     synchronized (this) {
-      if (timestamp <= _stateTimestamp)
+      if (timestamp < _stateTimestamp)
         return;
+
+      if (log.isLoggable(Level.FINER) && ! _isActive)
+        log.finer(this + " notify-start");
     
       _isActive = true;
       _stateTimestamp = timestamp;
@@ -768,8 +772,11 @@ public final class ClusterServer {
       _serverPool.notifyStop();
 
     synchronized (this) {
-      if (timestamp <= _stateTimestamp)
+      if (timestamp < _stateTimestamp)
         return;
+
+      if (log.isLoggable(Level.FINER) && _isActive)
+        log.finer(this + " notify-stop");
     
       _isActive = false;
       _stateTimestamp = timestamp;

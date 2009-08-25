@@ -2115,6 +2115,7 @@ public class Server extends ProtocolDispatchServer
       for (int i = 0; i < ports.size(); i++) {
         Port port = ports.get(i);
 
+        port.setServer(this);
         port.start();
       }
     } finally {

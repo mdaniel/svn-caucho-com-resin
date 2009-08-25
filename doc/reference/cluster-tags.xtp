@@ -617,6 +617,11 @@ PingThread will catch errors like deadlocks.</p>
   <td>required</td>
 </tr>
 <tr>
+  <td>freeze-timeout</td>
+  <td>Time with no response to detect a frozen jvm.</td>
+  <td>15m</td>
+</tr>
+<tr>
   <td>retry-time</td>
   <td>time between retries</td>
   <td>1s</td>

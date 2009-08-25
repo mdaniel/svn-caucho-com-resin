@@ -200,8 +200,9 @@ public class Alarm implements ThreadTask {
   {
     if (_testTime > 0)
       return _testTime;
-    else
+    else {
       return System.currentTimeMillis();
+    }
   }
 
   /**
@@ -323,7 +324,8 @@ public class Alarm implements ThreadTask {
       if (_heapIndex > 0)
 	dequeueImpl(this);
 
-      long wakeTime = delta + getExactTime();
+      // #3548 - getCurrentTime for consistency
+      long wakeTime = delta + getCurrentTime();
       
       _wakeTime = wakeTime;
 
@@ -425,7 +427,8 @@ public class Alarm implements ThreadTask {
   static Alarm extractAlarm()
   {
     synchronized (_queueLock) {
-      long now = getExactTime();
+      // #3548 - getCurrentTime for consistency
+      long now = getCurrentTime();
 
       Alarm []heap = _heap;
 
@@ -455,7 +458,7 @@ public class Alarm implements ThreadTask {
       if (alarm != null)
 	return alarm._wakeTime;
       else
-	return getExactTime() + 120000;
+	return getCurrentTime() + 120000;
     }
   }
 
@@ -720,7 +723,8 @@ public class Alarm implements ThreadTask {
 	  }
 
 	  long next = nextAlarmTime();
-	  long now = getExactTime();
+          // #3548 - getCurrentTime for consistency
+	  long now = getCurrentTime();
 
 	  if (now < next) {
 	    Thread.interrupted();

@@ -398,18 +398,23 @@ public class TransactionManagerImpl
 
     _serverId = 0;
 
+    ArrayList<TransactionImpl> xaList = new ArrayList<TransactionImpl>();
+
     synchronized (_transactionList) {
       for (int i = _transactionList.size() - 1; i >= 0; i--) {
 	WeakReference<TransactionImpl> ref = _transactionList.get(i);
 	TransactionImpl xa = ref.get();
 
-	try {
-	  if (xa != null) {
-	    xa.rollback();
-	  }
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        if (xa != null)
+          xaList.add(xa);
+      }
+    }
+
+    for (TransactionImpl xa : xaList) {
+      try {
+        xa.rollback();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

@@ -13,6 +13,11 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>cron: use getCurrentTime() consistently for Alarm (#3548, rep by mkenney)</li>
+<li>ping: add freeze-timeout to PingThread configuration (#3592, rep by C. Karantzas)</li>
+<li>mod_caucho: use load-balance-connect-timeout for mod_caucho (#3642)</li>
+<li>xa: _transactionList rollback needs to be outside of synchronized (#3571, rep by jacky)</li>
+<li>jni: user-name fix with 64-bit start (#3521, rep by norlab)</li>
 <li>eclipse: server wizard cleanup and enhancement</li>
 <li>eclipse: spaces in path (#3589, rep by Michael Ludwig)</li>
 <li>eclipse: respect http port (#3502, rep by Michael Ludwig)</li>

@@ -63,7 +63,8 @@ public class ContentLengthStream extends StreamImpl {
    *
    * @return the number of bytes read or -1 for the end of the file.
    */
-  public int read(byte []buffer, int offset, int length) throws IOException
+  public int read(byte []buffer, int offset, int length)
+    throws IOException
   {
     if (_length < length)
       length = (int) _length;

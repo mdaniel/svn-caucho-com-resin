@@ -387,6 +387,9 @@ public class HmuxDispatchRequest {
     
       writeString(os, HmuxRequest.HMUX_HEADER, "read-timeout");
       writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceSocketTimeout() / 1000));
+    
+      writeString(os, HmuxRequest.HMUX_HEADER, "connect-timeout");
+      writeString(os, HmuxRequest.HMUX_STRING, "" + (server.getLoadBalanceConnectTimeout() / 1000));
     }
 
     for (int i = 0; i < servers.length; i++) {

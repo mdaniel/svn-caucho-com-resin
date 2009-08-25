@@ -490,6 +490,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   int max_idle_time = -1;
   int fail_recover_time = -1;
   int read_timeout = -1;
+  int connect_timeout = -1;
   char error_page[1024];
   char etag[sizeof(host->etag)];
   int is_valid = 0; /* true if the request completed */
@@ -659,6 +660,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  fail_recover_time = resin_atoi(value);
 	else if (! strcmp(buffer, "read-timeout"))
 	  read_timeout = resin_atoi(value);
+	else if (! strcmp(buffer, "connect-timeout"))
+	  connect_timeout = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
 	  int last_update_time = resin_atoi(value);
 
@@ -719,6 +722,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	      srun->srun->fail_recover_timeout = fail_recover_time;
 	    if (read_timeout > 0)
 	      srun->srun->read_timeout = read_timeout;
+	    if (connect_timeout > 0)
+	      srun->srun->connect_timeout = connect_timeout;
 	  }
 	}
       }
@@ -951,6 +956,10 @@ write_config(config_t *config)
 
       sprintf(buffer, "%d", srun->srun->read_timeout);
       hmux_write_string(&s, HMUX_HEADER, "read-timeout");
+      hmux_write_string(&s, HMUX_STRING, buffer);
+
+      sprintf(buffer, "%d", srun->srun->connect_timeout);
+      hmux_write_string(&s, HMUX_HEADER, "connect-timeout");
       hmux_write_string(&s, HMUX_STRING, buffer);
 
       code = srun->is_backup ? HMUX_SRUN_BACKUP : HMUX_SRUN;
