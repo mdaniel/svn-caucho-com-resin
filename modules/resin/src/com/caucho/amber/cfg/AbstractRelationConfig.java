@@ -134,7 +134,7 @@ abstract class AbstractRelationConfig extends AbstractConfig
     int idCols;
 
     // XXX: jpa/0l48
-    while ((idCols = id.getColumns().size()) == 0) {
+    while ((idCols = id.getKeyCount()) == 0) {
       parentType = parentType.getParentType();
 
       if (parentType == null)
@@ -165,9 +165,9 @@ abstract class AbstractRelationConfig extends AbstractConfig
       if (((ref == null) || ref.equals("")) && size > 1)
         throw error(field, L.l("referencedColumnName is required when more than one @JoinColumn is specified."));
 
-      AmberColumn column = findColumn(id.getColumns(), ref);
+      IdField key = getKey(id.getKeys(), ref);
 
-      if (column == null)
+      if (key == null)
         throw error(field, L.l("referencedColumnName '{0}' does not match any key column in '{1}'.",
                                ref, targetType.getName()));
     }
@@ -237,6 +237,19 @@ abstract class AbstractRelationConfig extends AbstractConfig
 
     throw new ConfigException(L.l("{0}: '{1}' is an unknown field for {2}",
 				  getTargetEntity(), name, getName()));
+  }
+
+  IdField getKey(ArrayList<IdField> keys, String name)
+  {
+    if (keys.size() == 1)
+      return keys.get(0);
+
+    for (IdField key : keys) {
+      if (key.getName().equals(name))
+	return key;
+    }
+
+    return null;
   }
   
 

@@ -354,6 +354,8 @@ public class UserQuery implements AmberQuery {
       firstResult = cacheChunk.getRowCount();
       if (cacheChunk.getRowCount() < chunkSize)
 	maxResults = 0;
+      else if (maxResults < 0)
+        maxResults = LIMIT_INF;
       else
 	maxResults -= firstResult - _firstResult;
 
@@ -362,7 +364,7 @@ public class UserQuery implements AmberQuery {
     }
     else if (maxResults < 0)
       maxResults = LIMIT_INF;
-    
+
     if (maxResults > 0) {
       ResultSet rs;
 

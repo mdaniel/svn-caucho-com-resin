@@ -143,7 +143,7 @@ public class Id {
    */
   public int getKeyCount()
   {
-    return _columns.size();
+    return _keys.size();
   }
 
   /**

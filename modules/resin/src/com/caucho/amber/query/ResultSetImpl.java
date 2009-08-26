@@ -429,7 +429,9 @@ public class ResultSetImpl implements ResultSet {
       else
       */
       if (_rs != null) {
-	return _rs.next();
+	boolean result = _rs.next();
+
+        return result;
       }
       /*
       else if (_userQuery != null) {

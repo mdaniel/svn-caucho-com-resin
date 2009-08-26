@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>amber: query maxResults issues (#3424, rep by Riccardo Cohen)</li>
 <li>web-app: check error case where root-directory with .war expansion is same as root (#3535, rep by voodude)</li>
 <li>security: request and SecurityContext isUserInRole share implementation (#3501, rep by skot)</li>
 <li>cron: use getCurrentTime() consistently for Alarm (#3548, rep by mkenney)</li>

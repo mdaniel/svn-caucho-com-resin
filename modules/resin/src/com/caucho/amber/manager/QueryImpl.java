@@ -158,14 +158,11 @@ public class QueryImpl implements Query {
         _currIndex = 1;
 
         if (n == 0) {
-
           try {
-
             metaData = rs.getMetaData();
 
             if (metaData != null)
               columnCount = metaData.getColumnCount();
-
           } catch (Exception ex) {
             // Below, we work around if DB is not able
             // to retrieve result set meta data. jpa/0t00
@@ -175,7 +172,7 @@ public class QueryImpl implements Query {
           if (columnCount <= 0)
             columnCount = 10000;
 
-          for (int i=1; i <= columnCount; i++) {
+          for (int i = 1; i <= columnCount; i++) {
 
             int columnType = -1;
 
@@ -185,7 +182,6 @@ public class QueryImpl implements Query {
             }
 
             try {
-
               if (isNativeQuery()) {
                 ArrayList<EntityResultConfig> entityResults
                   = _sqlResultSetMapping.getEntityResults();
@@ -288,7 +284,6 @@ public class QueryImpl implements Query {
           }
         }
         else {
-
           row = new Object[n];
 
           for (int i=0; i < n; i++) {
@@ -314,7 +309,6 @@ public class QueryImpl implements Query {
             results.add(row);
         }
         else {
-
           try {
             for (int i=0; i < row.length; i++) {
               Class primitiveType = _primitiveColumns[i];

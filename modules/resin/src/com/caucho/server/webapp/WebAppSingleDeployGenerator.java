@@ -205,7 +205,8 @@ public class WebAppSingleDeployGenerator
     }
 
     if (_rootDirectory == null) {
-      if ((_urlPrefix.equals("/") || _urlPrefix.equals(""))
+      if (_archivePath != null
+          && (_urlPrefix.equals("/") || _urlPrefix.equals(""))
           && _container != null) {
         log.warning(L.l("web-app's root-directory '{0}' must be outside of the '{1}' root-directory when using 'archive-path",
                         _rootDirectory, _container));
