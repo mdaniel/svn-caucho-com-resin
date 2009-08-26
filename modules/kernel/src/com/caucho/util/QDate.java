@@ -1249,7 +1249,9 @@ public class QDate {
         if (MONTH_NAMES[(int) month].equalsIgnoreCase(smonth))
           break;
       }
-      if (month == 12) throw new Exception("Unexpected month: " + month);
+      
+      if (month == 12)
+        throw new Exception("Unexpected month: " + month);
 
       i = scan(string, i, cb, true);
 
@@ -1272,10 +1274,10 @@ public class QDate {
       if (year <= 1600)
         dayOfMonth--;
 
-      long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
-                                 monthToDayOfYear(month, isLeapYear(year)) +
-                                 dayOfMonth - 1) +
-                  timeOfDay);
+      long time = (MS_PER_DAY * (yearToDayOfEpoch(year)
+                                 + monthToDayOfYear(month, isLeapYear(year))
+                                 + dayOfMonth - 1)
+                   + timeOfDay);
 
       try {
         i = scan(string, i, cb, false);
@@ -1480,7 +1482,7 @@ public class QDate {
    */
   private boolean isLeapYear(long year)
   {
-    return ! ((_year % 4) != 0 || (_year % 100) == 0 && (_year % 400) != 0);
+    return ! ((year % 4) != 0 || (year % 100) == 0 && (year % 400) != 0);
   }
 
   private int scanISOInt(String string, int pos, int length, int digits)
@@ -1713,9 +1715,10 @@ public class QDate {
     _year += divFloor(_month, 12);
     _month -= 12 * divFloor(_month, 12);
 
-    _localTimeOfEpoch = MS_PER_DAY * (yearToDayOfEpoch(_year) +
-                                    monthToDayOfYear(_month, isLeapYear(_year)) +
-                                    _dayOfMonth);
+    _localTimeOfEpoch
+      = MS_PER_DAY * (yearToDayOfEpoch(_year)
+                      + monthToDayOfYear(_month, isLeapYear(_year))
+                      + _dayOfMonth);
 
     _localTimeOfEpoch += _ms + 1000 * (_second + 60 * (_minute + 60 * _hour));
 

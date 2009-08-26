@@ -273,7 +273,8 @@ abstract public class AbstractBean<T>
     sb.append(getClass().getSimpleName());
     sb.append("[");
 
-    sb.append(getBeanClass().getSimpleName());
+    if (getBeanClass() != null)
+      sb.append(getBeanClass().getSimpleName());
     sb.append(", {");
 
     ArrayList<Annotation> bindings = new ArrayList<Annotation>(getBindings());

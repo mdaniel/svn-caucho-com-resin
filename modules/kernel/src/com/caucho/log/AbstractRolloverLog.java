@@ -579,7 +579,7 @@ public class AbstractRolloverLog {
     try {
       if (! savedPath.getParent().isDirectory())
 	savedPath.getParent().mkdirs();
-    } catch (Throwable e) {
+    } catch (Exception e) {
       logWarning(L.l("Can't open archive directory {0}",
 		     savedPath.getParent()),
 		 e);
@@ -609,21 +609,21 @@ public class AbstractRolloverLog {
 	  } finally {
 	    try {
 	      out.close();
-	    } catch (Throwable e) {
+	    } catch (Exception e) {
 	      // can't log in log rotation routines
 	    }
 
 	    try {
 	      if (out != os)
 		os.close();
-	    } catch (Throwable e) {
+	    } catch (Exception e) {
 	      // can't log in log rotation routines
 	    }
 	  }
 	}
       }
-    } catch (Throwable e) {
-      logWarning(L.l("Error rotating logs"), e);
+    } catch (Exception e) {
+      logWarning(L.l("Error rotating logs: {0}", e.toString()), e);
     }
 
     try {

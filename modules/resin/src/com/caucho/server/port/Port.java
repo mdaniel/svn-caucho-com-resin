@@ -994,11 +994,6 @@ public class Port
     if (! _lifecycle.toInit())
       return;
 
-    assert(_server != null);
-
-    if (_server instanceof EnvironmentBean)
-      Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
-
     StringBuilder url = new StringBuilder();
 
     if (_protocol != null)
@@ -1207,6 +1202,12 @@ public class Port
 
     boolean isValid = false;
     try {
+
+      assert(_server != null);
+
+      if (_server instanceof EnvironmentBean)
+        Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
+      
       bind();
       postBind();
 

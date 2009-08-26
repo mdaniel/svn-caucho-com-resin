@@ -173,6 +173,9 @@ public class WebApp extends ServletContextImpl
   private boolean _isDynamicDeploy;
   private boolean _isDisableCrossContext;
 
+  // true for jsp compilation from a command line
+  private boolean _isCompileContext;
+
   // Any war-generators.
   private ArrayList<DeployGenerator> _appGenerators
     = new ArrayList<DeployGenerator>();
@@ -837,6 +840,16 @@ public class WebApp extends ServletContextImpl
   public void setDisableCrossContext(boolean isDisable)
   {
     _isDisableCrossContext = isDisable;
+  }
+
+  public void setCompileContext(boolean isCompile)
+  {
+    _isCompileContext = isCompile;
+  }
+
+  public boolean isCompileContext()
+  {
+    return _isCompileContext;
   }
 
   public boolean isVersionAlias()
@@ -2278,12 +2291,14 @@ public class WebApp extends ServletContextImpl
 
       _characterEncoding = CharacterEncoding.getLocalEncoding();
 
-      for (int i = 0; i < _resourceValidators.size(); i++) {
-        Validator validator = _resourceValidators.get(i);
+      if (! _isCompileContext) {
+        for (int i = 0; i < _resourceValidators.size(); i++) {
+          Validator validator = _resourceValidators.get(i);
 
-        validator.validate();
+          validator.validate();
+        }
       }
-
+      
       //Servlet 3.0
       initAnnotated();
     } finally {

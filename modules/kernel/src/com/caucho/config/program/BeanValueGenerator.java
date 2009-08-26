@@ -70,4 +70,9 @@ public class BeanValueGenerator extends ValueGenerator {
     
     return _beanManager.getReference(_bean, type, env);
   }
+
+  public String toString()
+  {
+    return getClass().getName() + "[" + _bean + "]";
+  }
 }

@@ -718,6 +718,8 @@ public class JspCompiler implements EnvironmentBean {
       }
 
       if (app != null) {
+        app.setCompileContext(true);
+        
 	app.init();
 
 	appDir = getWebApp().getAppDir();

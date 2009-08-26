@@ -119,6 +119,10 @@
   <target name="artifacts" depends="init, compat">
     <mkdir dir="artifacts"/>
     <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="ant"/>
+    </antcall>
+    
+    <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
     </antcall>
     

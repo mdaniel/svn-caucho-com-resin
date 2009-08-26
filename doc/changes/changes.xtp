@@ -13,6 +13,10 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jsp: Jspc ant/maven task needs to disable resource-ref validation (#3577, rep by Boris Goykhman)</li>
+<li>jpa: registration of EntityManagerFactory incorrect (#3429, rep by Scott Hernandez)</li>
+<li>jpa: registration of PersistenceContext incorrect (#3622, rep by Jeff Schnitzer)</li>
+<li>server: QDate isLeapYear using _year field instead of argument (#3512, rep by damaan)</li>
 <li>amber: query maxResults issues (#3424, rep by Riccardo Cohen)</li>
 <li>web-app: check error case where root-directory with .war expansion is same as root (#3535, rep by voodude)</li>
 <li>security: request and SecurityContext isUserInRole share implementation (#3501, rep by skot)</li>
