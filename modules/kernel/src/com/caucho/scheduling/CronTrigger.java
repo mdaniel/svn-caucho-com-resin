@@ -212,21 +212,22 @@ public class CronTrigger implements Trigger {
           }
 
           if ((dayOfWeek < 0) || (dayOfWeek > 6)) {
-            throw new ConfigException(L.l("'{0}' is an illegal cron range.",
+            throw new ConfigException(L.l(
+                "'{0}' is an illegal cron range (day of week out of range)",
                 range));
           }
 
           if ((min < 1) || (min > 5)) {
-            throw new ConfigException(L.l("'{0}' is an illegal cron range",
-                range));
+            throw new ConfigException(L.l(
+                "'{0}' is an illegal cron range (invalid day of week)", range));
           }
 
           if (i < range.length()) {
             if ((i < (range.length() - 1)) && (character == ',')) {
               i++;
             } else {
-              throw new ConfigException(L.l("'{0}' is an illegal cron range",
-                  range));
+              throw new ConfigException(L.l(
+                  "'{0}' is an illegal cron range (invalid syntax)", range));
             }
           }
 
@@ -252,7 +253,8 @@ public class CronTrigger implements Trigger {
           }
 
           if ((dayOfMonth < 0) || (dayOfMonth > 30)) {
-            throw new ConfigException(L.l("'{0}' is an illegal cron range",
+            throw new ConfigException(L.l(
+                "'{0}' is an illegal cron range (day of month out of range)",
                 range));
           }
 
@@ -265,8 +267,11 @@ public class CronTrigger implements Trigger {
             }
 
             if ((increment < rangeMin) && (increment > rangeMax)) {
-              throw new ConfigException(L.l("'{0}' is an illegal cron range",
-                  range));
+              throw new ConfigException(
+                  L
+                      .l(
+                          "'{0}' is an illegal cron range (increment value out of range)",
+                          range));
             }
           }
 
@@ -282,13 +287,14 @@ public class CronTrigger implements Trigger {
             }
 
             if ((dayOfWeek < 0) || (dayOfWeek > 6)) {
-              throw new ConfigException(L.l("'{0}' is an illegal cron range",
+              throw new ConfigException(L.l(
+                  "'{0}' is an illegal cron range (day of week out of range)",
                   range));
             }
 
             if (min != 0) {
-              throw new ConfigException(L.l("'{0}' is an illegal cron range",
-                  range));
+              throw new ConfigException(L.l(
+                  "'{0}' is an illegal cron range (invalid syntax)", range));
             }
           }
 
@@ -296,15 +302,15 @@ public class CronTrigger implements Trigger {
             if ((i < (range.length() - 1)) && (character == ',')) {
               i++;
             } else {
-              throw new ConfigException(L.l("'{0}' is an illegal cron range",
-                  range));
+              throw new ConfigException(L.l(
+                  "'{0}' is an illegal cron range (invalid syntax)", range));
             }
           }
 
           continue;
         } else {
-          throw new ConfigException(L
-              .l("'{0}' is an illegal cron range", range));
+          throw new ConfigException(L.l(
+              "'{0}' is an illegal cron range (invalid syntax)", range));
         }
       }
 
@@ -330,8 +336,9 @@ public class CronTrigger implements Trigger {
         }
 
         if ((increment < rangeMin) && (increment > rangeMax)) {
-          throw new ConfigException(L
-              .l("'{0}' is an illegal cron range", range));
+          throw new ConfigException(L.l(
+              "'{0}' is an illegal cron range (increment value out of range)",
+              range));
         }
       }
 
@@ -339,8 +346,8 @@ public class CronTrigger implements Trigger {
         if ((i < (range.length() - 1)) && (character == ',')) {
           i++;
         } else {
-          throw new ConfigException(L
-              .l("'{0}' is an illegal cron range", range));
+          throw new ConfigException(L.l(
+              "'{0}' is an illegal cron range (invalid syntax)", range));
         }
       }
 
