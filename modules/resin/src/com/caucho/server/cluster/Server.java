@@ -154,7 +154,7 @@ public class Server extends ProtocolDispatchServer
 
   private HostContainer _hostContainer;
 
-  private String _staging = "default";
+  private String _stage = "default";
   
   private String _serverHeader;
 
@@ -804,22 +804,22 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
-   * Sets the staging id
+   * Sets the stage id
    */
-  public void setStaging(String staging)
+  public void setStage(String stage)
   {
-    if (staging == null || "".equals(staging))
-      _staging = "staging";
+    if (stage == null || "".equals(stage))
+      _stage = "default";
     else
-      _staging = staging;
+      _stage = stage;
   }
 
   /**
-   * Returns the staging id
+   * Returns the stage id
    */
-  public String getStaging()
+  public String getStage()
   {
-    return _staging;
+    return _stage;
   }
 
   /**
@@ -1904,6 +1904,7 @@ public class Server extends ProtocolDispatchServer
         }
 
         log.info("user.name  = " + System.getProperty("user.name"));
+        log.info("stage = " + _stage);
       }
 
       _lifecycle.toStarting();

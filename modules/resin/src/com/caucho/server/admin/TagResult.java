@@ -29,32 +29,44 @@
 package com.caucho.server.admin;
 
 import java.io.Serializable;
+import java.net.URL;
 
-public class QueryTagsQuery implements Serializable {
-  private String _pattern;
+public class TagResult implements Serializable {
+  private String _tag;
+  private String _root;
 
-  public QueryTagsQuery()
+  public TagResult()
   {
   }
 
-  public QueryTagsQuery(String pattern)
+  public TagResult(String tag, String root)
   {
-    _pattern = pattern;
+    _tag = tag;
+    _root = root;
   }
 
-  public String getPattern()
+  public String getTag()
   {
-    return _pattern;
+    return _tag;
   }
 
-  public void setPattern(String pattern)
+  public void setTag(String tag)
   {
-    _pattern = pattern;
+    _tag = tag;
   }
 
-  @Override
+  public String getRoot()
+  {
+    return _root;
+  }
+
+  public void setRoot(String root)
+  {
+    _root = root;
+  }
+
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _pattern + "]";
+    return (getClass().getSimpleName() + "[" + _tag + ",root=" + _root + "]");
   }
 }

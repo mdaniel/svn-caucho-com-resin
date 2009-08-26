@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -187,6 +187,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   private InputStream _waitIn;
 
   private Socket _pingSocket;
+
+  private String _stage = null;
 
   /**
    * Creates a new resin server.
@@ -947,6 +949,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       _server = clusterServer.startServer();
 
+      if (_stage != null) 
+        _server.setStage(_stage);
+
       _server.start();
     }
 
@@ -1358,6 +1363,16 @@ public class Resin implements EnvironmentBean, SchemaBean
                || argv[i].startsWith("-X")) {
         i += 1;
       }
+      else if (argv[i].equals("-stage")
+               || argv[i].equals("--stage")) {
+        _stage = argv[i + 1];
+        i += 2;
+      }
+      else if (argv[i].equals("-preview")
+               || argv[i].equals("--preview")) {
+        _stage = "preview";
+        i += 1;
+      }
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();
@@ -1379,6 +1394,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     System.err.println(L().l("   -server <id>          : select a <server> to run"));
     System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
     System.err.println(L().l("   -verbose              : print verbose starting information"));
+    System.err.println(L().l("   -preview              : run as a preview server"));
   }
 
   /**

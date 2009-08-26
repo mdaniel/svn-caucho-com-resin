@@ -1,3 +1,32 @@
+/*
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
 package com.caucho.boot;
 
 import com.caucho.Version;
@@ -214,17 +243,17 @@ class WatchdogArgs
       }
       else if ("-dynamic-server".equals(arg)
 	       || "--dynamic-server".equals(arg)) {
-	String []str = argv[i + 1].split(":");
+        String []str = argv[i + 1].split(":");
 
-	if (str.length != 3) {
-	  System.out.println(L().l("-dynamic server requires 'cluster:address:port' at '{0}'", argv[i + 1]));
-	  System.exit(1);
-	}
+        if (str.length != 3) {
+          System.out.println(L().l("-dynamic server requires 'cluster:address:port' at '{0}'", argv[i + 1]));
+          System.exit(1);
+        }
 
-	_isDynamicServer = true;
-	_dynamicCluster = str[0];
-	_dynamicAddress = str[1];
-	_dynamicPort = Integer.parseInt(str[2]);
+        _isDynamicServer = true;
+        _dynamicCluster = str[0];
+        _dynamicAddress = str[1];
+        _dynamicPort = Integer.parseInt(str[2]);
 
         i++;
       }
@@ -256,6 +285,13 @@ class WatchdogArgs
         _rootDirectory = Vfs.lookup(argv[i + 1]);
         i++;
       }
+      else if ("-stage".equals(arg) || "--stage".equals(arg)) {
+        // skip stage
+        i++;
+      }
+      else if ("-preview".equals(arg) || "--preview".equals(arg)) {
+        // pass to server
+      }
       else if ("-watchdog-port".equals(arg) || "--watchdog-port".equals(arg)) {
         _watchdogPort = Integer.parseInt(argv[i + 1]);
         i++;
@@ -269,31 +305,31 @@ class WatchdogArgs
         Logger.getLogger("").setLevel(Level.CONFIG);
       }
       else if ("console".equals(arg)) {
-	_startMode = StartMode.CONSOLE;
+        _startMode = StartMode.CONSOLE;
       }
       else if ("status".equals(arg)) {
-	_startMode = StartMode.STATUS;
+        _startMode = StartMode.STATUS;
       }
       else if ("start".equals(arg)) {
-	_startMode = StartMode.START;
+        _startMode = StartMode.START;
       }
       else if ("stop".equals(arg)) {
-	_startMode = StartMode.STOP;
+        _startMode = StartMode.STOP;
       }
       else if ("kill".equals(arg)) {
-	_startMode = StartMode.KILL;
+        _startMode = StartMode.KILL;
       }
       else if ("restart".equals(arg)) {
-	_startMode = StartMode.RESTART;
+        _startMode = StartMode.RESTART;
       }
       else if ("shutdown".equals(arg)) {
-	_startMode = StartMode.SHUTDOWN;
+        _startMode = StartMode.SHUTDOWN;
       }
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();
-	usage();
-	System.exit(1);
+        usage();
+        System.exit(1);
       }
     }
 
@@ -336,6 +372,7 @@ class WatchdogArgs
     System.err.println(L().l("   -server <id>          : select a <server> to run"));
     System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
     System.err.println(L().l("   -verbose              : print verbose starting information"));
+    System.err.println(L().l("   -preview              : run as a preview server"));
   }
 
   private String []fillArgv(String []argv)
@@ -345,20 +382,20 @@ class WatchdogArgs
     try {
       MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
       ObjectName name = new ObjectName("java.lang:type=Runtime");
-      
+
       String []jvmArgs
-	= (String []) mbeanServer.getAttribute(name, "InputArguments");
+        = (String []) mbeanServer.getAttribute(name, "InputArguments");
 
       if (jvmArgs != null) {
         for (int i = 0; i < jvmArgs.length; i++) {
           String arg = jvmArgs[i];
 
-	  if (args.contains(arg))
-	    continue;
+          if (args.contains(arg))
+            continue;
 
-	  if (arg.startsWith("-Djava.class.path=")) {
-	    // IBM JDK
-	  }
+          if (arg.startsWith("-Djava.class.path=")) {
+            // IBM JDK
+          }
           else if (arg.startsWith("-D"))
             args.add("-J" + arg);
         }

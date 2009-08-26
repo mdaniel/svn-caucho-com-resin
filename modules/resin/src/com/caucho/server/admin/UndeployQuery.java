@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -7,8 +7,9 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,38 +24,50 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
 package com.caucho.server.admin;
 
-import java.io.Serializable;
+import java.util.*;
 
-public class QueryTagsQuery implements Serializable {
-  private String _pattern;
+public class UndeployQuery implements java.io.Serializable
+{
+  private String _tag;
+  private String _user;
+  private String _message;
 
-  public QueryTagsQuery()
+  private UndeployQuery()
   {
   }
 
-  public QueryTagsQuery(String pattern)
+  public UndeployQuery(String tag,
+                       String user,
+                       String message)
   {
-    _pattern = pattern;
+    _tag = tag;
+    _user = user;
+    _message = message;
   }
 
-  public String getPattern()
+  public String getTag()
   {
-    return _pattern;
+    return _tag;
   }
 
-  public void setPattern(String pattern)
+  public String getMessage()
   {
-    _pattern = pattern;
+    return _message;
+  }
+
+  public String getUser()
+  {
+    return _user;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _pattern + "]";
+    return getClass().getSimpleName() + "[" + _tag + "," + _user + "]";
   }
 }

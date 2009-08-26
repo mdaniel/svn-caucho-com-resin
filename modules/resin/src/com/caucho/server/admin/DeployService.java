@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
@@ -121,8 +122,8 @@ public class DeployService extends SimpleActor
 
     if (commitList.getCommitList() != null) {
       for (String commit : commitList.getCommitList()) {
-	if (! _repository.exists(commit))
-	  uncommittedList.add(commit);
+        if (! _repository.exists(commit))
+          uncommittedList.add(commit);
       }
     }
 
@@ -142,7 +143,7 @@ public class DeployService extends SimpleActor
   {
     ArrayList<WebAppQuery> apps = new ArrayList<WebAppQuery>();
 
-    String staging = _server.getStaging();
+    String stage = _server.getStage();
 
     for (HostController host : _server.getHostControllers()) {
       if (listQuery.getHost().equals(host.getName())) {
@@ -154,7 +155,7 @@ public class DeployService extends SimpleActor
           if (name.startsWith("/"))
             name = name.substring(1);
 
-          q.setTag(staging + "/wars/" + host.getName() + "/" + name);
+          q.setTag(stage + "/wars/" + host.getName() + "/" + name);
 
           q.setHost(host.getName());
           q.setUrl(webApp.getURL());
@@ -205,55 +206,20 @@ public class DeployService extends SimpleActor
                            String from,
                            QueryTagsQuery tagsQuery)
   {
-    ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
+    ArrayList<TagResult> tags = new ArrayList<TagResult>();
+
+    Pattern pattern = Pattern.compile(tagsQuery.getPattern());
 
     for (Map.Entry<String, RepositoryTagEntry> entry : 
          _repository.getTagMap().entrySet()) {
       String tag = entry.getKey();
-      int p = 0;
 
-      if (tagsQuery.getStaging() != null &&
-          ! tag.startsWith(tagsQuery.getStaging() + '/', p))
-        continue;
-
-      p = tag.indexOf('/', p);
-
-      if (p < 0)
-        continue;
-
-      if (tagsQuery.getType() != null &&
-          ! tag.startsWith(tagsQuery.getType() + '/', p + 1))
-        continue;
-
-      p = tag.indexOf('/', p + 1);
-
-      if (p < 0)
-        continue;
-
-      if (tagsQuery.getHost() != null &&
-          ! tag.startsWith(tagsQuery.getHost() + '/', p + 1))
-        continue;
-
-      p = tag.indexOf('/', p + 1);
-
-      if (p < 0)
-        continue;
-
-      // allow versions
-      if (tagsQuery.getName() != null &&
-          ! (tag.endsWith(tagsQuery.getName())
-             || tag.startsWith(tagsQuery.getName() + '-', p + 1)))
-        continue;
-
-      TagQuery tagQuery = new TagQuery();
-      tagQuery.setTag(tag);
-      tagQuery.setRoot(entry.getValue().getRoot());
-
-      tags.add(tagQuery);
+      if (pattern.matcher(tag).matches())
+        tags.add(new TagResult(tag, entry.getValue().getRoot()));
     }
 
     getBrokerStream()
-      .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
+      .queryResult(id, from, to, tags.toArray(new TagResult[tags.size()]));
 
     return true;
   }
@@ -364,7 +330,7 @@ public class DeployService extends SimpleActor
   public boolean controllerUndeploy(long id,
                                     String to,
                                     String from,
-                                    RemoveTagQuery query)
+                                    UndeployQuery query)
   {
     String status = undeploy(query.getTag(), query.getUser(), query.getMessage());
 
@@ -399,6 +365,19 @@ public class DeployService extends SimpleActor
     boolean result
       = _repository.setTag(tag, entry.getRoot(), query.getUser(),
 			   query.getMessage(), query.getVersion());
+    
+    getBrokerStream().queryResult(id, from, to, result);
+  }
+
+  @QuerySet
+  public void removeTag(long id,
+                        String to,
+                        String from,
+                        RemoveTagQuery query)
+  {
+    boolean result = _repository.removeTag(query.getTag(), 
+                                           query.getUser(), 
+                                           query.getMessage());
     
     getBrokerStream().queryResult(id, from, to, result);
   }
@@ -543,7 +522,7 @@ public class DeployService extends SimpleActor
 
   @QuerySet
   public boolean sendCommitQuery(long id, String to, String from,
-				  DeployCommitQuery query)
+                                 DeployCommitQuery query)
   {
     String tag = query.getTag();
     String hex = query.getHex();
@@ -559,7 +538,7 @@ public class DeployService extends SimpleActor
 
   @QuerySet
   public boolean sendAddFileQuery(long id, String to, String from,
-				   DeployAddFileQuery query)
+                                  DeployAddFileQuery query)
   {
     String tag = query.getTag();
     String name = query.getName();
@@ -605,7 +584,7 @@ public class DeployService extends SimpleActor
     if (p < 0 || q < 0 || r < 0) 
       return L.l("'{0}' is an unknown type", gitPath);
 
-    String staging = gitPath.substring(0, p);
+    String stage = gitPath.substring(0, p);
     String type = gitPath.substring(p + 1, q);
     String host = gitPath.substring(q + 1, r);
     String name = gitPath.substring(r + 1);
@@ -651,7 +630,7 @@ public class DeployService extends SimpleActor
     if (p < 0 || q < 0 || r < 0) 
       return L.l("'{0}' is an unknown type", tag);
 
-    String staging = tag.substring(0, p);
+    String stage = tag.substring(0, p);
     String type = tag.substring(p + 1, q);
     String host = tag.substring(q + 1, r);
     String name = tag.substring(r + 1);
@@ -710,7 +689,7 @@ public class DeployService extends SimpleActor
     if (p < 0 || q < 0 || r < 0) 
       return null;
 
-    String staging = tag.substring(0, p);
+    String stage = tag.substring(0, p);
     String type = tag.substring(p + 1, q);
     String host = tag.substring(q + 1, r);
     String name = tag.substring(r + 1);

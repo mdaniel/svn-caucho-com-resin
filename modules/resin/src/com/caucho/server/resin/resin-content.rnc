@@ -677,8 +677,8 @@ r_server-Content =
   & (attribute socket-timeout { r_period-Type }
      | element socket-timeout { r_period-Type })?
 
-  & (attribute staging { string }
-     | element staging { string })?
+  & (attribute stage { string }
+     | element stage { string })?
 
   & (attribute system-class-loader { r_class-Type }
      | element system-class-loader { r_class-Type })?

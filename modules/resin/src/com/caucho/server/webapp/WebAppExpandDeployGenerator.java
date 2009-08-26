@@ -104,14 +104,14 @@ public class WebAppExpandDeployGenerator
       
       String hostName = webAppContainer.getHostName();
       if ("".equals(hostName))
-	hostName = "default";
+        hostName = "default";
 
-      String staging = "default";
+      String stage = "default";
 
       if (server != null)
-        staging = server.getStaging();
+        stage = server.getStage();
     
-      setRepositoryTag(staging + "/wars/" + hostName);
+      setRepositoryTag(stage + "/wars/" + hostName);
       
       setEntryNamePrefix("/");
     }
@@ -387,10 +387,10 @@ public class WebAppExpandDeployGenerator
 
     if (! baseName.equals(contextPath)) {
       WebAppController versionController
-	= _container.getWebAppGenerator().findController(baseName);
+        = _container.getWebAppGenerator().findController(baseName);
 
       if (versionController instanceof WebAppVersioningController) {
-	((WebAppVersioningController) versionController).setModified(true);
+        ((WebAppVersioningController) versionController).setModified(true);
       }
     }
 
@@ -425,9 +425,9 @@ public class WebAppExpandDeployGenerator
       }
 
       if (controller.getRepositoryTag() == null) {
-	String tag = "wars/default/" + rootDirectory.getTail();
-	
-	controller.setRepositoryTag(tag);
+        String tag = "wars/default/" + rootDirectory.getTail();
+
+        controller.setRepositoryTag(tag);
       }
 
       controller.setStartupMode(getStartupMode());

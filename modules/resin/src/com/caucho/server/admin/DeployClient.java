@@ -158,25 +158,43 @@ public class DeployClient
                           String message,
                           HashMap<String,String> extraAttr)
   {
-    RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
+    UndeployQuery query = new UndeployQuery(tag, user, message);
 
     return (Boolean) querySet(query);
   }
 
   /**
-   * Undeploys a tag
+   * Copies a tag
    *
-   * @param tag symbolic name of the jar file to add
+   * @param tag the new tag to create
+   * @param sourceTag the source tag from which to copy
    * @param user user name for the commit message
    * @param message the commit message
    */
   public Boolean copyTag(String tag,
                          String sourceTag,
-			 String user,
-			 String message,
-			 String version)
+                         String user,
+                         String message,
+                         String version)
   {
-    CopyTagQuery query = new CopyTagQuery(tag, sourceTag, user, message, version);
+    CopyTagQuery query = 
+      new CopyTagQuery(tag, sourceTag, user, message, version);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * deletes a tag from the repository
+   *
+   * @param tag the tag to remove
+   * @param user user name for the commit message
+   * @param message the commit message
+   */
+  public Boolean removeTag(String tag,
+                           String user,
+                           String message)
+  {
+    RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
 
     return (Boolean) querySet(query);
   }
@@ -370,9 +388,6 @@ public class DeployClient
     return (String) querySet(query);
   }
 
-  /**
-   * Public for QA, but not normally exposed.
-   */
   private String commit(String tag,
                         String sha1,
                         String user,
@@ -411,14 +426,11 @@ public class DeployClient
     return (TagQuery []) queryGet(new ListTagsQuery(host));
   }
 
-  public TagQuery []queryTags(String staging, 
-                              String type, 
-                              String host, 
-                              String name)
+  public TagResult []queryTags(String pattern)
   {
-    QueryTagsQuery query = new QueryTagsQuery(staging, type, host, name);
+    QueryTagsQuery query = new QueryTagsQuery(pattern);
 
-    return (TagQuery []) queryGet(query);
+    return (TagResult []) queryGet(query);
   }
 
   private Serializable queryGet(Serializable query)
@@ -441,7 +453,7 @@ public class DeployClient
     return createTag("default", type, host, name);
   }
 
-  private String createTag(String staging, 
+  private String createTag(String stage, 
                            String type, 
                            String host, 
                            String name)
@@ -449,7 +461,7 @@ public class DeployClient
     while (name.startsWith("/"))
       name = name.substring(1);
     
-    return staging + "/" + type + "/" + host + "/" + name;
+    return stage + "/" + type + "/" + host + "/" + name;
   }
 
   @Override

@@ -45,11 +45,11 @@ public class DeployCommitQuery implements java.io.Serializable
   }
 
   public DeployCommitQuery(String tag,
-			   String hex,
-			   String user,
-			   String message,
-			   String version,
-			   HashMap<String,String> attr)
+                           String hex,
+                           String user,
+                           String message,
+                           String version,
+                           HashMap<String,String> attr)
   {
     _tag = tag;
     _hex = hex;
