@@ -57,7 +57,8 @@ import com.caucho.vfs.WriteStream;
 abstract public class ExpandDeployController<I extends DeployInstance>
   extends DeployController<I> {
   private static final L10N L = new L10N(ExpandDeployController.class);
-  private static final Logger log = Log.open(ExpandDeployController.class);
+  private static final Logger log
+    = Logger.getLogger(ExpandDeployController.class.getName());
 
   private Object _archiveExpandLock = new Object();
 

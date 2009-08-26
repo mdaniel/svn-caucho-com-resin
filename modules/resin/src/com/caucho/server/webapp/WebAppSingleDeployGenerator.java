@@ -29,11 +29,13 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ public class WebAppSingleDeployGenerator
   extends DeployGenerator<WebAppController>
   implements EnvironmentListener
 {
+  private static final L10N L = new L10N(WebAppSingleDeployGenerator.class);
   private static final Logger log
     = Logger.getLogger(WebAppSingleDeployGenerator.class.getName());
 
@@ -189,20 +192,29 @@ public class WebAppSingleDeployGenerator
       return;
 
     String appDir = _config.getDocumentDirectory();
-
-    if (appDir == null)
-      appDir = "./" + _urlPrefix;
-
-    if (_rootDirectory == null) {
-      _rootDirectory = PathBuilder.lookupPath(appDir, null,
-					      _container.getDocumentDirectory());
-    }
-
     String archivePath = _config.getArchivePath();
 
     if (archivePath != null) {
       _archivePath = PathBuilder.lookupPath(archivePath, null,
-					      _container.getRootDirectory());
+                                            _container.getRootDirectory());
+    }
+
+
+    if (appDir == null) {
+      appDir = "./" + _urlPrefix;
+    }
+
+    if (_rootDirectory == null) {
+      if ((_urlPrefix.equals("/") || _urlPrefix.equals(""))
+          && _container != null) {
+        log.warning(L.l("web-app's root-directory '{0}' must be outside of the '{1}' root-directory when using 'archive-path",
+                        _rootDirectory, _container));
+
+        appDir = "./ROOT";
+      }
+      
+      _rootDirectory = PathBuilder.lookupPath(appDir, null,
+                                              _container.getDocumentDirectory());
     }
     
     _controller = new WebAppController(_urlPrefix, _urlPrefix,

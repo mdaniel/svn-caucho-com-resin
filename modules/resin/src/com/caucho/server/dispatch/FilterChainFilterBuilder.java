@@ -80,6 +80,6 @@ public class FilterChainFilterBuilder extends FilterChainBuilder {
    */
   public FilterChain build(FilterChain next, Invocation invocation)
   {
-    return new FilterFilterChain(next, _filter);
+    return new FilterFilterChain(next, _filter, true);
   }
 }
