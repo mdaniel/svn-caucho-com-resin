@@ -662,9 +662,10 @@ abstract public class AbstractHttpResponse {
   {
     if (_responseStream.isCommitted())
       return true;
-
-    if (_contentLength >= 0
-	&& _contentLength <= _responseStream.getContentLength()) {
+    
+    // server/05a7
+    if (_contentLength > 0
+	    && _contentLength <= _responseStream.getContentLength()) {
       return true;
     }
 
