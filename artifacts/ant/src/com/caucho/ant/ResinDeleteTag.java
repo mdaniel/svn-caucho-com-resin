@@ -34,6 +34,7 @@ import java.io.IOException;
 
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.TagResult;
 import com.caucho.vfs.Vfs;
 
 import org.apache.tools.ant.AntClassLoader;
@@ -41,51 +42,43 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.Path;
 
 /**
- * Ant task to move staged Resin applications deployed via the 
- * ResinDeployWar task to production.
+ * Ant task to delete a tag in the repository.  The tag may be specified
+ * explicitly by the "tag" attribute or constructed using the stage,
+ * type, host, context root, and version attributes.
  */
-public class ResinUnstage extends ResinDeployClientTask {
-  private String _staging = "staging";
-  private String _production = "default";
+public class ResinDeleteTag extends ResinDeployClientTask {
+  private String _tag;
 
   /**
    * For ant.
    **/
-  public ResinUnstage()
+  public ResinDeleteTag()
   {
   }
 
-  public void setStaging(String staging)
+  public void setTag(String tag)
   {
-    _staging = staging;
-  }
-
-  public void setProduction(String production)
-  {
-    _production = production;
-  }
-
-  @Override
-  protected String getTaskName()
-  {
-    return "resin-unstage";
+    _tag = tag;
   }
 
   @Override
   protected void validate()
     throws BuildException
   {
-    if (getContextRoot() == null)
-      throw new BuildException("contextRoot is required by " + getTaskName());
+    if (_tag == null && getContextRoot() == null)
+      throw new BuildException("tag or contextRoot is required by " + 
+                               getTaskName());
   }
 
   @Override
   protected void doTask(DeployClient client)
     throws BuildException
   {
-    String oldTag = getVersionedWarTag(_staging);
-    String newTag = getVersionedWarTag(_production);
+    String tag = _tag;
 
-    client.copyTag(newTag, oldTag, getUser(), getCommitMessage(), getVersion());
+    if (tag == null)
+      tag = buildVersionedWarTag();
+
+    client.removeTag(tag, getUser(), getCommitMessage());
   }
 }

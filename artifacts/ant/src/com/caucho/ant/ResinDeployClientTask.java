@@ -38,17 +38,20 @@ import com.caucho.vfs.Vfs;
 
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
-public abstract class ResinDeployClientTask {
+public abstract class ResinDeployClientTask extends Task {
   private String _server;
   private int _port = -1;
   private String _user;
   private String _message;
   private String _password;
-  private String _version;
+
+  private String _stage = "default";
   private String _virtualHost = "default";
-  private String _contextRoot = null;
+  private String _contextRoot;
+  private String _version;
 
   public void setServer(String server)
   {
@@ -68,26 +71,6 @@ public abstract class ResinDeployClientTask {
   public int getPort()
   {
     return _port;
-  }
-
-  public void setContextRoot(String contextRoot)
-  {
-    _contextRoot = contextRoot;
-  }
-
-  public String getContextRoot()
-  {
-    return _contextRoot;
-  }
-
-  public void setCommitMessage(String message)
-  {
-    _message = message;
-  }
-
-  public String getCommitMessage()
-  {
-    return _message;
   }
 
   public void setUser(String user)
@@ -110,14 +93,24 @@ public abstract class ResinDeployClientTask {
     return _password;
   }
 
-  public void setVersion(String version)
+  public void setCommitMessage(String message)
   {
-    _version = version;
+    _message = message;
   }
 
-  public String getVersion()
+  public String getCommitMessage()
   {
-    return _version;
+    return _message;
+  }
+
+  public void setStage(String stage)
+  {
+    _stage = stage;
+  }
+
+  public String getStage()
+  {
+    return _stage;
   }
 
   public void setVirtualHost(String virtualHost)
@@ -130,20 +123,53 @@ public abstract class ResinDeployClientTask {
     return _virtualHost;
   }
 
-  protected String getWarTag(String prefix)
+  public void setContextRoot(String contextRoot)
   {
-    return prefix + "/wars/" + _virtualHost + "/" + _contextRoot;
+    _contextRoot = contextRoot;
   }
 
-  protected String getVersionedWarTag(String prefix)
+  public String getContextRoot()
   {
-    if (_version != null)
-      return getWarTag(prefix) + "-" + _version;
-
-    return getWarTag(prefix);
+    return _contextRoot;
   }
 
-  protected abstract String getTaskName();
+  public void setVersion(String version)
+  {
+    _version = version;
+  }
+
+  public String getVersion()
+  {
+    return _version;
+  }
+
+  protected String buildWarTag()
+  {
+    return buildWarTag(_stage, _virtualHost, _contextRoot);
+  }
+
+  protected String buildWarTag(String stage, 
+                               String host, 
+                               String contextRoot)
+  {
+    return stage + "/wars/" + host + "/" + contextRoot;
+  }
+
+  protected String buildVersionedWarTag()
+  {
+    return buildVersionedWarTag(_stage, _virtualHost, _contextRoot, _version);
+  }
+
+  protected String buildVersionedWarTag(String stage, 
+                                        String host, 
+                                        String contextRoot, 
+                                        String version)
+  {
+    if (version != null)
+      return buildWarTag(stage, host, contextRoot) + '-' + version;
+
+    return buildWarTag(stage, host, contextRoot);
+  }
 
   protected void validate()
     throws BuildException
@@ -164,6 +190,7 @@ public abstract class ResinDeployClientTask {
   /**
    * Executes the ant task.
    **/
+  @Override
   public void execute()
     throws BuildException
   {

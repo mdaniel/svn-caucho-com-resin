@@ -34,7 +34,7 @@ import java.io.IOException;
 
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.admin.DeployClient;
-import com.caucho.server.admin.TagQuery;
+import com.caucho.server.admin.TagResult;
 import com.caucho.vfs.Vfs;
 
 import org.apache.tools.ant.AntClassLoader;
@@ -46,8 +46,8 @@ import org.apache.tools.ant.types.Path;
  * ResinDeployWar task to production.
  */
 public class ResinQueryTags extends ResinDeployClientTask {
-  private String _staging = "default";
-  private String _type = "wars";
+  private String _pattern = "";
+  private boolean _printValues = false;
 
   /**
    * For ant.
@@ -56,65 +56,51 @@ public class ResinQueryTags extends ResinDeployClientTask {
   {
   }
 
-  public void setStaging(String staging)
+  public void setPattern(String pattern)
   {
-    if ("*".equals(staging))
-      _staging = null;
-    else
-      _staging = staging;
+    _pattern = pattern;
   }
 
-  public String getStaging()
+  public String getPattern()
   {
-    return _staging;
+    return _pattern;
   }
 
-  public void setType(String type)
+  public void setPrintValues(boolean printValues)
   {
-    if ("*".equals(type))
-      _type = null;
-    else
-      _type = type;
+    _printValues = printValues;
   }
 
-  public String getType()
+  public boolean getPrintValues()
   {
-    return _type;
+    return _printValues;
   }
   
   @Override
-  public void setVirtualHost(String virtualHost)
+  protected void validate()
+    throws BuildException
   {
-    if ("*".equals(virtualHost))
-      super.setVirtualHost(null);
-    else
-      super.setVirtualHost(virtualHost);
-  }
-
-  @Override
-  public void setContextRoot(String contextRoot)
-  {
-    if ("*".equals(contextRoot))
-      super.setContextRoot(null);
-    else
-      super.setContextRoot(contextRoot);
-  }
-
-  @Override
-  protected String getTaskName()
-  {
-    return "resin-query-tags";
+    if (_pattern == null && getContextRoot() == null)
+      throw new BuildException("pattern or contextRoot is required by " 
+                               + getTaskName());
   }
 
   @Override
   protected void doTask(DeployClient client)
     throws BuildException
   {
-    TagQuery []tags = 
-      client.queryTags(_staging, _type, getVirtualHost(), getContextRoot());
+    String pattern = _pattern;
 
-    for (TagQuery tag : tags) {
-      System.out.println(tag.getTag());
+    if (pattern == null)
+      pattern = buildVersionedWarTag();
+
+    TagResult []tags = client.queryTags(pattern);
+
+    for (TagResult tag : tags) {
+      if (_printValues) 
+        System.out.println(tag.getTag() + " -> " + tag.getRoot());
+      else
+        System.out.println(tag.getTag());
     }
   }
 }
