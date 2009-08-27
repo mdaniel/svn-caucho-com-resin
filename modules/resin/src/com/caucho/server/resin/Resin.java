@@ -1363,15 +1363,23 @@ public class Resin implements EnvironmentBean, SchemaBean
                || argv[i].startsWith("-X")) {
         i += 1;
       }
-      else if (argv[i].equals("-stage")
-               || argv[i].equals("--stage")) {
+      else if ("-stage".equals(argv[i])
+               || "--stage".equals(argv[i])) {
         _stage = argv[i + 1];
         i += 2;
       }
-      else if (argv[i].equals("-preview")
-               || argv[i].equals("--preview")) {
+      else if ("-preview".equals(argv[i])
+               || "--preview".equals(argv[i])) {
         _stage = "preview";
         i += 1;
+      }
+      else if ("-debug-port".equals(argv[i])
+               || "--debug-port".equals(argv[i])) {
+        i += 2;
+      }
+      else if ("-jmx-port".equals(argv[i])
+               || "--jmx-port".equals(argv[i])) {
+        i += 2;
       }
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));

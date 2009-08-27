@@ -242,7 +242,7 @@ class WatchdogArgs
         i++;
       }
       else if ("-dynamic-server".equals(arg)
-	       || "--dynamic-server".equals(arg)) {
+               || "--dynamic-server".equals(arg)) {
         String []str = argv[i + 1].split(":");
 
         if (str.length != 3) {
@@ -297,8 +297,14 @@ class WatchdogArgs
         i++;
       }
       else if (arg.startsWith("-J")
-	       || arg.startsWith("-D")
-	       || arg.startsWith("-X")) {
+               || arg.startsWith("-D")
+               || arg.startsWith("-X")) {
+      }
+      else if ("-debug-port".equals(arg) || "--debug-port".equals(arg)) {
+        i++;
+      }
+      else if ("-jmx-port".equals(arg) || "--jmx-port".equals(arg)) {
+        i++;
       }
       else if ("-verbose".equals(arg) || "--verbose".equals(arg)) {
         _isVerbose = true;
@@ -335,13 +341,13 @@ class WatchdogArgs
 
     if (_startMode == null) {
       System.out.println(L().l("Resin requires a command:"
-			       + "\n  console - start Resin in console mode"
-			       + "\n  status - watchdog status"
-			       + "\n  start - start a Resin server"
-			       + "\n  stop - stop a Resin server"
-			       + "\n  restart - restart a Resin server"
-			       + "\n  kill - force a kill of a Resin server"
-			       + "\n  shutdown - shutdown the watchdog"));
+                               + "\n  console - start Resin in console mode"
+                               + "\n  status - watchdog status"
+                               + "\n  start - start a Resin server"
+                               + "\n  stop - stop a Resin server"
+                               + "\n  restart - restart a Resin server"
+                               + "\n  kill - force a kill of a Resin server"
+                               + "\n  shutdown - shutdown the watchdog"));
       System.exit(1);
     }
 
@@ -373,6 +379,9 @@ class WatchdogArgs
     System.err.println(L().l("   -watchdog-port <port> : override the watchdog-port"));
     System.err.println(L().l("   -verbose              : print verbose starting information"));
     System.err.println(L().l("   -preview              : run as a preview server"));
+    System.err.println(L().l("   -debug-port <port>    : configure a debug port"));
+    System.err.println(L().l("   -jmx-port <port>      : configure an unauthenticated jmx port"));
+
   }
 
   private String []fillArgv(String []argv)
@@ -446,9 +455,9 @@ class WatchdogArgs
       String resinJar;
 
       if (p >= 0)
-	resinJar = classPath.substring(p + 1, q);
+        resinJar = classPath.substring(p + 1, q);
       else
-	resinJar = classPath.substring(0, q);
+        resinJar = classPath.substring(0, q);
 
       return Vfs.lookup(resinJar).lookup("../..");
     }
@@ -461,7 +470,7 @@ class WatchdogArgs
 
     if (! path.startsWith("jar:"))
       throw new RuntimeException(L().l("Resin/{0}: can't find jar for ResinBoot in {1}",
-				       Version.VERSION, path));
+                                 Version.VERSION, path));
 
     int p = path.indexOf(':');
     int q = path.indexOf('!');
@@ -497,20 +506,20 @@ class WatchdogArgs
   }
 
   static String calculateClassPath(ArrayList<String> classPath,
-				   Path resinHome)
+                                   Path resinHome)
     throws IOException
   {
     String oldClassPath = System.getProperty("java.class.path");
     if (oldClassPath != null) {
       for (String item : oldClassPath.split("[" + File.pathSeparatorChar + "]")) {
-	addClassPath(classPath, item);
+        addClassPath(classPath, item);
       }
     }
 
     oldClassPath = System.getenv("CLASSPATH");
     if (oldClassPath != null) {
       for (String item : oldClassPath.split("[" + File.pathSeparatorChar + "]")) {
-	addClassPath(classPath, item);
+        addClassPath(classPath, item);
       }
     }
 
@@ -541,14 +550,14 @@ class WatchdogArgs
 
     for (int i = 0; i < list.length; i++) {
       if (! list[i].endsWith(".jar"))
-	continue;
-      
+        continue;
+
       Path item = resinLib.lookup(list[i]);
 
       String pathName = item.getNativePath();
 
       if (! classPath.contains(pathName))
-	addClassPath(classPath, pathName);
+        addClassPath(classPath, pathName);
     }
 
     String cp = "";
@@ -610,29 +619,29 @@ class WatchdogArgs
     private void loadLicenses()
     {
       if (_isLicenseCheck)
-	return;
-      
+        return;
+
       _isLicenseCheck = true;
-      
+
       LicenseCheck license;
 
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	Class cl = Class.forName("com.caucho.license.LicenseCheckImpl",
-				 false, loader);
-				 
-	license = (LicenseCheck) cl.newInstance();
-	
-	license.requireProfessional(1);
+        Class cl = Class.forName("com.caucho.license.LicenseCheckImpl",
+            false, loader);
 
-	Vfs.initJNI();
+        license = (LicenseCheck) cl.newInstance();
 
-	_isResinProfessional = true;
+        license.requireProfessional(1);
 
-	// license.doLogging(1);
+        Vfs.initJNI();
+
+        _isResinProfessional = true;
+
+        // license.doLogging(1);
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }

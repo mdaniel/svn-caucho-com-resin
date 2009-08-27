@@ -459,7 +459,7 @@ class WatchdogProcess
 
     jvmArgs.add(_watchdog.getJavaExe());
     jvmArgs.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
-    
+
     // This is needed for JMX to work correctly.
     String systemClassLoader = _watchdog.getSystemClassLoader();
     if (systemClassLoader != null && ! "".equals(systemClassLoader)) {
@@ -468,36 +468,54 @@ class WatchdogProcess
     // #2567
     jvmArgs.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     jvmArgs.add("-Djava.awt.headless=true");
-    
+
     Path resinHome = _watchdog.getResinHome();
     jvmArgs.add("-Dresin.home=" + resinHome.getFullPath());
 
     if (! _watchdog.hasXss())
       jvmArgs.add("-Xss1m");
-    
+
     if (! _watchdog.hasXmx())
       jvmArgs.add("-Xmx256m");
 
     for (String arg : _watchdog.getJvmArgs()) {
       if (! arg.startsWith("-Djava.class.path"))
-	jvmArgs.add(arg);
+        jvmArgs.add(arg);
     }
 
-    for (String arg : _watchdog.getArgv()) {
-      if (arg.startsWith("-D") || arg.startsWith("-X"))
-	jvmArgs.add(arg);
-      else if (arg.startsWith("-J"))
-	jvmArgs.add(arg.substring(2));
+    String[] argv = _watchdog.getArgv();
+
+    for (int i = 0; i < argv.length; i++) {
+      String arg = argv[i];
+
+      if (arg.startsWith("-D") || arg.startsWith("-X")) {
+        jvmArgs.add(arg);
+      }
+      else if (arg.startsWith("-J")) {
+        jvmArgs.add(arg.substring(2));
+      }
+      else if ("--debug-port".equals(arg) || "-debug-port".equals(arg)) {
+        jvmArgs.add("-Xdebug");
+        jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="
+                    + argv[i + 1]);
+        i++;
+      }
+      else if ("--jmx-port".equals(arg) || "-jmx-port".equals(arg)) {
+        jvmArgs.add("-Dcom.sun.management.jmxremote.port=" + argv[i + 1]);
+        jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false");
+        jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false");
+        i++;
+      }
     }
 
     if (! jvmArgs.contains("-d32") && ! jvmArgs.contains("-d64")
-	&& _watchdog.is64bit() && ! CauchoSystem.isWindows()) {
+        && _watchdog.is64bit() && ! CauchoSystem.isWindows()) {
       jvmArgs.add("-d64");
     }
 
     if (! jvmArgs.contains("-server")
-	&& ! jvmArgs.contains("-client")
-	&& ! CauchoSystem.isWindows()) {
+        && ! jvmArgs.contains("-client")
+        && ! CauchoSystem.isWindows()) {
       // #3331, windows can't add -server automatically
       jvmArgs.add("-server");
     }
