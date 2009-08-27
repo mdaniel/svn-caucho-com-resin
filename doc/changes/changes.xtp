@@ -13,10 +13,9 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
-<<<<<<< .mine
+<li>embed/maven: ResinEmbed.initializeEnvironment() must start JNDI (#3486, rep by Jan Kriesten)</li>
 <li>admin: -agentlib:resin start cleanup (#3118 rep by bubek)</li>
 <li>vfs: NotFoundPath (error:) needs to be able to lookup absolute paths (#3628, #3475, rep by kvirkki)</li>
-=======
 <li>jsp: Jspc ant/maven task needs to disable resource-ref validation (#3577, rep by Boris Goykhman)</li>
 <li>jpa: registration of EntityManagerFactory incorrect (#3429, rep by Scott Hernandez)</li>
 <li>jpa: registration of PersistenceContext incorrect (#3622, rep by Jeff Schnitzer)</li>
@@ -24,7 +23,6 @@
 <li>amber: query maxResults issues (#3424, rep by Riccardo Cohen)</li>
 <li>web-app: check error case where root-directory with .war expansion is same as root (#3535, rep by voodude)</li>
 <li>security: request and SecurityContext isUserInRole share implementation (#3501, rep by skot)</li>
->>>>>>> .r6004
 <li>cron: use getCurrentTime() consistently for Alarm (#3548, rep by mkenney)</li>
 <li>ping: add freeze-timeout to PingThread configuration (#3592, rep by C. Karantzas)</li>
 <li>mod_caucho: use load-balance-connect-timeout for mod_caucho (#3642)</li>

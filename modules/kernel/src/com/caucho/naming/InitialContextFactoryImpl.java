@@ -80,26 +80,30 @@ public class InitialContextFactoryImpl implements InitialContextFactory
       AbstractModel model = _rootModel.getLevel();
 
       if (model == null) {
-	EnvironmentModelRoot root = EnvironmentModelRoot.create();
+        EnvironmentModelRoot root = EnvironmentModelRoot.create();
 
-	model = root.get("");
+        model = root.get("");
 
-	_rootModel.set(model);
+        _rootModel.set(model);
 
-	try {
-	  AbstractModel javaComp = model.createSubcontext("java:comp");
-	  AbstractModel java = model.createSubcontext("java:");
-	  // server/158i
-	  java.bind("comp", javaComp);
-	} catch (NamingException e) {
-	  throw new RuntimeException(e);
-	}
+        try {
+          AbstractModel javaComp = model.createSubcontext("java:comp");
+          AbstractModel java = model.createSubcontext("java:");
+          // server/158i
+          java.bind("comp", javaComp);
+
+          // #3486, support/1101
+          AbstractModel env = javaComp.createSubcontext("env");
+          javaComp.bind("env", env);
+        } catch (NamingException e) {
+          throw new RuntimeException(e);
+        }
       }
 
       return model;
     }
   }
-  
+
   /**
    * Returns the initial context for the current thread.
    */

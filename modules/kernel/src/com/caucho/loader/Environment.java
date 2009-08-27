@@ -777,11 +777,6 @@ public class Environment {
       } catch (Throwable e) {
       }
 
-      /*
-      if (System.getProperty("org.xml.sax.driver") == null)
-        System.setProperty("org.xml.sax.driver", "com.caucho.xml.Xml");
-      */
-
       Properties props = System.getProperties();
 
       /*
@@ -805,6 +800,14 @@ public class Environment {
         log().log(Level.FINER, e.toString(), e);
       }
 
+      // #3486
+      String namingPkgs = (String) props.get("java.naming.factory.url.pkgs");
+      if (namingPkgs == null)
+        namingPkgs = "com.caucho.naming";
+      else
+        namingPkgs = namingPkgs + ":" + "com.caucho.naming";
+      props.put("java.naming.factory.url.pkgs", namingPkgs);
+
       if (isGlobalLoadable) {
         // These properties require Resin to be at the system loader
 
@@ -813,7 +816,7 @@ public class Environment {
                     "com.caucho.naming.InitialContextFactoryImpl");
         }
 
-        props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
+        // props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
 
         EnvironmentProperties.enableEnvironmentSystemProperties(true);
 
@@ -857,8 +860,6 @@ public class Environment {
         e.printStackTrace();
       }
       */
-
-      // J2EEManagedObject.register(new JTAResource(tm));
     } catch (NamingException e) {
       log().log(Level.FINE, e.toString(), e);
     } catch (Throwable e) {

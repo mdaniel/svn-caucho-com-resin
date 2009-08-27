@@ -37,6 +37,7 @@ import java.util.*;
 import com.caucho.config.*;
 import com.caucho.config.types.*;
 import com.caucho.lifecycle.*;
+import com.caucho.loader.Environment;
 import com.caucho.server.cluster.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.host.*;
@@ -68,15 +69,15 @@ import com.caucho.vfs.*;
 public class ResinEmbed
 {
   private static final L10N L = new L10N(ResinEmbed.class);
-  
+
   private static final String EMBED_CONF
     = "classpath:com/caucho/resin/resin-embed.xml";
-  
+
   private Resin _resin = Resin.create();
   private Cluster _cluster;
   private ClusterServer _clusterServer;
   private String _serverId;
-  
+
   private Host _host;
   private Server _server;
 
@@ -89,7 +90,7 @@ public class ResinEmbed
     = new ArrayList<WebAppEmbed>();
 
   private Lifecycle _lifecycle = new Lifecycle();
-  
+
   /**
    * Creates a new resin server.
    */
@@ -97,7 +98,7 @@ public class ResinEmbed
   {
     this(EMBED_CONF);
   }
-  
+
   /**
    * Creates a new resin server.
    */
@@ -105,7 +106,7 @@ public class ResinEmbed
   {
     try {
       Config config = new Config();
-      
+
       config.configure(_resin, Vfs.lookup(configFile));
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -113,9 +114,9 @@ public class ResinEmbed
 
     if (_resin.getClusters().length == 0)
       throw new ConfigException(L.l("Resin needs at least one defined <cluster>"));
-    
+
     String clusterId = _resin.getClusters()[0].getName();
-    
+
     _cluster = _resin.findCluster(clusterId);
 
     if (_cluster.getPodList().length == 0)
@@ -185,23 +186,31 @@ public class ResinEmbed
   public void addBean(BeanEmbed bean)
   {
     _beanList.add(bean);
-    
+
     if (_lifecycle.isActive()) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(_server.getClassLoader());
-      
-	bean.configure();
+        thread.setContextClassLoader(_server.getClassLoader());
+
+        bean.configure();
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Throwable e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
+  }
+
+  /**
+   * Initialize the Resin environment
+   */
+  public void initializeEnvironment()
+  {
+    Environment.initializeEnvironment();
   }
 
   //
@@ -215,10 +224,10 @@ public class ResinEmbed
   {
     if (! _lifecycle.toActive())
       return;
-      
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-      
+
     try {
       _resin.start();
       _server = _resin.getServer();
@@ -226,30 +235,30 @@ public class ResinEmbed
       thread.setContextClassLoader(_server.getClassLoader());
 
       if (_serverHeader != null)
-	_server.setServerHeader(_serverHeader);
-      
+        _server.setServerHeader(_serverHeader);
+
       for (BeanEmbed beanEmbed : _beanList) {
-	beanEmbed.configure();
+        beanEmbed.configure();
       }
-      
+
       HostConfig hostConfig = new HostConfig();
       _server.addHost(hostConfig);
       _host = _server.getHost("", 0);
 
       if (_host == null) {
-	throw new ConfigException(L.l("ResinEmbed requires a <host> to be configured in the resin.xml, because the webapps must belong to a host."));
+        throw new ConfigException(L.l("ResinEmbed requires a <host> to be configured in the resin.xml, because the webapps must belong to a host."));
       }
 
       thread.setContextClassLoader(_host.getClassLoader());
 
       for (WebAppEmbed webApp : _webAppList) {
-	WebAppConfig config = new WebAppConfig();
-	config.setContextPath(webApp.getContextPath());
-	config.setRootDirectory(new RawString(webApp.getRootDirectory()));
+        WebAppConfig config = new WebAppConfig();
+        config.setContextPath(webApp.getContextPath());
+        config.setRootDirectory(new RawString(webApp.getRootDirectory()));
 
-	config.addBuilderProgram(new WebAppProgram(webApp));
+        config.addBuilderProgram(new WebAppProgram(webApp));
 
-	_host.addWebApp(config);
+        _host.addWebApp(config);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -265,7 +274,7 @@ public class ResinEmbed
   {
     if (! _lifecycle.toStop())
       return;
-      
+
     try {
       _resin.stop();
     } catch (RuntimeException e) {
@@ -282,7 +291,7 @@ public class ResinEmbed
   {
     while (! _resin.isClosed()) {
       try {
-	Thread.sleep(1000);
+        Thread.sleep(1000);
       } catch (Exception e) {
       }
     }
@@ -295,7 +304,7 @@ public class ResinEmbed
   {
     if (! _lifecycle.toDestroy())
       return;
-      
+
     try {
       _resin.destroy();
     } catch (RuntimeException e) {
@@ -372,7 +381,7 @@ public class ResinEmbed
     throws Throwable
   {
     super.finalize();
-    
+
     destroy();
   }
 
@@ -386,28 +395,28 @@ public class ResinEmbed
 
     for (int i = 0; i < args.length; i++) {
       if (args[i].startsWith("--port=")) {
-	int port = Integer.parseInt(args[i].substring("--port=".length()));
+        int port = Integer.parseInt(args[i].substring("--port=".length()));
 
-	HttpEmbed http = new HttpEmbed(port);
-	resin.addPort(http);
+        HttpEmbed http = new HttpEmbed(port);
+        resin.addPort(http);
       }
       else if (args[i].startsWith("--deploy:")) {
-	String valueString = args[i].substring("--deploy:".length());
+        String valueString = args[i].substring("--deploy:".length());
 
-	String []values = valueString.split("[=,]");
+        String []values = valueString.split("[=,]");
 
-	String role = null;
+        String role = null;
 
-	for (int j = 0; j < values.length; j += 2) {
-	  if (values[j].equals("role"))
-	    role = values[j + 1];
-	}
+        for (int j = 0; j < values.length; j += 2) {
+          if (values[j].equals("role"))
+            role = values[j + 1];
+        }
 
-	WebAppLocalDeployEmbed webApp = new WebAppLocalDeployEmbed();
-	if (role != null)
-	  webApp.setRole(role);
+        WebAppLocalDeployEmbed webApp = new WebAppLocalDeployEmbed();
+        if (role != null)
+          webApp.setRole(role);
 
-	resin.addWebApp(webApp);
+        resin.addWebApp(webApp);
       }
     }
 
@@ -435,16 +444,16 @@ public class ResinEmbed
     {
       _conn = new StreamConnection();
       // _conn.setVirtualHost(_virtualHost);
-      
+
       _request = new HttpRequest(_resin.getServer(), _conn);
       _request.init();
-      
+
       _vfsStream = new VfsStream(null, null);
       _readStream = new ReadStream();
       _writeStream = new WriteStream();
-      
+
       // _conn.setSecure(_isSecure);
-      
+
       try {
         _localAddress = InetAddress.getByName("127.0.0.1");
         _remoteAddress = InetAddress.getByName("127.0.0.1");
@@ -506,13 +515,13 @@ public class ResinEmbed
 
       int len = input.length();
       if (_chars.length < len) {
-	_chars = new char[len];
-	_bytes = new byte[len];
+        _chars = new char[len];
+        _bytes = new byte[len];
       }
 
       input.getChars(0, len, _chars, 0);
       for (int i = 0; i < len; i++)
-	_bytes[i] = (byte) _chars[i];
+        _bytes[i] = (byte) _chars[i];
 
       is = new ByteArrayInputStream(_bytes, 0, len);
 
@@ -529,26 +538,26 @@ public class ResinEmbed
 
       ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
       try {
-	_vfsStream.init(is, os);
-	_conn.setStream(is, os);
-	_conn.setLocalAddress(_localAddress);
-	_conn.setLocalPort(_port);
-	_conn.setRemoteAddress(_remoteAddress);
-	_conn.setRemotePort(9666);
-	// _conn.setSecure(_isSecure);
+        _vfsStream.init(is, os);
+        _conn.setStream(is, os);
+        _conn.setLocalAddress(_localAddress);
+        _conn.setLocalPort(_port);
+        _conn.setRemoteAddress(_remoteAddress);
+        _conn.setRemotePort(9666);
+        // _conn.setSecure(_isSecure);
 
-	try {
-	  Thread.sleep(10);
-	} catch (Exception e) {
-	}
+        try {
+          Thread.sleep(10);
+        } catch (Exception e) {
+        }
 
         while (_request.handleRequest()) {
-	  out.flush();
+          out.flush();
         }
       } catch (EOFException e) {
       } finally {
-	out.flush();
-	
+        out.flush();
+
         Thread.currentThread().setContextClassLoader(oldLoader);
       }
     }
@@ -565,7 +574,7 @@ public class ResinEmbed
     {
       _config = webAppConfig;
     }
-    
+
     /**
      * Configures the object.
      */

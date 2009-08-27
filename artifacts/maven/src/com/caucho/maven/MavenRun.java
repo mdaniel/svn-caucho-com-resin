@@ -100,6 +100,8 @@ public class MavenRun extends AbstractMojo
   {
     ResinEmbed resin = new ResinEmbed();
 
+    resin.initializeEnvironment();
+
     HttpEmbed http = new HttpEmbed(_port);
     resin.addPort(http);
 
