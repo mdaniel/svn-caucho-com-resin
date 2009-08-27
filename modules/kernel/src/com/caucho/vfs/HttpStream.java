@@ -806,7 +806,7 @@ class HttpStream extends StreamImpl {
         log.fine(key + ": " + value);
       
       if (key.matchesIgnoreCase("content-length")) {
-        _contentLength = Integer.parseInt(value);
+        _contentLength = Integer.parseInt(value.trim());
       }
       else if (key.matchesIgnoreCase("connection")
                && value.equalsIgnoreCase("close")) {
@@ -824,8 +824,8 @@ class HttpStream extends StreamImpl {
       String oldValue = (String) _attributes.put(keyString, value);
 
       if (oldValue != null) {
-	value = oldValue + '\n' + value;
-	_attributes.put(keyString, value);
+        value = oldValue + '\n' + value;
+        _attributes.put(keyString, value);
       }
     }
   }
