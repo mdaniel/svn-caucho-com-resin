@@ -156,13 +156,13 @@ public class MergePath extends FilesystemPath {
         }
 
         if (depth != 0)
-          return new NotFoundPath(filePath);
+          return new NotFoundPath(getSchemeMap(), filePath);
       }
       else
         tail++;
     }
 
-    return new NotFoundPath(filePath);
+    return new NotFoundPath(getSchemeMap(), filePath);
   }
 
   /**
@@ -630,7 +630,7 @@ public class MergePath extends FilesystemPath {
     ArrayList<Path> pathList = ((MergePath) _root)._pathList;
 
     if (pathList.size() == 0)
-      return new NotFoundPath(pathname);
+      return new NotFoundPath(getSchemeMap(), pathname);
     else {
       return pathList.get(0).lookup(pathname);
     }
@@ -716,7 +716,7 @@ public class MergePath extends FilesystemPath {
       return realPath;
     }
 
-    return new NotFoundPath(_userPath);
+    return new NotFoundPath(getSchemeMap(), _userPath);
   }
 
   /**

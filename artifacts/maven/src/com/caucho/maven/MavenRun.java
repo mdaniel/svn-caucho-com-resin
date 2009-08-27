@@ -32,6 +32,7 @@ package com.caucho.maven;
 import com.caucho.resin.*;
 
 import java.io.*;
+import java.util.logging.*;
 import org.apache.maven.plugin.*;
 
 /**
@@ -40,12 +41,16 @@ import org.apache.maven.plugin.*;
  */
 public class MavenRun extends AbstractMojo
 {
+  private static final Logger log = Logger.getLogger(MavenRun.class.getName());
+
   private int _port = 8080;
   private String _contextPath = "/";
   private File _rootDirectory;
+  private int _timeout = -1;
 
   /**
    * Sets the HTTP port that resin:run will listen to
+   * @parameter
    */
   public void setPort(int port)
   {
@@ -54,6 +59,7 @@ public class MavenRun extends AbstractMojo
 
   /**
    * Sets the context-path (defaults to "/")
+   * @parameter
    */
   public void setContextPath(String contextPath)
   {
@@ -62,10 +68,29 @@ public class MavenRun extends AbstractMojo
 
   /**
    * Sets the web-app's root directory
+   * @parameter
    */
   public void setRootDirectory(File rootDirectory)
   {
     _rootDirectory = rootDirectory;
+  }
+
+  /**
+   * Timeout for testing.  Shuts down the server after the given time.
+   * @parameter
+   */
+  public void setTimeout(int timeout)
+  {
+    _timeout = timeout;
+  }
+
+  /**
+   * Timeout for testing.  Shuts down the server after the given time.
+   * @parameter
+   */
+  public void setMytime(int timeout)
+  {
+    _timeout = timeout;
   }
 
   /**
@@ -79,15 +104,46 @@ public class MavenRun extends AbstractMojo
     resin.addPort(http);
 
     WebAppEmbed webApp = new WebAppEmbed(_contextPath,
-					 _rootDirectory.getAbsolutePath());
+                                         _rootDirectory.getAbsolutePath());
 
     resin.addWebApp(webApp);
-    
+
     resin.start();
+
+    if (_timeout > 0) {
+      new TimeoutThread(resin, _timeout).start();
+    }
+
     try {
       resin.join();
     } finally {
       resin.destroy();
+    }
+  }
+
+  static class TimeoutThread extends Thread {
+    private final ResinEmbed _resin;
+    private final long _timeout;
+
+    TimeoutThread(ResinEmbed resin, long timeout)
+    {
+      _resin = resin;
+      _timeout = timeout;
+    }
+
+    public void run()
+    {
+      try {
+        Thread.sleep(_timeout * 1000L);
+      } catch (Exception e) {
+        e.printStackTrace();
+      } finally {
+        log.info("Closing from testing timeout");
+
+        _resin.destroy();
+
+        System.exit(0);
+      }
     }
   }
 }

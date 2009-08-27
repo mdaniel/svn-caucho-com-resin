@@ -45,12 +45,11 @@ public class NotFoundPath extends Path {
   /**
    * Creates new NotFoundPath
    */
-  public NotFoundPath(String url)
+  public NotFoundPath(SchemeMap schemeMap, String url)
   {
-    super(null);
+    super(schemeMap);
 
     _url = url;
-    _schemeMap = SchemeMap.getNullSchemeMap();
   }
 
   /**
@@ -68,7 +67,7 @@ public class NotFoundPath extends Path {
    */
   public String getURL()
   {
-    return "error:" + _url;
+    return _url;
   }
 
   public String getScheme()
@@ -82,14 +81,6 @@ public class NotFoundPath extends Path {
   public String getPath()
   {
     return _url;
-  }
-
-  /**
-   * Dummy return.
-   */
-  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
-  {
-    return this;
   }
 
   /**

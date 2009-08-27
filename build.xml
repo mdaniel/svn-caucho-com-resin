@@ -127,6 +127,10 @@
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="maven"/>
+    </antcall>
+    
+    <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
     </antcall>
     
@@ -847,7 +851,7 @@
      <exec executable="autoconf"/>
   </target>
 
-  <target name="maven-dist" depends="init, compile, ant, eclipse, netbeans, maven-plugin, artifacts, resin.dist.jar">
+  <target name="maven-dist" depends="init, compile, ant, maven-plugin, artifacts, resin.dist.jar">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-jar" inheritRefs="true">
@@ -869,14 +873,14 @@
       <param name="jar.name" value="resin-ant.jar"/>
       <param name="maven.name" value="resin-ant"/>
     </antcall>
-
+<!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="eclipse"/>
       <param name="jar.name"
 	     value="com.caucho.resin.eclipse_${version}.jar"/>
       <param name="maven.name" value="resin-eclipse"/>
     </antcall>
-
+-->
     <!--
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="deploy"/>

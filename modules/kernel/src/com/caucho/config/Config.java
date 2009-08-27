@@ -476,7 +476,6 @@ public class Config {
         loader = ClassLoader.getSystemClassLoader();
 
       URL url = loader.getResource(location);
-      //System.out.println("GET: " + url + " " + loader);
 
       if (url == null)
         return null;
