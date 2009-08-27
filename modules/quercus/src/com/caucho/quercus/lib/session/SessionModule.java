@@ -393,8 +393,6 @@ public class SessionModule extends AbstractQuercusModule
     Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
     String sessionId = null;
 
-    HttpServletResponse response = env.getResponse();
-
     env.removeConstant("SID");
 
     String cookieName = env.getIni("session.name").toString();
@@ -462,8 +460,12 @@ public class SessionModule extends AbstractQuercusModule
       sessionId = env.generateSessionId();
       create = true;
     }
+    
+    HttpServletResponse response = env.getResponse();
 
-    if (response.isCommitted())
+    if (response == null) {
+    }
+    else if (response.isCommitted())
       env.warning(L.l("cannot send session cache limiter headers because response is committed"));
     else {
       Value cacheLimiterValue = env.getIni("session.cache_limiter");

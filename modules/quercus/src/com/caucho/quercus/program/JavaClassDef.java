@@ -290,7 +290,7 @@ public class JavaClassDef extends ClassDef {
                                Class type,
                                boolean isTop)
   {
-    if (type == null || Object.class.equals(type))
+    if (type == null)
       return;
     
     if (isTop)
@@ -972,7 +972,7 @@ public class JavaClassDef extends ClassDef {
   private void introspectAnnotations(Class type)
   {
     try {
-      if (type == null || type == Object.class)
+      if (type == null)
 	return;
 
       // interfaces
@@ -1085,7 +1085,7 @@ public class JavaClassDef extends ClassDef {
    */
   private void introspectFields(ModuleContext moduleContext, Class type)
   {
-    if (type == null || type.equals(Object.class))
+    if (type == null)
       return;
 
     if (! Modifier.isPublic(type.getModifiers()))
@@ -1212,7 +1212,7 @@ public class JavaClassDef extends ClassDef {
    */
   private void introspectConstants(Class type)
   {
-    if (type == null || type.equals(Object.class))
+    if (type == null)
       return;
 
     if (! Modifier.isPublic(type.getModifiers()))
@@ -1254,16 +1254,13 @@ public class JavaClassDef extends ClassDef {
    */
   private void introspectMethods(ModuleContext moduleContext, Class type)
   {
-    if (type == null || type.equals(Object.class))
+    if (type == null)
       return;
 
     Method []methods = type.getMethods();
 
     for (Method method : methods) {
       if (! Modifier.isPublic(method.getModifiers()))
-        continue;
-
-      if (method.getDeclaringClass() == Object.class)
         continue;
       
       if ("iterator".equals(method.getName())

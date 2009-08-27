@@ -333,9 +333,16 @@ abstract public class ArrayValue extends Value {
   @Override
   public int getCountRecursive(Env env)
   {
-    env.stub("recursive count of array unimplemented");
+    int count = getCount(env);
+    
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      Value value = entry.getValue();
+      
+      if (value.isArray())
+        count += value.getCountRecursive(env);
+    }
 
-    return getSize();
+    return count;
   }
 
   /**

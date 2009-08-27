@@ -75,17 +75,19 @@ public class HashModule extends AbstractQuercusModule {
    * Hashes a string
    */
   public Value hash(Env env,
-		    String algorithm,
-		    StringValue string,
-		    @Optional boolean isBinary)
+                    String algorithm,
+                    StringValue string,
+                    @Optional boolean isBinary)
   {
     try {
+      algorithm = getAlgorithm(algorithm);
+      
       MessageDigest digest = MessageDigest.getInstance(algorithm);
       
       int len = string.length();
 
       for (int i = 0; i < len; i++) {
-	digest.update((byte) string.charAt(i));
+        digest.update((byte) string.charAt(i));
       }
 
       byte []bytes = digest.digest();
@@ -113,7 +115,7 @@ public class HashModule extends AbstractQuercusModule {
 
     for (String name : Security.getAlgorithms("MessageDigest")) {
       if (! values.contains(name))
-	array.put(env.createString(name));
+        array.put(env.createString(name));
     }
     
     return array;
@@ -134,11 +136,13 @@ public class HashModule extends AbstractQuercusModule {
    * Hashes a file
    */
   public Value hash_file(Env env,
-			 String algorithm,
-			 Path path,
-			 @Optional boolean isBinary)
+                         String algorithm,
+                         Path path,
+                         @Optional boolean isBinary)
   {
     try {
+      algorithm = getAlgorithm(algorithm);
+      
       MessageDigest digest = MessageDigest.getInstance(algorithm);
 
       TempBuffer tempBuffer = TempBuffer.allocate();
@@ -175,8 +179,8 @@ public class HashModule extends AbstractQuercusModule {
    * Returns the final hash value
    */
   public Value hash_final(Env env,
-			  HashContext context,
-			  @Optional boolean isBinary)
+                          HashContext context,
+                          @Optional boolean isBinary)
   {
     if (context == null)
       return BooleanValue.FALSE;
@@ -193,6 +197,8 @@ public class HashModule extends AbstractQuercusModule {
 			 StringValue key,
 			 @Optional boolean isBinary)
   {
+    algorithm = getAlgorithm(algorithm);
+    
     HashContext context = hash_init(env, algorithm, HASH_HMAC, key);
     
     hash_update(env, context, data);
@@ -209,6 +215,8 @@ public class HashModule extends AbstractQuercusModule {
 			      StringValue key,
 			      @Optional boolean isBinary)
   {
+    algorithm = getAlgorithm(algorithm);
+    
     HashContext context = hash_init(env, algorithm, HASH_HMAC, key);
     
     hash_update_file(env, context, path);
@@ -220,11 +228,13 @@ public class HashModule extends AbstractQuercusModule {
    * Initialize a hash context.
    */
   public HashContext hash_init(Env env,
-			       String algorithm,
-			       @Optional int options,
-			       @Optional StringValue keyString)
+                               String algorithm,
+                               @Optional int options,
+                               @Optional StringValue keyString)
   {
     try {
+      algorithm = getAlgorithm(algorithm);
+      
       if (options == HASH_HMAC) {
         algorithm = "Hmac" + algorithm;
 
@@ -264,8 +274,8 @@ public class HashModule extends AbstractQuercusModule {
    * Updates the hash with more data
    */
   public Value hash_update(Env env,
-			   HashContext context,
-			   StringValue value)
+                           HashContext context,
+                           StringValue value)
   {
     if (context == null)
       return BooleanValue.FALSE;
@@ -279,8 +289,8 @@ public class HashModule extends AbstractQuercusModule {
    * Updates the hash with more data
    */
   public Value hash_update_file(Env env,
-				HashContext context,
-				Path path)
+                                HashContext context,
+                                Path path)
   {
     if (context == null)
       return BooleanValue.FALSE;
@@ -313,9 +323,9 @@ public class HashModule extends AbstractQuercusModule {
    * Updates the hash with more data
    */
   public int hash_update_stream(Env env,
-				HashContext context,
-				InputStream is,
-				@Optional("-1") int length)
+                                HashContext context,
+                                InputStream is,
+                                @Optional("-1") int length)
   {
     if (context == null)
       return -1;
@@ -387,6 +397,16 @@ public class HashModule extends AbstractQuercusModule {
 
       return v;
     }
+  }
+  
+  private static String getAlgorithm(String algorithm)
+  {
+    String name = _algorithmMap.get(algorithm);
+    
+    if (name != null)
+      return name;
+    else
+      return algorithm;
   }
 
   public abstract static class HashContext

@@ -3172,7 +3172,7 @@ public class QuercusParser {
         Expr expr = parseTerm();
 
 	token = parseToken();
-
+	
 	if (token == '=') {
 	  token = parseToken();
 
@@ -3189,7 +3189,8 @@ public class QuercusParser {
 	}
         else if (token == INSTANCEOF) {
           // php/03p1
-          return _factory.createNot(_factory.createInstanceOf(expr, parseIdentifier()));
+          // php/
+          return _factory.createNot(_factory.createInstanceOfVar(expr, parseTermBase()));
         }
         else {
 	  _peekToken = token;

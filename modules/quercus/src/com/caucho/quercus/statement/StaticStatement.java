@@ -62,13 +62,8 @@ public class StaticStatement extends Statement {
       if (_staticName == null)
         _staticName = env.createStaticName();
 
-      QuercusClass cls = env.getCallingClass();
-
       String staticName = _staticName;
       
-      if (cls != null)
-        staticName = cls.getName() + "::" + staticName;
-
       Var var = env.getStaticVar(staticName);
       
       env.setValue(_var.getName(), var);

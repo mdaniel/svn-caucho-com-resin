@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
@@ -576,9 +577,12 @@ public class QuercusClass {
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
     AbstractFunction existingFun = _methodMap.get(name);
-    
+
     if (existingFun == null || ! fun.isAbstract())
       _methodMap.put(name, fun);
+    else if (! existingFun.isAbstract() && fun.isAbstract())
+      Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
+                                  getName(), name));
   }
   
   /*

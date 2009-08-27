@@ -234,7 +234,7 @@ public class StringBuilderValue
    */
   public static StringValue create(byte value)
   {
-    return CHAR_STRINGS[(value & 0xFF)];
+    return CHAR_STRINGS[value & 0xFF];
   }
   
   /**
@@ -242,7 +242,7 @@ public class StringBuilderValue
    */
   public static StringValue create(char value)
   {
-    return CHAR_STRINGS[value];
+    return CHAR_STRINGS[value & 0xFF];
   }
 
   /**
