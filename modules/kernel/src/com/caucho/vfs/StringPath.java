@@ -35,10 +35,9 @@ public class StringPath extends Path {
 
   public StringPath(String string)
   {
-    super(null);
+    super(SchemeMap.getNullSchemeMap());
 
     _string = string;
-    _schemeMap = SchemeMap.getNullSchemeMap();
   }
 
   public Path schemeWalk(String userPath, Map<String,Object> attributes,

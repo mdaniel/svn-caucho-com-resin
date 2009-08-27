@@ -33,11 +33,13 @@ import com.caucho.config.program.ConfigProgram;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.config.types.*;
 import com.caucho.lifecycle.*;
 import com.caucho.loader.Environment;
+import com.caucho.log.handler.PathHandler;
 import com.caucho.server.cluster.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.host.*;
@@ -74,6 +76,8 @@ public class ResinEmbed
     = "classpath:com/caucho/resin/resin-embed.xml";
 
   private Resin _resin = Resin.create();
+  private String _configFile = EMBED_CONF;
+
   private Cluster _cluster;
   private ClusterServer _clusterServer;
   private String _serverId;
@@ -96,7 +100,6 @@ public class ResinEmbed
    */
   public ResinEmbed()
   {
-    this(EMBED_CONF);
   }
 
   /**
@@ -104,34 +107,20 @@ public class ResinEmbed
    */
   public ResinEmbed(String configFile)
   {
-    try {
-      Config config = new Config();
-
-      config.configure(_resin, Vfs.lookup(configFile));
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-
-    if (_resin.getClusters().length == 0)
-      throw new ConfigException(L.l("Resin needs at least one defined <cluster>"));
-
-    String clusterId = _resin.getClusters()[0].getName();
-
-    _cluster = _resin.findCluster(clusterId);
-
-    if (_cluster.getPodList().length == 0)
-      throw new ConfigException(L.l("Resin needs at least one defined <server> or <cluster-pod>"));
-
-    if (_cluster.getPodList()[0].getServerList().length == 0)
-      throw new ConfigException(L.l("Resin needs at least one defined <server>"));
-
-    _clusterServer = _cluster.getPodList()[0].getServerList()[0];
-    _resin.setServerId(_clusterServer.getId());
+    setConfig(configFile);
   }
 
   //
   // Configuration/Injection methods
   //
+
+  /**
+   * Sets the config file
+   */
+  public void setConfig(String configFile)
+  {
+    _configFile = configFile;
+  }
 
   /**
    * Adds a port to the server, e.g. a HTTP port.
@@ -213,6 +202,19 @@ public class ResinEmbed
     Environment.initializeEnvironment();
   }
 
+  /**
+   * Set log handler
+   */
+  public void resetLogManager()
+  {
+    LogManager.getLogManager().reset();
+
+    /*
+    Logger log = Logger.getLogger("");
+    log.addHandler(new PathHandler(Vfs.lookup(path)));
+    */
+  }
+
   //
   // Lifecycle
   //
@@ -229,6 +231,10 @@ public class ResinEmbed
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      Environment.initializeEnvironment();
+
+      initConfig(_configFile);
+
       _resin.start();
       _server = _resin.getServer();
 
@@ -377,6 +383,37 @@ public class ResinEmbed
     return conn;
   }
 
+  //
+  // utilities
+  //
+
+  private void initConfig(String configFile)
+  {
+    try {
+      Config config = new Config();
+
+      config.configure(_resin, Vfs.lookup(configFile));
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+
+    if (_resin.getClusters().length == 0)
+      throw new ConfigException(L.l("Resin needs at least one defined <cluster>"));
+
+    String clusterId = _resin.getClusters()[0].getName();
+
+    _cluster = _resin.findCluster(clusterId);
+
+    if (_cluster.getPodList().length == 0)
+      throw new ConfigException(L.l("Resin needs at least one defined <server> or <cluster-pod>"));
+
+    if (_cluster.getPodList()[0].getServerList().length == 0)
+      throw new ConfigException(L.l("Resin needs at least one defined <server>"));
+
+    _clusterServer = _cluster.getPodList()[0].getServerList()[0];
+    _resin.setServerId(_clusterServer.getId());
+  }
+
   protected void finalize()
     throws Throwable
   {
@@ -400,6 +437,11 @@ public class ResinEmbed
         HttpEmbed http = new HttpEmbed(port);
         resin.addPort(http);
       }
+      else if (args[i].startsWith("--config=")) {
+        String config = args[i].substring("--config=".length());
+
+        resin.setConfig(config);
+      }
       else if (args[i].startsWith("--deploy:")) {
         String valueString = args[i].substring("--deploy:".length());
 
@@ -419,6 +461,8 @@ public class ResinEmbed
         resin.addWebApp(webApp);
       }
     }
+
+    resin.resetLogManager();
 
     resin.start();
 

@@ -64,12 +64,12 @@ public class EntityManagerTransactionProxy
 
   public EntityManagerTransactionProxy(AmberContainer amber,
                                        String unitName,
-				       Map props)
+                                       Map props)
   {
     _amber = amber;
     _unitName = unitName;
     _props = props;
-    
+
     _ut = UserTransactionProxy.getCurrent();
   }
 
@@ -174,7 +174,7 @@ public class EntityManagerTransactionProxy
    */
   public Object getDelegate()
   {
-    return _threadEntityManager.get();
+    return getCurrent();
   }
 
   /**
@@ -263,8 +263,8 @@ public class EntityManagerTransactionProxy
    * @since JPA 2.0
    */
   public <T> T find(Class<T> entityCLass,
-		    Object primaryKey,
-		    LockModeType lockMode)
+                    Object primaryKey,
+                    LockModeType lockMode)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -275,9 +275,9 @@ public class EntityManagerTransactionProxy
    * @since JPA 2.0
    */
   public <T> T find(Class<T> entityCLass,
-		    Object primaryKey,
-		    LockModeType lockMode,
-		    Map properties)
+                    Object primaryKey,
+                    LockModeType lockMode,
+                    Map properties)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -288,8 +288,8 @@ public class EntityManagerTransactionProxy
    * @since JPA 2.0
    */
   public void lock(Object entity,
-		   LockModeType lockMode,
-		   Map properties)
+                   LockModeType lockMode,
+                   Map properties)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -310,8 +310,8 @@ public class EntityManagerTransactionProxy
    * @since JPA 2.0
    */
   public void refresh(Object entity,
-		      LockModeType lockMode,
-		      Map properties)
+                      LockModeType lockMode,
+                      Map properties)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -380,33 +380,33 @@ public class EntityManagerTransactionProxy
       if (_emf == null) {
         _emf = _amber.getEntityManagerFactory(_unitName);
       }
-      
+
       Transaction xa = _ut.getTransaction();
 
       if (xa != null) {
-	em = _emf.createEntityManager(_props);
+        em = _emf.createEntityManager(_props);
 
-	_threadEntityManager.set(em);
-      
-	xa.registerSynchronization(new EntityManagerSynchronization(em));
+        _threadEntityManager.set(em);
 
-	return em;
+        xa.registerSynchronization(new EntityManagerSynchronization(em));
+
+        return em;
       }
 
       UserTransactionImpl ut = _ut.getCurrentUserTransactionImpl();
 
       if (ut != null && ut.isInContext()) {
-	em = _emf.createEntityManager(_props);
+        em = _emf.createEntityManager(_props);
 
-	_threadEntityManager.set(em);
+        _threadEntityManager.set(em);
 
-	ut.enlistCloseResource(new EntityManagerCloseResource(em));
+        ut.enlistCloseResource(new EntityManagerCloseResource(em));
 
-	return em;
+        return em;
       }
 
       throw new IllegalStateException(L.l("{0}: @PersistenceContext EntityManager may not be used outside of a transaction",
-					  this));
+                                          this));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -443,7 +443,7 @@ public class EntityManagerTransactionProxy
     {
       _em = em;
     }
-    
+
     public void beforeCompletion()
     {
     }
@@ -451,7 +451,7 @@ public class EntityManagerTransactionProxy
     public void afterCompletion(int status)
     {
       _threadEntityManager.set(null);
-      
+
       _em.close();
     }
   }
@@ -467,7 +467,7 @@ public class EntityManagerTransactionProxy
     public void close()
     {
       _threadEntityManager.set(null);
-      
+
       _em.close();
     }
   }

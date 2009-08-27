@@ -32,15 +32,14 @@ import java.util.Map;
 
 public class NullPath extends Path {
   public static final Path NULL = new NullPath("null:");
-  
+
   private String _url;
 
   public NullPath(String url)
   {
-    super(null);
+    super(SchemeMap.getNullSchemeMap());
 
     _url = url;
-    _schemeMap = SchemeMap.getNullSchemeMap();
   }
 
   public Path schemeWalk(String userPath, Map<String,Object> attributes,

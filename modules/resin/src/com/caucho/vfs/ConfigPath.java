@@ -44,7 +44,7 @@ public class ConfigPath extends Path {
    */
   ConfigPath()
   {
-    super(null);
+    super(SchemeMap.getNullSchemeMap());
   }
 
   /**
@@ -66,8 +66,8 @@ public class ConfigPath extends Path {
    * @return the found path
    */
   protected Path schemeWalk(String userPath,
-			    Map<String,Object> newAttributes,
-			    String newPath, int offset)
+                            Map<String,Object> newAttributes,
+                            String newPath, int offset)
   {
     throw new UnsupportedOperationException();
     /*

@@ -13,6 +13,9 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>vfs: ReadStream.skip incorrectly updated index with negative skip (#3542, rep by Jamison Novak)</li>
+<li>embed: add resetLogManager() and call it by default in ResinEmbed (#3530, rep by Daniel Lopez)</li>
+<li>jpa: EntityManager.getDelegate() needs to create delegate if none exists (#3537, rep by voodude)</li>
 <li>embed/maven: ResinEmbed.initializeEnvironment() must start JNDI (#3486, rep by Jan Kriesten)</li>
 <li>admin: -agentlib:resin start cleanup (#3118 rep by bubek)</li>
 <li>vfs: NotFoundPath (error:) needs to be able to lookup absolute paths (#3628, #3475, rep by kvirkki)</li>
