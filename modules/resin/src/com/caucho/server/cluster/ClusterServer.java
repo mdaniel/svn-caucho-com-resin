@@ -66,7 +66,7 @@ public final class ClusterServer {
   private final Cluster _cluster;
   private final ClusterPod _pod;
   private final int _index;
-  
+
   private String _id = "";
 
   private Machine _machine;
@@ -79,25 +79,25 @@ public final class ClusterServer {
   private String _serverDomainId;
   // the bam admin name
   private String _bamJid;
-  
+
   private ClusterPort _clusterPort;
   private boolean _isClusterPortConfig;
-  
+
   //
   // config parameters
   //
 
   private long _socketTimeout = 90000L;
   private long _keepaliveTimeout = 75000L;
-  
+
   private int _loadBalanceConnectionMin = 0;
   private long _loadBalanceIdleTime = DEFAULT;
   private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceSocketTimeout = DEFAULT;
   private long _loadBalanceWarmupTime = 60000L;
-  
+
   private long _loadBalanceConnectTimeout = 5000L;
-  
+
   private int _loadBalanceWeight = 100;
 
   private ContainerProgram _serverProgram
@@ -106,6 +106,8 @@ public final class ClusterServer {
   private ArrayList<ConfigProgram> _portDefaults
     = new ArrayList<ConfigProgram>();
   private ArrayList<Port> _ports = new ArrayList<Port>();
+
+  private ArrayList<String> _pingUrls = new ArrayList<String>();
 
   private boolean _isSelf;
 
@@ -128,7 +130,7 @@ public final class ClusterServer {
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
-    
+
     StringBuilder sb = new StringBuilder();
 
     sb.append(convert(getIndex()));
@@ -136,11 +138,11 @@ public final class ClusterServer {
     sb.append(convert(getClusterPod().getIndex() / 64));
 
     _serverClusterId = sb.toString();
-      
+
     String clusterId = _cluster.getId();
     if (clusterId.equals(""))
       clusterId = "default";
-      
+
     _serverDomainId = _serverClusterId + "." + clusterId.replace('.', '_');
 
     _bamJid = _serverDomainId + ".admin.resin";
@@ -402,6 +404,22 @@ public final class ClusterServer {
   }
 
   /**
+   * Adds a ping url for availability testing
+   */
+  public void addPingUrl(String url)
+  {
+    _pingUrls.add(url);
+  }
+
+  /**
+   * Returns the ping url list
+   */
+  public ArrayList<String> getPingUrlList()
+  {
+    return _pingUrls;
+  }
+
+  /**
    * Sets the loadBalance read/write timeout
    */
   public void setSocketTimeout(Period period)
@@ -544,7 +562,7 @@ public final class ClusterServer {
     addProtocolPort(port);
 
     applyPortDefaults(port);
-    
+
     return port;
   }
 
@@ -573,7 +591,7 @@ public final class ClusterServer {
     applyPortDefaults(port);
 
     protocolPort.getConfigProgram().configure(port);
-    
+
     addProtocolPort(port);
   }
 
@@ -597,19 +615,19 @@ public final class ClusterServer {
       Port serverPort = _ports.get(i);
 
       if (port != serverPort.getPort())
-	continue;
+        continue;
 
       if ((address == null) != (serverPort.getAddress() == null))
-	continue;
+        continue;
       else if (address == null || address.equals(serverPort.getAddress())) {
-	serverPort.bind(ss);
+        serverPort.bind(ss);
 
-	return;
+        return;
       }
     }
 
     throw new IllegalStateException(L.l("No matching port for {0}:{1}",
-					address, port));
+                                        address, port));
   }
 
   /**
@@ -642,7 +660,7 @@ public final class ClusterServer {
     applyPortDefaults(_clusterPort);
 
     _isClusterPortConfig = true;
-    
+
     return _clusterPort;
   }
 
@@ -703,7 +721,7 @@ public final class ClusterServer {
   {
     return _serverProgram;
   }
-  
+
   /**
    * Initialize
    */
@@ -711,7 +729,7 @@ public final class ClusterServer {
   {
     if (! _isClusterPortConfig)
       applyPortDefaults(_clusterPort);
-    
+
     _clusterPort.init();
 
     if (! getId().equals(Resin.getCurrent().getServerId())) {
@@ -752,7 +770,7 @@ public final class ClusterServer {
 
       if (log.isLoggable(Level.FINER) && ! _isActive)
         log.finer(this + " notify-start");
-    
+
       _isActive = true;
       _stateTimestamp = timestamp;
     }
@@ -777,7 +795,7 @@ public final class ClusterServer {
 
       if (log.isLoggable(Level.FINER) && _isActive)
         log.finer(this + " notify-stop");
-    
+
       _isActive = false;
       _stateTimestamp = timestamp;
     }
@@ -797,7 +815,7 @@ public final class ClusterServer {
     _isSelf = true;
     _isActive = true;
     _stateTimestamp = Alarm.getCurrentTime();
-    
+
     return _cluster.startServer(this);
   }
 
@@ -835,7 +853,7 @@ public final class ClusterServer {
   //
   // admin
   //
-  
+
   /**
    * Returns the admin object
    */
@@ -858,11 +876,11 @@ public final class ClusterServer {
   {
     return getClass().getSimpleName() + "[id=" + getId() + "]";
   }
-  
+
   private static char convert(long code)
   {
     code = code & 0x3f;
-    
+
     if (code < 26)
       return (char) ('a' + code);
     else if (code < 52)
@@ -879,7 +897,7 @@ public final class ClusterServer {
   {
     return DECODE[code & 0x7f];
   }
-  
+
   static {
     DECODE = new int[128];
     for (int i = 0; i < 64; i++)

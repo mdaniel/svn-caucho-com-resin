@@ -667,6 +667,9 @@ r_server-Content =
 
   & r_ping*
 
+  & (attribute ping-url { string }
+     | element ping-url { string })*
+
   & r_port-default*
 
   & r_protocol*
