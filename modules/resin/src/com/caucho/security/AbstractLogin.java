@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  * to the ServletAuthenticator.
  *
  * <p>The Servlet API calls the Login in two contexts: directly from
- * <code>ServletRequest.getUserPrincipal()</code>, and during 
+ * <code>ServletRequest.getUserPrincipal()</code>, and during
  * security checking.   When called from the Servlet API, the login class
  * can't change the response.  In other words, if an application
  * calls getUserPrincipal(), the Login class can't return a forbidden
@@ -96,7 +96,7 @@ public abstract class AbstractLogin implements Login {
 
   private boolean _isSessionSaveLogin = true;
   private boolean _isLogoutOnTimeout = true;
-  
+
   protected AbstractLogin()
   {
   }
@@ -116,17 +116,17 @@ public abstract class AbstractLogin implements Login {
   {
     if (_auth == null) {
       if (! _authInstance.isUnsatisfied()) {
-	_auth = _authInstance.get();
+        _auth = _authInstance.get();
       }
 
       if (_auth == null) {
-	_auth = new NullAuthenticator();
+        _auth = new NullAuthenticator();
       }
 
       if (log.isLoggable(Level.FINE))
-	log.fine(toString() + " using " + _auth);
+        log.fine(toString() + " using " + _auth);
     }
-    
+
     return _auth;
   }
 
@@ -136,18 +136,18 @@ public abstract class AbstractLogin implements Login {
       Authenticator auth = getAuthenticator();
 
       if (_auth instanceof AbstractAuthenticator) {
-	AbstractAuthenticator abstractAuth
-	  = (AbstractAuthenticator) auth;
-	
-	_singleSignon = abstractAuth.getSingleSignon();
+        AbstractAuthenticator abstractAuth
+          = (AbstractAuthenticator) auth;
+
+        _singleSignon = abstractAuth.getSingleSignon();
       }
 
       if (_singleSignon == null) {
-	try {
-	  _singleSignon = new ClusterSingleSignon("login");
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          _singleSignon = new ClusterSingleSignon("login");
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
 
@@ -185,7 +185,7 @@ public abstract class AbstractLogin implements Login {
   {
     return _isSessionSaveLogin;
   }
-  
+
   /**
    * Initialize the login.  <code>init()</code> will be called after all
    * the bean parameters have been set.
@@ -198,7 +198,7 @@ public abstract class AbstractLogin implements Login {
     /*
     try {
       if (_auth == null)
-	_auth = _webBeans.getInstanceByType(Authenticator.class);
+        _auth = _webBeans.getInstanceByType(Authenticator.class);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
@@ -218,7 +218,7 @@ public abstract class AbstractLogin implements Login {
   {
     return "none";
   }
-  
+
   /**
    * Returns the Principal associated with the current request.
    * getUserPrincipal is called in response to the Request.getUserPrincipal
@@ -243,7 +243,7 @@ public abstract class AbstractLogin implements Login {
     // server/12c9 - new login overrides old
     if (savedUser != null && isSavedUserValid(request, savedUser)) {
       request.setAttribute(LOGIN_NAME, savedUser);
-      
+
       return savedUser;
     }
 
@@ -256,7 +256,7 @@ public abstract class AbstractLogin implements Login {
 
     return user;
   }
-  
+
   /**
    * Logs a user in.  The authenticate method is called during the
    * security check.  If the user does not exist, <code>authenticate</code>
@@ -269,8 +269,8 @@ public abstract class AbstractLogin implements Login {
    * @return the logged in principal on success, null on failure.
    */
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response,
-			 boolean isFail)
+                         HttpServletResponse response,
+                         boolean isFail)
   {
     // Most login classes will extract the user and password (or some other
     // credentials) from the request and call auth.login.
@@ -281,23 +281,23 @@ public abstract class AbstractLogin implements Login {
     if (savedUser != null && isSavedUserValid(request, savedUser)) {
       return savedUser;
     }
-    
+
     Principal user = getLoginPrincipalImpl(request);
 
     try {
       if (user != null || savedUser != null) {
-	// server/12h7
-	saveUser(request, user);
+        // server/12h7
+        saveUser(request, user);
       }
-	
+
       if (user != null) {
-	loginSuccessResponse(user, request, response);
-      
-	return user;
+        loginSuccessResponse(user, request, response);
+
+        return user;
       }
 
       if (isFail)
-	loginChallenge(request, response);
+        loginChallenge(request, response);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -314,7 +314,7 @@ public abstract class AbstractLogin implements Login {
   protected Principal findSavedUser(HttpServletRequest request)
   {
     SingleSignon singleSignon = getSingleSignon();
-    
+
     SessionImpl session = (SessionImpl) request.getSession(false);
 
     String sessionId;
@@ -334,12 +334,12 @@ public abstract class AbstractLogin implements Login {
    * Saves the user based on session or single signon.
    */
   protected void saveUser(HttpServletRequest request,
-			  Principal user)
+                          Principal user)
   {
     request.setAttribute(LOGIN_NAME, user);
-    
+
     SingleSignon singleSignon = getSingleSignon();
-    
+
     SessionImpl session;
 
     if (isSessionSaveLogin())
@@ -376,11 +376,11 @@ public abstract class AbstractLogin implements Login {
    * Returns the non-authenticated principal for the user request
    */
   protected boolean isSavedUserValid(HttpServletRequest request,
-				     Principal savedUser)
+                                     Principal savedUser)
   {
     return true;
   }
-  
+
   /**
    * Gets the user from a persistent cookie, using authenticateCookie
    * to actually look the cookie up.
@@ -394,7 +394,7 @@ public abstract class AbstractLogin implements Login {
    * Implementation of the login challenge
    */
   protected void loginChallenge(HttpServletRequest request,
-				HttpServletResponse response)
+                                HttpServletResponse response)
     throws ServletException, IOException
   {
   }
@@ -403,12 +403,12 @@ public abstract class AbstractLogin implements Login {
    * HTTP updates after a successful login
    */
   protected void loginSuccessResponse(Principal user,
-				      HttpServletRequest request,
-				      HttpServletResponse response)
+                                      HttpServletRequest request,
+                                      HttpServletResponse response)
     throws ServletException, IOException
   {
   }
-  
+
   /**
    * Returns true if the current user plays the named role.
    * <code>isUserInRole</code> is called in response to the
@@ -423,7 +423,7 @@ public abstract class AbstractLogin implements Login {
   {
     return getAuthenticator().isUserInRole(user, role);
   }
-  
+
   /**
    * Logs the user out from the given request.
    *
@@ -432,38 +432,38 @@ public abstract class AbstractLogin implements Login {
    * in the ServletContext attribute "caucho.login".
    */
   public void logout(Principal user,
-		     HttpServletRequest request,
+                     HttpServletRequest request,
                      HttpServletResponse response)
   {
     String sessionId = request.getRequestedSessionId();
-      
+
     logoutImpl(user, request, response);
-    
+
     SingleSignon singleSignon = getSingleSignon();
 
     if (singleSignon != null)
       singleSignon.remove(sessionId);
   }
-  
+
   /**
    * Called when the session invalidates.
    */
   public void sessionInvalidate(HttpSession session,
-				boolean isTimeout)
+                                boolean isTimeout)
   {
     //LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
 
     if (session != null) {
       SingleSignon singleSignon = getSingleSignon();
-      
+
       // server/12cg
       if (singleSignon != null
-	  && (! isTimeout || isLogoutOnSessionTimeout())) {
-	singleSignon.remove(session.getId());
+          && (! isTimeout || isLogoutOnSessionTimeout())) {
+        singleSignon.remove(session.getId());
       }
     }
   }
-  
+
   /**
    * Logs the user out from the given request.
    *
@@ -472,8 +472,8 @@ public abstract class AbstractLogin implements Login {
    * in the ServletContext attribute "caucho.login".
    */
   protected void logoutImpl(Principal user,
-			    HttpServletRequest request,
-			    HttpServletResponse response)
+                            HttpServletRequest request,
+                            HttpServletResponse response)
   {
   }
 
@@ -492,35 +492,35 @@ public abstract class AbstractLogin implements Login {
       if (_principalCache == null) {
       }
       else if (timeoutSession != null) {
-	PrincipalEntry entry =  _principalCache.get(sessionId);
-	
-	if (entry != null && entry.logout(timeoutSession)) {
-	  _principalCache.remove(sessionId);
-	}
+        PrincipalEntry entry =  _principalCache.get(sessionId);
+
+        if (entry != null && entry.logout(timeoutSession)) {
+          _principalCache.remove(sessionId);
+        }
       }
       else {
-	PrincipalEntry entry =  _principalCache.remove(sessionId);
+        PrincipalEntry entry =  _principalCache.remove(sessionId);
 
-	if (entry != null)
-	  entry.logout();
+        if (entry != null)
+          entry.logout();
       }
 
       Application app = (Application) application;
       SessionManager manager = app.getSessionManager();
 
       if (manager != null) {
-	try {
-	  SessionImpl session = manager.getSession(sessionId,
-						   Alarm.getCurrentTime(),
-						   false, true);
+        try {
+          SessionImpl session = manager.getSession(sessionId,
+                                                   Alarm.getCurrentTime(),
+                                                   false, true);
 
-	  if (session != null) {
-	    session.finish();
-	    session.logout();
-	  }
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+          if (session != null) {
+            session.finish();
+            session.logout();
+          }
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }
@@ -549,8 +549,8 @@ public abstract class AbstractLogin implements Login {
     void addSession(SessionImpl session)
     {
       if (_sessions == null)
-	_sessions = new ArrayList<SoftReference<SessionImpl>>();
-      
+        _sessions = new ArrayList<SoftReference<SessionImpl>>();
+
       _sessions.add(new SoftReference<SessionImpl>(session));
     }
 
@@ -563,48 +563,48 @@ public abstract class AbstractLogin implements Login {
       ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
 
       if (sessions == null)
-	return true;
+        return true;
 
       boolean isEmpty = true;
       for (int i = sessions.size() - 1; i >= 0; i--) {
-	SoftReference<SessionImpl> ref = sessions.get(i);
-	SessionImpl session = ref.get();
+        SoftReference<SessionImpl> ref = sessions.get(i);
+        SessionImpl session = ref.get();
 
-	try {
-	  if (session == timeoutSession) {
-	    sessions.remove(i);
-	    // session.logout();
-	    // XXX: invalidate?
-	  }
-	  else if (session == null)
-	    sessions.remove(i);
-	  else
-	    isEmpty = false;
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          if (session == timeoutSession) {
+            sessions.remove(i);
+            // session.logout();
+            // XXX: invalidate?
+          }
+          else if (session == null)
+            sessions.remove(i);
+          else
+            isEmpty = false;
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       return isEmpty;
     }
-      
+
     void logout()
     {
       ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
       _sessions = null;
-      
-      for (int i = 0; sessions != null && i < sessions.size(); i++) {
-	SoftReference<SessionImpl> ref = sessions.get(i);
-	SessionImpl session = ref.get();
 
-	try {
-	  if (session != null) {
-	    // session.logout();
-	    session.invalidateLogout();  // #599,  server/12i3
-	  }
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+      for (int i = 0; sessions != null && i < sessions.size(); i++) {
+        SoftReference<SessionImpl> ref = sessions.get(i);
+        SessionImpl session = ref.get();
+
+        try {
+          if (session != null) {
+            // session.logout();
+            session.invalidateLogout();  // #599,  server/12i3
+          }
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }

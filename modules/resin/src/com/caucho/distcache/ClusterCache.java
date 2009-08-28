@@ -44,15 +44,16 @@ import javax.enterprise.context.ApplicationScoped;
  */
 
 @ApplicationScoped
-@Configurable  
+@Configurable
 public class ClusterCache extends AbstractCache
 {
   public ClusterCache()
   {
   }
-  
+
   public ClusterCache(String name)
   {
     setName(name);
+    init();
   }
 }

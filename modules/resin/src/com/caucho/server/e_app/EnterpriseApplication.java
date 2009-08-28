@@ -113,7 +113,7 @@ public class EnterpriseApplication
   {
     if (container == null || controller == null)
       throw new NullPointerException();
-    
+
     _container = container;
 
     _controller = controller;
@@ -380,7 +380,7 @@ public class EnterpriseApplication
   {
     if (e != null)
       e.printStackTrace();
-    
+
     _configException = e;
 
     for (WebAppController controller : _webApps) {
@@ -432,7 +432,7 @@ public class EnterpriseApplication
 
       for (Path path : _ejbPaths) {
         ejbContainer.addRoot(path);
-	_loader.addJar(path);
+        _loader.addJar(path);
       }
 
       _loader.validate();
@@ -605,11 +605,14 @@ public class EnterpriseApplication
         contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
     }
 
+    if (! contextUrl.startsWith("/"))
+      contextUrl = "/" + contextUrl;
+
     controller = findWebAppEntry(contextUrl);
 
     if (controller == null) {
       controller = new WebAppController(contextUrl,
-					contextUrl,
+                                        contextUrl,
                                         path,
                                         _container);
 
@@ -809,5 +812,8 @@ public class EnterpriseApplication
       return;
 
     _ejbPaths.add(ejbPath);
+    EjbContainer ejbContainer = EjbContainer.create();
+
+    ejbContainer.addRoot(ejbPath);
   }
 }

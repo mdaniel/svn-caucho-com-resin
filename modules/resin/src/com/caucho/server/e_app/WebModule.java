@@ -95,4 +95,10 @@ public class WebModule {
   {
     _webAppConfig.addAll(list);
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _webUri + "," + _contextRoot + "]";
+  }
 }

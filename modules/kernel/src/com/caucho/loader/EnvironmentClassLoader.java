@@ -93,7 +93,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   // server/306i  - can't be weak reference, instead create WeakStopListener
   private ArrayList<EnvironmentListener> _listeners
     = new ArrayList<EnvironmentListener>();
-  
+
   private WeakStopListener _stopListener;
 
   // The state of the environment

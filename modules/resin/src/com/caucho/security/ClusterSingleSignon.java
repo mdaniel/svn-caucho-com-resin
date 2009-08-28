@@ -53,12 +53,12 @@ public class ClusterSingleSignon implements SingleSignon {
 
   public ClusterSingleSignon()
   {
-    _cache = new ClusterCache("resin:single-signon");
+    this("resin:single-signon");
   }
 
   public ClusterSingleSignon(String name)
   {
-    this();
+    _cache = new ClusterCache();
 
     setName(name);
 
@@ -69,7 +69,7 @@ public class ClusterSingleSignon implements SingleSignon {
   {
     _cache.setName("resin:single-signon:" + name);
   }
-  
+
   /**
    * Initialize the single signon.
    */
@@ -78,7 +78,7 @@ public class ClusterSingleSignon implements SingleSignon {
   {
     _cache.init();
   }
-  
+
   /**
    * Returns any saved single signon entry.
    */
@@ -86,7 +86,7 @@ public class ClusterSingleSignon implements SingleSignon {
   {
     return (Principal) _cache.get(id);
   }
-  
+
   /**
    * Adds a principal to the cache
    *
@@ -96,7 +96,7 @@ public class ClusterSingleSignon implements SingleSignon {
   {
     _cache.put(id, user);
   }
-  
+
   /**
    * Removes a principal from the single-signon
    */
@@ -105,5 +105,10 @@ public class ClusterSingleSignon implements SingleSignon {
     _cache.remove(id);
 
     return true;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _cache + "]";
   }
 }

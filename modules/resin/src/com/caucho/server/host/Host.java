@@ -65,7 +65,7 @@ import java.util.regex.*;
  */
 public class Host extends WebAppContainer
   implements EnvironmentBean, Dependency, SchemaBean,
-	     EnvironmentDeployInstance
+             EnvironmentDeployInstance
 {
   private static final Logger log = Logger.getLogger(Host.class.getName());
   private static final L10N L = new L10N(Host.class);
@@ -97,19 +97,19 @@ public class Host extends WebAppContainer
   private HempBroker _bamBroker;
 
   private Throwable _configException;
-  
+
   private boolean _isRootDirSet;
   private boolean _isDocDirSet;
 
   private String _configETag = null;
-  
+
   /**
    * Creates the webApp with its environment loader.
    */
   public Host(HostContainer parent, HostController controller, String hostName)
   {
-    super(EnvironmentClassLoader.create("host:" + hostName),
-	  new Lifecycle(log, "Host[" + hostName + "]", Level.INFO));
+    super(EnvironmentClassLoader.create("host:" + controller.getName()),
+          new Lifecycle(log, "Host[" + hostName + "]", Level.INFO));
 
     try {
       _controller = controller;
@@ -118,7 +118,7 @@ public class Host extends WebAppContainer
       setHostName(hostName);
 
       _hostLocal.set(this, getClassLoader());
-    } catch (Throwable e) {
+    } catch (Exception e) {
       _configException = e;
     }
   }
@@ -144,12 +144,12 @@ public class Host extends WebAppContainer
 
     addHostAlias(name);
 
-    getEnvironmentClassLoader().setId("host:" + name);
-    
+    // getEnvironmentClassLoader().setId("host:" + name);
+
     // _jmxContext.put("J2EEServer", name);
 
     int p = name.indexOf("://");
-    
+
     if (p >= 0)
       name = name.substring(p + 3);
 
@@ -158,20 +158,20 @@ public class Host extends WebAppContainer
     p = name.lastIndexOf(':');
     if (p > 0) {
       _serverName = name.substring(0, p);
-      
+
       boolean isPort = true;
       int port = 0;
       for (p++; p < name.length(); p++) {
-	char ch = name.charAt(p);
+        char ch = name.charAt(p);
 
-	if ('0' <= ch && ch <= '9')
-	  port = 10 * port + ch - '0';
-	else
+        if ('0' <= ch && ch <= '9')
+          port = 10 * port + ch - '0';
+        else
           isPort = false;
       }
 
       if (isPort)
-	_serverPort = port;
+        _serverPort = port;
     }
   }
 
@@ -231,7 +231,7 @@ public class Host extends WebAppContainer
   {
     return "com/caucho/server/host/host.rnc";
   }
-  
+
   /**
    * Returns the URL for the container.
    */
@@ -240,18 +240,18 @@ public class Host extends WebAppContainer
     if (_url != null && ! "".equals(_url))
       return _url;
     else if (_hostName == null
-	     || _hostName.equals("")) {
+             || _hostName.equals("")) {
       return getURL();
     }
     else if (_hostName.startsWith("http:")
-	     || _hostName.startsWith("https:"))
+             || _hostName.startsWith("https:"))
       return _hostName;
     else if (_hostName.equals(""))
       return "http://default";
     else
       return "http://" + _hostName;
   }
-  
+
   /**
    * Returns the URL for the container.
    */
@@ -260,38 +260,38 @@ public class Host extends WebAppContainer
     if (_url != null && ! "".equals(_url))
       return _url;
     else if (_hostName == null
-	     || _hostName.equals("")
-	     || _hostName.equals("default")) {
+             || _hostName.equals("")
+             || _hostName.equals("default")) {
       Server server = getServer();
 
       if (server == null)
-	return "http://localhost";
+        return "http://localhost";
 
       for (Port port : server.getPorts()) {
-	if ("http".equals(port.getProtocolName())) {
-	  String address = port.getAddress();
-	  
-	  if (address == null || address.equals(""))
-	    address = "localhost";
-	  
-	  return "http://" + address + ":" + port.getPort();
-	}
+        if ("http".equals(port.getProtocolName())) {
+          String address = port.getAddress();
+
+          if (address == null || address.equals(""))
+            address = "localhost";
+
+          return "http://" + address + ":" + port.getPort();
+        }
       }
 
       for (Port port : server.getPorts()) {
-	if ("https".equals(port.getProtocolName())) {
-	  String address = port.getAddress();
-	  if (address == null || address.equals(""))
-	    address = "localhost";
-	  
-	  return "https://" + address + ":" + port.getPort();
-	}
+        if ("https".equals(port.getProtocolName())) {
+          String address = port.getAddress();
+          if (address == null || address.equals(""))
+            address = "localhost";
+
+          return "https://" + address + ":" + port.getPort();
+        }
       }
 
       return "http://localhost";
     }
     else if (_hostName.startsWith("http:")
-	     || _hostName.startsWith("https:"))
+             || _hostName.startsWith("https:"))
       return _hostName;
     else if (_hostName.equals("") || _hostName.equals("default"))
       return "http://localhost";
@@ -332,7 +332,7 @@ public class Host extends WebAppContainer
     name = name.trim();
 
     Pattern pattern = Pattern.compile(name, Pattern.CASE_INSENSITIVE);
-    
+
     _controller.addExtHostAliasRegexp(pattern);
   }
 
@@ -400,7 +400,7 @@ public class Host extends WebAppContainer
       getEnvironmentClassLoader().addDependency(AlwaysModified.create());
 
       if (log.isLoggable(Level.FINE))
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -421,12 +421,12 @@ public class Host extends WebAppContainer
       DispatchServer server = _parent.getDispatchServer();
 
       if (server instanceof Server)
-	return (Server) server;
+        return (Server) server;
     }
 
     return null;
   }
-  
+
   /**
    * Returns the current cluster.
    */
@@ -482,9 +482,10 @@ public class Host extends WebAppContainer
 
     EnvironmentClassLoader loader;
     loader = getEnvironmentClassLoader();
-    
-    loader.setId("host:" + getURL());
-                       
+
+    // server/1al2
+    // loader.setId("host:" + getURL());
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -492,13 +493,13 @@ public class Host extends WebAppContainer
       thread.setContextClassLoader(loader);
 
       initBam();
-      
+
       super.startImpl();
-      
+
       loader.start();
 
       if (_parent != null)
-	_parent.clearCache();
+        _parent.clearCache();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -508,14 +509,14 @@ public class Host extends WebAppContainer
   {
     if (Resin.getCurrent() == null)
       return;
-    
+
     String hostName = _hostName;
-    
+
     if ("".equals(hostName)) {
       try {
-	hostName = InetAddress.getLocalHost().getCanonicalHostName();
+        hostName = InetAddress.getLocalHost().getCanonicalHostName();
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
@@ -528,18 +529,18 @@ public class Host extends WebAppContainer
 
     for (String alias : _aliasList) {
       _bamBroker.addAlias(alias);
-      
+
       if (brokerManager != null)
-	brokerManager.addBroker(alias, _bamBroker);
+        brokerManager.addBroker(alias, _bamBroker);
     }
 
     InjectManager webBeans = InjectManager.getCurrent();
 
     webBeans.addBean(webBeans.createBeanFactory(Broker.class)
-		     .name("bamBroker").singleton(_bamBroker));
+                     .name("bamBroker").singleton(_bamBroker));
 
     webBeans.addExtension(_bamBroker);
-    
+
     // XXX: webBeans.addRegistrationListener(new BamRegisterListener());
   }
 
@@ -572,9 +573,9 @@ public class Host extends WebAppContainer
         return super.buildInvocation(invocation);
       else {
         invocation.setFilterChain(new ExceptionFilterChain(_configException));
-	invocation.setDependency(AlwaysModified.create());
+        invocation.setDependency(AlwaysModified.create());
 
-	return invocation;
+        return invocation;
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -623,7 +624,7 @@ public class Host extends WebAppContainer
   {
     return false;
   }
-  
+
   /**
    * Stops the host.
    */
@@ -637,39 +638,39 @@ public class Host extends WebAppContainer
       thread.setContextClassLoader(envLoader);
 
       if (! _lifecycle.toStopping())
-	return false;
-      
+        return false;
+
       super.stop();
 
       if (_bamBroker != null)
-	_bamBroker.close();
-      
+        _bamBroker.close();
+
       envLoader.stop();
 
       return true;
     } finally {
       _lifecycle.toStop();
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * Closes the host.
    */
   public void destroy()
   {
     stop();
-    
+
     if (isDestroyed())
       return;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     EnvironmentClassLoader classLoader = getEnvironmentClassLoader();
-    
+
     thread.setContextClassLoader(classLoader);
-    
+
     try {
       super.destroy();
     } finally {

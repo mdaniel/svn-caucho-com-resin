@@ -13,6 +13,10 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>security: ClusterSingleSignon in cluster and host (#3467, rep by Scott Hernandez)</li>
+<li>ejb: TimerService needs to be injectalbe (#3572)</li>
+<li>ejb: ear scanning issues (#3583)</li>
+<li>ejb: .ear manifest with class-path prevented detection of ejbs (#3601, rep by mbrew)</li>
 <li>vfs: ReadStream.skip incorrectly updated index with negative skip (#3542, rep by Jamison Novak)</li>
 <li>embed: add resetLogManager() and call it by default in ResinEmbed (#3530, rep by Daniel Lopez)</li>
 <li>jpa: EntityManager.getDelegate() needs to create delegate if none exists (#3537, rep by voodude)</li>

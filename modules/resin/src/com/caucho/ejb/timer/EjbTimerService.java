@@ -66,13 +66,14 @@ public class EjbTimerService implements TimerService {
   protected static final Logger log = Logger.getLogger(EjbTimerService.class
       .getName());
 
-  private static final EnvironmentLocal<EjbTimerService> _localTimerService = new EnvironmentLocal<EjbTimerService>();
+  private static final EnvironmentLocal<EjbTimerService> _localTimerService
+    = new EnvironmentLocal<EjbTimerService>();
 
   private AbstractContext _context;
 
   /**
    * Creates a new timer service.
-   * 
+   *
    * @param context
    *          EJB context.
    */
@@ -83,7 +84,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Gets the local timer service for the class loader.
-   * 
+   *
    * @param loader
    *          Local class loader.
    * @param context
@@ -91,7 +92,7 @@ public class EjbTimerService implements TimerService {
    * @return Local timer service.
    */
   public static EjbTimerService getLocal(ClassLoader loader,
-      AbstractContext context)
+                                         AbstractContext context)
   {
     synchronized (_localTimerService) {
       EjbTimerService timerService = _localTimerService.get(loader);
@@ -108,7 +109,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Gets timer service for the current class loader.
-   * 
+   *
    * @return Timer service for the current class loader.
    */
   public static EjbTimerService getCurrent()
@@ -118,7 +119,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Gets the current timer service for a given class loader.
-   * 
+   *
    * @param loader
    *          Class loader for timer service.
    * @return The current timer service for the class loader.
@@ -129,8 +130,31 @@ public class EjbTimerService implements TimerService {
   }
 
   /**
+   * Gets or creates the current timer service for a given class loader.
+   *
+   * @param loader
+   *          Class loader for timer service.
+   * @return The current timer service for the class loader.
+   */
+  public static EjbTimerService create()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    synchronized (_localTimerService) {
+      EjbTimerService service = _localTimerService.get();
+
+      if (service == null) {
+        service = new EjbTimerService(null);
+        _localTimerService.set(service);
+      }
+
+      return service;
+    }
+  }
+
+  /**
    * Create a single-action timer that expires after a specified duration.
-   * 
+   *
    * @param duration
    *          The number of milliseconds that must elapse before the timer
    *          expires.
@@ -161,7 +185,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Create a single-action timer that expires after a specified duration.
-   * 
+   *
    * @param duration
    *          The number of milliseconds that must elapse before the timer
    *          expires.
@@ -197,7 +221,7 @@ public class EjbTimerService implements TimerService {
    * Create an interval timer whose first expiration occurs after a specified
    * duration, and whose subsequent expirations occur after a specified
    * interval.
-   * 
+   *
    * @param initialDuration
    *          The number of milliseconds that must elapse before the first timer
    *          expiration notification.
@@ -221,9 +245,11 @@ public class EjbTimerService implements TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   @Override
-  public Timer createTimer(long initialDuration, long intervalDuration,
-      Serializable info) throws IllegalArgumentException,
-      IllegalStateException, EJBException
+  public Timer createTimer(long initialDuration,
+                           long intervalDuration,
+                           Serializable info)
+    throws IllegalArgumentException,
+           IllegalStateException, EJBException
   {
     if (initialDuration < 0) {
       throw new IllegalArgumentException(
@@ -244,7 +270,7 @@ public class EjbTimerService implements TimerService {
    * Create an interval timer whose first expiration occurs after a specified
    * duration, and whose subsequent expirations occur after a specified
    * interval.
-   * 
+   *
    * @param initialDuration
    *          The number of milliseconds that must elapse before the first timer
    *          expiration notification.
@@ -267,9 +293,11 @@ public class EjbTimerService implements TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   @Override
-  public Timer createIntervalTimer(long initialDuration, long intervalDuration,
-      TimerConfig timerConfig) throws IllegalArgumentException,
-      IllegalStateException, EJBException
+  public Timer createIntervalTimer(long initialDuration,
+                                   long intervalDuration,
+                                   TimerConfig timerConfig)
+    throws IllegalArgumentException,
+           IllegalStateException, EJBException
   {
     if (initialDuration < 0) {
       throw new IllegalArgumentException(
@@ -293,7 +321,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Create a single-action timer that expires at a given point in time.
-   * 
+   *
    * @param expiration
    *          The point in time at which the timer must expire.
    * @param info
@@ -326,7 +354,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Create a single-action timer that expires at a given point in time.
-   * 
+   *
    * @param expiration
    *          The point in time at which the timer must expire.
    * @param timerConfig
@@ -341,7 +369,8 @@ public class EjbTimerService implements TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   @Override
-  public Timer createSingleActionTimer(Date expiration, TimerConfig timerConfig)
+  public Timer createSingleActionTimer(Date expiration,
+                                       TimerConfig timerConfig)
       throws IllegalArgumentException, IllegalStateException, EJBException
   {
     if (expiration == null) {
@@ -363,7 +392,7 @@ public class EjbTimerService implements TimerService {
   /**
    * Create an interval timer whose first expiration occurs at a given point in
    * time and whose subsequent expirations occur after a specified interval.
-   * 
+   *
    * @param initialExpiration
    *          The point in time at which the first timer expiration must occur.
    * @param intervalDuration
@@ -387,9 +416,11 @@ public class EjbTimerService implements TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   @Override
-  public Timer createTimer(Date initialExpiration, long intervalDuration,
-      Serializable info) throws IllegalArgumentException,
-      IllegalStateException, EJBException
+  public Timer createTimer(Date initialExpiration,
+                           long intervalDuration,
+                           Serializable info)
+    throws IllegalArgumentException,
+           IllegalStateException, EJBException
   {
     if (initialExpiration == null) {
       throw new IllegalArgumentException(
@@ -412,7 +443,7 @@ public class EjbTimerService implements TimerService {
   /**
    * Create an interval timer whose first expiration occurs at a given point in
    * time and whose subsequent expirations occur after a specified interval.
-   * 
+   *
    * @param initialExpiration
    *          The point in time at which the first timer expiration must occur.
    * @param intervalDuration
@@ -436,7 +467,8 @@ public class EjbTimerService implements TimerService {
    */
   @Override
   public Timer createIntervalTimer(Date initialExpiration,
-      long intervalDuration, TimerConfig timerConfig)
+                                   long intervalDuration,
+                                   TimerConfig timerConfig)
       throws IllegalArgumentException, IllegalStateException, EJBException
   {
     if (initialExpiration == null) {
@@ -464,7 +496,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Create a calendar-based timer based on the input schedule expression.
-   * 
+   *
    * @param schedule
    *          A schedule expression describing the timeouts for this timer.
    * @param info
@@ -489,7 +521,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Create a calendar-based timer based on the input schedule expression.
-   * 
+   *
    * @param schedule
    *          A schedule expression describing the timeouts for this timer.
    * @param timerConfig
@@ -517,7 +549,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Get all the active timers associated with this bean.
-   * 
+   *
    * @return A collection of javax.ejb.Timer objects.
    * @throws IllegalStateException
    *           If this method is invoked while the instance is in a state that
@@ -538,8 +570,8 @@ public class EjbTimerService implements TimerService {
     // including EJBs?
     Class invokingBean = _context.getServer().getAnnotatedType().getJavaClass();
 
-    Collection<ScheduledTask> scheduledTasks = Scheduler
-        .getScheduledTasksByTargetBean(invokingBean);
+    Collection<ScheduledTask> scheduledTasks
+      = Scheduler.getScheduledTasksByTargetBean(invokingBean);
 
     for (ScheduledTask scheduledTask : scheduledTasks) {
       EjbTimer timer = new EjbTimer();
@@ -552,19 +584,8 @@ public class EjbTimerService implements TimerService {
   }
 
   /**
-   * Returns a string representation of the object.
-   * 
-   * @return String representation of the object.
-   */
-  @Override
-  public String toString()
-  {
-    return "Resin Timer Service";
-  }
-
-  /**
    * Create a single-action timer that expires at a given point in time.
-   * 
+   *
    * @param expiration
    *          The point in time at which the timer must expire.
    * @param info
@@ -592,7 +613,7 @@ public class EjbTimerService implements TimerService {
   /**
    * Create an interval timer whose first expiration occurs at a given point in
    * time and whose subsequent expirations occur after a specified interval.
-   * 
+   *
    * @param expiration
    *          The point in time at which the first timer expiration must occur.
    * @param interval
@@ -623,7 +644,7 @@ public class EjbTimerService implements TimerService {
 
   /**
    * Create a calendar-based timer based on the input schedule expression.
-   * 
+   *
    * @param schedule
    *          A schedule expression describing the timeouts for this timer.
    * @param info
@@ -685,5 +706,16 @@ public class EjbTimerService implements TimerService {
     }
 
     return targetMethod;
+  }
+
+  /**
+   * Returns a string representation of the object.
+   *
+   * @return String representation of the object.
+   */
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

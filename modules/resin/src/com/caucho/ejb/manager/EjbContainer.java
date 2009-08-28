@@ -369,7 +369,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the information for a client remote configuration, e.g. the
    * <ejb-ref> needed for the client to properly connect.
-   * 
+   *
    * Only needed for the TCK.
    */
   public String getClientRemoteConfig()
@@ -418,9 +418,10 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
    */
   public boolean isRootScannable(Path root)
   {
-    if (_ejbUrls.contains(root.getURL())) {
-    } else if (!root.lookup("META-INF/ejb-jar.xml").canRead())
+    if (! _ejbUrls.contains(root.getURL())
+        &&  ! root.lookup("META-INF/ejb-jar.xml").canRead()) {
       return false;
+    }
 
     EjbRootConfig context = _configManager.createRootConfig(root);
 
@@ -444,12 +445,14 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 
   public boolean isScanMatchAnnotation(CharBuffer annotationName)
   {
-    if (annotationName.matches("javax.ejb.Stateless"))
+    if (annotationName.matches("javax.ejb.Stateless")) {
       return true;
+    }
     else if (annotationName.matches("javax.ejb.Stateful"))
       return true;
-    else if (annotationName.matches("javax.ejb.MessageDriven"))
+    else if (annotationName.matches("javax.ejb.MessageDriven")) {
       return true;
+    }
     else
       return false;
   }
@@ -457,8 +460,9 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Callback to note the class matches
    */
-  public void classMatchEvent(EnvironmentClassLoader loader, Path root,
-      String className)
+  public void classMatchEvent(EnvironmentClassLoader loader,
+                              Path root,
+                              String className)
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
     config.addClassName(className);

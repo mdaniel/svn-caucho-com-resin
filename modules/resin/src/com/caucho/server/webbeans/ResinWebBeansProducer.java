@@ -78,7 +78,7 @@ public class ResinWebBeansProducer
   public ResinWebBeansProducer()
   {
   }
-  
+
   /**
    * Returns the web beans container.
    */
@@ -89,7 +89,7 @@ public class ResinWebBeansProducer
     return InjectManager.create();
   }
   */
-  
+
   /**
    * Returns the web beans conversation controller
    */
@@ -98,7 +98,7 @@ public class ResinWebBeansProducer
   {
     return InjectManager.create().createConversation();
   }
-  
+
   /**
    * Returns the MBeanServer
    */
@@ -108,7 +108,7 @@ public class ResinWebBeansProducer
   {
     return Jmx.getGlobalMBeanServer();
   }
-  
+
   /**
    * Returns the TransactionManager
    */
@@ -118,7 +118,7 @@ public class ResinWebBeansProducer
   {
     return TransactionManagerImpl.getInstance();
   }
-  
+
   /**
    * Returns the UserTransaction
    */
@@ -128,7 +128,7 @@ public class ResinWebBeansProducer
   {
     return UserTransactionProxy.getInstance();
   }
-  
+
   /**
    * Returns the ScheduledExecutorService
    */
@@ -139,7 +139,7 @@ public class ResinWebBeansProducer
   {
     return ScheduledThreadPool.getLocal();
   }
-  
+
   /**
    * Returns the javax.ejb.TimerService
    */
@@ -148,6 +148,6 @@ public class ResinWebBeansProducer
   @ContextDependent
   public TimerService getTimerService()
   {
-    return EjbTimerService.getCurrent();
+    return EjbTimerService.create();
   }
 }
