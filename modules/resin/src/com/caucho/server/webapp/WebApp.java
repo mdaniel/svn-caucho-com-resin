@@ -192,6 +192,8 @@ public class WebApp extends ServletContextImpl
   private boolean _isStrictMapping;
   // True if the servlet init-param is allowed to use EL
   private boolean _servletAllowEL = false;
+  // True if requestDispatcher forward is allowed after buffers flush
+  private boolean _isAllowForward = false;
 
   // The filter manager
   private FilterManager _filterManager;
@@ -831,6 +833,15 @@ public class WebApp extends ServletContextImpl
   public void setAllowServletEL(boolean allow)
   {
     _servletAllowEL = allow;
+  }
+
+  @Configurable
+  public void setAllowForward(boolean allowForward) {
+    _isAllowForward = allowForward;
+  }
+
+  public boolean isAllowForward() {
+    return _isAllowForward;
   }
 
   /**

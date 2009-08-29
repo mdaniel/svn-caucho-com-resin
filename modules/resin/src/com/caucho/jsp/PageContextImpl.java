@@ -1079,10 +1079,10 @@ public class PageContextImpl extends PageContext
     HttpServletRequest req = (HttpServletRequest) getCauchoRequest();
     HttpServletResponse res = (HttpServletResponse) getResponse();
 
-    if (res.isCommitted())
+    if (res.isCommitted() && ! _webApp.isAllowForward())
       throw new IllegalStateException(L.l("can't forward after writing HTTP headers"));
-    
-    _out.clear();
+    else if (! _webApp.isAllowForward())
+      _out.clear();
 
     if (relativeUrl != null && ! relativeUrl.startsWith("/")) {
       String servletPath = RequestAdapter.getPageServletPath(req);

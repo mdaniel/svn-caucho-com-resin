@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>servlet: allow-forward feature after response buffer is flushed (#3580, rep by andrewm)</li>
 <li>admin: add ping-url for server-independent ping testing (#3605, rep by John Bowen)</li>
 <li>security: ClusterSingleSignon in cluster and host (#3467, rep by Scott Hernandez)</li>
 <li>ejb: TimerService needs to be injectalbe (#3572)</li>

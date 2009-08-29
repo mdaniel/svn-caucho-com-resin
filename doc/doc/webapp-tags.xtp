@@ -67,6 +67,21 @@ element active-wait-time {
 
 </defun>
 
+<defun title="&lt;allow-forward>">
+<parents>web-app</parents>
+
+<p>The &lt;allow-forward> flag configures whether IllegalStateExcdeption
+  is thrown when using forward() method. Flag configures behavior of servlet and
+  jsp.</p>
+
+<def title="&lt;allow-forward> schema">
+element allow-servlet-el {
+  r_boolean-Type
+}
+</def>
+
+</defun>
+
 <defun title="&lt;allow-servlet-el>">
 <parents>web-app</parents>
 

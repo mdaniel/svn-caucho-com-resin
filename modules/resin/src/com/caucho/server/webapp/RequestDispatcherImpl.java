@@ -153,7 +153,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       cauchoRes = (CauchoResponse) res;
 
     // jsp/15m8
-    if (res.isCommitted() && method == null) {
+    if (res.isCommitted() && method == null && ! _webApp.isAllowForward()) {
       IllegalStateException exn;
       exn = new IllegalStateException("forward() not allowed after buffer has committed.");
 
