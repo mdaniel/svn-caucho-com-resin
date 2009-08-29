@@ -948,8 +948,6 @@
       </fileset>
     </jar>
 
-    <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
-
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin.jar"
           file="${dist}/${dist.name}/lib/resin.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"
@@ -975,6 +973,8 @@
         <include name="LICENSE"/>
       </fileset>
     </jar>
+    
+    <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
 
     <jar destfile="${dist}/quercus-${version}-src.jar">
       <fileset dir="${resin.modules}/kernel/src">
