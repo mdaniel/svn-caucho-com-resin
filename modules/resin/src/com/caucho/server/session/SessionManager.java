@@ -137,6 +137,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private long _cookieMaxAge;
   private boolean _cookieSecure;
   private int _isCookieHttpOnly;
+  private String _cookieComment;
   private String _cookiePort;
   private int _reuseSessionId = COOKIE;
   private int _cookieLength = 21;
@@ -822,10 +823,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void setComment(String comment) {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
+
+    _cookieComment = comment;
   }
 
   public String getComment() {
-    return null;
+    return _cookieComment;
   }
 
   public void setHttpOnly(boolean httpOnly) {
@@ -1067,7 +1070,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    * group matches, then use it because different webApps on the
    * same matchine should use the same cookie.
    *
-   * @param sessionGroup possibly assigned by the web server
+   * @param request current request
    */
   public String createSessionId(HttpServletRequest request)
   {
@@ -1079,7 +1082,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
    * group matches, then use it because different webApps on the
    * same machine should use the same cookie.
    *
-   * @param sessionGroup possibly assigned by the web server
+   * @param request current request
    */
   public String createSessionId(HttpServletRequest request,
                                 boolean create)
@@ -1185,8 +1188,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   /**
    * Finds a session in the session store, creating one if 'create' is true
    *
-   * @param create if the session doesn't exist, create it
-   * @param requestId the session id from the request
+   * @param isCreate if the session doesn't exist, create it
+   * @param request current request
+   * @sessionId a desired sessionId or null
    * @param now the time in milliseconds
    * @param fromCookie true if the session id comes from a cookie
    *
