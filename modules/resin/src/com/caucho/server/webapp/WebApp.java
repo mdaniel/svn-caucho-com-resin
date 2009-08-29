@@ -193,7 +193,7 @@ public class WebApp extends ServletContextImpl
   // True if the servlet init-param is allowed to use EL
   private boolean _servletAllowEL = false;
   // True if requestDispatcher forward is allowed after buffers flush
-  private boolean _isAllowForward = false;
+  private boolean _isAllowForwardAfterFlush = false;
 
   // The filter manager
   private FilterManager _filterManager;
@@ -836,12 +836,12 @@ public class WebApp extends ServletContextImpl
   }
 
   @Configurable
-  public void setAllowForward(boolean allowForward) {
-    _isAllowForward = allowForward;
+  public boolean isAllowForwardAfterFlush() {
+    return _isAllowForwardAfterFlush;
   }
 
-  public boolean isAllowForward() {
-    return _isAllowForward;
+  public void setAllowForwardAfterFlush(boolean allowForwardAfterFlush) {
+    _isAllowForwardAfterFlush = allowForwardAfterFlush;
   }
 
   /**

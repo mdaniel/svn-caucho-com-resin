@@ -1115,8 +1115,8 @@ r_web-app-Basis =
 
   & r_access-log*
 
-  & (attribute allow-forward { r_boolean-Type }
-     | element allow-forward { r_boolean-Type })?
+  & (attribute allow-forward-after-flush { r_boolean-Type }
+     | element allow-forward-after-flush { r_boolean-Type })?
      
   & (attribute active-wait-time { r_period }
      | element active-wait-time { r_period })?

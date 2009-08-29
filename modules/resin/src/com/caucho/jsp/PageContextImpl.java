@@ -338,7 +338,7 @@ public class PageContextImpl extends PageContext
    * Sets the page attribute with the given name.
    *
    * @param name the attribute name.
-   * @param value the new value
+   * @param attribute the new value
    */
   public void setAttribute(String name, Object attribute)
   {
@@ -355,7 +355,7 @@ public class PageContextImpl extends PageContext
    * Sets the page attribute with the given name.
    *
    * @param name the attribute name.
-   * @param value the new value
+   * @param attribute the new value
    */
   public Object putAttribute(String name, Object attribute)
   {
@@ -1079,9 +1079,9 @@ public class PageContextImpl extends PageContext
     HttpServletRequest req = (HttpServletRequest) getCauchoRequest();
     HttpServletResponse res = (HttpServletResponse) getResponse();
 
-    if (res.isCommitted() && ! _webApp.isAllowForward())
+    if (res.isCommitted() && ! _webApp.isAllowForwardAfterFlush())
       throw new IllegalStateException(L.l("can't forward after writing HTTP headers"));
-    else if (! _webApp.isAllowForward())
+    else if (! _webApp.isAllowForwardAfterFlush())
       _out.clear();
 
     if (relativeUrl != null && ! relativeUrl.startsWith("/")) {
