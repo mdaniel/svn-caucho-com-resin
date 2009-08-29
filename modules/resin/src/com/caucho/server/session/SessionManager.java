@@ -141,6 +141,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private String _cookiePort;
   private int _reuseSessionId = COOKIE;
   private int _cookieLength = 21;
+  //Servlet 3.0 plain | ssl session tracking cookies become secure when set to true
+  private boolean _isSecure;
 
   // persistence configuration
 
@@ -845,10 +847,12 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void setSecure(boolean secure) {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
+
+    _isSecure = secure;
   }
 
   public boolean isSecure() {
-    return false;
+    return _isSecure;
   }
 
   public void setMaxAge(int maxAge) {
@@ -943,7 +947,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (_isCookieHttpOnly == SET_TRUE)
       return true;
     else if (_isCookieHttpOnly == SET_FALSE)
-      return true;
+      return false;
     else
       return getWebApp().getCookieHttpOnly();
   }

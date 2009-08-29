@@ -1180,6 +1180,19 @@ public class HttpServletRequestImpl implements CauchoRequest
     if (_cookiesIn == null) {
       _cookiesIn = _request.getCookies();
 
+      SessionManager sessionManager = getSessionManager();
+      String sessionCookieName = getSessionCookie(sessionManager);
+
+      for (int i = 0; i < _cookiesIn.length; i++) {
+        Cookie cookie = _cookiesIn[i];
+
+        if (cookie.getName().equals(sessionCookieName)
+          && sessionManager.isSecure()) {
+          cookie.setSecure(true);
+          break;
+        }
+      }
+
       /*
       // The page varies depending on the presense of any cookies
       setVaryCookie(null);
