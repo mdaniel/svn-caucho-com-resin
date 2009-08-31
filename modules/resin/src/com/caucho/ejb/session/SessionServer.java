@@ -97,7 +97,8 @@ abstract public class SessionServer extends AbstractServer {
 
       InjectManager beanManager = InjectManager.create();
 
-      BeanFactory factory = beanManager.createBeanFactory(SessionContext.class);
+      BeanFactory factory
+        = beanManager.createBeanFactory(SessionContext.class);
 
       _component = factory.singleton(getSessionContext());
 

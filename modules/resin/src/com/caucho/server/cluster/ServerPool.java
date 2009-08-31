@@ -40,6 +40,7 @@ import javax.management.ObjectName;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,7 +109,7 @@ public class ServerPool
   private volatile int _activeCount;
   private volatile int _startingCount;
 
-  private volatile int _loadBalanceAllocateCount;
+  private final AtomicInteger _loadBalanceAllocateCount = new AtomicInteger();
 
   // numeric value representing the throttle state
   private volatile int _warmupState;
@@ -345,7 +346,7 @@ public class ServerPool
    */
   public int getLoadBalanceAllocateCount()
   {
-    return _loadBalanceAllocateCount;
+    return _loadBalanceAllocateCount.get();
   }
 
   /**
@@ -353,9 +354,7 @@ public class ServerPool
    */
   public void allocateLoadBalance()
   {
-    synchronized (this) {
-      _loadBalanceAllocateCount++;
-    }
+    _loadBalanceAllocateCount.incrementAndGet();
   }
 
   /**
@@ -363,9 +362,7 @@ public class ServerPool
    */
   public void freeLoadBalance()
   {
-    synchronized (this) {
-      _loadBalanceAllocateCount--;
-    }
+    _loadBalanceAllocateCount.decrementAndGet();
   }
 
   /**

@@ -574,7 +574,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (cache.get(_id, os)) {
         InputStream is = os.getInputStream();
 
-        SessionDeserializer in = new HessianSessionDeserializer(is);
+        SessionDeserializer in = _manager.createSessionDeserializer(is);
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load valueHash="
@@ -736,7 +736,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       _isModified = false;
 
       TempOutputStream os = new TempOutputStream();
-      SessionSerializer out = new HessianSessionSerializer(os);
+      SessionSerializer out = _manager.createSessionSerializer(os);
 
       store(out);
 

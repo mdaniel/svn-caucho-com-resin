@@ -1061,6 +1061,24 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     return _sessionStore;
   }
 
+  public SessionSerializer createSessionSerializer(OutputStream os)
+    throws IOException
+  {
+    if (_isHessianSerialization)
+      return new HessianSessionSerializer(os);
+    else
+      return new JavaSessionSerializer(os);
+  }
+
+  public SessionDeserializer createSessionDeserializer(InputStream is)
+    throws IOException
+  {
+    if (_isHessianSerialization)
+      return new HessianSessionDeserializer(is);
+    else
+      return new JavaSessionDeserializer(is);
+  }
+
   /**
    * Returns true if the session exists in this manager.
    */

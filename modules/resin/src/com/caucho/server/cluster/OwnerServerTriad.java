@@ -198,25 +198,31 @@ public final class OwnerServerTriad
     if (pool != null && pool.isActive() && server != oldServer)
       return server;
 
-    // force the send
+    // force the send.  Server must be active, but pool may have a failure
 
     server = _primary;
-    pool = server != null ? server.getServerPool() : null;
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
     
-    if (pool != null && server != oldServer)
-      return server;
+      if (pool != null && server != oldServer)
+        return server;
+    }
 
     server = _secondary;
-    pool = server != null ? server.getServerPool() : null;
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
     
-    if (pool != null && server != oldServer)
-      return server;
+      if (pool != null && server != oldServer)
+        return server;
+    }
 
     server = _tertiary;
-    pool = server != null ? server.getServerPool() : null;
+    if (server != null && server.isActive()) {
+      pool = server.getServerPool();
     
-    if (pool != null && server != oldServer)
-      return server;
+      if (pool != null && server != oldServer)
+        return server;
+    }
 
     return null;
   }

@@ -91,7 +91,7 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
   @Configurable
   public void addAddress(String address)
   {
-    _proxyServlet.setServerAddress(address);
+    _proxyServlet.addAddress(address);
   }
 
   /**
@@ -99,13 +99,11 @@ public class FastCgiProxy extends AbstractTargetDispatchRule
    *
    * @param period the recover timeout
    */
-  /*
   @Configurable
   public void setFailRecoverTime(Period period)
   {
     _proxyServlet.setFailRecoverTime(period);
   }
-  */
 
   @PostConstruct
   public void init()

@@ -463,6 +463,10 @@ public class HmuxRequest extends AbstractHttpRequest
       getRequestFacade().setInvocation(invocation);
 
       startInvocation();
+      
+      if (_server.isPreview() && ! "resin.admin".equals(getHost())) {
+        return sendBusyResponse();
+      }
 
       invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {
@@ -568,6 +572,19 @@ public class HmuxRequest extends AbstractHttpRequest
       bamConn.close();
 
     _isSecure = _conn.isSecure();
+  }
+
+  /**
+   * Sends busy response for preview mode.
+   */
+  private boolean sendBusyResponse()
+    throws IOException
+  {
+    HttpServletResponseImpl response = getResponseFacade();
+
+    response.sendError(503);
+
+    return true;
   }
 
   /**

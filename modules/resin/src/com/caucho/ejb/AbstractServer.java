@@ -62,6 +62,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -899,29 +900,32 @@ abstract public class AbstractServer implements EnvironmentBean {
       getInjectionTarget().inject(instance, env);
     }
 
-    if (_initInject != null) {
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-      try {
-        thread.setContextClassLoader(_loader);
-
+    try {
+      thread.setContextClassLoader(_loader);
+      
+      if (_initInject != null) {
         if (env == null)
           env = new ConfigContext();
 
         for (ConfigProgram inject : _initInject)
           inject.inject(instance, env);
-      } finally {
-        thread.setContextClassLoader(oldLoader);
       }
-    }
 
-    try {
-      if (_cauchoPostConstruct != null)
-        _cauchoPostConstruct.invoke(instance, null);
-    } catch (Throwable e) {
-      log.log(Level.FINER, L.l("Error invoking method {0}",
-          _cauchoPostConstruct), e);
+      try {
+        if (_cauchoPostConstruct != null)
+          _cauchoPostConstruct.invoke(instance, null);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e.getCause());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
 
     if (env != null && bean != null)

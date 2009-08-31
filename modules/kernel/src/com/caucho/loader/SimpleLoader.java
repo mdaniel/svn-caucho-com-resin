@@ -100,7 +100,10 @@ public class SimpleLoader extends Loader {
   {
     DynamicClassLoader loader = new DynamicClassLoader(parent, false);
 
-    loader.addLoader(new SimpleLoader(path, prefix));
+    SimpleLoader simpleLoader = new SimpleLoader(path, prefix);
+    simpleLoader.init();
+    
+    loader.addLoader(simpleLoader);
 
     loader.init();
 

@@ -94,9 +94,10 @@ abstract public class Loader {
     // Find the path corresponding to the class
     Path path = getPath(pathName);
 
-    if (path != null && path.getLength() > 0)
+    if (path != null && path.getLength() > 0) {
       return new ClassEntry(_loader, name, path, path,
 			    getCodeSource(path));
+    }
     else
       return null;
   }

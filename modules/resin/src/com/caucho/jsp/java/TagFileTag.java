@@ -166,12 +166,33 @@ public class TagFileTag extends GenericTag {
 
     String childContext = fillTagFileAttributes(out, name);
 
+    /*
+    String parentTagName;
+    
+    JspNode parentTagNode = getParent().getParentTagNode();
+    if (parentTagNode == null) {
+      parentTagName = null;
+    }
+    else if (parentTagNode.isSimpleTag()) {
+      parentTagName = null;
+
+      String parentName = parentTagNode.getCustomTagName();
+      
+      out.println("if (" + parentName + "_adapter == null)");
+      out.println("  " + parentName + "_adapter = new javax.servlet.jsp.tagext.TagAdapter(" + parentName + ");");
+      out.println(var + ".setParent(" + parentName + "_adapter);");
+    }
+    else {
+      parentTagName = parentTagNode.getCustomTagName();
+    }
+    */
+
     out.print(name + ".doTag(pageContext, " + childContext + ", out, ");
     if (_body != null)
       generateFragment(out, _body, "pageContext");
     else
       out.print("null");
-    
+
     out.println(");");
 
     printVarDeclaration(out, VariableInfo.AT_END);

@@ -149,7 +149,7 @@ public class TagSupport implements IterationTag, Serializable {
       return null;
 
     tag = tag.getParent();
-    
+    System.out.println("PARENT: " + tag);    
     for (; tag != null; tag = tag.getParent()) {
       if (cl.isAssignableFrom(tag.getClass()))
 	return tag;

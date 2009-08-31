@@ -29,19 +29,50 @@
 
 package com.caucho.server.session;
 
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Serializer for session data
  */
-abstract public class SessionDeserializer {
-  abstract public int readInt()
-    throws IOException;
+public class JavaSessionSerializer extends SessionSerializer {
+  private static final Logger log
+    = Logger.getLogger(JavaSessionSerializer.class.getName());
+  
+  private ObjectOutputStream _out;
 
-  abstract public Object readObject()
-    throws IOException, ClassNotFoundException;
+  public JavaSessionSerializer(OutputStream os)
+    throws IOException
+  {
+    _out = new ObjectOutputStream(os);
+  }
+  
+  public void writeInt(int v)
+    throws IOException
+  {
+    _out.writeInt(v);
+  }
+
+  public void writeObject(Object v)
+    throws IOException
+  {
+    _out.writeObject(v);
+  }
 
   public void close()
   {
+    ObjectOutputStream out = _out;
+    _out = null;
+
+    if (out != null) {
+      try {
+	out.close();
+      } catch (IOException e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
   }
 }

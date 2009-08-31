@@ -13,6 +13,11 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jsp: add CodeSigner for JSP class loader (#3657, rep by Kai Virkki)</li>
+<li>http-proxy: enable load-balancing (#3068, rep by Zeke)</li>
+<li>deploy: -preview now detaches server from load balancing (#3345)</li>
+<li>ejb: session beans were not initialized in correct context (#3603, rep by Matthew Brew)</li>
+<li>session: add "java" as a session serialization type (#3648, rep by Mattias Jiderhamn)</li>
 <li>servlet: allow-forward-after-flush allows forward after response has been commited (feature) (#3580, rep by andrewm)</li>
 <li>admin: add ping-url for server-independent ping testing (#3605, rep by John Bowen)</li>
 <li>security: ClusterSingleSignon in cluster and host (#3467, rep by Scott Hernandez)</li>

@@ -1431,15 +1431,15 @@ public class InjectManager
     WebComponent component = getWebComponent(createBaseType(type));
 
     if (component == null) {
-      throw new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans implementing that class have been registered with the injection Manager.",
-                                                   type));
+      throw new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans implementing that class have been registered with the injection manager {1}.",
+                                                   type, this));
     }
     else {
       ArrayList<Bean<?>> enabledList = component.getEnabledBeanList();
 
       if (enabledList.size() == 0) {
-        throw new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans implementing that class have been registered with the injection Manager.",
-                                                     type));
+        throw new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans implementing that class have been registered with the injection manager {1}.",
+                                                     type, this));
       }
       else {
         return new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans match the type and bindings {1}.\nBeans:{2}",

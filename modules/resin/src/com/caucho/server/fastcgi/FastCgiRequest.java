@@ -308,11 +308,9 @@ public class FastCgiRequest extends AbstractHttpRequest
       if (invocation == null)
         return false;
 
-      /*
-      setInvocation(invocation);
+      getRequestFacade().setInvocation(invocation);
 
       startInvocation();
-      */
 
       invocation.service(getRequestFacade(), getResponseFacade());
     } catch (ClientDisconnectException e) {

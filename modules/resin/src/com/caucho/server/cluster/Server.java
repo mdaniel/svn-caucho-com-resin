@@ -155,6 +155,7 @@ public class Server extends ProtocolDispatchServer
   private HostContainer _hostContainer;
 
   private String _stage = "default";
+  private boolean _isPreview;
   
   private String _serverHeader;
 
@@ -812,6 +813,8 @@ public class Server extends ProtocolDispatchServer
       _stage = "default";
     else
       _stage = stage;
+
+    _isPreview = "preview".equals(_stage);
   }
 
   /**
@@ -820,6 +823,14 @@ public class Server extends ProtocolDispatchServer
   public String getStage()
   {
     return _stage;
+  }
+
+  /**
+   * Returns true in preview mode
+   */
+  public boolean isPreview()
+  {
+    return _isPreview;
   }
 
   /**
@@ -2368,6 +2379,14 @@ public class Server extends ProtocolDispatchServer
   public LoadBalanceManager createClusterLoadBalancer(String clusterName)
   {
     throw new ConfigException(L.l("Cluster LoadBalancer requires Resin Professional."));
+  }
+  
+  /**
+   * Creates and returns a load balancer configured explicitly
+   */
+  public CustomLoadBalanceManager createProxyLoadBalancer()
+  {
+    return new SingleLoadBalanceManager();
   }
 
   /**
