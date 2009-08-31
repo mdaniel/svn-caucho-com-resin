@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -199,7 +199,8 @@ public class SimpleLoader extends Loader {
     throws ConfigException
   {
     try {
-      _codeSource = new CodeSource(new URL(_path.getURL()), (Certificate []) null);
+      _codeSource = new CodeSource(new URL(_path.getURL()),
+                                   (Certificate []) null);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
