@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>configure: MacOS-X was not properly detecting JVMTI for profile (#3000, rep by Bryant Harris)</li>
 <li>jsp: add CodeSigner for JSP class loader (#3657, rep by Kai Virkki)</li>
 <li>http-proxy: enable load-balancing (#3068, rep by Zeke)</li>
 <li>deploy: -preview now detaches server from load balancing (#3345)</li>

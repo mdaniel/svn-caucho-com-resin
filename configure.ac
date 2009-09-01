@@ -926,28 +926,35 @@ AC_ARG_ENABLE(jni,
  *) AC_MSG_ERROR(bad value ${enableval} for --enable-jni) ;;
  esac],[JNI=""])
 
+JNI_INCLUDE_DIR=""
+
 if test -n "$JNI_INCLUDE"; then
   JNI=yes
 elif test -r "$JAVA_HOME/include/jni_md.h"; then
-  JNI_INCLUDE="-I$JAVA_HOME/include"
+  JNI_INCLUDE_DIR="${JAVA_HOME}/include"
+  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
   JNI=yes
   echo "checking for JNI in $JAVA_HOME/include ... found"
 elif test -r "$JAVA_HOME/include/$jni_os/jni_md.h"; then
+  JNI_INCLUDE_DIR="${JAVA_HOME}/include"
   JNI_INCLUDE="-I$JAVA_HOME/include -I$JAVA_HOME/include/$jni_os"
   JNI=yes
   echo "checking for JNI in $JAVA_HOME/include/$jni_os ... found"
 elif test -r "/System/Library/Frameworks/JavaVM.framework/Headers/jni_md.h"; then
   # Darwin
   echo "checking for JNI in /System/Library/Frameworks/JavaVM.framework/Headers ... found"
-  JNI_INCLUDE="-I/System/Library/Frameworks/JavaVM.framework/Headers"
+  JNI_INCLUDE_DIR="/System/Library/Frameworks/JavaVM.framework/Headers"
+  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
   JNI=yes
 elif test -r "$JAVA_HOME/../Headers/jni_md.h"; then
   # Darwin
   echo "checking for JNI in $JAVA_HOME/../Headers ... found"
-  JNI_INCLUDE="-I$JAVA_HOME/../Headers"
+  JNI_INCLUDE_DIR="$JAVA_HOME/../Headers"
+  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
   JNI=yes
 elif test -r "$JAVA_HOME/include/jni.h"; then
-  JNI_INCLUDE="-I$JAVA_HOME/include"
+  JNI_INCLUDE_DIR="$JAVA_HOME/include"
+  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
   JNI=yes
   echo "checking for JNI in $JAVA_HOME/include ... found"
 else
@@ -955,24 +962,12 @@ else
   AC_MSG_WARN([Can't find JNI directory ${JAVA_HOME}/include/$jni_os])
 fi
 
-if test -r "$JAVA_HOME/include/jvmti.h"; then
+if test -r "$JNI_INCLUDE_DIR/jvmti.h"; then
   echo "Using JVMTI for class reloading"
   
   CFLAGS="$CFLAGS -DHAS_JVMTI"
-elif test -r "$JAVA_HOME/../Headers/jvmti.h"; then
-  echo "Using JVMTI for class reloading"
-  
-  CFLAGS="$CFLAGS -DHAS_JVMTI"
-fi
-
-if test -r "$JAVA_HOME/include/jvmdi.h"; then
-  echo "Using JVMDI for class reloading"
-  
-  CFLAGS="$CFLAGS -DHAS_JVMDI"
-elif test -r "$JAVA_HOME/../Headers/jvmdi.h"; then
-  echo "Using JVMDI for class reloading"
-  
-  CFLAGS="$CFLAGS -DHAS_JVMDI"
+else
+  AC_MSG_WARN([Can't find JVMTI directory ${JNI_INCLUDE_DIR}/jvmti.h])
 fi
 	
 if test -n "$JNI"; then
