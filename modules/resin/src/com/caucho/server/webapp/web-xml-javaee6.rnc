@@ -18,6 +18,7 @@ javaee_dispatcher = element dispatcher {
   | "REQUEST"
   | "INCLUDE"
   | "ERROR"
+  | "ASYNC"
 }
 
 javaee_error-page = element error-page {
@@ -102,9 +103,9 @@ javaee_jsp-property-group = element jsp-property-group {
 
   element include-coda { javaee_path }*,
 
-  element deferred-syntax-allowed-as-literal { j2ee_boolean }?,
+  element deferred-syntax-allowed-as-literal { javaee_boolean }?,
 
-  element trim-directive-whitespaces { j2ee_boolean }?
+  element trim-directive-whitespaces { javaee_boolean }?
 }
 
 javaee_listener = element listener {
@@ -225,6 +226,10 @@ javaee_user-data-constraint = element user-data-constraint {
 javaee6_web-app-Content =
   javaee_description-Group*
 
+  & element name{ javaee_string }?
+
+  & javaee6_ordering?
+
   & element distributable { empty }?
 
   & element context-param { javaee_param-value-Type }*
@@ -271,6 +276,38 @@ javaee6_web-app = element web-app {
   attribute metadata-complete { javaee_boolean }?,
 
   javaee6_web-app-Content
+}
+
+javaee6_web-fragment = element web-fragment {
+  attribute metadata-complete { javaee_boolean }?,
+
+  javaee6_web-app-Content
+}
+
+javaee6_ordering =
+   javaee6_web-app-absolute-ordering
+ | javaee6_web-fragment-ordering
+
+javaee6_web-app-absolute-ordering = element absolute-ordering {
+  element name { javaee_string }*
+  
+  & element others { empty }?
+}
+
+javaee6_web-fragment-ordering = element ordering {
+  element before {
+    element name { string }*
+
+    & element others { empty }?
+  }?
+  
+  & element after {
+    element name { string }*
+
+    & element others { empty }?
+  }?
+
+  & element name { string }*
 }
 
 javaee_web-resource-collection = element web-resource-collection {

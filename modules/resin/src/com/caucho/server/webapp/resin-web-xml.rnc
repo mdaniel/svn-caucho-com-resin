@@ -4,4 +4,10 @@ include "web-xml-javaee6.rnc"
 
 start = m_web-app
 
-m_web-app = r_web-app | j2ee_web-app | javaee_web-app | javaee6_web-app | l_web-app
+m_web-app = 
+   r_web-app
+ | j2ee_web-app
+ | javaee_web-app
+ | javaee6_web-app
+ | javaee6_web-fragment
+ | l_web-app
