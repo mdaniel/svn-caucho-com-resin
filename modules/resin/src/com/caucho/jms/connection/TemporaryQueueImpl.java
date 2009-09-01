@@ -29,12 +29,13 @@
 
 package com.caucho.jms.connection;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.jms.JMSException;
+import javax.jms.TemporaryQueue;
+
 import com.caucho.jms.memory.MemoryQueue;
-
 import com.caucho.util.L10N;
-
-import java.util.ArrayList;
-import javax.jms.*;
 
 /**
  * A temporary queue
@@ -48,9 +49,12 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
   private JmsSession _session;
   private boolean _isClosed;
   
+  private AtomicInteger _messageConsumerCount;
+  
   TemporaryQueueImpl(JmsSession session)
   {
     _session = session;
+    _messageConsumerCount = new AtomicInteger();
     setName("TemporaryQueue-" + _idCount++);
   }
 
@@ -59,10 +63,20 @@ public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
     return _session;
   }
   
+  public void addMessageConsumer() 
+  {
+    _messageConsumerCount.incrementAndGet();
+  }
+  
+  public void removeMessageConsumer() 
+  {
+    _messageConsumerCount.decrementAndGet();
+  }
+  
   public void delete()
     throws JMSException
   {
-    if (getConsumerCount() > 0)
+    if (_messageConsumerCount.get() > 0)
       throw new javax.jms.IllegalStateException(L.l("temporary queue is still active"));
   }
 }

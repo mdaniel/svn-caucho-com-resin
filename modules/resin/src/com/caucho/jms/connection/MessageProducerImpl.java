@@ -44,12 +44,14 @@ import com.caucho.util.L10N;
  */
 public class MessageProducerImpl implements MessageProducer {
   static final L10N L = new L10N(MessageProducer.class);
+  
+  public static final long DEFAULT_TIME_TO_LIVE = 30 * 24 * 3600 * 1000L;
 
   private int _deliveryMode = DeliveryMode.PERSISTENT;
   private boolean _disableMessageId = true;
   private boolean _disableMessageTimestamp = true;
   private int _priority = 4;
-  private long _timeToLive = 30 * 24 * 3600 * 1000L;
+  private long _timeToLive = DEFAULT_TIME_TO_LIVE;
 
   protected JmsSession _session;
   protected AbstractDestination _queue;
@@ -265,6 +267,15 @@ public class MessageProducerImpl implements MessageProducer {
 
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
+    
+    if (destination instanceof TemporaryTopicImpl) {
+      
+      // Message can not be sent on Temporary Queue if Session is not active.      
+      if (((TemporaryTopicImpl)destination).getSession().isClosed()) {
+        throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' session is not active",
+            destination));
+      }     
+    } 
 
     _session.send((AbstractDestination) destination,
 		  message,

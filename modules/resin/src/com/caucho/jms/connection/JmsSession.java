@@ -29,22 +29,53 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
-import com.caucho.util.ThreadTask;
-
-import javax.jms.*;
-import javax.jms.IllegalStateException;
-import javax.naming.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.jms.BytesMessage;
+import javax.jms.Destination;
+import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
+import javax.jms.Session;
+import javax.jms.StreamMessage;
+import javax.jms.TemporaryQueue;
+import javax.jms.TemporaryTopic;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
+import javax.jms.XASession;
+import javax.naming.InitialContext;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+
+import com.caucho.jms.message.BytesMessageImpl;
+import com.caucho.jms.message.MapMessageImpl;
+import com.caucho.jms.message.MessageFactory;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.message.ObjectMessageImpl;
+import com.caucho.jms.message.StreamMessageImpl;
+import com.caucho.jms.message.TextMessageImpl;
+import com.caucho.jms.queue.AbstractDestination;
+import com.caucho.jms.queue.AbstractQueue;
+import com.caucho.jms.queue.AbstractTopic;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
+import com.caucho.util.ThreadTask;
 
 /**
  * Manages the JMS session.
@@ -385,14 +416,28 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     
     if (destination instanceof TemporaryQueueImpl) {
       
-      // Consumer can not be created on a different Connection on Temporary Queue.
+      // Consumer can not be created on a different Connection on Temporary Queue.      
       if (!((TemporaryQueueImpl)destination).getSession().getConnection()
           .equals(_connection)) {
         throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
             destination, this));
       }
+      
+      ((TemporaryQueueImpl)destination).addMessageConsumer();
     }    
 
+    if (destination instanceof TemporaryTopicImpl) {
+      
+      // Consumer can not be created on a different Connection on Temporary Queue.      
+      if (!((TemporaryTopicImpl)destination).getSession().getConnection()
+          .equals(_connection)) {
+        throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
+            destination, this));
+      }
+      
+      ((TemporaryTopicImpl)destination).addMessageConsumer();
+    }    
+    
     MessageConsumerImpl consumer;
     
     if (destination instanceof AbstractQueue) {
@@ -889,8 +934,13 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     // messages that have expired; however, the JMS API does not 
     // guarantee that this will not happen.
     long now = Alarm.getExactTime();
-    long expireTime = now + timeout;
-    appMessage.setJMSExpiration(expireTime);
+    long expireTime = 0;
+    if (timeout == 0) {
+      expireTime = now + MessageProducerImpl.DEFAULT_TIME_TO_LIVE;
+    } else {
+      expireTime = now + timeout;
+      appMessage.setJMSExpiration(expireTime);
+    }    
     
     appMessage.setJMSMessageID(queue.generateMessageID());
     

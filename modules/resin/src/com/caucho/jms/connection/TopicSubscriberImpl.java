@@ -130,7 +130,11 @@ public class TopicSubscriberImpl extends MessageConsumerImpl
 
       subscription.close();
       _isSubscriptionClosed = Boolean.TRUE;
-    }
+    }    
+    
+    if (_topic instanceof TemporaryTopicImpl) {    
+      ((TemporaryTopicImpl)_topic).removeMessageConsumer();
+    }    
   }
 }
 

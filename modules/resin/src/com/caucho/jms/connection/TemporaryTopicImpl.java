@@ -34,6 +34,8 @@ import com.caucho.jms.memory.MemoryTopic;
 import com.caucho.jms.queue.MessageAvailableListener;
 import com.caucho.util.L10N;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.jms.*;
 
 /**
@@ -45,6 +47,8 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
   private static int _idCount;
 
   private JmsSession _session;
+  
+  private AtomicInteger _messageConsumerCount;  
 
   private ArrayList<MessageAvailableListener> _consumerList
     = new ArrayList<MessageAvailableListener>();
@@ -52,7 +56,7 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
   TemporaryTopicImpl(JmsSession session)
   {
     _session = session;
-    
+    _messageConsumerCount = new AtomicInteger();
     setName("TemporaryTopic-" + _idCount++);
   }
 
@@ -61,13 +65,22 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
     return _session;
   }
 
+  
+  public void addMessageConsumer() 
+  {
+    _messageConsumerCount.incrementAndGet();
+  }
+  
+  public void removeMessageConsumer() 
+  {
+    _messageConsumerCount.decrementAndGet();
+  }
+  
   public void delete()
     throws JMSException
   {
-    /*
-    if (_consumerList.size() > 0)
-      throw new javax.jms.IllegalStateException(L.l("temporary topic is still active"));
-    */
+    if (_messageConsumerCount.get() > 0)
+      throw new javax.jms.IllegalStateException(L.l("temporary queue is still active"));
   }
 }
 
