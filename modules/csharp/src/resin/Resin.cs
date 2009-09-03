@@ -78,7 +78,9 @@ namespace Caucho
   stop - stop a Resin server
   restart - restart a Resin server
   kill - force a kill of a Resin server
-  shutdown - shutdown the watchdog";
+  shutdown - shutdown the watchdog
+  
+  Start with -h for extended help message.";
 
     private bool _verbose;
     private bool _nojit;
@@ -181,6 +183,7 @@ namespace Caucho
           _service = false;
           
           ServiceName = args[argsIdx + 1];
+          _displayName = args[argsIdx + 1];
           
           argsIdx += 2;
         } else if ("-remove".Equals(args[argsIdx])) {
