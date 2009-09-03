@@ -472,13 +472,7 @@ li.server {
   background : #ccddee;
 }
 
-ul.tabs {
-  border-bottom: 1px solid gray;
-  list-style-type:none;
-  position:relative;
-  padding : 0em;
-  padding-bottom : 0.15em;
-}
+/*
 
 .tabs li {
   background: #F4F4F4 none repeat scroll 0 0;
@@ -489,6 +483,35 @@ ul.tabs {
   border-top: 1px solid gray;
   border-left: 1px solid gray;
   border-right: 1px solid gray;
+}
+*/
+
+ul.tabs {
+  font-family : Verdana, Helvetica, Arial, sans-serif;
+  list-style:none;
+  float:left;
+  margin: 0;
+  margin-bottom: 0.5em;
+  padding : 0;
+  padding-bottom : 0.15em;
+  width: 100%;
+}
+
+.tabs li {
+  float:left;
+  margin : 0em;
+  margin-top: 0.5em;
+  padding: 0.15em 0.4em 0.2em 0.4em;
+  background: #F4F4F4 none repeat scroll 0 0;
+  display : inline;
+  margin-bottom: -1px;
+  margin-left: -1px;
+  overflow:hidden;
+
+  border-top: 1px solid gray;
+  border-left: 1px solid gray;
+  border-right: 1px solid gray;
+  border-bottom: 1px solid gray;
 }
 
 .tabs li.selected {

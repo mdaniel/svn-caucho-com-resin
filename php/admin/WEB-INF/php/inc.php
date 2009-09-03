@@ -762,4 +762,25 @@ function sort_webapp($a, $b)
   return strcmp($a->ContextPath, $b->ContextPath);
 }
 
+function display_timeout($timeout)
+{
+  if ($timeout == 0)
+    return "0s";
+  else if ($timeout % (24 * 3600 * 1000) == 0) {
+    return ($timeout / (24 * 3600 * 1000)) . "d";
+  }
+  else if ($timeout % (3600 * 1000) == 0) {
+    return ($timeout / (3600 * 1000)) . "h";
+  }
+  else if ($timeout % (60 * 1000) == 0) {
+    return ($timeout / (60 * 1000)) . "m";
+  }
+  else if ($timeout % (1000) == 0) {
+    return ($timeout / (1000)) . "s";
+  }
+  else {
+    return $timeout . "ms";
+  }
+}
+
 ?>

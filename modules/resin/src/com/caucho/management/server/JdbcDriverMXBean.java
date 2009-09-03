@@ -33,6 +33,7 @@ import com.caucho.jmx.Description;
 import com.caucho.jmx.Units;
 
 import java.util.Date;
+import java.util.Properties;
 
 /**
  * MBean API for a JDBC driver.
@@ -58,6 +59,12 @@ public interface JdbcDriverMXBean extends ManagedObjectMXBean {
    */
   @Description("The driver URL")
   public String getUrl();
+  
+  /**
+   * Returns the drivers configured properties
+   */
+  @Description("The driver properties")
+  public Properties getProperties();
 
   //
   // state

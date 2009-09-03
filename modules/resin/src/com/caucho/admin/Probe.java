@@ -47,7 +47,7 @@ abstract public class Probe {
   /**
    * Return the probe's next sample.
    */
-  abstract public long sample();
+  abstract public double sample();
 
   @Override
   public String toString()

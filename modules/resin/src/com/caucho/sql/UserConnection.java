@@ -29,6 +29,7 @@
 
 package com.caucho.sql;
 
+import com.caucho.admin.TimeSample;
 import com.caucho.util.L10N;
 
 import java.sql.*;
@@ -85,6 +86,11 @@ public class UserConnection implements java.sql.Connection {
       conn = ((com.caucho.sql.spy.SpyConnection)conn).getConnection();
 
     return conn;
+  }
+
+  TimeSample getTimeProbe()
+  {
+    return _mConn.getDBPool().getTimeProbe();
   }
 
   public Class getDriverClass()

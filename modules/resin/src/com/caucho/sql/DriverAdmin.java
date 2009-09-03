@@ -35,12 +35,19 @@ import javax.management.*;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.JdbcDriverMXBean;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
+import java.beans.*;
+import java.util.logging.*;
 
 public class DriverAdmin extends AbstractManagedObject
   implements JdbcDriverMXBean
 {
+  private static final Logger log
+    = Logger.getLogger(DriverAdmin.class.getName());
+  
   private DriverConfig _driver;
 
   public DriverAdmin(DriverConfig driver)
@@ -61,7 +68,55 @@ public class DriverAdmin extends AbstractManagedObject
 
   public String getUrl()
   {
+    Properties props = getProperties();
+
+    String url = (String) props.get("url");
+
+    if (url != null)
+      return url;
+
     return _driver.getURL();
+  }
+
+  public Properties getProperties()
+  {
+    try {
+      Properties props = new Properties();
+      
+      Object driverObject = _driver.getDriverObject();
+
+      BeanInfo info = Introspector.getBeanInfo(driverObject.getClass());
+
+      for (PropertyDescriptor property : info.getPropertyDescriptors()) {
+        String name = property.getName();
+
+        if (name.equalsIgnoreCase("url"))
+          name = "url";
+
+        Method getter = property.getReadMethod();
+
+        if (getter == null || property.getWriteMethod() == null)
+          continue;
+
+        try {
+          Object value = getter.invoke(driverObject);
+
+          if (name.equalsIgnoreCase("password"))
+            value = "****";
+          
+          if (value != null)
+            props.put(name, String.valueOf(value));
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+
+      return props;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   protected void addObjectNameProperties(Map<String,String> props)

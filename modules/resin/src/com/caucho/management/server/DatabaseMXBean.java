@@ -29,51 +29,40 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
+
+import java.util.Date;
+
 /**
- * Value for a statistics data point.
+ * MBean API for the database connection pool.
+ *
+ * <pre>
+ * resin:type=Database,name=jdbc/resin,...
+ * </pre>
  */
-public class StatServiceValue implements java.io.Serializable
-{
-  private final long _time;
-  private final double _value;
+@Description("A pool of reusable connections to a database")
+public interface DatabaseMXBean extends ConnectionPoolMXBean {
+  //
+  // Configuration
+  //
 
   /**
-   * Null constructor for Hessian
+   * Returns the primary URL for the database.
    */
-  private StatServiceValue()
-  {
-    _time = 0;
-    _value = 0;
-  }
+  @Description("The primary JDBC driver url")
+  public String getUrl();
 
   /**
-   * Standard constructor
+   * Returns true for query spy mode, logged at "com.caucho.sql.spy" at
+   * the finer level.
    */
-  public StatServiceValue(long time, double value)
-  {
-    _time = time;
-    _value = value;
-  }
+  @Description("Enables spy debugging for com.caucho.sql.spy logging")
+  public boolean isSpy();
 
   /**
-   * Returns the value's time
+   * Returns the primary drivers.
    */
-  public long getTime()
-  {
-    return _time;
-  }
-
-  /**
-   * Returns the value's value
-   */
-  public double getValue()
-  {
-    return _value;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _time + "," + _value + "]";
-  }
+  @Description("The JDBC drivers")
+  public JdbcDriverMXBean []getDrivers();
 }

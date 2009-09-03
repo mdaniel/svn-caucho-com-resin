@@ -354,7 +354,7 @@ function print_value($value)
   else if ($value >= 1)
     return sprintf("%.1f", $value);
   else
-    return sprintf("%.2g", $value);
+    return sprintf("%.3g", $value);
 }
 
 function calculate_bounds($bounds, $values)

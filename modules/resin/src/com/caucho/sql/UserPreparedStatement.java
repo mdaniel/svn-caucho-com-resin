@@ -29,6 +29,8 @@
 
 package com.caucho.sql;
 
+import com.caucho.admin.TimeSample;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 import java.io.InputStream;
@@ -52,6 +54,8 @@ public class UserPreparedStatement extends UserStatement
   protected PreparedStatementCacheItem _cacheItem;
 
   private boolean _isClosed;
+
+  private TimeSample _timeProbe;
   
   UserPreparedStatement(UserConnection conn,
 			PreparedStatement pStmt,
@@ -61,6 +65,7 @@ public class UserPreparedStatement extends UserStatement
     
     _pstmt = pStmt;
     _cacheItem = cacheItem;
+    _timeProbe = conn.getTimeProbe();
 
     if (pStmt == null)
       throw new NullPointerException();
@@ -86,6 +91,8 @@ public class UserPreparedStatement extends UserStatement
   public ResultSet executeQuery()
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _pstmt.executeQuery();
     } catch (RuntimeException e) {
@@ -94,6 +101,8 @@ public class UserPreparedStatement extends UserStatement
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -103,6 +112,8 @@ public class UserPreparedStatement extends UserStatement
   public int executeUpdate()
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _pstmt.executeUpdate();
     } catch (RuntimeException e) {
@@ -111,6 +122,8 @@ public class UserPreparedStatement extends UserStatement
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -120,6 +133,8 @@ public class UserPreparedStatement extends UserStatement
   public boolean execute()
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _pstmt.execute();
     } catch (RuntimeException e) {
@@ -128,6 +143,8 @@ public class UserPreparedStatement extends UserStatement
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 

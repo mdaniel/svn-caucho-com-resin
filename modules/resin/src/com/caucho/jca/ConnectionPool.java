@@ -57,6 +57,7 @@ import javax.transaction.xa.Xid;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -148,7 +149,7 @@ public class ConnectionPool extends AbstractManagedObject
   // statistics
   //
 
-  private long _connectionCountTotal;
+  private final AtomicLong _connectionCountTotal = new AtomicLong();
   private long _connectionCreateCountTotal;
   private long _connectionFailCountTotal;
   private long _lastFailTime;
@@ -570,9 +571,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     Object conn = allocate(mcf, subject, info);
 
-    synchronized (this) {
-      _connectionCountTotal++;
-    }
+    _connectionCountTotal.incrementAndGet();
 
     return conn;
   }
@@ -670,7 +669,7 @@ public class ConnectionPool extends AbstractManagedObject
    */
   public long getConnectionCountTotal()
   {
-    return _connectionCountTotal;
+    return _connectionCountTotal.get();
   }
 
   /**

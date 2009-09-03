@@ -1,0 +1,84 @@
+<?php
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+$mbean_server = $g_mbean_server;
+
+$databases = $g_mbean_server->query("resin:type=Database,*");
+
+echo "<h1>Configuration</h1>";
+
+foreach ($databases as $db) {
+  echo "<h2>";
+  echo $db->Name;
+  echo "</h2>\n";
+
+  echo "<pre>";
+  print_database_config($db);
+  echo "</pre>";
+}
+
+function print_database_config($db)
+{
+  echo "&lt;database name=\"" . $db->Name . "\">\n";
+
+  foreach ($db->Drivers as $driver) {
+    echo "  &lt;driver"
+    echo " url=\"";
+    echo $driver->getUrl();
+    echo "\"\n";
+    echo "          class=\"";
+    echo $driver->getClassName();
+    echo "\">\n";
+
+    foreach ($driver->Properties as $key => $value) {
+      echo "    &lt;" . $key . ">" . $value . "&lt;/" . $key . "/>\n";
+    }
+
+    echo "  &lt;/driver>\n\n";
+  }
+
+  echo "  &lt;spy>";
+  echo $db->Spy ? "true" : "false";
+  echo "&lt;/spy>\n\n";
+
+  echo "  &lt;max-connections>";
+  echo $db->MaxConnections;
+  echo "&lt;/max-connections>\n";
+
+  echo "  &lt;max-idle-count>";
+  echo $db->MaxIdleCount;
+  echo "&lt;/max-idle-count>\n";
+
+  echo "  &lt;max-create-connections>";
+  echo $db->MaxCreateConnections;
+  echo "&lt;/max-create-connections>\n";
+
+  echo "  &lt;max-overflow-connections>";
+  echo $db->MaxOverflowConnections;
+  echo "&lt;/max-overflow-connections>\n";
+
+  echo "\n";
+
+  echo "  &lt;max-idle-time>";
+  echo display_timeout($db->MaxIdleTime);
+  echo "&lt;/max-idle-time>\n";
+
+  echo "  &lt;max-active-time>";
+  echo display_timeout($db->MaxActiveTime);
+  echo "&lt;/max-active-time>\n";
+
+  echo "  &lt;max-pool-time>";
+  echo display_timeout($db->MaxPoolTime);
+  echo "&lt;/max-pool-time>\n";
+
+  echo "  &lt;connection-wait-time>";
+  echo display_timeout($db->ConnectionWaitTime);
+  echo "&lt;/connection-wait-time>\n";
+
+  echo "&lt;/database>\n";
+}

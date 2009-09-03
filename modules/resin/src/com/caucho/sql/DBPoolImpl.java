@@ -29,12 +29,15 @@
 
 package com.caucho.sql;
 
+import com.caucho.admin.TimeSample;
+import com.caucho.admin.ProbeManager;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
+import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -201,6 +204,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // Count for debugging ids.
   private int _idCount;
 
+  private TimeSample _timeProbe;
+
   // The alarm
   private Alarm _alarm;
 
@@ -291,6 +296,22 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   }
 
   /**
+   * Returns the driver admin
+   */
+  public JdbcDriverMXBean []getDriverAdmin()
+  {
+    JdbcDriverMXBean []drivers = new JdbcDriverMXBean[_driverList.size()];
+
+    for (int i = 0; i < _driverList.size(); i++) {
+      DriverConfig driver = _driverList.get(i);
+
+      drivers[i] = driver.getAdmin();
+    }
+
+    return drivers;
+  }
+
+  /**
    * Creates the connection config.
    */
   public ConnectionConfig createConnection()
@@ -304,6 +325,17 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   public ConnectionConfig getConnectionConfig()
   {
     return _connectionConfig;
+  }
+
+  TimeSample getTimeProbe()
+  {
+    if (_timeProbe == null) {
+      ProbeManager manager = ProbeManager.getCurrent();
+
+      _timeProbe = manager.createTimeRangeProbe("Resin|Database|Query");
+    }
+
+    return _timeProbe;
   }
 
   /**
@@ -888,19 +920,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   {
     Environment.addEnvironmentListener(this);
 
-    // _alarm = new Alarm("db-pool", this, 60000);
-
-    /*
-    if (_pingInterval > 0 &&
-        _pingInterval < _maxIdleTime &&
-        _pingInterval < 60000L)
-      _alarm.queue(_pingInterval);
-    else if (_maxIdleTime > 60000)
-      _alarm.queue(60000);
-    else
-      _alarm.queue(_maxIdleTime);
-    */
-
     try {
       if (_tm == null) {
         Object obj = new InitialContext().lookup("java:comp/TransactionManager");
@@ -911,11 +930,6 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
-    /*
-    if (isXA() && _tm == null)
-      throw new ConfigException(L.l("Can't find TransactionManager in java:comp/TransactionManager for transaction-enabled DBPool."));
-    */
 
     for (int i = 0; i < _driverList.size(); i++) {
       DriverConfig driver = _driverList.get(i);

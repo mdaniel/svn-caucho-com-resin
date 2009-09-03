@@ -13,6 +13,8 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>admin: add "database" tab to admin and improve configuration visibility (rep by Bill Au)</li>
+<li>admin: add DatabaseMXBean and add getUrl() (#3664, rep by Bill Au)</li>
 <li>configure: MacOS-X was not properly detecting JVMTI for profile (#3000, rep by Bryant Harris)</li>
 <li>jsp: add CodeSigner for JSP class loader (#3657, rep by Kai Virkki)</li>
 <li>http-proxy: enable load-balancing (#3068, rep by Zeke)</li>

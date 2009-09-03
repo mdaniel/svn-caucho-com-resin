@@ -91,6 +91,19 @@ public class ManagedFactoryImpl
   }
 
   /**
+   * Returns the primary URL
+   */
+  public String getURL()
+  {
+    if (_drivers.length > 0)
+      return _drivers[0].getURL();
+    else if (_backupDrivers.length > 0)
+      return _backupDrivers[0].getURL();
+    else
+      return null;
+  }
+
+  /**
    * Returns the connection config.
    */
   ConnectionConfig getConnectionConfig()

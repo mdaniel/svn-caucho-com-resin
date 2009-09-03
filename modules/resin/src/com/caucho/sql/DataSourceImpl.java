@@ -56,6 +56,14 @@ public class DataSourceImpl implements DataSource {
   }
 
   /**
+   * Returns the primary URL for the connection
+   */
+  public String getURL()
+  {
+    return _managedFactory.getURL();
+  }
+
+  /**
    * Returns a connection.
    */
   public Connection getConnection()

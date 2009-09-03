@@ -46,7 +46,7 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   //
   // Configuration
   //
-  
+
   /**
    * Returns the maximum number of connections.
    */

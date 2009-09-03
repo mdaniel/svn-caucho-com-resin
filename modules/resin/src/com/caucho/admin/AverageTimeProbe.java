@@ -54,13 +54,13 @@ public final class AverageTimeProbe extends Probe {
   /**
    * Return the probe's next sample.
    */
-  public final long sample()
+  public final double sample()
   {
     long sum = _sum.getAndSet(0);
     int count = _count.getAndSet(0);
 
     if (count != 0)
-      return sum / count;
+      return sum / (double) count;
     else
       return 0;
   }

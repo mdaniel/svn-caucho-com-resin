@@ -28,7 +28,9 @@
 
 package com.caucho.sql;
 
+import com.caucho.admin.TimeSample;
 import com.caucho.util.L10N;
+import com.caucho.util.Alarm;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,10 +57,13 @@ public class UserStatement implements Statement {
   // True if the statement is changed in a way that forbids its caching.
   protected boolean _isPoolable = true;
 
+  private final TimeSample _timeProbe;
+
   UserStatement(UserConnection conn, Statement stmt)
   {
     _conn = conn;
     _stmt = stmt;
+    _timeProbe = conn.getTimeProbe();
   }
 
   public void setPoolable(boolean poolable)
@@ -177,6 +182,8 @@ public class UserStatement implements Statement {
   public ResultSet executeQuery(String sql)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.executeQuery(sql);
     } catch (RuntimeException e) {
@@ -185,6 +192,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -194,6 +203,8 @@ public class UserStatement implements Statement {
   public int executeUpdate(String sql)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.executeUpdate(sql);
     } catch (RuntimeException e) {
@@ -202,6 +213,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -211,6 +224,8 @@ public class UserStatement implements Statement {
   public int executeUpdate(String query, int resultType)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.executeUpdate(query, resultType);
     } catch (RuntimeException e) {
@@ -219,6 +234,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -228,6 +245,8 @@ public class UserStatement implements Statement {
   public int executeUpdate(String query, int []columns)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.executeUpdate(query, columns);
     } catch (RuntimeException e) {
@@ -236,6 +255,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -245,6 +266,8 @@ public class UserStatement implements Statement {
   public int executeUpdate(String query, String []columns)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.executeUpdate(query, columns);
     } catch (RuntimeException e) {
@@ -253,6 +276,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -262,6 +287,8 @@ public class UserStatement implements Statement {
   public boolean execute(String sql)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.execute(sql);
     } catch (RuntimeException e) {
@@ -270,6 +297,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -279,6 +308,8 @@ public class UserStatement implements Statement {
   public boolean execute(String query, int resultType)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.execute(query, resultType);
     } catch (RuntimeException e) {
@@ -287,6 +318,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -297,6 +330,8 @@ public class UserStatement implements Statement {
   public boolean execute(String query, int []columns)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.execute(query, columns);
     } catch (RuntimeException e) {
@@ -305,6 +340,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -315,6 +352,8 @@ public class UserStatement implements Statement {
   public boolean execute(String query, String []columns)
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.execute(query, columns);
     } catch (RuntimeException e) {
@@ -323,6 +362,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -332,6 +373,8 @@ public class UserStatement implements Statement {
   public int[]executeBatch()
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.executeBatch();
     } catch (RuntimeException e) {
@@ -340,6 +383,8 @@ public class UserStatement implements Statement {
     } catch (SQLException e) {
       killPool();
       throw e;
+    } finally {
+      _timeProbe.add(Alarm.getCurrentTime() - startTime);
     }
   }
 
@@ -349,6 +394,8 @@ public class UserStatement implements Statement {
   public java.sql.ResultSet getResultSet()
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.getResultSet();
     } catch (RuntimeException e) {
@@ -366,6 +413,8 @@ public class UserStatement implements Statement {
   public int getUpdateCount()
     throws SQLException
   {
+    long startTime = Alarm.getCurrentTime();
+    
     try {
       return _stmt.getUpdateCount();
     } catch (RuntimeException e) {
@@ -750,8 +799,9 @@ public class UserStatement implements Statement {
       _conn.killPool();
   }
 
+  @Override
   public String toString()
   {
-    return "UserStatement[" + _stmt + "]";
+    return getClass().getSimpleName() + "[" + _stmt + "]";
   }
 }

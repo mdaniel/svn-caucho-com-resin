@@ -41,6 +41,7 @@ import com.caucho.config.types.Period;
 import com.caucho.jca.ConnectionPool;
 import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
@@ -143,6 +144,7 @@ public class DBPool
   private Object _serializationHandle;
 
   private QueryAdmin _queryAdmin = new QueryAdmin(this);
+  private DatabaseAdmin _databaseAdmin;
 
   /**
    * Null constructor for the Driver interface; called by the JNDI
@@ -154,6 +156,8 @@ public class DBPool
 
     _resourceManager = ResourceManagerImpl.createLocalManager();
     _connectionPool = _resourceManager.createConnectionPool();
+
+    _databaseAdmin = new DatabaseAdmin(this, _connectionPool);
 
     DatabaseConfig.configDefault(this);
   }
@@ -283,6 +287,14 @@ public class DBPool
     throws SQLException
   {
     getPool().setJDBCDriver(jdbcDriver);
+  }
+
+  /**
+   * Returns driver admin
+   */
+  public JdbcDriverMXBean []getDriverAdmin()
+  {
+    return getPool().getDriverAdmin();
   }
 
   /**
@@ -690,6 +702,14 @@ public class DBPool
   }
 
   /**
+   * Returns true for spy
+   */
+  public boolean isSpy()
+  {
+    return getPool().isSpy();
+  }
+
+  /**
    * HandleAware callback to set the webbeans handle for serialization
    */
   public void setSerializationHandle(Object handle)
@@ -757,7 +777,8 @@ public class DBPool
     manager.addBean(factory.singleton(this));
 
     _queryAdmin.register();
- }
+    _databaseAdmin.register();
+  }
 
   /**
    * Returns a new or pooled connection.

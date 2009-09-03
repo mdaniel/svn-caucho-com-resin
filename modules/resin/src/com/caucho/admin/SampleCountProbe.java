@@ -33,8 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class SampleCountProbe extends Probe {
   private final AtomicLong _count = new AtomicLong();
-
-  private long _lastSampleCount;
+  private final AtomicLong _lastCount = new AtomicLong();
 
   public SampleCountProbe(String name)
   {
@@ -49,8 +48,11 @@ public final class SampleCountProbe extends Probe {
   /**
    * Return the probe's next sample.
    */
-  public final long sample()
+  public final double sample()
   {
-    return _count.getAndSet(0);
+    long count = _count.get();
+    long lastCount = _lastCount.getAndSet(count);
+    
+    return count - lastCount;
   }
 }

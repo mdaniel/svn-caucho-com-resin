@@ -83,6 +83,11 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
     _database.setPath(Vfs.lookup(url));
   }
 
+  public String getURL()
+  {
+    return "jdbc:resin:" + _database.getPath().getFullPath();
+  }
+
   /**
    * If true, creates the database on init.
    */

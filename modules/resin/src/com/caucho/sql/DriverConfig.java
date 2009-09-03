@@ -39,6 +39,7 @@ import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.InitParam;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.tools.profiler.ConnectionPoolDataSourceWrapper;
 import com.caucho.tools.profiler.DriverWrapper;
@@ -471,6 +472,14 @@ public class DriverConfig
   public void setProfilerPoint(ProfilerPoint profilerPoint)
   {
     _profilerPoint = profilerPoint;
+  }
+
+  /**
+   * Returns the driver admin.
+   */
+  public JdbcDriverMXBean getAdmin()
+  {
+    return _admin;
   }
 
   /**

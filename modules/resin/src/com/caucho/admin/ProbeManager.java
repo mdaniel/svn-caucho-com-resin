@@ -82,6 +82,48 @@ public class ProbeManager {
     return (SampleCountProbe) probe;
   }
 
+  public static TimeProbe createTimeProbe(String name)
+  {
+    return _manager.createTimeProbeImpl(name);
+  }
+
+  private TimeProbe createTimeProbeImpl(String name)
+  {
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+      probe = createProbe(new TimeProbe(name));
+    }
+    
+    return (TimeProbe) probe;
+  }
+
+  public static TimeRangeProbe createTimeRangeProbe(String baseName)
+  {
+    return _manager.createTimeRangeProbeImpl(baseName);
+  }
+
+  private TimeRangeProbe createTimeRangeProbeImpl(String baseName)
+  {
+    String timeName = baseName + " Time";
+    
+    Probe probe = _probeMap.get(timeName);
+
+    if (probe == null) {
+      probe = createProbe(new TimeRangeProbe(timeName));
+      
+      TimeRangeProbe timeRangeProbe = (TimeRangeProbe) probe;
+
+      String countName = baseName + " Count";
+      createProbe(timeRangeProbe.createCount(countName));
+      
+      String maxName = baseName + " Max";
+      createProbe(timeRangeProbe.createMax(maxName));
+    }
+    
+    return (TimeRangeProbe) probe;
+  }
+
   protected Probe createProbe(Probe newProbe)
   {
     Probe probe = _probeMap.putIfAbsent(newProbe.getName(), newProbe);
