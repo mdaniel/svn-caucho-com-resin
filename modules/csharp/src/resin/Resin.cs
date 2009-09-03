@@ -129,7 +129,7 @@ namespace Caucho
         if ("-verbose".Equals(args[argsIdx])) {
           _verbose = true;
           
-          argsIdx++;
+          resinArgs.Append(' ').Append(args[argsIdx++]);
         } else if (args[argsIdx].StartsWith("-J")){
           argsIdx++;
         } else if (args[argsIdx].StartsWith("-D")) {
