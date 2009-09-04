@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.lib.mail;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
@@ -43,7 +43,6 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,15 +106,6 @@ public class MailModule extends AbstractQuercusModule {
       if (user != null && ! user.toString().equals("")) {
         String userString = user.toString();
 
-	/*
-	int p = userString.indexOf('<');
-	int q = userString.indexOf('>');
-	
-	if (p >= 0 && q >= 0) {
-	  userString = userString.substring(p + 1, q);
-	}
-	*/
-	
         props.put("mail.from", userString);
       }
       else if (System.getProperty("mail.from") != null)
@@ -149,7 +139,7 @@ public class MailModule extends AbstractQuercusModule {
       Session mailSession = Session.getInstance(props, null);
       smtp = mailSession.getTransport("smtp");
 
-      MimeMessage msg = new MimeMessage(mailSession);
+      QuercusMimeMessage msg = new QuercusMimeMessage(mailSession);
       
       if (subject == null)
         subject = "";
@@ -239,7 +229,7 @@ public class MailModule extends AbstractQuercusModule {
     }
   }
 
-  private static void addRecipients(MimeMessage msg,
+  private static void addRecipients(QuercusMimeMessage msg,
                                     Message.RecipientType type,
                                     String to,
                                     ArrayList<Address> addrList)
@@ -282,7 +272,7 @@ public class MailModule extends AbstractQuercusModule {
     }
   }
 
-  private static void addHeaders(MimeMessage msg,
+  private static void addHeaders(QuercusMimeMessage msg,
                                  HashMap<String,String> headerMap,
                                  ArrayList<Address> addrList)
     throws MessagingException
@@ -304,6 +294,9 @@ public class MailModule extends AbstractQuercusModule {
       }
       else if (name.equalsIgnoreCase("Cc")) {
         addRecipients(msg, Message.RecipientType.CC, value, addrList);
+      }
+      else if (name.equalsIgnoreCase("Message-ID")) {
+        msg.setMessageID(value);
       }
       else
         msg.addHeader(name, value);

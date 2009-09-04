@@ -18,7 +18,7 @@ com.caucho.quercus.lib.HttpModule
 com.caucho.quercus.lib.ImageModule
 com.caucho.quercus.lib.JavaModule
 com.caucho.quercus.lib.json.JsonModule
-com.caucho.quercus.lib.MailModule
+com.caucho.quercus.lib.mail.MailModule
 com.caucho.quercus.lib.MathModule
 com.caucho.quercus.lib.i18n.MbstringModule
 com.caucho.quercus.lib.mcrypt.McryptModule
