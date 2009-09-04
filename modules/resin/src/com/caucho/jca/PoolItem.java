@@ -673,34 +673,12 @@ class PoolItem implements ConnectionEventListener, XAResource {
 	  xaHead._xaNext = this;
 	}
       }
-      
-      /* XXX: is this still an issue?
-      if (_xaDelegate != this)
-        throw new IllegalStateException("pool state exception");
-      
-      PoolItem delegate = _cm.getDelegatePoolItem(xid);
-
-      // set to the delegate
-      _xaDelegate = delegate._xaDelegate;
-      
-      // single link list of parents
-      _xaDelegateNext = _xaDelegate._xaDelegateNext;
-      _xaDelegate._xaDelegateNext = this;
-      */
-
-      /*
-      if (log.isLoggable(Level.FINER))
-        log.finer("start XA: using delegate " + _xaDelegate + " for XID " + xid);
-      return;
-      */
     }
 
     // local transaction optimization
     if (! _isXATransaction
 	&& flags != TMJOIN
 	&& _localTransaction != null) {
-      // XXX: server/1810, etc
-      // && _xaResource == null) { // XXX: temp disable for ActiveMQ
       try {
 	if (log.isLoggable(Level.FINER))
 	  log.finer("begin-local-XA: " + xid + " " + _localTransaction);
@@ -715,7 +693,6 @@ class PoolItem implements ConnectionEventListener, XAResource {
       return;
     }
 
-    
     if (_xaResource != null) {
       if (log.isLoggable(Level.FINER))
 	log.finer("start-XA: " + xid + " " + _xaResource);
@@ -833,14 +810,6 @@ class PoolItem implements ConnectionEventListener, XAResource {
   public void end(Xid xid, int flags)
     throws XAException
   {
-    /* XXX:
-    if (_xid == null)
-      throw new IllegalStateException("ending with no transaction");
-    */
-
-    //if (log.isLoggable(Level.FINER))
-    //  log.finer("connection pool end XA: " + this + " xa=" + xid + " flags=" + flags);
-
     _endFlags = flags;
 
     // XXX: In theory, drop the _xid.  The underlying XADataSource
@@ -857,18 +826,18 @@ class PoolItem implements ConnectionEventListener, XAResource {
     throws XAException
   {
     try {
-      if (_endFlags != -1) {
-	try {
-	  int endFlags = _endFlags;
-	  _endFlags = -1;
+      int endFlags = _endFlags;
+      _endFlags = -1;
 
-	  if (_isXATransaction)
-	    endResource(xid, endFlags);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	  if (_isXATransaction)
+      if (endFlags != -1 && _isXATransaction) {
+        boolean isValid = false;
+        
+        try {
+          endResource(xid, endFlags);
+          isValid = true;
+	} finally {
+          if (! isValid)
 	    _xaResource.rollback(xid);
-	  return;
 	}
       }
     
@@ -902,22 +871,19 @@ class PoolItem implements ConnectionEventListener, XAResource {
     boolean logFiner = log.isLoggable(Level.FINER);
     
     try {
-      if (_endFlags != -1) {
+      int endFlags = _endFlags;
+      _endFlags = -1;
+      
+      if (endFlags != -1 && _isXATransaction) {
+        boolean isValid = false;
+        
 	try {
-	  int endFlags = _endFlags;
-	  _endFlags = -1;
-
-	  if (_isXATransaction)
-	    endResource(xid, endFlags);
-	} catch (XAException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	  _xaResource.rollback(xid);
-	  throw e;
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	  _xaResource.rollback(xid);
-	  throw new XAException(XAException.XA_RBOTHER);
-	}
+          endResource(xid, endFlags);
+          isValid = true;
+	} finally {
+          if (! isValid)
+            _xaResource.rollback(xid);
+        }
       }
 
       if (_isXATransaction) {
