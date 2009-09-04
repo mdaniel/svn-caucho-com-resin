@@ -106,7 +106,7 @@ public class ConnectionPool extends AbstractManagedObject
   private long _connectionWaitCount = _connectionWaitTime / 1000L;
 
   // debugging timeout for a connection-overflow thread dump
-  private long _threadDumpTimeout;
+  private long _threadDumpExpire;
 
   // True if the connector supports local transactions.
   private boolean _enableLocalTransaction = true;
@@ -150,8 +150,8 @@ public class ConnectionPool extends AbstractManagedObject
   //
 
   private final AtomicLong _connectionCountTotal = new AtomicLong();
-  private long _connectionCreateCountTotal;
-  private long _connectionFailCountTotal;
+  private final AtomicLong _connectionCreateCountTotal = new AtomicLong();
+  private final AtomicLong _connectionFailCountTotal = new AtomicLong();
   private long _lastFailTime;
 
   private final Lifecycle _lifecycle = new Lifecycle();
@@ -677,7 +677,7 @@ public class ConnectionPool extends AbstractManagedObject
    */
   public long getConnectionCreateCountTotal()
   {
-    return _connectionCreateCountTotal;
+    return _connectionCreateCountTotal.get();
   }
 
   /**
@@ -685,7 +685,7 @@ public class ConnectionPool extends AbstractManagedObject
    */
   public long getConnectionFailCountTotal()
   {
-    return _connectionFailCountTotal;
+    return _connectionFailCountTotal.get();
   }
 
   /**
@@ -802,15 +802,15 @@ public class ConnectionPool extends AbstractManagedObject
     }
 
     if (! _lifecycle.isActive())
-      throw new IllegalStateException(L.l("connection pool closed"));
+      throw new IllegalStateException(L.l("Can't allocate connection because the connection pool is closed."));
 
     log.warning(this + " pool overflow");
 
     Resin resin = Resin.getCurrent();
 
     synchronized (this) {
-      if (resin != null && _threadDumpTimeout < Alarm.getCurrentTime()) {
-	_threadDumpTimeout = Alarm.getCurrentTime() + 600 * 1000L;
+      if (resin != null && _threadDumpExpire < Alarm.getCurrentTime()) {
+	_threadDumpExpire = Alarm.getCurrentTime() + 600 * 1000L;
 	resin.dumpThreads();
       }
     }
@@ -914,12 +914,23 @@ public class ConnectionPool extends AbstractManagedObject
 
       if (isOverflow
 	  && _maxConnections + _maxOverflowConnections <= _createCount + size) {
-        throw new ResourceException(L.l("Connection pool is full.  Can't allocate connection."));
+        throw new ResourceException(L.l("Can't allocate connection because pool is full.\n  max-connections={0}, max-overflow-connections={1}, create-count={2}, pool-size={3}.",
+                                        _maxConnections,
+                                        _maxOverflowConnections,
+                                        _createCount,
+                                        size));
+                                        
       }
       // if the pool is full, don't create, and wait
       else if (! isOverflow
 	       && (_maxConnections <= _createCount + size
 		   || _maxCreateConnections <= _createCount)) {
+
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(this + " pool wait size=" + size
+                   + " create-count=" + _createCount);
+        }
+        
         try {
           _pool.wait(1000);
         } catch (Exception e) {
@@ -947,9 +958,7 @@ public class ConnectionPool extends AbstractManagedObject
       // Ensure the connection is still valid
       userPoolItem = poolItem.toActive(subject, info, oldUserItem);
       if (userPoolItem != null) {
-	synchronized (this) {
-	  _connectionCreateCountTotal++;
-	}
+        _connectionCreateCountTotal.incrementAndGet();
 	
         return userPoolItem;
       }
@@ -957,17 +966,13 @@ public class ConnectionPool extends AbstractManagedObject
       throw new IllegalStateException(L.l("Connection '{0}' was not valid on creation",
                                           poolItem));
     } catch (RuntimeException e) {
-      synchronized (this) {
-	_connectionFailCountTotal++;
-	_lastFailTime = Alarm.getCurrentTime();
-      }
+      _connectionFailCountTotal.incrementAndGet();
+      _lastFailTime = Alarm.getCurrentTime();
       
       throw e;
     } catch (ResourceException e) {
-      synchronized (this) {
-	_connectionFailCountTotal++;
-	_lastFailTime = Alarm.getCurrentTime();
-      }
+      _connectionFailCountTotal.incrementAndGet();
+      _lastFailTime = Alarm.getCurrentTime();
       
       throw e;
     } finally {
