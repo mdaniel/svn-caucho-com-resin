@@ -13,6 +13,8 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>candi: scope adapter left in debugging (#3675, rep by hontvari)</li>
+<li>database: _idlePool and _pool must be synchronized together (#3660, rep by Shinomiya Nobuaki)</li>
 <li>database: cleanup connection idle pooling (#3052)</li>
 <li>admin: add database "Query Time" statistics (#3397, rep by Bryant Harris)</li>
 <li>admin: add "database" tab to admin and improve configuration visibility (rep by Bill Au)</li>

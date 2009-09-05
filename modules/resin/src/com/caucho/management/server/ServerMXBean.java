@@ -97,12 +97,36 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   //
 
   /**
+   * Returns true if ports are bound after startup.
+   */
+  @Description("Ports may be bound after startup completes")
+  public boolean isBindPortsAfterStart();
+
+  /**
    * Returns true if detailed statistics are being kept.
    */
   @Description("Detailed statistics causes various parts of Resin to keep"
                + " more detailed statistics at the possible expense of"
                +" some performance")
   public boolean isDetailedStatistics();
+
+  /**
+   * True if detailed error pages are being generated.
+   */
+  @Description("Detailed error pages for development")
+  public boolean isDevelopmentModeErrorPage();
+
+  /**
+   * Returns the memory-free-min limit for forcing GC and restarting.
+   */
+  @Description("The minimum free heap memory for GC and restart")
+  public long getMemoryFreeMin();
+
+  /**
+   * Returns the perm-gen-free-min limit for forcing GC and restarting.
+   */
+  @Description("The perm-gen free heap memory for GC and restart")
+  public long getPermGenFreeMin();
 
   /**
    * The maximum time to spend waiting for the server to stop gracefully
@@ -115,6 +139,24 @@ public interface ServerMXBean extends ManagedObjectMXBean {
    */
   @Description("A SelectManager handles keepalive without requiring a thread")
   public boolean isSelectManagerEnabled();
+
+  /**
+   * Returns the HTTP server header.
+   */
+  @Description("The HTTP Server: header")
+  public String getServerHeader();
+
+  /**
+   * Returns the deployment repository stage.
+   */
+  @Description("The deployment repository stage")
+  public String getStage();
+
+  /**
+   * Returns the HTTP URL maximum length
+   */
+  @Description("The HTTP maximum URL length")
+  public int getUrlLengthMax();
 
   //
   // state

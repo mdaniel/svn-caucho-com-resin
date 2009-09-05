@@ -76,9 +76,6 @@ public final class ThreadPool {
 
   private final AtomicLong _resetCount = new AtomicLong();
 
-  private final ArrayList<PoolThread> _threads
-    = new ArrayList<PoolThread>();
-
   private final ArrayList<TaskItem> _taskQueue = new ArrayList<TaskItem>();
   private final ArrayList<TaskItem> _priorityQueue = new ArrayList<TaskItem>();
 
@@ -90,13 +87,12 @@ public final class ThreadPool {
   private PoolThread _idleHead;
   // number of threads in the idle stack
   private int _idleCount;
+  // number of threads in the wait queue
+  private int _waitCount;
 
-  private int _activeCount;
+  private final AtomicInteger _activeCount = new AtomicInteger();
   // number of threads which are in the process of starting
-  private int _startCount;
-
-  // count of start requests waiting for a thread
-  private int _scheduleWaitCount;
+  private final AtomicInteger _startingCount = new AtomicInteger();
 
   // throttling time before a thread can expire itself to reduce churn
   private long _threadIdleOverflowExpire;
@@ -107,6 +103,9 @@ public final class ThreadPool {
   // queue for waiting executor tasks
   private ExecutorQueueItem _executorQueueHead;
   private ExecutorQueueItem _executorQueueTail;
+  
+  private final AtomicLong _createCount = new AtomicLong();
+  private final AtomicLong _overflowCount = new AtomicLong();
 
   private boolean _isInit;
 
@@ -263,12 +262,32 @@ public final class ThreadPool {
     return _threadPriority;
   }
 
+  //
+  // statistics
+  //
+
   /**
    * Returns the total thread count.
    */
   public int getThreadCount()
   {
-    return _activeCount;
+    return _activeCount.get();
+  }
+
+  /**
+   * Returns the active thread count.
+   */
+  public int getThreadActiveCount()
+  {
+    return _activeCount.get() - _idleCount;
+  }
+
+  /**
+   * Returns the starting thread count.
+   */
+  public int getThreadStartingCount()
+  {
+    return _startingCount.get();
   }
 
   /**
@@ -280,11 +299,11 @@ public final class ThreadPool {
   }
 
   /**
-   * Returns the active thread count.
+   * Returns the waiting thread count.
    */
-  public int getThreadActiveCount()
+  public int getThreadWaitCount()
   {
-    return getThreadCount() - getThreadIdleCount();
+    return _waitCount;
   }
 
   /**
@@ -292,7 +311,39 @@ public final class ThreadPool {
    */
   public int getFreeThreadCount()
   {
-    return _threadMax - _activeCount - _startCount;
+    return _threadMax - _activeCount.get() - _startingCount.get();
+  }
+
+  /**
+   * Returns the total created thread count.
+   */
+  public long getThreadCreateCountTotal()
+  {
+    return _createCount.get();
+  }
+
+  /**
+   * Returns the total created overflow thread count.
+   */
+  public long getThreadOverflowCountTotal()
+  {
+    return _overflowCount.get();
+  }
+
+  /**
+   * Returns priority queue size
+   */
+  public int getThreadPriorityQueueSize()
+  {
+    return _priorityQueue.size();
+  }
+
+  /**
+   * Returns task queue size
+   */
+  public int getThreadTaskQueueSize()
+  {
+    return _taskQueue.size();
   }
 
   //
@@ -364,8 +415,8 @@ public final class ThreadPool {
     if (! schedule(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to schedule priority thread " + task
 		  + " pri=" + _threadPriority
-		  + " active=" + _activeCount
-		  + " idle=" + (_idleCount + _startCount)
+		  + " active=" + _activeCount.get()
+		  + " idle=" + (_idleCount + _startingCount.get())
 		  + " max=" + _threadMax);
 
       OverflowThread item = new OverflowThread(task);
@@ -481,8 +532,8 @@ public final class ThreadPool {
     if (! schedule(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to start priority thread " + task
 		  + " pri=" + _threadPriority
-		  + " active=" + _activeCount
-		  + " idle=" + (_idleCount + _startCount)
+		  + " active=" + _activeCount.get()
+		  + " idle=" + (_idleCount + _startingCount.get())
 		  + " max=" + _threadMax);
 
       ThreadDump.dumpThreads();
@@ -552,12 +603,14 @@ public final class ThreadPool {
     boolean isWakeLauncher = false;
 
     int freeThreadsRequired = isPriority ? 0 : _threadPriority;
+    
+    TaskItem item = new TaskItem(task, loader);
 
     do {
       try {
 	synchronized (_idleLock) {
 	  int idleCount = _idleCount;
-	  int threadCount = _activeCount + _startCount;
+	  int threadCount = _activeCount.get() + _startingCount.get();
 	  int freeCount = idleCount + _threadMax - threadCount;
 	  boolean startNew = false;
 
@@ -577,8 +630,7 @@ public final class ThreadPool {
 	    poolThread._next = null;
 	    poolThread._isIdle = false;
 	    
-	    poolThread.setTask(task);
-	    poolThread.setLoader(loader);
+	    poolThread.setItem(item);
 
 	    _idleCount--;
 	    
@@ -594,8 +646,6 @@ public final class ThreadPool {
 	      isWakeLauncher = true;
 	      isQueueIfFull = true;
 	    
-	      TaskItem item = new TaskItem(task, loader);
-	      
 	      if (isPriority) {
 		_priorityQueue.add(item);
 	      }
@@ -605,24 +655,23 @@ public final class ThreadPool {
 	    }
 	    else if (Alarm.getCurrentTime() < expireTime) {
 	      _launcher.wake();
-	      
-	      _scheduleWaitCount++;
-		
-	      try {
-		// clear interrupted flag
-		Thread.interrupted();
 
-		if (! Alarm.isTest()) {
-		  long delta = expireTime - Alarm.getCurrentTime();
+              // clear interrupted flag
+              Thread.interrupted();
 
-		  if (delta > 0)
-		    _idleLock.wait(delta);
-		}
-		else
-		  _idleLock.wait(1000);
-	      } finally {
-		_scheduleWaitCount--;
-	      }
+              _waitCount++;
+              try {
+                if (! Alarm.isTest()) {
+                  long delta = expireTime - Alarm.getCurrentTime();
+
+                  if (delta > 0)
+                    _idleLock.wait(delta);
+                }
+                else
+                  _idleLock.wait(1000);
+              } finally {
+                _waitCount--;
+              }
 	    }
 	  }
 	}
@@ -686,6 +735,28 @@ public final class ThreadPool {
     }
   }
 
+  /**
+   * Checks if the launcher should start another thread.
+   */
+  private boolean doStart()
+  {
+    synchronized (_idleLock) {
+      int idleCount = _idleCount;
+      int threadCount = _activeCount.get() + _startingCount.get();
+
+      if (_threadMax < threadCount)
+        return false;
+      else if (_threadIdleMin < idleCount + _startingCount.get())
+        return false;
+      else {
+        _startingCount.incrementAndGet();
+
+        return true;
+      }
+    }
+  }
+
+
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
@@ -702,9 +773,8 @@ public final class ThreadPool {
     boolean _isIdle;
 
     long _threadResetCount;
-  
-    Runnable _task;
-    ClassLoader _classLoader;
+
+    volatile TaskItem _item;
 
     PoolThread()
     {
@@ -752,17 +822,9 @@ public final class ThreadPool {
     /**
      * Sets the thread's task
      */
-    final void setTask(Runnable task)
+    final void setItem(TaskItem item)
     {
-      _task = task;
-    }
-
-    /**
-     * Sets the thread's loader
-     */
-    final void setLoader(ClassLoader loader)
-    {
-      _classLoader = loader;
+      _item = item;
     }
 
     /**
@@ -770,27 +832,22 @@ public final class ThreadPool {
      */
     public void run()
     {
-      synchronized (_idleLock) {
-	_startCount--;
-	_activeCount++;
-	_threads.add(this);
+      int startCount = _startingCount.decrementAndGet();
 
-	if (_startCount < 0) {
-	  _startCount = 0;
-	  new IllegalStateException().printStackTrace();
-	}
+      if (startCount < 0) {
+        _startingCount.set(0);
+        new IllegalStateException().printStackTrace();
       }
-
-      _launcher.wake();
+      
+      _activeCount.incrementAndGet();
       
       try {
+        _launcher.wake();
+        _createCount.incrementAndGet();
+      
 	runTasks();
       } finally {
-	synchronized (_idleLock) {
-	  _activeCount--;
-
-	  _threads.remove(this);
-	}
+        _activeCount.decrementAndGet();
 
 	_launcher.wake();
       }
@@ -814,11 +871,12 @@ public final class ThreadPool {
 	  synchronized (_idleLock) {
 	    if (_isIdle) {
 	    }
-	    else if (_task != null) {
-	      task = _task;
-	      _task = null;
-	      classLoader = _classLoader;
-	      _classLoader = null;
+	    else if (_item != null) {
+              TaskItem item = _item;
+              _item = null;
+              
+	      task = item.getRunnable();
+	      classLoader = item.getLoader();
 	    }
 	    else {
 	      TaskItem item = null;
@@ -851,8 +909,7 @@ public final class ThreadPool {
 		_idleHead = this;
 		_idleCount++;
 
-		if (_scheduleWaitCount > 0)
-		  _idleLock.notifyAll();
+                _idleLock.notifyAll();
 	      }
 	    }
 	  }
@@ -907,6 +964,8 @@ public final class ThreadPool {
       thread.setContextClassLoader(_loader);
 
       try {
+        _overflowCount.incrementAndGet();
+        
 	_task.run();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
@@ -934,23 +993,7 @@ public final class ThreadPool {
     private boolean startConnection(boolean isWait)
       throws InterruptedException
     {
-      boolean doStart = true;
-      
-      synchronized (_idleLock) {
-	int idleCount = _idleCount;
-	int threadCount = _activeCount + _startCount;
-
-	if (_threadMax < threadCount)
-	  doStart = false;
-	else if (_threadIdleMin < idleCount + _startCount)
-	  doStart = false;
-
-	if (doStart) {
-	  _startCount++;
-	}
-      }
-
-      if (doStart) {
+      if (doStart()) {
 	try {
 	  long now = Alarm.getCurrentTime();
 	  _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
@@ -958,17 +1001,10 @@ public final class ThreadPool {
 	  PoolThread poolThread = new PoolThread();
 	  poolThread.start();
 	} catch (Throwable e) {
-	  // XXX: should we exit in this case?
-	  
-	  synchronized (_idleLock) {
-	    _startCount--;
-	  }
+          e.printStackTrace();
+          System.err.println("Resin exiting because of failed thread");
 
-	  e.printStackTrace();
-	  if (_startCount < 0) {
-	    Thread.dumpStack();
-	    _startCount = 0;
-	  }
+          System.exit(1);
 	}
       }
       else {
@@ -999,10 +1035,9 @@ public final class ThreadPool {
       while (true) {
 	try {
 	  startConnection(true);
-	} catch (OutOfMemoryError e) {
-	  System.exit(10);
 	} catch (Throwable e) {
 	  e.printStackTrace();
+	  System.exit(10);
 	}
       }
     }

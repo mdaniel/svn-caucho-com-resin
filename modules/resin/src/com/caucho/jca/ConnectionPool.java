@@ -745,9 +745,11 @@ public class ConnectionPool extends AbstractManagedObject
         }
       }
 
+      PoolItem poolItem = null;
+      
       // asks the Driver's ManagedConnectionFactory to match an
       // idle connection
-      synchronized (_idlePool) {
+      synchronized (_pool) {
         mConn = mcf.matchManagedConnections(_idlePool, subject, info);
 
         // If there are no more idle connections, return null
@@ -755,9 +757,9 @@ public class ConnectionPool extends AbstractManagedObject
           return null;
 
         _idlePool.remove(mConn);
-      }
 
-      PoolItem poolItem = findPoolItem(mConn);
+        poolItem = findPoolItem(mConn);
+      }
 
       if (poolItem == null)
         throw new IllegalStateException(L.l("No matching PoolItem found for {0}",
@@ -949,7 +951,7 @@ public class ConnectionPool extends AbstractManagedObject
       
       mConn.cleanup();
 
-      synchronized (_idlePool) {
+      synchronized (_pool) {
         long now = Alarm.getCurrentTime();
 
         if (_idlePool.size() == 0)
@@ -982,11 +984,9 @@ public class ConnectionPool extends AbstractManagedObject
    */
   void toDead(PoolItem item)
   {
-    synchronized (_idlePool) {
-      _idlePool.remove(item.getManagedConnection());
-    }
-
     synchronized (_pool) {
+      _idlePool.remove(item.getManagedConnection());
+
       _pool.remove(item);
       _pool.notifyAll();
     }
@@ -1010,11 +1010,9 @@ public class ConnectionPool extends AbstractManagedObject
     
     ArrayList<PoolItem> clearItems = new ArrayList<PoolItem>();
 
-    synchronized (_idlePool) {
+    synchronized (_pool) {
       _idlePool.clear();
-    }
-    
-    synchronized (pool) {
+
       clearItems.addAll(pool);
 
       pool.clear();

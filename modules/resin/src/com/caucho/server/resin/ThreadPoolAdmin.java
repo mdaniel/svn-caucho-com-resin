@@ -67,6 +67,10 @@ public class ThreadPoolAdmin extends AbstractManagedObject
     return null;
   }
 
+  //
+  // configuration
+  //
+
   /**
    * Returns the maximum number of threads.
    */
@@ -107,6 +111,10 @@ public class ThreadPoolAdmin extends AbstractManagedObject
     return _threadPool.getThreadPriority();
   }
 
+  //
+  // statistics
+  //
+
   /**
    * Returns the total number of threads.
    */
@@ -124,11 +132,51 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   }
 
   /**
+   * Returns the current number of starting threads.
+   */
+  public int getThreadStartingCount()
+  {
+    return _threadPool.getThreadStartingCount();
+  }
+
+  /**
    * Returns the current number of idle threads.
    */
   public int getThreadIdleCount()
   {
     return _threadPool.getThreadIdleCount();
+  }
+
+  /**
+   * Returns the current number of starting threads.
+   */
+  public long getThreadCreateCountTotal()
+  {
+    return _threadPool.getThreadCreateCountTotal();
+  }
+
+  /**
+   * Returns the current number of overflow threads.
+   */
+  public long getThreadOverflowCountTotal()
+  {
+    return _threadPool.getThreadOverflowCountTotal();
+  }
+
+  /**
+   * Returns the thread priority queue size
+   */
+  public int getThreadPriorityQueueSize()
+  {
+    return _threadPool.getThreadPriorityQueueSize();
+  }
+  
+  /**
+   * Returns the thread task queue size
+   */
+  public int getThreadTaskQueueSize()
+  {
+    return _threadPool.getThreadTaskQueueSize();
   }
 
   public void register()

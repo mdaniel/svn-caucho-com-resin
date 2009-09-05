@@ -78,6 +78,22 @@ $thread_pool = $g_server->ThreadPool;
   </table>
 </div>
 
+<h2>Config</h2>
+
+<!-- XML config -->
+<?php
+
+echo "<pre><code>\n";
+echo "&lt;resin xmlns=\"http://caucho.com/ns/resin\"\n";
+echo "       xmlns:resin=\"urn:java:com.caucho.resin\">\n";
+
+display_config_cluster($g_server);
+
+echo "&lt;/resin>\n";
+
+echo "</code></pre>\n";
+?>
+
 <!-- TCP ports -->
 
 <?php
@@ -295,4 +311,211 @@ foreach ($webapps as $webapp) {
 
 </table>
 
-<?php display_footer("config.php"); ?>
+<?php
+
+function display_config_cluster($g_server)
+{
+  $cluster = $g_server->Cluster;
+
+  if (! $cluster)
+    return;
+
+  echo "\n";
+  echo "  &lt;cluster id=\"" . $cluster->Id . "\">\n";
+
+  foreach ($cluster->Servers as $server) {
+    echo "\n";
+
+    display_cluster_server($server);
+  }
+
+  echo "  &lt;/cluster>\n";
+}
+
+function display_cluster_server($server)
+{
+  global $g_server;
+
+  if ($server == $g_server) {
+    echo "    &lt;!-- current server '" . $server->Id . "' -->\n"
+  }
+
+  echo "    &lt;server id=\"" . $server->Id . "\""; 
+  echo " address=\"" . $server->Address . "\"";
+  echo " port=\"" . $server->Port . "\"";
+  echo ">\n";
+  echo "      &lt;!--";
+  echo " index=" . $server->ClusterIndex;
+  if ($server->TriadServer) {
+    echo " triad=true";
+  }
+  if ($server->SelfServer) {
+    echo " self=true";
+  }
+  echo " -->\n";
+
+  echo "\n";
+  echo "      &lt;load-balance-connect-timeout>";
+  echo display_timeout($server->ConnectTimeout);
+  echo "&lt;/load-balance-connect-timeout>\n";
+
+  echo "      &lt;load-balance-idle-time>";
+  echo display_timeout($server->IdleTime);
+  echo "&lt;/load-balance-idle-time>\n";
+
+  echo "      &lt;load-balance-recover-time>";
+  echo display_timeout($server->RecoverTime);
+  echo "&lt;/load-balance-recover-time>\n";
+
+  echo "      &lt;load-balance-socket-timeout>";
+  echo display_timeout($server->SocketTimeout);
+  echo "&lt;/load-balance-socket-timeout>\n";
+
+  echo "      &lt;load-balance-warmup-time>";
+  echo display_timeout($server->WarmupTime);
+  echo "&lt;/load-balance-warmup-time>\n";
+
+  echo "      &lt;load-balance-weight>";
+  echo $server->Weight;
+  echo "&lt;/load-balance-weight>\n";
+
+  if ($server == $g_server) {
+    display_server($g_server);
+  }
+
+  echo "    &lt;/server>\n";
+}
+
+function display_server($server)
+{
+  global $g_mbean_server;
+
+  echo "\n";
+
+  $thread_pool = $server->ThreadPool;
+
+  echo "      &lt;bind-ports-after-start>";
+  echo ($server->BindPortsAfterStart ? "true" : "false");
+  echo "&lt;/bind-ports-after-start>\n";
+
+  echo "      &lt;development-mode-error-page>";
+  echo ($server->DevelopmentModeErrorPage ? "true" : "false");
+  echo "&lt;/development-mode-error-page>\n";
+
+  echo "      &lt;memory-free-min>";
+  echo $server->MemoryFreeMin;
+  echo "&lt;/memory-free-min>\n";
+
+  echo "      &lt;perm-gen-free-min>";
+  echo $server->PermGenFreeMin;
+  echo "&lt;/perm-gen-free-min>\n";
+
+  echo "      &lt;select-manager-enable>";
+  echo ($server->SelectManagerEnable ? "true" : "false");
+  echo "&lt;/select-manager-enable>\n";
+
+  echo "      &lt;server-header>";
+  echo $server->ServerHeader;
+  echo "&lt;/server-header>\n";
+
+  echo "      &lt;shutdown-wait-max>";
+  echo display_timeout($server->ShutdownWaitMax);
+  echo "&lt;/shutdown-wait-max>\n";
+
+  echo "      &lt;stage>";
+  echo $server->Stage;
+  echo "&lt;/stage>\n";
+
+  echo "      &lt;thread-max>";
+  echo $thread_pool->ThreadMax;
+  echo "&lt;/thread-max>\n";
+
+  echo "      &lt;thread-idle-max>";
+  echo $thread_pool->ThreadIdleMax;
+  echo "&lt;/thread-idle-max>\n";
+
+  echo "      &lt;thread-idle-min>";
+  echo $thread_pool->ThreadIdleMin;
+  echo "&lt;/thread-idle-min>\n";
+
+  echo "      &lt;thread-executor-max>";
+  echo $thread_pool->ThreadExecutorMax;
+  echo "&lt;/thread-executor-max>\n";
+
+  echo "      &lt;thread-priority-min>";
+  echo $thread_pool->ThreadPriorityMin;
+  echo "&lt;/thread-priority-min>\n";
+
+  echo "      &lt;url-length-max>";
+  echo $server->UrlLengthMax;
+  echo "&lt;/url-length-max>\n";
+
+  $runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
+
+  echo "\n";
+  foreach ($runtime->InputArguments as $jvm_arg) {
+    echo "      &lt;jvm-arg>";
+    echo $jvm_arg;
+    echo "&lt;/jvm-arg>\n";
+  }
+
+  foreach ($server->Ports as $port) {
+    display_port($port);
+  }
+}
+
+function display_port($port)
+{
+  $name = $port->ProtocolName;
+
+  if ($name == "server")
+    $name = "cluster-port";
+
+  echo "\n";
+  echo "      &lt;" . $name;
+  echo " address=\"" . $port->Address . "\"";
+  echo " port=\"" . $port->Port . "\"";
+  echo ">\n";
+
+  echo "        &lt;accept-listen-backlog>";
+  echo $port->AcceptListenBacklog;
+  echo "&lt;/accept-listen-backlog>\n";
+
+  echo "        &lt;accept-thread-max>";
+  echo $port->AcceptThreadMax;
+  echo "&lt;/accept-thread-max>\n";
+
+  echo "        &lt;connection-max>";
+  echo $port->ConnectionMax;
+  echo "&lt;/connection-max>\n";
+
+  echo "        &lt;keepalive-connection-time-max>";
+  echo display_timeout($port->KeepaliveConnectionTimeMax);
+  echo "&lt;/keepalive-connection-time-max>\n";
+
+  echo "        &lt;keepalive-max>";
+  echo $port->KeepaliveMax;
+  echo "&lt;/keepalive-max>\n";
+
+  echo "        &lt;keepalive-select-max>";
+  echo $port->KeepaliveSelectMax;
+  echo "&lt;/keepalive-select-max>\n";
+
+  echo "        &lt;keepalive-timeout>";
+  echo display_timeout($port->KeepaliveTimeout);
+  echo "&lt;/keepalive-timeout>\n";
+
+  echo "        &lt;socket-timeout>";
+  echo display_timeout($port->SocketTimeout);
+  echo "&lt;/socket-timeout>\n";
+
+  echo "        &lt;suspend-time-max>";
+  echo display_timeout($port->SuspendTimeMax);
+  echo "&lt;/suspent-time-max>\n";
+
+  echo "      &lt;/" . $name;
+  echo ">\n";
+}
+
+display_footer("config.php");
+?>

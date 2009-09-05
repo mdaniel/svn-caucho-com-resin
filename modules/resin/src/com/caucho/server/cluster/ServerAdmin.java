@@ -125,6 +125,11 @@ public class ServerAdmin extends AbstractEmitterObject
   //
   // Configuration attributes
   //
+  
+  public boolean isBindPortsAfterStart()
+  {
+    return _server.isBindPortsAfterStart();
+  }
 
   /**
    * Returns true if detailed statistics are being kept.
@@ -133,21 +138,45 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     return false;
   }
+  
+  public boolean isDevelopmentModeErrorPage()
+  {
+    return _server.isDevelopmentModeErrorPage();
+  }
+  
+  public long getMemoryFreeMin()
+  {
+    return _server.getMemoryFreeMin();
+  }
+  
+  public long getPermGenFreeMin()
+  {
+    return _server.getPermGenFreeMin();
+  }
 
-  /**
-   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
-   */
+  public String getServerHeader()
+  {
+    return _server.getServerHeader();
+  }
+
   public boolean isSelectManagerEnabled()
   {
     return _server.isSelectManagerEnabled();
   }
 
-  /**
-   * The maximum time to spend waiting for the server to stop gracefully
-   */
   public long getShutdownWaitMax()
   {
     return _server.getShutdownWaitMax();
+  }
+
+  public String getStage()
+  {
+    return _server.getStage();
+  }
+
+  public int getUrlLengthMax()
+  {
+    return _server.getUrlLengthMax();
   }
 
   //
