@@ -63,6 +63,12 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   //
   
   /**
+   * Returns the cluster server for this server
+   */
+  @Description("The ClusterServer for this server")
+  public ClusterServerMXBean getSelfServer();
+  
+  /**
    * Returns the cluster owning this server
    */
   @Description("The cluster contains the peer servers")

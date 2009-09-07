@@ -97,6 +97,18 @@ public interface ThreadPoolMXBean extends ManagedObjectMXBean {
   public int getThreadStartingCount();
   
   /**
+   * Returns the current number of idle threads.
+   */
+  @Description("The current number of idle threads")
+  public int getThreadIdleCount();
+  
+  /**
+   * Returns the current number of waiting schedule threads.
+   */
+  @Description("The current number of wait threads")
+  public int getThreadWaitCount();
+  
+  /**
    * Returns the total number of started threads.
    */
   @Description("The total number of created threads")
@@ -107,12 +119,6 @@ public interface ThreadPoolMXBean extends ManagedObjectMXBean {
    */
   @Description("The total number of overflow threads")
   public long getThreadOverflowCountTotal();
-  
-  /**
-   * Returns the current number of idle threads.
-   */
-  @Description("The current number of idle threads")
-  public int getThreadIdleCount();
   
   /**
    * Returns the thread priority queue size

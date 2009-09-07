@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class TimeRangeProbe extends Probe implements TimeSample {
+  private final double _scale;
+
   private final AtomicLong _count = new AtomicLong();
   private final AtomicLong _time = new AtomicLong();
   private final AtomicLong _timeMax = new AtomicLong();
@@ -39,11 +41,12 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
   private final AtomicLong _lastAvgCount = new AtomicLong();
   private final AtomicLong _lastAvgTime = new AtomicLong();
   private final AtomicLong _lastCount = new AtomicLong();
-  
 
   public TimeRangeProbe(String name)
   {
     super(name);
+
+    _scale = 1.0;
   }
 
   public Probe createCount(String name)
@@ -81,7 +84,7 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
     if (count == lastCount)
       return 0;
     else
-      return (time - lastTime) / (double) (count - lastCount);
+      return _scale * (time - lastTime) / (double) (count - lastCount);
   }
   
   /**
@@ -102,7 +105,7 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
   {
     long max = _timeMax.getAndSet(0);
 
-    return max;
+    return _scale * max;
   }
 
   class TimeRangeCountProbe extends Probe {

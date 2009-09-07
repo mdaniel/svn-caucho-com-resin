@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,7 +53,7 @@ public final class ThreadPool {
   private static final int DEFAULT_THREAD_IDLE_MIN = 10;
   private static final int DEFAULT_THREAD_IDLE_GAP = 5;
 
-  private static final long OVERFLOW_TIMEOUT = 5000L;
+  private static final long OVERFLOW_TIMEOUT = 30000L;
 
   private static final long PRIORITY_TIMEOUT = 10L;
 
@@ -614,32 +615,20 @@ public final class ThreadPool {
 	  int freeCount = idleCount + _threadMax - threadCount;
 	  boolean startNew = false;
 
-	  poolThread = _idleHead;
-
 	  boolean isFreeThreadAvailable = freeThreadsRequired <= freeCount;
 
-	  if (poolThread != null && isFreeThreadAvailable) {
-	    if (_idleCount <= 0) {
-	      String msg = this + " critical internal error in ThreadPool, requiring Resin restart";
-	      System.err.println(msg);
-	      System.exit(10);
-	    }
-	    
-	    poolThread = _idleHead;
-	    _idleHead = poolThread._next;
-	    poolThread._next = null;
-	    poolThread._isIdle = false;
-	    
-	    poolThread.setItem(item);
-
-	    _idleCount--;
-	    
-	    if (idleCount < _threadIdleMin)
-	      isWakeLauncher = true;
+	  if (isFreeThreadAvailable) {
+            // grab next idle thread, skipping any closed threads
+            while ((poolThread = _idleHead) != null
+                   && ! poolThread.scheduleTask(item)) {
+              poolThread = null;
+            }
 	  }
-	  else {
-	    poolThread = null;
-
+          
+          if (idleCount < _threadIdleMin)
+            isWakeLauncher = true;
+          
+	  if (poolThread == null) {
 	    // queue if schedule() or if there's space to run but no
 	    // active thread yet
 	    if (isQueueIfFull || isFreeThreadAvailable) {
@@ -692,7 +681,7 @@ public final class ThreadPool {
 	     && Alarm.getCurrentTime() <= expireTime);
 
     if (poolThread != null) {
-      LockSupport.unpark(poolThread);
+      poolThread.unpark();
 
       return true;
     }
@@ -766,15 +755,13 @@ public final class ThreadPool {
     final int _id;
     final String _name;
 
-    Thread _thread;
-    Thread _queueThread;
-
-    PoolThread _next;
-    boolean _isIdle;
-
     long _threadResetCount;
 
-    volatile TaskItem _item;
+    private PoolThread _next;
+    private boolean _isIdle;
+
+    private final AtomicReference<TaskItem> _itemRef
+      = new AtomicReference<TaskItem>();
 
     PoolThread()
     {
@@ -784,16 +771,6 @@ public final class ThreadPool {
       setName(_name);
       setDaemon(true);
     }
-
-    /**
-     * Returns the id.
-     */
-    /*
-    int getId()
-    {
-      return _id;
-    }
-    */
 
     /**
      * Returns the name.
@@ -812,19 +789,36 @@ public final class ThreadPool {
     }
 
     /**
-     * Returns the thread.
+     * Sets the thread's task.  Must be called inside _idleLock
      */
-    Thread getThread()
+    final boolean scheduleTask(TaskItem item)
     {
-      return _thread;
+      if (this != _idleHead) {
+        log.severe("ThreadPool wake() head mismatch.  Forcing quit.");
+        System.exit(10);
+      }
+
+      _idleHead = _next;
+      _next = null;
+
+      if (! _isIdle) {
+        return false;
+      }
+
+      _idleCount--;
+      _isIdle = false;
+
+      _itemRef.set(item);
+
+      return true;
     }
 
     /**
-     * Sets the thread's task
+     * Wake the thread.  Called outside of _idleLock
      */
-    final void setItem(TaskItem item)
+    final void unpark()
     {
-      _item = item;
+      LockSupport.unpark(this);
     }
 
     /**
@@ -861,83 +855,89 @@ public final class ThreadPool {
       ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
       while (true) {
-	try {
-	  thread.setName(_name);
+        thread.setName(_name);
 	  
-	  Runnable task = null;
-	  ClassLoader classLoader = null;
-	  
-	  // put the thread into the idle ring
-	  synchronized (_idleLock) {
-	    if (_isIdle) {
-	    }
-	    else if (_item != null) {
-              TaskItem item = _item;
-              _item = null;
-              
-	      task = item.getRunnable();
-	      classLoader = item.getLoader();
-	    }
-	    else {
-	      TaskItem item = null;
-	      
-	      if (_priorityQueue.size() > 0) {
-		item = _priorityQueue.remove(0);
-	      }
+        Runnable task = null;
+        ClassLoader classLoader = null;
 
-	      if (item == null && _threadPriority <= _idleCount) {
-		if (_taskQueue.size() > 0) {
-		  item = _taskQueue.remove(0);
-		}
-	      }
+        TaskItem item = nextTask();
 
-	      if (item != null) {
-		task = item.getRunnable();
-		classLoader = item.getLoader();
-	      }
-	      else {
-		long now = Alarm.getCurrentTime();
-		if (_threadIdleMax < _idleCount
-		    && _threadIdleOverflowExpire < now) {
-		  _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
-		  return;
-		}
-	      
-		_next = _idleHead;
-		_isIdle = true;
+        if (item == null)
+          return;
+          
+        task = item.getRunnable();
+        classLoader = item.getLoader();
 
-		_idleHead = this;
-		_idleCount++;
-
-                _idleLock.notifyAll();
-	      }
-	    }
-	  }
-	  
-	  // clear interrupted flag
-	  Thread.interrupted();
-	  // wait for next request
-	  if (task == null) {
-	    LockSupport.park();
-	  }
-
-	  // if the task is available, run it in the proper context
-	  if (task != null) {
-	    thread.setContextClassLoader(classLoader);
+        try {
+          // if the task is available, run it in the proper context
+          thread.setContextClassLoader(classLoader);
 	    
-	    try {
-	      thread.setName(_name + "-" + task.getClass().getSimpleName());
+          thread.setName(_name + "-" + task.getClass().getSimpleName());
 	      
-	      task.run();
-	    } catch (Throwable e) {
-	      log.log(Level.WARNING, e.toString(), e);
-	    } finally {
-	      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-	    }
-	  }
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          task.run();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+        }
+      }
+    }
+
+    /**
+     * Returns the next available task, returning null if the thread
+     * should exit.
+     */
+    private TaskItem nextTask()
+    {
+      synchronized (_idleLock) {
+        // process any priority queue item
+        if (_priorityQueue.size() > 0) {
+          return _priorityQueue.remove(0);
+        }
+
+        // if we have spare threads, process any task queue item
+        if (_taskQueue.size() > 0 && _threadPriority <= _idleCount) {
+          return _taskQueue.remove(0);
+        }
+
+        long now = Alarm.getCurrentTime();
+        
+        // if idle queue overflows, return and exit
+        if (_threadIdleMax < _idleCount
+            && _threadIdleOverflowExpire < now) {
+          _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
+          return null;
+        }
+
+        _next = _idleHead;
+        _idleHead = this;
+                
+        _isIdle = true;
+        _idleCount++;
+
+        _idleLock.notifyAll();
+      }
+
+      try {
+        while (true) {
+          TaskItem item = _itemRef.getAndSet(null);
+          if (item != null)
+            return item;
+          
+          Thread.interrupted();
+          LockSupport.park();
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+
+        return null;
+      } finally {
+        synchronized (_idleLock) {
+          if (_isIdle) {
+            _isIdle = false;
+            _idleCount--;
+          }
+        }
       }
     }
   }
@@ -1000,6 +1000,8 @@ public final class ThreadPool {
 	  
 	  PoolThread poolThread = new PoolThread();
 	  poolThread.start();
+
+          return true;
 	} catch (Throwable e) {
           e.printStackTrace();
           System.err.println("Resin exiting because of failed thread");
@@ -1012,11 +1014,9 @@ public final class ThreadPool {
 
 	if (isWait)
 	  LockSupport.park();
-	
-	return false;
       }
-
-      return true;
+	
+      return false;
     }
     
     public void run()

@@ -37,6 +37,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.ThreadPool;
+import com.caucho.util.TaskWorker;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
@@ -110,12 +111,13 @@ public class AbstractRolloverLog {
   private long _nextRolloverCheckTime = -1;
 
   private long _lastTime;
+  
+  private final RolloverWorker _rolloverWorker = new RolloverWorker();
+  private final Object _logLock = new Object();
 
-  private boolean _isRollingOver;
-  private Path _savedPath;
+  private volatile boolean _isRollingOver;
   private TempStream _tempStream;
   private long _tempStreamSize;
-  private ArchiveTask _archiveTask = new ArchiveTask();
 
   private WriteStream _os;
   private WriteStream _zipOut;
@@ -379,10 +381,10 @@ public class AbstractRolloverLog {
   protected void write(byte []buffer, int offset, int length)
     throws IOException
   {
-    synchronized (this) {
+    synchronized (_logLock) {
       if (_isRollingOver && ROLLOVER_OVERFLOW_MAX < _tempStreamSize) {
 	try {
-	  wait();
+	  _logLock.wait();
 	} catch (Exception e) {
 	}
       }
@@ -418,7 +420,7 @@ public class AbstractRolloverLog {
   protected void flushStream()
     throws IOException
   {
-    synchronized (this) {
+    synchronized (_logLock) {
       if (_os != null)
 	_os.flush();
 
@@ -436,78 +438,76 @@ public class AbstractRolloverLog {
   {
     long now = Alarm.getCurrentTime();
     
-    boolean isRollingOver = false;
-    
+    if (_nextRolloverCheckTime < now) {
+      _nextRolloverCheckTime = now + _rolloverCheckPeriod;
+
+      _rolloverWorker.wake();
+    }
+  }
+
+  /**
+   * Called from rollover worker
+   */
+  void rolloverLogImpl()
+  {
     try {
+      _isRollingOver = true;
+      
       Path savedPath = null;
 
-      if (now < _nextRolloverCheckTime) {
-	return;
-      }
+      long lastPeriodEnd = _nextPeriodEnd;
+
+      long now = Alarm.getCurrentTime();
       
-      synchronized (this) {
-	if (_isRollingOver || now < _nextRolloverCheckTime) {
-	  return;
-	}
+      if (_rolloverCron != null)
+        _nextPeriodEnd = _rolloverCron.nextTime(now);
+      else
+        _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
 
-	_nextRolloverCheckTime = now + _rolloverCheckPeriod;
-	_isRollingOver = isRollingOver = true;
+      Path path = getPath();
 
-	long lastPeriodEnd = _nextPeriodEnd;
-
-	if (_rolloverCron != null)
-	  _nextPeriodEnd = _rolloverCron.nextTime(now);
-	else
-	  _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
-
-	Path path = getPath();
-
-	if (lastPeriodEnd < now) {
-	  closeLogStream();
+      synchronized (_logLock) {
+        if (lastPeriodEnd < now) {
+          closeLogStream();
       
-	  if (getPathFormat() == null) {
-	    savedPath = getArchivePath(lastPeriodEnd - 1);
-	  }
+          if (getPathFormat() == null) {
+            savedPath = getArchivePath(lastPeriodEnd - 1);
+          }
 
-	  /*
-	    if (log.isLoggable(Level.FINE))
-	    log.fine(getPath() + ": next rollover at " +
-	    QDate.formatLocal(_nextPeriodEnd));
-	  */
-	}
-	else if (path != null && getRolloverSize() <= path.getLength()) {
-	  closeLogStream();
+          /*
+            if (log.isLoggable(Level.FINE))
+            log.fine(getPath() + ": next rollover at " +
+            QDate.formatLocal(_nextPeriodEnd));
+          */
+        }
+        else if (path != null && getRolloverSize() <= path.getLength()) {
+          closeLogStream();
 
-	  if (getPathFormat() == null) {
-	    savedPath = getArchivePath(now);
-	  }
-	}
+          if (getPathFormat() == null) {
+            savedPath = getArchivePath(now);
+          }
+        }
 
-	long nextPeriodEnd = _nextPeriodEnd;
-	if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-	  _nextRolloverCheckTime = _nextPeriodEnd;
+        long nextPeriodEnd = _nextPeriodEnd;
+        if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
+          _nextRolloverCheckTime = _nextPeriodEnd;
       }
 
       // archiving of path is outside of the synchronized block to
       // avoid freezing during archive
       if (savedPath != null) {
-	_savedPath = savedPath;
-	isRollingOver = false;
-	ThreadPool.getThreadPool().startPriority(_archiveTask);
+        movePathToArchive(savedPath);
       }
-
     } finally {
-      synchronized (this) {
-	if (isRollingOver) {
-	  _isRollingOver = false;
-	  flushTempStream();
-	}
+      synchronized (_logLock) {
+        _isRollingOver = false;
+        flushTempStream();
       }
     }
   }
 
   /**
-   * Tries to open the log.
+   * Tries to open the log.  Called from inside _logLock
    */
   private void openLog()
   {
@@ -569,8 +569,10 @@ public class AbstractRolloverLog {
   {
     if (savedPath == null)
       return;
-    
-    closeLogStream();
+
+    synchronized (_logLock) {
+      closeLogStream();
+    }
     
     Path path = getPath();
     
@@ -806,10 +808,12 @@ public class AbstractRolloverLog {
   /**
    * Closes the log, flushing the results.
    */
-  public synchronized void close()
+  public void close()
     throws IOException
   {
-    closeLogStream();
+    synchronized (_logLock) {
+      closeLogStream();
+    }
   }
 
   /**
@@ -822,7 +826,7 @@ public class AbstractRolloverLog {
       _os = null;
 
       if (os != null)
-	os.close();
+        os.close();
     } catch (Throwable e) {
       // can't log in log routines
     }
@@ -832,12 +836,15 @@ public class AbstractRolloverLog {
       _zipOut = null;
 
       if (zipOut != null)
-	zipOut.close();
+        zipOut.close();
     } catch (Throwable e) {
       // can't log in log routines
     }
   }
 
+  /**
+   * Called from inside _logLock
+   */
   private void flushTempStream()
   {
     TempStream ts = _tempStream;
@@ -862,32 +869,14 @@ public class AbstractRolloverLog {
 	}
       }
     } finally {
-      notifyAll();
+      _logLock.notifyAll();
     }
   }
 
-  class ArchiveTask implements Runnable {
-    private boolean _isArchiving;
-    
-    public void run()
+  class RolloverWorker extends TaskWorker {
+    public void runTask()
     {
-      try {
-	synchronized (this) {
-	  Path savedPath = _savedPath;
-	  
-	  if (savedPath != null)
-	    movePathToArchive(savedPath);
-	  
-	  _savedPath = null;
-	}
-      } finally {
-	// Write any new data from the temp stream to the log.
-	synchronized (AbstractRolloverLog.this) {
-	  _isRollingOver = false;
-
-	  flushTempStream();
-	}
-      }
+      rolloverLogImpl();
     }
   }
 }

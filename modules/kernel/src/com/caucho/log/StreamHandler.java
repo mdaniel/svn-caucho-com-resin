@@ -39,7 +39,7 @@ import java.util.logging.LogRecord;
  * Resin's rotating path-based log.
  */
 public class StreamHandler extends Handler {
-  private static L10N L = new L10N(StreamHandler.class);
+  private static final L10N L = new L10N(StreamHandler.class);
   
   private WriteStream _os;
 

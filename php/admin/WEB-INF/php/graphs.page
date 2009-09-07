@@ -1,29 +1,98 @@
 <?php
 
-require_once "WEB-INF/php/inc.php";
+$cache = resin_create_distcache("resin:admin:graph");
 
-if (! admin_init()) {
+$p_hash = $_REQUEST['h'];
+
+$p_submit = $_REQUEST['submit'];
+$p_graph = $_REQUEST['graph'];
+$p_period = $_REQUEST['p'];
+if ($_REQUEST['period'])
+  $p_period = $_REQUEST['period'];
+if ($_REQUEST['np'])
+  $p_period = $_REQUEST['np'];
+
+$user = $request->getRemoteUser();
+
+$user_item = $cache->get($user);
+$is_refresh = false;
+
+if ($p_graph) {
+  $p_hash = $user_item['user-graphs'][$p_graph];
+  $p_submit = null;
+
+  if ($_POST['remove']) {
+    unset($user_item['user-graphs'][$p_graph]);
+    $cache->put($user, $user_item);
+  }
+
+  $is_refresh = true;
+}
+
+if ($p_hash && ! $p_submit) {
+  $item = $cache->get($p_hash);
+  $p_name = $item['name'];
+  $p_checks = $item['checks'];
+  $p_servers = $item['servers'];
+}
+else {
+  $is_refresh = true;
+
+  $p_name = $_REQUEST['name'];
+  $p_checks = $_REQUEST['checks'];
+  $p_servers = $_REQUEST['servers'];
+
+  if (! $p_name) {
+    $p_submit = null;
+    $p_name = $p_servers[0] . "|" . $p_checks[0];
+  }
+
+  $item = array("name"=>$p_name,
+                "checks"=>$p_checks,
+                "servers"=>$p_servers);
+
+  $ser = serialize($item);
+  $p_hash = dechex(crc32($ser));
+
+  $cache->put($p_hash, $item);
+
+  if ($p_submit) {
+    $user_graphs = $user_item['user-graphs'];
+    if ($user_graphs == null) {
+      $user_graphs = array();
+    }
+
+    $user_graphs[$p_name] = $p_hash;
+    $user_item['user-graphs'] = $user_graphs;
+
+    $cache->put($user, $user_item);
+  }
+}
+
+$query = "&h=" . $p_hash . "&p=" . $p_period;
+
+if ($is_refresh) {
+  // redirect so the refresh will work
+  $g_next_url = "?q=" . $_REQUEST['q'] . "&s=" . $_REQUEST['s'] . $query;
+  header("Location: " . $_SERVER['SCRIPT_URL'] . $g_next_url);
   return;
 }
 
-$mbean_server = $g_mbean_server;
+require_once "WEB-INF/php/inc.php";
 
-$stat = $g_mbean_server->lookup("resin:type=StatService");
-
-if (! $stat)
+if (! admin_init($query, true)) {
   return;
+}
 
 $names = array();
 
 $full_height = 500;
 $full_width = 600;
 
-$p_checks = $_REQUEST['checks'];
-$p_servers = $_REQUEST['servers'];
-$p_period = $_REQUEST['period'];
+$mbean_server = $g_mbean_server;
 
 if (! $p_period) {
-  $p_period = 24 * 60 * 60;
+  $p_period = 60;
 }
 
 foreach ($p_checks as $check) {
@@ -32,43 +101,53 @@ foreach ($p_checks as $check) {
   }
 }
 
-$p_name = $p_names[0];
+$stat = $g_mbean_server->lookup("resin:type=StatService");
+
+if (! $stat)
+  return;
+
+if (! $p_name)
+  $p_name = $p_names[0];
 
 if (! $p_name) {
   $p_name = "00|Resin|Server|Server Index";
   $p_names[] = $p_name;
 }
 
-echo "<h2>$p_name</h2>";
+echo "<h1><a href=" . $g_next_url . ">Graph: $p_name</a></h1>";
 
 echo "<p><b>Note:</b> this page requires HTML 5 canvas support.  You may need
 to use Firefox 3.5 or other HTML 5-capable browser
 to see the graphs properly.</p>\n";
 
-echo "<form method='post'>"
-echo "Interval: <select name='period'>\n";
+$user_graphs = $user_item['user-graphs'];
 
-echo "<option ";
-if ($p_period == 60 * 60)
-  echo " selected";
-echo " value='" . (60 * 60) . "'>1 hour\n";
+echo "Time: "
 
-echo "<option ";
-if ($p_period == 6 * 60 * 60)
-  echo " selected";
-echo " value='" . (6 * 60 * 60) . "'>6 hours\n";
+if ($p_period == 60)
+  echo " 1h";
+else
+  echo " <a href=" . $g_next_url . "&np=" . (60) . ">1h</a>";
 
-echo "<option ";
-if ($p_period == 24 * 60 * 60)
-  echo " selected";
-echo " value='" . (24 * 60 * 60) . "'>1 day\n";
+if ($p_period == 6 * 60)
+  echo " 6h";
+else
+  echo " <a href=" . $g_next_url . "&np=" . (6 * 60) . ">6h</a>";
 
-echo "<option ";
-if ($p_period == 7 * 24 * 60 * 60)
-  echo " selected";
-echo " value='" . (7 * 24 * 60 * 60) . "'>1 week\n";
+if ($p_period == 24 * 60)
+  echo " 24h";
+else
+  echo " <a href=" . $g_next_url . "&np=" . (24 * 60) . ">24h</a>";
 
-echo "</select>\n";
+if ($p_period == 7 * 24 * 60)
+  echo " 7d";
+else
+  echo " <a href=" . $g_next_url . "&np=" . (7 * 24 * 60) . ">7d</a>";
+
+if ($p_period == 30 * 24 * 60)
+  echo " 30d";
+else
+  echo " <a href=" . $g_next_url . "&np=" . (30 * 24 * 60) . ">30d</a>";
 
 ?>
 
@@ -183,6 +262,45 @@ foreach ($sections as $section => $names) {
 echo "</ul>";
 */
 
+echo "<br>";
+
+// existing graphs
+
+echo "<h3>Existing Graphs</h3>\n";
+echo "<form method='POST' action='" . $g_next_url . "'>";
+echo "<select name='graph'>\n";
+foreach ($user_item['user-graphs'] as $name => $hash) {
+  echo "<option ";
+  if ($p_hash == $hash) {
+    echo " selected";
+  }
+  echo " value='" . $name . "'>" . $name . "\n";
+}
+echo "</select>\n";
+echo "<input type='submit' value='Display'><br>\n";
+echo "<input type='submit' name='remove' value='Delete Graph'>\n";
+echo "</form>";
+
+// server
+echo "<h3>Add New Graph</h3>";
+echo "<br>";
+
+echo "<form method='post' action='" . $g_next_url . "'>"
+echo "<input type='hidden' name='submit' value='true'>\n";
+
+echo "Name: ";
+echo "<input name='name' size='40'><br>";
+echo "Servers: ";
+ksort($servers);
+foreach ($servers as $server) {
+  echo "<input type='checkbox' name='servers[]'";
+  if (in_array($server, $p_servers))
+    echo " checked='true'";
+  echo " value='$server'>$server\n";      
+}
+echo "<br>";
+echo "Data: ";
+
 // data selection
 /*
 echo "<table width='600'>";
@@ -217,27 +335,17 @@ foreach ($sections as $section => $names) {
   echo "<ul style='list-style-type:none'>";
   foreach ($names as $name) {
     echo "<li><input type='checkbox' name='checks[]'";
+    /*
     if (in_array("$section|$name", $p_checks))
       echo " checked='true'";
+    */
       
     echo "value='$section|$name'>$name<br>\n";
   }
   echo "</ul>";
 }
 echo "</ul>"
-
-// server
-echo "Servers: ";
-ksort($servers);
-foreach ($servers as $server) {
-  echo "<input type='checkbox' name='servers[]'";
-  if (in_array($server, $p_servers))
-    echo " checked='true'";
-  echo " value='$server'>$server\n";      
-}
-echo "<br>";
-
-echo "<input type='submit'>\n";
+echo "<input type='submit' value='Create Graph'>\n";
 
 echo "</form>\n";
 
@@ -247,12 +355,51 @@ $width = 600 - 60;
 $height = 400 - 40;
 
 $now = time();
-$start = $now - $p_period;
+$start = $now - $p_period * 60;
+$dt = date_create();
+$tz = date_timezone_get($dt);
+$offset = timezone_offset_get($tz, $dt);
+
+$time = $start + $offset;
+
+if ($p_period <= 60) {
+}
+else if ($p_period <= 12 * 60) {
+  $time += 3600 - 1;
+  $time -= $time % 3600;
+}
+else if ($p_period <= 24 * 60) {
+  $time += 3 * 3600 - 1;
+  $time -= $time % (3 * 3600);
+}
+else {
+  $time += 24 * 3600 - 1;
+  $time -= $time % (24 * 3600);
+}
+
+$start = $time - $offset;
 
 $value_set = array();
 
+$step = 0;
+if ($p_period <= 60) {
+  $step = 0;
+}
+else if ($p_period <= 6 * 60) {
+  $step = 2 * 60;
+}
+else if ($p_period <= 24 * 60) {
+  $step = 10 * 60;
+}
+else if ($p_period <= 7 * 24 * 60) {
+  $step = 60 * 60;
+}
+else {
+  $step = 4 * 60 * 60;
+}
+
 foreach ($p_names as $name) {
-  $values = $stat->statisticsData($name, $start * 1000, -1);
+  $values = $stat->statisticsData($name, $start * 1000, -1, $step * 1000);
 
   $bounds = calculate_bounds($bounds, $values);
 
@@ -262,7 +409,7 @@ foreach ($p_names as $name) {
 list($x1, $y1, $x2, $y2) = $bounds;
 $x0 = $x1;
 $x1 = $start * 1000;
-$x2 - $now * 1000;
+$x2 = ($start + $p_period * 60) * 1000;
 
 $dx = ($x2 - $x1) / $width;
 $dy = ($y2 - $y1) / $height;
@@ -289,6 +436,8 @@ $colors[] = "#80f080"; // green
 
 echo "<script type='application/x-javascript'>\n";
 echo "c = start_bounds(0, 0, 100, 100);\n";
+
+draw_grid($x1, $y1, $x2, $y2, 0, 0, 100, 100, "#c0c0c0", "#c0c0c0");
 
 $i = 0;
 foreach ($value_set as $name => $values) {
@@ -331,13 +480,15 @@ echo "c.beginPath();";
 echo "c.strokeStyle ='#000000';\n";
 echo "c.font = '10px Monotype';\n";
 echo "c.fillStyle ='#000000';\n";
-draw_grid($x1, $y1, $x2, $y2, 0, 0, 100, 100, "#808000", "#008080");
+
 echo "c.fillText('" . print_value($y1) . "', -45, " . ($height) . ");\n";
 echo "c.fillText('" . print_value($y2) . "', -45, " . (10) . ");\n";
+/*
 echo "c.fillText('" . date("H:i", $x1 / 1000) . "', -10, " . ($height + 10) . ");\n";
 echo "c.fillText('" . date("m-d", $x1 / 1000) . "', -10, " . ($height + 20) . ");\n";
 echo "c.fillText('" . date("H:i", $x2 / 1000) . "', " . ($width - 20) . ", " . ($height + 10) . ");\n";
 echo "c.fillText('" . date("m-d", $x2 / 1000) . "', " . ($width - 20) . ", " . ($height + 20) . ");\n";
+*/
 
 echo "</script>\n";
 
@@ -392,41 +543,34 @@ function draw_line($x_0, $y_0, $x_1, $y_1)
 
   printf("rline(c,%.2f,%.2f,%.2f,%.2f)\n",
            ($x_0 - $x1) / $dx,
-           ($dy - $y_0) / $dy + $height,
+           ($dy - $y_0) / $dy * $height,
            ($x_1 - $x1) / $dx,
-           ($dy - $y_1) / $dy + $height);
+           ($dy - $y_1) / $dy * $height);
 }
 
 function draw_grid($min_x, $min_y, $max_x, $max_y,
-                   $x0, $y0, $width, $height, $low_color, $high_color)
+                   $x0, $y0, $width, $delta_y, $low_color, $high_color)
 {
+  global $dx;
+  global $dy;
+  global $height;
+
   // x-grid
   $x = $min_x;
+  echo "c.save();\n";
+  echo "c.strokeStyle = '" . $high_color . "';\n";
+  echo "c.strokeWidth = 1;\n";
+  echo "c.fillStyle ='#000000';\n";
+  echo "c.font = '10px Monotype';\n";
+  echo "c.beginPath();\n";
 
-  for ($x = $min_x; $x < $max_x; $x += 3600000) {
-    $hour_x = ($x + 3599999);
-    $hour_x -= $hour_x % 3600000;
+  $x_step = grid_delta_x($min_x, $max_x);
 
-    $hour_time = $hour_x / 1000;
-    $hour_time += date_create($hour_x)->offset;
-    $day_hour = $hour_time / 3600 % 24;
+  for ($x = $min_x; $x <= $max_x; $x += $x_step) {
+    draw_line($x, 0, $x, $dy);
 
-    if ($hour_x < $max_x) {
-      $xp = $x0 + ($hour_x - $min_x) * $width / ($max_x - $min_x);
-
-      if ($day_hour % 6 == 0) {
-        $color = $high_color;
-      }
-      else
-        $color = $low_color;
-
-      if ($min_x < $x && $x + 3600000 < $max_x) {
-        $s = date("H", $hour_x / 1000);
-        // imagestring($im, 1, $xp - 2, $y0 + $height + 2, $s, $color);
-      }
-
-      draw_line($xp, $y0, $xp, $y0 + $height);
-    }
+    echo "c.fillText('" . date("H:i", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 10) . ");\n";
+    echo "c.fillText('" . date("m-d", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 20) . ");\n";
   }
   
   // y-grid
@@ -458,6 +602,30 @@ function draw_grid($min_x, $min_y, $max_x, $max_y,
     // imageline($im, $x0, $yp, $x0 + $width, $yp, $color);
 
     $i++;
+  }
+}
+
+function grid_delta_x($min_x, $max_x)
+{
+  $delta = ($max_x - $min_x) / 60000;
+
+  if ($delta <= 60) {
+    return 15 * 60000;
+  }
+  else if ($delta <= 3 * 60) {
+    return 30 * 60000;
+  }
+  else if ($delta <= 12 * 60) {
+    return 60 * 60000;
+  }
+  else if ($delta <= 24 * 60) {
+    return 3 * 60 * 60000;
+  }
+  else if ($delta <= 7 * 24 * 60) {
+    return 24 * 60 * 60000;
+  }
+  else {
+    return 7 * 24 * 60 * 60000;
   }
 }
 

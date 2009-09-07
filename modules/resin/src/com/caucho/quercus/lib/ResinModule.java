@@ -32,6 +32,8 @@ package com.caucho.quercus.lib;
 
 import com.caucho.Version;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.CacheManager;
 import com.caucho.naming.Jndi;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
@@ -40,6 +42,7 @@ import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
@@ -430,5 +433,49 @@ public class ResinModule
   {
     if (_saveState != null)
       _saveState.clear();
+  }
+
+  //
+  // caching
+  //
+  public static QuercusDistcache resin_create_distcache(Env env, String name)
+  {
+    CacheManager manager = CacheManager.createManager();
+    
+    return new QuercusDistcache(manager.create(name));
+  }
+
+  public static class QuercusDistcache {
+    private final AbstractCache _cache;
+
+    QuercusDistcache(AbstractCache cache)
+    {
+      _cache = cache;
+    }
+
+    public Value get(Env env,  StringValue key)
+    {
+      String value = (String) _cache.get(key.toString());
+
+      if (value == null)
+        return NullValue.NULL;
+
+      return VariableModule.unserialize(env, new StringBuilderValue(value));
+    }
+
+    public Value put(Env env, StringValue key, Value value)
+    {
+      String sValue = VariableModule.serialize(env, value);
+      
+      _cache.put(key.toString(), sValue);
+
+      return value;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _cache + "]";
+    }
   }
 }

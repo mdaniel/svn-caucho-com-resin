@@ -5,6 +5,10 @@
 
 require_once "WEB-INF/php/inc.php";
 
+if (! admin_init()) {
+  return;
+}
+
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 $si = sprintf("%02d", $g_server->Index);

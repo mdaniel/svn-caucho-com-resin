@@ -1691,6 +1691,17 @@ public class Env {
   }
 
   /**
+   * Sets a special value, a special value is used to store and retrieve module
+   * specific values in the env using a unique name.
+   */
+  public Object setSpecialValue(String name, Object value)
+  {
+    _specialMap.put(name, value);
+
+    return value;
+  }
+
+  /**
    * Gets a global
    */
   public Value getGlobalValue(String name)
@@ -2583,17 +2594,6 @@ public class Env {
       return (Var) value;
     else
       return new Var(value);
-  }
-
-  /**
-   * Sets a special value, a special value is used to store and retrieve module
-   * specific values in the env using a unique name.
-   */
-  public Object setSpecialValue(String name, Object value)
-  {
-    _specialMap.put(name, value);
-
-    return value;
   }
 
   /**

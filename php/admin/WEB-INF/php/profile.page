@@ -5,6 +5,10 @@
 
 require_once "WEB-INF/php/inc.php";
 
+if (! admin_init()) {
+  return;
+}
+
 $profile = @new Java("com.caucho.profile.Profile");
 $profileQuercus = isset($_POST['profile_quercus']);
 
@@ -112,7 +116,7 @@ if ($profile) {
   $results = $profile->getResults();
 
   $partition = do_partition_profile($results);
-  $groups = array("active", "jni", "resin", "keepalive", "wait", "block",
+  $groups = array("active", "block", "jni", "resin", "keepalive", "wait",
                   "accept", "single");
 
   echo "<table class='threads'>\n";

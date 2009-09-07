@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>log: update AbstractRolloverLog to eliminate long archive block (#3650, rep by Patrik Stymne)</li>
 <li>candi: scope adapter left in debugging (#3675, rep by hontvari)</li>
 <li>database: _idlePool and _pool must be synchronized together (#3660, rep by Shinomiya Nobuaki)</li>
 <li>database: cleanup connection idle pooling (#3052)</li>

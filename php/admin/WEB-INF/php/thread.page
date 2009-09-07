@@ -5,6 +5,10 @@
 
 require_once "WEB-INF/php/inc.php";
 
+if (! admin_init()) {
+  return;
+}
+
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
 $server = $g_mbean_server->lookup("resin:type=Server");
 

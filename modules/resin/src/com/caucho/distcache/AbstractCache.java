@@ -64,11 +64,7 @@ abstract public class AbstractCache extends AbstractMap
   private static final Logger log
     = Logger.getLogger(AbstractCache.class.getName());
 
-  private static final EnvironmentLocal<HashSet<String>> _localCacheNameSet
-    = new EnvironmentLocal<HashSet<String>>();
-
-  private static final String DUPLICATE_CACHE_NAME_MESSAGE
-    = "'{0}' is an invalid Cache name because it's already used by another cache.";
+  private CacheManager _localManager;
 
   private String _name = null;
 
@@ -91,6 +87,11 @@ abstract public class AbstractCache extends AbstractMap
 
   private String _scopeName = Scope.CLUSTER.toString();
   private String _persistenceOption = Persistence.TRIPLE.toString();
+
+  public AbstractCache()
+  {
+    _localManager = CacheManager.createManager();
+  }
 
   /**
    * Returns the name of the cache.
@@ -396,6 +397,11 @@ abstract public class AbstractCache extends AbstractMap
 
       _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
                                                      _config.getKeySerializer()));
+
+      if (_localManager.putIfAbsent(_guid, this) != null) {
+        throw new ConfigException(L.l("'{0}' is an invalid Cache name because it's already used by another cache.",
+                                    _name));
+      }
 
       _entryCache = new LruCache<Object,DistCacheEntry>(512);
     }
@@ -898,20 +904,8 @@ abstract public class AbstractCache extends AbstractMap
 
   protected void duplicateCacheNameException(String cacheName)
   {
-    throw new ConfigException(L.l(DUPLICATE_CACHE_NAME_MESSAGE, cacheName));
-  }
-
-  protected HashSet<String> getLocalCacheNameSet()
-  {
-    HashSet<String> cacheNameSet = _localCacheNameSet.getLevel();
-
-    if (cacheNameSet == null) {
-      cacheNameSet = new HashSet<String>();
-
-      _localCacheNameSet.set(cacheNameSet);
-    }
-
-    return cacheNameSet;
+    throw new ConfigException(L.l("'{0}' is an invalid cache name because it's already used by another cache.",
+                                  cacheName));
   }
 
   public boolean isClosed()
@@ -936,20 +930,12 @@ abstract public class AbstractCache extends AbstractMap
     if (_name == null || _name.length() == 0)
       throw new ConfigException(L.l("Each Cache must have a name."));
 
-    HashSet<String> cacheNameSet = getLocalCacheNameSet();
     String contextId = Environment.getEnvironmentName();
 
     if (_guid == null)
       _guid = contextId + ":" + _name;
 
     _config.setGuid(_guid);
-
-    if (! cacheNameSet.contains(_guid))
-      cacheNameSet.add(_guid);
-    else
-      throw new ConfigException(L.l(
-                                    "'{0}' is an invalid Cache name because it's already used by another cache.",
-                                    _name));
   }
 
   private void initPersistence(String persistence)

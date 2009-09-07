@@ -40,7 +40,7 @@ import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,11 +53,11 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   private static final Logger log
     = Logger.getLogger(RotateStream.class.getName());
   
-  private static HashMap<Path,SoftReference<RotateStream>> _streams
-    = new HashMap<Path,SoftReference<RotateStream>>();
+  private static HashMap<Path,WeakReference<RotateStream>> _streams
+    = new HashMap<Path,WeakReference<RotateStream>>();
   
-  private static HashMap<String,SoftReference<RotateStream>> _formatStreams
-    = new HashMap<String,SoftReference<RotateStream>>();
+  private static HashMap<String,WeakReference<RotateStream>> _formatStreams
+    = new HashMap<String,WeakReference<RotateStream>>();
 
   private final AbstractRolloverLog _rolloverLog = new AbstractRolloverLog();
 
@@ -96,13 +96,13 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   public static RotateStream create(Path path)
   {
     synchronized (_streams) {
-      SoftReference<RotateStream> ref = _streams.get(path);
+      WeakReference<RotateStream> ref = _streams.get(path);
       RotateStream stream = ref != null ? ref.get() : null;
 
       if (stream == null) {
         stream = new RotateStream(path);
 
-        _streams.put(path, new SoftReference<RotateStream>(stream));
+        _streams.put(path, new WeakReference<RotateStream>(stream));
       }
 
       return stream;
@@ -116,13 +116,13 @@ public class RotateStream extends StreamImpl implements AlarmListener {
     throws ConfigException
   {
     synchronized (_formatStreams) {
-      SoftReference<RotateStream> ref = _formatStreams.get(path);
+      WeakReference<RotateStream> ref = _formatStreams.get(path);
       RotateStream stream = ref != null ? ref.get() : null;
 
       if (stream == null) {
         stream = new RotateStream(path);
 
-        _formatStreams.put(path, new SoftReference<RotateStream>(stream));
+        _formatStreams.put(path, new WeakReference<RotateStream>(stream));
       }
 
       return stream;
@@ -135,7 +135,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   public static void clear()
   {
     synchronized (_streams) {
-      for (SoftReference<RotateStream> streamRef : _streams.values()) {
+      for (WeakReference<RotateStream> streamRef : _streams.values()) {
 	try {
 	  RotateStream stream = streamRef.get();
 
@@ -149,7 +149,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
     }
     
     synchronized (_formatStreams) {
-      for (SoftReference<RotateStream> streamRef : _formatStreams.values()) {
+      for (WeakReference<RotateStream> streamRef : _formatStreams.values()) {
 	try {
 	  RotateStream stream = streamRef.get();
 

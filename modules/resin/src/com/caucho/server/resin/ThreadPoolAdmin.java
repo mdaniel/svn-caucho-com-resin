@@ -148,6 +148,14 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   }
 
   /**
+   * Returns the current number of waiting threads.
+   */
+  public int getThreadWaitCount()
+  {
+    return _threadPool.getThreadWaitCount();
+  }
+
+  /**
    * Returns the current number of starting threads.
    */
   public long getThreadCreateCountTotal()

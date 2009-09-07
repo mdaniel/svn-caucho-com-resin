@@ -18,10 +18,6 @@ else {
     $g_page = "summary";
   }
 
-  if (! admin_init()) {
-    return;
-  }
-
   include_once($g_pages[$g_page]);
 
   display_footer($g_page);

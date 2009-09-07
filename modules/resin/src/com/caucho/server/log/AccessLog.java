@@ -78,6 +78,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   private QDate _calendar = QDate.createLocal();
   private String _timeFormat;
   private int _timeFormatSecondOffset = -1;
+  private int _timeFormatMinuteOffset = -1;
 
   private final AccessLogWriter _logWriter = new AccessLogWriter(this);
   
@@ -255,6 +256,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     if (_timeFormat == null || _timeFormat.equals("")) {
       _timeFormat = "[%d/%b/%Y:%H:%M:%S %z]";
       _timeFormatSecondOffset = 0;
+      _timeFormatMinuteOffset = 0;
     }
 
     _logWriter.init();
@@ -745,17 +747,24 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   private void fillTime(long date)
     throws IOException
   {
-    if (date / 1000 == _lastTime / 1000)
-      return;
-
     synchronized (_timeBuffer) {
-      if (_timeFormatSecondOffset >= 0 && date / 60000 == _lastTime / 60000) {
+      if (date / 1000 == _lastTime / 1000)
+        return;
+
+      if (_timeFormatSecondOffset >= 0
+          && date / 3600000 == _lastTime / 3600000) {
 	byte []bBuf = _timeBuffer.getBuffer();
-	
+
+        int min = (int) (date / 60000 % 60);
 	int sec = (int) (date / 1000 % 60);
 
+	bBuf[_timeFormatMinuteOffset + 0] = (byte) ('0' + min / 10);
+	bBuf[_timeFormatMinuteOffset + 1] = (byte) ('0' + min % 10);
+        
 	bBuf[_timeFormatSecondOffset + 0] = (byte) ('0' + sec / 10);
 	bBuf[_timeFormatSecondOffset + 1] = (byte) ('0' + sec % 10);
+
+        _lastTime = date;
 
 	return;
       }
@@ -763,8 +772,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       _timeCharBuffer.clear();
       QDate.formatLocal(_timeCharBuffer, date, _timeFormat);
 
-      if (_timeFormatSecondOffset >= 0)
+      if (_timeFormatSecondOffset >= 0) {
 	_timeFormatSecondOffset = _timeCharBuffer.lastIndexOf(':') + 1;
+	_timeFormatMinuteOffset = _timeFormatSecondOffset - 3;
+      }
       
       char []cBuf = _timeCharBuffer.getBuffer();
       int length = _timeCharBuffer.getLength();

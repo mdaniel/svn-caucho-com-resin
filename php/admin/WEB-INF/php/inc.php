@@ -15,29 +15,35 @@ header("Expires: 01 Dec 1994 16:00:00 GMT");
 header("Cache-Control: max-age=0,private"); 
 header("Pragma: No-Cache");
 
-function admin_init()
+function admin_init($query="", $is_refresh=false)
 {
   global $g_server_id;
+  global $g_server_index;
   global $g_mbean_server;
   global $g_resin;
   global $g_server;
   global $g_page;
-  
-  $g_server_id = $_GET["server-id"];
 
-  if (! $g_server_id) {
+  $g_server_index = $_GET["s"];
+
+  if (empty($g_server_index)) {
     $g_mbean_server = new MBeanServer();
-    $server = $g_mbean_server->lookup("resin:type=Server");
-    $g_server_id = $server->Id;
+    $g_server = $g_mbean_server->lookup("resin:type=Server");
+    $g_server_index = $g_server->SelfServer->ClusterIndex;
+    $g_server_id = $g_server->Id;
 
     if (! $g_server_id)
       $g_server_id = "default";
   }
   else {
-    if ($g_server_id == "default")
-      $g_mbean_server = new MBeanServer("");
-    else
-      $g_mbean_server = new MBeanServer($g_server_id);
+    $g_mbean_server = new MBeanServer("");
+    $server = server_find_by_index($g_mbean_server, g_server_index);
+
+    $g_server_id = $server->Id;
+    $g_mbean_server = new MBeanServer($g_server_id);
+
+    $g_server = $g_mbean_server->lookup("resin:type=Server");
+
 
     if (! $g_mbean_server) {
       if ($g_server_id)
@@ -45,7 +51,7 @@ function admin_init()
       else
         $title = "Resin: $g_page for server default";
 
-      display_header("thread.php", $title, $g_server);
+      display_header("thread.php", $title, $g_server, $query, $is_refresh);
 
       echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
     
@@ -63,7 +69,7 @@ function admin_init()
   else
     $title = "Resin: $g_page";
 
-  display_header("thread.php", $title, $g_server, true);
+  display_header("thread.php", $title, $g_server, $query, $is_refresh, true);
 
   return true;
 }  
@@ -502,13 +508,16 @@ function jmx_short_name($name, $exclude_array)
  *
  * @return true if the header was output, false if a header has already been output
  */
-function display_header($script, $title, $server, $allow_remote = false)
+function display_header($script, $title, $server, $query, $is_refresh,
+                        $allow_remote = false)
 {
   global $g_server_id;
+  global $g_server_index;
   global $g_page;
-  
+  global $g_next_url;
+
   $title = $title . " for server " . $g_server_id;
-  
+
   $server_id = $server->Id;
 
   global $display_header_script, $display_header_title;
@@ -527,6 +536,11 @@ function display_header($script, $title, $server, $allow_remote = false)
 <head>
   <title><?= $title ?></title>
   <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
+<?php
+if ($is_refresh) {
+  echo "<meta http-equiv=\"refresh\" content=\"60\" />\n";
+}
+?>
 
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
@@ -567,12 +581,14 @@ function display_header($script, $title, $server, $allow_remote = false)
 <?
 if (! empty($server)) {
   $server_name = $server->Id ? $server->Id : "default";
-  
+
+  $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
+
 ?>
    <li class="server">Server: <?= $g_server_id ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
-   <li><a href="?q=<?= $g_page ?>&server-id=<?= $g_server_id ?>">refresh</a></li>
+   <li><a href="<?= $g_next_url ?>">refresh</a></li>
    <li><a href="?q=index.php&logout=true">logout</a></li>
    </ul>
   </td>
@@ -781,6 +797,19 @@ function display_timeout($timeout)
   else {
     return $timeout . "ms";
   }
+}
+
+
+function server_find_by_index($g_mbean_server, $index)
+{
+  $server = $g_mbean_server->lookup("resin:type=Server");
+
+  foreach ($server->Servers as $cluster_server) {
+    if ($cluster_server->ServerIndex == $index)
+      return $cluster_server;
+  }
+
+  return null;
 }
 
 ?>
