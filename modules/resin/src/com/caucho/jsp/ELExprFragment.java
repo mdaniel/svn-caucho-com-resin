@@ -82,7 +82,12 @@ public class ELExprFragment extends JspFragment {
       oldOut = _pageContext.pushBody(out);
 
     try {
-      _expr.print(_pageContext.getOut(), _pageContext.getELContext(), false);
+      Object value = _expr.getValue(_pageContext.getELContext());
+
+      if (value instanceof JspFragment)
+        ((JspFragment) value).invoke(out);
+      else
+        _expr.toStream(_pageContext.getOut(), value);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

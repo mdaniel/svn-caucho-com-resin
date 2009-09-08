@@ -67,6 +67,18 @@ public class ServletManager {
     _isLazyValidate = isLazy;
   }
 
+  public boolean isFacesServletConfigured()
+  {
+    for (ServletConfigImpl servletConfig : _servletList) {
+      String className = servletConfig.getServletClass().getName();
+      
+      if ("javax.faces.FacesServlet".equals(className))
+        return true;
+    }
+
+    return false;
+  }
+
   /**
    * Adds a servlet to the servlet manager.
    */

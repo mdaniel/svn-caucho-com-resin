@@ -1866,6 +1866,11 @@ public class WebApp extends ServletContextImpl
     return _jsf;
   }
 
+  public boolean isFacesServletConfigured()
+  {
+    return _servletManager.isFacesServletConfigured();
+  }
+
   /**
    * Returns the JspApplicationContext for EL evaluation.
    */

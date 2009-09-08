@@ -750,8 +750,10 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (annType.equals(Inject.class))
         return true;
       // XXX: no longer true
+      /*
       if (annType.isAnnotationPresent(Qualifier.class))
         return true;
+      */
     }
 
     return false;

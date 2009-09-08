@@ -415,6 +415,7 @@ public abstract class Expr extends ValueExpression {
     
     Object obj = getValue(env);
 
+
     if (obj == null)
       return true;
     else if (escapeXml) {

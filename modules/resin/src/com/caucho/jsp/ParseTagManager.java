@@ -87,6 +87,17 @@ public class ParseTagManager {
   }
 
   /**
+   * Temporary tag info for recursive tags
+   */
+  TagInfo addTempTagInfo(QName qname, TagInfo info)
+  {
+    if (_tagMap.get(qname) == null)
+      _tagMap.put(qname, info);
+
+    return _tagMap.get(qname);
+  }
+
+  /**
    * Returns the tag with the given qname.
    */
   private TagInfo getTagImpl(QName qname)

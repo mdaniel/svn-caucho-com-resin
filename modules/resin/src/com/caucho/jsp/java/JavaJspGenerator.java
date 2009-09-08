@@ -378,6 +378,11 @@ public class JavaJspGenerator extends JspGenerator {
     return _parseState.getJspVersion().compareTo("2.1") < 0;
   }
 
+  public boolean isPrototype()
+  {
+    return _parseState.isPrototype();
+  }
+  
   /**
    * Adds a taglib.
    */

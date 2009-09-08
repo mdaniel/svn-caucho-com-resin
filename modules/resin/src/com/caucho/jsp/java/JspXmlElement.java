@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -43,6 +44,10 @@ public class JspXmlElement extends JspContainerNode {
   private ArrayList<QName> _attrNames = new ArrayList<QName>();
   private ArrayList<String> _attrValues = new ArrayList<String>();
 
+  public JspXmlElement()
+  {
+  }
+  
   /**
    * Adds an attribute.
    */
@@ -59,8 +64,12 @@ public class JspXmlElement extends JspContainerNode {
   public void addAttribute(QName name, JspAttribute value)
     throws JspParseException
   {
-    throw error(L.l("jsp:attribute '{0}' is not allowed as a child of an XML element.",
-		    name.getName()));
+    // jsp/10j0
+    if (_gen.isPrototype())
+      return;
+    
+    throw error(L.l("jsp:attribute '{0}' is not allowed as a child of XML element <{1}>.",
+		    name.getName(), getTagName()));
   }
 
   /**

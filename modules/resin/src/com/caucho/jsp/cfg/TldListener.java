@@ -32,6 +32,7 @@ package com.caucho.jsp.cfg;
 import com.caucho.config.ConfigException;
 import com.caucho.server.webapp.Listener;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
 
 /**
  * Configuration for the taglib listener in the .tld
@@ -74,20 +75,29 @@ public class TldListener {
   /**
    * Registers with the web-app.
    */
-  public void register(WebApp app)
+  public void register(WebApp webApp)
   {
-    if (app == null)
+    if (webApp == null)
       return;
 
-    if (app.hasListener(_listenerClass))
+    if (webApp.hasListener(_listenerClass))
       return;
+
+    String className = _listenerClass.getName();
+
+    
+    if ("com.sun.faces.config.ConfigureListener".equals(className)
+        && ! webApp.isFacesServletConfigured()) {
+      // avoid initializing JSF if it's not used.
+      return;
+    }
 
     try {
       Listener listener = new Listener();
       listener.setListenerClass(_listenerClass);
       //listener.init();
     
-      app.addListener(listener);
+      webApp.addListener(listener);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

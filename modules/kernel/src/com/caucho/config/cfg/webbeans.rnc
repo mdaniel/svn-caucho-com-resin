@@ -25,7 +25,7 @@ w_bean-Custom = element * - w:* {
    
    & element Production { w_bean-Custom* }?
    
-   & element Current { empty }?
+   & element Default { empty }?
    
    & element Decorates { empty }?
   )

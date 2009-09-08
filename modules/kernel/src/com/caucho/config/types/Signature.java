@@ -36,12 +36,15 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.logging.*;
 
 /**
  * Configuration for a function signature.
  */
 public class Signature {
-  private static L10N L = new L10N(Signature.class);
+  private static final L10N L = new L10N(Signature.class);
+  private static final Logger log
+    = Logger.getLogger(Signature.class.getName());
 
   private String _signature;
   private String _className;
@@ -105,6 +108,7 @@ public class Signature {
         }
       }
     } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     }
     
     return null;
@@ -169,8 +173,8 @@ public class Signature {
     for (int i = 0; i < parameterTypes.length; i++) {
       String param = getName(parameterTypes[i]);
 
-      if (! param.equals(sigTypes[i]) &&
-          ! param.endsWith("." + sigTypes[i]))
+      if (! param.equals(sigTypes[i])
+          && ! param.endsWith("." + sigTypes[i]))
         return false;
     }
 

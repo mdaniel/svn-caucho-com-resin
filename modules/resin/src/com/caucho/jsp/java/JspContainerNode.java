@@ -135,7 +135,7 @@ public abstract class JspContainerNode extends JspNode {
           if (isWhitespace(text))
             _children.remove(i);
           else
-            throw child.error(L.l("tags using jsp:attribute must put body content in a jsp:body tag"));
+            throw child.error(L.l("tags using jsp:attribute must put body content in a jsp:body tag."));
         }
         else if (child instanceof JspBody)
           i++;

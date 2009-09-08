@@ -13,6 +13,8 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jsp: StaticMethodExpr needs serialization fix (#3677, rep by boris_kovalenko)</li>
+<li>jsp: jsp:attribute in tag file (#3228, rep by jens)</li>
 <li>log: update AbstractRolloverLog to eliminate long archive block (#3650, rep by Patrik Stymne)</li>
 <li>candi: scope adapter left in debugging (#3675, rep by hontvari)</li>
 <li>database: _idlePool and _pool must be synchronized together (#3660, rep by Shinomiya Nobuaki)</li>

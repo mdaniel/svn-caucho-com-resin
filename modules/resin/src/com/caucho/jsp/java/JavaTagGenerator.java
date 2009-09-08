@@ -31,6 +31,7 @@ package com.caucho.jsp.java;
 import com.caucho.config.types.Signature;
 import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.ParseTagManager;
+import com.caucho.jsp.TempTagInfo;
 import com.caucho.jsp.cfg.TldAttribute;
 import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.cfg.TldVariable;
@@ -70,6 +71,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
   private ArrayList<TldAttribute> _attributes = new ArrayList<TldAttribute>();
   private ArrayList<TldVariable> _variables = new ArrayList<TldVariable>();
+
+  private TempTagInfo _tagInfo = new TempTagInfo();
 
   public JavaTagGenerator(ParseTagManager tagManager)
   {

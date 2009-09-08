@@ -53,7 +53,9 @@ public class TagFileManager {
     _jspCompiler = compiler;
   }
 
-  public TagInfo getTag(String prefix, String shortName, String location)
+  public TagInfo getTag(String prefix,
+                        String shortName,
+                        String location)
     throws JspParseException
   {
     if (location == null)
@@ -95,7 +97,8 @@ public class TagFileManager {
     }
   }
 
-  public TagInfo getTag(String prefix, String location)
+  public TagInfo getTag(String prefix,
+                        String location)
     throws JspParseException
   {
     TagTaglib taglib = new TagTaglib(prefix, location);
@@ -103,7 +106,8 @@ public class TagFileManager {
     return getTag(location, taglib);
   }
 
-  public TagInfo getTag(String location, TagTaglib taglib)
+  public TagInfo getTag(String location,
+                        TagTaglib taglib)
     throws JspParseException
   {
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
@@ -115,7 +119,9 @@ public class TagFileManager {
     return getTag(path, location, taglib);
   }
 
-  public TagInfo getTag(Path path, String prefix, String location)
+  public TagInfo getTag(Path path,
+                        String prefix,
+                        String location)
     throws JspParseException
   {
     TagTaglib taglib = new TagTaglib(prefix, location);
@@ -123,7 +129,9 @@ public class TagFileManager {
     return getTag(path, location, taglib);
   }
 
-  public TagInfo getTag(Path path, String location, TagTaglib taglib)
+  public TagInfo getTag(Path path,
+                        String location,
+                        TagTaglib taglib)
     throws JspParseException
   {
     if (path == null || ! path.canRead())

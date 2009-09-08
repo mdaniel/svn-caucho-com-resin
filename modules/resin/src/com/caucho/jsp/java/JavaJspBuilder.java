@@ -112,8 +112,6 @@ public class JavaJspBuilder extends JspBuilder {
   private JspNode _currentNode;
   private JspNode _openNode;
 
-  private boolean _isPrototype;
-
   private int _elementDepth;
   private boolean _isTagDependent;
 
@@ -145,7 +143,7 @@ public class JavaJspBuilder extends JspBuilder {
    */
   public void setPrototype(boolean prototype)
   {
-    _isPrototype = prototype;
+    _parseState.setPrototype(prototype);
   }
 
   /**
@@ -153,7 +151,7 @@ public class JavaJspBuilder extends JspBuilder {
    */
   public boolean isPrototype()
   {
-    return _isPrototype;
+    return _parseState.isPrototype();
   }
   
   /**
@@ -262,6 +260,7 @@ public class JavaJspBuilder extends JspBuilder {
       }
     }
 
+    // jsp/10j0
     if (isPrototype()) {
       createElementNode(qname);
 

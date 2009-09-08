@@ -35,6 +35,7 @@ import com.caucho.vfs.WriteStream;
 import javax.el.ELContext;
 import javax.el.ELException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 
@@ -72,8 +73,15 @@ public class StaticMethodExpr extends Expr {
       sig.init();
 
       _method = sig.getMethod();
+
+      if (_method == null)
+        throw new RuntimeException(L.l("'{0}' is an unknown method",
+                                       sig));
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      throw new RuntimeException(e);
+      // log.log(Level.FINE, e.toString(), e);
     }
     
     initMethod();
@@ -176,6 +184,39 @@ public class StaticMethodExpr extends Expr {
       os.print(cl.getName());
   }
 
+  private Object writeReplace()
+  {
+    StringBuilder sig = new StringBuilder();
+
+    addType(sig, _method.getReturnType());
+    sig.append(" ");
+    sig.append(_method.getDeclaringClass().getName());
+    sig.append(".");
+    sig.append(_method.getName());
+    sig.append("(");
+    Class []param = _method.getParameterTypes();
+    
+    for (int i = 0; i < param.length; i++) {
+      if (i != 0)
+        sig.append(",");
+      
+      addType(sig, param[i]);
+    }
+    sig.append(")");
+    
+    return new Handle(sig.toString());
+  }
+
+  private void addType(StringBuilder sb, Class cl)
+  {
+    if (cl.isArray()) {
+      addType(sb, cl.getComponentType());
+      sb.append("[]");
+    }
+    else
+      sb.append(cl.getName());
+  }
+
   /**
    * Returns true for equal strings.
    */
@@ -188,9 +229,27 @@ public class StaticMethodExpr extends Expr {
 
     return _method.equals(expr._method);
   }
-
+                      
   public String toString()
   {
     return _method.getName();
+  }
+
+  static class Handle implements Serializable {
+    private String _signature;
+
+    private Handle()
+    {
+    }
+
+    private Handle(String signature)
+    {
+      _signature = signature;
+    }
+
+    public Object readResolve()
+    {
+      return new StaticMethodExpr(_signature);
+    }
   }
 }

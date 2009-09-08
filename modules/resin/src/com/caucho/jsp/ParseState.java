@@ -76,7 +76,7 @@ public class ParseState {
   
   private boolean _isAutoFlush = true;
   private boolean _isAutoFlushSet = false;
-  
+
   private boolean _isThreadSafe = true;
   private boolean _isThreadSafeSet = false;
 
@@ -110,7 +110,9 @@ public class ParseState {
   private ArrayList<PersistentDependency> _depends
     = new ArrayList<PersistentDependency>();
   private LineMap _lineMap;
-
+  
+  private boolean _isPrototype;
+  
   private Xml _xml;
   private Namespace _namespaces;
 
@@ -836,6 +838,16 @@ public class ParseState {
   public String findPrefix(String uri)
   {
     return Namespace.findPrefix(_namespaces, uri);
+  }
+
+  public boolean isPrototype()
+  {
+    return _isPrototype;
+  }
+
+  public void setPrototype(boolean isPrototype)
+  {
+    _isPrototype = isPrototype;
   }
 }
 
