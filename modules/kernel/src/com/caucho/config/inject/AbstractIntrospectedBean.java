@@ -77,7 +77,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.inject.Named;
 import javax.inject.Qualifier;
-import javax.interceptor.InterceptorBindingType;
 
 /**
  * Common bean introspection for Produces and ManagedBean.
@@ -425,7 +424,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 	    throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition, because @Stereotypes are used with multiple beans."));
 	}
 	
-	if (annType.isAnnotationPresent(Qualifier.class)) {
+	if (annType.isAnnotationPresent(Qualifier.class)
+            && ! annType.equals(Named.class)) {
 	  throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @Qualifier annotations",
 					ann, stereotype));
 	}

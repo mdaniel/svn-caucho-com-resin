@@ -36,7 +36,7 @@ import javax.ejb.*;
 import javax.decorator.Decorator;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorBindingType;
+import javax.interceptor.InterceptorQualifier;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -141,13 +141,13 @@ abstract public class View {
 	  for (Annotation sAnn : ann.annotationType().getAnnotations()) {
 	    Class sAnnType = sAnn.annotationType();
 	  
-	    if (sAnnType.isAnnotationPresent(InterceptorBindingType.class)) {
+	    if (sAnnType.isAnnotationPresent(InterceptorQualifier.class)) {
 	      interceptorBindingList.add(sAnn);
 	    }
 	  }
 	}
 	  
-	if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+	if (annType.isAnnotationPresent(InterceptorQualifier.class)) {
 	  interceptorBindingList.add(ann);
 	}
       }

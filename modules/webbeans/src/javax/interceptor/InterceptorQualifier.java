@@ -40,5 +40,5 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RUNTIME)
 @Target(ANNOTATION_TYPE)
-public @interface InterceptorBindingType {
+public @interface InterceptorQualifier {
 }

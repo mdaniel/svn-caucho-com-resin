@@ -39,7 +39,7 @@ import javax.annotation.*;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
-import javax.interceptor.InterceptorBindingType;
+import javax.interceptor.InterceptorQualifier;
 import javax.interceptor.InvocationContext;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
@@ -246,7 +246,7 @@ public class InterceptorBean<X> implements Interceptor<X>
 
   protected void introspect()
   {
-    introspectBindingTypes(_type.getAnnotations());
+    introspectQualifiers(_type.getAnnotations());
     
     introspectMethods();
   }
@@ -274,10 +274,10 @@ public class InterceptorBean<X> implements Interceptor<X>
     }
   }
 
-  protected void introspectBindingTypes(Annotation []annList)
+  protected void introspectQualifiers(Annotation []annList)
   {
     for (Annotation ann : annList) {
-      if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(InterceptorQualifier.class)) {
 	_bindings.add(ann);
       }
     }

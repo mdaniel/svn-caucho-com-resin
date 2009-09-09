@@ -47,7 +47,6 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.interceptor.InterceptorBindingType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.Produces;

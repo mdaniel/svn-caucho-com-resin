@@ -54,7 +54,7 @@ import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeDefaultInterceptors;
-import javax.interceptor.InterceptorBindingType;
+import javax.interceptor.InterceptorQualifier;
 import javax.interceptor.Interceptors;
 import javax.interceptor.ExcludeClassInterceptors;
 
@@ -279,7 +279,7 @@ public class InterceptorCallChain
   {
     Class annType = ann.annotationType();
 
-    if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+    if (annType.isAnnotationPresent(InterceptorQualifier.class)) {
       interceptorTypes.put(ann.annotationType(), ann);
     }
       
@@ -336,7 +336,7 @@ public class InterceptorCallChain
 
     for (Annotation annotation : annotations) {
       if (annotation.annotationType()
-	  .isAnnotationPresent(InterceptorBindingType.class))
+	  .isAnnotationPresent(InterceptorQualifier.class))
         return annotation;
     }
 

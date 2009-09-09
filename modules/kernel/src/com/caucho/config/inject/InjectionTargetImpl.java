@@ -56,7 +56,6 @@ import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.inject.Qualifier;
 import javax.inject.Inject;
-import javax.interceptor.InterceptorBindingType;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.

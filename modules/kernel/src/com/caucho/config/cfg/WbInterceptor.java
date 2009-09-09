@@ -59,13 +59,13 @@ public class WbInterceptor {
     _cl = cl;
 
     for (Annotation ann : cl.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
+      if (ann.annotationType().isAnnotationPresent(InterceptorQualifier.class)) {
 	_bindingList.add(ann);
       }
     }
 
     if (_bindingList.size() == 0) {
-      throw new ConfigException(L.l("'{0}' must have at least one @InterceptorBindingType annotation to be declared as an interceptor.",
+      throw new ConfigException(L.l("'{0}' must have at least one @InterceptorQualifier annotation to be declared as an interceptor.",
 				    cl.getName()));
     }
 

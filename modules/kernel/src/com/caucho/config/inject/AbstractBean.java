@@ -77,7 +77,6 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.inject.Named;
 import javax.inject.Qualifier;
-import javax.interceptor.InterceptorBindingType;
 
 /**
  * Common bean introspection for Produces and ManagedBean.

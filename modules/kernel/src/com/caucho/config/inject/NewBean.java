@@ -48,7 +48,6 @@ import java.util.logging.*;
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.interceptor.InterceptorBindingType;
 import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedType;

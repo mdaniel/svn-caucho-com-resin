@@ -31,6 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.server.connection.AbstractHttpRequest;
 
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.util.L10N;
@@ -241,8 +242,8 @@ public class ServletInvocation {
   {
     ServerRequest req = TcpConnection.getCurrentRequest();
 
-    if (req instanceof ServletRequest)
-      return (ServletRequest) req;
+    if (req instanceof AbstractHttpRequest)
+      return ((AbstractHttpRequest) req).getRequestFacade();
     else
       return null;
   }

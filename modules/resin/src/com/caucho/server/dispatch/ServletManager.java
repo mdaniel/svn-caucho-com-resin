@@ -72,7 +72,7 @@ public class ServletManager {
     for (ServletConfigImpl servletConfig : _servletList) {
       String className = servletConfig.getServletClass().getName();
       
-      if ("javax.faces.FacesServlet".equals(className))
+      if ("javax.faces.webapp.FacesServlet".equals(className))
         return true;
     }
 

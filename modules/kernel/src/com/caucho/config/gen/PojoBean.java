@@ -44,7 +44,7 @@ import javax.enterprise.inject.stereotype.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorBindingType;
+import javax.interceptor.InterceptorQualifier;
 
 /**
  * Generates the skeleton for a session bean.
@@ -168,13 +168,13 @@ public class PojoBean extends BeanGenerator {
 	  for (Annotation sAnn : ann.annotationType().getAnnotations()) {
 	    Class sAnnType = sAnn.annotationType();
 	  
-	    if (sAnnType.isAnnotationPresent(InterceptorBindingType.class)) {
+	    if (sAnnType.isAnnotationPresent(InterceptorQualifier.class)) {
 	      interceptorBindingList.add(sAnn);
 	    }
 	  }
 	}
 	  
-	if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+	if (annType.isAnnotationPresent(InterceptorQualifier.class)) {
 	  interceptorBindingList.add(ann);
 	}
       }

@@ -58,7 +58,7 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Qualifier;
-import javax.interceptor.InterceptorBindingType;
+import javax.interceptor.InterceptorQualifier;
 
 import org.w3c.dom.Node;
 
@@ -270,10 +270,10 @@ public class CustomBeanConfig {
       clearBindings(_annotatedType);
     }
 
-    if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)
+    if (ann.annotationType().isAnnotationPresent(InterceptorQualifier.class)
         && ! _hasInterceptorBindings) {
       _hasInterceptorBindings = true;
-      clearAnnotations(_annotatedType, InterceptorBindingType.class);
+      clearAnnotations(_annotatedType, InterceptorQualifier.class);
     }
 
     if (ann.annotationType().isAnnotationPresent(ScopeType.class))
