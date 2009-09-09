@@ -528,13 +528,14 @@ public final class ThreadPool {
     long expire = Alarm.getCurrentTime() + PRIORITY_TIMEOUT;
 
     boolean isPriority = true;
-    boolean isQueue = false;
+    boolean isQueue = true;
     
     if (! schedule(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to start priority thread " + task
 		  + " pri=" + _threadPriority
 		  + " active=" + _activeCount.get()
-		  + " idle=" + (_idleCount + _startingCount.get())
+		  + " idle=" + _idleCount
+		  + " starting=" + _startingCount.get()
 		  + " max=" + _threadMax);
 
       ThreadDump.dumpThreads();
@@ -573,18 +574,19 @@ public final class ThreadPool {
       PoolThread item = _idleHead;
       _idleHead = null;
 
-      _idleCount = 0;
-      
       while (item != null) {
 	PoolThread next = item._next;
 
 	item._next = null;
-	item._isIdle = false;
+        if (item._isIdle) {
+          item._isIdle = false;
+          _idleCount--;
+        }
 
-	try {
-	  item.interrupt();
-	} catch (Throwable e) {
-	}
+        try {
+          item.unpark();
+        } catch (Exception e) {
+        }
 
 	item = next;
       }
@@ -914,6 +916,7 @@ public final class ThreadPool {
                 
         _isIdle = true;
         _idleCount++;
+        System.out.println("add-idle: " +_idleCount);
 
         _idleLock.notifyAll();
       }
@@ -933,6 +936,7 @@ public final class ThreadPool {
         return null;
       } finally {
         synchronized (_idleLock) {
+          System.out.println("free-idle: " +_idleCount + " "+ _isIdle);
           if (_isIdle) {
             _isIdle = false;
             _idleCount--;
