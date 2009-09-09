@@ -42,7 +42,7 @@ public class WebAppFragmentConfig
     = Logger.getLogger(WebAppFragmentConfig.class.getName());
 
   //web-fragment name
-  private String _name = "com.caucho.web-fragment.no-name";
+  private String _name;
 
   //web-fragment metadata-complete
   private boolean _isMetadataComplete;

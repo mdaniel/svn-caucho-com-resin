@@ -679,6 +679,17 @@ public class ServletConfigImpl
       return null;
   }
 
+  public void merge(ServletConfigImpl config) {
+    if (_loadOnStartup == Integer.MIN_VALUE)
+      _loadOnStartup = config._loadOnStartup;
+
+    for (Map.Entry<String, String> param : config._initParams
+      .entrySet()) {
+      if (! _initParams.containsKey(param.getKey()))
+        _initParams.put(param.getKey(), param.getValue());
+    }
+  }
+
   /**
    * Initialize the servlet config.
    */

@@ -339,7 +339,8 @@ public class WebApp extends ServletContextImpl
   private boolean _metadataComplete = false;
   private List<String> _pendingClasses = new ArrayList<String>();
   private Ordering _absoluteOrdering;
-  private Map<String, WebAppFragmentConfig> _webFragments;
+  private List<WebAppFragmentConfig> _webFragments;
+  private boolean _isApplyingWebFragments = false;
 
   /**
    * Creates the webApp with its environment loader.
@@ -920,7 +921,7 @@ public class WebApp extends ServletContextImpl
   {
     config.setServletContext(this);
 
-    _servletManager.addServlet(config);
+    _servletManager.addServlet(config, _isApplyingWebFragments);
   }
 
   public void addServlet(WebServlet webServlet, String servletClassName)
@@ -2305,10 +2306,14 @@ public class WebApp extends ServletContextImpl
         loadWebFragments();
 
         List<WebAppFragmentConfig> fragments = sortWebFragments();
+
+        _isApplyingWebFragments = true;
         
         for (WebAppConfig fragment : fragments) {
           fragment.getBuilderProgram().configure(this);
         }
+
+        _isApplyingWebFragments = false;
         
         _classLoader.addScanListener(this);
       }
@@ -2349,12 +2354,16 @@ public class WebApp extends ServletContextImpl
     }
   }
 
+  public boolean isApplyingWebFragments() {
+    return _isApplyingWebFragments;
+  }
+
   private void loadWebFragments() {
     if (log.isLoggable(Level.FINER))
       log.finer(L.l("Loading web-fragments for '{0}'.", this));
 
     if (_webFragments == null)
-      _webFragments = new HashMap<String, WebAppFragmentConfig>();
+      _webFragments = new ArrayList<WebAppFragmentConfig>();
 
     try {
       Enumeration<URL> fragments
@@ -2373,7 +2382,7 @@ public class WebApp extends ServletContextImpl
         WebAppFragmentConfig fragmentConfig = new WebAppFragmentConfig();
         config.configure(fragmentConfig, Vfs.lookup(url.toString()));
 
-        _webFragments.put(fragmentConfig.getName(), fragmentConfig);
+        _webFragments.add(fragmentConfig);
       }
     } catch (IOException e) {
       if (log.isLoggable(Level.FINE))
@@ -2383,21 +2392,43 @@ public class WebApp extends ServletContextImpl
   }
 
   private List<WebAppFragmentConfig> sortWebFragments() {
+    Map<String, WebAppFragmentConfig> namedFragments
+      = new HashMap<String, WebAppFragmentConfig>();
+
+    List<WebAppFragmentConfig> anonFragments =
+      new ArrayList<WebAppFragmentConfig>();
+
+    for (WebAppFragmentConfig fragment : _webFragments) {
+      if (fragment.getName() != null)
+        namedFragments.put(fragment.getName(), fragment);
+      else
+        anonFragments.add(fragment);
+    }
+    
     if (_absoluteOrdering != null) {
-      return getWebFragments(null, _absoluteOrdering);
+      return getWebFragments(null,
+                             _absoluteOrdering,
+                             namedFragments,
+                             anonFragments);
     } else {
       Map<WebAppFragmentConfig, Set<WebAppFragmentConfig>> parentsMap
         = new HashMap<WebAppFragmentConfig, Set<WebAppFragmentConfig>>();
 
-      for (WebAppFragmentConfig config : _webFragments.values()) {
+      for (WebAppFragmentConfig config : namedFragments.values()) {
         if (config.getOrdering() == null)
           continue;
 
         List<WebAppFragmentConfig> children
-          = getWebFragments(config, config.getOrdering().getBefore());
+          = getWebFragments(config,
+                            config.getOrdering().getBefore(),
+                            namedFragments,
+                            anonFragments);
 
         List<WebAppFragmentConfig> parents
-          = getWebFragments(config, config.getOrdering().getAfter());
+          = getWebFragments(config,
+                            config.getOrdering().getAfter(),
+                            namedFragments,
+                            anonFragments);
 
         if (children != null && parents != null) {
           for (WebAppFragmentConfig fragmentConfig : children) {
@@ -2471,22 +2502,27 @@ public class WebApp extends ServletContextImpl
           throw new ConfigException(L.l("web-fragments at '{0}' appear to have circular dependency. Consider using <absolute-ordering> in web.xml.", this));
       }
 
-      for (WebAppFragmentConfig config : _webFragments.values()) {
+      for (WebAppFragmentConfig config : namedFragments.values()) {
         if (! result.contains(config))
           result.add(config);
       }
+
+      if (anonFragments.size() > 0)
+        result.addAll(anonFragments);
 
       return result;
     }
   }
 
   private List<WebAppFragmentConfig> getWebFragments(final WebAppFragmentConfig config,
-                                                     Ordering ordering) {
+                                                     Ordering ordering,
+                                                     Map<String, WebAppFragmentConfig> namedFragments,
+                                                     List<WebAppFragmentConfig> anonFragments) {
     if (ordering == null)
       return null;
 
     Map<String, WebAppFragmentConfig> others
-      = new HashMap<String, WebAppFragmentConfig>(_webFragments);
+      = new HashMap<String, WebAppFragmentConfig>(namedFragments);
 
     if (config != null)
       others.remove(config.getName());
@@ -2510,8 +2546,11 @@ public class WebApp extends ServletContextImpl
       result.ensureCapacity(result.size() + others.size());
 
       result.addAll(othersIdx, others.values());
+      result.addAll(anonFragments);
+      
+      anonFragments.clear();
     }
-
+    
     return result;
   }
 
