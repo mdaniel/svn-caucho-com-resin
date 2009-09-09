@@ -39,6 +39,7 @@ import com.caucho.vfs.*;
 import com.caucho.xml.*;
 import com.caucho.xpath.XPath;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.TimeoutException;
 
 import org.w3c.dom.*;
 
@@ -148,6 +149,11 @@ public class DeploymentManagerImpl
       return targets;
     } // XXX: hack
     catch (RemoteConnectionFailedException e) {
+      reset();
+
+      return getTargets();
+    }
+    catch (TimeoutException e) {
       reset();
 
       return getTargets();
@@ -273,7 +279,7 @@ public class DeploymentManagerImpl
       String type = XPath.evalString("/deployment-plan/archive-type", doc);
       String name = XPath.evalString("/deployment-plan/name", doc);
 
-      String tag = type + "s/default/" + name;
+      String tag = "default/" + type + "s/default/" + name;
 
       if (archive != null)
         _deployClient.deployJarContents(Vfs.lookup(archive.getAbsolutePath()),
