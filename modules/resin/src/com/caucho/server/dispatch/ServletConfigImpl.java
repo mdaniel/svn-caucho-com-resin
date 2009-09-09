@@ -94,6 +94,8 @@ public class ServletConfigImpl
 
   private boolean _allowEL = true;
   private HashMap<String,String> _initParams = new HashMap<String,String>();
+  // used for params defined prior to applying fragments.
+  private Set<String> _paramNames = new HashSet();
 
   private HashMap<String,String> _roleMap;
 
@@ -417,7 +419,17 @@ public class ServletConfigImpl
    */
   public void setInitParam(InitParam initParam)
   {
-    _initParams.putAll(initParam.getParameters());
+    if (_webApp.isAllowInitParamOverride())
+      _initParams.putAll(initParam.getParameters());
+    else {
+      for (Map.Entry<String, String> param : initParam.getParameters()
+        .entrySet()) {
+        if (! _initParams.containsKey(param.getKey())) {
+          _initParams.put(param.getKey(), param.getValue());
+          _paramNames.add(param.getKey());
+        }
+      }
+    }
   }
 
   /**
@@ -683,10 +695,25 @@ public class ServletConfigImpl
     if (_loadOnStartup == Integer.MIN_VALUE)
       _loadOnStartup = config._loadOnStartup;
 
+    if (! getClassName().equals(config.getClassName()))
+      throw new ConfigException(L.l(
+        "Illegal attempt to specify different servlet-class '{0}' for servlet '{1}'. Servlet '{1}' has already been defined with servlet-class '{2}'. Consider using <absolute-ordering> to exclude conflicting web-fragment.",
+        config.getClassName(),
+        _servletName,
+        _servletClassName));
+
     for (Map.Entry<String, String> param : config._initParams
       .entrySet()) {
-      if (! _initParams.containsKey(param.getKey()))
+      if (_paramNames.contains(param.getKey())) {
+      }
+      else if (! _initParams.containsKey(param.getKey()))
         _initParams.put(param.getKey(), param.getValue());
+      else if (! _initParams.get(param.getKey()).equals(param.getValue())) {
+        throw new ConfigException(L.l(
+          "Illegal attempt to specify different param-value of '{0}' for parameter '{1}'. This error indicates that two web-fragments use different values. Consider defining the parameter in web.xml to override definitions in web-fragment.",
+          param.getValue(),
+          param.getKey()));
+      }
     }
   }
 

@@ -2358,6 +2358,10 @@ public class WebApp extends ServletContextImpl
     return _isApplyingWebFragments;
   }
 
+  public boolean isAllowInitParamOverride() {
+    return _servletVersion == null || ! _servletVersion.startsWith("3");
+  }
+
   private void loadWebFragments() {
     if (log.isLoggable(Level.FINER))
       log.finer(L.l("Loading web-fragments for '{0}'.", this));
