@@ -923,7 +923,7 @@ public final class ThreadPool {
       try {
         while (true) {
           TaskItem item = _itemRef.getAndSet(null);
-          if (item != null)
+          if (item != null || ! _isIdle)
             return item;
           
           Thread.interrupted();
