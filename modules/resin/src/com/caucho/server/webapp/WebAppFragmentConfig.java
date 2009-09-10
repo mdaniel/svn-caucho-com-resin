@@ -71,6 +71,13 @@ public class WebAppFragmentConfig
     _isMetadataComplete = metadataComplete;
   }
 
+  // XXX: this will make tck tests with misspelled metadata-complete deploy.
+  // tck test generally seems valid except for this problem
+  @Configurable
+  public void setMetaDataComplete(boolean metadataComplete) {
+    _isMetadataComplete = metadataComplete;
+  }
+
   public String getJarPath() {
     return _jarPath;
   }
