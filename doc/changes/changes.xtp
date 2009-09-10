@@ -13,6 +13,9 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>session: add cookie-use-context-path and cookie-path</li>
+<li>loader: handle duplicate class definition errors (#3673, rep by Jamison Novak)</li>
+<li>config: add ${server.address} and ${server.port} (#3671, rep by Ken Roach)</li>
 <li>jsp: StaticMethodExpr needs serialization fix (#3677, rep by boris_kovalenko)</li>
 <li>jsp: jsp:attribute in tag file (#3228, rep by jens)</li>
 <li>log: update AbstractRolloverLog to eliminate long archive block (#3650, rep by Patrik Stymne)</li>

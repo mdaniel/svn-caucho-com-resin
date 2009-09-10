@@ -916,7 +916,6 @@ public final class ThreadPool {
                 
         _isIdle = true;
         _idleCount++;
-        System.out.println("add-idle: " +_idleCount);
 
         _idleLock.notifyAll();
       }
@@ -936,7 +935,6 @@ public final class ThreadPool {
         return null;
       } finally {
         synchronized (_idleLock) {
-          System.out.println("free-idle: " +_idleCount + " "+ _isIdle);
           if (_isIdle) {
             _isIdle = false;
             _idleCount--;

@@ -133,7 +133,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // default cookie version
   private int _cookieVersion;
   private String _cookieDomain;
-  private String _cookiePath = "/";
+  private boolean _isCookieUseContextPath;
+  private String _cookiePath;
   private long _cookieMaxAge;
   private boolean _cookieSecure;
   private int _isCookieHttpOnly;
@@ -285,6 +286,14 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void setCookiePort(String port)
   {
     _cookiePort = port;
+  }
+
+  /**
+   * Sets the cookie ports.
+   */
+  public void setCookieUseContextPath(boolean isCookieUseContextPath)
+  {
+    _isCookieUseContextPath = isCookieUseContextPath;
   }
 
   /**
@@ -789,84 +798,99 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   }
 
   //SessionCookieConfig implementation (Servlet 3.0)
-  public void setName(String name) {
+  public void setName(String name)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     setCookieName(name);
   }
 
-  public String getName() {
+  public String getName()
+  {
     return getCookieName();
   }
 
-  public void setDomain(String domain) {
+  public void setDomain(String domain)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     setCookieDomain(domain);
   }
 
-  public String getDomain() {
+  public String getDomain()
+  {
     return getCookieDomain();
   }
 
-  public void setPath(String path) {
+  public void setPath(String path)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     _cookiePath = path;
   }
 
-  public String getPath() {
+  public String getPath()
+  {
     return _cookiePath;
   }
 
-  public void setComment(String comment) {
+  public void setComment(String comment)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     _cookieComment = comment;
   }
 
-  public String getComment() {
+  public String getComment()
+  {
     return _cookieComment;
   }
 
-  public void setHttpOnly(boolean httpOnly) {
+  public void setHttpOnly(boolean httpOnly)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     setCookieHttpOnly(httpOnly);
   }
 
-  public boolean isHttpOnly() {
+  public boolean isHttpOnly()
+  {
     return isCookieHttpOnly();
   }
 
-  public void setSecure(boolean secure) {
+  public void setSecure(boolean secure)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     _isSecure = secure;
   }
 
-  public boolean isSecure() {
+  public boolean isSecure()
+  {
     return _isSecure;
   }
 
-  public void setMaxAge(int maxAge) {
+  public void setMaxAge(int maxAge)
+  {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     _cookieMaxAge = maxAge * 1000;
   }
 
-  public int getMaxAge() {
+  public int getMaxAge()
+  {
     return (int) (_cookieMaxAge / 1000);
   }
 
-  public void setCookieName(String cookieName) {
+  public void setCookieName(String cookieName)
+  {
     _cookieName = cookieName;
   }
   /**
@@ -902,6 +926,14 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void setCookieDomain(String domain)
   {
     _cookieDomain = domain;
+  }
+
+  /**
+   * Sets the default session cookie domain.
+   */
+  public void setCookiePath(String path)
+  {
+    _cookiePath = path;
   }
 
   /**
@@ -1026,25 +1058,13 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       _sessionStore = sessionCache;
     }
 
-    /*
-    if (_storeManager != null) {
-      _sessionStore = _storeManager.createStore(_distributionId,
-                                                _objectManager);
-      _sessionStore.setMaxIdleTime(_sessionTimeout);
-
-      if (_alwaysLoadSession == SET_TRUE)
-        _sessionStore.setAlwaysLoad(true);
-      else if (_alwaysLoadSession == SET_FALSE)
-        _sessionStore.setAlwaysLoad(false);
-
-      if (_alwaysSaveSession == SET_TRUE)
-        _sessionStore.setAlwaysSave(true);
-      else if (_alwaysSaveSession == SET_FALSE)
-        _sessionStore.setAlwaysSave(false);
+    if (_cookiePath != null) {
     }
+    else if (_isCookieUseContextPath)
+      _cookiePath = _webApp.getContextPath();
 
-    _objectManager.setStore(_sessionStore);
-    */
+    if (_cookiePath == null || "".equals(_cookiePath))
+      _cookiePath = "/";
   }
 
   public void start()

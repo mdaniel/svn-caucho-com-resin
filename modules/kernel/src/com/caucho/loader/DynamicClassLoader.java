@@ -1659,6 +1659,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     try {
+      cl = findLoadedClass(entry.getName());
+
+      // #3673
+      if (cl != null) {
+        if (entry.getEntryClass() == null)
+          entry.setEntryClass(cl);
+        
+        return cl;
+      }
+      
       // #3423 - defineClass must be outside ClassEntry synchronized
       // block because it can force recursive definitions,
       // possibly causing deadlocks
@@ -1679,6 +1689,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       //exn.initCause(e);
 
       throw exn;
+    } catch (LinkageError e) {
+      // #3673
+      cl = findLoadedClass(entry.getName());
+      
+      if (cl != null) {
+        log().log(Level.WARNING, e.toString(), e);
+        return cl;
+      }
+      else
+        throw e;
     }
 
     if (entry.postLoad()) {

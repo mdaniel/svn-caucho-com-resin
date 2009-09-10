@@ -921,6 +921,13 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _server;
   }
 
+  public void setServer(Server server)
+  {
+    assert(_server == null);
+
+    _server = server;
+  }
+
   /**
    * Returns the management api.
    */
@@ -947,7 +954,9 @@ public class Resin implements EnvironmentBean, SchemaBean
                                         _serverId));
 
 
-      _server = clusterServer.startServer();
+      Server server = clusterServer.startServer();
+
+      assert(server == _server);
 
       if (_stage != null) 
         _server.setStage(_stage);
@@ -1921,8 +1930,13 @@ public class Resin implements EnvironmentBean, SchemaBean
     public String getAddress()
     {
       try {
-        if (Alarm.isTest())
-          return "127.0.0.1";
+        Server server = _server;
+        
+        if (server != null) {
+          ClusterServer clusterServer = server.getSelfServer();
+          
+          return clusterServer.getAddress();
+        }
         else
           return InetAddress.getLocalHost().getHostAddress();
       } catch (Exception e) {
@@ -1937,7 +1951,15 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public int getPort()
     {
-      return 0;
+      Server server = _server;
+        
+      if (server != null) {
+        ClusterServer clusterServer = server.getSelfServer();
+          
+        return clusterServer.getPort();
+      }
+      else
+        return 0;
     }
 
     /**

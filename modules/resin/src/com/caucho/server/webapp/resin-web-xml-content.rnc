@@ -933,6 +933,12 @@ r_session-config = element session-config {
   & (attribute cookie-modulo-cluster { r_boolean-Type }
      | element cookie-modulo-cluster { r_boolean-Type })?
 
+  & (attribute cookie-use-context-path { r_boolean-Type }
+     | element cookie-use-context-path { r_boolean-Type })?
+
+  & (attribute cookie-path { string }
+     | element cookie-pathdport { string })?
+
   & (attribute cookie-port { string }
      | element cookie-port { string })?
 

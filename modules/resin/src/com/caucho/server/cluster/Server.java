@@ -240,6 +240,7 @@ public class Server extends ProtocolDispatchServer
     _selfServer = clusterServer;
     Cluster cluster = clusterServer.getCluster();
     _resin = cluster.getResin();
+    _resin.setServer(this);
 
     _id = cluster.getId() + ":" + clusterServer.getId();
 
