@@ -486,6 +486,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     try {
       AmberContainer.create().start();
 
+      config();  // ejb/4200
+
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 

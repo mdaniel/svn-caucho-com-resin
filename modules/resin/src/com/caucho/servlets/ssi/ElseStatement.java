@@ -29,34 +29,39 @@
 
 package com.caucho.servlets.ssi;
 
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
- * Represents a SSI expression
+ * Represents a SSI set statement
  */
-abstract public class SSIExpr {
-  /**
-   * Evaluate as a string.
-   */
-  abstract public String evalString(HttpServletRequest request,
-				    HttpServletResponse response);
-  /**
-   * Evaluate as a boolean.
-   */
-  public boolean evalBoolean(HttpServletRequest request,
-                             HttpServletResponse response)
+public class ElseStatement extends Statement{
+  private ElseStatement()
   {
-    String value = evalString(request, response);
+  }
 
-    if (value == null
-        || "".equals(value)
-        || "null".equals(value)
-        || "false".equals(value)
-        || "0".equals(value)) {
-      return false;
-    }
-    else
-      return true;
+  static Statement create(HashMap<String,String> attr, Path path)
+  {
+    return new ElseStatement();
+  }
+  
+  /**
+   * Executes the SSI statement.
+   *
+   * @param out the output stream
+   * @param request the servlet request
+   * @param response the servlet response
+   */
+  public void apply(WriteStream out,
+		    HttpServletRequest request,
+		    HttpServletResponse response)
+    throws IOException, ServletException
+  {
   }
 }

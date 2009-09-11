@@ -92,11 +92,14 @@ public abstract class NamespaceContextImpl implements NamespaceContext
         Decl decl = oldBinding.get(i);
         NamespaceBinding binding = decl.getBinding();
 
-        if (decl.getOldUri() == null)
-          remove(binding.getPrefix(), binding.getUri());
-        else {
-          _version++;
+        _version++;
 
+        if (decl.getOldUri() == null) {
+          binding.setUri(decl.getOldUri());
+          binding.setVersion(_version);
+          // remove(binding.getPrefix(), binding.getUri());
+        }
+        else {
           binding.setUri(decl.getOldUri());
           binding.setVersion(_version);
         }

@@ -26,7 +26,7 @@
  *
  * @author Scott Ferguson
  */
-package com.caucho.ejb.timer;
+package com.caucho.config.timer;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -43,9 +43,6 @@ import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
 import com.caucho.config.inject.InjectManager;
-import com.caucho.scheduling.CronExpression;
-import com.caucho.scheduling.ScheduledTask;
-import com.caucho.scheduling.ScheduledTaskStatus;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -62,19 +59,26 @@ import com.caucho.util.L10N;
 // familiar with the way the module dependencies are organized.
 public class EjbTimer implements Timer, Runnable {
   private static final L10N L = new L10N(EjbTimer.class);
-  protected static final Logger log = Logger
-      .getLogger(EjbTimer.class.getName());
+  private static final Logger log
+    = Logger.getLogger(EjbTimer.class.getName());
 
   private static InjectManager _injectionManager = InjectManager.create();
 
-  private ScheduledTask _scheduledTask;
+  private TimerTask _scheduledTask;
 
   /**
    * Creates timer.
    */
   public EjbTimer()
   {
-    super();
+  }
+
+  /**
+   * Creates timer.
+   */
+  public EjbTimer(TimerTask task)
+  {
+    _scheduledTask = task;
   }
 
   /**
@@ -83,7 +87,7 @@ public class EjbTimer implements Timer, Runnable {
    * @param scheduledTask
    *          The underlying scheduled task.
    */
-  public void setScheduledTask(final ScheduledTask scheduledTask)
+  public void setScheduledTask(TimerTask scheduledTask)
   {
     _scheduledTask = scheduledTask;
   }
@@ -276,30 +280,7 @@ public class EjbTimer implements Timer, Runnable {
   public void run()
   {
     if (_scheduledTask.getStatus() == ScheduledTaskStatus.ACTIVE) {
-      try {
-        // TODO What happens when there isn't a unique reference?
-        Object targetBeanReference = _injectionManager
-            .getReference(_scheduledTask.getTargetBean());
-        Method targetMethod = _scheduledTask.getTargetMethod();
-
-        if (targetMethod != null) {
-          if (targetMethod.getParameterTypes().length == 0) {
-            targetMethod.invoke(targetBeanReference);
-          } else {
-            targetMethod.invoke(targetBeanReference, this);
-          }
-        } else {
-          TimedObject timedObject = (TimedObject) targetBeanReference;
-          timedObject.ejbTimeout(this);
-        }
-      } catch (IllegalArgumentException e) {
-        log.log(Level.WARNING, L.l("Cannot invoke scheduled method."), e);
-      } catch (IllegalAccessException e) {
-        log.log(Level.WARNING, L.l("Cannot invoke scheduled method."), e);
-      } catch (InvocationTargetException e) {
-        log.log(Level.WARNING, L
-            .l("The scheduled method threw an unexpected exception."), e);
-      }
+      _scheduledTask.invoke(this);
     }
   }
 
@@ -318,5 +299,10 @@ public class EjbTimer implements Timer, Runnable {
     if (_scheduledTask.getStatus() == ScheduledTaskStatus.EXPIRED) {
       throw new NoSuchObjectLocalException("This timer has already expired.");
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _scheduledTask + "]";
   }
 }

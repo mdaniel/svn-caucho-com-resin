@@ -139,15 +139,4 @@ public class ResinWebBeansProducer
   {
     return ScheduledThreadPool.getLocal();
   }
-
-  /**
-   * Returns the javax.ejb.TimerService
-   */
-  @Produces
-  @CauchoDeployment
-  @ContextDependent
-  public TimerService getTimerService()
-  {
-    return EjbTimerService.create();
-  }
 }

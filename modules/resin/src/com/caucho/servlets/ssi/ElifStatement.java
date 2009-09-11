@@ -29,34 +29,31 @@
 
 package com.caucho.servlets.ssi;
 
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
- * Represents a SSI expression
+ * Represents a SSI set statement
  */
-abstract public class SSIExpr {
-  /**
-   * Evaluate as a string.
-   */
-  abstract public String evalString(HttpServletRequest request,
-				    HttpServletResponse response);
-  /**
-   * Evaluate as a boolean.
-   */
-  public boolean evalBoolean(HttpServletRequest request,
-                             HttpServletResponse response)
+public class ElifStatement extends IfStatement {
+  protected ElifStatement(SSIExpr test)
   {
-    String value = evalString(request, response);
+    super(test);
+  }
 
-    if (value == null
-        || "".equals(value)
-        || "null".equals(value)
-        || "false".equals(value)
-        || "0".equals(value)) {
-      return false;
-    }
-    else
-      return true;
+  static Statement create(HashMap<String,String> attr, Path path)
+  {
+    String test = attr.get("expr");
+
+    if (test == null)
+      return new ErrorStatement("['test' is a required attribute of #elif]");
+
+    return new ElifStatement(ExprParser.parseString(test, path));
   }
 }

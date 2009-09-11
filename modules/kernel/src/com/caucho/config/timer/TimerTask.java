@@ -26,12 +26,13 @@
  *
  * @author Reza Rahman
  */
-package com.caucho.scheduling;
+package com.caucho.config.timer;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.ejb.Timer;
 
 import com.caucho.config.types.Trigger;
 import com.caucho.util.Alarm;
@@ -40,18 +41,16 @@ import com.caucho.util.ThreadPool;
 
 /**
  * Scheduled task.
- * 
- * @author Reza Rahman
  */
-public class ScheduledTask implements AlarmListener {
-  private static ClassLoader _loader = Thread.currentThread()
-      .getContextClassLoader();
+public class TimerTask implements AlarmListener {
   private static AtomicLong _currentTaskId = new AtomicLong();
+  
+  private ClassLoader _loader
+    = Thread.currentThread().getContextClassLoader();
 
   private long _taskId;
   @SuppressWarnings("unchecked")
-  private Class _targetBean;
-  private Method _targetMethod;
+  private TimeoutInvoker _invoker;
   private Runnable _task;
   private CronExpression _cronExpression;
   private Trigger _trigger;
@@ -84,14 +83,18 @@ public class ScheduledTask implements AlarmListener {
    *          The data to be passed to the invocation target.
    */
   @SuppressWarnings("unchecked")
-  public ScheduledTask(final Class targetBean, final Method targetMethod,
-      final Runnable task, final CronExpression cronExpression,
-      final Trigger trigger, final long start, final long end,
-      final Serializable data)
+  public TimerTask(TimeoutInvoker invoker,
+                   Runnable task,
+                   CronExpression cronExpression,
+                   Trigger trigger,
+                   long start,
+                   long end,
+                   Serializable data)
   {
     _taskId = _currentTaskId.incrementAndGet();
-    _targetBean = targetBean;
-    _targetMethod = targetMethod;
+    
+    _invoker = invoker;
+
     _task = task;
     _cronExpression = cronExpression;
     _trigger = trigger;
@@ -101,8 +104,9 @@ public class ScheduledTask implements AlarmListener {
     _data = data;
 
     long now = Alarm.getCurrentTime();
-    long nextTime = _trigger.nextTime(now + 500);
-    _alarm = new Alarm(this, nextTime - now); // TODO Try a weak alarm instead.
+    long nextTime = _trigger.nextTime(now);
+    _alarm = new Alarm(this); // TODO Try a weak alarm instead.
+    _alarm.queue(nextTime - now);
   }
 
   /**
@@ -113,27 +117,6 @@ public class ScheduledTask implements AlarmListener {
   public long getTaskId()
   {
     return _taskId;
-  }
-
-  /**
-   * Gets target bean.
-   * 
-   * @return Target bean.
-   */
-  @SuppressWarnings("unchecked")
-  public Class getTargetBean()
-  {
-    return _targetBean;
-  }
-
-  /**
-   * Gets the target method to be invoked by the scheduled task.
-   * 
-   * @return Target method (may be null).
-   */
-  public Method getTargetMethod()
-  {
-    return _targetMethod;
   }
 
   /**
@@ -196,7 +179,7 @@ public class ScheduledTask implements AlarmListener {
   {
     // TODO This should probably be a proper lookup of the timer service
     // (perhaps via JCDI).
-    Scheduler.removeScheduledTask(this);
+    Scheduler.removeTimerTask(this);
     _cancelled.set(true);
     _alarm.dequeue();
   }
@@ -222,6 +205,11 @@ public class ScheduledTask implements AlarmListener {
     return ScheduledTaskStatus.ACTIVE;
   }
 
+  public void invoke(Timer timer)
+  {
+    _invoker.timeout(timer);
+  }
+
   /**
    * Handles alarm.
    * 
@@ -242,7 +230,8 @@ public class ScheduledTask implements AlarmListener {
       long now = Alarm.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);
 
-      alarm.queue(nextTime - now);
+      if (nextTime > 0)
+        alarm.queue(nextTime - now);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -278,9 +267,17 @@ public class ScheduledTask implements AlarmListener {
       return false;
     if (getClass() != object.getClass())
       return false;
-    ScheduledTask other = (ScheduledTask) object;
+    TimerTask other = (TimerTask) object;
+    
     if (_taskId != other.getTaskId())
       return false;
+    
     return true;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _invoker + "]";
   }
 }

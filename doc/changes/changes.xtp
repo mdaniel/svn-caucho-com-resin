@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>xml: XMLStream parsing for atlassian (#3651)</li>
 <li>session: add cookie-use-context-path and cookie-path</li>
 <li>loader: handle duplicate class definition errors (#3673, rep by Jamison Novak)</li>
 <li>config: add ${server.address} and ${server.port} (#3671, rep by Ken Roach)</li>

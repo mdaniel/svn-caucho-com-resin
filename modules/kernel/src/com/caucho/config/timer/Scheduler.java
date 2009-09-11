@@ -26,7 +26,7 @@
  *
  * @author Reza Rahman
  */
-package com.caucho.scheduling;
+package com.caucho.config.timer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,8 +56,8 @@ public class Scheduler {
   protected static final Logger log = Logger.getLogger(Scheduler.class
       .getName());
 
-  private static List<ScheduledTask> _scheduledTasks = Collections
-      .synchronizedList(new ArrayList<ScheduledTask>());
+  private static List<TimerTask> _scheduledTasks = Collections
+      .synchronizedList(new ArrayList<TimerTask>());
 
   /**
    * Adds a scheduled task.
@@ -65,7 +65,7 @@ public class Scheduler {
    * @param task
    *          The task to add.
    */
-  public static void addScheduledTask(final ScheduledTask task)
+  public static void addTimerTask(final TimerTask task)
   {
     _scheduledTasks.add(task);
   }
@@ -77,9 +77,9 @@ public class Scheduler {
    *          The ID of the task to match.
    * @return The matching scheduled task, null if one is not found.
    */
-  public static ScheduledTask getScheduledTaskById(final long taskId)
+  public static TimerTask getTimerTaskById(final long taskId)
   {
-    for (ScheduledTask scheduledTask : _scheduledTasks) {
+    for (TimerTask scheduledTask : _scheduledTasks) {
       if (scheduledTask.getTaskId() == taskId) {
         return scheduledTask;
       }
@@ -96,16 +96,18 @@ public class Scheduler {
    * @return The scheduled tasks for the target bean.
    */
   @SuppressWarnings("unchecked")
-  public static Collection<ScheduledTask> getScheduledTasksByTargetBean(
+  public static Collection<TimerTask> getTimerTasksByTargetBean(
       final Class targetBean)
   {
-    Collection<ScheduledTask> tasks = new LinkedList<ScheduledTask>();
+    Collection<TimerTask> tasks = new LinkedList<TimerTask>();
 
-    for (ScheduledTask task : _scheduledTasks) {
+    /*
+    for (TimerTask task : _scheduledTasks) {
       if (task.getTargetBean() == targetBean) {
         tasks.add(task);
       }
     }
+    */
 
     return tasks;
   }
@@ -116,7 +118,7 @@ public class Scheduler {
    * @param scheduledTask
    *          The scheduled task to remove.
    */
-  public static void removeScheduledTask(final ScheduledTask scheduledTask)
+  public static void removeTimerTask(TimerTask scheduledTask)
   {
     _scheduledTasks.remove(scheduledTask);
   }

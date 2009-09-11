@@ -26,37 +26,13 @@
  *
  * @author Scott Ferguson
  */
+package com.caucho.config.timer;
 
-package com.caucho.servlets.ssi;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.ejb.Timer;
 
 /**
- * Represents a SSI expression
+ * Callback for a timer
  */
-abstract public class SSIExpr {
-  /**
-   * Evaluate as a string.
-   */
-  abstract public String evalString(HttpServletRequest request,
-				    HttpServletResponse response);
-  /**
-   * Evaluate as a boolean.
-   */
-  public boolean evalBoolean(HttpServletRequest request,
-                             HttpServletResponse response)
-  {
-    String value = evalString(request, response);
-
-    if (value == null
-        || "".equals(value)
-        || "null".equals(value)
-        || "false".equals(value)
-        || "0".equals(value)) {
-      return false;
-    }
-    else
-      return true;
-  }
+abstract public class TimeoutInvoker {
+  abstract public void timeout(Timer timer);
 }

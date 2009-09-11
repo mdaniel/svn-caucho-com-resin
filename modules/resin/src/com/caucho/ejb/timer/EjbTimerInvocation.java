@@ -26,37 +26,32 @@
  *
  * @author Scott Ferguson
  */
+package com.caucho.ejb.timer;
 
-package com.caucho.servlets.ssi;
+import javax.ejb.Timer;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.config.timer.TimeoutInvoker;
 
 /**
- * Represents a SSI expression
+ * Callback for a timer
  */
-abstract public class SSIExpr {
-  /**
-   * Evaluate as a string.
-   */
-  abstract public String evalString(HttpServletRequest request,
-				    HttpServletResponse response);
-  /**
-   * Evaluate as a boolean.
-   */
-  public boolean evalBoolean(HttpServletRequest request,
-                             HttpServletResponse response)
-  {
-    String value = evalString(request, response);
+public class EjbTimerInvocation extends TimeoutInvoker {
+  private AbstractServer _server;
 
-    if (value == null
-        || "".equals(value)
-        || "null".equals(value)
-        || "false".equals(value)
-        || "0".equals(value)) {
-      return false;
-    }
-    else
-      return true;
+  EjbTimerInvocation(AbstractServer server)
+  {
+    _server = server;
+  }
+  
+  public void timeout(Timer timer)
+  {
+    _server.timeout(timer);
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _server + "]";
   }
 }

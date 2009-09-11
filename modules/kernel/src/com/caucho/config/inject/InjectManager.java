@@ -128,9 +128,11 @@ public class InjectManager
 
   private static final String []FORBIDDEN_ANNOTATIONS = {
     "javax.persistence.Entity",
+    /*
     "javax.ejb.Stateful",
     "javax.ejb.Stateless",
     "javax.ejb.Singleton",
+    */
     "javax.ejb.MessageDriven"
   };
 
@@ -2151,7 +2153,6 @@ public class InjectManager
         return;
 
       AnnotatedType type = createAnnotatedType(cl);
-
       type = processAnnotatedType(type);
 
       if (type == null) {

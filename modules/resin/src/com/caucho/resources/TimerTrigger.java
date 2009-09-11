@@ -42,7 +42,6 @@ public class TimerTrigger implements Trigger {
    */
   public TimerTrigger()
   {
-    super();
   }
 
   /**
@@ -53,8 +52,6 @@ public class TimerTrigger implements Trigger {
    */
   public TimerTrigger(long firstTime)
   {
-    super();
-
     _firstTime = firstTime;
   }
 
@@ -68,8 +65,6 @@ public class TimerTrigger implements Trigger {
    */
   public TimerTrigger(long firstTime, long period)
   {
-    super();
-
     _firstTime = firstTime;
     _period = period;
   }
@@ -113,5 +108,11 @@ public class TimerTrigger implements Trigger {
 
       return now + _period - delta;
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _period + "," + _firstTime + "]";
   }
 }

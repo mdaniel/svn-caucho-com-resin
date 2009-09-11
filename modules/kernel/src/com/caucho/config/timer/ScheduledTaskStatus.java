@@ -26,7 +26,7 @@
  *
  * @author Reza Rahman
  */
-package com.caucho.scheduling;
+package com.caucho.config.timer;
 
 /**
  * Scheduled task status.

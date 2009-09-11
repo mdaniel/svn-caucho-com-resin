@@ -57,6 +57,11 @@ public class ExprParser {
 
   private SSIExpr parseString()
   {
+    return parseTerm();
+  }
+  
+  private SSIExpr parseTerm()
+  {
     int ch;
 
     SSIExpr expr = null;
@@ -75,10 +80,10 @@ public class ExprParser {
 	}
 	else {
 	  for (;
-	       'a' <= ch && ch <= 'z' ||
-		 'A' <= ch && ch <= 'Z' ||
-		 '0' <= ch && ch <= '9' ||
-		 ch == '_';
+	       'a' <= ch && ch <= 'z'
+                 || 'A' <= ch && ch <= 'Z'
+                 || '0' <= ch && ch <= '9'
+                 || ch == '_';
 	       ch = read()) {
 	    _sb.append((char) ch);
 	  }

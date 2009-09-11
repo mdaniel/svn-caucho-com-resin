@@ -85,7 +85,6 @@ public class ResinStandardPlugin implements Extension
 	|| annotatedType.isAnnotationPresent(MessageDriven.class)
 	|| annotatedType.isAnnotationPresent(JmsMessageListener.class)) {
       EjbContainer ejbContainer = EjbContainer.create();
-      System.out.println("NULLSOZ:");
       ejbContainer.createBean(annotatedType, null);
       event.veto();
     }

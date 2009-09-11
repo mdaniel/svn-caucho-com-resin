@@ -55,6 +55,14 @@ public class SSIFactory
       return IncludeStatement.create(attr, path);
     else if ("set".equals(cmd))
       return SetStatement.create(attr, path);
+    else if ("if".equals(cmd))
+      return IfStatement.create(attr, path);
+    else if ("else".equals(cmd))
+      return ElseStatement.create(attr, path);
+    else if ("elif".equals(cmd))
+      return ElifStatement.create(attr, path);
+    else if ("endif".equals(cmd))
+      return EndifStatement.create(attr, path);
     else
       return null;
   }

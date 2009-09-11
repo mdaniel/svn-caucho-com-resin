@@ -38,12 +38,13 @@ import javax.ejb.Timer;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Trigger;
-import com.caucho.ejb.timer.EjbTimer;
 import com.caucho.java.JavaWriter;
-import com.caucho.scheduling.CronExpression;
-import com.caucho.scheduling.CronTrigger;
-import com.caucho.scheduling.ScheduledTask;
-import com.caucho.scheduling.Scheduler;
+import com.caucho.config.timer.CronExpression;
+import com.caucho.config.timer.CronTrigger;
+import com.caucho.config.timer.EjbTimer;
+import com.caucho.config.timer.TimerTask;
+import com.caucho.config.timer.TimeoutInvoker;
+import com.caucho.config.timer.Scheduler;
 import com.caucho.util.L10N;
 
 /**
@@ -164,11 +165,14 @@ public class SchedulingCallChain extends AbstractCallChain {
     // TODO What really needs to be passed in is a unique reference to the bean
     // (maybe a JCDI Bean definition?), not just the bean class. Is there an
     // easy way to do that?
-    ScheduledTask scheduledTask = new ScheduledTask(_targetBean, _targetMethod,
+    TimeoutInvoker timeout = null;
+
+    TimerTask scheduledTask = new TimerTask(timeout,
         timer, cronExpression, trigger, -1, -1, schedule.info());
+
     timer.setScheduledTask(scheduledTask);
 
     // TODO This should probably be an injection of the scheduler by JCDI.
-    Scheduler.addScheduledTask(scheduledTask);
+    Scheduler.addTimerTask(scheduledTask);
   }
 }

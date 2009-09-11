@@ -692,6 +692,25 @@ public class Environment {
   }
 
   /**
+   * Returns the environment name.
+   */
+  public static String getEnvironmentName(ClassLoader loader)
+  {
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+        String name = ((EnvironmentClassLoader) loader).getId();
+
+        if (name != null)
+          return name;
+        else
+          return "";
+      }
+    }
+
+    return Thread.currentThread().getContextClassLoader().toString();
+  }
+
+  /**
    * Apply the action to visible classloaders
    */
   public static void applyVisibleModules(EnvironmentApply apply)

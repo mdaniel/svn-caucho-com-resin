@@ -26,7 +26,7 @@
  *
  * @author Rodrigo Westrupp
  */
-package com.caucho.ejb.timer;
+package com.caucho.config.timer;
 
 import java.util.logging.Logger;
 
@@ -35,8 +35,6 @@ import javax.ejb.NoSuchObjectLocalException;
 import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
-import com.caucho.scheduling.ScheduledTask;
-import com.caucho.scheduling.Scheduler;
 import com.caucho.util.L10N;
 
 /**
@@ -89,7 +87,7 @@ public class EjbTimerHandle implements TimerHandle {
   {
     // TODO This should probably be a proper lookup of the scheduler (perhaps
     // via JCDI).
-    ScheduledTask scheduledTask = Scheduler.getScheduledTaskById(_taskId);
+    TimerTask scheduledTask = Scheduler.getTimerTaskById(_taskId);
 
     if (scheduledTask == null) {
       throw new NoSuchObjectLocalException("The timer no longer exists.");

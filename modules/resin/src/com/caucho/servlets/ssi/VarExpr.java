@@ -106,11 +106,17 @@ public class VarExpr extends SSIExpr {
   {
     String fmt;
     String value = null;
+    Object attr = null;
     
     switch (_code) {
     case ATTRIBUTE:
-      value = String.valueOf(request.getAttribute(_var));
-      break;
+      {
+        attr = request.getParameter(_var);
+        if (attr == null)
+          attr = request.getAttribute(_var);
+        value = String.valueOf(attr);
+        break;
+      }
 
     case HTTP_:
       value = request.getHeader(_var);

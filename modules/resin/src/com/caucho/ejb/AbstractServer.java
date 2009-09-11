@@ -32,6 +32,7 @@ package com.caucho.ejb;
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.InjectIntrospector;
@@ -139,6 +140,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected Bean _component;
 
+  private Method _timeoutMethod;
   private TimerService _timerService;
 
   protected ConfigProgram _initProgram;
@@ -174,6 +176,11 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     _bean = managedBean;
     _injectionTarget = managedBean.getInjectionTarget();
+
+    _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
+
+    if (_timeoutMethod != null)
+      _timerService = new EjbTimerService(this);
   }
 
   /**
@@ -622,18 +629,33 @@ abstract public class AbstractServer implements EnvironmentBean {
     return _transactionTimeout;
   }
 
+  private Method getTimeoutMethod(Class targetBean)
+  {
+    if (TimedObject.class.isAssignableFrom(targetBean)) {
+      try {
+        return targetBean.getMethod("ejbTimeout", Timer.class);
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    
+    for (Method method : targetBean.getMethods()) {
+      if (method.getAnnotation(Timeout.class) != null) {
+        return method;
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Returns the timer service.
    */
   public TimerService getTimerService()
   {
     // ejb/0fj0
-    if (_timerService == null) {
-      _timerService = EjbTimerService.getLocal(_ejbContainer.getClassLoader(),
-          getContext());
-    }
-
-    return _timerService;
+    throw new UnsupportedOperationException(L.l("'{0}' does not support a timer service because it does not have a @Timeout method",
+                                                this));
   }
 
   /**
@@ -879,8 +901,10 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Initialize an instance
    */
-  public void initInstance(Object instance, InjectionTarget target,
-      Object proxy, CreationalContext cxt)
+  public void initInstance(Object instance,
+                           InjectionTarget target,
+                           Object proxy,
+                           CreationalContext cxt)
   {
     ConfigContext env = (ConfigContext) cxt;
 
@@ -892,19 +916,19 @@ abstract public class AbstractServer implements EnvironmentBean {
       // env.push(proxy);
     }
 
-    if (target != null) {
-      target.inject(instance, env);
-    }
-
-    if (getInjectionTarget() != null && target != getInjectionTarget()) {
-      getInjectionTarget().inject(instance, env);
-    }
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_loader);
+
+      if (target != null) {
+        target.inject(instance, env);
+      }
+
+      if (getInjectionTarget() != null && target != getInjectionTarget()) {
+        getInjectionTarget().inject(instance, env);
+      }
       
       if (_initInject != null) {
         if (env == null)
@@ -930,6 +954,15 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     if (env != null && bean != null)
       env.remove(bean);
+  }
+
+  public void timeout(Timer timer)
+  {
+    /*
+    throw new UnsupportedOperationException(L.l("EJB '{0}' does not support a timeout, because it does not have a @Timeout method",
+                                                this));
+    */
+    getContext().__caucho_timeout_callback(timer);
   }
 
   /**
@@ -999,6 +1032,15 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     // Injection binding occurs in the start phase
 
+    InjectManager inject = InjectManager.create();
+
+    _injectionTarget = inject.createInjectionTarget(getEjbClass());
+
+    if (_timerService != null) {
+      BeanFactory factory = inject.createBeanFactory(TimerService.class);
+      inject.addBean(factory.singleton(_timerService));
+    }
+    /*
     ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
     InjectIntrospector.introspectInject(injectList, getEjbClass());
     // XXX: add inject from xml here
@@ -1024,6 +1066,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     if (injectArray.length > 0)
       _destroyInject = injectArray;
+    */
   }
 
   protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
