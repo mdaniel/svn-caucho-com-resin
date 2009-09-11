@@ -183,14 +183,11 @@ public class ArrayGetExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    Value array = _expr.evalArray(env);
-    Value index = _index.eval(env);
-
-    array.put(index, value);
+    _expr.evalArrayAssign(env, _index.eval(env), value);
   }
   
   /**
-   * Evalues the expression as an isset(
+   * Evaluates the expression as an isset().
    */
   @Override
   public boolean evalIsset(Env env)

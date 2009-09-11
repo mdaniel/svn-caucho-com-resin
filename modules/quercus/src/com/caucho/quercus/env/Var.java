@@ -707,9 +707,10 @@ public class Var extends Value
   /**
    * Clone for the clone keyword
    */
-  public Value clone()
+  @Override
+  public Value clone(Env env)
   {
-    return _value.clone();
+    return _value.clone(env);
   }
 
   /**
@@ -877,6 +878,31 @@ public class Var extends Value
   public Value rshift(Value rValue)
   {
     return _value.rshift(rValue);
+  }
+  
+  /**
+   * Binary And.
+   */
+  public Value bitAnd(Value rValue)
+  {
+    return _value.bitAnd(rValue);
+  }
+  
+  /**
+   * Binary or.
+   */
+  public Value bitOr(Value rValue)
+  {
+    return _value.bitOr(rValue);
+  }
+  
+  /**
+   * Binary xor.
+   */
+  @Override
+  public Value bitXor(Value rValue)
+  {
+    return _value.bitXor(rValue);
   }
   
   /**

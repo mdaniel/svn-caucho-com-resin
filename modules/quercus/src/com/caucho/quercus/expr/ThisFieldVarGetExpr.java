@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
@@ -110,6 +111,21 @@ public class ThisFieldVarGetExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+  }
+  
+  /**
+   * Evaluates as an array index assign ($a[index] = value).
+   */
+  public void evalArrayAssign(Env env, Value index, Value value)
+  {
+    Value obj = env.getThis();
+    
+    StringValue name = _nameExpr.evalStringValue(env);
+    
+    Value field = obj.getThisField(env, name);
+    Value result = field.put(index, value);
+    
+    obj.putThisField(env, name, result);
   }
 
   /**

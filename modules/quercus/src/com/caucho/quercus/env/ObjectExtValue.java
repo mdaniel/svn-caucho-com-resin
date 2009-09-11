@@ -1233,14 +1233,26 @@ public class ObjectExtValue extends ObjectValue
    * Clone the object
    */
   @Override
-  public Value clone()
+  public Value clone(Env env)
   {
     ObjectExtValue newObject = new ObjectExtValue(_quercusClass);
 
+    Iterator<Entry> iter = new EntryIterator(_entries);
+    
+    while (iter.hasNext()) {
+      Entry entry = iter.next();
+      
+      Entry copy = newObject.createEntry(entry.getKey(),
+                                         entry.getVisibility());
+      
+      copy.setValue(entry.getRawValue());
+      
+    }
+    
     for (Map.Entry<Value,Value> entry : entrySet()) {
-      newObject.putThisField(null,
-			     (StringValue) entry.getKey(),
-			     entry.getValue());
+      newObject.putThisField(env,
+			                 (StringValue) entry.getKey(),
+			                 entry.getValue());
     }
 
     return newObject;
@@ -1871,9 +1883,14 @@ public class ObjectExtValue extends ObjectValue
       return _value;
     }
 
-    public Value getKey()
+    public StringValue getKey()
     {
       return _key;
+    }
+    
+    public FieldVisibility getVisibility()
+    {
+      return _visibility;
     }
 
     public final boolean isPrivate()

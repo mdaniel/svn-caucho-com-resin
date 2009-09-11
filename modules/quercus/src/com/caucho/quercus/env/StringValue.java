@@ -935,7 +935,7 @@ abstract public class StringValue
   public Value bitXor(Value rValue)
   {
     if (rValue.isString()) {
-      StringValue rStr = (StringValue) rValue;
+      StringValue rStr = rValue.toStringValue();
       
       int len = Math.min(length(), rValue.length());
       StringValue sb = createStringBuilder();

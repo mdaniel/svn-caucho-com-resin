@@ -1812,13 +1812,14 @@ public class QuercusParser {
     int token = parseToken();
 
     switch (token) {
+    case TEXT_PHP:
     case ';':
       _peekToken = token;
 
       return _factory.createContinue(location,
                                      null,
                                      (ArrayList<String>) _loopLabelList.clone());
-      
+    
     default:
       _peekToken = token;
 

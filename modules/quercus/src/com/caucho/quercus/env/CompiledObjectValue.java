@@ -476,7 +476,7 @@ public class CompiledObjectValue extends ObjectValue
    * Clone the object
    */
   @Override
-  public Value clone()
+  public Value clone(Env env)
   {
     throw new UnsupportedOperationException();
   }

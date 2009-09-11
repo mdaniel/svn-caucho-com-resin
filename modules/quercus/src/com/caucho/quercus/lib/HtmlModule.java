@@ -127,7 +127,7 @@ public class HtmlModule extends AbstractQuercusModule {
     }
 
     if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
-      result.put(env.createString('\''), env.createString("&apos;"));
+      result.put(env.createString('\''), env.createString("&#39;"));
 
     if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
       result.put(env.createString('"'), env.createString("&quot;"));

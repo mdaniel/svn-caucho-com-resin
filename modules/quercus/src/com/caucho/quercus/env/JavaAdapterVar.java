@@ -770,6 +770,31 @@ public class JavaAdapterVar extends Value
   }
   
   /**
+   * Binary And.
+   */
+  public Value bitAnd(Value rValue)
+  {
+    return getValue().bitAnd(rValue);
+  }
+  
+  /**
+   * Binary or.
+   */
+  public Value bitOr(Value rValue)
+  {
+    return getValue().bitOr(rValue);
+  }
+  
+  /**
+   * Binary xor.
+   */
+  @Override
+  public Value bitXor(Value rValue)
+  {
+    return getValue().bitXor(rValue);
+  }
+  
+  /**
    * Absolute value.
    */
   public Value abs()

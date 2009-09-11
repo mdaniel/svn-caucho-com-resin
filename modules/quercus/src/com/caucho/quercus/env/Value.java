@@ -1008,7 +1008,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Clone for the clone keyword
    */
-  public Value clone()
+  public Value clone(Env env)
   {
     return this;
   }
@@ -1833,7 +1833,7 @@ abstract public class Value implements java.io.Serializable
     return LongValue.create(toLong() | rValue.toLong());
   }
   
-  /*
+  /**
    * Binary xor.
    */
   public Value bitXor(Value rValue)
@@ -2158,6 +2158,22 @@ abstract public class Value implements java.io.Serializable
   {
     return putField(env, name, object);
   }
+  
+  /**
+   * Sets an array field ref.
+   */
+  public Value putThisField(Env env,
+                            StringValue name,
+                            Value array,
+                            Value index,
+                            Value value)
+  {
+    Value result = array.append(index, value);
+    
+    putThisField(env, name, result);
+    
+    return value;
+  }
 
   /**
    * Returns true if the field is set
@@ -2310,18 +2326,6 @@ abstract public class Value implements java.io.Serializable
   public Var putRef()
   {
     return new Var();
-  }
-
-  /**
-   * Appends the array
-   */
-  public Value putArray()
-  {
-    ArrayValue value = new ArrayValueImpl();
-
-    put(value);
-
-    return value;
   }
 
   /**

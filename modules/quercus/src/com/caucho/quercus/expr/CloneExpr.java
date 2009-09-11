@@ -56,7 +56,7 @@ public class CloneExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    return _expr.eval(env).clone();
+    return _expr.eval(env).clone(env);
   }
 
   public String toString()

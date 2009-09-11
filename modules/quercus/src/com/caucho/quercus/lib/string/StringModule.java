@@ -4088,12 +4088,10 @@ public class StringModule extends AbstractQuercusModule {
     if (start < 0 || start >= strLen)
       return BooleanValue.FALSE;
 
-    if (lenV.isDefault()) {
+    if (lenV.isDefault())
       return string.substring(start);
-    }
-    else if (len == 0) {
+    else if (len == 0)
       return string.EMPTY;
-    }
     else {
       int end;
 
@@ -4119,14 +4117,19 @@ public class StringModule extends AbstractQuercusModule {
                                      @Optional boolean isCaseInsensitive)
   {
     int strLen = mainStr.length();
+    int len = lenV.toInt();
     
-    if (lenV.toInt() > strLen
+    if (! lenV.isDefault() && len == 0)
+      return BooleanValue.FALSE;
+    
+    if (len > strLen
         || offset > strLen
-        || lenV.toInt() + offset > strLen) {
+        || len + offset > strLen) {
       return BooleanValue.FALSE;
     }
 
     mainStr = substr(env, mainStr, offset, lenV).toStringValue();
+    str = substr(env, str, 0, lenV).toStringValue();
 
     if (isCaseInsensitive)
       return LongValue.create(strcasecmp(mainStr, str));
