@@ -155,10 +155,13 @@ public class StatelessGenerator extends SessionGenerator {
 
     String beanClass = getBeanClass().getName();
 
+    /*
     out.println();
     out.println("private " + beanClass + " []_freeBeanStack = new "
 		+ beanClass + "[" + freeStackMax + "];");
     out.println("private int _freeBeanTop;");
+    */
+    
     out.println();
     out.println("public " + getClassName() + "(StatelessServer server)");
     out.println("{");
@@ -186,6 +189,38 @@ public class StatelessGenerator extends SessionGenerator {
     for (View view : getViews()) {
       view.generateTimer(out);
     }
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
+    out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
+    out.println("{");
+    out.pushDepth();
+
+    View view = getViews().get(0);
+
+    out.print(view.getBeanClassName() + " bean = ");
+    view.generateNewInstance(out);
+    out.println(";");
+    out.println("method.invoke(bean, timer);");
+    view.generateFreeInstance(out, "bean");
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method)");
+    out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
+    out.println("{");
+    out.pushDepth();
+
+    out.print(view.getBeanClassName() + " bean = ");
+    view.generateNewInstance(out);
+    out.println(";");
+    out.println("method.invoke(bean);");
+    view.generateFreeInstance(out, "bean");
     
     out.popDepth();
     out.println("}");

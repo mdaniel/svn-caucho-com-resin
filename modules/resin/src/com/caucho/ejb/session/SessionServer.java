@@ -163,6 +163,11 @@ abstract public class SessionServer extends AbstractServer {
     }
   }
 
+  protected Bean getBean()
+  {
+    return _bean;
+  }
+
   @SuppressWarnings("unchecked")
   protected Bean createBean(ManagedBeanImpl mBean, Class api)
   {

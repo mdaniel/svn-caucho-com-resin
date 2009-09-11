@@ -33,6 +33,8 @@ import java.security.Principal;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.ejb.EJBContext;
 import javax.ejb.EJBHome;
@@ -375,6 +377,27 @@ abstract public class AbstractContext implements EJBContext {
    * Runs the timeout callbacks.
    */
   public void __caucho_timeout_callback(javax.ejb.Timer timer)
+  {
+    throw new IllegalStateException(L.l(
+        "'{0}' does not have a @Timeout callback", getClass().getName()));
+  }
+
+  /**
+   * Runs the timeout callbacks.
+   */
+  public void __caucho_timeout_callback(Method method)
+    throws IllegalAccessException, InvocationTargetException
+  {
+    throw new IllegalStateException(L.l(
+        "'{0}' does not have a @Timeout callback", getClass().getName()));
+  }
+
+  /**
+   * Runs the timeout callbacks.
+   */
+  public void __caucho_timeout_callback(Method method,
+                                        javax.ejb.Timer timer)
+    throws IllegalAccessException, InvocationTargetException
   {
     throw new IllegalStateException(L.l(
         "'{0}' does not have a @Timeout callback", getClass().getName()));

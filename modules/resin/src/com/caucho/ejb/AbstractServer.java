@@ -1015,6 +1015,8 @@ abstract public class AbstractServer implements EnvironmentBean {
 
       bindInjection();
 
+      postStart();
+
       log.config(this + " active");
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1026,6 +1028,10 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected void bindContext()
   {
 
+  }
+
+  protected void postStart()
+  {
   }
 
   protected void bindInjection()

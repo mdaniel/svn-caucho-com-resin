@@ -55,8 +55,6 @@ public class TimerTask implements AlarmListener {
   private CronExpression _cronExpression;
   private Trigger _trigger;
   private Alarm _alarm;
-  private long _start;
-  private long _end;
   private Serializable _data;
   private AtomicBoolean _cancelled = new AtomicBoolean();
 
@@ -87,8 +85,6 @@ public class TimerTask implements AlarmListener {
                    Runnable task,
                    CronExpression cronExpression,
                    Trigger trigger,
-                   long start,
-                   long end,
                    Serializable data)
   {
     _taskId = _currentTaskId.incrementAndGet();
@@ -98,13 +94,17 @@ public class TimerTask implements AlarmListener {
     _task = task;
     _cronExpression = cronExpression;
     _trigger = trigger;
-    _cronExpression = cronExpression;
-    _start = start;
-    _end = end;
     _data = data;
 
+    if (invoker == null)
+      throw new NullPointerException();
+  }
+
+  public void start()
+  {
     long now = Alarm.getCurrentTime();
     long nextTime = _trigger.nextTime(now);
+    
     _alarm = new Alarm(this); // TODO Try a weak alarm instead.
     _alarm.queue(nextTime - now);
   }
@@ -127,26 +127,6 @@ public class TimerTask implements AlarmListener {
   public CronExpression getCronExpression()
   {
     return _cronExpression;
-  }
-
-  /**
-   * Gets the start date for the schedule.
-   * 
-   * @return Start date for schedule.
-   */
-  public long getStart()
-  {
-    return _start;
-  }
-
-  /**
-   * Gets the end date for the schedule.
-   * 
-   * @return End date for schedule.
-   */
-  public long getEnd()
-  {
-    return _end;
   }
 
   /**

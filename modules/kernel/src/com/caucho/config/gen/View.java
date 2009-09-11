@@ -206,6 +206,24 @@ abstract public class View {
   }
 
   /**
+   * Generates a new bean instance.
+   */
+  public void generateNewInstance(JavaWriter out)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Frees a bean instance.
+   */
+  public void generateFreeInstance(JavaWriter out, String name)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Generates any global destroy
    */
   public void generateDestroy(JavaWriter out)

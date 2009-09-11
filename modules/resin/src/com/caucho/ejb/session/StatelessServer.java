@@ -31,7 +31,11 @@ package com.caucho.ejb.session;
 
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.timer.TimerTask;
+import com.caucho.config.timer.TimeoutCaller;
+import com.caucho.config.timer.ScheduleIntrospector;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatelessBeanImpl;
@@ -40,9 +44,9 @@ import com.caucho.ejb.protocol.*;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
+import javax.ejb.Timer;
+import javax.enterprise.context.spi.*;
+import javax.enterprise.inject.spi.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -181,6 +185,24 @@ public class StatelessServer extends SessionServer {
     }
   }
 
+  @Override
+  protected void postStart()
+  {
+    ScheduleIntrospector introspector = new ScheduleIntrospector();
+
+    InjectManager manager = InjectManager.create();
+    AnnotatedType type = manager.createAnnotatedType(getEjbClass());
+    ArrayList<TimerTask> timers;
+    
+    timers = introspector.introspect(new StatelessTimeoutCaller(), type);
+
+    if (timers != null) {
+      for (TimerTask task : timers) {
+        task.start();
+      }
+    }
+  }
+
   protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
 				   Class ejbClass)
   {
@@ -315,5 +337,19 @@ public class StatelessServer extends SessionServer {
     }
 
     super.destroy();
+  }
+
+  class StatelessTimeoutCaller implements TimeoutCaller {
+    public void timeout(Method method, Timer timer)
+      throws InvocationTargetException
+    {
+      getContext().__caucho_timeout_callback(method, timer);
+    }
+    
+    public void timeout(Method method)
+      throws InvocationTargetException
+    {
+      getContext().__caucho_timeout_callback(method);
+    }
   }
 }

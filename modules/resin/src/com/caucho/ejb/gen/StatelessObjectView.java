@@ -176,6 +176,30 @@ public class StatelessObjectView extends StatelessView {
   }
 
   /**
+   * Generates code to create an instance
+   */
+  @Override
+  public void generateNewInstance(JavaWriter out)
+    throws IOException
+  {
+    String localVar = "_local_" + getViewClass().getSimpleName();
+    
+    out.print(localVar + "._ejb_begin()");
+  }
+
+  /**
+   * Generates code to free an instance
+   */
+  @Override
+  public void generateFreeInstance(JavaWriter out, String bean)
+    throws IOException
+  {
+    String localVar = "_local_" + getViewClass().getSimpleName();
+    
+    out.println(localVar + "._ejb_free(" + bean + ");");
+  }
+
+  /**
    * Generates the view code.
    */
   public void generate(JavaWriter out)

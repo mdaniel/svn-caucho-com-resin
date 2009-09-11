@@ -527,7 +527,6 @@ public class EjbTimerService implements TimerService {
   {
     Trigger trigger = new TimerTrigger(expiration);
 
-    System.out.println("ONE: " + (expiration - Alarm.getCurrentTime()));
     return createTimer(trigger, info);
   }
 
@@ -546,12 +545,14 @@ public class EjbTimerService implements TimerService {
   {
     EjbTimer timer = new EjbTimer();
     TimerTask scheduledTask
-      = new TimerTask(_timeout, timer, null, trigger, -1, -1, info);
+      = new TimerTask(_timeout, timer, null, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     synchronized (_timers) {
       _timers.add(scheduledTask);
     }
+
+    scheduledTask.start();
 
     return timer;
   }
@@ -579,13 +580,15 @@ public class EjbTimerService implements TimerService {
     EjbTimer timer = new EjbTimer();
     
     TimerTask scheduledTask
-      = new TimerTask(_timeout, timer, null, trigger, -1, -1, info);
+      = new TimerTask(_timeout, timer, null, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     // TODO This should probably be an injection of the scheduler by JCDI.
     synchronized (_timers) {
       _timers.add(scheduledTask);
     }
+
+    scheduledTask.start();
 
     return timer;
   }
@@ -612,10 +615,11 @@ public class EjbTimerService implements TimerService {
         schedule.getMonth(), schedule.getYear(), schedule.getStart(), schedule
             .getEnd());
 
+    // schedule.getStart().getTime();
+    // schedule.getEnd().getTime();
     EjbTimer timer = new EjbTimer();
     TimerTask scheduledTask = new TimerTask(_timeout,
-        timer, cronExpression, trigger, schedule.getStart().getTime(), schedule
-            .getEnd().getTime(), info);
+        timer, cronExpression, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     // TODO This should probably be an injection of the scheduler by JCDI.
@@ -623,7 +627,7 @@ public class EjbTimerService implements TimerService {
       _timers.add(scheduledTask);
     }
 
-    // scheduledTask.start();
+    scheduledTask.start();
 
     return timer;
   }
