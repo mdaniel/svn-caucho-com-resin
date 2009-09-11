@@ -341,13 +341,13 @@ public class StatelessServer extends SessionServer {
 
   class StatelessTimeoutCaller implements TimeoutCaller {
     public void timeout(Method method, Timer timer)
-      throws InvocationTargetException
+      throws InvocationTargetException, IllegalAccessException
     {
       getContext().__caucho_timeout_callback(method, timer);
     }
     
     public void timeout(Method method)
-      throws InvocationTargetException
+      throws InvocationTargetException, IllegalAccessException
     {
       getContext().__caucho_timeout_callback(method);
     }

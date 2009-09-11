@@ -34,7 +34,6 @@ import javax.ejb.Timer;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-import com.caucho.ejb.AbstractServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.util.L10N;
@@ -44,8 +43,8 @@ import com.caucho.util.L10N;
  */
 public interface TimeoutCaller {
   public void timeout(Method method)
-    throws InvocationTargetException;
+    throws InvocationTargetException, IllegalAccessException;
   
   public void timeout(Method method, Timer timer)
-    throws InvocationTargetException;
+    throws InvocationTargetException, IllegalAccessException;
 }

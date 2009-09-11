@@ -34,7 +34,6 @@ import javax.ejb.Timer;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-import com.caucho.ejb.AbstractServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.util.L10N;
@@ -68,10 +67,16 @@ public class MethodTimeoutInvoker extends TimeoutInvoker {
   
   public void timeout(Timer timer)
   {
-    if (_isTimer)
-      _caller.timeout(_method, timer);
-    else
-      _caller.timeout(_method);
+    try {
+      if (_isTimer)
+        _caller.timeout(_method, timer);
+      else
+        _caller.timeout(_method);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

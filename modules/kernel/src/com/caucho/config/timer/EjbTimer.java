@@ -117,7 +117,7 @@ public class EjbTimer implements Timer, Runnable {
 
       Date start = null;
       Date end = null;
-
+      /*
       if (_scheduledTask.getStart() != -1) {
         start = new Date(_scheduledTask.getStart());
       }
@@ -125,6 +125,7 @@ public class EjbTimer implements Timer, Runnable {
       if (_scheduledTask.getEnd() != -1) {
         end = new Date(_scheduledTask.getEnd());
       }
+      */
 
       return new ScheduleExpression().second(cronExpression.getSecond())
           .minute(cronExpression.getMinute()).hour(cronExpression.getHour())
