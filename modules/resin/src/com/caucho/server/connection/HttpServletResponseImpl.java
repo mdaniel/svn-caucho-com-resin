@@ -1016,11 +1016,11 @@ public final class HttpServletResponseImpl implements CauchoResponse
         break;
     }
 
-    WebApp app = getRequest().getWebApp();
+    WebApp webApp = getRequest().getWebApp();
 
     String hostPrefix = null;
     String host = _request.getHeader("Host");
-    String serverName = app.getHostName();
+    String serverName = webApp.getHostName();
 
     if (serverName == null
 	|| serverName.equals("")
@@ -1050,6 +1050,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
       return hostPrefix + path;
 
     String uri = _request.getRequestURI();
+    String contextPath = _request.getContextPath();
     String queryString = null;
 
     int p = path.indexOf('?');
@@ -1057,11 +1058,16 @@ public final class HttpServletResponseImpl implements CauchoResponse
       queryString = path.substring(p + 1);
       path = path.substring(0, p);
     }
-    
-    p = uri.lastIndexOf('/');
 
-    if (p >= 0)
-      path = uri.substring(0, p + 1) + path;
+    if (uri.equals(contextPath)) {
+      path = uri + "/" + path;
+    }
+    else {
+      p = uri.lastIndexOf('/');
+
+      if (p >= 0)
+        path = uri.substring(0, p + 1) + path;
+    }
 
     try {
       if (queryString != null)

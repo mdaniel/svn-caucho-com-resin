@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,63 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.regexp;
+package com.caucho.servlets.ssi;
 
-import com.caucho.quercus.env.StringValue;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-class PeekString extends PeekStream {
-  CharSequence _string;
-  int _length;
-  int _index;
+/**
+ * Represents a SSI string expression
+ */
+public class LeExpr extends SSIExpr {
+  private final SSIExpr _left;
+  private final SSIExpr _right;
 
-  PeekString(CharSequence string)
+  LeExpr(SSIExpr left, SSIExpr right)
   {
-    _string = string;
-    _length = string.length();
-    _index = 0;
+    _left = left;
+    _right = right;
   }
 
-  int read() 
-  { 
-    if (_index < _length)
-      return _string.charAt(_index++);
-    else
-      return -1; 
-  }
-
-  int peek() 
+  /**
+   * Evaluate as a string.
+   */
+  @Override
+  public String evalString(HttpServletRequest request,
+			   HttpServletResponse response)
   {
-    if (_index < _length)
-      return _string.charAt(_index);
-    else
-      return -1; 
+    return String.valueOf(evalBoolean(request, response));
   }
 
-  void ungetc(int ch) { 
-    if (_index <= 0)
-      throw new RuntimeException();
-
-    _index--;
-  }
-
-  StringValue createStringBuilder()
+  /**
+   * Evaluate as a string.
+   */
+  @Override
+  public boolean evalBoolean(HttpServletRequest request,
+			   HttpServletResponse response)
   {
-    return ((StringValue) _string).createStringBuilder();
+    String leftValue = _left.evalString(request, response);
+    String rightValue = _right.evalString(request, response);
+    
+    return leftValue.compareTo(rightValue) <= 0;
   }
 
   @Override
-  public String getPattern()
-  {
-    return "/" + _string + "/";
-  }
-
   public String toString()
   {
-    return "PeekString[" + _string + "]";
+    return getClass().getSimpleName() + "[" + _left + "," + _right + "]";
   }
 }
-
-
-
-
-

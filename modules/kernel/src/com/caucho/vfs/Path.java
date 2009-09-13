@@ -38,6 +38,8 @@ import com.caucho.util.RandomUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -120,6 +122,16 @@ public abstract class Path {
    */
   public final Path lookup(String name)
   {
+    return lookup(name, null);
+  }
+
+  /**
+   * Looks up a path by a URL.
+   */
+  public final Path lookup(URL url)
+  {
+    String name = URLDecoder.decode(url.toString());
+  
     return lookup(name, null);
   }
 

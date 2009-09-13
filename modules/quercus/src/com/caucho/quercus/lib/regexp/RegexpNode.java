@@ -930,13 +930,24 @@ class RegexpNode {
       int begin = state.getBegin(_group);
       int end = state.getEnd(_group);
 
-      if (_group <= state.getLength() && begin <= end) {
-	return _first.match(string, length, offset, state);
+      if (_group <= state.getLength() && begin >= 0 && begin <= end) {
+	int match = _first.match(string, length, offset, state);
+        return match;
       }
       else if (_second != null)
 	return _second.match(string, length, offset, state);
       else
 	return _tail.match(string, length, offset, state);
+    }
+
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+              + "[" + _group
+              + "," + _first
+              + "," + _tail
+              + "]");
     }
   }
   

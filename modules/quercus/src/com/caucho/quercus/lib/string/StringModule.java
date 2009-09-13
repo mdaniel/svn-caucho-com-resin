@@ -3537,8 +3537,13 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strncmp(StringValue a, StringValue b, int length)
+  public static int strncmp(Env env, StringValue a, StringValue b, int length)
   {
+    if (length < 0) {
+      env.warning(L.l("strncmp() length '{0}' must be non-negative",
+                      length));
+    }
+    
     if (length < a.length())
       a = a.substring(0, length);
 

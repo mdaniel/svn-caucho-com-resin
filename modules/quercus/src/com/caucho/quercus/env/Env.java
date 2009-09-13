@@ -4962,11 +4962,11 @@ public class Env {
       if (path != null) {
       }
       else if (isRequire) {
-        error(L.l("'{0}' is not a valid path", include));
+        error(L.l("'{0}' is not a valid include path", include));
         return BooleanValue.FALSE;
       }
       else {
-        warning(L.l("'{0}' is not a valid path", include));
+        warning(L.l("'{0}' is not a valid include path", include));
         return BooleanValue.FALSE;
       }
 
@@ -5960,10 +5960,14 @@ public class Env {
 	if (getIniBoolean("track_errors"))
 	  setGlobalValue("php_errormsg", createString(fullMsg));
 	
-	if ("stderr".equals(getIniString("display_errors")))
-	  System.err.println(fullMsg);
-	else if (getIniBoolean("display_errors"))
-	  getOut().println(fullMsg);
+	if ("stderr".equals(getIniString("display_errors"))) {
+          // initial newline to match PHP
+	  System.err.println("\n" + fullMsg);
+        }
+	else if (getIniBoolean("display_errors")) {
+          // initial newline to match PHP
+	  getOut().println("\n" + fullMsg);
+        }
 
 	if (getIniBoolean("log_errors"))
 	  log.info(fullMsg);

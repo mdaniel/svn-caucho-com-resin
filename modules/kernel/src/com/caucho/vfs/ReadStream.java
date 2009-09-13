@@ -372,13 +372,13 @@ public final class ReadStream extends InputStream
   public long skip(long n)
     throws IOException
   {
+    if (n <= 0)
+      return n;
+    
     int skipped = _readLength - _readOffset;
 
-    if (n < 0)
-      return n;
-    else if (n < skipped) {
+    if (n < skipped) {
       _readOffset += n;
-      _position += n;
       return n;
     }
 
@@ -394,7 +394,7 @@ public final class ReadStream extends InputStream
       if (sourceSkipped < 0)
         return skipped;
       else {
-        _position += sourceSkipped + skipped;
+        _position += sourceSkipped;
 
         return sourceSkipped + skipped;
       }
@@ -405,8 +405,9 @@ public final class ReadStream extends InputStream
       _readOffset = 0;
       _readLength = 0;
 
-      if (! readBuffer())
+      if (! readBuffer()) {
         return skipped;
+      }
     }
 
     _readOffset += (int) (n - skipped);

@@ -6,10 +6,7 @@ namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
 include "../../server/resin/javaee.rnc"
 
-javaee_dewey-version = string
 javaee_generic-boolean = string
-javaee_java-identifier = string
-javaee_path = string
 javaee_variable = string
 
 ## XXX: jsf-cardemo has out of order

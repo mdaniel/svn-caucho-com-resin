@@ -293,6 +293,9 @@ public class CompactParser {
         pattern = new GroupPattern();
         next = parseToken();
         if (next == '=') {
+          if (grammar.getDefinition(name) != null)
+            throw error(L.l("duplicate definition of {0}", name));
+            
           grammar.setDefinition(name, parsePattern(grammar));
         }
         else

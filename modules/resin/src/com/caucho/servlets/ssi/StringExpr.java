@@ -51,4 +51,10 @@ public class StringExpr extends SSIExpr {
   {
     return _value;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _value + "]";
+  }
 }

@@ -299,8 +299,14 @@ class BasicConfig extends AbstractConfig
       String tableName = _column.getTable();
       AmberTable table;
 
-      if (tableName.equals(""))
+      if (tableName.equals("")) {
         table = entityType.getTable();
+
+        if (table == null)
+          throw error(_field, L.l("{0} @Column(name='{1}') is an unknown table.",
+                                  _fieldName,
+                                  name));
+      }
       else {
         table = entityType.getSecondaryTable(tableName);
 

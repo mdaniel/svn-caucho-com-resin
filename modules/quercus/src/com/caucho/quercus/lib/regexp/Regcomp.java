@@ -70,6 +70,8 @@ class Regcomp {
 
   static final ConcurrentHashMap<String,RegexpSet> _unicodeBlockMap
     = new ConcurrentHashMap<String,RegexpSet>();
+
+  private PeekStream _pattern;
   
   int _nGroup;
   int _nLoop;
@@ -127,6 +129,8 @@ class Regcomp {
 
   RegexpNode parse(PeekStream pattern) throws IllegalRegexpException
   {
+    _pattern = pattern;
+    
     _nGroup = 1;
 
     RegexpNode begin = null;
@@ -628,7 +632,7 @@ class Regcomp {
 
   private IllegalRegexpException error(String msg)
   {
-    return new IllegalRegexpException(msg);
+    return new IllegalRegexpException(msg + " " + _pattern.getPattern());
   }
 
   /**

@@ -299,9 +299,9 @@ public class CgiEnv
   
   @Override
   protected void fillPost(ArrayValue postArray,
-                             ArrayValue files,
-                             HttpServletRequest request,
-                             boolean isMagicQuotes)
+                          ArrayValue files,
+                          HttpServletRequest request,
+                          boolean isMagicQuotes)
   {
     InputStream is = System.in;
     
@@ -328,7 +328,7 @@ public class CgiEnv
                     isMagicQuotes);
     } else if (! method.equals("GET")) {
       StringValue bb = createBinaryBuilder();
-      bb.appendReadAll(is, contentLength);
+      //bb.appendReadAll(is, contentLength);
 
       setInputData(bb);
     }

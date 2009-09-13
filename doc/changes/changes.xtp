@@ -13,6 +13,11 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>config: relaxng forbid duplicate rules (#3595, rep by hmh)</li>
+<li>ssi: add basic SSI conditionals (#3534, rep by fly-away)</li>
+<li>jpa: issue with @ManyToOne and MappedSuperclass (#3335, rep by rdhauwe)</li>
+<li>vfs: paths with spaces in them caused trouble with class scanning and enhancement (#3574, rep by N. Shannon)</li>
+<li>servlet: sendRedirect in filter with artifactory (#3416, rep by Jan Kriesten)</li>
 <li>xml: XMLStream parsing for atlassian (#3651)</li>
 <li>session: add cookie-use-context-path and cookie-path</li>
 <li>loader: handle duplicate class definition errors (#3673, rep by Jamison Novak)</li>

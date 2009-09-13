@@ -1745,6 +1745,8 @@ public class Store {
           buffer[i] = 0;
       }
 
+      _blockManager.addBlockRead();
+
       freeRowFile(wrapper);
       wrapper = null;
     } finally {
@@ -1774,6 +1776,8 @@ public class Store {
           _fileSize = blockAddress + length;
         }
       }
+      
+      _blockManager.addBlockWrite();
     } finally {
       if (wrapper != null)
         wrapper.close();

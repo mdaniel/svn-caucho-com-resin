@@ -42,9 +42,9 @@ import java.io.*;
  * Scans for matching classes.
  */
 public class ByteCodeClassScanner {
-  static private final Logger log
+  private static final Logger log
     = Logger.getLogger(ByteCodeClassScanner.class.getName());
-  static private final L10N L = new L10N(ByteCodeClassScanner.class);
+  private static final L10N L = new L10N(ByteCodeClassScanner.class);
 
   private final String _className;
 
@@ -103,7 +103,7 @@ public class ByteCodeClassScanner {
     int i = 1;
     while (i < count) {
       int code = _is.read();
-      
+
       if (code == ByteCodeParser.CP_LONG || code == ByteCodeParser.CP_DOUBLE)
 	i += 2;
       else
@@ -192,6 +192,9 @@ public class ByteCodeClassScanner {
   private boolean parseUtf8ForAnnotation(CharBuffer cb, int len)
     throws IOException
   {
+    if (len <= 0)
+      return false;
+    
     InputStream is = _is;
 
     int ch = is.read();

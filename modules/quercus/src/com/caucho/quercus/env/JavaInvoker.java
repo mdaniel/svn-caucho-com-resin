@@ -627,7 +627,6 @@ abstract public class JavaInvoker
 
 
     for (int i = 0; i < _marshalArgs.length; i++) {
-
       if (i < args.length && args[i] != null)
         javaArgs[k] = _marshalArgs[i].marshal(env, args[i], _param[k]);
       else if (_defaultExprs[i] != null) {
@@ -665,6 +664,11 @@ abstract public class JavaInvoker
       }
 
       javaArgs[k++] = rest;
+    }
+    else if (_marshalArgs.length < args.length) {
+      // php/153o
+      env.warning(L.l("function '{0}' called with {1} arguments, but only expects {2} arguments",
+                      _name, args.length, _marshalArgs.length));
     }
 
     Object result = invoke(obj, javaArgs);

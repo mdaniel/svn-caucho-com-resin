@@ -229,6 +229,12 @@ public class VarExpr extends SSIExpr {
       return "(null)";
   }
 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _var + "]";
+  }
+
   static {
     _varMap.put("server_software", SERVER_SOFTWARE);
     _varMap.put("server_name", SERVER_NAME);

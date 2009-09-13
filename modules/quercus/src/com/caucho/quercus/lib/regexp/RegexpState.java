@@ -173,7 +173,10 @@ public class RegexpState {
   
   public int getSubjectLength()
   {
-    return _subject.length();
+    if (_subject != null)
+      return _subject.length();
+    else
+      return 0;
   }
   
   public boolean setSubject(Env env, StringValue subject)
@@ -181,6 +184,12 @@ public class RegexpState {
     _subject = _regexp.convertSubject(env, subject);
     
     return _subject != null;
+  }
+
+  public void setFirst(int first)
+  {
+    _first = first;
+    _start = first;
   }
 
   public boolean find()
@@ -191,6 +200,9 @@ public class RegexpState {
     
       int minLength = _regexp._minLength;
       boolean []firstSet = _regexp._firstSet;
+
+      if (_subject == null)
+        return false;
 
       int length = _subject.length();
 
@@ -219,9 +231,9 @@ public class RegexpState {
 	  if (_first < offset)
 	    _first = offset;
 	  else
-	    _first += 1;
+            _first += 1;
           
-	  return true;
+          return true;
 	}
       }
 

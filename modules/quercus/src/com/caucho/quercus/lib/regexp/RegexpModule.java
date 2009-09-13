@@ -33,6 +33,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
@@ -62,13 +63,21 @@ public class RegexpModule
 
   public static final int PREG_PATTERN_ORDER = 0x01;
   public static final int PREG_SET_ORDER = 0x02;
-  public static final int PREG_OFFSET_CAPTURE = 0x04;
+  public static final int PREG_OFFSET_CAPTURE = 0x100;
 
   public static final int PREG_SPLIT_NO_EMPTY = 0x01;
   public static final int PREG_SPLIT_DELIM_CAPTURE = 0x02;
   public static final int PREG_SPLIT_OFFSET_CAPTURE = 0x04;
 
   public static final int PREG_GREP_INVERT = 1;
+
+  public static final int PREG_NO_ERROR = 0;
+  public static final int PREG_INTERNAL_ERROR = 1;
+  public static final int PREG_BACKTRACK_LIMIT_ERROR = 2;
+  public static final int PREG_RECURSION_LIMIT_ERROR = 3;
+  public static final int PREG_BAD_UTF8_ERROR = 4;
+  public static final int PREG_BAD_UTF8_OFFSET_ERROR = 5;
+  public static final String PCRE_VERSION = "7.0 18-Dec-2006";
 
   // #2526, possible JIT/OS problem with max comparison
   private static final long LONG_MAX = Long.MAX_VALUE - 1;
@@ -300,23 +309,29 @@ public class RegexpModule
 
   public static Regexp []createRegexpArray(Env env, Value pattern)
   {
-    if (pattern.isArray()) {
-      ArrayValue array = pattern.toArrayValue(env);
+    try {
+      if (pattern.isArray()) {
+        ArrayValue array = pattern.toArrayValue(env);
 
-      Regexp []regexpArray = new Regexp[array.getSize()];
+        Regexp []regexpArray = new Regexp[array.getSize()];
 
-      int i = 0;
-      for (Value value : array.values()) {
-        Regexp regexp = createRegexp(env, value.toStringValue(env));
-        regexpArray[i++] = regexp;
+        int i = 0;
+        for (Value value : array.values()) {
+          Regexp regexp = createRegexp(env, value.toStringValue(env));
+          regexpArray[i++] = regexp;
+        }
+
+        return regexpArray;
       }
+      else {
+        Regexp regexp = createRegexp(env, pattern.toStringValue(env));
 
-      return regexpArray;
-    }
-    else {
-      Regexp regexp = createRegexp(env, pattern.toStringValue(env));
+        return new Regexp [] { regexp };
+      }
+    } catch (Exception e) {
+      env.warning(e);
 
-      return new Regexp [] { regexp };
+      return new Regexp[0];
     }
   }
 
@@ -510,6 +525,14 @@ public class RegexpModule
     }
   }
 
+  /**
+   * Returns the last regexp error
+   */
+  public static Value preg_last_error(Env env)
+  {
+    return LongValue.ZERO;
+  }
+  
   public static Value preg_match(Env env,
                                  Regexp regexp,
                                  StringValue subject,
@@ -544,57 +567,57 @@ public class RegexpModule
 
     if (regs != null) {
       if (isOffsetCapture) {
-    ArrayValueImpl part = new ArrayValueImpl();
-    part.append(regexpState.group(env));
-    part.append(LongValue.create(regexpState.start()));
+        ArrayValueImpl part = new ArrayValueImpl();
+        part.append(regexpState.group(env));
+        part.append(LongValue.create(regexpState.start()));
 
-    regs.put(LongValue.ZERO, part);
+        regs.put(LongValue.ZERO, part);
       }
       else
-    regs.put(LongValue.ZERO, regexpState.group(env));
+        regs.put(LongValue.ZERO, regexpState.group(env));
 
       int count = regexpState.groupCount();
       for (int i = 1; i < count; i++) {
-    if (! regexpState.isMatchedGroup(i))
-      continue;
+        if (! regexpState.isMatchedGroup(i))
+          continue;
 
-    StringValue group = regexpState.group(env, i);
+        StringValue group = regexpState.group(env, i);
 
-    if (isOffsetCapture) {
-      // php/151u
-      // add unmatched groups first
-      for (int j = regs.getSize(); j < i; j++) {
-        ArrayValue part = new ArrayValueImpl();
+        if (isOffsetCapture) {
+          // php/151u
+          // add unmatched groups first
+          for (int j = regs.getSize(); j < i; j++) {
+            ArrayValue part = new ArrayValueImpl();
 
-        part.append(empty);
-        part.append(LongValue.MINUS_ONE);
+            part.append(empty);
+            part.append(LongValue.MINUS_ONE);
 
-        regs.put(LongValue.create(j), part);
-      }
+            regs.put(LongValue.create(j), part);
+          }
 
-      ArrayValueImpl part = new ArrayValueImpl();
-      part.append(group);
-      part.append(LongValue.create(regexpState.start(i)));
+          ArrayValueImpl part = new ArrayValueImpl();
+          part.append(group);
+          part.append(LongValue.create(regexpState.start(i)));
 
-      StringValue name = regexpState.getGroupName(i);
-      if (name != null)
-        regs.put(name, part);
+          StringValue name = regexpState.getGroupName(i);
+          if (name != null)
+            regs.put(name, part);
 
-      regs.put(LongValue.create(i), part);
-    }
-    else {
-      // php/151u
-      // add unmatched groups first
-      for (int j = regs.getSize(); j < i; j++) {
-        regs.put(LongValue.create(j), empty);
-      }
+          regs.put(LongValue.create(i), part);
+        }
+        else {
+          // php/151u
+          // add unmatched groups first
+          for (int j = regs.getSize(); j < i; j++) {
+            regs.put(LongValue.create(j), empty);
+          }
 
-      StringValue name = regexp.getGroupName(i);
-      if (name != null)
-        regs.put(name, group);
+          StringValue name = regexp.getGroupName(i);
+          if (name != null)
+            regs.put(name, group);
 
-      regs.put(LongValue.create(i), group);
-    }
+          regs.put(LongValue.create(i), group);
+        }
       }
 
       matchRef.set(regs);
@@ -611,14 +634,17 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static Value preg_match_all(Env env,
-                     Regexp regexp,
-                     StringValue subject,
-                     @Reference Value matchRef,
-                     @Optional("PREG_PATTERN_ORDER") int flags,
-                     @Optional int offset)
+                                     Regexp regexp,
+                                     StringValue subject,
+                                     @Reference Value matchRef,
+                                     @Optional("PREG_PATTERN_ORDER") int flags,
+                                     @Optional int offset)
   {
     if (regexp == null)
       return BooleanValue.FALSE;
+
+    if (offset < 0)
+      offset = subject.length() + offset;
 
     if ((flags & PREG_PATTERN_ORDER) == 0) {
       // php/152m
@@ -634,6 +660,9 @@ public class RegexpModule
     }
 
     RegexpState regexpState = RegexpState.create(env, regexp, subject);
+
+    if (offset > 0)
+      regexpState.setFirst(offset);
 
     ArrayValue matches;
 
@@ -679,11 +708,11 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static LongValue pregMatchAllPatternOrder(Env env,
-                           RegexpState regexpState,
-                           StringValue subject,
-                           ArrayValue matches,
-                           int flags,
-                           int offset)
+                                                   RegexpState regexpState,
+                                                   StringValue subject,
+                                                   ArrayValue matches,
+                                                   int flags,
+                                                   int offset)
   {
     int groupCount = regexpState == null ? 0 : regexpState.groupCount();
 
@@ -759,12 +788,12 @@ public class RegexpModule
    * @param env the calling environment
    */
   private static LongValue pregMatchAllSetOrder(Env env,
-                        Regexp regexp,
-                        RegexpState regexpState,
-                        StringValue subject,
-                        ArrayValue matches,
-                        int flags,
-                        int offset)
+                                                Regexp regexp,
+                                                RegexpState regexpState,
+                                                StringValue subject,
+                                                ArrayValue matches,
+                                                int flags,
+                                                int offset)
   {
     if (regexpState == null || ! regexpState.find()) {
       return LongValue.ZERO;
@@ -784,8 +813,9 @@ public class RegexpModule
         int start = regexpState.start(i);
         int end = regexpState.end(i);
 
+        // php/1545
         // group is unmatched, skip
-        if (end - start <= 0)
+        if (start < 0 || end < start)
           continue;
 
         StringValue groupValue = regexpState.group(env, i);
@@ -793,7 +823,12 @@ public class RegexpModule
         Value result = NullValue.NULL;
 
         if (groupValue != null) {
+          // php/1544
+          Value patternName = regexpState.getGroupName(i);
 
+          if (patternName != null)
+            matchResult.put(patternName, groupValue);
+      
           if ((flags & PREG_OFFSET_CAPTURE) != 0) {
 
             // php/152n
@@ -808,6 +843,7 @@ public class RegexpModule
             }
 
             result = new ArrayValueImpl();
+
             result.put(groupValue);
             result.put(LongValue.create(start));
           } else {
@@ -859,6 +895,10 @@ public class RegexpModule
         sb.append('\\');
         sb.append(ch);
       }
+      else if (ch == 0) {
+        // php/153q
+        sb.append("\\000");
+      }
       else
         sb.append(ch);
     }
@@ -885,6 +925,12 @@ public class RegexpModule
                                    @Optional("-1") long limit,
                                    @Optional @Reference Value count)
   {
+    if (regexp == null)
+      return BooleanValue.FALSE;
+
+    if (count != null)
+      count.set(LongValue.ZERO);
+    
     try {
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -990,7 +1036,7 @@ public class RegexpModule
                                    @Optional @Reference Value count)
   {
     try {
-      Regexp []regexpList = createRegexpArray(pattern);
+      Regexp []regexpList = createRegexpArray(env, pattern);
 
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1168,6 +1214,9 @@ public class RegexpModule
 
     if (replacementProgram == null) {
       replacementProgram = compileReplacement(env, replacement, isEval);
+      if (replacementProgram == null)
+        return null;
+      
       _replacementCache.put(replacement, replacementProgram);
     }
 
@@ -1270,6 +1319,8 @@ public class RegexpModule
 
     if (replacementProgram == null) {
       replacementProgram = compileReplacement(env, replacementStr, false);
+      if (replacementProgram == null)
+        return null;
       _replacementCache.put(replacementStr, replacementProgram);
     }
 
@@ -1328,18 +1379,22 @@ public class RegexpModule
       if (isEval) {
         StringValue evalString = subject.createStringBuilder();
 
-        for (int i = 0; i < replacementLen; i++) {
-          Replacement replacement = replacementProgram.get(i);
+        try {
+          for (int i = 0; i < replacementLen; i++) {
+            Replacement replacement = replacementProgram.get(i);
 
-          evalString = replacement.eval(env, evalString, regexpState);
+            evalString = replacement.eval(env, evalString, regexpState);
+          }
+        } catch (Exception e) {
+          env.warning(e);
         }
 
         try {
           if (evalString.length() > 0) { // php/152z
             result = result.append(env.evalCode(evalString.toString()));
           }
-        } catch (IOException e) {
-          throw new QuercusException(e);
+        } catch (Exception e) {
+          env.warning(e);
         }
 
       } else {
@@ -1375,11 +1430,29 @@ public class RegexpModule
    */
   public static Value preg_replace_callback(Env env,
                                             Regexp regexp,
-                                            Callback fun,
+                                            @NotNull Callback fun,
                                             Value subject,
                                             @Optional("-1") long limit,
                                             @Optional @Reference Value count)
   {
+    if (fun == null) {
+      env.warning(L.l("callback argument can't be null in preg_replace_callback"));
+      return StringValue.EMPTY;
+    }
+    
+    if (regexp == null)
+      return NullValue.NULL;
+    else if (regexp.isEval()) {
+      env.warning(L.l("regexp can't use /e preg_replace_callback /{0}/",
+                      regexp.getPattern()));
+      
+      return NullValue.NULL;
+    }
+
+    // php/153s
+    if (count != null)
+      count.set(LongValue.ZERO);
+    
     try {
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1394,7 +1467,6 @@ public class RegexpModule
         }
 
         return result;
-
       } else if (subject.isset()) {
         return pregReplaceCallback(env,
                                    regexp,
@@ -1545,7 +1617,7 @@ public class RegexpModule
     if (limit <= 0)
       limit = LONG_MAX;
 
-    StringValue empty = string.EMPTY;
+    StringValue empty = StringValue.EMPTY;
 
     RegexpState regexpState = RegexpState.create(env, regexp);
     regexpState.setSubject(env, string);
@@ -1568,11 +1640,12 @@ public class RegexpModule
 
       // Get non-matching sequence
       if (count == limit - 1) {
-        unmatched = string.substring(head);
+        unmatched = regexpState.substring(env, head);
         head = string.length();
       }
       else {
-        unmatched = string.substring(head, regexpState.start());
+        // php/153y
+        unmatched = regexpState.substring(env, head, regexpState.start());
         head = regexpState.end();
       }
 
@@ -1612,7 +1685,7 @@ public class RegexpModule
           if (allowEmpty) {
             int group = i;
             while (neighborMap.hasNeighbor(group)) {
-          group = neighborMap.getNeighbor(group);
+              group = neighborMap.getNeighbor(group);
 
           if (regexpState.isMatchedGroup(group))
             break;
@@ -1640,7 +1713,7 @@ public class RegexpModule
             ArrayValue part = new ArrayValueImpl();
 
             part.put(groupValue);
-            part.put(LongValue.create(startPosition));
+            part.put(LongValue.create(start));
 
             result.put(part);
           }
@@ -1652,18 +1725,18 @@ public class RegexpModule
     }
 
     // Append non-matching sequence at the end
-    if (count < limit && (head < string.length() || allowEmpty)) {
-  if (isCaptureOffset) {
-    ArrayValue part = new ArrayValueImpl();
+    if (count < limit && (head < regexpState.start() || allowEmpty)) {
+      if (isCaptureOffset) {
+        ArrayValue part = new ArrayValueImpl();
 
-    part.put(string.substring(head));
-    part.put(LongValue.create(head));
+        part.put(regexpState.substring(env, head));
+        part.put(LongValue.create(head));
 
-    result.put(part);
-  }
-  else {
-    result.put(string.substring(head));
-  }
+        result.put(part);
+      }
+      else {
+        result.put(regexpState.substring(env, head));
+      }
     }
 
     env.freeRegexpState(regexpState);
@@ -1809,8 +1882,11 @@ public class RegexpModule
 
     ArrayValue matchArray = new ArrayValueImpl();
 
-    for (Map.Entry<Value, Value> entry : input.entrySet()) {
-      Value entryValue = entry.getValue();
+    for (ArrayValue.Entry entry = input.getHead();
+         entry != null;
+         entry = entry.getNext()) {
+      // php/153v
+      Value entryValue = entry.getRawValue();
       Value entryKey = entry.getKey();
 
       boolean found = regexpState.find(env, entryValue.toStringValue());
@@ -1888,15 +1964,17 @@ public class RegexpModule
           int group = 0;
 
           while (i < replacement.length()
-         && '0' <= (digit = replacement.charAt(i)) && digit <= '9') {
+                 && '0' <= (digit = replacement.charAt(i)) && digit <= '9') {
             group = 10 * group + digit - '0';
 
             i++;
           }
 
           if (digit != '}') {
-            env.warning(L.l("bad regexp {0}", replacement));
-            throw new QuercusException("bad regexp");
+            // env.warning(L.l("expected '}' to close replacement at '{1}' replacement {0}", (char) digit, replacement));
+            text.append("${");
+            text.append(group);
+            continue;
           }
 
           if (text.length() > 0)
@@ -2392,6 +2470,7 @@ public class RegexpModule
     PREG_QUOTE['|'] = true;
     PREG_QUOTE[':'] = true;
     PREG_QUOTE['.'] = true;
+    PREG_QUOTE['-'] = true; // php/153w
 
   }
 }

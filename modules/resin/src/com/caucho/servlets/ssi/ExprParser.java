@@ -57,7 +57,9 @@ public class ExprParser {
 
   private SSIExpr parseString()
   {
-    return parseTerm();
+    SSIExpr expr = parseTerm();
+
+    return expr;
   }
   
   private SSIExpr parseTerm()
@@ -65,34 +67,15 @@ public class ExprParser {
     int ch;
 
     SSIExpr expr = null;
-    
+
     while ((ch = read()) >= 0) {
       if (ch == '$') {
 	if (_sb.length() > 0)
 	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
 	_sb.setLength(0);
 
-	ch = read();
-	if (ch == '{') {
-	  for (ch = read(); ch >= 0 && ch != '}'; ch = read()) {
-	    _sb.append((char) ch);
-	  }
-	}
-	else {
-	  for (;
-	       'a' <= ch && ch <= 'z'
-                 || 'A' <= ch && ch <= 'Z'
-                 || '0' <= ch && ch <= '9'
-                 || ch == '_';
-	       ch = read()) {
-	    _sb.append((char) ch);
-	  }
-
-	  unread();
-	}
-
-	expr = ConcatExpr.create(expr, new VarExpr(_sb.toString(), _path));
-	_sb.setLength(0);
+        SSIExpr var = parseVar();
+	expr = ConcatExpr.create(expr, var);
       }
       else if (ch == '\\') {
 	ch = read();
@@ -106,6 +89,47 @@ public class ExprParser {
 	  unread();
 	}
       }
+      else if (ch == '=') {
+	if (_sb.length() > 0)
+	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+	_sb.setLength(0);
+
+        SSIExpr right = parseTerm();
+
+        return new EqExpr(expr, parseTerm());
+      }
+      else if (ch == '<') {
+	if (_sb.length() > 0)
+	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+	_sb.setLength(0);
+        
+	ch = read();
+
+	if (ch == '=') {
+          return new LeExpr(expr, parseTerm());
+        }
+	else {
+	  unread();
+          
+          return new LtExpr(expr, parseTerm());
+	}
+      }
+      else if (ch == '>') {
+	if (_sb.length() > 0)
+	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+	_sb.setLength(0);
+        
+	ch = read();
+
+	if (ch == '=') {
+          return new GeExpr(expr, parseTerm());
+        }
+	else {
+	  unread();
+          
+          return new GtExpr(expr, parseTerm());
+	}
+      }
       else
 	_sb.append((char) ch);
     }
@@ -114,6 +138,34 @@ public class ExprParser {
       expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
 
     return expr;
+  }
+
+  private SSIExpr parseVar()
+  {
+    int ch = read();
+    
+    if (ch == '{') {
+      for (ch = read(); ch >= 0 && ch != '}'; ch = read()) {
+        _sb.append((char) ch);
+      }
+    }
+    else {
+      for (;
+           'a' <= ch && ch <= 'z'
+             || 'A' <= ch && ch <= 'Z'
+             || '0' <= ch && ch <= '9'
+             || ch == '_';
+           ch = read()) {
+        _sb.append((char) ch);
+      }
+
+      unread();
+    }
+    
+    SSIExpr var = new VarExpr(_sb.toString(), _path);
+    _sb.setLength(0);
+
+    return var;
   }
 
   private int read()

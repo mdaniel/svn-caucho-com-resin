@@ -810,7 +810,8 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the head.
    */
-  abstract protected Entry getHead();
+  // XX: php/153v getHead needed by grep for getRawValue()
+  abstract public Entry getHead();
 
   /**
    * Returns the tail.

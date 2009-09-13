@@ -6,10 +6,7 @@ namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
 include "../../server/resin/j2ee.rnc"
 
-j2ee_dewey-version = string
 j2ee_generic-boolean = string
-j2ee_java-identifier = string
-j2ee_path = string
 j2ee_variable = string
 
 jsp20_attribute = element attribute {

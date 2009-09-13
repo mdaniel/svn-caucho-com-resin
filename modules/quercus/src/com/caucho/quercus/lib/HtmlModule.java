@@ -35,6 +35,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.regexp.Ereg;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -62,6 +63,8 @@ public class HtmlModule extends AbstractQuercusModule {
   public static final int ENT_QUOTES = ENT_HTML_QUOTE_SINGLE | ENT_HTML_QUOTE_DOUBLE;
   public static final int ENT_NOQUOTES = ENT_HTML_QUOTE_NONE;
 
+  private static StringValue []HTML_SPECIALCHARS_MAP;
+  
   private static ArrayValue HTML_SPECIALCHARS_ARRAY;
   private static ArrayValue HTML_ENTITIES_ARRAY;
 
@@ -310,51 +313,53 @@ public class HtmlModule extends AbstractQuercusModule {
     }
     
     StringValue sb = string.createStringBuilder(string.length() * 5 / 4);
-
-    ArrayValue entitiesArray;
-    
-    if (env.isUnicodeSemantics()) {
-      if (HTML_ENTITIES_ARRAY_UNICODE == null)
-        HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(env, HTML_ENTITIES_ARRAY);
-      
-      entitiesArray = HTML_ENTITIES_ARRAY_UNICODE;
-    }
-    else {
-      entitiesArray = HTML_ENTITIES_ARRAY;
-    }
     
     int ch;
     try {
       while ((ch = reader.read()) >= 0) {
-        StringValue chV = env.createString((char) ch);
-        
-        Value entity = entitiesArray.get(chV);
-        
-        if (entity.isNull())
-          entity = chV;
+        StringValue entity = HTML_SPECIALCHARS_MAP[ch & 0xffff];
         
         if (ch == '"') {
-          if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0) {
-            entity = env.createString("&quot;");
-          }
+          if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
+            sb.append("&quot;");
           else
-            entity = chV;
+            sb.append('"');
         }
         else if (ch == '\'') {
-          if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0) {
-            entity = env.createString("&#039;");
-          }
+          if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
+            sb.append("&#039;");
           else
-            entity = chV;
+            sb.append('\'');
         }
-        
-        sb.append(entity);
+        else if (entity != null)
+          sb.append(entity);
+        else if (env.isUnicodeSemantics() || 0x00 <= ch && ch <= 0xff) {
+          sb.append((char) ch);
+        }
+        else {
+          sb.append("&#");
+          sb.append(hexdigit(ch >> 12));
+          sb.append(hexdigit(ch >> 8));
+          sb.append(hexdigit(ch >> 4));
+          sb.append(hexdigit(ch));
+          sb.append(";");
+        }
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
 
     return sb;
+  }
+
+  private static char hexdigit(int ch)
+  {
+    ch = ch & 0xf;
+
+    if (ch < 10)
+      return (char) (ch + '0');
+    else
+      return (char) (ch - 10 + 'a');
   }
 
   /**
@@ -432,10 +437,12 @@ public class HtmlModule extends AbstractQuercusModule {
     return sb;
   }
 
-  private static void entity(ArrayValue array, int ch, String entity)
+  private static void entity(ArrayValue array, StringValue []map,
+                             int ch, String entity)
   {
     // XXX: i18n and optimize static variables usuage
     array.put("" + (char) ch, entity);
+    map[ch & 0xffff] = new StringBuilderValue(entity);
   }
 
   static {
@@ -446,109 +453,111 @@ public class HtmlModule extends AbstractQuercusModule {
     array.put("&", "&amp;");
     
     HTML_SPECIALCHARS_ARRAY = new ConstArrayValue(array);
+    StringValue []map = new StringValue[65536];
+    HTML_SPECIALCHARS_MAP = map;
 
-    
     array = new ArrayValueImpl();
-    entity(array, '<', "&lt;");
-    entity(array, '>', "&gt;");
-    entity(array, '&', "&amp;");
+    entity(array, map, '<', "&lt;");
+    entity(array, map, '>', "&gt;");
+    entity(array, map, '&', "&amp;");
 
-    entity(array, 160, "&nbsp;");
-    entity(array, 161, "&iexcl;");
-    entity(array, 162, "&cent;");
-    entity(array, 163, "&pound;");
-    entity(array, 164, "&curren;");
-    entity(array, 165, "&yen;");
-    entity(array, 166, "&brvbar;");
-    entity(array, 167, "&sect;");
-    entity(array, 168, "&uml;");
-    entity(array, 169, "&copy;");
-    entity(array, 170, "&ordf;");
-    entity(array, 171, "&laquo;");
-    entity(array, 172, "&not;");
-    entity(array, 173, "&shy;");
-    entity(array, 174, "&reg;");
-    entity(array, 175, "&macr;");
-    entity(array, 176, "&deg;");
-    entity(array, 177, "&plusmn;");
-    entity(array, 178, "&sup2;");
-    entity(array, 179, "&sup3;");
-    entity(array, 180, "&acute;");
-    entity(array, 181, "&micro;");
-    entity(array, 182, "&para;");
-    entity(array, 183, "&middot;");
-    entity(array, 184, "&cedil;");
-    entity(array, 185, "&sup1;");
-    entity(array, 186, "&ordm;");
-    entity(array, 187, "&raquo;");
-    entity(array, 188, "&frac14;");
-    entity(array, 189, "&frac12;");
-    entity(array, 190, "&frac34;");
-    entity(array, 191, "&iquest;");
-    entity(array, 192, "&Agrave;");
-    entity(array, 193, "&Aacute;");
-    entity(array, 194, "&Acirc;");
-    entity(array, 195, "&Atilde;");
-    entity(array, 196, "&Auml;");
-    entity(array, 197, "&Aring;");
-    entity(array, 198, "&AElig;");
-    entity(array, 199, "&Ccedil;");
-    entity(array, 200, "&Egrave;");
-    entity(array, 201, "&Eacute;");
-    entity(array, 202, "&Ecirc;");
-    entity(array, 203, "&Euml;");
-    entity(array, 204, "&Igrave;");
-    entity(array, 205, "&Iacute;");
-    entity(array, 206, "&Icirc;");
-    entity(array, 207, "&Iuml;");
-    entity(array, 208, "&ETH;");
-    entity(array, 209, "&Ntilde;");
-    entity(array, 210, "&Ograve;");
-    entity(array, 211, "&Oacute;");
-    entity(array, 212, "&Ocirc;");
-    entity(array, 213, "&Otilde;");
-    entity(array, 214, "&Ouml;");
-    entity(array, 215, "&times;");
-    entity(array, 216, "&Oslash;");
-    entity(array, 217, "&Ugrave;");
-    entity(array, 218, "&Uacute;");
-    entity(array, 219, "&Ucirc;");
-    entity(array, 220, "&Uuml;");
-    entity(array, 221, "&Yacute;");
-    entity(array, 222, "&THORN;");
-    entity(array, 223, "&szlig;");
-    entity(array, 224, "&agrave;");
-    entity(array, 225, "&aacute;");
-    entity(array, 226, "&acirc;");
-    entity(array, 227, "&atilde;");
-    entity(array, 228, "&auml;");
-    entity(array, 229, "&aring;");
-    entity(array, 230, "&aelig;");
-    entity(array, 231, "&ccedil;");
-    entity(array, 232, "&egrave;");
-    entity(array, 233, "&eacute;");
-    entity(array, 234, "&ecirc;");
-    entity(array, 235, "&euml;");
-    entity(array, 236, "&igrave;");
-    entity(array, 237, "&iacute;");
-    entity(array, 238, "&icirc;");
-    entity(array, 239, "&iuml;");
-    entity(array, 240, "&eth;");
-    entity(array, 241, "&ntilde;");
-    entity(array, 242, "&ograve;");
-    entity(array, 243, "&oacute;");
-    entity(array, 244, "&ocirc;");
-    entity(array, 245, "&otilde;");
-    entity(array, 246, "&ouml;");
-    entity(array, 247, "&divide;");
-    entity(array, 248, "&oslash;");
-    entity(array, 249, "&ugrave;");
-    entity(array, 250, "&uacute;");
-    entity(array, 251, "&ucirc;");
-    entity(array, 252, "&uuml;");
-    entity(array, 253, "&yacute;");
-    entity(array, 254, "&thorn;");
-    entity(array, 255, "&yuml;");
+    entity(array, map, 160, "&nbsp;");
+    entity(array, map, 161, "&iexcl;");
+    entity(array, map, 162, "&cent;");
+    entity(array, map, 163, "&pound;");
+    entity(array, map, 164, "&curren;");
+    entity(array, map, 165, "&yen;");
+    entity(array, map, 166, "&brvbar;");
+    entity(array, map, 167, "&sect;");
+    entity(array, map, 168, "&uml;");
+    entity(array, map, 169, "&copy;");
+    entity(array, map, 170, "&ordf;");
+    entity(array, map, 171, "&laquo;");
+    entity(array, map, 172, "&not;");
+    entity(array, map, 173, "&shy;");
+    entity(array, map, 174, "&reg;");
+    entity(array, map, 175, "&macr;");
+    entity(array, map, 176, "&deg;");
+    entity(array, map, 177, "&plusmn;");
+    entity(array, map, 178, "&sup2;");
+    entity(array, map, 179, "&sup3;");
+    entity(array, map, 180, "&acute;");
+    entity(array, map, 181, "&micro;");
+    entity(array, map, 182, "&para;");
+    entity(array, map, 183, "&middot;");
+    entity(array, map, 184, "&cedil;");
+    entity(array, map, 185, "&sup1;");
+    entity(array, map, 186, "&ordm;");
+    entity(array, map, 187, "&raquo;");
+    entity(array, map, 188, "&frac14;");
+    entity(array, map, 189, "&frac12;");
+    entity(array, map, 190, "&frac34;");
+    entity(array, map, 191, "&iquest;");
+    entity(array, map, 192, "&Agrave;");
+    entity(array, map, 193, "&Aacute;");
+    entity(array, map, 194, "&Acirc;");
+    entity(array, map, 195, "&Atilde;");
+    entity(array, map, 196, "&Auml;");
+    entity(array, map, 197, "&Aring;");
+    entity(array, map, 198, "&AElig;");
+    entity(array, map, 199, "&Ccedil;");
+    entity(array, map, 200, "&Egrave;");
+    entity(array, map, 201, "&Eacute;");
+    entity(array, map, 202, "&Ecirc;");
+    entity(array, map, 203, "&Euml;");
+    entity(array, map, 204, "&Igrave;");
+    entity(array, map, 205, "&Iacute;");
+    entity(array, map, 206, "&Icirc;");
+    entity(array, map, 207, "&Iuml;");
+    entity(array, map, 208, "&ETH;");
+    entity(array, map, 209, "&Ntilde;");
+    entity(array, map, 210, "&Ograve;");
+    entity(array, map, 211, "&Oacute;");
+    entity(array, map, 212, "&Ocirc;");
+    entity(array, map, 213, "&Otilde;");
+    entity(array, map, 214, "&Ouml;");
+    entity(array, map, 215, "&times;");
+    entity(array, map, 216, "&Oslash;");
+    entity(array, map, 217, "&Ugrave;");
+    entity(array, map, 218, "&Uacute;");
+    entity(array, map, 219, "&Ucirc;");
+    entity(array, map, 220, "&Uuml;");
+    entity(array, map, 221, "&Yacute;");
+    entity(array, map, 222, "&THORN;");
+    entity(array, map, 223, "&szlig;");
+    entity(array, map, 224, "&agrave;");
+    entity(array, map, 225, "&aacute;");
+    entity(array, map, 226, "&acirc;");
+    entity(array, map, 227, "&atilde;");
+    entity(array, map, 228, "&auml;");
+    entity(array, map, 229, "&aring;");
+    entity(array, map, 230, "&aelig;");
+    entity(array, map, 231, "&ccedil;");
+    entity(array, map, 232, "&egrave;");
+    entity(array, map, 233, "&eacute;");
+    entity(array, map, 234, "&ecirc;");
+    entity(array, map, 235, "&euml;");
+    entity(array, map, 236, "&igrave;");
+    entity(array, map, 237, "&iacute;");
+    entity(array, map, 238, "&icirc;");
+    entity(array, map, 239, "&iuml;");
+    entity(array, map, 240, "&eth;");
+    entity(array, map, 241, "&ntilde;");
+    entity(array, map, 242, "&ograve;");
+    entity(array, map, 243, "&oacute;");
+    entity(array, map, 244, "&ocirc;");
+    entity(array, map, 245, "&otilde;");
+    entity(array, map, 246, "&ouml;");
+    entity(array, map, 247, "&divide;");
+    entity(array, map, 248, "&oslash;");
+    entity(array, map, 249, "&ugrave;");
+    entity(array, map, 250, "&uacute;");
+    entity(array, map, 251, "&ucirc;");
+    entity(array, map, 252, "&uuml;");
+    entity(array, map, 253, "&yacute;");
+    entity(array, map, 254, "&thorn;");
+    entity(array, map, 255, "&yuml;");
+    entity(array, map, 0x20ac, "&euro;");
     
     HTML_ENTITIES_ARRAY = new ConstArrayValue(array);
   }

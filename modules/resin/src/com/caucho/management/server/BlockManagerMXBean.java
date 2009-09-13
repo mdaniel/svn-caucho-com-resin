@@ -53,6 +53,18 @@ public interface BlockManagerMXBean extends ManagedObjectMXBean {
   //
   
   /**
+   * Returns the block read count.
+   */
+  @Description("The total blocks read from the backing")
+  public long getBlockReadCountTotal();
+  
+  /**
+   * Returns the block write count.
+   */
+  @Description("The total blocks written to the backing")
+  public long getBlockWriteCountTotal();
+  
+  /**
    * Returns the block LRU cache hit count.
    */
   @Description("The hit count is the number of block accesses found in"

@@ -110,6 +110,12 @@ public class QuercusEngine
       else if ("-f".equals(args[i])) {
         _fileName = args[++i];
       }
+      else if ("-q".equals(args[i])) {
+        // quiet
+      }
+      else if ("-n".equals(args[i])) {
+        // no php-pip
+      }
       else if ("--".equals(args[i])) {
         break;
       }

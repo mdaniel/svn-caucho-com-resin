@@ -59,7 +59,8 @@ public class ScanManager {
 
   public void scan(EnvironmentClassLoader loader, URL url)
   {
-    scan(loader, Vfs.lookup(url.toString()));
+    // #3576
+    scan(loader, Vfs.lookup(url));
   }
   
   public void scan(EnvironmentClassLoader loader, Path root)

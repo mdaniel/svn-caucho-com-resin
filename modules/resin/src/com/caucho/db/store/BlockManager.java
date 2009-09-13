@@ -37,6 +37,7 @@ import com.caucho.util.LongKeyLruCache;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +59,9 @@ public final class BlockManager
 
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   private int _writeQueueMax = 32;
+
+  private final AtomicLong _blockWriteCount = new AtomicLong();
+  private final AtomicLong _blockReadCount = new AtomicLong();
 
   private BlockManager(int capacity)
   {
@@ -333,6 +337,32 @@ public final class BlockManager
   public long getMissCountTotal()
   {
     return _blockCache.getMissCount();
+  }
+
+  final void addBlockRead()
+  {
+    _blockReadCount.incrementAndGet();
+  }
+  
+  /**
+   * Returns the read count.
+   */
+  public long getBlockReadCountTotal()
+  {
+    return _blockReadCount.get();
+  }
+
+  final void addBlockWrite()
+  {
+    _blockWriteCount.incrementAndGet();
+  }
+
+  /**
+   * Returns the write count.
+   */
+  public long getBlockWriteCountTotal()
+  {
+    return _blockWriteCount.get();
   }
 
   private static IllegalStateException stateError(String msg)

@@ -41,8 +41,10 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -149,7 +151,7 @@ public class EnhancerFixup {
     Path postPath = getPostWorkPath();
 
     Path source = getSource(className);
-
+    
     if (source == null || ! source.canRead())
       return;
 
@@ -158,7 +160,8 @@ public class EnhancerFixup {
 
     try {
       target.getParent().mkdirs();
-    } catch (Throwable e) {
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     }
 
     if (source != null)
@@ -621,7 +624,8 @@ public class EnhancerFixup {
     URL url = loader.getResource(className.replace('.', '/') + ".class");
 
     // XXX: workaround for tck
-    String s = url.toString();
+    // jpa/0g0s, #3574
+    String s = URLDecoder.decode(url.toString());
     int index = s.indexOf("jar!/");
     if (index > 0) {
       s = s.substring(9, index+3);
@@ -630,7 +634,7 @@ public class EnhancerFixup {
       return path;
     }
 
-    return Vfs.lookup(url.toString());
+    return Vfs.lookup(s);
   }
 
   /**

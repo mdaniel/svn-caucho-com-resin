@@ -318,11 +318,8 @@ public class EnhancerManager implements ClassFileTransformer
 
       return load(className);
     } catch (RuntimeException e) {
-      e.printStackTrace();
-      
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       
       throw new ClassNotFoundException(e.getMessage());
@@ -335,7 +332,13 @@ public class EnhancerManager implements ClassFileTransformer
     throws IOException
   {
     Path path = getPostWorkPath().lookup(className.replace('.', '/') + ".class");
-    byte []buffer = new byte[(int) path.getLength()];
+    int length = (int) path.getLength();
+
+    if (length < 0)
+      throw new FileNotFoundException(L.l("Can't find class file '{0}'",
+                                          path.getNativePath()));
+    
+    byte []buffer = new byte[length];
       
     ReadStream is = path.openRead();
     try {

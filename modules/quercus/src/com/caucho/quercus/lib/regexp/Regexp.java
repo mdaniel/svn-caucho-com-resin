@@ -132,7 +132,7 @@ public class Regexp {
           String.valueOf(delim),
           rawRegexp));
 
-    StringValue sflags = rawRegexp.substring(tail);
+    StringValue sflags = rawRegexp.substring(tail + 1);
     StringValue pattern = rawRegexp.substring(head + 1, tail); 
     
     _pattern = pattern;
@@ -141,19 +141,24 @@ public class Regexp {
     
     for (int i = 0; sflags != null && i < sflags.length(); i++) {
       switch (sflags.charAt(i)) {
-        case 'm': flags |= Regcomp.MULTILINE; break;
-        case 's': flags |= Regcomp.SINGLE_LINE; break;
-        case 'i': flags |= Regcomp.IGNORE_CASE; break;
-        case 'x': flags |= Regcomp.IGNORE_WS; break;
-        case 'g': flags |= Regcomp.GLOBAL; break;
+      case 'm': flags |= Regcomp.MULTILINE; break;
+      case 's': flags |= Regcomp.SINGLE_LINE; break;
+      case 'i': flags |= Regcomp.IGNORE_CASE; break;
+      case 'x': flags |= Regcomp.IGNORE_WS; break;
+      case 'g': flags |= Regcomp.GLOBAL; break;
         
-        case 'A': flags |= Regcomp.ANCHORED; break;
-        case 'D': flags |= Regcomp.END_ONLY; break;
-        case 'U': flags |= Regcomp.UNGREEDY; break;
-        case 'X': flags |= Regcomp.STRICT; break;
+      case 'A': flags |= Regcomp.ANCHORED; break;
+      case 'D': flags |= Regcomp.END_ONLY; break;
+      case 'U': flags |= Regcomp.UNGREEDY; break;
+      case 'X': flags |= Regcomp.STRICT; break;
+      case 'S': /* speedup */; break;
         
-        case 'u': flags |= Regcomp.UTF8; break;
-        case 'e': _isEval = true; break;
+      case 'u': flags |= Regcomp.UTF8; break;
+      case 'e': _isEval = true; break;
+
+      default:
+        throw new QuercusException(L.l("'{0}' is an unknown regexp flag in {1}",
+                                       (char) sflags.charAt(i), rawRegexp));
       }
     }
     
@@ -266,20 +271,19 @@ public class Regexp {
       if (ch < 0x80) {
         target.append(ch);
       }
-      else if ((ch & 0xE0) == 0xC0) {
-        
-        if (i + 1 >= len) {
+      else if ((ch & 0xe0) == 0xc0) {
+        if (len <= i + 1) {
           log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
           return null;
         }
         
         char ch2 = source.charAt(++i);
 
-        target.append((char) (((ch & 0x1F) << 6)
-                              + (ch2 & 0x3F)));
+        target.append((char) (((ch & 0x1f) << 6)
+                              + (ch2 & 0x3f)));
       }
-      else if ((ch & 0xF0) == 0xE0) {
-        if (i + 2 >= len) {
+      else if ((ch & 0xf0) == 0xe0) {
+        if (len <= i + 2) {
           log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
           return null;
         }
@@ -287,9 +291,9 @@ public class Regexp {
         char ch2 = source.charAt(++i);
         char ch3 = source.charAt(++i);
         
-        target.append((char) (((ch & 0x0F) << 12)
-                              + ((ch2 & 0x3F) << 6)
-                              + (ch3 & 0x3F)));
+        target.append((char) (((ch & 0x0f) << 12)
+                              + ((ch2 & 0x3f) << 6)
+                              + (ch3 & 0x3f)));
       }
       else {
         if (i + 3 >= len) {
@@ -326,6 +330,6 @@ public class Regexp {
   
   public String toString()
   {
-    return "Regexp[" + _pattern + "]";
+    return getClass().getSimpleName() + "[" + _pattern + "]";
   }
 }

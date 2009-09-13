@@ -37,6 +37,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -193,6 +195,16 @@ public final class Vfs {
   public static Path lookupNative(String url)
   {
     return getPwd().lookupNative(url, null);
+  }
+
+  /**
+   * Looks up a URL, decoding '%'
+   *
+   * @param url a relative path using the native filesystem conventions.
+   */
+  public static Path lookup(URL url)
+  {
+    return getPwd().lookup(url);
   }
 
   /**
