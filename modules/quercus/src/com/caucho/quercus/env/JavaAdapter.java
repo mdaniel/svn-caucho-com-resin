@@ -439,7 +439,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the head.
    */
-  protected Entry getHead()
+  public Entry getHead()
   {
     throw new UnsupportedOperationException();
   }

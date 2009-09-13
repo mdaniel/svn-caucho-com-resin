@@ -64,7 +64,7 @@ public class PathJndiContext implements Context {
     throws NamingException
   {
     if (name == null || name.equals(""))
-      return new PathJndiContext(_path.lookup(null), _root);
+      return new PathJndiContext(_path.lookup((String) null), _root);
 
     Path subpath = _path.lookup(name);
 

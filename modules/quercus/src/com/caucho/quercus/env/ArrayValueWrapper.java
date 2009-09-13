@@ -210,7 +210,7 @@ public class ArrayValueWrapper extends ArrayValue {
    * Returns the head.
    */
   @Override
-  protected Entry getHead()
+  public Entry getHead()
   {
     return _array.getHead();
   }

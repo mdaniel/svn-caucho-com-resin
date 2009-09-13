@@ -1144,7 +1144,7 @@ public class ArrayValueImpl extends ArrayValue
       return NullValue.NULL;
   }
 
-  protected final Entry getHead()
+  public final Entry getHead()
   {
     return _head;
   }

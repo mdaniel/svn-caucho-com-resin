@@ -299,7 +299,7 @@ public class CopyArrayValue extends ArrayValue {
     return getCopyArray().shuffle();
   }
 
-  protected Entry getHead()
+  public Entry getHead()
   {
     if (_copyArray != null)
       return _copyArray.getHead();
