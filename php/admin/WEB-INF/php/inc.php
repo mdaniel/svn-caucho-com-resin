@@ -508,7 +508,9 @@ function jmx_short_name($name, $exclude_array)
  *
  * @return true if the header was output, false if a header has already been output
  */
-function display_header($script, $title, $server, $query, $is_refresh,
+function display_header($script, $title, $server,
+                        $query = "",
+                        $is_refresh = false,
                         $allow_remote = false)
 {
   global $g_server_id;
