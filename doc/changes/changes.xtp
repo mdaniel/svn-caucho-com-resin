@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>comet: wrapped request needs to work with comet (#3665, rep by Fiaz Hossain)</li>
 <li>config: relaxng forbid duplicate rules (#3595, rep by hmh)</li>
 <li>ssi: add basic SSI conditionals (#3534, rep by fly-away)</li>
 <li>jpa: issue with @ManyToOne and MappedSuperclass (#3335, rep by rdhauwe)</li>

@@ -29,12 +29,7 @@
 
 package com.caucho.server.dispatch;
 
-import javax.servlet.FilterChain;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.UnavailableException;
+import javax.servlet.*;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -110,7 +105,13 @@ public class CometServletFilterChain implements FilterChain {
     ConnectionCometController controller = null;
 
     try {
-      HttpServletRequestImpl requestImpl = (HttpServletRequestImpl) request;
+      ServletRequest reqPtr = request;
+
+      while (reqPtr instanceof ServletRequestWrapper) {
+        reqPtr = ((ServletRequestWrapper) request).getRequest();
+      }
+
+      HttpServletRequestImpl requestImpl = (HttpServletRequestImpl) reqPtr;
 
       controller = requestImpl.getCometController();
 

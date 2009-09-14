@@ -930,7 +930,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       EntityManagerFactoryComponent emf
         = new EntityManagerFactoryComponent(manager, this, provider, unit);
       */
-      
+
       EntityManagerFactoryProxy emf
         = new EntityManagerFactoryProxy(this, unitName);
 
@@ -1071,7 +1071,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
    */
   public boolean isRootScannable(Path root)
   {
-    if (!root.lookup("META-INF/persistence.xml").canRead())
+    if (! root.lookup("META-INF/persistence.xml").canRead())
       return false;
 
     RootContext context = _persistenceRootMap.get(root);

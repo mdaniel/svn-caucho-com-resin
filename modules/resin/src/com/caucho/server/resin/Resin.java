@@ -170,7 +170,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   private Path _resinConf;
 
   private ClassLoader _systemClassLoader;
-  
+
   private Thread _mainThread;
   private FailSafeHaltThread _failSafeHaltThread;
   private ShutdownThread _shutdownThread;
@@ -230,9 +230,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       _classLoader = (EnvironmentClassLoader) loader;
     else
       _classLoader = EnvironmentClassLoader.create();
-
-    _shutdownThread = new ShutdownThread();
-    _shutdownThread.start();
   }
 
   /**
@@ -969,7 +966,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       assert(server == _server);
 
-      if (_stage != null) 
+      if (_stage != null)
         _server.setStage(_stage);
 
       _server.start();
@@ -1147,13 +1144,17 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     FailSafeHaltThread haltThread = _failSafeHaltThread;
     if (haltThread != null)
       haltThread.startShutdown();
-    
+
     if (_lifecycle.isDestroying())
       return;
 
     log().severe(msg);
 
-    _shutdownThread.startShutdown();
+    ShutdownThread shutdownThread = _shutdownThread;
+    if (shutdownThread != null)
+      shutdownThread.startShutdown();
+    else
+      shutdownImpl();
   }
 
   public void destroy()
@@ -1162,7 +1163,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     FailSafeHaltThread haltThread = _failSafeHaltThread;
     if (haltThread != null)
       haltThread.startShutdown();
-    
+
     if (_lifecycle.isDestroying())
       return;
 
@@ -1170,15 +1171,17 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     shutdownImpl();
   }
-  
+
   /**
    * Closes the server.
    */
   private void shutdownImpl()
   {
     // start the fail-safe thread in case the shutdown fails
-    _failSafeHaltThread.destroy();
-    
+    FailSafeHaltThread haltThread = _failSafeHaltThread;
+    if (haltThread != null)
+      haltThread.startShutdown();
+
     try {
       try {
         Socket socket = _pingSocket;
@@ -1191,7 +1194,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       try {
         Server server = _server;
-        
+
         if (server != null)
           server.destroy();
       } catch (Throwable e) {
@@ -1469,6 +1472,9 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     _failSafeHaltThread = new FailSafeHaltThread();
     _failSafeHaltThread.start();
+
+    _shutdownThread = new ShutdownThread();
+    _shutdownThread.start();
 
     setShutdown(this);
 
@@ -1943,10 +1949,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     {
       try {
         Server server = _server;
-        
+
         if (server != null) {
           ClusterServer clusterServer = server.getSelfServer();
-          
+
           return clusterServer.getAddress();
         }
         else
@@ -1964,10 +1970,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     public int getPort()
     {
       Server server = _server;
-        
+
       if (server != null) {
         ClusterServer clusterServer = server.getSelfServer();
-          
+
         return clusterServer.getPort();
       }
       else
