@@ -344,15 +344,13 @@ public class ArrayModule
       if (value.isArray())
         return value.toArrayValue(env).each();
       else {
-        L.l("each() requires argument to be an array");
-        env.warning("each() requires argument to be an array");
+        env.warning(L.l("each() requires argument to be an array"));
 
         return NullValue.NULL;
       }
     }
     else {
-      L.l("each() argument must be a variable");
-      return env.error("each() argument must be a variable");
+      return env.error(L.l("each() argument must be a variable"));
     }
   }
 

@@ -2597,6 +2597,26 @@ public class Env {
   }
 
   /**
+   * Convert to a reference argument.  It's a PHP error to convert anything
+   * but a var or null to a ref arg.
+   */
+  public Value toRefArgument(Value value)
+  {
+    // php/33lg
+    
+    if (value instanceof Var)
+      return (Var) value;
+    else if (value instanceof NullValue)
+      return NullValue.NULL;
+    else {
+      warning(L.l("'{0}' is an invalid reference, because only variables may be passed by reference.",
+                  value));
+      
+      return NullValue.NULL;
+    }
+  }
+
+  /**
    * External calls to set a global value.
    */
   public Value setGlobalValue(String name, Value value)
