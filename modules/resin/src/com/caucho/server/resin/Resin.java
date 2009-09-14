@@ -77,6 +77,7 @@ import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.RandomUtil;
+import com.caucho.util.Shutdown;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
@@ -97,6 +98,7 @@ import java.net.SocketTimeoutException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.*;
+import java.util.concurrent.locks.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -104,10 +106,13 @@ import java.util.logging.Logger;
  * The Resin class represents the top-level container for Resin.
  * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class Resin implements EnvironmentBean, SchemaBean
+public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 {
   private static Logger _log;
   private static L10N _L;
+
+  public static final int EXIT_OK = 0;
+  public static final int EXIT_HALT = 3;
 
   private static final String OBJECT_NAME= "resin:type=Resin";
 
@@ -165,7 +170,10 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Path _resinConf;
 
   private ClassLoader _systemClassLoader;
+  
   private Thread _mainThread;
+  private FailSafeHaltThread _failSafeHaltThread;
+  private ShutdownThread _shutdownThread;
 
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
@@ -222,6 +230,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       _classLoader = (EnvironmentClassLoader) loader;
     else
       _classLoader = EnvironmentClassLoader.create();
+
+    _shutdownThread = new ShutdownThread();
+    _shutdownThread.start();
   }
 
   /**
@@ -1128,20 +1139,48 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
-   * Closes the server.
+   * Start the server shutdown
    */
-  public void destroy()
+  public void startShutdown(String msg)
   {
-    if (! _lifecycle.toDestroying())
+    // start the fail-safe thread in case the shutdown fails
+    FailSafeHaltThread haltThread = _failSafeHaltThread;
+    if (haltThread != null)
+      haltThread.startShutdown();
+    
+    if (_lifecycle.isDestroying())
       return;
 
+    log().severe(msg);
+
+    _shutdownThread.startShutdown();
+  }
+
+  public void destroy()
+  {
+    // start the fail-safe thread in case the shutdown fails
+    FailSafeHaltThread haltThread = _failSafeHaltThread;
+    if (haltThread != null)
+      haltThread.startShutdown();
+    
+    if (_lifecycle.isDestroying())
+      return;
+
+    log().severe("Resin shutdown from destroy() call");
+
+    shutdownImpl();
+  }
+  
+  /**
+   * Closes the server.
+   */
+  private void shutdownImpl()
+  {
+    // start the fail-safe thread in case the shutdown fails
+    _failSafeHaltThread.destroy();
+    
     try {
       try {
-        // notify watchdog thread before starting shutdown
-        synchronized (this) {
-          notifyAll();
-        }
-
         Socket socket = _pingSocket;
 
         if (socket != null)
@@ -1152,12 +1191,13 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       try {
         Server server = _server;
-        _server = null;
-
+        
         if (server != null)
           server.destroy();
       } catch (Throwable e) {
         log().log(Level.WARNING, e.toString(), e);
+      } finally {
+        _server = null;
       }
 
       try {
@@ -1180,7 +1220,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       _lifecycle.toDestroy();
 
       if (_mainThread != null)
-        System.exit(0); // XXX: check exit code with config errors
+        System.exit(EXIT_OK); // check exit code with config errors
     }
   }
 
@@ -1426,6 +1466,11 @@ public class Resin implements EnvironmentBean, SchemaBean
     _mainThread.setContextClassLoader(_systemClassLoader);
 
     addRandom();
+
+    _failSafeHaltThread = new FailSafeHaltThread();
+    _failSafeHaltThread.start();
+
+    setShutdown(this);
 
     System.out.println(com.caucho.Version.FULL_VERSION);
     System.out.println(com.caucho.Version.COPYRIGHT);
@@ -1683,18 +1728,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
-   * Shuts the server down.
-   */
-  public static void shutdown()
-  {
-    Resin resin = getLocal();
-
-    if (resin != null) {
-      resin.destroy();
-    }
-  }
-
-  /**
    * The main start of the web server.
    *
    * <pre>
@@ -1719,34 +1752,13 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       Server server = resin.getServer();
 
-      DestroyThread destroyThread = new DestroyThread(resin);
-      destroyThread.start();
-
       resin.startResinActor();
 
       resin.waitForExit();
 
-      destroyThread.shutdown();
+      resin.startShutdown("Resin shutdown from watchdog exit");
 
-      long stopTime = System.currentTimeMillis();
-      long endTime = stopTime + 15000L;
-
-      if (server != null)
-        endTime = stopTime + server.getShutdownWaitMax() ;
-
-      while (System.currentTimeMillis() < endTime && ! resin.isClosed()) {
-        try {
-          Thread.interrupted();
-          Thread.sleep(100);
-        } catch (Throwable e) {
-        }
-      }
-
-      if (! resin.isClosed()) {
-        EnvironmentStream.getOriginalSystemErr().println("Resin halting due to stalled shutdown");
-        Runtime.getRuntime().halt(1);
-      }
-
+      Thread.sleep(resin.getShutdownWaitMax() + 600000);
       System.exit(0);
     } catch (Throwable e) {
       boolean isCompile = false;
@@ -2197,40 +2209,76 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
   }
 
-  static class DestroyThread extends Thread {
-    private final Resin _resin;
-    private boolean _isDestroy;
+  class ShutdownThread extends Thread {
+    private volatile boolean _isShutdown;
 
-    DestroyThread(Resin resin)
+    ShutdownThread()
     {
-      _resin = resin;
-
-      setName("resin-destroy");
+      setName("resin-shutdown");
       setDaemon(true);
     }
 
-    public void shutdown()
+    /**
+     * Starts the destroy sequence
+     */
+    public void startShutdown()
     {
-      synchronized (this) {
-        _isDestroy = true;
-        notifyAll();
-      }
+      _isShutdown = true;
+      LockSupport.unpark(this);
     }
 
     public void run()
     {
-      synchronized (this) {
-        while (! _isDestroy) {
-          try {
-            wait();
-          } catch (Exception e) {
-          }
+      while (! _isShutdown) {
+        try {
+          LockSupport.park();
+        } catch (Exception e) {
         }
       }
 
-      EnvironmentStream.logStderr("closing server");
+      shutdownImpl();
+    }
+  }
 
-      _resin.destroy();
+  class FailSafeHaltThread extends Thread {
+    private volatile boolean _isShutdown;
+
+    FailSafeHaltThread()
+    {
+      setName("resin-fail-safe-halt");
+      setDaemon(true);
+    }
+
+    /**
+     * Starts the shutdown sequence
+     */
+    public void startShutdown()
+    {
+      _isShutdown = true;
+      LockSupport.unpark(this);
+    }
+
+    public void run()
+    {
+      while (! _isShutdown) {
+        try {
+          LockSupport.park();
+        } catch (Exception e) {
+        }
+      }
+
+      long expire = System.currentTimeMillis() + _shutdownWaitMax;
+      long now;
+
+      while ((now = System.currentTimeMillis()) < expire) {
+        try {
+          Thread.interrupted();
+          Thread.sleep(expire - now);
+        } catch (Exception e) {
+        }
+      }
+
+      Runtime.getRuntime().halt(Resin.EXIT_HALT);
     }
   }
 

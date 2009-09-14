@@ -312,7 +312,7 @@ public class ResinEmbed
       return;
 
     try {
-      _resin.destroy();
+      _resin.startShutdown("Resin shutdown from embedded server");
     } catch (RuntimeException e) {
       throw e;
     } catch (Throwable e) {

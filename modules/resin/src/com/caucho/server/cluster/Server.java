@@ -2149,9 +2149,9 @@ public class Server extends ProtocolDispatchServer
 
       if (isModified()) {
         // XXX: message slightly wrong
-        log.warning("Resin restarting due to configuration change");
+        String msg = L.l("Resin restarting due to configuration change");
 
-        _selfServer.getCluster().getResin().destroy();
+        _selfServer.getCluster().getResin().startShutdown(msg);
         return;
       }
 
@@ -2413,6 +2413,21 @@ public class Server extends ProtocolDispatchServer
       if (alarm != null)
         alarm.dequeue();
 
+      if (getSelectManager() != null)
+        getSelectManager().stop();
+
+      ArrayList<Port> ports = _selfServer.getPorts();
+      for (int i = 0; i < ports.size(); i++) {
+        Port port = ports.get(i);
+
+        try {
+          if (port != _selfServer.getClusterPort())
+            port.close();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      }
+
       try {
         if (_systemStore != null)
           _systemStore.close();
@@ -2425,20 +2440,6 @@ public class Server extends ProtocolDispatchServer
           _globalStore.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
-      }
-
-      if (getSelectManager() != null)
-        getSelectManager().stop();
-
-      ArrayList<Port> ports = _selfServer.getPorts();
-      for (int i = 0; i < ports.size(); i++) {
-        Port port = ports.get(i);
-
-        try {
-          port.close();
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
       }
 
       try {
@@ -2536,13 +2537,14 @@ public class Server extends ProtocolDispatchServer
       Resin resin = _resin;
 
       if (resin != null)
-        resin.destroy();
+        resin.startShutdown(L.l("Resin shutdown from Server.destroy()"));
     }
   }
 
   public String toString()
   {
-    return (getClass().getSimpleName() + "[id=" + getServerId()
+    return (getClass().getSimpleName()
+            + "[id=" + getServerId()
             + ",cluster=" + _selfServer.getCluster().getId() + "]");
   }
 

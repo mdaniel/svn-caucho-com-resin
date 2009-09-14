@@ -27,50 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.resin;
+package com.caucho.util;
 
-import com.caucho.bam.*;
-import com.caucho.boot.WatchdogStopQuery;
-import com.caucho.hemp.broker.HempMemoryQueue;
-import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
 
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Service for handling the distributed cache
+ * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ResinActor extends SimpleActor
-{
-  private static final Logger log
-    = Logger.getLogger(ResinActor.class.getName());
+abstract public class Shutdown {
+  private static Shutdown _shutdown;
 
-  private static final L10N L = new L10N(ResinActor.class);
-
-  private Resin _resin;
-  
-  ResinActor(Resin resin)
+  protected void setShutdown(Shutdown shutdown)
   {
-    _resin = resin;
-    
-    setJid("resin");
+    _shutdown = _shutdown;
   }
 
-  @QuerySet
-  public void stop(long id,
-		   String to,
-		   String from,
-		   WatchdogStopQuery query)
+  abstract protected void startShutdown(String msg);
+
+  public static void shutdown(String msg)
   {
-    log.info(_resin + " stop request from watchdog '" + from + "'");
+    Shutdown shutdown = _shutdown;
 
-    _resin.startShutdown(L.l("Resin shutdown from watchdog stop '"
-                             + from + "'"));
-
-    getBrokerStream().queryResult(id, from, to, query);
-  }
-
-  public void destroy()
-  {
-    _resin.startShutdown(L.l("Resin shutdown from ResinActor"));
+    if (shutdown != null)
+      shutdown.startShutdown(msg);
+    else {
+      System.err.println(msg);
+      System.exit(1);
+    }
   }
 }
