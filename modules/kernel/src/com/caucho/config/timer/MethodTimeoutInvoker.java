@@ -26,16 +26,13 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.config.timer;
 
-import javax.enterprise.inject.spi.Producer;
-import javax.ejb.Timer;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+
+import javax.ejb.Timer;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.util.L10N;
 
 /**
@@ -43,28 +40,27 @@ import com.caucho.util.L10N;
  */
 public class MethodTimeoutInvoker extends TimeoutInvoker {
   private static final L10N L = new L10N(BeanTimeoutInvoker.class);
-  
+
   private TimeoutCaller _caller;
   private Method _method;
   private boolean _isTimer;
 
-  MethodTimeoutInvoker(TimeoutCaller caller,
-                     Method method)
+  @SuppressWarnings("unchecked")
+  MethodTimeoutInvoker(TimeoutCaller caller, Method method)
   {
     _caller = caller;
     _method = method;
 
-    Class []param = method.getParameterTypes();
+    Class[] param = method.getParameterTypes();
 
     if (param.length == 0) {
-    }
-    else if (param.length == 1 && param[0].isAssignableFrom(Timer.class))
+    } else if (param.length == 1 && param[0].isAssignableFrom(Timer.class))
       _isTimer = true;
     else
       throw new ConfigException(L.l("'{0}' is an invalid schedule method",
-                                    method));
+          method));
   }
-  
+
   public void timeout(Timer timer)
   {
     try {

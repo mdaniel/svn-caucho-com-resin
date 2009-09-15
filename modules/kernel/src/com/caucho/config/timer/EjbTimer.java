@@ -29,20 +29,15 @@
 package com.caucho.config.timer;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.EJBException;
 import javax.ejb.NoSuchObjectLocalException;
 import javax.ejb.ScheduleExpression;
-import javax.ejb.TimedObject;
 import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
-import com.caucho.config.inject.InjectManager;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -50,19 +45,11 @@ import com.caucho.util.L10N;
  * Resin EJB timer. This object is mostly an adapter/decorator over the
  * underlying scheduled task.
  */
-// TODO This is in the kernel module because it needs to be referenced by the
-// callback chain. The timer service is in the resin module
-// because it is heavily dependent on the classes in that module. Is there a
-// way to be able to invoke the timer service implementation directly from the
-// chain? If that is possible, it would eliminate a bit of code strangeness. I
-// did not want to move too many things around because I am not really very
-// familiar with the way the module dependencies are organized.
 public class EjbTimer implements Timer, Runnable {
+  @SuppressWarnings("unused")
   private static final L10N L = new L10N(EjbTimer.class);
-  private static final Logger log
-    = Logger.getLogger(EjbTimer.class.getName());
-
-  private static InjectManager _injectionManager = InjectManager.create();
+  @SuppressWarnings("unused")
+  private static final Logger log = Logger.getLogger(EjbTimer.class.getName());
 
   private TimerTask _scheduledTask;
 
@@ -118,14 +105,12 @@ public class EjbTimer implements Timer, Runnable {
       Date start = null;
       Date end = null;
       /*
-      if (_scheduledTask.getStart() != -1) {
-        start = new Date(_scheduledTask.getStart());
-      }
-
-      if (_scheduledTask.getEnd() != -1) {
-        end = new Date(_scheduledTask.getEnd());
-      }
-      */
+       * if (_scheduledTask.getStart() != -1) { start = new
+       * Date(_scheduledTask.getStart()); }
+       * 
+       * if (_scheduledTask.getEnd() != -1) { end = new
+       * Date(_scheduledTask.getEnd()); }
+       */
 
       return new ScheduleExpression().second(cronExpression.getSecond())
           .minute(cronExpression.getMinute()).hour(cronExpression.getHour())
@@ -276,7 +261,6 @@ public class EjbTimer implements Timer, Runnable {
   /**
    * Runs the timer task.
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void run()
   {

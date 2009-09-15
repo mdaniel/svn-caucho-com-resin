@@ -45,11 +45,6 @@ import com.caucho.util.L10N;
 // TODO This should probably be a application/server/cluster managed bean
 // itself - would get rid of the boilerplate factory code; I could not figure
 // out how to make that happen - tried @ApplicationScoped.
-// TODO The reason for this layer is to avoid moving EJB related classes to the
-// kernel and still be able to do EJB scheduling from the call chain generators.
-// Is there a way to do all the alarm handling in the timer service in
-// the resin module instead and put the timer service implementation in the
-// kernel module?
 public class Scheduler {
   @SuppressWarnings("unused")
   private static final L10N L = new L10N(Scheduler.class);
@@ -100,14 +95,6 @@ public class Scheduler {
       final Class targetBean)
   {
     Collection<TimerTask> tasks = new LinkedList<TimerTask>();
-
-    /*
-    for (TimerTask task : _scheduledTasks) {
-      if (task.getTargetBean() == targetBean) {
-        tasks.add(task);
-      }
-    }
-    */
 
     return tasks;
   }

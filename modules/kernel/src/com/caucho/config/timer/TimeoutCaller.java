@@ -29,22 +29,18 @@
 
 package com.caucho.config.timer;
 
-import javax.enterprise.inject.spi.Producer;
-import javax.ejb.Timer;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.timer.TimeoutInvoker;
-import com.caucho.util.L10N;
+import javax.ejb.Timer;
 
 /**
  * Callback for a timer
  */
 public interface TimeoutCaller {
-  public void timeout(Method method)
-    throws InvocationTargetException, IllegalAccessException;
-  
+  public void timeout(Method method) throws InvocationTargetException,
+      IllegalAccessException;
+
   public void timeout(Method method, Timer timer)
-    throws InvocationTargetException, IllegalAccessException;
+      throws InvocationTargetException, IllegalAccessException;
 }

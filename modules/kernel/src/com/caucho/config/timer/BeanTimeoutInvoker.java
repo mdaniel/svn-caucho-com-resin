@@ -26,7 +26,6 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.config.timer;
 
 import javax.enterprise.inject.spi.Producer;
@@ -43,28 +42,29 @@ import com.caucho.util.L10N;
  */
 public class BeanTimeoutInvoker extends TimeoutInvoker {
   private static final L10N L = new L10N(BeanTimeoutInvoker.class);
-  
+
+  @SuppressWarnings("unchecked")
   private Producer _producer;
   private Method _method;
   private boolean _isTimer;
 
-  BeanTimeoutInvoker(Producer producer,
-                     Method method)
+  @SuppressWarnings("unchecked")
+  BeanTimeoutInvoker(Producer producer, Method method)
   {
     _producer = producer;
     _method = method;
 
-    Class []param = method.getParameterTypes();
+    Class[] param = method.getParameterTypes();
 
     if (param.length == 0) {
-    }
-    else if (param.length == 1 && param[0].isAssignableFrom(Timer.class))
+    } else if (param.length == 1 && param[0].isAssignableFrom(Timer.class))
       _isTimer = true;
     else
       throw new ConfigException(L.l("'{0}' is an invalid schedule method",
-                                    method));
+          method));
   }
-  
+
+  @SuppressWarnings("unchecked")
   public void timeout(Timer timer)
   {
     try {

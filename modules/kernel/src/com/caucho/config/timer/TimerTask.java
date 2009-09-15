@@ -29,9 +29,9 @@
 package com.caucho.config.timer;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.ejb.Timer;
 
 import com.caucho.config.types.Trigger;
@@ -44,12 +44,10 @@ import com.caucho.util.ThreadPool;
  */
 public class TimerTask implements AlarmListener {
   private static AtomicLong _currentTaskId = new AtomicLong();
-  
-  private ClassLoader _loader
-    = Thread.currentThread().getContextClassLoader();
+
+  private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
 
   private long _taskId;
-  @SuppressWarnings("unchecked")
   private TimeoutInvoker _invoker;
   private Runnable _task;
   private CronExpression _cronExpression;
@@ -80,15 +78,11 @@ public class TimerTask implements AlarmListener {
    * @param data
    *          The data to be passed to the invocation target.
    */
-  @SuppressWarnings("unchecked")
-  public TimerTask(TimeoutInvoker invoker,
-                   Runnable task,
-                   CronExpression cronExpression,
-                   Trigger trigger,
-                   Serializable data)
+  public TimerTask(TimeoutInvoker invoker, Runnable task,
+      CronExpression cronExpression, Trigger trigger, Serializable data)
   {
     _taskId = _currentTaskId.incrementAndGet();
-    
+
     _invoker = invoker;
 
     _task = task;
@@ -104,7 +98,7 @@ public class TimerTask implements AlarmListener {
   {
     long now = Alarm.getCurrentTime();
     long nextTime = _trigger.nextTime(now);
-    
+
     _alarm = new Alarm(this); // TODO Try a weak alarm instead.
     _alarm.queue(nextTime - now);
   }
@@ -157,8 +151,8 @@ public class TimerTask implements AlarmListener {
    */
   public void cancel()
   {
-    // TODO This should probably be a proper lookup of the timer service
-    // (perhaps via JCDI).
+    // TODO This should probably be a proper lookup/injection of the scheduler
+    // via CDI.
     Scheduler.removeTimerTask(this);
     _cancelled.set(true);
     _alarm.dequeue();
@@ -248,10 +242,10 @@ public class TimerTask implements AlarmListener {
     if (getClass() != object.getClass())
       return false;
     TimerTask other = (TimerTask) object;
-    
+
     if (_taskId != other.getTaskId())
       return false;
-    
+
     return true;
   }
 

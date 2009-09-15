@@ -43,7 +43,7 @@ public class EjbTimerInvocation extends TimeoutInvoker {
   {
     _server = server;
   }
-  
+
   public void timeout(Timer timer)
   {
     _server.timeout(timer);

@@ -41,13 +41,6 @@ import com.caucho.util.L10N;
  * Resin EJB timer handle. This is mostly an adapter/decorator on top of the
  * underlying scheduling system.
  */
-// TODO This is in the kernel module because it needs to be referenced by the
-// callback chain. The timer service is in the resin module
-// because it is heavily dependent on the classes in that module. Is there a
-// way to be able to invoke the timer service implementation directly from the
-// chain? If that is possible, it would eliminate a bit of code strangeness. I
-// did not want to move too many things around because I am not really very
-// familiar with the way the module dependencies are organized.
 public class EjbTimerHandle implements TimerHandle {
   private static final long serialVersionUID = 1L;
 
@@ -85,8 +78,8 @@ public class EjbTimerHandle implements TimerHandle {
   public Timer getTimer() throws IllegalStateException,
       NoSuchObjectLocalException, EJBException
   {
-    // TODO This should probably be a proper lookup of the scheduler (perhaps
-    // via JCDI).
+    // TODO This should probably be a proper lookup/injection of the scheduler
+    // via CDI.
     TimerTask scheduledTask = Scheduler.getTimerTaskById(_taskId);
 
     if (scheduledTask == null) {
