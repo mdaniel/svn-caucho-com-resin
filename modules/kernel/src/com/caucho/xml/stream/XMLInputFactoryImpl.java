@@ -261,6 +261,14 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
       // XXX?
       return;
     }
+    else if ("javax.xml.stream.supportDTD".equals(name)) {
+      boolean supportDTD = (Boolean) value;
+
+      if (supportDTD)
+        throw new UnsupportedOperationException("javax.xml.stream.supportDTD=true not implemented");
+
+      return;
+    }
 
     throw new IllegalArgumentException("property \""+name+"\" not supported");
   }
