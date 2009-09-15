@@ -561,6 +561,9 @@ public class DeployService extends SimpleActor
 
       Path path = root.lookup(name);
 
+      if (! path.getParent().exists())
+        path.getParent().mkdirs();
+
       _repository.expandToPath(path, hex);
 
       getBrokerStream().queryResult(id, from, to, "ok");
