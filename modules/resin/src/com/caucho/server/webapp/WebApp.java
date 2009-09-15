@@ -3279,8 +3279,10 @@ public class WebApp extends ServletContextImpl
   public RequestDispatcher getNamedDispatcher(String servletName)
   {
     try {
+      Invocation invocation = null;
+      
       FilterChain chain
-	= _servletManager.createServletChain(servletName, null);
+	= _servletManager.createServletChain(servletName, null, invocation);
 
       FilterChain includeChain
         = _includeFilterMapper.buildFilterChain(chain, servletName);

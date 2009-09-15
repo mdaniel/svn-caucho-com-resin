@@ -151,7 +151,10 @@ public class FilterMapper {
           Filter filter = _filterManager.createFilter(filterName);
           FilterConfigImpl config = _filterManager.getFilter(filterName);
 
-          chain = addFilter(chain, filter, config.isAsyncSupported());
+          if (! config.isAsyncSupported())
+            invocation.clearAsyncSupported();
+
+          chain = addFilter(chain, filter);
         }
       }
     }
@@ -166,7 +169,10 @@ public class FilterMapper {
           Filter filter = _filterManager.createFilter(filterName);
           FilterConfigImpl config = _filterManager.getFilter(filterName);
 
-          chain = addFilter(chain, filter, config.isAsyncSupported());
+          if (! config.isAsyncSupported())
+            invocation.clearAsyncSupported();
+
+          chain = addFilter(chain, filter);
         }
       }
     }
@@ -185,7 +191,7 @@ public class FilterMapper {
    * Fills in the invocation.
    */
   public FilterChain buildFilterChain(FilterChain chain,
-                                     String servletName)
+                                      String servletName)
     throws ServletException
   {
     synchronized (_filterMap) {
@@ -197,7 +203,7 @@ public class FilterMapper {
 
           Filter filter = _filterManager.createFilter(filterName);
 
-          chain = addFilter(chain, filter, true);
+          chain = addFilter(chain, filter);
         }
       }
     }
@@ -206,9 +212,8 @@ public class FilterMapper {
   }
 
   private FilterChain addFilter(FilterChain chain,
-                                Filter filter,
-                                boolean isAsyncSupported)
+                                Filter filter)
   {
-    return new FilterFilterChain(chain, filter, isAsyncSupported);
+    return new FilterFilterChain(chain, filter);
   }
 }

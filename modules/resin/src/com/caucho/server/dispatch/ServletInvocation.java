@@ -69,6 +69,8 @@ public class ServletInvocation {
   private String _servletName;
   private FilterChain _filterChain;
 
+  private boolean _isAsyncSupported = true;
+
   private AtomicLong _requestCount = new AtomicLong();
 
   private HashMap<String,String> _securityRoleMap;
@@ -233,6 +235,22 @@ public class ServletInvocation {
   public long getRequestCount()
   {
     return _requestCount.get();
+  }
+
+  /**
+   * True if the invocation chain supports async (comet) requets.
+   */
+  public boolean isAsyncSupported()
+  {
+    return _isAsyncSupported;
+  }
+
+  /**
+   * Mark the invocation chain as not supporting async.
+   */
+  public void clearAsyncSupported()
+  {
+    _isAsyncSupported = false;
   }
 
   /**

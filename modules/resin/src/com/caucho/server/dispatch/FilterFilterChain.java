@@ -53,8 +53,6 @@ public class FilterFilterChain implements FilterChain
   // filter
   private Filter _filter;
 
-  final private boolean _isAsyncSupported;
-
   private boolean _isFinest;
 
   /**
@@ -64,12 +62,10 @@ public class FilterFilterChain implements FilterChain
    * @param filter the user's filter
    */
   public FilterFilterChain(FilterChain next,
-                           Filter filter,
-                           boolean isAsyncSupported)
+                           Filter filter)
   {
     _next = next;
     _filter = filter;
-    _isAsyncSupported = isAsyncSupported;
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
@@ -88,9 +84,6 @@ public class FilterFilterChain implements FilterChain
   {
     if (_isFinest)
       log.finest("Dispatch " + request + " filter=" + _filter + " next=" + _next);
-
-    if (request instanceof CauchoRequest)
-      ((CauchoRequest)request).setAsyncSupported(_isAsyncSupported);
 
     _filter.doFilter(request, response, _next);
   }

@@ -79,7 +79,7 @@ public class RewriteFilterAdapter implements RewriteFilter
 			 String queryString,
 			 FilterChain next)
   {
-    return new FilterFilterChain(next, _filter, true);
+    return new FilterFilterChain(next, _filter);
   }
 
   public String toString()

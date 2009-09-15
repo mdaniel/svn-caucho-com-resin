@@ -462,8 +462,8 @@ public final class Lifecycle implements LifecycleState {
 
     _lastChangeTime = Alarm.getCurrentTime();
 
-    if (_log != null && _log.isLoggable(_lowLevel))
-      _log.log(_lowLevel, _name + " active");
+    if (_log != null && _log.isLoggable(_level))
+      _log.log(_level, _name + " active");
 
     notifyListeners(state, IS_ACTIVE);
 
@@ -518,8 +518,8 @@ public final class Lifecycle implements LifecycleState {
 
     _lastChangeTime = Alarm.getCurrentTime();
 
-    if (_log != null && _log.isLoggable(_lowLevel))
-      _log.log(_lowLevel, _name + " stopping");
+    if (_log != null && _log.isLoggable(_level))
+      _log.log(_level, _name + " stopping");
 
     notifyListeners(state, IS_STOPPING);
 

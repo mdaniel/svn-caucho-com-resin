@@ -109,17 +109,6 @@ public class ServletFilterChain implements FilterChain {
     }
 
     try {
-      //XXX: Better way of passing this in is needed
-      request.setAttribute(HttpServletRequestImpl.MULTIPARTCONFIG,
-                           _config.getMultipartConfig());
-
-      if (request instanceof CauchoRequest) {
-        CauchoRequest cauchoRequest
-          = (CauchoRequest) request;
-
-        cauchoRequest.setAsyncSupported(_config.isAsyncSupported());
-      }
-
       _servlet.service(request, response);
     } catch (UnavailableException e) {
       _servlet = null;

@@ -374,7 +374,7 @@ public class ServletMapper {
     }
 
     FilterChain chain
-      = _servletManager.createServletChain(servletName, config);
+      = _servletManager.createServletChain(servletName, config, invocation);
 
     if (chain instanceof PageFilterChain) {
       PageFilterChain pageChain = (PageFilterChain) chain;

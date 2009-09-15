@@ -116,7 +116,7 @@ public class CometServletFilterChain implements FilterChain {
       controller = requestImpl.getCometController();
 
       if (controller != null) {
-        if (! _servlet.service(request, response, controller)) {
+        if (! _servlet.resume(request, response, controller)) {
           controller.complete();
           controller = null;
         }

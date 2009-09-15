@@ -278,11 +278,6 @@ public class CauchoRequestWrapper implements CauchoRequest {
     return _request.isAsyncSupported();
   }
 
-  public void setAsyncSupported(boolean isAsyncSupported) {
-    if (_request instanceof CauchoRequest)
-      ((CauchoRequest)_request).setAsyncSupported(isAsyncSupported);
-  }
-
   public void setAsyncTimeout(long timeout)
   {
     _request.setAsyncTimeout(timeout);

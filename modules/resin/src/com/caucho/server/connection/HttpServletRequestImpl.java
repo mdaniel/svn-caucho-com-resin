@@ -2082,18 +2082,13 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isAsyncSupported()
   {
-    return _isAsyncSupported;
-  }
+    Invocation invocation = _invocation;
 
-  /**
-   * Once set to false remains false 
-   * @param isAsyncSupported
-   */
-  public void setAsyncSupported(boolean isAsyncSupported) {
-    if (_isAsyncSupported)
-      _isAsyncSupported = isAsyncSupported;
+    if (invocation != null)
+      return invocation.isAsyncSupported();
+    else
+      return false;
   }
-
 
   /**
    * Sets the async timeout
@@ -2117,8 +2112,9 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public AsyncContext startAsync()
   {
-    if (!_isAsyncSupported)
-      throw new IllegalStateException(L.l("Async is not supported. Check that all Filters and Servlets at '{0}' support asynchronous mode.", getServletPath()));
+    if (! _isAsyncSupported)
+      throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not have an @AsyncSupported annotation.",
+                                          getServletName(), getServletPath()));
 
     if (_comet == null) {
       _comet = _request.getConnection().toComet(true, this, _response);

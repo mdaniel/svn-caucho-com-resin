@@ -209,7 +209,8 @@ public class ServletManager {
    * Creates the servlet chain for the servlet.
    */
   public FilterChain createServletChain(String servletName,
-					ServletConfigImpl config)
+					ServletConfigImpl config,
+                                        ServletInvocation invocation)
     throws ServletException
   {
     if (config == null)
@@ -218,6 +219,9 @@ public class ServletManager {
     if (config == null) {
       throw new ServletConfigException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
     }
+
+    if (! config.isAsyncSupported())
+      invocation.clearAsyncSupported();
 
     return config.createServletChain();
   }
