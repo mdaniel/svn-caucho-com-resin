@@ -10,7 +10,10 @@ if ($error) {
   echo "<h3 class='fail'>Error: $error</h3>";
 }
 
-?><form method="POST" action="j_security_check?j_uri=index.php">
+?>
+<h2>Login</h2>
+
+<form method="POST" action="j_security_check?j_uri=index.php">
 <table border='0'>
 <tr>
   <th>Username: </th>

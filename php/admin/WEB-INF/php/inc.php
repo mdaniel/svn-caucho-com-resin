@@ -152,7 +152,7 @@ function format_ago_class($date, $fail=3600, $warn=14400)
   if ($event_time < 365 * 24 * 3600)
     return "";
 
-  $now = time(0);
+  $now = time();
   $ago = $now - $event_time;
 
   if ($ago < $fail)

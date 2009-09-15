@@ -148,6 +148,12 @@ if ($profile) {
 
     echo "</th></tr>\n";
 
+    echo "<tr>";
+    echo "  <th>% self</th>";
+    echo "  <th>% sum</th>";
+    echo "  <th>time self";
+    echo "<th><th>trace\n";
+
     $total_percent = 0;
     for ($i = 0; $i < sizeof($entries); $i++) {
       $entry = $entries[$i];

@@ -31,8 +31,6 @@ package com.caucho.server.log;
 
 import com.caucho.util.FreeList;
 
-import java.util.concurrent.Semaphore;
-
 /**
  * Holds the HTTP buffers for keepalive reuse.  Because a request needs a
  * large number of buffers, but a keepalive doesn't need those buffers,
@@ -41,33 +39,13 @@ import java.util.concurrent.Semaphore;
  */
 public final class LogBuffer
 {
-  private static final Semaphore _logSemaphore = new Semaphore(16 * 1024);
-  private static final FreeList<LogBuffer> _freeList
-    = new FreeList<LogBuffer>(256);
-				    
   private final byte []_logBuffer = new byte[1024];
   private int _length;
 
   private LogBuffer _next;
 
-  private LogBuffer()
+  LogBuffer()
   {
-  }
-
-  public static LogBuffer allocate()
-  {
-    try {
-      Thread.interrupted();
-      _logSemaphore.acquire();
-    } catch (Exception e) {
-    }
-    
-    LogBuffer buffer = _freeList.allocate();
-
-    if (buffer == null)
-      buffer = new LogBuffer();
-
-    return buffer;
   }
 
   public final byte []getBuffer()
@@ -95,16 +73,6 @@ public final class LogBuffer
     _next = next;
   }
 
-  public void free()
-  {
-    _logSemaphore.release();
-
-    _next = null;
-
-    _freeList.free(this);
-  }
-  
-  
   @Override
   public String toString()
   {

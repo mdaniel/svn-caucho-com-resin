@@ -75,11 +75,11 @@ public class Table extends Store {
 
   private final static int ROOT_DATA_OFFSET = STORE_CREATE_END;
   private final static int INDEX_ROOT_OFFSET = ROOT_DATA_OFFSET + 32;
-  
+
   private final static int ROOT_DATA_END = ROOT_DATA_OFFSET + 1024;
-  
+
   public final static int INLINE_BLOB_SIZE = 120;
-  
+
   public final static long ROW_CLOCK_MIN = 1024;
 
   public final static byte ROW_VALID = 0x1;
@@ -88,7 +88,7 @@ public class Table extends Store {
 
   private final static String DB_VERSION = "Resin-DB 4.0.2";
   private final static String MIN_VERSION = "Resin-DB 4.0.2";
-  
+
   private final Row _row;
 
   private final int _rowLength;
@@ -96,7 +96,7 @@ public class Table extends Store {
   private final int _rowEnd;
 
   private final Constraint[]_constraints;
-  
+
   private final Column _autoIncrementColumn;
 
   private long _entries;
@@ -116,7 +116,7 @@ public class Table extends Store {
   Table(Database database, String name, Row row, Constraint constraints[])
   {
     super(database, name, null);
-    
+
     _row = row;
     _constraints = constraints;
 
@@ -125,14 +125,14 @@ public class Table extends Store {
     _rowEnd = _rowLength * _rowsPerBlock;
 
     _rowClockAddr = 0;
-    
+
     Column []columns = _row.getColumns();
     Column autoIncrementColumn = null;
     for (int i = 0; i < columns.length; i++) {
       columns[i].setTable(this);
-      
+
       if (columns[i].getAutoIncrement() >= 0)
-	autoIncrementColumn = columns[i];
+        autoIncrementColumn = columns[i];
     }
     _autoIncrementColumn = autoIncrementColumn;
 
@@ -160,7 +160,7 @@ public class Table extends Store {
   {
     return _rowEnd;
   }
-  
+
   public final Column []getColumns()
   {
     return _row.getColumns();
@@ -195,7 +195,7 @@ public class Table extends Store {
 
     for (int i = 0; i < columns.length; i++) {
       if (columns[i].getName().equals(name))
-	return columns[i];
+        return columns[i];
     }
 
     return null;
@@ -215,7 +215,7 @@ public class Table extends Store {
 
     for (int i = 0; i < columns.length; i++) {
       if (columns[i].getName().equals(name))
-	return i;
+        return i;
     }
 
     return -1;
@@ -231,8 +231,8 @@ public class Table extends Store {
 
     if (! path.exists()) {
       if (log.isLoggable(Level.FINE))
-	log.fine(db + " '" + path.getNativePath() + "' is an unknown table");
-      
+        log.fine(db + " '" + path.getNativePath() + "' is an unknown table");
+
       return null; //throw new SQLException(L.l("table {0} does not exist", name));
     }
 
@@ -247,19 +247,19 @@ public class Table extends Store {
       int ch;
 
       while ((ch = is.read()) > 0) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       version = sb.toString();
 
       if (! version.startsWith("Resin-DB")) {
-	throw new SQLException(L.l("table {0} is not a Resin DB.  Version '{1}'",
-				   name, version));
+        throw new SQLException(L.l("table {0} is not a Resin DB.  Version '{1}'",
+                                   name, version));
       }
       else if (version.compareTo(MIN_VERSION) < 0 ||
-	       DB_VERSION.compareTo(version) < 0) {
-	throw new SQLException(L.l("table {0} is out of date.  Old version {1}.",
-				   name, version));
+               DB_VERSION.compareTo(version) < 0) {
+        throw new SQLException(L.l("table {0} is out of date.  Old version {1}.",
+                                   name, version));
       }
     } finally {
       is.close();
@@ -274,39 +274,37 @@ public class Table extends Store {
 
       int ch;
       while ((ch = is.read()) > 0) {
-	cb.append((char) ch);
+        cb.append((char) ch);
       }
 
       String sql = cb.toString();
 
       if (log.isLoggable(Level.FINER))
-	log.finer("Table[" + name + "] " + version + " loading\n" + sql);
+        log.finer("Table[" + name + "] " + version + " loading\n" + sql);
 
       try {
-	CreateQuery query = (CreateQuery) Parser.parse(db, sql);
+        CreateQuery query = (CreateQuery) Parser.parse(db, sql);
 
-	TableFactory factory = query.getFactory();
+        TableFactory factory = query.getFactory();
 
-	if (! factory.getName().equalsIgnoreCase(name))
-	  throw new IOException(L.l("factory {0} does not match", name));
-	
-	Table table = new Table(db, factory.getName(), factory.getRow(),
-				factory.getConstraints());
+        if (! factory.getName().equalsIgnoreCase(name))
+          throw new IOException(L.l("factory {0} does not match", name));
 
-	table.init();
+        Table table = new Table(db, factory.getName(), factory.getRow(),
+                                factory.getConstraints());
 
-	table.clearIndexes();
-	table.initIndexes();
-	table.rebuildIndexes();
-      
-	return table;
+        table.init();
+
+        table.clearIndexes();
+        table.initIndexes();
+        table.rebuildIndexes();
+
+        return table;
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	log.warning(e.toString());
+        log.log(Level.WARNING, e.toString(), e);
 
-	throw new SQLException(L.l("can't load table {0} in {1}.\n{2}",
-				   name, path.getNativePath(), e.toString()));
+        throw new SQLException(L.l("can't load table {0} in {1}.\n{2}",
+                                   name, path.getNativePath(), e.toString()));
       }
     } finally {
       is.close();
@@ -328,13 +326,13 @@ public class Table extends Store {
     readBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE);
 
     TempStream ts = new TempStream();
-      
+
     WriteStream os = new WriteStream(ts);
 
     try {
       for (int i = 0; i < ROOT_DATA_OFFSET; i++)
-	os.write(tempBuffer[i]);
-      
+        os.write(tempBuffer[i]);
+
       writeTableHeader(os);
     } finally {
       os.close();
@@ -344,13 +342,13 @@ public class Table extends Store {
     int offset = 0;
     for (; head != null; head = head.getNext()) {
       byte []buffer = head.getBuffer();
-      
+
       int length = head.getLength();
-      
+
       System.arraycopy(buffer, 0, tempBuffer, offset, length);
 
       for (; length < buffer.length; length++) {
-	tempBuffer[offset + length] = 0;
+        tempBuffer[offset + length] = 0;
       }
 
       offset += buffer.length;
@@ -363,7 +361,7 @@ public class Table extends Store {
 
     _database.addTable(this);
   }
-  
+
   /**
    * Initialize the indexes
    */
@@ -375,24 +373,24 @@ public class Table extends Store {
       Column column = columns[i];
 
       if (! column.isUnique())
-	continue;
+        continue;
 
       KeyCompare keyCompare = column.getIndexKeyCompare();
 
       if (keyCompare == null)
-	continue;
+        continue;
 
       Block rootBlock = allocateIndexBlock();
       long rootBlockId = rootBlock.getBlockId();
       rootBlock.free();
 
       BTree btree = new BTree(this, rootBlockId, column.getLength(),
-			      keyCompare);
+                              keyCompare);
 
       column.setIndex(btree);
     }
   }
-  
+
   /**
    * Clears the indexes
    */
@@ -405,34 +403,34 @@ public class Table extends Store {
       BTree index = columns[i].getIndex();
 
       if (index == null)
-	continue;
+        continue;
 
       long rootAddr = index.getIndexRoot();
 
       Block block = readBlock(addressToBlockId(rootAddr));
 
       try {
-	byte []blockBuffer = block.getBuffer();
+        byte []blockBuffer = block.getBuffer();
 
-	synchronized (blockBuffer) {
-	  for (int j = 0; j < blockBuffer.length; j++) {
-	    blockBuffer[j] = 0;
-	  }
+        synchronized (blockBuffer) {
+          for (int j = 0; j < blockBuffer.length; j++) {
+            blockBuffer[j] = 0;
+          }
 
-	  block.setDirty(0, BLOCK_SIZE);
-	}
+          block.setDirty(0, BLOCK_SIZE);
+        }
       } finally {
-	block.free();
+        block.free();
       }
     }
 
     long blockAddr = 0;
-    
+
     while ((blockAddr = firstBlock(blockAddr + BLOCK_SIZE, ALLOC_INDEX)) > 0) {
       freeBlock(blockAddr);
     }
   }
-  
+
   /**
    * Rebuilds the indexes
    */
@@ -450,20 +448,20 @@ public class Table extends Store {
       Column []columns = _row.getColumns();
 
       while (iter.nextBlock()) {
-	iter.initRow();
+        iter.initRow();
 
-	byte []blockBuffer = iter.getBuffer();
-      
-	while (iter.nextRow()) {
-	  long rowAddress = iter.getRowAddress();
-	  int rowOffset = iter.getRowOffset();
-	  
-	  for (int i = 0; i < columns.length; i++) {
-	    Column column = columns[i];
+        byte []blockBuffer = iter.getBuffer();
 
-	    column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
-	  }
-	}
+        while (iter.nextRow()) {
+          long rowAddress = iter.getRowAddress();
+          int rowOffset = iter.getRowOffset();
+
+          for (int i = 0; i < columns.length; i++) {
+            Column column = columns[i];
+
+            column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
+          }
+        }
       }
     } finally {
       xa.commit();
@@ -483,15 +481,15 @@ public class Table extends Store {
     Column []columns = _row.getColumns();
     for (int i = 0; i < columns.length; i++) {
       if (! columns[i].isUnique())
-	continue;
+        continue;
 
       BTree index = columns[i].getIndex();
 
       if (index != null) {
-	writeLong(os, index.getIndexRoot());
+        writeLong(os, index.getIndexRoot());
       }
       else {
-	writeLong(os, 0);
+        writeLong(os, 0);
       }
     }
 
@@ -502,70 +500,70 @@ public class Table extends Store {
     os.print("CREATE TABLE " + getName() + "(");
     for (int i = 0; i < _row.getColumns().length; i++) {
       Column column = _row.getColumns()[i];
-      
+
       if (i != 0)
-	os.print(",");
-      
+        os.print(",");
+
       os.print(column.getName());
       os.print(" ");
 
       switch (column.getTypeCode()) {
       case Column.VARCHAR:
-	os.print("VARCHAR(" + column.getDeclarationSize() + ")");
-	break;
+        os.print("VARCHAR(" + column.getDeclarationSize() + ")");
+        break;
       case Column.VARBINARY:
-	os.print("VARBINARY(" + column.getDeclarationSize() + ")");
-	break;
+        os.print("VARBINARY(" + column.getDeclarationSize() + ")");
+        break;
       case Column.BINARY:
-	os.print("BINARY(" + column.getDeclarationSize() + ")");
-	break;
+        os.print("BINARY(" + column.getDeclarationSize() + ")");
+        break;
       case Column.SHORT:
-	os.print("SMALLINT");
-	break;
+        os.print("SMALLINT");
+        break;
       case Column.INT:
-	os.print("INTEGER");
-	break;
+        os.print("INTEGER");
+        break;
       case Column.LONG:
-	os.print("BIGINT");
-	break;
+        os.print("BIGINT");
+        break;
       case Column.DOUBLE:
-	os.print("DOUBLE");
-	break;
+        os.print("DOUBLE");
+        break;
       case Column.DATE:
-	os.print("TIMESTAMP");
-	break;
+        os.print("TIMESTAMP");
+        break;
       case Column.BLOB:
-	os.print("BLOB");
-	break;
+        os.print("BLOB");
+        break;
       case Column.NUMERIC:
-	{
-	  NumericColumn numeric = (NumericColumn) column;
-	  
-	  os.print("NUMERIC(" + numeric.getPrecision() + "," + numeric.getScale() + ")");
-	  break;
-	}
+        {
+          NumericColumn numeric = (NumericColumn) column;
+
+          os.print("NUMERIC(" + numeric.getPrecision() + "," + numeric.getScale() + ")");
+          break;
+        }
       default:
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
       }
 
       if (column.isPrimaryKey())
-	os.print(" PRIMARY KEY");
+        os.print(" PRIMARY KEY");
       else if (column.isUnique())
-	os.print(" UNIQUE");
-      
+        os.print(" UNIQUE");
+
       if (column.isNotNull())
-	os.print(" NOT NULL");
+        os.print(" NOT NULL");
 
       Expr defaultExpr = column.getDefault();
-      
+
       if (defaultExpr != null) {
-	os.print(" DEFAULT (");
-	os.print(defaultExpr);
-	os.print(")");
+        os.print(" DEFAULT (");
+        os.print(defaultExpr);
+        os.print(")");
       }
 
       if (column.getAutoIncrement() >= 0)
-	os.print(" auto_increment");
+        os.print(" auto_increment");
     }
     os.print(")");
 
@@ -579,7 +577,7 @@ public class Table extends Store {
   public TableIterator createTableIterator()
   {
     assertStoreActive();
-    
+
     return new TableIterator(this);
   }
 
@@ -591,21 +589,21 @@ public class Table extends Store {
   {
     synchronized (this) {
       if (_autoIncrementValue >= 0)
-	return ++_autoIncrementValue;
+        return ++_autoIncrementValue;
     }
 
     long max = 0;
-    
+
     try {
       TableIterator iter = createTableIterator();
       iter.init(context);
       while (iter.next()) {
-	byte []buffer = iter.getBuffer();
-      
-	long value = _autoIncrementColumn.getLong(buffer, iter.getRowOffset());
+        byte []buffer = iter.getBuffer();
 
-	if (max < value)
-	  max = value;
+        long value = _autoIncrementColumn.getLong(buffer, iter.getRowOffset());
+
+        if (max < value)
+          max = value;
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
@@ -613,7 +611,7 @@ public class Table extends Store {
 
     synchronized (this) {
       if (_autoIncrementValue < max)
-	_autoIncrementValue = max;
+        _autoIncrementValue = max;
 
       return ++_autoIncrementValue;
     }
@@ -623,19 +621,19 @@ public class Table extends Store {
    * Inserts a new row, returning the row address.
    */
   public long insert(QueryContext queryContext, Transaction xa,
-		     ArrayList<Column> columns,
-		     ArrayList<Expr> values)
+                     ArrayList<Column> columns,
+                     ArrayList<Expr> values)
     throws IOException, SQLException
   {
     if (log.isLoggable(Level.FINEST))
       log.finest("db table " + getName() + " insert row xa:" + xa);
-    
+
     Block block = null;
-    
+
     try {
       long addr;
       int rowOffset = 0;
-      
+
       boolean isLoop = false;
       boolean hasRow = false;
 
@@ -643,111 +641,111 @@ public class Table extends Store {
       long rowClockAddr = 0;
       long rowClockUsed = 0;
       long rowClockTotal = 0;
-      
+
       do {
-	long blockId = 0;
+        long blockId = 0;
 
-	if (block != null) {
-	  block.free();
-	  block = null;
-	}
+        if (block != null) {
+          block.free();
+          block = null;
+        }
 
-	synchronized (_rowClockLock) {
-	  blockId = firstRow(_rowClockAddr);
+        synchronized (_rowClockLock) {
+          blockId = firstRow(_rowClockAddr);
 
-	  if (blockId >= 0) {
-	  }
-	  else if (! isLoop
-		   && (ROW_CLOCK_MIN < _rowClockTotal
-		       && 4 * _rowClockUsed < 3 * _rowClockTotal
-		       || _rowAllocCount > 8)) {
-	    // System.out.println("LOOP: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
-	    // go around loop if there are sufficient entries, i.e. over
-	    // ROW_CLOCK_MIN and at least 1/4 free entries.
-	    isLoop = true;
-	    _rowClockCount = 0;
-	    _rowClockAddr = 0;
-	    _rowClockUsed = 0;
-	    _rowClockTotal = 0;
-	    _rowAllocCount = 0;
-	    continue;
-	  }
-	  else {
-	    //System.out.println("ROW: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
+          if (blockId >= 0) {
+          }
+          else if (! isLoop
+                   && (ROW_CLOCK_MIN < _rowClockTotal
+                       && 4 * _rowClockUsed < 3 * _rowClockTotal
+                       || _rowAllocCount > 8)) {
+            // System.out.println("LOOP: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
+            // go around loop if there are sufficient entries, i.e. over
+            // ROW_CLOCK_MIN and at least 1/4 free entries.
+            isLoop = true;
+            _rowClockCount = 0;
+            _rowClockAddr = 0;
+            _rowClockUsed = 0;
+            _rowClockTotal = 0;
+            _rowAllocCount = 0;
+            continue;
+          }
+          else {
+            //System.out.println("ROW: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
 
-	    _rowAllocCount++;
-	    
-	    // if no free row is available, allocate a new one
-	    block = xa.allocateRow(this);
-	    //System.out.println("ALLOC: " + block);
+            _rowAllocCount++;
 
-	    blockId = block.getBlockId();
-	  }
+            // if no free row is available, allocate a new one
+            block = xa.allocateRow(this);
+            //System.out.println("ALLOC: " + block);
 
-	  rowClockCount = _rowClockCount;
-	  rowClockAddr = blockIdToAddress(blockId);
-	  rowClockUsed = _rowClockUsed;
-	  rowClockTotal = _rowClockTotal;
+            blockId = block.getBlockId();
+          }
 
-	  // the next insert will try the following block
-	  _rowClockCount++;
-	  _rowClockAddr = rowClockAddr + BLOCK_SIZE;
-	  _rowClockUsed = rowClockUsed + _rowsPerBlock;
-	  _rowClockTotal = rowClockTotal + _rowsPerBlock;
-	}
+          rowClockCount = _rowClockCount;
+          rowClockAddr = blockIdToAddress(blockId);
+          rowClockUsed = _rowClockUsed;
+          rowClockTotal = _rowClockTotal;
 
-	if (block == null)
-	  block = xa.readBlock(this, blockId);
+          // the next insert will try the following block
+          _rowClockCount++;
+          _rowClockAddr = rowClockAddr + BLOCK_SIZE;
+          _rowClockUsed = rowClockUsed + _rowsPerBlock;
+          _rowClockTotal = rowClockTotal + _rowsPerBlock;
+        }
 
-	Lock blockLock = block.getLock();
+        if (block == null)
+          block = xa.readBlock(this, blockId);
 
-	if (xa.lockReadAndWriteNoWait(blockLock)) {
-	  try {
-	    rowOffset = 0;
+        Lock blockLock = block.getLock();
 
-	    byte []buffer = block.getBuffer();
-	    
-	    for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
-	      if (buffer[rowOffset] == 0) {
-		block.setDirty(rowOffset, rowOffset + 1);
-			     
-		hasRow = true;
-		buffer[rowOffset] = ROW_ALLOC;
-		break;
-	      }
-	    }
-	  } finally {
-	    xa.unlockReadAndWrite(blockLock);
-	  }
-	}
+        if (xa.lockReadAndWriteNoWait(blockLock)) {
+          try {
+            rowOffset = 0;
+
+            byte []buffer = block.getBuffer();
+
+            for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
+              if (buffer[rowOffset] == 0) {
+                block.setDirty(rowOffset, rowOffset + 1);
+
+                hasRow = true;
+                buffer[rowOffset] = ROW_ALLOC;
+                break;
+              }
+            }
+          } finally {
+            xa.unlockReadAndWrite(blockLock);
+          }
+        }
       } while (! hasRow);
 
       insertRow(queryContext, xa, columns, values,
-		block, rowOffset);
+                block, rowOffset);
 
       synchronized (_rowClockLock) {
-	if (rowClockCount < _rowClockCount) {
-	  // the next insert will retry this block
-	  int blocks = _rowClockCount - rowClockCount;
+        if (rowClockCount < _rowClockCount) {
+          // the next insert will retry this block
+          int blocks = _rowClockCount - rowClockCount;
 
-	  _rowClockCount = rowClockCount;
-	  _rowClockAddr = rowClockAddr;
-	  _rowClockUsed -= blocks * _rowsPerBlock;
-	  _rowClockTotal -= blocks * _rowsPerBlock;
-	}
+          _rowClockCount = rowClockCount;
+          _rowClockAddr = rowClockAddr;
+          _rowClockUsed -= blocks * _rowsPerBlock;
+          _rowClockTotal -= blocks * _rowsPerBlock;
+        }
       }
 
       return blockIdToAddress(block.getBlockId(), rowOffset);
     } finally {
       if (block != null)
-	block.free();
+        block.free();
     }
   }
 
   public void insertRow(QueryContext queryContext, Transaction xa,
-			ArrayList<Column> columns,
-			ArrayList<Expr> values,
-			Block block, int rowOffset)
+                        ArrayList<Column> columns,
+                        ArrayList<Expr> values,
+                        Block block, int rowOffset)
     throws SQLException
   {
     byte []buffer = block.getBuffer();
@@ -767,51 +765,51 @@ public class Table extends Store {
       iter.setRow(block, rowOffset);
 
       block.setDirty(rowOffset, rowOffset + _rowLength);
-	  
+
       for (int i = rowOffset + _rowLength - 1; rowOffset < i; i--)
-	buffer[i] = 0;
+        buffer[i] = 0;
 
       for (int i = 0; i < columns.size(); i++) {
-	Column column = columns.get(i);
-	Expr value = values.get(i);
+        Column column = columns.get(i);
+        Expr value = values.get(i);
 
-	column.setExpr(xa, buffer, rowOffset, value, queryContext);
+        column.setExpr(xa, buffer, rowOffset, value, queryContext);
       }
 
       // lock for insert, i.e. entries, indices, and validation
       // XXX: the set index needs to handle the validation
       //xa.lockWrite(_insertLock);
       try {
-	validate(block, rowOffset, queryContext, xa);
-      
-	buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
+        validate(block, rowOffset, queryContext, xa);
 
-	for (int i = 0; i < columns.size(); i++) {
-	  Column column = columns.get(i);
-	  Expr value = values.get(i);
+        buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
 
-	  column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
-	}
+        for (int i = 0; i < columns.size(); i++) {
+          Column column = columns.get(i);
+          Expr value = values.get(i);
 
-	xa.addUpdateBlock(block);
+          column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
+        }
 
-	if (_autoIncrementColumn != null) {
-	  long value = _autoIncrementColumn.getLong(buffer, rowOffset);
+        xa.addUpdateBlock(block);
 
-	  synchronized (this) {
-	    if (_autoIncrementValue < value)
-	      _autoIncrementValue = value;
-	  }
-	}
-	  
-	_entries++;
-      
-	isOkay = true;
+        if (_autoIncrementColumn != null) {
+          long value = _autoIncrementColumn.getLong(buffer, rowOffset);
+
+          synchronized (this) {
+            if (_autoIncrementValue < value)
+              _autoIncrementValue = value;
+          }
+        }
+
+        _entries++;
+
+        isOkay = true;
       } finally {
-	// xa.unlockWrite(_insertLock);
-	  
-	if (! isOkay)
-	  delete(xa, block, buffer, rowOffset, false);
+        // xa.unlockWrite(_insertLock);
+
+        if (! isOkay)
+          delete(xa, block, buffer, rowOffset, false);
       }
     } finally {
       queryContext.unlock();
@@ -822,7 +820,7 @@ public class Table extends Store {
    * Validates the given row.
    */
   private void validate(Block block, int rowOffset,
-			QueryContext queryContext, Transaction xa)
+                        QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     TableIterator row = createTableIterator();
@@ -834,38 +832,38 @@ public class Table extends Store {
       _constraints[i].validate(rows, queryContext, xa);
     }
   }
-  
+
   void delete(Transaction xa, Block block,
-	      byte []buffer, int rowOffset,
-	      boolean isDeleteIndex)
+              byte []buffer, int rowOffset,
+              boolean isDeleteIndex)
     throws SQLException
   {
     byte rowState = buffer[rowOffset];
 
     if ((rowState & ROW_MASK) != ROW_VALID)
       return;
-    
+
     buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
-    
+
     Column []columns = _row.getColumns();
-    
+
     for (int i = 0; i < columns.length; i++) {
       columns[i].deleteData(xa, buffer, rowOffset);
     }
 
     if (isDeleteIndex) {
       for (int i = 0; i < columns.length; i++) {
-	columns[i].deleteIndex(xa, buffer, rowOffset);
+        columns[i].deleteIndex(xa, buffer, rowOffset);
       }
     }
 
     buffer[rowOffset] = 0;
-    
+
     synchronized (_rowClockLock) {
       long addr = blockIdToAddress(block.getBlockId());
-      
+
       if (addr <= _rowClockAddr) {
-	_rowClockUsed--;
+        _rowClockUsed--;
       }
     }
   }
@@ -903,15 +901,15 @@ public class Table extends Store {
                   + ((buffer[offset + 1] & 0xffL) << 48)
                   + ((buffer[offset + 2] & 0xffL) << 40)
                   + ((buffer[offset + 3] & 0xffL) << 32)
-                  
-		  + ((buffer[offset + 4] & 0xffL) << 24)
+
+                  + ((buffer[offset + 4] & 0xffL) << 24)
                   + ((buffer[offset + 5] & 0xffL) << 16)
                   + ((buffer[offset + 6] & 0xffL) << 8)
                   + ((buffer[offset + 7] & 0xffL)));
 
     return value;
   }
-  
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + ":" + getId() + "]";

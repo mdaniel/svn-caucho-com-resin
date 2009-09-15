@@ -149,7 +149,7 @@ public abstract class AbstractHttpRequest
   protected final CharBuffer _cb = new CharBuffer();
 
   private HttpBufferStore _httpBuffer;
-  
+
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
 
@@ -288,7 +288,7 @@ public abstract class AbstractHttpRequest
   {
     return _httpBuffer;
   }
-  
+
   public abstract byte []getUriBuffer();
 
   public abstract int getUriLength();
@@ -319,7 +319,7 @@ public abstract class AbstractHttpRequest
   public StringBuffer getRequestURL()
   {
     HttpServletRequestImpl request = getRequestFacade();
-    
+
     if (request != null)
       return request.getRequestURL();
     else
@@ -952,8 +952,10 @@ public abstract class AbstractHttpRequest
     int size = _cookies.size();
 
     if (size > 0) {
-      Cookie []cookiesIn = new Cookie[_cookies.size()];
-      _cookies.toArray(cookiesIn);
+      Cookie []cookiesIn = new Cookie[size];
+
+      for (int i = size - 1; i >= 0; i--)
+        cookiesIn[i] = _cookies.get(i);
 
       return cookiesIn;
     }
@@ -1196,7 +1198,7 @@ public abstract class AbstractHttpRequest
 
   protected void initAttributes(HttpServletRequestImpl facade)
   {
-    
+
   }
 
   /*
@@ -1284,7 +1286,7 @@ public abstract class AbstractHttpRequest
 
   //
   // security
-  // 
+  //
 
   /**
    * Returns true if the request is secure.
@@ -1354,7 +1356,7 @@ public abstract class AbstractHttpRequest
 
     if (invocation != null)
       return invocation.getRequestInvocation(_requestFacade);
-    
+
     invocation = _server.createInvocation();
     invocation.setSecure(isSecure());
 
@@ -1482,7 +1484,7 @@ public abstract class AbstractHttpRequest
 
     if (_server instanceof Server) {
       WebApp webApp = ((Server) _server).getDefaultWebApp();
-      
+
       if (webApp != null && getRequestFacade() != null) {
         webApp.accessLog(getRequestFacade(), getResponseFacade());
       }
@@ -1581,7 +1583,7 @@ public abstract class AbstractHttpRequest
   protected HashMapImpl<String,String[]> getForm()
   {
     _form.clear();
-    
+
     return _form;
   }
 
@@ -1621,7 +1623,7 @@ public abstract class AbstractHttpRequest
     // to avoid finish when no request server/05b0
     if (_startTime < 0)
       return;
-    
+
     try {
       _response.finishInvocation();
     } catch (IOException e) {
@@ -1642,7 +1644,7 @@ public abstract class AbstractHttpRequest
 
       if (requestFacade != null)
         requestFacade.finishRequest();
-      
+
       // server/0219, but must be freed for GC
       _response.finishRequest();
 
@@ -1661,7 +1663,7 @@ public abstract class AbstractHttpRequest
 
       HttpServletResponseImpl responseFacade = _responseFacade;
       _responseFacade = null;
-      
+
       HttpBufferStore httpBuffer = _httpBuffer;
       _httpBuffer = null;
 

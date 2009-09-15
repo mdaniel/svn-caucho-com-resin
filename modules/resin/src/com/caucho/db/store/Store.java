@@ -1731,7 +1731,7 @@ public class Store {
 
     try {
       if (blockAddress < 0 || _fileSize < blockAddress + length) {
-        throw new IllegalStateException(L.l("block at {0} is invalid for file {1} (length {2})",
+        throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})",
                                             Long.toHexString(blockAddress),
                                             _path,
                                             Long.toHexString(_fileSize)));
@@ -1776,7 +1776,7 @@ public class Store {
           _fileSize = blockAddress + length;
         }
       }
-      
+
       _blockManager.addBlockWrite();
     } finally {
       if (wrapper != null)

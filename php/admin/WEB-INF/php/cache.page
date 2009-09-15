@@ -5,6 +5,10 @@
 
 require_once "WEB-INF/php/inc.php";
 
+if (! admin_init()) {
+  return;
+}
+
 $block_cache = $g_mbean_server->lookup("resin:type=BlockManager");
 $proxy_cache = $g_mbean_server->lookup("resin:type=ProxyCache");
 

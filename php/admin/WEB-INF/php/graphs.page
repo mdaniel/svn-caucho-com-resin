@@ -35,7 +35,7 @@ if ($p_hash && ! $p_submit) {
   $p_checks = $item['checks'];
   $p_servers = $item['servers'];
 }
-else {
+else if ($p_submit) {
   $is_refresh = true;
 
   $p_name = $_REQUEST['name'];
@@ -114,13 +114,30 @@ if (! $p_name) {
   $p_names[] = $p_name;
 }
 
-echo "<h1><a href=" . $g_next_url . ">Graph: $p_name</a></h1>";
-
 echo "<p><b>Note:</b> this page requires HTML 5 canvas support.  You may need
 to use Firefox 3.5 or other HTML 5-capable browser
 to see the graphs properly.</p>\n";
 
 $user_graphs = $user_item['user-graphs'];
+
+// existing graphs
+
+echo "<h3>Choose Existing Graphs</h3>\n";
+echo "<form method='POST' action='" . $g_next_url . "'>";
+echo "<select name='graph'>\n";
+foreach ($user_item['user-graphs'] as $name => $hash) {
+  echo "<option ";
+  if ($p_hash == $hash) {
+    echo " selected";
+  }
+  echo " value='" . $name . "'>" . $name . "\n";
+}
+echo "</select>\n";
+echo "<input type='submit' value='Display'><br>\n";
+echo "<input type='submit' name='remove' value='Delete Graph'>\n";
+echo "</form>";
+
+echo "<h1><a href=" . $g_next_url . ">Graph: $p_name</a></h1>";
 
 echo "Time: "
 
@@ -148,9 +165,7 @@ if ($p_period == 30 * 24 * 60)
   echo " 30d";
 else
   echo " <a href=" . $g_next_url . "&np=" . (30 * 24 * 60) . ">30d</a>";
-
 ?>
-
 <p>
 <canvas id="graph" width="<?= $full_width ?>" height="<?= $full_height ?>">
 HTML 5 &lt;canvas> is not supported in this browser
@@ -263,23 +278,6 @@ echo "</ul>";
 */
 
 echo "<br>";
-
-// existing graphs
-
-echo "<h3>Existing Graphs</h3>\n";
-echo "<form method='POST' action='" . $g_next_url . "'>";
-echo "<select name='graph'>\n";
-foreach ($user_item['user-graphs'] as $name => $hash) {
-  echo "<option ";
-  if ($p_hash == $hash) {
-    echo " selected";
-  }
-  echo " value='" . $name . "'>" . $name . "\n";
-}
-echo "</select>\n";
-echo "<input type='submit' value='Display'><br>\n";
-echo "<input type='submit' name='remove' value='Delete Graph'>\n";
-echo "</form>";
 
 // server
 echo "<h3>Add New Graph</h3>";
