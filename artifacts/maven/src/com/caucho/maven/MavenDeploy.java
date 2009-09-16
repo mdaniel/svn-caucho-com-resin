@@ -30,11 +30,13 @@
 package com.caucho.maven;
 
 import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.StatusQuery;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -133,14 +135,22 @@ public class MavenDeploy extends AbstractMojo
   public void execute() 
     throws MojoExecutionException
   {
-    DeployClient client = null;
-
-    String tag = "wars/" + _virtualHost + _contextPath;
+    WebAppDeployClient client = null;
 
     try {
-      client = new DeployClient(_server, _port, _user, _password);
+      client = new WebAppDeployClient(_server, _port, _user, _password);
+
+      String tag = 
+        WebAppDeployClient.createTag("default", _virtualHost, _contextPath);
+
       Path path = Vfs.lookup(_warFile);
-      client.deployJarContents(path, tag, _user, _message, _version, null);
+
+      HashMap<String,String> attributes = new HashMap<String,String>();
+      attributes.put(WebAppDeployClient.USER_ATTRIBUTE, _user);
+      attributes.put(WebAppDeployClient.MESSAGE_ATTRIBUTE, _message);
+      attributes.put(WebAppDeployClient.VERSION_ATTRIBUTE, _version);
+
+      client.deployJarContents(tag, path, attributes);
     }
     catch (IOException e) {
       throw new MojoExecutionException("Unable to connect to server", e);
