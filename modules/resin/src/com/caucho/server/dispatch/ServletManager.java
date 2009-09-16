@@ -223,6 +223,8 @@ public class ServletManager {
     if (! config.isAsyncSupported())
       invocation.clearAsyncSupported();
 
+    invocation.setMultipartConfig(config.getMultipartConfig());
+
     return config.createServletChain();
   }
 

@@ -76,8 +76,6 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   private static final L10N L = new L10N(HttpServletRequestImpl.class);
 
-  public static final String MULTIPARTCONFIG = "com.caucho.multipart-config";
-
   private static final String CHAR_ENCODING = "resin.form.character.encoding";
   private static final String FORM_LOCALE = "resin.form.local";
   private static final String CAUCHO_CHAR_ENCODING = "caucho.form.character.encoding";
@@ -1109,7 +1107,7 @@ public class HttpServletRequestImpl implements CauchoRequest
         }
 
         MultipartConfig multipartConfig
-          = (MultipartConfig) getAttribute(MULTIPARTCONFIG);
+          = _invocation.getMultipartConfig();
 
         long fileUploadMax = -1;
 
@@ -2338,7 +2336,7 @@ public class HttpServletRequestImpl implements CauchoRequest
       else
         path = (Path) value;
 
-      MultipartConfig mc = (MultipartConfig) getAttribute(MULTIPARTCONFIG);
+      MultipartConfig mc = _invocation.getMultipartConfig();
       String location = mc.location().replace('\\', '/');
       fileName = fileName.replace('\\', '/');
 
