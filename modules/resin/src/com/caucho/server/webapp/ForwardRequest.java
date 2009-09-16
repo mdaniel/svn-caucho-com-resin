@@ -31,19 +31,19 @@ package com.caucho.server.webapp;
 
 import com.caucho.server.connection.*;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.webapp.WebApp;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import java.io.*;
 import java.util.*;
-import java.security.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class ForwardRequest extends CauchoRequestWrapper {
   private static final IntMap _forwardAttributeMap = new IntMap();
+  private static final L10N L = new L10N(ForwardRequest.class);
 
   private static final String REQUEST_URI
     = "javax.servlet.forward.request_uri";
@@ -180,6 +180,30 @@ public class ForwardRequest extends CauchoRequestWrapper {
   public WebApp getWebApp()
   {
     return _invocation.getWebApp();
+  }
+
+  @Override
+  public boolean isAsyncSupported() {
+    return _invocation.isAsyncSupported() && getRequest().isAsyncSupported();
+  }
+
+  @Override
+  public AsyncContext startAsync()
+    throws IllegalStateException
+  {
+    if (! isAsyncSupported())
+      throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.",
+                                          getServletName(), getServletPath()));
+    return super.startAsync();
+  }
+
+  public String getServletName()
+  {
+    if (_invocation != null) {
+      return _invocation.getServletName();
+    }
+    else
+      return null;
   }
 
   /*

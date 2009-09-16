@@ -932,10 +932,8 @@ public class WebApp extends ServletContextImpl
 
     String name = webServlet.name();
 
-    if (name == null)
+    if (name == null || "".equals(name))
       name = servletClassName;
-
-    mapping.setServletName(name);
 
     mapping.setServletName(name);
 
