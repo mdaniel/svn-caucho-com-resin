@@ -32,8 +32,10 @@ package com.caucho.ant;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.HashMap;
+
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.TagResult;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Vfs;
@@ -49,8 +51,7 @@ import org.apache.tools.ant.types.Path;
 public class ResinUploadWar extends ResinDeployClientTask {
   private String _warFile;
   private String _archive;
-  private boolean _isHead = true;
-  private boolean _isTest = false;
+  private boolean _writeHead = true;
 
   /**
    * For ant.
@@ -83,57 +84,9 @@ public class ResinUploadWar extends ResinDeployClientTask {
     _archive = tag;
   }
 
-  public void setIsHead(boolean isHead)
+  public void setWriteHead(boolean writeHead)
   {
-    _isHead = isHead;
-  }
-
-  public void setIsTest(boolean isTest)
-  {
-    _isTest = isTest;
-  }
-
-  private String getDefaultArchiveTag()
-  {
-    QDate qDate = new QDate();
-    long time = qDate.getTimeOfDay() / 1000;
-
-    StringBuilder sb = new StringBuilder();
-
-    if (_isTest) {
-      sb.append("archive/1994-12-01T16:00:00");
-    }
-    else {
-      sb.append("archive/");
-
-      sb.append(qDate.printISO8601Date());
-
-      sb.append('T');
-      sb.append((time / 36000) % 10);
-      sb.append((time / 3600) % 10);
-
-      sb.append(':');
-      sb.append((time / 600) % 6);
-      sb.append((time / 60) % 10);
-
-      sb.append(':');
-      sb.append((time / 10) % 6);
-      sb.append((time / 1) % 10);
-    }
-
-    sb.append("/wars/");
-
-    sb.append(getVirtualHost());
-    sb.append('/');
-
-    sb.append(getContextRoot());
-
-    if (getVersion() != null) {
-      sb.append('-');
-      sb.append(getVersion());
-    }
-
-    return sb.toString();
+    _writeHead = writeHead;
   }
 
   @Override
@@ -147,84 +100,44 @@ public class ResinUploadWar extends ResinDeployClientTask {
   }
 
   @Override
-  protected void doTask(DeployClient client)
+  protected void doTask(WebAppDeployClient client)
     throws BuildException
   {
     try {
       // upload
       com.caucho.vfs.Path path = Vfs.lookup(_warFile);
 
-      String tag = buildVersionedWarTag();
-      client.deployJarContents(path, tag, getUser(), getCommitMessage(), 
-                               getVersion(), null);
-
-      log("Deployed " + path);
-      log("  tag = " + tag);
-
-      // archive
-
       String archiveTag = _archive;
 
       if ("true".equals(archiveTag)) {
-        archiveTag = getDefaultArchiveTag();
+        archiveTag = client.createArchiveTag(getVirtualHost(), 
+                                             getContextRoot(), 
+                                             getVersion());
       }
       else if ("false".equals(archiveTag)) {
         archiveTag = null;
       }
 
+      String tag = buildVersionedWarTag();
+
+      HashMap<String,String> attributes = getCommitAttributes();
+
+      client.deployJarContents(tag, path, attributes);
+
+      log("Deployed " + path + " to tag " + tag);
+
       if (archiveTag != null) {
-        client.copyTag(archiveTag, tag, 
-                       getUser(), getCommitMessage(), getVersion());
-        log("  archive tag = " + archiveTag, Project.MSG_VERBOSE);
+        client.copyTag(archiveTag, tag, attributes);
+
+        log("Created archive tag " + archiveTag);
       }
 
-      // publish (copy tag to head)
+      if (getVersion() != null && _writeHead) {
+        String headTag = buildWarTag();
 
-      if (getVersion() != null) {
-        boolean isHead = _isHead;
-        String head = buildWarTag();
+        client.copyTag(headTag, tag, attributes);
 
-        TagResult []tags = client.queryTags(tag);
-        TagResult []headTags = client.queryTags(head);
-        TagResult []otherTags = client.queryTags(head + "-.*");
-
-        if (tags.length != 1) {
-          throw new BuildException("Tag of war file not in repository");
-        }
-
-        boolean existingHead = (headTags.length == 1);
-
-        if (existingHead) {
-          // ignore isHead == false if updating the "current" version in-place
-          if (tags[0].getRoot().equals(headTags[0].getRoot()))
-            isHead = true;
-
-          log("  found existing head = " + head, Project.MSG_VERBOSE);
-          log("    (hash: " + headTags[0].getRoot() + ")", Project.MSG_VERBOSE);
-        }
-
-        if (isHead) {
-          if (existingHead) {
-            client.removeTag(head, getUser(), getCommitMessage());
-
-            for (TagResult other : otherTags) {
-              if (other.getRoot().equals(headTags[0].getRoot())) {
-                log("  removing old head version = " + other.getTag(), 
-                    Project.MSG_VERBOSE);
-                log("    (hash: " + headTags[0].getRoot() + ")", 
-                    Project.MSG_VERBOSE);
-              }
-            }
-          }
-
-          client.copyTag(head, tag, 
-                         getUser(), getCommitMessage(), getVersion());
-
-          if (existingHead)
-            log("  rewrote head = " + head, Project.MSG_VERBOSE);
-          else
-            log("  wrote head = " + head, Project.MSG_VERBOSE);
-        }
+        log("Wrote head version tag " + headTag);
       }
     }
     catch (IOException e) {

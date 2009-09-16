@@ -31,13 +31,17 @@ package com.caucho.ant;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.logging.*;
 
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.vfs.Vfs;
 
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
@@ -145,30 +149,17 @@ public abstract class ResinDeployClientTask extends Task {
 
   protected String buildWarTag()
   {
-    return buildWarTag(_stage, _virtualHost, _contextRoot);
-  }
-
-  protected String buildWarTag(String stage, 
-                               String host, 
-                               String contextRoot)
-  {
-    return stage + "/wars/" + host + "/" + contextRoot;
+    return WebAppDeployClient.createTag(_stage, 
+                                        _virtualHost, 
+                                        _contextRoot);
   }
 
   protected String buildVersionedWarTag()
   {
-    return buildVersionedWarTag(_stage, _virtualHost, _contextRoot, _version);
-  }
-
-  protected String buildVersionedWarTag(String stage, 
-                                        String host, 
-                                        String contextRoot, 
-                                        String version)
-  {
-    if (version != null)
-      return buildWarTag(stage, host, contextRoot) + '-' + version;
-
-    return buildWarTag(stage, host, contextRoot);
+    return WebAppDeployClient.createTag(_stage, 
+                                        _virtualHost, 
+                                        _contextRoot, 
+                                        _version);
   }
 
   protected void validate()
@@ -184,8 +175,23 @@ public abstract class ResinDeployClientTask extends Task {
       throw new BuildException("user is required by " + getTaskName());
   }
 
-  protected abstract void doTask(DeployClient client)
+  protected abstract void doTask(WebAppDeployClient client)
     throws BuildException;
+
+  protected HashMap<String,String> getCommitAttributes()
+  {
+    HashMap<String,String> attributes = new HashMap<String,String>();
+
+    attributes.put(DeployClient.USER_ATTRIBUTE, _user);
+    attributes.put(DeployClient.MESSAGE_ATTRIBUTE, _message);
+    attributes.put(DeployClient.VERSION_ATTRIBUTE, _version);
+
+    attributes.put("user.name", 
+                   System.getProperties().getProperty("user.name"));
+    attributes.put("client", "ant (" + getClass().getSimpleName() + ")");
+
+    return attributes;
+  }
 
   /**
    * Executes the ant task.
@@ -198,18 +204,66 @@ public abstract class ResinDeployClientTask extends Task {
 
     // fix the class loader
 
-    ClassLoader loader = DeployClient.class.getClassLoader();
+    ClassLoader loader = WebAppDeployClient.class.getClassLoader();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
+    Logger clientLogger = Logger.getLogger(WebAppDeployClient.class.getName());
+    AntLogHandler antLogHandler = new AntLogHandler();
+    boolean useParentHandlers = clientLogger.getUseParentHandlers();
+    Level oldLevel = clientLogger.getLevel();
+
     try {
+      clientLogger.setLevel(Level.ALL);
+      clientLogger.setUseParentHandlers(false);
+      clientLogger.addHandler(antLogHandler);
+
       thread.setContextClassLoader(loader);
 
-      doTask(new DeployClient(_server, _port, _user, _password));
+      doTask(new WebAppDeployClient(_server, _port, _user, _password));
     }
     finally {
       thread.setContextClassLoader(oldLoader);
+
+      clientLogger.removeHandler(antLogHandler);
+      clientLogger.setUseParentHandlers(useParentHandlers);
+      clientLogger.setLevel(oldLevel);
+    }
+  }
+
+  private class AntLogHandler extends Handler {
+    @Override
+    public void close()
+      throws SecurityException
+    {
+    }
+
+    @Override
+    public void flush()
+    {
+    }
+
+    @Override
+    public void publish(LogRecord record) 
+    {
+      if (Level.ALL.equals(record.getLevel())
+          || Level.INFO.equals(record.getLevel())
+          || Level.CONFIG.equals(record.getLevel()))
+        log(record.getMessage());
+
+      else if (Level.FINE.equals(record.getLevel()))
+        log(record.getMessage(), Project.MSG_VERBOSE);
+
+      else if (Level.FINER.equals(record.getLevel())
+               || Level.FINEST.equals(record.getLevel()))
+        log(record.getMessage(), Project.MSG_DEBUG);
+
+      else if (Level.SEVERE.equals(record.getLevel()))
+        log(record.getMessage(), Project.MSG_ERR);
+
+      else if (Level.WARNING.equals(record.getLevel()))
+        log(record.getMessage(), Project.MSG_WARN);
     }
   }
 }

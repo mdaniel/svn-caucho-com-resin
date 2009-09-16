@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.vfs.Vfs;
 
 import org.apache.tools.ant.AntClassLoader;
@@ -116,7 +116,7 @@ public class ResinCopyTag extends ResinDeployClientTask {
   }
 
   @Override
-  protected void doTask(DeployClient client)
+  protected void doTask(WebAppDeployClient client)
     throws BuildException
   {
     String tag = _tag;
@@ -126,15 +126,13 @@ public class ResinCopyTag extends ResinDeployClientTask {
       tag = buildVersionedWarTag();
 
     if (sourceTag == null) {
-      sourceTag = buildVersionedWarTag(_sourceStage, 
-                                       _sourceVirtualHost,
-                                       _sourceContextRoot,
-                                       _sourceVersion);
+      sourceTag = WebAppDeployClient.createTag(_sourceStage, 
+                                               _sourceVirtualHost,
+                                               _sourceContextRoot,
+                                               _sourceVersion);
     }
 
-    boolean result =
-      client.copyTag(tag, sourceTag, 
-                     getUser(), getCommitMessage(), getVersion());
+    boolean result = client.copyTag(tag, sourceTag, getCommitAttributes());
 
     if (result)
       log("Copied " + sourceTag + " to " + tag);

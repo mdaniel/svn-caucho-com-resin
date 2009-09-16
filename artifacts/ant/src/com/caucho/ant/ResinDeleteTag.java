@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.TagResult;
 import com.caucho.vfs.Vfs;
 
@@ -71,7 +71,7 @@ public class ResinDeleteTag extends ResinDeployClientTask {
   }
 
   @Override
-  protected void doTask(DeployClient client)
+  protected void doTask(WebAppDeployClient client)
     throws BuildException
   {
     String tag = _tag;
@@ -79,6 +79,9 @@ public class ResinDeleteTag extends ResinDeployClientTask {
     if (tag == null)
       tag = buildVersionedWarTag();
 
-    client.removeTag(tag, getUser(), getCommitMessage());
+    if (client.removeTag(tag, getCommitAttributes()))
+      log("Deleted tag " + tag);
+    else
+      log("Failed to delete tag " + tag);
   }
 }

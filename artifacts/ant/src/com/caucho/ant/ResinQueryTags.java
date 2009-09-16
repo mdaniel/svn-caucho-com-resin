@@ -33,12 +33,13 @@ import java.io.File;
 import java.io.IOException;
 
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.server.admin.TagResult;
 import com.caucho.vfs.Vfs;
 
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 
 /**
@@ -46,7 +47,7 @@ import org.apache.tools.ant.types.Path;
  * ResinDeployWar task to production.
  */
 public class ResinQueryTags extends ResinDeployClientTask {
-  private String _pattern = "";
+  private String _pattern;
   private boolean _printValues = false;
 
   /**
@@ -80,27 +81,36 @@ public class ResinQueryTags extends ResinDeployClientTask {
   protected void validate()
     throws BuildException
   {
-    if (_pattern == null && getContextRoot() == null)
-      throw new BuildException("pattern or contextRoot is required by " 
-                               + getTaskName());
+    if (_pattern == null 
+        && getStage() == null
+        && getVirtualHost() == null
+        && getContextRoot() == null
+        && getVersion() == null)
+      throw new BuildException("At least one of pattern, stage, virtualHost, contextRoot, or version is required by " + getTaskName());
   }
 
   @Override
-  protected void doTask(DeployClient client)
+  protected void doTask(WebAppDeployClient client)
     throws BuildException
   {
     String pattern = _pattern;
 
-    if (pattern == null)
+    if (pattern == null) {
+      if (getContextRoot() == null)
+        setContextRoot(".*");
+
       pattern = buildVersionedWarTag();
+    }
+
+    log("Query pattern = '" + pattern + "'", Project.MSG_DEBUG);
 
     TagResult []tags = client.queryTags(pattern);
 
     for (TagResult tag : tags) {
       if (_printValues) 
-        System.out.println(tag.getTag() + " -> " + tag.getRoot());
+        log(tag.getTag() + " -> " + tag.getRoot());
       else
-        System.out.println(tag.getTag());
+        log(tag.getTag());
     }
   }
 }
