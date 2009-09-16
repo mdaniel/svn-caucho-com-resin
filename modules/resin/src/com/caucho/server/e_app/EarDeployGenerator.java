@@ -75,7 +75,7 @@ public class EarDeployGenerator
       if ("".equals(hostName))
         hostName = "default";
     
-      setRepositoryTag("default/ears/" + hostName);
+      setRepositoryTag("ears/default/" + hostName);
     }
 
     _parentContainer = parentContainer;
