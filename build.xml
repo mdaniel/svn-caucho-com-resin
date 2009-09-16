@@ -9,7 +9,7 @@
   <property name="shell" value="bash"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management">
+          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management, j2ee-deploy">
   </target>
 
   <!--
