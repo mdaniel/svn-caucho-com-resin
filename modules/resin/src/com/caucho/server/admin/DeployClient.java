@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,10 +33,13 @@ import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.git.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 import com.caucho.vfs.*;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Deploy Client API
@@ -44,6 +47,12 @@ import java.util.HashMap;
 public class DeployClient
 {
   private static final L10N L = new L10N(DeployClient.class);
+  private static final Logger log 
+    = Logger.getLogger(DeployClient.class.getName());
+
+  public static final String USER_ATTRIBUTE = "user";
+  public static final String MESSAGE_ATTRIBUTE = "message";
+  public static final String VERSION_ATTRIBUTE = "version";
 
   private Broker _broker;
   private ActorClient _conn;
@@ -70,7 +79,7 @@ public class DeployClient
   }
   
   public DeployClient(String host, int port,
-		      String userName, String password)
+                      String userName, String password)
   {
     String url = "http://" + host + ":" + port + "/hmtp";
     
@@ -95,26 +104,21 @@ public class DeployClient
    * The jar is unzipped and each component is uploaded separately.
    * For wars, this means that only the changed files need updates.
    *
-   * @param jar path to the jar file
    * @param tag symbolic name of the jar file to add
-   * @param user user name for the commit message
-   * @param message the commit message
-   * @param version the symbolic version for the jar
-   * @param extraAttr any extra information for the commit
+   * @param jar path to the jar file
+   * @param attributes commit attributes including user, message, and version
    */
-  public String deployJarContents(Path jar,
-                                  String tag,
-                                  String user,
-                                  String message,
-                                  String version,
-                                  HashMap<String,String> extraAttr)
+  public String deployJarContents(String tag,
+                                  Path jar,
+                                  HashMap<String,String> attributes)
     throws IOException
   {
     GitCommitJar commit = new GitCommitJar(jar);
 
     try {
-      return deployJar(commit, tag, user, message, version, extraAttr);
-    } finally {
+      return deployJar(tag, commit, attributes);
+    } 
+    finally {
       commit.close();
     }
   }
@@ -122,45 +126,23 @@ public class DeployClient
   /**
    * Uploads a stream to a jar/zip file to a Resin server
    *
-   * @param is stream containing a jar/zip
    * @param tag symbolic name of the jar file to add
-   * @param user user name for the commit message
-   * @param message the commit message
-   * @param version the symbolic version for the jar
-   * @param extraAttr any extra information for the commit
+   * @param is stream containing a jar/zip
+   * @param attributes commit attributes including user, message, and version
    */
-  public String deployJarContents(InputStream is,
-                                  String tag,
-                                  String user,
-                                  String message,
-                                  String version,
-                                  HashMap<String,String> extraAttr)
+  public String deployJarContents(String tag,
+                                  InputStream is,
+                                  HashMap<String,String> attributes)
     throws IOException
   {
     GitCommitJar commit = new GitCommitJar(is);
 
     try {
-      return deployJar(commit, tag, user, message, version, extraAttr);
-    } finally {
+      return deployJar(tag, commit, attributes);
+    } 
+    finally {
       commit.close();
     }
-  }
-
-  /**
-   * Undeploys a tag
-   *
-   * @param tag symbolic name of the jar file to add
-   * @param user user name for the commit message
-   * @param message the commit message
-   */
-  public Boolean undeploy(String tag,
-                          String user,
-                          String message,
-                          HashMap<String,String> extraAttr)
-  {
-    UndeployQuery query = new UndeployQuery(tag, user, message);
-
-    return (Boolean) querySet(query);
   }
 
   /**
@@ -168,15 +150,16 @@ public class DeployClient
    *
    * @param tag the new tag to create
    * @param sourceTag the source tag from which to copy
-   * @param user user name for the commit message
-   * @param message the commit message
+   * @param attributes commit attributes including user and message
    */
   public Boolean copyTag(String tag,
                          String sourceTag,
-                         String user,
-                         String message,
-                         String version)
+                         HashMap<String,String> attributes)
   {
+    String user = attributes.get(USER_ATTRIBUTE);
+    String message = attributes.get(MESSAGE_ATTRIBUTE);
+    String version = attributes.get(VERSION_ATTRIBUTE);
+
     CopyTagQuery query = 
       new CopyTagQuery(tag, sourceTag, user, message, version);
 
@@ -187,130 +170,15 @@ public class DeployClient
    * deletes a tag from the repository
    *
    * @param tag the tag to remove
-   * @param user user name for the commit message
-   * @param message the commit message
+   * @param attributes commit attributes including user and message
    */
-  public Boolean removeTag(String tag,
-                           String user,
-                           String message)
+  public Boolean removeTag(String tag, 
+                           HashMap<String,String> attributes)
   {
+    String user = attributes.get(USER_ATTRIBUTE);
+    String message = attributes.get(MESSAGE_ATTRIBUTE);
+
     RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
-
-    return (Boolean) querySet(query);
-  }
-
-  /**
-   * Deploys a war, but does not start it
-   *
-   * @param host the virtual host
-   * @param name the web-app name
-   */
-  public Boolean deployWar(String host, String name)
-  {
-    String tag = createTag("wars", host, name);
-
-    return deploy(tag);
-  }
-
-  /**
-   * Deploys an ear, but does not start it
-   *
-   * @param host the virtual host
-   * @param name the ear name
-   */
-  public Boolean deployEar(String host, String name)
-  {
-    String tag = createTag("ears", host, name);
-
-    return deploy(tag);
-  }
-
-  /**
-   * Deploy controller based on a deployment tag: wars/foo.com/my-war
-   *
-   * @param tag the encoded controller name
-   */
-  public Boolean deploy(String tag)
-  {
-    ControllerDeployQuery query = new ControllerDeployQuery(tag);
-
-    return (Boolean) querySet(query);
-  }
-
-  /**
-   * Starts a controller
-   *
-   * @param type the controller type: war, ear, etc.
-   * @param host the virtual host
-   * @param name the web-app/ear name
-   */
-  public Boolean start(String type, String host, String name)
-  {
-    String tag = createTag(type, host, name);
-
-    return start(tag);
-  }
-  
-  /**
-   * Starts a controller based on a deployment tag: wars/foo.com/my-war
-   *
-   * @param tag the encoded controller name
-   */
-  public Boolean start(String tag)
-  {
-    ControllerStartQuery query = new ControllerStartQuery(tag);
-
-    return (Boolean) querySet(query);
-  }
-
-  /**
-   * Stops a controller
-   *
-   * @param type the controller type: war, ear, etc.
-   * @param host the virtual host
-   * @param name the web-app/ear name
-   */
-  public Boolean stop(String type, String host, String name)
-  {
-    String tag = createTag(type, host, name);
-
-    return stop(tag);
-  }
-
-  /**
-   * Stops a controller based on a deployment tag: wars/foo.com/my-war
-   *
-   * @param tag the encoded controller name
-   */
-  public Boolean stop(String tag)
-  {
-    ControllerStopQuery query = new ControllerStopQuery(tag);
-
-    return (Boolean) querySet(query);
-  }
-
-  /**
-   * Undeploys a controller
-   *
-   * @param type the controller type: war, ear, etc.
-   * @param host the virtual host
-   * @param name the web-app/ear name
-   */
-  public Boolean undeploy(String type, String host, String name)
-  {
-    String tag = createTag(type, host, name);
-
-    return undeploy(tag);
-  }
-
-  /**
-   * Undeploy a controller based on a deployment tag: wars/foo.com/my-war
-   *
-   * @param tag the encoded controller name
-   */
-  public Boolean undeploy(String tag)
-  {
-    ControllerUndeployQuery query = new ControllerUndeployQuery(tag);
 
     return (Boolean) querySet(query);
   }
@@ -319,12 +187,9 @@ public class DeployClient
   // low-level routines
   //
 
-  private String deployJar(GitCommitJar commit,
-                           String tag,
-                           String user,
-                           String message,
-                           String version,
-                           HashMap<String,String> extraAttr)
+  protected String deployJar(String tag,
+                             GitCommitJar commit,
+                             HashMap<String,String> attributes)
     throws IOException
   {
     String []files = getCommitList(commit.getCommitList());
@@ -338,8 +203,9 @@ public class DeployClient
       querySet(query);
     }
 
-    String result = commit(tag, commit.getDigest(), user, message, version, extraAttr);
+    String result = setTag(tag, commit.getDigest(), attributes);
 
+    // XXX 
     deploy(tag);
 
     return result;
@@ -382,50 +248,29 @@ public class DeployClient
 
   public String addDeployFile(String tag, String name, String sha1)
   {
-    DeployAddFileQuery query
-      = new DeployAddFileQuery(tag, name, sha1);
+    DeployAddFileQuery query = new DeployAddFileQuery(tag, name, sha1);
 
     return (String) querySet(query);
   }
 
-  private String commit(String tag,
-                        String sha1,
-                        String user,
-                        String message,
-                        String version,
-                        HashMap<String,String> attr)
+  protected String setTag(String tag,
+                          String sha1,
+                          HashMap<String,String> attributes)
   {
+    HashMap<String,String> attributeCopy = 
+      (HashMap<String,String>) attributes.clone();
+
+    String user = attributeCopy.remove(USER_ATTRIBUTE);
+    String message = attributeCopy.remove(MESSAGE_ATTRIBUTE);
+    String version = attributeCopy.remove(VERSION_ATTRIBUTE);
+
     // server/2o66
-    DeployCommitQuery query
-      = new DeployCommitQuery(tag, sha1, user, message, version, attr);
+    SetTagQuery query
+      = new SetTagQuery(tag, sha1, user, message, version, attributeCopy);
 
     return (String) querySet(query);
   }
   
-  public StatusQuery status(String tag)
-  {
-    StatusQuery query = new StatusQuery(tag);
-
-    return (StatusQuery) queryGet(query);
-  }
-
-  public HostQuery []listHosts()
-  {
-    ListHostsQuery query = new ListHostsQuery();
-
-    return (HostQuery []) queryGet(query);
-  }
-
-  public WebAppQuery []listWebApps(String host)
-  {
-    return (WebAppQuery []) queryGet(new ListWebAppsQuery(host));
-  }
-
-  public TagQuery []listTags(String host)
-  {
-    return (TagQuery []) queryGet(new ListTagsQuery(host));
-  }
-
   public TagResult []queryTags(String pattern)
   {
     QueryTagsQuery query = new QueryTagsQuery(pattern);
@@ -433,7 +278,118 @@ public class DeployClient
     return (TagResult []) queryGet(query);
   }
 
-  private Serializable queryGet(Serializable query)
+  /**
+   * Starts a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   *
+   * @deprecated
+   */
+  public Boolean start(String tag)
+  {
+    ControllerStartQuery query = new ControllerStartQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Stops a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   *
+   * @deprecated
+   */
+  public Boolean stop(String tag)
+  {
+    ControllerStopQuery query = new ControllerStopQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Deploy controller based on a deployment tag: wars/default/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   *
+   * @deprecated
+   */
+  public Boolean deploy(String tag)
+  {
+    ControllerDeployQuery query = new ControllerDeployQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Undeploy a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   *
+   * @deprecated
+   */
+  public Boolean undeploy(String tag)
+  {
+    ControllerUndeployQuery query = new ControllerUndeployQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Undeploys a tag
+   *
+   * @param tag symbolic name of the jar file to add
+   * @param user user name for the commit message
+   * @param message the commit message
+   *
+   * @deprecated
+   */
+  public Boolean undeploy(String tag,
+                          String user,
+                          String message,
+                          HashMap<String,String> extraAttr)
+  {
+    UndeployQuery query = new UndeployQuery(tag, user, message);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * @deprecated
+   **/
+  public StatusQuery status(String tag)
+  {
+    StatusQuery query = new StatusQuery(tag);
+
+    return (StatusQuery) queryGet(query);
+  }
+
+  /**
+   * @deprecated
+   **/
+  public HostQuery []listHosts()
+  {
+    ListHostsQuery query = new ListHostsQuery();
+
+    return (HostQuery []) queryGet(query);
+  }
+
+  /**
+   * @deprecated
+   **/
+  public WebAppQuery []listWebApps(String host)
+  {
+    return (WebAppQuery []) queryGet(new ListWebAppsQuery(host));
+  }
+
+  /**
+   * @deprecated
+   **/
+  public TagQuery []listTags(String host)
+  {
+    return (TagQuery []) queryGet(new ListTagsQuery(host));
+  }
+
+  protected Serializable queryGet(Serializable query)
   {
     try {
       return (Serializable) _conn.queryGet(_deployJid, query);
@@ -443,25 +399,9 @@ public class DeployClient
     }
   }
 
-  private Serializable querySet(Serializable query)
+  protected Serializable querySet(Serializable query)
   {
     return (Serializable) _conn.querySet(_deployJid, query);
-  }
-
-  private String createTag(String type, String host, String name)
-  {
-    return createTag("default", type, host, name);
-  }
-
-  private String createTag(String stage, 
-                           String type, 
-                           String host, 
-                           String name)
-  {
-    while (name.startsWith("/"))
-      name = name.substring(1);
-    
-    return stage + "/" + type + "/" + host + "/" + name;
   }
 
   @Override

@@ -37,6 +37,7 @@ import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
+import com.caucho.git.GitWorkingTree;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
@@ -54,6 +55,7 @@ import com.caucho.util.IoUtil;
 import com.caucho.vfs.*;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +118,7 @@ public class DeployService extends SimpleActor
 
   @QueryGet
   public boolean commitList(long id, String to, String from,
-			    DeployCommitListQuery commitList)
+                            DeployCommitListQuery commitList)
   {
     ArrayList<String> uncommittedList = new ArrayList<String>();
 
@@ -131,212 +133,6 @@ public class DeployService extends SimpleActor
       = new DeployCommitListQuery(uncommittedList);
 
     getBrokerStream().queryResult(id, from, to, resultList);
-
-    return true;
-  }
-
-  @QueryGet
-  public boolean listWebApps(long id,
-                             String to,
-                             String from,
-                             ListWebAppsQuery listQuery)
-  {
-    ArrayList<WebAppQuery> apps = new ArrayList<WebAppQuery>();
-
-    String stage = _server.getStage();
-
-    for (HostController host : _server.getHostControllers()) {
-      if (listQuery.getHost().equals(host.getName())) {
-        for (WebAppController webApp
-            : host.getDeployInstance().getWebAppList()) {
-          WebAppQuery q = new WebAppQuery();
-          String name = webApp.getId();
-
-          if (name.startsWith("/"))
-            name = name.substring(1);
-
-          q.setTag(stage + "/wars/" + host.getName() + "/" + name);
-
-          q.setHost(host.getName());
-          q.setUrl(webApp.getURL());
-
-          apps.add(q);
-        }
-      }
-    }
-
-    getBrokerStream()
-      .queryResult(id, from, to, apps.toArray(new WebAppQuery[apps.size()]));
-
-    return true;
-  }
-
-  @QueryGet
-  public boolean listTags(long id,
-                          String to,
-                          String from,
-                          ListTagsQuery listQuery)
-  {
-    ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
-
-    for (String tag : _repository.getTagMap().keySet()) {
-      if (tag.startsWith("default/wars/") || tag.startsWith("default/ears/")) {
-        int p = tag.indexOf('/', "default/".length());
-        int q = tag.indexOf('/', p + 1);
-
-        if (q < 0)
-          continue;
-
-        String host = tag.substring(p + 1, q);
-        String name = tag.substring(q + 1);
-
-        tags.add(new TagQuery(host, tag));
-      }
-    }
-
-    getBrokerStream()
-      .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
-
-    return true;
-  }
-
-  @QueryGet
-  public boolean queryTags(long id,
-                           String to,
-                           String from,
-                           QueryTagsQuery tagsQuery)
-  {
-    ArrayList<TagResult> tags = new ArrayList<TagResult>();
-
-    Pattern pattern = Pattern.compile(tagsQuery.getPattern());
-
-    for (Map.Entry<String, RepositoryTagEntry> entry : 
-         _repository.getTagMap().entrySet()) {
-      String tag = entry.getKey();
-
-      if (pattern.matcher(tag).matches())
-        tags.add(new TagResult(tag, entry.getValue().getRoot()));
-    }
-
-    getBrokerStream()
-      .queryResult(id, from, to, tags.toArray(new TagResult[tags.size()]));
-
-    return true;
-  }
-
-  @QueryGet
-  public boolean listHosts(long id,
-			   String to,
-			   String from,
-			   ListHostsQuery query)
-  {
-    List<HostQuery> hosts = new ArrayList<HostQuery>();
-
-    for (HostController controller : _server.getHostControllers()) {
-      if ("admin.resin".equals(controller.getName()))
-         continue;
-
-      HostQuery q = new HostQuery();
-      q.setName(controller.getName());
-
-      hosts.add(q);
-    }
-
-    getBrokerStream()
-      .queryResult(id, from, to, hosts.toArray(new HostQuery[hosts.size()]));
-
-    return true;
-  }
-
-  @QueryGet
-  public boolean status(long id,
-                        String to,
-                        String from,
-                        StatusQuery query)
-  {
-    String tag = query.getTag();
-
-    String errorMessage = statusMessage(tag);
-    String state = null;
-    
-    StatusQuery result = new StatusQuery(tag, state, errorMessage);
-
-    getBrokerStream().queryResult(id, from, to, result);
-
-    return true;
-  }
-
-  @QuerySet
-  public boolean controllerDeploy(long id,
-                                  String to,
-                                  String from,
-                                  ControllerDeployQuery query)
-  {
-    String status = deploy(query.getTag());
-    
-    log.fine(this + " deploy '" + query.getTag() + "' -> " + status);
-
-    getBrokerStream().queryResult(id, from, to, true);
-
-    return true;
-  }
-
-  @QuerySet
-  public boolean controllerStart(long id,
-				   String to,
-				   String from,
-				   ControllerStartQuery query)
-  {
-    String status = start(query.getTag());
-    
-    log.fine(this + " start '" + query.getTag() + "' -> " + status);
-
-    getBrokerStream().queryResult(id, from, to, true);
-
-    return true;
-  }
-
-  @QuerySet
-  public boolean controllerStop(long id,
-                                String to,
-                                String from,
-                                ControllerStopQuery query)
-  {
-    String status = stop(query.getTag());
-    
-    log.fine(this + " stop '" + query.getTag() + "' -> " + status);
-
-    getBrokerStream().queryResult(id, from, to, true);
-
-    return true;
-  }
-
-  @QuerySet
-  public boolean controllerUndeploy(long id,
-                                    String to,
-                                    String from,
-                                    ControllerUndeployQuery query)
-  {
-    String status = undeploy(query.getTag());
-
-    log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
-
-    getBrokerStream().queryResult(id, from, to, true);
-
-    return true;
-  }
-
-  @QuerySet
-  public boolean controllerUndeploy(long id,
-                                    String to,
-                                    String from,
-                                    UndeployQuery query)
-  {
-    String status = undeploy(query.getTag(), query.getUser(), query.getMessage());
-
-    log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
-
-    getBrokerStream().queryResult(id, from, to, true);
 
     return true;
   }
@@ -382,6 +178,155 @@ public class DeployService extends SimpleActor
     getBrokerStream().queryResult(id, from, to, result);
   }
 
+  @QuerySet
+  public boolean sendFileQuery(long id, String to, String from,
+                               DeploySendQuery query)
+  {
+    String sha1 = query.getSha1();
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " sendFileQuery sha1=" + sha1);
+
+    InputStream is = null;
+    try {
+      is = query.getInputStream();
+
+      _repository.writeRawGitFile(sha1, is);
+    
+      getBrokerStream().queryResult(id, from, to, true);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      getBrokerStream().queryResult(id, from, to, false);
+    } finally {
+      IoUtil.close(is);
+    }
+
+    return true;
+  }
+
+  @QuerySet
+  public boolean setTagQuery(long id, String to, String from, SetTagQuery query)
+  {
+    String tag = query.getTag();
+    String hex = query.getHex();
+
+    boolean result
+      = _repository.setTag(tag, hex, query.getUser(),
+                           query.getMessage(), query.getVersion());
+    
+    getBrokerStream().queryResult(id, from, to, String.valueOf(result));
+
+    return true;
+  }
+
+  @QueryGet
+  public boolean queryTags(long id,
+                           String to,
+                           String from,
+                           QueryTagsQuery tagsQuery)
+  {
+    ArrayList<TagResult> tags = new ArrayList<TagResult>();
+
+    Pattern pattern = Pattern.compile(tagsQuery.getPattern());
+
+    for (Map.Entry<String, RepositoryTagEntry> entry : 
+         _repository.getTagMap().entrySet()) {
+      String tag = entry.getKey();
+
+      if (pattern.matcher(tag).matches())
+        tags.add(new TagResult(tag, entry.getValue().getRoot()));
+    }
+
+    getBrokerStream()
+      .queryResult(id, from, to, tags.toArray(new TagResult[tags.size()]));
+
+    return true;
+  }
+
+  /**
+   * @deprecated
+   */
+  @QuerySet
+  public boolean controllerDeploy(long id,
+                                  String to,
+                                  String from,
+                                  ControllerDeployQuery query)
+  {
+    String status = deploy(query.getTag());
+    
+    log.fine(this + " deploy '" + query.getTag() + "' -> " + status);
+
+    getBrokerStream().queryResult(id, from, to, true);
+
+    return true;
+  }
+
+  private String deploy(String gitPath)
+  {
+    int p = gitPath.indexOf('/');
+    int q = gitPath.indexOf('/', p + 1);
+    int r = gitPath.lastIndexOf('/');
+
+    if (p < 0 || q < 0 || r < 0) 
+      return L.l("'{0}' is an unknown type", gitPath);
+
+    String type = gitPath.substring(0, p);
+    String stage = gitPath.substring(p + 1, q);
+    String host = gitPath.substring(q + 1, r);
+    String name = gitPath.substring(r + 1);
+
+    try {
+      if (type.equals("ears")) {
+        ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
+
+        for (Object proxy : Jmx.query(pattern)) {
+          EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
+
+          earDeploy.deploy(name);
+
+
+          return statusMessage(gitPath);
+        }
+      }
+      else if (type.equals("wars")) {
+        ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
+
+        for (Object proxy : Jmx.query(pattern)) {
+          WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+
+          warDeploy.deploy(name);
+
+          return statusMessage(gitPath);
+        }
+      }
+
+      return L.l("'{0}' is an unknown type", gitPath);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return L.l("deploy '{0}' failed\n{1}", gitPath, e.toString());
+    }
+  }
+
+  /**
+   * @deprecated
+   */
+  @QuerySet
+  public boolean controllerStart(long id,
+                                 String to,
+                                 String from,
+                                 ControllerStartQuery query)
+  {
+    String status = start(query.getTag());
+    
+    log.fine(this + " start '" + query.getTag() + "' -> " + status);
+
+    getBrokerStream().queryResult(id, from, to, true);
+
+    return true;
+  }
+
   private String start(String tag)
   {
     DeployControllerMXBean controller = findController(tag);
@@ -398,6 +343,24 @@ public class DeployService extends SimpleActor
       
       return e.toString();
     }
+  }
+
+  /**
+   * @deprecated
+   */
+  @QuerySet
+  public boolean controllerStop(long id,
+                                String to,
+                                String from,
+                                ControllerStopQuery query)
+  {
+    String status = stop(query.getTag());
+    
+    log.fine(this + " stop '" + query.getTag() + "' -> " + status);
+
+    getBrokerStream().queryResult(id, from, to, true);
+
+    return true;
   }
 
   private String stop(String tag)
@@ -418,6 +381,27 @@ public class DeployService extends SimpleActor
     }
   }
 
+  /**
+   * @deprecated
+   */
+  @QuerySet
+  public boolean controllerUndeploy(long id,
+                                    String to,
+                                    String from,
+                                    ControllerUndeployQuery query)
+  {
+    String status = undeploy(query.getTag());
+
+    log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
+
+    getBrokerStream().queryResult(id, from, to, true);
+
+    return true;
+  }
+
+  /**
+   * @deprecated
+   */
   private String undeploy(String tag)
   {
     DeployControllerMXBean controller = findController(tag);
@@ -443,6 +427,24 @@ public class DeployService extends SimpleActor
       
       return e.toString();
     }
+  }
+
+  /**
+   * @deprecated
+   */
+  @QuerySet
+  public boolean controllerUndeploy(long id,
+                                    String to,
+                                    String from,
+                                    UndeployQuery query)
+  {
+    String status = undeploy(query.getTag(), query.getUser(), query.getMessage());
+
+    log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
+
+    getBrokerStream().queryResult(id, from, to, true);
+
+    return true;
   }
 
   private String undeploy(String tag, String user, String message)
@@ -475,67 +477,9 @@ public class DeployService extends SimpleActor
     }
   }
 
-
-  private WebAppController findWebApp(String hostName, String webAppName)
-  {
-    for (HostController host : _server.getHostControllers()) {
-      if (! hostName.equals(host.getName()))
-	continue;
-	  
-      for (WebAppController webApp
-	     : host.getDeployInstance().getWebAppList()) {
-
-	if (webAppName.equals(webApp.getId()))
-	  return webApp;
-      }
-    }
-
-    return null;
-  }
-
-  @QuerySet
-  public boolean sendFileQuery(long id, String to, String from,
-				DeploySendQuery query)
-  {
-    String sha1 = query.getSha1();
-    
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " sendFileQuery sha1=" + sha1);
-
-    InputStream is = null;
-    try {
-      is = query.getInputStream();
-
-      _repository.writeRawGitFile(sha1, is);
-    
-      getBrokerStream().queryResult(id, from, to, true);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-      
-      getBrokerStream().queryResult(id, from, to, false);
-    } finally {
-      IoUtil.close(is);
-    }
-
-    return true;
-  }
-
-  @QuerySet
-  public boolean sendCommitQuery(long id, String to, String from,
-                                 DeployCommitQuery query)
-  {
-    String tag = query.getTag();
-    String hex = query.getHex();
-
-    boolean result
-      = _repository.setTag(tag, hex, query.getUser(),
-			   query.getMessage(), query.getVersion());
-    
-    getBrokerStream().queryResult(id, from, to, String.valueOf(result));
-
-    return true;
-  }
-
+  /**
+   * @deprecated
+   */
   @QuerySet
   public boolean sendAddFileQuery(long id, String to, String from,
                                   DeployAddFileQuery query)
@@ -578,50 +522,123 @@ public class DeployService extends SimpleActor
     }
   }
 
-  private String deploy(String gitPath)
+  /**
+   * @deprecated
+   **/
+  @QueryGet
+  public boolean listWebApps(long id,
+                             String to,
+                             String from,
+                             ListWebAppsQuery listQuery)
   {
-    int p = gitPath.indexOf('/');
-    int q = gitPath.indexOf('/', p + 1);
-    int r = gitPath.lastIndexOf('/');
+    ArrayList<WebAppQuery> apps = new ArrayList<WebAppQuery>();
 
-    if (p < 0 || q < 0 || r < 0) 
-      return L.l("'{0}' is an unknown type", gitPath);
+    String stage = _server.getStage();
 
-    String stage = gitPath.substring(0, p);
-    String type = gitPath.substring(p + 1, q);
-    String host = gitPath.substring(q + 1, r);
-    String name = gitPath.substring(r + 1);
+    for (HostController host : _server.getHostControllers()) {
+      if (listQuery.getHost().equals(host.getName())) {
+        for (WebAppController webApp
+            : host.getDeployInstance().getWebAppList()) {
+          WebAppQuery q = new WebAppQuery();
+          String name = webApp.getId();
 
-    try {
-      if (type.equals("ears")) {
-        ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
+          if (name.startsWith("/"))
+            name = name.substring(1);
 
-        for (Object proxy : Jmx.query(pattern)) {
-          EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
+          q.setTag("wars/" + stage + "/" + host.getName() + "/" + name);
 
-          earDeploy.deploy(name);
+          q.setHost(host.getName());
+          q.setUrl(webApp.getURL());
 
-          return statusMessage(gitPath);
+          apps.add(q);
         }
       }
-      else if (type.equals("wars")) {
-        ObjectName pattern = new ObjectName("resin:type=WebAppDeploy,*");
-
-        for (Object proxy : Jmx.query(pattern)) {
-          WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
-
-          warDeploy.deploy(name);
-
-          return statusMessage(gitPath);
-        }
-      }
-
-      return L.l("'{0}' is an unknown type", gitPath);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return L.l("deploy '{0}' failed\n{1}", gitPath, e.toString());
     }
+
+    getBrokerStream()
+      .queryResult(id, from, to, apps.toArray(new WebAppQuery[apps.size()]));
+
+    return true;
+  }
+
+  /**
+   * @deprecated
+   **/
+  @QueryGet
+  public boolean listTags(long id,
+                          String to,
+                          String from,
+                          ListTagsQuery listQuery)
+  {
+    ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
+
+    for (String tag : _repository.getTagMap().keySet()) {
+      if (tag.startsWith("wars/default") || tag.startsWith("ears/default")) {
+        int p = "wars/default/".length();
+        int q = tag.indexOf('/', p + 1);
+
+        if (q < 0)
+          continue;
+
+        String host = tag.substring(p, q);
+        String name = tag.substring(q + 1);
+
+        tags.add(new TagQuery(host, tag));
+      }
+    }
+
+    getBrokerStream()
+      .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
+
+    return true;
+  }
+
+  /**
+   * @deprecated
+   **/
+  @QueryGet
+  public boolean listHosts(long id,
+                           String to,
+                           String from,
+                           ListHostsQuery query)
+  {
+    List<HostQuery> hosts = new ArrayList<HostQuery>();
+
+    for (HostController controller : _server.getHostControllers()) {
+      if ("admin.resin".equals(controller.getName()))
+         continue;
+
+      HostQuery q = new HostQuery();
+      q.setName(controller.getName());
+
+      hosts.add(q);
+    }
+
+    getBrokerStream()
+      .queryResult(id, from, to, hosts.toArray(new HostQuery[hosts.size()]));
+
+    return true;
+  }
+
+  /**
+   * @deprecated
+   **/
+  @QueryGet
+  public boolean status(long id,
+                        String to,
+                        String from,
+                        StatusQuery query)
+  {
+    String tag = query.getTag();
+
+    String errorMessage = statusMessage(tag);
+    String state = null;
+    
+    StatusQuery result = new StatusQuery(tag, state, errorMessage);
+
+    getBrokerStream().queryResult(id, from, to, result);
+
+    return true;
   }
 
   private String statusMessage(String tag)
@@ -633,8 +650,8 @@ public class DeployService extends SimpleActor
     if (p < 0 || q < 0 || r < 0) 
       return L.l("'{0}' is an unknown type", tag);
 
-    String stage = tag.substring(0, p);
-    String type = tag.substring(p + 1, q);
+    String type = tag.substring(0, p);
+    String stage = tag.substring(p + 1, q);
     String host = tag.substring(q + 1, r);
     String name = tag.substring(r + 1);
 
@@ -692,8 +709,8 @@ public class DeployService extends SimpleActor
     if (p < 0 || q < 0 || r < 0) 
       return null;
 
-    String stage = tag.substring(0, p);
-    String type = tag.substring(p + 1, q);
+    String type = tag.substring(0, p);
+    String stage = tag.substring(p + 1, q);
     String host = tag.substring(q + 1, r);
     String name = tag.substring(r + 1);
 
@@ -722,32 +739,4 @@ public class DeployService extends SimpleActor
 
     return null;
   }
-
-  private String getTagName(String name)
-  {
-    for (int i = 0; i < name.length(); i++) {
-      if (name.charAt(i) != '/')
-        return name.substring(i);
-    }
-
-    return name;
-  }
-
-  /*
-  private boolean writeFile(String sha1, TempOutputStream out)
-  {
-    try {
-      git.writeFile(out, sha1);
-
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " writeFile " + sha1);
-
-      return true;
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    return false;
-  }
-  */
 }

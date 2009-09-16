@@ -111,7 +111,7 @@ public class WebAppExpandDeployGenerator
       if (server != null)
         stage = server.getStage();
     
-      setRepositoryTag(stage + "/wars/" + hostName);
+      setRepositoryTag("wars/" + stage + "/" + hostName);
       
       setEntryNamePrefix("/");
     }

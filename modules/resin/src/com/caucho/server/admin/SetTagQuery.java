@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,26 +31,32 @@ package com.caucho.server.admin;
 
 import java.util.*;
 
-public class DeployCommitResult implements java.io.Serializable
+public class SetTagQuery implements java.io.Serializable
 {
   private String _tag;
   private String _hex;
-  private String _status;
+  private String _user;
   private String _message;
+  private String _version;
+  private HashMap<String,String> _attr;
 
-  private DeployCommitResult()
+  private SetTagQuery()
   {
   }
 
-  public DeployCommitResult(String tag,
-			    String hex,
-			    String status,
-			    String message)
+  public SetTagQuery(String tag,
+                     String hex,
+                     String user,
+                     String message,
+                     String version,
+                     HashMap<String,String> attr)
   {
     _tag = tag;
     _hex = hex;
-    _status = status;
+    _user = user;
     _message = message;
+    _version = version;
+    _attr = attr;
   }
 
   public String getTag()
@@ -63,9 +69,9 @@ public class DeployCommitResult implements java.io.Serializable
     return _hex;
   }
 
-  public String getStatus()
+  public String getUser()
   {
-    return _status;
+    return _user;
   }
 
   public String getMessage()
@@ -73,15 +79,14 @@ public class DeployCommitResult implements java.io.Serializable
     return _message;
   }
 
+  public String getVersion()
+  {
+    return _version;
+  }
+
   @Override
   public String toString()
   {
-    if (_message != null)
-      return (getClass().getSimpleName()
-	      + "[" + _tag
-	      + "," + _hex
-	      + "," + _message + "]");
-    else
-      return getClass().getSimpleName() + "[" + _tag + "," + _hex + "]";
+    return getClass().getSimpleName() + "[" + _tag + "," + _hex + "]";
   }
 }

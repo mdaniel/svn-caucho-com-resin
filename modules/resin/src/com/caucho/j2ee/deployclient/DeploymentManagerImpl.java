@@ -279,14 +279,20 @@ public class DeploymentManagerImpl
       String type = XPath.evalString("/deployment-plan/archive-type", doc);
       String name = XPath.evalString("/deployment-plan/name", doc);
 
-      String tag = "default/" + type + "s/default/" + name;
+      String tag = type + "s/default/default/" + name;
+
+      HashMap<String,String> attributes = new HashMap<String,String>();
+      attributes.put(DeployClient.USER_ATTRIBUTE, _user);
+      attributes.put(DeployClient.MESSAGE_ATTRIBUTE, "");
 
       if (archive != null)
-        _deployClient.deployJarContents(Vfs.lookup(archive.getAbsolutePath()),
-                                        tag, _user, "", null, null);
+        _deployClient.deployJarContents(tag, 
+                                        Vfs.lookup(archive.getAbsolutePath()),
+                                        attributes);
       else
-        _deployClient.deployJarContents(archiveStream,
-                                        tag, _user, "", null, null);
+        _deployClient.deployJarContents(tag, 
+                                        archiveStream,
+                                        attributes);
 
       _deployClient.deploy(tag);
 
