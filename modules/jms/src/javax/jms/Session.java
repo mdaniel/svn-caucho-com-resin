@@ -38,7 +38,7 @@ public interface Session extends Runnable {
   public final static int AUTO_ACKNOWLEDGE = 1;
   public final static int CLIENT_ACKNOWLEDGE = 2;
   public final static int DUPS_OK_ACKNOWLEDGE = 3;
-  public final static int SESSION_TRANSACTED = 4;
+  public final static int SESSION_TRANSACTED = 0;
 
   public BytesMessage createBytesMessage()
     throws JMSException;

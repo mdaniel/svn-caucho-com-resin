@@ -108,8 +108,14 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    * Primary message receiving, registers a callback for any new
    * message.
    */
-  public E receiveEntry(long expireTime, boolean isAutoAck)
-    throws MessageException
+  public E receiveEntry(long expireTime, boolean isAutoAck) 
+     throws MessageException
+  {
+    return receiveEntry(expireTime, isAutoAck, null);
+  }
+  
+  public E receiveEntry(long expireTime, boolean isAutoAck, 
+                        QueueEntrySelector selector) throws MessageException
   {
     _receiverCount.incrementAndGet();
     
@@ -118,7 +124,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 
       synchronized (_queueLock) {
         if (_callbackList.size() == 0) {
-        entry = readEntry();
+        entry = readEntry(selector);
         }
       }
 
@@ -317,6 +323,13 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    */
   protected E readEntry()
   {
+    return readEntry(null);
+  }
+  /**
+   * Returns the next entry from the queue
+   */
+  protected E readEntry(QueueEntrySelector selector)
+  {
     for (int i = _head.length - 1; i >= 0; i--) {
       for (QueueEntry entry = _head[i];
            entry != null;
@@ -327,6 +340,11 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
         }
 
         if (entry.isRead()) {
+          continue;
+        }
+        
+        readPayload((E)entry);
+        if ((selector != null) && (!selector.isMatch(entry))) {
           continue;
         }
           

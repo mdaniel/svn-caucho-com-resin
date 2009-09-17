@@ -76,6 +76,11 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
     _messageConsumerCount.decrementAndGet();
   }
   
+  public boolean isClosed()
+  {
+    return getSession() != null ? getSession().isClosed() : false; 
+  }
+  
   public void delete()
     throws JMSException
   {

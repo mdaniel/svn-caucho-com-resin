@@ -45,8 +45,8 @@ import java.util.logging.Level;
  */
 public class BytesMessageImpl extends MessageImpl implements BytesMessage {
   private TempStream _tempStream;
-  private ReadStream _rs;
-  private WriteStream _ws;
+  private transient ReadStream _rs;
+  private transient WriteStream _ws;
 
   public BytesMessageImpl()
   {

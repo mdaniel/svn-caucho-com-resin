@@ -28,17 +28,21 @@
 
 package com.caucho.jms.selector;
 
-import com.caucho.jms.message.ObjectConverter;
-import com.caucho.util.L10N;
+import java.util.logging.Logger;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.util.logging.Logger;
+
+import com.caucho.jms.message.ObjectConverter;
+import com.caucho.jms.queue.MessageException;
+import com.caucho.jms.queue.QueueEntry;
+import com.caucho.jms.queue.QueueEntrySelector;
+import com.caucho.util.L10N;
 
 /**
  * The base selector.
  */
-abstract public class Selector  {
+abstract public class Selector implements QueueEntrySelector {
   protected static final Logger log
     = Logger.getLogger(Selector.class.getName());
   static final L10N L = new L10N(Selector.class);
@@ -63,6 +67,17 @@ abstract public class Selector  {
 
     return bool.booleanValue();
   }
+  
+  @Override
+  public boolean isMatch(Object entry)
+  {
+    try {
+      QueueEntry queueEntry = (QueueEntry)entry;
+      return isMatch((Message)queueEntry.getPayload());
+    } catch (JMSException je) {
+      throw new MessageException(je);
+    }
+  }  
 
   protected static Boolean toBoolean(boolean value)
   {

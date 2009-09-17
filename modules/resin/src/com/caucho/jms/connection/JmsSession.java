@@ -724,6 +724,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     ArrayList<TransactedMessage> messages = _transactedMessages;
     if (messages == null || messages.size() == 0) {
       throw new IllegalStateException(L.l("commit() can only be called only when there are transactions to be committed."));
+      //return;
     }
     
     try {

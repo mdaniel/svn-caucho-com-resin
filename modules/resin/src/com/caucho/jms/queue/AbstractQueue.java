@@ -119,6 +119,12 @@ abstract public class AbstractQueue extends AbstractDestination
    * message.
    */
   public QueueEntry receiveEntry(long timeout, boolean isAutoAck)
+  {
+    return receiveEntry(timeout, isAutoAck, null);
+  }
+  
+  public QueueEntry receiveEntry(long timeout, boolean isAutoAck, 
+                                 QueueEntrySelector selector)
     throws MessageException
   {
     return null;

@@ -271,7 +271,7 @@ public class MessageProducerImpl implements MessageProducer {
     if (destination instanceof TemporaryTopicImpl) {
       
       // Message can not be sent on Temporary Queue if Session is not active.      
-      if (((TemporaryTopicImpl)destination).getSession().isClosed()) {
+      if (((TemporaryTopicImpl)destination).isClosed()) {
         throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' session is not active",
             destination));
       }     

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,47 +19,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Ram Lakshmanan
  */
 
-package javax.jms;
+package com.caucho.jms.queue;
 
-/**
- * The main message.
- */
-public class JMSException extends Exception {
-  private String _errorCode;
-  private Exception _cause;
+
+public interface QueueEntrySelector
+{
   
-  public JMSException(String reason)
-  {
-    super(reason);
-  }
-  
-  public JMSException(String reason, String errorCode)
-  {
-    super(reason);
-
-    _errorCode = errorCode;
-  }
-
-  public String getErrorCode()
-  {
-    return _errorCode;
-  }
-
-  public Exception getLinkedException()
-  {
-    return _cause;
-  }
-
-  public synchronized void setLinkedException(Exception cause)
-  {
-    _cause = cause;
-  }
+  public boolean isMatch(Object entry);
 
 }

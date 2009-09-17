@@ -263,7 +263,7 @@ public class MessageConsumerImpl implements MessageConsumer
     long expireTime = timeout > 0 ? now + timeout : 0;
 
     while (_session.isActive()) {
-      QueueEntry entry = _queue.receiveEntry(expireTime, _isAutoAcknowledge);
+      QueueEntry entry = _queue.receiveEntry(expireTime, _isAutoAcknowledge, _selector);
 
       if (entry == null)
 	return null;
@@ -289,20 +289,20 @@ public class MessageConsumerImpl implements MessageConsumer
 
       msg.setReceive();
       
-      if (_selector != null && ! _selector.isMatch(msg)) {
+      /*if (_selector != null && ! _selector.isMatch(msg)) {
         _queue.acknowledge(msg.getJMSMessageID());
         continue;
-      }
+      }*/
 
-      else {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(_queue + " receiving message " + msg);
+      //else {
+      if (log.isLoggable(Level.FINE))
+	log.fine(_queue + " receiving message " + msg);
 	
-        if (! _isAutoAcknowledge)
-          _session.addTransactedReceive(_queue, msg);
+      if (! _isAutoAcknowledge)
+        _session.addTransactedReceive(_queue, msg);
 
-        return msg;
-      }
+      return msg;
+      //}
     }
 
     return null;
