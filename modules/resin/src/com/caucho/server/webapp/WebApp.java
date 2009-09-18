@@ -2877,7 +2877,10 @@ public class WebApp extends ServletContextImpl
 
         if (entry != null && ! entry.isModified()) {
           chain = entry.getFilterChain();
-	  invocation.setServletName(entry.getServletName());
+          invocation.setServletName(entry.getServletName());
+
+          if (! entry.isAsyncSupported())
+            invocation.clearAsyncSupported();
         } else {
           chain = _servletMapper.mapServlet(invocation);
 
@@ -3782,6 +3785,7 @@ public class WebApp extends ServletContextImpl
     String _servletName;
     HashMap<String,String> _securityRoleMap;
     final Dependency _dependency;
+    boolean _isAsyncSupported;
 
     FilterChainEntry(FilterChain filterChain, Invocation invocation)
     {
@@ -3790,6 +3794,7 @@ public class WebApp extends ServletContextImpl
       _servletPath = invocation.getServletPath();
       _servletName = invocation.getServletName();
       _dependency = invocation.getDependency();
+      _isAsyncSupported = invocation.isAsyncSupported();
     }
 
     boolean isModified()
@@ -3825,6 +3830,10 @@ public class WebApp extends ServletContextImpl
     String getServletName()
     {
       return _servletName;
+    }
+
+    boolean isAsyncSupported() {
+      return _isAsyncSupported;
     }
   }
 

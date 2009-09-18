@@ -379,7 +379,7 @@ public class FilterConfigImpl
 
   public void setAsyncSupported(boolean isAsyncSupported)
   {
-    if (_webApp != null && !_webApp.isInitializing())
+    if (_webApp != null && ! _webApp.isInitializing())
       throw new IllegalStateException();
     
    _isAsyncSupported = isAsyncSupported;
