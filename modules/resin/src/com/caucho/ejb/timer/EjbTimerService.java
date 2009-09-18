@@ -41,10 +41,10 @@ import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
 
 import com.caucho.config.timer.CronExpression;
+import com.caucho.config.timer.CronTrigger;
 import com.caucho.config.timer.EjbTimer;
 import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.config.timer.TimerTask;
-import com.caucho.config.types.CronType;
 import com.caucho.config.types.Trigger;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.resources.TimerTrigger;
@@ -595,13 +595,8 @@ public class EjbTimerService implements TimerService {
     CronExpression cronExpression = new CronExpression(schedule.getSecond(),
         schedule.getMinute(), schedule.getHour(), schedule.getDayOfWeek(),
         schedule.getDayOfMonth(), schedule.getMonth(), schedule.getYear());
-    Trigger trigger = new CronType(schedule.getSecond(), schedule.getMinute(),
-        schedule.getHour(), schedule.getDayOfWeek(), schedule.getDayOfMonth(),
-        schedule.getMonth(), schedule.getYear(), schedule.getStart(), schedule
-            .getEnd());
 
-    // schedule.getStart().getTime();
-    // schedule.getEnd().getTime();
+    Trigger trigger = new CronTrigger(cronExpression, -1, -1);
     EjbTimer timer = new EjbTimer();
     TimerTask scheduledTask = new TimerTask(_timeout, timer, cronExpression,
         trigger, info);

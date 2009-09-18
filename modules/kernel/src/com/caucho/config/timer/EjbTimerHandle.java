@@ -80,14 +80,14 @@ public class EjbTimerHandle implements TimerHandle {
   {
     // TODO This should probably be a proper lookup/injection of the scheduler
     // via CDI.
-    TimerTask scheduledTask = Scheduler.getTimerTaskById(_taskId);
+    TimerTask timerTask = Scheduler.getTimerTaskById(_taskId);
 
-    if (scheduledTask == null) {
+    if (timerTask == null) {
       throw new NoSuchObjectLocalException("The timer no longer exists.");
     }
 
     EjbTimer timer = new EjbTimer();
-    timer.setScheduledTask(scheduledTask);
+    timer.setScheduledTask(timerTask);
     timer.checkStatus();
 
     return timer;

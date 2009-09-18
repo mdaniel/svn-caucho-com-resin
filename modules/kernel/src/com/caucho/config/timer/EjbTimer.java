@@ -51,7 +51,7 @@ public class EjbTimer implements Timer, Runnable {
   @SuppressWarnings("unused")
   private static final Logger log = Logger.getLogger(EjbTimer.class.getName());
 
-  private TimerTask _scheduledTask;
+  private TimerTask _timerTask;
 
   /**
    * Creates timer.
@@ -65,7 +65,7 @@ public class EjbTimer implements Timer, Runnable {
    */
   public EjbTimer(TimerTask task)
   {
-    _scheduledTask = task;
+    _timerTask = task;
   }
 
   /**
@@ -76,7 +76,7 @@ public class EjbTimer implements Timer, Runnable {
    */
   public void setScheduledTask(TimerTask scheduledTask)
   {
-    _scheduledTask = scheduledTask;
+    _timerTask = scheduledTask;
   }
 
   /**
@@ -99,8 +99,8 @@ public class EjbTimer implements Timer, Runnable {
   {
     checkStatus();
 
-    if (_scheduledTask.getCronExpression() != null) {
-      CronExpression cronExpression = _scheduledTask.getCronExpression();
+    if (_timerTask.getCronExpression() != null) {
+      CronExpression cronExpression = _timerTask.getCronExpression();
 
       Date start = null;
       Date end = null;
@@ -142,7 +142,7 @@ public class EjbTimer implements Timer, Runnable {
   {
     checkStatus();
 
-    return _scheduledTask.getData();
+    return _timerTask.getData();
   }
 
   /**
@@ -186,7 +186,7 @@ public class EjbTimer implements Timer, Runnable {
   {
     checkStatus();
 
-    return new Date(_scheduledTask.getNextAlarmTime());
+    return new Date(_timerTask.getNextAlarmTime());
   }
 
   /**
@@ -210,7 +210,7 @@ public class EjbTimer implements Timer, Runnable {
     checkStatus();
 
     long now = Alarm.getExactTime();
-    long nextTime = _scheduledTask.getNextAlarmTime();
+    long nextTime = _timerTask.getNextAlarmTime();
 
     return (nextTime - now);
   }
@@ -234,7 +234,7 @@ public class EjbTimer implements Timer, Runnable {
   {
     checkStatus();
 
-    return new EjbTimerHandle(_scheduledTask.getTaskId());
+    return new EjbTimerHandle(_timerTask.getTaskId());
   }
 
   /**
@@ -255,7 +255,7 @@ public class EjbTimer implements Timer, Runnable {
   {
     checkStatus();
 
-    _scheduledTask.cancel();
+    _timerTask.cancel();
   }
 
   /**
@@ -264,8 +264,8 @@ public class EjbTimer implements Timer, Runnable {
   @Override
   public void run()
   {
-    if (_scheduledTask.getStatus() == ScheduledTaskStatus.ACTIVE) {
-      _scheduledTask.invoke(this);
+    if (_timerTask.getStatus() == ScheduledTaskStatus.ACTIVE) {
+      _timerTask.invoke(this);
     }
   }
 
@@ -277,17 +277,17 @@ public class EjbTimer implements Timer, Runnable {
    */
   void checkStatus() throws NoSuchObjectLocalException
   {
-    if (_scheduledTask.getStatus() == ScheduledTaskStatus.CANCELLED) {
+    if (_timerTask.getStatus() == ScheduledTaskStatus.CANCELLED) {
       throw new NoSuchObjectLocalException("This timer has been cancelled.");
     }
 
-    if (_scheduledTask.getStatus() == ScheduledTaskStatus.EXPIRED) {
+    if (_timerTask.getStatus() == ScheduledTaskStatus.EXPIRED) {
       throw new NoSuchObjectLocalException("This timer has already expired.");
     }
   }
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _scheduledTask + "]";
+    return getClass().getSimpleName() + "[" + _timerTask + "]";
   }
 }

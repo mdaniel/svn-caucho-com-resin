@@ -39,7 +39,7 @@ import com.caucho.util.L10N;
  * Callback for a timer
  */
 public class MethodTimeoutInvoker extends TimeoutInvoker {
-  private static final L10N L = new L10N(BeanTimeoutInvoker.class);
+  private static final L10N L = new L10N(MethodTimeoutInvoker.class);
 
   private TimeoutCaller _caller;
   private Method _method;
@@ -51,7 +51,7 @@ public class MethodTimeoutInvoker extends TimeoutInvoker {
     _caller = caller;
     _method = method;
 
-    Class[] param = method.getParameterTypes();
+    Class [] param = method.getParameterTypes();
 
     if (param.length == 0) {
     } else if (param.length == 1 && param[0].isAssignableFrom(Timer.class))
