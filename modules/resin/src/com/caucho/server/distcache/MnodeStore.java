@@ -687,7 +687,6 @@ public class MnodeStore implements AlarmListener {
 	alarm.queue(_expireReaperTimeout);
       }
     }
-    System.out.println("ALARM:" + alarm);
   }
 
   public void destroy()
