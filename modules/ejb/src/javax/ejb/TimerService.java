@@ -258,8 +258,8 @@ public interface TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   public Timer createCalendarTimer(ScheduleExpression schedule,
-                                   Serializable info)
-    throws IllegalArgumentException, IllegalStateException, EJBException;
+      Serializable info) throws IllegalArgumentException,
+      IllegalStateException, EJBException;
 
   /**
    * Create a calendar-based timer based on the input schedule expression.
