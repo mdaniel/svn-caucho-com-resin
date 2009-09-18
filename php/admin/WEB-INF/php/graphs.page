@@ -440,11 +440,11 @@ if ($dy == 0)
 // 330  #ff0080  - rose
 
 $colors[] = "#ff3030"; // red
-$colors[] = "#3090ff"; // azure
+$colors[] = "#30b0ff"; // azure
 $colors[] = "#906000"; // brown
 $colors[] = "#ff9030"; // orange
-$colors[] = "#000000"; // black
 $colors[] = "#3030ff"; // blue
+$colors[] = "#000000"; // black
 $colors[] = "#30b030"; // green
 $colors[] = "#d030d0"; // magenta
 $colors[] = "#30d0d0"; // cyan

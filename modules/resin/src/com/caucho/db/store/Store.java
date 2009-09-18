@@ -165,8 +165,7 @@ public class Store {
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
 
   // Can't use semaphore greater than 1 because write/read not atomic
-  //private final Semaphore _rowFileSemaphore = new Semaphore(4);
-  private final Semaphore _rowFileSemaphore = new Semaphore(1);
+  private final Semaphore _rowFileSemaphore = new Semaphore(4);
 
   private Lock _rowLock;
 

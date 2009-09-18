@@ -220,10 +220,12 @@ public class ServletManager {
       throw new ServletConfigException(L.l("'{0}' is not a known servlet.  Servlets must be defined by <servlet> before being used.", servletName));
     }
 
-    if (! config.isAsyncSupported())
-      invocation.clearAsyncSupported();
+    if (invocation != null) { // XXX: namedDispatcher
+      if (! config.isAsyncSupported())
+        invocation.clearAsyncSupported();
 
-    invocation.setMultipartConfig(config.getMultipartConfig());
+      invocation.setMultipartConfig(config.getMultipartConfig());
+    }
 
     return config.createServletChain();
   }

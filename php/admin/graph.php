@@ -79,7 +79,7 @@ foreach ($items as $item) {
 
   $stat_data->desc = $stat->description;
   $val = $stat_service->statisticsData($stat_data->name,
-                                       $now - 24 * $hour, $now);
+                                       $now - 24 * $hour, $now, 1);
 
   $stat_data->val = $val;
   calculate_data_bounds($stat_data);

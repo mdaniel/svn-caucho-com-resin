@@ -173,7 +173,7 @@ function format_ago($date)
   if ($event_time < 365 * 24 * 3600)
     return "";
 
-  $now = time(0);
+  $now = time();
   $ago = $now - $event_time;
 
   return sprintf("%dh%02d", $ago / 3600, $ago / 60 % 60);

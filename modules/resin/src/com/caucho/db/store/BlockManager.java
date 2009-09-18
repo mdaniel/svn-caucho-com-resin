@@ -196,7 +196,7 @@ public final class BlockManager
       while (hasPendingStore(store)) {
         _writer.wake();
         try {
-          _writeQueue.wait();
+          _writeQueue.wait(1000L);
         } catch (InterruptedException e) {
         }
       }
@@ -206,7 +206,9 @@ public final class BlockManager
   private boolean hasPendingStore(Store store)
   {
     for (int i = _writeQueue.size() - 1; i >= 0; i--) {
-      if (_writeQueue.get(i).getStore() == store)
+      Block block = _writeQueue.get(i);
+
+      if (block.getStore() == store)
         return true;
     }
 
@@ -277,7 +279,6 @@ public final class BlockManager
       
       if (block != oldBlock) {
         block.free();
-        System.out.println("OVERRIDE: " + oldBlock + " " + block);
       }
       
       block = oldBlock;
@@ -422,8 +423,7 @@ public final class BlockManager
               }
             }
 
-            if (isMax)
-              _writeQueue.notifyAll();
+            _writeQueue.notifyAll();
           }
         }
       } catch (Throwable e) {
