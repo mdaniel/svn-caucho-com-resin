@@ -23,32 +23,32 @@
       <executionStrategy>once-per-session</executionStrategy>
       <parameters>
         <parameter>
-	  <name>port</name>
-	  <type>int</type>
-	  <required>false</required>
-	  <editable>true</editable>
+          <name>port</name>
+          <type>int</type>
+          <required>false</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>contextPath</name>
-	  <type>java.lang.String</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>contextRoot</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>rootDirectory</name>
-	  <type>java.io.File</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>rootDirectory</name>
+          <type>java.io.File</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>timeout</name>
-	  <type>int</type>
-	  <required>false</required>
-	  <editable>true</editable>
+          <name>timeout</name>
+          <type>int</type>
+          <required>false</required>
+          <editable>true</editable>
         </parameter>
       </parameters>
       <configuration>
-        <contextPath implementation="java.lang.String">/${project.artifactId}</contextPath>
+        <contextRoot implementation="java.lang.String">/${project.artifactId}</contextRoot>
         <rootDirectory implementation="java.io.File">${project.build.directory}/${project.artifactId}</rootDirectory>
       </configuration>
     </mojo>
@@ -93,8 +93,8 @@
     </mojo>
 
     <mojo>
-      <goal>deploy</goal>
-      <description>Deploys a WAR file to a running Resin instance</description>
+      <goal>upload-war</goal>
+      <description>Uploads a WAR file to a running Resin instance</description>
       <requiresDirectInvocation>false</requiresDirectInvocation>
       <requiresProject>true</requiresProject>
       <requiresReports>false</requiresReports>
@@ -102,63 +102,207 @@
       <requiresOnline>false</requiresOnline>
       <inheritedByDefault>true</inheritedByDefault>
       <executePhase>package</executePhase>
-      <implementation>com.caucho.maven.MavenDeploy</implementation>
+      <implementation>com.caucho.maven.MavenUploadWar</implementation>
       <language>java</language>
       <instantiationStrategy>per-lookup</instantiationStrategy>
       <executionStrategy>once-per-session</executionStrategy>
       <parameters>
         <parameter>
-	  <name>port</name>
-	  <type>int</type>
-	  <required>false</required>
-	  <editable>true</editable>
+          <name>port</name>
+          <type>int</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>server</name>
-	  <type>java.lang.String</type>
-	  <required>false</required>
-	  <editable>true</editable>
+          <name>server</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>contextPath</name>
-	  <type>java.lang.String</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>contextRoot</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>warFile</name>
-	  <type>java.lang.String</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>warFile</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>user</name>
-	  <type>java.lang.String</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>user</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>password</name>
-	  <type>java.lang.String</type>
-	  <required>true</required>
-	  <editable>true</editable>
+          <name>password</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>commitMessage</name>
-	  <type>java.lang.String</type>
-	  <required>false</required>
-	  <editable>true</editable>
+          <name>commitMessage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
         </parameter>
         <parameter>
-	  <name>version</name>
-	  <type>java.lang.String</type>
-	  <required>false</required>
-	  <editable>true</editable>
+          <name>version</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>stage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>virtualHost</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>archive</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>writeHead</name>
+          <type>java.lang.Boolean</type>
+          <defaultValue>true</defaultValue>
+          <required>false</required>
+          <editable>true</editable>
         </parameter>
       </parameters>
       <configuration>
-        <contextPath implementation="java.lang.String">/${project.artifactId}</contextPath>
-        <warFile implementation="java.lang.String">${project.build.directory}/${project.artifactId}.war</warFile>
+        <contextRoot implementation="java.lang.String">/${project.build.finalName}</contextRoot>
+        <warFile implementation="java.lang.String">${project.build.directory}/${project.build.finalName}.war</warFile>
+      </configuration>
+    </mojo>
+
+    <mojo>
+      <goal>copy-tag</goal>
+      <description>Copies a tag within Resin instance</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>package</executePhase>
+      <implementation>com.caucho.maven.MavenCopyTag</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+          <name>port</name>
+          <type>int</type>
+          <required>true</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>server</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>contextRoot</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>commitMessage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>version</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>stage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>virtualHost</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>sourceContextRoot</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>sourceVersion</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>sourceStage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>sourceVirtualHost</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>sourceTag</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>tag</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+      </parameters>
+
+      <configuration>
+        <sourceContextRoot implementation="java.lang.String">${sourceContextRoot}</sourceContextRoot>
+        <contextRoot implementation="java.lang.String">${contextRoot}</contextRoot>
+
+        <sourceStage implementation="java.lang.String">${sourceStage}</sourceStage>
+        <stage implementation="java.lang.String">${stage}</stage>
+
+        <sourceVirtualHost implementation="java.lang.String">${sourceVirtualHost}</sourceVirtualHost>
+        <virtualHost implementation="java.lang.String">${virtualHost}</virtualHost>
       </configuration>
     </mojo>
  

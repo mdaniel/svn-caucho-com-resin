@@ -27,63 +27,66 @@
  * @author Emil Ong
  */
 
-package com.caucho.ant;
+package com.caucho.maven;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.server.admin.TagResult;
+import com.caucho.server.admin.StatusQuery;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import org.apache.tools.ant.AntClassLoader;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.types.Path;
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 /**
- * Ant task to delete a tag in the repository.  The tag may be specified
- * explicitly by the "tag" attribute or constructed using the stage,
- * type, host, context root, and version attributes.
+ * The MavenDeploy
+ * @goal delete-tag
  */
-public class ResinDeleteTag extends ResinDeployClientTask {
+public class MavenDeleteTag extends AbstractDeployMojo
+{
   private String _tag;
-
-  /**
-   * For ant.
-   **/
-  public ResinDeleteTag()
-  {
-  }
 
   public void setTag(String tag)
   {
     _tag = tag;
   }
 
+  protected String getMojoName()
+  {
+    return "resin-delete-tag";
+  }
+
   @Override
   protected void validate()
-    throws BuildException
+    throws MojoExecutionException 
   {
     super.validate();
 
     if (_tag == null && getContextRoot() == null)
-      throw new BuildException("tag or contextRoot is required by " + 
-                               getTaskName());
+      throw new  MojoExecutionException("tag or contextRoot is required by " + getMojoName());
   }
 
+  /**
+   * Executes the maven resin:run task
+   */
   @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  protected void doTask(WebAppDeployClient client) 
+    throws MojoExecutionException
   {
+    Log log = getLog();
+
     String tag = _tag;
 
     if (tag == null)
       tag = buildVersionedWarTag();
 
     if (client.removeTag(tag, getCommitAttributes()))
-      log("Deleted tag " + tag);
+      log.info("Deleted tag " + tag);
     else
-      log("Failed to delete tag " + tag);
+      log.warn("Failed to delete tag " + tag);
   }
 }

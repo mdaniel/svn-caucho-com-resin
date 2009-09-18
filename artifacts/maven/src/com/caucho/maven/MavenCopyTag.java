@@ -27,29 +27,27 @@
  * @author Emil Ong
  */
 
-package com.caucho.ant;
+package com.caucho.maven;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.server.admin.StatusQuery;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import org.apache.tools.ant.AntClassLoader;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.types.Path;
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 /**
- * Ant task to copy a tag in the repository.  A tag can be copied by
- * specifying the source tag explicitly using the "sourceTag" attribute
- * or using the "sourceStage", "sourceType", "sourceVirtualHost", 
- * "sourceContextRoot", and "sourceVersion" attributes.  The target
- * tag can be specified explicitly using the "tag" attribute or by using
- * the "stage", "type", "virtualHost", "contextRoot", and "version" 
- * attributes.
+ * The MavenDeploy
+ * @goal copy-tag
  */
-public class ResinCopyTag extends ResinDeployClientTask {
+public class MavenCopyTag extends AbstractDeployMojo
+{
   private String _tag;
   private String _sourceTag;
 
@@ -59,61 +57,86 @@ public class ResinCopyTag extends ResinDeployClientTask {
   private String _sourceContextRoot = null;
 
   /**
-   * For ant.
-   **/
-  public ResinCopyTag()
-  {
-  }
-
+   * The stage of the source tag to copy 
+   * @parameter
+   */
   public void setSourceStage(String stage)
   {
     _sourceStage = stage;
   }
 
+  /**
+   * The explicit target tag of the copy
+   * @parameter
+   */
   public void setTag(String tag)
   {
     _tag = tag;
   }
 
+  /**
+   * The explicit source tag to copy 
+   * @parameter
+   */
   public void setSourceTag(String tag)
   {
     _sourceTag = tag;
   }
 
+  /**
+   * The context root of the source tag to copy 
+   * @parameter
+   */
   public void setSourceContextRoot(String contextRoot)
   {
     _sourceContextRoot = contextRoot;
   }
 
+  /**
+   * The version of the source tag to copy 
+   * @parameter
+   */
   public void setSourceVersion(String version)
   {
     _sourceVersion = version;
   }
 
+  /**
+   * The virtual host of the source tag to copy 
+   * @parameter
+   */
   public void setSourceVirtualHost(String virtualHost)
   {
     _sourceVirtualHost = virtualHost;
   }
 
+  protected String getMojoName()
+  {
+    return "resin-copy-tag";
+  }
+
   @Override
   protected void validate()
-    throws BuildException
+    throws MojoExecutionException 
   {
     super.validate();
 
     if (_tag == null && getContextRoot() == null)
-      throw new BuildException("tag or contextRoot is required by " 
-                               + getTaskName());
+      throw new MojoExecutionException("tag or contextRoot is required by " + getMojoName());
 
     if (_sourceTag == null && _sourceContextRoot == null)
-      throw new BuildException("sourceTag or sourceContextRoot is required by " 
-                               + getTaskName());
+      throw new MojoExecutionException("sourceTag or sourceContextRoot is required by " + getMojoName());
   }
 
+  /**
+   * Executes the maven resin:run task
+   */
   @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  protected void doTask(WebAppDeployClient client) 
+    throws MojoExecutionException
   {
+    Log log = getLog();
+
     String tag = _tag;
     String sourceTag = _sourceTag;
 
@@ -130,8 +153,8 @@ public class ResinCopyTag extends ResinDeployClientTask {
     boolean result = client.copyTag(tag, sourceTag, getCommitAttributes());
 
     if (result)
-      log("Copied " + sourceTag + " to " + tag);
+      log.info("Copied " + sourceTag + " to " + tag);
     else
-      log("Failed to copy " + sourceTag + " to " + tag);
+      log.warn("Failed to copy " + sourceTag + " to " + tag);
   }
 }

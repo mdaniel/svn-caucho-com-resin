@@ -308,6 +308,15 @@
         <filter token="VERSION" value="${maven.version}"/>
       </filterset>
     </copy>
+
+    <copy tofile="${module.build}/META-INF/maven/plugin.xml"
+          file="${module.src}/META-INF/maven/plugin.xml.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${maven.version}"/>
+      </filterset>
+    </copy>
    
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="maven"/>

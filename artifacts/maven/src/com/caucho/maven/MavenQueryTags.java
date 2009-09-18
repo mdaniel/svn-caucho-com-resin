@@ -27,35 +27,30 @@
  * @author Emil Ong
  */
 
-package com.caucho.ant;
+package com.caucho.maven;
 
-import java.io.File;
-import java.io.IOException;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.TagResult;
+import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.server.admin.StatusQuery;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import org.apache.tools.ant.AntClassLoader;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Path;
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 /**
- * Ant task to query tags of Resin applications deployed via the 
- * ResinDeployWar task to production.
+ * The MavenDeploy
+ * @goal query-tags
  */
-public class ResinQueryTags extends ResinDeployClientTask {
+public class MavenQueryTags extends AbstractDeployMojo
+{
   private String _pattern;
   private boolean _printValues = false;
-
-  /**
-   * For ant.
-   **/
-  public ResinQueryTags()
-  {
-  }
 
   public void setPattern(String pattern)
   {
@@ -77,9 +72,14 @@ public class ResinQueryTags extends ResinDeployClientTask {
     return _printValues;
   }
   
+  protected String getMojoName()
+  {
+    return "resin-query-tags";
+  }
+
   @Override
   protected void validate()
-    throws BuildException
+    throws MojoExecutionException
   {
     super.validate();
 
@@ -88,13 +88,18 @@ public class ResinQueryTags extends ResinDeployClientTask {
         && getVirtualHost() == null
         && getContextRoot() == null
         && getVersion() == null)
-      throw new BuildException("At least one of pattern, stage, virtualHost, contextRoot, or version is required by " + getTaskName());
+      throw new MojoExecutionException("At least one of pattern, stage, virtualHost, contextRoot, or version is required by " + getMojoName());
   }
 
+  /**
+   * Executes the maven resin:run task
+   */
   @Override
-  protected void doTask(WebAppDeployClient client)
-    throws BuildException
+  protected void doTask(WebAppDeployClient client) 
+    throws MojoExecutionException
   {
+    Log log = getLog();
+
     String pattern = _pattern;
 
     if (pattern == null) {
@@ -104,15 +109,15 @@ public class ResinQueryTags extends ResinDeployClientTask {
       pattern = buildVersionedWarTag();
     }
 
-    log("Query pattern = '" + pattern + "'", Project.MSG_DEBUG);
+    log.debug("Query pattern = '" + pattern + "'");
 
     TagResult []tags = client.queryTags(pattern);
 
     for (TagResult tag : tags) {
       if (_printValues) 
-        log(tag.getTag() + " -> " + tag.getRoot());
+        log.info(tag.getTag() + " -> " + tag.getRoot());
       else
-        log(tag.getTag());
-    }
+        log.info(tag.getTag());
+    }  
   }
 }
