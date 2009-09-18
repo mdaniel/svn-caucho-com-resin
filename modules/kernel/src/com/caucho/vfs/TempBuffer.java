@@ -45,9 +45,13 @@ public class TempBuffer implements java.io.Serializable {
   
   private static final FreeList<TempBuffer> _smallFreeList
     = new FreeList<TempBuffer>(32);
+  
+  private static final FreeList<TempBuffer> _largeFreeList
+    = new FreeList<TempBuffer>(32);
 
   private static final boolean _isSmallmem;
   public static final int SMALL_SIZE;
+  public static final int LARGE_SIZE;
   public static final int SIZE;
 
   TempBuffer _next;
@@ -105,6 +109,26 @@ public class TempBuffer implements java.io.Serializable {
 
     if (next == null)
       return new TempBuffer(SMALL_SIZE);
+
+    next._isFree = false;
+    next._next = null;
+
+    next._offset = 0;
+    next._length = 0;
+    next._bufferCount = 0;
+
+    return next;
+  }
+
+  /**
+   * Allocate a TempBuffer, reusing one if available.
+   */
+  public static TempBuffer allocateLarge()
+  {
+    TempBuffer next = _smallFreeList.allocate();
+
+    if (next == null)
+      return new TempBuffer(LARGE_SIZE);
 
     next._isFree = false;
     next._next = null;
@@ -313,6 +337,51 @@ public class TempBuffer implements java.io.Serializable {
     }
   }
 
+  /**
+   * Frees a single buffer.
+   */
+  public static void freeLarge(TempBuffer buf)
+  {
+    buf._next = null;
+
+    if (buf._buf.length == LARGE_SIZE) {
+      if (buf._isFree) {
+	RuntimeException e
+	  = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
+	log().log(Level.SEVERE, e.toString(), e);
+	throw e;
+      }
+
+      buf._isFree = true;
+      
+      _largeFreeList.free(buf);
+    }
+  }
+
+  public static void freeAllLarge(TempBuffer buf)
+  {
+    while (buf != null) {
+      TempBuffer next = buf._next;
+      buf._next = null;
+      
+      if (buf._buf.length == LARGE_SIZE) {
+	if (buf._isFree) {
+	  RuntimeException e
+	    = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
+	  
+	  log().log(Level.SEVERE, e.toString(), e);
+	  throw e;
+	}
+
+	buf._isFree = true;
+      
+	_largeFreeList.free(buf);
+      }
+      
+      buf = next;
+    }
+  }
+
   private static Logger log()
   {
     if (_log == null)
@@ -336,6 +405,7 @@ public class TempBuffer implements java.io.Serializable {
 
     _isSmallmem = isSmallmem;
     SIZE = size;
+    LARGE_SIZE = 8 * 1024;
     SMALL_SIZE = 512;
   }
 }

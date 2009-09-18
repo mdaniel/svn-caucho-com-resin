@@ -310,6 +310,9 @@ public class LongKeyLruCache<V> {
 
 	  oldValue = item._value;
 
+          if (replace && oldValue instanceof SyncCacheListener)
+            ((SyncCacheListener) oldValue).syncRemoveEvent();
+
 	  if (replace)
 	    item._value = value;
 
@@ -341,9 +344,6 @@ public class LongKeyLruCache<V> {
 
 	return null;
       }
-
-      if (replace && oldValue instanceof SyncCacheListener)
-	((SyncCacheListener) oldValue).syncRemoveEvent();
     }
 
     if (replace && oldValue instanceof CacheListener)
@@ -529,6 +529,12 @@ public class LongKeyLruCache<V> {
 	if (item._key == key) {
           removeLruItem(item);
 
+	  value = item._value;
+
+          // sync must occur before remove because get() is non-locking
+          if (value instanceof SyncCacheListener)
+            ((SyncCacheListener) value).syncRemoveEvent();
+          
 	  CacheItem<V> nextHash = item._nextHash;
 
 	  if (prevItem != null)
@@ -539,15 +545,11 @@ public class LongKeyLruCache<V> {
 	    _entries[hash] = nextHash;
           }
 
-	  value = item._value;
 	  break;
 	}
 
 	prevItem = item;
       }
-
-      if (value instanceof SyncCacheListener)
-	((SyncCacheListener) value).syncRemoveEvent();
     }
 
     if (value instanceof CacheListener)

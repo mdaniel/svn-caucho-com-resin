@@ -99,12 +99,11 @@ public class Management
   }
 
   /**
-   * Sets the path for storing managment related logs and files,
-   * default is "admin".
+   * @Deprecated
    */
   public void setPath(Path path)
   {
-    _resin.setAdminPath(path);
+    // _resin.setAdminPath(path);
   }
 
   public XmlAuthenticator.User createUser()

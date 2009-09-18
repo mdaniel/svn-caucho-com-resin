@@ -348,6 +348,45 @@ public final class ThreadPool {
   }
 
   //
+  // initialization
+  //
+
+  private void init()
+  {
+    if (_threadMax < 0)
+      _threadMax = DEFAULT_THREAD_MAX;
+
+    if (! _isThreadIdleMaxSet) {
+      _threadIdleMax = _threadMax / 16;
+
+      if (_threadIdleMax > 64)
+	_threadIdleMax = 64;
+      if (_threadIdleMax < 16)
+	_threadIdleMax = 16;
+      
+      if (_isThreadIdleMinSet && _threadIdleMax <= _threadIdleMin)
+	_threadIdleMax = _threadIdleMin + 8;
+      
+      if (_threadMax < _threadIdleMax)
+	_threadIdleMax = _threadMax;
+    }
+
+    if (! _isThreadIdleMinSet) {
+      _threadIdleMin = _threadIdleMax / 2;
+
+      if (_threadIdleMin <= 0)
+	_threadIdleMin = 1;
+    }
+    
+    if (! _isThreadPrioritySet) {
+      _threadPriority = _threadIdleMin / 2;
+
+      if (_threadPriority <= 0)
+	_threadPriority = _threadIdleMin;
+    }
+  }
+
+  //
   // Resin methods
   //
 
@@ -610,6 +649,8 @@ public final class ThreadPool {
     TaskItem item = new TaskItem(task, loader);
 
     do {
+      boolean isDumpThreads = false;
+      
       try {
 	synchronized (_idleLock) {
 	  int idleCount = _idleCount;
@@ -636,6 +677,8 @@ public final class ThreadPool {
 	    if (isQueueIfFull || isFreeThreadAvailable) {
 	      isWakeLauncher = true;
 	      isQueueIfFull = true;
+
+              isDumpThreads = true;
 	    
 	      if (isPriority) {
 		_priorityQueue.add(item);
@@ -669,6 +712,9 @@ public final class ThreadPool {
       
 	if (isWakeLauncher)
 	  _launcher.wake();
+        
+        if (isDumpThreads)
+          ThreadDump.dumpThreads();
       } catch (OutOfMemoryError e) {
 	try {
 	  System.err.println("ThreadPool.schedule exiting due to OutOfMemoryError");
@@ -689,41 +735,6 @@ public final class ThreadPool {
     }
     else
       return isQueueIfFull;
-  }
-
-  private void init()
-  {
-    if (_threadMax < 0)
-      _threadMax = DEFAULT_THREAD_MAX;
-
-    if (! _isThreadIdleMaxSet) {
-      _threadIdleMax = _threadMax / 16;
-
-      if (_threadIdleMax > 64)
-	_threadIdleMax = 64;
-      if (_threadIdleMax < 16)
-	_threadIdleMax = 16;
-      
-      if (_isThreadIdleMinSet && _threadIdleMax <= _threadIdleMin)
-	_threadIdleMax = _threadIdleMin + 8;
-      
-      if (_threadMax < _threadIdleMax)
-	_threadIdleMax = _threadMax;
-    }
-
-    if (! _isThreadIdleMinSet) {
-      _threadIdleMin = _threadIdleMax / 2;
-
-      if (_threadIdleMin <= 0)
-	_threadIdleMin = 1;
-    }
-    
-    if (! _isThreadPrioritySet) {
-      _threadPriority = _threadIdleMin / 2;
-
-      if (_threadPriority <= 0)
-	_threadPriority = _threadIdleMin;
-    }
   }
 
   /**

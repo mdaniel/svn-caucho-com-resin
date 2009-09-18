@@ -110,6 +110,11 @@ public class Transaction extends StoreTransaction {
   {
     _timeout = timeout;
   }
+
+  public long getTimeout()
+  {
+    return _timeout;
+  }
   
   /**
    * Acquires a new read lock.

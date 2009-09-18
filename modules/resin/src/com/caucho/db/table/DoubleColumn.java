@@ -54,6 +54,7 @@ class DoubleColumn extends Column {
   /**
    * Returns the column's type code.
    */
+  @Override
   public int getTypeCode()
   {
     return DOUBLE;
@@ -62,6 +63,7 @@ class DoubleColumn extends Column {
   /**
    * Returns the column's Java type.
    */
+  @Override
   public Class getJavaType()
   {
     return double.class;
@@ -70,6 +72,7 @@ class DoubleColumn extends Column {
   /**
    * Returns the column's declaration size.
    */
+  @Override
   public int getDeclarationSize()
   {
     return 8;
@@ -78,6 +81,7 @@ class DoubleColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return 8;
@@ -90,6 +94,7 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
     if (str == null)
@@ -104,6 +109,7 @@ class DoubleColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public String getString(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -119,6 +125,7 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setInteger(Transaction xa, byte []block, int rowOffset, int value)
   {
     setDouble(xa, block, rowOffset, value);
@@ -130,6 +137,7 @@ class DoubleColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public int getInteger(byte []block, int rowOffset)
   {
     return (int) getDouble(block, rowOffset);
@@ -142,6 +150,7 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setLong(Transaction xa, byte []block, int rowOffset, long value)
   {
     setDouble(xa, block, rowOffset, value);
@@ -153,6 +162,7 @@ class DoubleColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public long getLong(byte []block, int rowOffset)
   {
     return (long) getDouble(block, rowOffset);
@@ -165,6 +175,7 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setDouble(Transaction xa,
 		 byte []block, int rowOffset, double value)
   {
@@ -191,6 +202,7 @@ class DoubleColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public double getDouble(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -219,6 +231,7 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa, byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
     throws SQLException
@@ -232,6 +245,7 @@ class DoubleColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
+  @Override
   public void evalToResult(byte []block, int rowOffset, SelectResult result)
   {
     if (isNull(block, rowOffset)) {
@@ -252,6 +266,7 @@ class DoubleColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -270,6 +285,7 @@ class DoubleColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -292,7 +308,9 @@ class DoubleColumn extends Column {
   /**
    * Sets based on an iterator.
    */
-  public void set(TableIterator iter, Expr expr, QueryContext context)
+  @Override
+  public void set(Transaction xa,
+                  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
     iter.setDirty();

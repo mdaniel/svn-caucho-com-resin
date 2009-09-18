@@ -72,6 +72,7 @@ class StringColumn extends Column {
   /**
    * Returns the type code for the column.
    */
+  @Override
   public int getTypeCode()
   {
     return VARCHAR;
@@ -80,6 +81,7 @@ class StringColumn extends Column {
   /**
    * Returns the java type.
    */
+  @Override
   public Class getJavaType()
   {
     return String.class;
@@ -88,6 +90,7 @@ class StringColumn extends Column {
   /**
    * Returns the declaration size
    */
+  @Override
   public int getDeclarationSize()
   {
     return _maxLength;
@@ -96,6 +99,7 @@ class StringColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return 2 * _maxLength + 1;
@@ -104,6 +108,7 @@ class StringColumn extends Column {
   /**
    * Returns the key compare for the column.
    */
+  @Override
   public KeyCompare getIndexKeyCompare()
   {
     return new StringKeyCompare();
@@ -116,6 +121,7 @@ class StringColumn extends Column {
    * @param rowOffset the offset into the row
    * @param str the string value
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
     int offset = rowOffset + _columnOffset;
@@ -139,6 +145,7 @@ class StringColumn extends Column {
     setNonNull(block, rowOffset);
   }
   
+  @Override
   public String getString(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -169,6 +176,7 @@ class StringColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -183,6 +191,7 @@ class StringColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -209,6 +218,7 @@ class StringColumn extends Column {
   /**
    * Returns true if the bytes match.
    */
+  @Override
   public boolean isEqual(byte []block, int rowOffset,
 			 byte []buffer, int offset, int length)
   {
@@ -231,6 +241,7 @@ class StringColumn extends Column {
     return true;
   }
   
+  @Override
   public boolean isEqual(byte []block, int rowOffset, String value)
   {
     if (value == null)
@@ -260,6 +271,7 @@ class StringColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
+  @Override
   public void evalToResult(byte []block, int rowOffset, SelectResult result)
   {
     if (isNull(block, rowOffset)) {
@@ -291,6 +303,7 @@ class StringColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -314,6 +327,7 @@ class StringColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
+  @Override
   void setIndex(Transaction xa,
 		byte []block, int rowOffset,
 		long rowAddr, QueryContext context)

@@ -587,7 +587,7 @@ if (! empty($server)) {
   $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
 
 ?>
-   <li class="server">Server: <?= $g_server_id ?></li>
+   <li class="server">Server: <?php display_servers($g_server_id) ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="<?= $g_next_url ?>">refresh</a></li>
@@ -597,7 +597,7 @@ if (! empty($server)) {
 </tr>
 
 <tr>
-  <td width="150" background='<?= uri("images/left_background.gif") ?>'>
+  <td width="150">
    <img src='<?= uri("images/pixel.gif") ?>' height="14">
   </td>
 
@@ -608,40 +608,28 @@ if (! empty($server)) {
   </td>
 </tr>
 
+<tr>
+<td width="150">
+<hr>
+</td>
+</tr>
 
 <tr>
   <td class="leftnav" valign="top">
+    <ul class="leftnav">
     <?php
+      display_pages();
+/*
          if ($allow_remote)
            display_left_navigation($server);
+*/
     ?>
+    </ul>
   </td>
 
   <td width="10">
   </td>
   <td>
-
-<ul class="tabs">
-<?
-global $g_pages;
-global $g_page;
-
-$names = array_keys($g_pages);
-sort($names);
-
-$names = array_diff($names, array('summary'));
-array_unshift($names, 'summary');
-
-foreach ($names as $name) {
-  if ($g_page == $name) {
-    ?><li class="selected"><?= $name ?></li><?
-  } else {
-    echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>\n";
-  }
-}
-
-?>
-</ul>
 
 <?php
   if (! $server && $g_server_id) {
@@ -650,6 +638,42 @@ foreach ($names as $name) {
   }
   
   return true;
+}
+
+function display_pages()
+{
+  global $g_pages;
+  global $g_page;
+
+  $names = array_keys($g_pages);
+  sort($names);
+
+  $names = array_diff($names, array('summary'));
+  array_unshift($names, 'summary');
+
+  foreach ($names as $name) {
+    if ($g_page == $name) {
+      ?><li class="selected"><?= $name ?></li><?
+    } else {
+      echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>\n";
+    }
+  }
+}
+
+function display_servers($server_id)
+{
+  echo "<select name=\"server_id\">\n";
+/*
+  foreach ($names as $name) {
+    if ($g_page == $name) {
+      ?><li class="selected"><?= $name ?></li><?
+    } else {
+      echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>\n";
+    }
+  }
+*/
+  echo "  <option selected value=\"" . $server_id ."\">" . $server_id . "\n";
+  echo "</select>";
 }
 
 /**

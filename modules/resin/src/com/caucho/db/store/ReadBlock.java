@@ -47,11 +47,7 @@ public class ReadBlock extends Block {
   {
     super(store, blockId);
 
-    _buffer = _freeBuffers.allocate();
-    
-    if (_buffer == null) {
-      _buffer = new byte[Store.BLOCK_SIZE];
-    }
+    _buffer = allocateBuffer();
   }
 
   /**
@@ -72,8 +68,7 @@ public class ReadBlock extends Block {
       byte []buffer = _buffer;
       _buffer = null;
 
-      if (buffer != null)
-	_freeBuffers.free(buffer);
+      freeBuffer(buffer);
     }
   }
 

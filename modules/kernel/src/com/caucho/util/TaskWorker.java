@@ -32,6 +32,7 @@ package com.caucho.util;
 import com.caucho.config.ConfigException;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,9 +43,11 @@ import java.util.logging.Logger;
 abstract public class TaskWorker implements Runnable {
   private final AtomicBoolean _isTask = new AtomicBoolean();
   private final AtomicBoolean _isActive = new AtomicBoolean();
+  private final AtomicLong _idGen = new AtomicLong();
 
   private final ClassLoader _classLoader;
   private long _idleTimeout = 30000L;
+  private boolean _isDestroyed;
   
   private volatile Thread _thread;
 
@@ -55,15 +58,26 @@ abstract public class TaskWorker implements Runnable {
 
   abstract public void runTask();
 
+  public void destroy()
+  {
+    _isDestroyed = true;
+
+    Thread thread = _thread;
+
+    if (thread != null)
+      LockSupport.unpark(thread);
+  }
+
   public final void wake()
   {
-    if (_isTask.getAndSet(true))
+    if (_isDestroyed)
       return;
 
     if (! _isActive.getAndSet(true)) {
       ThreadPool.getCurrent().schedule(this);
     }
-    else {
+    
+    if (! _isTask.getAndSet(true)) {
       Thread thread = _thread;
 
       if (thread != null)
@@ -71,16 +85,25 @@ abstract public class TaskWorker implements Runnable {
     }
   }
 
+  protected String getThreadName()
+  {
+    return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
+  }
+
   public final void run()
   {
     try {
       _thread = Thread.currentThread();
       _thread.setContextClassLoader(_classLoader);
+      _thread.setName(getThreadName());
       
       do {
         while (_isTask.getAndSet(false)) {
           runTask();
         }
+
+        if (_isDestroyed)
+          return;
 
         Thread.interrupted();
         LockSupport.parkNanos(_idleTimeout * 1000000L);
@@ -90,9 +113,8 @@ abstract public class TaskWorker implements Runnable {
       
       _isActive.set(false);
 
-      if (_isTask.get()) {
+      if (_isTask.get())
         wake();
-      }
     }
   }
 }

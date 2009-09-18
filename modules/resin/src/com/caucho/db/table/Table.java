@@ -42,6 +42,7 @@ import com.caucho.db.store.Store;
 import com.caucho.db.store.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
+import com.caucho.util.TaskWorker;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
@@ -51,6 +52,9 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,12 +105,26 @@ public class Table extends Store {
 
   private long _entries;
 
+  private static final int FREE_ROW_SIZE = 256;
+  private final AtomicLongArray _insertFreeRowArray
+    = new AtomicLongArray(FREE_ROW_SIZE);
+  private final AtomicInteger _insertFreeRowTop = new AtomicInteger();
+
+  // top of file counters for row insert allocation
+  private final Object _rowTailLock = new Object();
+  private long _rowTailTop = Store.BLOCK_SIZE * 256;
+  private final AtomicLong _rowTailOffset = new AtomicLong();
+  
   private final Object _rowClockLock = new Object();
-  private long _rowClockAddr;
-  private long _rowClockTotal;
+
+  private final RowAllocator _rowAllocator = new RowAllocator();
+
+  // clock counters for row insert allocation
+  private long _rowClockTop;
+  private long _rowClockOffset;
+  
+  private long _rowClockFree;
   private long _rowClockUsed;
-  private int _rowClockCount;
-  private int _rowAllocCount;
 
   private long _autoIncrementValue = -1;
 
@@ -123,8 +141,6 @@ public class Table extends Store {
     _rowLength = _row.getLength();
     _rowsPerBlock = BLOCK_SIZE / _rowLength;
     _rowEnd = _rowLength * _rowsPerBlock;
-
-    _rowClockAddr = 0;
 
     Column []columns = _row.getColumns();
     Column autoIncrementColumn = null;
@@ -220,6 +236,10 @@ public class Table extends Store {
 
     return -1;
   }
+
+  //
+  // initialization
+  //
 
   /**
    * Loads the table from the file.
@@ -453,13 +473,22 @@ public class Table extends Store {
         byte []blockBuffer = iter.getBuffer();
 
         while (iter.nextRow()) {
-          long rowAddress = iter.getRowAddress();
-          int rowOffset = iter.getRowOffset();
+          try {
+            long rowAddress = iter.getRowAddress();
+            int rowOffset = iter.getRowOffset();
 
-          for (int i = 0; i < columns.length; i++) {
-            Column column = columns[i];
+            for (int i = 0; i < columns.length; i++) {
+              Column column = columns[i];
 
-            column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
+              /*
+              if (column.getIndex() != null)
+                System.out.println(Long.toHexString(rowAddress) + ":" + Long.toHexString(rowOffset) + ": " + column.getIndexKeyCompare().toString(blockBuffer, rowOffset + column.getColumnOffset(), column.getLength()));
+              */
+
+              column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
+            }
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
           }
         }
       }
@@ -617,6 +646,10 @@ public class Table extends Store {
     }
   }
 
+  //
+  // insert code
+  //
+
   /**
    * Inserts a new row, returning the row address.
    */
@@ -637,11 +670,6 @@ public class Table extends Store {
       boolean isLoop = false;
       boolean hasRow = false;
 
-      int rowClockCount = 0;
-      long rowClockAddr = 0;
-      long rowClockUsed = 0;
-      long rowClockTotal = 0;
-
       do {
         long blockId = 0;
 
@@ -650,90 +678,36 @@ public class Table extends Store {
           block = null;
         }
 
-        synchronized (_rowClockLock) {
-          blockId = firstRow(_rowClockAddr);
+        blockId = peekInsertRow();
 
-          if (blockId >= 0) {
-          }
-          else if (! isLoop
-                   && (ROW_CLOCK_MIN < _rowClockTotal
-                       && 4 * _rowClockUsed < 3 * _rowClockTotal
-                       || _rowAllocCount > 8)) {
-            // System.out.println("LOOP: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
-            // go around loop if there are sufficient entries, i.e. over
-            // ROW_CLOCK_MIN and at least 1/4 free entries.
-            isLoop = true;
-            _rowClockCount = 0;
-            _rowClockAddr = 0;
-            _rowClockUsed = 0;
-            _rowClockTotal = 0;
-            _rowAllocCount = 0;
-            continue;
-          }
-          else {
-            //System.out.println("ROW: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
-
-            _rowAllocCount++;
-
-            // if no free row is available, allocate a new one
-            block = xa.allocateRow(this);
-            //System.out.println("ALLOC: " + block);
-
-            blockId = block.getBlockId();
-          }
-
-          rowClockCount = _rowClockCount;
-          rowClockAddr = blockIdToAddress(blockId);
-          rowClockUsed = _rowClockUsed;
-          rowClockTotal = _rowClockTotal;
-
-          // the next insert will try the following block
-          _rowClockCount++;
-          _rowClockAddr = rowClockAddr + BLOCK_SIZE;
-          _rowClockUsed = rowClockUsed + _rowsPerBlock;
-          _rowClockTotal = rowClockTotal + _rowsPerBlock;
-        }
-
-        if (block == null)
-          block = xa.readBlock(this, blockId);
+        block = xa.readBlock(this, blockId);
 
         Lock blockLock = block.getLock();
+        byte []buffer = block.getBuffer();
 
-        if (xa.lockReadAndWriteNoWait(blockLock)) {
-          try {
-            rowOffset = 0;
+        blockLock.lockReadAndWrite(xa.getTimeout());
+        try {
+          rowOffset = 0;
 
-            byte []buffer = block.getBuffer();
+          for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
+            if (buffer[rowOffset] == 0) {
+              block.setDirty(rowOffset, rowOffset + 1);
 
-            for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
-              if (buffer[rowOffset] == 0) {
-                block.setDirty(rowOffset, rowOffset + 1);
-
-                hasRow = true;
-                buffer[rowOffset] = ROW_ALLOC;
-                break;
-              }
+              hasRow = true;
+              buffer[rowOffset] = ROW_ALLOC;
+              break;
             }
-          } finally {
-            xa.unlockReadAndWrite(blockLock);
           }
+        } finally {
+          blockLock.unlockReadAndWrite();
         }
+
+        if (! hasRow)
+          popRow(blockId);
       } while (! hasRow);
 
       insertRow(queryContext, xa, columns, values,
                 block, rowOffset);
-
-      synchronized (_rowClockLock) {
-        if (rowClockCount < _rowClockCount) {
-          // the next insert will retry this block
-          int blocks = _rowClockCount - rowClockCount;
-
-          _rowClockCount = rowClockCount;
-          _rowClockAddr = rowClockAddr;
-          _rowClockUsed -= blocks * _rowsPerBlock;
-          _rowClockTotal -= blocks * _rowsPerBlock;
-        }
-      }
 
       return blockIdToAddress(block.getBlockId(), rowOffset);
     } finally {
@@ -756,7 +730,8 @@ public class Table extends Store {
     TableIterator iter = createTableIterator();
     TableIterator []iterSet = new TableIterator[] { iter };
     // QueryContext context = QueryContext.allocate();
-    queryContext.init(xa, iterSet, true);
+    boolean isReadOnly = false;
+    queryContext.init(xa, iterSet, isReadOnly);
     iter.init(queryContext);
 
     boolean isOkay = false;
@@ -766,6 +741,10 @@ public class Table extends Store {
 
       block.setDirty(rowOffset, rowOffset + _rowLength);
 
+      if (buffer[rowOffset] != ROW_ALLOC)
+        throw new IllegalStateException(L.l("Expected ROW_ALLOC at '{0}'",
+                                            buffer[rowOffset]));
+      
       for (int i = rowOffset + _rowLength - 1; rowOffset < i; i--)
         buffer[i] = 0;
 
@@ -782,14 +761,14 @@ public class Table extends Store {
       try {
         validate(block, rowOffset, queryContext, xa);
 
-        buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
-
         for (int i = 0; i < columns.size(); i++) {
           Column column = columns.get(i);
           Expr value = values.get(i);
 
           column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
         }
+
+        buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
 
         xa.addUpdateBlock(block);
 
@@ -805,6 +784,9 @@ public class Table extends Store {
         _entries++;
 
         isOkay = true;
+      } catch (SQLException e) {
+        // e.printStackTrace();
+        throw e;
       } finally {
         // xa.unlockWrite(_insertLock);
 
@@ -815,6 +797,187 @@ public class Table extends Store {
       queryContext.unlock();
     }
   }
+
+  //
+  // row allocation
+  //
+
+  private long peekInsertRow()
+    throws IOException
+  {
+    long blockId = peekFreeRow();
+
+    if (blockId != 0)
+      return blockId;
+
+    long rowTailOffset = _rowTailOffset.get();
+
+    blockId = firstRow(rowTailOffset);
+
+    if (blockId <= 0) {
+      Block block = allocateRow();
+      
+      blockId = block.getBlockId();
+    
+      block.free();
+    }
+
+    _rowTailOffset.compareAndSet(rowTailOffset, blockId);
+
+    return blockId;
+  }
+
+  private void popRow(long blockId)
+  {
+    popFreeRow(blockId);
+
+    _rowTailOffset.compareAndSet(blockId, blockId + BLOCK_SIZE);
+  }
+
+  private long peekFreeRow()
+  {
+    int top = _insertFreeRowTop.get();
+    long blockId = 0;
+
+    if (top > 0) {
+      blockId = _insertFreeRowArray.get(top - 1);
+    }
+
+    if (2 * top < FREE_ROW_SIZE && _rowTailTop < _rowTailOffset.get()) {
+      _rowAllocator.wake();
+    }
+
+    return blockId;
+  }
+
+  private void popFreeRow(long blockId)
+  {
+    int top = _insertFreeRowTop.get();
+
+    if (top > 0 && _insertFreeRowArray.compareAndSet(top - 1, blockId, 0)) {
+      _insertFreeRowTop.compareAndSet(top, top - 1);
+    }
+  }
+
+  private long allocateFreeRow()
+  {
+    int top = _insertFreeRowTop.get();
+    long blockId = 0;
+
+    if (top > 0 && _insertFreeRowTop.compareAndSet(top, top - 1)) {
+      blockId = _insertFreeRowArray.getAndSet(top - 1, 0);
+    }
+
+    if (2 * top < FREE_ROW_SIZE && _rowTailTop <= _rowTailOffset.get()) {
+      _rowAllocator.wake();
+    }
+
+    return blockId;
+  }
+
+  //
+  // allocator
+  //
+
+  private void fillFreeRows()
+  {
+    if (_rowClockTop <= _rowClockOffset) {
+      // force 50% free rows before clock starts again
+      long count = (_rowClockUsed - _rowClockFree) / _rowsPerBlock;
+
+      // minimum 256 blocks of free rows
+      if (_rowClockFree < 256 && _rowClockOffset > 0)
+        count = 256;
+
+      if (count > 0) {
+        _rowTailTop = _rowTailOffset.get() + count * Store.BLOCK_SIZE;
+      }
+      
+      _rowClockOffset = 0;
+      _rowClockTop = _rowTailOffset.get();
+      _rowClockUsed = 0;
+      _rowClockFree = 0;
+
+      if (count > 0)
+        return;
+    }
+
+    while (isFreeRowAvailable()) {
+      long rowClockOffset = _rowClockOffset;
+
+      try {
+        rowClockOffset = firstRow(rowClockOffset);
+
+        if (rowClockOffset < 0) {
+          rowClockOffset = _rowClockTop;
+          return;
+        }
+
+        if (isRowFree(rowClockOffset)) {
+          freeRow(rowClockOffset);
+        
+          _rowClockFree++;
+        }
+        else {
+          _rowClockUsed++;
+        }
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+
+        rowClockOffset = _rowClockTop;
+      } finally {
+        _rowClockOffset = rowClockOffset + Store.BLOCK_SIZE;
+      }
+    }
+  }
+
+  /**
+   * Test if any row in the block is free
+   */
+  private boolean isRowFree(long blockId)
+    throws IOException
+  {
+    Block block = readBlock(blockId);
+
+    try {
+      int rowOffset = 0;
+
+      byte []buffer = block.getBuffer();
+      boolean isFree = false;
+
+      for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
+        if (buffer[rowOffset] == 0) {
+          isFree = true;
+          _rowClockFree++;
+        }
+        else
+          _rowClockUsed++;
+      }
+
+      return isFree;
+    } finally {
+      block.free();
+    }
+  }
+
+  private boolean isFreeRowAvailable()
+  {
+    return _insertFreeRowTop.get() < FREE_ROW_SIZE;
+  }
+
+  private void freeRow(long blockId)
+  {
+    int top;
+    
+    do {
+      top = _insertFreeRowTop.get();
+      _insertFreeRowArray.set(top, blockId);
+    } while (! _insertFreeRowTop.compareAndSet(top, top + 1));
+  }
+
+  //
+  // insert
+  //
 
   /**
    * Validates the given row.
@@ -840,8 +1003,10 @@ public class Table extends Store {
   {
     byte rowState = buffer[rowOffset];
 
-    if ((rowState & ROW_MASK) != ROW_VALID)
+    /*
+    if ((rowState & ROW_MASK) == 0)
       return;
+    */
 
     buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
 
@@ -858,16 +1023,16 @@ public class Table extends Store {
     }
 
     buffer[rowOffset] = 0;
-
-    synchronized (_rowClockLock) {
-      long addr = blockIdToAddress(block.getBlockId());
-
-      if (addr <= _rowClockAddr) {
-        _rowClockUsed--;
-      }
-    }
   }
 
+  @Override
+  public void close()
+  {
+    super.close();
+
+    _rowAllocator.destroy();
+  }
+  
   private void writeLong(WriteStream os, long value)
     throws IOException
   {
@@ -913,5 +1078,12 @@ public class Table extends Store {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + ":" + getId() + "]";
+  }
+
+  class RowAllocator extends TaskWorker {
+    public void runTask()
+    {
+      fillFreeRows();
+    }
   }
 }

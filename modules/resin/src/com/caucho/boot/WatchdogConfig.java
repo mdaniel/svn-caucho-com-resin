@@ -265,8 +265,8 @@ class WatchdogConfig
 
     if (logDirectory != null)
       return logDirectory;
-    if (_watchdogLog != null && _watchdogLog.getDir() != null)
-      return _watchdogLog.getDir();
+    if (_watchdogLog != null && _watchdogLog.getLogDirectory() != null)
+      return _watchdogLog.getLogDirectory();
     else
       return getRootDirectory().lookup("log");
   }
@@ -496,20 +496,20 @@ class WatchdogConfig
   }
 
   public class WatchdogLog {
-    private Path _dir;
+    private Path _logDirectory;
     
     private Integer _rolloverCount;
     private Period _rolloverPeriod;
     private Bytes _rolloverSize;
 
-    public void setDir(Path dir)
+    public void setLogDirectory(Path dir)
     {
-      _dir = dir;
+      _logDirectory = dir;
     }
 
-    Path getDir()
+    Path getLogDirectory()
     {
-      return _dir;
+      return _logDirectory;
     }
 
     public void setRolloverCount(int count)

@@ -174,8 +174,9 @@ public class TableIterator {
     _block = null;
     _buffer = null;
 
-    if (block != null)
+    if (block != null) {
       block.free();
+    }
     
     _blockId = 0;
     _rowOffset = Integer.MAX_VALUE / 2;
@@ -269,8 +270,9 @@ public class TableIterator {
     _block = null;
     _buffer = null;
 
-    if (block != null)
+    if (block != null) {
       block.free();
+    }
 
     _blockId = _table.firstRow(_blockId + Table.BLOCK_SIZE);
 
@@ -303,8 +305,9 @@ public class TableIterator {
       _block = null;
       _buffer = null;
 
-      if (block != null)
+      if (block != null) {
 	block.free();
+      }
 
       _block = _xa.readBlock(_table, _blockId);
       _buffer = _block.getBuffer();
@@ -445,7 +448,7 @@ public class TableIterator {
   {
     _xa.addUpdateBlock(_block);
 
-    _block.setDirty(getRowOffset(), getRowOffset() + _rowLength);
+    _block.setDirty(_rowOffset, _rowOffset + _rowLength);
   }
 
   public void free()

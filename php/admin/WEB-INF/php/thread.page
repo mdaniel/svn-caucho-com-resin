@@ -92,7 +92,7 @@ foreach ($thread_ids as $id) {
 }
 
 $thread_group = partition_threads($threads);
-$groups = array("active", "misc", "accept", "keepalive", "idle");
+$groups = array("active", "blocked", "misc", "accept", "keepalive", "wait", "idle");
 
 echo "<h2>Threads</h2>\n"
 echo "<table class='threads'>\n";
@@ -150,7 +150,7 @@ foreach ($groups as $name) {
     $id = $info->threadId;
 
 //    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
-    echo "<td>" . $id . "</td>";
+    echo "<td><a name='th" . $id . "'></a>" . $id . "</td>";
     echo "<td>" . $info->threadName . "</td>";
 
     if ($info->stackTrace[0]) {
@@ -184,7 +184,8 @@ foreach ($groups as $name) {
 
     if ($info->getLockName()) {
       echo "Lock " . $info->getLockName() . " owned by ";
-      echo $info->getLockOwnerId() . "\n\n";
+      echo "<a href='#th" . $info->getLockOwnerId() . "'>"
+           . $info->getLockOwnerId() . "</a>\n\n";
     }
     
     // echo $info;
@@ -251,6 +252,10 @@ function partition_threads($threads)
     $info = $thread["info"];
     
     $stackTrace = $info->stackTrace;
+    if (is_blocked_thread($info)) {
+      $partition["blocked"][] = $thread;
+    }
+
     if (is_idle_pool_thread($info)) {
       $partition["idle"][] = $thread;
     }
@@ -259,6 +264,9 @@ function partition_threads($threads)
     }
     else if (is_keepalive_thread($info)) {
       $partition["keepalive"][] = $thread;
+    }
+    else if (is_wait_thread($info)) {
+      $partition["wait"][] = $thread;
     }
     else if (preg_match("/^(http|hmux)/", $info->threadName)) {
       $partition["active"][] = $thread;
@@ -280,6 +288,14 @@ function is_accept_thread($info)
   }
 
   return false;
+}
+
+function is_blocked_thread($info)
+{
+  if ($info != null)
+    return $info->getLockOwnerName() != null;
+  else
+    return false;
 }
 
 function is_keepalive_thread($info)
@@ -311,6 +327,19 @@ function is_keepalive_thread($info)
   return false;
 }
 
+function is_wait_thread($info)
+{
+  if ($info == null)
+    return false;
+
+  if ($info->getThreadState() == "WAITING"
+      || $info->getThreadState() == "TIMED_WAITING") {
+    return true;
+  }
+  else
+    return false;
+}
+
 function is_idle_pool_thread($info)
 {
   $stackTrace = $info->stackTrace;
@@ -319,7 +348,7 @@ function is_idle_pool_thread($info)
     $item = $stackTrace[$i];
   
     if ($item->className == "com.caucho.util.ThreadPool\$PoolThread"
-        && $item->methodName == "runTasks") {
+        && $item->methodName == "nextTask") {
       $prev = $stackTrace[$i - 1];
       
       if ($prev->className == "java.util.concurrent.locks.LockSupport"

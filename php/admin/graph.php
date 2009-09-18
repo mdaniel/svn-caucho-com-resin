@@ -16,7 +16,7 @@ if (! $stat_service) {
   return;
 }
 
-$now = time(0) * 1000;
+$now = time() * 1000;
 $hour = 3600 * 1000;
 
 $full_width = $_GET['width'];

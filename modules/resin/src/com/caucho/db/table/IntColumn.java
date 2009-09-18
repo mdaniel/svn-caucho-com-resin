@@ -56,6 +56,7 @@ class IntColumn extends Column {
   /**
    * Returns the column's type code.
    */
+  @Override
   public int getTypeCode()
   {
     return INT;
@@ -64,6 +65,7 @@ class IntColumn extends Column {
   /**
    * Returns the column's Java type.
    */
+  @Override
   public Class getJavaType()
   {
     return int.class;
@@ -72,6 +74,7 @@ class IntColumn extends Column {
   /**
    * Returns the column's declaration size.
    */
+  @Override
   public int getDeclarationSize()
   {
     return 4;
@@ -80,6 +83,7 @@ class IntColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return 4;
@@ -88,6 +92,7 @@ class IntColumn extends Column {
   /**
    * Returns the key compare for the column.
    */
+  @Override
   public KeyCompare getIndexKeyCompare()
   {
     return new IntKeyCompare();
@@ -99,6 +104,7 @@ class IntColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public String getString(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -114,6 +120,7 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
     if (str == null)
@@ -128,6 +135,7 @@ class IntColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public int getInteger(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -151,6 +159,7 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setInteger(Transaction xa, byte []block, int rowOffset, int value)
   {
     int offset = rowOffset + _columnOffset;
@@ -170,6 +179,7 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setLong(Transaction xa, byte []block, int rowOffset, long value)
   {
     setInteger(xa, block, rowOffset, (int) value);
@@ -181,6 +191,7 @@ class IntColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
+  @Override
   public long getLong(byte []block, int rowOffset)
   {
     return getInteger(block, rowOffset);
@@ -193,6 +204,7 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -207,6 +219,7 @@ class IntColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
+  @Override
   public void evalToResult(byte []block, int rowOffset, SelectResult result)
   {
     if (isNull(block, rowOffset)) {
@@ -230,6 +243,7 @@ class IntColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -248,6 +262,7 @@ class IntColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -266,13 +281,14 @@ class IntColumn extends Column {
   /**
    * Sets based on an iterator.
    */
-  public void set(TableIterator iter, Expr expr, QueryContext context)
+  @Override
+  public void set(Transaction xa,
+		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
     iter.setDirty();
-    setInteger(iter.getTransaction(),
-	       iter.getBuffer(), iter.getRowOffset(),
-	       (int) expr.evalLong(context));
+    setInteger(xa, iter.getBuffer(), iter.getRowOffset(),
+               (int) expr.evalLong(context));
   }
   
   /**

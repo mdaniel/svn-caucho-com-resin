@@ -181,7 +181,8 @@ public final class BTree {
 
     try {
       Lock blockLock = block.getLock();
-      xa.lockRead(blockLock);
+      
+      blockLock.lockRead(_timeout);
 
       try {
 	byte []buffer = block.getBuffer();
@@ -198,7 +199,7 @@ public final class BTree {
 	  return lookup(keyBuffer, keyOffset, keyLength,
 			xa, value);
       } finally {
-        xa.unlockRead(blockLock);
+        blockLock.unlockRead();
       }
     } finally {
       block.free();
@@ -509,7 +510,7 @@ public final class BTree {
     long parentId = parentBlock.getBlockId();
     long blockId = block.getBlockId();
     
-    log.finer("btree splitting " + debugId(blockId));
+    log.finest("btree splitting " + debugId(blockId));
     
     block.setFlushDirtyOnCommit(false);
     block.setDirty(0, Store.BLOCK_SIZE);
@@ -607,7 +608,7 @@ public final class BTree {
   {
     long parentId = parentBlock.getBlockId();
     
-    log.finer("btree splitting root " + (parentId / BLOCK_SIZE));
+    log.finest("btree splitting root " + (parentId / BLOCK_SIZE));
 
     Block leftBlock = null;
     Block rightBlock = null;

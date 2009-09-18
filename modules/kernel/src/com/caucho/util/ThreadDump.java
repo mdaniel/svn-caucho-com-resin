@@ -35,6 +35,7 @@ import java.lang.management.*;
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -45,6 +46,7 @@ public class ThreadDump
   private static Logger log = Logger.getLogger(ThreadDump.class.getName());
 
   private static final ThreadDump _threadDump = new ThreadDump();
+  private final AtomicLong _lastDump = new AtomicLong();
   
   private ThreadDump()
   {
@@ -52,7 +54,20 @@ public class ThreadDump
 
   public static void dumpThreads()
   {
-    _threadDump.threadDumpImpl();
+    long timeout = 3600L * 1000L;
+    
+    _threadDump.threadDump(timeout);
+  }
+
+  private void threadDump(long timeout)
+  {
+    long now = Alarm.getCurrentTime();
+    long lastDump = _lastDump.get();
+
+    if (lastDump + timeout < now
+        && _lastDump.compareAndSet(lastDump, now)) {
+      threadDumpImpl();
+    }
   }
 
   private void threadDumpImpl()
@@ -66,15 +81,38 @@ public class ThreadDump
     sb.append("Thread Dump:\n");
 
     Arrays.sort(info, new ThreadCompare());
-    buildThreads(sb, info);
+    buildThreads(sb, info, Thread.State.RUNNABLE, false);
+    buildThreads(sb, info, Thread.State.RUNNABLE, true);
+    buildThreads(sb, info, Thread.State.BLOCKED, false);
+    buildThreads(sb, info, Thread.State.WAITING, false);
+    buildThreads(sb, info, Thread.State.TIMED_WAITING, false);
+    buildThreads(sb, info, null, false);
 
     log.info(sb.toString());
   }
 
-  private void buildThreads(StringBuilder sb, ThreadInfo []info)
+  private void buildThreads(StringBuilder sb,
+                            ThreadInfo []infoArray,
+                            Thread.State matchState,
+                            boolean isNative)
   {
-    for (int i = 0; i < info.length; i++) {
-      buildThread(sb, info[i]);
+    for (ThreadInfo info : infoArray) {
+      Thread.State state = info.getThreadState();
+
+      if (matchState == Thread.State.RUNNABLE
+          && (isNative != info.isInNative())) {
+        continue;
+      }
+      
+      if (state == matchState)
+        buildThread(sb, info);
+      else if (state == null
+               && matchState != Thread.State.RUNNABLE
+               && matchState != Thread.State.BLOCKED
+               && matchState != Thread.State.WAITING
+               && matchState != Thread.State.TIMED_WAITING) {
+        buildThread(sb, info);
+      }
     }
   }
 

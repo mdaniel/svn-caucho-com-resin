@@ -47,9 +47,7 @@ public class XAWriteBlock extends WriteBlock {
   {
     super(block);
 
-    _buffer = _freeBuffers.allocate();
-    if (_buffer == null)
-      _buffer = new byte[Store.BLOCK_SIZE];
+    _buffer = allocateBuffer();
 
     block.read();
 
@@ -83,8 +81,7 @@ public class XAWriteBlock extends WriteBlock {
       byte []buffer = _buffer;
       _buffer = null;
     
-      if (buffer != null)
-	_freeBuffers.free(buffer);
+      freeBuffer(buffer);
     }
   }
 

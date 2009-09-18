@@ -656,7 +656,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
    */
   public void setAdminPath(Path path)
   {
-    setResinDataDirectory(path);
+    // setResinDataDirectory(path);
   }
 
   /**

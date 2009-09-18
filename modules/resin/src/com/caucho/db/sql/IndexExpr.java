@@ -155,8 +155,10 @@ class IndexExpr extends RowIterateExpr {
    * Returns the next row.
    */
   boolean nextBlock(QueryContext context, TableIterator rowIter)
-    throws IOException
+    throws IOException, SQLException
   {
+    context.unlock();
+    
     return false;
   }
 

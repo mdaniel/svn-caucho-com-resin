@@ -49,6 +49,14 @@ abstract public class Probe {
    */
   abstract public double sample();
 
+  /**
+   * Returns the current value.
+   */
+  public double peek()
+  {
+    return 0;
+  }
+
   @Override
   public String toString()
   {

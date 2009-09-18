@@ -33,6 +33,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.BlockManagerMXBean;
 import com.caucho.util.L10N;
 import com.caucho.util.LongKeyLruCache;
+import com.caucho.util.TaskWorker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,11 +58,14 @@ public final class BlockManager
   private final byte []_storeMask = new byte[8192];
   private LongKeyLruCache<Block> _blockCache;
 
+  private final Object _copyLock = new Object();
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
-  private int _writeQueueMax = 32;
+  private int _writeQueueMax = 256;
 
   private final AtomicLong _blockWriteCount = new AtomicLong();
   private final AtomicLong _blockReadCount = new AtomicLong();
+
+  private final BlockManagerWriter _writer;
 
   private BlockManager(int capacity)
   {
@@ -74,11 +78,7 @@ public final class BlockManager
 
     registerSelf();
 
-    BlockManagerWriter writer = new BlockManagerWriter();
-    Thread thread = new Thread(writer, "resin-block-manager-writer");
-    thread.setDaemon(true);
-
-    thread.start();
+    _writer = new BlockManagerWriter();
   }
 
   /**
@@ -194,6 +194,7 @@ public final class BlockManager
 
     synchronized (_writeQueue) {
       while (hasPendingStore(store)) {
+        _writer.wake();
         try {
           _writeQueue.wait();
         } catch (InterruptedException e) {
@@ -260,17 +261,31 @@ public final class BlockManager
       if (dirtyBlock != null) {
         byte []dirtyBuffer = dirtyBlock.getBuffer();
 
-        if (dirtyBuffer != null) {
+        if (dirtyBuffer != null && dirtyBlock.isValid()) {
           System.arraycopy(dirtyBuffer, 0, block.getBuffer(), 0, dirtyBuffer.length);
           block.validate();
         }
 
+        // System.out.println("COPY: " + dirtyBlock + " " + _writeQueue.size());
+
         dirtyBlock.free();
       }
 
-      // needs to be outside the synchronized since the put
+      // needs to be outside the synchronized because the put
       // can cause an LRU drop which might lead to a dirty write
-      block = _blockCache.putIfNew(blockId, block);
+      Block oldBlock = _blockCache.putIfNew(blockId, block);
+      
+      if (block != oldBlock) {
+        block.free();
+        System.out.println("OVERRIDE: " + oldBlock + " " + block);
+      }
+      
+      block = oldBlock;
+    }
+
+    if (blockId != block.getBlockId()) {
+      Thread.dumpStack();
+      System.out.println("BLOCK: " + Long.toHexString(blockId) + " " + Long.toHexString(block.getBlockId()));
     }
 
     return block;
@@ -290,9 +305,9 @@ public final class BlockManager
       }
 
       _writeQueue.add(block);
-
-      _writeQueue.notifyAll();
     }
+
+    _writer.wake();
   }
 
   //
@@ -373,48 +388,46 @@ public final class BlockManager
     return e;
   }
 
-  class BlockManagerWriter implements Runnable {
-    public void run()
+  class BlockManagerWriter extends TaskWorker {
+    public void runTask()
     {
-      while (true) {
-        try {
+      try {
+        while (true) {
           Block block = null;
 
           synchronized (_writeQueue) {
-            loop:
-            while (true) {
-              for (int i = 0; i < _writeQueue.size(); i++) {
-                block = _writeQueue.get(i);
+            for (int i = 0; i < _writeQueue.size(); i++) {
+              block = _writeQueue.get(i);
 
-                if (block.isFree())
-                  break loop;
-                else
-                  block = null;
-              }
-
-              if (_writeQueue.size() == 0)
-                _writeQueue.wait();
+              if (block.isFree())
+                break;
               else
-                _writeQueue.wait(100);
+                block = null;
             }
           }
+
+          if (block == null)
+            return;
 
           block.close();
 
           synchronized (_writeQueue) {
-            for (int i = 0; i < _writeQueue.size(); i++) {
+            int size = _writeQueue.size();
+            boolean isMax = _writeQueueMax <= size;
+          
+            for (int i = size - 1; i >= 0; i--) {
               if (block == _writeQueue.get(i)) {
                 _writeQueue.remove(i);
                 break;
               }
             }
 
-            _writeQueue.notifyAll();
+            if (isMax)
+              _writeQueue.notifyAll();
           }
-        } catch (InterruptedException e) {
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
         }
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

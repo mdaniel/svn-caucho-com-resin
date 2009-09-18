@@ -728,12 +728,12 @@ abstract public class Query {
       Expr []whereExprs = _whereExprs;
 
       for (int i = 0; i < rowLength; i++) {
-	TableIterator table = rows[i];
+	TableIterator tableIter = rows[i];
 	RowIterateExpr indexExpr = indexExprs[i];
 
 	Expr whereExpr = whereExprs == null ? null : whereExprs[i];
 
-	while (indexExpr.nextRow(queryContext, table)) {
+	while (indexExpr.nextRow(queryContext, tableIter)) {
 	  if (whereExpr == null || whereExpr.isSelect(queryContext)) {
 	    if (i == 0 || initBlockRow(i - 1, rows, queryContext)) {
 	      return true;

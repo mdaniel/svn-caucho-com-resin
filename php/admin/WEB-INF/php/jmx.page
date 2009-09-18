@@ -5,6 +5,10 @@
 
 require_once "WEB-INF/php/inc.php";
 
+if (! admin_init($query)) {
+  return;
+}
+
 $mbean_list = $g_mbean_server->query("*:*");
 
 $mbean_group = jmx_partition($mbean_list, array(":domain:"));

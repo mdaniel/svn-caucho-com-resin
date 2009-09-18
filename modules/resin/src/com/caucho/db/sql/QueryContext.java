@@ -466,8 +466,10 @@ public class QueryContext {
   public void lock()
     throws SQLException
   {
-    if (_isLocked)
+    if (_isLocked) {
+      Thread.dumpStack();
       throw new IllegalStateException(L.l("blocks are already locked"));
+    }
     _isLocked = true;
     
     int len = _tableIterators.length;
@@ -505,11 +507,11 @@ public class QueryContext {
 
       if (bestBlock == null) {
       }
-      else if (_isWrite) {
-	_xa.lockReadAndWrite(bestBlock.getLock());
+      else if (_isWrite && i == 0) {
+	bestBlock.getLock().lockReadAndWrite(_xa.getTimeout());
       }
       else {
-	_xa.lockRead(bestBlock.getLock());
+	bestBlock.getLock().lockRead(_xa.getTimeout());
       }
     }
   }
@@ -536,11 +538,11 @@ public class QueryContext {
 
       if (block == null) {
       }
-      else if (_isWrite) {
-	_xa.unlockReadAndWrite(block.getLock());
+      else if (_isWrite && i == 0) {
+	block.getLock().unlockReadAndWrite();
       }
       else {
-	_xa.unlockRead(block.getLock());
+	block.getLock().unlockRead();
       }
     }
 
@@ -553,7 +555,7 @@ public class QueryContext {
 
 	if (block == null) {
 	}
-	else if (_isWrite) {
+	else if (_isWrite && i == 0) {
 	  try {
 	    block.commit();
 	  } catch (IOException e) {

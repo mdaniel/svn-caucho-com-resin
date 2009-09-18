@@ -47,8 +47,8 @@ abstract public class Block implements SyncCacheListener {
     = Logger.getLogger(Block.class.getName());
   private static final L10N L = new L10N(Block.class);
 
-  protected static final FreeList<byte[]> _freeBuffers
-    = new FreeList<byte[]>(4);
+  private static final FreeList<byte[]> _freeBuffers
+    = new FreeList<byte[]>(64);
 
   private final Store _store;
   private final long _blockId;
@@ -192,6 +192,9 @@ abstract public class Block implements SyncCacheListener {
   public void write()
     throws IOException
   {
+    if (_dirtyMax <= _dirtyMin)
+      return;
+    
     if (_writeCount.getAndIncrement() < 2) {
       try {
         writeImpl();
@@ -246,6 +249,11 @@ abstract public class Block implements SyncCacheListener {
   {
     _store.writeBlock((_blockId & Store.BLOCK_MASK) + offset,
 		      getBuffer(), offset, length);
+  }
+
+  public final boolean isValid()
+  {
+    return _isValid;
   }
 
   /**
@@ -374,6 +382,23 @@ abstract public class Block implements SyncCacheListener {
    */
   protected void freeImpl()
   {
+  }
+
+  protected byte []allocateBuffer()
+  {
+    byte []buffer = _freeBuffers.allocate();
+    
+    if (buffer == null) {
+      buffer = new byte[Store.BLOCK_SIZE];
+    }
+
+    return buffer;
+  }
+
+  protected void freeBuffer(byte []buffer)
+  {
+    if (buffer != null)
+      _freeBuffers.freeCareful(buffer);
   }
 
   public String toString()

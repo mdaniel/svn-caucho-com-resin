@@ -88,7 +88,8 @@ public class Store {
     = Logger.getLogger(Store.class.getName());
   private final static L10N L = new L10N(Store.class);
 
-  public final static int BLOCK_BITS = 14;
+  // 8k block size
+  public final static int BLOCK_BITS = 13;
   public final static int BLOCK_SIZE = 1 << BLOCK_BITS;
   public final static long BLOCK_INDEX_MASK = BLOCK_SIZE - 1;
   public final static long BLOCK_MASK = ~ BLOCK_INDEX_MASK;
@@ -96,12 +97,14 @@ public class Store {
 
   private final static int ALLOC_BYTES_PER_BLOCK = 2;
 
-  // total size of an allocation group
-  private final static long ALLOC_GROUP_SIZE
-    = 1L * BLOCK_SIZE * BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK;
-
   //private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
   private final static int ALLOC_CHUNK_SIZE = BLOCK_SIZE;
+  private final static int ALLOC_GROUP_COUNT
+    = BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK;
+
+  // total size of an allocation group
+  private final static long ALLOC_GROUP_SIZE
+    = 1L * ALLOC_GROUP_COUNT * BLOCK_SIZE;
 
   public final static int ALLOC_FREE      = 0x00;
   public final static int ALLOC_ROW       = 0x01;
@@ -160,7 +163,10 @@ public class Store {
 
   private Object _fileLock = new Object();
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
-  private final Semaphore _rowFileSemaphore = new Semaphore(4);
+
+  // Can't use semaphore greater than 1 because write/read not atomic
+  //private final Semaphore _rowFileSemaphore = new Semaphore(4);
+  private final Semaphore _rowFileSemaphore = new Semaphore(1);
 
   private Lock _rowLock;
 
@@ -399,25 +405,31 @@ public class Store {
       RandomAccessStream file = wrapper.getFile();
 
       _fileSize = file.getLength();
-      _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
-
-      int allocCount = (int) (_blockCount * ALLOC_BYTES_PER_BLOCK);
-
-      allocCount += ALLOC_CHUNK_SIZE - allocCount % ALLOC_CHUNK_SIZE;
-
-      _allocationTable = new byte[allocCount];
-
-      for (int i = 0; i < allocCount; i += BLOCK_SIZE) {
-        int len = allocCount - i;
-
-        if (BLOCK_SIZE < len)
-          len = BLOCK_SIZE;
-
-        readBlock((long) i / ALLOC_BYTES_PER_BLOCK * ALLOC_GROUP_SIZE,
-                  _allocationTable, i, len);
-      }
     } finally {
-      wrapper.close();
+      closeRowFile(wrapper);
+    }
+    
+    _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
+
+    int allocCount = (int) _blockCount;
+
+    allocCount += (ALLOC_GROUP_COUNT - 1);
+    allocCount -= allocCount % ALLOC_GROUP_COUNT;
+
+    int allocSize = allocCount * ALLOC_BYTES_PER_BLOCK;
+
+    _allocationTable = new byte[allocSize];
+
+    for (int i = 0; i < allocSize; i += BLOCK_SIZE) {
+      int len = allocSize - i;
+
+      long allocGroup = i / BLOCK_SIZE;
+
+      if (BLOCK_SIZE < len)
+        len = BLOCK_SIZE;
+
+      readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
+                _allocationTable, i, len);
     }
   }
 
@@ -602,11 +614,13 @@ public class Store {
 
       if (_allocationTable.length <= ALLOC_BYTES_PER_BLOCK * blockIndex) {
         // expand the allocation table
+
         byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
         System.arraycopy(_allocationTable, 0,
                          newTable, 0,
                          _allocationTable.length);
         _allocationTable = newTable;
+        _allocDirtyMax = newTable.length;
 
         // if the allocation table is over 8k, allocate the block for the
         // extension (each allocation block of 8k allocates 512m)
@@ -619,8 +633,8 @@ public class Store {
       // mark USED before actual code so it's properly initialized
       setAllocation(blockIndex, ALLOC_USED);
 
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " allocating block " + blockIndex + " " + codeToName(code));
+      if (log.isLoggable(Level.FINER))
+        log.finer(this + " allocating block " + blockIndex + " " + codeToName(code));
 
       if (_blockCount <= blockIndex) {
         isFileExtended = true;
@@ -781,24 +795,30 @@ public class Store {
         _allocDirtyMax = 0;
       }
 
-      // Write each dirty block to disk.  The physical blocks are
-      // broken up each BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK.
-      for (;
-           dirtyMin < dirtyMax;
-           dirtyMin = (dirtyMin + BLOCK_SIZE) - dirtyMin % BLOCK_SIZE) {
-        int allocGroup = dirtyMin / (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK);
+      saveAllocation(dirtyMin, dirtyMax);
+    }
+  }
 
-        int offset = dirtyMin % BLOCK_SIZE;
-        int length;
+  private void saveAllocation(int dirtyMin, int dirtyMax)
+    throws IOException
+  {
+    // Write each dirty block to disk.  The physical blocks are
+    // broken up each BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK.
+    for (;
+         dirtyMin < dirtyMax;
+         dirtyMin = (dirtyMin + BLOCK_SIZE) - dirtyMin % BLOCK_SIZE) {
+      int allocGroup = dirtyMin / BLOCK_SIZE;
 
-        if (dirtyMin / BLOCK_SIZE != dirtyMax / BLOCK_SIZE)
-          length = BLOCK_SIZE - offset;
-        else
-          length = dirtyMax - dirtyMin;
+      int offset = dirtyMin % BLOCK_SIZE;
+      int length;
 
-        writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
-                   _allocationTable, offset, length);
-      }
+      if (dirtyMin / BLOCK_SIZE != dirtyMax / BLOCK_SIZE)
+        length = BLOCK_SIZE - offset;
+      else
+        length = dirtyMax - dirtyMin;
+
+      writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
+                 _allocationTable, offset, length);
     }
   }
 
@@ -1725,11 +1745,12 @@ public class Store {
     throws IOException
   {
     RandomAccessWrapper wrapper = openRowFile();
-    RandomAccessStream is = wrapper.getFile();
-
-    long blockAddress = blockId & BLOCK_MASK;
 
     try {
+      RandomAccessStream is = wrapper.getFile();
+
+      long blockAddress = blockId & BLOCK_MASK;
+      
       if (blockAddress < 0 || _fileSize < blockAddress + length) {
         throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})",
                                             Long.toHexString(blockAddress),
@@ -1741,6 +1762,7 @@ public class Store {
       int readLen = is.read(blockAddress, buffer, offset, length);
 
       if (readLen < 0) {
+        System.out.println("BAD-READ: " + Long.toHexString(blockAddress));
         for (int i = 0; i < BLOCK_SIZE; i++)
           buffer[i] = 0;
       }
@@ -1750,8 +1772,7 @@ public class Store {
       freeRowFile(wrapper);
       wrapper = null;
     } finally {
-      if (wrapper != null)
-        wrapper.close();
+      closeRowFile(wrapper);
     }
   }
 
@@ -1763,9 +1784,9 @@ public class Store {
     throws IOException
   {
     RandomAccessWrapper wrapper = openRowFile();
-    RandomAccessStream os = wrapper.getFile();
 
     try {
+      RandomAccessStream os = wrapper.getFile();
       os.write(blockAddress, buffer, offset, length);
 
       freeRowFile(wrapper);
@@ -1779,8 +1800,7 @@ public class Store {
 
       _blockManager.addBlockWrite();
     } finally {
-      if (wrapper != null)
-        wrapper.close();
+      closeRowFile(wrapper);
     }
   }
 
@@ -1793,12 +1813,29 @@ public class Store {
     // limit number of active row files
 
     try {
+      Thread.interrupted();
       _rowFileSemaphore.acquire();
+    } catch (InterruptedException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return null;
+    }
+      
+    RandomAccessWrapper wrapper = null;
+    try {
+      wrapper = openRowFileImpl();
+
+      return wrapper;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (IOException e) {
+      throw e;
     } catch (Exception e) {
       throw new IOException(e);
+    } finally {
+      if (wrapper == null)
+        _rowFileSemaphore.release();
     }
-
-    return openRowFileImpl();
   }
 
   /**
@@ -1834,6 +1871,9 @@ public class Store {
   private void freeRowFile(RandomAccessWrapper wrapper)
     throws IOException
   {
+    if (wrapper == null)
+      return;
+    
     _rowFileSemaphore.release();
 
     synchronized (this) {
@@ -1842,6 +1882,17 @@ public class Store {
         return;
       }
     }
+
+    wrapper.close();
+  }
+
+  private void closeRowFile(RandomAccessWrapper wrapper)
+    throws IOException
+  {
+    if (wrapper == null)
+      return;
+    
+    _rowFileSemaphore.release();
 
     wrapper.close();
   }

@@ -5,6 +5,10 @@
 
 require_once "WEB-INF/php/inc.php";
 
+if (! admin_init($query, true)) {
+  return;
+}
+
 ?>
 
 <h2>Cluster Overview</h2>

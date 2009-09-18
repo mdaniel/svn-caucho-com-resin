@@ -95,6 +95,10 @@ if (! $p_period) {
   $p_period = 60;
 }
 
+if ($p_servers == null) {
+  $p_servers = array(sprintf("%02d", $g_server->SelfServer->ClusterIndex));
+}
+
 foreach ($p_checks as $check) {
   foreach ($p_servers as $server) {
     $p_names[] = "$server|$check";
@@ -122,19 +126,23 @@ $user_graphs = $user_item['user-graphs'];
 
 // existing graphs
 
-echo "<h3>Choose Existing Graphs</h3>\n";
-echo "<form method='POST' action='" . $g_next_url . "'>";
-echo "<select name='graph'>\n";
+echo "<h3>Select Defined Graph</h3>\n";
+echo "<form name='existing' method='POST' action='" . $g_next_url . "'>";
+echo "<select name='graph' onchange='document.forms.existing.submit();'>\n";
+
+$selected = false;
 foreach ($user_item['user-graphs'] as $name => $hash) {
   echo "<option ";
   if ($p_hash == $hash) {
+    $selected = true;
     echo " selected";
   }
   echo " value='" . $name . "'>" . $name . "\n";
 }
+if (! $selected)
+  echo "<option selected>--------\n";
+
 echo "</select>\n";
-echo "<input type='submit' value='Display'><br>\n";
-echo "<input type='submit' name='remove' value='Delete Graph'>\n";
 echo "</form>";
 
 echo "<h1><a href=" . $g_next_url . ">Graph: $p_name</a></h1>";
@@ -203,7 +211,8 @@ HTML 5 &lt;canvas> is not supported in this browser
 
     ctx.save();
     
-    ctx.fillStyle = "#eeeedd";
+//    ctx.fillStyle = "#eeeedd";
+    ctx.fillStyle = "#fcf8e5";
     ctx.rect(0, 0, <?= $full_width ?>, <?= $full_height ?>);
     ctx.fill();
 //    ctx.stroke();
@@ -286,14 +295,12 @@ echo "<br>";
 echo "<form method='post' action='" . $g_next_url . "'>"
 echo "<input type='hidden' name='submit' value='true'>\n";
 
-echo "Name: ";
+echo "Defined Name: ";
 echo "<input name='name' size='40'><br>";
 echo "Servers: ";
 ksort($servers);
 foreach ($servers as $server) {
   echo "<input type='checkbox' name='servers[]'";
-  if (in_array($server, $p_servers))
-    echo " checked='true'";
   echo " value='$server'>$server\n";      
 }
 echo "<br>";
@@ -418,19 +425,33 @@ if ($dx == 0)
 if ($dy == 0)
   $dy = 1;
 
-$colors[] = "#ff0000"; // red
-$colors[] = "#4040ff"; // blue
-$colors[] = "#ffb000"; // orange
-$colors[] = "#00c0c0"; // cyan
+// saturated primary/secondary
+// 0    #ff0000  - red
+// 30   #ff8000  - orange
+// 60   #ffff00  - yellow
+// 90   #80ff00  - chartreuse
+// 120  #00ff00  - green
+// 150  #00ff80  - spring green
+// 180  #00ffff  - cyan
+// 210  #0080ff  - azure
+// 240  #0000ff  - blue
+// 270  #8000ff  - indigo
+// 300  #ff00ff  - magenta
+// 330  #ff0080  - rose
+
+$colors[] = "#ff3030"; // red
+$colors[] = "#3090ff"; // azure
+$colors[] = "#906000"; // brown
+$colors[] = "#ff9030"; // orange
 $colors[] = "#000000"; // black
-$colors[] = "#800080"; // magenta
-$colors[] = "#a0a0f0"; // gray
-$colors[] = "#808000"; // brown
-$colors[] = "#108010"; // green
-$colors[] = "#ff00ff"; // magenta
-$colors[] = "#00d000"; // green
-$colors[] = "#ffa0ff"; // magenta
-$colors[] = "#80f080"; // green
+$colors[] = "#3030ff"; // blue
+$colors[] = "#30b030"; // green
+$colors[] = "#d030d0"; // magenta
+$colors[] = "#30d0d0"; // cyan
+$colors[] = "#b03060"; // rose
+$colors[] = "#e090ff"; // indigo
+$colors[] = "#c0c0c0"; // gray
+$colors[] = "#408040"; // forest green
 
 echo "<script type='application/x-javascript'>\n";
 echo "c = start_bounds(0, 0, 100, 100);\n";

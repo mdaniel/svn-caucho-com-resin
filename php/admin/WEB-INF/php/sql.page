@@ -6,6 +6,10 @@
 require_once "WEB-INF/php/inc.php";
 require_once "WEB-INF/php/wizard.php";
 
+if (! admin_init($query, true)) {
+  return;
+}
+
 ?>
 <h1>JDBC Pool Query Utility</h1>
 <p>

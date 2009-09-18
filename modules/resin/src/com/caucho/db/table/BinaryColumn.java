@@ -72,6 +72,7 @@ class BinaryColumn extends Column {
   /**
    * Returns the type code for the column.
    */
+  @Override
   public int getTypeCode()
   {
     return BINARY;
@@ -80,6 +81,7 @@ class BinaryColumn extends Column {
   /**
    * Returns the java type.
    */
+  @Override
   public Class getJavaType()
   {
     return String.class;
@@ -88,6 +90,7 @@ class BinaryColumn extends Column {
   /**
    * Returns the declaration size
    */
+  @Override
   public int getDeclarationSize()
   {
     return _length;
@@ -96,6 +99,7 @@ class BinaryColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return _length;
@@ -104,6 +108,7 @@ class BinaryColumn extends Column {
   /**
    * Returns the key compare for the column.
    */
+  @Override
   public KeyCompare getIndexKeyCompare()
   {
     return new BinaryKeyCompare(_length);
@@ -116,6 +121,7 @@ class BinaryColumn extends Column {
    * @param rowOffset the offset into the row
    * @param str the string value
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
     int offset = rowOffset + _columnOffset;
@@ -147,6 +153,7 @@ class BinaryColumn extends Column {
     setNonNull(block, rowOffset);
   }
   
+  @Override
   public String getString(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -174,6 +181,7 @@ class BinaryColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -190,6 +198,7 @@ class BinaryColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -210,6 +219,7 @@ class BinaryColumn extends Column {
   /**
    * Returns true if the bytes match.
    */
+  @Override
   public boolean isEqual(byte []block, int rowOffset,
 			 byte []buffer, int offset, int length)
   {
@@ -231,6 +241,7 @@ class BinaryColumn extends Column {
     return true;
   }
   
+  @Override
   public boolean isEqual(byte []block, int rowOffset, String value)
   {
     if (value == null)
@@ -283,6 +294,7 @@ class BinaryColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -300,6 +312,7 @@ class BinaryColumn extends Column {
   /**
    * Sets based on an iterator.
    */
+  @Override
   public void set(Transaction xa,
 		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
@@ -322,6 +335,7 @@ class BinaryColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
+  @Override
   void setIndex(Transaction xa,
 		byte []block, int rowOffset,
 		long rowAddr, QueryContext context)
@@ -331,6 +345,20 @@ class BinaryColumn extends Column {
 
     if (index != null) {
       try {
+        int len = getLength();
+
+        if (len > 3) {
+          int d1 = block[rowOffset + _columnOffset + len - 1];
+          int d2 = block[rowOffset + _columnOffset + len - 2];
+          int d3 = block[rowOffset + _columnOffset + len - 3];
+          
+          if (d1 == 0 && d2 == 0 && d3 == 0) {
+            System.out.println("INSERT: " + this + " " + rowOffset + " " + getDebugString(block, rowOffset));
+
+            Thread.dumpStack();
+          }
+        }
+
 	index.insert(block,
 		     rowOffset + _columnOffset, getLength(),
 		     rowAddr,

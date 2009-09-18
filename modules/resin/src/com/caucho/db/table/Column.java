@@ -424,7 +424,7 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  void setDate(Transaction xa, byte []block, int rowOffset, double value)
+  void setDate(Transaction xa, byte []block, int rowOffset, long value)
     throws SQLException
   {
     throw new UnsupportedOperationException();

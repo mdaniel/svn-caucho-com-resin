@@ -216,6 +216,9 @@ public class DataStore implements AlarmListener {
       if (rs.next()) {
 	InputStream is = rs.getBinaryStream(1);
 
+        if (is == null)
+          return false;
+          
 	try {
 	  os.writeStream(is);
 	} finally {

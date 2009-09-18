@@ -752,8 +752,8 @@ r_stat-item = element stat-item {
 }
 
 r_stat-service = element stat-service {
-  (attribute cpu-load-exit-threshold { r_double-Type }
-   | element cpu-load-exit-threshold { r_double-Type })?
+  (attribute unix-load-avg-exit-threshold { r_double-Type }
+   | element unix-load-avg-exit-threshold { r_double-Type })?
 
   & (attribute cpu-load-log-info-threshold { r_double-Type }
      | element cpu-load-log-info-threshold { r_double-Type })?
@@ -820,7 +820,8 @@ r_user-name =
   | element user-name { string }
 
 r_watchdog-log = element watchdog-log {
-  r_dir
+  (attribute log-directory { string }
+   | element log-directory { string })?
 
   & r_rollover-count?
 

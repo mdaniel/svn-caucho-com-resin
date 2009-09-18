@@ -104,7 +104,7 @@ public class BlobOutputStream extends OutputStream {
     _offset = 0;
 
     if (_tempBuffer == null) {
-      _tempBuffer = TempBuffer.allocate();
+      _tempBuffer = TempBuffer.allocateLarge();
       _buffer = _tempBuffer.getBuffer();
       _bufferEnd = _buffer.length;
     }
@@ -192,7 +192,7 @@ public class BlobOutputStream extends OutputStream {
       _tempBuffer = null;
 
       if (tempBuffer != null) {
-	TempBuffer.free(tempBuffer);
+	TempBuffer.freeLarge(tempBuffer);
       }
     }
   }

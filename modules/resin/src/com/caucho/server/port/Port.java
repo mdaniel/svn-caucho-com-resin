@@ -73,7 +73,7 @@ import java.util.Set;
 /**
  * Represents a protocol connection.
  */
-public class Port
+public class Port extends TaskWorker
   implements EnvironmentListener, Runnable
 {
   private static final L10N L = new L10N(Port.class);
@@ -167,10 +167,6 @@ public class Port
   // timeout to limit the thread close rate
   private long _idleCloseTimeout = 15000L;
   private volatile long _idleCloseExpire;
-
-  // semaphore to request a new start thread
-  private Thread _portThread;
-  private final AtomicBoolean _isPortStart = new AtomicBoolean();
 
   // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
@@ -1213,10 +1209,7 @@ public class Port
 
       enable();
 
-      String name = "resin-port-" + _serverSocket.getLocalPort();
-      _portThread = new Thread(this, name);
-      _portThread.setDaemon(true);
-      _portThread.start();
+      wake();
 
       _suspendAlarm = new Alarm(new SuspendReaper());
       _suspendAlarm.queue(_suspendReaperTimeout);
@@ -1346,15 +1339,7 @@ public class Port
       if (isStartThreadRequired()) {
         // if there are not enough idle threads, wake the manager to
         // create a new one
-        Thread portThread = _portThread;
-
-        if (portThread != null && _isPortStart.compareAndSet(false, true)) {
-          try {
-            LockSupport.unpark(portThread);
-          } finally {
-            _isPortStart.set(false);
-          }
-        }
+        wake();
       }
     }
 
@@ -1591,43 +1576,35 @@ public class Port
   /**
    * The port thread is responsible for creating new connections.
    */
-  public void run()
+  public void runTask()
   {
-    while (! _lifecycle.isDestroyed()) {
-      try {
-        // need delay to avoid spawing too many threads over a short time,
-        // when the load doesn't justify it
-        // Thread.yield();
+    if (_lifecycle.isDestroyed())
+      return;
+    
+    try {
+      TcpConnection startConn = null;
 
-        // XXX: Thread.sleep(10);
+      if (isStartThreadRequired()
+          && _lifecycle.isActive()
+          && _activeConnectionCount.get() <= _connectionMax) {
+        startConn = _freeConn.allocate();
 
-        TcpConnection startConn = null;
-
-        if (isStartThreadRequired()
-            && _lifecycle.isActive()
-            && _activeConnectionCount.get() <= _connectionMax) {
-          startConn = _freeConn.allocate();
-
-          if (startConn == null || startConn.isDestroyed()) {
-            startConn = new TcpConnection(this, _serverSocket.createSocket());
-          }
-          else
-            startConn._isFree = false; // XXX: validation for 4.0
+        if (startConn == null || startConn.isDestroyed()) {
+          startConn = new TcpConnection(this, _serverSocket.createSocket());
         }
-        else {
-          LockSupport.park();
-        }
-
-        if (startConn != null) {
-          _startThreadCount.incrementAndGet();
-          _activeConnectionCount.incrementAndGet();
-          _activeConnectionSet.add(startConn);
-
-          _threadPool.schedule(startConn.getAcceptTask());
-        }
-      } catch (Throwable e) {
-        log.log(Level.SEVERE, e.toString(), e);
+        else
+          startConn._isFree = false; // XXX: validation for 4.0
       }
+
+      if (startConn != null) {
+        _startThreadCount.incrementAndGet();
+        _activeConnectionCount.incrementAndGet();
+        _activeConnectionSet.add(startConn);
+
+        _threadPool.schedule(startConn.getAcceptTask());
+      }
+    } catch (Throwable e) {
+      log.log(Level.SEVERE, e.toString(), e);
     }
   }
 
@@ -1700,9 +1677,11 @@ public class Port
     _activeConnectionCount.decrementAndGet();
 
     // wake the start thread
-    Thread portThread = _portThread;
-    if (portThread != null)
-      LockSupport.unpark(portThread);
+    if (isStartThreadRequired()) {
+      // if there are not enough idle threads, wake the manager to
+      // create a new one
+      wake();
+    }
   }
 
   /**
@@ -1718,6 +1697,8 @@ public class Port
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " closing");
+
+    super.destroy();
 
     Alarm suspendAlarm = _suspendAlarm;
     _suspendAlarm = null;
@@ -1776,9 +1757,7 @@ public class Port
     }
 
     // wake the start thread
-    Thread portThread = _portThread;
-    if (portThread != null)
-      LockSupport.unpark(portThread);
+    wake();
 
     // Close the socket server socket and send some request to make
     // sure the Port accept thread is woken and dies.
@@ -1823,6 +1802,11 @@ public class Port
     return _url;
   }
 
+  @Override
+  protected String getThreadName()
+  {
+    return "resin-port-" + getAddress() + ":" + getPort();
+  }
 
   @Override
   public String toString()

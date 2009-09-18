@@ -6,6 +6,10 @@
      <init compile="false"/>
   </servlet-mapping>
 
+  <session-config>
+    <use-persistent-store/>
+  </session-config>
+
   <!--
      - Security configuration
     -->

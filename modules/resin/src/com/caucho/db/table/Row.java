@@ -28,13 +28,24 @@
 
 package com.caucho.db.table;
 
+import com.caucho.config.ConfigException;
+import com.caucho.db.store.Store;
+import com.caucho.util.L10N;
+
 class Row {
+  private static final L10N L = new L10N(Row.class);
+  
   // bit of the first null mask, i.e. skipping the allocation bits
   private static final int NULL_OFFSET = 2;
 
+  private Table _table;
   private Column []_columns = new Column[0];
   private int _rowLength = 1;
   private int _nullOffset = 0;
+
+  Row()
+  {
+  }
 
   /**
    * Returns the current row length
@@ -105,6 +116,17 @@ class Row {
 
     _rowLength += column.getLength();
 
+    if (Store.BLOCK_SIZE <= _rowLength) {
+      throw new ConfigException(L.l("database row max length {0} exceeded at column {1}",
+                                    Store.BLOCK_SIZE, column.getName()));
+    }
+
     return column;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _table + "]";
   }
 }
