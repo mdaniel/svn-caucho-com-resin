@@ -53,6 +53,8 @@ public @interface Schedule {
   String dayOfWeek() default "*";
 
   String year() default "*";
+  
+  String timezone() default "";
 
   String info() default "";
 

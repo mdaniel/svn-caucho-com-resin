@@ -291,6 +291,6 @@ public interface TimerService {
    * @throws EJBException
    *           If this method could not complete due to a system-level failure.
    */
-  @SuppressWarnings("unchecked")
-  public Collection getTimers() throws IllegalStateException, EJBException;
+  public Collection<Timer> getTimers() throws IllegalStateException,
+      EJBException;
 }

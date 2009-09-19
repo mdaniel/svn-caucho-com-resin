@@ -135,6 +135,21 @@ public interface Timer {
       NoSuchObjectLocalException, EJBException;
 
   /**
+   * Query whether this timer is a calendar-based timer.
+   * 
+   * @return true if this timer is a calendar-based timer.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been cancelled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public boolean isCalendarTimer() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException;
+
+  /**
    * Query whether this timer has persistent semantics.
    * 
    * @return true if this timer has persistent guarantees.

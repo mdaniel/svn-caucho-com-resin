@@ -167,6 +167,26 @@ public class EjbTimer implements Timer, Runnable {
   }
 
   /**
+   * Query whether this timer is a calendar-based timer.
+   * 
+   * @return true if this timer is a calendar-based timer.
+   * @throws IllegalStateException
+   *           If this method is invoked while the instance is in a state that
+   *           does not allow access to this method.
+   * @throws NoSuchObjectLocalException
+   *           If invoked on a timer that has expired or has been cancelled.
+   * @throws EJBException
+   *           If this method could not complete due to a system-level failure.
+   */
+  public boolean isCalendarTimer() throws IllegalStateException,
+      NoSuchObjectLocalException, EJBException
+  {
+    checkStatus();
+
+    return (_timerTask.getCronExpression() != null);
+  }
+
+  /**
    * Get the point in time at which the next timer expiration is scheduled to
    * occur.
    * 

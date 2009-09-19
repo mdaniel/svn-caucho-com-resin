@@ -46,6 +46,8 @@ public class ScheduleExpression implements Serializable {
   private String _month = "*";
   private String _year = "*";
 
+  private String _timezone = "";
+
   private Date _start;
   private Date _end;
 
@@ -126,6 +128,16 @@ public class ScheduleExpression implements Serializable {
   public String getYear()
   {
     return _year;
+  }
+
+  /**
+   * Gets the time zone for the schedule.
+   * 
+   * @return Time zone for the schedule.
+   */
+  public String getTimezone()
+  {
+    return _timezone;
   }
 
   /**
@@ -345,6 +357,20 @@ public class ScheduleExpression implements Serializable {
   }
 
   /**
+   * Sets the time zone for this schedule.
+   * 
+   * @param timezoneId
+   *          Time zone ID of this schedule.
+   * @return Reference to the current object (this) for method chaining.
+   */
+  public ScheduleExpression timezone(String timezoneId)
+  {
+    _timezone = timezoneId;
+
+    return this;
+  }
+
+  /**
    * Sets the start date for this schedule.
    * 
    * @param start
@@ -377,8 +403,8 @@ public class ScheduleExpression implements Serializable {
   {
     return String
         .format(
-            "schedule expression[second: %s, minute: %s, hour: %s, day of week: %s, day of month: %s, month: %s, year: %s, start: %s, end: %s]",
+            "schedule expression[second: %s, minute: %s, hour: %s, day of week: %s, day of month: %s, month: %s, year: %s, timezone: %s, start: %s, end: %s]",
             _second, _minute, _hour, _dayOfWeek, _dayOfMonth, _month, _year,
-            _start, _end);
+            _timezone, _start, _end);
   }
 }
