@@ -124,6 +124,35 @@ public class ProbeManager {
     return (TimeRangeProbe) probe;
   }
 
+  public static AverageProbe createAverageProbe(String name, String type)
+  {
+    return _manager.createAverageProbeImpl(name, type);
+  }
+
+  private AverageProbe createAverageProbeImpl(String baseName, String type)
+  {
+    String name = baseName + " " + type;
+    
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+      probe = createProbe(new AverageProbe(name));
+      
+      AverageProbe averageProbe = (AverageProbe) probe;
+
+      String countName = baseName + " Count";
+      createProbe(averageProbe.createCount(countName));
+      
+      String sigmaName = name + " 95%";
+      createProbe(averageProbe.createSigma(sigmaName, 3));
+      
+      String maxName = name + " Max";
+      createProbe(averageProbe.createMax(maxName));
+    }
+    
+    return (AverageProbe) probe;
+  }
+
   protected Probe createProbe(Probe newProbe)
   {
     Probe probe = _probeMap.putIfAbsent(newProbe.getName(), newProbe);

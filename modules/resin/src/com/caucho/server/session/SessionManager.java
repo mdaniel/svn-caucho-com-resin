@@ -29,6 +29,8 @@
 
 package com.caucho.server.session;
 
+import com.caucho.admin.AverageSample;
+import com.caucho.admin.ProbeManager;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ByteStreamCache;
@@ -186,6 +188,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private volatile long _sessionTimeoutCount;
   private volatile long _sessionInvalidateCount;
 
+  private final AverageSample _sessionSaveSample;
+
   /**
    * Creates and initializes a new session manager
    *
@@ -237,6 +241,9 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       _distributionId = name;
 
     _alarm = new Alarm(this);
+    _sessionSaveSample
+      = ProbeManager.createAverageProbe("Resin|WebApp|Session Save", "Size");
+    
     _admin = new SessionManagerAdmin(this);
   }
 
@@ -1543,6 +1550,14 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   void removeSession(SessionImpl session)
   {
     _sessions.remove(session.getId());
+  }
+
+  /**
+   * Adds a new session save event
+   */
+  void addSessionSaveSample(long size)
+  {
+    _sessionSaveSample.add(size);
   }
 
   /**

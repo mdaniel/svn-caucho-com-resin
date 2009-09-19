@@ -35,9 +35,6 @@ AC_SUBST(resin_home)
 # --with-resin-root
 #
 
-echo "ROOT: ${resin_root}"
-echo "ROOT2: ${resin_home}"
-
 AC_ARG_WITH(resin-root,
 [  --with-resin-root=DIR  resin data directory
 ], [
@@ -47,8 +44,6 @@ resin_root=${withval}
 if test -z "$resin_root"; then
   resin_root="${resin_home}"
 fi
-
-echo "ROOT3: ${resin_root}"
 
 AC_SUBST(resin_root)
 

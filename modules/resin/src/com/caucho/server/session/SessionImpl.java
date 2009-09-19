@@ -742,6 +742,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       out.close();
 
+      _manager.addSessionSaveSample(os.getLength());
+
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
                                             _idleTimeout);
 

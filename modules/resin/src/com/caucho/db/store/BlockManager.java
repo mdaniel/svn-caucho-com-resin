@@ -298,9 +298,9 @@ public final class BlockManager
   void addLruDirtyWriteBlock(Block block)
   {
     synchronized (_writeQueue) {
-      while (_writeQueueMax < _writeQueue.size()) {
+      if (_writeQueueMax < _writeQueue.size()) {
         try {
-          _writeQueue.wait();
+          _writeQueue.wait(100);
         } catch (InterruptedException e) {
         }
       }

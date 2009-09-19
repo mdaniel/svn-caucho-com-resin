@@ -30,6 +30,7 @@ package com.caucho.java;
 
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharCursor;
+import com.caucho.util.L10N;
 import com.caucho.util.StringCharCursor;
 import com.caucho.vfs.ByteToChar;
 
@@ -43,6 +44,7 @@ import java.util.logging.Logger;
  * Reads javac error messages and parses them into a usable format.
  */
 class JavacErrorParser extends ErrorParser {
+  private static final L10N L = new L10N(JavacErrorParser.class);
   private static final Logger log
     = Logger.getLogger(JavacErrorParser.class.getName());
   
@@ -50,17 +52,27 @@ class JavacErrorParser extends ErrorParser {
   private CharBuffer _buf = new CharBuffer();
   private ByteToChar _lineBuf = ByteToChar.create();
 
+  private AbstractJavaCompiler _compiler;
+  private String _file;
+  private String _encoding;
+
   public JavacErrorParser()
     throws UnsupportedEncodingException
   {
-    this(null);
+    this(null, null, null);
   }
 
-  public JavacErrorParser(String encoding)
+  public JavacErrorParser(AbstractJavaCompiler compiler,
+                          String file,
+                          String encoding)
     throws UnsupportedEncodingException
   {
     if (encoding == null)
       encoding = System.getProperty("file.encoding");
+
+    _compiler = compiler;
+    _file = file;
+    _encoding = encoding;
   
     _lineBuf.setEncoding(encoding);
   }
@@ -76,7 +88,16 @@ class JavacErrorParser extends ErrorParser {
 	_lineBuf.clear();
 
 	for (; ch >= 0 && ch != '\n'; ch = is.read()) {
-	  _lineBuf.addByte((byte) ch);
+          try {
+            _lineBuf.addByte((byte) ch);
+          } catch (Exception e) {
+            log.log(Level.FINER, e.toString(), e);
+
+            log.warning(L.l("{0}: javac error parsing encoding error detected while parsing Javac output.  The javac error encoding appears to be different from Resin's configured encoding '{1}'\n  {2}",
+                            _file,
+                            _encoding,
+                            e.toString()));
+          }
 	}
       
 	_lineBuf.addByte('\n');

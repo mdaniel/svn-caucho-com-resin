@@ -214,7 +214,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
       }
 
       ReadStream read = tempStream.openReadAndSaveBuffer();
-      JavacErrorParser parser = new JavacErrorParser(_compiler.getEncoding());
+      JavacErrorParser parser = new JavacErrorParser(this, path[0], _compiler.getEncoding());
 
       String errors = parser.parseErrors((InputStream) read, lineMap);
       read.close();
