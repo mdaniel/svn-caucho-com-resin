@@ -189,7 +189,13 @@ public class ThreadDump
   static class ThreadCompare implements Comparator<ThreadInfo> {
     public int compare(ThreadInfo a, ThreadInfo b)
     {
-      if (a.getThreadState() != b.getThreadState())
+      if (a == b)
+        return 0;
+      else if (a == null)
+        return -1;
+      else if (b == null)
+        return 1;
+      else if (a.getThreadState() != b.getThreadState())
 	return a.getThreadState().ordinal() - b.getThreadState().ordinal();
       else if (a.isInNative() && ! b.isInNative())
 	return 1;

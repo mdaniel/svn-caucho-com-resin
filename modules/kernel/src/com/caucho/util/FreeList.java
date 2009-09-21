@@ -101,12 +101,12 @@ public final class FreeList<T> {
    *
    * @param obj the object to be freed.
    */
-  public void freeCareful(T obj)
+  public boolean freeCareful(T obj)
   {
     if (checkDuplicate(obj))
       throw new IllegalStateException("tried to free object twice: " + obj);
 
-    free(obj);
+    return free(obj);
   }
 
   /**

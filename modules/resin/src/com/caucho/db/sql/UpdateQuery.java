@@ -101,7 +101,7 @@ class UpdateQuery extends Query {
       do {
 	TableIterator iter = rows[0];
 	// iter.setDirty();
-	
+
 	for (int i = 0; i < setItems.length; i++) {
 	  Column column = setItems[i].getColumn();
 	  Expr expr = setItems[i].getExpr();

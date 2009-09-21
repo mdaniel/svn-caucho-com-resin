@@ -284,10 +284,14 @@ public final class BlockManager
       block = oldBlock;
     }
 
-    if (blockId != block.getBlockId()) {
+    if (blockId != block.getBlockId()
+        || (blockId & Store.BLOCK_INDEX_MASK) != store.getId()
+        || block.getStore() != store) {
       Thread.dumpStack();
-      System.out.println("BLOCK: " + Long.toHexString(blockId) + " " + Long.toHexString(block.getBlockId()));
+      System.out.println("BLOCK: " + Long.toHexString(blockId) + " " + Long.toHexString(block.getBlockId()) + " " + store + " " + block.getStore());
     }
+
+
 
     return block;
   }

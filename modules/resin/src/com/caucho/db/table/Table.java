@@ -482,7 +482,7 @@ public class Table extends Store {
 
               /*
               if (column.getIndex() != null)
-                System.out.println(Long.toHexString(rowAddress) + ":" + Long.toHexString(rowOffset) + ": " + column.getIndexKeyCompare().toString(blockBuffer, rowOffset + column.getColumnOffset(), column.getLength()));
+                System.out.println(Long.toHexString(iter.getBlock().getBlockId()) + ":" + Long.toHexString(rowAddress) + ":" + Long.toHexString(rowOffset) + ": " + column.getIndexKeyCompare().toString(blockBuffer, rowOffset + column.getColumnOffset(), column.getLength()));
               */
 
               column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);

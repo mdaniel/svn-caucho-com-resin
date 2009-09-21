@@ -47,10 +47,12 @@ public final class Lock {
     = Logger.getLogger(Lock.class.getName());
 
   private static final long WRITE_LOCK = 1L << 48;
+  private static final long WRITE_LOCK_MASK = 0xffffL << 48;
   private static final long WRITE = 1L << 32;
   private static final long READ_LOCK = 1L << 16;
-  private static final long READ_LOCK_MASK = 0xffff0000L;
+  private static final long READ_LOCK_MASK = 0xffffL << 16;
   private static final long READ = 1L;
+  private static final long FAIL_MASK = 0x8000800080008000L;
 
   private static final long RW_LOCK = WRITE_LOCK|WRITE|READ_LOCK|READ;
 
@@ -102,22 +104,27 @@ public final class Lock {
         break;
     }
 
-    LockNode node = null;
+    LockNode node = new LockNode(true);
     
     synchronized (_lock) {
-      lock = _lockCount.get();
-
-      if (lock < WRITE) {
-        addLock(READ_LOCK);
-        return;
+      while ((lock = _lockCount.get()) < WRITE) {
+        if (_lockCount.compareAndSet(lock, lock + READ_LOCK))
+          return;
       }
 
       //System.out.println("QR: " + this + " " + Long.toHexString(lock) + " " + _activeLockCount);
-      node = queueLock(true);
+      queueLock(node);
     }
     
     long expires = Alarm.getCurrentTime() + timeout;
     lock(node, timeout, expires, READ);
+
+    if ((_lockCount.get() & READ_LOCK_MASK) == 0) {
+      System.out.println("READ_LOCK: " + Long.toHexString(_lockCount.get()) + " " + node.isLock() + " " + node.isRead() + " " + node.isDead());
+      Thread.dumpStack();
+
+      addLock(READ_LOCK);
+    }
   }
 
   /**
@@ -135,17 +142,23 @@ public final class Lock {
 
       // if read-only, or if not the last read-lock, unlock and exit
       if ((lock < WRITE
-           || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) != READ_LOCK))
+           || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) > READ_LOCK))
           && _lockCount.compareAndSet(lock, lock - (READ|READ_LOCK))) {
+        if (((lock - (READ|READ_LOCK)) & FAIL_MASK) != 0) {
+          System.out.println("FAILED: " + Long.toHexString(lock));
+        }
         return;
       }
     } while (lock < WRITE
-             || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) != READ_LOCK));
+             || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) > READ_LOCK));
     
     synchronized (_lock) {
       unparkNode = unlock();
 
       addLock(- (READ|READ_LOCK));
+      
+      if (unparkNode == null && _lockCount.get() != 0)
+        Thread.dumpStack();
     }
 
     if (unparkNode != null)
@@ -167,18 +180,12 @@ public final class Lock {
 
     long lock;
 
-    while (true) {
-      lock = _lockCount.get();
-
-      if (lock == 0) {
-        if (_lockCount.compareAndSet(lock, lock + (WRITE|WRITE_LOCK)))
-          return;
-      }
-      else
-        break;
+    while (_lockCount.get() == 0) {
+      if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK)))
+        return;
     }
 
-    LockNode node = null;
+    LockNode node = new LockNode(false);
     
     synchronized (_lock) {
       // mark the write lock
@@ -186,7 +193,7 @@ public final class Lock {
         lock = _lockCount.get();
       
         if (lock == 0) {
-          if (_lockCount.compareAndSet(lock, lock + (WRITE|WRITE_LOCK)))
+          if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK)))
             return;
         }
         else if (_lockCount.compareAndSet(lock, lock + WRITE))
@@ -194,11 +201,18 @@ public final class Lock {
       }
 
       //System.out.println("QW: " + this + " " + Long.toHexString(lock) + " " + _activeLockCount);
-      node = queueLock(false);
+      queueLock(node);
     }
     
     long expires = Alarm.getCurrentTime() + timeout;
     lock(node, timeout, expires, WRITE);
+
+    if ((_lockCount.get() & WRITE_LOCK_MASK) == 0) {
+      System.out.println("WRITE_LOCK: " + Long.toHexString(_lockCount.get()) + " " + node.isLock() + " " + node.isRead() + " " + node.isDead());
+      Thread.dumpStack();
+
+      addLock(WRITE|WRITE_LOCK);
+    }
   }
 
   /**
@@ -212,11 +226,12 @@ public final class Lock {
                  + "0x" + Long.toHexString(_lockCount.get()));
     }
 
-    long lock = _lockCount.get();
+    long lock;
 
-    if (lock == (WRITE|WRITE_LOCK)
-        && _lockCount.compareAndSet((WRITE|WRITE_LOCK), 0))
-      return;
+    while ((lock = _lockCount.get()) == (WRITE|WRITE_LOCK)) {
+      if (_lockCount.compareAndSet((WRITE|WRITE_LOCK), 0))
+        return;
+    }
 
     LockNode unparkNode = null;
 
@@ -225,8 +240,15 @@ public final class Lock {
       
       addLock(- (WRITE|WRITE_LOCK));
 
-      if (_lockCount.get() < WRITE && _lockHead != null)
+      if (_lockCount.get() < WRITE && _lockHead != null) {
+        System.out.println("LOCK: " + Long.toHexString(_lockCount.get()) + " " + unparkNode + " " + _lockHead);
         Thread.dumpStack();
+      }
+      
+      if (unparkNode == null && _lockCount.get() != 0) {
+        System.out.println("LOCK2: " + Long.toHexString(_lockCount.get()) + " " + unparkNode + " " + _lockHead);
+        Thread.dumpStack();
+      }
     }
 
     if (unparkNode != null)
@@ -281,11 +303,8 @@ public final class Lock {
    *
    * Must be called from inside _lock
    */
-  private LockNode queueLock(boolean isRead)
-    throws LockTimeoutException
+  private void queueLock(LockNode node)
   {
-    LockNode node = new LockNode(isRead);
-
     if (_lockTail != null) {
       _lockTail.setNext(node);
       _lockTail = node;
@@ -293,8 +312,6 @@ public final class Lock {
     else {
       _lockHead = _lockTail = node;
     }
-
-    return node;
   }
 
   /**
@@ -311,9 +328,14 @@ public final class Lock {
       long now = Alarm.getCurrentTime();
 
       if (expires < now) {
-        node.setDead();
-        addLock(- value);
-          
+        synchronized (_lock) {
+          if (node.isLock())
+            return;
+
+          node.setDead();
+          addLock(- value);
+        }
+        
         throw new LockTimeoutException(L.l("{0} lock timed out ({1}ms) 0x{2}",
                                            this, timeout,
                                            Long.toHexString(_lockCount.get())));
@@ -326,6 +348,9 @@ public final class Lock {
   private LockNode unlock()
   {
     LockNode head = _lockHead;
+
+    if (head == null)
+      return null;
 
     LockNode ptr = head;
     LockNode tail = ptr;
@@ -344,6 +369,7 @@ public final class Lock {
         isRead = true;
 
         addLock(READ_LOCK);
+        ptr.setLock();
 
         tail = ptr;
       }
@@ -352,36 +378,40 @@ public final class Lock {
       }
       else {
         addLock(WRITE_LOCK);
+        ptr.setLock();
 
         isWrite = true;
         tail = ptr;
       }
     }
 
-    if (tail != null) {
-      _lockHead = tail.getNext();
-      if (_lockHead == null)
-        _lockTail = null;
+    _lockHead = tail.getNext();
+    if (_lockHead == null)
+      _lockTail = null;
       
-      tail.setNext(null);
-    }
-    else {
-      _lockHead = _lockTail = null;
-    }
+    tail.setNext(null);
 
     return head;
   }
 
   private long addLock(long value)
   {
-    long lock;
-    
-    for (lock = _lockCount.get();
-         ! _lockCount.compareAndSet(lock, lock + value);
-         lock = _lockCount.get()) {
-    }
+    while (true) {
+      long lock = _lockCount.get();
 
-    return lock;
+      if (((lock + value) & FAIL_MASK) != 0) {
+        System.out.println("FAIL: " + Long.toHexString(lock + value)
+                           + " " + Long.toHexString(lock)
+                           + " " + Long.toHexString(value));
+        
+        Thread.dumpStack();
+        return lock;
+      }
+      
+      if (_lockCount.compareAndSet(lock, lock + value)) {
+        return lock;
+      }
+    }
   }
   
   private void unparkNode(LockNode node)
@@ -428,6 +458,11 @@ public final class Lock {
       return _isRead;
     }
 
+    public void setLock()
+    {
+      _isLock = true;
+    }
+
     public boolean isLock()
     {
       return _isLock;
@@ -462,8 +497,6 @@ public final class Lock {
     
     public void unpark()
     {
-      _isLock = true;
-
       LockSupport.unpark(_thread);
     }
   }

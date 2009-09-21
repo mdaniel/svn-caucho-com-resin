@@ -96,18 +96,21 @@ abstract public class TaskWorker implements Runnable {
       _thread = Thread.currentThread();
       _thread.setContextClassLoader(_classLoader);
       _thread.setName(getThreadName());
+
+      long expires = Alarm.getCurrentTime() + _idleTimeout;
       
       do {
         while (_isTask.getAndSet(false)) {
           runTask();
+          expires = Alarm.getCurrentTime() + _idleTimeout;
         }
 
         if (_isDestroyed)
           return;
 
         Thread.interrupted();
-        LockSupport.parkNanos(_idleTimeout * 1000000L);
-      } while (_isTask.get());
+        LockSupport.parkUntil(expires);
+      } while (_isTask.get() || Alarm.getCurrentTime() < expires);
     } finally {
       _thread = null;
       

@@ -538,6 +538,7 @@ public final class BTree {
       int parentLength = getLength(parentBuffer);
     
       leftBlock = _store.allocateIndexBlock();
+      // System.out.println("TREE-alloc1:" + Long.toHexString(leftBlock.getBlockId()));
       leftBlock.setFlushDirtyOnCommit(false);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
@@ -622,12 +623,14 @@ public final class BTree {
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
       leftBlock = _store.allocateIndexBlock();
+      // System.out.println("TREE-alloc2:" + Long.toHexString(leftBlock.getBlockId()));
       leftBlock.setFlushDirtyOnCommit(false);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long leftBlockId = leftBlock.getBlockId();
     
       rightBlock = _store.allocateIndexBlock();
+      // System.out.println("TREE-alloc3:" + Long.toHexString(rightBlock.getBlockId()));
       rightBlock.setFlushDirtyOnCommit(false);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
       
@@ -641,7 +644,7 @@ public final class BTree {
       //                    + " PIVOT=" + pivot);
 
       if (length <= 2 || _n < length || pivot < 1 || length <= pivot)
-	throw new IllegalStateException(length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
+	throw new IllegalStateException(Long.toHexString(parentBlock.getBlockId()) + ": " + length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
 
       int pivotOffset = HEADER_SIZE + pivot * _tupleSize;
       long pivotValue = getPointer(parentBuffer, pivotOffset);
@@ -792,6 +795,8 @@ public final class BTree {
         if (childId == FAIL)
           return true;
 
+        boolean isDeallocate = false;
+        
         Block childBlock = _store.readBlock(childId);
         try {
           boolean isJoin = false;
@@ -799,10 +804,16 @@ public final class BTree {
           isJoin = ! removeWrite(childBlock, keyBuffer, keyOffset, keyLength);
 
           if (isJoin && joinBlocks(block, childBlock)) {
-            childBlock.deallocate();
+            isDeallocate = true;
           }
         } finally {
           childBlock.free();
+        }
+
+        if (isDeallocate) {
+          // must be outside childBlock allocation
+          // System.out.println("FREE-index:" + Long.toHexString(childBlock.getBlockId()));
+          childBlock.deallocate();
         }
       }
       

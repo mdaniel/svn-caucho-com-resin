@@ -97,7 +97,6 @@ public class QueryContext {
       queryContext = new QueryContext();
 
     queryContext.clearParameters();
-
     queryContext._limit = -1;
 
     return queryContext;
@@ -507,7 +506,7 @@ public class QueryContext {
 
       if (bestBlock == null) {
       }
-      else if (_isWrite && i == 0) {
+      else if (_isWrite) {
 	bestBlock.getLock().lockReadAndWrite(_xa.getTimeout());
       }
       else {
@@ -524,8 +523,9 @@ public class QueryContext {
   public void unlock()
     throws SQLException
   {
-    if (! _isLocked)
+    if (! _isLocked) {
       return;
+    }
     
     _isLocked = false;
     
@@ -538,7 +538,7 @@ public class QueryContext {
 
       if (block == null) {
       }
-      else if (_isWrite && i == 0) {
+      else if (_isWrite) {
 	block.getLock().unlockReadAndWrite();
       }
       else {
@@ -555,10 +555,10 @@ public class QueryContext {
 
 	if (block == null) {
 	}
-	else if (_isWrite && i == 0) {
+	else if (_isWrite) {
 	  try {
 	    block.commit();
-	  } catch (IOException e) {
+	  } catch (Exception e) {
 	    log.log(Level.FINE, e.toString(), e);
 	  }
 	}

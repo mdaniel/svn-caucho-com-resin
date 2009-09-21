@@ -48,8 +48,7 @@ public class StatementImpl implements java.sql.Statement {
   protected final ConnectionImpl _conn;
 
   protected ResultSetImpl _rs;
-
-  protected QueryContext _queryContext;
+  private QueryContext _queryContext;
 
   private boolean _isClosed;
   
@@ -76,6 +75,11 @@ public class StatementImpl implements java.sql.Statement {
       _queryContext = QueryContext.allocate();
 
     return _queryContext;
+  }
+
+  protected void freeQueryContext(QueryContext context)
+  {
+    // QueryContext.free(context);
   }
 
   public void addBatch(String sql)

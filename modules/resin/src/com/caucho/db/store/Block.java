@@ -329,6 +329,9 @@ abstract public class Block implements SyncCacheListener {
       log.finest(this + " free (" + _useCount + ")");
 
     int useCount = _useCount.decrementAndGet();
+
+    if (useCount < 0)
+      Thread.dumpStack();
       
     //System.out.println(this + " FREE " + _useCount);
 

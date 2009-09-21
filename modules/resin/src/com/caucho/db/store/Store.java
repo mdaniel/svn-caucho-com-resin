@@ -164,7 +164,6 @@ public class Store {
   private Object _fileLock = new Object();
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
 
-  // Can't use semaphore greater than 1 because write/read not atomic
   private final Semaphore _rowFileSemaphore = new Semaphore(4);
 
   private Lock _rowLock;
@@ -427,6 +426,10 @@ public class Store {
       if (BLOCK_SIZE < len)
         len = BLOCK_SIZE;
 
+      /*
+      System.out.println("READ: " + Long.toHexString(allocGroup * ALLOC_GROUP_SIZE) + " " + allocGroup * ALLOC_GROUP_SIZE);
+      */
+      
       readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
                 _allocationTable, i, len);
     }
@@ -526,7 +529,11 @@ public class Store {
   public Block allocateRow()
     throws IOException
   {
-    return allocateBlock(ALLOC_ROW);
+    Block block = allocateBlock(ALLOC_ROW);
+
+    // System.out.println("ROW: " + Long.toHexString(block.getBlockId()));
+
+    return block;
   }
 
   /**
@@ -611,7 +618,7 @@ public class Store {
           break;
       }
 
-      if (_allocationTable.length <= ALLOC_BYTES_PER_BLOCK * blockIndex) {
+      if (blockIndex == _allocationTable.length / ALLOC_BYTES_PER_BLOCK) {
         // expand the allocation table
 
         byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
@@ -817,7 +824,7 @@ public class Store {
         length = dirtyMax - dirtyMin;
 
       writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
-                 _allocationTable, offset, length);
+                 _allocationTable, dirtyMin, length);
     }
   }
 
@@ -1786,6 +1793,12 @@ public class Store {
 
     try {
       RandomAccessStream os = wrapper.getFile();
+      /*
+      if (blockAddress > 2 * 0x2000000) {
+      System.out.println("BLOCK: " + Long.toHexString(blockAddress) + " " + offset);
+      Thread.dumpStack();
+      }
+      */
       os.write(blockAddress, buffer, offset, length);
 
       freeRowFile(wrapper);

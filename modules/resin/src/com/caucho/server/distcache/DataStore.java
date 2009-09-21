@@ -682,7 +682,7 @@ public class DataStore implements AlarmListener {
 
     void close()
     {
-      if (_freeConn == null || ! _freeConn.free(this)) {
+      if (_freeConn == null || ! _freeConn.freeCareful(this)) {
 	try {
 	  _conn.close();
 	} catch (SQLException e) {

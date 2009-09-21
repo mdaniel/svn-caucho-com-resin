@@ -127,7 +127,7 @@ public final class AverageProbe extends Probe implements AverageSample {
     synchronized (_lock) {
       long count = _count;
       long lastCount = _lastStdCount;
-      _lastStdCount = lastCount;
+      _lastStdCount = count;
     
       double sum = _sum;
       double lastSum = _lastStdSum;
