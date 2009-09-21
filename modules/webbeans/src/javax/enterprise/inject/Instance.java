@@ -30,6 +30,7 @@
 package javax.enterprise.inject;
 
 import java.lang.annotation.Annotation;
+import javax.inject.Provider;
 
 /**
  * Factory to create instances of a bean.
@@ -54,13 +55,8 @@ import java.lang.annotation.Annotation;
  *
  * @see javax.event.Event
  */
-public interface Instance<T> extends Iterable<T>
+public interface Instance<T> extends Provider<T>, Iterable<T>
 {
-  /**
-   * Returns an instance of the selected bean
-   */
-  public T get();
-
   /**
    * Restricts the instance given a set of bindings
    */

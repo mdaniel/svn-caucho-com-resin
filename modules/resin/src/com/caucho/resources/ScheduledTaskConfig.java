@@ -78,7 +78,7 @@ public class ScheduledTaskConfig extends BeanConfig
   {
     setBeanConfigClass(Runnable.class);
 
-    setScopeType(Dependent.class);
+    setScope(Dependent.class);
   }
 
   /**

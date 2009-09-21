@@ -49,12 +49,12 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.inject.Qualifier;
+import javax.inject.Scope;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
@@ -192,12 +192,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     ConfigContext env = (ConfigContext) cxt;
 
-    ScopeType scopeType = getScopeType().getAnnotation(ScopeType.class);
+    Scope scopeType = getScope().getAnnotation(Scope.class);
     
     // ioc/0520
     if (scopeType != null
-	&& scopeType.normal()
-	&& ! env.canInject(getScopeType())) {
+	// && scopeType.normal()
+	&& ! env.canInject(getScope())) {
       Object value = _scopeAdapter;
 
       if (value == null) {

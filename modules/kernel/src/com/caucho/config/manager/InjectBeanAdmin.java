@@ -134,9 +134,9 @@ public class InjectBeanAdmin extends AbstractManagedObject
   /**
    * Returns the @ScopeType attribute
    */
-  public String getScopeType()
+  public String getScope()
   {
-    Class annType = _bean.getScopeType();
+    Class annType = _bean.getScope();
 
     if (annType != null)
       return annType.getName();

@@ -35,11 +35,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.el.ELResolver;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observer;
 import javax.enterprise.inject.TypeLiteral;
+import javax.inject.Scope;
 
 /**
  * API for the Java Injection (JSR-299) BeanManager.
@@ -66,12 +66,12 @@ public interface BeanManager
   /**
    * Tests if an annotation is an enabled scope type
    */
-  public boolean isScopeType(Class<? extends Annotation> annotationType);
+  public boolean isScope(Class<? extends Annotation> annotationType);
 
   /**
    * Returns the scope definition for a scope type
    */
-  public ScopeType getScopeDefinition(Class<? extends Annotation> scopeType);
+  public Scope getScopeDefinition(Class<? extends Annotation> scope);
 
   /**
    * Tests if an annotation is an enabled binding type

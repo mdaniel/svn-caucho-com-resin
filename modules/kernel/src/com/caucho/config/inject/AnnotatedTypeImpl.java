@@ -40,13 +40,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.*;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.inject.Scope;
 
 /**
  * Abstract introspected view of a Bean
@@ -187,8 +187,8 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
 	continue;
       }
       
-      if (ann.annotationType().isAnnotationPresent(ScopeType.class)
-	  && hasMetaAnnotation(getAnnotations(), ScopeType.class)) {
+      if (ann.annotationType().isAnnotationPresent(Scope.class)
+	  && hasMetaAnnotation(getAnnotations(), Scope.class)) {
 	continue;
       }
 

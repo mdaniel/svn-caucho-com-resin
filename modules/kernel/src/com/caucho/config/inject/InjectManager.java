@@ -68,7 +68,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.Conversation;
@@ -104,6 +103,7 @@ import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.inject.Qualifier;
+import javax.inject.Scope;
 import javax.naming.*;
 
 /**
@@ -711,7 +711,7 @@ public class InjectManager
   /**
    * Tests if an annotation is an enabled scope type
    */
-  public boolean isScopeType(Class<? extends Annotation> annotationType)
+  public boolean isScope(Class<? extends Annotation> annotationType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -719,7 +719,7 @@ public class InjectManager
   /**
    * Returns the scope definition for a scope type
    */
-  public ScopeType getScopeDefinition(Class<? extends Annotation> scopeType)
+  public Scope getScopeDefinition(Class<? extends Annotation> scopeType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -1373,7 +1373,7 @@ public class InjectManager
     }
     else
     */
-    Class scopeType = bean.getScopeType();
+    Class scopeType = bean.getScope();
 
     if (Dependent.class.equals(scopeType)) {
       // server/4764

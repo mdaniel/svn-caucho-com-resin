@@ -48,7 +48,6 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Produces;
@@ -58,6 +57,7 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Qualifier;
+import javax.inject.Scope;
 import javax.interceptor.InterceptorQualifier;
 
 import org.w3c.dom.Node;
@@ -276,8 +276,8 @@ public class CustomBeanConfig {
       clearAnnotations(_annotatedType, InterceptorQualifier.class);
     }
 
-    if (ann.annotationType().isAnnotationPresent(ScopeType.class))
-      clearAnnotations(_annotatedType, ScopeType.class);
+    if (ann.annotationType().isAnnotationPresent(Scope.class))
+      clearAnnotations(_annotatedType, Scope.class);
 
     _annotatedType.addAnnotation(ann);
   }
@@ -331,9 +331,9 @@ public class CustomBeanConfig {
         if (_component.getDeploymentType() == null)
           _component.setDeploymentType(annType);
       }
-      else if (annType.isAnnotationPresent(ScopeType.class)) {
-        if (_component.getScopeType() == null)
-          _component.setScopeType(annType);
+      else if (annType.isAnnotationPresent(Scope.class)) {
+        if (_component.getScope() == null)
+          _component.setScope(annType);
       }
       else if (annType.isAnnotationPresent(Qualifier.class)) {
         _component.addBinding(ann);

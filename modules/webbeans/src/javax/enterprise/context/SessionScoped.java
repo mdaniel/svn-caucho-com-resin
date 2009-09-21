@@ -34,10 +34,12 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.inject.Scope;
+
 /**
  * The @SessionScoped represents the servlet session scope
  */
-@ScopeType(passivating=true)
+@Scope
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface SessionScoped {

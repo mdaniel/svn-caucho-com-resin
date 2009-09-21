@@ -52,6 +52,7 @@ import javax.enterprise.context.*;
 import javax.enterprise.context.spi.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.inject.*;
 
 /**
  * Configuration for the xml web bean component.
@@ -222,20 +223,20 @@ public class BeanConfig {
       } catch (ClassNotFoundException e) {
       }
 
-      setScopeType(cl);
+      setScope(cl);
     }
   }
 
-  public void setScopeType(Class cl)
+  public void setScope(Class cl)
   {
     if (cl == null)
-      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));
 
     if (! Annotation.class.isAssignableFrom(cl))
-      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));
 
-    if (! cl.isAnnotationPresent(ScopeType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+    if (! cl.isAnnotationPresent(Scope.class))
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));
 
     _scope = cl;
   }
@@ -597,7 +598,7 @@ public class BeanConfig {
   {
     if (_scope == null) {
       for (Annotation ann : _cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	if (ann.annotationType().isAnnotationPresent(Scope.class)) {
 	  if (_scope != null) {
 	    throw new ConfigException(L.l("{0}: multiple scope annotations are forbidden ({1} and {2}).",
 					  _cl.getName(),

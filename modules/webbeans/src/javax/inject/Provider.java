@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,19 +29,35 @@
 
 package javax.inject;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.Annotation;
 
 /**
- * The @Named annotation for web beans
+ * Factory to create instances of a bean.
+ *
+ * <h3>Example: injecting and using Instance</h3>
+ *
+ * <code><pre>
+ * package example;
+ *
+ * import javax.enterprise.inject.*;
+ * import javax.servlet.*;
+ *
+ * public class MyServlet extends GenericServlet {
+ *  {@link javax.enterprise.inject.Obtains @Obtains} {@literal @Instance}&lt;MyBean> _beanFactory;
+ *
+ *  public void service(ServletRequest req, ServletResponse res)
+ *  {
+ *    MyBean bean = _beanFactory.get();
+ *  }
+ * }
+ * </pre></code>
+ *
+ * @see javax.event.Event
  */
-
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface Named {
-  String value() default "";
+public interface Provider<T>
+{
+  /**
+   * Returns an instance of the selected bean
+   */
+  public T get();
 }

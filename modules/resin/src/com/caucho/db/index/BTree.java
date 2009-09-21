@@ -615,10 +615,14 @@ public final class BTree {
     Block rightBlock = null;
 
     try {
+      byte []parentBuffer = parentBlock.getBuffer();
+      int length = getLength(parentBuffer);
+
+      if (length == 1)
+        return;
+      
       parentBlock.setFlushDirtyOnCommit(false);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
-
-      byte []parentBuffer = parentBlock.getBuffer();
 
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
@@ -635,8 +639,6 @@ public final class BTree {
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long rightBlockId = rightBlock.getBlockId();
-
-      int length = getLength(parentBuffer);
 
       int pivot = (length - 1) / 2;
       

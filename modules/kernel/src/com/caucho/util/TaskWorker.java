@@ -74,7 +74,7 @@ abstract public class TaskWorker implements Runnable {
       return;
 
     if (! _isActive.getAndSet(true)) {
-      ThreadPool.getCurrent().schedule(this);
+      ThreadPool.getCurrent().schedulePriority(this);
     }
     
     if (! _isTask.getAndSet(true)) {

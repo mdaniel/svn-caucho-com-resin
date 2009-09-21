@@ -124,9 +124,9 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   /**
    * Returns the bean's scope type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
-    return _producesBean.getScopeType();
+    return _producesBean.getScope();
   }
 
   /**

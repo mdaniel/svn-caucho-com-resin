@@ -71,7 +71,7 @@ public interface Bean<T> extends Contextual<T> {
   /**
    * Returns the bean's scope type.
    */
-  public Class<? extends Annotation> getScopeType();
+  public Class<? extends Annotation> getScope();
 
   /**
    * Returns the stereotypes that the bean uses for priority

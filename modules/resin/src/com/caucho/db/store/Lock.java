@@ -238,15 +238,17 @@ public final class Lock {
     synchronized (_lock) {
       unparkNode = unlock();
       
-      addLock(- (WRITE|WRITE_LOCK));
+      lock = addLock(- (WRITE|WRITE_LOCK));
 
-      if (_lockCount.get() < WRITE && _lockHead != null) {
-        System.out.println("LOCK: " + Long.toHexString(_lockCount.get()) + " " + unparkNode + " " + _lockHead);
+      lock -= (WRITE|WRITE_LOCK);
+
+      if (lock < WRITE && _lockHead != null) {
+        System.out.println("LOCK: " + Long.toHexString(lock) + " " + unparkNode + " " + _lockHead);
         Thread.dumpStack();
       }
       
-      if (unparkNode == null && _lockCount.get() != 0) {
-        System.out.println("LOCK2: " + Long.toHexString(_lockCount.get()) + " " + unparkNode + " " + _lockHead);
+      if (unparkNode == null && lock != 0) {
+        System.out.println("LOCK2: " + Long.toHexString(lock) + " " + unparkNode + " " + _lockHead);
         Thread.dumpStack();
       }
     }

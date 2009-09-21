@@ -135,7 +135,7 @@ public class EventBeanImpl<T> implements Bean<T>
   /**
    * Returns the bean's scope type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     return Dependent.class;
   }

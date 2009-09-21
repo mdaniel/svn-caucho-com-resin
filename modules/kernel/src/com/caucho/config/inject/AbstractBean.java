@@ -55,7 +55,6 @@ import java.io.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.IfExists;
 import javax.enterprise.event.Observes;
@@ -185,7 +184,7 @@ abstract public class AbstractBean<T>
     return false;
   }
 
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     return Dependent.class;
   }
@@ -294,9 +293,9 @@ abstract public class AbstractBean<T>
       sb.append(getName());
     }
     
-    if (getScopeType() != null && getScopeType() != Dependent.class) {
+    if (getScope() != null && getScope() != Dependent.class) {
       sb.append(", @");
-      sb.append(getScopeType().getSimpleName());
+      sb.append(getScope().getSimpleName());
     }
 
     sb.append("]");

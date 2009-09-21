@@ -34,11 +34,12 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.inject.Scope;
 
 /**
  * The @ApplicationScoped represents the servlet application scope
  */
-@ScopeType
+@Scope
 @Documented  
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})

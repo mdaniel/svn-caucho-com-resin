@@ -55,7 +55,6 @@ import java.io.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.event.IfExists;
@@ -77,6 +76,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.stereotype.Stereotype;
 import javax.inject.Named;
 import javax.inject.Qualifier;
+import javax.inject.Scope;
 
 /**
  * Common bean introspection for Produces and ManagedBean.
@@ -113,7 +113,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   private ArrayList<Annotation> _bindings
     = new ArrayList<Annotation>();
 
-  private Class<? extends Annotation> _scopeType;
+  private Class<? extends Annotation> _scope;
 
   private ArrayList<Annotation> _stereotypes
     = new ArrayList<Annotation>();
@@ -252,9 +252,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns the scope
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
-    return _scopeType;
+    return _scope;
   }
 
   /**
@@ -350,14 +350,14 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   protected void introspectScope(Annotated annotated)
   {
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	if (_scopeType != null && _scopeType != ann.annotationType())
-	  throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  Java Injection components may only have a single @ScopeType.",
+      if (ann.annotationType().isAnnotationPresent(Scope.class)) {
+	if (_scope != null && _scope != ann.annotationType())
+	  throw new ConfigException(L.l("{0}: @Scope annotation @{1} conflicts with @{2}.  Java Injection components may only have a single @Scope.",
 					getTargetName(),
-					_scopeType.getName(),
+					_scope.getName(),
 					ann.annotationType().getName()));
 
-	_scopeType = ann.annotationType();
+	_scope = ann.annotationType();
       }
     }
   }
@@ -413,8 +413,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
 	Class annType = ann.annotationType();
 	  
-	if (_scopeType == null && annType.isAnnotationPresent(ScopeType.class))
-	  _scopeType = annType;
+	if (_scope == null && annType.isAnnotationPresent(Scope.class))
+	  _scope = annType;
 	  
 	if (annType.equals(Named.class) && _name == null) {
 	  Named named = (Named) ann;
@@ -438,8 +438,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     if (_bindings.size() == 0)
       _bindings.add(CurrentLiteral.CURRENT);
 
-    if (_scopeType == null)
-      _scopeType = Dependent.class;
+    if (_scope == null)
+      _scope = Dependent.class;
 
     if ("".equals(_name))
       _name = getDefaultName();
@@ -539,9 +539,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       sb.append(binding);
     }
 
-    if (_scopeType != null && _scopeType != Dependent.class) {
+    if (_scope != null && _scope != Dependent.class) {
       sb.append(", @");
-      sb.append(_scopeType.getSimpleName());
+      sb.append(_scope.getSimpleName());
     }
 
     sb.append("]");

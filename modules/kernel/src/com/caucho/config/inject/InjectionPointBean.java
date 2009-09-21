@@ -118,7 +118,7 @@ public class InjectionPointBean<T> implements Bean<T>
   /**
    * Returns the bean's scope type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

@@ -145,12 +145,12 @@ abstract public class AbstractSingletonBean extends BeanWrapper
   /**
    * Returns the bean's scope type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     if (_scopeType != null)
       return _scopeType;
     else
-      return getBean().getScopeType();
+      return getBean().getScope();
   }
 
   /**

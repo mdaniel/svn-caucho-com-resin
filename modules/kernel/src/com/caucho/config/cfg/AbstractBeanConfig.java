@@ -49,7 +49,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.ScopeType;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.stereotype.Stereotype;
@@ -194,7 +193,7 @@ abstract public class AbstractBeanConfig {
     else if ("conversation".equals(scope))
       add(new AnnotationLiteral<ConversationScoped>() {});
     else {
-      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));
     }
   }
 

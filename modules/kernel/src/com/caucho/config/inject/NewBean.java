@@ -92,7 +92,7 @@ public class NewBean extends InjectionTargetImpl
    * The scope for @New is dependent.
    */
   @Override
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     return Dependent.class;
   }

@@ -134,9 +134,9 @@ public class InterceptorBean<X> implements Interceptor<X>
   /**
    * Returns the bean's scope
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
-    return _bean.getScopeType();
+    return _bean.getScope();
   }
 
   /**

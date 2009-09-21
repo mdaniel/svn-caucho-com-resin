@@ -53,7 +53,7 @@ public class ObserverImpl implements Observer {
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private final InjectManager _webBeans;
+  private final InjectManager _inject;
   private final AbstractBean _bean;
 
   private final Method _method;
@@ -69,7 +69,7 @@ public class ObserverImpl implements Observer {
                       Method method,
                       int paramIndex)
   {
-    _webBeans = webBeans;
+    _inject = webBeans;
     _bean = bean;
     _method = method;
     _method.setAccessible(true);
@@ -131,7 +131,7 @@ public class ObserverImpl implements Observer {
         if (hasObserves(annList[i]))
           continue;
 
-        Set beans = _webBeans.getBeans(param[i], annList[i]);
+        Set beans = _inject.getBeans(param[i], annList[i]);
 
         if (beans == null || beans.size() == 0) {
           throw new ConfigException(loc
@@ -167,16 +167,16 @@ public class ObserverImpl implements Observer {
     Object obj = null;
 
     if (_ifExists) {
-      Context context = _webBeans.getContext(_bean.getScopeType());
+      Context context = _inject.getContext(_bean.getScope());
 
       if (context != null && context.isActive())
         obj = context.get(_bean);
     }
     else {
       // XXX: perf
-      CreationalContext env = _webBeans.createCreationalContext();
+      CreationalContext env = _inject.createCreationalContext();
 
-      obj = _webBeans.getReference(_bean, _bean.getBeanClass(), env);
+      obj = _inject.getReference(_bean, _bean.getBeanClass(), env);
     }
 
     try {
@@ -187,9 +187,9 @@ public class ObserverImpl implements Observer {
           Bean bean = _args[i];
 
           if (bean != null) {
-            CreationalContext env = _webBeans.createCreationalContext();
+            CreationalContext env = _inject.createCreationalContext();
 
-            args[i] = _webBeans.getReference(bean, bean.getBeanClass(), env);
+            args[i] = _inject.getReference(bean, bean.getBeanClass(), env);
           }
           else
             args[i] = event;

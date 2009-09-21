@@ -186,7 +186,7 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
     Class<?> type = bean.getBeanClass();
 
     if (_isIfExists) {
-      Class scopeType = bean.getScopeType();
+      Class scopeType = bean.getScope();
       Context context = _beanManager.getContext(scopeType);
 
       if (context != null)

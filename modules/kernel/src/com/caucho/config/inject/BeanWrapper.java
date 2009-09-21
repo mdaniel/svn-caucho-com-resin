@@ -115,9 +115,9 @@ public class BeanWrapper<T> extends AbstractBean<T>
   /**
    * Returns the bean's scope type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
-    return getBean().getScopeType();
+    return getBean().getScope();
   }
 
   /**

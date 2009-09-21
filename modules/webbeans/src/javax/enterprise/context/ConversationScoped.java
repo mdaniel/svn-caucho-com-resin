@@ -35,10 +35,12 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.inject.Scope;
+
 /**
  * The @ConversationScoped represents the JSF conversation scope
  */
-@ScopeType(passivating=true)
+@Scope
 @Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})

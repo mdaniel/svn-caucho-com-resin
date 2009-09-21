@@ -34,12 +34,12 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.context.ScopeType;
+import javax.inject.Scope;
 
 /**
  * The @EnvironmentScoped represents an instance for each Resin environment.
  */
-@ScopeType
+@Scope
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface EnvironmentScoped {

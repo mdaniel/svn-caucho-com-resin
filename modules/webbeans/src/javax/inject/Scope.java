@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.context;
+package javax.inject;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -41,7 +41,5 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RUNTIME)
 @Target(ANNOTATION_TYPE)
-public @interface ScopeType {
-  boolean normal() default true;
-  boolean passivating() default false;
+public @interface Scope {
 }
