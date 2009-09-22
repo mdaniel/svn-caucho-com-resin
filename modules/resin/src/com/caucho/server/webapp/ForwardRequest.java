@@ -223,23 +223,33 @@ public class ForwardRequest extends CauchoRequestWrapper {
   {
     switch (_forwardAttributeMap.get(name)) {
     case REQUEST_URI_CODE:
-      return getRequest().getRequestURI();
+      return unwrapRequest().getRequestURI();
       
     case CONTEXT_PATH_CODE:
-      return getRequest().getContextPath();
+      return unwrapRequest().getContextPath();
       
     case SERVLET_PATH_CODE:
-      return getRequest().getServletPath();
+      return unwrapRequest().getServletPath();
       
     case PATH_INFO_CODE:
-      return getRequest().getPathInfo();
+      return unwrapRequest().getPathInfo();
       
     case QUERY_STRING_CODE:
-      return getRequest().getQueryString();
+      return unwrapRequest().getQueryString();
       
     default:
       return super.getAttribute(name);
     }
+  }
+
+  public HttpServletRequest unwrapRequest() {
+    HttpServletRequest request = this.getRequest();
+
+    while (request instanceof ForwardRequest) {
+      request = ((ForwardRequest) request).getRequest();
+    }
+
+    return request;
   }
 
   //
