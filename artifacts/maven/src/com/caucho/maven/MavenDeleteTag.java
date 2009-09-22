@@ -37,6 +37,7 @@ import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -58,6 +59,30 @@ public class MavenDeleteTag extends AbstractDeployMojo
   protected String getMojoName()
   {
     return "resin-delete-tag";
+  }
+
+  @Override
+  protected void processSystemProperties()
+    throws MojoExecutionException
+  {
+    super.processSystemProperties();
+
+    Properties properties = System.getProperties();
+
+    String tag = properties.getProperty("resin.tag");
+
+    if (tag != null)
+      _tag = tag;
+  }
+
+  @Override
+  protected void printParameters()
+  {
+    super.printParameters();
+    
+    Log log = getLog();
+
+    log.debug("  tag = " + _tag);
   }
 
   @Override
@@ -84,9 +109,9 @@ public class MavenDeleteTag extends AbstractDeployMojo
     if (tag == null)
       tag = buildVersionedWarTag();
 
-    if (client.removeTag(tag, getCommitAttributes()))
-      log.info("Deleted tag " + tag);
-    else
+    log.info("Deleting tag " + tag);
+
+    if (! client.removeTag(tag, getCommitAttributes()))
       log.warn("Failed to delete tag " + tag);
   }
 }

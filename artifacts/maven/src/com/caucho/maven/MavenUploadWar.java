@@ -37,6 +37,7 @@ import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -99,6 +100,45 @@ public class MavenUploadWar extends AbstractDeployMojo
   protected String getMojoName()
   {
     return "resin-upload-war";
+  }
+
+  @Override
+  protected void processSystemProperties()
+    throws MojoExecutionException
+  {
+    super.processSystemProperties();
+
+    Properties properties = System.getProperties();
+    String archive = properties.getProperty("resin.archive");
+    String writeHead = properties.getProperty("resin.writeHead");
+    String warFile = properties.getProperty("resin.warFile");
+
+    if (archive != null)
+      _archive = archive;
+
+    if (writeHead != null) {
+      if ("true".equalsIgnoreCase(writeHead))
+        _writeHead = true;
+      else if ("false".equalsIgnoreCase(writeHead))
+        _writeHead = false;
+      else
+        throw new MojoExecutionException("resin.writeHead must be a either 'true' or 'false'");
+    }
+
+    if (warFile != null)
+      setWarFile(warFile);
+  }
+
+  @Override
+  protected void printParameters()
+  {
+    super.printParameters();
+    
+    Log log = getLog();
+
+    log.debug("  warFile = " + _warFile);
+    log.debug("  archive = " + _archive);
+    log.debug("  writeHead = " + _writeHead);
   }
 
   @Override

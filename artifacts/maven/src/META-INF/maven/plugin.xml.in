@@ -110,37 +110,37 @@
         <parameter>
           <name>port</name>
           <type>int</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>server</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>contextRoot</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>warFile</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>user</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>password</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
@@ -205,35 +205,35 @@
         <parameter>
           <name>port</name>
           <type>int</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>server</name>
           <type>java.lang.String</type>
-          <required>true</required>
-          <editable>true</editable>
-        </parameter>
-        <parameter>
-          <name>contextRoot</name>
-          <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>user</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>password</name>
           <type>java.lang.String</type>
-          <required>true</required>
+          <required>false</required>
           <editable>true</editable>
         </parameter>
         <parameter>
           <name>commitMessage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>contextRoot</name>
           <type>java.lang.String</type>
           <required>false</required>
           <editable>true</editable>
@@ -293,16 +293,158 @@
           <editable>true</editable>
         </parameter>
       </parameters>
-
       <configuration>
-        <sourceContextRoot implementation="java.lang.String">${sourceContextRoot}</sourceContextRoot>
-        <contextRoot implementation="java.lang.String">${contextRoot}</contextRoot>
+        <contextRoot implementation="java.lang.String">/${project.build.finalName}</contextRoot>
+      </configuration>
+    </mojo>
 
-        <sourceStage implementation="java.lang.String">${sourceStage}</sourceStage>
-        <stage implementation="java.lang.String">${stage}</stage>
+    <mojo>
+      <goal>delete-tag</goal>
+      <description>Deletes a tag within Resin instance</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>package</executePhase>
+      <implementation>com.caucho.maven.MavenDeleteTag</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+          <name>port</name>
+          <type>int</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>server</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>contextRoot</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>version</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>stage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>virtualHost</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>tag</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+      </parameters>
+      <configuration>
+        <contextRoot implementation="java.lang.String">/${project.build.finalName}</contextRoot>
+      </configuration>
+    </mojo>
 
-        <sourceVirtualHost implementation="java.lang.String">${sourceVirtualHost}</sourceVirtualHost>
-        <virtualHost implementation="java.lang.String">${virtualHost}</virtualHost>
+    <mojo>
+      <goal>query-tags</goal>
+      <description>Queries tags within Resin instance</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>package</executePhase>
+      <implementation>com.caucho.maven.MavenQueryTags</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+          <name>port</name>
+          <type>int</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>server</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>user</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>password</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>contextRoot</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>version</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>stage</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>virtualHost</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+        <parameter>
+          <name>pattern</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+          <editable>true</editable>
+        </parameter>
+      </parameters>
+      <configuration>
+        <contextRoot implementation="java.lang.String">/${project.build.finalName}</contextRoot>
       </configuration>
     </mojo>
  

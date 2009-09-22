@@ -38,6 +38,7 @@ import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -75,6 +76,30 @@ public class MavenQueryTags extends AbstractDeployMojo
   protected String getMojoName()
   {
     return "resin-query-tags";
+  }
+
+  @Override
+  protected void processSystemProperties()
+    throws MojoExecutionException
+  {
+    super.processSystemProperties();
+
+    Properties properties = System.getProperties();
+
+    String pattern = properties.getProperty("resin.pattern");
+
+    if (pattern != null)
+      _pattern = pattern;
+  }
+
+  @Override
+  protected void printParameters()
+  {
+    super.printParameters();
+    
+    Log log = getLog();
+
+    log.debug("  pattern = " + _pattern);
   }
 
   @Override

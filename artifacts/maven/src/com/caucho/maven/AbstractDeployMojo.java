@@ -37,9 +37,11 @@ import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 /**
  * The MavenDeploy
@@ -86,34 +88,6 @@ abstract public class AbstractDeployMojo extends AbstractMojo
   }
 
   /**
-   * Sets the stage in which to deploy the webapp (defaults to default)
-   * @parameter
-   */
-  public void setStage(String stage)
-  {
-    _stage = stage;
-  }
-
-  public String getStage()
-  {
-    return _stage;
-  }
-
-  /**
-   * Sets the virtual host to which to deploy the webapp (defaults to default)
-   * @parameter
-   */
-  public void setVirtualHost(String virtualHost)
-  {
-    _virtualHost = virtualHost;
-  }
-
-  public String getVirtualHost()
-  {
-    return _virtualHost;
-  }
-
-  /**
    * Sets the user name for the deployment service
    * @parameter
    */
@@ -125,20 +99,6 @@ abstract public class AbstractDeployMojo extends AbstractMojo
   public String getUser()
   {
     return _user;
-  }
-
-  /**
-   * Sets the context path of the webapp (defaults to /${finalName})
-   * @parameter
-   */
-  public void setContextRoot(String contextRoot)
-  {
-    _contextRoot = contextRoot;
-  }
-
-  public String getContextRoot()
-  {
-    return _contextRoot;
   }
 
   /**
@@ -167,6 +127,48 @@ abstract public class AbstractDeployMojo extends AbstractMojo
   public String getCommitMessage()
   {
     return _message;
+  }
+
+  /**
+   * Sets the stage in which to deploy the webapp (defaults to default)
+   * @parameter
+   */
+  public void setStage(String stage)
+  {
+    _stage = stage;
+  }
+
+  public String getStage()
+  {
+    return _stage;
+  }
+
+  /**
+   * Sets the virtual host to which to deploy the webapp (defaults to default)
+   * @parameter
+   */
+  public void setVirtualHost(String virtualHost)
+  {
+    _virtualHost = virtualHost;
+  }
+
+  public String getVirtualHost()
+  {
+    return _virtualHost;
+  }
+
+  /**
+   * Sets the context path of the webapp (defaults to /${finalName})
+   * @parameter
+   */
+  public void setContextRoot(String contextRoot)
+  {
+    _contextRoot = contextRoot;
+  }
+
+  public String getContextRoot()
+  {
+    return _contextRoot;
   }
 
   /**
@@ -228,6 +230,70 @@ abstract public class AbstractDeployMojo extends AbstractMojo
     return attributes;
   }
 
+  /**
+    * Set parameter values with system properties to support 
+    * command line overrides.
+   **/
+  protected void processSystemProperties()
+    throws MojoExecutionException
+  {
+    Properties properties = System.getProperties();
+    String server = properties.getProperty("resin.server");
+    String port = properties.getProperty("resin.port");
+
+    String user = properties.getProperty("resin.user");
+    String password = properties.getProperty("resin.password");
+    String message = properties.getProperty("resin.commitMessage");
+
+    String stage = properties.getProperty("resin.stage");
+    String virtualHost = properties.getProperty("resin.virtualHost");
+    String contextRoot = properties.getProperty("resin.contextRoot");
+    String version = properties.getProperty("resin.version");
+
+    if (server != null) 
+      _server = server;
+    
+    if (port != null)
+      _port = Integer.parseInt(port);
+
+    if (user != null)
+      _user = user;
+
+    if (password != null)
+      _password = password;
+
+    if (message != null)
+      _message = message;
+
+    if (stage != null)
+      _stage = stage;
+
+    if (virtualHost != null)
+      _virtualHost = virtualHost;
+
+    if (contextRoot != null)
+      _contextRoot = contextRoot;
+
+    if (version != null)
+      _version = version;
+  }
+
+  protected void printParameters()
+  {
+    Log log = getLog();
+    
+    log.debug(getMojoName() + " parameters");
+    log.debug("  server = " + _server);
+    log.debug("  port = " + _port);
+    log.debug("  user = " + _user);
+    log.debug("  password = " + _password);
+    log.debug("  commitMessage = " + _message);
+    log.debug("  stage = " + _stage);
+    log.debug("  virtualHost = " + _virtualHost);
+    log.debug("  contextRoot = " + _contextRoot);
+    log.debug("  version = " + _version);
+  }
+
   protected abstract void doTask(WebAppDeployClient client)
     throws MojoExecutionException;
 
@@ -238,6 +304,11 @@ abstract public class AbstractDeployMojo extends AbstractMojo
   public void execute() 
     throws MojoExecutionException
   {
+    processSystemProperties();
+
+    if (getLog().isDebugEnabled())
+      printParameters();
+
     validate();
 
     doTask(new WebAppDeployClient(_server, _port, _user, _password));

@@ -37,6 +37,7 @@ import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -116,6 +117,60 @@ public class MavenCopyTag extends AbstractDeployMojo
   }
 
   @Override
+  protected void processSystemProperties()
+    throws MojoExecutionException
+  {
+    super.processSystemProperties();
+
+    Properties properties = System.getProperties();
+
+    String sourceStage = 
+      properties.getProperty("resin.sourceStage");
+    String sourceVirtualHost = 
+      properties.getProperty("resin.sourceVirtualHost");
+    String sourceContextRoot = 
+      properties.getProperty("resin.sourceContextRoot");
+    String sourceVersion = 
+      properties.getProperty("resin.sourceVersion");
+
+    String tag = properties.getProperty("resin.tag");
+    String sourceTag = properties.getProperty("resin.sourceTag");
+
+    if (sourceStage != null)
+      _sourceStage = sourceStage;
+
+    if (sourceVirtualHost != null)
+      _sourceVirtualHost = sourceVirtualHost;
+
+    if (sourceContextRoot != null)
+      _sourceContextRoot = sourceContextRoot;
+
+    if (sourceVersion != null)
+      _sourceVersion = sourceVersion;
+
+    if (tag != null)
+      _tag = tag;
+
+    if (sourceTag != null) 
+      _sourceTag = sourceTag;
+  }
+
+  @Override
+  protected void printParameters()
+  {
+    super.printParameters();
+    
+    Log log = getLog();
+
+    log.debug("  sourceStage = " + _sourceStage);
+    log.debug("  sourceVirtualHost = " + _sourceVirtualHost);
+    log.debug("  sourceContextRoot = " + _sourceContextRoot);
+    log.debug("  sourceVersion = " + _sourceVersion);
+    log.debug("  tag = " + _tag);
+    log.debug("  sourceTag = " + _sourceTag);
+  }
+
+  @Override
   protected void validate()
     throws MojoExecutionException 
   {
@@ -150,11 +205,11 @@ public class MavenCopyTag extends AbstractDeployMojo
                                                _sourceVersion);
     }
 
+    log.info("Copying " + sourceTag + " to " + tag);
+
     boolean result = client.copyTag(tag, sourceTag, getCommitAttributes());
 
-    if (result)
-      log.info("Copied " + sourceTag + " to " + tag);
-    else
+    if (! result)
       log.warn("Failed to copy " + sourceTag + " to " + tag);
   }
 }
