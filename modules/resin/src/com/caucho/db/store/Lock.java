@@ -59,12 +59,16 @@ public final class Lock {
   private final String _id;
 
   private final Object _lock = new Object();
+  private final Object _testLock = new Object();
   
   private final AtomicLong _lockCount = new AtomicLong();
   private final AtomicLong _activeLockCount = new AtomicLong();
   
   private LockNode _lockHead;
   private LockNode _lockTail;
+
+  private Thread _writeLock;
+  private IllegalStateException _writeExn;
   
   public Lock(String id)
   {
@@ -93,23 +97,23 @@ public final class Lock {
 
     long lock;
 
-    while (true) {
-      lock = _lockCount.get();
-      
-      if (lock < WRITE) {
-        if (_lockCount.compareAndSet(lock, lock + (READ|READ_LOCK)))
-          return;
-      }
-      else if (_lockCount.compareAndSet(lock, lock + READ))
-        break;
+    while ((lock = _lockCount.get()) < WRITE) {
+      if (_lockCount.compareAndSet(lock, lock + (READ|READ_LOCK)))
+        return;
     }
 
     LockNode node = new LockNode(true);
     
     synchronized (_lock) {
-      while ((lock = _lockCount.get()) < WRITE) {
-        if (_lockCount.compareAndSet(lock, lock + READ_LOCK))
-          return;
+      while (true) {
+        lock = _lockCount.get();
+        
+        if (lock < WRITE) {
+          if (_lockCount.compareAndSet(lock, lock + (READ|READ_LOCK)))
+            return;
+        }
+        else if (_lockCount.compareAndSet(lock, lock + READ))
+          break;
       }
 
       //System.out.println("QR: " + this + " " + Long.toHexString(lock) + " " + _activeLockCount);
@@ -181,8 +185,14 @@ public final class Lock {
     long lock;
 
     while (_lockCount.get() == 0) {
-      if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK)))
+      if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK))) {
+        if (_writeLock != null)
+          Thread.dumpStack();
+        _writeLock = Thread.currentThread();
+        _writeExn = new IllegalStateException("alloc");
+        _writeExn.fillInStackTrace();
         return;
+      }
     }
 
     LockNode node = new LockNode(false);
@@ -193,8 +203,14 @@ public final class Lock {
         lock = _lockCount.get();
       
         if (lock == 0) {
-          if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK)))
+          if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK))) {
+        if (_writeLock != null)
+          Thread.dumpStack();
+            _writeLock = Thread.currentThread();
+        _writeExn = new IllegalStateException("alloc");
+        _writeExn.fillInStackTrace();
             return;
+          }
         }
         else if (_lockCount.compareAndSet(lock, lock + WRITE))
           break;
@@ -213,6 +229,12 @@ public final class Lock {
 
       addLock(WRITE|WRITE_LOCK);
     }
+
+    if (_writeLock != null)
+      Thread.dumpStack();
+    _writeLock = Thread.currentThread();
+        _writeExn = new IllegalStateException("alloc");
+        _writeExn.fillInStackTrace();
   }
 
   /**
@@ -221,6 +243,14 @@ public final class Lock {
   public void unlockReadAndWrite()
     throws SQLException
   {
+      if (_writeLock != Thread.currentThread()) {
+        System.out.println("MISTMATCH: " + _writeLock + " " + Thread.currentThread());
+        if (_writeExn != null)
+          _writeExn.printStackTrace();
+        Thread.dumpStack();
+      }
+      _writeLock = null;
+      
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + " unlockReadAndWrite "
                  + "0x" + Long.toHexString(_lockCount.get()));

@@ -114,7 +114,7 @@ class UpdateQuery extends Query {
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows
       // throws an exception
-      context.unlock();
+      context.close();
       
       freeRows(rows, rows.length);
     }

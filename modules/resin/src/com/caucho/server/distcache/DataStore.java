@@ -371,6 +371,7 @@ public class DataStore implements AlarmListener {
 
       return true;
     } catch (SQLException e) {
+      e.printStackTrace();
       log.finer(this + " " + e.toString());
       log.log(Level.FINEST, e.toString(), e);
     } finally {
@@ -407,7 +408,15 @@ public class DataStore implements AlarmListener {
         log.finer(this + " updateExpires " + id);
 
       return count > 0;
+      /*
+    } catch (LockTimeoutException e) {
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, e.toString(), e);
+      else
+        log.info(e.toString());
+      */
     } catch (SQLException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)

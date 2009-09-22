@@ -81,6 +81,8 @@ public class QueryContext {
 
   private byte []_buffer = new byte[256];
 
+  private Thread _thread;
+
   private QueryContext()
   {
     _tempGroupItem = GroupItem.allocate(new boolean[8]);
@@ -119,6 +121,11 @@ public class QueryContext {
 		   TableIterator []tableIterators,
 		   boolean isReadOnly)
   {
+    if (_isLocked)
+      throw new IllegalStateException();
+    
+    _thread = Thread.currentThread();
+    
     _xa = xa;
     _isWrite = ! isReadOnly;
     _tableIterators = tableIterators;
@@ -131,8 +138,6 @@ public class QueryContext {
       for (int i = _blockLockLength - 1; i >= 0; i--)
 	_blockLocks[i] = null;
     }
-    
-    _isLocked = false;
 
     _rowUpdateCount = 0;
     _groupItem = _tempGroupItem;
@@ -471,6 +476,9 @@ public class QueryContext {
     }
     _isLocked = true;
     
+    if (_thread != Thread.currentThread())
+      throw new IllegalStateException();
+    
     int len = _tableIterators.length;
 
     for (int i = 0; i < len; i++) {
@@ -502,8 +510,6 @@ public class QueryContext {
 	bestBlock = block;
       }
 
-      _blockLocks[i] = bestBlock;
-
       if (bestBlock == null) {
       }
       else if (_isWrite) {
@@ -512,6 +518,9 @@ public class QueryContext {
       else {
 	bestBlock.getLock().lockRead(_xa.getTimeout());
       }
+      // assignment must be after obtaining lock because the unlock
+      // requires a lock
+      _blockLocks[i] = bestBlock;
     }
   }
 
@@ -528,6 +537,9 @@ public class QueryContext {
     }
     
     _isLocked = false;
+    
+    if (_thread != Thread.currentThread())
+      throw new IllegalStateException();
     
     int len = _blockLocks.length;
 
@@ -566,13 +578,33 @@ public class QueryContext {
     }
   }
 
+  public void close()
+    throws SQLException
+  {
+    unlock();
+    
+    if (_thread != Thread.currentThread())
+      throw new IllegalStateException();
+
+    _thread = null;
+  }
+
   /**
    * Returns a new query context.
    */
   public static void free(QueryContext queryContext)
   {
+    if (queryContext._isLocked)
+      throw new IllegalStateException();
+    
     queryContext._groupMap = null;
+    
+    if (queryContext._thread != null
+        && queryContext._thread != Thread.currentThread())
+      throw new IllegalStateException();
 
-    _freeList.free(queryContext);
+    queryContext._thread = null;
+
+    _freeList.freeCareful(queryContext);
   }
 }

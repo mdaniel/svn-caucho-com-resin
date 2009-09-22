@@ -64,10 +64,11 @@ class DeleteQuery extends Query {
   {
     int count = 0;
     TableIterator []rows = new TableIterator[1];
-    rows[0] = _table.createTableIterator();
-    context.init(xa, rows, isReadOnly());
 
     try {
+      rows[0] = _table.createTableIterator();
+      context.init(xa, rows, isReadOnly());
+      
       if (! start(rows, rows.length, context, xa)) {
 	return;
       }
@@ -80,7 +81,7 @@ class DeleteQuery extends Query {
     } finally {
       // autoCommitWrite must be before freeRows in case freeRows
       // throws an exception
-      context.unlock();
+      context.close();
       
       freeRows(rows, rows.length);
     }

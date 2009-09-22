@@ -172,7 +172,7 @@ public class SelectQuery extends Query {
     } finally {
       // autoCommitRead must be before freeRows in case freeRows
       // throws an exception
-      context.unlock();
+      context.close();
       
       if (rows != null)
 	freeRows(rows, rows.length);
