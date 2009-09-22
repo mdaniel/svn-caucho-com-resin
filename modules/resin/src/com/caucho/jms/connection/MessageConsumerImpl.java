@@ -394,8 +394,7 @@ public class MessageConsumerImpl implements MessageConsumer
     if (callback != null) {
       boolean isAutoAcknowledge = _isAutoAcknowledge;
       
-      EntryCallback _entryCallback
-	= _queue.addMessageCallback(callback, isAutoAcknowledge);
+      _entryCallback = _queue.addMessageCallback(callback, isAutoAcknowledge);
     }
   }
 

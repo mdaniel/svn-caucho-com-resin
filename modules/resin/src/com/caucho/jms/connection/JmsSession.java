@@ -720,11 +720,10 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       throw new IllegalStateException(L.l("commit() can only be called on a transacted session."));
 
     _isXA = false;
-
-    ArrayList<TransactedMessage> messages = _transactedMessages;
+    
+    ArrayList<TransactedMessage> messages = _transactedMessages;    
     if (messages == null || messages.size() == 0) {
-      throw new IllegalStateException(L.l("commit() can only be called only when there are transactions to be committed."));
-      //return;
+      return;
     }
     
     try {
@@ -804,7 +803,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   public void rollbackImpl()
     throws JMSException
-  {
+  {    
     if (! _isTransacted && ! _isXA)
       throw new IllegalStateException(L.l("rollback() can only be called on a transacted session."));
 
