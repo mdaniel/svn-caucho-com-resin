@@ -15,7 +15,7 @@ else {
   $g_page = $_GET['q'];
 
   if (! $g_pages[$g_page]) {
-    $g_page = "summary";
+    $g_page = "index";
   }
 
   include_once($g_pages[$g_page]);

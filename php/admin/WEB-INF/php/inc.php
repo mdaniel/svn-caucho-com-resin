@@ -650,14 +650,15 @@ function display_pages()
   $names = array_keys($g_pages);
   sort($names);
 
-  $names = array_diff($names, array('summary'));
+  $names = array_diff($names, array('index', 'summary'));
   array_unshift($names, 'summary');
+  array_unshift($names, 'index');
 
   foreach ($names as $name) {
     if ($g_page == $name) {
-      ?><li class="selected"><?= $name ?></li><?
+      echo "<li class='selected'>$name</li>";
     } else {
-      echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>\n";
+      echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>";
     }
   }
 }

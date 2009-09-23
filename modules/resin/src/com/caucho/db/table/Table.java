@@ -480,10 +480,8 @@ public class Table extends Store {
             for (int i = 0; i < columns.length; i++) {
               Column column = columns[i];
 
-              /*
               if (column.getIndex() != null)
                 System.out.println(Long.toHexString(iter.getBlock().getBlockId()) + ":" + Long.toHexString(rowAddress) + ":" + Long.toHexString(rowOffset) + ": " + column.getIndexKeyCompare().toString(blockBuffer, rowOffset + column.getColumnOffset(), column.getLength()));
-              */
 
               column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
             }

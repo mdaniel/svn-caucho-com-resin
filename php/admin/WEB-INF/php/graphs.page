@@ -295,8 +295,11 @@ echo "<br>";
 echo "<form method='post' action='" . $g_next_url . "'>"
 echo "<input type='hidden' name='submit' value='true'>\n";
 
-echo "Defined Name: ";
+echo "<input type='submit' value='Create Graph'><br>\n";
+
+echo "Graph Name: ";
 echo "<input name='name' size='40'><br>";
+
 echo "Servers: ";
 ksort($servers);
 foreach ($servers as $server) {
@@ -350,7 +353,6 @@ foreach ($sections as $section => $names) {
   echo "</ul>";
 }
 echo "</ul>"
-echo "<input type='submit' value='Create Graph'>\n";
 
 echo "</form>\n";
 
@@ -445,9 +447,9 @@ $colors[] = "#906000"; // brown
 $colors[] = "#ff9030"; // orange
 $colors[] = "#3030ff"; // blue
 $colors[] = "#000000"; // black
-$colors[] = "#30b030"; // green
+$colors[] = "#50b000"; // green
 $colors[] = "#d030d0"; // magenta
-$colors[] = "#30d0d0"; // cyan
+$colors[] = "#008080"; // cyan
 $colors[] = "#b03060"; // rose
 $colors[] = "#e090ff"; // indigo
 $colors[] = "#c0c0c0"; // gray

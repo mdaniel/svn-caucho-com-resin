@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
@@ -181,6 +182,9 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
                      config.getValueSerializer());
 
     if (value == null) {
+      // Recovery from dropped or corrupted data
+      log.warning("Missing or corrupted data for " + mnodeValue);
+      remove(entry, config);
     }
 
     mnodeValue.setObjectValue(value);
@@ -210,7 +214,15 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     if (valueHash == null || valueHash == HashManager.NULL)
       return false;
 
-    return readData(valueHash, config.getFlags(), os);
+    boolean isData = readData(valueHash, config.getFlags(), os);
+    
+    if (! isData) {
+      log.warning("Missing or corrupted data for " + mnodeValue);
+      // Recovery from dropped or corrupted data
+      remove(entry, config);
+    }
+
+    return isData;
   }
 
   public MnodeValue getMnodeValue(E entry,
@@ -988,12 +1000,12 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       WriteStream out = Vfs.openWrite(os);
 
       if (! _dataStore.load(valueKey, out)) {
-        System.out.println("MISSING_DATA: " + valueKey);
-        
         requestClusterData(valueKey, flags);
 
         if (! _dataStore.load(valueKey, out)) {
           out.close();
+          System.out.println("MISSING_DATA: " + valueKey);
+        
           return null;
         }
       }
@@ -1014,7 +1026,9 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
         is.close();
       }
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      log.log(Level.WARNING, e.toString(), e);
+      
+      return null;
     } finally {
       if (os != null)
         os.close();

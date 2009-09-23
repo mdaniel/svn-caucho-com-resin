@@ -75,7 +75,7 @@ public class DataStore implements AlarmListener {
 
   // remove unused data after 1 hour
   //private long _expireTimeout = 3600L * 1000L;
-  private long _expireTimeout = 2 * 60L * 1000L;
+  private long _expireTimeout = 10 * 60L * 1000L;
 
   private DataSource _dataSource;
     
@@ -458,9 +458,11 @@ public class DataStore implements AlarmListener {
 
       System.out.println("EXPIRE: " + count);
     } catch (SQLException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
-      conn.close();
+      if (conn != null)
+        conn.close();
     }
   }
 
@@ -488,12 +490,12 @@ public class DataStore implements AlarmListener {
         isData = false;
         
         pstmt.setLong(1, resinOid);
-        pstmt.setFetchSize(256);
+        // pstmt.setFetchSize(8192);
 
         ResultSet rs = pstmt.executeQuery();
 
         while (rs.next()) {
-          isData = true;
+          // isData = true;
 
           byte []key = rs.getBytes(1);
           resinOid = rs.getLong(2);
