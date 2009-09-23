@@ -29,6 +29,7 @@
 package com.caucho.config.timer;
 
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 import javax.ejb.Schedule;
 import javax.ejb.Schedules;
@@ -90,17 +91,23 @@ public class ScheduleIntrospector {
         schedule.minute(), schedule.hour(), schedule.dayOfWeek(), schedule
             .dayOfMonth(), schedule.month(), schedule.year());
 
-    Trigger trigger = new CronTrigger(cronExpression, -1, -1);
+    TimeZone timezone = null;
+
+    if (!schedule.timezone().trim().equals("")) {
+      timezone = TimeZone.getTimeZone(schedule.timezone());
+    }
+
+    Trigger trigger = new CronTrigger(cronExpression, -1, -1, timezone);
     EjbTimer ejbTimer = new EjbTimer();
 
-    TimeoutInvoker timeout = new MethodTimeoutInvoker(caller, method
+    TimeoutInvoker timeoutnvoker = new MethodTimeoutInvoker(caller, method
         .getJavaMember());
 
-    TimerTask timer = new TimerTask(timeout, ejbTimer, cronExpression, trigger,
-        schedule.info());
+    TimerTask timerTask = new TimerTask(timeoutnvoker, ejbTimer,
+        cronExpression, trigger, schedule.info());
 
-    ejbTimer.setScheduledTask(timer);
+    ejbTimer.setScheduledTask(timerTask);
 
-    timers.add(timer);
+    timers.add(timerTask);
   }
 }

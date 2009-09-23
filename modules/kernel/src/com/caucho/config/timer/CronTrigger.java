@@ -30,6 +30,7 @@ package com.caucho.config.timer;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.caucho.config.ConfigException;
@@ -48,33 +49,36 @@ import com.caucho.util.QDate;
 public class CronTrigger implements Trigger {
   private static final L10N L = new L10N(CronTrigger.class);
   // Order of search is important in the token maps.
-  private static final String[][] MONTH_TOKEN_MAP = { { "january", "1" },
+  private static final String [][] MONTH_TOKEN_MAP = { { "january", "1" },
       { "february", "2" }, { "march", "3" }, { "april", "4" }, { "may", "5" },
       { "june", "6" }, { "july", "7" }, { "august", "8" },
       { "september", "9" }, { "october", "10" }, { "november", "11" },
       { "december", "12" }, { "jan", "1" }, { "feb", "2" }, { "mar", "3" },
       { "apr", "4" }, { "jun", "6" }, { "jul", "7" }, { "aug", "8" },
       { "sep", "9" }, { "oct", "10" }, { "nov", "11" }, { "dec", "12" } };
-  private static final String[][] DAY_OF_WEEK_TOKEN_MAP = { { "sunday", "0" },
+  private static final String [][] DAY_OF_WEEK_TOKEN_MAP = { { "sunday", "0" },
       { "monday", "1" }, { "tuesday", "2" }, { "wednesday", "3" },
       { "thursday", "4" }, { "friday", "5" }, { "saturday", "6" },
       { "sun", "0" }, { "mon", "1" }, { "tue", "2" }, { "wed", "3" },
       { "thu", "4" }, { "fri", "5" }, { "sat", "6" } };
-  private static final String[][] RELATIVE_DAY_OF_WEEK_TOKEN_MAP = {
+  private static final String [][] RELATIVE_DAY_OF_WEEK_TOKEN_MAP = {
       { "last", "-0" }, { "1st", "1" }, { "2nd", "2" }, { "3rd", "3" },
       { "4th", "4" }, { "5th", "5" } };
 
   private AtomicReference<QDate> _localCalendar = new AtomicReference<QDate>();
 
-  private boolean[] _seconds;
-  private boolean[] _minutes;
-  private boolean[] _hours;
+  private boolean [] _seconds;
+  private boolean [] _minutes;
+  private boolean [] _hours;
   private boolean _isDaysFilterRelative;
-  private boolean[] _days;
+  private boolean [] _days;
   private String _daysFilter;
-  private boolean[] _months;
-  private boolean[] _daysOfWeek;
+  private boolean [] _months;
+  private boolean [] _daysOfWeek;
   private YearsFilter _yearsFilter;
+
+  private TimeZone _timezone = TimeZone.getTimeZone("GMT");
+
   private long _start = -1;
   private long _end = -1;
 
@@ -89,9 +93,10 @@ public class CronTrigger implements Trigger {
    * @param end
    *          The date the trigger should end firing, in milliseconds. -1
    *          indicates that no end date should be enforced.
+   * @param string
    */
   public CronTrigger(final CronExpression cronExpression, final long start,
-      final long end)
+      final long end, TimeZone timezone)
   {
     if (cronExpression.getSecond() != null) {
       _seconds = parseRange(cronExpression.getSecond(), 0, 59, false);
@@ -128,6 +133,10 @@ public class CronTrigger implements Trigger {
       _yearsFilter = parseYear(cronExpression.getYear());
     }
 
+    if (timezone != null) {
+      _timezone = timezone;
+    }
+
     _start = start;
     _end = end;
   }
@@ -154,7 +163,7 @@ public class CronTrigger implements Trigger {
     return month;
   }
 
-  private String tokenize(String value, String[][] tokenMap)
+  private String tokenize(String value, String [][] tokenMap)
   {
     // TODO The String processing is more resource intensive than necessary. See
     // if StringBuilder can work with regex?
@@ -170,10 +179,10 @@ public class CronTrigger implements Trigger {
    * parses a range, following cron rules.
    */
   // TODO This does not handle extra spaces between tokens, should it?
-  private boolean[] parseRange(String range, int rangeMin, int rangeMax,
+  private boolean [] parseRange(String range, int rangeMin, int rangeMax,
       boolean parseDayOfMonth) throws ConfigException
   {
-    boolean[] values = new boolean[rangeMax + 1];
+    boolean [] values = new boolean[rangeMax + 1];
 
     int i = 0;
     while (i < range.length()) {
@@ -443,6 +452,11 @@ public class CronTrigger implements Trigger {
   @Override
   public long nextTime(long now)
   {
+    // Jump to start time.
+    if ((_start != -1) && (now < _start)) {
+      now = _start;
+    }
+
     QDate calendar = allocateCalendar();
 
     // Round up to seconds.
@@ -454,7 +468,13 @@ public class CronTrigger implements Trigger {
 
     if (nextTime != null) {
       time = nextTime.getGMTTime();
+      time -= _timezone.getRawOffset(); // Adjust for time zone specification.
     } else {
+      time = Long.MAX_VALUE; // This trigger is inactive.
+    }
+
+    // Check for end date
+    if ((_end != -1) && (time > _end)) {
       time = Long.MAX_VALUE; // This trigger is inactive.
     }
 
@@ -808,12 +828,12 @@ public class CronTrigger implements Trigger {
     }
   }
 
-  private int getNextMatch(boolean[] range, int start)
+  private int getNextMatch(boolean [] range, int start)
   {
     return getNextMatch(range, start, range.length);
   }
 
-  private int getNextMatch(boolean[] range, int start, int end)
+  private int getNextMatch(boolean [] range, int start, int end)
   {
     for (int match = start; match < end; match++) {
       if (range[match]) {

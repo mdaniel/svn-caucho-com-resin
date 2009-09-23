@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import javax.ejb.EJBException;
@@ -489,11 +490,6 @@ public class EjbTimerService implements TimerService {
   {
     Collection<Timer> timers = new LinkedList<Timer>();
 
-    // TODO I'm not sure this is right; what's really needed here is a way to
-    // uniquely identify a bean whether it is an EJB or not. Maybe
-    // getDeployBean is more appropriate and is uniquely identifiable in JCDI,
-    // including EJBs?
-
     synchronized (_timers) {
       for (TimerTask task : _timers) {
         timers.add(new EjbTimer(task));
@@ -596,7 +592,24 @@ public class EjbTimerService implements TimerService {
         schedule.getMinute(), schedule.getHour(), schedule.getDayOfWeek(),
         schedule.getDayOfMonth(), schedule.getMonth(), schedule.getYear());
 
-    Trigger trigger = new CronTrigger(cronExpression, -1, -1);
+    TimeZone timezone = null;
+
+    if (!schedule.getTimezone().trim().equals("")) {
+      timezone = TimeZone.getTimeZone(schedule.getTimezone());
+    }
+
+    long start = -1;
+    long end = -1;
+
+    if (schedule.getStart() != null) {
+      start = schedule.getStart().getTime();
+    }
+
+    if (schedule.getEnd() != null) {
+      end = schedule.getEnd().getTime();
+    }
+
+    Trigger trigger = new CronTrigger(cronExpression, start, end, timezone);
     EjbTimer timer = new EjbTimer();
     TimerTask scheduledTask = new TimerTask(_timeout, timer, cronExpression,
         trigger, info);
