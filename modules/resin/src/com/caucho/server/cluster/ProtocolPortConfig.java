@@ -50,7 +50,7 @@ public class ProtocolPortConfig extends Port
 
   private static final Logger log
     = Logger.getLogger(ProtocolPortConfig.class.getName());
-  
+
   // The protocol
   private Class _protocolClass;
   private ContainerProgram _init;
@@ -102,16 +102,16 @@ public class ProtocolPortConfig extends Port
 
       /*
       Protocol protocol
-	= (Protocol) webBeans.createTransientObjectNoInit(_protocolClass);
+        = (Protocol) webBeans.createTransientObjectNoInit(_protocolClass);
       */
       InjectionTarget target = webBeans.createManagedBean(_protocolClass);
-      CreationalContext env = webBeans.createCreationalContext();
-      
+      CreationalContext env = webBeans.createCreationalContext(null);
+
       Protocol protocol = (Protocol) target.produce(env);
       target.inject(protocol, env);
-      
+
       if (_init != null)
-	_init.configure(protocol);
+        _init.configure(protocol);
 
       target.postConstruct(protocol);
 

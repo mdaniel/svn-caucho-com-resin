@@ -58,7 +58,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
-import javax.interceptor.InterceptorQualifier;
+import javax.interceptor.InterceptorBinding;
 
 import org.w3c.dom.Node;
 
@@ -78,7 +78,7 @@ public class CustomBeanConfig {
 
   private Class _class;
   private AnnotatedTypeImpl _annotatedType;
-  private Bean _component;
+  private Bean _bean;
   private ConfigType _configType;
 
   private ArrayList<ConfigProgram> _args;
@@ -270,10 +270,10 @@ public class CustomBeanConfig {
       clearBindings(_annotatedType);
     }
 
-    if (ann.annotationType().isAnnotationPresent(InterceptorQualifier.class)
+    if (ann.annotationType().isAnnotationPresent(InterceptorBinding.class)
         && ! _hasInterceptorBindings) {
       _hasInterceptorBindings = true;
-      clearAnnotations(_annotatedType, InterceptorQualifier.class);
+      clearAnnotations(_annotatedType, InterceptorBinding.class);
     }
 
     if (ann.annotationType().isAnnotationPresent(Scope.class))
@@ -482,9 +482,9 @@ public class CustomBeanConfig {
     else
       injectProgram = new ConfigProgram[0];
 
-    _component = new XmlBean(managedBean, javaCtor, newProgram, injectProgram);
+    _bean = new XmlBean(managedBean, javaCtor, newProgram, injectProgram);
 
-    beanManager.addBean(_component);
+    beanManager.addBean(_bean);
 
     for (ProducesBean producesBean : managedBean.getProducerBeans()) {
       beanManager.addBean(producesBean);
@@ -503,17 +503,17 @@ public class CustomBeanConfig {
     if (set == null || set.size() == 0)
       return null;
 
-    return _beanManager.getHighestPrecedenceBean(set);
+    return _beanManager.resolve(set);
   }
 
   public Object toObject()
   {
     InjectManager beanManager = InjectManager.create();
 
-    CreationalContext<?> env = beanManager.createCreationalContext();
-    Class type = _component.getBeanClass();
+    CreationalContext<?> env = beanManager.createCreationalContext(_bean);
+    Class type = _bean.getBeanClass();
 
-    return InjectManager.create().getReference(_component, type, env);
+    return InjectManager.create().getReference(_bean, type, env);
   }
 
   public String toString()

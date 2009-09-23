@@ -46,14 +46,14 @@ public class BeanValueGenerator extends ValueGenerator {
 
   private final InjectManager _beanManager;
   private final Bean _bean;
-  
+
   private final String _location;
 
   public BeanValueGenerator(String location, Bean bean)
   {
     if (bean == null)
       throw new NullPointerException();
-    
+
     _location = location;
 
     _beanManager = InjectManager.create();
@@ -65,9 +65,9 @@ public class BeanValueGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    CreationalContext<?> env = _beanManager.createCreationalContext();
+    CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
     Class type = _bean.getBeanClass();
-    
+
     return _beanManager.getReference(_bean, type, env);
   }
 

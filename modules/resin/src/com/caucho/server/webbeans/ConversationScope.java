@@ -43,7 +43,7 @@ import javax.faces.component.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.spi.Conversation;
+import javax.enterprise.context.Conversation;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.inject.spi.Bean;
@@ -55,13 +55,13 @@ public class ConversationScope extends ScopeContext
   implements Conversation, java.io.Serializable
 {
   private static final L10N L = new L10N(ConversationScope.class);
-  
+
   private ScopeIdMap _idMap = new ScopeIdMap();
 
   public ConversationScope()
   {
   }
-  
+
   /**
    * Returns true if the scope is currently active.
    */
@@ -71,11 +71,16 @@ public class ConversationScope extends ScopeContext
 
     return facesContext != null;
   }
-  
+
+  public boolean isTransient()
+  {
+    return false;
+  }
+
   /**
    * Returns the scope annotation type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     return ConversationScoped.class;
   }
@@ -108,7 +113,7 @@ public class ConversationScope extends ScopeContext
       map = scope._extendedConversation;
 
       if (map != null)
-	scope._conversationMap.put(id, map);
+        scope._conversationMap.put(id, map);
     }
 
     Bean comp = (Bean) bean;
@@ -125,7 +130,7 @@ public class ConversationScope extends ScopeContext
    * Returns the current value of the component in the conversation scope.
    */
   public <T> T get(Contextual<T> bean,
-		   CreationalContext<T> cxt)
+                   CreationalContext<T> cxt)
   {
     T instance = get(bean);
 
@@ -160,10 +165,10 @@ public class ConversationScope extends ScopeContext
       map = scope._extendedConversation;
 
       if (map != null)
-	scope._conversationMap.put(id, map);
+        scope._conversationMap.put(id, map);
       else {
-	map = new HashMap();
-	scope._conversationMap.put(id, map);
+        map = new HashMap();
+        scope._conversationMap.put(id, map);
       }
     }
 
@@ -184,8 +189,8 @@ public class ConversationScope extends ScopeContext
   public boolean canInject(ScopeContext scope)
   {
     return (scope instanceof ApplicationScope
-	    || scope instanceof SessionScope
-	    || scope instanceof ConversationScope);
+            || scope instanceof SessionScope
+            || scope instanceof ConversationScope);
   }
 
   //
@@ -199,7 +204,7 @@ public class ConversationScope extends ScopeContext
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Begins an extended conversation
    */
@@ -224,7 +229,7 @@ public class ConversationScope extends ScopeContext
     String id = root.getViewId();
 
     HashMap map = scope._conversationMap.get(id);
-    
+
     if (map == null) {
       map = new HashMap(8);
       scope._conversationMap.put(id, map);
@@ -258,17 +263,17 @@ public class ConversationScope extends ScopeContext
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public String getId()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public long getTimeout()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public void setTimeout(long timeout)
   {
     throw new UnsupportedOperationException(getClass().getName());

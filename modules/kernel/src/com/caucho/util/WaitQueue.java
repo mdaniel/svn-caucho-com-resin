@@ -28,6 +28,7 @@
 
 package com.caucho.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 
@@ -35,13 +36,17 @@ import java.util.concurrent.locks.LockSupport;
  * wait queue
  */
 public class WaitQueue {
+  private final AtomicBoolean _isWake = new AtomicBoolean();
+
   private volatile Item _head;
 
   public boolean wake()
   {
+    _isWake.set(true);
+
     for (Item item = _head; item != null; item = item.getNext()) {
       if (item.unpark())
-	return true;
+        return true;
     }
 
     return false;
@@ -49,9 +54,21 @@ public class WaitQueue {
 
   public void wakeAll()
   {
+    _isWake.set(true);
+
     for (Item item = _head; item != null; item = item.getNext()) {
       item.unpark();
     }
+  }
+
+  public void park(Item item, long timeout)
+  {
+    if (_isWake.getAndSet(false))
+      return;
+
+    item.park(timeout);
+
+    _isWake.set(false);
   }
 
   public Item create()
@@ -72,14 +89,14 @@ public class WaitQueue {
       Item prev = null;
 
       for (Item ptr = _head; ptr != null; ptr = ptr.getNext()) {
-	if (ptr == item) {
-	  if (prev != null) {
-	    prev.setNext(ptr.getNext());
-	  }
-	  else {
-	    _head = ptr.getNext();
-	  }
-	}
+        if (ptr == item) {
+          if (prev != null) {
+            prev.setNext(ptr.getNext());
+          }
+          else {
+            _head = ptr.getNext();
+          }
+        }
       }
     }
   }
@@ -124,7 +141,7 @@ public class WaitQueue {
       boolean isParked = _isParked;
 
       LockSupport.unpark(_thread);
-	
+
       return isParked;
     }
 
@@ -134,7 +151,7 @@ public class WaitQueue {
 
       Thread.interrupted();
       LockSupport.parkNanos(millis * 1000L);
-      
+
       _isParked = false;
     }
 

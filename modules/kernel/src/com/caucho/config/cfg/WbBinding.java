@@ -38,7 +38,7 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.Nonbinding;
 
 /**
  * Configuration for the xml web bean component.
@@ -61,17 +61,17 @@ public class WbBinding {
   public WbBinding(Annotation ann)
   {
     _annotation = ann;
-    
+
     setClass(ann.annotationType());
 
     try {
       for (Method method : _cl.getDeclaredMethods()) {
-	if (method.isAnnotationPresent(NonBinding.class))
-	  continue;
-	
-	Object value = method.invoke(ann);
-	
-	_valueList.add(new WbBindingValue(method, value));
+        if (method.isAnnotationPresent(Nonbinding.class))
+          continue;
+
+        Object value = method.invoke(ann);
+
+        _valueList.add(new WbBindingValue(method, value));
       }
     } catch (RuntimeException e) {
       throw e;
@@ -97,7 +97,7 @@ public class WbBinding {
       _valueList.add(new WbBindingValue(method, value));
     } catch (Exception e) {
       throw new ConfigException(L.l("{0}: '{1}' is an unknown method.",
-				    _cl.getSimpleName(), name));
+                                    _cl.getSimpleName(), name));
     }
   }
 
@@ -115,7 +115,7 @@ public class WbBinding {
   {
     return _cl;
   }
-  
+
   public String getClassName()
   {
     if (_cl != null)
@@ -141,9 +141,9 @@ public class WbBinding {
   {
     if (_signature == null)
       throw new ConfigException(L.l("binding requires an annotation"));
-    
+
     int p = _signature.indexOf('(');
-    
+
     String className;
 
     if (p > 0)
@@ -153,7 +153,7 @@ public class WbBinding {
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       _cl = Class.forName(className, false, loader);
     } catch (RuntimeException e) {
       throw e;
@@ -169,7 +169,7 @@ public class WbBinding {
 
     for (int i = 0; i < _valueList.size(); i++) {
       if (! _valueList.get(i).isMatch(bindAnn))
-	return false;
+        return false;
     }
 
     return true;
@@ -182,7 +182,7 @@ public class WbBinding {
 
     for (int i = 0; i < _valueList.size(); i++) {
       if (! _valueList.get(i).isMatch(bind))
-	return false;
+        return false;
     }
 
     return true;
@@ -194,9 +194,9 @@ public class WbBinding {
       Annotation ann = bindingList.get(i);
 
       if (ann.annotationType().equals(_cl))
-	return true;
+        return true;
     }
-    
+
     return false;
   }
 
@@ -233,7 +233,7 @@ public class WbBinding {
       WbBindingValue value = _valueList.get(i);
 
       if (! binding._valueList.contains(value)) {
-	return false;
+        return false;
       }
     }
 
@@ -265,20 +265,20 @@ public class WbBinding {
       sb.append("(");
 
       for (int i = 0; i < _valueList.size(); i++) {
-	WbBindingValue value = _valueList.get(i);
+        WbBindingValue value = _valueList.get(i);
 
-	if (value.getValue() == null)
-	  continue;
+        if (value.getValue() == null)
+          continue;
 
-	if (i != 0)
-	  sb.append(",");
+        if (i != 0)
+          sb.append(",");
 
-	sb.append(value.getName());
-	sb.append("=");
+        sb.append(value.getName());
+        sb.append("=");
 
-	addValue(sb, value.getValue());
+        addValue(sb, value.getValue());
       }
-      
+
       sb.append(")");
 
       _signature = sb.toString();
@@ -293,34 +293,34 @@ public class WbBinding {
       sb.append("{");
       Object []array = (Object []) value;
       for (int i = 0; i < array.length; i++) {
-	if (i != 0)
-	  sb.append(",");
-	
-	addValue(sb, array[i]);
+        if (i != 0)
+          sb.append(",");
+
+        addValue(sb, array[i]);
       }
       sb.append("}");
     }
     else if (value instanceof String) {
       String string = (String) value;
-      
+
       sb.append("\"");
 
       for (int i = 0; i < string.length(); i++) {
-	char ch = string.charAt(i);
+        char ch = string.charAt(i);
 
-	switch (ch) {
-	case '\\':
-	  sb.append("\\\\");
-	  break;
-	case '\"':
-	  sb.append("\\\"");
-	  break;
-	default:
-	  sb.append(ch);
-	  break;
-	}
+        switch (ch) {
+        case '\\':
+          sb.append("\\\\");
+          break;
+        case '\"':
+          sb.append("\\\"");
+          break;
+        default:
+          sb.append(ch);
+          break;
+        }
       }
-      
+
       sb.append("\"");
     }
     else
@@ -341,24 +341,24 @@ public class WbBinding {
       WbBindingValue value = _valueList.get(i);
 
       if (i != 0)
-	sb.append(",");
+        sb.append(",");
 
       if (! value.getName().equals("value")) {
-	sb.append(value.getName());
-	sb.append("=");
+        sb.append(value.getName());
+        sb.append("=");
       }
 
       Object objValue = value.getValue();
 
       if (objValue instanceof String) {
-	sb.append("\"");
-	sb.append(objValue);
-	sb.append("\"");
+        sb.append("\"");
+        sb.append(objValue);
+        sb.append("\"");
       }
       else
-	sb.append(objValue);
+        sb.append(objValue);
     }
-    
+
     sb.append(")");
 
     return sb.toString();
@@ -392,18 +392,18 @@ public class WbBinding {
     boolean isMatch(Annotation ann)
     {
       try {
-	Object value = _method.invoke(ann);
+        Object value = _method.invoke(ann);
 
-	if (value == _value)
-	  return true;
-	else if (value == null)
-	  return false;
-	else
-	  return value.equals(_value);
+        if (value == _value)
+          return true;
+        else if (value == null)
+          return false;
+        else
+          return value.equals(_value);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
@@ -414,28 +414,28 @@ public class WbBinding {
       Object value = binding.get(key);
 
       if (value == _value)
-	return true;
+        return true;
       else if (value == null)
-	return false;
+        return false;
       else
-	return value.equals(_value);
+        return value.equals(_value);
     }
 
     public boolean equals(Object o)
     {
       if (this == o)
-	return true;
+        return true;
       else if (! (o instanceof WbBindingValue))
-	return false;
+        return false;
 
       WbBindingValue value = (WbBindingValue) o;
 
       if (! _method.equals(value._method))
-	return false;
+        return false;
       else if (_value == value._value)
-	return true;
+        return true;
       else
-	return _value != null && _value.equals(value._value);
+        return _value != null && _value.equals(value._value);
     }
 
     public String toString()

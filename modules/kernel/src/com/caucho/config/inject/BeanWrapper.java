@@ -47,7 +47,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
   public BeanWrapper(InjectManager manager, Bean<T> bean)
   {
     super(manager);
-    
+
     _bean = bean;
   }
 
@@ -59,7 +59,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
   //
   // from javax.enterprise.inject.InjectionTarget
   //
-  
+
   public T create(CreationalContext<T> env)
   {
     return getBean().create(env);
@@ -69,7 +69,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
   {
     getBean().destroy(instance, env);
   }
-      
+
   //
   // metadata for the bean
   //
@@ -84,12 +84,12 @@ public class BeanWrapper<T> extends AbstractBean<T>
       return null;
   }
 
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
-    return getBean().getBindings();
+    return getBean().getQualifiers();
   }
 
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     return getBean().getStereotypes();
   }
@@ -102,6 +102,11 @@ public class BeanWrapper<T> extends AbstractBean<T>
   public String getName()
   {
     return getBean().getName();
+  }
+
+  public boolean isAlternative()
+  {
+    return getBean().isAlternative();
   }
 
   /**
@@ -127,7 +132,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
   {
     return getBean().getTypes();
   }
-  
+
   public Class getBeanClass()
   {
     return getBean().getBeanClass();

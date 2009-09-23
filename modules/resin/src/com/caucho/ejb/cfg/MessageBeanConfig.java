@@ -56,7 +56,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
     = Logger.getLogger(MessageBeanConfig.class.getName());
 
   private ActivationSpec _activationSpec;
-  
+
   private Class _destinationType;
   private String _destinationName;
   private Object _destination;
@@ -69,7 +69,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
   {
     _activationSpec = spec;
   }
-  
+
   public void setDestinationType(Class type)
   {
     _destinationType = type;
@@ -97,17 +97,17 @@ public class MessageBeanConfig extends AbstractBeanConfig
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-message-bean requires a 'class' attribute"));
-    
+
     EjbContainer ejbContainer = EjbContainer.create();
     EjbConfigManager configManager = ejbContainer.getConfigManager();
 
     EjbMessageBean bean = new EjbMessageBean(configManager, "config");
     bean.setConfigLocation(getFilename(), getLine());
-    
+
     bean.setEJBClass(getInstanceClass());
 
     String name = getName();
-    
+
     if (name == null)
       name = getJndiName();
 
@@ -123,7 +123,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
     InjectManager webBeans = InjectManager.create();
 
     bean.setMessageConsumerMax(_messageConsumerMax);
-    
+
     if (_destination != null) {
       bean.setDestinationValue((Destination) _destination);
     }
@@ -132,45 +132,44 @@ public class MessageBeanConfig extends AbstractBeanConfig
     }
     else {
       Class destinationType = _destinationType;
-      
+
       if (_destinationType == null)
-	destinationType = Destination.class;
+        destinationType = Destination.class;
 
       Set<Bean<?>> beanSet;
 
       if (_destinationName != null)
-	beanSet = webBeans.getBeans(_destinationName);
+        beanSet = webBeans.getBeans(_destinationName);
       else
-	beanSet = webBeans.getBeans(destinationType);
+        beanSet = webBeans.getBeans(destinationType);
 
       Object destComp = null;
 
       if (beanSet.size() > 0) {
-	Bean destBean = webBeans.getHighestPrecedenceBean(beanSet);
-	CreationalContext env = webBeans.createCreationalContext();
+        Bean destBean = webBeans.resolve(beanSet);
+        CreationalContext env = webBeans.createCreationalContext(destBean);
 
-	destComp
-	  = webBeans.getReference(destBean, destBean.getBeanClass(), env);
+        destComp
+          = webBeans.getReference(destBean, destBean.getBeanClass(), env);
       }
 
       if (destComp == null)
-	throw new ConfigException(L.l("{0}: '{1}' is an unknown destination type '{2}'",
-				      loc,
-				      _destinationName,
-				      _destinationType.getName()));
+        throw new ConfigException(L.l("{0}: '{1}' is an unknown destination type '{2}'",
+                                      loc,
+                                      _destinationName,
+                                      _destinationType.getName()));
 
       bean.setDestinationValue((Destination) destComp);
 
       beanSet = webBeans.getBeans(ConnectionFactory.class);
 
-      Bean factoryBean = webBeans.getHighestPrecedenceBean(beanSet);
-      CreationalContext env = webBeans.createCreationalContext();
-      
-      Object comp = webBeans.getReference(factoryBean, ConnectionFactory.class,
-					  env);
+      Bean factoryBean = webBeans.resolve(beanSet);
+      CreationalContext env = webBeans.createCreationalContext(factoryBean);
+
+      Object comp = webBeans.getReference(factoryBean);
 
       if (comp == null)
-	throw new ConfigException(L.l("ejb-message-bean requires a configured JMS ConnectionFactory"));
+        throw new ConfigException(L.l("ejb-message-bean requires a configured JMS ConnectionFactory"));
       bean.setConnectionFactoryValue((ConnectionFactory) comp);
     }
 

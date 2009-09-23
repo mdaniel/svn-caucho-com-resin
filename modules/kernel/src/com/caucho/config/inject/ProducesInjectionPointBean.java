@@ -57,7 +57,7 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   private final InjectionPoint _ij;
 
   ProducesInjectionPointBean(ProducesBean producesBean,
-			     InjectionPoint ij)
+                             InjectionPoint ij)
   {
     _producesBean = producesBean;
     _ij = ij;
@@ -70,15 +70,15 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   /**
    * Returns the bean's binding annotations.
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
-    return _producesBean.getBindings();
+    return _producesBean.getQualifiers();
   }
 
   /**
    * Returns the bean's stereotype annotations.
    */
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     return _producesBean.getStereotypes();
   }
@@ -87,7 +87,7 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   {
     return _producesBean.getBeanClass();
   }
-  
+
   /**
    * Returns the set of injection points, for validation.
    */
@@ -122,6 +122,14 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   }
 
   /**
+   * Returns true if the bean is serializable
+   */
+  public boolean isAlternative()
+  {
+    return _producesBean.isAlternative();
+  }
+
+  /**
    * Returns the bean's scope type.
    */
   public Class<? extends Annotation> getScope()
@@ -136,7 +144,7 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   {
     return _producesBean.getTypes();
   }
-  
+
   public Object create(CreationalContext creationalContext)
   {
     Object instance = _producesBean.produce(creationalContext);
@@ -144,7 +152,7 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
 
     return instance;
   }
-  
+
   /**
    * Instantiate the bean.
    */
@@ -152,21 +160,21 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   {
     return (X) _producesBean.produce(cxt);
   }
-  
+
   /**
    * Inject the bean.
    */
   public void inject(X instance, CreationalContext cxt)
   {
   }
-  
+
   /**
    * Call post-construct
    */
   public void postConstruct(X instance)
   {
   }
-  
+
   /**
    * Call pre-destroy
    */
@@ -174,7 +182,7 @@ public class ProducesInjectionPointBean<X> implements Bean<X> {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call destroy
    */

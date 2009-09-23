@@ -46,15 +46,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.Nonbinding;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.Stereotype;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeDefaultInterceptors;
-import javax.interceptor.InterceptorQualifier;
+import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
 import javax.interceptor.ExcludeClassInterceptors;
 
@@ -134,10 +134,10 @@ public class InterceptorCallChain
     }
     else {
       return (_defaultInterceptors.size() > 0
-	      /*
+              /*
               || (! _isExcludeDefaultInterceptors
                   && _view.getBean().getDefaultInterceptors().size() > 0)
-	      */
+              */
               || _classInterceptors.size() > 0
               || _interceptorBinding.size() > 0
               || _interceptors.size() > 0
@@ -245,7 +245,7 @@ public class InterceptorCallChain
     addInterceptorBindings(interceptorTypes, apiClass.getAnnotations());
     if (implClass != apiClass)
       addInterceptorBindings(interceptorTypes, implClass.getAnnotations());
-    
+
     addInterceptorBindings(interceptorTypes, apiMethod.getAnnotations());
     addInterceptorBindings(interceptorTypes, implMethod.getAnnotations());
 
@@ -258,34 +258,34 @@ public class InterceptorCallChain
 
     for (Type decorator : decorators) {
       Class decoratorClass = (Class) decorator;
-	
+
       for (Method method : decoratorClass.getMethods()) {
-	if (isMatch(method, apiMethod.getMethod()))
-	  _decoratorType = decoratorClass;
+        if (isMatch(method, apiMethod.getMethod()))
+          _decoratorType = decoratorClass;
       }
     }
   }
 
   private void addInterceptorBindings(HashMap<Class,Annotation> interceptorTypes,
-				      Set<Annotation> annotations)
+                                      Set<Annotation> annotations)
   {
     for (Annotation ann : annotations) {
       addInterceptorBindings(interceptorTypes, ann);
     }
   }
-  
+
   private void addInterceptorBindings(HashMap<Class,Annotation> interceptorTypes,
-				      Annotation ann)
+                                      Annotation ann)
   {
     Class annType = ann.annotationType();
 
-    if (annType.isAnnotationPresent(InterceptorQualifier.class)) {
+    if (annType.isAnnotationPresent(InterceptorBinding.class)) {
       interceptorTypes.put(ann.annotationType(), ann);
     }
-      
+
     if (annType.isAnnotationPresent(Stereotype.class)) {
       for (Annotation subAnn : annType.getAnnotations()) {
-	addInterceptorBindings(interceptorTypes, subAnn);
+        addInterceptorBindings(interceptorTypes, subAnn);
       }
     }
   }
@@ -295,7 +295,7 @@ public class InterceptorCallChain
     if (implMethod == null) {
       return false;
     }
-    
+
     if (implMethod.isStatic()) {
       return false;
     }
@@ -336,7 +336,7 @@ public class InterceptorCallChain
 
     for (Annotation annotation : annotations) {
       if (annotation.annotationType()
-	  .isAnnotationPresent(InterceptorQualifier.class))
+          .isAnnotationPresent(InterceptorBinding.class))
         return annotation;
     }
 
@@ -538,8 +538,8 @@ public class InterceptorCallChain
       out.println();
 
       out.print("private static int []" + _chainName
-		+ "_objectIndexChain = new int[] {");
-      
+                + "_objectIndexChain = new int[] {");
+
       for (int i : indexChain) {
         out.print(i);
         out.print(',');
@@ -577,20 +577,20 @@ public class InterceptorCallChain
     for (Interceptor interceptor : _interceptors) {
       String var = (String) map.get("interceptor-" + iClass.getName());
       if (var == null) {
-	var = "__caucho_i" + out.generateId();
+        var = "__caucho_i" + out.generateId();
 
-	out.println();
-	out.print("private static ");
-	out.printClass(Bean.class);
-	out.println(" " + var + "_f;");
-	
-	out.print("private transient ");
-	out.printClass(iClass);
-	out.println(" " + var + ";");
+        out.println();
+        out.print("private static ");
+        out.printClass(Bean.class);
+        out.println(" " + var + "_f;");
 
-	map.put("interceptor-" + iClass.getName(), var);
+        out.print("private transient ");
+        out.printClass(iClass);
+        out.println(" " + var + ";");
 
-	_ownInterceptors.add(interceptor);
+        map.put("interceptor-" + iClass.getName(), var);
+
+        _ownInterceptors.add(interceptor);
       }
 
       _interceptorVarMap.put(interceptor, var);
@@ -633,7 +633,7 @@ public class InterceptorCallChain
     if (getAroundInvokeMethod() != null) {
       out.println("__caucho_aroundInvokeMethod, ");
     }
-    
+
     out.popDepth();
     out.println("};");
     */
@@ -664,7 +664,7 @@ public class InterceptorCallChain
       if (void.class.equals(method.getReturnType()))
         continue;
 
-      if (method.isAnnotationPresent(NonBinding.class))
+      if (method.isAnnotationPresent(Nonbinding.class))
         continue;
 
       out.pushDepth();
@@ -761,14 +761,14 @@ public class InterceptorCallChain
       out.println();
 
       out.println("private static "
-		  + "java.util.List<javax.enterprise.inject.spi.Decorator<?>> "
-		  + _decoratorBeanVar + ";");
+                  + "java.util.List<javax.enterprise.inject.spi.Decorator<?>> "
+                  + _decoratorBeanVar + ";");
 
       out.println("private transient Object [] " + _decoratorBeanVar + "_i;");
     }
 
     _delegateVar = (String) map.get(_decoratorType.getName() + "_var");
-    
+
     if (_delegateVar == null) {
       _delegateVar = _uniqueName + "_delegate";
       map.put(_decoratorType.getName() + "_var", _delegateVar);
@@ -835,7 +835,7 @@ public class InterceptorCallChain
 
     for (Type decorator : decorators) {
       Class decoratorClass = (Class) decorator;
-      
+
       for (Method method : decoratorClass.getMethods()) {
         if (! containsMethod(methodList, method)) {
           methodList.add(method);
@@ -1008,7 +1008,7 @@ public class InterceptorCallChain
 
     for (Type decorator : _view.getBean().getDecoratorTypes()) {
       Class decoratorClass = (Class) decorator;
-      
+
       if (containsMethod(decoratorClass.getMethods(), method)
           && ! apis.contains(decoratorClass))
         apis.add(decoratorClass);
@@ -1058,7 +1058,7 @@ public class InterceptorCallChain
       out.print("(");
       out.printClass(_decoratorType);
       out.print(")");
-      
+
       out.print("com.caucho.config.gen.EjbUtil.generateDelegate(");
       out.print(_decoratorBeanVar + ", ");
       out.println(" new " + className + "());");
@@ -1211,7 +1211,7 @@ public class InterceptorCallChain
 
     out.println(")");
     _next.generateThrows(out, _implMethod.getExceptionTypes());
-    
+
     out.println("{");
     out.pushDepth();
 
@@ -1228,7 +1228,7 @@ public class InterceptorCallChain
     out.print(".set(new " + _decoratorClass + "(");
     out.println(_decoratorBeanVar + "_i.length));");
     out.println();
-    
+
     if (! void.class.equals(_implMethod.getReturnType()))
       out.print("return ");
 
@@ -1291,7 +1291,7 @@ public class InterceptorCallChain
       generateThis(out);
       out.print(", ");
     }
-    
+
     out.println("};");
   }
   */

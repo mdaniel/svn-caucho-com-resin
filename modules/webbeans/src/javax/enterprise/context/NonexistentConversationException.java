@@ -19,32 +19,37 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.stereotype;
-
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package javax.enterprise.context;
 
 /**
- * The @Stereotype annotation for web beans
+ * Exception thrown when a webbean definition is inconsistent or invalid
  */
-@Documented  
-@Retention(RUNTIME)
-@Target(ANNOTATION_TYPE)
-public @interface Stereotype {
-  public Class<?>[] requiredTypes() default {};
-  
-  public Class<? extends Annotation>[] supportedScopes() default {};
+
+public class NonexistentConversationException extends ContextException
+{
+  public NonexistentConversationException()
+  {
+  }
+
+  public NonexistentConversationException(String message)
+  {
+    super(message);
+  }
+
+  public NonexistentConversationException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public NonexistentConversationException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

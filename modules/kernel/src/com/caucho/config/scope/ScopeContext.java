@@ -50,11 +50,11 @@ abstract public class ScopeContext implements Context {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Returns the scope annotation type.
    */
-  abstract public Class<? extends Annotation> getScopeType();
+  abstract public Class<? extends Annotation> getScope();
 
   /**
    * Returns the current instance, if it exists.
@@ -66,12 +66,12 @@ abstract public class ScopeContext implements Context {
     if (scopeMap != null) {
       return (T) scopeMap.get(bean);
     }
-    
+
     return null;
   }
-  
+
   public <T> T get(Contextual<T> bean,
-		   CreationalContext<T> creationalContext)
+                   CreationalContext<T> creationalContext)
   {
     ScopeMap scopeMap = getScopeMap();
 
@@ -81,7 +81,7 @@ abstract public class ScopeContext implements Context {
       instance = (T) scopeMap.get(bean);
 
       if (instance != null)
-	return instance;
+        return instance;
     }
 
     if (creationalContext == null)
@@ -98,14 +98,14 @@ abstract public class ScopeContext implements Context {
 
     scopeMap.put(bean, instance);
     addDestructor(bean, instance);
-    
+
     return instance;
   }
 
   public void put(Contextual bean, Object instance)
   {
     ScopeMap scopeMap = getScopeMap();
-    
+
     scopeMap.put(bean, instance);
   }
 
@@ -113,12 +113,12 @@ abstract public class ScopeContext implements Context {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   protected ScopeMap createScopeMap()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Returns true if a value in the target scope can be safely be injected
    * into this scope
@@ -126,18 +126,18 @@ abstract public class ScopeContext implements Context {
   public boolean canInject(ScopeContext scope)
   {
     return (getClass().equals(scope.getClass())
-	    || scope instanceof ApplicationScope);
+            || scope instanceof ApplicationScope);
   }
-  
+
   /**
    * Returns true if a value in the target scope can be safely be injected
    * into this scope
    */
-  public boolean canInject(Class scopeType)
+  public boolean canInject(Class scope)
   {
-    return (getScopeType() == scopeType
-	    || scopeType == ApplicationScoped.class
-	    || scopeType == Dependent.class);
+    return (getScope() == scope
+            || scope == ApplicationScoped.class
+            || scope == Dependent.class);
   }
 
   public void addDestructor(Contextual bean, Object value)

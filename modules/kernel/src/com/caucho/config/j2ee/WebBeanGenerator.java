@@ -59,9 +59,9 @@ abstract public class WebBeanGenerator extends ValueGenerator {
   {
     Set<Bean<?>> beans = _beanManager.getBeans(type, bindings);
 
-    Bean bean = _beanManager.getHighestPrecedenceBean(beans);
+    Bean bean = _beanManager.resolve(beans);
 
-    CreationalContext<?> env = _beanManager.createCreationalContext();
+    CreationalContext<?> env = _beanManager.createCreationalContext(bean);
 
     return (T) _beanManager.getReference(bean, type, env);
   }

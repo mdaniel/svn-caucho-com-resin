@@ -39,7 +39,7 @@ import javax.annotation.*;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
-import javax.interceptor.InterceptorQualifier;
+import javax.interceptor.InterceptorBinding;
 import javax.interceptor.InvocationContext;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
@@ -53,7 +53,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   private static final L10N L = new L10N(InterceptorBean.class);
 
   private final InjectManager _beanManager;
-  
+
   private Class _type;
 
   private ManagedBeanImpl _bean;
@@ -66,9 +66,9 @@ public class InterceptorBean<X> implements Interceptor<X>
 
   private HashSet<Annotation> _bindings
     = new HashSet<Annotation>();
-  
+
   public InterceptorBean(InjectManager beanManager,
-			 Class type)
+                         Class type)
   {
     _beanManager = beanManager;
 
@@ -78,7 +78,7 @@ public class InterceptorBean<X> implements Interceptor<X>
 
     init();
   }
-  
+
   public InterceptorBean(Class type)
   {
     this(InjectManager.create(), type);
@@ -92,16 +92,16 @@ public class InterceptorBean<X> implements Interceptor<X>
    * Returns the bean's bindings
    */
   @Override
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
-    return _bean.getBindings();
+    return _bean.getQualifiers();
   }
 
   /**
    * Returns the bean's stereotypes
    */
   @Override
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     return _bean.getStereotypes();
   }
@@ -119,6 +119,14 @@ public class InterceptorBean<X> implements Interceptor<X>
    * Returns true if the bean can be null
    */
   public boolean isNullable()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the bean can be null
+   */
+  public boolean isAlternative()
   {
     return false;
   }
@@ -165,7 +173,7 @@ public class InterceptorBean<X> implements Interceptor<X>
     return _bean.create();
   }
   */
-  
+
   /**
    * Destroys a bean instance
    */
@@ -200,10 +208,10 @@ public class InterceptorBean<X> implements Interceptor<X>
 
     case PRE_DESTROY:
       return _preDestroy;
-      
+
     case PRE_PASSIVATE:
       return _prePassivate;
-      
+
     case POST_ACTIVATE:
       return _postActivate;
 
@@ -224,7 +232,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     return _bean.create(creationalContext);
   }
-  
+
   /**
    * Returns the set of injection points, for validation.
    */
@@ -240,14 +248,14 @@ public class InterceptorBean<X> implements Interceptor<X>
   public void init()
   {
     // _bean.init();
-    
+
     introspect();
   }
 
   protected void introspect()
   {
     introspectQualifiers(_type.getAnnotations());
-    
+
     introspectMethods();
   }
 
@@ -255,30 +263,30 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     for (Method method : _type.getMethods()) {
       if (Modifier.isStatic(method.getModifiers()))
-	continue;
+        continue;
 
       if (method.isAnnotationPresent(AroundInvoke.class))
-	_aroundInvoke = method;
+        _aroundInvoke = method;
 
       if (method.isAnnotationPresent(PostConstruct.class))
-	_postConstruct = method;
+        _postConstruct = method;
 
       if (method.isAnnotationPresent(PreDestroy.class))
-	_preDestroy = method;
+        _preDestroy = method;
 
       if (method.isAnnotationPresent(PrePassivate.class))
-	_prePassivate = method;
+        _prePassivate = method;
 
       if (method.isAnnotationPresent(PostActivate.class))
-	_postActivate = method;
+        _postActivate = method;
     }
   }
 
   protected void introspectQualifiers(Annotation []annList)
   {
     for (Annotation ann : annList) {
-      if (ann.annotationType().isAnnotationPresent(InterceptorQualifier.class)) {
-	_bindings.add(ann);
+      if (ann.annotationType().isAnnotationPresent(InterceptorBinding.class)) {
+        _bindings.add(ann);
       }
     }
   }
@@ -287,12 +295,12 @@ public class InterceptorBean<X> implements Interceptor<X>
    * Invokes the callback
    */
   public Object intercept(InterceptionType type,
-			  X instance,
-			  InvocationContext ctx)
+                          X instance,
+                          InvocationContext ctx)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Instantiate the bean.
    */
@@ -300,7 +308,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Inject the bean.
    */
@@ -308,7 +316,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call post-construct
    */
@@ -316,7 +324,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call pre-destroy
    */
@@ -324,7 +332,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call destroy
    */
@@ -361,7 +369,7 @@ public class InterceptorBean<X> implements Interceptor<X>
     sb.append(_type.getSimpleName());
 
     sb.append("]");
-    
+
     return sb.toString();
   }
 }

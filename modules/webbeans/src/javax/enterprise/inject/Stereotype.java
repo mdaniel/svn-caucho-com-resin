@@ -27,17 +27,24 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
+package javax.enterprise.inject;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * The @Asynchronously annotation for web beans
+ * The @Stereotype annotation for web beans
  */
 @Documented
 @Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface Asynchronously {
+@Target(ANNOTATION_TYPE)
+public @interface Stereotype {
+  public Class<?>[] requiredTypes() default {};
+
+  public Class<? extends Annotation>[] supportedScopes() default {};
 }

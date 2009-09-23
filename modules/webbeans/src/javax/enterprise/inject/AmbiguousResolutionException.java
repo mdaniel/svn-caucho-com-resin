@@ -51,7 +51,7 @@ package javax.enterprise.inject;
  * }
  * </code></pre>
  */
-public class AmbiguousResolutionException extends InjectionException
+public class AmbiguousResolutionException extends ResolutionException
 {
   public AmbiguousResolutionException()
   {
@@ -66,7 +66,7 @@ public class AmbiguousResolutionException extends InjectionException
   {
     super(cause);
   }
-  
+
   public AmbiguousResolutionException(String message, Throwable cause)
   {
     super(message, cause);

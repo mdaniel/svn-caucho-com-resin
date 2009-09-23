@@ -45,7 +45,7 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.PassivationCapable;
+import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
  * Internal implementation for a Bean
@@ -61,11 +61,11 @@ public class XmlBean<X> extends BeanWrapper<X>
   private ConfigProgram []_injectProgram;
 
   private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
-  
+
   public XmlBean(ManagedBeanImpl bean,
-		 Constructor ctor,
-		 Arg []newProgram,
-		 ConfigProgram []injectProgram)
+                 Constructor ctor,
+                 Arg []newProgram,
+                 ConfigProgram []injectProgram)
   {
     super(bean.getBeanManager(), bean);
 
@@ -101,7 +101,7 @@ public class XmlBean<X> extends BeanWrapper<X>
   public Object getScopeAdapter(CreationalContext context)
   {
     Bean bean = getBean();
-    
+
     if (bean instanceof ScopeAdapterBean)
       return ((ScopeAdapterBean) bean).getScopeAdapter(context);
     else
@@ -116,7 +116,7 @@ public class XmlBean<X> extends BeanWrapper<X>
 
     try {
       thread.setContextClassLoader(_loader);
-      
+
       X instance = produce(context);
       inject(instance, context);
       postConstruct(instance);
@@ -130,23 +130,23 @@ public class XmlBean<X> extends BeanWrapper<X>
   public X produce(CreationalContext context)
   {
     ConfigContext env = (ConfigContext) context;
-    
+
     if (_ctor == null)
       return (X) getBean().getInjectionTarget().produce(env);
     else {
       Object []args = new Object[_newProgram.length];
 
       for (int i = 0; i < args.length; i++) {
-	args[i] = _newProgram[i].eval(env);
+        args[i] = _newProgram[i].eval(env);
       }
 
       try {
-	return (X) _ctor.newInstance(args);
+        return (X) _ctor.newInstance(args);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	// XXX: clean up exception type
-	throw new RuntimeException(e);
+        // XXX: clean up exception type
+        throw new RuntimeException(e);
       }
     }
   }
@@ -157,7 +157,7 @@ public class XmlBean<X> extends BeanWrapper<X>
 
     if (_injectProgram.length > 0) {
       for (ConfigProgram program : _injectProgram) {
-	program.inject(instance, (ConfigContext) env);
+        program.inject(instance, (ConfigContext) env);
       }
     }
   }
@@ -169,16 +169,23 @@ public class XmlBean<X> extends BeanWrapper<X>
     /*
     if (_initProgram.length > 0) {
       for (ConfigProgram program : _initProgram) {
-	program.inject(instance, (ConfigContext) env);
+        program.inject(instance, (ConfigContext) env);
       }
     }
     */
   }
-  
+
   /**
    * Call destroy
    */
   public void preDestroy(X instance)
+  {
+  }
+
+  /**
+   * Call destroy
+   */
+  public void dispose(X instance)
   {
   }
 

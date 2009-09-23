@@ -27,17 +27,27 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
+package javax.enterprise.inject;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
 
 /**
- * The transaction annotation for web beans
+ * A standard @Stereotype
  */
-
+@Named
+@RequestScoped
+@Stereotype
+@Documented
 @Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface AfterTransactionCompletion {
+@Target({TYPE, METHOD})
+public @interface Model {
 }

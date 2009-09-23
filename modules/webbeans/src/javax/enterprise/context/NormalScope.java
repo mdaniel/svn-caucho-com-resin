@@ -27,27 +27,20 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.stereotype;
+package javax.enterprise.context;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
-
 /**
- * A standard @Stereotype
+ * The @NormalScope
  */
-@Named
-@RequestScoped
-@Stereotype  
-@Documented  
+@Documented
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Model {
+@Target(ANNOTATION_TYPE)
+public @interface NormalScope {
+  public boolean passivating() default false;
 }

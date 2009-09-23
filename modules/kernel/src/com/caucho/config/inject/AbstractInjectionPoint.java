@@ -49,13 +49,13 @@ public class AbstractInjectionPoint implements InjectionPoint
   private Annotation []_annotations;
 
   private Bean _injectionBean;
-  
+
   public AbstractInjectionPoint(InjectManager inject,
-				Bean bean,
-				Member member,
-				Type type,
-				Set<Annotation> bindings,
-				Annotation []annotations)
+                                Bean bean,
+                                Member member,
+                                Type type,
+                                Set<Annotation> bindings,
+                                Annotation []annotations)
   {
     _inject = inject;
     _bean = bean;
@@ -69,47 +69,47 @@ public class AbstractInjectionPoint implements InjectionPoint
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
-  public Set<Annotation> getBindings()
+
+  public Set<Annotation> getQualifiers()
   {
     return _bindings;
   }
-  
+
   public Type getType()
   {
     return _type;
   }
-  
+
   public Bean<?> getBean()
   {
     return _bean;
   }
-  
+
   public Member getMember()
   {
     return _member;
   }
-    
+
   public Annotation []getAnnotations()
   {
     return _annotations;
   }
-  
+
   public <T extends Annotation> T getAnnotation(Class<T> annotationType)
   {
     for (Annotation ann : getAnnotations()) {
       if (ann.annotationType().equals(annotationType))
-	return (T) ann;
+        return (T) ann;
     }
 
     return null;
   }
-  
+
   public boolean isAnnotationPresent(Class<? extends Annotation> annType)
   {
     for (Annotation ann : getAnnotations()) {
       if (ann.annotationType().equals(annType))
-	return true;
+        return true;
     }
 
     return false;
@@ -121,7 +121,7 @@ public class AbstractInjectionPoint implements InjectionPoint
       _injectionBean = _inject.resolveByInjectionPoint(this);
 
     return _inject.getReference(_injectionBean,
-				_injectionBean.getBeanClass(), cxt);
+                                _injectionBean.getBeanClass(), cxt);
   }
 
   public boolean isDelegate()

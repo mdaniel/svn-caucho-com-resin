@@ -36,6 +36,6 @@ public enum SessionBeanType
 {
   STATELESS,
   STATEFUL,
-    SINGLETON,
+  SINGLETON;
 }
 

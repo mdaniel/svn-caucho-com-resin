@@ -58,21 +58,21 @@ import javax.inject.Provider;
 public interface Instance<T> extends Provider<T>, Iterable<T>
 {
   /**
-   * Restricts the instance given a set of bindings
+   * Restricts the instance given a set of qualifiers
    */
-  public Instance<T> select(Annotation ... bindings);
+  public Instance<T> select(Annotation ... qualifiers);
 
   /**
    * Restricts the instance to a subtype and bindings.
    */
   public <U extends T> Instance<U> select(Class<U> subtype,
-					  Annotation... bindings);
+                                          Annotation... bindings);
 
   /**
    * Restricts the instance to a subtype and bindings.
    */
   public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
-					  Annotation... bindings);
+                                          Annotation... bindings);
 
   /**
    * Test if there are any beans that match the instance.

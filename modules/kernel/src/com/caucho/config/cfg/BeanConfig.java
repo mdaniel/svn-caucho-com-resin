@@ -64,9 +64,9 @@ public class BeanConfig {
   private int _line;
 
   private String _uri;
-  
+
   private String _jndiName;
-  
+
   private String _mbeanName;
   private Class _beanConfigClass;
 
@@ -75,11 +75,11 @@ public class BeanConfig {
   private static final Object []NULL_ARGS = new Object[0];
 
   private InjectManager _beanManager;
-  
+
   private Class _cl;
 
   private String _name;
-  
+
   private ArrayList<Annotation> _bindingList
     = new ArrayList<Annotation>();
 
@@ -96,14 +96,14 @@ public class BeanConfig {
 
   // XXX: temp for osgi
   private boolean _isService;
-  
+
   public BeanConfig()
   {
     _beanManager = InjectManager.create();
-    
+
     if (getDefaultScope() != null)
       setScope(getDefaultScope());
-    
+
     setService(isDefaultService());
   }
 
@@ -162,7 +162,7 @@ public class BeanConfig {
 
     if (type != null && ! type.isAssignableFrom(cl))
       throw new ConfigException(L.l("'{0}' is not a valid instance of '{1}'",
-				    cl.getName(), type.getName()));
+                                    cl.getName(), type.getName()));
   }
 
   public Class getClassType()
@@ -215,11 +215,11 @@ public class BeanConfig {
       _scope = ConversationScoped.class;
     else {
       Class cl = null;
-      
+
       try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	cl = Class.forName(scope, false, loader);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+        cl = Class.forName(scope, false, loader);
       } catch (ClassNotFoundException e) {
       }
 
@@ -393,11 +393,11 @@ public class BeanConfig {
 
     if (beanConfigClass == null) {
       throw new ConfigException(L.l("'{0}' does not support the 'uri' attribute because its bean-config-class is undefined",
-				    getClass().getName()));
+                                    getClass().getName()));
     }
 
     _uri = uri;
-    
+
     String scheme;
     String properties = "";
 
@@ -410,19 +410,19 @@ public class BeanConfig {
       scheme = uri;
 
     TypeFactory factory = TypeFactory.create();
-    
+
     setClass(factory.getDriverClassByUrl(beanConfigClass, uri));
 
     String []props = properties.split("[;]");
 
     for (String prop : props) {
       if (prop.length() == 0)
-	continue;
-      
+        continue;
+
       String []values = prop.split("[=]");
 
       if (values.length != 2)
-	throw new ConfigException(L.l("'{0}' is an invalid URI.  Bean URI syntax is 'scheme:prop1=value1;prop2=value2'", uri));
+        throw new ConfigException(L.l("'{0}' is an invalid URI.  Bean URI syntax is 'scheme:prop1=value1;prop2=value2'", uri));
 
       addStringProperty(values[0], values[1]);
     }
@@ -452,13 +452,13 @@ public class BeanConfig {
     if (_customBean != null) {
       // server/1a37
       // _customBean.initComponent();
-      
+
       return;
     }
 
     if (_cl == null)
       throw new ConfigException(L.l("<{0}> requires a class attribute",
-				    getTagName()));
+                                    getTagName()));
 
     /* XXX:
     if (_cl.isAnnotationPresent(Stateless.class)) {
@@ -477,7 +477,7 @@ public class BeanConfig {
 
     InjectManager beanManager = InjectManager.create();
     BeanFactory factory =  beanManager.createBeanFactory(_cl);
-    
+
     _annotatedType = factory.getAnnotatedType();
 
     if (_name != null) {
@@ -485,7 +485,7 @@ public class BeanConfig {
 
       // server/2n00
       if (! Map.class.isAssignableFrom(_cl))
-	addOptionalStringProperty("name", _name);
+        addOptionalStringProperty("name", _name);
     }
 
     /*
@@ -495,19 +495,19 @@ public class BeanConfig {
 
     // server/21q1
     if (! _annotatedType.isAnnotationPresent(Stateful.class)
-	&& ! _annotatedType.isAnnotationPresent(Stateless.class)
-	&& ! _annotatedType.isAnnotationPresent(MessageDriven.class)) {
+        && ! _annotatedType.isAnnotationPresent(Stateless.class)
+        && ! _annotatedType.isAnnotationPresent(MessageDriven.class)) {
       factory.annotation(new Startup() {
-	  public Class annotationType() { return Startup.class; }
-	});
+          public Class annotationType() { return Startup.class; }
+        });
     }
-    
+
     for (Annotation binding : _bindingList) {
       factory.binding(binding);
     }
 
     for (Annotation stereotype : _stereotypeList) {
-      factory.stereotype(stereotype);
+      factory.stereotype(stereotype.annotationType());
     }
 
     if (_scope != null) {
@@ -534,12 +534,12 @@ public class BeanConfig {
     introspectPostInit();
 
     deploy();
-    
+
     try {
       if (_bean == null) {
       }
       else if (_jndiName != null) {
-	Jndi.bindDeepShort(_jndiName, _bean);
+        Jndi.bindDeepShort(_jndiName, _bean);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -567,15 +567,15 @@ public class BeanConfig {
   public Object getObject()
   {
     if (_bean != null) {
-      CreationalContext env = _beanManager.createCreationalContext();
-      
+      CreationalContext env = _beanManager.createCreationalContext(_bean);
+
       Object value = _beanManager.getReference(_bean, _bean.getBeanClass(), env);
 
       /*
       if (_init != null)
-	_init.inject(value, (ConfigContext) env);
+        _init.inject(value, (ConfigContext) env);
       */
-      
+
       return value;
     }
     else
@@ -585,7 +585,7 @@ public class BeanConfig {
   public Object createObjectNoInit()
   {
     if (_bean != null) {
-      CreationalContext env = _beanManager.createCreationalContext();
+      CreationalContext env = _beanManager.createCreationalContext(_bean);
       // XXX:
       return _beanManager.getReference(_bean, (Class) null, env);
       // return _bean.createNoInit();
@@ -598,16 +598,16 @@ public class BeanConfig {
   {
     if (_scope == null) {
       for (Annotation ann : _cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(Scope.class)) {
-	  if (_scope != null) {
-	    throw new ConfigException(L.l("{0}: multiple scope annotations are forbidden ({1} and {2}).",
-					  _cl.getName(),
-					  _scope.getSimpleName(),
-					  ann.annotationType().getSimpleName()));
-	  }
-	  
-	  _scope = ann.annotationType();
-	}
+        if (ann.annotationType().isAnnotationPresent(Scope.class)) {
+          if (_scope != null) {
+            throw new ConfigException(L.l("{0}: multiple scope annotations are forbidden ({1} and {2}).",
+                                          _cl.getName(),
+                                          _scope.getSimpleName(),
+                                          ann.annotationType().getSimpleName()));
+          }
+
+          _scope = ann.annotationType();
+        }
       }
     }
   }

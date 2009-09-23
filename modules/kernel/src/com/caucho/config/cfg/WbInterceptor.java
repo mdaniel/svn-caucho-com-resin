@@ -42,47 +42,47 @@ import com.caucho.util.*;
  */
 public class WbInterceptor {
   private static final L10N L = new L10N(WbInterceptor.class);
-  
+
   private Class _cl;
-  
+
   private ArrayList<Annotation> _bindingList
     = new ArrayList<Annotation>();
-  
+
   private Method _invokeMethod;
 
   WbInterceptor(Class cl)
   {
     if (! cl.isAnnotationPresent(Interceptor.class))
       throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation to be declared as an interceptor.",
-				    cl.getName()));
+                                    cl.getName()));
 
     _cl = cl;
 
     for (Annotation ann : cl.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(InterceptorQualifier.class)) {
-	_bindingList.add(ann);
+      if (ann.annotationType().isAnnotationPresent(InterceptorBinding.class)) {
+        _bindingList.add(ann);
       }
     }
 
     if (_bindingList.size() == 0) {
-      throw new ConfigException(L.l("'{0}' must have at least one @InterceptorQualifier annotation to be declared as an interceptor.",
-				    cl.getName()));
+      throw new ConfigException(L.l("'{0}' must have at least one @InterceptorBinding annotation to be declared as an interceptor.",
+                                    cl.getName()));
     }
 
     for (Method method : cl.getDeclaredMethods()) {
       if (method.isAnnotationPresent(AroundInvoke.class)) {
-	if (_invokeMethod != null) {
-	  throw new ConfigException(L.l("'{0}' has two @AroundInvoke methods: '{1}' and '{2}'.",
-					cl.getName(), _invokeMethod, method));
-	}
-	  
-	_invokeMethod = method;
+        if (_invokeMethod != null) {
+          throw new ConfigException(L.l("'{0}' has two @AroundInvoke methods: '{1}' and '{2}'.",
+                                        cl.getName(), _invokeMethod, method));
+        }
+
+        _invokeMethod = method;
       }
     }
 
     if (_invokeMethod == null) {
       throw new ConfigException(L.l("'{0}' must have at least one @AroundInvoke method",
-				    cl.getName()));
+                                    cl.getName()));
     }
   }
 
@@ -111,9 +111,9 @@ public class WbInterceptor {
   {
     for (int i = 0; i < _bindingList.size(); i++) {
       if (! isMatch(_bindingList.get(i), bindList))
-	return false;
+        return false;
     }
-    
+
     return true;
   }
 
@@ -127,9 +127,9 @@ public class WbInterceptor {
     /*
     for (int i = 0; i < bindList.size(); i++) {
       if (binding.isMatch(bindList.get(i)))
-	return true;
+        return true;
     }
-    
+
     return false;
     */
   }

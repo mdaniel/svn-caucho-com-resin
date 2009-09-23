@@ -99,24 +99,24 @@ public class EjbMessageBean extends EjbBean {
   {
     super(config, ejbModuleName);
   }
-  
+
   /**
    * Creates a new session bean configuration.
    */
   public EjbMessageBean(EjbConfig ejbConfig,
-			AnnotatedType annType,
-			MessageDriven messageDriven)
+                        AnnotatedType annType,
+                        MessageDriven messageDriven)
   {
     super(ejbConfig, annType, messageDriven.name());
   }
 
-  
+
   /**
    * Creates a new session bean configuration.
    */
   public EjbMessageBean(EjbConfig ejbConfig,
-			AnnotatedType annType,
-			String ejbName)
+                        AnnotatedType annType,
+                        String ejbName)
   {
     super(ejbConfig, annType, ejbName);
   }
@@ -351,32 +351,31 @@ public class EjbMessageBean extends EjbBean {
   {
     if ("destination".equals(name)) {
       if (value instanceof Destination)
-	setDestination((Destination) value);
+        setDestination((Destination) value);
       else {
         String destinationName = String.valueOf(value);
 
-	InjectManager webBeans = InjectManager.create();
+        InjectManager webBeans = InjectManager.create();
 
         Destination dest = null;
 
         Set<Bean<?>> beans = webBeans.getBeans(Destination.class,
-					       Names.create(destinationName));
+                                               Names.create(destinationName));
 
-	if (beans.size() > 0) {
-	  Bean bean = webBeans.getHighestPrecedenceBean(beans);
+        if (beans.size() > 0) {
+          Bean bean = webBeans.resolve(beans);
 
-	  dest = (Destination) webBeans.getReference(bean, Destination.class,
-						     webBeans.createCreationalContext());
-	}
+          dest = (Destination) webBeans.getReference(bean);
+        }
 
-	setDestination(dest);
+        setDestination(dest);
       }
     }
     else if ("messageSelector".equals(name)) {
       _messageSelector = (String) value;
     }
     else if ("message-consumer-max".equals(name)
-	     || "consumer-max".equals(name)) {
+             || "consumer-max".equals(name)) {
       setMessageConsumerMax(Integer.parseInt(String.valueOf(value)));
     }
     else
@@ -405,21 +404,21 @@ public class EjbMessageBean extends EjbBean {
     }
     else if (_activationSpec != null) {
       String specName = _activationSpec.getClass().getName();
-      
+
       ResourceArchive ra
-	= ResourceArchiveManager.findResourceArchive(specName);
+        = ResourceArchiveManager.findResourceArchive(specName);
 
       if (ra == null) {
-	throw new ConfigException(L.l("'{0}' is an unknown activation-spec.  Make sure the JCA adapter is deployed in a .rar file",
-				      specName));
+        throw new ConfigException(L.l("'{0}' is an unknown activation-spec.  Make sure the JCA adapter is deployed in a .rar file",
+                                      specName));
       }
-      
+
       try {
-	_activationSpec.validate();
+        _activationSpec.validate();
       } catch (Exception e) {
-	throw error(e);
+        throw error(e);
       }
-      
+
       MessageListenerConfig listener = ra.getMessageListener(specName);
 
       _messagingType = listener.getMessageListenerType();
@@ -436,13 +435,13 @@ public class EjbMessageBean extends EjbBean {
 
     ApiMethod ejbCreate
       = getEJBClassWrapper().getMethod("ejbCreate", new Class[0]);
-    
+
     if (ejbCreate != null) {
       if (! ejbCreate.isPublic() && ! ejbCreate.isProtected())
-	throw error(L.l("{0}: ejbCreate method must be public or protected.",
-			getEJBClass().getName()));
+        throw error(L.l("{0}: ejbCreate method must be public or protected.",
+                        getEJBClass().getName()));
     }
-    
+
     // J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
   }
 
@@ -455,19 +454,19 @@ public class EjbMessageBean extends EjbBean {
 
     if (messageDriven != null) {
       ActivationConfigProperty []activationConfig
-	= messageDriven.activationConfig();
+        = messageDriven.activationConfig();
 
       if (activationConfig != null) {
-	for (ActivationConfigProperty prop : activationConfig) {
-	  addActivationConfigProperty(prop.propertyName(),
-				      prop.propertyValue());
-	  
-	}
+        for (ActivationConfigProperty prop : activationConfig) {
+          addActivationConfigProperty(prop.propertyName(),
+                                      prop.propertyValue());
+
+        }
       }
 
       Class type = messageDriven.messageListenerInterface();
       if (type != null && ! Object.class.equals(type))
-	_messagingType = type;
+        _messagingType = type;
     }
 
     JmsMessageListener listener
@@ -476,7 +475,7 @@ public class EjbMessageBean extends EjbBean {
     if (listener != null) {
       addActivationConfigProperty("destination", listener.destination());
       addActivationConfigProperty("consumer-max",
-				  String.valueOf(listener.consumerMax()));
+                                  String.valueOf(listener.consumerMax()));
     }
   }
 
@@ -534,7 +533,7 @@ public class EjbMessageBean extends EjbBean {
       configureMethods(type);
     }
   }
-  
+
   /**
    * Creates the bean generator for the session bean.
    */
@@ -542,9 +541,9 @@ public class EjbMessageBean extends EjbBean {
   protected BeanGenerator createBeanGenerator()
   {
     _messageBean = new MessageGenerator(getEJBName(), getEJBClassWrapper());
-    
+
     _messageBean.setApi(new ApiClass(_messagingType));
-    
+
     return _messageBean;
   }
 
@@ -579,12 +578,12 @@ public class EjbMessageBean extends EjbBean {
   }
 
   private AbstractServer deployJmsServer(EjbContainer ejbManager,
-					 JavaClassGenerator javaGen)
+                                         JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
     ConnectionFactory factory;
     Destination destination = null;
-    
+
     if (_connectionFactory != null)
       factory = _connectionFactory;
     else
@@ -595,7 +594,7 @@ public class EjbMessageBean extends EjbBean {
 
       factory = webBeans.getReference(ConnectionFactory.class);
     }
-      
+
     if (_destination != null)
       destination = _destination;
     else if (_messageDestinationLink != null) {
@@ -603,16 +602,16 @@ public class EjbMessageBean extends EjbBean {
       dest = getConfig().getMessageDestination(_messageDestinationLink);
 
       if (dest != null)
-	destination = dest.getResolvedDestination();
+        destination = dest.getResolvedDestination();
     }
 
     if (destination == null)
       throw new ConfigException(L.l("ejb-message-bean '{0}' does not have a configured JMS destination or activation-spec",
-				    getEJBName()));
+                                    getEJBName()));
 
     if (factory == null)
       throw new ConfigException(L.l("ejb-message-bean '{0}' does not have a configured JMS connection factory",
-				    getEJBName()));
+                                    getEJBName()));
 
     JmsResourceAdapter ra
       = new JmsResourceAdapter(getEJBName(), factory, destination);
@@ -623,7 +622,7 @@ public class EjbMessageBean extends EjbBean {
     ra.setAcknowledgeMode(_acknowledgeMode);
     ra.setMessageSelector(_messageSelector);
     ra.setSubscriptionName(_subscriptionName);
-    
+
     if (_consumerMax > 0)
       ra.setConsumerMax(_consumerMax);
     else
@@ -636,7 +635,7 @@ public class EjbMessageBean extends EjbBean {
    * Deploys the bean.
    */
   public AbstractServer deployActivationSpecServer(EjbContainer ejbManager,
-						   JavaClassGenerator javaGen)
+                                                   JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
     if (_activationSpec == null)
@@ -647,23 +646,23 @@ public class EjbMessageBean extends EjbBean {
       ResourceArchive raCfg = ResourceArchiveManager.findResourceArchive(specType);
 
       if (raCfg == null)
-	throw error(L.l("'{0}' is an unknown activation-spec.  Make sure the .rar file for the driver is properly installed.",
-			specType));
+        throw error(L.l("'{0}' is an unknown activation-spec.  Make sure the .rar file for the driver is properly installed.",
+                        specType));
 
       Class raClass = raCfg.getResourceAdapterClass();
 
       if (raClass == null)
-	throw error(L.l("resource-adapter class does not exist for activation-spec '{0}'.  Make sure the .rar file for the driver is properly installed.",
-			raClass.getName()));
+        throw error(L.l("resource-adapter class does not exist for activation-spec '{0}'.  Make sure the .rar file for the driver is properly installed.",
+                        raClass.getName()));
 
       InjectManager webBeans = InjectManager.create();
 
       ResourceAdapter ra
-	= (ResourceAdapter) webBeans.getReference(raClass);
+        = (ResourceAdapter) webBeans.getReference(raClass);
 
       if (ra == null) {
-	throw error(L.l("resource-adapter '{0}' must be configured in a <connector> tag.",
-			raClass.getName()));
+        throw error(L.l("resource-adapter '{0}' must be configured in a <connector> tag.",
+                        raClass.getName()));
       }
 
     return deployMessageServer(ejbManager, javaGen, ra, _activationSpec);
@@ -673,21 +672,21 @@ public class EjbMessageBean extends EjbBean {
    * Deploys the bean.
    */
   public AbstractServer deployMessageServer(EjbContainer ejbManager,
-					    JavaClassGenerator javaGen,
-					    ResourceAdapter ra,
-					    ActivationSpec spec)
+                                            JavaClassGenerator javaGen,
+                                            ResourceAdapter ra,
+                                            ActivationSpec spec)
     throws ClassNotFoundException
   {
     MessageServer server;
-    
+
     try {
       if (spec == null)
-	throw new ConfigException(L.l("ActivationSpec is required for MessageServer"));
-      
-      if (ra == null)
-	throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
+        throw new ConfigException(L.l("ActivationSpec is required for MessageServer"));
 
-    
+      if (ra == null)
+        throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
+
+
       server = new MessageServer(ejbManager, getAnnotatedType());
 
       server.setConfigLocation(getFilename(), getLine());
@@ -700,14 +699,14 @@ public class EjbMessageBean extends EjbBean {
       server.setContainerTransaction(isContainerTransaction());
 
       server.setEjbClass(getEJBClass());
-    
+
       Class contextImplClass = javaGen.loadClass(getSkeletonName());
 
       server.setContextImplClass(contextImplClass);
 
       server.setActivationSpec(spec);
       server.setResourceAdapter(ra);
-    
+
       // server.setMessageListenerType(_messagingType);
 
       Class beanClass = javaGen.loadClass(getEJBClass().getName());
@@ -716,16 +715,16 @@ public class EjbMessageBean extends EjbBean {
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(server.getClassLoader());
+        thread.setContextClassLoader(server.getClassLoader());
 
-	ContainerProgram initContainer = getInitProgram();
+        ContainerProgram initContainer = getInitProgram();
 
-	server.setInitProgram(initContainer);
+        server.setInitProgram(initContainer);
 
-	if (getServerProgram() != null)
-	  getServerProgram().configure(server);
+        if (getServerProgram() != null)
+          getServerProgram().configure(server);
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     } catch (Exception e) {
       throw error(e);

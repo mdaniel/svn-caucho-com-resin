@@ -140,7 +140,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (ctor.getParameterTypes().length == 0)
         return true;
 
-      if (ctor.isAnnotationPresent(Initializer.class))
+      if (ctor.isAnnotationPresent(Inject.class))
         return true;
     }
 
@@ -334,6 +334,10 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
+  public void dispose(X instance)
+  {
+  }
+
   /**
    * Binds parameters
    */
@@ -451,8 +455,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   private boolean isUnbound()
   {
-    for (Object annObj : getBindings()) {
-      Annotation ann = (Annotation) annObj;
+    for (Annotation annObj : getQualifiers()) {
+      Annotation ann = annObj;
 
       if (Unbound.class.equals(ann.annotationType()))
         return true;
@@ -590,7 +594,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         }
         else if (hasBindingAnnotation(ctor)) {
           if (best != null && hasBindingAnnotation(best))
-            throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Initializer or by a @Qualifier, because the Java Injection BeanManager can't tell which one to use.",
+            throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Inject or by a @Qualifier, because the Java Injection BeanManager can't tell which one to use.",
                                           beanType.getJavaClass().getName()));
           best = ctor;
           second = null;
@@ -705,7 +709,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (method.getAnnotations().size() == 0)
         continue;
 
-      if (method.isAnnotationPresent(Initializer.class)) {
+      if (method.isAnnotationPresent(Inject.class)) {
         // boolean isOptional = isBindingOptional(field);
 
         List<AnnotatedParameter> params = method.getParameters();
@@ -772,7 +776,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   private static boolean hasBindingAnnotation(AnnotatedConstructor ctor)
   {
-    return ctor.isAnnotationPresent(Initializer.class);
+    return ctor.isAnnotationPresent(Inject.class);
   }
 
   private static boolean hasBindingAnnotation(Method method)

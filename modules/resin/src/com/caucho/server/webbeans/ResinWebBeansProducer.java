@@ -33,7 +33,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
 import com.caucho.config.annotation.ServiceBinding;
-import com.caucho.config.annotation.OsgiServiceBinding;
 import com.caucho.config.inject.BeanStartupEvent;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.inject.InjectManager;
@@ -53,15 +52,13 @@ import java.util.concurrent.*;
 import java.util.logging.*;
 import javax.ejb.*;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.Conversation;
+import javax.enterprise.context.Conversation;
 import javax.enterprise.event.Observes;
 import javax.management.*;
 import javax.transaction.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-
-//import org.osgi.framework.BundleContext;
 
 /**
  * Resin WebBeans producer for the main singletons.

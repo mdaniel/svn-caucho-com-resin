@@ -34,8 +34,8 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
 import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.inject.Singleton;
+import javax.enterprise.inject.Stereotype;
 
 /**
  * @Service is a startup @Stereotype for an @ApplicationScoped bean
@@ -43,9 +43,9 @@ import javax.enterprise.inject.stereotype.Stereotype;
  */
 
 @Stereotype
-@Startup  
-@ApplicationScoped
-@Documented  
+@Startup
+@Singleton
+@Documented
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})
 public @interface Service {

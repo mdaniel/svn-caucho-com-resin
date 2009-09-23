@@ -45,19 +45,19 @@ public class ComponentValueGenerator extends ValueGenerator {
   private static final L10N L = new L10N(ComponentValueGenerator.class);
 
   private final InjectManager _beanManager;
-  private final Bean _comp;
-  
+  private final Bean _bean;
+
   private final String _location;
 
-  public ComponentValueGenerator(String location, Bean comp)
+  public ComponentValueGenerator(String location, Bean bean)
   {
-    if (comp == null)
+    if (bean == null)
       throw new NullPointerException();
-    
+
     _location = location;
 
     _beanManager = InjectManager.create();
-    _comp = comp;
+    _bean = bean;
   }
 
   /**
@@ -65,9 +65,9 @@ public class ComponentValueGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    CreationalContext<?> env = _beanManager.createCreationalContext();
-    Class type = _comp.getBeanClass();
-    
-    return _beanManager.getReference(_comp, type, env);
+    CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
+    Class type = _bean.getBeanClass();
+
+    return _beanManager.getReference(_bean, type, env);
   }
 }

@@ -26,24 +26,30 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package javax.enterprise.context;
 
 /**
- * Initialization lifecycle methods and constructors are declared with
- * the {@literal @Initializer} annotation.
- *
- * After the bean is created and after field injection, the injection
- * {@link javax.inject.manager.Manager} calls any method marked by the
- * {@literal @Initializer} annotation.
+ * Exception thrown when a webbean definition is inconsistent or invalid
  */
-@Documented
-@Retention(RUNTIME)
-@Target({CONSTRUCTOR, METHOD})
-public @interface Initializer {
+
+public class BusyConversationException extends ContextException
+{
+  public BusyConversationException()
+  {
+  }
+
+  public BusyConversationException(String message)
+  {
+    super(message);
+  }
+
+  public BusyConversationException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public BusyConversationException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

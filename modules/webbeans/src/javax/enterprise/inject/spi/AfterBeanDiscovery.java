@@ -29,6 +29,7 @@
 
 package javax.enterprise.inject.spi;
 
+import javax.enterprise.context.spi.Context;
 /**
  * Framework callback after all bean discovery
  *
@@ -48,6 +49,16 @@ public interface AfterBeanDiscovery
    * Registers an extension bean with the BeanManager
    */
   public void addBean(Bean<?> bean);
+
+  /**
+   * Registers a context with the BeanManager
+   */
+  public void addContext(Context context);
+
+  /**
+   * Registers an observer method with the BeanManager
+   */
+  public void addObserverMethod(ObserverMethod<?> observerMethod);
 
   /**
    * Registers an error with the BeanManager, causing the container to abort

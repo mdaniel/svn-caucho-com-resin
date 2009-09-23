@@ -39,10 +39,10 @@ import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.PassivationCapable;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -57,23 +57,23 @@ abstract public class AbstractSingletonBean extends BeanWrapper
   implements Closeable, AnnotatedBean, PassivationCapable
 {
   private ManagedBeanImpl _managedBean;
-  
+
   private Set<Type> _types;
   private Annotated _annotated;
   private Set<Annotation> _bindings;
-  private Set<Annotation> _stereotypes;
+  private Set<Class<? extends Annotation>> _stereotypes;
   private Class<? extends Annotation> _scopeType;
   private String _name;
 
   private String _passivationId;
-  
+
   AbstractSingletonBean(ManagedBeanImpl managedBean,
-			Set<Type> types,
-			Annotated annotated,
-			Set<Annotation> bindings,
-			Set<Annotation> stereotypes,
-			Class<? extends Annotation> scopeType,
-			String name)
+                        Set<Type> types,
+                        Annotated annotated,
+                        Set<Annotation> bindings,
+                        Set<Class<? extends Annotation>> stereotypes,
+                        Class<? extends Annotation> scopeType,
+                        String name)
   {
     super(managedBean.getBeanManager(), managedBean);
 
@@ -86,7 +86,7 @@ abstract public class AbstractSingletonBean extends BeanWrapper
     _scopeType = scopeType;
     _name = name;
   }
-      
+
   //
   // metadata for the bean
   //
@@ -107,15 +107,15 @@ abstract public class AbstractSingletonBean extends BeanWrapper
       return _managedBean.getAnnotatedType();
   }
 
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
     if (_bindings != null)
       return _bindings;
     else
-      return super.getBindings();
+      return super.getQualifiers();
   }
 
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     if (_stereotypes != null)
       return _stereotypes;
@@ -130,7 +130,7 @@ abstract public class AbstractSingletonBean extends BeanWrapper
     else
       return getBean().getName();
   }
-  
+
   /**
    * Return passivation id
    */
@@ -138,7 +138,7 @@ abstract public class AbstractSingletonBean extends BeanWrapper
   {
     if (_passivationId == null)
       _passivationId = calculatePassivationId();
-    
+
     return _passivationId;
   }
 

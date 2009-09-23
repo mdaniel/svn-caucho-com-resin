@@ -46,7 +46,7 @@ import java.lang.annotation.Annotation;
  * }
  * </pre></code>
  */
-public interface ProcessProducerField<X,T> extends ProcessBean<T>
+public interface ProcessProducerField<T,X> extends ProcessBean<X>
 {
-  public AnnotatedField<X> getAnnotatedProducerField();
+  public AnnotatedField<T> getAnnotatedProducerField();
 }

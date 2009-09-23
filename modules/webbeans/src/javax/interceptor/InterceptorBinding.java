@@ -26,19 +26,19 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.context.spi;
+package javax.interceptor;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * The web bean conversation
+ * The @InterceptorBindingType annotation for web beans
  */
-
-public interface Conversation {
-  public void begin();
-  public void begin(String id);
-  public void end();
-
-  public boolean isLongRunning();
-  public String getId();
-  public long getTimeout();
-  public void setTimeout(long timeout);
+@Documented
+@Retention(RUNTIME)
+@Target(ANNOTATION_TYPE)
+public @interface InterceptorBinding {
 }

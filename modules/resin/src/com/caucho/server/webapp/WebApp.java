@@ -369,8 +369,8 @@ public class WebApp extends ServletContextImpl
 
     _classLoader
       = EnvironmentClassLoader.create(controller.getParentClassLoader(),
-				      "web-app:" + getId());
-    
+                                      "web-app:" + getId());
+
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
     initConstructor();
@@ -440,11 +440,11 @@ public class WebApp extends ServletContextImpl
                && _appDir.equals(_parent.getRootDirectory())) {
         throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n", _appDir.getURL()));
       }
-      
+
       _beanManager = InjectManager.create(_classLoader);
       _beanManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
       _beanManager.addExtension(new WebAppInjectExtension(_beanManager, this));
-      
+
       _jspApplicationContext.addELResolver(_beanManager.getELResolver());
     } catch (Throwable e) {
       setConfigException(e);
@@ -464,8 +464,8 @@ public class WebApp extends ServletContextImpl
     InjectManager webBeans = InjectManager.create();
 
     webBeans.addSingleton(_osgiBundle.getBundleContext(),
-			  CauchoDeployment.class, (String) null,
-			  BundleContext.class);
+                          CauchoDeployment.class, (String) null,
+                          BundleContext.class);
     */
   }
 
@@ -872,7 +872,7 @@ public class WebApp extends ServletContextImpl
   {
     return _controller.isVersionAlias();
   }
-  
+
   /**
    * Sets the old version web-app.
    */
@@ -892,7 +892,7 @@ public class WebApp extends ServletContextImpl
   @Configurable
   public Ordering createOrdering() {
     log.finer(L.l("'{0}' ordering tag should not be used inside web application descriptor.", this));
-    
+
     return new Ordering();
   }
 
@@ -995,7 +995,7 @@ public class WebApp extends ServletContextImpl
       config.setServletClass(servletClassName);
 
       if (servlet != null) {
-        CreationalContext context = _beanManager.createCreationalContext();
+        CreationalContext context = _beanManager.createCreationalContext(null);
 
         InjectionTarget injectionTarget
           = _beanManager.createInjectionTarget(servlet.getClass());
@@ -1111,7 +1111,7 @@ public class WebApp extends ServletContextImpl
   public FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
   {
     Class cl = filter.getClass();
-    
+
     return addFilter(filterName, cl.getName(), cl, filter);
   }
 
@@ -1138,7 +1138,7 @@ public class WebApp extends ServletContextImpl
 
       if (filter != null)
         config.setFilter(filter);
-      
+
       addFilter(config);
 
       return config;
@@ -1249,7 +1249,7 @@ public class WebApp extends ServletContextImpl
 
     config.setFilterManager(_filterManager);
     config.setWebApp(this);
-    
+
     _filterManager.addFilter(config);
   }
 
@@ -1569,7 +1569,7 @@ public class WebApp extends ServletContextImpl
   {
     if (filter.isRequest()) {
       if (_requestRewriteDispatch == null)
-	_requestRewriteDispatch = new RewriteDispatch(this);
+        _requestRewriteDispatch = new RewriteDispatch(this);
 
       _requestRewriteDispatch.addAction(filter);
     }
@@ -1582,7 +1582,7 @@ public class WebApp extends ServletContextImpl
   {
     if (rule.isRequest()) {
       if (_requestRewriteDispatch == null)
-	_requestRewriteDispatch = new RewriteDispatch(this);
+        _requestRewriteDispatch = new RewriteDispatch(this);
 
       _requestRewriteDispatch.addRule(rule);
     }
@@ -1603,10 +1603,10 @@ public class WebApp extends ServletContextImpl
   {
     if (dispatch.isRequest())
       _requestRewriteDispatch = dispatch;
-    
+
     if (dispatch.isInclude())
       _includeRewriteDispatch = dispatch;
-    
+
     if (dispatch.isForward())
       _forwardRewriteDispatch = dispatch;
   }
@@ -2066,25 +2066,25 @@ public class WebApp extends ServletContextImpl
       Throwable e1 = e;
       for (;
            e1 != null
-	     && ! (e1 instanceof ConfigException)
+             && ! (e1 instanceof ConfigException)
              && e1.getCause() != null
              && e1.getCause() != e1;
            e1 = e1.getCause()) {
       }
-      
+
       if (e1 != null) {
-	if (e1 instanceof ConfigException) {
-	  if (log.isLoggable(Level.FINE))
-	    log.log(Level.WARNING, e1.toString(), e1);
-	  else
-	    log.warning(e1.getMessage());
-	}
-	else {
-	  log.log(Level.WARNING, e1.toString(), e1);
-	}
+        if (e1 instanceof ConfigException) {
+          if (log.isLoggable(Level.FINE))
+            log.log(Level.WARNING, e1.toString(), e1);
+          else
+            log.warning(e1.getMessage());
+        }
+        else {
+          log.log(Level.WARNING, e1.toString(), e1);
+        }
       }
     }
-    
+
     if (_configException == null)
       _configException = e;
 
@@ -2271,33 +2271,33 @@ public class WebApp extends ServletContextImpl
       _beanManager = InjectManager.getCurrent();
 
       try {
-	// server/1a36
-	
-	Authenticator auth = _beanManager.getReference(Authenticator.class);
+        // server/1a36
 
-	setAttribute("caucho.authenticator", auth);
+        Authenticator auth = _beanManager.getReference(Authenticator.class);
+
+        setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
-	log.finest(e.toString());
+        log.finest(e.toString());
       }
 
       try {
-	if (_login == null)
-	  _login = _beanManager.getReference(Login.class);
+        if (_login == null)
+          _login = _beanManager.getReference(Login.class);
 
-	if (_login == null) {
-	  _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
-	  _login = _beanManager.getReference(Login.class);
-	}
+        if (_login == null) {
+          _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
+          _login = _beanManager.getReference(Login.class);
+        }
 
-	setAttribute("caucho.login", _login);
+        setAttribute("caucho.login", _login);
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
 
       /*
       _beanManager.addObserver(new WebBeansObserver(),
-			    BeanManager.class,
-			    new AnnotationLiteral<Initialized>() {});
+                            BeanManager.class,
+                            new AnnotationLiteral<Initialized>() {});
       */
 
       if (! _metadataComplete) {
@@ -2306,13 +2306,13 @@ public class WebApp extends ServletContextImpl
         List<WebAppFragmentConfig> fragments = sortWebFragments();
 
         _isApplyingWebFragments = true;
-        
+
         for (WebAppConfig fragment : fragments) {
           fragment.getBuilderProgram().configure(this);
         }
 
         _isApplyingWebFragments = false;
-        
+
         _classLoader.addScanListener(this);
       }
 
@@ -2320,7 +2320,7 @@ public class WebApp extends ServletContextImpl
       if (_controller != null)
         parent = _controller.getParent();
       if (_isInheritSession && parent != null
-	  && _sessionManager != parent.getWebApp().getSessionManager()) {
+          && _sessionManager != parent.getWebApp().getSessionManager()) {
         SessionManager sessionManager = _sessionManager;
         _sessionManager = parent.getWebApp().getSessionManager();
 
@@ -2329,10 +2329,10 @@ public class WebApp extends ServletContextImpl
       }
 
       if (_server != null) {
-	if (getSessionManager() != null)
-	  getSessionManager().init();
+        if (getSessionManager() != null)
+          getSessionManager().init();
       }
-      
+
       _roleMapManager = RoleMapManager.create();
 
       _characterEncoding = CharacterEncoding.getLocalEncoding();
@@ -2344,7 +2344,7 @@ public class WebApp extends ServletContextImpl
           validator.validate();
         }
       }
-      
+
       //Servlet 3.0
       initAnnotated();
     } finally {
@@ -2406,7 +2406,7 @@ public class WebApp extends ServletContextImpl
       else
         anonFragments.add(fragment);
     }
-    
+
     if (_absoluteOrdering != null) {
       return getWebFragments(null,
                              _absoluteOrdering,
@@ -2473,7 +2473,7 @@ public class WebApp extends ServletContextImpl
 
         Set<WebAppFragmentConfig> removeSet
           = new HashSet<WebAppFragmentConfig>();
-        
+
         for (
           Iterator<Map.Entry<WebAppFragmentConfig, Set<WebAppFragmentConfig>>>
             entries = parentsMap.entrySet().iterator(); entries.hasNext();) {
@@ -2549,10 +2549,10 @@ public class WebApp extends ServletContextImpl
 
       result.addAll(othersIdx, others.values());
       result.addAll(anonFragments);
-      
+
       anonFragments.clear();
     }
-    
+
     return result;
   }
 
@@ -2662,14 +2662,14 @@ public class WebApp extends ServletContextImpl
         _configException = Environment.getConfigException();
 
       try {
-	if (getSessionManager() != null)
-	  getSessionManager().start();
+        if (getSessionManager() != null)
+          getSessionManager().start();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
 
       _jspApplicationContext.addELResolver(new WebBeansELResolver());
-      
+
       ServletContextEvent event = new ServletContextEvent(this);
 
       for (Listener listener : _listeners) {
@@ -2847,17 +2847,17 @@ public class WebApp extends ServletContextImpl
         chain = new ExceptionFilterChain(_configException);
         invocation.setFilterChain(chain);
         invocation.setDependency(AlwaysModified.create());
-	
+
         return invocation;
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " returned 503 busy for '" + invocation.getRawURI() + "'");
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " returned 503 busy for '" + invocation.getRawURI() + "'");
         int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         chain = new ErrorFilterChain(code);
         invocation.setFilterChain(chain);
         invocation.setDependency(AlwaysModified.create());
-	
+
         return invocation;
       }
       else {
@@ -2869,8 +2869,8 @@ public class WebApp extends ServletContextImpl
         boolean isCache = true;
         if (query != null && query.indexOf("jsp_precompile") >= 0)
           isCache = false;
-	else if (_requestRewriteDispatch != null)
-	  isCache = false;
+        else if (_requestRewriteDispatch != null)
+          isCache = false;
 
         if (isCache)
           entry = _filterChainCache.get(invocation.getContextURI());
@@ -2885,16 +2885,16 @@ public class WebApp extends ServletContextImpl
           chain = _servletMapper.mapServlet(invocation);
 
           if (_requestRewriteDispatch != null) {
-	    FilterChain newChain
-	      = _requestRewriteDispatch.map(invocation.getContextURI(),
-					    invocation.getQueryString(),
-					    chain);
+            FilterChain newChain
+              = _requestRewriteDispatch.map(invocation.getContextURI(),
+                                            invocation.getQueryString(),
+                                            chain);
 
-	    chain = newChain;
+            chain = newChain;
           }
 
-	  // server/13s[o-r]
-	  _filterMapper.buildDispatchChain(invocation, chain);
+          // server/13s[o-r]
+          _filterMapper.buildDispatchChain(invocation, chain);
 
           chain = invocation.getFilterChain();
 
@@ -2915,10 +2915,10 @@ public class WebApp extends ServletContextImpl
         WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
 
         webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
-	chain = webAppChain;
+        chain = webAppChain;
 
-	// TCK: cache needs to be outside because the cache flush conflicts
-	// with the request listener destroy callback
+        // TCK: cache needs to be outside because the cache flush conflicts
+        // with the request listener destroy callback
         // top-level filter elements
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
@@ -2929,17 +2929,17 @@ public class WebApp extends ServletContextImpl
       }
 
       if (_oldWebApp != null
-	  && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
-	Invocation oldInvocation = new Invocation();
-	oldInvocation.copyFrom(invocation);
-	oldInvocation.setWebApp(_oldWebApp);
+          && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
+        Invocation oldInvocation = new Invocation();
+        oldInvocation.copyFrom(invocation);
+        oldInvocation.setWebApp(_oldWebApp);
 
-	_oldWebApp.buildInvocation(oldInvocation);
-	
-	invocation = new VersionInvocation(invocation, this,
-					   oldInvocation,
-					   oldInvocation.getWebApp(),
-					   _oldWebAppExpireTime);
+        _oldWebApp.buildInvocation(oldInvocation);
+
+        invocation = new VersionInvocation(invocation, this,
+                                           oldInvocation,
+                                           oldInvocation.getWebApp(),
+                                           _oldWebAppExpireTime);
       }
 
       return invocation;
@@ -2969,12 +2969,12 @@ public class WebApp extends ServletContextImpl
 
     if (server != null)
       server.clearCache();
-    
+
     WebAppContainer parent = _parent;
 
     if (parent != null)
       parent.clearCache();
-    
+
     // server/1kg1
     synchronized (_filterChainCache) {
       _filterChainCache.clear();
@@ -3055,18 +3055,18 @@ public class WebApp extends ServletContextImpl
       else {
         chain = _servletMapper.mapServlet(invocation);
 
-	if (_includeRewriteDispatch != null
-	    && filterMapper == _includeFilterMapper) {
-	  chain = _includeRewriteDispatch.map(invocation.getContextURI(),
-					      invocation.getQueryString(),
-					      chain);
-	}
-	else if (_forwardRewriteDispatch != null
-		 && filterMapper == _forwardFilterMapper) {
-	  chain = _forwardRewriteDispatch.map(invocation.getContextURI(),
-					      invocation.getQueryString(),
-					      chain);
-	}
+        if (_includeRewriteDispatch != null
+            && filterMapper == _includeFilterMapper) {
+          chain = _includeRewriteDispatch.map(invocation.getContextURI(),
+                                              invocation.getQueryString(),
+                                              chain);
+        }
+        else if (_forwardRewriteDispatch != null
+                 && filterMapper == _forwardFilterMapper) {
+          chain = _forwardRewriteDispatch.map(invocation.getContextURI(),
+                                              invocation.getQueryString(),
+                                              chain);
+        }
 
         filterMapper.buildDispatchChain(invocation, chain);
 
@@ -3085,7 +3085,7 @@ public class WebApp extends ServletContextImpl
       invocation.setFilterChain(chain);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       FilterChain chain = new ExceptionFilterChain(e);
       invocation.setFilterChain(chain);
     } finally {
@@ -3129,8 +3129,8 @@ public class WebApp extends ServletContextImpl
         _parent.buildDispatchInvocation(dispatchInvocation);
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
-					    getVersionContextPath()));
+        throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
+                                            getVersionContextPath()));
       }
       else {
         FilterChain chain = _servletMapper.mapServlet(includeInvocation);
@@ -3153,7 +3153,7 @@ public class WebApp extends ServletContextImpl
       disp = new RequestDispatcherImpl(includeInvocation,
                                        forwardInvocation,
                                        errorInvocation,
-				       dispatchInvocation,
+                                       dispatchInvocation,
                                        this);
 
       getDispatcherCache().put(url, disp);
@@ -3243,8 +3243,8 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(errorInvocation, rawURI);
 
       if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
-					    getVersionContextPath()));
+        throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
+                                            getVersionContextPath()));
       }
       else if (_parent != null) {
         _parent.buildInvocation(loginInvocation);
@@ -3262,7 +3262,7 @@ public class WebApp extends ServletContextImpl
       disp = new RequestDispatcherImpl(loginInvocation,
                                        loginInvocation,
                                        errorInvocation,
-				       loginInvocation,
+                                       loginInvocation,
                                        this);
       disp.setLogin(true);
 
@@ -3281,9 +3281,9 @@ public class WebApp extends ServletContextImpl
   {
     try {
       Invocation invocation = null;
-      
+
       FilterChain chain
-	= _servletManager.createServletChain(servletName, null, invocation);
+        = _servletManager.createServletChain(servletName, null, invocation);
 
       FilterChain includeChain
         = _includeFilterMapper.buildFilterChain(chain, servletName);
@@ -3306,7 +3306,7 @@ public class WebApp extends ServletContextImpl
   {
     if (uri == null)
       throw new NullPointerException();
-    
+
     String realPath = _realPathCache.get(uri);
 
     if (realPath != null)
@@ -3581,8 +3581,8 @@ public class WebApp extends ServletContextImpl
       long beginStop = Alarm.getCurrentTime();
 
       while (_requestCount.get() > 0
-	     && Alarm.getCurrentTime() < beginStop + _shutdownWaitTime
-	     && ! Alarm.isTest()) {
+             && Alarm.getCurrentTime() < beginStop + _shutdownWaitTime
+             && ! Alarm.isTest()) {
         try {
           Thread.interrupted();
           Thread.sleep(100);
@@ -3601,36 +3601,36 @@ public class WebApp extends ServletContextImpl
       _sessionManager = null;
 
       if (sessionManager != null
-	  && (! _isInheritSession || _controller.getParent() == null))
+          && (! _isInheritSession || _controller.getParent() == null))
         sessionManager.close();
 
       if (_servletManager != null)
-	_servletManager.destroy();
+        _servletManager.destroy();
       if (_filterManager != null)
-	_filterManager.destroy();
+        _filterManager.destroy();
 
       // server/10g8 -- webApp listeners after session
       if (_webAppListeners != null) {
-	for (int i = _webAppListeners.size() - 1; i >= 0; i--) {
-	  ServletContextListener listener = _webAppListeners.get(i);
+        for (int i = _webAppListeners.size() - 1; i >= 0; i--) {
+          ServletContextListener listener = _webAppListeners.get(i);
 
-	  try {
-	    listener.contextDestroyed(event);
-	  } catch (Exception e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	}
+          try {
+            listener.contextDestroyed(event);
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
+        }
       }
 
       // server/10g8 -- webApp listeners after session
       for (int i = _listeners.size() - 1; i >= 0; i--) {
-	Listener listener = _listeners.get(i);
+        Listener listener = _listeners.get(i);
 
-	try {
-	  listener.destroy();
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          listener.destroy();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       try {
@@ -3758,19 +3758,19 @@ public class WebApp extends ServletContextImpl
       // search for servlets
 
       for (Bean bean : manager.getBeans(Servlet.class, new CurrentLiteral())) {
-	if (bean instanceof CauchoBean) {
-	  CauchoBean cBean = (CauchoBean) bean;
-	  
-	  for (Annotation ann : cBean.getAnnotations()) {
-	    if (ann.annotationType().equals(WebServlet.class)) {
-	      //ServletConfigImpl config
-	      //  = new ServletConfigImpl(this, ann, manager.getInstance(bean));
+        if (bean instanceof CauchoBean) {
+          CauchoBean cBean = (CauchoBean) bean;
 
-	      // _servletManager.addServlet(config);
-	      
-	    }
-	  }
-	}
+          for (Annotation ann : cBean.getAnnotations()) {
+            if (ann.annotationType().equals(WebServlet.class)) {
+              //ServletConfigImpl config
+              //  = new ServletConfigImpl(this, ann, manager.getInstance(bean));
+
+              // _servletManager.addServlet(config);
+
+            }
+          }
+        }
       }
 
       return false;

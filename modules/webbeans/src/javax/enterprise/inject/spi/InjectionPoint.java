@@ -43,17 +43,17 @@ public interface InjectionPoint
    * injected field's type.
    */
   public Type getType();
-  
+
   /**
-   * Returns the declared bindings on the injection point.
+   * Returns the declared qualifiers on the injection point.
    */
-  public Set<Annotation> getBindings();
-  
+  public Set<Annotation> getQualifiers();
+
   /**
    * Returns the owning bean for the injection point.
    */
   public Bean<?> getBean();
-  
+
   /**
    * Returns the Field for field injection, the Method for method injection,
    * and Constructor for constructor injection.

@@ -19,24 +19,36 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.enterprise.inject.spi;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
 
 /**
- * Disables the bean from the initial discovery.
+ * {@link javax.enterprise.inject.spi.Extension} callback while processing
+ * a producer method.
+ *
+ * <code><pre>
+ * public class MyExtension implements Extension
+ * {
+ *  &lt;T,X> public void
+ *  processProducerBean(@Observes ProcessObserverMethod&lt;T,X> event)
+ *  {
+ *    ...
+ *  }
+ * }
+ * </pre></code>
  */
-@Target({TYPE})
-@Retention(RUNTIME)
-@Documented  
-public @interface Disabled {
+public interface ProcessObserverMethod<T,X>
+{
+  public AnnotatedParameter<T> getAnnotatedEventParameter();
+  public ObserverMethod<T> getObserverMethod();
+  public void addDefinitionError(Throwable t);
 }

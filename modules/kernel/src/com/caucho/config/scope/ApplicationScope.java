@@ -51,7 +51,7 @@ public class ApplicationScope extends ScopeContext {
   public ApplicationScope()
   {
   }
-  
+
   /**
    * Returns true if the scope is currently active.
    */
@@ -59,11 +59,11 @@ public class ApplicationScope extends ScopeContext {
   {
     return true;
    }
-  
+
   /**
    * Returns the scope annotation type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     return ApplicationScoped.class;
   }
@@ -92,14 +92,14 @@ public class ApplicationScope extends ScopeContext {
 
     if (loader != null) {
       DestructionListener listener
-	= (DestructionListener) loader.getAttribute("caucho.destroy");
+        = (DestructionListener) loader.getAttribute("caucho.destroy");
 
       if (listener == null) {
-	listener = new DestructionListener();
-	loader.setAttribute("caucho.destroy", listener);
-	loader.addListener(listener);
+        listener = new DestructionListener();
+        loader.setAttribute("caucho.destroy", listener);
+        loader.addListener(listener);
       }
-      
+
       listener.addValue(comp, value);
     }
   }

@@ -39,7 +39,7 @@ import javax.inject.Scope;
 /**
  * The @SessionScoped represents the servlet session scope
  */
-@Scope
+@NormalScope
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface SessionScoped {

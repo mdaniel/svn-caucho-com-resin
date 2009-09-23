@@ -56,15 +56,12 @@ import java.io.*;
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.PassivationCapable;
-import javax.enterprise.event.IfExists;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Initializer;
-import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Annotated;
@@ -73,7 +70,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.spi.PassivationCapable;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
@@ -100,7 +97,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   // AnnotatedType for ManagedBean, AnnotatedMethod for produces
   private Annotated _annotated;
-  
+
   private Type _type;
   private BaseType _baseType;
 
@@ -109,7 +106,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   private LinkedHashSet<Type> _typeClasses
     = new LinkedHashSet<Type>();
-  
+
   private ArrayList<Annotation> _bindings
     = new ArrayList<Annotation>();
 
@@ -125,14 +122,14 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   private boolean _isNullable;
 
   // protected ScopeContext _scope;
-  
+
   public AbstractIntrospectedBean(InjectManager manager,
-				  Type type,
-				  Annotated annotated)
+                                  Type type,
+                                  Annotated annotated)
   {
     super(manager);
     _annotated = annotated;
-    
+
     _type = type;
 
     if (type instanceof Class) {
@@ -152,12 +149,12 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     return _baseType.getRawClass();
   }
-  
+
   public Type getTargetType()
   {
     return _baseType.toType();
   }
-  
+
   public String getTargetSimpleName()
   {
     return _baseType.getSimpleName();
@@ -167,7 +164,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     return _baseType.toString();
   }
-  
+
   public Class getTargetClass()
   {
     return _baseType.getRawClass();
@@ -185,7 +182,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return  new BeanTypeImpl(getTargetType(), getIntrospectionClass());
   }
   */
-  
+
   protected Class getIntrospectionClass()
   {
     return getTargetClass();
@@ -202,7 +199,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns the bean's binding types
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
     Set<Annotation> set = new LinkedHashSet<Annotation>();
 
@@ -217,19 +214,20 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     if (_passivationId == null)
       _passivationId = calculatePassivationId();
-    
+
     return _passivationId;
   }
 
   /**
    * Returns the bean's stereotypes
    */
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
-    Set<Annotation> set = new LinkedHashSet<Annotation>();
+    Set<Class<? extends Annotation>> set
+      = new LinkedHashSet<Class<? extends Annotation>>();
 
     for (Annotation stereotype : _stereotypes) {
-      set.add(stereotype);
+      set.add(stereotype.annotationType());
     }
 
     return set;
@@ -245,7 +243,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     Annotation []bindings = new Annotation[_bindings.size()];
     _bindings.toArray(bindings);
-    
+
     return bindings;
   }
 
@@ -290,13 +288,13 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       return;
 
     BaseType baseType = addType(type, paramMap);
-    
+
     if (baseType == null)
       return;
 
     HashMap newParamMap = baseType.getParamMap();
     Class cl = baseType.getRawClass();
-    
+
     introspectTypes(cl.getGenericSuperclass(), newParamMap);
 
     for (Type iface : cl.getGenericInterfaces()) {
@@ -313,7 +311,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     if (_types.contains(baseType))
       return null;
-    
+
     _types.add(baseType);
 
     /*
@@ -329,7 +327,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public void introspect()
   {
     super.introspect();
-    
+
     introspectTypes(_baseType.toType());
     introspect(_annotated);
   }
@@ -351,13 +349,13 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     for (Annotation ann : annotated.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Scope.class)) {
-	if (_scope != null && _scope != ann.annotationType())
-	  throw new ConfigException(L.l("{0}: @Scope annotation @{1} conflicts with @{2}.  Java Injection components may only have a single @Scope.",
-					getTargetName(),
-					_scope.getName(),
-					ann.annotationType().getName()));
+        if (_scope != null && _scope != ann.annotationType())
+          throw new ConfigException(L.l("{0}: @Scope annotation @{1} conflicts with @{2}.  Java Injection components may only have a single @Scope.",
+                                        getTargetName(),
+                                        _scope.getName(),
+                                        ann.annotationType().getName()));
 
-	_scope = ann.annotationType();
+        _scope = ann.annotationType();
       }
     }
   }
@@ -369,7 +367,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     for (Annotation ann : annotated.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-	_bindings.add(ann);
+        _bindings.add(ann);
       }
     }
   }
@@ -380,21 +378,21 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   protected void introspectName(Annotated annotated)
   {
     Annotation ann = annotated.getAnnotation(Named.class);
-      
+
     if (ann != null) {
       String value = null;
-	
+
       try {
-	// ioc/0m04
-	Method m = ann.getClass().getMethod("value", new Class[0]);
-	value = (String) m.invoke(ann);
+        // ioc/0m04
+        Method m = ann.getClass().getMethod("value", new Class[0]);
+        value = (String) m.invoke(ann);
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
 
       if (value == null)
-	value = "";
-	  
+        value = "";
+
       _name = value;
     }
   }
@@ -408,27 +406,27 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       Class stereotypeType = stereotype.annotationType();
 
       if (stereotypeType.isAnnotationPresent(Stereotype.class))
-	_stereotypes.add(stereotype);
-	
-      for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
-	Class annType = ann.annotationType();
-	  
-	if (_scope == null && annType.isAnnotationPresent(Scope.class))
-	  _scope = annType;
-	  
-	if (annType.equals(Named.class) && _name == null) {
-	  Named named = (Named) ann;
-	  _name = "";
+        _stereotypes.add(stereotype);
 
-	  if (! "".equals(named.value()))
-	    throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition, because @Stereotypes are used with multiple beans."));
-	}
-	
-	if (annType.isAnnotationPresent(Qualifier.class)
+      for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
+        Class annType = ann.annotationType();
+
+        if (_scope == null && annType.isAnnotationPresent(Scope.class))
+          _scope = annType;
+
+        if (annType.equals(Named.class) && _name == null) {
+          Named named = (Named) ann;
+          _name = "";
+
+          if (! "".equals(named.value()))
+            throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition, because @Stereotypes are used with multiple beans."));
+        }
+
+        if (annType.isAnnotationPresent(Qualifier.class)
             && ! annType.equals(Named.class)) {
-	  throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @Qualifier annotations",
-					ann, stereotype));
-	}
+          throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @Qualifier annotations",
+                                        ann, stereotype));
+        }
       }
     }
   }
@@ -471,7 +469,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     return Serializable.class.isAssignableFrom(getTargetClass());
   }
-  
+
   /**
    * Instantiate the bean.
    */
@@ -479,14 +477,21 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call destroy
    */
   public void destroy(T instance, CreationalContext<T> env)
   {
   }
-  
+
+  /**
+   * Call destroy
+   */
+  public void destroy(T instance)
+  {
+  }
+
   /**
    * Inject the bean.
    */
@@ -495,7 +500,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
   }
 */
-  
+
   /**
    * Call post-construct
    */
@@ -504,7 +509,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
   }
 */
-  
+
   /**
    * Call pre-destroy
    */
@@ -513,6 +518,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
   }
 */
+
+  public void dispose(T instance)
+  {
+  }
 
   /**
    * Returns the set of injection points, for validation.
@@ -528,7 +537,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     sb.append(getTargetSimpleName());
     sb.append("[");
-    
+
     if (_name != null) {
       sb.append("name=");
       sb.append(_name);
@@ -561,7 +570,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     {
       Class annTypeA = a.annotationType();
       Class annTypeB = b.annotationType();
-      
+
       return annTypeA.getName().compareTo(annTypeB.getName());
     }
   }

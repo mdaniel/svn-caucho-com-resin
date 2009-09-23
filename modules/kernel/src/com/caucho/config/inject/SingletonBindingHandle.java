@@ -47,7 +47,7 @@ public class SingletonBindingHandle implements Serializable
   private static final L10N L = new L10N(SingletonBindingHandle.class);
   private static final Logger log
     = Logger.getLogger(SingletonBindingHandle.class.getName());
-  
+
   private final Class _type;
   private final Annotation []_binding;
 
@@ -60,10 +60,10 @@ public class SingletonBindingHandle implements Serializable
   public SingletonBindingHandle(Class type, Annotation ...binding)
   {
     _type = type;
-    
+
     if (binding != null && binding.length == 0)
       binding = null;
-    
+
     _binding = binding;
   }
 
@@ -76,9 +76,9 @@ public class SingletonBindingHandle implements Serializable
       InjectManager inject = InjectManager.create();
 
       Bean bean
-	= inject.getHighestPrecedenceBean(inject.getBeans(_type, _binding));
+        = inject.resolve(inject.getBeans(_type, _binding));
 
-      return inject.create(bean);
+      return inject.getReference(bean);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

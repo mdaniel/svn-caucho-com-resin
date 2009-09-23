@@ -59,5 +59,5 @@ public interface WebBeanMXBean extends ManagedObjectMXBean {
    * Returns the binding types
    */
   @Description("The @BindingType")
-  public String []getBindingTypes();
+  public String []getQualifiers();
 }

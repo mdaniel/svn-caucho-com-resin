@@ -59,9 +59,9 @@ public class ResourceGenerator extends ValueGenerator {
 
   private final Class _type;
   private final String _mappedName;
-  
+
   private final String _jndiName;
-  
+
   private final String _location;
 
   private InjectManager _webBeans;
@@ -69,15 +69,15 @@ public class ResourceGenerator extends ValueGenerator {
   private boolean _isBound;
 
   ResourceGenerator(Class type,
-		    String mappedName,
-		    String jndiName,
-		    String location)
+                    String mappedName,
+                    String jndiName,
+                    String location)
   {
     _type = type;
     _mappedName = mappedName;
-    
+
     _jndiName = jndiName;
-    
+
     _location = location;
   }
 
@@ -97,57 +97,57 @@ public class ResourceGenerator extends ValueGenerator {
   {
     if (_bean == null && ! _isBound) {
       _isBound = false;
-      
+
       InjectManager webBeans = InjectManager.create();
 
       if (_mappedName != null && ! "".equals(_mappedName)) {
-	_bean = InjectIntrospector.bind(_location, _type, _mappedName);
-	
-	if (_bean == null) {
-	  Object value = getJndiValue(_type);
+        _bean = InjectIntrospector.bind(_location, _type, _mappedName);
 
-	  if (value != null)
-	    return value;
-	  
-	  throw new ConfigException(_location + L.l("'{0}' with mappedName='{1}' is an unknown @EJB", _type.getName(), _mappedName));
-	}
+        if (_bean == null) {
+          Object value = getJndiValue(_type);
+
+          if (value != null)
+            return value;
+
+          throw new ConfigException(_location + L.l("'{0}' with mappedName='{1}' is an unknown @EJB", _type.getName(), _mappedName));
+        }
       }
       else if (_jndiName != null && ! "".equals(_jndiName)) {
-	_bean = InjectIntrospector.bind(_location, _type, _jndiName);
-	
-	if (_bean == null) {
-	  Object value = getJndiValue(_type);
+        _bean = InjectIntrospector.bind(_location, _type, _jndiName);
 
-	  if (value != null)
-	    return value;
-	}
+        if (_bean == null) {
+          Object value = getJndiValue(_type);
+
+          if (value != null)
+            return value;
+        }
       }
 
       if (_bean == null) {
-	_bean = InjectIntrospector.bind(_location, _type);
-	
-	if (_bean == null) {
-	  Object value = getJndiValue(_type);
+        _bean = InjectIntrospector.bind(_location, _type);
 
-	  if (value != null)
-	    return value;
+        if (_bean == null) {
+          Object value = getJndiValue(_type);
 
-	  throw new ConfigException(_location + L.l("'{0}'  is an unknown @Resource", _type.getName()));
-	}
+          if (value != null)
+            return value;
+
+          throw new ConfigException(_location + L.l("'{0}'  is an unknown @Resource", _type.getName()));
+        }
       }
 
       if (_bean != null && _jndiName != null && ! "".equals(_jndiName)) {
-	try {
-	  Jndi.bindDeepShort(_jndiName, _bean);
-	} catch (NamingException e) {
-	  throw ConfigException.create(e);
-	}
+        try {
+          Jndi.bindDeepShort(_jndiName, _bean);
+        } catch (NamingException e) {
+          throw ConfigException.create(e);
+        }
       }
     }
 
     if (_bean != null) {
-      CreationalContext<?> env = _webBeans.createCreationalContext();
-      
+      CreationalContext<?> env = _webBeans.createCreationalContext(_bean);
+
       return _webBeans.getReference(_bean, _bean.getBeanClass(), env);
     }
     else
@@ -158,14 +158,14 @@ public class ResourceGenerator extends ValueGenerator {
   {
     if (_jndiName == null || "".equals(_jndiName))
       return null;
-    
+
     try {
       Object value = Jndi.lookup(_jndiName);
 
       if (value != null)
-	return PortableRemoteObject.narrow(value, type);
+        return PortableRemoteObject.narrow(value, type);
       else
-	return null;
+        return null;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -177,16 +177,16 @@ public class ResourceGenerator extends ValueGenerator {
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-    
+
     sb.append(getClass().getSimpleName());
     sb.append("[");
     sb.append(_type.getName());
-    
+
     if (_mappedName != null) {
       sb.append(", mappedName=");
       sb.append(_mappedName);
     }
-    
+
     if (_jndiName != null) {
       sb.append(", jndiName=");
       sb.append(_jndiName);

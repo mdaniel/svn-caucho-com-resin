@@ -44,7 +44,6 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
@@ -205,7 +204,7 @@ public class WebComponent {
 
       _bean = bean;
 
-      Set<Annotation> bindings = bean.getBindings();
+      Set<Annotation> bindings = bean.getQualifiers();
 
       _bindings = new Binding[bindings.size()];
 

@@ -45,7 +45,7 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.PassivationCapable;
+import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
  * Internal implementation for a Bean
@@ -54,7 +54,7 @@ public class SessionBeanImpl<X> extends BeanWrapper<X>
   implements ScopeAdapterBean, PassivationCapable, EjbGeneratedBean
 {
   private static final L10N L = new L10N(SessionBeanImpl.class);
-  
+
   public SessionBeanImpl(ManagedBeanImpl<X> bean)
   {
     super(bean.getBeanManager(), bean);

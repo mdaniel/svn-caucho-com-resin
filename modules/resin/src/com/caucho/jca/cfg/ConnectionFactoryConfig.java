@@ -77,7 +77,7 @@ import javax.resource.spi.*;
 public class ConnectionFactoryConfig extends BeanConfig {
   private static final Logger log
     = Logger.getLogger(ConnectionFactoryConfig.class.getName());
-  
+
   private static L10N L = new L10N(ConnectionFactoryConfig.class);
 
   private ResourceAdapter _ra;
@@ -122,25 +122,25 @@ public class ConnectionFactoryConfig extends BeanConfig {
     InjectManager manager = InjectManager.create();
 
     ManagedConnectionFactory managedFactory
-      = (ManagedConnectionFactory) manager.getReference(comp, ManagedConnectionFactory.class, manager.createCreationalContext());
-    
+      = (ManagedConnectionFactory) manager.getReference(comp);
+
     if (managedFactory instanceof ResourceAdapterAssociation) {
       Class cl = managedFactory.getClass();
 
       ResourceAdapter ra = findResourceAdapter(cl);
 
       ResourceAdapterAssociation factoryAssoc
-	= (ResourceAdapterAssociation) managedFactory;
+        = (ResourceAdapterAssociation) managedFactory;
 
       try {
-	factoryAssoc.setResourceAdapter(ra);
+        factoryAssoc.setResourceAdapter(ra);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
     ResourceManagerImpl rm = ResourceManagerImpl.create();
-	
+
     ConnectionPool cm = rm.createConnectionPool();
 
     if (getName() != null)
@@ -155,20 +155,20 @@ public class ConnectionFactoryConfig extends BeanConfig {
       String trans = rar.getTransactionSupport();
 
       if (trans == null) { // guess XA
-	cm.setXATransaction(true);
-	cm.setLocalTransaction(true);
+        cm.setXATransaction(true);
+        cm.setLocalTransaction(true);
       }
       else if (trans.equals("XATransaction")) {
-	cm.setXATransaction(true);
-	cm.setLocalTransaction(true);
+        cm.setXATransaction(true);
+        cm.setLocalTransaction(true);
       }
       else if (trans.equals("NoTransaction")) {
-	cm.setXATransaction(false);
-	cm.setLocalTransaction(false);
+        cm.setXATransaction(false);
+        cm.setLocalTransaction(false);
       }
       else if (trans.equals("LocalTransaction")) {
-	cm.setXATransaction(false);
-	cm.setLocalTransaction(true);
+        cm.setXATransaction(false);
+        cm.setLocalTransaction(true);
       }
     }
     /*
@@ -183,15 +183,15 @@ public class ConnectionFactoryConfig extends BeanConfig {
       cm.start();
 
       BeanFactory factory
-	= manager.createBeanFactory(connectionFactory.getClass());
-      
-      if (getName() != null) {
-	Jndi.bindDeepShort(getName(), connectionFactory);
+        = manager.createBeanFactory(connectionFactory.getClass());
 
-	factory.name(getName());
-	factory.binding(Names.create(getName()));
-	// server/30i0
-	factory.binding(CurrentLiteral.CURRENT);
+      if (getName() != null) {
+        Jndi.bindDeepShort(getName(), connectionFactory);
+
+        factory.name(getName());
+        factory.binding(Names.create(getName()));
+        // server/30i0
+        factory.binding(CurrentLiteral.CURRENT);
       }
 
       Bean bean = factory.singleton(connectionFactory);
@@ -206,27 +206,27 @@ public class ConnectionFactoryConfig extends BeanConfig {
   {
     if (_ra != null)
       return _ra;
-    
+
     ResourceArchive ra
       = ResourceArchiveManager.findResourceArchive(cl.getName());
 
     if (ra == null) {
       throw new ConfigException(L.l("'{0}' does not have a defined resource-adapter.  Either define it in a &lt;resource-adapter> property or check the rar or META-INF/resin-ra.xml files",
-				    cl.getName()));
+                                    cl.getName()));
     }
-      
+
     InjectManager webBeans = InjectManager.create();
     String raName = ra.getResourceAdapterClass().getName();
 
     Instance<ResourceAdapterController> instance
       = _raControllerInstance.select(Names.create(raName));
-    
+
     ResourceAdapterController raController = instance.get();
 
     if (raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
-				    raName,
-				    cl.getName()));
+                                    raName,
+                                    cl.getName()));
     }
 
     return raController.getResourceAdapter();
@@ -238,4 +238,4 @@ public class ConnectionFactoryConfig extends BeanConfig {
   }
 }
 
-  
+

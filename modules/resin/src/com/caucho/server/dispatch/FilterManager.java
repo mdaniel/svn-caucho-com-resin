@@ -47,14 +47,14 @@ import java.util.logging.Logger;
  */
 public class FilterManager {
   static final Logger log = Logger.getLogger(FilterManager.class.getName());
-  
+
   static final L10N L = new L10N(FilterManager.class);
 
   private Hashtable<String,FilterConfigImpl> _filters
     = new Hashtable<String,FilterConfigImpl>();
 
-  private InjectionTarget _comp;
-  
+  private InjectionTarget _bean;
+
   private Hashtable<String,Filter> _instances
     = new Hashtable<String,Filter>();
 
@@ -71,7 +71,7 @@ public class FilterManager {
   {
     if (config.getServletContext() == null)
       throw new NullPointerException();
-    
+
     _filters.put(config.getFilterName(), config);
   }
 
@@ -91,9 +91,9 @@ public class FilterManager {
   {
     for (String name : _filters.keySet()) {
       try {
-	createFilter(name);
+        createFilter(name);
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -122,7 +122,7 @@ public class FilterManager {
 
         _servletNames.put(filterMapping.getName(), names);
       }
-      
+
       names.addAll(servletNames);
     }
   }
@@ -150,45 +150,45 @@ public class FilterManager {
     if (config == null) {
       throw new ServletException(L.l("`{0}' is not a known filter.  Filters must be defined by <filter> before being used.", filterName));
     }
-    
+
     Class filterClass = config.getFilterClass();
 
     /* XXX:
     if (! config.isAvailable(Alarm.getCurrentTime()))
       throw config.getInitException();
     */
-    
+
     synchronized (config) {
       try {
         Filter filter = _instances.get(filterName);
 
         if (filter != null)
           return filter;
-	
-	InjectManager beanManager = InjectManager.create();
-      
-	_comp = beanManager.createInjectionTarget(filterClass);
+
+        InjectManager beanManager = InjectManager.create();
+
+        _bean = beanManager.createInjectionTarget(filterClass);
 
         filter = config.getFilter();
 
-	CreationalContext env = beanManager.createCreationalContext();
+        CreationalContext env = beanManager.createCreationalContext(null);
         if (filter == null)
-	  filter = (Filter) _comp.produce(env);
+          filter = (Filter) _bean.produce(env);
 
-	_comp.inject(filter, env);
+        _bean.inject(filter, env);
 
-	// InjectIntrospector.configure(filter);
+        // InjectIntrospector.configure(filter);
 
         // Initialize bean properties
         ContainerProgram init = config.getInit();
-        
+
         if (init != null)
           init.configure(filter);
 
-	_comp.postConstruct(filter);
+        _bean.postConstruct(filter);
 
         filter.init(config);
-        
+
         _instances.put(filterName, filter);
 
         /*
@@ -198,25 +198,25 @@ public class FilterManager {
           String jmxName = (domain + ":" +
                             "j2eeType=Filter," +
                             "WebModule=" + getContextPath() + "," +
-                            "J2EEApplication=default," + 
-                            "J2EEServer=" + getJ2EEServerName() + "," + 
+                            "J2EEApplication=default," +
+                            "J2EEServer=" + getJ2EEServerName() + "," +
                             "name=" + filterName);
           getJMXServer().conditionalRegisterObject(filter, jmxName);
         } catch (Throwable e) {
           dbg.log(e);
         }
         */
-        
+
         return filter;
       } catch (ServletException e) {
         // XXX: log(e.getMessage(), e);
-      
+
         // XXX: config.setInitException(e);
-      
+
         throw e;
       } catch (Throwable e) {
         // XXX: log(e.getMessage(), e);
-      
+
         throw new ServletException(e);
       }
     }
@@ -225,7 +225,7 @@ public class FilterManager {
   public void destroy()
   {
     ArrayList<Filter> filterList = new ArrayList<Filter>();
-    
+
     if (_instances != null) {
       synchronized (_instances) {
         Enumeration<Filter> en = _instances.elements();
@@ -236,13 +236,13 @@ public class FilterManager {
         }
       }
     }
-    
+
     for (int i = 0; i < filterList.size(); i++) {
       Filter filter = filterList.get(i);
 
       try {
-	if (_comp != null)
-	  _comp.preDestroy(filter);
+        if (_bean != null)
+          _bean.preDestroy(filter);
 
         filter.destroy();
       } catch (Throwable e) {

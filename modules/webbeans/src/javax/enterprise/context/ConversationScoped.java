@@ -40,7 +40,7 @@ import javax.inject.Scope;
 /**
  * The @ConversationScoped represents the JSF conversation scope
  */
-@Scope
+@NormalScope
 @Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})

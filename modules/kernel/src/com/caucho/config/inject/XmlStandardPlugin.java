@@ -61,15 +61,15 @@ import javax.enterprise.inject.spi.ProcessBean;
 public class XmlStandardPlugin implements Extension
 {
   private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
-  
+
   private InjectManager _manager;
   private ClassLoader _classLoader;
 
   private HashSet<String> _configuredBeans = new HashSet<String>();
-  
+
   private ArrayList<Path> _paths = new ArrayList<Path>();
   private ArrayList<Path> _pendingPaths = new ArrayList<Path>();
-  
+
   private ArrayList<BeansConfig> _pendingBeans = new ArrayList<BeansConfig>();
 
   private ArrayList<Bean> _pendingService = new ArrayList<Bean>();
@@ -79,7 +79,7 @@ public class XmlStandardPlugin implements Extension
   public XmlStandardPlugin(InjectManager manager)
   {
     _manager = manager;
-    
+
     _classLoader = Thread.currentThread().getContextClassLoader();
   }
 
@@ -97,28 +97,28 @@ public class XmlStandardPlugin implements Extension
 
     try {
       for (Path root : paths) {
-	configurePath(root.lookup("META-INF/beans.xml"));
-	configurePath(root.lookup("META-INF/resin-beans.xml"));
+        configurePath(root.lookup("META-INF/beans.xml"));
+        configurePath(root.lookup("META-INF/resin-beans.xml"));
 
-	if (root.getFullPath().endsWith("WEB-INF/classes/")) {
-	  configurePath(root.lookup("../beans.xml"));
-	  configurePath(root.lookup("../resin-beans.xml"));
-	}
+        if (root.getFullPath().endsWith("WEB-INF/classes/")) {
+          configurePath(root.lookup("../beans.xml"));
+          configurePath(root.lookup("../resin-beans.xml"));
+        }
       }
 
       for (int i = 0; i < _pendingBeans.size(); i++) {
-	BeansConfig config = _pendingBeans.get(i);
+        BeansConfig config = _pendingBeans.get(i);
 
-	ArrayList<Class> deployList = config.getDeployList();
+        ArrayList<Class> deployList = config.getDeployList();
 
-	if (deployList != null && deployList.size() > 0) {
-	  _manager.setDeploymentTypes(deployList);
-	}
+        if (deployList != null && deployList.size() > 0) {
+          _manager.setDeploymentTypes(deployList);
+        }
       }
     } catch (Exception e) {
       if (_configException == null)
-	_configException = e;
-      
+        _configException = e;
+
       throw ConfigException.create(e);
     }
   }
@@ -155,8 +155,8 @@ public class XmlStandardPlugin implements Extension
     }
 
     if (type.isAnnotationPresent(Stateful.class)
-	|| type.isAnnotationPresent(Stateless.class)
-	|| type.isAnnotationPresent(MessageDriven.class)) {
+        || type.isAnnotationPresent(Stateless.class)
+        || type.isAnnotationPresent(MessageDriven.class)) {
       event.veto();
     }
   }
@@ -188,12 +188,12 @@ public class XmlStandardPlugin implements Extension
     _pendingService.clear();
 
     for (Bean bean : startupBeans) {
-      CreationalContext<?> env = _manager.createCreationalContext();
-      
+      CreationalContext<?> env = _manager.createCreationalContext(bean);
+
       _manager.getReference(bean, bean.getBeanClass(), env);
     }
   }
-  
+
   private boolean isStartup(Annotated annotated)
   {
     if (annotated == null)
@@ -203,16 +203,16 @@ public class XmlStandardPlugin implements Extension
       Class annType = ann.annotationType();
 
       if (annType.equals(Startup.class))
-	return true;
-      
+        return true;
+
       if (annType.isAnnotationPresent(Startup.class))
-	return true;
-      
+        return true;
+
       if (annType.equals(ServiceStartup.class))
-	return true;
+        return true;
 
       if (annType.isAnnotationPresent(ServiceStartup.class)) {
-	return true;
+        return true;
       }
     }
 

@@ -19,24 +19,34 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
+package javax.enterprise.inject.spi;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.Set;
+
+import javax.enterprise.event.Reception;
+import javax.enterprise.event.TransactionPhase;
 
 /**
- * The transaction annotation for web beans
+ * Abstract introspected view of a Bean injectible field
  */
-
-@Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface AfterTransactionFailure {
+public interface ObserverMethod<T>
+{
+  public Class<?> getBeanClass();
+  public Type getObservedType();
+  public Set<Annotation> getObservedQualifiers();
+  public Reception getReception();
+  public TransactionPhase getTransactionPhase();
+  public void notify(T event);
 }

@@ -79,8 +79,8 @@ public class Mojarra12InjectionProvider
 
     if (log.isLoggable(Level.FINEST))
       log.fine(L.l("{0} injecting bean '{1}'", this, o));
-    
-    target.inject(o, _manager.createCreationalContext());
+
+    target.inject(o, _manager.createCreationalContext(null));
   }
 
   public void invokePreDestroy(Object o)

@@ -19,24 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.context.spi;
+package javax.enterprise.inject;
 
-import javax.enterprise.context.spi.Contextual;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
 
 /**
- * Beans which can be passivated need to return a unique id.
+ * Disables the bean from the initial discovery.
  */
-public interface PassivationCapable {
-  /**
-   * Returns the unique context id for the bean.
-   */
-  public String getId();
+@Target({TYPE})
+@Retention(RUNTIME)
+@Documented
+public @interface Alternative {
 }

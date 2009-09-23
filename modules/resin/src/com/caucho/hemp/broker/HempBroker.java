@@ -85,18 +85,18 @@ public class HempBroker
 
   private HempBrokerManager _manager;
   private DomainManager _domainManager;
-  
+
   // actors
   private final
     ConcurrentHashMap<String,WeakReference<ActorStream>> _actorStreamMap
     = new ConcurrentHashMap<String,WeakReference<ActorStream>>();
-  
+
   private final HashMap<String,Actor> _actorMap
     = new HashMap<String,Actor>();
-  
+
   private final Map<String,WeakReference<Actor>> _actorCache
     = Collections.synchronizedMap(new HashMap<String,WeakReference<Actor>>());
-  
+
   private String _serverId;
 
   private String _domain = "localhost";
@@ -118,14 +118,14 @@ public class HempBroker
 
     if (server == null) {
       throw new IllegalStateException(L.l("{0} must be created from an active server context",
-					  this));
+                                          this));
     }
 
     _serverId = server.getServerId();
 
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
-    
+
     _domainService = new HempDomainService(this, "");
 
     if (_localBroker.getLevel() == null)
@@ -140,14 +140,14 @@ public class HempBroker
 
     if (server == null) {
       throw new IllegalStateException(L.l("{0} must be created from an active server context",
-					  this));
+                                          this));
     }
 
     _serverId = server.getServerId();
-    
+
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
-    
+
     _domain = domain;
     _managerJid = domain;
 
@@ -177,7 +177,7 @@ public class HempBroker
   {
     _aliasList.add(domain);
   }
-  
+
   /**
    * Returns the stream to the broker
    */
@@ -185,7 +185,7 @@ public class HempBroker
   {
     return this;
   }
-  
+
   /**
    * Returns the domain service
    */
@@ -197,7 +197,7 @@ public class HempBroker
   //
   // configuration
   //
-  
+
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
@@ -205,9 +205,9 @@ public class HempBroker
   {
     ActorManager []actorManagerList
       = new ActorManager[_actorManagerList.length + 1];
-    
+
     System.arraycopy(_actorManagerList, 0, actorManagerList, 0,
-		     _actorManagerList.length);
+                     _actorManagerList.length);
     actorManagerList[actorManagerList.length - 1] = actorManager;
     _actorManagerList = actorManagerList;
   }
@@ -220,7 +220,7 @@ public class HempBroker
    * Creates a session
    */
   public ActorClient getConnection(String uid,
-				   String resourceId)
+                                   String resourceId)
   {
     return getConnection(null, uid, resourceId);
   }
@@ -229,15 +229,15 @@ public class HempBroker
    * Creates a session
    */
   public ActorClient getConnection(ActorStream actorStream,
-				   String uid,
-				   String resourceId)
+                                   String uid,
+                                   String resourceId)
   {
     String jid = generateJid(uid, resourceId);
 
     HempConnectionImpl conn = new HempConnectionImpl(this, jid, actorStream);
 
     actorStream = conn.getActorStream();
-    
+
     _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
 
     if (log.isLoggable(Level.FINE))
@@ -246,11 +246,11 @@ public class HempBroker
     int p = jid.indexOf('/');
     if (p > 0) {
       String owner = jid.substring(0, p);
-      
+
       Actor resource = findParentActor(owner);
 
       if (resource != null)
-	resource.onChildStart(jid);
+        resource.onChildStart(jid);
     }
 
     return conn;
@@ -274,10 +274,10 @@ public class HempBroker
     else {
       Base64.encode(sb, _jidGenerator.incrementAndGet());
     }
-    
+
     return sb.toString();
   }
-  
+
   /**
    * Registers a actor
    */
@@ -289,19 +289,19 @@ public class HempBroker
       Actor oldActor = _actorMap.get(jid);
 
       if (oldActor != null)
-	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
-					    jid));
-      
+        throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
+                                            jid));
+
       _actorMap.put(jid, actor);
       _actorCache.put(jid, new WeakReference<Actor>(actor));
     }
-    
+
     synchronized (_actorStreamMap) {
       WeakReference<ActorStream> oldRef = _actorStreamMap.get(jid);
 
       if (oldRef != null && oldRef.get() != null)
-	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
-					    jid));
+        throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
+                                            jid));
 
       ActorStream actorStream = actor.getActorStream();
       _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
@@ -310,20 +310,20 @@ public class HempBroker
     if (log.isLoggable(Level.FINE))
       log.fine(this + " addActor jid=" + jid + " " + actor);
  }
-  
+
   /**
    * Removes a actor
    */
   public void removeActor(Actor actor)
   {
     String jid = actor.getJid();
-    
+
     synchronized (_actorMap) {
       _actorMap.remove(jid);
     }
-    
+
     _actorCache.remove(jid);
-    
+
     synchronized (_actorStreamMap) {
       _actorStreamMap.remove(jid);
     }
@@ -347,7 +347,7 @@ public class HempBroker
   {
     return _domain;
   }
-  
+
   /**
    * getJid() returns null for the broker
    */
@@ -367,8 +367,8 @@ public class HempBroker
       stream.presence(to, from, payload);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " presence (no actor) " + payload
-		  + " {to:" + to + ", from:" + from + "}");
+        log.finer(this + " presence (no actor) " + payload
+                  + " {to:" + to + ", from:" + from + "}");
       }
     }
   }
@@ -377,8 +377,8 @@ public class HempBroker
    * Presence unavailable
    */
   public void presenceUnavailable(String to,
-				      String from,
-				      Serializable data)
+                                      String from,
+                                      Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -386,8 +386,8 @@ public class HempBroker
       stream.presenceUnavailable(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceUnavailable (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceUnavailable (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -396,8 +396,8 @@ public class HempBroker
    * Presence probe
    */
   public void presenceProbe(String to,
-			        String from,
-			        Serializable data)
+                                String from,
+                                Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -405,8 +405,8 @@ public class HempBroker
       stream.presenceProbe(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceProbe (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceProbe (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -415,8 +415,8 @@ public class HempBroker
    * Presence subscribe
    */
   public void presenceSubscribe(String to,
-				    String from,
-				    Serializable data)
+                                    String from,
+                                    Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -424,8 +424,8 @@ public class HempBroker
       stream.presenceSubscribe(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceSubscribe (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceSubscribe (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -434,8 +434,8 @@ public class HempBroker
    * Presence subscribed
    */
   public void presenceSubscribed(String to,
-				     String from,
-				     Serializable data)
+                                     String from,
+                                     Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -443,8 +443,8 @@ public class HempBroker
       stream.presenceSubscribed(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceSubscribed (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceSubscribed (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -453,8 +453,8 @@ public class HempBroker
    * Presence unsubscribe
    */
   public void presenceUnsubscribe(String to,
-				      String from,
-				      Serializable data)
+                                      String from,
+                                      Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -462,8 +462,8 @@ public class HempBroker
       stream.presenceUnsubscribe(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceUnsubscribe (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceUnsubscribe (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -472,8 +472,8 @@ public class HempBroker
    * Presence unsubscribed
    */
   public void presenceUnsubscribed(String to,
-				       String from,
-				       Serializable data)
+                                       String from,
+                                       Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -481,8 +481,8 @@ public class HempBroker
       stream.presenceUnsubscribed(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceUnsubscribed (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceUnsubscribed (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -491,9 +491,9 @@ public class HempBroker
    * Presence error
    */
   public void presenceError(String to,
-			        String from,
-			        Serializable data,
-			        ActorError error)
+                                String from,
+                                Serializable data,
+                                ActorError error)
   {
     ActorStream stream = findActorStream(to);
 
@@ -501,8 +501,8 @@ public class HempBroker
       stream.presenceError(to, from, data, error);
     else {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresenceError (no resource) to=" + to
-		  + " from=" + from + " value=" + data);
+        log.finer(this + " sendPresenceError (no resource) to=" + to
+                  + " from=" + from + " value=" + data);
       }
     }
   }
@@ -513,14 +513,14 @@ public class HempBroker
   public void message(String to, String from, Serializable value)
   {
     Alarm.yieldIfTest();
-    
+
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.message(to, from, value);
     else {
       log.fine(this + " sendMessage to=" + to + " from=" + from
-	       + " is an unknown actor stream.");
+               + " is an unknown actor stream.");
     }
   }
 
@@ -528,19 +528,19 @@ public class HempBroker
    * Sends a message
    */
   public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       ActorError error)
+                               String from,
+                               Serializable value,
+                               ActorError error)
   {
     Alarm.yieldIfTest();
-    
+
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.messageError(to, from, value, error);
     else {
       log.fine(this + " sendMessageError to=" + to + " from=" + from
-	       + " error=" + error + " is an unknown actor stream.");
+               + " error=" + error + " is an unknown actor stream.");
     }
   }
 
@@ -548,21 +548,21 @@ public class HempBroker
    * Query an entity
    */
   public void queryGet(long id, String to, String from,
-			      Serializable payload)
+                              Serializable payload)
   {
     Alarm.yieldIfTest();
-    
+
     ActorStream stream = findActorStream(to);
 
     if (stream != null) {
       try {
-	stream.queryGet(id, to, from, payload);
+        stream.queryGet(id, to, from, payload);
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	ActorError error = ActorError.create(e);
-	
-	queryError(id, from, to, payload, error);
+        log.log(Level.FINER, e.toString(), e);
+
+        ActorError error = ActorError.create(e);
+
+        queryError(id, from, to, payload, error);
       }
 
       return;
@@ -570,15 +570,15 @@ public class HempBroker
 
     if (log.isLoggable(Level.FINE)) {
       log.fine(this + " queryGet to unknown stream to='" + to
-	       + "' from=" + from);
+               + "' from=" + from);
     }
 
     String msg = L.l("'{0}' is an unknown actor for queryGet", to);
-    
+
     ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-				    ActorError.SERVICE_UNAVAILABLE,
-				    msg);
-				    
+                                    ActorError.SERVICE_UNAVAILABLE,
+                                    msg);
+
     queryError(id, from, to, payload, error);
   }
 
@@ -586,26 +586,26 @@ public class HempBroker
    * Query an entity
    */
   public void querySet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     Alarm.yieldIfTest();
-    
+
     ActorStream stream = findActorStream(to);
 
     if (stream == null) {
       if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " querySet to unknown stream '" + to
-		 + "' from=" + from);
+        log.fine(this + " querySet to unknown stream '" + to
+                 + "' from=" + from);
       }
 
       String msg = L.l("'{0}' is an unknown actor for querySet", to);
-    
+
       ActorError error = new ActorError(ActorError.TYPE_CANCEL,
-				      ActorError.SERVICE_UNAVAILABLE,
-				      msg);
-				    
+                                      ActorError.SERVICE_UNAVAILABLE,
+                                      msg);
+
       queryError(id, from, to, payload, error);
 
       return;
@@ -620,27 +620,27 @@ public class HempBroker
   public void queryResult(long id, String to, String from, Serializable value)
   {
     Alarm.yieldIfTest();
-    
+
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
       stream.queryResult(id, to, from, value);
     else
       throw new RuntimeException(L.l("{0}: {1} is an unknown actor stream.",
-				     this, to));
+                                     this, to));
   }
 
   /**
    * Query an entity
    */
   public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable payload,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable payload,
+                         ActorError error)
   {
     Alarm.yieldIfTest();
-    
+
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
@@ -653,16 +653,16 @@ public class HempBroker
   {
     if (jid == null)
       return null;
-    
+
     WeakReference<ActorStream> ref = _actorStreamMap.get(jid);
 
     if (ref != null) {
       ActorStream stream = ref.get();
 
       if (stream != null)
-	return stream;
+        return stream;
     }
-    
+
     if (jid.endsWith("@")) {
       // jms/3d00
       jid = jid + getDomain();
@@ -678,7 +678,7 @@ public class HempBroker
       actorStream = actor.getActorStream();
 
       if (actorStream != null) {
-	return putActorStream(jid, actorStream);
+        return putActorStream(jid, actorStream);
       }
     }
     else {
@@ -688,7 +688,7 @@ public class HempBroker
       ref = _actorStreamMap.get(jid);
 
       if (ref != null)
-	return ref.get();
+        return ref.get();
     }
 
     return null;
@@ -698,12 +698,12 @@ public class HempBroker
   {
     if (actorStream == null)
       return null;
-    
+
     synchronized (_actorStreamMap) {
       WeakReference<ActorStream> ref = _actorStreamMap.get(jid);
 
       if (ref != null)
-	return ref.get();
+        return ref.get();
 
       _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
 
@@ -725,7 +725,7 @@ public class HempBroker
       ref = _actorCache.get(jid);
 
       if (ref != null)
-	return ref.get();
+        return ref.get();
     }
 
     if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0) {
@@ -733,23 +733,23 @@ public class HempBroker
       Actor actor = null;
 
       if (broker instanceof HempBroker) {
-	HempBroker hempBroker = (HempBroker) broker;
+        HempBroker hempBroker = (HempBroker) broker;
 
-	actor = hempBroker.getDomainService();
+        actor = hempBroker.getDomainService();
       }
 
       if (actor != null) {
-	ref = _actorCache.get(jid);
+        ref = _actorCache.get(jid);
 
-	if (ref != null)
-	  return ref.get();
+        if (ref != null)
+          return ref.get();
 
-	_actorCache.put(jid, new WeakReference<Actor>(actor));
+        _actorCache.put(jid, new WeakReference<Actor>(actor));
 
-	return actor;
+        return actor;
       }
     }
-    
+
     int p;
 
     if ((p = jid.indexOf('/')) > 0) {
@@ -759,7 +759,7 @@ public class HempBroker
     }
     else if ((p = jid.indexOf('@')) > 0) {
       String domainName = jid.substring(p + 1);
-      
+
       return findParentActor(domainName);
     }
     else
@@ -783,12 +783,12 @@ public class HempBroker
 
       return actor.getActorStream();
     }
-    
+
     if (broker == this)
       return null;
 
     ActorStream stream = null;
-    
+
     if (_domainManager != null)
       stream = _domainManager.findDomain(domain);
 
@@ -804,7 +804,7 @@ public class HempBroker
 
     return false;
   }
-  
+
   /**
    * Closes a connection
    */
@@ -813,20 +813,20 @@ public class HempBroker
     int p = jid.indexOf('/');
     if (p > 0) {
       String owner = jid.substring(0, p);
-      
+
       Actor actor = findParentActor(owner);
 
       if (actor != null) {
-	try {
-	  actor.onChildStop(jid);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          actor.onChildStop(jid);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
-    
+
     _actorCache.remove(jid);
-    
+
     synchronized (_actorStreamMap) {
       _actorStreamMap.remove(jid);
     }
@@ -842,7 +842,7 @@ public class HempBroker
   public void registerActor(@Observes ProcessBean event)
   {
     Bean bean = event.getBean();
-    
+
     Annotated annotated = event.getAnnotated();
 
     if (annotated == null)
@@ -858,16 +858,15 @@ public class HempBroker
   private void addStartupActor(Bean bean, BamService bamService)
   {
     ActorStartup startup = new ActorStartup(bean, bamService);
-    
+
     Environment.addEnvironmentListener(startup);
   }
 
   private void startActor(Bean bean, BamService bamService)
   {
     InjectManager beanManager = InjectManager.getCurrent();
-      
-    Actor actor = (Actor) beanManager.getReference(bean, Actor.class,
-						   beanManager.createCreationalContext());
+
+    Actor actor = (Actor) beanManager.getReference(bean);
 
     actor.setBrokerStream(this);
 
@@ -888,8 +887,8 @@ public class HempBroker
     // queue
     if (threadMax > 0) {
       bamActor = new MemoryQueueServiceFilter(bamActor,
-					      this,
-					      threadMax);
+                                              this,
+                                              threadMax);
     }
 
     addActor(bamActor);
@@ -900,7 +899,7 @@ public class HempBroker
   public void close()
   {
     _isClosed = true;
-    
+
     _manager.removeBroker(_domain);
 
     for (String alias : _aliasList)
@@ -919,7 +918,7 @@ public class HempBroker
 
     if (bamAnn != null)
       name = bamAnn.name();
-    
+
     if (name == null || "".equals(name))
       name = actor.getJid();
 
@@ -947,14 +946,14 @@ public class HempBroker
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(com.caucho.remote.BamService.class))
-	return (com.caucho.remote.BamService) ann;
+        return (com.caucho.remote.BamService) ann;
 
       // XXX: stereotypes
     }
 
     return null;
   }
-  
+
   @Override
   public String toString()
   {
@@ -980,20 +979,20 @@ public class HempBroker
     {
       return _service;
     }
-    
+
     public void environmentConfigure(EnvironmentClassLoader loader)
     {
     }
-  
+
     public void environmentBind(EnvironmentClassLoader loader)
     {
     }
-  
+
     public void environmentStart(EnvironmentClassLoader loader)
     {
       startActor(_bean, _service);
     }
-  
+
     public void environmentStop(EnvironmentClassLoader loader)
     {
     }
@@ -1006,7 +1005,7 @@ public class HempBroker
     {
       _actor = actor;
     }
-    
+
     public void close()
     {
       removeActor(_actor);

@@ -116,7 +116,7 @@ public class LoginConfig {
   {
     return _realmName;
   }
-  
+
   /**
    * Creates the form-login-config
    */
@@ -124,10 +124,10 @@ public class LoginConfig {
   {
     if (_formLoginConfig == null)
       _formLoginConfig = new ContainerProgram();
-    
+
     return _formLoginConfig;
   }
-  
+
   /**
    * Creates the init
    */
@@ -135,7 +135,7 @@ public class LoginConfig {
   {
     if (_init == null)
       _init = new ContainerProgram();
-    
+
     return _init;
   }
 
@@ -146,51 +146,51 @@ public class LoginConfig {
   {
     try {
       /*
-	if (auth == null)
-	throw new ServletException(L.l("Login needs an authenticator resource with JNDI name java:comp/env/caucho/auth"));
+        if (auth == null)
+        throw new ServletException(L.l("Login needs an authenticator resource with JNDI name java:comp/env/caucho/auth"));
       */
 
       AbstractLogin login;
 
       if (_customType != null) {
-	login = (AbstractLogin) _customType.newInstance();
-      
-	if (_init != null)
-	  _init.configure(login);
+        login = (AbstractLogin) _customType.newInstance();
+
+        if (_init != null)
+          _init.configure(login);
       }
       else if (_authMethod.equalsIgnoreCase("basic")) {
-	BasicLogin basicLogin = new BasicLogin();
-	basicLogin.setRealmName(_realmName);
-	login = basicLogin;
+        BasicLogin basicLogin = new BasicLogin();
+        basicLogin.setRealmName(_realmName);
+        login = basicLogin;
       }
       else if (_authMethod.equalsIgnoreCase("digest")) {
-	DigestLogin digestLogin = new DigestLogin();
-	digestLogin.setRealmName(_realmName);
-	login = digestLogin;
+        DigestLogin digestLogin = new DigestLogin();
+        digestLogin.setRealmName(_realmName);
+        login = digestLogin;
       }
       else if (_authMethod.equalsIgnoreCase("client-cert")) {
-	ClientCertLogin certLogin = new ClientCertLogin();
-	login = certLogin;
+        ClientCertLogin certLogin = new ClientCertLogin();
+        login = certLogin;
       }
       else if (_authMethod.equalsIgnoreCase("form")) {
-	login = new FormLogin();
+        login = new FormLogin();
 
-	if (_formLoginConfig == null)
-	  throw new ConfigException(L.l("'form' authentication requires form-login"));
+        if (_formLoginConfig == null)
+          throw new ConfigException(L.l("'form' authentication requires form-login"));
 
-	_formLoginConfig.configure(login);
+        _formLoginConfig.configure(login);
       }
       else
-	throw new ConfigException(L.l("'{0}' is an unknown auth-type.",
-				       _authMethod));
+        throw new ConfigException(L.l("'{0}' is an unknown auth-type.",
+                                       _authMethod));
 
       if (_authenticator != null)
-	login.setAuthenticator(_authenticator);
+        login.setAuthenticator(_authenticator);
 
       InjectManager manager = InjectManager.create();
       InjectionTarget inject = manager.createInjectionTarget(login.getClass());
-      inject.inject(login, manager.createCreationalContext());
-    
+      inject.inject(login, manager.createCreationalContext(null));
+
       login.init();
 
       return login;

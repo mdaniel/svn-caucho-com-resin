@@ -73,7 +73,7 @@ public class ResinModule
 
   private static final Logger log
     = Logger.getLogger(ResinModule.class.getName());
-  
+
   public final static int XA_STATUS_ACTIVE = 0;
   public final static int XA_STATUS_MARKED_ROLLBACK = 1;
   public final static int XA_STATUS_PREPARED = 2;
@@ -91,8 +91,8 @@ public class ResinModule
    * Converts a string into its binary representation, according to the
    * given encoding, if given, or the script encoding if not given.
    */
-  public static Value resin_string_to_binary(Env env, String string, 
-					     @Optional String encoding)
+  public static Value resin_string_to_binary(Env env, String string,
+                                             @Optional String encoding)
   {
     if (encoding == null || encoding.length() == 0)
       encoding = env.getScriptEncoding();
@@ -121,9 +121,9 @@ public class ResinModule
     if (beans.size() == 0)
       return null;
 
-    Bean bean = beanManager.getHighestPrecedenceBean(beans);
-    CreationalContext env = beanManager.createCreationalContext();
-    
+    Bean bean = beanManager.resolve(beans);
+    CreationalContext env = beanManager.createCreationalContext(bean);
+
     return beanManager.getReference(bean, bean.getBeanClass(), env);
   }
 
@@ -161,7 +161,7 @@ public class ResinModule
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return false;
     }
   }
@@ -178,7 +178,7 @@ public class ResinModule
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return false;
     }
   }
@@ -195,7 +195,7 @@ public class ResinModule
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return false;
     }
   }
@@ -212,7 +212,7 @@ public class ResinModule
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return false;
     }
   }
@@ -229,7 +229,7 @@ public class ResinModule
     } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
-      
+
       return false;
     }
   }
@@ -254,9 +254,9 @@ public class ResinModule
     try {
       // XXX: this could be cached, since it's a constant for the
       // current environment
-      
+
       Context ic = new InitialContext();
-      
+
       return ((UserTransaction) ic.lookup("java:comp/UserTransaction"));
     } catch (NamingException e) {
       throw new QuercusModuleException(e);
@@ -275,7 +275,7 @@ public class ResinModule
 
       if (name == null)
         name = "";
-      
+
       ObjectName objectName = new ObjectName(name);
 
       exploded.put(":domain:", objectName.getDomain());
@@ -301,35 +301,35 @@ public class ResinModule
   {
     try {
       if (exploded == null)
-	return null;
+        return null;
 
       String domain;
 
       Value domainValue = exploded.get(StringValue.create(":domain:"));
 
       if (domainValue.isNull())
-	domain = "*";
+        domain = "*";
       else
-	domain = domainValue.toString();
+        domain = domainValue.toString();
 
       Hashtable<String, String> entries = new Hashtable<String, String>();
 
       for (Map.Entry<Value, Value> entry : exploded.entrySet()) {
-	String key = entry.getKey().toString();
-	String value = entry.getValue().toString();
+        String key = entry.getKey().toString();
+        String value = entry.getValue().toString();
 
-	if (":domain:".equals(key))
-	  continue;
+        if (":domain:".equals(key))
+          continue;
 
-	entries.put(key, value);
+        entries.put(key, value);
       }
 
       ObjectName objectName;
 
       if (entries.isEmpty())
-	objectName = new ObjectName(domain + ":" + "*");
+        objectName = new ObjectName(domain + ":" + "*");
       else
-	objectName = new ObjectName(domain, entries);
+        objectName = new ObjectName(domain, entries);
 
       return objectName.getCanonicalName();
     } catch (MalformedObjectNameException e) {
@@ -348,16 +348,16 @@ public class ResinModule
   {
     try {
       WriteStream out = Vfs.openWrite("stdout:");
-      
+
       out.setNewlineString("\n");
 
       if (args != null) {
-	for (Value v : args) {
-	  if (v != null)
-	    v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
+        for (Value v : args) {
+          if (v != null)
+            v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
 
-	  out.println();
-	}
+          out.println();
+        }
       }
 
       out.close();
@@ -380,7 +380,7 @@ public class ResinModule
 
     if (saveState != null && ! saveState.isModified()) {
       env.restoreState(saveState);
-      
+
       return true;
     }
     else
@@ -399,13 +399,13 @@ public class ResinModule
 
     if (saveState != null) {
       _saveState.put(env.getSelfPath().getURL(), saveState);
-    
+
       return true;
     }
     else
       return false;
   }
-  
+
   /**
    * Clears the current state
    */
@@ -413,11 +413,11 @@ public class ResinModule
   {
     if (_saveState == null)
       return false;
-    
+
     String url = env.getSelfPath().getURL();
-    
+
     SaveState saveState = _saveState.get(url);
-    
+
     if (saveState != null) {
       _saveState.remove(url);
       return true;
@@ -425,7 +425,7 @@ public class ResinModule
     else
       return false;
   }
-  
+
   /**
    * Clears all states.
    */
@@ -441,7 +441,7 @@ public class ResinModule
   public static QuercusDistcache resin_create_distcache(Env env, String name)
   {
     CacheManager manager = CacheManager.createManager();
-    
+
     return new QuercusDistcache(manager.create(name));
   }
 
@@ -466,7 +466,7 @@ public class ResinModule
     public Value put(Env env, StringValue key, Value value)
     {
       String sValue = VariableModule.serialize(env, value);
-      
+
       _cache.put(key.toString(), sValue);
 
       return value;

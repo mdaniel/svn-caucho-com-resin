@@ -33,7 +33,7 @@ package javax.enterprise.inject;
  * the injection {@link javax.enterprise.inject.spi.BeanManager} will
  * throw this exception.
  */
-public class UnproxyableResolutionException extends InjectionException
+public class UnproxyableResolutionException extends ResolutionException
 {
   public UnproxyableResolutionException()
   {
@@ -48,7 +48,7 @@ public class UnproxyableResolutionException extends InjectionException
   {
     super(cause);
   }
-  
+
   public UnproxyableResolutionException(String message, Throwable cause)
   {
     super(message, cause);

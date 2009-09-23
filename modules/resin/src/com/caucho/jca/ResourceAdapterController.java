@@ -55,10 +55,10 @@ public class ResourceAdapterController implements EnvironmentListener
   private ResourceAdapter _ra;
 
   public ResourceAdapterController(Bean<ResourceAdapter> comp,
-				   ResourceArchive raConfig)
+                                   ResourceArchive raConfig)
   {
     _beanManager = InjectManager.create();
-    
+
     _comp = comp;
     _raConfig = raConfig;
 
@@ -68,7 +68,7 @@ public class ResourceAdapterController implements EnvironmentListener
   public ResourceAdapter getResourceAdapter()
   {
     start();
-    
+
     return _ra;
   }
 
@@ -80,10 +80,8 @@ public class ResourceAdapterController implements EnvironmentListener
     if (! _lifecycle.toActive())
       return;
 
-    _ra = (ResourceAdapter) _beanManager.getReference(_comp,
-						      ResourceAdapter.class,
-						      _beanManager.createCreationalContext());
-    
+    _ra = (ResourceAdapter) _beanManager.getReference(_comp);
+
     try {
       _ra.start(ResourceManagerImpl.create());
     } catch (RuntimeException e) {
@@ -105,14 +103,14 @@ public class ResourceAdapterController implements EnvironmentListener
       ResourceAdapter ra = _ra;
 
       if (ra != null)
-	ra.stop();
+        ra.stop();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new StartLifecycleException(e);
     }
   }
-  
+
   /**
    * Handles the environment config phase.
    */
@@ -120,7 +118,7 @@ public class ResourceAdapterController implements EnvironmentListener
     throws StartLifecycleException
   {
   }
-  
+
   /**
    * Handles the environment bind phase.
    */
@@ -128,7 +126,7 @@ public class ResourceAdapterController implements EnvironmentListener
     throws StartLifecycleException
   {
   }
-  
+
   /**
    * Handles the case where the environment is starting (after init).
    */
@@ -138,7 +136,7 @@ public class ResourceAdapterController implements EnvironmentListener
     start();
   }
 
- 
+
   /**
    * Handles the case where the environment is stopping
    */

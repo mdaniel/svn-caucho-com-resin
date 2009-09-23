@@ -39,12 +39,11 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 import javax.decorator.Decorator;
-import javax.enterprise.inject.NonBinding;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorQualifier;
+import javax.interceptor.InterceptorBinding;
 
 /**
  * Generates the skeleton for a session bean.
@@ -65,7 +64,7 @@ public class PojoBean extends BeanGenerator {
   private boolean _isReadResolveEnhanced;
   private boolean _isSingleton;
   private boolean _isSerializeHandle;
-  
+
   public PojoBean(ApiClass beanClass)
   {
     super(beanClass.getName() + "$ResinWebBean", beanClass);
@@ -74,15 +73,15 @@ public class PojoBean extends BeanGenerator {
 
     if (beanClass.isAnnotationPresent(SerializeHandle.class)) {
       _isSerializeHandle = true;
-      
+
       addInterfaceName("java.io.Serializable");
       addInterfaceName("com.caucho.config.inject.HandleAware");
     }
-    
+
     addImport("javax.transaction.*");
 
     _view = new PojoView(this, getBeanClass());
-    
+
     _beanClass = beanClass;
   }
 
@@ -95,46 +94,46 @@ public class PojoBean extends BeanGenerator {
   public void introspect()
   {
     super.introspect();
-    
+
     introspectClass(_beanClass);
 
     for (ApiMethod method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
-	continue;
+        continue;
 
       if (method.getName().equals("readResolve")
-	  && method.getParameterTypes().length == 0) {
-	_hasReadResolve = true;
+          && method.getParameterTypes().length == 0) {
+        _hasReadResolve = true;
       }
 
       int index = _businessMethods.size();
       BusinessMethodGenerator bizMethod
-	= new BusinessMethodGenerator(_view, method, method, index);
+        = new BusinessMethodGenerator(_view, method, method, index);
 
       // ioc/0i10
       if (_businessMethods.contains(bizMethod))
-	continue;
+        continue;
 
       bizMethod.introspect(method, method);
 
       if (! bizMethod.isEnhanced())
-	continue;
-      
+        continue;
+
       if (! method.isPublic() && ! method.isProtected())
-	throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on private methods.", bizMethod));
+        throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on private methods.", bizMethod));
       if (method.isStatic())
-	throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on static methods.", bizMethod));
+        throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on static methods.", bizMethod));
       if (method.isFinal())
-	throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on final methods.", bizMethod));
+        throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on final methods.", bizMethod));
 
       _isEnhanced = true;
 
       _businessMethods.add(bizMethod);
     }
-    
+
     if (Serializable.class.isAssignableFrom(_beanClass.getJavaClass())
-	&& ! _hasReadResolve
-	&& hasTransientInject(_beanClass.getJavaClass())) {
+        && ! _hasReadResolve
+        && hasTransientInject(_beanClass.getJavaClass())) {
       _isReadResolveEnhanced = true;
       _isEnhanced = true;
     }
@@ -146,10 +145,10 @@ public class PojoBean extends BeanGenerator {
   protected void introspectClass(ApiClass cl)
   {
     if (cl.isAnnotationPresent(Interceptor.class)
-	|| cl.isAnnotationPresent(Decorator.class)) {
+        || cl.isAnnotationPresent(Decorator.class)) {
       return;
     }
-    
+
     ArrayList<Annotation> interceptorBindingList
       = new ArrayList<Annotation>();
 
@@ -157,26 +156,26 @@ public class PojoBean extends BeanGenerator {
 
     if (xmlInterceptorBindings != null) {
       for (Annotation ann : xmlInterceptorBindings) {
-	interceptorBindingList.add(ann);
+        interceptorBindingList.add(ann);
       }
     }
     else {
       for (Annotation ann : cl.getAnnotations()) {
-	Class annType = ann.annotationType();
-      
-	if (annType.isAnnotationPresent(Stereotype.class)) {
-	  for (Annotation sAnn : ann.annotationType().getAnnotations()) {
-	    Class sAnnType = sAnn.annotationType();
-	  
-	    if (sAnnType.isAnnotationPresent(InterceptorQualifier.class)) {
-	      interceptorBindingList.add(sAnn);
-	    }
-	  }
-	}
-	  
-	if (annType.isAnnotationPresent(InterceptorQualifier.class)) {
-	  interceptorBindingList.add(ann);
-	}
+        Class annType = ann.annotationType();
+
+        if (annType.isAnnotationPresent(Stereotype.class)) {
+          for (Annotation sAnn : ann.annotationType().getAnnotations()) {
+            Class sAnnType = sAnn.annotationType();
+
+            if (sAnnType.isAnnotationPresent(InterceptorBinding.class)) {
+              interceptorBindingList.add(sAnn);
+            }
+          }
+        }
+
+        if (annType.isAnnotationPresent(InterceptorBinding.class)) {
+          interceptorBindingList.add(ann);
+        }
       }
     }
 
@@ -194,22 +193,22 @@ public class PojoBean extends BeanGenerator {
 
     for (Field field : cl.getDeclaredFields()) {
       if (! Modifier.isTransient(field.getModifiers()))
-	continue;
+        continue;
       if (Modifier.isStatic(field.getModifiers()))
-	continue;
+        continue;
 
       Annotation []annList = field.getDeclaredAnnotations();
       if (annList == null)
-	continue;
+        continue;
 
       for (Annotation ann : annList) {
-	if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-	  return true;
+        if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+          return true;
 
-	/*
-	if (In.class.equals(ann.annotationType()))
-	  return true;
-	*/
+        /*
+        if (In.class.equals(ann.annotationType()))
+          return true;
+        */
       }
     }
 
@@ -220,14 +219,14 @@ public class PojoBean extends BeanGenerator {
   {
     if (! isEnhanced())
       return _beanClass.getJavaClass();
-    
+
     try {
       JavaClassGenerator gen = new JavaClassGenerator();
 
       Class cl = gen.preload(getFullClassName());
 
       if (cl != null)
-	return cl;
+        return cl;
 
       gen.generate(this);
 
@@ -256,9 +255,9 @@ public class PojoBean extends BeanGenerator {
     }
 
     for (Constructor ctor
-	   : _beanClass.getJavaClass().getDeclaredConstructors()) {
+           : _beanClass.getJavaClass().getDeclaredConstructors()) {
       if (Modifier.isPublic(ctor.getModifiers()))
-	generateConstructor(out, ctor);
+        generateConstructor(out, ctor);
     }
 
     generatePostConstruct(out);
@@ -357,26 +356,26 @@ public class PojoBean extends BeanGenerator {
       // XXX: need a handle or serialize to the base class (?)
     }
   }
-  
+
   protected void generateConstructor(JavaWriter out, Constructor ctor)
     throws IOException
   {
     Class []paramTypes = ctor.getParameterTypes();
-    
+
     out.print("public " + getClassName() + "(");
 
     for (int i = 0; i < paramTypes.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       out.printClass(paramTypes[i]);
       out.print(" a" + i);
     }
-    
+
     out.println(")");
 
     generateThrows(out, ctor.getExceptionTypes());
-    
+
     out.println("{");
     out.pushDepth();
 
@@ -384,7 +383,7 @@ public class PojoBean extends BeanGenerator {
 
     for (int i = 0; i < paramTypes.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       out.print("a" + i);
     }
@@ -394,7 +393,7 @@ public class PojoBean extends BeanGenerator {
     for (BusinessMethodGenerator method : _businessMethods) {
       method.generateConstructorTop(out, map);
     }
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -406,10 +405,10 @@ public class PojoBean extends BeanGenerator {
       return;
 
     out.print(" throws ");
-    
+
     for (int i = 0; i < exnCls.length; i++) {
       if (i != 0)
-	out.print(", ");
+        out.print(", ");
 
       out.printClass(exnCls[i]);
     }

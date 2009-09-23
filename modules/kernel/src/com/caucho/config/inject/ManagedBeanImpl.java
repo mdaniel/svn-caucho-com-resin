@@ -53,6 +53,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.inject.Inject;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 
@@ -86,7 +87,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   private Object _scopeAdapter;
 
   public ManagedBeanImpl(InjectManager webBeans,
-			 AnnotatedType beanType)
+                         AnnotatedType beanType)
   {
     super(webBeans, beanType);
 
@@ -101,11 +102,11 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   }
 
   public ManagedBeanImpl(InjectManager webBeans,
-			 AnnotatedType beanType,
-			 InjectionTarget injectionTarget)
+                         AnnotatedType beanType,
+                         InjectionTarget injectionTarget)
   {
     this(webBeans, beanType);
-    
+
     _injectionTarget = injectionTarget;
   }
 
@@ -128,14 +129,14 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     if (type.isInterface())
       throw new ConfigException(L.l("'{0}' is an invalid ManagedBean because it is an interface",
-				    type));
+                                    type));
   }
 
   private boolean isAnnotationPresent(Annotation []annotations, Class type)
   {
     for (Annotation ann : annotations) {
       if (ann.annotationType().equals(type))
-	return true;
+        return true;
     }
 
     return false;
@@ -145,7 +146,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     for (Annotation ann : annotations) {
       if (ann.annotationType().isAnnotationPresent(type))
-	return true;
+        return true;
     }
 
     return false;
@@ -169,22 +170,22 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     return instance;
   }
-  
+
   /**
    * Creates a new instance of the component.
    */
   /*
   public T create(CreationalContext<T> context,
-		  InjectionPoint ij)
+                  InjectionPoint ij)
   {
     T object = createNew(context, ij);
 
     init(object, context);
-    
+
     return object;
   }
   */
-  
+
   public Object getScopeAdapter(CreationalContext cxt)
   {
     if (! (cxt instanceof ConfigContext))
@@ -193,17 +194,17 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     ConfigContext env = (ConfigContext) cxt;
 
     Scope scopeType = getScope().getAnnotation(Scope.class);
-    
+
     // ioc/0520
     if (scopeType != null
-	// && scopeType.normal()
-	&& ! env.canInject(getScope())) {
+        // && scopeType.normal()
+        && ! env.canInject(getScope())) {
       Object value = _scopeAdapter;
 
       if (value == null) {
-	ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
-	_scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
-	value = _scopeAdapter;
+        ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
+        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
+        value = _scopeAdapter;
       }
 
       return value;
@@ -215,7 +216,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   public Object getScopeAdapter()
   {
     Object value = _scopeAdapter;
-	
+
     if (value == null) {
       ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
       _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
@@ -224,12 +225,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     return value;
   }
-  
+
   public Set<ProducesBean<X,?>> getProducerBeans()
   {
     return _producerBeans;
   }
-  
+
   /**
    * Returns the observer methods
    */
@@ -237,7 +238,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     return _observerMethods;
   }
-  
+
   /**
    * Call post-construct
    */
@@ -245,7 +246,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
 
   }
-  
+
   /**
    * Call pre-destroy
    */
@@ -285,16 +286,16 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     for (AnnotatedMethod beanMethod : beanType.getMethods()) {
       if (beanMethod.isAnnotationPresent(Produces.class))
-	addProduces(beanMethod);
+        addProduces(beanMethod);
     }
   }
 
   protected void addProduces(AnnotatedMethod beanMethod)
   {
     Arg []args = introspectArguments(beanMethod.getParameters());
-    
+
     ProducesBean bean = ProducesBean.create(getBeanManager(), this, beanMethod,
-					    args);
+                                            args);
 
     // bean.init();
 
@@ -309,9 +310,9 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
       AnnotatedParameter param = params.get(i);
 
       if (InjectionPoint.class.equals(param.getBaseType()))
-	args[i] = new InjectionPointArg();
+        args[i] = new InjectionPointArg();
       else
-	args[i] = new BeanArg(param.getBaseType(), getBindings(param));
+        args[i] = new BeanArg(param.getBaseType(), getBindings(param));
     }
 
     return args;
@@ -323,7 +324,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     for (Annotation ann : annotated.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-	bindingList.add(ann);
+        bindingList.add(ann);
       }
     }
 
@@ -343,14 +344,14 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     for (AnnotatedMethod<?> beanMethod : beanType.getMethods()) {
       for (AnnotatedParameter param : beanMethod.getParameters()) {
-	if (param.isAnnotationPresent(Observes.class)) {
-	  addObserver(beanMethod);
-	  break;
-	}
+        if (param.isAnnotationPresent(Observes.class)) {
+          addObserver(beanMethod);
+          break;
+        }
       }
     }
   }
-  
+
   protected void addObserver(AnnotatedMethod beanMethod)
   {
     int param = findObserverAnnotation(beanMethod);
@@ -362,20 +363,17 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     Type eventType = method.getGenericParameterTypes()[param];
 
     HashSet<Annotation> bindingSet = new HashSet<Annotation>();
-      
+
     Annotation [][]annList = method.getParameterAnnotations();
     if (annList != null && annList[param] != null) {
       for (Annotation ann : annList[param]) {
-	if (ann.annotationType().equals(IfExists.class))
-	  continue;
-	  
-	if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-	  bindingSet.add(ann);
+        if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+          bindingSet.add(ann);
       }
     }
 
-    if (method.isAnnotationPresent(Initializer.class)) {
-      throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Initializer annotation."));
+    if (method.isAnnotationPresent(Inject.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Inject annotation."));
     }
 
     if (method.isAnnotationPresent(Produces.class)) {
@@ -388,7 +386,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     ObserverMethodImpl observerMethod
       = new ObserverMethodImpl(getBeanManager(), this, beanMethod,
-			       eventType, bindingSet);
+                               eventType, bindingSet);
 
     _observerMethods.add(observerMethod);
   }
@@ -401,14 +399,14 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     for (int i = 0; i < size; i++) {
       AnnotatedParameter param = params.get(i);
-      
+
       for (Annotation ann : param.getAnnotations()) {
-	if (ann instanceof Observes) {
-	  if (observer >= 0)
-	    throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
-	  
-	  observer = i;
-	}
+        if (ann instanceof Observes) {
+          if (observer >= 0)
+            throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
+
+          observer = i;
+        }
       }
     }
 

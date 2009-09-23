@@ -40,8 +40,8 @@ import javax.inject.Scope;
 /**
  * The @RequestScoped represents the servlet request scope
  */
-@Scope
-@Documented  
+@NormalScope
+@Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
 public @interface RequestScoped {

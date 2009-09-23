@@ -19,23 +19,37 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
+package javax.enterprise.context;
 
 /**
- * Observer interface for events
+ * Exception thrown when a webbean definition is inconsistent or invalid
  */
-public interface Observer<T>
+
+public class ContextException extends RuntimeException
 {
-  /**
-   * Called to notify the observer on an event
-   */
-  public boolean notify(T event);
+  public ContextException()
+  {
+  }
+
+  public ContextException(String message)
+  {
+    super(message);
+  }
+
+  public ContextException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public ContextException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

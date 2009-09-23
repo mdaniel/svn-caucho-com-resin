@@ -43,9 +43,9 @@ public class WebBeansContextResolver extends ELResolver {
   public WebBeansContextResolver()
   {
   }
-  
+
   public Class<?> getCommonPropertyType(ELContext context,
-					Object base)
+                                        Object base)
   {
     return Object.class;
   }
@@ -59,8 +59,8 @@ public class WebBeansContextResolver extends ELResolver {
   }
 
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -71,10 +71,10 @@ public class WebBeansContextResolver extends ELResolver {
   }
 
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     if (! (property instanceof String) || base != null)
       return null;
@@ -91,9 +91,8 @@ public class WebBeansContextResolver extends ELResolver {
     if (beans.size() == 0)
       return null;
 
-    Bean bean = webBeans.getHighestPrecedenceBean(beans);
-    Object result = webBeans.getReference(bean, bean.getBeanClass(),
-					  webBeans.createCreationalContext());
+    Bean bean = webBeans.resolve(beans);
+    Object result = webBeans.getReference(bean);
 
     if (result != null) {
       context.setPropertyResolved(true);
@@ -105,21 +104,21 @@ public class WebBeansContextResolver extends ELResolver {
   }
 
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return true;
   }
 
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
     throws PropertyNotFoundException,
-	   PropertyNotWritableException,
-	   ELException
+           PropertyNotWritableException,
+           ELException
   {
   }
 }

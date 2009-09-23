@@ -33,7 +33,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observer;
+import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.TypeLiteral;
 
@@ -44,28 +44,30 @@ public class EventImpl<T> implements Event<T>
   private final Annotation []_bindings;
 
   public EventImpl(BeanManager manager,
-		   Type type,
-		   Annotation []bindings)
+                   Type type,
+                   Annotation []bindings)
   {
     _manager = manager;
     _type = type;
     _bindings = bindings;
   }
-  
+
   public void fire(T event)
   {
     _manager.fireEvent(event, _bindings);
   }
 
-  public void addObserver(Observer<T> observer)
+  /*
+  public void addObserver(ObserverMethod<T> observer)
   {
     _manager.addObserver(observer, _bindings);
   }
 
-  public void removeObserver(Observer<T> observer)
+  public void removeObserver(ObserverMethod<T> observer)
   {
     _manager.removeObserver(observer);
   }
+  */
 
   public Event<T> select(Annotation... bindings)
   {
@@ -75,15 +77,15 @@ public class EventImpl<T> implements Event<T>
     // ioc/0b54 - union would cause problems with @Current
     return new EventImpl(_manager, _type, bindings);
   }
-  
+
   public <U extends T> Event<U> select(Class<U> subtype,
-				       Annotation... bindings)
+                                       Annotation... bindings)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public <U extends T> Event<U> select(TypeLiteral<U> subtype,
-				       Annotation... bindings)
+                                       Annotation... bindings)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

@@ -39,8 +39,8 @@ import javax.inject.Scope;
 /**
  * The @ApplicationScoped represents the servlet application scope
  */
-@Scope
-@Documented  
+@NormalScope
+@Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
 public @interface ApplicationScoped {

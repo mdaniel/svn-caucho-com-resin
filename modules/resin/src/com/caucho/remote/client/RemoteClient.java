@@ -49,7 +49,7 @@ import javax.annotation.PostConstruct;
  */
 public class RemoteClient extends BeanConfig
 {
-  private static final Logger log 
+  private static final Logger log
     = Logger.getLogger(RemoteClient.class.getName());
   private static final L10N L = new L10N(RemoteClient.class);
 
@@ -62,7 +62,7 @@ public class RemoteClient extends BeanConfig
   {
     setBeanConfigClass(ProtocolProxyFactory.class);
   }
-  
+
   /**
    * Sets the proxy interface class.
    */
@@ -72,7 +72,7 @@ public class RemoteClient extends BeanConfig
 
     if (! type.isInterface())
       throw new ConfigException(L.l("remote-client interface '{0}' must be an interface",
-				    type.getName()));
+                                    type.getName()));
   }
 
   protected void deploy()
@@ -80,11 +80,11 @@ public class RemoteClient extends BeanConfig
     ProtocolProxyFactory proxyFactory = (ProtocolProxyFactory) getObject();
 
     Object proxy = proxyFactory.createProxy(_interface);
-    
+
     InjectManager beanManager = InjectManager.create();
 
     BeanFactory factory = beanManager.createBeanFactory(_interface);
-    
+
     if (getName() != null) {
       factory = factory.name(getName());
 
@@ -96,10 +96,10 @@ public class RemoteClient extends BeanConfig
     }
 
     for (Annotation stereotype : getStereotypeList()) {
-      factory = factory.stereotype(stereotype);
+      factory = factory.stereotype(stereotype.annotationType());
     }
 
-    factory.stereotype(ConfiguredLiteral.create());
+    factory.stereotype(Configured.class);
 
     _bean = (AbstractBean) factory.singleton(proxy);
 

@@ -48,12 +48,12 @@ public class InstanceBeanImpl<T> implements Bean<T>
   private InjectManager _beanManager;
   private Type _type;
   private Annotation []_bindings;
-  
+
   private InstanceImpl _instance;
-  
+
   InstanceBeanImpl(InjectManager beanManager,
-		   Type type,
-		   Annotation []bindings)
+                   Type type,
+                   Annotation []bindings)
   {
     _beanManager = beanManager;
     _type = type;
@@ -66,16 +66,16 @@ public class InstanceBeanImpl<T> implements Bean<T>
   {
     return (Class) _type;
   }
-  
+
   public T create(CreationalContext<T> env)
   {
     return (T) _instance;
   }
-  
+
   public void destroy(T instance, CreationalContext<T> env)
   {
   }
-  
+
   //
   // metadata for the bean
   //
@@ -83,7 +83,7 @@ public class InstanceBeanImpl<T> implements Bean<T>
   /**
    * Returns the bean's binding annotations.
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
     return null;
   }
@@ -91,7 +91,7 @@ public class InstanceBeanImpl<T> implements Bean<T>
   /**
    * Returns the bean's stereotype annotations.
    */
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     return null;
   }
@@ -117,6 +117,14 @@ public class InstanceBeanImpl<T> implements Bean<T>
    * Returns true if the bean can be null
    */
   public boolean isNullable()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the bean can be null
+   */
+  public boolean isAlternative()
   {
     return false;
   }

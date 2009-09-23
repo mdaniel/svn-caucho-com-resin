@@ -43,15 +43,15 @@ import javax.enterprise.inject.spi.Bean;
  */
 public class WebBeansELResolver extends ELResolver {
   private final InjectManager _webBeans;
-  
+
   public WebBeansELResolver()
   {
     _webBeans = InjectManager.create();
     _webBeans.update();
   }
-  
+
   public Class<?> getCommonPropertyType(ELContext context,
-					Object base)
+                                        Object base)
   {
     return Object.class;
   }
@@ -65,8 +65,8 @@ public class WebBeansELResolver extends ELResolver {
   }
 
   public Class<?> getType(ELContext context,
-			  Object base,
-			  Object property)
+                          Object base,
+                          Object property)
   {
     Object value = getValue(context, base, property);
 
@@ -77,10 +77,10 @@ public class WebBeansELResolver extends ELResolver {
   }
 
   public Object getValue(ELContext context,
-			 Object base,
-			 Object property)
+                         Object base,
+                         Object property)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     if (base != null || ! (property instanceof String))
       return null;
@@ -94,9 +94,9 @@ public class WebBeansELResolver extends ELResolver {
     if (beans.size() == 0)
       return null;
 
-    Bean bean = _webBeans.getHighestPrecedenceBean(beans);
-    CreationalContext env = _webBeans.createCreationalContext();
-    
+    Bean bean = _webBeans.resolve(beans);
+    CreationalContext env = _webBeans.createCreationalContext(bean);
+
     result = _webBeans.getReference(bean, bean.getBeanClass(), env);
 
     if (result != null) {
@@ -109,21 +109,21 @@ public class WebBeansELResolver extends ELResolver {
   }
 
   public boolean isReadOnly(ELContext context,
-			    Object base,
-			    Object property)
+                            Object base,
+                            Object property)
     throws PropertyNotFoundException,
-	   ELException
+           ELException
   {
     return true;
   }
 
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
     throws PropertyNotFoundException,
-	   PropertyNotWritableException,
-	   ELException
+           PropertyNotWritableException,
+           ELException
   {
   }
 }

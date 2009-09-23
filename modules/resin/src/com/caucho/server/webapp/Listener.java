@@ -62,7 +62,7 @@ public class Listener extends DescriptionGroupConfig {
   private Object _object;
 
   private InjectionTarget _target;
-  
+
   private ContainerProgram _init;
 
   /**
@@ -72,7 +72,7 @@ public class Listener extends DescriptionGroupConfig {
     throws ConfigException
   {
     Config.checkCanInstantiate(cl);
-    
+
     if (ServletContextListener.class.isAssignableFrom(cl)) {
     }
     else if (ServletContextAttributeListener.class.isAssignableFrom(cl)) {
@@ -89,8 +89,8 @@ public class Listener extends DescriptionGroupConfig {
     }
     else
       throw new ConfigException(L.l("listener-class '{0}' does not implement any web-app listener interface.",
-				    cl.getName()));
-    
+                                    cl.getName()));
+
     _listenerClass = cl;
   }
 
@@ -130,8 +130,8 @@ public class Listener extends DescriptionGroupConfig {
     InjectManager webBeans = InjectManager.create();
     _target = webBeans.createInjectionTarget(_listenerClass);
 
-    CreationalContext env = webBeans.createCreationalContext();
-    
+    CreationalContext env = webBeans.createCreationalContext(null);
+
     _object = _target.produce(env);
     _target.inject(_object, env);
 
@@ -145,7 +145,7 @@ public class Listener extends DescriptionGroupConfig {
 
     return _object;
   }
-  
+
   public void destroy()
   {
     _target.preDestroy(_object);

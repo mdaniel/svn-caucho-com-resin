@@ -52,31 +52,31 @@ public class InstanceImpl<T> implements Instance<T>
   private Bean _bean;
 
   InstanceImpl(InjectManager beanManager,
-	       Type type,
-	       Annotation []bindings)
+               Type type,
+               Annotation []bindings)
   {
     _beanManager = beanManager;
     _type = type;
     _bindings = bindings;
-    
+
     _beanSet = beanManager.getBeans(type, bindings);
     _version = beanManager.getVersion();
   }
-  
+
   /**
    * Returns an instance of the selected bean
    */
   public T get()
   {
     if (_bean == null) {
-      _bean = _beanManager.getHighestPrecedenceBean(getBeanSet());
+      _bean = _beanManager.resolve(getBeanSet());
     }
 
     if (_bean == null)
       return null;
-    
-    CreationalContext<?> env = _beanManager.createCreationalContext();
-    
+
+    CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
+
     return (T) _beanManager.getReference(_bean, _bean.getBeanClass(), env);
   }
 
@@ -92,7 +92,7 @@ public class InstanceImpl<T> implements Instance<T>
    * Restricts the instance to a subtype and bindings.
    */
   public <U extends T> Instance<U> select(Class<U> subtype,
-					  Annotation... bindings)
+                                          Annotation... bindings)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -101,7 +101,7 @@ public class InstanceImpl<T> implements Instance<T>
    * Restricts the instance to a subtype and bindings.
    */
   public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
-					  Annotation... bindings)
+                                          Annotation... bindings)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -156,7 +156,7 @@ public class InstanceImpl<T> implements Instance<T>
     {
       Bean<T> bean = _beanIter.next();
 
-      CreationalContext<?> env = _manager.createCreationalContext();
+      CreationalContext<?> env = _manager.createCreationalContext(bean);
 
       return (T) _manager.getReference(bean, bean.getBeanClass(), env);
     }

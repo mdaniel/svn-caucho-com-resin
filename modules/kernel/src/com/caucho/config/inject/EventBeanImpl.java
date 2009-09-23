@@ -51,12 +51,12 @@ public class EventBeanImpl<T> implements Bean<T>
   private InjectManager _beanManager;
   private Type _type;
   private Annotation []_bindings;
-  
+
   private EventImpl _event;
-  
+
   EventBeanImpl(InjectManager beanManager,
-		   Type type,
-		   Annotation []bindings)
+                   Type type,
+                   Annotation []bindings)
   {
     _beanManager = beanManager;
     _type = type;
@@ -69,16 +69,16 @@ public class EventBeanImpl<T> implements Bean<T>
   {
     return Event.class;
   }
-  
+
   public T create(CreationalContext<T> env)
   {
     return (T) _event;
   }
-  
+
   public void destroy(T instance, CreationalContext<T> env)
   {
   }
-  
+
   //
   // metadata for the bean
   //
@@ -86,7 +86,7 @@ public class EventBeanImpl<T> implements Bean<T>
   /**
    * Returns the bean's binding annotations.
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
     return null;
   }
@@ -94,7 +94,7 @@ public class EventBeanImpl<T> implements Bean<T>
   /**
    * Returns the bean's stereotype annotations.
    */
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     return null;
   }
@@ -120,6 +120,14 @@ public class EventBeanImpl<T> implements Bean<T>
    * Returns true if the bean can be null
    */
   public boolean isNullable()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the bean can be null
+   */
+  public boolean isAlternative()
   {
     return false;
   }

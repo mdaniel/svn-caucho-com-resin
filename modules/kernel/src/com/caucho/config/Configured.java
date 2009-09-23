@@ -32,14 +32,14 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.Stereotype;
 
 /**
  * Default deployment type for an XML file, with higher priority than
  * Production.
  */
 @Stereotype
-@Documented  
+@Documented
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})
 public @interface Configured {

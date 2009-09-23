@@ -47,20 +47,20 @@ public class InjectionPointImpl implements InjectionPoint
   private final HashSet<Annotation> _bindings = new HashSet<Annotation>();
 
   InjectionPointImpl(Bean bean,
-		     AnnotatedField field)
+                     AnnotatedField field)
   {
     this(bean, field, field.getJavaMember());
   }
 
   InjectionPointImpl(Bean bean,
-		     AnnotatedParameter param)
+                     AnnotatedParameter param)
   {
     this(bean, param, param.getDeclaringCallable().getJavaMember());
   }
 
   InjectionPointImpl(Bean bean,
-		     Annotated annotated,
-		     Member member)
+                     Annotated annotated,
+                     Member member)
   {
     _bean = bean;
     _annotated = annotated;
@@ -68,14 +68,14 @@ public class InjectionPointImpl implements InjectionPoint
 
     for (Annotation ann : annotated.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-	_bindings.add(ann);
+        _bindings.add(ann);
       }
     }
 
     if (_bindings.size() == 0)
       _bindings.add(CurrentLiteral.CURRENT);
   }
-  
+
   /**
    * Returns the declared type of the injection point, e.g. an
    * injected field's type.
@@ -84,15 +84,15 @@ public class InjectionPointImpl implements InjectionPoint
   {
     return _annotated.getBaseType();
   }
-  
+
   /**
    * Returns the declared bindings on the injection point.
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
     return _bindings;
   }
-  
+
   /**
    * Returns the owning bean for the injection point.
    */
@@ -100,7 +100,7 @@ public class InjectionPointImpl implements InjectionPoint
   {
     return _bean;
   }
-  
+
   /**
    * Returns the Field for field injection, the Method for method injection,
    * and Constructor for constructor injection.

@@ -42,43 +42,44 @@ import java.util.Set;
 
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.IfExists;
+import javax.enterprise.event.Reception;
+import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.ObserverMethod;
 
 /**
  * Internal implementation for a producer Bean
  */
-public class ObserverMethodImpl<X, T> implements Observer<T> {
+public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   private InjectManager _beanManager;
 
   private Bean<X> _bean;
   private AnnotatedMethod<X> _method;
 
   private Type _type;
-  private Set<Annotation> _bindings;
-  
+  private Set<Annotation> _qualifiers;
+
   private BeanArg []_args;
   private boolean _isIfExists;
 
   ObserverMethodImpl(InjectManager beanManager,
-		     Bean<X> bean,
-		     AnnotatedMethod<X> method,
-		     Type type,
-		     Set<Annotation> bindings)
+                     Bean<X> bean,
+                     AnnotatedMethod<X> method,
+                     Type type,
+                     Set<Annotation> qualifiers)
   {
     _beanManager = beanManager;
     _bean = bean;
     _method = method;
     _method.getJavaMember().setAccessible(true);
     _type = type;
-    _bindings = bindings;
+    _qualifiers = qualifiers;
 
     introspect();
   }
@@ -110,36 +111,38 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
   /**
    * Returns the observed event bindings
    */
-  public Set<Annotation> getObservedEventBindings()
+  public Set<Annotation> getObservedQualifiers()
   {
-    return _bindings;
+    return _qualifiers;
   }
 
   private void introspect()
   {
     List<AnnotatedParameter<X>> parameters = _method.getParameters();
 
+    /*
     if (parameters.size() == 1) {
       if (parameters.get(0).isAnnotationPresent(IfExists.class)) {
-	_isIfExists = true;
+        _isIfExists = true;
       }
-      
+
       return;
     }
+    */
 
     _args = new BeanArg[parameters.size()];
 
     for (int i = 0; i < _args.length; i++) {
       AnnotatedParameter<?> param = parameters.get(i);
 
-      if (param.isAnnotationPresent(Observes.class)) {
-	if (param.isAnnotationPresent(IfExists.class)) {
-	  _isIfExists = true;
-	}
+      Observes observes = param.getAnnotation(Observes.class);
+
+      if (observes != null) {
+        _isIfExists = observes.receive() == Reception.IF_EXISTS;
       }
       else {
-	_args[i] = new BeanArg(param.getBaseType(),
-			       _beanManager.getBindings(param.getAnnotations()));
+        _args[i] = new BeanArg(param.getBaseType(),
+                               _beanManager.getQualifiers(param.getAnnotations()));
       }
     }
   }
@@ -147,12 +150,12 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
   /**
    * Send the event notification.
    */
-  public boolean notify(T event)
+  public void notify(T event)
   {
     Object instance = getInstance();
 
     if (instance == null)
-      return false;
+      return;
 
     Method method = _method.getJavaMember();
 
@@ -160,24 +163,22 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
       method.invoke(instance, getEventArguments(event));
     } catch (IllegalArgumentException e) {
       String loc = (method.getDeclaringClass().getSimpleName() + "."
-		    + method.getName() + ": ");
+                    + method.getName() + ": ");
 
       throw new InjectionException(loc + e.getMessage(), e.getCause());
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
       String loc = (method.getDeclaringClass().getSimpleName() + "."
-		    + method.getName() + ": ");
+                    + method.getName() + ": ");
 
       throw new InjectionException(loc + e.getMessage(), e.getCause());
     } catch (Exception e) {
       String loc = (method.getDeclaringClass().getSimpleName() + "."
-		    + method.getName() + ": ");
+                    + method.getName() + ": ");
 
       throw new InjectionException(loc + e.getMessage(), e.getCause());
     }
-
-    return false;
   }
 
   protected Object getInstance()
@@ -190,13 +191,14 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
       Context context = _beanManager.getContext(scopeType);
 
       if (context != null)
-	return context.get(bean);
+        return context.get(bean);
       else
-	return null;
+        return null;
     }
 
-    CreationalContext env = _beanManager.createCreationalContext();
-    
+    CreationalContext env
+      = _beanManager.createCreationalContext(getParentBean());
+
     return _beanManager.getReference(getParentBean(), type, env);
   }
 
@@ -207,17 +209,28 @@ public class ObserverMethodImpl<X, T> implements Observer<T> {
 
     Object []args = new Object[_args.length];
 
-    CreationalContext env = _beanManager.createCreationalContext();
+    CreationalContext env
+      = _beanManager.createCreationalContext(getParentBean());
     for (int i = 0; i < _args.length; i++) {
       BeanArg arg = _args[i];
 
       if (arg != null)
-	args[i] = arg.eval((ConfigContext) env);
+        args[i] = arg.eval((ConfigContext) env);
       else
-	args[i] = event;
+        args[i] = event;
     }
 
     return args;
+  }
+
+  public Reception getReception()
+  {
+    return Reception.ALWAYS;
+  }
+
+  public TransactionPhase getTransactionPhase()
+  {
+    return TransactionPhase.IN_PROGRESS;
   }
 
   public Set<InjectionPoint> getInjectionPoints()

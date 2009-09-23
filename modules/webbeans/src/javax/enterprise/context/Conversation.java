@@ -19,23 +19,27 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
+package javax.enterprise.context;
 
 /**
- * event types
+ * The web bean conversation
  */
-public enum Notify
-{
-  IF_EXISTS,
-    SYNCHRONOUSLY,
-    ASYNCHRONOUSLY
-}
 
+public interface Conversation {
+  public void begin();
+  public void begin(String id);
+  public void end();
+
+  public boolean isLongRunning();
+  public String getId();
+  public long getTimeout();
+  public void setTimeout(long timeout);
+  public boolean isTransient();
+}

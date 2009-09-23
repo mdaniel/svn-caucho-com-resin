@@ -27,31 +27,18 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.enterprise.inject.spi;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+
+import java.util.Set;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * When two {@link javax.enterprise.inject.BindingType @BindingType} annotations
- * with the same annotationType are passed to
- * a {@link javax.enterprise.inject.spi.BeanManager} method, this exception is thrown.
+ * Abstract introspected view of a Bean injectible field
  */
-public class DuplicateBindingTypeException extends InjectionException
+public interface PassivationCapable
 {
-  public DuplicateBindingTypeException()
-  {
-  }
-
-  public DuplicateBindingTypeException(String message)
-  {
-    super(message);
-  }
-
-  public DuplicateBindingTypeException(Throwable cause)
-  {
-    super(cause);
-  }
-  
-  public DuplicateBindingTypeException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+  public String getId();
 }

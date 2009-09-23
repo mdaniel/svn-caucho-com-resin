@@ -51,7 +51,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 import javax.naming.*;
@@ -64,7 +64,7 @@ abstract public class AbstractBeanConfig {
 
   private String _filename;
   private int _line;
-  
+
   private String _name;
   private String _jndiName;
 
@@ -72,15 +72,15 @@ abstract public class AbstractBeanConfig {
 
   private ArrayList<Annotation> _annotations
     = new ArrayList<Annotation>();
-  
+
   private ArrayList<Annotation> _bindings
     = new ArrayList<Annotation>();
-  
+
   private ArrayList<Annotation> _stereotypes
     = new ArrayList<Annotation>();
 
   private Class _scope;
-  
+
   private ContainerProgram _init;
 
   protected AbstractBeanConfig()
@@ -212,7 +212,7 @@ abstract public class AbstractBeanConfig {
   {
     return _init;
   }
-  
+
   protected void initImpl()
   {
   }
@@ -224,7 +224,7 @@ abstract public class AbstractBeanConfig {
 
     if (_cl == null) {
       throw new ConfigException(L.l("{0} requires a 'class' attribute",
-				    getClass().getSimpleName()));
+                                    getClass().getSimpleName()));
     }
 
     InjectManager beanManager = InjectManager.create();
@@ -242,7 +242,7 @@ abstract public class AbstractBeanConfig {
     for (Annotation stereotype : _stereotypes) {
       beanType.addAnnotation(stereotype);
     }
-    
+
     for (Annotation ann : _annotations) {
       beanType.addAnnotation(ann);
     }
@@ -266,14 +266,14 @@ abstract public class AbstractBeanConfig {
       bean = factory.bean();
       beanManager.addBean(bean);
     }
-      
+
 
     // XXXX: JNDI isn't right
     if (_jndiName != null) {
       try {
-	Jndi.bindDeepShort(_jndiName, bean);
+        Jndi.bindDeepShort(_jndiName, bean);
       } catch (NamingException e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
   }

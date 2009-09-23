@@ -58,11 +58,11 @@ import javax.enterprise.inject.spi.Producer;
  */
 public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   implements InjectionTarget<T>
-{	     
+{
   private static final L10N L = new L10N(ProducesBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];
-  
+
   private final Bean _producerBean;
   private final AnnotatedMethod _beanMethod;
 
@@ -74,9 +74,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   private boolean _isBound;
 
   protected ProducesBean(InjectManager manager,
-			 Bean producerBean,
-			 AnnotatedMethod beanMethod,
-			 Arg []args)
+                         Bean producerBean,
+                         AnnotatedMethod beanMethod,
+                         Arg []args)
   {
     super(manager, beanMethod.getBaseType(), beanMethod);
 
@@ -92,9 +92,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   }
 
   public static ProducesBean create(InjectManager manager,
-				    Bean producer,
-				    AnnotatedMethod beanMethod,
-				    Arg []args)
+                                    Bean producer,
+                                    AnnotatedMethod beanMethod,
+                                    Arg []args)
   {
     ProducesBean bean = new ProducesBean(manager, producer, beanMethod, args);
     bean.introspect();
@@ -127,10 +127,10 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   protected void initDefault()
   {
     if (getDeploymentType() == null
-	&& _producer.getDeploymentType() != null) {
+        && _producer.getDeploymentType() != null) {
       setDeploymentType(_producer.getDeploymentType());
     }
-    
+
     super.initDefault();
   }
   */
@@ -149,10 +149,10 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   protected String getDefaultName()
   {
     String methodName = _beanMethod.getJavaMember().getName();
-      
+
     if (methodName.startsWith("get") && methodName.length() > 3) {
       return (Character.toLowerCase(methodName.charAt(3))
-	      + methodName.substring(4));
+              + methodName.substring(4));
     }
     else
       return methodName;
@@ -162,7 +162,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     for (Class paramType : _beanMethod.getJavaMember().getParameterTypes()) {
       if (InjectionPoint.class.equals(paramType))
-	return true;
+        return true;
     }
 
     return false;
@@ -175,7 +175,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     return _producerBean;
   }
-  
+
   public T create(CreationalContext<T> createEnv)
   {
     return produce(createEnv);
@@ -193,12 +193,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     ConfigContext env = (ConfigContext) cxt;
     Class type = _producerBean.getBeanClass();
-      
+
     X factory = (X) getBeanManager().getReference(_producerBean, type, env);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
-					  this, _producerBean));
+                                          this, _producerBean));
     }
 
     return produce(factory, env.getInjectionPoint());
@@ -213,23 +213,25 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       Object []args;
 
       if (_args.length > 0) {
-	args = new Object[_args.length];
+        args = new Object[_args.length];
 
-	ConfigContext env
-	  = (ConfigContext) getBeanManager().createCreationalContext();
+        InjectManager inject = getBeanManager();
 
-	for (int i = 0; i < args.length; i++) {
-	  if (_args[i] instanceof InjectionPointArg)
-	    args[i] = ij;
-	  else
-	    args[i] = _args[i].eval(env);
-	}
+        ConfigContext env
+          = (ConfigContext) inject.createCreationalContext(_producerBean);
+
+        for (int i = 0; i < args.length; i++) {
+          if (_args[i] instanceof InjectionPointArg)
+            args[i] = ij;
+          else
+            args[i] = _args[i].eval(env);
+        }
       }
       else
-	args = NULL_ARGS;
+        args = NULL_ARGS;
 
       T value = (T) _beanMethod.getJavaMember().invoke(bean, args);
-      
+
       return value;
     } catch (RuntimeException e) {
       throw e;
@@ -259,12 +261,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     synchronized (this) {
       if (_isBound)
-	return;
+        return;
 
       _isBound = true;
-      
+
       Method method = _beanMethod.getJavaMember();
-    
+
       String loc = InjectManager.location(method);
 
       Type []param = method.getGenericParameterTypes();
@@ -275,18 +277,18 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       _args = new Arg[param.length];
 
       for (int i = 0; i < param.length; i++) {
-	_args[i] = bindParameter(loc, param[i], beanParams.get(i).getAnnotations());
+        _args[i] = bindParameter(loc, param[i], beanParams.get(i).getAnnotations());
 
-	if (_args[i] != null) {
-	}
-	else if (InjectionPoint.class.equals(param[i])) {
-	  _args[i] = createInjectionPointBean(getManager());
-	}
-	else {
-	  throw error(_beanMethod.getJavaMember(),
-		      L.l("Type '{0}' for method parameter #{1} has no matching component.",
-			  getSimpleName(param[i]), i));
-	}
+        if (_args[i] != null) {
+        }
+        else if (InjectionPoint.class.equals(param[i])) {
+          _args[i] = createInjectionPointBean(getManager());
+        }
+        else {
+          throw error(_beanMethod.getJavaMember(),
+                      L.l("Type '{0}' for method parameter #{1} has no matching component.",
+                          getSimpleName(param[i]), i));
+        }
       }
       */
     }
@@ -296,14 +298,14 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     return new ProducesInjectionPointBean(this, ij);
   }
-  
+
   /**
    * Disposes a bean instance
    */
   public void preDestroy(T instance)
   {
   }
-  
+
   /**
    * Returns the owning producer
    */
@@ -311,7 +313,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Returns the owning disposer
    */
@@ -319,7 +321,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public AnnotatedParameter<X> getDisposedParameter()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -345,15 +347,13 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     sb.append(".");
     sb.append(method.getName());
     sb.append("()");
-    
+
     sb.append(", {");
 
     boolean isFirst = true;
-    for (Object obj : getBindings()) {
-      Annotation ann = (Annotation) obj;
-      
+    for (Annotation ann : getQualifiers()) {
       if (! isFirst)
-	sb.append(", ");
+        sb.append(", ");
 
       sb.append(ann);
 
@@ -361,7 +361,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     }
 
     sb.append("}");
-    
+
     if (getName() != null) {
       sb.append(", name=");
       sb.append(getName());

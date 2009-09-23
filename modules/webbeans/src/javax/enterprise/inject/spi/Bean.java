@@ -44,14 +44,14 @@ public interface Bean<T> extends Contextual<T> {
   //
 
   /**
+   * True for a disabled alternative.
+   */
+  public boolean isAlternative();
+
+  /**
    * Returns the bean class.
    */
   public Class<?> getBeanClass();
-
-  /**
-   * Returns the bean's binding annotations.
-   */
-  public Set<Annotation> getBindings();
 
   /**
    * Returns the set of injection points, for validation.
@@ -69,6 +69,11 @@ public interface Bean<T> extends Contextual<T> {
   public boolean isNullable();
 
   /**
+   * Returns the bean's qualifier annotations.
+   */
+  public Set<Annotation> getQualifiers();
+
+  /**
    * Returns the bean's scope type.
    */
   public Class<? extends Annotation> getScope();
@@ -76,7 +81,7 @@ public interface Bean<T> extends Contextual<T> {
   /**
    * Returns the stereotypes that the bean uses for priority
    */
-  public Set<Annotation> getStereotypes();
+  public Set<Class<? extends Annotation>> getStereotypes();
 
   /**
    * Returns the types that the bean exports for bindings.

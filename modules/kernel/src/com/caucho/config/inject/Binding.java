@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.NonBinding;
+import javax.enterprise.inject.Nonbinding;
 
 /**
  * Introspected annotation binding
@@ -68,7 +68,7 @@ public class Binding {
     for (Method method : methods) {
       if (method.getName().equals("annotationType"))
         continue;
-      else if (method.isAnnotationPresent(NonBinding.class))
+      else if (method.isAnnotationPresent(Nonbinding.class))
         continue;
       else if (method.getParameterTypes().length > 0)
         continue;

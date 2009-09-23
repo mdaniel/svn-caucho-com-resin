@@ -47,7 +47,7 @@ public class SingletonHandle implements Serializable
   private static final L10N L = new L10N(SingletonHandle.class);
   private static final Logger log
     = Logger.getLogger(SingletonHandle.class.getName());
-  
+
   private final String _id;
 
   private SingletonHandle()
@@ -71,10 +71,10 @@ public class SingletonHandle implements Serializable
       Bean bean = inject.getPassivationCapableBean(_id);
 
       if (bean == null)
-	throw new NullPointerException(L.l("'{0}' is an unknown SingletonHandle bean.",
-					   _id));
+        throw new NullPointerException(L.l("'{0}' is an unknown SingletonHandle bean.",
+                                           _id));
 
-      return inject.create(bean);
+      return inject.getReference(bean);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -34,9 +34,9 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import javax.decorator.Decorator;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.Stereotype;
 import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorQualifier;
+import javax.interceptor.InterceptorBinding;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -68,7 +68,7 @@ abstract public class View {
   {
     return _bean;
   }
-  
+
   /**
    * Returns the bean's ejbclass
    */
@@ -119,10 +119,10 @@ abstract public class View {
   protected void introspectClass(ApiClass cl)
   {
     if (cl.isAnnotationPresent(Interceptor.class)
-	|| cl.isAnnotationPresent(Decorator.class)) {
+        || cl.isAnnotationPresent(Decorator.class)) {
       return;
     }
-    
+
     ArrayList<Annotation> interceptorBindingList
       = new ArrayList<Annotation>();
 
@@ -130,26 +130,26 @@ abstract public class View {
 
     if (xmlInterceptorBindings != null) {
       for (Annotation ann : xmlInterceptorBindings) {
-	interceptorBindingList.add(ann);
+        interceptorBindingList.add(ann);
       }
     }
     else {
       for (Annotation ann : cl.getAnnotations()) {
-	Class annType = ann.annotationType();
-      
-	if (annType.isAnnotationPresent(Stereotype.class)) {
-	  for (Annotation sAnn : ann.annotationType().getAnnotations()) {
-	    Class sAnnType = sAnn.annotationType();
-	  
-	    if (sAnnType.isAnnotationPresent(InterceptorQualifier.class)) {
-	      interceptorBindingList.add(sAnn);
-	    }
-	  }
-	}
-	  
-	if (annType.isAnnotationPresent(InterceptorQualifier.class)) {
-	  interceptorBindingList.add(ann);
-	}
+        Class annType = ann.annotationType();
+
+        if (annType.isAnnotationPresent(Stereotype.class)) {
+          for (Annotation sAnn : ann.annotationType().getAnnotations()) {
+            Class sAnnType = sAnn.annotationType();
+
+            if (sAnnType.isAnnotationPresent(InterceptorBinding.class)) {
+              interceptorBindingList.add(sAnn);
+            }
+          }
+        }
+
+        if (annType.isAnnotationPresent(InterceptorBinding.class)) {
+          interceptorBindingList.add(ann);
+        }
       }
     }
 
@@ -178,7 +178,7 @@ abstract public class View {
   public void generateContextPrologue(JavaWriter out)
     throws IOException
   {
-    
+
   }
 
   /**

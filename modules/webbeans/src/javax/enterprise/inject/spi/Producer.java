@@ -46,6 +46,11 @@ public interface Producer<T>
   public T produce(CreationalContext<T> ctx);
 
   /**
+   * Dispose the bean.
+   */
+  public void dispose(T instance);
+
+  /**
    * Returns the injection points.
    */
   public Set<InjectionPoint> getInjectionPoints();

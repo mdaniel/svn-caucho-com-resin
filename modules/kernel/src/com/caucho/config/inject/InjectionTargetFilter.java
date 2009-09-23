@@ -57,7 +57,7 @@ public class InjectionTargetFilter<T> implements InjectionTarget<T>
     _next = next;
     _init = init;
   }
-  
+
   public T produce(CreationalContext<T> ctx)
   {
     return _next.produce(ctx);
@@ -75,14 +75,19 @@ public class InjectionTargetFilter<T> implements InjectionTarget<T>
     if (_init != null)
       _init.inject(instance, (ConfigContext) ctx);
   }
-  
+
   public void postConstruct(T instance)
   {
     _next.postConstruct(instance);
   }
-  
+
   public void preDestroy(T instance)
   {
     _next.preDestroy(instance);
+  }
+
+  public void dispose(T instance)
+  {
+    _next.dispose(instance);
   }
 }

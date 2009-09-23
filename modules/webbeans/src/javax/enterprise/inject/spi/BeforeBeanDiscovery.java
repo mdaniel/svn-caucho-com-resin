@@ -55,6 +55,9 @@ public interface BeforeBeanDiscovery
    */
   public void addAnnotatedType(AnnotatedType<?> type);
 
+  public void addInterceptorBinding(Class<? extends Annotation> bindingType,
+                                    Annotation... bindingTypeDef);
+
   /**
    * Registers an annotation as a binding type, so applications can use
    * existing annotations for binding without modifying the annotation
@@ -62,15 +65,12 @@ public interface BeforeBeanDiscovery
    *
    * @param bindingType the annotation to register as a binding type.
    */
-  public void addBindingType(Class<? extends Annotation> bindingType);
+  public void addQualifier(Class<? extends Annotation> qualifier);
 
-  public void addScopeType(Class<? extends Annotation> scopeType,
-			   boolean isNormal,
-			   boolean isPassivating);
+  public void addScope(Class<? extends Annotation> scopeType,
+                       boolean isNormal,
+                       boolean isPassivating);
 
   public void addStereotype(Class<? extends Annotation> stereotype,
-			    Annotation... stereotypeDef);
-
-  public void addInterceptorBindingType(Class<? extends Annotation> bindingType,
-					Annotation... bindingTypeDef);
+                            Annotation... stereotypeDef);
 }

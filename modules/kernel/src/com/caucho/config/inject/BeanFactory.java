@@ -53,13 +53,13 @@ import javax.enterprise.inject.spi.*;
 public class BeanFactory<T>
 {
   private ManagedBeanImpl<T> _managedBean;
-  
+
   private Object _value;
 
   private Set<Type> _types;
   private AnnotatedElementImpl _annotated;
   private Set<Annotation> _bindings;
-  private Set<Annotation> _stereotypes;
+  private Set<Class<? extends Annotation>> _stereotypes;
   private String _name;
   private Class<? extends Annotation> _scopeType;
 
@@ -80,7 +80,7 @@ public class BeanFactory<T>
   public BeanFactory name(String name)
   {
     _name = name;
-    
+
     return this;
   }
 
@@ -90,7 +90,7 @@ public class BeanFactory<T>
       _bindings = new LinkedHashSet<Annotation>();
 
     _bindings.add(ann);
-    
+
     return this;
   }
 
@@ -100,27 +100,27 @@ public class BeanFactory<T>
       _bindings = new LinkedHashSet<Annotation>();
 
     _bindings.addAll(list);
-    
+
     return this;
   }
 
-  public BeanFactory stereotype(Annotation ann)
+  public BeanFactory stereotype(Class annType)
   {
     if (_stereotypes == null)
-      _stereotypes = new LinkedHashSet<Annotation>();
+      _stereotypes = new LinkedHashSet<Class<? extends Annotation>>();
 
-    _stereotypes.add(ann);
-    
+    _stereotypes.add(annType);
+
     return this;
   }
 
-  public BeanFactory stereotype(Collection<Annotation> list)
+  public BeanFactory stereotype(Collection<Class<? extends Annotation>> list)
   {
     if (_stereotypes == null)
-      _stereotypes = new LinkedHashSet<Annotation>();
+      _stereotypes = new LinkedHashSet<Class<? extends Annotation>>();
 
     _stereotypes.addAll(list);
-    
+
     return this;
   }
 
@@ -130,7 +130,7 @@ public class BeanFactory<T>
       _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
 
     _annotated.addAnnotation(ann);
-    
+
     return this;
   }
 
@@ -142,7 +142,7 @@ public class BeanFactory<T>
     for (Annotation ann : list) {
       _annotated.addAnnotation(ann);
     }
-    
+
     return this;
   }
 
@@ -160,10 +160,10 @@ public class BeanFactory<T>
 
     if (types != null) {
       for (Type type : types) {
-	_types.add(type);
+        _types.add(type);
       }
     }
-    
+
     return this;
   }
 
@@ -171,8 +171,8 @@ public class BeanFactory<T>
   {
     if (init != null) {
       if (_init == null) {
-	_init = new ContainerProgram();
-	_injectionTarget = new InjectionTargetFilter(_injectionTarget, _init);
+        _init = new ContainerProgram();
+        _injectionTarget = new InjectionTargetFilter(_injectionTarget, _init);
       }
 
       _init.addProgram(init);
@@ -184,36 +184,36 @@ public class BeanFactory<T>
   public Bean singleton(Object value)
   {
     return new SingletonBean(_managedBean,
-			     _types,
-			     _annotated,
-			     _bindings,
-			     _stereotypes,
-			     _scopeType,
-			     _name,
-			     value);
+                             _types,
+                             _annotated,
+                             _bindings,
+                             _stereotypes,
+                             _scopeType,
+                             _name,
+                             value);
   }
 
   public Bean injection(InjectionTarget injection)
   {
     return new InjectionBean(_managedBean,
-			     _types,
-			     _annotated,
-			     _bindings,
-			     _stereotypes,
-			     _scopeType,
-			     _name,
-			     injection);
+                             _types,
+                             _annotated,
+                             _bindings,
+                             _stereotypes,
+                             _scopeType,
+                             _name,
+                             injection);
   }
 
   public Bean bean()
   {
     return new InjectionBean(_managedBean,
-			     _types,
-			     _annotated,
-			     _bindings,
-			     _stereotypes,
-			     _scopeType,
-			     _name,
-			     _injectionTarget);
+                             _types,
+                             _annotated,
+                             _bindings,
+                             _stereotypes,
+                             _scopeType,
+                             _name,
+                             _injectionTarget);
   }
 }

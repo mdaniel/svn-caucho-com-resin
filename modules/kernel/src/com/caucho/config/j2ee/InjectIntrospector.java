@@ -49,7 +49,6 @@ import javax.ejb.EJBs;
 import javax.naming.*;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Initializer;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
@@ -80,7 +79,7 @@ public class InjectIntrospector {
 
   public static InjectProgram
     introspectProgram(Class type,
-		      HashMap<Method,Annotation[]> methodAnnMap)
+                      HashMap<Method,Annotation[]> methodAnnMap)
   {
     ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
 
@@ -92,11 +91,11 @@ public class InjectIntrospector {
 
     return new InjectProgram(injectList);
   }
-  
+
   public static void
     introspectInit(ArrayList<ConfigProgram> initList,
-		   Class type,
-		   HashMap<Method,Annotation[]> methodAnnotationMap)
+                   Class type,
+                   HashMap<Method,Annotation[]> methodAnnotationMap)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
@@ -108,31 +107,31 @@ public class InjectIntrospector {
       Annotation []annList = null;
 
       if (methodAnnotationMap != null)
-	annList = methodAnnotationMap.get(method);
+        annList = methodAnnotationMap.get(method);
 
       if (annList == null)
-	annList = method.getAnnotations();
-      
+        annList = method.getAnnotations();
+
       if (! isAnnotationPresent(annList, PostConstruct.class)) {
-	// && ! isAnnotationPresent(annList, Initializer.class)) {
-	continue;
+        // && ! isAnnotationPresent(annList, Inject.class)) {
+        continue;
       }
 
       if (method.getParameterTypes().length == 1
-	  && InvocationContext.class.equals(method.getParameterTypes()[0]))
-	continue;
-      
+          && InvocationContext.class.equals(method.getParameterTypes()[0]))
+        continue;
+
       if (isAnnotationPresent(annList, PostConstruct.class)
-	  && method.getParameterTypes().length != 0) {
+          && method.getParameterTypes().length != 0) {
           throw new ConfigException(location(method)
-				    + L.l("{0}: @PostConstruct is requires zero arguments"));
+                                    + L.l("{0}: @PostConstruct is requires zero arguments"));
       }
-	
+
       PostConstructProgram initProgram
-	= new PostConstructProgram(method);
+        = new PostConstructProgram(method);
 
       if (! initList.contains(initProgram))
-	initList.add(initProgram);
+        initList.add(initProgram);
     }
   }
 
@@ -143,7 +142,7 @@ public class InjectIntrospector {
 
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(type))
-	return true;
+        return true;
     }
 
     return false;
@@ -156,12 +155,12 @@ public class InjectIntrospector {
 
     for (Annotation ann : annList) {
       if (ann.annotationType().equals(type))
-	return ann;
+        return ann;
     }
 
     return null;
   }
-  
+
   public static void
     introspectDestroy(ArrayList<ConfigProgram> destroyList, Class type)
     throws ConfigException
@@ -173,18 +172,18 @@ public class InjectIntrospector {
 
     for (Method method : type.getDeclaredMethods()) {
       if (method.isAnnotationPresent(PreDestroy.class)) {
-	Class []types = method.getParameterTypes();
-	
+        Class []types = method.getParameterTypes();
+
         if (types.length == 0) {
-	}
-	else if (types.length == 1 && types[0].equals(InvocationContext.class)) {
-	  // XXX:
-	  continue;
-	}
-	else
+        }
+        else if (types.length == 1 && types[0].equals(InvocationContext.class)) {
+          // XXX:
+          continue;
+        }
+        else
           throw new ConfigException(location(method)
-				    + L.l("@PreDestroy is requires zero arguments"));
-	
+                                    + L.l("@PreDestroy is requires zero arguments"));
+
         PreDestroyInject destroyProgram
           = new PreDestroyInject(method);
 
@@ -222,12 +221,12 @@ public class InjectIntrospector {
         initList.add(new PreDestroyProgram(method));
       }
     }
-    
+
     introspectConstruct(initList, type.getSuperclass());
   }
 
   public static void introspectInject(ArrayList<ConfigProgram> injectList,
-				      Class type)
+                                      Class type)
     throws ConfigException
   {
     try {
@@ -240,7 +239,7 @@ public class InjectIntrospector {
   }
 
   private static void introspectInjectImpl(ArrayList<ConfigProgram> injectList,
-					   Class type)
+                                           Class type)
     throws ConfigException, ClassNotFoundException
   {
     if (type == null || type.equals(Object.class))
@@ -255,14 +254,14 @@ public class InjectIntrospector {
       if (hasBindingAnnotation(field)) {
         InjectManager webBeans = InjectManager.create();
 
-	boolean isOptional = isBindingOptional(field);
-	
+        boolean isOptional = isBindingOptional(field);
+
         webBeans.createProgram(injectList, field, isOptional);
 
         continue;
       }
       */
-      
+
       introspect(injectList, field);
     }
 
@@ -315,25 +314,25 @@ public class InjectIntrospector {
                                     type.getName()));
     } else if (ejb != null) {
       if (Object.class.equals(ejb.beanInterface()))
-	throw new ConfigException(location
-				  + L.l("@EJB at the class level must have a beanInterface()"));
-      
+        throw new ConfigException(location
+                                  + L.l("@EJB at the class level must have a beanInterface()"));
+
       if ("".equals(ejb.name()))
-	throw new ConfigException(location
-				  + L.l("@EJB at the class level must have a name()"));
-      
+        throw new ConfigException(location
+                                  + L.l("@EJB at the class level must have a name()"));
+
       generateEjb(location, Object.class, "", ejb);
     } else if (ejbs != null) {
       for (EJB childEjb : ejbs.value()) {
-	if (Object.class.equals(childEjb.beanInterface()))
-	  throw new ConfigException(location
-				    + L.l("@EJB at the class level must have a beanInterface()"));
-      
-	if ("".equals(childEjb.name()))
-	  throw new ConfigException(location
-				    + L.l("@EJB at the class level must have a name()"));
-      
-	generateEjb(location, Object.class, "", childEjb);
+        if (Object.class.equals(childEjb.beanInterface()))
+          throw new ConfigException(location
+                                    + L.l("@EJB at the class level must have a beanInterface()"));
+
+        if ("".equals(childEjb.name()))
+          throw new ConfigException(location
+                                    + L.l("@EJB at the class level must have a name()"));
+
+        generateEjb(location, Object.class, "", childEjb);
       }
     }
   }
@@ -350,7 +349,7 @@ public class InjectIntrospector {
 
     if (field != null) {
       ValueGenerator gen
-	= generateResource(location(field), field.getType(), "", resource);
+        = generateResource(location(field), field.getType(), "", resource);
 
       return;
     }
@@ -359,9 +358,9 @@ public class InjectIntrospector {
 
     if (method != null) {
       ValueGenerator gen
-	= generateResource(location(method),
-			   method.getParameterTypes()[0],
-			   "", resource);
+        = generateResource(location(method),
+                           method.getParameterTypes()[0],
+                           "", resource);
 
       return;
     }
@@ -369,33 +368,33 @@ public class InjectIntrospector {
 
   private static void
     introspectClassPersistenceContext(ArrayList<ConfigProgram> initList,
-				      Class type,
-				      PersistenceContext pContext)
+                                      Class type,
+                                      PersistenceContext pContext)
     throws ConfigException
   {
     String location = type.getSimpleName() + ": ";
 
     ValueGenerator gen
       = generatePersistenceContext(location, EntityManager.class,
-				   "", pContext);
+                                   "", pContext);
   }
 
   public static void introspect(ArrayList<ConfigProgram> injectList,
-				AnnotatedField field)
+                                AnnotatedField field)
     throws ConfigException
   {
     introspect(injectList, field.getJavaMember());
   }
 
   public static void introspect(ArrayList<ConfigProgram> injectList,
-				AnnotatedMethod method)
+                                AnnotatedMethod method)
     throws ConfigException
   {
     introspect(injectList, method.getJavaMember());
   }
 
   private static void introspect(ArrayList<ConfigProgram> injectList,
-				 Field field)
+                                 Field field)
     throws ConfigException
   {
     String location = location(field);
@@ -422,14 +421,14 @@ public class InjectIntrospector {
     }
     else if (field.isAnnotationPresent(PersistenceContext.class)) {
       PersistenceContext pContext
-	= field.getAnnotation(PersistenceContext.class);
+        = field.getAnnotation(PersistenceContext.class);
 
       gen = generatePersistenceContext(location, field.getType(), jndiName, pContext);
     }
     /*
     else if (field.isAnnotationPresent(WebServiceRef.class)) {
       WebServiceRef webService
-	= field.getAnnotation(WebServiceRef.class);
+        = field.getAnnotation(WebServiceRef.class);
 
       gen = generateWebService(location, field.getType(), jndiName, webService);
     }
@@ -444,7 +443,7 @@ public class InjectIntrospector {
   }
 
   private static void introspect(ArrayList<ConfigProgram> injectList,
-				 Method method)
+                                 Method method)
     throws ConfigException
   {
     String location = location(method);
@@ -475,14 +474,14 @@ public class InjectIntrospector {
     }
     else if (method.isAnnotationPresent(PersistenceContext.class)) {
       PersistenceContext pContext
-	= method.getAnnotation(PersistenceContext.class);
+        = method.getAnnotation(PersistenceContext.class);
 
       gen = generatePersistenceContext(location, type, jndiName, pContext);
     }
     /*
     else if (method.isAnnotationPresent(WebServiceRef.class)) {
       WebServiceRef webService
-	= method.getAnnotation(WebServiceRef.class);
+        = method.getAnnotation(WebServiceRef.class);
 
       gen = generateWebService(location, type, jndiName, webService);
     }
@@ -499,9 +498,9 @@ public class InjectIntrospector {
   /*
   private static ValueGenerator
     generateWebService(String location,
-		       Class type,
-		       String jndiName,
-		       WebServiceRef ref)
+                       Class type,
+                       String jndiName,
+                       WebServiceRef ref)
     throws ConfigException
   {
     String mappedName = ref.mappedName();
@@ -515,9 +514,9 @@ public class InjectIntrospector {
 
   private static ValueGenerator
     generatePersistenceContext(String location,
-			       Class type,
-			       String jndiName,
-			       PersistenceContext pContext)
+                               Class type,
+                               String jndiName,
+                               PersistenceContext pContext)
     throws ConfigException
   {
     // AmberContainer.create().start();
@@ -526,8 +525,8 @@ public class InjectIntrospector {
 
     if (PersistenceContextType.EXTENDED.equals(pType))
       return generateExtendedPersistenceContext(location, type,
-						jndiName, pContext);
-    
+                                                jndiName, pContext);
+
     if (! type.isAssignableFrom(EntityManager.class)) {
       throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));
     }
@@ -536,21 +535,21 @@ public class InjectIntrospector {
 
     if (! "".equals(pContext.name()))
       jndiName = pContext.name();
-    
+
     Bean bean;
 
     if ("".equals(unitName)) {
       bean = bind(location, EntityManager.class, null);
 
       if (bean == null)
-	throw new ConfigException(location + L.l("@PersistenceContext cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
+        throw new ConfigException(location + L.l("@PersistenceContext cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
     }
     else {
       bean = bind(location, EntityManager.class, unitName);
 
       if (bean == null)
-	throw new ConfigException(location + L.l("'{0}' is an unknown @PersistenceContext.",
-						 unitName));
+        throw new ConfigException(location + L.l("'{0}' is an unknown @PersistenceContext.",
+                                                 unitName));
     }
 
     bindJndi(location, jndiName, bean);
@@ -562,19 +561,19 @@ public class InjectIntrospector {
 
   private static ValueGenerator
     generateExtendedPersistenceContext(String location,
-				       Class type,
-				       String jndiName,
-				       PersistenceContext pContext)
+                                       Class type,
+                                       String jndiName,
+                                       PersistenceContext pContext)
     throws ConfigException
   {
     // AmberContainer.create().start();
-    
+
     if (! type.isAssignableFrom(EntityManager.class)) {
       throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));
     }
 
     PersistenceContextGenerator gen;
-    
+
     gen = new PersistenceContextGenerator(location, pContext);
 
     bindJndi(location, jndiName, gen);
@@ -584,9 +583,9 @@ public class InjectIntrospector {
 
   private static ValueGenerator
     generatePersistenceUnit(String location,
-			    Class type,
-			    String jndiName,
-			    PersistenceUnit pUnit)
+                            Class type,
+                            String jndiName,
+                            PersistenceUnit pUnit)
     throws ConfigException
   {
     if (! type.isAssignableFrom(EntityManagerFactory.class)) {
@@ -597,22 +596,22 @@ public class InjectIntrospector {
 
     if (! "".equals(pUnit.name()))
       jndiName = pUnit.name();
-    
+
     InjectManager webBeans = InjectManager.create();
-    
+
     Bean component;
 
     if ("".equals(unitName)) {
       component = bind(location, EntityManagerFactory.class);
 
       if (component == null)
-	throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
+        throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
     }
     else {
       component = bind(location, EntityManagerFactory.class, unitName);
 
       if (component == null)
-	throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", unitName));
+        throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", unitName));
     }
 
     bindJndi(location, jndiName, component);
@@ -621,9 +620,9 @@ public class InjectIntrospector {
   }
 
   private static ValueGenerator generateEjb(String location,
-					    Class fieldType,
-					    String jndiName,
-					    EJB ejb)
+                                            Class fieldType,
+                                            String jndiName,
+                                            EJB ejb)
     throws ConfigException
   {
     Class type = ejb.beanInterface();
@@ -634,13 +633,13 @@ public class InjectIntrospector {
       jndiName = ejb.name();
 
     return generateJndiComponent(location, fieldType, type,
-				 jndiName, beanName, mappedName);
+                                 jndiName, beanName, mappedName);
   }
 
   private static ValueGenerator generateResource(String location,
-						 Class fieldType,
-						 String jndiName,
-						 Resource resource)
+                                                 Class fieldType,
+                                                 String jndiName,
+                                                 Resource resource)
     throws ConfigException
   {
     String mappedName = resource.mappedName();
@@ -650,11 +649,11 @@ public class InjectIntrospector {
       jndiName = resource.name();
 
     return generateJndiComponent(location, fieldType, type,
-				 jndiName, mappedName, "");
+                                 jndiName, mappedName, "");
   }
 
   private static void introspectWebBean(ArrayList<ConfigProgram> injectList,
-					Field field)
+                                        Field field)
     throws ConfigException
   {
     InjectManager webBeans = InjectManager.create();
@@ -664,7 +663,7 @@ public class InjectIntrospector {
   }
 
   private static void introspectWebBean(ArrayList<ConfigProgram> injectList,
-					Method method)
+                                        Method method)
     throws ConfigException
   {
     InjectManager webBeans = InjectManager.create();
@@ -677,25 +676,25 @@ public class InjectIntrospector {
    */
   private static ValueGenerator
     generateJndiComponent(String location,
-			  Class fieldType,
-			  Class type,
-			  String jndiName,
-			  String mappedName,
-			  String beanName)
+                          Class fieldType,
+                          Class type,
+                          String jndiName,
+                          String mappedName,
+                          String beanName)
   {
     if (! fieldType.isAssignableFrom(type))
       type = fieldType;
 
     if (type.isPrimitive())
       type = _primitiveTypeMap.get(type);
-    
+
     Object value = Jndi.lookup(jndiName);
 
     // XXX: can use lookup-link and store the proxy
 
     if (value != null)
       return new SingletonGenerator(value);
-    
+
     Bean component = null;
 
     if (mappedName == null || "".equals(mappedName))
@@ -705,26 +704,26 @@ public class InjectIntrospector {
 
     if (component != null) {
       bindJndi(location, jndiName, component);
-      
+
       return new ComponentValueGenerator(location, component);
     }
-    
+
     if (component == null && beanName != null && ! "".equals(beanName)) {
       component = bind(location, type, beanName);
       if (component != null) {
-	bindJndi(location, jndiName, component);
-      
-	return new ComponentValueGenerator(location, component);
+        bindJndi(location, jndiName, component);
+
+        return new ComponentValueGenerator(location, component);
       }
     }
-    
+
     if (component == null && jndiName != null && ! "".equals(jndiName)) {
       component = bind(location, type, jndiName);
 
       if (component != null) {
-	bindJndi(location, jndiName, component);
-      
-	return new ComponentValueGenerator(location, component);
+        bindJndi(location, jndiName, component);
+
+        return new ComponentValueGenerator(location, component);
       }
     }
 
@@ -733,7 +732,7 @@ public class InjectIntrospector {
 
     if (component != null) {
       bindJndi(location, jndiName, component);
-      
+
       return new ComponentValueGenerator(location, component);
     }
 
@@ -746,11 +745,11 @@ public class InjectIntrospector {
 
     /*
       if (_component != null && _jndiName != null && ! "".equals(_jndiName)) {
-	try {
-	  Jndi.bindDeepShort(_jndiName, _component);
-	} catch (NamingException e) {
-	  throw new ConfigException(e);
-	}
+        try {
+          Jndi.bindDeepShort(_jndiName, _component);
+        } catch (NamingException e) {
+          throw new ConfigException(e);
+        }
       }
     }
 
@@ -777,9 +776,9 @@ public class InjectIntrospector {
 
     for (Bean bean : beans) {
       // XXX: dup
-      
+
       if (name == null || name.equals(bean.getName()))
-	return bean;
+        return bean;
     }
 
     return null;
@@ -832,7 +831,7 @@ public class InjectIntrospector {
       if (annType.equals(Inject.class))
         return true;
       else if (annType.isAnnotationPresent(Qualifier.class))
-	return true;
+        return true;
     }
 
     return false;
@@ -842,9 +841,9 @@ public class InjectIntrospector {
   {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
-      
+
       if (annType.isAnnotationPresent(Qualifier.class))
-	return false;
+        return false;
     }
 
     return false;
@@ -854,12 +853,12 @@ public class InjectIntrospector {
   {
     for (Annotation ann : method.getAnnotations()) {
       Class annType = ann.annotationType();
-      
+
       if (annType.equals(Produces.class))
-	return false;
+        return false;
       /*
       else if (annType.equals(Destroys.class))
-	return false;
+        return false;
       */
     }
 
@@ -869,17 +868,17 @@ public class InjectIntrospector {
         continue;
 
       for (Annotation ann : annList) {
-	Class annType = ann.annotationType();
-	
-	if (annType.equals(Observes.class))
-	  return false;
-	if (annType.equals(Disposes.class))
-	  return false;
-	else if (annType.equals(Inject.class))
-	  hasBinding = true;
+        Class annType = ann.annotationType();
+
+        if (annType.equals(Observes.class))
+          return false;
+        if (annType.equals(Disposes.class))
+          return false;
+        else if (annType.equals(Inject.class))
+          hasBinding = true;
         // XXX: implicit qualifier needs to be removed
         else if (annType.isAnnotationPresent(Qualifier.class))
-	  hasBinding = true;
+          hasBinding = true;
       }
     }
 

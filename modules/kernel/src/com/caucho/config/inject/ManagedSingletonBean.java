@@ -57,18 +57,18 @@ public class ManagedSingletonBean extends AbstractSingletonBean
   implements Closeable
 {
   private ConfigProgram _init;
-  
+
   ManagedSingletonBean(ManagedBeanImpl managedBean,
-		       Set<Type> types,
-		       Annotated annotated,
-		       Set<Annotation> bindings,
-		       Set<Annotation> stereotypes,
-		       Class<? extends Annotation> scopeType,
-		       String name,
-		       ConfigProgram init)
+                       Set<Type> types,
+                       Annotated annotated,
+                       Set<Annotation> qualifiers,
+                       Set<Class<? extends Annotation>> stereotypes,
+                       Class<? extends Annotation> scopeType,
+                       String name,
+                       ConfigProgram init)
   {
-    super(managedBean, types, annotated, bindings, stereotypes,
-	  scopeType, name);
+    super(managedBean, types, annotated, qualifiers, stereotypes,
+          scopeType, name);
 
     _init = init;
   }
@@ -86,7 +86,7 @@ public class ManagedSingletonBean extends AbstractSingletonBean
     env.push(value);
 
     target.inject(value, env);
-    
+
     if (_init != null)
       _init.inject(value, (ConfigContext) env);
 

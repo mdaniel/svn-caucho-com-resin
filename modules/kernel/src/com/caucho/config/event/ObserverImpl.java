@@ -32,23 +32,24 @@ package com.caucho.config.event;
 import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
-import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.IfExists;
+import javax.enterprise.event.Reception;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ObserverMethod;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.AbstractObserverMethod;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
 
 /**
  * Implements a single observer.
  */
-public class ObserverImpl implements Observer {
+public class ObserverImpl extends AbstractObserverMethod {
   private static final L10N L = new L10N(ObserverImpl.class);
 
   private static final Object []NULL_ARGS = new Object[0];
@@ -76,8 +77,10 @@ public class ObserverImpl implements Observer {
     _paramIndex = paramIndex;
 
     for (Annotation ann : method.getParameterAnnotations()[paramIndex]) {
-      if (ann instanceof IfExists)
-        _ifExists = true;
+      if (ann instanceof Observes) {
+        Observes observes = (Observes) ann;
+        _ifExists = observes.receive() == Reception.IF_EXISTS;
+      }
     }
 
     bind();
@@ -162,7 +165,7 @@ public class ObserverImpl implements Observer {
     return false;
   }
 
-  public boolean notify(Object event)
+  public void notify(Object event)
   {
     Object obj = null;
 
@@ -174,7 +177,7 @@ public class ObserverImpl implements Observer {
     }
     else {
       // XXX: perf
-      CreationalContext env = _inject.createCreationalContext();
+      CreationalContext env = _inject.createCreationalContext(_bean);
 
       obj = _inject.getReference(_bean, _bean.getBeanClass(), env);
     }
@@ -187,7 +190,7 @@ public class ObserverImpl implements Observer {
           Bean bean = _args[i];
 
           if (bean != null) {
-            CreationalContext env = _inject.createCreationalContext();
+            CreationalContext env = _inject.createCreationalContext(bean);
 
             args[i] = _inject.getReference(bean, bean.getBeanClass(), env);
           }
@@ -204,8 +207,6 @@ public class ObserverImpl implements Observer {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
-    return false;
   }
 
   public boolean equals(Object obj)

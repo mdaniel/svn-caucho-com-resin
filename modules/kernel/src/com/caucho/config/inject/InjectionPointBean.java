@@ -52,7 +52,7 @@ public class InjectionPointBean<T> implements Bean<T>
   //
   // metadata for the bean
   //
-  
+
   public Class<T> getBeanClass()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -61,7 +61,7 @@ public class InjectionPointBean<T> implements Bean<T>
   /**
    * Returns the bean's binding annotations.
    */
-  public Set<Annotation> getBindings()
+  public Set<Annotation> getQualifiers()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -69,7 +69,7 @@ public class InjectionPointBean<T> implements Bean<T>
   /**
    * Returns the bean's stereotype annotations.
    */
-  public Set<Annotation> getStereotypes()
+  public Set<Class<? extends Annotation>> getStereotypes()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -108,6 +108,14 @@ public class InjectionPointBean<T> implements Bean<T>
   }
 
   /**
+   * Returns true if the bean can be null
+   */
+  public boolean isAlternative()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Returns true if the bean is serializable
    */
   public boolean isPassivationCapable()
@@ -130,7 +138,7 @@ public class InjectionPointBean<T> implements Bean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public T create(CreationalContext<T> creationalContext)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -142,7 +150,7 @@ public class InjectionPointBean<T> implements Bean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Inject the bean.
    */
@@ -150,7 +158,7 @@ public class InjectionPointBean<T> implements Bean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call post-construct
    */
@@ -158,7 +166,7 @@ public class InjectionPointBean<T> implements Bean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Call pre-destroy
    */

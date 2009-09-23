@@ -46,7 +46,7 @@ package javax.enterprise.inject;
  * }
  * </code></pre>
  */
-public class UnsatisfiedResolutionException extends InjectionException
+public class UnsatisfiedResolutionException extends ResolutionException
 {
   public UnsatisfiedResolutionException()
   {
@@ -61,7 +61,7 @@ public class UnsatisfiedResolutionException extends InjectionException
   {
     super(cause);
   }
-  
+
   public UnsatisfiedResolutionException(String message, Throwable cause)
   {
     super(message, cause);

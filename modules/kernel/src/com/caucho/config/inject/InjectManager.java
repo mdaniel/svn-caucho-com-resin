@@ -63,45 +63,17 @@ import java.util.logging.*;
 import javax.decorator.Decorates;
 import javax.el.*;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observer;
 import javax.enterprise.event.Observes;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.Conversation;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.PassivationCapable;
-import javax.enterprise.inject.AnnotationLiteral;
-import javax.enterprise.inject.Disabled;
-import javax.enterprise.inject.Initializer;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.New;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Specializes;
-import javax.enterprise.inject.TypeLiteral;
-import javax.enterprise.inject.AmbiguousResolutionException;
-import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Decorator;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.Interceptor;
-import javax.enterprise.inject.spi.InterceptionType;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.ProcessInjectionTarget;
-import javax.enterprise.inject.stereotype.Stereotype;
+import javax.enterprise.inject.*;
+import javax.enterprise.inject.spi.*;
+import javax.inject.Inject;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.naming.*;
@@ -559,7 +531,7 @@ public class InjectManager
       return null;
   }
 
-  Annotation []getBindings(Set<Annotation> annotations)
+  Annotation []getQualifiers(Set<Annotation> annotations)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
@@ -574,7 +546,7 @@ public class InjectManager
     return bindings;
   }
 
-  private Annotation []getBindings(Annotation []annotations)
+  private Annotation []getQualifiers(Annotation []annotations)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
@@ -727,7 +699,7 @@ public class InjectManager
   /**
    * Tests if an annotation is an enabled binding type
    */
-  public boolean isBindingType(Class<? extends Annotation> annotationType)
+  public boolean isQualifier(Class<? extends Annotation> annotationType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -735,7 +707,7 @@ public class InjectManager
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
-  public boolean isInterceptorBindingType(Class<? extends Annotation> annotationType)
+  public boolean isInterceptorBinding(Class<? extends Annotation> annotationType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -743,7 +715,7 @@ public class InjectManager
   /**
    * Returns the bindings for an interceptor binding type
    */
-  public Set<Annotation> getInterceptorBindingTypeDefinition(Class<? extends Annotation> bindingType)
+  public Set<Annotation> getInterceptorBindingDefinition(Class<? extends Annotation> bindingType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -1204,7 +1176,7 @@ public class InjectManager
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public <X> Bean<? extends X> getHighestPrecedenceBean(Set<Bean<? extends X>> beans)
+  public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans)
   {
     Bean bestBean = null;
     Bean secondBean = null;
@@ -1238,11 +1210,11 @@ public class InjectManager
   {
     int priority = DEFAULT_PRIORITY;
 
-    Set<Annotation> stereotypes = bean.getStereotypes();
+    Set<Class<? extends Annotation>> stereotypes = bean.getStereotypes();
 
     if (stereotypes != null) {
-      for (Annotation ann : stereotypes) {
-        Integer value = _deploymentMap.get(ann.annotationType());
+      for (Class<? extends Annotation> annType : stereotypes) {
+        Integer value = _deploymentMap.get(annType);
 
         if (value != null && priority < value)
           priority = value;
@@ -1279,9 +1251,9 @@ public class InjectManager
     }
   }
 
-  public CreationalContext<?> createCreationalContext()
+  public <T> CreationalContext<T> createCreationalContext(Contextual<T> bean)
   {
-    return new ConfigContext();
+    return (CreationalContext<T>) new ConfigContext();
   }
 
   /**
@@ -1290,12 +1262,12 @@ public class InjectManager
   public <T> T getReference(Class<T> type, Annotation... bindings)
   {
     Set<Bean<?>> beans = getBeans(type);
-    Bean<?> bean = getHighestPrecedenceBean(beans);
+    Bean<?> bean = resolve(beans);
 
     if (bean == null)
       return null;
 
-    CreationalContext<?> env = createCreationalContext();
+    CreationalContext<?> env = createCreationalContext(bean);
 
     return (T) getReference(bean, type, env);
   }
@@ -1306,12 +1278,12 @@ public class InjectManager
   public <T> T getReference(String name)
   {
     Set<Bean<?>> beans = getBeans(name);
-    Bean<?> bean = getHighestPrecedenceBean(beans);
+    Bean<?> bean = resolve(beans);
 
     if (bean == null)
       return null;
 
-    CreationalContext<?> env = createCreationalContext();
+    CreationalContext<?> env = createCreationalContext(bean);
 
     return (T) getReference(bean, bean.getBeanClass(), env);
   }
@@ -1345,9 +1317,9 @@ public class InjectManager
   /**
    * Used by ScopeProxy
    */
-  public Object create(Bean<?> bean)
+  public Object getReference(Bean<?> bean)
   {
-    CreationalContext<?> env = createCreationalContext();
+    CreationalContext<?> env = createCreationalContext(bean);
 
     return getReference(bean, bean.getBeanClass(), env);
   }
@@ -1525,9 +1497,9 @@ public class InjectManager
   public Bean resolveByInjectionPoint(InjectionPoint ij)
   {
     Type type = ij.getType();
-    Set<Annotation> bindingSet = ij.getBindings();
+    Set<Annotation> qualifiers = ij.getQualifiers();
 
-    return resolveByInjectionPoint(type, bindingSet);
+    return resolveByInjectionPoint(type, qualifiers);
   }
 
   public Bean resolveByInjectionPoint(Type type, Set<Annotation> bindingSet)
@@ -1552,7 +1524,7 @@ public class InjectManager
       throw unsatisfiedException(type, bindings);
     }
 
-    return getHighestPrecedenceBean(set);
+    return resolve(set);
 
     /*
     else if (set.size() == 1) {
@@ -1613,6 +1585,12 @@ public class InjectManager
     return _elResolver;
   }
 
+  public ExpressionFactory
+    wrapExpressionFactory(ExpressionFactory expressionFactory)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   //
   // scopes
   //
@@ -1622,7 +1600,7 @@ public class InjectManager
    */
   public void addContext(Context context)
   {
-    _contextMap.put(context.getScopeType(), context);
+    _contextMap.put(context.getScope(), context);
   }
 
   /**
@@ -1657,7 +1635,7 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  public void addObserver(Observer<?> observer,
+  public void addObserver(ObserverMethod<?> observer,
                           Annotation... bindings)
   {
     BaseType baseType = createBaseType(observer.getClass());
@@ -1674,7 +1652,7 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  public void addObserver(Observer<?> observer,
+  public void addObserver(ObserverMethod<?> observer,
                           Type type,
                           Annotation... bindings)
   {
@@ -1689,7 +1667,7 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  public void addObserver(Observer<?> observer,
+  public void addObserver(ObserverMethod<?> observer,
                           BaseType eventBaseType,
                           Annotation... bindings)
   {
@@ -1729,7 +1707,7 @@ public class InjectManager
    * @param eventType the type of event to listen for
    * @param bindings the binding set for the event
    */
-  public void removeObserver(Observer<?> observer)
+  public void removeObserver(ObserverMethod<?> observer)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -1792,15 +1770,16 @@ public class InjectManager
    * @param eventType event to resolve
    * @param bindings the binding set for the event
    */
-  public <T> Set<Observer<T>> resolveObservers(T event,
-                                               Annotation... bindings)
+  public <T> Set<ObserverMethod<? super T>>
+    resolveObserverMethod(T event, Annotation... qualifiers)
   {
-    HashSet<Observer<T>> set = new HashSet<Observer<T>>();
+    HashSet<ObserverMethod<? super T>> set
+      = new HashSet<ObserverMethod<? super T>>();
 
     BaseType eventType = createBaseType(event.getClass());
 
     for (ObserverMap map : getLocalObserverList(event.getClass())) {
-      map.resolveObservers(set, eventType, bindings);
+      map.resolveObservers(set, eventType, qualifiers);
     }
 
     return set;
@@ -2217,7 +2196,7 @@ public class InjectManager
       if (ctor.getParameterTypes().length == 0)
         return true;
 
-      if (ctor.isAnnotationPresent(Initializer.class))
+      if (ctor.isAnnotationPresent(Inject.class))
         return true;
     }
 
@@ -2253,7 +2232,7 @@ public class InjectManager
       // observer = processObserver(observer);
 
       if (observer != null) {
-        Set<Annotation> annSet = observer.getObservedEventBindings();
+        Set<Annotation> annSet = observer.getObservedQualifiers();
 
         Annotation []bindings = new Annotation[annSet.size()];
         annSet.toArray(bindings);
@@ -2277,7 +2256,7 @@ public class InjectManager
       // observer = processObserver(observer);
 
       if (observer != null) {
-        Set<Annotation> annSet = observer.getObservedEventBindings();
+        Set<Annotation> annSet = observer.getObservedQualifiers();
 
         Annotation []bindings = new Annotation[annSet.size()];
         annSet.toArray(bindings);
@@ -2379,7 +2358,7 @@ public class InjectManager
     BeanArg []args = new BeanArg[param.length];
 
     for (int i = 1; i < param.length; i++) {
-      Annotation []bindings = getBindings(paramAnn[i]);
+      Annotation []bindings = getQualifiers(paramAnn[i]);
 
       if (bindings.length == 0)
         bindings = new Annotation[] { CurrentLiteral.CURRENT };
@@ -2387,11 +2366,11 @@ public class InjectManager
       args[i] = new BeanArg(param[i], bindings);
     }
 
-    Observer observer = new ExtensionObserver(extension, method, args);
+    ObserverMethod observer = new ExtensionObserver(extension, method, args);
 
     BaseType baseType = createBaseType(param[0]);
 
-    addObserver(observer, baseType, getBindings(paramAnn[0]));
+    addObserver(observer, baseType, getQualifiers(paramAnn[0]));
 
     /*
     // XXX: isAssignableFrom
@@ -2553,7 +2532,7 @@ public class InjectManager
     }
 
     for (Bean bean : services) {
-      CreationalContext<?> env = createCreationalContext();
+      CreationalContext<?> env = createCreationalContext(bean);
 
       getReference(bean, bean.getBeanClass(), env);
     }
@@ -2929,13 +2908,13 @@ public class InjectManager
     public void addAnnotatedType(AnnotatedType<?> annType)
     {
     }
-    public void addBindingType(Class<? extends Annotation> bindingType)
+    public void addQualifier(Class<? extends Annotation> qualifier)
     {
     }
 
-    public void addScopeType(Class<? extends Annotation> scopeType,
-                             boolean isNormal,
-                             boolean isPassivating)
+    public void addScope(Class<? extends Annotation> scopeType,
+                         boolean isNormal,
+                         boolean isPassivating)
     {
     }
 
@@ -2944,8 +2923,8 @@ public class InjectManager
     {
     }
 
-    public void addInterceptorBindingType(Class<? extends Annotation> bindingType,
-                                          Annotation... bindings)
+    public void addInterceptorBinding(Class<? extends Annotation> bindingType,
+                                      Annotation... bindings)
     {
     }
 
@@ -3036,6 +3015,16 @@ public class InjectManager
     public void addBean(Bean bean)
     {
       InjectManager.this.addBean(bean);
+    }
+
+    public void addContext(Context context)
+    {
+      InjectManager.this.addContext(context);
+    }
+
+    public void addObserverMethod(ObserverMethod<?> observerMethod)
+    {
+      InjectManager.this.addObserver(observerMethod);
     }
 
     public void addDefinitionError(Throwable t)
@@ -3131,7 +3120,7 @@ public class InjectManager
     }
   }
 
-  static class ExtensionObserver implements Observer<Object> {
+  static class ExtensionObserver extends AbstractObserverMethod<Object> {
     private Extension _extension;
     private Method _method;
     private BeanArg []_args;
@@ -3143,7 +3132,7 @@ public class InjectManager
       _args = args;
     }
 
-    public boolean notify(Object event)
+    public void notify(Object event)
     {
       try {
         Object []args = new Object[_args.length];
@@ -3154,8 +3143,6 @@ public class InjectManager
         }
 
         _method.invoke(_extension, args);
-
-        return false;
       } catch (RuntimeException e) {
         throw e;
       } catch (InvocationTargetException e) {

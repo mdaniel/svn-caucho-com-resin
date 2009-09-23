@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
@@ -49,18 +50,18 @@ import javax.enterprise.inject.spi.InterceptionType;
  */
 public class EjbUtil {
   private static final L10N L = new L10N(EjbUtil.class);
-  
+
   public static final Object []NULL_OBJECT_ARRAY = new Object[0];
-  
+
   private EjbUtil()
   {
   }
 
   public static int []createInterceptors(InjectManager manager,
-					 ArrayList<Interceptor> beans,
+                                         ArrayList<Interceptor> beans,
                                          int []indexList,
-					 InterceptionType type,
-					 Annotation ...bindings)
+                                         InterceptionType type,
+                                         Annotation ...bindings)
   {
     List<Interceptor<?>> interceptors;
 
@@ -88,10 +89,10 @@ public class EjbUtil {
 
       int index = beans.indexOf(interceptor);
       if (index >= 0)
-	indexList[offset + i] = index;
+        indexList[offset + i] = index;
       else {
-	indexList[offset + i] = beans.size();
-	beans.add(interceptor);
+        indexList[offset + i] = beans.size();
+        beans.add(interceptor);
       }
     }
 
@@ -99,8 +100,8 @@ public class EjbUtil {
   }
 
   public static Method []createMethods(ArrayList<Interceptor> beans,
-				       InterceptionType type,
-				       int []indexChain)
+                                       InterceptionType type,
+                                       int []indexChain)
   {
     Method []methods = new Method[indexChain.length];
 
@@ -111,18 +112,18 @@ public class EjbUtil {
       Method method = ((InterceptorBean) beans.get(index)).getMethod(type);
 
       if (method == null)
-	throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
-					   type, beans.get(index)));
+        throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
+                                           type, beans.get(index)));
 
       methods[i] = method;
     }
-    
+
     return methods;
   }
 
   public static Method getMethod(Class cl,
-				 String methodName,
-				 Class paramTypes[])
+                                 String methodName,
+                                 Class paramTypes[])
     throws Exception
   {
     Method method = null;
@@ -130,12 +131,12 @@ public class EjbUtil {
 
     do {
       try {
-	method = cl.getDeclaredMethod(methodName, paramTypes);
+        method = cl.getDeclaredMethod(methodName, paramTypes);
       } catch (Exception e) {
-	if (firstException == null)
-	  firstException = e;
+        if (firstException == null)
+          firstException = e;
 
-	cl = cl.getSuperclass();
+        cl = cl.getSuperclass();
       }
     } while (method == null && cl != null);
 
@@ -143,17 +144,18 @@ public class EjbUtil {
       throw firstException;
 
     method.setAccessible(true);
-    
+
     return method;
   }
 
   public static Object generateDelegate(List<Decorator> beans,
-					Object tail)
+                                        Object tail)
   {
     InjectManager webBeans = InjectManager.create();
 
-    CreationalContext env = webBeans.createCreationalContext();
-    
+    Bean parentBean = null;
+    CreationalContext env = webBeans.createCreationalContext(parentBean);
+
     for (int i = beans.size() - 1; i >= 0; i--) {
       Decorator bean = beans.get(i);
 
@@ -164,18 +166,19 @@ public class EjbUtil {
 
       tail = instance;
     }
-    
+
     return tail;
   }
 
   public static Object []generateProxyDelegate(InjectManager webBeans,
-					       List<Decorator<?>> beans,
-					       Object proxy)
+                                               List<Decorator<?>> beans,
+                                               Object proxy)
   {
     Object []instances = new Object[beans.size()];
 
-    CreationalContext env = webBeans.createCreationalContext();
-    
+    Bean parentBean = null;
+    CreationalContext env = webBeans.createCreationalContext(parentBean);
+
     for (int i = 0; i < beans.size(); i++) {
       Decorator bean = beans.get(i);
 
@@ -186,17 +189,17 @@ public class EjbUtil {
 
       instances[beans.size() - 1 - i] = instance;
     }
-    
+
     return instances;
   }
 
   public static int nextDelegate(Object []beans,
-				 Class api,
-				 int index)
+                                 Class api,
+                                 int index)
   {
     for (index--; index >= 0; index--) {
       if (api.isAssignableFrom(beans[index].getClass())) {
-	return index;
+        return index;
       }
     }
 
@@ -204,13 +207,13 @@ public class EjbUtil {
   }
 
   public static int nextDelegate(Object []beans,
-				 Class []apis,
-				 int index)
+                                 Class []apis,
+                                 int index)
   {
     for (index--; index >= 0; index--) {
       for (Class api : apis) {
-	if (api.isAssignableFrom(beans[index].getClass()))
-	  return index;
+        if (api.isAssignableFrom(beans[index].getClass()))
+          return index;
       }
     }
 

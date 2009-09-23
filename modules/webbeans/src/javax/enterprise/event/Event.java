@@ -55,41 +55,27 @@ public interface Event<T> {
   public void fire(T event);
 
   /**
-   * Adds an observer to listen to the event, with the Event's bindings.
+   * Adds the current set of qualifiers, returning a new Event object.
    *
-   * @param observer the new observer of the event
+   * @param qualifiers the additional qualifiers
    */
-  public void addObserver(Observer<T> observer);
-  
-  /**
-   * Removes an observer listening to the event.
-   *
-   * @param observer the new observer of the event
-   */
-  public void removeObserver(Observer<T> observer);
+  public Event<T> select(Annotation... qualifiers);
 
   /**
    * Adds the current set of bindings, returning a new Event object.
    *
-   * @param bindings the additional bindings
-   */
-  public Event<T> select(Annotation... bindings);
-  
-  /**
-   * Adds the current set of bindings, returning a new Event object.
-   *
    * @param subtype the restricted type
-   * @param bindings the additional bindings
+   * @param qualifiers the additional qualifiers
    */
   public <U extends T> Event<U> select(Class<U> subtype,
-				       Annotation... bindings);
-  
+                                       Annotation... qaualifiers);
+
   /**
-   * Adds the current set of bindings, returning a new Event object.
+   * Adds the current set of qualifiers, returning a new Event object.
    *
    * @param subtype the restricted type
-   * @param bindings the additional bindings
+   * @param qualifiers the additional qualifiers
    */
   public <U extends T> Event<U> select(TypeLiteral<U> subtype,
-				       Annotation... bindings);
+                                       Annotation... qualifiers);
 }

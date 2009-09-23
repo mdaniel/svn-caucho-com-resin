@@ -48,7 +48,7 @@ import java.lang.annotation.Annotation;
  */
 public interface ProcessSessionBean<X> extends ProcessBean<Object>
 {
-  public AnnotatedType<X> getAnnotatedBeanClass();
+  public AnnotatedType<X> getAnnotatedSessionBeanClass();
   public String getEjbName();
   public SessionBeanType getSessionBeanType();
 }

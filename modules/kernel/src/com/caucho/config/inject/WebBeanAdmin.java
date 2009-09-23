@@ -114,15 +114,15 @@ public class WebBeanAdmin extends AbstractManagedObject
   /**
    * Returns all the bean's binding types
    */
-  public String []getBindingTypes()
+  public String []getQualifiers()
   {
-    Set<Annotation> types = _bean.getBindings();
+    Set<Annotation> types = _bean.getQualifiers();
 
     ArrayList<String> nameList = new ArrayList<String>();
-    
+
     for (Annotation ann : types) {
       if (ann != null)
-	nameList.add(ann.toString());
+        nameList.add(ann.toString());
     }
 
     String []names = new String[nameList.size()];

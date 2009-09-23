@@ -49,7 +49,7 @@ public class AbstractBeanType extends BeanType
   private static final L10N L = new L10N(AbstractBeanType.class);
 
   private final Class _type;
-  
+
   /**
    * Create the interface type
    */
@@ -59,7 +59,7 @@ public class AbstractBeanType extends BeanType
 
     _type = type;
   }
-  
+
   /**
    * Returns the Java type.
    */
@@ -75,10 +75,10 @@ public class AbstractBeanType extends BeanType
   public Object create(Object parent, QName name)
   {
     InterfaceConfig cfg = new InterfaceConfig(_type, _type.getSimpleName());
-    
+
     return cfg;
   }
-  
+
   /**
    * Replace the type with the generated object
    */
@@ -89,7 +89,7 @@ public class AbstractBeanType extends BeanType
     else
       super.init(bean);
   }
-  
+
   /**
    * Replace the type with the generated object
    */
@@ -100,7 +100,7 @@ public class AbstractBeanType extends BeanType
     else
       return bean;
   }
-  
+
   /**
    * Converts the string to a value of the type.
    */
@@ -122,12 +122,12 @@ public class AbstractBeanType extends BeanType
       beans = beanManager.getBeans(_type);
 
     if (beans.iterator().hasNext()) {
-      Bean bean = beanManager.getHighestPrecedenceBean(beans);
+      Bean bean = beanManager.resolve(beans);
 
-      CreationalContext<?> env = beanManager.createCreationalContext(); 
-    
+      CreationalContext<?> env = beanManager.createCreationalContext(bean);
+
       value = beanManager.getReference(bean, _type, env);
-      
+
       return value;
     }
 
@@ -137,9 +137,9 @@ public class AbstractBeanType extends BeanType
       return value;
 
     throw new ConfigException(L.l("{0}: '{1}' is an unknown bean.",
-				  _type.getName(), text));
+                                  _type.getName(), text));
   }
-  
+
   /**
    * Converts the value to a value of the type.
    */
@@ -153,7 +153,7 @@ public class AbstractBeanType extends BeanType
       return value;
     else
       throw new ConfigException(L.l("{0}: '{1}' is an invalid value.",
-				    _type.getName(), value));
+                                    _type.getName(), value));
   }
 
   public String toString()

@@ -44,7 +44,6 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.NonBinding;
 import javax.enterprise.inject.spi.Bean;
 
 /**

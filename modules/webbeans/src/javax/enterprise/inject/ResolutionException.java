@@ -19,24 +19,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package javax.enterprise.inject;
 
 /**
- * The @IfExists annotation for web beans
+ * When bean creation fails, the injection
+ * {@link javax.enterprise.inject.spi.BeanManager} will throw this exception.
  */
-@Target({PARAMETER})
-@Retention(RUNTIME)
-public @interface IfExists {
+public class ResolutionException extends InjectionException
+{
+  public ResolutionException()
+  {
+  }
+
+  public ResolutionException(String message)
+  {
+    super(message);
+  }
+
+  public ResolutionException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public ResolutionException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

@@ -57,16 +57,16 @@ public class SingletonBean extends AbstractSingletonBean
   private Object _value;
 
   SingletonBean(ManagedBeanImpl managedBean,
-		Set<Type> types,
-		Annotated annotated,
-		Set<Annotation> bindings,
-		Set<Annotation> stereotypes,
-		Class<? extends Annotation> scopeType,
-		String name,
-		Object value)
+                Set<Type> types,
+                Annotated annotated,
+                Set<Annotation> bindings,
+                Set<Class<? extends Annotation>> stereotypes,
+                Class<? extends Annotation> scopeType,
+                String name,
+                Object value)
   {
     super(managedBean, types, annotated, bindings,
-	  stereotypes, scopeType, name);
+          stereotypes, scopeType, name);
 
     _value = value;
 
@@ -75,7 +75,7 @@ public class SingletonBean extends AbstractSingletonBean
       String id = getId();
 
       if (id != null)
-	handleAware.setSerializationHandle(new SingletonHandle(id));
+        handleAware.setSerializationHandle(new SingletonHandle(id));
     }
   }
 
@@ -92,7 +92,7 @@ public class SingletonBean extends AbstractSingletonBean
   {
     if (_value != null) {
       CreationalContext env = null;
-      
+
       destroy(_value, env);
     }
   }

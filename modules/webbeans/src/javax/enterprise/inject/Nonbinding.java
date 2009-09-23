@@ -27,17 +27,17 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.event;
+package javax.enterprise.inject;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * The transaction annotation for web beans
+ * The @Nonbinding annotation for web beans
  */
-
 @Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface BeforeTransactionCompletion {
+@Target(METHOD)
+public @interface Nonbinding {
 }

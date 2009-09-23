@@ -56,8 +56,8 @@ public interface Context
   /**
    * Returns the @ScopeType corresponding to the current context.
    */
-  public Class<? extends Annotation> getScopeType();
-  
+  public Class<? extends Annotation> getScope();
+
   /**
    * Returns true if the scope is currently active.
    */
@@ -86,5 +86,5 @@ public interface Context
    * @return the bean instance
    */
   public <T> T get(Contextual<T> bean,
-		   CreationalContext<T> creationalContext);
+                   CreationalContext<T> creationalContext);
 }

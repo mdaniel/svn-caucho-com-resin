@@ -82,8 +82,8 @@ public class LoginResinConfig extends BeanConfig {
     InjectManager manager = InjectManager.create();
 
     Bean bean = getComponentFactory();
-    CreationalContext env = manager.createCreationalContext();
-    
+    CreationalContext env = manager.createCreationalContext(bean);
+
     return (AbstractLogin) manager.getReference(bean, AbstractLogin.class, env);
   }
 }

@@ -58,20 +58,36 @@ public class ScopeIdMap
 
     return id;
   }
-  
+
   private String generateScopeId(Bean<?> bean)
   {
     long crc64 = 17;
 
+    ArrayList<String> types = new ArrayList<String>();
     for (Type type : bean.getTypes()) {
-      crc64 = Crc64.generate(crc64, String.valueOf(type));
+      types.add(String.valueOf(type));
+    }
+
+    Collections.sort(types);
+    for (String type : types) {
+      crc64 = Crc64.generate(crc64, type);
     }
 
     if (bean.getName() != null)
       crc64 = Crc64.generate(crc64, bean.getName());
 
-    for (Annotation binding : bean.getBindings()) {
-      crc64 = Crc64.generate(crc64, String.valueOf(binding));
+    ArrayList<String> qualifiers = new ArrayList<String>();
+    for (Annotation qualifier : bean.getQualifiers()) {
+      qualifiers.add(String.valueOf(qualifier));
+    }
+
+    Collections.sort(qualifiers);
+    for (String qualifier : qualifiers) {
+      crc64 = Crc64.generate(crc64, qualifier);
+    }
+
+    for (String qualifier : qualifiers) {
+      crc64 = Crc64.generate(crc64, qualifier);
     }
 
     StringBuilder sb = new StringBuilder();

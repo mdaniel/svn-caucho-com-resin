@@ -27,17 +27,14 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package javax.enterprise.event;
 
 /**
- * The @NonBinding annotation for web beans
+ * event types
  */
-@Retention(RUNTIME)
-@Target(METHOD)
-public @interface NonBinding {
+public enum Reception
+{
+  IF_EXISTS,
+  ALWAYS
 }
+

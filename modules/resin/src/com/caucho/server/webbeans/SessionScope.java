@@ -42,13 +42,14 @@ import javax.enterprise.context.*;
 import javax.enterprise.context.spi.*;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
  * The session scope value
  */
 public class SessionScope extends ScopeContext {
   private ScopeIdMap _idMap = new ScopeIdMap();
-  
+
   /**
    * Returns true if the scope is currently active.
    */
@@ -64,15 +65,15 @@ public class SessionScope extends ScopeContext {
 
     return false;
   }
-  
+
   /**
    * Returns the scope annotation type.
    */
-  public Class<? extends Annotation> getScopeType()
+  public Class<? extends Annotation> getScope()
   {
     return SessionScoped.class;
   }
-  
+
   public <T> T get(Contextual<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
@@ -90,7 +91,7 @@ public class SessionScope extends ScopeContext {
 
     if (context != null) {
       String id = ((PassivationCapable) bean).getId();
-      
+
       return (T) context.get(id);
     }
 
@@ -98,7 +99,7 @@ public class SessionScope extends ScopeContext {
   }
 
   public <T> T get(Contextual<T> bean,
-		   CreationalContext<T> creationalContext)
+                   CreationalContext<T> creationalContext)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
@@ -118,16 +119,16 @@ public class SessionScope extends ScopeContext {
       context = new SessionContextContainer();
       session.setAttribute("webbeans.resin", context);
     }
-    
+
     Object result = context.get(id);
 
     if (result != null || creationalContext == null)
       return (T) result;
-    
+
     result = comp.create(creationalContext);
 
     context.put(id, result);
-    
+
     return (T) result;
   }
 
@@ -135,16 +136,16 @@ public class SessionScope extends ScopeContext {
   public boolean canInject(Class scopeType)
   {
     return (scopeType == ApplicationScoped.class
-	    || scopeType == SessionScoped.class
-	    || scopeType == ConversationScoped.class
-	    || scopeType == Dependent.class);
+            || scopeType == SessionScoped.class
+            || scopeType == ConversationScoped.class
+            || scopeType == Dependent.class);
   }
 
   @Override
   public boolean canInject(ScopeContext scope)
   {
     return (scope instanceof ApplicationScope
-	    || scope instanceof SessionScope);
+            || scope instanceof SessionScope);
   }
 
   public void addDestructor(Bean comp, Object value)
@@ -154,11 +155,11 @@ public class SessionScope extends ScopeContext {
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
       DestructionListener listener
-	= (DestructionListener) session.getAttribute("caucho.destroy");
+        = (DestructionListener) session.getAttribute("caucho.destroy");
 
       if (listener == null) {
-	listener = new DestructionListener();
-	session.setAttribute("caucho.destroy", listener);
+        listener = new DestructionListener();
+        session.setAttribute("caucho.destroy", listener);
       }
 
       // XXX:

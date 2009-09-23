@@ -48,6 +48,6 @@ import java.lang.annotation.*;
 @Target({PARAMETER})
 public @interface Observes {
   TransactionPhase during() default TransactionPhase.IN_PROGRESS;
-  
-  Notify notifyType() default Notify.SYNCHRONOUSLY;
+
+  Reception receive() default Reception.ALWAYS;
 }
