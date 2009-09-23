@@ -492,7 +492,7 @@ public class SessionModule extends AbstractQuercusModule
         response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
       }
       else if ("public".equals(cacheLimiter)) {
-        response.setHeader("Cache-Control", "max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setHeader("Cache-Control", "public, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
       }
       else if ("none".equals(cacheLimiter)) {
       }
