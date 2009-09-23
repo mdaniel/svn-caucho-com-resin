@@ -326,8 +326,6 @@ public class PreparedStatementImpl extends StatementImpl
       
       xa = _conn.getTransaction();
       QueryContext queryContext = getQueryContext();
-      if (queryContext.getLimit() >= 0)
-	Thread.dumpStack();
     
       if (_query.isSelect()) {
 	com.caucho.db.ResultSetImpl rs = null;

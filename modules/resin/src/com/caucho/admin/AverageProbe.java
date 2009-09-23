@@ -36,15 +36,15 @@ public final class AverageProbe extends Probe implements AverageSample {
   private final Object _lock = new Object();
 
   // sample data
-  private long _count;
-  private double _sum;
+  private final AtomicLong _count = new AtomicLong();
+  private final AtomicLong _sum = new AtomicLong();
+  private final AtomicLong _max = new AtomicLong();
   private double _sumSquare;
-  private double _max;
   
   private long _lastCount;
 
   private long _lastAvgCount;
-  private double _lastAvgSum;
+  private long _lastAvgSum;
 
   // for 95%
   private long _lastStdCount;
@@ -72,15 +72,17 @@ public final class AverageProbe extends Probe implements AverageSample {
     return new SigmaProbe(name, n);
   }
 
-  public final void add(double value)
+  public final void add(long value)
   {
-    synchronized (_lock) {
-      _count++;
-      _sum += value;
-      _sumSquare += value * value;
+    double sqValue = value * value;
 
-      if (_max < value)
-        _max = value;
+    _count.incrementAndGet();
+    _sum.addAndGet(value);
+    _sumSquare += sqValue;
+
+    long max;
+    while ((max = _max.get()) < value
+           && ! _max.compareAndSet(max, value)) {
     }
   }
   
@@ -90,11 +92,11 @@ public final class AverageProbe extends Probe implements AverageSample {
   public final double sample()
   {
     synchronized (_lock) {
-      long count = _count;
+      long count = _count.get();
       long lastCount = _lastAvgCount;
       _lastAvgCount = count;
     
-      double sum = _sum;
+      long sum = _sum.get();
       double lastSum = _lastAvgSum;
       _lastAvgSum = sum;
 
@@ -111,7 +113,7 @@ public final class AverageProbe extends Probe implements AverageSample {
   public final double sampleCount()
   {
     synchronized (_lock) {
-      long count = _count;
+      long count = _count.get();
       long lastCount = _lastCount;
       _lastCount = count;
 
@@ -125,11 +127,11 @@ public final class AverageProbe extends Probe implements AverageSample {
   public final double sampleSigma(int n)
   {
     synchronized (_lock) {
-      long count = _count;
+      long count = _count.get();
       long lastCount = _lastStdCount;
       _lastStdCount = count;
     
-      double sum = _sum;
+      double sum = _sum.get();
       double lastSum = _lastStdSum;
       _lastStdSum = sum;
 
@@ -157,8 +159,7 @@ public final class AverageProbe extends Probe implements AverageSample {
   public final double sampleMax()
   {
     synchronized (_lock) {
-      double max = _max;
-      _max = 0;
+      long max = _max.getAndSet(0);
 
       return _scale * max;
     }

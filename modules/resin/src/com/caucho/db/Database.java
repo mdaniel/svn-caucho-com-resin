@@ -95,14 +95,7 @@ public class Database
     if (dir != null)
       setPath(dir);
 
-    long minSize = 1 * 1024 * 1024;
-
-    long memorySize = Runtime.getRuntime().maxMemory() / 64;
-
-    if (memorySize < minSize)
-      memorySize = minSize;
-
-    _blockManager = BlockManager.create((int) (memorySize / Store.BLOCK_SIZE));
+    _blockManager = BlockManager.create();
   }
 
   /**

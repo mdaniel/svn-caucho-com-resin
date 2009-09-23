@@ -204,6 +204,12 @@ abstract public class Block implements SyncCacheListener {
     }
   }
 
+  public void saveAllocation()
+    throws IOException
+  {
+    getStore().saveAllocation();
+  }
+
   private void writeImpl()
     throws IOException
   {
@@ -264,7 +270,7 @@ abstract public class Block implements SyncCacheListener {
     synchronized (this) {
       if (_dirtyMin < _dirtyMax)
 	throw new IllegalStateException();
-    
+
       _isValid = false;
       _dirtyMin = Store.BLOCK_SIZE;
       _dirtyMax = 0;

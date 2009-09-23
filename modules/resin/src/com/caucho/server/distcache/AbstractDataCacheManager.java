@@ -988,6 +988,8 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
       WriteStream out = Vfs.openWrite(os);
 
       if (! _dataStore.load(valueKey, out)) {
+        System.out.println("MISSING_DATA: " + valueKey);
+        
         requestClusterData(valueKey, flags);
 
         if (! _dataStore.load(valueKey, out)) {

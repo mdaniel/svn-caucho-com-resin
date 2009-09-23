@@ -153,6 +153,46 @@ public class ProbeManager {
     return (AverageProbe) probe;
   }
 
+  public static SemaphoreProbe createSimpleSemaphoreProbe(String name)
+  {
+    return _manager.createSemaphoreProbeImpl(name, false);
+  }
+
+  /**
+   * Creates a semaphore probe and generate Count, Min, and Max probe.
+   */
+  public static SemaphoreProbe createSemaphoreProbe(String name)
+  {
+    return _manager.createSemaphoreProbeImpl(name, true);
+  }
+
+  private SemaphoreProbe createSemaphoreProbeImpl(String baseName,
+                                                  boolean isExtended)
+  {
+    String name = baseName;
+    
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null)
+      probe = createProbe(new SemaphoreProbe(name));
+      
+    SemaphoreProbe semaphoreProbe = (SemaphoreProbe) probe;
+
+    if (! isExtended)
+      return semaphoreProbe;
+
+    String countName = baseName + " Acquire";
+    createProbe(semaphoreProbe.createCount(countName));
+      
+    String maxName = name + " Max";
+    createProbe(semaphoreProbe.createMax(maxName));
+      
+    String minName = name + " Min";
+    createProbe(semaphoreProbe.createMin(minName));
+    
+    return (SemaphoreProbe) probe;
+  }
+
   protected Probe createProbe(Probe newProbe)
   {
     Probe probe = _probeMap.putIfAbsent(newProbe.getName(), newProbe);

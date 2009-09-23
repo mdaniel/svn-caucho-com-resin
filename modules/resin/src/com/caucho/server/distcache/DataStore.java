@@ -36,6 +36,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
 import com.caucho.util.IoUtil;
+import com.caucho.util.Hex;
 import com.caucho.util.HashKey;
 import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
@@ -73,16 +74,17 @@ public class DataStore implements AlarmListener {
   private final String _mnodeTableName;
 
   // remove unused data after 1 hour
-  private long _expireTimeout = 3600L * 1000L;
+  //private long _expireTimeout = 3600L * 1000L;
+  private long _expireTimeout = 2 * 60L * 1000L;
 
   private DataSource _dataSource;
     
   private String _insertQuery;
   private String _loadQuery;
   private String _dataAvailableQuery;
-  private String _updateAllExpiresQuery;
+  private String _selectAllLimitQuery;
   private String _updateExpiresQuery;
-  private String _timeoutQuery;
+  private String _deleteTimeoutQuery;
   
   private String _countQuery;
 
@@ -131,21 +133,26 @@ public class DataStore implements AlarmListener {
 			   + " WHERE id=?");
 
     // XXX: add random component to expire time?
+    /*
     _updateAllExpiresQuery = ("UPDATE " + _tableName
 			      + " SET expire_time=?"
 			      + " WHERE expire_time<? AND EXISTS "
 			      + "      (SELECT * FROM " + _mnodeTableName
 			      +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
+    */
+    
+    _selectAllLimitQuery = ("SELECT value, resin_oid FROM " + _mnodeTableName
+                            + " WHERE resin_oid > ?");
 
-    _timeoutQuery = ("DELETE FROM " + _tableName
-		     + " WHERE expire_time < ?");
+    _deleteTimeoutQuery = ("DELETE FROM " + _tableName
+                           + " WHERE expire_time < ?");
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
     initDatabase();
 
     _alarm = new Alarm(this);
-    handleAlarm(_alarm);
+    _alarm.queue(_expireTimeout / 2);
   }
 
   /**
@@ -431,6 +438,8 @@ public class DataStore implements AlarmListener {
    */
   public void removeExpiredData()
   {
+    updateExpire();
+
     DataConnection conn = null;
 
     try {
@@ -438,21 +447,73 @@ public class DataStore implements AlarmListener {
   
       long now = Alarm.getCurrentTime();
       
-      PreparedStatement pstmt = conn.prepareUpdateAllExpires();
+      PreparedStatement pstmt = conn.prepareDeleteTimeout();
 
-      pstmt.setLong(1, now + 3L * 3600 * 1000L);
-      pstmt.setLong(2, now);
-
-      pstmt.executeUpdate();
-      
-      pstmt = conn.prepareTimeout();
-	
       pstmt.setLong(1, now);
 
       int count = pstmt.executeUpdate();
 
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
+
+      System.out.println("EXPIRE: " + count);
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      conn.close();
+    }
+  }
+
+  /**
+   * Update used expire times.
+   */
+  private void updateExpire()
+  {
+    DataConnection conn = null;
+
+    try {
+      conn = getConnection();
+
+      long limit = 256;
+      long offset = 0;
+      long resinOid = 0;
+      boolean isData = false;
+  
+      PreparedStatement pstmt = conn.prepareSelectAllLimitExpires();
+      PreparedStatement pstmtUpdate = conn.prepareUpdateExpires();
+
+      long expires = Alarm.getCurrentTime() + _expireTimeout;
+
+      do {
+        isData = false;
+        
+        pstmt.setLong(1, resinOid);
+        pstmt.setFetchSize(256);
+
+        ResultSet rs = pstmt.executeQuery();
+
+        while (rs.next()) {
+          isData = true;
+
+          byte []key = rs.getBytes(1);
+          resinOid = rs.getLong(2);
+
+          if (key != null) {
+            try {
+              pstmtUpdate.setLong(1, expires);
+              pstmtUpdate.setBytes(2, key);
+              int count = pstmtUpdate.executeUpdate();
+
+              // System.out.println("COUNT: " + count + " " + Hex.toHex(key));
+            } catch (SQLException e) {
+              e.printStackTrace();
+              log.log(Level.FINER, e.toString(), e);
+            }
+          }
+        }
+        
+        offset += limit;
+      } while (isData);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -615,9 +676,9 @@ public class DataStore implements AlarmListener {
     private PreparedStatement _loadStatement;
     private PreparedStatement _dataAvailableStatement;
     private PreparedStatement _insertStatement;
-    private PreparedStatement _updateAllExpiresStatement;
+    private PreparedStatement _selectAllLimitStatement;
     private PreparedStatement _updateExpiresStatement;
-    private PreparedStatement _timeoutStatement;
+    private PreparedStatement _deleteTimeoutStatement;
     
     private PreparedStatement _countStatement;
 
@@ -653,13 +714,13 @@ public class DataStore implements AlarmListener {
       return _insertStatement;
     }
 
-    PreparedStatement prepareUpdateAllExpires()
+    PreparedStatement prepareSelectAllLimitExpires()
       throws SQLException
     {
-      if (_updateAllExpiresStatement == null)
-	_updateAllExpiresStatement = _conn.prepareStatement(_updateAllExpiresQuery);
+      if (_selectAllLimitStatement == null)
+	_selectAllLimitStatement = _conn.prepareStatement(_selectAllLimitQuery);
 
-      return _updateAllExpiresStatement;
+      return _selectAllLimitStatement;
     }
 
     PreparedStatement prepareUpdateExpires()
@@ -671,13 +732,13 @@ public class DataStore implements AlarmListener {
       return _updateExpiresStatement;
     }
 
-    PreparedStatement prepareTimeout()
+    PreparedStatement prepareDeleteTimeout()
       throws SQLException
     {
-      if (_timeoutStatement == null)
-	_timeoutStatement = _conn.prepareStatement(_timeoutQuery);
+      if (_deleteTimeoutStatement == null)
+	_deleteTimeoutStatement = _conn.prepareStatement(_deleteTimeoutQuery);
 
-      return _timeoutStatement;
+      return _deleteTimeoutStatement;
     }
 
     PreparedStatement prepareCount()

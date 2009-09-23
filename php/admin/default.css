@@ -488,25 +488,25 @@ li.server {
 
 ul.tabs {
   font-family : Verdana, Helvetica, Arial, sans-serif;
-  list-style:none;
-  float:left;
+  list-style-type: none;
+/*  float:left; */
   margin: 0;
   margin-bottom: 0.5em;
   padding : 0;
-  padding-bottom : 0.15em;
-  width: 100%;
+  padding-bottom : 0.2em;
+  border-bottom: 1px solid gray;
 }
 
 .tabs li {
-  float:left;
+/*  float:left; */
   margin : 0em;
   margin-top: 0.5em;
+  margin-right: 0.5em;
   padding: 0.15em 0.4em 0.2em 0.4em;
   background: #F4F4F4 none repeat scroll 0 0;
   display : inline;
   margin-bottom: -1px;
   margin-left: -1px;
-  overflow:hidden;
 
   border-top: 1px solid gray;
   border-left: 1px solid gray;
@@ -621,7 +621,7 @@ th.fail {
 td.leftnav {
 /*  background : #E0E6F8; */
   color : black;
-  vertical-align : top;
+/*  vertical-align : top; */
   padding : 3px;
 }
 .nav-cluster {
@@ -643,7 +643,7 @@ table.form {
 
 table.form td {
   text-align: left;
-  vertical-align: top;
+/*  vertical-align: top; */
   padding: 0.5em;
 }
 
@@ -653,7 +653,7 @@ table.form td input {
 
 table.form th {
   text-align: left;
-  vertical-align: center;
+/*  vertical-align: center; */
 }
 
 .missing-value {

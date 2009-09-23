@@ -107,6 +107,9 @@ public class LongKeyLruCache<V> {
 
     _capacity = initialCapacity;
     _capacity1 = _capacity / 2;
+
+    if (capacity > 16)
+      _lruTimeout = capacity / 16;
   }
 
   /**
@@ -133,6 +136,16 @@ public class LongKeyLruCache<V> {
     int capacity = calculateCapacity(newCapacity);
 
     if (capacity <= _entries.length)
+      return this;
+    else
+      return setCapacity(newCapacity);
+  }
+
+  public LongKeyLruCache setCapacity(int newCapacity)
+  {
+    int capacity = calculateCapacity(newCapacity);
+
+    if (capacity == _entries.length)
       return this;
 
     LongKeyLruCache newCache = new LongKeyLruCache(newCapacity);
@@ -361,7 +374,7 @@ public class LongKeyLruCache<V> {
     long lruCounter = _lruCounter;
     long itemCounter = item._lruCounter;
 
-    long delta = lruCounter - itemCounter;
+    long delta = (lruCounter - itemCounter) & 0x3fffffff;
 
     if (_lruTimeout < delta || delta < 0) {
       // update LRU only if not used recently
@@ -517,7 +530,7 @@ public class LongKeyLruCache<V> {
   public V remove(long key)
   {
     int hash = hash(key) & _mask;
-    
+
     V value = null;
 
     synchronized (_entries) {

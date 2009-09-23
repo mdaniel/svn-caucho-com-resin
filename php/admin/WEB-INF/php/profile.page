@@ -117,15 +117,63 @@ if ($profile) {
 
   $partition = do_partition_profile($results);
   $groups = array("active", "block", "jni", "resin", "keepalive", "wait",
-                  "accept", "single");
+                  "accept", "single", "all");
 
-  echo "<table class='threads'>\n";
+//  echo "<table class='threads'>\n";
 
+  echo "<p>";
+  echo "<ul class='tabs'>";
+  $count = 0;
   foreach ($groups as $name) {
     $entries = $partition[$name];
 
     if (sizeof($entries) <= 0)
       continue;
+
+    $count++;
+
+    echo "<li id='tab_" . $name . "'";
+    if ($count == 1)
+      echo " class='selected'";
+    else
+      echo " class=''";
+    echo ">\n";
+
+    echo "<a href='#' onclick=\"";
+    foreach ($groups as $subname) {
+      if (sizeof($partition[$subname]) <= 0)
+        continue;
+
+      if ($subname == $name) {
+        echo "show('g_" . $subname . "');";
+        echo "sel('tab_" . $subname . "');";
+      }
+      else {
+        echo "hide('g_" . $subname . "');";
+        echo "unsel('tab_" . $subname . "');";
+      }
+    }
+    echo "\">" . $name . "</a></li>";
+  }
+  echo "</ul>\n";
+
+  $count = 0;
+  foreach ($groups as $name) {
+    $entries = $partition[$name];
+
+    if (sizeof($entries) <= 0)
+      continue;
+
+    $count++;
+
+    echo "<div"
+    echo " id='g_" . $name . "'";
+    if ($count != 1)
+     echo " style='display:none'";
+    echo ">\n";
+
+    echo "<table";
+    echo " class='threads'>\n";
 
     //$topTicks = $entries[0]->getCount();
     $totalTicks = 0;
@@ -153,6 +201,7 @@ if ($profile) {
     echo "  <th>% sum</th>";
     echo "  <th>time self";
     echo "<th><th>trace\n";
+    echo "</tr>";
 
     $total_percent = 0;
     for ($i = 0; $i < sizeof($entries); $i++) {
@@ -211,9 +260,12 @@ if ($profile) {
       echo "</td>";
       echo "</tr>\n";
     }
+
+    echo "</table>\n";
+    echo "</div>\n";
   }
 
-  echo "</table>\n";
+ // echo "</table>\n";
 }
 else {
   echo "<h2>Profiling is not available</h2>";
@@ -225,17 +277,26 @@ function do_partition_profile($entries)
 {
   $partition = array();
   foreach ($entries as $info) {
-    $stackTrace = $info->stackTrace;
+    $stackTrace = $info->getStackTrace();
 
     if (! $stackTrace) {
+      continue;
     }
-    else if ($info->getCount() < 2) {
+
+    $partition["all"][] = $info;
+    $className = $stackTrace[0]->className;
+    $methodName = $stackTrace[0]->methodName;
+
+    if ($info->getCount() < 2) {
       $partition["single"][] = $info;
     }
     else if ($info->isBlocked()) {
       $partition["block"][] = $info;
     }
-    else if ($info->isJni()) {
+    else if ($info->isJni()
+             && ! preg_match("/com.caucho.server.admin/", $className)
+             && $className != "com.caucho.vfs.JniRandomAccessFile"
+             && $className != "com.caucho.vfs.JniFileStream") {
       $partition["jni"][] = $info;
     }
     else if ($info->isWaiting() || $info->isParked() || $info->isSleeping()) {

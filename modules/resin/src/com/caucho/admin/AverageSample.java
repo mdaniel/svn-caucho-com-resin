@@ -35,5 +35,5 @@ public interface AverageSample {
   /**
    * Adds a data sample to the probe
    */
-  public void add(double value);
+  public void add(long value);
 }

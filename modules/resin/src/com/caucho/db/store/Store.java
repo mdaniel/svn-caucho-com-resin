@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.sql.SQLException;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -148,6 +149,7 @@ public class Store {
   private byte []_allocationTable;
 
   private final Object _allocationWriteLock = new Object();
+  private final AtomicInteger _allocationWriteCount = new AtomicInteger();
   private int _allocDirtyMin = Integer.MAX_VALUE;
   private int _allocDirtyMax;
 
@@ -164,7 +166,7 @@ public class Store {
   private Object _fileLock = new Object();
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
 
-  private final Semaphore _rowFileSemaphore = new Semaphore(4);
+  private final Semaphore _rowFileSemaphore = new Semaphore(8);
 
   private Lock _rowLock;
 
@@ -485,12 +487,11 @@ public class Store {
       blockId = BLOCK_SIZE;
 
     long blockIndex = blockId >> BLOCK_BITS;
+    long blockCount = _blockCount;
 
-    synchronized (_allocationLock) {
-      for (; blockIndex < _blockCount; blockIndex++) {
-        if (getAllocation(blockIndex) == type)
-          return blockIndexToBlockId(blockIndex);
-      }
+    for (; blockIndex < _blockCount; blockIndex++) {
+      if (getAllocation(blockIndex) == type)
+        return blockIndexToBlockId(blockIndex);
     }
 
     return -1;
@@ -529,7 +530,8 @@ public class Store {
   public Block allocateRow()
     throws IOException
   {
-    Block block = allocateBlock(ALLOC_ROW);
+    boolean isSave = true;
+    Block block = allocateBlock(ALLOC_ROW, isSave);
 
     // System.out.println("ROW: " + Long.toHexString(block.getBlockId()));
 
@@ -552,7 +554,8 @@ public class Store {
   public Block allocateBlock()
     throws IOException
   {
-    return allocateBlock(ALLOC_USED);
+    boolean isSave = true;
+    return allocateBlock(ALLOC_USED, isSave);
   }
 
   /**
@@ -563,7 +566,8 @@ public class Store {
   private Block allocateFragmentBlock()
     throws IOException
   {
-    return allocateBlock(ALLOC_FRAGMENT);
+    boolean isSave = true;
+    return allocateBlock(ALLOC_FRAGMENT, isSave);
   }
 
   /**
@@ -574,7 +578,8 @@ public class Store {
   private Block allocateMiniFragmentBlock()
     throws IOException
   {
-    return allocateBlock(ALLOC_MINI_FRAG);
+    boolean isSave = true;
+    return allocateBlock(ALLOC_MINI_FRAG, isSave);
   }
 
   /**
@@ -585,7 +590,8 @@ public class Store {
   public Block allocateIndexBlock()
     throws IOException
   {
-    return allocateBlock(ALLOC_INDEX);
+    boolean isSave = false;
+    return allocateBlock(ALLOC_INDEX, isSave);
   }
 
   /**
@@ -601,7 +607,7 @@ public class Store {
    *
    * @return the block id of the allocated block.
    */
-  private Block allocateBlock(int code)
+  private Block allocateBlock(int code, boolean isSave)
     throws IOException
   {
     long blockIndex;
@@ -673,6 +679,10 @@ public class Store {
       setAllocation(blockIndex, code);
     }
 
+    /* XXX: requires more
+    if (isSave)
+      saveAllocation();
+    */
     saveAllocation();
 
     return block;
@@ -782,26 +792,37 @@ public class Store {
   /**
    * Sets the allocation for a block.
    */
-  void saveAllocation()
+  public void saveAllocation()
     throws IOException
   {
     // cache doesn't actually need to write this data
     if (! _isFlushDirtyBlocksOnCommit)
       return;
 
-    synchronized (_allocationWriteLock) {
-      int dirtyMin;
-      int dirtyMax;
+    if (_allocDirtyMax <= _allocDirtyMin)
+      return;
 
-      synchronized (_allocationLock) {
-        dirtyMin = _allocDirtyMin;
-        _allocDirtyMin = Integer.MAX_VALUE;
+    try {
+      // only two threads should try saving at once.  The second thread
+      // is necessary if the dirty range is set after the write
+      if (_allocationWriteCount.incrementAndGet() < 2) {
+        synchronized (_allocationWriteLock) {
+          int dirtyMin;
+          int dirtyMax;
 
-        dirtyMax = _allocDirtyMax;
-        _allocDirtyMax = 0;
+          synchronized (_allocationLock) {
+            dirtyMin = _allocDirtyMin;
+            _allocDirtyMin = Integer.MAX_VALUE;
+
+            dirtyMax = _allocDirtyMax;
+            _allocDirtyMax = 0;
+          }
+
+          saveAllocation(dirtyMin, dirtyMax);
+        }
       }
-
-      saveAllocation(dirtyMin, dirtyMax);
+    } finally {
+      _allocationWriteCount.decrementAndGet();
     }
   }
 
@@ -1542,25 +1563,27 @@ public class Store {
     throws IOException
   {
     while (true) {
-      synchronized (_allocationLock) {
-        byte []allocationTable = _allocationTable;
+      byte []allocationTable = _allocationTable;
 
-        for (int i = 0;
-             i < allocationTable.length;
-             i += ALLOC_BYTES_PER_BLOCK) {
-          int fragMask = allocationTable[i + 1] & 0xff;
+      for (int i = 0;
+           i < allocationTable.length;
+           i += ALLOC_BYTES_PER_BLOCK) {
+        int fragMask = allocationTable[i + 1] & 0xff;
 
-          if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
-            allocationTable[i + 1] = (byte) 0xff;
+        if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
+          synchronized (allocationTable) {
+            if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
+              allocationTable[i + 1] = (byte) 0xff;
 
-            setAllocDirty(i + 1, i + 2);
+              setAllocDirty(i + 1, i + 2);
 
-            _miniFragmentUseCount++;
+              _miniFragmentUseCount++;
 
-            long fragmentAddress
-              = BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK);
+              long fragmentAddress
+                = BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK);
 
-            return fragmentAddress;
+              return fragmentAddress;
+            }
           }
         }
       }
@@ -1764,7 +1787,7 @@ public class Store {
                                             Long.toHexString(_fileSize)));
       }
 
-      //System.out.println("READ: " + (blockAddress >> 16) + ":" + (blockAddress & 0xffff));
+      // System.out.println("READ: " + Long.toHexString(blockAddress));
       int readLen = is.read(blockAddress, buffer, offset, length);
 
       if (readLen < 0) {

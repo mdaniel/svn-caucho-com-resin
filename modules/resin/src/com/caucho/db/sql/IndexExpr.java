@@ -33,6 +33,7 @@ import com.caucho.db.index.IndexCache;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
 import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.Hex;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -139,6 +140,7 @@ class IndexExpr extends RowIterateExpr {
     long index = _cache.lookup(_index, buffer, 0, length,
 			       context.getTransaction());
     */
+    
     long index;
     try {
       index = _index.lookup(buffer, 0, length,
@@ -146,6 +148,7 @@ class IndexExpr extends RowIterateExpr {
     } catch (IOException e) {
       throw new SQLException(e);
     }
+    // System.out.println("ROW: " + index + " " + _index + " " + Hex.toHex(buffer, 0, length));
 
     // System.out.println("LOOKUP: " + index + " " + _expr.evalString(context));
     return index;

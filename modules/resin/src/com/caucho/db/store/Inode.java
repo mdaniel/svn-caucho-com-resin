@@ -754,16 +754,19 @@ public class Inode {
           }
         }
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       _freeBytes.free(bytes);
 
+      // XXX: saved by caller
+      /*
       try {
         _store.saveAllocation();
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
+      */
     }
   }
 

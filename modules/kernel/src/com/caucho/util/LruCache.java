@@ -402,7 +402,7 @@ public final class LruCache<K,V> {
     long lruCounter = _lruCounter;
     long itemCounter = item._lruCounter;
 
-    long delta = lruCounter - itemCounter;
+    long delta = (lruCounter - itemCounter) & 0x3fffffff;
 
     if (_lruTimeout < delta || delta < 0) {
       // update LRU only if not used recently

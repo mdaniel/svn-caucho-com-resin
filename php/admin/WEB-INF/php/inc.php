@@ -547,6 +547,8 @@ if ($is_refresh) {
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
     function show(id) { document.getElementById(id).style.display = 'block'; }
+    function sel(id) { document.getElementById(id).className = 'selected'; }
+    function unsel(id) { document.getElementById(id).className = ''; }
     function showInline(id) { document.getElementById(id).style.display = 'inline'; }
     function setValue(id, v) { document.getElementById(id).value = v; }
     function selectChoice(root, name)
@@ -629,7 +631,7 @@ if (! empty($server)) {
 
   <td width="10">
   </td>
-  <td>
+  <td valign='top'>
 
 <?php
   if (! $server && $g_server_id) {

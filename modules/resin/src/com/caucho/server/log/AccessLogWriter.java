@@ -29,10 +29,13 @@
 
 package com.caucho.server.log;
 
+import com.caucho.admin.ProbeManager;
+import com.caucho.admin.SemaphoreProbe;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
+import com.caucho.util.TaskWorker;
 import com.caucho.util.ThreadPool;
 
 import java.io.IOException;
@@ -49,7 +52,7 @@ import java.util.concurrent.Semaphore;
 /**
  * Represents an log of every top-level request to the server.
  */
-public class AccessLogWriter extends AbstractRolloverLog implements Runnable
+public class AccessLogWriter extends AbstractRolloverLog
 {
   protected static final L10N L = new L10N(AccessLogWriter.class);
   protected static final Logger log
@@ -74,7 +77,11 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 
   private final AtomicBoolean _hasFlushThread = new AtomicBoolean();
   private final AtomicBoolean _isThreadWake = new AtomicBoolean();
+
+  private final LogWriterTask _logWriterTask = new LogWriterTask();
   private Thread _flushThread;
+
+  private SemaphoreProbe _semaphoreProbe;
 
   AccessLogWriter(AccessLog log)
   {
@@ -85,6 +92,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     _buffer = _logBuffer.getBuffer();
     _length = 0;
     */
+
+    _semaphoreProbe = ProbeManager.createSemaphoreProbe("Resin|Log|Semaphore");
   }
 
   void writeThrough(byte []buffer, int offset, int length)
@@ -114,7 +123,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       }
     }
 
-    scheduleThread(queueSize);
+    if (_logQueueSize > 32)
+      _logWriterTask.wake();
   }
 
   // must be synchronized by _bufferLock.
@@ -160,56 +170,11 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
         delta = 1000;
 
       try {
-        Thread thread = _flushThread;
-
-        if (thread != null && ! _isThreadWake.getAndSet(true))
-          LockSupport.unpark(thread);
+        _logWriterTask.wake();
 
         Thread.sleep(delta);
       } catch (Exception e) {
       }
-    }
-  }
-
-  private void scheduleThread(int queueSize)
-  {
-    if (! _hasFlushThread.getAndSet(true)) {
-      ThreadPool.getThreadPool().schedulePriority(this);
-    }
-
-    Thread thread = _flushThread;
-
-    if (thread != null && queueSize > 32 && ! _isThreadWake.getAndSet(true))
-      LockSupport.unpark(thread);
-  }
-
-  public void run()
-  {
-    try {
-      _flushThread = Thread.currentThread();
-      int fullCount = 60;
-      int count = fullCount;
-
-      while (true) {
-        if (flushBuffer()) {
-          count = fullCount;
-          continue;
-        }
-
-        if (count-- < 0)
-          return;
-
-        Thread.interrupted();
-        LockSupport.parkNanos(1000 * 1000000L);
-        _isThreadWake.set(false);
-      }
-    } finally {
-      _flushThread = null;
-      _hasFlushThread.set(false);
-
-      if (_logHead != null)
-        scheduleThread(0);
-
     }
   }
 
@@ -250,6 +215,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
     try {
       Thread.interrupted();
       _logSemaphore.acquire();
+
+      _semaphoreProbe.acquire();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -265,6 +232,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   void freeBuffer(LogBuffer logBuffer)
   {
     _logSemaphore.release();
+    _semaphoreProbe.release();
 
     logBuffer.setNext(null);
 
@@ -288,5 +256,12 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       }
     }
     */
+  }
+
+  class LogWriterTask extends TaskWorker {
+    public void runTask()
+    {
+      flushBuffer();
+    }
   }
 }

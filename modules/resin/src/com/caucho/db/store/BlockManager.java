@@ -41,6 +41,9 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 
 /**
  * Manages the block cache
@@ -84,14 +87,44 @@ public final class BlockManager
   /**
    * Returns the block manager, ensuring a minimum number of entries.
    */
-  public static synchronized BlockManager create(int minEntries)
+  public static synchronized BlockManager create()
   {
-    if (_staticManager == null)
-      _staticManager = new BlockManager(minEntries);
+    if (_staticManager == null) {
+      int minEntries = (int) defaultCapacity();
 
-    _staticManager.ensureCapacity(minEntries);
+      _staticManager = new BlockManager(minEntries);
+    }
 
     return _staticManager;
+  }
+
+  private static long defaultCapacity()
+  {
+    long minSize = 1 * 1024 * 1024;
+
+    long memorySize = getMaxMemory() / 64;
+
+    if (memorySize < minSize)
+      memorySize = minSize;
+
+    return memorySize / Store.BLOCK_SIZE;
+  }
+
+  private static long getMaxMemory()
+  {
+    try {
+      MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+      MemoryUsage heap = memoryBean.getHeapMemoryUsage();
+
+      if (heap.getCommitted() < heap.getMax())
+        return heap.getMax();
+      else
+        return heap.getCommitted();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+      
+    return Runtime.getRuntime().maxMemory();
   }
 
   public static BlockManager getBlockManager()
@@ -107,6 +140,17 @@ public final class BlockManager
   public void ensureCapacity(int minCapacity)
   {
     _blockCache = _blockCache.ensureCapacity(minCapacity);
+  }
+
+  /**
+   * Ensures the cache has a minimum number of blocks.
+   *
+   * @param minCapacity the minimum capacity in blocks
+   */
+  public void setCapacity(int minCapacity)
+  {
+    if (minCapacity > 1024 * 1024 / Store.BLOCK_SIZE)
+      _blockCache = _blockCache.setCapacity(minCapacity);
   }
 
   /**

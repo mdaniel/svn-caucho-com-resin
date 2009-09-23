@@ -709,6 +709,8 @@ public class Table extends Store {
       insertRow(queryContext, xa, columns, values,
                 block, rowOffset);
 
+      block.saveAllocation();
+
       return blockIdToAddress(block.getBlockId(), rowOffset);
     } finally {
       if (block != null)
