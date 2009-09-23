@@ -35,6 +35,7 @@ import com.caucho.quercus.env.EnvVar;
 import com.caucho.quercus.env.EnvVarImpl;
 import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;

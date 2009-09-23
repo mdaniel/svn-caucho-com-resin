@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.This;
@@ -235,7 +236,7 @@ public class ArrayIterator
   }
 
 
-  static private void printDepth(WriteStream out, int depth)
+   private static void printDepth(WriteStream out, int depth)
     throws java.io.IOException
   {
     for (int i = depth; i > 0; i--)

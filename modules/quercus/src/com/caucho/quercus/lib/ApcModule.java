@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
@@ -49,7 +50,8 @@ import java.util.logging.Logger;
  */
 public class ApcModule extends AbstractQuercusModule
 {
-  private static final Logger log = Logger.getLogger(ApcModule.class.getName());
+  private static final Logger log
+    = Logger.getLogger(ApcModule.class.getName());
   private static final L10N L = new L10N(ApcModule.class);
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
@@ -197,8 +199,12 @@ public class ApcModule extends AbstractQuercusModule
   /**
    * Returns a value.
    */
-  public Value apc_fetch(Env env, String key)
+  public Value apc_fetch(Env env, 
+                         String key,
+                         @Optional @Reference Value isSuccessful)
   {
+    isSuccessful.set(BooleanValue.FALSE);
+    
     if (_cache == null)
       return BooleanValue.FALSE;
     
@@ -213,6 +219,7 @@ public class ApcModule extends AbstractQuercusModule
       initObject(env, new IdentityHashMap<Value,Value>(), value);
 
     if (value != null) {
+      isSuccessful.set(BooleanValue.TRUE);
       return value;
     }
     else

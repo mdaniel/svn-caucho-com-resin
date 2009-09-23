@@ -1292,11 +1292,13 @@ public class Env {
   {
     String realPath = getIniString("upload_tmp_dir");
 
-    if (realPath == null && getRequest() != null)
-      realPath = getRequest().getRealPath("/WEB-INF/upload");
-    else
-      realPath = "/tmp/caucho/upload";
-    
+    if (realPath == null) {
+      if (getRequest() != null)
+        realPath = getRequest().getRealPath("/WEB-INF/upload");
+      else
+        realPath = "/tmp/caucho/upload";
+    }
+
     return realPath;
   }
   
@@ -1954,6 +1956,22 @@ public class Env {
   {
     return getGlobalVar(name);
   }
+  
+  /**
+   * Gets a static variable
+   *
+   * @param name the variable name
+   */
+  public final Var getStaticClassVar(Value qThis, String name)
+  {
+    if (qThis != null && qThis.isset()) {
+      name = qThis.getClassName() + "::" + name;
+    } else if (getCallingClass() != null) {
+      name = getCallingClass().getName() + "::" + name;
+    }
+    
+    return getGlobalVar(name);
+  }
 
   /**
    * Unsets variable
@@ -2267,11 +2285,10 @@ public class Env {
         if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this)) {
           String contentType = getContentType();
           
-          if (contentType != null
-              && ! contentType.equals("unknown/type"))
+          if (contentType == null || ! contentType.equals("unknown/type"))
             return null;
         }
-        
+
         if (_inputData == null)
           return null;
         
@@ -4490,10 +4507,15 @@ public class Env {
       QuercusClass cl = findClass(classId, true, true);
       
       if (cl != null)
-	return cl;
-      else
-	throw new QuercusException(L.l("'{0}' is an unknown class",
-				       _quercus.getClassName(classId)));
+        return cl;
+      else {
+        error(L.l("'{0}' is an unknown class.",
+                  _quercus.getClassName(classId)));
+
+        
+        throw new QuercusException(L.l("'{0}' is an unknown class.",
+                                       _quercus.getClassName(classId)));
+      }
     }
 
     int parentId = -1;

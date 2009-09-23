@@ -331,7 +331,7 @@ public class RegexpModule
     } catch (Exception e) {
       env.warning(e);
 
-      return new Regexp[0];
+      return null;
     }
   }
 
@@ -1037,6 +1037,9 @@ public class RegexpModule
   {
     try {
       Regexp []regexpList = createRegexpArray(env, pattern);
+      
+      if (regexpList == null)
+        return NullValue.NULL;
 
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1437,7 +1440,7 @@ public class RegexpModule
   {
     if (fun == null) {
       env.warning(L.l("callback argument can't be null in preg_replace_callback"));
-      return StringValue.EMPTY;
+      return subject;
     }
     
     if (regexp == null)
@@ -1505,6 +1508,9 @@ public class RegexpModule
     }
 
     Regexp []regexpList = createRegexpArray(env, regexpValue);
+    
+    if (regexpList == null)
+      return NullValue.NULL;
 
     try {
       if (subject instanceof ArrayValue) {

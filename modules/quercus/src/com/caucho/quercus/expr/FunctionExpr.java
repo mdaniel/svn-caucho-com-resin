@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.*;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
@@ -170,6 +171,10 @@ public class FunctionExpr extends Expr {
     Value []args = fun.evalArguments(env, this, _args);
 
     env.pushCall(this, NullValue.NULL, args);
+    
+    // php/0249
+    QuercusClass oldCallingClass = env.setCallingClass(null);
+    
     // XXX: qa/1d14 Value oldThis = env.setThis(UnsetValue.NULL);
     try {
       env.checkTimeout();
@@ -184,6 +189,7 @@ public class FunctionExpr extends Expr {
     //  throw QuercusException.create(e, env.getStackTrace());
     } finally {
       env.popCall();
+      env.setCallingClass(oldCallingClass);
       // XXX: qa/1d14 env.setThis(oldThis);
     }
   }

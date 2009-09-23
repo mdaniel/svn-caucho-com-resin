@@ -440,7 +440,7 @@ public class HtmlModule extends AbstractQuercusModule {
   private static void entity(ArrayValue array, StringValue []map,
                              int ch, String entity)
   {
-    // XXX: i18n and optimize static variables usuage
+    // XXX: i18n and optimize static variables usage
     array.put("" + (char) ch, entity);
     map[ch & 0xffff] = new StringBuilderValue(entity);
   }
@@ -557,7 +557,9 @@ public class HtmlModule extends AbstractQuercusModule {
     entity(array, map, 253, "&yacute;");
     entity(array, map, 254, "&thorn;");
     entity(array, map, 255, "&yuml;");
-    entity(array, map, 0x20ac, "&euro;");
+    
+    // XXX: charset
+    //entity(array, map, '\u20ac', "&euro;");
     
     HTML_ENTITIES_ARRAY = new ConstArrayValue(array);
   }

@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.MethodMap;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
@@ -97,13 +98,15 @@ public class MethodCallExpr extends Expr {
       args[i] = _args[i].evalArg(env, true);
 
     env.pushCall(this, obj, args);
-
+    QuercusClass oldCallingClass = env.setCallingClass(obj.getQuercusClass());
+    
     try {
       env.checkTimeout();
 
       return obj.callMethod(env, _hash, _name, _name.length, args);
     } finally {
       env.popCall();
+      env.setCallingClass(oldCallingClass);
     }
   }
 
@@ -127,12 +130,15 @@ public class MethodCallExpr extends Expr {
 
     env.pushCall(this, obj, args);
     
+    QuercusClass oldCallingClass = env.setCallingClass(obj.getQuercusClass());
+    
     try {
       env.checkTimeout();
 
       return obj.callMethodRef(env, _hash, _name, _name.length, args);
     } finally {
       env.popCall();
+      env.setCallingClass(oldCallingClass);
     }
   }
   

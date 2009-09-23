@@ -64,7 +64,15 @@ public class StaticStatement extends Statement {
 
       String staticName = _staticName;
       
-      Var var = env.getStaticVar(staticName);
+      Value thisV = env.getThis();
+
+      Var var;
+      
+      if (thisV != null && thisV.isset()
+          || env.getCallingClass() != null)
+        var = env.getStaticClassVar(thisV, staticName);
+      else
+        var = env.getStaticVar(staticName);
       
       env.setValue(_var.getName(), var);
 

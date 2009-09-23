@@ -563,7 +563,7 @@ public class QuercusServlet
     for (ServerEnv serverEnv : _serverEnvList) {
       for (Map.Entry<String,String> entry
            : serverEnv._propertyMap.entrySet()) {
-        quercus.setIni(entry.getKey(), entry.getValue());
+        quercus.setServerEnv(entry.getKey(), entry.getValue());
       }
     }
   }

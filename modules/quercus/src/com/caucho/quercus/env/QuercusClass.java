@@ -173,19 +173,25 @@ public class QuercusClass {
     _instanceofSet = new HashSet<String>();
 
     HashSet<String> ifaces = new HashSet<String>();
-
+    
+    // add interfaces
     for (int i = classDefList.length - 1; i >= 0; i--) {
       classDef = classDefList[i];
-
+      
       if (classDef == null) {
         throw new NullPointerException("classDef:" + _classDef
                                        + " i:" + i + " parent:" + parent);
       }
-
+      
       classDef.init();
-
+      
       addInstances(_instanceofSet, ifaces, classDef);
+    }
 
+    // then add concrete ancestors
+    for (int i = classDefList.length - 1; i >= 0; i--) {
+      classDef = classDefList[i];
+      
       classDef.initClass(this);
     }
     
@@ -215,8 +221,8 @@ public class QuercusClass {
       QuercusClass cl = Env.getInstance().findClass(iface, true, true);
         
       if (cl == null)
-	throw new QuercusRuntimeException(L.l("cannot find interface {0}",
-					      iface));
+        throw new QuercusRuntimeException(L.l("cannot find interface {0}",
+                                              iface));
 
       // _instanceofSet.addAll(cl.getInstanceofSet());
         
@@ -224,11 +230,11 @@ public class QuercusClass {
       // ClassDef ifaceDef = moduleContext.findClass(iface);
 
       if (ifaceDef != null) {
-	if (ifaces.add(iface)) {
-	  addInstances(instanceofSet, ifaces, ifaceDef);
+        if (ifaces.add(iface)) {
+          addInstances(instanceofSet, ifaces, ifaceDef);
 
-	  ifaceDef.initClass(this);
-	}
+          ifaceDef.initClass(this);
+        }
       }
     }
   }
@@ -577,7 +583,7 @@ public class QuercusClass {
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
     AbstractFunction existingFun = _methodMap.get(name);
-
+    
     if (existingFun == null || ! fun.isAbstract())
       _methodMap.put(name, fun);
     else if (! existingFun.isAbstract() && fun.isAbstract())

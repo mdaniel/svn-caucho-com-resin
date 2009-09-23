@@ -86,11 +86,11 @@ public class SessionModule extends AbstractQuercusModule
    * and "public". If a value other than these values is supplied, then a warning is produced
    * and no cache related headers will be sent to the client.
    */
-  public Value session_cache_limiter(Env env, @Optional String newValue)
+  public Value session_cache_limiter(Env env, @Optional Value newValue)
   {
     Value value = env.getIni("session.cache_limiter");
 
-    if (newValue == null || "".equals(newValue)) // XXX: php/1k16
+    if (newValue.isDefault())
       return value;
 
     env.setIni("session.cache_limiter", newValue);
@@ -342,7 +342,8 @@ public class SessionModule extends AbstractQuercusModule
                                          long lifetime,
                                          @Optional Value path,
                                          @Optional Value domain,
-                                         @Optional Value secure)
+                                         @Optional Value isSecure,
+                                         @Optional Value isHttpOnly)
   {
     env.setIni("session.cookie_lifetime", String.valueOf(lifetime));
 
@@ -352,8 +353,9 @@ public class SessionModule extends AbstractQuercusModule
     if (domain.isset())
       env.setIni("session.cookie_domain", domain.toString());
 
-    if (secure.isset())
-      env.setIni("session.cookie_secure", secure.toBoolean() ? "1" : "0");
+    if (isSecure.isset())
+      env.setIni("session.cookie_secure", 
+                 isSecure.toBoolean() ? "1" : "0");
 
     return NullValue.NULL;
   }

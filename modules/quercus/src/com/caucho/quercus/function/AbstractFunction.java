@@ -112,6 +112,11 @@ abstract public class AbstractFunction {
     _bindingClass = qcl;
   }
   
+  public QuercusClass getBindingClass()
+  {
+    return _bindingClass;
+  }
+  
   /*
    * Returns the implementing class.
    */
