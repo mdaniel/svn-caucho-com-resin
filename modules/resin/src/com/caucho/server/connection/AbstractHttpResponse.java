@@ -429,7 +429,7 @@ abstract public class AbstractHttpResponse {
       else if (value.equals("x-anonymous")) {
       }
       else
-	_request.getResponseFacade().setCacheControl(true);
+        _request.getResponseFacade().setCacheControl(true);
       
       return false;
 	
@@ -443,7 +443,9 @@ abstract public class AbstractHttpResponse {
       return true;
 	
     case HEADER_CONTENT_LENGTH:
-      _contentLength = Long.parseLong(value);
+      // server/05a8
+      // php/164v
+      _contentLength = Long.parseLong(value.trim());
       return true;
 	
     case HEADER_DATE:
