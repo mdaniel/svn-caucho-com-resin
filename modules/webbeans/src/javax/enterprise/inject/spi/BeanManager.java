@@ -210,7 +210,7 @@ public interface BeanManager
    * @param qualifiers the qualifier set for the event
    */
   public <T> Set<ObserverMethod<? super T>>
-    resolveObserverMethod(T event, Annotation... qualifiers);
+    resolveObserverMethods(T event, Annotation... qualifiers);
 
   /**
    * Fires an event

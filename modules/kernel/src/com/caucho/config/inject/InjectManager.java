@@ -1637,15 +1637,18 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  public void addObserver(ObserverMethod<?> observer,
-                          Annotation... bindings)
+  public void addObserver(ObserverMethod<?> observer)
   {
-    BaseType baseType = createBaseType(observer.getClass());
-    BaseType observerType = baseType.findClass(this, Observer.class);
+    BaseType observedType = createBaseType(observer.getObservedType());
+    Set<Annotation> qualifierSet = observer.getObservedQualifiers();
 
-    BaseType eventType = observerType.getParameters()[0];
+    Annotation[] qualifiers = new Annotation[qualifierSet.size()];
+    int i = 0;
+    for (Annotation qualifier : qualifierSet) {
+      qualifiers[i++] = qualifier;
+    }
 
-    addObserver(observer, eventType, bindings);
+    addObserver(observer, observedType, qualifiers);
   }
 
   /**
@@ -1773,7 +1776,7 @@ public class InjectManager
    * @param bindings the binding set for the event
    */
   public <T> Set<ObserverMethod<? super T>>
-    resolveObserverMethod(T event, Annotation... qualifiers)
+    resolveObserverMethods(T event, Annotation... qualifiers)
   {
     HashSet<ObserverMethod<? super T>> set
       = new HashSet<ObserverMethod<? super T>>();

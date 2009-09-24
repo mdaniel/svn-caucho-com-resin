@@ -42,8 +42,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Nonbinding;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Introspected annotation binding
@@ -55,6 +56,7 @@ public class Binding {
   private static final Class []NULL_ARG = new Class[0];
 
   private Annotation _ann;
+  private Class<? extends Annotation> _annType;
 
   private ArrayList<Method> _methodList
     = new ArrayList<Method>();
@@ -62,8 +64,9 @@ public class Binding {
   Binding(Annotation ann)
   {
     _ann = ann;
+    _annType = ann.annotationType();
 
-    Method []methods = ann.annotationType().getMethods();
+    Method []methods = _annType.getMethods();
 
     for (Method method : methods) {
       if (method.getName().equals("annotationType"))
@@ -93,7 +96,12 @@ public class Binding {
 
   boolean isMatch(Annotation ann)
   {
-    if (! _ann.annotationType().equals(ann.annotationType())) {
+    Class annType = ann.annotationType();
+
+    if (_annType == Any.class)
+      return true;
+
+    if (! _annType.equals(annType)) {
       return false;
     }
 
