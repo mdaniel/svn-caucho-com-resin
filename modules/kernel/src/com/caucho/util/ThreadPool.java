@@ -46,7 +46,7 @@ public final class ThreadPool {
   private static final L10N L = new L10N(ThreadPool.class);
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
-  
+
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
 
   private static final int DEFAULT_THREAD_MAX = 8192;
@@ -60,15 +60,15 @@ public final class ThreadPool {
   private static ThreadPool _globalThreadPool;
 
   private final AtomicInteger _gId = new AtomicInteger();
-    
+
   private int _threadMax = DEFAULT_THREAD_MAX;
-  
+
   private int _threadIdleMax = -1;
   private boolean _isThreadIdleMaxSet;
-  
+
   private int _threadIdleMin = -1;
   private boolean _isThreadIdleMinSet;
-  
+
   // the minimum number of free threads reserved for priority tasks
   private int _threadPriority = -1;
   private boolean _isThreadPrioritySet = false;
@@ -82,7 +82,7 @@ public final class ThreadPool {
 
   private final Object _idleLock = new Object();
 
-  private final ThreadLauncher _launcher = new ThreadLauncher();
+  private final ThreadLauncher _launcher;
 
   // the idle stack
   private PoolThread _idleHead;
@@ -104,7 +104,7 @@ public final class ThreadPool {
   // queue for waiting executor tasks
   private ExecutorQueueItem _executorQueueHead;
   private ExecutorQueueItem _executorQueueTail;
-  
+
   private final AtomicLong _createCount = new AtomicLong();
   private final AtomicLong _overflowCount = new AtomicLong();
 
@@ -112,7 +112,9 @@ public final class ThreadPool {
 
   private ThreadPool()
   {
-     // initialize default values
+    _launcher = new ThreadLauncher();
+
+    // initialize default values
     init();
   }
 
@@ -120,13 +122,13 @@ public final class ThreadPool {
   {
     return getThreadPool();
   }
-  
+
   public static ThreadPool getThreadPool()
   {
     synchronized (ThreadPool.class) {
       if (_globalThreadPool == null)
-	_globalThreadPool = new ThreadPool();
-      
+        _globalThreadPool = new ThreadPool();
+
       return _globalThreadPool;
     }
   }
@@ -142,10 +144,10 @@ public final class ThreadPool {
   {
     synchronized (this) {
       int threadIdleMax = _threadIdleMax;
-      
+
       if (max < threadIdleMax && _isThreadIdleMaxSet)
-	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})", threadIdleMax, max));
-	
+        throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})", threadIdleMax, max));
+
       _threadMax = max;
     }
 
@@ -167,14 +169,14 @@ public final class ThreadPool {
   {
     synchronized (this) {
       int threadIdleMax = _threadIdleMax;
-      
+
       if (threadIdleMax < min && _isThreadIdleMaxSet)
-	throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})", min, threadIdleMax));
-    
+        throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})", min, threadIdleMax));
+
       _threadIdleMin = min;
       _isThreadIdleMinSet = true;
     }
-    
+
     init();
   }
 
@@ -194,18 +196,18 @@ public final class ThreadPool {
     synchronized (this) {
       int threadIdleMin = _threadIdleMin;
       if (max < threadIdleMin && _isThreadIdleMinSet)
-	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be greater than <thread-idle-min> ({1})",
-				      max, threadIdleMin));
+        throw new ConfigException(L.l("<thread-idle-max> ({0}) must be greater than <thread-idle-min> ({1})",
+                                      max, threadIdleMin));
 
       int threadMax = _threadMax;
       if (threadMax < max)
-	throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
-				      max, threadMax));
-    
+        throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
+                                      max, threadMax));
+
       _threadIdleMax = max;
       _isThreadIdleMaxSet = true;
     }
-    
+
     init();
   }
 
@@ -216,7 +218,7 @@ public final class ThreadPool {
   {
     _threadPriority = priority;
     _isThreadPrioritySet = true;
-    
+
     init();
   }
 
@@ -235,12 +237,12 @@ public final class ThreadPool {
   {
     synchronized (this) {
       if (_threadMax < max)
-	throw new ConfigException(L.l("<thread-executor-max> ({0}) must be less than <thread-max> ({1})",
-				      max, _threadMax));
-    
+        throw new ConfigException(L.l("<thread-executor-max> ({0}) must be less than <thread-max> ({1})",
+                                      max, _threadMax));
+
       if (max == 0)
-	throw new ConfigException(L.l("<thread-executor-max> must not be zero."));
-    
+        throw new ConfigException(L.l("<thread-executor-max> must not be zero."));
+
       _executorTaskMax = max;
     }
   }
@@ -360,29 +362,29 @@ public final class ThreadPool {
       _threadIdleMax = _threadMax / 16;
 
       if (_threadIdleMax > 64)
-	_threadIdleMax = 64;
+        _threadIdleMax = 64;
       if (_threadIdleMax < 16)
-	_threadIdleMax = 16;
-      
+        _threadIdleMax = 16;
+
       if (_isThreadIdleMinSet && _threadIdleMax <= _threadIdleMin)
-	_threadIdleMax = _threadIdleMin + 8;
-      
+        _threadIdleMax = _threadIdleMin + 8;
+
       if (_threadMax < _threadIdleMax)
-	_threadIdleMax = _threadMax;
+        _threadIdleMax = _threadMax;
     }
 
     if (! _isThreadIdleMinSet) {
       _threadIdleMin = _threadIdleMax / 2;
 
       if (_threadIdleMin <= 0)
-	_threadIdleMin = 1;
+        _threadIdleMin = 1;
     }
-    
+
     if (! _isThreadPrioritySet) {
       _threadPriority = _threadIdleMin / 2;
 
       if (_threadPriority <= 0)
-	_threadPriority = _threadIdleMin;
+        _threadPriority = _threadIdleMin;
     }
   }
 
@@ -416,7 +418,7 @@ public final class ThreadPool {
 
     boolean isPriority = false;
     boolean isQueue = true;
-    
+
     return schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
   }
 
@@ -426,17 +428,17 @@ public final class ThreadPool {
   public boolean schedule(Runnable task, long timeout)
   {
     long expire;
-    
+
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
       expire = Alarm.getCurrentTime() + timeout;
-    
+
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     boolean isPriority = false;
     boolean isQueue = true;
-    
+
     return schedule(task, loader, expire, isPriority, isQueue);
   }
 
@@ -451,13 +453,13 @@ public final class ThreadPool {
 
     boolean isPriority = true;
     boolean isQueue = true;
-    
+
     if (! schedule(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to schedule priority thread " + task
-		  + " pri=" + _threadPriority
-		  + " active=" + _activeCount.get()
-		  + " idle=" + (_idleCount + _startingCount.get())
-		  + " max=" + _threadMax);
+                  + " pri=" + _threadPriority
+                  + " active=" + _activeCount.get()
+                  + " idle=" + (_idleCount + _startingCount.get())
+                  + " max=" + _threadMax);
 
       OverflowThread item = new OverflowThread(task);
       item.start();
@@ -475,22 +477,22 @@ public final class ThreadPool {
       _executorTaskCount++;
 
       if (_executorTaskCount <= _executorTaskMax || _executorTaskMax < 0) {
-	boolean isPriority = false;
-	boolean isQueue = true;
-    
-	return schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
+        boolean isPriority = false;
+        boolean isQueue = true;
+
+        return schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
       }
       else {
-	ExecutorQueueItem item = new ExecutorQueueItem(task, loader);
+        ExecutorQueueItem item = new ExecutorQueueItem(task, loader);
 
-	if (_executorQueueTail != null)
-	  _executorQueueTail._next = item;
-	else
-	  _executorQueueHead = item;
+        if (_executorQueueTail != null)
+          _executorQueueTail._next = item;
+        else
+          _executorQueueHead = item;
 
-	_executorQueueTail = item;
+        _executorQueueTail = item;
 
-	return false;
+        return false;
       }
     }
   }
@@ -506,20 +508,20 @@ public final class ThreadPool {
       assert(_executorTaskCount >= 0);
 
       if (_executorQueueHead != null) {
-	ExecutorQueueItem item = _executorQueueHead;
+        ExecutorQueueItem item = _executorQueueHead;
 
-	_executorQueueHead = item._next;
+        _executorQueueHead = item._next;
 
-	if (_executorQueueHead == null)
-	  _executorQueueTail = null;
+        if (_executorQueueHead == null)
+          _executorQueueTail = null;
 
-	Runnable task = item.getRunnable();
-	ClassLoader loader = item.getLoader();
+        Runnable task = item.getRunnable();
+        ClassLoader loader = item.getLoader();
 
-	boolean isPriority = false;
-	boolean isQueue = true;
-	
-	schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
+        boolean isPriority = false;
+        boolean isQueue = true;
+
+        schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
       }
     }
   }
@@ -530,10 +532,10 @@ public final class ThreadPool {
   public boolean start(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     boolean isPriority = false;
     boolean isQueue = false;
-    
+
     return schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
   }
 
@@ -543,17 +545,17 @@ public final class ThreadPool {
   public boolean start(Runnable task, long timeout)
   {
     long expire;
-    
+
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
       expire = Alarm.getCurrentTime() + timeout;
-    
+
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     boolean isPriority = false;
     boolean isQueue = false;
-    
+
     return schedule(task, loader, expire, isPriority, isQueue);
   }
 
@@ -563,22 +565,22 @@ public final class ThreadPool {
   public void startPriority(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     long expire = Alarm.getCurrentTime() + PRIORITY_TIMEOUT;
 
     boolean isPriority = true;
     boolean isQueue = true;
-    
+
     if (! schedule(task, loader, expire, isPriority, isQueue)) {
       log.warning(this + " unable to start priority thread " + task
-		  + " pri=" + _threadPriority
-		  + " active=" + _activeCount.get()
-		  + " idle=" + _idleCount
-		  + " starting=" + _startingCount.get()
-		  + " max=" + _threadMax);
+                  + " pri=" + _threadPriority
+                  + " active=" + _activeCount.get()
+                  + " idle=" + _idleCount
+                  + " starting=" + _startingCount.get()
+                  + " max=" + _threadMax);
 
       ThreadDump.dumpThreads();
-      
+
       OverflowThread item = new OverflowThread(task);
       item.start();
     }
@@ -590,17 +592,17 @@ public final class ThreadPool {
   public boolean startPriority(Runnable task, long timeout)
   {
     long expire;
-    
+
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
       expire = Alarm.getCurrentTime() + timeout;
-    
+
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     boolean isPriority = true;
     boolean isQueue = false;
-    
+
     return schedule(task, loader, expire, isPriority, isQueue);
   }
 
@@ -614,9 +616,9 @@ public final class ThreadPool {
       _idleHead = null;
 
       while (item != null) {
-	PoolThread next = item._next;
+        PoolThread next = item._next;
 
-	item._next = null;
+        item._next = null;
         if (item._isIdle) {
           item._isIdle = false;
           _idleCount--;
@@ -627,7 +629,7 @@ public final class ThreadPool {
         } catch (Exception e) {
         }
 
-	item = next;
+        item = next;
       }
     }
   }
@@ -636,59 +638,59 @@ public final class ThreadPool {
    * Adds a new task.
    */
   private boolean schedule(Runnable task,
-			   ClassLoader loader,
-			   long expireTime,
-			   boolean isPriority,
-			   boolean isQueueIfFull)
+                           ClassLoader loader,
+                           long expireTime,
+                           boolean isPriority,
+                           boolean isQueueIfFull)
   {
     PoolThread poolThread = null;
     boolean isWakeLauncher = false;
 
     int freeThreadsRequired = isPriority ? 0 : _threadPriority;
-    
+
     TaskItem item = new TaskItem(task, loader);
 
     do {
       boolean isDumpThreads = false;
-      
+
       try {
-	synchronized (_idleLock) {
-	  int idleCount = _idleCount;
-	  int threadCount = _activeCount.get() + _startingCount.get();
-	  int freeCount = idleCount + _threadMax - threadCount;
-	  boolean startNew = false;
+        synchronized (_idleLock) {
+          int idleCount = _idleCount;
+          int threadCount = _activeCount.get() + _startingCount.get();
+          int freeCount = idleCount + _threadMax - threadCount;
+          boolean startNew = false;
 
-	  boolean isFreeThreadAvailable = freeThreadsRequired <= freeCount;
+          boolean isFreeThreadAvailable = freeThreadsRequired <= freeCount;
 
-	  if (isFreeThreadAvailable) {
+          if (isFreeThreadAvailable) {
             // grab next idle thread, skipping any closed threads
             while ((poolThread = _idleHead) != null
                    && ! poolThread.scheduleTask(item)) {
               poolThread = null;
             }
-	  }
-          
+          }
+
           if (idleCount < _threadIdleMin)
             isWakeLauncher = true;
-          
-	  if (poolThread == null) {
-	    // queue if schedule() or if there's space to run but no
-	    // active thread yet
-	    if (isQueueIfFull || isFreeThreadAvailable) {
-	      isWakeLauncher = true;
-	      isQueueIfFull = true;
+
+          if (poolThread == null) {
+            // queue if schedule() or if there's space to run but no
+            // active thread yet
+            if (isQueueIfFull || isFreeThreadAvailable) {
+              isWakeLauncher = true;
+              isQueueIfFull = true;
 
               isDumpThreads = true;
-	    
-	      if (isPriority) {
-		_priorityQueue.add(item);
-	      }
-	      else {
-		_taskQueue.add(item);
-	      }
-	    }
-	    else if (Alarm.getCurrentTime() < expireTime) {
-	      _launcher.wake();
+
+              if (isPriority) {
+                _priorityQueue.add(item);
+              }
+              else {
+                _taskQueue.add(item);
+              }
+            }
+            else if (Alarm.getCurrentTime() < expireTime) {
+              _launcher.wake();
 
               // clear interrupted flag
               Thread.interrupted();
@@ -706,27 +708,27 @@ public final class ThreadPool {
               } finally {
                 _waitCount--;
               }
-	    }
-	  }
-	}
-      
-	if (isWakeLauncher)
-	  _launcher.wake();
-        
+            }
+          }
+        }
+
+        if (isWakeLauncher)
+          _launcher.wake();
+
         if (isDumpThreads)
           ThreadDump.dumpThreads();
       } catch (OutOfMemoryError e) {
-	try {
-	  System.err.println("ThreadPool.schedule exiting due to OutOfMemoryError");
-	} finally {
-	  System.exit(11);
-	}
+        try {
+          System.err.println("ThreadPool.schedule exiting due to OutOfMemoryError");
+        } finally {
+          System.exit(11);
+        }
       } catch (Throwable e) {
-	e.printStackTrace();
+        e.printStackTrace();
       }
     } while (poolThread == null
-	     && ! isQueueIfFull
-	     && Alarm.getCurrentTime() <= expireTime);
+             && ! isQueueIfFull
+             && Alarm.getCurrentTime() <= expireTime);
 
     if (poolThread != null) {
       poolThread.unpark();
@@ -845,31 +847,31 @@ public final class ThreadPool {
         _startingCount.set(0);
         new IllegalStateException().printStackTrace();
       }
-      
+
       _activeCount.incrementAndGet();
-      
+
       try {
         _launcher.wake();
         _createCount.incrementAndGet();
-      
-	runTasks();
+
+        runTasks();
       } finally {
         _activeCount.decrementAndGet();
 
-	_launcher.wake();
+        _launcher.wake();
       }
     }
 
     private void runTasks()
     {
       _threadResetCount = _resetCount.get();
-    
+
       Thread thread = this;
       ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
       while (true) {
         thread.setName(_name);
-	  
+
         Runnable task = null;
         ClassLoader classLoader = null;
 
@@ -877,16 +879,16 @@ public final class ThreadPool {
 
         if (item == null)
           return;
-          
+
         task = item.getRunnable();
         classLoader = item.getLoader();
 
         try {
           // if the task is available, run it in the proper context
           thread.setContextClassLoader(classLoader);
-	    
+
           thread.setName(_name + "-" + task.getClass().getSimpleName());
-	      
+
           task.run();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
@@ -914,7 +916,7 @@ public final class ThreadPool {
         }
 
         long now = Alarm.getCurrentTime();
-        
+
         // if idle queue overflows, return and exit
         if (_threadIdleMax < _idleCount
             && _threadIdleOverflowExpire < now) {
@@ -924,7 +926,7 @@ public final class ThreadPool {
 
         _next = _idleHead;
         _idleHead = this;
-                
+
         _isIdle = true;
         _idleCount++;
 
@@ -936,7 +938,7 @@ public final class ThreadPool {
           TaskItem item = _itemRef.getAndSet(null);
           if (item != null || ! _isIdle)
             return item;
-          
+
           Thread.interrupted();
           LockSupport.park();
         }
@@ -963,7 +965,7 @@ public final class ThreadPool {
     {
       super("resin-overflow-" + task.getClass().getSimpleName());
       setDaemon(true);
-      
+
       _task = task;
       _loader = Thread.currentThread().getContextClassLoader();
     }
@@ -978,10 +980,10 @@ public final class ThreadPool {
 
       try {
         _overflowCount.incrementAndGet();
-        
-	_task.run();
+
+        _task.run();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -1007,51 +1009,51 @@ public final class ThreadPool {
       throws InterruptedException
     {
       if (doStart()) {
-	try {
-	  long now = Alarm.getCurrentTime();
-	  _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
-	  
-	  PoolThread poolThread = new PoolThread();
-	  poolThread.start();
+        try {
+          long now = Alarm.getCurrentTime();
+          _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
+
+          PoolThread poolThread = new PoolThread();
+          poolThread.start();
 
           return true;
-	} catch (Throwable e) {
+        } catch (Throwable e) {
           e.printStackTrace();
           System.err.println("Resin exiting because of failed thread");
 
           System.exit(1);
-	}
+        }
       }
       else {
-	Thread.interrupted();
+        Thread.interrupted();
 
-	if (isWait)
-	  LockSupport.park();
+        if (isWait)
+          LockSupport.park();
       }
-	
+
       return false;
     }
-    
+
     public void run()
     {
       ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-      
+
       Thread.currentThread().setContextClassLoader(systemLoader);
 
       try {
-	for (int i = 0; i < _threadIdleMin; i++)
-	  startConnection(false);
+        for (int i = 0; i < _threadIdleMin; i++)
+          startConnection(false);
       } catch (Throwable e) {
-	e.printStackTrace();
+        e.printStackTrace();
       }
-      
+
       while (true) {
-	try {
-	  startConnection(true);
-	} catch (Throwable e) {
-	  e.printStackTrace();
-	  System.exit(10);
-	}
+        try {
+          startConnection(true);
+        } catch (Throwable e) {
+          e.printStackTrace();
+          System.exit(10);
+        }
       }
     }
   }

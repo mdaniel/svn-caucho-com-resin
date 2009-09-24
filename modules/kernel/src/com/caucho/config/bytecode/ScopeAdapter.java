@@ -48,9 +48,9 @@ import com.caucho.vfs.*;
  */
 public class ScopeAdapter {
   private static final L10N L = new L10N(ScopeAdapter.class);
-  
+
   private final Class _cl;
-  
+
   private Class _proxyClass;
   private Constructor _proxyCtor;
 
@@ -60,14 +60,14 @@ public class ScopeAdapter {
 
     generateProxy(cl);
   }
-  
+
   public static ScopeAdapter create(Class cl)
   {
     ScopeAdapter adapter = new ScopeAdapter(cl);
-    
+
     return adapter;
   }
-    
+
   public Object wrap(InjectManager manager, Bean comp)
   {
     try {
@@ -84,28 +84,28 @@ public class ScopeAdapter {
       Constructor zeroCtor = null;
 
       for (Constructor ctorItem : cl.getConstructors()) {
-	if (ctorItem.getParameterTypes().length == 0) {
-	  if (Modifier.isPublic(ctorItem.getModifiers())
-	      || Modifier.isProtected(ctorItem.getModifiers())) {
-	    zeroCtor = ctorItem;
-	    break;
-	  }
-	}
+        if (ctorItem.getParameterTypes().length == 0) {
+          if (Modifier.isPublic(ctorItem.getModifiers())
+              || Modifier.isProtected(ctorItem.getModifiers())) {
+            zeroCtor = ctorItem;
+            break;
+          }
+        }
       }
 
       if (zeroCtor == null) {
-	throw new ConfigException(L.l("'{0}' does not have a zero-arg public or protected constructor.  Scope adapter components need a zero-arg constructor, e.g. @RequestScoped stored in @ApplicationScoped.",
-				      cl.getName()));
+        throw new ConfigException(L.l("'{0}' does not have a zero-arg public or protected constructor.  Scope adapter components need a zero-arg constructor, e.g. @RequestScoped stored in @ApplicationScoped.",
+                                      cl.getName()));
       }
-      
+
       JavaClassLoader jLoader = new JavaClassLoader(cl.getClassLoader());
-      
+
       JavaClass jClass = new JavaClass(jLoader);
       jClass.setAccessFlags(Modifier.PUBLIC);
       ConstantPool cp = jClass.getConstantPool();
 
       jClass.setWrite(true);
-      
+
       jClass.setMajor(49);
       jClass.setMinor(0);
 
@@ -116,20 +116,20 @@ public class ScopeAdapter {
       jClass.setThisClass(thisClassName);
 
       JavaField managerField
-	= jClass.createField("_manager",
-			     "Lcom/caucho/config/inject/InjectManager;");
+        = jClass.createField("_manager",
+                             "Lcom/caucho/config/inject/InjectManager;");
       managerField.setAccessFlags(Modifier.PRIVATE);
-      
+
       JavaField beanField
-	= jClass.createField("_bean", "Ljavax/enterprise/inject/spi/Bean;");
+        = jClass.createField("_bean", "Ljavax/enterprise/inject/spi/Bean;");
       beanField.setAccessFlags(Modifier.PRIVATE);
 
       JavaMethod ctor
-	= jClass.createMethod("<init>",
-			      "(Lcom/caucho/config/inject/InjectManager;"
-			      + "Ljavax/enterprise/inject/spi/Bean;)V");
+        = jClass.createMethod("<init>",
+                              "(Lcom/caucho/config/inject/InjectManager;"
+                              + "Ljavax/enterprise/inject/spi/Bean;)V");
       ctor.setAccessFlags(Modifier.PUBLIC);
-      
+
       CodeWriterAttribute code = ctor.createCodeWriter();
       code.setMaxLocals(3);
       code.setMaxStack(4);
@@ -139,28 +139,28 @@ public class ScopeAdapter {
       code.pushObjectVar(0);
       code.pushObjectVar(1);
       code.putField(thisClassName, managerField.getName(),
-		    managerField.getDescriptor());
+                    managerField.getDescriptor());
       code.pushObjectVar(0);
       code.pushObjectVar(2);
       code.putField(thisClassName, beanField.getName(),
-		    beanField.getDescriptor());
+                    beanField.getDescriptor());
       code.addReturn();
       code.close();
 
       for (Method method : _cl.getMethods()) {
-	if (Modifier.isStatic(method.getModifiers()))
-	  continue;
-	if (Modifier.isFinal(method.getModifiers()))
-	  continue;
-	
-	createProxyMethod(jClass, method);
+        if (Modifier.isStatic(method.getModifiers()))
+          continue;
+        if (Modifier.isFinal(method.getModifiers()))
+          continue;
+
+        createProxyMethod(jClass, method);
       }
-    
+
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       WriteStream out = Vfs.openWrite(bos);
 
       jClass.write(out);
-    
+
       out.close();
 
       byte []buffer = bos.toByteArray();
@@ -187,76 +187,76 @@ public class ScopeAdapter {
   private void createProxyMethod(JavaClass jClass, Method method)
   {
     String descriptor = createDescriptor(method);
-    
+
     JavaMethod jMethod = jClass.createMethod(method.getName(),
-					     descriptor);
+                                             descriptor);
     jMethod.setAccessFlags(Modifier.PUBLIC);
 
     Class []parameterTypes = method.getParameterTypes();
-      
+
     CodeWriterAttribute code = jMethod.createCodeWriter();
     code.setMaxLocals(1 + 2 * parameterTypes.length);
     code.setMaxStack(3 + 2 * parameterTypes.length);
 
     code.pushObjectVar(0);
     code.getField(jClass.getThisClass(), "_manager",
-		  "Lcom/caucho/config/inject/InjectManager;");
+                  "Lcom/caucho/config/inject/InjectManager;");
 
     code.pushObjectVar(0);
     code.getField(jClass.getThisClass(), "_bean",
-		  "Ljavax/enterprise/inject/spi/Bean;");
-    
+                  "Ljavax/enterprise/inject/spi/Bean;");
+
     code.invoke("com/caucho/config/inject/InjectManager",
-		"create",
-		"(Ljavax/enterprise/inject/spi/Bean;)Ljava/lang/Object;",
-		1, 1);
-    
+                "getReference",
+                "(Ljavax/enterprise/inject/spi/Bean;)Ljava/lang/Object;",
+                1, 1);
+
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));
 
     int stack = 1;
     int index = 1;
     for (Class type : parameterTypes) {
       if (boolean.class.equals(type)
-	  || byte.class.equals(type)
-	  || short.class.equals(type)
-	  || int.class.equals(type)) {
-	code.pushIntVar(index);
-	index += 1;
-	stack += 1;
+          || byte.class.equals(type)
+          || short.class.equals(type)
+          || int.class.equals(type)) {
+        code.pushIntVar(index);
+        index += 1;
+        stack += 1;
       }
       else if (long.class.equals(type)) {
-	code.pushLongVar(index);
-	index += 2;
-	stack += 2;
+        code.pushLongVar(index);
+        index += 2;
+        stack += 2;
       }
       else if (float.class.equals(type)) {
-	code.pushFloatVar(index);
-	index += 1;
-	stack += 1;
+        code.pushFloatVar(index);
+        index += 1;
+        stack += 1;
       }
       else if (double.class.equals(type)) {
-	code.pushDoubleVar(index);
-	index += 2;
-	stack += 2;
+        code.pushDoubleVar(index);
+        index += 2;
+        stack += 2;
       }
       else {
-	code.pushObjectVar(index);
-	index += 1;
-	stack += 1;
+        code.pushObjectVar(index);
+        index += 1;
+        stack += 1;
       }
     }
-    
+
     code.invoke(method.getDeclaringClass().getName().replace('.', '/'),
-		method.getName(),
-		createDescriptor(method),
-		stack, 1);
+                method.getName(),
+                createDescriptor(method),
+                stack, 1);
 
     Class retType = method.getReturnType();
-    
+
     if (boolean.class.equals(retType)
-	|| byte.class.equals(retType)
-	|| short.class.equals(retType)
-	|| int.class.equals(retType)) {
+        || byte.class.equals(retType)
+        || short.class.equals(retType)
+        || int.class.equals(retType)) {
       code.addIntReturn();
     }
     else if (long.class.equals(retType)) {
@@ -274,7 +274,7 @@ public class ScopeAdapter {
     else {
       code.addObjectReturn();
     }
-    
+
     code.close();
   }
 
@@ -283,11 +283,11 @@ public class ScopeAdapter {
     StringBuilder sb = new StringBuilder();
 
     sb.append("(");
-    
+
     for (Class param : method.getParameterTypes()) {
       sb.append(createDescriptor(param));
     }
-    
+
     sb.append(")");
     sb.append(createDescriptor(method.getReturnType()));
 

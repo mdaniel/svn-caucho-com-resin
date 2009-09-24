@@ -68,6 +68,7 @@ import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.Conversation;
 import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
@@ -685,7 +686,8 @@ public class InjectManager
    */
   public boolean isScope(Class<? extends Annotation> annotationType)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (annotationType.isAnnotationPresent(Scope.class)
+            || annotationType.isAnnotationPresent(NormalScope.class));
   }
 
   /**
@@ -701,7 +703,7 @@ public class InjectManager
    */
   public boolean isQualifier(Class<? extends Annotation> annotationType)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return annotationType.isAnnotationPresent(Qualifier.class);
   }
 
   /**

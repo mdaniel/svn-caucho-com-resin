@@ -347,8 +347,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectScope(Annotated annotated)
   {
+    BeanManager inject = getBeanManager();
+
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Scope.class)) {
+      if (inject.isScope(ann.annotationType())) {
         if (_scope != null && _scope != ann.annotationType())
           throw new ConfigException(L.l("{0}: @Scope annotation @{1} conflicts with @{2}.  Java Injection components may only have a single @Scope.",
                                         getTargetName(),
@@ -365,8 +367,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectBindings(Annotated annotated)
   {
+    BeanManager inject = getBeanManager();
+
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+      if (inject.isQualifier(ann.annotationType())) {
         _bindings.add(ann);
       }
     }

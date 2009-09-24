@@ -79,12 +79,12 @@ public class ObserverMap {
 
   public void fireEvent(Object event,
                         BaseType eventType,
-                        Annotation []bindings)
+                        Annotation []qualifiers)
   {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry observer = _observerList.get(i);
 
-      if (observer.isMatch(eventType, bindings)) {
+      if (observer.isMatch(eventType, qualifiers)) {
         observer.getObserver().notify(event);
       }
     }
