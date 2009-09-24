@@ -1843,7 +1843,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   public int getRequestDepth(int depth)
   {
-    return 0;
+    return depth;
   }
 
   public void setHeader(String key, String value)
