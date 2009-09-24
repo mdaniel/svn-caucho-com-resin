@@ -1,8 +1,8 @@
-default namespace w = "urn:java:ee"
+default namespace w = "http://java.sun.com/xml/ns/javaee"
 
 namespace xsi="http://www.w3.org/2001/XMLSchema-instance"
 
-start = w_Beans
+start = w_beans
 
 w_Any = text | (attribute * {string} | element * { w_Any })*
 
@@ -119,7 +119,7 @@ w_standard = element Standard {
   empty
 }  
 
-w_Beans = element Beans {
+w_beans = element beans {
   attribute xsi:schemaLocation { string }?
   
   & w_bean-Custom*

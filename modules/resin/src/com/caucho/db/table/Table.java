@@ -480,8 +480,10 @@ public class Table extends Store {
             for (int i = 0; i < columns.length; i++) {
               Column column = columns[i];
 
+              /*
               if (column.getIndex() != null)
                 System.out.println(Long.toHexString(iter.getBlock().getBlockId()) + ":" + Long.toHexString(rowAddress) + ":" + Long.toHexString(rowOffset) + ": " + column.getIndexKeyCompare().toString(blockBuffer, rowOffset + column.getColumnOffset(), column.getLength()));
+              */
 
               column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
             }
@@ -678,13 +680,15 @@ public class Table extends Store {
 
         blockId = peekInsertRow();
 
-        block = xa.readBlock(this, blockId);
-
+        block = xa.loadBlock(this, blockId);
         Lock blockLock = block.getLock();
-        byte []buffer = block.getBuffer();
 
         blockLock.lockReadAndWrite(xa.getTimeout());
         try {
+          block.read();
+          
+          byte []buffer = block.getBuffer();
+
           rowOffset = 0;
 
           for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
@@ -1018,7 +1022,11 @@ public class Table extends Store {
 
     if (isDeleteIndex) {
       for (int i = 0; i < columns.length; i++) {
-        columns[i].deleteIndex(xa, buffer, rowOffset);
+        try {
+          columns[i].deleteIndex(xa, buffer, rowOffset);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
 

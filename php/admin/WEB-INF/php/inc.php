@@ -589,7 +589,7 @@ if (! empty($server)) {
   $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
 
 ?>
-   <li class="server">Server: <?php display_servers($g_server_id) ?></li>
+   <li class="server">Server: <?php display_servers($server) ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="<?= $g_next_url ?>">refresh</a></li>
@@ -663,19 +663,24 @@ function display_pages()
   }
 }
 
-function display_servers($server_id)
+function display_servers($server)
 {
   echo "<select name=\"server_id\">\n";
-/*
-  foreach ($names as $name) {
-    if ($g_page == $name) {
-      ?><li class="selected"><?= $name ?></li><?
-    } else {
-      echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>\n";
-    }
+
+  $self_server = $server->SelfServer;
+
+  foreach ($self_server->Cluster->Servers as $cluster_server) {
+    $id = $cluster_server->Id;
+    if (! $id)
+      $id = "default";
+
+    echo "  <option";
+    if ($id == $self_server->Id)
+      echo " selected";
+
+    echo " value=\"" . $id ."\">";
+    printf("%02d - %s\n", $cluster_server->Index, $id);
   }
-*/
-  echo "  <option selected value=\"" . $server_id ."\">" . $server_id . "\n";
   echo "</select>";
 }
 

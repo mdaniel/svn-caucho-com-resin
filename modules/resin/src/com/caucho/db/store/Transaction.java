@@ -385,6 +385,29 @@ public class Transaction extends StoreTransaction {
   }
 
   /**
+   * Returns a read block.
+   */
+  public Block loadBlock(Store store, long blockAddress)
+    throws IOException
+  {
+    long blockId = store.addressToBlockId(blockAddress);
+      
+    Block block;
+    
+    if (_writeBlocks != null)
+      block = _writeBlocks.get(blockId);
+    else
+      block = null;
+
+    if (block != null)
+      block.allocate();
+    else
+      block = store.loadBlock(blockId);
+
+    return block;
+  }
+
+  /**
    * Returns a modified block.
    */
   public WriteBlock getWriteBlock(long blockId)

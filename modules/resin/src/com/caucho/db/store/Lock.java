@@ -189,8 +189,8 @@ public final class Lock {
         if (_writeLock != null)
           Thread.dumpStack();
         _writeLock = Thread.currentThread();
-        _writeExn = new IllegalStateException("alloc");
-        _writeExn.fillInStackTrace();
+        //_writeExn = new IllegalStateException("alloc");
+        //_writeExn.fillInStackTrace();
         return;
       }
     }
@@ -207,8 +207,8 @@ public final class Lock {
         if (_writeLock != null)
           Thread.dumpStack();
             _writeLock = Thread.currentThread();
-        _writeExn = new IllegalStateException("alloc");
-        _writeExn.fillInStackTrace();
+            //_writeExn = new IllegalStateException("alloc");
+            //_writeExn.fillInStackTrace();
             return;
           }
         }
@@ -233,8 +233,8 @@ public final class Lock {
     if (_writeLock != null)
       Thread.dumpStack();
     _writeLock = Thread.currentThread();
-        _writeExn = new IllegalStateException("alloc");
-        _writeExn.fillInStackTrace();
+    //_writeExn = new IllegalStateException("alloc");
+    //_writeExn.fillInStackTrace();
   }
 
   /**

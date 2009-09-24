@@ -507,19 +507,31 @@ public class Store {
 
     Block block = _blockManager.getBlock(this, blockId);
 
+    boolean isValid = false;
+
     try {
       block.read();
 
+      isValid = true;
+      
       return block;
-    } catch (IOException e) {
-      block.free();
-
-      throw e;
-    } catch (RuntimeException e) {
-      block.free();
-
-      throw e;
+    } finally {
+      if (! isValid)
+        block.free();
     }
+  }
+
+  /**
+   * Returns the matching block.
+   */
+  public final Block loadBlock(long blockAddress)
+    throws IOException
+  {
+    long blockId = addressToBlockId(blockAddress);
+
+    Block block = _blockManager.getBlock(this, blockId);
+
+    return block;
   }
 
   /**
@@ -1508,6 +1520,7 @@ public class Store {
 
       try {
         byte []blockBuffer = block.getBuffer();
+        int freeOffset = -1;
 
         synchronized (blockBuffer) {
           for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
@@ -1532,22 +1545,21 @@ public class Store {
             int mask = 1 << (i % 8);
 
             if ((blockBuffer[offset] & mask) == 0) {
-              hasFree = true;
+              freeOffset =
+                (int) (ALLOC_BYTES_PER_BLOCK * (blockAddr / BLOCK_SIZE));
               break;
             }
           }
-
-          if (hasFree) {
-            int i = (int) (ALLOC_BYTES_PER_BLOCK * (blockAddr / BLOCK_SIZE));
-
-            synchronized (_allocationLock) {
-              _allocationTable[i + 1]  = 0;
-              setAllocDirty(i + 1, i + 2);
-            }
-          }
-
-          return blockAddr + fragOffset;
         }
+
+        if (freeOffset >= 0) {
+          synchronized (_allocationLock) {
+            _allocationTable[freeOffset + 1]  = 0;
+            setAllocDirty(freeOffset + 1, freeOffset + 2);
+          }
+        }
+
+        return blockAddr + fragOffset;
       } finally {
         block.free();
       }

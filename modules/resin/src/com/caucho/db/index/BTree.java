@@ -62,6 +62,8 @@ import java.util.logging.Logger;
  * b8  - ptr to the actual data
  * key - the tuple's key
  * </pre>
+ *
+ * For a non-leaf node, the key is the last matching entry in the subtree.
  */
 public final class BTree {
   private final static L10N L = new L10N(BTree.class);
@@ -177,7 +179,7 @@ public final class BTree {
       block.allocate();
     }
     else
-      block = _store.readBlock(blockId);
+      block = _store.loadBlock(blockId);
 
     try {
       Lock blockLock = block.getLock();
@@ -185,6 +187,8 @@ public final class BTree {
       blockLock.lockRead(_timeout);
 
       try {
+        block.read();
+        
 	byte []buffer = block.getBuffer();
 
 	boolean isLeaf = isLeaf(buffer);
@@ -252,7 +256,7 @@ public final class BTree {
       block.allocate();
     }
     else
-      block = _store.readBlock(blockId);
+      block = _store.loadBlock(blockId);
     
     try {
       if (isRead && insertReadChild(keyBuffer, keyOffset, keyLength,
@@ -278,6 +282,8 @@ public final class BTree {
     blockLock.lockRead(_timeout);
       
     try {
+      block.read();
+      
       long blockId = block.getBlockId();
       byte []buffer = block.getBuffer();
 
@@ -316,6 +322,8 @@ public final class BTree {
     blockLock.lockReadAndWrite(_timeout);
       
     try {
+      block.read();
+      
       long blockId = block.getBlockId();
       byte []buffer = block.getBuffer();
 
@@ -537,6 +545,9 @@ public final class BTree {
       byte []parentBuffer = parentBlock.getBuffer();
       int parentLength = getLength(parentBuffer);
     
+      validate(parentId, parentBuffer);
+      validate(blockId, buffer);
+      
       leftBlock = _store.allocateIndexBlock();
       // System.out.println("TREE-alloc1:" + Long.toHexString(leftBlock.getBlockId()));
       leftBlock.setFlushDirtyOnCommit(false);
@@ -559,6 +570,7 @@ public final class BTree {
       setLength(leftBuffer, pivot);
       // XXX: NEXT_OFFSET needs to work with getRightIndex
       setPointer(leftBuffer, NEXT_OFFSET, 0);
+      
       setPointer(leftBuffer, PARENT_OFFSET, parentId);
 
       System.arraycopy(buffer, pivotEnd,
@@ -571,6 +583,10 @@ public final class BTree {
 		      leftBuffer, pivotEnd - _tupleSize + PTR_SIZE, _keySize,
 		      leftBlockId,
 		      true);
+              
+      validate(parentId, parentBuffer);
+      validate(leftBlockId, leftBuffer);
+      validate(blockId, buffer);
     } finally {
       if (leftBlock != null)
 	leftBlock.free();
@@ -659,7 +675,7 @@ public final class BTree {
       setInt(leftBuffer, FLAGS_OFFSET, parentFlags);
       setLength(leftBuffer, pivot + 1);
       setPointer(leftBuffer, PARENT_OFFSET, parentId);
-      setPointer(leftBuffer, NEXT_OFFSET, rightBlockId);
+      setPointer(leftBuffer, NEXT_OFFSET, 0); // rightBlockId); 
 
       byte []rightBuffer = rightBlock.getBuffer();
 
@@ -797,25 +813,17 @@ public final class BTree {
         if (childId == FAIL)
           return true;
 
-        boolean isDeallocate = false;
-        
         Block childBlock = _store.readBlock(childId);
         try {
-          boolean isJoin = false;
+          boolean isJoin;
 
           isJoin = ! removeWrite(childBlock, keyBuffer, keyOffset, keyLength);
 
           if (isJoin && joinBlocks(block, childBlock)) {
-            isDeallocate = true;
+            childBlock.deallocate();
           }
         } finally {
           childBlock.free();
-        }
-
-        if (isDeallocate) {
-          // must be outside childBlock allocation
-          // System.out.println("FREE-index:" + Long.toHexString(childBlock.getBlockId()));
-          childBlock.deallocate();
         }
       }
       
@@ -826,10 +834,20 @@ public final class BTree {
   }
 
   /**
-   * Performs any block-merging cleanup after the delete.
+   * Balances the block size so it's always 1/2 full.  joinBlocks is called
+   * when the block has one too few items, i.e. less than half full.
    *
-   * parent is read-locked by the parent.
+   * If the left block has enough items, copy one from the left.
+   * If the right block has enough items, copy one from the right.
+   *
+   * Otherwise, merge the block with either the left or the right block.
+   *
+   * parent is write-locked by the parent.
    * block is not locked.
+   *
+   * <pre>
+   * ... | leftBlock | block | rightBlock | ...
+   * </pre>
    *
    * @return true if the block should be deleted/freed
    */
@@ -837,6 +855,7 @@ public final class BTree {
 			     Block block)
     throws IOException, SQLException
   {
+    long parentBlockId = parent.getBlockId();
     byte []parentBuffer = parent.getBuffer();
     int parentLength = getLength(parentBuffer);
 
@@ -846,7 +865,8 @@ public final class BTree {
     long leftBlockId = getLeftBlockId(parent, blockId);
     long rightBlockId = getRightBlockId(parent, blockId);
 
-    // try to shift from left and right first
+    // If the left block has extra data, shift the last left item
+    // to the block
     if (leftBlockId > 0) {
       Block leftBlock = _store.readBlock(leftBlockId);
 
@@ -870,8 +890,16 @@ public final class BTree {
               leftBlock.setFlushDirtyOnCommit(false);
               leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
+              validate(parentBlockId, parentBuffer);
+              validate(leftBlockId, leftBuffer);
+              validate(blockId, buffer);
+              
               // System.out.println("MOVE_FROM_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
               moveFromLeft(parentBuffer, leftBuffer, buffer, blockId);
+              
+              validate(parentBlockId, parentBuffer);
+              validate(leftBlockId, leftBuffer);
+              validate(blockId, buffer);
 
               return false;
             }
@@ -886,6 +914,8 @@ public final class BTree {
       }
     }
 
+    // If the right block has extra data, shift the first right item
+    // to the block
     if (rightBlockId > 0) {
       Block rightBlock = _store.readBlock(rightBlockId);
 
@@ -912,6 +942,10 @@ public final class BTree {
               // System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
               moveFromRight(parentBuffer, buffer, rightBuffer, blockId);
+              
+              validate(parentBlockId, parentBuffer);
+              validate(blockId, buffer);
+              validate(rightBlockId, rightBuffer);
 
               return false;
             }
@@ -929,6 +963,7 @@ public final class BTree {
     if (parentLength < 2)
       return false;
     
+    // If the left block has space, merge with it
     if (leftBlockId > 0) {
       Block leftBlock = _store.readBlock(leftBlockId);
       
@@ -957,7 +992,12 @@ public final class BTree {
       
               // System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
 	    
-              mergeLeft(parentBuffer, leftBuffer, buffer, blockId);
+              mergeLeft(parentBuffer,
+                        leftBuffer, leftBlockId,
+                        buffer, blockId);
+              
+              validate(parentBlockId, parentBuffer);
+              validate(leftBlockId, leftBuffer);
 
               return true;
             }
@@ -972,6 +1012,7 @@ public final class BTree {
       }
     }
     
+    // If the right block has space, merge with it
     if (rightBlockId > 0) {
       Block rightBlock = _store.readBlock(rightBlockId);
 
@@ -1000,6 +1041,9 @@ public final class BTree {
               // System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
               mergeRight(parentBuffer, buffer, rightBuffer, blockId);
+              
+              validate(parentBlockId, parentBuffer);
+              validate(rightBlockId, rightBuffer);
 
               return true;
             }
@@ -1014,11 +1058,17 @@ public final class BTree {
       }
     }
 
+    // XXX: error
+
     return false;
   }
 
   /**
-   * Returns the index to the left of the current one
+   * Returns the block index to the left of blockId
+   *
+   * <pre>
+   *  ... | leftBlockId | blockId | ...
+   * </pre>
    */
   private long getLeftBlockId(Block parent, long blockId)
   {
@@ -1070,8 +1120,8 @@ public final class BTree {
     int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
+    int parentEnd = HEADER_SIZE + parentLength * tupleSize;
     int parentOffset = HEADER_SIZE;
-    int parentEnd = parentOffset + parentLength * tupleSize;
 
     int leftLength = getLength(leftBuffer);
 
@@ -1085,7 +1135,7 @@ public final class BTree {
       parentLeftOffset = parentEnd - tupleSize;
     }
     else {
-      for (parentOffset += tupleSize;
+      for (parentOffset = HEADER_SIZE + tupleSize;
 	   parentOffset < parentEnd;
 	   parentOffset += tupleSize) {
 	long pointer = getPointer(parentBuffer, parentOffset);
@@ -1107,8 +1157,10 @@ public final class BTree {
 		     buffer, HEADER_SIZE + tupleSize,
 		     length * tupleSize);
 
+    int leftEnd = HEADER_SIZE + leftLength * tupleSize;
+    
     // copy the last item in the left to the buffer
-    System.arraycopy(leftBuffer, HEADER_SIZE + (leftLength - 1) * tupleSize,
+    System.arraycopy(leftBuffer, leftEnd - tupleSize,
 		     buffer, HEADER_SIZE,
 		     tupleSize);
 
@@ -1119,29 +1171,49 @@ public final class BTree {
     leftLength -= 1;
     setLength(leftBuffer, leftLength);
 
-    // copy the entry from the new left tail to the parent
-    System.arraycopy(leftBuffer,
-		     HEADER_SIZE + (leftLength - 1) * tupleSize + PTR_SIZE,
+    leftEnd = HEADER_SIZE + leftLength * tupleSize;
+
+    // copy the key from the new left tail to the left item
+    System.arraycopy(leftBuffer, leftEnd - tupleSize + PTR_SIZE,
 		     parentBuffer, parentLeftOffset + PTR_SIZE,
 		     tupleSize - PTR_SIZE);
   }
 
   /**
-   * Returns the index to the left of the current one
+   * Merge the buffer together with the leftBuffer
+   *
+   * <pre>
+   * ... | leftBlock | block | rightBlock | ...
+   * </pre>
+   *
+   * <pre>
+   * ... | leftBlock + block | rightBlock | ...
+   * </pre>
    */
   private void mergeLeft(byte []parentBuffer,
 			 byte []leftBuffer,
+                         long leftBlockId,
 			 byte []buffer,
 			 long blockId)
   {
-    int leftLength = getLength(leftBuffer);
-    int length = getLength(buffer);
+    if (isLeaf(leftBuffer) != isLeaf(buffer)) {
+      throw new IllegalStateException("leaf does not match "
+                                      + isLeaf(leftBuffer)
+                                      + " " + isLeaf(buffer)
+                                      + debugId(blockId));
+    }
+    
+    int tupleSize = _tupleSize;
 
     int parentLength = getLength(parentBuffer);
-
-    int tupleSize = _tupleSize;
+    int parentEnd = HEADER_SIZE + parentLength * tupleSize;
     int parentOffset = HEADER_SIZE;
-    int parentEnd = parentOffset + parentLength * tupleSize;
+    
+    int leftLength = getLength(leftBuffer);
+    int leftEnd = HEADER_SIZE + leftLength * tupleSize;
+
+    int blockLength = getLength(buffer);
+    int blockSize = blockLength * tupleSize;
 
     for (parentOffset += tupleSize;
 	 parentOffset < parentEnd;
@@ -1149,39 +1221,32 @@ public final class BTree {
       long pointer = getPointer(parentBuffer, parentOffset);
 
       if (pointer == blockId) {
-	int leftOffset = HEADER_SIZE + leftLength * tupleSize;
-
-	// copy the pointer from the left pointer
-	setPointer(parentBuffer, parentOffset,
-		   getPointer(parentBuffer, parentOffset - tupleSize));
-
-	if (parentOffset - tupleSize < HEADER_SIZE)
-	  throw new IllegalStateException();
-		   
-	// shift the parent
+	// shift the parent buffer to replace the left item with the
+        // current item (replacing the key)
 	System.arraycopy(parentBuffer, parentOffset,
 			 parentBuffer, parentOffset - tupleSize,
 			 parentEnd - parentOffset);
+        
+        // set the parent's pointer to the left block id
+        setPointer(parentBuffer, parentOffset - tupleSize, leftBlockId);
 	setLength(parentBuffer, parentLength - 1);
 
 	// the new left.next value is the buffer's next value
 	setPointer(leftBuffer, NEXT_OFFSET,
 		   getPointer(buffer, NEXT_OFFSET));
 
-	if (leftOffset < HEADER_SIZE)
-	  throw new IllegalStateException();
-	
 	// append the buffer to the left buffer
-	// XXX: leaf vs non-leaf?
 	System.arraycopy(buffer, HEADER_SIZE,
-			 leftBuffer, leftOffset,
-			 length * tupleSize);
+			 leftBuffer, leftEnd,
+			 blockSize);
 
-	setLength(leftBuffer, leftLength + length);
+	setLength(leftBuffer, leftLength + blockLength);
 
 	return;
       }
     }
+
+    // Here block is the last item in the parent
 
     long pointer = getPointer(parentBuffer, NEXT_OFFSET);
 
@@ -1190,25 +1255,19 @@ public final class BTree {
       return;
     }
     
-    int leftOffset = HEADER_SIZE + (parentLength - 1) * tupleSize;
-    
-    long leftPointer = getPointer(parentBuffer, leftOffset);
-
-    setPointer(parentBuffer, NEXT_OFFSET, leftPointer);
+    setPointer(parentBuffer, NEXT_OFFSET, leftBlockId);
     setLength(parentBuffer, parentLength - 1);
 
-    // XXX: leaf vs non-leaf?
-    
     // the new left.next value is the buffer's next value
     setPointer(leftBuffer, NEXT_OFFSET,
 	       getPointer(buffer, NEXT_OFFSET));
 
     // append the buffer to the left buffer
     System.arraycopy(buffer, HEADER_SIZE,
-		     leftBuffer, HEADER_SIZE + leftLength * tupleSize,
-		     length * tupleSize);
+		     leftBuffer, leftEnd,
+		     blockSize);
 
-    setLength(leftBuffer, leftLength + length);
+    setLength(leftBuffer, leftLength + blockLength);
   }
 
   /**
@@ -1256,14 +1315,16 @@ public final class BTree {
     int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
-    int parentOffset = HEADER_SIZE;
-    int parentEnd = parentOffset + parentLength * tupleSize;
+    int parentEnd = HEADER_SIZE + parentLength * tupleSize;
+    int parentOffset;
 
     int rightLength = getLength(rightBuffer);
+    int rightSize = rightLength * tupleSize;
 
-    int length = getLength(buffer);
+    int blockLength = getLength(buffer);
+    int blockEnd = HEADER_SIZE + blockLength * tupleSize;
 
-    for (;
+    for (parentOffset = HEADER_SIZE;
 	 parentOffset < parentEnd;
 	 parentOffset += tupleSize) {
       long pointer = getPointer(parentBuffer, parentOffset);
@@ -1279,72 +1340,84 @@ public final class BTree {
 
     // copy the first item in the right to the buffer
     System.arraycopy(rightBuffer, HEADER_SIZE,
-		     buffer, HEADER_SIZE + length * tupleSize,
+		     buffer, blockEnd,
 		     tupleSize);
+
+    // add the buffer length
+    setLength(buffer, blockLength + 1);
 
     // shift the data in the right buffer
     System.arraycopy(rightBuffer, HEADER_SIZE + tupleSize,
 		     rightBuffer, HEADER_SIZE,
-		     (rightLength - 1) * tupleSize);
-
-    // add the buffer length
-    setLength(buffer, length + 1);
+		     rightSize - tupleSize);
 
     // subtract from the right length
     setLength(rightBuffer, rightLength - 1);
 
-    // copy the entry from the new buffer tail to the parent
-    System.arraycopy(buffer,
-		     HEADER_SIZE + length * tupleSize + PTR_SIZE,
+    // copy the entry from the new buffer tail to the buffer's parent entry
+    System.arraycopy(buffer, blockEnd + PTR_SIZE,
 		     parentBuffer, parentOffset + PTR_SIZE,
 		     tupleSize - PTR_SIZE);
   }
 
   /**
    * Merges the buffer with the right-most one.
+   *
+   * <pre>
+   * ... | leftBlock | block | rightBlock | ...
+   * </pre>
+   *
+   * <pre>
+   * ... | leftBlock | block + rightBlock | ...
+   * </pre>
    */
   private void mergeRight(byte []parentBuffer,
 			  byte []buffer,
 			  byte []rightBuffer,
 			  long blockId)
   {
-    int parentLength = getLength(parentBuffer);
-
+    if (isLeaf(buffer) != isLeaf(rightBuffer)) {
+      throw new IllegalStateException("leaf does not match "
+                                      + isLeaf(buffer)
+                                      + " " + isLeaf(rightBuffer)
+                                      + debugId(blockId));
+    }
+    
     int tupleSize = _tupleSize;
-    int parentOffset = HEADER_SIZE;
-    int parentEnd = parentOffset + parentLength * tupleSize;
+    
+    int parentLength = getLength(parentBuffer);
+    int parentEnd = HEADER_SIZE + parentLength * tupleSize;
+    int parentOffset;
 
     int rightLength = getLength(rightBuffer);
 
-    int length = getLength(buffer);
+    int blockLength = getLength(buffer);
+    int blockSize = blockLength * tupleSize;
 
-    for (;
+    for (parentOffset = HEADER_SIZE;
 	 parentOffset < parentEnd;
 	 parentOffset += tupleSize) {
       long pointer = getPointer(parentBuffer, parentOffset);
 
       if (pointer == blockId) {
-	// add space in the right buffer
-	System.arraycopy(rightBuffer, HEADER_SIZE,
-			 rightBuffer, HEADER_SIZE + length * tupleSize,
-			 rightLength * tupleSize);
-	
-	// add the buffer to the right buffer
-	System.arraycopy(buffer, HEADER_SIZE,
-			 rightBuffer, HEADER_SIZE,
-			 length * tupleSize);
-
-	setLength(rightBuffer, length + rightLength);
-
-	if (parentOffset < HEADER_SIZE)
-	  throw new IllegalStateException();
-
 	// remove the buffer's pointer from the parent
 	System.arraycopy(parentBuffer, parentOffset + tupleSize,
 			 parentBuffer, parentOffset,
 			 parentEnd - parentOffset - tupleSize);
 
 	setLength(parentBuffer, parentLength - 1);
+        
+	// add space in the right buffer
+	System.arraycopy(rightBuffer, HEADER_SIZE,
+			 rightBuffer, HEADER_SIZE + blockSize,
+			 blockSize);
+	
+	// add the buffer to the right buffer
+	System.arraycopy(buffer, HEADER_SIZE,
+			 rightBuffer, HEADER_SIZE,
+			 blockSize);
+
+	setLength(rightBuffer, blockLength + rightLength);
 
 	return;
       }
@@ -1368,7 +1441,7 @@ public final class BTree {
 
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
-    int end = offset + length * tupleSize;
+    int end = HEADER_SIZE + length * tupleSize;
 
     long value;
 
@@ -1422,10 +1495,17 @@ public final class BTree {
       else if (offset == end) {
 	value = getPointer(buffer, NEXT_OFFSET);
 
+        if (value != 0 || isLeaf)
+          return value;
+        else
+          return getPointer(buffer, end - tupleSize);
+        
+        /*
 	if (value == 0 && ! isLeaf)
-	  throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+	  throw new IllegalStateException("illegal 0 value at end=" + newOffset + " for block " + debugId(blockId) + " tuple=" + _tupleSize);
 
 	return value;
+        */
       }
       else {
 	value = getPointer(buffer, offset);
@@ -1473,15 +1553,15 @@ public final class BTree {
         continue;
       }
       else if (cmp == 0) {
-	int tupleLength = length * tupleSize;
+	int blockEnd = HEADER_SIZE + length * tupleSize;
 
-	if (offset + tupleSize < HEADER_SIZE + tupleLength) {
+	if (offset + tupleSize < blockEnd) {
 	  if (offset < HEADER_SIZE)
 	    throw new IllegalStateException();
 	  
 	  System.arraycopy(buffer, offset + tupleSize,
 			   buffer, offset,
-			   HEADER_SIZE + tupleLength - offset - tupleSize);
+			   blockEnd - offset - tupleSize);
 	}
 
 	setLength(buffer, length - 1);
@@ -1494,6 +1574,30 @@ public final class BTree {
     }
 
     return 0;
+  }
+
+  private void validate(long blockId, byte []buffer)
+  {
+    boolean isLeaf = isLeaf(buffer);
+
+    if (isLeaf)
+      return;
+    
+    int tupleSize = _tupleSize;
+    int length = getLength(buffer);
+    int end = HEADER_SIZE + tupleSize * length;
+
+    int offset;
+
+    if (false && getPointer(buffer, NEXT_OFFSET) == 0)
+      throw new IllegalStateException("Null next pointer for " + debugId(blockId));
+
+    for (offset = HEADER_SIZE;
+         offset < end;
+         offset += tupleSize) {
+      if (getPointer(buffer, offset) == 0)
+        throw new IllegalStateException("Null pointer at " + offset + " for " + debugId(blockId) + " tupleSize=" + tupleSize);
+    }
   }
 
   private boolean isLeaf(byte []buffer)
@@ -1670,7 +1774,7 @@ public final class BTree {
 
   private String debugId(long blockId)
   {
-    return "" + (blockId % Store.BLOCK_SIZE) + ":" + (blockId / Store.BLOCK_SIZE);
+    return Long.toHexString(blockId);
   }
 
   public void close()
