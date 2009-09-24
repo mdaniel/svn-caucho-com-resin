@@ -320,7 +320,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
   {
     _locale = locale;
 
-    if (_charEncoding != null && ! isCommitted()) {
+    if (_charEncoding == null && ! isCommitted()) {
       _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
 
       try {
