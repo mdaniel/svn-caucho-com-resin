@@ -48,6 +48,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
@@ -197,7 +198,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
     // ioc/0520
-    if (scopeType != null) {
+    if (scopeType != null
+        && ! getScope().equals(ApplicationScoped.class)) {
       // && scopeType.normal()
       //  && ! env.canInject(getScope())) {
 

@@ -44,16 +44,6 @@ w_class = element class {
   string
 }
 
-w_component = element component {
-  w_binding*
-  & w_class?
-  & w_init?
-  & w_name?
-  & w_producer?
-  & w_scope?
-  & w_type?
-}
-
 w_deploy = element Deploy {
   w_bean-Field-Custom*
   & w_standard?
@@ -67,16 +57,8 @@ w_enable = element enable {
   & w_stereotype*
 }
 
-w_component-type =
-  attribute component-type { string }
-  | element component-type { string }
-
-w_component-types =  element component-types {
-  w_component-type*
-}
-
-w_decorators = element Decorators {
-  w_bean-Field-Custom*
+w_decorators = element decorators {
+  w_class*
 }
 
 w_name = element name {
@@ -91,8 +73,8 @@ w_new =
   attribute new { string }
   | element new { w_Any }
 
-w_interceptors = element Interceptors {
-  w_bean-Field-Custom*
+w_interceptors = element interceptors {
+  w_class*
 }
 
 w_producer = element producer {

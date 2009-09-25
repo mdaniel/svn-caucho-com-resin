@@ -732,7 +732,8 @@ public class InterceptorCallChain
 
       out.println();
       out.println("javax.enterprise.context.spi.CreationalContext env");
-      out.println("  = __caucho_manager.createCreationalContext();");
+      // XXX: should be parent bean
+      out.println("  = __caucho_manager.createCreationalContext(null);");
       out.println();
       out.println("for (int i = 0; i < size; i++) {");
       out.pushDepth();

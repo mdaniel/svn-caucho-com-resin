@@ -37,9 +37,7 @@ import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.program.FieldEventProgram;
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.CreationContextImpl;
-import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.*;
@@ -217,6 +215,7 @@ public class InjectManager
   // XXX: needs to be a local resolver
   private ELResolver _elResolver = new WebBeansContextResolver();
 
+  private SingletonScope _singletonScope = new SingletonScope();
   private ApplicationScope _applicationScope = new ApplicationScope();
   private XmlStandardPlugin _xmlExtension;
 
@@ -263,6 +262,7 @@ public class InjectManager
       addContext("com.caucho.server.webbeans.SessionScope");
       addContext("com.caucho.server.webbeans.ConversationScope");
       addContext(_applicationScope);
+      addContext(_singletonScope);
 
       _deploymentMap.put(CauchoDeployment.class, 0);
       // DEFAULT_PRIORITY

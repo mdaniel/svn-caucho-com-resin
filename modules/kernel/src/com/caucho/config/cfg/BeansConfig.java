@@ -60,29 +60,29 @@ public class BeansConfig {
   private static final L10N L = new L10N(BeansConfig.class);
   private static final Logger log
     = Logger.getLogger(BeansConfig.class.getName());
-  
+
   private InjectManager _injectManager;
   private Path _root;
-  
+
   private Path _beansFile;
-  
+
   private ArrayList<Class> _deployList
     = new ArrayList<Class>();
 
   private ArrayList<Interceptor> _interceptorList;
-  
+
   private ArrayList<Class> _decoratorList
     = new ArrayList<Class>();
 
   private ArrayList<Class> _pendingClasses
     = new ArrayList<Class>();
-  
+
   private boolean _isConfigured;
 
   public BeansConfig(InjectManager injectManager, Path root)
   {
     _injectManager = injectManager;
-    
+
     _root = root;
     _beansFile = root.lookup("META-INF/beans.xml");
     _beansFile.setUserPath(_beansFile.getURL());
@@ -107,7 +107,7 @@ public class BeansConfig {
   {
     return getContainer().getClassLoader();
   }
-  
+
   /**
    * Gets the web beans root directory
    */
@@ -176,7 +176,6 @@ public class BeansConfig {
   /**
    * Adds the interceptors
    */
-  @TagName("Interceptors")
   public Interceptors createInterceptors()
   {
     return new Interceptors();
@@ -185,7 +184,6 @@ public class BeansConfig {
   /**
    * Adds the decorators
    */
-  @TagName("Decorators")
   public Decorators createDecorators()
   {
     return new Decorators();
@@ -205,7 +203,7 @@ public class BeansConfig {
     _decoratorList.clear();
 
     update();
-    
+
     if (_interceptorList != null) {
       _injectManager.setInterceptorList(_interceptorList);
       _interceptorList = null;
@@ -218,39 +216,39 @@ public class BeansConfig {
 
     try {
       if (_pendingClasses.size() > 0) {
-	ArrayList<Class> pendingClasses
-	  = new ArrayList<Class>(_pendingClasses);
-	_pendingClasses.clear();
+        ArrayList<Class> pendingClasses
+          = new ArrayList<Class>(_pendingClasses);
+        _pendingClasses.clear();
 
-	for (Class cl : pendingClasses) {
-	  /*
-	  if (injectManager.getWebComponent(cl) != null)
-	    continue;
-	  */
+        for (Class cl : pendingClasses) {
+          /*
+          if (injectManager.getWebComponent(cl) != null)
+            continue;
+          */
 
-	  ManagedBeanImpl<?> bean;
+          ManagedBeanImpl<?> bean;
 
-	  /*
-	  if (cl.isAnnotationPresent(Singleton.class))
-	    component = new SingletonClassComponent(cl);
-	  else
-	  */
-	  /*
-	  component = new SimpleBean(cl);
+          /*
+          if (cl.isAnnotationPresent(Singleton.class))
+            component = new SingletonClassComponent(cl);
+          else
+          */
+          /*
+          component = new SimpleBean(cl);
 
-	  component.setFromClass(true);
-	  component.init();
-	  */
-	  bean = injectManager.createManagedBean(cl);
-	  
-	  injectManager.addBean(bean);
+          component.setFromClass(true);
+          component.init();
+          */
+          bean = injectManager.createManagedBean(cl);
 
-	  for (ProducesBean producerBean : bean.getProducerBeans()) {
-	    injectManager.addBean(producerBean);
-	  }
+          injectManager.addBean(bean);
 
-	  //_pendingComponentList.add(component);
-	}
+          for (ProducesBean producerBean : bean.getProducerBeans()) {
+            injectManager.addBean(producerBean);
+          }
+
+          //_pendingComponentList.add(component);
+        }
       }
     } catch (Exception e) {
       throw LineConfigException.create(_beansFile.getURL(), 1, e);
@@ -283,17 +281,22 @@ public class BeansConfig {
   }
 
   public class Interceptors {
+    public void addClass(Class cl)
+    {
+      addInterceptor(cl);
+    }
+
     public void addCustomBean(CustomBeanConfig config)
     {
       Class cl = config.getClassType();
-      
+
       if (cl.isInterface())
-	throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
-				      cl.getName()));
+        throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
+                                      cl.getName()));
 
       if (! cl.isAnnotationPresent(javax.interceptor.Interceptor.class))
-	throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation because it is an interceptor implementation",
-				      cl.getName()));
+        throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation because it is an interceptor implementation",
+                                      cl.getName()));
 
       addInterceptor(cl);
     }
@@ -306,19 +309,24 @@ public class BeansConfig {
     {
       _location = location;
     }
-    
+
+    public void addClass(Class cl)
+    {
+      _decoratorList.add(cl);
+    }
+
     public void addCustomBean(CustomBeanConfig config)
     {
       Class cl = config.getClassType();
-      
+
       if (cl.isInterface())
-	throw new ConfigException(L.l("'{0}' is not valid because <Decorators> can only contain decorator implementations",
-				      cl.getName()));
-      
+        throw new ConfigException(L.l("'{0}' is not valid because <Decorators> can only contain decorator implementations",
+                                      cl.getName()));
+
       /*
       if (! comp.isAnnotationPresent(Decorator.class)) {
-	throw new ConfigException(L.l("'{0}' must have an @Decorator annotation because it is a decorator implementation",
-				      cl.getName()));
+        throw new ConfigException(L.l("'{0}' must have an @Decorator annotation because it is a decorator implementation",
+                                      cl.getName()));
       }
       */
 
@@ -340,8 +348,8 @@ public class BeansConfig {
 
       /*
       if (! cl.isAnnotationPresent(DeploymentType.class))
-	throw new ConfigException(L.l("'{0}' must have a @DeploymentType annotation because because <Deploy> can only contain @DeploymentType annotations",
-				      cl.getName()));
+        throw new ConfigException(L.l("'{0}' must have a @DeploymentType annotation because because <Deploy> can only contain @DeploymentType annotations",
+                                      cl.getName()));
       */
 
       _deployList.add(cl);
@@ -353,7 +361,7 @@ public class BeansConfig {
     {
       _deployList.add(cl);
     }
-    
+
     public void addStereotype(Class cl)
     {
       _deployList.add(cl);
