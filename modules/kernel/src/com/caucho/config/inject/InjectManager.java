@@ -1892,7 +1892,7 @@ public class InjectManager
                                                   Annotation... bindings)
   {
     if (bindings == null || bindings.length == 0)
-      throw new IllegalArgumentException(L.l("resolveInterceptors requires at least one @InterceptorBindingType"));
+      throw new IllegalArgumentException(L.l("resolveInterceptors requires at least one @InterceptorBinding"));
 
     ArrayList<Interceptor<?>> interceptorList
       = new ArrayList<Interceptor<?>>();
