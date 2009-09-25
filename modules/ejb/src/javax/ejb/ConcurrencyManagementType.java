@@ -32,5 +32,5 @@ package javax.ejb;
  * Concurrency management type.
  */
 public enum ConcurrencyManagementType {
-  CONTAINER, BEAN, CONCURRENCY_NOT_ALLOWED
+  CONTAINER, BEAN
 }

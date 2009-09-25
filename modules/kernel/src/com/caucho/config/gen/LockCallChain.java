@@ -42,7 +42,6 @@ import javax.ejb.LockType;
 
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
-import com.caucho.ejb.locking.ConcurrencyNotAllowedLock;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -51,6 +50,8 @@ import com.caucho.util.L10N;
  * it towards EJB singletons, but it can be used for other bean types.
  */
 public class LockCallChain extends AbstractCallChain {
+  private static final int DEFAULT_TIMEOUT = 10000;
+
   @SuppressWarnings("unused")
   private static final L10N L = new L10N(LockCallChain.class);
 
@@ -58,7 +59,6 @@ public class LockCallChain extends AbstractCallChain {
 
   private boolean _isContainerManaged;
   private LockType _lockType;
-  private boolean _concurrencyNotAllowed;
   private long _lockTimeout;
   private TimeUnit _lockTimeoutUnit;
 
@@ -70,9 +70,7 @@ public class LockCallChain extends AbstractCallChain {
 
     _isContainerManaged = true;
     _lockType = null;
-    _concurrencyNotAllowed = false;
-
-    _lockTimeout = 10000;
+    _lockTimeout = DEFAULT_TIMEOUT;
     _lockTimeoutUnit = TimeUnit.MILLISECONDS;
   }
 
@@ -94,7 +92,7 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public boolean isEnhanced()
   {
-    return (_isContainerManaged && ((_lockType != null) || _concurrencyNotAllowed));
+    return (_isContainerManaged && (_lockType != null));
   }
 
   /**
@@ -134,14 +132,6 @@ public class LockCallChain extends AbstractCallChain {
       _lockTimeout = accessTimeoutAttribute.timeout();
       _lockTimeoutUnit = accessTimeoutAttribute.unit();
     }
-
-    ConcurrencyNotAllowedLock concurrencyNotAllowedAttribute = getAnnotation(
-        ConcurrencyNotAllowedLock.class, apiMethod, apiClass,
-        implementationMethod, implementationClass);
-
-    if (concurrencyNotAllowedAttribute != null) {
-      _concurrencyNotAllowed = true;
-    }
   }
 
   // TODO Should this be moved into the abstract super class?
@@ -176,16 +166,13 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public void generatePrologue(JavaWriter out, HashMap map) throws IOException
   {
-    if ((_isContainerManaged && ((_lockType != null) || _concurrencyNotAllowed))
+    if ((_isContainerManaged && (_lockType != null))
         && (map.get("caucho.ejb.lock") == null)) {
-      // TODO Does this need be registered somewhere?
       map.put("caucho.ejb.lock", "done");
 
       out.println();
       out
-          .println("private transient final java.util.concurrent.locks.ReadWriteLock _readWriteLock");
-      out
-          .println("  = new java.util.concurrent.locks.ReentrantReadWriteLock();");
+          .println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock = new java.util.concurrent.locks.ReentrantReadWriteLock();");
       out.println();
     }
 
@@ -199,102 +186,56 @@ public class LockCallChain extends AbstractCallChain {
   public void generateCall(JavaWriter out) throws IOException
   {
     // TODO Is this too much code to be in-lined?
-    if (_isContainerManaged && ((_lockType != null) || _concurrencyNotAllowed)) {
-      if (_concurrencyNotAllowed) {
+    if (_isContainerManaged && (_lockType != null)) {
+      switch (_lockType) {
+      case READ:
         out.println();
-        out.println("if (_readWriteLock.writeLock().tryLock()) {");
-        out.pushDepth();
-        out.println("try {");
-        out.pushDepth();
-        out.println();
-      } else {
-        switch (_lockType) {
-        case READ:
+
+        if (_lockTimeout != -1) {
+          out.println("boolean lockAquired = false;");
           out.println();
           out.println("try {");
           out.pushDepth();
-          out.println("if (_readWriteLock.readLock().tryLock("
+          out.println("lockAquired = _readWriteLock.readLock().tryLock("
               + _lockTimeoutUnit.toMillis(_lockTimeout)
-              + ", java.util.concurrent.TimeUnit.MILLISECONDS)) {");
-          out.pushDepth();
-          out.println("try {");
-          out.pushDepth();
-          out.println();
-          break;
-
-        case WRITE:
-          out.println();
-          out.println("try {");
-          out.pushDepth();
-          out.println("if (_readWriteLock.writeLock().tryLock("
-              + _lockTimeoutUnit.toMillis(_lockTimeout)
-              + ", java.util.concurrent.TimeUnit.MILLISECONDS)) {");
-          out.pushDepth();
-          out.println("try {");
-          out.pushDepth();
-          out.println();
-          break;
-        }
-      }
-    }
-
-    generateNext(out);
-
-    if (_isContainerManaged && ((_lockType != null) || _concurrencyNotAllowed)) {
-      if (_concurrencyNotAllowed) {
-        out.popDepth();
-        out.println("} finally {");
-        out.pushDepth();
-        out.println("_readWriteLock.writeLock().unlock();");
-        out.popDepth();
-        out.println("}");
-        out.popDepth();
-        out.println("} else {");
-        out.pushDepth();
-        out
-            .println("throw new javax.ejb.ConcurrentAccessException(\"Concurrent access not allowed\");");
-        out.popDepth();
-        out.println("}");
-        out.println();
-      } else {
-        switch (_lockType) {
-        case READ:
+              + ", java.util.concurrent.TimeUnit.MILLISECONDS);");
           out.popDepth();
-          out.println("} finally {");
-          out.pushDepth();
-          out.println("_readWriteLock.readLock().unlock();");
-          out.popDepth();
-          out.println("}");
-          out.popDepth();
-          out.println("} else {");
-          out.pushDepth();
-          out
-              .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
-          out.popDepth();
-          out.println("}");
-          out.popDepth();
-          out.println("} catch (InterruptedException interruptedException) {");
+          out.println(" } catch (InterruptedException interruptedException) {");
           out.pushDepth();
           out
               .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
           out.popDepth();
           out.println("}");
           out.println();
-          break;
-        case WRITE:
-          out.popDepth();
-          out.println("} finally {");
+          out.println("if (lockAquired) {");
           out.pushDepth();
-          out.println("_readWriteLock.writeLock().unlock();");
-          out.popDepth();
-          out.println("}");
-          out.popDepth();
-          out.println("} else {");
+          out.println("try {");
+        } else {
+          out.println("_readWriteLock.readLock().lock();");
+          out.println();
+          out.println("try {");
+        }
+        break;
+
+      case WRITE:
+        out.println();
+        out
+            .println("if ((_readWriteLock.getReadHoldCount() > 0) && (_readWriteLock.getWriteHoldCount() == 0)) {");
+        out.pushDepth();
+        out
+            .println("throw new javax.ejb.IllegalLoopbackException(\"Cannot attempt a nested write lock without an existing write lock.\");");
+        out.popDepth();
+        out.println("}");
+        out.println();
+
+        if (_lockTimeout != -1) {
+          out.println("boolean lockAquired = false;");
+          out.println();
+          out.println("try {");
           out.pushDepth();
-          out
-              .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring write lock.\");");
-          out.popDepth();
-          out.println("}");
+          out.println("lockAquired = _readWriteLock.writeLock().tryLock("
+              + _lockTimeoutUnit.toMillis(_lockTimeout)
+              + ", java.util.concurrent.TimeUnit.MILLISECONDS);");
           out.popDepth();
           out.println("} catch (InterruptedException interruptedException) {");
           out.pushDepth();
@@ -303,8 +244,61 @@ public class LockCallChain extends AbstractCallChain {
           out.popDepth();
           out.println("}");
           out.println();
-          break;
+          out.println("if (lockAquired) {");
+          out.pushDepth();
+          out.println("try {");
+          out.println();
+        } else {
+          out.println("_readWriteLock.writeLock().lock();");
+          out.println();
         }
+
+        break;
+      }
+    }
+
+    generateNext(out);
+
+    if (_isContainerManaged && (_lockType != null)) {
+      switch (_lockType) {
+      case READ:
+        out.popDepth();
+        out.println("} finally {");
+        out.pushDepth();
+        out.println("_readWriteLock.readLock().unlock();");
+        out.popDepth();
+        out.println("}");
+
+        if (_lockTimeout != -1) {
+          out.popDepth();
+          out.println("} else {");
+          out.pushDepth();
+          out
+              .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
+          out.popDepth();
+          out.println("}");
+        }
+
+        break;
+      case WRITE:
+        out.popDepth();
+        out.println("} finally {");
+        out.pushDepth();
+        out.println("_readWriteLock.writeLock().unlock();");
+        out.popDepth();
+        out.println("}");
+
+        if (_lockTimeout != -1) {
+          out.popDepth();
+          out.println("} else {");
+          out.pushDepth();
+          out
+              .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring write lock.\");");
+          out.popDepth();
+          out.println("}");
+        }
+
+        break;
       }
     }
   }
