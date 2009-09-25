@@ -2168,8 +2168,8 @@ public class InjectManager
       if (_deploymentMap.containsKey(annType))
         return false;
 
-      if (annType.equals(Disabled.class)
-          || annType.isAnnotationPresent(Disabled.class)) {
+      if (annType.equals(Alternative.class)
+          || annType.isAnnotationPresent(Alternative.class)) {
         isDisabled = true;
       }
     }

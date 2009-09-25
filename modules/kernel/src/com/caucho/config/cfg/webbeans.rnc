@@ -6,6 +6,11 @@ start = w_beans
 
 w_Any = text | (attribute * {string} | element * { w_Any })*
 
+w_alternatives = element alternatives {
+  w_class*
+  & w_stereotype*
+}
+
 w_bean-Custom = element * - w:* {
   (w_bean-Field-Custom*
 
@@ -49,11 +54,6 @@ w_deploy = element Deploy {
   & w_standard?
   & w_production?
   & w_class*
-  & w_stereotype*
-}
-
-w_enable = element enable {
-  w_class*
   & w_stereotype*
 }
 
@@ -110,7 +110,7 @@ w_beans = element beans {
   
   & w_deploy?
   
-  & w_enable?
+  & w_alternatives?
   
   & w_interceptors?
 }

@@ -107,7 +107,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   private LinkedHashSet<Type> _typeClasses
     = new LinkedHashSet<Type>();
 
-  private ArrayList<Annotation> _bindings
+  private ArrayList<Annotation> _qualifiers
     = new ArrayList<Annotation>();
 
   private Class<? extends Annotation> _scope;
@@ -189,7 +189,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
 
   /**
-   * Gets the bean's EL binding name.
+   * Gets the bean's EL qualifier name.
    */
   public String getName()
   {
@@ -197,14 +197,14 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
 
   /**
-   * Returns the bean's binding types
+   * Returns the bean's qualifier types
    */
   public Set<Annotation> getQualifiers()
   {
     Set<Annotation> set = new LinkedHashSet<Annotation>();
 
-    for (Annotation binding : _bindings) {
-      set.add(binding);
+    for (Annotation qualifier : _qualifiers) {
+      set.add(qualifier);
     }
 
     return set;
@@ -234,17 +234,17 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
 
   /**
-   * Returns an array of the binding annotations
+   * Returns an array of the qualifier annotations
    */
-  public Annotation []getBindingArray()
+  public Annotation []getQualifierArray()
   {
-    if (_bindings == null || _bindings.size() == 0)
+    if (_qualifiers == null || _qualifiers.size() == 0)
       return new Annotation[] { new CurrentLiteral() };
 
-    Annotation []bindings = new Annotation[_bindings.size()];
-    _bindings.toArray(bindings);
+    Annotation []qualifiers = new Annotation[_qualifiers.size()];
+    _qualifiers.toArray(qualifiers);
 
-    return bindings;
+    return qualifiers;
   }
 
   /**
@@ -335,7 +335,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   protected void introspect(Annotated annotated)
   {
     introspectScope(annotated);
-    introspectBindings(annotated);
+    introspectQualifiers(annotated);
     introspectName(annotated);
     introspectStereotypes(annotated);
 
@@ -363,21 +363,29 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
 
   /**
-   * Introspects the binding annotations
+   * Introspects the qualifier annotations
    */
-  protected void introspectBindings(Annotated annotated)
+  protected void introspectQualifiers(Annotated annotated)
   {
     BeanManager inject = getBeanManager();
 
     for (Annotation ann : annotated.getAnnotations()) {
       if (inject.isQualifier(ann.annotationType())) {
-        _bindings.add(ann);
+        if (ann instanceof Named) {
+          Named named = (Named) ann;
+
+          if ("".equals(named.value())) {
+            ann = Names.create(getDefaultName());
+          }
+        }
+
+        _qualifiers.add(ann);
       }
     }
   }
 
   /**
-   * Introspects the binding annotations
+   * Introspects the qualifier annotations
    */
   protected void introspectName(Annotated annotated)
   {
@@ -437,8 +445,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   protected void introspectDefault()
   {
-    if (_bindings.size() == 0)
-      _bindings.add(CurrentLiteral.CURRENT);
+    if (_qualifiers.size() == 0)
+      _qualifiers.add(CurrentLiteral.CURRENT);
 
     if (_scope == null)
       _scope = Dependent.class;
@@ -547,9 +555,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       sb.append(_name);
     }
 
-    for (Annotation binding : _bindings) {
+    for (Annotation qualifier : _qualifiers) {
       sb.append(",");
-      sb.append(binding);
+      sb.append(qualifier);
     }
 
     if (_scope != null && _scope != Dependent.class) {

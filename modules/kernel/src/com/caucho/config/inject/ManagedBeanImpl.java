@@ -56,6 +56,7 @@ import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 
@@ -316,29 +317,41 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
       if (InjectionPoint.class.equals(param.getBaseType()))
         args[i] = new InjectionPointArg();
       else
-        args[i] = new BeanArg(param.getBaseType(), getBindings(param));
+        args[i] = new BeanArg(param.getBaseType(), getQualifiers(param));
     }
 
     return args;
   }
 
-  private Annotation []getBindings(Annotated annotated)
+  private Annotation []getQualifiers(Annotated annotated)
   {
-    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+    ArrayList<Annotation> qualifierList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-        bindingList.add(ann);
+      if (ann instanceof Named) {
+        Named named = (Named) ann;
+
+        if ("".equals(named.value())) {
+          String name = getBeanClass().getSimpleName();
+
+          named = Names.create(name);
+        }
+
+        qualifierList.add(named);
+
+      }
+      else if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+        qualifierList.add(ann);
       }
     }
 
-    if (bindingList.size() == 0)
-      bindingList.add(CurrentLiteral.CURRENT);
+    if (qualifierList.size() == 0)
+      qualifierList.add(CurrentLiteral.CURRENT);
 
-    Annotation []bindings = new Annotation[bindingList.size()];
-    bindingList.toArray(bindings);
+    Annotation []qualifiers = new Annotation[qualifierList.size()];
+    qualifierList.toArray(qualifiers);
 
-    return bindings;
+    return qualifiers;
   }
 
   /**

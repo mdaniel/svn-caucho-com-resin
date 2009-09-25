@@ -35,7 +35,7 @@ import java.lang.annotation.*;
 import javax.enterprise.inject.Stereotype;
 
 /**
- * Default deployment type for an XML file, with higher priority than
+ * Alternative for an XML file, with higher priority than
  * Production.
  */
 @Stereotype

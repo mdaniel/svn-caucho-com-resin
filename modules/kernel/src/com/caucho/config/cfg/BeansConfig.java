@@ -168,9 +168,9 @@ public class BeansConfig {
   /**
    * Adds a deploy
    */
-  public EnableConfig createEnable()
+  public AlternativesConfig createAlternatives()
   {
-    return new EnableConfig();
+    return new AlternativesConfig();
   }
 
   /**
@@ -356,7 +356,7 @@ public class BeansConfig {
     }
   }
 
-  public class EnableConfig {
+  public class AlternativesConfig {
     public void addClass(Class cl)
     {
       _deployList.add(cl);

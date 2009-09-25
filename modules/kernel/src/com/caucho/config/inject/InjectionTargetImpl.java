@@ -592,8 +592,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         else if (best == null) {
           best = ctor;
         }
-        else if (hasBindingAnnotation(ctor)) {
-          if (best != null && hasBindingAnnotation(best))
+        else if (hasQualifierAnnotation(ctor)) {
+          if (best != null && hasQualifierAnnotation(best))
             throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Inject or by a @Qualifier, because the Java Injection BeanManager can't tell which one to use.",
                                           beanType.getJavaClass().getName()));
           best = ctor;
@@ -630,7 +630,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
                      beanType.getJavaClass().getName()));
       }
       else
-        throw new ConfigException(L.l("{0}: Bean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
+        throw new ConfigException(L.l("{0}: Bean does not have a unique constructor.  One constructor must be marked with @Inject or have a qualifier annotation.",
                                       beanType.getJavaClass().getName()));
 
       _beanCtor = best;
@@ -651,10 +651,10 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter param = params.get(i);
 
-      Annotation []bindings = getBindings(param);
+      Annotation []qualifiers = getQualifiers(param);
 
-      if (bindings.length > 0)
-        args[i] = new BeanArg(param.getBaseType(), bindings);
+      if (qualifiers.length > 0)
+        args[i] = new BeanArg(param.getBaseType(), qualifiers);
       else
         args[i] = new ValueArg(param.getBaseType());
     }
@@ -662,23 +662,23 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return args;
   }
 
-  private Annotation []getBindings(Annotated annotated)
+  private Annotation []getQualifiers(Annotated annotated)
   {
-    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+    ArrayList<Annotation> qualifierList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotated.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-        bindingList.add(ann);
+        qualifierList.add(ann);
       }
     }
 
-    if (bindingList.size() == 0)
-      bindingList.add(CurrentLiteral.CURRENT);
+    if (qualifierList.size() == 0)
+      qualifierList.add(CurrentLiteral.CURRENT);
 
-    Annotation []bindings = new Annotation[bindingList.size()];
-    bindingList.toArray(bindings);
+    Annotation []qualifiers = new Annotation[qualifierList.size()];
+    qualifierList.toArray(qualifiers);
 
-    return bindings;
+    return qualifiers;
   }
 
   private void introspectInject(AnnotatedType<?> type)
@@ -691,8 +691,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       if (field.isAnnotationPresent(Decorates.class))
         continue;
-      else if (hasBindingAnnotation(field)) {
-        boolean isOptional = isBindingOptional(field);
+      else if (hasQualifierAnnotation(field)) {
+        boolean isOptional = isQualifierOptional(field);
 
         InjectionPoint ij = new InjectionPointImpl(this, field);
 
@@ -710,7 +710,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         continue;
 
       if (method.isAnnotationPresent(Inject.class)) {
-        // boolean isOptional = isBindingOptional(field);
+        // boolean isOptional = isQualifierOptional(field);
 
         List<AnnotatedParameter> params = method.getParameters();
 
@@ -745,7 +745,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     */
   }
 
-  private static boolean hasBindingAnnotation(AnnotatedField field)
+  private static boolean hasQualifierAnnotation(AnnotatedField field)
   {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
@@ -762,7 +762,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return false;
   }
 
-  private static boolean isBindingOptional(AnnotatedField field)
+  private static boolean isQualifierOptional(AnnotatedField field)
   {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
@@ -774,12 +774,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return false;
   }
 
-  private static boolean hasBindingAnnotation(AnnotatedConstructor ctor)
+  private static boolean hasQualifierAnnotation(AnnotatedConstructor ctor)
   {
     return ctor.isAnnotationPresent(Inject.class);
   }
 
-  private static boolean hasBindingAnnotation(Method method)
+  private static boolean hasQualifierAnnotation(Method method)
   {
     for (Annotation ann : method.getAnnotations()) {
       Class annType = ann.annotationType();
@@ -792,7 +792,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       */
     }
 
-    boolean hasBinding = false;
+    boolean hasQualifier = false;
     for (Annotation []annList : method.getParameterAnnotations()) {
       if (annList == null)
         continue;
@@ -805,11 +805,11 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         if (annType.equals(Disposes.class))
           return false;
         else if (annType.isAnnotationPresent(Qualifier.class))
-          hasBinding = true;
+          hasQualifier = true;
       }
     }
 
-    return hasBinding;
+    return hasQualifier;
   }
 
   class FieldInjectProgram extends ConfigProgram {

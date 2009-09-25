@@ -29,6 +29,8 @@
 
 package com.caucho.config;
 
+import javax.inject.Named;
+
 /**
  * Utility class for creating @Name annotations, used for generic
  * resources like DataSources.
@@ -37,18 +39,18 @@ public final class Names {
   /**
    * Creates a new @Name annotation with the given value
    */
-  public static Name create(String value)
+  public static Named create(String value)
   {
     final String name = value;
-    
-    return new Name() {
-      public Class annotationType() { return Name.class; }
+
+    return new Named() {
+      public Class annotationType() { return Named.class; }
 
       public String value() { return name; }
 
       public String toString()
       {
-	return "@Name('" + name + "')";
+        return "@" + Named.class.getSimpleName() + "('" + name + "')";
       }
     };
   }
