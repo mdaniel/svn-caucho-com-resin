@@ -189,8 +189,6 @@ public class LockCallChain extends AbstractCallChain {
     if (_isContainerManaged && (_lockType != null)) {
       switch (_lockType) {
       case READ:
-        out.println();
-
         if (_lockTimeout != -1) {
           out.println("boolean lockAquired = false;");
           out.println();
@@ -200,7 +198,7 @@ public class LockCallChain extends AbstractCallChain {
               + _lockTimeoutUnit.toMillis(_lockTimeout)
               + ", java.util.concurrent.TimeUnit.MILLISECONDS);");
           out.popDepth();
-          out.println(" } catch (InterruptedException interruptedException) {");
+          out.println("} catch (InterruptedException interruptedException) {");
           out.pushDepth();
           out
               .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
@@ -210,15 +208,16 @@ public class LockCallChain extends AbstractCallChain {
           out.println("if (lockAquired) {");
           out.pushDepth();
           out.println("try {");
+          out.pushDepth();
         } else {
           out.println("_readWriteLock.readLock().lock();");
           out.println();
           out.println("try {");
+          out.pushDepth();
         }
         break;
 
       case WRITE:
-        out.println();
         out
             .println("if ((_readWriteLock.getReadHoldCount() > 0) && (_readWriteLock.getWriteHoldCount() == 0)) {");
         out.pushDepth();
@@ -247,10 +246,12 @@ public class LockCallChain extends AbstractCallChain {
           out.println("if (lockAquired) {");
           out.pushDepth();
           out.println("try {");
-          out.println();
+          out.pushDepth();
         } else {
           out.println("_readWriteLock.writeLock().lock();");
           out.println();
+          out.println("try {");
+          out.pushDepth();
         }
 
         break;
