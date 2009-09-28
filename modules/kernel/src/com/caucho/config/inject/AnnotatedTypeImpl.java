@@ -67,12 +67,12 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
 
   private Set<AnnotatedMethod> _methodSet
     = new LinkedHashSet<AnnotatedMethod>();
-  
+
   public AnnotatedTypeImpl(Class javaClass)
   {
     this(javaClass, javaClass);
   }
-  
+
   public AnnotatedTypeImpl(Type type, Class javaClass)
   {
     super(type, null, javaClass.getDeclaredAnnotations());
@@ -81,7 +81,7 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
 
     introspect(javaClass);
   }
-  
+
   /**
    * Returns the concrete Java class
    */
@@ -113,7 +113,7 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   {
     for (AnnotatedMethod annMethod : _methodSet) {
       if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
-	return annMethod;
+        return annMethod;
       }
     }
 
@@ -140,22 +140,22 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
 
     for (Method method : cl.getDeclaredMethods()) {
       if (hasBeanAnnotation(method)) {
-	_methodSet.add(new AnnotatedMethodImpl(this, null, method));
+        _methodSet.add(new AnnotatedMethodImpl(this, null, method));
       }
     }
 
     if (! cl.isInterface()) {
       for (Constructor ctor : cl.getDeclaredConstructors()) {
-	_constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
+        _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
       }
 
       if (_constructorSet.size() == 0) {
-	try {
-	  Constructor ctor = cl.getConstructor(new Class[0]);
-	  _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
-	} catch (NoSuchMethodException e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+        try {
+          Constructor ctor = cl.getConstructor(new Class[0]);
+          _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
+        } catch (NoSuchMethodException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }
@@ -166,39 +166,41 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
       return;
 
     introspectFields(cl.getSuperclass());
-    
+
     for (Field field : cl.getDeclaredFields()) {
       if (hasBeanAnnotation(field.getAnnotations())) {
-	_fieldSet.add(new AnnotatedFieldImpl(this, field));
+        _fieldSet.add(new AnnotatedFieldImpl(this, field));
       }
     }
   }
-  
+
   private void introspectInheritedAnnotations(Class cl)
   {
     if (cl == null)
       return;
-    
+
     for (Annotation ann : cl.getDeclaredAnnotations()) {
-      if (! ann.annotationType().isAnnotationPresent(Inherited.class)) {
-	continue;
+      Class annType = ann.annotationType();
+
+      if (! annType.isAnnotationPresent(Inherited.class)) {
+        continue;
       }
 
       if (isAnnotationPresent(cl)) {
-	continue;
+        continue;
       }
-      
+
       if ((ann.annotationType().isAnnotationPresent(Scope.class)
            || ann.annotationType().isAnnotationPresent(NormalScope.class))
-	  && (hasMetaAnnotation(getAnnotations(), Scope.class)
+          && (hasMetaAnnotation(getAnnotations(), Scope.class)
               || hasMetaAnnotation(getAnnotations(), NormalScope.class))) {
-	continue;
+        continue;
       }
 
       /*
       if (ann.annotationType().isAnnotationPresent(DeploymentType.class)
-	  && hasMetaAnnotation(getAnnotations(), DeploymentType.class)) {
-	continue;
+          && hasMetaAnnotation(getAnnotations(), DeploymentType.class)) {
+        continue;
       }
       */
 
@@ -216,8 +218,8 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
     Annotation [][]paramAnn = method.getParameterAnnotations();
     if (paramAnn != null) {
       for (int i = 0; i < paramAnn.length; i++) {
-	if (hasBeanAnnotation(paramAnn[i]))
-	  return true;
+        if (hasBeanAnnotation(paramAnn[i]))
+          return true;
       }
     }
 
@@ -228,14 +230,14 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   {
     if (annotations == null)
       return false;
-    
+
     for (Annotation ann : annotations) {
       if (isBeanAnnotation(ann.annotationType()))
-	return true;
+        return true;
 
       for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-	if (isBeanAnnotation(metaAnn.annotationType()))
-	  return true;
+        if (isBeanAnnotation(metaAnn.annotationType()))
+          return true;
       }
     }
 
@@ -243,16 +245,16 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   }
 
   private boolean hasMetaAnnotation(Set<Annotation> annotations,
-				    Class metaAnnType)
+                                    Class metaAnnType)
   {
     if (annotations == null)
       return false;
-    
+
     for (Annotation ann : annotations) {
       for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-	if (metaAnnType.equals(metaAnn.annotationType())) {
-	  return true;
-	}
+        if (metaAnnType.equals(metaAnn.annotationType())) {
+          return true;
+        }
       }
     }
 
@@ -262,7 +264,7 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   private boolean isBeanAnnotation(Class annType)
   {
     String name = annType.getName();
-    
+
     return name.startsWith("javax.");
   }
 

@@ -52,7 +52,7 @@ public class HttpResponse extends AbstractHttpResponse
   static final byte []_textHtmlBytes = "\r\nContent-Type: text/html".getBytes();
   static final byte []_charsetBytes = "; charset=".getBytes();
   static final byte []_textHtmlLatin1Bytes = "\r\nContent-Type: text/html; charset=iso-8859-1".getBytes();
-  
+
   static final byte []_connectionCloseBytes = "\r\nConnection: close".getBytes();
 
   final byte []_resinServerBytes;
@@ -64,7 +64,7 @@ public class HttpResponse extends AbstractHttpResponse
 
   private final byte []_dateBuffer = new byte[256];
   private final CharBuffer _dateCharBuffer = new CharBuffer();
-  
+
   private int _dateBufferLength;
   private long _lastDate;
   private boolean _isChunked;
@@ -104,7 +104,7 @@ public class HttpResponse extends AbstractHttpResponse
   {
     TcpConnection conn
       = (TcpConnection) ((TcpServerRequest) getRequest()).getConnection();
-    
+
     TcpDuplexController controller = conn.toDuplex(handler);
 
     HttpServletResponseImpl response = _request.getResponseFacade();
@@ -114,7 +114,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " upgrade HTTP to " + handler);
-    
+
     return controller;
   }
 
@@ -141,7 +141,7 @@ public class HttpResponse extends AbstractHttpResponse
     os.write(_dateBuffer, 0, _dateBufferLength);
     os.flush();
     */
-    
+
     os.print("HTTP/1.1 100 Continue\r\n\r\n");
   }
 
@@ -157,12 +157,12 @@ public class HttpResponse extends AbstractHttpResponse
    */
   @Override
   protected boolean writeHeadersInt(int length,
-				    boolean isHead)
+                                    boolean isHead)
     throws IOException
   {
     HttpServletRequestImpl request = _request.getRequestFacade();
     HttpServletResponseImpl response = _request.getResponseFacade();
-    
+
     if (request == null)
       return false;
 
@@ -177,7 +177,7 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     WebApp webApp = request.getWebApp();
-    
+
     String contentType = response.getContentTypeImpl();
     String charEncoding = response.getCharacterEncodingImpl();
 
@@ -186,14 +186,14 @@ public class HttpResponse extends AbstractHttpResponse
     int statusCode = response.getStatus();
     if (statusCode == 200) {
       if (version < HttpRequest.HTTP_1_1)
-	os.write(_http10ok, 0, _http10ok.length);
+        os.write(_http10ok, 0, _http10ok.length);
       else
-	os.write(_http11ok, 0, _http11ok.length);
+        os.write(_http11ok, 0, _http11ok.length);
     } else {
       if (version < HttpRequest.HTTP_1_1)
-	os.print("HTTP/1.0 ");
+        os.print("HTTP/1.0 ");
       else
-	os.print("HTTP/1.1 ");
+        os.print("HTTP/1.1 ");
 
       os.write((statusCode / 100) % 10 + '0');
       os.write((statusCode / 10) % 10 + '0');
@@ -204,7 +204,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     if (debug) {
       log.fine(_request.dbgId() + "HTTP/1.1 " +
-	       statusCode + " " + response.getStatusMessage());
+               statusCode + " " + response.getStatusMessage());
     }
 
     if (! containsHeader("Server")) {
@@ -314,8 +314,8 @@ public class HttpResponse extends AbstractHttpResponse
       os.print(contentType);
 
       if (charEncoding != null) {
-	os.write(_charsetBytes, 0, _charsetBytes.length);
-	os.print(charEncoding);
+        os.write(_charsetBytes, 0, _charsetBytes.length);
+        os.print(charEncoding);
 
         if (debug) {
           log.fine(_request.dbgId() + "Content-Type: " + contentType
@@ -323,19 +323,19 @@ public class HttpResponse extends AbstractHttpResponse
         }
       }
       else {
-	charEncoding = (webApp != null
+        charEncoding = (webApp != null
                         ? webApp.getCharacterEncoding()
                         : null);
 
-	if (charEncoding != null) {
-	  os.write(_charsetBytes, 0, _charsetBytes.length);
-	  os.print(charEncoding);
-          
+        if (charEncoding != null) {
+          os.write(_charsetBytes, 0, _charsetBytes.length);
+          os.print(charEncoding);
+
           if (debug) {
             log.fine(_request.dbgId() + "Content-Type: " + contentType
                      + "; charset=" + charEncoding);
           }
-	}
+        }
         else {
           if (debug) {
             log.fine(_request.dbgId() + "Content-Type: " + contentType);
@@ -347,7 +347,7 @@ public class HttpResponse extends AbstractHttpResponse
       os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
       os.write(_charsetBytes, 0, _charsetBytes.length);
       os.print(charEncoding);
-      
+
       if (debug) {
         log.fine(_request.dbgId() + "Content-Type: text/html; charset="
                  + charEncoding);
@@ -360,9 +360,9 @@ public class HttpResponse extends AbstractHttpResponse
 
       os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
       if (charEncoding != null) {
-	os.write(_charsetBytes, 0, _charsetBytes.length);
-	os.print(charEncoding);
-      
+        os.write(_charsetBytes, 0, _charsetBytes.length);
+        os.print(charEncoding);
+
         if (debug) {
           log.fine(_request.dbgId() + "Content-Type: text/html; charset="
                    + charEncoding);

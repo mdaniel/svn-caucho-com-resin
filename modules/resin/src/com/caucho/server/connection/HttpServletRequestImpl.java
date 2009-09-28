@@ -111,7 +111,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   // input stream management
   private boolean _hasReader;
   private boolean _hasInputStream;
-  
+
   // servlet attributes
   private HashMapImpl<String,Object> _attributes;
 
@@ -383,14 +383,14 @@ public class HttpServletRequestImpl implements CauchoRequest
   public Object getAttribute(String name)
   {
     HashMapImpl<String,Object> attributes = _attributes;
-    
+
     if (attributes != null)
       return attributes.get(name);
     else if (isSecure()) {
       _attributes = new HashMapImpl<String,Object>();
       attributes = _attributes;
       _request.initAttributes(this);
-      
+
       return attributes.get(name);
     }
     else
@@ -403,7 +403,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   public Enumeration<String> getAttributeNames()
   {
     HashMapImpl<String,Object> attributes = _attributes;
-    
+
     if (attributes != null) {
       return Collections.enumeration(attributes.keySet());
     }
@@ -411,7 +411,7 @@ public class HttpServletRequestImpl implements CauchoRequest
       _attributes = new HashMapImpl<String,Object>();
       _attributes = attributes;
       _request.initAttributes(this);
-      
+
       return Collections.enumeration(attributes.keySet());
     }
     else
@@ -427,33 +427,35 @@ public class HttpServletRequestImpl implements CauchoRequest
   public void setAttribute(String name, Object value)
   {
     HashMapImpl<String,Object> attributes = _attributes;
-    
+
     if (value != null) {
       if (attributes == null) {
         attributes = new HashMapImpl<String,Object>();
         _attributes = attributes;
         _request.initAttributes(this);
       }
-      
+
       Object oldValue = attributes.put(name, value);
 
       WebApp webApp = getWebApp();
 
-      for (ServletRequestAttributeListener listener
-             : webApp.getRequestAttributeListeners()) {
-        ServletRequestAttributeEvent event;
+      if (webApp != null) {
+        for (ServletRequestAttributeListener listener
+               : webApp.getRequestAttributeListeners()) {
+          ServletRequestAttributeEvent event;
 
-        if (oldValue != null) {
-          event = new ServletRequestAttributeEvent(webApp, this,
-                                                   name, oldValue);
+          if (oldValue != null) {
+            event = new ServletRequestAttributeEvent(webApp, this,
+                                                     name, oldValue);
 
-          listener.attributeReplaced(event);
-        }
-        else {
-          event = new ServletRequestAttributeEvent(webApp, this,
-                                                   name, value);
+            listener.attributeReplaced(event);
+          }
+          else {
+            event = new ServletRequestAttributeEvent(webApp, this,
+                                                     name, value);
 
-          listener.attributeAdded(event);
+            listener.attributeAdded(event);
+          }
         }
       }
     }
@@ -472,9 +474,9 @@ public class HttpServletRequestImpl implements CauchoRequest
 
     if (attributes == null)
       return;
-    
+
     Object oldValue = attributes.remove(name);
-    
+
     WebApp webApp = getWebApp();
 
     for (ServletRequestAttributeListener listener
@@ -1199,7 +1201,7 @@ public class HttpServletRequestImpl implements CauchoRequest
         setHasCookie();
       */
     }
-    
+
     if (_cookiesIn == null || _cookiesIn.length == 0)
       return null;
     else
@@ -1939,7 +1941,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     if (_closeOnExit == null)
       _closeOnExit = new ArrayList<Path>();
-    
+
     _closeOnExit.add(path);
   }
 
@@ -2006,7 +2008,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     return _request.getStartTime();
   }
-  
+
   public void finishInvocation()
   {
     _request.finishInvocation();
@@ -2171,7 +2173,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   public void cleanup()
   {
     HashMapImpl<String,Object> attributes = _attributes;
-    
+
     if (attributes != null) {
       for (Map.Entry<String,Object> entry : attributes.entrySet()) {
         Object value = entry.getValue();
@@ -2203,7 +2205,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     return _request.getServer();
   }
-  
+
   /**
    * Returns the invocation's webApp.
    */

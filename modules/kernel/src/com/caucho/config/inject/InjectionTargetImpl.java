@@ -525,12 +525,17 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   // introspection
   //
 
-  @Override
   public void introspect()
   {
     super.introspect();
 
     introspect(_beanType);
+  }
+
+  @Override
+  protected Annotated getIntrospectedAnnotated()
+  {
+    return _beanType;
   }
 
   /**

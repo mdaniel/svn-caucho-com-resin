@@ -223,11 +223,11 @@ public class BeanConfig {
       } catch (ClassNotFoundException e) {
       }
 
-      setScope(cl);
+      setScopeType(cl);
     }
   }
 
-  public void setScope(Class cl)
+  public void setScopeType(Class cl)
   {
     if (cl == null)
       throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));

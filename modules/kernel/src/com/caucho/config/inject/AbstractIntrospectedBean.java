@@ -330,7 +330,12 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     super.introspect();
 
     introspectTypes(_baseType.toType());
-    introspect(_annotated);
+    introspect(getIntrospectedAnnotated());
+  }
+
+  protected Annotated getIntrospectedAnnotated()
+  {
+    return _annotated;
   }
 
   protected void introspect(Annotated annotated)
@@ -348,6 +353,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectScope(Annotated annotated)
   {
+    if (_scope != null)
+      return;
+
     BeanManager inject = getBeanManager();
 
     for (Annotation ann : annotated.getAnnotations()) {
@@ -368,6 +376,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectQualifiers(Annotated annotated)
   {
+    if (_qualifiers.size() > 0)
+      return;
+
     BeanManager inject = getBeanManager();
 
     for (Annotation ann : annotated.getAnnotations()) {
@@ -390,6 +401,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectName(Annotated annotated)
   {
+    if (_name != null)
+      return;
+
     Annotation ann = annotated.getAnnotation(Named.class);
 
     if (ann != null) {
@@ -415,6 +429,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectStereotypes(Annotated annotated)
   {
+    Class scope = null;
+
     for (Annotation stereotype : annotated.getAnnotations()) {
       Class stereotypeType = stereotype.annotationType();
 
@@ -424,10 +440,15 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
         Class annType = ann.annotationType();
 
-        if (_scope == null
-            && (annType.isAnnotationPresent(Scope.class)
-                || annType.isAnnotationPresent(NormalScope.class)))
-          _scope = annType;
+        if (annType.isAnnotationPresent(Scope.class)
+            || annType.isAnnotationPresent(NormalScope.class)) {
+          if (_scope == null && scope != null && ! scope.equals(annType)) {
+            throw new ConfigException(L.l("'{0}' is an invalid @Scope because a scope '{1}' has already been defined.  Only one @Scope or @NormalScope is allowed on a bean.",
+                                          scope.getName(), annType.getName()));
+          }
+
+          scope = annType;
+        }
 
         if (annType.equals(Named.class) && _name == null) {
           Named named = (Named) ann;
@@ -444,7 +465,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
         }
       }
     }
-  }
+
+    if (_scope == null)
+      _scope = scope;
+}
 
   protected void introspectDefault()
   {

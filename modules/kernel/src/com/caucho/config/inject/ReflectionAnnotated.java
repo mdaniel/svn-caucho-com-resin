@@ -46,9 +46,9 @@ public class ReflectionAnnotated implements Annotated
 {
   private static final LinkedHashSet<Annotation> _emptyAnnSet
     = new  LinkedHashSet<Annotation>();
-  
+
   private static final Annotation []_emptyAnnArray = new Annotation[0];
-  
+
   private Type _type;
 
   private LinkedHashSet<Type> _typeSet
@@ -57,20 +57,20 @@ public class ReflectionAnnotated implements Annotated
   private LinkedHashSet<Annotation> _annSet;
 
   private Annotation []_annArray;
-  
+
   protected ReflectionAnnotated(Type type,
-				Annotation []annList)
+                                Annotation []annList)
   {
     _type = type;
     _typeSet.add(type);
 
     if (annList != null && annList.length > 0) {
       _annSet = new LinkedHashSet<Annotation>();
-      
+
       for (Annotation ann : annList) {
-	_annSet.add(ann);
+        _annSet.add(ann);
       }
-      
+
       _annArray = new Annotation[_annSet.size()];
       _annSet.toArray(_annArray);
     }
@@ -95,7 +95,7 @@ public class ReflectionAnnotated implements Annotated
   {
     return _typeSet;
   }
-  
+
   /**
    * Returns the introspected annotations
    */
@@ -111,10 +111,20 @@ public class ReflectionAnnotated implements Annotated
   {
     for (Annotation ann : _annArray) {
       if (annType.equals(ann.annotationType()))
-	return (T) ann;
+        return (T) ann;
     }
 
     return null;
+  }
+
+  protected void addAnnotation(Annotation ann)
+  {
+    if (_annSet == _emptyAnnSet)
+      _annSet = new LinkedHashSet<Annotation>();
+
+    _annSet.add(ann);
+    _annArray = new Annotation[_annSet.size()];
+    _annSet.toArray(_annArray);
   }
 
   /**
@@ -124,7 +134,7 @@ public class ReflectionAnnotated implements Annotated
   {
     for (Annotation ann : _annArray) {
       if (annType.equals(ann.annotationType()))
-	return true;
+        return true;
     }
 
     return false;

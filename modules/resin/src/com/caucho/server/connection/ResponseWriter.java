@@ -40,7 +40,7 @@ public class ResponseWriter extends AbstractPrintWriter {
   private static final Logger log
     = Logger.getLogger(ResponseWriter.class.getName());
   static final L10N L = new L10N(ResponseWriter.class);
-  
+
   private AbstractResponseStream _out;
   private boolean _hasError;
 
@@ -92,7 +92,7 @@ public class ResponseWriter extends AbstractPrintWriter {
   {
     _out.clearBuffer();
   }
-  
+
   /**
    * Writes a character to the output.
    *
@@ -137,25 +137,25 @@ public class ResponseWriter extends AbstractPrintWriter {
       int end = off + len;
 
       while (off < end) {
-	int sublen = end - off;
+        int sublen = end - off;
 
-	if (size - writeLength < sublen) {
-	  if (size == writeLength) {
-	    writeBuffer = _out.nextCharBuffer(writeLength);
-	    writeLength = 0;
-	  
-	    if (size < sublen)
-	      sublen = size;
-	  }
-	  else
-	    sublen = size - writeLength;
-	}
+        if (size - writeLength < sublen) {
+          if (size == writeLength) {
+            writeBuffer = _out.nextCharBuffer(writeLength);
+            writeLength = 0;
 
-	int tail = off + sublen;
-	s.getChars(off, tail, writeBuffer, writeLength);
+            if (size < sublen)
+              sublen = size;
+          }
+          else
+            sublen = size - writeLength;
+        }
 
-	off = tail;
-	writeLength += sublen;
+        int tail = off + sublen;
+        s.getChars(off, tail, writeBuffer, writeLength);
+
+        off = tail;
+        writeLength += sublen;
       }
 
       _out.setCharOffset(writeLength);

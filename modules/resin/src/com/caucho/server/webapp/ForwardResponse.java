@@ -43,11 +43,11 @@ import java.io.*;
 class ForwardResponse extends CauchoResponseWrapper
 {
   private static final L10N L = new L10N(ForwardResponse.class);
-  
+
   ForwardResponse()
   {
   }
-  
+
   ForwardResponse(HttpServletResponse response)
   {
     super(response);
@@ -63,7 +63,13 @@ class ForwardResponse extends CauchoResponseWrapper
     // server/106f
     AbstractResponseStream stream = getResponseStream();
 
+    // ioc/0310
+
+    /*
     if (stream != null)
       stream.close();
+    if (stream != null)
+      stream.finish();
+    */
   }
 }

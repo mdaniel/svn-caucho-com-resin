@@ -78,13 +78,13 @@ public class ScheduledTaskConfig extends BeanConfig
   {
     setBeanConfigClass(Runnable.class);
 
-    setScope(Dependent.class);
+    setScopeType(Dependent.class);
   }
 
   /**
    * Sets the delay
    */
-  @Configurable  
+  @Configurable
   public void setDelay(Period delay)
   {
     _scheduledTask.setDelay(delay);
@@ -93,7 +93,7 @@ public class ScheduledTaskConfig extends BeanConfig
   /**
    * Sets the period
    */
-  @Configurable  
+  @Configurable
   public void setPeriod(Period period)
   {
     _scheduledTask.setPeriod(period);
@@ -123,7 +123,7 @@ public class ScheduledTaskConfig extends BeanConfig
   public void setUrl(String url)
   {
     _scheduledTask.setUrl(url);
-    
+
     _isTask = true;
   }
 
@@ -134,14 +134,14 @@ public class ScheduledTaskConfig extends BeanConfig
   public void setWork(Runnable work)
   {
     _scheduledTask.setTask(work);
-    
+
     _isTask = true;
   }
 
   /**
    * Sets the task.
    */
-  @Configurable  
+  @Configurable
   public void setTask(Runnable task)
   {
     _scheduledTask.setTask(task);
@@ -161,7 +161,7 @@ public class ScheduledTaskConfig extends BeanConfig
       super.init();
 
       if (_scheduledTask.getTask() == null)
-	_scheduledTask.setTask((Runnable) getObject());
+        _scheduledTask.setTask((Runnable) getObject());
     }
 
     _scheduledTask.init();

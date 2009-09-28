@@ -42,18 +42,18 @@ import java.util.logging.*;
 public class HttpResponseStream extends ResponseStream {
   private static final Logger log
     = Logger.getLogger(HttpResponseStream.class.getName());
-  
+
   private static final L10N L = new L10N(HttpResponseStream.class);
 
   private static final int _tailChunkedLength = 7;
   private static final byte []_tailChunked
     = new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
-  
+
   private final byte []_buffer = new byte[16];
-  
+
   private HttpResponse _response;
   private WriteStream _next;
-  
+
   private boolean _isChunkedEncoding;
   private int _bufferStartOffset;
 
@@ -64,7 +64,7 @@ public class HttpResponseStream extends ResponseStream {
     _response = response;
     _next = next;
   }
-  
+
   /**
    * initializes the Response stream at the beginning of a request.
    */
@@ -104,10 +104,10 @@ public class HttpResponseStream extends ResponseStream {
         _next.setBufferOffset(_bufferStartOffset);
       }
     }
-    
+
     return _bufferStartOffset;
   }
-      
+
   @Override
   protected int getNextBufferOffset()
     throws IOException
@@ -118,10 +118,10 @@ public class HttpResponseStream extends ResponseStream {
         _next.setBufferOffset(_bufferStartOffset);
       }
     }
-    
+
     return _next.getBufferOffset();
   }
-  
+
   @Override
   protected void setNextBufferOffset(int offset)
   {
@@ -143,7 +143,7 @@ public class HttpResponseStream extends ResponseStream {
       byte []buffer = next.getBuffer();
 
       writeChunkHeader(buffer, bufferStart, offset - bufferStart);
-      
+
       _bufferStartOffset = 0;
     }
 
@@ -191,7 +191,7 @@ public class HttpResponseStream extends ResponseStream {
       if (log.isLoggable(Level.FINE))
         log.fine(dbgId() + "write-chunk-tail(" + (bufferOffset - bufferStart) + ")");
     }
-    
+
     if (! _isChunkedEncoding)
       return;
 
@@ -202,14 +202,14 @@ public class HttpResponseStream extends ResponseStream {
 
       _bufferStartOffset = 0;
     }
-	
+
     ArrayList<String> footerKeys = _response.getFooterKeys();
 
     if (footerKeys.size() == 0)
       _next.write(_tailChunked, 0, _tailChunkedLength);
     else {
       ArrayList<String> footerValues = _response.getFooterValues();
-	  
+
       _next.print("\r\n0\r\n");
 
       for (int i = 0; i < footerKeys.size(); i++) {
@@ -218,7 +218,7 @@ public class HttpResponseStream extends ResponseStream {
         _next.print(footerValues.get(i));
         _next.print("\r\n");
       }
-	  
+
       _next.print("\r\n");
     }
 

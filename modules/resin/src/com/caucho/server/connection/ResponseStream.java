@@ -48,22 +48,22 @@ import java.util.logging.Logger;
 abstract public class ResponseStream extends ToByteResponseStream {
   private static final Logger log
     = Logger.getLogger(ResponseStream.class.getName());
-  
+
   private static final L10N L = new L10N(ResponseStream.class);
-  
+
   private final byte []_buffer = new byte[16];
   private final byte []_singleByteBuffer = new byte[1];
-  
+
   private AbstractHttpResponse _response;
 
   private AbstractCacheFilterChain _cacheInvocation;
   private AbstractCacheEntry _newCacheEntry;
   private OutputStream _cacheStream;
   private long _cacheMaxLength;
-  
+
   private int _bufferSize;
   private boolean _disableAutoFlush;
-  
+
   // bytes actually written
   private int _contentLength;
   // True for the first chunk
@@ -86,7 +86,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     _response = response;
   }
-  
+
   /**
    * initializes the Response stream at the beginning of a request.
    */
@@ -122,7 +122,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     if (cacheStream == null)
       return;
-    
+
     AbstractHttpRequest req = _response.getRequest();
     WebApp app = req.getWebApp();
     _cacheMaxLength = app.getCacheMaxLength();
@@ -201,27 +201,27 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     return _isCommitted || _contentLength > 0;
   }
-  
+
   public boolean isFlushed()
   {
     try {
       if (_isCommitted)
-	return true;
+        return true;
 
       if (_contentLength > 0) {
-	flushCharBuffer();
-	int bufferOffset = getByteBufferOffset();
+        flushCharBuffer();
+        int bufferOffset = getByteBufferOffset();
 
-	// server/05e8
-	if (_contentLength <= bufferOffset)
-	  return true;
+        // server/05e8
+        if (_contentLength <= bufferOffset)
+          return true;
       }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       return true;
     }
-    
+
     return false;
   }
 
@@ -229,11 +229,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     clearBuffer();
-    
+
     if (_isCommitted)
       throw new IOException(L.l("can't clear response after writing headers"));
   }
-  
+
   public void clearBuffer()
   {
     super.clearBuffer();
@@ -260,7 +260,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (_isCommitted)
       return;
-    
+
     _isCommitted = true;
 
     startCaching(true);
@@ -287,7 +287,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (_isCommitted) {
       flushBuffer();
-      
+
       writeNext(buffer, offset, length, false);
     }
     else
@@ -304,7 +304,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (_isCommitted) {
       flushBuffer();
-      
+
       return getNextBuffer();
     }
     else
@@ -319,7 +319,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (! _isCommitted)
       return super.getBufferOffset();
-    
+
     flushBuffer();
 
     return getNextBufferOffset();
@@ -340,7 +340,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     }
 
     flushBuffer();
-    
+
     int startOffset = getNextStartOffset();
     if (offset == startOffset)
       return;
@@ -351,18 +351,18 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     if (lengthHeader > 0 && lengthHeader < _contentLength + sublen) {
       byte []nextBuffer = getNextBuffer();
-      
+
       lengthException(nextBuffer, oldOffset, sublen, lengthHeader);
 
       sublen = (int) (lengthHeader - _contentLength);
       offset = oldOffset + sublen;
     }
-    
+
     _contentLength += sublen;
-    
+
     if (_cacheStream != null) {
       byte []nextBuffer = getNextBuffer();
-      
+
       writeCache(nextBuffer, oldOffset, sublen);
     }
 
@@ -382,16 +382,16 @@ abstract public class ResponseStream extends ToByteResponseStream {
       // server/055b
       return super.nextBuffer(offset);
     }
-    
+
     if (_isClosed)
       return getNextBuffer();
-    
+
     flushBuffer();
 
     byte []nextBuffer = getNextBuffer();
     int startOffset = getNextStartOffset();
     int oldOffset = getNextBufferOffset();
-    
+
     int sublen = offset - oldOffset;
     long lengthHeader = _response.getContentLengthHeader();
 
@@ -405,29 +405,29 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     try {
       if (_isHead) {
-	return nextBuffer;
+        return nextBuffer;
       }
-      
+
       if (_cacheStream != null)
         writeCache(nextBuffer, oldOffset, offset - oldOffset);
-      
+
       return writeNextBuffer(offset);
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
       // XXX: _response.killCache();
 
       if (_response.isIgnoreClientDisconnect()) {
-	return nextBuffer;
+        return nextBuffer;
       }
       else
         throw e;
     } catch (IOException e) {
       // XXX: _response.killCache();
-      
+
       throw e;
     }
   }
-  
+
   /**
    * Writes the next chunk of data to the response stream.
    *
@@ -436,15 +436,15 @@ abstract public class ResponseStream extends ToByteResponseStream {
    * @param length length of the data in the buffer
    */
   protected void writeNext(byte []buf, int offset, int length,
-			   boolean isFinished)
+                           boolean isFinished)
     throws IOException
   {
     try {
       if (_isClosed)
-	return;
+        return;
 
       if (_disableAutoFlush && ! isFinished)
-	throw new IOException(L.l("auto-flushing has been disabled"));
+        throw new IOException(L.l("auto-flushing has been disabled"));
 
       boolean isHeaderWritten = _isHeaderWritten;
       _isHeaderWritten = true;
@@ -466,17 +466,17 @@ abstract public class ResponseStream extends ToByteResponseStream {
       long contentLengthHeader = _response.getContentLengthHeader();
       // Can't write beyond the content length
       if (0 < contentLengthHeader
-	  && contentLengthHeader < length + _contentLength) {
-	if (lengthException(buf, offset, length, contentLengthHeader))
-	  return;
+          && contentLengthHeader < length + _contentLength) {
+        if (lengthException(buf, offset, length, contentLengthHeader))
+          return;
 
-	length = (int) (contentLengthHeader - _contentLength);
+        length = (int) (contentLengthHeader - _contentLength);
       }
 
       if (_isHead) {
         return;
       }
-      
+
       if (_cacheStream != null)
         writeCache(buf, offset, length);
 
@@ -497,14 +497,14 @@ abstract public class ResponseStream extends ToByteResponseStream {
         _contentLength += sublen;
 
         if (writeLength > 0) {
-          
+
           buffer = writeNextBuffer(bufferOffset);
-              
+
           bufferStart = getNextStartOffset();
           bufferOffset = bufferStart;
         }
       }
-      
+
       // server/051c
       if (bufferOffset < buffer.length)
         setNextBufferOffset(bufferOffset);
@@ -520,16 +520,16 @@ abstract public class ResponseStream extends ToByteResponseStream {
         throw e;
     }
   }
-  
+
   private boolean lengthException(byte []buf, int offset, int length,
-				  long contentLengthHeader)
+                                  long contentLengthHeader)
   {
     if (_response.isClientDisconnect() || _isHead || _isClosed) {
     }
     else if (contentLengthHeader < _contentLength) {
       AbstractHttpRequest request = _response.getRequest();
       ServletContext app = request.getWebApp();
-      
+
       String msg = L.l("{0}: Can't write {1} extra bytes beyond the content-length header {2}.  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
                        request.getRequestURL(),
                        "" + (length + _contentLength),
@@ -539,33 +539,33 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
       return false;
     }
-    
+
     for (int i = (int) (offset + contentLengthHeader - _contentLength);
-	 i < offset + length;
-	 i++) {
+         i < offset + length;
+         i++) {
       int ch = buf[i];
 
       if (ch != '\r' && ch != '\n' && ch != ' ' && ch != '\t') {
-	AbstractHttpRequest request = _response.getRequest();
-	ServletContext app = request.getWebApp();
-	String graph = "";
-	    
-	if (Character.isLetterOrDigit((char) ch))
-	  graph = "'" + (char) ch + "', ";
-	    
-	String msg =
-	  L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
-					request.getRequestURL(),
-					"" + (length + _contentLength),
-					"" + contentLengthHeader,
-					graph,
-					"" + ch);
+        AbstractHttpRequest request = _response.getRequest();
+        ServletContext app = request.getWebApp();
+        String graph = "";
+
+        if (Character.isLetterOrDigit((char) ch))
+          graph = "'" + (char) ch + "', ";
+
+        String msg =
+          L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
+                                        request.getRequestURL(),
+                                        "" + (length + _contentLength),
+                                        "" + contentLengthHeader,
+                                        graph,
+                                        "" + ch);
 
         log.fine(msg);
-	break;
+        break;
       }
     }
-        
+
     length = (int) (contentLengthHeader - _contentLength);
     return (length <= 0);
   }
@@ -587,15 +587,15 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
         if (bufferStart != bufferOffset) {
           _contentLength += (bufferOffset - bufferStart);
-          
+
           writeNextBuffer(bufferOffset);
-	}
+        }
 
         flushNext();
       }
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
-      
+
       if (! _response.isIgnoreClientDisconnect())
         throw e;
     }
@@ -632,7 +632,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     // _isCommitted = true;
   }
   */
-  
+
   /**
    * Complete the request.
    */
@@ -650,7 +650,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     _isFinished = true;
     _allowFlush = true;
-    
+
     flushBuffer();
 
     // flushBuffer can force 304 and then a cache write which would
@@ -658,9 +658,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
     if (isClosed) {
       return;
     }
-    
+
     _isClosed = true;
-    
+
     try {
       writeTail();
 
@@ -668,23 +668,24 @@ abstract public class ResponseStream extends ToByteResponseStream {
       if (req.isComet() || req.isDuplex()) {
       }
       else if (! req.allowKeepalive()) {
-	_isClosed = true;
+        _isClosed = true;
+
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "close stream");
         }
-      
+
         closeNext();
       }
       else {
-	_isClosed = true;
-	
+        _isClosed = true;
+
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "finish/keepalive");
         }
       }
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
-      
+
       if (! _response.isIgnoreClientDisconnect()) {
         throw e;
       }
@@ -701,10 +702,10 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     return 0;
   }
-  
+
   abstract protected void setNextBufferOffset(int offset)
     throws IOException;
-      
+
   abstract protected int getNextBufferOffset()
     throws IOException;
 
@@ -743,25 +744,25 @@ abstract public class ResponseStream extends ToByteResponseStream {
         || res.isDisableCache()) {
       return;
     }
-    
+
     AbstractCacheFilterChain cacheInvocation = res.getCacheInvocation();
 
     if (cacheInvocation == null)
       return;
-    
+
     _cacheInvocation = cacheInvocation;
-    
+
     HttpServletRequestImpl req = _response.getRequest().getRequestFacade();
-    
+
     ArrayList<String> keys = res.getHeaderKeys();
     ArrayList<String> values = res.getHeaderValues();
     String contentType = res.getContentTypeImpl();
     String charEncoding = res.getCharacterEncodingImpl();
-    
+
     int contentLength = -1;
-    
+
     AbstractCacheEntry newCacheEntry
-      = cacheInvocation.startCaching(req, res, 
+      = cacheInvocation.startCaching(req, res,
                                      keys, values,
                                      contentType,
                                      charEncoding,
@@ -771,12 +772,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
     }
     else if (isByte) {
       _newCacheEntry = newCacheEntry;
-      
+
       setByteCacheStream(newCacheEntry.openOutputStream());
     }
     else {
       _newCacheEntry = newCacheEntry;
-      
+
       setCharCacheStream(newCacheEntry.openWriter());
     }
   }
@@ -786,7 +787,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (length == 0)
       return;
-    
+
     if (_cacheMaxLength < _contentLength) {
       _cacheStream = null;
       // XXX: _response.killCache();
@@ -816,7 +817,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (_isClosed)
       return;
-    
+
     finish();
     finishCache();
 
@@ -829,7 +830,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     try {
       OutputStream cacheStream = getByteCacheStream();
       setByteCacheStream(null);
-	
+
       Writer cacheWriter = getCharCacheStream();
       setCharCacheStream(null);
 
@@ -846,31 +847,31 @@ abstract public class ResponseStream extends ToByteResponseStream {
         if (request == null)
           return;
 
-	WebApp webApp = request.getWebApp();
-	if (webApp != null && webApp.isActive()) {
+        WebApp webApp = request.getWebApp();
+        if (webApp != null && webApp.isActive()) {
           AbstractCacheEntry cacheEntry = _newCacheEntry;
 
-	  _cacheInvocation.finishCaching(cacheEntry);
-          
+          _cacheInvocation.finishCaching(cacheEntry);
+
           _newCacheEntry = null;
         }
       }
     } finally {
       AbstractCacheFilterChain cache = _cacheInvocation;
       _cacheInvocation = null;
-      
+
       AbstractCacheEntry cacheEntry = _newCacheEntry;
       _newCacheEntry = null;
 
       if (cache != null && cacheEntry != null)
-	cache.killCaching(cacheEntry);
+        cache.killCaching(cacheEntry);
     }
   }
 
   protected String dbgId()
   {
     Object request = _response.getRequest();
-    
+
     if (request instanceof AbstractHttpRequest) {
       AbstractHttpRequest req = (AbstractHttpRequest) request;
 
