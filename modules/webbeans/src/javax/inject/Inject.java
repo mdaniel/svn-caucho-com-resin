@@ -39,39 +39,29 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Custom binding annotations are marked with @Qualifier
- * as a meta-annotation.
+ * Designates fields, methods and constructors as injectable. Injectable can
+ * have any access qualifier (private, package-private, protected or public).
+ * It applies to static or instance members. The order of resolving injectable
+ * is as following:
+ * <lu>
+ * <li>Constructors</li>
+ * <li>Fields</li>
+ * <li>Methods</li>
+ * </lu>
  *
- * <h2>Example: creating a custom binding type</h2>
+ * When resolving injectable super classes are resolved first.
  *
- * <code><pre>
- * package example;
- *
- * import static java.lang.annotation.ElementType.*;
- * import static java.lang.annotation.RetentionPolicy.Runtime;
- * import java.lang.annotation.*;
- *
- * import javax.inject.Qualifier;
- *
- * {@literal @Qualifier}
- * {@literal @Documented}
- * Target({TYPE, METHOD, FIELD, PARAMETER})
- * Retention(RUNTIME)
- * public {@literal @interface} MyBinding {
- * }
- * </pre></code>
- *
- * <h2>Example: injecting a servlet using a custom binding type</h2>
+ * <h2>Example: injecting a servlet</h2>
  *
  * <code><pre>
  * package example;
  *
- * import example.MyBinding;
  * import javax.servlet.*;
  * import java.io.*;
+ * import javax.inject.*;
  *
  * public class MyServlet extends GenericServlet {
- *   {@literal @MyBinding} MyBean _bean;
+ *   {@literal @Inject} MyBean _bean;
  *
  *   public void service(ServletRequest req, ServletResponse res)
  *     throws IOException
@@ -81,20 +71,6 @@ import java.lang.annotation.Target;
  *     out.println("my-bean: " + _bean);
  *   }
  * }
- * </pre></code>
- *
- * <h2>Example: configuring using a custom qualifier</h2>
- *
- * META-INF/beans.xml
- *
- * <code><pre>
- * &lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
- *
- *   &lt;example:MyBean>
- *     &lt;example:MyQualifier/>
- *   &lt;/example:MyBean>
- *
- * &lt;/Beans>
  * </pre></code>
  */
 @Documented  

@@ -86,13 +86,13 @@ import java.lang.annotation.Target;
  * META-INF/beans.xml
  *
  * <code><pre>
- * &lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
+ * &lt;beans xmlns="http://java.sun.com/xml/ns/javaee" xmlns:example="urn:java:example">
  *
  *   &lt;example:MyBean>
  *     &lt;example:MyQualifier/>
  *   &lt;/example:MyBean>
  *
- * &lt;/Beans>
+ * &lt;/beans>
  * </pre></code>
  */
 @Documented  

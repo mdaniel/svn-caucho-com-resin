@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @ScopeType meta-annotation for web beans
+ * The @Scope meta-annotation for web beans
  */
 @Documented
 @Retention(RUNTIME)
