@@ -55,6 +55,7 @@ import java.io.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.AnnotationLiteral;
@@ -423,7 +424,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
         Class annType = ann.annotationType();
 
-        if (_scope == null && annType.isAnnotationPresent(Scope.class))
+        if (_scope == null
+            && (annType.isAnnotationPresent(Scope.class)
+                || annType.isAnnotationPresent(NormalScope.class)))
           _scope = annType;
 
         if (annType.equals(Named.class) && _name == null) {

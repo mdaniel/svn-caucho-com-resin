@@ -476,8 +476,6 @@ public class DataStore implements AlarmListener {
     try {
       conn = getConnection();
 
-      long limit = 256;
-      long offset = 0;
       long resinOid = 0;
       boolean isData = false;
   
@@ -490,12 +488,12 @@ public class DataStore implements AlarmListener {
         isData = false;
         
         pstmt.setLong(1, resinOid);
-        // pstmt.setFetchSize(8192);
+        pstmt.setFetchSize(65536);
 
         ResultSet rs = pstmt.executeQuery();
 
         while (rs.next()) {
-          // isData = true;
+          isData = true;
 
           byte []key = rs.getBytes(1);
           resinOid = rs.getLong(2);
@@ -513,10 +511,9 @@ public class DataStore implements AlarmListener {
             }
           }
         }
-        
-        offset += limit;
       } while (isData);
     } catch (SQLException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       conn.close();

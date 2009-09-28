@@ -1040,6 +1040,10 @@ public final class BTree {
 	  
               // System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
+              validate(blockId, buffer);
+              validate(parentBlockId, parentBuffer);
+              validate(rightBlockId, rightBuffer);
+              
               mergeRight(parentBuffer, buffer, rightBuffer, blockId);
               
               validate(parentBlockId, parentBuffer);
@@ -1585,7 +1589,12 @@ public final class BTree {
     
     int tupleSize = _tupleSize;
     int length = getLength(buffer);
+
     int end = HEADER_SIZE + tupleSize * length;
+    
+    if (length < 0 || Store.BLOCK_SIZE < end) {
+      throw new IllegalStateException("illegal length " + length + " for " + debugId(blockId));
+    }
 
     int offset;
 

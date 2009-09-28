@@ -60,16 +60,16 @@ public class CustomBeanType extends ConfigType
 
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
-  private static final String WEBBEANS_NS
-    = "urn:java:javax.webbeans";
+  private static final String JAVAEE_NS
+    = "http://java.sun.com/xml/ns/javaee";
 
   private static final QName TEXT = new QName("#text");
 
-  private static final QName W_VALUE = new QName("", "value", WEBBEANS_NS);
+  private static final QName W_VALUE = new QName("", "value", JAVAEE_NS);
   private static final QName R_VALUE = new QName("", "value", RESIN_NS);
   private static final QName A_VALUE = new QName("value", null);
 
-  private static final QName W_NEW = new QName("", "new", WEBBEANS_NS);
+  private static final QName W_NEW = new QName("", "new", JAVAEE_NS);
   private static final QName R_NEW = new QName("", "new", RESIN_NS);
   private static final QName A_NEW = new QName("new", null);
 
@@ -119,7 +119,9 @@ public class CustomBeanType extends ConfigType
     }
     */
 
-    _attributeMap.put("new", CustomBeanNewAttribute.ATTRIBUTE);
+    _nsAttributeMap.put(W_NEW, CustomBeanNewAttribute.ATTRIBUTE);
+    _nsAttributeMap.put(R_NEW, CustomBeanNewAttribute.ATTRIBUTE);
+    _nsAttributeMap.put(A_NEW, CustomBeanNewAttribute.ATTRIBUTE);
   }
 
   /**

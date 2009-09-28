@@ -235,7 +235,8 @@ public class BeanConfig {
     if (! Annotation.class.isAssignableFrom(cl))
       throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));
 
-    if (! cl.isAnnotationPresent(Scope.class))
+    if (! cl.isAnnotationPresent(Scope.class)
+        && ! cl.isAnnotationPresent(NormalScope.class))
       throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @Scope annotation."));
 
     _scope = cl;
@@ -598,7 +599,8 @@ public class BeanConfig {
   {
     if (_scope == null) {
       for (Annotation ann : _cl.getDeclaredAnnotations()) {
-        if (ann.annotationType().isAnnotationPresent(Scope.class)) {
+        if (ann.annotationType().isAnnotationPresent(Scope.class)
+            || ann.annotationType().isAnnotationPresent(NormalScope.class)) {
           if (_scope != null) {
             throw new ConfigException(L.l("{0}: multiple scope annotations are forbidden ({1} and {2}).",
                                           _cl.getName(),

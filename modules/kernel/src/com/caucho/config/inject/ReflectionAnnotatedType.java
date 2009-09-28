@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.*;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -189,8 +190,10 @@ public class ReflectionAnnotatedType
 	continue;
       }
       
-      if (ann.annotationType().isAnnotationPresent(Scope.class)
-	  && hasMetaAnnotation(getAnnotations(), Scope.class)) {
+      if ((ann.annotationType().isAnnotationPresent(Scope.class)
+           || ann.annotationType().isAnnotationPresent(NormalScope.class))
+	  && (hasMetaAnnotation(getAnnotations(), Scope.class)
+              || hasMetaAnnotation(getAnnotations(), NormalScope.class))) {
 	continue;
       }
 

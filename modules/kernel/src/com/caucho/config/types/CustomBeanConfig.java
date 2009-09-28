@@ -49,6 +49,7 @@ import java.lang.annotation.*;
 
 import javax.annotation.*;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -149,18 +150,6 @@ public class CustomBeanConfig {
   {
     return _line;
   }
-
-  /*
-  public void setClass(Class cl)
-  {
-    _component.setInstanceClass(cl);
-  }
-
-  public void setScope(String scope)
-  {
-    _component.setScope(scope);
-  }
-  */
 
   public void addArg(ConfigProgram arg)
   {
@@ -276,8 +265,11 @@ public class CustomBeanConfig {
       clearAnnotations(_annotatedType, InterceptorBinding.class);
     }
 
-    if (ann.annotationType().isAnnotationPresent(Scope.class))
+    if (ann.annotationType().isAnnotationPresent(Scope.class)
+        || ann.annotationType().isAnnotationPresent(NormalScope.class)) {
       clearAnnotations(_annotatedType, Scope.class);
+      clearAnnotations(_annotatedType, NormalScope.class);
+    }
 
     _annotatedType.addAnnotation(ann);
   }
