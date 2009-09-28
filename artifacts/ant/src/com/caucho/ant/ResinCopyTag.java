@@ -127,11 +127,11 @@ public class ResinCopyTag extends ResinDeployClientTask {
                                                _sourceVersion);
     }
 
+    log("Copying " + sourceTag + " to " + tag);
+
     boolean result = client.copyTag(tag, sourceTag, getCommitAttributes());
 
-    if (result)
-      log("Copied " + sourceTag + " to " + tag);
-    else
+    if (! result)
       log("Failed to copy " + sourceTag + " to " + tag);
   }
 }
