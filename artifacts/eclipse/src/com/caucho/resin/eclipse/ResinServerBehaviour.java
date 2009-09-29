@@ -28,14 +28,7 @@
 
 package com.caucho.resin.eclipse;
 
-import java.io.File;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.GenericServerBehaviour;
-import org.eclipse.jst.server.generic.internal.core.util.FileUtil;
-import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 
 @SuppressWarnings("restriction")
 public class ResinServerBehaviour extends GenericServerBehaviour

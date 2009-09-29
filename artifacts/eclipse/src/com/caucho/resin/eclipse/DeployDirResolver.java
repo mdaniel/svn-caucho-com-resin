@@ -8,6 +8,7 @@ import org.eclipse.core.variables.IDynamicVariableResolver;
 import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.internal.core.util.FileUtil;
 
+@SuppressWarnings("restriction")
 public class DeployDirResolver implements IDynamicVariableResolver {
   private String _tempDirectory = null;
   

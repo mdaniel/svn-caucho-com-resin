@@ -10,6 +10,7 @@ import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.publishers.AntPublisher;
 import org.eclipse.wst.server.core.IModuleArtifact;
 
+@SuppressWarnings("restriction")
 public class ResinPublisher extends AntPublisher
                             implements ResinPropertyIds
 {

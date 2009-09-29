@@ -29,24 +29,22 @@
 
 package com.caucho.resin.eclipse;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.jst.server.generic.core.internal.CorePlugin;
-import org.eclipse.jst.server.generic.core.internal.publishers.AntPublisher;
-import org.eclipse.jst.server.generic.internal.core.util.FileUtil;
 import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleArtifact;
 import org.eclipse.wst.server.core.internal.ServerPlugin;
 
 import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -78,12 +76,19 @@ public class ResinGitPublisher extends ResinPublisher
     String user = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
                                                  DEPLOY_USERNAME);
     
+    String tag = 
+      WebAppDeployClient.createTag("default", host, getModuleName());
     Path war = getWarPath();
-    String tag = "wars/" + host + "/" + getModuleName(); 
-    
+
+    HashMap<String,String> attributes = new HashMap<String,String>();
+    attributes.put(DeployClient.USER_ATTRIBUTE, user);
+    attributes.put("user.name", 
+      System.getProperties().getProperty("user.name"));
+    attributes.put("client", "Eclipse Resin plugin");
+
     try {
-      getDeployClient().deployJarContents(war, tag, user, "", null, null);
-      getDeployClient().start(tag);
+      // XXX add support for message, version, and stage
+      getDeployClient().deployJarContents(tag, war, attributes);
     }
     catch (IOException e) {
       IStatus s = new Status(IStatus.ERROR, 

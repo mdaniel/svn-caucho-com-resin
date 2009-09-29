@@ -31,7 +31,6 @@ package com.caucho.resin.eclipse;
 
 import java.io.File;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IMessageProvider;
