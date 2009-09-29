@@ -48,9 +48,9 @@ import org.springframework.context.support.*;
 public class ResinBeanFactory extends DefaultListableBeanFactory
 {
   private static final L10N L = new L10N(ResinBeanFactory.class);
-  
+
   private final InjectManager _webBeans = InjectManager.create();
-  
+
   /**
    * Creates a new bean factory adapter
    */
@@ -83,7 +83,7 @@ public class ResinBeanFactory extends DefaultListableBeanFactory
     Set<Bean<?>> beans = _webBeans.getBeans(name);
 
     if (beans != null && beans.size() > 0) {
-      return _webBeans.create(_webBeans.getHighestPrecedenceBean(beans));
+      return _webBeans.getReference(_webBeans.resolve(beans));
     }
     return null;
   }

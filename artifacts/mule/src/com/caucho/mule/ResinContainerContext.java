@@ -51,7 +51,7 @@ import org.mule.umo.manager.UMOContainerContext;
 public class ResinContainerContext implements UMOContainerContext
 {
   private static final L10N L = new L10N(ResinContainerContext.class);
-  private static final Logger log = 
+  private static final Logger log =
     Logger.getLogger(ResinContainerContext.class.getName());
 
   private final WeakHashMap<Class,Bean> _beanMap
@@ -84,7 +84,7 @@ public class ResinContainerContext implements UMOContainerContext
     return _name;
   }
 
-  public Object getComponent(Object key) 
+  public Object getComponent(Object key)
     throws ObjectNotFoundException
   {
     if (key == null)
@@ -117,9 +117,9 @@ public class ResinContainerContext implements UMOContainerContext
         if (bean == null) {
           Set<Bean<?>> set = _webBeans.getBeans(clazz);
 
-	  Iterator<Bean<?>> iter = set.iterator();
-	  if (iter.hasNext())
-	    bean = iter.next();
+          Iterator<Bean<?>> iter = set.iterator();
+          if (iter.hasNext())
+            bean = iter.next();
 
           if (bean == null)
             bean = _webBeans.createManagedBean(clazz);
@@ -128,7 +128,7 @@ public class ResinContainerContext implements UMOContainerContext
         }
       }
 
-      return _webBeans.create(bean);
+      return _webBeans.getReference(bean);
     }
     else if (key instanceof String) {
       return _webBeans.getBeans((String) key);
@@ -138,10 +138,10 @@ public class ResinContainerContext implements UMOContainerContext
     }
   }
 
-  public void configure(Reader configuration, String doctype, String encoding) 
+  public void configure(Reader configuration, String doctype, String encoding)
     throws ContainerException
   {
-    // Resin beans are configured from 
+    // Resin beans are configured from
     // resin.conf, web.xml, resin-web.xml, and/or web-beans.xml
   }
 }

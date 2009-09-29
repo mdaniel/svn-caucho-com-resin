@@ -45,7 +45,7 @@ import org.apache.wicket.application.*;
 public class ResinComponentInjector implements IComponentInstantiationListener
 {
   private InjectManager _webBeans = InjectManager.create();
-  
+
   /**
    * Called for a component that is instantiated
    */
@@ -54,7 +54,7 @@ public class ResinComponentInjector implements IComponentInstantiationListener
     InjectionTarget inject
       = _webBeans.createInjectionTarget(component.getClass());
 
-    CreationalContext<?> env = _webBeans.createCreationalContext();
+    CreationalContext<?> env = _webBeans.createCreationalContext(null);
     inject.inject(component, env);
   }
 }
