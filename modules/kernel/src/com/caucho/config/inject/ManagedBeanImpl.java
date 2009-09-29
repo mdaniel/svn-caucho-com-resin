@@ -272,6 +272,15 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   // introspection
   //
 
+  public void introspect()
+  {
+    super.introspect();
+
+    // ioc/0e13
+    if (_injectionTarget instanceof PassivationSetter)
+      ((PassivationSetter) _injectionTarget).setPassivationId(getId());
+  }
+
   /**
    * Called for implicit introspection.
    */

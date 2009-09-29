@@ -81,7 +81,7 @@ import javax.inject.Scope;
  */
 //  implements ObjectProxy
 public class AbstractIntrospectedBean<T> extends AbstractBean<T>
-  implements PassivationCapable
+  implements PassivationCapable, PassivationSetter
 {
   private static final L10N L = new L10N(AbstractIntrospectedBean.class);
   private static final Logger log
@@ -217,6 +217,11 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       _passivationId = calculatePassivationId();
 
     return _passivationId;
+  }
+
+  public void setPassivationId(String passivationId)
+  {
+    _passivationId = passivationId;
   }
 
   /**

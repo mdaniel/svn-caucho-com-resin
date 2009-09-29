@@ -70,6 +70,9 @@ public class InjectionBean extends AbstractSingletonBean
           scopeType, name);
 
     _target = target;
+
+    if (target instanceof PassivationSetter)
+      ((PassivationSetter) target).setPassivationId(getId());
   }
 
   @Override

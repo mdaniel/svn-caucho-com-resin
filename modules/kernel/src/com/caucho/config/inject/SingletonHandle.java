@@ -71,7 +71,7 @@ public class SingletonHandle implements Serializable
       Bean bean = inject.getPassivationCapableBean(_id);
 
       if (bean == null)
-        throw new NullPointerException(L.l("'{0}' is an unknown SingletonHandle bean.",
+        throw new IllegalStateException(L.l("'{0}' is an unknown SingletonHandle bean.  Unserializing this bean requires an equivalent Managed Bean to be registered.",
                                            _id));
 
       return inject.getReference(bean);

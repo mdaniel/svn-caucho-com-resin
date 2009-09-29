@@ -47,7 +47,8 @@ import javax.enterprise.inject.spi.InjectionTarget;
 /**
  * Adds behavior for an injection target.
  */
-public class InjectionTargetFilter<T> implements InjectionTarget<T>
+public class InjectionTargetFilter<T> implements InjectionTarget<T>,
+                                                 PassivationSetter
 {
   private InjectionTarget<T> _next;
   private ConfigProgram _init;
@@ -66,6 +67,12 @@ public class InjectionTargetFilter<T> implements InjectionTarget<T>
   public Set<InjectionPoint> getInjectionPoints()
   {
     return _next.getInjectionPoints();
+  }
+
+  public void setPassivationId(String id)
+  {
+    if (_next instanceof PassivationSetter)
+      ((PassivationSetter) _next).setPassivationId(id);
   }
 
   public void inject(T instance, CreationalContext<T> ctx)

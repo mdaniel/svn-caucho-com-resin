@@ -85,6 +85,9 @@ abstract public class AbstractSingletonBean extends BeanWrapper
     _stereotypes = stereotypes;
     _scopeType = scopeType;
     _name = name;
+
+    // ioc/0e13
+    _managedBean.setPassivationId(getId());
   }
 
   //

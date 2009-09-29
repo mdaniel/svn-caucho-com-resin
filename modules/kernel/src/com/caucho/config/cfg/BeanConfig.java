@@ -202,7 +202,7 @@ public class BeanConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = ApplicationScoped.class;
+      _scope = Singleton.class;
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))

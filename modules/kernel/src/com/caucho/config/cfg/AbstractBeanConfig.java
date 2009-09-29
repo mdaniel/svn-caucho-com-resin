@@ -54,6 +54,7 @@ import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
+import javax.inject.Singleton;
 import javax.naming.*;
 
 /**
@@ -181,7 +182,7 @@ abstract public class AbstractBeanConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      add(new AnnotationLiteral<ApplicationScoped>() {});
+      add(new AnnotationLiteral<Singleton>() {});
     else if ("dependent".equals(scope))
       add(new AnnotationLiteral<Dependent>() {});
     else if ("request".equals(scope))
