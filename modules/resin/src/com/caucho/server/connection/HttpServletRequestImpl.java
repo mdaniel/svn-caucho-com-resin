@@ -2157,6 +2157,9 @@ public class HttpServletRequestImpl implements CauchoRequest
     if (session != null)
       session.finishRequest();
 
+    // ioc/0a10
+    cleanup();
+
     if (_closeOnExit != null) {
       for (int i = _closeOnExit.size() - 1; i >= 0; i--) {
         Path path = _closeOnExit.get(i);

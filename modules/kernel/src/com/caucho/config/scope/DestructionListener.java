@@ -43,12 +43,12 @@ import com.caucho.loader.*;
  */
 public class DestructionListener
   implements ScopeRemoveListener,
-	     HttpSessionBindingListener,
-	     ClassLoaderListener,
-	     Serializable {
+             HttpSessionBindingListener,
+             ClassLoaderListener,
+             Serializable {
   private transient ArrayList<Contextual> _beanList
     = new ArrayList<Contextual>();
-  
+
   private transient ArrayList<WeakReference<Object>> _valueList
     = new ArrayList<WeakReference<Object>>();
 
@@ -62,20 +62,20 @@ public class DestructionListener
   {
     close();
   }
-  
+
   public void valueBound(HttpSessionBindingEvent event)
   {
   }
-  
+
   public void valueUnbound(HttpSessionBindingEvent event)
   {
     close();
   }
-  
+
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-  
+
   public void classLoaderDestroy(DynamicClassLoader loader)
   {
     close();
@@ -85,7 +85,7 @@ public class DestructionListener
   {
     ArrayList<Contextual> beanList = _beanList;
     _beanList = null;
-    
+
     ArrayList<WeakReference<Object>> valueList = _valueList;
     _valueList = null;
 
@@ -99,10 +99,10 @@ public class DestructionListener
       CreationalContext<?> env = null;
 
       if (ref != null) {
-	value = ref.get();
+        value = ref.get();
 
-	if (value != null)
-	  bean.destroy(value, null);
+        if (value != null)
+          bean.destroy(value, null);
       }
     }
   }

@@ -173,7 +173,7 @@ public class RequestScope extends ScopeContext
       }
 
       // XXX:
-      // listener.addValue(comp, value);
+      listener.addValue(comp, value);
     }
   }
 }
