@@ -60,17 +60,17 @@ public class ModuleInfo {
   private HashSet<String> _extensionSet
     = new HashSet<String>();
 
-  private HashMap<String, Value> _constMap
-    = new HashMap<String, Value>();
+  private HashMap<StringValue, Value> _constMap
+    = new HashMap<StringValue, Value>();
 
   private HashMap<String, AbstractFunction> _staticFunctions
     = new HashMap<String, AbstractFunction>();
 
   private IniDefinitions _iniDefinitions = new IniDefinitions();
-  
+
   private HashSet<String> _extensionClassMap
     = new HashSet<String>();
-  
+
   /**
    * Constructor.
    */
@@ -78,7 +78,7 @@ public class ModuleInfo {
     throws ConfigException
   {
     _context = context;
-    
+
     _name = name;
     _module = module;
 
@@ -103,7 +103,7 @@ public class ModuleInfo {
   {
     return _module;
   }
-  
+
   /**
    * Returns true if an extension is loaded.
    */
@@ -112,7 +112,7 @@ public class ModuleInfo {
     return _extensionSet;
   }
 
-  public HashMap<String, Value> getConstMap()
+  public HashMap<StringValue, Value> getConstMap()
   {
     return _constMap;
   }
@@ -120,7 +120,7 @@ public class ModuleInfo {
   /**
    * Returns a named constant.
    */
-  public Value getConstant(String name)
+  public Value getConstant(StringValue name)
   {
     return _constMap.get(name);
   }
@@ -150,7 +150,7 @@ public class ModuleInfo {
       _extensionSet.add(ext);
     }
 
-    Map<String, Value> map = _module.getConstMap();
+    Map<StringValue, Value> map = _module.getConstMap();
 
     if (map != null)
       _constMap.putAll(map);
@@ -170,7 +170,7 @@ public class ModuleInfo {
       Value value = objectToValue(obj);
 
       if (value != null)
-        _constMap.put(field.getName(), value);
+        _constMap.put(new ConstStringValue(field.getName()), value);
     }
 
     IniDefinitions iniDefinitions = _module.getIniDefinitions();
@@ -180,14 +180,14 @@ public class ModuleInfo {
 
     for (Method method : cl.getMethods()) {
       if (method.getDeclaringClass().equals(Object.class))
-	continue;
-      
+        continue;
+
       if (method.getDeclaringClass().isAssignableFrom(AbstractQuercusModule.class))
-	continue;
-      
+        continue;
+
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
-      
+
       if (method.getAnnotation(Hide.class) != null)
         continue;
 
@@ -206,10 +206,10 @@ public class ModuleInfo {
         continue;
 
       if (hasCheckedException(method)) {
-	log.warning(L.l("Module method '{0}.{1}' may not throw checked exceptions",
-			method.getDeclaringClass().getName(),
-			method.getName()));
-	continue;
+        log.warning(L.l("Module method '{0}.{1}' may not throw checked exceptions",
+                        method.getDeclaringClass().getName(),
+                        method.getName()));
+        continue;
       }
 
       try {
@@ -239,7 +239,7 @@ public class ModuleInfo {
   {
     for (Class exnCl : method.getExceptionTypes()) {
       if (! RuntimeException.class.isAssignableFrom(exnCl))
-	return true;
+        return true;
     }
 
     return false;

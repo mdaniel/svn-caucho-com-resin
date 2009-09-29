@@ -49,89 +49,89 @@ public class ReflectionExtension
   implements Reflector
 {
   private static final L10N L = new L10N(ReflectionExtension.class);
-  
+
   private String _name;
-  
+
   protected ReflectionExtension(Env env, String extension)
   {
     _name = extension;
   }
-  
+
   final private void __clone()
   {
-    
+
   }
-  
+
   public static ReflectionExtension __construct(Env env, String name)
   {
     return new ReflectionExtension(env, name);
   }
-  
+
   public static String export(Env env,
                               String name,
                               @Optional boolean isReturn)
   {
     return null;
   }
-  
+
   public String getName()
   {
     return _name;
   }
-  
+
   public String getVersion()
   {
     return null;
   }
-  
+
   public ArrayValue getFunctions(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     for (ModuleInfo moduleInfo : env.getQuercus().getModules()) {
       Set<String> extensionSet = moduleInfo.getLoadedExtensions();
 
       if (extensionSet.contains(_name)) {
         for (String functionName : moduleInfo.getFunctions().keySet()) {
           AbstractFunction fun = env.findFunction(functionName);
-          
+
           array.put(env.wrapJava(new ReflectionFunction(fun)));
         }
       }
     }
-    
+
     return array;
   }
-  
+
   public ArrayValue getConstants(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     for (ModuleInfo moduleInfo : env.getQuercus().getModules()) {
       Set<String> extensionSet = moduleInfo.getLoadedExtensions();
 
       if (extensionSet.contains(_name)) {
-        for (Map.Entry<String, Value> entry : moduleInfo.getConstMap().entrySet()) {
-          array.put(StringValue.create(entry.getKey()), entry.getValue());
+        for (Map.Entry<StringValue, Value> entry : moduleInfo.getConstMap().entrySet()) {
+          array.put(entry.getKey(), entry.getValue());
         }
       }
     }
-    
+
     return array;
   }
-  
+
   public ArrayValue getINIEntries(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     for (ModuleInfo moduleInfo : env.getQuercus().getModules()) {
       Set<String> extensionSet = moduleInfo.getLoadedExtensions();
 
       if (extensionSet.contains(_name)) {
         IniDefinitions iniDefs = moduleInfo.getIniDefinitions();
-        
+
         Set<Map.Entry<String, IniDefinition>> entrySet = iniDefs.entrySet();
-        
+
         if (entrySet != null) {
           for (Map.Entry<String, IniDefinition> entry : entrySet) {
             array.put(StringValue.create(entry.getKey()),
@@ -140,16 +140,16 @@ public class ReflectionExtension
         }
       }
     }
-    
+
     return array;
   }
-  
+
   public ArrayValue getClasses(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     HashSet<String> exts = env.getModuleContext().getExtensionClasses(_name);
-    
+
     if (exts != null) {
       for (String name : exts) {
         array.put(StringValue.create(name),
@@ -159,22 +159,22 @@ public class ReflectionExtension
 
     return array;
   }
-  
+
   public ArrayValue getClassNames(Env env)
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     HashSet<String> exts = env.getModuleContext().getExtensionClasses(_name);
-    
+
     if (exts != null) {
       for (String name : exts) {
         array.put(name);
       }
     }
-    
+
     return array;
   }
-  
+
   public String toString()
   {
     return "ReflectionExtension[" + _name + "]";

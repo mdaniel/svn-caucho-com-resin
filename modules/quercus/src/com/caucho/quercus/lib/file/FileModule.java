@@ -110,11 +110,11 @@ public class FileModule extends AbstractQuercusModule {
   public static final int SEEK_SET = BinaryStream.SEEK_SET;
   public static final int SEEK_CUR = BinaryStream.SEEK_CUR;
   public static final int SEEK_END = BinaryStream.SEEK_END;
-  
+
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
-  private static final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
+  private static final HashMap<StringValue,Value> _constMap
+    = new HashMap<StringValue,Value>();
 
   /**
    * Returns the default quercus.ini values.
@@ -123,26 +123,26 @@ public class FileModule extends AbstractQuercusModule {
   {
     return _iniDefinitions;
   }
-  
+
   /**
    * Returns the constants defined by this module.
    */
-  public Map<String,Value> getConstMap()
+  public Map<StringValue,Value> getConstMap()
   {
     return _constMap;
   }
-  
+
   /**
    * Returns the base name of a string.
    */
   public static Value basename(StringValue path,
-			       @Optional StringValue suffix)
+                               @Optional StringValue suffix)
   {
     int len = path.length();
 
     if (len == 0)
       return path;
-    
+
     else if (path.charAt(len - 1) == '/')
       len -= 1;
     else if (path.charAt(len - 1) == '\\')
@@ -192,7 +192,7 @@ public class FileModule extends AbstractQuercusModule {
   public static boolean chroot(Env env, Path path)
   {
     if (path.isDirectory()) {
-      
+
       env.setPwd(path.createRoot());
 
       return true;
@@ -382,24 +382,24 @@ public class FileModule extends AbstractQuercusModule {
       return env.createString(".");
     else if (len == 1 && path.charAt(0) == '/')
       return path;
-    
+
     int p = path.lastIndexOf('/', len - 2);
-    
+
     // php/1601 (for Windows)
     p = Math.max(p, path.lastIndexOf('\\', len - 2));
-    
+
     if (p == 0)
       return env.createString("/");
     else if (p > 0)
       return path.substring(0, p);
-    
+
     p = path.lastIndexOf('\\', len - 2);
-    
+
     if (p == 0)
       return env.createString("\\");
     else if (p > 0)
       return path.substring(0, p);
-    
+
     return env.createString(".");
   }
 
@@ -505,14 +505,14 @@ public class FileModule extends AbstractQuercusModule {
       int ch = is.read();
 
       if (ch >= 0) {
-	StringValue v = env.createBinaryBuilder(1);
-	
-	v.append((char) ch);
-	
-	return v;
+        StringValue v = env.createBinaryBuilder(1);
+
+        v.append((char) ch);
+
+        return v;
       }
       else
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -637,8 +637,8 @@ public class FileModule extends AbstractQuercusModule {
    * Returns the next line
    */
   public static Value fgets(Env env,
-			    @NotNull BinaryInput is,
-			    @Optional("0x7fffffff") int length)
+                            @NotNull BinaryInput is,
+                            @Optional("0x7fffffff") int length)
   {
     // php/1615
 
@@ -697,7 +697,7 @@ public class FileModule extends AbstractQuercusModule {
                            @Optional Value context)
   {
     if (filename.length() == 0)
-      return BooleanValue.FALSE;    
+      return BooleanValue.FALSE;
 
     try {
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
@@ -830,8 +830,8 @@ public class FileModule extends AbstractQuercusModule {
       return new LongValue(time / 1000L);
     else {
       if (!path.canRead()) {
-	env.warning(L.l("{0} cannot be read", path.getFullPath()));
-	return BooleanValue.FALSE;
+        env.warning(L.l("{0} cannot be read", path.getFullPath()));
+        return BooleanValue.FALSE;
       }
 
       return BooleanValue.FALSE;
@@ -872,10 +872,10 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null) {
       env.warning(L.l("path cannot be read"));
-      
+
       return BooleanValue.FALSE;
     }
-    
+
     if (! path.exists() || ! path.isFile()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
@@ -941,11 +941,11 @@ public class FileModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public static StringValue
     file_get_contents(Env env,
-		      StringValue filename,
-		      @Optional boolean useIncludePath,
-		      @Optional Value context,
-		      @Optional long offset,
-		      @Optional("4294967296") long maxLen)
+                      StringValue filename,
+                      @Optional boolean useIncludePath,
+                      @Optional Value context,
+                      @Optional long offset,
+                      @Optional("4294967296") long maxLen)
   {
     if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
@@ -958,10 +958,10 @@ public class FileModule extends AbstractQuercusModule {
       return null;
 
     BinaryInput is = (BinaryInput) s;
-    
+
     StringValue bb = env.createLargeBinaryBuilder();
     bb.appendReadAll(is, maxLen);
-    
+
     s.close();
     return bb;
   }
@@ -1031,10 +1031,10 @@ public class FileModule extends AbstractQuercusModule {
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     } finally {
-      if (s != null && (s instanceof LockableStream) && 
+      if (s != null && (s instanceof LockableStream) &&
           ((flags & LOCK_EX) != 0))
         flock(env, (LockableStream) s, LOCK_UN, null);
-    } 
+    }
   }
 
   /**
@@ -1078,7 +1078,7 @@ public class FileModule extends AbstractQuercusModule {
         fileV.unlock();
         return true;
       default:
-        // This is PHP's behavior... 
+        // This is PHP's behavior...
         return true;
     }
 
@@ -1089,7 +1089,7 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Converts a glob pattern to a regular expression.
    */
-  private static String globToRegex(String pattern, int flags, boolean brace) 
+  private static String globToRegex(String pattern, int flags, boolean brace)
   {
     StringBuilder globRegex = new StringBuilder();
 
@@ -1141,7 +1141,7 @@ public class FileModule extends AbstractQuercusModule {
             if (inSquareBrackets)
               bracketCount++;
           }
-          
+
           break;
 
         case '!':
@@ -1153,11 +1153,11 @@ public class FileModule extends AbstractQuercusModule {
             if (inSquareBrackets)
               bracketCount++;
           }
-          
+
           break;
 
         case '/':
-          if (! ((inSquareBrackets || inCurlyBrackets) && 
+          if (! ((inSquareBrackets || inCurlyBrackets) &&
                  ((flags & FNM_PATHNAME) != 0))) {
             globRegex.append(ch);
 
@@ -1174,7 +1174,7 @@ public class FileModule extends AbstractQuercusModule {
         case '$':
         case '.':
         case '|':
-          // escape regex special characters that are not glob 
+          // escape regex special characters that are not glob
           // special characters
           globRegex.append('\\');
           globRegex.append(ch);
@@ -1267,11 +1267,11 @@ public class FileModule extends AbstractQuercusModule {
 
     return globRegex.toString();
   }
-    
+
   /**
    * Returns true if the given string matches the given glob pattern.
    */
-  public static boolean fnmatch(Env env, String pattern, String string, 
+  public static boolean fnmatch(Env env, String pattern, String string,
                                 @Optional int flags)
   {
     if (pattern == null || string == null)
@@ -1283,7 +1283,7 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     // match "leading" periods exactly (i.e. no wildcards)
-    if ((flags & FNM_PERIOD) != 0) { 
+    if ((flags & FNM_PERIOD) != 0) {
       if (string.length() > 0 && string.charAt(0) == '.'){
         if (! (pattern.length() > 0 && pattern.charAt(0) == '.'))
           return false;
@@ -1302,7 +1302,7 @@ public class FileModule extends AbstractQuercusModule {
           string = string.substring(2);
           pattern = pattern.substring(2);
         }
-      } 
+      }
     }
 
     String globRegex = globToRegex(pattern, flags, false);
@@ -1314,7 +1314,7 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   private static ProtocolWrapper getProtocolWrapper(Env env,
-						    StringValue pathName)
+                                                    StringValue pathName)
   {
     int p = pathName.indexOf("://");
 
@@ -1349,9 +1349,9 @@ public class FileModule extends AbstractQuercusModule {
       env.warning(L.l("fopen mode must not be null"));
       return null;
     }
-    
+
     StreamContextResource context = null;
-    
+
     if (contextV instanceof StreamContextResource)
       context = (StreamContextResource) contextV;
 
@@ -1365,7 +1365,7 @@ public class FileModule extends AbstractQuercusModule {
 
         if (useIncludePath)
           options = StreamModule.STREAM_USE_PATH;
-           
+
         return wrapper.fopen(env, filename,
                                   env.createString(mode),
                                   LongValue.create(options));
@@ -1379,7 +1379,7 @@ public class FileModule extends AbstractQuercusModule {
 
         return null;
       }
-      
+
       if (mode.startsWith("r")) {
         if (useIncludePath)
           path = env.lookupInclude(filename.toStringValue());
@@ -1388,18 +1388,18 @@ public class FileModule extends AbstractQuercusModule {
           env.warning(L.l("{0} cannot be read", filename));
 
           return null;
-	}
-	// server/2l80
+        }
+        // server/2l80
         /* else if (! path.exists()) {
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return null;
         }
-	  */
+          */
 
         try {
           String scheme = path.getScheme();
-          
+
           if (scheme.equals("http") || scheme.equals("https"))
             return new HttpInputOutput(env, path, context);
           else if (mode.startsWith("r+"))
@@ -1409,7 +1409,7 @@ public class FileModule extends AbstractQuercusModule {
             return new FileInput(env, path);
         } catch (IOException e) {
           log.log(Level.FINE, e.toString(), e);
-	  
+
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return null;
@@ -1421,13 +1421,13 @@ public class FileModule extends AbstractQuercusModule {
 
           if (scheme.equals("http") || scheme.equals("https"))
             return new HttpInputOutput(env, path, context);
-          else if (mode.startsWith("w+")) 
+          else if (mode.startsWith("w+"))
             return new FileInputOutput(env, path,
                                        false, true, false);
           else
             return new FileOutput(env, path);
         } catch (IOException e) {
-          
+
           log.log(Level.FINE, e.toString(), e);
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
@@ -1442,7 +1442,7 @@ public class FileModule extends AbstractQuercusModule {
           else
             return new FileOutput(env, path, true);
         } catch (IOException e) {
-          
+
           log.log(Level.FINE, e.toString(), e);
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
@@ -1452,14 +1452,14 @@ public class FileModule extends AbstractQuercusModule {
       else if (mode.startsWith("x")) {
         if (path.exists()) {
           env.warning(L.l("{0} already exist", filename));
-          
+
           return null;
         }
-        
+
         if (mode.startsWith("x+"))
           return new FileInputOutput(env, path,
                                      false, false, false);
-        else 
+        else
           return new FileOutput(env, path);
       }
 
@@ -1475,16 +1475,16 @@ public class FileModule extends AbstractQuercusModule {
       return null;
     }
   }
-  
+
   private static boolean isUrl(Path path)
   {
     String scheme = path.getScheme();
-    
+
     if ("".equals(scheme)
         || "file".equals(scheme)
         || "memory".equals(scheme))
       return false;
-    
+
     // XXX: too restrictive for filters
     return ! "php".equals(scheme)
            || path.toString().startsWith("php://filter");
@@ -1499,7 +1499,7 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       if (is == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       WriteStream out = env.getOut();
 
@@ -1528,52 +1528,52 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       if (os == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       if (value == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       char comma = ',';
       char quote = '\"';
 
       if (delimiter != null && delimiter.length() > 0)
-	comma = delimiter.charAt(0);
+        comma = delimiter.charAt(0);
 
       if (enclosure != null && enclosure.length() > 0)
-	quote = enclosure.charAt(0);
+        quote = enclosure.charAt(0);
 
       int writeLength = 0;
       boolean isFirst = true;
 
       for (Value data : value.values()) {
-	if (! isFirst) {
-	  os.print(comma);
-	  writeLength++;
-	}
-	isFirst = false;
+        if (! isFirst) {
+          os.print(comma);
+          writeLength++;
+        }
+        isFirst = false;
 
-	StringValue s = data.toStringValue();
-	int strlen = s.length();
+        StringValue s = data.toStringValue();
+        int strlen = s.length();
 
-	writeLength++;
-	os.print(quote);
+        writeLength++;
+        os.print(quote);
 
-	for (int i = 0; i < strlen; i++) {
-	  char ch = s.charAt(i);
+        for (int i = 0; i < strlen; i++) {
+          char ch = s.charAt(i);
 
-	  if (ch != quote) {
-	    os.print(ch);
-	    writeLength++;
-	  }
-	  else {
-	    os.print(quote);
-	    os.print(quote);
-	    writeLength += 2;
-	  }
-	}
+          if (ch != quote) {
+            os.print(ch);
+            writeLength++;
+          }
+          else {
+            os.print(quote);
+            os.print(quote);
+            writeLength += 2;
+          }
+        }
 
-	os.print(quote);
-	writeLength++;
+        os.print(quote);
+        writeLength++;
       }
 
       os.print("\n");
@@ -1589,9 +1589,9 @@ public class FileModule extends AbstractQuercusModule {
    * Writes a string to the file.
    */
   public static Value fputs(Env env,
-			    BinaryOutput os,
-			    InputStream value,
-			    @Optional("0x7fffffff") int length)
+                            BinaryOutput os,
+                            InputStream value,
+                            @Optional("0x7fffffff") int length)
   {
     return fwrite(env, os, value, length);
   }
@@ -1602,8 +1602,8 @@ public class FileModule extends AbstractQuercusModule {
    * @param is the file
    */
   public static Value fread(Env env,
-			    @NotNull BinaryInput is,
-			    int length)
+                            @NotNull BinaryInput is,
+                            int length)
   {
     if (is == null)
       return BooleanValue.FALSE;
@@ -1648,9 +1648,9 @@ public class FileModule extends AbstractQuercusModule {
    * @return 0 on success, -1 on error.
    */
   public static Value fseek(Env env,
-			    @NotNull BinaryStream binaryStream,
-			    long offset,
-			    @Optional("SEEK_SET") int whence)
+                            @NotNull BinaryStream binaryStream,
+                            long offset,
+                            @Optional("SEEK_SET") int whence)
   {
     if (binaryStream == null)
       return LongValue.MINUS_ONE;
@@ -1670,7 +1670,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (stream == null)
       return BooleanValue.FALSE;
-    
+
     return stream.stat();
   }
 
@@ -1681,7 +1681,7 @@ public class FileModule extends AbstractQuercusModule {
    * @return position in file or FALSE on error.
    */
   public static Value ftell(Env env,
-			    @NotNull BinaryStream binaryStream)
+                            @NotNull BinaryStream binaryStream)
   {
     if (binaryStream == null)
       return BooleanValue.FALSE;
@@ -1697,18 +1697,18 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Truncates a file.
    */
-  public static boolean ftruncate(Env env, 
-                                  @NotNull BinaryOutput handle, 
+  public static boolean ftruncate(Env env,
+                                  @NotNull BinaryOutput handle,
                                   long size)
   {
     Path path = null;
 
-    if (handle instanceof FileOutput) 
+    if (handle instanceof FileOutput)
       path = ((FileOutput) handle).getPath();
     else if (handle instanceof FileInputOutput)
       path = ((FileInputOutput) handle).getPath();
     else return false;
-    
+
     try {
       return path.truncate(size);
     } catch (IOException e) {
@@ -1720,9 +1720,9 @@ public class FileModule extends AbstractQuercusModule {
    * Writes a string to the file.
    */
   public static Value fwrite(Env env,
-			     @NotNull BinaryOutput os,
-			     InputStream value,
-			     @Optional("0x7fffffff") int length)
+                             @NotNull BinaryOutput os,
+                             InputStream value,
+                             @Optional("0x7fffffff") int length)
   {
     try {
       if (os == null)
@@ -1734,7 +1734,7 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  private static ArrayValue globImpl(Env env, String pattern, int flags, 
+  private static ArrayValue globImpl(Env env, String pattern, int flags,
                                      Path path, String prefix,
                                      ArrayValue result)
   {
@@ -1775,7 +1775,7 @@ public class FileModule extends AbstractQuercusModule {
       compiledGlobRegex = Pattern.compile(globRegex);
     } catch (PatternSyntaxException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return null;
     }
 
@@ -1788,7 +1788,7 @@ public class FileModule extends AbstractQuercusModule {
 
       return null;
     }
-    
+
     for (String entry : list) {
       Matcher matcher = compiledGlobRegex.matcher(entry);
 
@@ -1797,7 +1797,7 @@ public class FileModule extends AbstractQuercusModule {
 
         if (prefix.length() > 0) {
           sb.append(prefix);
-          
+
           if (! prefix.equals("/"))
             sb.append("/");
         }
@@ -1810,14 +1810,14 @@ public class FileModule extends AbstractQuercusModule {
           if (firstSlash >= 0 && subPattern.length() > 0) {
             // ArrayValue.add only adds values when the argument is an
             // actual array
-            
+
             boolean isNull = null == globImpl(env,
                                               subPattern,
                                               flags,
                                               entryPath,
                                               sb.toString(),
                                               result);
-            
+
             if ((flags & GLOB_ERR) != 0 && isNull)
               return null;
           } else if ((flags & GLOB_MARK) != 0) {
@@ -1825,9 +1825,9 @@ public class FileModule extends AbstractQuercusModule {
           }
         }
 
-        if ((firstSlash < 0 || subPattern.length() == 0) && 
+        if ((firstSlash < 0 || subPattern.length() == 0) &&
             (((flags & GLOB_ONLYDIR) == 0) ||
-             (((flags & GLOB_ONLYDIR) != 0) && 
+             (((flags & GLOB_ONLYDIR) != 0) &&
               (entryPath != null && entryPath.isDirectory())))) {
             result.put(sb);
         }
@@ -1846,20 +1846,20 @@ public class FileModule extends AbstractQuercusModule {
 
     int patternLength = pattern.length();
     String prefix = "";
-    
+
     int braceIndex;
     if ((flags & GLOB_BRACE) != 0 && (braceIndex = pattern.indexOf('{')) >= 0) {
       if ((flags & GLOB_NOESCAPE) != 0)
         return globBrace(env, pattern, flags, braceIndex);
-      
+
       int i = 0;
-      
+
       boolean isEscaped = false;
-      
+
       // find open bracket '{'
       while (i < patternLength) {
         char ch = pattern.charAt(i);
-        
+
         if (ch == '\\')
           isEscaped = ! isEscaped;
         else if (ch == '{') {
@@ -1870,17 +1870,17 @@ public class FileModule extends AbstractQuercusModule {
         }
         else
           isEscaped = false;
-        
+
         i++;
       }
-      
+
       if (i < patternLength)
         return globBrace(env, pattern, flags, i);
     }
-    
+
     if (patternLength > 0 && pattern.charAt(0) == '/') {
       prefix = "/";
-      
+
       int i;
 
       // strip off any leading slashes
@@ -1896,17 +1896,17 @@ public class FileModule extends AbstractQuercusModule {
     else if (Path.isWindows()
              && patternLength > 2 && pattern.charAt(1) == ':') {
       prefix = pattern.substring(0, 2);
-      
+
       String driveLetter = pattern.substring(0, 2);
-      
+
       // X:/ - slash is required when looking up root
       path = path.lookup(driveLetter + '/');
-      
+
       pattern = pattern.substring(3);
     }
 
     ArrayValue result = new ArrayValueImpl();
-    
+
     result = globImpl(env, pattern, flags, path, prefix, result);
 
     if (result == null)
@@ -1919,7 +1919,7 @@ public class FileModule extends AbstractQuercusModule {
 
     return result;
   }
-  
+
   /*
    * Breaks a glob with braces into multiple globs.
    */
@@ -1927,25 +1927,25 @@ public class FileModule extends AbstractQuercusModule {
                                  int braceIndex)
   {
     int patternLength = pattern.length();
-    
+
     boolean isEscaped = false;
-    
+
     String prefix = pattern.substring(0, braceIndex);
 
     ArrayList<StringBuilder> basePathList
       = new ArrayList<StringBuilder>();
-    
+
     StringBuilder sb = new StringBuilder();
     sb.append(prefix);
-    
+
     isEscaped = false;
-    
+
     int i = braceIndex + 1;
-    
+
     // parse bracket contents
     while (i < patternLength) {
       char ch = pattern.charAt(i++);
-      
+
       if (ch == ',') {
         if (isEscaped) {
           isEscaped = false;
@@ -1987,18 +1987,18 @@ public class FileModule extends AbstractQuercusModule {
         sb.append(ch);
       }
     }
-    
+
     String suffix = "";
-    
+
     if (i < patternLength)
       suffix = pattern.substring(i);
-    
+
     Value result = null;
 
     for (StringBuilder path : basePathList) {
       path.append(suffix);
       Value subresult = glob(env, path.toString(), flags);
-      
+
       if (subresult.isArray() && subresult.getSize() > 0) {
         if (prefix.length() == 0 && suffix.length() == 0)
           return subresult;
@@ -2008,17 +2008,17 @@ public class FileModule extends AbstractQuercusModule {
           else {
             Iterator<Value> iter
               = subresult.getValueIterator(env);
-          
+
             while (iter.hasNext())
               result.put(iter.next());
           }
         }
       }
     }
-    
+
     if (result == null)
       result = new ArrayValueImpl();
-    
+
     return result;
   }
 
@@ -2032,7 +2032,7 @@ public class FileModule extends AbstractQuercusModule {
     // for xoops on Windows
     // paths returned must be consistent across Quercus
     return env.getPwd().getPath();
-    
+
     // return env.getPwd().getNativePath();
   }
 
@@ -2045,7 +2045,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return false;
-    
+
     return path.isDirectory();
   }
 
@@ -2058,7 +2058,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return false;
-    
+
     return path.isExecutable();
   }
 
@@ -2071,7 +2071,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return false;
-    
+
     return path.isFile();
   }
 
@@ -2084,7 +2084,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return false;
-    
+
     return path.isLink();
   }
 
@@ -2140,7 +2140,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return false;
-    
+
     return is_writable(path);
   }
 
@@ -2176,7 +2176,7 @@ public class FileModule extends AbstractQuercusModule {
 
     if (wrapper != null)
       // XXX flags?
-      return wrapper.url_stat(env, filename, 
+      return wrapper.url_stat(env, filename,
           LongValue.create(StreamModule.STREAM_URL_STAT_LINK));
 
     Path path = env.lookupPwd(filename);
@@ -2202,11 +2202,11 @@ public class FileModule extends AbstractQuercusModule {
 
     if (wrapper != null)
       // XXX options?
-      return wrapper.mkdir(env, dirname, 
+      return wrapper.mkdir(env, dirname,
                            LongValue.create(mode), LongValue.ZERO);
 
     Path path = env.lookupPwd(dirname);
-    
+
     try {
       if (recursive)
         return path.mkdirs();
@@ -2214,7 +2214,7 @@ public class FileModule extends AbstractQuercusModule {
         return path.mkdir();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return false;
     }
   }
@@ -2266,7 +2266,7 @@ public class FileModule extends AbstractQuercusModule {
     if (wrapper != null)
       /// XXX options?
       return wrapper.opendir(env, pathName, LongValue.ZERO);
- 
+
     try {
       Path path = env.lookupPwd(pathName);
 
@@ -2286,11 +2286,11 @@ public class FileModule extends AbstractQuercusModule {
    * Parses the ini file.
    */
   public static Value parse_ini_file(Env env,
-				     Path path,
-				     @Optional boolean processSections)
+                                     Path path,
+                                     @Optional boolean processSections)
   {
     ReadStream is = null;
-    
+
     try {
       is = path.openRead();
       is.setEncoding(env.getScriptEncoding());
@@ -2302,59 +2302,59 @@ public class FileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     } finally {
       if (is != null)
-	is.close();
+        is.close();
     }
   }
 
   private static ArrayValue parseIni(Env env,
-				     ReadStream is,
-				     boolean processSections)
+                                     ReadStream is,
+                                     boolean processSections)
     throws IOException
   {
     ArrayValue top = new ArrayValueImpl();
     ArrayValue section = top;
-    
+
     int ch;
 
     while ((ch = is.read()) >= 0) {
       if (Character.isWhitespace(ch)) {
       }
       else if (ch == ';') {
-	for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
-	}
+        for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
+        }
       }
       else if (ch == '[') {
-	StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-	for (ch = is.read(); ch >= 0 && ch != ']'; ch = is.read()) {
-	  sb.append((char) ch);
-	}
+        for (ch = is.read(); ch >= 0 && ch != ']'; ch = is.read()) {
+          sb.append((char) ch);
+        }
 
-	String name = sb.toString().trim();
+        String name = sb.toString().trim();
 
-	if (processSections) {
-	  section = new ArrayValueImpl();
-	  top.put(env.createString(name), section);
-	}
+        if (processSections) {
+          section = new ArrayValueImpl();
+          top.put(env.createString(name), section);
+        }
       }
       else if (isValidIniKeyChar((char) ch)) {
-	StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-	for (; isValidIniKeyChar((char) ch); ch = is.read()) {
-	  sb.append((char) ch);
-	}
+        for (; isValidIniKeyChar((char) ch); ch = is.read()) {
+          sb.append((char) ch);
+        }
 
-	String key = sb.toString().trim();
+        String key = sb.toString().trim();
 
-	for (; ch >= 0 && ch != '='; ch = is.read()) {
-	}
+        for (; ch >= 0 && ch != '='; ch = is.read()) {
+        }
 
-	for (ch = is.read(); ch == ' ' || ch == '\t'; ch = is.read()) {
-	}
+        for (ch = is.read(); ch == ' ' || ch == '\t'; ch = is.read()) {
+        }
 
-	Value value = parseIniValue(env, ch, is);
+        Value value = parseIniValue(env, ch, is);
 
-	section.put(env.createString(key), value);
+        section.put(env.createString(key), value);
       }
     }
 
@@ -2369,9 +2369,9 @@ public class FileModule extends AbstractQuercusModule {
 
     if (ch == '"') {
       StringValue sb = env.createUnicodeBuilder();
-      
+
       for (ch = is.read(); ch >= 0 && ch != '"'; ch = is.read()) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       skipToEndOfLine(ch, is);
@@ -2380,9 +2380,9 @@ public class FileModule extends AbstractQuercusModule {
     }
     else if (ch == '\'') {
       StringValue sb = env.createUnicodeBuilder();
-      
+
       for (ch = is.read(); ch >= 0 && ch != '\''; ch = is.read()) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       skipToEndOfLine(ch, is);
@@ -2393,79 +2393,79 @@ public class FileModule extends AbstractQuercusModule {
       StringBuilder sb = new StringBuilder();
 
       for (;
-	   ch >= 0 && ch != '\r' && ch != '\n';
-	   ch = is.read()) {
-	
-	if (ch == ';') {
-	  skipToEndOfLine(ch, is);
-	  break;
-	}
-	else if (ch == '$') {
-	  int peek = is.read();
+           ch >= 0 && ch != '\r' && ch != '\n';
+           ch = is.read()) {
 
-	  if (peek == '{') {
-	    StringBuilder var = new StringBuilder();
+        if (ch == ';') {
+          skipToEndOfLine(ch, is);
+          break;
+        }
+        else if (ch == '$') {
+          int peek = is.read();
 
-	    for (ch = is.read();
-		 ch >= 0 && ch != '\r' && ch != '\n' && ch != '}';
-		 ch = is.read()) {
-	      var.append((char) ch);
-	    }
-	    
-	    Value value = env.getIni(var.toString());
+          if (peek == '{') {
+            StringBuilder var = new StringBuilder();
 
-	    if (value != null)
-	      sb.append(value);
-	  }
-	  else {
-	    sb.append('$');
-	    is.unread();
-	  }
+            for (ch = is.read();
+                 ch >= 0 && ch != '\r' && ch != '\n' && ch != '}';
+                 ch = is.read()) {
+              var.append((char) ch);
+            }
 
-	}
-	else
-	  sb.append((char) ch);
+            Value value = env.getIni(var.toString());
+
+            if (value != null)
+              sb.append(value);
+          }
+          else {
+            sb.append('$');
+            is.unread();
+          }
+
+        }
+        else
+          sb.append((char) ch);
       }
 
       String value = sb.toString().trim();
 
       if (value.equalsIgnoreCase("null"))
-	return env.getEmptyString();
+        return env.getEmptyString();
       else if (value.equalsIgnoreCase("true")
-	       || value.equalsIgnoreCase("yes"))
-	return env.createString("1");
+               || value.equalsIgnoreCase("yes"))
+        return env.createString("1");
       else if (value.equalsIgnoreCase("false")
-	       || value.equalsIgnoreCase("no"))
-	return env.getEmptyString();
+               || value.equalsIgnoreCase("no"))
+        return env.getEmptyString();
 
       if (env.isDefined(value))
-	return env.createString(env.getConstant(value).toString());
+        return env.createString(env.getConstant(value).toString());
       else
-	return env.createString(value);
+        return env.createString(value);
     }
   }
 
   private static boolean isValidIniKeyChar(char ch)
   {
     if (ch <= 0
-	|| ch == '='
-	|| ch == ';'
-	|| ch == '{'
-	|| ch == '}'
-	|| ch == '|'
-	|| ch == '&'
-	|| ch == '~'
-	|| ch == '!'
-	|| ch == '['
-	|| ch == '('
-	|| ch == ')'
-	|| ch == '"')
+        || ch == '='
+        || ch == ';'
+        || ch == '{'
+        || ch == '}'
+        || ch == '|'
+        || ch == '&'
+        || ch == '~'
+        || ch == '!'
+        || ch == '['
+        || ch == '('
+        || ch == ')'
+        || ch == '"')
       return false;
     else
       return true;
   }
 
-  
+
   private static void skipToEndOfLine(int ch, ReadStream is)
     throws IOException
   {
@@ -2480,7 +2480,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (optionsV == null)
       return env.getEmptyString();
-    
+
     if (path == null) {
       if (! (optionsV instanceof DefaultValue)) {
         return env.getEmptyString();
@@ -2505,10 +2505,10 @@ public class FileModule extends AbstractQuercusModule {
     }
 
     p = path.indexOf('.');
-    
+
     String filename = path;
     String ext = "";
-    
+
     if (p > 0) {
       filename = path.substring(0, p);
       ext = path.substring(p + 1);
@@ -2553,9 +2553,9 @@ public class FileModule extends AbstractQuercusModule {
     }
   }
 
-  @ReturnNullAsFalse 
-  public static BinaryStream popen(Env env, 
-                                   @NotNull String command, 
+  @ReturnNullAsFalse
+  public static BinaryStream popen(Env env,
+                                   @NotNull String command,
                                    @NotNull StringValue mode)
   {
     boolean doRead = false;
@@ -2593,7 +2593,7 @@ public class FileModule extends AbstractQuercusModule {
       return null;
     }
   }
-  
+
   /**
    * Reads the next entry
    *
@@ -2603,7 +2603,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (dir == null)
       return BooleanValue.FALSE;
-    
+
     return dir.readdir();
   }
 
@@ -2659,7 +2659,7 @@ public class FileModule extends AbstractQuercusModule {
       pathStr = path.getFullPath();
 
     StringValue sb = env.createStringBuilder();
-    
+
     // php/164c
     if (pathStr.endsWith("/"))
       return sb.append(pathStr, 0, pathStr.length()- 1);
@@ -2703,13 +2703,13 @@ public class FileModule extends AbstractQuercusModule {
    * @param is the file resource
    */
   public static Value rewind(Env env,
-			     @NotNull BinaryStream binaryStream)
+                             @NotNull BinaryStream binaryStream)
   {
     if (binaryStream == null)
       return BooleanValue.FALSE;
 
     fseek(env, binaryStream, 0, SEEK_SET);
-    
+
     return BooleanValue.TRUE;
   }
 
@@ -2722,7 +2722,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (dir == null)
       return;
-    
+
     dir.rewinddir();
   }
 
@@ -2867,13 +2867,13 @@ public class FileModule extends AbstractQuercusModule {
 
     result.put("dev", path.getDevice());
     result.put("ino", path.getInode());
-    
+
     result.put("mode", path.getMode());
     result.put("nlink", path.getNumberOfLinks());
     result.put("uid", path.getUser());
     result.put("gid", path.getGroup());
     result.put("rdev", path.getDeviceId());
-    
+
     result.put("size", path.getLength());
 
     result.put("atime", path.getLastAccessTime() / 1000L);
@@ -2905,7 +2905,7 @@ public class FileModule extends AbstractQuercusModule {
   public static Value tempnam(Env env, Path dir, String prefix)
   {
     // php/160u
-    
+
     if (dir == null || ! dir.isDirectory())
       dir = env.getTempDirectory();
 
@@ -2914,7 +2914,7 @@ public class FileModule extends AbstractQuercusModule {
     }
     catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return BooleanValue.FALSE;
     }
 
@@ -2922,9 +2922,9 @@ public class FileModule extends AbstractQuercusModule {
       Path path = dir.createTempFile(prefix, ".tmp");
 
       //path.remove();
-      
+
       env.addCleanup(new RemoveFile(path));
-      
+
       return env.createString(path.getTail());
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -2947,7 +2947,7 @@ public class FileModule extends AbstractQuercusModule {
       Path file = tmp.createTempFile("resin", "tmp");
 
       env.addCleanup(new RemoveFile(file));
-      
+
       return new FileInputOutput(env, file, false, false, true);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -3043,26 +3043,26 @@ public class FileModule extends AbstractQuercusModule {
     StreamModule.stream_wrapper_register(new ConstStringValue("php"),
                                          new PhpProtocolWrapper());
 
-    _constMap.put("SEEK_SET", LongValue.create(SEEK_SET));
-    _constMap.put("SEEK_CUR", LongValue.create(SEEK_CUR));
-    _constMap.put("SEEK_END", LongValue.create(SEEK_END));
+    addConstant(_constMap, "SEEK_SET", SEEK_SET);
+    addConstant(_constMap, "SEEK_CUR", SEEK_CUR);
+    addConstant(_constMap, "SEEK_END", SEEK_END);
 
-    _constMap.put("LOCK_SH", LongValue.create(LOCK_SH));
-    _constMap.put("LOCK_EX", LongValue.create(LOCK_EX));
-    _constMap.put("LOCK_UN", LongValue.create(LOCK_UN));
-    _constMap.put("LOCK_NB", LongValue.create(LOCK_NB));
+    addConstant(_constMap, "LOCK_SH", LOCK_SH);
+    addConstant(_constMap, "LOCK_EX", LOCK_EX);
+    addConstant(_constMap, "LOCK_UN", LOCK_UN);
+    addConstant(_constMap, "LOCK_NB", LOCK_NB);
 
-    _constMap.put("FNM_PATHNAME", LongValue.create(FNM_PATHNAME));
-    _constMap.put("FNM_NOESCAPE", LongValue.create(FNM_NOESCAPE));
-    _constMap.put("FNM_PERIOD", LongValue.create(FNM_PERIOD));
-    _constMap.put("FNM_CASEFOLD", LongValue.create(FNM_CASEFOLD));
+    addConstant(_constMap, "FNM_PATHNAME", FNM_PATHNAME);
+    addConstant(_constMap, "FNM_NOESCAPE", FNM_NOESCAPE);
+    addConstant(_constMap, "FNM_PERIOD", FNM_PERIOD);
+    addConstant(_constMap, "FNM_CASEFOLD", FNM_CASEFOLD);
 
-    _constMap.put("GLOB_MARK", LongValue.create(GLOB_MARK));
-    _constMap.put("GLOB_NOSORT", LongValue.create(GLOB_NOSORT));
-    _constMap.put("GLOB_NOCHECK", LongValue.create(GLOB_NOCHECK));
-    _constMap.put("GLOB_NOESCAPE", LongValue.create(GLOB_NOESCAPE));
-    _constMap.put("GLOB_BRACE", LongValue.create(GLOB_BRACE));
-    _constMap.put("GLOB_ONLYDIR", LongValue.create(GLOB_ONLYDIR));
+    addConstant(_constMap, "GLOB_MARK", GLOB_MARK);
+    addConstant(_constMap, "GLOB_NOSORT", GLOB_NOSORT);
+    addConstant(_constMap, "GLOB_NOCHECK", GLOB_NOCHECK);
+    addConstant(_constMap, "GLOB_NOESCAPE", GLOB_NOESCAPE);
+    addConstant(_constMap, "GLOB_BRACE", GLOB_BRACE);
+    addConstant(_constMap, "GLOB_ONLYDIR", GLOB_ONLYDIR);
   }
 
   static final IniDefinition INI_ALLOW_URL_FOPEN

@@ -77,7 +77,7 @@ public class Quercus
   private final QuercusSessionManager _sessionManager;
 
   private final ClassLoader _loader;
-  
+
   private ModuleContext _moduleContext;
 
   private LruCache<String, UnicodeBuilderValue> _unicodeMap
@@ -94,7 +94,7 @@ public class Quercus
 
   private HashSet<String> _extensionSet
     = new HashSet<String>();
-  
+
   private HashSet<String> _extensionSetLowerCase
   = new HashSet<String>();
 
@@ -111,7 +111,7 @@ public class Quercus
 
   private ConcurrentHashMap<String, JavaClassDef> _javaClassWrappers
     = new ConcurrentHashMap<String, JavaClassDef>();
-  
+
   private LruCache<String, String> _classNotFoundCache
     = new LruCache<String, String>(64);
 
@@ -119,7 +119,7 @@ public class Quercus
     = new HashMap<String, JavaClassDef>();
 
   private final IniDefinitions _iniDefinitions = new IniDefinitions();
-  
+
   private Path _iniFile;
   private HashMap<String, Value> _iniMap;
 
@@ -130,7 +130,7 @@ public class Quercus
   private String []_classNames = new String[256];
   private ClassDef []_classDefMap = new ClassDef[256];
   private QuercusClass []_classCacheMap = new QuercusClass[256];
-  
+
   private IntMap _constantNameMap = new IntMap(8192);
   private int []_constantLowerMap = new int[256];
   private Value []_constantNameList = new Value[256];
@@ -138,7 +138,7 @@ public class Quercus
 
   // protected to allow locking from pro
   protected IntMap _functionNameMap = new IntMap(8192);
-  
+
   private AbstractFunction []_functionMap = new AbstractFunction[256];
 
   private LruCache<String, QuercusProgram> _evalCache
@@ -170,11 +170,11 @@ public class Quercus
 
   private boolean _isStrict;
   private boolean _isRequireSource;
-  
+
   private boolean _isConnectionPool = true;
 
   private Boolean _isUnicodeSemantics;
-  
+
   private DataSource _database;
 
   private ConcurrentHashMap<String,DataSource> _databaseMap
@@ -184,9 +184,9 @@ public class Quercus
 
   private Path _pwd;
   private Path _workDir;
-  
+
   private ServletContext _servletContext;
-  
+
   /**
    * Constructor.
    */
@@ -195,17 +195,17 @@ public class Quercus
     _loader = Thread.currentThread().getContextClassLoader();
 
     _moduleContext = getLocalContext();
-    
+
     _pageManager = createPageManager();
-    
+
     _sessionManager = createSessionManager();
-    
+
     for (Map.Entry<String,String> entry : System.getenv().entrySet()) {
        _serverEnvMap.put(createString(entry.getKey()),
                          createString(entry.getValue()));
     }
   }
-  
+
   /**
    * Returns the working directory.
    */
@@ -213,7 +213,7 @@ public class Quercus
   {
     if (_pwd == null)
       _pwd = new FilePath(System.getProperty("user.dir"));
-    
+
     return _pwd;
   }
 
@@ -277,7 +277,7 @@ public class Quercus
   {
     return "20090801";
   }
-  
+
   /**
    * Returns the SAPI (Server API) name.
    */
@@ -290,12 +290,12 @@ public class Quercus
   {
     return false;
   }
-  
+
   public int getProfileIndex(String name)
   {
     return -1;
   }
-  
+
   public void setProfileProbability(double probability)
   {
   }
@@ -309,7 +309,7 @@ public class Quercus
   {
     return new QuercusSessionManager();
   }
-  
+
   /**
    * Returns the context for this class loader.
    */
@@ -322,8 +322,8 @@ public class Quercus
   {
     synchronized (this) {
       if (_moduleContext == null) {
-	_moduleContext = createModuleContext(null, loader);
-	_moduleContext.init();
+        _moduleContext = createModuleContext(null, loader);
+        _moduleContext.init();
       }
     }
 
@@ -331,7 +331,7 @@ public class Quercus
   }
 
   protected ModuleContext createModuleContext(ModuleContext parent,
-					      ClassLoader loader)
+                                              ClassLoader loader)
   {
     return new ModuleContext(parent, loader);
   }
@@ -356,7 +356,7 @@ public class Quercus
   {
     return _pageManager.isCompile();
   }
-  
+
   /**
    * Returns true if this is the Professional version.
    */
@@ -364,7 +364,7 @@ public class Quercus
   {
     return false;
   }
-  
+
   /**
    * Returns true if Quercus is running under Resin.
    */
@@ -372,7 +372,7 @@ public class Quercus
   {
     return false;
   }
-  
+
   /**
    * Returns true if unicode.semantics is on.
    */
@@ -382,10 +382,10 @@ public class Quercus
       _isUnicodeSemantics
         = Boolean.valueOf(getIniBoolean("unicode.semantics"));
     }
-    
+
     return _isUnicodeSemantics.booleanValue();
   }
-  
+
   /*
    * Returns true if URLs may be arguments of include().
    */
@@ -393,7 +393,7 @@ public class Quercus
   {
     return getIniBoolean("allow_url_include");
   }
-  
+
   /*
    * Returns true if URLs may be arguments of fopen().
    */
@@ -401,7 +401,7 @@ public class Quercus
   {
     return getIniBoolean("allow_url_fopen");
   }
-  
+
   /**
    * Set true if pages should be compiled.
    */
@@ -417,7 +417,7 @@ public class Quercus
   {
     _pageManager.setLazyCompile(isCompile);
   }
-  
+
   /*
    * true if interpreted pages should be used if pages fail to compile.
    */
@@ -477,7 +477,7 @@ public class Quercus
     _phpVersion = version;
     _phpVersionValue = null;
   }
-  
+
   public StringValue getPhpVersionValue()
   {
     if (_phpVersionValue == null) {
@@ -486,10 +486,10 @@ public class Quercus
       else
         _phpVersionValue = createString(_phpVersion);
     }
-    
+
     return _phpVersionValue;
   }
-  
+
   /*
    * Sets the ServletContext.
    */
@@ -497,7 +497,7 @@ public class Quercus
   {
     _servletContext = servletContext;
   }
-  
+
   /*
    * Returns the ServletContext.
    */
@@ -531,27 +531,27 @@ public class Quercus
       return _database;
     else {
       try {
-	String key = driver + ";" + url;
-	
-	DataSource database = _databaseMap.get(key);
+        String key = driver + ";" + url;
 
-	if (database != null)
-	  return database;
-	
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-	Class cls = loader.loadClass(driver);
-        
-	Object ds = cls.newInstance();
-        
-	if (ds instanceof DataSource)
-	  database = (DataSource) ds;
-	else
-	  database = new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
+        DataSource database = _databaseMap.get(key);
 
-	_databaseMap.put(key, database);
+        if (database != null)
+          return database;
 
-	return database;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+        Class cls = loader.loadClass(driver);
+
+        Object ds = cls.newInstance();
+
+        if (ds instanceof DataSource)
+          database = (DataSource) ds;
+        else
+          database = new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
+
+        _databaseMap.put(key, database);
+
+        return database;
       } catch (ClassNotFoundException e) {
         throw new QuercusModuleException(e);
       } catch (InstantiationException e) {
@@ -561,7 +561,7 @@ public class Quercus
       }
     }
   }
-  
+
   /*
    * Marks the connection for removal from the connection pool.
    */
@@ -576,7 +576,7 @@ public class Quercus
   {
     return conn;
   }
-  
+
   /**
    * Unwrap statement if necessary.
    */
@@ -600,7 +600,7 @@ public class Quercus
   {
     return _isStrict;
   }
-  
+
   /*
    * Gets the max size of the page cache.
    */
@@ -608,7 +608,7 @@ public class Quercus
   {
     return _pageManager.getPageCacheSize();
   }
-  
+
   /*
    * Sets the capacity of the page cache.
    */
@@ -616,7 +616,7 @@ public class Quercus
   {
     _pageManager.setPageCacheSize(size);
   }
-  
+
   /*
    * Gets the max size of the regexp cache.
    */
@@ -624,7 +624,7 @@ public class Quercus
   {
     return RegexpModule.getRegexpCacheSize();
   }
-  
+
   /*
    * Sets the capacity of the regexp cache.
    */
@@ -632,7 +632,7 @@ public class Quercus
   {
     RegexpModule.setRegexpCacheSize(size);
   }
-  
+
   /*
    * Set to true if compiled pages need to be backed by php source files.
    */
@@ -640,7 +640,7 @@ public class Quercus
   {
     _isRequireSource = isRequireSource;
   }
-  
+
   /*
    * Returns whether the php source is required for compiled files.
    */
@@ -648,7 +648,7 @@ public class Quercus
   {
     return _isRequireSource;
   }
-  
+
   /*
    * Turns connection pooling on or off.
    */
@@ -656,7 +656,7 @@ public class Quercus
   {
     _isConnectionPool = isEnable;
   }
-  
+
   /*
    * Returns true if connections should be pooled.
    */
@@ -709,7 +709,7 @@ public class Quercus
     catch (ClassNotFoundException e) {
       throw new QuercusRuntimeException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
     }
-    
+
     addJavaClass(phpName, type);
   }
 
@@ -735,24 +735,24 @@ public class Quercus
   public JavaClassDef getJavaClassDefinition(Class type, String className)
   {
     JavaClassDef def;
-    
+
     if (_classNotFoundCache.get(className) != null)
       return null;
-    
+
     def = _javaClassWrappers.get(className);
 
     if (def == null) {
       try {
-	def = getModuleContext().getJavaClassDefinition(type, className);
+        def = getModuleContext().getJavaClassDefinition(type, className);
 
-	int id = getClassId(className);
-	_classDefMap[id] = def;
+        int id = getClassId(className);
+        _classDefMap[id] = def;
 
-	_javaClassWrappers.put(className, def);
+        _javaClassWrappers.put(className, def);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new QuercusRuntimeException(e);
+        throw new QuercusRuntimeException(e);
       }
     }
 
@@ -760,30 +760,30 @@ public class Quercus
 
     return def;
   }
-  
+
   /**
    * Adds a java class
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
     JavaClassDef def;
-    
+
     if (_classNotFoundCache.get(className) != null)
       return null;
-    
+
     def = _javaClassWrappers.get(className);
 
     if (def == null) {
       try {
-	def = getModuleContext().getJavaClassDefinition(className);
+        def = getModuleContext().getJavaClassDefinition(className);
 
-	_javaClassWrappers.put(className, def);
+        _javaClassWrappers.put(className, def);
       } catch (RuntimeException e) {
-	_classNotFoundCache.put(className, className);
-          
-	throw e;
+        _classNotFoundCache.put(className, className);
+
+        throw e;
       } catch (Exception e) {
-	throw new QuercusRuntimeException(e);
+        throw new QuercusRuntimeException(e);
       }
     }
 
@@ -791,7 +791,7 @@ public class Quercus
 
     return def;
   }
-  
+
   /**
    * Finds the java class wrapper.
    */
@@ -825,11 +825,11 @@ public class Quercus
           setIni(entry.getKey().toString(), entry.getValue().toString());
         }
       }
-      
+
       _iniFile = path;
     }
   }
-  
+
   /**
    * Returns the ini file.
    */
@@ -880,7 +880,7 @@ public class Quercus
   {
     return _iniDefinitions.get(name).getAsBoolean(this);
   }
-  
+
   /**
    * Returns an ini value as a long.
    */
@@ -888,7 +888,7 @@ public class Quercus
   {
     return _iniDefinitions.get(name).getAsLongValue(this).toLong();
   }
-  
+
   /**
    * Returns an ini value.
    */
@@ -896,7 +896,7 @@ public class Quercus
   {
     return _iniDefinitions.get(name).getValue(this);
   }
-  
+
   /**
    * Sets a server env value.
    */
@@ -928,7 +928,7 @@ public class Quercus
   {
     return _serverEnvMap;
   }
-  
+
   /**
    * Returns the compile classloader
    */
@@ -943,7 +943,7 @@ public class Quercus
   public void setCompileClassLoader(ClassLoader loader)
   {
   }
-  
+
   /**
    * Returns the relative path.
    */
@@ -951,7 +951,7 @@ public class Quercus
   {
     if (path == null)
       return "tmp.eval";
-    
+
     String pathName = path.getFullPath();
     String pwdName = getPwd().getFullPath();
 
@@ -1222,10 +1222,10 @@ public class Quercus
 
     synchronized (_functionNameMap) {
       id = _functionNameMap.get(name);
-	  
+
       if (id >= 0)
-	return id;
-	
+        return id;
+
       id = _functionNameMap.size();
 
       extendFunctionMap(name, id);
@@ -1241,7 +1241,7 @@ public class Quercus
     if (_functionMap.length <= id) {
       AbstractFunction []functionMap = new AbstractFunction[id + 256];
       System.arraycopy(_functionMap, 0,
-		       functionMap, 0, _functionMap.length);
+                       functionMap, 0, _functionMap.length);
       _functionMap = functionMap;
     }
 
@@ -1279,7 +1279,7 @@ public class Quercus
   public int setFunction(String name, AbstractFunction fun)
   {
     int id = getFunctionId(name);
-    
+
     _functionMap[id] = fun;
 
     return id;
@@ -1301,31 +1301,31 @@ public class Quercus
       id = _classNameMap.get(name);
 
       if (id >= 0) {
-	_classNameMap.put(className, id);
-	
-	return id;
+        _classNameMap.put(className, id);
+
+        return id;
       }
-      
+
       id = _classNameMap.size();
 
       if (_classDefMap.length <= id) {
-	String []classNames = new String[id + 256];
-	System.arraycopy(_classNames, 0,
-			 classNames, 0,
-			 _classNames.length);
-	_classNames = classNames;
-	  
-	ClassDef []classDefMap = new ClassDef[_classNames.length];
-	System.arraycopy(_classDefMap, 0,
-			 classDefMap, 0,
-			 _classDefMap.length);
-	_classDefMap = classDefMap;
-	  
-	QuercusClass []classCacheMap = new QuercusClass[_classNames.length];
-	System.arraycopy(_classCacheMap, 0,
-			 classCacheMap, 0,
-			 _classCacheMap.length);
-	_classCacheMap = classCacheMap;
+        String []classNames = new String[id + 256];
+        System.arraycopy(_classNames, 0,
+                         classNames, 0,
+                         _classNames.length);
+        _classNames = classNames;
+
+        ClassDef []classDefMap = new ClassDef[_classNames.length];
+        System.arraycopy(_classDefMap, 0,
+                         classDefMap, 0,
+                         _classDefMap.length);
+        _classDefMap = classDefMap;
+
+        QuercusClass []classCacheMap = new QuercusClass[_classNames.length];
+        System.arraycopy(_classCacheMap, 0,
+                         classCacheMap, 0,
+                         _classCacheMap.length);
+        _classCacheMap = classCacheMap;
       }
 
       _classNames[id] = className;
@@ -1422,28 +1422,28 @@ public class Quercus
       id = _constantNameMap.get(name);
 
       if (id >= 0)
-	return id;
-      
+        return id;
+
       id = _constantNameMap.size();
 
       if (_classDefMap.length <= id) {
-	Value []constantMap = new Value[id + 256];
-	System.arraycopy(_constantMap, 0,
-			 constantMap, 0,
-			 _constantMap.length);
-	_constantMap = constantMap;
-	  
-	Value []constantNameList = new Value[id + 256];
-	System.arraycopy(_constantNameList, 0,
-			 constantNameList, 0,
-			 _constantNameList.length);
-	_constantNameList = constantNameList;
-	  
-	int []constantLowerMap = new int[_constantMap.length];
-	System.arraycopy(_constantLowerMap, 0,
-			 constantLowerMap, 0,
-			 _constantLowerMap.length);
-	_constantLowerMap = constantLowerMap;
+        Value []constantMap = new Value[id + 256];
+        System.arraycopy(_constantMap, 0,
+                         constantMap, 0,
+                         _constantMap.length);
+        _constantMap = constantMap;
+
+        Value []constantNameList = new Value[id + 256];
+        System.arraycopy(_constantNameList, 0,
+                         constantNameList, 0,
+                         _constantNameList.length);
+        _constantNameList = constantNameList;
+
+        int []constantLowerMap = new int[_constantMap.length];
+        System.arraycopy(_constantLowerMap, 0,
+                         constantLowerMap, 0,
+                         _constantLowerMap.length);
+        _constantLowerMap = constantLowerMap;
       }
 
       // XXX: i18n
@@ -1451,18 +1451,25 @@ public class Quercus
 
       // php/1a0g, php/1d06
       _constantNameMap.put(name, id);
-      
-      // php/0501
-      int lowerId;
 
-      if (! name.equals(name.toLowerCase()))
-        lowerId = getConstantId(name.toLowerCase());
-      else
-        lowerId = id;
-    
-      _constantLowerMap[id] = lowerId;
+      // php/050a - only case-insensitive constants should add lower case,
+      // i.e. use addLowerConstantId
     }
-      
+
+    return id;
+  }
+
+  /**
+   * Returns the id for a constant
+   */
+  public int addLowerConstantId(StringValue name)
+  {
+    int id = getConstantId(name);
+
+    int lowerId = getConstantId(name.toLowerCase());
+
+    _constantLowerMap[id] = lowerId;
+
     return id;
   }
 
@@ -1547,7 +1554,7 @@ public class Quercus
 
     if (module == null)
       throw new IllegalStateException(L.l("'{0}' is an unknown quercus module",
-					  name));
+                                          name));
 
     return module;
   }
@@ -1602,7 +1609,7 @@ public class Quercus
     else
       return BooleanValue.FALSE;
   }
-  
+
   public Collection<ModuleInfo> getModules()
   {
     return _modules.values();
@@ -1619,9 +1626,9 @@ public class Quercus
     _workDir = getWorkDir();
 
     _iniDefinitions.addAll(_ini);
-    
+
     _includeCache = new TimedCache<IncludeKey, Path>(getIncludeCacheMax(),
-						     getIncludeCacheTimeout());
+                                                     getIncludeCacheTimeout());
 
     initLocal();
   }
@@ -1629,8 +1636,8 @@ public class Quercus
   public void addModule(QuercusModule module)
   {
     ModuleInfo info = new ModuleInfo(_moduleContext,
-				     module.getClass().getName(),
-				     module);
+                                     module.getClass().getName(),
+                                     module);
 
     addModuleInfo(info);
   }
@@ -1648,7 +1655,7 @@ public class Quercus
   protected void addModuleInfo(ModuleInfo info)
   {
     _modules.put(info.getName(), info);
-    
+
     if (info.getModule() instanceof ModuleStartupListener)
       _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
 
@@ -1657,23 +1664,23 @@ public class Quercus
       _extensionSetLowerCase.add(ext.toLowerCase());
     }
 
-    Map<String, Value> map = info.getConstMap();
+    Map<StringValue, Value> map = info.getConstMap();
 
     if (map != null) {
-      for (Map.Entry<String,Value> entry : map.entrySet()) {
-	int id = getConstantId(entry.getKey());
+      for (Map.Entry<StringValue,Value> entry : map.entrySet()) {
+        int id = getConstantId(entry.getKey());
 
-	_constantMap[id] = entry.getValue();
+        _constantMap[id] = entry.getValue();
       }
     }
 
     _iniDefinitions.addAll(info.getIniDefinitions());
 
     for (Map.Entry<String, AbstractFunction> entry
-	   : info.getFunctions().entrySet()) {
+           : info.getFunctions().entrySet()) {
       String funName = entry.getKey();
       AbstractFunction fun = entry.getValue();
-      
+
       _funMap.put(funName, fun);
       _lowerFunMap.put(funName.toLowerCase(), fun);
 
@@ -1687,17 +1694,17 @@ public class Quercus
   private void initClasses()
   {
     for (Map.Entry<String,JavaClassDef> entry
-	   : _moduleContext.getWrapperMap().entrySet()) {
+           : _moduleContext.getWrapperMap().entrySet()) {
       String name = entry.getKey();
       JavaClassDef def = entry.getValue();
-      
+
       _javaClassWrappers.put(name, def);
       _lowerJavaClassWrappers.put(name.toLowerCase(), def);
     }
-    
+
     for (Map.Entry<String,ClassDef> entry
-	   : _moduleContext.getClassMap().entrySet()) {
-      
+           : _moduleContext.getClassMap().entrySet()) {
+
       String name = entry.getKey();
       ClassDef def = entry.getValue();
 
@@ -1723,7 +1730,7 @@ public class Quercus
 
     return value;
   }
-  
+
   /**
    * Creates a string.  Because these strings are typically Java
    * constants, they fit into a lru cache.
@@ -1751,12 +1758,12 @@ public class Quercus
 
     if (value != null)
       return value;
-    
+
     synchronized (_internMap) {
       value = _internMap.get(name);
 
       if (value != null)
-	return value;
+        return value;
 
       if (value == null) {
         name = name.intern();
@@ -1836,9 +1843,9 @@ public class Quercus
     if (obj == null)
       return NullValue.NULL;
     else if (Byte.class.equals(obj.getClass())
-	     || Short.class.equals(obj.getClass())
-	     || Integer.class.equals(obj.getClass())
-	     || Long.class.equals(obj.getClass())) {
+             || Short.class.equals(obj.getClass())
+             || Integer.class.equals(obj.getClass())
+             || Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
     } else if (Float.class.equals(obj.getClass()) ||
                Double.class.equals(obj.getClass())) {
@@ -1869,7 +1876,7 @@ public class Quercus
 
     for (String path : paths) {
       if (pwd.lookup(path).isDirectory()) {
-	sb.append(":").append(pwd.lookup(path).getPath());
+        sb.append(":").append(pwd.lookup(path).getPath());
       }
     }
 
@@ -1887,7 +1894,7 @@ public class Quercus
   {
     return new Env(this, page, out, request, response);
   }
-  
+
   public ExprFactory createExprFactory()
   {
     return new ExprFactory();
@@ -1916,9 +1923,9 @@ public class Quercus
     private final Path _scriptPwd;
 
     IncludeKey(StringValue include,
-	       String includePath,
-	       Path pwd,
-	       Path scriptPwd)
+               String includePath,
+               Path pwd,
+               Path scriptPwd)
     {
       _include = include;
       _includePath = includePath;
@@ -1946,9 +1953,9 @@ public class Quercus
       IncludeKey key = (IncludeKey) o;
 
       return (_include.equals(key._include)
-	      && _includePath.equals(key._includePath)
-	      && _pwd.equals(key._pwd)
-	      && _scriptPwd.equals(key._scriptPwd));
+              && _includePath.equals(key._includePath)
+              && _pwd.equals(key._pwd)
+              && _scriptPwd.equals(key._scriptPwd));
     }
   }
 
@@ -1962,10 +1969,10 @@ public class Quercus
     _superGlobals.add("_SERVER");
     _superGlobals.add("_SESSION");
     _superGlobals.add("_REQUEST");
-    
+
     /*
     String includePath;
-    
+
     if (Path.isWindows())
       includePath = "."
                     + FileModule.PATH_SEPARATOR
@@ -1976,7 +1983,7 @@ public class Quercus
                     + "/usr/share/php"
                     + FileModule.PATH_SEPARATOR
                     + "/usr/share/pear";
-    
+
     INI_INCLUDE_PATH = _ini.add("include_path", includePath, IniDefinition.PHP_INI_ALL);
     */
   }
@@ -1987,7 +1994,7 @@ public class Quercus
     = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
   public static final IniDefinition INI_ALWAYS_POPULATE_RAW_POST_DATA
     = _ini.add("always_populate_raw_post_data", false, IniDefinition.PHP_INI_PERDIR);
-  
+
   // unicode ini
   public static final IniDefinition INI_UNICODE_SEMANTICS
     = _ini.add("unicode.semantics", false, IniDefinition.PHP_INI_SYSTEM);

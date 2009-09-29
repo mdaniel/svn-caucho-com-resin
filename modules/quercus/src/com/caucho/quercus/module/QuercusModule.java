@@ -30,6 +30,7 @@
 package com.caucho.quercus.module;
 
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 
 import java.util.Map;
 
@@ -37,7 +38,7 @@ import java.util.Map;
  * Represents a quercus module.
  */
 public interface QuercusModule {
-  public Map<String,Value> getConstMap();
+  public Map<StringValue,Value> getConstMap();
 
   /**
    * Returns the extensions implemented by the module.

@@ -196,21 +196,21 @@ public class SocketModule extends AbstractQuercusModule {
   private static final int SOL_TCP = 6;
   private static final int SOL_UDP = 17;
 
-  private static final HashMap<String,Value> _constMap
-    = new HashMap<String,Value>();
+  private static final HashMap<StringValue,Value> _constMap
+    = new HashMap<StringValue,Value>();
 
   /**
    * Returns the constants defined by this module.
    */
-  public Map<String,Value> getConstMap()
+  public Map<StringValue,Value> getConstMap()
   {
     return _constMap;
   }
- 
+
   @ReturnNullAsFalse
   public static SocketInputOutput socket_create(Env env,
-                                                int domain, 
-                                                int type, 
+                                                int domain,
+                                                int type,
                                                 int protocol)
   {
     try {
@@ -249,7 +249,7 @@ public class SocketModule extends AbstractQuercusModule {
 
   public static boolean socket_bind(Env env,
                                     @NotNull SocketInputOutput socket,
-                                    StringValue address, 
+                                    StringValue address,
                                     @Optional("0") int port)
   {
     try {
@@ -260,7 +260,7 @@ public class SocketModule extends AbstractQuercusModule {
         return false;
       }
 
-      InetSocketAddress socketAddress = 
+      InetSocketAddress socketAddress =
         new InetSocketAddress(addresses[0], port);
 
       socket.bind(socketAddress);
@@ -288,7 +288,7 @@ public class SocketModule extends AbstractQuercusModule {
         return false;
       }
 
-      InetSocketAddress socketAddress = 
+      InetSocketAddress socketAddress =
         new InetSocketAddress(addresses[0], port);
 
       socket.connect(socketAddress);
@@ -353,7 +353,7 @@ public class SocketModule extends AbstractQuercusModule {
 
   public static Value socket_write(Env env,
                                    @NotNull SocketInputOutput socket,
-                                   @NotNull InputStream is, 
+                                   @NotNull InputStream is,
                                    @Optional("-1") int length)
   {
     if (is == null)
@@ -372,7 +372,7 @@ public class SocketModule extends AbstractQuercusModule {
         return LongValue.create(result);
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -393,166 +393,166 @@ public class SocketModule extends AbstractQuercusModule {
     case 0:
       file.closeRead();
       return true;
-      
+
     case 1:
       file.closeWrite();
       return true;
-      
+
     case 2:
       file.close();
       return true;
-      
+
     default:
       return false;
     }
   }
 
   static {
-    _constMap.put("AF_UNIX", LongValue.create(AF_UNIX));
-    _constMap.put("AF_INET", LongValue.create(AF_INET));
-    _constMap.put("AF_INET6", LongValue.create(AF_INET6));
+    addConstant(_constMap ,"AF_UNIX", AF_UNIX);
+    addConstant(_constMap, "AF_INET", AF_INET);
+    addConstant(_constMap, "AF_INET6", AF_INET6);
 
-    _constMap.put("SOCK_STREAM", LongValue.create(SOCK_STREAM));
-    _constMap.put("SOCK_DGRAM", LongValue.create(SOCK_DGRAM));
-    _constMap.put("SOCK_RAW", LongValue.create(SOCK_RAW));
-    _constMap.put("SOCK_SEQPACKET", LongValue.create(SOCK_SEQPACKET));
-    _constMap.put("SOCK_RDM", LongValue.create(SOCK_RDM));
+    addConstant(_constMap, "SOCK_STREAM", SOCK_STREAM);
+    addConstant(_constMap, "SOCK_DGRAM", SOCK_DGRAM);
+    addConstant(_constMap, "SOCK_RAW", SOCK_RAW);
+    addConstant(_constMap, "SOCK_SEQPACKET", SOCK_SEQPACKET);
+    addConstant(_constMap, "SOCK_RDM", SOCK_RDM);
 
-    _constMap.put("MSG_OOB", LongValue.create(MSG_OOB));
-    _constMap.put("MSG_WAITALL", LongValue.create(MSG_WAITALL));
-    _constMap.put("MSG_PEEK", LongValue.create(MSG_PEEK));
-    _constMap.put("MSG_DONTROUTE", LongValue.create(MSG_DONTROUTE));
+    addConstant(_constMap, "MSG_OOB", MSG_OOB);
+    addConstant(_constMap, "MSG_WAITALL", MSG_WAITALL);
+    addConstant(_constMap, "MSG_PEEK", MSG_PEEK);
+    addConstant(_constMap, "MSG_DONTROUTE", MSG_DONTROUTE);
 
-    _constMap.put("SO_DEBUG", LongValue.create(SO_DEBUG));
-    _constMap.put("SO_REUSEADDR", LongValue.create(SO_REUSEADDR));
-    _constMap.put("SO_KEEPALIVE", LongValue.create(SO_KEEPALIVE));
-    _constMap.put("SO_DONTROUTE", LongValue.create(SO_DONTROUTE));
-    _constMap.put("SO_LINGER", LongValue.create(SO_LINGER));
-    _constMap.put("SO_BROADCAST", LongValue.create(SO_BROADCAST));
-    _constMap.put("SO_OOBINLINE", LongValue.create(SO_OOBINLINE));
-    _constMap.put("SO_SNDBUF", LongValue.create(SO_SNDBUF));
-    _constMap.put("SO_RCVBUF", LongValue.create(SO_RCVBUF));
-    _constMap.put("SO_SNDLOWAT", LongValue.create(SO_SNDLOWAT));
-    _constMap.put("SO_RCVLOWAT", LongValue.create(SO_RCVLOWAT));
-    _constMap.put("SO_SNDTIMEO", LongValue.create(SO_SNDTIMEO));
-    _constMap.put("SO_RCVTIMEO", LongValue.create(SO_RCVTIMEO));
-    _constMap.put("SO_TYPE", LongValue.create(SO_TYPE));
-    _constMap.put("SO_ERROR", LongValue.create(SO_ERROR));
+    addConstant(_constMap, "SO_DEBUG", SO_DEBUG);
+    addConstant(_constMap, "SO_REUSEADDR", SO_REUSEADDR);
+    addConstant(_constMap, "SO_KEEPALIVE", SO_KEEPALIVE);
+    addConstant(_constMap, "SO_DONTROUTE", SO_DONTROUTE);
+    addConstant(_constMap, "SO_LINGER", SO_LINGER);
+    addConstant(_constMap, "SO_BROADCAST", SO_BROADCAST);
+    addConstant(_constMap, "SO_OOBINLINE", SO_OOBINLINE);
+    addConstant(_constMap, "SO_SNDBUF", SO_SNDBUF);
+    addConstant(_constMap, "SO_RCVBUF", SO_RCVBUF);
+    addConstant(_constMap, "SO_SNDLOWAT", SO_SNDLOWAT);
+    addConstant(_constMap, "SO_RCVLOWAT", SO_RCVLOWAT);
+    addConstant(_constMap, "SO_SNDTIMEO", SO_SNDTIMEO);
+    addConstant(_constMap, "SO_RCVTIMEO", SO_RCVTIMEO);
+    addConstant(_constMap, "SO_TYPE", SO_TYPE);
+    addConstant(_constMap, "SO_ERROR", SO_ERROR);
 
-    _constMap.put("SOL_SOCKET", LongValue.create(SOL_SOCKET));
+    addConstant(_constMap, "SOL_SOCKET", SOL_SOCKET);
 
-    _constMap.put("SOMAXCONN", LongValue.create(SOMAXCONN));
+    addConstant(_constMap, "SOMAXCONN", SOMAXCONN);
 
-    _constMap.put("PHP_NORMAL_READ", LongValue.create(PHP_NORMAL_READ));
-    _constMap.put("PHP_BINARY_READ", LongValue.create(PHP_BINARY_READ));
-    
-    _constMap.put("SOCKET_EPERM", LongValue.create(SOCKET_EPERM));
-    _constMap.put("SOCKET_ENOENT", LongValue.create(SOCKET_ENOENT));
-    _constMap.put("SOCKET_EINTR", LongValue.create(SOCKET_EINTR));
-    _constMap.put("SOCKET_EIO", LongValue.create(SOCKET_EIO));
-    _constMap.put("SOCKET_ENXIO", LongValue.create(SOCKET_ENXIO));
-    _constMap.put("SOCKET_E2BIG", LongValue.create(SOCKET_E2BIG));
-    _constMap.put("SOCKET_EBADF", LongValue.create(SOCKET_EBADF));
-    _constMap.put("SOCKET_EAGAIN", LongValue.create(SOCKET_EAGAIN));
-    _constMap.put("SOCKET_ENOMEM", LongValue.create(SOCKET_ENOMEM));
-    _constMap.put("SOCKET_EACCES", LongValue.create(SOCKET_EACCES));
-    _constMap.put("SOCKET_EFAULT", LongValue.create(SOCKET_EFAULT));
-    _constMap.put("SOCKET_ENOTBLK", LongValue.create(SOCKET_ENOTBLK));
-    _constMap.put("SOCKET_EBUSY", LongValue.create(SOCKET_EBUSY));
-    _constMap.put("SOCKET_EEXIST", LongValue.create(SOCKET_EEXIST));
-    _constMap.put("SOCKET_EXDEV", LongValue.create(SOCKET_EXDEV));
-    _constMap.put("SOCKET_ENODEV", LongValue.create(SOCKET_ENODEV));
-    _constMap.put("SOCKET_ENOTDIR", LongValue.create(SOCKET_ENOTDIR));
-    _constMap.put("SOCKET_EISDIR", LongValue.create(SOCKET_EISDIR));
-    _constMap.put("SOCKET_EINVAL", LongValue.create(SOCKET_EINVAL));
-    _constMap.put("SOCKET_ENFILE", LongValue.create(SOCKET_ENFILE));
-    _constMap.put("SOCKET_EMFILE", LongValue.create(SOCKET_EMFILE));
-    _constMap.put("SOCKET_ENOTTY", LongValue.create(SOCKET_ENOTTY));
-    _constMap.put("SOCKET_ENOSPC", LongValue.create(SOCKET_ENOSPC));
-    _constMap.put("SOCKET_ESPIPE", LongValue.create(SOCKET_ESPIPE));
-    _constMap.put("SOCKET_EROFS", LongValue.create(SOCKET_EROFS));
-    _constMap.put("SOCKET_EMLINK", LongValue.create(SOCKET_EMLINK));
-    _constMap.put("SOCKET_EPIPE", LongValue.create(SOCKET_EPIPE));
-    _constMap.put("SOCKET_ENAMETOOLONG", LongValue.create(SOCKET_ENAMETOOLONG));
-    _constMap.put("SOCKET_ENOLCK", LongValue.create(SOCKET_ENOLCK));
-    _constMap.put("SOCKET_ENOSYS", LongValue.create(SOCKET_ENOSYS));
-    _constMap.put("SOCKET_ENOTEMPTY", LongValue.create(SOCKET_ENOTEMPTY));
-    _constMap.put("SOCKET_ELOOP", LongValue.create(SOCKET_ELOOP));
-    _constMap.put("SOCKET_EWOULDBLOCK", LongValue.create(SOCKET_EWOULDBLOCK));
-    _constMap.put("SOCKET_ENOMSG", LongValue.create(SOCKET_ENOMSG));
-    _constMap.put("SOCKET_EIDRM", LongValue.create(SOCKET_EIDRM));
-    _constMap.put("SOCKET_ECHRNG", LongValue.create(SOCKET_ECHRNG));
-    _constMap.put("SOCKET_EL2NSYNC", LongValue.create(SOCKET_EL2NSYNC));
-    _constMap.put("SOCKET_EL3HLT", LongValue.create(SOCKET_EL3HLT));
-    _constMap.put("SOCKET_EL3RST", LongValue.create(SOCKET_EL3RST));
-    _constMap.put("SOCKET_ELNRNG", LongValue.create(SOCKET_ELNRNG));
-    _constMap.put("SOCKET_EUNATCH", LongValue.create(SOCKET_EUNATCH));
-    _constMap.put("SOCKET_ENOCSI", LongValue.create(SOCKET_ENOCSI));
-    _constMap.put("SOCKET_EL2HLT", LongValue.create(SOCKET_EL2HLT));
-    _constMap.put("SOCKET_EBADE", LongValue.create(SOCKET_EBADE));
-    _constMap.put("SOCKET_EBADR", LongValue.create(SOCKET_EBADR));
-    _constMap.put("SOCKET_EXFULL", LongValue.create(SOCKET_EXFULL));
-    _constMap.put("SOCKET_ENOANO", LongValue.create(SOCKET_ENOANO));
-    _constMap.put("SOCKET_EBADRQC", LongValue.create(SOCKET_EBADRQC));
-    _constMap.put("SOCKET_EBADSLT", LongValue.create(SOCKET_EBADSLT));
-    _constMap.put("SOCKET_ENOSTR", LongValue.create(SOCKET_ENOSTR));
-    _constMap.put("SOCKET_ENODATA", LongValue.create(SOCKET_ENODATA));
-    _constMap.put("SOCKET_ETIME", LongValue.create(SOCKET_ETIME));
-    _constMap.put("SOCKET_ENOSR", LongValue.create(SOCKET_ENOSR));
-    _constMap.put("SOCKET_ENONET", LongValue.create(SOCKET_ENONET));
-    _constMap.put("SOCKET_EREMOTE", LongValue.create(SOCKET_EREMOTE));
-    _constMap.put("SOCKET_ENOLINK", LongValue.create(SOCKET_ENOLINK));
-    _constMap.put("SOCKET_EADV", LongValue.create(SOCKET_EADV));
-    _constMap.put("SOCKET_ESRMNT", LongValue.create(SOCKET_ESRMNT));
-    _constMap.put("SOCKET_ECOMM", LongValue.create(SOCKET_ECOMM));
-    _constMap.put("SOCKET_EPROTO", LongValue.create(SOCKET_EPROTO));
-    _constMap.put("SOCKET_EMULTIHOP", LongValue.create(SOCKET_EMULTIHOP));
-    _constMap.put("SOCKET_EBADMSG", LongValue.create(SOCKET_EBADMSG));
-    _constMap.put("SOCKET_ENOTUNIQ", LongValue.create(SOCKET_ENOTUNIQ));
-    _constMap.put("SOCKET_EBADFD", LongValue.create(SOCKET_EBADFD));
-    _constMap.put("SOCKET_EREMCHG", LongValue.create(SOCKET_EREMCHG));
-    _constMap.put("SOCKET_ERESTART", LongValue.create(SOCKET_ERESTART));
-    _constMap.put("SOCKET_ESTRPIPE", LongValue.create(SOCKET_ESTRPIPE));
-    _constMap.put("SOCKET_EUSERS", LongValue.create(SOCKET_EUSERS));
-    _constMap.put("SOCKET_ENOTSOCK", LongValue.create(SOCKET_ENOTSOCK));
-    _constMap.put("SOCKET_EDESTADDRREQ", LongValue.create(SOCKET_EDESTADDRREQ));
-    _constMap.put("SOCKET_EMSGSIZE", LongValue.create(SOCKET_EMSGSIZE));
-    _constMap.put("SOCKET_EPROTOTYPE", LongValue.create(SOCKET_EPROTOTYPE));
-    _constMap.put("SOCKET_ENOPROTOOPT", LongValue.create(SOCKET_ENOPROTOOPT));
-    _constMap.put("SOCKET_EPROTONOSUPPORT", 
-        LongValue.create(SOCKET_EPROTONOSUPPORT));
-    _constMap.put("SOCKET_ESOCKTNOSUPPORT", 
-        LongValue.create(SOCKET_ESOCKTNOSUPPORT));
-    _constMap.put("SOCKET_EOPNOTSUPP", LongValue.create(SOCKET_EOPNOTSUPP));
-    _constMap.put("SOCKET_EPFNOSUPPORT", LongValue.create(SOCKET_EPFNOSUPPORT));
-    _constMap.put("SOCKET_EAFNOSUPPORT", LongValue.create(SOCKET_EAFNOSUPPORT));
-    _constMap.put("SOCKET_EADDRINUSE", LongValue.create(SOCKET_EADDRINUSE));
-    _constMap.put("SOCKET_EADDRNOTAVAIL", 
-        LongValue.create(SOCKET_EADDRNOTAVAIL));
-    _constMap.put("SOCKET_ENETDOWN", LongValue.create(SOCKET_ENETDOWN));
-    _constMap.put("SOCKET_ENETUNREACH", LongValue.create(SOCKET_ENETUNREACH));
-    _constMap.put("SOCKET_ENETRESET", LongValue.create(SOCKET_ENETRESET));
-    _constMap.put("SOCKET_ECONNABORTED", LongValue.create(SOCKET_ECONNABORTED));
-    _constMap.put("SOCKET_ECONNRESET", LongValue.create(SOCKET_ECONNRESET));
-    _constMap.put("SOCKET_ENOBUFS", LongValue.create(SOCKET_ENOBUFS));
-    _constMap.put("SOCKET_EISCONN", LongValue.create(SOCKET_EISCONN));
-    _constMap.put("SOCKET_ENOTCONN", LongValue.create(SOCKET_ENOTCONN));
-    _constMap.put("SOCKET_ESHUTDOWN", LongValue.create(SOCKET_ESHUTDOWN));
-    _constMap.put("SOCKET_ETOOMANYREFS", LongValue.create(SOCKET_ETOOMANYREFS));
-    _constMap.put("SOCKET_ETIMEDOUT", LongValue.create(SOCKET_ETIMEDOUT));
-    _constMap.put("SOCKET_ECONNREFUSED", LongValue.create(SOCKET_ECONNREFUSED));
-    _constMap.put("SOCKET_EHOSTDOWN", LongValue.create(SOCKET_EHOSTDOWN));
-    _constMap.put("SOCKET_EHOSTUNREACH", LongValue.create(SOCKET_EHOSTUNREACH));
-    _constMap.put("SOCKET_EALREADY", LongValue.create(SOCKET_EALREADY));
-    _constMap.put("SOCKET_EINPROGRESS", LongValue.create(SOCKET_EINPROGRESS));
-    _constMap.put("SOCKET_EISNAM", LongValue.create(SOCKET_EISNAM));
-    _constMap.put("SOCKET_EREMOTEIO", LongValue.create(SOCKET_EREMOTEIO));
-    _constMap.put("SOCKET_EDQUOT", LongValue.create(SOCKET_EDQUOT));
-    _constMap.put("SOCKET_ENOMEDIUM", LongValue.create(SOCKET_ENOMEDIUM));
-    _constMap.put("SOCKET_EMEDIUMTYPE", LongValue.create(SOCKET_EMEDIUMTYPE));
+    addConstant(_constMap, "PHP_NORMAL_READ", PHP_NORMAL_READ);
+    addConstant(_constMap, "PHP_BINARY_READ", PHP_BINARY_READ);
 
-    _constMap.put("SOL_TCP", LongValue.create(SOL_TCP));
-    _constMap.put("SOL_UDP", LongValue.create(SOL_UDP));
+    addConstant(_constMap, "SOCKET_EPERM", SOCKET_EPERM);
+    addConstant(_constMap, "SOCKET_ENOENT", SOCKET_ENOENT);
+    addConstant(_constMap, "SOCKET_EINTR", SOCKET_EINTR);
+    addConstant(_constMap, "SOCKET_EIO", SOCKET_EIO);
+    addConstant(_constMap, "SOCKET_ENXIO", SOCKET_ENXIO);
+    addConstant(_constMap, "SOCKET_E2BIG", SOCKET_E2BIG);
+    addConstant(_constMap, "SOCKET_EBADF", SOCKET_EBADF);
+    addConstant(_constMap, "SOCKET_EAGAIN", SOCKET_EAGAIN);
+    addConstant(_constMap, "SOCKET_ENOMEM", SOCKET_ENOMEM);
+    addConstant(_constMap, "SOCKET_EACCES", SOCKET_EACCES);
+    addConstant(_constMap, "SOCKET_EFAULT", SOCKET_EFAULT);
+    addConstant(_constMap, "SOCKET_ENOTBLK", SOCKET_ENOTBLK);
+    addConstant(_constMap, "SOCKET_EBUSY", SOCKET_EBUSY);
+    addConstant(_constMap, "SOCKET_EEXIST", SOCKET_EEXIST);
+    addConstant(_constMap, "SOCKET_EXDEV", SOCKET_EXDEV);
+    addConstant(_constMap, "SOCKET_ENODEV", SOCKET_ENODEV);
+    addConstant(_constMap, "SOCKET_ENOTDIR", SOCKET_ENOTDIR);
+    addConstant(_constMap, "SOCKET_EISDIR", SOCKET_EISDIR);
+    addConstant(_constMap, "SOCKET_EINVAL", SOCKET_EINVAL);
+    addConstant(_constMap, "SOCKET_ENFILE", SOCKET_ENFILE);
+    addConstant(_constMap, "SOCKET_EMFILE", SOCKET_EMFILE);
+    addConstant(_constMap, "SOCKET_ENOTTY", SOCKET_ENOTTY);
+    addConstant(_constMap, "SOCKET_ENOSPC", SOCKET_ENOSPC);
+    addConstant(_constMap, "SOCKET_ESPIPE", SOCKET_ESPIPE);
+    addConstant(_constMap, "SOCKET_EROFS", SOCKET_EROFS);
+    addConstant(_constMap, "SOCKET_EMLINK", SOCKET_EMLINK);
+    addConstant(_constMap, "SOCKET_EPIPE", SOCKET_EPIPE);
+    addConstant(_constMap, "SOCKET_ENAMETOOLONG", SOCKET_ENAMETOOLONG);
+    addConstant(_constMap, "SOCKET_ENOLCK", SOCKET_ENOLCK);
+    addConstant(_constMap, "SOCKET_ENOSYS", SOCKET_ENOSYS);
+    addConstant(_constMap, "SOCKET_ENOTEMPTY", SOCKET_ENOTEMPTY);
+    addConstant(_constMap, "SOCKET_ELOOP", SOCKET_ELOOP);
+    addConstant(_constMap, "SOCKET_EWOULDBLOCK", SOCKET_EWOULDBLOCK);
+    addConstant(_constMap, "SOCKET_ENOMSG", SOCKET_ENOMSG);
+    addConstant(_constMap, "SOCKET_EIDRM", SOCKET_EIDRM);
+    addConstant(_constMap, "SOCKET_ECHRNG", SOCKET_ECHRNG);
+    addConstant(_constMap, "SOCKET_EL2NSYNC", SOCKET_EL2NSYNC);
+    addConstant(_constMap, "SOCKET_EL3HLT", SOCKET_EL3HLT);
+    addConstant(_constMap, "SOCKET_EL3RST", SOCKET_EL3RST);
+    addConstant(_constMap, "SOCKET_ELNRNG", SOCKET_ELNRNG);
+    addConstant(_constMap, "SOCKET_EUNATCH", SOCKET_EUNATCH);
+    addConstant(_constMap, "SOCKET_ENOCSI", SOCKET_ENOCSI);
+    addConstant(_constMap, "SOCKET_EL2HLT", SOCKET_EL2HLT);
+    addConstant(_constMap, "SOCKET_EBADE", SOCKET_EBADE);
+    addConstant(_constMap, "SOCKET_EBADR", SOCKET_EBADR);
+    addConstant(_constMap, "SOCKET_EXFULL", SOCKET_EXFULL);
+    addConstant(_constMap, "SOCKET_ENOANO", SOCKET_ENOANO);
+    addConstant(_constMap, "SOCKET_EBADRQC", SOCKET_EBADRQC);
+    addConstant(_constMap, "SOCKET_EBADSLT", SOCKET_EBADSLT);
+    addConstant(_constMap, "SOCKET_ENOSTR", SOCKET_ENOSTR);
+    addConstant(_constMap, "SOCKET_ENODATA", SOCKET_ENODATA);
+    addConstant(_constMap, "SOCKET_ETIME", SOCKET_ETIME);
+    addConstant(_constMap, "SOCKET_ENOSR", SOCKET_ENOSR);
+    addConstant(_constMap, "SOCKET_ENONET", SOCKET_ENONET);
+    addConstant(_constMap, "SOCKET_EREMOTE", SOCKET_EREMOTE);
+    addConstant(_constMap, "SOCKET_ENOLINK", SOCKET_ENOLINK);
+    addConstant(_constMap, "SOCKET_EADV", SOCKET_EADV);
+    addConstant(_constMap, "SOCKET_ESRMNT", SOCKET_ESRMNT);
+    addConstant(_constMap, "SOCKET_ECOMM", SOCKET_ECOMM);
+    addConstant(_constMap, "SOCKET_EPROTO", SOCKET_EPROTO);
+    addConstant(_constMap, "SOCKET_EMULTIHOP", SOCKET_EMULTIHOP);
+    addConstant(_constMap, "SOCKET_EBADMSG", SOCKET_EBADMSG);
+    addConstant(_constMap, "SOCKET_ENOTUNIQ", SOCKET_ENOTUNIQ);
+    addConstant(_constMap, "SOCKET_EBADFD", SOCKET_EBADFD);
+    addConstant(_constMap, "SOCKET_EREMCHG", SOCKET_EREMCHG);
+    addConstant(_constMap, "SOCKET_ERESTART", SOCKET_ERESTART);
+    addConstant(_constMap, "SOCKET_ESTRPIPE", SOCKET_ESTRPIPE);
+    addConstant(_constMap, "SOCKET_EUSERS", SOCKET_EUSERS);
+    addConstant(_constMap, "SOCKET_ENOTSOCK", SOCKET_ENOTSOCK);
+    addConstant(_constMap, "SOCKET_EDESTADDRREQ", SOCKET_EDESTADDRREQ);
+    addConstant(_constMap, "SOCKET_EMSGSIZE", SOCKET_EMSGSIZE);
+    addConstant(_constMap, "SOCKET_EPROTOTYPE", SOCKET_EPROTOTYPE);
+    addConstant(_constMap, "SOCKET_ENOPROTOOPT", SOCKET_ENOPROTOOPT);
+    addConstant(_constMap, "SOCKET_EPROTONOSUPPORT",
+        SOCKET_EPROTONOSUPPORT);
+    addConstant(_constMap, "SOCKET_ESOCKTNOSUPPORT",
+        SOCKET_ESOCKTNOSUPPORT);
+    addConstant(_constMap, "SOCKET_EOPNOTSUPP", SOCKET_EOPNOTSUPP);
+    addConstant(_constMap, "SOCKET_EPFNOSUPPORT", SOCKET_EPFNOSUPPORT);
+    addConstant(_constMap, "SOCKET_EAFNOSUPPORT", SOCKET_EAFNOSUPPORT);
+    addConstant(_constMap, "SOCKET_EADDRINUSE", SOCKET_EADDRINUSE);
+    addConstant(_constMap, "SOCKET_EADDRNOTAVAIL",
+        SOCKET_EADDRNOTAVAIL);
+    addConstant(_constMap, "SOCKET_ENETDOWN", SOCKET_ENETDOWN);
+    addConstant(_constMap, "SOCKET_ENETUNREACH", SOCKET_ENETUNREACH);
+    addConstant(_constMap, "SOCKET_ENETRESET", SOCKET_ENETRESET);
+    addConstant(_constMap, "SOCKET_ECONNABORTED", SOCKET_ECONNABORTED);
+    addConstant(_constMap, "SOCKET_ECONNRESET", SOCKET_ECONNRESET);
+    addConstant(_constMap, "SOCKET_ENOBUFS", SOCKET_ENOBUFS);
+    addConstant(_constMap, "SOCKET_EISCONN", SOCKET_EISCONN);
+    addConstant(_constMap, "SOCKET_ENOTCONN", SOCKET_ENOTCONN);
+    addConstant(_constMap, "SOCKET_ESHUTDOWN", SOCKET_ESHUTDOWN);
+    addConstant(_constMap, "SOCKET_ETOOMANYREFS", SOCKET_ETOOMANYREFS);
+    addConstant(_constMap, "SOCKET_ETIMEDOUT", SOCKET_ETIMEDOUT);
+    addConstant(_constMap, "SOCKET_ECONNREFUSED", SOCKET_ECONNREFUSED);
+    addConstant(_constMap, "SOCKET_EHOSTDOWN", SOCKET_EHOSTDOWN);
+    addConstant(_constMap, "SOCKET_EHOSTUNREACH", SOCKET_EHOSTUNREACH);
+    addConstant(_constMap, "SOCKET_EALREADY", SOCKET_EALREADY);
+    addConstant(_constMap, "SOCKET_EINPROGRESS", SOCKET_EINPROGRESS);
+    addConstant(_constMap, "SOCKET_EISNAM", SOCKET_EISNAM);
+    addConstant(_constMap, "SOCKET_EREMOTEIO", SOCKET_EREMOTEIO);
+    addConstant(_constMap, "SOCKET_EDQUOT", SOCKET_EDQUOT);
+    addConstant(_constMap, "SOCKET_ENOMEDIUM", SOCKET_ENOMEDIUM);
+    addConstant(_constMap, "SOCKET_EMEDIUMTYPE", SOCKET_EMEDIUMTYPE);
+
+    addConstant(_constMap, "SOL_TCP", SOL_TCP);
+    addConstant(_constMap, "SOL_UDP", SOL_UDP);
   }
 }
 

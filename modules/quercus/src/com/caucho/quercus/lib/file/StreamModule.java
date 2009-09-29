@@ -76,13 +76,13 @@ public class StreamModule extends AbstractQuercusModule {
   public static final int STREAM_URL_STAT_LINK = 1;
   public static final int STREAM_URL_STAT_QUIET = 2;
 
-  private static final HashMap<String,Value> _constMap 
-    = new HashMap<String,Value>();
+  private static final HashMap<StringValue,Value> _constMap
+    = new HashMap<StringValue,Value>();
 
-  private static final HashMap<String,ProtocolWrapper> _wrapperMap 
+  private static final HashMap<String,ProtocolWrapper> _wrapperMap
     = new HashMap<String,ProtocolWrapper>();
 
-  private static final HashMap<String,ProtocolWrapper> _unregisteredWrapperMap 
+  private static final HashMap<String,ProtocolWrapper> _unregisteredWrapperMap
     = new HashMap<String,ProtocolWrapper>();
 
   private static final ArrayValue _wrapperArray = new ArrayValueImpl();
@@ -92,13 +92,13 @@ public class StreamModule extends AbstractQuercusModule {
    *
    * @return the new constant chain
    */
-  public Map<String,Value> getConstMap()
+  public Map<StringValue,Value> getConstMap()
   {
     return _constMap;
   }
 
   /*
-  public static void stream_bucket_append(Env env, 
+  public static void stream_bucket_append(Env env,
                                           @NotNull StreamBucketBrigade brigade,
                                           @NotNull StreamBucket bucket)
   {
@@ -106,17 +106,17 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   @ReturnNullAsFalse
-  public static Value stream_bucket_make_writable(Env env, 
+  public static Value stream_bucket_make_writable(Env env,
       @NotNull StreamBucketBrigade brigade)
   {
     return brigade.popTop();
   }
-  */                                       
+  */
 
   /**
    * Creates a stream context.
    */
-  public static Value stream_context_create(Env env, 
+  public static Value stream_context_create(Env env,
                                             @Optional ArrayValue options)
   {
     return new StreamContextResource(options);
@@ -205,7 +205,7 @@ public class StreamModule extends AbstractQuercusModule {
                                            @Optional int offset)
   {
     long bytesWritten = 0;
-    
+
     try {
       if (in == null)
         return -1;
@@ -320,14 +320,14 @@ public class StreamModule extends AbstractQuercusModule {
         return line;
     } catch (IOException e) {
       env.warning(e);
-      
+
       return BooleanValue.FALSE;
     }
   }
 
   /**
    * Returns the metadata of this stream.
-   * 
+   *
    * XXX: TODO
    */
   public static Value stream_get_meta_data(Env env,
@@ -335,11 +335,11 @@ public class StreamModule extends AbstractQuercusModule {
   {
     if (stream == null)
       return BooleanValue.FALSE;
-    
-    ArrayValue array = new ArrayValueImpl();    
+
+    ArrayValue array = new ArrayValueImpl();
 
     boolean isTimeout = false;
-    
+
     if (stream instanceof AbstractBinaryInputOutput)
       isTimeout = ((AbstractBinaryInputOutput) stream).isTimeout();
 
@@ -347,7 +347,7 @@ public class StreamModule extends AbstractQuercusModule {
       array.put(env.createString("timed_out"), BooleanValue.TRUE);
     else
       array.put(env.createString("timed_out"), BooleanValue.FALSE);
-    
+
     return array;
   }
 
@@ -387,13 +387,13 @@ public class StreamModule extends AbstractQuercusModule {
                                             int mode)
   {
     env.stub("stream_set_blocking()");
-    
+
     if (stream == null)
       return false;
     else
       return true;
   }
-  
+
   public static boolean stream_set_timeout(Env env,
                                            @NotNull Value stream,
                                            int seconds,
@@ -423,7 +423,7 @@ public class StreamModule extends AbstractQuercusModule {
   {
     return 0;
   }
-  
+
   /*
    * Opens an Internet connection.
    */
@@ -441,17 +441,17 @@ public class StreamModule extends AbstractQuercusModule {
         env.warning("socket to connect to must not be null");
         return null;
       }
-      
+
       if (flags != STREAM_CLIENT_CONNECT) {
         env.stub("unsupported stream_socket_client flag");
       }
-      
+
       boolean isTcp = true;
       boolean isSecure = false;
       remoteSocket = remoteSocket.trim();
 
       int typeIndex = remoteSocket.indexOf("://");
-      
+
       if (typeIndex > 0) {
         String type = remoteSocket.substring(0, typeIndex);
         remoteSocket = remoteSocket.substring(typeIndex + 3);
@@ -466,24 +466,24 @@ public class StreamModule extends AbstractQuercusModule {
         }
         else {
           env.warning(L.l("unrecognized socket transport: {0}", type));
-          
+
           return null;
         }
       }
 
       int colonIndex = remoteSocket.lastIndexOf(':');
-      
+
       String host = remoteSocket;
       int port = 80;
-      
+
       if (colonIndex > 0) {
         host = remoteSocket.substring(0, colonIndex);
-        
+
         port = 0;
-        
+
         for (int i = colonIndex + 1; i < remoteSocket.length(); i++) {
           char ch = remoteSocket.charAt(i);
-          
+
           if ('0' <= ch && ch <= '9')
             port = port * 10 + ch - '0';
           else
@@ -492,12 +492,12 @@ public class StreamModule extends AbstractQuercusModule {
       }
 
       SocketInputOutput stream;
-      
+
       if (isTcp)
         stream = new TcpInputOutput(env, host, port, isSecure, Domain.AF_INET);
       else
         stream = new UdpInputOutput(env, host, port, Domain.AF_INET);
-      
+
       stream.setTimeout((int) (timeout * 1000));
       stream.init();
 
@@ -505,21 +505,21 @@ public class StreamModule extends AbstractQuercusModule {
     }
     catch (UnknownHostException e) {
       errorStr.set(env.createString(e.getMessage()));
-      
+
       return null;
     }
     catch (IOException e) {
       errorStr.set(env.createString(e.getMessage()));
-      
+
       return null;
     }
   }
 
-  public static void stream_wrapper_register(StringValue protocol, 
+  public static void stream_wrapper_register(StringValue protocol,
                                              ProtocolWrapper wrapper)
   {
     _wrapperMap.put(protocol.toString(), wrapper);
-    
+
     _wrapperArray.append(protocol);
   }
 
@@ -535,7 +535,7 @@ public class StreamModule extends AbstractQuercusModule {
     QuercusClass qClass = env.getClass(className);
 
     stream_wrapper_register(protocol, new ProtocolWrapper(qClass));
-    
+
     return true;
   }
 
@@ -547,7 +547,7 @@ public class StreamModule extends AbstractQuercusModule {
     if (! _unregisteredWrapperMap.containsKey(protocol.toString()))
       return false;
 
-    ProtocolWrapper oldWrapper = 
+    ProtocolWrapper oldWrapper =
       _unregisteredWrapperMap.remove(protocol.toString());
 
     stream_wrapper_register(protocol, oldWrapper);
@@ -563,7 +563,7 @@ public class StreamModule extends AbstractQuercusModule {
     if (! _wrapperMap.containsKey(protocol.toString()))
       return false;
 
-    _unregisteredWrapperMap.put(protocol.toString(), 
+    _unregisteredWrapperMap.put(protocol.toString(),
                                 _wrapperMap.remove(protocol.toString()));
 
     _wrapperArray.remove(protocol);
@@ -584,32 +584,31 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   static {
-    _constMap.put("STREAM_URL_STAT_LINK", LongValue.create(STREAM_URL_STAT_LINK));
-    _constMap.put("STREAM_URL_STAT_QUIET", 
-                  LongValue.create(STREAM_URL_STAT_QUIET));
+    addConstant(_constMap, "STREAM_URL_STAT_LINK", STREAM_URL_STAT_LINK);
+    addConstant(_constMap, "STREAM_URL_STAT_QUIET", STREAM_URL_STAT_QUIET);
 
-    _constMap.put("STREAM_FILTER_READ", LongValue.create(STREAM_FILTER_READ));
-    _constMap.put("STREAM_FILTER_WRITE", LongValue.create(STREAM_FILTER_WRITE));
-    _constMap.put("STREAM_FILTER_ALL", LongValue.create(STREAM_FILTER_ALL));
+    addConstant(_constMap, "STREAM_FILTER_READ", STREAM_FILTER_READ);
+    addConstant(_constMap, "STREAM_FILTER_WRITE", STREAM_FILTER_WRITE);
+    addConstant(_constMap, "STREAM_FILTER_ALL", STREAM_FILTER_ALL);
 
-    _constMap.put("PSFS_PASS_ON", LongValue.create(PSFS_PASS_ON));
-    _constMap.put("PSFS_FEED_ME", LongValue.create(PSFS_FEED_ME));
-    _constMap.put("PSFS_ERR_FATAL", LongValue.create(PSFS_ERR_FATAL));
+    addConstant(_constMap, "PSFS_PASS_ON", PSFS_PASS_ON);
+    addConstant(_constMap, "PSFS_FEED_ME", PSFS_FEED_ME);
+    addConstant(_constMap, "PSFS_ERR_FATAL", PSFS_ERR_FATAL);
 
-    _constMap.put("STREAM_USE_PATH", LongValue.create(STREAM_USE_PATH));
-    _constMap.put("STREAM_REPORT_ERRORS", LongValue.create(STREAM_REPORT_ERRORS));
+    addConstant(_constMap, "STREAM_USE_PATH", STREAM_USE_PATH);
+    addConstant(_constMap, "STREAM_REPORT_ERRORS", STREAM_REPORT_ERRORS);
 
-    _constMap.put("STREAM_CLIENT_ASYNC_CONNECT",
-                  LongValue.create(STREAM_CLIENT_ASYNC_CONNECT));
-    _constMap.put("STREAM_CLIENT_CONNECT",
-                  LongValue.create(STREAM_CLIENT_CONNECT));
-    _constMap.put("STREAM_CLIENT_PERSISTENT",
-                  LongValue.create(STREAM_CLIENT_PERSISTENT));
+    addConstant(_constMap, "STREAM_CLIENT_ASYNC_CONNECT",
+                STREAM_CLIENT_ASYNC_CONNECT);
+    addConstant(_constMap, "STREAM_CLIENT_CONNECT",
+                STREAM_CLIENT_CONNECT);
+    addConstant(_constMap, "STREAM_CLIENT_PERSISTENT",
+                STREAM_CLIENT_PERSISTENT);
 
-    _constMap.put("STREAM_SERVER_BIND",
-                  LongValue.create(STREAM_SERVER_BIND));
-    _constMap.put("STREAM_SERVER_LISTEN",
-                  LongValue.create(STREAM_SERVER_LISTEN));
+    addConstant(_constMap, "STREAM_SERVER_BIND",
+                STREAM_SERVER_BIND);
+    addConstant(_constMap, "STREAM_SERVER_LISTEN",
+                STREAM_SERVER_LISTEN);
   }
 }
 
