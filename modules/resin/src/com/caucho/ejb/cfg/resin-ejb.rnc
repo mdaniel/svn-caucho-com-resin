@@ -81,9 +81,9 @@ r_cmr-field = element cmr-field {
   r_deployment-extension*
 }
 
-r_connection-factory =
-  attribute connection-factory { string }
-  | element connection-factory { string }
+## r_connection-factory =
+##   attribute connection-factory { string }
+##   | element connection-factory { string }
 
 r_container-transaction = element container-transaction {
   r_description*,
@@ -91,19 +91,19 @@ r_container-transaction = element container-transaction {
   element trans-attribute { "Bean" | "Container" }
 }
 
-r_deployment-extension = element deployment-extension { string }
+## r_deployment-extension = element deployment-extension { string }
 
-r_description =
-  attribute description { string }
-  | element description { string }
+## r_description =
+##  attribute description { string }
+##   | element description { string }
 
 r_destination =
   attribute destination { string }
   | element destination { string }
 
-r_display-name =
-  attribute display-name { string }
-  | element display-name { string }
+## r_display-name =
+##  attribute display-name { string }
+##  | element display-name { string }
 
 ## generic ejb bean, i.e. refers to either entity or session
 r_ejb-bean = element ejb-bean {
@@ -311,11 +311,11 @@ r_entity = element entity {
   r_deployment-extension*
 }
 
-r_env-entry = element env-entry {
-  (attribute env-entry-name { string } | element env-entry-name { string }),
-  (attribute env-entry-type { string } | element env-entry-type { string }),
-  (attribute env-entry-value { string } | element env-entry-value { string })?
-}
+## r_env-entry = element env-entry {
+##  (attribute env-entry-name { string } | element env-entry-name { string }),
+##  (attribute env-entry-type { string } | element env-entry-type { string }),
+##  (attribute env-entry-value { string } | element env-entry-value { string })?
+## }
 
 r_exclude-list = element exclude-list {
   r_description*,
@@ -323,62 +323,62 @@ r_exclude-list = element exclude-list {
   r_method+
 }
 
-r_home =
-  attribute home { j2ee_class }
-  | element home { j2ee_class }
+##r_home =
+##  attribute home { j2ee_class }
+##  | element home { j2ee_class }
 
-r_icon =
-  attribute icon { string }
-  | element icon { string }
+##r_icon =
+##  attribute icon { string }
+##  | element icon { string }
 
-r_local =
-  attribute local { string }
-  | element local { j2ee_class }
+##r_local =
+##  attribute local { string }
+##  | element local { j2ee_class }
 
-r_local-home =
-  attribute local-home { string }
-  | element local-home { string }
+##r_local-home =
+##  attribute local-home { string }
+##  | element local-home { string }
 
-r_message-destination = element message-destination {
-  r_description*
+##r_message-destination = element message-destination {
+##  r_description*
+##
+##  & r_display-name*
+##
+##  & r_icon*
+##
+##  & (attribute message-destination-name { string }
+##   | element message-destination-name { string })
+##
+##  & r_deployment-extension*
+##
+##  & r_mapped-name
+## }
 
-  & r_display-name*
+## r_mapped-name =
+##  attribute mapped-name { string }
+##  | element mapped-name { string }
 
-  & r_icon*
+## r_message-destination-link = element message-destination-link { j2ee_class }
 
-  & (attribute message-destination-name { string }
-   | element message-destination-name { string })
-
-  & r_deployment-extension*
-
-  & r_mapped-name
-}
-
-r_mapped-name =
-  attribute mapped-name { string }
-  | element mapped-name { string }
-
-r_message-destination-link = element message-destination-link { j2ee_class }
-
-r_message-destination-ref = element message-destination-ref {
-  r_description*
-
-  & (attribute message-destination-ref-name { string }
-     | element message-destination-ref-name { string })
-
-  & r_message-destination-type
-
-  & element message-destination-usage {
-      "Consumes" | "Produces" | "ConsumesProduces"
-    }
-
-  & (attribute message-destination-link { string }
-     | element message-destination-link { string }?)
-
-  & r_deployment-extension*
-
-  & r_foreign-name?
-}
+## r_message-destination-ref = element message-destination-ref {
+##  r_description*
+##
+##  & (attribute message-destination-ref-name { string }
+##     | element message-destination-ref-name { string })
+##
+##  & r_message-destination-type
+##
+##  & element message-destination-usage {
+##      "Consumes" | "Produces" | "ConsumesProduces"
+##    }
+##
+##  & (attribute message-destination-link { string }
+##     | element message-destination-link { string }?)
+##
+##  & r_deployment-extension*
+##
+##  & r_foreign-name?
+## }
 
 r_message-destination-type = element message-destination-type { string }
 
@@ -532,16 +532,16 @@ r_relationships = element relationships {
   r_deployment-extension*
 }
 
-r_remote = element remote {
-  j2ee_class
-}
+## r_remote = element remote {
+##  j2ee_class
+## }
 
-r_resource-env-ref = element resource-env-ref { string }
-r_resource-ref = element resource-ref { string }
+## r_resource-env-ref = element resource-env-ref { string }
+## r_resource-ref = element resource-ref { string }
 
-r_role-name =
-  attribute role-name { string }
-  | element role-name { string }
+##r_role-name =
+##  attribute role-name { string }
+##  | element role-name { string }
 
 r_security-identity = element security-identity {
   r_description*,
@@ -551,11 +551,11 @@ r_security-identity = element security-identity {
   | r_run-as)
 }
 
-r_security-role = element security-role { string }
+## r_security-role = element security-role { string }
 
-r_security-role-ref = element security-role-ref { string }
+## r_security-role-ref = element security-role-ref { string }
 
-r_service-ref = element service-ref { string }
+## r_service-ref = element service-ref { string }
 
 r_session = element session {
   r_description?,

@@ -33,6 +33,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.AbstractSerializer;
 import com.caucho.hessian.io.HessianRemoteObject;
+import com.caucho.hessian.io.HessianRemote;
 
 import java.io.IOException;
 
@@ -43,7 +44,7 @@ public class EJBObjectSerializer extends AbstractSerializer {
   {
     return singleton;
   }
-  
+
   public void writeObject(Object obj, AbstractHessianOutput out)
     throws IOException
   {
@@ -51,16 +52,16 @@ public class EJBObjectSerializer extends AbstractSerializer {
       AbstractEJBObject ejbObject = (AbstractEJBObject) obj;
       AbstractServer server = ejbObject.__caucho_getServer();
 
-      // XXX:
-      // out.writeRemote(server.getRemoteObjectClass().getName(),
-      //                server.getHandleEncoder("hessian").getURL(ejbObject.__caucho_getId()));
+      String className = server.getRemoteObjectClass().getName();
+      String url = server.getHandleEncoder("hessian").getURL(ejbObject.__caucho_getId());
+
+      out.writeObject(new HessianRemote(className, url));
     }
     else if (obj instanceof HessianRemoteObject) {
       HessianRemoteObject ejbObject = (HessianRemoteObject) obj;
 
-      // XXX: need proxy
-      //out.writeRemote(ejbObject.getHessianType(),
-      //                ejbObject.getHessianURL());
+      out.writeObject(new HessianRemote(ejbObject.getHessianType(),
+                                        ejbObject.getHessianURL()));
     }
     else
       throw new IllegalArgumentException(String.valueOf(obj));

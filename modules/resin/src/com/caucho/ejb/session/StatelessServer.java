@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- * 
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -73,7 +73,7 @@ public class StatelessServer extends SessionServer {
 
   /**
    * Creates a new stateless server.
-   * 
+   *
    * @param urlPrefix
    *          the url prefix for any request to the server
    * @param allowJVMCall
@@ -220,7 +220,7 @@ public class StatelessServer extends SessionServer {
           && method.getParameterTypes().length == 0) {
         injectList.add(new PreDestroyInject(method));
       } else if ("ejbRemove".equals(method.getName())
-          && SessionBean.class.isAssignableFrom(ejbClass)) {
+                 && SessionBean.class.isAssignableFrom(ejbClass)) {
         injectList.add(new PreDestroyInject(method));
       }
     }
@@ -228,10 +228,10 @@ public class StatelessServer extends SessionServer {
 
   /**
    * Finds the remote bean by its key.
-   * 
+   *
    * @param key
    *          the remote key
-   * 
+   *
    * @return the remote interface of the entity.
    */
   @Override
@@ -282,7 +282,7 @@ public class StatelessServer extends SessionServer {
   {
     /*
      * XXX: ComponentImpl comp = getComponent(api);
-     * 
+     *
      * // XXX: remote handle differently if (comp != null && comp.getHandle() !=
      * null) return comp.getHandle(); else return new
      * ObjectSkeletonWrapper(obj.getHandle());
@@ -308,7 +308,7 @@ public class StatelessServer extends SessionServer {
    * JVMObject createEJBObject(Object primaryKey) { try { JVMObject obj =
    * (JVMObject) _remoteStubClass.newInstance(); obj._init(this,
    * createSessionKey(null));
-   * 
+   *
    * return obj; } catch (Exception e) { throw new EJBExceptionWrapper(e); } }
    */
 

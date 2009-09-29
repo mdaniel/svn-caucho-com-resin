@@ -37,6 +37,7 @@ import javax.annotation.PreDestroy;
 import javax.ejb.SessionBean;
 import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
+import javax.ejb.Timer;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.ApiClass;
@@ -117,8 +118,8 @@ public class StatelessObjectView extends StatelessView {
 
       if (method.isAnnotationPresent(Timeout.class)) {
         if ((method.getParameterTypes().length != 0)
-            && (method.getParameterTypes().length != 1 || !javax.ejb.Timer.class
-                .equals(method.getParameterTypes()[0]))) {
+            && (method.getParameterTypes().length != 1
+                || ! Timer.class.equals(method.getParameterTypes()[0]))) {
           throw new ConfigException(L.l(
               "{0}: timeout method '{1}' does not have a (Timer) parameter", cl
                   .getName(), method.getName()));
@@ -302,21 +303,21 @@ public class StatelessObjectView extends StatelessView {
 
     /*
      * for (BusinessMethodGenerator bizMethod : getMethods()) { out.println();
-     * 
+     *
      * bizMethod.generateHeader(out); out.println("{"); out.pushDepth();
-     * 
+     *
      * out.println("Thread thread = Thread.currentThread();");
      * out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
      * out.println(); out.println("try {"); out.pushDepth();out.println(
      * "thread.setContextClassLoader(getStatelessServer().getClassLoader());");
      * out.println();
-     * 
+     *
      * generateProxyCall(out, bizMethod.getImplMethod());
-     * 
+     *
      * out.popDepth(); out.println("} finally {");
      * out.println("  thread.setContextClassLoader(oldLoader);");
      * out.println("}");
-     * 
+     *
      * out.popDepth(); out.println("}"); }
      */
 

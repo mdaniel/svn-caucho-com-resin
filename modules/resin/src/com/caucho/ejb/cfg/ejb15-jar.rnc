@@ -4,11 +4,11 @@ namespace l = ""
 
 include "../../server/resin/javaee.rnc"
 
-javaee_boolean = string
-javaee_string = string
-javaee_path = string
+## javaee_boolean = string
+## javaee_string = string
+## javaee_path = string
 javaee_class = string
-javaee_java-identifier = string
+## javaee_java-identifier = string
 cmp-field-type-Type = string
 
 ejb15_abstract-schema-name = element abstract-schema-name { string }

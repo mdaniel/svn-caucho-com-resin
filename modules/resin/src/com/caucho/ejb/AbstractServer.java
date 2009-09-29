@@ -160,7 +160,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   /**
    * Creates a new server container
-   * 
+   *
    * @param manager
    *          the owning server container
    */
@@ -638,7 +638,7 @@ abstract public class AbstractServer implements EnvironmentBean {
         throw new IllegalStateException(e);
       }
     }
-    
+
     for (Method method : targetBean.getMethods()) {
       if (method.getAnnotation(Timeout.class) != null) {
         return method;
@@ -791,7 +791,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   /**
    * Returns the remote skeleton for the given API
-   * 
+   *
    * @param api
    *          the bean's api to return a value for
    * @param protocol
@@ -801,7 +801,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   /**
    * Returns the a new local stub for the given API
-   * 
+   *
    * @param api
    *          the bean's api to return a value for
    */
@@ -809,7 +809,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   /**
    * Returns the local jndi proxy for the given API
-   * 
+   *
    * @param api
    *          the bean's api to return a value for
    */
@@ -929,7 +929,7 @@ abstract public class AbstractServer implements EnvironmentBean {
       if (getInjectionTarget() != null && target != getInjectionTarget()) {
         getInjectionTarget().inject(instance, env);
       }
-      
+
       if (_initInject != null) {
         if (env == null)
           env = new ConfigContext();
@@ -1062,17 +1062,18 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     if (injectArray.length > 0)
       _initInject = injectArray;
+    */
 
-    injectList = new ArrayList<ConfigProgram>();
+    ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
 
     introspectDestroy(injectList, getEjbClass());
 
+    ConfigProgram[] injectArray;
     injectArray = new ConfigProgram[injectList.size()];
     injectList.toArray(injectArray);
 
     if (injectArray.length > 0)
       _destroyInject = injectArray;
-    */
   }
 
   protected void introspectDestroy(ArrayList<ConfigProgram> injectList,

@@ -36,6 +36,7 @@ import com.caucho.util.*;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -54,26 +55,33 @@ public class HessianEjbSkeleton extends Skeleton {
   private Object _object;
   private HessianSkeleton _skel;
   private HessianRemoteResolver _resolver;
+  private HessianFactory _factory;
 
   public HessianEjbSkeleton(Object object,
-			   HessianSkeleton skel,
-			   HessianRemoteResolver resolver)
+                           HessianSkeleton skel,
+                           HessianRemoteResolver resolver)
   {
     assert(object != null);
-      
+
     _object = object;
     _skel = skel;
     _resolver = resolver;
+
+    _factory = new HessianFactory();
+    // _factory.getSerializerFactory().setRemoteResolver(_resolver);
   }
 
   @Override
   public void _service(InputStream is, OutputStream os)
     throws Exception
   {
+    if (log.isLoggable(Level.FINEST))
+      os = _factory.createHessian2DebugOutput(os, log, Level.FINEST);
+
     Hessian2Output out = new HessianWriter(os);
 
     String oldProtocol = EjbProtocolManager.setThreadProtocol("hessian");
-    
+
     int code = is.read();
 
     if (code < 0)
@@ -83,27 +91,29 @@ public class HessianEjbSkeleton extends Skeleton {
     int minor = is.read();
 
     AbstractHessianInput in;
-    
+
     if (code == 'c' && major == 2 && minor == 0) {
       in = new HessianInput(is);
     }
     else if (code == 'H' && major == 2 && minor == 0) {
       in = new Hessian2Input(is);
-      
+
       code = in.readCall();
     }
     else {
       throw new IOException(L.l("Unexpected Hessian call {0} {1}.{2}",
-				(code > 0x20 && code < 0x7f
-				 ? String.valueOf((char) code)
-				 : Integer.toHexString(code)),
-				major, minor));
+                                (code > 0x20 && code < 0x7f
+                                 ? String.valueOf((char) code)
+                                 : Integer.toHexString(code)),
+                                major, minor));
     }
-    
+
     in.setRemoteResolver(_resolver);
 
     try {
       _skel.invoke(_object, in, out);
+
+      out.flush();
     } finally {
       EjbProtocolManager.setThreadProtocol(oldProtocol);
     }

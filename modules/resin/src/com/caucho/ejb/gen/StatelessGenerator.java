@@ -44,15 +44,15 @@ public class StatelessGenerator extends SessionGenerator {
   private static final L10N L = new L10N(StatelessGenerator.class);
 
   public StatelessGenerator(String ejbName,
-			    ApiClass ejbClass,
-			    ApiClass localHome,
-			    ArrayList<ApiClass> localApi,
-			    ApiClass remoteHome,
-			    ArrayList<ApiClass> remoteApi)
+                            ApiClass ejbClass,
+                            ApiClass localHome,
+                            ArrayList<ApiClass> localApi,
+                            ApiClass remoteHome,
+                            ArrayList<ApiClass> remoteApi)
   {
     super(ejbName, ejbClass,
-	  localHome, localApi,
-	  remoteHome, remoteApi);
+          localHome, localApi,
+          remoteHome, remoteApi);
   }
 
   public boolean isStateless()
@@ -102,7 +102,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println();
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
-    
+
     out.println();
     out.println("public class " + getClassName());
     out.println("  extends StatelessContext");
@@ -110,13 +110,13 @@ public class StatelessGenerator extends SessionGenerator {
     out.pushDepth();
 
     generateContext(out);
-    
+
     generateCreateProvider(out);
-    
+
     generateViews(out);
-    
+
     generateDependency(out);
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -128,7 +128,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("public StatelessProvider getProvider(Class api)");
     out.println("{");
     out.pushDepth();
-    
+
     for (View view : getViews()) {
       StatelessView sView = (StatelessView) view;
 
@@ -141,7 +141,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
   }
-  
+
   @Override
   protected void generateContext(JavaWriter out)
     throws IOException
@@ -158,22 +158,22 @@ public class StatelessGenerator extends SessionGenerator {
     /*
     out.println();
     out.println("private " + beanClass + " []_freeBeanStack = new "
-		+ beanClass + "[" + freeStackMax + "];");
+                + beanClass + "[" + freeStackMax + "];");
     out.println("private int _freeBeanTop;");
     */
-    
+
     out.println();
     out.println("public " + getClassName() + "(StatelessServer server)");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("super(server);");
     //out.println("_xaManager = server.getTransactionManager();");
 
     for (View view : getViews()) {
       view.generateContextHomeConstructor(out);
     }
-    
+
     out.popDepth();
     out.println("}");
 
@@ -189,24 +189,49 @@ public class StatelessGenerator extends SessionGenerator {
     for (View view : getViews()) {
       view.generateTimer(out);
     }
-    
+
     out.popDepth();
     out.println("}");
 
+    generateTimeoutCallback(out);
+
+    out.println();
+    out.println("public void destroy()");
+    out.println("{");
+    out.pushDepth();
+
+    generateDestroyViews(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateTimeoutCallback(JavaWriter out)
+    throws IOException
+  {
     out.println();
     out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
     out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 
-    View view = getViews().get(0);
+    View objectView = null;
 
-    out.print(view.getBeanClassName() + " bean = ");
-    view.generateNewInstance(out);
-    out.println(";");
-    out.println("method.invoke(bean, timer);");
-    view.generateFreeInstance(out, "bean");
-    
+    for (View view : getViews()) {
+      if (view instanceof StatelessObjectView) {
+        objectView = view;
+        break;
+      }
+    }
+
+    if (objectView != null) {
+      out.print(objectView.getBeanClassName() + " bean = ");
+      objectView.generateNewInstance(out);
+      out.println(";");
+      out.println("method.invoke(bean, timer);");
+      objectView.generateFreeInstance(out, "bean");
+    }
+
     out.popDepth();
     out.println("}");
 
@@ -216,21 +241,13 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("{");
     out.pushDepth();
 
-    out.print(view.getBeanClassName() + " bean = ");
-    view.generateNewInstance(out);
-    out.println(";");
-    out.println("method.invoke(bean);");
-    view.generateFreeInstance(out, "bean");
-    
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public void destroy()");
-    out.println("{");
-    out.pushDepth();
-
-    generateDestroyViews(out);
+    if (objectView != null) {
+      out.print(objectView.getBeanClassName() + " bean = ");
+      objectView.generateNewInstance(out);
+      out.println(";");
+      out.println("method.invoke(bean);");
+      objectView.generateFreeInstance(out, "bean");
+    }
 
     out.popDepth();
     out.println("}");
