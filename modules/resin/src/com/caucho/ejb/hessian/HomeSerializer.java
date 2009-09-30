@@ -33,6 +33,7 @@ import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.AbstractSerializer;
+import com.caucho.hessian.io.HessianRemote;
 
 import javax.ejb.EJBHome;
 import javax.ejb.HomeHandle;
@@ -45,7 +46,7 @@ public class HomeSerializer extends AbstractSerializer {
   {
     return _singleton;
   }
-  
+
   public void writeObject(Object obj, AbstractHessianOutput out)
     throws IOException
   {
@@ -53,17 +54,19 @@ public class HomeSerializer extends AbstractSerializer {
       AbstractEJBHome ejbHome = (AbstractEJBHome) obj;
       AbstractServer server = ejbHome.__caucho_getServer();
 
-      // XXX: need handle
-      // out.writeRemote(server.getRemoteHomeClass().getName(),
-      //                 server.getHandleEncoder("hessian").getURL());
+      String className = server.getRemoteHomeClass().getName();
+      String url = server.getHandleEncoder("hessian").getURL();
+
+      out.writeObject(new HessianRemote(className, url));
     }
     else if (obj instanceof AbstractEJBObject) {
       AbstractEJBObject ejbObject = (AbstractEJBObject) obj;
       AbstractServer server = ejbObject.__caucho_getServer();
 
-      // XXX: need handle
-      //out.writeRemote(server.getRemoteHomeClass().getName(),
-      //                server.getHandleEncoder("hessian").getURL());
+      String className = server.getRemoteHomeClass().getName();
+      String url = server.getHandleEncoder("hessian").getURL();
+
+      out.writeObject(new HessianRemote(className, url));
     }
     else {
       EJBHome ejbHome = (EJBHome) obj;
@@ -71,8 +74,7 @@ public class HomeSerializer extends AbstractSerializer {
 
       Class api = ejbHome.getEJBMetaData().getHomeInterfaceClass();
 
-      // XXX: need handle
-      // out.writeRemote(api.getName(), handle.toString());
+      out.writeObject(new HessianRemote(api.getName(), handle.toString()));
     }
   }
 }

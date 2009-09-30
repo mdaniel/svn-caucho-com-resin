@@ -46,7 +46,7 @@ abstract public class StatefulView extends View {
   private static final L10N L = new L10N(StatefulView.class);
 
   private StatefulGenerator _sessionBean;
-  
+
   private ArrayList<BusinessMethodGenerator> _businessMethods
     = new ArrayList<BusinessMethodGenerator>();
 
@@ -96,31 +96,31 @@ abstract public class StatefulView extends View {
   {
     ApiClass implClass = getBeanClass();
     ApiClass apiClass = getViewClass();
-    
+
     for (ApiMethod apiMethod : apiClass.getMethods()) {
       Method javaMethod = apiMethod.getJavaMember();
-      
+
       if (javaMethod.getDeclaringClass().equals(Object.class))
-	continue;
+        continue;
       if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-	  && ! apiMethod.getName().equals("remove"))
-	continue;
+          && ! apiMethod.getName().equals("remove"))
+        continue;
 
       if (apiMethod.getName().startsWith("ejb")) {
-	throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
-				      javaMethod.getDeclaringClass(),
-				      apiMethod.getName()));
+        throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
+                                      javaMethod.getDeclaringClass(),
+                                      apiMethod.getName()));
       }
 
       int index = _businessMethods.size();
-      
+
       BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
-      
+
       if (bizMethod != null) {
-	bizMethod.introspect(bizMethod.getApiMethod(),
-			     bizMethod.getImplMethod());
-	
-	_businessMethods.add(bizMethod);
+        bizMethod.introspect(bizMethod.getApiMethod(),
+                             bizMethod.getImplMethod());
+
+        _businessMethods.add(bizMethod);
       }
     }
   }
@@ -143,7 +143,7 @@ abstract public class StatefulView extends View {
     throws IOException
   {
     generateBean(out);
-    
+
     out.println();
     out.println("public static class " + getViewClassName());
 
@@ -156,12 +156,12 @@ abstract public class StatefulView extends View {
       out.println("  extends " + getBeanClass().getName());
       out.println("  implements StatefulProvider");
     }
-    
+
     out.println("{");
     out.pushDepth();
 
     generateClassContent(out);
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -180,27 +180,31 @@ abstract public class StatefulView extends View {
     if (isProxy()) {
       out.println("private " + getBeanClassName() + " _bean;");
     }
-    
+
     out.println("private transient boolean _isValid;");
     out.println("private transient boolean _isActive;");
 
     out.println();
     out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
     out.println("  = new com.caucho.ejb3.xa.XAManager();");
-    
+
     //generateBusinessPrologue(out);
 
     out.println();
     out.println(getViewClassName() + "(StatefulServer server)");
     out.println("{");
     out.pushDepth();
-    
+
     generateSuper(out, "server");
-    
+
     out.println("_server = server;");
     out.println("_isValid = true;");
-    out.println("_bean = new " + getBeanClassName() + "(this);");
-    
+
+    // ejb/1143
+    if (isProxy()) {
+      out.println("_bean = new " + getBeanClassName() + "(this);");
+    }
+
     out.popDepth();
     out.println("}");
 
@@ -208,12 +212,12 @@ abstract public class StatefulView extends View {
     out.println(getViewClassName() + "(StatefulServer server, boolean isProvider)");
     out.println("{");
     out.pushDepth();
-    
+
     generateSuper(out, "server");
-    
+
     out.println("_server = server;");
     out.println("_isValid = true;");
-    
+
     out.popDepth();
     out.println("}");
 
@@ -222,7 +226,7 @@ abstract public class StatefulView extends View {
     out.println("public " + getViewClassName() + "(StatefulServer server, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.pushDepth();
-    
+
     generateSuper(out, "server");
     out.println("_server = server;");
     out.println("_bean = new " + getBeanClassName() + "(this);");
@@ -236,15 +240,15 @@ abstract public class StatefulView extends View {
     /*
     out.println();
     out.println("public " + getViewClassName()
-		+ "(StatefulServer server, "
-		+ getBeanClassName() + " bean)");
+                + "(StatefulServer server, "
+                + getBeanClassName() + " bean)");
     out.println("{");
     generateSuper(out, "server");
     out.println("  _server = server;");
     out.println("  _bean = bean;");
-    
+
     // generateBusinessConstructor(out);
-    
+
     out.println("}");
     */
 
@@ -271,7 +275,7 @@ abstract public class StatefulView extends View {
     out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.InjectionTarget injectBean, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.println("  " + getViewClassName() + " bean"
-		+ " = new " + getViewClassName() + "(_server);");
+                + " = new " + getViewClassName() + "(_server);");
 
     if (isProxy())
       out.println("  _server.initInstance(bean._bean, injectBean, bean, env);");
@@ -291,9 +295,9 @@ abstract public class StatefulView extends View {
 
     StatefulMethod bizMethod
       = new StatefulMethod(this,
-			   apiMethod,
-			   implMethod,
-			   index);
+                           apiMethod,
+                           implMethod,
+                           index);
 
     return bizMethod;
   }
@@ -314,10 +318,10 @@ abstract public class StatefulView extends View {
 
     if (implMethod != null)
       return implMethod;
-  
+
     throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
-				  apiMethod.getMethod().getDeclaringClass().getSimpleName(),
-				  apiMethod.getFullName(),
-				  getBeanClass().getName()));
+                                  apiMethod.getMethod().getDeclaringClass().getSimpleName(),
+                                  apiMethod.getFullName(),
+                                  getBeanClass().getName()));
   }
 }
