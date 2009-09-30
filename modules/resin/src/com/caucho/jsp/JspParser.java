@@ -330,6 +330,8 @@ public class JspParser {
       }
       else {
         //_parseState.setContentType("text/html; charset=UTF-16BE");
+        log.finer(L.l("JSP '{0}': setting page encoding using BOM 'fe ff' -> 'UTF-16BE'", _jspPath.toString()));
+        _parseState.setBom(0xfeff);
         _parseState.setPageEncoding("UTF-16BE");
         stream.setEncoding("UTF-16BE");
       }
@@ -341,6 +343,8 @@ public class JspParser {
       }
       else {
         //_parseState.setContentType("text/html; charset=UTF-16LE");
+        log.finer(L.l("JSP '{0}': setting page encoding using BOM 'ff fe' -> 'UTF-16LE'", _jspPath.toString()));
+        _parseState.setBom(0xfffe);
         _parseState.setPageEncoding("UTF-16LE");
         stream.setEncoding("UTF-16LE");
       }
@@ -357,6 +361,8 @@ public class JspParser {
       else {
         // jsp/002a, #3062
         // _parseState.setContentType("text/html; charset=UTF-8");
+        log.finer(L.l("JSP '{0}': setting page encoding using BOM 'ef bb bf' -> 'UTF-8'", _jspPath.toString()));
+        _parseState.setBom(0xefbbbf);
         _parseState.setPageEncoding("UTF-8");
         stream.setEncoding("UTF-8");
       }
