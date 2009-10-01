@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
@@ -502,27 +503,31 @@ public final class ThreadPool {
    */
   public void completeExecutorTask()
   {
+    ExecutorQueueItem item = null;
+    
     synchronized (_executorLock) {
       _executorTaskCount--;
 
       assert(_executorTaskCount >= 0);
 
       if (_executorQueueHead != null) {
-        ExecutorQueueItem item = _executorQueueHead;
+        item = _executorQueueHead;
 
         _executorQueueHead = item._next;
 
         if (_executorQueueHead == null)
           _executorQueueTail = null;
-
-        Runnable task = item.getRunnable();
-        ClassLoader loader = item.getLoader();
-
-        boolean isPriority = false;
-        boolean isQueue = true;
-
-        schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
       }
+    }
+
+    if (item != null) {
+      Runnable task = item.getRunnable();
+      ClassLoader loader = item.getLoader();
+
+      boolean isPriority = false;
+      boolean isQueue = true;
+
+      schedule(task, loader, MAX_EXPIRE, isPriority, isQueue);
     }
   }
 
@@ -892,8 +897,6 @@ public final class ThreadPool {
           // if the task is available, run it in the proper context
           thread.setContextClassLoader(classLoader);
 
-          thread.setName(_name + "-" + task.getClass().getSimpleName());
-
           task.run();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
@@ -994,6 +997,8 @@ public final class ThreadPool {
   }
 
   final class ThreadLauncher extends Thread {
+    private final AtomicBoolean _isWake = new AtomicBoolean();
+    
     private ThreadLauncher()
     {
       super("resin-thread-launcher");
@@ -1004,7 +1009,9 @@ public final class ThreadPool {
 
     void wake()
     {
-      LockSupport.unpark(this);
+      if (! _isWake.getAndSet(true)) {
+        LockSupport.unpark(this);
+      }
     }
 
     /**
@@ -1032,8 +1039,9 @@ public final class ThreadPool {
       else {
         Thread.interrupted();
 
-        if (isWait)
+        if (isWait && ! _isWake.getAndSet(false)) {
           LockSupport.park();
+        }
       }
 
       return false;

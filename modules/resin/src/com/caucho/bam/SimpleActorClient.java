@@ -32,6 +32,7 @@ package com.caucho.bam;
 import java.io.Serializable;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import java.util.concurrent.locks.*;
 
 import com.caucho.util.*;
 
@@ -563,11 +564,10 @@ public class SimpleActorClient implements ActorClient {
   }
 
   static final class WaitQueryCallback implements QueryCallback {
-    private final CountDownLatch _latch = new CountDownLatch(1);
-    
     private volatile Serializable _result;
     private volatile ActorError _error;
-    private volatile boolean _isResult;
+    private final AtomicBoolean _isResult = new AtomicBoolean();
+    private volatile Thread _thread;
 
     public Serializable getResult()
     {
@@ -581,30 +581,43 @@ public class SimpleActorClient implements ActorClient {
 
     boolean waitFor()
     {
-      try {
-	_latch.await(10, TimeUnit.SECONDS);
-      } catch (Exception e) {
+      _thread = Thread.currentThread();
+      long now = Alarm.getCurrentTimeActual();
+      long expires = now + 10000L;
+
+      while (! _isResult.get() && Alarm.getCurrentTimeActual() < expires) {
+        try {
+          Thread.interrupted();
+          LockSupport.parkUntil(expires);
+        } catch (Exception e) {
+        }
       }
 
-      return _isResult;
+      _thread = null;
+
+      return _isResult.get();
     }
     
     public void onQueryResult(String fromJid, String toJid,
 			      Serializable payload)
     {
       _result = payload;
-      _isResult = true;
+      _isResult.set(true);
 
-      _latch.countDown();
+      Thread thread = _thread;
+      if (thread != null)
+        LockSupport.unpark(thread);
     }
   
     public void onQueryError(String fromJid, String toJid,
 			     Serializable payload, ActorError error)
     {
       _error = error;
-      _isResult = true;
+      _isResult.set(true);
 
-      _latch.countDown();
+      Thread thread = _thread;
+      if (thread != null)
+        LockSupport.unpark(thread);
     }
   }
 }

@@ -622,11 +622,6 @@ public class Alarm implements ThreadTask {
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-
-    try {
-      Thread.sleep(10);
-    } catch (Exception e) {
-    }
   }
 
   static void setTestNanoDelta(long delta)
