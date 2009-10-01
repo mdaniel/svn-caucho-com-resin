@@ -1755,6 +1755,36 @@ public class InjectManager
   }
   */
 
+  Annotation []getQualifiers(Set<Annotation> annotations)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+        bindingList.add(ann);
+    }
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    return bindings;
+  }
+
+  Annotation []getQualifiers(Annotation []annotations)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+        bindingList.add(ann);
+    }
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    return bindings;
+  }
+
   /**
    * Sends the specified event to any observer instances in the scope
    */

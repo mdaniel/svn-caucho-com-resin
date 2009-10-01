@@ -171,11 +171,13 @@ public class ExtensionManager
 
       if (! hasObserver(paramAnn))
         return null;
+      
+      InjectManager inject = InjectManager.create();
 
       BeanArg []args = new BeanArg[param.length];
 
       for (int i = 1; i < param.length; i++) {
-        Annotation []bindings = getQualifiers(paramAnn[i]);
+        Annotation []bindings = inject.getQualifiers(paramAnn[i]);
 
         if (bindings.length == 0)
           bindings = new Annotation[] { CurrentLiteral.CURRENT };
@@ -183,42 +185,11 @@ public class ExtensionManager
         args[i] = new BeanArg(param[i], bindings);
       }
 
-      InjectManager inject = InjectManager.create();
-
       BaseType baseType = inject.createBaseType(param[0]);
 
-      return new ExtensionMethod(method, baseType, getQualifiers(paramAnn[0]),
+      return new ExtensionMethod(method, baseType,
+                                 inject.getQualifiers(paramAnn[0]),
                                  args);
-    }
-
-    Annotation []getQualifiers(Set<Annotation> annotations)
-    {
-      ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
-
-      for (Annotation ann : annotations) {
-        if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-          bindingList.add(ann);
-      }
-
-      Annotation []bindings = new Annotation[bindingList.size()];
-      bindingList.toArray(bindings);
-
-      return bindings;
-    }
-
-    private Annotation []getQualifiers(Annotation []annotations)
-    {
-      ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
-
-      for (Annotation ann : annotations) {
-        if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-          bindingList.add(ann);
-      }
-
-      Annotation []bindings = new Annotation[bindingList.size()];
-      bindingList.toArray(bindings);
-
-      return bindings;
     }
 
     private boolean hasObserver(Annotation [][]paramAnn)
