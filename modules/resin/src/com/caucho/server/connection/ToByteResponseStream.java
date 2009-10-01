@@ -421,7 +421,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       length -= sublen;
       charLength += sublen;
 
-      if (charLength == SIZE) {
+      if (charLength == SIZE && length > 0) {
         _charLength = charLength;
         charLength = 0;
         flushCharBuffer();

@@ -96,9 +96,10 @@ public final class ISO8859_1Writer extends EncodingWriter {
   /**
    * Writes a character buffer using the correct encoding.
    *
-   * @param cbuf character buffer receiving the data.
-   * @param off starting offset into the buffer.
-   * @param len number of characters to write
+   * @param os output stream for data.
+   * @param cBuf data.
+   * @param cOffset starting offset into the buffer.
+   * @param cLength number of characters to write
    */
   @Override
   public void write(OutputStreamWithBuffer os,
@@ -124,7 +125,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
       cOffset += sublen;
       cLength -= sublen;
       
-      if (bOffset == bEnd) {
+      if (bOffset == bEnd && cLength > 0) {
 	bBuf = os.nextBuffer(bOffset);
 	bOffset = os.getBufferOffset();
 	bEnd = bBuf.length;
