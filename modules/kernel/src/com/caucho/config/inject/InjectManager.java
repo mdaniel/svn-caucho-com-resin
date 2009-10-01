@@ -535,36 +535,6 @@ public class InjectManager
       return null;
   }
 
-  Annotation []getQualifiers(Set<Annotation> annotations)
-  {
-    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
-
-    for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-        bindingList.add(ann);
-    }
-
-    Annotation []bindings = new Annotation[bindingList.size()];
-    bindingList.toArray(bindings);
-
-    return bindings;
-  }
-
-  private Annotation []getQualifiers(Annotation []annotations)
-  {
-    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
-
-    for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-        bindingList.add(ann);
-    }
-
-    Annotation []bindings = new Annotation[bindingList.size()];
-    bindingList.toArray(bindings);
-
-    return bindings;
-  }
-
   /**
    * Finds a component by its component name.
    */
@@ -842,7 +812,7 @@ public class InjectManager
     ProcessInjectionTargetImpl processTarget
       = new ProcessInjectionTargetImpl(target);
 
-    fireEvent(processTarget);
+    fireExtensionEvent(processTarget);
 
     return processTarget.getInjectionTarget();
   }
@@ -877,7 +847,7 @@ public class InjectManager
   {
     ProcessBeanImpl processBean = new ProcessBeanImpl(this, bean);
 
-    fireEvent(processBean);
+    fireExtensionEvent(processBean);
 
     if (processBean.isVeto())
       return null;
@@ -1618,7 +1588,7 @@ public class InjectManager
     if (context != null && context.isActive())
       return context;
     else
-      throw new ContextNotActiveException(L.l("'@{0}' is not an active WebBeans context.",
+      throw new ContextNotActiveException(L.l("'@{0}' is not an active Java Injection context.",
                                               scopeType.getName()));
   }
 
@@ -1714,9 +1684,9 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  public void addExtensionObserver(ObserverMethod<?> observer,
-                                   BaseType eventBaseType,
-                                   Annotation... bindings)
+  void addExtensionObserver(ObserverMethod<?> observer,
+                            BaseType eventBaseType,
+                            Annotation... bindings)
   {
     addObserver(_extObserverMap, observer, eventBaseType, bindings);
   }
@@ -2406,64 +2376,7 @@ public class InjectManager
 
   public void addExtension(Extension extension)
   {
-    for (Method method : extension.getClass().getMethods()) {
-      bindObserver(extension, method);
-    }
-  }
-
-  private void bindObserver(Extension extension, Method method)
-  {
-    Type []param = method.getGenericParameterTypes();
-
-    if (param.length < 1)
-      return;
-
-    Annotation [][]paramAnn = method.getParameterAnnotations();
-
-    if (! hasObserver(paramAnn))
-      return;
-
-    BeanArg []args = new BeanArg[param.length];
-
-    for (int i = 1; i < param.length; i++) {
-      Annotation []bindings = getQualifiers(paramAnn[i]);
-
-      if (bindings.length == 0)
-        bindings = new Annotation[] { CurrentLiteral.CURRENT };
-
-      args[i] = new BeanArg(param[i], bindings);
-    }
-
-    ObserverMethod observer = new ExtensionObserver(extension, method, args);
-
-    BaseType baseType = createBaseType(param[0]);
-
-    addExtensionObserver(observer, baseType, getQualifiers(paramAnn[0]));
-
-    /*
-    // XXX: isAssignableFrom
-    if (_isBeforeBeanDiscoveryComplete
-        && param[0].equals(BeforeBeanDiscovery.class)) {
-      observer.notify(new BeforeBeanDiscoveryImpl());
-    }
-
-    if (_isAfterBeanDiscoveryComplete
-        && param[0].equals(AfterBeanDiscovery.class)) {
-      observer.notify(new AfterBeanDiscoveryImpl());
-    }
-    */
-  }
-
-  private boolean hasObserver(Annotation [][]paramAnn)
-  {
-    for (int i = 0; i < paramAnn.length; i++) {
-      for (int j = 0; j < paramAnn[i].length; j++) {
-        if (paramAnn[i][j].annotationType().equals(Observes.class))
-          return true;
-      }
-    }
-
-    return false;
+    ExtensionManager.addExtension(this, extension);
   }
 
   /**
@@ -2488,7 +2401,7 @@ public class InjectManager
       if (isBind) {
         _isAfterBeanDiscoveryComplete = true;
 
-        fireEvent(new AfterBeanDiscoveryImpl());
+        fireExtensionEvent(new AfterBeanDiscoveryImpl());
       }
 
       if (_configException != null)
@@ -2502,7 +2415,7 @@ public class InjectManager
       */
 
       if (isBind) {
-        fireEvent(new AfterDeploymentValidationImpl());
+        fireExtensionEvent(new AfterDeploymentValidationImpl());
       }
     } catch (ConfigException e) {
       if (_configException == null)
@@ -3185,48 +3098,6 @@ public class InjectManager
       }
 
       return true;
-    }
-  }
-
-  static class ExtensionObserver extends AbstractObserverMethod<Object> {
-    private Extension _extension;
-    private Method _method;
-    private BeanArg []_args;
-
-    ExtensionObserver(Extension extension, Method method, BeanArg []args)
-    {
-      _extension = extension;
-      _method = method;
-      _args = args;
-    }
-
-    public void notify(Object event)
-    {
-      try {
-        Object []args = new Object[_args.length];
-        args[0] = event;
-
-        for (int i = 1; i < args.length; i++) {
-          args[i] = _args[i].eval(null);
-        }
-
-        _method.invoke(_extension, args);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (InvocationTargetException e) {
-        String loc = (_extension + "." + _method.getName() + ": ");
-
-        throw new InjectionException(loc + e.getMessage(), e.getCause());
-      } catch (Exception e) {
-        String loc = (_extension + "." + _method.getName() + ": ");
-
-        throw new InjectionException(loc + e.getMessage(), e);
-      }
-    }
-
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _extension + "," + _method.getName() + "]";
     }
   }
 
