@@ -680,7 +680,12 @@ public final class ThreadPool {
               isWakeLauncher = true;
               isQueueIfFull = true;
 
-              isDumpThreads = true;
+              if (! isFreeThreadAvailable) {
+                isDumpThreads = true;
+
+                if (log.isLoggable(Level.FINE))
+                  log.fine(this + " queuing task with no idle threads active-threads=" + threadCount);
+              }
 
               if (isPriority) {
                 _priorityQueue.add(item);

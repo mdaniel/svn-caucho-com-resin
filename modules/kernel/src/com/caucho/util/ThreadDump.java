@@ -47,7 +47,7 @@ public class ThreadDump
 
   private static final ThreadDump _threadDump = new ThreadDump();
   private final AtomicLong _lastDump = new AtomicLong();
-  
+
   private ThreadDump()
   {
   }
@@ -55,7 +55,7 @@ public class ThreadDump
   public static void dumpThreads()
   {
     long timeout = 3600L * 1000L;
-    
+
     _threadDump.threadDump(timeout);
   }
 
@@ -97,13 +97,16 @@ public class ThreadDump
                             boolean isNative)
   {
     for (ThreadInfo info : infoArray) {
+      if (info == null)
+        continue;
+
       Thread.State state = info.getThreadState();
 
       if (matchState == Thread.State.RUNNABLE
           && (isNative != info.isInNative())) {
         continue;
       }
-      
+
       if (state == matchState)
         buildThread(sb, info);
       else if (state == null
@@ -135,9 +138,9 @@ public class ThreadDump
       sb.append(lockName);
 
       if (info.getLockOwnerName() != null) {
-	sb.append("\n    owned by \"");
-	sb.append(info.getLockOwnerName());
-	sb.append("\"");
+        sb.append("\n    owned by \"");
+        sb.append(info.getLockOwnerName());
+        sb.append("\"");
       }
     }
 
@@ -150,37 +153,37 @@ public class ThreadDump
       TcpConnection conn = server.findConnectionByThreadId(info.getThreadId());
 
       if (conn != null && conn.getRequest() instanceof AbstractHttpRequest) {
-	AbstractHttpRequest req = (AbstractHttpRequest) conn.getRequest();
+        AbstractHttpRequest req = (AbstractHttpRequest) conn.getRequest();
 
-	if (req.getRequestURI() != null) {
-	  sb.append("   ").append(req.getRequestURI()).append("\n");
-	}
+        if (req.getRequestURI() != null) {
+          sb.append("   ").append(req.getRequestURI()).append("\n");
+        }
       }
     }
     */
-    
+
     StackTraceElement []stackList = info.getStackTrace();
     if (stackList == null)
       return;
-    
+
     for (StackTraceElement stack : stackList) {
       sb.append("  at ");
       sb.append(stack.getClassName());
       sb.append(".");
       sb.append(stack.getMethodName());
-      
+
       if (stack.getFileName() != null) {
-	sb.append(" (");
-	sb.append(stack.getFileName());
-	if (stack.getLineNumber() > 0) {
-	  sb.append(":");
-	  sb.append(stack.getLineNumber());
-	}
-	sb.append(")");
+        sb.append(" (");
+        sb.append(stack.getFileName());
+        if (stack.getLineNumber() > 0) {
+          sb.append(":");
+          sb.append(stack.getLineNumber());
+        }
+        sb.append(")");
       }
 
       if (stack.isNativeMethod())
-	sb.append(" (native)");
+        sb.append(" (native)");
 
       sb.append("\n");
     }
@@ -196,13 +199,13 @@ public class ThreadDump
       else if (b == null)
         return 1;
       else if (a.getThreadState() != b.getThreadState())
-	return a.getThreadState().ordinal() - b.getThreadState().ordinal();
+        return a.getThreadState().ordinal() - b.getThreadState().ordinal();
       else if (a.isInNative() && ! b.isInNative())
-	return 1;
+        return 1;
       else if (b.isInNative() && ! a.isInNative())
-	return -1;
+        return -1;
       else
-	return a.getThreadName().compareTo(b.getThreadName());
+        return a.getThreadName().compareTo(b.getThreadName());
     }
   }
 }

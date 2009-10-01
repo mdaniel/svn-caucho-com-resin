@@ -37,12 +37,15 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.*;
 import javax.enterprise.inject.spi.ObserverMethod;
 
 /**
  * Matches bindings
  */
 public class ObserverMap {
+  private static final Logger log
+    = Logger.getLogger(ObserverMap.class.getName());
   private static final L10N L = new L10N(ObserverMap.class);
 
   private Class _type;
@@ -85,6 +88,9 @@ public class ObserverMap {
       ObserverEntry observer = _observerList.get(i);
 
       if (observer.isMatch(eventType, qualifiers)) {
+        if (log.isLoggable(Level.FINER))
+          log.finer(observer.getObserver() + " notify " + event);
+
         observer.getObserver().notify(event);
       }
     }

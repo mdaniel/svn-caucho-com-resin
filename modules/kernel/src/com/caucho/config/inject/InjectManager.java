@@ -154,6 +154,9 @@ public class InjectManager
   private HashMap<String,ArrayList<Bean<?>>> _selfNamedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
 
+  private HashMap<Class,ObserverMap> _extObserverMap
+    = new HashMap<Class,ObserverMap>();
+
   private HashMap<Class,ObserverMap> _selfObserverMap
     = new HashMap<Class,ObserverMap>();
 
@@ -782,7 +785,7 @@ public class InjectManager
     ProcessAnnotatedTypeImpl processType
       = new ProcessAnnotatedTypeImpl(type);
 
-    fireLocalEvent(processType);
+    fireExtensionEvent(processType);
 
     if (! processType.isVeto())
       return processType.getAnnotatedType();
@@ -1706,6 +1709,59 @@ public class InjectManager
   }
 
   /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param bindings the binding set for the event
+   */
+  public void addExtensionObserver(ObserverMethod<?> observer,
+                                   BaseType eventBaseType,
+                                   Annotation... bindings)
+  {
+    addObserver(_extObserverMap, observer, eventBaseType, bindings);
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param bindings the binding set for the event
+   */
+  private void addObserver(HashMap<Class,ObserverMap> observerMap,
+                           ObserverMethod<?> observer,
+                           BaseType eventBaseType,
+                           Annotation... bindings)
+  {
+    Class eventType = eventBaseType.getRawClass();
+
+    checkActive();
+
+    /*
+    if (eventType.getTypeParameters() != null
+        && eventType.getTypeParameters().length > 0) {
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
+                                             eventType));
+    }
+    */
+
+    synchronized (observerMap) {
+      ObserverMap map = observerMap.get(eventType);
+
+      if (map == null) {
+        map = new ObserverMap(eventType);
+        observerMap.put(eventType, map);
+      }
+
+      map.addObserver(observer, eventBaseType, bindings);
+    }
+
+    synchronized (_observerListCache) {
+      // XXX: mark the map as changed
+      _observerListCache.clear();
+    }
+  }
+
+  /**
    * Removes an event observer
    *
    * @param observer the observer object
@@ -1734,8 +1790,8 @@ public class InjectManager
    */
   public void fireEvent(Object event, Annotation... bindings)
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " fireEvent " + event);
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " fireEvent " + event);
 
     BaseType eventType = createBaseType(event.getClass());
 
@@ -1757,7 +1813,7 @@ public class InjectManager
       if (observerList == null) {
         observerList = new ArrayList<ObserverMap>();
 
-        fillLocalObserverList(observerList, eventType);
+        fillLocalObserverList(_observerMap, observerList, eventType);
 
         _observerListCache.put(event.getClass(), observerList);
       }
@@ -1802,7 +1858,7 @@ public class InjectManager
 
         BaseType eventType = createClassBaseType(cl);
 
-        fillLocalObserverList(observerList, eventType);
+        fillLocalObserverList(_observerMap, observerList, eventType);
 
         _observerListCache.put(cl, observerList);
       }
@@ -1811,13 +1867,19 @@ public class InjectManager
     return observerList;
   }
 
-  private void fireLocalEvent(Object event, Annotation... bindings)
+  private void fireExtensionEvent(Object event, Annotation... bindings)
+  {
+    fireLocalEvent(_extObserverMap, event, bindings);
+  }
+
+  private void fireLocalEvent(HashMap<Class,ObserverMap> localMap,
+                              Object event, Annotation... bindings)
   {
     ArrayList<ObserverMap> observerList = new ArrayList<ObserverMap>();
     // ioc/0062 - class with type-param handled specially
     BaseType eventType = createClassBaseType(event.getClass());
 
-    fillLocalObserverList(observerList, eventType);
+    fillLocalObserverList(localMap, observerList, eventType);
 
     int size = observerList.size();
     for (int i = 0; i < size; i++) {
@@ -1825,20 +1887,21 @@ public class InjectManager
     }
   }
 
-  private void fillLocalObserverList(ArrayList<ObserverMap> list,
+  private void fillLocalObserverList(HashMap<Class,ObserverMap> localMap,
+                                     ArrayList<ObserverMap> list,
                                      BaseType eventType)
   {
     Class cl = eventType.getRawClass();
 
     // XXX: generic
     if (cl.getSuperclass() != null)
-      fillLocalObserverList(list, createBaseType(cl.getSuperclass()));
+      fillLocalObserverList(localMap, list, createBaseType(cl.getSuperclass()));
 
     for (Class iface : cl.getInterfaces()) {
-      fillLocalObserverList(list, createBaseType(iface));
+      fillLocalObserverList(localMap, list, createBaseType(iface));
     }
 
-    ObserverMap map = _observerMap.get(eventType.getRawClass());
+    ObserverMap map = localMap.get(eventType.getRawClass());
 
     if (map != null)
       list.add(map);
@@ -2078,7 +2141,7 @@ public class InjectManager
       }
 
       _isBeforeBeanDiscoveryComplete = true;
-      fireEvent(new BeforeBeanDiscoveryImpl());
+      fireExtensionEvent(new BeforeBeanDiscoveryImpl());
 
       // ioc/0061
       if (rootContextList.size() == 0)
@@ -2375,7 +2438,7 @@ public class InjectManager
 
     BaseType baseType = createBaseType(param[0]);
 
-    addObserver(observer, baseType, getQualifiers(paramAnn[0]));
+    addExtensionObserver(observer, baseType, getQualifiers(paramAnn[0]));
 
     /*
     // XXX: isAssignableFrom
