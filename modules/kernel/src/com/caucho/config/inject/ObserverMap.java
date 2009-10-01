@@ -88,8 +88,8 @@ public class ObserverMap {
       ObserverEntry observer = _observerList.get(i);
 
       if (observer.isMatch(eventType, qualifiers)) {
-        if (log.isLoggable(Level.FINER))
-          log.finer(observer.getObserver() + " notify " + event);
+        if (log.isLoggable(Level.FINEST))
+          log.finest(observer.getObserver() + " notify " + event);
 
         observer.getObserver().notify(event);
       }

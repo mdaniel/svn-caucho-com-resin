@@ -761,19 +761,22 @@ public final class ClusterServer {
    */
   public void notifyStart(long timestamp)
   {
-    if (_serverPool != null)
-      _serverPool.notifyStart();
-
     synchronized (this) {
-      if (timestamp < _stateTimestamp)
+      if (timestamp <= _stateTimestamp)
         return;
 
       if (log.isLoggable(Level.FINER) && ! _isActive)
         log.finer(this + " notify-start");
-
+      
       _isActive = true;
       _stateTimestamp = timestamp;
     }
+
+    // notify after timestamp check to avoid closing sockets already opened
+    // to the target server
+    
+    if (_serverPool != null)
+      _serverPool.notifyStart();
 
     Server server = Server.getCurrent();
 
@@ -786,11 +789,8 @@ public final class ClusterServer {
    */
   public void notifyStop(long timestamp)
   {
-    if (_serverPool != null)
-      _serverPool.notifyStop();
-
     synchronized (this) {
-      if (timestamp < _stateTimestamp)
+      if (timestamp <= _stateTimestamp)
         return;
 
       if (log.isLoggable(Level.FINER) && _isActive)
@@ -799,6 +799,9 @@ public final class ClusterServer {
       _isActive = false;
       _stateTimestamp = timestamp;
     }
+    
+    if (_serverPool != null)
+      _serverPool.notifyStop();
 
     Server server = Server.getCurrent();
 

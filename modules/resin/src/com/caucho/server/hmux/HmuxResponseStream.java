@@ -184,7 +184,7 @@ public class HmuxResponseStream extends ResponseStream {
       _bufferStartOffset = 0;
     }
     
-    if (log.isLoggable(Level.FINE))
+    if (log.isLoggable(Level.FINE) && offset > bufferStart)
       log.fine(dbgId() + "write-tail(" + (offset - bufferStart) + ")");
 
     next.nextBuffer(offset);

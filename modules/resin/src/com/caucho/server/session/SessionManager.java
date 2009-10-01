@@ -1212,6 +1212,13 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
     if (length > 0) {
       long time = Alarm.getCurrentTime();
+
+      // The QA needs to add a millisecond for each server start so the
+      // clustering test will work, but all the session ids are generated
+      // based on the timestamp.  So QA sessions don't have milliseconds
+      if (Alarm.isTest())
+        time -= time % 1000;
+      
       for (int i = 0; i < 7 && length-- > 0; i++) {
         sb.append(convert(time));
         time = time >> 6;

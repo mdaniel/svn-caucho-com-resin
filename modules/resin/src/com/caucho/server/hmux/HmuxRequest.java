@@ -612,6 +612,7 @@ public class HmuxRequest extends AbstractHttpRequest
       case -1:
         if (isLoggable)
           log.fine(dbgId() + "r: end of file");
+        _filter.setClientClosed(true);
         killKeepalive();
         return false;
 
