@@ -38,6 +38,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.ErrorData;
@@ -103,16 +104,19 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the servlet response for the page.
    */
+  @Override
   public CauchoResponse getCauchoResponse()
   {
     return _parent.getCauchoResponse();
   }
 
+  @Override
   public HttpSession getSession()
   {
     return _parent.getSession();
   }
 
+  @Override
   public ServletConfig getServletConfig()
   {
     return _parent.getServletConfig();
@@ -121,6 +125,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the page's servlet context.
    */
+  @Override
   public ServletContext getServletContext()
   {
     return _parent.getServletContext();
@@ -129,6 +134,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the page's application.
    */
+  @Override
   public WebApp getApplication()
   {
     return _parent.getApplication();
@@ -137,6 +143,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the page's error page.
    */
+  @Override
   public String getErrorPage()
   {
     return _parent.getErrorPage();
@@ -145,6 +152,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Sets the page's error page.
    */
+  @Override
   public void setErrorPage(String errorPage)
   {
     _parent.setErrorPage(errorPage);
@@ -251,5 +259,38 @@ public class PageContextWrapper extends PageContextImpl {
   public ExpressionEvaluator getExpressionEvaluator()
   {
     return _parent.getExpressionEvaluator();
+  }
+
+  @Override
+  public void forward(String relativeUrl, String query)
+    throws ServletException, IOException
+  {
+    _parent.forward(relativeUrl, query);
+  }
+
+  @Override
+  public void forward(String relativeUrl)
+    throws ServletException, IOException
+  {
+    _parent.forward(relativeUrl);
+  }
+
+  public void include(String relativeUrl)
+    throws ServletException, IOException
+  {
+    _parent.include(relativeUrl);
+  }
+  
+  public void include(String relativeUrl, String query, boolean flush)
+    throws ServletException, IOException
+  {
+    _parent.include(relativeUrl, query, flush);
+  }
+  
+  @Override
+  public void include(String relativeUrl, boolean flush)
+    throws ServletException, IOException
+  {
+    _parent.include(relativeUrl, flush);
   }
 }

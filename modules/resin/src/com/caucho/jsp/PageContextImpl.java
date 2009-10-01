@@ -202,7 +202,7 @@ public class PageContextImpl extends PageContext
       session = ((HttpServletRequest) request).getSession(true);
 
     ServletConfig config = servlet.getServletConfig();
-    WebApp app = (WebApp) config.getServletContext();
+    WebApp app = (WebApp) request.getServletContext();
 
     initialize(servlet, app, request, response,
 	       errorPage, session, bufferSize, autoFlush,
@@ -265,6 +265,9 @@ public class PageContextImpl extends PageContext
     _errorPage = errorPage;
     _webApp = app;
     _locale = null;
+    
+    if (app == null)
+      throw new NullPointerException();
 
     // XXX: recycling is important for performance reasons
     /* 
