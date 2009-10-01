@@ -48,7 +48,7 @@ abstract public class TaskWorker implements Runnable {
   private final ClassLoader _classLoader;
   private long _idleTimeout = 30000L;
   private boolean _isDestroyed;
-  
+
   private volatile Thread _thread;
 
   protected TaskWorker()
@@ -76,7 +76,7 @@ abstract public class TaskWorker implements Runnable {
     if (! _isActive.getAndSet(true)) {
       ThreadPool.getCurrent().schedulePriority(this);
     }
-    
+
     if (! _isTask.getAndSet(true)) {
       Thread thread = _thread;
 
@@ -97,12 +97,12 @@ abstract public class TaskWorker implements Runnable {
       _thread.setContextClassLoader(_classLoader);
       _thread.setName(getThreadName());
 
-      long expires = Alarm.getCurrentTime() + _idleTimeout;
-      
+      long expires = Alarm.getCurrentTimeActual() + _idleTimeout;
+
       do {
         while (_isTask.getAndSet(false)) {
           runTask();
-          expires = Alarm.getCurrentTime() + _idleTimeout;
+          expires = Alarm.getCurrentTimeActual() + _idleTimeout;
         }
 
         if (_isDestroyed)
@@ -110,10 +110,10 @@ abstract public class TaskWorker implements Runnable {
 
         Thread.interrupted();
         LockSupport.parkUntil(expires);
-      } while (_isTask.get() || Alarm.getCurrentTime() < expires);
+      } while (_isTask.get() || Alarm.getCurrentTimeActual() < expires);
     } finally {
       _thread = null;
-      
+
       _isActive.set(false);
 
       if (_isTask.get())

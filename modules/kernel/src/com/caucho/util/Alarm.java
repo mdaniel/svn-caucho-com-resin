@@ -43,11 +43,11 @@ import java.util.logging.Logger;
 public class Alarm implements ThreadTask {
   private static final Logger log
     = Logger.getLogger(Alarm.class.getName());
-  
+
   private static final ClassLoader _systemLoader;
-  
+
   private static final Object _queueLock = new Object();
-  
+
   private static final AlarmThread _alarmThread;
   private static final CoordinatorThread _coordinatorThread;
 
@@ -58,10 +58,10 @@ public class Alarm implements ThreadTask {
 
   private static Alarm []_heap = new Alarm[256];
   private static int _heapTop;
-  
+
   private static final AtomicInteger _runningAlarmCount
     = new AtomicInteger();
-  
+
   private static long _testTime;
   private static long _testNanoDelta;
 
@@ -71,11 +71,11 @@ public class Alarm implements ThreadTask {
   private String _name;
 
   private boolean _isPriority = true;
-  
+
   private int _heapIndex = 0;
 
   private volatile boolean _isRunning;
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
@@ -84,48 +84,48 @@ public class Alarm implements ThreadTask {
   {
     _name = "alarm";
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
-  public Alarm(AlarmListener listener) 
+  public Alarm(AlarmListener listener)
   {
     this("alarm[" + listener + "]", listener);
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
-  public Alarm(String name, AlarmListener listener) 
+  public Alarm(String name, AlarmListener listener)
   {
     this(name, listener, Thread.currentThread().getContextClassLoader());
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
-  public Alarm(String name, AlarmListener listener, ClassLoader loader) 
+  public Alarm(String name, AlarmListener listener, ClassLoader loader)
   {
     _name = name;
-    
+
     setListener(listener);
     setContextLoader(loader);
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
   public Alarm(String name,
-	       AlarmListener listener,
-	       long delta,
-	       ClassLoader loader) 
+               AlarmListener listener,
+               long delta,
+               ClassLoader loader)
   {
     _name = name;
-    
+
     setListener(listener);
     setContextLoader(loader);
 
@@ -139,21 +139,21 @@ public class Alarm implements ThreadTask {
    * @param listener the object prepared to receive the callback
    * @param delta the time in milliseconds to wake up
    */
-  public Alarm(String name, AlarmListener listener, long delta) 
+  public Alarm(String name, AlarmListener listener, long delta)
   {
     this(listener);
 
     _name = name;
     queue(delta);
   }
-  
+
   /**
    * Creates a new alarm and schedules its wakeup.
    *
    * @param listener the object prepared to receive the callback
    * @param delta the time in milliseconds to wake up
    */
-  public Alarm(AlarmListener listener, long delta) 
+  public Alarm(AlarmListener listener, long delta)
   {
     this(listener);
 
@@ -185,12 +185,23 @@ public class Alarm implements ThreadTask {
     // test avoids extra writes on multicore machines
     if (! _isCurrentTimeUsed) {
       if (_alarmThread != null)
-	_isCurrentTimeUsed = true;
+        _isCurrentTimeUsed = true;
       else
-	return System.currentTimeMillis();
+        return System.currentTimeMillis();
     }
-      
+
     return _currentTime;
+  }
+
+  /**
+   * Gets current time, handling test
+   */
+  public static long getCurrentTimeActual()
+  {
+    if (_testTime > 0)
+      return System.currentTimeMillis();
+    else
+      return getCurrentTime();
   }
 
   /**
@@ -214,7 +225,7 @@ public class Alarm implements ThreadTask {
       // php/190u
       // System.nanoTime() is not related to currentTimeMillis(), so return
       // a different offset.  See System.nanoTime() javadoc
-      
+
       return (_testTime - 10000000) * 1000000L + _testNanoDelta;
     }
 
@@ -238,7 +249,7 @@ public class Alarm implements ThreadTask {
       // Thread.yield();
     }
   }
-  
+
   /**
    * Returns the wake time of this alarm.
    */
@@ -246,7 +257,7 @@ public class Alarm implements ThreadTask {
   {
     return _wakeTime;
   }
-  
+
   /**
    * Return the alarm's listener.
    */
@@ -254,7 +265,7 @@ public class Alarm implements ThreadTask {
   {
     return _listener;
   }
-  
+
   /**
    * Sets the alarm's listener.
    */
@@ -262,7 +273,7 @@ public class Alarm implements ThreadTask {
   {
     _listener = listener;
   }
-  
+
   /**
    * Sets the alarm's context loader
    */
@@ -270,7 +281,7 @@ public class Alarm implements ThreadTask {
   {
     _contextLoader = loader;
   }
-  
+
   /**
    * Sets the alarm's context loader
    */
@@ -319,14 +330,14 @@ public class Alarm implements ThreadTask {
   public void queue(long delta)
   {
     boolean isNotify = false;
-    
+
     synchronized (_queueLock) {
       if (_heapIndex > 0)
-	dequeueImpl(this);
+        dequeueImpl(this);
 
       // #3548 - getCurrentTime for consistency
       long wakeTime = delta + getCurrentTime();
-      
+
       _wakeTime = wakeTime;
 
       isNotify = insertImpl(this);
@@ -348,13 +359,13 @@ public class Alarm implements ThreadTask {
 
     synchronized (_queueLock) {
       if (_heapIndex > 0)
-	dequeueImpl(this);
-      
+        dequeueImpl(this);
+
       _wakeTime = wakeTime;
 
       isNotify = insertImpl(this);
     }
-    
+
     if (isNotify) {
       _coordinatorThread.wake();
     }
@@ -367,7 +378,7 @@ public class Alarm implements ThreadTask {
   {
     synchronized (_queueLock) {
       if (_heapIndex > 0)
-	dequeueImpl(this);
+        dequeueImpl(this);
     }
   }
 
@@ -392,13 +403,13 @@ public class Alarm implements ThreadTask {
   private void handleAlarm()
   {
     AlarmListener listener = getListener();
-    
+
     if (listener == null)
       return;
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader loader = getContextLoader();
-    
+
     if (loader != null)
       thread.setContextClassLoader(loader);
     else
@@ -435,9 +446,9 @@ public class Alarm implements ThreadTask {
       Alarm alarm = heap[1];
 
       if (alarm == null)
-	return null;
+        return null;
       else if (now < alarm._wakeTime)
-	return null;
+        return null;
 
       dequeueImpl(alarm);
 
@@ -456,9 +467,9 @@ public class Alarm implements ThreadTask {
       Alarm alarm = heap[1];
 
       if (alarm != null)
-	return alarm._wakeTime;
+        return alarm._wakeTime;
       else
-	return getCurrentTime() + 120000;
+        return getCurrentTime() + 120000;
     }
   }
 
@@ -469,7 +480,7 @@ public class Alarm implements ThreadTask {
   {
     if (item._heapIndex != 0)
       throw new IllegalStateException();
-    
+
     // resize if necessary
     if (_heap.length <= _heapTop + 2) {
       Alarm []newHeap = new Alarm[2 * _heap.length];
@@ -492,7 +503,7 @@ public class Alarm implements ThreadTask {
 
     heap[i] = item;
     item._heapIndex = i;
-    
+
     if (_heapTop < i)
       throw new IllegalStateException();
 
@@ -508,7 +519,7 @@ public class Alarm implements ThreadTask {
 
     if (i < 1)
       return;
-    
+
     if (_heapTop < i)
       throw new IllegalStateException("bad heap: " + _heapTop + " index:" + i);
 
@@ -522,7 +533,7 @@ public class Alarm implements ThreadTask {
     heap[i] = heap[size];
     heap[i]._heapIndex = i;
     heap[size] = null;
-    
+
     item._heapIndex = 0;
 
     if (size == i)
@@ -530,30 +541,30 @@ public class Alarm implements ThreadTask {
 
     if (item._wakeTime < heap[i]._wakeTime) {
       while (i < size) {
-	item = heap[i];
+        item = heap[i];
 
-	int minIndex = i;
-	long minWakeTime = item._wakeTime;
-      
-	int left = i << 1;
-	if (left < size && heap[left]._wakeTime < minWakeTime) {
-	  minIndex = left;
-	  minWakeTime = heap[left]._wakeTime;
-	}
-      
-	int right = left + 1;
-	if (right < size && heap[right]._wakeTime < minWakeTime)
-	  minIndex = right;
+        int minIndex = i;
+        long minWakeTime = item._wakeTime;
 
-	if (i == minIndex)
-	  return;
+        int left = i << 1;
+        if (left < size && heap[left]._wakeTime < minWakeTime) {
+          minIndex = left;
+          minWakeTime = heap[left]._wakeTime;
+        }
 
-	heap[i] = heap[minIndex];
-	heap[i]._heapIndex = i;
-	heap[minIndex] = item;
-	item._heapIndex = minIndex;
-      
-	i = minIndex;
+        int right = left + 1;
+        if (right < size && heap[right]._wakeTime < minWakeTime)
+          minIndex = right;
+
+        if (i == minIndex)
+          return;
+
+        heap[i] = heap[minIndex];
+        heap[i]._heapIndex = i;
+        heap[minIndex] = item;
+        item._heapIndex = minIndex;
+
+        i = minIndex;
       }
     }
     else {
@@ -563,9 +574,9 @@ public class Alarm implements ThreadTask {
       long wakeTime = item._wakeTime;
 
       while (i > 1 && wakeTime < (alarm = heap[parent = (i >> 1)])._wakeTime) {
-	heap[i] = alarm;
-	alarm._heapIndex = i;
-	i = parent;
+        heap[i] = alarm;
+        alarm._heapIndex = i;
+        i = parent;
       }
 
       heap[i] = item;
@@ -583,14 +594,14 @@ public class Alarm implements ThreadTask {
       _heap[_heapTop] = null;
     }
   }
-  
+
   static void setTestTime(long time)
   {
     _testTime = time;
-    
+
     if (_testTime > 0) {
       if (time < _currentTime) {
-	testClear();
+        testClear();
       }
 
       _currentTime = time;
@@ -606,18 +617,18 @@ public class Alarm implements ThreadTask {
 
     try {
       while ((alarm = Alarm.extractAlarm()) != null) {
-	alarm.run();
+        alarm.run();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-    
+
     try {
       Thread.sleep(10);
     } catch (Exception e) {
     }
   }
-  
+
   static void setTestNanoDelta(long delta)
   {
     _testNanoDelta = delta;
@@ -631,50 +642,50 @@ public class Alarm implements ThreadTask {
   static class AlarmThread extends Thread {
     private static final long MIN = 10L;
     private static final long MAX = 250L;
-      
+
     AlarmThread()
     {
       super("resin-timer");
-      
+
       setDaemon(true);
       setPriority(Thread.MAX_PRIORITY);
     }
-    
+
     public void run()
     {
       long sleepTime = MIN;
-      
+
       while (true) {
-	try {
-	  boolean isCurrentTimeUsed = _isCurrentTimeUsed;
-	  _isCurrentTimeUsed = false;
+        try {
+          boolean isCurrentTimeUsed = _isCurrentTimeUsed;
+          _isCurrentTimeUsed = false;
 
-	  if (isCurrentTimeUsed) {
-	    sleepTime = sleepTime / 2;
-	    if (sleepTime < MIN)
-	      sleepTime = MIN;
-	  }
-	  else {
-	    sleepTime = sleepTime + 1;
-	    
-	    if (MAX < sleepTime)
-	      sleepTime = MAX;
-	  }
-	  
-	  if (_testTime > 0) {
-	    _currentTime = _testTime;
-	    
-	    LockSupport.park();
-	  }
-	  else {
-	    long now = System.currentTimeMillis();
+          if (isCurrentTimeUsed) {
+            sleepTime = sleepTime / 2;
+            if (sleepTime < MIN)
+              sleepTime = MIN;
+          }
+          else {
+            sleepTime = sleepTime + 1;
 
-	    _currentTime = now;
-	    
-	    LockSupport.parkNanos(sleepTime * 1000000L);
-	  }
-	} catch (Throwable e) {
-	}
+            if (MAX < sleepTime)
+              sleepTime = MAX;
+          }
+
+          if (_testTime > 0) {
+            _currentTime = _testTime;
+
+            LockSupport.park();
+          }
+          else {
+            long now = System.currentTimeMillis();
+
+            _currentTime = now;
+
+            LockSupport.parkNanos(sleepTime * 1000000L);
+          }
+        } catch (Throwable e) {
+        }
       }
     }
   }
@@ -692,7 +703,7 @@ public class Alarm implements ThreadTask {
     {
       LockSupport.unpark(this);
     }
-    
+
     /**
      * Runs the coordinator task.
      */
@@ -701,38 +712,38 @@ public class Alarm implements ThreadTask {
       Thread thread = this;
 
       while (true) {
-	try {
-	  Alarm alarm;
+        try {
+          Alarm alarm;
 
-	  if ((alarm = Alarm.extractAlarm()) != null) {
-	    // throttle alarm invocations by 5ms so quick alarms don't need
-	    // extra threads
-	    if (_concurrentAlarmThrottle < _runningAlarmCount.get()) {
-	      try {
-		Thread.sleep(5);
-	      } catch (Throwable e) {
-	      }
-	    }
+          if ((alarm = Alarm.extractAlarm()) != null) {
+            // throttle alarm invocations by 5ms so quick alarms don't need
+            // extra threads
+            if (_concurrentAlarmThrottle < _runningAlarmCount.get()) {
+              try {
+                Thread.sleep(5);
+              } catch (Throwable e) {
+              }
+            }
 
-	    _runningAlarmCount.incrementAndGet();
+            _runningAlarmCount.incrementAndGet();
 
-	    if (alarm.isPriority())
-	      ThreadPool.getThreadPool().startPriority(alarm);
-	    else
-	      ThreadPool.getThreadPool().start(alarm);
-	  }
+            if (alarm.isPriority())
+              ThreadPool.getThreadPool().startPriority(alarm);
+            else
+              ThreadPool.getThreadPool().start(alarm);
+          }
 
-	  long next = nextAlarmTime();
+          long next = nextAlarmTime();
           // #3548 - getCurrentTime for consistency
-	  long now = getCurrentTime();
+          long now = getCurrentTime();
 
-	  if (now < next) {
-	    Thread.interrupted();
-	    LockSupport.parkNanos((next - now) * 1000000L);
-	  }
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          if (now < next) {
+            Thread.interrupted();
+            LockSupport.parkNanos((next - now) * 1000000L);
+          }
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }
@@ -746,10 +757,10 @@ public class Alarm implements ThreadTask {
 
     try {
       systemLoader = ClassLoader.getSystemClassLoader();
-    
+
       alarmThread = new AlarmThread();
       alarmThread.start();
-      
+
       coordinatorThread = new CoordinatorThread();
       coordinatorThread.start();
     } catch (Throwable e) {
