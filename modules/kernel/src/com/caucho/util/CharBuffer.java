@@ -425,7 +425,7 @@ public final class CharBuffer extends CharSegment {
 
     char []buffer = _buffer;
     for (; len > 0; len--)
-      buffer[length++] = (char) buf[offset++];
+      buffer[length++] = (char) (buf[offset++] & 0xff);
 
     _length = length;
 
