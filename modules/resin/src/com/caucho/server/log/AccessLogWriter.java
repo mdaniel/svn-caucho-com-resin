@@ -148,26 +148,20 @@ public class AccessLogWriter extends AbstractRolloverLog
   {
     long expire;
 
-    if (! Alarm.isTest())
-      expire = Alarm.getCurrentTime() + timeout;
-    else
-      expire = System.currentTimeMillis() + timeout;
+    expire = Alarm.getCurrentTimeActual() + timeout;
 
     while (true) {
       if (_logHead == null)
         return;
 
       long delta;
-      if (! Alarm.isTest())
-        delta = expire - Alarm.getCurrentTime();
-      else
-        delta = expire - System.currentTimeMillis();
+      delta = expire - Alarm.getCurrentTimeActual();
 
       if (delta < 0)
         return;
 
-      if (delta > 1000)
-        delta = 1000;
+      if (delta > 50)
+        delta = 50;
 
       try {
         _logWriterTask.wake();

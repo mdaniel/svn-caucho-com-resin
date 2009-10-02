@@ -456,7 +456,7 @@ public class DataStore implements AlarmListener {
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
 
-      System.out.println("EXPIRE: " + count);
+      // System.out.println("EXPIRE: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
