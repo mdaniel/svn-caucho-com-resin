@@ -30,7 +30,10 @@
 package com.caucho.quercus.lib.session;
 
 import com.caucho.config.ConfigException;
+import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.SessionArrayValue;
 import com.caucho.util.*;
 
@@ -40,6 +43,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,6 +94,8 @@ public class QuercusSessionManager implements AlarmListener {
 
   //private Alarm _alarm = new Alarm(this);
 
+  private Map _persistentStore;
+
   // statistics
   protected Object _statisticsLock = new Object();
   protected long _sessionCreateCount;
@@ -98,10 +104,12 @@ public class QuercusSessionManager implements AlarmListener {
   /**
    * Creates and initializes a new session manager.
    */
-  public QuercusSessionManager()
+  public QuercusSessionManager(Quercus quercus)
   {
     _sessions = new LruCache<String,SessionArrayValue>(_sessionMax);
     _sessionIter = _sessions.values();
+
+    _persistentStore = quercus.getSessionCache();
   }
 
   /**
@@ -413,7 +421,12 @@ public class QuercusSessionManager implements AlarmListener {
     SessionArrayValue copy = (SessionArrayValue) session.copy(env);
 
     _sessions.put(session.getId(), copy);
+    
     session.finish();
+
+    if (_persistentStore != null) {
+      _persistentStore.put(session.getId(), copy.encode(env));
+    }
   }
 
   /**
@@ -464,7 +477,16 @@ public class QuercusSessionManager implements AlarmListener {
       else if (now <= 0) {
         return false;
       }
-      else if (session.load()) {
+
+      if (_persistentStore != null) {
+        String encoded = (String) _persistentStore.get(session.getId());
+
+        if (encoded != null) {
+          session.decode(env, new StringBuilderValue(encoded));
+        }
+      }
+      
+      if (session.load()) {
         session.setAccess(now);
         return true;
       }

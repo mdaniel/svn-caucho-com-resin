@@ -307,7 +307,7 @@ public class Quercus
 
   protected QuercusSessionManager createSessionManager()
   {
-    return new QuercusSessionManager();
+    return new QuercusSessionManager(this);
   }
 
   /**
@@ -1790,6 +1790,11 @@ public class Quercus
     return ("s" + _staticId++).intern();
   }
 
+  public Map getSessionCache()
+  {
+    return null;
+  }
+  
   /**
    * Loads the session from the backing.
    */
@@ -1797,8 +1802,8 @@ public class Quercus
   {
     long now = Alarm.getCurrentTime();
 
-    SessionArrayValue session =
-      _sessionManager.getSession(env, sessionId, now);
+    SessionArrayValue session
+      = _sessionManager.getSession(env, sessionId, now);
 
     if (session == null)
       session = _sessionManager.createSession(env, sessionId, now);

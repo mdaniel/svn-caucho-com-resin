@@ -30,9 +30,11 @@
 package com.caucho.quercus;
 
 import com.caucho.loader.*;
+import com.caucho.distcache.*;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ResinModuleContext;
 import com.caucho.server.webapp.*;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.session.*;
 import com.caucho.sql.*;
 import com.caucho.util.*;
@@ -41,6 +43,7 @@ import com.caucho.java.*;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -54,6 +57,8 @@ public class ResinQuercus extends Quercus
   
   private static EnvironmentLocal<ModuleContext> _localModuleContext
     = new EnvironmentLocal<ModuleContext>();
+
+  private Map _sessionCache;
 
   private WebApp _webApp;
   private long _dependencyCheckInterval = 2000L;
@@ -124,6 +129,21 @@ public class ResinQuercus extends Quercus
       return sm.getCookieName();
     else
       return "JSESSIONID";
+  }
+
+  @Override
+  public Map getSessionCache()
+  {
+    if (_sessionCache == null && Server.getCurrent() != null) {
+      CacheManager cacheManager = CacheManager.createManager();
+      AbstractCache cache = cacheManager.create("resin:quercus:session");
+
+      cache.setIdleTimeoutMillis(3600 * 1000L);
+
+      _sessionCache = cache;
+    }
+    
+    return _sessionCache;
   }
 
   public SessionManager getSessionManager()
