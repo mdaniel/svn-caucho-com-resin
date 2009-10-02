@@ -417,6 +417,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       try {
         // ioc/0m04
         Method m = ann.getClass().getMethod("value", new Class[0]);
+        m.setAccessible(true);
         value = (String) m.invoke(ann);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);

@@ -839,7 +839,7 @@ public class HempBroker
   /**
    * Called when a @Actor is annotated on the actor
    */
-  public void registerActor(@Observes ProcessBean event)
+  public void registerActor(ProcessBean event)
   {
     Bean bean = event.getBean();
 

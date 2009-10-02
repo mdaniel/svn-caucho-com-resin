@@ -48,8 +48,8 @@ import java.util.logging.Logger;
  * customized to PHP instead of J2EE sessions.
  */
 public class QuercusSessionManager implements AlarmListener {
-  static protected final L10N L = new L10N(QuercusSessionManager.class);
-  static protected final Logger log
+  private static final L10N L = new L10N(QuercusSessionManager.class);
+  private static final Logger log
     = Logger.getLogger(QuercusSessionManager.class.getName());
 
   private static int FALSE = 0;
@@ -223,9 +223,9 @@ public class QuercusSessionManager implements AlarmListener {
   {
     if (reuse == null)
       _reuseSessionId = COOKIE;
-    else if (reuse.equalsIgnoreCase("true") ||
-	     reuse.equalsIgnoreCase("yes") ||
-	     reuse.equalsIgnoreCase("cookie"))
+    else if (reuse.equalsIgnoreCase("true")
+             || reuse.equalsIgnoreCase("yes")
+             || reuse.equalsIgnoreCase("cookie"))
       _reuseSessionId = COOKIE;
     else if (reuse.equalsIgnoreCase("false") || reuse.equalsIgnoreCase("no"))
       _reuseSessionId = FALSE;
