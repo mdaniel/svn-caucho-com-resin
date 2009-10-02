@@ -85,6 +85,9 @@ public class DriverAdmin extends AbstractManagedObject
       
       Object driverObject = _driver.getDriverObject();
 
+      if (driverObject == null)
+        return props;
+
       BeanInfo info = Introspector.getBeanInfo(driverObject.getClass());
 
       for (PropertyDescriptor property : info.getPropertyDescriptors()) {
