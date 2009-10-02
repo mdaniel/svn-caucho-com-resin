@@ -63,7 +63,7 @@ class ForwardResponse extends CauchoResponseWrapper
     // server/106f
     AbstractResponseStream stream = getResponseStream();
 
-    // ioc/0310
+    // ioc/0310 vs server/12b2
 
     /*
     if (stream != null)
@@ -71,5 +71,7 @@ class ForwardResponse extends CauchoResponseWrapper
     if (stream != null)
       stream.finish();
     */
+    if (stream != null)
+      stream.close();
   }
 }

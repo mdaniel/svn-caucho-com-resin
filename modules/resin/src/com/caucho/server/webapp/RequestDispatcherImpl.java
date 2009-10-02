@@ -154,8 +154,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     // jsp/15m8
     if (res.isCommitted()
-      && method == null
-      && ! _webApp.isAllowForwardAfterFlush()) {
+        && method == null
+        && ! _webApp.isAllowForwardAfterFlush()) {
       IllegalStateException exn;
       exn = new IllegalStateException("forward() not allowed after buffer has committed.");
 
@@ -188,9 +188,9 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       resWrapper = (HttpServletResponseWrapper) res;
       parentRes = (HttpServletResponse) resWrapper.getResponse();
     }
-    
-    ForwardRequest subRequest
-      = new ForwardRequest(parentReq, parentRes, invocation);
+
+    ForwardRequest subRequest;
+    subRequest = new ForwardRequest(parentReq, parentRes, invocation);
 
     ForwardResponse subResponse = subRequest.getResponse();
 
@@ -222,11 +222,34 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       if (resWrapper != null)
         resWrapper.setResponse(parentRes);
       
-      // server/106r
-      if (isValid)
-        subRequest.finishRequest();
+      // server/106r, ioc/0310
+      if (isValid) {
+        finishResponse(res);
+      }
     }
   }
+
+  private void finishResponse(HttpServletResponse res)
+    throws ServletException, IOException
+  {
+    if (res instanceof CauchoResponse) {
+      ((CauchoResponse) res).close();
+    }
+    else {
+      try {
+        OutputStream os = res.getOutputStream();
+        os.close();
+      } catch (Exception e) {
+      }
+      
+      try {
+        PrintWriter out = res.getWriter();
+        out.close();
+      } catch (Exception e) {
+      }
+    }
+  }
+  
   public void include(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {

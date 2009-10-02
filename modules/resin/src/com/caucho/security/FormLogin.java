@@ -399,7 +399,7 @@ public class FormLogin extends AbstractLogin
     disp.forward(request, response);
 
     if (log.isLoggable(Level.FINE))
-      log.fine("the form request has no authenticated user");
+      log.fine(this + " request '" + uri + "' has no authenticated user");
   }
 
   private void generateCookie(Principal user,
