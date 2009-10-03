@@ -297,7 +297,7 @@ abstract public class AbstractHttpResponse {
     
     int headerSize = keys.size();
     for (int i = 0; i < headerSize; i++) {
-      String oldKey = (String) keys.get(i);
+      String oldKey = keys.get(i);
  
       if (oldKey.equalsIgnoreCase(name))
  	return (String) _headerValues.get(i);

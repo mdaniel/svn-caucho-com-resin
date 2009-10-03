@@ -30,12 +30,14 @@
 package com.caucho.server.webapp;
 
 import com.caucho.server.connection.*;
+import com.caucho.server.cache.*;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
@@ -55,8 +57,13 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   private ServletOutputStream _os;
   private PrintWriter _writer;
   
+  private AbstractCacheEntry _cacheEntry;
   private OutputStream _cacheStream;
   private Writer _cacheWriter;
+  private boolean _isCommitted;
+
+  private ArrayList<String> _headerKeys = new ArrayList<String>(); 
+  private ArrayList<String> _headerValues = new ArrayList<String>(); 
   
   IncludeResponseStream2(IncludeResponse response)
   {
@@ -82,6 +89,10 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
 	_stream = cNext.getResponseStream();
     }
 
+    _isCommitted = false;
+    _headerKeys.clear();
+    _headerValues.clear();
+
     start();
   }
 
@@ -103,6 +114,12 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   }
   */
 
+  void addHeader(String key, String value)
+  {
+    _headerKeys.add(key);
+    _headerValues.add(value);
+  }
+    
   /**
    * Sets any cache stream.
    */
@@ -159,6 +176,20 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
 
     if (_stream == null)
       flushByteBuffer();
+  }
+
+  /**
+   * Sets the byte buffer offset.
+   */
+  public byte []nextBuffer(int offset)
+    throws IOException
+  {
+    super.nextBuffer(offset);
+
+    if (_stream == null)
+      flushByteBuffer();
+
+    return getBuffer();
   }
 
   /**
@@ -226,6 +257,32 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       if (_response != null)
 	_response.writeHeaders(null, -1);
       */
+
+      if (! _isCommitted) {
+        _isCommitted = true;
+
+        AbstractCacheFilterChain cacheInvocation
+          = _response.getCacheInvocation();
+
+        if (cacheInvocation != null) {
+          // _cacheInvocation = cacheInvocation;
+
+          String contentType = null;
+          String charEncoding = null;
+
+          int contentLength = -1;
+
+          _cacheEntry
+            = cacheInvocation.startCaching(_response.getRequest(), _response,
+                                           _headerKeys, _headerValues,
+                                           contentType,
+                                           charEncoding,
+                                           contentLength);
+
+          if (_cacheEntry != null)
+            _cacheStream = _cacheEntry.openOutputStream();
+        }
+      }
     
       if (length == 0)
 	return;
@@ -293,6 +350,20 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     return _writer;
   }
 
+  /*
+  public void killCaching()
+  {
+    AbstractCacheEntry cacheEntry = _newCacheEntry;
+    _newCacheEntry = null;
+
+    if (cacheEntry != null) {
+      _cacheInvocation.killCaching(cacheEntry);
+      setByteCacheStream(null);
+      setCharCacheStream(null);
+    }
+  }
+  */
+
   /**
    * Finish.
    */
@@ -309,11 +380,49 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       _os.flush();
     */
 
+    finishCache();
+
     _os = null;
     _writer = null;
     
     _cacheStream = null;
     _cacheWriter = null;
+  }
+
+  public void finishCache()
+    throws IOException
+  {
+    AbstractCacheFilterChain cache = _response.getCacheInvocation();
+      
+    try {
+      OutputStream cacheStream = _cacheStream;
+      _cacheStream = null;
+
+      Writer cacheWriter = getCharCacheStream();
+      setCharCacheStream(null);
+
+      if (cacheStream != null)
+        cacheStream.close();
+
+      if (cacheWriter != null)
+        cacheWriter.close();
+
+      AbstractCacheEntry cacheEntry = _cacheEntry;
+
+      if (cacheEntry != null) {
+        _cacheEntry = null;
+        
+        cache.finishCaching(cacheEntry);
+      }
+    } finally {
+      // _response.setCacheInvocation(null);
+
+      AbstractCacheEntry cacheEntry = _cacheEntry;
+      _cacheEntry = null;
+
+      if (cache != null && cacheEntry != null)
+        cache.killCaching(cacheEntry);
+    }
   }
 
   /**
@@ -322,6 +431,8 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   public void close()
     throws IOException
   {
+    finish();
+
     super.close();
 
     /*

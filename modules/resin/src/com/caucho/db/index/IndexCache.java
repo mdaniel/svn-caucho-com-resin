@@ -56,11 +56,11 @@ public final class IndexCache
   private final AtomicReference<IndexKey> _freeKey
     = new AtomicReference<IndexKey>();
 
+  private IndexCacheWriter _indexWriter = new IndexCacheWriter();
+
   private IndexCache(int capacity)
   {
     _cache = new LruCache<IndexKey,IndexKey>(capacity);
-
-    new IndexCacheWriter();
   }
 
   /**
@@ -208,75 +208,68 @@ public final class IndexCache
   {
     key.setStored(true);
     
-    synchronized (_writeQueue) {
-      while (_writeQueue.size() > 1024) {
-	try {
-	  _writeQueue.wait(1000);
-	} catch (Exception e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	}
+    while (_writeQueue.size() > 1024) {
+      _indexWriter.wake();
+    
+      synchronized (_writeQueue) {
+        if (_writeQueue.size() > 1024) {
+          try {
+            _writeQueue.wait(1000);
+          } catch (Exception e) {
+            log.log(Level.FINEST, e.toString(), e);
+          }
+        }
       }
-      
-      _writeQueue.add(key);
-
-      _writeQueue.notifyAll();
     }
+
+    synchronized (_writeQueue) {
+      _writeQueue.add(key);
+    }
+    
+    _indexWriter.wake();
   }
 
-  class IndexCacheWriter implements Runnable {
-    private final Thread _thread;
-    
-    IndexCacheWriter()
-    {
-      _thread = new Thread(this, "index-cache-writer");
-      _thread.setDaemon(true);
-
-      _thread.start();
-    }
-    
-    public void run()
+  class IndexCacheWriter extends TaskWorker {
+    public void runTask()
     {
       Transaction xa = Transaction.create();
       
-      while (true) {
-	try {
-	  IndexKey key = null;
+      try {
+        IndexKey key = null;
 
-	  Thread.interrupted();
+        Thread.interrupted();
 	  
-	  synchronized (_writeQueue) {
-	    if (_writeQueue.size() == 0)
-	      _writeQueue.wait();
-	    else
-	      key = _writeQueue.get(0);
-	  }
+        synchronized (_writeQueue) {
+          if (_writeQueue.size() == 0)
+            return;
 
-	  if (key != null) {
-	    BTree btree = key.getBTree();
-	    long value = key.getValue();
+          key = _writeQueue.get(0);
+        }
 
-	    if (! key.isStored()) {
-	    }
-	    else if (value != 0) {
-	      btree.insert(key.getBuffer(), key.getOffset(), key.getLength(),
-			   value, true);
-	    }
-	    else {
-	      btree.remove(key.getBuffer(), key.getOffset(), key.getLength(),
-			   xa);
-	    }
-	  }
+        if (key != null) {
+          BTree btree = key.getBTree();
+          long value = key.getValue();
+
+          if (! key.isStored()) {
+          }
+          else if (value != 0) {
+            btree.insert(key.getBuffer(), key.getOffset(), key.getLength(),
+                         value, true);
+          }
+          else {
+            btree.remove(key.getBuffer(), key.getOffset(), key.getLength(),
+                         xa);
+          }
+        }
 	  
-	  synchronized (_writeQueue) {
-	    if (key != null)
-	      _writeQueue.remove(0);
+        synchronized (_writeQueue) {
+          if (key != null)
+            _writeQueue.remove(0);
 
-	    _writeQueue.notify();
-	  }
-	} catch (InterruptedException e) {
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          _writeQueue.notify();
+        }
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }

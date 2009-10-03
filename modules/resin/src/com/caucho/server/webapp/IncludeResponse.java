@@ -30,12 +30,15 @@
 package com.caucho.server.webapp;
 
 import com.caucho.server.connection.*;
+import com.caucho.server.cache.*;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
+import java.util.*;
 
 /**
  * Internal response for an include() or forward()
@@ -51,16 +54,22 @@ class IncludeResponse extends CauchoResponseWrapper
     = new ServletOutputStreamImpl();
   private final ResponseWriter _responsePrintWriter
     = new ResponseWriter();
-  
+
+  private IncludeRequest _request;
+
+  private QDate _calendar = new QDate();
   private AbstractResponseStream _stream;
+  private AbstractCacheFilterChain _cacheInvocation;
   
   IncludeResponse()
   {
   }
   
-  IncludeResponse(HttpServletResponse response)
+  IncludeResponse(IncludeRequest request, HttpServletResponse response)
   {
     super(response);
+
+    _request = request;
   }
 
   /**
@@ -73,6 +82,8 @@ class IncludeResponse extends CauchoResponseWrapper
 
     _responseOutputStream.init(_stream);
     _responsePrintWriter.init(_stream);
+
+    _cacheInvocation = null;
   }
 
   /**
@@ -82,6 +93,27 @@ class IncludeResponse extends CauchoResponseWrapper
     throws IOException
   {
     _stream.close();
+  }
+
+  IncludeRequest getRequest()
+  {
+    return _request;
+  }
+
+  /**
+   * Sets the cache invocation to indicate that the response might be
+   * cacheable.
+   */
+  public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
+  {
+    assert(_cacheInvocation == null);
+
+    _cacheInvocation = cacheInvocation;
+  }
+
+  public final AbstractCacheFilterChain getCacheInvocation()
+  {
+    return _cacheInvocation;
   }
 
   @Override
@@ -95,10 +127,12 @@ class IncludeResponse extends CauchoResponseWrapper
   
   public void setHeader(String name, String value)
   {
+    _originalStream.addHeader(name, value);
   }
   
   public void addHeader(String name, String value)
   {
+    _originalStream.addHeader(name, value);
   }
   
   public boolean containsHeader(String name)
@@ -108,18 +142,26 @@ class IncludeResponse extends CauchoResponseWrapper
   
   public void setDateHeader(String name, long date)
   {
+    _calendar.setGMTTime(date);
+
+    setHeader(name, _calendar.printDate());
   }
   
   public void addDateHeader(String name, long date)
   {
+    _calendar.setGMTTime(date);
+
+    addHeader(name, _calendar.printDate());
   }
   
   public void setIntHeader(String name, int value)
   {
+    setHeader(name, String.valueOf(value));
   }
   
   public void addIntHeader(String name, int value)
   {
+    addHeader(name, String.valueOf(value));
   }
   
   public void addCookie(Cookie cookie)
@@ -230,6 +272,11 @@ class IncludeResponse extends CauchoResponseWrapper
   public void setDisableAutoFlush(boolean disable)
   {
     // XXX: _responseStream.setDisableAutoFlush(disable);
+  }
+
+  public void reset()
+  {
+    resetBuffer();
   }
 
   public void resetBuffer()
