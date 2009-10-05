@@ -172,7 +172,7 @@ public class XmppRequest implements TcpServerRequest {
       TcpDuplexHandler handler
 	= new XmppBrokerStream(this, _broker, _is, _in, _os);
       
-      TcpDuplexController controller = _conn.toDuplex(handler);
+      TcpDuplexController controller = _conn.startDuplex(handler);
 
       return true;
     } catch (XMLStreamException e) {

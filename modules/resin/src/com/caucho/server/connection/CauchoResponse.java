@@ -74,5 +74,4 @@ public interface CauchoResponse extends HttpServletResponse {
    * Return wrapped response
    */
   public ServletResponse getResponse();
-  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler);
 }

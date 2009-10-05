@@ -31,6 +31,7 @@ package com.caucho.db.store;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.BlockManagerMXBean;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LongKeyLruCache;
 import com.caucho.util.TaskWorker;
@@ -236,11 +237,20 @@ public final class BlockManager
       _blockCache.remove(block.getBlockId());
     }
 
+    long expires = Alarm.getCurrentTimeActual() + 60000L;
+
     synchronized (_writeQueue) {
       while (hasPendingStore(store)) {
         _writer.wake();
         try {
-          _writeQueue.wait(1000L);
+          long delta = expires - Alarm.getCurrentTimeActual();
+
+          if (delta > 0)
+            _writeQueue.wait(delta);
+          else {
+            log.warning(this + " block close for " + store + " timeout");
+            break;
+          }
         } catch (InterruptedException e) {
         }
       }

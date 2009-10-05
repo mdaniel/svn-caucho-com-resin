@@ -224,9 +224,9 @@ public class QuercusServletImpl extends HttpServlet
       finally {
         if (env != null)
           env.close();
-        
+
         // don't want a flush for an exception
-        if (ws != null)
+        if (ws != null && env.getDuplex() == null)
           ws.close();
       }
     }

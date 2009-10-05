@@ -130,11 +130,20 @@ public class XmppBrokerStream
     return _xmppContext;
   }
   
-  public boolean serviceRead(ReadStream is,
-			     TcpDuplexController controller)
+  public void onRead(TcpDuplexController context)
     throws IOException
   {
-    return _reader.readNext();
+    _reader.readNext();
+  }
+  
+  public void onComplete(TcpDuplexController context)
+    throws IOException
+  {
+  }
+  
+  public void onTimeout(TcpDuplexController context)
+    throws IOException
+  {
   }
   
   public boolean serviceWrite(WriteStream os,

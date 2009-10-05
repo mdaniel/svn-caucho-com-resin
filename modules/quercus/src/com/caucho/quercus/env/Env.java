@@ -323,6 +323,8 @@ public class Env {
 
   private RegexpState _freeRegexpState;
 
+  private Object _duplex;
+
   private CharBuffer _cb = new CharBuffer();
 
   public Env(Quercus quercus,
@@ -6450,11 +6452,36 @@ public class Env {
     return _gzStream;
   }
 
+  public void startDuplex(Object duplex)
+  {
+    if (_duplex != null)
+      return;
+    
+    _duplex = duplex;
+  }
+
+  public void closeDuplex()
+  {
+    _duplex = null;
+
+    close();
+  }
+
+  public Object getDuplex()
+  {
+    return _duplex;
+  }
+
   /**
    * Called when the Env is no longer needed.
    */
   public void close()
   {
+    if (_duplex != null) {
+      log.fine(this + " skipping close for duplex mode");
+      return;
+    }
+    
     try {
       // php/1l0t
       // output buffers callbacks may throw an exception

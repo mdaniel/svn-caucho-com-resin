@@ -32,6 +32,8 @@ package com.caucho.server.connection;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.servlet.DuplexContext;
+import com.caucho.servlet.DuplexListener;
 
 import java.io.*;
 import java.util.*;
@@ -717,6 +719,11 @@ public class CauchoRequestWrapper implements CauchoRequest {
     CauchoRequest cRequest = (CauchoRequest) _request;
 
     return cRequest.getAbstractHttpRequest();
+  }
+
+  public DuplexContext startDuplex(DuplexListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override

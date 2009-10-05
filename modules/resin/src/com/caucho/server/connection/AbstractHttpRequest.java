@@ -1138,6 +1138,12 @@ public abstract class AbstractHttpRequest
     return _rawRead.getBuffer();
   }
 
+  public int getAvailable()
+    throws IOException
+  {
+    return _readStream.getAvailable();
+  }
+
   protected void skip()
     throws IOException
   {
@@ -1319,6 +1325,20 @@ public abstract class AbstractHttpRequest
     else
       return null;
   }
+
+  //
+  // duplex/websocket
+  //
+
+  /**
+   * Starts a duplex connection, e.g. for WebSocket.
+   */
+  public TcpDuplexController startDuplex(TcpDuplexHandler listener)
+  {
+    throw new UnsupportedOperationException(L.l("{0} does not support duplex connections.  Only HTTP protocols support duplex.",
+                                                getClass().getName()));
+  }
+  
 
   //
   // internal goodies

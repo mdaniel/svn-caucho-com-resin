@@ -894,12 +894,6 @@ abstract public class AbstractHttpResponse {
 
     return true;
   }
-
-  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
-  {
-    throw new IllegalStateException(L.l("'{0}' does not support upgrading",
-					this));
-  }
   
   /**
    * Closes the request, called from web-app for early close.

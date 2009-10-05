@@ -65,9 +65,14 @@ class XmppWriter
     try {
       XmppStreamWriterImpl out = _out;
 
-      synchronized (out) {
-	out.writeStartElement("message");
-
+      Text []subjects = null;
+      Text []bodys = null;
+      String thread = null;
+      String type = null;
+      Serializable extra = null;
+      Serializable []extras = null;
+      
+      if (value instanceof ImMessage) {
         ImMessage msg = (ImMessage) value;
 
         if (msg.getTo() != null)
@@ -76,16 +81,34 @@ class XmppWriter
         if (msg.getFrom() != null)
           from = msg.getFrom();
 
+        if (msg.getType() != null)
+          type = msg.getType();
+
+        subjects = msg.getSubjects();
+        bodys = msg.getBodys();
+        thread = msg.getThread();
+
+        extras = msg.getExtra();
+      }
+      else if (value instanceof Serializable[]) {
+        extras = (Serializable[]) value;
+      }
+      else {
+        extra = value;
+      }
+      
+      synchronized (out) {
+	out.writeStartElement("message");
+
 	if (to != null)
 	  out.writeAttribute("to", to);
 
 	if (from != null)
 	  out.writeAttribute("from", from);
 
-	if (msg.getType() != null)
-	  out.writeAttribute("type", msg.getType());
+	if (type != null)
+	  out.writeAttribute("type", type);
 
-	Text []subjects = msg.getSubjects();
 	if (subjects != null) {
 	  for (Text subject : subjects) {
 	    out.writeStartElement("subject");
@@ -98,7 +121,6 @@ class XmppWriter
 	  }
 	}
 	
-	Text []bodys = msg.getBodys();
 	if (bodys != null) {
 	  for (Text body : bodys) {
 	    out.writeStartElement("body");
@@ -112,15 +134,18 @@ class XmppWriter
 	  }
 	}
 
-	if (msg.getThread() != null) {
+	if (thread != null) {
 	  out.writeStartElement("thread");
-	  out.writeCharacters(msg.getThread());
+	  out.writeCharacters(thread);
 	  out.writeEndElement(); // </thread>
 	}
 
-	Serializable []extra = msg.getExtra();
-	if (extra != null) {
-	  for (Serializable extraItem : extra) {
+        if (extra != null) {
+          out.writeValue(extra);
+        }
+        
+	if (extras != null) {
+	  for (Serializable extraItem : extras) {
 	    out.writeValue(extraItem);
 	  }
 	}

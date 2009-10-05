@@ -33,7 +33,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.server.port.TcpConnection;
+import com.caucho.servlet.DuplexContext;
+import com.caucho.servlet.DuplexListener;
 import com.caucho.util.Alarm;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -43,8 +46,8 @@ import com.caucho.vfs.WriteStream;
  */
 public class TcpDuplexController extends ConnectionController {
   private static final L10N L = new L10N(TcpDuplexController.class);
-  private static final Logger log = Logger.getLogger(TcpDuplexController.class
-      .getName());
+  private static final Logger log
+    = Logger.getLogger(TcpDuplexController.class.getName());
 
   private ClassLoader _loader;
 
@@ -56,7 +59,8 @@ public class TcpDuplexController extends ConnectionController {
   private TcpDuplexHandler _handler;
   private String _readThreadName;
 
-  public TcpDuplexController(TcpConnection conn, TcpDuplexHandler handler)
+  public TcpDuplexController(TcpConnection conn,
+                             TcpDuplexHandler handler)
   {
     if (handler == null)
       throw new NullPointerException(L.l("handler is a required argument"));
@@ -70,7 +74,7 @@ public class TcpDuplexController extends ConnectionController {
     _os = _conn.getWriteStream();
 
     _readThreadName = ("resin-" + _handler.getClass().getSimpleName()
-        + "-read-" + conn.getId());
+                       + "-read-" + conn.getId());
   }
 
   /**
@@ -133,26 +137,6 @@ public class TcpDuplexController extends ConnectionController {
     return _handler;
   }
 
-  public void close()
-  {
-    closeImpl();
-  }
-
-  /**
-   * Closes the connection.
-   */
-  @Override
-  public void closeImpl()
-  {
-    _conn = null;
-    _is = null;
-    _os = null;
-    _handler = null;
-    _loader = null;
-
-    super.closeImpl();
-  }
-
   public boolean serviceRead()
   {
     Thread thread = Thread.currentThread();
@@ -172,17 +156,61 @@ public class TcpDuplexController extends ConnectionController {
       if (conn == null || is == null || handler == null)
         return false;
 
-      isValid = handler.serviceRead(is, this);
+      if (is.getAvailable() > 0) {
+        isValid = true;
+        handler.onRead(this);
+        return true;
+      }
+      else {
+        handler.onComplete(this);
+        return false;
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       thread.setName(oldName);
 
-      if (!isValid)
+      if (! isValid)
         close();
     }
 
-    return isValid;
+    return true;
+  }
+
+  public void complete()
+  {
+    close();
+  }
+  
+  public void close()
+  {
+    closeImpl();
+  }
+
+  /**
+   * Closes the connection.
+   */
+  @Override
+  public void closeImpl()
+  {
+    ReadStream is = _is;
+    _is = null;
+    
+    TcpConnection conn = _conn;
+    _conn = null;
+    _os = null;
+    _handler = null;
+    _loader = null;
+
+    IoUtil.close(is);
+    
+    try {
+      if (conn != null)
+        conn.close();
+    } catch (Exception e) {
+    }
+
+    super.closeImpl();
   }
 
   @Override

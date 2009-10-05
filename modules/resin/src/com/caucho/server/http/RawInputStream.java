@@ -19,43 +19,57 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.http;
+
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
 
 import java.io.IOException;
 
 /**
- * Application handler for a bidirectional tcp stream
- *
- * The read stream should only be read by the <code>onRead</code> thread.
- * 
- * The write stream must be synchronized if it's every written by a thread
- * other than the <code>serviceRead</code>
+ * Filter so POST readers can only read data up to the content length
  */
-public interface TcpDuplexHandler
-{
+public class RawInputStream extends StreamImpl {
+  // the underlying stream
+  private ReadStream _next;
+
+  void init(ReadStream next)
+  {
+    _next = next;
+  }
+
+  public boolean canRead()
+  {
+    return true;
+  }
+
   /**
-   * Called when read data is available
+   * Reads from the buffer, limiting to the content length.
+   *
+   * @param buffer the buffer containing the results.
+   * @param offset the offset into the result buffer
+   * @param length the length of the buffer.
+   *
+   * @return the number of bytes read or -1 for the end of the file.
    */
-  public void onRead(TcpDuplexController controller)
-    throws IOException;
-  
-  /**
-   * Called when the connection closes
-   */
-  public void onComplete(TcpDuplexController controller)
-    throws IOException;
-  
-  /**
-   * Called when the connection times out
-   */
-  public void onTimeout(TcpDuplexController controller)
-    throws IOException;
+  public int read(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    int len = _next.read(buffer, offset, length);
+
+    return len;
+  }
+
+  public int getAvailable()
+    throws IOException
+  {
+    return _next.available();
+  }
 }

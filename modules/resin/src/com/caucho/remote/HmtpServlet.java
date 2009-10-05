@@ -39,6 +39,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.connection.*;
 import com.caucho.server.cluster.Server;
+import com.caucho.servlet.DuplexContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -146,8 +147,8 @@ public class HmtpServlet extends GenericServlet {
       = new ServerFromLinkStream(broker, _linkManager, is, os, address,
                                  _auth, _isAuthenticationRequired);
 
-    TcpDuplexController controller = res.upgradeProtocol(fromLinkStream);
+    DuplexContext duplex = req.startDuplex(fromLinkStream);
 
-    controller.setIdleTimeMax(30 * 60 * 1000L);
+    duplex.setTimeout(30 * 60 * 1000L);
   }
 }

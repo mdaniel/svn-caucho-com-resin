@@ -1613,7 +1613,8 @@ public class FileModule extends AbstractQuercusModule {
 
     StringValue sb = env.createBinaryBuilder();
 
-    sb.appendRead(is, length);
+    if (sb.appendRead(is, length) < 0)
+      return BooleanValue.FALSE;
 
     return sb;
   }

@@ -165,6 +165,11 @@ public final class ReadStream extends InputStream
     return _source;
   }
 
+  public void setSource(StreamImpl source)
+  {
+    _source = source;
+  }
+
   public void setReuseBuffer(boolean reuse)
   {
     _reuseBuffer = reuse;
@@ -304,7 +309,12 @@ public final class ReadStream extends InputStream
     if (_sibling != null)
       _sibling.flush();
 
-    return _source.getAvailable();
+    StreamImpl source = _source;
+
+    if (source != null)
+      return source.getAvailable();
+    else
+      return -1;
   }
 
   /**
@@ -1083,8 +1093,15 @@ public final class ReadStream extends InputStream
       _sibling.flush();
 
     _readOffset = 0;
-    int readLength = _source.readTimeout(_readBuffer, 0, _readBuffer.length,
-                                         timeout);
+    StreamImpl source = _source;
+
+    if (source == null) {
+      // return true on end of file
+      return true;
+    }
+    
+    int readLength
+      = source.readTimeout(_readBuffer, 0, _readBuffer.length, timeout);
 
     // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (readLength > 0) {

@@ -30,6 +30,8 @@
 package com.caucho.server.connection;
 
 import com.caucho.util.NullEnumeration;
+import com.caucho.servlet.DuplexContext;
+import com.caucho.servlet.DuplexListener;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.ReadStream;
 
@@ -442,6 +444,11 @@ public class StubServletRequest implements CauchoRequest {
   public AsyncContext startAsync(ServletRequest servletRequest,
                                  ServletResponse servletResponse)
     throws IllegalStateException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public DuplexContext startDuplex(DuplexListener listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

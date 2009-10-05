@@ -169,6 +169,34 @@ public class XmppReader
 
   /**
    * Processes a message
+   *
+   * <code><pre>
+   * element message{xmlns="jabber:client"} {
+   *   attribute from?
+   *   &amp; attribute to?
+   *   &amp; attribute id?
+   *   &amp; attribute type?
+   *
+   *   &amp; subject*
+   *   &amp; body*
+   *   &amp; thread?
+   *   &amp; other*
+   * }
+   *
+   * element body {
+   *   attribute xml:lang?
+   *   &amp; string
+   * }
+   *
+   * element subject {
+   *   attribute xml:lang?
+   *   &amp; string
+   * } 
+   *
+   * element thread {
+   *   &amp; string
+   * }
+   * </pre></code>
    */
   boolean handleMessage()
     throws IOException, XMLStreamException
@@ -179,13 +207,13 @@ public class XmppReader
     String to = _in.getAttributeValue(null, "to");
 
     if (type == null)
-      type = "chat";
+      type = "normal";
 
     int tag;
 
-    ArrayList<Text> subjectList = new ArrayList<Text>();
-    ArrayList<Text> bodyList = new ArrayList<Text>();
-    ArrayList<Serializable> extraList = new ArrayList<Serializable>();
+    ArrayList<Text> subjectList = null;
+    ArrayList<Text> bodyList = null;
+    ArrayList<Serializable> extraList = null;
     String thread = null;
     
     while ((tag = _in.next()) > 0
@@ -212,6 +240,9 @@ public class XmppReader
 
 	String body = _in.getText();
 
+        if (bodyList == null)
+          bodyList = new ArrayList<Text>();
+
 	bodyList.add(new Text(body, lang));
 
 	expectEnd("body");
@@ -230,6 +261,9 @@ public class XmppReader
 
 	String text = _in.getText();
 
+        if (subjectList == null)
+          subjectList = new ArrayList<Text>();
+
 	subjectList.add(new Text(text, lang));
 
 	expectEnd("subject");
@@ -246,10 +280,23 @@ public class XmppReader
       }
       else {
 	String name = _in.getLocalName();
+	QName qName = _in.getName();
 	String uri = _in.getNamespaceURI();
-	String data = _in.readAsXmlString();
 
-	extraList.add(new XmlData(name, uri, data));
+        if (extraList == null)
+          extraList = new ArrayList<Serializable>();
+
+        XmppMarshal marshal = _marshalFactory.getUnserialize(qName);
+
+        Serializable extra;
+
+        if (marshal != null)
+          extra = marshal.fromXml(_in);
+        else
+          extra = readAsXmlString(_in);
+
+	// extraList.add(new XmlData(name, uri, data));
+	extraList.add(extra);
       }
     }
 
@@ -257,23 +304,23 @@ public class XmppReader
 
     Text []subjectArray = null;
 
-    if (subjectList.size() > 0) {
+    if (subjectList != null) {
       subjectArray = new Text[subjectList.size()];
       subjectList.toArray(subjectArray);
     }
 
     Text []bodyArray = null;
 
-    if (bodyList.size() > 0) {
+    if (bodyList != null) {
       bodyArray = new Text[bodyList.size()];
       bodyList.toArray(bodyArray);
     }
 
-    Serializable []extra = null;
+    Serializable []extraArray = null;
     
-    if (extraList.size() > 0) {
-      extra = new Serializable[extraList.size()];
-      extraList.toArray(extra);
+    if (extraList != null) {
+      extraArray = new Serializable[extraList.size()];
+      extraList.toArray(extraArray);
     }
 
     if (_jid != null)
@@ -282,13 +329,28 @@ public class XmppReader
     if (to == null)
       to = _uid;
 
-    ImMessage message = new ImMessage(to, from, type,
-				      subjectArray, bodyArray, thread,
-				      extra);
+    Serializable message;
+
+    /*
+    if (! "normal".equals(type)
+        || subjectArray != null 
+        || bodyArray != null 
+        || thread != null
+        || extraArray == null
+        || extraArray.length > 1) {
+    }
+    else {
+      message = extraArray[0];
+    }
+    */
+
+    message = new ImMessage(to, from, type,
+                            subjectArray, bodyArray, thread,
+                            extraArray);
 
     if (_handler != null)
       _handler.message(to, from, message);
-
+    
     return true;
   }
 

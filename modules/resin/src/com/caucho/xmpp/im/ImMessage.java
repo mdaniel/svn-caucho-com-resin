@@ -101,6 +101,24 @@ public class ImMessage implements Serializable {
     _body = new Text[] { new Text(body) };
   }
 
+  public ImMessage(String to, String from, String body, Serializable extra)
+  {
+    _type = "chat";
+    _to = to;
+    _from = from;
+    _body = new Text[] { new Text(body) };
+    _extra = new Serializable[] { extra };
+  }
+
+  public ImMessage(String to, String from, String body, Serializable []extra)
+  {
+    _type = "chat";
+    _to = to;
+    _from = from;
+    _body = new Text[] { new Text(body) };
+    _extra = extra;
+  }
+
   public ImMessage(String to, String from, String type,
 		   Text []subject,
 		   Text []body,

@@ -46,6 +46,8 @@ import com.caucho.security.BasicPrincipal;
 import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.connection.*;
 import com.caucho.server.cluster.Server;
+import com.caucho.servlet.DuplexContext;
+import com.caucho.servlet.DuplexListener;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import java.io.*;
@@ -58,7 +60,7 @@ import javax.servlet.*;
  * Main protocol handler for the HTTP version of HMTP
  */
 public class ServerFromLinkStream extends FromLinkStream
-  implements TcpDuplexHandler
+  implements DuplexListener
 {
   private static final L10N L = new L10N(ServerFromLinkStream.class);
   private static final Logger log
@@ -140,28 +142,23 @@ public class ServerFromLinkStream extends FromLinkStream
     return getJid();
   }
   
-  public boolean serviceRead(ReadStream is,
-			     TcpDuplexController controller)
+  public void onRead(DuplexContext duplexContext)
     throws IOException
   {
-    try {
-      if (readPacket()) {
-	return true;
-      }
-      else {
-	controller.close();
-	return false;
-      }
-    } catch (Exception e) {
-      return false;
+    if (! readPacket()) {
+      duplexContext.complete();
     }
   }
   
-  public boolean serviceWrite(WriteStream os,
-			      TcpDuplexController controller)
+  public void onTimeout(DuplexContext duplexContext)
     throws IOException
   {
-    return false;
+    duplexContext.complete();
+  }
+  
+  public void onComplete(DuplexContext duplexContext)
+    throws IOException
+  {
   }
 
   String login(String uid, Object credentials, String resource,

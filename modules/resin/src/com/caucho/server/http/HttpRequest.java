@@ -118,6 +118,7 @@ public class HttpRequest extends AbstractHttpRequest
 
   private ChunkedInputStream _chunkedInputStream = new ChunkedInputStream();
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
+  private RawInputStream _rawInputStream = new RawInputStream();
 
   private AverageProbe _requestTimeProbe;
   private SampleCountProbe _requestCountProbe;
@@ -682,11 +683,17 @@ public class HttpRequest extends AbstractHttpRequest
   public boolean initStream(ReadStream readStream, ReadStream rawRead)
     throws IOException
   {
-    long contentLength = getLongContentLength();
-
     // needed to avoid auto-flush on read conflicting with partially
     // generated response
     rawRead.setSibling(null);
+
+    if (getConnection().isDuplex()) {
+      _rawInputStream.init(rawRead);
+      readStream.init(_rawInputStream, null);
+      return true;
+    }
+    
+    long contentLength = getLongContentLength();
 
     String te;
     if (contentLength < 0 && HTTP_1_1 <= getVersion()
@@ -1199,6 +1206,27 @@ public class HttpRequest extends AbstractHttpRequest
 
       _headerSize = headerSize;
     }
+  }
+
+  //
+  // upgrade to duplex
+  //
+
+
+  /**
+   * Upgrade to duplex
+   */
+  @Override
+  public TcpDuplexController startDuplex(TcpDuplexHandler handler)
+  {
+    TcpConnection conn = (TcpConnection) _conn;
+
+    TcpDuplexController context = conn.startDuplex(handler);
+
+    _rawInputStream.init(conn.getReadStream());
+    _readStream.setSource(_rawInputStream);
+
+    return context;
   }
 
   public final void protocolCloseEvent()

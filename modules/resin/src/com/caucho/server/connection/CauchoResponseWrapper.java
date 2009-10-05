@@ -398,14 +398,6 @@ public class CauchoResponseWrapper implements CauchoResponse {
     return _response;
   }
   
-  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
-  {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-    
-    return cResponse.upgradeProtocol(handler);
-  }
-  
-  
   @Override
   public String toString()
   {

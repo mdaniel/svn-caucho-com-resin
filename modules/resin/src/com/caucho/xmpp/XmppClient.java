@@ -118,6 +118,14 @@ public class XmppClient {
     }
   }
 
+  public void connect(String name, String password)
+    throws IOException
+  {
+    connect();
+
+    login(name, password);
+  }
+
   public void connect()
     throws IOException
   {

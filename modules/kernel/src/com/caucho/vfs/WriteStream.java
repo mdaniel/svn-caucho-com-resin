@@ -1150,7 +1150,7 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void close() throws IOException
   {
     StreamImpl s = _source;
-    
+
     try {
       int len = _writeLength;
       if (len > 0) {

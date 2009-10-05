@@ -37,6 +37,7 @@ import com.caucho.server.connection.*;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.servlet.DuplexListener;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
@@ -647,7 +648,7 @@ public class TcpConnection extends Connection
       if (_port.getSelectManager().keepalive(this)) {
         if (log.isLoggable(Level.FINE))
           log.fine(dbgId() + " keepalive (select)");
-
+        
         return RequestState.THREAD_DETACHED;
       }
       // keepalive to select manager fails (e.g. filled select manager)
@@ -844,7 +845,7 @@ public class TcpConnection extends Connection
   /**
    * Starts a full duplex (tcp style) request for hmtp/xmpp
    */
-  public TcpDuplexController toDuplex(TcpDuplexHandler handler)
+  public TcpDuplexController startDuplex(TcpDuplexHandler handler)
   {
     if (_controller != null) {
       ConnectionState state = _state;
@@ -1213,11 +1214,24 @@ public class TcpConnection extends Connection
       _state = _state.toActive();
 
       RequestState result;
+      long position = 0;
+      int retry = 256;
 
-      do {
-        result = RequestState.THREAD_DETACHED;
-      } while (_duplex.serviceRead()
-               && (result = processKeepalive()) == RequestState.REQUEST);
+      ReadStream readStream = getReadStream();
+
+      while ((result = processKeepalive()) == RequestState.REQUEST) {
+        _duplex.serviceRead();
+
+        if (position != readStream.getPosition()) {
+          retry = 256;
+          position = readStream.getPosition();
+        }
+        else if (retry-- < 0) {
+          log.warning(_duplex + " was not processing any data. Shutting down.");
+          close();
+          return RequestState.EXIT;
+        }
+      }
 
       return result;
     }

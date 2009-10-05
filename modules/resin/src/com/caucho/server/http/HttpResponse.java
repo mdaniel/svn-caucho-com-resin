@@ -99,6 +99,7 @@ public class HttpResponse extends AbstractHttpResponse
   /**
    * Upgrade protocol
    */
+  /*
   @Override
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
@@ -117,6 +118,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     return controller;
   }
+  */
 
   /**
    * Writes the 100 continue response.
@@ -176,6 +178,11 @@ public class HttpResponse extends AbstractHttpResponse
       return false;
     }
 
+    TcpConnection tcpConn = null;
+
+    if (_request.getConnection() instanceof TcpConnection)
+      tcpConn = (TcpConnection) _request.getConnection();
+    
     WebApp webApp = request.getWebApp();
 
     String contentType = response.getContentTypeImpl();
@@ -205,6 +212,25 @@ public class HttpResponse extends AbstractHttpResponse
     if (debug) {
       log.fine(_request.dbgId() + "HTTP/1.1 " +
                statusCode + " " + response.getStatusMessage());
+    }
+
+    boolean isUpgrade = false;
+    
+    if (tcpConn != null && tcpConn.isDuplex()) {
+      isUpgrade = true;
+      
+      String upgrade = getHeader("Upgrade");
+
+      if (upgrade != null) {
+        os.print("\r\nUpgrade: ");
+        os.print(upgrade);
+      }
+      
+      os.print("\r\nConnection: Upgrade");
+      _request.killKeepalive();
+
+      if (debug)
+        log.fine(_request.dbgId() + "Connection: Upgrade");
     }
 
     if (! containsHeader("Server")) {
@@ -270,6 +296,10 @@ public class HttpResponse extends AbstractHttpResponse
     int size = _headerKeys.size();
     for (int i = 0; i < size; i++) {
       String key = (String) _headerKeys.get(i);
+      
+      if (isUpgrade && "Upgrade".equalsIgnoreCase(key))
+        continue;
+          
       os.write('\r');
       os.write('\n');
       os.print(key);
@@ -437,7 +467,11 @@ public class HttpResponse extends AbstractHttpResponse
       else
       */
 
-      if (! _request.allowKeepalive()) {
+      if (_request.allowKeepalive()) {
+      }
+      else if (isUpgrade) {
+      }
+      else {
         os.write(_connectionCloseBytes, 0, _connectionCloseBytes.length);
         _request.killKeepalive();
 
