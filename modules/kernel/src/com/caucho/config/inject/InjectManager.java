@@ -990,8 +990,8 @@ public class InjectManager
       Set beans = component.resolve(baseType, bindings);
 
       if (beans != null && beans.size() > 0) {
-        if (log.isLoggable(Level.FINER))
-          log.finer(this + " bind(" + baseType.getSimpleName()
+        if (log.isLoggable(Level.FINEST))
+          log.finest(this + " bind(" + baseType.getSimpleName()
                      + "," + toList(bindings) + ") -> " + beans);
 
         return beans;
@@ -1069,8 +1069,8 @@ public class InjectManager
     if (component != null) {
       Set beans = component.resolve(type, bindings);
 
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " bind(" + getSimpleName(type)
+      if (log.isLoggable(Level.FINEST))
+        log.finest(this + " bind(" + getSimpleName(type)
                   + "," + toList(bindings) + ") -> " + beans);
 
       if (beans != null && beans.size() > 0)

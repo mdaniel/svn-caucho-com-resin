@@ -130,12 +130,11 @@ public class HempBrokerManager
     if (host == null)
       return null;
 
-    // jms/3f00
-    /*
-    // XXX: need to determine actual host
-    if ("default".equals(host.getHostName()))
+    // jms/3f00 vs server/2e06
+    if ("default".equals(host.getHostName())
+        && ! "localhost".equals(name)) {
       return null;
-    */
+    }
 
     Broker broker = host.getBamBroker();
 

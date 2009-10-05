@@ -38,6 +38,7 @@ import com.caucho.server.connection.Connection;
 import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpServletResponseImpl;
+import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -1914,6 +1915,18 @@ public class HmuxRequest extends AbstractHttpRequest
     return _hOut;
   }
 
+  void flushResponseBuffer()
+    throws IOException
+  {
+    HttpServletRequestImpl request = getRequestFacade();
+    
+    if (request != null) {
+      AbstractResponseStream stream = request.getResponse().getResponseStream();
+
+      stream.flushBuffer();
+    }
+  }
+
   private void writeObject(WriteStream out, Serializable value)
     throws IOException
   {
@@ -2079,7 +2092,7 @@ public class HmuxRequest extends AbstractHttpRequest
           _os.write(channel);
 
           if (log.isLoggable(Level.FINE))
-            log.fine(_request.dbgId() + "A-r:ack channel 2");
+            log.fine(_request.dbgId() + "A-w:ack channel 2");
         }
 
         _needsAck = false;
@@ -2149,6 +2162,8 @@ public class HmuxRequest extends AbstractHttpRequest
     public void write(byte []buf, int offset, int length, boolean isEnd)
       throws IOException
     {
+      _request.flushResponseBuffer();
+
       if (log.isLoggable(Level.FINE)) {
         log.fine(_request.dbgId() + (char) HMUX_DATA + ":data " + length);
 

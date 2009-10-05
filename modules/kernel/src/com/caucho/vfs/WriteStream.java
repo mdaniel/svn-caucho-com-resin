@@ -363,6 +363,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (len > 0) {
       _writeLength = 0;
       _source.write(_writeBuffer, 0, len, false);
+      
       _position += len;
     }
 
