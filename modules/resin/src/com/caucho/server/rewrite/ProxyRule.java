@@ -170,5 +170,17 @@ public class ProxyRule
     {
       return _queryString;
     }
+
+    @Override
+    public Object getAttribute(String name)
+    {
+      return null;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _uri + "?" + _queryString + "]";
+    }
   }
 }

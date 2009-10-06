@@ -36,6 +36,7 @@ import com.caucho.servlets.HttpProxyServlet;
 import com.caucho.server.cluster.CustomLoadBalanceManager;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterStream;
+import com.caucho.server.connection.CauchoRequest;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
@@ -119,6 +120,10 @@ public class HttpProxyServlet extends GenericServlet {
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
+    CauchoRequest cReq = null;
+
+    if (req instanceof CauchoRequest)
+      cReq = (CauchoRequest) req;
 
     String sessionId = req.getRequestedSessionId();
     
@@ -130,13 +135,24 @@ public class HttpProxyServlet extends GenericServlet {
     else
       uri = req.getRequestURI();
 
-    if (req.getQueryString() != null)
-      uri += '?' + req.getQueryString();
+    String queryString = null;
+    
+    if (cReq != null)
+      queryString = cReq.getPageQueryString();
+    else {
+      queryString = (String) req.getAttribute("javax.servlet.include.query_string");
+
+      if (queryString == null)
+        queryString = req.getQueryString();
+    }
+    
+    if (queryString != null)
+      uri += '?' + queryString;
 
     ClusterStream stream = _loadBalancer.openServer(sessionId, null);
 
     try {
-      if (handleRequest(req, res, stream)) {
+      if (handleRequest(req, res, uri, stream)) {
         stream.free();
         stream = null;
         return;
@@ -149,6 +165,7 @@ public class HttpProxyServlet extends GenericServlet {
 
   private boolean handleRequest(HttpServletRequest req,
 				HttpServletResponse res,
+                                String uri,
 				ClusterStream stream)
     throws ServletException, IOException
   {
@@ -158,7 +175,7 @@ public class HttpProxyServlet extends GenericServlet {
     try {
       out.print(req.getMethod());
       out.print(' ');
-      out.print(req.getRequestURI());
+      out.print(uri);
       out.print(" HTTP/1.1\r\n");
 
       out.print("Host: ");

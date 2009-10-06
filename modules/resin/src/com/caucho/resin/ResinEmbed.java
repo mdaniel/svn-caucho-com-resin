@@ -94,6 +94,7 @@ public class ResinEmbed
     = new ArrayList<WebAppEmbed>();
 
   private Lifecycle _lifecycle = new Lifecycle();
+  private boolean _isConfig;
 
   /**
    * Creates a new resin server.
@@ -129,6 +130,10 @@ public class ResinEmbed
    */
   public void addPort(PortEmbed port)
   {
+    // server/1e00
+    if (_clusterServer == null)
+      initConfig(_configFile);
+    
     port.bindTo(_clusterServer);
   }
 
@@ -390,6 +395,10 @@ public class ResinEmbed
   private void initConfig(String configFile)
   {
     try {
+      if (_isConfig)
+        return;
+      _isConfig = true;
+      
       Config config = new Config();
 
       config.configure(_resin, Vfs.lookup(configFile));
