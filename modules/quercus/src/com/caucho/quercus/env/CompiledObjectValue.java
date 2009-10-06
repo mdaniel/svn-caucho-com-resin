@@ -486,6 +486,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Serializes the value.
    */
+  /*
   @Override
   public void serialize(Env env, StringBuilder sb, SerializeMap map)
   {
@@ -497,7 +498,7 @@ public class CompiledObjectValue extends ObjectValue
     sb.append(getSize());
     sb.append(":{");
 
-    ArrayList<StringValue> names = _quercusClass.getFieldNames();
+    HashMap<StringValue,ClassField> names = _quercusClass.getClassFields();
     
     if (names != null) {
       int index = 0;
@@ -536,6 +537,7 @@ public class CompiledObjectValue extends ObjectValue
 
     sb.append("}");
   }
+  */
 
   /**
    * Converts to a string.

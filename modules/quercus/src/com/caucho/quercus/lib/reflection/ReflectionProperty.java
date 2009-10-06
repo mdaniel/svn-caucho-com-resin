@@ -174,7 +174,7 @@ public class ReflectionProperty
     
     public static Property create(Env env, QuercusClass cls, StringValue nameV)
     { 
-      if (cls.findFieldIndex(nameV) >= 0)
+      if (cls.getClassField(nameV) != null)
         return new Property(cls, nameV);
       else if (cls.getStaticField(env, nameV.toString()) != null)
         return new StaticProperty(cls, nameV);
@@ -236,7 +236,7 @@ public class ReflectionProperty
 
       if (refClass != null)
         return refClass;
-      else if (cls.findFieldIndex(_nameV) >= 0)
+      else if (cls.getClassField(_nameV) != null)
         return cls;
 
       return null;

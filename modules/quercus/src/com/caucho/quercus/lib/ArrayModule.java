@@ -414,12 +414,7 @@ public class ArrayModule
       return false;
     }
 
-    if (searchArray instanceof ArrayValue) {
-      return ((ArrayValue) searchArray).containsKey(key) != null;
-    }
-    else {
-      return ! searchArray.getField(env, key.toStringValue()).isNull();
-    }
+    return searchArray.isset(key);
   }
 
   /**

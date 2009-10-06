@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,6 +39,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ClassField;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.env.NullValue;
@@ -208,7 +209,7 @@ public class ReflectionClass
   
   public boolean hasProperty(StringValue name)
   {
-    return _cls.findFieldIndex(name) >= 0;
+    return _cls.getClassField(name) != null;
   }
   
   public ReflectionProperty getProperty(Env env, StringValue name)
@@ -220,13 +221,15 @@ public class ReflectionClass
   {
     ArrayValue array = new ArrayValueImpl();
     
-    ArrayList<StringValue> fieldList = _cls.getFieldNames();
+    HashMap<StringValue,ClassField> fieldMap = _cls.getClassFields();
     
-    for (StringValue field : fieldList) {
-      ReflectionProperty prop
-        = ReflectionProperty.create(env, _cls, field, false);
+    for (ClassField field : fieldMap.values()) {
+      if (field.isPublic()) {
+        ReflectionProperty prop
+          = ReflectionProperty.create(env, _cls, field.getName(), false);
       
-      array.put(env.wrapJava(prop));
+        array.put(env.wrapJava(prop));
+      }
     }
     
     ArrayList<String> staticFieldList = _cls.getStaticFieldNames();
@@ -435,9 +438,11 @@ public class ReflectionClass
     
     getStaticFields(env, array, _cls);
     
-    HashMap<StringValue, Expr> fieldMap = _cls.getClassVars();
-    for (Map.Entry<StringValue, Expr> entry : fieldMap.entrySet()) {
-      array.put(entry.getKey(), entry.getValue().eval(env));
+    HashMap<StringValue, ClassField> fieldMap = _cls.getClassFields();
+    for (Map.Entry<StringValue, ClassField> entry : fieldMap.entrySet()) {
+      Expr initExpr = entry.getValue().getInitValue();
+      
+      array.put(entry.getKey(), initExpr.eval(env));
     }
     
     return array;

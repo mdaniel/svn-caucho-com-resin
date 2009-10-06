@@ -3031,6 +3031,15 @@ public class Env {
       if (value != null)
         return value;
     }
+    
+    id = _quercus.getConstantLowerId(name);
+    
+    if (id > 0 && id < _const.length) {
+      Value value = _const[id];
+
+      if (value != null)
+        return value;
+    }
 
     /*
     id = _quercus.getConstantLower(id);
@@ -3042,7 +3051,7 @@ public class Env {
         return value;
     }
     */
-
+    
     return null;
 
     /*

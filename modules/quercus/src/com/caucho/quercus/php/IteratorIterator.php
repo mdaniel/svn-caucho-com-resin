@@ -8,7 +8,7 @@ class IteratorIterator implements OuterIterator {
     $this->it = $it;
   }
 
-  function getInnerItator()
+  function getInnerIterator()
   {
     return $this->it;
   }

@@ -947,15 +947,17 @@ public class StringBuilderValue
                                int mLength)
   {
     int length = _length;
-
-    if (length < offset + mLength)
+    
+    if (length < offset + mLength) {
       return false;
+    }
 
     byte []buffer = _buffer;
 
     for (int i = 0; i < mLength; i++) {
-      if (buffer[offset + i] != mBuffer[mOffset + i])
+      if ((buffer[offset + i] & 0xFF) != mBuffer[mOffset + i]) {
         return false;
+      }
     }
 
     return true;
@@ -977,7 +979,7 @@ public class StringBuilderValue
     byte []buffer = _buffer;
 
     for (int i = 0; i < mLength; i++) {
-      byte a = buffer[offset + i];
+      int a = buffer[offset + i] & 0xFF;
       char b = mBuffer[mOffset + i];
 
       if ('A' <= a && a <= 'Z')

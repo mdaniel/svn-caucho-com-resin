@@ -9,11 +9,6 @@ class FilterIterator extends IteratorIterator {
     parent::__construct($iter);
   }
 
-  function accept()
-  {
-    return true;
-  }
-
   function current()
   {
     return $this->_current;

@@ -1695,18 +1695,20 @@ abstract public class StringValue
    * Returns true if the region matches
    */
   public boolean regionMatches(int offset,
-			       char []mBuffer, int mOffset, int mLength)
+                               char []mBuffer, int mOffset, int mLength)
   {
     int length = length();
 
-    if (length < offset + mLength)
+    if (length < offset + mLength) {
       return false;
-
-    for (int i = 0; i < mLength; i++) {
-      if (charAt(offset + i) != mBuffer[mOffset + i])
-	return false;
     }
 
+    for (int i = 0; i < mLength; i++) {
+      if (charAt(offset + i) != mBuffer[mOffset + i]) {
+        return false;
+      }
+    }
+    
     return true;
   }
     
@@ -1723,7 +1725,7 @@ abstract public class StringValue
 
     for (int i = 0; i < mLength; i++) {
       if (charAt(offset + i) != match.charAt(mOffset + i))
-	return false;
+        return false;
     }
 
     return true;

@@ -167,7 +167,8 @@ public class ClassesModule extends AbstractQuercusModule {
     
     // to combine __construct and class name constructors
     for (AbstractFunction fun : cl.getClassMethods()) {
-      set.add(fun.getName());
+      if (fun.isPublic())
+        set.add(fun.getName());
     }
     
     for (String name : set) {
@@ -184,27 +185,31 @@ public class ClassesModule extends AbstractQuercusModule {
    *
    * @return an array of member names and values
    */
-  public static Value get_class_vars(Env env, Value clss)
+  public static Value get_class_vars(Env env, Value obj)
   {
     // php/1j10
 
     QuercusClass cl;
 
-    if (clss instanceof ObjectValue)
-      cl = ((ObjectValue) clss).getQuercusClass();
+    if (obj instanceof ObjectValue)
+      cl = ((ObjectValue) obj).getQuercusClass();
     else
-      cl = env.findClass(clss.toString());
+      cl = env.findClass(obj.toString());
 
     if (cl == null)
       return BooleanValue.FALSE;
 
     ArrayValue varArray = new ArrayValueImpl();
 
-    for (Map.Entry<StringValue,Expr> entry : cl.getClassVars().entrySet()) {
-      Value key = entry.getKey();
-      Value value = entry.getValue().eval(env);
+    for (ClassField field : cl.getClassFields().values()) {
+      if (field.isPublic()) {
+        StringValue name = field.getName();
+        Expr initValue = field.getInitValue();
+        
+        Value value = initValue.eval(env);
 
-      varArray.append(key, value);
+        varArray.append(name, value);
+      }
     }
 
     ArrayModule.ksort(env, varArray, ArrayModule.SORT_STRING);

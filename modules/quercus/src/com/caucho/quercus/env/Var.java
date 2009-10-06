@@ -86,7 +86,8 @@ public class Var extends Value
 
     _value = value;
 
-    return value;
+    // php/151m
+    return this;
   }
 
   /**
@@ -97,7 +98,7 @@ public class Var extends Value
     // quercus/0431
     _value = value;
 
-    return _value;
+    return this;
   }
 
   /**

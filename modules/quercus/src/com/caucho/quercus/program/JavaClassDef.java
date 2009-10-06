@@ -293,10 +293,8 @@ public class JavaClassDef extends ClassDef {
     if (type == null)
       return;
     
-    if (isTop)
-      interfaceSet.add(_name.toLowerCase());
-    else
-      interfaceSet.add(type.getSimpleName().toLowerCase());
+    interfaceSet.add(_name.toLowerCase());
+    interfaceSet.add(type.getSimpleName().toLowerCase());
 
     if (type.getInterfaces() != null) {
       for (Class iface : type.getInterfaces()) {
@@ -565,13 +563,18 @@ public class JavaClassDef extends ClassDef {
   public Value callNew(Env env, Value []args)
   {
     if (_cons != null) {
-      Value value = _cons.callMethod(env, null, args);
+      if (__construct != null) {
+        Value value = _cons.callMethod(env, null, Value.NULL_ARGS);
 
-      if (__construct != null)
-	__construct.callMethod(env, value, args);
-
-      return value;
+        __construct.callMethod(env, value, args);
+        
+        return value;
+      }
+      else
+        return _cons.callMethod(env, null, args);
     }
+    else if (__construct != null)
+      return __construct.callMethod(env, null, args);
     else
       return NullValue.NULL;
   }

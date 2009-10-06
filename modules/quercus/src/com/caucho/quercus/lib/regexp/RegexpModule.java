@@ -809,13 +809,17 @@ public class RegexpModule
       ArrayValue matchResult = new ArrayValueImpl();
       matches.put(matchResult);
 
-      for (int i = 0; i < regexpState.groupCount(); i++) {
+      int groupCount = regexpState.groupCount();
+      
+      for (int i = 0; i < groupCount; i++) {
         int start = regexpState.start(i);
         int end = regexpState.end(i);
 
+        // php/1542
         // php/1545
         // group is unmatched, skip
-        if (start < 0 || end < start)
+        if (start < 0 || end < start
+            || (end == start && i == groupCount - 1))
           continue;
 
         StringValue groupValue = regexpState.group(env, i);
@@ -1647,7 +1651,7 @@ public class RegexpModule
       // Get non-matching sequence
       if (count == limit - 1) {
         unmatched = regexpState.substring(env, head);
-        head = string.length();
+        head = regexpState.getSubjectLength();
       }
       else {
         // php/153y
@@ -1693,19 +1697,19 @@ public class RegexpModule
             while (neighborMap.hasNeighbor(group)) {
               group = neighborMap.getNeighbor(group);
 
-          if (regexpState.isMatchedGroup(group))
-            break;
+              if (regexpState.isMatchedGroup(group))
+                break;
 
-          if (isCaptureOffset) {
-            ArrayValue part = new ArrayValueImpl();
+              if (isCaptureOffset) {
+                ArrayValue part = new ArrayValueImpl();
 
-            part.put(empty);
-            part.put(LongValue.create(startPosition));
+                part.put(empty);
+                part.put(LongValue.create(startPosition));
 
-            result.put(part);
-          }
-          else
-            result.put(empty);
+                result.put(part);
+              }
+              else
+                result.put(empty);
             }
           }
 
@@ -1731,7 +1735,8 @@ public class RegexpModule
     }
 
     // Append non-matching sequence at the end
-    if (count < limit && (head < regexpState.start() || allowEmpty)) {
+    if (count < limit
+        && (head < regexpState.getSubjectLength() || allowEmpty)) {
       if (isCaptureOffset) {
         ArrayValue part = new ArrayValueImpl();
 

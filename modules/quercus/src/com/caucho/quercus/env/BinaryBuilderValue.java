@@ -165,6 +165,41 @@ public class BinaryBuilderValue
   {
     return "string";
   }
+  
+  /**
+   * Returns true for a BinaryValue.
+   */
+  public boolean isBinary()
+  {
+    return true;
+  }
+  
+  /**
+   * Converts to a UnicodeValue.
+   */
+  @Override
+  public StringValue toUnicodeValue()
+  {
+    return new UnicodeBuilderValue(this);
+  }
+
+  /**
+   * Converts to a UnicodeValue.
+   */
+  @Override
+  public StringValue toUnicodeValue(Env env)
+  {
+    return new UnicodeBuilderValue(this);
+  }
+
+  /**
+   * Converts to a UnicodeValue in desired charset.
+   */
+  @Override
+  public StringValue toUnicodeValue(Env env, String charset)
+  {
+    return toUnicodeValue(env);
+  }
 
   /**
    * Converts to a string builder

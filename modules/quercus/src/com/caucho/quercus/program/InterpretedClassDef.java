@@ -211,7 +211,6 @@ public class InterpretedClassDef extends ClassDef
       FieldEntry fieldEntry = entry.getValue();
       
       cl.addField(entry.getKey(),
-                  0,
                   fieldEntry.getValue(),
                   fieldEntry.getVisibility());
     }

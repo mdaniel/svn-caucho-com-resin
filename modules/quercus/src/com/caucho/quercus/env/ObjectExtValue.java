@@ -164,22 +164,23 @@ public class ObjectExtValue extends ObjectValue
   public void initObject(Env env, QuercusClass cls)
   {
     setQuercusClass(cls);
+    _incompleteObjectName = null;
     
-    Entry []entries = _entries;
+    Entry []existingEntries = _entries;
     
-    _entries = new Entry[_entries.length];
+    _entries = new Entry[DEFAULT_SIZE];
     _hashMask = _entries.length - 1;
     _size = 0;
     
     cls.initObject(env, this);
     
-    EntryIterator iter = new EntryIterator(entries);
+    EntryIterator iter = new EntryIterator(existingEntries);
     
     while (iter.hasNext()) {
       Entry newField = iter.next();
       
       Entry entry = getThisEntry(newField._key);
-      
+
       if (entry != null)
         entry._value = newField._value;
       else
@@ -206,16 +207,7 @@ public class ObjectExtValue extends ObjectValue
     
     // php/09ks vs php/091m
     if (entry != null) {
-      /*
-      if (entry._visibility == FieldVisibility.PRIVATE
-          && _quercusClass != env.getCallingClass()) {
-      }
-      else
-        return entry._value.toValue();
-      */
-      
       return entry._value.toValue();
-        
     }
 
     return getFieldExt(env, name);
@@ -635,97 +627,6 @@ public class ObjectExtValue extends ObjectValue
     // XXX: possibly resize
 
     return newEntry;
-  }
-
-  //
-  // array methods
-  //
-
-  /**
-   * Returns the array value with the given key.
-   */
-  @Override
-  public Value get(Value key)
-  {
-    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-
-    // php/066q vs. php/0906
-    //return getField(null, key.toString());
-
-    if (delegate != null)
-      return delegate.get(this, key);
-    else
-      return super.get(key);
-  }
-
-  /**
-   * Sets the array value with the given key.
-   */
-  @Override
-  public Value put(Value key, Value value)
-  {
-    // php/0d94
-    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-
-    if (delegate != null)
-      return delegate.put(this, key, value);
-    else
-      return super.put(key, value);
-  }
-
-  /**
-   * Appends a new array value
-   */
-  @Override
-  public Value put(Value value)
-  {
-    // php/0d94
-    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-
-    if (delegate != null)
-      return delegate.put(this, value);
-    else
-      return super.put(value);
-  }
-  
-  /**
-   * Sets the array value, returning the new array, e.g. to handle
-   * string update ($a[0] = 'A').  Creates an array automatically if
-   * necessary.
-   */
-  public Value append(Value index, Value value)
-  {
-    put(index, value);
-    
-    return this;
-  }
-
-  /**
-   * Unsets the array value
-   */
-  @Override
-  public Value remove(Value key)
-  {
-    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-
-    if (delegate != null)
-      return delegate.unset(this, key);
-    else
-      return super.remove(key);
-  }
-  
-  /**
-   * Returns the array value with the given key.
-   */
-  @Override
-  public boolean isset(Value key)
-  {
-    ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-
-    if (delegate != null)
-      return delegate.isset(this, key);
-    else
-      return get(key).isset();
   }
 
   //

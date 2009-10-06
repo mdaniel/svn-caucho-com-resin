@@ -62,10 +62,6 @@ public class ArrayIterator
 
   private java.util.Iterator<Map.Entry<Value,Value>> _iterator;
   private Map.Entry<Value, Value> _current;
-
-  public ArrayIterator()
-  {
-  }
   
   @Name("__construct")
   public Value __construct(Env env,

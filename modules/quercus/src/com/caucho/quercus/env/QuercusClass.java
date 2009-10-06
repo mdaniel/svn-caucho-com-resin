@@ -87,16 +87,9 @@ public class QuercusClass {
 
   private final ArrayList<InstanceInitializer> _initializers;
   
-  private final ArrayList<StringValue> _fieldNames;
-  
-  private final IntMap _fieldMap;
-  
-  private final HashMap<StringValue,Expr> _fieldInitMap;
-  
   private final MethodMap<AbstractFunction> _methodMap;
-
   private final HashMap<String,Expr> _constMap;
-
+  private final LinkedHashMap<StringValue,ClassField> _fieldMap;
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
 
   private final HashSet<String> _instanceofSet;
@@ -122,14 +115,10 @@ public class QuercusClass {
     _isInterface = _classDef.isInterface();
     
     _initializers = new ArrayList<InstanceInitializer>();
-    _fieldNames = new ArrayList<StringValue>();
-    _fieldMap = new IntMap(16);
   
-    _fieldInitMap = new HashMap<StringValue,Expr>();
+    _fieldMap = new LinkedHashMap<StringValue,ClassField>();
     _methodMap = new MethodMap<AbstractFunction>();
-
     _constMap = new HashMap<String,Expr>();
-
     _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();
 
     JavaClassDef javaClassDef = null;
@@ -210,16 +199,22 @@ public class QuercusClass {
   }
 
   private void addInstances(HashSet<String> instanceofSet,
-			    HashSet<String> ifaces,
-			    ClassDef classDef)
+                            HashSet<String> ifaces,
+                            ClassDef classDef)
   {
     // _instanceofSet.add(classDef.getName());
     classDef.addInterfaces(instanceofSet);
 
     for (String iface : classDef.getInterfaces()) {
+      boolean isJavaClassDef = classDef instanceof JavaClassDef;
+      
+      QuercusClass cl;
+      
       // XXX: php/0cn2, but this is wrong:
-      QuercusClass cl = Env.getInstance().findClass(iface, true, true);
-        
+      cl = Env.getInstance().findClass(iface, 
+                                       ! isJavaClassDef,
+                                       isJavaClassDef);
+
       if (cl == null)
         throw new QuercusRuntimeException(L.l("cannot find interface {0}",
                                               iface));
@@ -269,9 +264,7 @@ public class QuercusClass {
 
     _initializers = cacheClass._initializers;
   
-    _fieldNames = cacheClass._fieldNames;
     _fieldMap = cacheClass._fieldMap;
-    _fieldInitMap = cacheClass._fieldInitMap;
     _methodMap = cacheClass._methodMap;
     _constMap = cacheClass._constMap;
     _staticFieldExprMap = cacheClass._staticFieldExprMap;
@@ -527,40 +520,36 @@ public class QuercusClass {
    * Adds a field.
    */
   public void addField(StringValue name,
-		       int index,
-		       Expr initExpr,
-		       FieldVisibility visibility)
+                       Expr initExpr,
+                       FieldVisibility visibility)
   {
-    _fieldNames.add(name);
-    _fieldMap.put(name, index);
-    _fieldInitMap.put(name, initExpr);
-  }
-
-  /**
-   * Adds a field.
-   */
-  public int addFieldIndex(StringValue name)
-  {
-    int index = _fieldMap.get(name);
-
-    if (index >= 0)
-      return index;
-    else {
-      index = _fieldNames.size();
+    ClassField field = new ClassField(name, initExpr, visibility);
     
-      _fieldMap.put(name, index);
-      _fieldNames.add(name);
-
-      return index;
-    }
+    _fieldMap.put(name, field);
   }
   
   /**
    * Returns a set of the fields and their initial values
    */
-  public HashMap<StringValue,Expr> getClassVars()
+  public HashMap<StringValue,ClassField> getClassFields()
   {
-    return _fieldInitMap;
+    return _fieldMap;
+  }
+  
+  /**
+   * Returns a set of the fields and their initial values
+   */
+  public ClassField getClassField(StringValue name)
+  {
+    return _fieldMap.get(name);
+  }
+  
+  /**
+   * Returns a set of the fields and their initial values
+   */
+  public int findFieldIndex(StringValue name)
+  {
+    throw new UnsupportedOperationException();
   }
   
   /**
@@ -658,23 +647,7 @@ public class QuercusClass {
    */
   public int getFieldSize()
   {
-    return _fieldNames.size();
-  }
-
-  /**
-   * Returns the field index.
-   */
-  public int findFieldIndex(StringValue name)
-  {
-    return _fieldMap.get(name);
-  }
-
-  /**
-   * Returns the key set.
-   */
-  public ArrayList<StringValue> getFieldNames()
-  {
-    return _fieldNames;
+    return _fieldMap.size();
   }
 
   public void validate(Env env)

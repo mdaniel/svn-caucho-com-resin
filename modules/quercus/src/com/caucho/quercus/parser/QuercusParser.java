@@ -2050,30 +2050,32 @@ public class QuercusParser {
       Expr expr = null;
 
       if (token == '=') {
-	expr = parseExpr();
+        expr = parseExpr();
       }
       else {
-	_peekToken = token;
-	expr = _factory.createNull();
+        _peekToken = token;
+        expr = _factory.createNull();
       }
+      
+      StringValue nameV = createStringValue(name);
 
       if ((modifiers & M_STATIC) != 0) {
-        ((ClassScope) _scope).addStaticVar(name, expr, _comment);
+        ((ClassScope) _scope).addStaticVar(nameV, expr, _comment);
       }
       else if ((modifiers & M_PRIVATE) != 0) {
-        ((ClassScope) _scope).addVar(name,
+        ((ClassScope) _scope).addVar(nameV,
                                      expr,
                                      FieldVisibility.PRIVATE,
                                      comment);
       }
       else if ((modifiers & M_PROTECTED) != 0) {
-        ((ClassScope) _scope).addVar(name,
+        ((ClassScope) _scope).addVar(nameV,
                                      expr,
                                      FieldVisibility.PROTECTED,
                                      comment);
       }
       else {
-        ((ClassScope) _scope).addVar(name,
+        ((ClassScope) _scope).addVar(nameV,
                                      expr,
                                      FieldVisibility.PUBLIC,
                                      comment);
@@ -4689,15 +4691,14 @@ public class QuercusParser {
     while (true) {
       Expr tail;
 
-      if (token == COMPLEX_STRING_ESCAPE ||
-          token == COMPLEX_BINARY_ESCAPE) {
+      if (token == COMPLEX_STRING_ESCAPE
+          || token == COMPLEX_BINARY_ESCAPE) {
+        tail = parseExpr();
 
-	tail = parseExpr();
-
-	expect('}');
+        expect('}');
       }
-      else if (token == SIMPLE_STRING_ESCAPE ||
-               token == SIMPLE_BINARY_ESCAPE) {
+      else if (token == SIMPLE_STRING_ESCAPE
+               || token == SIMPLE_BINARY_ESCAPE) {
 	int ch = read();
 	
 	_sb.setLength(0);
@@ -4762,7 +4763,7 @@ public class QuercusParser {
         else
           string = createBinary(_sb.toString().getBytes());
         
-	expr = _factory.createAppend(expr, string);
+        expr = _factory.createAppend(expr, string);
       }
 
       if (token == STRING)

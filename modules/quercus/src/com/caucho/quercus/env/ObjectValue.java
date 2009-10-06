@@ -99,7 +99,6 @@ abstract public class ObjectValue extends Value {
   public void initObject(Env env, QuercusClass cls)
   {
     setQuercusClass(cls);
-    
     _incompleteObjectName = null;
   }
 
@@ -198,14 +197,11 @@ abstract public class ObjectValue extends Value {
   public Value get(Value key)
   {
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-      
-    // php/066q vs. php/0906
-    //return getField(null, key.toString());
 
     if (delegate != null)
       return delegate.get(this, key);
     else
-      return super.get(key);
+      return getField(Env.getInstance(), key.toStringValue());
       //return Env.getInstance().error(L.l("Can't use object '{0}' as array",
       //                                   getName()));
   }
@@ -265,7 +261,7 @@ abstract public class ObjectValue extends Value {
     if (delegate != null)
       return delegate.isset(this, key);
     else
-      return get(key).isset();
+      return getField(Env.getInstance(), key.toStringValue()).isset();
   }
 
   /**

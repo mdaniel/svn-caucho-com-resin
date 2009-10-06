@@ -43,12 +43,6 @@ public class BinaryLiteralExpr extends StringLiteralExpr
     super(location, new BinaryBuilderValue(bytes));
   }
 
-  // XXX: this constructor doesn't make sense
-  public BinaryLiteralExpr(Location location, String string, String encoding)
-  {
-    super(location, new BinaryBuilderValue(string));
-  }
-
   public BinaryLiteralExpr(Location location, BinaryBuilderValue value)
   {
     super(location, value);
@@ -57,11 +51,6 @@ public class BinaryLiteralExpr extends StringLiteralExpr
   public BinaryLiteralExpr(byte[] bytes)
   {
     this(Location.UNKNOWN, bytes);
-  }
-
-  public BinaryLiteralExpr(String string, String encoding)
-  {
-    this(Location.UNKNOWN, string, encoding);
   }
 
   public BinaryLiteralExpr(BinaryBuilderValue value)

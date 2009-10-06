@@ -1480,6 +1480,14 @@ public class Quercus
   {
     return _constantLowerMap[id];
   }
+  
+  /**
+   * Returns the constant id.
+   */
+  public int getConstantLowerId(String name)
+  {
+    return getConstantId(name.toLowerCase());
+  }
 
   /**
    * Returns the name map.

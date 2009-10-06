@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,8 +30,7 @@
 package com.caucho.quercus.parser;
 
 import com.caucho.quercus.env.FieldVisibility;
-import com.caucho.quercus.env.ConstStringValue;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
@@ -54,7 +53,7 @@ public class ClassScope extends Scope
     _cl = cl;
   }
   
-  /*
+  /**
    * Returns true if scope is within a class.
    */
   public boolean isClass()
@@ -94,40 +93,20 @@ public class ClassScope extends Scope
   /**
    * Adds a value
    */
-  public void addVar(String name, Expr value, FieldVisibility visibility)
-  {
-    // XXX: i18n
-    _cl.addValue(new ConstStringValue(name), value, visibility);
-  }
-  
-  /**
-   * Adds a value
-   */
-  public void addVar(String name,
+  public void addVar(StringValue name,
                      Expr value,
                      FieldVisibility visibility,
                      String comment)
   {
-    // XXX: i18n
-    _cl.addValue(new ConstStringValue(name), value, visibility, comment);
+    _cl.addValue(name, value, visibility, comment);
   }
   
   /**
    * Adds a static value
    */
-  public void addStaticVar(String name, Expr value)
+  public void addStaticVar(StringValue name, Expr value, String comment)
   {
-    // XXX: i18n
-    _cl.addStaticValue(new ConstStringValue(name), value, null);
-  }
-  
-  /**
-   * Adds a static value
-   */
-  public void addStaticVar(String name, Expr value, String comment)
-  {
-    // XXX: i18n
-    _cl.addStaticValue(new ConstStringValue(name), value, comment);
+    _cl.addStaticValue(name, value, comment);
   }
   
   /**

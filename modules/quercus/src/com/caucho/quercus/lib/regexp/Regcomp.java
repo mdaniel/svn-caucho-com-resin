@@ -1230,11 +1230,11 @@ class Regcomp {
     
     int oct = parseOctal(ch, pattern);
     
-    return parseString(oct, pattern, true);
+    return createString((char) oct);
   }
 
   private RegexpNode parseString(int ch,
-				 PeekStream pattern)
+				                 PeekStream pattern)
     throws IllegalRegexpException
   {
     return parseString(ch, pattern, false);
@@ -1244,8 +1244,8 @@ class Regcomp {
    * parseString
    */
   private RegexpNode parseString(int ch,
-				 PeekStream pattern,
-				 boolean isEscaped)
+                                 PeekStream pattern,
+                                 boolean isEscaped)
     throws IllegalRegexpException
   {
     CharBuffer cb = new CharBuffer();
@@ -1254,35 +1254,35 @@ class Regcomp {
     for (ch = pattern.read(); ch >= 0; ch = pattern.read()) {
       switch (ch) {
       case ' ': case '\t': case '\n': case '\r':
-	if (! isIgnoreWs() || isEscaped)
-	  cb.append((char) ch);
-	break;
+        if (! isIgnoreWs() || isEscaped)
+          cb.append((char) ch);
+        break;
 
       case '#':
-	if (! isIgnoreWs() || isEscaped)
-	  cb.append((char) ch);
-	else {
-	  while ((ch = pattern.read()) != '\n' && ch >= 0) {
-	  }
-	}
-	break;
+        if (! isIgnoreWs() || isEscaped)
+          cb.append((char) ch);
+        else {
+          while ((ch = pattern.read()) != '\n' && ch >= 0) {
+          }
+        }
+        break;
 
       case '(': case ')': case '[':
       case '+': case '?': case '*': case '.':
       case '$': case '^': case '|':
-	pattern.ungetc(ch);
-	return createString(cb);
+        pattern.ungetc(ch);
+        return createString(cb);
 
       case '{':
-	if ('0' <= pattern.peek() && pattern.peek() <= '9') {
-	  pattern.ungetc(ch);
-	  return createString(cb);
-	}
-	cb.append('{');
-	break;
+        if ('0' <= pattern.peek() && pattern.peek() <= '9') {
+          pattern.ungetc(ch);
+          return createString(cb);
+        }
+        cb.append('{');
+        break;
 	
       case '\\':
-	ch = pattern.read();
+        ch = pattern.read();
 	
 	switch (ch) {
 	case -1:
@@ -1372,7 +1372,7 @@ class Regcomp {
 	break;
 
       default:
-	cb.append((char) ch);
+        cb.append((char) ch);
       }
     }
 
@@ -1385,6 +1385,14 @@ class Regcomp {
       return new RegexpNode.StringIgnoreCase(cb);
     else
       return new RegexpNode.StringNode(cb);
+  }
+  
+  private RegexpNode createString(char ch)
+  {
+    if (isIgnoreCase())
+      return new RegexpNode.StringIgnoreCase(ch);
+    else
+      return new RegexpNode.StringNode(ch);
   }
   
   private int parseOctal(int ch, PeekStream pattern)
