@@ -134,6 +134,20 @@ public class IncludeRequest extends CauchoRequestWrapper {
     return _invocation.getWebApp();
   }
 
+  @Override
+  public boolean isSyntheticCacheHeader()
+  {
+    // server/137b
+    
+    return true;
+  }
+  
+  @Override
+  public void setHeader(String name, String value)
+  {
+    // server/13r4
+  }
+
   /*
   public ServletResponse getServletResponse()
   {

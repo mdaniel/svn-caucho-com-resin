@@ -422,14 +422,16 @@ abstract public class AbstractHttpResponse {
 
     switch (_headerCodes.get(_headerBuffer, length)) {
     case HEADER_CACHE_CONTROL:
+      // server/13d9, server/13dg
       if (value.startsWith("max-age")) {
       }
       else if (value.startsWith("s-maxage")) {
       }
       else if (value.equals("x-anonymous")) {
       }
-      else
+      else {
         _request.getResponseFacade().setCacheControl(true);
+      }
       
       return false;
 	
@@ -954,9 +956,18 @@ abstract public class AbstractHttpResponse {
 	handleNotModified(_isTopCache);
       }
       if (_statusCode == SC_NOT_MODIFIED) {
-	handleNotModified(_isTopCache);
+        boolean isTopCache = true;
+        
+	handleNotModified(isTopCache);
       }
       */
+      // server/137p
+      HttpServletResponseImpl response = _request.getResponseFacade();
+      if (response != null
+          && response.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
+        response.handleNotModified();
+      }
+      
       
       if (_responseStream == null) {
       }

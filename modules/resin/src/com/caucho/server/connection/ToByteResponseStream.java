@@ -390,10 +390,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     else if (_isHead)
       return;
 
-    _charBuffer[_charLength++] = (char) ch;
-
-    if (_charLength == SIZE)
+    // server/13ww
+    if (SIZE <= _charLength)
       flushCharBuffer();
+    
+    _charBuffer[_charLength++] = (char) ch;
   }
 
   /**

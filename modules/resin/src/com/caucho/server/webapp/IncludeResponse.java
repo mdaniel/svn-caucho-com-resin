@@ -106,7 +106,8 @@ class IncludeResponse extends CauchoResponseWrapper
    */
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
-    assert(_cacheInvocation == null);
+    // server/135q
+    assert(_cacheInvocation == null || cacheInvocation == null);
 
     _cacheInvocation = cacheInvocation;
   }
@@ -119,27 +120,42 @@ class IncludeResponse extends CauchoResponseWrapper
   @Override
   public void close()
   {
+    // server/135q
+    
+    try {
+      _stream.close();
+    } catch (IOException e) {
+    }
   }
 
   //
-  // headers
+  // status and headers
   //
+
+  @Override
+  public void sendError(int code, String msg)
+  {
+  }
   
+  @Override
   public void setHeader(String name, String value)
   {
     _originalStream.addHeader(name, value);
   }
   
+  @Override
   public void addHeader(String name, String value)
   {
     _originalStream.addHeader(name, value);
   }
   
+  @Override
   public boolean containsHeader(String name)
   {
     return false;
   }
   
+  @Override
   public void setDateHeader(String name, long date)
   {
     _calendar.setGMTTime(date);
@@ -147,6 +163,7 @@ class IncludeResponse extends CauchoResponseWrapper
     setHeader(name, _calendar.printDate());
   }
   
+  @Override
   public void addDateHeader(String name, long date)
   {
     _calendar.setGMTTime(date);
@@ -154,16 +171,19 @@ class IncludeResponse extends CauchoResponseWrapper
     addHeader(name, _calendar.printDate());
   }
   
+  @Override
   public void setIntHeader(String name, int value)
   {
     setHeader(name, String.valueOf(value));
   }
   
+  @Override
   public void addIntHeader(String name, int value)
   {
     addHeader(name, String.valueOf(value));
   }
   
+  @Override
   public void addCookie(Cookie cookie)
   {
   }
@@ -171,10 +191,12 @@ class IncludeResponse extends CauchoResponseWrapper
   /**
    * included response can't set the content type.
    */
+  @Override
   public void setContentType(String type)
   {
   }
 
+  @Override
   public void setContentLength(int length)
   {
   }

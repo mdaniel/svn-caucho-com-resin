@@ -409,7 +409,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
    */
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
-    assert(_cacheInvocation == null);
+    assert(_cacheInvocation == null || cacheInvocation == null);
 
     _cacheInvocation = cacheInvocation;
   }
@@ -466,8 +466,9 @@ public final class HttpServletResponseImpl implements CauchoResponse
    */
   public void setCacheControl(boolean isCacheControl)
   {
+    // server/13d9
     _isCacheControl = isCacheControl;
-    killCache();
+    // killCache();
   }
 
   /**
@@ -680,7 +681,7 @@ public final class HttpServletResponseImpl implements CauchoResponse
    *
    * @return true if we filled from the cache
    */
-  private boolean handleNotModified()
+  boolean handleNotModified()
     throws IOException
   {
     boolean isTop = true;
