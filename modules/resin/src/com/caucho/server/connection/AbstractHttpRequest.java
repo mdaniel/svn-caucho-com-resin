@@ -453,13 +453,15 @@ public abstract class AbstractHttpRequest
         }
       }
 
-      return isSecure() ? 443 : 80;
+      // server/0521
+      // return isSecure() ? 443 : 80;
     }
 
     if (host == null)
       return _conn.getLocalPort();
 
     int p1 = host.lastIndexOf(':');
+
     if (p1 < 0)
       return isSecure() ? 443 : 80;
     else {
