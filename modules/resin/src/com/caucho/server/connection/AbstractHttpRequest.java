@@ -453,8 +453,10 @@ public abstract class AbstractHttpRequest
         }
       }
 
-      // server/0521
-      // return isSecure() ? 443 : 80;
+      // server/0521 vs server/052o
+      // because of proxies, need to use the host header,
+      // not the actual port
+      return isSecure() ? 443 : 80;
     }
 
     if (host == null)

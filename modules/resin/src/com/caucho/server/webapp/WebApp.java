@@ -2256,7 +2256,8 @@ public class WebApp extends ServletContextImpl
 
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
 
-      FilterChainBuilder securityBuilder = _constraintManager.getFilterBuilder();
+      FilterChainBuilder securityBuilder
+        = _constraintManager.getFilterBuilder();
 
       if (securityBuilder != null)
         _filterMapper.addTopFilter(securityBuilder);
@@ -3072,10 +3073,9 @@ public class WebApp extends ServletContextImpl
 
         chain = invocation.getFilterChain();
 
-        /* server/10gv - only if new web-app
+        /* server/10gv, server/10gf - only if new web-app */
         if (getRequestListeners().length > 0)
           chain = new DispatchFilterChain(chain, this); // invocation);
-        */
 
         if (_cache != null && filterMapper == _includeFilterMapper) {
           chain = _cache.createFilterChain(chain, this);
