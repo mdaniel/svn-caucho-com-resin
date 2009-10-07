@@ -494,10 +494,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
         writeLength -= sublen;
         offset += sublen;
         bufferOffset += sublen;
-        _contentLength += sublen;
+        _contentLength += sublen - bufferStart;
 
         if (writeLength > 0) {
-
           buffer = writeNextBuffer(bufferOffset);
 
           bufferStart = getNextStartOffset();
@@ -553,13 +552,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
         if (Character.isLetterOrDigit((char) ch))
           graph = "'" + (char) ch + "', ";
 
-        String msg =
-          L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
-                                        request.getRequestURL(),
-                                        "" + (length + _contentLength),
-                                        "" + contentLengthHeader,
-                                        graph,
-                                        "" + ch);
+        String msg
+          = L.l("{0}: tried to write {1} bytes with content-length {2} (At {3}char={4}).  Check that the Content-Length header correctly matches the expected bytes, and ensure that any filter which modifies the content also suppresses the content-length (to use chunked encoding).",
+                request.getRequestURL(),
+                "" + (length + _contentLength),
+                "" + contentLengthHeader,
+                graph,
+                "" + ch);
 
         log.fine(msg);
         break;
@@ -586,7 +585,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
         int bufferOffset = getNextBufferOffset();
 
         if (bufferStart != bufferOffset) {
-          _contentLength += (bufferOffset - bufferStart);
+          // server/10c9
+          // _contentLength += (bufferOffset - bufferStart);
 
           writeNextBuffer(bufferOffset);
         }

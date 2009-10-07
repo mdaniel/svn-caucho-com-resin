@@ -145,14 +145,17 @@ public class ForwardRequest extends CauchoRequestWrapper {
   @Override
   public String getQueryString()
   {
-    // server/1ks7
-    
+    // server/1ks7 vs server/1233
+
+    return _invocation.getQueryString();
+    /*
     String queryString = _invocation.getQueryString();
 
     if (queryString != null)
       return queryString;
 
     return getRequest().getQueryString();
+    */
   }
 
   //

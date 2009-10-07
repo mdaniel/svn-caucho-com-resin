@@ -3073,9 +3073,11 @@ public class WebApp extends ServletContextImpl
 
         chain = invocation.getFilterChain();
 
-        /* server/10gv, server/10gf - only if new web-app */
+        /* server/10gw - #3111 */
+        /*
         if (getRequestListeners().length > 0)
           chain = new DispatchFilterChain(chain, this); // invocation);
+        */
 
         if (_cache != null && filterMapper == _includeFilterMapper) {
           chain = _cache.createFilterChain(chain, this);
