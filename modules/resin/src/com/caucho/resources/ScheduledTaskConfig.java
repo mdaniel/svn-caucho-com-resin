@@ -81,6 +81,12 @@ public class ScheduledTaskConfig extends BeanConfig
     setScopeType(Dependent.class);
   }
 
+  @Override
+  protected boolean isStartup()
+  {
+    return false;
+  }
+
   /**
    * Sets the delay
    */

@@ -41,7 +41,7 @@ import java.security.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-public class CauchoRequestWrapper implements CauchoRequest {
+public class CauchoRequestWrapper extends AbstractCauchoRequest {
   // the wrapped request
   private HttpServletRequest _request;
 
@@ -243,14 +243,16 @@ public class CauchoRequestWrapper implements CauchoRequest {
     }
   }
 
+  /*
   public String getRealPath(String uri)
   {
     return _request.getRealPath(uri);
   }
+  */
 
   public ServletContext getServletContext()
   {
-    return _request.getServletContext();
+    return getWebApp();
   }
 
   public void addAsyncListener(AsyncListener listener)

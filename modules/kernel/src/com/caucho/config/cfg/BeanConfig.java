@@ -447,6 +447,11 @@ public class BeanConfig {
     return "bean";
   }
 
+  protected boolean isStartup()
+  {
+    return true;
+  }
+
   @PostConstruct
   public void init()
   {
@@ -495,7 +500,8 @@ public class BeanConfig {
     */
 
     // server/21q1
-    if (! _annotatedType.isAnnotationPresent(Stateful.class)
+    if (isStartup()
+        && ! _annotatedType.isAnnotationPresent(Stateful.class)
         && ! _annotatedType.isAnnotationPresent(Stateless.class)
         && ! _annotatedType.isAnnotationPresent(MessageDriven.class)) {
       factory.annotation(new Startup() {

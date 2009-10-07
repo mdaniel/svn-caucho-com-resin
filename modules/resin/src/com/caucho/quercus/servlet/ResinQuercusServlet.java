@@ -104,6 +104,8 @@ public class ResinQuercusServlet extends QuercusServletImpl
     return ws;
   }
 
+  /*
+  @Override
   Path getPath(HttpServletRequest req)
   {
     String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
@@ -126,6 +128,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
     return Vfs.lookup().lookup(req.getRealPath(fullPath));
   }
+  */
 
   /**
    * Returns the Quercus instance.

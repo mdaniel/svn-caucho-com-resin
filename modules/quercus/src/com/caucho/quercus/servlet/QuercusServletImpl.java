@@ -267,7 +267,7 @@ public class QuercusServletImpl extends HttpServlet
     String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
     String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
 
-    Path pwd = new FilePath(System.getProperty("user.dir"));
+    Path pwd = Vfs.lookup();
 
     Path path = pwd.lookup(req.getRealPath(scriptPath));
 
