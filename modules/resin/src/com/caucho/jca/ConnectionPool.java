@@ -611,7 +611,7 @@ public class ConnectionPool extends AbstractManagedObject
    */
   String generateId()
   {
-    return String.valueOf(_idCount.incrementAndGet());
+    return String.valueOf(_idCount.getAndIncrement());
   }
 
   /**
