@@ -62,6 +62,9 @@ public interface CauchoRequest extends HttpServletRequest {
 
   public boolean hasRequest();
   
+  public String getSessionId();
+  public void setSessionId(String sessionId);
+  public boolean isSessionIdFromCookie();
   public HttpSession getMemorySession();
   public Cookie getCookie(String name);
   public void setHasCookie();

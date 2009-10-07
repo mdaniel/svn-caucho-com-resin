@@ -31,9 +31,12 @@ package com.caucho.server.connection;
 
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
+import com.caucho.server.session.SessionImpl;
+import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
+import com.caucho.util.Alarm;
 
 import java.io.*;
 import java.util.*;
@@ -42,7 +45,11 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 abstract public class AbstractCauchoRequest implements CauchoRequest {
-  
+  protected int _sessionGroup = -1;
+
+  private boolean _sessionIsLoaded;
+  private SessionImpl _session;
+
   public RequestDispatcher getRequestDispatcher(String path)
   {
     if (path == null || path.length() == 0)
@@ -119,15 +126,178 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     else
       return getRealPath(pathInfo);
   }
+
+  public boolean isTop()
+  {
+    return false;
+  }
+
+  //
+  // session management
+  //
+
+  public abstract boolean isSessionIdFromCookie();
   
+  public abstract String getSessionId();
+  
+  public abstract void setSessionId(String sessionId);
+  
+  /**
+   * Returns the memory session.
+   */
+  public HttpSession getMemorySession()
+  {
+    if (_session != null && _session.isValid())
+      return _session;
+    else
+      return null;
+  }
+
+  /**
+   * Returns the current session, creating one if necessary.
+   * Sessions are a convenience for keeping user state
+   * across requests.
+   */
   public HttpSession getSession()
   {
     return getSession(true);
   }
 
-  public boolean isTop()
+  /**
+   * Returns the current session.
+   *
+   * @param create true if a new session should be created
+   *
+   * @return the current session
+   */
+  public HttpSession getSession(boolean create)
   {
-    return false;
+    if (_session != null) {
+      if (_session.isValid())
+        return _session;
+    }
+    else if (! create && _sessionIsLoaded)
+      return null;
+
+    _sessionIsLoaded = true;
+
+    _session = createSession(create);
+
+    return _session;
+  }
+
+  /**
+   * Returns the current session.
+   *
+   * @return the current session
+   */
+  public HttpSession getLoadedSession()
+  {
+    if (_session != null && _session.isValid())
+      return _session;
+    else
+      return null;
+  }
+
+  /**
+   * Returns true if the HTTP request's session id refers to a valid
+   * session.
+   */
+  public boolean isRequestedSessionIdValid()
+  {
+    String id = getRequestedSessionId();
+
+    if (id == null)
+      return false;
+
+    SessionImpl session = _session;
+
+    if (session == null)
+      session = (SessionImpl) getSession(false);
+
+    return session != null && session.isValid() && session.getId().equals(id);
+  }
+
+  /**
+   * Returns the current session.
+   *
+   * XXX: duplicated in RequestAdapter
+   *
+   * @param create true if a new session should be created
+   *
+   * @return the current session
+   */
+  private SessionImpl createSession(boolean create)
+  {
+    SessionManager manager = getSessionManager();
+
+    if (manager == null)
+      return null;
+
+    String id = getSessionId();
+
+    long now = Alarm.getCurrentTime();
+
+    SessionImpl session
+      = manager.createSession(create, this, id, now,
+                              isSessionIdFromCookie());
+
+    if (session != null
+        && (id == null || ! session.getId().equals(id))
+        && manager.enableSessionCookies()) {
+      setSessionId(session.getId());
+    }
+
+    return session;
+  }
+
+  /**
+   * Returns the session manager.
+   */
+  protected final SessionManager getSessionManager()
+  {
+    WebApp webApp = getWebApp();
+
+    if (webApp != null)
+      return webApp.getSessionManager();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the session cookie.
+   */
+  protected final String getSessionCookie(SessionManager manager)
+  {
+    if (isSecure())
+      return manager.getSSLCookieName();
+    else
+      return manager.getCookieName();
+  }
+
+  public int getSessionGroup()
+  {
+    return _sessionGroup;
+  }
+
+  void saveSession()
+  {
+    SessionImpl session = _session;
+    if (session != null)
+      session.save();
+  }
+  
+  //
+  // lifecycle
+  //
+  
+  protected void finishRequest()
+    throws IOException
+  {
+    SessionImpl session = _session;
+
+    if (session != null)
+      session.finishRequest();
   }
 
   @Override

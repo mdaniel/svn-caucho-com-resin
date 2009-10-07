@@ -525,7 +525,6 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     _accessTime = Alarm.getCurrentTime();
     // update cache access?
-
     if (_useCount.decrementAndGet() > 0)
       return;
 

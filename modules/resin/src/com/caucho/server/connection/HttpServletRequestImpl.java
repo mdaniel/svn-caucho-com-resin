@@ -71,7 +71,8 @@ import javax.servlet.http.Part;
 /**
  * User facade for http requests.
  */
-public class HttpServletRequestImpl implements CauchoRequest
+public class HttpServletRequestImpl extends AbstractCauchoRequest
+  implements CauchoRequest
 {
   private static final Logger log
     = Logger.getLogger(HttpServletRequestImpl.class.getName());
@@ -99,12 +100,8 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   private boolean _varyCookies;   // True if the page depends on cookies
   private boolean _hasCookie;
+  
   private boolean _isSessionIdFromCookie;
-
-  protected int _sessionGroup = -1;
-
-  private boolean _sessionIsLoaded;
-  private SessionImpl _session;
 
   // security
   private String _runAs;
@@ -1244,92 +1241,38 @@ public class HttpServletRequestImpl implements CauchoRequest
   }
 
   /**
-   * Returns the memory session.
+   * Returns the session id in the HTTP request.  The cookie has
+   * priority over the URL.  Because the webApp might be using
+   * the cookie to change the page contents, the caching sets
+   * vary: JSESSIONID.
    */
-  public HttpSession getMemorySession()
-  {
-    if (_session != null && _session.isValid())
-      return _session;
-    else
-      return null;
-  }
-
-  /**
-   * Returns the current session, creating one if necessary.
-   * Sessions are a convenience for keeping user state
-   * across requests.
-   */
-  public HttpSession getSession()
-  {
-    return getSession(true);
-  }
-
-  /**
-   * Returns the current session.
-   *
-   * @param create true if a new session should be created
-   *
-   * @return the current session
-   */
-  public HttpSession getSession(boolean create)
-  {
-    if (_session != null) {
-      if (_session.isValid())
-        return _session;
-    }
-    else if (! create && _sessionIsLoaded)
-      return null;
-
-    _sessionIsLoaded = true;
-
-    _session = createSession(create);
-
-    return _session;
-  }
-
-  /**
-   * Returns the current session.
-   *
-   * @return the current session
-   */
-  public HttpSession getLoadedSession()
-  {
-    if (_session != null && _session.isValid())
-      return _session;
-    else
-      return null;
-  }
-
-  /**
-   * Returns the current session.
-   *
-   * XXX: duplicated in RequestAdapter
-   *
-   * @param create true if a new session should be created
-   *
-   * @return the current session
-   */
-  private SessionImpl createSession(boolean create)
+  public String getRequestedSessionId()
   {
     SessionManager manager = getSessionManager();
 
-    if (manager == null)
-      return null;
+    String cookieName = null;
 
-    String id = getRequestedSessionId();
+    if (manager != null && manager.enableSessionCookies()) {
+      setVaryCookie(getSessionCookie(manager));
 
-    long now = Alarm.getCurrentTime();
+      String id = findSessionIdFromCookie();
 
-    SessionImpl session
-      = manager.createSession(create, this, id, now, _isSessionIdFromCookie);
-
-    if (session != null
-        && (id == null || ! session.getId().equals(id))
-        && manager.enableSessionCookies()) {
-      getResponse().setSessionId(session.getId());
+      if (id != null) {
+        _isSessionIdFromCookie = true;
+        setHasCookie();
+        return id;
+      }
     }
 
-    return session;
+    String id = findSessionIdFromUrl();
+    if (id != null) {
+      return id;
+    }
+
+    if (manager != null && manager.enableSessionCookies())
+      return null;
+    else
+      return _request.findSessionIdFromConnection();
   }
 
   /**
@@ -1337,7 +1280,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    * Because the webApp might use the cookie to change
    * the page contents, the caching sets vary: JSESSIONID.
    */
-  private String findSessionIdFromCookie()
+  protected String findSessionIdFromCookie()
   {
     SessionManager manager = getSessionManager();
 
@@ -1354,6 +1297,29 @@ public class HttpServletRequestImpl implements CauchoRequest
       return null;
   }
 
+  @Override
+  public boolean isSessionIdFromCookie()
+  {
+    return _isSessionIdFromCookie;
+  }
+
+  @Override
+  public String getSessionId()
+  {
+    String sessionId = getResponse().getSessionId();
+
+    if (sessionId != null)
+      return sessionId;
+    else
+      return getRequestedSessionId();
+  }
+  
+  @Override
+  public void setSessionId(String sessionId)
+  {
+    getResponse().setSessionId(sessionId);
+  }
+  
   /**
    * Returns the session id in the HTTP request from the url.
    */
@@ -1367,25 +1333,6 @@ public class HttpServletRequestImpl implements CauchoRequest
       setHasCookie();
 
     return id;
-  }
-
-  /**
-   * Returns true if the HTTP request's session id refers to a valid
-   * session.
-   */
-  public boolean isRequestedSessionIdValid()
-  {
-    String id = getRequestedSessionId();
-
-    if (id == null)
-      return false;
-
-    SessionImpl session = _session;
-
-    if (session == null)
-      session = (SessionImpl) getSession(false);
-
-    return session != null && session.isValid() && session.getId().equals(id);
   }
 
   /**
@@ -1431,77 +1378,6 @@ public class HttpServletRequestImpl implements CauchoRequest
     _response.setPrivateOrResinCache(privateCache);
 
     return id;
-  }
-
-  /**
-   * Returns the session id in the HTTP request.  The cookie has
-   * priority over the URL.  Because the webApp might be using
-   * the cookie to change the page contents, the caching sets
-   * vary: JSESSIONID.
-   */
-  public String getRequestedSessionId()
-  {
-    SessionManager manager = getSessionManager();
-
-    String cookieName = null;
-
-    if (manager != null && manager.enableSessionCookies()) {
-      setVaryCookie(getSessionCookie(manager));
-
-      String id = findSessionIdFromCookie();
-
-      if (id != null) {
-        _isSessionIdFromCookie = true;
-        setHasCookie();
-        return id;
-      }
-    }
-
-    String id = findSessionIdFromUrl();
-    if (id != null) {
-      return id;
-    }
-
-    if (manager != null && manager.enableSessionCookies())
-      return null;
-    else
-      return _request.findSessionIdFromConnection();
-  }
-
-  /**
-   * Returns the session cookie.
-   */
-  protected final String getSessionCookie(SessionManager manager)
-  {
-    if (isSecure())
-      return manager.getSSLCookieName();
-    else
-      return manager.getCookieName();
-  }
-
-  /**
-   * Returns the session manager.
-   */
-  protected final SessionManager getSessionManager()
-  {
-    WebApp webApp = getWebApp();
-
-    if (webApp != null)
-      return webApp.getSessionManager();
-    else
-      return null;
-  }
-
-  public int getSessionGroup()
-  {
-    return _sessionGroup;
-  }
-
-  void saveSession()
-  {
-    SessionImpl session = _session;
-    if (session != null)
-      session.save();
   }
 
   //
@@ -1815,7 +1691,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public String getRemoteUser(boolean create)
   {
-    if (_session == null)
+    if (getSession(false) == null)
       return null;
 
     Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
@@ -2114,7 +1990,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   public AsyncContext startAsync()
   {
     if (! isAsyncSupported())
-      throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.",
+      throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.  The servlet should be annotated with a @WebServlet(asyncSupported=true) annotation or have a <async-supported> tag in the web.xml.",
                                           getServletName(), getServletPath()));
 
     if (_comet == null) {
@@ -2181,12 +2057,11 @@ public class HttpServletRequestImpl implements CauchoRequest
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  void finishRequest()
+  @Override
+  protected void finishRequest()
+    throws IOException
   {
-    SessionImpl session = _session;
-
-    if (session != null)
-      session.finishRequest();
+    super.finishRequest();
 
     // ioc/0a10
     cleanup();

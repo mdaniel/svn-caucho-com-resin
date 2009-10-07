@@ -1212,6 +1212,11 @@ public final class HttpServletResponseImpl implements CauchoResponse
     return _cookiesOut;
   }
 
+  public String getSessionId()
+  {
+    return _sessionId;
+  }
+  
   public void setSessionId(String id)
   {
     _sessionId = id;

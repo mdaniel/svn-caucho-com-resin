@@ -422,22 +422,12 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   {
     return _request.getCookies();
   }
-  
-  public HttpSession getSession(boolean create)
-  {
-    return _request.getSession(create);
-  }
-  
-  public HttpSession getSession()
-  {
-    return getSession(true);
-  }
-  
+
   public String getRequestedSessionId()
   {
     return _request.getRequestedSessionId();
   }
-  
+
   public boolean isRequestedSessionIdValid()
   {
     return _request.isRequestedSessionIdValid();
@@ -451,6 +441,33 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   public boolean isRequestedSessionIdFromURL()
   {
     return _request.isRequestedSessionIdFromURL();
+  }
+
+  @Override
+  public void setSessionId(String sessionId)
+  {
+    CauchoRequest cRequest = getCauchoRequest();
+
+    cRequest.setSessionId(sessionId);
+  }
+
+  @Override
+  public String getSessionId()
+  {
+    CauchoRequest cRequest = getCauchoRequest();
+
+    return cRequest.getSessionId();
+  }
+
+  @Override
+  public boolean isSessionIdFromCookie()
+  {
+    CauchoRequest cRequest = getCauchoRequest();
+
+    if (cRequest != null)
+      return cRequest.isSessionIdFromCookie();
+    else
+      return ! _request.isRequestedSessionIdFromURL();
   }
   
   public String getAuthType()
@@ -728,6 +745,20 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  private CauchoRequest getCauchoRequest()
+  {
+    ServletRequest request = _request;
+    
+    while (request instanceof ServletRequestWrapper) {
+      if (request instanceof CauchoRequest)
+        return (CauchoRequest) request;
+
+      request = ((ServletRequestWrapper) request).getRequest();
+    }
+
+    return (CauchoRequest) request;
+  }
+  
   @Override
   public String toString()
   {

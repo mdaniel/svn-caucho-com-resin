@@ -128,6 +128,17 @@ public class IncludeRequest extends CauchoRequestWrapper {
   {
     return _invocation.getQueryString();
   }
+
+  public String getMethod()
+  {
+    String method = getRequest().getMethod();
+
+    // server/10jk
+    if ("POST".equalsIgnoreCase(method))
+      return method;
+    else
+      return "GET";
+  }
   
   public WebApp getWebApp()
   {
@@ -299,10 +310,13 @@ public class IncludeRequest extends CauchoRequestWrapper {
   {
     _response.startRequest();
   }
-  
-  void finishRequest()
+
+  @Override
+  protected void finishRequest()
     throws IOException
   {
+    super.finishRequest();
+    
     _response.finishRequest();
   }
 

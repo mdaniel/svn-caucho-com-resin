@@ -93,9 +93,11 @@ public class ForwardRequest extends CauchoRequestWrapper {
     _response.startRequest();
   }
   
-  void finishRequest()
+  protected void finishRequest()
     throws IOException
   {
+    super.finishRequest();
+    
     _response.finishRequest();
   }
 
@@ -145,17 +147,15 @@ public class ForwardRequest extends CauchoRequestWrapper {
   @Override
   public String getQueryString()
   {
+    // server/10j2
     // server/1ks7 vs server/1233
 
-    return _invocation.getQueryString();
-    /*
     String queryString = _invocation.getQueryString();
 
     if (queryString != null)
       return queryString;
 
     return getRequest().getQueryString();
-    */
   }
 
   //
