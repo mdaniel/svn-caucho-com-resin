@@ -41,6 +41,10 @@
       <td>--with-apxs=<var>/path/to/apxs</var></td>
       <td>Enable <a href="install-3rd-party.xtp">Apache integration</a> and produce mod_caucho</td>
     </tr>
+    <tr>
+      <td>--enable-debug</td>
+      <td>Enables extended logging for mod_caucho, isapi_dll and resin_jni. Log files corresponding to these modules can be found respectively in /tmp/mod_caucho.log, /temp/isapi_dll.log and stderr for the JVM running Resin.</td>
+    </tr>
     </deftable>
 
     <p>
