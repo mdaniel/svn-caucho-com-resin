@@ -357,4 +357,9 @@ public class CauchoResponseWrapper extends ResponseWrapper
   {
     throw new UnsupportedOperationException("unimplemented");
   }
+
+  public boolean isNoCacheUnlessVary()
+  {
+    return false;
+  }
 }

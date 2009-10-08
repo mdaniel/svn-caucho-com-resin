@@ -339,6 +339,11 @@ public class StubServletResponse implements CauchoResponse {
     return null;
   }
 
+  public boolean isNoCacheUnlessVary()
+  {
+    return false;
+  }
+  
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
   {
   }

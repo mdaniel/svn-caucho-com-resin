@@ -56,6 +56,11 @@ public class CauchoResponseWrapper implements CauchoResponse {
     _response = response;
   }
 
+  public void setResponse(HttpServletResponse response)
+  {
+    _response = response;
+  }
+
   //
   // ServletResponse
   //
@@ -376,6 +381,24 @@ public class CauchoResponseWrapper implements CauchoResponse {
     CauchoResponse cResponse = (CauchoResponse) _response;
     
     cResponse.setPrivateCache(isPrivate);
+  }
+
+  public boolean isNoCacheUnlessVary()
+  {
+    CauchoResponse cRes = getCauchoResponse();
+
+    if (cRes != null)
+      return cRes.isNoCacheUnlessVary();
+    else
+      return false;
+  }
+
+  public CauchoResponse getCauchoResponse()
+  {
+    if (_response instanceof CauchoResponse)
+      return (CauchoResponse) _response;
+    else
+      return null;
   }
   
   public AbstractHttpResponse getAbstractHttpResponse()

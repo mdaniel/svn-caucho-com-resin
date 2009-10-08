@@ -316,6 +316,26 @@ public class ResponseAdapter extends ResponseWrapper
       ((CauchoResponse) getResponse()).setSessionId(id);
   }
 
+  public boolean isNoCacheUnlessVary()
+  {
+    CauchoResponse cRes = getCauchoResponse();
+
+    if (cRes != null)
+      return cRes.isNoCacheUnlessVary();
+    else
+      return false;
+  }
+
+  public CauchoResponse getCauchoResponse()
+  {
+    ServletResponse response = getResponse();
+
+    if (response instanceof CauchoResponse)
+      return (CauchoResponse) response;
+    else
+      return null;
+  }
+
   public void finish()
     throws IOException
   {
