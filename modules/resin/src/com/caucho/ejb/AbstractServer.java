@@ -938,6 +938,13 @@ abstract public class AbstractServer implements EnvironmentBean {
           inject.inject(instance, env);
       }
 
+      if (_initProgram != null) {
+        if (env == null)
+          env = new ConfigContext();
+
+        _initProgram.inject(instance, env);
+      }
+
       try {
         if (_cauchoPostConstruct != null)
           _cauchoPostConstruct.invoke(instance, null);
@@ -1040,7 +1047,9 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     InjectManager inject = InjectManager.create();
 
-    _injectionTarget = inject.createInjectionTarget(getEjbClass());
+    // server/4751
+    if (_injectionTarget == null)
+      _injectionTarget = inject.createInjectionTarget(getEjbClass());
 
     if (_timerService != null) {
       BeanFactory factory = inject.createBeanFactory(TimerService.class);

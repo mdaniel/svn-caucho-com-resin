@@ -242,9 +242,11 @@ public class FileServlet extends GenericServlet {
         }
       }
 
-      ServletContext app = getServletContext();
+      ServletContext webApp = getServletContext();
 
-      cache = new Cache(_calendar, path, relPath, app.getMimeType(relPath));
+      String mimeType = webApp.getMimeType(relPath);
+
+      cache = new Cache(_calendar, path, relPath, mimeType);
 
       _pathCache.put(uri, cache);
     }
@@ -467,7 +469,7 @@ public class FileServlet extends GenericServlet {
 	}
 
 	isFirstChunk = false;
-	
+
 	os.write('-');
 	os.write('-');
 	os.print(boundary);

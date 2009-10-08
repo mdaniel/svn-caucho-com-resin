@@ -42,8 +42,8 @@ import javax.annotation.PostConstruct;
 public class CharacterEncoding {
   private static final L10N L = new L10N(CharacterEncoding.class);
 
-  private static final EnvironmentLocal<String> _localEncoding =
-    new EnvironmentLocal<String>("caucho.i18n.encoding");
+  private static final EnvironmentLocal<String> _localEncoding
+    = new EnvironmentLocal<String>();
 
   private String _encoding;
 
@@ -75,7 +75,7 @@ public class CharacterEncoding {
 
   public String toString()
   {
-    return "CharacterEncoding[" + _encoding + "]";
+    return getClass().getSimpleName() + "[" + _encoding + "]";
   }
 }
 

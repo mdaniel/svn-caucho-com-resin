@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.server.connection.*;
+
 class ConditionFilterChain
   implements FilterChain
 {
@@ -81,6 +83,12 @@ class ConditionFilterChain
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
+
+    if (res instanceof HttpServletResponseImpl) {
+      HttpServletResponseImpl cRes = (HttpServletResponseImpl) res;
+
+      cRes.setNoCacheUnlessVary(true);
+    }
 
     for (int i = 0; i < _conditions.length; i++) {
       if (! _conditions[i].isMatch(req, res)) {

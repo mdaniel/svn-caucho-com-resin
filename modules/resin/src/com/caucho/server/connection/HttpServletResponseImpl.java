@@ -869,17 +869,19 @@ public final class HttpServletResponseImpl implements CauchoResponse
     if (_charEncoding != null)
       return _charEncoding;
 
-    WebApp app = _request.getWebApp();
+    WebApp webApp = _request.getWebApp();
 
     String encoding = null;
 
-    if (app != null)
-      encoding = app.getCharacterEncoding();
+    if (webApp != null)
+      encoding = webApp.getCharacterEncoding();
 
     if (encoding != null)
       return encoding;
-    else
-      return "iso-8859-1";
+    else {
+      // server/085a
+      return null;
+    }
   }
 
   /**

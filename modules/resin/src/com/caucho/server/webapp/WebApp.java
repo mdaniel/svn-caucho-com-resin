@@ -3364,9 +3364,9 @@ public class WebApp extends ServletContextImpl
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    WebApp app = (WebApp) getContext(fullURI);
+    WebApp webApp = (WebApp) getContext(fullURI);
 
-    if (app == null)
+    if (webApp == null)
       return null;
 
     int p = uri.lastIndexOf('.');
@@ -3374,7 +3374,7 @@ public class WebApp extends ServletContextImpl
     if (p < 0)
       return null;
     else
-      return app.getMimeTypeImpl(uri.substring(p));
+      return webApp.getMimeTypeImpl(uri.substring(p));
   }
 
   /**

@@ -484,7 +484,7 @@ public class EjbSessionBean extends EjbBean {
       thread.setContextClassLoader(server.getClassLoader());
 
       server.setInjectionTarget(getInjectionTarget());
-      
+
       server.setInitProgram(getInitProgram());
 
       try {

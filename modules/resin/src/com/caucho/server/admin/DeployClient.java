@@ -62,6 +62,9 @@ public class DeployClient
   {
     Resin resin = Resin.getCurrent();
 
+    if (resin == null)
+      throw new IllegalStateException(L.l("DeployClient was not called in a Resin context. For external clients, use the DeployClient constructor with host,port arguments."));
+    
     _broker = resin.getManagement().getAdminBroker();
     _conn = _broker.getConnection("admin", null);
 
@@ -71,6 +74,9 @@ public class DeployClient
   public DeployClient(String serverId)
   {
     Resin resin = Resin.getCurrent();
+
+    if (resin == null)
+      throw new IllegalStateException(L.l("DeployClient was not called in a Resin context. For external clients, use the DeployClient constructor with host,port arguments."));
 
     _broker = resin.getManagement().getAdminBroker();
     _conn = _broker.getConnection("admin", null);
@@ -156,9 +162,15 @@ public class DeployClient
                          String sourceTag,
                          HashMap<String,String> attributes)
   {
-    String user = attributes.get(USER_ATTRIBUTE);
-    String message = attributes.get(MESSAGE_ATTRIBUTE);
-    String version = attributes.get(VERSION_ATTRIBUTE);
+    String user = null;
+    String message = null;
+    String version = null;
+
+    if (attributes != null) {
+      user = attributes.get(USER_ATTRIBUTE);
+      message = attributes.get(MESSAGE_ATTRIBUTE);
+      version = attributes.get(VERSION_ATTRIBUTE);
+    }
 
     CopyTagQuery query = 
       new CopyTagQuery(tag, sourceTag, user, message, version);
@@ -257,8 +269,12 @@ public class DeployClient
                           String sha1,
                           HashMap<String,String> attributes)
   {
-    HashMap<String,String> attributeCopy = 
-      (HashMap<String,String>) attributes.clone();
+    HashMap<String,String> attributeCopy;
+
+    if (attributes != null)
+      attributeCopy = (HashMap<String,String>) attributes.clone();
+    else
+      attributeCopy = new HashMap<String,String>();
 
     String user = attributeCopy.remove(USER_ATTRIBUTE);
     String message = attributeCopy.remove(MESSAGE_ATTRIBUTE);

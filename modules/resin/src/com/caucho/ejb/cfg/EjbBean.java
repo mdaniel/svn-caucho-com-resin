@@ -77,8 +77,8 @@ import javax.interceptor.*;
 public class EjbBean extends DescriptionGroupConfig
   implements EnvironmentBean, DependencyBean
 {
-  private static Logger log = Logger.getLogger(EjbBean.class.getName());
-  private static L10N L = new L10N(EjbBean.class);
+  private static final Logger log = Logger.getLogger(EjbBean.class.getName());
+  private static final L10N L = new L10N(EjbBean.class);
 
   private static EnvironmentLocal<Map<Class,SoftReference<ApiMethod[]>>> _methodCache
     = new EnvironmentLocal<Map<Class,SoftReference<ApiMethod[]>>>();

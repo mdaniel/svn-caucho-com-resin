@@ -337,11 +337,22 @@ public class HttpResponse extends AbstractHttpResponse
       }
     }
 
-    if (contentType == null) {
-    }
-    else if (! contentType.equals("text/html")) {
-      os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
-      os.print(contentType);
+    if (contentType != null) {
+      if (charEncoding == null && webApp != null)
+        charEncoding = webApp.getCharacterEncoding();
+      
+      if (! contentType.equals("text/html")) {
+        os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
+        os.print(contentType);
+      }
+      else {
+        os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
+      }
+        
+      if (debug) {
+        log.fine(_request.dbgId() + "Content-Type: " + contentType
+                 + "; charset=" + charEncoding);
+      }
 
       if (charEncoding != null) {
         os.write(_charsetBytes, 0, _charsetBytes.length);
@@ -350,57 +361,6 @@ public class HttpResponse extends AbstractHttpResponse
         if (debug) {
           log.fine(_request.dbgId() + "Content-Type: " + contentType
                    + "; charset=" + charEncoding);
-        }
-      }
-      else {
-        charEncoding = (webApp != null
-                        ? webApp.getCharacterEncoding()
-                        : null);
-
-        if (charEncoding != null) {
-          os.write(_charsetBytes, 0, _charsetBytes.length);
-          os.print(charEncoding);
-
-          if (debug) {
-            log.fine(_request.dbgId() + "Content-Type: " + contentType
-                     + "; charset=" + charEncoding);
-          }
-        }
-        else {
-          if (debug) {
-            log.fine(_request.dbgId() + "Content-Type: " + contentType);
-          }
-        }
-      }
-    }
-    else if (charEncoding != null) {
-      os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
-      os.write(_charsetBytes, 0, _charsetBytes.length);
-      os.print(charEncoding);
-
-      if (debug) {
-        log.fine(_request.dbgId() + "Content-Type: text/html; charset="
-                 + charEncoding);
-      }
-    }
-    else {
-      charEncoding = (webApp != null
-                      ? webApp.getCharacterEncoding()
-                      : null);
-
-      os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
-      if (charEncoding != null) {
-        os.write(_charsetBytes, 0, _charsetBytes.length);
-        os.print(charEncoding);
-
-        if (debug) {
-          log.fine(_request.dbgId() + "Content-Type: text/html; charset="
-                   + charEncoding);
-        }
-      }
-      else {
-        if (debug) {
-          log.fine(_request.dbgId() + "Content-Type: text/html");
         }
       }
     }

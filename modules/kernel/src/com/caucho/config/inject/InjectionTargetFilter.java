@@ -97,4 +97,10 @@ public class InjectionTargetFilter<T> implements InjectionTarget<T>,
   {
     _next.dispose(instance);
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "," + _init + "]";
+  }
 }

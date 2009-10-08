@@ -32,6 +32,7 @@ import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.vfs.FlushBuffer;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.PrintWriterImpl;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -247,11 +248,6 @@ public class StubServletResponse implements CauchoResponse {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-    
-  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
   
   public ServletResponse getResponse()
   {
@@ -321,13 +317,17 @@ public class StubServletResponse implements CauchoResponse {
   public PrintWriter getWriter()
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new PrintWriterImpl(new NullWriter());
   }
 
   public ServletOutputStream getOutputStream()
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    ServletOutputStreamImpl out = new ServletOutputStreamImpl();
+
+    out.init(NullOutputStream.NULL);
+
+    return out;
   }
 
   public void setCharacterEncoding(String enc)
@@ -336,7 +336,7 @@ public class StubServletResponse implements CauchoResponse {
 
   public String getContentType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
 
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
@@ -345,5 +345,23 @@ public class StubServletResponse implements CauchoResponse {
 
   public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
+  }
+
+  static class NullWriter extends Writer {
+    private static final NullWriter NULL = new NullWriter();
+
+    public void write(int ch) {}
+    public void write(char []buffer, int offset, int length) {}
+    public void flush() {}
+    public void close() {}
+  }
+
+  static class NullOutputStream extends OutputStream {
+    private static final NullOutputStream NULL = new NullOutputStream();
+
+    public void write(int ch) {}
+    public void write(byte []buffer, int offset, int length) {}
+    public void flush() {}
+    public void close() {}
   }
 }
