@@ -460,6 +460,34 @@ public class RequestAdapter extends RequestWrapper
     return isValid;
   }
 
+  public boolean isSessionIdFromCookie()
+  {
+    CauchoRequest cReq = getCauchoRequest();
+
+    if (cReq != null)
+      return cReq.isSessionIdFromCookie();
+    else
+      return isRequestedSessionIdFromCookie();
+  }
+
+  public String getSessionId()
+  {
+    CauchoRequest cReq = getCauchoRequest();
+
+    if (cReq != null)
+      return cReq.getSessionId();
+    else
+      return getRequestedSessionId();
+  }
+
+  public void setSessionId(String sessionId)
+  {
+    CauchoRequest cReq = getCauchoRequest();
+
+    if (cReq != null)
+      cReq.setSessionId(sessionId);
+  }
+
   protected final SessionManager getSessionManager()
   {
     WebApp app = getWebApp();
@@ -630,6 +658,11 @@ public class RequestAdapter extends RequestWrapper
   public DuplexContext startDuplex(DuplexListener listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public CauchoRequest getCauchoRequest()
+  {
+    return (CauchoRequest) getRequest();
   }
 
   /**

@@ -464,5 +464,19 @@ public class StubServletRequest implements CauchoRequest {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  public boolean isSessionIdFromCookie()
+  {
+    return true;
+  }
+
+  public String getSessionId()
+  {
+    return null;
+  }
+
+  public void setSessionId(String sessionId)
+  {
+  }
 }
   
