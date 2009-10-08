@@ -29,8 +29,10 @@
 
 package com.caucho.jms.queue;
 
+import java.io.Serializable;
 
-public interface QueueEntrySelector
+
+public interface QueueEntrySelector extends Serializable
 {
   
   public boolean isMatch(Object entry);
