@@ -184,7 +184,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
   
   public String getPageQueryString()
   {
-    return _invocation.getQueryString();
+    return getQueryString();
   }
   
   public WebApp getWebApp()
@@ -327,8 +327,9 @@ public class ForwardRequest extends CauchoRequestWrapper {
 
     try {
       String queryString = _invocation.getQueryString();
+      String oldQueryString = getRequest().getQueryString();
       
-      if (queryString != null) {
+      if (queryString != null && ! queryString.equals(oldQueryString)) {
         formParser.parseQueryString(form, queryString, javaEncoding, false);
       }
     } catch (Exception e) {

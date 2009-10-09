@@ -63,7 +63,7 @@ public class SetStatement extends Statement{
     if (value == null)
       return new ErrorStatement("['value' is a required attribute of #set]");
 
-    return new SetStatement(var, ExprParser.parseString(value, path));
+    return new SetStatement(var, ExprParser.parseConcat(value, path));
   }
   
   /**

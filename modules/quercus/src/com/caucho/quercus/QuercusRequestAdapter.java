@@ -49,6 +49,7 @@ public class QuercusRequestAdapter
       return uri;
     else {
       // php/0829
+
       uri = (String) request.getAttribute(FWD_REQUEST_URI);
 
       if (uri != null)
@@ -107,6 +108,7 @@ public class QuercusRequestAdapter
     if (uri != null)
       return (String) request.getAttribute(QUERY_STRING);
     else {
+      /*
       // php/0829
       uri = (String) request.getAttribute(FWD_REQUEST_URI);
 
@@ -114,6 +116,8 @@ public class QuercusRequestAdapter
 	return (String) request.getAttribute(FWD_QUERY_STRING);
       else
 	return request.getQueryString();
+      */
+      return request.getQueryString();
     }
   }
 }

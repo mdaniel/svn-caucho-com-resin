@@ -51,7 +51,8 @@ import javax.servlet.http.*;
 /**
  * User facade for http responses.
  */
-public final class HttpServletResponseImpl implements CauchoResponse
+public final class HttpServletResponseImpl extends AbstractCauchoResponse
+  implements CauchoResponse
 {
   private static final Logger log
     = Logger.getLogger(HttpServletResponseImpl.class.getName());
@@ -934,9 +935,6 @@ public final class HttpServletResponseImpl implements CauchoResponse
       throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
 
     _responseStream.clearBuffer();
-    // _responseStream.clearBuffer();
-
-    // _responseStream = _originalResponseStream;
     resetBuffer();
 
     setStatus(SC_MOVED_TEMPORARILY);

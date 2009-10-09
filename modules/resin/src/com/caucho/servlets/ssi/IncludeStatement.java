@@ -57,7 +57,7 @@ public class IncludeStatement extends Statement{
     if (virtual == null)
       return new ErrorStatement("['virtual' is a required attribute of #include]");
 
-    return new IncludeStatement(ExprParser.parseString(virtual, path));
+    return new IncludeStatement(ExprParser.parseConcat(virtual, path));
   }
   
   /**

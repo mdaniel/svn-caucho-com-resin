@@ -342,15 +342,18 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
                   ServletContext application)
     throws IOException
   {
-    HttpServletRequestImpl request = (HttpServletRequestImpl) req;
+    // server/1kk7
+    CauchoRequest cRequest = (CauchoRequest) req;
     HttpServletResponseImpl responseImpl = (HttpServletResponseImpl) res;
 
+    AbstractHttpRequest absRequest = cRequest.getAbstractHttpRequest();
+    HttpServletRequestImpl request = absRequest.getRequestFacade();
     AbstractHttpResponse response = responseImpl.getAbstractHttpResponse();
 
     // skip excluded urls
     if (_excludes.length > 0) {
-      byte []data = request.getAbstractHttpRequest().getUriBuffer();
-      int sublen = request.getAbstractHttpRequest().getUriLength();
+      byte []data = absRequest.getUriBuffer();
+      int sublen = absRequest.getUriLength();
 
       String uri = new String(data, 0, sublen);
 

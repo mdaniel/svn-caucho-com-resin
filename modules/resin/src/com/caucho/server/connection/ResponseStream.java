@@ -402,6 +402,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
     }
 
     _contentLength += sublen;
+    // server/1213
+    offset = oldOffset + sublen;
 
     try {
       if (_isHead) {
@@ -409,7 +411,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       }
 
       if (_cacheStream != null)
-        writeCache(nextBuffer, oldOffset, offset - oldOffset);
+        writeCache(nextBuffer, oldOffset, sublen);
 
       return writeNextBuffer(offset);
     } catch (ClientDisconnectException e) {

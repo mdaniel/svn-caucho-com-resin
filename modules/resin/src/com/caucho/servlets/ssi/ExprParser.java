@@ -54,6 +54,14 @@ public class ExprParser {
   {
     return new ExprParser(expr, path).parseString();
   }
+  
+  /**
+   * parse a string.
+   */
+  public static SSIExpr parseConcat(String expr, Path path)
+  {
+    return new ExprParser(expr, path).parseConcat();
+  }
 
   private SSIExpr parseString()
   {
@@ -128,6 +136,43 @@ public class ExprParser {
 	  unread();
           
           return new GtExpr(expr, parseTerm());
+	}
+      }
+      else
+	_sb.append((char) ch);
+    }
+
+    if (_sb.length() > 0)
+      expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+
+    return expr;
+  }
+  
+  private SSIExpr parseConcat()
+  {
+    int ch;
+
+    SSIExpr expr = null;
+
+    while ((ch = read()) >= 0) {
+      if (ch == '$') {
+	if (_sb.length() > 0)
+	  expr = ConcatExpr.create(expr, new StringExpr(_sb.toString()));
+	_sb.setLength(0);
+
+        SSIExpr var = parseVar();
+	expr = ConcatExpr.create(expr, var);
+      }
+      else if (ch == '\\') {
+	ch = read();
+
+	if (ch == '$')
+	  _sb.append((char) ch);
+	else if (ch == '\\')
+	  _sb.append((char) ch);
+	else {
+	  _sb.append('\\');
+	  unread();
 	}
       }
       else

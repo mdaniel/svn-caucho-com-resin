@@ -298,7 +298,7 @@ public class StubServletResponse implements CauchoResponse {
 
   public AbstractResponseStream getResponseStream()
   {
-    return null;
+    return new WrapperResponseStream();
   }
 
   public boolean isDisabled()
