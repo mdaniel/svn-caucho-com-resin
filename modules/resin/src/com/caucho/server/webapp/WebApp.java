@@ -2353,11 +2353,13 @@ public class WebApp extends ServletContextImpl
     }
   }
 
-  public boolean isApplyingWebFragments() {
+  public boolean isApplyingWebFragments()
+  {
     return _isApplyingWebFragments;
   }
 
-  public boolean isAllowInitParamOverride() {
+  public boolean isAllowInitParamOverride()
+  {
     return _servletVersion == null || ! _servletVersion.startsWith("3");
   }
 

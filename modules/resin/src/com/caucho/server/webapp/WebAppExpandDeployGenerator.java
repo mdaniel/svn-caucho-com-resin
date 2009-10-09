@@ -352,11 +352,11 @@ public class WebAppExpandDeployGenerator
       rootDirectory = getExpandDirectory().lookup("./" + expandName);
     }
 
-    String tag = getRepositoryTag() + "/" + segmentName;
+    String versionTag = getRepositoryTag() + "/" + segmentName;
 
     if (! rootDirectory.isDirectory()
         && (jarPath == null || ! jarPath.isFile())
-        && getRepository().getTagRoot(tag) == null)
+        && getRepository().getTagRoot(versionTag) == null)
       return null;
     else if (rootDirectory.isDirectory()
              && ! isValidDirectory(rootDirectory, versionName.substring(1)))
@@ -389,7 +389,7 @@ public class WebAppExpandDeployGenerator
 
     controller.setRepository(getRepository());
 
-    controller.setRepositoryTag(tag);
+    controller.setRepositoryTag(versionTag);
 
     if (! baseName.equals(contextPath)) {
       WebAppController versionController
