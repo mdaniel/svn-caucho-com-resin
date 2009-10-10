@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>encoding: default encoding is now set by file.encoding and defaults to utf-8 if no file.encoding exists</li>
 <li>watchdog: add watchdog-log configuration (#3566, rep by Pedre Neves)</li>
 <li>comet: wrapped request needs to work with comet (#3665, rep by Fiaz Hossain)</li>
 <li>config: relaxng forbid duplicate rules (#3595, rep by hmh)</li>

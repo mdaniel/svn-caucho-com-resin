@@ -63,8 +63,12 @@ public abstract class ServletOutputStream extends OutputStream {
     if (s == null)
       s = "null";
 
-    byte []bytes = s.getBytes();
-    write(bytes, 0, bytes.length);
+    int length = s.length();
+
+    // server/0810
+    for (int i = 0; i < length; i++) {
+      write(s.charAt(i));
+    }
   }
 
   /**

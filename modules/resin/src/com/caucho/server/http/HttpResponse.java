@@ -338,30 +338,23 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     if (contentType != null) {
-      if (charEncoding == null && webApp != null)
-        charEncoding = webApp.getCharacterEncoding();
+      if (charEncoding == null) {
+        if (webApp != null)
+          charEncoding = webApp.getCharacterEncoding();
+
+        // always use a character encoding to avoid XSS attacks
+        if (charEncoding == null)
+          charEncoding = "utf-8";
+      }
       
-      if (! contentType.equals("text/html")) {
-        os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
-        os.print(contentType);
-      }
-      else {
-        os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
-      }
+      os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
+      os.print(contentType);
+      os.write(_charsetBytes, 0, _charsetBytes.length);
+      os.print(charEncoding);
         
       if (debug) {
         log.fine(_request.dbgId() + "Content-Type: " + contentType
                  + "; charset=" + charEncoding);
-      }
-
-      if (charEncoding != null) {
-        os.write(_charsetBytes, 0, _charsetBytes.length);
-        os.print(charEncoding);
-
-        if (debug) {
-          log.fine(_request.dbgId() + "Content-Type: " + contentType
-                   + "; charset=" + charEncoding);
-        }
       }
     }
 

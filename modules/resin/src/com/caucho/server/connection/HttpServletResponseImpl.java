@@ -881,7 +881,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       return encoding;
     else {
       // server/085a
-      return null;
+      return "utf-8";
     }
   }
 
