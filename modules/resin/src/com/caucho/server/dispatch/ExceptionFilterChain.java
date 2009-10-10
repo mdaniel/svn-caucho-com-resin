@@ -72,4 +72,13 @@ public class ExceptionFilterChain implements FilterChain {
     else
       throw _servletException;
   }
+
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + (_runtimeException != null
+                     ? _runtimeException
+                     : _servletException)
+            + "]");
 }

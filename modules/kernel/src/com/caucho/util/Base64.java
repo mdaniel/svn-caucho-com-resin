@@ -232,7 +232,7 @@ public class Base64 {
   {
     try {
       StringWriter sw = new StringWriter();
-      encode(sw, new ByteArrayInputStream(value.getBytes()));
+      encode(sw, new ByteArrayInputStream(value.getBytes("iso-8859-1")));
       return sw.toString();
     }
     catch (IOException e) {
@@ -315,7 +315,7 @@ public class Base64 {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       decode(new StringReader(value), baos);
-      return new String(baos.toByteArray());
+      return new String(baos.toByteArray(), "iso-8859-1");
     }
     catch (IOException e) {
       throw new RuntimeException("this should not be possible: " + e);

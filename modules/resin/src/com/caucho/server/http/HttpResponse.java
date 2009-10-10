@@ -342,7 +342,7 @@ public class HttpResponse extends AbstractHttpResponse
         if (webApp != null)
           charEncoding = webApp.getCharacterEncoding();
 
-        // always use a character encoding to avoid XSS attacks
+        // always use a character encoding to avoid XSS attacks (?)
         if (charEncoding == null)
           charEncoding = "utf-8";
       }

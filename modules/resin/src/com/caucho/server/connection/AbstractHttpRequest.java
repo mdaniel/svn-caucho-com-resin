@@ -891,8 +891,8 @@ public abstract class AbstractHttpRequest
 
     int tail;
     for (tail = i; tail < len; tail++) {
-      if (Character.isWhitespace(value.charAt(tail)) ||
-          value.charAt(tail) == ';')
+      if (Character.isWhitespace(value.charAt(tail))
+          || value.charAt(tail) == ';')
         break;
     }
 

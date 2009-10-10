@@ -646,7 +646,11 @@ public final class ByteBuffer {
    */
   public String toString()
   {
-    return new String(_buffer, 0, _length);
+    try {
+      return new String(_buffer, 0, _length, "iso-8859-1");
+    } catch (Exception e) {
+      return new String(_buffer, 0, _length);
+    }
   }
 
   public String toString(String encoding)
