@@ -42,6 +42,9 @@ import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
+import com.caucho.servlet.WebSocketServletRequest;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -72,7 +75,7 @@ import javax.servlet.http.Part;
  * User facade for http requests.
  */
 public class HttpServletRequestImpl extends AbstractCauchoRequest
-  implements CauchoRequest
+  implements CauchoRequest, WebSocketServletRequest
 {
   private static final Logger log
     = Logger.getLogger(HttpServletRequestImpl.class.getName());
@@ -2024,8 +2027,73 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   }
 
   //
-  // duplex
+  // WebSocket
   //
+
+  public WebSocketContext startWebSocket(WebSocketListener listener)
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " upgrade HTTP to WebSocket " + listener);
+
+    String connection = getHeader("Connection");
+    String upgrade = getHeader("Upgrade");
+
+    if (! "WebSocket".equals(upgrade)) {
+      throw new IllegalStateException(L.l("HTTP Upgrade header '{0}' must be 'WebSocket', because the WebSocket protocol requires an Upgrade: WebSocket header.",
+                                          upgrade));
+    }
+
+    if (! "Upgrade".equalsIgnoreCase(connection)) {
+      throw new IllegalStateException(L.l("HTTP Connection header '{0}' must be 'Upgrade', because the WebSocket protocol requires a Connection: Upgrade header.",
+                                          connection));
+    }
+    
+    String origin = getHeader("Origin");
+
+    if (origin == null) {
+      throw new IllegalStateException(L.l("HTTP Origin header is required, because the WebSocket protocol requires an Origin header."));
+    }
+
+    _response.setStatus(101, "Web Socket Protocol Handshake");
+    _response.setHeader("Upgrade", "WebSocket");
+
+    _response.setContentLength(0);
+
+    StringBuilder sb = new StringBuilder();
+    if (isSecure())
+      sb.append("wss://");
+    else
+      sb.append("ws://");
+    sb.append(getServerName());
+
+    if (! isSecure() && getServerPort() != 80
+        || isSecure() && getServerPort() != 443) {
+      sb.append(":");
+      sb.append(getServerPort());
+    }
+    
+    sb.append(getContextPath());
+    if (getServletPath() != null)
+      sb.append(getServletPath());
+
+    String url = sb.toString();
+    
+    _response.setHeader("WebSocket-Location", url);
+    _response.setHeader("WebSocket-Origin", origin.toLowerCase());
+
+    String protocol = getHeader("WebSocket-Protocol");
+
+    if (protocol != null)
+      _response.setHeader("WebSocket-Protocol", protocol);
+
+    WebSocketContextImpl duplex
+      = new WebSocketContextImpl(this, _response, listener);
+
+    TcpDuplexController controller = _request.startDuplex(duplex);
+    duplex.setController(controller);
+
+    return duplex;
+  }
 
   public DuplexContext startDuplex(DuplexListener listener)
   {
@@ -2322,6 +2390,83 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     DuplexContextImpl(HttpServletRequestImpl request,
                       HttpServletResponseImpl response,
                       DuplexListener listener)
+    {
+      _request = request;
+      _response = response;
+      _listener = listener;
+    }
+
+    public void setController(TcpDuplexController controller)
+    {
+      _controller = controller;
+    }
+
+    public void setTimeout(long timeout)
+    {
+      _controller.setIdleTimeMax(timeout);
+    }
+
+    public long getTimeout()
+    {
+      return _controller.getIdleTimeMax();
+    }
+
+    public ServletRequest getRequest()
+    {
+      return _request;
+    }
+
+    public ServletResponse getResponse()
+    {
+      return _response;
+    }
+
+    public void complete()
+    {
+      _controller.complete();
+    }
+
+    public void onRead(TcpDuplexController duplex)
+      throws IOException
+    {
+      do {
+        _listener.onRead(this);
+      } while (_request.getAvailable() > 0);
+    }
+
+    public void onComplete(TcpDuplexController duplex)
+      throws IOException
+    {
+      _listener.onComplete(this);
+    }
+
+    public void onTimeout(TcpDuplexController duplex)
+      throws IOException
+    {
+      _listener.onTimeout(this);
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _listener + "]";
+    }
+  }
+
+  static class WebSocketContextImpl
+    implements WebSocketContext, TcpDuplexHandler
+  {
+    private final HttpServletRequestImpl _request;
+    private final HttpServletResponseImpl _response;
+
+    private final WebSocketListener _listener;
+
+    private TcpDuplexController _controller;
+    private boolean _isComplete;
+
+    WebSocketContextImpl(HttpServletRequestImpl request,
+                         HttpServletResponseImpl response,
+                         WebSocketListener listener)
     {
       _request = request;
       _response = response;
