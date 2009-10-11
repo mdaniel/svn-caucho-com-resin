@@ -33,6 +33,7 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorError;
 import com.caucho.util.Alarm;
 
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.*;
 
 /**
@@ -47,6 +48,9 @@ public class Packet
   private final String _from;
 
   private final long _createTime;
+
+  private Thread _waitThread;
+  private volatile boolean _isDequeue;
 
   /**
    * null constructor for Hessian deserialization
@@ -104,6 +108,26 @@ public class Packet
 			    ActorError error)
   {
     log.fine(this + " dispatchError " + error);
+  }
+
+  public void waitForDequeue(long timeout)
+  {
+    _waitThread = Thread.currentThread();
+
+    if (! _isDequeue) {
+      LockSupport.parkNanos(timeout * 1000000L);
+    }
+
+    _waitThread = null;
+  }
+  
+  public void unparkDequeue()
+  {
+    _isDequeue = true;
+    Thread thread = _waitThread;
+
+    if (thread != null)
+      LockSupport.unpark(thread);
   }
 
   public String toString()

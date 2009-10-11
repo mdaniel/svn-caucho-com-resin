@@ -33,6 +33,7 @@ import com.caucho.hemp.packet.*;
 import com.caucho.bam.Broker;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorError;
+import com.caucho.loader.Environment;
 import com.caucho.server.resin.*;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
@@ -42,11 +43,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 import java.lang.ref.*;
 import java.io.Serializable;
+import java.io.*;
 
 /**
  * Queue of hmtp packets
  */
-public class HempMemoryQueue implements ActorStream, Runnable
+public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 {
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
@@ -55,9 +57,9 @@ public class HempMemoryQueue implements ActorStream, Runnable
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
-  private long _queueIdleTimeout = 250L;
+  private long _queueIdleTimeout = 500L;
 
-  private final ScheduledThreadPool _executor = ScheduledThreadPool.getLocal();
+  private final ThreadPool _threadPool = ThreadPool.getCurrent();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
 
@@ -108,6 +110,8 @@ public class HempMemoryQueue implements ActorStream, Runnable
     long expireTimeout = -1;
 
     _queue = new PacketQueue(name, maxDiscardSize, maxBlockSize, expireTimeout);
+
+    Environment.addCloseListener(this);
   }
 
   /**
@@ -287,16 +291,27 @@ public class HempMemoryQueue implements ActorStream, Runnable
 
     _queue.enqueue(packet);
 
-    long lastExitTime = _lastExitTime;
-    _lastExitTime = Alarm.getCurrentTime();
-
     /*
     if (_dequeueCount.get() > 0)
       return;
     */
 
-    if (_wait.wake())
+    wakeConsumer();
+
+    // wait a millisecond for the dequeue to avoid spawing extra
+    // processing threads
+    packet.waitForDequeue(1);
+  }
+
+  private void wakeConsumer()
+  {
+
+    long lastExitTime = _lastExitTime;
+    _lastExitTime = Alarm.getCurrentTime();
+    
+    if (_wait.wake()) {
       return;
+    }
 
     while (true) {
       int size = _queue.getSize();
@@ -324,8 +339,8 @@ public class HempMemoryQueue implements ActorStream, Runnable
         return;
       }
       else if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
-        if (! _executor.isShutdown()) {
-          _executor.execute(this);
+        if (! _threadPool.start(this, 10)) {
+          _threadPool.schedule(this);
         }
         return;
       }
@@ -351,16 +366,19 @@ public class HempMemoryQueue implements ActorStream, Runnable
     try {
       Packet packet = _queue.dequeue();
 
-      if (packet != null) {
-        return packet;
+      if (packet == null) {
+        if (timeout <= 0)
+          return null;
+
+        item.park(timeout);
+
+        packet = _queue.dequeue();
       }
 
-      if (timeout <= 0)
-        return null;
+      if (packet != null)
+        packet.unparkDequeue();
 
-      item.park(timeout);
-
-      return _queue.dequeue();
+      return packet;
     } finally {
       item.endPark();
     }
@@ -396,35 +414,36 @@ public class HempMemoryQueue implements ActorStream, Runnable
 
   private boolean waitForQueue(WaitQueue.Item item)
   {
-    try {
-      if (! isClosed() && _queue.getSize() == 0) {
-        _wait.park(item, _queueIdleTimeout);
-      }
-    } catch (Exception e) {
-    }
+    long expires = Alarm.getCurrentTimeActual() + _queueIdleTimeout;
 
-    long now = Alarm.getCurrentTime();
-
-    if (_queue.getSize() > 0) {
-      // check for queue values
-      return true;
-    }
-    else if (_lastExitTime + _queueIdleTimeout < now
-             || Alarm.isTest()) {
-      // if thread hasn't exited recently
-      _lastExitTime = now;
-
-      int threadCount = _threadCount.decrementAndGet();
-
-      if (_queue.getSize() > 0
-          && threadCount < _threadMax
-          && _threadCount.compareAndSet(threadCount, threadCount + 1)) {
-        // second check needed in case a packet arrived
+    while (! isClosed()) {
+      if (_queue.getSize() > 0) {
+        // check for queue values
         return true;
       }
-      else {
-        // exit the thread
-        return false;
+
+      long now = Alarm.getCurrentTimeActual();
+
+      if (now < expires) {
+        _wait.parkUntil(item, expires);
+      }
+      else if (_lastExitTime + _queueIdleTimeout < now
+               || Alarm.isTest()) {
+        // if thread hasn't exited recently
+        _lastExitTime = now;
+
+        int threadCount = _threadCount.decrementAndGet();
+
+        if (_queue.getSize() > 0
+            && threadCount < _threadMax
+            && _threadCount.compareAndSet(threadCount, threadCount + 1)) {
+          // second check needed in case a packet arrived
+          return true;
+        }
+        else {
+          // exit the thread
+          return false;
+        }
       }
     }
 

@@ -759,11 +759,11 @@ public final class ClusterServer {
   /**
    * Notify that a start event has been received.
    */
-  public void notifyStart(long timestamp)
+  public boolean notifyStart(long timestamp)
   {
     synchronized (this) {
       if (timestamp <= _stateTimestamp)
-        return;
+        return false;
 
       if (log.isLoggable(Level.FINER) && ! _isActive)
         log.finer(this + " notify-start");
@@ -782,16 +782,18 @@ public final class ClusterServer {
 
     if (server != null)
       server.notifyServerStart(this);
+
+    return true;
   }
 
   /**
    * Notify that a start event has been received.
    */
-  public void notifyStop(long timestamp)
+  public boolean notifyStop(long timestamp)
   {
     synchronized (this) {
       if (timestamp <= _stateTimestamp)
-        return;
+        return false;
 
       if (log.isLoggable(Level.FINER) && _isActive)
         log.finer(this + " notify-stop");
@@ -807,6 +809,8 @@ public final class ClusterServer {
 
     if (server != null)
       server.notifyServerStop(this);
+
+    return true;
   }
 
   /**

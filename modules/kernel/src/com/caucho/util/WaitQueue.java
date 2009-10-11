@@ -73,6 +73,17 @@ public class WaitQueue {
     _isWake.set(false);
   }
 
+  public void parkUntil(Item item, long expires)
+  {
+    if (_isWake.getAndSet(false))
+      return;
+
+    item.startPark();
+    item.parkUntil(expires);
+
+    _isWake.set(false);
+  }
+
   public Item create()
   {
     Item item = new Item();
@@ -167,6 +178,19 @@ public class WaitQueue {
       try {
         Thread.interrupted();
         LockSupport.parkNanos(millis * 1000000L);
+      } finally {
+        _isParked.set(false);
+      }
+    }
+    
+    public final void parkUntil(long expires)
+    {
+      if (! _isParked.get())
+        return;
+
+      try {
+        Thread.interrupted();
+        LockSupport.parkUntil(expires);
       } finally {
         _isParked.set(false);
       }

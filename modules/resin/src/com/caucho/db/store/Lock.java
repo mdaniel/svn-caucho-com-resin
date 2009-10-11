@@ -149,6 +149,7 @@ public final class Lock {
            || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) > READ_LOCK))
           && _lockCount.compareAndSet(lock, lock - (READ|READ_LOCK))) {
         if (((lock - (READ|READ_LOCK)) & FAIL_MASK) != 0) {
+          _lockCount.set(0);
           System.out.println("FAILED: " + Long.toHexString(lock));
         }
         return;
@@ -157,9 +158,11 @@ public final class Lock {
              || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) > READ_LOCK));
     
     synchronized (_lock) {
-      unparkNode = unlock();
-
-      addLock(- (READ|READ_LOCK));
+      try {
+        unparkNode = unlock();
+      } finally {
+        addLock(- (READ|READ_LOCK));
+      }
       
       if (unparkNode == null && _lockCount.get() != 0)
         Thread.dumpStack();
@@ -266,9 +269,11 @@ public final class Lock {
     LockNode unparkNode = null;
 
     synchronized (_lock) {
-      unparkNode = unlock();
-      
-      lock = addLock(- (WRITE|WRITE_LOCK));
+      try {
+        unparkNode = unlock();
+      } finally {
+        lock = addLock(- (WRITE|WRITE_LOCK));
+      }
 
       lock -= (WRITE|WRITE_LOCK);
 
@@ -435,7 +440,8 @@ public final class Lock {
         System.out.println("FAIL: " + Long.toHexString(lock + value)
                            + " " + Long.toHexString(lock)
                            + " " + Long.toHexString(value));
-        
+
+        _lockCount.set(0);
         Thread.dumpStack();
         return lock;
       }
