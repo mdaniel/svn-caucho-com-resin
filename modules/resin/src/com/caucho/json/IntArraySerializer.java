@@ -27,50 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.json;
 
-import com.caucho.xmpp.im.Text;
-import com.caucho.xmpp.im.ImPresence;
-import com.caucho.xmpp.im.ImMessage;
-import com.caucho.bam.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
-import java.util.logging.*;
-import javax.xml.stream.*;
 
-/**
- * xmpp client to broker
- */
-class XmppClientBrokerStream extends XmppWriter
-{
-  private static final Logger log
-    = Logger.getLogger(XmppClientBrokerStream.class.getName());
+public class IntArraySerializer implements JsonSerializer {
+  static final JsonSerializer SER = new IntArraySerializer();
 
-  private WriteStream _os;
-  private XmppWriterImpl _out;
-
-  XmppClientBrokerStream(XmppClient client, XmppWriterImpl out)
+  private IntArraySerializer() {}
+  
+  public void write(JsonOutput out, Object objValue)
+    throws IOException
   {
-    super(out);
-    _out = out;
-  }
+    int []value = (int []) objValue;
 
-  public String getJid()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ActorStream getBrokerStream()
-  {
-    return this;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + "]";
+    int i = 0;
+    
+    out.writeArrayBegin();
+    for (int child : value) {
+      if (i != 0)
+        out.writeArrayComma();
+      i++;
+      out.writeLong(child);
+    }
+    out.writeArrayEnd();
   }
 }

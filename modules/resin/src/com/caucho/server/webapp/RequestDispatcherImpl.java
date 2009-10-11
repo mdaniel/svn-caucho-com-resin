@@ -222,7 +222,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       if (resWrapper != null)
         resWrapper.setResponse(parentRes);
 
-      subRequest.finishRequest();
+      subRequest.finishRequest(isValid);
       
       // server/106r, ioc/0310
       if (isValid) {

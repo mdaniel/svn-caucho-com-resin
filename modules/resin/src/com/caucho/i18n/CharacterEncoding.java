@@ -88,7 +88,9 @@ public class CharacterEncoding {
   static {
     String encoding = System.getProperty("file.encoding");
 
-    if (encoding == null)
+    if (encoding != null)
+      encoding = Encoding.getMimeName(encoding);
+    else
       encoding = "utf-8";
 
     _systemEncoding = encoding;

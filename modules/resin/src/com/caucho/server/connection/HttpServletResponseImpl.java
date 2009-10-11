@@ -73,6 +73,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   private ServletOutputStreamImpl _outputStream;
   private ResponseWriter _writer;
 
+  private String _setCharEncoding;
   private String _charEncoding;
   private String _contentPrefix;
   private String _contentType;
@@ -169,8 +170,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     _writer = _response.getResponsePrintWriter();
     _writer.init(_responseStream);
 
-    if (_charEncoding != null) {
-      _responseStream.setEncoding(_charEncoding);
+    String encoding = getCharacterEncoding();
+
+    if (encoding != null) {
+      _responseStream.setEncoding(encoding);
     }
 
     return _writer;
@@ -247,6 +250,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     _status = 200;
     _statusMessage = "OK";
 
+    _setCharEncoding = null;
     _charEncoding = null;
     _locale = null;
 
@@ -321,8 +325,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     _locale = locale;
 
-    if (_charEncoding == null && ! isCommitted()) {
-      _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
+    if (_setCharEncoding == null && ! isCommitted()) {
+      _setCharEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
+      _charEncoding = _setCharEncoding;
 
       try {
         if (_charEncoding != null) {
@@ -821,6 +826,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
         _contentType = sb.toString();
 
+        _setCharEncoding = encoding;
+        
         if (_writer == null) {
           _charEncoding = encoding;
         }
@@ -832,7 +839,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     // XXX: conflict with servlet exception throwing order?
     try {
-      _responseStream.setEncoding(_charEncoding);
+      String encoding = getCharacterEncoding();
+      
+      _responseStream.setEncoding(encoding);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -867,22 +876,21 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    */
   public String getCharacterEncoding()
   {
-    if (_charEncoding != null)
-      return _charEncoding;
+    if (_charEncoding == null) {
+      _charEncoding = _setCharEncoding;
 
-    WebApp webApp = _request.getWebApp();
+      WebApp webApp = _request.getWebApp();
 
-    String encoding = null;
+      if (_charEncoding == null && webApp != null)
+        _charEncoding = webApp.getCharacterEncoding();
 
-    if (webApp != null)
-      encoding = webApp.getCharacterEncoding();
-
-    if (encoding != null)
-      return encoding;
-    else {
-      // server/085a
-      return "utf-8";
+      if (_charEncoding == null) {
+        // server/085a
+        _charEncoding = "utf-8";
+      }
     }
+
+    return _charEncoding;
   }
 
   /**
@@ -890,7 +898,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    */
   public String getCharacterEncodingImpl()
   {
-    return _charEncoding;
+    // XXX:
+    return _setCharEncoding;
   }
 
   /**
@@ -906,11 +915,12 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (encoding == null
         || encoding.equals("ISO-8859-1")
         || encoding.equals("")) {
-      encoding = null;
-      _charEncoding = "iso-8859-1";
+      _setCharEncoding = "iso-8859-1";
     }
     else
-      _charEncoding = encoding;
+      _setCharEncoding = encoding;
+
+    _charEncoding = _setCharEncoding;
 
     try {
       _responseStream.setEncoding(encoding);

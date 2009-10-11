@@ -50,7 +50,7 @@ public class XmppAgentStream implements ActorStream
   
   private WriteStream _os;
 
-  private XmppWriter _writer;
+  private XmppWriterImpl _writer;
 
   XmppAgentStream(XmppBrokerStream packetHandler,
 		  WriteStream os)
@@ -64,7 +64,7 @@ public class XmppAgentStream implements ActorStream
     XmppStreamWriterImpl out;
     out = new XmppStreamWriterImpl(_os, marshalFactory);
       
-    _writer = new XmppWriter(_xmppContext, out);
+    _writer = new XmppWriterImpl(_xmppContext, out);
   }
   
   /**
@@ -83,7 +83,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from);
       }
 
-      _writer.sendMessage(to, from, value);
+      _writer.message(to, from, value);
       
       _os.flush();
     } catch (IOException e) {
@@ -171,7 +171,7 @@ public class XmppAgentStream implements ActorStream
   {
     String id = _xmppContext.findId(bamId);
 
-    _writer.sendQuery(id, to, from, value, "result");
+    _writer.sendQuery(id, to, from, value, "result", null);
   }
   
   public void queryError(long id,
@@ -221,7 +221,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, null);
+      _writer.sendPresence(to, from, data, null, null);
 
       _os.flush();
     } catch (IOException e) {
@@ -244,7 +244,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "unavailable");
+      _writer.sendPresence(to, from, data, "unavailable", null);
 
       _os.flush();
     } catch (IOException e) {
@@ -267,7 +267,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "probe");
+      _writer.sendPresence(to, from, data, "probe", null);
 
       _os.flush();
     } catch (IOException e) {
@@ -290,7 +290,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "subscribe");
+      _writer.sendPresence(to, from, data, "subscribe", null);
 
       _os.flush();
     } catch (IOException e) {
@@ -313,7 +313,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "subscribed");
+      _writer.sendPresence(to, from, data, "subscribed", null);
 
       _os.flush();
     } catch (IOException e) {
@@ -336,7 +336,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "unsubscribe");
+      _writer.sendPresence(to, from, data, "unsubscribe", null);
 
       _os.flush();
     } catch (IOException e) {
@@ -359,7 +359,7 @@ public class XmppAgentStream implements ActorStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "unsubscribed");
+      _writer.sendPresence(to, from, data, "unsubscribed", null);
 
       _os.flush();
     } catch (IOException e) {

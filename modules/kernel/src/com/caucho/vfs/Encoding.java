@@ -104,14 +104,14 @@ public class Encoding {
   public static String getMimeName(Locale locale)
   {
     if (locale == null)
-      return "ISO-8859-1";
+      return "utf-8";
 
     String mimeName = _localeName.get(locale.toString());
     if (mimeName == null)
       mimeName = _localeName.get(locale.getLanguage());
 
     if (mimeName == null)
-      return "ISO-8859-1";
+      return "utf-8";
     else
       return mimeName;
   }
@@ -338,19 +338,19 @@ public class Encoding {
     _mimeName.put("ISO2022-JP2", "ISO-2022-JP-2");
     _javaName.put("ISO-2022-JP-2", "ISO2022_JP2");
 
-    _mimeName.put("ISO_8859-1:1987", "ISO-8859-1");
-    _mimeName.put("ISO-IR-100", "ISO-8859-1");
-    _mimeName.put("ISO-8859-1", "ISO-8859-1");
-    _mimeName.put("LATIN1", "ISO-8859-1");
-    _mimeName.put("LATIN-1", "ISO-8859-1");
-    _mimeName.put("L1", "ISO-8859-1");
-    _mimeName.put("IBM819", "ISO-8859-1");
-    _mimeName.put("CP819", "ISO-8859-1");
-    _mimeName.put("CSISOLATIN1", "ISO-8859-1");
-    _mimeName.put("ISO8859-1", "ISO-8859-1");
-    _mimeName.put("8859-1", "ISO-8859-1");
-    _mimeName.put("8859_1", "ISO-8859-1");
-    _javaName.put("ISO-8859-1", "ISO8859_1");
+    _mimeName.put("ISO_8859-1:1987", "iso-8859-1");
+    _mimeName.put("ISO-IR-100", "iso-8859-1");
+    _mimeName.put("ISO-8859-1", "iso-8859-1");
+    _mimeName.put("LATIN1", "iso-8859-1");
+    _mimeName.put("LATIN-1", "iso-8859-1");
+    _mimeName.put("L1", "iso-8859-1");
+    _mimeName.put("IBM819", "iso-8859-1");
+    _mimeName.put("CP819", "iso-8859-1");
+    _mimeName.put("CSISOLATIN1", "iso-8859-1");
+    _mimeName.put("ISO8859-1", "iso-8859-1");
+    _mimeName.put("8859-1", "iso-8859-1");
+    _mimeName.put("8859_1", "iso-8859-1");
+    _javaName.put("iso-8859-1", "ISO8859_1");
 
     _mimeName.put("ISO-8859-2:1987", "ISO-8859-2");
     _mimeName.put("ISO-IR-101", "ISO-8859-2");
@@ -447,17 +447,17 @@ public class Encoding {
     _mimeName.put("UTF7", "UTF-7");
     _javaName.put("UTF-7", "UTF7");
 
-    _mimeName.put("UTF-8", "UTF-8");
-    _mimeName.put("UTF8", "UTF-8");
-    _javaName.put("UTF-8", "UTF8");
+    _mimeName.put("UTF-8", "utf-8");
+    _mimeName.put("UTF8", "utf-8");
+    _javaName.put("utf-8", "utf8");
 
-    _mimeName.put("UTF-16", "UTF-16");
-    _mimeName.put("UTF16", "UTF-16");
-    _javaName.put("UTF-16", "UTF16");
+    _mimeName.put("UTF-16", "utf-16");
+    _mimeName.put("UTF16", "utf-16");
+    _javaName.put("utf-16", "utf16");
 
-    _mimeName.put("UTF-16-REV", "UTF-16-REV");
-    _mimeName.put("UTF16-REV", "UTF-16-REV");
-    _javaName.put("UTF-16-REV", "UTF16_REV");
+    _mimeName.put("UTF-16-REV", "utf-16-rev");
+    _mimeName.put("UTF16-REV", "utf-16-rev");
+    _javaName.put("utf-16-rev", "UTF16_REV");
 
     _mimeName.put("JIS-ENCODING", "JIS_Encoding");
     _mimeName.put("JIS-ENCODING", "JIS_Encoding");

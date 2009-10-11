@@ -63,7 +63,7 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   
   public void setRequest(HttpServletRequest request)
   {
-    if (request == null)
+    if (request == null || request == this)
       throw new IllegalArgumentException();
     
     _request = request;

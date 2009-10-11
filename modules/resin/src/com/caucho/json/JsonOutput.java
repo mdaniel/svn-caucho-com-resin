@@ -29,11 +29,8 @@
 
 package com.caucho.json;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import com.caucho.hessian.io.AbstractHessianOutput;
+import java.io.*;
+import com.caucho.util.Utf8;
 
 /**
  * Abstract output stream for JSON requests.
@@ -48,12 +45,15 @@ import com.caucho.hessian.io.AbstractHessianOutput;
  * out.completeCall();      // complete the call
  * </pre>
  */
-public class JsonOutput extends AbstractHessianOutput {
+public class JsonOutput {
+  private static final byte []NULL = new byte[] { 'n', 'u', 'l', 'l' };
+  private static final byte []TRUE = new byte[] { 't', 'r', 'u', 'e' };
+  private static final byte []FALSE = new byte[] { 'f', 'a', 'l', 's', 'e' };
+
+  private JsonSerializerFactory _factory = new JsonSerializerFactory();
+  
   private OutputStream _os;
   
-  private byte []_buffer = new byte[1024];
-  private int _offset;
-
   public JsonOutput()
   {
   }
@@ -71,528 +71,205 @@ public class JsonOutput extends AbstractHessianOutput {
     _os = os;
   }
 
-  /**
-   * Starts the method call:
-   *
-   * @param method the method name to call.
-   */
-  public void startCall()
+  public void writeObject(Serializable value)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().toString());
-  }
+    OutputStream os = _os;
 
-  /**
-   * Starts the method call:
-   *
-   * <code><pre>
-   * C string int
-   * </pre></code>
-   *
-   * @param method the method name to call.
-   */
-  public void startCall(String method, int length)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().toString());
-  }
-
-  /**
-   * Writes the method tag.
-   *
-   * <code><pre>
-   * string
-   * </pre></code>
-   *
-   * @param method the method name to call.
-   */
-  public void writeMethod(String method)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().toString());
-  }
-
-  /**
-   * Completes the method call:
-   *
-   * <code><pre>
-   * </pre></code>
-   */
-  public void completeCall()
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().toString());
-  }
-
-  /**
-   * Writes a boolean value to the stream.  The boolean will be written
-   * with the following syntax:
-   *
-   * <code><pre>
-   * T
-   * F
-   * </pre></code>
-   *
-   * @param value the boolean value to write.
-   */
-  public void writeBoolean(boolean value)
-    throws IOException
-  {
-    if (value)
-      write("true");
-    else
-      write("false");
-  }
-
-  /**
-   * Writes an integer value to the stream.  The integer will be written
-   * with the following syntax:
-   *
-   * @param value the integer value to write.
-   */
-  public void writeInt(int value)
-    throws IOException
-  {
-    writeLong(value);
-  }
-
-  /**
-   * Writes a long value to the stream.  The long will be written
-   * with the following syntax:
-   *
-   * <code><pre>
-   * L b64 b56 b48 b40 b32 b24 b16 b8
-   * </pre></code>
-   *
-   * @param value the long value to write.
-   */
-  public void writeLong(long value)
-    throws IOException
-  {
-    if (value == 0) {
-      write('0');
+    if (value == null) {
+      os.write(NULL, 0, 4);
       return;
     }
-    
-    byte []buffer = _buffer;
-    int offset = _offset;
-    
-    if (buffer.length <= offset + 32) {
-      flushBuffer();
-      _offset = offset;
-    }
 
-    if (value < 0) {
-      value = -value;
-      buffer[offset++] = '-';
-    }
+    JsonSerializer ser = _factory.getSerializer(value.getClass());
 
-    int startOffset = offset;
-
-    for (; value > 0; value /= 10) {
-      int digit = (int) value % 10;
-
-      buffer[offset++] = (byte) ('0' + digit);
-    }
-
-    int pivot = (offset - startOffset) / 2;
-
-    while (pivot-- > 0) {
-      byte tmp = buffer[startOffset + pivot];
-      buffer[startOffset + pivot] = buffer[offset - pivot - 1];
-      buffer[offset - pivot - 1] = tmp;
-    }
-
-    _offset = offset;
+    ser.write(this, value);
   }
 
-  /**
-   * Writes a double value to the stream.  The double will be written
-   * with the following syntax:
-   *
-   * <code><pre>
-   * D b64 b56 b48 b40 b32 b24 b16 b8
-   * </pre></code>
-   *
-   * @param value the double value to write.
-   */
-  public void writeDouble(double value)
-    throws IOException
-  {
-  }
-
-  /**
-   * Writes a date to the stream.
-   *
-   * <code><pre>
-   * T  b64 b56 b48 b40 b32 b24 b16 b8
-   * </pre></code>
-   *
-   * @param time the date in milliseconds from the epoch in UTC
-   */
-  public void writeUTCDate(long time)
-    throws IOException
-  {
-  }
-
-  /**
-   * Writes a null value to the stream.
-   * The null will be written with the following syntax
-   *
-   * <code><pre>
-   * N
-   * </pre></code>
-   *
-   * @param value the string value to write.
-   */
   public void writeNull()
     throws IOException
   {
-    write("null");
+    OutputStream os = _os;
+    
+    os.write(NULL, 0, 4);
   }
-
-  /**
-   * Writes a string value to the stream using UTF-8 encoding.
-   * The string will be written with the following syntax:
-   *
-   * If the value is null, it will be written as
-   *
-   * <code><pre>
-   * N
-   * </pre></code>
-   *
-   * @param value the string value to write.
-   */
-  public void writeString(String value)
+    
+  public void writeBoolean(boolean value)
     throws IOException
   {
-    if (value == null)
-      write("null");
-    else {
-      write('"');
-      writeUTF(value);
-      write('"');
+    OutputStream os = _os;
+    
+    if (value)
+      os.write(TRUE, 0, 4);
+    else
+      os.write(FALSE, 0, 5);
+  }
+    
+  public void writeLong(long value)
+    throws IOException
+  {
+    writeStringValue(String.valueOf(value));
+  }
+    
+  public void writeDouble(double value)
+    throws IOException
+  {
+    writeStringValue(String.valueOf(value));
+  }
+
+  public void writeString(String v)
+    throws IOException
+  {
+    OutputStream os = _os;
+    
+    if (v == null) {
+      os.write(NULL, 0, 4);
+      return;
+    }
+    
+    os.write('"');
+    int len = v.length();
+    for (int i = 0; i < len; i++) {
+      char ch = v.charAt(i);
+
+      writeChar(os, ch);
+    }
+    
+    os.write('"');
+  }
+
+  public void writeString(char []v, int offset, int length)
+    throws IOException
+  {
+    OutputStream os = _os;
+    
+    os.write('"');
+
+    for (int i = 0; i < length; i++) {
+      char ch = v[offset + i];
+
+      writeChar(os, ch);
+    }
+    
+    os.write('"');
+  }
+
+  private void writeChar(OutputStream os, char ch)
+    throws IOException
+  {
+    switch (ch) {
+    case 0:
+      os.write('\\');
+      os.write('u');
+      os.write('0');
+      os.write('0');
+      os.write('0');
+      os.write('0');
+      break;
+    case '\n':
+      os.write('\\');
+      os.write('n');
+      break;
+    case '\r':
+      os.write('\\');
+      os.write('r');
+      break;
+    case '\t':
+      os.write('\\');
+      os.write('t');
+      break;
+    case '\b':
+      os.write('\\');
+      os.write('b');
+      break;
+    case '\f':
+      os.write('\\');
+      os.write('f');
+      break;
+    case '\\':
+      os.write('\\');
+      os.write('\\');
+      break;
+    case '"':
+      os.write('\\');
+      os.write('"');
+      break;
+    default:
+      Utf8.write(os, ch);
+      break;
     }
   }
 
-  /**
-   * Writes a string value to the stream using UTF-8 encoding.
-   * The string will be written with the following syntax:
-   *
-   * @param value the string value to write.
-   */
-  public void writeString(char []buffer, int offset, int length)
+  public void writeArrayBegin()
     throws IOException
   {
-    write('"');
-    writeUTF(buffer, offset, length);
-    write('"');
+    _os.write('[');
   }
 
-  /**
-   * Writes a byte array to the stream.
-   * The array will be written with the following syntax:
-   *
-   * <code><pre>
-   * B b16 b18 bytes
-   * </pre></code>
-   *
-   * If the value is null, it will be written as
-   *
-   * <code><pre>
-   * N
-   * </pre></code>
-   *
-   * @param value the string value to write.
-   */
-  public void writeBytes(byte []buffer)
+  public void writeArrayComma()
     throws IOException
   {
-  }
-  
-  /**
-   * Writes a byte array to the stream.
-   * The array will be written with the following syntax:
-   *
-   * <code><pre>
-   * B b16 b18 bytes
-   * </pre></code>
-   *
-   * If the value is null, it will be written as
-   *
-   * <code><pre>
-   * N
-   * </pre></code>
-   *
-   * @param value the string value to write.
-   */
-  public void writeBytes(byte []buffer, int offset, int length)
-    throws IOException
-  {
-  }
-  
-  /**
-   * Writes a byte buffer to the stream.
-   */
-  public void writeByteBufferStart()
-    throws IOException
-  {
-  }
-  
-  /**
-   * Writes a byte buffer to the stream.
-   *
-   * <code><pre>
-   * b b16 b18 bytes
-   * </pre></code>
-   *
-   * @param value the string value to write.
-   */
-  public void writeByteBufferPart(byte []buffer,
-					   int offset,
-					   int length)
-    throws IOException
-  {
-  }
-  
-  /**
-   * Writes the last chunk of a byte buffer to the stream.
-   *
-   * <code><pre>
-   * b b16 b18 bytes
-   * </pre></code>
-   *
-   * @param value the string value to write.
-   */
-  public void writeByteBufferEnd(byte []buffer,
-				 int offset,
-				 int length)
-    throws IOException
-  {
+    _os.write(',');
   }
 
-  /**
-   * Writes a reference.
-   *
-   * @param value the integer value to write.
-   */
-  protected void writeRef(int value)
+  public void writeArrayEnd()
     throws IOException
   {
+    _os.write(']');
   }
 
-  /**
-   * Removes a reference.
-   */
-  public boolean removeRef(Object obj)
+  public void writeMapBegin()
     throws IOException
   {
-    return false;
+    _os.write('{');
   }
 
-  /**
-   * Replaces a reference from one object to another.
-   */
-  public boolean replaceRef(Object oldRef, Object newRef)
+  public void writeMapComma()
     throws IOException
   {
-    return false;
+    _os.write(',');
   }
 
-  /**
-   * Adds an object to the reference list.  If the object already exists,
-   * writes the reference, otherwise, the caller is responsible for
-   * the serialization.
-   *
-   * @param object the object to add as a reference.
-   *
-   * @return true if the object has already been written.
-   */
-  public boolean addRef(Object object)
+  public void writeMapEntry(String key, Object value)
     throws IOException
   {
-    return false;
+    writeString(key);
+    _os.write(':');
+    writeObject((Serializable) value);
   }
 
-  /**
-   * Resets the references for streaming.
-   */
-  public void resetReferences()
-  {
-  }
-
-  /**
-   * Writes a generic object to the output stream.
-   */
-  public void writeObject(Object object)
-    throws IOException
-  {
-  }
-
-  /**
-   * Writes the list header to the stream.  List writers will call
-   * <code>writeListBegin</code> followed by the list contents and then
-   * call <code>writeListEnd</code>.
-   */
-  public boolean writeListBegin(int length, String type)
-    throws IOException
-  {
-    write('[');
-
-    return false;
-  }
-
-  /**
-   * Writes the tail of the list to the stream.
-   */
-  public void writeListEnd()
-    throws IOException
-  {
-    write(']');
-  }
-
-  /**
-   * Writes the map header to the stream.  Map writers will call
-   * <code>writeMapBegin</code> followed by the map contents and then
-   * call <code>writeMapEnd</code>.
-   *
-   * <code><pre>
-   * M type (<key> <value>)* Z
-   * </pre></code>
-   */
-  public void writeMapBegin(String type)
-    throws IOException
-  {
-    write("{class:\"");
-    write(type);
-    write('\"');
-  }
-
-  /**
-   * Writes the tail of the map to the stream.
-   */
   public void writeMapEnd()
     throws IOException
   {
-    write('}');
+    _os.write('}');
   }
 
-  protected void write(int ch)
+  private void writeStringValue(String s)
     throws IOException
   {
-    byte []buffer = _buffer;
-
-    if (buffer.length <= _offset)
-      flushBuffer();
-
-    buffer[_offset++] = (byte) ch;
-  }
-
-  protected void write(String s)
-    throws IOException
-  {
+    OutputStream os = _os;
+    
     int len = s.length();
-    
-    byte []buffer = _buffer;
-    int offset = _offset;
 
-    int sOff = 0;
-    while (len-- > 0) {
-      if (buffer.length <= offset) {
-	_offset = offset;
-	flushBuffer();
-	offset = _offset;
-      }
-      
-      buffer[offset++] = (byte) s.charAt(sOff++);
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      os.write(ch);
     }
-
-    _offset = offset;
   }
 
-  protected void writeUTF(String s)
+  public void flushBuffer()
     throws IOException
   {
-    int len = s.length();
-    
-    byte []buffer = _buffer;
-    int offset = _offset;
-
-    int sOff = 0;
-    while (len > 0) {
-      if (buffer.length <= offset + 2) {
-	_offset = offset;
-	flushBuffer();
-	offset = _offset;
-      }
-
-      int ch = s.charAt(sOff++);
-
-      if (ch < 0x80)
-	buffer[offset++] = (byte) ch;
-      else if (ch < 0x800) {
-	buffer[offset++] = (byte) (0xc0 + (ch >> 6));
-	buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
-      }
-      else {
-	buffer[offset++] = (byte) (0xe0 + (ch >> 12));
-	buffer[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-	buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
-      }
-    }
-
-    _offset = offset;
-  }
-
-  protected void writeUTF(char []s, int sOff, int len)
-    throws IOException
-  {
-    byte []buffer = _buffer;
-    int offset = _offset;
-
-    while (len > 0) {
-      if (buffer.length <= offset + 2) {
-	_offset = offset;
-	flushBuffer();
-	offset = _offset;
-      }
-
-      int ch = s[sOff++];
-
-      if (ch < 0x80)
-	buffer[offset++] = (byte) ch;
-      else if (ch < 0x800) {
-	buffer[offset++] = (byte) (0xc0 + (ch >> 6));
-	buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
-      }
-      else {
-	buffer[offset++] = (byte) (0xe0 + (ch >> 12));
-	buffer[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-	buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
-      }
-    }
-
-    _offset = offset;
-  }
-
-  protected void flushBuffer()
-    throws IOException
-  {
-    if (_offset > 0)
-      _os.write(_buffer, 0 , _offset);
-    
-    _offset = 0;
   }
 
   public void flush()
     throws IOException
   {
-    flushBuffer();
   }
 
   public void close()
     throws IOException
   {
-    flush();
   }
 }

@@ -202,7 +202,6 @@ public class ClusterStream implements ActorStream {
 
       hOut.writeObject(query);
       hOut.endPacket();
-      hOut.flushBuffer();
     } catch (IOException e) {
       throw new ActorException(e);
     }
@@ -232,7 +231,6 @@ public class ClusterStream implements ActorStream {
       hOut.writeObject(error);
       
       hOut.endPacket();
-      hOut.flushBuffer();
     } catch (IOException e) {
       throw new ActorException(e);
     }
@@ -259,7 +257,6 @@ public class ClusterStream implements ActorStream {
       hOut.writeLong(id);
       hOut.writeObject(query);
       hOut.endPacket();
-      hOut.flushBuffer();
     } catch (IOException e) {
       throw new ActorException(e);
     }
@@ -288,7 +285,6 @@ public class ClusterStream implements ActorStream {
 
       hOut.writeObject(query);
       hOut.endPacket();
-      hOut.flushBuffer();
     } catch (IOException e) {
       throw new ActorException(e);
     }

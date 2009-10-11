@@ -287,6 +287,14 @@ public class TldManager {
     for (int i = 0; i < paths.size(); i++) {
       Path subPath = paths.get(i);
 
+      // skip jre libraries
+      String pathName = subPath.getFullPath();
+      if (pathName.endsWith("/jre/lib/rt.jar")
+          || pathName.endsWith("/jre/lib/charsets.jar")
+          || pathName.endsWith("/jre/lib/deploy.jar")) {
+        continue;
+      }
+
       if (subPath.getPath().endsWith(".jar")) {
 	loadJarTlds(taglibs, subPath, prefix);
       }

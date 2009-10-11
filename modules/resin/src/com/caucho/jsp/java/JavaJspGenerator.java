@@ -1036,8 +1036,11 @@ public class JavaJspGenerator extends JspGenerator {
     if (encoding == null)
       encoding = Encoding.getMimeName(_parseState.getPageEncoding());
 
+    // jsp/1co7
+    /*
     if (encoding == null)
       encoding = Encoding.getMimeName(CharacterEncoding.getLocalEncoding());
+    */
 
     /*
     if ("ISO-8859-1".equals(encoding))

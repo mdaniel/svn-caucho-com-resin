@@ -39,11 +39,7 @@ import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.IOExceptionWrapper;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -260,11 +256,48 @@ public class JavaCompiler {
   {
     _compileParent = compileParent;
   }
+
+  /**
+   * Returns the classpath.
+   */
+  public String getClassPath()
+  {
+    String rawClassPath = buildClassPath();
+
+    if (true)
+      return rawClassPath;
+    
+    char sep = CauchoSystem.getPathSeparatorChar();
+    String []splitClassPath = rawClassPath.split("[" + sep + "]");
+
+    String javaHome = System.getProperty("java.home");
+
+    Path pwd = Vfs.lookup(System.getProperty("user.dir"));
+
+    ArrayList<String> cleanClassPath = new ArrayList<String>();
+    StringBuilder sb = new StringBuilder();
+
+    for (String pathName : splitClassPath) {
+      Path path = pwd.lookup(pathName);
+      pathName = path.getNativePath();
+      
+      if (! pathName.startsWith(javaHome)
+          && ! cleanClassPath.contains(pathName)) {
+        cleanClassPath.add(pathName);
+        if (sb.length() > 0)
+          sb.append(sep);
+        sb.append(pathName);
+      }
+    }
+
+    return sb.toString();
+  }
+    
   
   /**
    * Returns the classpath for the compiler.
    */
-  public String getClassPath()
+  private String buildClassPath()
   {
     String classPath = null;//_classPath;
     
@@ -289,7 +322,6 @@ public class JavaCompiler {
     String classDirName = getClassDirName();
     
     char sep = CauchoSystem.getPathSeparatorChar();
-
 
     if (_extraClassPath != null)
       classPath = classPath + sep + _extraClassPath;

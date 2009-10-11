@@ -27,50 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.json;
 
-import com.caucho.xmpp.im.Text;
-import com.caucho.xmpp.im.ImPresence;
-import com.caucho.xmpp.im.ImMessage;
-import com.caucho.bam.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import java.io.Serializable;
-import java.util.*;
-import java.util.logging.*;
-import javax.xml.stream.*;
+import java.io.*;
 
-/**
- * xmpp client to broker
- */
-class XmppClientBrokerStream extends XmppWriter
-{
-  private static final Logger log
-    = Logger.getLogger(XmppClientBrokerStream.class.getName());
+public class BooleanSerializer implements JsonSerializer {
+  static final JsonSerializer SER = new BooleanSerializer();
 
-  private WriteStream _os;
-  private XmppWriterImpl _out;
-
-  XmppClientBrokerStream(XmppClient client, XmppWriterImpl out)
+  private BooleanSerializer() {}
+  
+  public void write(JsonOutput out, Object objValue)
+    throws IOException
   {
-    super(out);
-    _out = out;
-  }
+    Boolean value = (Boolean) objValue;
 
-  public String getJid()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ActorStream getBrokerStream()
-  {
-    return this;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + "]";
+    out.writeBoolean(value);
   }
 }

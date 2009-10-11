@@ -138,7 +138,12 @@ abstract public class AbstractActorStream implements ActorStream
 				      ActorError.FEATURE_NOT_IMPLEMENTED,
 				      msg);
 
-    getBrokerStream().queryError(id, from, to, payload, error);
+    ActorStream brokerStream = getBrokerStream();
+
+    if (brokerStream == null)
+      throw new IllegalStateException(this + " brokerStream is missing and required to send an error for a QueryGet");
+    
+    brokerStream.queryError(id, from, to, payload, error);
   }
   
   /**
@@ -174,7 +179,13 @@ abstract public class AbstractActorStream implements ActorStream
 				      ActorError.FEATURE_NOT_IMPLEMENTED,
 				      msg);
 
-    getBrokerStream().queryError(id, from, to, payload, error);
+
+    ActorStream brokerStream = getBrokerStream();
+
+    if (brokerStream == null)
+      throw new IllegalStateException(this + " brokerStream is missing and required to send an error for a QueryGet");
+    
+    brokerStream.queryError(id, from, to, payload, error);
   }
   
   /**

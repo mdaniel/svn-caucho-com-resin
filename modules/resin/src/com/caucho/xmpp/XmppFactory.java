@@ -35,39 +35,33 @@ import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * xmpp client to broker
+ * Creates XmppReaders and XmppWriters.
  */
-class XmppClientBrokerStream extends XmppWriter
+public class XmppFactory
 {
   private static final Logger log
-    = Logger.getLogger(XmppClientBrokerStream.class.getName());
+    = Logger.getLogger(XmppFactory.class.getName());
 
-  private WriteStream _os;
-  private XmppWriterImpl _out;
+  private XmppMarshalFactory _marshalFactory = new XmppMarshalFactory();
 
-  XmppClientBrokerStream(XmppClient client, XmppWriterImpl out)
+  public XmppWriter newWriter(OutputStream os)
   {
-    super(out);
-    _out = out;
-  }
+    WriteStream wOut = Vfs.openWrite(os);
+    
+    XmppStreamWriterImpl out
+      = new XmppStreamWriterImpl(wOut, _marshalFactory);
+    
+    XmppWriterImpl writerImpl = new XmppWriterImpl(null, out);
 
-  public String getJid()
-  {
-    throw new UnsupportedOperationException();
+    return new XmppWriter(writerImpl);
   }
-
-  @Override
-  public ActorStream getBrokerStream()
-  {
-    return this;
-  }
-
+  
   @Override
   public String toString()
   {

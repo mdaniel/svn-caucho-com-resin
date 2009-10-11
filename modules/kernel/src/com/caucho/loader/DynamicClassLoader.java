@@ -939,7 +939,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * Fill data for the class path.  fillClassPath() will add all
    * .jar and .zip files in the directory list.
    */
-  protected final void buildClassPath(ArrayList<String> cp)
+  public final void buildClassPath(ArrayList<String> cp)
   {
     ClassLoader parent = getParent();
 

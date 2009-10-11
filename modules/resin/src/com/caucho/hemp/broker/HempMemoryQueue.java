@@ -346,17 +346,24 @@ public class HempMemoryQueue implements ActorStream, Runnable
 
   protected Packet dequeue(WaitQueue.Item item, long timeout)
   {
-    Packet packet = _queue.dequeue();
+    item.startPark();
 
-    if (packet != null)
-      return packet;
+    try {
+      Packet packet = _queue.dequeue();
 
-    if (timeout <= 0)
-      return null;
+      if (packet != null) {
+        return packet;
+      }
 
-    item.park(timeout);
+      if (timeout <= 0)
+        return null;
 
-    return _queue.dequeue();
+      item.park(timeout);
+
+      return _queue.dequeue();
+    } finally {
+      item.endPark();
+    }
   }
 
   private void consumeQueue(WaitQueue.Item item)

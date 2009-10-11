@@ -226,21 +226,21 @@ public class ActorError implements Serializable {
   private static final HashMap<String,ErrorGroup> _errorMap
     = new HashMap<String,ErrorGroup>();
   
-  private final String _type;
-  private final String _group;
-  private final String _text;
+  private final String type;
+  private final String group;
+  private final String text;
   
-  private Serializable _data;
-  private Serializable _extra;
+  private Serializable data;
+  private Serializable extra;
   
   /**
    * zero-arg constructor for Hessian
    */
   private ActorError()
   {
-    _type = null;
-    _group = null;
-    _text = null;
+    this.type = null;
+    this.group = null;
+    this.text = null;
   }
 
   /**
@@ -250,9 +250,9 @@ public class ActorError implements Serializable {
    */
   public ActorError(String text)
   {
-    _type = TYPE_CANCEL;
-    _group = INTERNAL_SERVER_ERROR;
-    _text = text;
+    this.type = TYPE_CANCEL;
+    this.group = INTERNAL_SERVER_ERROR;
+    this.text = text;
   }
 
   /**
@@ -264,9 +264,9 @@ public class ActorError implements Serializable {
   public ActorError(String type,
 		    String group)
   {
-    _type = type;
-    _group = group;
-    _text = null;
+    this.type = type;
+    this.group = group;
+    this.text = null;
   }
 
   /**
@@ -280,9 +280,9 @@ public class ActorError implements Serializable {
 		    String group,
 		    String text)
   {
-    _type = type;
-    _group = group;
-    _text = text;
+    this.type = type;
+    this.group = group;
+    this.text = text;
   }
 
   /**
@@ -304,7 +304,7 @@ public class ActorError implements Serializable {
    */
   public String getType()
   {
-    return _type;
+    return this.type;
   }
 
   /**
@@ -312,7 +312,7 @@ public class ActorError implements Serializable {
    */
   public String getGroup()
   {
-    return _group;
+    return this.group;
   }
 
   /**
@@ -320,7 +320,7 @@ public class ActorError implements Serializable {
    */
   public String getText()
   {
-    return _text;
+    return this.text;
   }
 
   /**
@@ -328,7 +328,7 @@ public class ActorError implements Serializable {
    */
   public Serializable getData()
   {
-    return _data;
+    return this.data;
   }
 
   /**
@@ -336,7 +336,7 @@ public class ActorError implements Serializable {
    */
   public void setData(Serializable data)
   {
-    _data = data;
+    this.data = data;
   }
 
   /**
@@ -344,7 +344,7 @@ public class ActorError implements Serializable {
    */
   public Serializable getExtra()
   {
-    return _extra;
+    return this.extra;
   }
 
   /**
@@ -352,7 +352,7 @@ public class ActorError implements Serializable {
    */
   public void setExtra(Serializable extra)
   {
-    _extra = extra;
+    this.extra = extra;
   }
 
   public ErrorPacketException createException()
@@ -387,18 +387,18 @@ public class ActorError implements Serializable {
 
     sb.append(getClass().getSimpleName());
     sb.append("[type=");
-    sb.append(_type);
+    sb.append(this.type);
     sb.append(",group=");
-    sb.append(_group);
+    sb.append(this.group);
 
-    if (_data != null) {
+    if (this.data != null) {
       sb.append(",data=");
-      sb.append(_data);
+      sb.append(this.data);
     }
     
-    if (_text != null) {
+    if (this.text != null) {
       sb.append(",text=");
-      sb.append(_text);
+      sb.append(this.text);
     }
 
     sb.append("]");

@@ -43,219 +43,101 @@ import javax.xml.stream.*;
 /**
  * xmpp client to broker
  */
-class XmppWriter
+public class XmppWriter extends AbstractActorStream
 {
   private static final Logger log
     = Logger.getLogger(XmppWriter.class.getName());
 
-  private XmppContext _xmppContext;
-  private XmppStreamWriterImpl _out;
+  private XmppWriterImpl _out;
 
-  XmppWriter(XmppContext xmppContext, XmppStreamWriterImpl out)
+  XmppWriter(XmppWriterImpl out)
   {
-    _xmppContext = xmppContext;
     _out = out;
   }
 
-  /**
-   * Sends a message to the stream
-   */
-  public void sendMessage(String to, String from, Serializable value)
+  public ActorStream getBrokerStream()
   {
-    try {
-      XmppStreamWriterImpl out = _out;
-
-      Text []subjects = null;
-      Text []bodys = null;
-      String thread = null;
-      String type = null;
-      Serializable extra = null;
-      Serializable []extras = null;
-      
-      if (value instanceof ImMessage) {
-        ImMessage msg = (ImMessage) value;
-
-        if (msg.getTo() != null)
-          to = msg.getTo();
-
-        if (msg.getFrom() != null)
-          from = msg.getFrom();
-
-        if (msg.getType() != null)
-          type = msg.getType();
-
-        subjects = msg.getSubjects();
-        bodys = msg.getBodys();
-        thread = msg.getThread();
-
-        extras = msg.getExtra();
-      }
-      else if (value instanceof Serializable[]) {
-        extras = (Serializable[]) value;
-      }
-      else {
-        extra = value;
-      }
-      
-      synchronized (out) {
-	out.writeStartElement("message");
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", from);
-
-	if (type != null)
-	  out.writeAttribute("type", type);
-
-	if (subjects != null) {
-	  for (Text subject : subjects) {
-	    out.writeStartElement("subject");
-
-	    if (subject.getLang() != null)
-	      out.writeAttribute("xml", "http://xml.org", "lang", subject.getLang());
-	    
-	    out.writeCharacters(subject.getValue());
-	    out.writeEndElement(); // </subject>
-	  }
-	}
-	
-	if (bodys != null) {
-	  for (Text body : bodys) {
-	    out.writeStartElement("body");
-
-	    if (body.getLang() != null)
-	      out.writeAttribute("xml", "http://xml.org", "lang",
-				 body.getLang());
-	    
-	    out.writeCharacters(body.getValue());
-	    out.writeEndElement(); // </body>
-	  }
-	}
-
-	if (thread != null) {
-	  out.writeStartElement("thread");
-	  out.writeCharacters(thread);
-	  out.writeEndElement(); // </thread>
-	}
-
-        if (extra != null) {
-          out.writeValue(extra);
-        }
-        
-	if (extras != null) {
-	  for (Serializable extraItem : extras) {
-	    out.writeValue(extraItem);
-	  }
-	}
-
-	out.writeEndElement(); // </message>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendMessage to=" + to + " from=" + from
-		  + " msg=" + value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return null;
   }
 
-  /**
-   * Sends a query get message to the stream
-   */
-  public void sendQuery(String id, String to, String from,
-			Serializable value, String type)
+  public String getJid()
   {
-    try {
-      XmppStreamWriterImpl out = _out;
-
-      synchronized (out) {
-	out.writeStartElement("iq");
-
-	out.writeAttribute("id", id);
-
-	out.writeAttribute("type", type);
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", to);
-
-	out.writeValue(value);
-
-	out.writeEndElement(); // </iq>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendQuery type=" + type + " id=" + id
-		  + " to=" + to + " from=" + from
-		  + " query=" + value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return null;
   }
 
-  /**
-   * Sends a presence message to the stream
-   */
-  void sendPresence(String to, String from,
-		    Serializable value,
-		    String type)
+  public void message(String to, String from, Serializable value)
   {
-    try {
-      XmppStreamWriterImpl out = _out;
+    _out.message(to, from, value);
+  }
 
-      synchronized (out) {
-	out.writeStartElement("presence");
+  public void messageError(String to, String from, Serializable value,
+                           ActorError error)
+  {
+    _out.messageError(to, from, value, error);
+  }
 
-	ImPresence presence = (ImPresence) value;
+  public void queryGet(long id, String to, String from, Serializable value)
+  {
+    String sid = String.valueOf(id);
+    
+    _out.sendQuery(sid, to, from, value, "get", null);
+  }
 
-	if (to != null)
-	  out.writeAttribute("to", to);
-  else if (presence.getTo() != null)
-	  out.writeAttribute("to", presence.getTo());
+  public void querySet(long id, String to, String from, Serializable value)
+  {
+    String sid = String.valueOf(id);
+    
+    _out.sendQuery(sid, to, from, value, "set", null);
+  }
 
-	if (from != null)
-	  out.writeAttribute("from", from);
-  else if (presence.getFrom() != null)
-	  out.writeAttribute("from", presence.getFrom());
+  public void queryResult(long id, String to, String from, Serializable value)
+  {
+    String sid = String.valueOf(id);
+    
+    _out.sendQuery(sid, to, from, value, "result", null);
+  }
 
-	if (type != null)
-	  out.writeAttribute("type", type);
+  public void queryError(long id, String to, String from, Serializable value,
+                         ActorError error)
+  {
+    String sid = String.valueOf(id);
+    
+    _out.sendQuery(sid, to, from, value, "error", error);
+  }
 
-	Text status = presence.getStatus();
-	if (status != null) {
-	  out.writeStartElement("status");
+  public void presence(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "presence", null);
+  }
 
-	  if (status.getLang() != null)
-	    out.writeAttribute("xml", "http://xml.org", "lang",
-			       status.getLang());
-	    
-	  out.writeCharacters(status.getValue());
-	  out.writeEndElement(); // </status>
-	}
+  public void presenceProbe(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "probe", null);
+  }
 
-	out.writeEndElement(); // </presence>
+  public void presenceUnavailable(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "unavailable", null);
+  }
 
-	out.flush();
-      }
+  public void presenceSubscribe(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "subscribe", null);
+  }
 
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresence type=" + type
-		  + " to=" + to + " from=" + from
-		  + " value=" + value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  public void presenceSubscribed(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "subscribed", null);
+  }
+
+  public void presenceUnsubscribe(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "unsubscribe", null);
+  }
+
+  public void presenceUnsubscribed(String to, String from, Serializable value)
+  {
+    _out.sendPresence(to, from, value, "unsubscribed", null);
   }
 
   @Override

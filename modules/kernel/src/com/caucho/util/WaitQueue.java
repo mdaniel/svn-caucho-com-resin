@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -66,6 +67,7 @@ public class WaitQueue {
     if (_isWake.getAndSet(false))
       return;
 
+    item.startPark();
     item.park(timeout);
 
     _isWake.set(false);
@@ -112,7 +114,7 @@ public class WaitQueue {
 
     // private final AtomicReference<Item> _next = new AtomicReference<Item>();
     private Item _next;
-    private boolean _isParked;
+    private final AtomicBoolean _isParked = new AtomicBoolean();
 
     Item()
     {
@@ -138,21 +140,36 @@ public class WaitQueue {
 
     final boolean unpark()
     {
-      boolean isParked = _isParked;
 
-      LockSupport.unpark(_thread);
-
-      return isParked;
+      if (_isParked.getAndSet(false)) {
+        LockSupport.unpark(_thread);
+        return true;
+      }
+      else
+        return false;
     }
 
+    public final void startPark()
+    {
+      _isParked.set(true);
+    }
+
+    public final void endPark()
+    {
+      _isParked.set(false);
+    }
+    
     public final void park(long millis)
     {
-      _isParked = true;
+      if (! _isParked.get())
+        return;
 
-      Thread.interrupted();
-      LockSupport.parkNanos(millis * 1000L);
-
-      _isParked = false;
+      try {
+        Thread.interrupted();
+        LockSupport.parkNanos(millis * 1000000L);
+      } finally {
+        _isParked.set(false);
+      }
     }
 
     public void remove()

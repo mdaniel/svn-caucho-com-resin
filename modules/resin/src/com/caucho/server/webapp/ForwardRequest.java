@@ -93,12 +93,13 @@ public class ForwardRequest extends CauchoRequestWrapper {
     _response.startRequest();
   }
   
-  protected void finishRequest()
+  void finishRequest(boolean isValid)
     throws IOException
   {
-    super.finishRequest();
-    
-    _response.finishRequest();
+    finishRequest();
+
+    if (isValid)
+      _response.finishRequest();
   }
 
   ForwardResponse getResponse()
