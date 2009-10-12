@@ -119,7 +119,7 @@ public class UTF8Writer extends EncodingWriter {
     byte []buffer = os.getBuffer();
     int length = os.getBufferOffset();
     int capacity = buffer.length;
-    
+
     for (int i = 0; i < len; i++) {
       if (capacity <= length + 2) {
 	buffer = os.nextBuffer(length);

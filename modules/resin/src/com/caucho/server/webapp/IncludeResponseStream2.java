@@ -94,6 +94,13 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     _headerValues.clear();
 
     start();
+
+    // server/053n
+    try {
+      setEncoding(next.getCharacterEncoding());
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -139,6 +146,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   /**
    * Converts the char buffer.
    */
+  @Override
   protected void flushCharBuffer()
     throws IOException
   {
@@ -146,7 +154,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     
     if (charLength == 0)
       return;
-    
+
     if (_stream != null) {
       // jsp/18ek
       super.flushCharBuffer();

@@ -1048,14 +1048,15 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       long contentLength = _request.getLongContentLength();
 
       String charEncoding = getCharacterEncoding();
-      if (charEncoding == null)
-        charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
-      if (charEncoding == null)
-        charEncoding = (String) getAttribute(CHAR_ENCODING);
       if (charEncoding == null) {
-        Locale locale = (Locale) getAttribute(FORM_LOCALE);
-        if (locale != null)
-          charEncoding = Encoding.getMimeName(locale);
+        charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
+        if (charEncoding == null)
+          charEncoding = (String) getAttribute(CHAR_ENCODING);
+        if (charEncoding == null) {
+          Locale locale = (Locale) getAttribute(FORM_LOCALE);
+          if (locale != null)
+            charEncoding = Encoding.getMimeName(locale);
+        }
       }
 
       if (query != null) {

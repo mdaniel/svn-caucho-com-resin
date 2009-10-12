@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -146,14 +147,15 @@ abstract public class AbstractByteToChar extends InputStream {
     throws IOException
   {
     Reader readEncoding = _readEncoding;
-    
+
     if (readEncoding == null)
       return read();
     else {
       if (readEncoding.read(_charBuffer, 0, 1) < 0)
 	return -1;
-      else
+      else {
 	return _charBuffer[0];
+      }
     }
   }
 

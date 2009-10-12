@@ -40,6 +40,7 @@ import java.io.OutputStream;
  */
 public class ServletOutputStreamImpl extends ServletOutputStream {
   private OutputStream _out;
+  private byte []_buffer;
 
   public ServletOutputStreamImpl()
   {
@@ -75,6 +76,7 @@ public class ServletOutputStreamImpl extends ServletOutputStream {
    *
    * @param s the string to write.
    */
+  @Override
   public void print(String s) throws IOException
   {
     if (s == null)
@@ -90,9 +92,27 @@ public class ServletOutputStreamImpl extends ServletOutputStream {
     else {
       int length = s.length();
 
+      if (_buffer == null)
+        _buffer = new byte[128];
+
+      byte []buffer = _buffer;
+
       // server/0810
-      for (int i = 0; i < length; i++) {
-        out.write(s.charAt(i) & 0xff);
+      int offset = 0;
+      
+      while (length > 0) {
+        int sublen = buffer.length;
+        if (length < sublen)
+          sublen = length;
+        
+        for (int i = 0; i < sublen; i++) {
+          buffer[i] = (byte) s.charAt(i + offset);
+        }
+
+        out.write(buffer, 0, sublen);
+
+        length -= sublen;
+        offset += sublen;
       }
     }
   }

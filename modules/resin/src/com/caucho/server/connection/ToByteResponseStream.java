@@ -112,6 +112,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _isOutputStreamOnly = isOutputStreamOnly;
   }
 
+  protected boolean setFlush(boolean isAllowFlush)
+  {
+    return true;
+  }
+
   /**
    * Sets the head.
    */
@@ -486,7 +491,10 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _charLength = 0;
 
     if (charLength > 0 && ! _isOutputStreamOnly) {
+      boolean isFlush = setFlush(false);
+                         
       _toByte.write(this, _charBuffer, 0, charLength);
+      setFlush(isFlush);
 
       if (_bufferCapacity <= _tailByteLength + _bufferSize) {
         flushByteBuffer();

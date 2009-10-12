@@ -284,7 +284,7 @@ public class Encoding {
    */
   private static String normalize(String name)
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     int len = name.length();
     for (int i = 0; i < len; i++) {
@@ -350,7 +350,7 @@ public class Encoding {
     _mimeName.put("ISO8859-1", "iso-8859-1");
     _mimeName.put("8859-1", "iso-8859-1");
     _mimeName.put("8859_1", "iso-8859-1");
-    _javaName.put("iso-8859-1", "ISO8859_1");
+    _javaName.put("ISO-8859-1", "ISO8859_1");
 
     _mimeName.put("ISO-8859-2:1987", "ISO-8859-2");
     _mimeName.put("ISO-IR-101", "ISO-8859-2");
@@ -449,11 +449,11 @@ public class Encoding {
 
     _mimeName.put("UTF-8", "utf-8");
     _mimeName.put("UTF8", "utf-8");
-    _javaName.put("utf-8", "utf8");
+    _javaName.put("UTF-8", "UTF8");
 
     _mimeName.put("UTF-16", "utf-16");
     _mimeName.put("UTF16", "utf-16");
-    _javaName.put("utf-16", "utf16");
+    _javaName.put("UTF-16", "UTF16");
 
     _mimeName.put("UTF-16-REV", "utf-16-rev");
     _mimeName.put("UTF16-REV", "utf-16-rev");

@@ -141,9 +141,14 @@ abstract public class ResponseStream extends ToByteResponseStream {
     return true;
   }
 
-  void setFlush(boolean flush)
+  @Override
+  protected boolean setFlush(boolean flush)
   {
+    boolean isFlush = _allowFlush;
+    
     _allowFlush = flush;
+
+    return isFlush;
   }
 
   public void setAutoFlush(boolean isAutoFlush)

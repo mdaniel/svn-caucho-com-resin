@@ -326,8 +326,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     _locale = locale;
 
     if (_setCharEncoding == null && ! isCommitted()) {
-      _setCharEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
-      _charEncoding = _setCharEncoding;
+      _charEncoding = getRequest().getWebApp().getLocaleEncoding(locale);
+      // server/12n0
+      // _setCharEncoding = _charEncoding;
 
       try {
         if (_charEncoding != null) {
@@ -826,11 +827,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
         _contentType = sb.toString();
 
-        _setCharEncoding = encoding;
-        
-        if (_writer == null) {
-          _charEncoding = encoding;
-        }
+        // server/172k
+        // _setCharEncoding = encoding;
+
+        setCharacterEncoding(encoding);
         break;
       }
       else
@@ -898,8 +898,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    */
   public String getCharacterEncodingImpl()
   {
+    // server/172d
     // XXX:
-    return _setCharEncoding;
+    // return _setCharEncoding;
+    return _charEncoding;
   }
 
   /**
@@ -909,8 +911,18 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     if (isCommitted())
       return;
-    if (_writer != null)
+    
+    if (_writer != null) {
+      // server/172k
+
+      if (encoding != null
+          && _charEncoding != null
+          && ! encoding.equalsIgnoreCase(_charEncoding)) {
+        log.fine(_request.getRequestURI() + ": setEncoding(" + encoding + ") ignored because writer already initialized with charset=" + _charEncoding);
+      }
+      
       return;
+    }
 
     if (encoding == null
         || encoding.equals("ISO-8859-1")
