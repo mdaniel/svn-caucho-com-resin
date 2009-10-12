@@ -167,10 +167,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       throw new IllegalStateException(L.l("getWriter() can't be called after getOutputStream()."));
     */
 
+    String encoding = getCharacterEncoding();
+
     _writer = _response.getResponsePrintWriter();
     _writer.init(_responseStream);
-
-    String encoding = getCharacterEncoding();
 
     if (encoding != null) {
       _responseStream.setEncoding(encoding);
@@ -901,7 +901,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // server/172d
     // XXX:
     // return _setCharEncoding;
-    return _charEncoding;
+    // server/2u00
+    return getCharacterEncoding();
   }
 
   /**
