@@ -460,7 +460,7 @@ public class DataStore implements AlarmListener {
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
 
-      System.out.println("EXPIRE: " + count);
+      // System.out.println("EXPIRE: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -489,7 +489,7 @@ public class DataStore implements AlarmListener {
       long expires = now + _expireTimeout;
       int totalCount = 0;
 
-      System.out.println("UPDATE_EXPIRE:" + _expireTimeout);
+      // System.out.println("UPDATE_EXPIRE:" + _expireTimeout);
       do {
         isData = false;
         
@@ -526,7 +526,8 @@ public class DataStore implements AlarmListener {
         }
       } while (isData);
 
-      System.out.println("TOTAL: " + totalCount);
+      // XXX:
+      log.fine("TOTAL: " + totalCount);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
