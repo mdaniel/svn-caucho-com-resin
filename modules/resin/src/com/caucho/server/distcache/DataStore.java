@@ -152,7 +152,9 @@ public class DataStore implements AlarmListener {
     initDatabase();
 
     _alarm = new Alarm(this);
-    _alarm.queue(_expireTimeout / 2);
+    // _alarm.queue(_expireTimeout);
+    
+    _alarm.queue(0);
   }
 
   /**
@@ -369,8 +371,10 @@ public class DataStore implements AlarmListener {
         
       if (log.isLoggable(Level.FINER)) 
 	log.finer(this + " insert " + id + " length:" + length);
+
+      // System.out.println("INSERT: " + id);
 	  
-      return true;
+      return count > 0;
     } catch (SqlIndexAlreadyExistsException e) {
       // the data already exists in the cache, so this is okay
       log.finer(this + " " + e.toString());
@@ -438,15 +442,15 @@ public class DataStore implements AlarmListener {
    */
   public void removeExpiredData()
   {
-    updateExpire();
+    long now = Alarm.getCurrentTime();
+      
+    updateExpire(now);
 
     DataConnection conn = null;
 
     try {
       conn = getConnection();
   
-      long now = Alarm.getCurrentTime();
-      
       PreparedStatement pstmt = conn.prepareDeleteTimeout();
 
       pstmt.setLong(1, now);
@@ -456,7 +460,7 @@ public class DataStore implements AlarmListener {
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
 
-      // System.out.println("EXPIRE: " + count);
+      System.out.println("EXPIRE: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -469,7 +473,7 @@ public class DataStore implements AlarmListener {
   /**
    * Update used expire times.
    */
-  private void updateExpire()
+  private void updateExpire(long now)
   {
     DataConnection conn = null;
 
@@ -482,21 +486,28 @@ public class DataStore implements AlarmListener {
       PreparedStatement pstmt = conn.prepareSelectAllLimitExpires();
       PreparedStatement pstmtUpdate = conn.prepareUpdateExpires();
 
-      long expires = Alarm.getCurrentTime() + _expireTimeout;
+      long expires = now + _expireTimeout;
+      int totalCount = 0;
 
+      System.out.println("UPDATE_EXPIRE:" + _expireTimeout);
       do {
         isData = false;
         
         pstmt.setLong(1, resinOid);
-        pstmt.setFetchSize(65536);
+        pstmt.setFetchSize(64 * 1024);
 
         ResultSet rs = pstmt.executeQuery();
 
         while (rs.next()) {
+          totalCount++;
+          
           isData = true;
 
           byte []key = rs.getBytes(1);
           resinOid = rs.getLong(2);
+
+          if (key == null)
+            System.out.println("NULL: " + totalCount + " " + Hex.toHex(key));
 
           if (key != null) {
             try {
@@ -504,7 +515,9 @@ public class DataStore implements AlarmListener {
               pstmtUpdate.setBytes(2, key);
               int count = pstmtUpdate.executeUpdate();
 
-              // System.out.println("COUNT: " + count + " " + Hex.toHex(key));
+              if (count <= 0) {
+                System.out.println("COUNT: " + count + " " + Hex.toHex(key));
+              }
             } catch (SQLException e) {
               e.printStackTrace();
               log.log(Level.FINER, e.toString(), e);
@@ -512,6 +525,8 @@ public class DataStore implements AlarmListener {
           }
         }
       } while (isData);
+
+      System.out.println("TOTAL: " + totalCount);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);

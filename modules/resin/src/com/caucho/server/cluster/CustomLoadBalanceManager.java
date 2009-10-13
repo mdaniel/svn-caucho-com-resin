@@ -57,6 +57,7 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
 
     boolean isSecure = false;
 
-    return new ServerPool(server.getServerId(), address, host, port, isSecure);
+    return new ServerPool(server.getServerId(), address, address,
+                          host, port, isSecure);
   }
 }

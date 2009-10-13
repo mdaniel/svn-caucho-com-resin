@@ -644,7 +644,6 @@ public class Store {
                          newTable, 0,
                          _allocationTable.length);
         _allocationTable = newTable;
-        _allocDirtyMax = newTable.length;
 
         // if the allocation table is over 8k, allocate the block for the
         // extension (each allocation block of 8k allocates 512m)
@@ -652,6 +651,8 @@ public class Store {
           setAllocation(blockIndex, ALLOC_USED);
           blockIndex++;
         }
+        _allocDirtyMin = 0;
+        _allocDirtyMax = newTable.length;
       }
 
       // mark USED before actual code so it's properly initialized
@@ -1583,7 +1584,7 @@ public class Store {
         int fragMask = allocationTable[i + 1] & 0xff;
 
         if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
-          synchronized (allocationTable) {
+          synchronized (_allocationLock) {
             if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
               allocationTable[i + 1] = (byte) 0xff;
 

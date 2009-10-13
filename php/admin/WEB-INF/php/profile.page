@@ -29,7 +29,7 @@ if ($profile) {
   }
 
   if ($profile->active) {
-    echo "<h2>Profile Active</h2>";
+    echo "<h2>Profile Active for Server " . $g_server->Id . "</h2>";
     echo "Period: {$profile->period}ms Depth: {$profile->depth}";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
@@ -228,8 +228,9 @@ if ($profile) {
       else 
         echo "<td>";
 
-      $stack = $entry->getStackTrace()[0];
-      echo print_stack_entry($stack);
+      echo $entry->getDescription();
+
+      // echo print_stack_entry($stack);
 
       if (contains_quercus_calls($entry))
         echo "*";

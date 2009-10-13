@@ -19,14 +19,14 @@ $server = $g_mbean_server->lookup("resin:type=Server");
 
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 $si = sprintf("%02d", $server->Index);
-
+/*
 if ($stat_service) {
   echo "<img src='graph.php?";
   echo "g[0][0]=$si|Resin|Thread|Active Thread Count"
   echo "&g[1][0]=$si|Resin|Thread|Thread Count"
   echo "&width=600&height=300' width='600' height='300'>\n"
 }
-
+*/
 $thread_pool = $g_server->ThreadPool;
 ?>
 
@@ -91,11 +91,51 @@ foreach ($thread_ids as $id) {
   $threads[] = $thread;
 }
 
-$thread_group = partition_threads($threads);
-$groups = array("active", "blocked", "misc", "accept", "keepalive", "wait", "idle");
-
 echo "<h2>Threads</h2>\n"
-echo "<table class='threads'>\n";
+
+$thread_group = partition_threads($threads);
+$groups = array("active", "blocked", "jni", "misc", "wait", "idle", "all");
+
+//  echo "<table class='threads'>\n";
+
+echo "<p>";
+echo "<ul class='tabs'>";
+$count = 0;
+foreach ($groups as $name) {
+  $entries = $thread_group[$name];
+
+  if (sizeof($entries) <= 0)
+    continue;
+
+  $count++;
+
+  echo "<li id='tab_" . $name . "'";
+  if ($count == 1)
+    echo " class='selected'";
+  else
+    echo " class=''";
+  echo ">\n";
+
+  echo "<a href='#' onclick=\"";
+  foreach ($groups as $subname) {
+    if (sizeof($thread_group[$subname]) <= 0)
+      continue;
+
+    if ($subname == $name) {
+      echo "sel('tab_" . $subname . "');";
+      echo "show('g_" . $subname . "');";
+    }
+    else {
+      echo "unsel('tab_" . $subname . "');";
+      echo "hide('g_" . $subname . "');";
+    }
+  }
+  echo "\">" . $name . " (" . sizeof($thread_group[$name]) . ")</a></li>";
+}
+echo "</ul>\n";
+
+// echo "<table class='threads'>\n";
+$is_first = true;
 
 foreach ($groups as $name) {
   $threads = $thread_group[$name];
@@ -105,6 +145,12 @@ foreach ($groups as $name) {
 
   usort($threads, "thread_name_cmp");
 
+  echo "<table class='threads' id='g_" . $name . "'";
+  if (! $is_first)
+    echo " style='display:none'";
+  $is_first = false;
+
+  echo ">\n";
   echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($threads) . ")";
 
   $show = "hide('s_$name');show('h_$name');";
@@ -153,13 +199,15 @@ foreach ($groups as $name) {
     echo "<td><a name='th" . $id . "'></a>" . $id . "</td>";
     echo "<td>" . $info->threadName . "</td>";
 
-    if ($info->stackTrace[0]) {
-      $name = $info->stackTrace[0]->className;
+    $topStack = thread_get_description($info);
+
+    if ($topStack) {
+      $name = $topStack->className;
       $tail = strrchr($name, '.');
       if ($tail)
         $name = substr($tail, 1);
       echo "<td>" . $name . "."
-	. $info->stackTrace[0]->methodName . "()</td>";
+	. $topStack->methodName . "()</td>";
     }
     else
       echo "<td></td>";
@@ -203,9 +251,25 @@ foreach ($groups as $name) {
     echo "</td>";
     echo "</tr>\n";
   }
+  echo "</table>\n";
 }
 
-echo "</table>\n";
+function thread_get_description($info)
+{
+  foreach ($info->stackTrace as $stackItem) {
+    if ($stackItem->className == "sun.misc.Unsafe"
+        || $stackItem->className == "java.util.concurrent.locks.LockSupport"
+        || $stackItem->className == "java.lang.Object") {
+      continue;
+    }
+
+    return $stackItem;
+  }
+
+  return $info->stackTrace[0];
+}
+
+// echo "</table>\n";
 
 /*
 foreach ($thread_ids as $id) {
@@ -250,24 +314,32 @@ function partition_threads($threads)
 
   foreach ($threads as $thread) {
     $info = $thread["info"];
+
+    $partition["all"][] = $thread;
     
     $stackTrace = $info->stackTrace;
-    if (is_blocked_thread($info)) {
-      $partition["blocked"][] = $thread;
-    }
-    else if (is_idle_pool_thread($info)) {
+
+    if (is_idle_pool_thread($info)) {
       $partition["idle"][] = $thread;
     }
+    else if (is_blocked_thread($info)) {
+      $partition["blocked"][] = $thread;
+    }
+    else if (is_jni_thread($info)) {
+      $partition["jni"][] = $thread;
+    }
+    else if (is_wait_thread($info)) {
+      $partition["wait"][] = $thread;
+    }
+/*
     else if (is_accept_thread($info)) {
       $partition["accept"][] = $thread;
     }
     else if (is_keepalive_thread($info)) {
       $partition["keepalive"][] = $thread;
     }
-    else if (is_wait_thread($info)) {
-      $partition["wait"][] = $thread;
-    }
-    else if (preg_match("/^(http|hmux)/", $info->threadName)) {
+*/
+    else if (preg_match("/^(http|server)/", $info->threadName)) {
       $partition["active"][] = $thread;
     }
     else {
@@ -287,14 +359,6 @@ function is_accept_thread($info)
   }
 
   return false;
-}
-
-function is_blocked_thread($info)
-{
-  if ($info != null)
-    return $info->getLockOwnerName() != null;
-  else
-    return false;
 }
 
 function is_keepalive_thread($info)
@@ -326,6 +390,14 @@ function is_keepalive_thread($info)
   return false;
 }
 
+function is_blocked_thread($info)
+{
+  if ($info == null)
+    return false;
+
+  return ($info->getThreadState() == "BLOCKED")
+}
+
 function is_wait_thread($info)
 {
   if ($info == null)
@@ -337,6 +409,11 @@ function is_wait_thread($info)
   }
   else
     return false;
+}
+
+function is_jni_thread($info)
+{
+  return $info->isInNative();
 }
 
 function is_idle_pool_thread($info)

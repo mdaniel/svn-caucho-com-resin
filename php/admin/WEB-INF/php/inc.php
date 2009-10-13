@@ -26,6 +26,10 @@ function admin_init($query="", $is_refresh=false)
 
   $g_server_index = $_GET["s"];
 
+  if (! empty($_REQUEST["new_s"])) {
+    $g_server_index = $_REQUEST["new_s"];
+  }
+
   if (empty($g_server_index)) {
     $g_mbean_server = new MBeanServer();
     $g_server = $g_mbean_server->lookup("resin:type=Server");
@@ -43,7 +47,6 @@ function admin_init($query="", $is_refresh=false)
     $g_mbean_server = new MBeanServer($g_server_id);
 
     $g_server = $g_mbean_server->lookup("resin:type=Server");
-
 
     if (! $g_mbean_server) {
       if ($g_server_id)
@@ -69,9 +72,8 @@ function admin_init($query="", $is_refresh=false)
   else
     $title = "Resin: $g_page";
 
-  display_header("thread.php", $title, $g_server, $query, $is_refresh, true);
-
-  return true;
+  return display_header("thread.php", $title, $g_server, $query,
+                        $is_refresh, true);
 }  
 
 function load_pages()
@@ -527,6 +529,13 @@ function display_header($script, $title, $server,
   if (! empty($display_header_script))
     return;
 
+  $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
+
+  if (! empty($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
+    header("Location: " . $g_next_url);
+    return false;
+  }
+
   $display_header_script = $script;
   $display_header_title = $title;
 
@@ -586,10 +595,8 @@ if ($is_refresh) {
 if (! empty($server)) {
   $server_name = $server->Id ? $server->Id : "default";
 
-  $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
-
 ?>
-   <li class="server">Server: <?php display_servers($server) ?></li>
+   <li class="server"><?php display_servers($server) ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="<?= $g_next_url ?>">refresh</a></li>
@@ -646,6 +653,7 @@ function display_pages()
 {
   global $g_pages;
   global $g_page;
+  global $g_server_index;
 
   $names = array_keys($g_pages);
   sort($names);
@@ -658,30 +666,36 @@ function display_pages()
     if ($g_page == $name) {
       echo "<li class='selected'>$name</li>";
     } else {
-      echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>";
+      echo "<li><a href='?q=$name&s=$g_server_index'>$name</a></li>";
     }
   }
 }
 
 function display_servers($server)
 {
-  echo "<select name=\"server_id\">\n";
+  global $g_next_url;
+  global $g_server_index;
+
+  echo "<form name='servers' method='POST' action='" . $g_next_url . "'>";
+  echo "Server: "; 
+  echo "<select name='new_s'>";// onchange='document.forms.servers.submit();'>\n";
 
   $self_server = $server->SelfServer;
 
   foreach ($self_server->Cluster->Servers as $cluster_server) {
-    $id = $cluster_server->Id;
+    $id = $cluster_server->Name;
     if (! $id)
       $id = "default";
 
     echo "  <option";
-    if ($id == $self_server->Id)
+    if ($cluster_server->ClusterIndex == $g_server_index)
       echo " selected";
 
-    echo " value=\"" . $id ."\">";
-    printf("%02d - %s\n", $cluster_server->Index, $id);
+    echo " value=\"" . $cluster_server->ClusterIndex ."\">";
+    printf("%02d - %s\n", $cluster_server->ClusterIndex, $id);
   }
   echo "</select>";
+  echo "</form>";
 }
 
 /**

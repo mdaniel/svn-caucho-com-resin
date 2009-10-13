@@ -693,10 +693,10 @@ public class Table extends Store {
 
           for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
             if (buffer[rowOffset] == 0) {
-              block.setDirty(rowOffset, rowOffset + 1);
-
               hasRow = true;
               buffer[rowOffset] = ROW_ALLOC;
+              
+              block.setDirty(rowOffset, rowOffset + 1);
               break;
             }
           }
@@ -743,8 +743,6 @@ public class Table extends Store {
     try {
       iter.setRow(block, rowOffset);
 
-      block.setDirty(rowOffset, rowOffset + _rowLength);
-
       if (buffer[rowOffset] != ROW_ALLOC)
         throw new IllegalStateException(L.l("Expected ROW_ALLOC at '{0}'",
                                             buffer[rowOffset]));
@@ -785,6 +783,7 @@ public class Table extends Store {
           }
         }
 
+        block.setDirty(rowOffset, rowOffset + _rowLength);
         _entries++;
 
         isOkay = true;
@@ -794,8 +793,10 @@ public class Table extends Store {
       } finally {
         // xa.unlockWrite(_insertLock);
 
-        if (! isOkay)
+        if (! isOkay) {
           delete(xa, block, buffer, rowOffset, false);
+          block.setDirty(rowOffset, rowOffset + _rowLength);
+        }
       }
     } finally {
       queryContext.unlock();

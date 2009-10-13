@@ -164,6 +164,14 @@ public final class ClusterServer {
     _id = id;
   }
 
+  public String getDebugId()
+  {
+    if ("".equals(_id))
+      return "default";
+    else
+      return _id;
+  }
+
   /**
    * Returns the server's id within the cluster
    */

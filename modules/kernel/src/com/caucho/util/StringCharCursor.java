@@ -32,44 +32,47 @@ package com.caucho.util;
  * text, nor does is allow changes.
  */
 public class StringCharCursor extends CharCursor {
-  CharSequence string;
-  int pos;
+  private CharSequence _string;
+  private int _length;
+  private int _pos;
 
   public StringCharCursor(CharSequence string)
   {
-    this.string = string;
-    this.pos = 0;
+    _string = string;
+    _length = string.length();
+    _pos = 0;
   }
 
   public StringCharCursor(CharSequence string, int offset)
   {
-    this.string = string;
-    this.pos = offset;
+    _string = string;
+    _length = string.length();
+    _pos = offset;
   }
 
   /** 
    * returns the current location of the cursor
    */
-  public int getIndex() { return pos; }
+  public int getIndex() { return _pos; }
 
   public int getBeginIndex() { return 0; }
-  public int getEndIndex() { return string.length(); }
+  public int getEndIndex() { return _length; }
   /**
    * sets the cursor to the position
    */
   public char setIndex(int pos) 
   { 
     if (pos < 0) {
-      this.pos = 0;
+      _pos = 0;
       return DONE;
     }
-    else if (pos >= string.length()) {
-      this.pos = string.length();
+    else if (_length <= pos) {
+      _pos = _length;
       return DONE;
     }
     else {
-      this.pos = pos; 
-      return string.charAt(pos);
+      _pos = pos; 
+      return _string.charAt(pos);
     }
   }
 
@@ -80,12 +83,12 @@ public class StringCharCursor extends CharCursor {
    */
   public char next() 
   { 
-    if (++pos >= string.length()) {
-      pos = string.length();
+    if (_length <= ++_pos) {
+      _pos = _length;
       return DONE;
     }
     else
-      return string.charAt(pos);
+      return _string.charAt(_pos);
   }
 
   /**
@@ -95,20 +98,20 @@ public class StringCharCursor extends CharCursor {
    */
   public char previous() 
   { 
-    if (--pos < 0) {
-      pos = 0;
+    if (--_pos < 0) {
+      _pos = 0;
       return DONE;
     }
     else
-      return string.charAt(pos);
+      return _string.charAt(_pos);
   }
 
   public char current() 
   { 
-    if (pos >= string.length())
+    if (_length <= _pos)
       return DONE;
     else
-      return string.charAt(pos);
+      return _string.charAt(_pos);
   }
 
   /**
@@ -116,22 +119,25 @@ public class StringCharCursor extends CharCursor {
    */
   public char skip(int n)
   {
-    pos += n;
-    if (pos >= string.length()) {
-      pos = string.length();
+    _pos += n;
+    
+    if (_length <= _pos) {
+      _pos = _string.length();
       return DONE;
     } else
-      return string.charAt(pos);
+      return _string.charAt(_pos);
   }
 
   public void init(CharSequence string)
   {
-    this.string = string;
-    this.pos = 0;
+    _string = string;
+    _length = string.length();
+    
+    _pos = 0;
   }
 
   public Object clone()
   {
-    return new StringCharCursor(string);
+    return new StringCharCursor(_string);
   }
 }

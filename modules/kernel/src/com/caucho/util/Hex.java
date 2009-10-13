@@ -38,6 +38,9 @@ public class Hex {
    */
   public static String toHex(byte []bytes)
   {
+    if (bytes == null)
+      return "null";
+    
     return toHex(bytes, 0, bytes.length);
   }
   
@@ -46,6 +49,9 @@ public class Hex {
    */
   public static String toHex(byte []bytes, int offset, int len)
   {
+    if (bytes == null)
+      return "null";
+    
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < len; i++) {

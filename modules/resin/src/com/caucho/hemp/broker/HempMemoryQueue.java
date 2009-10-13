@@ -296,14 +296,17 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       return;
     */
 
-    wakeConsumer();
 
-    // wait a millisecond for the dequeue to avoid spawing extra
-    // processing threads
-    packet.waitForDequeue(1);
+    wakeConsumer(packet);
+    
+    if (Alarm.isTest()) {
+      // wait a millisecond for the dequeue to avoid spawing extra
+      // processing threads
+      packet.waitForDequeue(1);
+    }
   }
 
-  private void wakeConsumer()
+  private void wakeConsumer(Packet packet)
   {
 
     long lastExitTime = _lastExitTime;
@@ -330,7 +333,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
         // too little work to spawn a new thread
         return;
       }
-      else if (threadCount > 0 && now <= lastExitTime + 1) {
+      else if (threadCount > 0 && now <= lastExitTime + 10) {
         // last spawn too recent
         return;
       }

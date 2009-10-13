@@ -880,7 +880,7 @@ public final class ThreadPool {
       ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
       while (true) {
-        thread.setName(_name);
+        // thread.setName(_name);
 
         Runnable task = null;
         ClassLoader classLoader = null;
@@ -938,7 +938,8 @@ public final class ThreadPool {
         _isIdle = true;
         _idleCount++;
 
-        _idleLock.notifyAll();
+        if (_waitCount > 0)
+          _idleLock.notifyAll();
       }
 
       try {

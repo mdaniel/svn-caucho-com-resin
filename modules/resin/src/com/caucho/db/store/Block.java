@@ -192,14 +192,18 @@ abstract public class Block implements SyncCacheListener {
   public void write()
     throws IOException
   {
-    if (_dirtyMax <= _dirtyMin)
-      return;
+    // this lock is critical because if the write is missed, the
+    // block will not be written, but the synchronized block will
+    // pile up threads.
     
-    if (_writeCount.getAndIncrement() < 2) {
+    while (_dirtyMin <= _dirtyMax
+           && _writeCount.compareAndSet(0, 1)) {
       try {
-        writeImpl();
+        synchronized (_writeLock) {
+          writeImpl();
+        }
       } finally {
-        _writeCount.getAndDecrement();
+        _writeCount.set(0);
       }
     }
   }
@@ -213,37 +217,35 @@ abstract public class Block implements SyncCacheListener {
   private void writeImpl()
     throws IOException
   {
-    synchronized (_writeLock) {
-      int dirtyMin = 0;
-      int dirtyMax = 0;
+    int dirtyMin = 0;
+    int dirtyMax = 0;
     
-      synchronized (this) {
-	dirtyMin = _dirtyMin;
-	_dirtyMin = Store.BLOCK_SIZE;
+    synchronized (this) {
+      dirtyMin = _dirtyMin;
+      _dirtyMin = Store.BLOCK_SIZE;
 
-	dirtyMax = _dirtyMax;
-	_dirtyMax = 0;
+      dirtyMax = _dirtyMax;
+      _dirtyMax = 0;
 
-	if (dirtyMax <= dirtyMin) {
-	  return;
-	}
+      if (dirtyMax <= dirtyMin) {
+        return;
+      }
 
-	// temp alloc for sync, matched by the free() below
-	_useCount.incrementAndGet();
-	_isValid = true;
+      // temp alloc for sync, matched by the free() below
+      _useCount.incrementAndGet();
+      _isValid = true;
       
-	if (log.isLoggable(Level.FINEST))
-	  log.finest("write alloc " + this + " (" + _useCount + ")");
-      }
+      if (log.isLoggable(Level.FINEST))
+        log.finest("write alloc " + this + " (" + _useCount + ")");
+    }
 
-      try {
-	if (log.isLoggable(Level.FINEST))
-	  log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+    try {
+      if (log.isLoggable(Level.FINEST))
+        log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
-	writeImpl(dirtyMin, dirtyMax - dirtyMin);
-      } finally {
-	free();
-      }
+      writeImpl(dirtyMin, dirtyMax - dirtyMin);
+    } finally {
+      free();
     }
   }
 
@@ -391,6 +393,8 @@ abstract public class Block implements SyncCacheListener {
    */
   protected void freeImpl()
   {
+    if (_dirtyMin < _dirtyMax)
+      Thread.dumpStack();
   }
 
   protected byte []allocateBuffer()
@@ -406,6 +410,9 @@ abstract public class Block implements SyncCacheListener {
 
   protected void freeBuffer(byte []buffer)
   {
+    if (_dirtyMin < _dirtyMax)
+      Thread.dumpStack();
+    
     if (buffer != null)
       _freeBuffers.freeCareful(buffer);
   }

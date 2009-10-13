@@ -31,9 +31,12 @@ package com.caucho.admin;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.caucho.util.Alarm;
+
 public final class TimeRangeProbe extends Probe implements TimeSample {
   private final double _scale;
 
+  private final AtomicLong _activeCount = new AtomicLong();
   private final AtomicLong _count = new AtomicLong();
   private final AtomicLong _time = new AtomicLong();
   private final AtomicLong _timeMax = new AtomicLong();
@@ -54,13 +57,31 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
     return new TimeRangeCountProbe(name);
   }
 
+  public Probe createActiveCount(String name)
+  {
+    return new TimeRangeActiveCountProbe(name);
+  }
+
   public Probe createMax(String name)
   {
     return new TimeRangeMaxProbe(name);
   }
 
-  public final void add(long time)
+  public final long start()
   {
+    long startTime = Alarm.getCurrentTime();
+
+    _activeCount.incrementAndGet();
+
+    return startTime;
+  }
+
+  public final void add(long startTime)
+  {
+    _activeCount.decrementAndGet();
+    
+    long time = Alarm.getCurrentTime() - startTime;
+    
     _count.incrementAndGet();
     _time.addAndGet(time);
 
@@ -117,6 +138,18 @@ public final class TimeRangeProbe extends Probe implements TimeSample {
     public double sample()
     {
       return sampleCount();
+    }
+  }
+
+  class TimeRangeActiveCountProbe extends Probe {
+    TimeRangeActiveCountProbe(String name)
+    {
+      super(name);
+    }
+
+    public double sample()
+    {
+      return _activeCount.get();
     }
   }
 

@@ -98,7 +98,9 @@ public class HmuxClient
   private ServerPool createClient(String address, int port)
   {
     try {
-      ServerPool conn = new ServerPool("hmux", address + ":" + port,
+      ServerPool conn = new ServerPool("hmux",
+                                       address + ":" + port,
+                                       address + ":" + port,
 				       address, port, false);
 
       conn.init();

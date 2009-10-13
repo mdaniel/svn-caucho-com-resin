@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.admin.ActiveTimeProbe;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;
 import com.caucho.bam.ActorStream;
@@ -59,6 +60,14 @@ public class ClusterStream implements ActorStream {
 
   private boolean _isAuthenticated;
 
+  private ActiveTimeProbe _connTimeProbe;
+  private ActiveTimeProbe _requestTimeProbe;
+  private ActiveTimeProbe _idleTimeProbe;
+
+  private long _connStartTime;
+  private long _requestStartTime;
+  private long _idleStartTime;
+  
   private long _freeTime;
 
   private String _debugId;
@@ -71,6 +80,14 @@ public class ClusterStream implements ActorStream {
     _os = os;
 
     _debugId = "[" + pool.getDebugId() + ":" + count + "]";
+
+    _connTimeProbe = pool.getConnectionTimeProbe();
+    _requestTimeProbe = pool.getRequestTimeProbe();
+    _idleTimeProbe = pool.getIdleTimeProbe();
+
+    _connStartTime = _connTimeProbe.start();
+
+    toActive();
   }
 
   /**
@@ -476,13 +493,28 @@ public class ClusterStream implements ActorStream {
   }
 
   /**
-   * Recycles.
+   * Adds the stream to the free pool.
    */
   public void free()
   {
+    if (_is == null) {
+      IllegalStateException exn = new IllegalStateException(L.l("{0} unexpected free of closed stream", this));
+      exn.fillInStackTrace();
+      
+      log.log(Level.FINE, exn.toString(), exn);
+      return;
+    }
+    
+    long requestStartTime = _requestStartTime;
+    _requestStartTime = 0;
+
+    if (requestStartTime > 0)
+      _requestTimeProbe.end(requestStartTime);
+
+    
     // #2369 - the load balancer might set its own view of the free
     // time
-    if (_is != null && _freeTime <= 0) {
+    if (_freeTime <= 0) {
       _freeTime = _is.getReadTime();
       
       if (_freeTime <= 0) {
@@ -491,7 +523,20 @@ public class ClusterStream implements ActorStream {
       }
     }
 
+    _idleStartTime = _idleTimeProbe.start();
+
     _pool.free(this);
+  }
+
+  public void toActive()
+  {
+    long idleStartTime = _idleStartTime;
+    _idleStartTime = 0;
+
+    if (idleStartTime > 0)
+      _idleTimeProbe.end(idleStartTime);
+
+    _requestStartTime = _requestTimeProbe.start();
   }
 
   public void close()
@@ -525,6 +570,16 @@ public class ClusterStream implements ActorStream {
 	os.close();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
+    }
+
+    if (is != null) {
+      _connTimeProbe.end(_connStartTime);
+
+      if (_idleStartTime > 0)
+        _idleTimeProbe.end(_idleStartTime);
+
+      if (_requestStartTime > 0)
+        _requestTimeProbe.end(_requestStartTime);
     }
   }
 

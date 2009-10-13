@@ -290,6 +290,11 @@ public final class BlockManager
     // XXX: proper handling of the synchronized is tricky because
     // the LRU dirty write might have timing issues
 
+    long storeId = blockId & Store.BLOCK_INDEX_MASK;
+    if (storeId != store.getId()) {
+      throw stateError("illegal block: " + Long.toHexString(blockId));
+    }
+
     Block block = _blockCache.get(blockId);
 
     while (block == null || ! block.allocate()) {
@@ -309,8 +314,10 @@ public final class BlockManager
         }
       }
 
+      /*
       if ((blockId & Store.BLOCK_MASK) == 0)
         throw stateError(L.l("Block 0 is reserved."));
+      */
 
       block = new ReadBlock(store, blockId);
 
@@ -460,8 +467,9 @@ public final class BlockManager
 
               if (block.isFree())
                 break;
-              else
+              else {
                 block = null;
+              }
             }
           }
 

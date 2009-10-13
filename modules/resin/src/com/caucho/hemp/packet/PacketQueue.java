@@ -134,7 +134,9 @@ public final class PacketQueue
       _blockCount.incrementAndGet();
       try {
 	synchronized (_blockLock) {
-	  _blockLock.wait(1000);
+          if (_blockMaxSize < _size.get()) {
+            _blockLock.wait(1000);
+          }
 	}
       } catch (Exception e) {
 	log.log(Level.ALL, e.toString(), e);
@@ -196,7 +198,7 @@ public final class PacketQueue
 	    // wake any blocked threads
 	    if (_blockCount.get() > 0 && _size.get() < _blockMaxSize) {
 	      synchronized (_blockLock) {
-		_blockLock.notify();
+		_blockLock.notifyAll();
 	      }
 	    }
 

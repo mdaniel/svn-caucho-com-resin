@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.QDate;
 import com.caucho.vfs.*;
+import com.caucho.admin.*;
 import com.caucho.server.resin.*;
 
 import javax.management.ObjectName;
@@ -78,6 +79,7 @@ public class ServerPool
   private final boolean _isSecure;
 
   private String _debugId;
+  private String _statId;
 
   private Path _tcpPath;
 
@@ -128,6 +130,10 @@ public class ServerPool
   private volatile double _latencyFactor;
 
   // statistics
+  private ActiveTimeProbe _requestTimeProbe;
+  private ActiveTimeProbe _connTimeProbe;
+  private ActiveTimeProbe _idleTimeProbe;
+  
   private volatile long _keepaliveCountTotal;
   private volatile long _connectCountTotal;
   private volatile long _failCountTotal;
@@ -138,16 +144,23 @@ public class ServerPool
 
   public ServerPool(String serverId,
                     String targetId,
+                    String statId,
                     String address,
                     int port,
                     boolean isSecure)
   {
     _serverId = serverId;
+
+    if ("".equals(targetId))
+      targetId = "default";
+    
     _targetId = targetId;
     _debugId = _serverId + "->" + _targetId;
     _address = address;
     _port = port;
     _isSecure = isSecure;
+
+    _statId = statId;
   }
 
   public ServerPool(String serverId,
@@ -155,6 +168,7 @@ public class ServerPool
   {
     this(serverId,
          server.getId(),
+         getStatId(server),
          server.getClusterPort().getAddress(),
          server.getClusterPort().getPort(),
          server.getClusterPort().isSSL());
@@ -166,6 +180,18 @@ public class ServerPool
     _loadBalanceRecoverTime = server.getLoadBalanceRecoverTime();
     _loadBalanceWarmupTime = server.getLoadBalanceWarmupTime();
     _loadBalanceWeight = server.getLoadBalanceWeight();
+  }
+
+  private static String getStatId(ClusterServer server)
+  {
+    String targetId = server.getId();
+
+    if ("".equals(targetId))
+      targetId = "default";
+
+    int index = server.getIndex();
+
+    return String.format("%02x:%s", index, targetId);
   }
 
   /**
@@ -873,6 +899,7 @@ public class ServerPool
           _keepaliveCountTotal++;
 
           stream.clearFreeTime();
+          stream.toActive();
 
           return stream;
         }
@@ -1039,8 +1066,9 @@ public class ServerPool
         oldStream.closeImpl();
     } while (oldStream != null);
 
-    if (stream != null)
+    if (stream != null) {
       stream.closeImpl();
+    }
   }
 
   private void updateWarmup()
@@ -1319,6 +1347,46 @@ public class ServerPool
       else
         stream.close();
     }
+  }
+
+  //
+  // statistics
+  //
+
+  public ActiveTimeProbe getConnectionTimeProbe()
+  {
+    if (_connTimeProbe == null) {
+      _connTimeProbe
+        = ProbeManager.createActiveTimeProbe("Resin|Cluster|Stream Connection",
+                                             "Time",
+                                             _statId);
+    }
+
+    return _connTimeProbe;
+  }
+
+  public ActiveTimeProbe getRequestTimeProbe()
+  {
+    if (_requestTimeProbe == null) {
+      _requestTimeProbe
+        = ProbeManager.createActiveTimeProbe("Resin|Cluster|Stream Request",
+                                             "Time",
+                                             _statId);
+    }
+    
+    return _requestTimeProbe;
+  }
+
+  public ActiveTimeProbe getIdleTimeProbe()
+  {
+    if (_idleTimeProbe == null) {
+      _idleTimeProbe
+        = ProbeManager.createActiveTimeProbe("Resin|Cluster|Stream Idle",
+                                             "Time",
+                                             _statId);
+    }
+    
+    return _idleTimeProbe;
   }
 
   @Override

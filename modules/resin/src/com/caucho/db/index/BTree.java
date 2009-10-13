@@ -375,11 +375,12 @@ public final class BTree {
     byte []buffer = block.getBuffer();
 
     block.setFlushDirtyOnCommit(false);
-    block.setDirty(0, Store.BLOCK_SIZE);
 	    
     insertLeafBlock(block.getBlockId(), buffer,
                     keyBuffer, keyOffset, keyLength,
                     value, isOverride);
+    
+    block.setDirty(0, Store.BLOCK_SIZE);
   }
 
   /**
@@ -521,7 +522,6 @@ public final class BTree {
     log.finest("btree splitting " + debugId(blockId));
     
     block.setFlushDirtyOnCommit(false);
-    block.setDirty(0, Store.BLOCK_SIZE);
 
     byte []buffer = block.getBuffer();
     int length = getLength(buffer);
@@ -540,7 +540,6 @@ public final class BTree {
 
     try {
       parentBlock.setFlushDirtyOnCommit(false);
-      parentBlock.setDirty(0, Store.BLOCK_SIZE);
     
       byte []parentBuffer = parentBlock.getBuffer();
       int parentLength = getLength(parentBuffer);
@@ -551,7 +550,6 @@ public final class BTree {
       leftBlock = _store.allocateIndexBlock();
       // System.out.println("TREE-alloc1:" + Long.toHexString(leftBlock.getBlockId()));
       leftBlock.setFlushDirtyOnCommit(false);
-      leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       byte []leftBuffer = leftBlock.getBuffer();
       long leftBlockId = leftBlock.getBlockId();
@@ -583,13 +581,18 @@ public final class BTree {
 		      leftBuffer, pivotEnd - _tupleSize + PTR_SIZE, _keySize,
 		      leftBlockId,
 		      true);
-              
+      
       validate(parentId, parentBuffer);
       validate(leftBlockId, leftBuffer);
       validate(blockId, buffer);
+      
+      leftBlock.setDirty(0, Store.BLOCK_SIZE);
+      parentBlock.setDirty(0, Store.BLOCK_SIZE);
     } finally {
       if (leftBlock != null)
 	leftBlock.free();
+      
+      block.setDirty(0, Store.BLOCK_SIZE);
     }
   }
 
@@ -638,21 +641,18 @@ public final class BTree {
         return;
       
       parentBlock.setFlushDirtyOnCommit(false);
-      parentBlock.setDirty(0, Store.BLOCK_SIZE);
 
       int parentFlags = getInt(parentBuffer, FLAGS_OFFSET);
 
       leftBlock = _store.allocateIndexBlock();
       // System.out.println("TREE-alloc2:" + Long.toHexString(leftBlock.getBlockId()));
       leftBlock.setFlushDirtyOnCommit(false);
-      leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long leftBlockId = leftBlock.getBlockId();
     
       rightBlock = _store.allocateIndexBlock();
       // System.out.println("TREE-alloc3:" + Long.toHexString(rightBlock.getBlockId()));
       rightBlock.setFlushDirtyOnCommit(false);
-      rightBlock.setDirty(0, Store.BLOCK_SIZE);
       
       long rightBlockId = rightBlock.getBlockId();
 
@@ -700,6 +700,10 @@ public final class BTree {
       setInt(parentBuffer, FLAGS_OFFSET, LEAF_FLAG);
       setLength(parentBuffer, 1);
       setPointer(parentBuffer, NEXT_OFFSET, rightBlockId);
+      
+      parentBlock.setDirty(0, Store.BLOCK_SIZE);
+      leftBlock.setDirty(0, Store.BLOCK_SIZE);
+      rightBlock.setDirty(0, Store.BLOCK_SIZE);
     } finally {
       if (leftBlock != null)
 	leftBlock.free();
@@ -798,10 +802,11 @@ public final class BTree {
 
       if (isLeaf) {
         block.setFlushDirtyOnCommit(false);
-        block.setDirty(0, Store.BLOCK_SIZE);
 
         removeLeafEntry(blockId, buffer,
                         keyBuffer, keyOffset, keyLength);
+        
+        block.setDirty(0, Store.BLOCK_SIZE);
       }
       else {
         long childId;
@@ -885,10 +890,8 @@ public final class BTree {
           try {
             if (_minN < leftLength && isLeaf(buffer) == isLeaf(leftBuffer)) {
               parent.setFlushDirtyOnCommit(false);
-              parent.setDirty(0, Store.BLOCK_SIZE);
 	    
               leftBlock.setFlushDirtyOnCommit(false);
-              leftBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
               validate(parentBlockId, parentBuffer);
               validate(leftBlockId, leftBuffer);
@@ -900,6 +903,9 @@ public final class BTree {
               validate(parentBlockId, parentBuffer);
               validate(leftBlockId, leftBuffer);
               validate(blockId, buffer);
+              
+              parent.setDirty(0, Store.BLOCK_SIZE);
+              leftBlock.setDirty(0, Store.BLOCK_SIZE);
 
               return false;
             }
@@ -934,10 +940,8 @@ public final class BTree {
 
             if (_minN < rightLength && isLeaf(buffer) == isLeaf(rightBuffer)) {
               parent.setFlushDirtyOnCommit(false);
-              parent.setDirty(0, Store.BLOCK_SIZE);
 	    
               rightBlock.setFlushDirtyOnCommit(false);
-              rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
               // System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
@@ -946,6 +950,9 @@ public final class BTree {
               validate(parentBlockId, parentBuffer);
               validate(blockId, buffer);
               validate(rightBlockId, rightBuffer);
+              
+              parent.setDirty(0, Store.BLOCK_SIZE);
+              rightBlock.setDirty(0, Store.BLOCK_SIZE);
 
               return false;
             }
@@ -985,10 +992,8 @@ public final class BTree {
             if (isLeaf(leftBuffer) == isLeaf(buffer)
                 && length + leftLength <= _n) {
               parent.setFlushDirtyOnCommit(false);
-              parent.setDirty(0, Store.BLOCK_SIZE);
 	  
               leftBlock.setFlushDirtyOnCommit(false);
-              leftBlock.setDirty(0, Store.BLOCK_SIZE);
       
               // System.out.println("MERGE_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
 	    
@@ -998,6 +1003,9 @@ public final class BTree {
               
               validate(parentBlockId, parentBuffer);
               validate(leftBlockId, leftBuffer);
+              
+              parent.setDirty(0, Store.BLOCK_SIZE);
+              leftBlock.setDirty(0, Store.BLOCK_SIZE);
 
               return true;
             }
@@ -1033,10 +1041,8 @@ public final class BTree {
             if (isLeaf(rightBuffer) == isLeaf(buffer)
                 && length + rightLength <= _n) {
               rightBlock.setFlushDirtyOnCommit(false);
-              rightBlock.setDirty(0, Store.BLOCK_SIZE);
 	  
               parent.setFlushDirtyOnCommit(false);
-              parent.setDirty(0, Store.BLOCK_SIZE);
 	  
               // System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
@@ -1048,6 +1054,9 @@ public final class BTree {
               
               validate(parentBlockId, parentBuffer);
               validate(rightBlockId, rightBuffer);
+              
+              rightBlock.setDirty(0, Store.BLOCK_SIZE);
+              parent.setDirty(0, Store.BLOCK_SIZE);
 
               return true;
             }

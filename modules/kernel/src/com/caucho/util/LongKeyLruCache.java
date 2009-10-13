@@ -326,8 +326,9 @@ public class LongKeyLruCache<V> {
           if (replace && oldValue instanceof SyncCacheListener)
             ((SyncCacheListener) oldValue).syncRemoveEvent();
 
-	  if (replace)
+	  if (replace) {
 	    item._value = value;
+          }
 
 	  break;
 	}

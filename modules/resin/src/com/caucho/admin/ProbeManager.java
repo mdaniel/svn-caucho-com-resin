@@ -153,6 +153,53 @@ public class ProbeManager {
     return (AverageProbe) probe;
   }
 
+  public static ActiveTimeProbe createActiveTimeProbe(String name,
+                                                      String type,
+                                                      String subName)
+  {
+    return _manager.createActiveTimeProbeImpl(name, type, subName);
+  }
+
+  private ActiveTimeProbe
+    createActiveTimeProbeImpl(String baseName,
+                              String type,
+                              String subName)
+  {
+    if (subName != null)
+      subName = "|" + subName;
+    else
+      subName = "";
+    
+    String name = baseName + " " + type + subName;
+    
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+      probe = createProbe(new ActiveTimeProbe(name));
+      
+      ActiveTimeProbe activeTimeProbe = (ActiveTimeProbe) probe;
+
+      /*
+      String activeCountName = baseName + " Active" + subName;
+      createProbe(activeTimeProbe.createActiveCount(activeCountName));
+      */
+
+      String activeMaxName = baseName + " Active Max" + subName;
+      createProbe(activeTimeProbe.createActiveCountMax(activeMaxName));
+
+      String totalCountName = baseName + " Total" + subName;
+      createProbe(activeTimeProbe.createTotalCount(totalCountName));
+      
+      String sigmaName = baseName + " " + type + " 95%" + subName;
+      createProbe(activeTimeProbe.createSigma(sigmaName, 3));
+      
+      String maxName = baseName + " " + type + " Max" + subName;
+      createProbe(activeTimeProbe.createMax(maxName));
+    }
+    
+    return (ActiveTimeProbe) probe;
+  }
+
   public static SemaphoreProbe createSimpleSemaphoreProbe(String name)
   {
     return _manager.createSemaphoreProbeImpl(name, false);
