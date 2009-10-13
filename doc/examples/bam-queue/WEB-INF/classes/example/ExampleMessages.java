@@ -2,11 +2,13 @@ package example;
 
 import java.util.ArrayList;
 
-import javax.enterprise.inject.Named;
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.enterprise.inject.Default;
 
 @Named
-@ApplicationScoped
+@Default  
+@Singleton
 public class ExampleMessages
 {
   private ArrayList<String> _messages = new ArrayList<String>();

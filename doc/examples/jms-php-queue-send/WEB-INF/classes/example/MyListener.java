@@ -1,10 +1,10 @@
 package example;
 
 import javax.jms.*;
-import javax.enterprise.inject.*;
+import javax.inject.Inject;
 
 public class MyListener implements MessageListener {
-  @Current
+  @Inject
   private MessageStore _messageStore;
 
   public void onMessage(Message message)

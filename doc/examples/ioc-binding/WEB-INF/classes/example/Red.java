@@ -3,9 +3,9 @@ package example;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)

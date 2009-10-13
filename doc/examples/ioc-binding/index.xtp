@@ -70,7 +70,7 @@ to the user's needs.</p>
 <p>Since the purpose of the service pattern is encapsulating state and
 managment for multiple clients, the tutorial shows a single service
 used by multiple servlets and by PHP and JSP scripts.  Services are
-typically singletons in the application and use <code>@Current</code>
+typically singletons in the application and use <code>@Inject</code>
 to mark the binding.</p>
 
 <p>The resource pattern configures a driver class and properties in
@@ -107,8 +107,8 @@ interface and the <code>@Any</code> annotation.</p>
 <s2 title="Java Injection API">
 
 <p>The most important CanDI classes are just three annotations:
-<code>@Current</code>, <code>@BindingType</code>
-and <code>@ApplicationScoped</code>, because many applications will
+<code>@Inject</code>, <code>@Qualifier</code>
+and <code>@Singleton</code>, because many applications will
 primarily use the service and resource patterns. By using these three
 annotations effectively, you can improve the readability and
 maintainability of your application's services and resources.</p>
@@ -119,15 +119,15 @@ maintainability of your application's services and resources.</p>
  <th>Description</th>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/context/ApplicationScoped.html">@ApplicationScoped</a></td>
+  <td><a href="http://caucho.com/resin-javadoc/javax/inject/Singleton.html">@Singleton</a></td>
   <td>scope annotation marking the service as a singleton</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/BindingType.html">@BindingType</a></td>
+  <td><a href="http://caucho.com/resin-javadoc/javax/inject/Qualifier.html">@Qualifier</a></td>
   <td>descriptive application bindings are marked with this meta-annotation</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Current.html">@Current</a></td>
+  <td><a href="http://caucho.com/resin-javadoc/javax/inject/Inject.html">@Inject</a></td>
   <td>Default binding for unique beans (service pattern).</td>
 </tr>
 </deftable>
@@ -142,7 +142,7 @@ scripting name for the beans.</p>
  <th>Description</th>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Named.html">Named</a></td>
+  <td><a href="http://caucho.com/resin-javadoc/javax/inject/Named.html">Named</a></td>
   <td>Scriping and JSP/JSF EL access to CanDI beans (service pattern)</td>
 </tr>
 </deftable>
@@ -172,7 +172,7 @@ additional CanDI classes to easily find plugins discovered during
 CanDI's classpath scanning.  <code>Instance&lt;T></code> provides an
 iterator over all the discovered and configured beans, and
 <code>@Any</code> selects all beans independent of their
-<code>@BindingType</code>.</p> 
+<code>@Qualifier</code>.</p> 
 
 <deftable title="Plugin/Extension Pattern CanDI classes" >
 <tr>
@@ -261,22 +261,22 @@ iterator over all the discovered and configured beans, and
 
 <p>Because services are often unique in an application, the service
 interface is generally enough to uniquely identify
-the service.  In CanDI, the <code>@Current</code> annotation injects a
+the service.  In CanDI, the <code>@Inject</code> annotation injects a
 unique service to a client class.  A declarative style applies to both
 the service declaration and the service use, by annotating the service
-scope as <code>@ApplicationScoped</code>, and annotating the client
-injection as <code>@Current</code>.  By describing the function on the
+scope as <code>@Singleton</code>, and annotating the client
+injection as <code>@Inject</code>.  By describing the function on the
 class itself, CanDI's annotations improve the readability and
 maintainability of service classes.</p>
 
 <example title="Example: GetServlet.java">
 package example;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 ...
 
 public class GetServlet extends HttpServlet {
-  private @Current MyService _service;
+  private @Inject MyService _service;
 
   ...
 }
@@ -303,7 +303,7 @@ on the class itself, because the service implementation is discovered
 through CanDI's classpath scanning.  In other words, The service's
 deployment is self-documenting. Since services are generally
 singletons, they will typically have the
-<code>@ApplicationScoped</code>
+<code>@Singleton</code>
 annotation.  Other annotations are optional and describe the service
 registration or behavior.  For example, the tutorial uses
 the <code>@Named</code> tag, because the <code>test.jsp</code> and
@@ -317,11 +317,13 @@ because CanDI uses the service type and binding annotations for matching.</p>
 <example title="Example: MyServiceBean.java">
 package example;
 
-import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.inject.Named;
+import javax.inject.Singleton;
+import javax.inject.Named;
+import javax.enterprise.inject.Default;
 
-@ApplicationScoped
-@Named("myService")  
+@Singleton
+@Named("myService")
+@Default
 public class MyServiceBean implements MyService {
   private String _message = "default";
   
@@ -377,8 +379,8 @@ message: ${myService.message}
 application and need configuration and description
 beyond their generic <code>DataSource</code> and
 <code>BlockingQueue</code> APIs.  While services are generally unique
-and can use the <code>@Current</code> binding, resources will
-generally create custom <code>@BindingType</code> annotations to
+and can use the <code>@Inject</code> qualifier, resources will
+generally create custom <code>@Qualifier</code> annotations to
 identify and document the resource.</p>
 
 <p>CanDI encourages a small number of binding
@@ -390,7 +392,7 @@ mail, and JPA EntityManager will generally have a unique name.  If
 users need customization and configuration of internal resources, you
 may need additional binding types.  If the application has a
 single database, it might only have one binding annotation, or might even
-use <code>@Current</code>.</p>
+use <code>@Inject</code>.</p>
 
 <p>The purpose of the binding annotation is to self-document the
 resource in the client code.  If the application uses
@@ -480,7 +482,7 @@ internal configuration.</p>
 describe the injection clearly. Anyone reading code should
 understand immediately which resource it's using.  The tutorial's
 <code>@Blue</code> binding annotation itself is a normal Java
-annotation marked by a CanDI <code>@BindingType</code> annotation.
+annotation marked by a CanDI <code>@Qualifier</code> annotation.
 Because
 of its importance and because there are only a small number of custom
 annotations, it's important to spend time choosing a good descriptive name for
@@ -492,9 +494,9 @@ package example;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
-import javax.enterprise.inject.BindingType;
+import javax.inject.Qualifier;
 
-@BindingType
+@Qualifier
 @Documented
 @Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
@@ -504,7 +506,7 @@ public @interface Blue {
 
 <p>The resource implementation itself is straightforward.  When the
 resource is a singleton, it will need a
-<code>@ApplicationScoped</code>
+<code>@Singleton</code>
 annotation, just like a service. By default, CanDI will inject a new
 instance of the bean at every injection point.</p>
 
@@ -539,11 +541,11 @@ package example;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Startup;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 @Startup
 public class MyStartupBean {
-  private @Current MyService _service;
+  private @Inject MyService _service;
 
   @PostConstruct
   public void init()
@@ -571,23 +573,24 @@ and list all instances for a plugin capability.  Since
 <code>Instance</code> implements the JDK's <code>Iterable</code>
 interface, you can use it in a <code>for</code> loop.  Each returned
 instance obeys the standard CanDI scoping rules, either returning the
-single value for <code>@ApplicationScoped</code> singletons, or
+single value for <code>@Singleton</code> singletons, or
 creating a new instance for the default.</p>
 
 <p>The <code>@Any</code> annotation works with <code>Instance</code>
 to select all values.  Because bindings default to the
-<code>@Current</code> binding type, we need to override the default to
+<code>@Inject</code> binding type, we need to override the default to
 get all instances.</p>
 
 <example title="Example: GetServlet.java">
 package example;
 
+import javax.inject.Inject;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 ...
 
 public class GetServlet extends HttpServlet {
-  @Any Instance&lt;MyResource> _resources;
+  @Inject @Any Instance&lt;MyResource> _resources;
 
   public void service(HttpServletRequest request,
                       HttpServletResponse response)

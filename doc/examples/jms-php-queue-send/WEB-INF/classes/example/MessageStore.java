@@ -3,14 +3,16 @@ package example;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.enterprise.inject.Named;
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.enterprise.inject.Default;
 
 /**
  * Custom singleton bean to store messages
  */
-@ApplicationScoped
 @Named  
+@Default
+@Singleton
 public class MessageStore {
   private LinkedList<String> _messageLog = new LinkedList<String>();
 

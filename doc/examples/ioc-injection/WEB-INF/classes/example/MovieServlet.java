@@ -9,11 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class MovieServlet extends HttpServlet {
   // Inject the MovieLister service
-  @Current private MovieLister _movieLister;
+  @Inject private MovieLister _movieLister;
   
   /**
    * Returns movies by a particular director.

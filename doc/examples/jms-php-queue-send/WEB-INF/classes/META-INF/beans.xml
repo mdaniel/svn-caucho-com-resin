@@ -1,5 +1,5 @@
-<Beans xmlns="urn:java:ee">
+<beans xmlns="http://java.sun.com/xml/ns/javaee">
   <!-- marker file to activate Java Injection -->
-</Beans>
+</beans>
 
   

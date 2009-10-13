@@ -11,13 +11,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class MessageServlet extends GenericServlet {
   private static final Logger log =
     Logger.getLogger(MessageServlet.class.getName());
 
-  @Current
+  @Inject
   private BlockingQueue _sender;
   private int _count;
   

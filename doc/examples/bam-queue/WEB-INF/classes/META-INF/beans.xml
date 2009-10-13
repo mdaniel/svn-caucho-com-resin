@@ -1,10 +1,12 @@
-<Beans xmlns="urn:java:ee">
+<beans xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:ee="urn:java:ee">
+
   <!-- marker file to activate Java Injection -->
   <!--
   <example:ExampleMessages xmlns:example="example">
-    <Named>exampleMessages</Named>
+    <ee:Named>exampleMessages</ee:Named>
   </example:ExampleMessages>
   -->
-</Beans>
+</beans>
 
   

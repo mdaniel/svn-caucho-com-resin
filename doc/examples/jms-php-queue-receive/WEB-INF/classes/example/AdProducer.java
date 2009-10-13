@@ -6,7 +6,8 @@ import java.util.logging.*;
 import java.util.concurrent.BlockingQueue;
 
 import javax.jms.*;
-import com.caucho.config.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 public class AdProducer implements MessageListener {
 
@@ -15,7 +16,8 @@ public class AdProducer implements MessageListener {
 
   private Random _random = new Random();
   
-  @Name("AdQueue") private BlockingQueue _producer;
+  @Inject @Named("AdQueue")
+  private BlockingQueue _producer;
 
   private static final String[] _ads = {
     "Buy widgets",

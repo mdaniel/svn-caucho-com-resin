@@ -1,6 +1,6 @@
 package example;
 
-import javax.enterprise.inject.Named;
+import javax.inject.Named;
 import javax.enterprise.context.RequestScoped;
 
 @RequestScoped

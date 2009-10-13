@@ -8,13 +8,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 /**
  * The greeting client calls the GreetingAPI client.
  */
 public class GreetingClientServlet extends GenericServlet {
-  @Current private GreetingAPI _greeting;
+  @Inject
+  private GreetingAPI _greeting;
 
   /**
    * Runs the servlet

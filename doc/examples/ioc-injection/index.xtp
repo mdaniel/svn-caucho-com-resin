@@ -148,10 +148,10 @@ MovieFinder interface, and the MovieServlet uses the dependent
 MovieListener class.</p>
 
 <example title="Example: finder injection">
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class MovieListener {
-  @Current private MovieFinder _finder;
+  @Inject private MovieFinder _finder;
 
   ...
 }
@@ -196,11 +196,11 @@ versions of the MovieListener.</li>
 </ul>
 
 <example title="Configuring the MovieServlet">
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class MovieServlet extends HttpServlet {
   // Inject the MovieLister service
-  @Current private MovieLister _movieLister;
+  @Inject private MovieLister _movieLister;
 
   ...
 }

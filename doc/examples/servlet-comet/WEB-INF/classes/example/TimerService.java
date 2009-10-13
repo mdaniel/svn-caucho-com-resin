@@ -3,9 +3,8 @@ package example;
 import java.util.*;
 import java.util.concurrent.*;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Current;
-import javax.enterprise.inject.Initializer;
+import javax.inject.Singleton;
+import javax.inject.Inject;
 
 import com.caucho.servlet.comet.*;
 
@@ -26,7 +25,7 @@ import com.caucho.servlet.comet.*;
  * Using Resin's ScheduledExecutorService is a good idea because it
  * uses Resin's own thread management and configuration for the applications.
  */
-@ApplicationScoped
+@Singleton
 public class TimerService implements Runnable {
   private ScheduledExecutorService _timer;
 
@@ -40,8 +39,8 @@ public class TimerService implements Runnable {
    * asks for it.  Java Injection passes the correct ScheduledExecutorService
    * automatically.
    */
-  @Initializer
-  public TimerService(@Current ScheduledExecutorService timer)
+  @Inject
+  public TimerService(ScheduledExecutorService timer)
   {
     _timer = timer;
 

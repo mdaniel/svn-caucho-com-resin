@@ -16,7 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.Name;
+import javax.inject.Named;
+import javax.inject.Inject;
 
 /**
  * The BasicServlet executes a simple JDBC query.
@@ -28,7 +29,7 @@ public class BasicServlet extends HttpServlet {
   /**
    * The saved DataSource for the database
    */
-  @Name("jdbc/basic")
+  @Inject @Named("jdbc/basic")
   private DataSource _ds;
 
   /**

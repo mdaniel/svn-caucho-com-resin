@@ -6,11 +6,11 @@ import com.caucho.bam.Message;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class ExampleService extends SimpleActor
 {
-  @Current
+  @Inject
   private ExampleMessages _messages;
   
   @Message

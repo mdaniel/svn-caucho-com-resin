@@ -2,12 +2,12 @@ package example;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Startup;
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 @Startup
 public class MyStartupBean {
-  private @Current StartupResourceBean _startupResource;
-  private @Current MyService _service;
+  private @Inject StartupResourceBean _startupResource;
+  private @Inject MyService _service;
 
   @PostConstruct
   public void init()

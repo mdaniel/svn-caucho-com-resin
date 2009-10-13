@@ -1,10 +1,12 @@
 package example;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Named;
+import javax.inject.Singleton;
+import javax.inject.Named;
+import javax.enterprise.inject.Default;
 
-@ApplicationScoped
-@Named("myService")  
+@Singleton
+@Named("myService")
+@Default  
 public class MyServiceBean implements MyService {
   private String _message = "initial message";
   

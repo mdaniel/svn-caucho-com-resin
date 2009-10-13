@@ -1,7 +1,7 @@
 package example;
 
+import javax.inject.Inject;
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Current;
 import javax.enterprise.inject.Instance;
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -9,13 +9,13 @@ import java.io.*;
 
 public class GetServlet extends HttpServlet {
   // service pattern
-  private @Current MyService _service;
+  private @Inject MyService _service;
 
   // plugin/extension pattern
-  private @Any Instance<MyResource> _resources;
+  private @Inject @Any Instance<MyResource> _resources;
   
   // startup pattern
-  private @Current StartupResourceBean _startupResource;
+  private @Inject StartupResourceBean _startupResource;
   
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response)
@@ -32,7 +32,7 @@ public class GetServlet extends HttpServlet {
 
     out.println("<table class='deftable'>");
     out.println("<tr><th>Binding<th>Value");
-    out.println("<tr><td>@Current MyService<td>" + _service);
+    out.println("<tr><td>@Inject MyService<td>" + _service);
     out.println("</table>");
 
     // plugin/extension pattern
@@ -49,7 +49,7 @@ public class GetServlet extends HttpServlet {
 
     out.println("<table class='deftable'>");
     out.println("<tr><th>Binding<th>Value");
-    out.println("<tr><td>@Current StartupResourceBean<td>" + _startupResource);
+    out.println("<tr><td>@Inject StartupResourceBean<td>" + _startupResource);
     out.println("</table>");
     
     writeFooter(out);
@@ -96,13 +96,13 @@ public class GetServlet extends HttpServlet {
     out.println("<div class='example'><pre>");
     out.println("public class GetServlet extends HttpServlet {");
     out.println("  // service pattern");
-    out.println("  private @Current MyService _service;");
+    out.println("  private @Inject MyService _service;");
     out.println();
     out.println("  // plugin/extension pattern");
     out.println("  private @Any Instance&lt;MyResource> _resources;");
     out.println();
     out.println("  // startup pattern");
-    out.println("  private @Current StartupResourceBean _startupResource;");
+    out.println("  private @Inject StartupResourceBean _startupResource;");
     out.println();
     out.println("  ...");
     out.println("}");

@@ -1,9 +1,9 @@
 <%@ page import="com.caucho.bam.LocalActorClient, java.util.*, example.*"
 %><%!
-@javax.enterprise.inject.Current
+@javax.inject.Inject
 ExampleService _service;
 
-@javax.enterprise.inject.Current
+@javax.inject.Inject
 ExampleMessages _messages;
 
 LocalActorClient _client = new LocalActorClient();

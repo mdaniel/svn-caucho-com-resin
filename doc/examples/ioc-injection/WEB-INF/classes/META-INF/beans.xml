@@ -1,4 +1,2 @@
-<Beans xmlns="urn:java:ee">
-</Beans>
-
+<beans xmlns="http://java.sun.com/xml/ns/javaee"/>
 

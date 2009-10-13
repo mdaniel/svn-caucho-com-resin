@@ -6,14 +6,15 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
-import com.caucho.config.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Implementation of the Hello bean.
  */
 @Stateless
 public class HelloBean implements Hello {
-  @Name("greeting")
+  @Inject @Named("greeting")
   private String _greeting;
   
   /**

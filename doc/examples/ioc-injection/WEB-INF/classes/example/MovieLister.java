@@ -2,10 +2,10 @@ package example;
 
 import java.util.ArrayList;
 
-import javax.enterprise.inject.Current;
+import javax.inject.Inject;
 
 public class MovieLister {
-  @Current private MovieFinder _finder;
+  @Inject private MovieFinder _finder;
   
   /**
    * Returns movies by a particular director.

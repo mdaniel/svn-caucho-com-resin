@@ -5,10 +5,10 @@ import javax.servlet.http.*;
 
 import java.io.*;
 import java.util.*;
-import javax.enterprise.inject.*;
+import javax.inject.Inject;
 
 public class TestServlet extends HttpServlet {
-  @Current AppConfig _appConfig;
+  @Inject AppConfig _appConfig;
 
   public void doGet(HttpServletRequest req,
                     HttpServletResponse res)

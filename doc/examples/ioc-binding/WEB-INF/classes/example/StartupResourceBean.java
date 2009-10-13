@@ -1,8 +1,8 @@
 package example;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 
-@ApplicationScoped
+@Singleton
 public class StartupResourceBean implements MyResource {
   private String _data = "default";
   

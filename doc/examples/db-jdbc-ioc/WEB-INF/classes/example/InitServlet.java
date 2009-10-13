@@ -15,7 +15,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.Name;
+import javax.inject.Named;
+import javax.inject.Inject;
 
 /**
  * The InitServlet initializes the database.
@@ -25,7 +26,8 @@ public class InitServlet extends HttpServlet {
   /**
    * The DataSource for the table.
    */
-  @Name("jdbc/basic") private DataSource _ds;
+  @Inject @Named("jdbc/basic")
+  private DataSource _ds;
 
   /**
    * Initializes the reference to the CourseBean home interface.
