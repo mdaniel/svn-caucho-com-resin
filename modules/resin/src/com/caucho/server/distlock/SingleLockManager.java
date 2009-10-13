@@ -50,6 +50,9 @@ public class SingleLockManager extends AbstractLockManager {
   
   public Lock getOrCreateLock(String name)
   {
+    if (true)
+      return null;
+    
     SingleLock lock = _lockMap.get(name);
 
     if (lock == null) {
