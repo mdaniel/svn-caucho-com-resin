@@ -566,11 +566,12 @@
   </target>
 
   <target name="resin.artifacts.dist" depends="init">
+    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
-    
+    -->
     <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
@@ -587,11 +588,12 @@
       <param name="artifact.name" value="wicket"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
-    
+<!--    
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
+    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>
@@ -948,18 +950,18 @@
       </fileset>
     </jar>
 
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin.jar"
+    <copy tofile="${dist}/php/quercus-war/WEB-INF/lib/resin.jar"
           file="${dist}/${dist.name}/lib/resin.jar"/>
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/inject-16.jar"
+    <copy tofile="${dist}/php/quercus-war/WEB-INF/lib/inject-16.jar"
           file="${resin.lib}/inject-16.jar"/>
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
+    <copy tofile="${dist}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
     <!--
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/pro.jar"
           file="${resin.lib}/pro.jar"/>
     -->
     <jar destfile="${dist}/quercus-${version}.war">
-      <fileset dir="${install}/php/quercus-war">
+      <fileset dir="${dist}/php/quercus-war">
         <include name="WEB-INF/lib/resin.jar"/>
         <include name="WEB-INF/lib/inject-16.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
@@ -974,8 +976,6 @@
       </fileset>
     </jar>
     
-    <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
-
     <jar destfile="${dist}/quercus-${version}-src.jar">
       <fileset dir="${resin.modules}/kernel/src">
         <exclude name=".cvsignore"/>

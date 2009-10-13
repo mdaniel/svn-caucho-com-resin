@@ -121,7 +121,7 @@
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="ant"/>
     </antcall>
-    
+    <!--
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
     </antcall>
@@ -133,6 +133,7 @@
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
     </antcall>
+    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
@@ -141,11 +142,11 @@
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
     </antcall>
-
+<!--
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
     </antcall>
-    
+    -->
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>
     </antcall>
