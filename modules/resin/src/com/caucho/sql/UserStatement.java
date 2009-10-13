@@ -28,7 +28,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.admin.TimeSample;
+import com.caucho.admin.ActiveTimeSample;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 
@@ -57,7 +57,7 @@ public class UserStatement implements Statement {
   // True if the statement is changed in a way that forbids its caching.
   protected boolean _isPoolable = true;
 
-  private final TimeSample _timeProbe;
+  private final ActiveTimeSample _timeProbe;
 
   UserStatement(UserConnection conn, Statement stmt)
   {
@@ -182,7 +182,7 @@ public class UserStatement implements Statement {
   public ResultSet executeQuery(String sql)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.executeQuery(sql);
@@ -193,7 +193,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -203,7 +203,7 @@ public class UserStatement implements Statement {
   public int executeUpdate(String sql)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.executeUpdate(sql);
@@ -214,7 +214,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -224,7 +224,7 @@ public class UserStatement implements Statement {
   public int executeUpdate(String query, int resultType)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.executeUpdate(query, resultType);
@@ -235,7 +235,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -245,7 +245,7 @@ public class UserStatement implements Statement {
   public int executeUpdate(String query, int []columns)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.executeUpdate(query, columns);
@@ -256,7 +256,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -266,7 +266,7 @@ public class UserStatement implements Statement {
   public int executeUpdate(String query, String []columns)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.executeUpdate(query, columns);
@@ -277,7 +277,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -287,7 +287,7 @@ public class UserStatement implements Statement {
   public boolean execute(String sql)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.execute(sql);
@@ -298,7 +298,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -308,7 +308,7 @@ public class UserStatement implements Statement {
   public boolean execute(String query, int resultType)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.execute(query, resultType);
@@ -319,7 +319,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -330,7 +330,7 @@ public class UserStatement implements Statement {
   public boolean execute(String query, int []columns)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.execute(query, columns);
@@ -341,7 +341,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -352,7 +352,7 @@ public class UserStatement implements Statement {
   public boolean execute(String query, String []columns)
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.execute(query, columns);
@@ -363,7 +363,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -373,7 +373,7 @@ public class UserStatement implements Statement {
   public int[]executeBatch()
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _stmt.executeBatch();
@@ -384,7 +384,7 @@ public class UserStatement implements Statement {
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -394,8 +394,6 @@ public class UserStatement implements Statement {
   public java.sql.ResultSet getResultSet()
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
-    
     try {
       return _stmt.getResultSet();
     } catch (RuntimeException e) {
@@ -413,8 +411,6 @@ public class UserStatement implements Statement {
   public int getUpdateCount()
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
-    
     try {
       return _stmt.getUpdateCount();
     } catch (RuntimeException e) {

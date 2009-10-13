@@ -153,6 +153,11 @@ public class ProbeManager {
     return (AverageProbe) probe;
   }
 
+  public static ActiveTimeProbe createActiveTimeProbe(String name)
+  {
+    return _manager.createActiveTimeProbeImpl(name, "Time", null);
+  }
+
   public static ActiveTimeProbe createActiveTimeProbe(String name,
                                                       String type,
                                                       String subName)

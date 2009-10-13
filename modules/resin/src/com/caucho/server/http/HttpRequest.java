@@ -29,7 +29,7 @@
 
 package com.caucho.server.http;
 
-import com.caucho.admin.AverageProbe;
+import com.caucho.admin.ActiveTimeProbe;
 import com.caucho.admin.SampleCountProbe;
 import com.caucho.admin.ProbeManager;
 import com.caucho.server.cluster.Server;
@@ -120,7 +120,7 @@ public class HttpRequest extends AbstractHttpRequest
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
   private RawInputStream _rawInputStream = new RawInputStream();
 
-  private AverageProbe _requestTimeProbe;
+  private ActiveTimeProbe _requestTimeProbe;
   private SampleCountProbe _requestCountProbe;
 
   /**
@@ -133,7 +133,7 @@ public class HttpRequest extends AbstractHttpRequest
     super(server, conn);
 
     _requestTimeProbe
-      = ProbeManager.createAverageProbe(REQUEST_TIME_PROBE, "Time");
+      = ProbeManager.createActiveTimeProbe(REQUEST_TIME_PROBE);
   }
 
   @Override
@@ -756,6 +756,7 @@ public class HttpRequest extends AbstractHttpRequest
     
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    long startTime = 0;
 
     try {
       thread.setContextClassLoader(_server.getClassLoader());
@@ -778,6 +779,7 @@ public class HttpRequest extends AbstractHttpRequest
       requestFacade.setInvocation(invocation);
 
       isInvocation = true;
+      startTime = _requestTimeProbe.start();
       startInvocation();
 
       invocation.service(requestFacade, getResponseFacade());
@@ -798,8 +800,10 @@ public class HttpRequest extends AbstractHttpRequest
     } finally {
       if (isInvocation) {
         finishInvocation();
+      }
 
-        _requestTimeProbe.add(Alarm.getCurrentTime() - getStartTime());
+      if (startTime > 0) {
+        _requestTimeProbe.end(startTime);
       }
 
       if (! isSuspend()) {

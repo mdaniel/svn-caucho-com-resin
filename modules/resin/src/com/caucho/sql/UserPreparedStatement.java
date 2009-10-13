@@ -29,7 +29,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.admin.TimeSample;
+import com.caucho.admin.ActiveTimeSample;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -55,7 +55,7 @@ public class UserPreparedStatement extends UserStatement
 
   private boolean _isClosed;
 
-  private TimeSample _timeProbe;
+  private ActiveTimeSample _timeProbe;
   
   UserPreparedStatement(UserConnection conn,
 			PreparedStatement pStmt,
@@ -91,7 +91,7 @@ public class UserPreparedStatement extends UserStatement
   public ResultSet executeQuery()
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _pstmt.executeQuery();
@@ -102,7 +102,7 @@ public class UserPreparedStatement extends UserStatement
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -112,7 +112,7 @@ public class UserPreparedStatement extends UserStatement
   public int executeUpdate()
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _pstmt.executeUpdate();
@@ -123,7 +123,7 @@ public class UserPreparedStatement extends UserStatement
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 
@@ -133,7 +133,7 @@ public class UserPreparedStatement extends UserStatement
   public boolean execute()
     throws SQLException
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = _timeProbe.start();
     
     try {
       return _pstmt.execute();
@@ -144,7 +144,7 @@ public class UserPreparedStatement extends UserStatement
       killPool();
       throw e;
     } finally {
-      _timeProbe.add(Alarm.getCurrentTime() - startTime);
+      _timeProbe.end(startTime);
     }
   }
 

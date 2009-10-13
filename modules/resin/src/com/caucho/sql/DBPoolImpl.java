@@ -29,7 +29,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.admin.TimeSample;
+import com.caucho.admin.ActiveTimeSample;
 import com.caucho.admin.ProbeManager;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
@@ -204,7 +204,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   // Count for debugging ids.
   private int _idCount;
 
-  private TimeSample _timeProbe;
+  private ActiveTimeSample _timeProbe;
 
   // The alarm
   private Alarm _alarm;
@@ -327,12 +327,12 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     return _connectionConfig;
   }
 
-  TimeSample getTimeProbe()
+  ActiveTimeSample getTimeProbe()
   {
     if (_timeProbe == null) {
       ProbeManager manager = ProbeManager.getCurrent();
 
-      _timeProbe = manager.createTimeRangeProbe("Resin|Database|Query");
+      _timeProbe = manager.createActiveTimeProbe("Resin|Database|Query");
     }
 
     return _timeProbe;
