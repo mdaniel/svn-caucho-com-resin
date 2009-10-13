@@ -88,10 +88,14 @@ AC_SUBST(resin_init_d)
 #
 # --with-java-home
 #
+JAVA_EXE=java
+
 AC_ARG_WITH(java-home,
 [  --with-java-home=DIR  java home
 ], [
 JAVA_HOME=${withval}
+
+JAVA_EXE="$JAVA_HOME/bin/java"
 ])
 
 if test -z "$JAVA_HOME"; then
@@ -572,7 +576,9 @@ echo -n "checking if Java is 64-bit... "
 
 tmpname="/tmp/java$$.out"
 	       	
-$JAVA_HOME/bin/java -version 2> $tmpname
+#$JAVA_HOME/bin/java -version 2> $tmpname
+
+$JAVA_EXE -version 2> $tmpname
 
 grep "64-Bit" $tmpname 1> /dev/null
 if test "$?" = "0"; then
