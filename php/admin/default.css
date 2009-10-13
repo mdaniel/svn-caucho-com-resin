@@ -519,6 +519,11 @@ ul.tabs {
   border-bottom: 1px solid white;
 }
 
+li.open {
+  list-style-image: none;
+  list-style: none;
+}
+
 dl.atoc-top {
   margin : 0;
 }

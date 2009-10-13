@@ -556,6 +556,8 @@ if ($is_refresh) {
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
     function show(id) { document.getElementById(id).style.display = 'block'; }
+    function show_n(id) { document.getElementById(id).style.display = ''; }
+    function show_i(id) { document.getElementById(id).style.display = 'inline'; }
     function sel(id) { document.getElementById(id).className = 'selected'; }
     function unsel(id) { document.getElementById(id).className = ''; }
     function showInline(id) { document.getElementById(id).style.display = 'inline'; }
