@@ -31,6 +31,7 @@ package com.caucho.quercus.page;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
@@ -231,7 +232,7 @@ abstract public class QuercusPage
       AbstractFunction fun = entry.getValue();
 
       if (fun.isGlobal())
-	env.addFunction(entry.getKey(), entry.getValue());
+        env.addFunction(entry.getKey(), entry.getValue());
     }
     
     for (Map.Entry<String,ClassDef> entry : _classMap.entrySet()) {
@@ -244,7 +245,8 @@ abstract public class QuercusPage
    */
   protected void addFunction(String name, AbstractFunction fun)
   {
-    _funMap.put(name, fun);
+    AbstractFunction oldFun = _funMap.put(name, fun);
+    
     _funMapLowerCase.put(name.toLowerCase(), fun);
   }
 

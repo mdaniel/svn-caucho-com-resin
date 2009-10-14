@@ -215,7 +215,7 @@ public class JavaValue extends ObjectValue
     if (value != null)
       return value;
     else
-      return NullValue.NULL;
+      return UnsetValue.NULL;
   }
 
   /**

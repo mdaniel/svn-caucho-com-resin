@@ -714,26 +714,26 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = entries[hash];
 	   entry != null;
 	   entry = entry._nextHash) {
-	if (key.equals(entry._key)) {
-	  Var var = entry._var;
-	
-	  return var != null ? var.toValue() : entry._value;
-	
-	  // return entry._value.toValue(); // php/39a1
-	}
+        if (key.equals(entry._key)) {
+          Var var = entry._var;
+        
+          return var != null ? var.toValue() : entry._value;
+        
+          // return entry._value.toValue(); // php/39a1
+        }
       }
     }
     else {
       for (Entry entry = _head;
 	   entry != null;
 	   entry = entry._next) {
-	if (key.equals(entry._key)) {
-	  Var var = entry._var;
-	
-	  return var != null ? var.toValue() : entry._value;
-	
-	  // return entry._value.toValue(); // php/39a1
-	}
+        if (key.equals(entry._key)) {
+          Var var = entry._var;
+        
+          return var != null ? var.toValue() : entry._value;
+        
+          // return entry._value.toValue(); // php/39a1
+        }
       }
     }
 

@@ -497,7 +497,8 @@ public class SessionModule extends AbstractQuercusModule
       else if ("none".equals(cacheLimiter)) {
       }
       else {
-        response.setHeader("Cache-Control", cacheLimiter + ", max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        // php/1k16
+        //response.setHeader("Cache-Control", cacheLimiter + ", max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
       }
     }
 

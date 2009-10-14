@@ -1101,6 +1101,9 @@ public class JavaClassDef extends ClassDef {
     for (Method method : methods) {
       if (Modifier.isStatic(method.getModifiers()))
         continue;
+      
+      if (method.isAnnotationPresent(Hide.class))
+        continue;
 
       String methodName = method.getName();
       int length = methodName.length();
@@ -1108,7 +1111,7 @@ public class JavaClassDef extends ClassDef {
       if (length > 3) {
         if (methodName.startsWith("get")) {
           StringValue quercusName
-	    = javaToQuercusConvert(methodName.substring(3, length));
+            = javaToQuercusConvert(methodName.substring(3, length));
 	  
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
@@ -1121,7 +1124,7 @@ public class JavaClassDef extends ClassDef {
         }
         else if (methodName.startsWith("is")) {
           StringValue quercusName
-	    = javaToQuercusConvert(methodName.substring(2, length));
+            = javaToQuercusConvert(methodName.substring(2, length));
           
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
@@ -1134,7 +1137,7 @@ public class JavaClassDef extends ClassDef {
         }
         else if (methodName.startsWith("set")) {
           StringValue quercusName
-	    = javaToQuercusConvert(methodName.substring(3, length));
+            = javaToQuercusConvert(methodName.substring(3, length));
           
           AbstractJavaMethod existingSetter = _setMap.get(quercusName);
           AbstractJavaMethod newSetter = new JavaMethod(moduleContext, method);
@@ -1142,10 +1145,10 @@ public class JavaClassDef extends ClassDef {
           if (existingSetter != null)
             newSetter = existingSetter.overload(newSetter);
 	    
-	  _setMap.put(quercusName, newSetter);
+          _setMap.put(quercusName, newSetter);
         } else if ("__get".equals(methodName)) {
-	  if (_funArrayDelegate == null)
-	    _funArrayDelegate = new FunctionArrayDelegate();
+          if (_funArrayDelegate == null)
+            _funArrayDelegate = new FunctionArrayDelegate();
 	  
           _funArrayDelegate.setArrayGet(new JavaMethod(moduleContext, method));
         } else if ("__set".equals(methodName)) {
@@ -1164,12 +1167,20 @@ public class JavaClassDef extends ClassDef {
         }
       }
     }
+    
+    if (__fieldGet != null)
+      _getMap.clear();
+    
+    if (__fieldSet != null)
+      _setMap.clear();
 
     // Introspect public non-static fields
     Field[] fields = type.getFields();
 
     for (Field field : fields) {
       if (Modifier.isStatic(field.getModifiers()))
+        continue;
+      else if (field.isAnnotationPresent(Hide.class))
         continue;
 
       MarshalFactory factory = moduleContext.getMarshalFactory();
@@ -1238,6 +1249,8 @@ public class JavaClassDef extends ClassDef {
         continue;
       else if (! Modifier.isFinal(field.getModifiers()))
         continue;
+      else if (field.isAnnotationPresent(Hide.class))
+        continue;
 
       try {
         Value value = Quercus.objectToValue(field.get(null));
@@ -1264,6 +1277,9 @@ public class JavaClassDef extends ClassDef {
 
     for (Method method : methods) {
       if (! Modifier.isPublic(method.getModifiers()))
+        continue;
+      
+      if (method.isAnnotationPresent(Hide.class))
         continue;
       
       if ("iterator".equals(method.getName())

@@ -1220,7 +1220,7 @@ class Regcomp {
       pattern.ungetc(ch2);
     
     if (ch == '8' || ch == '9'
-	|| '0' <= ch3 && ch3 <= '9' && value * 10 + ch3 - '0' > 0xFF) {
+        || '0' <= ch3 && ch3 <= '9' && value * 10 + ch3 - '0' > 0xFF) {
       //out of byte range or not an octal,
       //need to parse backslash as the NULL character
       
@@ -1230,7 +1230,9 @@ class Regcomp {
     
     int oct = parseOctal(ch, pattern);
     
-    return createString((char) oct);
+    return parseString(oct, pattern, true);
+    
+    //return createString((char) oct);
   }
 
   private RegexpNode parseString(int ch,

@@ -357,7 +357,7 @@ public class ClassesModule extends AbstractQuercusModule {
       return NullValue.NULL;
     }
     
-    if (cls != null && cls.findFieldIndex(name) >= 0)
+    if (cls != null && cls.getClassField(name) != null)
       return BooleanValue.TRUE;
     else
       return BooleanValue.FALSE;

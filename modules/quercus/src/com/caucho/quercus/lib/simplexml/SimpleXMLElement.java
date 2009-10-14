@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.simplexml;
 
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -72,7 +73,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     = Logger.getLogger(SimpleXMLElement.class.getName());
   private static final L10N L = new L10N(SimpleXMLElement.class);
   
-  SimpleXMLElement _parent;
+  protected SimpleXMLElement _parent;
   
   protected String _name;
   
@@ -82,10 +83,10 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   protected ArrayList<SimpleXMLElement> _children;
   protected ArrayList<SimpleXMLElement> _attributes;
   
-  String _namespace;
-  String _prefix;
+  protected String _namespace;
+  protected String _prefix;
   
-  LinkedHashMap<String, String> _namespaceMap;
+  protected LinkedHashMap<String, String> _namespaceMap;
   
   protected Env _env;
   protected QuercusClass _cls;
@@ -300,6 +301,11 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   {
     return true;
   }
+  
+  protected boolean isNamespaceAttribute()
+  {
+    return false;
+  }
 
   protected void setText(StringValue text)
   {
@@ -318,8 +324,12 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   {
     if (namespace == null || namespace.length() == 0)
       return true;
-    else
+    else if (_namespace != null && _namespace.length() > 0)
       return namespace.equals(_namespace);
+    else if (_parent != null)
+      return _parent.isSameNamespace(namespace);
+    else
+      return false;
   }
   
   protected boolean isSamePrefix(String prefix)
@@ -340,7 +350,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       SimpleXMLElement attr = _attributes.get(i);
 
       if (attr.getName().equals(name))
-	return attr;
+        return attr;
     }
 
     return null;
@@ -366,16 +376,19 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   // Map.Entry api for iterator
   //
 
+  @Hide
   public String getKey()
   {
     return _name;
   }
 
+  @Hide
   public Object getValue()
   {
     return wrapJava(_env, _cls, this);
   }
 
+  @Hide
   public Object setValue(Object value)
   {
     return wrapJava(_env, _cls, this);
@@ -421,9 +434,9 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       _attributes = new ArrayList<SimpleXMLElement>();
 
     SimpleXMLAttribute attr
-      = new SimpleXMLAttribute(env, _cls,
-                               this, name, "",
-                               env.createString(namespace));
+      = new SimpleXMLNamespaceAttribute(env, _cls,
+                                        this, name, "",
+                                        env.createString(namespace));
 
     int p = name.indexOf(':');
     if (p > 0) {
@@ -441,9 +454,9 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       SimpleXMLElement oldAttr = _attributes.get(i);
 
       if (oldAttr.getName().equals(name)
-	  && oldAttr.getNamespace().equals(namespace)) {
-	_attributes.set(i, attr);
-	return;
+          && oldAttr.getNamespace().equals(namespace)) {
+        _attributes.set(i, attr);
+        return;
       }
     }
     
@@ -453,7 +466,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   /**
    * Adds an attribute to this node.
    */
-  public void addAttribute(SimpleXMLElement attr)
+  protected void addAttribute(SimpleXMLElement attr)
   {
     if (_attributes == null)
       _attributes = new ArrayList<SimpleXMLElement>();
@@ -477,14 +490,18 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   {
     String namespace;
 
+    /*
     if (! namespaceV.isNull())
       namespace = namespaceV.toString();
     else
       namespace = _namespace;
+    */
+    
+    namespace = namespaceV.toString();
     
     SimpleXMLElement child
       = new SimpleXMLElement(env, _cls, this, name, namespace);
-    
+
     child.setText(env.createString(value));
 
     addChild(child);
@@ -515,12 +532,14 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       namespace = namespaceV.toString();
 
     SimpleXMLElement attrList
-      = new SimpleXMLAttribute(env, _cls, this, _name, namespace, null);
+      = new SimpleXMLAttributeList(env, _cls, this,
+                                   "#attrlist", namespace, null);
 
     if (_attributes != null) {
       for (SimpleXMLElement attr : _attributes) {
-	if (attrList.isSameNamespace(attr.getNamespace()))
-	  attrList.addAttribute(attr);
+        if (attr.isSameNamespace(namespace)
+            && ! attr.isNamespaceAttribute())
+          attrList.addAttribute(attr);
       }
     }
 
@@ -557,6 +576,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       for (SimpleXMLElement child : _children) {
         if (isPrefix) {
           if (child.isSamePrefix(namespace)) {
+            result.addChild(child);
           }
         }
         else {

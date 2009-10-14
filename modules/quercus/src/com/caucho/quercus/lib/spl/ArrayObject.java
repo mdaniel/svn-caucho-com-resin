@@ -191,7 +191,7 @@ public class ArrayObject
     if ((_flags & ARRAY_AS_PROPS) != 0)
       return _value.get(key);
     else
-      return NullValue.NULL;
+      return UnsetValue.UNSET;
   }
 
   static private void printDepth(WriteStream out, int depth)

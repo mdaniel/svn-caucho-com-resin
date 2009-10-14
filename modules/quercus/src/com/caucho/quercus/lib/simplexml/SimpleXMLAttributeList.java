@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Charles Reich
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.lib.simplexml;
@@ -65,26 +65,40 @@ import java.util.logging.*;
  * SimpleXMLElement object oriented API facade.
  * Also acts as the DOM document.
  */
-public class SimpleXMLAttribute extends SimpleXMLElement
+public class SimpleXMLAttributeList extends SimpleXMLElement
 {
-  protected SimpleXMLAttribute(Env env,
-                               QuercusClass cls,
-                               SimpleXMLElement parent,
-                               String name)
+  protected SimpleXMLAttributeList(Env env,
+                                   QuercusClass cls,
+                                   SimpleXMLElement parent,
+                                   String name)
   {
     super(env, cls, parent, name);
   }
   
-  protected SimpleXMLAttribute(Env env,
-                               QuercusClass cls,
-                               SimpleXMLElement parent,
-                               String name,
-                               String namespace,
-                               StringValue text)
+  protected SimpleXMLAttributeList(Env env,
+                                   QuercusClass cls,
+                                   SimpleXMLElement parent,
+                                   String name,
+                                   String namespace,
+                                   StringValue text)
   {
     super(env, cls, parent, name, namespace);
 
     _text = text;
+  }
+
+  /**
+   * Returns the name of the node.
+   * 
+   * @return name of the node
+   */
+  @Name("getName")
+  public String simplexml_getName()
+  {
+    if (_attributes == null)
+      return "";
+    else
+      return _attributes.get(0).getName();
   }
 
   @Override
@@ -134,9 +148,19 @@ public class SimpleXMLAttribute extends SimpleXMLElement
   {
     StringValue sb = env.createStringBuilder();
 
-    toXMLImpl(sb);
-    
-    return sb;
+    if (_attributes != null) {
+      for (SimpleXMLElement attr : _attributes) {
+        if (attr._name.equals("xmlns"))
+          continue;
+        
+        attr.toXMLImpl(sb);
+        break;
+      }
+      
+      return sb;
+    }
+    else
+      return null;
   }
 
   @Override

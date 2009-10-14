@@ -1424,7 +1424,8 @@ public class Quercus
       if (id >= 0)
         return id;
 
-      id = _constantNameMap.size();
+      // php/313j
+      id = _constantNameMap.size() + 1;
 
       if (_classDefMap.length <= id) {
         Value []constantMap = new Value[id + 256];
