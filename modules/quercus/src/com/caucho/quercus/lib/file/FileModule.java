@@ -1316,7 +1316,7 @@ public class FileModule extends AbstractQuercusModule {
   private static ProtocolWrapper getProtocolWrapper(Env env,
                                                     StringValue pathName)
   {
-    int p = pathName.indexOf("://");
+    int p = pathName.indexOf(":");
 
     if (p < 0)
       return null;

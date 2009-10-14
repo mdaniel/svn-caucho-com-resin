@@ -1916,7 +1916,7 @@ public class Server extends ProtocolDispatchServer
         }
 
         log.info("user.name  = " + System.getProperty("user.name"));
-        log.info("stage = " + _stage);
+        log.info("stage      = " + _stage);
       }
 
       _lifecycle.toStarting();

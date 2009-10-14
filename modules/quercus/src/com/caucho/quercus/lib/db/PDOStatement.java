@@ -846,7 +846,7 @@ public class PDOStatement
   private Value fetchNamed()
   {
     try {
-      if (!advanceResultSet()) {
+      if (! advanceResultSet()) {
         _fetchErrorCode = FETCH_EXHAUSTED;
         
         return BooleanValue.FALSE;

@@ -331,8 +331,8 @@ public class Mcrypt {
   private static String getAlgorithm(String algorithm)
   {
     if (McryptModule.MCRYPT_RIJNDAEL_128.equals(algorithm) ||
-	McryptModule.MCRYPT_RIJNDAEL_192.equals(algorithm) ||
-	McryptModule.MCRYPT_RIJNDAEL_256.equals(algorithm))
+        McryptModule.MCRYPT_RIJNDAEL_192.equals(algorithm) ||
+        McryptModule.MCRYPT_RIJNDAEL_256.equals(algorithm))
       return "AES";
     else if (McryptModule.MCRYPT_3DES.equals(algorithm))
       return "DESede";

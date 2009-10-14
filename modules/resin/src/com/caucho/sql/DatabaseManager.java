@@ -58,7 +58,7 @@ public class DatabaseManager {
   private final ArrayList<Driver> _driverList
     = new ArrayList<Driver>();
 
-  private static int _gId;
+  private int _gId;
 
   /**
    * The manager is never instantiated.
@@ -115,28 +115,28 @@ public class DatabaseManager {
   {
     try {
       synchronized (_databaseMap) {
-	DBPool db = _databaseMap.get(url);
+        DBPool db = _databaseMap.get(url);
 
-	if (db == null) {
-	  db = new DBPool();
+        if (db == null) {
+          db = new DBPool();
 
-	  db.setVar(url + "-" + _gId++);
-	
-	  DriverConfig driver = db.createDriver();
+          db.setVar(url + "-" + _gId++);
 
-	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	  Class driverClass = Class.forName(driverName, false, loader);
+          DriverConfig driver = db.createDriver();
 
-	  driver.setType(driverClass);
-	  driver.setURL(url);
+          ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-	  db.init();
+          Class driverClass = Class.forName(driverName, false, loader);
 
-	  _databaseMap.put(url, db);
-	}
+          driver.setType(driverClass);
+          driver.setURL(url);
 
-	return db;
+          db.init();
+
+          _databaseMap.put(url, db);
+        }
+
+        return db;
       }
     } catch (RuntimeException e) {
       throw e;

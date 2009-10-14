@@ -31,10 +31,16 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.util.L10N;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Time;
 import java.util.logging.Logger;
 
 /**
@@ -97,5 +103,47 @@ public class PostgresResult extends JdbcResultResource {
     // See PostgresModule.pg_fetch_array
 
     return _passedNullRow;
+  }
+
+  /* php/43c? - postgres times and dates can have timezones, so the
+   * string representation conforms to the php representation, but 
+   * the java.sql.Date representation does not.
+   */
+
+  @Override
+  protected Value getColumnTime(Env env, ResultSet rs, int column)
+    throws SQLException
+  {
+    Time time = rs.getTime(column);
+    
+    if (time == null)
+      return NullValue.NULL;
+    else
+      return env.createString(rs.getString(column));
+  }
+
+  @Override
+  protected Value getColumnDate(Env env, ResultSet rs, int column)
+    throws SQLException
+  {
+    Date date = rs.getDate(column);
+    
+    if (date == null)
+      return NullValue.NULL;
+    else
+      return env.createString(rs.getString(column));
+  }
+
+  @Override
+  protected Value getColumnTimestamp(Env env, ResultSet rs, int column)
+    throws SQLException
+  {
+    Timestamp timestamp = rs.getTimestamp(column);
+
+    if (timestamp == null)
+      return NullValue.NULL;
+    else {
+      return env.createString(rs.getString(column));
+    }
   }
 }

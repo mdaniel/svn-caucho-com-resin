@@ -70,6 +70,13 @@ public class Mysqli extends JdbcConnectionResource {
   protected static final String DRIVER
     = "com.mysql.jdbc.Driver";
 
+  // Because _checkedDriverVersion is static, it affects spy output
+  // for various qa's.  If running them individually, there is an
+  // extra call to getMetaData in the log, but if a Mysqli object
+  // is created in a non-spy qa before the spy qa in question, there
+  // is no getMetaData call logged.  The spy qa's are written with
+  // the assumption that _checkedDriverVersion has already been set,
+  // i.e. without the getMetaData call.
   private static volatile String _checkedDriverVersion = null;
   private static Object _checkDriverLock = new Object();
 
