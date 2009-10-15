@@ -1118,10 +1118,10 @@ public class MysqlModule extends AbstractQuercusModule {
       catalog = "";
     */
 
-    Mysqli mysqli = new Mysqli(env, hostStr, userName.toString(),
-                               password.toString(), "",
-                               port, socketStr, flags,
-                               null, null, isNewLink);
+    Mysqli mysqli = new MysqliResource(env, hostStr, userName.toString(),
+                                       password.toString(), "",
+                                       port, socketStr, flags,
+                                       null, null, isNewLink);
 
     if (! mysqli.isConnected())
       return BooleanValue.FALSE;
@@ -1218,11 +1218,11 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn != null)
       return conn;
 
-    conn = new Mysqli(env,
-                      env.getEmptyString(),
-                      env.getEmptyString(), env.getEmptyString(),
-                      db, 3306,
-                      env.getEmptyString());
+    conn = new MysqliResource(env,
+                              env.getEmptyString(),
+                              env.getEmptyString(), env.getEmptyString(),
+                              db, 3306,
+                              env.getEmptyString());
 
     env.setSpecialValue("caucho.mysql", conn);
 

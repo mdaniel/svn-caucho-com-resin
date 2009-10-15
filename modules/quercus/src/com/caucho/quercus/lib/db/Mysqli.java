@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -62,7 +62,6 @@ import java.util.logging.Logger;
 /**
  * mysqli object oriented API facade
  */
-@ResourceType("mysql link")
 public class Mysqli extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
@@ -167,11 +166,6 @@ public class Mysqli extends JdbcConnectionResource {
   protected Mysqli(Env env)
   {
     super(env);
-  }
-
-  public String getResourceType()
-  {
-    return "mysql link";
   }
 
   public boolean isLastSqlDescribe()
