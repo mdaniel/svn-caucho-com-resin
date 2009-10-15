@@ -385,7 +385,12 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   @Hide
   public Object getValue()
   {
-    return wrapJava(_env, _cls, this);
+    if (_children == null)
+      return _text;
+    else if (_children.size() == 1 && ! _children.get(0).isElement())
+      return _text;
+    else
+      return wrapJava(_env, _cls, this);
   }
 
   @Hide
@@ -1045,9 +1050,9 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       ArrayValue array = new ArrayValueImpl();
       
       for (SimpleXMLElement attr : _attributes) {
-	StringValue value = attr._text;
+        StringValue value = attr._text;
 	
-	array.put(_env.createString(attr._name), value);
+        array.put(_env.createString(attr._name), value);
       }
 
       map.put(_env.createString("@attributes"), array);
@@ -1056,35 +1061,35 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     boolean hasElement = false;
     if (_children != null) {
       for (SimpleXMLElement child : _children) {
-	if (! child.isElement())
-	  continue;
+        if (! child.isElement())
+          continue;
 
-	hasElement = true;
-	
-	StringValue name = _env.createString(child.getName());
-	Value oldChild = map.get(name);
-	Value childValue;
+        hasElement = true;
+        
+        StringValue name = _env.createString(child.getName());
+        Value oldChild = map.get(name);
+        Value childValue;
 
-	if (child._text != null)
-	  childValue = child._text;
-	else
-	  childValue = wrapJava(_env, _cls, child);
+        if (child._text != null)
+          childValue = child._text;
+        else
+          childValue = wrapJava(_env, _cls, child);
 
-	if (oldChild == null) {
-	  map.put(name, childValue);
-	}
-	else if (oldChild instanceof ArrayValue) {
-	  ArrayValue array = (ArrayValue) oldChild;
+        if (oldChild == null) {
+          map.put(name, childValue);
+        }
+        else if (oldChild.isArray()) {
+          ArrayValue array = (ArrayValue) oldChild;
 
-	  array.append(childValue);
-	}
-	else {
-	  ArrayValue array = new ArrayValueImpl();
-	  array.append(oldChild);
-	  array.append(childValue);
+          array.append(childValue);
+        }
+        else {
+          ArrayValue array = new ArrayValueImpl();
+          array.append(oldChild);
+          array.append(childValue);
 
-	  map.put(name, array);
-	}
+          map.put(name, array);
+        }
       }
     }
     
@@ -1190,10 +1195,10 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     public boolean hasNext()
     {
       for (; _index < _size; _index++) {
-	SimpleXMLElement elt = _children.get(_index);
+        SimpleXMLElement elt = _children.get(_index);
 
-	if (elt.isElement())
-	  return true;
+        if (elt.isElement())
+          return true;
       }
 
       return false;

@@ -121,7 +121,7 @@ public class JavaMethod extends JavaInvoker {
         throw (QuercusException) e1;
 
       if (e1 instanceof QuercusException)
-	throw (QuercusException) e1;
+        throw (QuercusException) e1;
       
       String methodName = (_method.getDeclaringClass().getName() + "."
                            + _method.getName());

@@ -273,13 +273,15 @@ abstract public class Value implements java.io.Serializable
   {
     return eq(rValue) ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
-
+  
   /**
    * Returns true for equality
    */
   public boolean eq(Value rValue)
   {
-    if (rValue instanceof BooleanValue)
+    if (rValue.isArray())
+      return rValue.eq(this);
+    else if (rValue instanceof BooleanValue)
       return toBoolean() == rValue.toBoolean();
     else if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() == rValue.toLong();

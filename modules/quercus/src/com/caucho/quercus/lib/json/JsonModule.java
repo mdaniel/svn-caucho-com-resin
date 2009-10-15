@@ -167,14 +167,14 @@ public class JsonModule
     
     while (iter.hasNext()) {
       Map.Entry<Value,Value> entry = iter.next();
-      
+
       if (length > 0)
         sb.append(',');
 
-          jsonEncodeImpl(env, sb, entry.getKey().toStringValue());
-          sb.append(':');
-          jsonEncodeImpl(env, sb, entry.getValue());
-          length++;
+      jsonEncodeImpl(env, sb, entry.getKey().toStringValue());
+      sb.append(':');
+      jsonEncodeImpl(env, sb, entry.getValue());
+      length++;
     }
 
     sb.append('}');

@@ -546,9 +546,14 @@ public class VariableModule extends AbstractQuercusModule {
   /**
    * Returns the type string for the variable
    */
-  public static boolean isset(@ReadOnly Value v)
+  public static boolean isset(@ReadOnly Value ... vList)
   {
-    return v.isset();
+    for (Value v : vList) {
+      if (! v.isset())
+        return false;
+    }
+    
+    return true;
   }
 
   /**
