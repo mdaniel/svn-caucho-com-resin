@@ -33,10 +33,8 @@ import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.HttpBufferStore;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.L10N;
-import com.caucho.jsf.context.JspResponseWrapper;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -168,10 +166,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       _webApp.log(exn.getMessage(), exn);
 
       return;
-    }
-
-    if (method == null)
+    } else if (method == null && ! _webApp.isAllowForwardAfterFlush()) {
       res.resetBuffer();
+
+      if (cauchoRes != null && cauchoRes.getResponse() != null) {
+        cauchoRes.getResponse().resetBuffer();
+      }
+    }
 
     HttpServletRequest parentReq = req;
     HttpServletRequestWrapper reqWrapper = null;
@@ -234,20 +235,27 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   private void finishResponse(HttpServletResponse res)
     throws ServletException, IOException
   {
-    if (res instanceof CauchoResponse) {
-      ((CauchoResponse) res).close();
-    }
-    else {
-      try {
-        OutputStream os = res.getOutputStream();
-        os.close();
-      } catch (Exception e) {
-      }
-      
-      try {
-        PrintWriter out = res.getWriter();
-        out.close();
-      } catch (Exception e) {
+    if (_webApp.isAllowForwardAfterFlush()) {
+      //
+    } else {
+      if (res instanceof CauchoResponse) {
+        CauchoResponse cauchoResponse = (CauchoResponse) res;
+        cauchoResponse.close();
+
+        if (cauchoResponse.getResponse() instanceof CauchoResponse)
+          ((CauchoResponse) cauchoResponse.getResponse()).close();
+      } else {
+        try {
+          OutputStream os = res.getOutputStream();
+          os.close();
+        } catch (Exception e) {
+        }
+
+        try {
+          PrintWriter out = res.getWriter();
+          out.close();
+        } catch (Exception e) {
+        }
       }
     }
   }

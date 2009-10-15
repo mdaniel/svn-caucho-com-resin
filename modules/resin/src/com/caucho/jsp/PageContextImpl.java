@@ -1008,10 +1008,12 @@ public class PageContextImpl extends PageContext
 
       String pathInfo = RequestAdapter.getPagePathInfo(req);
 
+      String servletPath = req.getServletPath();
+
       if (path != null) {
-	// jsp/15du vs jsp/15lk (tck)
-	if (pathInfo != null)
-	  path += pathInfo;
+        // jsp/15du vs jsp/15lk (tck)
+        if (pathInfo != null && !path.equalsIgnoreCase(servletPath))
+          path += pathInfo;
       }
       else if (pathInfo != null)
 	path = pathInfo;
