@@ -1012,7 +1012,7 @@ public class PageContextImpl extends PageContext
 
       if (path != null) {
         // jsp/15du vs jsp/15lk (tck)
-        if (pathInfo != null && !path.equalsIgnoreCase(servletPath))
+        if (pathInfo != null && ! path.equalsIgnoreCase(servletPath))
           path += pathInfo;
       }
       else if (pathInfo != null)
