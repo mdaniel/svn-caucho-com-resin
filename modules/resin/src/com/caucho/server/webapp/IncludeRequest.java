@@ -56,18 +56,21 @@ public class IncludeRequest extends CauchoRequestWrapper {
   private static final String QUERY_STRING
     = "javax.servlet.include.query_string";
 
+  private static Enumeration _emptyEnum;
+
   private static final int REQUEST_URI_CODE = 1;
   private static final int CONTEXT_PATH_CODE = 2;
   private static final int SERVLET_PATH_CODE = 3;
   private static final int PATH_INFO_CODE = 4;
   private static final int QUERY_STRING_CODE = 5;
-  
+
   // the wrapped request
   private Invocation _invocation;
 
   private IncludeResponse _response;
 
   private HashMapImpl<String,String[]> _filledForm;
+  private ArrayList<String> _headerNames;
   
   public IncludeRequest()
   {
@@ -157,6 +160,41 @@ public class IncludeRequest extends CauchoRequestWrapper {
   public void setHeader(String name, String value)
   {
     // server/13r4
+  }
+
+  @Override
+  public String getHeader(String name) {
+    if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name))
+      return null;
+
+    return super.getHeader(name);
+  }
+
+  @Override
+  public Enumeration getHeaders(String name) {
+    if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name))
+      return _emptyEnum;
+
+    return super.getHeaders(name);
+  }
+
+  @Override
+  public Enumeration getHeaderNames() {
+    // jsp/17eh jsp/17ek
+    if (_headerNames == null) {
+      _headerNames = new ArrayList<String>();
+
+      Enumeration names = super.getHeaderNames();
+      while (names.hasMoreElements()) {
+        String name = (String) names.nextElement();
+        if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name)) {
+        } else {
+          _headerNames.add(name);
+        }
+      }
+    }
+
+    return Collections.enumeration(_headerNames);
   }
 
   /*
@@ -326,5 +364,15 @@ public class IncludeRequest extends CauchoRequestWrapper {
     _includeAttributeMap.put(SERVLET_PATH, SERVLET_PATH_CODE);
     _includeAttributeMap.put(PATH_INFO, PATH_INFO_CODE);
     _includeAttributeMap.put(QUERY_STRING, QUERY_STRING_CODE);
+
+    _emptyEnum = new Enumeration() {
+      public boolean hasMoreElements() {
+        return false;
+      }
+
+      public Object nextElement() {
+        throw new NoSuchElementException();
+      }
+    };
   }
 }
