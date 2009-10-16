@@ -146,6 +146,8 @@ public class PageContextImpl extends PageContext
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
 
+  private ELContextListener[] _elContextListeners;
+
   PageContextImpl()
   {
     _attributes = new HashMapImpl<String,Object>();
@@ -269,9 +271,10 @@ public class PageContextImpl extends PageContext
     if (app == null)
       throw new NullPointerException();
 
+    // jsp/1059, jsp/3147
+    _elContext = null;
     // XXX: recycling is important for performance reasons
     /* 
-     _elContext = null;
      _elResolver = null;
      _bundleManager = null;
      _varResolver = null;
@@ -294,7 +297,8 @@ public class PageContextImpl extends PageContext
   protected void init()
   {
     // XXX: important for performance reasons
-    // _elContext = null;
+    // jsp/1059, jsp/3147
+     _elContext = null;
   }
 
   protected void setOut(JspWriter out)
@@ -1293,25 +1297,30 @@ public class PageContextImpl extends PageContext
       return _elContext;
 
     WebApp webApp = getApplication();
-      
-    JspApplicationContextImpl jspContext
-      = (JspApplicationContextImpl) webApp.getJspApplicationContext();
 
-    ELResolver []resolverArray = jspContext.getELResolverArray();
+    JspApplicationContextImpl jspContext = webApp.getJspApplicationContext();
+
+    if (_elResolver == null) {
+      ELResolver[] resolverArray = jspContext.getELResolverArray();
+      _elResolver = new PageContextELResolver(this, resolverArray);
+    }
+
+    if (_functionMapper == null)
+      _functionMapper = new PageFunctionMapper();
+
+    if (_variableMapper == null)
+      _variableMapper = new PageVariableMapper();
 
     _elContext = new PageELContext();
-    _elResolver = new PageContextELResolver(this, resolverArray);
-      
-    _functionMapper = new PageFunctionMapper();
-    _variableMapper = new PageVariableMapper();
 
-    ELContextListener []listenerArray = jspContext.getELListenerArray();
+    if (_elContextListeners == null)
+      _elContextListeners = jspContext.getELListenerArray();
 
-    if (listenerArray.length > 0) {
+    if (_elContextListeners.length > 0) {
       ELContextEvent event = new ELContextEvent(_elContext);
 
-      for (int i = 0; i < listenerArray.length; i++) {
-	listenerArray[i].contextCreated(event);
+      for (int i = 0; i < _elContextListeners.length; i++) {
+        _elContextListeners[i].contextCreated(event);
       }
     }
     
