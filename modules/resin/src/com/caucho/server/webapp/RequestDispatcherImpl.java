@@ -52,6 +52,8 @@ import java.io.PrintWriter;
 public class RequestDispatcherImpl implements RequestDispatcher {
   private static final L10N L = new L10N(RequestDispatcherImpl.class);
 
+  static final int MAX_DEPTH = 64;
+
   private static final String REQUEST_URI
     = "javax.servlet.include.request_uri";
   private static final String CONTEXT_PATH
@@ -209,6 +211,10 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     ForwardRequest subRequest;
     subRequest = new ForwardRequest(parentReq, parentRes, invocation);
 
+    // server/10ye
+    if (subRequest.getRequestDepth(0) > MAX_DEPTH)
+      throw new ServletException(L.l("too many servlet forwards `{0}'", req.getServletPath()));
+
     ForwardResponse subResponse = subRequest.getResponse();
 
     HttpServletRequest topRequest = subRequest;
@@ -321,6 +327,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     
     IncludeRequest subRequest
       = new IncludeRequest(parentReq, parentRes, invocation);
+    
+    // server/10yf, jsp/15di
+    if (subRequest.getRequestDepth(0) > MAX_DEPTH)
+      throw new ServletException(L.l("too many servlet includes `{0}'", req.getServletPath()));
+
     IncludeResponse subResponse = subRequest.getResponse();
 
     HttpServletRequest topRequest = subRequest;
