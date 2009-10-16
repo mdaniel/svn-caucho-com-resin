@@ -32,6 +32,7 @@ package com.caucho.server.dispatch;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
 import com.caucho.util.L10N;
+import com.caucho.server.connection.JspResponse;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
@@ -119,8 +120,8 @@ public class PageFilterChain implements FilterChain
   /**
    * Invokes the final servlet at the end of the chain.
    *
-   * @param req the servlet request
-   * @param res the servlet response
+   * @param request the servlet request
+   * @param response the servlet response
    */
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
@@ -185,14 +186,17 @@ public class PageFilterChain implements FilterChain
       ((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
     }
     else if (req instanceof HttpServletRequest) {
+      // jsp/0510
+      JspResponse jspResponse = new JspResponse(res);
+
       try {
 	if (_isSingleThread) {
 	  synchronized (page) {
-	    page.pageservice(req, res);
+	    page.pageservice(req, jspResponse);
 	  }
 	}
 	else
-	  page.pageservice(req, res);
+	  page.pageservice(req, jspResponse);
       } catch (ServletException e) {
 	request.setAttribute(SERVLET_EXN, e);
 	if (_config != null)
