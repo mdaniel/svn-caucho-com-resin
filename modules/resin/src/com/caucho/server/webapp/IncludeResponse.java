@@ -33,12 +33,10 @@ import com.caucho.server.connection.*;
 import com.caucho.server.cache.*;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
-import com.caucho.vfs.WriteStream;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
-import java.util.*;
 
 /**
  * Internal response for an include() or forward()
@@ -61,6 +59,8 @@ class IncludeResponse extends CauchoResponseWrapper
   private AbstractResponseStream _stream;
   private AbstractCacheFilterChain _cacheInvocation;
   
+  private boolean _isForwardEnclosed;
+
   IncludeResponse()
   {
   }
@@ -326,5 +326,18 @@ class IncludeResponse extends CauchoResponseWrapper
   public void clearBuffer()
   {
     _stream.clearBuffer();
+  }
+
+  @Override
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+    _isForwardEnclosed = isForwardEnclosed;
+  }
+
+  @Override
+  public boolean isForwardEnclosed() {
+    if (! (getResponse() instanceof CauchoResponse))
+      return _isForwardEnclosed;
+    else
+      return _isForwardEnclosed || ((CauchoResponse) getResponse()).isForwardEnclosed();
   }
 }

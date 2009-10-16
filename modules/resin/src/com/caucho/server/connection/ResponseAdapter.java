@@ -394,6 +394,13 @@ public class ResponseAdapter extends ResponseWrapper
     throw new UnsupportedOperationException("unimplemented");
   }
 
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  }
+
+  public boolean isForwardEnclosed() {
+    return false;
+  }
+
   public static void free(ResponseAdapter resAdapt)
   {
     resAdapt.free();

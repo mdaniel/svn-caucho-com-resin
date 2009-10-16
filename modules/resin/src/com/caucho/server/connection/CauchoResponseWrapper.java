@@ -29,14 +29,11 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.vfs.*;
-import com.caucho.server.webapp.WebApp;
 import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 
 import java.io.*;
 import java.util.*;
-import java.security.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -420,7 +417,14 @@ public class CauchoResponseWrapper implements CauchoResponse {
   {
     return _response;
   }
-  
+
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  }
+
+  public boolean isForwardEnclosed() {
+    return false;
+  }
+
   @Override
   public String toString()
   {

@@ -147,8 +147,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   {
     CauchoResponse cauchoRes = null;
 
-    if (res instanceof CauchoResponse)
+    if (res instanceof CauchoResponse) {
       cauchoRes = (CauchoResponse) res;
+
+      cauchoRes.setForwardEnclosed(! _webApp.isAllowForwardAfterFlush());
+    }
 
     // jsp/15m8
     if (res.isCommitted()
@@ -169,8 +172,21 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     } else if (method == null && ! _webApp.isAllowForwardAfterFlush()) {
       res.resetBuffer();
 
-      if (cauchoRes != null && cauchoRes.getResponse() != null) {
-        cauchoRes.getResponse().resetBuffer();
+
+      if (cauchoRes != null) {
+        ServletResponse resp = cauchoRes.getResponse();
+
+        while(resp != null) {
+          if (resp instanceof CauchoResponse) {
+            CauchoResponse cr = (CauchoResponse) resp;
+            cr.resetBuffer();
+            resp = cr.getResponse();
+          } else {
+            resp.resetBuffer();
+
+            resp = null;
+          }
+        }
       }
     }
 
@@ -242,8 +258,17 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         CauchoResponse cauchoResponse = (CauchoResponse) res;
         cauchoResponse.close();
 
-        if (cauchoResponse.getResponse() instanceof CauchoResponse)
-          ((CauchoResponse) cauchoResponse.getResponse()).close();
+        ServletResponse resp = cauchoResponse.getResponse();
+
+        while(resp != null) {
+          if (resp instanceof CauchoResponse) {
+            CauchoResponse cr = (CauchoResponse)resp;
+            cr.close();
+            resp = cr.getResponse();
+          } else {
+            resp = null;
+          }
+        }
       } else {
         try {
           OutputStream os = res.getOutputStream();

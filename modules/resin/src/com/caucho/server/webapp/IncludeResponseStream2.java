@@ -42,7 +42,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
 
 public class IncludeResponseStream2 extends ToByteResponseStream {
   private static final Logger log
@@ -201,11 +200,8 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   }
 
   /**
-   * Writes the next chunk of data to the response stream.
-   *
-   * @param buf the buffer containing the data
-   * @param offset start offset into the buffer
-   * @param length length of the data in the buffer
+   * Writes a byte
+   * @param ch byte to write
    */
   public void write(int ch)
     throws IOException
@@ -287,8 +283,10 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
                                            charEncoding,
                                            contentLength);
 
-          if (_cacheEntry != null)
+          if (_cacheEntry != null) {
+            _cacheEntry.setForwardEnclosed(_response.isForwardEnclosed());
             _cacheStream = _cacheEntry.openOutputStream();
+          }
         }
       }
     
@@ -419,8 +417,9 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
 
       if (cacheEntry != null) {
         _cacheEntry = null;
-        
-        cache.finishCaching(cacheEntry);
+
+        if (cache != null)
+          cache.finishCaching(cacheEntry);
       }
     } finally {
       // _response.setCacheInvocation(null);

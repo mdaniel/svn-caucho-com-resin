@@ -1557,6 +1557,13 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     return _response.getHeaderNames();
   }
 
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  }
+
+  public boolean isForwardEnclosed() {
+    return false;
+  }
+
   public void closeImpl()
     throws IOException
   {

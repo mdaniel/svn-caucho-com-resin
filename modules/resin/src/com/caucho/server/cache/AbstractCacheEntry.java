@@ -54,4 +54,11 @@ abstract public class AbstractCacheEntry {
    * Destroys the entry.
    */
   abstract public void destroy();
+
+  /**
+   * Marks cached entry enclosed in forward()
+   */
+  abstract public void setForwardEnclosed(boolean isForward);
+
+  abstract public boolean isForwardEnclosed();
 }

@@ -358,6 +358,13 @@ public class CauchoResponseWrapper extends ResponseWrapper
     throw new UnsupportedOperationException("unimplemented");
   }
 
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  }
+
+  public boolean isForwardEnclosed() {
+    return false;
+  }
+
   public boolean isNoCacheUnlessVary()
   {
     return false;

@@ -352,6 +352,13 @@ public class StubServletResponse implements CauchoResponse {
   {
   }
 
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  }
+
+  public boolean isForwardEnclosed() {
+    return false;
+  }
+
   static class NullWriter extends Writer {
     private static final NullWriter NULL = new NullWriter();
 

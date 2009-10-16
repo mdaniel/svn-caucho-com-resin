@@ -75,4 +75,8 @@ public interface CauchoResponse extends HttpServletResponse {
    * Return wrapped response
    */
   public ServletResponse getResponse();
+
+  public void setForwardEnclosed(boolean isForwardEnclosed);
+
+  public boolean isForwardEnclosed();
 }
