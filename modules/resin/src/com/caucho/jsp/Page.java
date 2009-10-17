@@ -30,17 +30,15 @@
 package com.caucho.jsp;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.loader.Environment;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.ToCharResponseAdapter;
+import com.caucho.server.webapp.JspResponse;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
@@ -532,8 +530,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
       res.setHeader("Last-Modified", _lastModifiedString);
     }
 
+    // jsp/0510, jsp/17f?
     if (res instanceof CauchoResponse) {
-      service(req, res);
+      JspResponse jspResponse = new JspResponse(res);
+      
+      service(req, jspResponse);
     }
     else {
       // The wrapping is needed to handle the output stream.

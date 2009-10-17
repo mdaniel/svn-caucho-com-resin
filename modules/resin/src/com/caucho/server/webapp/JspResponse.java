@@ -1,7 +1,3 @@
-package com.caucho.server.connection;
-
-import javax.servlet.http.HttpServletResponse;
-
 /*
  * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
@@ -30,6 +26,12 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Alex Rojkov
  */
+package com.caucho.server.webapp;
+
+import com.caucho.server.connection.CauchoResponseWrapper;
+
+import javax.servlet.http.HttpServletResponse;
+
 public class JspResponse extends CauchoResponseWrapper {
   public JspResponse() {
     super();
