@@ -199,11 +199,16 @@ public class BodyContentImpl extends AbstractBodyContent {
   {
     TempCharBuffer head = _tempStream.getHead();
 
-    if (head == null)
+    if (head == null || head.getBuffer().length == 0)
       return "";
 
+    int bomLength = 0;
+
+    if (head.getBuffer()[0] == 0xfeff)
+      bomLength = 1;
+
     if (head.getNext() == null)
-      return new String(head.getBuffer(), 0, head.getLength());
+      return new String(head.getBuffer(), bomLength, head.getLength() - bomLength);
 
     int length = 0;
     for (; head != null; head = head.getNext())
@@ -220,8 +225,8 @@ public class BodyContentImpl extends AbstractBodyContent {
 
       offset += sublen;
     }
-      
-    return new String(buf, 0, length);
+
+    return new String(buf, bomLength, length - bomLength);
   }
 
   /**
