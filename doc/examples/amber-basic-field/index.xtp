@@ -346,8 +346,8 @@ public class MyServlet {
 }
 </example>
 
-<p>Notice that the read doesn't require a transaction.  In fact, Amber
-generally generally caches reads and only accesses the database when the
+<p>Notice that the read doesn't require a transaction.  In fact, Amber generally
+caches reads and only accesses the database when the
 cache expires or the data changes.</p>
 
 <p>Of course, the find method is generally only useful if you already
