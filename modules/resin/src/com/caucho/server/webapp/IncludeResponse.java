@@ -335,9 +335,11 @@ class IncludeResponse extends CauchoResponseWrapper
 
   @Override
   public boolean isForwardEnclosed() {
-    if (! (getResponse() instanceof CauchoResponse))
-      return _isForwardEnclosed;
+    if (_isForwardEnclosed)
+      return true;
+    else if (getResponse() instanceof CauchoResponse)
+      return ((CauchoResponse) getResponse()).isForwardEnclosed();
     else
-      return _isForwardEnclosed || ((CauchoResponse) getResponse()).isForwardEnclosed();
+      return false;
   }
 }

@@ -29,16 +29,28 @@
 package com.caucho.server.webapp;
 
 import com.caucho.server.connection.CauchoResponseWrapper;
+import com.caucho.server.connection.CauchoResponse;
 
 import javax.servlet.http.HttpServletResponse;
 
 public class JspResponse extends CauchoResponseWrapper {
+
   public JspResponse() {
     super();
   }
 
-  public JspResponse(HttpServletResponse response) {
+  public JspResponse(CauchoResponse response) {
     super(response);
+  }
+
+  @Override
+  public void setForwardEnclosed(boolean isForwardEnclosed) {
+    ((CauchoResponse)getResponse()).setForwardEnclosed(isForwardEnclosed);
+  }
+
+  @Override
+  public boolean isForwardEnclosed() {
+    return ((CauchoResponse) getResponse()).isForwardEnclosed();
   }
 
   @Override

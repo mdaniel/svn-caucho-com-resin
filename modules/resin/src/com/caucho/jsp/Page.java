@@ -532,7 +532,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
     // jsp/0510, jsp/17f?
     if (res instanceof CauchoResponse) {
-      JspResponse jspResponse = new JspResponse(res);
+      JspResponse jspResponse = new JspResponse((CauchoResponse) res);
       
       service(req, jspResponse);
     }
