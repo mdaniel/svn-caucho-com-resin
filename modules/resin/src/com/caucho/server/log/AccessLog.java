@@ -207,6 +207,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     _isAutoFlush =  isAutoFlush;
   }
 
+  boolean isAutoFlush()
+  {
+    return _isAutoFlush;
+  }
+
   /**
    * Sets the autoFlushTime
    */
@@ -373,15 +378,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
       logBuffer.setLength(length);
 
-      if (_isAutoFlush && _autoFlushTime > 0) {
-        _logWriter.writeThrough(buffer, 0, length);
-        _logWriter.flush();
-      }
-      else {
-        _logWriter.writeBuffer(logBuffer);
-
-        logBuffer = null;
-      }
+      _logWriter.writeBuffer(logBuffer);
+      logBuffer = null;
     } finally {
       if (logBuffer != null)
         _logWriter.freeBuffer(logBuffer);

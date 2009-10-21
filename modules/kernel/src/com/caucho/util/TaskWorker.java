@@ -41,6 +41,9 @@ import java.util.logging.Logger;
  * A generic pool of threads available for Alarms and Work tasks.
  */
 abstract public class TaskWorker implements Runnable {
+  private static final Logger log
+    = Logger.getLogger(TaskWorker.class.getName());
+  
   private final AtomicBoolean _isTask = new AtomicBoolean();
   private final AtomicBoolean _isActive = new AtomicBoolean();
   private final AtomicLong _idGen = new AtomicLong();
@@ -80,8 +83,9 @@ abstract public class TaskWorker implements Runnable {
     if (! _isTask.getAndSet(true)) {
       Thread thread = _thread;
 
-      if (thread != null)
+      if (thread != null) {
         LockSupport.unpark(thread);
+      }
     }
   }
 

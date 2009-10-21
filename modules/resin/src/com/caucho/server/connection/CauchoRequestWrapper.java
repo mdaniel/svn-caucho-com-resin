@@ -580,9 +580,13 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   
   public int getRequestDepth(int depth)
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    if (_request instanceof CauchoRequest) {
+      CauchoRequest cRequest = (CauchoRequest) _request;
 
-    return cRequest.getRequestDepth(depth + 1);
+      return cRequest.getRequestDepth(depth + 1);
+    }
+    else
+      return 0;
   }
   
   public void setHeader(String key, String value)

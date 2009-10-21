@@ -1167,12 +1167,15 @@ public class JavaClassDef extends ClassDef {
         }
       }
     }
-    
+
+    // server/2v00
+    /*
     if (__fieldGet != null)
       _getMap.clear();
     
     if (__fieldSet != null)
       _setMap.clear();
+    */
 
     // Introspect public non-static fields
     Field[] fields = type.getFields();

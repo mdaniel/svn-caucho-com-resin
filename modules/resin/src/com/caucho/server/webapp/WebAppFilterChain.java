@@ -65,7 +65,7 @@ public class WebAppFilterChain implements FilterChain {
   private FilterChain _next;
 
   // app
-  private WebApp _app;
+  private WebApp _webApp;
   // transaction manager
   private TransactionManagerImpl _tm;
   // transaction proxy
@@ -99,16 +99,16 @@ public class WebAppFilterChain implements FilterChain {
    * @param next the next filterChain
    * @param filter the user's filter
    */
-  public WebAppFilterChain(FilterChain next, WebApp app, boolean isTop)
+  public WebAppFilterChain(FilterChain next, WebApp webApp, boolean isTop)
   {
     _next = next;
-    _app = app;
-    _errorPageManager = app.getErrorPageManager();
+    _webApp = webApp;
+    _errorPageManager = webApp.getErrorPageManager();
     _isTop = isTop;
-    _requestListeners = app.getRequestListeners();
+    _requestListeners = webApp.getRequestListeners();
 
     if (_isTop)
-      _accessLog = app.getAccessLog();
+      _accessLog = webApp.getAccessLog();
 
     try {
       if (_isTop) {
@@ -151,16 +151,16 @@ public class WebAppFilterChain implements FilterChain {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    WebApp app = _app;
+    WebApp webApp = _webApp;
 
     UserTransactionImpl ut = null;
     if (_isTop)
       ut = _utm.getUserTransaction();
 
     try {
-      thread.setContextClassLoader(app.getClassLoader());
+      thread.setContextClassLoader(webApp.getClassLoader());
 
-      if (! app.enterWebApp() && app.getConfigException() == null) {
+      if (! webApp.enterWebApp() && webApp.getConfigException() == null) {
         if (response instanceof HttpServletResponse) {
           HttpServletResponse res = (HttpServletResponse) response;
 
@@ -175,7 +175,7 @@ public class WebAppFilterChain implements FilterChain {
         ((AbstractHttpRequest) request).setRoleMap(_securityRoleMap);
       */
       for (int i = 0; i < _requestListeners.length; i++) {
-        ServletRequestEvent event = new ServletRequestEvent(_app, request);
+        ServletRequestEvent event = new ServletRequestEvent(_webApp, request);
 
         _requestListeners[i].requestInitialized(event);
       }
@@ -184,11 +184,11 @@ public class WebAppFilterChain implements FilterChain {
     } catch (Throwable e) {
       _errorPageManager.sendServletError(e, request, response);
     } finally {
-      app.exitWebApp();
+      webApp.exitWebApp();
 
       for (int i = _requestListeners.length - 1; i >= 0; i--) {
         try {
-          ServletRequestEvent event = new ServletRequestEvent(_app, request);
+          ServletRequestEvent event = new ServletRequestEvent(_webApp, request);
 
           _requestListeners[i].requestDestroyed(event);
         } catch (Throwable e) {
@@ -214,15 +214,17 @@ public class WebAppFilterChain implements FilterChain {
       if (request instanceof HttpServletRequestImpl)
         ((HttpServletRequestImpl) request).finishInvocation();
 
+      /*
       try {
         if (_accessLog != null) {
           _accessLog.log((HttpServletRequest) request,
                          (HttpServletResponse) response,
-                         _app);
+                         _webApp);
         }
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
+      */
 
       thread.setContextClassLoader(oldLoader);
     }
@@ -232,7 +234,7 @@ public class WebAppFilterChain implements FilterChain {
   public String toString()
   {
     return (getClass().getSimpleName()
-            + "[" + _app.getURL()
+            + "[" + _webApp.getURL()
             + ", next=" + _next + "]");
   }
 }

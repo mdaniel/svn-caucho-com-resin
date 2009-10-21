@@ -2923,8 +2923,13 @@ public class WebApp extends ServletContextImpl
         // TCK: cache needs to be outside because the cache flush conflicts
         // with the request listener destroy callback
         // top-level filter elements
+        // server/021h - cache not logging
+        
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
+
+        if (getAccessLog() != null)
+          chain = new AccessLogFilterChain(chain, this);
 
         invocation.setFilterChain(chain);
         invocation.setPathInfo(entry.getPathInfo());

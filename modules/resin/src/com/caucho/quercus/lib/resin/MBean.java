@@ -30,6 +30,7 @@
 
 package com.caucho.quercus.lib.resin;
 
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.Value;
 
 import javax.management.Attribute;
@@ -71,6 +72,7 @@ public class MBean {
   /**
    * Returns the MBeanInfo for the mbean.
    */
+  @Name("mbean_info")
   public MBeanInfo getMbean_info()
   {
     try {

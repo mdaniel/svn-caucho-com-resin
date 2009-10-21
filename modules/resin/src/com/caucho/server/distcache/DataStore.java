@@ -506,8 +506,8 @@ public class DataStore implements AlarmListener {
           byte []key = rs.getBytes(1);
           resinOid = rs.getLong(2);
 
-          if (key == null)
-            System.out.println("NULL: " + totalCount + " " + Hex.toHex(key));
+          if (key == null && ! Alarm.isTest())
+            System.out.println(this + " NULL: " + totalCount + " " + Hex.toHex(key));
 
           if (key != null) {
             try {
@@ -515,8 +515,8 @@ public class DataStore implements AlarmListener {
               pstmtUpdate.setBytes(2, key);
               int count = pstmtUpdate.executeUpdate();
 
-              if (count <= 0) {
-                System.out.println("COUNT: " + count + " " + Hex.toHex(key));
+              if (count <= 0 && ! Alarm.isTest()) {
+                System.out.println(this + " COUNT: " + count + " " + Hex.toHex(key));
               }
             } catch (SQLException e) {
               e.printStackTrace();
@@ -527,7 +527,7 @@ public class DataStore implements AlarmListener {
       } while (isData);
 
       // XXX:
-      log.fine("TOTAL: " + totalCount);
+      // log.fine("TOTAL: " + totalCount);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);

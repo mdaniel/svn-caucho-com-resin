@@ -63,6 +63,7 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   private final AccessLog _log;
 
+  private boolean _isAutoFlush;
   private final Object _bufferLock = new Object();
 
   private final Semaphore _logSemaphore = new Semaphore(16 * 1024);
@@ -96,6 +97,15 @@ public class AccessLogWriter extends AbstractRolloverLog
     _semaphoreProbe = ProbeManager.createSemaphoreProbe("Resin|Log|Semaphore");
   }
 
+  @Override
+  public void init()
+    throws IOException
+  {
+    super.init();
+    
+    _isAutoFlush = _log.isAutoFlush();
+  }
+
   void writeThrough(byte []buffer, int offset, int length)
     throws IOException
   {
@@ -103,7 +113,7 @@ public class AccessLogWriter extends AbstractRolloverLog
       write(buffer, offset, length);
     }
 
-    flush();
+    flushStream();
   }
 
   void writeBuffer(LogBuffer buffer)
@@ -123,14 +133,18 @@ public class AccessLogWriter extends AbstractRolloverLog
       }
     }
 
-    if (_logQueueSize > 32)
+    if (_logQueueSize > 32 || _isAutoFlush) {
       _logWriterTask.wake();
+    }
   }
 
   // must be synchronized by _bufferLock.
   @Override
   protected void flush()
   {
+    // server/021g
+    _logWriterTask.wake();
+    
     /*
     boolean isFlush = false;
 
@@ -199,6 +213,12 @@ public class AccessLogWriter extends AbstractRolloverLog
       }
 
       ptr = next;
+    }
+
+    try {
+      flushStream();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
 
     return true;

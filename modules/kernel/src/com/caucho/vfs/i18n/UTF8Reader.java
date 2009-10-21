@@ -33,11 +33,14 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.logging.*;
 
 /**
  * Implements an encoding reader for UTF8.
  */
 public class UTF8Reader extends EncodingReader {
+  private static final Logger log
+    = Logger.getLogger(UTF8Reader.class.getName());
   private InputStream _is;
   private int _peek = -1;
 
@@ -92,10 +95,12 @@ public class UTF8Reader extends EncodingReader {
       int ch2 = is.read();
       if (ch2 < 0)
         throw new EOFException("unexpected end of file in utf8 character");
-      else if ((ch2 & 0xc0) != 0x80)
-        throw new CharConversionException("illegal utf8 encoding at"
-					  + " \\x" + Integer.toHexString(ch1)
-					  + "\\x" + Integer.toHexString(ch2));
+      else if ((ch2 & 0xc0) != 0x80) {
+        log.fine("utf-8 character conversion error for '{0}' because second byte is invalid at "
+                 + String.format("0x%02x 0x%02x", ch1, ch2));
+        
+        return (char) 0xfffd;
+      }
       
       return ((ch1 & 0x1f) << 6) + (ch2 & 0x3f);
     }
