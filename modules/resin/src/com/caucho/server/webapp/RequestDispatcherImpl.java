@@ -178,7 +178,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       if (cauchoRes != null) {
         ServletResponse resp = cauchoRes.getResponse();
 
-        while(resp != null) {
+        while (resp != null) {
           if (resp instanceof CauchoResponse) {
             CauchoResponse cr = (CauchoResponse) resp;
             cr.resetBuffer();

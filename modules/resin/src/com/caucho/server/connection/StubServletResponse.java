@@ -251,7 +251,7 @@ public class StubServletResponse implements CauchoResponse {
   
   public ServletResponse getResponse()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
   
   public void setNoCache(boolean killCache)
