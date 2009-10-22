@@ -35,12 +35,9 @@ import com.caucho.util.L10N;
 import javax.management.*;
 import javax.management.loading.ClassLoaderRepository;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
+import java.io.Closeable;
 
 /**
  * The context containing mbeans registered at a particular level.
@@ -50,6 +47,11 @@ public class MBeanContext
   private static final Logger log
     = Logger.getLogger(MBeanContext.class.getName());
   private static final L10N L = new L10N(MBeanContext.class);
+
+  /*
+  private final EnvironmentLocal<MBeanClose> _mbeanClose
+    = new EnvironmentLocal<MBeanClose>();
+  */
 
   private MBeanContext _parent;
   
@@ -257,6 +259,19 @@ public class MBeanContext
     }
 
     addMBean(name, mbean);
+
+    /*
+    // server/21c4
+    if (_loader != Thread.currentThread().getContextClassLoader()) {
+      MBeanClose close = _mbeanClose.getLevel();
+      if (close == null) {
+        close = new MBeanClose();
+        _mbeanClose.set(close);
+        Environment.addCloseListener(close);
+      }
+      close.addName(name);
+    }
+    */
 
     try {
       if (registration != null)
@@ -696,6 +711,39 @@ public class MBeanContext
       
       else
 	return true;
+    }
+  }
+
+  public class MBeanClose implements Closeable {
+    private final ArrayList<ObjectName> _names = new ArrayList<ObjectName>();
+
+    public void addName(ObjectName name)
+    {
+      _names.add(name);
+    }
+
+    public void removeName(ObjectName name)
+    {
+      _names.add(name);
+    }
+
+    public void close()
+    {
+      ArrayList<ObjectName> names = new ArrayList<ObjectName>(_names);
+      _names.clear();
+
+      for (ObjectName name : names) {
+        try {
+          unregisterMBean(name);
+        } catch (Exception e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
+      }
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName();
     }
   }
 }

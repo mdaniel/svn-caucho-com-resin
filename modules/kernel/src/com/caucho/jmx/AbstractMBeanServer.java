@@ -409,7 +409,8 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     context = createContext();
 
     if (context.getMBean(name) != null) {
-      throw new InstanceAlreadyExistsException(String.valueOf(name));
+      throw new InstanceAlreadyExistsException(L.l("'{0}' in {1}",
+                                                   name, context, this));
     }
 
     DynamicMBean dynMBean = createMBean(object, name);

@@ -30,6 +30,7 @@
 package com.caucho.loader;
 
 import com.caucho.make.DependencyContainer;
+import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -469,7 +470,11 @@ public class ClassEntry implements Dependency {
     try {
       System.loadLibrary("resin_os");
       _hasJNIReload = canReloadNative();
-      if (_hasJNIReload)
+
+      if (Alarm.isTest()) {
+        // skip logging for test
+      }
+      else if (_hasJNIReload)
 	log.config("In-place class redefinition (HotSwap) is available.");
       else
 	log.config("In-place class redefinition (HotSwap) is not available.  In-place class reloading during development requires a compatible JDK and -Xdebug.");

@@ -31,6 +31,7 @@ package com.caucho.loader;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
+import java.io.Closeable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,6 +81,13 @@ public class CloseListener implements ClassLoaderListener {
 
   public static Method getDestroyMethod(Class cl)
   {
+    if (Closeable.class.isAssignableFrom(cl)) {
+      try {
+        return Closeable.class.getMethod("close", new Class[0]);
+      } catch (Throwable e) {
+      }
+    }
+    
     try {
       return cl.getMethod("destroy", new Class[0]);
     } catch (Throwable e) {

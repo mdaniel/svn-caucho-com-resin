@@ -850,8 +850,11 @@ public class Environment {
           "com.caucho.jmx.EnvironmentMBeanServerBuilder");
         */
 
+        // server/21ab
+        /*
         if (MBeanServerFactory.findMBeanServer(null).size() == 0)
           MBeanServerFactory.createMBeanServer("Resin");
+        */
 
         ManagementFactory.getPlatformMBeanServer();
       }
