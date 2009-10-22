@@ -170,9 +170,11 @@ public class MessageConsumerImpl implements MessageConsumer
 
     _listenerClassLoader = Thread.currentThread().getContextClassLoader();
 
-    // XXX: if start?
-    
-    // _session.setAsynchronous();
+    // if Consumer has already been started then register the message Call back.
+    if (isActive()) {
+      addMessageCallback();
+    }
+
   }
 
   /**
@@ -383,11 +385,8 @@ public class MessageConsumerImpl implements MessageConsumer
 
     return false;
   }
-
-  /**
-   * Starts the consumer
-   */
-  public void start()
+  
+  public void addMessageCallback() 
   {
     MessageConsumerCallback callback = _messageCallback;
 
@@ -395,8 +394,17 @@ public class MessageConsumerImpl implements MessageConsumer
       boolean isAutoAcknowledge = _isAutoAcknowledge;
       
       _entryCallback = _queue.addMessageCallback(callback, isAutoAcknowledge);
-    }
+    }    
   }
+
+  /**
+   * Starts the consumer
+   */
+  public void start()
+  {
+    addMessageCallback();
+  }  
+  
 
   /**
    * Stops the consumer.
