@@ -31,22 +31,38 @@ package com.caucho.server.connection;
 
 import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.server.webapp.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class CauchoResponseWrapper implements CauchoResponse {
+  private static final Logger log
+    = Logger.getLogger(CauchoResponseWrapper.class.getName());
+  
+  private final CauchoRequest _request;
+  
   // the wrapped response
   private HttpServletResponse _response;
   
   public CauchoResponseWrapper()
   {
+    _request = null;
   }
   
-  public CauchoResponseWrapper(HttpServletResponse response)
+  public CauchoResponseWrapper(CauchoRequest request)
   {
+    _request = request;
+  }
+  
+  public CauchoResponseWrapper(CauchoRequest request,
+                               HttpServletResponse response)
+  {
+    _request = request;
+    
     if (response == null)
       throw new IllegalArgumentException();
     
@@ -167,13 +183,51 @@ public class CauchoResponseWrapper implements CauchoResponse {
   public void sendError(int sc, String msg)
     throws IOException
   {
-    _response.sendError(sc, msg);
+    if (! sendInternalError(sc, msg))
+      _response.sendError(sc, msg);
   }
   
   public void sendError(int sc)
     throws IOException
   {
-    _response.sendError(sc);
+    if (! sendInternalError(sc, null))
+      _response.sendError(sc);
+  }
+
+  protected boolean sendInternalError(int sc, String msg)
+  {
+    // server/10su
+    CauchoRequest req = _request;
+
+    if (req == null)
+      return false;
+
+    WebApp webApp = req.getWebApp();
+
+    if (webApp == null)
+      return false;
+
+    ErrorPageManager errorManager = webApp.getErrorPageManager();
+
+    if (errorManager == null)
+      return false;
+
+    if (msg != null)
+      setStatus(sc);
+    else
+      setStatus(sc, msg);
+
+    try {
+      errorManager.sendError(_request, this, sc, getStatusMessage());
+
+      killCache();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return false;
+    }
+
+    return true;
   }
   
   public void sendRedirect(String location)

@@ -61,13 +61,14 @@ class IncludeResponse extends CauchoResponseWrapper
   
   private boolean _isForwardEnclosed;
 
-  IncludeResponse()
+  IncludeResponse(IncludeRequest request)
   {
+    super(request);
   }
   
   IncludeResponse(IncludeRequest request, HttpServletResponse response)
   {
-    super(response);
+    super(request, response);
 
     _request = request;
   }

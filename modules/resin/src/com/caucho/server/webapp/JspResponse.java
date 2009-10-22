@@ -35,26 +35,31 @@ import javax.servlet.http.HttpServletResponse;
 
 public class JspResponse extends CauchoResponseWrapper {
 
-  public JspResponse() {
+  public JspResponse()
+  {
     super();
   }
 
-  public JspResponse(CauchoResponse response) {
-    super(response);
+  public JspResponse(CauchoResponse response)
+  {
+    super(null, response);
   }
 
   @Override
-  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  public void setForwardEnclosed(boolean isForwardEnclosed)
+  {
     ((CauchoResponse)getResponse()).setForwardEnclosed(isForwardEnclosed);
   }
 
   @Override
-  public boolean isForwardEnclosed() {
+  public boolean isForwardEnclosed()
+  {
     return ((CauchoResponse) getResponse()).isForwardEnclosed();
   }
 
   @Override
-  public void setContentLength(int len) {
+  public void setContentLength(int len)
+  {
     if (! getResponse().isCommitted()) {
       resetBuffer();
       super.setContentLength(len);

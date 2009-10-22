@@ -74,7 +74,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   
   public IncludeRequest()
   {
-    _response = new IncludeResponse();
+    _response = new IncludeResponse(this);
   }
   
   public IncludeRequest(HttpServletRequest request,

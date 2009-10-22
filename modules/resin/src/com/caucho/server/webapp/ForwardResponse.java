@@ -44,13 +44,14 @@ class ForwardResponse extends CauchoResponseWrapper
 {
   private static final L10N L = new L10N(ForwardResponse.class);
 
-  ForwardResponse()
+  ForwardResponse(ForwardRequest request)
   {
+    super(request);
   }
 
-  ForwardResponse(HttpServletResponse response)
+  ForwardResponse(ForwardRequest request, HttpServletResponse response)
   {
-    super(response);
+    super(request, response);
   }
 
   void startRequest()

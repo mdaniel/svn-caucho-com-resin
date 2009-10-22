@@ -71,7 +71,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
   
   public ForwardRequest()
   {
-    _response = new ForwardResponse();
+    _response = new ForwardResponse(this);
   }
   
   public ForwardRequest(HttpServletRequest request,
@@ -80,7 +80,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
   {
     super(request);
 
-    _response = new ForwardResponse(response);
+    _response = new ForwardResponse(this, response);
 
     _invocation = invocation;
   }
