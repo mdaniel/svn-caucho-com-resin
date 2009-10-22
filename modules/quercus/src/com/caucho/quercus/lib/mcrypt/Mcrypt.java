@@ -71,7 +71,6 @@ public class Mcrypt {
       throw new QuercusRuntimeException(L.l("'{0}' is an unknown algorithm",
 					    algorithm));
 
-
     _cipher = Cipher.getInstance(transformation);
   }
 
@@ -156,12 +155,16 @@ public class Mcrypt {
   {
     ArrayValue value = new ArrayValueImpl();
 
+    // php/1q0c - can mix any key size with any block size
     if (McryptModule.MCRYPT_RIJNDAEL_128.equals(_algorithm)) {
       value.put(128 / 8);
+      value.put(192 / 8);
+      value.put(256 / 8);
     }
     else if (McryptModule.MCRYPT_RIJNDAEL_192.equals(_algorithm)) {
       value.put(128 / 8);
       value.put(192 / 8);
+      value.put(256 / 8);
     }
     else if (McryptModule.MCRYPT_RIJNDAEL_256.equals(_algorithm)) {
       value.put(128 / 8);
@@ -179,14 +182,18 @@ public class Mcrypt {
   }
 
   /**
-   * Returns the key size in bytes.
+   * Returns the maximum key size in bytes.
    */
   public int get_key_size()
   {
+    // php/1q0s - php mcrypt allows up to 256 bit keys for Rijndael of any 
+    // block size.  The number in the algorithm string is the block size.  
+    // Note that when they say "Rijndael", they are not referring to AES, 
+    // which has a fixed block size of 128 bits.
     if (McryptModule.MCRYPT_RIJNDAEL_128.equals(_algorithm))
-      return 128 / 8;
+      return 256 / 8;
     else if (McryptModule.MCRYPT_RIJNDAEL_192.equals(_algorithm))
-      return 192 / 8;
+      return 256 / 8;
     else if (McryptModule.MCRYPT_RIJNDAEL_256.equals(_algorithm))
       return 256 / 8;
     else if (McryptModule.MCRYPT_3DES.equals(_algorithm))
@@ -206,6 +213,39 @@ public class Mcrypt {
   }
 
   /**
+   * Pads a key up to the next accepted size for the given cipher.
+   * Follows php mcrypt behavior php/1q0x
+   **/
+  private byte []padKey(byte []keyData)
+  {
+    int keySize = get_key_size();
+    int len = keyData.length;
+
+    if (McryptModule.MCRYPT_RIJNDAEL_128.equals(_algorithm)
+        || McryptModule.MCRYPT_RIJNDAEL_192.equals(_algorithm)
+        || McryptModule.MCRYPT_RIJNDAEL_256.equals(_algorithm)) {
+      if (len <= 16)
+        keySize = 16;
+      else if (len <= 24)
+        keySize = 24;
+      else if (len <= 32)
+        keySize = 32;
+      else
+        throw new QuercusRuntimeException(L.l("Key too large for algorithm ({0} > 32)", len));
+    }
+
+    if (len == keySize)
+      return keyData;
+    else {
+      byte []paddedKey = new byte[keySize];
+
+      System.arraycopy(keyData, 0, paddedKey, 0, len);
+
+      return paddedKey;
+    }
+  }
+
+  /**
    * Returns the initialization vector size.
    */
   public String get_modes_name()
@@ -220,13 +260,8 @@ public class Mcrypt {
   {
     byte []keyBytes;
 
-    if (isPadKey()) {
-      keyBytes = new byte[get_key_size()];
-    
-      int length = Math.min(keyBytesArg.length, keyBytes.length);
-    
-      System.arraycopy(keyBytesArg, 0, keyBytes, 0, length);
-    }
+    if (isPadKey())
+      keyBytes = padKey(keyBytesArg);
     else
       keyBytes = keyBytesArg;
 
@@ -289,11 +324,10 @@ public class Mcrypt {
 
   private boolean isPadded()
   {
-    return (McryptModule.MCRYPT_DES.equals(_algorithm)
-            || McryptModule.MCRYPT_3DES.equals(_algorithm)
-            || McryptModule.MCRYPT_RIJNDAEL_128.equals(_algorithm)
-            || McryptModule.MCRYPT_RIJNDAEL_192.equals(_algorithm)
-            || McryptModule.MCRYPT_RIJNDAEL_256.equals(_algorithm));
+    if (_mode.equals("CFB") || _mode.equals("OFB")) 
+      return false;
+
+    return true;
   }
 
   /**
@@ -307,19 +341,29 @@ public class Mcrypt {
     throws Exception
   {
     mode = mode.toUpperCase();
+
+    // php/1q02 & php/1q0s
+    // mcrypt thinks OFB == OFB8 while Java thinks OFB == OFB64
+    if (mode.equals("OFB"))
+      mode = "OFB8";
+
+    // XXX Sun and BC don't provide 192 and 256 Rijndael at
+    // this time, probably because they were rejected by the AES
+    // standard, but mcrypt does.  Using numbers in the mode part just
+    // selects the mode block size, not the cipher block size.
     if (McryptModule.MCRYPT_RIJNDAEL_128.equals(algorithm))
       return "AES/" + mode + "/NoPadding";
     else if (McryptModule.MCRYPT_RIJNDAEL_192.equals(algorithm))
-      return "AES/" + mode + "192/NoPadding";
+      return "Rijndael192/" + mode + "/NoPadding";
     else if (McryptModule.MCRYPT_RIJNDAEL_256.equals(algorithm))
-      return "AES/" + mode + "256/NoPadding";
+      return "Rijndael256/" + mode + "/NoPadding";
     else if (McryptModule.MCRYPT_DES.equals(algorithm))
       return "DES/" + mode + "/NoPadding";
     else if (McryptModule.MCRYPT_3DES.equals(algorithm))
       return "DESede/" + mode + "/NoPadding";
     else if (McryptModule.MCRYPT_BLOWFISH.equals(algorithm)) {
       // php/1q0t, #2561
-      return "Blowfish/" + mode + "/PKCS5Padding";
+      return "Blowfish/" + mode + "/NoPadding";
     }
     else if (McryptModule.MCRYPT_ARCFOUR.equals(algorithm)
 	     || McryptModule.MCRYPT_RC4.equals(algorithm))
@@ -330,10 +374,11 @@ public class Mcrypt {
 
   private static String getAlgorithm(String algorithm)
   {
-    if (McryptModule.MCRYPT_RIJNDAEL_128.equals(algorithm) ||
-        McryptModule.MCRYPT_RIJNDAEL_192.equals(algorithm) ||
-        McryptModule.MCRYPT_RIJNDAEL_256.equals(algorithm))
+    if (McryptModule.MCRYPT_RIJNDAEL_128.equals(algorithm))
       return "AES";
+    else if (McryptModule.MCRYPT_RIJNDAEL_192.equals(algorithm) 
+             || McryptModule.MCRYPT_RIJNDAEL_256.equals(algorithm))
+      return "Rijndael";
     else if (McryptModule.MCRYPT_3DES.equals(algorithm))
       return "DESede";
     else

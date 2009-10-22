@@ -535,7 +535,8 @@ public class McryptModule extends AbstractQuercusModule {
                                                     @Optional String libDir)
   {
     try {
-      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+      // use ofb because it exists for most ciphers
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
 
       return mcrypt.get_key_size();
     } catch (Exception e) {
@@ -553,7 +554,8 @@ public class McryptModule extends AbstractQuercusModule {
                                                             @Optional String libDir)
   {
     try {
-      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+      // use ofb because it exists for most ciphers
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
 
       return mcrypt.get_supported_key_sizes();
     } catch (Exception e) {
@@ -571,7 +573,8 @@ public class McryptModule extends AbstractQuercusModule {
                                                          @Optional String libDir)
   {
     try {
-      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+      // use ofb because it exists for most ciphers
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
 
       return mcrypt.is_block_algorithm();
     } catch (Exception e) {
