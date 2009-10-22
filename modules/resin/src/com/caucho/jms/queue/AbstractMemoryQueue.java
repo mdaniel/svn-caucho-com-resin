@@ -358,6 +358,36 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   }
 
   /**
+   * 
+   * @param selector
+   * @return          Entries present in the Queue.
+   */
+  public ArrayList<QueueEntry> getBrowserList()
+  {
+    ArrayList<QueueEntry> enteries = new ArrayList<QueueEntry>();
+    for (int i = _head.length - 1; i >= 0; i--) {
+      for (QueueEntry entry = _head[i];
+           entry != null;
+           entry = entry._next) {
+
+        if (! entry.isLease()) {
+          continue;
+        }
+
+        if (entry.isRead()) {
+          continue;
+        }
+        
+        readPayload((E)entry);
+
+        enteries.add((E)entry);
+      }
+    }
+    
+    return enteries.size() > 0 ? enteries : null;
+  }
+  
+  /**
    * Removes message.
    */
   protected E removeEntry(String msgId)

@@ -29,17 +29,24 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms.JmsRuntimeException;
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.selector.*;
-import com.caucho.util.*;
-
-import javax.jms.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.logging.Logger;
-import java.util.logging.Level;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
+
+import com.caucho.jms.JmsRuntimeException;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.message.MessageFactory;
+import com.caucho.jms.queue.AbstractQueue;
+import com.caucho.jms.queue.QueueEntry;
+import com.caucho.jms.selector.Selector;
+import com.caucho.jms.selector.SelectorParser;
+import com.caucho.util.L10N;
 
 /**
  * A basic message consumer.
@@ -51,6 +58,8 @@ public class MessageBrowserImpl
     = Logger.getLogger(MessageBrowserImpl.class.getName());
   static final L10N L = new L10N(MessageBrowserImpl.class);
 
+  private MessageFactory _messageFactory = new MessageFactory();
+  
   private JmsSession _session;
   private AbstractQueue _queue;
   private String _messageSelector;
@@ -84,12 +93,24 @@ public class MessageBrowserImpl
   public Enumeration getEnumeration()
     throws JMSException
   {
-    ArrayList<MessageImpl> list;
+    ArrayList<MessageImpl> list = new ArrayList<MessageImpl>(0);
 
-    if (_session.isActive())
-      list = _queue.getBrowserList();
-    else
-      list = new ArrayList<MessageImpl>(0);
+    if (_session.isActive()) {
+    
+      ArrayList<QueueEntry> queueEntryList = _queue.getBrowserList();
+      
+      if (queueEntryList != null) { 
+        Iterator<QueueEntry> iterator = queueEntryList.iterator();
+        while (iterator.hasNext()) {
+          
+          // Copying the message. So that if client actor tampers the message
+          // will not affect the message in the Queue.
+          MessageImpl messageCopy 
+               = _messageFactory.copy((MessageImpl)iterator.next().getPayload());
+          list.add(messageCopy);
+        }
+      }
+    }
     
     return new BrowserEnumeration(list, _selector);
   }

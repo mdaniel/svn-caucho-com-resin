@@ -32,6 +32,7 @@ package com.caucho.jms.queue;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -129,7 +130,7 @@ abstract public class AbstractQueue extends AbstractDestination
   {
     return receiveEntry(timeout, isAutoAck);
   }
-
+  
   /**
    * Adds the callback to the listening list.
    */
@@ -193,9 +194,9 @@ abstract public class AbstractQueue extends AbstractDestination
       return null;
   }
 
-  public ArrayList<MessageImpl> getBrowserList()
+  public ArrayList<QueueEntry> getBrowserList()
   {
-    return new ArrayList<MessageImpl>();
+    return new ArrayList<QueueEntry>();
   }
 
   //
