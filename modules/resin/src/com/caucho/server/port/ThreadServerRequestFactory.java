@@ -30,6 +30,9 @@
 package com.caucho.server.port;
 
 import com.caucho.config.scope.ThreadRequestFactory;
+import com.caucho.server.connection.AbstractHttpRequest;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * The thread request factory
@@ -38,8 +41,26 @@ public class ThreadServerRequestFactory extends ThreadRequestFactory {
   /**
    * Returns the current request object.
    */
+  @Override
   public Object getRequestImpl()
   {
     return TcpConnection.getCurrentRequest();
+  }
+  
+  /**
+   * Returns the current request object.
+   */
+  @Override
+  public HttpServletRequest getHttpRequestImpl()
+  {
+    Object objRequest = TcpConnection.getCurrentRequest();
+
+    if (objRequest instanceof AbstractHttpRequest) {
+      AbstractHttpRequest absRequest = (AbstractHttpRequest) objRequest;
+
+      return absRequest.getRequestFacade();
+    }
+    else
+      return null;
   }
 }

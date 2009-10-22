@@ -78,7 +78,9 @@ public class ELFormatter extends MessageFormatter {
   {
     if (_format != null) {
       try {
-        _expr = (new ELParser(new ConfigELContext(), _format)).parse();
+        ELParser elParser = new ELParser(new ConfigELContext(), _format);
+        
+        _expr = elParser.parse();
       } catch (Exception ex) {
         throw ConfigException.create(ex);
       }
@@ -147,10 +149,10 @@ public class ELFormatter extends MessageFormatter {
       else if ("cookie".equals(property)) {
 	env.setPropertyResolved(true);
 
-	Object request = ThreadRequestFactory.getCurrentRequest();
+	HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
 
-	if (request instanceof HttpServletRequest) {
-	  Cookie []cookies = ((HttpServletRequest) request).getCookies();
+	if (req != null) {
+	  Cookie []cookies = req.getCookies();
 
 	  if (cookies != null)
 	    return new CookieMap(cookies);
@@ -163,9 +165,9 @@ public class ELFormatter extends MessageFormatter {
 
 	Object request = ThreadRequestFactory.getCurrentRequest();
 
-	if (request instanceof HttpServletRequest) {
-	  HttpServletRequest req = (HttpServletRequest) request;
-	  
+	HttpServletRequest req = ThreadRequestFactory.getCurrentHttpRequest();
+        
+	if (req != null) {
 	  HttpSession session = req.getSession(false);
 
 	  return session;

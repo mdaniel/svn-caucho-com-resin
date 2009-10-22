@@ -29,6 +29,8 @@
 
 package com.caucho.config.scope;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * The thread request factory
  */
@@ -42,8 +44,21 @@ public class ThreadRequestFactory {
     else
       return null;
   }
+
+  public static HttpServletRequest getCurrentHttpRequest()
+  {
+    if (_factory != null)
+      return _factory.getHttpRequestImpl();
+    else
+      return null;
+  }
   
   public Object getRequestImpl()
+  {
+    return null;
+  }
+  
+  public HttpServletRequest getHttpRequestImpl()
   {
     return null;
   }

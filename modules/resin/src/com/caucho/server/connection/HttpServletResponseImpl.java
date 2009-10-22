@@ -1258,7 +1258,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
         addServletCookie(webApp);
       }
       */
-    if (_sessionId != null)
+
+    // server/003a
+    if (_sessionId != null && webApp != null)
       addCookie(createServletCookie(webApp));
   }
 
