@@ -96,7 +96,7 @@ class IncludeResponse extends CauchoResponseWrapper
     _stream.close();
   }
 
-  IncludeRequest getRequest()
+  public IncludeRequest getRequest()
   {
     return _request;
   }
