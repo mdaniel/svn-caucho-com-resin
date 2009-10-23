@@ -115,6 +115,10 @@ public class HmuxResponseStream extends ResponseStream {
       buffer[bufferStart - 1] = (byte) (length);
       
       _bufferStartOffset = 0;
+
+      // server/26a0
+      if (length == 0)
+        offset = bufferStart - 3;
     }
     
     _next.setBufferOffset(offset);

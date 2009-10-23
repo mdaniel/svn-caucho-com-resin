@@ -39,7 +39,8 @@ import java.util.logging.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-public class CauchoResponseWrapper implements CauchoResponse {
+public class CauchoResponseWrapper extends AbstractCauchoResponse
+  implements CauchoResponse {
   private static final Logger log
     = Logger.getLogger(CauchoResponseWrapper.class.getName());
   
@@ -72,6 +73,11 @@ public class CauchoResponseWrapper implements CauchoResponse {
   public void setResponse(HttpServletResponse response)
   {
     _response = response;
+  }
+
+  protected CauchoRequest getRequest()
+  {
+    return _request;
   }
 
   //

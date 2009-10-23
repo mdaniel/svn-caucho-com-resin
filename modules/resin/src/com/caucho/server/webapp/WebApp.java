@@ -61,6 +61,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.BasicLogin;
 import com.caucho.security.Login;
 import com.caucho.security.Deny;
+import com.caucho.rewrite.RedirectSecure;
 import com.caucho.rewrite.IfSecure;
 import com.caucho.rewrite.Not;
 import com.caucho.server.cache.AbstractCache;
@@ -1669,11 +1670,11 @@ public class WebApp extends ServletContextImpl
     _isSecure = isSecure;
 
     if (isSecure) {
-      Deny deny = new Deny();
-      deny.addURLPattern("/*");
-      deny.add(new Not(new IfSecure()));
+      RedirectSecure redirect = new RedirectSecure();
+      // redirect.addURLPattern("/*");
+      redirect.add(new Not(new IfSecure()));
 
-      _constraintManager.addConstraint(deny);
+      add(redirect);
     }
   }
 

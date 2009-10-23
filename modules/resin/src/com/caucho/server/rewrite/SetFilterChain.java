@@ -75,7 +75,15 @@ public class SetFilterChain
 
     CauchoRequest oldRequest = null;
     AbstractHttpResponse cauchoResponse = null;
-    if (_isRequestSecure != null) {
+
+    if (_isRequestSecure == null) {
+    }
+    else if (request instanceof HttpServletRequestImpl) {
+      HttpServletRequestImpl req = (HttpServletRequestImpl) request;
+
+      req.setSecure(_isRequestSecure);
+    }
+    else {
       CauchoRequest cauchoRequest
 	= new SetRequestSecureFilterChain.SecureServletRequestWrapper((HttpServletRequest) request,
 								      _isRequestSecure);

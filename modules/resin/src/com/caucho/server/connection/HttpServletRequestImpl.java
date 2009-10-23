@@ -167,7 +167,13 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
    */
   public String getScheme()
   {
-    return _request.getScheme();
+    String scheme = _request.getScheme();
+
+    // server/12j2
+    if (isSecure() && "http".equals(scheme))
+      return "https";
+    else
+      return scheme;
   }
 
   /**
@@ -1687,6 +1693,12 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     _runAs = role;
 
     return oldRunAs;
+  }
+
+  public void setSecure(boolean isSecure)
+  {
+    // server/12ds
+    _isSecure = isSecure;
   }
 
   /**

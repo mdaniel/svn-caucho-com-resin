@@ -84,10 +84,11 @@ public class SetRequestSecureFilterChain implements FilterChain
       }
     }
     */
+    
     if (req instanceof HttpServletRequestImpl) {
       HttpServletRequestImpl requestFacade = (HttpServletRequestImpl) req;
 
-      // XXX: requestFacade.setSecure(true);
+      requestFacade.setSecure(true);
 
       // XXX: finally
 
