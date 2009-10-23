@@ -31,9 +31,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
 
-import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
 
@@ -64,15 +62,6 @@ class ForwardResponse extends CauchoResponseWrapper
     // server/106f, server/12b2, ioc/0310
     // XXX remove all on a good regression run
     //AbstractResponseStream stream = getResponseStream();
-
-    // ioc/0310 vs server/12b2
-
-    /*
-    if (stream != null)
-      stream.close();
-    if (stream != null)
-      stream.finish();
-    */
     /*
     if (stream != null)
       stream.close();
