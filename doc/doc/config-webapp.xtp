@@ -139,6 +139,7 @@ for ear expansion.</p>
 </td></tr><tr><td>dependency-check-interval</td><td>How often to check the jsp for changes, -1 disables</td><td>inherited
 </td></tr><tr><td>session</td><td>Creates sessions for each JSP page</td><td>true
 </td></tr><tr><td>velocity-enabled</td><td>Enable Velocity statements</td><td>false
+</td></tr><tr><td>character-encoding</td><td>Sets JSP response character encoding; overrides character encoding defined at web-app level</td><td>false
 </td></tr></deftable-childtags>
 
 <p>The class that corresponds to &lt;jsp&gt; is 

@@ -309,6 +309,9 @@ r_jsp = element jsp {
 
  & (attribute velocity-enabled { r_boolean-Type }
     | element velocity-enabled { r_boolean-Type })?
+
+ & (attribute  character-encoding { string }
+    | element character-encoding { string })?
 }
 
 r_jsf = element jsf {

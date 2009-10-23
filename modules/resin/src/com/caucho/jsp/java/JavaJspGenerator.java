@@ -1033,6 +1033,9 @@ public class JavaJspGenerator extends JspGenerator {
     if (encoding == null && isXml())
       encoding = "UTF-8";
 
+    if (encoding == null && _parseState.getJspPropertyGroup() != null)
+      encoding = _parseState.getJspPropertyGroup().getCharacterEncoding();
+
     if (encoding == null)
       encoding = Encoding.getMimeName(_parseState.getPageEncoding());
 

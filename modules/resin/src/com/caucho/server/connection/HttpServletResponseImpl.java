@@ -881,6 +881,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
       WebApp webApp = _request.getWebApp();
 
+      if (_charEncoding == null && webApp != null && webApp.getJsp() != null)
+        _charEncoding = webApp.getJsp().getCharacterEncoding();
+
       if (_charEncoding == null && webApp != null)
         _charEncoding = webApp.getCharacterEncoding();
 

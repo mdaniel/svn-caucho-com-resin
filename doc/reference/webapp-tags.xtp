@@ -852,6 +852,11 @@ handle invalid .tld files</td>
   <td>if true, velocity-style tags are allowed</td>
   <td>false</td>
 </tr>
+<tr>
+  <td>character-encoding</td>
+  <td>Sets JSP response character encoding; overrides character encoding defined at web-app level</td>
+  <td>false</td>
+</tr>
 </deftable-childtags>
 
 <def title="&lt;jsp> schema">

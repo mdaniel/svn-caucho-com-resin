@@ -63,6 +63,7 @@ public class JspPropertyGroup {
   private Boolean _isXml = null;
   private ArrayList<String> _includePrelude = new ArrayList<String>();
   private ArrayList<String> _includeCoda = new ArrayList<String>();
+  private String _characterEncoding;
 
   // Resin config
   private boolean _precompile = true;
@@ -266,6 +267,16 @@ public class JspPropertyGroup {
   public ArrayList<String> getIncludeCodaList()
   {
     return _includeCoda;
+  }
+
+  public String getCharacterEncoding()
+  {
+    return _characterEncoding;
+  }
+
+  public void setCharacterEncoding(String characterEncoding)
+  {
+    _characterEncoding = characterEncoding;
   }
 
   // Resin config
