@@ -61,8 +61,9 @@ class ForwardResponse extends CauchoResponseWrapper
   void finishRequest()
     throws IOException
   {
-    // server/106f
-    AbstractResponseStream stream = getResponseStream();
+    // server/106f, server/12b2, ioc/0310
+    // XXX remove all on a good regression run
+    //AbstractResponseStream stream = getResponseStream();
 
     // ioc/0310 vs server/12b2
 
@@ -72,7 +73,9 @@ class ForwardResponse extends CauchoResponseWrapper
     if (stream != null)
       stream.finish();
     */
+    /*
     if (stream != null)
       stream.close();
+    */
   }
 }
