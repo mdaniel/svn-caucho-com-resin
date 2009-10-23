@@ -141,6 +141,19 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 </td>
 </tr>
 
+<tr>
+<td>
+<h2><a href="rest.php">REST</a></h2>
+
+<p>REST pages for programmatic access</p>
+
+<?php
+
+foreach (load_pages("rest") as $key => $value) {
+  echo "<a href='rest.php?q='" . $key . "'>" . $key . "</a><br>\n"
+}
+?>
+
 </table>
 
 <?php display_footer("index.php"); ?>

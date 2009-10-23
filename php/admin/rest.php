@@ -10,7 +10,7 @@ if ($_REQUEST['logout'] == 'true') {
 else {
   require "WEB-INF/php/inc.php";
 
-  $g_pages = load_pages("page");
+  $g_pages = load_pages("rest");
 
   $g_page = $_GET['q'];
 
@@ -19,8 +19,6 @@ else {
   }
 
   include_once($g_pages[$g_page]);
-
-  display_footer($g_page);
 }
 
 ?>

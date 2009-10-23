@@ -82,6 +82,38 @@ public class ProbeManager {
     return (SampleCountProbe) probe;
   }
 
+    public static Probe createJmx(String name, String objectName, String attribute)
+  {
+      return _manager.createJmxImpl(name, objectName, attribute);
+  }
+
+    private Probe createJmxImpl(String name, String objectName, String attribute)
+  {
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+	probe = createProbe(new JmxAttributeProbe(name, objectName, attribute));
+    }
+    
+    return probe;
+  }
+
+    public static Probe createJmxDelta(String name, String objectName, String attribute)
+  {
+      return _manager.createJmxDeltaImpl(name, objectName, attribute);
+  }
+
+    private Probe createJmxDeltaImpl(String name, String objectName, String attribute)
+  {
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+	probe = createProbe(new JmxDeltaProbe(name, objectName, attribute));
+    }
+    
+    return probe;
+  }
+
   public static TimeProbe createTimeProbe(String name)
   {
     return _manager.createTimeProbeImpl(name);

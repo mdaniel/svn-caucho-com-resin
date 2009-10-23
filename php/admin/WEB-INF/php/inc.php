@@ -24,6 +24,38 @@ function admin_init($query="", $is_refresh=false)
   global $g_server;
   global $g_page;
 
+  mbean_init();
+  
+  if (! $g_mbean_server) {
+    if ($g_server_id)
+      $title = "Resin: $g_page for server $g_server_id";
+    else
+      $title = "Resin: $g_page for server default";
+
+    display_header("thread.php", $title, $g_server, $query, $is_refresh);
+
+    echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
+    
+    return false;
+  }
+
+  if ($g_server_id)
+    $title = "Resin: $g_page";
+  else
+    $title = "Resin: $g_page";
+
+  return display_header("thread.php", $title, $g_server, $query,
+                        $is_refresh, true);
+}  
+
+function mbean_init()
+{
+  global $g_server_id;
+  global $g_server_index;
+  global $g_mbean_server;
+  global $g_resin;
+  global $g_server;
+
   $g_server_index = $_GET["s"];
 
   if (! empty($_REQUEST["new_s"])) {
@@ -47,48 +79,39 @@ function admin_init($query="", $is_refresh=false)
     $g_mbean_server = new MBeanServer($g_server_id);
 
     $g_server = $g_mbean_server->lookup("resin:type=Server");
-
-    if (! $g_mbean_server) {
-      if ($g_server_id)
-        $title = "Resin: $g_page for server $g_server_id";
-      else
-        $title = "Resin: $g_page for server default";
-
-      display_header("thread.php", $title, $g_server, $query, $is_refresh);
-
-      echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
-    
-      return false;
-    }
   }
 
   if ($g_mbean_server) {
     $g_resin = $g_mbean_server->lookup("resin:type=Resin");
     $g_server = $g_mbean_server->lookup("resin:type=Server");
   }
+}
 
-  if ($g_server_id)
-    $title = "Resin: $g_page";
-  else
-    $title = "Resin: $g_page";
-
-  return display_header("thread.php", $title, $g_server, $query,
-                        $is_refresh, true);
-}  
-
-function load_pages()
+function load_pages($suffix)
 {
-  $dir = opendir("WEB-INF/php");
+  $pages = load_dir_pages("WEB-INF/php", $suffix);
 
-  $pages = null;
+  $config = java("com.caucho.config.Config");
+  $user_path = $config->getProperty("resin_admin_ext_path");
+
+  if ($user_path)
+    $pages = array_merge($pages, load_dir_pages($user_path, $suffix));
+    
+  return $pages;
+}
+
+function load_dir_pages($dir_name, $suffix)
+{
+  $dir = opendir($dir_name);
+
+  $pages = array();
 
   while (($file = readdir($dir))) {
     $values = null;
-    if (preg_match("/(.*)\.page$/", $file, $values)) {
-      // include_once("WEB-INF/php/" . $file);
 
+    if (preg_match("/(.*)\." . $suffix . "$/", $file, $values)) {
       $name = $values[1];
-      $pages[$name] = "WEB-INF/php/" . $file;
+      $pages[$name] = $dir_name . "/" . $file;
     }
   }
 
