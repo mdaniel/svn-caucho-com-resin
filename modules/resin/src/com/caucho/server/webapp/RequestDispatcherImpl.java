@@ -149,16 +149,16 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   {
     CauchoResponse cauchoRes = null;
 
+    boolean allowForward = _webApp.isAllowForwardAfterFlush();
+
     if (res instanceof CauchoResponse) {
       cauchoRes = (CauchoResponse) res;
 
-      cauchoRes.setForwardEnclosed(! _webApp.isAllowForwardAfterFlush());
+      cauchoRes.setForwardEnclosed(! allowForward);
     }
 
     // jsp/15m8
-    if (res.isCommitted()
-        && method == null
-        && ! _webApp.isAllowForwardAfterFlush()) {
+    if (res.isCommitted() && method == null && ! allowForward) {
       IllegalStateException exn;
       exn = new IllegalStateException("forward() not allowed after buffer has committed.");
 
@@ -171,9 +171,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       _webApp.log(exn.getMessage(), exn);
 
       return;
-    } else if (method == null && ! _webApp.isAllowForwardAfterFlush()) {
+    } else if ("error".equals(method) || (method == null && ! allowForward)) {
       res.resetBuffer();
-
 
       if (cauchoRes != null) {
         ServletResponse resp = cauchoRes.getResponse();
