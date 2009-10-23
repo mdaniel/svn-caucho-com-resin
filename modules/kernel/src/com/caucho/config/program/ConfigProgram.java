@@ -66,7 +66,7 @@ public abstract class ConfigProgram {
   public void configure(Object bean)
     throws ConfigException
   {
-    // server/23e7
+    // ioc/23e7
     inject(bean, ConfigContext.create());
   }
 

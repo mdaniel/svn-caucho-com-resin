@@ -136,7 +136,8 @@ public class Listener extends DescriptionGroupConfig {
     _target.inject(_object, env);
 
     if (_init != null) {
-      // _init.configure(_object);
+      // jsp/18n2
+      _init.configure(_object);
 
       _init.init(_object);
     }
