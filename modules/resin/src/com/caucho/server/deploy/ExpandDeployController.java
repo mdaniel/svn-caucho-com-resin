@@ -67,6 +67,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
   private Repository _repository;
   private String _repositoryTag;
+  private String _baseRepositoryTag;
 
   private FileSetType _expandCleanupFileSet;
 
@@ -153,6 +154,22 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public void setRepositoryTag(String tag)
   {
     _repositoryTag = tag;
+  }
+
+  /**
+   * The base repository tag
+   */
+  public String getBaseRepositoryTag()
+  {
+    return _baseRepositoryTag;
+  }
+
+  /**
+   * The base repository tag
+   */
+  public void setBaseRepositoryTag(String tag)
+  {
+    _baseRepositoryTag = tag;
   }
 
   /**
@@ -534,7 +551,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (getRepository() != null && getRepositoryTag() != null) {
       String tag = getRepositoryTag();
-      
       String value = getRepository().getTagRoot(tag);
 
       Environment.addDependency(new RepositoryDependency(tag, value));

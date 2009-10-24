@@ -700,6 +700,7 @@ public class LongKeyLruCache<V> {
    */
   static class ValueIterator<V> implements Iterator<V> {
     private LongKeyLruCache<V> _cache;
+    private CacheItem<V> _entry;
     private int _i = -1;
 
     ValueIterator(LongKeyLruCache<V> cache)
@@ -710,6 +711,7 @@ public class LongKeyLruCache<V> {
     void init(LongKeyLruCache<V> cache)
     {
       _cache = cache;
+      _entry = null;
       _i = -1;
     }
 
@@ -718,6 +720,9 @@ public class LongKeyLruCache<V> {
      */
     public boolean hasNext()
     {
+      if (_entry != null)
+        return true;
+      
       CacheItem<V> []entries = _cache._entries;
       int length = entries.length;
 
@@ -739,15 +744,24 @@ public class LongKeyLruCache<V> {
      */
     public V next()
     {
+      CacheItem<V> entry = _entry;
+
+      if (entry != null) {
+        _entry = entry._nextHash;
+        return entry._value;
+      }
+      
       CacheItem<V> []entries = _cache._entries;
       int length = entries.length;
 
       int i = _i + 1;
       for (; i < length; i++) {
-	CacheItem<V> entry = entries[i];
+	entry = entries[i];
 	
 	if (entry != null) {
+          _entry = entry._nextHash;
 	  _i = i;
+          
 	  return entry._value;
 	}
       }

@@ -71,9 +71,4 @@ public class ReadBlock extends Block {
       freeBuffer(buffer);
     }
   }
-
-  public String toString()
-  {
-    return "ReadBlock[" + getStore() + "," + getBlockId() / Store.BLOCK_SIZE + "]";
-  }
 }

@@ -306,7 +306,9 @@ public final class BlockManager
         for (int i = 0; i < size; i++) {
           dirtyBlock = _writeQueue.get(i);
 
-          if (dirtyBlock.getBlockId() == blockId && dirtyBlock.allocate()) {
+          if (dirtyBlock.getBlockId() == blockId
+              && dirtyBlock.getStore() == store
+              && dirtyBlock.allocate()) {
             break;
           }
           else
@@ -348,11 +350,9 @@ public final class BlockManager
     if (blockId != block.getBlockId()
         || (blockId & Store.BLOCK_INDEX_MASK) != store.getId()
         || block.getStore() != store) {
-      Thread.dumpStack();
       System.out.println("BLOCK: " + Long.toHexString(blockId) + " " + Long.toHexString(block.getBlockId()) + " " + store + " " + block.getStore());
+      Thread.dumpStack();
     }
-
-
 
     return block;
   }

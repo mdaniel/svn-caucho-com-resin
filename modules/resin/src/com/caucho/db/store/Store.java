@@ -1995,10 +1995,9 @@ public class Store {
 
     if (_blockManager != null) {
       _blockManager.freeStore(this);
-      _blockManager.freeStoreId(_id);
     }
 
-    long id = _id;
+    int id = _id;
     _id = 0;
 
     _path = null;
@@ -2016,6 +2015,10 @@ public class Store {
         wrapper.close();
       } catch (Throwable e) {
       }
+    }
+
+    if (_blockManager != null) {
+      _blockManager.freeStoreId(id);
     }
   }
 

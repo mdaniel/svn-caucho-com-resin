@@ -420,6 +420,6 @@ abstract public class Block implements SyncCacheListener {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _store + "," + _blockId / Store.BLOCK_SIZE + "]");
+	    + "[" + _store + "," + Long.toHexString(_blockId) + "]");
   }
 }

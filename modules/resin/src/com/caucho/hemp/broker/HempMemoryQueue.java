@@ -98,7 +98,11 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     _broker = broker;
     _brokerStream = broker.getBrokerStream();
     _actorStream = actorStream;
-    _threadMax = 5;
+
+    if (Alarm.isTest())
+      _threadMax = 1;
+    else
+      _threadMax = 5;
 
     if (name == null)
       name = _actorStream.getJid();
@@ -296,7 +300,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       return;
     */
 
-
     wakeConsumer(packet);
     
     if (Alarm.isTest()) {
@@ -308,7 +311,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
   private void wakeConsumer(Packet packet)
   {
-
     long lastExitTime = _lastExitTime;
     _lastExitTime = Alarm.getCurrentTime();
     

@@ -429,6 +429,11 @@ public class WebApp extends ServletContextImpl
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
 
+      if (_controller.getRepository() != null
+          && _controller.getBaseRepositoryTag() != null) {
+        System.out.println("BRT: " + _controller.getBaseRepositoryTag());
+      }
+
       _jspApplicationContext = new JspApplicationContextImpl(this);
 
       // validation
