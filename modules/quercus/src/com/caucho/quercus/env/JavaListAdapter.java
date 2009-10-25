@@ -68,12 +68,13 @@ public class JavaListAdapter
   {
     int pos = key.toInt();
     int size = getSize();
-    
+
     if (0 <= pos && pos <= size) {
-      if (pos < size)
-        _list.remove(pos);
-      
-      _list.add(pos, value.toJavaObject());
+      if (pos < size) {
+        _list.set(pos, value.toJavaObject());
+      }
+      else
+        _list.add(pos, value.toJavaObject());
 
       return value;
     }

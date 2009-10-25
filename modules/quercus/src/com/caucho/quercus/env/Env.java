@@ -4356,6 +4356,8 @@ public class Env {
     // XXX: why is this logic here?  The def should be correct on the call
     // logic is for JavaMarshal, where can avoid the lookup call
     if (def.getType() != obj.getClass()) {
+      // php/0ceg
+      
       // XXX: what if types are incompatible, does it matter?
       // if it doesn't matter, simplify this to one if with no else
       def = getJavaClassDefinition(obj.getClass());

@@ -38,7 +38,7 @@ public abstract class NumberValue extends Value {
    */
   public int cmp(Value rValue)
   {
-    if (rValue.isBoolean()) {
+    if (rValue.isBoolean() || rValue.isNull()) {
       boolean lBool = toBoolean();
       boolean rBool = rValue.toBoolean();
       

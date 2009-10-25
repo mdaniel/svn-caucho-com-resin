@@ -61,9 +61,6 @@ abstract public class JavaAdapter extends ArrayValue
   
   private JavaClassDef _classDef;
 
-  // Vars to update when matching array item is modified
-  private HashMap<Value,Value> _refs;
-
   protected JavaAdapter(Env env, Object object, JavaClassDef def)
   {
     if (env != null)
@@ -281,26 +278,7 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public final Value put(Value key, Value value)
   { 
-    Value retValue = putImpl(key, value);
-    
-    if (_refs == null)
-      _refs = new HashMap<Value,Value>();
-    
-    if (value instanceof Var) {
-      Var var = (Var) value;
-      
-      var.setReference();
-      
-      _refs.put(key, var);
-    }
-    else {
-      Value ref = _refs.get(key);
-      
-      if (ref != null)
-        ref.set(value);
-    }
-
-    return retValue;
+    return putImpl(key, value);
   }
   
   /**
@@ -369,12 +347,11 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Var getRef(Value index)
   {
-    Var var = new Var(new JavaAdapterVar(this, index));
+    // php/0ceg - Since Java does not support references, the adapter
+    // just creates a new Var, but modifying the var will not modify
+    // the field
     
-    if (_refs == null)
-      _refs = new HashMap<Value,Value>();
-
-    _refs.put(index, var);
+    Var var = new Var(new JavaAdapterVar(this, index));
     
     return var;
   }
@@ -914,9 +891,6 @@ abstract public class JavaAdapter extends ArrayValue
       out.println("]=>");
 
       printDepth(out, nestedDepth * 2);
-      
-      if (_refs != null && _refs.get(key) != null)
-        out.print('&');
       
       mapEntry.getValue().varDump(env, out, nestedDepth, valueSet);
 

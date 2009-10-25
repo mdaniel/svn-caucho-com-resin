@@ -103,7 +103,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   {
     if (key.toInt() != getSize())
       throw new UnsupportedOperationException("random assignment into Collection");
-    
+
     _collection.add(value.toJavaObject());
     
     return value;

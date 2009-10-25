@@ -69,7 +69,7 @@ public class VarVarExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    String varName = _var.evalString(env).intern();
+    String varName = _var.evalString(env);
 
     Value value = env.getValue(varName);
 
@@ -107,9 +107,10 @@ public class VarVarExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    String varName = _var.evalString(env).intern();
+    String varName = _var.evalString(env);
 
-    env.getVar(varName).set(value);
+    // php/0d63
+    env.getVar(varName).set(value.toValue());
   }
 
   /**

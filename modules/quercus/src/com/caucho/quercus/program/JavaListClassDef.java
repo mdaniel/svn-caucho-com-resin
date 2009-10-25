@@ -49,7 +49,7 @@ public class JavaListClassDef extends JavaClassDef {
   {
     if (!_isInit)
       init();
-    
+
     return new JavaListAdapter(env, (List)obj, this);
   }
 }

@@ -31,10 +31,12 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaCollectionAdapter;
+import com.caucho.quercus.env.JavaListAdapter;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.ModuleContext;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents an introspected Java class.
@@ -47,10 +49,10 @@ public class JavaCollectionClassDef extends JavaClassDef {
 
   public Value wrap(Env env, Object obj)
   {
-    if (!_isInit)
+    if (! _isInit)
       init();
-    
-    return new JavaCollectionAdapter(env, (Collection)obj, this);
+
+    return new JavaCollectionAdapter(env, (Collection) obj, this);
   }
 }
 
