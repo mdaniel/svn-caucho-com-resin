@@ -621,11 +621,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 	
       E controller = createController(name);
 
-      if (controller != null) {
-	controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+      if (controller == null)
+        return null;
 
-	_controllerNames.add(name); // server/1d19
-      }
+      controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+
+      _controllerNames.add(name); // server/1d19
       
       return controller;
     } finally {

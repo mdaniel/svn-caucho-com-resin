@@ -49,12 +49,15 @@ public class WebAppVersioningController extends WebAppController {
   private static final long EXPIRE_PERIOD = 3600 * 1000L;
 
   private long _versionRolloverTime = EXPIRE_PERIOD;
-  
+
   private ArrayList<WebAppController> _controllerList
     = new ArrayList<WebAppController>();
 
   private final WebAppExpandDeployGenerator _generator;
 
+  // if the versioning has a controller matching the un-versioned path
+  private WebAppController _baseController;
+  
   private long _restartTime;
   
   private WebAppController _primaryController;
@@ -62,11 +65,11 @@ public class WebAppVersioningController extends WebAppController {
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
   public WebAppVersioningController(String name,
-				    String contextPath,
+				    String baseContextPath,
 				    WebAppExpandDeployGenerator generator,
 				    WebAppContainer container)
   {
-    super(name, contextPath, null, container);
+    super(name, baseContextPath, null, container);
 
     _generator = generator;
   }
@@ -74,6 +77,11 @@ public class WebAppVersioningController extends WebAppController {
   void setModified(boolean isModified)
   {
     _isModified = isModified;
+  }
+
+  void setBaseController(WebAppController baseController)
+  {
+    _baseController = baseController;
   }
 
   public boolean isVersioning()
@@ -161,16 +169,24 @@ public class WebAppVersioningController extends WebAppController {
 
     try {
       synchronized (this) {
-        String versionName = _generator.getPrimaryVersion(getId());
-
-        if (versionName == null) {
-          throw new ConfigException(L.l(this + " does not have an implementing version"));
-        }
-
         WebAppController oldPrimaryController = _primaryController;
         
-        WebAppController newPrimaryController
-          = _container.getWebAppGenerator().findController(versionName);
+        WebAppController newPrimaryController = null;
+        
+        String versionName = _generator.getPrimaryVersion(getId());
+
+        if (versionName != null) {
+          newPrimaryController
+            = _container.getWebAppGenerator().findController(versionName);
+        } else if (_baseController != null
+                   && _controllerList.size() == 0) {
+          // server/1h52
+          newPrimaryController = _baseController;
+        }
+
+        if (newPrimaryController == null) {
+          throw new ConfigException(L.l(this + " does not have an implementing version"));
+        }
 
         if (newPrimaryController == oldPrimaryController)
           return;

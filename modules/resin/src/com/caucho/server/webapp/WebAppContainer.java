@@ -996,7 +996,7 @@ public class WebAppContainer
    *
    * @return the controller or null if none match the url.
    */
-  private WebAppController getWebAppController(Invocation invocation)
+  protected WebAppController getWebAppController(Invocation invocation)
   {
     WebAppController controller = findByURI(invocation.getURI());
     if (controller == null)

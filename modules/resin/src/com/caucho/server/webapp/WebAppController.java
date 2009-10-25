@@ -66,8 +66,8 @@ public class WebAppController
   private WebAppController _parent;
 
   // The context path is the URL prefix for the web-app
-  private String _contextPath;
-  private String _versionContextPath;
+  private final String _contextPath;
+  private final String _baseContextPath;
   private String _version = "";
 
   // true if the versioned web-app is an alias for the base web-app
@@ -104,22 +104,21 @@ public class WebAppController
     this("/", "/", null, null);
   }
 
-  public WebAppController(String versionContextPath,
-                          String contextPath,
+  public WebAppController(String contextPath,
+                          String baseContextPath,
                           Path rootDirectory,
                           WebAppContainer container)
   {
-    super(versionContextPath, rootDirectory);
+    super(contextPath, rootDirectory);
 
     _container = container;
 
-    setContextPath(contextPath);
-
-    _versionContextPath = versionContextPath;
+    _contextPath = contextPath;
+    _baseContextPath = baseContextPath;
   }
 
   /**
-   * Returns the webApp's canonical context path
+   * Returns the webApp's canonical context path, e.g. /foo-1.0
    */
   public String getContextPath()
   {
@@ -127,25 +126,11 @@ public class WebAppController
   }
 
   /**
-   * Returns the webApp's version context path
+   * Returns the webApp's base context path, e.g. /foo for /foo-1.0
    */
-  public String getVersionContextPath()
+  public String getBaseContextPath()
   {
-    return _versionContextPath;
-  }
-
-  /**
-   * Sets the webApp's context path
-   */
-  public void setContextPath(String contextPath)
-  {
-    if (! contextPath.equals("") && ! contextPath.startsWith("/"))
-      contextPath = "/" + contextPath;
-
-    if (contextPath.endsWith("/"))
-      contextPath = contextPath.substring(0, contextPath.length() - 1);
-
-    _contextPath = contextPath;
+    return _baseContextPath;
   }
 
   /**
@@ -154,10 +139,10 @@ public class WebAppController
   public String getContextPath(String uri)
   {
     if (getConfig() == null || getConfig().getURLRegexp() == null) {
-      if (uri.startsWith(getVersionContextPath()))
-        return getVersionContextPath();
-      else
+      if (uri.startsWith(getContextPath()))
         return getContextPath();
+      else
+        return getBaseContextPath();
     }
 
     Pattern regexp = getConfig().getURLRegexp();
@@ -420,9 +405,9 @@ public class WebAppController
   public boolean isNameMatch(String url)
   {
     if (CauchoSystem.isCaseInsensitive())
-      return url.equalsIgnoreCase(_versionContextPath);
+      return url.equalsIgnoreCase(_contextPath);
     else
-      return url.equals(_versionContextPath);
+      return url.equals(_contextPath);
   }
 
   /**
@@ -445,7 +430,7 @@ public class WebAppController
         //  The contextPath comes from current web-app
         WebAppController mergedController
           = new WebAppController(getContextPath(),
-                                 getContextPath(),
+                                 getBaseContextPath(),
                                  getRootDirectory(),
                                  _container);
 
@@ -550,7 +535,7 @@ public class WebAppController
    * Creates the webApp.
    */
   @Override
-  protected void configureInstanceVariables(WebApp app)
+  protected void configureInstanceVariables(WebApp webApp)
     throws Throwable
   {
     InjectManager beanManager = InjectManager.create();
@@ -559,21 +544,21 @@ public class WebAppController
     factory.type(ServletContext.class);
     // factory.stereotype(CauchoDeploymentLiteral.create());
 
-    beanManager.addBean(factory.singleton(app));
+    beanManager.addBean(factory.singleton(webApp));
 
     Config.setProperty("webApp", getVar());
     Config.setProperty("app", getVar());
 
-    app.setRegexp(_regexpValues);
-    app.setDynamicDeploy(isDynamicDeploy());
+    webApp.setRegexp(_regexpValues);
+    webApp.setDynamicDeploy(isDynamicDeploy());
 
     if (_oldWebAppController != null
         && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
-      app.setOldWebApp(_oldWebAppController.request(),
-                       _oldWebAppExpireTime);
+      webApp.setOldWebApp(_oldWebAppController.request(),
+                          _oldWebAppExpireTime);
     }
 
-    super.configureInstanceVariables(app);
+    super.configureInstanceVariables(webApp);
   }
 
   @Override

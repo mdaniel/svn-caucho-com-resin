@@ -57,6 +57,7 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
+import com.caucho.server.repository.Repository;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicLogin;
 import com.caucho.security.Login;
@@ -70,6 +71,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
+import com.caucho.server.deploy.RepositoryDependency;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
@@ -165,7 +167,7 @@ public class WebApp extends ServletContextImpl
   private final Path _appDir;
 
   // The context path
-  private String _contextPath = "";
+  private String _baseContextPath = "";
   private String _versionContextPath = "";
 
   // A description
@@ -358,10 +360,8 @@ public class WebApp extends ServletContextImpl
   {
     _server = Server.getCurrent();
 
-    String contextPath = controller.getContextPath();
-    setContextPathId(contextPath);
-
-    setVersionContextPath(controller.getId());
+    _versionContextPath = controller.getContextPath();
+    _baseContextPath = controller.getBaseContextPath();
 
     _controller = controller;
     _appDir = controller.getRootDirectory();
@@ -431,7 +431,10 @@ public class WebApp extends ServletContextImpl
 
       if (_controller.getRepository() != null
           && _controller.getBaseRepositoryTag() != null) {
-        System.out.println("BRT: " + _controller.getBaseRepositoryTag());
+        String baseTag = _controller.getBaseRepositoryTag();
+        String baseValue = _controller.getRepository().getTagRoot(baseTag);
+
+        _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));
       }
 
       _jspApplicationContext = new JspApplicationContextImpl(this);
@@ -702,7 +705,7 @@ public class WebApp extends ServletContextImpl
   public String getContextPath()
   {
     if (isVersionAlias())
-      return _contextPath;
+      return _baseContextPath;
     else
       return _versionContextPath;
   }
@@ -712,7 +715,7 @@ public class WebApp extends ServletContextImpl
    */
   private void setContextPath(String contextPath)
   {
-    _contextPath = contextPath;
+    _baseContextPath = contextPath;
   }
 
   /**
@@ -3137,7 +3140,20 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(errorInvocation, rawURI);
       decoder.splitQuery(dispatchInvocation, rawURI);
 
+      // server/1h57
+      boolean isSameWebApp = false;
       if (_parent != null) {
+        WebAppController subController
+          = _parent.getWebAppController(includeInvocation);
+
+        if (subController != null
+            && (_controller.getBaseContextPath()
+                .equals(subController.getBaseContextPath()))) {
+          isSameWebApp = true;
+        }
+      }
+
+      if (_parent != null && ! isSameWebApp) {
         _parent.buildIncludeInvocation(includeInvocation);
         _parent.buildForwardInvocation(forwardInvocation);
         _parent.buildErrorInvocation(errorInvocation);

@@ -252,6 +252,84 @@ public class WebAppExpandDeployGenerator
     if (! name.startsWith(_urlPrefix))
       return null;
 
+    String segmentName = buildSegmentName(name);
+
+    if (segmentName == null)
+      return null;
+
+    String baseSegmentName = buildBaseSegmentName(segmentName);
+    String version = buildVersion(segmentName);
+
+    String contextPath = buildContextPath(segmentName);
+    String baseContextPath = buildContextPath(baseSegmentName);
+
+    String repositoryTag = buildRepositoryTag(segmentName);
+    String baseRepositoryTag = buildRepositoryTag(baseSegmentName);
+
+    Path rootDirectory = buildRootDirectory(segmentName);
+
+    WebAppVersioningController baseController = null;
+
+    if (contextPath.equals(baseContextPath)
+        && (getRepository() != null
+            && getRepository().getTagRoot(baseRepositoryTag) != null)) {
+      baseController
+        = new WebAppVersioningController(baseSegmentName,
+                                         baseContextPath,
+                                         this,
+                                         _container);
+    }
+    
+    if (! rootDirectory.isDirectory()
+        && (getRepository() != null
+            && getRepository().getTagRoot(repositoryTag) == null)) {
+      return baseController;
+    }
+
+    WebAppController controller
+      = new WebAppController(contextPath, baseContextPath,
+                             rootDirectory, _container);
+
+    controller.setWarName(segmentName.substring(1));
+
+    controller.setParentWebApp(_parent);
+
+    controller.setDynamicDeploy(true);
+    controller.setSourceType("expand");
+
+    controller.setVersion(version);
+
+    controller.setRepository(getRepository());
+    controller.setRepositoryTag(repositoryTag);
+    controller.setBaseRepositoryTag(baseRepositoryTag);
+
+    if (baseController != null) {
+      // server/1h52
+      initBaseController(controller);
+      
+      baseController.setBaseController(controller);
+
+      return baseController;
+    }
+    else if ((getRepository() != null
+              && getRepository().getTagRoot(baseRepositoryTag) != null)) {
+      WebAppController versionController
+        = _container.getWebAppGenerator().findController(baseSegmentName);
+
+      if (versionController instanceof WebAppVersioningController) {
+        ((WebAppVersioningController) versionController).setModified(true);
+      }
+    }
+
+    return controller;
+  }
+
+  /**
+   * Returns the segment-name of the web-app, i.e. the versioned
+   * contextPath like /foo-1.0 or /ROOT-3.0.
+   */
+  private String buildSegmentName(String name)
+  {
     String segmentName = name.substring(_urlPrefix.length());
 
     Path webAppRoot = _contextPathMap.get(segmentName);
@@ -261,8 +339,6 @@ public class WebAppExpandDeployGenerator
     else if (segmentName.indexOf('/', 1) > 0)
       return null;
 
-    String contextPath = segmentName;
-
     if (segmentName.equals("")) {
       if (CaseInsensitive.isCaseInsensitive())
         segmentName = "/root";
@@ -270,19 +346,95 @@ public class WebAppExpandDeployGenerator
         segmentName = "/ROOT";
     }
 
-    // server/26cg
-    if (contextPath.equals("/ROOT"))
-      contextPath = "";
-    else if (contextPath.equalsIgnoreCase("/root")
-             && CaseInsensitive.isCaseInsensitive())
-      contextPath = "";
+    return segmentName;
+  }
 
-    if (isVersioning())
-      return createVersioningController(name, contextPath, segmentName);
+  /**
+   * Returns the base segment-name of the web-app, i.e. the unversioned
+   * contextPath like /foo or /ROOT.
+   */
+  private String buildBaseSegmentName(String name)
+  {
+    int slash = name.lastIndexOf('/');
+    int p = name.indexOf('-');
+
+    if (p > 0 && (slash < p))
+      return name.substring(0, p);
+    else
+      return name;
+  }
+
+  /**
+   * Returns the version of the web-app
+   */
+  private String buildVersion(String name)
+  {
+    int slash = name.lastIndexOf('/');
+    int p = name.indexOf('-');
+
+    if (p > 0 && (slash < p))
+      return name.substring(p + 1);
+    else
+      return "";
+  }
+
+  /**
+   * Returns the context path of the web-app, i.e.
+   * converting "/ROOT" to "";
+   */
+  private String buildContextPath(String name)
+  {
+    // server/26cg
+    if (name.equals("/ROOT"))
+      return _urlPrefix;
+    else if (name.equalsIgnoreCase("/root")
+             && CaseInsensitive.isCaseInsensitive())
+      return _urlPrefix;
+    else
+      return _urlPrefix + name;
+  }
+
+  /**
+   * Returns the repository tag of the web-app, e.g.
+   * wars/stage/my-host/foo-1.0
+   */
+  private String buildRepositoryTag(String segmentName)
+  {
+    return getRepositoryTag() + segmentName;
+  }
+
+  private Path buildRootDirectory(String segmentName)
+  {
+    String archiveName = segmentName + ".war";
+    Path jarPath = getArchiveDirectory().lookup("./" + archiveName);
+
+    Path rootDirectory;
+
+    if (jarPath.isDirectory()) {
+      //rootDirectory = getExpandDirectory().lookup("./" + archiveName);
+      // server/10kw
+      rootDirectory = jarPath;
+      jarPath = null;
+    }
     else {
-      return makeController(name,
-                            _urlPrefix + contextPath,
-                            _urlPrefix + segmentName);
+      // server/003j
+      rootDirectory = getExpandDirectory().lookup("./" + segmentName);
+    }
+
+    return rootDirectory;
+  }
+
+  private void initBaseController(WebAppController controller)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(controller.getParentClassLoader());
+
+      controller.init();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
