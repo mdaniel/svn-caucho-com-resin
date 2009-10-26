@@ -248,6 +248,30 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     return EVAL_PAGE;
   }
 
+  private String getCharEncoding()
+  {
+    if (_charEncoding != null && !"".equals(_charEncoding))
+      return _charEncoding;
+
+    String charEncoding = _charEncoding;
+
+    if (_charEncoding == null || "".equals(_charEncoding))
+      charEncoding = null;
+
+    if (charEncoding == null) {
+      //XXX performance?
+      WebApp webApp = WebApp.getCurrent();
+
+      if (webApp.getJsp() != null)
+        charEncoding = webApp.getJsp().getPageEncoding();
+
+      if (charEncoding == null)
+        charEncoding = webApp.getCharacterEncoding();
+    }
+
+    return charEncoding;
+  }
+
   private void handleBody(BodyContentImpl body)
     throws JspException, ServletException, IOException
   {
@@ -293,21 +317,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
 	
 	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
 
-        String charEncoding = _charEncoding;
-
-        if (_charEncoding == null || "".equals(_charEncoding))
-          charEncoding = null;
-
-        if (charEncoding == null) {
-          //XXX performance?
-          WebApp webApp = WebApp.getCurrent();
-
-          if (webApp.getJsp() != null)
-            charEncoding = webApp.getJsp().getPageEncoding();
-
-          if (charEncoding == null)
-            charEncoding = webApp.getCharacterEncoding();
-        }
+        String charEncoding = getCharEncoding();
 
         if (charEncoding != null)
           response.getResponseStream().setEncoding(charEncoding);
@@ -346,21 +356,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       ServletRequest request = pageContext.getRequest();
       CauchoResponse response = (CauchoResponse) pageContext.getResponse();
 
-      String charEncoding = _charEncoding;
-
-      if (_charEncoding == null || "".equals(_charEncoding))
-        charEncoding = null;
-
-      if (charEncoding == null) {
-        //XXX performance?
-        WebApp webApp = WebApp.getCurrent();
-
-        if (webApp.getJsp() != null)
-          charEncoding = webApp.getJsp().getPageEncoding();
-
-        if (charEncoding == null)
-          charEncoding = webApp.getCharacterEncoding();
-      }
+      String charEncoding = getCharEncoding();
 
       if (charEncoding != null)
         response.getResponseStream().setEncoding(charEncoding);
