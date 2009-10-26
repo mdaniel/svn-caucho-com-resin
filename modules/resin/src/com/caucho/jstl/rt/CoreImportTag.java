@@ -33,6 +33,7 @@ import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.ResinJspWriter;
 import com.caucho.jstl.NameValueTag;
 import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -291,9 +292,25 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
                                      url));
 	
 	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
-        
-        if (_charEncoding != null && ! "".equals(_charEncoding))
-          response.getResponseStream().setEncoding(_charEncoding);
+
+        String charEncoding = _charEncoding;
+
+        if (_charEncoding == null || "".equals(_charEncoding))
+          charEncoding = null;
+
+        if (charEncoding == null) {
+          //XXX performance?
+          WebApp webApp = WebApp.getCurrent();
+
+          if (webApp.getJsp() != null)
+            charEncoding = webApp.getJsp().getPageEncoding();
+
+          if (charEncoding == null)
+            charEncoding = webApp.getCharacterEncoding();
+        }
+
+        if (charEncoding != null)
+          response.getResponseStream().setEncoding(charEncoding);
 
         final ServletRequest request = pageContext.getRequest();
 
@@ -329,9 +346,25 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       ServletRequest request = pageContext.getRequest();
       CauchoResponse response = (CauchoResponse) pageContext.getResponse();
 
-      if (_charEncoding != null && ! "".equals(_charEncoding))
-        response.getResponseStream().setEncoding(_charEncoding);
-      
+      String charEncoding = _charEncoding;
+
+      if (_charEncoding == null || "".equals(_charEncoding))
+        charEncoding = null;
+
+      if (charEncoding == null) {
+        //XXX performance?
+        WebApp webApp = WebApp.getCurrent();
+
+        if (webApp.getJsp() != null)
+          charEncoding = webApp.getJsp().getPageEncoding();
+
+        if (charEncoding == null)
+          charEncoding = webApp.getCharacterEncoding();
+      }
+
+      if (charEncoding != null)
+        response.getResponseStream().setEncoding(charEncoding);
+
       RequestDispatcher disp = request.getRequestDispatcher(url);
 
       disp.include(request, response);

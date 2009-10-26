@@ -1419,14 +1419,16 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
   public AbstractResponseStream getResponseStream()
   {
-    String encoding = getCharacterEncoding();
-
-    // server/053y
-    try {
-      _responseStream.setEncoding(encoding);
-    } catch (Exception e) {
+    // jsp/(1cie, 1civ, 1ciw, 1cir), server/053y 
+    if (_responseStream.getEncoding() == null) {
+      String encoding = getCharacterEncoding();
+      // server/053y
+      try {
+        _responseStream.setEncoding(encoding);
+      } catch (Exception e) {
+      }
     }
-    
+
     return _responseStream;
   }
 

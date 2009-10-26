@@ -77,6 +77,12 @@ public class BodyResponseStream extends AbstractResponseStream {
     _encodingReader = null;
   }
 
+  @Override
+  public String getEncoding()
+  {
+    return _encoding;
+  }
+
   public void setEncoding(String encoding)
   {
     _encoding = encoding;
@@ -255,9 +261,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   /**
    * Writes the next chunk of data to the response stream.
    *
-   * @param buf the buffer containing the data
-   * @param offset start offset into the buffer
-   * @param length length of the data in the buffer
+   * @param ch - character to write
    */
   public void write(int ch)
     throws IOException

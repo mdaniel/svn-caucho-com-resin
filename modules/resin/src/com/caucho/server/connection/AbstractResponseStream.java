@@ -67,7 +67,12 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   {
     return false;
   }
-  
+
+  public String getEncoding()
+  {
+    return null;
+  }
+
   /**
    * Sets the encoding.
    */
