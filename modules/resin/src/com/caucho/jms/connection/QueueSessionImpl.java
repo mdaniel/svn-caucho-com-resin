@@ -72,32 +72,7 @@ public class QueueSessionImpl extends JmsSession
   public QueueReceiver createReceiver(Queue queue, String messageSelector)
     throws JMSException
   {
-    checkOpen();
-
-    if (queue == null)
-      throw new InvalidDestinationException(L.l("queue is null.  Destination may not be null for Session.createReceiver"));
-    
-    if (! (queue instanceof AbstractQueue))
-      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
-						queue));
-
-    AbstractQueue dest = (AbstractQueue) queue;
-
-    if (dest instanceof TemporaryQueueImpl) {
-      TemporaryQueueImpl temp = (TemporaryQueueImpl) dest;
-
-      if (temp.getSession() != this) {
-        throw new javax.jms.IllegalStateException(L.l("temporary queue '{0}' does not belong to this session '{1}'",
-                                                      queue, this));
-      }
-    }
-
-    QueueReceiverImpl receiver
-      = new QueueReceiverImpl(this, dest, messageSelector);
-    
-     addConsumer(receiver);
-
-    return receiver;
+    return (QueueReceiver)createConsumer(queue, messageSelector);
   }
 
   /**

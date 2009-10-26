@@ -29,17 +29,14 @@
 
 package com.caucho.jms.connection;
 
-import com.caucho.jms.message.*;
-import com.caucho.jms.queue.*;
-import com.caucho.jms.selector.Selector;
-import com.caucho.jms.selector.SelectorParser;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.AlarmListener;
-
-import javax.jms.*;
 import java.util.logging.Logger;
-import java.util.logging.Level;
+
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueReceiver;
+
+import com.caucho.jms.queue.AbstractQueue;
+import com.caucho.util.L10N;
 
 /**
  * A basic message consumer.
@@ -57,6 +54,15 @@ public class QueueReceiverImpl extends MessageConsumerImpl
     throws JMSException
   {
     super(session, queue, messageSelector, false);
+  }
+  
+  QueueReceiverImpl(JmsSession session,
+      AbstractQueue queue,
+      String messageSelector,
+      boolean noLocal)
+    throws JMSException
+  {
+    super(session, queue, messageSelector, noLocal);
   }
 
   public Queue getQueue()

@@ -443,7 +443,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (destination instanceof AbstractQueue) {
       AbstractQueue dest = (AbstractQueue) destination;
 
-      consumer = new MessageConsumerImpl(this, dest, messageSelector, noLocal);
+      consumer = new QueueReceiverImpl(this, dest, messageSelector, noLocal);
     }
     else if (destination instanceof AbstractTopic) {
       AbstractTopic dest = (AbstractTopic) destination;

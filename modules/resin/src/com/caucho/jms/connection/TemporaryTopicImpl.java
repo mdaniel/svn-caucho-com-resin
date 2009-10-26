@@ -85,7 +85,7 @@ public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
     throws JMSException
   {
     if (_messageConsumerCount.get() > 0)
-      throw new javax.jms.IllegalStateException(L.l("temporary queue is still active"));
+      throw new javax.jms.IllegalStateException(L.l("temporary topic is still active"));
   }
 }
 

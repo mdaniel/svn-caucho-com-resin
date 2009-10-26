@@ -85,32 +85,7 @@ public class TopicSessionImpl extends JmsSession
                                           boolean noLocal)
     throws JMSException
   {
-    checkOpen();
-
-    if (topic == null)
-      throw new InvalidDestinationException(L.l("topic is null.  Destination may not be null for Session.createSubscriber"));
-    
-    if (! (topic instanceof AbstractTopic))
-      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
-						topic));
-
-    AbstractTopic dest = (AbstractTopic) topic;
-
-    if (dest instanceof TemporaryTopicImpl) {
-      TemporaryTopicImpl temp = (TemporaryTopicImpl) dest;
-
-      if (temp.getSession() != this) {
-        throw new javax.jms.IllegalStateException(L.l("temporary topic '{0}' does not belong to this session '{1}'",
-                                                      topic, this));
-      }
-    }
-
-    TopicSubscriberImpl subscriber
-      = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
-    
-    addConsumer(subscriber);
-
-    return subscriber;
+    return (TopicSubscriber)createConsumer(topic, messageSelector, noLocal);   
   }
 
   /**
