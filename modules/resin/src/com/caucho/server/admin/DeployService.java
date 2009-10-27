@@ -105,12 +105,12 @@ public class DeployService extends SimpleActor
   {
     if (_isInit.getAndSet(true))
       return;
-    
+
     _server = Server.getCurrent();
 
     if (_server == null)
       throw new ConfigException(L.l("resin:DeployService requires an active Server."));
-    
+
     _repository = new RepositoryManager();
 
     getBroker().addActor(this);
@@ -151,22 +151,27 @@ public class DeployService extends SimpleActor
     if (entry == null) {
       log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
-      getBrokerStream().queryError(id, from, to, query, 
+      getBrokerStream().queryError(id, from, to, query,
                                    new ActorError(ActorError.TYPE_CANCEL,
                                                   ActorError.ITEM_NOT_FOUND,
                                                   "unknown tag"));
       return;
     }
-    
+
     log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
     boolean result
       = _repository.setTag(tag, entry.getRoot(), query.getUser(),
-			   query.getMessage(), query.getVersion());
+<<<<<<< .mine
+                           query.getMessage(), query.getVersion());
+
+=======
+                           query.getMessage(), query.getVersion());
 
     System.out.println("ROOT: " + tag + " " + entry.getRoot()
                        + " " + _repository.getTag(tag));
-    
+
+>>>>>>> .r6219
     getBrokerStream().queryResult(id, from, to, result);
   }
 
@@ -176,10 +181,10 @@ public class DeployService extends SimpleActor
                         String from,
                         RemoveTagQuery query)
   {
-    boolean result = _repository.removeTag(query.getTag(), 
-                                           query.getUser(), 
+    boolean result = _repository.removeTag(query.getTag(),
+                                           query.getUser(),
                                            query.getMessage());
-    
+
     getBrokerStream().queryResult(id, from, to, result);
   }
 
@@ -188,7 +193,7 @@ public class DeployService extends SimpleActor
                                DeploySendQuery query)
   {
     String sha1 = query.getSha1();
-    
+
     if (log.isLoggable(Level.FINER))
       log.finer(this + " sendFileQuery sha1=" + sha1);
 
@@ -197,11 +202,11 @@ public class DeployService extends SimpleActor
       is = query.getInputStream();
 
       _repository.writeRawGitFile(sha1, is);
-    
+
       getBrokerStream().queryResult(id, from, to, true);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       getBrokerStream().queryResult(id, from, to, false);
     } finally {
       IoUtil.close(is);
@@ -219,7 +224,7 @@ public class DeployService extends SimpleActor
     boolean result
       = _repository.setTag(tag, hex, query.getUser(),
                            query.getMessage(), query.getVersion());
-    
+
     getBrokerStream().queryResult(id, from, to, String.valueOf(result));
 
     return true;
@@ -235,7 +240,7 @@ public class DeployService extends SimpleActor
 
     Pattern pattern = Pattern.compile(tagsQuery.getPattern());
 
-    for (Map.Entry<String, RepositoryTagEntry> entry : 
+    for (Map.Entry<String, RepositoryTagEntry> entry :
          _repository.getTagMap().entrySet()) {
       String tag = entry.getKey();
 
@@ -259,7 +264,7 @@ public class DeployService extends SimpleActor
                                   ControllerDeployQuery query)
   {
     String status = deploy(query.getTag());
-    
+
     log.fine(this + " deploy '" + query.getTag() + "' -> " + status);
 
     getBrokerStream().queryResult(id, from, to, true);
@@ -273,7 +278,7 @@ public class DeployService extends SimpleActor
     int q = gitPath.indexOf('/', p + 1);
     int r = gitPath.lastIndexOf('/');
 
-    if (p < 0 || q < 0 || r < 0) 
+    if (p < 0 || q < 0 || r < 0 || r <= q)
       return L.l("'{0}' is an unknown type", gitPath);
 
     String type = gitPath.substring(0, p);
@@ -324,7 +329,7 @@ public class DeployService extends SimpleActor
                                  ControllerStartQuery query)
   {
     String status = start(query.getTag());
-    
+
     log.fine(this + " start '" + query.getTag() + "' -> " + status);
 
     getBrokerStream().queryResult(id, from, to, true);
@@ -345,7 +350,7 @@ public class DeployService extends SimpleActor
       return controller.getState();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return e.toString();
     }
   }
@@ -360,7 +365,7 @@ public class DeployService extends SimpleActor
                                 ControllerStopQuery query)
   {
     String status = stop(query.getTag());
-    
+
     log.fine(this + " stop '" + query.getTag() + "' -> " + status);
 
     getBrokerStream().queryResult(id, from, to, true);
@@ -381,7 +386,7 @@ public class DeployService extends SimpleActor
       return controller.getState();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return e.toString();
     }
   }
@@ -429,7 +434,7 @@ public class DeployService extends SimpleActor
                    tag);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return e.toString();
     }
   }
@@ -468,7 +473,7 @@ public class DeployService extends SimpleActor
 
       if (controller.destroy()) {
         _repository.removeTag(tag, user, message);
-        
+
         return "undeployed";
       }
       else
@@ -638,7 +643,7 @@ public class DeployService extends SimpleActor
 
     String errorMessage = statusMessage(tag);
     String state = null;
-    
+
     StatusQuery result = new StatusQuery(tag, state, errorMessage);
 
     getBrokerStream().queryResult(id, from, to, result);
@@ -652,7 +657,7 @@ public class DeployService extends SimpleActor
     int q = tag.indexOf('/', p + 1);
     int r = tag.lastIndexOf('/');
 
-    if (p < 0 || q < 0 || r < 0) 
+    if (p < 0 || q < 0 || r < 0)
       return L.l("'{0}' is an unknown type", tag);
 
     String type = tag.substring(0, p);
@@ -711,7 +716,7 @@ public class DeployService extends SimpleActor
     int q = tag.indexOf('/', p + 1);
     int r = tag.lastIndexOf('/');
 
-    if (p < 0 || q < 0 || r < 0) 
+    if (p < 0 || q < 0 || r < 0)
       return null;
 
     String type = tag.substring(0, p);
