@@ -702,8 +702,8 @@ public class ServletConfigImpl
         _servletName,
         _servletClassName));
 
-    for (Map.Entry<String, String> param : config._initParams
-      .entrySet()) {
+    for (Map.Entry<String, String> param
+           : config._initParams.entrySet()) {
       if (_paramNames.contains(param.getKey())) {
       }
       else if (! _initParams.containsKey(param.getKey()))

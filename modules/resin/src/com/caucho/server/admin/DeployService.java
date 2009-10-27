@@ -162,16 +162,8 @@ public class DeployService extends SimpleActor
 
     boolean result
       = _repository.setTag(tag, entry.getRoot(), query.getUser(),
-<<<<<<< .mine
                            query.getMessage(), query.getVersion());
-
-=======
-                           query.getMessage(), query.getVersion());
-
-    System.out.println("ROOT: " + tag + " " + entry.getRoot()
-                       + " " + _repository.getTag(tag));
-
->>>>>>> .r6219
+    
     getBrokerStream().queryResult(id, from, to, result);
   }
 
