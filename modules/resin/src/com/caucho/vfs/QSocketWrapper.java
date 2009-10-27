@@ -249,7 +249,7 @@ public class QSocketWrapper extends QSocket {
     if (_streamImpl == null)
       _streamImpl = new SocketStream();
 
-    _streamImpl.init(getInputStream(), getOutputStream());
+    _streamImpl.init(_s);
 
     return _streamImpl;
   }

@@ -153,8 +153,9 @@ public class TcpDuplexController extends ConnectionController {
       ReadStream is = _is;
       TcpDuplexHandler handler = _handler;
 
-      if (conn == null || is == null || handler == null)
+      if (conn == null || is == null || handler == null) {
         return false;
+      }
 
       if (is.getAvailable() > 0) {
         isValid = true;

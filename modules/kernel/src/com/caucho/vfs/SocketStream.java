@@ -369,5 +369,10 @@ public class SocketStream extends StreamImpl {
         s.close();
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _s + "]";
+  }
 }
 

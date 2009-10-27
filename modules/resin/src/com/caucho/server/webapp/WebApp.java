@@ -2961,6 +2961,8 @@ public class WebApp extends ServletContextImpl
 
       return invocation;
     } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
       FilterChain chain = new ExceptionFilterChain(e);
       chain = new WebAppFilterChain(chain, this);
       invocation.setDependency(AlwaysModified.create());

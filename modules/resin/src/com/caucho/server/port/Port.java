@@ -1470,8 +1470,10 @@ public class Port extends TaskWorker
     if (isClosed())
       return false;
 
-    if (is.getBufferAvailable() > 0)
+    if (is.getBufferAvailable() > 0) {
+      System.out.println("DATA:");
       return true;
+    }
 
     long timeout = getKeepaliveTimeout();
 
