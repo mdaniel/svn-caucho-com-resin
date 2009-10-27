@@ -281,7 +281,7 @@ public class WebAppSingleDeployGenerator
     // last controller has priority.
     if (controller.getRootDirectory().equals(_controller.getRootDirectory())) {
       // server/1h10
-      // XXX: controller.setContextPath(_controller.getContextPath());
+      controller.setContextPath(_controller.getContextPath());
       
       controller.setDynamicDeploy(false);
       

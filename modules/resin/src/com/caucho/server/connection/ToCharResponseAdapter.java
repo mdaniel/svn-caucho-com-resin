@@ -102,7 +102,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
   }
 
   class ToCharResponseStreamWrapper extends ToCharResponseStream {
-    protected String getEncoding()
+    public String getEncoding()
     {
       return getResponse().getCharacterEncoding();
     }

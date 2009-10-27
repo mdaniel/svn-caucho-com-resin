@@ -418,7 +418,8 @@ public class WebAppExpandDeployGenerator
     }
     else {
       // server/003j
-      rootDirectory = getExpandDirectory().lookup("./" + segmentName);
+      rootDirectory
+        = getExpandDirectory().lookup("./" + getExpandPrefix() + segmentName);
     }
 
     return rootDirectory;
@@ -596,8 +597,13 @@ public class WebAppExpandDeployGenerator
 
       WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
 
-      if (cfg != null)
+      if (cfg != null) {
+        // server/1h11
+        if (cfg.getContextPath() != null)
+          controller.setContextPath(cfg.getContextPath());
+
         controller.addConfigDefault(cfg);
+      }
     } catch (ConfigException e) {
       log.warning(e.toString());
       log.log(Level.FINEST, e.toString(), e);

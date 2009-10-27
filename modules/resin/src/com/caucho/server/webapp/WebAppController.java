@@ -66,7 +66,8 @@ public class WebAppController
   private WebAppController _parent;
 
   // The context path is the URL prefix for the web-app
-  private final String _contextPath;
+  private String _contextPath;
+  private final String _versionContextPath;
   private final String _baseContextPath;
   private String _version = "";
 
@@ -113,8 +114,10 @@ public class WebAppController
 
     _container = container;
 
-    _contextPath = contextPath;
+    _versionContextPath = contextPath;
     _baseContextPath = baseContextPath;
+
+    _contextPath = contextPath;
   }
 
   /**
@@ -123,6 +126,13 @@ public class WebAppController
   public String getContextPath()
   {
     return _contextPath;
+  }
+
+  void setContextPath(String contextPath)
+  {
+    // server/1h10
+    
+    _contextPath = contextPath;
   }
 
   /**

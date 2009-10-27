@@ -175,4 +175,9 @@ public class WebAppConfig extends DeployConfig {
   {
     return _prologue;
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _contextPath + "]";
+  }
 }

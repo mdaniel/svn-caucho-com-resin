@@ -431,7 +431,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Returns the encoding.
    */
-  abstract protected String getEncoding();
+  abstract public String getEncoding();
   
   /**
    * Writes to the next.

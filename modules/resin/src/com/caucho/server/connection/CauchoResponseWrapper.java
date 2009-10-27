@@ -219,9 +219,9 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
       return false;
 
     if (msg != null)
-      setStatus(sc);
-    else
       setStatus(sc, msg);
+    else
+      setStatus(sc);
 
     try {
       errorManager.sendError(_request, this, sc, getStatusMessage());
