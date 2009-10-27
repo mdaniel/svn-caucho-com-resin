@@ -267,6 +267,7 @@ public class WebAppExpandDeployGenerator
     String baseRepositoryTag = buildRepositoryTag(baseSegmentName);
 
     Path rootDirectory = buildRootDirectory(segmentName);
+    Path jarPath = buildJarPath(segmentName);
 
     WebAppVersioningController baseController = null;
 
@@ -274,13 +275,15 @@ public class WebAppExpandDeployGenerator
         && (getRepository() != null
             && getRepository().getTagRoot(baseRepositoryTag) != null)) {
       baseController
-        = new WebAppVersioningController(baseSegmentName,
+        = new WebAppVersioningController(contextPath,
                                          baseContextPath,
                                          this,
                                          _container);
     }
-    
-    if (! rootDirectory.isDirectory()
+
+    // server/10tk
+    if (! isValidDirectory(rootDirectory, segmentName)
+        && ! jarPath.canRead()
         && (getRepository() != null
             && getRepository().getTagRoot(repositoryTag) == null)) {
       return baseController;
@@ -290,6 +293,7 @@ public class WebAppExpandDeployGenerator
       = new WebAppController(contextPath, baseContextPath,
                              rootDirectory, _container);
 
+    controller.setArchivePath(jarPath);
     controller.setWarName(segmentName.substring(1));
 
     controller.setParentWebApp(_parent);
@@ -406,7 +410,9 @@ public class WebAppExpandDeployGenerator
   private Path buildRootDirectory(String segmentName)
   {
     String archiveName = segmentName + ".war";
-    Path jarPath = getArchiveDirectory().lookup("./" + archiveName);
+
+    // server/10to
+    Path jarPath = getExpandDirectory().lookup("./" + archiveName);
 
     Path rootDirectory;
 
@@ -417,12 +423,25 @@ public class WebAppExpandDeployGenerator
       jarPath = null;
     }
     else {
-      // server/003j
+      int p = segmentName.lastIndexOf('/');
+      String tailName = segmentName;
+      if (p == 0)
+        tailName = segmentName.substring(p + 1);
+      
+      // server/003j, server/10t8
       rootDirectory
-        = getExpandDirectory().lookup("./" + getExpandPrefix() + segmentName);
+        = getExpandDirectory().lookup("./" + getExpandPrefix() + tailName);
     }
 
     return rootDirectory;
+  }
+
+  private Path buildJarPath(String segmentName)
+  {
+    String archiveName = segmentName + ".war";
+    Path jarPath = getArchiveDirectory().lookup("./" + archiveName);
+
+    return jarPath;
   }
 
   private void initBaseController(WebAppController controller)

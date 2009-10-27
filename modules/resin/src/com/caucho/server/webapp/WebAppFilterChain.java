@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  * Represents the next filter in a filter chain.  The final filter will
  * be the servlet itself.
  */
-public class WebAppFilterChain implements FilterChain {
+public class WebAppFilterChain implements CauchoFilterChain {
   private static final Logger log
     = Logger.getLogger(WebAppFilterChain.class.getName());
 

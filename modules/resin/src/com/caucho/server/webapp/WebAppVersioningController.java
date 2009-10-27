@@ -64,12 +64,12 @@ public class WebAppVersioningController extends WebAppController {
   private boolean _isModified = true;
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
-  public WebAppVersioningController(String name,
+  public WebAppVersioningController(String versionContextPath,
 				    String baseContextPath,
 				    WebAppExpandDeployGenerator generator,
 				    WebAppContainer container)
   {
-    super(name, baseContextPath, null, container);
+    super(versionContextPath, baseContextPath, null, container);
 
     _generator = generator;
   }

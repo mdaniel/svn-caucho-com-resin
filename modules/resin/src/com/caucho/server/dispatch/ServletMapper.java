@@ -361,9 +361,9 @@ public class ServletMapper {
 
     invocation.setServletName(servletName);
     
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(_servletContext + " invoke (uri:"   
-	       + contextURI + " -> " + servletName + ")");
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(_servletContext + " map (uri:"   
+                + contextURI + " -> " + servletName + ")");
     }
 
     if (config == null)

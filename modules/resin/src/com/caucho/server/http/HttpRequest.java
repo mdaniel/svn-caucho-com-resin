@@ -219,14 +219,6 @@ public class HttpRequest extends AbstractHttpRequest
   }
 
   /**
-   * Returns true for a secure connection.
-   */
-  public boolean isSecure()
-  {
-    return _conn.isSecure();
-  }
-
-  /**
    * Returns the virtual host of the request
    */
   protected CharSequence getHost()

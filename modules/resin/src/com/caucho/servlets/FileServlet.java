@@ -181,7 +181,7 @@ public class FileServlet extends GenericServlet {
         
       if (servletPath != null)
         cb.append(servletPath);
-      
+
       String pathInfo;
       if (cauchoReq != null)
         pathInfo = cauchoReq.getPagePathInfo();

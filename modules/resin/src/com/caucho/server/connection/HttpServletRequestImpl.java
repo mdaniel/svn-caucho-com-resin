@@ -31,6 +31,7 @@ package com.caucho.server.connection;
 
 import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
+import com.caucho.security.Authenticator;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.RoleMapManager;
 import com.caucho.security.Login;
@@ -1502,7 +1503,17 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   public boolean authenticate(HttpServletResponse response)
     throws IOException, ServletException
   {
-    Login login = getLogin();
+    WebApp webApp = getWebApp();
+
+    if (webApp == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+      
+    Authenticator auth = webApp.getAuthenticator();
+
+    if (auth == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+    
+    Login login = webApp.getConfiguredLogin();
 
     if (login == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
@@ -1521,7 +1532,10 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   public void login(String username, String password)
     throws ServletException
   {
-    Login login = getLogin();
+    WebApp webApp = getWebApp();
+
+    // server/1aj0
+    Login login = webApp.getConfiguredLogin();
 
     if (login == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));

@@ -85,6 +85,11 @@ public class ForwardRequest extends CauchoRequestWrapper {
     _invocation = invocation;
   }
 
+  protected Invocation getInvocation()
+  {
+    return _invocation;
+  }
+
   /**
    * Starts the request
    */
@@ -148,6 +153,11 @@ public class ForwardRequest extends CauchoRequestWrapper {
   @Override
   public String getQueryString()
   {
+    return calculateQueryString();
+  }
+
+  protected String calculateQueryString()
+  {
     // server/10j2
     // server/1ks7 vs server/1233
 
@@ -194,7 +204,8 @@ public class ForwardRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public boolean isAsyncSupported() {
+  public boolean isAsyncSupported()
+  {
     return _invocation.isAsyncSupported() && getRequest().isAsyncSupported();
   }
 

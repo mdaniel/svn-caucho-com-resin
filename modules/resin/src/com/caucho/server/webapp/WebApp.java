@@ -236,6 +236,7 @@ public class WebApp extends ServletContextImpl
   private final Object _dispatcherCacheLock = new Object();
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
 
+  private Login _defaultLogin;
   private Login _login;
 
   private RoleMapManager _roleMapManager;
@@ -2291,12 +2292,14 @@ public class WebApp extends ServletContextImpl
       }
 
       try {
-        if (_login == null)
+        if (_login == null) {
           _login = _beanManager.getReference(Login.class);
+        }
 
         if (_login == null) {
           _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
-          _login = _beanManager.getReference(Login.class);
+          // server/1aj0
+          _defaultLogin = _beanManager.getReference(Login.class);
         }
 
         setAttribute("caucho.login", _login);
@@ -2651,7 +2654,7 @@ public class WebApp extends ServletContextImpl
 
       if (_accessLog == null)
         _accessLog = _accessLogLocal.get();
-
+      
       long interval = _classLoader.getDependencyCheckInterval();
       _invocationDependency.setCheckInterval(interval);
 
@@ -3148,6 +3151,11 @@ public class WebApp extends ServletContextImpl
         WebAppController subController
           = _parent.getWebAppController(includeInvocation);
 
+        // server/1233
+        _parent.getWebAppController(forwardInvocation);
+        _parent.getWebAppController(errorInvocation);
+        _parent.getWebAppController(dispatchInvocation);
+        
         if (subController != null
             && (_controller.getBaseContextPath()
                 .equals(subController.getBaseContextPath()))) {
@@ -3435,6 +3443,15 @@ public class WebApp extends ServletContextImpl
    */
   public Login getLogin()
   {
+    if (_login != null)
+      return _login;
+    else
+      return _defaultLogin;
+  }
+
+  public Login getConfiguredLogin()
+  {
+    // server/1aj0
     return _login;
   }
 

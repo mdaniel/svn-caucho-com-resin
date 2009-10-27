@@ -54,68 +54,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Logs the request.
+ * Represents the next filter in a filter chain.  The final filter will
+ * be the servlet itself.
  */
-public class AccessLogFilterChain implements CauchoFilterChain {
-  private static final Logger log
-    = Logger.getLogger(AccessLogFilterChain.class.getName());
-
-  // Next filter chain
-  private final FilterChain _next;
-
-  // app
-  private final WebApp _webApp;
-  private final AbstractAccessLog _accessLog;
-
-  /**
-   * Creates a new FilterChainFilter.
-   *
-   * @param next the next filterChain
-   * @param filter the user's filter
-   */
-  public AccessLogFilterChain(FilterChain next, WebApp webApp)
-  {
-    _next = next;
-    _webApp = webApp;
-    _accessLog = webApp.getAccessLog();
-  }
-
-  /**
-   * Returns true if cacheable.
-   */
-  public FilterChain getNext()
-  {
-    return _next;
-  }
-
-  /**
-   * Invokes the next filter in the chain or the final servlet at
-   * the end of the chain.
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   * @since Servlet 2.3
-   */
-  public void doFilter(ServletRequest request,
-                       ServletResponse response)
-    throws ServletException, IOException
-  {
-    _next.doFilter(request, response);
-    
-    try {
-      _accessLog.log((HttpServletRequest) request,
-                     (HttpServletResponse) response,
-                     _webApp);
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-  }
-
-  @Override
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-            + "[" + _webApp.getURL()
-            + ", next=" + _next + "]");
-  }
+public interface CauchoFilterChain extends FilterChain {
+  public FilterChain getNext();
 }

@@ -208,7 +208,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     }
 
     ForwardRequest subRequest;
-    subRequest = new ForwardRequest(parentReq, parentRes, invocation);
+
+    if (_isLogin)
+      subRequest = new LoginRequest(parentReq, parentRes, invocation);
+    else
+      subRequest = new ForwardRequest(parentReq, parentRes, invocation);
 
     // server/10ye
     if (subRequest.getRequestDepth(0) > MAX_DEPTH)

@@ -146,21 +146,26 @@ public class DeployService extends SimpleActor
     String tag = query.getTag();
     String sourceTag = query.getSourceTag();
 
-    log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
-
     RepositoryTagEntry entry = _repository.getTag(sourceTag);
 
     if (entry == null) {
+      log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
+
       getBrokerStream().queryError(id, from, to, query, 
                                    new ActorError(ActorError.TYPE_CANCEL,
                                                   ActorError.ITEM_NOT_FOUND,
                                                   "unknown tag"));
       return;
     }
+    
+    log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
     boolean result
       = _repository.setTag(tag, entry.getRoot(), query.getUser(),
 			   query.getMessage(), query.getVersion());
+
+    System.out.println("ROOT: " + tag + " " + entry.getRoot()
+                       + " " + _repository.getTag(tag));
     
     getBrokerStream().queryResult(id, from, to, result);
   }

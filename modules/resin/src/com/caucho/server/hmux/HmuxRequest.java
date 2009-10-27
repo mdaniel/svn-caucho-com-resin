@@ -1635,7 +1635,7 @@ public class HmuxRequest extends AbstractHttpRequest
   @Override
   public boolean isSecure()
   {
-    return _isSecure;
+    return _conn.isSecure() || _isSecure;
   }
 
   /**
