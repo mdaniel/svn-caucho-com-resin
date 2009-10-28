@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>(2009-10-28): BeanELResolver IllegalAccessException (#3727, rep on behalf of Kenneth Yeung)</li>
 <li>(2009-10-22) encoding: JSP response character encoding can be specified at jsp group property level</li>
 <li>(2009-10-12) encoding: default encoding is now set by file.encoding and defaults to utf-8 if no file.encoding exists</li>
 <li>watchdog: add watchdog-log configuration (#3566, rep by Pedre Neves)</li>
