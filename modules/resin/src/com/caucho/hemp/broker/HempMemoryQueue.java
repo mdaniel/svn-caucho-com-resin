@@ -301,11 +301,11 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     */
 
     wakeConsumer(packet);
-    
+
     if (Alarm.isTest()) {
       // wait a millisecond for the dequeue to avoid spawing extra
       // processing threads
-      packet.waitForDequeue(1);
+      packet.waitForDequeue(100);
     }
   }
 
@@ -313,7 +313,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   {
     long lastExitTime = _lastExitTime;
     _lastExitTime = Alarm.getCurrentTime();
-    
+
     if (_wait.wake()) {
       return;
     }
