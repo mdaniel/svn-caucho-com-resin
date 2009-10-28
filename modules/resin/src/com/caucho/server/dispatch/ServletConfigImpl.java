@@ -948,8 +948,10 @@ public class ServletConfigImpl
       servletChain = new ServletFilterChain(this);
     }
 
+    /*
     if (_roleMap != null)
       servletChain = new SecurityRoleMapFilterChain(servletChain, _roleMap);
+    */
 
     // server/10a8.  JSP pages need a fresh PageFilterChain
     // XXX: lock contention issues with JSPs?

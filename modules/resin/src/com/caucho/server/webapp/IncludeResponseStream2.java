@@ -141,6 +141,11 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   {
     _cacheWriter = cacheWriter;
   }
+  
+  public Writer getCharCacheStream()
+  {
+    return _cacheWriter;
+  }
 
   /**
    * Converts the char buffer.
@@ -164,7 +169,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     setCharOffset(0);
     char []buffer = getCharBuffer();
 
-    // XXX: _response.startCaching(false);
+    startCaching(false);
 
     getWriter().write(buffer, 0, charLength);
     
@@ -262,34 +267,8 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
 	_response.writeHeaders(null, -1);
       */
 
-      if (! _isCommitted) {
-        _isCommitted = true;
-
-        AbstractCacheFilterChain cacheInvocation
-          = _response.getCacheInvocation();
-
-        if (cacheInvocation != null) {
-          // _cacheInvocation = cacheInvocation;
-
-          String contentType = null;
-          String charEncoding = null;
-
-          int contentLength = -1;
-
-          _cacheEntry
-            = cacheInvocation.startCaching(_response.getRequest(), _response,
-                                           _headerKeys, _headerValues,
-                                           contentType,
-                                           charEncoding,
-                                           contentLength);
-
-          if (_cacheEntry != null) {
-            _cacheEntry.setForwardEnclosed(_response.isForwardEnclosed());
-            _cacheStream = _cacheEntry.openOutputStream();
-          }
-        }
-      }
-    
+      startCaching(true);
+      
       if (length == 0)
 	return;
     
@@ -311,6 +290,41 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
       */
 
       throw e;
+    }
+  }
+
+  protected void startCaching(boolean isByte)
+  {
+    if (! _isCommitted) {
+      _isCommitted = true;
+
+      AbstractCacheFilterChain cacheInvocation
+        = _response.getCacheInvocation();
+
+      if (cacheInvocation != null) {
+        // _cacheInvocation = cacheInvocation;
+
+        String contentType = null;
+        String charEncoding = null;
+
+        int contentLength = -1;
+
+        _cacheEntry
+          = cacheInvocation.startCaching(_response.getRequest(), _response,
+                                         _headerKeys, _headerValues,
+                                         contentType,
+                                         charEncoding,
+                                         contentLength);
+
+        if (_cacheEntry != null) {
+          _cacheEntry.setForwardEnclosed(_response.isForwardEnclosed());
+
+          if (isByte)
+            _cacheStream = _cacheEntry.openOutputStream();
+          else
+            _cacheWriter = _cacheEntry.openWriter();
+        }
+      }
     }
   }
 

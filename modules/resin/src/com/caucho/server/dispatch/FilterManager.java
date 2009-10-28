@@ -100,17 +100,17 @@ public class FilterManager {
 
   public void addFilterMapping(FilterMapping filterMapping)
   {
-    String pattern = filterMapping.getURLPattern();
-    if (pattern != null) {
+    Set<String> patterns = filterMapping.getURLPatterns();
+    if (patterns != null) {
       Set<String> urls = _urlPatterns.get(filterMapping.getName());
 
       if (urls == null) {
-        urls = new HashSet<String>();
+        urls = new LinkedHashSet<String>();
 
         _urlPatterns.put(filterMapping.getName(), urls);
       }
 
-      urls.add(pattern);
+      urls.addAll(patterns);
     }
 
     List<String> servletNames = filterMapping.getServletNames();
@@ -127,11 +127,13 @@ public class FilterManager {
     }
   }
 
-  public Set<String> getUrlPatternMappings(String filterName) {
+  public Set<String> getUrlPatternMappings(String filterName)
+  {
     return _urlPatterns.get(filterName);
   }
 
-  public Set<String> getServletNameMappings(String filterName){
+  public Set<String> getServletNameMappings(String filterName)
+  {
     return _servletNames.get(filterName);
   }
 

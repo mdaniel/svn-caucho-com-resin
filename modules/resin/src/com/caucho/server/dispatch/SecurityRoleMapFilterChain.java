@@ -113,4 +113,9 @@ public class SecurityRoleMapFilterChain implements FilterChain {
       */
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _roleMap + "," + _next + "]";
+  }
 }

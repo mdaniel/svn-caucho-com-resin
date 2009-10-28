@@ -38,7 +38,9 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.DispatcherType;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -48,6 +50,9 @@ public class FilterMapping extends FilterConfigImpl {
   static L10N L = new L10N(FilterMapping.class);
 
   private String _urlPattern;
+  private final LinkedHashSet<String> _urlPatterns
+    = new LinkedHashSet<String>();
+  
   private final ArrayList<String> _servletNames = new ArrayList<String>();
   
   // The match expressions
@@ -77,6 +82,11 @@ public class FilterMapping extends FilterConfigImpl {
   public String getURLPattern()
   {
     return _urlPattern;
+  }
+
+  public HashSet<String> getURLPatterns()
+  {
+    return _urlPatterns;
   }
 
   /**
@@ -126,7 +136,8 @@ public class FilterMapping extends FilterConfigImpl {
     }
   }
 
-  public void addDispatcher(DispatcherType dispather) {
+  public void addDispatcher(DispatcherType dispather)
+  {
     if (_dispatcher == null)
       _dispatcher = new HashSet<DispatcherType>();
 
@@ -326,6 +337,7 @@ public class FilterMapping extends FilterConfigImpl {
       pattern = pattern.trim();
       
       _urlPattern = pattern;
+      _urlPatterns.add(pattern);
 
       Pattern regexp;
       

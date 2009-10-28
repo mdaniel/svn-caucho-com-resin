@@ -366,8 +366,14 @@ public class ServletMapper {
                 + contextURI + " -> " + servletName + ")");
     }
 
+    /*
     if (config == null)
       config = _servletManager.getServlet(servletName);
+    */
+    // server/13f1
+    ServletConfigImpl newConfig = _servletManager.getServlet(servletName);
+    if (newConfig != null)
+      config = newConfig;
 
     if (config != null) {
       invocation.setSecurityRoleMap(config.getRoleMap());

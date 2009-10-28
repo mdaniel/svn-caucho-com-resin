@@ -1060,31 +1060,33 @@ public class WebApp extends ServletContextImpl
 
     String filterName = webFilter.filterName();
     if ("".equals(filterName))
-     filterName = filterClassName;
+      filterName = filterClassName;
 
     config.setFilterName(filterName);
 
-    if (webFilter.value().length > 0 &&
-        webFilter.urlPatterns().length == 0 &&
-        webFilter.servletNames().length == 0) {
+    if (webFilter.value().length > 0
+        && webFilter.urlPatterns().length == 0
+        && webFilter.servletNames().length == 0) {
       FilterMapping.URLPattern urlPattern = config.createUrlPattern();
       for (String url : webFilter.value())
         urlPattern.addText(url);
 
       urlPattern.init();
     }
-    else if (webFilter.urlPatterns().length > 0 &&
-             webFilter.value().length == 0 &&
-             webFilter.servletNames().length == 0) {
+    else if (webFilter.urlPatterns().length > 0
+             && webFilter.value().length == 0
+             && webFilter.servletNames().length == 0) {
       FilterMapping.URLPattern urlPattern = config.createUrlPattern();
-      for (String url : webFilter.urlPatterns())
+      
+      for (String url : webFilter.urlPatterns()) {
         urlPattern.addText(url);
+      }
 
       urlPattern.init();
     }
-    else if (webFilter.servletNames().length > 0 &&
-             webFilter.value().length == 0 &&
-             webFilter.urlPatterns().length == 0) {
+    else if (webFilter.servletNames().length > 0
+             && webFilter.value().length == 0
+             && webFilter.urlPatterns().length == 0) {
       for (String servletName : webFilter.servletNames())
         config.addServletName(servletName);
     }
@@ -3174,9 +3176,9 @@ public class WebApp extends ServletContextImpl
                                             getVersionContextPath()));
       }
       else {
-        FilterChain chain = _servletMapper.mapServlet(includeInvocation);
-        _includeFilterMapper.buildDispatchChain(includeInvocation, chain);
-        includeInvocation.setWebApp(this);
+        buildIncludeInvocation(includeInvocation);
+
+        FilterChain chain;
 
         chain = _servletMapper.mapServlet(forwardInvocation);
         _forwardFilterMapper.buildDispatchChain(forwardInvocation, chain);

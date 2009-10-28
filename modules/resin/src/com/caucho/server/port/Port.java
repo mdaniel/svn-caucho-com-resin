@@ -1471,7 +1471,6 @@ public class Port extends TaskWorker
       return false;
 
     if (is.getBufferAvailable() > 0) {
-      System.out.println("DATA:");
       return true;
     }
 

@@ -480,11 +480,6 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.getRemoteUser();
   }
   
-  public boolean isUserInRole(String role)
-  {
-    return _request.isUserInRole(role);
-  }
-  
   public Principal getUserPrincipal()
   {
     return _request.getUserPrincipal();

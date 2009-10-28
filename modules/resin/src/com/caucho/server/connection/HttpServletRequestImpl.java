@@ -1395,67 +1395,10 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   // security
   //
 
-  /**
-   * Returns true if the user represented by the current request
-   * plays the named role.
-   *
-   * @param role the named role to test.
-   * @return true if the user plays the role.
-   */
-  public boolean isUserInRole(String role)
+  @Override
+  protected String getRunAs()
   {
-    HashMap<String,String> roleMap = _invocation.getSecurityRoleMap();
-
-    if (roleMap != null) {
-      String linkRole = roleMap.get(role);
-
-      if (linkRole != null)
-        role = linkRole;
-    }
-
-    if (_runAs != null)
-      return _runAs.equals(role);
-
-    WebApp app = getWebApp();
-
-    Principal user = getUserPrincipal();
-
-    if (user == null) {
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " no user for isUserInRole");
-
-      return false;
-    }
-
-    RoleMapManager roleManager = app != null ? app.getRoleMapManager() : null;
-
-    if (roleManager != null) {
-      Boolean result = roleManager.isUserInRole(role, user);
-
-      if (result != null) {
-        if (log.isLoggable(Level.FINE))
-          log.fine(this + " userInRole(" + role + ")->" + result);
-
-        return result;
-      }
-    }
-
-    Login login = app == null ? null : app.getLogin();
-
-    boolean inRole = login != null && login.isUserInRole(user, role);
-
-    if (log.isLoggable(Level.FINE)) {
-      if (login == null)
-        log.fine(this + " no Login for isUserInRole");
-      else if (user == null)
-        log.fine(this + " no user for isUserInRole");
-      else if (inRole)
-        log.fine(this + " " + user + " is in role: " + role);
-      else
-        log.fine(this + " failed " + user + " in role: " + role);
-    }
-
-    return inRole;
+    return _runAs;
   }
 
   /**

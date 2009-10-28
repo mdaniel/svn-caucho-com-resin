@@ -31,20 +31,27 @@ package com.caucho.server.connection;
 
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
+import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
+import com.caucho.security.RoleMapManager;
+import com.caucho.security.Login;
 import com.caucho.util.Alarm;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 import java.security.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 abstract public class AbstractCauchoRequest implements CauchoRequest {
+  private static final Logger log
+    = Logger.getLogger(AbstractCauchoRequest.class.getName());
+  
   protected int _sessionGroup = -1;
 
   private boolean _sessionIsLoaded;
@@ -286,6 +293,104 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     if (session != null)
       session.save();
   }
+
+  //
+  // security
+  //
+
+  protected String getRunAs()
+  {
+    return null;
+  }
+
+  protected ServletInvocation getInvocation()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the next request in a chain.
+   */
+  protected HttpServletRequest getRequest()
+  {
+    return null;
+  }
+
+  /**
+   * Returns true if the user represented by the current request
+   * plays the named role.
+   *
+   * @param role the named role to test.
+   * @return true if the user plays the role.
+   */
+  public boolean isUserInRole(String role)
+  {
+    ServletInvocation invocation = getInvocation();
+
+    if (invocation == null) {
+      if (getRequest() != null)
+        return getRequest().isUserInRole(role);
+      else
+        return false;
+    }
+    
+    HashMap<String,String> roleMap = invocation.getSecurityRoleMap();
+
+    if (roleMap != null) {
+      String linkRole = roleMap.get(role);
+
+      if (linkRole != null)
+        role = linkRole;
+    }
+
+    String runAs = getRunAs();
+    
+    if (runAs != null)
+      return runAs.equals(role);
+
+    WebApp webApp = getWebApp();
+
+    Principal user = getUserPrincipal();
+
+    if (user == null) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(this + " no user for isUserInRole");
+
+      return false;
+    }
+
+    RoleMapManager roleManager
+      = webApp != null ? webApp.getRoleMapManager() : null;
+
+    if (roleManager != null) {
+      Boolean result = roleManager.isUserInRole(role, user);
+
+      if (result != null) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " userInRole(" + role + ")->" + result);
+
+        return result;
+      }
+    }
+
+    Login login = webApp == null ? null : webApp.getLogin();
+
+    boolean inRole = login != null && login.isUserInRole(user, role);
+
+    if (log.isLoggable(Level.FINE)) {
+      if (login == null)
+        log.fine(this + " no Login for isUserInRole");
+      else if (user == null)
+        log.fine(this + " no user for isUserInRole");
+      else if (inRole)
+        log.fine(this + " " + user + " is in role: " + role);
+      else
+        log.fine(this + " failed " + user + " in role: " + role);
+    }
+
+    return inRole;
+  }
+  
   
   //
   // lifecycle

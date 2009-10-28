@@ -50,9 +50,9 @@ import java.util.logging.Level;
  * A repository for request information gleaned from the uri.
  */
 public class ServletInvocation {
-  static final Logger log
+  private static final Logger log
     = Logger.getLogger(ServletInvocation.class.getName());
-  static final L10N L = new L10N(ServletInvocation.class);
+  private static final L10N L = new L10N(ServletInvocation.class);
 
   private final boolean _isFiner;
 

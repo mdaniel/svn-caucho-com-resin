@@ -225,6 +225,10 @@ public class ServletManager {
         invocation.clearAsyncSupported();
 
       invocation.setMultipartConfig(config.getMultipartConfig());
+
+      // server/12h2
+      if (config.getRoleMap() != null)
+        invocation.setSecurityRoleMap(config.getRoleMap());
     }
 
     return config.createServletChain();
