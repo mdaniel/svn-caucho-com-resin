@@ -2071,6 +2071,20 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Removes the field ref.
+   */
+  public void unsetArray(Env env, StringValue name, Value index)
+  {
+  }
+
+  /**
+   * Removes the field ref.
+   */
+  public void unsetThisArray(Env env, StringValue name, Value index)
+  {
+  }
+  
+  /**
    * Returns the field value
    */
   public Value getThisField(Env env, StringValue name)

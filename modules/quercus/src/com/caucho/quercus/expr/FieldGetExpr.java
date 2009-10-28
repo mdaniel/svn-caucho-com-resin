@@ -223,6 +223,16 @@ public class FieldGetExpr extends AbstractVarExpr {
 
     obj.unsetField(_name);
   }
+  
+  /**
+   * Evaluates the expression as an array index unset
+   */
+  public void evalUnsetArray(Env env, Value index)
+  {
+    Value obj = _objExpr.eval(env);
+
+    obj.unsetArray(env, _name, index);
+  }
 
   @Override
   public String toString()

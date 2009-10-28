@@ -29,12 +29,16 @@
 
 package com.caucho.quercus;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.quercus.env.CgiEnv;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.StdoutStream;
 import com.caucho.vfs.WriteStream;
 
 public class CgiQuercus
@@ -54,6 +58,21 @@ public class CgiQuercus
     return new CgiEnv(this, page, out, request, response);
   }
   
+  public static void main(String []args)
+    throws IOException
+  {
+    CgiQuercus quercus = new CgiQuercus();
+    
+    quercus.parseArgs(args);
+    
+    if (quercus.getFileName() != null) {
+      quercus.execute();
+    }
+    else {
+      throw new RuntimeException("input file not specified");
+    }
+  }
+  
   /**
    * Returns the SAPI (Server API) name.
    */
@@ -61,5 +80,32 @@ public class CgiQuercus
   public String getSapiName()
   {
     return "cgi";
+  }
+
+  @Override
+  public void execute()
+    throws IOException
+  {
+    Path path = getPwd().lookup(getFileName());
+    
+    QuercusPage page = parse(path);
+    
+    WriteStream os = new WriteStream(StdoutStream.create());
+      
+    os.setNewlineString("\n");
+    os.setEncoding("iso-8859-1");
+    
+    Env env = createEnv(page, os, null, null);
+    env.start();
+    
+    try {
+      env.execute();
+    } catch (QuercusDieException e) {
+    } catch (QuercusExitException e) {
+    }
+    
+    env.close();
+    
+    os.flush();
   }
 }

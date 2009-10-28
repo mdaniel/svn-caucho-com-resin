@@ -407,7 +407,7 @@ public class OutputModule extends AbstractQuercusModule
                                  @Optional("true") boolean erase)
   {
     if (callback != null
-	&& callback.getCallbackName().equals("ob_gzhandler")) {
+        && callback.getCallbackName().equals("ob_gzhandler")) {
       OutputBuffer ob = env.getOutputBuffer();
 
       for (; ob != null; ob = ob.getNext()) {

@@ -50,6 +50,7 @@ public class BinaryBuilderStream extends StreamImpl
   {
     return _out;
   }
+  
   /**
    * Returns true if this is a writable stream.
    */

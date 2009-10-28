@@ -209,11 +209,11 @@ public class QuercusClass {
       boolean isJavaClassDef = classDef instanceof JavaClassDef;
       
       QuercusClass cl;
-      
+
       // XXX: php/0cn2, but this is wrong:
       cl = Env.getInstance().findClass(iface, 
                                        ! isJavaClassDef,
-                                       isJavaClassDef);
+                                       true);
 
       if (cl == null)
         throw new QuercusRuntimeException(L.l("cannot find interface {0}",

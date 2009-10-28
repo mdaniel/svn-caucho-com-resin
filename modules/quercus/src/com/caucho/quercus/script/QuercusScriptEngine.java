@@ -127,7 +127,7 @@ public class QuercusScriptEngine
       catch (QuercusExitException e) {
         //php/2148
       }
-        
+      
       out.flushBuffer();
       out.free();
 

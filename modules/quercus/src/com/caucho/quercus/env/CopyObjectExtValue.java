@@ -177,6 +177,27 @@ public class CopyObjectExtValue extends ObjectExtValue
 
     super.unsetField(name);
   }
+  
+  /**
+   * Removes the field ref.
+   */
+  @Override
+  public void unsetArray(Env env, StringValue name, Value index)
+  {
+    _root.setModified();
+    
+    super.unsetArray(env, name, index);
+  }
+  
+  /**
+   * Removes the field ref.
+   */
+  public void unsetThisArray(Env env, StringValue name, Value index)
+  {
+    _root.setModified();
+    
+    super.unsetThisArray(env, name, index);
+  }
 
   /**
    * Sets the array value with the given key.

@@ -535,22 +535,54 @@ public class ObjectExtValue extends ObjectValue
 	 entry != null;
 	 entry = entry._next) {
       if (name.equals(entry.getKey())) {
-	Entry prev = entry._prev;
-	Entry next = entry._next;
+        Entry prev = entry._prev;
+        Entry next = entry._next;
 
-	if (prev != null)
-	  prev._next = next;
-	else
-	  _entries[hash] = next;
+        if (prev != null)
+          prev._next = next;
+        else
+          _entries[hash] = next;
 
-	if (next != null)
-	  next._prev = prev;
+        if (next != null)
+          next._prev = prev;
 
-	_size--;
+        _size--;
 
         return;
       }
     }
+  }
+  
+  /**
+   * Removes the field array ref.
+   */
+  @Override
+  public void unsetArray(Env env, StringValue name, Value index)
+  {
+    // php/022b
+    if (_quercusClass.getFieldGet() != null)
+      return;
+    
+    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
+    
+    // XXX
+    //if (entry._visibility == FieldVisibility.PRIVATE)
+      //return;
+    
+    entry.toValue().remove(index);
+  }
+  
+  /**
+   * Removes the field array ref.
+   */
+  public void unsetThisArray(Env env, StringValue name, Value index)
+  {
+    if (_quercusClass.getFieldGet() != null)
+      return;
+    
+    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
+    
+    entry.toValue().remove(index);
   }
 
   /**

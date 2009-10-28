@@ -605,7 +605,7 @@ public class MiscModule extends AbstractQuercusModule {
       args[2] = command;
       
       ProcessBuilder processBuilder = new ProcessBuilder(args);
-      processBuilder.redirectErrorStream(true);
+      processBuilder.redirectErrorStream(false);
       // XXX: security issues?
       processBuilder.directory(new File(env.getShellPwd()));
       final Process process = processBuilder.start();
@@ -625,21 +625,22 @@ public class MiscModule extends AbstractQuercusModule {
       is.close();
 
       if ((ch = es.read()) >= 0) {
-        env.print((char)ch);
+        env.print((char) ch);
         
         while ((ch = es.read()) >= 0) {
-          env.print((char)ch);
+          env.print((char) ch);
         }
-        
+
         return NullValue.NULL;
       }
-      
+
       es.close();
 
       int status = process.waitFor();
 
       return sb;
     } catch (Exception e) {
+
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e.getMessage(), e);
 

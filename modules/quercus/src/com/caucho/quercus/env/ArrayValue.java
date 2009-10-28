@@ -618,7 +618,7 @@ abstract public class ArrayValue extends Value {
   @Override
   public boolean isset(Value key)
   {
-    return get(key).isset();
+    return get(key) != UnsetValue.UNSET;
   }
   
   /**

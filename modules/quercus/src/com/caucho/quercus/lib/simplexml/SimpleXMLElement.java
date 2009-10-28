@@ -387,8 +387,6 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   {
     if (_children == null)
       return _text;
-    else if (_children.size() == 1 && ! _children.get(0).isElement())
-      return _text;
     else
       return wrapJava(_env, _cls, this);
   }

@@ -542,6 +542,16 @@ abstract public class Expr {
   {
     return eval(env).isset();
   }
+  
+  /**
+   * Evaluates the expression as an array index unset
+   */
+  public void evalUnsetArray(Env env, Value index)
+  {
+    Value array = evalDirty(env);
+
+    array.remove(index);
+  }
 
   /**
    * Prints to the output as an echo.

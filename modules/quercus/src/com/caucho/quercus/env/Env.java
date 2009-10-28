@@ -1831,7 +1831,7 @@ public class Env {
     if (_map == _globalMap)
       return getGlobalEnvVar(name, isAutoCreate);
 
-    envVar = getSuperGlobalRef(name, true);
+    envVar = getSuperGlobalRef(name, true, false);
 
     // php/0809
     if (envVar != null)
@@ -1869,7 +1869,7 @@ public class Env {
     if (envVar != null)
       return envVar;
 
-    envVar = getSuperGlobalRef(name);
+    envVar = getSuperGlobalRef(name, true);
 
     if (envVar == null) {
       // variables set by the caller, e.g. the servlet
@@ -2089,15 +2089,17 @@ public class Env {
     return value;
   }
 
-  private EnvVar getSuperGlobalRef(String name)
+  private EnvVar getSuperGlobalRef(String name, boolean isGlobal)
   {
-    return getSuperGlobalRef(name, false);
+    return getSuperGlobalRef(name, false, isGlobal);
   }
 
   /**
    * Returns a superglobal.
    */
-  private EnvVar getSuperGlobalRef(String name, boolean isCheckGlobal)
+  private EnvVar getSuperGlobalRef(String name,
+                                   boolean isCheckGlobal,
+                                   boolean isGlobal)
   {
     Var var;
     EnvVar envVar;
@@ -2177,6 +2179,8 @@ public class Env {
 
       case HTTP_GET_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+          return null;
+        else if (! isGlobal)
           return null;
         else
           return getGlobalEnvVar("_GET");
@@ -3320,8 +3324,8 @@ public class Env {
 
     if (_anonymousFunMap != null)
       return _anonymousFunMap.get(name);
-
-    return null;
+    else
+      return null;
   }
 
   public AbstractFunction getFunction(String name)

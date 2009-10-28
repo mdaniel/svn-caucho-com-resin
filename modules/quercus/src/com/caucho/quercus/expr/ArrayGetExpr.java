@@ -207,10 +207,15 @@ public class ArrayGetExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
+    /*
     Value array = _expr.evalDirty(env);
     Value index = _index.eval(env);
 
     array.remove(index);
+    */
+    
+    Value index = _index.eval(env);
+    _expr.evalUnsetArray(env, index);
   }
 
   public String toString()

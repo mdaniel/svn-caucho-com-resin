@@ -1484,9 +1484,9 @@ public class JavaClassDef extends ClassDef {
     public boolean hasNext()
     {
       if (_iterator != null)
-	return _iterator.hasNext();
+        return _iterator.hasNext();
       else
-	return false;
+        return false;
     }
     
     public void remove()
