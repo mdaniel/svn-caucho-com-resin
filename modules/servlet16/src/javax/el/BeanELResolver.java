@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  */
 public class BeanELResolver extends ELResolver {
   private final static Logger log
-    = Logger.getLogger(MapELResolver.class.getName());
+    = Logger.getLogger(BeanELResolver.class.getName());
 
   private static WeakHashMap<Class,SoftReference<BeanProperties>> _classMap
     = new WeakHashMap<Class,SoftReference<BeanProperties>>();
@@ -195,8 +195,26 @@ public class BeanELResolver extends ELResolver {
     if (prop == null || prop.getReadMethod() == null)
       throw new PropertyNotFoundException("'" + property + "' is an unknown bean property of '" + base.getClass().getName() + "'");
 
+    Method method = prop.getReadMethod();
+
     try {
-      return prop.getReadMethod().invoke(base);
+      return method.invoke(base);
+    } catch (IllegalAccessException e) {
+      if (method.isAccessible())
+        throw new ELException(e);
+    } catch (InvocationTargetException e) {
+      throw new ELException(e.getCause());
+    }
+
+    log.finest("accessible for '"
+      + method
+      + "' was changed to '"
+      + method.isAccessible()
+      + "', retrying with accessible 'true'.");
+    
+    method.setAccessible(true);
+    try {
+      return method.invoke(base);
     } catch (IllegalAccessException e) {
       throw new ELException(e);
     } catch (InvocationTargetException e) {
