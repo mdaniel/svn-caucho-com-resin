@@ -195,26 +195,8 @@ public class BeanELResolver extends ELResolver {
     if (prop == null || prop.getReadMethod() == null)
       throw new PropertyNotFoundException("'" + property + "' is an unknown bean property of '" + base.getClass().getName() + "'");
 
-    Method method = prop.getReadMethod();
-
     try {
-      return method.invoke(base);
-    } catch (IllegalAccessException e) {
-      if (method.isAccessible())
-        throw new ELException(e);
-    } catch (InvocationTargetException e) {
-      throw new ELException(e.getCause());
-    }
-
-    log.finest("accessible for '"
-      + method
-      + "' was changed to '"
-      + method.isAccessible()
-      + "', retrying with accessible 'true'.");
-    
-    method.setAccessible(true);
-    try {
-      return method.invoke(base);
+      return prop.getReadMethod().invoke(base);
     } catch (IllegalAccessException e) {
       throw new ELException(e);
     } catch (InvocationTargetException e) {
@@ -418,7 +400,14 @@ public class BeanELResolver extends ELResolver {
       _descriptor = descriptor;
 
       // #3598
-      _readMethod = descriptor.getReadMethod();
+      Method readMethod = descriptor.getReadMethod();
+      try {
+        if (readMethod != null)
+          //create a copy of the method
+          _readMethod = _base.getMethod(readMethod.getName(),
+                                        readMethod.getParameterTypes());
+      } catch (NoSuchMethodException e) {
+      }
 
       if (_readMethod != null)
 	_readMethod.setAccessible(true);
@@ -434,10 +423,13 @@ public class BeanELResolver extends ELResolver {
 	_base = baseClass;
 	_descriptor = new PropertyDescriptor(name, getter, null);
 
-        _readMethod = getter;
+        //create a copy of the method
+        if (getter != null)
+          _readMethod = _base.getMethod(getter.getName(),
+                                        getter.getParameterTypes());
 
-	if (getter != null)
-	  getter.setAccessible(true);
+        if (_readMethod != null)
+          getter.setAccessible(true);
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
