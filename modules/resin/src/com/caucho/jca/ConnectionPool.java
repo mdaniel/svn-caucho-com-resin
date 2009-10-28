@@ -29,6 +29,8 @@
 
 package com.caucho.jca;
 
+import com.caucho.admin.ActiveTimeProbe;
+import com.caucho.admin.ProbeManager;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
@@ -146,6 +148,10 @@ public class ConnectionPool extends AbstractManagedObject
   //
   // statistics
   //
+
+  private ActiveTimeProbe _connectionTime;
+  private ActiveTimeProbe _idleTime;
+  private ActiveTimeProbe _activeTime;
 
   private final AtomicLong _connectionCountTotal = new AtomicLong();
   private final AtomicLong _connectionCreateCountTotal = new AtomicLong();
@@ -475,6 +481,30 @@ public class ConnectionPool extends AbstractManagedObject
   //
 
   /**
+   * Returns the connection time probe
+   */
+  public ActiveTimeProbe getConnectionTimeProbe()
+  {
+    return _connectionTime;
+  }
+
+  /**
+   * Returns the idle time probe
+   */
+  public ActiveTimeProbe getIdleTimeProbe()
+  {
+    return _idleTime;
+  }
+
+  /**
+   * Returns the active time probe
+   */
+  public ActiveTimeProbe getActiveTimeProbe()
+  {
+    return _activeTime;
+  }
+
+  /**
    * Returns the total connections.
    */
   public int getConnectionCount()
@@ -559,6 +589,10 @@ public class ConnectionPool extends AbstractManagedObject
 
     _idlePool = new IdlePoolSet(_maxIdleCount);
 
+    _connectionTime = ProbeManager.createActiveTimeProbe("Resin|Database|Connection");
+    _idleTime = ProbeManager.createActiveTimeProbe("Resin|Database|Idle");
+    _activeTime = ProbeManager.createActiveTimeProbe("Resin|Database|Active");
+    
     registerSelf();
 
     _alarm = new WeakAlarm(this);
@@ -776,7 +810,7 @@ public class ConnectionPool extends AbstractManagedObject
         }
       } finally {
         if (poolItem != null)
-          toDead(poolItem);
+          poolItem.destroy();
       }
     }
 
@@ -866,6 +900,8 @@ public class ConnectionPool extends AbstractManagedObject
         _lastFailTime = Alarm.getCurrentTime();
       }
 
+      // server/308b - connection removed on rollback-only, when it's
+      // theoretically possible to reuse it
       if (poolItem != null)
         poolItem.destroy();
     }
@@ -971,7 +1007,7 @@ public class ConnectionPool extends AbstractManagedObject
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (item != null)
-        toDead(item);
+        item.destroy();
       
       synchronized (_pool) {
         _pool.notifyAll();
@@ -982,10 +1018,10 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Removes a connection
    */
-  void toDead(PoolItem item)
+  void removeItem(PoolItem item, ManagedConnection mConn)
   {
     synchronized (_pool) {
-      _idlePool.remove(item.getManagedConnection());
+      _idlePool.remove(mConn);
 
       _pool.remove(item);
       _pool.notifyAll();
@@ -1050,7 +1086,7 @@ public class ConnectionPool extends AbstractManagedObject
         PoolItem item = _alarmConnections.get(i);
 
         if (! item.isValid())
-          toDead(item);
+          item.destroy();
       }
 
       _alarmConnections.clear();

@@ -98,6 +98,14 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
   private IllegalStateException _allocationStackTrace;
 
+  //
+  // statistics
+  //
+
+  private long _connectionStartTime;
+  private long _idleStartTime;
+  private long _activeStartTime;
+
   public PoolItem(ConnectionPool cm,
 		  ManagedConnectionFactory mcf,
 		  ManagedConnection conn)
@@ -111,6 +119,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
     _poolStartTime = Alarm.getCurrentTime();
     _poolEventTime = Alarm.getCurrentTime();
+
+    _connectionStartTime = cm.getConnectionTimeProbe().start();
 
     // Gets the resource object from the driver
     try {
@@ -141,9 +151,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
 	_localTransaction = conn.getLocalTransaction();
     } catch (NotSupportedException e) {
       _cm.setLocalTransaction(false);
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
     
     _mConn.addConnectionEventListener(this);
@@ -987,7 +997,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
     if (! isClosed) {
     }
     else if (_hasConnectionError) {
-      toDead();
+      destroy();
     }
     else {
       toIdle();
@@ -1004,7 +1014,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
     else if (_xid != null || _isLocalTransaction)
       return;
     else if (_hasConnectionError) {
-      toDead();
+      destroy();
       return;
     }
 
@@ -1033,22 +1043,13 @@ class PoolItem implements ConnectionEventListener, XAResource {
    */
   void abortConnection()
   {
-    toDead();
-  }
-
-  /**
-   * Kills the connection.
-   */
-  private void toDead()
-  {
-    _cm.toDead(this);
+    destroy();
   }
 
   /**
    * Closes the connection.
    */
   void destroy()
-    throws ResourceException
   {
     ManagedConnection mConn = _mConn;
     _mConn = null;
@@ -1058,6 +1059,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
     if (mConn == null)
       return;
+
+    _cm.removeItem(this, mConn);
 
     UserPoolItem userItem = _shareHead;
 
@@ -1079,14 +1082,20 @@ class PoolItem implements ConnectionEventListener, XAResource {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    mConn.destroy();
+    try {
+      mConn.destroy();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      _cm.getConnectionTimeProbe().end(_connectionStartTime);
+    }
   }
 
   public String toString()
   {
     if (_mConn != null) {
       return ("PoolItem[" + _cm.getName() + "," + _id + ","
-	      + _mConn.getClass().getSimpleName() + "]");
+              + _mConn.getClass().getSimpleName() + "]");
     }
     else {
       return ("PoolItem[" + _cm.getName() + "," + _id + ",null]");

@@ -231,8 +231,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
       // validate the status
       if (_status != Status.STATUS_MARKED_ROLLBACK) {
       }
-      else if (_rollbackException != null)
+      else if (_rollbackException != null) {
         throw RollbackExceptionWrapper.create(_rollbackException);
+      }
       else
         throw new RollbackException(L.l("Can't enlist resource {0} because the transaction is marked rollback-only.",
 					resource));
@@ -573,8 +574,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     _status = Status.STATUS_MARKED_ROLLBACK;
 
-    if (_rollbackException == null)
+    if (_rollbackException == null) {
       _rollbackException = exn;
+    }
 
     if (log.isLoggable(Level.FINE)) {
       log.fine(this + " rollback-only: " + exn.toString());
