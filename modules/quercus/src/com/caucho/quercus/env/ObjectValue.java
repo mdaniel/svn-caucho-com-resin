@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.vfs.WriteStream;
 
@@ -547,6 +546,33 @@ abstract public class ObjectValue extends Value {
     printDepth(out, 2 * depth);
 
     out.print("}");
+  }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    sb.append('{');
+
+    int length = 0;
+
+    Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
+    
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+
+      if (length > 0)
+        sb.append(',');
+
+      entry.getKey().toStringValue().jsonEncode(env, sb);
+      sb.append(':');
+      entry.getValue().jsonEncode(env, sb);
+      length++;
+    }
+
+    sb.append('}');
   }
 }
 

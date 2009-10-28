@@ -1045,6 +1045,62 @@ abstract public class ArrayValue extends Value {
 
     sb.append(")");
   }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    long length = 0;
+    
+    Iterator<Value> keyIter = getKeyIterator(env);
+    
+    while (keyIter.hasNext()) {
+      Value key = keyIter.next();
+      
+      if ((! key.isLongConvertible()) || key.toLong() != length) {
+        jsonEncodeAssociative(env, sb);
+        return;
+      }
+      length++;
+    }
+
+    sb.append('[');
+
+    length = 0;
+    for (Value value : values()) {
+      if (length > 0)
+        sb.append(',');
+      value.jsonEncode(env, sb);
+      length++;
+    }
+
+    sb.append(']');
+  }
+  
+  private void jsonEncodeAssociative(Env env, StringValue sb)
+  {
+    sb.append('{');
+
+    int length = 0;
+    
+    Iterator<Map.Entry<Value,Value>> iter = getIterator(env);
+    
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+
+      if (length > 0)
+        sb.append(',');
+
+      entry.getKey().toStringValue().jsonEncode(env, sb);
+      sb.append(':');
+      entry.getValue().jsonEncode(env, sb);
+      length++;
+    }
+
+    sb.append('}');
+  }
 
   /**
    * Resets all numerical keys with the first index as base

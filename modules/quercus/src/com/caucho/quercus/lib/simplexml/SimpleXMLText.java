@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.simplexml;
 
+import com.caucho.quercus.annotation.JsonEncode;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -104,5 +105,13 @@ public class SimpleXMLText extends SimpleXMLElement
   public StringValue __toString()
   {
     return _text;
+  }
+  
+  @Override
+  protected void jsonEncodeImpl(Env env, StringValue sb, boolean isTop)
+  {
+    sb.append('"');
+    sb.append(_text);
+    sb.append('"');
   }
 }

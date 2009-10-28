@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -2420,7 +2420,7 @@ abstract public class Value implements java.io.Serializable
     }
   }
   
-  /*
+  /**
    * Serializes the value.
    * 
    * @param env
@@ -2434,6 +2434,16 @@ abstract public class Value implements java.io.Serializable
     serializeMap.incrementIndex();
     
     serialize(env, sb);
+  }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    env.warning(L.l("type is unsupported; json encoded as null"));
+    
+    sb.append("null");
   }
   
   /**

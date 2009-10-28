@@ -222,7 +222,7 @@ public class MiscModule extends AbstractQuercusModule {
       args[2] = command;
       
       ProcessBuilder processBuilder = new ProcessBuilder(args);
-      processBuilder.redirectErrorStream(true);
+      processBuilder.redirectErrorStream(false);
       // XXX: security issues?
       processBuilder.directory(new File(env.getShellPwd()));
       final Process process = processBuilder.start();

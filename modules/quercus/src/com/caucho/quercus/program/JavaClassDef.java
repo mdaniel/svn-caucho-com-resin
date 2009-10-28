@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -117,6 +118,7 @@ public class JavaClassDef extends ClassDef {
 
   private Method _printRImpl;
   private Method _varDumpImpl;
+  private Method _jsonEncode;
   private Method _entrySet;
 
   private TraversableDelegate _traversableDelegate;
@@ -1286,15 +1288,17 @@ public class JavaClassDef extends ClassDef {
         continue;
       
       if ("iterator".equals(method.getName())
-	  && method.getParameterTypes().length == 0
-	  && Iterator.class.isAssignableFrom(method.getReturnType())) {
-	_iteratorMethod = method;
+          && method.getParameterTypes().length == 0
+          && Iterator.class.isAssignableFrom(method.getReturnType())) {
+        _iteratorMethod = method;
       }
 
       if ("printRImpl".equals(method.getName())) {
         _printRImpl = method;
       } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
+      } else if (method.isAnnotationPresent(JsonEncode.class)) {
+        _jsonEncode = method;
       } else if (method.isAnnotationPresent(EntrySet.class)) {
         _entrySet = method;
       } else if ("__call".equals(method.getName())) {
@@ -1340,16 +1344,32 @@ public class JavaClassDef extends ClassDef {
     return __toString.callMethod(env, value, new Expr[0]).toStringValue();
   }
   
+  public boolean jsonEncode(Env env, Object obj, StringValue sb)
+  {
+    if (_jsonEncode == null)
+      return false;
+    
+    try {
+      _jsonEncode.invoke(obj, env, sb);
+      return true;
+      
+    } catch (InvocationTargetException e) {
+      throw new QuercusRuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new QuercusRuntimeException(e);
+    }
+  }
+  
   /**
    *
    * @return false if printRImpl not implemented
    * @throws IOException
    */
   public boolean printRImpl(Env env,
-                               Object obj,
-                               WriteStream out,
-                               int depth,
-                               IdentityHashMap<Value, String> valueSet)
+                            Object obj,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
 
@@ -1361,13 +1381,16 @@ public class JavaClassDef extends ClassDef {
 
       _printRImpl.invoke(obj, env, out, depth, valueSet);
       return true;
-    } catch (Exception e) {
-      throw new QuercusException(e);
+    } catch (InvocationTargetException e) {
+      throw new QuercusRuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new QuercusRuntimeException(e);
     }
   }
 
   public boolean varDumpImpl(Env env,
-                             Object obj,
+                             Value obj,
+                             Object javaObj,
                              WriteStream out,
                              int depth,
                              IdentityHashMap<Value, String> valueSet)
@@ -1377,10 +1400,12 @@ public class JavaClassDef extends ClassDef {
       if (_varDumpImpl == null)
         return false;
 
-      _varDumpImpl.invoke(obj, env, out, depth, valueSet);
+      _varDumpImpl.invoke(javaObj, env, obj, out, depth, valueSet);
       return true;
-    } catch (Exception e) {
-      throw new QuercusException(e);
+    } catch (InvocationTargetException e) {
+      throw new QuercusRuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new QuercusRuntimeException(e);
     }
   }
   
@@ -1399,11 +1424,12 @@ public class JavaClassDef extends ClassDef {
     {
       try {
         Iterator iterator
-	  = (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+          = (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
         
         return new JavaIterator(env, iterator);
-      }
-      catch (Exception e) {
+      } catch (InvocationTargetException e) {
+        throw new QuercusRuntimeException(e);
+      } catch (IllegalAccessException e) {
         throw new QuercusRuntimeException(e);
       }
     }
@@ -1415,8 +1441,9 @@ public class JavaClassDef extends ClassDef {
           (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
         
         return new JavaKeyIterator(iterator);
-      }
-      catch (Exception e) {
+      } catch (InvocationTargetException e) {
+        throw new QuercusRuntimeException(e);
+      } catch (IllegalAccessException e) {
         throw new QuercusRuntimeException(e);
       }
     }
@@ -1428,8 +1455,9 @@ public class JavaClassDef extends ClassDef {
           (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
 
         return new JavaValueIterator(env, iterator);
-      }
-      catch (Exception e) {
+      } catch (InvocationTargetException e) {
+        throw new QuercusRuntimeException(e);
+      } catch (IllegalAccessException e) {
         throw new QuercusRuntimeException(e);
       }
     }

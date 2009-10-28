@@ -240,19 +240,24 @@ public class ArrayIterator
   }
 
   public void varDumpImpl(Env env,
+                          Value obj,
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    String name = "ArrayIterator";
+    
+    if (obj != null)
+      name = obj.getClassName();
+    
     if ((_flags & STD_PROP_LIST) != 0) {
       // XXX:  env.getThis().varDumpObject(env, out, depth, valueSet);
     }
     else {
       Value arrayValue = _value;
 
-      // XXX: ArrayIterator may be extended
-      out.println("object(ArrayIterator) (" + arrayValue.getCount(env) + ") {");
+      out.println("object(" + name + ") (" + arrayValue.getCount(env) + ") {");
 
       depth++;
 
@@ -269,7 +274,7 @@ public class ArrayIterator
 
         out.print("[");
 
-        if (key instanceof StringValue)
+        if (key.isString())
           out.print("\"" + key + "\"");
         else
           out.print(key);

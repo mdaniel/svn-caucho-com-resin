@@ -299,6 +299,18 @@ public class BooleanValue extends Value
     sb.append(_value ? 1 : 0);
     sb.append(';');
   }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    if (_value)
+      sb.append("true");
+    else
+      sb.append("false");
+  }
 
   /**
    * Exports the value.

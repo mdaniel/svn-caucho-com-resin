@@ -534,6 +534,15 @@ public class NullValue extends Value
   {
     sb.append("NULL");
   }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    sb.append("null");
+  }
 
   /**
    * Returns a new array.

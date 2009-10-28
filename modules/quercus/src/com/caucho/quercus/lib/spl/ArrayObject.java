@@ -253,19 +253,25 @@ public class ArrayObject
   }
 
   public void varDumpImpl(Env env,
+                          Value object,
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    String name = "ArrayObject";
+    
+    if (object != null)
+      name = object.getClassName();
+    
     if ((_flags & STD_PROP_LIST) != 0) {
       // XXX:
-      out.println("object(ArrayObject) (0) {");
+      out.println("object(" + name + ") (0) {");
       out.print("}");
 
     }
     else {
-      out.println("object(ArrayObject) (" + _value.getSize() + ") {");
+      out.println("object(" + name + ") (" + _value.getSize() + ") {");
 
       depth++;
 

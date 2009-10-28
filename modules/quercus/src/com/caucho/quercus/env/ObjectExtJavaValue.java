@@ -106,7 +106,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    if (! _javaClassDef.varDumpImpl(env, _object, out, depth, valueSet))
+    if (! _javaClassDef.varDumpImpl(env, this, _object, out, depth, valueSet))
       super.varDumpImpl(env, out, depth, valueSet);
   }
 

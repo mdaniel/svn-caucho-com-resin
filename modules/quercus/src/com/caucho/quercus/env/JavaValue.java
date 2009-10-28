@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -192,7 +192,7 @@ public class JavaValue extends ObjectValue
     Value oldThis = env.setThis(this);
 
     try {
-      if (! _classDef.varDumpImpl(env, _object, out, depth, valueSet))
+      if (! _classDef.varDumpImpl(env, this, _object, out, depth, valueSet))
         out.print("resource(" + toString(env) + ")"); // XXX:
     }
     finally {
@@ -495,7 +495,17 @@ public class JavaValue extends ObjectValue
       // php/121f
       sb.append("i:0;");
     }
-
+  }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    if (_classDef.jsonEncode(env, _object, sb))
+      return;
+    else
+      super.jsonEncode(env, sb);
   }
 
   /**

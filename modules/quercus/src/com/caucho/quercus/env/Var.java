@@ -1716,6 +1716,15 @@ public class Var extends Value
       _value.serialize(env, sb, serializeMap);
     }
   }
+  
+  /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    _value.jsonEncode(env, sb);
+  }
 
   @Override
   public void varDumpImpl(Env env,

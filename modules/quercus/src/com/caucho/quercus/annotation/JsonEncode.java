@@ -33,8 +33,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Used to hide Java functions from the php namespace.
+ * Used to specify a function to be used for json encoding.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Hide {
+public @interface JsonEncode {
 }

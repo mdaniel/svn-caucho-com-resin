@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.simplexml;
 
 import com.caucho.quercus.annotation.Hide;
+import com.caucho.quercus.annotation.JsonEncode;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -1102,11 +1103,17 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
    * var_dump() implementation
    */
   public void varDumpImpl(Env env,
+                          Value obj,
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    String name = "SimpleXMLElement";
+    
+    if (obj != null)
+      name = obj.getClassName();
+    
     // php/1x33
     if (_text != null && _children == null && _attributes == null) {
       if (depth > 0) {
@@ -1114,7 +1121,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
         return;
       }
       
-      out.println("object(SimpleXMLElement) (1) {");
+      out.println("object(" + name + ") (1) {");
       printDepth(out, 2 * (depth + 1));
       out.println("[0]=>");
       
@@ -1129,15 +1136,17 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     }
     
     Set<Map.Entry<Value,Value>> entrySet = entrySet();
-    out.println("object(SimpleXMLElement) (" + entrySet.size() + ") {");
+    out.println("object(" + name + ") (" + entrySet.size() + ") {");
 
     for (Map.Entry<Value,Value> entry : entrySet) {
       printDepth(out, 2 * (depth + 1));
       out.print("[");
-      if (entry.getKey() instanceof StringValue)
+      
+      if (entry.getKey().isString())
         out.print("\"" + entry.getKey() + "\"");
       else
         out.print(entry.getKey());
+      
       out.println("]=>");
 
       printDepth(out, 2 * (depth + 1));
@@ -1148,8 +1157,74 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     printDepth(out, 2 * depth);
     out.print('}');
   }
+  
+  @JsonEncode
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    sb.append('{');
+    
+    jsonEncodeImpl(env, sb, true);
+    
+    sb.append('}');
+  }
+  
+  protected void jsonEncodeImpl(Env env, StringValue sb, boolean isTop)
+  {  
+    if (! isTop) {
+      sb.append('"');
+      sb.append(getName());
+      sb.append('"');
+      
+      sb.append(':');
+    }
 
-  void printDepth(WriteStream out, int depth)
+    if (_attributes == null
+        && _children != null
+        && _children.size() == 1
+        && ! _children.get(0).isElement())
+    {
+      _children.get(0).jsonEncodeImpl(env, sb, false);
+    }
+    else {
+      int length = 0;
+      
+      boolean hasChildren = _attributes != null && _children != null;
+      
+      if (hasChildren)
+        sb.append('{');
+      
+      if (_attributes != null) {
+        length++;
+        
+        sb.append("\"@attributes\"");
+        sb.append(':');
+        sb.append('{');
+        
+        for (SimpleXMLElement attribute : _attributes) {
+          attribute.jsonEncodeImpl(env, sb, false);
+        }
+        
+        sb.append('}');
+      }
+      
+      if (_children != null) {
+        for (SimpleXMLElement child : _children) {
+          if (! child.isElement())
+            continue;
+          
+          if (length++ > 0)
+            sb.append(',');
+          
+          child.jsonEncodeImpl(env, sb, false);
+        }
+      }
+
+      if (hasChildren)
+        sb.append('}');
+    }
+  }
+
+  protected void printDepth(WriteStream out, int depth)
     throws IOException
   {
     for (int i = 0; i < depth; i++)

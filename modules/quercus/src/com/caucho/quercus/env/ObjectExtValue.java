@@ -1493,6 +1493,36 @@ public class ObjectExtValue extends ObjectValue
     }
   }
   
+  /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, StringValue sb)
+  {
+    sb.append('{');
+
+    int length = 0;
+
+    Iterator<Entry> iter = new EntryIterator(_entries);
+    
+    while (iter.hasNext()) {
+      Entry entry = iter.next();
+      
+      if (entry.getVisibility() != FieldVisibility.PUBLIC)
+        continue;
+
+      if (length > 0)
+        sb.append(',');
+
+      entry.getKey().toStringValue().jsonEncode(env, sb);
+      sb.append(':');
+      entry.getValue().jsonEncode(env, sb);
+      length++;
+    }
+
+    sb.append('}');
+  }
+  
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
   { 
