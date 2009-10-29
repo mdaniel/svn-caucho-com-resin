@@ -238,6 +238,7 @@ public class WebApp extends ServletContextImpl
 
   private Login _defaultLogin;
   private Login _login;
+  private Authenticator _authenticator;
 
   private RoleMapManager _roleMapManager;
 
@@ -361,7 +362,7 @@ public class WebApp extends ServletContextImpl
   {
     _server = Server.getCurrent();
 
-    _versionContextPath = controller.getContextPath();
+    setVersionContextPath(controller.getContextPath());
     _baseContextPath = controller.getBaseContextPath();
 
     _controller = controller;
@@ -2302,6 +2303,8 @@ public class WebApp extends ServletContextImpl
           _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
           // server/1aj0
           _defaultLogin = _beanManager.getReference(Login.class);
+
+          _authenticator = _beanManager.getReference(Authenticator.class);
         }
 
         setAttribute("caucho.login", _login);
@@ -3177,20 +3180,9 @@ public class WebApp extends ServletContextImpl
       }
       else {
         buildIncludeInvocation(includeInvocation);
-
-        FilterChain chain;
-
-        chain = _servletMapper.mapServlet(forwardInvocation);
-        _forwardFilterMapper.buildDispatchChain(forwardInvocation, chain);
-        forwardInvocation.setWebApp(this);
-
-        chain = _servletMapper.mapServlet(errorInvocation);
-        _errorFilterMapper.buildDispatchChain(errorInvocation, chain);
-        errorInvocation.setWebApp(this);
-
-        chain = _servletMapper.mapServlet(dispatchInvocation);
-        _filterMapper.buildDispatchChain(dispatchInvocation, chain);
-        dispatchInvocation.setWebApp(this);
+        buildForwardInvocation(forwardInvocation);
+        buildErrorInvocation(errorInvocation);
+        buildDispatchInvocation(dispatchInvocation);
       }
 
       disp = new RequestDispatcherImpl(includeInvocation,
@@ -3470,8 +3462,22 @@ public class WebApp extends ServletContextImpl
       return null;
   }
 
+  /**
+   * Gets the authenticator
+   */
+  public Authenticator getConfiguredAuthenticator()
+  {
+    Login login = getConfiguredLogin();
+
+    if (login != null)
+      return login.getAuthenticator();
+
+    return _authenticator;
+  }
+
   @Override
-  public SessionCookieConfig getSessionCookieConfig() {
+  public SessionCookieConfig getSessionCookieConfig()
+  {
     return getSessionManager();
   }
 

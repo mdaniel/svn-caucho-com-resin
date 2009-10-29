@@ -1450,13 +1450,14 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
     if (webApp == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
-      
-    Authenticator auth = webApp.getAuthenticator();
+
+    // server/1aj{0,1}
+    Authenticator auth = webApp.getConfiguredAuthenticator();
 
     if (auth == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
     
-    Login login = webApp.getConfiguredLogin();
+    Login login = webApp.getLogin();
 
     if (login == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
@@ -1477,11 +1478,16 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     WebApp webApp = getWebApp();
 
+    Authenticator auth = webApp.getConfiguredAuthenticator();
+    
+    if (auth == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+
     // server/1aj0
-    Login login = webApp.getConfiguredLogin();
+    Login login = webApp.getLogin();
 
     if (login == null)
-      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+      throw new ServletException(L.l("No login mechanism is configured for '{0}'", getWebApp()));
 
     if (! login.isPasswordBased())
       throw new ServletException(L.l("Authentication mechanism '{0}' does not support password authentication", login));

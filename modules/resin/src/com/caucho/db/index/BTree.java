@@ -899,7 +899,6 @@ public final class BTree {
               
               // System.out.println("MOVE_FROM_LEFT: " + debugId(blockId) + " from " + debugId(leftBlockId));
               moveFromLeft(parentBuffer, leftBuffer, buffer, blockId);
-              
               validate(parentBlockId, parentBuffer);
               validate(leftBlockId, leftBuffer);
               validate(blockId, buffer);
@@ -946,7 +945,6 @@ public final class BTree {
               // System.out.println("MOVE_FROM_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
               moveFromRight(parentBuffer, buffer, rightBuffer, blockId);
-              
               validate(parentBlockId, parentBuffer);
               validate(blockId, buffer);
               validate(rightBlockId, rightBuffer);
@@ -1144,6 +1142,7 @@ public final class BTree {
     int parentLeftOffset = -1;
 
     if (blockId == getPointer(parentBuffer, NEXT_OFFSET)) {
+      // db/0040
       // parentLeftOffset = parentOffset - tupleSize;
       parentLeftOffset = parentEnd - tupleSize;
     }
@@ -1403,6 +1402,7 @@ public final class BTree {
     int parentOffset;
 
     int rightLength = getLength(rightBuffer);
+    int rightSize = rightLength * tupleSize;
 
     int blockLength = getLength(buffer);
     int blockSize = blockLength * tupleSize;
@@ -1423,7 +1423,7 @@ public final class BTree {
 	// add space in the right buffer
 	System.arraycopy(rightBuffer, HEADER_SIZE,
 			 rightBuffer, HEADER_SIZE + blockSize,
-			 blockSize);
+			 rightSize);
 	
 	// add the buffer to the right buffer
 	System.arraycopy(buffer, HEADER_SIZE,
@@ -1759,6 +1759,30 @@ public final class BTree {
     block.free();
     
     return keys;
+  }
+  
+  /**
+   * Testing: returns the keys for a block
+   */
+  public long getBlockNext(long blockIndex)
+    throws IOException
+  {
+    long blockId = _store.addressToBlockId(blockIndex * BLOCK_SIZE);
+
+    if (! _store.isIndexBlock(blockId)) {
+      return -1;
+    }
+    
+    Block block = _store.readBlock(blockId);
+
+    block.read();
+    byte []buffer = block.getBuffer();
+      
+    long next = getPointer(buffer, NEXT_OFFSET);
+
+    block.free();
+    
+    return next / Store.BLOCK_SIZE;
   }
 
   public static BTree createTest(Path path, int keySize)

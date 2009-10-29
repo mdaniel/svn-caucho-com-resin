@@ -441,7 +441,10 @@ public class WebAppExpandDeployGenerator
     String archiveName = segmentName + ".war";
     Path jarPath = getArchiveDirectory().lookup("./" + archiveName);
 
-    return jarPath;
+    if (jarPath.isDirectory())
+      return null;
+    else
+      return jarPath;
   }
 
   private void initBaseController(WebAppController controller)
