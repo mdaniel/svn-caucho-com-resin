@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -384,7 +385,7 @@ public final class ReadStream extends InputStream
   {
     if (n <= 0)
       return n;
-    
+
     int skipped = _readLength - _readOffset;
 
     if (n < skipped) {
@@ -1075,6 +1076,8 @@ public final class ReadStream extends InputStream
   /**
    * Fills the buffer with a non-blocking read.
    *
+   * @param timeout the timeout in milliseconds for the next data
+
    * @return true on data or end of file, false on timeout
    */
   public boolean fillWithTimeout(long timeout)
@@ -1099,7 +1102,7 @@ public final class ReadStream extends InputStream
       // return true on end of file
       return true;
     }
-    
+
     int readLength
       = source.readTimeout(_readBuffer, 0, _readBuffer.length, timeout);
 
@@ -1119,6 +1122,61 @@ public final class ReadStream extends InputStream
       // return true on end of file
       _readLength = 0;
       return true;
+    }
+  }
+
+  /**
+   * Fills the buffer with a timed read, testing for the end of file.
+   * Used for cases like comet to test if the read stream has closed.
+   *
+   * @param timeout the timeout in milliseconds for the next data
+
+   * @return true on data or timeout, false on end of file
+   */
+  public boolean fillIfLive(long timeout)
+    throws IOException
+  {
+    StreamImpl source = _source;
+    byte []readBuffer = _readBuffer;
+
+    if (readBuffer == null || source == null) {
+      _readOffset = 0;
+      _readLength = 0;
+      return false;
+    }
+
+    if (_readOffset > 0) {
+      System.arraycopy(readBuffer, _readOffset, readBuffer, 0,
+                       _readLength - _readOffset);
+      _readLength -= _readOffset;
+      _readOffset = 0;
+    }
+
+    if (_readLength == readBuffer.length)
+      return true;
+
+    if (_sibling != null)
+      _sibling.flush();
+
+    int readLength
+      = source.readTimeout(_readBuffer, _readLength,
+                           _readBuffer.length - _readLength, timeout);
+
+    if (readLength >= 0) {
+      _readLength += readLength;
+      _position += readLength;
+      _readTime = Alarm.getCurrentTime();
+      return true;
+    }
+    else if (readLength == READ_TIMEOUT) {
+      // timeout
+
+      return true;
+    }
+    else {
+      // return false on end of file
+
+      return false;
     }
   }
 

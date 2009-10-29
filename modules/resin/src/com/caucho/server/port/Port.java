@@ -1112,7 +1112,7 @@ public class Port extends TaskWorker
 
     if (_serverSocket == null)
       return;
-    
+
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
@@ -1203,7 +1203,7 @@ public class Port extends TaskWorker
 
       if (_server instanceof EnvironmentBean)
         Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
-      
+
       bind();
       postBind();
 
@@ -1581,7 +1581,7 @@ public class Port extends TaskWorker
   {
     if (_lifecycle.isDestroyed())
       return;
-    
+
     try {
       TcpConnection startConn = null;
 
@@ -1816,44 +1816,66 @@ public class Port extends TaskWorker
   }
 
   public class SuspendReaper implements AlarmListener {
+    private ArrayList<TcpConnection> _suspendSet
+      = new ArrayList<TcpConnection>();
+
+    private ArrayList<TcpConnection> _timeoutSet
+      = new ArrayList<TcpConnection>();
+
+    private ArrayList<TcpConnection> _completeSet
+      = new ArrayList<TcpConnection>();
+
     public void handleAlarm(Alarm alarm)
     {
       try {
-        ArrayList<TcpConnection> oldList = null;
+        _suspendSet.clear();
+        _timeoutSet.clear();
+        _completeSet.clear();
 
         long now = Alarm.getCurrentTime();
 
         synchronized (_suspendConnectionSet) {
-          Iterator<TcpConnection> iter = _suspendConnectionSet.iterator();
+          _suspendSet.addAll(_suspendConnectionSet);
+        }
 
-          while (iter.hasNext()) {
-            TcpConnection conn = iter.next();
+        for (int i = _suspendSet.size() - 1; i >= 0; i--) {
+          TcpConnection conn = _suspendSet.get(i);
 
-            if (conn.getIdleStartTime() + _suspendTimeMax < now) {
-              iter.remove();
+          if (conn.getIdleStartTime() + _suspendTimeMax < now) {
+            _timeoutSet.add(conn);
+          }
 
-              if (oldList == null)
-                oldList = new ArrayList<TcpConnection>();
-
-              oldList.add(conn);
-            }
+          if (conn.isReadEof()) {
+            _completeSet.add(conn);
           }
         }
 
-        if (oldList != null) {
-          for (int i = 0; i < oldList.size(); i++) {
-            TcpConnection conn = oldList.get(i);
+        for (int i = _timeoutSet.size() - 1; i >= 0; i--) {
+          TcpConnection conn = _timeoutSet.get(i);
 
-            if (log.isLoggable(Level.FINE))
-              log.fine(this + " suspend idle timeout " + conn);
+          if (log.isLoggable(Level.FINE))
+            log.fine(this + " suspend idle timeout " + conn);
 
-            ConnectionController async = conn.getController();
+          ConnectionController async = conn.getController();
 
-            if (async != null)
-              async.timeout();
+          if (async != null)
+            async.timeout();
 
-            conn.destroy();
-          }
+          conn.destroy();
+        }
+
+        for (int i = _completeSet.size() - 1; i >= 0; i--) {
+          TcpConnection conn = _completeSet.get(i);
+
+          if (log.isLoggable(Level.FINE))
+            log.fine(this + " async end-of-file " + conn);
+
+          ConnectionController async = conn.getController();
+
+          if (async != null)
+            async.complete();
+
+          conn.destroy();
         }
       } finally {
         if (! isClosed())

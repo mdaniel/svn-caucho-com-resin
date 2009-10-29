@@ -43,7 +43,7 @@ public class Packet
 {
   private static final Logger log
     = Logger.getLogger(Packet.class.getName());
-  
+
   private final String _to;
   private final String _from;
 
@@ -58,7 +58,7 @@ public class Packet
   public Packet()
   {
     _createTime = 0;
-    
+
     _to = null;
     _from = null;
   }
@@ -72,7 +72,7 @@ public class Packet
   public Packet(String to, String from)
   {
     _createTime = Alarm.getCurrentTime();
-    
+
     _to = to;
     _from = from;
   }
@@ -104,8 +104,8 @@ public class Packet
    * SPI method to dispatch the packet to the proper handler
    */
   public void dispatchError(ActorStream handler,
-			    ActorStream toSource,
-			    ActorError error)
+                            ActorStream toSource,
+                            ActorError error)
   {
     log.fine(this + " dispatchError " + error);
   }
@@ -115,12 +115,12 @@ public class Packet
     _waitThread = Thread.currentThread();
 
     if (! _isDequeue) {
-      LockSupport.parkNanos(timeout * 1000000L);
+      LockSupport.parkUntil(Alarm.getCurrentTimeActual() + timeout);
     }
 
     _waitThread = null;
   }
-  
+
   public void unparkDequeue()
   {
     _isDequeue = true;
@@ -143,7 +143,7 @@ public class Packet
     }
 
     sb.append("]");
-    
+
     return sb.toString();
   }
 }

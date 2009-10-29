@@ -58,6 +58,10 @@ public class ConnectionController {
   {
   }
 
+  public void complete()
+  {
+  }
+
   /**
    * Closes the connection.
    */

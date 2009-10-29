@@ -44,9 +44,11 @@ import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.StreamImpl;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
@@ -83,6 +85,7 @@ public class TcpConnection extends Connection
   private final Port _port;
   private final QSocket _socket;
   private final ServerRequest _request;
+  private final byte []_testBuffer = new byte[1];
 
   private final AcceptTask _acceptTask = new AcceptTask();
   private final KeepaliveRequestTask _keepaliveRequestTask
@@ -275,7 +278,7 @@ public class TcpConnection extends Connection
   {
     return _isKeepalive;
   }
-  
+
   @Override
   public boolean isComet()
   {
@@ -483,6 +486,29 @@ public class TcpConnection extends Connection
       return null;
   }
 
+  /**
+   * Poll the socket to test for an end-of-file.
+   */
+  public boolean isReadEof()
+  {
+    QSocket socket = _socket;
+
+    if (socket == null)
+      return true;
+
+    try {
+      StreamImpl s = socket.getStream();
+
+      int len = s.read(_testBuffer, 0, 0);
+
+      return len < 0;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return true;
+    }
+  }
+
   //
   // request processing
   //
@@ -648,7 +674,7 @@ public class TcpConnection extends Connection
       if (_port.getSelectManager().keepalive(this)) {
         if (log.isLoggable(Level.FINE))
           log.fine(dbgId() + " keepalive (select)");
-        
+
         return RequestState.THREAD_DETACHED;
       }
       // keepalive to select manager fails (e.g. filled select manager)
@@ -741,7 +767,7 @@ public class TcpConnection extends Connection
   {
     _isKeepalive = false;
   }
-  
+
   @Override
   public boolean toKeepalive()
   {

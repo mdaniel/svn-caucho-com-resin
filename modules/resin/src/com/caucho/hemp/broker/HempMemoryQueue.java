@@ -406,6 +406,8 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
           if (log.isLoggable(Level.FINEST))
             log.finest(this + " dequeue " + packet);
 
+          packet.unparkDequeue();
+
           dispatch(packet, item);
         }
         else if (! waitForQueue(item)) {
