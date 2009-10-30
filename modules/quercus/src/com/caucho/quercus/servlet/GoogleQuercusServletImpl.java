@@ -182,6 +182,7 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
         env.start();
         
         // GoogleAppEngine SDK is missing non-essential Jetty classes
+        // (Jetty also hides server classes from webapp)
         //env.setGlobalValue("request", env.wrapJava(request));
         //env.setGlobalValue("response", env.wrapJava(response));
         //env.setGlobalValue("servletContext", env.wrapJava(_servletContext));

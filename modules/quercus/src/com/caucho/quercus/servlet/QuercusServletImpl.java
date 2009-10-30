@@ -161,9 +161,13 @@ public class QuercusServletImpl extends HttpServlet
       try {
         env.start();
         
-        env.setGlobalValue("request", env.wrapJava(request));
-        env.setGlobalValue("response", env.wrapJava(response));
-        env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
+        // php/2030, php/2032, php/2033
+        // Jetty hides server classes from web-app
+        // http://docs.codehaus.org/display/JETTY/Classloading
+        //
+        // env.setGlobalValue("request", env.wrapJava(request));
+        // env.setGlobalValue("response", env.wrapJava(response));
+        // env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
 
         StringValue prepend
           = quercus.getIniValue("auto_prepend_file").toStringValue(env);
