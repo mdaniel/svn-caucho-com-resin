@@ -4,7 +4,7 @@
  */
 
 if ($_REQUEST['logout'] == 'true') {
-  $request->getSession()->invalidate();
+  quercus_servlet_request()->getSession()->invalidate();
   header("Location: index.php");
 }
 else {

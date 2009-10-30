@@ -9,7 +9,7 @@ require_once "WEB-INF/php/inc.php";
 
 $webapp = $g_mbean_server->lookup($_GET['id']);
 
-$request = quercus_get_request();
+$request = quercus_servlet_request();
 $is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $action = $_POST['action'];

@@ -346,8 +346,8 @@ function redirect_nocache($relative_url)
 if (is_null($target_uri))
   $target_uri = $_SERVER['PHP_SELF'];
 
-$is_read_role = $request->isUserInRole("read");
-$is_write_role = $request->isUserInRole("write");
+$is_read_role = quercus_servlet_request()->isUserInRole("read");
+$is_write_role = quercus_servlet_request()->isUserInRole("write");
 
 $display_header_script = NULL;
 $display_header_title = NULL;

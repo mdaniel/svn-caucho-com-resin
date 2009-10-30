@@ -12,7 +12,7 @@ if ($_REQUEST['period'])
 if ($_REQUEST['np'])
   $p_period = $_REQUEST['np'];
 
-$user = $request->getRemoteUser();
+$user = quercus_servlet_request()->getRemoteUser();
 
 $user_item = $cache->get($user);
 $is_refresh = false;

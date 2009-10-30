@@ -21,6 +21,8 @@ if (! ($is_read_role || $is_write_role) ) {
   <a href="<?= $login_uri ?>">Login is required</a>
 </p>
 <?php
+  $request = quercus_servlet_request()
+
   if (! $is_localhost)
     $is_localhost = $request->remoteHost == $request->serverName;
 
