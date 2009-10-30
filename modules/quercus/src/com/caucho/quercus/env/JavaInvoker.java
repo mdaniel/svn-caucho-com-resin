@@ -60,7 +60,7 @@ abstract public class JavaInvoker
   private final Annotation []_methodAnn;
 
   private volatile boolean _isInit;
-  
+
   private int _minArgumentLength;
   private int _maxArgumentLength;
 
@@ -93,7 +93,7 @@ abstract public class JavaInvoker
     _paramAnn = paramAnn;
     _methodAnn = methodAnn;
     _retType = retType;
-    
+
     // init();
   }
 
@@ -101,127 +101,127 @@ abstract public class JavaInvoker
   {
     if (_isInit)
       return;
-    
+
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
 
       MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
       ExprFactory exprFactory = _moduleContext.getExprFactory();
 
       try {
-	boolean callUsesVariableArgs = false;
-	boolean callUsesSymbolTable = false;
-	boolean returnNullAsFalse = false;
+        boolean callUsesVariableArgs = false;
+        boolean callUsesSymbolTable = false;
+        boolean returnNullAsFalse = false;
 
-	for (Annotation ann : _methodAnn) {
-	  if (VariableArguments.class.isAssignableFrom(ann.annotationType()))
-	    callUsesVariableArgs = true;
+        for (Annotation ann : _methodAnn) {
+          if (VariableArguments.class.isAssignableFrom(ann.annotationType()))
+            callUsesVariableArgs = true;
 
-	  if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType()))
-	    callUsesSymbolTable = true;
+          if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType()))
+            callUsesSymbolTable = true;
 
-	  if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType()))
-	    returnNullAsFalse = true;
-	}
+          if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType()))
+            returnNullAsFalse = true;
+        }
 
-	_isCallUsesVariableArgs = callUsesVariableArgs;
-	_isCallUsesSymbolTable = callUsesSymbolTable;
+        _isCallUsesVariableArgs = callUsesVariableArgs;
+        _isCallUsesSymbolTable = callUsesSymbolTable;
 
-	_hasEnv = _param.length > 0 && _param[0].equals(Env.class);
-	int envOffset = _hasEnv ? 1 : 0;
+        _hasEnv = _param.length > 0 && _param[0].equals(Env.class);
+        int envOffset = _hasEnv ? 1 : 0;
 
-	if (envOffset < _param.length)
-	  _hasThis = hasThis(_param[envOffset], _paramAnn[envOffset]);
-	else
-	  _hasThis = false;
+        if (envOffset < _param.length)
+          _hasThis = hasThis(_param[envOffset], _paramAnn[envOffset]);
+        else
+          _hasThis = false;
 
-	if (_hasThis)
-	  envOffset++;
+        if (_hasThis)
+          envOffset++;
 
-	boolean hasRestArgs = false;
-	boolean isRestReference = false;
+        boolean hasRestArgs = false;
+        boolean isRestReference = false;
 
-	if (_param.length > 0
-	    && (_param[_param.length - 1].equals(Value[].class)
-		|| _param[_param.length - 1].equals(Object[].class))) {
-	  hasRestArgs = true;
+        if (_param.length > 0
+            && (_param[_param.length - 1].equals(Value[].class)
+                || _param[_param.length - 1].equals(Object[].class))) {
+          hasRestArgs = true;
 
-	  for (Annotation ann : _paramAnn[_param.length - 1]) {
-	    if (Reference.class.isAssignableFrom(ann.annotationType()))
-	      isRestReference = true;
-	  }
-	}
+          for (Annotation ann : _paramAnn[_param.length - 1]) {
+            if (Reference.class.isAssignableFrom(ann.annotationType()))
+              isRestReference = true;
+          }
+        }
 
-	_hasRestArgs = hasRestArgs;
-	_isRestReference = isRestReference;
+        _hasRestArgs = hasRestArgs;
+        _isRestReference = isRestReference;
 
-	int argLength = _param.length;
+        int argLength = _param.length;
 
-	if (_hasRestArgs)
-	  argLength -= 1;
+        if (_hasRestArgs)
+          argLength -= 1;
 
-	_defaultExprs = new Expr[argLength - envOffset];
-	_marshalArgs = new Marshal[argLength - envOffset];
+        _defaultExprs = new Expr[argLength - envOffset];
+        _marshalArgs = new Marshal[argLength - envOffset];
 
-	_maxArgumentLength = argLength - envOffset;
-	_minArgumentLength = _maxArgumentLength;
+        _maxArgumentLength = argLength - envOffset;
+        _minArgumentLength = _maxArgumentLength;
 
-	for (int i = 0; i < argLength - envOffset; i++) {
-	  boolean isReference = false;
-	  boolean isPassThru = false;
-      
-	  boolean isNotNull = false;
+        for (int i = 0; i < argLength - envOffset; i++) {
+          boolean isReference = false;
+          boolean isPassThru = false;
 
-	  for (Annotation ann : _paramAnn[i + envOffset]) {
-	    if (Optional.class.isAssignableFrom(ann.annotationType())) {
-	      _minArgumentLength--;
+          boolean isNotNull = false;
 
-	      Optional opt = (Optional) ann;
+          for (Annotation ann : _paramAnn[i + envOffset]) {
+            if (Optional.class.isAssignableFrom(ann.annotationType())) {
+              _minArgumentLength--;
 
-	      if (opt.value().equals(Optional.NOT_SET))
-	        _defaultExprs[i] = exprFactory.createDefault();
-	      else if (opt.value().equals(""))
-	        _defaultExprs[i] = QuercusParser.parseDefault("''");
-	      else
-	        _defaultExprs[i] = QuercusParser.parseDefault(opt.value());
-	    } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
-	      isReference = true;
-	    } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
-	      isPassThru = true;
-	    } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
-	      isNotNull = true;
-	    }
-	  }
+              Optional opt = (Optional) ann;
 
-	  Class argType = _param[i + envOffset];
+              if (opt.value().equals(Optional.NOT_SET))
+                _defaultExprs[i] = exprFactory.createDefault();
+              else if (opt.value().equals(""))
+                _defaultExprs[i] = QuercusParser.parseDefault("''");
+              else
+                _defaultExprs[i] = QuercusParser.parseDefault(opt.value());
+            } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
+              isReference = true;
+            } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
+              isPassThru = true;
+            } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
+              isNotNull = true;
+            }
+          }
 
-	  if (isReference) {
-	    _marshalArgs[i] = marshalFactory.createReference();
+          Class argType = _param[i + envOffset];
 
-	    if (! Value.class.equals(argType)
-	        && ! Var.class.equals(argType)) {
-	      throw new QuercusException(L.l("reference must be Value or Var for {0}",
-					     _name));
-	    }
-	  }
-	  else if (isPassThru) {
-	    _marshalArgs[i] = marshalFactory.createValuePassThru();
-        
-	    if (! Value.class.equals(argType)) {
+          if (isReference) {
+            _marshalArgs[i] = marshalFactory.createReference();
+
+            if (! Value.class.equals(argType)
+                && ! Var.class.equals(argType)) {
+              throw new QuercusException(L.l("reference must be Value or Var for {0}",
+                                             _name));
+            }
+          }
+          else if (isPassThru) {
+            _marshalArgs[i] = marshalFactory.createValuePassThru();
+
+            if (! Value.class.equals(argType)) {
               throw new QuercusException(L.l("pass thru must be Value for {0}",
                                              _name));
             }
-	  }
-	  else
-	    _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
-	}
+          }
+          else
+            _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
+        }
 
-	_unmarshalReturn = marshalFactory.create(_retType,
-						 false,
-						 returnNullAsFalse);
+        _unmarshalReturn = marshalFactory.create(_retType,
+                                                 false,
+                                                 returnNullAsFalse);
       } finally {
-	_isInit = true;
+        _isInit = true;
       }
     }
   }
@@ -234,10 +234,10 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _minArgumentLength;
   }
-  
+
   /**
    * Returns the maximum number of arguments allowed.
    */
@@ -246,7 +246,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _maxArgumentLength;
   }
 
@@ -257,7 +257,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _hasEnv;
   }
 
@@ -268,7 +268,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _hasRestArgs;
   }
 
@@ -279,7 +279,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _isRestReference;
   }
 
@@ -290,7 +290,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _unmarshalReturn;
   }
 
@@ -302,7 +302,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _isCallUsesVariableArgs;
   }
 
@@ -314,7 +314,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _isCallUsesSymbolTable;
   }
 
@@ -325,7 +325,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _unmarshalReturn.isBoolean();
   }
 
@@ -336,7 +336,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _unmarshalReturn.isString();
   }
 
@@ -347,7 +347,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _unmarshalReturn.isLong();
   }
 
@@ -358,7 +358,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _unmarshalReturn.isDouble();
   }
 
@@ -374,7 +374,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _marshalArgs;
   }
 
@@ -385,7 +385,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _paramAnn;
   }
 
@@ -396,7 +396,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return _defaultExprs;
   }
 
@@ -408,7 +408,7 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     Value []values = new Value[args.length];
 
     for (int i = 0; i < args.length; i++) {
@@ -418,11 +418,11 @@ abstract public class JavaInvoker
         arg = _marshalArgs[i];
       else if (_isRestReference) {
         values[i] = args[i].evalRef(env);
-	continue;
+        continue;
       }
       else {
         values[i] = args[i].eval(env);
-	continue;
+        continue;
       }
 
       if (arg == null)
@@ -459,10 +459,10 @@ abstract public class JavaInvoker
 
     int cost = 0;
     int i = 0;
-    
+
     for (; i < _marshalArgs.length; i++) {
       Marshal marshal = _marshalArgs[i];
-      
+
       if (i < args.length && args[i] != null) {
         Value arg = args[i].toValue();
 
@@ -475,7 +475,7 @@ abstract public class JavaInvoker
     // consume all the REST args
     if (_hasRestArgs) {
       int restLen = args.length - _marshalArgs.length;
-      
+
       if (restLen > 0)
         i += restLen;
     }
@@ -487,7 +487,7 @@ abstract public class JavaInvoker
 
     return cost;
   }
-  
+
   public int getMarshalingCost(Expr []args)
   {
     if (! _isInit)
@@ -506,10 +506,10 @@ abstract public class JavaInvoker
 
     int cost = 0;
     int i = 0;
-    
+
     for (; i < _marshalArgs.length; i++) {
       Marshal marshal = _marshalArgs[i];
-      
+
       if (i < args.length && args[i] != null) {
         Expr arg = args[i];
 
@@ -522,7 +522,7 @@ abstract public class JavaInvoker
     // consume all the REST args
     if (_hasRestArgs) {
       int restLen = args.length - _marshalArgs.length;
-      
+
       if (restLen > 0)
         i += restLen;
     }
@@ -538,11 +538,11 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     int len = (_defaultExprs.length +
-	       (_hasEnv ? 1 : 0) +
-	       (_hasThis ? 1 : 0) +
-	       (_hasRestArgs ? 1 : 0));
+               (_hasEnv ? 1 : 0) +
+               (_hasThis ? 1 : 0) +
+               (_hasRestArgs ? 1 : 0));
 
     Object []values = new Object[len];
 
@@ -596,7 +596,7 @@ abstract public class JavaInvoker
     }
 
     Object result = invoke(obj, values);
-    
+
     return _unmarshalReturn.unmarshal(env, result);
   }
 
@@ -620,7 +620,7 @@ abstract public class JavaInvoker
       javaArgs[k++] = env;
 
     Object obj = qThis != null ? qThis.toJavaObject() : null;
-    
+
     if (_hasThis) {
       javaArgs[k++] = qThis;
     }
@@ -673,7 +673,9 @@ abstract public class JavaInvoker
 
     Object result = invoke(obj, javaArgs);
 
-    return _unmarshalReturn.unmarshal(env, result);
+    Value value = _unmarshalReturn.unmarshal(env, result);
+
+    return value;
   }
 
   abstract public Object invoke(Object obj, Object []args);
@@ -688,7 +690,7 @@ abstract public class JavaInvoker
 
     for (int i = 0; i < ann.length; i++) {
       if (This.class.isAssignableFrom(ann[i].annotationType()))
-	return true;
+        return true;
     }
 
     return false;

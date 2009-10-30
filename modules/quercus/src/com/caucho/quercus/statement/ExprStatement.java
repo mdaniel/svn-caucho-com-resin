@@ -39,7 +39,7 @@ import com.caucho.quercus.expr.Expr;
  */
 public class ExprStatement extends Statement {
   private Expr _expr;
-  
+
   /**
    * Creates the expression statement.
    */
@@ -57,11 +57,16 @@ public class ExprStatement extends Statement {
   {
     return _expr;
   }
-  
+
   public Value execute(Env env)
   {
+    // php/0d92
+    Location oldLocation = env.setLocation(getLocation());
+
     // php/1a08
     _expr.eval(env);
+
+    env.setLocation(oldLocation);
 
     return null;
   }

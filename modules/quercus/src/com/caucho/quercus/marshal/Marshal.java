@@ -65,6 +65,7 @@ abstract public class Marshal {
   public static final int COST_STRING_TO_CHAR = 320;
   public static final int COST_BINARY_TO_BYTE = 320;
   public static final int COST_STRING_TO_BYTE = 330;
+  public static final int COST_BINARY_TO_STRING = 330;
   public static final int COST_TO_STRING = 350;
   public static final int COST_TO_CHAR = COST_TO_STRING + 10;
 

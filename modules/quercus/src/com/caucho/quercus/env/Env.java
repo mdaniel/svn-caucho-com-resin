@@ -49,14 +49,7 @@ import com.caucho.quercus.program.*;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.*;
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.MemoryPath;
-import com.caucho.vfs.NullPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.*;
 import com.caucho.vfs.i18n.EncodingReader;
 
 import javax.script.Bindings;
@@ -245,6 +238,7 @@ public class Env {
 
   private ArrayList<Callback> _autoloadList;
   private InternalAutoloadCallback _internalAutoload;
+  private Location _location;
 
   private long _startTime;
   private long _timeLimit = 600000L;
@@ -3010,7 +3004,7 @@ public class Env {
     */
 
     value = createString(name);
-    
+
     return value;
   }
 
@@ -3035,9 +3029,9 @@ public class Env {
       if (value != null)
         return value;
     }
-    
+
     id = _quercus.getConstantLowerId(name);
-    
+
     if (id > 0 && id < _const.length) {
       Value value = _const[id];
 
@@ -3055,7 +3049,7 @@ public class Env {
         return value;
     }
     */
-    
+
     return null;
 
     /*
@@ -4361,7 +4355,7 @@ public class Env {
     // logic is for JavaMarshal, where can avoid the lookup call
     if (def.getType() != obj.getClass()) {
       // php/0ceg
-      
+
       // XXX: what if types are incompatible, does it matter?
       // if it doesn't matter, simplify this to one if with no else
       def = getJavaClassDefinition(obj.getClass());
@@ -5093,8 +5087,14 @@ public class Env {
 
     if ("".equals(scheme)
         || "file".equals(scheme)
-        || "memory".equals(scheme))
+        || "memory".equals(scheme)) {
       return false;
+    }
+
+    if (path instanceof JarPath) {
+      // php/0h1a
+      return isUrl(((JarPath) path).getContainer());
+    }
 
     // XXX: too restrictive for filters
     return ! "php".equals(scheme)
@@ -6202,6 +6202,19 @@ public class Env {
     return null;
   }
 
+  public final Location setLocation(Location newLocation)
+  {
+    Location location = _location;
+    _location = newLocation;
+
+    return location;
+  }
+
+  protected final Location getLocationImpl()
+  {
+    return _location;
+  }
+
   /**
    * Returns the current execution location.
    *
@@ -6210,6 +6223,11 @@ public class Env {
    */
   public Location getLocation()
   {
+    Location location = _location;
+
+    if (location != null)
+      return location;
+
     Expr call = peekCall(0);
 
     if (call != null)
@@ -6471,7 +6489,7 @@ public class Env {
   {
     if (_duplex != null)
       return;
-    
+
     _duplex = duplex;
   }
 
@@ -6496,7 +6514,7 @@ public class Env {
       log.fine(this + " skipping close for duplex mode");
       return;
     }
-    
+
     try {
       // php/1l0t
       // output buffers callbacks may throw an exception

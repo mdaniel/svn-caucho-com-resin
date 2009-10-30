@@ -39,7 +39,7 @@ import com.caucho.quercus.expr.Expr;
  */
 public class StringMarshal extends Marshal {
   public static final StringMarshal MARSHAL = new StringMarshal();
-  
+
   public boolean isString()
   {
     return true;
@@ -67,10 +67,13 @@ public class StringMarshal extends Marshal {
     else
       return env.createString((String) value);
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toStringMarshalCost();
+
+    /*
     if (argValue.isString()) {
       if (argValue.isUnicode())
         return Marshal.UNICODE_STRING_COST;
@@ -83,8 +86,9 @@ public class StringMarshal extends Marshal {
       return Marshal.THREE;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   public int getMarshalingCost(Expr expr)
   {
     if (expr.isString())
@@ -92,7 +96,7 @@ public class StringMarshal extends Marshal {
     else
       return Marshal.FOUR;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

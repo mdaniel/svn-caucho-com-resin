@@ -300,6 +300,15 @@ abstract public class StringValue
   }
 
   /**
+   * Cost to convert to a byte
+   */
+  @Override
+  public int toStringMarshalCost()
+  {
+    return Marshal.COST_EQUAL;
+  }
+
+  /**
    * Returns true for equality
    */
   public int cmp(Value rValue)

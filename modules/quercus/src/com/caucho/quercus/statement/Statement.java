@@ -49,7 +49,7 @@ abstract public class Statement {
   public static final int RETURN = 0x2;
 
   private final Location _location;
-  
+
   private Statement _parent;
   private String _loopLabel;
 
@@ -63,7 +63,7 @@ abstract public class Statement {
     _location = location;
   }
 
-  public Location getLocation()
+  public final Location getLocation()
   {
     return _location;
   }
@@ -72,12 +72,12 @@ abstract public class Statement {
   {
     return false;
   }
-  
+
   final public Statement getParent()
   {
     return _parent;
   }
-  
+
   final public void setParent(Statement parent)
   {
     _parent = parent;

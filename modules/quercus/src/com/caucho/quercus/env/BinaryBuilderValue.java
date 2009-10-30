@@ -189,9 +189,17 @@ public class BinaryBuilderValue
       return Marshal.COST_NUMERIC_LOSSLESS;
     else if (isDoubleConvertible())
       return Marshal.COST_NUMERIC_LOSSY;
-    else {
+    else
       return Marshal.COST_BINARY_TO_BYTE;
-    }
+  }
+
+  /**
+   * Cost to convert to a byte
+   */
+  @Override
+  public int toStringMarshalCost()
+  {
+    return Marshal.COST_BINARY_TO_STRING;
   }
 
   /**
