@@ -37,7 +37,7 @@ import com.caucho.quercus.expr.Expr;
 public class FloatObjectMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new FloatObjectMarshal();
-  
+
   public boolean isReadOnly()
   {
     return true;
@@ -61,20 +61,24 @@ public class FloatObjectMarshal extends Marshal
     else
       return new DoubleValue(((Number) value).doubleValue());
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toDoubleMarshalCost() + 3;
+
+    /*
     if (argValue instanceof DoubleValue)
       return Marshal.ONE;
     else if (argValue.isLongConvertible())
-      return LONG_CONVERTIBLE_FLOAT_OBJECT_COST;
+      return LONG_CONVERTIBLE_FLOAT_COST;
     else if (argValue.isDoubleConvertible())
-      return DOUBLE_CONVERTIBLE_FLOAT_OBJECT_COST;
+      return DOUBLE_CONVERTIBLE_FLOAT_COST;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

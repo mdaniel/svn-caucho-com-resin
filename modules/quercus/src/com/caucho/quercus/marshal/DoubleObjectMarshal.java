@@ -37,7 +37,7 @@ import com.caucho.quercus.expr.Expr;
 public class DoubleObjectMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new DoubleObjectMarshal();
-  
+
   public boolean isReadOnly()
   {
     return true;
@@ -60,20 +60,24 @@ public class DoubleObjectMarshal extends Marshal
     else
       return new DoubleValue(((Number) value).doubleValue());
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toDoubleMarshalCost() + 1;
+
+    /*
     if (argValue instanceof DoubleValue)
-      return Marshal.ONE;
+      return COST_EQUAL;
     else if (argValue.isLongConvertible())
-      return LONG_CONVERTIBLE_DOUBLE_OBJECT_COST;
+      return COST_LOSSY_NUMERIC;
     else if (argValue.isDoubleConvertible())
-      return DOUBLE_CONVERTIBLE_DOUBLE_OBJECT_COST;
+      return COST_LOSSLESS_NUMERIC;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

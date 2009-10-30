@@ -41,11 +41,37 @@ abstract public class Marshal {
   protected static final L10N L = new L10N(Marshal.class);
 
   // scale to describe cost of marshaling an argument
+
+  // Value match
   public static final int ZERO = 0;
+  public static final int COST_VALUE = 0;
+
+  // equal Java value
   public static final int ONE = 100;
+  public static final int COST_EQUAL = 100;
+
+  // lossless numeric conversion
   public static final int TWO = 200;
+  public static final int COST_NUMERIC_LOSSLESS = 200;
+
+  // lossy numeric conversion
   public static final int THREE = 300;
+  public static final int COST_NUMERIC_LOSSY = 300;
+
+  // XXX: to string
+
+  public static final int COST_FROM_NULL = 310;
+  public static final int COST_TO_JAVA_OBJECT = 320;
+  public static final int COST_STRING_TO_CHAR = 320;
+  public static final int COST_BINARY_TO_BYTE = 320;
+  public static final int COST_STRING_TO_BYTE = 330;
+  public static final int COST_TO_STRING = 350;
+  public static final int COST_TO_CHAR = COST_TO_STRING + 10;
+
+  // incompatible
   public static final int FOUR = 400;
+  public static final int COST_INCOMPATIBLE = 400;
+
   public static final int MAX = Integer.MAX_VALUE / 32;
 
   public static final int PHP5_STRING_VALUE_COST = ZERO;
@@ -153,7 +179,7 @@ abstract public class Marshal {
   {
     return false;
   }
-  
+
   abstract public Object marshal(Env env, Expr expr, Class argClass);
 
   public Object marshal(Env env, Value value, Class argClass)
@@ -165,27 +191,27 @@ abstract public class Marshal {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public final int getMarshalingCost(Value value)
   {
     Class expectedClass = getExpectedClass();
 
     if (expectedClass.equals(value.getClass()))
       return ZERO;
-    
+
     return getMarshalingCostImpl(value);
   }
-  
+
   protected int getMarshalingCostImpl(Value value)
   {
     throw new UnsupportedOperationException(getClass().toString());
   }
-  
+
   public int getMarshalingCost(Expr expr)
   {
     return MAX;
   }
-  
+
   public Class getExpectedClass()
   {
     throw new UnsupportedOperationException(getClass().toString());

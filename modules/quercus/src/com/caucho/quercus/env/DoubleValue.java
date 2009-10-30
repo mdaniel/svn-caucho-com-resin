@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.marshal.Marshal;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class DoubleValue extends NumberValue
   public String getType()
   {
     // php/0142
-    
+
     return "double";
   }
 
@@ -100,7 +101,7 @@ public class DoubleValue extends NumberValue
   {
     return _value == (double)((long) _value);
   }
-  
+
   /**
    * Returns true for a long-value.
    */
@@ -109,7 +110,7 @@ public class DoubleValue extends NumberValue
   {
     return false;
   }
-  
+
   /**
    * Returns true for a double-value.
    */
@@ -135,6 +136,59 @@ public class DoubleValue extends NumberValue
   {
     return true;
   }
+
+  //
+  // marshal cost
+  //
+
+  /**
+   * Cost to convert to a double
+   */
+  @Override
+  public int toDoubleMarshalCost()
+  {
+    return Marshal.COST_EQUAL;
+  }
+
+  /**
+   * Cost to convert to a long
+   */
+  @Override
+  public int toLongMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSY;
+  }
+
+  /**
+   * Cost to convert to an integer
+   */
+  @Override
+  public int toIntegerMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSY;
+  }
+
+  /**
+   * Cost to convert to a short
+   */
+  @Override
+  public int toShortMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSY;
+  }
+
+  /**
+   * Cost to convert to a byte
+   */
+  @Override
+  public int toByteMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSY;
+  }
+
+  //
+  // conversions
+  //
 
   /**
    * Converts to a boolean.
@@ -253,7 +307,7 @@ public class DoubleValue extends NumberValue
   {
     return new DoubleValue(lValue * _value);
   }
-  
+
   /**
    * Absolute value.
    */
@@ -290,10 +344,10 @@ public class DoubleValue extends NumberValue
 
     double abs = _value < 0 ? - _value : _value;
     int exp = (int) Math.log10(abs);
-    
+
     // php/0c02
     if (longValue == _value && exp < 18)
-      return String.valueOf(longValue); 
+      return String.valueOf(longValue);
 
     if (-5 < exp && exp < 18) {
       int digits = 13 - exp;
@@ -302,7 +356,7 @@ public class DoubleValue extends NumberValue
         digits = 13;
       else if (digits < 0)
         digits = 0;
-      
+
       String v = String.format("%." + digits + "f", _value);
 
       int len = v.length();
@@ -314,7 +368,7 @@ public class DoubleValue extends NumberValue
 
         if (ch == '.')
           dot = true;
-    
+
         if (ch != '0' && nonzero < 0) {
           if (ch == '.')
             nonzero = len - 1;
@@ -420,13 +474,13 @@ public class DoubleValue extends NumberValue
   {
     out.print("float(" + toString() + ")");
   }
-  
+
   //
   // Java Serialization
   //
-  
+
   private Object readResolve()
-  { 
+  {
     if (_value == 0)
       return ZERO;
     else

@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.marshal.Marshal;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class LongValue extends NumberValue
   {
     return true;
   }
-  
+
   /**
    * Returns true for a long-value.
    */
@@ -114,7 +115,7 @@ public class LongValue extends NumberValue
   {
     return true;
   }
-  
+
   /**
    * Returns true for a double-value.
    */
@@ -139,6 +140,55 @@ public class LongValue extends NumberValue
   public boolean isEmpty()
   {
     return _value == 0;
+  }
+
+  //
+  // marshal cost
+  //
+
+  /**
+   * Cost to convert to a double
+   */
+  @Override
+  public int toDoubleMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSLESS;
+  }
+
+  /**
+   * Cost to convert to a long
+   */
+  @Override
+  public int toLongMarshalCost()
+  {
+    return Marshal.COST_EQUAL;
+  }
+
+  /**
+   * Cost to convert to an integer
+   */
+  @Override
+  public int toIntegerMarshalCost()
+  {
+    return Marshal.COST_EQUAL + 1;
+  }
+
+  /**
+   * Cost to convert to a short
+   */
+  @Override
+  public int toShortMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSY;
+  }
+
+  /**
+   * Cost to convert to a byte
+   */
+  @Override
+  public int toByteMarshalCost()
+  {
+    return Marshal.COST_NUMERIC_LOSSY;
   }
 
   /**
@@ -276,7 +326,7 @@ public class LongValue extends NumberValue
   {
     return LongValue.create(_value - rLong);
   }
-  
+
   /**
    * Absolute value.
    */
@@ -310,15 +360,15 @@ public class LongValue extends NumberValue
     if (rValue.isBoolean()) {
       boolean lBool = toBoolean();
       boolean rBool = rValue.toBoolean();
-      
+
       if (! lBool && rBool)
         return -1;
       if (lBool && ! rBool)
         return 1;
-      
+
       return 0;
     }
-    
+
     long l = _value;
     double r = rValue.toDouble();
 
@@ -377,7 +427,7 @@ public class LongValue extends NumberValue
   {
     return sb.append(_value);
   }
-  
+
   /**
    * Append to a string builder.
    */
@@ -435,7 +485,7 @@ public class LongValue extends NumberValue
   public final int hashCode()
   {
     long v = _value;
-    
+
     return (int) (17 * v + 65537 * (v >> 32));
   }
 
@@ -462,11 +512,11 @@ public class LongValue extends NumberValue
   {
     out.print("int(" + toLong() + ")");
   }
-  
+
   //
   // Java Serialization
   //
-  
+
   private Object readResolve()
   {
     if (STATIC_MIN <= _value && _value <= STATIC_MAX)

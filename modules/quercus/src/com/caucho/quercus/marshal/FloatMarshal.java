@@ -65,10 +65,13 @@ public class FloatMarshal extends Marshal
     else
       return new DoubleValue(((Number) value).doubleValue());
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toDoubleMarshalCost() + 2;
+
+    /*
     if (argValue instanceof DoubleValue)
       return Marshal.ONE;
     else if (argValue.isLongConvertible())
@@ -77,8 +80,9 @@ public class FloatMarshal extends Marshal
       return DOUBLE_CONVERTIBLE_FLOAT_COST;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {
