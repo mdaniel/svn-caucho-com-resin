@@ -4839,10 +4839,14 @@ public class QuercusParser {
   private Expr createBinary(byte []bytes)
   {
     // XXX: see QuercusParser.parseDefault for _quercus == null
+    // php/0ch1
+    return _factory.createBinary(bytes);
+    /*
     if (_quercus != null && _quercus.isUnicodeSemantics())
       return _factory.createBinary(bytes);
     else
       return _factory.createString(new String(bytes));
+    */
   }
 
   /**

@@ -151,6 +151,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Cost to convert to a boolean
+   */
+  @Override
+  public int toBooleanMarshalCost()
+  {
+    return Marshal.COST_FROM_NULL;
+  }
+
+  /**
    * Converts to a boolean.
    */
   @Override

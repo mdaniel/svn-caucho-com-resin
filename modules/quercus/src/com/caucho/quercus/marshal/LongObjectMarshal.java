@@ -60,10 +60,13 @@ public class LongObjectMarshal extends Marshal
     else
       return LongValue.create(((Number) value).longValue());
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toLongMarshalCost() + 1;
+
+    /*
     if (argValue instanceof LongValue)
       return Marshal.ONE;
     else if (argValue.isLongConvertible())
@@ -72,8 +75,9 @@ public class LongObjectMarshal extends Marshal
       return DOUBLE_CONVERTIBLE_LONG_OBJECT_COST;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

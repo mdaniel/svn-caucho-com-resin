@@ -69,7 +69,7 @@ public class FloatMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    return argValue.toDoubleMarshalCost() + 2;
+    return argValue.toFloatMarshalCost();
 
     /*
     if (argValue instanceof DoubleValue)

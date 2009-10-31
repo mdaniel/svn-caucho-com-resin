@@ -37,7 +37,7 @@ import com.caucho.quercus.expr.Expr;
 public class LongMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new LongMarshal();
-  
+
   public boolean isLong()
   {
     return true;
@@ -65,10 +65,13 @@ public class LongMarshal extends Marshal
     else
       return LongValue.create(((Number) value).longValue());
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toLongMarshalCost();
+
+    /*
     if (argValue instanceof LongValue)
       return Marshal.ONE;
     else if (argValue.isLongConvertible())
@@ -77,8 +80,9 @@ public class LongMarshal extends Marshal
       return DOUBLE_CONVERTIBLE_LONG_COST;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

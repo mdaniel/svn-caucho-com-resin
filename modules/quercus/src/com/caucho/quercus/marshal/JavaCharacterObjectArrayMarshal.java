@@ -39,7 +39,7 @@ public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
 {
   public static final Marshal MARSHAL
     = new JavaCharacterObjectArrayMarshal();
-  
+
   @Override
   public Value unmarshal(Env env, Object value)
   {
@@ -52,10 +52,13 @@ public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
     else
       return new StringBuilderValue(buffer);
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return Marshal.COST_INCOMPATIBLE;
+
+    /*
     if (argValue.isString()) {
       if (argValue.isUnicode())
         return Marshal.UNICODE_CHARACTER_OBJECT_ARRAY_COST;
@@ -68,8 +71,9 @@ public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
       return Marshal.THREE;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

@@ -29,16 +29,13 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.BytesValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 
 /**
  * Bucket for stream filters.
  */
 public class StreamBucket extends Value {
-  public StreamBucket(Env env, BytesValue data)
+  public StreamBucket(Env env, BinaryValue data)
   {
     putField(env, "data", data);
     putField(env, "datalen", LongValue.create(data.length()));

@@ -81,6 +81,46 @@ abstract public class ArrayValue extends Value {
     return ValueType.ARRAY;
   }
 
+  //
+  // marshal costs
+  //
+
+  /**
+   * Cost to convert to a character
+   */
+  @Override
+  public int toCharMarshalCost()
+  {
+    return Marshal.COST_INCOMPATIBLE;
+  }
+
+  /**
+   * Cost to convert to a string
+   */
+  @Override
+  public int toStringMarshalCost()
+  {
+    return Marshal.COST_INCOMPATIBLE;
+  }
+
+  /**
+   * Cost to convert to a binary value
+   */
+  @Override
+  public int toBinaryValueMarshalCost()
+  {
+    return Marshal.COST_INCOMPATIBLE;
+  }
+
+  /**
+   * Cost to convert to a StringValue
+   */
+  @Override
+  public int toStringValueMarshalCost()
+  {
+    return Marshal.COST_INCOMPATIBLE;
+  }
+
   /**
    * Converts to a boolean.
    */

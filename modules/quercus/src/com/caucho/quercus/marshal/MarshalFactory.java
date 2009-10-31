@@ -160,7 +160,7 @@ public class MarshalFactory {
     else if (BinaryValue.class.equals(argType)) {
       marshal = BinaryValueMarshal.MARSHAL;
     }
-    else if (BytesValue.class.equals(argType)) {
+    else if (BinaryBuilderValue.class.equals(argType)) {
       marshal = BinaryValueMarshal.MARSHAL;
     }
     else if (InputStream.class.equals(argType)) {
@@ -280,7 +280,7 @@ public class MarshalFactory {
   {
     return ReferenceMarshal.MARSHAL;
   }
-  
+
   public Marshal createValuePassThru()
   {
     return ValueMarshal.MARSHAL_PASS_THRU;

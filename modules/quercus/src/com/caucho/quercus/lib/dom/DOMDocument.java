@@ -66,8 +66,8 @@ public class DOMDocument
   }
 
   public static DOMDocument __construct(Env env,
-					@Optional("'1.0'") String version,
-					@Optional String encoding)
+                                        @Optional("'1.0'") String version,
+                                        @Optional String encoding)
   {
     DOMDocument document = getImpl(env).createDocument();
 
@@ -377,7 +377,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-	is.close();
+        is.close();
       }
     }
 
@@ -414,7 +414,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-	is.close();
+        is.close();
       }
     }
 
@@ -449,7 +449,7 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-	is.close();
+        is.close();
       }
     }
 
@@ -467,7 +467,7 @@ public class DOMDocument
 
     try {
       in = Vfs.openRead(is);
-      
+
       getImpl().parseXMLDocument(_delegate, in, null);
     }
     catch (SAXException ex) {
@@ -595,7 +595,7 @@ public class DOMDocument
       return null;
     }
 
-    TempBufferBytesValue result = new TempBufferBytesValue(tempStream.getHead());
+    StringValue result = env.createBinaryString(tempStream.getHead());
 
     tempStream.discard();
 

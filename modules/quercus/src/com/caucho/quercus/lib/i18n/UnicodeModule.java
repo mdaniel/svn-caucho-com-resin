@@ -58,10 +58,10 @@ public class UnicodeModule extends AbstractQuercusModule {
 
   public static final String ICONV_IMPL = "QuercusIconv";
   public static final String ICONV_VERSION = "1.0";
-  
+
   public static final int ICONV_MIME_DECODE_STRICT = 1;
   public static final int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 2;
-  
+
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
@@ -71,7 +71,7 @@ public class UnicodeModule extends AbstractQuercusModule {
   {
     return new String[] { "iconv" };
   }
-  
+
   /**
    * Returns the default quercus.ini values.
    */
@@ -86,13 +86,13 @@ public class UnicodeModule extends AbstractQuercusModule {
   }
 
   public static Value unicode_decode(Env env,
-                                     BytesValue str,
+                                     BinaryValue str,
                                      String encoding,
                                      @Optional int errorMode)
   {
     try {
       Decoder decoder = Decoder.create(encoding);
-      
+
       return decoder.decodeUnicode(env, str);
     } catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -109,7 +109,7 @@ public class UnicodeModule extends AbstractQuercusModule {
   {
     try {
       Encoder encoder = Encoder.create(encoding);
-      
+
       return encoder.encode(env, str);
     } catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -126,24 +126,24 @@ public class UnicodeModule extends AbstractQuercusModule {
    * @return first occurence of needle in haystack, FALSE otherwise
    */
   public static Value iconv_strpos(Env env,
-				   StringValue haystack,
-				   StringValue needle,
-				   @Optional("0") int offset,
-				   @Optional("") String charset)
+                                   StringValue haystack,
+                                   StringValue needle,
+                                   @Optional("0") int offset,
+                                   @Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
       Decoder decoder = Decoder.create(charset);
-      
+
       StringValue haystackUnicode = decoder.decodeUnicode(env, haystack);
-      
+
       decoder.reset();
       StringValue needleUnicode = decoder.decodeUnicode(env, needle);
-      
+
       int index = haystackUnicode.indexOf(needleUnicode, offset);
-      
+
       if (index < 0)
         return BooleanValue.FALSE;
 
@@ -165,23 +165,23 @@ public class UnicodeModule extends AbstractQuercusModule {
    * @return last occurence of needle in haystack, FALSE otherwise
    */
   public static Value iconv_strrpos(Env env,
-				    StringValue haystack,
-				    StringValue needle,
-				    @Optional("") String charset)
+                                    StringValue haystack,
+                                    StringValue needle,
+                                    @Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
       Decoder decoder = Decoder.create(charset);
-      
+
       StringValue haystackUnicode = decoder.decodeUnicode(env, haystack);
-      
+
       decoder.reset();
       StringValue needleUnicode = decoder.decodeUnicode(env, needle);
-      
+
       int index = haystackUnicode.lastIndexOf(needleUnicode);
-      
+
       if (index < 0)
         return BooleanValue.FALSE;
 
@@ -218,11 +218,11 @@ public class UnicodeModule extends AbstractQuercusModule {
       Decoder decoder = Decoder.create(charset);
 
       CharSequence unicodeStr = decoder.decode(env, str);
-      
+
       if (decoder.hasError()) {
         log.log(Level.FINE, L.l("string has invalid {0} encoding", charset));
         env.notice(L.l("string has invalid {0} encoding", charset));
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -230,7 +230,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       int strlen = unicodeStr.length();
 
       int newOffset = offset;
-      
+
       if (offset < 0)
         newOffset = strlen + offset;
 
@@ -249,10 +249,10 @@ public class UnicodeModule extends AbstractQuercusModule {
         return str.EMPTY;
 
       unicodeStr = unicodeStr.subSequence(newOffset, tail);
-      
+
       Encoder encoder = Encoder.create(charset);
       StringValue encodedStr = encoder.encode(env, unicodeStr);
-      
+
       return encodedStr;
     } catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -276,16 +276,16 @@ public class UnicodeModule extends AbstractQuercusModule {
                             StringValue str)
   {
     boolean isIgnoreErrors = false;
-    
+
     // options should be on outCharset
     if (inCharset.endsWith("//IGNORE"))
       inCharset = inCharset.substring(0, inCharset.length() - 8);
     else if (inCharset.endsWith("//TRANSLIT"))
       inCharset = inCharset.substring(0, inCharset.length() - 10);
-    
+
     if (outCharset.endsWith("//IGNORE")) {
       isIgnoreErrors = true;
-      
+
       outCharset = outCharset.substring(0, outCharset.length() - 8);
     }
     else if (outCharset.endsWith("//TRANSLIT")) {
@@ -293,31 +293,31 @@ public class UnicodeModule extends AbstractQuercusModule {
 
       outCharset = outCharset.substring(0, outCharset.length() - 10);
     }
-    
+
     boolean isStartUtf8 = false;
     boolean isEndUtf8 = false;
-    
+
     if (inCharset.equalsIgnoreCase("utf8")
         || inCharset.equalsIgnoreCase("utf-8"))
       isStartUtf8 = true;
-    
+
     if (outCharset.equalsIgnoreCase("utf8")
         || outCharset.equalsIgnoreCase("utf-8"))
       isEndUtf8 = true;
-    
+
     if (isStartUtf8 && isEndUtf8)
       return UnicodeUtility.utf8Clean(env, str, null, isIgnoreErrors);
-    
+
     CharSequence unicodeStr;
-    
+
     try {
       Decoder decoder;
-      
+
       if (isStartUtf8)
         decoder = new Utf8Decoder(inCharset);
       else
         decoder = Decoder.create(inCharset);
-      
+
       decoder.setIgnoreErrors(isIgnoreErrors);
 
       unicodeStr = decoder.decode(env, str);
@@ -327,17 +327,17 @@ public class UnicodeModule extends AbstractQuercusModule {
 
       return BooleanValue.FALSE;
     }
-    
+
     try {
       Encoder encoder;
-      
+
       if (isEndUtf8)
         encoder = new Utf8Encoder();
       else
         encoder = Encoder.create(outCharset);
-      
+
       encoder.setIgnoreErrors(isIgnoreErrors);
-      
+
       return encoder.encode(env, unicodeStr);
     } catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -386,7 +386,7 @@ public class UnicodeModule extends AbstractQuercusModule {
 
     return BooleanValue.FALSE;
   }
-  
+
   /**
    * Sets the current encoding.
    * @param env
@@ -414,7 +414,7 @@ public class UnicodeModule extends AbstractQuercusModule {
 
     return BooleanValue.FALSE;
   }
-  
+
   /**
    * Returns the length of the decoded string.
    * Uses iconv.internal_encoding.
@@ -429,19 +429,19 @@ public class UnicodeModule extends AbstractQuercusModule {
   {
     if (charset.length() == 0 )
       charset = env.getIniString("iconv.internal_encoding");
-    
+
     try {
       Decoder decoder = Decoder.create(charset);
 
       CharSequence unicodeStr = decoder.decode(env, str);
-      
+
       if (decoder.hasError()) {
         log.log(Level.FINE, L.l("string has invalid {0} encoding", charset));
         env.notice(L.l("string has invalid {0} encoding", charset));
-        
+
         return BooleanValue.FALSE;
       }
-      
+
       return LongValue.create(unicodeStr.length());
     } catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -450,7 +450,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Encodes a MIME header.
    *
@@ -513,7 +513,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
   }
-  
+
   /**
    * Decodes all the headers and place them in an array.
    * Use iconv.internal_encoding.
@@ -545,7 +545,7 @@ public class UnicodeModule extends AbstractQuercusModule {
 
     return BooleanValue.FALSE;
   }
-  
+
   /**
    * Uses iconv.internal_encoding.
    *
@@ -554,12 +554,12 @@ public class UnicodeModule extends AbstractQuercusModule {
    * @param env
    * @param encoded_header
    * @param mode controls error recovery
-   * @param charset to encode resultant 
+   * @param charset to encode resultant
    */
   public static Value iconv_mime_decode(Env env,
-					StringValue encodedHeader,
-					@Optional("1") int mode,
-					@Optional("") String charset)
+                                        StringValue encodedHeader,
+                                        @Optional("1") int mode,
+                                        @Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
@@ -570,11 +570,11 @@ public class UnicodeModule extends AbstractQuercusModule {
     catch (UnsupportedEncodingException e) {
       env.warning(e);
       log.log(Level.FINE, e.getMessage(), e);
-      
+
       return BooleanValue.FALSE;
     }
   }
-  
+
   static final IniDefinition INI_ICONV_INPUT_ENCODING
     = _iniDefinitions.add("iconv.input_encoding", "utf-8", PHP_INI_ALL);
   static final IniDefinition INI_ICONV_OUTPUT_ENCODING

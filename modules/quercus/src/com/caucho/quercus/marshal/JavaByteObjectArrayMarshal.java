@@ -37,7 +37,7 @@ public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
 {
   public static final Marshal MARSHAL
     = new JavaByteObjectArrayMarshal();
-  
+
   @Override
   public Value unmarshal(Env env, Object value)
   {
@@ -49,13 +49,15 @@ public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
     byte []data = new byte[byteValue.length];
     for (int i = 0; i < data.length; i++)
       data[i] = byteValue[i];
-    
+
     return env.createBinaryBuilder(data);
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return Marshal.COST_INCOMPATIBLE;
+    /*
     if (argValue.isString()) {
       if (argValue.isUnicode())
         return Marshal.UNICODE_BYTE_OBJECT_ARRAY_COST;
@@ -68,8 +70,9 @@ public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
       return Marshal.THREE;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

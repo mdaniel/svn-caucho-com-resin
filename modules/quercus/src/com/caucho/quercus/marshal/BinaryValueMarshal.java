@@ -29,10 +29,10 @@
 
 package com.caucho.quercus.marshal;
 
-import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 
@@ -44,7 +44,7 @@ public class BinaryValueMarshal extends Marshal
   {
     return true;
   }
-  
+
   /**
    * Return true if is a Value.
    */
@@ -62,7 +62,7 @@ public class BinaryValueMarshal extends Marshal
   public Object marshal(Env env, Value value, Class expectedClass)
   {
     Value arg = value.toBinaryValue(env);
-    
+
     assert arg instanceof BinaryValue : "" + value.getClass() + ".toBinaryValue() returned a " + arg.getClass();
 
     return arg;
@@ -70,8 +70,8 @@ public class BinaryValueMarshal extends Marshal
 
   public Value unmarshal(Env env, Object value)
   {
-    if (value instanceof BinaryValue)
-      return (BinaryValue) value;
+    if (value instanceof BinaryBuilderValue)
+      return (BinaryBuilderValue) value;
     else if (value instanceof Value)
       return ((Value) value).toBinaryValue(env);
     else {
@@ -80,10 +80,13 @@ public class BinaryValueMarshal extends Marshal
       return ret;
     }
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toBinaryValueMarshalCost();
+
+    /*
     if (argValue.isString()) {
       if (argValue.isUnicode())
         return Marshal.UNICODE_BINARY_VALUE_COST;
@@ -96,11 +99,12 @@ public class BinaryValueMarshal extends Marshal
       return Marshal.THREE;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {
-    return BytesValue.class;
+    return BinaryValue.class;
   }
 }

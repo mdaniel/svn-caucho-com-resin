@@ -60,7 +60,7 @@ public class JMSQueue
    * Connects to a named queue.
    */
   public JMSQueue(ConnectionFactory connectionFactory,
-		  Destination queue)
+                  Destination queue)
     throws Exception
   {
     _connection = connectionFactory.createConnection();
@@ -103,8 +103,8 @@ public class JMSQueue
       Set<Map.Entry<Value,Value>> entrySet = array.entrySet();
 
       for (Map.Entry<Value,Value> entry : entrySet) {
-        if (entry.getValue() instanceof BytesValue) {
-          byte []bytes = ((BytesValue) entry.getValue()).toBytes();
+        if (entry.getValue() instanceof BinaryValue) {
+          byte []bytes = ((BinaryValue) entry.getValue()).toBytes();
 
           ((MapMessage) message).setBytes(entry.getKey().toString(), bytes);
         } else {
@@ -113,11 +113,11 @@ public class JMSQueue
                                            entry.getValue().toString());
         }
       }
-    } else if (value instanceof BytesValue) {
+    } else if (value instanceof BinaryValue) {
       message = _session.createBytesMessage();
 
 
-      byte []bytes = ((BytesValue) value).toBytes();
+      byte []bytes = ((BinaryValue) value).toBytes();
 
       ((BytesMessage) message).writeBytes(bytes);
     } else if (value.isLongConvertible()) {
@@ -176,12 +176,12 @@ public class JMSQueue
       int sublen;
 
       while (true) {
-	sublen = bytesMessage.readBytes(tempBuffer.getBuffer());
+        sublen = bytesMessage.readBytes(tempBuffer.getBuffer());
 
-	if (sublen > 0)
-	  bb.append(tempBuffer.getBuffer(), 0, sublen);
-	else
-	  break;
+        if (sublen > 0)
+          bb.append(tempBuffer.getBuffer(), 0, sublen);
+        else
+          break;
       }
 
       TempBuffer.free(tempBuffer);

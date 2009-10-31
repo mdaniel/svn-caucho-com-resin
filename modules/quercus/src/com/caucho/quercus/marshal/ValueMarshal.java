@@ -38,14 +38,14 @@ public class ValueMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new ValueMarshal(false);
   public static final Marshal MARSHAL_PASS_THRU = new ValueMarshal(true);
-  
+
   private boolean _isPassThru;
-  
+
   protected ValueMarshal(boolean isPassThru)
   {
     _isPassThru = isPassThru;
   }
-  
+
   public boolean isReadOnly()
   {
     return false;
@@ -59,7 +59,7 @@ public class ValueMarshal extends Marshal
   {
     return true;
   }
-  
+
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
     return expr.eval(env);
@@ -81,19 +81,21 @@ public class ValueMarshal extends Marshal
   {
     return (Value) value;
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    return Marshal.FOUR;
+    return Marshal.COST_VALUE;
   }
-  
+
+  /*
   @Override
   public int getMarshalingCost(Expr expr)
   {
     return Marshal.FOUR;
   }
-  
+  */
+
   @Override
   public Class getExpectedClass()
   {

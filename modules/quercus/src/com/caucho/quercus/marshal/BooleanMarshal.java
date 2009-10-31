@@ -40,7 +40,7 @@ import com.caucho.quercus.expr.Expr;
  */
 public class BooleanMarshal extends Marshal {
   public static final BooleanMarshal MARSHAL = new BooleanMarshal();
-  
+
   public boolean isBoolean()
   {
     return true;
@@ -67,19 +67,22 @@ public class BooleanMarshal extends Marshal {
       return NullValue.NULL;
     else
       return Boolean.TRUE.equals(value)
-	? BooleanValue.TRUE
-	: BooleanValue.FALSE;
+        ? BooleanValue.TRUE
+        : BooleanValue.FALSE;
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toBooleanMarshalCost();
+    /*
     if (argValue instanceof BooleanValue)
       return Marshal.ONE;
     else
       return Marshal.THREE;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

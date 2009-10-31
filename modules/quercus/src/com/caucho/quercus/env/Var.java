@@ -517,6 +517,14 @@ public class Var extends Value
   //
 
   /**
+   * Cost to convert to a boolean
+   */
+  public int toBooleanMarshalCost()
+  {
+    return _value.toBooleanMarshalCost();
+  }
+
+  /**
    * Cost to convert to a byte
    */
   public int toByteMarshalCost()
@@ -557,6 +565,14 @@ public class Var extends Value
   }
 
   /**
+   * Cost to convert to a float
+   */
+  public int toFloatMarshalCost()
+  {
+    return _value.toFloatMarshalCost();
+  }
+
+  /**
    * Cost to convert to a character
    */
   public int toCharMarshalCost()
@@ -567,9 +583,28 @@ public class Var extends Value
   /**
    * Cost to convert to a string
    */
+  @Override
   public int toStringMarshalCost()
   {
     return _value.toStringMarshalCost();
+  }
+
+  /**
+   * Cost to convert to a byte[]
+   */
+  @Override
+  public int toByteArrayMarshalCost()
+  {
+    return _value.toByteArrayMarshalCost();
+  }
+
+  /**
+   * Cost to convert to a char[]
+   */
+  @Override
+  public int toCharArrayMarshalCost()
+  {
+    return _value.toCharArrayMarshalCost();
   }
 
   /**
@@ -578,6 +613,24 @@ public class Var extends Value
   public int toJavaObjectMarshalCost()
   {
     return _value.toJavaObjectMarshalCost();
+  }
+
+  /**
+   * Cost to convert to a binary value
+   */
+  @Override
+  public int toBinaryValueMarshalCost()
+  {
+    return _value.toBinaryValueMarshalCost();
+  }
+
+  /**
+   * Cost to convert to a StringValue
+   */
+  @Override
+  public int toStringValueMarshalCost()
+  {
+    return _value.toStringValueMarshalCost();
   }
 
   /**

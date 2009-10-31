@@ -37,7 +37,7 @@ import com.caucho.quercus.expr.Expr;
 public class CharacterMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new CharacterMarshal();
-  
+
   public boolean isReadOnly()
   {
     return true;
@@ -60,10 +60,13 @@ public class CharacterMarshal extends Marshal
     else
       return env.createString(value.toString());
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toCharMarshalCost();
+
+    /*
     if (argValue.isUnicode() && argValue.length() == 1)
       return Marshal.ONE;
     else if (argValue.isString() &&  !argValue.isBinary() && argValue.length() == 1)
@@ -72,8 +75,9 @@ public class CharacterMarshal extends Marshal
       return Marshal.THREE;
     else
       return Marshal.FOUR;
+    */
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

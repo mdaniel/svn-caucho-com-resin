@@ -44,10 +44,12 @@ abstract public class Marshal {
 
   // Value match
   public static final int ZERO = 0;
-  public static final int COST_VALUE = 0;
+  public static final int COST_IDENTICAL = 0;
+  public static final int COST_VALUE = 10;
 
   // equal Java value
   public static final int ONE = 100;
+  // COST_EQUAL is more expensive than ZERO because Values have priority
   public static final int COST_EQUAL = 100;
 
   // lossless numeric conversion
@@ -61,13 +63,18 @@ abstract public class Marshal {
   // XXX: to string
 
   public static final int COST_FROM_NULL = 310;
+  public static final int COST_STRING_TO_CHAR_ARRAY = 305;
   public static final int COST_TO_JAVA_OBJECT = 320;
   public static final int COST_STRING_TO_CHAR = 320;
   public static final int COST_BINARY_TO_BYTE = 320;
-  public static final int COST_STRING_TO_BYTE = 330;
+  public static final int COST_STRING_TO_BYTE = 340;
   public static final int COST_BINARY_TO_STRING = 330;
+  public static final int COST_STRING_TO_BINARY = 330;
   public static final int COST_TO_STRING = 350;
+  public static final int COST_TO_CHAR_ARRAY = COST_TO_STRING + 5;
   public static final int COST_TO_CHAR = COST_TO_STRING + 10;
+  public static final int COST_TO_BOOLEAN = 380;
+  public static final int COST_TO_BYTE_ARRAY = 390;
 
   // incompatible
   public static final int FOUR = 400;

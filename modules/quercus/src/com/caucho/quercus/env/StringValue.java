@@ -236,8 +236,28 @@ abstract public class StringValue
   @Override
   public int toDoubleMarshalCost()
   {
-    if (isDoubleConvertible())
-      return Marshal.COST_NUMERIC_LOSSLESS;
+    ValueType valueType = getValueType();
+
+    if (valueType.isLongCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 20;
+    else if (valueType.isNumberCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 10;
+    else
+      return Marshal.COST_INCOMPATIBLE;
+  }
+
+  /**
+   * Cost to convert to a float
+   */
+  @Override
+  public int toFloatMarshalCost()
+  {
+    ValueType valueType = getValueType();
+
+    if (valueType.isLongCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 25;
+    else if (valueType.isNumberCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 15;
     else
       return Marshal.COST_INCOMPATIBLE;
   }
@@ -248,10 +268,12 @@ abstract public class StringValue
   @Override
   public int toLongMarshalCost()
   {
-    if (isLongConvertible())
-      return Marshal.COST_NUMERIC_LOSSLESS;
-    else if (isDoubleConvertible())
-      return Marshal.COST_NUMERIC_LOSSY;
+    ValueType valueType = getValueType();
+
+    if (valueType.isLongCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 10;
+    else if (valueType.isNumberCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 40;
     else
       return Marshal.COST_INCOMPATIBLE;
   }
@@ -262,10 +284,12 @@ abstract public class StringValue
   @Override
   public int toIntegerMarshalCost()
   {
-    if (isLongConvertible())
-      return Marshal.COST_NUMERIC_LOSSLESS;
-    else if (isDoubleConvertible())
-      return Marshal.COST_NUMERIC_LOSSY;
+    ValueType valueType = getValueType();
+
+    if (valueType.isLongCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 10;
+    else if (valueType.isNumberCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 40;
     else
       return Marshal.COST_INCOMPATIBLE;
   }
@@ -276,10 +300,12 @@ abstract public class StringValue
   @Override
   public int toShortMarshalCost()
   {
-    if (isLongConvertible())
-      return Marshal.COST_NUMERIC_LOSSLESS;
-    else if (isDoubleConvertible())
-      return Marshal.COST_NUMERIC_LOSSY;
+    ValueType valueType = getValueType();
+
+    if (valueType.isLongCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 30;
+    else if (valueType.isNumberCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 50;
     else
       return Marshal.COST_INCOMPATIBLE;
   }
@@ -290,22 +316,58 @@ abstract public class StringValue
   @Override
   public int toByteMarshalCost()
   {
-    if (isLongConvertible())
-      return Marshal.COST_NUMERIC_LOSSLESS;
-    else if (isDoubleConvertible())
-      return Marshal.COST_NUMERIC_LOSSY;
-    else {
+    ValueType valueType = getValueType();
+
+    if (valueType.isLongCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 30;
+    else if (valueType.isNumberCmp())
+      return Marshal.COST_TO_CHAR_ARRAY + 50;
+    else
       return Marshal.COST_STRING_TO_BYTE;
-    }
   }
 
   /**
-   * Cost to convert to a byte
+   * Cost to convert to a character
+   */
+  @Override
+  public int toCharMarshalCost()
+  {
+    return Marshal.COST_STRING_TO_CHAR;
+  }
+
+  /**
+   * Cost to convert to a String
    */
   @Override
   public int toStringMarshalCost()
   {
     return Marshal.COST_EQUAL;
+  }
+
+  /**
+   * Cost to convert to a char[]
+   */
+  @Override
+  public int toCharArrayMarshalCost()
+  {
+    return Marshal.COST_STRING_TO_CHAR_ARRAY;
+  }
+
+  /**
+   * Cost to convert to a StringValue
+   */
+  public int toStringValueMarshalCost()
+  {
+    return Marshal.COST_IDENTICAL;
+  }
+
+  /**
+   * Cost to convert to a binary value
+   */
+  @Override
+  public int toBinaryValueMarshalCost()
+  {
+    return Marshal.COST_STRING_TO_BINARY;
   }
 
   /**

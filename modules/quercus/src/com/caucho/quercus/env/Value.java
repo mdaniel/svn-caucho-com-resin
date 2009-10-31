@@ -248,6 +248,14 @@ abstract public class Value implements java.io.Serializable
   //
 
   /**
+   * Cost to convert to a boolean
+   */
+  public int toBooleanMarshalCost()
+  {
+    return Marshal.COST_TO_BOOLEAN;
+  }
+
+  /**
    * Cost to convert to a byte
    */
   public int toByteMarshalCost()
@@ -288,6 +296,14 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Cost to convert to a float
+   */
+  public int toFloatMarshalCost()
+  {
+    return toDoubleMarshalCost() + 10;
+  }
+
+  /**
    * Cost to convert to a character
    */
   public int toCharMarshalCost()
@@ -304,11 +320,43 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Cost to convert to a byte[]
+   */
+  public int toByteArrayMarshalCost()
+  {
+    return Marshal.COST_TO_BYTE_ARRAY;
+  }
+
+  /**
+   * Cost to convert to a char[]
+   */
+  public int toCharArrayMarshalCost()
+  {
+    return Marshal.COST_TO_CHAR_ARRAY;
+  }
+
+  /**
    * Cost to convert to a Java object
    */
   public int toJavaObjectMarshalCost()
   {
     return Marshal.COST_TO_JAVA_OBJECT;
+  }
+
+  /**
+   * Cost to convert to a binary value
+   */
+  public int toBinaryValueMarshalCost()
+  {
+    return Marshal.COST_TO_STRING + 1;
+  }
+
+  /**
+   * Cost to convert to a StringValue
+   */
+  public int toStringValueMarshalCost()
+  {
+    return Marshal.COST_TO_STRING + 1;
   }
 
   //

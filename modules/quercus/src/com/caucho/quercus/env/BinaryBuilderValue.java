@@ -194,12 +194,48 @@ public class BinaryBuilderValue
   }
 
   /**
-   * Cost to convert to a byte
+   * Cost to convert to a String
    */
   @Override
   public int toStringMarshalCost()
   {
     return Marshal.COST_BINARY_TO_STRING;
+  }
+
+  /**
+   * Cost to convert to a char[]
+   */
+  @Override
+  public int toCharArrayMarshalCost()
+  {
+    return Marshal.COST_BINARY_TO_STRING + 5;
+  }
+
+  /**
+   * Cost to convert to a byte[]
+   */
+  @Override
+  public int toByteArrayMarshalCost()
+  {
+    return Marshal.COST_EQUAL;
+  }
+
+  /**
+   * Cost to convert to a binary value
+   */
+  @Override
+  public int toBinaryValueMarshalCost()
+  {
+    return Marshal.COST_IDENTICAL;
+  }
+
+  /**
+   * Cost to convert to a string value
+   */
+  @Override
+  public int toStringValueMarshalCost()
+  {
+    return Marshal.COST_IDENTICAL + 1;
   }
 
   /**
