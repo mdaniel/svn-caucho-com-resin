@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jsp: Faulty code generated for tag files with scriptlets (#3699, rep by daniel_larsson)</li>
 <li>async: poll socket periodically to test for client exit (#3294, rep by Caleb Richardson)</li>
 <li>(2009-10-28): BeanELResolver IllegalAccessException (#3727, rep on behalf of Kenneth Yeung)</li>
 <li>(2009-10-22) encoding: JSP response character encoding can be specified at jsp group property level</li>

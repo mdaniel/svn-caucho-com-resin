@@ -148,7 +148,7 @@ abstract public class JspFragmentNode extends JspContainerNode
 
     _isJspFragment = true;
 
-    if (isStatic()) 
+    if (isStatic())
       out.println("com.caucho.jsp.StaticJspFragmentSupport " + _fragmentName + " = null;");
     else
       out.println("_CauchoFragment " + _fragmentName + " = null;");
@@ -216,9 +216,14 @@ abstract public class JspFragmentNode extends JspContainerNode
     else
       cb.append(parent.getId());
 
-    if (_gen instanceof JavaTagGenerator)
-      cb.append(", _jspBody");
-    else
+    if (_gen instanceof JavaTagGenerator) {
+      JavaTagGenerator tagGen = (JavaTagGenerator) _gen;
+
+      if (tagGen.isStaticDoTag())
+        cb.append(", _jspBody"); //jsp/100f
+      else
+        cb.append(", getJspBody()"); //jsp/100g
+    } else
       cb.append(", null");
 
     cb.append(", _jsp_state");
