@@ -43,10 +43,10 @@ public class UnicodeBuilderValue
   public static final UnicodeBuilderValue EMPTY = new UnicodeBuilderValue("");
 
   private static final UnicodeBuilderValue []CHAR_STRINGS;
-  
+
   private char []_buffer;
   private int _length;
-  
+
   protected boolean _isCopy;
   private int _hashCode;
 
@@ -66,7 +66,7 @@ public class UnicodeBuilderValue
   public UnicodeBuilderValue(String s)
   {
     int len = s.length();
-    
+
     _buffer = new char[len];
     _length = len;
 
@@ -94,10 +94,10 @@ public class UnicodeBuilderValue
   public UnicodeBuilderValue(Character []buffer)
   {
     int length = buffer.length;
-    
+
     _buffer =  new char[length];
     _length = length;
-    
+
     for (int i = 0; i < length; i++) {
       _buffer[i] = buffer[i].charValue();
     }
@@ -118,11 +118,11 @@ public class UnicodeBuilderValue
     int bufferLength = MIN_LENGTH;
     while (bufferLength < len)
       bufferLength *= 2;
-    
+
     _buffer = new char[bufferLength];
-    
+
     _length = len;
-    
+
     System.arraycopy(s, 0, _buffer, 0, len);
 
     v1.appendTo(this);
@@ -155,7 +155,7 @@ public class UnicodeBuilderValue
     System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
     _length = v._length;
   }
-  
+
   /**
    * Creates the string.
    */
@@ -183,7 +183,7 @@ public class UnicodeBuilderValue
 
   /**
    * Decodes the Unicode str from charset.
-   * 
+   *
    * @param str should be a Unicode string
    * @param charset to decode string from
    */
@@ -192,7 +192,7 @@ public class UnicodeBuilderValue
   {
     return str;
   }
-  
+
   /**
    * Decodes from charset and returns UnicodeValue.
    *
@@ -203,7 +203,7 @@ public class UnicodeBuilderValue
   {
     return this;
   }
-  
+
   /**
    * Returns true for UnicodeValue
    */
@@ -212,7 +212,7 @@ public class UnicodeBuilderValue
   {
     return true;
   }
-  
+
   /**
    * Returns the value.
    */
@@ -237,7 +237,7 @@ public class UnicodeBuilderValue
   {
     return getValueType(_buffer, 0, _length);
   }
-  
+
   /**
    * Converts to a string builder
    */
@@ -246,7 +246,7 @@ public class UnicodeBuilderValue
   {
     return new UnicodeBuilderValue(this);
   }
-  
+
   /**
    * Converts to a string builder
    */
@@ -265,7 +265,7 @@ public class UnicodeBuilderValue
     UnicodeBuilderValue v = new UnicodeBuilderValue(this);
 
     value.appendTo(v);
-    
+
     return v;
   }
 
@@ -308,18 +308,17 @@ public class UnicodeBuilderValue
   /**
    * Append a buffer to the value.
    */
-  /*
   public final StringValue append(byte []buf, int offset, int length)
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
+    /*
     Env env = Env.getInstance();
     String charset = (env != null
-		      ? env.getRuntimeEncoding().toString()
-		      : null);
-
-    // ...
+                      ? env.getRuntimeEncoding().toString()
+                      : null);
+    */
 
     char []charBuffer = _buffer;
     int charLength = _length;
@@ -331,19 +330,18 @@ public class UnicodeBuilderValue
 
     return this;
   }
-  */
 
   //
   // append code
   //
-  
+
   /**
    * Append a Java value to the value.
    */
   public StringValue append(Value v)
   {
     v.appendTo(this);
-    
+
     return this;
   }
 
@@ -353,14 +351,14 @@ public class UnicodeBuilderValue
   public StringValue append(String s)
   {
     int len = s.length();
-    
+
     if (_buffer.length < _length + len)
       ensureCapacity(_length + len);
-    
+
     s.getChars(0, len, _buffer, _length);
-    
+
     _length += len;
-    
+
     return this;
   }
 
@@ -370,14 +368,14 @@ public class UnicodeBuilderValue
   public StringValue append(String s, int start, int end)
   {
     int len = Math.min(s.length(), end - start);
-    
+
     if (_buffer.length < _length + len)
       ensureCapacity(_length + len);
-    
+
     s.getChars(start, start + len, _buffer, _length);
-    
+
     _length += len;
-    
+
     return this;
   }
 
@@ -388,12 +386,12 @@ public class UnicodeBuilderValue
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
-    
+
     _buffer[_length++] = v;
-    
+
     return this;
   }
-  
+
   /**
    * Append a Java buffer to the value.
    */
@@ -401,11 +399,11 @@ public class UnicodeBuilderValue
   {
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
-    
+
     System.arraycopy(buf, offset, _buffer, _length, length);
-    
+
     _length += length;
-    
+
     return this;
   }
 
@@ -423,19 +421,19 @@ public class UnicodeBuilderValue
   public StringValue append(CharSequence buf, int head, int tail)
   {
     int len = tail - head;
-    
+
     if (_buffer.length < _length + len)
       ensureAppendCapacity(len);
-    
+
     char []buffer = _buffer;
     int bufferLength = _length;
-    
+
     for (; head < tail; head++) {
       buffer[bufferLength++] = buf.charAt(head);
     }
 
     _length = bufferLength;
-    
+
     return this;
   }
 
@@ -445,21 +443,21 @@ public class UnicodeBuilderValue
   public StringValue append(UnicodeBuilderValue sb, int head, int tail)
   {
     int len = tail - head;
-    
+
     if (_buffer.length < _length + len)
       ensureAppendCapacity(len);
-    
+
     System.arraycopy(sb._buffer, head, _buffer, _length, len);
-    
+
     _length += len;
-    
+
     return this;
   }
-  
-  
+
+
   /*
    * Appends a Unicode string to the value.
-   * 
+   *
    * @param str should be a Unicode string
    * @param charset to decode string from
    */
@@ -468,7 +466,7 @@ public class UnicodeBuilderValue
   {
     return append(unicodeStr);
   }
-  
+
   /**
    * Append to a string builder.
    */
@@ -479,15 +477,15 @@ public class UnicodeBuilderValue
 
     return sb;
   }
-  
+
   @Override
   public StringValue append(Reader reader, long length)
     throws IOException
   {
     // php/4407 - oracle clob callback passes very long length
-    
+
     int sublen = (int) Math.min(_length, length);
-    
+
     try {
       while (length > 0) {
         if (_buffer.length < _length + sublen)
@@ -508,7 +506,7 @@ public class UnicodeBuilderValue
 
     return this;
   }
-  
+
   /**
    * Append a Java byte to the value without conversions.
    */
@@ -516,12 +514,12 @@ public class UnicodeBuilderValue
   {
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
-    
+
     _buffer[_length++] = (char) v;
-    
+
     return this;
   }
-  
+
   /**
    * Returns true if the value is empty.
    */
@@ -573,7 +571,7 @@ public class UnicodeBuilderValue
   public final byte[] toBytes()
   {
     byte[] bytes = new byte[_length];
-    
+
     for (int i = 0; i < _length; i++) {
       bytes[i] = (byte) (_buffer[i] & 0xFF);
     }
@@ -592,7 +590,7 @@ public class UnicodeBuilderValue
   {
     return charValueAt(key.toLong());
   }
-  
+
   /**
    * Sets the array ref.
    */
@@ -603,7 +601,7 @@ public class UnicodeBuilderValue
 
     return value;
   }
-  
+
   /**
    * Sets the array ref.
    */
@@ -615,7 +613,7 @@ public class UnicodeBuilderValue
     else
       return new ArrayValueImpl().append(index, value);
   }
-  
+
   /**
    * Returns the buffer.
    */
@@ -647,7 +645,7 @@ public class UnicodeBuilderValue
   {
     return _buffer.length;
   }
-  
+
   /**
    * Converts to a BinaryValue.
    */
@@ -712,7 +710,7 @@ public class UnicodeBuilderValue
         return new UnicodeBuilderValue((char) ch);
     }
   }
-  
+
   /**
    * sets the character at an index
    */
@@ -725,11 +723,11 @@ public class UnicodeBuilderValue
       return this;
     else if (indexL < len) {
       UnicodeBuilderValue sb = new UnicodeBuilderValue(_buffer, 0, len);
-      
+
       StringValue str = value.toStringValue();
-      
+
       int index = (int) indexL;
-      
+
       if (value.length() == 0)
         sb._buffer[index] = 0;
       else
@@ -744,13 +742,13 @@ public class UnicodeBuilderValue
 
       if (sb._buffer.length < index + 1)
         sb.ensureCapacity(index + 1);
-      
+
       int padLen = index - len;
 
       for (int i = 0; i <= padLen; i++) {
          sb._buffer[sb._length++] = ' ';
       }
-      
+
       StringValue str = value.toStringValue();
 
       if (value.length() == 0)
@@ -761,7 +759,7 @@ public class UnicodeBuilderValue
       return sb;
     }
   }
-  
+
   //
   // CharSequence
   //
@@ -773,7 +771,7 @@ public class UnicodeBuilderValue
   {
     return _length;
   }
-  
+
   /**
    * Returns the character at a particular location
    */
@@ -792,7 +790,7 @@ public class UnicodeBuilderValue
 
     if (len == 0)
       return EMPTY;
-    
+
     UnicodeBuilderValue sb = new UnicodeBuilderValue(len);
 
     sb.append(_buffer, start, len);
@@ -811,30 +809,30 @@ public class UnicodeBuilderValue
   public StringValue toLowerCase()
   {
     int length = _length;
-    
+
     UnicodeBuilderValue string = new UnicodeBuilderValue(length);
-    
+
     char []srcBuffer = _buffer;
     char []dstBuffer = string._buffer;
 
     for (int i = 0; i < length; i++) {
       char ch = srcBuffer[i];
-      
+
       if ('A' <= ch && ch <= 'Z')
-	dstBuffer[i] = (char) (ch + 'a' - 'A');
+        dstBuffer[i] = (char) (ch + 'a' - 'A');
       else if (ch < 0x80)
-	dstBuffer[i] = ch;
+        dstBuffer[i] = ch;
       else if (Character.isUpperCase(ch))
-	dstBuffer[i] = Character.toLowerCase(ch);
+        dstBuffer[i] = Character.toLowerCase(ch);
       else
-	dstBuffer[i] = ch;
+        dstBuffer[i] = ch;
     }
 
     string._length = length;
 
     return string;
   }
-  
+
   /**
    * Convert to lower case.
    */
@@ -842,7 +840,7 @@ public class UnicodeBuilderValue
   public StringValue toUpperCase()
   {
     int length = _length;
-    
+
     UnicodeBuilderValue string = new UnicodeBuilderValue(_length);
 
     char []srcBuffer = _buffer;
@@ -850,15 +848,15 @@ public class UnicodeBuilderValue
 
     for (int i = 0; i < length; i++) {
       char ch = srcBuffer[i];
-      
+
       if ('a' <= ch && ch <= 'z')
         dstBuffer[i] = (char) (ch + 'A' - 'a');
       else if (ch < 0x80)
-	dstBuffer[i] = ch;
+        dstBuffer[i] = ch;
       else if (Character.isLowerCase(ch))
         dstBuffer[i] = Character.toUpperCase(ch);
       else
-	dstBuffer[i] = ch;
+        dstBuffer[i] = ch;
     }
 
     string._length = length;
@@ -871,11 +869,11 @@ public class UnicodeBuilderValue
    */
   @Override
   public char []toCharArray()
-  { 
+  {
     char[] dest = new char[_length];
-    
+
     System.arraycopy(_buffer, 0, dest, 0, _length);
-    
+
     return dest;
   }
 
@@ -930,7 +928,7 @@ public class UnicodeBuilderValue
   {
     return new UnicodeBuilderValue(length);
   }
-  
+
   //
   // static helper functions
   //
@@ -996,7 +994,7 @@ public class UnicodeBuilderValue
     while (i < len && Character.isWhitespace(buffer[i])) {
       i++;
     }
-    
+
     if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
       i++;
     }
@@ -1018,7 +1016,7 @@ public class UnicodeBuilderValue
 
     for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
     }
-    
+
     while (i < len && Character.isWhitespace(buffer[i])) {
       i++;
     }
@@ -1031,7 +1029,7 @@ public class UnicodeBuilderValue
                        ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
            i++) {
       }
-      
+
       while (i < len && Character.isWhitespace(buffer[i])) {
         i++;
       }
@@ -1044,7 +1042,7 @@ public class UnicodeBuilderValue
     else
       return ValueType.STRING;
   }
-  
+
   /**
    * Converts to a boolean.
    */
@@ -1067,7 +1065,7 @@ public class UnicodeBuilderValue
   {
     return parseLong(_buffer, 0, _length);
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -1084,25 +1082,25 @@ public class UnicodeBuilderValue
   {
     return toDouble(_buffer, 0, _length);
   }
-  
+
   public static double toDouble(char []buffer, int offset, int len)
   {
     int start = offset;
     int i = offset;
     int ch = 0;
-    
+
     while (i < len && Character.isWhitespace(buffer[i])) {
       start++;
       i++;
     }
 
     int end = len + offset;
-    
+
     if (offset + 1 < end && buffer[offset] == '0'
         && ((ch = buffer[offset + 1]) == 'x' || ch == 'X')) {
-      
+
       double value = 0;
-      
+
       for (offset += 2; offset < end; offset++) {
         ch = buffer[offset] & 0xFF;
 
@@ -1115,10 +1113,10 @@ public class UnicodeBuilderValue
         else
           return value;
       }
-      
+
       return value;
     }
-    
+
     if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
       i++;
     }
@@ -1131,7 +1129,7 @@ public class UnicodeBuilderValue
       }
 
       if (i == 1)
-	return 0;
+        return 0;
     }
 
     if (ch == 'e' || ch == 'E') {
@@ -1162,11 +1160,11 @@ public class UnicodeBuilderValue
   {
     ensureCapacity(_length + newCapacity);
   }
-  
+
   protected void ensureCapacity(int newCapacity)
   {
     int bufferLength = _buffer.length;
-    
+
     if (newCapacity <= bufferLength)
       return;
 
@@ -1181,7 +1179,7 @@ public class UnicodeBuilderValue
     _buffer = buffer;
     _isCopy = false;
   }
-  
+
   /**
    * Returns the hash code.
    */
@@ -1192,7 +1190,7 @@ public class UnicodeBuilderValue
 
     if (hash != 0)
       return hash;
-    
+
     hash = 37;
 
     int length = _length;
@@ -1220,7 +1218,7 @@ public class UnicodeBuilderValue
 
     return hash;
   }
-  
+
   /**
    * Returns true for equality
    */
@@ -1228,7 +1226,7 @@ public class UnicodeBuilderValue
   public boolean eq(Value rValue)
   {
     rValue = rValue.toValue();
-    
+
     ValueType typeB = rValue.getValueType();
 
     if (typeB.isNumber()) {
@@ -1240,7 +1238,7 @@ public class UnicodeBuilderValue
     else if (typeB.isBoolean()) {
       return toBoolean() == rValue.toBoolean();
     }
-      
+
     ValueType typeA = getValueType();
     if (typeA.isNumberCmp() && typeB.isNumberCmp()) {
       double l = toDouble();
@@ -1248,12 +1246,12 @@ public class UnicodeBuilderValue
 
       return l == r;
     }
-    
+
     if (rValue instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) rValue;
 
       int length = _length;
-      
+
       if (length != value._length)
         return false;
 
@@ -1269,7 +1267,7 @@ public class UnicodeBuilderValue
     }
     else {
       String rString = rValue.toString();
-      
+
       int len = rString.length();
 
       if (_length != len)
@@ -1279,7 +1277,7 @@ public class UnicodeBuilderValue
     if (_buffer[i] != rString.charAt(i))
       return false;
       }
-      
+
       return true;
     }
   }
@@ -1289,12 +1287,12 @@ public class UnicodeBuilderValue
   {
     if (o == this)
       return true;
-    
+
     if (o instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) o;
 
       int length = _length;
-      
+
       if (length != value._length)
         return false;
 
@@ -1311,7 +1309,7 @@ public class UnicodeBuilderValue
     /*
     else if (o instanceof UnicodeValue) {
       UnicodeValue value = (UnicodeValue)o;
-      
+
       return value.equals(this);
     }
     */
@@ -1323,15 +1321,15 @@ public class UnicodeBuilderValue
   public boolean eql(Value o)
   {
     o = o.toValue();
-    
+
     if (o == this)
       return true;
-    
+
     if (o instanceof UnicodeBuilderValue) {
       UnicodeBuilderValue value = (UnicodeBuilderValue) o;
 
       int length = _length;
-      
+
       if (length != value._length)
         return false;
 
@@ -1348,23 +1346,23 @@ public class UnicodeBuilderValue
     else
       return false;
   }
-  
+
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
   {
     _length = in.readInt();
     _buffer = new char[_length];
-    
+
     for (int i = 0; i < _length; i++) {
       _buffer[i] = (char) (in.read() & 0xFF);
     }
   }
-  
+
   public String toString()
   {
     return String.valueOf(_buffer, 0, _length);
   }
-  
+
   static {
     CHAR_STRINGS = new UnicodeBuilderValue[256];
 

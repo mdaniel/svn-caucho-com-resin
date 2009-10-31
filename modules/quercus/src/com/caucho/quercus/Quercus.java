@@ -169,6 +169,7 @@ public class Quercus
   private StringValue _phpVersionValue;
 
   private boolean _isStrict;
+  private boolean _isLooseParse;
   private boolean _isRequireSource;
 
   private boolean _isConnectionPool = true;
@@ -599,6 +600,22 @@ public class Quercus
   public boolean isStrict()
   {
     return _isStrict;
+  }
+
+  /**
+   * Sets the loose mode.
+   */
+  public void setLooseParse(boolean isLoose)
+  {
+    _isLooseParse = isLoose;
+  }
+
+  /**
+   * Gets the loose mode.
+   */
+  public boolean isLooseParse()
+  {
+    return _isLooseParse;
   }
 
   /*
@@ -1481,7 +1498,7 @@ public class Quercus
   {
     return _constantLowerMap[id];
   }
-  
+
   /**
    * Returns the constant id.
    */
@@ -1803,7 +1820,7 @@ public class Quercus
   {
     return null;
   }
-  
+
   /**
    * Loads the session from the backing.
    */
