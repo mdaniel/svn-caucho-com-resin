@@ -84,24 +84,16 @@ public class AppendExpr extends Expr
   public Value eval(Env env)
   {
     Value value = _value.eval(env);
-    
-    if (_next != null) {
-      if (value.isBinary())
-        return value.toBinaryValue(env).append(_next.eval(env));
-      else
-        return value.toStringBuilder(env, _next.eval(env));
-    }
-    else {
-      return value.toStringBuilder(env);
-    }
 
-    /*
+    StringValue sb = value.toStringBuilder(env);
+
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       Value ptrValue = ptr._value.eval(env);
-      
+
       sb = sb.appendUnicode(ptrValue);
     }
-    */
+
+    return sb;
   }
 
   @Override

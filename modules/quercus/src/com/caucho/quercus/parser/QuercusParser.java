@@ -43,6 +43,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import java.io.CharConversionException;
+import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -3080,7 +3081,11 @@ public class QuercusParser {
       return parseEscapedString(_lexeme, token, false);
 
     case BINARY:
-      return createBinary(_lexeme.getBytes());
+      try {
+        return createBinary(_lexeme.getBytes("iso-8859-1"));
+      } catch (Exception e) {
+        throw new QuercusParseException(e);
+      }
 
     case SIMPLE_BINARY_ESCAPE:
     case COMPLEX_BINARY_ESCAPE:
@@ -4682,7 +4687,7 @@ public class QuercusParser {
       expr = createString(prefix);
     else {
       // XXX: getBytes isn't correct
-      expr = createBinary(prefix.getBytes());
+      expr = createBinary(prefix.getBytes("iso-8859-1"));
     }
 
     while (true) {
@@ -4758,7 +4763,7 @@ public class QuercusParser {
         if (isUnicode)
           string = createString(_sb.toString());
         else
-          string = createBinary(_sb.toString().getBytes());
+          string = createBinary(_sb.toString().getBytes("iso-8859-1"));
 
         expr = _factory.createAppend(expr, string);
       }
@@ -4837,16 +4842,21 @@ public class QuercusParser {
   }
 
   private Expr createBinary(byte []bytes)
+    throws IOException
   {
     // XXX: see QuercusParser.parseDefault for _quercus == null
-    // php/0ch1
-    return _factory.createBinary(bytes);
-    /*
+    // php/0ch1, php/0350
+    // return _factory.createBinary(bytes);
+
     if (_quercus != null && _quercus.isUnicodeSemantics())
       return _factory.createBinary(bytes);
-    else
-      return _factory.createString(new String(bytes));
-    */
+    else {
+      try {
+        return _factory.createString(new String(bytes, 0, bytes.length, "iso-8859-1"));
+      } catch (UnsupportedEncodingException e) {
+        throw new QuercusParseException(e);
+      }
+    }
   }
 
   /**

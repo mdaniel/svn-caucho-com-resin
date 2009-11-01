@@ -36,11 +36,13 @@ import com.caucho.quercus.marshal.Marshal;
  */
 abstract public class BinaryValue extends StringValue
 {
+  /*
   @Override
   public boolean isBinary()
   {
     return true;
   }
+  */
 
   /**
    * Cost to convert to a binary value

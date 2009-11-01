@@ -222,7 +222,6 @@ public class ObjectExtValue extends ObjectValue
     Entry entry = getThisEntry(name);
 
     if (entry != null) {
-      System.out.println("ENTRY:  " + entry + " " + entry._value.getClass() + " " + entry._value.toValue().getClass());
       return entry._value.toValue();
     }
 

@@ -1128,8 +1128,8 @@ public class MiscModule extends AbstractQuercusModule {
       case 's':
         segments.add(new BigEndianPackSegment(name, count, 2, true));
         break;
-      case 'n':
       case 'S':
+      case 'n':
         segments.add(new BigEndianPackSegment(name, count, 2, false));
         break;
       case 'v':
@@ -1589,7 +1589,7 @@ public class MiscModule extends AbstractQuercusModule {
         long v = 0;
 
         for (int k = 0; k < _bytes; k++) {
-          if (offset >= strLen)
+          if (strLen <= offset)
             break outer;
 
           char ch = s.charAt(offset++);
