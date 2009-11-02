@@ -712,9 +712,9 @@ namespace Caucho
         arguments.Append("-Djava.compiler=NONE ");
       
       arguments.Append("-Xrs -jar ");
-      arguments.Append(_resinHome + "\\lib\\resin.jar ");
-      arguments.Append("-resin-home ").Append(_resinHome).Append(' ');
-      arguments.Append("-root-directory ").Append(_rootDirectory).Append(' ');
+      arguments.Append("\"" + _resinHome + "\\lib\\resin.jar\" ");
+      arguments.Append("-resin-home \"").Append(_resinHome).Append("\" ");
+      arguments.Append("-root-directory \"").Append(_rootDirectory).Append("\" ");
       arguments.Append(_resinArgs).Append(' ');
       
       if (command != null)
