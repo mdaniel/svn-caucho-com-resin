@@ -80,7 +80,9 @@ public final class BTree {
   private final static int NEXT_OFFSET = PARENT_OFFSET + PTR_SIZE;
   private final static int HEADER_SIZE = NEXT_OFFSET + PTR_SIZE;
 
-  private final static int LEAF_FLAG = 1;
+  private final static int LEAF_MASK = 0x03;
+  private final static int IS_LEAF = 0x01;
+  private final static int IS_NODE = 0x02;
 
   private BlockManager _blockManager;
 
@@ -125,7 +127,7 @@ public final class BTree {
     _lock = new Lock("index:" + store.getName());
     
     if (BLOCK_SIZE < keySize + HEADER_SIZE)
-      throw new IOException(L.l("BTree key size `{0}' is too large.",
+      throw new IOException(L.l("BTree key size '{0}' is too large.",
                                 keySize));
 
     _keySize = keySize;
@@ -138,6 +140,10 @@ public final class BTree {
       _minN = 1;
 
     _keyCompare = keyCompare;
+
+    byte []rootBuffer = _rootBlock.getBuffer();
+    if (getInt(rootBuffer, FLAGS_OFFSET) == 0)
+      setLeaf(rootBuffer, true);
   }
 
   /**
@@ -187,11 +193,13 @@ public final class BTree {
       blockLock.lockRead(_timeout);
 
       try {
+        validateIndex(block);
+        
         block.read();
         
 	byte []buffer = block.getBuffer();
 
-	boolean isLeaf = isLeaf(buffer);
+	boolean isLeaf = isLeaf(buffer, block);
       
 	long value = lookupTuple(blockId, buffer,
 				 keyBuffer, keyOffset, keyLength,
@@ -259,6 +267,8 @@ public final class BTree {
       block = _store.loadBlock(blockId);
     
     try {
+      validateIndex(block);
+        
       if (isRead && insertReadChild(keyBuffer, keyOffset, keyLength,
                                     value, isOverride, block))
         return true;
@@ -282,6 +292,8 @@ public final class BTree {
     blockLock.lockRead(_timeout);
       
     try {
+      validateIndex(block);
+        
       block.read();
       
       long blockId = block.getBlockId();
@@ -294,7 +306,7 @@ public final class BTree {
         return false;
       }
 	
-      if (isLeaf(buffer)) {
+      if (isLeaf(buffer, block)) {
         return false;
       }
 
@@ -324,6 +336,8 @@ public final class BTree {
     try {
       block.read();
       
+      validate(block);
+      
       long blockId = block.getBlockId();
       byte []buffer = block.getBuffer();
 
@@ -334,9 +348,11 @@ public final class BTree {
         return false;
       }
 	
-      if (isLeaf(buffer)) {
+      if (isLeaf(buffer, block)) {
         insertValue(keyBuffer, keyOffset, keyLength,
                     value, isOverride, block);
+
+        validate(block);
 
         return true;
       }
@@ -354,6 +370,8 @@ public final class BTree {
                                    keyBuffer, keyOffset, keyLength,
                                    false);
       }
+      
+      validate(block);
 
       return true;
     } finally {
@@ -374,12 +392,11 @@ public final class BTree {
   {
     byte []buffer = block.getBuffer();
 
-    block.setFlushDirtyOnCommit(false);
-	    
     insertLeafBlock(block.getBlockId(), buffer,
                     keyBuffer, keyOffset, keyLength,
                     value, isOverride);
     
+    block.setFlushDirtyOnCommit(false);
     block.setDirty(0, Store.BLOCK_SIZE);
   }
 
@@ -496,11 +513,15 @@ public final class BTree {
     Block block = _store.readBlock(blockId);
 
     try {
+      validate(block);
+        
       Lock blockLock = block.getLock();
       blockLock.lockReadAndWrite(_timeout);
 	
       try {
         split(parent, block);
+
+        validate(block);
       } finally {
         blockLock.unlockReadAndWrite();
       }
@@ -550,6 +571,7 @@ public final class BTree {
       leftBlock = _store.allocateIndexBlock();
       // System.out.println("TREE-alloc1:" + Long.toHexString(leftBlock.getBlockId()));
       leftBlock.setFlushDirtyOnCommit(false);
+      // System.out.println("ALLOC: " + leftBlock);
       
       byte []leftBuffer = leftBlock.getBuffer();
       long leftBlockId = leftBlock.getBlockId();
@@ -586,6 +608,10 @@ public final class BTree {
       validate(leftBlockId, leftBuffer);
       validate(blockId, buffer);
       
+      validate(block);
+      validate(parentBlock);
+      validate(leftBlock);
+      
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
     } finally {
@@ -611,6 +637,8 @@ public final class BTree {
       
       try {
 	splitRoot(rootBlock);
+
+        validate(rootBlock);
       } finally {
 	rootLock.unlockReadAndWrite();
       }
@@ -697,13 +725,17 @@ public final class BTree {
 		       _tupleSize);
       setPointer(parentBuffer, HEADER_SIZE, leftBlockId);
 
-      setInt(parentBuffer, FLAGS_OFFSET, LEAF_FLAG);
+      setLeaf(parentBuffer, false);
       setLength(parentBuffer, 1);
       setPointer(parentBuffer, NEXT_OFFSET, rightBlockId);
       
       parentBlock.setDirty(0, Store.BLOCK_SIZE);
       leftBlock.setDirty(0, Store.BLOCK_SIZE);
       rightBlock.setDirty(0, Store.BLOCK_SIZE);
+      
+      validate(parentBlock);
+      validate(leftBlock);
+      validate(rightBlock);
     } finally {
       if (leftBlock != null)
 	leftBlock.free();
@@ -750,10 +782,12 @@ public final class BTree {
     blockLock.lockRead(_timeout);
 
     try {
+      validateIndex(block);
+        
       byte []buffer = block.getBuffer();
       long blockId = block.getBlockId();
 
-      if (isLeaf(buffer))
+      if (isLeaf(buffer, block))
         return false;
       
       long childId;
@@ -768,6 +802,8 @@ public final class BTree {
       Block childBlock = _store.readBlock(childId);
         
       try {
+        validateIndex(childBlock);
+        
         if (removeRead(childBlock, keyBuffer, keyOffset, keyLength))
           return true;
         else
@@ -798,7 +834,7 @@ public final class BTree {
     blockLock.lockReadAndWrite(_timeout);
 
     try {
-      boolean isLeaf = isLeaf(buffer);
+      boolean isLeaf = isLeaf(buffer, block);
 
       if (isLeaf) {
         block.setFlushDirtyOnCommit(false);
@@ -820,6 +856,8 @@ public final class BTree {
 
         Block childBlock = _store.readBlock(childId);
         try {
+          validateIndex(childBlock);
+
           boolean isJoin;
 
           isJoin = ! removeWrite(childBlock, keyBuffer, keyOffset, keyLength);
@@ -827,6 +865,8 @@ public final class BTree {
           if (isJoin && joinBlocks(block, childBlock)) {
             childBlock.deallocate();
           }
+
+          validate(block);
         } finally {
           childBlock.free();
         }
@@ -836,6 +876,15 @@ public final class BTree {
     } finally {
       blockLock.unlockReadAndWrite();
     }
+  }
+
+  private void validateIndex(Block block)
+  {
+    if (block == _rootBlock)
+      return;
+    
+    if (! block.isIndex())
+      throw new IllegalStateException("Block " + block + " is not an index");
   }
 
   /**
@@ -888,7 +937,9 @@ public final class BTree {
           blockLock.lockReadAndWrite(_timeout);
 	    
           try {
-            if (_minN < leftLength && isLeaf(buffer) == isLeaf(leftBuffer)) {
+            if (_minN < leftLength) {
+              validateEqualLeaf(buffer, leftBuffer, block, leftBlock);
+              
               parent.setFlushDirtyOnCommit(false);
 	    
               leftBlock.setFlushDirtyOnCommit(false);
@@ -937,7 +988,9 @@ public final class BTree {
           try {
             int rightLength = getLength(rightBuffer);
 
-            if (_minN < rightLength && isLeaf(buffer) == isLeaf(rightBuffer)) {
+            if (_minN < rightLength) {
+              validateEqualLeaf(buffer, rightBuffer, block, rightBlock);
+              
               parent.setFlushDirtyOnCommit(false);
 	    
               rightBlock.setFlushDirtyOnCommit(false);
@@ -987,8 +1040,9 @@ public final class BTree {
           try {
             int length = getLength(buffer);
 	      
-            if (isLeaf(leftBuffer) == isLeaf(buffer)
-                && length + leftLength <= _n) {
+            if (length + leftLength <= _n) {
+              validateEqualLeaf(leftBuffer, buffer, leftBlock, block);
+              
               parent.setFlushDirtyOnCommit(false);
 	  
               leftBlock.setFlushDirtyOnCommit(false);
@@ -1004,6 +1058,8 @@ public final class BTree {
               
               parent.setDirty(0, Store.BLOCK_SIZE);
               leftBlock.setDirty(0, Store.BLOCK_SIZE);
+
+              // System.out.println("FREE-ML: " + block);
 
               return true;
             }
@@ -1036,8 +1092,9 @@ public final class BTree {
             int length = getLength(buffer);
             int rightLength = getLength(rightBuffer);
 	      
-            if (isLeaf(rightBuffer) == isLeaf(buffer)
-                && length + rightLength <= _n) {
+            if (length + rightLength <= _n) {
+              validateEqualLeaf(rightBuffer, buffer, rightBlock, block);
+
               rightBlock.setFlushDirtyOnCommit(false);
 	  
               parent.setFlushDirtyOnCommit(false);
@@ -1056,6 +1113,8 @@ public final class BTree {
               rightBlock.setDirty(0, Store.BLOCK_SIZE);
               parent.setDirty(0, Store.BLOCK_SIZE);
 
+              // System.out.println("FREE-MR: " + block);
+
               return true;
             }
           } finally {
@@ -1072,6 +1131,17 @@ public final class BTree {
     // XXX: error
 
     return false;
+  }
+
+  private void validateEqualLeaf(byte []leftBuffer, byte []rightBuffer,
+                                 Block left, Block right)
+  {
+    if (isLeaf(leftBuffer, left) != isLeaf(rightBuffer, right)) {
+      throw new IllegalStateException(L.l("leaf mismatch {0} {1} and {2} {3}",
+                                          isLeaf(leftBuffer, left),
+                                          isLeaf(rightBuffer, right),
+                                          left, right));
+    }
   }
 
   /**
@@ -1263,8 +1333,7 @@ public final class BTree {
     long pointer = getPointer(parentBuffer, NEXT_OFFSET);
 
     if (pointer != blockId) {
-      log.warning("BTree remove can't find matching block: " + debugId(blockId));
-      return;
+      throw new IllegalStateException("BTree remove can't find matching block: " + debugId(blockId));
     }
     
     setPointer(parentBuffer, NEXT_OFFSET, leftBlockId);
@@ -1436,7 +1505,7 @@ public final class BTree {
       }
     }
 
-    log.warning("BTree merge right can't find matching index: " + debugId(blockId));
+    throw new IllegalStateException("BTree merge right can't find matching index: " + debugId(blockId));
   }
 
   /**
@@ -1618,17 +1687,54 @@ public final class BTree {
     }
   }
 
+  private boolean isLeaf(byte []buffer, Block block)
+  {
+    int flags = getInt(buffer, FLAGS_OFFSET) & LEAF_MASK;
+
+    if (flags == IS_LEAF)
+      return true;
+    else if (flags == IS_NODE)
+      return false;
+    else {
+      if (! block.isIndex())
+        throw new IllegalStateException(L.l("block {0} is not an index block",
+                                            block));
+      
+      if (! block.isValid())
+        throw new IllegalStateException(L.l("block {0} is not valid",
+                                            block));
+      
+      throw new IllegalStateException(L.l("leaf value is invalid: {0} for {1}",
+                                          flags, block));
+    }
+  }
+
+  private void validate(Block block)
+  {
+    isLeaf(block.getBuffer(), block);
+  }
+
   private boolean isLeaf(byte []buffer)
   {
-    return (getInt(buffer, FLAGS_OFFSET) & LEAF_FLAG) == 0;
+    int flags = getInt(buffer, FLAGS_OFFSET) & LEAF_MASK;
+
+    if (flags == IS_LEAF)
+      return true;
+    else if (flags == IS_NODE)
+      return false;
+    else
+      throw new IllegalStateException(L.l("leaf value is invalid: {0}",
+                                          flags));
   }
 
   private void setLeaf(byte []buffer, boolean isLeaf)
   {
+    int flags = getInt(buffer, FLAGS_OFFSET) & ~LEAF_MASK;
+    
     if (isLeaf)
-      setInt(buffer, FLAGS_OFFSET, getInt(buffer, FLAGS_OFFSET) & ~LEAF_FLAG);
+      setInt(buffer, FLAGS_OFFSET, flags + IS_LEAF);
     else
-      setInt(buffer, FLAGS_OFFSET, getInt(buffer, FLAGS_OFFSET) | LEAF_FLAG);
+      setInt(buffer, FLAGS_OFFSET, flags + IS_NODE);
   }
   
   /**

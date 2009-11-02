@@ -42,8 +42,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class BlobColumn extends Column {
+  private static final Logger log
+    = Logger.getLogger(BlobColumn.class.getName());
+  
   /**
    * Creates an inode column.
    *

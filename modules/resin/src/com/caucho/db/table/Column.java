@@ -36,11 +36,15 @@ import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.store.Transaction;
+import com.caucho.util.L10N;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import java.io.IOException;
 
 abstract public class Column {
-  protected final static Logger log
+  private static final L10N L = new L10N(Column.class);
+  
+  private final static Logger log
     = Logger.getLogger(Column.class.getName());
   
   public final static int NONE = 0;
@@ -549,6 +553,31 @@ abstract public class Column {
 
     index.remove(block, rowOffset + getColumnOffset(), getLength(),
 		 xa);
+  }
+  
+  /**
+   * Sets any index for the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   * @param rowAddr the address of the row
+   */
+  void validateIndex(Transaction xa,
+                     byte []block, int rowOffset,
+                     long rowAddr)
+    throws SQLException, IOException
+  {
+    BTree index = getIndex();
+
+    if (index == null)
+      return;
+
+    long value
+      = index.lookup(block, rowOffset + getColumnOffset(), getLength(), xa);
+
+    if (value != rowAddr)
+      throw new IllegalStateException(L.l("invalid index '{0}' at {1}",
+                                          value, "unknown"));
   }
   
   /**

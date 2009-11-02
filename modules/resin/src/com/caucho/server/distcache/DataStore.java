@@ -74,7 +74,7 @@ public class DataStore implements AlarmListener {
   private final String _mnodeTableName;
 
   // remove unused data after 1 hour
-  //private long _expireTimeout = 3600L * 1000L;
+  //private long _expireTimeout = 60 * 60L * 1000L;
   private long _expireTimeout = 10 * 60L * 1000L;
 
   private DataSource _dataSource;
@@ -85,11 +85,12 @@ public class DataStore implements AlarmListener {
   private String _selectAllLimitQuery;
   private String _updateExpiresQuery;
   private String _deleteTimeoutQuery;
+  private String _validateQuery;
   
   private String _countQuery;
 
   private Alarm _alarm;
-  private long _expireReaperTimeout = 15 * 60 * 1000L;
+  // private long _expireReaperTimeout = 15 * 60 * 1000L;
   
   public DataStore(String serverName,
 		   MnodeStore mnodeStore)
@@ -146,6 +147,8 @@ public class DataStore implements AlarmListener {
 
     _deleteTimeoutQuery = ("DELETE FROM " + _tableName
                            + " WHERE expire_time < ?");
+
+    _validateQuery = ("VALIDATE " + _tableName);
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
@@ -442,6 +445,8 @@ public class DataStore implements AlarmListener {
    */
   public void removeExpiredData()
   {
+    validateDatabase();
+    
     long now = Alarm.getCurrentTime();
       
     updateExpire(now);
@@ -460,7 +465,7 @@ public class DataStore implements AlarmListener {
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
 
-      // System.out.println("EXPIRE: " + count);
+      System.out.println(this + " EXPIRE: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -488,26 +493,31 @@ public class DataStore implements AlarmListener {
 
       long expires = now + _expireTimeout;
       int totalCount = 0;
+      int fetchSize = 64 * 1024;
+      int subCount;
 
       // System.out.println("UPDATE_EXPIRE:" + _expireTimeout);
       do {
         isData = false;
         
         pstmt.setLong(1, resinOid);
-        pstmt.setFetchSize(64 * 1024);
+        pstmt.setFetchSize(fetchSize);
 
         ResultSet rs = pstmt.executeQuery();
 
-        while (rs.next()) {
-          totalCount++;
-          
-          isData = true;
+        subCount = 0;
 
+        while (rs.next()) {
+          subCount++;
+          
           byte []key = rs.getBytes(1);
           resinOid = rs.getLong(2);
 
+          // key is null if the entry is deleted
+          /*
           if (key == null && ! Alarm.isTest())
             System.out.println(this + " NULL: " + totalCount + " " + Hex.toHex(key));
+          */
 
           if (key != null) {
             try {
@@ -516,7 +526,7 @@ public class DataStore implements AlarmListener {
               int count = pstmtUpdate.executeUpdate();
 
               if (count <= 0 && ! Alarm.isTest()) {
-                System.out.println(this + " COUNT: " + count + " " + Hex.toHex(key));
+                System.out.println(this + " no-update COUNT: " + count + " " + Hex.toHex(key));
               }
             } catch (SQLException e) {
               e.printStackTrace();
@@ -524,8 +534,11 @@ public class DataStore implements AlarmListener {
             }
           }
         }
-      } while (isData);
+        totalCount += subCount;
+        System.out.println(this + " SUB-TOTAL:" + subCount);
+      } while (subCount == fetchSize);
 
+      System.out.println(this + " TOTAL:" + totalCount);
       // XXX:
       // log.fine("TOTAL: " + totalCount);
     } catch (SQLException e) {
@@ -533,6 +546,28 @@ public class DataStore implements AlarmListener {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       conn.close();
+    }
+  }
+
+  /**
+   * Clears the expired data
+   */
+  public void validateDatabase()
+  {
+    DataConnection conn = null;
+
+    try {
+      conn = getConnection();
+  
+      PreparedStatement pstmt = conn.prepareValidate();
+
+      int count = pstmt.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (conn != null)
+        conn.close();
     }
   }
 
@@ -575,7 +610,8 @@ public class DataStore implements AlarmListener {
       try {
 	removeExpiredData();
       } finally {
-	alarm.queue(_expireTimeout / 2);
+	// alarm.queue(_expireTimeout / 2);
+	alarm.queue(2 * 60000L);
       }
     }
   }
@@ -694,6 +730,7 @@ public class DataStore implements AlarmListener {
     private PreparedStatement _selectAllLimitStatement;
     private PreparedStatement _updateExpiresStatement;
     private PreparedStatement _deleteTimeoutStatement;
+    private PreparedStatement _validateStatement;
     
     private PreparedStatement _countStatement;
 
@@ -754,6 +791,15 @@ public class DataStore implements AlarmListener {
 	_deleteTimeoutStatement = _conn.prepareStatement(_deleteTimeoutQuery);
 
       return _deleteTimeoutStatement;
+    }
+
+    PreparedStatement prepareValidate()
+      throws SQLException
+    {
+      if (_validateStatement == null)
+	_validateStatement = _conn.prepareStatement(_validateQuery);
+
+      return _validateStatement;
     }
 
     PreparedStatement prepareCount()

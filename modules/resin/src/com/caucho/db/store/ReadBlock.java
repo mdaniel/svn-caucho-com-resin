@@ -59,6 +59,27 @@ public class ReadBlock extends Block {
   }
 
   /**
+   * Copies the contents to a target block. Used by the BlockManager
+   * for LRU'd blocks
+   */
+  @Override
+  protected boolean copyToBlock(Block block)
+  {
+    synchronized (this) {
+      byte []buffer = _buffer;
+
+      if (buffer == null || ! isValid())
+        return false;
+
+      System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
+      block.validate();
+      System.out.println(block + " COPY FROM " + this);
+
+      return true;
+    }
+  }
+
+  /**
    * Called when the block is removed from the cache.
    */
   protected void freeImpl()

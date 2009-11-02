@@ -413,7 +413,7 @@ function is_wait_thread($info)
 
 function is_jni_thread($info)
 {
-  return $info->isInNative();
+  return $info && $info->isInNative();
 }
 
 function is_idle_pool_thread($info)

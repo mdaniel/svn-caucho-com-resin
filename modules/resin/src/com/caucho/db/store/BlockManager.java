@@ -307,8 +307,7 @@ public final class BlockManager
           dirtyBlock = _writeQueue.get(i);
 
           if (dirtyBlock.getBlockId() == blockId
-              && dirtyBlock.getStore() == store
-              && dirtyBlock.allocate()) {
+              && dirtyBlock.getStore() == store) {
             break;
           }
           else
@@ -324,16 +323,7 @@ public final class BlockManager
       block = new ReadBlock(store, blockId);
 
       if (dirtyBlock != null) {
-        byte []dirtyBuffer = dirtyBlock.getBuffer();
-
-        if (dirtyBuffer != null && dirtyBlock.isValid()) {
-          System.arraycopy(dirtyBuffer, 0, block.getBuffer(), 0, dirtyBuffer.length);
-          block.validate();
-        }
-
-        // System.out.println("COPY: " + dirtyBlock + " " + _writeQueue.size());
-
-        dirtyBlock.free();
+        dirtyBlock.copyToBlock(block);
       }
 
       // needs to be outside the synchronized because the put
@@ -476,7 +466,7 @@ public final class BlockManager
           if (block == null)
             return;
 
-          block.close();
+          block.closeWrite();
 
           synchronized (_writeQueue) {
             int size = _writeQueue.size();

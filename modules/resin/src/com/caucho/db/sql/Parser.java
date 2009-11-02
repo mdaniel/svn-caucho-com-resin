@@ -100,9 +100,10 @@ public class Parser {
   final static int UPDATE = DROP + 1;
   final static int SET = UPDATE + 1;
   final static int DELETE = SET + 1;
-  final static int SHOW = DELETE + 1;
+  final static int VALIDATE = DELETE + 1;
+  final static int SHOW = VALIDATE + 1;
 
-  final static int CONSTRAINT = DELETE + 1;
+  final static int CONSTRAINT = SHOW + 1;
   final static int UNIQUE = CONSTRAINT + 1;
   final static int PRIMARY = UNIQUE + 1;
   final static int CHECK = PRIMARY + 1;
@@ -180,6 +181,9 @@ public class Parser {
 
     case DELETE:
       return parseDelete();
+
+    case VALIDATE:
+      return parseValidate();
 
     case DROP:
       return parseDrop();
@@ -1116,6 +1120,27 @@ public class Parser {
   }
 
   /**
+   * Parses the delete.
+   */
+  private Query parseValidate()
+    throws SQLException
+  {
+    int token;
+
+    if ((token = scanToken()) != IDENTIFIER)
+      throw error(L.l("expected identifier at '{0}'", tokenName(token)));
+
+    Table table = _database.getTable(_lexeme);
+
+    if (table == null)
+      throw error(L.l("unknown table '{0}'", tokenName(token)));
+
+    ValidateQuery query = new ValidateQuery(_database, _sql, table);
+
+    return query;
+  }
+
+  /**
    * Parses the insert.
    */
   private Query parseDrop()
@@ -2020,6 +2045,7 @@ public class Parser {
     _reserved.put("update", UPDATE);
     _reserved.put("set", SET);
     _reserved.put("delete", DELETE);
+    _reserved.put("validate", VALIDATE);
 
     _reserved.put("constraint", CONSTRAINT);
     _reserved.put("unique", UNIQUE);

@@ -148,6 +148,12 @@ public class Store {
   private final Object _allocationLock = new Object();
   private byte []_allocationTable;
 
+  private long _freeAllocIndex; // index for finding a free allocation
+  private int _freeAllocCount;
+  
+  private int _freeMiniAllocIndex; // index for finding a free mini
+  private int _freeMiniAllocCount;
+
   private final Object _allocationWriteLock = new Object();
   private final AtomicInteger _allocationWriteCount = new AtomicInteger();
   private int _allocDirtyMin = Integer.MAX_VALUE;
@@ -320,7 +326,7 @@ public class Store {
    * Converts from the block index to the address for database
    * storage.
    */
-  private static long blockIdToIndex(long blockId)
+  public static long blockIdToIndex(long blockId)
   {
     return blockId >> BLOCK_BITS;
   }
@@ -625,45 +631,9 @@ public class Store {
     long blockIndex;
     boolean isFileExtended = false;
 
-    synchronized (_allocationLock) {
-      long end = _blockCount;
-
-      if (_allocationTable.length < ALLOC_BYTES_PER_BLOCK * end)
-        end = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
-
-      for (blockIndex = 0; blockIndex < end; blockIndex++) {
-        if (getAllocation(blockIndex) == ALLOC_FREE)
-          break;
-      }
-
-      if (blockIndex == _allocationTable.length / ALLOC_BYTES_PER_BLOCK) {
-        // expand the allocation table
-
-        byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
-        System.arraycopy(_allocationTable, 0,
-                         newTable, 0,
-                         _allocationTable.length);
-        _allocationTable = newTable;
-
-        // if the allocation table is over 8k, allocate the block for the
-        // extension (each allocation block of 8k allocates 512m)
-        if (blockIndex % (BLOCK_SIZE / ALLOC_BYTES_PER_BLOCK) == 0) {
-          setAllocation(blockIndex, ALLOC_USED);
-          blockIndex++;
-        }
-        _allocDirtyMin = 0;
-        _allocDirtyMax = newTable.length;
-      }
-
-      // mark USED before actual code so it's properly initialized
-      setAllocation(blockIndex, ALLOC_USED);
-
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " allocating block " + blockIndex + " " + codeToName(code));
-
-      if (_blockCount <= blockIndex) {
-        isFileExtended = true;
-        _blockCount = blockIndex + 1;
+    while ((blockIndex = findFreeBlock()) == 0) {
+      if (_freeAllocIndex == _blockCount && _freeAllocCount == 0) {
+        extendFile();
       }
     }
 
@@ -673,19 +643,12 @@ public class Store {
 
     byte []buffer = block.getBuffer();
 
-    for (int i = BLOCK_SIZE - 1; i >= 0; i--)
-      buffer[i] = 0;
+    synchronized (buffer) {
+      for (int i = BLOCK_SIZE - 1; i >= 0; i--)
+        buffer[i] = 0;
 
-    block.setDirty(0, BLOCK_SIZE);
-    block.validate();
-
-    // if extending file, write the contents now
-    if (isFileExtended) {
-      try {
-        block.write();
-      } catch (IOException e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
+      block.setDirty(0, BLOCK_SIZE);
+      block.validate();
     }
 
     synchronized (_allocationLock) {
@@ -699,6 +662,117 @@ public class Store {
     saveAllocation();
 
     return block;
+  }
+
+  private long findFreeBlock()
+  {
+    synchronized (_allocationLock) {
+      long end = _blockCount;
+
+      if (_allocationTable.length < ALLOC_BYTES_PER_BLOCK * end)
+        end = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
+
+      for (long blockIndex = _freeAllocIndex; blockIndex < end; blockIndex++) {
+        if (getAllocation(blockIndex) == ALLOC_FREE) {
+          _freeAllocIndex = blockIndex;
+          _freeAllocCount++;
+          
+          // mark USED before actual code so it's properly initialized
+          setAllocation(blockIndex, ALLOC_USED);
+          
+          return blockIndex;
+        }
+      }
+
+      if (_freeAllocCount > 0) {
+        _freeAllocIndex = 0;
+        _freeAllocCount = 0;
+      }
+      else {
+        _freeAllocIndex = _blockCount;
+      }
+      
+      return 0;
+    }
+  }
+
+  private void extendFile()
+  {
+    long newBlockCount;
+      
+    synchronized (_allocationLock) {
+      if (_freeAllocIndex < _blockCount)
+        return;
+
+      if (_blockCount < 256)
+        newBlockCount = _blockCount + 1;
+      else
+        newBlockCount = _blockCount + 256;
+
+      while (_allocationTable.length / ALLOC_BYTES_PER_BLOCK
+             <= newBlockCount) {
+        // expand the allocation table
+
+        byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
+        System.arraycopy(_allocationTable, 0,
+                         newTable, 0,
+                         _allocationTable.length);
+        _allocationTable = newTable;
+
+        long superBlockMax = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
+        for (long count = 0;
+             count < superBlockMax;
+             count += ALLOC_GROUP_COUNT) {
+          // if the allocation table is over 8k, allocate the block for the
+          // extension (each allocation block of 8k allocates 512m)
+          setAllocation(count, ALLOC_USED);
+          // System.out.println("SET_ALLOC: " + count);
+
+          // avoid collision
+          if (newBlockCount == count)
+            newBlockCount++;
+        }
+        
+        _allocDirtyMin = 0;
+        _allocDirtyMax = newTable.length;
+      }
+
+      if (log.isLoggable(Level.FINER))
+        log.finer(this + " extending file " + newBlockCount);
+
+      _blockCount = newBlockCount;
+      _freeAllocIndex = 0;
+
+      if (getAllocation(newBlockCount) != ALLOC_FREE)
+        System.out.println("BAD_BLOCK: " + newBlockCount);
+      
+      setAllocation(newBlockCount, ALLOC_USED);
+    }
+
+    long blockId = blockIndexToBlockId(newBlockCount);
+
+    Block block = _blockManager.getBlock(this, blockId);
+
+    byte []buffer = block.getBuffer();
+
+    for (int i = BLOCK_SIZE - 1; i >= 0; i--)
+      buffer[i] = 0;
+
+    block.setDirty(0, BLOCK_SIZE);
+    block.validate();
+
+    // if extending file, write the contents now
+    try {
+      block.write();
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    block.free();
+
+    synchronized (_allocationLock) {
+      setAllocation(newBlockCount, ALLOC_FREE);
+    }
   }
 
   /**
@@ -768,7 +842,7 @@ public class Store {
   /**
    * Sets the allocation for a block.
    */
-  private final int getAllocation(long blockIndex)
+  public final int getAllocation(long blockIndex)
   {
     int allocOffset = (int) (ALLOC_BYTES_PER_BLOCK * blockIndex);
 
@@ -1555,7 +1629,7 @@ public class Store {
 
         if (freeOffset >= 0) {
           synchronized (_allocationLock) {
-            _allocationTable[freeOffset + 1]  = 0;
+            _allocationTable[freeOffset + 1] = 0;
             setAllocDirty(freeOffset + 1, freeOffset + 2);
           }
         }
@@ -1578,12 +1652,15 @@ public class Store {
     while (true) {
       byte []allocationTable = _allocationTable;
 
-      for (int i = 0;
+      for (int i = _freeMiniAllocIndex;
            i < allocationTable.length;
            i += ALLOC_BYTES_PER_BLOCK) {
         int fragMask = allocationTable[i + 1] & 0xff;
 
         if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
+          _freeMiniAllocIndex = i;
+          _freeMiniAllocCount++;
+          
           synchronized (_allocationLock) {
             if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
               allocationTable[i + 1] = (byte) 0xff;
@@ -1601,10 +1678,23 @@ public class Store {
         }
       }
 
-      // if no fragment, allocate a new one.
+      if (_freeMiniAllocCount == 0) {
+        // if no fragment, allocate a new one.
 
-      Block block = allocateMiniFragmentBlock();
-      block.free();
+        int count;
+        if (_blockCount >= 256)
+          count = 16;
+        else
+          count = 1;
+
+        for (int i = 0; i < count; i++) {
+          Block block = allocateMiniFragmentBlock();
+          block.free();
+        }
+      }
+      
+      _freeMiniAllocCount = 0;
+      _freeMiniAllocIndex = 0;
     }
   }
 
@@ -1803,9 +1893,12 @@ public class Store {
       // System.out.println("READ: " + Long.toHexString(blockAddress));
       int readLen = is.read(blockAddress, buffer, offset, length);
 
-      if (readLen < 0) {
+      if (readLen < length) {
         System.out.println("BAD-READ: " + Long.toHexString(blockAddress));
-        for (int i = 0; i < BLOCK_SIZE; i++)
+        if (readLen < 0)
+          readLen = 0;
+        
+        for (int i = readLen; i < BLOCK_SIZE; i++)
           buffer[i] = 0;
       }
 

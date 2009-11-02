@@ -497,6 +497,60 @@ public class Table extends Store {
     }
   }
 
+  /**
+   * Rebuilds the indexes
+   */
+  public void validate()
+    throws SQLException
+  {
+    try {
+      validateIndexes();
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * Rebuilds the indexes
+   */
+  public void validateIndexes()
+    throws IOException, SQLException
+  {
+    Transaction xa = Transaction.create();
+    xa.setAutoCommit(true);
+
+    try {
+      TableIterator iter = createTableIterator();
+
+      iter.init(xa);
+
+      Column []columns = _row.getColumns();
+
+      while (iter.nextBlock()) {
+        iter.initRow();
+
+        byte []blockBuffer = iter.getBuffer();
+
+        while (iter.nextRow()) {
+          try {
+            long rowAddress = iter.getRowAddress();
+            int rowOffset = iter.getRowOffset();
+
+            for (int i = 0; i < columns.length; i++) {
+              Column column = columns[i];
+
+              column.validateIndex(xa, blockBuffer, rowOffset, rowAddress);
+            }
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
+        }
+      }
+    } finally {
+      xa.commit();
+    }
+  }
+
   private void writeTableHeader(WriteStream os)
     throws IOException
   {

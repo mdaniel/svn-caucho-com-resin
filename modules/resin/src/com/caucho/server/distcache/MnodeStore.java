@@ -74,7 +74,7 @@ public class MnodeStore implements AlarmListener {
   
   private String _updateVersionQuery;
   
-  private String _timeoutQuery;
+  private String _expireQuery;
   
   private String _countQuery;
   private String _updatesSinceQuery;
@@ -84,7 +84,8 @@ public class MnodeStore implements AlarmListener {
   private long _startupLastUpdateTime;
 
   private Alarm _alarm;
-  private long _expireReaperTimeout = 5 * 60 * 1000L;
+  // private long _expireReaperTimeout = 60 * 60 * 1000L;
+  private long _expireReaperTimeout = 3 * 60 * 1000L;
   
   public MnodeStore(Path path, String serverName)
     throws Exception
@@ -172,7 +173,7 @@ public class MnodeStore implements AlarmListener {
 			   + " SET update_time=?, server_version=?"
 			   + " WHERE id=? AND value=?");
 
-    _timeoutQuery = ("DELETE FROM " + _tableName
+    _expireQuery = ("DELETE FROM " + _tableName
 		     + " WHERE update_time + 5 * idle_timeout / 4 < ?"
 		     + " OR update_time + expire_timeout < ?");
     
@@ -628,7 +629,7 @@ public class MnodeStore implements AlarmListener {
 
     try {
       conn = getConnection();
-      PreparedStatement pstmt = conn.prepareTimeout();
+      PreparedStatement pstmt = conn.prepareExpire();
   
       long now = Alarm.getCurrentTime();
 	
@@ -637,6 +638,8 @@ public class MnodeStore implements AlarmListener {
 
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
+
+      System.out.println(this + " EXPIRE: " + count);
     } catch (Exception e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -763,7 +766,7 @@ public class MnodeStore implements AlarmListener {
     
     private PreparedStatement _updateVersionStatement;
     
-    private PreparedStatement _timeoutStatement;
+    private PreparedStatement _expireStatement;
     
     private PreparedStatement _countStatement;
 
@@ -819,13 +822,13 @@ public class MnodeStore implements AlarmListener {
       return _updateVersionStatement;
     }
 
-    PreparedStatement prepareTimeout()
+    PreparedStatement prepareExpire()
       throws SQLException
     {
-      if (_timeoutStatement == null)
-	_timeoutStatement = _conn.prepareStatement(_timeoutQuery);
+      if (_expireStatement == null)
+	_expireStatement = _conn.prepareStatement(_expireQuery);
 
-      return _timeoutStatement;
+      return _expireStatement;
     }
 
     PreparedStatement prepareCount()
