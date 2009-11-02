@@ -29,6 +29,8 @@
 package com.caucho.server.security;
 
 import com.caucho.security.FormLogin;
+import com.caucho.security.Login;
+import com.caucho.security.LoginList;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.RequestDispatcherImpl;
@@ -59,19 +61,7 @@ public class FormLoginServlet extends GenericServlet {
     HttpServletResponse res = (HttpServletResponse) response;
 
     WebApp app = (WebApp) getServletContext();
-    FormLogin login;
-
-    if (! (app.getLogin() instanceof FormLogin))
-      throw new ServletException(L.l("FormLoginServlet requires a form login auth-type configuration at '{0}' in '{1}'",
-                                     app.getLogin() != null
-				     ? app.getLogin().getAuthType()
-				     : null,
-				     app));
-
-    login = (FormLogin) app.getLogin();
-
-    if (login == null)
-      throw new ServletException(L.l("j_security_check requires a login"));
+    FormLogin login = getFormLogin(app.getLogin());
 
     String username = request.getParameter("j_username");
     String password = request.getParameter("j_password");
@@ -184,5 +174,27 @@ public class FormLoginServlet extends GenericServlet {
     }
     
     res.sendRedirect(res.encodeRedirectURL(uri));
+  }
+
+  private FormLogin getFormLogin(Login login)
+    throws ServletException
+  {
+    if (login == null)
+      throw new ServletException(L.l("j_security_check requires a login"));
+    
+    if (login instanceof FormLogin)
+      return (FormLogin) login;
+    else if (login instanceof LoginList) {
+      for (Login subLogin : ((LoginList) login).getLoginList()) {
+        if (subLogin instanceof FormLogin)
+          return (FormLogin) subLogin;
+      }
+    }
+
+    throw new ServletException(L.l("FormLoginServlet requires a form login auth-type configuration at '{0}' in '{1}'",
+                                   login != null
+                                   ? login.getAuthType()
+                                   : null,
+                                   getServletContext()));
   }
 }

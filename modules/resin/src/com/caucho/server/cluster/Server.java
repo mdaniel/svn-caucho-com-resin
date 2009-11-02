@@ -279,8 +279,6 @@ public class Server extends ProtocolDispatchServer
         _hostContainer.setClassLoader(_classLoader);
         _hostContainer.setDispatchServer(this);
 
-        _admin = new ServerAdmin(this);
-
         _alarm = new Alarm(this);
 
         _webBeans = InjectManager.create();
@@ -1798,6 +1796,8 @@ public class Server extends ProtocolDispatchServer
       createManagement().setServer(this);
       createManagement().init();
     }
+
+    _admin = new ServerAdmin(this);
 
     if (_threadIdleMax > 0
         && _threadMax > 0

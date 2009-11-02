@@ -111,6 +111,9 @@ public class TcpConnection extends Connection
   private long _idleStartTime;
   private long _idleExpireTime;
 
+  // statistics state
+  private String _displayState;
+
   private Thread _thread;
 
   public boolean _isFree;
@@ -462,6 +465,26 @@ public class TcpConnection extends Connection
   public Runnable getResumeTask()
   {
     return _resumeTask;
+  }
+
+  //
+  // statistics state
+  //
+
+  /**
+   * Returns the user statistics state
+   */
+  public String getDisplayState()
+  {
+    return _displayState;
+  }
+
+  /**
+   * Sets the user statistics state
+   */
+  public void setStatState(String state)
+  {
+    _displayState = state;
   }
 
   //
@@ -1140,8 +1163,10 @@ public class TcpConnection extends Connection
         }
 
         _state = _state.toAccept();
+        setStatState("accept");
 
         if (! _port.accept(_socket)) {
+          setStatState(null);
           close();
 
           return RequestState.EXIT;
@@ -1149,6 +1174,7 @@ public class TcpConnection extends Connection
 
         _connectionStartTime = Alarm.getCurrentTime();
 
+        setStatState("read");
         initSocket();
 
         _request.startConnection();
@@ -1160,8 +1186,12 @@ public class TcpConnection extends Connection
           return result;
         }
         else if (result == RequestState.DUPLEX) {
+          setStatState("duplex");
+          
           return _keepaliveTask.doTask();
         }
+        
+        setStatState(null);
 
         close();
       }
@@ -1351,6 +1381,11 @@ public class TcpConnection extends Connection
     public String getState()
     {
       return TcpConnection.this.getState();
+    }
+
+    public String getDisplayState()
+    {
+      return TcpConnection.this.getDisplayState();
     }
 
     void register()

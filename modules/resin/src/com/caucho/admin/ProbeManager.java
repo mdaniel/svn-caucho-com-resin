@@ -50,6 +50,16 @@ public class ProbeManager {
     return _manager;
   }
 
+  public static Probe getProbe(String name)
+  {
+    return _manager.getProbeImpl(name);
+  }
+
+  private Probe getProbeImpl(String name)
+  {
+    return _probeMap.get(name);
+  }
+
   public static AverageTimeProbe createAverageTimeProbe(String name)
   {
     return _manager.createAverageTimeProbeImpl(name);
@@ -163,7 +173,12 @@ public class ProbeManager {
 
   private AverageProbe createAverageProbeImpl(String baseName, String type)
   {
-    String name = baseName + " " + type;
+    String name;
+
+    if (! "".equals(type))
+      name = baseName + " " + type;
+    else
+      name = baseName;
     
     Probe probe = _probeMap.get(name);
 
@@ -220,18 +235,18 @@ public class ProbeManager {
       String activeCountName = baseName + " Active" + subName;
       createProbe(activeTimeProbe.createActiveCount(activeCountName));
       */
-
-      String activeMaxName = baseName + " Active Max" + subName;
-      createProbe(activeTimeProbe.createActiveCountMax(activeMaxName));
-
-      String totalCountName = baseName + " Total" + subName;
-      createProbe(activeTimeProbe.createTotalCount(totalCountName));
       
       String sigmaName = baseName + " " + type + " 95%" + subName;
       createProbe(activeTimeProbe.createSigma(sigmaName, 3));
       
       String maxName = baseName + " " + type + " Max" + subName;
       createProbe(activeTimeProbe.createMax(maxName));
+
+      String activeMaxName = baseName + " Active Max" + subName;
+      createProbe(activeTimeProbe.createActiveCountMax(activeMaxName));
+
+      String totalCountName = baseName + " Count" + subName;
+      createProbe(activeTimeProbe.createTotalCount(totalCountName));
     }
     
     return (ActiveTimeProbe) probe;

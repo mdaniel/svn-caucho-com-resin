@@ -13,9 +13,11 @@
   <!--
      - Security configuration
     -->
-  <resin:FormLogin
-	   login-page="/login.php"
-	   error-page="/error.php"/>
+  <resin:LoginList>
+    <resin:FormLogin login-page="/login.php"
+                     error-page="/error.php"/>
+    <resin:BasicLogin/>
+  </resin:LoginList>
 
   <resin:Allow url-pattern="*.php">
     <resin:if test="${! resin_admin_external}">

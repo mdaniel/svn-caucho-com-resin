@@ -30,6 +30,7 @@
 package com.caucho.server.http;
 
 import com.caucho.admin.ActiveTimeProbe;
+import com.caucho.admin.AverageProbe;
 import com.caucho.admin.SampleCountProbe;
 import com.caucho.admin.ProbeManager;
 import com.caucho.server.cluster.Server;
@@ -87,9 +88,11 @@ public class HttpRequest extends AbstractHttpRequest
   static final CharBuffer _http10Cb = new CharBuffer("HTTP/1.0");
 
   private static final String REQUEST_TIME_PROBE
-    = "Resin|Server|Http Request";
+    = "Resin|Request|Http Request";
   private static final String REQUEST_COUNT_PROBE
-    = "Resin|Server|Http Request Count";
+    = "Resin|Request|Http Request Count";
+  private static final String REQUEST_BYTES_PROBE
+    = "Resin|Request|Http Request Bytes";
 
   private final CharBuffer _method     // "GET"
     = new CharBuffer();
@@ -122,6 +125,7 @@ public class HttpRequest extends AbstractHttpRequest
 
   private ActiveTimeProbe _requestTimeProbe;
   private SampleCountProbe _requestCountProbe;
+  private AverageProbe _requestBytesProbe;
 
   /**
    * Creates a new HttpRequest.  New connections reuse the request.
@@ -134,6 +138,9 @@ public class HttpRequest extends AbstractHttpRequest
 
     _requestTimeProbe
       = ProbeManager.createActiveTimeProbe(REQUEST_TIME_PROBE);
+
+    _requestBytesProbe
+      = ProbeManager.createAverageProbe(REQUEST_BYTES_PROBE, "");
   }
 
   @Override
@@ -794,12 +801,13 @@ public class HttpRequest extends AbstractHttpRequest
         finishInvocation();
       }
 
-      if (startTime > 0) {
-        _requestTimeProbe.end(startTime);
-      }
-
       if (! isSuspend()) {
         finishRequest();
+      }
+
+      if (startTime > 0) {
+        _requestTimeProbe.end(startTime);
+        _requestBytesProbe.add(getResponse().getContentLength());
       }
 
       thread.setContextClassLoader(oldLoader);

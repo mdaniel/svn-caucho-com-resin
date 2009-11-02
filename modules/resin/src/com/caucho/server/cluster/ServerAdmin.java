@@ -29,6 +29,9 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.admin.CountProbe;
+import com.caucho.admin.Probe;
+import com.caucho.admin.ProbeManager;
 import com.caucho.management.server.AbstractEmitterObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;
@@ -48,11 +51,20 @@ import java.util.Date;
 public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
 {
+  private static final String BYTES_PROBE = "Resin|Request|Http Request Bytes";
+  private CountProbe _httpBytesProbe;
+  
   private Server _server;
 
   ServerAdmin(Server server)
   {
     _server = server;
+
+    ProbeManager.createAverageProbe(BYTES_PROBE, "");
+    
+    String name = BYTES_PROBE;
+
+    _httpBytesProbe = (CountProbe) ProbeManager.getProbe(name);
 
     registerSelf();
   }
@@ -329,7 +341,10 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public long getRequestWriteBytesTotal()
   {
-    return -1;
+    if (_httpBytesProbe != null)
+      return (long) _httpBytesProbe.getTotal();
+    else
+      return 0;
   }
 
   /**

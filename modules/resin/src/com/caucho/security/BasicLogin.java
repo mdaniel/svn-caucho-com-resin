@@ -74,6 +74,15 @@ public class BasicLogin extends AbstractLogin {
   }
 
   /**
+   * Returns true if the request has a matching login.
+   */
+  @Override
+  public boolean isLoginUsedForRequest(HttpServletRequest request)
+  {
+    return request.getHeader("authorization") != null;
+  }
+
+  /**
    * Returns the principal from a basic authentication
    *
    * @param request

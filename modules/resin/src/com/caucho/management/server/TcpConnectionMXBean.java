@@ -70,6 +70,12 @@ public interface TcpConnectionMXBean extends ManagedObjectMXBean {
   //
 
   /**
+   * Returns the connection state.
+   */
+  @Description("The user display state")
+  public String getDisplayState();
+
+  /**
    * Returns the time this request has spent in the active state.
    */
   @Units("milliseconds")

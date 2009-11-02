@@ -195,6 +195,15 @@ public class FormLogin extends AbstractLogin
   }
 
   /**
+   * Returns true if the request has a matching login.
+   */
+  @Override
+  public boolean isLoginUsedForRequest(HttpServletRequest request)
+  {
+    return request.getServletPath().indexOf("j_security_check") >= 0;
+  }
+
+  /**
    * Logs a user in with a user name and a password.
    *
    * @param request servlet request

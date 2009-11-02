@@ -36,6 +36,8 @@ import com.caucho.util.LruCache;
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.ejb.Startup;
+import javax.inject.Singleton;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -46,33 +48,66 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Used to login and logout users in a servlet request.  AbstractLogin handles
- * the different login types like "basic" or "form".  Normally, a Login
- * will delegate the actual authentication to a ServletAuthenticator.
+ * Used to allow multiple login types in a priority list.
  *
- * @since Resin 4.0.0
+ * @since Resin 4.0.2
  */
-public interface Login {
-  public static final String LOGIN_NAME = "caucho.login";
-  public static final String LOGIN_USER = "caucho.user";
-  public static final String LOGIN_PASSWORD = "caucho.password";
+@Singleton
+@Startup
+public class LoginList implements Login {
+  private final ArrayList<Login> _loginList = new ArrayList<Login>();
+
+  /**
+   * Adds the next login in the list.
+   */
+  public void add(Login login)
+  {
+    _loginList.add(login);
+  }
+
+  /**
+   * Returns the login list.
+   */
+  public ArrayList<Login> getLoginList()
+  {
+    return _loginList;
+  }
 
   /**
    * Returns the authentication type.  <code>getAuthType</code> is called
    * by <code>HttpServletRequest.getAuthType</code>.
    */
-  public String getAuthType();
+  public String getAuthType()
+  {
+    if (_loginList.size() == 0)
+      return null;
+
+    return _loginList.get(0).getAuthType();
+  }
 
   /**
    * Returns the configured authenticator
    */
-  public Authenticator getAuthenticator();
-  
+  public Authenticator getAuthenticator()
+  {
+    if (_loginList.size() == 0)
+      return null;
+
+    return _loginList.get(0).getAuthenticator();
+  }
+
   /**
-   * Returns true if the login can be used for this request. This lets
-   * webapps use multiple login methods.
+   * Returns true if the login is used for this request
    */
-  public boolean isLoginUsedForRequest(HttpServletRequest request);
+  public boolean isLoginUsedForRequest(HttpServletRequest request)
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      if (_loginList.get(i).isLoginUsedForRequest(request))
+        return true;
+    }
+
+    return false;
+  }
   
   /**
    * Returns the Principal associated with the current request.
@@ -84,7 +119,17 @@ public interface Login {
    *
    * @return the logged in principal on success, null on failure.
    */
-  public Principal getUserPrincipal(HttpServletRequest request);
+  public Principal getUserPrincipal(HttpServletRequest request)
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      Principal user = _loginList.get(i).getUserPrincipal(request);
+
+      if (user != null)
+        return user;
+    }
+
+    return null;
+  }
   
   /**
    * Logs a user in.  The authenticate method is called during the
@@ -99,14 +144,46 @@ public interface Login {
    */
   public Principal login(HttpServletRequest request,
 			 HttpServletResponse response,
-			 boolean isFail);
+			 boolean isFail)
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      Login login = _loginList.get(i);
+
+      if (login.isLoginUsedForRequest(request)) {
+        Principal user = _loginList.get(i).login(request, response, isFail);
+
+        if (user != null)
+          return user;
+      }
+    }
+
+    // if none match, use first
+
+    for (int i = 0; i < _loginList.size(); i++) {
+      Login login = _loginList.get(i);
+
+      Principal user = _loginList.get(i).login(request, response, isFail);
+
+      return user;
+    }
+
+    return null;
+  }
 
   /**
    * Returns true if username and password based authentication is supported.
    * @see BasicLogin
    * @return
    */
-  public boolean isPasswordBased();
+  public boolean isPasswordBased()
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      if (_loginList.get(i).isPasswordBased())
+        return true;
+    }
+
+    return false;
+  }
 
   /**
    * Returns true if the current user plays the named role.
@@ -118,7 +195,15 @@ public interface Login {
    *
    * @return true if the user plays the named role
    */
-  public boolean isUserInRole(Principal user, String role);
+  public boolean isUserInRole(Principal user, String role)
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      if (_loginList.get(i).isUserInRole(user, role))
+        return true;
+    }
+
+    return false;
+  }
   
   /**
    * Logs the user out from the given request.
@@ -129,11 +214,21 @@ public interface Login {
    */
   public void logout(Principal user,
 		     HttpServletRequest request,
-                     HttpServletResponse response);
+                     HttpServletResponse response)
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      _loginList.get(i).logout(user, request, response);
+    }
+  }
   
   /**
    * Called when the session invalidates.
    */
   public void sessionInvalidate(HttpSession session,
-				boolean isTimeout);
+				boolean isTimeout)
+  {
+    for (int i = 0; i < _loginList.size(); i++) {
+      _loginList.get(i).sessionInvalidate(session, isTimeout);
+    }
+  }
 }

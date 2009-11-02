@@ -30,7 +30,7 @@ package com.caucho.admin;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class AverageProbe extends Probe implements AverageSample {
+public final class AverageProbe extends CountProbe implements AverageSample {
   private final double _scale;
 
   private final Object _lock = new Object();
@@ -57,9 +57,9 @@ public final class AverageProbe extends Probe implements AverageSample {
     _scale = 1.0;
   }
 
-  public Probe createCount(String name)
+  public CountProbe createCount(String name)
   {
-    return new CountProbe(name);
+    return new AverageCountProbe(name);
   }
 
   public Probe createMax(String name)
@@ -105,6 +105,12 @@ public final class AverageProbe extends Probe implements AverageSample {
       else
         return _scale * (sum - lastSum) / (double) (count - lastCount);
     }
+  }
+
+  @Override
+  public double getTotal()
+  {
+    return _sum.get();
   }
   
   /**
@@ -165,8 +171,8 @@ public final class AverageProbe extends Probe implements AverageSample {
     }
   }
 
-  class CountProbe extends Probe {
-    CountProbe(String name)
+  class AverageCountProbe extends CountProbe {
+    AverageCountProbe(String name)
     {
       super(name);
     }
@@ -174,6 +180,12 @@ public final class AverageProbe extends Probe implements AverageSample {
     public double sample()
     {
       return sampleCount();
+    }
+
+    @Override
+    public double getTotal()
+    {
+      return _count.get();
     }
   }
 

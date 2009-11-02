@@ -465,7 +465,7 @@ public class DataStore implements AlarmListener {
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
 
-      System.out.println(this + " EXPIRE: " + count);
+      // System.out.println(this + " EXPIRE: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -535,10 +535,10 @@ public class DataStore implements AlarmListener {
           }
         }
         totalCount += subCount;
-        System.out.println(this + " SUB-TOTAL:" + subCount);
+        //System.out.println(this + " SUB-TOTAL:" + subCount);
       } while (subCount == fetchSize);
 
-      System.out.println(this + " TOTAL:" + totalCount);
+      // System.out.println(this + " TOTAL:" + totalCount);
       // XXX:
       // log.fine("TOTAL: " + totalCount);
     } catch (SQLException e) {

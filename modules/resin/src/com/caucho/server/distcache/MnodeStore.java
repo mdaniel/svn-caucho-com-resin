@@ -639,7 +639,7 @@ public class MnodeStore implements AlarmListener {
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
 
-      System.out.println(this + " EXPIRE: " + count);
+      // System.out.println(this + " EXPIRE: " + count);
     } catch (Exception e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);

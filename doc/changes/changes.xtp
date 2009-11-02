@@ -13,6 +13,8 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>security: add LoginList to allow both form and basic for /resin-admin REST (rep by Martin Thompson)</li>
+<li>admin: add /resin-admin/rest.php?q=mod_status to duplicate Apache's REST interface (#3730, rep by Martin Thompson)</li>
 <li>jsp: Faulty code generated for tag files with scriptlets (#3699, rep by daniel_larsson)</li>
 <li>async: poll socket periodically to test for client exit (#3294, rep by Caleb Richardson)</li>
 <li>(2009-10-28): BeanELResolver IllegalAccessException (#3727, rep on behalf of Kenneth Yeung)</li>
