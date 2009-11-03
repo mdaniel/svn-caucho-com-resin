@@ -167,6 +167,18 @@ public class BinaryBuilderValue
   }
 
   /**
+   * Creates the string.
+   */
+  public static StringValue create(char value)
+  {
+    // php/3jb1
+    if (value < CHAR_STRINGS.length)
+      return CHAR_STRINGS[value];
+    else
+      return new BinaryBuilderValue(value);
+  }
+
+  /**
    * Returns the type.
    */
   @Override
@@ -371,7 +383,7 @@ public class BinaryBuilderValue
    * Creates a string builder of the same type.
    */
   @Override
-  public StringValue createStringBuilder()
+  public BinaryBuilderValue createStringBuilder()
   {
     return new BinaryBuilderValue();
   }
@@ -380,7 +392,17 @@ public class BinaryBuilderValue
    * Creates a string builder of the same type.
    */
   @Override
-  public StringValue createStringBuilder(int length)
+  public BinaryBuilderValue createStringBuilder(int length)
+  {
+    return new BinaryBuilderValue(length);
+  }
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  @Override
+  public BinaryBuilderValue
+    createStringBuilder(byte []buffer, int offset, int length)
   {
     return new BinaryBuilderValue(length);
   }

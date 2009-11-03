@@ -83,8 +83,8 @@ public class Quercus
   private LruCache<String, UnicodeBuilderValue> _unicodeMap
     = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
 
-  private LruCache<String, ConstStringValue> _stringMap
-    = new LruCache<String, ConstStringValue>(8 * 1024);
+  private LruCache<String, StringValue> _stringMap
+    = new LruCache<String, StringValue>(8 * 1024);
 
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
@@ -919,7 +919,11 @@ public class Quercus
    */
   public void setServerEnv(String name, String value)
   {
-    setServerEnv(createString(name), new ConstStringValue(value));
+    // php/3j58
+    if (isUnicodeSemantics())
+      setServerEnv(createUnicodeString(name), createUnicodeString(value));
+    else
+      setServerEnv(createString(name), createString(value));
   }
 
   /**
@@ -1422,7 +1426,11 @@ public class Quercus
    */
   public int getConstantId(String name)
   {
-    return getConstantId(new ConstStringValue(name));
+    // php/3j12
+    if (isUnicodeSemantics())
+      return getConstantId(new UnicodeBuilderValue(name));
+    else
+      return getConstantId(new ConstStringValue(name));
   }
 
   /**
@@ -1763,7 +1771,7 @@ public class Quercus
    */
   public StringValue createString(String name)
   {
-    ConstStringValue value = _stringMap.get(name);
+    StringValue value = _stringMap.get(name);
 
     if (value == null) {
       value = new ConstStringValue(name);

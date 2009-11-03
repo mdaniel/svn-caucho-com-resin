@@ -782,7 +782,7 @@ public class StringBuilderValue
     if (indexL < 0)
       return this;
     else if (indexL < len) {
-      StringBuilderValue sb = new StringBuilderValue(_buffer, 0, len);
+      StringBuilderValue sb = createStringBuilder(_buffer, 0, len);
 
       StringValue str = value.toStringValue();
 
@@ -864,7 +864,7 @@ public class StringBuilderValue
     if (end <= start)
       return StringBuilderValue.EMPTY;
 
-    return new StringBuilderValue(_buffer, start, end - start);
+    return createStringBuilder(_buffer, start, end - start);
   }
 
   /**
@@ -893,7 +893,7 @@ public class StringBuilderValue
   {
     int length = _length;
 
-    StringBuilderValue string = new StringBuilderValue(length);
+    StringBuilderValue string = createStringBuilder(length);
 
     byte []srcBuffer = _buffer;
     byte []dstBuffer = string._buffer;
@@ -920,7 +920,7 @@ public class StringBuilderValue
   {
     int length = _length;
 
-    StringBuilderValue string = new StringBuilderValue(_length);
+    StringBuilderValue string = createStringBuilder(_length);
 
     byte []srcBuffer = _buffer;
     byte []dstBuffer = string._buffer;
@@ -1000,7 +1000,7 @@ public class StringBuilderValue
    * Creates a string builder of the same type.
    */
   @Override
-  public StringValue createStringBuilder()
+  public StringBuilderValue createStringBuilder()
   {
     return new StringBuilderValue();
   }
@@ -1009,9 +1009,18 @@ public class StringBuilderValue
    * Creates a string builder of the same type.
    */
   @Override
-  public StringValue createStringBuilder(int length)
+  public StringBuilderValue createStringBuilder(int length)
   {
     return new StringBuilderValue(length);
+  }
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  public StringBuilderValue
+    createStringBuilder(byte []buffer, int offset, int length)
+  {
+    return new StringBuilderValue(buffer, offset, length);
   }
 
   /**
