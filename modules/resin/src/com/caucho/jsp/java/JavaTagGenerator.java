@@ -487,7 +487,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
       generateTagVariablesAtEnd(out);
     } else {
-      out.println("doTag(_jsp_parentContext, pageContext, out, null);");
+      out.println("doTag(_jsp_parentContext, pageContext, out, null, this);");
     }
     
     out.popDepth();
@@ -561,7 +561,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("public static void doTag(javax.servlet.jsp.JspContext _jsp_parentContext,");
     out.println("                         com.caucho.jsp.PageContextWrapper pageContext,");
     out.println("                         javax.servlet.jsp.JspWriter out,");
-    out.println("                         javax.servlet.jsp.tagext.JspFragment _jspBody)");
+    out.println("                         javax.servlet.jsp.tagext.JspFragment _jspBody,");
+    out.println("                         javax.servlet.jsp.tagext.JspTag jsp_parent_tag)");
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
@@ -577,7 +578,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     }
     
     out.println("TagState _jsp_state = new TagState();");
-    out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag = null;");
+    out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag = jsp_parent_tag;");
 
     generatePrologue(out);
 

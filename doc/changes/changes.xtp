@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>jsp: findAncestorWithClass() fails with tags nested in a tag file(#3436, rep by paru)</li>
 <li>security: add LoginList to allow both form and basic for /resin-admin REST (rep by Martin Thompson)</li>
 <li>admin: add /resin-admin/rest.php?q=mod_status to duplicate Apache's REST interface (#3730, rep by Martin Thompson)</li>
 <li>jsp: Faulty code generated for tag files with scriptlets (#3699, rep by daniel_larsson)</li>

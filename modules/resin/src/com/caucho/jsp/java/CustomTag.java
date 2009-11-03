@@ -417,7 +417,7 @@ public class CustomTag extends GenericTag
 
     out.println(var + ".setPageContext(pageContext);");
     if (parentTagNode == null) {
-      out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
+      out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) _jsp_parent_tag);");
     }
     else if (parentTagNode.isSimpleTag()) {
       String parentName = parentTagNode.getCustomTagName();
