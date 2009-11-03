@@ -642,6 +642,11 @@ abstract public class JavaInvoker
         javaArgs[k] = _marshalArgs[i].marshal(env, NullValue.NULL, _param[k]);
       }
 
+      /*
+      if (javaArgs[k] != null)
+        System.out.println("ARG: " + javaArgs[k] + " " + _marshalArgs[i]);
+      */
+
       k++;
     }
 

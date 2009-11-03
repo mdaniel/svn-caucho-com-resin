@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.marshal.Marshal;
 
 import java.util.IdentityHashMap;
 import java.io.IOException;
@@ -138,6 +139,14 @@ abstract public class UnicodeValue extends StringValue {
   public boolean isUnicode()
   {
     return true;
+  }
+
+  /**
+   * Cost to convert to a UnicodeValue
+   */
+  public int toUnicodeValueMarshalCost()
+  {
+    return Marshal.COST_IDENTICAL;
   }
 
   /**

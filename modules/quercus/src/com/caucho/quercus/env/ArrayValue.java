@@ -122,6 +122,15 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Cost to convert to a UnicodeValue
+   */
+  @Override
+  public int toUnicodeValueMarshalCost()
+  {
+    return Marshal.COST_INCOMPATIBLE;
+  }
+
+  /**
    * Converts to a boolean.
    */
   @Override

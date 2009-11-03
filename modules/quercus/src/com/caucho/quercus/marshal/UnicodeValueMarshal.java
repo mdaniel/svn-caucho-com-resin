@@ -76,6 +76,9 @@ public class UnicodeValueMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
+    return argValue.toUnicodeValueMarshalCost();
+
+    /*
     if (argValue.isUnicode())
       return Marshal.ZERO;
     else if (argValue.isString())
@@ -84,6 +87,7 @@ public class UnicodeValueMarshal extends Marshal
       return Marshal.THREE;
     else
       return Marshal.FOUR;
+    */
   }
   
   @Override

@@ -527,7 +527,8 @@ public class StringBuilderValue
   @Override
   public StringValue toUnicodeValue()
   {
-    return this;
+    // php/0c94
+    return new UnicodeBuilderValue().append(getBuffer(), 0, length());
   }
 
   /**

@@ -127,6 +127,14 @@ public class BinaryBuilderValue
     v1.appendTo(this);
   }
 
+  public BinaryBuilderValue(TempBuffer head)
+  {
+    this();
+
+    // php/0c4l
+    append(head);
+  }
+
   public BinaryBuilderValue(Byte []buffer)
   {
     int length = buffer.length;

@@ -634,6 +634,15 @@ public class Var extends Value
   }
 
   /**
+   * Cost to convert to a UnicdeValue
+   */
+  @Override
+  public int toUnicodeValueMarshalCost()
+  {
+    return _value.toUnicodeValueMarshalCost();
+  }
+
+  /**
    * Append to a unicode builder.
    */
   @Override

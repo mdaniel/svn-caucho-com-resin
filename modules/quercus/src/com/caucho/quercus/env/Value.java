@@ -359,6 +359,14 @@ abstract public class Value implements java.io.Serializable
     return Marshal.COST_TO_STRING + 1;
   }
 
+  /**
+   * Cost to convert to a UnicodeValue
+   */
+  public int toUnicodeValueMarshalCost()
+  {
+    return Marshal.COST_TO_STRING + 1;
+  }
+
   //
   // predicates
   //
@@ -922,7 +930,8 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toUnicodeValue(Env env)
   {
-    return env.createString(toString());
+    // php/0ci0
+    return new UnicodeBuilderValue(env.createString(toString()));
   }
 
   /**

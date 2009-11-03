@@ -1589,6 +1589,18 @@ abstract public class StringValue
   }
 
   /**
+   * Append from a temp buffer list
+   */
+  public StringValue append(TempBuffer ptr)
+  {
+    for (; ptr != null; ptr = ptr.getNext()) {
+      append(ptr.getBuffer(), 0, ptr.getLength());
+    }
+
+    return this;
+  }
+
+  /**
    * Append from a read stream
    */
   public StringValue append(Reader reader)
