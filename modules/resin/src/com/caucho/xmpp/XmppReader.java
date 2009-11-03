@@ -521,7 +521,7 @@ public class XmppReader
 					 extraList);
 
     if (_handler != null) {
-      if ("".equals(type))
+      if ("".equals(type) || "presence".equals(type))
 	_handler.presence(target, from, presence);
       else if ("probe".equals(type))
 	_handler.presenceProbe(target, from, presence);
