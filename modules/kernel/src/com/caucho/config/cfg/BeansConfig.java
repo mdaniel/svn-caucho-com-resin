@@ -243,7 +243,7 @@ public class BeansConfig {
 
           injectManager.addBean(bean);
 
-          for (ProducesBean producerBean : bean.getProducerBeans()) {
+          for (Bean producerBean : bean.getProducerBeans()) {
             injectManager.addBean(producerBean);
           }
 

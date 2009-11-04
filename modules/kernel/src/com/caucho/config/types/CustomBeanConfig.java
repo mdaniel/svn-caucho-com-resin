@@ -478,7 +478,7 @@ public class CustomBeanConfig {
 
     beanManager.addBean(_bean);
 
-    for (ProducesBean producesBean : managedBean.getProducerBeans()) {
+    for (Bean producesBean : managedBean.getProducerBeans()) {
       beanManager.addBean(producesBean);
     }
   }
