@@ -494,9 +494,12 @@ public class Host extends WebAppContainer
 
       initBam();
 
-      super.startImpl();
-
+      // ioc/04010
+      // loader needs to start first, so Host managed beans will be
+      // initialized before the webappd
       loader.start();
+
+      super.startImpl();
 
       if (_parent != null)
         _parent.clearCache();

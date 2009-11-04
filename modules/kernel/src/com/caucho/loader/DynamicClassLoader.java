@@ -1221,17 +1221,23 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public final void make()
     throws Exception
   {
-    for (ClassLoader loader = getParent();
-         loader != null;
-         loader = loader.getParent()) {
-      if (loader instanceof Make) {
-        ((Make) loader).make();
-        break;
-      }
-    }
+    makeParents(getParent());
 
     if (_makeList != null)
       _makeList.make();
+  }
+
+  private final void makeParents(ClassLoader loader)
+    throws Exception
+  {
+    if (loader == null)
+      return;
+
+    makeParents(loader.getParent());
+    
+    if (loader instanceof Make) {
+      ((Make) loader).make();
+    }
   }
 
   /**

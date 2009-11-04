@@ -71,4 +71,10 @@ public class WebBeansRootContext  {
   {
     _isScanComplete = isScanComplete;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _root + "]";
+  }
 }

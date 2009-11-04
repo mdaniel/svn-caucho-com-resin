@@ -2198,7 +2198,7 @@ public class InjectManager
 
       if (isDisabled(cl))
         return;
-
+      
       AnnotatedType type = createAnnotatedType(cl);
       type = processAnnotatedType(type);
 
