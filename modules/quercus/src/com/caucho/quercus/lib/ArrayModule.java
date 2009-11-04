@@ -414,7 +414,7 @@ public class ArrayModule
       return false;
     }
 
-    return searchArray.isset(key);
+    return searchArray.keyExists(key);
   }
 
   /**

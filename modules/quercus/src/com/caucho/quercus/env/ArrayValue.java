@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
 import com.caucho.vfs.WriteStream;
@@ -671,6 +669,18 @@ abstract public class ArrayValue extends Value {
 
     // php/0d40
     return value != null && value.isset();
+  }
+  
+  /**
+   * Returns true if the key exists in the array.
+   */
+  @Override
+  public boolean keyExists(Value key)
+  {
+    Value value = get(key);
+
+    // php/173m
+    return value == null || value != UnsetValue.UNSET;
   }
 
   /**

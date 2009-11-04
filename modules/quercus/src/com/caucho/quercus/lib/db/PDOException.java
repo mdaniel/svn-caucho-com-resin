@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,13 +31,14 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.Location;
 
 public class PDOException
   extends QuercusLanguageException
 {
-  protected final String code;
-  protected final String message;
+  private final String _code;
+  private final String _message;
 
   private Location _location;
 
@@ -45,15 +46,15 @@ public class PDOException
   {
     super(NullValue.NULL);
 
-    this.code = code;
-    this.message = "SQLSTATE[" + code + "]: " + message;
+    _code = code;
+    _message = "SQLSTATE[" + code + "]: " + message;
 
     _location = Env.getInstance().getLocation();
   }
 
   public String getCode()
   {
-    return this.code;
+    return _code;
   }
 
 
@@ -64,11 +65,22 @@ public class PDOException
 
   public String getMessage()
   {
-    return this.message;
+    return _message;
   }
 
   public String getMessage(Env env)
   {
     return getMessage();
+  }
+  
+  /**
+   * Converts the exception to a Value.
+   */
+  @Override
+  public Value toValue(Env env)
+  {
+    Value e = env.createException("PDOException", _message);
+    
+    return e;
   }
 }

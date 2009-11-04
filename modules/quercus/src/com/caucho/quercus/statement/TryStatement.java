@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusExitException;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
@@ -69,7 +70,13 @@ public class TryStatement extends Statement {
     try {
       return _block.execute(env);
     } catch (QuercusLanguageException e) {
-      Value value = e.getValue();
+      Value value = null;
+      
+      try {
+        value = e.toValue(env);
+      } catch (Throwable e1) {
+        throw new QuercusRuntimeException(e1);
+      }
 
       for (int i = 0; i < _catchList.size(); i++) {
         Catch item = _catchList.get(i);
@@ -114,7 +121,6 @@ public class TryStatement extends Statement {
       throw e;
 
     } catch (Exception e) {
-
       for (int i = 0; i < _catchList.size(); i++) {
         Catch item = _catchList.get(i);
 

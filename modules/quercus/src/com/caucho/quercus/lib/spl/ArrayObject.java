@@ -259,10 +259,7 @@ public class ArrayObject
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    String name = "ArrayObject";
-    
-    if (object != null)
-      name = object.getClassName();
+    String name = object.getClassName();
     
     if ((_flags & STD_PROP_LIST) != 0) {
       // XXX:

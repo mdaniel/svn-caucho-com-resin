@@ -4,6 +4,7 @@ com.caucho.quercus.lib.db.Mysqli
 com.caucho.quercus.lib.db.OracleOciCollection
 com.caucho.quercus.lib.db.OracleOciLob
 com.caucho.quercus.lib.db.PDO provides PDO
+com.caucho.quercus.lib.db.PDOException provides PDO
 com.caucho.quercus.lib.ExceptionClass as Exception
 com.caucho.quercus.lib.Java
 com.caucho.quercus.lib.jms.JMSQueue

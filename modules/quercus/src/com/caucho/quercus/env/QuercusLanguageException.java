@@ -60,6 +60,14 @@ public class QuercusLanguageException extends QuercusException
     return _value;
   }
   
+  /**
+   * Converts the exception to a Value.
+   */
+  public Value toValue(Env env)
+  {
+    return _value;
+  }
+  
   /*
    * Returns the PHP exception message.  If null, returns the empty string.
    */

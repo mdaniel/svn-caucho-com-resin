@@ -195,11 +195,11 @@ public class ModuleContext
   }
 
   public JavaClassDef addClass(String name, Class type,
-			       String extension, Class javaClassDefClass)
+                               String extension, Class javaClassDefClass)
     throws NoSuchMethodException,
-	   InvocationTargetException,
-	   IllegalAccessException,
-	   InstantiationException
+           InvocationTargetException,
+           IllegalAccessException,
+           InstantiationException
   {
     synchronized (_javaClassWrappers) {
       JavaClassDef def = _javaClassWrappers.get(name);
@@ -259,9 +259,10 @@ public class ModuleContext
       def = JavaClassDef.create(this, className, type);
 
       if (def == null)
-	def = createDefaultJavaClassDef(className, type);
+        def = createDefaultJavaClassDef(className, type);
 
       _javaClassWrappers.put(className, def);
+      _javaClassWrappers.put(type.getName(), def);
     }
 
     return def;
@@ -280,32 +281,33 @@ public class ModuleContext
       JavaClassDef def = _javaClassWrappers.get(className);
 
       if (def != null)
-	return def;
+        return def;
 
       try {
-	Class type;
+        Class type;
 
-	try {
-	  type = Class.forName(className, false, _loader);
-	}
-	catch (ClassNotFoundException e) {
-	  throw new ClassNotFoundException(L.l("'{0}' is not a known Java class: {1}", className, e.toString()), e);
-	}
+        try {
+            type = Class.forName(className, false, _loader);
+        }
+        catch (ClassNotFoundException e) {
+          throw new ClassNotFoundException(L.l("'{0}' is not a known Java class: {1}", className, e.toString()), e);
+        }
 
-	def = JavaClassDef.create(this, className, type);
+        def = JavaClassDef.create(this, className, type);
 
-	if (def == null)
-	  def = createDefaultJavaClassDef(className, type);
+        if (def == null)
+          def = createDefaultJavaClassDef(className, type);
 
-	_javaClassWrappers.put(className, def);
+        _javaClassWrappers.put(className, def);
+        _javaClassWrappers.put(type.getName(), def);
 
-	// def.introspect();
+        // def.introspect();
 
-	return def;
+        return def;
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new QuercusRuntimeException(e);
+        throw new QuercusRuntimeException(e);
       }
     }
   }
@@ -816,7 +818,7 @@ public class ModuleContext
    * @param javaClassDefClass
    */
   public void introspectJavaClass(String name, Class type, String extension,
-				  Class javaClassDefClass)
+                                  Class javaClassDefClass)
     throws IllegalAccessException, InstantiationException, ConfigException,
            NoSuchMethodException, InvocationTargetException
   {
@@ -824,6 +826,7 @@ public class ModuleContext
 
     synchronized (_javaClassWrappers) {
       _javaClassWrappers.put(name, def);
+      _javaClassWrappers.put(type.getName(), def);
       // _lowerJavaClassWrappers.put(name.toLowerCase(), def);
     }
 

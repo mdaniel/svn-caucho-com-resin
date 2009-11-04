@@ -2493,6 +2493,14 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
+  
+  /**
+   * Returns true if the key exists in the array.
+   */
+  public boolean keyExists(Value key)
+  {
+    return isset(key);
+  }
 
   /**
    * Return unset the value.

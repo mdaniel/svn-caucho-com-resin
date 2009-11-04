@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,29 +29,45 @@
 
 package com.caucho.quercus.lib.reflection;
 
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.lib.ExceptionClass;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusLanguageException;
+import com.caucho.quercus.env.Value;
 
-public class ReflectionException extends QuercusException
+public class ReflectionException extends QuercusLanguageException
 {
+  private String _message;
+  
   public ReflectionException()
   {
+    super(NullValue.NULL);
   }
 
   public ReflectionException(String msg)
   {
-    super(msg);
-  }
-
-  public ReflectionException(Throwable cause)
-  {
-    super(cause);
-  }
-
-  public ReflectionException(String msg, Throwable cause)
-  {
-    super(msg, cause);
+    super(NullValue.NULL);
+    
+    _message = msg;
   }
   
+  public String getMessage()
+  {
+    return _message;
+  }
+
+  public String getMessage(Env env)
+  {
+    return getMessage();
+  }
+  
+  /**
+   * Converts the exception to a Value.
+   */
+  @Override
+  public Value toValue(Env env)
+  {
+    Value e = env.createException("ReflectionException", _message);
+    
+    return e;
+  }
 }
