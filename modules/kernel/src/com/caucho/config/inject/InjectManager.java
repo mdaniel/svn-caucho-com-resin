@@ -453,11 +453,11 @@ public class InjectManager
     int priority = DEFAULT_PRIORITY + 1;
 
     if (! deploymentList.contains(Configured.class)) {
-      _deploymentMap.put(Configured.class, priority++);
+      _deploymentMap.put(Configured.class, priority);
     }
 
     for (int i = deploymentList.size() - 1; i >= 0; i--) {
-      _deploymentMap.put(deploymentList.get(i), priority++);
+      _deploymentMap.put(deploymentList.get(i), priority);
     }
   }
 
@@ -2311,7 +2311,7 @@ public class InjectManager
       }
     }
 
-    for (ProducesBean producerBean : managedBean.getProducerBeans()) {
+    for (Bean producerBean : managedBean.getProducerBeans()) {
       addBean(producerBean);
     }
   }
@@ -2335,7 +2335,7 @@ public class InjectManager
       }
     }
 
-    for (ProducesBean producerBean : managedBean.getProducerBeans()) {
+    for (Bean producerBean : managedBean.getProducerBeans()) {
       addBean(producerBean);
     }
   }
@@ -2814,7 +2814,7 @@ public class InjectManager
       _type = type;
       _bean = bean;
 
-      _isModulePrivate = isModulePrivate(bean);
+      _isModulePrivate = isModulePrivate(bean) || bean.isAlternative();
     }
 
     boolean isModulePrivate()

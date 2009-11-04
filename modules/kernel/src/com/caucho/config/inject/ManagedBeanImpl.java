@@ -79,8 +79,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   private Set<InjectionPoint> _injectionPointSet
     = new LinkedHashSet<InjectionPoint>();
 
-  private HashSet<ProducesBean<X,?>> _producerBeans
-    = new LinkedHashSet<ProducesBean<X,?>>();
+  private HashSet<Bean<?>> _producerBeans
+    = new LinkedHashSet<Bean<?>>();
 
   private HashSet<ObserverMethodImpl<X,?>> _observerMethods
     = new LinkedHashSet<ObserverMethodImpl<X,?>>();
@@ -231,7 +231,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     return value;
   }
 
-  public Set<ProducesBean<X,?>> getProducerBeans()
+  public Set<Bean<?>> getProducerBeans()
   {
     return _producerBeans;
   }
@@ -302,6 +302,11 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
       if (beanMethod.isAnnotationPresent(Produces.class))
         addProduces(beanMethod);
     }
+    
+    for (AnnotatedField beanField : beanType.getFields()) {
+      if (beanField.isAnnotationPresent(Produces.class))
+        addProduces(beanField);
+    }
   }
 
   protected void addProduces(AnnotatedMethod beanMethod)
@@ -310,6 +315,16 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
     ProducesBean bean = ProducesBean.create(getBeanManager(), this, beanMethod,
                                             args);
+
+    // bean.init();
+
+    _producerBeans.add(bean);
+  }
+
+  protected void addProduces(AnnotatedField beanField)
+  {
+    ProducesFieldBean bean
+      = ProducesFieldBean.create(getBeanManager(), this, beanField);
 
     // bean.init();
 
