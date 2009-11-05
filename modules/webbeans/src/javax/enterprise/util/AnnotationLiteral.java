@@ -27,69 +27,44 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.enterprise.util;
 
+import java.lang.annotation.*;
 import java.lang.reflect.*;
 
 /**
- * Convenience API to create runtime parameterized types.
+ * Convenience API to create runtime Annotations.
  *
  * <code><pre>
- * new TypeLiteral&lt;ArrayList&lt;String>>() {}
+ * Annotation current = new AnnotationLiteral&lt;Current>() {}
+ * </pre></code>
+ *
+ * <code><pre>
+ * Annotation named = new AnnotationLiteral&lt;Named>() {
+ *   public String name() { return "my-name"; }
+ * }
  * </pre></code>
  */
-public abstract class TypeLiteral<T>
+public abstract class AnnotationLiteral<T extends Annotation>
+  implements Annotation
 {
-  public final Type getType()
+  @SuppressWarnings("unchecked")
+  public final Class<T> annotationType()
   {
     Type type = getClass().getGenericSuperclass();
 
     if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
 
-      return pType.getActualTypeArguments()[0];
+      return (Class) pType.getActualTypeArguments()[0];
     }
     else
       throw new UnsupportedOperationException(type.toString());
-  }
-
-  public final Class<T> getRawType()
-  {
-    Type type = getType();
-
-    if (type instanceof Class)
-      return (Class) type;
-    else if (type instanceof ParameterizedType) {
-      ParameterizedType pType = (ParameterizedType) type;
-
-      return (Class) pType.getRawType();
-    }
-    else
-      throw new UnsupportedOperationException(type.toString());
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return getType().hashCode();
-  }
-
-  @Override
-  public boolean equals(Object o)
-  {
-    if (this == o)
-      return true;
-    else if (! (o instanceof TypeLiteral))
-      return false;
-
-    TypeLiteral lit = (TypeLiteral) o;
-    
-    return getType().equals(lit.getType());
   }
 
   @Override
   public String toString()
   {
-    return "TypeLiteral[" + getType() + "]";
+    return "@" + annotationType().getName() + "()";
   }
 }

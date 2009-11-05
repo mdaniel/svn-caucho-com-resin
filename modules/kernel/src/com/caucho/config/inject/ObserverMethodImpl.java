@@ -138,7 +138,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
       Observes observes = param.getAnnotation(Observes.class);
 
       if (observes != null) {
-        _isIfExists = observes.receive() == Reception.IF_EXISTS;
+        _isIfExists = observes.notifyObserver() == Reception.IF_EXISTS;
       }
       else {
         _args[i] = new BeanArg(param.getBaseType(),

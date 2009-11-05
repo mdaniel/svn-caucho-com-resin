@@ -19,25 +19,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.decorator;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Nonbinding annotation for web beans
+ * The @Delegate marker for the delegate
  */
+@Documented
 @Retention(RUNTIME)
-@Target(METHOD)
-public @interface Nonbinding {
+@Target({FIELD,PARAMETER})
+public @interface Delegate {
 }

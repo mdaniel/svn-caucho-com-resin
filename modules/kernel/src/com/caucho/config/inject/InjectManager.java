@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
-import javax.decorator.Decorates;
+import javax.decorator.Delegate;
 import javax.el.*;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -664,6 +664,24 @@ public class InjectManager
   }
 
   /**
+   * Tests if an annotation is an enabled scope type
+   */
+  public boolean isNormalScope(Class<? extends Annotation> annotationType)
+  {
+    return annotationType.isAnnotationPresent(NormalScope.class);
+  }
+
+  /**
+   * Tests if an annotation is an enabled scope type
+   */
+  public boolean isPassivatingScope(Class<? extends Annotation> annotationType)
+  {
+    NormalScope scope =  annotationType.getAnnotation(NormalScope.class);
+
+    return scope != null && scope.passivating();
+  }
+
+  /**
    * Returns the scope definition for a scope type
    */
   public Scope getScopeDefinition(Class<? extends Annotation> scopeType)
@@ -682,7 +700,7 @@ public class InjectManager
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
-  public boolean isInterceptorBinding(Class<? extends Annotation> annotationType)
+  public boolean isInterceptorBindingType(Class<? extends Annotation> annotationType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -690,7 +708,7 @@ public class InjectManager
   /**
    * Returns the bindings for an interceptor binding type
    */
-  public Set<Annotation> getInterceptorBindingDefinition(Class<? extends Annotation> bindingType)
+  public Set<Annotation> getInterceptorBindingTypeDefinition(Class<? extends Annotation> bindingType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -2034,7 +2052,7 @@ public class InjectManager
     }
 
     if (bindingList.size() == 0)
-      bindingList.add(new CurrentLiteral());
+      bindingList.add(CurrentLiteral.CURRENT);
 
     Annotation []bindings = new Annotation[bindingList.size()];
     bindingList.toArray(bindings);

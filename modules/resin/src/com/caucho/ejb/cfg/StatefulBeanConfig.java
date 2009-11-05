@@ -33,8 +33,6 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.logging.*;
 
-import javax.enterprise.inject.AnnotationLiteral;
-
 import javax.annotation.*;
 import javax.ejb.Stateful;
 
@@ -64,14 +62,14 @@ public class StatefulBeanConfig extends AbstractBeanConfig
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
-    
+
     final String name = getName();
 
     Annotation statefulAnn = new Stateful() {
-	public Class annotationType() { return Stateful.class; }
-	public String name() { return name; }
-	public String mappedName() { return name; }
-	public String description() { return ""; }
+        public Class annotationType() { return Stateful.class; }
+        public String name() { return name; }
+        public String mappedName() { return name; }
+        public String description() { return ""; }
     };
 
     add(statefulAnn);

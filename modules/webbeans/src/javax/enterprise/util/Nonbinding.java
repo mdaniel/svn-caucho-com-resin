@@ -27,44 +27,17 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject;
+package javax.enterprise.util;
 
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Convenience API to create runtime Annotations.
- *
- * <code><pre>
- * Annotation current = new AnnotationLiteral&lt;Current>() {}
- * </pre></code>
- *
- * <code><pre>
- * Annotation named = new AnnotationLiteral&lt;Named>() {
- *   public String name() { return "my-name"; }
- * }
- * </pre></code>
+ * The @Nonbinding annotation for web beans
  */
-public abstract class AnnotationLiteral<T extends Annotation>
-  implements Annotation
-{
-  @SuppressWarnings("unchecked")
-  public final Class<T> annotationType()
-  {
-    Type type = getClass().getGenericSuperclass();
-
-    if (type instanceof ParameterizedType) {
-      ParameterizedType pType = (ParameterizedType) type;
-
-      return (Class) pType.getActualTypeArguments()[0];
-    }
-    else
-      throw new UnsupportedOperationException(type.toString());
-  }
-
-  @Override
-  public String toString()
-  {
-    return "@" + annotationType().getName() + "()";
-  }
+@Retention(RUNTIME)
+@Target(METHOD)
+public @interface Nonbinding {
 }

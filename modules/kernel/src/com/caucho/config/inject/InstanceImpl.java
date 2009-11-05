@@ -37,6 +37,7 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * Factory to create instances of a bean.

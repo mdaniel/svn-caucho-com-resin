@@ -36,7 +36,7 @@ import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import javax.persistence.*;
-import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.util.AnnotationLiteral;
 
 import java.util.logging.Logger;
 
@@ -48,18 +48,18 @@ public class PersistenceUnitGenerator extends WebBeanGenerator
   private static final L10N L = new L10N(PersistenceUnitGenerator.class);
 
   private InjectManager _beanManager = InjectManager.create();
-  
+
   private String _location;
   private String _jndiName;
   private String _unitName;
   private EntityManagerFactory _factory;
 
   PersistenceUnitGenerator(String location,
-			   String jndiName,
-			   String unitName)
+                           String jndiName,
+                           String unitName)
   {
     _location = location;
-    
+
     _jndiName = jndiName;
     _unitName = unitName;
   }
@@ -67,7 +67,7 @@ public class PersistenceUnitGenerator extends WebBeanGenerator
   PersistenceUnitGenerator(String location, PersistenceUnit unit)
   {
     _location = location;
-    
+
     _jndiName = unit.name();
     _unitName = unit.unitName();
   }
@@ -88,9 +88,9 @@ public class PersistenceUnitGenerator extends WebBeanGenerator
   {
     try {
       return create(EntityManagerFactory.class,
-		    new AnnotationLiteral<JpaPersistenceContext>() {
-		      public String value() { return _unitName; }
-		    });
+                    new AnnotationLiteral<JpaPersistenceContext>() {
+                      public String value() { return _unitName; }
+                    });
     } catch (Exception e) {
       throw ConfigException.create(_location, e);
     }

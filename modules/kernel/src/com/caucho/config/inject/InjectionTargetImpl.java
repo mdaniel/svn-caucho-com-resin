@@ -49,7 +49,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.decorator.Decorates;
+import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.*;
 import javax.enterprise.inject.*;
@@ -694,7 +694,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (field.getAnnotations().size() == 0)
         continue;
 
-      if (field.isAnnotationPresent(Decorates.class))
+      if (field.isAnnotationPresent(Delegate.class))
         continue;
       else if (hasQualifierAnnotation(field)) {
         boolean isOptional = isQualifierOptional(field);

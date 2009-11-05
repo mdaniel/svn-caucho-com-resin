@@ -35,7 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import javax.persistence.*;
-import javax.enterprise.inject.AnnotationLiteral;
+import javax.enterprise.util.AnnotationLiteral;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -55,13 +55,13 @@ public class PersistenceContextGenerator extends WebBeanGenerator
   private EntityManager _manager;
 
   PersistenceContextGenerator(String location,
-			      String jndiName,
-			      String unitName,
-			      PersistenceContextType type,
-			      Map properties)
+                              String jndiName,
+                              String unitName,
+                              PersistenceContextType type,
+                              Map properties)
   {
     _location = location;
-    
+
     _jndiName = jndiName;
     _unitName = unitName;
     _type = type;
@@ -71,13 +71,13 @@ public class PersistenceContextGenerator extends WebBeanGenerator
   PersistenceContextGenerator(String location, PersistenceContext pc)
   {
     _location = location;
-    
+
     _jndiName = pc.name();
     _unitName = pc.unitName();
     _type = pc.type();
-    
+
     _properties = new HashMap();
-    
+
     PersistenceProperty[] propertyList = pc.properties();
     for (int i = 0; propertyList != null && i < propertyList.length; i++) {
       PersistenceProperty prop = propertyList[i];
@@ -105,17 +105,17 @@ public class PersistenceContextGenerator extends WebBeanGenerator
 
     try {
       if (PersistenceContextType.EXTENDED.equals(_type)) {
-	_manager = create(EntityManager.class,
-		      new AnnotationLiteral<JpaPersistenceContext>() {
-			public String value() { return _unitName; }
-			public boolean extended() { return true; }
-		      });
+        _manager = create(EntityManager.class,
+                      new AnnotationLiteral<JpaPersistenceContext>() {
+                        public String value() { return _unitName; }
+                        public boolean extended() { return true; }
+                      });
       }
       else {
-	_manager = create(EntityManager.class,
-		      new AnnotationLiteral<JpaPersistenceContext>() {
-			public String value() { return _unitName; }
-		      });
+        _manager = create(EntityManager.class,
+                      new AnnotationLiteral<JpaPersistenceContext>() {
+                        public String value() { return _unitName; }
+                      });
       }
     } catch (Exception e) {
       throw ConfigException.create(_location, e);

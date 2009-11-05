@@ -43,8 +43,8 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Nonbinding;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.util.Nonbinding;
 
 /**
  * Introspected annotation binding

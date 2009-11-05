@@ -72,7 +72,7 @@ public class DecoratorEntry<X> {
     }
 
     if (_bindings.size() == 0)
-      _bindings.add(new Binding(new CurrentLiteral()));
+      _bindings.add(new Binding(CurrentLiteral.CURRENT));
   }
 
   public Decorator<X> getDecorator()

@@ -44,7 +44,6 @@ import java.util.logging.*;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Nonbinding;
 import javax.enterprise.inject.spi.Bean;
 
 /**

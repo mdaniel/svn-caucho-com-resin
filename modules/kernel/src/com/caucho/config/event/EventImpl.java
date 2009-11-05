@@ -35,7 +35,7 @@ import java.lang.reflect.Type;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.TypeLiteral;
+import javax.enterprise.util.TypeLiteral;
 
 public class EventImpl<T> implements Event<T>
 {

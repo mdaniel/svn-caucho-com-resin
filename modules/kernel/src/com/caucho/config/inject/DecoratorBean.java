@@ -38,8 +38,7 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.enterprise.context.spi.CreationalContext;
-import javax.decorator.Decorates;
-import javax.enterprise.inject.AnnotationLiteral;
+import javax.decorator.Delegate;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -262,7 +261,7 @@ public class DecoratorBean<T> implements Decorator<T>
     introspect();
 
     if (_delegateField == null)
-      throw new ConfigException(L.l("{0} is missing a @Decorates field.  All @Decorators need a @Decorates field for a delegate injection",
+      throw new ConfigException(L.l("{0} is missing a @Delegate field.  All @Decorators need a @Delegate field for a delegate injection",
                                     _type.getName()));
   }
 
@@ -279,13 +278,13 @@ public class DecoratorBean<T> implements Decorator<T>
         if (Modifier.isStatic(field.getModifiers()))
           continue;
 
-        if (! field.isAnnotationPresent(Decorates.class))
+        if (! field.isAnnotationPresent(Delegate.class))
           continue;
 
         Class fieldType = field.getType();
 
         if (! fieldType.isInterface()) {
-          throw new ConfigException(L.l("{0}.{1} is an invalid @Decorates field because its type '{2}' is not an interface",
+          throw new ConfigException(L.l("{0}.{1} is an invalid @Delegate field because its type '{2}' is not an interface",
                                         _type.getName(),
                                         field.getName(),
                                         fieldType.getName()));
@@ -293,7 +292,7 @@ public class DecoratorBean<T> implements Decorator<T>
 
         for (Class iface : _type.getInterfaces()) {
           if (! iface.isAssignableFrom(fieldType)) {
-            throw new ConfigException(L.l("{0}.{1} is an invalid @Decorates field because {2} does not implement the API {3}",
+            throw new ConfigException(L.l("{0}.{1} is an invalid @Delegate field because {2} does not implement the API {3}",
                                           _type.getName(),
                                           field.getName(),
                                           fieldType.getName(),

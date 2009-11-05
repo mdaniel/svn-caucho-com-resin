@@ -58,7 +58,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
@@ -94,7 +93,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     = new HashSet<Class>();
 
   public static final Annotation []CURRENT_ANN
-    = new Annotation[] { new CurrentLiteral() };
+    = new Annotation[] { CurrentLiteral.CURRENT };
 
   // AnnotatedType for ManagedBean, AnnotatedMethod for produces
   private Annotated _annotated;
@@ -245,7 +244,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public Annotation []getQualifierArray()
   {
     if (_qualifiers == null || _qualifiers.size() == 0)
-      return new Annotation[] { new CurrentLiteral() };
+      return new Annotation[] { CurrentLiteral.CURRENT };
 
     Annotation []qualifiers = new Annotation[_qualifiers.size()];
     _qualifiers.toArray(qualifiers);

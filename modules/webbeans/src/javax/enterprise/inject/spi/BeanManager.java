@@ -39,7 +39,7 @@ import javax.el.ExpressionFactory;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.TypeLiteral;
+import javax.enterprise.util.TypeLiteral;
 import javax.inject.Scope;
 
 /**
@@ -65,6 +65,16 @@ public interface BeanManager
   public boolean isScope(Class<? extends Annotation> annotationType);
 
   /**
+   * Tests if an annotation is an enabled scope type
+   */
+  public boolean isPassivatingScope(Class<? extends Annotation> annotationType);
+
+  /**
+   * Tests if an annotation is an enabled scope type
+   */
+  public boolean isNormalScope(Class<? extends Annotation> annotationType);
+
+  /**
    * Tests if an annotation is an enabled qualifier type
    */
   public boolean isQualifier(Class<? extends Annotation> annotationType);
@@ -72,12 +82,12 @@ public interface BeanManager
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
-  public boolean isInterceptorBinding(Class<? extends Annotation> annotationType);
+  public boolean isInterceptorBindingType(Class<? extends Annotation> annotationType);
 
   /**
    * Returns the bindings for an interceptor binding type
    */
-  public Set<Annotation> getInterceptorBindingDefinition(Class<? extends Annotation> bindingType);
+  public Set<Annotation> getInterceptorBindingTypeDefinition(Class<? extends Annotation> bindingType);
 
   /**
    * Tests if an annotation is an enabled stereotype.
@@ -129,6 +139,13 @@ public interface BeanManager
    * @param beans the set of beans to select from
    */
   public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans);
+
+  /**
+   * Returns the bean with the highest precedence deployment type from a set.
+   *
+   * @param beans the set of beans to select from
+   */
+  public <X> Bean<? extends X> getMostSpecializedBean(Bean<X> bean);
 
   /**
    * Returns the passivation-capable bean with the given id.  Used by

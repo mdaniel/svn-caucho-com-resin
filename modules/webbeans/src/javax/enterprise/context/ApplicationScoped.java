@@ -31,9 +31,7 @@ package javax.enterprise.context;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 import javax.inject.Scope;
 
 /**
@@ -42,6 +40,7 @@ import javax.inject.Scope;
 @NormalScope
 @Documented
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
+@Target({TYPE, METHOD, FIELD})
+@Inherited
 public @interface ApplicationScoped {
 }

@@ -39,7 +39,7 @@ import javax.inject.Qualifier;
 /**
  * New bean creation and injection uses the {@literal @New} annotation as the
  * {@link javax.inject.Qualifier @Qualifier} for the injection point.
- * 
+ *
  * The {@literal @New} annotation injects a new instance of a bean to
  * the injection
  * point.  The configuration for the {@literal @New} instance is separate
@@ -69,8 +69,9 @@ import javax.inject.Qualifier;
  * </pre></code>
  */
 @Qualifier
-@Documented  
+@Documented
 @Retention(RUNTIME)
 @Target({FIELD, METHOD, PARAMETER, TYPE})
 public @interface New {
+  public Class<?> value = null;
 }

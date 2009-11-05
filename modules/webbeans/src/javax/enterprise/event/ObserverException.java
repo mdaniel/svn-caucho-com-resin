@@ -29,13 +29,11 @@
 
 package javax.enterprise.event;
 
-import javax.enterprise.inject.InjectionException;
-
 /**
  * Exception during runtime for webbeans
  */
 
-public class ObserverException extends InjectionException
+public class ObserverException extends RuntimeException
 {
   public ObserverException()
   {
@@ -50,7 +48,7 @@ public class ObserverException extends InjectionException
   {
     super(cause);
   }
-  
+
   public ObserverException(String message, Throwable cause)
   {
     super(message, cause);

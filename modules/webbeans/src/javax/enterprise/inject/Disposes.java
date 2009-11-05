@@ -30,8 +30,7 @@ package javax.enterprise.inject;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Factory destruction methods are declared with the {@literal @Disposes}
@@ -39,5 +38,6 @@ import java.lang.annotation.Target;
  */
 @Target({PARAMETER})
 @Retention(RUNTIME)
+@Documented
 public @interface Disposes {
 }

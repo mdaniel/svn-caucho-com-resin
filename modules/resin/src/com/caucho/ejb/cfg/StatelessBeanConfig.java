@@ -35,7 +35,6 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.ejb.Stateless;
-import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.jms.*;
 
@@ -64,14 +63,14 @@ public class StatelessBeanConfig extends AbstractBeanConfig
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-stateless-bean requires a 'class' attribute"));
-    
+
     final String name = getName();
 
     Annotation ann = new Stateless() {
-	public Class annotationType() { return Stateless.class; }
-	public String name() { return name; }
-	public String mappedName() { return name; }
-	public String description() { return ""; }
+        public Class annotationType() { return Stateless.class; }
+        public String name() { return name; }
+        public String mappedName() { return name; }
+        public String description() { return ""; }
     };
 
     add(ann);

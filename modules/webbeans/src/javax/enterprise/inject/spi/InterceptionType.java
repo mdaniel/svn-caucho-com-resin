@@ -35,6 +35,7 @@ package javax.enterprise.inject.spi;
 public enum InterceptionType
 {
   AROUND_INVOKE,
+  AROUND_TIMEOUT,
   POST_CONSTRUCT,
   PRE_DESTROY,
   PRE_PASSIVATE,

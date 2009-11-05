@@ -31,18 +31,17 @@ package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.Default;
 
 /**
  * Represents the @Default annotation
  */
-public class CurrentLiteral extends AnnotationLiteral<Default> {
+public class CurrentLiteral {
   public static final Default CURRENT = new Default() {
       public Class annotationType() { return Default.class; }
       public String toString() { return "@Default()"; }
     };
-  
+
   public static final Annotation []CURRENT_ANN_LIST
     = new Annotation[] { CURRENT };
 }

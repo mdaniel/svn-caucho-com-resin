@@ -30,7 +30,7 @@
 package javax.enterprise.event;
 
 import java.lang.annotation.*;
-import javax.enterprise.inject.TypeLiteral;
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * Injectable interface providing simplified access to the event system.

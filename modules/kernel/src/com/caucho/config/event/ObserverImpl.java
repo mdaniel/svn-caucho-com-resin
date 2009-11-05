@@ -79,7 +79,7 @@ public class ObserverImpl extends AbstractObserverMethod {
     for (Annotation ann : method.getParameterAnnotations()[paramIndex]) {
       if (ann instanceof Observes) {
         Observes observes = (Observes) ann;
-        _ifExists = observes.receive() == Reception.IF_EXISTS;
+        _ifExists = observes.notifyObserver() == Reception.IF_EXISTS;
       }
     }
 

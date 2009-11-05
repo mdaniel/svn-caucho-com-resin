@@ -41,8 +41,8 @@ import java.util.logging.Logger;
 
 import javax.persistence.*;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.AnnotationLiteral;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.util.AnnotationLiteral;
 
 
 abstract public class WebBeanGenerator extends ValueGenerator {

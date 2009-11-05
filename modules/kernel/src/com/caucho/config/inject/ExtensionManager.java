@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
-import javax.decorator.Decorates;
+import javax.decorator.Delegate;
 import javax.el.*;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -102,7 +102,7 @@ public class ExtensionManager
 
     synchronized (_localExtension) {
       ClassLoader loader = ext.getClass().getClassLoader();
-      
+
       extManager = _localExtension.get(loader);
 
       if (extManager == null) {
@@ -171,7 +171,7 @@ public class ExtensionManager
 
       if (! hasObserver(paramAnn))
         return null;
-      
+
       InjectManager inject = InjectManager.create();
 
       BeanArg []args = new BeanArg[param.length];
@@ -231,7 +231,7 @@ public class ExtensionManager
     {
       return _args;
     }
-    
+
     public BaseType getBaseType()
     {
       return _type;

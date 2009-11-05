@@ -34,7 +34,6 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.jms.*;
-import javax.enterprise.inject.AnnotationLiteral;
 import javax.resource.spi.*;
 
 import com.caucho.bam.*;
@@ -61,7 +60,7 @@ public class BamServiceConfig extends AbstractBeanConfig
 
   private int _threadMax = 1;
   private Actor _service;
-  
+
   public BamServiceConfig()
   {
     _broker = HempBroker.getCurrent();
@@ -86,13 +85,13 @@ public class BamServiceConfig extends AbstractBeanConfig
   {
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-stateful-bean requires a 'class' attribute"));
-    
+
     final String name = getName();
 
     add(new BamService() {
-	public Class annotationType() { return BamService.class; }
-	public int threadMax() { return 5; }
-	public String name() { return name; }
+        public Class annotationType() { return BamService.class; }
+        public int threadMax() { return 5; }
+        public String name() { return name; }
       });
   }
 
@@ -102,7 +101,7 @@ public class BamServiceConfig extends AbstractBeanConfig
   {
     super.init();
 
-    // XXX: 3.2.0 temp 
+    // XXX: 3.2.0 temp
     com.caucho.loader.Environment.addCloseListener(this);
 
     start();
@@ -147,8 +146,8 @@ public class BamServiceConfig extends AbstractBeanConfig
     // queue
     if (_threadMax > 0) {
       service = new MemoryQueueServiceFilter(service,
-					     _broker,
-					     _threadMax);
+                                             _broker,
+                                             _threadMax);
     }
 
     _service = service;

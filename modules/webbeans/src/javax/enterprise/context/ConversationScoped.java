@@ -31,18 +31,16 @@ package javax.enterprise.context;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 import javax.inject.Scope;
 
 /**
  * The @ConversationScoped represents the JSF conversation scope
  */
-@NormalScope
+@NormalScope(passivating=true)
 @Documented
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
+@Target({TYPE, METHOD, FIELD})
 public @interface ConversationScoped {
 }
