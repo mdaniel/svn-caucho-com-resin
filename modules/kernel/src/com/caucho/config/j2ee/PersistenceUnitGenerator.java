@@ -87,9 +87,18 @@ public class PersistenceUnitGenerator extends WebBeanGenerator
   public Object create()
   {
     try {
+      final String name;
+
+      if (_unitName != null && ! "".equals(_unitName))
+        name = _unitName;
+      else if (_jndiName != null && ! _jndiName.equals(""))
+        name = _jndiName;
+      else
+        name = _unitName;
+
       return create(EntityManagerFactory.class,
                     new AnnotationLiteral<JpaPersistenceContext>() {
-                      public String value() { return _unitName; }
+                      public String value() { return name; }
                     });
     } catch (Exception e) {
       throw ConfigException.create(_location, e);

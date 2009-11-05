@@ -53,6 +53,7 @@ import com.caucho.amber.query.ResultSetCacheChunk;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -104,7 +105,7 @@ public class AmberPersistenceUnit {
 
   private String _jtaDataSourceName;
   private String _nonJtaDataSourceName;
-  
+
   // persistence.xml jta-data-source
   private DataSource _jtaDataSource;
   // persistence.xml non-jta-data-source
@@ -177,7 +178,7 @@ public class AmberPersistenceUnit {
     = new ArrayList<ListenerType>();
 
   private AmberConfigManager _configManager;
-  
+
   private EmbeddableIntrospector _embeddableIntrospector;
   private MappedSuperIntrospector _mappedSuperIntrospector;
 
@@ -240,12 +241,12 @@ public class AmberPersistenceUnit {
     BeanFactory beanFactory
       = manager.createBeanFactory(EntityManagerFactory.class);
 
-    beanFactory.name(name);
+    beanFactory.binding(Names.create(name));
     manager.addBean(beanFactory.singleton(factory));
 
     beanFactory = manager.createBeanFactory(EntityManager.class);
-    beanFactory.name(name);
-    
+    beanFactory.binding(Names.create(name));
+
     manager.addBean(beanFactory.singleton(new EntityManagerProxy(this)));
 
     String jndiName
@@ -265,7 +266,7 @@ public class AmberPersistenceUnit {
   {
     return _amberContainer;
   }
-  
+
   public ClassLoader getTempClassLoader()
   {
     return _amberContainer.getTempClassLoader();
@@ -469,7 +470,7 @@ public class AmberPersistenceUnit {
       return _xid++;
     }
   }
-  
+
   public Class loadTempClass(String className)
   {
     try {
@@ -712,8 +713,8 @@ public class AmberPersistenceUnit {
 
     if (type != null && ! (type instanceof EmbeddableType))
       throw new ConfigException(L.l("'{0}' is not a valid embeddable type",
-				    name));
-    
+                                    name));
+
     EmbeddableType embeddableType;
 
     embeddableType = (EmbeddableType) type;
@@ -943,15 +944,15 @@ public class AmberPersistenceUnit {
 
     try {
       for (MappedSuperclassType mappedType : _mappedSuperclassTypes) {
-	type = mappedType;
-	
+        type = mappedType;
+
         initType(mappedType);
       }
 
       while (_lazyGenerate.size() > 0) {
         EntityType entityType = _lazyGenerate.remove(0);
 
-	type = entityType;
+        type = entityType;
 
         // Entity
         initType(entityType);
@@ -967,23 +968,23 @@ public class AmberPersistenceUnit {
 
         // Entity Listeners
         for (ListenerType listenerType : listeners) {
-	  type = listenerType;
-	  
+          type = listenerType;
+
           initType(listenerType);
-	}
+        }
       }
 
       // Embeddable
       for (EmbeddableType embeddableType : _embeddableTypes) {
-	type = embeddableType;
-	
+        type = embeddableType;
+
         initType(embeddableType);
       }
 
       // Default Listeners
       for (ListenerType listenerType : _defaultListeners) {
-	type = listenerType;
-	
+        type = listenerType;
+
         initType(listenerType);
       }
     } catch (Exception e) {
@@ -1186,7 +1187,7 @@ public class AmberPersistenceUnit {
   {
     return getEntityType(cl.getName());
   }
-  
+
   /**
    * Returns a matching entity.
    */
@@ -1394,7 +1395,7 @@ public class AmberPersistenceUnit {
     throws AmberRuntimeException, ConfigException
   {
     ArrayList<AmberEntityHome> homeList;
-    
+
     synchronized (this) {
       if (_isInit)
         return;
@@ -1428,13 +1429,13 @@ public class AmberPersistenceUnit {
   {
     for (IdGenerator gen : _tableGenMap.values())
       gen.start();
-    
+
     while (_lazyTable.size() > 0) {
       AmberTable table = _lazyTable.remove(0);
 
       if (getDataSource() == null)
         throw new ConfigException(L.l("{0}: No configured data-source found.",
-				      this));
+                                      this));
 
       if (getCreateDatabaseTables())
         table.createDatabaseTable(this);
@@ -1515,7 +1516,7 @@ public class AmberPersistenceUnit {
   {
     _queryParseCache.put(sql, query);
   }
-  
+
   /**
    * Returns the query result.
    */
@@ -1717,8 +1718,8 @@ public class AmberPersistenceUnit {
    * Updates the cache item after commit.
    */
   public void updateCacheItem(EntityType rootType,
-			      Object key,
-			      EntityItem cacheItem)
+                              Object key,
+                              EntityItem cacheItem)
   {
     if (cacheItem == null)
       throw new IllegalStateException(L.l("Null entity item cannot be used to update the persistence unit cache"));
@@ -1761,7 +1762,7 @@ public class AmberPersistenceUnit {
         if (value == null)
           continue;
 
-	AmberEntityHome entityHome = value.getEntityHome();
+        AmberEntityHome entityHome = value.getEntityHome();
         EntityType entityRoot = entityHome.getEntityType();
         Object entityKey = key.getKey();
 

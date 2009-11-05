@@ -133,6 +133,6 @@ public class EntityManagerFactoryProxy
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _unitName + "," + _emf + "]";
+    return getClass().getSimpleName() + "[" + _unitName + "," + getFactory() + "]";
   }
 }

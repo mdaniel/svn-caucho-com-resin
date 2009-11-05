@@ -414,6 +414,15 @@ public class EntityManagerTransactionProxy
     }
   }
 
+  private EntityManagerFactory getFactory()
+  {
+    if (_emf == null) {
+      _emf = _amber.getEntityManagerFactory(_unitName);
+    }
+
+    return _emf;
+  }
+
   /**
    * Serialization handle
    */
@@ -433,7 +442,7 @@ public class EntityManagerTransactionProxy
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _unitName + "," + _emf + "]";
+    return getClass().getSimpleName() + "[" + _unitName + "," + getFactory() + "]";
   }
 
   class EntityManagerSynchronization implements Synchronization {

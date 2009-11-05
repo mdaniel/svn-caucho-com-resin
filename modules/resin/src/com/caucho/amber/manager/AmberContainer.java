@@ -32,10 +32,7 @@ package com.caucho.amber.manager;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,10 +69,8 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanMatch;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 /**
  * Environment-based container.
@@ -787,8 +782,12 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
       for (PersistenceUnitConfig unitConfig : unitList) {
         Class provider = unitConfig.getProvider();
+
+        if (provider == null)
+          provider = getServiceProvider();
+
         if (provider != null
-            && !AmberPersistenceProvider.class.equals(provider)) {
+            && ! AmberPersistenceProvider.class.equals(provider)) {
           addProviderUnit(unitConfig);
 
           continue;
@@ -798,7 +797,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
           log.config("Amber PersistenceUnit[" + unitConfig.getName()
               + "] configuring " + rootContext.getRoot().getURL());
 
-        if (!unitConfig.isExcludeUnlistedClasses()) {
+        if (! unitConfig.isExcludeUnlistedClasses()) {
           classMap.clear();
 
           for (String className : rootContext.getClassNameList())
@@ -863,6 +862,55 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     }
   }
 
+  private Class getServiceProvider()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    try {
+      Enumeration e = loader.getResources("META-INF/services/" + PersistenceProvider.class.getName());
+      while (e.hasMoreElements()) {
+        URL url  = (URL) e.nextElement();
+
+        Class providerClass = loadProvider(url);
+
+        if (providerClass != null
+            && ! providerClass.equals(AmberPersistenceProvider.class)) {
+          return providerClass;
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return null;
+  }
+
+  private Class loadProvider(URL url)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    InputStream is = null;
+
+    try {
+      is = url.openStream();
+
+      ReadStream in = Vfs.openRead(is);
+      String line;
+      while ((line = in.readLine()) != null) {
+        line = line.trim();
+
+        if (! "".equals(line) && ! line.startsWith("#")) {
+          return Class.forName(line, false, loader);
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      IoUtil.close(is);
+    }
+
+    return null;
+  }
+
   /**
    * Adds the URLs for the classpath.
    */
@@ -900,6 +948,12 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   {
     try {
       Class cl = unit.getProvider();
+
+      if (cl == null)
+        cl = getServiceProvider();
+
+      if (cl == null)
+        cl = AmberPersistenceProvider.class;
 
       if (log.isLoggable(Level.CONFIG)) {
         log.config("JPA PersistenceUnit[" + unit.getName() + "] handled by "

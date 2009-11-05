@@ -29,6 +29,7 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.Names;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.SingletonGenerator;
 import com.caucho.config.program.BeanValueGenerator;
@@ -47,11 +48,13 @@ import javax.decorator.Delegate;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.naming.*;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 import javax.interceptor.*;
@@ -601,17 +604,25 @@ public class InjectIntrospector {
 
     Bean component;
 
-    if ("".equals(unitName)) {
-      component = bind(location, EntityManagerFactory.class);
-
-      if (component == null)
-        throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
-    }
-    else {
+    if (! "".equals(unitName)) {
       component = bind(location, EntityManagerFactory.class, unitName);
 
       if (component == null)
         throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", unitName));
+    }
+    else {
+      if (! "".equals(jndiName)) {
+        component = bind(location, EntityManagerFactory.class, jndiName);
+
+        if (component == null)
+          throw new ConfigException(location + L.l("@PersistenceUnit(name='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", jndiName));
+      }
+      else {
+        component = bind(location, EntityManagerFactory.class);
+
+        if (component == null)
+          throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
+      }
     }
 
     bindJndi(location, jndiName, component);
@@ -769,7 +780,15 @@ public class InjectIntrospector {
   {
     InjectManager webBeans = InjectManager.create();
 
-    Set<Bean> beans = webBeans.resolveAllByType(type);
+    Set<Bean<?>> beans = null;
+
+    if (name != null)
+      beans = webBeans.getBeans(type, Names.create(name));
+
+    if (beans != null && beans.size() != 0)
+      return webBeans.resolve(beans);
+
+      beans = webBeans.getBeans(type, new AnnotationLiteral<Any>() {});
 
     if (beans == null || beans.size() == 0)
       return null;
