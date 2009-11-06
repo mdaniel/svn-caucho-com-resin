@@ -35,7 +35,7 @@ queue size for the port.</p>
 <defun title="&lt;accept-thread-max>" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
 
-<p>&lt;accept-thread-min> configures the maximum number of 
+<p>&lt;accept-thread-max> configures the maximum number of 
 threads listening for new connections on this port.</p>
 
 </defun>
