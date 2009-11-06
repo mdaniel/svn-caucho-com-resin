@@ -37,6 +37,7 @@ import javax.enterprise.inject.New;
 public class NewLiteral {
   public static final New NEW = new New() {
       public Class annotationType() { return New.class; }
+      public Class value() { return null; }
       public String toString() { return "@New()"; }
     };
 

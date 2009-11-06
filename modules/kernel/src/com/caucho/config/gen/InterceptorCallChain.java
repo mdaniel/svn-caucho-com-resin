@@ -643,7 +643,7 @@ public class InterceptorCallChain
                                     Annotation ann)
     throws IOException
   {
-    out.print("new javax.enterprise.inject.AnnotationLiteral<");
+    out.print("new javax.enterprise.util.AnnotationLiteral<");
     out.printClass(ann.annotationType());
     out.print(">() {");
 

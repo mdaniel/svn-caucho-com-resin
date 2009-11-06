@@ -73,5 +73,5 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({FIELD, METHOD, PARAMETER, TYPE})
 public @interface New {
-  public Class<?> value = null;
+  public Class<?> value() default void.class;
 }
