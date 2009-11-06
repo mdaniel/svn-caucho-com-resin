@@ -259,6 +259,15 @@ public class BinaryBuilderValue
   }
 
   /**
+   * Converts to a Unicode, 16-bit string.
+   */
+  @Override
+  public StringValue toUnicode(Env env)
+  {
+    return new UnicodeBuilderValue(this);
+  }
+
+  /**
    * Converts to a UnicodeValue.
    */
   @Override

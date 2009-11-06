@@ -918,7 +918,18 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Converts to a UnicodeValue.
+   * Converts to a Unicode string.  For unicode.semantics=false, this will
+   * still return a StringValue. For unicode.semantics=true, this will
+   * return a UnicodeStringValue.
+   */
+  public StringValue toUnicode(Env env)
+  {
+    return toUnicodeValue(env);
+  }
+
+  /**
+   * Converts to a UnicodeValue for marshaling, so it will create a
+   * UnicodeValue event when unicode.semantics=false.
    */
   public StringValue toUnicodeValue()
   {
@@ -926,7 +937,8 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Converts to a UnicodeValue.
+   * Converts to a UnicodeValue for marshaling, so it will create a
+   * UnicodeValue event when unicode.semantics=false.
    */
   public StringValue toUnicodeValue(Env env)
   {
@@ -2493,7 +2505,7 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
-  
+
   /**
    * Returns true if the key exists in the array.
    */

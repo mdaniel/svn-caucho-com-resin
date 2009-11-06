@@ -822,10 +822,10 @@ abstract public class StringValue
   public Object valuesToArray(Env env, Class elementType)
   {
     if (char.class.equals(elementType)) {
-      return toUnicodeValue(env).toCharArray();
+      return toUnicode(env).toCharArray();
     }
     else if (Character.class.equals(elementType)) {
-      char[] chars = toUnicodeValue(env).toCharArray();
+      char[] chars = toUnicode(env).toCharArray();
 
       int length = chars.length;
 
@@ -2206,6 +2206,15 @@ abstract public class StringValue
   }
 
   /**
+   * Converts to a unicode value.
+   */
+  @Override
+  public StringValue toUnicode(Env env)
+  {
+    return this;
+  }
+
+  /**
    * Decodes from charset and returns UnicodeValue.
    *
    * @param env
@@ -2213,7 +2222,7 @@ abstract public class StringValue
    */
   public StringValue toUnicodeValue(Env env, String charset)
   {
-    StringValue sb = env.createUnicodeBuilder();
+    StringValue sb = new UnicodeBuilderValue();
 
     Decoder decoder = Decoder.create(charset);
 

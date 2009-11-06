@@ -774,6 +774,12 @@ public class Var extends Value
   }
 
   @Override
+  public StringValue toUnicode(Env env)
+  {
+    return _value.toUnicode(env);
+  }
+
+  @Override
   public StringValue toUnicodeValue(Env env)
   {
     return _value.toUnicodeValue(env);
