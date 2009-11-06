@@ -980,6 +980,11 @@ public class Env {
     _startTime = Alarm.getCurrentTime();
     _endTime = _startTime + _timeLimit;
   }
+  
+  public long getStartTime()
+  {
+    return _startTime;
+  }
 
   /**
    * Returns the writer.
@@ -6417,6 +6422,47 @@ public class Env {
   public static Value comma(double a0, Value a1)
   {
     return a1;
+  }
+  
+  /**
+   * Calls a parent::name method.
+   */
+  public Value callParentMethod(Value qThis,
+                                String parentName,
+                                String funName,
+                                Value []args)
+  {
+    AbstractFunction fun
+      = getClass(parentName).getFunction(funName);
+        
+    Value retValue = fun.callMethod(this, qThis, args);
+    
+    if (fun.isConstructor())
+      qThis.setJavaObject(retValue);
+
+    return retValue;
+  }
+  
+  /**
+   * Calls a parent::name method.
+   */
+  public Value callParentMethod(Value qThis,
+                                String parentName,
+                                int hash,
+                                char []name,
+                                int len,
+                                Value []args)
+  {
+    
+    AbstractFunction fun
+      = getClass(parentName).getFunction(hash, name, len);
+
+    Value retValue = fun.callMethod(this, qThis, args);
+    
+    if (fun.isConstructor())
+      qThis.setJavaObject(retValue);
+    
+    return retValue;
   }
 
   public String toString()

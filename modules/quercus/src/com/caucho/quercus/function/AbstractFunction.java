@@ -54,6 +54,7 @@ abstract public class AbstractFunction {
   private boolean _isGlobal = true;
   protected boolean _isStatic = false;
   protected boolean _isFinal = false;
+  protected boolean _isConstructor = false;
   
   protected Visibility _visibility = Visibility.PUBLIC;
   protected String _declaringClassName;
@@ -168,6 +169,16 @@ abstract public class AbstractFunction {
   public final void setFinal(boolean isFinal)
   {
     _isFinal = isFinal;
+  }
+  
+  public boolean isConstructor()
+  {
+    return _isConstructor;
+  }
+  
+  public final void setConstructor(boolean isConstructor)
+  {
+    _isConstructor = isConstructor;
   }
 
   /*

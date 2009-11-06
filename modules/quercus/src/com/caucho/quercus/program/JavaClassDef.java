@@ -468,13 +468,19 @@ public class JavaClassDef extends ClassDef {
       }
     }
     
+    AbstractFunction phpGet = qThis.getQuercusClass().getFieldGet();
+    
+    if (phpGet != null) {
+      return phpGet.callMethod(env, qThis, name);    
+    }
+    
     if (__fieldGet != null) {
       try {
         return __fieldGet.callMethod(env, qThis, name);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 
-	return null;
+        return null;
       }
     }
 
@@ -513,6 +519,22 @@ public class JavaClassDef extends ClassDef {
         return NullValue.NULL;
       }
     }
+    
+    if (! qThis.isFieldInit()) {
+      AbstractFunction phpSet = qThis.getQuercusClass().getFieldSet();
+      
+      if (phpSet != null) {
+        qThis.setFieldInit(true);
+        
+        try {
+          return phpSet.callMethod(env, qThis, name, value);          
+          
+        } finally {
+          qThis.setFieldInit(false);
+        }
+      }
+    }
+    
 
     if (__fieldSet != null) {
       try {
@@ -806,6 +828,7 @@ public class JavaClassDef extends ClassDef {
     }
     
     if (__construct != null) {
+      cl.setConstructor(__construct);
       cl.addMethod("__construct", __construct);
     }
 
@@ -937,14 +960,26 @@ public class JavaClassDef extends ClassDef {
 
     _marshal = new JavaMarshal(this, false);
 
-    Method consMethod = getConsMethod(_type);
+    AbstractJavaMethod consMethod = getConsMethod();
     
     if (consMethod != null) {
-      if (Modifier.isStatic(consMethod.getModifiers()))
-	_cons = new JavaMethod(_moduleContext, consMethod);
+      if (consMethod.isStatic())
+        _cons = consMethod;
       else
-	__construct = new JavaMethod(_moduleContext, consMethod);
+        __construct = consMethod;
     }
+    
+    
+    //Method consMethod = getConsMethod(_type);
+    
+    /*
+    if (consMethod != null) {
+      if (Modifier.isStatic(consMethod.getModifiers()))
+        _cons = new JavaMethod(_moduleContext, consMethod);
+      else
+        __construct = new JavaMethod(_moduleContext, consMethod);
+    }
+    */
     
     if (_cons == null) {
       Constructor []cons = _type.getConstructors();
@@ -969,7 +1004,12 @@ public class JavaClassDef extends ClassDef {
       } else
         _cons = null;
     }
+    
+    if (_cons != null)
+      _cons.setConstructor(true);
 
+    if (__construct != null)
+      __construct.setConstructor(true);
 
     introspectAnnotations(_type);
   }
@@ -1062,6 +1102,7 @@ public class JavaClassDef extends ClassDef {
     return true;
   }
 
+  /*
   private Method getConsMethod(Class type)
   {
     Method []methods = type.getMethods();
@@ -1070,19 +1111,25 @@ public class JavaClassDef extends ClassDef {
       Method method = methods[i];
 
       if (! method.getName().equals("__construct"))
-	continue;
+        continue;
       if (! Modifier.isPublic(method.getModifiers()))
-	continue;
+        continue;
       
       return method;
     }
 
     return null;
   }
-
-  protected void setCons(Method method)
+  */
+  
+  private AbstractJavaMethod getConsMethod()
   {
-    _cons = new JavaMethod(_moduleContext, method);
+    for (AbstractJavaMethod method : _functionMap.values()) {
+      if (method.getName().equals("__construct"))
+        return method;
+    }
+    
+    return null;
   }
 
   /**

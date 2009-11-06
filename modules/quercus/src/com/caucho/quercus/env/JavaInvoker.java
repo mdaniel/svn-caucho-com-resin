@@ -619,12 +619,14 @@ abstract public class JavaInvoker
     if (_hasEnv)
       javaArgs[k++] = env;
 
-    Object obj = qThis != null ? qThis.toJavaObject() : null;
+    Object obj = null;
+
+    if (! isStatic() || ! isConstructor())
+      obj = qThis != null ? qThis.toJavaObject() : null;
 
     if (_hasThis) {
       javaArgs[k++] = qThis;
     }
-
 
     for (int i = 0; i < _marshalArgs.length; i++) {
       if (i < args.length && args[i] != null)
@@ -649,7 +651,7 @@ abstract public class JavaInvoker
 
       k++;
     }
-
+    
     if (_hasRestArgs) {
       Value []rest;
 

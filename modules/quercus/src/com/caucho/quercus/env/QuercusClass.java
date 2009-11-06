@@ -846,12 +846,17 @@ public class QuercusClass {
       else if (_javaClassDef != null && _javaClassDef.isDelegate()) {
         objectValue = new ObjectExtValue(this);
       }
+      /*
       else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
         // php/0k3-
         Value javaWrapper = _javaClassDef.callNew(env, args);
         Object object = javaWrapper.toJavaObject();
         
         objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
+      }
+      */
+      else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
+        objectValue = new ObjectExtJavaValue(this, null, _javaClassDef);
       }
       else {
         objectValue = _classDef.newInstance(env, this);

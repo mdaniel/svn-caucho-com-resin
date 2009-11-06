@@ -1828,6 +1828,10 @@ public class Quercus
   {
     return null;
   }
+  
+  public void setSessionTimeout(long sessionTimeout)
+  {
+  }
 
   /**
    * Loads the session from the backing.

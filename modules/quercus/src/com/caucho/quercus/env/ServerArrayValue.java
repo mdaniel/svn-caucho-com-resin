@@ -102,6 +102,11 @@ public class ServerArrayValue extends ArrayValueImpl
   private static final StringValue REQUEST_URI_VU
     = new UnicodeBuilderValue("REQUEST_URI");
   
+  private static final StringValue REQUEST_TIME_V
+    = new ConstStringValue("REQUEST_TIME");
+  private static final StringValue REQUEST_TIME_VU
+    = new UnicodeBuilderValue("REQUEST_TIME");
+  
   private static final StringValue SCRIPT_URL_V
     = new ConstStringValue("SCRIPT_URL");
   private static final StringValue SCRIPT_URL_VU
@@ -344,6 +349,10 @@ public class ServerArrayValue extends ArrayValueImpl
 
       super.put(isUnicode ? REQUEST_URI_VU : REQUEST_URI_V,
                 _env.createString(requestURI));
+      
+      super.put(isUnicode ? REQUEST_TIME_VU : REQUEST_TIME_V,
+                LongValue.create(_env.getStartTime() / 1000));
+      
       super.put(isUnicode ? SCRIPT_FILENAME_VU : SCRIPT_FILENAME_V,
                 _env.createString(request.getRealPath(servletPath)));
 

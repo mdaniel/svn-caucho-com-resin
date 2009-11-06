@@ -624,15 +624,16 @@ public abstract class JdbcConnectionResource
       // statement reuse does not gain performance significantly (< 1%)
       // php/142v
       if (true || stmt == null) {
-	// XXX: test for performance
-	boolean canSeek = true;
-	if (canSeek)
-	  stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-				      ResultSet.CONCUR_READ_ONLY);
-	else
-	  stmt = conn.createStatement();
-      
-	stmt.setEscapeProcessing(false); // php/1406
+        // XXX: test for performance
+        
+        boolean isSeekable = isSeekable();
+        if (isSeekable)
+          stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                          ResultSet.CONCUR_READ_ONLY);
+        else
+          stmt = conn.createStatement();
+          
+        stmt.setEscapeProcessing(false); // php/1406
       }
 
       if (stmt.execute(sql)) {
@@ -1046,6 +1047,15 @@ public abstract class JdbcConnectionResource
       _errorMessage = e.toString();
     
     _errorCode = e.getErrorCode();
+  }
+  
+  /**
+   * Returns true if this connection supports TYPE_SCROLL_INSENSITIVE.
+   * http://bugs.caucho.com/view.php?id=3746
+   */
+  protected boolean isSeekable()
+  {
+    return true;
   }
 
   static class TableKey {

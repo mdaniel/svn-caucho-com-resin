@@ -58,7 +58,7 @@ public class ResinQuercus extends Quercus
   private static EnvironmentLocal<ModuleContext> _localModuleContext
     = new EnvironmentLocal<ModuleContext>();
 
-  private Map _sessionCache;
+  private AbstractCache _sessionCache;
 
   private WebApp _webApp;
   private long _dependencyCheckInterval = 2000L;
@@ -144,6 +144,15 @@ public class ResinQuercus extends Quercus
     }
     
     return _sessionCache;
+  }
+  
+  @Override
+  public void setSessionTimeout(long sessionTimeout)
+  {
+    if (_sessionCache == null)
+      getSessionCache();
+    
+    _sessionCache.setIdleTimeoutMillis(sessionTimeout);
   }
 
   public SessionManager getSessionManager()

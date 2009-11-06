@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,23 +29,12 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.StringLiteralExpr;
-import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.AbstractSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Represents a PHP object which extends a Java value.
@@ -53,7 +42,7 @@ import java.util.TreeSet;
 public class ObjectExtJavaValue extends ObjectExtValue
   implements Serializable
 {
-  private final Object _object;
+  private Object _object;
   private final JavaClassDef _javaClassDef;
   
   public ObjectExtJavaValue(QuercusClass cl, Object object,
@@ -62,6 +51,14 @@ public class ObjectExtJavaValue extends ObjectExtValue
     super(cl);
 
     _object = object;
+    _javaClassDef = javaClassDef;
+  }
+  
+  public ObjectExtJavaValue(QuercusClass cl,
+                            JavaClassDef javaClassDef)
+  {
+    super(cl);
+
     _javaClassDef = javaClassDef;
   }
   
@@ -75,6 +72,10 @@ public class ObjectExtJavaValue extends ObjectExtValue
   @Override
   protected Value getFieldExt(Env env, StringValue name)
   {
+    if (_object == null) {
+      _object = createJavaObject(Env.getInstance());
+    }
+    
     Value value = _javaClassDef.getField(env, this, name);
 
     if (value != null)
@@ -88,6 +89,10 @@ public class ObjectExtJavaValue extends ObjectExtValue
    */
   protected Value putFieldExt(Env env, StringValue name, Value value)
   {
+    if (_object == null) {
+      createJavaObject(env);
+    }
+    
     return _javaClassDef.putField(env, this, name, value);
   }
 
@@ -97,7 +102,30 @@ public class ObjectExtJavaValue extends ObjectExtValue
   @Override
   public Object toJavaObject()
   {
+    if (_object == null) {
+      _object = createJavaObject(Env.getInstance());
+    }
+    
     return _object;
+  }
+  
+  /**
+   * Binds a Java object to this object.
+   */
+  @Override
+  public void setJavaObject(Value value)
+  {
+    if (_object == null)
+      _object = value.toJavaObject();
+  }
+  
+  /**
+   * Creats a backing Java object for this php object.
+   */
+  private Object createJavaObject(Env env)
+  {
+    Value javaWrapper = _javaClassDef.callNew(env, Value.NULL_ARGS);
+    return javaWrapper.toJavaObject();
   }
   
   public void varDumpImpl(Env env,
@@ -106,6 +134,10 @@ public class ObjectExtJavaValue extends ObjectExtValue
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    if (_object == null) {
+      _object = createJavaObject(Env.getInstance());
+    }
+    
     if (! _javaClassDef.varDumpImpl(env, this, _object, out, depth, valueSet))
       super.varDumpImpl(env, out, depth, valueSet);
   }
@@ -117,6 +149,10 @@ public class ObjectExtJavaValue extends ObjectExtValue
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    if (_object == null) {
+      _object = createJavaObject(Env.getInstance());
+    }
+    
     _javaClassDef.printRImpl(env, _object, out, depth, valueSet);
   }
 }

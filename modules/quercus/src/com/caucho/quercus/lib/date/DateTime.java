@@ -122,7 +122,11 @@ public class DateTime
   public void setTimeZone(DateTimeZone dateTimeZone)
   {
     _dateTimeZone = dateTimeZone;
+    
+    long time = _qDate.getGMTTime();
+    
     _qDate = new QDate(dateTimeZone.getTimeZone());
+    _qDate.setGMTTime(time);
   }
   
   public long getOffset()

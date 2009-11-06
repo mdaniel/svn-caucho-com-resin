@@ -534,10 +534,12 @@ public class JdbcStatementResource {
         _stmt = conn.prepareCall(_query,
                                  ResultSet.TYPE_SCROLL_INSENSITIVE,
                                  ResultSet.CONCUR_READ_ONLY);
-      } else {
+      } else if (_conn.isSeekable()) {
         _stmt = conn.prepareStatement(_query,
                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
                                       ResultSet.CONCUR_READ_ONLY);
+      } else {
+        _stmt = conn.prepareStatement(_query);
       }
 
       return true;

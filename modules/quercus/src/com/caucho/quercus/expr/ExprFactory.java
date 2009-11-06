@@ -882,6 +882,17 @@ public class ExprFactory {
   }
   
   /**
+   * Creates a new function call.
+   */
+  public Expr createParentMethod(Location loc,
+                                 String parentName,
+                                 String name,
+                                 ArrayList<Expr> args)
+  {
+    return new ParentMethodExpr(loc, parentName, name, args);
+  }
+  
+  /**
    * Creates a new function call based on the class context.
    */
   public Expr createLateStaticBindingClassMethod(Location loc,

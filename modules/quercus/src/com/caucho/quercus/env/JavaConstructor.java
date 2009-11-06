@@ -51,7 +51,7 @@ public class JavaConstructor extends JavaInvoker {
    * @param method the introspected method.
    */
   public JavaConstructor(ModuleContext moduleContext,
-			 Constructor cons)
+			             Constructor cons)
   {    
     super(moduleContext,
 	  getName(cons),
@@ -90,6 +90,12 @@ public class JavaConstructor extends JavaInvoker {
 
     return name;
   }
+  
+  @Override
+  public boolean isConstructor()
+  {
+    return true;
+  }
 
   public int getArgumentLength()
   {
@@ -106,9 +112,9 @@ public class JavaConstructor extends JavaInvoker {
       throw e;
     } catch (InvocationTargetException e) {
       if (e.getCause() instanceof RuntimeException)
-	throw (RuntimeException) e.getCause();
+        throw (RuntimeException) e.getCause();
       else
-	throw new QuercusException(e.getCause());
+        throw new QuercusException(e.getCause());
     } catch (Exception e) {
       throw new QuercusException(e);
     }

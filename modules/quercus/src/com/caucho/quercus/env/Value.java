@@ -2196,6 +2196,19 @@ abstract public class Value implements java.io.Serializable
 
     return putField(env, name, result);
   }
+  
+  public void setFieldInit(boolean isInit)
+  {
+  }
+  
+  /**
+   * Returns true if the object is in a __set() method call.
+   * Prevents infinite recursion.
+   */
+  public boolean isFieldInit()
+  {
+    return false;
+  }
 
   /**
    * Returns true if the field is set
@@ -2610,6 +2623,13 @@ abstract public class Value implements java.io.Serializable
   public void varExport(StringBuilder sb)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Binds a Java object to this object.
+   */
+  public void setJavaObject(Value value)
+  {
   }
 
   //

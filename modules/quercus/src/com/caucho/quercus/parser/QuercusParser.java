@@ -3270,6 +3270,7 @@ public class QuercusParser {
 
         String className = null;
         String name = _lexeme;
+        boolean isParent = false;
 
         token = parseToken();
         _peekToken = token;
@@ -3292,6 +3293,7 @@ public class QuercusParser {
           else if (className.equals("parent")) {
             isInstantiated = true;
             className = _classDef.getParentName();
+            isParent = true;
 
             if (className == null)
               throw error(L.l("object does not have a parent class"));
@@ -3333,8 +3335,11 @@ public class QuercusParser {
           }
           */
           else {
-            return parseFunction(className, name,
-                                 isInstantiated, isLateStaticBinding);
+            return parseFunction(className,
+                                 name,
+                                 isInstantiated,
+                                 isLateStaticBinding,
+                                 isParent);
           }
         }
         else
@@ -3386,7 +3391,7 @@ public class QuercusParser {
         if (token == '(') {
           _peekToken = token;
 
-          return parseFunction(null, importTokenString, false, false);
+          return parseFunction(null, importTokenString, false, false, false);
         }
         else {
           _peekToken = token;
@@ -3501,9 +3506,10 @@ public class QuercusParser {
    * Parses the next function
    */
   private Expr parseFunction(String className,
-                              String name,
-                              boolean isInstantiated,
-                              boolean isLateStaticBinding)
+                             String name,
+                             boolean isInstantiated,
+                             boolean isLateStaticBinding,
+                             boolean isParent)
     throws IOException
   {
     if (name.equalsIgnoreCase("array"))
@@ -3534,6 +3540,12 @@ public class QuercusParser {
       if (isLateStaticBinding)
         return _factory.createLateStaticBindingClassMethod(getLocation(),
                                                            name, args);
+      else if (isParent) {
+        return _factory.createParentMethod(getLocation(),
+                                           className,
+                                           name,
+                                           args);
+      }
       else
         return _factory.createClassMethod(getLocation(),
                                           className, name, args);

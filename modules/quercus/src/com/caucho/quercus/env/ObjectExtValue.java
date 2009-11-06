@@ -475,11 +475,15 @@ public class ObjectExtValue extends ObjectValue
         if (fieldSet != null) {
           //php/09k7
           _isFieldInit = true;
+          Value retValue = NullValue.NULL;
 
-          Value retVal = fieldSet.callMethod(env, this, name, value);
+          try {
+            retValue = fieldSet.callMethod(env, this, name, value);
+          } finally {
+            _isFieldInit = false;
+          }
 
-          _isFieldInit = false;
-          return retVal;
+          return retValue;
         }
       }
     }
@@ -509,6 +513,22 @@ public class ObjectExtValue extends ObjectValue
   protected Value putFieldExt(Env env, StringValue name, Value value)
   {
     return null;
+  }
+  
+  @Override
+  public void setFieldInit(boolean isInit)
+  {
+    _isFieldInit = isInit;
+  }
+  
+  /**
+   * Returns true if the object is in a __set() method call.
+   * Prevents infinite recursion.
+   */
+  @Override
+  public boolean isFieldInit()
+  {
+    return _isFieldInit;
   }
 
   /**

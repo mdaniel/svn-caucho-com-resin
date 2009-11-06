@@ -36,6 +36,7 @@ import com.caucho.util.L10N;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Represents a function created from a java method.
@@ -60,6 +61,7 @@ public class JavaMethod extends JavaInvoker {
 	  method.getReturnType());
     
     _method = method;
+    _isStatic = Modifier.isStatic(method.getModifiers());
     
     // php/069a
     // Java 6 fixes the need to do this for methods of inner classes
