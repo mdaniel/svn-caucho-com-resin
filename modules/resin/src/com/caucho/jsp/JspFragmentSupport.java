@@ -59,6 +59,8 @@ abstract public class JspFragmentSupport extends JspFragment {
   // the tag body
   protected JspFragment _jspBody;
 
+  protected com.caucho.jsp.PageManager _jsp_pageManager;
+
   /**
    * Returns the context.
    */

@@ -1041,6 +1041,8 @@ public abstract class JspNode {
       cb.append(", null");
 
     cb.append(", _jsp_state");
+    cb.append(", _jsp_pageManager");
+
     cb.append(")");
 
     return cb.toString();
