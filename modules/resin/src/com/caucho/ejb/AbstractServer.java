@@ -170,17 +170,6 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbContainer = container;
 
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
-
-    InjectManager beanManager = InjectManager.create();
-    ManagedBeanImpl managedBean = beanManager.createManagedBean(annotatedType);
-
-    _bean = managedBean;
-    _injectionTarget = managedBean.getInjectionTarget();
-
-    _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
-
-    if (_timeoutMethod != null)
-      _timerService = new EjbTimerService(this);
   }
 
   /**
@@ -1043,6 +1032,18 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected void bindInjection()
   {
+    InjectManager beanManager = InjectManager.create();
+    ManagedBeanImpl managedBean
+      = beanManager.createManagedBean(_annotatedType);
+
+    _bean = managedBean;
+    _injectionTarget = managedBean.getInjectionTarget();
+
+    _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
+
+    if (_timeoutMethod != null)
+      _timerService = new EjbTimerService(this);
+
     // Injection binding occurs in the start phase
 
     InjectManager inject = InjectManager.create();

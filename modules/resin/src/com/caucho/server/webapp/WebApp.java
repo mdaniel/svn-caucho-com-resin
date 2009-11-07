@@ -1078,7 +1078,7 @@ public class WebApp extends ServletContextImpl
              && webFilter.value().length == 0
              && webFilter.servletNames().length == 0) {
       FilterMapping.URLPattern urlPattern = config.createUrlPattern();
-      
+
       for (String url : webFilter.urlPatterns()) {
         urlPattern.addText(url);
       }
@@ -2659,7 +2659,7 @@ public class WebApp extends ServletContextImpl
 
       if (_accessLog == null)
         _accessLog = _accessLogLocal.get();
-      
+
       long interval = _classLoader.getDependencyCheckInterval();
       _invocationDependency.setCheckInterval(interval);
 
@@ -2941,7 +2941,7 @@ public class WebApp extends ServletContextImpl
         // with the request listener destroy callback
         // top-level filter elements
         // server/021h - cache not logging
-        
+
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
 
@@ -2970,7 +2970,7 @@ public class WebApp extends ServletContextImpl
       return invocation;
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       FilterChain chain = new ExceptionFilterChain(e);
       chain = new WebAppFilterChain(chain, this);
       invocation.setDependency(AlwaysModified.create());
@@ -3160,7 +3160,7 @@ public class WebApp extends ServletContextImpl
         _parent.getWebAppController(forwardInvocation);
         _parent.getWebAppController(errorInvocation);
         _parent.getWebAppController(dispatchInvocation);
-        
+
         if (subController != null
             && (_controller.getBaseContextPath()
                 .equals(subController.getBaseContextPath()))) {
@@ -3175,7 +3175,7 @@ public class WebApp extends ServletContextImpl
         _parent.buildDispatchInvocation(dispatchInvocation);
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
-        throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
+        throw new IllegalStateException(L.l("web-app '{0}' is restarting and is not yet ready to receive requests",
                                             getVersionContextPath()));
       }
       else {

@@ -708,8 +708,11 @@ public class InjectIntrospector {
 
     Bean component = null;
 
+    // ejb/0f92
+    /*
     if (mappedName == null || "".equals(mappedName))
       mappedName = jndiName;
+    */
 
     component = bind(location, type, mappedName);
 
