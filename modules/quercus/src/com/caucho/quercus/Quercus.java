@@ -1698,7 +1698,12 @@ public class Quercus
       _extensionSetLowerCase.add(ext.toLowerCase());
     }
 
-    Map<StringValue, Value> map = info.getConstMap();
+    Map<StringValue, Value> map;
+
+    if (isUnicodeSemantics())
+      map = info.getUnicodeConstMap();
+    else
+      map = info.getConstMap();
 
     if (map != null) {
       for (Map.Entry<StringValue,Value> entry : map.entrySet()) {

@@ -63,6 +63,9 @@ public class ModuleInfo {
   private HashMap<StringValue, Value> _constMap
     = new HashMap<StringValue, Value>();
 
+  private HashMap<StringValue, Value> _unicodeConstMap
+    = new HashMap<StringValue, Value>();
+
   private HashMap<String, AbstractFunction> _staticFunctions
     = new HashMap<String, AbstractFunction>();
 
@@ -117,6 +120,11 @@ public class ModuleInfo {
     return _constMap;
   }
 
+  public HashMap<StringValue, Value> getUnicodeConstMap()
+  {
+    return _unicodeConstMap;
+  }
+
   /**
    * Returns a named constant.
    */
@@ -152,8 +160,10 @@ public class ModuleInfo {
 
     Map<StringValue, Value> map = _module.getConstMap();
 
-    if (map != null)
+    if (map != null) {
       _constMap.putAll(map);
+      _unicodeConstMap.putAll(map);
+    }
 
     for (Field field : cl.getFields()) {
       if (! Modifier.isPublic(field.getModifiers()))
@@ -169,8 +179,12 @@ public class ModuleInfo {
 
       Value value = objectToValue(obj);
 
-      if (value != null)
+      if (value != null) {
         _constMap.put(new ConstStringValue(field.getName()), value);
+
+        _unicodeConstMap.put(new UnicodeBuilderValue(field.getName()),
+                             value);
+      }
     }
 
     IniDefinitions iniDefinitions = _module.getIniDefinitions();
