@@ -353,6 +353,13 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println(" {");
     out.pushDepth();
 
+    // jsp/102e, jsp/102g
+    if (_rootNode != null && _rootNode.hasCustomTag()) {
+      out.println("public static final boolean _caucho_hasCustomTag = true;");
+    } else {
+      out.println("public static final boolean _caucho_hasCustomTag = false;");
+    }
+
     out.println("private final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
     // jsp/107{0,1}
     out.println("private static com.caucho.jsp.PageManager _jsp_pageManager;");
@@ -481,7 +488,9 @@ public class JavaTagGenerator extends JavaJspGenerator {
      
     if (hasScripting()) {
       out.println("TagState _jsp_state = new TagState();");
-      out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag = null;");
+      // jsp/100h
+      out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag");
+      out.println("  = new javax.servlet.jsp.tagext.TagAdapter(this);");
 
       node.generate(out);
       

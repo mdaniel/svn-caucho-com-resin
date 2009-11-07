@@ -35,6 +35,7 @@ import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.lang.reflect.Field;
 
 /**
  * Represents a custom tag.
@@ -44,6 +45,7 @@ public class TagFileTag extends GenericTag {
   private JspBody _body;
   private int _maxFragmentIndex;
   private String _contextVarName;
+  private Boolean _hasCustomTag;
 
   /**
    * Called when the attributes end.
@@ -100,6 +102,23 @@ public class TagFileTag extends GenericTag {
   @Override
   public boolean hasCustomTag()
   {
+    if (Boolean.TRUE.equals(_hasCustomTag))
+      return true;
+
+    if (_hasCustomTag == null && _tagClass != null) {
+      try {
+        Field hasCustomTagField = _tagClass.getDeclaredField("_caucho_hasCustomTag");
+        _hasCustomTag = (Boolean) hasCustomTagField.get(null);
+
+        if (Boolean.TRUE.equals(_hasCustomTag))
+          return true;
+      } catch (NoSuchFieldException e) {
+        //
+      } catch (IllegalAccessException e) {
+        //
+      }
+    }
+
     return super.hasCustomTag() || (_body != null && _body.hasCustomTag());
   }
 

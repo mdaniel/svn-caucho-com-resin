@@ -65,4 +65,10 @@ abstract public class JspTagSupport extends SimpleTagSupport {
   {
     return false;
   }
+
+  @Override
+  public String toString()
+  {
+    return this.getClass().getName() + "[]";
+  }
 }
