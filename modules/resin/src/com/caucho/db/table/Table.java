@@ -377,7 +377,8 @@ public class Table extends Store {
     for (; offset < BLOCK_SIZE; offset++)
       tempBuffer[offset] = 0;
 
-    writeBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE);
+    boolean isPriority = false;
+    writeBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE, isPriority);
 
     _database.addTable(this);
   }
@@ -718,60 +719,61 @@ public class Table extends Store {
     Block block = null;
 
     try {
-      long addr;
-      int rowOffset = 0;
-
-      boolean isLoop = false;
-      boolean hasRow = false;
-
-      do {
-        long blockId = 0;
-
-        if (block != null) {
-          block.free();
-          block = null;
-        }
-
-        blockId = peekInsertRow();
+      while (true) {
+        long blockId = allocateInsertRow();
 
         block = xa.loadBlock(this, blockId);
-        Lock blockLock = block.getLock();
 
-        blockLock.lockReadAndWrite(xa.getTimeout());
-        try {
-          block.read();
-          
-          byte []buffer = block.getBuffer();
+        int rowOffset = allocateRow(block, xa);
 
-          rowOffset = 0;
+        if (rowOffset >= 0) {
+          insertRow(queryContext, xa, columns, values,
+                    block, rowOffset);
 
-          for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
-            if (buffer[rowOffset] == 0) {
-              hasRow = true;
-              buffer[rowOffset] = ROW_ALLOC;
-              
-              block.setDirty(rowOffset, rowOffset + 1);
-              break;
-            }
-          }
-        } finally {
-          blockLock.unlockReadAndWrite();
+          block.saveAllocation();
+
+          freeRow(blockId);
+
+          return blockIdToAddress(blockId, rowOffset);
         }
 
-        if (! hasRow)
-          popRow(blockId);
-      } while (! hasRow);
-
-      insertRow(queryContext, xa, columns, values,
-                block, rowOffset);
-
-      block.saveAllocation();
-
-      return blockIdToAddress(block.getBlockId(), rowOffset);
+        Block freeBlock = block;
+        block = null;
+        freeBlock.free();
+      }
     } finally {
       if (block != null)
         block.free();
     }
+  }
+
+  private int allocateRow(Block block, Transaction xa)
+    throws IOException, SQLException
+  {
+    Lock blockLock = block.getLock();
+
+    blockLock.lockReadAndWrite(xa.getTimeout());
+    try {
+      block.read();
+          
+      byte []buffer = block.getBuffer();
+
+      int rowOffset = 0;
+
+      for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
+        if (buffer[rowOffset] == 0) {
+          buffer[rowOffset] = ROW_ALLOC;
+              
+          block.setDirty(rowOffset, rowOffset + 1);
+
+          return rowOffset;
+        }
+      }
+    } finally {
+      blockLock.unlockReadAndWrite();
+    }
+
+    return -1;
   }
 
   public void insertRow(QueryContext queryContext, Transaction xa,
@@ -861,13 +863,14 @@ public class Table extends Store {
   // row allocation
   //
 
-  private long peekInsertRow()
+  private long allocateInsertRow()
     throws IOException
   {
-    long blockId = peekFreeRow();
+    long blockId = allocateFreeRow();
 
-    if (blockId != 0)
+    if (blockId != 0) {
       return blockId;
+    }
 
     long rowTailOffset = _rowTailOffset.get();
 
@@ -881,7 +884,7 @@ public class Table extends Store {
       block.free();
     }
 
-    _rowTailOffset.compareAndSet(rowTailOffset, blockId);
+    _rowTailOffset.compareAndSet(rowTailOffset, blockId + BLOCK_SIZE);
 
     return blockId;
   }
@@ -1030,6 +1033,10 @@ public class Table extends Store {
     
     do {
       top = _insertFreeRowTop.get();
+
+      if (top >= FREE_ROW_SIZE)
+        return;
+      
       _insertFreeRowArray.set(top, blockId);
     } while (! _insertFreeRowTop.compareAndSet(top, top + 1));
   }

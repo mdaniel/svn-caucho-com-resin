@@ -299,42 +299,37 @@ public final class BlockManager
 
     while (block == null || ! block.allocate()) {
       // Find any matching block in the process of being written
-      Block dirtyBlock = null;
-      synchronized (_writeQueue) {
-        int size = _writeQueue.size();
+      Block dirtyBlock = getDirtyBlock(store, blockId);
 
-        for (int i = 0; i < size; i++) {
-          dirtyBlock = _writeQueue.get(i);
-
-          if (dirtyBlock.getBlockId() == blockId
-              && dirtyBlock.getStore() == store) {
-            break;
-          }
-          else
-            dirtyBlock = null;
-        }
+      if (dirtyBlock != null && dirtyBlock.allocateDirty()) {
+        block = dirtyBlock;
       }
+      else {
+        block = new ReadBlock(store, blockId);
 
-      /*
-      if ((blockId & Store.BLOCK_MASK) == 0)
-        throw stateError(L.l("Block 0 is reserved."));
-      */
-
-      block = new ReadBlock(store, blockId);
-
-      if (dirtyBlock != null) {
-        dirtyBlock.copyToBlock(block);
+        if (dirtyBlock != null) {
+          dirtyBlock.copyToBlock(block);
+        }
       }
 
       // needs to be outside the synchronized because the put
       // can cause an LRU drop which might lead to a dirty write
-      Block oldBlock = _blockCache.putIfNew(blockId, block);
-      
-      if (block != oldBlock) {
+      Block oldBlock = _blockCache.putIfAbsent(blockId, block);
+
+      if (oldBlock != null) {
         block.free();
+        
+        if (block == dirtyBlock) {
+          wakeWriter();
+          dirtyBlock = null;
+        }
+        
+        block = oldBlock;
       }
-      
-      block = oldBlock;
+
+      if (dirtyBlock != null) {
+        removeDirtyBlock(dirtyBlock);
+      }
     }
 
     if (blockId != block.getBlockId()
@@ -345,6 +340,44 @@ public final class BlockManager
     }
 
     return block;
+  }
+
+  private Block getDirtyBlock(Store store, long blockId)
+  {
+    synchronized (_writeQueue) {
+      int size = _writeQueue.size();
+
+      for (int i = size - 1; i >= 0; i--) {
+        Block block = _writeQueue.get(i);
+
+        if (block.getBlockId() == blockId
+            && block.getStore() == store) {
+          // System.out.println("FOUND-DIRTY: " + block + " " + _writeQueue.size());
+          return block;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private Block removeDirtyBlock(Block block)
+  {
+    synchronized (_writeQueue) {
+      int size = _writeQueue.size();
+
+      for (int i = size - 1; i >= 0; i--) {
+        Block dirtyBlock = _writeQueue.get(i);
+
+        if (dirtyBlock == block) {
+          _writeQueue.remove(i);
+          
+          return dirtyBlock;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -363,6 +396,11 @@ public final class BlockManager
       _writeQueue.add(block);
     }
 
+    wakeWriter();
+  }
+
+  void wakeWriter()
+  {
     _writer.wake();
   }
 
@@ -448,42 +486,64 @@ public final class BlockManager
     public void runTask()
     {
       try {
+        int retryMax = 10;
+        int retry = retryMax;
+        
         while (true) {
-          Block block = null;
+          Block block = getNextFreeBlock();
 
-          synchronized (_writeQueue) {
-            for (int i = 0; i < _writeQueue.size(); i++) {
-              block = _writeQueue.get(i);
+          if (block != null) {
+            retry = retryMax;
 
-              if (block.isFree())
-                break;
-              else {
-                block = null;
-              }
-            }
+            block.closeWrite();
+
+            removeBlock(block);
           }
-
-          if (block == null)
+          else if (retry-- <= 0) {
             return;
-
-          block.closeWrite();
-
-          synchronized (_writeQueue) {
-            int size = _writeQueue.size();
-            boolean isMax = _writeQueueMax <= size;
-          
-            for (int i = size - 1; i >= 0; i--) {
-              if (block == _writeQueue.get(i)) {
-                _writeQueue.remove(i);
-                break;
-              }
-            }
-
-            _writeQueue.notifyAll();
           }
         }
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+
+    private Block getNextFreeBlock()
+    {
+      int unfree = 0;
+      
+      synchronized (_writeQueue) {
+        for (int i = 0; i < _writeQueue.size(); i++) {
+          Block block = _writeQueue.get(i);
+
+          if (block == null) {
+          }
+          else if (block.isFree())
+            return block;
+          else {
+            unfree++;
+          }
+        }
+      }
+                
+      return null;
+    }
+
+    private void removeBlock(Block block)
+    {
+      synchronized (_writeQueue) {
+        int size = _writeQueue.size();
+        boolean isMax = _writeQueueMax <= size;
+          
+        for (int i = size - 1; i >= 0; i--) {
+          Block writeBlock = _writeQueue.get(i);
+          
+          if (block == writeBlock || writeBlock == null) {
+            _writeQueue.remove(i);
+          }
+        }
+
+        _writeQueue.notifyAll();
       }
     }
   }

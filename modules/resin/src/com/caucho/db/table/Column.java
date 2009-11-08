@@ -577,7 +577,7 @@ abstract public class Column {
 
     if (value != rowAddr)
       throw new IllegalStateException(L.l("invalid index '{0}' at {1}",
-                                          value, "unknown"));
+                                          value, Long.toHexString(rowAddr)));
   }
   
   /**

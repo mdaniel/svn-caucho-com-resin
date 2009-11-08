@@ -96,9 +96,11 @@ abstract public class TaskWorker implements Runnable {
 
   public final void run()
   {
+    String oldName = null;
     try {
       _thread = Thread.currentThread();
       _thread.setContextClassLoader(_classLoader);
+      oldName = _thread.getName();
       _thread.setName(getThreadName());
 
       long expires = Alarm.getCurrentTimeActual() + _idleTimeout;
@@ -116,12 +118,16 @@ abstract public class TaskWorker implements Runnable {
         LockSupport.parkUntil(expires);
       } while (_isTask.get() || Alarm.getCurrentTimeActual() < expires);
     } finally {
+      Thread thread = _thread;
       _thread = null;
 
       _isActive.set(false);
 
       if (_isTask.get())
         wake();
+
+      if (thread != null && oldName != null)
+        thread.setName(oldName);
     }
   }
 }

@@ -1593,8 +1593,8 @@ public class Port extends TaskWorker
         if (startConn == null || startConn.isDestroyed()) {
           startConn = new TcpConnection(this, _serverSocket.createSocket());
         }
-        else
-          startConn._isFree = false; // XXX: validation for 4.0
+
+        startConn.toInit(); // change to the init/ready state
       }
 
       if (startConn != null) {
@@ -1648,13 +1648,7 @@ public class Port extends TaskWorker
   {
     closeConnection(conn);
 
-    // XXX: remove when 4.0 stable
-    if (conn._isFree) {
-      log.warning(conn + " double free");
-      Thread.dumpStack();
-      return;
-    }
-    conn._isFree = true;
+    conn.toIdle();
 
     _freeConn.free(conn);
   }

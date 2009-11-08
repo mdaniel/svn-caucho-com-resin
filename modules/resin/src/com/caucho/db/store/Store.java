@@ -33,6 +33,7 @@ import com.caucho.db.Database;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
+import com.caucho.util.FreeList;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 
@@ -170,7 +171,8 @@ public class Store {
   private long _miniFragmentUseCount;
 
   private Object _fileLock = new Object();
-  private SoftReference<RandomAccessWrapper> _cachedRowFile;
+  private FreeList<SoftReference<RandomAccessWrapper>> _cachedRowFile
+    = new FreeList<SoftReference<RandomAccessWrapper>>(4);
 
   private final Semaphore _rowFileSemaphore = new Semaphore(8);
 
@@ -388,11 +390,13 @@ public class Store {
     // allocates the header information
     setAllocation(1, ALLOC_USED);
 
-    byte []buffer = new byte[BLOCK_SIZE];
-    writeBlock(0, buffer, 0, BLOCK_SIZE);
-    writeBlock(BLOCK_SIZE, buffer, 0, BLOCK_SIZE);
+    boolean isPriority = true;
 
-    writeBlock(0, _allocationTable, 0, _allocationTable.length);
+    byte []buffer = new byte[BLOCK_SIZE];
+    writeBlock(0, buffer, 0, BLOCK_SIZE, isPriority);
+    writeBlock(BLOCK_SIZE, buffer, 0, BLOCK_SIZE, isPriority);
+
+    writeBlock(0, _allocationTable, 0, _allocationTable.length, isPriority);
 
     _blockCount = 2;
   }
@@ -405,14 +409,16 @@ public class Store {
 
     log.finer(this + " init");
 
-    RandomAccessWrapper wrapper = openRowFile();
+    boolean isPriority = true;
+
+    RandomAccessWrapper wrapper = openRowFile(true);
 
     try {
       RandomAccessStream file = wrapper.getFile();
 
       _fileSize = file.getLength();
     } finally {
-      closeRowFile(wrapper);
+      closeRowFile(wrapper, isPriority);
     }
     
     _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
@@ -643,13 +649,11 @@ public class Store {
 
     byte []buffer = block.getBuffer();
 
-    synchronized (buffer) {
-      for (int i = BLOCK_SIZE - 1; i >= 0; i--)
-        buffer[i] = 0;
+    for (int i = BLOCK_SIZE - 1; i >= 0; i--)
+      buffer[i] = 0;
 
-      block.setDirty(0, BLOCK_SIZE);
-      block.validate();
-    }
+    block.validate();
+    block.setDirty(0, BLOCK_SIZE);
 
     synchronized (_allocationLock) {
       setAllocation(blockIndex, code);
@@ -758,8 +762,8 @@ public class Store {
     for (int i = BLOCK_SIZE - 1; i >= 0; i--)
       buffer[i] = 0;
 
-    block.setDirty(0, BLOCK_SIZE);
     block.validate();
+    block.setDirty(0, BLOCK_SIZE);
 
     // if extending file, write the contents now
     try {
@@ -931,8 +935,9 @@ public class Store {
       else
         length = dirtyMax - dirtyMin;
 
+      boolean isPriority = true;
       writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
-                 _allocationTable, dirtyMin, length);
+                 _allocationTable, dirtyMin, length, isPriority);
     }
   }
 
@@ -1876,7 +1881,8 @@ public class Store {
   public void readBlock(long blockId, byte []buffer, int offset, int length)
     throws IOException
   {
-    RandomAccessWrapper wrapper = openRowFile();
+    boolean isPriority = false;
+    RandomAccessWrapper wrapper = openRowFile(isPriority);
 
     try {
       RandomAccessStream is = wrapper.getFile();
@@ -1893,6 +1899,10 @@ public class Store {
       // System.out.println("READ: " + Long.toHexString(blockAddress));
       int readLen = is.read(blockAddress, buffer, offset, length);
 
+      if (readLen < 0) {
+        throw new IllegalStateException("Error reading " + is + " for block " + Long.toHexString(blockAddress) + " result=" + readLen);
+      }
+
       if (readLen < length) {
         System.out.println("BAD-READ: " + Long.toHexString(blockAddress));
         if (readLen < 0)
@@ -1904,10 +1914,10 @@ public class Store {
 
       _blockManager.addBlockRead();
 
-      freeRowFile(wrapper);
+      freeRowFile(wrapper, isPriority);
       wrapper = null;
     } finally {
-      closeRowFile(wrapper);
+      closeRowFile(wrapper, isPriority);
     }
   }
 
@@ -1915,10 +1925,13 @@ public class Store {
    * Saves the buffer to the database.
    */
   public void writeBlock(long blockAddress,
-                         byte []buffer, int offset, int length)
+                         byte []buffer, int offset, int length,
+                         boolean isPriority)
     throws IOException
   {
-    RandomAccessWrapper wrapper = openRowFile();
+    RandomAccessWrapper wrapper;
+
+    wrapper = openRowFile(isPriority);
 
     try {
       RandomAccessStream os = wrapper.getFile();
@@ -1930,7 +1943,7 @@ public class Store {
       */
       os.write(blockAddress, buffer, offset, length);
 
-      freeRowFile(wrapper);
+      freeRowFile(wrapper, isPriority);
       wrapper = null;
 
       synchronized (_fileLock) {
@@ -1941,25 +1954,27 @@ public class Store {
 
       _blockManager.addBlockWrite();
     } finally {
-      closeRowFile(wrapper);
+      closeRowFile(wrapper, isPriority);
     }
   }
 
   /**
    * Opens the underlying file to the database.
    */
-  private RandomAccessWrapper openRowFile()
+  private RandomAccessWrapper openRowFile(boolean isPriority)
     throws IOException
   {
     // limit number of active row files
 
-    try {
-      Thread.interrupted();
-      _rowFileSemaphore.acquire();
-    } catch (InterruptedException e) {
-      log.log(Level.FINE, e.toString(), e);
+    if (! isPriority) {
+      try {
+        Thread.interrupted();
+        _rowFileSemaphore.acquire();
+      } catch (InterruptedException e) {
+        log.log(Level.FINE, e.toString(), e);
       
-      return null;
+        return null;
+      }
     }
       
     RandomAccessWrapper wrapper = null;
@@ -1988,13 +2003,10 @@ public class Store {
     RandomAccessStream file = null;
     RandomAccessWrapper wrapper = null;
 
-    synchronized (this) {
-      SoftReference<RandomAccessWrapper> ref = _cachedRowFile;
-      _cachedRowFile = null;
+    SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
 
-      if (ref != null) {
-        wrapper = ref.get();
-      }
+    if (ref != null) {
+      wrapper = ref.get();
     }
 
     if (wrapper != null)
@@ -2009,31 +2021,33 @@ public class Store {
     return wrapper;
   }
 
-  private void freeRowFile(RandomAccessWrapper wrapper)
+  private void freeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
     throws IOException
   {
     if (wrapper == null)
       return;
-    
-    _rowFileSemaphore.release();
 
-    synchronized (this) {
-      if (_cachedRowFile == null) {
-        _cachedRowFile = new SoftReference<RandomAccessWrapper>(wrapper);
-        return;
-      }
+    if (! isPriority)
+      _rowFileSemaphore.release();
+
+    SoftReference<RandomAccessWrapper> fileRef
+      = new SoftReference<RandomAccessWrapper>(wrapper);
+    
+    if (_cachedRowFile.free(fileRef)) {
+      return;
     }
 
     wrapper.close();
   }
 
-  private void closeRowFile(RandomAccessWrapper wrapper)
+  private void closeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
     throws IOException
   {
     if (wrapper == null)
       return;
-    
-    _rowFileSemaphore.release();
+
+    if (! isPriority)
+      _rowFileSemaphore.release();
 
     wrapper.close();
   }
@@ -2097,8 +2111,7 @@ public class Store {
 
     RandomAccessWrapper wrapper = null;
 
-    SoftReference<RandomAccessWrapper> ref = _cachedRowFile;
-    _cachedRowFile = null;
+    SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
 
     if (ref != null)
       wrapper = ref.get();

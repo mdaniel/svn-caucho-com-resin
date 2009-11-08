@@ -32,6 +32,7 @@ package com.caucho.db.store;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.SyncCacheListener;
+import com.caucho.util.CacheListener;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * Represents a versioned row
  */
-abstract public class Block implements SyncCacheListener {
+abstract public class Block implements SyncCacheListener, CacheListener {
   private static final Logger log
     = Logger.getLogger(Block.class.getName());
   private static final L10N L = new L10N(Block.class);
@@ -118,7 +119,10 @@ abstract public class Block implements SyncCacheListener {
     } while (! _useCount.compareAndSet(useCount, useCount + 1));
 
     if (getBuffer() == null) {
-      throw new IllegalStateException(this + " null buffer " + this + " " + _useCount.get());
+      _useCount.decrementAndGet();
+      Thread.dumpStack();
+      log.fine(this + " null buffer " + this + " " + _useCount.get());
+      return false;
     }
       
     if (log.isLoggable(Level.FINEST))
@@ -132,6 +136,24 @@ abstract public class Block implements SyncCacheListener {
     }
 
     return true;
+  }
+  private boolean _isDump;
+
+  boolean allocateDirty()
+  {
+    _useCount.incrementAndGet();
+    
+    // System.out.println("DIRTY: " + this + " " + _useCount.get());
+    
+    // the dirty block can be allocated only if it's not freed yet
+    if (getBuffer() != null) {
+      return true;
+    }
+    else {
+      _useCount.decrementAndGet();
+      
+      return false;
+    }
   }
 
   /**
@@ -178,8 +200,7 @@ abstract public class Block implements SyncCacheListener {
 			 getBuffer(), 0, Store.BLOCK_SIZE);
 	_isValid = true;
 
-	_dirtyMin = Store.BLOCK_SIZE;
-	_dirtyMax = 0;
+        clearDirty();
       }
     }
   }
@@ -212,7 +233,7 @@ abstract public class Block implements SyncCacheListener {
            && _writeCount.compareAndSet(0, 1)) {
       try {
         synchronized (_writeLock) {
-          writeImpl();
+          writeImpl(false);
         }
       } finally {
         _writeCount.set(0);
@@ -226,7 +247,7 @@ abstract public class Block implements SyncCacheListener {
     getStore().saveAllocation();
   }
 
-  private void writeImpl()
+  private void writeImpl(boolean isPriority)
     throws IOException
   {
     int dirtyMin = 0;
@@ -234,10 +255,9 @@ abstract public class Block implements SyncCacheListener {
     
     synchronized (this) {
       dirtyMin = _dirtyMin;
-      _dirtyMin = Store.BLOCK_SIZE;
-
       dirtyMax = _dirtyMax;
-      _dirtyMax = 0;
+      
+      clearDirty();
 
       if (dirtyMax <= dirtyMin) {
         return;
@@ -245,7 +265,6 @@ abstract public class Block implements SyncCacheListener {
 
       // temp alloc for sync, matched by the free() below
       _useCount.incrementAndGet();
-      _isValid = true;
       
       if (log.isLoggable(Level.FINEST))
         log.finest("write alloc " + this + " (" + _useCount + ")");
@@ -255,7 +274,7 @@ abstract public class Block implements SyncCacheListener {
       if (log.isLoggable(Level.FINEST))
         log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
-      writeImpl(dirtyMin, dirtyMax - dirtyMin);
+      writeImpl(dirtyMin, dirtyMax - dirtyMin, isPriority);
     } finally {
       free();
     }
@@ -264,11 +283,12 @@ abstract public class Block implements SyncCacheListener {
   /**
    * Write the dirty block.
    */
-  protected void writeImpl(int offset, int length)
+  protected void writeImpl(int offset, int length, boolean isPriority)
     throws IOException
   {
     _store.writeBlock((_blockId & Store.BLOCK_MASK) + offset,
-		      getBuffer(), offset, length);
+		      getBuffer(), offset, length,
+                      isPriority);
   }
 
   public final boolean isValid()
@@ -286,8 +306,7 @@ abstract public class Block implements SyncCacheListener {
 	throw new IllegalStateException();
 
       _isValid = false;
-      _dirtyMin = Store.BLOCK_SIZE;
-      _dirtyMax = 0;
+      clearDirty();
     }
   }
 
@@ -308,7 +327,8 @@ abstract public class Block implements SyncCacheListener {
       Thread.dumpStack();
 
     synchronized (this) {
-      _isValid = true;
+      if (! _isValid)
+        throw new IllegalStateException(this + " set dirty without valid");
 
       if (min < _dirtyMin)
 	_dirtyMin = min;
@@ -326,10 +346,34 @@ abstract public class Block implements SyncCacheListener {
     return _dirtyMin < _dirtyMax;
   }
 
+  protected int getDirtyMin()
+  {
+    return _dirtyMin;
+  }
+
+  protected int getDirtyMax()
+  {
+    return _dirtyMax;
+  }
+
+  /**
+   * Callable only by the block itself, and must synchronize the Block.
+   */
+  protected void clearDirty()
+  {
+    _dirtyMax = 0;
+    _dirtyMin = Store.BLOCK_SIZE;
+  }
+
   public void deallocate()
     throws IOException
   {
+    if (_useCount.get() > 2)
+      throw new IllegalStateException(this + " deallocate requires a single active thread:" + _useCount.get());
+
+    // the deallocated block is not written back
     _isValid = false;
+    clearDirty();
     
     getStore().freeBlock(getBlockId());
   }
@@ -352,10 +396,10 @@ abstract public class Block implements SyncCacheListener {
    */
   public final void free()
   {
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " free (" + _useCount + ")");
-
     int useCount = _useCount.decrementAndGet();
+
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " free (" + useCount + ")");
 
     if (useCount < 0)
       Thread.dumpStack();
@@ -371,9 +415,9 @@ abstract public class Block implements SyncCacheListener {
 
       return;
     }
-
-    // dirty blocks get queued for writing
-    BlockManager.getBlockManager().addLruDirtyWriteBlock(this);
+    else {
+      BlockManager.getBlockManager().wakeWriter();
+    }
   }
 
   /**
@@ -381,9 +425,28 @@ abstract public class Block implements SyncCacheListener {
    */
   public final void syncRemoveEvent()
   {
-    free();
+    int useCount = _useCount.decrementAndGet();
+
+    if (useCount > 0 || _dirtyMin < _dirtyMax) {
+      // dirty blocks get queued for writing
+      BlockManager.getBlockManager().addLruDirtyWriteBlock(this);
+    }
+    else {
+      freeImpl();
+    }
   }
 
+  /**
+   * Called when the block is removed from the cache.
+   */
+  public final void removeEvent()
+  {
+    /*
+    if (_useCount.get() > 0)
+      System.out.println("REMOVE with live: " + this + " " + _useCount);
+    */
+  }
+  
   /**
    * Copies the contents to a target block. Used by the BlockManager
    * for LRU'd blocks
@@ -406,15 +469,14 @@ abstract public class Block implements SyncCacheListener {
     if (_dirtyMin < _dirtyMax) {
       try {
         synchronized (_writeLock) {
-          writeImpl();
+          writeImpl(true);
         }
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);
       }
     }
 
-    if (_useCount.get() <= 0)
-      freeImpl();
+    freeImpl();
 
     if (log.isLoggable(Level.FINEST))
       log.finest("db-block remove " + this);
@@ -453,5 +515,11 @@ abstract public class Block implements SyncCacheListener {
   {
     return (getClass().getSimpleName()
 	    + "[" + _store + "," + Long.toHexString(_blockId) + "]");
+  }
+
+  public void finalize()
+  {
+    if (_dirtyMin < _dirtyMax)
+      System.out.println("BLOCK freed while dirty " + this);
   }
 }

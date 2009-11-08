@@ -30,21 +30,28 @@
 package com.caucho.server.port;
 
 enum ConnectionState {
-  IDLE,
-    ACCEPT,
-    REQUEST,
-    REQUEST_ACTIVE,
-    REQUEST_KEEPALIVE,
-    COMET,
-    DUPLEX,
-    DUPLEX_KEEPALIVE,
-    COMPLETE,
-    CLOSED,
-    DESTROYED;
+  IDLE,                 // TcpConnection in free list
+  INIT,                 // allocated, ready to accept
+  ACCEPT,               // accepting
+  REQUEST_READ,         // after accept, but before any data is read
+  REQUEST_ACTIVE,       // processing a request
+  REQUEST_NO_KEEPALIVE, // processing a request, but keepalive forbidden
+  REQUEST_KEEPALIVE,    // waiting for keepalive data
+  COMET,                // processing an active comet service
+  COMET_SUSPEND,        // suspended waiting for a wake
+  DUPLEX,               // converted to a duplex/websocket
+  DUPLEX_KEEPALIVE,     // waiting for duplex read data
+  CLOSED,               // connection closed, ready for accept
+  DESTROYED;            // connection destroyed
 
   boolean isComet()
   {
     return this == COMET;
+  }
+
+  boolean isCometSuspend()
+  {
+    return this == COMET_SUSPEND;
   }
 
   boolean isDuplex()
@@ -66,10 +73,10 @@ enum ConnectionState {
   boolean isActive()
   {
     switch (this) {
-    case IDLE:
     case ACCEPT:
-    case REQUEST:
+    case REQUEST_READ:
     case REQUEST_ACTIVE:
+    case REQUEST_NO_KEEPALIVE:
       return true;
 
     default:
@@ -80,7 +87,7 @@ enum ConnectionState {
   boolean isRequestActive()
   {
     switch (this) {
-    case REQUEST:
+    case REQUEST_READ:
     case REQUEST_ACTIVE:
       return true;
 
@@ -99,10 +106,103 @@ enum ConnectionState {
     return this == DESTROYED;
   }
 
+  boolean isAllowKeepalive()
+  {
+    switch (this) {
+    case REQUEST_READ:
+    case REQUEST_ACTIVE:
+    case REQUEST_KEEPALIVE:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  //
+  // state changes
+  //
+
+  /**
+   * Convert from the idle (pooled) or closed state to the initial state
+   * before accepting a connection.
+   */
+  ConnectionState toInit()
+  {
+    if (this == IDLE || this == CLOSED)
+      return INIT;
+    else
+      throw new IllegalStateException(this + " is an illegal init state");
+  }
+
+  /**
+   * Change to the accept state.
+   */
+  ConnectionState toAccept()
+  {
+    switch (this) {
+    case INIT:
+    case CLOSED:
+      return ACCEPT;
+    default:
+      throw new IllegalStateException(this + " is an illegal accept state");
+    }
+  }
+
+  ConnectionState toActive()
+  {
+    switch (this) {
+    case ACCEPT:
+    case REQUEST_READ:
+    case REQUEST_ACTIVE:
+    case REQUEST_KEEPALIVE:
+      return REQUEST_ACTIVE;
+      
+    case REQUEST_NO_KEEPALIVE:
+      return REQUEST_NO_KEEPALIVE;
+
+      /*
+    case DUPLEX_KEEPALIVE:
+    case DUPLEX:
+      return DUPLEX;
+      */
+
+    case COMET:
+    case COMET_SUSPEND:
+      return COMET;
+
+    default:
+      throw new IllegalStateException(this + " is an illegal active state");
+    }
+  }
+
+  ConnectionState toKillKeepalive()
+  {
+    switch (this) {
+    case REQUEST_ACTIVE:
+      return REQUEST_NO_KEEPALIVE;
+    default:
+      return this;
+    }
+  }
+
+  ConnectionState toKeepalive()
+  {
+    switch (this) {
+    case REQUEST_READ:
+    case REQUEST_ACTIVE:
+    case REQUEST_KEEPALIVE:
+      return REQUEST_KEEPALIVE;
+
+    default:
+      return this;
+    }
+  }
+
   ConnectionState toKeepaliveSelect()
   {
     switch (this) {
-    case REQUEST:
+    case ACCEPT:  // XXX: unsure if this should be allowed
+    case REQUEST_READ:
     case REQUEST_ACTIVE:
     case REQUEST_KEEPALIVE:
       return REQUEST_KEEPALIVE;
@@ -116,59 +216,18 @@ enum ConnectionState {
     }
   }
 
-  ConnectionState toActive()
-  {
-    switch (this) {
-    case ACCEPT:
-    case REQUEST:
-    case REQUEST_ACTIVE:
-    case REQUEST_KEEPALIVE:
-      return REQUEST_ACTIVE;
-
-    case DUPLEX_KEEPALIVE:
-    case DUPLEX:
-      return DUPLEX;
-
-    case COMET:
-      return COMET;
-
-    default:
-      throw new IllegalStateException(this + " is an illegal active state");
-    }
-  }
-
-  ConnectionState toAccept()
-  {
-    if (this != DESTROYED)
-      return ACCEPT;
-    else
-      throw new IllegalStateException(this + " is an illegal accept state");
-  }
-
   ConnectionState toIdle()
   {
-    if (this != DESTROYED)
+    if (this == CLOSED)
       return IDLE;
     else
       throw new IllegalStateException(this + " is an illegal idle state");
   }
 
-  ConnectionState toComplete()
-  {
-    switch (this) {
-    case CLOSED:
-    case DESTROYED:
-      return this;
-
-    default:
-      return COMPLETE;
-    }
-  }
-
   ConnectionState toCompleteComet()
   {
     if (this == COMET)
-      return REQUEST;
+      return REQUEST_READ;
     else
       return this;
   }
@@ -178,6 +237,6 @@ enum ConnectionState {
     if (this != DESTROYED)
       return CLOSED;
     else
-      throw new IllegalStateException(this + " is an illegal closed state");
+      return this;
   }
 }

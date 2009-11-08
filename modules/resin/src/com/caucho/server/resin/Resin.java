@@ -84,6 +84,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
 import javax.annotation.PostConstruct;
@@ -1629,42 +1630,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       try {
         Thread.sleep(10);
 
-        long minFreeMemory = getMinFreeMemory();
+        if (! checkMemory(runtime))
+          return;
 
-        if (minFreeMemory <= 0) {
-          // memory check disabled
-        }
-        else if (2 * minFreeMemory < getFreeMemory(runtime)) {
-          // plenty of free memory
-        }
-        else {
-          if (log().isLoggable(Level.FINER)) {
-            log().finer(L().l("free memory {0} max:{1} total:{2} free:{3}",
-                          "" + getFreeMemory(runtime),
-                          "" + runtime.maxMemory(),
-                          "" + runtime.totalMemory(),
-                          "" + runtime.freeMemory()));
-          }
-
-          log().info(L().l("Forcing GC due to low memory. {0} free bytes.",
-                       getFreeMemory(runtime)));
-
-          runtime.gc();
-
-          Thread.sleep(1000);
-
-          runtime.gc();
-
-          if (getFreeMemory(runtime) < minFreeMemory) {
-            log().severe(L().l("Restarting due to low free memory. {0} free bytes",
-                           getFreeMemory(runtime)));
-
-            return;
-          }
-        }
-
-        // second memory check
-        memoryTest = new Integer(0);
+        if (! checkFileDescriptor())
+          return;
 
         if (_waitIn != null) {
           int len;
@@ -1712,6 +1682,66 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
         return;
       }
+    }
+  }
+
+  private boolean checkMemory(Runtime runtime)
+    throws InterruptedException
+  {
+    long minFreeMemory = getMinFreeMemory();
+
+    if (minFreeMemory <= 0) {
+      // memory check disabled
+      return true;
+    }
+    else if (2 * minFreeMemory < getFreeMemory(runtime)) {
+      // plenty of free memory
+      return true;
+    }
+    else {
+      if (log().isLoggable(Level.FINER)) {
+        log().finer(L().l("free memory {0} max:{1} total:{2} free:{3}",
+                          "" + getFreeMemory(runtime),
+                          "" + runtime.maxMemory(),
+                          "" + runtime.totalMemory(),
+                          "" + runtime.freeMemory()));
+      }
+
+      log().info(L().l("Forcing GC due to low memory. {0} free bytes.",
+                       getFreeMemory(runtime)));
+
+      runtime.gc();
+
+      Thread.sleep(1000);
+
+      runtime.gc();
+
+      if (getFreeMemory(runtime) < minFreeMemory) {
+        log().severe(L().l("Restarting due to low free memory. {0} free bytes",
+                           getFreeMemory(runtime)));
+
+        return false;
+      }
+    }
+
+    // second memory check
+    Object memoryTest = new Integer(0);
+
+    return true;
+  }
+
+  private boolean checkFileDescriptor()
+  {
+    try {
+      ReadStream is = _resinConf.openRead();
+      is.close();
+
+      return true;
+    } catch (IOException e) {
+      log().severe(L().l("Restarting due to file descriptor failure:\n{0}",
+                         e));
+
+      return false;
     }
   }
 

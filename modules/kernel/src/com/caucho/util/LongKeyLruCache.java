@@ -54,9 +54,10 @@ public class LongKeyLruCache<V> {
   // hash table containing the entries.  Its size is twice the capacity
   // so it will always remain at least half empty
   private final CacheItem<V> []_entries;
-
+  private final Object []_locks;
+  
   // mask for the hash
-  private final int _mask;
+  private final int _prime;
   
   //
   // LRU
@@ -81,7 +82,7 @@ public class LongKeyLruCache<V> {
   private CacheItem<V> _tail2;
 
   // lru timeout reduces lru updates for the most used items
-  private int _lruTimeout = 1;
+  private final int _lruTimeout;
 
   private final AtomicBoolean _isLruTailRemove = new AtomicBoolean();
 
@@ -103,13 +104,20 @@ public class LongKeyLruCache<V> {
     int capacity = calculateCapacity(initialCapacity);
 
     _entries = new CacheItem[capacity];
-    _mask = capacity - 1;
+    _prime = Primes.getBiggestPrime(_entries.length);
+
+    _locks = new Object[(_entries.length >> 3) + 1];
+    for (int i = 0; i < _locks.length; i++) {
+      _locks[i] = new Object();
+    }
 
     _capacity = initialCapacity;
     _capacity1 = _capacity / 2;
 
-    if (capacity > 16)
-      _lruTimeout = capacity / 16;
+    if (capacity > 32)
+      _lruTimeout = capacity / 32;
+    else
+      _lruTimeout = 1;
   }
 
   /**
@@ -150,8 +158,11 @@ public class LongKeyLruCache<V> {
 
     LongKeyLruCache newCache = new LongKeyLruCache(newCapacity);
 
-    synchronized (_entries) {
-      for (int i = 0; i < _entries.length; i++) {
+
+    for (int i = 0; i < _entries.length; i++) {
+      Object lock = getLock(i);
+      
+      synchronized (lock) {
 	for (CacheItem item = _entries[i];
 	     item != null;
 	     item = item._nextHash) {
@@ -183,11 +194,14 @@ public class LongKeyLruCache<V> {
     ArrayList<CacheListener> listeners = null;
     ArrayList<SyncCacheListener> syncListeners = null;
 
-    synchronized (_entries) {
-      for (int i = _entries.length - 1; i >= 0; i--) {
+    for (int i = _entries.length - 1; i >= 0; i--) {
+      Object lock = getLock(i);
+      
+      synchronized (lock) {
         CacheItem<V> item = _entries[i];
 
         for (; item != null; item = item._nextHash) {
+          removeLruItem(item);
           if (item._value instanceof CacheListener) {
             if (listeners == null)
               listeners = new ArrayList<CacheListener>();
@@ -202,15 +216,6 @@ public class LongKeyLruCache<V> {
         }
         
         _entries[i] = null;
-      }
-
-      synchronized (_lruLock) {
-        _size1 = 0;
-        _head1 = null;
-        _tail1 = null;
-        _size2 = 0;
-        _head2 = null;
-        _tail2 = null;
       }
     }
 
@@ -235,7 +240,7 @@ public class LongKeyLruCache<V> {
    */
   public V get(long key)
   {
-    int hash = hash(key) & _mask;
+    int hash = hash(key) % _prime;
 
     CacheItem<V> item;
 
@@ -301,18 +306,33 @@ public class LongKeyLruCache<V> {
    * @param key key to store data
    * @param value value to be stored
    *
+   * @return the value actually stored
+   */
+  public V putIfAbsent(long key, V value)
+  {
+    return put(key, value, false);
+  }
+
+  /**
+   * Puts a new item in the cache.  If the cache is full, remove the
+   * LRU item.
+   *
+   * @param key key to store data
+   * @param value value to be stored
+   *
    * @return old value stored under the key
    */
   private V put(long key, V value, boolean replace)
   {
     removeLru();
 
-    int hash = hash(key) & _mask;
-    int count = _size1 + _size2 + 1;
+    int hash = hash(key) % _prime;
 
     V oldValue = null;
 
-    synchronized (_entries) {
+    Object lock = getLock(hash);
+
+    synchronized (lock) {
       CacheItem<V> item = _entries[hash];
       for (;
 	   item != null;
@@ -340,18 +360,7 @@ public class LongKeyLruCache<V> {
         
 	item = new CacheItem<V>(key, value);
 
-        synchronized (_lruLock) {
-          _lruCounter++;
-          _size1++;
-
-          item._nextLru = _head1;
-	  if (_head1 != null)
-	    _head1._prevLru = item;
-	  _head1 = item;
-          
-	  if (_tail1 == null)
-	    _tail1 = item;
-        }
+        addNewLruItem(item);
         
 	item._nextHash = next;
         _entries[hash] = item;
@@ -364,6 +373,24 @@ public class LongKeyLruCache<V> {
       ((CacheListener) oldValue).removeEvent();
 
     return oldValue;
+  }
+
+  private void addNewLruItem(CacheItem<V> item)
+  {
+    synchronized (_lruLock) {
+      _lruCounter = (_lruCounter + 1) & 0x3fffffff;
+      item._lruCounter = _lruCounter;
+          
+      _size1++;
+
+      item._nextLru = _head1;
+      if (_head1 != null)
+        _head1._prevLru = item;
+      _head1 = item;
+          
+      if (_tail1 == null)
+        _tail1 = item;
+    }
   }
 
   /**
@@ -530,11 +557,13 @@ public class LongKeyLruCache<V> {
    */
   public V remove(long key)
   {
-    int hash = hash(key) & _mask;
+    int hash = hash(key) % _prime;
 
     V value = null;
 
-    synchronized (_entries) {
+    Object lock = getLock(hash);
+    
+    synchronized (lock) {
       CacheItem<V> prevItem = null;
       
       for (CacheItem<V> item = _entries[hash];
@@ -575,6 +604,8 @@ public class LongKeyLruCache<V> {
   private void removeLruItem(CacheItem<V> item)
   {
     synchronized (_lruLock) {
+      _lruCounter = (_lruCounter + 1) & 0x3fffffff;
+      
       CacheItem<V> prevLru = item._prevLru;
       CacheItem<V> nextLru = item._nextLru;
 
@@ -637,7 +668,12 @@ public class LongKeyLruCache<V> {
     hash = 65537 * hash + (key >>> 32);
     hash = 65537 * hash + (key >>> 48);
 
-    return (int) hash;
+    return (int) (hash & 0x7fffffff);
+  }
+
+  private Object getLock(int hash)
+  {
+    return _locks[hash >> 3];
   }
 
   /**

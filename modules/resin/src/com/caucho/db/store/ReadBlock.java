@@ -68,12 +68,20 @@ public class ReadBlock extends Block {
     synchronized (this) {
       byte []buffer = _buffer;
 
-      if (buffer == null || ! isValid())
+      if (buffer == null || ! isValid()) {
+        // System.out.println(block + " COPY FROM FAIL " + this);
         return false;
+      }
 
       System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
       block.validate();
-      System.out.println(block + " COPY FROM " + this);
+      
+      // The new block takes over responsibility for the writing, because
+      // it may modify the block before the write completes
+      block.setDirty(getDirtyMin(), getDirtyMax());
+
+      clearDirty();
+      // System.out.println(block + " COPY FROM " + this);
 
       return true;
     }
@@ -86,10 +94,14 @@ public class ReadBlock extends Block {
   {
     //System.out.println(this + " FREE-IMPL");
     synchronized (this) {
-      byte []buffer = _buffer;
-      _buffer = null;
+      // timing for block reuse. The useCount can be reactivated from
+      // the BlockManager writeQueue
+      if (isFree()) {
+        byte []buffer = _buffer;
+        _buffer = null;
 
-      freeBuffer(buffer);
+        freeBuffer(buffer);
+      }
     }
   }
 }

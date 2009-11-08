@@ -66,4 +66,14 @@ public class Primes {
     134217689, /* 1<<27 = 134217728 */
     268435399, /* 1<<28 = 268435456 */
   };
+
+  public static int getBiggestPrime(int value)
+  {
+    for (int i = PRIMES.length - 1; i >= 0; i--) {
+      if (PRIMES[i] <= value)
+        return PRIMES[i];
+    }
+
+    return 2;
+  }
 }
