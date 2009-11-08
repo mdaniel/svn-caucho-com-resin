@@ -1284,13 +1284,15 @@ public class JavaClassDef extends ClassDef {
     if (! Modifier.isPublic(type.getModifiers()))
       return;
 
+    /* not needed because Class.getFields() is recursive
     Class []ifcs = type.getInterfaces();
 
     for (Class ifc : ifcs) {
       introspectConstants(ifc);
     }
+    */
 
-    Field []fields = type.getDeclaredFields();
+    Field []fields = type.getFields();
 
     for (Field field : fields) {
       if (_constMap.get(field.getName()) != null)
@@ -1314,18 +1316,19 @@ public class JavaClassDef extends ClassDef {
       }
     }
 
-    introspectConstants(type.getSuperclass());
+    //introspectConstants(type.getSuperclass());
   }
-
+  
   /**
    * Introspects the Java class.
    */
-  private void introspectMethods(ModuleContext moduleContext, Class type)
+  private void introspectMethods(ModuleContext moduleContext,
+                                 Class<?> type)
   {
     if (type == null)
       return;
 
-    Method []methods = type.getDeclaredMethods();
+    Method []methods = type.getMethods();
 
     for (Method method : methods) {
       if (! Modifier.isPublic(method.getModifiers()))
@@ -1340,23 +1343,17 @@ public class JavaClassDef extends ClassDef {
         _iteratorMethod = method;
       }
 
-      if (_printRImpl == null
-          && "printRImpl".equals(method.getName())) {
+      if ("printRImpl".equals(method.getName())) {
         _printRImpl = method;
-      } else if (_varDumpImpl == null
-                 && "varDumpImpl".equals(method.getName())) {
+      } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
-      } else if (_jsonEncode == null
-                 && method.isAnnotationPresent(JsonEncode.class)) {
+      } else if (method.isAnnotationPresent(JsonEncode.class)) {
         _jsonEncode = method;
-      } else if (_entrySet == null
-                 && method.isAnnotationPresent(EntrySet.class)) {
+      } else if (method.isAnnotationPresent(EntrySet.class)) {
         _entrySet = method;
-      } else if (__call == null
-                 && "__call".equals(method.getName())) {
+      } else if ("__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, method);
-      } else if (__toString == null
-                 && "__toString".equals(method.getName())) {
+      } else if ("__toString".equals(method.getName())) {
         __toString = new JavaMethod(moduleContext, method);
       } else {
         if (method.getName().startsWith("quercus_"))
@@ -1374,6 +1371,7 @@ public class JavaClassDef extends ClassDef {
       }
     }
     
+    /* Class.getMethods() is recursive
     introspectMethods(moduleContext, type.getSuperclass());
 
     Class []ifcs = type.getInterfaces();
@@ -1381,6 +1379,7 @@ public class JavaClassDef extends ClassDef {
     for (Class ifc : ifcs) {
       introspectMethods(moduleContext, ifc);
     }
+    */
   }
   
   public JavaMethod getToString()
