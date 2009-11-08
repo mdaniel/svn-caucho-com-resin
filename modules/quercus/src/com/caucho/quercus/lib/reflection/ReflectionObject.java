@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.reflection;
 
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
@@ -67,6 +66,6 @@ public class ReflectionObject extends ReflectionClass
   
   public String toString()
   {
-    return "ReflectionObject[" + getQuercusClass().getName() + "]";
+    return "ReflectionObject[" + getName() + "]";
   }
 }

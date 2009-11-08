@@ -922,8 +922,8 @@ public class JavaClassDef extends ClassDef {
       super.init();
 
       try {
-	initInterfaceList(_type);
-	introspect();
+        initInterfaceList(_type);
+        introspect();
       }
       finally {
 	_isInit = true;
@@ -1325,7 +1325,7 @@ public class JavaClassDef extends ClassDef {
     if (type == null)
       return;
 
-    Method []methods = type.getMethods();
+    Method []methods = type.getDeclaredMethods();
 
     for (Method method : methods) {
       if (! Modifier.isPublic(method.getModifiers()))
@@ -1340,22 +1340,28 @@ public class JavaClassDef extends ClassDef {
         _iteratorMethod = method;
       }
 
-      if ("printRImpl".equals(method.getName())) {
+      if (_printRImpl == null
+          && "printRImpl".equals(method.getName())) {
         _printRImpl = method;
-      } else if ("varDumpImpl".equals(method.getName())) {
+      } else if (_varDumpImpl == null
+                 && "varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
-      } else if (method.isAnnotationPresent(JsonEncode.class)) {
+      } else if (_jsonEncode == null
+                 && method.isAnnotationPresent(JsonEncode.class)) {
         _jsonEncode = method;
-      } else if (method.isAnnotationPresent(EntrySet.class)) {
+      } else if (_entrySet == null
+                 && method.isAnnotationPresent(EntrySet.class)) {
         _entrySet = method;
-      } else if ("__call".equals(method.getName())) {
+      } else if (__call == null
+                 && "__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, method);
-      } else if ("__toString".equals(method.getName())) {
+      } else if (__toString == null
+                 && "__toString".equals(method.getName())) {
         __toString = new JavaMethod(moduleContext, method);
       } else {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method.getName()));
-
+        
         JavaMethod newFun = new JavaMethod(moduleContext, method);
         AbstractJavaMethod fun = _functionMap.get(newFun.getName());
 
@@ -1367,7 +1373,7 @@ public class JavaClassDef extends ClassDef {
         _functionMap.put(fun.getName(), fun);
       }
     }
-
+    
     introspectMethods(moduleContext, type.getSuperclass());
 
     Class []ifcs = type.getInterfaces();
