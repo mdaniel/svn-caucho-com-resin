@@ -955,7 +955,7 @@ public class JavaClassDef extends ClassDef {
   private void introspect()
   {
     introspectConstants(_type);
-    introspectMethods(_moduleContext, _type);
+    introspectMethods(_moduleContext, _type, ! _type.getName().equals(_name));
     introspectFields(_moduleContext, _type);
 
     _marshal = new JavaMarshal(this, false);
@@ -1323,7 +1323,8 @@ public class JavaClassDef extends ClassDef {
    * Introspects the Java class.
    */
   private void introspectMethods(ModuleContext moduleContext,
-                                 Class<?> type)
+                                 Class<?> type,
+                                 boolean isPhpClass)
   {
     if (type == null)
       return;
@@ -1335,6 +1336,9 @@ public class JavaClassDef extends ClassDef {
         continue;
       
       if (method.isAnnotationPresent(Hide.class))
+        continue;
+
+      if (isPhpClass && method.getDeclaringClass() == Object.class)
         continue;
       
       if ("iterator".equals(method.getName())
