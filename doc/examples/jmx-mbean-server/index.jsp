@@ -1,6 +1,6 @@
-<%@ page import='javax.enterprise.inject.Current, javax.management.*, example.TestAdmin' %>
+<%@ page import='javax.inject.Inject, javax.management.*, example.TestAdmin' %>
 <%!
-@Current MBeanServer _server;
+@Inject MBeanServer _server;
 %><%
 ObjectName name = new ObjectName("example:name=test");
 

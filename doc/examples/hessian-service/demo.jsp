@@ -1,7 +1,7 @@
-<%@ page import="com.caucho.config.Name" %>
+<%@ page import="javax.inject.*" %>
 <%@ page import="example.MathService" %>
 <%!
-@Name("math") MathService math;
+@Inject @Named("math") MathService math;
 %>
 <pre>
 3 + 2 = <%= math.add(3, 2) %>

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import javax.inject.Named;
+import javax.inject.Inject;
 
 /**
  * The BasicServlet executes a simple JDBC query.
@@ -28,7 +29,7 @@ public class BasicServlet extends HttpServlet {
   /**
    * The saved DataSource for the database
    */
-  @Named("jdbc/basic")
+  @Inject @Named("jdbc/basic")
   private DataSource _ds;
 
   /**

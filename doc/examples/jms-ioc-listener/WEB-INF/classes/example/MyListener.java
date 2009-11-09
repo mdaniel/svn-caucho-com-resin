@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import javax.jms.Message;
-import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
 import javax.jms.MessageListener;
 
 public class MyListener implements MessageListener {
@@ -26,11 +26,11 @@ public class MyListener implements MessageListener {
   public void onMessage(Message message)
   {
     try {
-      ObjectMessage objMessage = (ObjectMessage) message;
+      TextMessage objMessage = (TextMessage) message;
 
-      log.info("received: " + objMessage.getObject());
+      log.info("received: " + objMessage.getText());
 
-      _lastMessage = (String) objMessage.getObject();
+      _lastMessage = (String) objMessage.getText();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

@@ -12,12 +12,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 public class MessageServlet extends GenericServlet {
   private static final Logger log =
     Logger.getLogger(MessageServlet.class.getName());
 
-  @Inject
+  @Inject @Named("my_queue")
   private BlockingQueue _sender;
   private int _count;
   
