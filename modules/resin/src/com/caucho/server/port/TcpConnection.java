@@ -1016,7 +1016,6 @@ public class TcpConnection extends Connection
    */
   public final void destroy()
   {
-    Thread.dumpStack();
     _socket.forceShutdown();
 
     closeImpl();

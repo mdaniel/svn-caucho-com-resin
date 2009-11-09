@@ -183,7 +183,7 @@ if ($stat_service) {
   echo "&width=300&height=240' width='300' height='240'>\n"
   
   echo "<img src='graph.php?";
-  echo "g[0][0]=$si|OS|System|CPU Load"
+  echo "g[0][0]=$si|OS|CPU|CPU Active"
   echo "&width=300&height=240' width='300' height='240'>\n"
   
   echo "<img src='graph.php?";
