@@ -48,9 +48,12 @@ public class ObjectConverter  {
   public static boolean toBoolean(Object obj)
     throws JMSException
   {
-    if (obj instanceof Boolean)
+    if (obj == null) { 
+      // jms/214c
+      throw new NullPointerException();
+    } else if (obj instanceof Boolean)
       return ((Boolean) obj).booleanValue();
-    else if (obj == null || obj instanceof String)
+    else if (obj instanceof String)
       return Boolean.valueOf((String) obj).booleanValue();
     else
       throw new MessageFormatException(L.l("can't convert '{0}' to boolean",
