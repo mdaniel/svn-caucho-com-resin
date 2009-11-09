@@ -88,6 +88,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   private static final Object []NULL_ARGS = new Object[0];
   private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
+  
+  private static final Method _namedValueMethod;
 
   private static final HashSet<Class> _reservedTypes
     = new HashSet<Class>();
@@ -387,10 +389,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     for (Annotation ann : annotated.getAnnotations()) {
       if (inject.isQualifier(ann.annotationType())) {
-        if (ann instanceof Named) {
-          Named named = (Named) ann;
+        if (ann.annotationType().equals(Named.class)) {
+          String namedValue = getNamedValue(ann);
 
-          if ("".equals(named.value())) {
+          if ("".equals(namedValue)) {
             ann = Names.create(getDefaultName());
           }
         }
@@ -411,16 +413,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     Annotation ann = annotated.getAnnotation(Named.class);
 
     if (ann != null) {
-      String value = null;
-
-      try {
-        // ioc/0m04
-        Method m = ann.getClass().getMethod("value", new Class[0]);
-        m.setAccessible(true);
-        value = (String) m.invoke(ann);
-      } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
+      String value = getNamedValue(ann);
 
       if (value == null)
         value = "";
@@ -456,10 +449,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
         }
 
         if (annType.equals(Named.class) && _name == null) {
-          Named named = (Named) ann;
+          String namedValue = getNamedValue(ann);
           _name = "";
 
-          if (! "".equals(named.value()))
+          if (! "".equals(namedValue))
             throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition, because @Stereotypes are used with multiple beans."));
         }
 
@@ -575,6 +568,15 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return new HashSet<InjectionPoint>();
   }
 
+  protected String getNamedValue(Annotation ann)
+  {
+    try {
+      return (String) _namedValueMethod.invoke(ann);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public String toDebugString()
   {
     StringBuilder sb = new StringBuilder();
@@ -625,5 +627,16 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     _reservedTypes.add(Cloneable.class);
     _reservedTypes.add(Object.class);
     _reservedTypes.add(Comparable.class);
+
+    Method namedValueMethod = null;
+    
+    try {
+      namedValueMethod = Named.class.getMethod("value");
+      namedValueMethod.setAccessible(true);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    _namedValueMethod = namedValueMethod;
   }
 }

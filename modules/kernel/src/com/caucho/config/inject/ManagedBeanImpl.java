@@ -352,16 +352,16 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     ArrayList<Annotation> qualifierList = new ArrayList<Annotation>();
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann instanceof Named) {
-        Named named = (Named) ann;
+      if (ann.annotationType().equals(Named.class)) {
+        String namedValue = getNamedValue(ann);
 
-        if ("".equals(named.value())) {
+        if ("".equals(namedValue)) {
           String name = getBeanClass().getSimpleName();
 
-          named = Names.create(name);
+          ann = Names.create(name);
         }
 
-        qualifierList.add(named);
+        qualifierList.add(ann);
 
       }
       else if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {

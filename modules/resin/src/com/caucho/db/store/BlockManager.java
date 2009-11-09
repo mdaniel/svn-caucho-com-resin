@@ -239,9 +239,10 @@ public final class BlockManager
 
     long expires = Alarm.getCurrentTimeActual() + 60000L;
 
-    synchronized (_writeQueue) {
-      while (hasPendingStore(store)) {
-        _writer.wake();
+    while (hasPendingStore(store)) {
+      wakeWriter();
+      
+      synchronized (_writeQueue) {
         try {
           long delta = expires - Alarm.getCurrentTimeActual();
 
@@ -262,8 +263,9 @@ public final class BlockManager
     for (int i = _writeQueue.size() - 1; i >= 0; i--) {
       Block block = _writeQueue.get(i);
 
-      if (block.getStore() == store)
+      if (block.getStore() == store && block.isDirty()) {
         return true;
+      }
     }
 
     return false;

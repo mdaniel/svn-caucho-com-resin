@@ -124,6 +124,13 @@ class Row {
     return column;
   }
 
+  public void close()
+  {
+    for (Column column : _columns) {
+      column.close();
+    }
+  }
+
   @Override
   public String toString()
   {

@@ -1098,8 +1098,11 @@ public class Table extends Store {
   @Override
   public void close()
   {
-    super.close();
 
+    _row.close();
+
+    super.close();
+    
     _rowAllocator.destroy();
   }
   

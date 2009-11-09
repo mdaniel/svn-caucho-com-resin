@@ -1,20 +1,22 @@
-<web-app xmlns="http://caucho.com/ns/resin">
+<web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:ee="urn:java:ee"
+        xmlns:example="urn:java:example">
   <!-- 
-    - Instantiate an instance of PeriodTaskImpl and store it in jndi.
+    - Instantiate an instance of PeriodTaskImpl and store it in Java Injection
     - The periodic task is then available for use in the various ways
     - illustrated below.
     -
     - The interface for PeriodicTaskImpl is PeriodicTask, which is the
     - view of the object provided to users of the service.
     -->
-  <bean class="example.PeriodicTask"
-        name="periodicTask"
+  <example:PeriodicTask>
+    <ee:Named>periodicTask</ee:Named>
+    <!--
         mbean-name="type=PeriodicTask"
         mbean-interface="example.PeriodicTask">
-    <init>
-      <estimated-average-time>5</estimated-average-time>
-    </init>
-  </bean>
+      -->
+    <estimated-average-time>5</estimated-average-time>
+  </example:PeriodicTask>
 
   <!-- 
      - servlet to manage the PeriodicTask
