@@ -228,6 +228,14 @@ public class ServerAdmin extends AbstractEmitterObject
     return new Date(_server.getStartTime());
   }
 
+  /**
+   * Returns the time since the last start time.
+   */
+  public long getUptime()
+  {
+    return Alarm.getExactTime() - _server.getStartTime();
+  }
+
   //
   // statistics
   //

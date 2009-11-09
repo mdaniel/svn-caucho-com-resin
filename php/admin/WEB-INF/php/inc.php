@@ -5,6 +5,8 @@
  * @author Sam
  */
 
+require_once "WEB-INF/php/graph.php";
+
 global $g_server_id;
 global $g_mbean_server;
 global $g_resin;

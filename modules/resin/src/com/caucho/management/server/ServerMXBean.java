@@ -186,6 +186,12 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   @Description("The time that this instance was last started or restarted")
   public Date getStartTime();
 
+  /**
+   * Returns the time in milliseconds since the last start.
+   */
+  @Description("The time in milliseconds since the last start")
+  public long getUptime();
+
   //
   // statistics
   //

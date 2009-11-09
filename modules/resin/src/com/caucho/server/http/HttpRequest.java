@@ -265,7 +265,7 @@ public class HttpRequest extends AbstractHttpRequest
       _host = _hostHeader;
     }
     else if (HTTP_1_1 <= getVersion())
-      throw new BadRequestException("HTTP/1.1 requires a Host header");
+      throw new BadRequestException("HTTP/1.1 requires a Host header (Remote IP=" + getRemoteHost() + ")");
 
     return _host;
   }

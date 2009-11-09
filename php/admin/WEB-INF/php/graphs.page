@@ -95,8 +95,10 @@ if (! $p_period) {
   $p_period = 60;
 }
 
+$self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
+
 if ($p_servers == null) {
-  $p_servers = array(sprintf("%02d", $g_server->SelfServer->ClusterIndex));
+  $p_servers = array($self_index);
 }
 
 foreach ($p_checks as $check) {
@@ -114,7 +116,7 @@ if (! $p_name)
   $p_name = $p_names[0];
 
 if (! $p_name) {
-  $p_name = "00|Resin|Server|Live";
+  $p_name = $self_index . "|Resin|Server|Uptime";
   $p_names[] = $p_name;
 }
 
@@ -175,77 +177,12 @@ else
   echo " <a href=" . $g_next_url . "&np=" . (30 * 24 * 60) . ">30d</a>";
 ?>
 <p>
-<canvas id="graph" width="<?= $full_width ?>" height="<?= $full_height ?>">
-HTML 5 &lt;canvas> is not supported in this browser
-</canvas>
-
-<script type="application/x-javascript">
-  function select_name(src, dst)
-  {
-    var source_list = document.getElementById(src);
-
-    if (source_list.selectedIndex <= 0)
-      return;
-
-    var selected_value = source_list.options[source_list.selectedIndex];
-
-    if (! selected_value)
-      return;
-    
-    var dest_list = document.getElementById(dst);
-    dest_list.add(selected_value);
-  }
-  
-  function start_bounds(x1, y1, x2, y2)
-  {
-    var canvas = document.getElementById("graph");
-    if (canvas.getContext) {
-      var ctx = canvas.getContext("2d");
-    }
-
-    if (! ctx)
-      return;
-
-    width = <?= $full_width; ?>;
-    height = <?= $full_height ?>;
-
-    ctx.save();
-    
-//    ctx.fillStyle = "#eeeedd";
-    ctx.fillStyle = "#fcf8e5";
-    ctx.rect(0, 0, <?= $full_width ?>, <?= $full_height ?>);
-    ctx.fill();
-//    ctx.stroke();
-//    ctx.beginPath();
-    ctx.strokeStyle = "#000000";
-    
-    ctx.translate(50, 10);
-//    ctx.scale((width - 20) / (x2 - x1), (height - 20) / (y1 - y2));
-//    ctx.translate(0, -y2);
-    ctx.strokeStyle = "#ff00ee";
-    ctx.fillStyle = "#ff00ee";
-
-    ctx.beginPath();    
-    ctx.moveTo(x1, y1);
-
-    return ctx;
-  }
-
-  function rl(c, x, y)
-  {
-    c.lineTo(x, y);
-    c.stroke();
-  }
-
-  function rline(c, x0, y0, x1, y1)
-  {
-    c.moveTo(x0, y0);
-    c.lineTo(x1, y1);
-    c.stroke();
-  }
-</script>
 
 <?php
+
+draw_main_graph();
+
+// graph_draw("graph", $p_names, $full_width, $full_height, $start, -1, $step);
 
 $full_names = $stat->statisticsNames();
 
@@ -273,6 +210,7 @@ foreach ($full_names as $name) {
     $names[] = $name;
   $sections[$section] = $names;
 }
+
 /*
 echo "<ul>";
 foreach ($sections as $section => $names) {
@@ -383,298 +321,64 @@ echo "</ul>";
 
 echo "</form>\n";
 
-$name = $p_name;
+function draw_main_graph()
+{
+  global $p_name;
+  global $p_names;
+  global $p_period;
 
-$width = 600 - 60;
-$height = 400 - 40;
+  $name = $p_name;
 
-$now = time();
-$start = $now - $p_period * 60;
-$dt = date_create();
-$tz = date_timezone_get($dt);
-$offset = timezone_offset_get($tz, $dt);
+  $width = 600 - 60;
+  $height = 400 - 40;
 
-$time = $start + $offset;
+  $now = time();
+  $start = $now - $p_period * 60;
+  $dt = date_create();
+  $tz = date_timezone_get($dt);
+  $offset = timezone_offset_get($tz, $dt);
 
-if ($p_period <= 60) {
-}
-else if ($p_period <= 12 * 60) {
-  $time += 3600 - 1;
-  $time -= $time % 3600;
-}
-else if ($p_period <= 24 * 60) {
-  $time += 3 * 3600 - 1;
-  $time -= $time % (3 * 3600);
-}
-else {
-  $time += 24 * 3600 - 1;
-  $time -= $time % (24 * 3600);
-}
+  $time = $start + $offset;
 
-$start = $time - $offset;
+  if ($p_period <= 60) {
+  }
+  else if ($p_period <= 12 * 60) {
+    $time += 3600 - 1;
+    $time -= $time % 3600;
+  }
+  else if ($p_period <= 24 * 60) {
+    $time += 3 * 3600 - 1;
+    $time -= $time % (3 * 3600);
+  }
+  else {
+    $time += 24 * 3600 - 1;
+    $time -= $time % (24 * 3600);
+  }
 
-$value_set = array();
+  $start = $time - $offset;
 
-$step = 0;
-if ($p_period <= 60) {
+  $value_set = array();
+
   $step = 0;
-}
-else if ($p_period <= 6 * 60) {
-  $step = 2 * 60;
-}
-else if ($p_period <= 24 * 60) {
-  $step = 10 * 60;
-}
-else if ($p_period <= 7 * 24 * 60) {
-  $step = 60 * 60;
-}
-else {
-  $step = 4 * 60 * 60;
-}
-
-foreach ($p_names as $name) {
-  $values = $stat->statisticsData($name, $start * 1000, -1, $step * 1000);
-
-  $bounds = calculate_bounds($bounds, $values);
-
-  $value_set[$name] = $values;
-}  
-
-list($x1, $y1, $x2, $y2) = $bounds;
-$x0 = $x1;
-$x1 = $start * 1000;
-$x2 = ($start + $p_period * 60) * 1000;
-
-$dx = ($x2 - $x1) / $width;
-$dy = ($y2 - $y1) / $height;
-
-if ($dx == 0)
-  $dx = 1;
-  
-if ($dy == 0)
-  $dy = 1;
-
-// saturated primary/secondary
-// 0    #ff0000  - red
-// 30   #ff8000  - orange
-// 60   #ffff00  - yellow
-// 90   #80ff00  - chartreuse
-// 120  #00ff00  - green
-// 150  #00ff80  - spring green
-// 180  #00ffff  - cyan
-// 210  #0080ff  - azure
-// 240  #0000ff  - blue
-// 270  #8000ff  - indigo
-// 300  #ff00ff  - magenta
-// 330  #ff0080  - rose
-
-$colors[] = "#ff3030"; // red
-$colors[] = "#30b0ff"; // azure
-$colors[] = "#906000"; // brown
-$colors[] = "#ff9030"; // orange
-$colors[] = "#3030ff"; // blue
-$colors[] = "#000000"; // black
-$colors[] = "#50b000"; // green
-$colors[] = "#d030d0"; // magenta
-$colors[] = "#008080"; // cyan
-$colors[] = "#b03060"; // rose
-$colors[] = "#e090ff"; // indigo
-$colors[] = "#c0c0c0"; // gray
-$colors[] = "#408040"; // forest green
-
-echo "<script type='application/x-javascript'>\n";
-echo "c = start_bounds(0, 0, 100, 100);\n";
-
-draw_grid($x1, $y1, $x2, $y2, 0, 0, 100, 100, "#c0c0c0", "#c0c0c0");
-
-$i = 0;
-foreach ($value_set as $name => $values) {
-  echo "c.save();";
-  echo "c.strokeStyle = '" . $colors[$i] . "';\n";
-  echo "c.beginPath();\n";
-  echo "c.moveTo(" . ($values[0]->time - $x1) / $dx
-        . "," . (($dy - $values[0]->value) / $dy + $height) . ");\n";
-
-  foreach ($values as $v) {
-    printf("rl(c,%.2f,%.2f);\n",
-           ($v->time - $x1) / $dx,
-           (($dy - $v->value) / $dy + $height));
+  if ($p_period <= 60) {
+    $step = 0;
   }
-
-  echo "c.translate(" . (-40 + 200 * floor($i / 10))
-       . ", " . ($height + 25 + 10 * ($i % 10)) . ");";
-
-  echo "c.beginPath();";
-  //echo "c.strokeStyle = '" . $colors[$i] . "';";
-  echo "c.moveTo(0, 10);";
-  echo "c.lineTo(30, 10);";
-  echo "c.stroke();";
-  echo "c.beginPath();";
-  echo "c.fillStyle = '#000000';\n";
-
-  $name_seg = preg_split('/[|]/', $name);
-  $server = array_shift($name_seg);
-  array_shift($name_seg);
-  array_shift($name_seg);
-  $name = join('|', $name_seg);
-
-  echo "c.fillText(" . sprintf("'%s - %s'", $server, $name) . ", 40, 13);";
-  echo "c.restore();";
-
-  $i++;
-}  
-
-echo "c.beginPath();";
-echo "c.strokeStyle ='#000000';\n";
-echo "c.font = '10px Monotype';\n";
-echo "c.fillStyle ='#000000';\n";
-
-echo "c.fillText('" . print_value($y1) . "', -45, " . ($height) . ");\n";
-echo "c.fillText('" . print_value($y2) . "', -45, " . (10) . ");\n";
-/*
-echo "c.fillText('" . date("H:i", $x1 / 1000) . "', -10, " . ($height + 10) . ");\n";
-echo "c.fillText('" . date("m-d", $x1 / 1000) . "', -10, " . ($height + 20) . ");\n";
-echo "c.fillText('" . date("H:i", $x2 / 1000) . "', " . ($width - 20) . ", " . ($height + 10) . ");\n";
-echo "c.fillText('" . date("m-d", $x2 / 1000) . "', " . ($width - 20) . ", " . ($height + 20) . ");\n";
-*/
-
-echo "</script>\n";
-
-function print_value($value)
-{
-  if ($value > 1e11)
-    return sprintf("%.2g", $value);
-  else if ($value >= 1e9)
-    return sprintf("%.1fG", $value / 1e9);
-  else if ($value >= 1e6)
-    return sprintf("%.1fM", $value / 1e6);
-  else if ($value >= 1e3)
-    return sprintf("%.1fk", $value / 1e3);
-  else if ($value >= 1)
-    return sprintf("%.1f", $value);
-  else
-    return sprintf("%.3g", $value);
-}
-
-function calculate_bounds($bounds, $values)
-{
-  if ($bounds) {
-    list($min_x, $min_y, $max_x, $max_y) = $bounds;
+  else if ($p_period <= 6 * 60) {
+    $step = 2 * 60;
+  }
+  else if ($p_period <= 24 * 60) {
+    $step = 10 * 60;
+  }
+  else if ($p_period <= 7 * 24 * 60) {
+    $step = 60 * 60;
   }
   else {
-    $min_x = 1e50;
-    $min_y = 0;//1e50;
-    $max_x = -1e50;
-    $max_y = -1e50;
-  }
-  
-  foreach ($values as $v) {
-    if ($v->getTime() < $min_x)
-      $min_x = $v->getTime();
-      
-    if ($max_x < $v->getTime())
-      $max_x = $v->getTime();
-      
-    if ($v->getValue() < $min_y)
-      $min_y = $v->getValue();
-      
-    if ($max_y < $v->getValue())
-      $max_y = $v->getValue();
+    $step = 4 * 60 * 60;
   }
 
-  return array($min_x, $min_y, $max_x, $max_y);
-}
+  $end = $start + $p_period * 60;
 
-function draw_line($x_0, $y_0, $x_1, $y_1)
-{
-  global $x1, $dx, $dy, $height;
-
-  printf("rline(c,%.2f,%.2f,%.2f,%.2f)\n",
-           ($x_0 - $x1) / $dx,
-           ($dy - $y_0) / $dy * $height,
-           ($x_1 - $x1) / $dx,
-           ($dy - $y_1) / $dy * $height);
-}
-
-function draw_grid($min_x, $min_y, $max_x, $max_y,
-                   $x0, $y0, $width, $delta_y, $low_color, $high_color)
-{
-  global $dx;
-  global $dy;
-  global $height;
-
-  // x-grid
-  $x = $min_x;
-  echo "c.save();\n";
-  echo "c.strokeStyle = '" . $high_color . "';\n";
-  echo "c.strokeWidth = 1;\n";
-  echo "c.fillStyle ='#000000';\n";
-  echo "c.font = '10px Monotype';\n";
-  echo "c.beginPath();\n";
-
-  $x_step = grid_delta_x($min_x, $max_x);
-
-  for ($x = $min_x; $x <= $max_x; $x += $x_step) {
-    draw_line($x, 0, $x, $dy);
-
-    echo "c.fillText('" . date("H:i", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 10) . ");\n";
-    echo "c.fillText('" . date("m-d", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 20) . ");\n";
-  }
-  
-  // y-grid
-  $y = $min_y;
-
-  $digit = (int) ($max_y / pow(10, floor(log10($max_y - $min_y))) + 0.5);
-  $high_mod = 2;
-  
-  if ($digit == 1)
-    $digit = 10;
-  else if ($digit == 2) {
-    $high_mod = 5;
-    $digit = 10;
-  }
-  else if ($digit == 3)
-    $digit = 6;
-
-  $delta = ($max_y - $min_y) / $digit;
-
-  if ($delta <= 0)
-    $delta = 1;
-
-  $i = 1;
-  for ($y = $min_y + $delta; $y < $max_y; $y += $delta) {
-    $yp = $y0 + ($y - $min_y) * $height / ($max_y - $min_y);
-
-    $color = $i % $high_mod == 0 ? $high_color : $low_color;
-
-    // imageline($im, $x0, $yp, $x0 + $width, $yp, $color);
-
-    $i++;
-  }
-}
-
-function grid_delta_x($min_x, $max_x)
-{
-  $delta = ($max_x - $min_x) / 60000;
-
-  if ($delta <= 60) {
-    return 15 * 60000;
-  }
-  else if ($delta <= 3 * 60) {
-    return 30 * 60000;
-  }
-  else if ($delta <= 12 * 60) {
-    return 60 * 60000;
-  }
-  else if ($delta <= 24 * 60) {
-    return 3 * 60 * 60000;
-  }
-  else if ($delta <= 7 * 24 * 60) {
-    return 24 * 60 * 60000;
-  }
-  else {
-    return 7 * 24 * 60 * 60000;
-  }
+  graph_draw("graph", $width, $height, $p_names, $start, $end, $step);
 }
 
 ?>
