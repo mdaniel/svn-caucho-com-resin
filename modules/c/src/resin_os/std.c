@@ -252,7 +252,8 @@ std_write(connection_t *conn, char *buf, int len)
     error = errno;
     
     if (errno == EINTR || errno == EAGAIN) {
-      poll_write(fd, conn->socket_timeout);
+      if (poll_write(fd, conn->socket_timeout) == 0)
+        return write_exception_status(conn, errno);
     }
     else {
       return write_exception_status(conn, errno);

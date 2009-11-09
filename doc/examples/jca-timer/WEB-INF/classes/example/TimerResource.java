@@ -69,17 +69,21 @@ public class TimerResource extends AbstractResourceAdapter {
   public void start(BootstrapContext ctx)
     throws ResourceAdapterInternalException
   {
-    log.info("WorkResource[] starting");
+    try {
+      log.info("WorkResource[] starting");
 
-    WorkManager workManager = ctx.getWorkManager();
+      WorkManager workManager = ctx.getWorkManager();
     
-    Work work = new WorkTask(this);
+      Work work = new WorkTask(this);
 
-    TimerTask timerTask = new WorkScheduleTimerTask(workManager, work);
+      TimerTask timerTask = new WorkScheduleTimerTask(workManager, work);
 
-    _timer = ctx.createTimer();
+      _timer = ctx.createTimer();
 
-    _timer.schedule(timerTask, _initialDelay, _period);
+      _timer.schedule(timerTask, _initialDelay, _period);
+    } catch (Exception e) {
+      throw new ResourceAdapterInternalException(e);
+    }
   }
   
   /**
@@ -87,7 +91,6 @@ public class TimerResource extends AbstractResourceAdapter {
    * web-app or host closes down.
    */
   public void stop()
-    throws ResourceAdapterInternalException
   {
     log.info("Resource[" + _count + "] stopping");
 

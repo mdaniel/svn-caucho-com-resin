@@ -1669,6 +1669,7 @@ public class Port extends TaskWorker
   private void closeConnection(TcpConnection conn)
   {
     _activeConnectionSet.remove(conn);
+    _suspendConnectionSet.remove(conn);
     _activeConnectionCount.decrementAndGet();
 
     // wake the start thread

@@ -247,6 +247,33 @@ public class JavaClassGenerator {
     }
   }
 
+  /**
+   * Try to preload the class.
+   *
+   * @return true if the preloaded class is still valid.
+   */
+  public Class load(String fullClassName)
+  {
+    try {
+      Class cl = loadClass(fullClassName, false);
+
+      if (cl != null) {
+        // force validation of the class
+        Constructor []ctors = cl.getConstructors();
+      }
+
+      return cl;
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return null;
+    } catch (ClassFormatError e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return null;
+    }
+  }
+
   public Path getClassFilePath(String className)
   {
     String classPathName = className.replace('.', '/') + ".class";
@@ -446,13 +473,19 @@ public class JavaClassGenerator {
     } catch (RuntimeException e) {
       if (! preload)
 	throw e;
-      else
+      else {
+        log.log(Level.FINE, e.toString(), e);
+        
 	return null;
+      }
     } catch (Error e) {
       if (! preload)
 	throw e;
-      else
+      else {
+        log.log(Level.FINE, e.toString(), e);
+      
 	return null;
+      }
     } catch (ClassNotFoundException e) {
       if (! preload)
 	throw e;

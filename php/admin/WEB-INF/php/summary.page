@@ -323,6 +323,8 @@ if ($ports) {
 <?php
   $count = 0;
   $row = 0;
+  $connInfoList = array();
+
   foreach ($ports as $port) {
     $count++;
 ?>
@@ -340,21 +342,27 @@ if ($ports) {
     <td><?= $port->CometIdleCount ?>
   </tr>
 <?php
+    $connInfoList = array_merge($connInfoList, $port->connectionInfo());
+  }
+
+echo "</table>";
+
+echo "<h3>Open Connections</h3>";
+
+echo "<table class='data'>";
+echo "<tr><th><th>time<th>id<th>url<th>IP</tr>\n";
 
 $conn = null;
 
 $jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
 
-$connInfoList = $port->connectionInfo();
-usort($connInfoList, "conn_time_cmp");
+$row = 0;
+@ usort($connInfoList, "conn_time_cmp");
 foreach ($connInfoList as $connInfo) {
   if ($connInfo->requestTime >= 0 && $connInfo->threadId >= 0) {
     echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
     echo "<tr>\n";
-    echo "<td></td>\n";
-    echo "<td colspan='8'>\n";
-//    echo "</td>\n";
-//    echo "<td colspan='7'>\n";
+    echo "<td>\n";
 
     $pname = "port_" . $row;
     
@@ -364,18 +372,26 @@ foreach ($connInfoList as $connInfo) {
     $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
     echo "<a id='s_$pname' href=\"javascript:$show\">[show]</a> ";
     echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>[hide]</a> ";
+    echo "<td>";
     
     echo sprintf("%.3fs", $connInfo->requestTime * 0.001);
     // echo " thread=" . $threadId;
-    echo " {conn-" . $connInfo->id . "} ";
+    echo "<td>";
+    echo $connInfo->id;
     
+    echo "<td>";
     $conn = $server->findConnectionByThreadId($threadId);
     if ($conn)
       echo $conn->getUrl();
     else
       echo $connInfo->state;
+
+    echo "<td>";
+    echo " " . $conn->getRemoteAddress();
     echo "\n";
-    
+    echo "</tr>";
+
+    echo "<tr><td colspan='5'>";
     echo "<pre id='h1_$pname' style='display:none'>";
 
     $thread = $jvm_thread->getThreadInfo($threadId, 50);
@@ -394,10 +410,7 @@ foreach ($connInfoList as $connInfo) {
 }
 
 ?>
-    </td>
-  </tr>
 <?php 
-  }
 }
 ?>
 </table>

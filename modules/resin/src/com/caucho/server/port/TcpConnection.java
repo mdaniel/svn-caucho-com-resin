@@ -1375,6 +1375,11 @@ public class TcpConnection extends Connection
       return TcpConnection.this.getDisplayState();
     }
 
+    public String getRemoteAddress()
+    {
+      return TcpConnection.this.getRemoteHost();
+    }
+
     void register()
     {
       registerSelf();
