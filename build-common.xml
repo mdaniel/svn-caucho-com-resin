@@ -671,6 +671,7 @@
         <include name="lib/jsf.LICENSE"/>
         <include name="lib/webutil.jar"/>
         <include name="lib/webservices-api.jar"/>
+        <include name="lib/webservices-extra-api.jar"/>
         <include name="lib/webservices.LICENSE"/>
 
 	<!--

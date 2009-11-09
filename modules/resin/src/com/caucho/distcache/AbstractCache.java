@@ -902,12 +902,6 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  protected void duplicateCacheNameException(String cacheName)
-  {
-    throw new ConfigException(L.l("'{0}' is an invalid cache name because it's already used by another cache.",
-                                  cacheName));
-  }
-
   public boolean isClosed()
   {
     return _isClosed;
