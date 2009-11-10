@@ -3,7 +3,7 @@
  * Provides the most important status information about the Resin server.
  */
 
-require_once "WEB-INF/php/inc.php";
+// require_once "WEB-INF/php/inc.php";
 
 //echo "<pre>";
 $mbean_server = new MBeanServer();

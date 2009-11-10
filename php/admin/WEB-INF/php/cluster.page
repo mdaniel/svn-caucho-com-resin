@@ -195,25 +195,25 @@ sort($servers);
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 if ($stat_service) {
-  create_graph("resin:type=Server", "CpuLoadAvg", $servers);
-  create_graph("resin:type=Memory", "TenuredUsed", $servers);
-  create_graph("java.lang:type=Threading", "ThreadCount", $servers);
+  create_graph("cpu", "OS|CPU|CPU Active", $servers);
+  create_graph("used", "JVM|Memory|Tenured Used", $servers);
+  create_graph("thread", "JVM|Thread|Thread Max", $servers);
 }
 
-function create_graph($mbean, $attr, $servers)
+function create_graph($name, $attr, $servers)
 {
   echo "<p>\n";
-  echo "<img src='graph.php?width=600&height=300";
 
-  $i = 0;
+  $names = array();
+
   foreach ($servers as $name) {
-    if (! $name)
-      $name = "default";
-      
-    echo "&g[$i][0]=$mbean&g[$i][1]=$attr&g[$i][2]=$name"
-    $i++;
+    $names[] = $index . "|" . $attr;
   }
-  echo "' width='600' height='300'>\n"
+
+  $end = time();
+  $start = $now - 3600 * 1000;
+
+  stat_graph($name, 600, 300, $start, $end, $names);
 }
 
 echo "<h2>Database Pools</h2>";

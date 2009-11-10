@@ -356,29 +356,9 @@ function draw_main_graph()
   }
 
   $start = $time - $offset;
-
-  $value_set = array();
-
-  $step = 0;
-  if ($p_period <= 60) {
-    $step = 0;
-  }
-  else if ($p_period <= 6 * 60) {
-    $step = 2 * 60;
-  }
-  else if ($p_period <= 24 * 60) {
-    $step = 10 * 60;
-  }
-  else if ($p_period <= 7 * 24 * 60) {
-    $step = 60 * 60;
-  }
-  else {
-    $step = 4 * 60 * 60;
-  }
-
   $end = $start + $p_period * 60;
 
-  graph_draw("graph", $width, $height, $p_names, $start, $end, $step);
+  stat_graph("graph", $width, $height, $start, $end, $p_names);
 }
 
 ?>

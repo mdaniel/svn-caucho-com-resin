@@ -30,8 +30,8 @@ $g_colors = array("#ff3030", // red
 
 $g_label_width = 180;
 
-function graph_draw($canvas, $width, $height,
-                    $names, $start, $end, $step, $expand_height = false)
+function stat_graph($canvas, $width, $height,
+                    $start, $end, $names, $expand_height = true)
 {
   global $g_mbean_server;
   global $g_label_width;
@@ -43,6 +43,8 @@ function graph_draw($canvas, $width, $height,
 
   if (! $stat)
     return;
+
+  $step = calculate_step($end - $start);
 
   graph_draw_header();
 
@@ -72,6 +74,26 @@ function graph_draw($canvas, $width, $height,
 
   graph_draw_impl($stat, $canvas, $width, $height,
                   $names, $value_set, $start, $end, $step);
+}
+
+function calculate_step($period)
+{
+
+  if ($p_period <= 60) {
+    return 0;
+  }
+  else if ($p_period <= 6 * 60) {
+    return 2 * 60;
+  }
+  else if ($p_period <= 24 * 60) {
+    return 10 * 60;
+  }
+  else if ($p_period <= 7 * 24 * 60) {
+    return 60 * 60;
+  }
+  else {
+    return 4 * 60 * 60;
+  }
 }
 
 function graph_write_canvas($canvas, $width, $height)
@@ -329,8 +351,21 @@ function draw_grid($width, $height,
     draw_line($x, 0, $x, $dy,
               $min_x, $dx, $dy, $height);
 
-    echo "c.fillText('" . date("H:i", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 10) . ");\n";
-    echo "c.fillText('" . date("m-d", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 20) . ");\n";
+
+    if ($x == $min_x || $max_x < $x + $x_step
+        || (floor(($x - $x_step) / (3600 * 1000))
+            != floor(($x) / (3600 * 1000)))) {
+      echo "c.fillText('" . date("H:i", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 10) . ");\n";
+    }
+    else {
+      echo "c.fillText('" . date("  :i", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 10) . ");\n";
+    }
+
+    if ($x == $min_x || $max_x < $x + $x_step
+        || (floor(($x - $x_step) / (24 * 3600 * 1000))
+            != floor(($x) / (24 * 3600 * 1000)))) {
+      echo "c.fillText('" . date("m-d", $x / 1000) . "', " . (($x - $min_x) / $dx - 13) . ", " . ($height + 20) . ");\n";
+    }
   }
   
   // y-grid
