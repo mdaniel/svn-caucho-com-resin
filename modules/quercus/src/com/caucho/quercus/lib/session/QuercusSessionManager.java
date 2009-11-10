@@ -275,6 +275,9 @@ public class QuercusSessionManager implements AlarmListener {
   public void removeSession(String sessionId)
   {
     _sessions.remove(sessionId);
+    
+    if (_persistentStore != null)
+      _persistentStore.remove(sessionId);
 
     remove(sessionId);
   }
@@ -454,7 +457,7 @@ public class QuercusSessionManager implements AlarmListener {
    * Creates a new SessionArrayValue instance.
    */
   protected SessionArrayValue createSessionValue(String key, long now,
-						 long sessionTimeout)
+                                                 long sessionTimeout)
   {
     return new SessionArrayValue(key, now, _sessionTimeout);
   }

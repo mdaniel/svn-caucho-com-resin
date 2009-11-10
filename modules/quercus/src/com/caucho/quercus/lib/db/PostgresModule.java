@@ -596,6 +596,8 @@ public class PostgresModule extends AbstractQuercusModule {
                                      @Optional("") String delimiter,
                                      @Optional("") String nullAs)
   {
+    // XXX delimiter not used?
+
     try {
       if (conn == null)
 	return false;

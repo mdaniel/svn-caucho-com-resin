@@ -860,6 +860,12 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fileperms(Env env, Path path)
   {
+    // php/160g
+    if (!path.canRead()) {
+      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+      return BooleanValue.FALSE;
+    }
+
     return LongValue.create(path.getMode());
   }
 

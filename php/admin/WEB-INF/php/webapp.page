@@ -22,13 +22,20 @@ if (! $action) {
 }
 else if ($is_secure) {
   if ($action == 'deploy') {
-    $client = @new Java("com.caucho.server.admin.DeployClient");
+    $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
     $vfs = java_class("com.caucho.vfs.Vfs");
 
     $path = $vfs->lookup($_FILES['warfile']['tmp_name']);
-    $tag = "wars/{$_REQUEST['host']}/{$_REQUEST['url']}";
+    $tag = $client->createTag("default", 
+                              $_REQUEST['host'], 
+                              $_REQUEST['url'], 
+                              NULL);
     $user = $request->getRemoteUser();
-    $client->deployJarContents($path, $tag, $user, "", "", null);
+
+    $attributes = array($client->USER_ATTRIBUTE => $user,
+                        "client", "resin-admin");
+
+    $client->deployJarContents($tag, $path, $attributes);
   }
   else if ($_POST['name'] == $_GET['id']) {
     if ($action == 'start') {
@@ -148,7 +155,10 @@ END;
 function display_webapp_summary($g_mbean_server)
 {
   global $is_secure;
-?>
+?><top>
+  <test-file/>
+</top>
+
 
 <!-- Applications -->
 <h2>WebApps</h2>
@@ -190,6 +200,11 @@ foreach ($webapps as $webapp) {
     <td class='item'>
 <?php
 $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
+
+if ($webApp->RepositoryTag) {
+  $context_path .= "<br/>&nbsp;&nbsp;(tag: {$webapp->RepositoryTag})";
+}
+
 $object_name = $webapp->mbean_name;
 
 echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "</a>";
