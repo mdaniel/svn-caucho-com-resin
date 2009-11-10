@@ -693,85 +693,8 @@ public class InjectIntrospector {
                           String mappedName,
                           String beanName)
   {
-    if (! fieldType.isAssignableFrom(type))
-      type = fieldType;
-
-    if (type.isPrimitive())
-      type = _primitiveTypeMap.get(type);
-
-    Object value = Jndi.lookup(jndiName);
-
-    // XXX: can use lookup-link and store the proxy
-
-    if (value != null)
-      return new SingletonGenerator(value);
-
-    Bean component = null;
-
-    // ejb/0f92
-    /*
-    if (mappedName == null || "".equals(mappedName))
-      mappedName = jndiName;
-    */
-
-    component = bind(location, type, mappedName);
-
-    if (component != null) {
-      bindJndi(location, jndiName, component);
-
-      return new ComponentValueGenerator(location, component);
-    }
-
-    if (component == null && beanName != null && ! "".equals(beanName)) {
-      component = bind(location, type, beanName);
-      if (component != null) {
-        bindJndi(location, jndiName, component);
-
-        return new ComponentValueGenerator(location, component);
-      }
-    }
-
-    if (component == null && jndiName != null && ! "".equals(jndiName)) {
-      component = bind(location, type, jndiName);
-
-      if (component != null) {
-        bindJndi(location, jndiName, component);
-
-        return new ComponentValueGenerator(location, component);
-      }
-    }
-
-    if (component == null)
-      component = bind(location, type);
-
-    if (component != null) {
-      bindJndi(location, jndiName, component);
-
-      return new ComponentValueGenerator(location, component);
-    }
-
-    else
-      throw new ConfigException(location + L.l("{0} with mappedName={1}, beanName={2}, and jndiName={3} does not match anything",
-                                             type.getName(),
-                                             mappedName,
-                                             beanName,
-                                             jndiName));
-
-    /*
-      if (_component != null && _jndiName != null && ! "".equals(_jndiName)) {
-        try {
-          Jndi.bindDeepShort(_jndiName, _component);
-        } catch (NamingException e) {
-          throw new ConfigException(e);
-        }
-      }
-    }
-
-    if (component != null)
-      return component.get();
-    else
-      return getJndiValue(_type);
-    */
+    return new JavaeeResourceGenerator(location, fieldType, type,
+                                       jndiName, mappedName, beanName);
   }
 
   public static Bean bind(String location, Class type)

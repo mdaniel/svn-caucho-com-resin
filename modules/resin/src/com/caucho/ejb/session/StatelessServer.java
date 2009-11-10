@@ -120,8 +120,8 @@ public class StatelessServer extends SessionServer {
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
           api, getStatelessContext()));
 
-    StatelessBeanImpl statelessBean = new StatelessBeanImpl(this, mBean,
-        provider);
+    StatelessBeanImpl statelessBean
+      = new StatelessBeanImpl(this, mBean, provider);
 
     return statelessBean;
   }

@@ -63,7 +63,7 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   
   public StatelessBeanImpl(StatelessServer server,
 			   ManagedBeanImpl<X> bean,
-			  StatelessProvider producer)
+                           StatelessProvider producer)
   {
     super(bean);
 

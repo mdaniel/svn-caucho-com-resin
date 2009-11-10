@@ -626,9 +626,7 @@ public class TcpConnection extends Connection
 
         return RequestState.THREAD_DETACHED;
       }
-
-      _state = _state.toKeepalive();
-    } while (_state.isKeepalive());
+    } while (_state.isAllowKeepalive());
 
     return result;
   }
@@ -677,7 +675,7 @@ public class TcpConnection extends Connection
       return RequestState.EXIT;
     }
 
-    _state = _state.toKeepaliveSelect();
+    _state = _state.toKeepalive();
 
     // use select manager if available
     if (_port.getSelectManager() != null) {
@@ -691,9 +689,6 @@ public class TcpConnection extends Connection
       // keepalive to select manager fails (e.g. filled select manager)
       else {
         log.warning(dbgId() + " failed keepalive (select)");
-
-        _state = _state.toActive();
-        port.keepaliveEnd(this);
 
         close();
 
@@ -714,9 +709,6 @@ public class TcpConnection extends Connection
       }
       // blocking read timed out or closed
       else {
-        _state = _state.toActive();
-        port.keepaliveEnd(this);
-
         close();
 
         return RequestState.EXIT;
