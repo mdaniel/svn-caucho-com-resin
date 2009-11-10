@@ -65,4 +65,9 @@ public interface StatServiceMXBean extends ManagedObjectMXBean
    * Returns the strings
    */
   public String []statisticsNames();
+
+  /**
+   * Returns the start times for the given server.
+   */
+  public long []getStartTimes(int serverIndex, long startTime, long endTime);
 }
