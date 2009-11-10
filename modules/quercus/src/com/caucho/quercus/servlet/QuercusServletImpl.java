@@ -76,7 +76,7 @@ public class QuercusServletImpl extends HttpServlet
   protected Quercus _quercus;
   protected ServletConfig _config;
   protected ServletContext _servletContext;
-
+  
   /**
    * initialize the script manager.
    */

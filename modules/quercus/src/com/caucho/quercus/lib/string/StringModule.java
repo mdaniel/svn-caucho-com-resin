@@ -1349,8 +1349,9 @@ public class StringModule extends AbstractQuercusModule {
   {
     if (string.length() == 0)
       return 0;
-    else
+    else {
       return string.charAt(0);
+    }
   }
 
   /**

@@ -440,7 +440,17 @@ abstract public class StringValue
   /**
    * Converts to a string value.
    */
+  @Override
   public StringValue toStringValue()
+  {
+    return this;
+  }
+
+  /**
+   * Converts to a string value.
+   */
+  @Override
+  public StringValue toStringValue(Env env)
   {
     return this;
   }

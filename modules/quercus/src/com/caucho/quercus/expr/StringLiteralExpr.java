@@ -52,6 +52,7 @@ public class StringLiteralExpr extends Expr {
   public StringLiteralExpr(Location location, StringValue value)
   {
     super(location);
+    
     _value = value;
   }
 

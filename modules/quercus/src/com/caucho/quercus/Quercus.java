@@ -374,6 +374,11 @@ public class Quercus
     return false;
   }
 
+  public void setUnicodeSemantics(boolean isUnicode)
+  {
+    _isUnicodeSemantics = isUnicode;
+  }
+  
   /**
    * Returns true if unicode.semantics is on.
    */
