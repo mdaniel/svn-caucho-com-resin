@@ -237,6 +237,14 @@ public class TcpConnection extends Connection
   //
 
   /**
+   * Returns the state.
+   */
+  public ConnectionState getState()
+  {
+    return _state;
+  }
+  
+  /**
    * Returns true for active.
    */
   public boolean isActive()
@@ -258,14 +266,6 @@ public class TcpConnection extends Connection
   public boolean isClosed()
   {
     return _state.isClosed();
-  }
-
-  /**
-   * Returns the state string.
-   */
-  public final String getState()
-  {
-    return _state.toString();
   }
 
   public final boolean isDestroyed()
@@ -621,7 +621,7 @@ public class TcpConnection extends Connection
         // duplex (xmpp/hmtp) handling
         return RequestState.DUPLEX;
       }
-      else if (_state == ConnectionState.COMET) {
+      else if (_state.isCometActive()) {
         _port.suspend(this);
 
         return RequestState.THREAD_DETACHED;
@@ -765,8 +765,10 @@ public class TcpConnection extends Connection
     if (controller != null)
       controller.closeImpl();
 
+    /*
     // XXX: to finishRequest
-    _state = _state.toCompleteComet();
+    _state = _state.toCometComplete();
+    */
   }
 
   @Override
@@ -818,9 +820,7 @@ public class TcpConnection extends Connection
                                            ServletRequest request,
                                            ServletResponse response)
   {
-    if (_controller != null)
-      throw new IllegalStateException(L.l("comet mode can't start in state '{0}'",
-                                          _state));
+    _state = _state.toComet();
 
     ConnectionCometController controller
       = super.toComet(isTop, request, response);
@@ -829,8 +829,6 @@ public class TcpConnection extends Connection
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " starting comet");
-
-    _state = ConnectionState.COMET;
 
     return controller;
   }
@@ -878,6 +876,16 @@ public class TcpConnection extends Connection
     }
   }
 
+  @Override
+  protected void toCometComplete()
+  {
+    _state = _state.toCometComplete();
+  }
+
+  //
+  // duplex/websocket
+  //
+
   /**
    * Starts a full duplex (tcp style) request for hmtp/xmpp
    */
@@ -921,7 +929,7 @@ public class TcpConnection extends Connection
    */
   protected void closeControllerImpl()
   {
-    _state = _state.toCompleteComet();
+    _state = _state.toCometComplete();
 
     getPort().resume(this);
   }
@@ -1358,7 +1366,7 @@ public class TcpConnection extends Connection
 
     public String getState()
     {
-      return TcpConnection.this.getState();
+      return TcpConnection.this.getState().toString();
     }
 
     public String getDisplayState()

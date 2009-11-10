@@ -36,7 +36,8 @@ import com.caucho.security.AbstractLogin;
 import com.caucho.security.RoleMapManager;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ConnectionCometController;
+import com.caucho.server.port.ConnectionCometController;
+import com.caucho.server.port.AsyncListenerNode;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
@@ -638,6 +639,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
    *
    * @since Servlet 3.0
    */
+  /*
   public boolean isSuspended()
   {
     if (_comet != null)
@@ -645,16 +647,20 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return false;
   }
+  */
 
   /**
    * Returns true if the servlet is resumed
    *
    * @since Servlet 3.0
    */
+  /*
   public boolean isResumed()
   {
-    return _comet != null && ! _comet.isInitial() && ! _comet.isComplete();
+    // return _comet != null && ! _comet.isInitial() && ! _comet.isComplete();
+    return _comet != null && ! _comet.isComplete();
   }
+  */
 
   /**
    * Returns true if the servlet timed out
@@ -671,6 +677,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
    *
    * @since Servlet 3.0
    */
+  /*
   public boolean isInitial()
   {
     if (_comet != null)
@@ -678,6 +685,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return true;
   }
+  */
 
   //
   // HttpServletRequest APIs

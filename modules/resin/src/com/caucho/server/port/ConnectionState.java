@@ -29,16 +29,22 @@
 
 package com.caucho.server.port;
 
-enum ConnectionState {
+public enum ConnectionState {
   IDLE,                 // TcpConnection in free list
   INIT,                 // allocated, ready to accept
   ACCEPT,               // accepting
   REQUEST_READ,         // after accept, but before any data is read
   REQUEST_ACTIVE,       // processing a request
-  REQUEST_NO_KEEPALIVE, // processing a request, but keepalive forbidden
+  REQUEST_NKA,          // processing a request, but keepalive forbidden
   REQUEST_KEEPALIVE,    // waiting for keepalive data
+  
   COMET,                // processing an active comet service
   COMET_SUSPEND,        // suspended waiting for a wake
+  COMET_COMPLETE,       // complete or timeout
+  COMET_NKA,            // processing an active comet service
+  COMET_SUSPEND_NKA,    // suspended waiting for a wake
+  COMET_COMPLETE_NKA,   // complete or timeout
+  
   DUPLEX,               // converted to a duplex/websocket
   DUPLEX_KEEPALIVE,     // waiting for duplex read data
   CLOSED,               // connection closed, ready for accept
@@ -46,15 +52,33 @@ enum ConnectionState {
 
   boolean isComet()
   {
-    return this == COMET;
+    switch (this) {
+    case COMET:
+    case COMET_SUSPEND:
+    case COMET_NKA:
+    case COMET_SUSPEND_NKA:
+      return true;
+    default:
+      return false;
+    }
   }
 
-  boolean isCometSuspend()
+  boolean isCometActive()
   {
-    return this == COMET_SUSPEND;
+    return this == COMET || this == COMET_NKA;
   }
 
-  boolean isDuplex()
+  public boolean isCometSuspend()
+  {
+    return this == COMET_SUSPEND || this == COMET_SUSPEND_NKA;
+  }
+
+  public boolean isCometComplete()
+  {
+    return this == COMET_COMPLETE || this == COMET_COMPLETE_NKA;
+  }
+
+  public boolean isDuplex()
   {
     return this == DUPLEX || this == DUPLEX_KEEPALIVE;
   }
@@ -76,7 +100,7 @@ enum ConnectionState {
     case ACCEPT:
     case REQUEST_READ:
     case REQUEST_ACTIVE:
-    case REQUEST_NO_KEEPALIVE:
+    case REQUEST_NKA:
       return true;
 
     default:
@@ -112,7 +136,12 @@ enum ConnectionState {
     case REQUEST_READ:
     case REQUEST_ACTIVE:
     case REQUEST_KEEPALIVE:
+      
+    case COMET:
+    case COMET_SUSPEND:
+    case COMET_COMPLETE:
       return true;
+      
     default:
       return false;
     }
@@ -157,8 +186,8 @@ enum ConnectionState {
     case REQUEST_KEEPALIVE:
       return REQUEST_ACTIVE;
       
-    case REQUEST_NO_KEEPALIVE:
-      return REQUEST_NO_KEEPALIVE;
+    case REQUEST_NKA:
+      return REQUEST_NKA;
 
       /*
     case DUPLEX_KEEPALIVE:
@@ -170,6 +199,10 @@ enum ConnectionState {
     case COMET_SUSPEND:
       return COMET;
 
+    case COMET_NKA:
+    case COMET_SUSPEND_NKA:
+      return COMET_NKA;
+
     default:
       throw new IllegalStateException(this + " is an illegal active state");
     }
@@ -179,7 +212,13 @@ enum ConnectionState {
   {
     switch (this) {
     case REQUEST_ACTIVE:
-      return REQUEST_NO_KEEPALIVE;
+      return REQUEST_NKA;
+    case COMET:
+      return COMET_NKA;
+    case COMET_SUSPEND:
+      return COMET_SUSPEND_NKA;
+    case COMET_COMPLETE:
+      return COMET_COMPLETE_NKA;
     default:
       return this;
     }
@@ -224,12 +263,42 @@ enum ConnectionState {
       throw new IllegalStateException(this + " is an illegal idle state");
   }
 
-  ConnectionState toCompleteComet()
+  ConnectionState toComet()
   {
-    if (this == COMET)
-      return REQUEST_READ;
-    else
+    switch (this) {
+    case REQUEST_READ:
+    case REQUEST_ACTIVE:
+    case REQUEST_KEEPALIVE:
+      return COMET;
+      
+    case REQUEST_NKA:
+      return COMET_NKA;
+
+    default:
+      throw new IllegalStateException(this + " cannot switch to comet");
+    }
+  }
+
+  ConnectionState toCometComplete()
+  {
+    switch (this) {
+    case COMET:
+    case COMET_SUSPEND:
+    case COMET_COMPLETE:
+      return COMET_COMPLETE;
+      
+    case COMET_NKA:
+    case COMET_SUSPEND_NKA:
+    case COMET_COMPLETE_NKA:
+      return COMET_COMPLETE_NKA;
+      
+    case CLOSED:
+    case DESTROYED:
       return this;
+
+    default:
+      throw new IllegalStateException(this + " cannot complete comet");
+    }
   }
 
   ConnectionState toClosed()

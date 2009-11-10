@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.port;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ public class AsyncListenerNode
   private final ServletResponse _response;
   private final AsyncListenerNode _next;
 
-  AsyncListenerNode(AsyncListener listener,
+  public AsyncListenerNode(AsyncListener listener,
                     ServletRequest request,
                     ServletResponse response,
                     AsyncListenerNode next)
@@ -54,18 +54,18 @@ public class AsyncListenerNode
     _next = next;
   }
 
-  AsyncListenerNode getNext()
+  public AsyncListenerNode getNext()
   {
     return _next;
   }
 
-  void onTimeout()
+  public void onTimeout()
     throws IOException
   {
     _listener.onTimeout(new AsyncEvent(_request, _response));
   }
 
-  void onComplete()
+  public void onComplete()
     throws IOException
   {
     _listener.onComplete(new AsyncEvent(_request, _response));

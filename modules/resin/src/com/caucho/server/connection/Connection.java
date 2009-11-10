@@ -30,6 +30,7 @@
 package com.caucho.server.connection;
 
 import com.caucho.util.L10N;
+import com.caucho.server.port.ConnectionCometController;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -215,13 +216,19 @@ public abstract class Connection
   {
   }
 
+  protected void toCometComplete()
+  {
+  }
+
   /**
    * Wakes the connection
    */
+  /*
   protected boolean wake()
   {
     return false;
   }
+  */
 
   static {
     try {

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.port;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,8 +39,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import com.caucho.server.port.TcpConnection;
 import com.caucho.servlet.comet.CometController;
+import com.caucho.server.connection.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
@@ -48,13 +48,13 @@ import com.caucho.util.ThreadPool;
 /**
  * Public API to control a comet connection.
  */
-public class ConnectionCometController extends ConnectionController implements
-    CometController {
+public class ConnectionCometController extends ConnectionController
+  implements CometController {
   private static final L10N L = new L10N(ConnectionCometController.class);
   private static final Logger log = Logger
       .getLogger(ConnectionCometController.class.getName());
 
-  private Connection _conn;
+  private TcpConnection _conn;
 
   private HashMap<String, Object> _map;
 
@@ -66,17 +66,17 @@ public class ConnectionCometController extends ConnectionController implements
   private boolean _isTimeout;
 
   private boolean _isInitial = true;
-  private boolean _isSuspended;
-  private boolean _isComplete;
 
   private String _forwardPath;
 
   private long _maxIdleTime;
 
   public ConnectionCometController(Connection conn, boolean isTop,
-      ServletRequest request, ServletResponse response)
+                                   ServletRequest request,
+                                   ServletResponse response)
   {
-    _conn = conn;
+    if (conn instanceof TcpConnection)
+      _conn = (TcpConnection) conn;
 
     _request = request;
     _response = response;
@@ -99,7 +99,7 @@ public class ConnectionCometController extends ConnectionController implements
     return _maxIdleTime;
   }
 
-  public Connection getConnection()
+  public TcpConnection getConnection()
   {
     return _conn;
   }
@@ -107,17 +107,21 @@ public class ConnectionCometController extends ConnectionController implements
   /**
    * Returns true if the connection is the initial request
    */
+  /*
   public final boolean isInitial()
   {
     return _isInitial;
   }
+  */
 
   /**
    * Returns true if the connection should be suspended
    */
   public final boolean isSuspended()
   {
-    return _isSuspended;
+    TcpConnection conn = _conn;
+    
+    return conn != null && conn.getState().isCometSuspend();
   }
 
   /**
@@ -126,8 +130,10 @@ public class ConnectionCometController extends ConnectionController implements
   @Override
   public final void suspend()
   {
-    if (!_isComplete)
-      _isSuspended = true;
+    TcpConnection conn = _conn;
+
+    if (conn != null)
+      conn.toSuspend();
   }
 
   /**
@@ -135,7 +141,12 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public final boolean isComplete()
   {
-    return _isComplete;
+    TcpConnection conn = _conn;
+
+    if (conn != null)
+      return conn.getState().isCometComplete();
+    else
+      return true;
   }
 
   /**
@@ -143,11 +154,14 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public final void complete()
   {
-    _isComplete = true;
-    _isSuspended = false;
+    TcpConnection conn = _conn;
 
-    for (AsyncListenerNode node = _listenerNode; node != null; node = node
-        .getNext()) {
+    if (conn != null)
+      conn.toCometComplete();
+    
+    for (AsyncListenerNode node = _listenerNode;
+         node != null;
+         node = node.getNext()) {
       try {
         node.onComplete();
       } catch (IOException e) {
@@ -163,8 +177,10 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public final void startResume()
   {
+    /*
     _isSuspended = false;
     _isInitial = false;
+    */
   }
 
   /**
@@ -172,7 +188,7 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public final boolean wake()
   {
-    Connection conn = _conn;
+    TcpConnection conn = _conn;
 
     if (conn != null)
       return conn.wake();
@@ -193,17 +209,17 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public final void timeout()
   {
-    _isTimeout = true;
-    _isComplete = true;
-
-    for (AsyncListenerNode node = _listenerNode; node != null; node = node
-        .getNext()) {
+    for (AsyncListenerNode node = _listenerNode;
+         node != null;
+         node = node.getNext()) {
       try {
         node.onTimeout();
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       }
     }
+
+    _conn.toCometComplete();
 
     wake();
   }
@@ -229,7 +245,9 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public boolean isComet()
   {
-    return _conn != null && !_isComplete;
+    TcpConnection conn = _conn;
+    
+    return conn != null && ! conn.getState().isCometComplete();
   }
 
   /**
@@ -243,8 +261,8 @@ public class ConnectionCometController extends ConnectionController implements
   public void addAsyncListener(AsyncListener listener, ServletRequest request,
       ServletResponse response)
   {
-    _listenerNode = new AsyncListenerNode(listener, request, response,
-        _listenerNode);
+    _listenerNode
+      = new AsyncListenerNode(listener, request, response, _listenerNode);
   }
 
   /**
@@ -294,7 +312,9 @@ public class ConnectionCometController extends ConnectionController implements
    */
   public final boolean isClosed()
   {
-    return _conn == null || _isComplete;
+    TcpConnection conn = _conn;
+    
+    return conn == null || conn.getState().isCometComplete();
   }
 
   public ServletRequest getRequest()
@@ -319,7 +339,7 @@ public class ConnectionCometController extends ConnectionController implements
 
   public void dispatch()
   {
-    Connection conn = _conn;
+    TcpConnection conn = _conn;
 
     if (conn != null) {
       conn.wake();
@@ -369,8 +389,6 @@ public class ConnectionCometController extends ConnectionController implements
     _request = null;
     _response = null;
 
-    _isComplete = true;
-
     if (conn != null)
       conn.closeController(this);
   }
@@ -390,13 +408,18 @@ public class ConnectionCometController extends ConnectionController implements
     else
       sb.append(conn.getId());
 
-    if (_isComplete)
+    TcpConnection tcpConn = null;
+
+    if (_conn instanceof TcpConnection)
+      tcpConn = (TcpConnection) _conn;
+
+    if (tcpConn != null && tcpConn.getState().isCometComplete())
       sb.append(",complete");
 
-    if (_isSuspended)
+    if (tcpConn != null && tcpConn.getState().isCometSuspend())
       sb.append(",suspended");
 
-    if (_conn instanceof TcpConnection && ((TcpConnection) _conn).isWake())
+    if (tcpConn != null && tcpConn.isWake())
       sb.append(",wake");
 
     sb.append("]");
