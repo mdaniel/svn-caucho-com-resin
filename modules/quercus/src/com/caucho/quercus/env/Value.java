@@ -908,7 +908,7 @@ abstract public class Value implements java.io.Serializable
    *
    * where $a is used as a variable in the function
    */
-  public Value toArgumentVar()
+  public Value toRefArgument()
   {
     Env.getCurrent().warning(L.l("'{0}' is an invalid reference, because only variables may be passed by reference.",
                                  this));

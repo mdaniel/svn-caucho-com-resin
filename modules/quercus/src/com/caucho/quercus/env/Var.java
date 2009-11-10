@@ -750,7 +750,7 @@ public class Var extends Value
    * Converts to a reference variable
    */
   @Override
-  public Var toArgumentVar()
+  public Value toRefArgument()
   {
     _refCount = 2;
 

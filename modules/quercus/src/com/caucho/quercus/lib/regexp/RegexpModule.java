@@ -239,6 +239,18 @@ public class RegexpModule
     }
   }
 
+  public static Regexp compileRegexp(StringValue regexpValue)
+  {
+    try {
+      return createRegexp(regexpValue);
+    } catch (Exception e) {
+      // XXX: should create special error regexp.
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    }
+  }
+
   public static Regexp createRegexp(StringValue regexpValue)
   {
     try {
@@ -532,7 +544,7 @@ public class RegexpModule
   {
     return LongValue.ZERO;
   }
-  
+
   public static Value preg_match(Env env,
                                  Regexp regexp,
                                  StringValue subject,
@@ -810,7 +822,7 @@ public class RegexpModule
       matches.put(matchResult);
 
       int groupCount = regexpState.groupCount();
-      
+
       for (int i = 0; i < groupCount; i++) {
         int start = regexpState.start(i);
         int end = regexpState.end(i);
@@ -832,7 +844,7 @@ public class RegexpModule
 
           if (patternName != null)
             matchResult.put(patternName, groupValue);
-      
+
           if ((flags & PREG_OFFSET_CAPTURE) != 0) {
 
             // php/152n
@@ -934,7 +946,7 @@ public class RegexpModule
 
     if (count != null)
       count.set(LongValue.ZERO);
-    
+
     try {
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1041,7 +1053,7 @@ public class RegexpModule
   {
     try {
       Regexp []regexpList = createRegexpArray(env, pattern);
-      
+
       if (regexpList == null)
         return NullValue.NULL;
 
@@ -1223,7 +1235,7 @@ public class RegexpModule
       replacementProgram = compileReplacement(env, replacement, isEval);
       if (replacementProgram == null)
         return null;
-      
+
       _replacementCache.put(replacement, replacementProgram);
     }
 
@@ -1446,20 +1458,20 @@ public class RegexpModule
       env.warning(L.l("callback argument can't be null in preg_replace_callback"));
       return subject;
     }
-    
+
     if (regexp == null)
       return NullValue.NULL;
     else if (regexp.isEval()) {
       env.warning(L.l("regexp can't use /e preg_replace_callback /{0}/",
                       regexp.getPattern()));
-      
+
       return NullValue.NULL;
     }
 
     // php/153s
     if (count != null)
       count.set(LongValue.ZERO);
-    
+
     try {
       if (subject instanceof ArrayValue) {
         ArrayValue result = new ArrayValueImpl();
@@ -1512,7 +1524,7 @@ public class RegexpModule
     }
 
     Regexp []regexpList = createRegexpArray(env, regexpValue);
-    
+
     if (regexpList == null)
       return NullValue.NULL;
 
