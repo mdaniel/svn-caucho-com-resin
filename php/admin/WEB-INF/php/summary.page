@@ -377,7 +377,9 @@ if ($ports) {
     <td><?= $port->CometIdleCount ?>
   </tr>
 <?php
-    $connInfoList = array_merge($connInfoList, $port->connectionInfo());
+    $portConnInfo = $port->connectionInfo();
+    if ($portConnInfo)
+      $connInfoList = array_merge($connInfoList, $portConnInfo);
   }
 
 echo "</table>";

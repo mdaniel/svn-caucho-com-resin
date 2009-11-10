@@ -29,6 +29,11 @@
 
 package com.caucho.util;
 
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
@@ -40,7 +45,7 @@ import java.util.logging.Logger;
  *
  * <p>A separate thread periodically tests the queue for alarms ready.
  */
-public class Alarm implements ThreadTask {
+public class Alarm implements ThreadTask, ClassLoaderListener {
   private static final Logger log
     = Logger.getLogger(Alarm.class.getName());
 
@@ -82,7 +87,14 @@ public class Alarm implements ThreadTask {
    */
   protected Alarm()
   {
-    _name = "alarm";
+    this("alarm");
+  }
+
+  protected Alarm(String name)
+  {
+    _name = name;
+
+    Environment.addClassLoaderListener(this);
   }
 
   /**
@@ -109,7 +121,7 @@ public class Alarm implements ThreadTask {
    */
   public Alarm(String name, AlarmListener listener, ClassLoader loader)
   {
-    _name = name;
+    this(name);
 
     setListener(listener);
     setContextLoader(loader);
@@ -124,7 +136,7 @@ public class Alarm implements ThreadTask {
                long delta,
                ClassLoader loader)
   {
-    _name = name;
+    this(name);
 
     setListener(listener);
     setContextLoader(loader);
@@ -141,9 +153,8 @@ public class Alarm implements ThreadTask {
    */
   public Alarm(String name, AlarmListener listener, long delta)
   {
-    this(listener);
+    this(name, listener);
 
-    _name = name;
     queue(delta);
   }
 
@@ -420,6 +431,21 @@ public class Alarm implements ThreadTask {
     } finally {
       thread.setContextClassLoader(_systemLoader);
     }
+  }
+
+  /**
+   * Handles the case where a class loader has completed initialization
+   */
+  public void classLoaderInit(DynamicClassLoader loader)
+  {
+  }
+  
+  /**
+   * Handles the case where a class loader is dropped.
+   */
+  public void classLoaderDestroy(DynamicClassLoader loader)
+  {
+    close();
   }
 
   /**
