@@ -50,6 +50,10 @@ public enum ConnectionState {
   CLOSED,               // connection closed, ready for accept
   DESTROYED;            // connection destroyed
 
+  //
+  // predicates
+  //
+
   boolean isComet()
   {
     switch (this) {
@@ -232,6 +236,9 @@ public enum ConnectionState {
     case REQUEST_KEEPALIVE:
       return REQUEST_KEEPALIVE;
 
+    case DUPLEX:
+      return DUPLEX_KEEPALIVE;
+
     default:
       return this;
     }
@@ -255,13 +262,9 @@ public enum ConnectionState {
     }
   }
 
-  ConnectionState toIdle()
-  {
-    if (this == CLOSED)
-      return IDLE;
-    else
-      throw new IllegalStateException(this + " is an illegal idle state");
-  }
+  //
+  // comet
+  //
 
   ConnectionState toComet()
   {
@@ -299,6 +302,48 @@ public enum ConnectionState {
     default:
       throw new IllegalStateException(this + " cannot complete comet");
     }
+  }
+
+  //
+  // duplex/websocket
+  //
+
+  ConnectionState toDuplex()
+  {
+    switch (this) {
+    case REQUEST_READ:
+    case REQUEST_ACTIVE:
+    case REQUEST_KEEPALIVE:
+    case REQUEST_NKA:
+      return DUPLEX;
+
+    default:
+      throw new IllegalStateException(this + " cannot switch to duplex/websocket");
+    }
+  }
+
+  ConnectionState toDuplexActive()
+  {
+    switch (this) {
+    case DUPLEX:
+    case DUPLEX_KEEPALIVE:
+      return DUPLEX;
+
+    default:
+      throw new IllegalStateException(this + " cannot switch to duplex/websocket");
+    }
+  }
+
+  //
+  // idle/close
+  //
+
+  ConnectionState toIdle()
+  {
+    if (this == CLOSED)
+      return IDLE;
+    else
+      throw new IllegalStateException(this + " is an illegal idle state");
   }
 
   ConnectionState toClosed()

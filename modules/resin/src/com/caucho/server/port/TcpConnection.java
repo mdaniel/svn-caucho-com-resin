@@ -891,16 +891,7 @@ public class TcpConnection extends Connection
    */
   public TcpDuplexController startDuplex(TcpDuplexHandler handler)
   {
-    if (_controller != null) {
-      ConnectionState state = _state;
-
-      log.warning(this + " toDuplex call failed for state " + state);
-
-      destroy();
-
-      throw new IllegalStateException(L.l("duplex mode can't start in state '{0}'",
-                                          state));
-    }
+    _state = _state.toDuplex();
 
     TcpDuplexController duplex = new TcpDuplexController(this, handler);
 
@@ -909,7 +900,6 @@ public class TcpConnection extends Connection
     if (log.isLoggable(Level.FINER))
       log.finer(this + " starting duplex");
 
-    _state = ConnectionState.DUPLEX;
     _duplexReadTask = new DuplexReadTask(duplex);
 
     return duplex;
@@ -1253,7 +1243,7 @@ public class TcpConnection extends Connection
     public RequestState doTask()
       throws IOException
     {
-      _state = _state.toActive();
+      _state = _state.toDuplexActive();
 
       RequestState result;
       long position = 0;
