@@ -902,6 +902,21 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Convert to a function argument reference value, e.g. for
+   *
+   * function foo(&$a)
+   *
+   * where $a is used as a variable in the function
+   */
+  public Value toArgumentVar()
+  {
+    Env.getCurrent().warning(L.l("'{0}' is an invalid reference, because only variables may be passed by reference.",
+                                 this));
+
+    return NullValue.NULL;
+  }
+
+  /**
    * Converts to a StringValue.
    */
   public StringValue toStringValue()
@@ -2196,11 +2211,11 @@ abstract public class Value implements java.io.Serializable
 
     return putField(env, name, result);
   }
-  
+
   public void setFieldInit(boolean isInit)
   {
   }
-  
+
   /**
    * Returns true if the object is in a __set() method call.
    * Prevents infinite recursion.
@@ -2624,7 +2639,7 @@ abstract public class Value implements java.io.Serializable
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   /**
    * Binds a Java object to this object.
    */

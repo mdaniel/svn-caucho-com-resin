@@ -980,7 +980,7 @@ public class Env {
     _startTime = Alarm.getCurrentTime();
     _endTime = _startTime + _timeLimit;
   }
-  
+
   public long getStartTime()
   {
     return _startTime;
@@ -2608,6 +2608,7 @@ public class Env {
   /**
    * Sets a value.
    */
+  /*
   public static Var toRef(Value value)
   {
     // php/3243
@@ -2617,11 +2618,13 @@ public class Env {
     else
       return new Var(value);
   }
+  */
 
   /**
    * Convert to a reference argument.  It's a PHP error to convert anything
    * but a var or null to a ref arg.
    */
+  /*
   public Value toRefArgument(Value value)
   {
     // php/33lg
@@ -2637,6 +2640,7 @@ public class Env {
       return NullValue.NULL;
     }
   }
+  */
 
   /**
    * External calls to set a global value.
@@ -6423,7 +6427,7 @@ public class Env {
   {
     return a1;
   }
-  
+
   /**
    * Calls a parent::name method.
    */
@@ -6434,15 +6438,15 @@ public class Env {
   {
     AbstractFunction fun
       = getClass(parentName).getFunction(funName);
-        
+
     Value retValue = fun.callMethod(this, qThis, args);
-    
+
     if (fun.isConstructor())
       qThis.setJavaObject(retValue);
 
     return retValue;
   }
-  
+
   /**
    * Calls a parent::name method.
    */
@@ -6453,15 +6457,15 @@ public class Env {
                                 int len,
                                 Value []args)
   {
-    
+
     AbstractFunction fun
       = getClass(parentName).getFunction(hash, name, len);
 
     Value retValue = fun.callMethod(this, qThis, args);
-    
+
     if (fun.isConstructor())
       qThis.setJavaObject(retValue);
-    
+
     return retValue;
   }
 

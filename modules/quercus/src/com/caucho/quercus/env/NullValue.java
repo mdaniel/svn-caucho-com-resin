@@ -491,6 +491,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Converts to a reference variable
+   */
+  @Override
+  public Value toArgumentVar()
+  {
+    return this;
+  }
+
+  /**
    * Converts to a key.
    */
   @Override

@@ -747,6 +747,17 @@ public class Var extends Value
   }
 
   /**
+   * Converts to a reference variable
+   */
+  @Override
+  public Var toArgumentVar()
+  {
+    _refCount = 2;
+
+    return this;
+  }
+
+  /**
    * Converts to a key.
    */
   @Override
