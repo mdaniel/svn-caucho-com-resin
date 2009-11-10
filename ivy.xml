@@ -14,6 +14,8 @@
     <dependency org="org.mule" name="mule" rev="1.4.3"/>
     <dependency org="org.springframework" name="spring" rev="2.0.8"
                 transitive="false"/>
+    <dependency org="org.springframework" name="spring" rev="2.5.6"
+                transitive="false"/>
     <dependency org="dom4j" name="dom4j" rev="1.6.1"/>
     <dependency org="hibernate" name="hibernate3" rev="3.2.3.GA"/>
     <dependency org="hibernate-annotations"
