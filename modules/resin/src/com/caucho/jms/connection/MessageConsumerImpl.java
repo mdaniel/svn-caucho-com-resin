@@ -482,7 +482,9 @@ public class MessageConsumerImpl implements MessageConsumer
 
 	if (_selector == null || _selector.isMatch(message)) {
 	  // XXX: only if XA
-	  _session.addTransactedReceive(_queue, message);
+	  if (! _isAutoAcknowledge) {
+	    _session.addTransactedReceive(_queue, message);
+	  }
 
 	  Thread thread = Thread.currentThread();
 	  ClassLoader oldLoader = thread.getContextClassLoader();
