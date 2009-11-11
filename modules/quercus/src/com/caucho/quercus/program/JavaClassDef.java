@@ -80,6 +80,7 @@ public class JavaClassDef extends ClassDef {
   private final boolean _isAbstract;
   private final boolean _isInterface;
   private final boolean _isDelegate;
+  private boolean _isPhpClass;
   
   private String _resourceType;
 
@@ -345,6 +346,11 @@ public class JavaClassDef extends ClassDef {
   public boolean isDelegate()
   {
     return _isDelegate;
+  }
+  
+  public void setPhpClass(boolean isPhpClass)
+  {
+    _isPhpClass = isPhpClass;
   }
 
   public JavaClassDef getComponentDef()
@@ -917,7 +923,7 @@ public class JavaClassDef extends ClassDef {
     
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
 
       super.init();
 
@@ -926,7 +932,7 @@ public class JavaClassDef extends ClassDef {
         introspect();
       }
       finally {
-	_isInit = true;
+        _isInit = true;
       }
     }
   }
@@ -955,7 +961,7 @@ public class JavaClassDef extends ClassDef {
   private void introspect()
   {
     introspectConstants(_type);
-    introspectMethods(_moduleContext, _type, ! _type.getName().equals(_name));
+    introspectMethods(_moduleContext, _type);
     introspectFields(_moduleContext, _type);
 
     _marshal = new JavaMarshal(this, false);
@@ -1323,8 +1329,7 @@ public class JavaClassDef extends ClassDef {
    * Introspects the Java class.
    */
   private void introspectMethods(ModuleContext moduleContext,
-                                 Class<?> type,
-                                 boolean isPhpClass)
+                                 Class<?> type)
   {
     if (type == null)
       return;
@@ -1338,7 +1343,7 @@ public class JavaClassDef extends ClassDef {
       if (method.isAnnotationPresent(Hide.class))
         continue;
 
-      if (isPhpClass && method.getDeclaringClass() == Object.class)
+      if (_isPhpClass && method.getDeclaringClass() == Object.class)
         continue;
       
       if ("iterator".equals(method.getName())

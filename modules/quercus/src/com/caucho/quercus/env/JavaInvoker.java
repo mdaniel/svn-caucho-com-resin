@@ -620,8 +620,8 @@ abstract public class JavaInvoker
       javaArgs[k++] = env;
 
     Object obj = null;
-
-    if (! isStatic() || ! isConstructor())
+    
+    if (! isStatic() && ! isConstructor())
       obj = qThis != null ? qThis.toJavaObject() : null;
 
     if (_hasThis) {

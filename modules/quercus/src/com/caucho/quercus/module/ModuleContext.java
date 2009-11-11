@@ -186,8 +186,8 @@ public class ModuleContext
       ModuleInfo info = _moduleInfoMap.get(name);
 
       if (info == null) {
-	info = new ModuleInfo(this, name, module);
-	_moduleInfoMap.put(name, info);
+        info = new ModuleInfo(this, name, module);
+        _moduleInfoMap.put(name, info);
       }
 
       return info;
@@ -205,38 +205,40 @@ public class ModuleContext
       JavaClassDef def = _javaClassWrappers.get(name);
 
       if (def == null) {
-	if (log.isLoggable(Level.FINEST)) {
-	  if (extension == null)
-	    log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
-	  else
-	    log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
-	}
+        if (log.isLoggable(Level.FINEST)) {
+          if (extension == null)
+            log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
+          else
+            log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+      }
 
-	if (javaClassDefClass != null) {
-	  Constructor constructor
-	    = javaClassDefClass.getConstructor(ModuleContext.class,
-					       String.class,
-					       Class.class);
+      if (javaClassDefClass != null) {
+        Constructor constructor
+          = javaClassDefClass.getConstructor(ModuleContext.class,
+                                             String.class,
+                                             Class.class);
 
-	  def = (JavaClassDef) constructor.newInstance(this, name, type);
-	}
-	else {
-	  def = JavaClassDef.create(this, name, type);
+        def = (JavaClassDef) constructor.newInstance(this, name, type);
+      }
+      else {
+        def = JavaClassDef.create(this, name, type);
 
-	  if (def == null)
-	    def = createDefaultJavaClassDef(name, type, extension);
-	}
+        if (def == null)
+          def = createDefaultJavaClassDef(name, type, extension);
+      }
+      
+      def.setPhpClass(true);
 
-	_javaClassWrappers.put(name, def);
-	// _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      _javaClassWrappers.put(name, def);
+      // _lowerJavaClassWrappers.put(name.toLowerCase(), def);
 
-	_staticClasses.put(name, def);
-	// _lowerStaticClasses.put(name.toLowerCase(), def);
+      _staticClasses.put(name, def);
+      // _lowerStaticClasses.put(name.toLowerCase(), def);
 
-	// def.introspect();
+      // def.introspect();
 
-	if (extension != null)
-	  _extensionSet.add(extension);
+      if (extension != null)
+        _extensionSet.add(extension);
       }
 
       return def;
@@ -254,7 +256,7 @@ public class ModuleContext
       def = _javaClassWrappers.get(className);
 
       if (def != null)
-	return def;
+        return def;
 
       def = JavaClassDef.create(this, className, type);
 
@@ -697,11 +699,11 @@ public class ModuleContext
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
-	if (! hasServiceClass(url)) {
-	  addServiceClass(url);
+        if (! hasServiceClass(url)) {
+          addServiceClass(url);
 
-	  urlSet.add(url);
-	}
+          urlSet.add(url);
+        }
       }
 
       for (URL url : urlSet) {
