@@ -17,15 +17,15 @@ if ($profile) {
     $profile->stop();
   }
   else if ($_POST['action'] == 'start') {
-    $profile->start();
-
     if ($_POST['period'] >= 10) {
-      $profile->setPeriod($_POST['period'] . "ms");
+      $profile->setPeriod($_POST['period']);
     }
 
     if ($_POST['depth'] >= 1) {
       $profile->setDepth($_POST['depth']);
     }
+    
+    $profile->start();
   }
 
   if ($profile->active) {
@@ -62,7 +62,7 @@ if ($profile) {
     if (!isset($_POST['period']) || 
         !is_numeric($_POST['period']) ||
         !in_array($_POST['period'], $PERIODS))
-      $postedPeriod = 10;
+      $postedPeriod = 100;
     else
       $postedPeriod = $_POST['period'];
 
@@ -113,7 +113,12 @@ if ($profile) {
       echo "<br/>* indicates stack trace contains PHP function calls";
   }
 
+  $period = $profile->getPeriod();
+  $sample_ticks = $profile->getTicks();
   $results = $profile->getResults();
+  
+
+  echo "<h3>Run Time: " . ($sample_ticks * $period / 1000) . "s</h3>\n";
 
   $partition = do_partition_profile($results);
   $groups = array("active", "block", "jni", "resin", "keepalive", "wait",
@@ -176,9 +181,9 @@ if ($profile) {
     echo " class='threads'>\n";
 
     //$topTicks = $entries[0]->getCount();
-    $totalTicks = 0;
+    $total_ticks = 0;
     for ($i = sizeof($entries) - 1; $i >= 0; $i--) {
-      $totalTicks += $entries[$i]->getCount();
+      $total_ticks += $entries[$i]->getCount();
     }
 
     echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($entries) . ")";
@@ -197,9 +202,9 @@ if ($profile) {
     echo "</th></tr>\n";
 
     echo "<tr>";
-    echo "  <th>% self</th>";
-    echo "  <th>% sum</th>";
+    echo "  <th>% time</th>";
     echo "  <th>time self";
+    echo "  <th>% sum</th>";
     echo "<th><th>trace\n";
     echo "</tr>";
 
@@ -207,16 +212,17 @@ if ($profile) {
     for ($i = 0; $i < sizeof($entries); $i++) {
       $entry = $entries[$i];
 
-      $percent = 100 * $entry->getCount() / $totalTicks;
-      $total_percent += $percent;
+      $time_percent = 100 * $entry->getCount() / $sample_ticks;
+      $self_percent = 100 * $entry->getCount() / $total_ticks;
+      $total_percent += $self_percent;
 
       echo "<tr>";
       echo "<td align='right'>";
-      printf("%9.3f%%", $percent);
+      printf("%9.3f%%", $time_percent);
+      echo "</td><td align='right'>";
+      printf("%.3fs", $entry->getCount() * $period * 0.001);
       echo "</td><td align='right'>";
       printf("%9.3f%%", $total_percent);
-      echo "</td><td align='right'>";
-      printf("%.3fs", $entry->getCount() * $profile->period * 0.001);
       echo "</td>";
       echo "<td>";
       echo "<a id='s_{$name}_{$i}' href=\"javascript:show('t_{$name}_{$i}');hide('s_{$name}_{$i}');show('h_{$name}_{$i}');\">show</a> ";
@@ -325,6 +331,10 @@ function do_partition_profile($entries)
     }
     else if ($stackTrace[0]->className == "com.caucho.profile.Profile"
              && $stackTrace[0]->methodName == "nativeProfile") {
+      $partition["resin"][] = $info;
+    }
+    else if ($stackTrace[0]->className == "com.caucho.server.admin.JniNetStat") {
+      // netstat is a slow blocking
       $partition["resin"][] = $info;
     }
     else if ($stackTrace[0]->className == "com.caucho.server.port.JniSelectManager"

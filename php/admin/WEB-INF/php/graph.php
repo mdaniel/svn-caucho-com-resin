@@ -112,7 +112,7 @@ function stat_graph($canvas, $width, $height,
 function calculate_step($range, $width)
 {
 
-  return $range / $width;
+  return $range / $width * 3;
   /*
   if ($period <= 60) {
     return 0;

@@ -124,7 +124,7 @@ public final class BlockManager
     } catch (Exception e) {
       e.printStackTrace();
     }
-      
+
     return Runtime.getRuntime().maxMemory();
   }
 
@@ -241,7 +241,7 @@ public final class BlockManager
 
     while (hasPendingStore(store)) {
       wakeWriter();
-      
+
       synchronized (_writeQueue) {
         try {
           long delta = expires - Alarm.getCurrentTimeActual();
@@ -260,11 +260,13 @@ public final class BlockManager
 
   private boolean hasPendingStore(Store store)
   {
-    for (int i = _writeQueue.size() - 1; i >= 0; i--) {
-      Block block = _writeQueue.get(i);
+    synchronized (_writeQueue) {
+      for (int i = _writeQueue.size() - 1; i >= 0; i--) {
+        Block block = _writeQueue.get(i);
 
-      if (block.getStore() == store && block.isDirty()) {
-        return true;
+        if (block.getStore() == store && block.isDirty()) {
+          return true;
+        }
       }
     }
 
@@ -320,12 +322,12 @@ public final class BlockManager
 
       if (oldBlock != null) {
         block.free();
-        
+
         if (block == dirtyBlock) {
           wakeWriter();
           dirtyBlock = null;
         }
-        
+
         block = oldBlock;
       }
 
@@ -373,7 +375,7 @@ public final class BlockManager
 
         if (dirtyBlock == block) {
           _writeQueue.remove(i);
-          
+
           return dirtyBlock;
         }
       }
@@ -454,7 +456,7 @@ public final class BlockManager
   {
     _blockReadCount.incrementAndGet();
   }
-  
+
   /**
    * Returns the read count.
    */
@@ -490,7 +492,7 @@ public final class BlockManager
       try {
         int retryMax = 10;
         int retry = retryMax;
-        
+
         while (true) {
           Block block = getNextFreeBlock();
 
@@ -513,7 +515,7 @@ public final class BlockManager
     private Block getNextFreeBlock()
     {
       int unfree = 0;
-      
+
       synchronized (_writeQueue) {
         for (int i = 0; i < _writeQueue.size(); i++) {
           Block block = _writeQueue.get(i);
@@ -527,7 +529,7 @@ public final class BlockManager
           }
         }
       }
-                
+
       return null;
     }
 
@@ -536,10 +538,10 @@ public final class BlockManager
       synchronized (_writeQueue) {
         int size = _writeQueue.size();
         boolean isMax = _writeQueueMax <= size;
-          
+
         for (int i = size - 1; i >= 0; i--) {
           Block writeBlock = _writeQueue.get(i);
-          
+
           if (block == writeBlock || writeBlock == null) {
             _writeQueue.remove(i);
           }

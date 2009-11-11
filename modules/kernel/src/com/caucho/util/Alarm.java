@@ -67,6 +67,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   private static final AtomicInteger _runningAlarmCount
     = new AtomicInteger();
 
+  private static final boolean _isStressTest;
+
   private static long _testTime;
   private static long _testNanoDelta;
 
@@ -439,7 +441,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
@@ -739,19 +741,37 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           if ((alarm = Alarm.extractAlarm()) != null) {
             // throttle alarm invocations by 5ms so quick alarms don't need
             // extra threads
+            /*
             if (_concurrentAlarmThrottle < _runningAlarmCount.get()) {
               try {
                 Thread.sleep(5);
               } catch (Throwable e) {
               }
             }
+            */
 
             _runningAlarmCount.incrementAndGet();
 
-            if (alarm.isPriority())
-              ThreadPool.getThreadPool().startPriority(alarm);
+            long now;
+
+            if (_isStressTest)
+              now = Alarm.getExactTime();
             else
-              ThreadPool.getThreadPool().start(alarm);
+              now = Alarm.getCurrentTime();
+
+            long delta = now - alarm._wakeTime;
+
+            if (delta > 10000) {
+              log.warning(this + " slow alarm " + alarm + " " + delta + "ms");
+            }
+            else if (_isStressTest && delta > 100) {
+              System.out.println(this + " slow alarm " + alarm + " " + delta);
+            }
+
+            if (alarm.isPriority())
+              ThreadPool.getThreadPool().schedulePriority(alarm);
+            else
+              ThreadPool.getThreadPool().schedule(alarm);
           }
 
           long next = nextAlarmTime();
@@ -791,5 +811,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     _systemLoader = systemLoader;
     _alarmThread = alarmThread;
     _coordinatorThread = coordinatorThread;
+
+    _isStressTest = System.getProperty("caucho.stress.test") != null;
   }
 }
