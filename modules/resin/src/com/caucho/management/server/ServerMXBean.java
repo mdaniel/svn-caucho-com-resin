@@ -50,7 +50,7 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   //
   // ID attributes
   //
-  
+
   /**
    * Returns the -server id.
    */
@@ -58,16 +58,22 @@ public interface ServerMXBean extends ManagedObjectMXBean {
                + " of Resin, the value of `-server'")
   public String getId();
 
+  /**
+   * Returns the server index in the cluster triad.
+   */
+  @Description("The server index in the cluster triad")
+  public int getServerIndex();
+
   //
   // Hierarchy
   //
-  
+
   /**
    * Returns the cluster server for this server
    */
   @Description("The ClusterServer for this server")
   public ClusterServerMXBean getSelfServer();
-  
+
   /**
    * Returns the cluster owning this server
    */

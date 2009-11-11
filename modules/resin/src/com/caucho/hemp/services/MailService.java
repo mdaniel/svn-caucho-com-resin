@@ -50,17 +50,17 @@ import javax.mail.internet.MimeMessage;
 public class MailService
 {
   private static final L10N L = new L10N(MailService.class);
-  
+
   private static final Logger log
     = Logger.getLogger(MailService.class.getName());
 
   private ArrayList<Address> _toList = new ArrayList<Address>();
   private Address []_to;
 
-  private String _subject = "MailService messages";
+  private String _subject = "Resin MailService messages";
 
   private Properties _properties = new Properties();
-  
+
   private Session _session;
   private Transport _smtp;
 
@@ -123,7 +123,7 @@ public class MailService
       msg.addRecipients(RecipientType.TO, _to);
       msg.setSubject(_subject);
       msg.setContent(text, "text/plain");
-    
+
       send(msg);
     } catch (RuntimeException e) {
       throw e;
@@ -138,7 +138,7 @@ public class MailService
   public void send(Message message)
   {
     Transport smtp = null;
-    
+
     try {
       smtp = _session.getTransport("smtp");
 
@@ -153,10 +153,10 @@ public class MailService
       throw new RuntimeException(e);
     } finally {
       try {
-	if (smtp != null)
-	  smtp.close();
+        if (smtp != null)
+          smtp.close();
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }
@@ -168,10 +168,10 @@ public class MailService
 
     _to = new Address[_toList.size()];
     _toList.toArray(_to);
-    
+
     try {
       if (_session == null) {
-	_session = Session.getInstance(_properties);
+        _session = Session.getInstance(_properties);
       }
 
       Transport smtp = _session.getTransport("smtp");

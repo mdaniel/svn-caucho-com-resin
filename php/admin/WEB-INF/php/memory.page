@@ -15,7 +15,7 @@ $si = sprintf("%02d", $g_server->Index);
 
 if ($stat_service) {
   echo "<h2>Graphs</h2>\n";
-  
+/*  
   echo "<p>";
   echo "<img src='graph.php?";
   echo "g[0][0]=$si|JVM|Memory|Heap Memory Used"
@@ -23,6 +23,14 @@ if ($stat_service) {
   echo "&g[2][0]=$si|JVM|Memory|Tenured Memory Used"
   echo "&g[3][0]=$si|JVM|Memory|PermGen Memory Used"
   echo "&width=600&height=300' width='600' height='300'>\n"
+  */
+  $end = time();
+  $start = $end - 6 * 3600;
+  stat_graph("memory", 600, 300, $start, $end,
+             array("$si|JVM|Memory|Heap Memory Used",
+                   "$si|JVM|Memory|Heap Memory Free",
+                   "$si|JVM|Memory|Tenured Memory Used",
+                   "$si|JVM|Memory|PermGen Memory Used"));
 }
 
 $memory = $g_mbean_server->lookup("resin:type=Memory");

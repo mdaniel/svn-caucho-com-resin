@@ -11,8 +11,39 @@ if (! admin_init()) {
   return;
 }
 
+echo "<p>";
+echo "<ul class='tabs'>";
+$count = 0;
+$sections = array('environment', 'cluster', 'webapps', 'database');
+
+foreach ($sections as $name) {
+  $count++;
+
+  echo "<li id='tab_" . $name . "'";
+  if ($count == 1)
+    echo " class='selected'";
+  else
+    echo " class=''";
+  echo ">\n";
+
+  echo "<a href='#' onclick=\"";
+  foreach ($sections as $subname) {
+    if ($subname == $name) {
+      echo "sel('tab_" . $subname . "');";
+      echo "show('s_" . $subname . "');";
+    }
+    else {
+      echo "unsel('tab_" . $subname . "');";
+      echo "hide('s_" . $subname . "');";
+    }
+  }
+  echo "\">" . $name  . "</a></li>";
+}
+echo "</ul>\n";
+
 ?>
 
+<div id='s_environment'>
 <h2>Server: <?= $g_server->Id ? $g_server->Id : "default" ?></h2>
 <div class='section'>
 <table class="data">
@@ -60,28 +91,15 @@ if (! admin_init()) {
    echo "</pre>";
    echo "</td></tr></table>";
 ?>
-<?php
-$thread_pool = $g_server->ThreadPool;
-?>
-  <p/>
-<h3>Threads</h3>  
-  <table class="data">
-  <tr>
-    <td class='item'>thread-idle-min</td>
-    <td><?= $thread_pool->ThreadIdleMin ?></td>
-  </tr>
-  <tr>
-    <td class='item'>thread-idle-max</td>
-    <td><?= $thread_pool->ThreadIdleMax ?></td>
-  </tr>
-  <tr>
-    <td class='item'>thread-max</td>
-    <td><?= $thread_pool->ThreadMax ?></td>
-  </tr>
-  </table>
-</div>
+</div> <!-- section -->
+</div> <!-- environment -->
 
-<h2>Config</h2>
+<!--
+   - XML cluster configuration
+  -->
+  
+<div id='s_cluster' style='display:none'>
+<h2>Cluster/Server</h2>
 
 <!-- XML config -->
 <?php
@@ -96,121 +114,13 @@ echo "&lt;/resin>\n";
 
 echo "</code></pre>\n";
 ?>
+</div> <!-- cluster -->
 
-<!-- TCP ports -->
+<!--
+   - webapps configuration
+  -->
 
-<?php
-$ports = $g_server->Ports;
-
-if ($ports) {
-?>
-<h2>TCP ports</h2>
-<div class='section'>
-<table class="data">
-<?php
-  $count = 0;
-  foreach ($ports as $port) {
-?>
-
-  <tr>
-    <td class='group' colspan='4'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>accept-thread-min</td>
-    <td><?= $port->AcceptThreadMin ?></td>
-
-    <td class='item'>keepalive-max</td>
-    <td><?= $port->KeepaliveMax ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>accept-thread-max</td>
-    <td><?= $port->AcceptThreadMax ?></td>
-
-    <td class='item'>keepalive-select-max</td>
-    <td><?= $port->KeepaliveSelectMax ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>accept-listen-backlog</td>
-    <td><?= $port->AcceptListenBacklog ?></td>
-
-    <td class='item'>keepalive-timeout</td>
-    <td><?= $port->KeepaliveTimeout ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>connection-max</td>
-    <td><?= $port->ConnectionMax ?></td>
-
-    <td class='item'>socket-timeout</td>
-    <td><?= $port->SocketTimeout ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>keepalive-connection-time-max</td>
-    <td><?= $port->KeepaliveConnectionTimeMax ?></td>
-
-    <td class='item'>suspend-time-max</td>
-    <td><?= $port->SuspendTimeMax ?></td>
-  </tr>
-<?php 
-  }
-}
-?>
-</table>
-</div>
-<?php
-echo "<h2>ClusterServer</h2>"
-echo "<div class='section'>";
-
-echo "<table class='data'>\n";
-
-$g_servers = $g_mbean_server->query("resin:*,type=ClusterServer");
-foreach ($g_servers as $srun) {
-?>
-  <tr>
-    <td class='group'><?= $srun->ClusterIndex + 1
-          ?>. <?= $srun->Name ? $srun->Name : "default" ?></td>
-    <td class='group'>hmux://<?= $srun->Address ? $srun->Address : "*" ?>:<?= $srun->Port ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>load-balance-connect-timeout</td>
-    <td><?= $srun->ConnectTimeout ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>load-balance-fail-recover-time</td>
-    <td><?= $srun->RecoverTime ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>load-balance-idle-time</td>
-    <td><?= $srun->IdleTime ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>load-balance-socket-timeout</td>
-    <td><?= $srun->SocketTimeout ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>load-balance-warmup-time</td>
-    <td><?= $srun->WarmupTime ?></td>
-  </tr>
-
-  <tr>
-    <td class='item'>load-balance-weight</td>
-    <td><?= $srun->Weight ?></td>
-  </tr>
-<?php 
-  }
-?>
-</table>
-</div>
-
+<div id='s_webapps' style='display:none'>
 <!-- cluster ports -->
 
 <?php
@@ -312,9 +222,29 @@ foreach ($webapps as $webapp) {
 
 ?>
 
-</table>
+</div> <!-- webapps -->
+
+<!--
+   - database configuration
+  -->
+
+<div id='s_database' style='display:none'>
 
 <?php
+
+$databases = $g_mbean_server->query("resin:type=Database,*");
+
+foreach ($databases as $db) {
+  echo "<h2>";
+  echo $db->ObjectName;
+  echo "</h2>\n";
+
+  echo "<pre>";
+  print_database_config($db);
+  echo "</pre>";
+}
+
+echo "</div>";
 
 function display_config_cluster($g_server)
 {
@@ -339,11 +269,13 @@ function display_cluster_server($server)
 {
   global $g_server;
 
-  if ($server == $g_server) {
-    echo "    &lt;!-- current server '" . $server->Id . "' -->\n"
+  if ($server->Name == $g_server->Name) {
+    echo "    &lt;!--\n";
+    echo "       - current server '" . $server->Name . "'\n";
+    echo "      -->\n";
   }
 
-  echo "    &lt;server id=\"" . $server->Id . "\""; 
+  echo "    &lt;server id=\"" . $server->Name . "\""; 
   echo " address=\"" . $server->Address . "\"";
   echo " port=\"" . $server->Port . "\"";
   echo ">\n";
@@ -520,5 +452,64 @@ function display_port($port)
   echo ">\n";
 }
 
-display_footer("config.php");
+function print_database_config($db)
+{
+  echo "&lt;database name=\"" . $db->Name . "\">\n";
+
+  foreach ($db->Drivers as $driver) {
+    echo "  &lt;driver"
+    echo " url=\"";
+    echo $driver->getUrl();
+    echo "\"\n";
+    echo "          class=\"";
+    echo $driver->getClassName();
+    echo "\">\n";
+
+    foreach ($driver->Properties as $key => $value) {
+      echo "    &lt;" . $key . ">" . $value . "&lt;/" . $key . "/>\n";
+    }
+
+    echo "  &lt;/driver>\n\n";
+  }
+
+  echo "  &lt;spy>";
+  echo $db->Spy ? "true" : "false";
+  echo "&lt;/spy>\n\n";
+
+  echo "  &lt;max-connections>";
+  echo $db->MaxConnections;
+  echo "&lt;/max-connections>\n";
+
+  echo "  &lt;max-idle-count>";
+  echo $db->MaxIdleCount;
+  echo "&lt;/max-idle-count>\n";
+
+  echo "  &lt;max-create-connections>";
+  echo $db->MaxCreateConnections;
+  echo "&lt;/max-create-connections>\n";
+
+  echo "  &lt;max-overflow-connections>";
+  echo $db->MaxOverflowConnections;
+  echo "&lt;/max-overflow-connections>\n";
+
+  echo "\n";
+
+  echo "  &lt;max-idle-time>";
+  echo display_timeout($db->MaxIdleTime);
+  echo "&lt;/max-idle-time>\n";
+
+  echo "  &lt;max-active-time>";
+  echo display_timeout($db->MaxActiveTime);
+  echo "&lt;/max-active-time>\n";
+
+  echo "  &lt;max-pool-time>";
+  echo display_timeout($db->MaxPoolTime);
+  echo "&lt;/max-pool-time>\n";
+
+  echo "  &lt;connection-wait-time>";
+  echo display_timeout($db->ConnectionWaitTime);
+  echo "&lt;/connection-wait-time>\n";
+
+  echo "&lt;/database>\n";
+}
 ?>

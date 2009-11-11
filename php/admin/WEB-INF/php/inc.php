@@ -705,7 +705,7 @@ function display_servers($server)
 
   echo "<form name='servers' method='POST' action='" . $g_next_url . "'>";
   echo "Server: "; 
-  echo "<select name='new_s'>";// onchange='document.forms.servers.submit();'>\n";
+  echo "<select name='new_s' onchange='document.forms.servers.submit();'>\n";
 
   $self_server = $server->SelfServer;
 

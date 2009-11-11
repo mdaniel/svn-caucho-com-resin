@@ -53,7 +53,7 @@ public class ServerAdmin extends AbstractEmitterObject
 {
   private static final String BYTES_PROBE = "Resin|Request|Http Request Bytes";
   private CountProbe _httpBytesProbe;
-  
+
   private Server _server;
 
   ServerAdmin(Server server)
@@ -61,7 +61,7 @@ public class ServerAdmin extends AbstractEmitterObject
     _server = server;
 
     ProbeManager.createAverageProbe(BYTES_PROBE, "");
-    
+
     String name = BYTES_PROBE;
 
     _httpBytesProbe = (CountProbe) ProbeManager.getProbe(name);
@@ -84,10 +84,15 @@ public class ServerAdmin extends AbstractEmitterObject
     return _server.getServerId();
   }
 
+  public int getServerIndex()
+  {
+    return _server.getServerIndex();
+  }
+
   //
   // Hierarchy
   //
-  
+
   /**
    * Returns the cluster server owning this server
    */
@@ -95,7 +100,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     return _server.getSelfServer().getAdmin();
   }
-  
+
   /**
    * Returns the cluster owning this server
    */
@@ -123,7 +128,7 @@ public class ServerAdmin extends AbstractEmitterObject
     for (Port port : portList) {
       ports[i++] = port.getAdmin();
     }
-    
+
     return ports;
   }
 
@@ -146,7 +151,7 @@ public class ServerAdmin extends AbstractEmitterObject
   //
   // Configuration attributes
   //
-  
+
   public boolean isBindPortsAfterStart()
   {
     return _server.isBindPortsAfterStart();
@@ -159,17 +164,17 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     return false;
   }
-  
+
   public boolean isDevelopmentModeErrorPage()
   {
     return _server.isDevelopmentModeErrorPage();
   }
-  
+
   public long getMemoryFreeMin()
   {
     return _server.getMemoryFreeMin();
   }
-  
+
   public long getPermGenFreeMin()
   {
     return _server.getPermGenFreeMin();
@@ -400,9 +405,9 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     try {
       if (Alarm.isTest())
-	return 0;
+        return 0;
       else
-	return CauchoSystem.getLoadAvg();
+        return CauchoSystem.getLoadAvg();
     } catch (Exception e) {
       return 0;
     }

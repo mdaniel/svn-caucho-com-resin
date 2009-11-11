@@ -62,7 +62,7 @@ public class CacheManager
     _envName = Environment.getEnvironmentName();
 
     synchronized (_localCacheManager) {
-      CacheManager manager = _localCacheManager.get();
+      CacheManager manager = _localCacheManager.getLevel();
 
       if (manager != null) {
         _cacheMap = manager._cacheMap;
@@ -73,24 +73,25 @@ public class CacheManager
       }
     }
   }
-  
+
   public static CacheManager createManager()
   {
     synchronized (_localCacheManager) {
-      CacheManager manager = _localCacheManager.get();
+      CacheManager manager = _localCacheManager.getLevel();
 
-      if (manager == null)
+      if (manager == null) {
         manager = new CacheManager();
+      }
 
       return manager;
     }
   }
-  
+
   public AbstractCache get(String name)
   {
     return _cacheMap.get(name);
   }
-  
+
   public AbstractCache create(String name)
   {
     AbstractCache cache = _cacheMap.get(name);
@@ -103,7 +104,7 @@ public class CacheManager
 
     return _cacheMap.get(name);
   }
-  
+
   public AbstractCache putIfAbsent(String name, AbstractCache cache)
   {
     return _cacheMap.putIfAbsent(name, cache);

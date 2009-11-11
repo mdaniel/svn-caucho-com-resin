@@ -400,7 +400,7 @@ abstract public class AbstractCache extends AbstractMap
 
       if (_localManager.putIfAbsent(_guid, this) != null) {
         throw new ConfigException(L.l("'{0}' with full name '{1}' is an invalid Cache name because it's already used by another cache.",
-                                      _name, _guid));
+                                      this, _guid));
       }
 
       _entryCache = new LruCache<Object,DistCacheEntry>(512);

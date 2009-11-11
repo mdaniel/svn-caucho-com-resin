@@ -30,7 +30,7 @@
 package com.caucho.distcache;
 
 import com.caucho.config.Configurable;
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 
 /**
  * Cache which stores consistent copies on the cluster segment.
@@ -43,7 +43,7 @@ import javax.enterprise.context.ApplicationScoped;
  * and consistency.
  */
 
-@ApplicationScoped
+@Singleton
 @Configurable
 public class ClusterCache extends AbstractCache
 {
