@@ -975,7 +975,8 @@ public class Mysqli extends JdbcConnectionResource {
         return false;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      getEnv().warning(e.getMessage());
+      // php/142d - php doesn't issue a warning if the database is
+      // unselectable.  modx depends on this behavior.
       return false;
     }
   }
