@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.marshal.Marshal;
@@ -2533,13 +2534,25 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
-
+  
   /**
    * Returns true if the key exists in the array.
    */
   public boolean keyExists(Value key)
   {
     return isset(key);
+  }
+  
+  /**
+   * Returns the corresponding value if this array contains the given key
+   *
+   * @param key to search for in the array
+   *
+   * @return the value if it is found in the array, NULL otherwise
+   */
+  public Value containsKey(Value key)
+  {
+    return null;
   }
 
   /**

@@ -678,7 +678,7 @@ abstract public class ArrayValue extends Value {
   public boolean keyExists(Value key)
   {
     Value value = get(key);
-
+    
     // php/173m
     return value == null || value != UnsetValue.UNSET;
   }
