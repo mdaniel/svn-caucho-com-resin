@@ -580,8 +580,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
       setStatus(code, value);
 
-      if (handleNotModified())
+      if (handleNotModified()) {
         return;
+      }
     }
 
     if (isCommitted())
@@ -697,23 +698,27 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       return false;
     }
     else if (_matchCacheEntry != null) {
-      if (_responseStream.isCommitted())
+      if (_responseStream.isCommitted()) {
         return false;
+      }
 
       // need to unclose because the not modified might be detected only
       // when flushing the data
       // _responseStream.clearClosed();
 
+      AbstractCacheFilterChain cacheInvocation = _cacheInvocation;
+      _cacheInvocation = null;
+
+      AbstractCacheEntry matchCacheEntry = _matchCacheEntry;
+      _matchCacheEntry = null;
+
       /* XXX: complications with filters */
-      if (_cacheInvocation != null
-          && _cacheInvocation.fillFromCache(getRequest(), this,
-                                            _matchCacheEntry)) {
-        _matchCacheEntry.updateExpiresDate();
-        _cacheInvocation = null;
-        _matchCacheEntry = null;
+      if (cacheInvocation != null
+          && cacheInvocation.fillFromCache(getRequest(), this,
+                                           matchCacheEntry)) {
+        matchCacheEntry.updateExpiresDate();
 
         _response.finishInvocation(); // Don't force a flush to avoid extra TCP packet
-
         return true;
       }
     }
@@ -840,7 +845,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // XXX: conflict with servlet exception throwing order?
     try {
       String encoding = getCharacterEncoding();
-      
+
       _responseStream.setEncoding(encoding);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -915,7 +920,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     if (isCommitted())
       return;
-    
+
     if (_writer != null) {
       // server/172k
 
@@ -924,7 +929,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
           && ! encoding.equalsIgnoreCase(_charEncoding)) {
         log.fine(_request.getRequestURI() + ": setEncoding(" + encoding + ") ignored because writer already initialized with charset=" + _charEncoding);
       }
-      
+
       return;
     }
 
@@ -1242,7 +1247,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     return _sessionId;
   }
-  
+
   public void setSessionId(String id)
   {
     _sessionId = id;
@@ -1419,7 +1424,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
   public AbstractResponseStream getResponseStream()
   {
-    // jsp/(1cie, 1civ, 1ciw, 1cir), server/053y 
+    // jsp/(1cie, 1civ, 1ciw, 1cir), server/053y
     if (_responseStream.getEncoding() == null) {
       String encoding = getCharacterEncoding();
       // server/053y

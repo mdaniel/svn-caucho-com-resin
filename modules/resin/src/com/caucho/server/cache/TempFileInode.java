@@ -68,7 +68,7 @@ public class TempFileInode {
   {
     return _length;
   }
-  
+
   /**
    * Allocates access to the inode.
    */
@@ -76,11 +76,11 @@ public class TempFileInode {
   {
     synchronized (this) {
       if (_useCount > 0) {
-	_useCount++;
-	return true;
+        _useCount++;
+        return true;
       }
       else
-	return false;
+        return false;
     }
   }
 
@@ -118,7 +118,7 @@ public class TempFileInode {
    * Writes the inode value to a stream.
    */
   public void writeToStream(OutputStreamWithBuffer os,
-			    long offset, long length)
+                            long offset, long length)
     throws IOException
   {
     if (_length < length)
@@ -128,30 +128,30 @@ public class TempFileInode {
     int writeLength = buffer.length;
     int writeOffset = os.getBufferOffset();
     long []fragmentArray = _fragmentArray;
-    
+
     while (length > 0) {
       int sublen = writeLength - writeOffset;
 
       if (sublen == 0) {
-	buffer = os.nextBuffer(writeOffset);
-	writeOffset = os.getBufferOffset();
-	sublen = writeLength - writeOffset;
+        buffer = os.nextBuffer(writeOffset);
+        writeOffset = os.getBufferOffset();
+        sublen = writeLength - writeOffset;
       }
 
       if (length < sublen)
-	sublen = (int) length;
+        sublen = (int) length;
 
       long fragmentAddress = fragmentArray[(int) (offset / Store.FRAGMENT_SIZE)];
       int fragmentOffset = (int) (offset % Store.FRAGMENT_SIZE);
 
       if (Store.FRAGMENT_SIZE - fragmentOffset < sublen)
-	sublen = Store.FRAGMENT_SIZE - fragmentOffset;
+        sublen = Store.FRAGMENT_SIZE - fragmentOffset;
 
       int len = _store.readFragment(fragmentAddress, fragmentOffset,
-				    buffer, writeOffset, sublen);
+                                    buffer, writeOffset, sublen);
 
       if (len <= 0) {
-	break;
+        break;
       }
 
       writeOffset += len;
@@ -162,7 +162,7 @@ public class TempFileInode {
     os.setBufferOffset(writeOffset);
 
     /*
-    if (_useCount < 2)
+      if (_useCount < 2)
       System.out.println("USE_COUNT: " + _useCount);
     */
 
@@ -180,27 +180,27 @@ public class TempFileInode {
     char []buffer = charBuffer.getBuffer();
 
     long offset = 0;
-    
+
     long length = _length;
-    
+
     while (length > 0) {
       long fragmentAddress
-	= _fragmentArray[(int) (offset / Store.FRAGMENT_SIZE)];
+        = _fragmentArray[(int) (offset / Store.FRAGMENT_SIZE)];
       int fragmentOffset = (int) (offset % Store.FRAGMENT_SIZE);
 
       int sublen = (Store.FRAGMENT_SIZE - fragmentOffset) / 2;
 
       if (buffer.length < sublen)
-	sublen = buffer.length;
+        sublen = buffer.length;
 
       if (length < 2 * sublen)
-	sublen = (int) (length / 2);
+        sublen = (int) (length / 2);
 
       int len = _store.readFragment(fragmentAddress, fragmentOffset,
-				    buffer, 0, sublen);
+                                    buffer, 0, sublen);
 
       if (len <= 0)
-	break;
+        break;
 
       out.write(buffer, 0, len);
 
@@ -220,7 +220,7 @@ public class TempFileInode {
   public void free()
   {
     int useCount;
-    
+
     synchronized (this) {
       useCount = --_useCount;
     }
@@ -238,7 +238,7 @@ public class TempFileInode {
   {
     ArrayList<Long> fragmentList;
     long []fragmentArray;
-    
+
     synchronized (this) {
       fragmentList = _fragmentList;
       _fragmentList = null;
@@ -251,26 +251,26 @@ public class TempFileInode {
 
     if (fragmentArray != null) {
       if (_useCount > 0)
-	Thread.dumpStack();
+        Thread.dumpStack();
       for (long fragment : fragmentArray) {
-	try {
-	  _store.deleteFragment(fragment);
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          _store.deleteFragment(fragment);
+        } catch (IOException e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
       if (_useCount > 0)
-	Thread.dumpStack();
+        Thread.dumpStack();
     }
     else if (fragmentList != null) {
       //System.out.println("FRAGMENT-LIST: " + fragmentList);
-      
+
       for (long fragment : fragmentList) {
-	try {
-	  _store.deleteFragment(fragment);
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          _store.deleteFragment(fragment);
+        } catch (IOException e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }
@@ -293,26 +293,26 @@ public class TempFileInode {
       long inodeOffset = _length;
 
       while (length > 0) {
-	while (_fragmentList.size() <= _length / Store.FRAGMENT_SIZE) {
-	  long fragment = _store.allocateFragment(_xa);
+        while (_fragmentList.size() <= _length / Store.FRAGMENT_SIZE) {
+          long fragment = _store.allocateFragment(_xa);
 
-	  _fragmentList.add(fragment);
-	}
+          _fragmentList.add(fragment);
+        }
 
-	int fragmentOffset = (int) (_length % Store.FRAGMENT_SIZE);
-	long fragmentAddress = _fragmentList.get(_fragmentList.size() - 1);
+        int fragmentOffset = (int) (_length % Store.FRAGMENT_SIZE);
+        long fragmentAddress = _fragmentList.get(_fragmentList.size() - 1);
 
-	int sublen = Store.FRAGMENT_SIZE - fragmentOffset;
-	if (length < sublen)
-	  sublen = length;
+        int sublen = Store.FRAGMENT_SIZE - fragmentOffset;
+        if (length < sublen)
+          sublen = length;
 
-	_length += sublen;
-	_store.writeFragment(_xa,
-			     fragmentAddress, fragmentOffset,
-			     buffer, offset, sublen);
+        _length += sublen;
+        _store.writeFragment(_xa,
+                             fragmentAddress, fragmentOffset,
+                             buffer, offset, sublen);
 
-	length -= sublen;
-	offset += sublen;
+        length -= sublen;
+        offset += sublen;
       }
     }
 
@@ -323,12 +323,12 @@ public class TempFileInode {
     public void close()
     {
       if (_fragmentList == null)
-	return;
-      
+        return;
+
       _fragmentArray = new long[_fragmentList.size()];
-      
+
       for (int i = 0; i < _fragmentList.size(); i++) {
-	_fragmentArray[i] = _fragmentList.get(i);
+        _fragmentArray[i] = _fragmentList.get(i);
       }
     }
   }
@@ -346,9 +346,9 @@ public class TempFileInode {
       int len = read(_tempBuffer, 0, 1);
 
       if (len > 0)
-	return _tempBuffer[0] & 0xff;
+        return _tempBuffer[0] & 0xff;
       else
-	return -1;
+        return -1;
     }
 
     /**
@@ -358,38 +358,38 @@ public class TempFileInode {
       throws IOException
     {
       if (_length - _offset < length)
-	length = (int) (_length - _offset);
+        length = (int) (_length - _offset);
 
       long []fragmentArray = _fragmentArray;
       int readLength = 0;
-    
+
       while (length > 0) {
-	long fragmentAddress
-	  = fragmentArray[(int) (_offset / Store.FRAGMENT_SIZE)];
-	int fragmentOffset = (int) (_offset % Store.FRAGMENT_SIZE);
+        long fragmentAddress
+          = fragmentArray[(int) (_offset / Store.FRAGMENT_SIZE)];
+        int fragmentOffset = (int) (_offset % Store.FRAGMENT_SIZE);
 
-	int sublen = length;
+        int sublen = length;
 
-	if (Store.FRAGMENT_SIZE - fragmentOffset < sublen)
-	  sublen = Store.FRAGMENT_SIZE - fragmentOffset;
+        if (Store.FRAGMENT_SIZE - fragmentOffset < sublen)
+          sublen = Store.FRAGMENT_SIZE - fragmentOffset;
 
-	int len = _store.readFragment(fragmentAddress, fragmentOffset,
-				      buffer, offset, sublen);
+        int len = _store.readFragment(fragmentAddress, fragmentOffset,
+                                      buffer, offset, sublen);
 
-	if (len <= 0) {
-	  break;
-	}
+        if (len <= 0) {
+          break;
+        }
 
-	offset += len;
-	_offset += len;
-	length -= len;
-	readLength += len;
+        offset += len;
+        _offset += len;
+        length -= len;
+        readLength += len;
       }
 
       if (readLength <= 0)
-	return -1;
+        return -1;
       else
-	return readLength;
+        return readLength;
     }
 
     public void close()
@@ -413,26 +413,26 @@ public class TempFileInode {
       throws IOException
     {
       while (length > 0) {
-	while (_fragmentList.size() <= _length / Store.FRAGMENT_SIZE) {
-	  long fragment = _store.allocateFragment(_xa);
+        while (_fragmentList.size() <= _length / Store.FRAGMENT_SIZE) {
+          long fragment = _store.allocateFragment(_xa);
 
-	  _fragmentList.add(fragment);
-	}
+          _fragmentList.add(fragment);
+        }
 
-	int fragmentOffset = (int) (_length % Store.FRAGMENT_SIZE);
-	long fragmentAddress = _fragmentList.get(_fragmentList.size() - 1);
+        int fragmentOffset = (int) (_length % Store.FRAGMENT_SIZE);
+        long fragmentAddress = _fragmentList.get(_fragmentList.size() - 1);
 
-	int sublen = (Store.FRAGMENT_SIZE - fragmentOffset) / 2;
-	if (length < sublen)
-	  sublen = length;
+        int sublen = (Store.FRAGMENT_SIZE - fragmentOffset) / 2;
+        if (length < sublen)
+          sublen = length;
 
-	_length += 2 * sublen;
-	_store.writeFragment(_xa,
-			     fragmentAddress, fragmentOffset,
-			     buffer, offset, sublen);
+        _length += 2 * sublen;
+        _store.writeFragment(_xa,
+                             fragmentAddress, fragmentOffset,
+                             buffer, offset, sublen);
 
-	length -= sublen;
-	offset += sublen;
+        length -= sublen;
+        offset += sublen;
       }
     }
 
@@ -443,16 +443,16 @@ public class TempFileInode {
     public void close()
     {
       synchronized (this) {
-	if (_fragmentList == null)
-	  return;
-      
-	_fragmentArray = new long[_fragmentList.size()];
-      
-	for (int i = 0; i < _fragmentList.size(); i++) {
-	  _fragmentArray[i] = _fragmentList.get(i);
-	}
+        if (_fragmentList == null)
+          return;
 
-	_fragmentList = null;
+        _fragmentArray = new long[_fragmentList.size()];
+
+        for (int i = 0; i < _fragmentList.size(); i++) {
+          _fragmentArray[i] = _fragmentList.get(i);
+        }
+
+        _fragmentList = null;
       }
     }
   }

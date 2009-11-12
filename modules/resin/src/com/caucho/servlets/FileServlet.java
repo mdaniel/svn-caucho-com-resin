@@ -80,7 +80,7 @@ public class FileServlet extends GenericServlet {
   {
     _characterEncoding = encoding;
   }
-  
+
   /**
    * Flag to disable the "Range" header.
    */
@@ -104,7 +104,7 @@ public class FileServlet extends GenericServlet {
   {
     _pathCache.remove(uri);
   }
-  
+
   @Override
   public void init(ServletConfig conf)
     throws ServletException
@@ -119,7 +119,7 @@ public class FileServlet extends GenericServlet {
     } catch (Exception e) {
       log.finest(e.toString());
     }
-      
+
     _pathCache = new LruCache<String,Cache>(1024);
 
     String enable = getInitParameter("enable-range");
@@ -144,13 +144,13 @@ public class FileServlet extends GenericServlet {
     }
     else
       req = (HttpServletRequest) request;
-    
+
     res = (HttpServletResponse) response;
-    
+
     String method = req.getMethod();
     if (! method.equalsIgnoreCase("GET")
-	&& ! method.equalsIgnoreCase("HEAD")
-	&& ! method.equalsIgnoreCase("POST")) {
+        && ! method.equalsIgnoreCase("HEAD")
+        && ! method.equalsIgnoreCase("POST")) {
       res.sendError(res.SC_NOT_IMPLEMENTED, "Method not implemented");
       return;
     }
@@ -178,7 +178,7 @@ public class FileServlet extends GenericServlet {
         servletPath = (String) req.getAttribute("javax.servlet.include.servlet_path");
       else
         servletPath = req.getServletPath();
-        
+
       if (servletPath != null)
         cb.append(servletPath);
 
@@ -189,7 +189,7 @@ public class FileServlet extends GenericServlet {
         pathInfo = (String) req.getAttribute("javax.servlet.include.path_info");
       else
         pathInfo = req.getPathInfo();
-        
+
       if (pathInfo != null)
         cb.append(pathInfo);
 
@@ -205,14 +205,14 @@ public class FileServlet extends GenericServlet {
       if (cauchoReq == null || cauchoReq.getRequestDepth(0) != 0) {
       }
       else if (relPath.regionMatches(true, 0, "/web-inf", 0, 8)
-	       && (relPath.length() == 8
-		   || ! Character.isLetterOrDigit(relPath.charAt(8)))) {
+               && (relPath.length() == 8
+                   || ! Character.isLetterOrDigit(relPath.charAt(8)))) {
         res.sendError(res.SC_NOT_FOUND);
         return;
       }
       else if (relPath.regionMatches(true, 0, "/meta-inf", 0, 9)
-	       && (relPath.length() == 9
-		   || ! Character.isLetterOrDigit(relPath.charAt(9)))) {
+               && (relPath.length() == 9
+                   || ! Character.isLetterOrDigit(relPath.charAt(9)))) {
         res.sendError(res.SC_NOT_FOUND);
         return;
       }
@@ -227,15 +227,15 @@ public class FileServlet extends GenericServlet {
       else if (path.isDirectory()) {
       }
       else if (path.isWindowsInsecure()) {
-	// Windows security issues with trailing '.'
-	res.sendError(res.SC_NOT_FOUND);
-	return;
+        // Windows security issues with trailing '.'
+        res.sendError(res.SC_NOT_FOUND);
+        return;
       }
 
       // A null will cause problems.
       for (int i = relPath.length() - 1; i >= 0; i--) {
         char ch = relPath.charAt(i);
-          
+
         if (ch == 0) {
           res.sendError(res.SC_NOT_FOUND);
           return;
@@ -250,14 +250,14 @@ public class FileServlet extends GenericServlet {
 
       _pathCache.put(uri, cache);
     }
-  
+
     cache.update();
 
     if (cache.isDirectory()) {
       if (_dir != null)
-	_dir.forward(req, res);
+        _dir.forward(req, res);
       else
-	res.sendError(res.SC_NOT_FOUND);
+        res.sendError(res.SC_NOT_FOUND);
       return;
     }
 
@@ -271,6 +271,7 @@ public class FileServlet extends GenericServlet {
 
     String ifMatch = req.getHeader("If-None-Match");
     String etag = cache.getEtag();
+
     if (ifMatch != null && ifMatch.equals(etag)) {
       res.addHeader("ETag", etag);
       res.sendError(res.SC_NOT_MODIFIED);
@@ -287,29 +288,29 @@ public class FileServlet extends GenericServlet {
       if (ifModified == null) {
       }
       else if (ifModified.equals(lastModified)) {
-	isModified = false;
+        isModified = false;
       }
       else {
-	long ifModifiedTime;
+        long ifModifiedTime;
 
-	synchronized (_calendar) {
-	  try {
-	    ifModifiedTime = _calendar.parseDate(ifModified);
-	  } catch (Exception e) {
+        synchronized (_calendar) {
+          try {
+            ifModifiedTime = _calendar.parseDate(ifModified);
+          } catch (Exception e) {
             log.log(Level.FINER, e.toString(), e);
-            
-	    ifModifiedTime = 0;
-	  }
-	}
 
-	isModified = ifModifiedTime != cache.getLastModified();
+            ifModifiedTime = 0;
+          }
+        }
+
+        isModified = ifModifiedTime != cache.getLastModified();
       }
 
       if (! isModified) {
-	if (etag != null)
-	  res.addHeader("ETag", etag);
-	res.sendError(res.SC_NOT_MODIFIED);
-	return;
+        if (etag != null)
+          res.addHeader("ETag", etag);
+        res.sendError(res.SC_NOT_MODIFIED);
+        return;
       }
     }
 
@@ -317,10 +318,10 @@ public class FileServlet extends GenericServlet {
     res.addHeader("Last-Modified", lastModified);
     if (_isEnableRange && cauchoReq != null && cauchoReq.isTop())
       res.addHeader("Accept-Ranges", "bytes");
-    
+
     if (_characterEncoding != null)
       res.setCharacterEncoding(_characterEncoding);
-    
+
     String mime = cache.getMimeType();
     if (mime != null)
       res.setContentType(mime);
@@ -334,12 +335,12 @@ public class FileServlet extends GenericServlet {
       String range = req.getHeader("Range");
 
       if (range != null) {
-	String ifRange = req.getHeader("If-Range");
+        String ifRange = req.getHeader("If-Range");
 
-	if (ifRange != null && ! ifRange.equals(etag)) {
-	}
-	else if (handleRange(req, res, cache, range, mime))
-	  return;
+        if (ifRange != null && ! ifRange.equals(etag)) {
+        }
+        else if (handleRange(req, res, cache, range, mime))
+          return;
       }
     }
 
@@ -359,8 +360,8 @@ public class FileServlet extends GenericServlet {
   private boolean handleRange(HttpServletRequest req,
                               HttpServletResponse res,
                               Cache cache,
-			      String range,
-			      String mime)
+                              String range,
+                              String mime)
     throws IOException
   {
     // This is duplicated in CacheInvocation.  Possibly, it should be
@@ -393,23 +394,23 @@ public class FileServlet extends GenericServlet {
 
       // read range start (before '-')
       for (;
-	   off < length && (ch = range.charAt(off)) >= '0' && ch <= '9';
-	   off++) {
-	first = 10 * first + ch - '0';
-	hasFirst = true;
+           off < length && (ch = range.charAt(off)) >= '0' && ch <= '9';
+           off++) {
+        first = 10 * first + ch - '0';
+        hasFirst = true;
       }
 
       if (length <= off && ! isFirstChunk)
-	break;
+        break;
       else if (ch != '-')
-	return false;
+        return false;
 
       // read range end (before '-')
       for (off++;
-	   off < length && (ch = range.charAt(off)) >= '0' && ch <= '9';
-	   off++) {
-	last = 10 * last + ch - '0';
-	hasLast = true;
+           off < length && (ch = range.charAt(off)) >= '0' && ch <= '9';
+           off++) {
+        last = 10 * last + ch - '0';
+        hasLast = true;
       }
 
       // Skip whitespace
@@ -421,26 +422,26 @@ public class FileServlet extends GenericServlet {
       long cacheLength = cache.getLength();
 
       if (! hasLast) {
-	if (first == 0)
-	  return false;
-	
-	last = cacheLength - 1;
+        if (first == 0)
+          return false;
+
+        last = cacheLength - 1;
       }
 
       // suffix
       if (! hasFirst) {
-	first = cacheLength - last;
-	last = cacheLength - 1;
+        first = cacheLength - last;
+        last = cacheLength - 1;
       }
 
       if (last < first)
-	break;
-    
+        break;
+
       if (cacheLength <= last) {
-	// XXX: actually, an error
-	break;
+        // XXX: actually, an error
+        break;
       }
-    
+
       res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
       StringBuilder cb = new StringBuilder();
@@ -453,51 +454,51 @@ public class FileServlet extends GenericServlet {
       String chunkRange = cb.toString();
 
       if (hasMore) {
-	if (isFirstChunk) {
-	  StringBuilder cb1 = new StringBuilder();
+        if (isFirstChunk) {
+          StringBuilder cb1 = new StringBuilder();
 
-	  cb1.append("--");
-	  Base64.encode(cb1, RandomUtil.getRandomLong());
-	  boundary = cb1.toString();
+          cb1.append("--");
+          Base64.encode(cb1, RandomUtil.getRandomLong());
+          boundary = cb1.toString();
 
-	  res.setContentType("multipart/byteranges; boundary=" + boundary);
-	  os = res.getOutputStream();
-	}
-	else {
-	  os.write('\r');
-	  os.write('\n');
-	}
+          res.setContentType("multipart/byteranges; boundary=" + boundary);
+          os = res.getOutputStream();
+        }
+        else {
+          os.write('\r');
+          os.write('\n');
+        }
 
-	isFirstChunk = false;
+        isFirstChunk = false;
 
-	os.write('-');
-	os.write('-');
-	os.print(boundary);
-	os.print("\r\nContent-Type: ");
-	os.print(mime);
-	os.print("\r\nContent-Range: ");
-	os.print(chunkRange);
-	os.write('\r');
-	os.write('\n');
-	os.write('\r');
-	os.write('\n');
+        os.write('-');
+        os.write('-');
+        os.print(boundary);
+        os.print("\r\nContent-Type: ");
+        os.print(mime);
+        os.print("\r\nContent-Range: ");
+        os.print(chunkRange);
+        os.write('\r');
+        os.write('\n');
+        os.write('\r');
+        os.write('\n');
       }
       else {
-	res.setContentLength((int) (last - first + 1));
-      
-	res.addHeader("Content-Range", chunkRange);
+        res.setContentLength((int) (last - first + 1));
+
+        res.addHeader("Content-Range", chunkRange);
       }
 
       ReadStream is = null;
       try {
-	is = cache.getPath().openRead();
-	is.skip(first);
+        is = cache.getPath().openRead();
+        is.skip(first);
 
-	os = res.getOutputStream();
-	is.writeToStream(os, (int) (last - first + 1));
+        os = res.getOutputStream();
+        is.writeToStream(os, (int) (last - first + 1));
       } finally {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
 
       for (off--; off < length && range.charAt(off) != ','; off++) {
@@ -533,7 +534,7 @@ public class FileServlet extends GenericServlet {
     String _etag;
     String _lastModifiedString;
     String _mimeType;
-    
+
     Cache(QDate calendar, Path path, String relPath, String mimeType)
     {
       _calendar = calendar;
@@ -592,7 +593,7 @@ public class FileServlet extends GenericServlet {
     void update()
     {
       synchronized (this) {
-	updateData();
+        updateData();
       }
     }
 
@@ -602,26 +603,26 @@ public class FileServlet extends GenericServlet {
       long length = _path.getLength();
 
       if (lastModified != _lastModified || length != _length) {
-	_lastModified = lastModified;
-	_length = length;
-	_canRead = _path.canRead();
-	_isDirectory = _path.isDirectory();
-	    
-	StringBuilder sb = new StringBuilder();
-	sb.append('"');
-	Base64.encode(sb, _path.getCrc64());
-	sb.append('"');
-	_etag = sb.toString();
+        _lastModified = lastModified;
+        _length = length;
+        _canRead = _path.canRead();
+        _isDirectory = _path.isDirectory();
 
-	synchronized (_calendar) {
-	  _calendar.setGMTTime(lastModified);
-	  _lastModifiedString = _calendar.printDate();
-	}
+        StringBuilder sb = new StringBuilder();
+        sb.append('"');
+        Base64.encode(sb, _path.getCrc64());
+        sb.append('"');
+        _etag = sb.toString();
+
+        synchronized (_calendar) {
+          _calendar.setGMTTime(lastModified);
+          _lastModifiedString = _calendar.printDate();
+        }
       }
-	  
+
       if (lastModified == 0) {
-	_canRead = false;
-	_isDirectory = false;
+        _canRead = false;
+        _isDirectory = false;
       }
     }
   }

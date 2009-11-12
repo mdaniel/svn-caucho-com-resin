@@ -179,31 +179,20 @@ if ($stat_service) {
   $start = $end - $period;
 
   $height = 150;
+  $width = 220;
 
   echo "<table>";
 
-  echo "<tr><th>Request Count<th>Request Time";
+  echo "<tr><th>Request Count<th>Request Time<th>Threads";
   echo "<tr valign='top'><td>";
-  stat_graph("request", 300, $height, $start, $end,
+  stat_graph("request", $width, $height, $start, $end,
              array("$si|Resin|Request|Http Request Count"));
   echo "<td>";
-  stat_graph("request_time", 300, $height, $start, $end,
+  stat_graph("request_time", $width, $height, $start, $end,
              array("$si|Resin|Request|Http Request Time",
                    "$si|Resin|Request|Http Request Time Max"));
-
-  echo "<tr><th>Database Query Active<th>Database Query Time";
-  echo "<tr valign='top'><td>";
-  stat_graph("database", 300, $height, $start, $end,
-             array("$si|Resin|Database|Query Active Max"));
-
   echo "<td>";
-  stat_graph("database_time", 300, $height, $start, $end,
-             array("$si|Resin|Database|Query Time",
-                   "$si|Resin|Database|Query Time Max"));
-
-  echo "<tr><th>Thread<th>CPU";
-  echo "<tr valign='top'><td>";
-  stat_graph("thread", 300, $height, $start, $end,
+  stat_graph("thread", $width, $height, $start, $end,
              array("$si|JVM|Thread|JVM Thread Count",
                    "$si|Resin|Thread|Thread Count",
                    "$si|Resin|Thread|Thread Active Count",
@@ -211,18 +200,36 @@ if ($stat_service) {
                    "$si|Resin|Thread|Thread Priority Queue",
                    "$si|Resin|Thread|Thread Overflow Count"));
 
+  echo "<tr><th>Database Query Active<th>Database Query Time<th>CPU";
+  echo "<tr valign='top'><td>";
+  stat_graph("database", $width, $height, $start, $end,
+             array("$si|Resin|Database|Query Active Max"));
+
   echo "<td>";
-  stat_graph("cpu", 300, $height, $start, $end,
+  stat_graph("database_time", $width, $height, $start, $end,
+             array("$si|Resin|Database|Query Time",
+                   "$si|Resin|Database|Query Time Max"));
+
+  echo "<td>";
+  stat_graph("cpu", $width, $height, $start, $end,
              array("$si|OS|CPU|CPU Active"));
 
-  echo "<tr><th>Memory";
+  echo "<tr><th>Memory<th>GC Time<th>Netstat";
   echo "<tr valign='top'><td>";
-  stat_graph("memory", 300, $height, $start, $end,
+  stat_graph("memory", $width, $height, $start, $end,
              array("$si|JVM|Memory|Heap Memory Used",
                    "$si|JVM|Memory|Heap Memory Free",
                    "$si|JVM|Memory|Tenured Memory Used",
                    "$si|JVM|Memory|PermGen Memory Used"));
 
+  echo "<td>";
+  stat_graph_regexp("memory_gc", $width, $height, $start, $end,
+                    "/$si\|JVM\|Memory\|GC Time/");
+                    
+  echo "<td>";
+  stat_graph_regexp("netstat", $width, $height, $start, $end,
+                    "/$si\|OS\|Network\|(?!tcp-time)/");
+                    
   echo "</table>";
 }
 ?>
@@ -322,10 +329,6 @@ if ($mbean) {
 <?php
 $thread_pool = $server->ThreadPool;
 ?>
-
-<!--
-"Restart" - "Exit this instance cleanly and allow the wrapper script to start a new JVM."
--->
 
 <!-- TCP ports -->
 

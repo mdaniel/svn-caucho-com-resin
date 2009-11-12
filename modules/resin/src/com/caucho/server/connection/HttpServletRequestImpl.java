@@ -105,7 +105,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
   private boolean _varyCookies;   // True if the page depends on cookies
   private boolean _hasCookie;
-  
+
   private boolean _isSessionIdFromCookie;
 
   // security
@@ -1332,13 +1332,13 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return getRequestedSessionId();
   }
-  
+
   @Override
   public void setSessionId(String sessionId)
   {
     getResponse().setSessionId(sessionId);
   }
-  
+
   /**
    * Returns the session id in the HTTP request from the url.
    */
@@ -1464,7 +1464,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
     if (auth == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
-    
+
     Login login = webApp.getLogin();
 
     if (login == null)
@@ -1487,7 +1487,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     WebApp webApp = getWebApp();
 
     Authenticator auth = webApp.getConfiguredAuthenticator();
-    
+
     if (auth == null)
       throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
 
@@ -1595,6 +1595,28 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   }
 
   /**
+   * Internal logging return to get the remote user.  If the request already
+   * knows the user, get it, otherwise just return null.
+   */
+  public String getRemoteUser(boolean create)
+  {
+    /*
+    if (getSession(false) == null)
+      return null;
+    */
+
+    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
+
+    if (user == null && create)
+      user = getUserPrincipal();
+
+    if (user != null)
+      return user.getName();
+    else
+      return null;
+  }
+
+  /**
    * Returns the Principal representing the logged in user.
    */
   public Principal getUserPrincipal()
@@ -1670,26 +1692,6 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     // server/12ds
     _isSecure = isSecure;
-  }
-
-  /**
-   * Internal logging return to get the remote user.  If the request already
-   * knows the user, get it, otherwise just return null.
-   */
-  public String getRemoteUser(boolean create)
-  {
-    if (getSession(false) == null)
-      return null;
-
-    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
-
-    if (user == null && create)
-      user = getUserPrincipal();
-
-    if (user != null)
-      return user.getName();
-    else
-      return null;
   }
 
   //
@@ -2031,7 +2033,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       throw new IllegalStateException(L.l("HTTP Connection header '{0}' must be 'Upgrade', because the WebSocket protocol requires a Connection: Upgrade header.",
                                           connection));
     }
-    
+
     String origin = getHeader("Origin");
 
     if (origin == null) {
@@ -2055,13 +2057,13 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       sb.append(":");
       sb.append(getServerPort());
     }
-    
+
     sb.append(getContextPath());
     if (getServletPath() != null)
       sb.append(getServletPath());
 
     String url = sb.toString();
-    
+
     _response.setHeader("WebSocket-Location", url);
     _response.setHeader("WebSocket-Origin", origin.toLowerCase());
 

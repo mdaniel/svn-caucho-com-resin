@@ -32,7 +32,7 @@ package com.caucho.db.store;
 /**
  * Wraps an exception in a SQLException wrapper.
  */
-public class LockTimeoutException extends java.sql.SQLException {
+public class LockTimeoutException extends RuntimeException {
   private Throwable _cause;
 
   /**

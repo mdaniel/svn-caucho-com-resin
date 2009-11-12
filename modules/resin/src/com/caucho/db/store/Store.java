@@ -37,6 +37,7 @@ import com.caucho.util.FreeList;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 
+import java.io.OutputStream;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.sql.SQLException;
@@ -151,7 +152,7 @@ public class Store {
 
   private long _freeAllocIndex; // index for finding a free allocation
   private int _freeAllocCount;
-  
+
   private int _freeMiniAllocIndex; // index for finding a free mini
   private int _freeMiniAllocCount;
 
@@ -177,6 +178,7 @@ public class Store {
   private final Semaphore _rowFileSemaphore = new Semaphore(8);
 
   private Lock _rowLock;
+  private long _blockLockTimeout = 120000;
 
   private boolean _isCorrupted;
 
@@ -420,7 +422,7 @@ public class Store {
     } finally {
       closeRowFile(wrapper, isPriority);
     }
-    
+
     _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
     int allocCount = (int) _blockCount;
@@ -443,7 +445,7 @@ public class Store {
       /*
       System.out.println("READ: " + Long.toHexString(allocGroup * ALLOC_GROUP_SIZE) + " " + allocGroup * ALLOC_GROUP_SIZE);
       */
-      
+
       readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
                 _allocationTable, i, len);
     }
@@ -512,12 +514,12 @@ public class Store {
   /**
    * Returns the matching block.
    */
-  public final Block readBlock(long blockAddress)
+  public final ReadBlock readBlock(long blockAddress)
     throws IOException
   {
     long blockId = addressToBlockId(blockAddress);
 
-    Block block = _blockManager.getBlock(this, blockId);
+    ReadBlock block = (ReadBlock) _blockManager.getBlock(this, blockId);
 
     boolean isValid = false;
 
@@ -525,7 +527,7 @@ public class Store {
       block.read();
 
       isValid = true;
-      
+
       return block;
     } finally {
       if (! isValid)
@@ -680,10 +682,10 @@ public class Store {
         if (getAllocation(blockIndex) == ALLOC_FREE) {
           _freeAllocIndex = blockIndex;
           _freeAllocCount++;
-          
+
           // mark USED before actual code so it's properly initialized
           setAllocation(blockIndex, ALLOC_USED);
-          
+
           return blockIndex;
         }
       }
@@ -695,7 +697,7 @@ public class Store {
       else {
         _freeAllocIndex = _blockCount;
       }
-      
+
       return 0;
     }
   }
@@ -703,7 +705,7 @@ public class Store {
   private void extendFile()
   {
     long newBlockCount;
-      
+
     synchronized (_allocationLock) {
       if (_freeAllocIndex < _blockCount)
         return;
@@ -736,7 +738,7 @@ public class Store {
           if (newBlockCount == count)
             newBlockCount++;
         }
-        
+
         _allocDirtyMin = 0;
         _allocDirtyMax = newTable.length;
       }
@@ -749,7 +751,7 @@ public class Store {
 
       if (getAllocation(newBlockCount) != ALLOC_FREE)
         System.out.println("BAD_BLOCK: " + newBlockCount);
-      
+
       setAllocation(newBlockCount, ALLOC_USED);
     }
 
@@ -967,19 +969,67 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getFragmentOffset(fragmentAddress);
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getFragmentOffset(fragmentAddress);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         System.arraycopy(blockBuffer, blockOffset + fragmentOffset,
                          buffer, offset, length);
-      }
 
-      return length;
+        return length;
+      } finally {
+        lock.unlockRead();
+      }
+    } finally {
+      block.free();
+    }
+  }
+
+  /**
+   * Reads a block to an output stream.
+   *
+   * @param blockAddress the address of the block
+   * @param blockOffset the offset inside the block to start reading
+   * @param os the result output stream
+   * @param length the number of bytes to read
+   *
+   * @return the number of bytes read
+   */
+  public void readBlock(long blockId, int blockOffset,
+                           OutputStream os, int length)
+    throws IOException
+  {
+    if (blockId <= 0) {
+      log.warning(this + " illegal block read with block-id=0");
+      return;
+    }
+
+    if (BLOCK_SIZE - blockOffset < length) {
+      // server/13df
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+                                             blockOffset, length));
+    }
+
+    ReadBlock block = readBlock(blockId);
+
+    try {
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
+
+      try {
+        byte []blockBuffer = block.getBuffer();
+
+        os.write(blockBuffer, blockOffset, length);
+      } finally {
+        lock.unlockRead();
+      }
     } finally {
       block.free();
     }
@@ -1006,15 +1056,18 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getFragmentOffset(fragmentAddress);
-      blockOffset += fragmentOffset;
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getFragmentOffset(fragmentAddress);
+        blockOffset += fragmentOffset;
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         for (int i = 0; i < length; i++) {
           int ch1 = blockBuffer[blockOffset] & 0xff;
           int ch2 = blockBuffer[blockOffset + 1] & 0xff;
@@ -1023,6 +1076,8 @@ public class Store {
 
           blockOffset += 2;
         }
+      } finally {
+        lock.unlockRead();
       }
 
       return length;
@@ -1040,15 +1095,20 @@ public class Store {
                                int fragmentOffset)
     throws IOException
   {
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getFragmentOffset(fragmentAddress);
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getFragmentOffset(fragmentAddress);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         return readLong(blockBuffer, blockOffset + fragmentOffset);
+      } finally {
+        lock.unlockRead();
       }
     } finally {
       block.free();
@@ -1076,17 +1136,22 @@ public class Store {
                                              blockOffset, length));
     }
 
-    Block block = readBlock(addressToBlockId(blockAddress));
+    ReadBlock block = readBlock(addressToBlockId(blockAddress));
 
     try {
-      byte []blockBuffer = block.getBuffer();
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      synchronized (blockBuffer) {
+      try {
+        byte []blockBuffer = block.getBuffer();
+
         System.arraycopy(blockBuffer, blockOffset,
                          buffer, offset, length);
-      }
 
-      return length;
+        return length;
+      } finally {
+        lock.unlockRead();
+      }
     } finally {
       block.free();
     }
@@ -1116,9 +1181,12 @@ public class Store {
     Block block = readBlock(addressToBlockId(blockAddress));
 
     try {
-      byte []blockBuffer = block.getBuffer();
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      synchronized (blockBuffer) {
+      try {
+        byte []blockBuffer = block.getBuffer();
+
         for (int i = 0; i < length; i++) {
           int ch1 = blockBuffer[blockOffset] & 0xff;
           int ch2 = blockBuffer[blockOffset + 1] & 0xff;
@@ -1127,9 +1195,11 @@ public class Store {
 
           blockOffset += 2;
         }
-      }
 
-      return length;
+        return length;
+      } finally {
+        lock.unlockRead();
+      }
     } finally {
       block.free();
     }
@@ -1144,13 +1214,18 @@ public class Store {
                             int offset)
     throws IOException
   {
-    Block block = readBlock(addressToBlockId(blockAddress));
+    ReadBlock block = readBlock(addressToBlockId(blockAddress));
 
     try {
-      byte []blockBuffer = block.getBuffer();
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      synchronized (blockBuffer) {
+      try {
+        byte []blockBuffer = block.getBuffer();
+
         return readLong(blockBuffer, offset);
+      } finally {
+        lock.unlockRead();
       }
     } finally {
       block.free();
@@ -1256,20 +1331,25 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      xa.addUpdateFragmentBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      int blockOffset = getFragmentOffset(fragmentAddress);
+      try {
+        xa.addUpdateFragmentBlock(block);
 
-      byte []blockBuffer = block.getBuffer();
+        int blockOffset = getFragmentOffset(fragmentAddress);
 
-      blockOffset += fragmentOffset;
+        byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
+        blockOffset += fragmentOffset;
+
         System.arraycopy(buffer, offset,
                          blockBuffer, blockOffset,
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1299,13 +1379,16 @@ public class Store {
     try {
       block = xa.createAutoCommitWriteBlock(block);
 
-      int blockOffset = getFragmentOffset(fragmentAddress);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getFragmentOffset(fragmentAddress);
 
-      blockOffset += fragmentOffset;
+        byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
+        blockOffset += fragmentOffset;
+
         int blockTail = blockOffset;
 
         for (int i = 0; i < length; i++) {
@@ -1318,6 +1401,8 @@ public class Store {
         }
 
         block.setDirty(blockOffset, blockTail);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1337,17 +1422,22 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      xa.addUpdateBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      int blockOffset = getFragmentOffset(fragmentAddress);
+      try {
+        xa.addUpdateBlock(block);
 
-      byte []blockBuffer = block.getBuffer();
-      int offset = blockOffset + fragmentOffset;
+        int blockOffset = getFragmentOffset(fragmentAddress);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+        int offset = blockOffset + fragmentOffset;
+
         writeLong(blockBuffer, offset, value);
 
         block.setDirty(offset, offset + 8);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1378,16 +1468,21 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(blockAddress));
 
     try {
-      xa.addUpdateBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        xa.addUpdateBlock(block);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         System.arraycopy(buffer, offset,
                          blockBuffer, blockOffset,
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1417,11 +1512,14 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(blockAddress));
 
     try {
-      block = xa.createAutoCommitWriteBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        block = xa.createAutoCommitWriteBlock(block);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         int blockTail = blockOffset;
 
         for (int i = 0; i < charLength; i++) {
@@ -1434,6 +1532,8 @@ public class Store {
         }
 
         block.setDirty(blockOffset, blockTail);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1453,14 +1553,19 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(blockAddress));
 
     try {
-      xa.addUpdateBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        xa.addUpdateBlock(block);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         writeLong(blockBuffer, offset, value);
 
         block.setDirty(offset, offset + 8);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1497,19 +1602,24 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getMiniFragmentOffset(fragmentAddress);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         System.arraycopy(blockBuffer, blockOffset + fragmentOffset,
                          buffer, offset, length);
-      }
 
-      return length;
+        return length;
+      } finally {
+        lock.unlockRead();
+      }
     } finally {
       block.free();
     }
@@ -1535,15 +1645,18 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getMiniFragmentOffset(fragmentAddress);
-      blockOffset += fragmentOffset;
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getMiniFragmentOffset(fragmentAddress);
+        blockOffset += fragmentOffset;
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         for (int i = 0; i < length; i++) {
           int ch1 = blockBuffer[blockOffset] & 0xff;
           int ch2 = blockBuffer[blockOffset + 1] & 0xff;
@@ -1552,9 +1665,11 @@ public class Store {
 
           blockOffset += 2;
         }
-      }
 
-      return length;
+        return length;
+      } finally {
+        lock.unlockRead();
+      }
     } finally {
       block.free();
     }
@@ -1569,15 +1684,20 @@ public class Store {
                                    int fragmentOffset)
     throws IOException
   {
-    Block block = readBlock(addressToBlockId(fragmentAddress));
+    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+      Lock lock = block.getLock();
+      lock.lockRead(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getMiniFragmentOffset(fragmentAddress);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+
         return readLong(blockBuffer, blockOffset + fragmentOffset);
+      } finally {
+        lock.unlockRead();
       }
     } finally {
       block.free();
@@ -1602,7 +1722,10 @@ public class Store {
         byte []blockBuffer = block.getBuffer();
         int freeOffset = -1;
 
-        synchronized (blockBuffer) {
+        Lock lock = block.getLock();
+        lock.lockReadAndWrite(_blockLockTimeout);
+
+        try {
           for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
             int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
             int mask = 1 << (i % 8);
@@ -1630,6 +1753,8 @@ public class Store {
               break;
             }
           }
+        } finally {
+          lock.unlockReadAndWrite();
         }
 
         if (freeOffset >= 0) {
@@ -1665,7 +1790,7 @@ public class Store {
         if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
           _freeMiniAllocIndex = i;
           _freeMiniAllocCount++;
-          
+
           synchronized (_allocationLock) {
             if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
               allocationTable[i + 1] = (byte) 0xff;
@@ -1697,7 +1822,7 @@ public class Store {
           block.free();
         }
       }
-      
+
       _freeMiniAllocCount = 0;
       _freeMiniAllocIndex = 0;
     }
@@ -1712,12 +1837,15 @@ public class Store {
     Block block = readBlock(fragmentAddress);
 
     try {
-      int fragIndex = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
-      int offset = fragIndex / 8 + MINI_FRAG_ALLOC_OFFSET;
-      int mask = 1 << (fragIndex % 8);
-      byte []blockBuffer = block.getBuffer();
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      synchronized (blockBuffer) {
+      try {
+        int fragIndex = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
+        int offset = fragIndex / 8 + MINI_FRAG_ALLOC_OFFSET;
+        int mask = 1 << (fragIndex % 8);
+        byte []blockBuffer = block.getBuffer();
+
         blockBuffer[offset] &= ~mask;
         block.setDirty(offset, offset + 1);
 
@@ -1737,6 +1865,8 @@ public class Store {
 
           setAllocDirty(i + 1, i + 2);
         }
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1767,20 +1897,25 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      xa.addUpdateBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+      try {
+        xa.addUpdateBlock(block);
 
-      byte []blockBuffer = block.getBuffer();
+        int blockOffset = getMiniFragmentOffset(fragmentAddress);
 
-      blockOffset += fragmentOffset;
+        byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
+        blockOffset += fragmentOffset;
+
         System.arraycopy(buffer, offset,
                          blockBuffer, blockOffset,
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1808,15 +1943,18 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      block = xa.createAutoCommitWriteBlock(block);
+      // block = xa.createAutoCommitWriteBlock(block);
 
-      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      byte []blockBuffer = block.getBuffer();
+      try {
+        int blockOffset = getMiniFragmentOffset(fragmentAddress);
 
-      blockOffset += fragmentOffset;
+        byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
+        blockOffset += fragmentOffset;
+
         int blockTail = blockOffset;
 
         for (int i = 0; i < length; i++) {
@@ -1829,6 +1967,8 @@ public class Store {
         }
 
         block.setDirty(blockOffset, blockTail);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1848,17 +1988,22 @@ public class Store {
     Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
 
     try {
-      xa.addUpdateBlock(block);
+      Lock lock = block.getLock();
+      lock.lockReadAndWrite(_blockLockTimeout);
 
-      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+      try {
+        xa.addUpdateBlock(block);
 
-      byte []blockBuffer = block.getBuffer();
-      int offset = blockOffset + fragmentOffset;
+        int blockOffset = getMiniFragmentOffset(fragmentAddress);
 
-      synchronized (blockBuffer) {
+        byte []blockBuffer = block.getBuffer();
+        int offset = blockOffset + fragmentOffset;
+
         writeLong(blockBuffer, offset, value);
 
         block.setDirty(offset, offset + 8);
+      } finally {
+        lock.unlockReadAndWrite();
       }
     } finally {
       block.free();
@@ -1888,7 +2033,7 @@ public class Store {
       RandomAccessStream is = wrapper.getFile();
 
       long blockAddress = blockId & BLOCK_MASK;
-      
+
       if (blockAddress < 0 || _fileSize < blockAddress + length) {
         throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})",
                                             Long.toHexString(blockAddress),
@@ -1907,7 +2052,7 @@ public class Store {
         System.out.println("BAD-READ: " + Long.toHexString(blockAddress));
         if (readLen < 0)
           readLen = 0;
-        
+
         for (int i = readLen; i < BLOCK_SIZE; i++)
           buffer[i] = 0;
       }
@@ -1972,11 +2117,11 @@ public class Store {
         _rowFileSemaphore.acquire();
       } catch (InterruptedException e) {
         log.log(Level.FINE, e.toString(), e);
-      
+
         return null;
       }
     }
-      
+
     RandomAccessWrapper wrapper = null;
     try {
       wrapper = openRowFileImpl();
@@ -2032,7 +2177,7 @@ public class Store {
 
     SoftReference<RandomAccessWrapper> fileRef
       = new SoftReference<RandomAccessWrapper>(wrapper);
-    
+
     if (_cachedRowFile.free(fileRef)) {
       return;
     }

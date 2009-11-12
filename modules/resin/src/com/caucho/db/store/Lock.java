@@ -60,16 +60,16 @@ public final class Lock {
 
   private final Object _lock = new Object();
   private final Object _testLock = new Object();
-  
+
   private final AtomicLong _lockCount = new AtomicLong();
   private final AtomicLong _activeLockCount = new AtomicLong();
-  
+
   private LockNode _lockHead;
   private LockNode _lockTail;
 
   private Thread _writeLock;
   private IllegalStateException _writeExn;
-  
+
   public Lock(String id)
   {
     _id = id;
@@ -103,11 +103,11 @@ public final class Lock {
     }
 
     LockNode node = new LockNode(true);
-    
+
     synchronized (_lock) {
       while (true) {
         lock = _lockCount.get();
-        
+
         if (lock < WRITE) {
           if (_lockCount.compareAndSet(lock, lock + (READ|READ_LOCK)))
             return;
@@ -119,7 +119,7 @@ public final class Lock {
       //System.out.println("QR: " + this + " " + Long.toHexString(lock) + " " + _activeLockCount);
       queueLock(node);
     }
-    
+
     long expires = Alarm.getCurrentTime() + timeout;
     lock(node, timeout, expires, READ);
 
@@ -135,7 +135,6 @@ public final class Lock {
    * Clears a read lock.
    */
   public void unlockRead()
-    throws SQLException
   {
     LockNode unparkNode = null;
 
@@ -156,14 +155,14 @@ public final class Lock {
       }
     } while (lock < WRITE
              || (lock < WRITE_LOCK && (lock & READ_LOCK_MASK) > READ_LOCK));
-    
+
     synchronized (_lock) {
       try {
         unparkNode = unlock();
       } finally {
         addLock(- (READ|READ_LOCK));
       }
-      
+
       if (unparkNode == null && _lockCount.get() != 0)
         Thread.dumpStack();
     }
@@ -178,7 +177,7 @@ public final class Lock {
    * @param timeout how long to wait for a timeout
    */
   public void lockReadAndWrite(long timeout)
-    throws SQLException
+    throws LockTimeoutException
   {
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + " lockReadAndWrite "
@@ -199,12 +198,12 @@ public final class Lock {
     }
 
     LockNode node = new LockNode(false);
-    
+
     synchronized (_lock) {
       // mark the write lock
       while (true) {
         lock = _lockCount.get();
-      
+
         if (lock == 0) {
           if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK))) {
         if (_writeLock != null)
@@ -222,7 +221,7 @@ public final class Lock {
       //System.out.println("QW: " + this + " " + Long.toHexString(lock) + " " + _activeLockCount);
       queueLock(node);
     }
-    
+
     long expires = Alarm.getCurrentTime() + timeout;
     lock(node, timeout, expires, WRITE);
 
@@ -244,7 +243,6 @@ public final class Lock {
    * Clears a write lock.
    */
   public void unlockReadAndWrite()
-    throws SQLException
   {
       if (_writeLock != Thread.currentThread()) {
         System.out.println("MISTMATCH: " + _writeLock + " " + Thread.currentThread());
@@ -253,7 +251,7 @@ public final class Lock {
         Thread.dumpStack();
       }
       _writeLock = null;
-      
+
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + " unlockReadAndWrite "
                  + "0x" + Long.toHexString(_lockCount.get()));
@@ -281,7 +279,7 @@ public final class Lock {
         System.out.println("LOCK: " + Long.toHexString(lock) + " " + unparkNode + " " + _lockHead);
         Thread.dumpStack();
       }
-      
+
       if (unparkNode == null && lock != 0) {
         System.out.println("LOCK2: " + Long.toHexString(lock) + " " + unparkNode + " " + _lockHead);
         Thread.dumpStack();
@@ -300,7 +298,6 @@ public final class Lock {
    * @return true if the write was successful
    */
   public boolean lockReadAndWriteNoWait()
-    throws SQLException
   {
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + " lockReadAndWriteNoWait "
@@ -360,7 +357,7 @@ public final class Lock {
     throws LockTimeoutException
   {
     // System.out.println("LOCK: " + this + " " + Long.toHexString(_lockCount.get()));
-    
+
     while (! node.isLock()) {
       long now = Alarm.getCurrentTime();
 
@@ -372,7 +369,7 @@ public final class Lock {
           node.setDead();
           addLock(- value);
         }
-        
+
         throw new LockTimeoutException(L.l("{0} lock timed out ({1}ms) 0x{2}",
                                            this, timeout,
                                            Long.toHexString(_lockCount.get())));
@@ -394,7 +391,7 @@ public final class Lock {
 
     boolean isRead = false;
     boolean isWrite = false;
-    
+
     for (; ptr != null; ptr = ptr.getNext()) {
       if (ptr.isDead()) {
         tail = ptr;
@@ -425,7 +422,7 @@ public final class Lock {
     _lockHead = tail.getNext();
     if (_lockHead == null)
       _lockTail = null;
-      
+
     tail.setNext(null);
 
     return head;
@@ -445,13 +442,13 @@ public final class Lock {
         Thread.dumpStack();
         return lock;
       }
-      
+
       if (_lockCount.compareAndSet(lock, lock + value)) {
         return lock;
       }
     }
   }
-  
+
   private void unparkNode(LockNode node)
   {
     for (; node != null; node = node.getNext()) {
@@ -469,9 +466,9 @@ public final class Lock {
   static final class LockNode {
     private final Thread _thread;
     private final boolean _isRead;
-    
+
     private LockNode _next;
-    
+
     private volatile boolean _isDead;
     private volatile boolean _isLock;
 
@@ -521,9 +518,9 @@ public final class Lock {
       try {
         if (_isLock)
           return;
-        
+
         Thread.interrupted();
-        
+
         if (Alarm.isTest())
           LockSupport.parkNanos(10000000L);
         else
@@ -532,7 +529,7 @@ public final class Lock {
         e.printStackTrace();
       }
     }
-    
+
     public void unpark()
     {
       LockSupport.unpark(_thread);

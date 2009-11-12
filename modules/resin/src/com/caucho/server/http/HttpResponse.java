@@ -182,7 +182,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     if (_request.getConnection() instanceof TcpConnection)
       tcpConn = (TcpConnection) _request.getConnection();
-    
+
     WebApp webApp = request.getWebApp();
 
     String contentType = response.getContentTypeImpl();
@@ -198,15 +198,15 @@ public class HttpResponse extends AbstractHttpResponse
         os.write(_http11ok, 0, _http11ok.length);
     } else {
       if (version < HttpRequest.HTTP_1_1)
-        os.print("HTTP/1.0 ");
+        os.printLatin1("HTTP/1.0 ");
       else
-        os.print("HTTP/1.1 ");
+        os.printLatin1("HTTP/1.1 ");
 
       os.write((statusCode / 100) % 10 + '0');
       os.write((statusCode / 10) % 10 + '0');
       os.write(statusCode % 10 + '0');
       os.write(' ');
-      os.print(response.getStatusMessage());
+      os.printLatin1(response.getStatusMessage());
     }
 
     if (debug) {
@@ -215,18 +215,18 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     boolean isUpgrade = false;
-    
+
     if (tcpConn != null && tcpConn.isDuplex()) {
       isUpgrade = true;
-      
+
       String upgrade = getHeader("Upgrade");
 
       if (upgrade != null) {
-        os.print("\r\nUpgrade: ");
-        os.print(upgrade);
+        os.printLatin1("\r\nUpgrade: ");
+        os.printLatin1(upgrade);
       }
-      
-      os.print("\r\nConnection: Upgrade");
+
+      os.printLatin1("\r\nConnection: Upgrade");
       _request.killKeepalive();
 
       if (debug)
@@ -259,7 +259,7 @@ public class HttpResponse extends AbstractHttpResponse
       // automatically set cache headers
       setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
 
-      os.print("\r\nCache-Control: no-cache");
+      os.printLatin1("\r\nCache-Control: no-cache");
 
       if (debug) {
         log.fine(_request.dbgId() + "" +
@@ -268,7 +268,7 @@ public class HttpResponse extends AbstractHttpResponse
     }
     else if (response.isNoCacheUnlessVary()
              && ! containsHeader("Vary")) {
-      os.print("\r\nCache-Control: private");
+      os.printLatin1("\r\nCache-Control: private");
 
       if (debug) {
         log.fine(_request.dbgId() + "Cache-Control: private");
@@ -278,14 +278,14 @@ public class HttpResponse extends AbstractHttpResponse
       if (HttpRequest.HTTP_1_1 <= version) {
         // technically, this could be private="Set-Cookie,Set-Cookie2"
         // but caches don't recognize it, so there's no real extra value
-        os.print("\r\nCache-Control: private");
+        os.printLatin1("\r\nCache-Control: private");
 
         if (debug)
           log.fine(_request.dbgId() + "Cache-Control: private");
       }
       else {
         setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
-        os.print("\r\nCache-Control: no-cache");
+        os.printLatin1("\r\nCache-Control: no-cache");
 
         if (debug) {
           log.fine(_request.dbgId() + "CacheControl: no-cache");
@@ -296,16 +296,16 @@ public class HttpResponse extends AbstractHttpResponse
     int size = _headerKeys.size();
     for (int i = 0; i < size; i++) {
       String key = (String) _headerKeys.get(i);
-      
+
       if (isUpgrade && "Upgrade".equalsIgnoreCase(key))
         continue;
-          
+
       os.write('\r');
       os.write('\n');
-      os.print(key);
+      os.printLatin1(key);
       os.write(':');
       os.write(' ');
-      os.print((String) _headerValues.get(i));
+      os.printLatin1((String) _headerValues.get(i));
 
       if (debug) {
         log.fine(_request.dbgId() + "" +
@@ -324,12 +324,12 @@ public class HttpResponse extends AbstractHttpResponse
         CharBuffer cb = _cb;
         // XXX:
         fillCookie(cb, cookie, now, cookieVersion, false);
-        os.print("\r\nSet-Cookie: ");
-        os.print(cb.getBuffer(), 0, cb.getLength());
+        os.printLatin1("\r\nSet-Cookie: ");
+        os.printLatin1(cb.getBuffer(), 0, cb.getLength());
         if (cookieVersion > 0) {
           fillCookie(cb, cookie, now, cookieVersion, true);
-          os.print("\r\nSet-Cookie2: ");
-          os.print(cb.getBuffer(), 0, cb.getLength());
+          os.printLatin1("\r\nSet-Cookie2: ");
+          os.printLatin1(cb.getBuffer(), 0, cb.getLength());
         }
 
         if (debug)
@@ -346,12 +346,12 @@ public class HttpResponse extends AbstractHttpResponse
         if (charEncoding == null)
           charEncoding = "utf-8";
       }
-      
+
       os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
-      os.print(contentType);
+      os.printLatin1(contentType);
       os.write(_charsetBytes, 0, _charsetBytes.length);
-      os.print(charEncoding);
-        
+      os.printLatin1(charEncoding);
+
       if (debug) {
         log.fine(_request.dbgId() + "Content-Type: " + contentType
                  + "; charset=" + charEncoding);
@@ -436,7 +436,7 @@ public class HttpResponse extends AbstractHttpResponse
     if (HttpRequest.HTTP_1_1 <= version
         && ! hasContentLength
         && ! isHead) {
-      os.print("\r\nTransfer-Encoding: chunked");
+      os.printLatin1("\r\nTransfer-Encoding: chunked");
       _isChunked = true;
 
       if (debug)

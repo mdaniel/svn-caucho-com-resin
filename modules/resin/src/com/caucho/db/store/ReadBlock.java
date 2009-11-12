@@ -53,7 +53,7 @@ public class ReadBlock extends Block {
   /**
    * Returns the block's buffer.
    */
-  public byte []getBuffer()
+  public final byte []getBuffer()
   {
     return _buffer;
   }
@@ -75,7 +75,7 @@ public class ReadBlock extends Block {
 
       System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
       block.validate();
-      
+
       // The new block takes over responsibility for the writing, because
       // it may modify the block before the write completes
       block.setDirty(getDirtyMin(), getDirtyMax());
