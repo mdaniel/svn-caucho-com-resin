@@ -44,22 +44,25 @@ abstract public class JspFragmentSupport extends JspFragment {
   private static final Logger log
     = Logger.getLogger(JspFragmentSupport.class.getName());
 
+  // XXX: jsp/103d - the public is temporary and should be turned back to
+  // protected.
+  
   // the parent page context
-  protected JspContext _jsp_parentContext;
+  public JspContext _jsp_parentContext;
 
   // the page context
-  protected PageContextImpl pageContext;
+  public PageContextImpl pageContext;
 
   // the EL context
-  protected ELContext _jsp_env;
+  public ELContext _jsp_env;
   
   // the parent tag
-  protected JspTag _jsp_parent_tag;
+  public JspTag _jsp_parent_tag;
   
   // the tag body
-  protected JspFragment _jspBody;
+  public JspFragment _jspBody;
 
-  protected com.caucho.jsp.PageManager _jsp_pageManager;
+  public com.caucho.jsp.PageManager _jsp_pageManager;
 
   /**
    * Returns the context.

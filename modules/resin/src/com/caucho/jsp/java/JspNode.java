@@ -1016,7 +1016,8 @@ public abstract class JspNode {
 
     String fragmentVar = frag.getFragmentName();
 
-    cb.append(fragmentVar + " = _CauchoFragment.create(" + fragmentVar
+    // jsp/103d
+    cb.append(fragmentVar + " = _CauchoFragment_create(" + fragmentVar
 	      + ", " + index
 	      + ", _jsp_parentContext"
 	      + ", " + contextVar
@@ -1719,12 +1720,14 @@ public abstract class JspNode {
     else if (value.startsWith("%=") && value.endsWith("%"))
       attribute = value.substring(2, value.length() - 1);
 
+    /*
     if (_gen.isTagFileAttribute(attribute))
       attribute = _gen.toFieldName(attribute);
 
     if (isInFragment()) {
       attribute = "_caucho_jsp_or_tag_parent." + attribute;
     }
+    */
 
     return attribute;
   }

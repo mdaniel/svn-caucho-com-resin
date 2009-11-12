@@ -1601,23 +1601,15 @@ public class JavaJspGenerator extends JspGenerator {
     if (! hasFragment)
       return;
 
-    out.println("public static class _CauchoFragment extends com.caucho.jsp.JspFragmentSupport {");
-    out.pushDepth();
-    out.println("private int _frag_code;");
-    out.println("private TagState _jsp_state;");
-
-    out.print("private ");
-    out.print(_className);
-    out.println(" _caucho_jsp_or_tag_parent;");
-
+    // jsp/103d
     out.println();
-    out.println("static _CauchoFragment create(_CauchoFragment frag, int code,");
-    out.println("                              javax.servlet.jsp.JspContext _jsp_parentContext,");
-    out.println("                              com.caucho.jsp.PageContextImpl pageContext,");
-    out.println("                              javax.servlet.jsp.tagext.JspTag parent,");
-    out.println("                              javax.servlet.jsp.tagext.JspFragment jspBody,");
-    out.println("                              TagState _jsp_state,");
-    out.println("                              com.caucho.jsp.PageManager _jsp_pageManager,");
+    out.println("_CauchoFragment _CauchoFragment_create(_CauchoFragment frag, int code,");
+    out.println("                       javax.servlet.jsp.JspContext _jsp_parentContext,");
+    out.println("                       com.caucho.jsp.PageContextImpl pageContext,");
+    out.println("                       javax.servlet.jsp.tagext.JspTag parent,");
+    out.println("                       javax.servlet.jsp.tagext.JspFragment jspBody,");
+    out.println("                       TagState _jsp_state,");
+    out.println("                       com.caucho.jsp.PageManager _jsp_pageManager,");
     
     out.print("                              ");
     out.print(_className);
@@ -1643,6 +1635,16 @@ public class JavaJspGenerator extends JspGenerator {
     out.popDepth();
     out.println("}");
     
+
+    // out.println("public static class _CauchoFragment extends com.caucho.jsp.JspFragmentSupport {");
+    out.println("public class _CauchoFragment extends com.caucho.jsp.JspFragmentSupport {");
+    out.pushDepth();
+    out.println("private int _frag_code;");
+    out.println("private TagState _jsp_state;");
+
+    out.print("private ");
+    out.print(_className);
+    out.println(" _caucho_jsp_or_tag_parent;");
       
     for (int i = 0; i < _fragmentList.size(); i++) {
       JspFragmentNode frag = _fragmentList.get(i);
