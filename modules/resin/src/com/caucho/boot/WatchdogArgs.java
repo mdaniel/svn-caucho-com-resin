@@ -74,10 +74,10 @@ class WatchdogArgs
     String logLevel = System.getProperty("caucho.logger.level");
 
     setLogLevel(logLevel);
-    
+
     _resinHome = calculateResinHome();
     _rootDirectory = calculateResinRoot(_resinHome);
-    
+
     _javaHome = Vfs.lookup(System.getProperty("java.home"));
 
     _argv = fillArgv(argv);
@@ -153,7 +153,7 @@ class WatchdogArgs
   {
     _watchdogPort = port;
   }
-  
+
   int getWatchdogPort()
   {
     return _watchdogPort;
@@ -233,7 +233,7 @@ class WatchdogArgs
   private void parseCommandLine(String[] argv)
   {
     String resinConf = null;
-    
+
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
 
@@ -331,6 +331,10 @@ class WatchdogArgs
       else if ("shutdown".equals(arg)) {
         _startMode = StartMode.SHUTDOWN;
       }
+      else if ("version".equals(arg)) {
+        System.out.println(Version.FULL_VERSION);
+        System.exit(0);
+      }
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();
@@ -422,12 +426,12 @@ class WatchdogArgs
 
     return argv;
   }
-  
+
   private static L10N L()
   {
     if (_L == null)
       _L = new L10N(WatchdogArgs.class);
-    
+
     return _L;
   }
 
@@ -485,10 +489,10 @@ class WatchdogArgs
   static Path calculateResinRoot(Path resinHome)
   {
     String resinRoot = System.getProperty("resin.root");
-    
+
     if (resinRoot != null)
       return Vfs.lookup(resinRoot);
-    
+
     resinRoot = System.getProperty("server.root");
 
     if (resinRoot != null)
@@ -533,9 +537,9 @@ class WatchdogArgs
       Path jdkHome = javaHome.getParent().lookup(tail);
 
       if (jdkHome.lookup("lib/tools.jar").canRead())
-	addClassPath(classPath, jdkHome.lookup("lib/tools.jar").getNativePath());
+        addClassPath(classPath, jdkHome.lookup("lib/tools.jar").getNativePath());
     }
-    
+
     if (javaHome.lookup("../lib/tools.jar").canRead())
       addClassPath(classPath, javaHome.lookup("../lib/tools.jar").getNativePath());
 
@@ -545,7 +549,7 @@ class WatchdogArgs
       addClassPath(classPath, resinLib.lookup("pro.jar").getNativePath());
     addClassPath(classPath, resinLib.lookup("resin.jar").getNativePath());
     //    addClassPath(classPath, resinLib.lookup("jaxrpc-15.jar").getNativePath());
-		  
+
     String []list = resinLib.list();
 
     for (int i = 0; i < list.length; i++) {
@@ -564,7 +568,7 @@ class WatchdogArgs
 
     for (int i = 0; i < classPath.size(); i++) {
       if (! "".equals(cp))
-	cp += File.pathSeparatorChar;
+        cp += File.pathSeparatorChar;
 
       cp += classPath.get(i);
     }
@@ -583,7 +587,7 @@ class WatchdogArgs
   {
     private boolean _isLicenseCheck;
     private boolean _isResinProfessional;
-    
+
     public Path getResinHome()
     {
       return WatchdogArgs.this.getResinHome();
