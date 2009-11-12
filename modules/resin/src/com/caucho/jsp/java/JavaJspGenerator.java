@@ -1606,6 +1606,10 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("private int _frag_code;");
     out.println("private TagState _jsp_state;");
 
+    out.print("private ");
+    out.print(_className);
+    out.println(" _caucho_jsp_or_tag_parent;");
+
     out.println();
     out.println("static _CauchoFragment create(_CauchoFragment frag, int code,");
     out.println("                              javax.servlet.jsp.JspContext _jsp_parentContext,");
@@ -1613,7 +1617,13 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("                              javax.servlet.jsp.tagext.JspTag parent,");
     out.println("                              javax.servlet.jsp.tagext.JspFragment jspBody,");
     out.println("                              TagState _jsp_state,");
-    out.println("                              com.caucho.jsp.PageManager _jsp_pageManager)");
+    out.println("                              com.caucho.jsp.PageManager _jsp_pageManager,");
+    
+    out.print("                              ");
+    out.print(_className);
+    out.print(" _caucho_jsp_or_tag_parent)");
+
+
     out.println("{");
     out.pushDepth();
     out.println("if (frag == null)");
@@ -1627,6 +1637,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("frag._jspBody = jspBody;");
     out.println("frag._jsp_state = _jsp_state;");
     out.println("frag._jsp_pageManager = _jsp_pageManager;");
+    out.println("frag._caucho_jsp_or_tag_parent = _caucho_jsp_or_tag_parent;");
     out.println();
     out.println("return frag;");
     out.popDepth();
@@ -2417,6 +2428,16 @@ public class JavaJspGenerator extends JspGenerator {
     exn.setErrorPage(_parseState.getErrorPage());
 
     return exn;
+  }
+
+  protected boolean isTagFileAttribute(final String name)
+  {
+    return false;
+  }
+
+  protected String toFieldName(final String name)
+  {
+    return name;
   }
 
   static class MethodExpr {

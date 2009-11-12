@@ -833,7 +833,9 @@ public abstract class JspNode {
   public boolean isInFragment()
   {
     for (JspNode node = getParent(); node != null; node = node.getParent()) {
-      if (node instanceof JspAttribute || node instanceof CustomSimpleTag)
+      if (node instanceof JspAttribute
+        || node instanceof CustomSimpleTag
+        || node instanceof JspFragmentNode)
         return true;
     }
 
@@ -1042,6 +1044,11 @@ public abstract class JspNode {
 
     cb.append(", _jsp_state");
     cb.append(", _jsp_pageManager");
+
+    if (_gen.hasScripting())
+      cb.append(", this");
+    else
+      cb.append(", null");
 
     cb.append(")");
 
@@ -1705,12 +1712,21 @@ public abstract class JspNode {
   public String getRuntimeAttribute(String value)
     throws Exception
   {
+    String attribute = value;
+
     if (value.startsWith("<%=") && value.endsWith("%>"))
-      return value.substring(3, value.length() - 2);
+      attribute = value.substring(3, value.length() - 2);
     else if (value.startsWith("%=") && value.endsWith("%"))
-      return value.substring(2, value.length() - 1);
-    else
-      return value;
+      attribute = value.substring(2, value.length() - 1);
+
+    if (_gen.isTagFileAttribute(attribute))
+      attribute = _gen.toFieldName(attribute);
+
+    if (isInFragment()) {
+      attribute = "_caucho_jsp_or_tag_parent." + attribute;
+    }
+
+    return attribute;
   }
 
   /**

@@ -307,7 +307,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
   /**
    * Generates the class header.
    *
-   * @param doc the XML document representing the JSP page.
+   * @param out the XML document representing the JSP page.
    */
   protected void generateClassHeader(JspJavaWriter out)
     throws IOException, JspParseException
@@ -430,6 +430,20 @@ public class JavaTagGenerator extends JavaJspGenerator {
     }
   }
 
+  @Override
+  public boolean isTagFileAttribute(String name)
+  {
+    if (_attributes == null || _attributes.size() == 0)
+      return false;
+
+    for (TldAttribute attr : _attributes) {
+      if (name.equals(attr.getName()))
+        return true;
+    }
+
+    return false;
+  }
+
   /**
    * Generates the attribute definitions.
    *
@@ -496,7 +510,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       
       generateTagVariablesAtEnd(out);
     } else {
-      out.println("doTag(_jsp_parentContext, pageContext, out, null, this);");
+      out.println("doTag(_jsp_parentContext, pageContext, out, null, null);");
     }
     
     out.popDepth();
@@ -911,7 +925,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("}");
   }
 
-  private String toFieldName(String name)
+  protected String toFieldName(String name)
   {
     if (hasScripting() && ! _reserved.contains(name))
       return name;
