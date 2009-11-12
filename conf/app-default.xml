@@ -43,8 +43,8 @@
   <servlet servlet-name="resin-xtp"
            servlet-class="com.caucho.jsp.XtpServlet"/>
   
-  <filter servlet-name="resin-gzip"
-          servlet-class="com.caucho.filters.GzipFilter"/>
+  <filter filter-name="resin-gzip"
+          filter-class="com.caucho.filters.GzipFilter"/>
 
   <servlet-mapping url-pattern="*.jsp" servlet-name="resin-jsp"/>
   <servlet-mapping url-pattern="*.jspf" servlet-name="resin-jsp"/>
