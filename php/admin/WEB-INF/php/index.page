@@ -49,14 +49,6 @@ the current Resin instance.</p>
 </tr>
 
 <tr>
-<!-- Database -->
-<td>
-<h2><a href="?q=database">Database</a></h2>
-
-<p>Overview of the JDBC database configuration status.</p>
-
-</td>
-
 <!-- Graphs -->
 <td>
 <h2><a href="?q=graphs">Graphs</a></h2>
@@ -65,9 +57,7 @@ the current Resin instance.</p>
 a HTML 5 browser like Firefox 3.5.</p>
 
 </td>
-</tr>
 
-<tr>
 <!-- JMX -->
 <td>
 <h2><a href="?q=jmx">JMX</a></h2>
@@ -75,13 +65,24 @@ a HTML 5 browser like Firefox 3.5.</p>
 <p>Table-based view of all JMX beans registered with the JVM.</p>
 
 </td>
+</tr>
 
+<tr>
 <!-- Memory -->
 <td>
 <h2><a href="?q=memory">Memory</a></h2>
 
 <p>Heap dump to debug memory leaks and memory overview.
 The heap dump requires Resin-Pro.</p>
+
+</td>
+
+<!-- Postmortem -->
+<td>
+<h2><a href="?q=postmortem">Postmortem</a></h2>
+
+<p>A report to aid in debugging failures in which the server died or
+restarted.</p>
 
 </td>
 </tr>
@@ -106,14 +107,6 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 </tr>
 
 <tr>
-<!-- SQL -->
-<td>
-<h2><a href="?q=sql">SQL</a></h2>
-
-<p>JDBC database administration.</p>
-
-</td>
-
 <!-- Thread -->
 <td>
 <h2><a href="?q=thread">Thread Dump</a></h2>
@@ -121,22 +114,12 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 <p>Provides thread dumps to check the current status of a Resin instance.</p>
 
 </td>
-</tr>
 
-<tr>
 <!-- Web-App -->
 <td>
 <h2><a href="?q=webapp">WebApp</a></h2>
 
 <p>Overview of the web-apps running in the Resin instance.</p>
-
-</td>
-
-<!-- Wizards -->
-<td>
-<h2><a href="?q=wizards">Wizards</a></h2>
-
-<p>Guides to Resin configuration.</p>
 
 </td>
 </tr>
@@ -150,7 +133,7 @@ lightweight and sample-based, it can be used in a runtime environment.</p>
 <?php
 
 foreach (load_pages("rest") as $key => $value) {
-  echo "<a href='rest.php?q='" . $key . "'>" . $key . "</a><br>\n"
+  echo "<a href='rest.php?q=" . $key . "'>" . $key . "</a><br>\n"
 }
 ?>
 

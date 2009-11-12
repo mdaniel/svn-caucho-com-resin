@@ -10,6 +10,7 @@
     <dependency org="cglib" name="cglib" rev="2.1_3"/>
     <dependency org="junit" name="junit" rev="4.7"/>
     <dependency org="org.apache.wicket" name="wicket" rev="1.3.7"/>
+    <dependency org="org.apache.maven" name="maven-plugin-api" rev="2.0"/>
     <dependency org="org.apache.openjpa" name="openjpa" rev="1.0.2"/>
     <dependency org="org.mule" name="mule" rev="1.4.3"/>
     <dependency org="org.springframework" name="spring" rev="2.0.8"
