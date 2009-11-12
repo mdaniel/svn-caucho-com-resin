@@ -57,6 +57,7 @@ public class Document {
   private String _encoding;
   private boolean _hasChildren;
   private boolean _isArticle;
+  private boolean _isDisableAction;
 
   private String _redirect;
 
@@ -91,6 +92,16 @@ public class Document {
   public void setArticle(boolean isArticle)
   {
     _isArticle = isArticle;
+  }
+
+  public void setDisableAction(boolean isDisable)
+  {
+    _isDisableAction = isDisable;
+  }
+
+  public boolean isDisableAction()
+  {
+    return _isDisableAction;
   }
 
   public Path getRealPath(String uri)

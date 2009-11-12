@@ -51,12 +51,17 @@ public class ViewFileLink implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    String cp = _document.getContextPath();
+    if (! _document.isDisableAction()) {
+      String cp = _document.getContextPath();
     
-    out.writeStartElement("a");
-    out.writeAttribute("href", "viewfile?file=" + _file);
-    out.writeCharacters(_file);
-    out.writeEndElement(); // a
+      out.writeStartElement("a");
+      out.writeAttribute("href", "viewfile?file=" + _file);
+      out.writeCharacters(_file);
+      out.writeEndElement(); // a
+    }
+    else {
+      out.writeCharacters(_file);
+    }
   }
 
   public void writeLaTeX(PrintWriter out)

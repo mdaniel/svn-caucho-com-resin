@@ -53,6 +53,7 @@ public class ResinDocServlet extends HttpServlet {
   private Path _pwd;
   private XMLOutputFactory _outputFactory;
   private String _encoding = "utf-8";
+  private boolean _isDisableAction;
 
   public void setDocumentEncoding(String encoding)
   {
@@ -62,6 +63,16 @@ public class ResinDocServlet extends HttpServlet {
   public void setDocContextPath(String contextPath)
   {
     _contextPath = contextPath;
+  }
+
+  public void setDisableAction(boolean isDisableAction)
+  {
+    _isDisableAction = isDisableAction;
+  }
+
+  public boolean isDisableAction()
+  {
+    return _isDisableAction;
   }
 
   public void init(ServletConfig config)
@@ -99,6 +110,8 @@ public class ResinDocServlet extends HttpServlet {
                                      path, _contextPath,
                                      request.getContextPath() + servletPath,
                                      _encoding);
+
+    document.setDisableAction(isDisableAction());
 
     try {
       response.setContentType("text/html");

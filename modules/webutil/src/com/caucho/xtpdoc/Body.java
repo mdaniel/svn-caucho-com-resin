@@ -212,7 +212,9 @@ public class Body extends ContainerNode {
       header.getDescription().writeHtml(out);
     }
 
-    if (header != null && header.getTutorialStartPage() != null) {
+    if (header != null
+        && header.getTutorialStartPage() != null
+        && ! getDocument().isDisableAction()) {
       out.writeStartElement("p");
       out.writeStartElement("a");
       out.writeAttribute("href", header.getTutorialStartPage());
@@ -226,7 +228,9 @@ public class Body extends ContainerNode {
 
     super.writeHtml(out);
 
-    if (header != null && header.getTutorialStartPage() != null) {
+    if (header != null
+        && header.getTutorialStartPage() != null
+        && ! getDocument().isDisableAction()) {
       out.writeStartElement("p");
       out.writeStartElement("a");
       out.writeAttribute("href", header.getTutorialStartPage());
