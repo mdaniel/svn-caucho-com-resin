@@ -279,13 +279,16 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _server = server;
 
+    if (server == null)
+      throw new NullPointerException();
+
     _hmuxProtocol = protocol;
 
     _rawWrite = conn.getWriteStream();
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
-    _server = Server.getCurrent();
+    // _server = Server.getCurrent();
 
     _dispatchRequest = new HmuxDispatchRequest(this);
 

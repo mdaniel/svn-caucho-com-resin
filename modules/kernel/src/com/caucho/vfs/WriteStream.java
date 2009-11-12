@@ -57,12 +57,14 @@ import java.util.Locale;
 public class WriteStream extends OutputStreamWithBuffer
     implements LockableStream
 {
-  private static byte []lfBytes = new byte[] {'\n'};
-  private static byte []crBytes = new byte[] {'\r'};
-  private static byte []crlfBytes = new byte[] {'\r', '\n'};
+  private static final byte []lfBytes = new byte[] {'\n'};
+  private static final byte []crBytes = new byte[] {'\r'};
+  private static final byte []crlfBytes = new byte[] {'\r', '\n'};
 
   private static String _sysNewline;
   private static byte []_sysNewlineBytes;
+
+  private static final int _charsLength = 256;
 
   static {
     _sysNewline = Path.getNewlineString();
@@ -76,7 +78,7 @@ public class WriteStream extends OutputStreamWithBuffer
   private StreamImpl _source;
   private long _position;
 
-  private char []chars;
+  private char []_chars;
   private byte []_bytes;
 
   private EncodingWriter _writeEncoding;
@@ -544,8 +546,6 @@ public class WriteStream extends OutputStreamWithBuffer
   public final void print(char []buffer, int offset, int length)
     throws IOException
   {
-    byte []writeBuffer = this._writeBuffer;
-
     if (_source == null)
       return;
 
@@ -555,6 +555,24 @@ public class WriteStream extends OutputStreamWithBuffer
       _disableFlush = false;
       return;
     }
+
+    printLatin1(buffer, offset, length);
+  }
+
+  /**
+   * Prints the character buffer to the stream encoded as latin1.
+   *
+   * @param buffer character buffer to write
+   * @param offset offset into the buffer to start writes
+   * @param length number of characters to write
+   */
+  public final void printLatin1(char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (_source == null)
+      return;
+
+    byte []writeBuffer = this._writeBuffer;
 
     while (length > 0) {
       int writeLength = _writeLength;
@@ -576,9 +594,6 @@ public class WriteStream extends OutputStreamWithBuffer
       offset += sublen;
       length -= sublen;
     }
-
-    if (_implicitFlush)
-      flush();
   }
 
   /**
@@ -624,22 +639,57 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Prints a string.
    */
-  public final void print(String string) throws IOException
+  public final void print(String string)
+    throws IOException
   {
     if (string == null)
       string = "null";
 	
     int length = string.length();
     int offset = 0;
+    
+    char []chars = _chars;
+    if (chars == null) {
+      _chars = new char[_charsLength];
+      chars = _chars;
+    }
+    
     while (length > 0) {
-      int sublen = length < 1024 ? length : 1024;
-
-      if (chars == null || chars.length < sublen)
-	chars = new char[sublen < 32 ? 32 : sublen];
+      int sublen = length < _charsLength ? length : _charsLength;
 
       string.getChars(offset, offset + sublen, chars, 0);
 
       print(chars, 0, sublen);
+
+      length -= sublen;
+      offset += sublen;
+    }
+  }
+
+  /**
+   * Prints a string.
+   */
+  public final void printLatin1(String string)
+    throws IOException
+  {
+    if (string == null)
+      string = "null";
+	
+    int length = string.length();
+    int offset = 0;
+    
+    char []chars = _chars;
+    if (chars == null) {
+      _chars = new char[_charsLength];
+      chars = _chars;
+    }
+    
+    while (length > 0) {
+      int sublen = length < _charsLength ? length : _charsLength;
+
+      string.getChars(offset, offset + sublen, chars, 0);
+
+      printLatin1(chars, 0, sublen);
 
       length -= sublen;
       offset += sublen;
@@ -658,12 +708,15 @@ public class WriteStream extends OutputStreamWithBuffer
   {
     if (string == null)
       string = "null";
-	
+    
+    char []chars = _chars;
+    if (chars == null) {
+      _chars = new char[_charsLength];
+      chars = _chars;
+    }
+    
     while (length > 0) {
-      int sublen = length < 1024 ? length : 1024;
-
-      if (chars == null || chars.length < sublen)
-	chars = new char[sublen < 32 ? 32 : sublen];
+      int sublen = length < _charsLength ? length : _charsLength;
 
       string.getChars(offset, offset + sublen, chars, 0);
 
@@ -1002,11 +1055,14 @@ public class WriteStream extends OutputStreamWithBuffer
     if (reader == null)
       return;
 
-    if (chars == null)
-      chars = new char[256];
+    char []chars = _chars;
+    if (chars == null) {
+      _chars = new char[_charsLength];
+      chars = _chars;
+    }
 
     int len;
-    while ((len = reader.read(chars, 0, chars.length)) > 0) {
+    while ((len = reader.read(chars, 0, _charsLength)) > 0) {
       print(chars, 0, len);
     }
   }
