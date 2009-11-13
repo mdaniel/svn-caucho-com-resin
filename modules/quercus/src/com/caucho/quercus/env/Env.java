@@ -3002,6 +3002,14 @@ public class Env {
    */
   public Value getConstant(String name)
   {
+    return getConstant(name, true);
+  }
+  
+  /**
+   * Returns a constant.
+   */
+  public Value getConstant(String name, boolean isAutoCreateString)
+  {
     Value value = getConstantImpl(name);
 
     if (value != null)
@@ -3012,9 +3020,10 @@ public class Env {
        name));
     */
 
-    value = createString(name);
-
-    return value;
+    if (isAutoCreateString)
+      return createString(name);
+    else
+      return null;
   }
 
   /**

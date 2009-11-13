@@ -86,8 +86,16 @@ public class VariableModule extends AbstractQuercusModule {
       
       return env.getClass(cls).getConstant(env, name);
     }
-    else
-      return env.getConstant(name);
+    else {
+      Value constant = env.getConstant(name, false);
+      
+      if (constant != null)
+        return constant;
+      else {
+        env.warning(L.l("cannot find constant '{0}'", name));
+        return NullValue.NULL;
+      }
+    }
   }
 
   /**
