@@ -104,7 +104,7 @@ public class HmuxResponse extends AbstractHttpResponse {
     else if (response.isPrivateCache())
       _req.writeHeader("Cache-Control", "private");
 
-    int load = (int) (1000 * CauchoSystem.getLoadAvg());
+    int load = (int) (1000 * _req.getServer().getCpuLoad());
     if (Alarm.isTest())
       load = 0;
 

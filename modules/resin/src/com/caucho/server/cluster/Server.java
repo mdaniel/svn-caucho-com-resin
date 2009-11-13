@@ -1501,6 +1501,11 @@ public class Server extends ProtocolDispatchServer
     return null;
   }
 
+  public double getCpuLoad()
+  {
+    return 0;
+  }
+
   //
   // listeners
   //

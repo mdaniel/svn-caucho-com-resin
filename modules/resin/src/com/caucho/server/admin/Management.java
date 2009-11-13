@@ -63,7 +63,7 @@ public class Management
   private Cluster _cluster;
   private Resin _resin;
   private Server _server;
-  
+
   private HostConfig _hostConfig;
 
   private AdminAuthenticator _auth;
@@ -82,12 +82,12 @@ public class Management
   {
     _cluster = cluster;
   }
-  
+
   public void setResin(Resin resin)
   {
     _resin = resin;
   }
-  
+
   public void setServer(Server server)
   {
     _server = server;
@@ -113,7 +113,7 @@ public class Management
 
     return _auth.createUser();
   }
-  
+
   /**
    * Adds a user
    */
@@ -180,7 +180,7 @@ public class Management
   public Object createRemoteService()
   {
     log.warning(L.l("remote-service requires Resin Professional"));
-    
+
     return new Object();
   }
 
@@ -190,7 +190,7 @@ public class Management
   public Object createStatService()
   {
     log.warning(L.l("stat-service requires Resin Professional"));
-    
+
     return new Object();
   }
 
@@ -200,7 +200,7 @@ public class Management
   public Object createPing()
   {
     log.warning(L.l("'ping' requires Resin Professional"));
-    
+
     return new ContainerProgram();
   }
 
@@ -217,7 +217,7 @@ public class Management
   public Object createXaLogService()
   {
     log.warning(L.l("xa-log-service requires Resin Professional"));
-    
+
     return new Object();
   }
 
@@ -248,24 +248,24 @@ public class Management
   {
     try {
       if (! _lifecycle.toInit())
-	return;
+        return;
 
       if (_auth != null) {
-	_auth.init();
-      
-	InjectManager webBeans = InjectManager.create();
-	BeanFactory factory = webBeans.createBeanFactory(Authenticator.class);
-	factory.type(Authenticator.class);
-	factory.type(AdminAuthenticator.class);
+        _auth.init();
 
-	webBeans.addBean(factory.singleton(_auth));
+        InjectManager webBeans = InjectManager.create();
+        BeanFactory factory = webBeans.createBeanFactory(Authenticator.class);
+        factory.type(Authenticator.class);
+        factory.type(AdminAuthenticator.class);
+
+        webBeans.addBean(factory.singleton(_auth));
       }
 
       if (_transactionManager != null)
-	_transactionManager.start();
+        _transactionManager.start();
     } catch (Exception e) {
       e.printStackTrace();
-      
+
       throw ConfigException.create(e);
     }
   }
@@ -288,27 +288,27 @@ public class Management
       hostConfig.setId(HOST_NAME);
       /*
       if (_path != null) {
-	hostConfig.setRootDirectory(new RawString(_path.getFullPath() + "/bogus-admin"));
+        hostConfig.setRootDirectory(new RawString(_path.getFullPath() + "/bogus-admin"));
       }
       else
-	hostConfig.setRootDirectory(new RawString("/bogus-admin"));
+        hostConfig.setRootDirectory(new RawString("/bogus-admin"));
       */
       hostConfig.setRootDirectory(new RawString("/bogus-admin"));
-      
+
       hostConfig.setSkipDefaultConfig(true);
 
       hostConfig.init();
 
       try {
-	if (_server == null)
-	  _server = _resin.getServer();
+        if (_server == null)
+          _server = _resin.getServer();
 
-	if (_server != null)
-	  _server.addHost(hostConfig);
+        if (_server != null)
+          _server.addHost(hostConfig);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       _hostConfig = hostConfig;
@@ -323,6 +323,11 @@ public class Management
       _cluster = Server.getCurrent().getCluster();
 
     return _cluster;
+  }
+
+  public double getCpuLoad()
+  {
+    return 0;
   }
 
   public void dumpThreads()
@@ -376,14 +381,14 @@ public class Management
     PasswordUser getPasswordUser()
     {
       if (_name == null)
-	throw new ConfigException(L.l("management <user> requires a 'name' attribute"));
-      
+        throw new ConfigException(L.l("management <user> requires a 'name' attribute"));
+
       boolean isAnonymous = false;
-      
+
       return new PasswordUser(new BasicPrincipal(_name),
-			      _password.toCharArray(),
-			      _isDisabled, isAnonymous,
-			      new String[] { "resin-admin" });
+                              _password.toCharArray(),
+                              _isDisabled, isAnonymous,
+                              new String[] { "resin-admin" });
     }
   }
 }
