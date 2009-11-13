@@ -153,7 +153,6 @@ public class HmuxResponseStream extends ResponseStream {
         log.fine(dbgId() + (char) HmuxRequest.HMUX_DATA + "-w(" + length + ")");
       buffer = next.nextBuffer(offset);
 
-
       return buffer;
     }
     else

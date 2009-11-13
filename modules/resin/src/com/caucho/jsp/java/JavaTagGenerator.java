@@ -299,6 +299,13 @@ public class JavaTagGenerator extends JavaJspGenerator {
     generateClassFooter(out);
   }
 
+  @Override
+  public boolean hasScripting()
+  {
+    // jsp/1025 - xxx: needs to be cleaned up
+    return true;
+  }
+  
   protected boolean isStaticDoTag()
   {
     return ! hasScripting();
