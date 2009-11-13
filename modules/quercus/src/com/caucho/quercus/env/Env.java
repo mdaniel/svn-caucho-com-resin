@@ -1963,13 +1963,9 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final Var getStaticClassVar(Value qThis, String name)
+  public final Var getStaticClassVar(String className, String name)
   {
-    if (qThis != null && qThis.isset()) {
-      name = qThis.getClassName() + "::" + name;
-    } else if (getCallingClass() != null) {
-      name = getCallingClass().getName() + "::" + name;
-    }
+    name = className + "::" + name;
 
     return getGlobalVar(name);
   }

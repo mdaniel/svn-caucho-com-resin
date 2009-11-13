@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -1025,7 +1025,16 @@ public class QuercusParser {
       }
 
       // var.getVarInfo().setReference();
-      statementList.add(_factory.createStatic(location, var, init));
+      
+      if (_classDef != null) {
+        statementList.add(_factory.createClassStatic(location,
+                                                     _classDef.getName(),
+                                                     var,
+                                                     init));
+      }
+      else {
+        statementList.add(_factory.createStatic(location, var, init));
+      }
 
       if (token != ',') {
         _peekToken = token;

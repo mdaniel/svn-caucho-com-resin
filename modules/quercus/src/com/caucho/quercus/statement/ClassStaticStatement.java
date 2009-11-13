@@ -24,14 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
@@ -40,18 +39,25 @@ import com.caucho.quercus.expr.VarExpr;
 /**
  * Represents a static statement in a PHP program.
  */
-public class StaticStatement extends Statement {
-  protected VarExpr _var;
-  protected Expr _initValue;
+public class ClassStaticStatement
+  extends Statement
+{
+  protected final String _className;
+  protected final VarExpr _var;
+  protected final Expr _initValue;
   protected String _staticName;
   
   /**
    * Creates the echo statement.
    */
-  public StaticStatement(Location location, VarExpr var, Expr initValue)
+  public ClassStaticStatement(Location location,
+                              String className,
+                              VarExpr var,
+                              Expr initValue)
   {
     super(location);
 
+    _className = className;
     _var = var;
     _initValue = initValue;
   }
@@ -62,9 +68,11 @@ public class StaticStatement extends Statement {
       if (_staticName == null)
         _staticName = env.createStaticName();
 
+      String className = _className;
       String staticName = _staticName;
+
+      Var var = env.getStaticClassVar(className, staticName);
       
-      Var var = env.getStaticVar(staticName);
       env.setValue(_var.getName(), var);
 
       if (! var.isset() && _initValue != null)
