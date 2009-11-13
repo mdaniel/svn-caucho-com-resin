@@ -165,25 +165,24 @@ namespace Caucho
     }
     
     public String GetApacheVersion(String apacheHome) {
-      ProcessStartInfo startInfo = new ProcessStartInfo();
+      Process process = new Process();
       
       if (File.Exists(apacheHome + "\\bin\\apache.exe"))
-        startInfo.FileName = apacheHome + "\\bin\\apache.exe";
+        process.StartInfo.FileName = apacheHome + "\\bin\\apache.exe";
       else if (File.Exists(apacheHome + "\\bin\\httpd.exe"))
-        startInfo.FileName = apacheHome + "\\bin\\httpd.exe";
+        process.StartInfo.FileName = apacheHome + "\\bin\\httpd.exe";
       else
         throw new ApplicationException(String.Format("Can not find apache.exe or httpd.exe in {0}\\bin", apacheHome));
       
-      startInfo.RedirectStandardError = true;
-      startInfo.RedirectStandardOutput = true;
-      startInfo.Arguments = "-v";
-      startInfo.UseShellExecute = false;
+      process.StartInfo.RedirectStandardError = true;
+      process.StartInfo.RedirectStandardOutput = true;
+      process.StartInfo.Arguments = "-v";
+      process.StartInfo.UseShellExecute = false;
 
       StringBuilder error = new StringBuilder();
       String version = null;
       String versionString = null;
-      
-      Process process = Process.Start(startInfo);
+
       process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs e) {
         if (e.Data != null)
           error.Append(e.Data).Append('\n');
@@ -202,13 +201,14 @@ namespace Caucho
             version = "2.0";
         }
       };
+
+      process.Start();
       
-      process.BeginErrorReadLine();
       process.BeginOutputReadLine();
-      while(! (process.HasExited)) {
-        //Vista needs more time
-        process.WaitForExit(3000);
-      }
+      process.BeginErrorReadLine();
+      
+      process.WaitForExit();
+      
       process.CancelErrorRead();
       process.CancelOutputRead();
       
