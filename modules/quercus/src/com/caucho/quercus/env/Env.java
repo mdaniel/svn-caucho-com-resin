@@ -1963,8 +1963,18 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final Var getStaticClassVar(String className, String name)
+  public final Var getStaticClassVar(Value qThis,
+                                     String className,
+                                     String name)
   {
+    // php/3248
+    // php/324a
+    // php/324b
+    QuercusClass callingClass = getCallingClass(qThis);
+    
+    if (callingClass.isA(className))
+      className = callingClass.getName();
+    
     name = className + "::" + name;
 
     return getGlobalVar(name);

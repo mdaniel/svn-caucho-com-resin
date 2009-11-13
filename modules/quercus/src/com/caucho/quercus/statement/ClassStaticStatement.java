@@ -71,7 +71,9 @@ public class ClassStaticStatement
       String className = _className;
       String staticName = _staticName;
 
-      Var var = env.getStaticClassVar(className, staticName);
+      Value qThis = env.getThis();
+      
+      Var var = env.getStaticClassVar(qThis, className, staticName);
       
       env.setValue(_var.getName(), var);
 
