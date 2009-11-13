@@ -286,8 +286,9 @@ function graph_draw_impl($stat, $canvas, $c_width, $c_height,
              (($dy - $v->value) / $dy + $height));
     }
 
+    $l_margin = 40;
     echo "c.translate("
-         . ($g_label_width * floor($i % $col) - 13)
+         . ($g_label_width * floor($i % $col) - $l_margin)
          . ", " . ($height + 25 + 10 * floor($i / $col)) . ");";
   
     echo "c.beginPath();";
