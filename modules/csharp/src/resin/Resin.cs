@@ -48,39 +48,39 @@ namespace Caucho
     private static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
 
     private static String USAGE = @"usage: {0} [flags] gui | console | status | start | stop | restart | kill | shutdown
-  -h                                     : this help
-  -verbose                               : information on launching java
-  -java_home <dir>                       : sets the JAVA_HOME
-  -java_exe <path>                       : path to java executable
-  -classpath <dir>                       : java classpath
-  -Jxxx                                  : JVM arg xxx
-  -J-Dfoo=bar                            : Set JVM variable
-  -Xxxx                                  : JVM -X parameter
-  -install                               : install as NT service
-  -install-as <name>                     : install as a named NT service
-  -remove                                : remove as NT service
-  -remove-as <name>                      : remove as a named NT service
-  -user <name>                           : specify username for NT service
-  -password <pwd>                        : specify password for NT
-  -resin_home <dir>                      : home of Resin
-  -root-directory <dir>                  : select a root directory
-  -log-directory  <dir>                  : select a logging directory
-  -dynamic-server <cluster:address:port> : initialize a dynamic server
-  -watchdog-port  <port>                 : override the watchdog-port
-  -server <id>                           : select a <server> to run
-  -conf <resin.conf>                     : alternate configuration file";
-    
-    private static String REQUIRE_COMMAND_MSG = @"Resin requires a command:
-  gui - start Resin with a Graphic UI
-  console - start Resin in console mode
-  status - watchdog status
-  start - start a Resin server
-  stop - stop a Resin server
-  restart - restart a Resin server
-  kill - force a kill of a Resin server
-  shutdown - shutdown the watchdog
-  
-  Start with -h for extended help message.";
+
+    COMMANDS:
+      gui - start Resin with a Graphic UI
+      console - start Resin in console mode
+      status - watchdog status
+      start - start a Resin server
+      stop - stop a Resin server
+      restart - restart a Resin server
+      kill - force a kill of a Resin server
+      shutdown - shutdown the watchdog
+
+    OPTIONS:
+      -h                                     : this help
+      -verbose                               : information on launching java
+      -java_home <dir>                       : sets the JAVA_HOME
+      -java_exe <path>                       : path to java executable
+      -classpath <dir>                       : java classpath
+      -Jxxx                                  : JVM arg xxx
+      -J-Dfoo=bar                            : Set JVM variable
+      -Xxxx                                  : JVM -X parameter
+      -install                               : install as NT service
+      -install-as <name>                     : install as a named NT service
+      -remove                                : remove as NT service
+      -remove-as <name>                      : remove as a named NT service
+      -user <name>                           : specify username for NT service
+      -password <pwd>                        : specify password for NT
+      -resin_home <dir>                      : home of Resin
+      -root-directory <dir>                  : select a root directory
+      -log-directory  <dir>                  : select a logging directory
+      -dynamic-server <cluster:address:port> : initialize a dynamic server
+      -watchdog-port  <port>                 : override the watchdog-port
+      -server <id>                           : select a <server> to run
+      -conf <resin.conf>                     : alternate configuration file";
 
     private bool _verbose;
     private bool _nojit;
@@ -314,7 +314,7 @@ namespace Caucho
           (! _uninstall)&&
           (! _service) &&
           (! _help)) {
-        Info(REQUIRE_COMMAND_MSG);
+        Usage(ServiceName);
         
         Environment.Exit(-1);
       }
@@ -401,6 +401,8 @@ namespace Caucho
       
       if (_javaExe == null)
         _javaExe = "java.exe";
+      
+      System.Environment.SetEnvironmentVariable("JAVA_HOME", _javaHome);
 
       try {
         Directory.SetCurrentDirectory(_rootDirectory);
@@ -412,7 +414,8 @@ namespace Caucho
       
       Environment.SetEnvironmentVariable("CLASSPATH", _cp);
       Environment.SetEnvironmentVariable("PATH",
-                                         String.Format("{0};{1}\\win32;{1}\\win64;\\openssl\\bin",
+                                         String.Format("{0};{1};{2}\\win32;{2}\\win64;\\openssl\\bin",
+                                                       _javaHome + "\\bin",
                                                        Environment.GetEnvironmentVariable("PATH"),
                                                        _resinHome));
 
@@ -431,9 +434,12 @@ namespace Caucho
       } else if (_standalone) {
         if (StartResin()) {
           Join();
-          
-          if (_process != null)
-            return _process.ExitCode;
+
+          if (_process != null) {
+            int exitCode = _process.ExitCode;
+            _process.Dispose();
+            return exitCode;
+          }
         }
         
         return 0;
@@ -702,12 +708,6 @@ namespace Caucho
         
         Info(info.ToString());
       }
-      
-      System.Environment.SetEnvironmentVariable("JAVA_HOME", _javaHome);
-      System.Environment.SetEnvironmentVariable("PATH", 
-                                                _javaHome 
-                                                + "\\bin;" 
-                                                + System.Environment.GetEnvironmentVariable("PATH"));
       
       ProcessStartInfo startInfo = new ProcessStartInfo();
       startInfo.FileName = _javaExe;
