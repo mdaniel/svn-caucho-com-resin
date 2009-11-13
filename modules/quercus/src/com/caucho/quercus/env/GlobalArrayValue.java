@@ -151,6 +151,16 @@ public class GlobalArrayValue extends ArrayValueImpl {
   }
   
   /**
+   * Returns true if the key exists in the array.
+   */
+  public boolean keyExists(Value key)
+  {
+    EnvVar var = _env.getGlobalEnv().get(key.toString());
+    
+    return var != null;
+  }
+  
+  /**
    * Prints the value.
    * @param env
    */
