@@ -92,7 +92,23 @@ public class ProbeManager {
     return (SampleCountProbe) probe;
   }
 
-    public static Probe createJmx(String name, String objectName, String attribute)
+  public static CountProbe createCountProbe(String name)
+  {
+    return _manager.createCountProbeImpl(name);
+  }
+
+  private CountProbe createCountProbeImpl(String name)
+  {
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+      probe = createProbe(new CountProbe(name));
+    }
+
+    return (CountProbe) probe;
+  }
+
+  public static Probe createJmx(String name, String objectName, String attribute)
   {
       return _manager.createJmxImpl(name, objectName, attribute);
   }
@@ -217,10 +233,10 @@ public class ProbeManager {
                               String type,
                               String subName)
   {
-    if (subName != null)
-      subName = "|" + subName;
-    else
+    if (subName == null || subName.equals(""))
       subName = "";
+    else if (! subName.startsWith("|"))
+      subName = "|" + subName;
 
     String name = baseName + " " + type + subName;
 
@@ -271,10 +287,10 @@ public class ProbeManager {
     createActiveProbeImpl(String baseName,
                           String subName)
   {
-    if (subName != null)
-      subName = "|" + subName;
-    else
+    if (subName == null || subName.equals(""))
       subName = "";
+    else if (! subName.startsWith("|"))
+      subName = "|" + subName;
 
     String name = baseName + " Count" + subName;
 

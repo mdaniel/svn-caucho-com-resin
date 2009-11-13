@@ -37,8 +37,13 @@ import com.caucho.util.L10N;
  */
 public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
   private static final L10N L = new L10N(SingleLoadBalanceManager.class);
-  
+
   private ServerPool _serverPool;
+
+  public SingleLoadBalanceManager(String probeCategory)
+  {
+    super(probeCategory);
+  }
 
   public void addAddress(String address)
   {
@@ -47,13 +52,13 @@ public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
 
     _serverPool = createServerPool(address);
   }
-  
+
   public void init()
   {
     if (_serverPool == null)
       throw new ConfigException(L.l("Load-balancing requires at least one server address."));
   }
-  
+
   /**
    * Opens the next available server.
    */

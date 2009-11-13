@@ -2395,9 +2395,9 @@ public class Server extends ProtocolDispatchServer
   /**
    * Creates and returns a load balancer configured explicitly
    */
-  public CustomLoadBalanceManager createProxyLoadBalancer()
+  public CustomLoadBalanceManager createProxyLoadBalancer(String probeCategory)
   {
-    return new SingleLoadBalanceManager();
+    return new SingleLoadBalanceManager(probeCategory);
   }
 
   /**

@@ -76,7 +76,7 @@ public class HttpProxyServlet extends GenericServlet {
   {
     Server server = Server.getCurrent();
 
-    _loadBalancer = server.createProxyLoadBalancer();
+    _loadBalancer = server.createProxyLoadBalancer("Resin|Http Proxy");
   }
 
   /**
@@ -126,17 +126,17 @@ public class HttpProxyServlet extends GenericServlet {
       cReq = (CauchoRequest) req;
 
     String sessionId = req.getRequestedSessionId();
-    
+
     String uri;
     if (req.isRequestedSessionIdFromUrl()) {
       uri =  (req.getRequestURI() + ";jsessionid=" +
-	      req.getRequestedSessionId());
+              req.getRequestedSessionId());
     }
     else
       uri = req.getRequestURI();
 
     String queryString = null;
-    
+
     if (cReq != null)
       queryString = cReq.getPageQueryString();
     else {
@@ -145,28 +145,34 @@ public class HttpProxyServlet extends GenericServlet {
       if (queryString == null)
         queryString = req.getQueryString();
     }
-    
+
     if (queryString != null)
       uri += '?' + queryString;
 
     ClusterStream stream = _loadBalancer.openServer(sessionId, null);
 
     try {
-      if (handleRequest(req, res, uri, stream)) {
+      if (stream == null) {
+        log.warning(L.l("{0}: no backend servers available to process {1}",
+                        this, req.getRequestURI()));
+
+        res.sendError(503); // send a busy
+      }
+      else if (handleRequest(req, res, uri, stream)) {
         stream.free();
         stream = null;
         return;
       }
     } finally {
       if (stream != null)
-	stream.close();
+        stream.close();
     }
   }
 
   private boolean handleRequest(HttpServletRequest req,
-				HttpServletResponse res,
+                                HttpServletResponse res,
                                 String uri,
-				ClusterStream stream)
+                                ClusterStream stream)
     throws ServletException, IOException
   {
     ReadStream rs = stream.getReadStream();
@@ -184,38 +190,41 @@ public class HttpProxyServlet extends GenericServlet {
         out.println(host);
       else
         out.println(req.getServerName() + ":" + req.getServerPort());
-      
+
       out.print("X-Forwarded-For: ");
       out.println(req.getRemoteAddr());
 
       Enumeration e = req.getHeaderNames();
       while (e.hasMoreElements()) {
-	String name = (String) e.nextElement();
+        String name = (String) e.nextElement();
 
-	Enumeration e1 = req.getHeaders(name);
-	while (e1.hasMoreElements()) {
-  	  String value = (String) e1.nextElement();
+        if (name.equalsIgnoreCase("Connection"))
+          continue;
+
+        Enumeration e1 = req.getHeaders(name);
+        while (e1.hasMoreElements()) {
+          String value = (String) e1.nextElement();
 
           out.print(name);
           out.print(": ");
           out.println(value);
-	}
+        }
       }
 
       int contentLength = req.getContentLength();
 
       InputStream is = req.getInputStream();
-      
+
       TempBuffer tempBuffer = TempBuffer.allocate();
       byte []buffer = tempBuffer.getBuffer();
 
       boolean isFirst = true;
-      
+
       if (contentLength >= 0) {
         isFirst = false;
         out.print("\r\n");
       }
-      
+
       int len;
       while ((len = is.read(buffer, 0, buffer.length)) > 0) {
         if (isFirst) {
@@ -237,7 +246,7 @@ public class HttpProxyServlet extends GenericServlet {
       }
       else
         out.print("\r\n0\r\n");
-      
+
       out.print("\r\n");
 
       TempBuffer.free(tempBuffer);
@@ -256,14 +265,14 @@ public class HttpProxyServlet extends GenericServlet {
     throws IOException
   {
     String line = parseStatus(is);
-    
+
     boolean isKeepalive = true;
 
     if (! line.startsWith("HTTP/1.1"))
       isKeepalive = false;
 
     int statusCode = parseStatusCode(line);
-    
+
     String location = null;
 
     String hostURL = "";
@@ -280,7 +289,7 @@ public class HttpProxyServlet extends GenericServlet {
 
       if (p < 0)
         break;
-      
+
       String name = line.substring(0, p);
       String value = line.substring(p + 1).trim();
 
@@ -323,7 +332,7 @@ public class HttpProxyServlet extends GenericServlet {
         else
           prefix = ("http://" + req.getServerName());
       }
-	
+
       if (! location.startsWith("/"))
         location = prefix + "/" + location;
       else
@@ -340,12 +349,12 @@ public class HttpProxyServlet extends GenericServlet {
       res.setStatus(statusCode);
 
     OutputStream os = res.getOutputStream();
-    
+
     if (isChunked)
       writeChunkedData(os, is);
     else if (contentLength > 0) {
       res.setContentLength(contentLength);
-      
+
       writeContentLength(os, is, contentLength);
     }
 
@@ -375,7 +384,7 @@ public class HttpProxyServlet extends GenericServlet {
 
     int i = 0;
     int ch;
-    
+
     for (; i < len && (ch = line.charAt(i)) != ' '; i++) {
     }
 
@@ -383,7 +392,7 @@ public class HttpProxyServlet extends GenericServlet {
     }
 
     int statusCode = 0;
-    
+
     for (; i < len && '0' <= (ch = line.charAt(i)) && ch <= '9'; i++) {
       statusCode = 10 * statusCode + ch - '0';
     }

@@ -396,7 +396,7 @@ function draw_grid($width, $height,
   echo "c.font = '10px Monotype';\n";
   echo "c.beginPath();\n";
 
-  $x_step = grid_delta_x($min_x, $max_x);
+  $x_step = grid_delta_x($min_x, $max_x, $width);
 
   for ($x = $min_x; $x <= $max_x; $x += $x_step) {
     draw_line($x, 0, $x, $dy,
@@ -449,7 +449,7 @@ function draw_grid($width, $height,
   echo "c.restore();\n";
 }
 
-function grid_delta_x($min_x, $max_x)
+function grid_delta_x($min_x, $max_x, $width)
 {
   $delta = ($max_x - $min_x) / 60000;
 
@@ -457,13 +457,22 @@ function grid_delta_x($min_x, $max_x)
     return 15 * 60000;
   }
   else if ($delta <= 3 * 60) {
-    return 30 * 60000;
+    if ($width < 300)
+      return 60 * 60000;
+    else
+      return 30 * 60000;
   }
   else if ($delta <= 12 * 60) {
-    return 60 * 60000;
+    if ($width < 300)
+      return 3 * 60 * 60000;
+    else
+      return 60 * 60000;
   }
   else if ($delta <= 24 * 60) {
-    return 3 * 60 * 60000;
+    if ($width < 300)
+      return 6 * 60 * 60000;
+    else
+      return 3 * 60 * 60000;
   }
   else if ($delta <= 7 * 24 * 60) {
     return 24 * 60 * 60000;

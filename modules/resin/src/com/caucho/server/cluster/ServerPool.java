@@ -134,6 +134,9 @@ public class ServerPool
   private ActiveTimeProbe _requestTimeProbe;
   private ActiveProbe _connProbe;
   private ActiveProbe _idleProbe;
+  private CountProbe _connFailProbe;
+  private CountProbe _requestFailProbe;
+  private CountProbe _requestBusyProbe;
 
   private volatile long _keepaliveCountTotal;
   private volatile long _connectCountTotal;
@@ -163,6 +166,10 @@ public class ServerPool
     _isSecure = isSecure;
 
     _statCategory = statCategory;
+
+    if (! "".equals(statId) && ! statId.startsWith("|"))
+      statId = "|" + statId;
+
     _statId = statId;
   }
 
@@ -641,6 +648,8 @@ public class ServerPool
     _lastBusyTime = Alarm.getCurrentTime();
     _firstSuccessTime = 0;
 
+    _requestBusyProbe.start();
+
     synchronized (this) {
       _busyCountTotal++;
 
@@ -654,6 +663,8 @@ public class ServerPool
     _failTime = Alarm.getCurrentTime();
     _lastFailTime = _failTime;
     _firstSuccessTime = 0;
+
+    getRequestFailProbe().start();
 
     synchronized (this) {
       _failCountTotal++;
@@ -670,6 +681,8 @@ public class ServerPool
    */
   public void failSocket()
   {
+    getRequestFailProbe().start();
+
     synchronized (this) {
       _failCountTotal++;
 
@@ -696,6 +709,8 @@ public class ServerPool
    */
   public void failConnect()
   {
+    getConnectionFailProbe().start();
+
     synchronized (this) {
       _failCountTotal++;
 
@@ -724,6 +739,8 @@ public class ServerPool
    */
   public void busy()
   {
+    getRequestBusyProbe().start();
+
     synchronized (this) {
       _lastBusyTime = Alarm.getCurrentTime();
       _firstSuccessTime = 0;
@@ -1368,6 +1385,16 @@ public class ServerPool
     return _connProbe;
   }
 
+  public CountProbe getConnectionFailProbe()
+  {
+    if (_connFailProbe == null) {
+      String name = _statCategory + "|Connection Fail|" + _statId;
+      _connFailProbe = ProbeManager.createCountProbe(name);
+    }
+
+    return _connFailProbe;
+  }
+
   public ActiveTimeProbe getRequestTimeProbe()
   {
     if (_requestTimeProbe == null) {
@@ -1377,6 +1404,26 @@ public class ServerPool
     }
 
     return _requestTimeProbe;
+  }
+
+  public CountProbe getRequestFailProbe()
+  {
+    if (_requestFailProbe == null) {
+      String name = _statCategory + "|Request Fail" + _statId;
+      _requestFailProbe = ProbeManager.createCountProbe(name);
+    }
+
+    return _requestFailProbe;
+  }
+
+  public CountProbe getRequestBusyProbe()
+  {
+    if (_requestBusyProbe == null) {
+      String name = _statCategory + "|Request Busy" + _statId;
+      _requestBusyProbe = ProbeManager.createCountProbe(name);
+    }
+
+    return _requestBusyProbe;
   }
 
   public ActiveProbe getIdleProbe()

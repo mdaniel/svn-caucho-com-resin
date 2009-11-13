@@ -40,7 +40,19 @@ import java.net.*;
 abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
   private static final L10N L = new L10N(CustomLoadBalanceManager.class);
 
+  private String _probeCategory;
+
+  protected CustomLoadBalanceManager(String probeCategory)
+  {
+    _probeCategory = probeCategory;
+  }
+
   abstract public void addAddress(String address);
+
+  protected String getProbeCategory()
+  {
+    return _probeCategory;
+  }
 
   protected ServerPool createServerPool(String address)
   {
@@ -59,7 +71,7 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
 
     return new ServerPool(server.getServerId(),
                           address,
-                          "Resin|Load Balance",
+                          getProbeCategory(),
                           address,
                           host, port, isSecure);
   }
