@@ -129,7 +129,7 @@ public class HmuxLinkService extends SimpleActor {
       long creationDate = selfCookie.getCreateTime();
       long now = Alarm.getCurrentTime();
 
-      if (Math.abs(creationDate - now) > 3 * 3600) {
+      if (Math.abs(creationDate - now) > 3 * 3600 * 1000) {
 	log.warning(this + " expired credentials date");
 
 	getBrokerStream().queryError(id, from, to, query,
