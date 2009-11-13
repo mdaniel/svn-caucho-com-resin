@@ -79,8 +79,19 @@ public class HmuxResponseStream extends ResponseStream {
   protected int getNextStartOffset()
   {
     if (_bufferStartOffset == 0) {
-      _bufferStartOffset = _next.getBufferOffset() + 3;
+      int bufferLength = _next.getBuffer().length;
+      int startOffset = _next.getBufferOffset() + 3;
+      if (bufferLength <= startOffset) {
+        try {
+          _next.flush();
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+        startOffset = _next.getBufferOffset() + 3;
+      }
+      
       _next.setBufferOffset(_bufferStartOffset);
+      _bufferStartOffset = startOffset;
     }
 
     return _bufferStartOffset;
@@ -91,8 +102,15 @@ public class HmuxResponseStream extends ResponseStream {
     throws IOException
   {
     if (_bufferStartOffset == 0) {
-      _bufferStartOffset = _next.getBufferOffset() + 3;
+      int bufferLength = _next.getBuffer().length;
+      int startOffset = _next.getBufferOffset() + 3;
+      if (bufferLength <= startOffset) {
+        _next.flush();
+        startOffset = _next.getBufferOffset() + 3;
+      }
+      
       _next.setBufferOffset(_bufferStartOffset);
+      _bufferStartOffset = startOffset;
     }
       
     return _next.getBufferOffset();
