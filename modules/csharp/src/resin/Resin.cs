@@ -703,6 +703,12 @@ namespace Caucho
         Info(info.ToString());
       }
       
+      System.Environment.SetEnvironmentVariable("JAVA_HOME", _javaHome);
+      System.Environment.SetEnvironmentVariable("PATH", 
+                                                _javaHome 
+                                                + "\\bin;" 
+                                                + System.Environment.GetEnvironmentVariable("PATH"));
+      
       ProcessStartInfo startInfo = new ProcessStartInfo();
       startInfo.FileName = _javaExe;
       
