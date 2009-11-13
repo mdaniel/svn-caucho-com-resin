@@ -72,7 +72,7 @@ public class ProbeManager {
     if (probe == null) {
       probe = createProbe(new AverageTimeProbe(name));
     }
-    
+
     return (AverageTimeProbe) probe;
   }
 
@@ -88,7 +88,7 @@ public class ProbeManager {
     if (probe == null) {
       probe = createProbe(new SampleCountProbe(name));
     }
-    
+
     return (SampleCountProbe) probe;
   }
 
@@ -102,9 +102,9 @@ public class ProbeManager {
     Probe probe = _probeMap.get(name);
 
     if (probe == null) {
-	probe = createProbe(new JmxAttributeProbe(name, objectName, attribute));
+        probe = createProbe(new JmxAttributeProbe(name, objectName, attribute));
     }
-    
+
     return probe;
   }
 
@@ -118,9 +118,9 @@ public class ProbeManager {
     Probe probe = _probeMap.get(name);
 
     if (probe == null) {
-	probe = createProbe(new JmxDeltaProbe(name, objectName, attribute));
+        probe = createProbe(new JmxDeltaProbe(name, objectName, attribute));
     }
-    
+
     return probe;
   }
 
@@ -136,7 +136,7 @@ public class ProbeManager {
     if (probe == null) {
       probe = createProbe(new TimeProbe(name));
     }
-    
+
     return (TimeProbe) probe;
   }
 
@@ -148,21 +148,21 @@ public class ProbeManager {
   private TimeRangeProbe createTimeRangeProbeImpl(String baseName)
   {
     String timeName = baseName + " Time";
-    
+
     Probe probe = _probeMap.get(timeName);
 
     if (probe == null) {
       probe = createProbe(new TimeRangeProbe(timeName));
-      
+
       TimeRangeProbe timeRangeProbe = (TimeRangeProbe) probe;
 
       String countName = baseName + " Count";
       createProbe(timeRangeProbe.createCount(countName));
-      
+
       String maxName = baseName + " Max";
       createProbe(timeRangeProbe.createMax(maxName));
     }
-    
+
     return (TimeRangeProbe) probe;
   }
 
@@ -179,24 +179,24 @@ public class ProbeManager {
       name = baseName + " " + type;
     else
       name = baseName;
-    
+
     Probe probe = _probeMap.get(name);
 
     if (probe == null) {
       probe = createProbe(new AverageProbe(name));
-      
+
       AverageProbe averageProbe = (AverageProbe) probe;
 
       String countName = baseName + " Count";
       createProbe(averageProbe.createCount(countName));
-      
+
       String sigmaName = name + " 95%";
       createProbe(averageProbe.createSigma(sigmaName, 3));
-      
+
       String maxName = name + " Max";
       createProbe(averageProbe.createMax(maxName));
     }
-    
+
     return (AverageProbe) probe;
   }
 
@@ -221,35 +221,80 @@ public class ProbeManager {
       subName = "|" + subName;
     else
       subName = "";
-    
+
     String name = baseName + " " + type + subName;
-    
+
     Probe probe = _probeMap.get(name);
 
     if (probe == null) {
       probe = createProbe(new ActiveTimeProbe(name));
-      
+
       ActiveTimeProbe activeTimeProbe = (ActiveTimeProbe) probe;
 
       /*
       String activeCountName = baseName + " Active" + subName;
       createProbe(activeTimeProbe.createActiveCount(activeCountName));
       */
-      
+
       String sigmaName = baseName + " " + type + " 95%" + subName;
       createProbe(activeTimeProbe.createSigma(sigmaName, 3));
-      
+
       String maxName = baseName + " " + type + " Max" + subName;
       createProbe(activeTimeProbe.createMax(maxName));
 
-      String activeMaxName = baseName + " Active Max" + subName;
+      String activeMaxName = baseName + " Active" + subName;
       createProbe(activeTimeProbe.createActiveCountMax(activeMaxName));
 
       String totalCountName = baseName + " Count" + subName;
       createProbe(activeTimeProbe.createTotalCount(totalCountName));
     }
-    
+
     return (ActiveTimeProbe) probe;
+  }
+
+  /**
+   * An ActiveProbe counts the number of an active resource, e.g. the
+   * number of active connections.
+   */
+  public static ActiveProbe createActiveProbe(String name)
+  {
+    return _manager.createActiveProbeImpl(name, null);
+  }
+
+  public static ActiveProbe createActiveProbe(String name,
+                                              String subName)
+  {
+    return _manager.createActiveProbeImpl(name, subName);
+  }
+
+  private ActiveProbe
+    createActiveProbeImpl(String baseName,
+                          String subName)
+  {
+    if (subName != null)
+      subName = "|" + subName;
+    else
+      subName = "";
+
+    String name = baseName + " Count" + subName;
+
+    Probe probe = _probeMap.get(name);
+
+    if (probe == null) {
+      probe = createProbe(new ActiveProbe(name));
+
+      ActiveProbe activeProbe = (ActiveProbe) probe;
+
+      String maxName = baseName + " Active" + subName;
+      createProbe(activeProbe.createMax(maxName));
+
+      /*
+      String totalName = baseName + " Total" + subName;
+      createProbe(activeProbe.createTotal(totalName));
+      */
+    }
+
+    return (ActiveProbe) probe;
   }
 
   public static SemaphoreProbe createSimpleSemaphoreProbe(String name)
@@ -269,12 +314,12 @@ public class ProbeManager {
                                                   boolean isExtended)
   {
     String name = baseName;
-    
+
     Probe probe = _probeMap.get(name);
 
     if (probe == null)
       probe = createProbe(new SemaphoreProbe(name));
-      
+
     SemaphoreProbe semaphoreProbe = (SemaphoreProbe) probe;
 
     if (! isExtended)
@@ -282,13 +327,13 @@ public class ProbeManager {
 
     String countName = baseName + " Acquire";
     createProbe(semaphoreProbe.createCount(countName));
-      
+
     String maxName = name + " Max";
     createProbe(semaphoreProbe.createMax(maxName));
-      
+
     String minName = name + " Min";
     createProbe(semaphoreProbe.createMin(minName));
-    
+
     return (SemaphoreProbe) probe;
   }
 

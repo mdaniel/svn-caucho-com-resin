@@ -14,7 +14,7 @@ l_resin = element l:caucho.com {
   r_any-Group
 }
 
-r_cache = element cache {
+r_proxy-cache = element (proxy-cache|cache) {
   r_path?
 
   & (attribute disk-size { r_int } | element disk-size { r_int })?
@@ -53,8 +53,6 @@ r_cluster-Content =
 
   & r_access-log?
 
-  & r_cache?
-
   & (attribute connection-error-page { string }
      | element connection-error-page { string })?
 
@@ -87,6 +85,8 @@ r_cluster-Content =
   & r_persistent-store?
 
   & r_ping*
+
+  & r_proxy-cache?
 
   & r_redeploy-mode?
 

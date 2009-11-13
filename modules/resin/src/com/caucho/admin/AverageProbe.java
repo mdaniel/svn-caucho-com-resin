@@ -30,7 +30,7 @@ package com.caucho.admin;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class AverageProbe extends CountProbe implements AverageSample {
+public final class AverageProbe extends TotalProbe implements AverageSample {
   private final double _scale;
 
   private final Object _lock = new Object();
@@ -40,7 +40,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
   private final AtomicLong _sum = new AtomicLong();
   private final AtomicLong _max = new AtomicLong();
   private double _sumSquare;
-  
+
   private long _lastCount;
 
   private long _lastAvgCount;
@@ -49,7 +49,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
   // for 95%
   private long _lastStdCount;
   private double _lastStdSum;
-  
+
   public AverageProbe(String name)
   {
     super(name);
@@ -57,7 +57,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
     _scale = 1.0;
   }
 
-  public CountProbe createCount(String name)
+  public TotalProbe createCount(String name)
   {
     return new AverageCountProbe(name);
   }
@@ -85,7 +85,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
            && ! _max.compareAndSet(max, value)) {
     }
   }
-  
+
   /**
    * Return the probe's next average.
    */
@@ -95,7 +95,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
       long count = _count.get();
       long lastCount = _lastAvgCount;
       _lastAvgCount = count;
-    
+
       long sum = _sum.get();
       double lastSum = _lastAvgSum;
       _lastAvgSum = sum;
@@ -112,7 +112,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
   {
     return _sum.get();
   }
-  
+
   /**
    * Return the probe's next sample.
    */
@@ -126,7 +126,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
       return count - lastCount;
     }
   }
-  
+
   /**
    * Return the probe's next 2-sigma
    */
@@ -136,7 +136,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
       long count = _count.get();
       long lastCount = _lastStdCount;
       _lastStdCount = count;
-    
+
       double sum = _sum.get();
       double lastSum = _lastStdSum;
       _lastStdSum = sum;
@@ -149,16 +149,16 @@ public final class AverageProbe extends CountProbe implements AverageSample {
 
       double avg = (sum - lastSum) / (count - lastCount);
       double part = (count - lastCount) * sumSquare - sum * sum;
-    
+
       if (part < 0)
         part = 0;
-    
+
       double std = Math.sqrt(part) / (count - lastCount);
 
       return _scale * (avg + n * std);
     }
   }
-  
+
   /**
    * Return the probe's next sample.
    */
@@ -171,7 +171,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
     }
   }
 
-  class AverageCountProbe extends CountProbe {
+  class AverageCountProbe extends TotalProbe {
     AverageCountProbe(String name)
     {
       super(name);
@@ -203,7 +203,7 @@ public final class AverageProbe extends CountProbe implements AverageSample {
 
   class SigmaProbe extends Probe {
     private final int _n;
-    
+
     SigmaProbe(String name, int n)
     {
       super(name);

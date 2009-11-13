@@ -30,6 +30,7 @@
 package com.caucho.server.cluster;
 
 import com.caucho.admin.ActiveTimeProbe;
+import com.caucho.admin.ActiveProbe;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorException;
 import com.caucho.bam.ActorStream;
@@ -46,7 +47,7 @@ import java.util.logging.*;
  */
 public class ClusterStream implements ActorStream {
   private static final L10N L = new L10N(ClusterStream.class);
-  
+
   private static final Logger log
     = Logger.getLogger(ClusterStream.class.getName());
 
@@ -60,20 +61,19 @@ public class ClusterStream implements ActorStream {
 
   private boolean _isAuthenticated;
 
-  private ActiveTimeProbe _connTimeProbe;
+  private ActiveProbe _connProbe;
   private ActiveTimeProbe _requestTimeProbe;
-  private ActiveTimeProbe _idleTimeProbe;
+  private ActiveProbe _idleProbe;
 
-  private long _connStartTime;
   private long _requestStartTime;
-  private long _idleStartTime;
-  
+  private boolean _isIdle;
+
   private long _freeTime;
 
   private String _debugId;
 
-  ClusterStream(ServerPool pool, int count, 
-		ReadStream is, WriteStream os)
+  ClusterStream(ServerPool pool, int count,
+                ReadStream is, WriteStream os)
   {
     _pool = pool;
     _is = is;
@@ -81,11 +81,11 @@ public class ClusterStream implements ActorStream {
 
     _debugId = "[" + pool.getDebugId() + ":" + count + "]";
 
-    _connTimeProbe = pool.getConnectionTimeProbe();
+    _connProbe = pool.getConnectionProbe();
     _requestTimeProbe = pool.getRequestTimeProbe();
-    _idleTimeProbe = pool.getIdleTimeProbe();
+    _idleProbe = pool.getIdleProbe();
 
-    _connStartTime = _connTimeProbe.start();
+    _connProbe.start();
 
     toActive();
   }
@@ -104,7 +104,7 @@ public class ClusterStream implements ActorStream {
   public ReadStream getReadStream()
   {
     _freeTime = 0;
-    
+
     return _is;
   }
 
@@ -114,7 +114,7 @@ public class ClusterStream implements ActorStream {
   public WriteStream getWriteStream()
   {
     _freeTime = 0;
-    
+
     return _os;
   }
 
@@ -187,7 +187,7 @@ public class ClusterStream implements ActorStream {
   public boolean isLongIdle()
   {
     long now = Alarm.getCurrentTime();
-    
+
     return (_pool.getLoadBalanceIdleTime() < now - _freeTime + 2000L);
   }
 
@@ -225,9 +225,9 @@ public class ClusterStream implements ActorStream {
   }
 
   public void messageError(String to,
-			   String from,
-			   Serializable query,
-			   ActorError error)
+                           String from,
+                           Serializable query,
+                           ActorError error)
   {
     try {
       WriteStream out = getWriteStream();
@@ -246,7 +246,7 @@ public class ClusterStream implements ActorStream {
 
       hOut.writeObject(query);
       hOut.writeObject(error);
-      
+
       hOut.endPacket();
     } catch (IOException e) {
       throw new ActorException(e);
@@ -254,7 +254,7 @@ public class ClusterStream implements ActorStream {
   }
 
   public void queryGet(long id, String to, String from,
-			  Serializable query)
+                          Serializable query)
   {
     try {
       WriteStream out = getWriteStream();
@@ -280,9 +280,9 @@ public class ClusterStream implements ActorStream {
   }
 
   public void querySet(long id,
-		       String to,
-		       String from,
-		       Serializable query)
+                       String to,
+                       String from,
+                       Serializable query)
   {
     try {
       WriteStream out = getWriteStream();
@@ -308,9 +308,9 @@ public class ClusterStream implements ActorStream {
   }
 
   public void queryResult(long id,
-			  String to,
-			  String from,
-			  Serializable query)
+                          String to,
+                          String from,
+                          Serializable query)
   {
     try {
       WriteStream out = getWriteStream();
@@ -335,10 +335,10 @@ public class ClusterStream implements ActorStream {
   }
 
   public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable query,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable query,
+                         ActorError error)
   {
     try {
       WriteStream out = getWriteStream();
@@ -355,7 +355,7 @@ public class ClusterStream implements ActorStream {
       hOut.writeString(to);
       hOut.writeString(from);
       hOut.writeLong(id);
-    
+
       hOut.writeObject(query);
       hOut.writeObject(error);
       hOut.endPacket();
@@ -400,9 +400,9 @@ public class ClusterStream implements ActorStream {
   }
 
   public void presenceError(String to,
-			    String from,
-			    Serializable value,
-			    ActorError error)
+                            String from,
+                            Serializable value,
+                            ActorError error)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -410,7 +410,7 @@ public class ClusterStream implements ActorStream {
   //
   // HMTP readers
   //
-  
+
   public Serializable readQueryResult(long id)
     throws IOException
   {
@@ -420,15 +420,15 @@ public class ClusterStream implements ActorStream {
 
     if (code < 0)
       throw new EOFException(L.l("{0} unexpected end of file",
-				 this));
+                                 this));
     else if (code == HmuxRequest.HMTP_QUERY_RESULT)
       return parseQueryResult(id, in);
     else if (code == HmuxRequest.HMTP_QUERY_ERROR)
       return parseQueryError(id, in);
     else
       throw new IOException(L.l("{0} expected query result at '"
-				+ (char) code + "' " + code,
-				this));
+                                + (char) code + "' " + code,
+                                this));
   }
 
   public Serializable parseQueryResult(long id, ReadStream is)
@@ -500,41 +500,41 @@ public class ClusterStream implements ActorStream {
     if (_is == null) {
       IllegalStateException exn = new IllegalStateException(L.l("{0} unexpected free of closed stream", this));
       exn.fillInStackTrace();
-      
+
       log.log(Level.FINE, exn.toString(), exn);
       return;
     }
-    
+
     long requestStartTime = _requestStartTime;
     _requestStartTime = 0;
 
     if (requestStartTime > 0)
       _requestTimeProbe.end(requestStartTime);
 
-    
+
     // #2369 - the load balancer might set its own view of the free
     // time
     if (_freeTime <= 0) {
       _freeTime = _is.getReadTime();
-      
+
       if (_freeTime <= 0) {
-	// for write-only, the read time is zero
-	_freeTime = Alarm.getCurrentTime();
+        // for write-only, the read time is zero
+        _freeTime = Alarm.getCurrentTime();
       }
     }
 
-    _idleStartTime = _idleTimeProbe.start();
+    _idleProbe.start();
+    _isIdle = true;
 
     _pool.free(this);
   }
 
   public void toActive()
   {
-    long idleStartTime = _idleStartTime;
-    _idleStartTime = 0;
-
-    if (idleStartTime > 0)
-      _idleTimeProbe.end(idleStartTime);
+    if (_isIdle) {
+      _isIdle = false;
+      _idleProbe.end();
+    }
 
     _requestStartTime = _requestTimeProbe.start();
   }
@@ -546,7 +546,7 @@ public class ClusterStream implements ActorStream {
 
     closeImpl();
   }
-  
+
   /**
    * closes the stream.
    */
@@ -554,32 +554,32 @@ public class ClusterStream implements ActorStream {
   {
     ReadStream is = _is;
     _is = null;
-    
+
     WriteStream os = _os;
     _os = null;
-    
+
     try {
       if (is != null)
-	is.close();
+        is.close();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
 
     try {
       if (os != null)
-	os.close();
+        os.close();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
 
     if (is != null) {
-      _connTimeProbe.end(_connStartTime);
-
-      if (_idleStartTime > 0)
-        _idleTimeProbe.end(_idleStartTime);
+      _connProbe.end();
 
       if (_requestStartTime > 0)
         _requestTimeProbe.end(_requestStartTime);
+
+      if (_isIdle)
+        _idleProbe.end();
     }
   }
 
@@ -629,7 +629,7 @@ public class ClusterStream implements ActorStream {
     throws IOException
   {
     WriteStream os = _os;
-    
+
     os.write(code);
     os.write(0);
     os.write(4);
@@ -643,7 +643,7 @@ public class ClusterStream implements ActorStream {
     throws IOException
   {
     WriteStream os = _os;
-    
+
     os.write((int) (id >> 56));
     os.write((int) (id >> 48));
     os.write((int) (id >> 40));
@@ -658,7 +658,7 @@ public class ClusterStream implements ActorStream {
     throws IOException
   {
     WriteStream os = _os;
-    
+
     os.write(code);
     os.write(0);
     os.write(8);
@@ -678,7 +678,7 @@ public class ClusterStream implements ActorStream {
     int len = s.length();
 
     WriteStream os = _os;
-    
+
     os.write(HmuxRequest.HMUX_STRING);
     os.write(len >> 8);
     os.write(len);
@@ -705,14 +705,14 @@ public class ClusterStream implements ActorStream {
     throws IOException
   {
     WriteStream os = _os;
-    
+
     if (value == null) {
       os.write(code);
       os.write(0);
       os.write(0);
       return;
     }
-    
+
     int len = value.length;
 
     os.write(code);
@@ -740,20 +740,20 @@ public class ClusterStream implements ActorStream {
     ReadStream is = _is;
 
     return (((long) is.read() << 56)
-	    + ((long) is.read() << 48)
-	    + ((long) is.read() << 40)
-	    + ((long) is.read() << 32)
-	    + ((long) is.read() << 24)
-	    + ((long) is.read() << 16)
-	    + ((long) is.read() << 8)
-	    + ((long) is.read() << 0));
+            + ((long) is.read() << 48)
+            + ((long) is.read() << 40)
+            + ((long) is.read() << 32)
+            + ((long) is.read() << 24)
+            + ((long) is.read() << 16)
+            + ((long) is.read() << 8)
+            + ((long) is.read() << 0));
   }
 
   public String readStringValue()
     throws IOException
   {
     ReadStream is = _is;
-    
+
     int len = (is.read() << 8) + is.read();
 
     char []data = new char[len];

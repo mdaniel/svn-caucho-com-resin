@@ -79,6 +79,7 @@ public class ServerPool
   private final boolean _isSecure;
 
   private String _debugId;
+  private String _statCategory;
   private String _statId;
 
   private Path _tcpPath;
@@ -131,9 +132,9 @@ public class ServerPool
 
   // statistics
   private ActiveTimeProbe _requestTimeProbe;
-  private ActiveTimeProbe _connTimeProbe;
-  private ActiveTimeProbe _idleTimeProbe;
-  
+  private ActiveProbe _connProbe;
+  private ActiveProbe _idleProbe;
+
   private volatile long _keepaliveCountTotal;
   private volatile long _connectCountTotal;
   private volatile long _failCountTotal;
@@ -144,6 +145,7 @@ public class ServerPool
 
   public ServerPool(String serverId,
                     String targetId,
+                    String statCategory,
                     String statId,
                     String address,
                     int port,
@@ -153,13 +155,14 @@ public class ServerPool
 
     if ("".equals(targetId))
       targetId = "default";
-    
+
     _targetId = targetId;
     _debugId = _serverId + "->" + _targetId;
     _address = address;
     _port = port;
     _isSecure = isSecure;
 
+    _statCategory = statCategory;
     _statId = statId;
   }
 
@@ -168,6 +171,7 @@ public class ServerPool
   {
     this(serverId,
          server.getId(),
+         "Resin|Cluster",
          getStatId(server),
          server.getClusterPort().getAddress(),
          server.getClusterPort().getPort(),
@@ -184,14 +188,14 @@ public class ServerPool
 
   private static String getStatId(ClusterServer server)
   {
-    String targetId = server.getId();
+    String targetCluster = server.getCluster().getId();
 
-    if ("".equals(targetId))
-      targetId = "default";
+    if ("".equals(targetCluster))
+      targetCluster = "default";
 
     int index = server.getIndex();
 
-    return String.format("%02x:%s", index, targetId);
+    return String.format("%02x:%s", index, targetCluster);
   }
 
   /**
@@ -1353,40 +1357,37 @@ public class ServerPool
   // statistics
   //
 
-  public ActiveTimeProbe getConnectionTimeProbe()
+  public ActiveProbe getConnectionProbe()
   {
-    if (_connTimeProbe == null) {
-      _connTimeProbe
-        = ProbeManager.createActiveTimeProbe("Resin|Cluster|Stream Connection",
-                                             "Time",
-                                             _statId);
+    if (_connProbe == null) {
+      _connProbe
+        = ProbeManager.createActiveProbe(_statCategory + "|Connection",
+                                         _statId);
     }
 
-    return _connTimeProbe;
+    return _connProbe;
   }
 
   public ActiveTimeProbe getRequestTimeProbe()
   {
     if (_requestTimeProbe == null) {
       _requestTimeProbe
-        = ProbeManager.createActiveTimeProbe("Resin|Cluster|Stream Request",
-                                             "Time",
-                                             _statId);
+        = ProbeManager.createActiveTimeProbe(_statCategory + "|Request",
+                                             "Time", _statId);
     }
-    
+
     return _requestTimeProbe;
   }
 
-  public ActiveTimeProbe getIdleTimeProbe()
+  public ActiveProbe getIdleProbe()
   {
-    if (_idleTimeProbe == null) {
-      _idleTimeProbe
-        = ProbeManager.createActiveTimeProbe("Resin|Cluster|Stream Idle",
-                                             "Time",
-                                             _statId);
+    if (_idleProbe == null) {
+      _idleProbe
+        = ProbeManager.createActiveProbe(_statCategory + "|Idle",
+                                         _statId);
     }
-    
-    return _idleTimeProbe;
+
+    return _idleProbe;
   }
 
   @Override

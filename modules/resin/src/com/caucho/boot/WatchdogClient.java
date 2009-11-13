@@ -65,7 +65,7 @@ class WatchdogClient
     = Logger.getLogger(WatchdogClient.class.getName());
 
   public static final String WATCHDOG_JID = "watchdog@admin.resin.caucho";
-  
+
   private final BootResinConfig _bootManager;
   private String _id = "";
 
@@ -73,7 +73,7 @@ class WatchdogClient
   private Watchdog _watchdog;
 
   private ActorClient _conn;
-  
+
   private Boot _jniBoot;
 
   WatchdogClient(BootResinConfig bootManager, WatchdogConfig config)
@@ -147,27 +147,27 @@ class WatchdogClient
   {
     return _config.isVerbose();
   }
-  
+
   public String getGroupName()
   {
     return _config.getGroupName();
   }
-  
+
   public String getUserName()
   {
     return _config.getUserName();
   }
-  
+
   public Path getLogDirectory()
   {
     return _config.getLogDirectory();
   }
-  
+
   public Path getResinDataDirectory()
   {
     return _bootManager.getResinDataDirectory();
   }
-  
+
   public long getShutdownWaitTime()
   {
     return _config.getShutdownWaitTime();
@@ -178,7 +178,7 @@ class WatchdogClient
   {
     if (_watchdog == null)
       _watchdog = new Watchdog(_config);
-    
+
     return _watchdog.startConsole();
   }
 
@@ -189,26 +189,26 @@ class WatchdogClient
   public String statusWatchdog()
     throws IOException
   {
-    
+
     ActorClient conn = getConnection();
 
     try {
       ResultStatus status = (ResultStatus)
-	conn.queryGet(WATCHDOG_JID, new WatchdogStatusQuery());
+        conn.queryGet(WATCHDOG_JID, new WatchdogStatusQuery());
 
       if (status.isSuccess())
-	return status.getMessage();
-      
+        return status.getMessage();
+
       throw new RuntimeException(L.l("{0}: watchdog status failed because of '{1}'",
-				     this, status.getMessage()));
+                                     this, status.getMessage()));
     } catch (Exception e) {
       Throwable e1 = e;
-      
+
       while (e1.getCause() != null)
-	e1 = e1.getCause();
+        e1 = e1.getCause();
 
       log.log(Level.FINE, e.toString(), e);
-      
+
       return e1.toString();
     }
   }
@@ -228,22 +228,22 @@ class WatchdogClient
 
     try {
       conn = getConnection();
-      
+
       ResultStatus status = (ResultStatus)
-	conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv));
+        conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv));
 
       if (status.isSuccess())
-	return;
+        return;
 
       throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
-				    this, status.getMessage()));
+                                    this, status.getMessage()));
     } catch (RemoteConnectionFailedException e) {
       log.log(Level.FINE, e.toString(), e);
     } catch (RuntimeException e) {
       throw e;
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
 
     launchManager(argv);
@@ -255,11 +255,11 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-	conn.querySet(WATCHDOG_JID, new WatchdogStopQuery(getId()));
+        conn.querySet(WATCHDOG_JID, new WatchdogStopQuery(getId()));
 
       if (! status.isSuccess())
-	throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
-				       this, status.getMessage()));
+        throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
+                                       this, status.getMessage()));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -274,11 +274,11 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-	conn.querySet(WATCHDOG_JID, new WatchdogKillQuery(getId()));
+        conn.querySet(WATCHDOG_JID, new WatchdogKillQuery(getId()));
 
       if (! status.isSuccess())
-	throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
-				       this, status.getMessage()));
+        throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
+                                       this, status.getMessage()));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -311,11 +311,11 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-	conn.querySet(WATCHDOG_JID, new WatchdogShutdownQuery());
+        conn.querySet(WATCHDOG_JID, new WatchdogShutdownQuery());
 
       if (! status.isSuccess())
-	throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",
-				       this, status.getMessage()));
+        throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",
+                                       this, status.getMessage()));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -324,29 +324,29 @@ class WatchdogClient
 
     return true;
   }
-  
+
   private ActorClient getConnection()
   {
     if (_conn == null) {
       HmtpClient client = new HmtpClient("http://" + getWatchdogAddress()
-					 + ":" + getWatchdogPort()
-					 + "/hmtp");
+                                         + ":" + getWatchdogPort()
+                                         + "/hmtp");
 
       client.setVirtualHost("admin.resin");
 
       String cookie = getAdminCookie();
 
       if (cookie != null) {
-	long now = Alarm.getCurrentTime();
+        long now = Alarm.getCurrentTime();
 
-	byte []encData = SelfEncryptedCookie.encrypt(cookie, now);
+        byte []encData = SelfEncryptedCookie.encrypt(cookie, now);
 
-	SelfEncryptedCredentials cred = new SelfEncryptedCredentials(encData);
+        SelfEncryptedCredentials cred = new SelfEncryptedCredentials(encData);
 
-	client.connect("admin.resin", cred);
+        client.connect("admin.resin", cred);
       }
       else {
-	client.connect("admin.resin", null);
+        client.connect("admin.resin", null);
       }
 
       _conn = client;
@@ -354,20 +354,20 @@ class WatchdogClient
 
     return _conn;
   }
-  
+
   public void launchManager(String []argv)
     throws IOException
   {
     System.out.println(L.l("Resin/{0} launching watchdog at {1}:{2}",
-			   Version.VERSION,
-			   getWatchdogAddress(),
-			   getWatchdogPort()));
+                           Version.VERSION,
+                           getWatchdogAddress(),
+                           getWatchdogPort()));
 
     log.fine(this + " starting ResinWatchdogManager");
-    
+
     Path resinHome = getResinHome();
     Path resinRoot = getRootDirectory();
-    
+
     ProcessBuilder builder = new ProcessBuilder();
 
     builder.directory(new File(resinRoot.getNativePath()));
@@ -400,18 +400,19 @@ class WatchdogClient
     ArrayList<String> list = new ArrayList<String>();
 
     list.add(_config.getJavaExe());
+    list.add("-Dresin.server=" + _id);
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
     list.add("-Dresin.root=" + resinRoot.getPath());
-    
+
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].startsWith("-Djava.class.path=")) {
-	// IBM JDK startup issues
+        // IBM JDK startup issues
       }
       else if (argv[i].startsWith("-J")) {
-	list.add(argv[i].substring(2));
+        list.add(argv[i].substring(2));
       }
     }
 
@@ -427,13 +428,13 @@ class WatchdogClient
 
     // XXX: can this just be copied from original args?
     if (! list.contains("-d32") && ! list.contains("-d64")
-	&& is64bit() && ! CauchoSystem.isWindows()) {
+        && is64bit() && ! CauchoSystem.isWindows()) {
       list.add("-d64");
     }
-    
+
     if (! list.contains("-server")
-	&& ! list.contains("-client")
-	&& ! CauchoSystem.isWindows()) {
+        && ! list.contains("-client")
+        && ! CauchoSystem.isWindows()) {
       // #3331, windows can't add -server automatically
       list.add("-server");
     }
@@ -445,12 +446,12 @@ class WatchdogClient
           || argv[i].equals("--conf")) {
         list.add(argv[i]);
         list.add(resinHome.lookup(argv[i + 1]).getNativePath());
-	i++;
+        i++;
       }
       else
         list.add(argv[i]);
     }
-    
+
     list.add("--log-directory");
     list.add(getLogDirectory().getFullPath());
 
@@ -478,7 +479,7 @@ class WatchdogClient
 
     env.put(prop, value);
   }
-  
+
   @Override
   public String toString()
   {
@@ -489,10 +490,10 @@ class WatchdogClient
   {
     if (_jniBoot != null)
       return _jniBoot.isValid() ? _jniBoot : null;
-    
+
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
 
       _jniBoot = (Boot) cl.newInstance();

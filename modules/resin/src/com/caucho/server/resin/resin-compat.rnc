@@ -47,7 +47,7 @@ r_server-Basis-Compat =
   & (attribute bind-ports-after-start { r_boolean-Type }
      | element bind-ports-after-start { r_boolean-Type })?
 
-  & r_cache?
+  & r_proxy-cache?
 
   & (attribute connection-error-page { string }
      | element connection-error-page { string })?

@@ -81,7 +81,7 @@ class WatchdogProcess
   private int _pid;
 
   private int _status = -1;
-  
+
   WatchdogProcess(String id, Watchdog watchdog)
   {
     _id = id;
@@ -97,7 +97,7 @@ class WatchdogProcess
   {
     if (! _lifecycle.toActive())
       return;
-    
+
     WriteStream jvmOut = null;
     ServerSocket ss = null;
     Socket s = null;
@@ -106,7 +106,7 @@ class WatchdogProcess
       ss = new ServerSocket(0, 5, InetAddress.getByName("127.0.0.1"));
 
       int port = ss.getLocalPort();
-      
+
       log.config(this + " starting Resin");
 
       jvmOut = createJvmOut();
@@ -114,59 +114,59 @@ class WatchdogProcess
       _process = createProcess(port, jvmOut);
 
       if (_process != null) {
-	if (_process instanceof JniProcess)
-	  _pid = ((JniProcess) _process).getPid();
-	else
-	  _pid = 0;
+        if (_process instanceof JniProcess)
+          _pid = ((JniProcess) _process).getPid();
+        else
+          _pid = 0;
 
-	InputStream stdIs = _process.getInputStream();
-	_stdOs = _process.getOutputStream();
-	  
-	WatchdogProcessLogThread logThread
-	  = new WatchdogProcessLogThread(stdIs, jvmOut);
+        InputStream stdIs = _process.getInputStream();
+        _stdOs = _process.getOutputStream();
 
-	ThreadPool.getCurrent().schedule(logThread);
+        WatchdogProcessLogThread logThread
+          = new WatchdogProcessLogThread(stdIs, jvmOut);
 
-	s = connectToChild(ss);
+        ThreadPool.getCurrent().schedule(logThread);
 
-	_status = _process.waitFor();
+        s = connectToChild(ss);
+
+        _status = _process.waitFor();
       }
     } catch (Exception e) {
       log.log(Level.INFO, e.toString(), e);
 
       try {
-	Thread.sleep(5000);
+        Thread.sleep(5000);
       } catch (Exception e1) {
       }
     } finally {
       if (ss != null) {
-	try {
-	  ss.close();
-	} catch (Exception e) {
-	}
+        try {
+          ss.close();
+        } catch (Exception e) {
+        }
       }
 
       try {
-	if (s != null)
-	  s.close();
+        if (s != null)
+          s.close();
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
-	  
+
       kill();
-      
+
       if (jvmOut != null && ! _watchdog.isConsole()) {
-	try {
-	  jvmOut.close();
-	} catch (Exception e) {
-	}
+        try {
+          jvmOut.close();
+        } catch (Exception e) {
+        }
       }
 
       synchronized (this) {
-	if (_status < 0)
-	  _status = 666;
-	
-	notifyAll();
+        if (_status < 0)
+          _status = 666;
+
+        notifyAll();
       }
     }
   }
@@ -191,9 +191,9 @@ class WatchdogProcess
 
     if (stdOs != null) {
       try {
-	stdOs.close();
+        stdOs.close();
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -202,26 +202,26 @@ class WatchdogProcess
 
     if (childSocket != null) {
       try {
-	childSocket.close();
+        childSocket.close();
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
     Process process = _process;
     _process = null;
-    
+
     if (process != null) {
       try {
-	process.destroy();
+        process.destroy();
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
 
       try {
-	process.waitFor();
+        process.waitFor();
       } catch (Exception e) {
-	log.log(Level.INFO, e.toString(), e);
+        log.log(Level.INFO, e.toString(), e);
       }
     }
   }
@@ -230,10 +230,10 @@ class WatchdogProcess
   {
     synchronized (this) {
       if (_status < 0) {
-	try {
-	  wait(60000);
-	} catch (Exception e) {
-	}
+        try {
+          wait(60000);
+        } catch (Exception e) {
+        }
       }
     }
   }
@@ -250,18 +250,18 @@ class WatchdogProcess
 
     try {
       ss.setSoTimeout(60000);
-      
+
       for (int i = 0; _lifecycle.isActive() && i < 120 && s == null; i++) {
-	try {
-	  s = ss.accept();
-	} catch (SocketTimeoutException e) {
-	}
+        try {
+          s = ss.accept();
+        } catch (SocketTimeoutException e) {
+        }
       }
-      
+
       if (s != null) {
-	_childSocket = s;
-	
-	startWatchdogActor(s);
+        _childSocket = s;
+
+        startWatchdogActor(s);
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -302,7 +302,7 @@ class WatchdogProcess
    * @param out the debug log jvm-default.log
    */
   private Process createProcess(int socketPort,
-				WriteStream out)
+                                WriteStream out)
     throws IOException
   {
     // watchdog/0210
@@ -320,82 +320,82 @@ class WatchdogProcess
     ArrayList<String> resinArgs = buildResinArgs(socketPort);
 
     addCommandLineArguments(jvmArgs, resinArgs);
-    
+
     jvmArgs.add("com.caucho.server.resin.Resin");
 
     jvmArgs.addAll(resinArgs);
 
     if (_watchdog.isVerbose()) {
       logVerboseArguments(out, jvmArgs);
-      
+
       logVerboseEnvironment(out, env);
     }
 
     Boot boot = getJniBoot();
     if (boot != null) {
       boot.clearSaveOnExec();
-      
+
       ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
 
       try {
-	if (_watchdog.getUserName() != null) {
-	  for (Port port : _watchdog.getPorts()) {
-	    QServerSocket ss = port.bindForWatchdog();
+        if (_watchdog.getUserName() != null) {
+          for (Port port : _watchdog.getPorts()) {
+            QServerSocket ss = port.bindForWatchdog();
 
-	    if (ss == null)
-	      continue;
+            if (ss == null)
+              continue;
 
-	    boundSockets.add(ss);
-	    
-	    if (ss.setSaveOnExec()) {
-	      jvmArgs.add("-port");
-	      jvmArgs.add(String.valueOf(ss.getSystemFD()));
-	      jvmArgs.add(String.valueOf(port.getAddress()));
-	      jvmArgs.add(String.valueOf(port.getPort()));
-	    }
-	  }
-	}
+            boundSockets.add(ss);
 
-	String chrootPath = null;
+            if (ss.setSaveOnExec()) {
+              jvmArgs.add("-port");
+              jvmArgs.add(String.valueOf(ss.getSystemFD()));
+              jvmArgs.add(String.valueOf(port.getAddress()));
+              jvmArgs.add(String.valueOf(port.getPort()));
+            }
+          }
+        }
 
-	if (chroot != null)
-	  chrootPath = chroot.getNativePath();
+        String chrootPath = null;
 
-	Process process = boot.exec(jvmArgs, env,
-				    chrootPath,
-				    processPwd.getNativePath(),
-				    _watchdog.getUserName(),
-				    _watchdog.getGroupName());
+        if (chroot != null)
+          chrootPath = chroot.getNativePath();
 
-	if (process != null) {
-	  return process;
-	}
+        Process process = boot.exec(jvmArgs, env,
+                                    chrootPath,
+                                    processPwd.getNativePath(),
+                                    _watchdog.getUserName(),
+                                    _watchdog.getGroupName());
+
+        if (process != null) {
+          return process;
+        }
       } catch (ConfigException e) {
-	log.warning(e.getMessage());
+        log.warning(e.getMessage());
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	for (int i = 0; i < boundSockets.size(); i++) {
-	  try {
-	    boundSockets.get(i).close();
-	  } catch (Throwable e) {
-	  }
-	}
+        for (int i = 0; i < boundSockets.size(); i++) {
+          try {
+            boundSockets.get(i).close();
+          } catch (Throwable e) {
+          }
+        }
       }
     }
 
     if (_watchdog.getUserName() != null) {
       if (_watchdog.isConsole())
-	throw new ConfigException(L.l("<user-name> requires compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a console process."));
+        throw new ConfigException(L.l("<user-name> requires compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a console process."));
       else
-	throw new ConfigException(L.l("<user-name> requires compiled JNI."));
+        throw new ConfigException(L.l("<user-name> requires compiled JNI."));
     }
-      
+
     if (_watchdog.getGroupName() != null) {
       if (_watchdog.isConsole())
-	throw new ConfigException(L.l("<group-name> compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a console process."));
+        throw new ConfigException(L.l("<group-name> compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a console process."));
       else
-	throw new ConfigException(L.l("<group-name> compiled JNI."));
+        throw new ConfigException(L.l("<group-name> compiled JNI."));
     }
 
     ProcessBuilder builder = new ProcessBuilder();
@@ -403,7 +403,7 @@ class WatchdogProcess
     builder.directory(new File(processPwd.getNativePath()));
 
     builder.environment().putAll(env);
-    
+
     builder = builder.command(jvmArgs);
 
     builder.redirectErrorStream(true);
@@ -417,14 +417,14 @@ class WatchdogProcess
     HashMap<String,String> env = new HashMap<String,String>();
 
     env.putAll(System.getenv());
-    
+
     Path resinHome = _watchdog.getResinHome();
 
     ArrayList<String> classPathList = new ArrayList<String>();
     classPathList.addAll(_watchdog.getJvmClasspath());
     String classPath
       = WatchdogArgs.calculateClassPath(classPathList, resinHome);
-    
+
     env.put("CLASSPATH", classPath);
 
     if (_watchdog.is64bit()) {
@@ -458,6 +458,8 @@ class WatchdogProcess
     ArrayList<String> jvmArgs = new ArrayList<String>();
 
     jvmArgs.add(_watchdog.getJavaExe());
+
+    jvmArgs.add("-Dresin.watchdog=" + _watchdog.getWatchdogPort());
     jvmArgs.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
 
     // This is needed for JMX to work correctly.
@@ -526,9 +528,9 @@ class WatchdogProcess
   private ArrayList<String> buildResinArgs(int socketPort)
   {
     ArrayList<String> resinArgs = new ArrayList<String>();
-    
+
     Path resinRoot = _watchdog.getResinRoot();
-    
+
     if (resinRoot != null) {
       resinArgs.add("--root-directory");
       resinArgs.add(resinRoot.getFullPath());
@@ -538,7 +540,7 @@ class WatchdogProcess
       resinArgs.add("-conf");
       resinArgs.add(_watchdog.getResinConf().getNativePath());
     }
-      
+
     resinArgs.add("-socketwait");
     resinArgs.add(String.valueOf(socketPort));
 
@@ -546,24 +548,24 @@ class WatchdogProcess
   }
 
   private void addCommandLineArguments(ArrayList<String> jvmArgs,
-				       ArrayList<String> resinArgs)
+                                       ArrayList<String> resinArgs)
   {
     String []argv = _watchdog.getArgv();
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].equals("-conf")) {
-	// resin conf handled below
-	i++;
+        // resin conf handled below
+        i++;
       }
       else if (argv[i].startsWith("-Djava.class.path=")) {
-	// IBM JDK startup issues
+        // IBM JDK startup issues
       }
       else if (argv[i].startsWith("-J")) {
-	jvmArgs.add(argv[i].substring(2));
+        jvmArgs.add(argv[i].substring(2));
       }
       else if (argv[i].startsWith("-Djava.class.path")) {
       }
       else
-	resinArgs.add(argv[i]);
+        resinArgs.add(argv[i]);
     }
   }
 
@@ -572,17 +574,17 @@ class WatchdogProcess
   {
     for (int i = 0; i < list.size(); i++) {
       if (i > 0)
-	out.print("  ");
-	
+        out.print("  ");
+
       out.print(list.get(i));
 
       if (i + 1 < list.size())
-	out.println(" \\");
+        out.println(" \\");
       else
-	out.println();
+        out.println();
     }
   }
-  
+
   private void logVerboseEnvironment(WriteStream out, Map<String,String> env)
     throws IOException
   {
@@ -591,21 +593,21 @@ class WatchdogProcess
       String value = envEntry.getValue();
 
       if ("CLASSPATH".equals(key)
-	  || "LD_LIBRARY_PATH".equals(key)
-	  || "DYLD_LIBRARY_PATH".equals(key)) {
-	out.println(key + ": ");
-	  
-	int len = (key + ": ").length();
+          || "LD_LIBRARY_PATH".equals(key)
+          || "DYLD_LIBRARY_PATH".equals(key)) {
+        out.println(key + ": ");
 
-	for (String v : value.split("[" + File.pathSeparatorChar + "]")) {
-	  for (int i = 0; i < len; i++)
-	    out.print(" ");
+        int len = (key + ": ").length();
 
-	  out.println(v);
-	}
+        for (String v : value.split("[" + File.pathSeparatorChar + "]")) {
+          for (int i = 0; i < len; i++)
+            out.print(" ");
+
+          out.println(v);
+        }
       }
       else
-	out.println("" + key + ": " + value);
+        out.println("" + key + ": " + value);
     }
   }
 
@@ -625,10 +627,10 @@ class WatchdogProcess
   {
     if (_jniBoot != null)
       return _jniBoot.isValid() ? _jniBoot : null;
-    
+
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
@@ -656,14 +658,14 @@ class WatchdogProcess
     if (_watchdog.isConsole()) {
       return Vfs.openWrite(System.out);
     }
-    
+
     String name;
     String id = _watchdog.getId();
     Path jvmPath = _watchdog.getLogPath();
 
     try {
       Path dir = jvmPath.getParent();
-	    
+
       if (! dir.exists()) {
         dir.mkdirs();
 
@@ -709,33 +711,33 @@ class WatchdogProcess
       _is = is;
       _out = out;
     }
-    
+
     public void run()
     {
       Thread thread = Thread.currentThread();
       thread.setName("watchdog-process-log-" + _pid + "-" + _id);
-      
+
       thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
 
       try {
-	int len;
+        int len;
 
-	byte []data = new byte[4096];
-    
-	while ((len = _is.read(data, 0, data.length)) >= 0) {
-	  _out.write(data, 0, len);
-	  _out.flush();
-	}
+        byte []data = new byte[4096];
+
+        while ((len = _is.read(data, 0, data.length)) >= 0) {
+          _out.write(data, 0, len);
+          _out.flush();
+        }
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	try {
+        try {
           if (! _watchdog.isConsole())
             _out.close();
-	} catch (IOException e) {
-	}
-      
-	kill();
+        } catch (IOException e) {
+        }
+
+        kill();
       }
     }
   }

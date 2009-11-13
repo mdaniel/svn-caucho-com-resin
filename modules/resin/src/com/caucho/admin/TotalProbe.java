@@ -28,12 +28,12 @@
 
 package com.caucho.admin;
 
-abstract public class CountProbe extends Probe {
-  protected CountProbe(String name)
+abstract public class TotalProbe extends Probe {
+  protected TotalProbe(String name)
   {
     super(name);
   }
-  
+
   /**
    * Return the total count
    */

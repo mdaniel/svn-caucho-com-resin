@@ -156,7 +156,7 @@ public class Server extends ProtocolDispatchServer
 
   private String _stage = "default";
   private boolean _isPreview;
-  
+
   private String _serverHeader;
 
   private int _urlLengthMax = 8192;
@@ -1263,15 +1263,25 @@ public class Server extends ProtocolDispatchServer
     return _hostContainer.createRewriteDispatch();
   }
 
+
   /**
-   * Adds the cache.
+   * Creates the proxy cache.
+   */
+  public AbstractCache createProxyCache()
+    throws ConfigException
+  {
+    log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
+
+    return new AbstractCache();
+  }
+
+  /**
+   * backward compatibility for proxy cache
    */
   public AbstractCache createCache()
     throws ConfigException
   {
-    log.warning(L.l("<cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
-
-    return new AbstractCache();
+    return createProxyCache();
   }
 
   /**
@@ -2371,7 +2381,7 @@ public class Server extends ProtocolDispatchServer
                                   int port)
   {
   }
-  
+
   /**
    * Creates an returns a load balancer based on the cluster name.
    *
@@ -2381,7 +2391,7 @@ public class Server extends ProtocolDispatchServer
   {
     throw new ConfigException(L.l("Cluster LoadBalancer requires Resin Professional."));
   }
-  
+
   /**
    * Creates and returns a load balancer configured explicitly
    */

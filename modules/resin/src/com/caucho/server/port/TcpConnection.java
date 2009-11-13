@@ -243,7 +243,7 @@ public class TcpConnection extends Connection
   {
     return _state;
   }
-  
+
   /**
    * Returns true for active.
    */
@@ -607,7 +607,7 @@ public class TcpConnection extends Connection
       if ((result = processKeepalive()) != RequestState.REQUEST) {
         return result;
       }
-      
+
       _state = _state.toActive();
 
       if (! getRequest().handleRequest()) {
@@ -726,7 +726,7 @@ public class TcpConnection extends Connection
   public void clearKeepalive()
   {
     // to init?
-    
+
     /*
     if (! _isKeepalive)
       log.warning(this + " illegal state: clearing keepalive with inactive keepalive");
@@ -780,8 +780,9 @@ public class TcpConnection extends Connection
   @Override
   public boolean toKeepalive()
   {
-    if (! _state.isAllowKeepalive())
+    if (! _state.isAllowKeepalive()) {
       return false;
+    }
 
     if (! _port.allowKeepalive(_connectionStartTime)) {
       _state = _state.toKillKeepalive();
@@ -1161,10 +1162,10 @@ public class TcpConnection extends Connection
         }
         else if (result == RequestState.DUPLEX) {
           setStatState("duplex");
-          
+
           return _duplexReadTask.doTask();
         }
-        
+
         setStatState(null);
 
         close();

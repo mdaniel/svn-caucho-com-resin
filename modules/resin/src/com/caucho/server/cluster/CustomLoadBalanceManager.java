@@ -39,7 +39,7 @@ import java.net.*;
  */
 abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
   private static final L10N L = new L10N(CustomLoadBalanceManager.class);
-  
+
   abstract public void addAddress(String address);
 
   protected ServerPool createServerPool(String address)
@@ -57,7 +57,10 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
 
     boolean isSecure = false;
 
-    return new ServerPool(server.getServerId(), address, address,
+    return new ServerPool(server.getServerId(),
+                          address,
+                          "Resin|Load Balance",
+                          address,
                           host, port, isSecure);
   }
 }

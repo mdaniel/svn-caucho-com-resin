@@ -29,7 +29,7 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.admin.CountProbe;
+import com.caucho.admin.TotalProbe;
 import com.caucho.admin.Probe;
 import com.caucho.admin.ProbeManager;
 import com.caucho.management.server.AbstractEmitterObject;
@@ -52,7 +52,7 @@ public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
 {
   private static final String BYTES_PROBE = "Resin|Request|Http Request Bytes";
-  private CountProbe _httpBytesProbe;
+  private TotalProbe _httpBytesProbe;
 
   private Server _server;
 
@@ -64,7 +64,7 @@ public class ServerAdmin extends AbstractEmitterObject
 
     String name = BYTES_PROBE;
 
-    _httpBytesProbe = (CountProbe) ProbeManager.getProbe(name);
+    _httpBytesProbe = (TotalProbe) ProbeManager.getProbe(name);
 
     registerSelf();
   }

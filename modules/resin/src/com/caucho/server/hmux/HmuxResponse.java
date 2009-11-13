@@ -45,11 +45,11 @@ import java.util.ArrayList;
  */
 public class HmuxResponse extends AbstractHttpResponse {
   private HmuxRequest _req;
-  
+
   HmuxResponse(HmuxRequest request, WriteStream rawWrite)
   {
     super(request, rawWrite);
-    
+
     _req = request;
   }
 
@@ -70,7 +70,7 @@ public class HmuxResponse extends AbstractHttpResponse {
 
   @Override
   protected boolean writeHeadersInt(int length,
-				    boolean isHead)
+                                    boolean isHead)
     throws IOException
   {
     if (! _request.hasRequest())
@@ -79,7 +79,7 @@ public class HmuxResponse extends AbstractHttpResponse {
     HttpServletResponseImpl response = _request.getResponseFacade();
 
     int statusCode = response.getStatus();
-    
+
     CharBuffer cb = _cb;
     cb.clear();
     cb.append((char) ((statusCode / 100) % 10 + '0'));
@@ -105,6 +105,9 @@ public class HmuxResponse extends AbstractHttpResponse {
       _req.writeHeader("Cache-Control", "private");
 
     int load = (int) (1000 * CauchoSystem.getLoadAvg());
+    if (Alarm.isTest())
+      load = 0;
+
     _req.writeString(HmuxRequest.HMUX_META_HEADER, "cpu-load");
     _req.writeString(HmuxRequest.HMUX_STRING, String.valueOf(load));
 
@@ -128,7 +131,7 @@ public class HmuxResponse extends AbstractHttpResponse {
     }
 
     HttpServletResponseImpl responseFacade = _request.getResponseFacade();
-    
+
     long now = Alarm.getCurrentTime();
     ArrayList<Cookie> cookiesOut = responseFacade.getCookies();
 
@@ -152,10 +155,10 @@ public class HmuxResponse extends AbstractHttpResponse {
 
     if (contentType != null) {
       if (charEncoding != null)
-	_req.writeHeader("Content-Type", contentType + "; charset=" + charEncoding);
+        _req.writeHeader("Content-Type", contentType + "; charset=" + charEncoding);
       else
-	_req.writeHeader("Content-Type", contentType);
-      
+        _req.writeHeader("Content-Type", contentType);
+
     }
 
     _req.sendHeader();
