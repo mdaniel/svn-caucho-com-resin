@@ -13,6 +13,7 @@
 
 <s2 title="4.0.2 snapshot">
 <ul>
+<li>resin: max-uri-length configuration tag introduced to set limit on URIs served by Resin. Default is 1024.</li>
 <li>ubuntu: missing LSB information (#3720, rep by floating world)</li>
 <li>jsp: findAncestorWithClass() fails with tags nested in a tag file(#3436, rep by paru)</li>
 <li>security: add LoginList to allow both form and basic for /resin-admin REST (rep by Martin Thompson)</li>

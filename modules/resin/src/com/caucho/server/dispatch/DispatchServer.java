@@ -61,6 +61,8 @@ public class DispatchServer implements Dependency {
 
   private int _invocationCacheSize = 64 * 1024;
   private int _maxURLLength = 256;
+  //sets a limit on URIs Resin serves
+  private int _maxURILength = 1024;
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -131,6 +133,19 @@ public class DispatchServer implements Dependency {
     _maxURLLength = length;
   }
 
+  public int getMaxURILength()
+  {
+    return _maxURILength;
+  }
+
+  /**
+   * Sets max uri length
+   */
+  public void setMaxURILength(int maxURILength)
+  {
+    _maxURILength = maxURILength;
+  }
+
   /**
    * Initializes the server.
    */
@@ -145,8 +160,10 @@ public class DispatchServer implements Dependency {
    */
   public InvocationDecoder getInvocationDecoder()
   {
-    if (_invocationDecoder == null)
+    if (_invocationDecoder == null) {
       _invocationDecoder = new InvocationDecoder();
+      _invocationDecoder.setMaxURILength(_maxURILength);
+    }
 
     return _invocationDecoder;
   }

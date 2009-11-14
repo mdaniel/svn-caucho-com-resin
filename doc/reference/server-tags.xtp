@@ -59,7 +59,7 @@ a new connection.</p>
 to wait for the connections.  Smaller values use less threads, but may
 be slower handling spikes.</p>
 
-<default>10</default>
+<default>8</default>
 
 </defun>
 
@@ -82,6 +82,8 @@ may pause until a new thread is available for the new connection.</p>
 <p>Larger values handle spiky loads better but require more threads
 to wait for the connections.  Smaller values use less threads, but may
 be slower handling spikes.</p>
+
+<default>4</default>
 
 </defun>
 

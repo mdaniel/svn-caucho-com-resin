@@ -61,6 +61,7 @@ public class InvocationDecoder {
 
   // The URL-encoded session prefix
   private String _sessionPrefix;
+  private int _maxURILength = 1024;
 
   /**
    * Creates the invocation decoder.
@@ -163,6 +164,16 @@ public class InvocationDecoder {
   public String getAlternateSessionURLPrefix()
   {
     return _sessionPrefix;
+  }
+
+  public int getMaxURILength()
+  {
+    return _maxURILength;
+  }
+
+  public void setMaxURILength(int maxURILength)
+  {
+    _maxURILength = maxURILength;
   }
 
   /**
@@ -323,7 +334,7 @@ public class InvocationDecoder {
    * @param uri the raw uri to be normalized
    * @return a normalized URI
    */
-  public static String normalizeUri(String uri)
+  public String normalizeUri(String uri)
     throws IOException
   {
     return normalizeUri(uri, CauchoSystem.isWindows());
@@ -335,14 +346,14 @@ public class InvocationDecoder {
    * @param uri the raw uri to be normalized
    * @return a normalized URI
    */
-  public static String normalizeUri(String uri, boolean isWindows)
+  public String normalizeUri(String uri, boolean isWindows)
     throws IOException
   {
     CharBuffer cb = new CharBuffer();
 
     int len = uri.length();
-    
-    if (len > 1024)
+
+    if (len > _maxURILength)
       throw new BadRequestException(L.l("The request contains an illegal URL."));
 
     boolean isBogus;

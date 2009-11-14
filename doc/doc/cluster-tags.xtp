@@ -577,6 +577,20 @@ element invocation-cache-max-url-length {
 </def>
 
 </defun>
+  
+<defun title="&lt;max-uri-length>" version="Resin 4.0.2">
+<parents>cluster</parents>
+<default>1024</default>
+
+<p>Sets limit on longest URIs that can be served by Resin.</p>
+
+<def title="&lt;max-uri-length> schema">
+element max-uri-length {
+  r_int-Type
+}
+</def>
+
+</defun>
 
 <defun title="&lt;persistent-store>" version="Resin 3.0.8">
 <parents>cluster</parents>

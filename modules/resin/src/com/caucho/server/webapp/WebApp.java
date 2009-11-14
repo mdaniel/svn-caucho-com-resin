@@ -166,6 +166,8 @@ public class WebApp extends ServletContextImpl
   // The webApp directory.
   private final Path _appDir;
 
+  private InvocationDecoder _invocationDecoder;
+  
   // The context path
   private String _baseContextPath = "";
   private String _versionContextPath = "";
@@ -362,6 +364,8 @@ public class WebApp extends ServletContextImpl
   {
     _server = Server.getCurrent();
 
+    _invocationDecoder = _server.getInvocationDecoder();
+
     setVersionContextPath(controller.getContextPath());
     _baseContextPath = controller.getBaseContextPath();
 
@@ -551,6 +555,20 @@ public class WebApp extends ServletContextImpl
       return (Server) _parent.getDispatchServer();
     else
       return null;
+  }
+
+  public InvocationDecoder getInvocationDecoder()
+  {
+    if (_invocationDecoder != null)
+      return _invocationDecoder;
+
+    if (_server != null)
+      _invocationDecoder = _server.getInvocationDecoder();
+
+    if (_invocationDecoder == null && _server == null)
+      _invocationDecoder = Server.getCurrent().getInvocationDecoder();
+
+    return _invocationDecoder;
   }
 
   /**
@@ -3350,7 +3368,7 @@ public class WebApp extends ServletContextImpl
     String fullURI = getContextPath() + "/" + uri;
 
     try {
-      fullURI = InvocationDecoder.normalizeUri(fullURI);
+      fullURI = getInvocationDecoder().normalizeUri(fullURI);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -3392,7 +3410,7 @@ public class WebApp extends ServletContextImpl
     String fullURI = getContextPath() + "/" + uri;
 
     try {
-      fullURI = InvocationDecoder.normalizeUri(fullURI);
+      fullURI = getInvocationDecoder().normalizeUri(fullURI);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

@@ -30,14 +30,12 @@
 package com.caucho.server.connection;
 
 import com.caucho.server.cache.*;
-import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.session.CookieImpl;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.util.*;
-import com.caucho.vfs.FlushBuffer;
 import com.caucho.xml.XmlChar;
 
 import java.io.*;
@@ -516,7 +514,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   /**
    * Sets the HTTP status
    *
-   * @param sc the HTTP status code
+   * @param code the HTTP status code
    */
   public void setStatus(int code)
   {
@@ -526,7 +524,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   /**
    * Sets the HTTP status
    *
-   * @param sc the HTTP status code
+   * @param code the HTTP status code
    * @param message the HTTP status message
    */
   public void setStatus(int code, String message)
@@ -560,7 +558,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   /**
    * Sends an HTTP error page based on the status code
    *
-   * @param sc the HTTP status code
+   * @param code the HTTP status code
    */
   public void sendError(int code)
     throws IOException
@@ -1103,9 +1101,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     try {
       if (queryString != null)
-        return hostPrefix + InvocationDecoder.normalizeUri(path) + '?' + queryString;
+        return hostPrefix + webApp.getInvocationDecoder().normalizeUri(path) + '?' + queryString;
       else
-        return hostPrefix + InvocationDecoder.normalizeUri(path);
+        return hostPrefix + webApp.getInvocationDecoder().normalizeUri(path);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -1312,7 +1310,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * Encodes session information in a URL. Calling this will enable
    * sessions for users who have disabled cookies.
    *
-   * @param url the url to encode
+   * @param string the url to encode
    * @return a url with session information encoded
    */
   public String encodeURL(String string)

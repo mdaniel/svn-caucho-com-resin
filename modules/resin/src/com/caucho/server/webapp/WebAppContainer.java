@@ -87,6 +87,8 @@ public class WebAppContainer
   // The owning dispatch server
   private DispatchServer _dispatchServer;
 
+  private InvocationDecoder _invocationDecoder;
+
   // The context class loader
   private EnvironmentClassLoader _classLoader;
 
@@ -184,6 +186,16 @@ public class WebAppContainer
   public void setDispatchServer(DispatchServer server)
   {
     _dispatchServer = server;
+    _invocationDecoder = _dispatchServer.getInvocationDecoder();
+  }
+
+  public InvocationDecoder getInvocationDecoder() {
+    if (_invocationDecoder != null)
+      return _invocationDecoder;
+
+    _invocationDecoder = Server.getCurrent().getInvocationDecoder();
+
+    return _invocationDecoder;
   }
 
   /**
@@ -1059,7 +1071,7 @@ public class WebAppContainer
 
     // server/105w
     try {
-      cleanUri = InvocationDecoder.normalizeUri(cleanUri);
+      cleanUri = getInvocationDecoder().normalizeUri(cleanUri);
     } catch (java.io.IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }

@@ -80,6 +80,9 @@ r_cluster-Content =
   & (attribute invocation-cache-max-url-length { r_int-Type }
      | element invocation-cache-max-url-length { r_int-Type })?
 
+  & (attribute max-uri-length { r_int-Type }
+     | element max-uri-length { r_int-Type })?
+
   & r_machine*
 
   & r_persistent-store?
