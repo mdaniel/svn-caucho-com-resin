@@ -1096,8 +1096,10 @@ public class HmuxRequest extends AbstractHttpRequest
       else
         getBrokerStream(isAdmin).message(to, from, query);
     } catch (RuntimeException e) {
+      e.printStackTrace();
       throw e;
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

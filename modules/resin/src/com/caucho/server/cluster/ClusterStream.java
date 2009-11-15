@@ -150,8 +150,20 @@ public class ClusterStream implements ActorStream {
    */
   public Hessian2Output getHessianOutputStream()
   {
-    if (_out == null)
-      _out = new Hessian2Output(_os);
+    if (_out == null) {
+      OutputStream os = _os;
+
+      /*
+      if (log.isLoggable(Level.FINEST)) {
+        HessianDebugOutputStream hOs
+          = new HessianDebugOutputStream(os, log, Level.FINEST);
+        // hOs.startTop2();
+        os = hOs;
+      }
+      */
+        
+      _out = new Hessian2Output(os);
+    }
 
     return _out;
   }
