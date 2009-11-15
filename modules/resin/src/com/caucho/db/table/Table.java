@@ -114,7 +114,7 @@ public class Table extends Store {
   private final Object _rowTailLock = new Object();
   private long _rowTailTop = Store.BLOCK_SIZE * 256;
   private final AtomicLong _rowTailOffset = new AtomicLong();
-  
+
   private final Object _rowClockLock = new Object();
 
   private final RowAllocator _rowAllocator = new RowAllocator();
@@ -122,7 +122,7 @@ public class Table extends Store {
   // clock counters for row insert allocation
   private long _rowClockTop;
   private long _rowClockOffset;
-  
+
   private long _rowClockFree;
   private long _rowClockUsed;
 
@@ -755,7 +755,7 @@ public class Table extends Store {
     blockLock.lockReadAndWrite(xa.getTimeout());
     try {
       block.read();
-          
+
       byte []buffer = block.getBuffer();
 
       int rowOffset = 0;
@@ -763,7 +763,7 @@ public class Table extends Store {
       for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
         if (buffer[rowOffset] == 0) {
           buffer[rowOffset] = ROW_ALLOC;
-              
+
           block.setDirty(rowOffset, rowOffset + 1);
 
           return rowOffset;
@@ -802,7 +802,7 @@ public class Table extends Store {
       if (buffer[rowOffset] != ROW_ALLOC)
         throw new IllegalStateException(L.l("Expected ROW_ALLOC at '{0}'",
                                             buffer[rowOffset]));
-      
+
       for (int i = rowOffset + _rowLength - 1; rowOffset < i; i--)
         buffer[i] = 0;
 
@@ -878,9 +878,9 @@ public class Table extends Store {
 
     if (blockId <= 0) {
       Block block = allocateRow();
-      
+
       blockId = block.getBlockId();
-    
+
       block.free();
     }
 
@@ -954,7 +954,7 @@ public class Table extends Store {
       if (count > 0) {
         _rowTailTop = _rowTailOffset.get() + count * Store.BLOCK_SIZE;
       }
-      
+
       _rowClockOffset = 0;
       _rowClockTop = _rowTailOffset.get();
       _rowClockUsed = 0;
@@ -977,7 +977,7 @@ public class Table extends Store {
 
         if (isRowFree(rowClockOffset)) {
           freeRow(rowClockOffset);
-        
+
           _rowClockFree++;
         }
         else {
@@ -1030,13 +1030,13 @@ public class Table extends Store {
   private void freeRow(long blockId)
   {
     int top;
-    
+
     do {
       top = _insertFreeRowTop.get();
 
       if (top >= FREE_ROW_SIZE)
         return;
-      
+
       _insertFreeRowArray.set(top, blockId);
     } while (! _insertFreeRowTop.compareAndSet(top, top + 1));
   }
@@ -1102,10 +1102,10 @@ public class Table extends Store {
     _row.close();
 
     super.close();
-    
+
     _rowAllocator.destroy();
   }
-  
+
   private void writeLong(WriteStream os, long value)
     throws IOException
   {

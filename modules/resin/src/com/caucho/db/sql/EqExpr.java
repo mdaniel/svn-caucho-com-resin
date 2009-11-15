@@ -33,24 +33,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-class EqExpr extends Expr {
-  private Expr _left;
-  private Expr _right;
+final class EqExpr extends Expr {
+  private final Expr _left;
+  private final Expr _right;
 
   EqExpr(Expr left, Expr right)
   {
-    _left = left;
-    _right = right;
-
     if (left == null || right == null)
       throw new NullPointerException();
 
     if (right instanceof UnboundIdentifierExpr &&
-	! (left instanceof UnboundIdentifierExpr)) {
-      Expr temp = _right;
-      _right = _left;
-      _left = temp;
+        ! (left instanceof UnboundIdentifierExpr)) {
+      Expr temp = right;
+      right = left;
+      left = temp;
     }
+
+    _left = left;
+    _right = right;
   }
 
   public Expr bind(Query query)
@@ -60,13 +60,21 @@ class EqExpr extends Expr {
     Expr newRight = _right.bind(query);
 
     if (newLeft instanceof ColumnExpr
-	&& newLeft.getType().equals(String.class)) {
+        && newLeft.getType().equals(String.class)) {
       return new StringEqExpr((ColumnExpr) newLeft, newRight);
     }
     else if (newRight instanceof ColumnExpr
-	     && newRight.getType().equals(String.class)) {
+             && newRight.getType().equals(String.class)) {
       return new StringEqExpr((ColumnExpr) newRight, newLeft);
     }
+
+    if (newLeft.isLong() && (newRight.isLong() || newRight.isParam()))
+      return new LongEqExpr(newLeft, newRight);
+    else if (newRight.isLong() && (newLeft.isLong() || newLeft.isParam()))
+      return new LongEqExpr(newLeft, newRight);
+
+    if (newLeft.isDouble() || newRight.isDouble())
+      return new DoubleEqExpr(newLeft, newRight);
 
     if (_left == newLeft && _right == newRight)
       return this;
@@ -83,20 +91,20 @@ class EqExpr extends Expr {
       IdExpr expr = (IdExpr) _left;
 
       if (expr.getColumn().getIndex() != null &&
-	  item == expr.getFromItem()) {
-	return new IndexExpr(expr, _right);
+          item == expr.getFromItem()) {
+        return new IndexExpr(expr, _right);
       }
     }
-    
+
     if (_right instanceof IdExpr) {
       IdExpr expr = (IdExpr) _right;
 
       if (expr.getColumn().getIndex() != null &&
-	  item == expr.getFromItem()) {
-	return new IndexExpr(expr, _left);
+          item == expr.getFromItem()) {
+        return new IndexExpr(expr, _left);
       }
     }
-    
+
     return null;
   }
 
@@ -113,14 +121,14 @@ class EqExpr extends Expr {
    */
   public long cost(ArrayList<FromItem> fromList)
   {
-    if (_left instanceof UnboundIdentifierExpr &&
-	_right.cost(fromList) == 0) {
+    if (_left instanceof UnboundIdentifierExpr
+        && _right.cost(fromList) == 0) {
       UnboundIdentifierExpr id = (UnboundIdentifierExpr) _left;
 
       return id.lookupCost(fromList);
     }
-    else if (_right instanceof UnboundIdentifierExpr &&
-	     _left.cost(fromList) == 0) {
+    else if (_right instanceof UnboundIdentifierExpr
+             && _left.cost(fromList) == 0) {
       UnboundIdentifierExpr id = (UnboundIdentifierExpr) _right;
 
       return id.lookupCost(fromList);
@@ -155,27 +163,27 @@ class EqExpr extends Expr {
   {
     if (_left.isNull(context) || _right.isNull(context))
       return UNKNOWN;
-    
+
     if (_left.isLong() && _right.isLong()) {
       if (_left.evalLong(context) == _right.evalLong(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     }
     else if (_left.isDouble() && _right.isDouble()) {
       if (_left.evalDouble(context) == _right.evalDouble(context))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     }
     else {
       String leftValue = _left.evalString(context);
       String rightValue = _right.evalString(context);
 
       if (leftValue == rightValue || leftValue.equals(rightValue))
-	return TRUE;
+        return TRUE;
       else
-	return FALSE;
+        return FALSE;
     }
   }
 

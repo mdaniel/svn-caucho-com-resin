@@ -47,13 +47,13 @@ class ParamExpr extends Expr {
   private static final int BYTES = BINARY + 1;
 
   private int _index;
-  
+
   private int _type = NULL;
-  
+
   private String _stringValue;
   private long _longValue;
   private double _doubleValue;
-  
+
   private InputStream _binaryStream;
   private int _streamLength;
   private byte []_bytes;
@@ -92,10 +92,29 @@ class ParamExpr extends Expr {
 
     case BYTES:
       return byte[].class;
-      
+
     default:
       return Object.class;
     }
+  }
+
+  /**
+   * Returns true for a parameter expression.
+   */
+  @Override
+  public boolean isParam()
+  {
+    return true;
+  }
+
+  /**
+   * XXX: Since we're only using this database internally, we can guarantee
+   * non-null for parameters.
+   */
+  @Override
+  public boolean isNullable()
+  {
+    return false;
   }
 
   /**
@@ -107,7 +126,7 @@ class ParamExpr extends Expr {
   }
 
   /**
-   * Clers the value.
+   * Clears the value.
    */
   public void clear()
   {
@@ -208,19 +227,19 @@ class ParamExpr extends Expr {
     switch (_type) {
     case NULL:
       return null;
-      
+
     case BOOLEAN:
       return _longValue != 0 ? "1" : "0";
-      
+
     case STRING:
       return _stringValue;
-      
+
     case LONG:
       return String.valueOf(_longValue);
-      
+
     case DATE:
       return QDate.formatISO8601(_longValue);
-      
+
     case DOUBLE:
       return String.valueOf(_doubleValue);
 
@@ -229,7 +248,7 @@ class ParamExpr extends Expr {
       StringBuilder sb = new StringBuilder();
       int len = _bytes.length;
       for (int i = 0; i < len; i++) {
-	sb.append((char) (_bytes[i] & 0xff));
+        sb.append((char) (_bytes[i] & 0xff));
       }
 
       return sb.toString();
@@ -253,11 +272,11 @@ class ParamExpr extends Expr {
     switch (_type) {
     case NULL:
       return UNKNOWN;
-      
+
     case BOOLEAN:
     case LONG:
       return _longValue != 0 ? TRUE : FALSE;
-      
+
     case DOUBLE:
       return _doubleValue != 0 ? TRUE : FALSE;
 
@@ -279,7 +298,7 @@ class ParamExpr extends Expr {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case BOOLEAN:
     case LONG:
     case DATE:
@@ -309,7 +328,7 @@ class ParamExpr extends Expr {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case LONG:
     case DATE:
       return _longValue;
@@ -338,7 +357,7 @@ class ParamExpr extends Expr {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case LONG:
     case DATE:
       return _longValue;
@@ -364,7 +383,7 @@ class ParamExpr extends Expr {
     switch (_type) {
     case NULL:
       return null;
-      
+
     case BINARY:
       return _binaryStream;
 
@@ -372,7 +391,7 @@ class ParamExpr extends Expr {
       throw new UnsupportedOperationException();
     }
   }
-  
+
   /**
    * Evaluates the expression to a buffer
    *
@@ -381,8 +400,8 @@ class ParamExpr extends Expr {
    * @return the length of the result
    */
   public int evalToBuffer(QueryContext context,
-			  byte []buffer,
-			  int offset)
+                          byte []buffer,
+                          int offset)
     throws SQLException
   {
     if (_type == BYTES) {
@@ -393,7 +412,7 @@ class ParamExpr extends Expr {
     else
       return evalToBuffer(context, buffer, offset, _type);
   }
-  
+
   /**
    * Evaluates the expression to a buffer
    *
@@ -402,9 +421,9 @@ class ParamExpr extends Expr {
    * @return the length of the result
    */
   public int evalToBuffer(QueryContext context,
-			  byte []buffer,
-			  int offset,
-			  int typecode)
+                          byte []buffer,
+                          int offset,
+                          int typecode)
     throws SQLException
   {
     if (_type == BYTES) {

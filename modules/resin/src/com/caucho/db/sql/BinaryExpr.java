@@ -33,7 +33,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-class BinaryExpr extends Expr {
+class BinaryExpr extends AbstractBinaryExpr {
   private Expr _left;
   private Expr _right;
   private int _op;
@@ -43,6 +43,24 @@ class BinaryExpr extends Expr {
     _left = left;
     _right = right;
     _op = op;
+  }
+
+  @Override
+  public final Expr getLeft()
+  {
+    return _left;
+  }
+
+  @Override
+  public final Expr getRight()
+  {
+    return _right;
+  }
+
+  @Override
+  public Expr create(Expr left, Expr right)
+  {
+    return new BinaryExpr(left, right, _op);
   }
 
   /**
@@ -61,9 +79,9 @@ class BinaryExpr extends Expr {
     case '/':
     case '%':
       if (newLeft.isLong() && newRight.isLong())
-	return new BinaryLongExpr(newLeft, newRight, _op);
+        return new BinaryLongExpr(newLeft, newRight, _op);
       else
-	return new BinaryDoubleExpr(newLeft, newRight, _op);
+        return new BinaryDoubleExpr(newLeft, newRight, _op);
     }
 
     throw new SQLException("can't cope: " + newLeft + " " + newLeft.getType() + " " + newRight);

@@ -169,6 +169,7 @@ if ($mbean_server) {
 /* graphs */
 
 $si = sprintf("%02d", $server->Index);
+// $si = sprintf("%02d", $g_server_index);
 $stat_service = $mbean_server->lookup("resin:type=StatService");
 
 if ($stat_service) {

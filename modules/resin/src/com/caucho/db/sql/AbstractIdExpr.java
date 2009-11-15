@@ -37,34 +37,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-final class IdExpr extends Expr {
+abstract class AbstractIdExpr extends Expr {
   private static final L10N L = new L10N(IdExpr.class);
 
-  private final FromItem _fromItem;
-  private final Column _column;
-
-  private int _tableIndex = -1;
-
-  /**
-   * Creates an unbound identifier with just a column name.
-   */
-  IdExpr(FromItem fromItem, Column column)
-  {
-    _fromItem = fromItem;
-    _column = column;
-  }
+  abstract protected FromItem getFromItem();
+  abstract protected Column getColumn();
+  abstract protected int getTableIndex();
 
   public Class getType()
   {
-    return _column.getJavaType();
-  }
-
-  /**
-   * Returns the column.
-   */
-  public Column getColumn()
-  {
-    return _column;
+    return getColumn().getJavaType();
   }
 
   /**
@@ -72,15 +54,7 @@ final class IdExpr extends Expr {
    */
   public String getName()
   {
-    return _column.getName();
-  }
-
-  /**
-   * Returns the from item
-   */
-  public FromItem getFromItem()
-  {
-    return _fromItem;
+    return getColumn().getName();
   }
 
   /**
@@ -88,7 +62,7 @@ final class IdExpr extends Expr {
    */
   public Table getTable()
   {
-    return _fromItem.getTable();
+    return getFromItem().getTable();
   }
 
   /**
@@ -97,7 +71,7 @@ final class IdExpr extends Expr {
   @Override
   public boolean isNullable()
   {
-    return ! _column.isNotNull();
+    return ! getColumn().isNotNull();
   }
 
   /**
@@ -105,15 +79,19 @@ final class IdExpr extends Expr {
    */
   protected long lookupCost(ArrayList<FromItem> fromList)
   {
-    if (! fromList.contains(_fromItem))
+    final FromItem fromItem = getFromItem();
+
+    if (! fromList.contains(fromItem))
       return COST_NO_TABLE;
 
-    if (fromList.indexOf(_fromItem) < fromList.size() - 1)
+    if (fromList.indexOf(fromItem) < fromList.size() - 1)
       return 0;
 
-    if (_column.isPrimaryKey())
+    final Column column = getColumn();
+
+    if (column.isPrimaryKey())
       return COST_INDEX;
-    else if (_column.isUnique())
+    else if (column.isUnique())
       return COST_UNIQUE;
     else
       return COST_SCAN;
@@ -122,62 +100,58 @@ final class IdExpr extends Expr {
   /**
    * The cost of a match of the expr.
    */
+  @Override
   public long subCost(ArrayList<FromItem> fromList)
   {
-    if (! fromList.contains(_fromItem))
+    if (! fromList.contains(getFromItem()))
       return Integer.MAX_VALUE;
 
 
     return 10 * 100 * 100 * 100;
   }
 
+  @Override
   public Expr bind(Query query)
     throws SQLException
   {
-    FromItem []fromItems = query.getFromItems();
-
-    for (int i = 0; i < fromItems.length; i++) {
-      if (fromItems[i] == _fromItem)
-        _tableIndex = i;
-    }
-
     return this;
   }
 
   /**
    * Returns true if the expression is null.
    */
-  public boolean isNull(QueryContext context)
+  @Override
+  public boolean isNull(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    return row.isNull(_column);
+    return row.isNull(getColumn());
   }
 
   /**
    * Evaluates the expression as a string.
    */
-  public String evalString(QueryContext context)
+  public String evalString(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    return row.getString(_column);
+    return row.getString(getColumn());
   }
 
   /**
    * Evaluates the expression as a boolean.
    */
-  public int evalBoolean(QueryContext context)
+  public int evalBoolean(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    String value = row.getString(_column);
+    final String value = row.getString(getColumn());
 
     if (value == null)
       return UNKNOWN;
@@ -191,31 +165,33 @@ final class IdExpr extends Expr {
       return FALSE;
   }
 
-  public int evalInt(QueryContext context)
+  public int evalInt(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    return row.getInteger(_column);
+    return row.getInteger(getColumn());
   }
 
-  public long evalLong(QueryContext context)
+  @Override
+  public long evalLong(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    return row.getLong(_column);
+    return row.getLong(getColumn());
   }
 
-  public double evalDouble(QueryContext context)
+  @Override
+  public double evalDouble(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    return row.getDouble(_column);
+    return row.getDouble(getColumn());
   }
 
   /**
@@ -224,13 +200,15 @@ final class IdExpr extends Expr {
    * @param context the query context
    * @param result the output result
    */
-  public void evalToResult(QueryContext context, SelectResult result)
+  @Override
+  public void evalToResult(final QueryContext context,
+                           final SelectResult result)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[getTableIndex()];
 
-    row.evalToResult(_column, result);
+    row.evalToResult(getColumn(), result);
   }
 
   /**
@@ -247,42 +225,42 @@ final class IdExpr extends Expr {
     throws SQLException
   {
     TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    TableIterator row = rows[getTableIndex()];
 
-    return row.getBuffer(_column, buffer, offset);
+    return row.getBuffer(getColumn(), buffer, offset);
   }
 
   public boolean evalEqual(QueryContext context, byte []matchBuffer)
     throws SQLException
   {
     TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    TableIterator row = rows[getTableIndex()];
 
-    return row.isEqual(_column, matchBuffer);
+    return row.isEqual(getColumn(), matchBuffer);
   }
 
   public boolean evalEqual(QueryContext context, String string)
     throws SQLException
   {
     TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    TableIterator row = rows[getTableIndex()];
 
-    return row.isEqual(_column, string);
+    return row.isEqual(getColumn(), string);
   }
 
   public boolean equals(Object o)
   {
-    if (o == null || ! IdExpr.class.equals(o.getClass()))
+    if (o == null || ! getClass().equals(o.getClass()))
       return false;
 
-    IdExpr expr = (IdExpr) o;
+    AbstractIdExpr expr = (AbstractIdExpr) o;
 
-    return (_fromItem == expr._fromItem &&
-            _column == expr._column);
+    return (getFromItem() == expr.getFromItem()
+            && getColumn() == expr.getColumn());
   }
 
   public String toString()
   {
-    return _fromItem.getName() + "." + _column.getName();
+    return getFromItem().getName() + "." + getColumn().getName();
   }
 }

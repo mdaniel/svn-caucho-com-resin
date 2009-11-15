@@ -35,18 +35,18 @@ import com.caucho.db.table.TableIterator;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-class ColumnExpr extends Expr {
-  private Table _table;
-  
-  private int _tableIndex;
-  private Column _column;
-  private int _columnIndex;
+final class ColumnExpr extends Expr {
+  private final Table _table;
 
-  private String _name;
-  private Class _type;
+  private final int _tableIndex;
+  private final Column _column;
+  private final int _columnIndex;
+
+  private final String _name;
+  private final Class _type;
 
   ColumnExpr(String name, Table table, int tableIndex,
-	     int columnIndex, Class type)
+             int columnIndex, Class type)
   {
     _name = name;
     _table = table;
@@ -86,13 +86,21 @@ class ColumnExpr extends Expr {
   }
 
   /**
+   * Returns true if the column can contain a null value.
+   */
+  public boolean isNullable()
+  {
+    return ! _column.isNotNull();
+  }
+
+  /**
    * Returns true if the expression is null.
    */
-  public boolean isNull(QueryContext context)
+  final public boolean isNull(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[_tableIndex];
 
     return row.isNull(_column);
   }
@@ -127,11 +135,11 @@ class ColumnExpr extends Expr {
     return row.getLong(_column);
   }
 
-  public double evalDouble(QueryContext context)
+  public final double evalDouble(final QueryContext context)
     throws SQLException
   {
-    TableIterator []rows = context.getTableIterators();
-    TableIterator row = rows[_tableIndex];
+    final TableIterator []rows = context.getTableIterators();
+    final TableIterator row = rows[_tableIndex];
 
     return row.getDouble(_column);
   }
@@ -186,8 +194,8 @@ class ColumnExpr extends Expr {
 
     ColumnExpr expr = (ColumnExpr) o;
 
-    return (_tableIndex == expr._tableIndex &&
-	    _column == expr._column);
+    return (_tableIndex == expr._tableIndex
+            && _column == expr._column);
   }
 
   public String toString()

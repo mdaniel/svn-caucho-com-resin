@@ -54,7 +54,7 @@ abstract public class Expr {
   final static long COST_UNIQUE   = 10000L;
   final static long COST_INDEX    = 100L;
   final static long COST_CONSTANT = 0L;
-  
+
   private static QDate _gmtDate = new QDate();
 
   public Expr bind(Query query)
@@ -79,7 +79,7 @@ abstract public class Expr {
     Class type = getType();
 
     return (int.class.equals(type) || long.class.equals(type)
-	    || java.sql.Date.class.equals(type));
+            || java.sql.Date.class.equals(type));
   }
 
   /**
@@ -88,7 +88,7 @@ abstract public class Expr {
   public boolean isDouble()
   {
     Class type = getType();
-    
+
     return isLong() || double.class.isAssignableFrom(type);
   }
 
@@ -108,6 +108,22 @@ abstract public class Expr {
     Class type = getType();
 
     return (InputStream.class.equals(type));
+  }
+
+  /**
+   * Returns true for a parameter expression.
+   */
+  public boolean isParam()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression can return a null value.
+   */
+  public boolean isNullable()
+  {
+    return true;
   }
 
   /**
@@ -180,7 +196,7 @@ abstract public class Expr {
     else
       return new StringOrder(index);
   }
-  
+
   /**
    * Returns true if result is null
    *
@@ -283,7 +299,7 @@ abstract public class Expr {
 
     try {
       synchronized (_gmtDate) {
-	return _gmtDate.parseDate(dateString);
+        return _gmtDate.parseDate(dateString);
       }
     } catch (Exception e) {
       throw new SQLExceptionWrapper(e);
@@ -329,8 +345,8 @@ abstract public class Expr {
    * @return the length of the result
    */
   public int evalToBuffer(QueryContext context,
-			  byte []buffer,
-			  int offset)
+                          byte []buffer,
+                          int offset)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -344,96 +360,96 @@ abstract public class Expr {
    * @return the length of the result
    */
   protected int evalToBuffer(QueryContext context,
-			     byte []buffer,
-			     int off,
-			     int columnType)
+                             byte []buffer,
+                             int off,
+                             int columnType)
     throws SQLException
   {
     switch (columnType) {
     case Column.INT:
       {
-	int v = (int) evalLong(context);
+        int v = (int) evalLong(context);
 
-	buffer[0] = (byte) (v >> 24);
-	buffer[1] = (byte) (v >> 16);
-	buffer[2] = (byte) (v >> 8);
-	buffer[3] = (byte) (v);
+        buffer[0] = (byte) (v >> 24);
+        buffer[1] = (byte) (v >> 16);
+        buffer[2] = (byte) (v >> 8);
+        buffer[3] = (byte) (v);
 
-	return 4;
+        return 4;
       }
-      
+
     case Column.LONG:
     case Column.DATE:
       {
-	long v = evalLong(context);
+        long v = evalLong(context);
 
-	buffer[0] = (byte) (v >> 56);
-	buffer[1] = (byte) (v >> 48);
-	buffer[2] = (byte) (v >> 40);
-	buffer[3] = (byte) (v >> 32);
-	
-	buffer[4] = (byte) (v >> 24);
-	buffer[5] = (byte) (v >> 16);
-	buffer[6] = (byte) (v >> 8);
-	buffer[7] = (byte) (v);
+        buffer[0] = (byte) (v >> 56);
+        buffer[1] = (byte) (v >> 48);
+        buffer[2] = (byte) (v >> 40);
+        buffer[3] = (byte) (v >> 32);
 
-	return 8;
+        buffer[4] = (byte) (v >> 24);
+        buffer[5] = (byte) (v >> 16);
+        buffer[6] = (byte) (v >> 8);
+        buffer[7] = (byte) (v);
+
+        return 8;
       }
 
     case Column.VARCHAR:
       {
-	String v = evalString(context);
+        String v = evalString(context);
 
-	if (v == null)
-	  return -1;
-	
-	int length = v.length();
+        if (v == null)
+          return -1;
 
-	int offset = 0;
-	buffer[offset++] = (byte) length;
-	for (int i = 0; i < length; i++) {
-	  int ch = v.charAt(i);
+        int length = v.length();
 
-	  buffer[offset++] = (byte) (ch >> 8);
-	  buffer[offset++] = (byte) (ch);
-	}
-	
-	return offset;
+        int offset = 0;
+        buffer[offset++] = (byte) length;
+        for (int i = 0; i < length; i++) {
+          int ch = v.charAt(i);
+
+          buffer[offset++] = (byte) (ch >> 8);
+          buffer[offset++] = (byte) (ch);
+        }
+
+        return offset;
       }
 
     case Column.VARBINARY:
       {
-	String v = evalString(context);
+        String v = evalString(context);
 
-	if (v == null)
-	  return -1;
-	
-	int length = v.length();
-	int offset = 1;
+        if (v == null)
+          return -1;
 
-	for (int i = 0; i < length; i++) {
-	  int ch = v.charAt(i);
+        int length = v.length();
+        int offset = 1;
 
-	  if (ch < 0x80)
-	    buffer[offset++] = (byte) (ch & 0xff);
-	  else if (ch < 0x800) {
-	    buffer[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
-	    buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
-	  }
-	  else {
-	    buffer[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
-	    buffer[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-	    buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
-	  }
-	}
-	buffer[0] = (byte) (offset - 1);
-	
-	return offset;
+        for (int i = 0; i < length; i++) {
+          int ch = v.charAt(i);
+
+          if (ch < 0x80)
+            buffer[offset++] = (byte) (ch & 0xff);
+          else if (ch < 0x800) {
+            buffer[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
+            buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
+          }
+          else {
+            buffer[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
+            buffer[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+            buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
+          }
+        }
+        buffer[0] = (byte) (offset - 1);
+
+        return offset;
       }
-      
+
     case Column.BINARY:
       return evalToBuffer(context, buffer, off);
-      
+
     default:
       throw new UnsupportedOperationException(getClass().getName() + " unknown column: " + columnType);
     }

@@ -35,7 +35,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-class AndExpr extends Expr {
+final class AndExpr extends Expr {
   private ArrayList<Expr> _exprList = new ArrayList<Expr>();
   private Expr []_exprs;
 
@@ -76,7 +76,13 @@ class AndExpr extends Expr {
       _exprs[i] = expr;
     }
 
-    return this;
+    Expr tailExpr = _exprs[_exprs.length - 1];
+
+    for (int i = _exprs.length - 2; i >= 0; i--) {
+      tailExpr = new BinaryAndExpr(_exprs[i], tailExpr);
+    }
+
+    return tailExpr;
   }
 
   /**
@@ -153,6 +159,24 @@ class AndExpr extends Expr {
     }
 
     return value;
+  }
+
+  /**
+   * Evaluates the expression as a boolean.
+   */
+  @Override
+  public final boolean isSelect(final QueryContext context)
+    throws SQLException
+  {
+    final Expr []exprs = _exprs;
+    final int length = exprs.length;
+
+    for (int i = 0; i < length; i++) {
+      if (! exprs[i].isSelect(context))
+        return false;
+    }
+
+    return true;
   }
 
   public String evalString(QueryContext context)

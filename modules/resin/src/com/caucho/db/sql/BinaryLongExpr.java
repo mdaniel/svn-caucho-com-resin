@@ -33,7 +33,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-class BinaryLongExpr extends Expr {
+class BinaryLongExpr extends AbstractBinaryExpr {
   private Expr _left;
   private Expr _right;
   private int _op;
@@ -43,6 +43,24 @@ class BinaryLongExpr extends Expr {
     _left = left;
     _right = right;
     _op = op;
+  }
+
+  @Override
+  public final Expr getLeft()
+  {
+    return _left;
+  }
+
+  @Override
+  public final Expr getRight()
+  {
+    return _right;
+  }
+
+  @Override
+  public Expr create(Expr left, Expr right)
+  {
+    return new BinaryLongExpr(left, right, _op);
   }
 
   public Expr bind(FromItem []fromItems)
@@ -144,8 +162,8 @@ class BinaryLongExpr extends Expr {
     BinaryLongExpr expr = (BinaryLongExpr) o;
 
     return (_op == expr._op &&
-	    _left.equals(expr._left) &&
-	    _right.equals(expr._right));
+            _left.equals(expr._left) &&
+            _right.equals(expr._right));
   }
 
   public String toString()

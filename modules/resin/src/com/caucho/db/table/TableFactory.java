@@ -38,9 +38,9 @@ import java.util.ArrayList;
 
 public class TableFactory {
   private static final L10N L = new L10N(TableFactory.class);
-  
+
   private Database _database;
-  
+
   private String _name;
   private Row _row;
 
@@ -66,7 +66,7 @@ public class TableFactory {
   {
     return _row;
   }
-  
+
   /**
    * Creates a table.
    */
@@ -85,14 +85,14 @@ public class TableFactory {
 
     return _row.addColumn(new StringColumn(_row, name, 256));
   }
-  
+
   /**
    * Adds a varchar
    */
   public Column addVarchar(String name, int size)
   {
     _row.allocateColumn();
-    
+
     if (size <= 128)
       return _row.addColumn(new StringColumn(_row, name, size));
     else
@@ -105,7 +105,7 @@ public class TableFactory {
   public Column addVarbinary(String name, int size)
   {
     _row.allocateColumn();
-    
+
     if (size <= 128)
       return _row.addColumn(new VarBinaryColumn(_row, name, size));
     else
@@ -118,7 +118,7 @@ public class TableFactory {
   public Column addBinary(String name, int size)
   {
     _row.allocateColumn();
-    
+
     if (size <= 128)
       return _row.addColumn(new BinaryColumn(_row, name, size));
     else
@@ -131,7 +131,7 @@ public class TableFactory {
   public Column addBlob(String name)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new BlobColumn(_row, name));
   }
 
@@ -141,7 +141,7 @@ public class TableFactory {
   public Column addShort(String name)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new ShortColumn(_row, name));
   }
 
@@ -151,7 +151,7 @@ public class TableFactory {
   public Column addInteger(String name)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new IntColumn(_row, name));
   }
 
@@ -161,7 +161,7 @@ public class TableFactory {
   public Column addLong(String name)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new LongColumn(_row, name));
   }
 
@@ -171,7 +171,7 @@ public class TableFactory {
   public Column addDouble(String name)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new DoubleColumn(_row, name));
   }
 
@@ -181,7 +181,7 @@ public class TableFactory {
   public Column addDateTime(String name)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new DateColumn(_row, name));
   }
 
@@ -191,7 +191,7 @@ public class TableFactory {
   public Column addNumeric(String name, int precision, int scale)
   {
     _row.allocateColumn();
-    
+
     return _row.addColumn(new NumericColumn(_row, name, precision, scale));
   }
 
@@ -261,7 +261,7 @@ public class TableFactory {
     // already checked by unique
     //addConstraint(new UniqueSingleColumnConstraint(column));
   }
-  
+
   /**
    * Sets the named column as auto-increment
    */
@@ -272,7 +272,7 @@ public class TableFactory {
 
     if (column == null)
       throw new SQLException(L.l("'{0}' is not a valid column for auto_increment",
-				 name));
+                                 name));
 
     column.setAutoIncrement(min);
   }
@@ -288,17 +288,17 @@ public class TableFactory {
       setUnique(names.get(0));
       return;
     }
-    
+
     ArrayList<Column> columns = new ArrayList<Column>();
 
     for (int i = 0; i < names.size(); i++) {
       String name = names.get(i);
-      
+
       Column column = _row.getColumn(name);
 
       if (column == null)
-	throw new SQLException(L.l("`{0}' is not a valid column for UNIQUE",
-				   name));
+        throw new SQLException(L.l("`{0}' is not a valid column for UNIQUE",
+                                   name));
     }
 
     Column []columnArray = new Column[columns.size()];
@@ -306,7 +306,7 @@ public class TableFactory {
 
     if (columnArray.length == 1) {
       columnArray[0].setUnique();
-      
+
       //addConstraint(new UniqueSingleColumnConstraint(columnArray[0]));
     }
     else
@@ -323,22 +323,22 @@ public class TableFactory {
       setPrimaryKey(names.get(0));
       return;
     }
-    
+
     ArrayList<Column> columns = new ArrayList<Column>();
 
     for (int i = 0; i < names.size(); i++) {
       String name = names.get(i);
-      
+
       Column column = _row.getColumn(name);
 
       if (column == null)
-	throw new SQLException(L.l("`{0}' is not a valid column for PRIMARY KEY",
-				   name));
+        throw new SQLException(L.l("`{0}' is not a valid column for PRIMARY KEY",
+                                   name));
     }
 
     Column []columnArray = new Column[columns.size()];
     columns.toArray(columnArray);
-    
+
     if (columnArray.length == 1) {
       columnArray[0].setPrimaryKey(true);
       //addConstraint(new PrimaryKeySingleColumnConstraint(columnArray[0]));
@@ -373,7 +373,7 @@ public class TableFactory {
     throws java.sql.SQLException, IOException
   {
     Table table = new Table(_database, _name, _row, getConstraints());
-    
+
     table.create();
   }
 }

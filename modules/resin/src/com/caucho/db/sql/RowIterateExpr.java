@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-class RowIterateExpr extends Expr { 
+class RowIterateExpr extends Expr {
+  static final RowIterateExpr DEFAULT = new RowIterateExpr();
+
   /**
    * Sets the initial row.
    */
@@ -81,18 +83,18 @@ class RowIterateExpr extends Expr {
     throws IOException, SQLException
   {
     context.unlock();
-    
+
     while (rowIter.nextBlock()) {
       context.lock();
 
       rowIter.initRow();
 
       if (rowIter.nextRow())
-	return true;
-      
+        return true;
+
       context.unlock();
     }
-    
+
     return false;
   }
 }

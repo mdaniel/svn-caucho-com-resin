@@ -103,7 +103,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   /**
    * Allocates the block for a query.
    */
-  public boolean allocate()
+  public final boolean allocate()
   {
     int useCount;
 
@@ -137,9 +137,8 @@ abstract public class Block implements SyncCacheListener, CacheListener {
 
     return true;
   }
-  private boolean _isDump;
 
-  boolean allocateDirty()
+  final boolean allocateDirty()
   {
     _useCount.incrementAndGet();
 
@@ -386,7 +385,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   /**
    * Return true if this is a free block.
    */
-  public boolean isFree()
+  public final boolean isFree()
   {
     return _useCount.get() == 0;
   }

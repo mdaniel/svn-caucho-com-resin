@@ -32,7 +32,7 @@ package com.caucho.db.sql;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-class CmpExpr extends Expr {
+class CmpExpr extends AbstractBinaryExpr {
   private Expr _left;
   private Expr _right;
   private int _op;
@@ -42,6 +42,24 @@ class CmpExpr extends Expr {
     _left = left;
     _right = right;
     _op = op;
+  }
+
+  @Override
+  public final Expr getLeft()
+  {
+    return _left;
+  }
+
+  @Override
+  public final Expr getRight()
+  {
+    return _right;
+  }
+
+  @Override
+  public Expr create(Expr left, Expr right)
+  {
+    return new CmpExpr(left, right, _op);
   }
 
   public Expr bind(Query query)
@@ -57,14 +75,32 @@ class CmpExpr extends Expr {
 
     switch (_op) {
     case Parser.LT:
+      if (_left.isNullable() || _right.isNullable())
+        return new DoubleLtExpr(_left, _right);
+      else
+        return new DoubleLtNonNullExpr(_left, _right);
+
     case Parser.LE:
+      if (_left.isNullable() || _right.isNullable()) {
+        return new DoubleLeExpr(_left, _right);
+      }
+      else
+        return new DoubleLeNonNullExpr(_left, _right);
+
     case Parser.GT:
+      return new DoubleGtExpr(_left, _right);
     case Parser.GE:
-      return new DoubleCmpExpr(_op, _left, _right);
+      return new DoubleGeExpr(_left, _right);
     }
 
-    if (_left.isDouble() || _right.isDouble())
-      return new DoubleCmpExpr(_op, _left, _right);
+    if (_left.isDouble() || _right.isDouble()) {
+      switch (_op) {
+      case Parser.EQ:
+        return new DoubleEqExpr(_left, _right);
+      case Parser.NE:
+        return new DoubleNeqExpr(_left, _right);
+      }
+    }
 
     return this;
   }
@@ -93,29 +129,29 @@ class CmpExpr extends Expr {
   {
     if (_left.isNull(context) || _right.isNull(context))
       return UNKNOWN;
-    
+
     switch (_op) {
     case Parser.NE:
       {
-	String leftValue = _left.evalString(context);
-	String rightValue = _right.evalString(context);
+        String leftValue = _left.evalString(context);
+        String rightValue = _right.evalString(context);
 
-	if (! (leftValue == rightValue
-	       || leftValue != null && leftValue.equals(rightValue)))
-	  return TRUE;
-	else
-	  return FALSE;
+        if (! (leftValue == rightValue
+               || leftValue != null && leftValue.equals(rightValue)))
+          return TRUE;
+        else
+          return FALSE;
       }
-    
+
     case Parser.EQ:
       {
-	String leftValue = _left.evalString(context);
-	String rightValue = _right.evalString(context);
-	if (leftValue == rightValue
-	    || leftValue != null && leftValue.equals(rightValue))
-	  return TRUE;
-	else
-	  return FALSE;
+        String leftValue = _left.evalString(context);
+        String rightValue = _right.evalString(context);
+        if (leftValue == rightValue
+            || leftValue != null && leftValue.equals(rightValue))
+          return TRUE;
+        else
+          return FALSE;
       }
 
     default:

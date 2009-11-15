@@ -71,6 +71,9 @@ abstract public class Query {
   private ArrayList<SubSelectParamExpr> _paramExprs
     = new ArrayList<SubSelectParamExpr>();
 
+  private InitRow _initRow;
+  private InitRow[] _initRowArray;
+
   protected Query(Database db, String sql)
   {
     _db = db;
@@ -146,7 +149,7 @@ abstract public class Query {
   public void setLimit(int limit)
   {
   }
-  
+
 
   /**
    * Returns any from items.
@@ -260,10 +263,10 @@ abstract public class Query {
       generateWhere(_whereExpr);
 
       for (int i = 0; i < _whereExprs.length; i++) {
-	Expr expr = _whereExprs[i];
+        Expr expr = _whereExprs[i];
 
-	if (expr != null)
-	  _whereExprs[i] = expr.bind(this);
+        if (expr != null)
+          _whereExprs[i] = expr.bind(this);
       }
     }
     else if (_fromItems != null) {
@@ -278,10 +281,10 @@ abstract public class Query {
     for (int i = 0; i < _indexExprs.length; i++) {
       Expr expr = _indexExprs[i];
 
-      if (expr == null)
-	_indexExprs[i] = new RowIterateExpr();
+      if (expr != null)
+        _indexExprs[i] = (RowIterateExpr) _indexExprs[i].bind(this);
       else
-	_indexExprs[i] = (RowIterateExpr) _indexExprs[i].bind(this);
+        _indexExprs[i] = RowIterateExpr.DEFAULT;
     }
 
     for (int i = 0; i < _paramExprs.size(); i++) {
@@ -290,6 +293,39 @@ abstract public class Query {
       expr = (SubSelectParamExpr) expr.bind(_parent);
       _paramExprs.set(i, expr);
     }
+
+    InitRow initRow;
+    _initRowArray = new InitRow[_indexExprs.length];
+
+    if (_whereExprs[0] != null) {
+      if (_indexExprs[0] == RowIterateExpr.DEFAULT)
+        initRow = new ExprTailNonIndexInitRow(_whereExprs[0]);
+      else
+        initRow = new ExprTailInitRow(_indexExprs[0], _whereExprs[0]);
+    }
+    else {
+      initRow = new TailInitRow(_indexExprs[0]);
+    }
+
+    _initRowArray[0] = initRow;
+
+    for (int i = 1; i < _indexExprs.length; i++) {
+      RowIterateExpr indexExpr = _indexExprs[i];
+
+      if (indexExpr == null)
+        indexExpr = new RowIterateExpr();
+
+      if (_whereExprs[i] != null) {
+        initRow = new ExprNonTailInitRow(i, indexExpr, _whereExprs[i],
+                                         initRow);
+      }
+      else
+        initRow = new NonTailInitRow(i, indexExpr, initRow);
+
+      _initRowArray[i] = initRow;
+    }
+
+    _initRow = initRow;
   }
 
   /**
@@ -316,7 +352,7 @@ abstract public class Query {
     costItems.clear();
     for (int i = fromItems.length; i >= 0; i--) {
       if (i < fromItems.length)
-	costItems.add(fromItems[i]);
+        costItems.add(fromItems[i]);
 
       AndExpr subWhereExpr = null;
       boolean hasExpr = false;
@@ -325,50 +361,50 @@ abstract public class Query {
       long bestCost;
 
       do {
-	bestCost = Long.MAX_VALUE;
+        bestCost = Long.MAX_VALUE;
 
-	for (int j = andProduct.size() - 1; j >= 0; j--) {
-	  Expr subExpr = andProduct.get(j);
+        for (int j = andProduct.size() - 1; j >= 0; j--) {
+          Expr subExpr = andProduct.get(j);
 
-	  long cost = subExpr.cost(costItems);
+          long cost = subExpr.cost(costItems);
 
-	  if (Integer.MAX_VALUE <= cost && i != 0) {
-	  }
-	  else if (cost < bestCost) {
-	    bestCost = cost;
-	    bestIndex = j;
-	  }
-	}
+          if (Integer.MAX_VALUE <= cost && i != 0) {
+          }
+          else if (cost < bestCost) {
+            bestCost = cost;
+            bestIndex = j;
+          }
+        }
 
-	if (bestCost < Long.MAX_VALUE) {
-	  Expr expr = andProduct.remove(bestIndex);
-	  RowIterateExpr indexExpr = null;
+        if (bestCost < Long.MAX_VALUE) {
+          Expr expr = andProduct.remove(bestIndex);
+          RowIterateExpr indexExpr = null;
 
-	  if (i < fromItems.length)
-	    indexExpr = expr.getIndexExpr(fromItems[i]);
+          if (i < fromItems.length)
+            indexExpr = expr.getIndexExpr(fromItems[i]);
 
-	  if (indexExpr != null && indexExprs[i] == null) {
-	    indexExprs[i] = indexExpr;
-	  }
-	  else {
-	    // XXX: check if really need to add
-	    if (subWhereExpr == null)
-	      subWhereExpr = new AndExpr();
+          if (indexExpr != null && indexExprs[i] == null) {
+            indexExprs[i] = indexExpr;
+          }
+          else {
+            // XXX: check if really need to add
+            if (subWhereExpr == null)
+              subWhereExpr = new AndExpr();
 
-	    subWhereExpr.add(expr);
-	  }
-	}
+            subWhereExpr.add(expr);
+          }
+        }
       } while (bestCost < Long.MAX_VALUE);
 
       if (subWhereExpr != null)
-	whereExprs[i] = subWhereExpr.getSingleExpr();
+        whereExprs[i] = subWhereExpr.getSingleExpr();
     }
 
     for (int i = 0; i < whereExprs.length; i++) {
       Expr expr = whereExprs[i];
       /*
       if (expr != null)
-	expr = expr.bind(this);
+        expr = expr.bind(this);
       */
 
       whereExprs[i] = expr;
@@ -380,17 +416,17 @@ abstract public class Query {
       log.finest("where-" + (whereExprs.length - 1) +  ": static " + whereExprs[whereExprs.length - 1]);
 
       for (int i = whereExprs.length - 2; i >= 0; i--) {
-	if (_indexExprs[i] != null)
-	  log.finest("index-" + i + ": " + _fromItems[i]
-		     + " " + _indexExprs[i]);
+        if (_indexExprs[i] != null)
+          log.finest("index-" + i + ": " + _fromItems[i]
+                     + " " + _indexExprs[i]);
 
-	log.finest("where-" + i + ": " + _fromItems[i] + " " + whereExprs[i]);
+        log.finest("where-" + i + ": " + _fromItems[i] + " " + whereExprs[i]);
       }
     }
   }
 
   private void orderFromItems(ArrayList<FromItem> costItems,
-			      ArrayList<Expr> topAndProduct)
+                              ArrayList<Expr> topAndProduct)
   {
     FromItem []fromItems = getFromItems();
 
@@ -400,45 +436,45 @@ abstract public class Query {
       costItems.clear();
 
       for (int j = i + 1; j < fromItems.length; j++)
-	costItems.add(fromItems[j]);
+        costItems.add(fromItems[j]);
 
       int bestIndex = i;
       long bestCost = Expr.COST_INVALID;
 
       loop:
       for (int j = 0; j <= i; j++) {
-	FromItem item = fromItems[j];
+        FromItem item = fromItems[j];
 
-	costItems.add(item);
+        costItems.add(item);
 
-	for (int k = 0; k < fromItems.length; k++) {
-	  if (! fromItems[k].isValid(costItems)) {
-	    costItems.remove(costItems.size() - 1);
-	    continue loop;
-	  }
-	}
+        for (int k = 0; k < fromItems.length; k++) {
+          if (! fromItems[k].isValid(costItems)) {
+            costItems.remove(costItems.size() - 1);
+            continue loop;
+          }
+        }
 
-	long cost = Long.MAX_VALUE;
-	for (int k = 0; k < andProduct.size(); k++) {
-	  Expr expr = andProduct.get(k);
+        long cost = Long.MAX_VALUE;
+        for (int k = 0; k < andProduct.size(); k++) {
+          Expr expr = andProduct.get(k);
 
-	  long subCost = expr.cost(costItems);
+          long subCost = expr.cost(costItems);
 
-	  if (Expr.COST_INVALID <= subCost) {
-	    costItems.remove(costItems.size() - 1);
-	    continue loop;
-	  }
+          if (Expr.COST_INVALID <= subCost) {
+            costItems.remove(costItems.size() - 1);
+            continue loop;
+          }
 
-	  if (subCost < cost)
-	    cost = subCost;
-	}
+          if (subCost < cost)
+            cost = subCost;
+        }
 
-	costItems.remove(costItems.size() - 1);
+        costItems.remove(costItems.size() - 1);
 
-	if (cost < bestCost) {
-	  bestCost = cost;
-	  bestIndex = j;
-	}
+        if (cost < bestCost) {
+          bestCost = cost;
+          bestIndex = j;
+        }
       }
 
       FromItem tempItem = fromItems[i];
@@ -447,13 +483,13 @@ abstract public class Query {
 
       costItems.add(fromItems[i]);
       for (int k = andProduct.size() - 1; k >= 0; k--) {
-	Expr expr = andProduct.get(k);
+        Expr expr = andProduct.get(k);
 
-	long subCost = expr.cost(costItems);
+        long subCost = expr.cost(costItems);
 
-	if (subCost < Expr.COST_NO_TABLE) {
-	  andProduct.remove(k);
-	}
+        if (subCost < Expr.COST_NO_TABLE) {
+          andProduct.remove(k);
+        }
       }
     }
   }
@@ -465,10 +501,10 @@ abstract public class Query {
     cb.append("[");
     for (int i = 0; i < _whereExprs.length; i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       if (_whereExprs[i] != null)
-	cb.append(_whereExprs[i]);
+        cb.append(_whereExprs[i]);
     }
 
     cb.append("]");
@@ -486,59 +522,59 @@ abstract public class Query {
 
     if (tableName == null) {
       if ("resin_oid".equals(columnName))
-	return new OidExpr(fromItems[0].getTable(), 0);
+        return new OidExpr(fromItems[0].getTable(), 0);
 
       for (int i = 0; i < fromItems.length; i++) {
-	Table table = fromItems[i].getTable();
+        Table table = fromItems[i].getTable();
 
-	int columnIndex = table.getColumnIndex(columnName);
+        int columnIndex = table.getColumnIndex(columnName);
 
-	if (columnIndex >= 0) {
-	  Column column = table.getColumn(columnName);
+        if (columnIndex >= 0) {
+          Column column = table.getColumn(columnName);
 
-	  return new IdExpr(fromItems[i], column);
-	}
+          return new IdExpr(fromItems[i], column);
+        }
       }
 
       Expr expr = bindParent(tableName, columnName);
       if (expr != null) {
-	return expr;
+        return expr;
       }
 
       throw new SQLException(L.l("`{0}' is an unknown column.", columnName));
     }
     else {
       for (int i = 0; i < fromItems.length; i++) {
-	if (tableName.equals(fromItems[i].getName())) {
-	  Table table = fromItems[i].getTable();
+        if (tableName.equals(fromItems[i].getName())) {
+          Table table = fromItems[i].getTable();
 
-	  if ("resin_oid".equals(columnName))
-	    return new OidExpr(table, i);
+          if ("resin_oid".equals(columnName))
+            return new OidExpr(table, i);
 
-	  int columnIndex = table.getColumnIndex(columnName);
+          int columnIndex = table.getColumnIndex(columnName);
 
-	  if (columnIndex < 0) {
-	    Expr expr = bindParent(tableName, columnName);
-	    if (expr != null)
-	      return expr;
+          if (columnIndex < 0) {
+            Expr expr = bindParent(tableName, columnName);
+            if (expr != null)
+              return expr;
 
-	    throw new SQLException(L.l("`{0}' is an unknown column in \n  {1}.",
-				       columnName, _sql));
-	  }
+            throw new SQLException(L.l("`{0}' is an unknown column in \n  {1}.",
+                                       columnName, _sql));
+          }
 
-	  Column column = table.getColumn(columnName);
+          Column column = table.getColumn(columnName);
 
-	  return new IdExpr(fromItems[i], column);
-	}
+          return new IdExpr(fromItems[i], column);
+        }
       }
 
       Expr expr = bindParent(tableName, columnName);
       if (expr != null)
-	return expr;
+        return expr;
 
 
       throw new SQLException(L.l("`{0}' is an unknown table.\n{1}",
-				 tableName, getSQL()));
+                                 tableName, getSQL()));
     }
   }
 
@@ -552,12 +588,12 @@ abstract public class Query {
       Expr expr = _parent.bind(tableName, columnName);
 
       if (expr != null) {
-	SubSelectParamExpr paramExpr;
+        SubSelectParamExpr paramExpr;
 
-	paramExpr = new SubSelectParamExpr(this, expr, _paramExprs.size());
-	_paramExprs.add(paramExpr);
+        paramExpr = new SubSelectParamExpr(this, expr, _paramExprs.size());
+        _paramExprs.add(paramExpr);
 
-	return paramExpr;
+        return paramExpr;
       }
     }
 
@@ -580,9 +616,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setBoolean(value);
   }
 
@@ -593,9 +629,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setString(value);
   }
 
@@ -606,9 +642,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setLong(value);
   }
 
@@ -619,9 +655,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setDouble(value);
   }
 
@@ -632,9 +668,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setDate(value);
   }
 
@@ -645,9 +681,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setBinaryStream(is, length);
   }
 
@@ -658,9 +694,9 @@ abstract public class Query {
   {
     if (index < 1 || _params.length < index) {
       throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
-					     this, index, _sql));
+                                             this, index, _sql));
     }
-    
+
     _params[index - 1].setBytes(bytes);
   }
 
@@ -674,7 +710,7 @@ abstract public class Query {
    * Starts the query.
    */
   protected boolean start(TableIterator []rows, int rowLength,
-			  QueryContext queryContext, Transaction xa)
+                          QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     try {
@@ -684,30 +720,30 @@ abstract public class Query {
       if (whereExprs == null || whereExprs[rowLength] == null) {
       }
       else if (! whereExprs[rowLength].isSelect(queryContext)) {
-	return false;
+        return false;
       }
 
       if (rowLength == 0) {
-	return true;
+        return true;
       }
 
       for (int i = rowLength - 1; i >= 0; i--) {
-	TableIterator row = rows[i];
-	RowIterateExpr iterExpr = _indexExprs[i];
+        TableIterator row = rows[i];
+        RowIterateExpr iterExpr = _indexExprs[i];
 
-	if (! iterExpr.init(queryContext, row)) {
-	  return false;
-	}
+        if (! iterExpr.init(queryContext, row)) {
+          return false;
+        }
 
-	// XXX: check to make sure others actually lock this properly
-	//if (! xa.isAutoCommit())
-	//  xa.lockRead(row.getTable().getLock());
+        // XXX: check to make sure others actually lock this properly
+        //if (! xa.isAutoCommit())
+        //  xa.lockRead(row.getTable().getLock());
       }
 
       //System.out.println("IBR:");
 
-      return (initBlockRow(rowLength - 1, rows, queryContext)
-	      || nextBlock(rowLength - 1, rows, rowLength, queryContext));
+      return (_initRow.initBlockRow(rows, queryContext)
+              || nextBlock(rowLength - 1, rows, rowLength, queryContext));
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     }
@@ -717,29 +753,30 @@ abstract public class Query {
    * Returns the next tuple from the query.
    */
   protected boolean nextTuple(TableIterator []rows, int rowLength,
-			      QueryContext queryContext, Transaction xa)
+                              QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     try {
       if (rowLength == 0)
-	return false;
+        return false;
 
       RowIterateExpr []indexExprs = _indexExprs;
       Expr []whereExprs = _whereExprs;
 
       for (int i = 0; i < rowLength; i++) {
-	TableIterator tableIter = rows[i];
-	RowIterateExpr indexExpr = indexExprs[i];
+        TableIterator tableIter = rows[i];
+        RowIterateExpr indexExpr = indexExprs[i];
 
-	Expr whereExpr = whereExprs == null ? null : whereExprs[i];
+        Expr whereExpr = whereExprs == null ? null : whereExprs[i];
 
-	while (indexExpr.nextRow(queryContext, tableIter)) {
-	  if (whereExpr == null || whereExpr.isSelect(queryContext)) {
-	    if (i == 0 || initBlockRow(i - 1, rows, queryContext)) {
-	      return true;
-	    }
-	  }
-	}
+        while (indexExpr.nextRow(queryContext, tableIter)) {
+          if (whereExpr == null || whereExpr.isSelect(queryContext)) {
+            if (i == 0 ||
+                _initRowArray[i - 1].initBlockRow(rows, queryContext)) {
+              return true;
+            }
+          }
+        }
       }
 
       return nextBlock(rowLength - 1, rows, rowLength, queryContext);
@@ -752,63 +789,100 @@ abstract public class Query {
    * Initialize this row and all previous rows within this block group.
    */
   private boolean nextBlock(int i,
-			    TableIterator []rows,
-			    int rowLength,
-			    QueryContext queryContext)
+                            TableIterator []rows,
+                            int rowLength,
+                            QueryContext queryContext)
     throws IOException, SQLException
   {
     TableIterator rowIter = rows[i];
     RowIterateExpr iterExpr = _indexExprs[i];
+    InitRow prevInitRow;
+
+    if (rowLength > 0)
+      prevInitRow = _initRowArray[rowLength - 1];
+    else
+      prevInitRow = null;
 
     while (true) {
       if (i > 0 && nextBlock(i - 1, rows, rowLength, queryContext)) {
-	return true;
+        return true;
       }
 
       if (! iterExpr.nextBlock(queryContext, rowIter)) {
-	return false;
+        return false;
       }
 
       if (! iterExpr.allowChildRowShift(queryContext, rows[i]))
-	return false;
+        return false;
 
       for (int j = i - 1; j >= 0; j--) {
-	if (! iterExpr.init(queryContext, rows[j]))
-	  return false;
+        if (! iterExpr.init(queryContext, rows[j]))
+          return false;
       }
 
-      if (initBlockRow(rowLength - 1, rows, queryContext))
-	return true;
+      if (prevInitRow.initBlockRow(rows, queryContext))
+        return true;
     }
   }
 
   /**
    * Initialize this row and all previous rows within this block group.
    */
-  private boolean initBlockRow(int i,
-			       TableIterator []rows,
-			       QueryContext queryContext)
+  private boolean initBlockRow(final int rowIndex,
+                               final TableIterator []rows,
+                               final QueryContext queryContext)
     throws IOException, SQLException
   {
-    RowIterateExpr iterExpr = _indexExprs[i];
+    final RowIterateExpr iterExpr = _indexExprs[rowIndex];
 
-    Expr []whereExprs = _whereExprs;
-    Expr expr = whereExprs == null ? null : whereExprs[i];
-
-    TableIterator rowIter = rows[i];
+    final TableIterator rowIter = rows[rowIndex];
 
     if (! iterExpr.initRow(queryContext, rowIter)) {
       return false;
     }
 
-    while (expr != null && ! expr.isSelect(queryContext)
-	   || i > 0 && ! initBlockRow(i - 1, rows, queryContext)) {
-      if (! iterExpr.nextRow(queryContext, rowIter)) {
-	return false;
+    final Expr []whereExprs = _whereExprs;
+    final Expr expr = whereExprs == null ? null : whereExprs[rowIndex];
+    final int prevRowIndex = rowIndex - 1;
+
+    if (expr != null) {
+      if (rowIndex <= 0) {
+        // first row with an expression
+        while (true) {
+          if (expr.isSelect(queryContext)) {
+            return true;
+          }
+          else if (! iterExpr.nextRow(queryContext, rowIter)) {
+            return false;
+          }
+        }
+      }
+      else {
+        // n > 1 row with an expression
+
+        while (true) {
+          if (expr.isSelect(queryContext)
+              && initBlockRow(prevRowIndex, rows, queryContext)) {
+            return true;
+          }
+          else if (! iterExpr.nextRow(queryContext, rowIter)) {
+            return false;
+          }
+        }
       }
     }
+    else {
+      // row with no expression
 
-    return true;
+      while (true) {
+        if (rowIndex <= 0 || initBlockRow(prevRowIndex, rows, queryContext)) {
+          return true;
+        }
+        else if (! iterExpr.nextRow(queryContext, rowIter)) {
+          return false;
+        }
+      }
+    }
   }
 
   /**
@@ -818,7 +892,188 @@ abstract public class Query {
   {
     for (rowLength--; rowLength >= 0; rowLength--) {
       if (rows[rowLength] != null)
-	rows[rowLength].free();
+        rows[rowLength].free();
+    }
+  }
+
+  abstract static class InitRow {
+    abstract protected boolean initBlockRow(TableIterator []rows,
+                                            QueryContext queryContext)
+      throws IOException, SQLException;
+  }
+
+  static final class ExprTailInitRow extends InitRow {
+    private final RowIterateExpr _iterExpr;
+    private final Expr _whereExpr;
+
+    ExprTailInitRow(RowIterateExpr iterExpr, Expr whereExpr)
+    {
+      _iterExpr = iterExpr;
+      _whereExpr = whereExpr;
+    }
+
+    @Override
+    protected final boolean initBlockRow(final TableIterator []rows,
+                                         final QueryContext queryContext)
+      throws IOException, SQLException
+    {
+      final TableIterator rowIter = rows[0];
+      final RowIterateExpr iterExpr = _iterExpr;
+
+      if (! iterExpr.initRow(queryContext, rowIter)) {
+        return false;
+      }
+
+      final Expr whereExpr = _whereExpr;
+
+      do {
+        if (whereExpr.isSelect(queryContext)) {
+          return true;
+        }
+      } while (iterExpr.nextRow(queryContext, rowIter));
+
+      return false;
+    }
+  }
+
+  static final class ExprTailNonIndexInitRow extends InitRow {
+    private final Expr _whereExpr;
+
+    ExprTailNonIndexInitRow(Expr whereExpr)
+    {
+      _whereExpr = whereExpr;
+    }
+
+    @Override
+    protected final boolean initBlockRow(final TableIterator []rows,
+                                         final QueryContext queryContext)
+      throws IOException, SQLException
+    {
+      final TableIterator rowIter = rows[0];
+
+      rowIter.initRow();
+
+      if (! rowIter.nextRow()) {
+        return false;
+      }
+
+      final Expr whereExpr = _whereExpr;
+
+      do {
+        if (whereExpr.isSelect(queryContext)) {
+          return true;
+        }
+      } while (rowIter.nextRow());
+
+      return false;
+    }
+  }
+
+  static final class ExprNonTailInitRow extends InitRow {
+    private final InitRow _next;
+    private final RowIterateExpr _iterExpr;
+    private final Expr _whereExpr;
+    private final int _rowIndex;
+
+    ExprNonTailInitRow(int rowIndex,
+                         RowIterateExpr iterExpr,
+                         Expr whereExpr,
+                         InitRow next)
+    {
+      _rowIndex = rowIndex;
+      _iterExpr = iterExpr;
+      _whereExpr = whereExpr;
+      _next = next;
+    }
+
+    @Override
+    protected final boolean initBlockRow(final TableIterator []rows,
+                                         final QueryContext queryContext)
+      throws IOException, SQLException
+    {
+      final TableIterator rowIter = rows[_rowIndex];
+      final RowIterateExpr iterExpr = _iterExpr;
+
+      if (! iterExpr.initRow(queryContext, rowIter)) {
+        return false;
+      }
+
+      final Expr whereExpr = _whereExpr;
+      final InitRow next = _next;
+
+      do {
+        if (whereExpr.isSelect(queryContext)
+            && next.initBlockRow(rows, queryContext)) {
+          return true;
+        }
+      } while (iterExpr.nextRow(queryContext, rowIter));
+
+      return false;
+    }
+  }
+
+  static final class TailInitRow extends InitRow {
+    private final RowIterateExpr _iterExpr;
+
+    TailInitRow(RowIterateExpr iterExpr)
+    {
+      if (iterExpr == null)
+        iterExpr = new RowIterateExpr();
+
+      _iterExpr = iterExpr;
+    }
+
+    @Override
+    protected final boolean initBlockRow(final TableIterator []rows,
+                                         final QueryContext queryContext)
+      throws IOException, SQLException
+    {
+      final TableIterator rowIter = rows[0];
+      final RowIterateExpr iterExpr = _iterExpr;
+
+      if (! iterExpr.initRow(queryContext, rowIter)) {
+        return false;
+      }
+
+      return true;
+    }
+  }
+
+  static final class NonTailInitRow extends InitRow {
+    private final InitRow _next;
+    private final RowIterateExpr _iterExpr;
+    private final int _rowIndex;
+
+    NonTailInitRow(int rowIndex,
+                     RowIterateExpr iterExpr,
+                     InitRow next)
+    {
+      _rowIndex = rowIndex;
+      _iterExpr = iterExpr;
+      _next = next;
+    }
+
+    @Override
+    protected final boolean initBlockRow(final TableIterator []rows,
+                                         final QueryContext queryContext)
+      throws IOException, SQLException
+    {
+      final TableIterator rowIter = rows[_rowIndex];
+      final RowIterateExpr iterExpr = _iterExpr;
+
+      if (! iterExpr.initRow(queryContext, rowIter)) {
+        return false;
+      }
+
+      final InitRow next = _next;
+
+      do {
+        if (next.initBlockRow(rows, queryContext)) {
+          return true;
+        }
+      } while (iterExpr.nextRow(queryContext, rowIter));
+
+      return false;
     }
   }
 }
