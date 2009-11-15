@@ -43,12 +43,12 @@ import java.io.*;
  */
 public class WebSocketOutputStream extends OutputStream {
   private static final L10N L = new L10N(WebSocketOutputStream.class);
-  
+
   private OutputStream _os;
   private TempBuffer _tBuf;
   private byte []_buffer;
   private int _offset;
-  
+
   public WebSocketOutputStream()
   {
   }
@@ -107,7 +107,7 @@ public class WebSocketOutputStream extends OutputStream {
     }
   }
 
-  public void flush()
+  public void complete()
     throws IOException
   {
     byte []buffer = _buffer;
@@ -131,11 +131,19 @@ public class WebSocketOutputStream extends OutputStream {
     _os.write(buffer, 0, offset);
   }
 
+  public void flush()
+    throws IOException
+  {
+    complete();
+
+    _os.flush();
+  }
+
   public void close()
     throws IOException
   {
     flush();
-    
+
     OutputStream os = _os;
     _os = null;
 

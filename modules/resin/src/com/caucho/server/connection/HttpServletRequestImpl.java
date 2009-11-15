@@ -53,6 +53,7 @@ import com.caucho.vfs.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -2078,6 +2079,12 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     TcpDuplexController controller = _request.startDuplex(duplex);
     duplex.setController(controller);
 
+    try {
+      duplex.onStart();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     return duplex;
   }
 
@@ -2474,19 +2481,27 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       return _controller.getIdleTimeMax();
     }
 
-    public ServletRequest getRequest()
+    public InputStream getInputStream()
+      throws IOException
     {
-      return _request;
+      return _request.getInputStream();
     }
 
-    public ServletResponse getResponse()
+    public OutputStream getOutputStream()
+      throws IOException
     {
-      return _response;
+      return _response.getOutputStream();
     }
 
     public void complete()
     {
       _controller.complete();
+    }
+
+    void onStart()
+      throws IOException
+    {
+      _listener.onStart(this);
     }
 
     public void onRead(TcpDuplexController duplex)

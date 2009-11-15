@@ -32,6 +32,10 @@ package com.caucho.servlet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
@@ -43,14 +47,16 @@ import javax.servlet.ServletResponse;
  */
 public interface WebSocketContext {
   /**
-   * Returns the original servlet request.
+   * Returns the input stream
    */
-  public ServletRequest getRequest();
-  
+  public InputStream getInputStream()
+    throws IOException;
+
   /**
-   * Returns the original servlet response.
+   * Returns the output stream.
    */
-  public ServletResponse getResponse();
+  public OutputStream getOutputStream()
+    throws IOException;
 
   /**
    * Sets the read timeout.
@@ -61,7 +67,7 @@ public interface WebSocketContext {
    * Gets the read timeout.
    */
   public long getTimeout();
-  
+
   /**
    * Complete and close the connection.
    */

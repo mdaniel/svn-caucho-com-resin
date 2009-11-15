@@ -35,24 +35,30 @@ import java.io.IOException;
  * Application handler for a WebSocket tcp stream
  *
  * The read stream should only be read by the <code>onRead</code> thread.
- * 
+ *
  * The write stream must be synchronized if it's every written by a thread
  * other than the <code>serviceRead</code>
  */
 public interface WebSocketListener
 {
   /**
+   * Called when the connection is established
+   */
+  public void onStart(WebSocketContext context)
+    throws IOException;
+
+  /**
    * Called when read data is available
    */
   public void onRead(WebSocketContext context)
     throws IOException;
-  
+
   /**
    * Called when the connection closes
    */
   public void onComplete(WebSocketContext context)
     throws IOException;
-  
+
   /**
    * Called when the connection times out
    */
