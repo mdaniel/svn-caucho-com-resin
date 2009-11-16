@@ -571,16 +571,16 @@ public class ConnectionPool extends AbstractManagedObject
 
     if (_name == null) {
       synchronized (_idGen) {
-	Integer v = _idGen.get();
-	
-	if (v == null)
-	  v = 1;
-	else
-	  v += 1;
-	
-	_idGen.set(v);
-	
-	_name = mcf.getClass().getSimpleName() + "-" + v;
+        Integer v = _idGen.get();
+
+        if (v == null)
+          v = 1;
+        else
+          v += 1;
+
+        _idGen.set(v);
+
+        _name = mcf.getClass().getSimpleName() + "-" + v;
       }
     }
 
@@ -592,7 +592,7 @@ public class ConnectionPool extends AbstractManagedObject
     _connectionTime = ProbeManager.createActiveTimeProbe("Resin|Database|Connection");
     _idleTime = ProbeManager.createActiveTimeProbe("Resin|Database|Idle");
     _activeTime = ProbeManager.createActiveTimeProbe("Resin|Database|Active");
-    
+
     registerSelf();
 
     _alarm = new WeakAlarm(this);
@@ -689,7 +689,7 @@ public class ConnectionPool extends AbstractManagedObject
 
       if (transaction != null)
         userPoolItem = transaction.allocate(mcf, subject, info);
-      
+
       if (userPoolItem == null)
         userPoolItem = allocatePool(mcf, subject, info, null);
 
@@ -740,8 +740,8 @@ public class ConnectionPool extends AbstractManagedObject
 
     synchronized (this) {
       if (resin != null && _threadDumpExpire < Alarm.getCurrentTime()) {
-	_threadDumpExpire = Alarm.getCurrentTime() + 600 * 1000L;
-	resin.dumpThreads();
+        _threadDumpExpire = Alarm.getCurrentTime() + 600 * 1000L;
+        resin.dumpThreads();
       }
     }
 
@@ -780,7 +780,7 @@ public class ConnectionPool extends AbstractManagedObject
       }
 
       PoolItem poolItem = null;
-      
+
       // asks the Driver's ManagedConnectionFactory to match an
       // idle connection
       synchronized (_pool) {
@@ -803,7 +803,7 @@ public class ConnectionPool extends AbstractManagedObject
         // Ensure the connection is still valid
         UserPoolItem userPoolItem;
         userPoolItem = poolItem.toActive(subject, info, oldUserItem);
-        
+
         if (userPoolItem != null) {
           poolItem = null;
           return userPoolItem;
@@ -856,7 +856,7 @@ public class ConnectionPool extends AbstractManagedObject
   {
     boolean isValid = false;
     PoolItem poolItem = null;
-    
+
     if (! startCreate(isOverflow, expireTime))
       return null;
 
@@ -875,14 +875,14 @@ public class ConnectionPool extends AbstractManagedObject
       userPoolItem = poolItem.toActive(subject, info, oldUserItem);
       if (userPoolItem != null) {
         _connectionCreateCountTotal.incrementAndGet();
-        
+
         synchronized (_pool) {
           _pool.add(poolItem);
         }
 
         poolItem = null;
         isValid = true;
-	
+
         return userPoolItem;
       }
 
@@ -917,24 +917,24 @@ public class ConnectionPool extends AbstractManagedObject
       int size = _pool.size();
 
       if (isOverflow
-	  && _maxConnections + _maxOverflowConnections <= _createCount + size) {
+          && _maxConnections + _maxOverflowConnections <= _createCount + size) {
         throw new ResourceException(L.l("Can't allocate connection because pool is full.\n  max-connections={0}, max-overflow-connections={1}, create-count={2}, pool-size={3}.",
                                         _maxConnections,
                                         _maxOverflowConnections,
                                         _createCount,
                                         size));
-                                        
+
       }
       // if the pool is full, don't create, and wait
       else if (! isOverflow
-	       && (_maxConnections <= _createCount + size
-		   || _maxCreateConnections <= _createCount)) {
+               && (_maxConnections <= _createCount + size
+                   || _maxCreateConnections <= _createCount)) {
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " pool wait size=" + size
                    + " create-count=" + _createCount);
         }
-        
+
         try {
           long now = Alarm.getCurrentTime();
 
@@ -953,7 +953,7 @@ public class ConnectionPool extends AbstractManagedObject
     }
   }
 
-  
+
   /*
    * Removes a connection from the pool.
    */
@@ -962,7 +962,7 @@ public class ConnectionPool extends AbstractManagedObject
     synchronized (_pool) {
       for (int i = _pool.size() - 1; i >= 0; i--) {
         PoolItem poolItem = _pool.get(i);
-        
+
         if (poolItem.getManagedConnection() == mConn) {
           poolItem.setConnectionError();
           return;
@@ -979,12 +979,12 @@ public class ConnectionPool extends AbstractManagedObject
     try {
       if (_maxConnections <= _pool.size() || item.isConnectionError())
         return;
-      
+
       ManagedConnection mConn = item.getManagedConnection();
-        
+
       if (mConn == null)
         return;
-      
+
       mConn.cleanup();
 
       synchronized (_pool) {
@@ -1008,7 +1008,7 @@ public class ConnectionPool extends AbstractManagedObject
     } finally {
       if (item != null)
         item.destroy();
-      
+
       synchronized (_pool) {
         _pool.notifyAll();
       }
@@ -1043,7 +1043,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     if (pool == null)
       return;
-    
+
     ArrayList<PoolItem> clearItems = new ArrayList<PoolItem>();
 
     synchronized (_pool) {
@@ -1053,14 +1053,14 @@ public class ConnectionPool extends AbstractManagedObject
 
       pool.clear();
     }
-    
+
     for (int i = 0; i < clearItems.size(); i++) {
       PoolItem poolItem = clearItems.get(i);
 
       try {
-	poolItem.destroy();
+        poolItem.destroy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -1124,23 +1124,24 @@ public class ConnectionPool extends AbstractManagedObject
     if (! _lifecycle.toDestroy())
       return;
 
-    ArrayList<PoolItem> pool = _pool;
+    ArrayList<PoolItem> pool;
 
-    synchronized (pool) {
-      for (int i = 0; i < pool.size(); i++) {
-        PoolItem poolItem = pool.get(i);
-
-        try {
-          poolItem.destroy();
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-
-      pool.clear();
+    synchronized (_pool) {
+      pool = new ArrayList<PoolItem>(_pool);
+      _pool.clear();
 
       if (_idlePool != null)
-	_idlePool.clear();
+        _idlePool.clear();
+    }
+
+    for (int i = 0; i < pool.size(); i++) {
+      PoolItem poolItem = pool.get(i);
+
+      try {
+        poolItem.destroy();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
     }
   }
 
