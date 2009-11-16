@@ -181,6 +181,8 @@ public class JmtpWriter implements ActorStream
         os.write('\n');
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -229,6 +231,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -273,6 +277,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -317,6 +323,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -366,6 +374,8 @@ public class JmtpWriter implements ActorStream
         os.write('\n');
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -406,6 +416,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -441,6 +453,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -476,6 +490,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -512,6 +528,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -548,6 +566,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -584,6 +604,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -620,6 +642,8 @@ public class JmtpWriter implements ActorStream
         out.flushBuffer();
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
@@ -660,6 +684,8 @@ public class JmtpWriter implements ActorStream
         os.write('\n');
 
         os.write(0xff);
+
+        os.flush();
       }
     } catch (IOException e) {
       close();
