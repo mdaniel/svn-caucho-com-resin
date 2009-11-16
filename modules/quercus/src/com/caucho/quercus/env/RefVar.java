@@ -87,7 +87,7 @@ public class RefVar extends Value
   {
     return _var.isNumberConvertible();
   }
-  
+
   /**
    * Returns true for a long-value.
    */
@@ -95,7 +95,7 @@ public class RefVar extends Value
   {
     return _var.isLong();
   }
-  
+
   /**
    * Returns true for a long-value.
    */
@@ -211,8 +211,9 @@ public class RefVar extends Value
   @Override
   public Value toArgValue()
   {
-    // php/0471
-    return _var;
+    Thread.dumpStack();
+    // php/0471, php/3d4a
+    return _var.toArgValue();
   }
 
   /**
@@ -277,7 +278,7 @@ public class RefVar extends Value
   {
     return _var.toInputStream();
   }
-  
+
   /**
    * Negates the value.
    */
@@ -349,7 +350,7 @@ public class RefVar extends Value
   {
     return _var.sub(rValue);
   }
-  
+
   /**
    * Multiplies to the following value.
    */
@@ -394,7 +395,7 @@ public class RefVar extends Value
   {
     return _var.rshift(rValue);
   }
-  
+
   /**
    * Absolute value.
    */
@@ -542,7 +543,7 @@ public class RefVar extends Value
    */
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen,
-			  Value a0, Value a1, Value a2)
+                          Value a0, Value a1, Value a2)
   {
     return _var.callMethod(env, hash, name, nameLen,
                            a0, a1, a2);
@@ -553,7 +554,7 @@ public class RefVar extends Value
    */
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen,
-			  Value a0, Value a1, Value a2, Value a3)
+                          Value a0, Value a1, Value a2, Value a3)
   {
     return _var.callMethod(env, hash, name, nameLen,
                            a0, a1, a2, a3);
@@ -564,7 +565,7 @@ public class RefVar extends Value
    */
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen,
-			  Value a0, Value a1, Value a2, Value a3, Value a4)
+                          Value a0, Value a1, Value a2, Value a3, Value a4)
   {
     return _var.callMethod(env, hash, name, nameLen,
                            a0, a1, a2, a3, a4);
@@ -673,10 +674,10 @@ public class RefVar extends Value
   {
     _var.serialize(env, sb);
   }
-  
+
   /*
    * Serializes the value.
-   * 
+   *
    * @param sb holds result of serialization
    * @param serializeMap holds reference indexes
    */
@@ -684,7 +685,7 @@ public class RefVar extends Value
   {
     _var.serialize(env, sb, serializeMap);
   }
-  
+
   /**
    * Prints the value.
    * @param env
@@ -715,7 +716,7 @@ public class RefVar extends Value
   {
     toValue().printRImpl(env, out, depth, valueSet);
   }
-  
+
   //
   // Java Serialization
   //

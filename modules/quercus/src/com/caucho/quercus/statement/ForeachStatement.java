@@ -54,7 +54,7 @@ public class ForeachStatement
   protected final boolean _isRef;
 
   protected final Statement _block;
-  
+
   protected final String _label;
 
   public ForeachStatement(Location location,
@@ -75,7 +75,7 @@ public class ForeachStatement
 
     _block = block;
     _label = label;
-    
+
     block.setParent(this);
   }
 
@@ -106,18 +106,18 @@ public class ForeachStatement
         }
         else if (result instanceof ContinueValue) {
           ContinueValue conValue = (ContinueValue) result;
-          
+
           int target = conValue.getTarget();
-          
+
           if (target > 1) {
             return new ContinueValue(target - 1);
           }
         }
         else if (result instanceof BreakValue) {
           BreakValue breakValue = (BreakValue) result;
-          
+
           int target = breakValue.getTarget();
-          
+
           if (target > 1)
             return new BreakValue(target - 1);
           else
@@ -147,18 +147,18 @@ public class ForeachStatement
         }
         else if (result instanceof ContinueValue) {
           ContinueValue conValue = (ContinueValue) result;
-          
+
           int target = conValue.getTarget();
-          
+
           if (target > 1) {
             return new ContinueValue(target - 1);
           }
         }
         else if (result instanceof BreakValue) {
           BreakValue breakValue = (BreakValue) result;
-          
+
           int target = breakValue.getTarget();
-          
+
           if (target > 1)
             return new BreakValue(target - 1);
           else
@@ -188,18 +188,18 @@ public class ForeachStatement
         }
         else if (result instanceof ContinueValue) {
           ContinueValue conValue = (ContinueValue) result;
-          
+
           int target = conValue.getTarget();
-          
+
           if (target > 1) {
             return new ContinueValue(target - 1);
           }
         }
         else if (result instanceof BreakValue) {
           BreakValue breakValue = (BreakValue) result;
-          
+
           int target = breakValue.getTarget();
-          
+
           if (target > 1)
             return new BreakValue(target - 1);
           else

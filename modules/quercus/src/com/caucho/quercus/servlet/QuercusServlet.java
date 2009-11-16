@@ -379,8 +379,12 @@ public class QuercusServlet
     for (PhpIni ini : _phpIniList) {
       String value = ini._propertyMap.get("unicode.semantics");
 
-      if (value != null && ! value.equals("0") && ! value.equals("false"))
+      if (value != null
+          && ! value.equals("0")
+          && ! value.equals("false")
+          && ! value.equals("off")) {
         return true;
+      }
     }
 
     return false;

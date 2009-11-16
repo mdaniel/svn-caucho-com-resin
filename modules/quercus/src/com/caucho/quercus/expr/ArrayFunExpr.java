@@ -45,11 +45,11 @@ public class ArrayFunExpr extends Expr {
   protected final Expr []_values;
 
   public ArrayFunExpr(Location location,
-		      ArrayList<Expr> keyList,
-		      ArrayList<Expr> valueList)
+                      ArrayList<Expr> keyList,
+                      ArrayList<Expr> valueList)
   {
     super(location);
-    
+
     _keys = new Expr[keyList.size()];
     keyList.toArray(_keys);
 
@@ -73,7 +73,7 @@ public class ArrayFunExpr extends Expr {
   {
     this(Location.UNKNOWN, keys, values);
   }
-  
+
   /**
    * Returns true if the expression evaluates to an array.
    */
@@ -113,9 +113,10 @@ public class ArrayFunExpr extends Expr {
 
     for (int i = 0; i < _values.length; i++) {
       Expr keyExpr = _keys[i];
-      
+
       Value value = _values[i].evalArg(env, true);
-      value = value.toArgValue();
+      // php/0471
+      value = value.toRefValue();
 
       if (keyExpr != null) {
         Value key = keyExpr.evalArg(env, true).toArgValue();
