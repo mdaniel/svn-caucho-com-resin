@@ -103,7 +103,7 @@ public class SimpleActorStream implements ActorStream
   {
     _client = client;
   }
-  
+
   /**
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
@@ -112,7 +112,16 @@ public class SimpleActorStream implements ActorStream
   {
     return _brokerStream;
   }
-  
+
+  /**
+   * Returns the stream to the broker for query results or errors, or
+   * low-level messaging.
+   */
+  public ActorStream getLinkStream()
+  {
+    return _brokerStream;
+  }
+
   /**
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
@@ -125,7 +134,7 @@ public class SimpleActorStream implements ActorStream
   //
   // message
   //
-  
+
   /**
    * Dispatches a unidirectional message to a matching method on
    * the SimpleActorStream.
@@ -135,18 +144,18 @@ public class SimpleActorStream implements ActorStream
    * a payload class matching the message payload.
    *
    * If no method is found, the message is ignored.
-   * 
+   *
    * @param to the SimpleActorStream's JID
    * @param from the sending actor's JID
    * @param payload the message payload
    */
   public void message(String to,
-		      String from,
-		      Serializable payload)
+                      String from,
+                      Serializable payload)
   {
     _skeleton.message(this, to, from, payload);
   }
-  
+
   /**
    * Dispatches a messageError to a matching method on
    * the SimpleActorStream.
@@ -156,16 +165,16 @@ public class SimpleActorStream implements ActorStream
    * a payload class matching the messageError payload.
    *
    * If no method is found, the messageError is ignored.
-   * 
+   *
    * @param to the SimpleActorStream's JID
    * @param from the sending actor's JID
    * @param payload the message payload
    * @param error the message error
    */
   public void messageError(String to,
-			   String from,
-			   Serializable payload,
-			   ActorError error)
+                           String from,
+                           Serializable payload,
+                           ActorError error)
   {
     _skeleton.messageError(this, to, from, payload, error);
   }
@@ -173,7 +182,7 @@ public class SimpleActorStream implements ActorStream
   //
   // RPC query
   //
-  
+
   /**
    * Dispatches a queryGet to a matching method on
    * the SimpleActorStream.
@@ -187,20 +196,20 @@ public class SimpleActorStream implements ActorStream
    *
    * If no method is found, queryGet sends a queryError response with
    * a feature-not-implemented error.
-   * 
+   *
    * @param id a correlation id to match the result or error
    * @param to the SimpleActorStream's JID
    * @param from the client actor's JID
    * @param payload the query payload
    */
   public void queryGet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     _skeleton.queryGet(this, id, to, from, payload);
   }
-  
+
   /**
    * Dispatches a querySet to a matching method on
    * the SimpleActorStream.
@@ -214,20 +223,20 @@ public class SimpleActorStream implements ActorStream
    *
    * If no method is found, querySet sends a queryError response with
    * a feature-not-implemented error.
-   * 
+   *
    * @param id a correlation id to match the result or error
    * @param to the SimpleActorStream's JID
    * @param from the client actor's JID
    * @param payload the query payload
    */
   public void querySet(long id,
-		       String to,
-		       String from,
-		       Serializable payload)
+                       String to,
+                       String from,
+                       Serializable payload)
   {
     _skeleton.querySet(this, id, to, from, payload);
   }
-  
+
   /**
    * Dispatches a queryResult to a matching method on
    * the SimpleActorStream.
@@ -237,26 +246,26 @@ public class SimpleActorStream implements ActorStream
    * a payload class matching the queryResult payload.
    *
    * If no method is found, queryResult ignores the packet.
-   * 
+   *
    * @param id the correlation id from the original query
    * @param to the SimpleActorStream's JID
    * @param from the client actor's JID
    * @param payload the query payload
    */
   public void queryResult(long id,
-			  String to,
-			  String from,
-			  Serializable payload)
+                          String to,
+                          String from,
+                          Serializable payload)
   {
     ActorClient client = _client;
 
     if (client != null && client.onQueryResult(id, to, from, payload)) {
       return;
     }
-    
+
     _skeleton.queryResult(this, id, to, from, payload);
   }
-  
+
   /**
    * Dispatches a queryError to a matching method on
    * the SimpleActorStream.
@@ -274,24 +283,24 @@ public class SimpleActorStream implements ActorStream
    * @param error the error information
    */
   public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable payload,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable payload,
+                         ActorError error)
   {
     ActorClient client = _client;
 
     if (client != null && client.onQueryError(id, to, from, payload, error)) {
       return;
     }
-    
+
     _skeleton.queryError(this, id, to, from, payload, error);
   }
 
   //
   // presence
   //
-  
+
   /**
    * Dispatches a presence notification to a matching method on
    * the SimpleActorStream.  Presence is a notification from
@@ -309,8 +318,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presence(String to,
-		       String from,
-		       Serializable presence)
+                       String from,
+                       Serializable presence)
   {
     _skeleton.presence(this, to, from, presence);
   }
@@ -332,8 +341,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presenceUnavailable(String to,
-				  String from,
-				  Serializable payload)
+                                  String from,
+                                  Serializable payload)
   {
     _skeleton.presenceUnavailable(this, to, from, payload);
   }
@@ -356,8 +365,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presenceProbe(String to,
-			    String from,
-			    Serializable payload)
+                            String from,
+                            Serializable payload)
   {
     _skeleton.presenceProbe(this, to, from, payload);
   }
@@ -380,8 +389,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presenceSubscribe(String to,
-				String from,
-				Serializable payload)
+                                String from,
+                                Serializable payload)
   {
     _skeleton.presenceSubscribe(this, to, from, payload);
   }
@@ -404,8 +413,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presenceSubscribed(String to,
-				 String from,
-				 Serializable payload)
+                                 String from,
+                                 Serializable payload)
   {
     _skeleton.presenceSubscribed(this, to, from, payload);
   }
@@ -429,8 +438,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presenceUnsubscribe(String to,
-				  String from,
-				  Serializable payload)
+                                  String from,
+                                  Serializable payload)
   {
     _skeleton.presenceUnsubscribe(this, to, from, payload);
   }
@@ -453,8 +462,8 @@ public class SimpleActorStream implements ActorStream
    * @param payload the presence payload
    */
   public void presenceUnsubscribed(String to,
-				   String from,
-				   Serializable payload)
+                                   String from,
+                                   Serializable payload)
   {
     _skeleton.presenceUnsubscribed(this, to, from, payload);
   }
@@ -477,9 +486,9 @@ public class SimpleActorStream implements ActorStream
    * @param error the error information
    */
   public void presenceError(String to,
-			    String from,
-			    Serializable payload,
-			    ActorError error)
+                            String from,
+                            Serializable payload,
+                            ActorError error)
   {
     _skeleton.presenceError(this, to, from, payload, error);
   }
