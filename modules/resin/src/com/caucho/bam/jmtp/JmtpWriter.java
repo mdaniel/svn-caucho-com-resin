@@ -50,7 +50,7 @@ public class JmtpWriter implements ActorStream
     = Logger.getLogger(JmtpWriter.class.getName());
 
   private String _jid;
-  
+
   private OutputStream _os;
   private JsonOutput _out;
 
@@ -66,10 +66,10 @@ public class JmtpWriter implements ActorStream
   public void init(OutputStream os)
   {
     _os = os;
-      
+
     _out = new JsonOutput(_os);
   }
-  
+
   /**
    * The jid of the stream
    */
@@ -77,7 +77,7 @@ public class JmtpWriter implements ActorStream
   {
     return _jid;
   }
-  
+
   /**
    * The jid of the stream
    */
@@ -108,30 +108,30 @@ public class JmtpWriter implements ActorStream
       JsonOutput out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " message " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " message " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
         os.write(0x00);
-	writeString(os, "message\n");
-	writeString(os, to);
+        writeString(os, "message\n");
+        writeString(os, to);
         os.write('\n');
-	writeString(os, from);
+        writeString(os, from);
         os.write('\n');
 
         writeType(os, value);
-        
-	out.writeObject(value);
+
+        out.writeObject(value);
         out.flushBuffer();
-        
+
         os.write(0xff);
 
-	os.flush();
+        os.flush();
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -148,19 +148,19 @@ public class JmtpWriter implements ActorStream
    * </pre></code>
    */
   public void messageError(String to,
-			   String from,
-			   Serializable value,
-			   ActorError error)
+                           String from,
+                           Serializable value,
+                           ActorError error)
   {
     try {
       OutputStream os = _os;
       JsonOutput out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " messageError " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " messageError " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
         os.write(0x00);
         writeString(os, "message_error\n");
@@ -184,7 +184,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -197,19 +197,19 @@ public class JmtpWriter implements ActorStream
    * Low-level query get
    */
   public void queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     try {
       OutputStream os = _os;
       JsonOutput out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryGet " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryGet " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
         os.write(0x00);
         writeString(os, "get\n");
@@ -220,10 +220,10 @@ public class JmtpWriter implements ActorStream
         writeString(os, from);
         os.write('\n');
 
+        writeType(os, value);
+
         writeString(os, String.valueOf(id));
         os.write('\n');
-
-        writeType(os, value);
 
         out.writeObject(value);
         out.flushBuffer();
@@ -232,7 +232,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -241,19 +241,19 @@ public class JmtpWriter implements ActorStream
    * Low-level query set
    */
   public void querySet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     try {
       OutputStream os = _os;
       JsonOutput out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " querySet " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " querySet " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
         os.write(0x00);
         writeString(os, "set\n");
@@ -264,10 +264,10 @@ public class JmtpWriter implements ActorStream
         writeString(os, from);
         os.write('\n');
 
+        writeType(os, value);
+
         writeString(os, String.valueOf(id));
         os.write('\n');
-
-        writeType(os, value);
 
         out.writeObject(value);
         out.flushBuffer();
@@ -276,7 +276,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -285,19 +285,19 @@ public class JmtpWriter implements ActorStream
    * Low-level query response
    */
   public void queryResult(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                              String to,
+                              String from,
+                              Serializable value)
   {
     try {
       OutputStream os = _os;
       JsonOutput out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryResult " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryResult " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
         os.write(0x00);
         writeString(os, "result\n");
@@ -308,10 +308,10 @@ public class JmtpWriter implements ActorStream
         writeString(os, from);
         os.write('\n');
 
+        writeType(os, value);
+
         writeString(os, String.valueOf(id));
         os.write('\n');
-
-        writeType(os, value);
 
         out.writeObject(value);
         out.flushBuffer();
@@ -320,7 +320,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -329,20 +329,20 @@ public class JmtpWriter implements ActorStream
    * Low-level query error
    */
   public void queryError(long id,
-			 String to,
-			 String from, 
-			 Serializable value,
-			 ActorError error)
+                         String to,
+                         String from,
+                         Serializable value,
+                         ActorError error)
   {
     try {
       OutputStream os = _os;
       JsonOutput out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryError " + error + " " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryError " + error + " " + value
+                    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+        }
 
         os.write(0x00);
         writeString(os, "query_error\n");
@@ -353,10 +353,10 @@ public class JmtpWriter implements ActorStream
         writeString(os, from);
         os.write('\n');
 
+        writeType(os, value);
+
         writeString(os, String.valueOf(id));
         os.write('\n');
-
-        writeType(os, value);
 
         out.writeObject(value);
         out.flushBuffer();
@@ -369,7 +369,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new RuntimeException(e);
     }
   }
@@ -382,8 +382,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence packet to the server
    */
   public void presence(String to,
-		       String from,
-		       Serializable value)
+                       String from,
+                       Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -409,7 +409,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -418,8 +418,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence packet to the server
    */
   public void presenceUnavailable(String to,
-				  String from,
-				  Serializable value)
+                                  String from,
+                                  Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -444,7 +444,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -453,8 +453,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence probe packet to the server
    */
   public void presenceProbe(String to,
-			    String from,
-			    Serializable value)
+                            String from,
+                            Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -479,7 +479,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -488,8 +488,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence subscribe packet to the server
    */
   public void presenceSubscribe(String to,
-				String from,
-				Serializable value)
+                                String from,
+                                Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -515,7 +515,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -524,8 +524,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence subscribed packet to the server
    */
   public void presenceSubscribed(String to,
-				 String from,
-				 Serializable value)
+                                 String from,
+                                 Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -551,7 +551,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -560,8 +560,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence subscribe packet to the server
    */
   public void presenceUnsubscribe(String to,
-				  String from,
-				  Serializable value)
+                                  String from,
+                                  Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -587,7 +587,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -596,8 +596,8 @@ public class JmtpWriter implements ActorStream
    * Sends a presence subscribed packet to the server
    */
   public void presenceUnsubscribed(String to,
-				   String from,
-				   Serializable value)
+                                   String from,
+                                   Serializable value)
   {
     try {
       OutputStream os = _os;
@@ -623,7 +623,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -632,9 +632,9 @@ public class JmtpWriter implements ActorStream
    * Sends a presence error packet to the server
    */
   public void presenceError(String to,
-			    String from,
-			    Serializable value,
-			    ActorError error)
+                            String from,
+                            Serializable value,
+                            ActorError error)
   {
     try {
       OutputStream os = _os;
@@ -663,7 +663,7 @@ public class JmtpWriter implements ActorStream
       }
     } catch (IOException e) {
       close();
-      
+
       throw new ProtocolException(e);
     }
   }
@@ -715,13 +715,13 @@ public class JmtpWriter implements ActorStream
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " close");
-    
+
     try {
       JsonOutput out = _out;
       _out = null;
 
       if (out != null)
-	out.close();
+        out.close();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

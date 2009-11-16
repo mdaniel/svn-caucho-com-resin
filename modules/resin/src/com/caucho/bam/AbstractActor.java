@@ -43,7 +43,7 @@ abstract public class AbstractActor implements Actor
 
   private ActorStream _actorStream;
   private ActorStream _brokerStream;
-  
+
   private String _jid;
 
   /**
@@ -68,18 +68,23 @@ abstract public class AbstractActor implements Actor
    * The stream to the Broker is used by the Actor to send messages to
    * all other Actors in the system.
    */
-  public ActorStream getBrokerStream()
+  public ActorStream getLinkStream()
   {
     return _brokerStream;
+  }
+
+  public ActorStream getBrokerStream()
+  {
+    return getLinkStream();
   }
 
   /**
    * The stream to the Broker is used by the Actor to send messages to
    * all other Actors in the system.
    */
-  public void setBrokerStream(ActorStream brokerStream)
+  public void setBrokerStream(ActorStream linkStream)
   {
-    _brokerStream = brokerStream;
+    _brokerStream = linkStream;
   }
 
   /**
@@ -114,7 +119,7 @@ abstract public class AbstractActor implements Actor
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " startChild(" + jid + ")");
-    
+
     return false;
   }
 
@@ -123,14 +128,14 @@ abstract public class AbstractActor implements Actor
    *
    * Examples of Actor children are IM login resources, e.g.
    * harry@caucho.com/browser is a child of harry@caucho.com.
-   * 
+   *
    * @jid the jid of the child actor logging in.
    */
   public boolean stopChild(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " stopChild(" + jid + ")");
-    
+
     return false;
   }
 
@@ -139,7 +144,7 @@ abstract public class AbstractActor implements Actor
    *
    * Examples of Actor children are IM login resources, e.g.
    * harry@caucho.com/browser is a child of harry@caucho.com.
-   * 
+   *
    * @jid the jid of the child actor logging in.
    */
   public void onChildStart(String jid)
@@ -153,7 +158,7 @@ abstract public class AbstractActor implements Actor
    *
    * Examples of Actor children are IM login resources, e.g.
    * harry@caucho.com/browser is a child of harry@caucho.com.
-   * 
+   *
    * @jid the jid of the child actor logging in.
    */
   public void onChildStop(String jid)

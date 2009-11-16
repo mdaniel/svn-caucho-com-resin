@@ -65,7 +65,7 @@ public interface Actor
   //
   // basic Actor API
   //
-  
+
   /**
    * Returns the actor's jid, so the {@link com.caucho.bam.Broker} can
    * deliver messages to this actor.
@@ -79,9 +79,9 @@ public interface Actor
   public void setJid(String jid);
 
   /**
-   * Sets the stream to the broker during registration
+   * Sets the stream to the link during registration
    */
-  public void setBrokerStream(ActorStream brokerStream);
+  public void setBrokerStream(ActorStream linkStream);
 
   /**
    * Returns the custom {@link com.caucho.bam.ActorStream} to the
@@ -144,7 +144,7 @@ public interface Actor
   //
   // filtering
   //
-  
+
   /**
    * Returns a filter for messages to the actor.
    */

@@ -74,7 +74,7 @@ public class HmtpReader {
   {
     if (actorStream == null)
       throw new IllegalStateException("HmtpReader.readPacket requires a valid ActorStream for callbacks");
-    
+
     int tag;
 
     Hessian2StreamingInput in = _in;
@@ -88,7 +88,7 @@ public class HmtpReader {
       hIn = in.startPacket();
     } catch (IOException e) {
       log.fine(this + " exception while reading HMTP packet\n  " + e);
-      
+
       log.log(Level.FINER, e.toString(), e);
     }
 
@@ -100,223 +100,223 @@ public class HmtpReader {
     int type = hIn.readInt();
     String to = hIn.readString();
     String from = hIn.readString();
-    
+
     switch (HmtpPacketType.TYPES[type]) {
     case MESSAGE:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " message " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
-	
-	actorStream.message(to, from, value);
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " message " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	break;
+        actorStream.message(to, from, value);
+
+        break;
       }
-      
+
     case MESSAGE_ERROR:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	ActorError error = (ActorError) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        ActorError error = (ActorError) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " messageError " + error + " " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " messageError " + error + " " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.messageError(to, from, value, error);
+        actorStream.messageError(to, from, value, error);
 
-	break;
+        break;
       }
-      
+
     case QUERY_GET:
       {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        long id = hIn.readLong();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryGet " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryGet " + value
+                    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+        }
 
         actorStream.queryGet(id, to, from, value);
 
-	break;
+        break;
       }
-      
+
     case QUERY_SET:
       {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        long id = hIn.readLong();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " querySet " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " querySet " + value
+                    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+        }
 
         actorStream.querySet(id, to, from, value);
 
-	break;
+        break;
       }
-      
+
     case QUERY_RESULT:
       {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        long id = hIn.readLong();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryResult " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryResult " + value
+                    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.queryResult(id, to, from, value);
+        actorStream.queryResult(id, to, from, value);
 
-	break;
+        break;
       }
-      
+
     case QUERY_ERROR:
       {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	ActorError error = (ActorError) hIn.readObject();
-	in.endPacket();
+        long id = hIn.readLong();
+        Serializable value = (Serializable) hIn.readObject();
+        ActorError error = (ActorError) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryError " + error + " " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " queryError " + error + " " + value
+                    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.queryError(id, to, from, value, error);
+        actorStream.queryError(id, to, from, value, error);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presence " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presence " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presence(to, from, value);
+        actorStream.presence(to, from, value);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE_UNAVAILABLE:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceUnavailable " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceUnavailable " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceUnavailable(to, from, value);
+        actorStream.presenceUnavailable(to, from, value);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE_PROBE:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceProbe " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceProbe " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceProbe(to, from, value);
+        actorStream.presenceProbe(to, from, value);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE_SUBSCRIBE:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceSubscribe " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceSubscribe " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceSubscribe(to, from, value);
+        actorStream.presenceSubscribe(to, from, value);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE_SUBSCRIBED:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceSubscribed " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceSubscribed " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceSubscribed(to, from, value);
+        actorStream.presenceSubscribed(to, from, value);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE_UNSUBSCRIBE:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceUnsubscribe " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceUnsubscribe " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceUnsubscribe(to, from, value);
+        actorStream.presenceUnsubscribe(to, from, value);
 
-	break;
+        break;
       }
-      
+
     case PRESENCE_UNSUBSCRIBED:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceUnsubscribed " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceUnsubscribed " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceUnsubscribed(to, from, value);
+        actorStream.presenceUnsubscribed(to, from, value);
 
-	break;
+        break;
       }
 
     case PRESENCE_ERROR:
       {
-	Serializable value = (Serializable) hIn.readObject();
-	ActorError error = (ActorError) hIn.readObject();
-	in.endPacket();
+        Serializable value = (Serializable) hIn.readObject();
+        ActorError error = (ActorError) hIn.readObject();
+        in.endPacket();
 
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " presenceError " + error + " " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " presenceError " + error + " " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	actorStream.presenceError(to, from, value, error);
+        actorStream.presenceError(to, from, value, error);
 
-	break;
+        break;
       }
 
     default:
@@ -333,11 +333,11 @@ public class HmtpReader {
       _in = null;
 
       if (in != null)
-	in.close();
+        in.close();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-    
+
     // _client.close();
   }
 

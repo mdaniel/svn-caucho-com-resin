@@ -39,7 +39,9 @@ import com.caucho.util.Utf8;
 public class JsonInput {
   private InputStream _is;
   private int _peek = -1;
-  
+
+  private JsonSerializerFactory _factory = new JsonSerializerFactory();
+
   public JsonInput()
   {
   }
@@ -48,7 +50,7 @@ public class JsonInput {
   {
     init(is);
   }
-  
+
   /**
    * Initialize the output with a new underlying stream.
    */
@@ -76,16 +78,16 @@ public class JsonInput {
       case '5': case '6': case '7': case '8': case '9':
       case '.': case '+': case '-':
         return parseNumber(ch);
-        
+
       case '"':
         return parseString();
-        
+
       case 'n':
         return parseNull(is);
-        
+
       case 't':
         return parseTrue(is);
-        
+
       case 'f':
         return parseFalse(is);
 
@@ -96,7 +98,7 @@ public class JsonInput {
         return parseMap(is);
       }
     }
-    
+
     return null;
   }
 
@@ -109,18 +111,75 @@ public class JsonInput {
   public <T> T readObject(Class<T> type)
     throws IOException
   {
+    if (type == null || Object.class == type)
+      return (T) readObject();
+
+    JsonDeserializer deser = _factory.getDeserializer(type);
+
+    if (deser == null)
+      return (T) readObject();
+
+    return (T) deser.read(this);
+  }
+
+  public long readLong()
+    throws IOException
+  {
     Object value = readObject();
 
-    if (value == null)
-      return null;
+    if (value instanceof Number)
+      return ((Number) value).longValue();
+    else
+      return 0; // XXX:error
+  }
 
-    if (type.isAssignableFrom(value.getClass()))
-      return (T) value;
-    else {
-      // XXX:
-      return null;
+  public double readDouble()
+    throws IOException
+  {
+    Object value = readObject();
+
+    if (value instanceof Number)
+      return ((Number) value).doubleValue();
+    else
+      return 0; // XXX:error
+  }
+
+  public String readString()
+    throws IOException
+  {
+    Object value = readObject();
+
+    return (String) value;
+  }
+
+  public boolean startPacket()
+    throws IOException
+  {
+    int ch;
+
+    while ((ch = read()) >= 0 && Character.isWhitespace((char) ch)) {
+    }
+
+    if (ch < 0)
+      return false;
+    else if (ch == 0)
+      return true;
+    else
+      throw new IOException("0x" + Integer.toHexString(ch) + " is an illegal JmtpPacket start");
+  }
+
+  public void endPacket()
+    throws IOException
+  {
+    int ch;
+
+    while ((ch = read()) >= 0 && ch != 0xff) {
     }
   }
+
+  //
+  // utility
+  //
 
   private Object parseNull(InputStream is)
     throws IOException
@@ -161,7 +220,7 @@ public class JsonInput {
 
     throw new IOException(this + " parsing of false failed at " + (char) ch);
   }
-    
+
   private String parseString()
     throws IOException
   {
@@ -202,7 +261,7 @@ public class JsonInput {
 
     return sb.toString();
   }
-    
+
   private Number parseNumber(int ch)
     throws IOException
   {
@@ -216,7 +275,7 @@ public class JsonInput {
       switch (ch) {
       case '+':
         break;
-        
+
       case '-':
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
@@ -227,19 +286,19 @@ public class JsonInput {
         sb.append((char) ch);
         isDouble = true;
         break;
-        
+
       default:
         _peek = ch;
         break loop;
       }
     }
-    
+
     if (isDouble)
       return Double.parseDouble(sb.toString());
     else
       return Long.parseLong(sb.toString());
   }
-    
+
   private ArrayList parseArray(InputStream is)
     throws IOException
   {
@@ -264,7 +323,7 @@ public class JsonInput {
 
     return list;
   }
-    
+
   private LinkedHashMap parseMap(InputStream is)
     throws IOException
   {
@@ -300,6 +359,55 @@ public class JsonInput {
     }
 
     return map;
+  }
+
+  public void parseBeanMap(Object bean,
+                           JsonDeserializer deser)
+    throws IOException
+  {
+    InputStream is = _is;
+
+    int ch;
+
+    while ((ch = read()) >= 0 && ch != '{') {
+      switch (ch) {
+      case ' ': case '\t': case '\r': case '\n':
+        break;
+
+      default:
+        throw new IOException("'" + (char) ch + "' (0x" + Integer.toHexString(ch) + ") is an unexpected character, expected '{'");
+      }
+    }
+
+    if (ch < 0)
+      return;
+
+    while ((ch = read()) >= 0) {
+      switch (ch) {
+      case ',':
+      case ' ': case '\t': case '\r': case '\n':
+        break;
+
+      case '}':
+        return;
+
+      case '"':
+        String key = parseString();
+        for (ch = read(); ch >= 0 && ch != ':' && ch != '}'; ch = is.read()) {
+        }
+
+        if (ch == ':') {
+          deser.readField(this, bean, key);
+        }
+        else
+          return;
+        break;
+
+      default:
+        _peek = ch;
+        return;
+      }
+    }
   }
 
   private int read()

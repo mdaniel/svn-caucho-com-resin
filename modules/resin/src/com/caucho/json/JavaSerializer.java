@@ -37,7 +37,7 @@ import java.lang.reflect.*;
 public class JavaSerializer implements JsonSerializer {
   private static final Logger log
     = Logger.getLogger(JavaSerializer.class.getName());
-  
+
   private Class _type;
   private Field []_fields;
 
@@ -67,7 +67,7 @@ public class JavaSerializer implements JsonSerializer {
       return;
 
     introspectFields(fields, type.getSuperclass());
-    
+
     for (Field field : type.getDeclaredFields()) {
       if (Modifier.isTransient(field.getModifiers()))
         continue;
@@ -78,7 +78,7 @@ public class JavaSerializer implements JsonSerializer {
       fields.add(field);
     }
   }
-  
+
   public void write(JsonOutput out, Object value)
     throws IOException
   {
@@ -99,8 +99,6 @@ public class JavaSerializer implements JsonSerializer {
       if (i++ > 0)
         out.writeMapComma();
 
-      System.out.println("WRITE: " + field.getName() + " " + fieldValue);
-      
       out.writeMapEntry(field.getName(), fieldValue);
     }
     out.writeMapEnd();
