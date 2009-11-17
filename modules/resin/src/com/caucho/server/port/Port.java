@@ -83,6 +83,8 @@ public class Port extends TaskWorker
 
   private static final int DEFAULT = -0xcafe;
 
+  private final AtomicInteger _connectionCount = new AtomicInteger();
+
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
   private FreeList<TcpConnection> _freeConn
@@ -1593,7 +1595,9 @@ public class Port extends TaskWorker
         startConn = _freeConn.allocate();
 
         if (startConn == null || startConn.isDestroyed()) {
-          startConn = new TcpConnection(this, _serverSocket.createSocket());
+          int connId = _connectionCount.incrementAndGet();
+          QSocket socket = _serverSocket.createSocket();
+          startConn = new TcpConnection(connId, this, socket);
         }
 
         startConn.toInit(); // change to the init/ready state
@@ -1855,12 +1859,7 @@ public class Port extends TaskWorker
           if (log.isLoggable(Level.FINE))
             log.fine(this + " suspend idle timeout " + conn);
 
-          ConnectionController async = conn.getController();
-
-          if (async != null)
-            async.timeout();
-
-          conn.destroy();
+          conn.toTimeout();
         }
 
         for (int i = _completeSet.size() - 1; i >= 0; i--) {
@@ -1874,8 +1873,12 @@ public class Port extends TaskWorker
           if (async != null)
             async.complete();
 
-          conn.destroy();
+          // server/1lc2
+          // conn.wake();
+          // conn.destroy();
         }
+      } catch (Throwable e) {
+        e.printStackTrace();
       } finally {
         if (! isClosed())
           alarm.queue(_suspendReaperTimeout);

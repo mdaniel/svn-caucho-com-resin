@@ -73,8 +73,6 @@ public class TcpConnection extends Connection
   private static final ThreadLocal<ServerRequest> _currentRequest
     = new ThreadLocal<ServerRequest>();
 
-  private static final AtomicInteger _connectionCount = new AtomicInteger();
-
   private static ClassLoader _systemClassLoader;
 
   private final int _connectionId;  // The connection's id
@@ -123,10 +121,11 @@ public class TcpConnection extends Connection
    * @param server The TCP server controlling the connections
    * @param request The protocol Request
    */
-  TcpConnection(Port port,
+  TcpConnection(int connId,
+                Port port,
                 QSocket socket)
   {
-    _connectionId = _connectionCount.incrementAndGet();
+    _connectionId = connId;
 
     _port = port;
     _socket = socket;
@@ -885,6 +884,23 @@ public class TcpConnection extends Connection
     else {
       return false;
     }
+  }
+
+  void toTimeout()
+  {
+    ConnectionState state = _state;
+
+    if (state.isKeepalive())
+      getPort().keepaliveEnd(this);
+
+    _state = _state.toCometComplete();
+
+    ConnectionController async = getController();
+
+    if (async != null)
+      async.timeout();
+
+    wake();
   }
 
   @Override

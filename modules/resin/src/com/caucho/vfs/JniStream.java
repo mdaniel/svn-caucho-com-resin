@@ -16,11 +16,11 @@ import java.io.InterruptedIOException;
  */
 public class JniStream extends StreamImpl {
   private static final L10N L = new L10N(JniStream.class);
-  
+
   private final static int INTERRUPT_EXN = -2;
   private final static int DISCONNECT_EXN = -3;
   private final static int TIMEOUT_EXN = -4;
-  
+
   private static NullPath NULL_PATH;
 
   private final JniSocketImpl _socket;
@@ -55,7 +55,7 @@ public class JniStream extends StreamImpl {
       throw new NullPointerException();
     else if (offset < 0 || buf.length < offset + length)
       throw new ArrayIndexOutOfBoundsException();
-    
+
     int result = _socket.read(buf, offset, length, -1);
 
     if (result > 0) {
@@ -76,7 +76,7 @@ public class JniStream extends StreamImpl {
       throw new NullPointerException();
     else if (offset < 0 || buf.length < offset + length)
       throw new ArrayIndexOutOfBoundsException();
-    
+
     int result = _socket.read(buf, offset, length, timeout);
 
     if (result > 0) {
@@ -145,7 +145,7 @@ public class JniStream extends StreamImpl {
     switch (result) {
     case INTERRUPT_EXN:
       return new InterruptedIOException("interrupted i/o");
-      
+
     case DISCONNECT_EXN:
       return new ClientDisconnectException("connection reset by peer");
 
