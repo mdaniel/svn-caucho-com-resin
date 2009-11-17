@@ -126,32 +126,7 @@ public class CustomSimpleTag extends GenericTag
     else
       return super.hasCustomTag();
   }
-
-  public boolean hasScripting()
-  {
-    if (_body != null && _body.hasScripting())
-      return true;
-    else if (hasRuntimeJspAttributes()) {
-      return true;
-    } else
-      return super.hasScripting();
-  }
-
-  public boolean hasRuntimeJspAttributes()
-  {
-    if (_attributeValues == null || _attributeValues.size() == 0)
-      return false;
-
-    for (Object value : _attributeValues) {
-      if (value instanceof JspAttribute
-        && ((JspAttribute) value).hasScripting()) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
+  
   /**
    * Generates code before the actual JSP.
    */

@@ -299,13 +299,6 @@ public class JavaTagGenerator extends JavaJspGenerator {
     generateClassFooter(out);
   }
 
-  @Override
-  public boolean hasScripting()
-  {
-    // jsp/1025 - xxx: needs to be cleaned up
-    return true;
-  }
-  
   protected boolean isStaticDoTag()
   {
     return ! hasScripting();
@@ -314,7 +307,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
   /**
    * Generates the class header.
    *
-   * @param out the XML document representing the JSP page.
+   * @param doc the XML document representing the JSP page.
    */
   protected void generateClassHeader(JspJavaWriter out)
     throws IOException, JspParseException
@@ -437,20 +430,6 @@ public class JavaTagGenerator extends JavaJspGenerator {
     }
   }
 
-  @Override
-  public boolean isTagFileAttribute(String name)
-  {
-    if (_attributes == null || _attributes.size() == 0)
-      return false;
-
-    for (TldAttribute attr : _attributes) {
-      if (name.equals(attr.getName()))
-        return true;
-    }
-
-    return false;
-  }
-
   /**
    * Generates the attribute definitions.
    *
@@ -501,25 +480,23 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("javax.el.ELContext _jsp_env = pageContext.getELContext();");
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
     generateTagAttributes(out);
-
-    if (hasScripting()) {
-      out.println("TagState _jsp_state = new TagState();");
-      // jsp/100h
-      out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag");
-      out.println("  = new javax.servlet.jsp.tagext.TagAdapter(this);");
-      // jsp/1071
+    if (hasScripting())
       generatePrologue(out);
-    }
 
     out.println("try {");
     out.pushDepth();
      
     if (hasScripting()) {
+      out.println("TagState _jsp_state = new TagState();");
+      // jsp/100h
+      out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag");
+      out.println("  = new javax.servlet.jsp.tagext.TagAdapter(this);");
+
       node.generate(out);
       
       generateTagVariablesAtEnd(out);
     } else {
-      out.println("doTag(_jsp_parentContext, pageContext, out, null, null);");
+      out.println("doTag(_jsp_parentContext, pageContext, out, null, this);");
     }
     
     out.popDepth();
@@ -934,7 +911,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("}");
   }
 
-  protected String toFieldName(String name)
+  private String toFieldName(String name)
   {
     if (hasScripting() && ! _reserved.contains(name))
       return name;

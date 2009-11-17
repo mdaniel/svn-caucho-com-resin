@@ -833,9 +833,7 @@ public abstract class JspNode {
   public boolean isInFragment()
   {
     for (JspNode node = getParent(); node != null; node = node.getParent()) {
-      if (node instanceof JspAttribute
-        || node instanceof CustomSimpleTag
-        || node instanceof JspFragmentNode)
+      if (node instanceof JspAttribute || node instanceof CustomSimpleTag)
         return true;
     }
 
@@ -1016,13 +1014,10 @@ public abstract class JspNode {
 
     String fragmentVar = frag.getFragmentName();
 
-    // jsp/103d
-    cb.append(fragmentVar + " = _CauchoFragment_create(" + fragmentVar
+    cb.append(fragmentVar + " = _CauchoFragment.create(" + fragmentVar
 	      + ", " + index
 	      + ", _jsp_parentContext"
 	      + ", " + contextVar
-              + ", request"
-              + ", response"
 	      + ", ");
 
     JspNode parentTag = getParentTagNode();
@@ -1047,11 +1042,6 @@ public abstract class JspNode {
 
     cb.append(", _jsp_state");
     cb.append(", _jsp_pageManager");
-
-    if (_gen.hasScripting())
-      cb.append(", " + _gen._className + ".this");
-    else
-      cb.append(", null");
 
     cb.append(")");
 
@@ -1715,23 +1705,12 @@ public abstract class JspNode {
   public String getRuntimeAttribute(String value)
     throws Exception
   {
-    String attribute = value;
-
     if (value.startsWith("<%=") && value.endsWith("%>"))
-      attribute = value.substring(3, value.length() - 2);
+      return value.substring(3, value.length() - 2);
     else if (value.startsWith("%=") && value.endsWith("%"))
-      attribute = value.substring(2, value.length() - 1);
-
-    /*
-    if (_gen.isTagFileAttribute(attribute))
-      attribute = _gen.toFieldName(attribute);
-
-    if (isInFragment()) {
-      attribute = "_caucho_jsp_or_tag_parent." + attribute;
-    }
-    */
-
-    return attribute;
+      return value.substring(2, value.length() - 1);
+    else
+      return value;
   }
 
   /**

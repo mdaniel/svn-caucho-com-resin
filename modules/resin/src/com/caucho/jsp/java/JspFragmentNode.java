@@ -198,8 +198,7 @@ abstract public class JspFragmentNode extends JspContainerNode
 
     CharBuffer cb = new CharBuffer();
 
-    //cb.append("_CauchoFragment." + _fragmentName + "(pageContext, ");
-    cb.append(_fragmentName + '.' + _fragmentName + "(pageContext, ");
+    cb.append("_CauchoFragment." + _fragmentName + "(pageContext, ");
 
     for (;
 	 parent != null && parent.isTagFileTag();
@@ -250,7 +249,7 @@ abstract public class JspFragmentNode extends JspContainerNode
     }
     
     out.println();
-    out.println("String " + _fragmentName + "(");
+    out.println("static String " + _fragmentName + "(");
     out.println("  com.caucho.jsp.PageContextImpl pageContext,");
     out.println("  javax.servlet.jsp.tagext.JspTag _jsp_parent_tag,");
     out.println("  javax.servlet.jsp.tagext.JspFragment _jspBody,");
