@@ -54,7 +54,7 @@ public class ConnectionCometController extends ConnectionController
   private static final Logger log = Logger
       .getLogger(ConnectionCometController.class.getName());
 
-  private TcpConnection _conn;
+  private Connection _conn;
 
   private HashMap<String, Object> _map;
 
@@ -75,8 +75,7 @@ public class ConnectionCometController extends ConnectionController
                                    ServletRequest request,
                                    ServletResponse response)
   {
-    if (conn instanceof TcpConnection)
-      _conn = (TcpConnection) conn;
+    _conn = conn;
 
     _request = request;
     _response = response;
@@ -101,7 +100,7 @@ public class ConnectionCometController extends ConnectionController
 
   public TcpConnection getConnection()
   {
-    return _conn;
+    return (TcpConnection) _conn;
   }
 
   /**
@@ -119,8 +118,8 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isSuspended()
   {
-    TcpConnection conn = _conn;
-    
+    Connection conn = _conn;
+
     return conn != null && conn.getState().isCometSuspend();
   }
 
@@ -130,7 +129,7 @@ public class ConnectionCometController extends ConnectionController
   @Override
   public final void suspend()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn != null)
       conn.toSuspend();
@@ -141,7 +140,7 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isComplete()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn != null)
       return conn.getState().isCometComplete();
@@ -154,11 +153,11 @@ public class ConnectionCometController extends ConnectionController
    */
   public final void complete()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn != null)
       conn.toCometComplete();
-    
+
     for (AsyncListenerNode node = _listenerNode;
          node != null;
          node = node.getNext()) {
@@ -188,7 +187,7 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean wake()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn != null)
       return conn.wake();
@@ -245,8 +244,8 @@ public class ConnectionCometController extends ConnectionController
    */
   public boolean isComet()
   {
-    TcpConnection conn = _conn;
-    
+    Connection conn = _conn;
+
     return conn != null && ! conn.getState().isCometComplete();
   }
 
@@ -312,8 +311,8 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isClosed()
   {
-    TcpConnection conn = _conn;
-    
+    Connection conn = _conn;
+
     return conn == null || conn.getState().isCometComplete();
   }
 
@@ -339,7 +338,7 @@ public class ConnectionCometController extends ConnectionController
 
   public void dispatch()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn != null) {
       conn.wake();
@@ -366,8 +365,7 @@ public class ConnectionCometController extends ConnectionController
       ThreadPool.getCurrent().schedule(task);
     else
       throw new IllegalStateException(
-          L
-              .l("AsyncContext.start() is not allowed because the AsyncContext has been completed."));
+          L.l("AsyncContext.start() is not allowed because the AsyncContext has been completed."));
   }
 
   /**

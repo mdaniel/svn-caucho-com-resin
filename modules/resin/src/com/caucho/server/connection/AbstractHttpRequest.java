@@ -1342,7 +1342,7 @@ public abstract class AbstractHttpRequest
     throw new UnsupportedOperationException(L.l("{0} does not support duplex connections.  Only HTTP protocols support duplex.",
                                                 getClass().getName()));
   }
-  
+
 
   //
   // internal goodies
@@ -1576,7 +1576,7 @@ public abstract class AbstractHttpRequest
   public boolean isSuspend()
   {
     // return _tcpConn != null && (_tcpConn.isSuspend() || _tcpConn.isDuplex());
-    return _tcpConn != null && (_tcpConn.isComet() || _tcpConn.isDuplex());
+    return _tcpConn != null && (_tcpConn.isSuspend() || _tcpConn.isDuplex());
   }
 
   public boolean isDuplex()

@@ -37,14 +37,14 @@ public enum ConnectionState {
   REQUEST_ACTIVE,       // processing a request
   REQUEST_NKA,          // processing a request, but keepalive forbidden
   REQUEST_KEEPALIVE,    // waiting for keepalive data
-  
+
   COMET,                // processing an active comet service
   COMET_SUSPEND,        // suspended waiting for a wake
   COMET_COMPLETE,       // complete or timeout
   COMET_NKA,            // processing an active comet service
   COMET_SUSPEND_NKA,    // suspended waiting for a wake
   COMET_COMPLETE_NKA,   // complete or timeout
-  
+
   DUPLEX,               // converted to a duplex/websocket
   DUPLEX_KEEPALIVE,     // waiting for duplex read data
   CLOSED,               // connection closed, ready for accept
@@ -61,6 +61,8 @@ public enum ConnectionState {
     case COMET_SUSPEND:
     case COMET_NKA:
     case COMET_SUSPEND_NKA:
+    case COMET_COMPLETE:
+    case COMET_COMPLETE_NKA:
       return true;
     default:
       return false;
@@ -74,7 +76,15 @@ public enum ConnectionState {
 
   public boolean isCometSuspend()
   {
-    return this == COMET_SUSPEND || this == COMET_SUSPEND_NKA;
+    switch (this) {
+    case COMET:
+    case COMET_SUSPEND:
+    case COMET_NKA:
+    case COMET_SUSPEND_NKA:
+      return true;
+    default:
+      return false;
+    }
   }
 
   public boolean isCometComplete()
@@ -140,12 +150,12 @@ public enum ConnectionState {
     case REQUEST_READ:
     case REQUEST_ACTIVE:
     case REQUEST_KEEPALIVE:
-      
+
     case COMET:
     case COMET_SUSPEND:
     case COMET_COMPLETE:
       return true;
-      
+
     default:
       return false;
     }
@@ -189,7 +199,7 @@ public enum ConnectionState {
     case REQUEST_ACTIVE:
     case REQUEST_KEEPALIVE:
       return REQUEST_ACTIVE;
-      
+
     case REQUEST_NKA:
       return REQUEST_NKA;
 
@@ -206,6 +216,10 @@ public enum ConnectionState {
     case COMET_NKA:
     case COMET_SUSPEND_NKA:
       return COMET_NKA;
+
+    case COMET_COMPLETE:
+    case COMET_COMPLETE_NKA:
+      return this;
 
     default:
       throw new IllegalStateException(this + " is an illegal active state");
@@ -262,6 +276,22 @@ public enum ConnectionState {
     }
   }
 
+  ConnectionState toFinishRequest()
+  {
+    switch (this) {
+    case COMET:
+    case COMET_COMPLETE:
+      return REQUEST_READ;
+
+    case COMET_NKA:
+    case COMET_COMPLETE_NKA:
+      return REQUEST_NKA;
+
+    default:
+      return this;
+    }
+  }
+
   //
   // comet
   //
@@ -273,7 +303,7 @@ public enum ConnectionState {
     case REQUEST_ACTIVE:
     case REQUEST_KEEPALIVE:
       return COMET;
-      
+
     case REQUEST_NKA:
       return COMET_NKA;
 
@@ -289,12 +319,12 @@ public enum ConnectionState {
     case COMET_SUSPEND:
     case COMET_COMPLETE:
       return COMET_COMPLETE;
-      
+
     case COMET_NKA:
     case COMET_SUSPEND_NKA:
     case COMET_COMPLETE_NKA:
       return COMET_COMPLETE_NKA;
-      
+
     case CLOSED:
     case DESTROYED:
       return this;

@@ -134,6 +134,8 @@ public class Port extends TaskWorker
 
   private long _suspendReaperTimeout = 60000L;
   private long _suspendTimeMax = DEFAULT;
+  // after for 120s start checking for EOF on comet requests
+  private long _suspendCloseTimeMax = 120 * 1000L;
 
   private boolean _tcpNoDelay = true;
 
@@ -1840,7 +1842,9 @@ public class Port extends TaskWorker
             _timeoutSet.add(conn);
           }
 
-          if (conn.isReadEof()) {
+          // check periodically for end of file
+          if (conn.getIdleStartTime() + _suspendCloseTimeMax < now
+              && conn.isReadEof()) {
             _completeSet.add(conn);
           }
         }

@@ -276,7 +276,8 @@ public class TcpConnection extends Connection
   @Override
   public boolean isKeepalive()
   {
-    return _state.isKeepalive();
+    // return _state.isKeepalive();
+    return _state.isAllowKeepalive();
   }
 
   @Override
@@ -608,7 +609,13 @@ public class TcpConnection extends Connection
         return result;
       }
 
+      ConnectionState state = _state;
+
       _state = _state.toActive();
+
+      if (state.isKeepalive()) {
+        getPort().keepaliveEnd(this);
+      }
 
       if (! getRequest().handleRequest()) {
         _state = _state.toKillKeepalive();
@@ -626,6 +633,9 @@ public class TcpConnection extends Connection
 
         return RequestState.THREAD_DETACHED;
       }
+
+      // server/1l80
+      _state = _state.toFinishRequest();
     } while (_state.isAllowKeepalive());
 
     return result;
@@ -851,7 +861,7 @@ public class TcpConnection extends Connection
       _controller.suspend();
   }
 
-  void toSuspend()
+  public void toSuspend()
   {
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _idleTimeout;
@@ -860,7 +870,7 @@ public class TcpConnection extends Connection
   /**
    * Wakes the connection (comet-style).
    */
-  protected boolean wake()
+  public boolean wake()
   {
     if (! _state.isComet())
       return false;
@@ -878,7 +888,7 @@ public class TcpConnection extends Connection
   }
 
   @Override
-  protected void toCometComplete()
+  public void toCometComplete()
   {
     _state = _state.toCometComplete();
   }
@@ -1196,8 +1206,6 @@ public class TcpConnection extends Connection
     {
       Port port = _port;
 
-      port.keepaliveEnd(TcpConnection.this);
-
       runThread();
     }
 
@@ -1205,7 +1213,13 @@ public class TcpConnection extends Connection
     public RequestState doTask()
       throws IOException
     {
+      ConnectionState state = _state;
+
       _state = _state.toActive();
+
+      if (state.isKeepalive()) {
+        getPort().keepaliveEnd(TcpConnection.this);
+      }
 
       RequestState result = handleRequests();
 
@@ -1234,8 +1248,6 @@ public class TcpConnection extends Connection
     public void run()
     {
       Port port = _port;
-
-      port.keepaliveEnd(TcpConnection.this);
 
       runThread();
     }
@@ -1290,7 +1302,8 @@ public class TcpConnection extends Connection
 
           isValid = true;
         }
-        else if (_state.isKeepalive()) {
+        else if (_state.isAllowKeepalive()) {
+          _state = _state.toFinishRequest();
           isValid = true;
           _keepaliveTask.run();
         }

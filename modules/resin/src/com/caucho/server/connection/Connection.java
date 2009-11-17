@@ -31,6 +31,7 @@ package com.caucho.server.connection;
 
 import com.caucho.util.L10N;
 import com.caucho.server.port.ConnectionCometController;
+import com.caucho.server.port.ConnectionState;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -50,9 +51,9 @@ import javax.servlet.ServletResponse;
 public abstract class Connection
 {
   private static final L10N L = new L10N(Connection.class);
-  
+
   private static Constructor _cometConstructor;
-  
+
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
 
@@ -63,7 +64,7 @@ public abstract class Connection
     _writeStream = new WriteStream();
     _writeStream.setReuseBuffer(true);
   }
-  
+
   /**
    * Returns the connection id.  Primarily for debugging.
    */
@@ -167,6 +168,11 @@ public abstract class Connection
   {
   }
 
+  public ConnectionState getState()
+  {
+    return ConnectionState.REQUEST_ACTIVE;
+  }
+
   /**
    * Returns true for a comet connection
    */
@@ -191,21 +197,26 @@ public abstract class Connection
     return false;
   }
 
+  public boolean wake()
+  {
+    return false;
+  }
+
   /**
    * Starts a comet request
    */
   public ConnectionCometController toComet(boolean isTop,
-					   ServletRequest request,
-					   ServletResponse response)
+                                           ServletRequest request,
+                                           ServletResponse response)
   {
     ConnectionCometController controller = null;
-    
+
     try {
       controller = (ConnectionCometController) _cometConstructor.newInstance(this, isTop, request, response);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    
+
     return controller;
   }
 
@@ -216,7 +227,11 @@ public abstract class Connection
   {
   }
 
-  protected void toCometComplete()
+  public void toCometComplete()
+  {
+  }
+
+  public void toSuspend()
   {
   }
 
@@ -233,13 +248,13 @@ public abstract class Connection
   static {
     try {
       Class asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
-      
+
       _cometConstructor = asyncComet.getConstructor(new Class[] {
-	  Connection.class,
-	  boolean.class,
-	  ServletRequest.class,
-	  ServletResponse.class
-	});
+          Connection.class,
+          boolean.class,
+          ServletRequest.class,
+          ServletResponse.class
+        });
     } catch (Throwable e) {
     }
   }
