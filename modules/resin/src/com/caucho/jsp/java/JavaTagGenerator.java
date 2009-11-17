@@ -502,17 +502,19 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
     generateTagAttributes(out);
 
-    out.println("try {");
-    out.pushDepth();
-     
     if (hasScripting()) {
       out.println("TagState _jsp_state = new TagState();");
       // jsp/100h
       out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag");
       out.println("  = new javax.servlet.jsp.tagext.TagAdapter(this);");
-
+      // jsp/1071
       generatePrologue(out);
+    }
 
+    out.println("try {");
+    out.pushDepth();
+     
+    if (hasScripting()) {
       node.generate(out);
       
       generateTagVariablesAtEnd(out);
