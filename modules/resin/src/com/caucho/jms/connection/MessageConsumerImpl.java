@@ -482,9 +482,9 @@ public class MessageConsumerImpl implements MessageConsumer
 
 	if (_selector == null || _selector.isMatch(message)) {
 	  // XXX: only if XA
-	  if (! _isAutoAcknowledge) {
-	    _session.addTransactedReceive(_queue, message);
-	  }
+	  //if (! _isAutoAcknowledge) {
+	  _session.addTransactedReceive(_queue, message);
+	  //}
 
 	  Thread thread = Thread.currentThread();
 	  ClassLoader oldLoader = thread.getContextClassLoader();
@@ -496,6 +496,10 @@ public class MessageConsumerImpl implements MessageConsumer
 	    thread.setContextClassLoader(oldLoader);
 
 	    // XXX: commit/rollback?
+	    if (_session.getTransacted())
+	      _session.commit();
+	    else  
+	      _session.acknowledge();	    
 	  }
 	}
       } catch (JMSException e) {
