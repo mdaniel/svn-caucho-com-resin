@@ -131,6 +131,25 @@ public class JspElement extends JspContainerNode {
     os.print("</jsp:element>");
   }
 
+  @Override
+  public void generatePrologueChildren(JspJavaWriter out)
+    throws Exception
+  {
+    if (_attrName != null) {
+      _attrName.generateFragmentPrologue(out);
+      _attrName.generateFragment(out, _attrName, "pageContext");
+      out.println(";");
+    }
+
+    for (JspAttribute attrValue : _attrValues) {
+      attrValue.generateFragmentPrologue(out);
+      attrValue.generateFragment(out, attrValue, "pageContext");
+      out.println(";");
+    }
+
+    super.generatePrologueChildren(out);
+  }
+
   /**
    * Generates the code for the tag
    *

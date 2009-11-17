@@ -1021,6 +1021,8 @@ public abstract class JspNode {
 	      + ", " + index
 	      + ", _jsp_parentContext"
 	      + ", " + contextVar
+              + ", request"
+              + ", response"
 	      + ", ");
 
     JspNode parentTag = getParentTagNode();
@@ -1047,7 +1049,7 @@ public abstract class JspNode {
     cb.append(", _jsp_pageManager");
 
     if (_gen.hasScripting())
-      cb.append(", this");
+      cb.append(", " + _gen._className + ".this");
     else
       cb.append(", null");
 

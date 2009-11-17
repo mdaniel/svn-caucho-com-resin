@@ -928,7 +928,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("com.caucho.server.webapp.WebApp _jsp_application = _caucho_getApplication();");
 
     out.print("com.caucho.jsp.PageContextImpl pageContext = _jsp_pageManager.allocatePageContext(");
-    
+
     out.print("this, _jsp_application, request, response, ");
     if (_parseState.getErrorPage() == null) 
       out.print("null");
@@ -1606,6 +1606,8 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("_CauchoFragment _CauchoFragment_create(_CauchoFragment frag, int code,");
     out.println("                       javax.servlet.jsp.JspContext _jsp_parentContext,");
     out.println("                       com.caucho.jsp.PageContextImpl pageContext,");
+    out.println("                       javax.servlet.http.HttpServletRequest request,");
+    out.println("                       javax.servlet.http.HttpServletResponse response,");
     out.println("                       javax.servlet.jsp.tagext.JspTag parent,");
     out.println("                       javax.servlet.jsp.tagext.JspFragment jspBody,");
     out.println("                       TagState _jsp_state,");
@@ -1624,6 +1626,10 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("frag._frag_code = code;");
     out.println("frag._jsp_parentContext = _jsp_parentContext;");
     out.println("frag.pageContext = pageContext;");
+    // jsp/103j (teamcity)
+    out.println("frag.jspContext = pageContext;");
+    out.println("frag.request = request;");
+    out.println("frag.response = response;");
     out.println("frag._jsp_env = pageContext.getELContext();");
     out.println("frag._jsp_parent_tag = parent;");
     out.println("frag._jspBody = jspBody;");
@@ -1641,6 +1647,8 @@ public class JavaJspGenerator extends JspGenerator {
     out.pushDepth();
     out.println("private int _frag_code;");
     out.println("private TagState _jsp_state;");
+    out.println("private javax.servlet.http.HttpServletRequest request;");
+    out.println("private javax.servlet.http.HttpServletResponse response;");
 
     out.print("private ");
     out.print(_className);

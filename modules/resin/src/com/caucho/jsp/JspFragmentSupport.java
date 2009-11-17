@@ -52,6 +52,7 @@ abstract public class JspFragmentSupport extends JspFragment {
 
   // the page context
   public PageContextImpl pageContext;
+  public JspContext jspContext;
 
   // the EL context
   public ELContext _jsp_env;
