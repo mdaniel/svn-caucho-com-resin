@@ -62,6 +62,9 @@ namespace Caucho
     OPTIONS:
       -h                                     : this help
       -verbose                               : information on launching java
+      -conf <resin.conf>                     : alternate configuration file
+      -server <id>                           : select a <server> to run
+      -dynamic-server <cluster:address:port> : initialize a dynamic server
       -java_home <dir>                       : sets the JAVA_HOME
       -java_exe <path>                       : path to java executable
       -classpath <dir>                       : java classpath
@@ -77,10 +80,11 @@ namespace Caucho
       -resin_home <dir>                      : home of Resin
       -root-directory <dir>                  : select a root directory
       -log-directory  <dir>                  : select a logging directory
-      -dynamic-server <cluster:address:port> : initialize a dynamic server
       -watchdog-port  <port>                 : override the watchdog-port
-      -server <id>                           : select a <server> to run
-      -conf <resin.conf>                     : alternate configuration file";
+      -preview                               : run as a preview server
+      -debug-port <port>                     : configure a debug port
+      -jmx-port <port>                       : configure an unauthenticated jmx port
+";
 
     private bool _verbose;
     private bool _nojit;
