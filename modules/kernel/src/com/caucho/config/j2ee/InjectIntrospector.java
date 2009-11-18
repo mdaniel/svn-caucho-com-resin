@@ -607,21 +607,24 @@ public class InjectIntrospector {
     if (! "".equals(unitName)) {
       component = bind(location, EntityManagerFactory.class, unitName);
 
-      if (component == null)
-        throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", unitName));
+      if (component == null) {
+        throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed{1}", unitName, listBeans(EntityManagerFactory.class)));
+      }
     }
     else {
       if (! "".equals(jndiName)) {
         component = bind(location, EntityManagerFactory.class, jndiName);
 
-        if (component == null)
-          throw new ConfigException(location + L.l("@PersistenceUnit(name='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", jndiName));
+        if (component == null) {
+          throw new ConfigException(location + L.l("@PersistenceUnit(name='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed{1}", jndiName, listBeans(EntityManagerFactory.class)));
+        }
       }
       else {
         component = bind(location, EntityManagerFactory.class);
 
         if (component == null)
-          throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
+          throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed{0}",
+                                                   listBeans(EntityManagerFactory.class)));
       }
     }
 
@@ -727,6 +730,20 @@ public class InjectIntrospector {
     }
 
     return null;
+  }
+
+  public static String listBeans(Class type)
+  {
+    InjectManager inject = InjectManager.create();
+
+    Set<Bean<?>> beans = inject.getBeans(type, new AnnotationLiteral<Any>() {});
+    StringBuilder sb = new StringBuilder();
+
+    for (Bean bean : beans) {
+      sb.append("\n  ").append(bean);
+    }
+
+    return sb.toString();
   }
 
   private static void bindJndi(String location, String name, Object value)

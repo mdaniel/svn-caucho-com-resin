@@ -455,9 +455,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void close()
   {
+
     dequeue();
+
+    // server/16a{0,1}
+    /*
     _listener = null;
     _contextLoader = null;
+    */
   }
 
   /**
