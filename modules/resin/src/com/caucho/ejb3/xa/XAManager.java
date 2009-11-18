@@ -26,26 +26,33 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.ejb3.xa;
 
-import com.caucho.jca.*;
-import com.caucho.transaction.*;
-import com.caucho.util.*;
+import java.util.logging.Logger;
 
-import java.util.logging.*;
-import javax.ejb.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
+import javax.ejb.EJBException;
+import javax.ejb.EJBTransactionRequiredException;
+import javax.ejb.SessionSynchronization;
+import javax.ejb.TransactionRolledbackLocalException;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.Transaction;
+import javax.transaction.xa.XAResource;
+
+import com.caucho.jca.UserTransactionProxy;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.util.L10N;
 
 /**
  * Manages XA for bean methods.
  */
-public class XAManager
-{
+public class XAManager {
   private static L10N L = new L10N(XAManager.class);
-  private static Logger log
-    = Logger.getLogger(XAManager.class.getName());
+  @SuppressWarnings("unused")
+  private static Logger log = Logger.getLogger(XAManager.class.getName());
 
   private UserTransactionProxy _ut;
 
@@ -61,11 +68,11 @@ public class XAManager
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       Transaction xa = tm.getTransaction();
 
       if (xa != null && xaResource != null)
-	xa.enlistResource(xaResource);
+        xa.enlistResource(xaResource);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -80,13 +87,13 @@ public class XAManager
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       Transaction xa = tm.getTransaction();
 
       if (xa != null && sync != null) {
-	sync.afterBegin();
-	
-	xa.registerSynchronization(new SynchronizationAdapter(sync));
+        sync.afterBegin();
+
+        xa.registerSynchronization(new SynchronizationAdapter(sync));
       }
     } catch (RuntimeException e) {
       throw e;
@@ -96,17 +103,18 @@ public class XAManager
   }
 
   /**
-   * Begins a manadatory transaction.
+   * Begins a mandatory transaction.
    */
   public void beginMandatory()
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       Transaction xa = tm.getTransaction();
 
       if (xa == null)
-	throw new EJBTransactionRequiredException(L.l("Transaction required for for 'Mandatory' TransactionAttribute"));
+        throw new EJBTransactionRequiredException(L
+            .l("Transaction required for 'Mandatory' transaction attribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -121,11 +129,12 @@ public class XAManager
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       Transaction xa = tm.getTransaction();
 
       if (xa != null)
-	throw new EJBException(L.l("Transaction forbidden for 'Never' TransactionAttribute"));
+        throw new EJBException(L
+            .l("Transaction forbidden for 'Never' transaction attribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -135,18 +144,18 @@ public class XAManager
 
   /**
    * Begins a required transaction.
-   *
+   * 
    * @return the current transaction if it exists
    */
   public Transaction beginRequired()
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       Transaction xa = tm.getTransaction();
-    
+
       if (xa != null)
-	return xa;
+        return xa;
 
       _ut.begin();
 
@@ -160,14 +169,14 @@ public class XAManager
 
   /**
    * Begins a requires-new transaction.
-   *
+   * 
    * @return the current transaction if it exists
    */
   public Transaction beginRequiresNew()
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       Transaction xa = tm.suspend();
 
       _ut.begin();
@@ -182,7 +191,7 @@ public class XAManager
 
   /**
    * Begins a requires-new transaction.
-   *
+   * 
    * @return the current transaction if it exists
    */
   public void endRequiresNew(Transaction xa)
@@ -195,29 +204,29 @@ public class XAManager
       throw new EJBException(e);
     } finally {
       try {
-	if (xa != null) {
-	  TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
-	  tm.resume(xa);
-	}
+        if (xa != null) {
+          TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
+
+          tm.resume(xa);
+        }
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new EJBException(e);
+        throw new EJBException(e);
       }
     }
   }
 
   /**
    * Begins a not-supported transaction, i.e. suspend any current transaction.
-   *
+   * 
    * @return the current transaction if it exists
    */
   public Transaction beginNotSupported()
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-    
+
       return tm.suspend();
     } catch (RuntimeException e) {
       throw e;
@@ -261,7 +270,7 @@ public class XAManager
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
-      
+
       tm.resume(xa);
     } catch (RuntimeException e) {
       throw e;
@@ -281,25 +290,25 @@ public class XAManager
     public void beforeCompletion()
     {
       try {
-	_sync.beforeCompletion();
+        _sync.beforeCompletion();
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new EJBException(e);
+        throw new EJBException(e);
       }
     }
 
     public void afterCompletion(int status)
     {
       try {
-	_sync.afterCompletion(status == Status.STATUS_COMMITTED);
+        _sync.afterCompletion(status == Status.STATUS_COMMITTED);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new EJBException(e);
+        throw new EJBException(e);
       }
     }
-    			   
+
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _sync + "]";
