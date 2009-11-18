@@ -57,7 +57,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
-  private long _queueIdleTimeout = 500L;
+  private long _queueIdleTimeout = 2000L;
 
   private final ThreadPool _threadPool = ThreadPool.getCurrent();
   private final ClassLoader _loader
@@ -302,11 +302,13 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
     wakeConsumer(packet);
 
+    /*
     if (Alarm.isTest()) {
       // wait a millisecond for the dequeue to avoid spawing extra
       // processing threads
-      packet.waitForDequeue(100);
+      packet.waitForDequeue(10);
     }
+    */
   }
 
   private void wakeConsumer(Packet packet)
@@ -344,9 +346,11 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
         return;
       }
       else if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
+        _threadPool.schedule(this);
+        /*
         if (! _threadPool.start(this, 10)) {
-          _threadPool.schedule(this);
         }
+        */
         return;
       }
       else if (_threadCount.get() > 0) {
@@ -422,11 +426,14 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   private boolean waitForQueue(WaitQueue.Item item)
   {
     long expires = Alarm.getCurrentTimeActual() + _queueIdleTimeout;
+    int spinMax = 8;
 
     while (! isClosed()) {
-      if (_queue.getSize() > 0) {
-        // check for queue values
-        return true;
+      for (int i = spinMax; i >= 0; i--) {
+        if (_queue.getSize() > 0) {
+          // check for queue values
+          return true;
+        }
       }
 
       long now = Alarm.getCurrentTimeActual();
@@ -434,23 +441,8 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       if (now < expires) {
         _wait.parkUntil(item, expires);
       }
-      else if (_lastExitTime + _queueIdleTimeout < now
-               || Alarm.isTest()) {
-        // if thread hasn't exited recently
-        _lastExitTime = now;
-
-        int threadCount = _threadCount.decrementAndGet();
-
-        if (_queue.getSize() > 0
-            && threadCount < _threadMax
-            && _threadCount.compareAndSet(threadCount, threadCount + 1)) {
-          // second check needed in case a packet arrived
-          return true;
-        }
-        else {
-          // exit the thread
-          return false;
-        }
+      else {
+        return false;
       }
     }
 
@@ -461,31 +453,40 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   {
     Thread thread = Thread.currentThread();
 
+    String oldName = thread.getName();
     String name = _name;
 
     thread.setName(name + "-" + _gid++);
 
     thread.setContextClassLoader(_loader);
 
-    boolean isValid = false;
     WaitQueue.Item item = _wait.create();
 
     try {
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(this + " spawn {threadCount:" + _threadCount.get()
-                 + ", queueSize:" + _queue.getSize() + "}");
+      while (true) {
+        try {
+          if (log.isLoggable(Level.FINEST)) {
+            log.finest(this + " spawn {threadCount:" + _threadCount.get()
+                       + ", queueSize:" + _queue.getSize() + "}");
+          }
+
+          consumeQueue(item);
+        } finally {
+          _threadCount.decrementAndGet();
+        }
+
+        if (_queue.getSize() == 0) {
+          // queue check after the _threadCount decrement for threading
+          // timing issues
+          return;
+        }
+
+        _threadCount.incrementAndGet();
       }
-
-      consumeQueue(item);
-
-      isValid = true;
     } finally {
-      // fix semaphore in case of thread death
-      if (! isValid) {
-        _threadCount.decrementAndGet();
-      }
-
       item.remove();
+
+      thread.setName(oldName);
     }
   }
 

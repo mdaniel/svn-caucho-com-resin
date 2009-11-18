@@ -163,7 +163,7 @@ public class DeployService extends SimpleActor
     boolean result
       = _repository.setTag(tag, entry.getRoot(), query.getUser(),
                            query.getMessage(), query.getVersion());
-    
+
     getBrokerStream().queryResult(id, from, to, result);
   }
 
@@ -713,8 +713,18 @@ public class DeployService extends SimpleActor
 
     String type = tag.substring(0, p);
     String stage = tag.substring(p + 1, q);
-    String host = tag.substring(q + 1, r);
-    String name = tag.substring(r + 1);
+
+    String host;
+    String name;
+
+    if (q < r) {
+      host = tag.substring(q + 1, r);
+      name = tag.substring(r + 1);
+    }
+    else {
+      host = tag.substring(q + 1);
+      name = "";
+    }
 
     String state = null;
 

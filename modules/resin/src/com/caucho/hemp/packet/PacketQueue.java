@@ -48,11 +48,11 @@ public final class PacketQueue
     = Logger.getLogger(PacketQueue.class.getName());
 
   private final String _name;
-  
+
   private final int _discardMaxSize;
   private final int _blockMaxSize;
   private final long _expireTimeout;
-  
+
   private final AtomicReference<QueueItem> _head
     = new AtomicReference<QueueItem>();
   private final AtomicReference<QueueItem> _tail
@@ -64,9 +64,9 @@ public final class PacketQueue
   private final Object _blockLock = new Object();
 
   public PacketQueue(String name,
-		     int discardMaxSize,
-		     int blockMaxSize,
-		     long expireTimeout)
+                     int discardMaxSize,
+                     int blockMaxSize,
+                     long expireTimeout)
   {
     _name = name;
 
@@ -75,7 +75,7 @@ public final class PacketQueue
 
     if (discardMaxSize == 0)
       throw new IllegalArgumentException(L.l("discardMaxSize may not be zero"));
-  
+
     _discardMaxSize = discardMaxSize;
 
     if (blockMaxSize > Integer.MAX_VALUE / 2 || blockMaxSize < 0)
@@ -83,9 +83,9 @@ public final class PacketQueue
 
     if (blockMaxSize == 0)
       throw new IllegalArgumentException(L.l("blockMaxSize may not be zero"));
-  
+
     _blockMaxSize = blockMaxSize;
-  
+
     if (expireTimeout > Long.MAX_VALUE / 2 || expireTimeout < 0)
       expireTimeout = Long.MAX_VALUE / 2;
 
@@ -93,7 +93,7 @@ public final class PacketQueue
       throw new IllegalArgumentException(L.l("expireTimeout may not be zero"));
 
     _expireTimeout = expireTimeout;
-    
+
     _head.set(new QueueItem(null));
     _tail.set(_head.get());
   }
@@ -118,30 +118,30 @@ public final class PacketQueue
   {
     while (_discardMaxSize < _size.get()) {
       if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " dropping overflow packets size=" + _size.get()
-		 + " maxSize=" + _discardMaxSize);
+        log.fine(this + " dropping overflow packets size=" + _size.get()
+                 + " maxSize=" + _discardMaxSize);
       }
-	
+
       dequeue();
     }
 
     if (_blockMaxSize < _size.get()) {
       if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " blocking due to overflow packets size=" + _size.get()
-		 + " maxSize=" + _blockMaxSize);
+        log.fine(this + " blocking due to overflow packets size=" + _size.get()
+                 + " maxSize=" + _blockMaxSize);
       }
 
       _blockCount.incrementAndGet();
       try {
-	synchronized (_blockLock) {
+        synchronized (_blockLock) {
           if (_blockMaxSize < _size.get()) {
             _blockLock.wait(1000);
           }
-	}
+        }
       } catch (Exception e) {
-	log.log(Level.ALL, e.toString(), e);
+        log.log(Level.ALL, e.toString(), e);
       } finally {
-	_blockCount.decrementAndGet();
+        _blockCount.decrementAndGet();
       }
     }
 
@@ -153,22 +153,22 @@ public final class PacketQueue
 
       // check for consistency
       if (tail != _tail.get()) {
-	continue;
+        continue;
       }
-      
+
       if (next != null) {
-	// if tail has new data, move the tail pointer
-	_tail.compareAndSet(tail, next);
+        // if tail has new data, move the tail pointer
+        _tail.compareAndSet(tail, next);
       }
       else if (tail.compareAndSetNext(next, item)) {
-	// link the tail to the new packet
-	// and move the _tail pointer to the new tail
-	_tail.compareAndSet(tail, item);
+        // link the tail to the new packet
+        // and move the _tail pointer to the new tail
+        _tail.compareAndSet(tail, item);
 
-	// increment the size
-	_size.incrementAndGet();
+        // increment the size
+        _size.incrementAndGet();
 
-	return;
+        return;
       }
     }
   }
@@ -178,48 +178,50 @@ public final class PacketQueue
    */
   public final Packet dequeue()
   {
+    int spinCount = 4; // how many times spinning before returning null
+
     while (true) {
       QueueItem head = _head.get();
       QueueItem tail = _tail.get();
       QueueItem next = head.getNext();
 
-      if (head != _head.get()) { // check for consistency 
-	continue;
+      if (head != _head.get()) { // check for consistency
+        continue;
       }
 
       if (head != tail) {
-	if (_head.compareAndSet(head, next)) {
-	  _size.decrementAndGet();
-	  
-	  long createTime = next.getCreateTime();
-	  long now = Alarm.getCurrentTime();
+        if (_head.compareAndSet(head, next)) {
+          _size.decrementAndGet();
 
-	  if (createTime > 0 && now <= createTime + _expireTimeout) {
-	    // wake any blocked threads
-	    if (_blockCount.get() > 0 && _size.get() < _blockMaxSize) {
-	      synchronized (_blockLock) {
-		_blockLock.notifyAll();
-	      }
-	    }
+          long createTime = next.getCreateTime();
+          long now = Alarm.getCurrentTime();
 
-	    if (next != null) {
-	      Packet packet = next.getPacket();
-	      next.clearPacket();
+          if (createTime > 0 && now <= createTime + _expireTimeout) {
+            // wake any blocked threads
+            if (_blockCount.get() > 0 && _size.get() < _blockMaxSize) {
+              synchronized (_blockLock) {
+                _blockLock.notifyAll();
+              }
+            }
 
-	      return packet;
-	    }
-	    else
-	      return null;
-	  }
-	}
+            if (next != null) {
+              Packet packet = next.getPacket();
+              next.clearPacket();
+
+              return packet;
+            }
+            else if (--spinCount <= 0)
+              return null;
+          }
+        }
       }
       else {                 // empty queue cases
-	if (next != null) {  // tail has new data
-	  _tail.compareAndSet(tail, next);
-	}
-	else {               // actual empty queue
-	  return null;
-	}
+        if (next != null) {  // tail has new data
+          _tail.compareAndSet(tail, next);
+        }
+        else {               // actual empty queue
+          return null;
+        }
       }
     }
   }
@@ -234,14 +236,14 @@ public final class PacketQueue
   {
     private static final Logger log
       = Logger.getLogger(QueueItem.class.getName());
-  
+
     private static final AtomicReferenceFieldUpdater<QueueItem,QueueItem> _casNext
       = AtomicReferenceFieldUpdater.newUpdater(QueueItem.class,
-					       QueueItem.class,
-					       "_next");
-  
+                                               QueueItem.class,
+                                               "_next");
+
     private volatile QueueItem _next;
-  
+
     private Packet _packet;
 
     private final long _createTime;

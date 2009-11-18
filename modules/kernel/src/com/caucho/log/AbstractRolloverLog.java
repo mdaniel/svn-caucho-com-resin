@@ -99,7 +99,7 @@ public class AbstractRolloverLog {
   private QDate _calendar = QDate.createLocal();
 
   private Path _pwd = Vfs.lookup();
-  
+
   protected Path _path;
 
   protected String _pathFormat;
@@ -111,7 +111,7 @@ public class AbstractRolloverLog {
   private long _nextRolloverCheckTime = -1;
 
   private long _lastTime;
-  
+
   private final RolloverWorker _rolloverWorker = new RolloverWorker();
   private final Object _logLock = new Object();
 
@@ -161,7 +161,7 @@ public class AbstractRolloverLog {
     throws ConfigException
   {
     _pathFormat = pathFormat;
-    
+
     if (pathFormat.endsWith(".zip")) {
       throw new ConfigException(L.l(".zip extension to path-format is not supported."));
     }
@@ -213,7 +213,7 @@ public class AbstractRolloverLog {
   public void setRolloverPeriod(Period period)
   {
     _rolloverPeriod = period.getPeriod();
-    
+
     if (_rolloverPeriod > 0) {
       _rolloverPeriod += 3600000L - 1;
       _rolloverPeriod -= _rolloverPeriod % 3600000L;
@@ -295,7 +295,7 @@ public class AbstractRolloverLog {
   {
     _lastTime = lastTime;
   }
-  
+
   /**
    * Initialize the log.
    */
@@ -303,32 +303,33 @@ public class AbstractRolloverLog {
     throws IOException
   {
     long now = Alarm.getExactTime();
-    
-    _nextRolloverCheckTime = now + _rolloverCheckPeriod;
+
+    // server/0263
+    // _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
     Path path = getPath();
 
     if (path != null) {
       path.getParent().mkdirs();
-    
+
       _rolloverPrefix = path.getTail();
 
       long lastModified = path.getLastModified();
-      if (lastModified <= 0)
-	lastModified = now;
-    
+      if (lastModified <= 0 || now < lastModified)
+        lastModified = now;
+
       _calendar.setGMTTime(lastModified);
 
       if (_rolloverCron != null)
-	_nextPeriodEnd = _rolloverCron.nextTime(lastModified);
+        _nextPeriodEnd = _rolloverCron.nextTime(lastModified);
       else
-	_nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
+        _nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
     }
     else {
       if (_rolloverCron != null)
-	_nextPeriodEnd = _rolloverCron.nextTime(now);
+        _nextPeriodEnd = _rolloverCron.nextTime(now);
       else
-	_nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+        _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
     }
 
     if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
@@ -359,7 +360,7 @@ public class AbstractRolloverLog {
   public boolean isRollover()
   {
     long now = Alarm.getCurrentTime();
-    
+
     return _nextPeriodEnd <= now || _nextRolloverCheckTime <= now;
   }
 
@@ -383,27 +384,27 @@ public class AbstractRolloverLog {
   {
     synchronized (_logLock) {
       if (_isRollingOver && ROLLOVER_OVERFLOW_MAX < _tempStreamSize) {
-	try {
-	  _logLock.wait();
-	} catch (Exception e) {
-	}
+        try {
+          _logLock.wait();
+        } catch (Exception e) {
+        }
       }
-      
-      if (! _isRollingOver) {
-	if (_os == null)
-	  openLog();
 
-	if (_os != null)
-	  _os.write(buffer, offset, length);
+      if (! _isRollingOver) {
+        if (_os == null)
+          openLog();
+
+        if (_os != null)
+          _os.write(buffer, offset, length);
       }
       else {
-	if (_tempStream == null) {
-	  _tempStream = new TempStream();
-	  _tempStreamSize = 0;
-	}
+        if (_tempStream == null) {
+          _tempStream = new TempStream();
+          _tempStreamSize = 0;
+        }
 
-	_tempStreamSize += length;
-	_tempStream.write(buffer, offset, length, false);
+        _tempStreamSize += length;
+        _tempStream.write(buffer, offset, length, false);
       }
     }
   }
@@ -422,10 +423,10 @@ public class AbstractRolloverLog {
   {
     synchronized (_logLock) {
       if (_os != null)
-	_os.flush();
+        _os.flush();
 
       if (_zipOut != null)
-	_zipOut.flush();
+        _zipOut.flush();
     }
   }
 
@@ -437,7 +438,7 @@ public class AbstractRolloverLog {
   protected void rolloverLog()
   {
     long now = Alarm.getCurrentTime();
-    
+
     if (_nextRolloverCheckTime < now) {
       _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
@@ -452,13 +453,13 @@ public class AbstractRolloverLog {
   {
     try {
       _isRollingOver = true;
-      
+
       Path savedPath = null;
 
       long lastPeriodEnd = _nextPeriodEnd;
 
       long now = Alarm.getCurrentTime();
-      
+
       if (_rolloverCron != null)
         _nextPeriodEnd = _rolloverCron.nextTime(now);
       else
@@ -469,7 +470,7 @@ public class AbstractRolloverLog {
       synchronized (_logLock) {
         if (lastPeriodEnd < now) {
           closeLogStream();
-      
+
           if (getPathFormat() == null) {
             savedPath = getArchivePath(lastPeriodEnd - 1);
           }
@@ -512,37 +513,37 @@ public class AbstractRolloverLog {
   private void openLog()
   {
     closeLogStream();
-    
+
     try {
       WriteStream os = _os;
       _os = null;
 
       if (os != null)
-	os.close();
+        os.close();
     } catch (Throwable e) {
       // can't log in log routines
     }
-      
+
     Path path = getPath();
 
     if (path == null) {
       path = getPath(Alarm.getCurrentTime());
     }
-    
+
     try {
       if (! path.getParent().isDirectory())
-	path.getParent().mkdirs();
+        path.getParent().mkdirs();
     } catch (Throwable e) {
       logWarning(L.l("Can't create log directory {0}", path.getParent()), e);
     }
 
     Exception exn = null;
-    
+
     for (int i = 0; i < 3 && _os == null; i++) {
       try {
-	_os = path.openAppend();
+        _os = path.openAppend();
       } catch (IOException e) {
-	exn = e;
+        exn = e;
       }
     }
 
@@ -550,15 +551,15 @@ public class AbstractRolloverLog {
 
     try {
       if (pathName.endsWith(".gz")) {
-	_zipOut = _os;
-	_os = Vfs.openWrite(new GZIPOutputStream(_zipOut));
+        _zipOut = _os;
+        _os = Vfs.openWrite(new GZIPOutputStream(_zipOut));
       }
       else if (pathName.endsWith(".zip")) {
-	throw new ConfigException("Can't support .zip in path-format");
+        throw new ConfigException("Can't support .zip in path-format");
       }
     } catch (Exception e) {
       if (exn == null)
-	exn = e;
+        exn = e;
     }
 
     if (exn != null)
@@ -573,18 +574,18 @@ public class AbstractRolloverLog {
     synchronized (_logLock) {
       closeLogStream();
     }
-    
+
     Path path = getPath();
-    
+
     String savedName = savedPath.getTail();
 
     try {
       if (! savedPath.getParent().isDirectory())
-	savedPath.getParent().mkdirs();
+        savedPath.getParent().mkdirs();
     } catch (Exception e) {
       logWarning(L.l("Can't open archive directory {0}",
-		     savedPath.getParent()),
-		 e);
+                     savedPath.getParent()),
+                 e);
     }
 
     try {
@@ -592,37 +593,37 @@ public class AbstractRolloverLog {
         WriteStream os = null;
         OutputStream out = null;
 
-	// *.gz and *.zip are copied.  Others are just renamed
+        // *.gz and *.zip are copied.  Others are just renamed
         if (savedName.endsWith(".gz")) {
-	  os = savedPath.openWrite();
+          os = savedPath.openWrite();
           out = new GZIPOutputStream(os);
-	}
+        }
         else if (savedName.endsWith(".zip")) {
-	  os = savedPath.openWrite();
+          os = savedPath.openWrite();
           out = new ZipOutputStream(os);
-	}
+        }
         else {
-	  path.renameTo(savedPath);
-	}
+          path.renameTo(savedPath);
+        }
 
-	if (out != null) {
-	  try {
-	    path.writeToStream(out);
-	  } finally {
-	    try {
-	      out.close();
-	    } catch (Exception e) {
-	      // can't log in log rotation routines
-	    }
+        if (out != null) {
+          try {
+            path.writeToStream(out);
+          } finally {
+            try {
+              out.close();
+            } catch (Exception e) {
+              // can't log in log rotation routines
+            }
 
-	    try {
-	      if (out != os)
-		os.close();
-	    } catch (Exception e) {
-	      // can't log in log rotation routines
-	    }
-	  }
-	}
+            try {
+              if (out != os)
+                os.close();
+            } catch (Exception e) {
+              // can't log in log rotation routines
+            }
+          }
+        }
       }
     } catch (Exception e) {
       logWarning(L.l("Error rotating logs: {0}", e.toString()), e);
@@ -663,22 +664,22 @@ public class AbstractRolloverLog {
 
       Pattern archiveRegexp = getArchiveRegexp();
       for (int i = 0; i < list.length; i++) {
-	Matcher matcher = archiveRegexp.matcher(list[i]);
+        Matcher matcher = archiveRegexp.matcher(list[i]);
 
-	if (matcher.matches())
-	  matchList.add(list[i]);
+        if (matcher.matches())
+          matchList.add(list[i]);
       }
 
       Collections.sort(matchList);
 
       if (_rolloverCount <= 0 || matchList.size() < _rolloverCount)
-	return;
+        return;
 
       for (int i = 0; i + _rolloverCount < matchList.size(); i++) {
-	try {
-	  parent.lookup(matchList.get(i)).remove();
-	} catch (Throwable e) {
-	}
+        try {
+          parent.lookup(matchList.get(i)).remove();
+        } catch (Throwable e) {
+        }
       }
     } catch (Throwable e) {
     }
@@ -696,16 +697,16 @@ public class AbstractRolloverLog {
       switch (ch) {
       case '.':  case '\\': case '*': case '?': case '+':
       case '(': case ')': case '{': case '}': case '|':
-	sb.append("\\");
-	sb.append(ch);
-	break;
+        sb.append("\\");
+        sb.append(ch);
+        break;
       case '%':
-	sb.append(".+");
-	i++;
-	break;
+        sb.append(".+");
+        i++;
+        break;
       default:
-	sb.append(ch);
-	break;
+        sb.append(ch);
+        break;
       }
     }
 
@@ -723,7 +724,7 @@ public class AbstractRolloverLog {
 
     if (formatString == null)
       throw new IllegalStateException(L.l("getPath requires a format path"));
-    
+
     String pathString = getFormatName(formatString, time);
 
     return getPwd().lookup(pathString);
@@ -745,24 +746,24 @@ public class AbstractRolloverLog {
 
     if (newPath.exists()) {
       if (archiveFormat.indexOf("%H") < 0)
-	archiveFormat = archiveFormat + ".%H%M";
+        archiveFormat = archiveFormat + ".%H%M";
       else if (archiveFormat.indexOf("%M") < 0)
-	archiveFormat = archiveFormat + ".%M";
+        archiveFormat = archiveFormat + ".%M";
 
       for (int i = 0; i < 100; i++) {
-	String suffix;
+        String suffix;
 
-	if (i == 0)
-	  suffix = _archiveSuffix;
-	else
-	  suffix = "." + i + _archiveSuffix;
-	
-	name = getFormatName(archiveFormat + suffix, time);
+        if (i == 0)
+          suffix = _archiveSuffix;
+        else
+          suffix = "." + i + _archiveSuffix;
 
-	newPath = path.getParent().lookup(name);
+        name = getFormatName(archiveFormat + suffix, time);
 
-	if (! newPath.exists())
-	  break;
+        newPath = path.getParent().lookup(name);
+
+        if (! newPath.exists())
+          break;
       }
     }
 
@@ -778,7 +779,7 @@ public class AbstractRolloverLog {
   {
     if (time <= 0)
       time = Alarm.getCurrentTime();
-    
+
     if (format != null)
       return _calendar.formatLocal(time, format);
     else if (_rolloverCron != null)
@@ -853,20 +854,20 @@ public class AbstractRolloverLog {
 
     try {
       if (ts != null) {
-	if (_os == null)
-	  openLog();
+        if (_os == null)
+          openLog();
 
-	try {
-	  ReadStream is = ts.openRead();
+        try {
+          ReadStream is = ts.openRead();
 
-	  try {
-	    is.writeToStream(_os);
-	  } finally {
-	    is.close();
-	  }
-	} catch (IOException e) {
-	  e.printStackTrace();
-	}
+          try {
+            is.writeToStream(_os);
+          } finally {
+            is.close();
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
       }
     } finally {
       _logLock.notifyAll();
