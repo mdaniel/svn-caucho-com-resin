@@ -364,7 +364,8 @@ public class WebApp extends ServletContextImpl
   {
     _server = Server.getCurrent();
 
-    _invocationDecoder = _server.getInvocationDecoder();
+    if (_server != null) // JspCompiler creates no server jsp/1930)
+      _invocationDecoder = _server.getInvocationDecoder();
 
     setVersionContextPath(controller.getContextPath());
     _baseContextPath = controller.getBaseContextPath();
