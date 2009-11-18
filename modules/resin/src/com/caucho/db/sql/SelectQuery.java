@@ -38,9 +38,12 @@ import com.caucho.util.CharBuffer;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class SelectQuery extends Query {
+  private static final Logger log
+    = Logger.getLogger(SelectQuery.class.getName());
+
   private Expr []_results;
   private String []_resultNames;
 
@@ -100,8 +103,8 @@ public class SelectQuery extends Query {
 
     if (isGroup()) {
       for (int i = 0; i < _results.length; i++) {
-	if (isGroup() && ! (_results[i] instanceof GroupExpr))
-	  _results[i] = new GroupResultExpr(i, _results[i]);
+        if (isGroup() && ! (_results[i] instanceof GroupExpr))
+          _results[i] = new GroupResultExpr(i, _results[i]);
       }
     }
 
@@ -160,9 +163,9 @@ public class SelectQuery extends Query {
       context.init(xa, rows, isReadOnly());
 
       if (isGroup())
-	executeGroup(result, rows, context, xa);
+        executeGroup(result, rows, context, xa);
       else
-	execute(result, rows, context, xa);
+        execute(result, rows, context, xa);
 
       result.initRead();
 
@@ -172,10 +175,14 @@ public class SelectQuery extends Query {
     } finally {
       // autoCommitRead must be before freeRows in case freeRows
       // throws an exception
-      context.close();
-      
+      try {
+        context.close();
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
       if (rows != null)
-	freeRows(rows, rows.length);
+        freeRows(rows, rows.length);
     }
   }
 
@@ -183,9 +190,9 @@ public class SelectQuery extends Query {
    * Executes the query.
    */
   private void execute(SelectResult result,
-		       TableIterator []rows,
-		       QueryContext context,
-		       Transaction xa)
+                       TableIterator []rows,
+                       QueryContext context,
+                       Transaction xa)
     throws SQLException, IOException
   {
     FromItem []fromItems = getFromItems();
@@ -198,19 +205,19 @@ public class SelectQuery extends Query {
 
     if (start(rows, rowLength, context, xa)) {
       do {
-	result.startRow();
+        result.startRow();
 
-	for (int i = 0; i < _results.length; i++) {
-	  _results[i].evalToResult(context, result);
-	}
+        for (int i = 0; i < _results.length; i++) {
+          _results[i].evalToResult(context, result);
+        }
       } while (nextTuple(rows, rowLength, context, xa) && --limit > 0);
     }
   }
 
   private void executeGroup(SelectResult result,
-			    TableIterator []rows,
-			    QueryContext context,
-			    Transaction transaction)
+                            TableIterator []rows,
+                            QueryContext context,
+                            Transaction transaction)
     throws SQLException, IOException
   {
     FromItem []fromItems = getFromItems();
@@ -232,19 +239,19 @@ public class SelectQuery extends Query {
 
     if (start(rows, rowLength, context, transaction)) {
       do {
-	context.initGroup(getDataFields(), _groupFields);
+        context.initGroup(getDataFields(), _groupFields);
 
-	for (int i = 0; i < groupByLength; i++) {
-	  if (groupByFields[i])
-	    results[i].evalGroup(context);
-	}
+        for (int i = 0; i < groupByLength; i++) {
+          if (groupByFields[i])
+            results[i].evalGroup(context);
+        }
 
-	context.selectGroup();
+        context.selectGroup();
 
-	for (int i = 0; i < resultsLength; i++) {
-	  if (! (i < groupByLength && groupByFields[i]))
-	    results[i].evalGroup(context);
-	}
+        for (int i = 0; i < resultsLength; i++) {
+          if (! (i < groupByLength && groupByFields[i]))
+            results[i].evalGroup(context);
+        }
       } while (nextTuple(rows, rowLength, context, transaction));
     }
 
@@ -257,7 +264,7 @@ public class SelectQuery extends Query {
 
       result.startRow();
       for (int i = 0; i < results.length; i++) {
-	results[i].evalToResult(context, result);
+        results[i].evalToResult(context, result);
       }
     }
   }
@@ -269,7 +276,7 @@ public class SelectQuery extends Query {
     cb.append("SELECT ");
     for (int i = 0; i < _results.length; i++) {
       if (i != 0)
-	cb.append(",");
+        cb.append(",");
       cb.append(_results[i]);
     }
     cb.append(" FROM ");
@@ -277,7 +284,7 @@ public class SelectQuery extends Query {
     FromItem []fromItems = getFromItems();
     for (int i = 0; i < fromItems.length; i++) {
       if (i != 0)
-	cb.append(",");
+        cb.append(",");
       cb.append(fromItems[i]);
     }
 

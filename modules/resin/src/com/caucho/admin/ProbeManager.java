@@ -42,6 +42,14 @@ public class ProbeManager {
 
   protected void setManager(ProbeManager manager)
   {
+    if (manager == null)
+      manager = new ProbeManager();
+    else {
+      ProbeManager oldManager = _manager;
+
+      manager._probeMap.putAll(_probeMap);
+    }
+
     _manager = manager;
   }
 

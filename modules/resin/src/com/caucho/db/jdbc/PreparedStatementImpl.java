@@ -43,7 +43,7 @@ import java.util.Calendar;
  */
 public class PreparedStatementImpl extends StatementImpl
   implements PreparedStatement {
-  
+
   private Query _query;
   private int _updateCount;
   private boolean _wasResultSet;
@@ -68,7 +68,7 @@ public class PreparedStatementImpl extends StatementImpl
   {
     return null;
   }
-  
+
   public void clearParameters()
     throws SQLException
   {
@@ -246,13 +246,13 @@ public class PreparedStatementImpl extends StatementImpl
       setString(parameter, (String) x);
     else if (x instanceof Number) {
       Number number = (Number) x;
-      
+
       if (x instanceof Double)
-	setDouble(parameter, number.doubleValue());
+        setDouble(parameter, number.doubleValue());
       else if (x instanceof java.lang.Float)
-	setDouble(parameter, number.doubleValue());
+        setDouble(parameter, number.doubleValue());
       else
-	setLong(parameter, number.longValue());
+        setLong(parameter, number.longValue());
     }
     else if (x instanceof java.sql.Time)
       setTime(parameter, (java.sql.Time) x);
@@ -293,7 +293,7 @@ public class PreparedStatementImpl extends StatementImpl
     throws SQLException
   {
   }
-  
+
   public java.sql.ResultSet executeQuery()
     throws SQLException
   {
@@ -309,7 +309,7 @@ public class PreparedStatementImpl extends StatementImpl
     throws SQLException
   {
     execute();
-    
+
     return getUpdateCount();
   }
 
@@ -319,37 +319,40 @@ public class PreparedStatementImpl extends StatementImpl
     _count++;
 
     Transaction xa = null;
+    QueryContext queryContext = null;
 
     try {
       if (_count != 1)
-	throw new IllegalStateException("Multithreading execute");
-      
+        throw new IllegalStateException("Multithreading execute");
+
       xa = _conn.getTransaction();
-      QueryContext queryContext = getQueryContext();
-    
+      queryContext = getQueryContext();
+
       if (_query.isSelect()) {
-	com.caucho.db.ResultSetImpl rs = null;
-    
-	_query.execute(queryContext, xa);
+        com.caucho.db.ResultSetImpl rs = null;
 
-	_wasResultSet = true;
-	_resultSet = new ResultSetImpl(this, queryContext.getResult());
+        _query.execute(queryContext, xa);
 
-	return true;
+        _wasResultSet = true;
+        _resultSet = new ResultSetImpl(this, queryContext.getResult());
+
+        return true;
       }
       else {
-	queryContext.setReturnGeneratedKeys(_isReturnGeneratedKeys);
-	
-	_query.execute(queryContext, xa);
+        queryContext.setReturnGeneratedKeys(_isReturnGeneratedKeys);
 
-	_wasResultSet = false;
-	return false;
+        _query.execute(queryContext, xa);
+
+        _wasResultSet = false;
+        return false;
       }
     } finally {
       _count--;
 
+      closeQueryContext(queryContext);
+
       if (xa != null && xa.isAutoCommit())
-	xa.rollback();
+        xa.rollback();
     }
   }
 
@@ -358,7 +361,7 @@ public class PreparedStatementImpl extends StatementImpl
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public ParameterMetaData getParameterMetaData()
   {
     throw new UnsupportedOperationException();

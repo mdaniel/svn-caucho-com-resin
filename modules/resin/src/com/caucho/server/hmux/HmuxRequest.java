@@ -467,7 +467,7 @@ public class HmuxRequest extends AbstractHttpRequest
       getRequestFacade().setInvocation(invocation);
 
       startInvocation();
-      
+
       if (_server.isPreview() && ! "resin.admin".equals(getHost())) {
         return sendBusyResponse();
       }
@@ -1924,7 +1924,7 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     HttpServletRequestImpl request = getRequestFacade();
-    
+
     if (request != null) {
       AbstractResponseStream stream = request.getResponse().getResponseStream();
 
@@ -2090,14 +2090,14 @@ public class HmuxRequest extends AbstractHttpRequest
 
       while (_pendingData == 0) {
         if (_needsAck) {
-          int channel = 2;
+          _request.flushResponseBuffer();
 
           _os.write(HMUX_ACK);
-          _os.write(channel >> 8);
-          _os.write(channel);
+          _os.write(0);
+          _os.write(0);
 
           if (log.isLoggable(Level.FINE))
-            log.fine(_request.dbgId() + "A-w:ack channel 2");
+            log.fine(_request.dbgId() + "A-w:ack channel");
         }
 
         _needsAck = false;

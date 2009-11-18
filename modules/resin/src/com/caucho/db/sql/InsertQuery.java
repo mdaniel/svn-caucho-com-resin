@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 
 class InsertQuery extends Query {
   private Table _table;
-      
+
   private ArrayList<Column> _columns;
   private ArrayList<Expr> _values;
 
@@ -77,21 +77,21 @@ class InsertQuery extends Query {
       Expr defaultExpr = column.getDefault();
 
       if (column.getAutoIncrement() > 0) {
-	defaultExpr = new AutoIncrementExpr(column.getTable());
+        defaultExpr = new AutoIncrementExpr(column.getTable());
       }
-      
+
       if (defaultExpr == null)
-	continue;
+        continue;
 
       int j = 0;
       for (; j < _columns.size(); j++) {
-	if (_columns.get(j) == column)
-	  break;
+        if (_columns.get(j) == column)
+          break;
       }
 
       if (j == _columns.size()) {
-	_columns.add(column);
-	_values.add(new NullExpr());
+        _columns.add(column);
+        _values.add(new NullExpr());
       }
 
       _values.set(j, new DefaultExpr(_values.get(j), defaultExpr));
@@ -105,18 +105,16 @@ class InsertQuery extends Query {
     throws SQLException
   {
     TableIterator []rows = new TableIterator[1];
-    
+
     try {
       rows[0] = _table.createTableIterator();
       queryContext.init(xa, rows, isReadOnly());
-      
+
       _table.insert(queryContext, xa, _columns, _values);
 
       queryContext.setRowUpdateCount(1);
     } catch (java.io.IOException e) {
       throw new SQLExceptionWrapper(e);
-    } finally {
-      queryContext.close();
     }
   }
 

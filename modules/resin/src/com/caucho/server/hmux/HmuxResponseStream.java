@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 public class HmuxResponseStream extends ResponseStream {
   private static final Logger log
     = Logger.getLogger(HmuxResponseStream.class.getName());
-  
+
   private static final L10N L = new L10N(HmuxResponseStream.class);
 
   private HmuxRequest _request;
@@ -64,7 +64,7 @@ public class HmuxResponseStream extends ResponseStream {
     _request = request;
     _next = next;
   }
-  
+
   //
   // implementations
   //
@@ -89,14 +89,14 @@ public class HmuxResponseStream extends ResponseStream {
         }
         startOffset = _next.getBufferOffset() + 3;
       }
-      
+
       _next.setBufferOffset(startOffset);
       _bufferStartOffset = startOffset;
     }
 
     return _bufferStartOffset;
   }
-      
+
   @Override
   protected int getNextBufferOffset()
     throws IOException
@@ -108,37 +108,38 @@ public class HmuxResponseStream extends ResponseStream {
         _next.flush();
         startOffset = _next.getBufferOffset() + 3;
       }
-      
+
       _next.setBufferOffset(startOffset);
       _bufferStartOffset = startOffset;
     }
-      
+
     return _next.getBufferOffset();
   }
-  
+
   @Override
   protected void setNextBufferOffset(int offset)
     throws IOException
   {
     // server/2642
     int bufferStart = _bufferStartOffset;
-    
+
     byte []buffer = _next.getBuffer();
 
-    if (bufferStart > 0 && offset == buffer.length) {
+    // if (bufferStart > 0 && offset == buffer.length) {
+    if (bufferStart > 0) {
       int length = offset - bufferStart;
 
       buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
       buffer[bufferStart - 2] = (byte) (length >> 8);
       buffer[bufferStart - 1] = (byte) (length);
-      
+
       _bufferStartOffset = 0;
 
       // server/26a0
       if (length == 0)
         offset = bufferStart - 3;
     }
-    
+
     _next.setBufferOffset(offset);
   }
 
@@ -149,7 +150,7 @@ public class HmuxResponseStream extends ResponseStream {
     WriteStream next = _next;
 
     int bufferStart = _bufferStartOffset;
-    
+
     if (offset == bufferStart) {
       if (offset > 0)
         offset = bufferStart - 3;
@@ -164,7 +165,7 @@ public class HmuxResponseStream extends ResponseStream {
       buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
       buffer[bufferStart - 2] = (byte) (length >> 8);
       buffer[bufferStart - 1] = (byte) (length);
-      
+
       _bufferStartOffset = 0;
 
       if (log.isLoggable(Level.FINE))
@@ -209,7 +210,7 @@ public class HmuxResponseStream extends ResponseStream {
 
     int bufferStart = _bufferStartOffset;
     int offset = next.getBufferOffset();
-    
+
     if (offset == bufferStart) {
       if (offset > 0)
         offset = bufferStart - 3;
@@ -222,10 +223,10 @@ public class HmuxResponseStream extends ResponseStream {
       buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
       buffer[bufferStart - 2] = (byte) (length >> 8);
       buffer[bufferStart - 1] = (byte) (length);
-      
+
       _bufferStartOffset = 0;
     }
-    
+
     if (log.isLoggable(Level.FINE) && offset > bufferStart)
       log.fine(dbgId() + "write-tail(" + (offset - bufferStart) + ")");
 
