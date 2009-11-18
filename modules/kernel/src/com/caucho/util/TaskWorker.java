@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 abstract public class TaskWorker implements Runnable {
   private static final Logger log
     = Logger.getLogger(TaskWorker.class.getName());
-  
+
   private final AtomicBoolean _isTask = new AtomicBoolean();
   private final AtomicBoolean _isActive = new AtomicBoolean();
   private final AtomicLong _idGen = new AtomicLong();
@@ -76,11 +76,13 @@ abstract public class TaskWorker implements Runnable {
     if (_isDestroyed)
       return;
 
+    boolean isNewTask = ! _isTask.getAndSet(true);
+
     if (! _isActive.getAndSet(true)) {
       ThreadPool.getCurrent().schedulePriority(this);
     }
 
-    if (! _isTask.getAndSet(true)) {
+    if (isNewTask) {
       Thread thread = _thread;
 
       if (thread != null) {
