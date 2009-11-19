@@ -227,7 +227,8 @@ abstract public class JspFragmentNode extends JspContainerNode
       cb.append(", null");
 
     cb.append(", _jsp_state");
-      
+    cb.append(", _jsp_pageManager");
+
     cb.append(")");
 
     return cb.close();
@@ -253,7 +254,8 @@ abstract public class JspFragmentNode extends JspContainerNode
     out.println("  com.caucho.jsp.PageContextImpl pageContext,");
     out.println("  javax.servlet.jsp.tagext.JspTag _jsp_parent_tag,");
     out.println("  javax.servlet.jsp.tagext.JspFragment _jspBody,");
-    out.println("  TagState _jsp_state)");
+    out.println("  TagState _jsp_state,");
+    out.println("  com.caucho.jsp.PageManager _jsp_pageManager)");
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();
