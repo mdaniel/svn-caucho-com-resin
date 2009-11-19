@@ -151,7 +151,6 @@ public class WaitQueue {
 
     final boolean unpark()
     {
-
       if (_isParked.getAndSet(false)) {
         LockSupport.unpark(_thread);
         return true;
@@ -169,7 +168,7 @@ public class WaitQueue {
     {
       _isParked.set(false);
     }
-    
+
     public final void park(long millis)
     {
       if (! _isParked.get())
@@ -182,7 +181,7 @@ public class WaitQueue {
         _isParked.set(false);
       }
     }
-    
+
     public final void parkUntil(long expires)
     {
       if (! _isParked.get())

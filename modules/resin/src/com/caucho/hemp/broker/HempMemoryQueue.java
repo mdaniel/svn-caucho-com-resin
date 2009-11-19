@@ -57,7 +57,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
-  private long _queueIdleTimeout = 2000L;
+  private long _queueIdleTimeout = 500L;
 
   private final ThreadPool _threadPool = ThreadPool.getCurrent();
   private final ClassLoader _loader
