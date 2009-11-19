@@ -42,18 +42,20 @@ import com.caucho.util.*;
  */
 public class SimpleActorClient implements ActorClient {
   private String _jid;
-  
+
   private ActorStream _actorStream;
   private ActorStream _brokerStream;
 
   private final QueryMap _queryMap = new QueryMap();
-    
+
   private final AtomicLong _qId = new AtomicLong();
+
+  private long _timeout = 10000L;
 
   protected SimpleActorClient()
   {
   }
-  
+
   /**
    * Returns the Actor's jid used for all "from" parameters.
    */
@@ -61,7 +63,7 @@ public class SimpleActorClient implements ActorClient {
   {
     return _jid;
   }
-  
+
   //
   // streams
   //
@@ -74,7 +76,7 @@ public class SimpleActorClient implements ActorClient {
     if (actorStream instanceof SimpleActorStream) {
       ((SimpleActorStream) actorStream).setActorClient(this);
     }
-	
+
     _actorStream = actorStream;
   }
 
@@ -85,7 +87,7 @@ public class SimpleActorClient implements ActorClient {
   {
     return _actorStream;
   }
-  
+
   /**
    * Returns the underlying, low-level stream to the broker
    */
@@ -109,7 +111,7 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
    * addressed by the Actor's JID.
-   * 
+   *
    * @param to the target actor's JID
    * @param payload the message payload
    */
@@ -143,15 +145,48 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the query payload
    */
   public Serializable queryGet(String to,
-			       Serializable payload)
+                               Serializable payload)
   {
     WaitQueryCallback callback = new WaitQueryCallback();
 
     queryGet(to, payload, callback);
 
-    if (! callback.waitFor()) {
+    if (! callback.waitFor(_timeout)) {
       throw new TimeoutException(this + " queryGet timeout " + payload
-				 + " {to:" + to + "}");
+                                 + " {to:" + to + "}");
+    }
+    else if (callback.getError() != null)
+      throw callback.getError().createException();
+    else
+      return callback.getResult();
+  }
+
+  /**
+   * Sends a query information call (get) to an actor,
+   * blocking until the actor responds with a result or an error.
+   *
+   * The target actor of a <code>queryGet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's JID
+   * @param payload the query payload
+   */
+  public Serializable queryGet(String to,
+                               Serializable payload,
+                               long timeout)
+  {
+    WaitQueryCallback callback = new WaitQueryCallback();
+
+    queryGet(to, payload, callback);
+
+    if (! callback.waitFor(timeout)) {
+      throw new TimeoutException(this + " queryGet timeout " + payload
+                                 + " {to:" + to + "}");
     }
     else if (callback.getError() != null)
       throw callback.getError().createException();
@@ -177,11 +212,11 @@ public class SimpleActorClient implements ActorClient {
    * @param callback the application's callback for the result
    */
   public void queryGet(String to,
-		       Serializable payload,
-		       QueryCallback callback)
+                       Serializable payload,
+                       QueryCallback callback)
   {
     long id = _qId.incrementAndGet();
-      
+
     _queryMap.add(id, callback);
 
     ActorStream stream = getBrokerStream();
@@ -208,15 +243,48 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the query payload
    */
   public Serializable querySet(String to,
-			       Serializable payload)
+                               Serializable payload)
   {
     WaitQueryCallback callback = new WaitQueryCallback();
 
     querySet(to, payload, callback);
 
-    if (! callback.waitFor()) {
+    if (! callback.waitFor(_timeout)) {
       throw new TimeoutException(this + " querySet timeout " + payload
-				 + " {to:" + to + "}");
+                                 + " {to:" + to + "}");
+    }
+    else if (callback.getError() != null)
+      throw callback.getError().createException();
+    else
+      return callback.getResult();
+  }
+
+  /**
+   * Sends a query update call (set) to an actor,
+   * blocking until the actor responds with a result or an error.
+   *
+   * The target actor of a <code>querySet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's JID
+   * @param payload the query payload
+   */
+  public Serializable querySet(String to,
+                               Serializable payload,
+                               long timeout)
+  {
+    WaitQueryCallback callback = new WaitQueryCallback();
+
+    querySet(to, payload, callback);
+
+    if (! callback.waitFor(timeout)) {
+      throw new TimeoutException(this + " querySet timeout " + payload
+                                 + " {to:" + to + "}");
     }
     else if (callback.getError() != null)
       throw callback.getError().createException();
@@ -242,11 +310,11 @@ public class SimpleActorClient implements ActorClient {
    * @param callback the application's callback for the result
    */
   public void querySet(String to,
-		       Serializable payload,
-		       QueryCallback callback)
+                       Serializable payload,
+                       QueryCallback callback)
   {
     long id = _qId.incrementAndGet();
-      
+
     _queryMap.add(id, callback);
 
     ActorStream stream = getBrokerStream();
@@ -269,7 +337,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presence(String to,
-		       Serializable payload)
+                       Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -278,7 +346,7 @@ public class SimpleActorClient implements ActorClient {
 
     stream.presence(to, getJid(), payload);
   }
-  
+
   /**
    * Announces a subscribing actor's logout, like an IM user logging out,
    * or subscriber logging out.
@@ -287,7 +355,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presenceUnavailable(String to,
-				  Serializable payload)
+                                  Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -296,7 +364,7 @@ public class SimpleActorClient implements ActorClient {
 
     stream.presenceUnavailable(to, getJid(), payload);
   }
-  
+
   /**
    * Presence probing packet from a publisher actor to a
    * subscriber actor, used to query subscriber capabilities.
@@ -305,7 +373,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presenceProbe(String to,
-			    Serializable payload)
+                            Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -314,7 +382,7 @@ public class SimpleActorClient implements ActorClient {
 
     stream.presenceProbe(to, getJid(), payload);
   }
-  
+
   /**
    * A subscription request from a subscriber to a publisher.
    *
@@ -322,7 +390,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presenceSubscribe(String to,
-				Serializable payload)
+                                Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -339,7 +407,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presenceSubscribed(String to,
-				 Serializable payload)
+                                 Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -348,7 +416,7 @@ public class SimpleActorClient implements ActorClient {
 
     stream.presenceSubscribed(to, getJid(), payload);
   }
-  
+
   /**
    * A unsubscription request from a subscriber to a publisher.
    *
@@ -356,7 +424,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presenceUnsubscribe(String to,
-				  Serializable payload)
+                                  Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -373,7 +441,7 @@ public class SimpleActorClient implements ActorClient {
    * @param payload the presence payload
    */
   public void presenceUnsubscribed(String to,
-				   Serializable payload)
+                                   Serializable payload)
   {
     ActorStream stream = getBrokerStream();
 
@@ -391,8 +459,8 @@ public class SimpleActorClient implements ActorClient {
    * @param error the error information
    */
   public void presenceError(String to,
-			    Serializable payload,
-			    ActorError error)
+                            Serializable payload,
+                            ActorError error)
   {
     ActorStream stream = getBrokerStream();
 
@@ -411,15 +479,15 @@ public class SimpleActorClient implements ActorClient {
    * if the client has a pending query, false otherwise.
    */
   public final boolean onQueryResult(long id,
-				     String to,
-				     String from,
-				     Serializable payload)
+                                     String to,
+                                     String from,
+                                     Serializable payload)
   {
     QueryItem item = _queryMap.remove(id);
 
     if (item != null) {
       item.onQueryResult(to, from, payload);
-      
+
       return true;
     }
     else
@@ -431,16 +499,16 @@ public class SimpleActorClient implements ActorClient {
    * if the client has a pending query, false otherwise.
    */
   public final boolean onQueryError(long id,
-				    String to,
-				    String from,
-				    Serializable payload,
-				    ActorError error)
+                                    String to,
+                                    String from,
+                                    Serializable payload,
+                                    ActorError error)
   {
     QueryItem item = _queryMap.remove(id);
 
     if (item != null) {
       item.onQueryError(to, from, payload, error);
-      
+
       return true;
     }
     else
@@ -450,7 +518,7 @@ public class SimpleActorClient implements ActorClient {
   //
   // lifecycle
   //
-  
+
   /**
    * Returns true if the client is closed
    */
@@ -476,13 +544,13 @@ public class SimpleActorClient implements ActorClient {
   static final class QueryMap {
     private final QueryItem []_entries = new QueryItem[128];
     private final int _mask = _entries.length - 1;
-    
+
     void add(long id, QueryCallback callback)
     {
       int hash = (int) (id & _mask);
 
       synchronized (_entries) {
-	_entries[hash] = new QueryItem(id, callback, _entries[hash]);
+        _entries[hash] = new QueryItem(id, callback, _entries[hash]);
       }
     }
 
@@ -491,24 +559,24 @@ public class SimpleActorClient implements ActorClient {
       int hash = (int) (id & _mask);
 
       synchronized (_entries) {
-	QueryItem prev = null;
+        QueryItem prev = null;
 
-	for (QueryItem ptr = _entries[hash];
-	     ptr != null;
-	     ptr = ptr.getNext()) {
-	  if (id == ptr.getId()) {
-	    if (prev != null)
-	      prev.setNext(ptr.getNext());
-	    else
-	      _entries[hash] = ptr.getNext();
+        for (QueryItem ptr = _entries[hash];
+             ptr != null;
+             ptr = ptr.getNext()) {
+          if (id == ptr.getId()) {
+            if (prev != null)
+              prev.setNext(ptr.getNext());
+            else
+              _entries[hash] = ptr.getNext();
 
-	    return ptr;
-	  }
+            return ptr;
+          }
 
-	  prev = ptr;
-	}
+          prev = ptr;
+        }
 
-	return null;
+        return null;
       }
     }
   }
@@ -544,18 +612,18 @@ public class SimpleActorClient implements ActorClient {
     void onQueryResult(String to, String from, Serializable value)
     {
       if (_callback != null)
-	_callback.onQueryResult(to, from, value);
+        _callback.onQueryResult(to, from, value);
     }
 
     void onQueryError(String to,
-		      String from,
-		      Serializable value,
-		      ActorError error)
+                      String from,
+                      Serializable value,
+                      ActorError error)
     {
       if (_callback != null)
-	_callback.onQueryError(to, from, value, error);
+        _callback.onQueryError(to, from, value, error);
     }
-    
+
     @Override
     public String toString()
     {
@@ -573,17 +641,17 @@ public class SimpleActorClient implements ActorClient {
     {
       return _result;
     }
-    
+
     public ActorError getError()
     {
       return _error;
     }
 
-    boolean waitFor()
+    boolean waitFor(long timeout)
     {
       _thread = Thread.currentThread();
       long now = Alarm.getCurrentTimeActual();
-      long expires = now + 10000L;
+      long expires = now + timeout;
 
       while (! _isResult.get() && Alarm.getCurrentTimeActual() < expires) {
         try {
@@ -597,9 +665,9 @@ public class SimpleActorClient implements ActorClient {
 
       return _isResult.get();
     }
-    
+
     public void onQueryResult(String fromJid, String toJid,
-			      Serializable payload)
+                              Serializable payload)
     {
       _result = payload;
       _isResult.set(true);
@@ -608,9 +676,9 @@ public class SimpleActorClient implements ActorClient {
       if (thread != null)
         LockSupport.unpark(thread);
     }
-  
+
     public void onQueryError(String fromJid, String toJid,
-			     Serializable payload, ActorError error)
+                             Serializable payload, ActorError error)
     {
       _error = error;
       _isResult.set(true);

@@ -44,11 +44,12 @@ public class LocalActorClient implements ActorClient {
 
   private static final WeakHashMap<ClassLoader,ClientActorFactory>
     _factoryMap = new WeakHashMap<ClassLoader,ClientActorFactory>();
-  
+
   private boolean _isFinest = log.isLoggable(Level.FINEST);
 
   private ActorClient _client;
 
+  private long _timeout = 10000L;
   private boolean _isClosed;
 
   public LocalActorClient()
@@ -99,7 +100,7 @@ public class LocalActorClient implements ActorClient {
   }
 
   public void message(String to,
-		      Serializable payload)
+                      Serializable payload)
   {
     _client.message(to, payload);
   }
@@ -109,27 +110,41 @@ public class LocalActorClient implements ActorClient {
   //
 
   public Serializable queryGet(String to,
-			       Serializable payload)
+                               Serializable payload)
   {
     return _client.queryGet(to, payload);
   }
 
+  public Serializable queryGet(String to,
+                               Serializable payload,
+                               long timeout)
+  {
+    return _client.queryGet(to, payload, timeout);
+  }
+
   public void queryGet(String to,
-		       Serializable payload,
-		       QueryCallback callback)
+                       Serializable payload,
+                       QueryCallback callback)
   {
     _client.queryGet(to, payload, callback);
   }
 
   public Serializable querySet(String to,
-			       Serializable payload)
+                               Serializable payload)
   {
     return _client.querySet(to, payload);
   }
 
+  public Serializable querySet(String to,
+                               Serializable payload,
+                               long timeout)
+  {
+    return _client.querySet(to, payload, timeout);
+  }
+
   public void querySet(String to,
-		       Serializable payload,
-		       QueryCallback callback)
+                       Serializable payload,
+                       QueryCallback callback)
   {
     _client.querySet(to, payload, callback);
   }
@@ -170,8 +185,8 @@ public class LocalActorClient implements ActorClient {
   }
 
   public void presenceError(String to,
-			    Serializable payload,
-			    ActorError error)
+                            Serializable payload,
+                            ActorError error)
   {
     _client.presenceError(to, payload, error);
   }
@@ -185,20 +200,20 @@ public class LocalActorClient implements ActorClient {
   {
     _client.close();
   }
-  
+
   public final boolean onQueryResult(long id,
-				     String to,
-				     String from,
-				     Serializable payload)
+                                     String to,
+                                     String from,
+                                     Serializable payload)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   public final boolean onQueryError(long id,
-				    String to,
-				    String from,
-				    Serializable payload,
-				    ActorError error)
+                                    String to,
+                                    String from,
+                                    Serializable payload,
+                                    ActorError error)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -212,16 +227,16 @@ public class LocalActorClient implements ActorClient {
       factory = _factoryMap.get(loader);
 
       if (factory != null)
-	return factory;
+        return factory;
     }
 
     try {
       String name = readFactoryClassName();
 
       if (name != null) {
-	Class cl = Class.forName(name, false, loader);
+        Class cl = Class.forName(name, false, loader);
 
-	factory = (ClientActorFactory) cl.newInstance();
+        factory = (ClientActorFactory) cl.newInstance();
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -233,49 +248,49 @@ public class LocalActorClient implements ActorClient {
     synchronized (_factoryMap) {
       _factoryMap.put(loader, factory);
     }
-    
+
     return factory;
   }
 
   private String readFactoryClassName()
   {
     InputStream is = null;
-    
+
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       is = loader.getResourceAsStream("META-INF/services/com.caucho.bam.ClientActorFactory");
 
       if (is == null)
-	return null;
+        return null;
 
       StringBuilder sb = new StringBuilder();
       int ch;
 
       while ((ch = is.read()) >= 0) {
-	if (ch == '\r' || ch == '\n') {
-	  String line = sb.toString();
+        if (ch == '\r' || ch == '\n') {
+          String line = sb.toString();
 
-	  int p = line.indexOf('#');
-	  if (p > 0)
-	    line = line.substring(0, p);
+          int p = line.indexOf('#');
+          if (p > 0)
+            line = line.substring(0, p);
 
-	  line = line.trim();
+          line = line.trim();
 
-	  if (line.length() > 0)
-	    return line;
+          if (line.length() > 0)
+            return line;
 
-	  sb = new StringBuilder();
-	}
-	else
-	  sb.append((char) ch);
+          sb = new StringBuilder();
+        }
+        else
+          sb.append((char) ch);
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       } catch (IOException e) {
       }
     }
@@ -294,7 +309,7 @@ public class LocalActorClient implements ActorClient {
     throws Throwable
   {
     super.finalize();
-    
+
     close();
   }
 }

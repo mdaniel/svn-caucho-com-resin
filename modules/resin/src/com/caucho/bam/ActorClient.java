@@ -46,7 +46,7 @@ public interface ActorClient {
   //
   // lifecycle
   //
-  
+
   /**
    * Returns true if the client is closed
    */
@@ -56,7 +56,7 @@ public interface ActorClient {
    * Closes the client
    */
   public void close();
-  
+
   //
   // handlers
   //
@@ -78,7 +78,7 @@ public interface ActorClient {
   /**
    * Sends a unidirectional message to an {@link com.caucho.bam.Actor},
    * addressed by the Actor's JID.
-   * 
+   *
    * @param to the target actor's JID
    * @param payload the message payload
    */
@@ -104,7 +104,27 @@ public interface ActorClient {
    * @param payload the query payload
    */
   public Serializable queryGet(String to,
-			       Serializable payload);
+                               Serializable payload);
+
+  /**
+   * Sends a query information call (get) to an actor,
+   * blocking until the actor responds with a result or an error.
+   *
+   * The target actor of a <code>queryGet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's JID
+   * @param payload the query payload
+   * @param timeout time spent waiting for the query to return
+   */
+  public Serializable queryGet(String to,
+                               Serializable payload,
+                               long timeout);
 
   /**
    * Sends a query information call (get) to an actor,
@@ -123,8 +143,8 @@ public interface ActorClient {
    * @param callback the application's callback for the result
    */
   public void queryGet(String to,
-		       Serializable payload,
-		       QueryCallback callback);
+                       Serializable payload,
+                       QueryCallback callback);
 
   /**
    * Sends a query update call (set) to an actor,
@@ -142,7 +162,27 @@ public interface ActorClient {
    * @param payload the query payload
    */
   public Serializable querySet(String to,
-			       Serializable payload);
+                               Serializable payload);
+
+  /**
+   * Sends a query update call (set) to an actor,
+   * blocking until the actor responds with a result or an error.
+   *
+   * The target actor of a <code>querySet</code> acts as a service and the
+   * caller acts as a client.  Because BAM Actors are symmetrical, all
+   * Actors can act as services and clients for different RPC calls.
+   *
+   * The target actor MUST send a <code>queryResult</code> or
+   * <code>queryError</code> to the client using the same <code>id</code>,
+   * because RPC clients rely on a response.
+   *
+   * @param to the target actor's JID
+   * @param payload the query payload
+   * @param timeout time spent waiting for the query to return
+   */
+  public Serializable querySet(String to,
+                               Serializable payload,
+                               long timeout);
 
   /**
    * Sends a query update call (set) to an actor,
@@ -161,8 +201,8 @@ public interface ActorClient {
    * @param callback the application's callback for the result
    */
   public void querySet(String to,
-		       Serializable payload,
-		       QueryCallback callback);
+                       Serializable payload,
+                       QueryCallback callback);
 
   //
   // presence handling
@@ -176,8 +216,8 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presence(String to,
-		       Serializable payload);
-  
+                       Serializable payload);
+
   /**
    * Announces a subscribing actor's logout, like an IM user logging out,
    * or subscriber logging out.
@@ -186,8 +226,8 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presenceUnavailable(String to,
-				  Serializable payload);
-  
+                                  Serializable payload);
+
   /**
    * Presence probing packet from a publisher actor to a
    * subscriber actor, used to query subscriber capabilities.
@@ -196,8 +236,8 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presenceProbe(String to,
-			    Serializable payload);
-  
+                            Serializable payload);
+
   /**
    * A subscription request from a subscriber to a publisher.
    *
@@ -205,7 +245,7 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presenceSubscribe(String to,
-				Serializable payload);
+                                Serializable payload);
 
   /**
    * A subscription acceptance from a publisher to a subscriber.
@@ -214,8 +254,8 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presenceSubscribed(String to,
-				 Serializable payload);
-  
+                                 Serializable payload);
+
   /**
    * A unsubscription request from a subscriber to a publisher.
    *
@@ -223,7 +263,7 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presenceUnsubscribe(String to,
-				  Serializable payload);
+                                  Serializable payload);
 
   /**
    * A unsubscription acceptance from a publisher to a subscriber.
@@ -232,7 +272,7 @@ public interface ActorClient {
    * @param payload the presence payload
    */
   public void presenceUnsubscribed(String to,
-				   Serializable payload);
+                                   Serializable payload);
 
   /**
    * A presence error message.
@@ -242,8 +282,8 @@ public interface ActorClient {
    * @param error the error information
    */
   public void presenceError(String to,
-			    Serializable payload,
-			    ActorError error);
+                            Serializable payload,
+                            ActorError error);
 
   //
   // callbacks and low-level routines
@@ -259,17 +299,17 @@ public interface ActorClient {
    * if the client has a pending query, false otherwise.
    */
   public boolean onQueryResult(long id,
-			       String to,
-			       String from,
-			       Serializable payload);
+                               String to,
+                               String from,
+                               Serializable payload);
 
   /**
    * Callback from the ActorStream to handle a queryResult.  Returns true
    * if the client has a pending query, false otherwise.
    */
   public boolean onQueryError(long id,
-			      String to,
-			      String from,
-			      Serializable payload,
-			      ActorError error);
+                              String to,
+                              String from,
+                              Serializable payload,
+                              ActorError error);
 }
