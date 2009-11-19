@@ -64,6 +64,8 @@ class WatchdogClient
   private static final Logger log
     = Logger.getLogger(WatchdogClient.class.getName());
 
+  private static final long BAM_TIMEOUT = 3 * 60 * 1000; //3 minutes
+
   public static final String WATCHDOG_JID = "watchdog@admin.resin.caucho";
 
   private final BootResinConfig _bootManager;
@@ -230,7 +232,7 @@ class WatchdogClient
       conn = getConnection();
 
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv));
+        conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv), BAM_TIMEOUT);
 
       if (status.isSuccess())
         return;
@@ -255,10 +257,10 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogStopQuery(getId()));
+        conn.querySet(WATCHDOG_JID, new WatchdogStopQuery(getId()), BAM_TIMEOUT);
 
       if (! status.isSuccess())
-        throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
+        throw new RuntimeException(L.l("{0}: watchdog stop failed because of '{1}'",
                                        this, status.getMessage()));
     } catch (RuntimeException e) {
       throw e;
@@ -274,7 +276,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogKillQuery(getId()));
+        conn.querySet(WATCHDOG_JID, new WatchdogKillQuery(getId()), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
@@ -311,7 +313,7 @@ class WatchdogClient
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.querySet(WATCHDOG_JID, new WatchdogShutdownQuery());
+        conn.querySet(WATCHDOG_JID, new WatchdogShutdownQuery(), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",
