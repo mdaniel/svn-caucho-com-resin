@@ -40,6 +40,8 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.Alarm;
+
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
@@ -433,7 +435,7 @@ public final class ThreadPool {
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
-      expire = Alarm.getCurrentTime() + timeout;
+      expire = Alarm.getCurrentTimeActual() + timeout;
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -450,7 +452,7 @@ public final class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    long expire = Alarm.getCurrentTime() + PRIORITY_TIMEOUT;
+    long expire = Alarm.getCurrentTimeActual() + PRIORITY_TIMEOUT;
 
     boolean isPriority = true;
     boolean isQueue = true;
@@ -504,7 +506,7 @@ public final class ThreadPool {
   public void completeExecutorTask()
   {
     ExecutorQueueItem item = null;
-    
+
     synchronized (_executorLock) {
       _executorTaskCount--;
 
@@ -554,7 +556,7 @@ public final class ThreadPool {
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
-      expire = Alarm.getCurrentTime() + timeout;
+      expire = Alarm.getCurrentTimeActual() + timeout;
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -571,7 +573,7 @@ public final class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    long expire = Alarm.getCurrentTime() + PRIORITY_TIMEOUT;
+    long expire = Alarm.getCurrentTimeActual() + PRIORITY_TIMEOUT;
 
     boolean isPriority = true;
     boolean isQueue = true;
@@ -601,7 +603,7 @@ public final class ThreadPool {
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
-      expire = Alarm.getCurrentTime() + timeout;
+      expire = Alarm.getCurrentTimeActual() + timeout;
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -653,7 +655,11 @@ public final class ThreadPool {
 
     int freeThreadsRequired = isPriority ? 0 : _threadPriority;
 
-    TaskItem item = new TaskItem(task, loader);
+    Thread requestThread = null;
+    if (! isQueueIfFull)
+      requestThread = Thread.currentThread();
+
+    TaskItem item = new TaskItem(task, loader, requestThread);
 
     do {
       boolean isDumpThreads = false;
@@ -699,7 +705,7 @@ public final class ThreadPool {
                 _taskQueue.add(item);
               }
             }
-            else if (Alarm.getCurrentTime() < expireTime) {
+            else if (Alarm.getCurrentTimeActual() < expireTime) {
               _launcher.wake();
 
               // clear interrupted flag
@@ -708,7 +714,7 @@ public final class ThreadPool {
               _waitCount++;
               try {
                 if (! Alarm.isTest()) {
-                  long delta = expireTime - Alarm.getCurrentTime();
+                  long delta = expireTime - Alarm.getCurrentTimeActual();
 
                   if (delta > 0)
                     _idleLock.wait(delta);
@@ -738,10 +744,14 @@ public final class ThreadPool {
       }
     } while (poolThread == null
              && ! isQueueIfFull
-             && Alarm.getCurrentTime() <= expireTime);
+             && Alarm.getCurrentTimeActual() <= expireTime);
 
     if (poolThread != null) {
       poolThread.unpark();
+
+      if (! isQueueIfFull) {
+        item.park(expireTime);
+      }
 
       return true;
     }
@@ -897,6 +907,8 @@ public final class ThreadPool {
           // if the task is available, run it in the proper context
           thread.setContextClassLoader(classLoader);
 
+          item.wake();
+
           task.run();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
@@ -923,7 +935,7 @@ public final class ThreadPool {
           return _taskQueue.remove(0);
         }
 
-        long now = Alarm.getCurrentTime();
+        long now = Alarm.getCurrentTimeActual();
 
         // if idle queue overflows, return and exit
         if (_threadIdleMax < _idleCount
@@ -999,7 +1011,7 @@ public final class ThreadPool {
 
   final class ThreadLauncher extends Thread {
     private final AtomicBoolean _isWake = new AtomicBoolean();
-    
+
     private ThreadLauncher()
     {
       super("resin-thread-launcher");
@@ -1023,7 +1035,7 @@ public final class ThreadPool {
     {
       if (doStart()) {
         try {
-          long now = Alarm.getCurrentTime();
+          long now = Alarm.getCurrentTimeActual();
           _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
 
           PoolThread poolThread = new PoolThread();
@@ -1073,13 +1085,15 @@ public final class ThreadPool {
   }
 
   static class TaskItem {
-    private Runnable _runnable;
-    private ClassLoader _loader;
+    private final Runnable _runnable;
+    private final ClassLoader _loader;
+    private volatile Thread _thread;
 
-    TaskItem(Runnable runnable, ClassLoader loader)
+    TaskItem(Runnable runnable, ClassLoader loader, Thread thread)
     {
       _runnable = runnable;
       _loader = loader;
+      _thread = thread;
     }
 
     public final Runnable getRunnable()
@@ -1090,6 +1104,38 @@ public final class ThreadPool {
     public final ClassLoader getLoader()
     {
       return _loader;
+    }
+
+    public final void wake()
+    {
+      Thread thread = _thread;
+      _thread = null;
+
+      if (thread != null)
+        LockSupport.unpark(thread);
+    }
+
+    public final void park(long expires)
+    {
+      Thread thread = _thread;
+
+      while (_thread != null
+             && Alarm.getCurrentTimeActual() < expires) {
+        try {
+          Thread.interrupted();
+          LockSupport.parkUntil(thread, expires);
+        } catch (Exception e) {
+        }
+      }
+
+      /*
+      if (_thread != null) {
+        System.out.println("TIMEOUT:" + thread);
+        Thread.dumpStack();
+      }
+      */
+
+      _thread = null;
     }
   }
 

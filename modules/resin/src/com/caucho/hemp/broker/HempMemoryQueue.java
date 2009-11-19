@@ -57,7 +57,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
-  private long _queueIdleTimeout = 500L;
+  private long _queueIdleTimeout = 2000L;
 
   private final ThreadPool _threadPool = ThreadPool.getCurrent();
   private final ClassLoader _loader
@@ -320,16 +320,17 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       return;
     }
 
-    while (true) {
+    while (! isClosed()) {
+      if (_queue.isEmpty()) {
+        // empty queue
+        return;
+      }
+
       int size = _queue.getSize();
       int threadCount = _threadCount.get();
       long now = Alarm.getCurrentTime();
 
-      if (size == 0) {
-        // empty queue
-        return;
-      }
-      else if (threadCount == _threadMax) {
+      if (threadCount == _threadMax) {
         // thread max
         return;
       }
@@ -346,11 +347,10 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
         return;
       }
       else if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
-        _threadPool.schedule(this);
-        /*
-        if (! _threadPool.start(this, 10)) {
+        // 10ms start is primarily for QA
+        if (! _threadPool.start(this, 100)) {
+          _threadPool.schedule(this);
         }
-        */
         return;
       }
       else if (_threadCount.get() > 0) {
@@ -430,7 +430,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
     while (! isClosed()) {
       for (int i = spinMax; i >= 0; i--) {
-        if (_queue.getSize() > 0) {
+        if (! _queue.isEmpty()) {
           // check for queue values
           return true;
         }
@@ -463,7 +463,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
     WaitQueue.Item item = _wait.create();
 
     try {
-      while (true) {
+      while (! isClosed()) {
         try {
           if (log.isLoggable(Level.FINEST)) {
             log.finest(this + " spawn {threadCount:" + _threadCount.get()
@@ -475,7 +475,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
           _threadCount.decrementAndGet();
         }
 
-        if (_queue.getSize() == 0) {
+        if (_queue.isEmpty()) {
           // queue check after the _threadCount decrement for threading
           // timing issues
           return;

@@ -111,7 +111,9 @@ public final class PacketQueue
    */
   public final boolean isEmpty()
   {
-    return _size.get() == 0;
+    QueueItem tail = _tail.get();
+
+    return tail.getPacket() == null;
   }
 
   public final void enqueue(Packet packet)
@@ -185,42 +187,47 @@ public final class PacketQueue
       QueueItem tail = _tail.get();
       QueueItem next = head.getNext();
 
-      if (head != _head.get()) { // check for consistency
+      if (head != _head.get()) {     // loop if another thread has modified
         continue;
       }
 
-      if (head != tail) {
-        if (_head.compareAndSet(head, next)) {
-          _size.decrementAndGet();
-
-          long createTime = next.getCreateTime();
-          long now = Alarm.getCurrentTime();
-
-          if (createTime > 0 && now <= createTime + _expireTimeout) {
-            // wake any blocked threads
-            if (_blockCount.get() > 0 && _size.get() < _blockMaxSize) {
-              synchronized (_blockLock) {
-                _blockLock.notifyAll();
-              }
-            }
-
-            if (next != null) {
-              Packet packet = next.getPacket();
-              next.clearPacket();
-
-              return packet;
-            }
-            else if (--spinCount <= 0)
-              return null;
-          }
+      if (head == tail) {            // empty queue cases
+        if (next != null) {          // tail has new data
+          _tail.compareAndSet(tail, next);
+          continue;
+        }
+        else if (--spinCount > 0) { // empty queue, retry spinCount times
+          continue;
+        }
+        else {
+          return null;              // finally return null
         }
       }
-      else {                 // empty queue cases
-        if (next != null) {  // tail has new data
-          _tail.compareAndSet(tail, next);
+
+      if (next == null) {           // empty queue, but item not removed
+        // XXX: impossible case?
+        continue;
+      }
+
+      // remove item from queue
+      if (_head.compareAndSet(head, next)) {
+        _size.decrementAndGet();
+
+        Packet packet = next.getPacket();
+        next.clearPacket();
+
+        // wake any blocked threads
+        if (_blockCount.get() > 0 && _size.get() < _blockMaxSize) {
+          synchronized (_blockLock) {
+            _blockLock.notifyAll();
+          }
         }
-        else {               // actual empty queue
-          return null;
+
+        // only return live packets
+        long createTime = next.getCreateTime();
+        long now = Alarm.getCurrentTime();
+        if (createTime > 0 && now <= createTime + _expireTimeout) {
+          return packet;
         }
       }
     }
