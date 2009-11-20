@@ -1025,7 +1025,13 @@ public class TcpConnection extends Connection
 
   public final void toIdle()
   {
-    _state = _state.toIdle();
+    ConnectionState state = _state;
+
+    _state = state.toIdle();
+
+    if (state.isKeepalive()) {
+      getPort().keepaliveEnd(this);
+    }
   }
 
   /**
@@ -1040,8 +1046,9 @@ public class TcpConnection extends Connection
     ConnectionState state = _state;
     _state = ConnectionState.DESTROYED;
 
-    if (state.isKeepalive())
+    if (state.isKeepalive()) {
       getPort().keepaliveEnd(this);
+    }
 
     if (state != ConnectionState.DESTROYED) {
       getPort().kill(this);
