@@ -1040,6 +1040,9 @@ public class TcpConnection extends Connection
     ConnectionState state = _state;
     _state = ConnectionState.DESTROYED;
 
+    if (state.isKeepalive())
+      getPort().keepaliveEnd(this);
+
     if (state != ConnectionState.DESTROYED) {
       getPort().kill(this);
     }

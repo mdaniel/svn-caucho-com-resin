@@ -90,7 +90,7 @@ public final class ThreadPool {
   // the idle stack
   private PoolThread _idleHead;
   // number of threads in the idle stack
-  private int _idleCount;
+  private final AtomicInteger _idleCount = new AtomicInteger();
   // number of threads in the wait queue
   private int _waitCount;
 
@@ -285,7 +285,7 @@ public final class ThreadPool {
    */
   public int getThreadActiveCount()
   {
-    return _activeCount.get() - _idleCount;
+    return _activeCount.get() - _idleCount.get();
   }
 
   /**
@@ -301,7 +301,7 @@ public final class ThreadPool {
    */
   public int getThreadIdleCount()
   {
-    return _idleCount;
+    return _idleCount.get();
   }
 
   /**
@@ -461,7 +461,7 @@ public final class ThreadPool {
       log.warning(this + " unable to schedule priority thread " + task
                   + " pri=" + _threadPriority
                   + " active=" + _activeCount.get()
-                  + " idle=" + (_idleCount + _startingCount.get())
+                  + " idle=" + (_idleCount.get() + _startingCount.get())
                   + " max=" + _threadMax);
 
       OverflowThread item = new OverflowThread(task);
@@ -582,7 +582,7 @@ public final class ThreadPool {
       log.warning(this + " unable to start priority thread " + task
                   + " pri=" + _threadPriority
                   + " active=" + _activeCount.get()
-                  + " idle=" + _idleCount
+                  + " idle=" + _idleCount.get()
                   + " starting=" + _startingCount.get()
                   + " max=" + _threadMax);
 
@@ -624,12 +624,8 @@ public final class ThreadPool {
 
       while (item != null) {
         PoolThread next = item._next;
-
         item._next = null;
-        if (item._isIdle) {
-          item._isIdle = false;
-          _idleCount--;
-        }
+        item._isWake = true;
 
         try {
           item.unpark();
@@ -666,7 +662,7 @@ public final class ThreadPool {
 
       try {
         synchronized (_idleLock) {
-          int idleCount = _idleCount;
+          int idleCount = _idleCount.get();
           int threadCount = _activeCount.get() + _startingCount.get();
           int freeCount = idleCount + _threadMax - threadCount;
           boolean startNew = false;
@@ -765,7 +761,7 @@ public final class ThreadPool {
   private boolean doStart()
   {
     synchronized (_idleLock) {
-      int idleCount = _idleCount;
+      int idleCount = _idleCount.get();
       int threadCount = _activeCount.get() + _startingCount.get();
 
       if (_threadMax < threadCount)
@@ -793,7 +789,7 @@ public final class ThreadPool {
     long _threadResetCount;
 
     private PoolThread _next;
-    private boolean _isIdle;
+    private boolean _isWake;
 
     private final AtomicReference<TaskItem> _itemRef
       = new AtomicReference<TaskItem>();
@@ -835,13 +831,6 @@ public final class ThreadPool {
 
       _idleHead = _next;
       _next = null;
-
-      if (! _isIdle) {
-        return false;
-      }
-
-      _idleCount--;
-      _isIdle = false;
 
       _itemRef.set(item);
 
@@ -930,15 +919,17 @@ public final class ThreadPool {
           return _priorityQueue.remove(0);
         }
 
+        int idleCount = _idleCount.get();
+
         // if we have spare threads, process any task queue item
-        if (_taskQueue.size() > 0 && _threadPriority <= _idleCount) {
+        if (_taskQueue.size() > 0 && _threadPriority <= idleCount) {
           return _taskQueue.remove(0);
         }
 
         long now = Alarm.getCurrentTimeActual();
 
         // if idle queue overflows, return and exit
-        if (_threadIdleMax < _idleCount
+        if (_threadIdleMax < idleCount
             && _threadIdleOverflowExpire < now) {
           _threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
           return null;
@@ -947,18 +938,25 @@ public final class ThreadPool {
         _next = _idleHead;
         _idleHead = this;
 
-        _isIdle = true;
-        _idleCount++;
+        _idleCount.incrementAndGet();
 
-        if (_waitCount > 0)
-          _idleLock.notifyAll();
+        if (_waitCount > 0) {
+          try {
+            _idleLock.notifyAll();
+          } catch (Throwable e) {
+            e.printStackTrace();
+          }
+        }
       }
 
       try {
         while (true) {
           TaskItem item = _itemRef.getAndSet(null);
-          if (item != null || ! _isIdle)
+          
+          if (item != null)
             return item;
+          else if (_isWake)
+            return null;
 
           Thread.interrupted();
           LockSupport.park();
@@ -968,12 +966,7 @@ public final class ThreadPool {
 
         return null;
       } finally {
-        synchronized (_idleLock) {
-          if (_isIdle) {
-            _isIdle = false;
-            _idleCount--;
-          }
-        }
+        _idleCount.decrementAndGet();
       }
     }
   }

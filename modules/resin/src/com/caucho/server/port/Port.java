@@ -896,6 +896,14 @@ public class Port extends TaskWorker
   }
 
   /**
+   * Returns the count of start threads.
+   */
+  public int getStartThreadCount()
+  {
+    return _startThreadCount.get();
+  }
+
+  /**
    * Returns the number of keepalive connections
    */
   public int getKeepaliveCount()
@@ -1365,6 +1373,7 @@ public class Port extends TaskWorker
   void startConnection(TcpConnection conn)
   {
     _startThreadCount.decrementAndGet();
+    wake();
   }
 
   /**
@@ -1381,6 +1390,7 @@ public class Port extends TaskWorker
   void threadEnd(TcpConnection conn)
   {
     _threadCount.decrementAndGet();
+    wake();
   }
 
   /**
@@ -1608,7 +1618,9 @@ public class Port extends TaskWorker
         _activeConnectionCount.incrementAndGet();
         _activeConnectionSet.add(startConn);
 
-        _threadPool.schedule(startConn.getAcceptTask());
+        if (! _threadPool.schedule(startConn.getAcceptTask())) {
+          log.severe(L.l("Schedule failed for {0}", startConn));
+        }
       }
     } catch (Throwable e) {
       log.log(Level.SEVERE, e.toString(), e);
@@ -1679,11 +1691,7 @@ public class Port extends TaskWorker
     _activeConnectionCount.decrementAndGet();
 
     // wake the start thread
-    if (isStartThreadRequired()) {
-      // if there are not enough idle threads, wake the manager to
-      // create a new one
-      wake();
-    }
+    wake();
   }
 
   /**

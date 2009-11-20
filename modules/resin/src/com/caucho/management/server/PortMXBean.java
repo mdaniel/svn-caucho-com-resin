@@ -169,6 +169,14 @@ public interface PortMXBean extends ManagedObjectMXBean {
   public int getThreadIdleCount();
 
   /**
+   * Returns the current number of threads that are starting and
+   * waiting to service requests.
+   */
+  @Description("The current number of threads that are"
+               + " starting and waiting to service requests")
+  public int getThreadStartCount();
+
+  /**
    * Returns the current number of connections that are in the keepalive
    * state
    */
