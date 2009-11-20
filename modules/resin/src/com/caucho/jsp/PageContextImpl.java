@@ -1093,6 +1093,10 @@ public class PageContextImpl extends PageContext
     else if (! _webApp.isAllowForwardAfterFlush())
       _out.clear();
 
+    //jsp/183n jsp/18kl jsp/1625
+    while (_out instanceof BodyContentImpl)
+      popBody();
+
     if (relativeUrl != null && ! relativeUrl.startsWith("/")) {
       String servletPath = RequestAdapter.getPageServletPath(req);
       int p = servletPath.lastIndexOf('/');
