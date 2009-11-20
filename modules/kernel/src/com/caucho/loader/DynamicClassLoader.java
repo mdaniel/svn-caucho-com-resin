@@ -1700,7 +1700,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       cl = findLoadedClass(entry.getName());
       
       if (cl != null) {
-        log().log(Level.WARNING, e.toString(), e);
+        log().log(Level.FINE, e.toString(), e);
         return cl;
       }
       else
