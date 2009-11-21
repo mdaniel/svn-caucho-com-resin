@@ -88,7 +88,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   private static final Object []NULL_ARGS = new Object[0];
   private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
-  
+
   private static final Method _namedValueMethod;
 
   private static final HashSet<Class> _reservedTypes
@@ -571,7 +571,19 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   protected String getNamedValue(Annotation ann)
   {
     try {
-      return (String) _namedValueMethod.invoke(ann);
+      if (ann instanceof Named) {
+        return ((Named) ann).value();
+      }
+
+      Method method = ann.getClass().getMethod("value");
+      method.setAccessible(true);
+
+      return (String) method.invoke(ann);
+    } catch (NoSuchMethodException e) {
+      // ioc/0m04
+      log.log(Level.FINE, e.toString(), e);
+
+      return "";
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -629,7 +641,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     _reservedTypes.add(Comparable.class);
 
     Method namedValueMethod = null;
-    
+
     try {
       namedValueMethod = Named.class.getMethod("value");
       namedValueMethod.setAccessible(true);
