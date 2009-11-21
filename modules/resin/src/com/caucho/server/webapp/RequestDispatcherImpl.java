@@ -171,14 +171,21 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       _webApp.log(exn.getMessage(), exn);
 
       return;
-    } else if ("error".equals(method) || (method == null && ! allowForward)) {
+    } else if ("error".equals(method) || (method == null)) {
+      // server/10yg
+      
+      // } else if ("error".equals(method) || (method == null && ! allowForward)) {
       res.resetBuffer();
 
       if (cauchoRes != null) {
         ServletResponse resp = cauchoRes.getResponse();
 
         while (resp != null) {
-          if (resp instanceof CauchoResponse) {
+          if (allowForward && resp instanceof IncludeResponse) {
+            // server/10yh
+            break;
+          }
+          else if (resp instanceof CauchoResponse) {
             CauchoResponse cr = (CauchoResponse) resp;
             cr.resetBuffer();
             resp = cr.getResponse();
