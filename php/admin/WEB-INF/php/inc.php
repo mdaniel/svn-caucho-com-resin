@@ -610,7 +610,7 @@ if ($is_refresh) {
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-  <td width="160" align="center"><img src='<?= uri("images/caucho-white.jpg") ?>' width='150' height='63'>
+  <td width="160" align="center">
   </td>
 
   <td width="10">
@@ -625,12 +625,18 @@ if (! empty($server)) {
 ?>
    <li class="server"><?php display_servers($server) ?></li>
 <? }  ?>
+<!--
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
+   -->
    <li><a href="<?= $g_next_url ?>">refresh</a></li>
    <li><a href="?q=index.php&logout=true">logout</a></li>
    </ul>
+
   </td>
-</tr>
+
+  <td align='right'
+   <img src='<?= uri("images/caucho-logo.png") ?>' width='300'</tr>
+  </td>
 
 <tr>
   <td width="150">
@@ -638,6 +644,9 @@ if (! empty($server)) {
   </td>
 
   <td width="10">
+  </td>
+
+  <td>
   </td>
 
   <td>
@@ -665,7 +674,7 @@ if (! empty($server)) {
 
   <td width="10">
   </td>
-  <td valign='top'>
+  <td valign='top' colspan='2'>
 
 <?php
   if (! $server && $g_server_id) {

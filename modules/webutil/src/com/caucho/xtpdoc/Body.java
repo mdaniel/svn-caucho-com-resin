@@ -72,7 +72,7 @@ public class Body extends ContainerNode {
     _summary = new Summary(getDocument());
 
     addItem(_summary);
-    
+
     return _summary;
   }
 
@@ -98,7 +98,7 @@ public class Body extends ContainerNode {
     addItem(s1);
     return s1;
   }
-  
+
   public Defun createDefun()
   {
     Defun defun = new Defun(getDocument());
@@ -119,7 +119,7 @@ public class Body extends ContainerNode {
 
     if (_class != null)
       out.writeAttribute("class", _class);
-    
+
     out.writeAttribute("bgcolor", "white");
     out.writeAttribute("leftmargin", "0");
 
@@ -129,7 +129,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("cellspacing", "0");
     out.writeAttribute("cellpadding", "0");
     out.writeAttribute("summary", "");
-    
+
     NavigationItem item = getDocument().getNavigation();
 
     out.writeStartElement("tr");
@@ -137,11 +137,11 @@ public class Body extends ContainerNode {
     out.writeAttribute("colspan", "3");
     //    writePixel(out, 1, 1);
     out.writeEndElement();
-    
+
     out.writeStartElement("td");
     out.writeStartElement("div");
     out.writeAttribute("class", "breadcrumb");
-    
+
     writeBreadcrumb(out, item);
     out.writeEndElement();
 
@@ -163,12 +163,12 @@ public class Body extends ContainerNode {
     //out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
     out.writeEndElement();
-    
+
     out.writeStartElement("td");
     // out.writeAttribute("bgcolor", "#b9cef7");
     out.writeAttribute("class", "leftnav");
     out.writeAttribute("width", "160");
-    
+
     parseNavigation();
 
     getDocument().writeLeftNav(out);
@@ -177,15 +177,15 @@ public class Body extends ContainerNode {
 
     out.writeStartElement("td"); //spacer
     out.writeEndElement();
-    
+
     out.writeStartElement("td");
-    
+
     // actual body
 
     /*
     out.writeStartElement("div");
     out.writeAttribute("class", "breadcrumb");
-    
+
     writeBreadcrumb(out, item);
     out.writeEndElement();
     */
@@ -195,7 +195,7 @@ public class Body extends ContainerNode {
     if (getDocument().getHeader() != null)
       out.writeCharacters(getDocument().getHeader().getTitle().toLowerCase());
     out.writeEndElement();
-    
+
     //out.writeStartElement("div");
     //out.writeAttribute("class", "breadcrumb");
     out.writeStartElement("hr");
@@ -207,7 +207,7 @@ public class Body extends ContainerNode {
     //out.writeEndElement();
 
     Header header = getDocument().getHeader();
-      
+
     if (header != null && header.getDescription() != null) {
       header.getDescription().writeHtml(out);
     }
@@ -241,16 +241,16 @@ public class Body extends ContainerNode {
 
     //out.writeStartElement("div");
     //out.writeAttribute("class", "breadcrumb");
-    
+
     out.writeStartElement("hr");
     out.writeEndElement();
 
     if (item != null) {
       writeThreadNavigation(out, item, true);
     }
-    
+
     //out.writeEndElement();
-    
+
     // nav
 
     out.writeStartElement("table");
@@ -290,14 +290,14 @@ public class Body extends ContainerNode {
     out.writeEndElement(); // td
     out.writeEndElement(); // tr
     out.writeEndElement(); // table
-    
+
     out.writeEndElement(); // td
     out.writeEndElement(); // tr
     out.writeEndElement(); // table
 
     out.writeEndElement(); //body
   }
-  
+
   private void writeSpaceRow(XMLStreamWriter out, int height)
     throws XMLStreamException
   {
@@ -307,7 +307,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("colspan", "4");
 
     writePixel(out, 1, height);
-    
+
     out.writeEndElement(); // </td>
     out.writeEndElement(); // </tr>
   }
@@ -322,7 +322,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
     out.writeEndElement(); // </img>
   }
-  
+
   private void writeTitleRow(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -363,7 +363,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("img");
     out.writeAttribute("alt", "Caucho Technology");
     out.writeAttribute("align", "right");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-title-logo.jpg");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-logo.png");
     out.writeEndElement(); // </img>
 
     /*
@@ -374,10 +374,10 @@ public class Body extends ContainerNode {
     out.writeEndElement();
     */
     out.writeEndElement(); // </td>
-    
+
     out.writeEndElement(); // </tr>
   }
-  
+
   private void writeOldTitleRow(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -427,7 +427,7 @@ public class Body extends ContainerNode {
     if (getDocument().getHeader() != null)
       out.writeCharacters(getDocument().getHeader().getTitle());
     out.writeEndElement();
-    
+
     /*
     out.writeStartElement("table");
     out.writeAttribute("width", "100%");
@@ -452,10 +452,10 @@ public class Body extends ContainerNode {
     out.writeEndElement(); // </table>
     */
     out.writeEndElement(); // </td>
-    
+
     out.writeEndElement(); // </tr>
   }
-  
+
   public void writeBreadcrumb(XMLStreamWriter out, NavigationItem item)
     throws XMLStreamException
   {
@@ -467,7 +467,7 @@ public class Body extends ContainerNode {
 
     writeBreadcrumbRec(out, item);
   }
-  
+
   public void writeBreadcrumbRec(XMLStreamWriter out, NavigationItem item)
     throws XMLStreamException
   {
@@ -475,17 +475,17 @@ public class Body extends ContainerNode {
       return;
 
     writeBreadcrumbRec(out, item.getParent());
-    
+
     out.writeCharacters(" / ");
     out.writeStartElement("a");
     out.writeAttribute("href", item.getLink());
     out.writeCharacters(item.getTitle().toLowerCase());
     out.writeEndElement();
   }
-  
+
   public void writeThreadNavigation(XMLStreamWriter out,
-				    NavigationItem item,
-				    boolean writeCenter)
+                                    NavigationItem item,
+                                    boolean writeCenter)
     throws XMLStreamException
   {
     out.writeCharacters("\n");
@@ -495,7 +495,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("cellspacing", "0");
     out.writeAttribute("width", "99%");
     out.writeStartElement("tr");
-      
+
     out.writeStartElement("td");
     out.writeAttribute("width", "30%");
     out.writeAttribute("align", "left");
@@ -503,7 +503,7 @@ public class Body extends ContainerNode {
       item.getPrevious().writeLink(out);
     }
     out.writeEndElement();
-      
+
     out.writeStartElement("td");
     out.writeAttribute("width", "40%");
     out.writeStartElement("center");
@@ -512,7 +512,7 @@ public class Body extends ContainerNode {
     }
     out.writeEndElement();
     out.writeEndElement();
-      
+
     out.writeStartElement("td");
     out.writeAttribute("width", "30%");
     out.writeAttribute("align", "right");
@@ -520,11 +520,11 @@ public class Body extends ContainerNode {
       item.getNext().writeLink(out);
     }
     out.writeEndElement();
-      
+
     out.writeEndElement();
     out.writeEndElement();
   }
-      
+
 
   public void writeLaTeXTop(PrintWriter out)
     throws IOException

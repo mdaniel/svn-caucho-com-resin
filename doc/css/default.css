@@ -1,8 +1,7 @@
-/* logo color #e5a122; HSV: 39, 25, 90 */
-/* blue body #12037a: HSV: 248, 90, 48 */
-/* blue wing #887fc0: HSV: 248, 34, 75 */
-/* red body #98012e: HSV: 342, 99, 60 */
-
+/* brown #4c2004 */
+/* yellow (hover) #ffcc33 */
+/* hr #fab41d */
+/* red #98012e;  */
 body {
   border : solid;
   border-width : 0px;
@@ -10,7 +9,7 @@ body {
 }
 
 .breadcrumb {
-  color : #003366;
+/*  color : #003366; */
   font-family : Verdana, Helvetica, Arial, sans-serif;
   font-size : 80%;
 }
@@ -26,39 +25,38 @@ body {
 
 a {
   text-decoration : none;
-  color : #003366;
+  color : #4c2004;
 }
 
-/* color : #e5a122 */
 a:hover {
-  color : #e5a122;
+  color : #ffcc33;
 }
 
 a:hover,visited {
-  color : #e5a122;
+  color : #ffcc33;
 }
 
 a.topnav:hover {
-  color : #e5a122;
+  color : #ffcc33;
 }
 
 a.topnav:hover,visited {
-  color : #e5a122;
+  color : #ffcc33;
 }
 
 a.topnav {
   text-decoration : none;
-  color : #002b80;
+  color : #4c2004;
   font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 a.leftnav {
   text-decoration : none;
-  color : #606060;
+  color : #4c2004;
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size : 80%;
 }
-
+/*
 a.leftnav:visited {
   text-decoration : none;
   color : #12037a;
@@ -71,6 +69,7 @@ a.leftnav:hover {
 a.leftnav:hover,visited {
   color : #ffcc33;
 }
+*/
 
 code {
   font-family : monospace;
@@ -79,7 +78,8 @@ code {
 hr {
   border : 0;
   height : 1px;
-  background : #999;
+/*  background : #999; */
+  background : #fab41d;
   margin : 0.2em 0em;
 }
 
@@ -88,6 +88,7 @@ hr {
 h1.title {
   margin : 0em 0.5em;
   border-bottom : 0;
+  border-color : 
 
   font-family : Helvetica, Arial, sans-serif;
   font-variant : normal;
@@ -97,7 +98,7 @@ h1.title {
 
 h1 {
   margin-right : 1em;
-  border-bottom : 1px solid black;
+  border-bottom : 1px solid #fab41d;
 
   font-family : Helvetica, Arial, sans-serif;
   font-size : 170%;
@@ -112,13 +113,13 @@ h2 {
   color : #003366;
 }
 
+/* background-color : #ccccdd; */
 h2.section {
   font-family : Helvetica, Arial, sans-serif;
   font-weight : normal;
 
   color : #003366;
   padding : 2px;
-  background-color : #ccccdd;
 }
 
 h3 {
@@ -131,9 +132,9 @@ h4 {
   font-variant : small-caps;
 }
 
+/* background : #b9cef7; */
 div.section-title {
   font-size : 150%;
-  background : #b9cef7;
   margin : 1.0em 0em;
   padding : 0.2em;
 }
@@ -185,10 +186,10 @@ div.section-title {
 
 /* background : #cac7d9 vs #ccccff */
 /* 204, 213, 221 */
+/* background : #ccccdd; */
 .toc {
   margin : 1em 2em;
   width : 90%;
-  background : #ccccdd;
   border : solid #999;
   border-width : 1px;
   font-size : 90%;
@@ -278,8 +279,9 @@ table.deftable th {
   font-variant : small-caps;
   font-weight : normal;
   font-size : 85%;
-  border-top : 1px solid #98012e;
-  border-bottom : 1px solid #98012e;
+  border-top : 1px solid  #fab41d;
+  border-bottom : 1px solid #fab41d;
+
   color : #666;
   padding : 0.3em 0.3em;
 }

@@ -2,6 +2,10 @@
 /* blue body #12037a: HSV: 248, 90, 48 */
 /* blue wing #887fc0: HSV: 248, 34, 75 */
 /* red body #98012e: HSV: 342, 99, 60 */
+/* link brown #4c2004 */
+/* yellow (hover) #ffcc33 */
+/* hr #fab41d */
+/* red #98012e;  */
 
 body {
   border : solid;
@@ -27,7 +31,7 @@ body {
 
 a {
   text-decoration : none;
-  color : #003366;
+  color : #4c2004;
 }
 
 /* color : #e5a122 */
@@ -49,7 +53,7 @@ a.topnav:hover,visited {
 
 a.topnav {
   text-decoration : none;
-  color : #002b80;
+  color : #4c2004;
   font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
@@ -80,7 +84,7 @@ code {
 hr {
   border : 0;
   height : 1px;
-  background : #999;
+  background : #fab41d;
   margin : 0.2em 0em;
 }
 
@@ -98,7 +102,7 @@ h1.title {
 
 h1 {
   margin-right : 1em;
-  border-bottom : 1px solid black;
+  border-bottom : 1px solid #fab41d;
 
   font-family : Helvetica, Arial, sans-serif;
   font-size : 170%;
