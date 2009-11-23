@@ -75,7 +75,7 @@ public class QuercusServlet
   private boolean _isRequireSource = true;
   private DataSource _database;
   private boolean _isStrict;
-  private boolean _isLooseParse;
+  private boolean _isLooseParse = true;
   private int _pageCacheSize = -1;
   private int _regexpCacheSize = -1;
   private boolean _isConnectionPool = true;
