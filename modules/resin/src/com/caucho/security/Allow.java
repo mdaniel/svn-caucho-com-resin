@@ -77,7 +77,7 @@ import javax.servlet.http.*;
 public class Allow extends com.caucho.server.security.SecurityConstraint
 {
   private static final L10N L = new L10N(Allow.class);
-  
+
   private ArrayList<Pattern> _patternList
     = new ArrayList<Pattern>();
 
@@ -119,7 +119,7 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
       Pattern pattern = _patternList.get(i);
 
       if (pattern.matcher(url).find())
-	return true;
+        return true;
     }
 
     return _patternList.size() == 0;
@@ -176,12 +176,13 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
     }
 
     public AuthorizationResult isAuthorized(HttpServletRequest request,
-					    HttpServletResponse response,
-					    ServletContext webApp)
+                                            HttpServletResponse response,
+                                            ServletContext webApp)
     {
       for (RequestPredicate predicate : _predicateList) {
-	if (! predicate.isMatch(request))
-	  return AuthorizationResult.DEFAULT_DENY;
+        if (! predicate.isMatch(request)) {
+          return AuthorizationResult.DEFAULT_DENY;
+        }
       }
 
       return AuthorizationResult.ALLOW;

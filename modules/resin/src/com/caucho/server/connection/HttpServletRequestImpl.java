@@ -1535,8 +1535,8 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
         return true;
       */
 
-      WebApp app = getWebApp();
-      if (app == null) {
+      WebApp webApp = getWebApp();
+      if (webApp == null) {
         if (log.isLoggable(Level.FINE))
           log.finer("authentication failed, no web-app found");
 
@@ -1546,10 +1546,11 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       }
 
       // If the authenticator can find the user, return it.
-      Login login = app.getLogin();
+      Login login = webApp.getLogin();
 
       if (login != null) {
         Principal user = login.login(this, getResponse(), isFail);
+        System.out.println("LOGIN: " + user + " " + login + " " + isFail);
 
         return user != null;
         /*
@@ -1564,7 +1565,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       else if (isFail) {
         if (log.isLoggable(Level.FINE))
           log.finer("authentication failed, no login module found for "
-                    + app);
+                    + webApp);
 
         _response.sendError(HttpServletResponse.SC_FORBIDDEN);
 

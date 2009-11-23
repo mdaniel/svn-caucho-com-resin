@@ -218,7 +218,7 @@ public abstract class AbstractLogin implements Login {
   {
     return "none";
   }
-  
+
   /**
    * Returns true if the login can be used for this request. This lets
    * webapps use multiple login methods.
@@ -227,7 +227,7 @@ public abstract class AbstractLogin implements Login {
   {
     return true;
   }
-  
+
   /**
    * Returns the Principal associated with the current request.
    * getUserPrincipal is called in response to the Request.getUserPrincipal

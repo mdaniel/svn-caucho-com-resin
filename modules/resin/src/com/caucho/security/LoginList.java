@@ -108,7 +108,7 @@ public class LoginList implements Login {
 
     return false;
   }
-  
+
   /**
    * Returns the Principal associated with the current request.
    * getUserPrincipal is called in response to the Request.getUserPrincipal
@@ -130,7 +130,7 @@ public class LoginList implements Login {
 
     return null;
   }
-  
+
   /**
    * Logs a user in.  The authenticate method is called during the
    * security check.  If the user does not exist, <code>authenticate</code>
@@ -143,14 +143,14 @@ public class LoginList implements Login {
    * @return the logged in principal on success, null on failure.
    */
   public Principal login(HttpServletRequest request,
-			 HttpServletResponse response,
-			 boolean isFail)
+                         HttpServletResponse response,
+                         boolean isFail)
   {
     for (int i = 0; i < _loginList.size(); i++) {
       Login login = _loginList.get(i);
 
       if (login.isLoginUsedForRequest(request)) {
-        Principal user = _loginList.get(i).login(request, response, isFail);
+        Principal user = login.login(request, response, isFail);
 
         if (user != null)
           return user;
@@ -162,7 +162,8 @@ public class LoginList implements Login {
     for (int i = 0; i < _loginList.size(); i++) {
       Login login = _loginList.get(i);
 
-      Principal user = _loginList.get(i).login(request, response, isFail);
+      Principal user = login.login(request, response, isFail);
+      System.out.println("LOGIN2: " + user + " " + login);
 
       return user;
     }
@@ -204,7 +205,7 @@ public class LoginList implements Login {
 
     return false;
   }
-  
+
   /**
    * Logs the user out from the given request.
    *
@@ -213,22 +214,27 @@ public class LoginList implements Login {
    * in the ServletContext attribute "caucho.login".
    */
   public void logout(Principal user,
-		     HttpServletRequest request,
+                     HttpServletRequest request,
                      HttpServletResponse response)
   {
     for (int i = 0; i < _loginList.size(); i++) {
       _loginList.get(i).logout(user, request, response);
     }
   }
-  
+
   /**
    * Called when the session invalidates.
    */
   public void sessionInvalidate(HttpSession session,
-				boolean isTimeout)
+                                boolean isTimeout)
   {
     for (int i = 0; i < _loginList.size(); i++) {
       _loginList.get(i).sessionInvalidate(session, isTimeout);
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + _loginList;
   }
 }

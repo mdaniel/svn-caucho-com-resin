@@ -1173,7 +1173,7 @@ public class TcpConnection extends Connection
 
       // _state = _state.toAccept();
 
-      while (! _port.isClosed()) {
+      while (! _port.isClosed() && ! _state.isDestroyed()) {
         _state = _state.toAccept();
         setStatState("accept");
 
