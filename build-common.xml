@@ -578,11 +578,13 @@
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
     -->
-    
+
+    <!-- 4.0.2
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
+    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>

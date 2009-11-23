@@ -134,10 +134,12 @@
       <param name="artifact.name" value="mule"/>
     </antcall>
     -->
-    
+
+    <!-- xxx 4.0.2
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
     </antcall>
+    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
@@ -917,7 +919,7 @@
       <param name="jar.name" value="resin-netbeans.nbm"/>
       <param name="maven.name" value="resin-netbeans"/>
     </antcall>
-    
+
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="spring"/>
       <param name="jar.name" value="resin-spring.jar"/>
