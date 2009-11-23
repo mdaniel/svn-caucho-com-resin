@@ -338,7 +338,6 @@ public class FormLogin extends AbstractLogin
       path = request.getPathInfo();
     else if (request.getPathInfo() != null)
       path = path + request.getPathInfo();
-    System.out.println("CHALLENGE: " + path);
 
     if (path.equals("")) {
       // Forward?

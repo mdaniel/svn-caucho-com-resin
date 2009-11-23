@@ -163,7 +163,6 @@ public class LoginList implements Login {
       Login login = _loginList.get(i);
 
       Principal user = login.login(request, response, isFail);
-      System.out.println("LOGIN2: " + user + " " + login);
 
       return user;
     }

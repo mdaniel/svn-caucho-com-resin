@@ -1550,7 +1550,6 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
       if (login != null) {
         Principal user = login.login(this, getResponse(), isFail);
-        System.out.println("LOGIN: " + user + " " + login + " " + isFail);
 
         return user != null;
         /*
