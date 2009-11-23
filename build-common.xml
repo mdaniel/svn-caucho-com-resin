@@ -636,6 +636,7 @@
         <exclude name="**/WEB-INF/pre_work/**"/>
         <exclude name="**/WEB-INF/tmp/**"/>
         <exclude name="**/WEB-INF/db/**"/>
+        <exclude name="conf/admin-users.xml"/>
         <exclude name="**/*~"/>
 
         <include name="automake/**"/>
