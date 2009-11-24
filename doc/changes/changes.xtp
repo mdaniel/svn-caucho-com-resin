@@ -11,7 +11,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.2 snapshot">
+<s2 title="4.0.2 - Nov 24, 2009">
 <ul>
 <li>resin.exe: fixed timeout issue when stopping resin(#3762)</li>
 <li>resin: max-uri-length configuration tag introduced to set limit on URIs served by Resin. Default is 1024.</li>
