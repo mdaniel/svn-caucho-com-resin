@@ -99,6 +99,33 @@
 <li>jni: JNI detection of clientdisconnect issues (rep by Fiaz Hossain)</li>
 <li>quercus: image fixes for vbulletin</li>
 <li>quercus: ksort fixes for vbulletin</li>
+<li>quercus: WordPress: Post revisions not shown (#3753)</li>
+<li>quercus: Avoid recursive instropection of methods. (#3748, rep by PeterJ)</li>
+<li>quercus: quercus request for support for $_SERVER["REQUEST_TIME"] (#3712, rep by ashamash)</li>
+<li>quercus: Enable overridding of setting TYPE_SCROLL_INSENSITIVE (#3746, rep by PeterJ)</li>
+<li>quercus: date_timezone_set does not update date correctly (#3737, rep by damien)</li>
+<li>quercus: jetty: ClassNotFoundException for org.eclipse.jetty.server.AsyncContext (#3733, rep by andjarnic)</li>
+<li>quercus: is_object and is_resource return wrong results in many cases (#3701, rep by PeterJ)</li>
+<li>quercus: isset returns wrong answer with multiple variables (#3702, rep by PeterJ)</li>
+<li>quercus: failure in simplexml_load_string() (#3476, rep by jredden)</li>
+<li>quercus: quercus 4.0.1 is missing QuercusServlet (#3674, everflux)</li>
+<li>quercus: phpBB3 - Links not displaying (#3637, rep by GT500)</li>
+<li>quercus: java.lang.NullPointerException running Yii (#3541, rep by johnsavior)</li>
+<li>quercus: Drupal and OpenID (#3609, rep by B. Wu)</li>
+<li>quercus: QuercusParseException - missing semicolon within a scriptlet php tag. (#3668, rep by kenfoo)</li>
+<li>quercus: StringBuilderValue.create() is not performing a "& 0xFF" on the character value (#3654, rep by kenfoo)</li>
+<li>quercus: ErrorException is missing (#3667, rep by kenfoo)</li>
+<li>quercus: substr_compare failed (#3662, rep by jindw)</li>
+<li>quercus: Quercus allows to make non-abstract function abstract again (#3644, rep by tlandmann)</li>
+<li>quercus: count() error with recursive (#3586, rep by Hoang)</li>
+<li>quercus: PHP-style hash algorithm names not supported (#3513, rep by koreth)</li>
+<li>quercus: Quercus $foo->getClass() method (#3555, rep by Herbert)</li>
+<li>quercus: NumberFormatException when calling $result = file_get_contents($url) (#3587, rep by tomi_m)</li>
+<li>quercus: instanceof parsing precedence (#3621, rep by H. Punt)</li>
+<li>quercus: isset() returns FALSE for $_SESSION (#3636, rep by rabbitism)</li>
+<li>quercus: static function variables not "really" static (#3610, rep by tlandmann)</li>
+<li>quercus: wordpress 2.8.1 and resin load-balancing - can't login (#3624, rep by J. Novak)</li>
+<li>quercus: mail() does not handle multi-line headers properly (#3616)</li>
 </ul>
 </s2>
 
