@@ -113,14 +113,13 @@ VI) Quercus on Tomcat
 The following step is only needed if you intend to use a database in
 Quercus with Tomcat:
 
-5) Download the databse driver and place it into Tomcat's
+5) Download the appropiate database driver and place it into Tomcat's
    lib directory.
 
 
 VII) Quercus on Glassfish
 ------------------------
-It is simple to deploy Quercus on Glassfish.  It is no different from the
-standard procedure to deploy any other webapp on Glassfish:
+You can use autodeploy or deloy the webapp via the Glassfish web admin:
 
 1) Download the latest Quercus .war file from http://quercus.caucho.com.
 
@@ -170,6 +169,9 @@ VIII) Resources
 2) http://bugs.caucho.com
    Report bugs here.
 
-3) http://maillist.caucho.com
+3) http://forum.caucho.com
+   Forums for Resin, Hessian, and Quercus.
+
+4) http://maillist.caucho.com
    Mailing lists for Resin, Hessian, and Quercus.
 
