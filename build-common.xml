@@ -1272,7 +1272,9 @@
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${resin.install}/conf">
+        <!--
         <include name="admin-users.xml"/>
+        -->
         <include name="app-default.xml"/>
       </fileset>
     </copy>
