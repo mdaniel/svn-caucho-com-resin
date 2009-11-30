@@ -155,6 +155,8 @@ public class HmuxResponseStream extends ResponseStream {
       if (offset > 0)
         offset = bufferStart - 3;
 
+      _bufferStartOffset = 0;
+
       return next.nextBuffer(offset);
     }
     else if (bufferStart > 0) {

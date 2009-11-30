@@ -19,35 +19,43 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.java;
+package com.caucho.quercus.lib.db;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.LineCompileException;
-import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-public class JavaCompileException extends ConfigException
-  implements LineCompileException {
-  public JavaCompileException(String message)
-  {
-    super(message);
-  }
+import java.io.*;
+import java.net.*;
+import java.sql.*;
+import java.util.*;
+import java.util.logging.*;
+import javax.sql.*;
 
-  public JavaCompileException(String message, Throwable e)
-  {
-    super(message, e);
-  }
+/**
+ * Extra ResultSet metadata for a Quercus Mysql connection.
+ */
+public interface QuercusResultSetMetaData extends ResultSetMetaData {
+  public boolean isPrimaryKey(int column);
 
-  public JavaCompileException(Throwable e)
-  {
-    super(e);
-  }
+  public boolean isUniqueKey(int column);
+
+  public boolean isUnsigned(int column);
+
+  public boolean isZeroFill(int column);
+
+  public boolean isMultipleKey(int column);
+
+  public boolean isBlob(int column);
+
+  public boolean isNotNull(int column);
+
+  public int getLength(int column);
 }
-
-

@@ -55,9 +55,9 @@ import java.util.regex.Pattern;
  */
 public class JavaCompiler {
   static final L10N L = new L10N(JavaCompiler.class);
-  static final Logger log 
+  static final Logger log
     = Logger.getLogger(JavaCompiler.class.getName());
-  
+
   private static final Object LOCK = new Object();
 
   // Parent class loader.  Used to grab the classpath.
@@ -67,7 +67,7 @@ public class JavaCompiler {
   private String _compiler;
 
   private String _sourceExt = ".java";
-  
+
   private Path _classDir;
   private Path _sourceDir;
 
@@ -93,7 +93,7 @@ public class JavaCompiler {
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
-  
+
   /**
    * Creates a new compiler.
    *
@@ -152,7 +152,7 @@ public class JavaCompiler {
   {
     if (_compiler == null)
       _compiler = "javac";
-    
+
     return _compiler;
   }
 
@@ -167,7 +167,7 @@ public class JavaCompiler {
       path.mkdirs();
     } catch (IOException e) {
     }
-    
+
     _classDir = path;
   }
 
@@ -266,7 +266,7 @@ public class JavaCompiler {
 
     if (true)
       return rawClassPath;
-    
+
     char sep = CauchoSystem.getPathSeparatorChar();
     String []splitClassPath = rawClassPath.split("[" + sep + "]");
 
@@ -280,7 +280,7 @@ public class JavaCompiler {
     for (String pathName : splitClassPath) {
       Path path = pwd.lookup(pathName);
       pathName = path.getNativePath();
-      
+
       if (! pathName.startsWith(javaHome)
           && ! cleanClassPath.contains(pathName)) {
         cleanClassPath.add(pathName);
@@ -292,15 +292,15 @@ public class JavaCompiler {
 
     return sb.toString();
   }
-    
-  
+
+
   /**
    * Returns the classpath for the compiler.
    */
   private String buildClassPath()
   {
     String classPath = null;//_classPath;
-    
+
     if (classPath != null)
       return classPath;
 
@@ -310,7 +310,7 @@ public class JavaCompiler {
     else { // if (true || _loader instanceof URLClassLoader) {
       StringBuilder sb = new StringBuilder();
       sb.append(CauchoSystem.getClassPath());
-      
+
       buildClassPath(sb, _loader);
 
       classPath = sb.toString();
@@ -320,7 +320,7 @@ public class JavaCompiler {
 
     String srcDirName = getSourceDirName();
     String classDirName = getClassDirName();
-    
+
     char sep = CauchoSystem.getPathSeparatorChar();
 
     if (_extraClassPath != null)
@@ -333,30 +333,30 @@ public class JavaCompiler {
 
     return classPath;
   }
-  
+
   private static void buildClassPath(StringBuilder sb, ClassLoader loader)
   {
     ClassLoader parent = loader.getParent();
-    
+
     if (parent != null)
       buildClassPath(sb, parent);
-    
+
     if (loader instanceof URLClassLoader) {
       for (URL url : ((URLClassLoader) loader).getURLs()) {
         if (sb.length() > 0)
           sb.append(CauchoSystem.getPathSeparatorChar());
-        
+
         String urlString = url.toString();
         if (urlString.startsWith("file:"))
           urlString = urlString.substring("file:".length());
-        
+
         // https://issues.apache.org/bugzilla/show_bug.cgi?id=47053
         // Tomcat's WebAppClassLoader.getURLs() returns paths with spaces
         // replaced by %20
         if (Path.isWindows() && urlString.contains("%20")) {
           urlString = urlString.replace("%20", " ");
         }
-        
+
         sb.append(urlString);
       }
     }
@@ -369,14 +369,14 @@ public class JavaCompiler {
   {
     try {
       if (argString != null) {
-	String []args = Pattern.compile("[\\s,]+").split(argString);
+        String []args = Pattern.compile("[\\s,]+").split(argString);
 
-	_args = new ArrayList<String>();
+        _args = new ArrayList<String>();
 
-	for (int i = 0; i < args.length; i++) {
-	  if (! args[i].equals(""))
-	    _args.add(args[i]);
-	}
+        for (int i = 0; i < args.length; i++) {
+          if (! args[i].equals(""))
+            _args.add(args[i]);
+        }
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -399,7 +399,7 @@ public class JavaCompiler {
     _charEncoding = encoding;
 
     String javaEncoding = Encoding.getJavaName(encoding);
-    
+
     if ("ISO8859_1".equals(javaEncoding))
       _charEncoding = null;
   }
@@ -442,18 +442,18 @@ public class JavaCompiler {
   public static String mangleName(String name)
   {
     boolean toLower = CauchoSystem.isCaseInsensitive();
-      
+
     CharBuffer cb = new CharBuffer();
     cb.append("_");
 
     for (int i = 0; i < name.length(); i++) {
       char ch = name.charAt(i);
-      
+
       if (ch == '/' || ch == CauchoSystem.getPathSeparatorChar()) {
         if (i == 0) {
         }
         else if (cb.charAt(cb.length() - 1) != '.' &&
-		 (i + 1 < name.length() && name.charAt(i + 1) != '/'))
+                 (i + 1 < name.length() && name.charAt(i + 1) != '/'))
           cb.append("._");
       }
       else if (ch == '.')
@@ -478,7 +478,7 @@ public class JavaCompiler {
   private static char encodeHex(int i)
   {
     i &= 0xf;
-    
+
     if (i < 10)
       return (char) (i + '0');
     else
@@ -544,11 +544,11 @@ public class JavaCompiler {
         if (_loader instanceof Make)
           ((Make) _loader).make();
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (ClassNotFoundException e) {
-	throw e;
+        throw e;
       } catch (IOException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
@@ -558,15 +558,15 @@ public class JavaCompiler {
     String path = fileName.substring(0, p);
     String javaName = path + _sourceExt;
     Path javaPath = getSourceDir().lookup(javaName);
-    
+
     String className = path + ".class";
     Path classPath = getClassDir().lookup(className);
 
     synchronized (LOCK) {
       if (ifModified
-	  && javaPath.getLastModified() <= classPath.getLastModified())
+          && javaPath.getLastModified() <= classPath.getLastModified())
         return;
-      
+
       if (javaPath.canRead() && classPath.exists())
         classPath.remove();
 
@@ -613,32 +613,32 @@ public class JavaCompiler {
     ArrayList<String> uniqueFiles = new ArrayList<String>();
     for (int i = 0; i < files.length; i++) {
       if (! uniqueFiles.contains(files[i]))
-	uniqueFiles.add(files[i]);
+        uniqueFiles.add(files[i]);
     }
     files = new String[uniqueFiles.size()];
     uniqueFiles.toArray(files);
 
     synchronized (LOCK) {
       for (int i = 0; i < files.length; i += batchCount) {
-	int len = files.length - i;
+        int len = files.length - i;
 
-	if (batchCount < len)
-	  len = batchCount;
+        if (batchCount < len)
+          len = batchCount;
 
-	String []batchFiles = new String[len];
+        String []batchFiles = new String[len];
 
-	System.arraycopy(files, i, batchFiles, 0, len);
+        System.arraycopy(files, i, batchFiles, 0, len);
 
-	Arrays.sort(batchFiles);
+        Arrays.sort(batchFiles);
 
-	try {
-	  compileInt(batchFiles, null);
-	} catch (IOException e) {
-	  if (exn == null)
-	    exn = e;
-	  else
-	    log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          compileInt(batchFiles, null);
+        } catch (IOException e) {
+          if (exn == null)
+            exn = e;
+          else
+            log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
 
@@ -656,6 +656,8 @@ public class JavaCompiler {
 
     if (_compiler.equals("internal"))
       compiler = new InternalCompiler(this);
+    else if (_compiler.equals("internal2"))
+      compiler = new InternalCompiler2(this);
     else if (_compiler.equals("eclipse"))
       compiler = new EclipseCompiler(this);
     else if (_compiler.equals("groovyc"))
@@ -698,14 +700,14 @@ public class JavaCompiler {
       Path javaPath = getSourceDir().lookup(path[i]);
 
       if (! path[i].endsWith(".java"))
-	continue;
+        continue;
 
       String className = path[i].substring(0, path[i].length() - 5) + ".class";
       Path classPath = getClassDir().lookup(className);
       Path smapPath = getSourceDir().lookup(path[i] + ".smap");
 
       if (classPath.canRead() && smapPath.canRead())
-	mergeSmap(classPath, smapPath);
+        mergeSmap(classPath, smapPath);
     }
   }
 
@@ -713,35 +715,35 @@ public class JavaCompiler {
   {
     try {
       if (smapPath.getLength() >= 65536) {
-	log.warning(".smap for " + classPath.getTail() + " is too large (" + smapPath.getLength() + " bytes)");
-	return;
+        log.warning(".smap for " + classPath.getTail() + " is too large (" + smapPath.getLength() + " bytes)");
+        return;
       }
-	
+
       log.fine("merging .smap for " + classPath.getTail());
-      
+
       ByteCodeParser parser = new ByteCodeParser();
       JavaClass javaClass;
-      
+
       ReadStream is = classPath.openRead();
       try {
-	javaClass = parser.parse(is);
+        javaClass = parser.parse(is);
       } finally {
-	is.close();
+        is.close();
       }
 
       CharBuffer smap = new CharBuffer();
 
       is = smapPath.openRead();
       try {
-	int ch;
+        int ch;
 
-	while ((ch = is.read()) >= 0) {
-	  smap.append((char) ch);
-	}
+        while ((ch = is.read()) >= 0) {
+          smap.append((char) ch);
+        }
       } finally {
-	is.close();
+        is.close();
       }
-      
+
       SourceDebugExtensionAttribute attr;
 
       attr = new SourceDebugExtensionAttribute(smap.toString());
@@ -750,9 +752,9 @@ public class JavaCompiler {
 
       WriteStream os = classPath.openWrite();
       try {
-	javaClass.write(os);
+        javaClass.write(os);
       } finally {
-	os.close();
+        os.close();
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

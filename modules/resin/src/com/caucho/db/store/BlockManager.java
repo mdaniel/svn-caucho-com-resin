@@ -237,7 +237,14 @@ public final class BlockManager
       _blockCache.remove(block.getBlockId());
     }
 
-    long expires = Alarm.getCurrentTimeActual() + 60000L;
+    long timeout;
+
+    if (Alarm.isTest())
+      timeout = 1000L;
+    else
+      timeout = 60000L;
+
+    long expires = Alarm.getCurrentTimeActual() + timeout;
 
     while (hasPendingStore(store)) {
       wakeWriter();

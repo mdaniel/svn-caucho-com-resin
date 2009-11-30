@@ -45,7 +45,7 @@ public class ConfigException
 {
   private static final Logger log
     = Logger.getLogger(ConfigException.class.getName());
-  
+
   /**
    * Create a null exception
    */
@@ -72,14 +72,12 @@ public class ConfigException
   /**
    * Creates an exception with a throwable
    */
-  /*
-  public ConfigException(Throwable e)
+  protected ConfigException(Throwable e)
   {
     super(getMessage(e), e);
   }
-  */
 
-  private static String getMessage(Throwable e)
+  protected static String getMessage(Throwable e)
   {
     if (e instanceof DisplayableException || e instanceof CompileException)
       return e.getMessage();
@@ -91,7 +89,7 @@ public class ConfigException
   {
     if (e instanceof InstantiationException && e.getCause() != null)
       e = e.getCause();
-    
+
     if (e instanceof InvocationTargetException && e.getCause() != null)
       e = e.getCause();
 
@@ -107,12 +105,12 @@ public class ConfigException
   public static RuntimeException createLine(String line, Throwable e)
   {
     while (e.getCause() != null
-	   && (e instanceof InstantiationException
-	       || e instanceof InvocationTargetException
-	       || e.getClass().equals(ConfigRuntimeException.class))) {
+           && (e instanceof InstantiationException
+               || e instanceof InvocationTargetException
+               || e.getClass().equals(ConfigRuntimeException.class))) {
       e = e.getCause();
     }
-    
+
     if (e instanceof LineConfigException)
       throw (LineConfigException) e;
     else if (e instanceof DisplayableException) {
@@ -145,18 +143,18 @@ public class ConfigException
   public static RuntimeException create(Throwable e)
   {
     while (e.getCause() != null
-	   && (e instanceof InstantiationException
-	       || e instanceof InvocationTargetException
-	       || e.getClass().equals(ConfigRuntimeException.class))) {
+           && (e instanceof InstantiationException
+               || e instanceof InvocationTargetException
+               || e.getClass().equals(ConfigRuntimeException.class))) {
       e = e.getCause();
     }
-    
+
     if (e instanceof RuntimeException)
       return (RuntimeException) e;
     else if (e instanceof LineCompileException)
       return new LineConfigException(e.getMessage(), e);
     else if (e instanceof DisplayableException
-	     || e instanceof CompileException)
+             || e instanceof CompileException)
       return new ConfigException(e.getMessage(), e);
     else
       return new ConfigRuntimeException(e);

@@ -145,7 +145,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   protected boolean setFlush(boolean flush)
   {
     boolean isFlush = _allowFlush;
-    
+
     _allowFlush = flush;
 
     return isFlush;
@@ -467,8 +467,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
       int bufferOffset = getNextBufferOffset();
 
       // server/05e2
-      if (length == 0 && ! isFinished && bufferStart == bufferOffset)
+      if (length == 0 && ! isFinished && bufferStart == bufferOffset) {
+        // server/26a5
+        writeNextBuffer(bufferOffset);
         return;
+      }
 
       long contentLengthHeader = _response.getContentLengthHeader();
       // Can't write beyond the content length

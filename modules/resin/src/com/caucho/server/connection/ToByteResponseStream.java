@@ -398,7 +398,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     // server/13ww
     if (SIZE <= _charLength)
       flushCharBuffer();
-    
+
     _charBuffer[_charLength++] = (char) ch;
   }
 
@@ -492,7 +492,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
     if (charLength > 0 && ! _isOutputStreamOnly) {
       boolean isFlush = setFlush(false);
-                         
+
       _toByte.write(this, _charBuffer, 0, charLength);
       setFlush(isFlush);
 

@@ -153,10 +153,10 @@ public class MysqlModule extends AbstractQuercusModule {
   public static boolean mysql_close(Env env, @Optional Mysqli conn)
   {
     boolean isEnvConn = false;
-    
+
     if (conn == null) {
       conn = (Mysqli) env.getSpecialValue("caucho.mysql");
-      
+
       isEnvConn = true;
     }
 
@@ -166,7 +166,7 @@ public class MysqlModule extends AbstractQuercusModule {
       env.warning(L.l("no MySQL-Link resource supplied"));
       return false;
     }
-    
+
     if (isEnvConn || env.getSpecialValue("caucho.mysql") != null)
       env.removeSpecialValue("caucho.mysql");
 
@@ -177,7 +177,7 @@ public class MysqlModule extends AbstractQuercusModule {
     }
     else {
       env.warning(L.l("connection is either not connected or is already closed"));
-      
+
       return false;
     }
   }
@@ -201,10 +201,10 @@ public class MysqlModule extends AbstractQuercusModule {
     try {
       try {
         Connection sqlConn = conn.validateConnection().getConnection(env);
-        
+
         if (sqlConn == null)
           return false;
-        
+
         stmt = sqlConn.createStatement();
         stmt.setEscapeProcessing(false);
         stmt.executeUpdate("CREATE DATABASE " + name.toString());
@@ -348,9 +348,9 @@ public class MysqlModule extends AbstractQuercusModule {
   public static StringValue mysql_escape_string(Env env, Value val)
   {
     StringValue unescapedString = val.toStringValue();
-    
+
     StringValue sb = unescapedString.createStringBuilder();
-    
+
     int len = unescapedString.length();
 
     for (int i = 0; i < len; i++) {
@@ -389,7 +389,7 @@ public class MysqlModule extends AbstractQuercusModule {
           sb.append(ch);
       }
     }
-    
+
     return sb;
   }
 
@@ -406,7 +406,7 @@ public class MysqlModule extends AbstractQuercusModule {
                                                      @Optional Mysqli conn)
   {
     StringValue unescapedString = val.toStringValue();
-    
+
     if (conn == null)
       conn = getConnection(env);
 
@@ -436,7 +436,7 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static ArrayValue mysql_fetch_assoc(Env env,
-					     @NotNull MysqliResult result)
+                                             @NotNull MysqliResult result)
   {
     if (result == null)
       return null;
@@ -459,8 +459,8 @@ public class MysqlModule extends AbstractQuercusModule {
    *
    */
   public static Value mysql_fetch_field(Env env,
-					@NotNull MysqliResult result,
-					@Optional("-1") int fieldOffset)
+                                        @NotNull MysqliResult result,
+                                        @Optional("-1") int fieldOffset)
   {
     /**
      * ERRATA is also documented in php/142s.qa
@@ -485,12 +485,17 @@ public class MysqlModule extends AbstractQuercusModule {
         return BooleanValue.FALSE;
       }
 
+      QuercusResultSetMetaData qMd = null;
+
+      if (md instanceof QuercusResultSetMetaData)
+        qMd = (QuercusResultSetMetaData) md;
+
       int jdbcField = fieldOffset + 1;
       int jdbcColumnType = md.getColumnType(jdbcField);
-      
+
       String catalogName = md.getCatalogName(jdbcField);
       String tableName = md.getTableName(jdbcField);
-      
+
       String schemaName = md.getSchemaName(jdbcField);
 
       String columnName = md.getColumnName(jdbcField);
@@ -500,20 +505,22 @@ public class MysqlModule extends AbstractQuercusModule {
         schemaName = tableName;
 
       if ((tableName == null || "".equals(tableName))
-	  && result.isLastSqlDescribe())
-	tableName = "COLUMNS";
+          && result.isLastSqlDescribe())
+        tableName = "COLUMNS";
 
       // some information is not available from the ResultSetMetaData
       JdbcColumnMetaData columnMd = null;
 
-      JdbcConnectionResource conn = getConnection(env).validateConnection();
+      if (qMd == null) {
+        JdbcConnectionResource conn = getConnection(env).validateConnection();
 
-      // php/141p
-      JdbcTableMetaData tableMd
-        = conn.getTableMetaData(catalogName, null, tableName);
+        // php/141p
+        JdbcTableMetaData tableMd
+          = conn.getTableMetaData(catalogName, null, tableName);
 
-      if (tableMd != null)
-        columnMd = tableMd.getColumn(columnName);
+        if (tableMd != null)
+          columnMd = tableMd.getColumn(columnName);
+      }
 
       // XXX: maxlen note from PHP comments:
       // the length of the longest value for that field in the returned dataset,
@@ -536,7 +543,15 @@ public class MysqlModule extends AbstractQuercusModule {
       int multipleKey = 0;
       int uniqueKey = 0;
 
-      if (columnMd != null) {
+      if (qMd != null) {
+        zerofill = qMd.isZeroFill(jdbcField) ? 1 : 0;
+        primaryKey = qMd.isPrimaryKey(jdbcField) ? 1 : 0;
+        multipleKey = qMd.isMultipleKey(jdbcField) ? 1 : 0;
+        uniqueKey = qMd.isUniqueKey(jdbcField) ? 1 : 0;
+        notNull = qMd.isNotNull(jdbcField) ? 1 : 0;
+        // maxLength = qMd.getLength(jdbcField);
+      }
+      else if (columnMd != null) {
         zerofill = columnMd.isZeroFill() ? 1 : 0;
         primaryKey = columnMd.isPrimaryKey() ? 1 : 0;
         // XXX: not sure what multipleKey is supposed to be
@@ -552,22 +567,22 @@ public class MysqlModule extends AbstractQuercusModule {
       fieldResult.putThisField(env, SV_TABLE, env.createString(tableName));
       fieldResult.putThisField(env, SV_DEF, env.getEmptyString());
       fieldResult.putThisField(env, SV_MAX_LENGTH,
-			       LongValue.create(maxLength));
+                               LongValue.create(maxLength));
       fieldResult.putThisField(env, SV_NOT_NULL,
-			       LongValue.create(notNull));
+                               LongValue.create(notNull));
       fieldResult.putThisField(env, SV_PRIMARY_KEY,
-			       LongValue.create(primaryKey));
+                               LongValue.create(primaryKey));
       fieldResult.putThisField(env, SV_MULTIPLE_KEY,
-			       LongValue.create(multipleKey));
+                               LongValue.create(multipleKey));
       fieldResult.putThisField(env, SV_UNIQUE_KEY,
-			       LongValue.create(uniqueKey));
+                               LongValue.create(uniqueKey));
       fieldResult.putThisField(env, SV_NUMERIC,
-			       LongValue.create(numeric));
+                               LongValue.create(numeric));
       fieldResult.putThisField(env, SV_BLOB,
-			       LongValue.create(blob));
+                               LongValue.create(blob));
       fieldResult.putThisField(env, SV_TYPE, env.createString(type));
       fieldResult.putThisField(env, SV_UNSIGNED,
-			       LongValue.create(unsigned));
+                               LongValue.create(unsigned));
       fieldResult.putThisField(env, SV_ZEROFILL, LongValue.create(zerofill));
 
       return fieldResult;
@@ -584,8 +599,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * for a successful select
    */
   public static Value mysql_query(Env env,
-				  StringValue sql,
-				  @Optional Mysqli conn)
+                                  StringValue sql,
+                                  @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -681,7 +696,7 @@ public class MysqlModule extends AbstractQuercusModule {
     Value resultV = conn.validateConnection().realQuery(env, sql);
 
     Object metaResult = resultV.toJavaObject();
-    
+
     if (metaResult instanceof MysqliResult)
       return ((MysqliResult) metaResult).getFieldFlagsImproved(
         env,
@@ -915,7 +930,7 @@ public class MysqlModule extends AbstractQuercusModule {
                                         @Optional Mysqli conn)
   {
     // php/141c
-    // php gives warnings when the table doesn't exist or is an 
+    // php gives warnings when the table doesn't exist or is an
     // empty string/null, but not when the database doesn't exist
 
     if (database == null || database.length() == 0)
@@ -933,7 +948,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (! conn.select_db(database))
       return BooleanValue.FALSE;
 
-    Value result = conn.query(env, 
+    Value result = conn.query(env,
                               env.createString("SELECT * FROM " + tableName + " WHERE NULL"),
                               1);
 
@@ -984,7 +999,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     if (conn == null)
       conn = getConnection(env, dbName);
-    
+
     return conn.select_db(dbName);
   }
 
@@ -1065,10 +1080,10 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public static Value mysql_connect(Env env,
                                     @Optional StringValue host,
-				                    @Optional StringValue userName,
-				                    @Optional StringValue password,
-				                    @Optional boolean isNewLink,
-				                    @Optional int flags)
+                                                    @Optional StringValue userName,
+                                                    @Optional StringValue password,
+                                                    @Optional boolean isNewLink,
+                                                    @Optional int flags)
   {
     int port = 3306;
     String socketStr = "";

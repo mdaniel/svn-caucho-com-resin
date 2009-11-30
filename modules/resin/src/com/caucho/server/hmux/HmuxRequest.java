@@ -457,7 +457,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     try {
       if (_method.getLength() == 0)
-        throw new RuntimeException("HTTP protocol exception");
+        throw new RuntimeException("HTTP protocol exception, expected method");
 
       Invocation invocation;
 
@@ -903,6 +903,10 @@ public class HmuxRequest extends AbstractHttpRequest
           readHmtpQueryError(code, is, isAdmin);
           break;
         }
+
+      case ' ': case '\n':
+        // skip for debugging
+        break;
 
       default:
         {
@@ -2104,7 +2108,8 @@ public class HmuxRequest extends AbstractHttpRequest
 
         int code = is.read();
 
-        if (code == HMUX_DATA) {
+        switch (code) {
+        case HMUX_DATA: {
           int len = (is.read() << 8) + is.read();
 
           if (log.isLoggable(Level.FINE))
@@ -2112,42 +2117,54 @@ public class HmuxRequest extends AbstractHttpRequest
 
           _pendingData = len;
         }
-        else if (code == HMUX_QUIT) {
+
+        case HMUX_QUIT: {
           if (log.isLoggable(Level.FINE))
             log.fine(_request.dbgId() + "Q-r:quit");
 
           return readLen;
         }
-        else if (code == HMUX_EXIT) {
+
+        case HMUX_EXIT: {
           if (log.isLoggable(Level.FINE))
             log.fine(_request.dbgId() + "X-r:exit");
 
           _request.killKeepalive();
           return readLen;
         }
-        else if (code == HMUX_YIELD) {
+
+        case HMUX_YIELD: {
           _needsAck = true;
+          break;
         }
-        else if (code == HMUX_CHANNEL) {
+
+        case HMUX_CHANNEL: {
           int channel = (is.read() << 8) + is.read();
 
           if (log.isLoggable(Level.FINE))
             log.fine(_request.dbgId() + "channel-r " + channel);
+          break;
         }
-        else if (code < 0) {
-          _request.killKeepalive();
 
-          return readLen;
-        }
-        else {
-          _request.killKeepalive();
+        case ' ': case '\n':
+          break;
 
-          int len = (is.read() << 8) + is.read();
+        default:
+          if (code < 0) {
+            _request.killKeepalive();
 
-          if (log.isLoggable(Level.FINE))
-            log.fine(_request.dbgId() + "unknown '" + (char) code + "' " + len);
+            return readLen;
+          }
+          else {
+            _request.killKeepalive();
 
-          is.skip(len);
+            int len = (is.read() << 8) + is.read();
+
+            if (log.isLoggable(Level.FINE))
+              log.fine(_request.dbgId() + "unknown-r '" + (char) code + "' " + len);
+
+            is.skip(len);
+          }
         }
       }
 
