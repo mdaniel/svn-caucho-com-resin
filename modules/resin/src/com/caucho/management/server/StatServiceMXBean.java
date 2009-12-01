@@ -39,11 +39,6 @@ package com.caucho.management.server;
 public interface StatServiceMXBean extends ManagedObjectMXBean
 {
   /**
-   * Returns the current statistics attributes
-   */
-  public StatServiceAttribute []getActiveAttributes();
-
-  /**
    * Returns the sample period in milliseconds
    */
   public long getSamplePeriod();

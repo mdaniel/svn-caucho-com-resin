@@ -32,15 +32,11 @@ package javax.el;
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Array;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 /**
  * Resolves properties based on arrays.
  */
 public class ArrayELResolver extends ELResolver {
-  private final static Logger log
-    = Logger.getLogger(ArrayELResolver.class.getName());
-  
   private final boolean _isReadOnly;
   
   public ArrayELResolver()
