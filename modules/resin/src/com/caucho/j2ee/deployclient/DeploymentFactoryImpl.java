@@ -32,6 +32,8 @@ import javax.enterprise.deploy.spi.DeploymentManager;
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 import javax.enterprise.deploy.spi.factories.DeploymentFactory;
 
+import com.caucho.VersionFactory;
+
 /**
  * Factory for the implementation classes.
  */
@@ -98,7 +100,7 @@ public class DeploymentFactoryImpl implements DeploymentFactory {
    */
   public String getProductVersion()
   {
-    return com.caucho.Version.FULL_VERSION;
+    return VersionFactory.getFullVersion();
   }
 }
 

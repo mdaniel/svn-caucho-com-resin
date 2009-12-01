@@ -29,6 +29,7 @@
 
 package com.caucho.servlets.ssi;
 
+import com.caucho.VersionFactory;
 import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
 import com.caucho.util.QDate;
@@ -123,7 +124,7 @@ public class VarExpr extends SSIExpr {
       break;
 
     case SERVER_SOFTWARE:
-      value = "Resin/" + com.caucho.Version.VERSION;
+      value = "Resin/" + VersionFactory.getVersion();
       break;
 
     case SERVER_NAME:

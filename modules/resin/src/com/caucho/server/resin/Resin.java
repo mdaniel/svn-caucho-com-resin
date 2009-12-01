@@ -29,6 +29,7 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.VersionFactory;
 import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.bam.*;
 import com.caucho.config.Config;
@@ -1334,7 +1335,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       }
       else if (argv[i].equals("-version")
                || argv[i].equals("--version")) {
-        System.out.println(com.caucho.Version.FULL_VERSION);
+        System.out.println(VersionFactory.getFullVersion());
         System.exit(66);
       }
       else if (argv[i].equals("-watchdog-port")
@@ -1479,8 +1480,8 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     setShutdown(this);
 
-    System.out.println(com.caucho.Version.FULL_VERSION);
-    System.out.println(com.caucho.Version.COPYRIGHT);
+    System.out.println(VersionFactory.getFullVersion());
+    System.out.println(VersionFactory.getCopyright());
     System.out.println();
 
     String licenseMessage = getLicenseMessage();
@@ -1589,7 +1590,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     RandomUtil.addRandom(System.identityHashCode(_mainThread));
     RandomUtil.addRandom(System.identityHashCode(_systemClassLoader));
-    RandomUtil.addRandom(com.caucho.Version.FULL_VERSION);
+    RandomUtil.addRandom(VersionFactory.getFullVersion());
 
     try {
       RandomUtil.addRandom(InetAddress.getLocalHost().toString());
@@ -1894,7 +1895,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     }
     else if (pkg.getSpecificationVersion() == null) {
       log().warning(L().l("{0} has no specification version.  Resin {1} requires version {2}.",
-                                    pkg, com.caucho.Version.VERSION,
+                                    pkg, VersionFactory.getVersion(),
                                     versions[0]));
 
       return;
@@ -1907,7 +1908,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     log().warning(L().l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
                       pkg.getSpecificationVersion(),
-                      pkg, com.caucho.Version.VERSION,
+                      pkg, VersionFactory.getVersion(),
                       versions[0]));
   }
 
@@ -2092,7 +2093,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       if (Alarm.isTest())
         return "3.1.test";
       else
-        return com.caucho.Version.VERSION;
+        return VersionFactory.getVersion();
     }
 
     /**
@@ -2105,7 +2106,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       if (Alarm.isTest())
         return "19980508T0251";
       else
-        return com.caucho.Version.VERSION_DATE;
+        return VersionFactory.getVersionDate();
     }
 
     /**

@@ -29,6 +29,7 @@
 
 package com.caucho.server.http;
 
+import com.caucho.VersionFactory;
 import com.caucho.server.cache.*;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.session.CookieImpl;
@@ -658,7 +659,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       else if (CauchoSystem.isTesting()) {
       }
       else
-        version = com.caucho.Version.FULL_VERSION;
+        version = VersionFactory.getFullVersion();
 
       if (version != null) {
         s.println("<p /><hr />");

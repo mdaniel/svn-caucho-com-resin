@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.VersionFactory;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.distcache.ClusterCache;
@@ -256,7 +257,7 @@ public class Server extends ProtocolDispatchServer
     _serverLocal.set(this, _classLoader);
 
     if (! Alarm.isTest())
-      _serverHeader = "Resin/" + com.caucho.Version.VERSION;
+      _serverHeader = "Resin/" + VersionFactory.getVersion();
     else
       _serverHeader = "Resin/1.1";
 

@@ -29,6 +29,7 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.VersionFactory;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -104,7 +105,7 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public String getServerInfo()
   {
-    return "Resin/" + com.caucho.Version.VERSION;
+    return "Resin/" + VersionFactory.getVersion();
   }
 
   /**

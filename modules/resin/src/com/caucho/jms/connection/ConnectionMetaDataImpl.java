@@ -29,6 +29,7 @@
 
 package com.caucho.jms.connection;
 
+import com.caucho.VersionFactory;
 import com.caucho.util.L10N;
 
 import javax.jms.ConnectionMetaData;
@@ -118,7 +119,7 @@ public class ConnectionMetaDataImpl implements ConnectionMetaData {
   public String getProviderVersion()
     throws JMSException
   {
-    return com.caucho.Version.VERSION;
+    return VersionFactory.getVersion();
   }
 }
 

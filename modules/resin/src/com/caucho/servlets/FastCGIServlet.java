@@ -29,6 +29,7 @@
 
 package com.caucho.servlets;
 
+import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.server.cluster.Server;
@@ -315,7 +316,7 @@ public class FastCGIServlet extends GenericServlet {
     addHeader(stream, ws, "REQUEST_URI", req.getRequestURI());
     addHeader(stream, ws, "REQUEST_METHOD", req.getMethod());
 
-    addHeader(stream, ws, "SERVER_SOFTWARE", "Resin/" + com.caucho.Version.VERSION);
+    addHeader(stream, ws, "SERVER_SOFTWARE", "Resin/" + VersionFactory.getVersion());
 
     addHeader(stream, ws, "SERVER_NAME", req.getServerName());
     //addHeader(stream, ws, "SERVER_ADDR=" + req.getServerAddr());

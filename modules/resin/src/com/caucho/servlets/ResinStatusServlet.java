@@ -29,6 +29,7 @@
 
 package com.caucho.servlets;
 
+import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.*;
@@ -815,7 +816,7 @@ public class ResinStatusServlet extends GenericServlet {
       out.println("<br><em>Resin test</em>");
     else
     */
-      out.println("<br><em>" + com.caucho.Version.FULL_VERSION + "</em>");
+      out.println("<br><em>" + VersionFactory.getFullVersion() + "</em>");
   }
 
   static class HostCompare implements Comparator<HostMXBean> {

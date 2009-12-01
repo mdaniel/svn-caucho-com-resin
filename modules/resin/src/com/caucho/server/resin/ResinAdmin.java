@@ -29,7 +29,7 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.Version;
+import com.caucho.VersionFactory;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
@@ -105,7 +105,7 @@ public class ResinAdmin extends AbstractManagedObject
 
   public String getVersion()
   {
-    return Version.FULL_VERSION;
+    return VersionFactory.getFullVersion();
   }
   
   public boolean isProfessional()

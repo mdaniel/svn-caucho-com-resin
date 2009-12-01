@@ -30,24 +30,6 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.Version;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.CacheManager;
-import com.caucho.naming.Jndi;
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.NotNull;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReadOnly;
-import com.caucho.quercus.annotation.Name;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.LruCache;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
@@ -65,6 +47,30 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
+
+import com.caucho.VersionFactory;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.CacheManager;
+import com.caucho.naming.Jndi;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.SaveState;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 public class ResinModule
   extends AbstractQuercusModule
@@ -146,7 +152,7 @@ public class ResinModule
    */
   public static String resin_version()
   {
-    return Version.FULL_VERSION;
+    return VersionFactory.getFullVersion();
   }
 
   /**

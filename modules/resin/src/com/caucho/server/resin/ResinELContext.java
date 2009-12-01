@@ -29,6 +29,7 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.VersionFactory;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
@@ -197,7 +198,7 @@ abstract public class ResinELContext
       if (Alarm.isTest())
         return "3.1.test";
       else
-        return com.caucho.Version.VERSION;
+        return VersionFactory.getVersion();
     }
 
     /**

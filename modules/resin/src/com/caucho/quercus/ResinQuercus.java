@@ -29,6 +29,7 @@
 
 package com.caucho.quercus;
 
+import com.caucho.VersionFactory;
 import com.caucho.loader.*;
 import com.caucho.distcache.*;
 import com.caucho.quercus.module.ModuleContext;
@@ -172,13 +173,13 @@ public class ResinQuercus extends Quercus
   @Override
   public String getVersion()
   {
-    return com.caucho.Version.VERSION;
+    return VersionFactory.getVersion();
   }
 
   @Override
   public String getVersionDate()
   {
-    return com.caucho.Version.VERSION_DATE;
+    return VersionFactory.getVersionDate();
   }
 
   @Override

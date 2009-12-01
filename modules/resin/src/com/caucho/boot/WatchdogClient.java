@@ -38,7 +38,7 @@ import com.caucho.config.program.*;
 import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
-import com.caucho.Version;
+import com.caucho.VersionFactory;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -361,7 +361,7 @@ class WatchdogClient
     throws IOException
   {
     System.out.println(L.l("Resin/{0} launching watchdog at {1}:{2}",
-                           Version.VERSION,
+                           VersionFactory.getVersion(),
                            getWatchdogAddress(),
                            getWatchdogPort()));
 

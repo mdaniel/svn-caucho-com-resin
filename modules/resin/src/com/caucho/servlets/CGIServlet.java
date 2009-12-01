@@ -29,6 +29,7 @@
 
 package com.caucho.servlets;
 
+import com.caucho.VersionFactory;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CharBuffer;
@@ -416,7 +417,7 @@ public class CGIServlet extends GenericServlet {
     
     ArrayList<String> env = new ArrayList<String>();
 
-    env.add("SERVER_SOFTWARE=Resin/" + com.caucho.Version.VERSION);
+    env.add("SERVER_SOFTWARE=Resin/" + VersionFactory.getVersion());
 
     env.add("SERVER_NAME=" + req.getServerName());
     //env.add("SERVER_ADDR=" + req.getServerAddr());

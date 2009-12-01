@@ -29,25 +29,13 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.Version;
-import com.caucho.config.*;
-import com.caucho.i18n.CharacterEncoding;
-import com.caucho.java.LineMap;
-import com.caucho.java.LineMapException;
-import com.caucho.java.ScriptStackTrace;
-import com.caucho.server.connection.*;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.BadRequestException;
-import com.caucho.server.http.AbstractHttpRequest;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.http.CauchoResponse;
-import com.caucho.server.http.HttpServletRequestImpl;
-import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.resin.Resin;
-import com.caucho.util.*;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.Encoding;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -57,13 +45,31 @@ import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.VersionFactory;
+import com.caucho.config.LineException;
+import com.caucho.i18n.CharacterEncoding;
+import com.caucho.java.LineMap;
+import com.caucho.java.LineMapException;
+import com.caucho.java.ScriptStackTrace;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.http.HttpServletResponseImpl;
+import com.caucho.server.resin.Resin;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CompileException;
+import com.caucho.util.DisplayableException;
+import com.caucho.util.L10N;
+import com.caucho.util.LineCompileException;
+import com.caucho.util.QDate;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.Encoding;
 
 /**
  * Represents the final servlet in a filter chain.
@@ -492,7 +498,7 @@ public class ErrorPageManager {
       else if (CauchoSystem.isTesting()) {
       }
       else
-	version = com.caucho.Version.FULL_VERSION;
+	version = VersionFactory.getFullVersion();
     
       if (version != null) {
 	out.println("<p /><hr />");
@@ -630,7 +636,7 @@ public class ErrorPageManager {
       else if (CauchoSystem.isTesting()) {
       }
       else
-	version = com.caucho.Version.FULL_VERSION;
+	version = VersionFactory.getFullVersion();
     
       if (version != null) {
 	out.println("<p /><hr />");

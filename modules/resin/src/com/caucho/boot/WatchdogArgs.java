@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.Version;
+import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.license.*;
 import com.caucho.server.resin.ResinELContext;
@@ -332,7 +332,7 @@ class WatchdogArgs
         _startMode = StartMode.SHUTDOWN;
       }
       else if ("version".equals(arg)) {
-        System.out.println(Version.FULL_VERSION);
+        System.out.println(VersionFactory.getFullVersion());
         System.exit(0);
       }
       else {
@@ -365,7 +365,7 @@ class WatchdogArgs
         _resinConf = _resinHome.lookup(resinConf);
 
       if (! _resinConf.exists())
-        throw new ConfigException(L().l("Resin/{0} can't find configuration file '{1}'", Version.VERSION, _resinConf.getNativePath()));
+        throw new ConfigException(L().l("Resin/{0} can't find configuration file '{1}'", VersionFactory.getVersion(), _resinConf.getNativePath()));
     }
   }
 
@@ -474,7 +474,7 @@ class WatchdogArgs
 
     if (! path.startsWith("jar:"))
       throw new RuntimeException(L().l("Resin/{0}: can't find jar for ResinBoot in {1}",
-                                 Version.VERSION, path));
+                                 VersionFactory.getVersion(), path));
 
     int p = path.indexOf(':');
     int q = path.indexOf('!');
@@ -632,7 +632,7 @@ class WatchdogArgs
       try {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-        Class cl = Class.forName("com.caucho.license.LicenseCheckImpl",
+        Class<?> cl = Class.forName("com.caucho.license.LicenseCheckImpl",
             false, loader);
 
         license = (LicenseCheck) cl.newInstance();
