@@ -29,6 +29,7 @@
 package com.caucho.quercus.mysql;
 
 import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.FreeList;
 import com.caucho.util.QDate;
 import com.caucho.util.L10N;
 
@@ -45,6 +46,9 @@ import java.util.Map;
  */
 abstract public class AbstractResultSet implements java.sql.ResultSet {
   private final static L10N L = new L10N(AbstractResultSet.class);
+
+  private final static FreeList<QDate> _freeDate = new FreeList<QDate>(16);
+
   private int _rowNumber;
 
   abstract public java.sql.Statement getStatement()
@@ -464,9 +468,14 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
       return null;
 
     try {
-      System.out.println("VALUE: " + value);
+      QDate qDate = _freeDate.allocate();
 
-      long date = new QDate().parseLocalDate(value);
+      if (qDate == null)
+        qDate = new QDate();
+
+      long date = qDate.parseLocalDate(value);
+
+      _freeDate.free(qDate);
 
       return new Timestamp(date);
     } catch (Exception e) {

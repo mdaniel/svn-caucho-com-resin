@@ -41,7 +41,7 @@ import com.caucho.util.*;
 public class RegexpState {
   private static final Logger log
     = Logger.getLogger(RegexpState.class.getName());
-  
+
   private static final L10N L = new L10N(Regexp.class);
 
   public static final int FAIL = -1;
@@ -49,8 +49,9 @@ public class RegexpState {
 
   private Regexp _regexp;
 
-  StringValue _subject;
-  
+  private StringValue _subject;
+  private int _subjectLength;
+
   boolean _isGlobal;
 
   int _first;
@@ -62,43 +63,16 @@ public class RegexpState {
 
   boolean _isUnicode;
   boolean _isPHP5String;
-  
+
   boolean _isUTF8;
   boolean _isEval;
 
   int _groupLength;
   int []_groupBegin;
   int []_groupEnd;
-  
+
   int []_loopCount;
   int []_loopOffset;
-
-  /*
-  public RegexpState(Env env, Regexp regexp, StringValue subject)
-  {
-    this(regexp);
-
-    subject = _regexp.convertSubject(env, subject);
-    
-    if (subject == null)
-      throw new QuercusException(L.l("error converting subject to utf8"));
-    
-    _subject = subject;
-  }
-  
-  public RegexpState(Regexp regexp)
-  {
-    _regexp = regexp;
-
-    int nGroup = _regexp._nGroup;
-    _groupBegin = new int[nGroup];
-    _groupEnd = new int[nGroup];
-
-    int nLoop = _regexp._nLoop;
-    _loopCount = new int[nLoop];
-    _loopOffset = new int[nLoop];
-  }
-  */
 
   private RegexpState()
   {
@@ -130,6 +104,7 @@ public class RegexpState {
     }
 
     _subject = null;
+    _subjectLength = 0;
     _isGlobal = false;
 
     _first = 0;
@@ -140,7 +115,7 @@ public class RegexpState {
 
     _isUnicode = false;
     _isPHP5String = false;
-  
+
     _isUTF8 = false;
     _isEval = false;
   }
@@ -162,7 +137,7 @@ public class RegexpState {
     RegexpState state = create(env, regexp);
 
     state.setSubject(env, subject);
-    
+
     return state;
   }
 
@@ -170,19 +145,17 @@ public class RegexpState {
   {
     env.freeRegexpState(state);
   }
-  
+
   public int getSubjectLength()
   {
-    if (_subject != null)
-      return _subject.length();
-    else
-      return 0;
+    return _subjectLength;
   }
-  
+
   public boolean setSubject(Env env, StringValue subject)
   {
     _subject = _regexp.convertSubject(env, subject);
-    
+    _subjectLength = _subject != null ? _subject.length() : 0;
+
     return _subject != null;
   }
 
@@ -196,56 +169,57 @@ public class RegexpState {
   {
     try {
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " find()");
-    
+        log.finest(this + " find()");
+
       int minLength = _regexp._minLength;
       boolean []firstSet = _regexp._firstSet;
 
       if (_subject == null)
         return false;
 
-      int length = _subject.length();
+      StringValue subject = _subject;
+      int length = _subjectLength;
 
       /* php/4e85 XXX: optim doesn't work for greedy loops
       if (_regexp._isAnchorBegin) {
-	if (_first + minLength <= length)
-	  length = _first + minLength;
+        if (_first + minLength <= length)
+          length = _first + minLength;
       }
       */
 
       for (; _first + minLength <= length; _first++) {
-	if (firstSet != null && _first < length) {
-	  char firstChar = _subject.charAt(_first);
-	
-	  if (firstChar < 256 && ! firstSet[firstChar])
-	    continue;
-	}
+        if (firstSet != null && _first < length) {
+          char firstChar = subject.charAt(_first);
 
-	clearGroup();
-	int offset = _regexp._prog.match(_subject, length, _first, this);
+          if (firstChar < 256 && ! firstSet[firstChar])
+            continue;
+        }
 
-	if (offset >= 0) {
-	  _groupBegin[0] = _first;
-	  _groupEnd[0] = offset;
+        clearGroup();
+        int offset = _regexp._prog.match(subject, length, _first, this);
 
-	  if (_first < offset)
-	    _first = offset;
-	  else
+        if (offset >= 0) {
+          _groupBegin[0] = _first;
+          _groupEnd[0] = offset;
+
+          if (_first < offset)
+            _first = offset;
+          else
             _first += 1;
-          
+
           return true;
-	}
+        }
       }
 
       _first = length + 1;
-    
+
       return false;
     } catch (StackOverflowError e) {
       log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-		      _regexp, _subject));
-      
+                      _regexp, _subject));
+
       throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
-				     _regexp), e);
+                                     _regexp), e);
     }
   }
 
@@ -253,20 +227,21 @@ public class RegexpState {
   {
     try {
       subject = _regexp.convertSubject(env, subject);
-      
+
       if (subject == null)
         throw new QuercusException(L.l("error converting subject to utf8"));
-    
+
       _subject = subject;
+      _subjectLength = subject != null ? subject.length() : 0;
       _first = 0;
 
       return find();
     } catch (StackOverflowError e) {
       log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-		      _regexp, subject));
-      
+                      _regexp, subject));
+
       throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
-				     _regexp), e);
+                                     _regexp), e);
     }
   }
 
@@ -274,28 +249,29 @@ public class RegexpState {
   {
     try {
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " find(" + subject + ")");
-    
+        log.finest(this + " find(" + subject + ")");
+
       subject = _regexp.convertSubject(env, subject);
-      
+
       if (subject == null)
         throw new QuercusException(L.l("error converting subject to utf8"));
-    
+
       _subject = subject;
+      _subjectLength = subject != null ? subject.length() : 0;
 
       _first = first;
       clearGroup();
 
-      return _regexp._prog.match(_subject, subject.length(), first, this);
+      return _regexp._prog.match(_subject, _subjectLength, first, this);
     } catch (StackOverflowError e) {
       log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-		      _regexp, subject));
-      
+                      _regexp, subject));
+
       throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
-					    _regexp), e);
+                                            _regexp), e);
     }
   }
-  
+
   /**
    * XXX: not proper behaviour with /g
    */
@@ -304,29 +280,30 @@ public class RegexpState {
     try {
       if (log.isLoggable(Level.FINEST))
         log.finest(this + " exec(" + subject + ")");
-      
+
       subject = _regexp.convertSubject(env, subject);
 
       if (subject == null) {
         if (log.isLoggable(Level.FINE))
           log.fine(L.l("error converting subject to utf8"));
-        
+
         return -1;
       }
 
       clearGroup();
-    
+
       _start = start;
       _first = start;
 
       _subject = subject;
-      int subjectLength = subject.length();
+      int subjectLength = subject != null ? subject.length() : 0;
+      _subjectLength = subjectLength;
 
       int minLength = _regexp._minLength;
       boolean []firstSet = _regexp._firstSet;
-      int end = subject.length() - minLength;
+      int end = subjectLength - minLength;
       RegexpNode prog = _regexp._prog;
-      
+
       if (_regexp._isAnchorBegin)
         end = start;
 
@@ -337,13 +314,13 @@ public class RegexpState {
           if (firstChar < 256 && ! firstSet[firstChar])
             continue;
         }
-        
+
         int value = prog.match(subject, subjectLength, start, this);
 
         if (value >= 0) {
           _groupBegin[0] = start;
           _groupEnd[0] = value;
-        
+
           return start;
         }
       }
@@ -351,10 +328,10 @@ public class RegexpState {
       return -1;
     } catch (StackOverflowError e) {
       log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
-		      _regexp, subject));
-      
+                      _regexp, subject));
+
       throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
-				     _regexp), e);
+                                     _regexp), e);
     }
   }
 
@@ -367,7 +344,7 @@ public class RegexpState {
       _groupEnd[i] = -1;
     }
   }
-  
+
   public int getBegin(int i)
   {
     return _groupBegin[i];
@@ -377,7 +354,7 @@ public class RegexpState {
   {
     return _groupEnd[i];
   }
-  
+
   public void setBegin(int i, int v)
   {
     _groupBegin[i] = v;
@@ -397,42 +374,42 @@ public class RegexpState {
   {
     _groupLength = length;
   }
-  
+
   public int length()
   {
     return _groupLength;
   }
-  
+
   public int start()
   {
     return getBegin(0);
   }
-  
+
   public int start(int i)
   {
     return getBegin(i);
   }
-  
+
   public int end()
   {
     return getEnd(0);
   }
-  
+
   public int end(int i)
   {
     return getEnd(i);
   }
-  
+
   public int groupCount()
   {
     return _regexp._nGroup;
   }
-  
+
   public boolean isMatchedGroup(int i)
   {
     return i <= _groupLength;
   }
-  
+
   public StringValue group(Env env)
   {
     return group(env, 0);
@@ -447,7 +424,7 @@ public class RegexpState {
 
     return _regexp.convertResult(env, s);
   }
-  
+
   public StringValue getGroupName(int i)
   {
     StringValue []groupNames = _regexp._groupNames;
@@ -457,14 +434,14 @@ public class RegexpState {
     else
       return groupNames[i];
   }
-  
+
   public StringValue substring(Env env, int start)
   {
     StringValue result = _subject.substring(start);
 
     return _regexp.convertResult(env, result);
   }
-  
+
   public StringValue substring(Env env, int start, int end)
   {
     StringValue result = _subject.substring(start, end);

@@ -144,7 +144,7 @@ abstract public class Expr {
   {
     return false;
   }
-  
+
   /*
    * Returns true if this is an assign expr.
    */
@@ -165,7 +165,7 @@ abstract public class Expr {
     throws IOException
   {
     String msg = (L.l("{0} is an invalid left-hand side of an assignment.",
-		      this));
+                      this));
 
     if (parser != null)
       throw parser.error(msg);
@@ -180,7 +180,7 @@ abstract public class Expr {
     throws IOException
   {
     String msg = L.l("{0} is an invalid left-hand side of an assignment.",
-		     this);
+                     this);
 
     if (parser != null)
       throw parser.error(msg);
@@ -193,7 +193,7 @@ abstract public class Expr {
   {
     // XXX: need real exception
     String msg = L.l("{0} is an invalid left-hand side of an assignment.",
-		     this);
+                     this);
 
     if (parser != null)
       throw parser.error(msg);
@@ -264,7 +264,7 @@ abstract public class Expr {
     throws IOException
   {
     throw new IOException(L.l("{0} is an illegal value to unset",
-			      this));
+                              this));
   }
 
   /**
@@ -274,9 +274,9 @@ abstract public class Expr {
     throws IOException
   {
     throw new IOException(L.l("{0} is an illegal value to isset",
-			      this));
+                              this));
   }
-  
+
   /**
    * Returns true if the expression evaluates to a boolean.
    */
@@ -316,7 +316,7 @@ abstract public class Expr {
   {
     return false;
   }
-  
+
   /**
    * Returns true if the expression evaluates to an array.
    */
@@ -332,7 +332,27 @@ abstract public class Expr {
    */
   public Value evalConstant()
   {
-    throw new IllegalStateException(L.l("{0} is not a constant expression", this));
+    return null;
+  }
+
+  /**
+   * Evaluates as a constant prefix.
+   *
+   * @return the expression value as a prefix.
+   */
+  public Value evalConstantPrefix()
+  {
+    return evalConstant();
+  }
+
+  /**
+   * Evaluates as a constant prefix.
+   *
+   * @return the expression value as a suffix.
+   */
+  public Value evalConstantSuffix()
+  {
+    return evalConstant();
   }
 
   /**
@@ -425,9 +445,9 @@ abstract public class Expr {
   public void evalAssign(Env env, Value value)
   {
     throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
-				   this));
+                                   this));
   }
-  
+
   /**
    * Evaluates as an array index assign ($a[index] = value).
    */
@@ -437,24 +457,24 @@ abstract public class Expr {
 
     array.put(index, value);
   }
-  
+
   /**
    * Handles post increments.
    */
   public Value evalPostIncrement(Env env, int incr)
   {
     Value value = evalRef(env);
-    
+
     return value.postincr(incr);
   }
-  
+
   /**
    * Handles post increments.
    */
   public Value evalPreIncrement(Env env, int incr)
   {
     Value value = evalRef(env);
-    
+
     return value.preincr(incr);
   }
 
@@ -468,7 +488,7 @@ abstract public class Expr {
   public String evalString(Env env)
   {
     Value value = eval(env);
-    
+
     if (value.isObject())
       return value.toString(env).toString();
     else
@@ -534,7 +554,7 @@ abstract public class Expr {
   {
     return eval(env).toDouble();
   }
-  
+
   /**
    * Evaluates the expression as an isset() statement.
    */
@@ -542,7 +562,7 @@ abstract public class Expr {
   {
     return eval(env).isset();
   }
-  
+
   /**
    * Evaluates the expression as an array index unset
    */

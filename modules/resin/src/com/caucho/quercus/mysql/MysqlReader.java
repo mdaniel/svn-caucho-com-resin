@@ -71,7 +71,6 @@ class MysqlReader {
 
       int len = _is.readAll(_header, 0, _header.length);
 
-      System.out.println("LEN: " + len);
       if (len < _header.length)
         throw new SQLException("end of file");
 
@@ -79,14 +78,10 @@ class MysqlReader {
                        + ((_header[1] & 0xff) << 8)
                        + ((_header[2] & 0xff) << 16));
 
-      System.out.println("PL: " + _packetLength);
-
       _packetNumber = _header[3];
       _packetOffset = 0;
 
       assert(_packetOffset <= _packetLength);
-
-      System.out.println("PN: " + _packetNumber);
     } catch (IOException e) {
       throw new SQLException(e);
     }
@@ -332,7 +327,6 @@ class MysqlReader {
   {
     try {
       int len = _packetLength - _packetOffset;
-      System.out.println("SKIP: " + len);
 
       _is.skip(len);
 

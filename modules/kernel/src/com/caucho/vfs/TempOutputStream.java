@@ -55,20 +55,37 @@ public class TempOutputStream extends OutputStream
   public void write(byte []buf, int offset, int length)
   {
     int index = 0;
-    while (index < length) {
-      if (_tail == null)
-        addBuffer(TempBuffer.allocate());
-      else if (_tail._buf.length <= _tail._length)
-        addBuffer(TempBuffer.allocate());
 
-      int sublen = _tail._buf.length - _tail._length;
+    TempBuffer tail = _tail;
+    int bufferSize = TempBuffer.SIZE;
+    int tailLength;
+
+    if (tail != null)
+      tailLength = tail._length;
+    else
+      tailLength = 0;
+
+    while (index < length) {
+      if (tail == null) {
+        addBuffer(TempBuffer.allocate());
+        tail = _tail;
+        tailLength = tail._length;
+      }
+      else if (bufferSize <= tailLength) {
+        addBuffer(TempBuffer.allocate());
+        tail = _tail;
+        tailLength = tail._length;
+      }
+
+      int sublen = bufferSize - tailLength;
       if (length - index < sublen)
         sublen = length - index;
 
-      System.arraycopy(buf, index + offset, _tail._buf, _tail._length, sublen);
+      System.arraycopy(buf, index + offset, tail._buf, tailLength, sublen);
 
       index += sublen;
-      _tail._length += sublen;
+      tailLength += sublen;
+      tail._length = tailLength;
     }
   }
 
@@ -216,7 +233,6 @@ public class TempOutputStream extends OutputStream
   public void readAll(int position, char []buffer, int offset, int length)
   {
     int len = getLength();
-    byte []data = new byte[len];
 
     TempBuffer ptr = _head;
 
@@ -240,6 +256,35 @@ public class TempOutputStream extends OutputStream
         buffer[offset++] = (char) (dataBuffer[position] & 0xff);
       }
 
+      length -= sublen;
+    }
+  }
+
+  public void readAll(int position, byte []buffer, int offset, int length)
+  {
+    int len = getLength();
+
+    TempBuffer ptr = _head;
+
+    for (; ptr != null && ptr.getLength() <= position; ptr = ptr._next) {
+      position -= ptr.getLength();
+    }
+
+    if (ptr == null)
+      return;
+
+    for (; ptr != null && length >= 0; ptr = ptr._next) {
+      int sublen = ptr.getLength() - position;
+
+      if (length < sublen)
+        sublen = length;
+
+      byte []dataBuffer = ptr.getBuffer();
+
+      System.arraycopy(dataBuffer, position, buffer, offset, sublen);
+
+      offset += sublen;
+      position += sublen;
       length -= sublen;
     }
   }

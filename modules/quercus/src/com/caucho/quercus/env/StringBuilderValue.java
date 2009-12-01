@@ -99,36 +99,20 @@ public class StringBuilderValue
     this(buffer, 0, buffer.length);
   }
 
-  public StringBuilderValue(Byte []buffer)
-  {
-    int length = buffer.length;
-
-    _buffer =  new byte[length];
-    _length = length;
-
-    for (int i = 0; i < length; i++) {
-      _buffer[i] =  buffer[i].byteValue();
-    }
-  }
-
-  public StringBuilderValue(Character []buffer)
-  {
-    int length = buffer.length;
-
-    _buffer =  new byte[length];
-    _length = length;
-
-    for (int i = 0; i < length; i++) {
-      _buffer[i] = (byte) buffer[i].charValue();
-    }
-  }
-
   public StringBuilderValue(char ch)
   {
     _buffer = new byte[1];
     _length = 1;
 
     _buffer[0] = (byte) ch;
+  }
+
+  public StringBuilderValue(byte ch)
+  {
+    _buffer = new byte[1];
+    _length = 1;
+
+    _buffer[0] = ch;
   }
 
   public StringBuilderValue(String s)
@@ -823,13 +807,13 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns the last index of the match string, starting from the head.
+   * Returns the first index of the match string, starting from the head.
    */
   public int indexOf(char match)
   {
-    int length = _length;
+    final int length = _length;
+    final byte []buffer = _buffer;
 
-    byte []buffer = _buffer;
     for (int head = 0; head < length; head++) {
       if (buffer[head] == match)
         return head;
@@ -845,8 +829,8 @@ public class StringBuilderValue
   public int indexOf(char match, int head)
   {
     int length = _length;
-
     byte []buffer = _buffer;
+
     for (; head < length; head++) {
       if (buffer[head] == match)
         return head;
@@ -1328,24 +1312,25 @@ public class StringBuilderValue
   @Override
   public final int indexOf(CharSequence match, int head)
   {
-    int length = _length;
-    int matchLength = match.length();
+    final int matchLength = match.length();
 
     if (matchLength <= 0)
       return -1;
     else if (head < 0)
       return -1;
 
-    int end = length - matchLength;
-    char first = match.charAt(0);
+    final int length = _length;
+    final int end = length - matchLength;
+    final char first = match.charAt(0);
+    final byte []buffer = _buffer;
 
     loop:
     for (; head <= end; head++) {
-      if (_buffer[head] != first)
+      if (buffer[head] != first)
         continue;
 
       for (int i = 1; i < matchLength; i++) {
-        if (_buffer[head + i] != match.charAt(i))
+        if (buffer[head + i] != match.charAt(i))
           continue loop;
       }
 

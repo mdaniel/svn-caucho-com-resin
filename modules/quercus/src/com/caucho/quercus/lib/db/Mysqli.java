@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 public class Mysqli extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
-  
+
   protected static final String DRIVER
     = "com.mysql.jdbc.Driver";
 
@@ -101,7 +101,7 @@ public class Mysqli extends JdbcConnectionResource {
     = new ArrayList<JdbcResultResource>();
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
-  
+
   private boolean _isPersistent;
 
   private LastSqlType _lastSql;
@@ -172,22 +172,22 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return _lastSql == LastSqlType.DESCRIBE;
   }
-  
+
   /**
    * Connects to the underlying database.
    */
   @Override
   protected ConnectionEntry connectImpl(Env env,
-					String host,
-					String userName,
-					String password,
-					String dbname,
-					int port,
-					String socket,
-					int flags,
-					String driver,
-					String url,
-					boolean isNewLink)
+                                        String host,
+                                        String userName,
+                                        String password,
+                                        String dbname,
+                                        int port,
+                                        String socket,
+                                        int flags,
+                                        String driver,
+                                        String url,
+                                        boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -213,19 +213,21 @@ public class Mysqli extends JdbcConnectionResource {
                      (flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
       }
-      
+
       ConnectionEntry jConn
         = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       checkDriverVersion(env, jConn);
 
       Connection conn = jConn.getConnection();
-      Statement stmt = conn.createStatement();
 
-      // php/1465
-      stmt.executeUpdate("SET NAMES 'latin1'");
+      if (! (conn instanceof QuercusConnection)) {
+        Statement stmt = conn.createStatement();
 
-      stmt.close();
+        // php/1465
+        stmt.executeUpdate("SET NAMES 'latin1'");
+        stmt.close();
+      }
 
       return jConn;
     } catch (SQLException e) {
@@ -242,7 +244,7 @@ public class Mysqli extends JdbcConnectionResource {
       return null;
     }
   }
-  
+
   protected static String getUrl(String host,
                                  int port,
                                  String dbname,
@@ -252,7 +254,7 @@ public class Mysqli extends JdbcConnectionResource {
                                  boolean useSsl)
   {
     StringBuilder urlBuilder = new StringBuilder();
-    
+
     urlBuilder.append("jdbc:mysql://");
     urlBuilder.append(host);
     urlBuilder.append(":");
@@ -296,7 +298,7 @@ public class Mysqli extends JdbcConnectionResource {
 
 /*
     //urlBuilder.append("&useInformationSchema=true");
-    
+
     // required to get the result table name alias,
     // doesn't work in mysql JDBC 5.1.6, but set it anyways in case
     // the mysql guys fix it
@@ -316,7 +318,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return affected_rows();
   }
-  
+
   /**
    * returns the number of affected rows.
    */
@@ -347,16 +349,16 @@ public class Mysqli extends JdbcConnectionResource {
     try {
       if (isConnected()) {
         Connection conn = getJavaConnection();
-        
+
         Class cls = conn.getClass();
-        
+
         Method method = cls.getMethod("changeUser", String.class, String.class);
-        
+
         if (method != null) {
           method.invoke(conn, user, password);
-          
+
           select_db(db);
-          
+
           return true;
         }
       }
@@ -368,13 +370,13 @@ public class Mysqli extends JdbcConnectionResource {
       throw new QuercusException(e);
     } catch (SQLException e) {
       getEnv().warning(L.l("unable to change user to '{0}'", user));
-      
+
       return false;
     }
 
     // XXX: Docs for mysqli_change_user indicate that if new user authorization fails,
     // then the existing user perms are retained.
-    
+
     close(getEnv());
 
     return connectInternal(getEnv(), _host, user, password,
@@ -407,7 +409,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return errno();
   }
-  
+
   /**
    * Returns the error code for the most recent function call
    */
@@ -493,7 +495,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return MysqliModule.mysqli_get_client_version(env);
   }
-  
+
   /**
    * Returns the database name.
    */
@@ -501,7 +503,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return getCatalog();
   }
-  
+
   /**
    * Quercus function to get the field 'host_info'.
    */
@@ -509,7 +511,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return get_host_info(env);
   }
-  
+
   /**
    * Returns the host information.
    */
@@ -611,7 +613,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return get_proto_info();
   }
-  
+
   /**
    * Returns the protocol information.
    */
@@ -627,17 +629,17 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return get_server_info(env);
   }
-  
+
   /**
    * Returns the server information.
    */
   public StringValue get_server_info(Env env)
   {
     String version = env.getQuercus().getMysqlVersion();
-    
+
     if (version != null)
       return env.createString(version);
-    
+
     try {
       return env.createString(validateConnection().getServerInfo());
     } catch (SQLException e) {
@@ -674,7 +676,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return field_count();
   }
-  
+
   /**
    * Returns the number of columns in the last query.
    */
@@ -690,7 +692,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return insert_id(env);
   }
-  
+
   /**
    * returns ID generated for an AUTO_INCREMENT column by the previous
    * INSERT query on success, 0 if the previous query does not generate
@@ -705,7 +707,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       if (conn == null)
         return BooleanValue.FALSE;
-      
+
       Statement stmt = null;
 
       try {
@@ -781,7 +783,7 @@ public class Mysqli extends JdbcConnectionResource {
                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
     String sql = sqlV.toString();
-    
+
     return realQuery(env, sql);
   }
 
@@ -794,7 +796,7 @@ public class Mysqli extends JdbcConnectionResource {
   protected Value realQuery(Env env, String sql)
   {
     clearErrors();
-    
+
     _lastSql = null;
 
     setResultResource(null);
@@ -806,64 +808,64 @@ public class Mysqli extends JdbcConnectionResource {
       // Check for valid conneciton
 
       Connection conn = getConnection(env);
-      
+
       if (conn == null)
         return BooleanValue.FALSE;
 
       SqlParseToken tok = parseSqlToken(sql, null);
 
       if (tok != null) {
-	switch (tok.getFirstChar()) {
-	case 'u': case 'U':
-	  if (tok.matchesToken("USE")) {
-	    // Mysql "USE DBNAME" statement.
-	    //
-	    // The Mysql JDBC driver does not properly implement getCatalog()
-	    // when calls to setCatalog() are mixed with SQL USE statements.
-	    // Work around this problem by translating a SQL USE statement
-	    // into a JDBC setCatalog() invocation. The setCatalog() API in
-	    // the ConnectorJ implementation just creates a USE statement
-	    // anyway. This also makes sure the database pool logic knows
-	    // which database is currently selected. If a second call to
-	    // select the current database is found, it is a no-op.
+        switch (tok.getFirstChar()) {
+        case 'u': case 'U':
+          if (tok.matchesToken("USE")) {
+            // Mysql "USE DBNAME" statement.
+            //
+            // The Mysql JDBC driver does not properly implement getCatalog()
+            // when calls to setCatalog() are mixed with SQL USE statements.
+            // Work around this problem by translating a SQL USE statement
+            // into a JDBC setCatalog() invocation. The setCatalog() API in
+            // the ConnectorJ implementation just creates a USE statement
+            // anyway. This also makes sure the database pool logic knows
+            // which database is currently selected. If a second call to
+            // select the current database is found, it is a no-op.
 
-	    tok = parseSqlToken(sql, tok);
+            tok = parseSqlToken(sql, tok);
 
-	    if (tok != null) {
-	      String dbname = tok.toUnquotedString();
+            if (tok != null) {
+              String dbname = tok.toUnquotedString();
 
-	      setCatalog(dbname);
+              setCatalog(dbname);
 
-	      return BooleanValue.TRUE;
-	    }
-	  }
-	  else if (tok != null && tok.matchesToken("UPDATE")) {
-	    // SQL UPDATE statement
+              return BooleanValue.TRUE;
+            }
+          }
+          else if (tok != null && tok.matchesToken("UPDATE")) {
+            // SQL UPDATE statement
 
-	    _lastSql = LastSqlType.UPDATE;
-	  }
-	  break;
+            _lastSql = LastSqlType.UPDATE;
+          }
+          break;
 
-	case 'd': case 'D':
-	  if (tok.matchesToken("DESCRIBE")) {
-	    // SQL DESCRIBE statement
+        case 'd': case 'D':
+          if (tok.matchesToken("DESCRIBE")) {
+            // SQL DESCRIBE statement
 
-	    _lastSql = LastSqlType.DESCRIBE;
-	  }
-	  break;
+            _lastSql = LastSqlType.DESCRIBE;
+          }
+          break;
 
-	case 's': case 'S':
-	  if (tok.matchesToken("SET")) {
-	    // SQL SET statement
+        case 's': case 'S':
+          if (tok.matchesToken("SET")) {
+            // SQL SET statement
 
-	    String lower = sql.toLowerCase();
-	    if (lower.indexOf(" names ") >= 0) {
-	      // php/1469 - need to control i18n 'names'
-	      return LongValue.ONE;
-	    }
-	  }
-	  break;
-	}
+            String lower = sql.toLowerCase();
+            if (lower.indexOf(" names ") >= 0) {
+              // php/1469 - need to control i18n 'names'
+              return LongValue.ONE;
+            }
+          }
+          break;
+        }
       }
 
       return super.realQuery(env, sql);
@@ -871,11 +873,11 @@ public class Mysqli extends JdbcConnectionResource {
       saveErrors(e);
 
       log.log(Level.FINER, e.toString(), e);
-      
+
       return BooleanValue.FALSE;
     } catch (IllegalStateException e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       // #2184, some drivers return this on closed connection
       saveErrors(new SQLExceptionWrapper(e));
 
@@ -968,7 +970,7 @@ public class Mysqli extends JdbcConnectionResource {
     try {
       if (isConnected()) {
         validateConnection().setCatalog(db);
-        
+
         return true;
       }
       else
@@ -1035,10 +1037,10 @@ public class Mysqli extends JdbcConnectionResource {
       JdbcConnectionResource connV = validateConnection();
 
       Connection conn = connV.getConnection(env);
-      
+
       if (conn == null)
         return BooleanValue.FALSE;
-      
+
       Statement stmt = null;
 
       StringBuilder str = new StringBuilder();
@@ -1141,7 +1143,7 @@ public class Mysqli extends JdbcConnectionResource {
     try {
       JdbcConnectionResource connV = validateConnection();
       Connection conn = connV.getConnection(env);
-      
+
       if (conn == null)
         return BooleanValue.FALSE;
 
@@ -1179,7 +1181,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       if (conn == null)
         return false;
-      
+
       Statement stmt = null;
       boolean result = false;
 
@@ -1189,12 +1191,12 @@ public class Mysqli extends JdbcConnectionResource {
         _conn.markForPoolRemoval();
 
         ResultSet rs = stmt.executeQuery("KILL CONNECTION " + threadId);
-        
+
         result = true;
-        
+
         // close the underlying java.sql connection, not Mysqli itself
         conn.close();
-        
+
       } catch (SQLException e) {
         // exception thrown if cannot find specified thread id
       } finally {
@@ -1236,7 +1238,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return warning_count(env);
   }
-  
+
   /**
    * returns the number of warnings from the last query
    * in the connection object.
@@ -1253,7 +1255,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   @Override
   protected JdbcResultResource createResult(Env env,
-					    Statement stmt,
+                                            Statement stmt,
                                             ResultSet rs)
   {
     return new MysqliResult(env, stmt, rs, this);
@@ -1299,10 +1301,10 @@ public class Mysqli extends JdbcConnectionResource {
 
     try {
       Connection conn = getConnection(env);
-      
+
       if (conn == null)
         return null;
-      
+
       conn.setCatalog(catalog);
 
       // need to create statement after setting catalog or
@@ -1312,7 +1314,7 @@ public class Mysqli extends JdbcConnectionResource {
 
       if (stmt.execute(sql)) {
         MysqliResult result
-	  = (MysqliResult) createResult(getEnv(), stmt, stmt.getResultSet());
+          = (MysqliResult) createResult(getEnv(), stmt, stmt.getResultSet());
         conn.setCatalog(currentCatalog.toString());
         return result;
       } else {
@@ -1373,10 +1375,10 @@ public class Mysqli extends JdbcConnectionResource {
 
       for (String s : splitQuery) {
         Connection conn = getConnection(env);
-        
+
         if (conn == null)
           return false;
-        
+
         stmt = conn.createStatement();
         stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
@@ -1506,11 +1508,11 @@ public class Mysqli extends JdbcConnectionResource {
   {
     if (_metaDataMethod == null) {
       MysqlMetaDataMethod metaDataMethod = _lastMetaDataMethod;
-      
+
       if (metaDataMethod == null
-	  || metaDataMethod.getMetaDataClass() != metaDataClass) {
-	metaDataMethod = new MysqlMetaDataMethod(metaDataClass);
-	_lastMetaDataMethod = metaDataMethod;
+          || metaDataMethod.getMetaDataClass() != metaDataClass) {
+        metaDataMethod = new MysqlMetaDataMethod(metaDataClass);
+        _lastMetaDataMethod = metaDataMethod;
       }
 
       _metaDataMethod = metaDataMethod;
@@ -1518,21 +1520,21 @@ public class Mysqli extends JdbcConnectionResource {
 
     return _metaDataMethod.getColumnCharacterSetMethod();
   }
-  
+
   /**
    * Verify that the ConnectorJ driver version is 3.1.14 or newer.
    * Older versions of this driver return incorrect type information
    * and suffer from encoding related bugs.
    */
   protected static void checkDriverVersion(Env env,
-					   ConnectionEntry connEntry)
+                                           ConnectionEntry connEntry)
     throws SQLException
   {
     if (_checkedDriverVersion != null)
       return;
 
     Connection conn = connEntry.getConnection();
-    
+
     synchronized(_checkDriverLock) {
       // to prevent multiple checks
       if (_checkedDriverVersion == null) {
@@ -1540,7 +1542,7 @@ public class Mysqli extends JdbcConnectionResource {
 
         if (_checkedDriverVersion.length() != 0)
           return;
-        
+
         /*
         String message = "Unable to detect MySQL Connector/J JDBC driver " +
                          "version.  The recommended JDBC version is " +
@@ -1593,7 +1595,7 @@ public class Mysqli extends JdbcConnectionResource {
     int end = version.indexOf(' ');
 
     String checkedDriverVersion = "";
-    
+
     if (end != -1) {
       version = version.substring(0, end);
 
@@ -1629,7 +1631,7 @@ public class Mysqli extends JdbcConnectionResource {
         }
       }
     }
-    
+
     return checkedDriverVersion;
   }
 
@@ -1644,7 +1646,7 @@ public class Mysqli extends JdbcConnectionResource {
 
     return super.close(env);
   }
-  
+
   /**
    * Converts to a string.
    */
@@ -1652,9 +1654,9 @@ public class Mysqli extends JdbcConnectionResource {
   {
     if (_conn != null && _conn.getConnection() != null) {
       Class cls = _conn.getConnection().getClass();
-      
+
       Method []methods = cls.getDeclaredMethods();
-      
+
       for (int i = 0; i < methods.length; i++) {
         if (methods[i].getName().equals("toString")
             && methods[i].getParameterTypes().length == 0)
@@ -1680,13 +1682,13 @@ public class Mysqli extends JdbcConnectionResource {
     MysqlMetaDataMethod(Class resultSetMetaDataClass)
     {
       _resultSetMetaDataClass = resultSetMetaDataClass;
-      
+
       try {
-	_getColumnCharacterSetMethod
-	  = _resultSetMetaDataClass.getMethod("getColumnCharacterSet",
-					      new Class[] { int.class });
+        _getColumnCharacterSetMethod
+          = _resultSetMetaDataClass.getMethod("getColumnCharacterSet",
+                                              new Class[] { int.class });
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 

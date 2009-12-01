@@ -11,6 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.3 - Nov 24, 2009">
+<ul>
+<li>server: hmux load balancer with incorrect protocol for short-response post (#3790, rep by Wesley Wu)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.2 - Nov 24, 2009">
 <ul>
 <li>resin.exe: fixed timeout issue when stopping resin(#3762)</li>

@@ -41,12 +41,12 @@ import java.util.Set;
 public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   // array containing the keys
   private K []_keys;
-  
+
   // array containing the values
   private V []_values;
 
   private V _nullValue;
-  
+
   // maximum allowed entries
   private int _capacity;
   // number of items in the cache
@@ -96,9 +96,13 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   public void clear()
   {
     if (_size > 0) {
-      for (int i = 0; i < _values.length; i++) {
-	_keys[i] = null;
-	_values[i] = null;
+      final K []keys = _keys;
+      final V []values = _values;
+      final int length = values.length;
+
+      for (int i = length - 1; i >= 0; i--) {
+        keys[i] = null;
+        values[i] = null;
       }
 
       _size = 0;
@@ -117,7 +121,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   {
     if (key == null)
       return _nullValue;
-    
+
     int hash = key.hashCode() & _mask;
     int count = _size + 1;
 
@@ -127,10 +131,10 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       K mapKey = keys[hash];
 
       if (mapKey == null)
-	return null;
+        return null;
 
       if (key.equals(_keys[hash]))
-	return _values[hash];
+        return _values[hash];
 
       hash = (hash + 1) & _mask;
     }
@@ -155,7 +159,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
 
       return item;
     }
-    
+
     V item = putImpl(key, value);
 
     // forced resizing if 3/4 full
@@ -170,11 +174,11 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       _size = 0;
 
       for (int i = oldValues.length - 1; i >= 0; i--) {
-	K oldKey = oldKeys[i];
-	V oldValue = oldValues[i];
+        K oldKey = oldKeys[i];
+        V oldValue = oldValues[i];
 
-	if (oldValue != null)
-	  putImpl(oldKey, oldValue);
+        if (oldValue != null)
+          putImpl(oldKey, oldValue);
       }
     }
 
@@ -196,18 +200,18 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
 
       // No matching item, so create one
       if (item == null) {
-	_keys[hash] = key;
-	_values[hash] = value;
-	_size++;
+        _keys[hash] = key;
+        _values[hash] = value;
+        _size++;
 
-	return null;
+        return null;
       }
 
       // matching item gets replaced
       if (_keys[hash].equals(key)) {
-	_values[hash] = value;
+        _values[hash] = value;
 
-	return item;
+        return item;
       }
 
       hash = (hash + 1) & _mask;
@@ -230,7 +234,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       _nullValue = null;
       return value;
     }
-    
+
     int hash = key.hashCode() & _mask;
     int count = _size + 1;
 
@@ -240,15 +244,15 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       item = _values[hash];
 
       if (item == null)
-	return null;
+        return null;
 
       if (_keys[hash].equals(key)) {
-	_keys[hash] = null;
-	_values[hash] = null;
-	_size--; 
+        _keys[hash] = null;
+        _values[hash] = null;
+        _size--;
 
-	refillEntries(hash);
-	break;
+        refillEntries(hash);
+        break;
       }
 
       hash = (hash + 1) & _mask;
@@ -269,12 +273,12 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       hash = (hash + 1) & _mask;
 
       if (_values[hash] == null)
-	return;
+        return;
 
       refillEntry(hash);
     }
   }
-  
+
   /**
    * Put the item in the best location available in the hash table.
    */
@@ -282,17 +286,17 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   {
     K key = _keys[baseHash];
     V value = _values[baseHash];
-    
+
     _keys[baseHash] = null;
     _values[baseHash] = null;
-    
+
     int hash = key.hashCode() & _mask;
-    
+
     for (int count = _size; count >= 0; count--) {
       if (_values[hash] == null) {
-	_keys[hash] = key;
-	_values[hash] = value;
-	return;
+        _keys[hash] = key;
+        _values[hash] = value;
+        return;
       }
 
       hash = (hash + 1) & _mask;
@@ -332,17 +336,17 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     public boolean contains(Object key)
     {
       if (key == null)
-	return _map._nullValue != null;
-      
+        return _map._nullValue != null;
+
       K1 []keys = _map._keys;
 
       for (int i = keys.length - 1 ; i >= 0; i--) {
-	K1 testKey = keys[i];
+        K1 testKey = keys[i];
 
-	if (key.equals(testKey))
-	  return true;
+        if (key.equals(testKey))
+          return true;
       }
-      
+
       return false;
     }
 
@@ -352,13 +356,13 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     public boolean removeAll(Collection<?> keys)
     {
       if (keys == null)
-	return false;
-      
+        return false;
+
       Iterator<?> iter = keys.iterator();
       while (iter.hasNext()) {
-	Object key = iter.next();
+        Object key = iter.next();
 
-	_map.remove(key);
+        _map.remove(key);
       }
 
       return true;
@@ -395,12 +399,12 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     {
       K1 []keys = _map._keys;
       int len = keys.length;
-      
+
       for (; _i < len; _i++) {
-	if (keys[_i] != null)
-	  return true;
+        if (keys[_i] != null)
+          return true;
       }
-      
+
       return false;
     }
 
@@ -408,15 +412,15 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     {
       K1 []keys = _map._keys;
       int len = keys.length;
-      
+
       for (; _i < len; _i++) {
-	K1 key = keys[_i];
-	
-	if (key != null) {
-	  _i++;
-	  
-	  return key;
-	}
+        K1 key = keys[_i];
+
+        if (key != null) {
+          _i++;
+
+          return key;
+        }
       }
 
       return null;
@@ -425,7 +429,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     public void remove()
     {
       if (_i > 0)
-	_map.remove(_map._keys[_i - 1]);
+        _map.remove(_map._keys[_i - 1]);
     }
   }
 
@@ -470,7 +474,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
    */
   static class EntryIterator<K1,V1> implements Iterator<Map.Entry<K1,V1>> {
     private final Entry<K1,V1> _entry = new Entry<K1,V1>();
-    
+
     private HashMapImpl<K1,V1> _map;
     private int _i;
 
@@ -489,12 +493,12 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     {
       K1 []keys = _map._keys;
       int len = keys.length;
-      
+
       for (; _i < len; _i++) {
-	if (keys[_i] != null)
-	  return true;
+        if (keys[_i] != null)
+          return true;
       }
-      
+
       return false;
     }
 
@@ -502,13 +506,13 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     {
       K1 []keys = _map._keys;
       int len = keys.length;
-      
-      for (; _i < len; _i++) {
-	if (keys[_i] != null) {
-	  _entry.init(_map, _i++);
 
-	  return _entry;
-	}
+      for (; _i < len; _i++) {
+        if (keys[_i] != null) {
+          _entry.init(_map, _i++);
+
+          return _entry;
+        }
       }
 
       return null;
@@ -517,7 +521,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     public void remove()
     {
       if (_i > 0)
-	_map.remove(_map._keys[_i - 1]);
+        _map.remove(_map._keys[_i - 1]);
     }
   }
 
@@ -553,7 +557,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     public V1 setValue(V1 value)
     {
       V1 oldValue = _map._values[_i];
-      
+
       _map._values[_i] = value;
 
       return oldValue;

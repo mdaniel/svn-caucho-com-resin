@@ -2712,7 +2712,7 @@ public class StringModule extends AbstractQuercusModule {
 
     StringValue result = null;
 
-    while ((next = indexOf(subject, search, head, isInsensitive)) >= head) {
+    while (head <= (next = indexOf(subject, search, head, isInsensitive))) {
       if (result == null)
         result = subject.createStringBuilder();
 

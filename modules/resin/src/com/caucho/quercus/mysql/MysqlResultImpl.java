@@ -142,7 +142,7 @@ public class MysqlResultImpl extends AbstractResultSet {
 
       if (! _isRowAvailable) {
         if (_resultData != null)
-          _resultData.clear();
+          _resultData.destroy();
       }
     }
 
@@ -155,7 +155,7 @@ public class MysqlResultImpl extends AbstractResultSet {
     if (_resultData == null)
       _resultData = new TempOutputStream();
     else
-      _resultData.clear();
+      _resultData.destroy();
 
     return _resultData;
   }
@@ -200,6 +200,35 @@ public class MysqlResultImpl extends AbstractResultSet {
     _resultData.readAll(offset, _charBuffer, 0, length);
 
     return new String(_charBuffer, 0, length);
+  }
+
+  public int getStringLength(int columnIndex)
+    throws SQLException
+  {
+    if (columnIndex < 1 || _columnCount < columnIndex)
+      throw new SQLException(L.l("{0} is an invalid column [1-{1}]",
+                                 columnIndex, _columnCount));
+
+    MysqlColumn column = _columns.get(columnIndex - 1);
+
+    return column.getRowLength();
+  }
+
+  public void getString(int columnIndex, byte []buffer, int offset, int length)
+    throws SQLException
+  {
+    if (columnIndex < 1 || _columnCount < columnIndex)
+      throw new SQLException(L.l("{0} is an invalid column [1-{1}]",
+                                 columnIndex, _columnCount));
+
+    MysqlColumn column = _columns.get(columnIndex - 1);
+
+    int columnOffset = column.getRowOffset();
+    int columnLength = column.getRowLength();
+
+    assert(length == columnLength);
+
+    _resultData.readAll(columnOffset, buffer, offset, length);
   }
 
   public String toString()

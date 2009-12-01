@@ -211,14 +211,8 @@ public class MarshalFactory {
     else if (byte[].class.equals(argType)) {
       marshal = JavaByteArrayMarshal.MARSHAL;
     }
-    else if (Byte[].class.equals(argType)) {
-      marshal = JavaByteObjectArrayMarshal.MARSHAL;
-    }
     else if (char[].class.equals(argType)) {
       marshal = JavaCharacterArrayMarshal.MARSHAL;
-    }
-    else if (Character[].class.equals(argType)) {
-      marshal = JavaCharacterObjectArrayMarshal.MARSHAL;
     }
     else if (argType.isArray()) {
       marshal = new JavaArrayMarshal(argType);

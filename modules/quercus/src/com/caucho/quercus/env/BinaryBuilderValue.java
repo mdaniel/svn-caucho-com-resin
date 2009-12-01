@@ -49,82 +49,42 @@ public class BinaryBuilderValue
 
   public BinaryBuilderValue()
   {
-    _buffer = new byte[128];
+    super(128);
   }
 
   public BinaryBuilderValue(BinaryBuilderValue v)
   {
-    if (v._isCopy) {
-      _buffer = new byte[v._buffer.length];
-      System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
-      _length = v._length;
-    }
-    else {
-      _buffer = v._buffer;
-      _length = v._length;
-      v._isCopy = true;
-    }
+    super(v);
   }
 
   public BinaryBuilderValue(int capacity)
   {
-    if (capacity < 64)
-      capacity = 128;
-    else
-      capacity = 2 * capacity;
-
-    _buffer = new byte[capacity];
+    super(capacity);
   }
 
   public BinaryBuilderValue(byte []buffer, int offset, int length)
   {
-    _buffer = new byte[length];
-    _length = length;
-
-    System.arraycopy(buffer, offset, _buffer, 0, length);
+    super(buffer, offset, length);
   }
 
   public BinaryBuilderValue(byte []buffer)
   {
-    this(buffer, 0, buffer.length);
+    super(buffer);
   }
 
   public BinaryBuilderValue(String s)
   {
-    int len = s.length();
-
-    _buffer = new byte[len];
-    _length = len;
-
-    for (int i = 0; i < len; i++)
-      _buffer[i] = (byte) s.charAt(i);
+    super(s);
   }
 
   public BinaryBuilderValue(char []buffer)
   {
-    _buffer = new byte[buffer.length];
-    _length = buffer.length;
-
-    for (int i = 0; i < buffer.length; i++)
-      _buffer[i] = (byte) buffer[i];
+    super(buffer);
   }
 
   public BinaryBuilderValue(char []s, Value v1)
   {
-    int len = s.length;
-
-    if (len < 128)
-      _buffer = new byte[128];
-    else
-      _buffer = new byte[len + 32];
-
-    _length = len;
-
-    for (int i = 0; i < len; i++) {
-      _buffer[i] = (byte) s[i];
-    }
-
-    v1.appendTo(this);
+    super(s, v1);
   }
 
   public BinaryBuilderValue(TempBuffer head)
@@ -135,24 +95,9 @@ public class BinaryBuilderValue
     append(head);
   }
 
-  public BinaryBuilderValue(Byte []buffer)
-  {
-    int length = buffer.length;
-
-    _buffer =  new byte[length];
-    _length = length;
-
-    for (int i = 0; i < length; i++) {
-      _buffer[i] = buffer[i].byteValue();
-    }
-  }
-
   public BinaryBuilderValue(byte ch)
   {
-    _buffer = new byte[1];
-    _length = 1;
-
-    _buffer[0] = ch;
+    super(ch);
   }
 
   /**

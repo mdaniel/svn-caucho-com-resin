@@ -165,6 +165,9 @@ public class Env {
   private static final FreeList<QDate> _freeLocalDateList
     = new FreeList<QDate>(256);
 
+  private static final LruCache<String,StringValue> _internStringMap
+    = new LruCache<String,StringValue>(4096);
+
   protected final Quercus _quercus;
 
   private QuercusPage _page;
@@ -1971,10 +1974,10 @@ public class Env {
     // php/324a
     // php/324b
     QuercusClass callingClass = getCallingClass(qThis);
-    
+
     if (callingClass.isA(className))
       className = callingClass.getName();
-    
+
     name = className + "::" + name;
 
     return getGlobalVar(name);
@@ -3010,7 +3013,7 @@ public class Env {
   {
     return getConstant(name, true);
   }
-  
+
   /**
    * Returns a constant.
    */
@@ -4121,8 +4124,18 @@ public class Env {
     }
     else if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(s);
-    else
-      return new ConstStringValue(s);
+    else {
+      StringValue stringValue = _internStringMap.get(s);
+
+      if (stringValue == null) {
+        stringValue = new ConstStringValue(s);
+        _internStringMap.put(s, stringValue);
+      }
+
+      return stringValue;
+
+      // return new ConstStringValue(s);
+    }
   }
 
   /**

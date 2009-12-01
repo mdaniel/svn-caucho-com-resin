@@ -133,14 +133,14 @@ public class JdbcResultResource {
 
       JdbcConnectionResource conn = _conn;
       _conn = null;
-      
+
       if (rs != null)
         rs.close();
 
       // XXX: statement no longer reused?
       if (stmt != null && conn != null)
-	conn.closeStatement(stmt);
-      
+        conn.closeStatement(stmt);
+
       _env = null;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -164,11 +164,11 @@ public class JdbcResultResource {
   {
     try {
       if (_rs == null)
-	return null;
-      
+        return null;
+
       if (_rs.next()) {
         _isValid = true;
-	
+
         ArrayValue array = new ArrayValueImpl();
 
         ResultSetMetaData md = getMetaData();
@@ -180,7 +180,7 @@ public class JdbcResultResource {
 
           for (int i = 0; i < count; i++) {
             String columnName = md.getColumnLabel(i + 1);
-	    
+
             _columnNames[i] = env.createString(columnName);
           }
         }
@@ -237,15 +237,15 @@ public class JdbcResultResource {
   {
     if (_rs == null)
       return null;
-    
+
     ObjectValue result = env.createObject();
 
     try {
       if (! _isValid) {
-	_isValid = true;
-	_rs.next();
+        _isValid = true;
+        _rs.next();
       }
-      
+
       result.putField(env, "name", env.createString(_rs.getString(1)));
       result.putField(env, "table", env.createString(tableName));
       result.putField(env, "max_length", LongValue.create(maxLength));
@@ -305,11 +305,11 @@ public class JdbcResultResource {
   {
     if (_rs == null)
       return NullValue.NULL;
-    
+
     try {
       if (_rs.next()) {
         _isValid = true;
-	
+
         Value result = env.createObject();
 
         ResultSetMetaData md = getMetaData();
@@ -411,7 +411,7 @@ public class JdbcResultResource {
         if (colName.equals(rsmd.getColumnLabel(i)))
           return (i - 1);
       }
-      
+
       return -1;
     }
     else {
@@ -419,7 +419,7 @@ public class JdbcResultResource {
         if (colName.equals(rsmd.getTableName(i) + '.' + rsmd.getColumnLabel(i)))
           return (i - 1);
       }
-      
+
       return -1;
     }
 
@@ -493,19 +493,19 @@ public class JdbcResultResource {
             return NullValue.NULL;
           else if (metaData.isCurrency(column)) {
             StringValue sb = _env.createUnicodeBuilder();
-             
+
             sb.append("$");
-            
+
             return sb.append(value);
           }
           else if (value == 0.0) {
             StringValue sb = _env.createUnicodeBuilder();
-            
+
             return sb.append("0");
           }
           else {
             StringValue sb = _env.createUnicodeBuilder();
-            
+
             return sb.append(value);
           }
         }
@@ -545,8 +545,8 @@ public class JdbcResultResource {
           if (is == null) // || rs.wasNull())
             return NullValue.NULL;
 
-	  try {
-	    bb.appendReadAll(is, Long.MAX_VALUE / 2);
+          try {
+            bb.appendReadAll(is, Long.MAX_VALUE / 2);
           } catch (RuntimeException e) {
             log.log(Level.WARNING, e.toString(), e);
 
@@ -558,20 +558,20 @@ public class JdbcResultResource {
 
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
-	if (env.isUnicodeSemantics())
-	  return getUnicodeColumnString(env, rs, metaData, column);
-	else
-	  return getColumnString(env, rs, metaData, column);
+        if (env.isUnicodeSemantics())
+          return getUnicodeColumnString(env, rs, metaData, column);
+        else
+          return getColumnString(env, rs, metaData, column);
 
       case Types.TIME:
-	return getColumnTime(env, rs, column);
-	
+        return getColumnTime(env, rs, column);
+
       case Types.TIMESTAMP:
-	return getColumnTimestamp(env, rs, column);
-	
+        return getColumnTimestamp(env, rs, column);
+
       case Types.DATE:
-	return getColumnDate(env, rs, column);
-	
+        return getColumnDate(env, rs, column);
+
       default:
         {
           String strValue = rs.getString(column);
@@ -584,7 +584,7 @@ public class JdbcResultResource {
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return NullValue.NULL;
     } catch (SQLException e) {
       // php/141e
@@ -595,27 +595,27 @@ public class JdbcResultResource {
   }
 
   protected Value getUnicodeColumnString(Env env,
-					 ResultSet rs,
-					 ResultSetMetaData md,
-					 int column)
+                                         ResultSet rs,
+                                         ResultSetMetaData md,
+                                         int column)
     throws IOException, SQLException
   {
     Reader reader = rs.getCharacterStream(column);
-            
+
     if (reader == null) // || rs.wasNull())
       return NullValue.NULL;
-            
+
     StringValue bb = env.createUnicodeBuilder();
-        
+
     bb.append(reader);
 
     return bb;
   }
 
   protected Value getColumnString(Env env,
-				  ResultSet rs,
-				  ResultSetMetaData md,
-				  int column)
+                                  ResultSet rs,
+                                  ResultSetMetaData md,
+                                  int column)
     throws SQLException
   {
     // php/1464, php/144f, php/144g
@@ -625,14 +625,14 @@ public class JdbcResultResource {
     // get bytes directly.  Also, getBytes is faster for MySQL since
     // getString converts from bytes to string.
     byte []bytes = rs.getBytes(column);
-            
+
     if (bytes == null)
       return NullValue.NULL;
 
     StringValue bb = env.createUnicodeBuilder();
 
     bb.append(bytes);
-            
+
     return bb;
   }
 
@@ -640,7 +640,7 @@ public class JdbcResultResource {
     throws SQLException
   {
     Time time = rs.getTime(column);
-    
+
     if (time == null)
       return NullValue.NULL;
     else
@@ -651,7 +651,7 @@ public class JdbcResultResource {
     throws SQLException
   {
     Date date = rs.getDate(column);
-    
+
     if (date == null)
       return NullValue.NULL;
     else
@@ -668,17 +668,17 @@ public class JdbcResultResource {
         return NullValue.NULL;
       else {
         String time = String.valueOf(timestamp);
-        
+
         // the .0 nanoseconds at the end may not matter, but strip it out
         // anyways to match php (postgresql)
         if (time.endsWith(".0"))
           time = time.substring(0, time.length() - 2);
-        
+
         return env.createString(time);
       }
     } catch (SQLException e) {
       if (log.isLoggable(Level.FINER))
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
 
       // php/1f0a - mysql jdbc driver issue with zero timestamp
       return env.createString("0000-00-00 00:00:00");
@@ -725,9 +725,9 @@ public class JdbcResultResource {
   {
     try {
       if (getMetaData() != null)
-	return getMetaData().getColumnCount();
+        return getMetaData().getColumnCount();
       else
-	return -1;
+        return -1;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -814,7 +814,7 @@ public class JdbcResultResource {
 
     try {
       ResultSetMetaData md = getMetaData();
-      
+
       if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
@@ -951,7 +951,7 @@ public class JdbcResultResource {
   {
     try {
       ResultSetMetaData md = getMetaData();
-      
+
       if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("schema", fieldOffset);
         return BooleanValue.FALSE;
@@ -1113,11 +1113,11 @@ public class JdbcResultResource {
     /*
     if (_rs != null && ! _isValid) {
       if (! _rs.next())
-	return null;
+        return null;
       _isValid = true;
     }
     */
-    
+
     if (_metaData == null && _rs != null)
       _metaData = _rs.getMetaData();
 

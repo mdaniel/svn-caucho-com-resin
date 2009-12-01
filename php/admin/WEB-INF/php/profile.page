@@ -77,7 +77,7 @@ if ($profile) {
 
     echo " Depth: <select type='select' name='depth'>";
 
-    $DEPTHS = Array(2, 4, 8, 12, 16, 20, 32, 250);
+    $DEPTHS = Array(1, 2, 4, 8, 12, 16, 20, 32, 250);
 
     if (!isset($_POST['depth']) || 
         !is_numeric($_POST['depth']) ||

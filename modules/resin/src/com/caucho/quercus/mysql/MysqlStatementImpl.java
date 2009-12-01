@@ -71,8 +71,6 @@ public class MysqlStatementImpl implements java.sql.Statement {
 
     _conn.readResult(_result);
 
-    Thread.dumpStack();
-
     return _result.isResultSet();
   }
 

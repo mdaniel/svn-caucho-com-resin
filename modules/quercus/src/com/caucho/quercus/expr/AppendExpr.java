@@ -110,6 +110,27 @@ public class AppendExpr extends Expr
     return sb.toString();
   }
 
+  /**
+   * Returns the first constant string, or null.
+   */
+  @Override
+  public Value evalConstantPrefix()
+  {
+    return _value.evalConstantPrefix();
+  }
+
+  /**
+   * Returns the tail constant string, or null.
+   */
+  @Override
+  public Value evalConstantSuffix()
+  {
+    if (_next != null)
+      return _next.evalConstantSuffix();
+    else
+      return null;
+  }
+
   public String toString()
   {
     if (_next != null)

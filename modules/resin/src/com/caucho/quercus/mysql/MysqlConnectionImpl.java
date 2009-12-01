@@ -29,6 +29,7 @@
 
  package com.caucho.quercus.mysql;
 
+import com.caucho.quercus.lib.db.QuercusConnection;
  import com.caucho.util.*;
  import com.caucho.vfs.*;
 
@@ -42,7 +43,7 @@
  /**
   * Special Quercus Mysql connection.
   */
- public class MysqlConnectionImpl implements java.sql.Connection {
+ public class MysqlConnectionImpl implements QuercusConnection {
    private static final Logger log
      = Logger.getLogger(MysqlConnectionImpl.class.getName());
    private static final L10N L = new L10N(MysqlConnectionImpl.class);
@@ -288,20 +289,20 @@
     if (fieldCount == 0xff)
       return readError(in);
 
-    if (fieldCount == 0x00)
-      System.out.println("OK: " + fieldCount);
+    if (fieldCount == 0x00) {
+      long rows = in.readLengthCodedBinary();
+      long insertId = in.readLengthCodedBinary();
+      int status = in.readShort();
+      int warningCount = in.readShort();
+      String message = in.readTailString();
 
-    long rows = in.readLengthCodedBinary();
-    long insertId = in.readLengthCodedBinary();
-    int status = in.readShort();
-    int warningCount = in.readShort();
-    String message = in.readTailString();
+      in.endPacket();
 
-    System.out.println("MESSAGE: " + message);
+      return message;
+    }
+    else
+      throw new SQLException("unexpected field");
 
-    in.endPacket();
-
-    return message;
   }
 
   String readResult(MysqlResultImpl result)
@@ -313,8 +314,6 @@
       in.readPacket();
 
       int fieldCount = in.readByte();
-
-      System.out.println("RESULT: " + fieldCount);
 
       if (fieldCount == 0xff)
         return readError(in);
@@ -347,8 +346,6 @@
   {
     MysqlReader in = _in;
 
-    System.out.println("FIELDS: " + fieldCount);
-
     result.setColumnCount(fieldCount);
 
     int index = 0;
@@ -362,7 +359,6 @@
         break;
       }
 
-      System.out.println("COUNT: " + count);
       MysqlColumn column = result.getColumn(index++);
 
       if (count == 251) {
@@ -406,19 +402,8 @@
       column.setDecimals(in.readByte());
 
       int filler = in.readShort();
-      System.out.println("FILLER: " + filler);
+      // only for show tables
       // column.setDefault(in.readLengthCodedBinary());
-
-      System.out.println("CATALOG: " + column.getCatalog());
-      System.out.println("DATABASE: " + column.getDatabase());
-      System.out.println("TABLE: " + column.getTable());
-      System.out.println("ORIG-TABLE: " + column.getOrigTable());
-      System.out.println("NAME: " + column.getName());
-      System.out.println("ORIG-NAME: " + column.getOrigName());
-      System.out.println("CHARSET: " + column.getCharset());
-      System.out.println("LENGTH: " + column.getLength());
-      System.out.println("TYPE: " + column.getType());
-      System.out.println("DEF: " + column.getDefault());
     }
 
     int warningCount = in.readShort();
@@ -461,6 +446,13 @@
       offset += length;
 
       for (fieldCount--; fieldCount > 0; fieldCount--) {
+        length = (int) in.readLengthCodedBinary();
+
+        column = result.getColumn(index++);
+        column.setRowOffset(offset);
+        column.setRowLength(length);
+        in.readData(resultStream, length);
+        offset += length;
       }
 
       return true;

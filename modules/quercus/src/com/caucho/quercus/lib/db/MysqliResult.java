@@ -54,7 +54,7 @@ public class MysqliResult extends JdbcResultResource {
     = Logger.getLogger(MysqliResult.class.getName());
   private static final L10N L
     = new L10N(MysqliResult.class);
-  
+
   private int _resultSetSize;
 
   /**
@@ -93,7 +93,7 @@ public class MysqliResult extends JdbcResultResource {
     return "mysql result";
   }
 
-  
+
   public boolean isLastSqlDescribe()
   {
     return ((Mysqli) getConnection()).isLastSqlDescribe();
@@ -134,8 +134,8 @@ public class MysqliResult extends JdbcResultResource {
                                 @Optional("MYSQLI_BOTH") int type)
   {
     if (type != MysqliModule.MYSQLI_ASSOC
-	    && type != MysqliModule.MYSQLI_BOTH
-	    && type != MysqliModule.MYSQLI_NUM) {
+            && type != MysqliModule.MYSQLI_BOTH
+            && type != MysqliModule.MYSQLI_NUM) {
       env.warning(L.l("invalid result_type"));
       return null;
     }
@@ -273,12 +273,12 @@ public class MysqliResult extends JdbcResultResource {
       ResultSetMetaData md = getMetaData();
 
       if (md == null)
-	return BooleanValue.FALSE;
-	
+        return BooleanValue.FALSE;
+
       int offset = fieldOffset + 1;
 
       if (offset < 1 || md.getColumnCount() < offset)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       int jdbcType = md.getColumnType(offset);
       String catalogName = md.getCatalogName(offset);
@@ -299,21 +299,21 @@ public class MysqliResult extends JdbcResultResource {
       MysqliResult metaResult;
 
       metaResult = ((Mysqli) getConnection()).metaQuery(env,
-							sql,
-							catalogName);
+                                                        sql,
+                                                        catalogName);
 
       if (metaResult == null) {
         return fetchFieldImproved(env, md, offset);
       }
 
       return metaResult.fetchFieldImproved(env,
-					   fieldLength,
-					   fieldAlias,
-					   fieldName,
-					   fieldTable,
-					   jdbcType,
-					   fieldMysqlType,
-					   fieldScale);
+                                           fieldLength,
+                                           fieldAlias,
+                                           fieldName,
+                                           fieldTable,
+                                           jdbcType,
+                                           fieldMysqlType,
+                                           fieldScale);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -322,7 +322,7 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   protected Value fetchFieldImproved(Env env,
-				     ResultSetMetaData md,
+                                     ResultSetMetaData md,
                                      int offset)
   {
     Value result = env.createObject();
@@ -339,9 +339,9 @@ public class MysqliResult extends JdbcResultResource {
       int scale = md.getScale(offset);
 
       if ((fieldTable == null || "".equals(fieldTable))
-	  && ((Mysqli) getConnection()).isLastSqlDescribe())
-	fieldTable = "COLUMNS";
-      
+          && ((Mysqli) getConnection()).isLastSqlDescribe())
+        fieldTable = "COLUMNS";
+
       result.putField(env, "name", env.createString(fieldAlias));
       result.putField(env, "orgname", env.createString(fieldName));
       result.putField(env, "table", env.createString(fieldTable));
@@ -369,76 +369,76 @@ public class MysqliResult extends JdbcResultResource {
       int quercusType = 0;
       switch (jdbcType) {
       case Types.DECIMAL:
-	quercusType = MysqliModule.MYSQLI_TYPE_DECIMAL;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_DECIMAL;
+        break;
       case Types.BIT:
-	// Connector-J enables the tinyInt1isBit property
-	// by default and converts TINYINT to BIT. Use
-	// the mysql type name to tell the two apart.
+        // Connector-J enables the tinyInt1isBit property
+        // by default and converts TINYINT to BIT. Use
+        // the mysql type name to tell the two apart.
 
-	if (mysqlType.equals("BIT")) {
-	  quercusType = MysqliModule.MYSQLI_TYPE_BIT;
-	} else {
-	  quercusType = MysqliModule.MYSQLI_TYPE_TINY;
-	}
-	break;
+        if (mysqlType.equals("BIT")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_BIT;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_TINY;
+        }
+        break;
       case Types.SMALLINT:
-	quercusType = MysqliModule.MYSQLI_TYPE_SHORT;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_SHORT;
+        break;
       case Types.INTEGER: {
-	if (! isInResultString(2, "medium"))
-	  quercusType = MysqliModule.MYSQLI_TYPE_LONG;
-	else
-	  quercusType = MysqliModule.MYSQLI_TYPE_INT24;
-	break;
+        if (! isInResultString(2, "medium"))
+          quercusType = MysqliModule.MYSQLI_TYPE_LONG;
+        else
+          quercusType = MysqliModule.MYSQLI_TYPE_INT24;
+        break;
       }
       case Types.REAL:
-	quercusType = MysqliModule.MYSQLI_TYPE_FLOAT;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_FLOAT;
+        break;
       case Types.DOUBLE:
-	quercusType = MysqliModule.MYSQLI_TYPE_DOUBLE;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_DOUBLE;
+        break;
       case Types.BIGINT:
-	quercusType = MysqliModule.MYSQLI_TYPE_LONGLONG;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_LONGLONG;
+        break;
       case Types.DATE:
-	if (mysqlType.equals("YEAR")) {
-	  quercusType = MysqliModule.MYSQLI_TYPE_YEAR;
-	} else {
-	  quercusType = MysqliModule.MYSQLI_TYPE_DATE;
-	}
-	break;
+        if (mysqlType.equals("YEAR")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_YEAR;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_DATE;
+        }
+        break;
       case Types.TINYINT:
-	quercusType = MysqliModule.MYSQLI_TYPE_TINY;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_TINY;
+        break;
       case Types.TIME:
-	quercusType = MysqliModule.MYSQLI_TYPE_TIME;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_TIME;
+        break;
       case Types.TIMESTAMP:
-	if (mysqlType.equals("TIMESTAMP")) {
-	  quercusType = MysqliModule.MYSQLI_TYPE_TIMESTAMP;
-	} else {
-	  quercusType = MysqliModule.MYSQLI_TYPE_DATETIME;
-	}
-	break;
+        if (mysqlType.equals("TIMESTAMP")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_TIMESTAMP;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_DATETIME;
+        }
+        break;
       case Types.LONGVARBINARY:
       case Types.LONGVARCHAR:
-	quercusType = MysqliModule.MYSQLI_TYPE_BLOB;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_BLOB;
+        break;
       case Types.BINARY:
       case Types.CHAR:
-	quercusType = MysqliModule.MYSQLI_TYPE_STRING;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_STRING;
+        break;
       case Types.VARBINARY:
       case Types.VARCHAR:
-	quercusType = MysqliModule.MYSQLI_TYPE_VAR_STRING;
-	break;
-	// XXX: may need to revisit default
+        quercusType = MysqliModule.MYSQLI_TYPE_VAR_STRING;
+        break;
+        // XXX: may need to revisit default
       default:
-	quercusType = MysqliModule.MYSQLI_TYPE_NULL;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_NULL;
+        break;
       }
-      
+
       result.putField(env, "type", LongValue.create(quercusType));
       result.putField(env, "decimals", LongValue.create(scale));
 
@@ -497,8 +497,8 @@ public class MysqliResult extends JdbcResultResource {
       ResultSetMetaData md = getMetaData();
 
       if (! _rs.next())
-	return BooleanValue.FALSE;
-      
+        return BooleanValue.FALSE;
+
       result.putField(env, "name", env.createString(name));
       result.putField(env, "orgname", env.createString(originalName));
       result.putField(env, "table", env.createString(table));
@@ -521,54 +521,54 @@ public class MysqliResult extends JdbcResultResource {
       long flags = 0;
 
       if (! isInResultString(4, "YES"))
-	flags += MysqliModule.NOT_NULL_FLAG;
+        flags += MysqliModule.NOT_NULL_FLAG;
 
       if (isInResultString(5, "PRI")) {
-	flags += MysqliModule.PRI_KEY_FLAG;
-	flags += MysqliModule.PART_KEY_FLAG;
+        flags += MysqliModule.PRI_KEY_FLAG;
+        flags += MysqliModule.PART_KEY_FLAG;
       }
 
       if (isInResultString(5, "MUL")) {
-	flags += MysqliModule.MULTIPLE_KEY_FLAG;
-	flags += MysqliModule.PART_KEY_FLAG;
+        flags += MysqliModule.MULTIPLE_KEY_FLAG;
+        flags += MysqliModule.PART_KEY_FLAG;
       }
 
       if (isInResultString(2, "blob")
-	  || (jdbcType == Types.LONGVARCHAR)
-	  || (jdbcType == Types.LONGVARBINARY))
-	flags += MysqliModule.BLOB_FLAG;
+          || (jdbcType == Types.LONGVARCHAR)
+          || (jdbcType == Types.LONGVARBINARY))
+        flags += MysqliModule.BLOB_FLAG;
 
       if (isInResultString(2, "unsigned"))
-	flags += MysqliModule.UNSIGNED_FLAG;
+        flags += MysqliModule.UNSIGNED_FLAG;
 
       if (isInResultString(2, "zerofill"))
-	flags += MysqliModule.ZEROFILL_FLAG;
+        flags += MysqliModule.ZEROFILL_FLAG;
 
       // php/1f73 - null check
       if (isInResultString(3, "bin")
-	  || (jdbcType == Types.LONGVARBINARY)
-	  || (jdbcType == Types.DATE)
-	  || (jdbcType == Types.TIMESTAMP))
-	flags += MysqliModule.BINARY_FLAG;
+          || (jdbcType == Types.LONGVARBINARY)
+          || (jdbcType == Types.DATE)
+          || (jdbcType == Types.TIMESTAMP))
+        flags += MysqliModule.BINARY_FLAG;
 
       if (isInResultString(2, "enum"))
-	flags += MysqliModule.ENUM_FLAG;
+        flags += MysqliModule.ENUM_FLAG;
 
       if (isInResultString(7, "auto"))
-	flags += MysqliModule.AUTO_INCREMENT_FLAG;
+        flags += MysqliModule.AUTO_INCREMENT_FLAG;
 
       if (isInResultString(2, "set"))
-	flags += MysqliModule.SET_FLAG;
+        flags += MysqliModule.SET_FLAG;
 
       if ((jdbcType == Types.BIGINT)
-	  || (jdbcType == Types.BIT)
-	  || (jdbcType == Types.BOOLEAN)
-	  || (jdbcType == Types.DECIMAL)
-	  || (jdbcType == Types.DOUBLE)
-	  || (jdbcType == Types.REAL)
-	  || (jdbcType == Types.INTEGER)
-	  || (jdbcType == Types.SMALLINT))
-	flags += MysqliModule.NUM_FLAG;
+          || (jdbcType == Types.BIT)
+          || (jdbcType == Types.BOOLEAN)
+          || (jdbcType == Types.DECIMAL)
+          || (jdbcType == Types.DOUBLE)
+          || (jdbcType == Types.REAL)
+          || (jdbcType == Types.INTEGER)
+          || (jdbcType == Types.SMALLINT))
+        flags += MysqliModule.NUM_FLAG;
 
       result.putField(env, "flags", LongValue.create(flags));
 
@@ -576,74 +576,74 @@ public class MysqliResult extends JdbcResultResource {
       int quercusType = 0;
       switch (jdbcType) {
       case Types.DECIMAL:
-	quercusType = MysqliModule.MYSQLI_TYPE_DECIMAL;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_DECIMAL;
+        break;
       case Types.BIT:
-	// Connector-J enables the tinyInt1isBit property
-	// by default and converts TINYINT to BIT. Use
-	// the mysql type name to tell the two apart.
+        // Connector-J enables the tinyInt1isBit property
+        // by default and converts TINYINT to BIT. Use
+        // the mysql type name to tell the two apart.
 
-	if (mysqlType.equals("BIT")) {
-	  quercusType = MysqliModule.MYSQLI_TYPE_BIT;
-	} else {
-	  quercusType = MysqliModule.MYSQLI_TYPE_TINY;
-	}
-	break;
+        if (mysqlType.equals("BIT")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_BIT;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_TINY;
+        }
+        break;
       case Types.SMALLINT:
-	quercusType = MysqliModule.MYSQLI_TYPE_SHORT;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_SHORT;
+        break;
       case Types.INTEGER: {
-	if (! isInResultString(2, "medium"))
-	  quercusType = MysqliModule.MYSQLI_TYPE_LONG;
-	else
-	  quercusType = MysqliModule.MYSQLI_TYPE_INT24;
-	break;
+        if (! isInResultString(2, "medium"))
+          quercusType = MysqliModule.MYSQLI_TYPE_LONG;
+        else
+          quercusType = MysqliModule.MYSQLI_TYPE_INT24;
+        break;
       }
       case Types.REAL:
-	quercusType = MysqliModule.MYSQLI_TYPE_FLOAT;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_FLOAT;
+        break;
       case Types.DOUBLE:
-	quercusType = MysqliModule.MYSQLI_TYPE_DOUBLE;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_DOUBLE;
+        break;
       case Types.BIGINT:
-	quercusType = MysqliModule.MYSQLI_TYPE_LONGLONG;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_LONGLONG;
+        break;
       case Types.DATE:
-	if (mysqlType.equals("YEAR")) {
-	  quercusType = MysqliModule.MYSQLI_TYPE_YEAR;
-	} else {
-	  quercusType = MysqliModule.MYSQLI_TYPE_DATE;
-	}
-	break;
+        if (mysqlType.equals("YEAR")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_YEAR;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_DATE;
+        }
+        break;
       case Types.TINYINT:
-	quercusType = MysqliModule.MYSQLI_TYPE_TINY;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_TINY;
+        break;
       case Types.TIME:
-	quercusType = MysqliModule.MYSQLI_TYPE_TIME;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_TIME;
+        break;
       case Types.TIMESTAMP:
-	if (mysqlType.equals("TIMESTAMP")) {
-	  quercusType = MysqliModule.MYSQLI_TYPE_TIMESTAMP;
-	} else {
-	  quercusType = MysqliModule.MYSQLI_TYPE_DATETIME;
-	}
-	break;
+        if (mysqlType.equals("TIMESTAMP")) {
+          quercusType = MysqliModule.MYSQLI_TYPE_TIMESTAMP;
+        } else {
+          quercusType = MysqliModule.MYSQLI_TYPE_DATETIME;
+        }
+        break;
       case Types.LONGVARBINARY:
       case Types.LONGVARCHAR:
-	quercusType = MysqliModule.MYSQLI_TYPE_BLOB;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_BLOB;
+        break;
       case Types.BINARY:
       case Types.CHAR:
-	quercusType = MysqliModule.MYSQLI_TYPE_STRING;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_STRING;
+        break;
       case Types.VARBINARY:
       case Types.VARCHAR:
-	quercusType = MysqliModule.MYSQLI_TYPE_VAR_STRING;
-	break;
-	// XXX: may need to revisit default
+        quercusType = MysqliModule.MYSQLI_TYPE_VAR_STRING;
+        break;
+        // XXX: may need to revisit default
       default:
-	quercusType = MysqliModule.MYSQLI_TYPE_NULL;
-	break;
+        quercusType = MysqliModule.MYSQLI_TYPE_NULL;
+        break;
       }
       result.putField(env, "type", LongValue.create(quercusType));
       result.putField(env, "decimals", LongValue.create(scale));
@@ -684,8 +684,8 @@ public class MysqliResult extends JdbcResultResource {
       // php/142r
 
       if (! _rs.next())
-	return BooleanValue.FALSE;
-      
+        return BooleanValue.FALSE;
+
       if (! isInResultString(4, "YES"))
         flags.append("not_null");
 
@@ -705,15 +705,15 @@ public class MysqliResult extends JdbcResultResource {
         mysqlType.equals("TIMESTAMP");
 
       if (isInResultString(2, "blob")
-	  || (jdbcType == Types.LONGVARCHAR)) {
+          || (jdbcType == Types.LONGVARCHAR)) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("blob");
       }
 
       if (isInResultString(2, "unsigned")
-	  || (jdbcType == Types.BIT && mysqlType.equals("BIT"))
-	  || isTimestamp) {
+          || (jdbcType == Types.BIT && mysqlType.equals("BIT"))
+          || isTimestamp) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("unsigned");
@@ -930,17 +930,35 @@ public class MysqliResult extends JdbcResultResource {
 
   @Override
   protected Value getColumnString(Env env,
-				  ResultSet rs,
-				  ResultSetMetaData md,
-				  int column)
+                                  ResultSet rs,
+                                  ResultSetMetaData md,
+                                  int column)
     throws SQLException
   {
     // php/1464, php/144f, php/144g, php/144b
 
     // The "SET NAMES 'latin1'" in Mysqli is important to make the default
     // encoding sane
-    
+
     Mysqli mysqli = getMysqli();
+
+    if (rs instanceof QuercusResultSet) {
+      QuercusResultSet qRs = (QuercusResultSet) rs;
+
+      int length = qRs.getStringLength(column);
+
+      if (length < 0)
+        return NullValue.NULL;
+
+      // XXX: i18n
+      StringBuilderValue sb = new StringBuilderValue();
+
+      qRs.getString(column, sb.getBuffer(), sb.getOffset());
+      sb.setOffset(sb.getOffset() + length);
+
+      return sb;
+    }
+
     Method getColumnCharacterSetMethod
       = mysqli.getColumnCharacterSetMethod(md.getClass());
 
@@ -957,9 +975,9 @@ public class MysqliResult extends JdbcResultResource {
       String value = rs.getString(column);
 
       if (value != null)
-	return env.createString(value);
+        return env.createString(value);
       else
-	return NullValue.NULL;
+        return NullValue.NULL;
     }
 
     // calling getString() will decode using the database encoding, so
@@ -968,37 +986,37 @@ public class MysqliResult extends JdbcResultResource {
 
     if ("UTF-8".equals(encoding)) {
       byte []bytes = rs.getBytes(column);
-            
+
       if (bytes == null)
-	return NullValue.NULL;
+        return NullValue.NULL;
 
       StringValue bb = env.createUnicodeBuilder();
 
       int length = bytes.length;
       int offset = 0;
-    
+
       bb.appendUtf8(bytes);
 
       /*
       while (offset < length) {
-	int ch = bytes[offset++] & 0xff;
+        int ch = bytes[offset++] & 0xff;
 
-	if (ch < 0x80) {
-	  bb.append((char) ch);
-	}
-	else if (ch < 0xe0) {
-	  int ch2 = bytes[offset++] & 0xff;
-	  int v = ((ch & 0x1f) << 6) + ((ch2 & 0x3f));
+        if (ch < 0x80) {
+          bb.append((char) ch);
+        }
+        else if (ch < 0xe0) {
+          int ch2 = bytes[offset++] & 0xff;
+          int v = ((ch & 0x1f) << 6) + ((ch2 & 0x3f));
 
-	  bb.append((char) MysqlLatin1Utility.decode(v));
-	}
-	else {
-	  int ch2 = bytes[offset++] & 0xff;
-	  int ch3 = bytes[offset++] & 0xff;
-	  int v = ((ch & 0xf) << 12) + ((ch2 & 0x3f) << 6) + ((ch3 & 0x3f));
+          bb.append((char) MysqlLatin1Utility.decode(v));
+        }
+        else {
+          int ch2 = bytes[offset++] & 0xff;
+          int ch3 = bytes[offset++] & 0xff;
+          int v = ((ch & 0xf) << 12) + ((ch2 & 0x3f) << 6) + ((ch3 & 0x3f));
 
-	  bb.append((char) MysqlLatin1Utility.decode(v));
-	}
+          bb.append((char) MysqlLatin1Utility.decode(v));
+        }
       }
       */
 
@@ -1006,10 +1024,10 @@ public class MysqliResult extends JdbcResultResource {
     }
     else if ("Cp1252".equals(encoding) || "LATIN1".equals(encoding)) {
       byte []bytes = rs.getBytes(column);
-            
+
       if (bytes == null)
-	return NullValue.NULL;
-    
+        return NullValue.NULL;
+
       StringValue bb = env.createUnicodeBuilder();
 
       bb.append(bytes);
@@ -1020,9 +1038,9 @@ public class MysqliResult extends JdbcResultResource {
       String value = rs.getString(column);
 
       if (value != null)
-	return env.createString(value);
+        return env.createString(value);
       else
-	return NullValue.NULL;
+        return NullValue.NULL;
     }
   }
 

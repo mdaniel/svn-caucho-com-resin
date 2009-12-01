@@ -40,30 +40,30 @@ public class ConstStringValue
   extends StringBuilderValue
 {
   public static final ConstStringValue EMPTY = new ConstStringValue();
-  
+
   protected LongValue _longValue;
   protected DoubleValue _doubleValue;
   protected String _string;
-  
+
   protected Value _key;
   protected ValueType _valueType;
   protected char []_serializeValue;
-  
+
   public ConstStringValue()
   {
     super();
   }
-  
+
   public ConstStringValue(StringBuilderValue sb)
   {
     super(sb._buffer, 0, sb._length);
   }
-  
+
   public ConstStringValue(byte []buffer, int offset, int length)
   {
     super(buffer, offset, length);
   }
-  
+
   public ConstStringValue(char []buffer, int offset, int length)
   {
     super(buffer, offset, length);
@@ -81,16 +81,6 @@ public class ConstStringValue
   {
     super(buffer);
   }
-  
-  public ConstStringValue(Byte []buffer)
-  {
-    super(buffer);
-  }
-  
-  public ConstStringValue(Character []buffer)
-  {
-    super(buffer);
-  }
 
   public ConstStringValue(char ch)
   {
@@ -100,7 +90,7 @@ public class ConstStringValue
   public ConstStringValue(String s)
   {
     super(s);
-    
+
     _string = s;
   }
 
@@ -113,7 +103,7 @@ public class ConstStringValue
   {
     super(s, v1);
   }
-  
+
   public ConstStringValue(byte []s, Value v1)
   {
     super(s, v1);
@@ -133,12 +123,12 @@ public class ConstStringValue
   {
     super(v1, v2, v3);
   }
-  
+
   public boolean isStatic()
   {
     return true;
   }
-  
+
   /**
    * Converts to a long vaule
    */
@@ -147,7 +137,7 @@ public class ConstStringValue
   {
     if (_longValue == null)
       _longValue = LongValue.create(super.toLong());
-    
+
     return _longValue;
   }
 
@@ -159,10 +149,10 @@ public class ConstStringValue
   {
     if (_doubleValue == null)
       _doubleValue = new DoubleValue(super.toDouble());
-    
+
     return _doubleValue;
   }
-  
+
   /**
    * Converts to a long.
    */
@@ -171,7 +161,7 @@ public class ConstStringValue
   {
     return toLongValue().toLong();
   }
-  
+
   /**
    * Converts to a double.
    */
@@ -180,7 +170,7 @@ public class ConstStringValue
   {
     return toDoubleValue().toDouble();
   }
-  
+
   /**
    * Returns the ValueType.
    */
@@ -189,10 +179,10 @@ public class ConstStringValue
   {
     if (_valueType == null)
       _valueType = super.getValueType();
-    
+
     return _valueType;
   }
-  
+
   /**
    * Converts to a key.
    */
@@ -201,10 +191,10 @@ public class ConstStringValue
   {
     if (_key == null)
       _key = super.toKey();
-    
+
     return _key;
   }
-  
+
   /**
    * Serializes the value.
    */
@@ -213,18 +203,18 @@ public class ConstStringValue
   {
     if (_serializeValue == null) {
       StringBuilder s = new StringBuilder();
-      
+
       super.serialize(env, s);
-      
+
       int len = s.length();
-      
+
       _serializeValue = new char[len];
       s.getChars(0, len, _serializeValue, 0);
     }
-    
+
     sb.append(_serializeValue, 0, _serializeValue.length);
   }
-  
+
   /**
    * Generates code to recreate the expression.
    *
@@ -236,7 +226,7 @@ public class ConstStringValue
   {
     // max JVM constant string length
     int maxSublen = 0xFFFE;
-    
+
     int len = length();
 
     if (len == 1) {
@@ -261,37 +251,37 @@ public class ConstStringValue
       out.print(", ");
       out.print(getValueType());
       out.print(", ");
-      
+
       Value key = toKey();
-      
+
       if (key instanceof LongValue) {
         key.generate(out);
         out.print(", ");
       }
-      
+
       out.print(hashCode());
       out.print("))");
     }
     else {
       out.print("(new ConstStringValue(new StringBuilderValue (\"");
-      
+
       // php/313u
       for (int i = 0; i < len; i += maxSublen) {
         if (i != 0)
           out.print("\").append(\"");
-        
+
         printJavaString(out, substring(i, Math.min(i + maxSublen, len)));
       }
-      
+
       out.print("\")))");
     }
   }
-  
+
   public String toString()
   {
     if (_string == null)
       _string = super.toString();
-    
+
     return _string;
   }
 }
