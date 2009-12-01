@@ -280,7 +280,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value getenv(Env env, StringValue key)
   {
-    Value serverVars = env.getGlobalVar("_SERVER");;
+    Value serverVars = env.getGlobalVar("_SERVER");
     Value val = serverVars.get(key);
 
     if (val == null || ! val.isset())
