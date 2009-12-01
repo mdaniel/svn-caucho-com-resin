@@ -30,9 +30,8 @@
 package com.caucho.resin;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.cluster.*;
+import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.connection.Port;
-import com.caucho.server.port.*;
 
 /**
  * Embeddable version of a HTTP port

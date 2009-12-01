@@ -29,14 +29,10 @@
 
 package com.caucho.server.connection;
 
-import java.util.*;
-import javax.servlet.*;
+import java.util.HashMap;
 
 import com.caucho.servlet.comet.CometController;
-
-import com.caucho.server.port.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
+import com.caucho.util.Alarm;
 
 /**
  * Public API to control a comet connection.

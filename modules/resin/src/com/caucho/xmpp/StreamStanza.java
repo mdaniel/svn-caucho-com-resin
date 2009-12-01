@@ -29,17 +29,10 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.xmpp.Stanza;
-import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import java.io.IOException;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.xml.stream.*;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * XMPP protocol item for stream features

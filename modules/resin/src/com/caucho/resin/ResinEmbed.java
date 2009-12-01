@@ -29,26 +29,38 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.program.ConfigProgram;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.logging.LogManager;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.lifecycle.*;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigContext;
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.types.RawString;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
-import com.caucho.log.handler.PathHandler;
-import com.caucho.server.cluster.*;
-import com.caucho.server.connection.*;
-import com.caucho.server.host.*;
-import com.caucho.server.http.*;
-import com.caucho.server.port.*;
-import com.caucho.server.resin.*;
-import com.caucho.server.webapp.*;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.StreamConnection;
+import com.caucho.server.host.Host;
+import com.caucho.server.host.HostConfig;
+import com.caucho.server.http.HttpRequest;
+import com.caucho.server.resin.Resin;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Embeddable version of the Resin server.

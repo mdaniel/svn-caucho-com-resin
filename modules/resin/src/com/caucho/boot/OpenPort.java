@@ -29,18 +29,14 @@
 
 package com.caucho.boot;
 
-import java.net.*;
-import java.util.logging.*;
-import javax.annotation.*;
+import java.net.InetAddress;
 
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.server.connection.Port;
-import com.caucho.server.port.*;
-import com.caucho.server.http.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.server.http.HttpProtocol;
+import com.caucho.vfs.QServerSocket;
+import com.caucho.vfs.SSLFactory;
 
 /**
  * Represents a protocol connection.

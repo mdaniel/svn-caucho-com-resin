@@ -29,19 +29,19 @@
 
 package com.caucho.server.http;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
+import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.WriteStream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
 
 public class HttpResponse extends AbstractHttpResponse
 {

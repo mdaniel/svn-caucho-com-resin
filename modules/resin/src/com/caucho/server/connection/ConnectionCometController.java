@@ -40,7 +40,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import com.caucho.servlet.comet.CometController;
-import com.caucho.server.connection.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;

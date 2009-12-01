@@ -29,17 +29,17 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.server.port.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
-import javax.annotation.*;
-import javax.jms.*;
-import javax.xml.namespace.*;
+import javax.xml.namespace.QName;
+
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 /*
  * XMPP protocol server

@@ -29,12 +29,9 @@
 
 package com.caucho.jms.hub;
 
-import com.caucho.jms.memory.*;
+import javax.jms.Destination;
 
-import com.caucho.server.port.*;
-
-import javax.annotation.*;
-import javax.jms.*;
+import com.caucho.jms.memory.MemoryTopic;
 
 /*
  * Hub for topics

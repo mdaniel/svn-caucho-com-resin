@@ -29,10 +29,7 @@
 
 package com.caucho.jms.hub;
 
-import com.caucho.server.port.*;
-
-import javax.annotation.*;
-import javax.jms.*;
+import javax.jms.Destination;
 
 /*
  * Hub for topics

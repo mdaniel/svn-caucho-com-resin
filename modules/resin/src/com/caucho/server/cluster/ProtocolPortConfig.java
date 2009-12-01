@@ -29,19 +29,19 @@
 
 package com.caucho.server.cluster;
 
-import java.util.logging.*;
-import javax.annotation.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.*;
+import java.util.logging.Logger;
 
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.InjectionTarget;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.server.connection.Port;
 import com.caucho.server.connection.Protocol;
-import com.caucho.server.port.*;
-import com.caucho.util.*;
-import com.caucho.config.inject.*;
+import com.caucho.util.L10N;
 
 /**
  * Represents a protocol connection.

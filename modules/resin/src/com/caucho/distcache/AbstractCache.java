@@ -29,28 +29,36 @@
 
 package com.caucho.distcache;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.config.types.Period;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.distcache.*;
-import com.caucho.util.L10N;
-import com.caucho.util.HashKey;
-import com.caucho.util.LruCache;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.cache.CacheEntry;
 import javax.cache.CacheListener;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.concurrent.ConcurrentLinkedQueue;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.types.Period;
+import com.caucho.loader.Environment;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.DistCacheEntry;
+import com.caucho.server.distcache.DistributedCacheManager;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 /**
  * Implements the distributed cache

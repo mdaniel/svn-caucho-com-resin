@@ -29,17 +29,20 @@
 
 package com.caucho.server.embed;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.lifecycle.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.host.*;
-import com.caucho.server.port.*;
-import com.caucho.server.resin.*;
-import com.caucho.server.webapp.*;
-import com.caucho.vfs.*;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.RawString;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.host.Host;
+import com.caucho.server.host.HostConfig;
+import com.caucho.server.resin.Resin;
+import com.caucho.server.webapp.WebAppConfig;
 
 /**
  * Embeddable version of the Resin server.

@@ -29,25 +29,18 @@
 
 package com.caucho.xmpp;
 
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.bam.Broker;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.hemp.broker.*;
+import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.connection.Protocol;
 import com.caucho.server.connection.ServerRequest;
 import com.caucho.server.connection.TcpConnection;
-import com.caucho.server.port.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
-import javax.annotation.*;
-import javax.jms.*;
-import javax.xml.namespace.*;
 
 /*
  * XMPP protocol server

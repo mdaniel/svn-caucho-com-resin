@@ -29,14 +29,9 @@
 
 package com.caucho.server.connection;
 
-import java.util.*;
-import javax.servlet.*;
-
-import com.caucho.servlet.comet.CometController;
-
-import com.caucho.server.port.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  * Public API to control a comet connection.
