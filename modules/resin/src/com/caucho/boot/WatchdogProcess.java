@@ -34,7 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.bam.hmtp.HmtpLink;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.RotateStream;
-import com.caucho.server.port.Port;
+import com.caucho.server.connection.Port;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;

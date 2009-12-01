@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,39 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import java.io.IOException;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
 
-/**
- * Protocol specific information for each request.  ServerRequest
- * is reused to reduce memory allocations.
- *
- * <p>ServerRequests are created by Server.createRequest()
- */
-public abstract  class AbstractServerRequest implements ServerRequest {
-  /**
-   * Initialize the connection.  At this point, the current thread is the
-   * connection thread.
-   */
-  public void init()
-  {
-  }
+import java.util.ArrayList;
+
+abstract public class AbstractServer implements EnvironmentBean {
+  // The environment class loader
+  private EnvironmentClassLoader _classLoader;
   
-  /**
-   * Handles a new connection.  The controlling TcpServer may call
-   * handleConnection again after the connection completes, so 
-   * the implementation must initialize any variables for each connection.
-   *
-   * @param conn Information about the connection, including buffered
-   * read and write streams.
-   */
-  public abstract boolean handleRequest() throws IOException;
+  // The server's ports
+  private ArrayList<Port> _portList;
 
   /**
-   * Handles a close event when the connection is closed.
+   * Creates a new server.
    */
-  public void closeEvent()
+  public AbstractServer()
   {
+    _classLoader = EnvironmentClassLoader.create();
+  }
+
+  /**
+   * Returns the environment class loader.
+   */
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+
+  /**
+   * Sets the environment class loader.
+   */
+  public void setClassLoader(EnvironmentClassLoader loader)
+  {
+    _classLoader = loader;
+  }
+
+  /**
+   * Adds a port.
+   */
+  public void addPort(Port port)
+  {
+    _portList.add(port);
   }
 }

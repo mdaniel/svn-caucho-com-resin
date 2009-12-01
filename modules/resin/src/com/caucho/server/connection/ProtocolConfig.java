@@ -19,48 +19,59 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import com.caucho.config.scope.ThreadRequestFactory;
-import com.caucho.server.http.AbstractHttpRequest;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
- * The thread request factory
+ * Represents a protocol connection.
  */
-public class ThreadServerRequestFactory extends ThreadRequestFactory {
+public class ProtocolConfig extends Protocol {
+  private String _name;
+  
   /**
-   * Returns the current request object.
+   * Sets the protocol name.
    */
-  @Override
-  public Object getRequestImpl()
+  public void setId(String text)
   {
-    return TcpConnection.getCurrentRequest();
+    _name = text;
   }
   
   /**
-   * Returns the current request object.
+   * Sets the protocol name.
    */
-  @Override
-  public HttpServletRequest getHttpRequestImpl()
+  public void addText(String text)
   {
-    Object objRequest = TcpConnection.getCurrentRequest();
+    _name = text;
+  }
 
-    if (objRequest instanceof AbstractHttpRequest) {
-      AbstractHttpRequest absRequest = (AbstractHttpRequest) objRequest;
+  /**
+   * Returns the protocol name.
+   */
+  public String getId()
+  {
+    return _name;
+  }
 
-      return absRequest.getRequestFacade();
-    }
-    else
-      return null;
+  /**
+   * Returns the protocol name.
+   */
+  public String getProtocol()
+  {
+    return _name;
+  }
+
+  /**
+   * Create a Request object for the new thread.
+   */
+  public ServerRequest createRequest(Connection conn)
+  {
+    throw new UnsupportedOperationException();
   }
 }

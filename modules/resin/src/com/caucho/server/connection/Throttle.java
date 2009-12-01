@@ -27,16 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import com.caucho.server.connection.*;
+import java.util.logging.*;
+import com.caucho.vfs.*;
 
 /**
- * Protocol specific information for each request.  ServerRequest
- * is reused to reduce memory allocations.
- *
- * <p>ServerRequests are created by Server.createRequest()
+ * Throttles connections
  */
-public interface TcpServerRequest extends ServerRequest {
-  public Connection getConnection();
+public class Throttle
+{
+  private static final Logger log = Logger.getLogger(Throttle.class.getName());
+  protected Throttle()
+  {
+  }
+
+  public void setMaxConcurrentRequests(int max)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public int getMaxConcurrentRequests()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public static Throttle createPro()
+  {
+    try {
+      Class<?> cl = Class.forName("com.caucho.server.port.ProThrottle");
+
+      return (Throttle) cl.newInstance();
+    } catch (Exception e) {
+      log.finer(e.toString());
+    }
+
+    return null;
+  }
+
+  public boolean accept(QSocket socket)
+  {
+    return true;
+  }
+
+  public void close(QSocket socket)
+  {
+  }
 }

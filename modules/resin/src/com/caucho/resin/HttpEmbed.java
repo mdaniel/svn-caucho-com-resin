@@ -31,6 +31,7 @@ package com.caucho.resin;
 
 import com.caucho.config.ConfigException;
 import com.caucho.server.cluster.*;
+import com.caucho.server.connection.Port;
 import com.caucho.server.port.*;
 
 /**

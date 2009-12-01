@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,47 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
 import java.io.IOException;
 
-import javax.servlet.*;
-
 /**
- * User facade for http requests.
+ * Protocol specific information for each request.  ServerRequest
+ * is reused to reduce memory allocations.
+ *
+ * <p>ServerRequests are created by Server.createRequest()
  */
-public class AsyncListenerNode
-{
-  private final AsyncListener _listener;
-  private final ServletRequest _request;
-  private final ServletResponse _response;
-  private final AsyncListenerNode _next;
-
-  public AsyncListenerNode(AsyncListener listener,
-                    ServletRequest request,
-                    ServletResponse response,
-                    AsyncListenerNode next)
+public abstract  class AbstractServerRequest implements ServerRequest {
+  /**
+   * Initialize the connection.  At this point, the current thread is the
+   * connection thread.
+   */
+  public void init()
   {
-    _listener = listener;
-    _request = request;
-    _response = response;
-    _next = next;
   }
+  
+  /**
+   * Handles a new connection.  The controlling TcpServer may call
+   * handleConnection again after the connection completes, so 
+   * the implementation must initialize any variables for each connection.
+   *
+   * @param conn Information about the connection, including buffered
+   * read and write streams.
+   */
+  public abstract boolean handleRequest() throws IOException;
 
-  public AsyncListenerNode getNext()
+  /**
+   * Handles a close event when the connection is closed.
+   */
+  public void closeEvent()
   {
-    return _next;
-  }
-
-  public void onTimeout()
-    throws IOException
-  {
-    _listener.onTimeout(new AsyncEvent(_request, _response));
-  }
-
-  public void onComplete()
-    throws IOException
-  {
-    _listener.onComplete(new AsyncEvent(_request, _response));
   }
 }

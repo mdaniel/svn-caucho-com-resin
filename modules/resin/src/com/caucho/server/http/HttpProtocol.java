@@ -30,8 +30,8 @@ package com.caucho.server.http;
 
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
-import com.caucho.server.port.Protocol;
-import com.caucho.server.port.ServerRequest;
+import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.ServerRequest;
 
 /**
  * The main class for the HTTP server.

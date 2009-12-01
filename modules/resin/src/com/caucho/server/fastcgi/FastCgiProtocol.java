@@ -34,14 +34,14 @@ import java.util.*;
 
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
-import com.caucho.server.port.Protocol;
-import com.caucho.server.port.ServerRequest;
+import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.ServerRequest;
 import com.caucho.loader.*;
 
 /**
  * Dispatches the FastCgi protocol.
  *
- * @see com.caucho.server.port.Protocol
+ * @see com.caucho.server.connection.Protocol
  */
 public class FastCgiProtocol extends Protocol {
   private String _protocolName = "fcgi";

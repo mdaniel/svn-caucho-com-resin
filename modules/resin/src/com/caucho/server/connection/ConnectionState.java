@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
 public enum ConnectionState {
   IDLE,                 // TcpConnection in free list

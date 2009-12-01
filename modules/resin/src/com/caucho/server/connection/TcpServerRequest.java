@@ -19,60 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.*;
 
 /**
- * Represents a protocol connection.
+ * Protocol specific information for each request.  ServerRequest
+ * is reused to reduce memory allocations.
+ *
+ * <p>ServerRequests are created by Server.createRequest()
  */
-public class ProtocolConfig extends Protocol {
-  private String _name;
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setId(String text)
-  {
-    _name = text;
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void addText(String text)
-  {
-    _name = text;
-  }
-
-  /**
-   * Returns the protocol name.
-   */
-  public String getId()
-  {
-    return _name;
-  }
-
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocol()
-  {
-    return _name;
-  }
-
-  /**
-   * Create a Request object for the new thread.
-   */
-  public ServerRequest createRequest(Connection conn)
-  {
-    throw new UnsupportedOperationException();
-  }
+public interface TcpServerRequest extends ServerRequest {
+  public Connection getConnection();
 }

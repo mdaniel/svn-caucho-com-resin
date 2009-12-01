@@ -32,9 +32,9 @@ package com.caucho.server.snmp;
 import java.util.HashMap;
 
 import com.caucho.server.connection.Connection;
-import com.caucho.server.port.Port;
-import com.caucho.server.port.Protocol;
-import com.caucho.server.port.ServerRequest;
+import com.caucho.server.connection.Port;
+import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.ServerRequest;
 
 import com.caucho.server.snmp.types.OctetStringValue;
 import com.caucho.server.snmp.types.SnmpValue;

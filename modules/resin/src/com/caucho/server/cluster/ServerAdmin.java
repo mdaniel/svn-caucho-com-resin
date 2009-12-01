@@ -40,8 +40,8 @@ import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
-import com.caucho.server.port.TcpConnection;
-import com.caucho.server.port.Port;
+import com.caucho.server.connection.Port;
+import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 

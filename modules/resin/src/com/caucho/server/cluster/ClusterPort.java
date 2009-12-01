@@ -29,8 +29,8 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.server.connection.Port;
 import com.caucho.server.hmux.HmuxProtocol;
-import com.caucho.server.port.Port;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;

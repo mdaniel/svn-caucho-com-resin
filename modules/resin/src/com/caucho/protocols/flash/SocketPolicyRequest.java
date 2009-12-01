@@ -4,8 +4,8 @@ import java.io.*;
 
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.ServerRequest;
 import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.port.ServerRequest;
 import com.caucho.server.http.HttpRequest;
 import com.caucho.vfs.*;
 import com.caucho.util.*;

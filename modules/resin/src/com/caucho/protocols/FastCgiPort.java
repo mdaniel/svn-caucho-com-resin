@@ -31,9 +31,9 @@ package com.caucho.protocols;
 
 import com.caucho.config.program.ConfigProgram;
 
+import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.ProtocolPort;
 import com.caucho.server.fastcgi.FastCgiProtocol;
-import com.caucho.server.port.ProtocolPort;
-import com.caucho.server.port.Protocol;
 
 /**
  * Represents a protocol connection.

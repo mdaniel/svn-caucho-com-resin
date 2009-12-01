@@ -27,49 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
 
-import java.util.ArrayList;
-
-abstract public class AbstractServer implements EnvironmentBean {
-  // The environment class loader
-  private EnvironmentClassLoader _classLoader;
-  
-  // The server's ports
-  private ArrayList<Port> _portList;
-
+/**
+ * Factory to create new request objects.
+ *
+ * @see TcpServer
+ */
+public interface RequestFactory {
   /**
-   * Creates a new server.
+   * Returns the protocol name.
    */
-  public AbstractServer()
-  {
-    _classLoader = EnvironmentClassLoader.create();
-  }
-
+  public String getProtocolName();
   /**
-   * Returns the environment class loader.
+   * Creates a new server request.
    */
-  public ClassLoader getClassLoader()
-  {
-    return _classLoader;
-  }
-
-  /**
-   * Sets the environment class loader.
-   */
-  public void setClassLoader(EnvironmentClassLoader loader)
-  {
-    _classLoader = loader;
-  }
-
-  /**
-   * Adds a port.
-   */
-  public void addPort(Port port)
-  {
-    _portList.add(port);
-  }
+  public ServerRequest createRequest(Connection conn);
 }

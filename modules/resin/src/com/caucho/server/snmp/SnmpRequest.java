@@ -46,7 +46,7 @@ import javax.inject.Inject;
 
 import com.caucho.jmx.Jmx;
 import com.caucho.server.connection.Connection;
-import com.caucho.server.port.ServerRequest;
+import com.caucho.server.connection.ServerRequest;
 import com.caucho.server.snmp.types.*;
 import com.caucho.server.thread.ResinThreadPoolExecutor;
 import com.caucho.util.L10N;

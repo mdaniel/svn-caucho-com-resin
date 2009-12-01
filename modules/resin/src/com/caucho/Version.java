@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
+*
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -27,22 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho;
 
-import com.caucho.server.connection.Connection;
+final public class Version {
+  public static final String COPYRIGHT =
+    "Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.";
 
-/**
- * Factory to create new request objects.
- *
- * @see TcpServer
- */
-public interface RequestFactory {
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName();
-  /**
-   * Creates a new server request.
-   */
-  public ServerRequest createRequest(Connection conn);
+  public static String FULL_VERSION = "Resin-4.0.s091201 (built Tue, 01 Dec 2009 02:42:49 PST)";
+  public static String VERSION = "4.0.s091201";
+  public static String VERSION_DATE = "20091201T024249";
+
+  public static void main(String []argv)
+  {
+    System.out.println(FULL_VERSION);
+    System.out.println(COPYRIGHT);
+  }
 }

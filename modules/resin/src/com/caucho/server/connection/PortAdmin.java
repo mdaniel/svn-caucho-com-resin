@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PortMXBean;

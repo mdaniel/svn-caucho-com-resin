@@ -37,6 +37,8 @@ import javax.enterprise.inject.spi.*;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
+import com.caucho.server.connection.Port;
+import com.caucho.server.connection.Protocol;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
 import com.caucho.config.inject.*;

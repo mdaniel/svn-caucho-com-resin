@@ -27,50 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import java.util.logging.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+
+import javax.servlet.*;
 
 /**
- * Throttles connections
+ * User facade for http requests.
  */
-public class Throttle
+public class AsyncListenerNode
 {
-  private static final Logger log = Logger.getLogger(Throttle.class.getName());
-  protected Throttle()
+  private final AsyncListener _listener;
+  private final ServletRequest _request;
+  private final ServletResponse _response;
+  private final AsyncListenerNode _next;
+
+  public AsyncListenerNode(AsyncListener listener,
+                    ServletRequest request,
+                    ServletResponse response,
+                    AsyncListenerNode next)
   {
+    _listener = listener;
+    _request = request;
+    _response = response;
+    _next = next;
   }
 
-  public void setMaxConcurrentRequests(int max)
+  public AsyncListenerNode getNext()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _next;
   }
 
-  public int getMaxConcurrentRequests()
+  public void onTimeout()
+    throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _listener.onTimeout(new AsyncEvent(_request, _response));
   }
 
-  public static Throttle createPro()
+  public void onComplete()
+    throws IOException
   {
-    try {
-      Class<?> cl = Class.forName("com.caucho.server.port.ProThrottle");
-
-      return (Throttle) cl.newInstance();
-    } catch (Exception e) {
-      log.finer(e.toString());
-    }
-
-    return null;
-  }
-
-  public boolean accept(QSocket socket)
-  {
-    return true;
-  }
-
-  public void close(QSocket socket)
-  {
+    _listener.onComplete(new AsyncEvent(_request, _response));
   }
 }

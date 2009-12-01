@@ -30,8 +30,6 @@
 package com.caucho.server.connection;
 
 import com.caucho.util.L10N;
-import com.caucho.server.port.ConnectionCometController;
-import com.caucho.server.port.ConnectionState;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 

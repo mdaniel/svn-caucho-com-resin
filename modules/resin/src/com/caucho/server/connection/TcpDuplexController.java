@@ -32,7 +32,6 @@ package com.caucho.server.connection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.server.port.TcpConnection;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
 import com.caucho.util.Alarm;

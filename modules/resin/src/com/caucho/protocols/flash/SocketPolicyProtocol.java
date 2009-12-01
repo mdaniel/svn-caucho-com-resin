@@ -6,8 +6,8 @@ import java.io.*;
 import com.caucho.config.*;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
-import com.caucho.server.port.Protocol;
-import com.caucho.server.port.ServerRequest;
+import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.ServerRequest;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
 

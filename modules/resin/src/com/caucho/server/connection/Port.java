@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -57,7 +57,6 @@ import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ConnectionController;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;

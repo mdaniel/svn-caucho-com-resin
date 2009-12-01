@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
 import com.caucho.util.L10N;
 

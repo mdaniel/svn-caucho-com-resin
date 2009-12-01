@@ -27,27 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.scope.ThreadRequestFactory;
+import com.caucho.server.http.AbstractHttpRequest;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * Represents a protocol connection.
+ * The thread request factory
  */
-abstract public class ProtocolPort
-{
-  private ContainerProgram _program = new ContainerProgram();
-
-  abstract public Protocol getProtocol();
-
-  public void addBuilderProgram(ConfigProgram program)
+public class ThreadServerRequestFactory extends ThreadRequestFactory {
+  /**
+   * Returns the current request object.
+   */
+  @Override
+  public Object getRequestImpl()
   {
-    _program.addProgram(program);
+    return TcpConnection.getCurrentRequest();
   }
-
-  public ConfigProgram getConfigProgram()
+  
+  /**
+   * Returns the current request object.
+   */
+  @Override
+  public HttpServletRequest getHttpRequestImpl()
   {
-    return _program;
+    Object objRequest = TcpConnection.getCurrentRequest();
+
+    if (objRequest instanceof AbstractHttpRequest) {
+      AbstractHttpRequest absRequest = (AbstractHttpRequest) objRequest;
+
+      return absRequest.getRequestFacade();
+    }
+    else
+      return null;
   }
 }

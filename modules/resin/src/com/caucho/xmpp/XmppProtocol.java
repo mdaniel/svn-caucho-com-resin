@@ -34,6 +34,9 @@ import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.port.*;
 import com.caucho.vfs.*;
 

@@ -27,61 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.boot;
+package com.caucho.server.connection;
 
-import java.net.*;
-import java.util.logging.*;
-import javax.annotation.*;
-
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.connection.Port;
-import com.caucho.server.port.*;
-import com.caucho.server.http.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 
 /**
  * Represents a protocol connection.
  */
-public class OpenPort extends Port
+abstract public class ProtocolPort
 {
-  public OpenPort()
-  {
-    super.setClass(HttpProtocol.class); // dummy
-  }
+  private ContainerProgram _program = new ContainerProgram();
 
-  public void setClass(Class cl)
-  {
-  }
-
-  /**
-   * Sets the SSL factory
-   */
-  public SSLFactory createOpenssl()
-    throws ConfigException
-  {
-    return new DummyOpenSSLFactory();
-  }
+  abstract public Protocol getProtocol();
 
   public void addBuilderProgram(ConfigProgram program)
   {
+    _program.addProgram(program);
   }
 
-  public static class DummyOpenSSLFactory implements SSLFactory {
-    public void addBuilderProgram(ConfigProgram program)
-    {
-    }
-
-    public QServerSocket create(InetAddress host, int port)
-    {
-      return null;
-    }
-  
-    public QServerSocket bind(QServerSocket ss)
-    {
-      return null;
-    }
+  public ConfigProgram getConfigProgram()
+  {
+    return _program;
   }
 }

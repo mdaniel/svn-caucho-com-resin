@@ -29,8 +29,8 @@
 
 package com.caucho.security;
 
-import com.caucho.server.port.ServerRequest;
-import com.caucho.server.port.TcpConnection;
+import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TcpConnection;
 import com.caucho.util.L10N;
 
 import java.security.*;

@@ -31,9 +31,9 @@
 package com.caucho.server.webapp;
 
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.http.AbstractHttpRequest;
-import com.caucho.server.port.TcpConnection;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 

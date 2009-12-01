@@ -147,7 +147,7 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   public long getShutdownWaitMax();
 
   /**
-   * Returns true if a {@link com.caucho.server.port.AbstractSelectManager} is enabled and active
+   * Returns true if a {@link com.caucho.server.connection.AbstractSelectManager} is enabled and active
    */
   @Description("A SelectManager handles keepalive without requiring a thread")
   public boolean isSelectManagerEnabled();
