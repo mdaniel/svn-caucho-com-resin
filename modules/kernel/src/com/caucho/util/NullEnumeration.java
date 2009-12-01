@@ -33,15 +33,16 @@ import java.util.Enumeration;
 /**
  * A null iterator
  */
-public class NullEnumeration implements Enumeration {
-  private static final NullEnumeration _singleton =
-    new NullEnumeration();
+public class NullEnumeration<T> implements Enumeration<T> {
+  private static final NullEnumeration<?> _singleton 
+    = new NullEnumeration<Object>();
 
   private NullEnumeration() {}
 
-  public static NullEnumeration create()
+  @SuppressWarnings("unchecked")
+  public static <T> NullEnumeration<T> create()
   {
-    return _singleton;
+    return (NullEnumeration<T>) _singleton;
   }
 
   public boolean hasMoreElements()
@@ -49,7 +50,7 @@ public class NullEnumeration implements Enumeration {
     return false;
   }
 
-  public Object nextElement()
+  public T nextElement()
   {
     return null;
   }

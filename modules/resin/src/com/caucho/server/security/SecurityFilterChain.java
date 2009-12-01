@@ -30,8 +30,8 @@
 package com.caucho.server.security;
 
 import com.caucho.servlet.comet.CometFilterChain;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;

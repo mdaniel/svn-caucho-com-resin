@@ -28,7 +28,7 @@
 
 package com.caucho.filters;
 
-import com.caucho.server.connection.ToByteResponseStream;
+import com.caucho.server.http.ToByteResponseStream;
 import com.caucho.util.L10N;
 
 import java.io.IOException;

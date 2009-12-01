@@ -29,7 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;

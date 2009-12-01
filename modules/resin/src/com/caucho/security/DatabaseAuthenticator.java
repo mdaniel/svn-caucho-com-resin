@@ -31,8 +31,8 @@ package com.caucho.security;
 
 import com.caucho.config.*;
 import com.caucho.config.types.Period;
-import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.dispatch.ServletConfigException;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.security.CachingPrincipal;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;

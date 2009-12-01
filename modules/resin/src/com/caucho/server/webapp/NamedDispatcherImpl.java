@@ -28,9 +28,9 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.RequestAdapter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;

@@ -28,8 +28,8 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
 

@@ -32,11 +32,11 @@ package com.caucho.server.webapp;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jca.UserTransactionImpl;
 import com.caucho.servlet.comet.CometFilterChain;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.HttpServletRequestImpl;
-import com.caucho.server.connection.HttpServletResponseImpl;
+import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.AbstractHttpResponse;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.transaction.TransactionManagerImpl;
 

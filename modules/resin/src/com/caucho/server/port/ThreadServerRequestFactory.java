@@ -30,7 +30,7 @@
 package com.caucho.server.port;
 
 import com.caucho.config.scope.ThreadRequestFactory;
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.http.AbstractHttpRequest;
 
 import javax.servlet.http.HttpServletRequest;
 

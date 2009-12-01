@@ -30,7 +30,7 @@
 package com.caucho.servlets;
 
 import com.caucho.i18n.CharacterEncoding;
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;

@@ -32,6 +32,9 @@ package com.caucho.server.rewrite;
 import com.caucho.server.connection.*;
 import com.caucho.filters.*;
 import com.caucho.server.dispatch.*;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.http.RequestAdapter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

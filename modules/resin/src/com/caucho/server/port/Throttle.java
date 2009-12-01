@@ -55,7 +55,7 @@ public class Throttle
   public static Throttle createPro()
   {
     try {
-      Class cl = Class.forName("com.caucho.server.port.ProThrottle");
+      Class<?> cl = Class.forName("com.caucho.server.port.ProThrottle");
 
       return (Throttle) cl.newInstance();
     } catch (Exception e) {

@@ -29,11 +29,11 @@
 
 package com.caucho.filters;
 
-import com.caucho.server.connection.AbstractResponseStream;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.ResponseWrapper;
-import com.caucho.server.connection.ResponseWriter;
-import com.caucho.server.connection.ServletOutputStreamImpl;
+import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.ResponseWrapper;
+import com.caucho.server.http.ResponseWriter;
+import com.caucho.server.http.ServletOutputStreamImpl;
 import com.caucho.vfs.FlushBuffer;
 
 import javax.servlet.ServletOutputStream;

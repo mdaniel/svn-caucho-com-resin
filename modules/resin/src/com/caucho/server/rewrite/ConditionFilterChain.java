@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.server.connection.*;
+import com.caucho.server.http.HttpServletResponseImpl;
 
 class ConditionFilterChain
   implements FilterChain

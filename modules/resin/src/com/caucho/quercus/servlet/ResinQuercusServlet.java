@@ -36,7 +36,7 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;

@@ -39,6 +39,8 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.connection.*;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;

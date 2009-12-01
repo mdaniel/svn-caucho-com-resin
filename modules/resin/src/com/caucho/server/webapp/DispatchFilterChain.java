@@ -39,10 +39,10 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import com.caucho.server.connection.HttpServletRequestImpl;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoRequestWrapper;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoRequestWrapper;
+import com.caucho.server.http.HttpServletRequestImpl;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will

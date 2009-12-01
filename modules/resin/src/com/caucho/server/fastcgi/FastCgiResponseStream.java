@@ -29,10 +29,10 @@
 
 package com.caucho.server.fastcgi;
 
-import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.ResponseStream;
-import com.caucho.server.connection.AbstractResponseStream;
-import com.caucho.server.connection.HttpBufferStore;
+import com.caucho.server.http.AbstractHttpResponse;
+import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.HttpBufferStore;
+import com.caucho.server.http.ResponseStream;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;

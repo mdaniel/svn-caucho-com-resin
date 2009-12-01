@@ -31,6 +31,9 @@ package com.caucho.server.webapp;
 
 import com.caucho.server.connection.*;
 import com.caucho.server.cache.*;
+import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.ToByteResponseStream;
 import com.caucho.util.L10N;
 
 import java.io.IOException;

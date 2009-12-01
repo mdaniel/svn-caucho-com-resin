@@ -30,7 +30,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.server.webapp.WebApp;
-import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 

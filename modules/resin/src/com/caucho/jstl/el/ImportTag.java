@@ -32,7 +32,7 @@ import com.caucho.el.Expr;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FlushBuffer;

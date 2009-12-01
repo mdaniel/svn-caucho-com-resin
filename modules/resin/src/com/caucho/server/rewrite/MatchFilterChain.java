@@ -30,8 +30,8 @@
 package com.caucho.server.rewrite;
 
 import com.caucho.rewrite.RequestPredicate;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.HttpServletResponseImpl;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.HttpServletResponseImpl;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

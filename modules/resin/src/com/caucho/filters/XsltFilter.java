@@ -29,8 +29,8 @@
 package com.caucho.filters;
 
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.RequestAdapter;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.RequestAdapter;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
 import com.caucho.vfs.MergePath;

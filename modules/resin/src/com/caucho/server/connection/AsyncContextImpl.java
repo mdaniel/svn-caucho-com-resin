@@ -31,6 +31,8 @@ package com.caucho.server.connection;
 
 import javax.servlet.*;
 
+import com.caucho.server.http.HttpServletRequestImpl;
+
 /**
  * Implementation of the Servlet 3.0 AsyncContext
  */

@@ -31,7 +31,7 @@ package com.caucho.server.security;
 
 import com.caucho.security.BasicPrincipal;
 import com.caucho.security.PasswordCredentials;
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;

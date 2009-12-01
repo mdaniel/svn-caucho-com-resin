@@ -36,7 +36,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.servlet.DuplexListener;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.util.*;

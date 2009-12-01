@@ -29,9 +29,25 @@
 
 package com.caucho.server.port;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
-import com.caucho.config.program.*;
-import com.caucho.config.types.*;
+import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
@@ -39,36 +55,21 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
-import com.caucho.server.connection.ConnectionController;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.*;
+import com.caucho.server.connection.ConnectionController;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
+import com.caucho.util.TaskWorker;
+import com.caucho.util.ThreadPool;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SSLFactory;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.LockSupport;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Represents a protocol connection.
@@ -168,10 +169,6 @@ public class Port extends TaskWorker
   private final AtomicInteger _idleThreadCount = new AtomicInteger();
   private final AtomicInteger _startThreadCount = new AtomicInteger();
 
-  // timeout to limit the thread close rate
-  private long _idleCloseTimeout = 15000L;
-  private volatile long _idleCloseExpire;
-
   // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
 
@@ -190,8 +187,6 @@ public class Port extends TaskWorker
   private AtomicInteger _keepaliveCount = new AtomicInteger();
   // thread-based
   private AtomicInteger _keepaliveThreadCount = new AtomicInteger();
-  private final Object _keepaliveCountLock = new Object();
-
   // True if the port has been bound
   private final AtomicBoolean _isBind = new AtomicBoolean();
   private final AtomicBoolean _isPostBind = new AtomicBoolean();
@@ -294,12 +289,12 @@ public class Port extends TaskWorker
     return _serverId;
   }
 
-  public void setType(Class cl)
+  public void setType(Class<?> cl)
   {
     setClass(cl);
   }
 
-  public void setClass(Class cl)
+  public void setClass(Class<?> cl)
   {
   }
 
@@ -433,7 +428,7 @@ public class Port extends TaskWorker
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      Class cl = Class.forName("com.caucho.vfs.OpenSSLFactory", false, loader);
+      Class<?> cl = Class.forName("com.caucho.vfs.OpenSSLFactory", false, loader);
 
       _sslFactory = (SSLFactory) cl.newInstance();
 
@@ -1328,8 +1323,6 @@ public class Port extends TaskWorker
             && _idleThreadCount.compareAndSet(idleThreadCount,
                                               idleThreadCount - 1)) {
           isDecrementIdle = false;
-          _idleCloseExpire = now + _idleCloseTimeout;
-
           return false;
         }
 
@@ -1522,8 +1515,6 @@ public class Port extends TaskWorker
    */
   void suspend(TcpConnection conn)
   {
-    boolean isResume = false;
-
     if (conn.isWake()) {
       conn.toResume();
 

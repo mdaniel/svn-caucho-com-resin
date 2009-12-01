@@ -28,8 +28,8 @@
 
 package com.caucho.server.cache;
 
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
 
 import javax.servlet.FilterChain;
 import java.io.IOException;

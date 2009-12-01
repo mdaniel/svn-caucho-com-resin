@@ -40,7 +40,11 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.jsp.*;
 import com.caucho.server.connection.*;
-import com.caucho.server.connection.CauchoResponseWrapper;
+import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.CauchoResponseWrapper;
+import com.caucho.server.http.ResponseWriter;
+import com.caucho.server.http.ServletOutputStreamImpl;
 
 public class JspResponseWrapper extends CauchoResponseWrapper
 {

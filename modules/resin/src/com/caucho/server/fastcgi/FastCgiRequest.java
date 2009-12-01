@@ -30,15 +30,15 @@
 package com.caucho.server.fastcgi;
 
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.HttpBufferStore;
-import com.caucho.server.connection.HttpServletRequestImpl;
-import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.HttpBufferStore;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.http.InvocationKey;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.server.port.TcpServerRequest;

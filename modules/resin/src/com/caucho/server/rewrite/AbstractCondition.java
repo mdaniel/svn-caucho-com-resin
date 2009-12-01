@@ -30,7 +30,7 @@
 package com.caucho.server.rewrite;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.HttpServletResponse;

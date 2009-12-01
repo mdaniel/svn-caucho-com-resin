@@ -30,12 +30,12 @@
 package com.caucho.server.webapp;
 
 import com.caucho.i18n.CharacterEncoding;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.Form;
-import com.caucho.server.connection.RequestAdapter;
-import com.caucho.server.connection.ServletInputStreamImpl;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.Form;
+import com.caucho.server.http.RequestAdapter;
+import com.caucho.server.http.ServletInputStreamImpl;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.util.Alarm;

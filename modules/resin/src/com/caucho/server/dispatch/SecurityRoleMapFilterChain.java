@@ -28,7 +28,7 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

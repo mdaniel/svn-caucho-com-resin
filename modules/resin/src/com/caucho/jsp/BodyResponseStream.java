@@ -29,7 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.server.connection.AbstractResponseStream;
+import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.TempBuffer;

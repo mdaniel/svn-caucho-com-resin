@@ -30,6 +30,9 @@
 package com.caucho.server.fastcgi;
 
 import com.caucho.server.connection.*;
+import com.caucho.server.http.AbstractHttpResponse;
+import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;

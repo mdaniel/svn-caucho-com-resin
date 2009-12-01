@@ -31,11 +31,11 @@ package com.caucho.jsp;
 
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.LineMap;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
-import com.caucho.server.connection.ResponseAdapter;
 import com.caucho.server.dispatch.ServletConfigImpl;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.RequestAdapter;
+import com.caucho.server.http.ResponseAdapter;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;

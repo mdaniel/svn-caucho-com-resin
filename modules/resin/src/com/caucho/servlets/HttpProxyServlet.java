@@ -36,7 +36,7 @@ import com.caucho.servlets.HttpProxyServlet;
 import com.caucho.server.cluster.CustomLoadBalanceManager;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterStream;
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;

@@ -36,7 +36,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.logging.*;
 
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will

@@ -32,6 +32,8 @@ package com.caucho.server.webapp;
 import com.caucho.server.connection.*;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.server.http.CauchoRequestWrapper;
+import com.caucho.server.http.Form;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;

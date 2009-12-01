@@ -29,11 +29,11 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.AbstractResponseStream;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.AbstractHttpResponse;
+import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.util.L10N;
 
 import javax.servlet.RequestDispatcher;

@@ -32,7 +32,7 @@ package com.caucho.jstl.rt;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.ResinJspWriter;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;

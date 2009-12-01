@@ -28,8 +28,8 @@
  */
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.CauchoResponseWrapper;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.CauchoResponseWrapper;
 
 import javax.servlet.http.HttpServletResponse;
 

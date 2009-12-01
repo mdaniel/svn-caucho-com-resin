@@ -34,6 +34,7 @@ import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.server.connection.*;
+import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;

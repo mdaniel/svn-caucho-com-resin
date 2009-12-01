@@ -29,7 +29,7 @@
 package com.caucho.jsp;
 
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;

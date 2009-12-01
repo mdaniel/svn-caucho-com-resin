@@ -31,7 +31,7 @@ package com.caucho.server.security;
 import com.caucho.security.FormLogin;
 import com.caucho.security.Login;
 import com.caucho.security.LoginList;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.util.L10N;

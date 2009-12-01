@@ -29,26 +29,14 @@
 
 package com.caucho.server.port;
 
-import java.util.logging.*;
-import javax.annotation.*;
-
-import com.caucho.config.*;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.port.*;
-import com.caucho.util.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 
 /**
  * Represents a protocol connection.
  */
 abstract public class ProtocolPort
 {
-  private static final L10N L = new L10N(ProtocolPort.class);
-
-  private static final Logger log
-    = Logger.getLogger(ProtocolPort.class.getName());
-  
   private ContainerProgram _program = new ContainerProgram();
 
   abstract public Protocol getProtocol();

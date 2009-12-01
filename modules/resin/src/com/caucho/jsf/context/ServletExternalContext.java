@@ -42,6 +42,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.server.connection.*;
+import com.caucho.server.http.CauchoRequest;
 import com.caucho.util.*;
 
 public class ServletExternalContext extends ExternalContext {

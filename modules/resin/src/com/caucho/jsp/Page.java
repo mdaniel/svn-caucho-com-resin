@@ -31,8 +31,8 @@ package com.caucho.jsp;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.make.DependencyContainer;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.ToCharResponseAdapter;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.ToCharResponseAdapter;
 import com.caucho.server.webapp.JspResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Base64;

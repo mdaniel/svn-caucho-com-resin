@@ -29,10 +29,10 @@
 
 package com.caucho.jsp;
 
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
-import com.caucho.server.connection.ResponseAdapter;
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.RequestAdapter;
+import com.caucho.server.http.ResponseAdapter;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;

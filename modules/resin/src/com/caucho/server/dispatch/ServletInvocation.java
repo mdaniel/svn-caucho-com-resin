@@ -31,7 +31,7 @@ package com.caucho.server.dispatch;
 
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.port.ServerRequest;
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.http.AbstractHttpRequest;
 
 import com.caucho.util.L10N;
 

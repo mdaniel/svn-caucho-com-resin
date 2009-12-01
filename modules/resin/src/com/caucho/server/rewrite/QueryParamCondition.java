@@ -42,6 +42,7 @@ import com.caucho.java.*;
 import com.caucho.vfs.*;
 import com.caucho.i18n.*;
 import com.caucho.server.connection.*;
+import com.caucho.server.http.Form;
 
 /**
 * A rewrite condition that passes if the value of a query parameter exists
